@@ -109,7 +109,9 @@
         "keepWarmYesterday": "感覚を保つため、最後は昨日。",
         "keepWarmToday": "感覚を保つため、今日すでに弾きました。",
         "keepWarmNew": "まずはお試し。"
-      }
+      },
+      "from": "{{path}} · {{level}} · ステップ {{step}}",
+      "fromNoLevel": "{{path}} · ステップ {{step}}"
     },
     "why": {
       "firstEver": "はじめてなので {{bpm}} BPM から。速さではなく、タイミングの練習です。",
@@ -405,7 +407,8 @@
       "finishHow": "{{count}}課題中{{need}}つ合格でこのステップは完了です。",
       "tabPreview": "最初の小節のタブ譜",
       "exerciseCount_other": "{{count}} 課題",
-      "exerciseCount": "{{count}} 課題"
+      "exerciseCount": "{{count}} 課題",
+      "levelSubscribed": "登録しました · ステップ{{n}}から開始"
     },
     "progress": {
       "title": "上達",
@@ -525,7 +528,8 @@
       "title": "このセッションを終了しますか？",
       "body": "ここまでのテイクは保存されています。",
       "stay": "続ける",
-      "leave": "終了する"
+      "leave": "終了する",
+      "bodyNothingSaved": "まだテイクはありません。止まるのは今流れているものだけです。"
     },
     "placement": {
       "result": "ステップ{{n}}から始めます：{{step}}"

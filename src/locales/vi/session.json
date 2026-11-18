@@ -109,7 +109,9 @@
         "keepWarmYesterday": "Giữ phong độ, chơi lần cuối hôm qua.",
         "keepWarmToday": "Giữ phong độ, đã chơi hôm nay.",
         "keepWarmNew": "Làm quen trước."
-      }
+      },
+      "from": "{{path}} · {{level}} · Bước {{step}}",
+      "fromNoLevel": "{{path}} · Bước {{step}}"
     },
     "why": {
       "firstEver": "Đây là lần đầu, nên bắt đầu ở {{bpm}} BPM. Trọng tâm là nhịp, không phải tốc độ.",
@@ -405,7 +407,8 @@
       "finishHow": "Đạt {{need}} / {{count}} để xong bước này.",
       "tabPreview": "Mấy ô nhịp đầu, dạng tab",
       "exerciseCount_other": "{{count}} bài tập",
-      "exerciseCount": "{{count}} bài tập"
+      "exerciseCount": "{{count}} bài tập",
+      "levelSubscribed": "Đã đăng ký · bắt đầu từ Bước {{n}}"
     },
     "progress": {
       "title": "Tiến bộ",
@@ -525,7 +528,8 @@
       "title": "Rời buổi tập này?",
       "body": "Các lượt chơi đến giờ đã được lưu.",
       "stay": "Tiếp tục",
-      "leave": "Rời đi"
+      "leave": "Rời đi",
+      "bodyNothingSaved": "Chưa có lượt chơi nào, nên chỉ phần đang chạy dừng lại."
     },
     "placement": {
       "result": "Bạn bắt đầu từ Bước {{n}}: {{step}}"

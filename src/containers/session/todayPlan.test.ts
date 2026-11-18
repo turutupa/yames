@@ -3,7 +3,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { PlanStep, ReasonCode } from "../../session/planner";
-import { ROLE_WORDS, bpmLine, roleOf, shortContext, shortReason, ticksOf } from "./todayPlan";
+import { ROLE_WORDS, bpmLine, planSources, roleOf, shortContext, shortReason, ticksOf } from "./todayPlan";
+import { ALT, progress } from "../../session/testKit";
 
 const ex = (role: string, code: ReasonCode, values: Record<string, string | number> = {}, extra = {}) =>
   ({ kind: "exercise", id: `${role}-${code}`, role, pathId: "shred", stepId: "s", exerciseId: "e", title: "T", bpm: 80, minutes: 4, variantSeed: null, why: { code, values }, ...extra }) as unknown as PlanStep;
@@ -88,5 +89,19 @@ describe("every row's words exist in all fifteen languages", () => {
     for (const k of ["leadFirstOutcome", "parts", "toolsAsk", "openTools", "moreBelow", "bpm", "bpmRange"]) {
       expect(typeof today[k], `${lang} ${k}`).toBe("string");
     }
+  });
+});
+
+describe("planSources: where today's plan comes from (acceptance P1-11)", () => {
+  it("names each Path the plan uses once, with its Level and current Step", () => {
+    const steps = [
+      { kind: "metronome", id: "w" },
+      { kind: "exercise", id: "a", pathId: ALT.id },
+      { kind: "exercise", id: "b", pathId: ALT.id },
+      { kind: "exercise", id: "c", pathId: "not-loaded" },
+    ] as unknown as PlanStep[];
+    const out = planSources(steps, [ALT], progress());
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({ pathId: ALT.id, title: ALT.title, levelId: "beginner", step: 1 });
   });
 });

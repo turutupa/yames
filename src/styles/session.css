@@ -251,11 +251,13 @@
 }
 .session-h1 {
   margin: 0;
+  text-wrap: balance;
   font: 500 clamp(38px, 5.4vh, 58px) / 1.02 var(--l-serif);
   letter-spacing: -0.02em;
 }
 .session-h2 {
   margin: 0;
+  text-wrap: balance;
   font: 500 clamp(26px, 3.6vh, 36px) / 1.08 var(--l-serif);
   letter-spacing: -0.012em;
 }
@@ -269,10 +271,12 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums lining-nums;
 }
+/* Prose never ends on one short word alone ("too.", "it.", acceptance P2-7). */
 .session-why {
   color: var(--l-quiet);
   font-size: 14px;
   line-height: 1.36;
+  text-wrap: pretty;
 }
 .session-why b {
   color: var(--l-ink);
@@ -282,6 +286,7 @@
   color: var(--l-quiet);
   font-size: 13px;
   line-height: 1.35;
+  text-wrap: pretty;
 }
 .session-good {
   color: var(--l-tone-text);
@@ -614,6 +619,13 @@
   color: var(--l-tone-text);
   border-color: color-mix(in srgb, var(--l-tone) 50%, transparent);
 }
+/* Following a Path is the accent's, not the pass colour's: a green tag read
+   as a grade, and sat off the palette in Ember (acceptance P2-9). */
+.session-tag[data-badge="subscribed"] {
+  color: var(--l-amber);
+  border-color: color-mix(in srgb, var(--l-amber) 50%, transparent);
+  background: color-mix(in srgb, var(--l-amber) 10%, transparent);
+}
 .session-glass {
   background: var(--l-panel);
   border: 1px solid var(--l-line);
@@ -753,6 +765,29 @@
   gap: 8px;
   justify-content: flex-start;
   min-width: 0;
+}
+/* The eyebrow breaks only between its parts, and evenly: never "START" alone
+   on a line of its own (acceptance P1-11). */
+.session-today-head > .session-kick {
+  text-wrap: balance;
+  line-height: 1.35;
+}
+.session-kick-part {
+  white-space: nowrap;
+}
+/* Where the plan comes from: "Sweep Picking · Beginner · Step 1". */
+.session-today-from {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--l-quiet);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-wrap: balance;
 }
 .session-today-minutes {
   white-space: nowrap;
@@ -1039,6 +1074,49 @@
     flex: none;
   }
 }
+/*
+ * A wide, tall window (2000x1000 and up, acceptance P2-14): the pair grows
+ * with the window instead of sitting as a small island in the middle of it.
+ * Both columns widen, the gap between them opens, and the type steps up one
+ * size, so the plan reads from across the room; past ~2400 px it stops.
+ */
+@media (min-width: 1700px) and (min-height: 860px) {
+  .session-today {
+    --today-hero: clamp(340px, 22vw, 520px);
+    --today-plan: clamp(640px, 44vw, 1040px);
+    grid-template-columns:
+      minmax(0, 1fr) minmax(280px, var(--today-hero)) clamp(56px, 4.5vw, 110px)
+      minmax(0, var(--today-plan)) minmax(0, 1fr);
+  }
+  .session-today .session-mega {
+    font-size: clamp(88px, 10.5vh, 124px);
+  }
+  .session-today-minutes {
+    font-size: clamp(48px, 5.6vh, 64px);
+  }
+  .session-today-from {
+    font-size: 16px;
+  }
+  .session-page .session-today-hero .session-today-start {
+    min-height: 96px;
+  }
+  .session-today-plan .session-plan-item {
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+    padding: 18px 24px 18px 18px;
+  }
+  .session-today-plan .session-plan-title {
+    font-size: 24px;
+  }
+  .session-today-plan .session-plan-why {
+    font-size: 15.5px;
+  }
+  .session-plan-meta {
+    font-size: 13px;
+  }
+  .session-today-plan .session-plan-mins {
+    font-size: 28px;
+  }
+}
 /* A short window: the hero's type steps down before anything leaves it. */
 @media (max-height: 760px) {
   .session-today .session-mega {
@@ -1204,6 +1282,7 @@
   letter-spacing: 0.01em;
 }
 .session-footnote {
+  text-wrap: pretty;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -1495,6 +1574,11 @@
   width: auto;
   min-width: 260px;
 }
+/* The nudges and the big button: one group so a phone can stick them
+   together; a desktop lays them out as part of the row. */
+.session-go {
+  display: contents;
+}
 .session-nudges {
   display: flex;
   flex-wrap: wrap;
@@ -1733,18 +1817,75 @@
   gap: 7px;
 }
 .session-path-card {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 18px;
   align-items: center;
   width: 100%;
-  padding: 10px 15px;
+  padding: 12px 15px;
   text-align: left;
   transition: border-color 0.25s, transform 0.25s var(--l-ease);
 }
-.session-path-card:hover {
+.session-path-card:hover,
+.session-path-card:focus-within {
   border-color: color-mix(in srgb, var(--l-amber) 55%, transparent);
   transform: translateY(-2px);
+}
+.session-path-card-main {
+  gap: 3px;
+  min-width: 0;
+}
+.session-path-card-side {
+  gap: 0;
+  min-width: 0;
+}
+/* The title is the card's button for a keyboard; a click anywhere on the card opens it. */
+.session-path-card {
+  cursor: pointer;
+}
+.session-page .session-path-open {
+  padding: 0;
+  text-align: left;
+  color: inherit;
+}
+/* A thumb's height on a phone or a touch screen, measured on the button itself. */
+@media (max-width: 480px), (pointer: coarse) {
+  .session-page .session-path-open {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+/* Its hit box is the whole card (a thumb's target on a phone, and the
+   pointer's anywhere); Continue sits above it. */
+.session-page .session-path-open::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.session-page .session-path-open:focus-visible {
+  outline: none;
+}
+.session-path-card:has(.session-path-open:focus-visible) {
+  outline: 2px solid var(--l-amber);
+  outline-offset: 2px;
+}
+/* What the Path is for, two lines at most. */
+.session-path-goal {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  max-width: 62ch;
+}
+.session-page .session-path-continue {
+  position: relative;
+  z-index: 1;
+  align-self: flex-start;
+  margin-top: 8px;
 }
 .session-path-card .session-pips {
   margin: 7px 0 5px;
@@ -1767,7 +1908,16 @@
 /* A page's one-line summary under its title: a reading measure, not the window's. */
 .session-lede {
   max-width: 72ch;
-  margin-top: 2px;
+  margin-top: 8px;
+}
+/* A page's title and the line under it (Paths, Progress): room between the two,
+   and between them and the page (acceptance P2-11). */
+.session-page .session-h1 + .session-why {
+  margin-top: 8px;
+  max-width: 72ch;
+}
+.session-page > .session-rise:first-child:has(> .session-h1) {
+  margin-bottom: 10px;
 }
 /*
  * A Path: the Steps on the left, and on the right what to do about them —
@@ -1941,18 +2091,37 @@
 }
 /* The Level: a segmented control, then who the chosen one is for and where it starts. */
 .session-level .session-level-seg {
-  /* Each Level as wide as its name, and a long one ("Продвинутый") wraps the
-     control to a second row rather than breaking mid-word or spilling out. */
+  /* One line, each Level as wide as its name, the padding what is left
+     (acceptance P1-7). Where even that does not fit (a wide theme font, a
+     long word such as "Продвинутый" in a narrow column) the type steps down,
+     and past that the control stacks, one Level a row, rather than leaving
+     one alone on a second row: `useRowFit` measures it. */
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   margin-top: 8px;
 }
 .session-page .session-level .session-level-seg button {
   flex: 1 1 auto;
-  font-size: 16px;
-  padding: 9px 8px;
+  font-size: 15.5px;
+  padding: 9px 6px;
   white-space: nowrap;
   line-height: 1.05;
+  /* Colours only: an animated size would be measured mid-way by useRowFit. */
+  transition:
+    color 0.2s var(--l-ease),
+    background 0.2s var(--l-ease),
+    box-shadow 0.2s var(--l-ease);
+}
+.session-page .session-level .session-level-seg[data-fit="tight"] button {
+  font-size: 13.5px;
+  padding: 9px 3px;
+  letter-spacing: 0;
+}
+.session-level .session-level-seg[data-fit="stacked"] {
+  flex-direction: column;
+}
+.session-page .session-level .session-level-seg[data-fit="stacked"] button {
+  padding: 9px 12px;
 }
 .session-level-about {
   margin-top: 10px;
@@ -2590,28 +2759,34 @@
   .session-body:not([data-phase="playing"]) > .session-actions > .session-signal {
     align-self: flex-start;
   }
-  .session-body:not([data-phase="playing"]) > .session-actions > .session-nudges {
-    align-self: flex-end;
-  }
-  .session-body:not([data-phase="playing"]) > .session-actions > .session-big {
+  /* The nudges stick with the button, above it (acceptance P1-5): at 390 px
+     the sticky button alone half covered Slower and Faster, and at 360 px hid
+     them. The pair is one sticky block over a fade of the page's colour. */
+  .session-body:not([data-phase="playing"]) > .session-actions > .session-go {
     position: sticky;
     bottom: calc(10px + var(--safe-bottom, 0px));
     z-index: 4;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    background: var(--l-bg);
     box-shadow:
-      0 1px 0 var(--l-gloss) inset,
-      0 -2px 0 color-mix(in srgb, var(--l-amber-deep) 45%, transparent) inset,
-      0 2px 8px color-mix(in srgb, var(--l-shade) 50%, transparent),
       0 0 0 10px var(--l-bg),
       0 -18px 22px 10px var(--l-bg);
   }
-  .session-body:not([data-phase="playing"]) > .session-actions > .session-big:disabled {
-    background:
-      linear-gradient(var(--l-btn), var(--l-btn)),
-      var(--l-bg);
+  .session-body:not([data-phase="playing"]) > .session-actions > .session-go > .session-nudges {
+    justify-content: flex-end;
+  }
+  .session-body:not([data-phase="playing"]) > .session-actions > .session-go > .session-big {
     box-shadow:
-      0 0 0 1px var(--l-line2) inset,
-      0 0 0 10px var(--l-bg),
-      0 -18px 22px 10px var(--l-bg);
+      0 1px 0 var(--l-gloss) inset,
+      0 -2px 0 color-mix(in srgb, var(--l-amber-deep) 45%, transparent) inset,
+      0 2px 8px color-mix(in srgb, var(--l-shade) 50%, transparent);
+  }
+  .session-body:not([data-phase="playing"]) > .session-actions > .session-go > .session-big:disabled {
+    background: var(--l-btn);
+    box-shadow: 0 0 0 1px var(--l-line2) inset;
   }
 }
 @media (prefers-reduced-motion: reduce) {

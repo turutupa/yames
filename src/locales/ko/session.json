@@ -109,7 +109,9 @@
         "keepWarmYesterday": "감 유지, 마지막 연주는 어제.",
         "keepWarmToday": "감 유지, 오늘 이미 연주했어요.",
         "keepWarmNew": "첫 맛보기."
-      }
+      },
+      "from": "{{path}} · {{level}} · {{step}}단계",
+      "fromNoLevel": "{{path}} · {{step}}단계"
     },
     "why": {
       "firstEver": "처음이니 {{bpm}} BPM에서 시작합니다. 속도가 아니라 타이밍 연습입니다.",
@@ -405,7 +407,8 @@
       "finishHow": "{{count}}개 중 {{need}}개를 통과하면 이 단계가 끝나요.",
       "tabPreview": "첫 마디들의 타브",
       "exerciseCount_other": "과제 {{count}}개",
-      "exerciseCount": "과제 {{count}}개"
+      "exerciseCount": "과제 {{count}}개",
+      "levelSubscribed": "구독함 · {{n}}단계부터 시작"
     },
     "progress": {
       "title": "진도",
@@ -525,7 +528,8 @@
       "title": "이 세션을 나갈까요?",
       "body": "지금까지의 테이크는 저장되어 있습니다.",
       "stay": "계속하기",
-      "leave": "나가기"
+      "leave": "나가기",
+      "bodyNothingSaved": "아직 테이크가 없어서 지금 재생 중인 것만 멈춥니다."
     },
     "placement": {
       "result": "{{n}}단계부터 시작합니다: {{step}}"

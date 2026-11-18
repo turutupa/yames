@@ -5,7 +5,7 @@
  * the rest of the app links to yet. Nothing is locked or priced: a Step can be
  * chosen from any point, and a Path the app cannot grade yet says "later".
  */
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import type { Exercise, Level, PathDoc, Step } from "../../paths/format";
@@ -102,7 +102,7 @@ function PathBadgeTag({ session, path }: { session: SessionRun; path: PathDoc })
   const badge = pathBadge(path.id, session.progress);
   if (!badge) return null;
   return (
-    <span className="session-tag" data-met={badge === "subscribed" ? "" : undefined} data-badge={badge}>
+    <span className="session-tag" data-badge={badge}>
       {t(PATH_BADGE_KEY[badge])}
     </span>
   );
@@ -111,10 +111,13 @@ function PathBadgeTag({ session, path }: { session: SessionRun; path: PathDoc })
 function PathList({
   session,
   onOpen,
+  onOpenStep,
   note,
 }: {
   session: SessionRun;
   onOpen: (path: PathDoc) => void;
+  /** Continue on a card: straight to the Step the player is on. */
+  onOpenStep?: (path: PathDoc, step: Step) => void;
   note?: InstrumentNoteProps;
 }) {
   const { t } = useTranslation();
@@ -135,24 +138,32 @@ function PathList({
           // Real progress, not "Step 1 of N" on every card (UX audit PATH-4).
           const started = progress.states.some((s) => s.pathId === path.id);
           const stepsDone = path.steps.filter((s) => isStepPassed(progress, path.id, s)).length;
+          const subscribed = isSubscribed(progress, path.id);
           return (
-            <button
+            // The card opens the Path: a click anywhere on it, or its title,
+            // which is the button a keyboard reaches. Continue, on a Path you
+            // follow, goes straight to the Step you are on (acceptance P2-9).
+            // Two buttons, never one inside the other.
+            <div
               key={path.id}
               className="session-path-card session-glass session-rise"
               style={rise(i + 1)}
               onClick={() => onOpen(path)}
               data-testid={`path-card-${path.id}`}
             >
-              <span className="session-col" style={{ gap: 2 }}>
+              <span className="session-col session-path-card-main">
                 <span className="session-row" data-wrap="">
-                  <span className="session-h2">{path.title}</span>
+                  <button type="button" className="session-path-open" data-testid={`path-open-${path.id}`}>
+                    <span className="session-h2">{path.title}</span>
+                  </button>
                   <PathBadgeTag session={session} path={path} />
                 </span>
-                <span className="session-why">
+                <span className="session-why session-path-goal">{path.goal}</span>
+                <span className="session-quiet">
                   {t("session.paths.stepCount", { count: path.steps.length })}
                 </span>
               </span>
-              <span className="session-col" style={{ gap: 0 }}>
+              <span className="session-col session-path-card-side">
                 <StepPips session={session} path={path} />
                 <span className="session-why" data-testid={`path-card-progress-${path.id}`}>
                   {started ? (
@@ -164,8 +175,20 @@ function PathList({
                     t("session.paths.notStarted")
                   )}
                 </span>
+                {started && subscribed && onOpenStep && (
+                  <button
+                    className="session-secondary session-path-continue"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenStep(path, current);
+                    }}
+                    data-testid={`path-continue-${path.id}`}
+                  >
+                    {t("session.paths.continue", { n: current.order })}
+                  </button>
+                )}
               </span>
-            </button>
+            </div>
           );
         })}
         {later.length > 0 && (
@@ -272,6 +295,43 @@ function StepRow({
 }
 
 /**
+ * How a row of buttons fits its card (acceptance P1-7: "Advanced" wrapped onto
+ * a row of its own in Aurora and in Russian): on one line as it is; on one line
+ * with smaller type and padding ("tight"); or, where even that does not fit,
+ * stacked, one button a row, never one left alone on a second row. Measured in
+ * the one-line layouts every time the card's width changes, so a theme's wider
+ * font or a longer word is what decides.
+ */
+type RowFit = "fits" | "tight" | "stacked";
+function useRowFit(card: React.RefObject<HTMLElement | null>, row: React.RefObject<HTMLElement | null>): RowFit {
+  const [fit, setFit] = useState<RowFit>("fits");
+  useLayoutEffect(() => {
+    const box = card.current;
+    const el = row.current;
+    if (!box || !el || typeof ResizeObserver === "undefined") return;
+    const over = () => el.scrollWidth > el.clientWidth + 1;
+    const measure = () => {
+      const was = el.dataset.fit;
+      el.dataset.fit = "fits";
+      let next: RowFit = "fits";
+      if (over()) {
+        el.dataset.fit = "tight";
+        next = over() ? "stacked" : "tight";
+      }
+      if (was === undefined) delete el.dataset.fit;
+      else el.dataset.fit = was;
+      setFit(next);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(box);
+    void document.fonts?.ready.then(measure);
+    return () => observer.disconnect();
+  }, [card, row]);
+  return fit;
+}
+
+/**
  * The Level picker: a segmented control, a default (the first Level, until one
  * is chosen), and under it who the chosen one is for and where it starts
  * (UX audit PATH-2). Choosing one moves the start Step; it says so.
@@ -279,6 +339,11 @@ function StepRow({
 function LevelPicker({ session, path, runnable }: { session: SessionRun; path: PathDoc; runnable: boolean }) {
   const { t } = useTranslation();
   const { progress, actions } = session;
+  const [joined, setJoined] = useState(false);
+  const [capped, setCapped] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const segRef = useRef<HTMLDivElement>(null);
+  const fit = useRowFit(cardRef, segRef);
   const levels = levelsOf(path);
   const chosen = chosenLevelOf(progress, path);
   // No Level chosen plays as the first one: show it as chosen (UX audit TODAY-1).
@@ -286,18 +351,38 @@ function LevelPicker({ session, path, runnable }: { session: SessionRun; path: P
   if (!shown) return null;
   const entry = levelEntryStep(progress, path, shown);
   const current = currentStepOf(progress, path);
+  // Choosing a Level on a Path you do not follow starts it: say so, and keep
+  // to the cap as Subscribe does (acceptance P2-10).
+  const following = progress.states.filter((s) => isSubscribed(progress, s.pathId)).length;
+  const subscribed = isSubscribed(progress, path.id);
+  const choose = (levelId: string) => {
+    const fresh = !progress.states.some((s) => s.pathId === path.id);
+    if (fresh && runnable && following >= SUBSCRIPTION_CAP) {
+      setCapped(true);
+      return;
+    }
+    setCapped(false);
+    setJoined(fresh && runnable);
+    actions.chooseLevel(path, levelId);
+  };
   return (
-    <div className="session-glass session-card session-rise session-level" data-testid="path-level">
+    <div className="session-glass session-card session-rise session-level" data-testid="path-level" ref={cardRef}>
       <div className="session-kick" id="session-level-label">
         {t("session.paths.level")}
       </div>
-      <div className="session-seg session-level-seg" role="group" aria-labelledby="session-level-label">
+      <div
+        className="session-seg session-level-seg"
+        role="group"
+        aria-labelledby="session-level-label"
+        ref={segRef}
+        data-fit={fit}
+      >
         {levels.map((l) => (
           <button
             key={l.id}
             className={l.id === shown.id ? "on" : ""}
             aria-pressed={l.id === shown.id}
-            onClick={() => actions.chooseLevel(path, l.id)}
+            onClick={() => choose(l.id)}
             data-testid={`level-${l.id}`}
           >
             {t(`session.paths.levelName.${l.id}`)}
@@ -308,10 +393,12 @@ function LevelPicker({ session, path, runnable }: { session: SessionRun; path: P
         <div className="session-level-title">{levelSubtitle(shown)}</div>
         {chosen && runnable ? (
           <div className="session-level-start" role="status" data-testid="level-start">
-            {t("session.paths.levelStart", {
-              n: current.order,
-              level: t(`session.paths.levelName.${chosen.id}`),
-            })}
+            {joined && subscribed
+              ? t("session.paths.levelSubscribed", { n: current.order })
+              : t("session.paths.levelStart", {
+                  n: current.order,
+                  level: t(`session.paths.levelName.${chosen.id}`),
+                })}
           </div>
         ) : (
           <div className="session-quiet" data-testid="level-default">
@@ -319,6 +406,11 @@ function LevelPicker({ session, path, runnable }: { session: SessionRun; path: P
           </div>
         )}
       </div>
+      {capped && (
+        <div className="session-why session-bad" role="alert" data-testid="level-subscribe-cap">
+          {t("session.paths.subscribeCap", { cap: SUBSCRIPTION_CAP })}
+        </div>
+      )}
       {shown.placement.startHereIf.length > 0 && (
         <div className="session-level-who" data-testid="level-start-here-if">
           <div className="session-kick">{t("session.paths.startHereIf")}</div>
@@ -418,7 +510,7 @@ function PathDetail({
             >
               <div className="session-subscribe">
                 {subscribed && (
-                  <span className="session-tag" data-met="">
+                  <span className="session-tag" data-badge="subscribed">
                     {t("session.paths.subscribed")}
                   </span>
                 )}
@@ -827,6 +919,7 @@ export function PathsView({
     <PathList
       session={session}
       onOpen={(p) => move({ pathId: p.id, stepId: null })}
+      onOpenStep={(p, s) => move({ pathId: p.id, stepId: s.id })}
       note={instrumentNote}
     />
   );

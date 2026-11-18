@@ -109,7 +109,9 @@
         "keepWarmYesterday": "Sıcak kalsın, en son dün çalındı.",
         "keepWarmToday": "Sıcak kalsın, bugün zaten çalındı.",
         "keepWarmNew": "İlk tadımlık."
-      }
+      },
+      "from": "{{path}} · {{level}} · Adım {{step}}",
+      "fromNoLevel": "{{path}} · Adım {{step}}"
     },
     "why": {
       "firstEver": "İlk seferin, o yüzden {{bpm}} BPM'den başlıyor. Mesele hız değil, zamanlama.",
@@ -405,7 +407,8 @@
       "finishHow": "Bu adımı bitirmek için {{count}} içinden {{need}} tanesini geç.",
       "tabPreview": "İlk ölçüler, tab olarak",
       "exerciseCount": "{{count}} alıştırma",
-      "exerciseCount_other": "{{count}} alıştırma"
+      "exerciseCount_other": "{{count}} alıştırma",
+      "levelSubscribed": "Abone olundu · Adım {{n}}'den başlıyor"
     },
     "progress": {
       "title": "İlerleme",
@@ -525,7 +528,8 @@
       "title": "Bu oturumdan çıkılsın mı?",
       "body": "Şimdiye kadarki kayıtların kaydedildi.",
       "stay": "Devam et",
-      "leave": "Çık"
+      "leave": "Çık",
+      "bodyNothingSaved": "Henüz kayıt yok, yalnızca çalan şey durur."
     },
     "placement": {
       "result": "Adım {{n}}'den başlıyorsun: {{step}}"

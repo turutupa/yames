@@ -1744,7 +1744,7 @@ export default definePath({
       warmups: [
         sweepExercise({
           id: "progression-of-the-day",
-          title: "A progression of the day",
+          title: "Four chords, linked",
           purpose: "A four-chord chain through a different minor progression and key each time. It's linked sweeps, gently, and it never repeats tomorrow what it did today.",
           howTo: [WARMUP_WORDS.how, "Keep your place by the sound of the chords, not by counting."],
           coach: WARMUP_WORDS.coach,

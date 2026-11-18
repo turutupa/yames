@@ -109,7 +109,9 @@
         "keepWarmYesterday": "保持手感，上次是昨天。",
         "keepWarmToday": "保持手感，今天已經練過。",
         "keepWarmNew": "先嚐個鮮。"
-      }
+      },
+      "from": "{{path}} · {{level}} · 第 {{step}} 步",
+      "fromNoLevel": "{{path}} · 第 {{step}} 步"
     },
     "why": {
       "firstEver": "這是你的第一次，所以從 {{bpm}} BPM 開始。練的是節奏，不是速度。",
@@ -405,7 +407,8 @@
       "finishHow": "通過 {{count}} 個中的 {{need}} 個即可完成這一步。",
       "tabPreview": "前幾小節的六線譜",
       "exerciseCount_other": "{{count}} 個練習",
-      "exerciseCount": "{{count}} 個練習"
+      "exerciseCount": "{{count}} 個練習",
+      "levelSubscribed": "已訂閱 · 從第 {{n}} 步開始"
     },
     "progress": {
       "title": "進度",
@@ -525,7 +528,8 @@
       "title": "離開這次練習？",
       "body": "你到目前為止的錄音都已儲存。",
       "stay": "繼續練",
-      "leave": "離開"
+      "leave": "離開",
+      "bodyNothingSaved": "還沒有錄音，只會停下正在播放的內容。"
     },
     "placement": {
       "result": "你從第 {{n}} 步開始：{{step}}"

@@ -401,6 +401,18 @@ function onward(state: RunState, now: number, insert?: PlanStep): RunState {
 }
 
 /**
+ * Whether leaving now loses something, so Escape and Exit ask first
+ * (acceptance P2-1, P2-2): a Take in this Session, a Take running or being
+ * scored, or a timed block running. A ready screen with nothing played and
+ * the recap leave at once.
+ */
+export function leaveNeedsAsking(state: RunState): boolean {
+  if (state.phase === "idle" || state.phase === "recap") return false;
+  if (state.outcomes.length > 0) return true;
+  return state.phase === "playing" || state.phase === "listening" || (state.phase === "timed" && !state.ended);
+}
+
+/**
  * Back to the timed step just before this one, when nothing has been played
  * here yet: a warm-up gone by on its own clock can be played again.
  */

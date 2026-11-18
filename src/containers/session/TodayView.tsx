@@ -13,7 +13,7 @@ import { FIRST_PATH_ID } from "../../session/packs";
 import type { PathDoc } from "../../paths/format";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { lineText } from "./lineText";
-import { bpmLine, pathTitleOf, roleKey, roleOf, rowKind, shortContext, shortReason, ticksOf } from "./todayPlan";
+import { bpmLine, pathTitleOf, planSources, roleKey, roleOf, rowKind, shortContext, shortReason, ticksOf } from "./todayPlan";
 import { InstrumentNote } from "./InstrumentNote";
 import { useNeck3d } from "./hooks/useNeck";
 import "../../styles/session.css";
@@ -211,6 +211,8 @@ export function TodayView({
   const planned = steps.reduce((sum, s) => sum + s.minutes, 0);
   // A Path's name on each row only says something when there are two or more.
   const showPath = myPaths.length > 1;
+  // Which Path, Level and Step the plan is built from (acceptance P1-11).
+  const sources = planSources(steps, session.paths, progress);
 
   return (
     <div className="session-page session-today-page" data-testid="today" data-neck3d={neck3d}>
@@ -224,7 +226,14 @@ export function TodayView({
             />
           )}
           <div className="session-today-head">
-            <div className="session-kick session-rise">{lead}</div>
+            <div className="session-kick session-rise" data-testid="today-lead">
+              {lead.split(" · ").map((part, i) => (
+                <span key={i}>
+                  {i > 0 && " · "}
+                  <span className="session-kick-part">{part}</span>
+                </span>
+              ))}
+            </div>
             <div className="session-today-headline">
               <h1 className="session-mega session-rise" style={rise(1)}>
                 {t("session.today.title")}
@@ -235,6 +244,21 @@ export function TodayView({
                 </div>
               )}
             </div>
+            {sources.length > 0 && (
+              <ul className="session-today-from session-rise" style={rise(2)} data-testid="today-from">
+                {sources.map((src) => (
+                  <li key={src.pathId}>
+                    {src.levelId
+                      ? t("session.today.from", {
+                          path: src.title,
+                          level: t(`session.paths.levelName.${src.levelId}`),
+                          step: src.step,
+                        })
+                      : t("session.today.fromNoLevel", { path: src.title, step: src.step })}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
           {noPaths ? (
             <button

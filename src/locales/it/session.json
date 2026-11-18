@@ -83,7 +83,7 @@
         "firstEver": "Il tuo primo. Stai preciso sul click; la velocità arriva dopo.",
         "newExercise": "Nuovo per te. Vai piano e tienilo pulito.",
         "newStep": "Si passa a qualcosa di nuovo: {{step}}.",
-        "nextInStep": "Il prossimo in {{step}}.",
+        "nextInStep": "{{step}}: il prossimo esercizio.",
         "nextInStepAgain": "E quello dopo.",
         "climb": "Pulito a {{bpm}} BPM l'ultima volta, quindi un filo più veloce.",
         "passedKeepGoing": "Questo ce l'hai. Un giro veloce perché resti.",
@@ -95,7 +95,7 @@
         "edgeFirst": "Cerchiamo il tuo tempo massimo: sale finché resti pulito.",
         "reviewDue": "Superato {{days}} giorni fa. Due take per tenerlo fresco.",
         "reviewDueSlipped": "L'ultima volta è sfuggito, quindi scendiamo di un gradino.",
-        "reviewDueLeft": "In sospeso da {{step}}. Vale la pena chiuderlo.",
+        "reviewDueLeft": "{{step}}: in sospeso. Vale la pena chiuderlo.",
         "finisher": "Suonalo con la band, a un tempo che hai già in mano.",
         "placement": "Una breve salita per capire da dove parti. Superala e salti uno step.",
         "testOut": "Una take a tempo pieno. Superala e lo step è fatto.",
@@ -110,13 +110,15 @@
         "keepWarmYesterday": "Per tenerlo caldo, suonato ieri.",
         "keepWarmToday": "Per tenerlo caldo, già suonato oggi.",
         "keepWarmNew": "Un primo assaggio."
-      }
+      },
+      "from": "{{path}} · {{level}} · Tappa {{step}}",
+      "fromNoLevel": "{{path}} · Tappa {{step}}"
     },
     "why": {
       "firstEver": "È la tua prima, quindi si parte a {{bpm}} BPM. Qui conta il tempo, non la velocità.",
       "newExercise": "Questo non l'hai ancora suonato, quindi parte dal suo primo tempo.",
       "newStep": "Prossima tappa: {{step}}. Si parte a {{bpm}} BPM.",
-      "nextInStep": "Il prossimo in {{step}}. Si parte a {{bpm}} BPM.",
+      "nextInStep": "{{step}}: il prossimo esercizio. Si parte a {{bpm}} BPM.",
       "belowBar": {
         "even": "Perché la regolarità era del {{value}}% a {{bpm}} BPM. L'asticella è al {{bar}}%.",
         "heard": "Perché ho sentito il {{value}}% delle note a {{bpm}} BPM. L'asticella è al {{bar}}%.",
@@ -147,7 +149,7 @@
       "edge": "Dal tempo che hai raggiunto, {{bpm}} BPM. Sale di un gradino dopo ogni take che supera l'asticella.",
       "edgeCheck": "Per verificare il tuo tempo pulito. L'ultima volta era {{clean}} BPM.",
       "edgeFirst": "Per trovare il tuo tempo pulito. Parte da {{bpm}} BPM e sale finché superi l'asticella.",
-      "chosen": "Scelto da te, da {{step}}.",
+      "chosen": "{{step}}: scelto da te.",
       "focusTurn": "Oggi guida {{path}}: tocca a lui.",
       "focusTurnAway": "Oggi guida {{path}}: non lo suoni da {{days}} giorni.",
       "keepWarm": "{{path}}, per tenerlo caldo: suonato {{days}} giorni fa.",
@@ -156,7 +158,7 @@
       "keepWarmNew": "{{path}}: il suo primo blocco.",
       "reviewDue": "Un ripasso: superato {{days}} giorni fa. Due take al tuo tempo pulito, {{bpm}} BPM.",
       "reviewDueSlipped": "Un ripasso che l'ultima volta è scivolato, quindi un gradino più in basso: {{bpm}} BPM.",
-      "reviewDueLeft": "Rimasto da {{step}}, che è completato. Un ripasso a {{bpm}} BPM.",
+      "reviewDueLeft": "{{step}} è completato; questo è rimasto. Un ripasso a {{bpm}} BPM.",
       "parked": "{{exercise}} è in pausa per {{days}} giorni dopo tre sessioni senza un nuovo tempo pulito. Torna fresco.",
       "skippedToday": "{{path}} riposa oggi: suonato {{days}} giorni fa.",
       "skippedTodayToday": "{{path}} riposa: già suonato oggi.",
@@ -164,7 +166,7 @@
       "skippedTodayNever": "{{path}} riposa oggi: non ancora suonato.",
       "finisher": "Per finire: {{exercise}} con la band a {{bpm}} BPM, un tempo già superato. Senza voto.",
       "placement": "Nuovo qui? Una breve salita da {{bpm}} BPM fino a {{pass}} e oltre, una take ciascuno, fermandosi al primo errore. Supera a {{pass}} e passi al passo successivo.",
-      "testOut": "Supera {{step}}: una take al tempo di superamento, {{bpm}} BPM.",
+      "testOut": "Supera «{{step}}»: una take al tempo di superamento, {{bpm}} BPM.",
       "benchmark": "Riferimento, giorno {{day}}: lo stesso esercizio a {{bpm}} BPM ogni volta, per confrontare.",
       "yourTurn": "Tocca a te: {{exercise}}. Non ancora controllato, quindi giudichi tu.",
       "newFromSibling": "Nuovo. Parte da {{bpm}} BPM, circa l’80% del tuo tempo pulito di {{clean}} BPM su {{sibling}}."
@@ -417,7 +419,8 @@
       "tabPreview": "Le prime battute, in tablatura",
       "exerciseCount": "{{count}} esercizio",
       "exerciseCount_many": "{{count}} esercizi",
-      "exerciseCount_other": "{{count}} esercizi"
+      "exerciseCount_other": "{{count}} esercizi",
+      "levelSubscribed": "Iscritto · si parte dal passo {{n}}"
     },
     "progress": {
       "title": "Progressi",
@@ -538,7 +541,8 @@
       "title": "Uscire da questa sessione?",
       "body": "Le tue take finora sono salvate.",
       "stay": "Continua",
-      "leave": "Esci"
+      "leave": "Esci",
+      "bodyNothingSaved": "Ancora nessuna take: si ferma solo quello che sta suonando."
     },
     "placement": {
       "result": "Parti dal passo {{n}}: {{step}}"

@@ -82,7 +82,7 @@
         "firstEver": "Je eerste. Zit precies op de klik; snelheid komt later.",
         "newExercise": "Nieuw voor je. Rustig aan en houd het schoon.",
         "newStep": "Door naar iets nieuws: {{step}}.",
-        "nextInStep": "De volgende in {{step}}.",
+        "nextInStep": "{{step}}: de volgende oefening.",
         "nextInStepAgain": "En die daarna.",
         "climb": "Vorige keer schoon op {{bpm}} BPM, dus een tikje sneller.",
         "passedKeepGoing": "Deze zit erin. Even kort, zodat het blijft.",
@@ -94,7 +94,7 @@
         "edgeFirst": "We zoeken je toptempo: het stijgt zolang je schoon blijft.",
         "reviewDue": "{{days}} dagen geleden gehaald. Twee takes om het vers te houden.",
         "reviewDueSlipped": "Vorige keer gleed het weg, dus een trede lager.",
-        "reviewDueLeft": "Nog open uit {{step}}. De moeite waard om af te ronden.",
+        "reviewDueLeft": "{{step}}: nog open. De moeite waard om af te ronden.",
         "finisher": "Speel het met de band, op een tempo dat je al beheerst.",
         "placement": "Een korte klim om te zien waar je begint. Haal je het, dan sla je een stap over.",
         "testOut": "Eén take op vol tempo. Gehaald, en de stap is klaar.",
@@ -109,13 +109,15 @@
         "keepWarmYesterday": "Warm houden, gisteren gespeeld.",
         "keepWarmToday": "Warm houden, vandaag al gespeeld.",
         "keepWarmNew": "Een eerste kennismaking."
-      }
+      },
+      "from": "{{path}} · {{level}} · Stap {{step}}",
+      "fromNoLevel": "{{path}} · Stap {{step}}"
     },
     "why": {
       "firstEver": "Je eerste, dus hij begint op {{bpm}} BPM. Het gaat hier om timing, niet om snelheid.",
       "newExercise": "Deze heb je nog niet gespeeld, dus hij begint op zijn eerste tempo.",
       "newStep": "Hierna: {{step}}. Begint op {{bpm}} BPM.",
-      "nextInStep": "Volgende in {{step}}. Begint op {{bpm}} BPM.",
+      "nextInStep": "{{step}}: de volgende oefening. Begint op {{bpm}} BPM.",
       "belowBar": {
         "even": "Omdat de gelijkmatigheid {{value}}% was op {{bpm}} BPM. De lat ligt op {{bar}}%.",
         "heard": "Omdat ik {{value}}% van de noten hoorde op {{bpm}} BPM. De lat ligt op {{bar}}%.",
@@ -146,7 +148,7 @@
       "edge": "Vanaf het tempo dat je haalde, {{bpm}} BPM. Na elke take die de lat haalt, gaat het een trede omhoog.",
       "edgeCheck": "Om je schone tempo te controleren. Vorige keer was het {{clean}} BPM.",
       "edgeFirst": "Om je schone tempo te vinden. Begint op {{bpm}} BPM en gaat omhoog zolang je de lat haalt.",
-      "chosen": "Jouw keuze, uit {{step}}.",
+      "chosen": "{{step}}: jouw keuze.",
       "focusTurn": "{{path}} gaat vandaag voorop: het is aan de beurt.",
       "focusTurnAway": "{{path}} gaat vandaag voorop: je hebt het {{days}} dagen niet gespeeld.",
       "keepWarm": "{{path}}, warm gehouden: {{days}} dagen geleden gespeeld.",
@@ -155,7 +157,7 @@
       "keepWarmNew": "{{path}}: het eerste blok.",
       "reviewDue": "Een herhaling: {{days}} dagen geleden gehaald. Twee takes op je schone tempo, {{bpm}} BPM.",
       "reviewDueSlipped": "Een herhaling die vorige keer misging, dus een trede lager: {{bpm}} BPM.",
-      "reviewDueLeft": "Over uit {{step}}, dat klaar is. Een herhaling op {{bpm}} BPM.",
+      "reviewDueLeft": "{{step}} is klaar, dit bleef over. Een herhaling op {{bpm}} BPM.",
       "parked": "{{exercise}} staat {{days}} dagen geparkeerd na drie sessies zonder nieuw schoon tempo. Het komt fris terug.",
       "skippedToday": "{{path}} rust vandaag: {{days}} dagen geleden gespeeld.",
       "skippedTodayToday": "{{path}} rust: vandaag al gespeeld.",
@@ -163,7 +165,7 @@
       "skippedTodayNever": "{{path}} rust vandaag: nog niet gespeeld.",
       "finisher": "Als afsluiter: {{exercise}} met de band op {{bpm}} BPM, een tempo dat je al haalde. Niet beoordeeld.",
       "placement": "Nieuw hier? Een korte klim van {{bpm}} BPM via {{pass}}, één take per trede, stoppen bij de eerste misser. Haal je {{pass}}, dan ga je door naar de volgende stap.",
-      "testOut": "Test jezelf uit {{step}}: één take op het slaagtempo, {{bpm}} BPM.",
+      "testOut": "{{step}} overslaan: één take op het slaagtempo, {{bpm}} BPM.",
       "benchmark": "Meetpunt, dag {{day}}: elke keer dezelfde oefening op {{bpm}} BPM, om te vergelijken.",
       "yourTurn": "Jouw beurt: {{exercise}}. Nog niet gecontroleerd, dus jij beoordeelt het.",
       "newFromSibling": "Nieuw. Hij begint op {{bpm}} BPM, ongeveer 80% van je schone {{clean}} BPM op {{sibling}}."
@@ -405,7 +407,8 @@
       "finishHow": "Haal {{need}} van {{count}} om deze stap af te ronden.",
       "tabPreview": "De eerste maten als tab",
       "exerciseCount": "{{count}} oefening",
-      "exerciseCount_other": "{{count}} oefeningen"
+      "exerciseCount_other": "{{count}} oefeningen",
+      "levelSubscribed": "Geabonneerd · je begint bij stap {{n}}"
     },
     "progress": {
       "title": "Voortgang",
@@ -525,7 +528,8 @@
       "title": "Deze sessie verlaten?",
       "body": "Je takes tot nu toe zijn bewaard.",
       "stay": "Doorgaan",
-      "leave": "Verlaten"
+      "leave": "Verlaten",
+      "bodyNothingSaved": "Nog geen takes, dus alleen wat nu loopt stopt."
     },
     "placement": {
       "result": "Je begint bij stap {{n}}: {{step}}"

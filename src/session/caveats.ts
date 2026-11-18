@@ -35,3 +35,29 @@ export function stepHonestLineKey(step: Step): "session.run.honest" | "session.r
   if (keys.length === 0) return null;
   return keys.includes("session.run.honestTiming") ? "session.run.honestTiming" : "session.run.honest";
 }
+
+/**
+ * Exercises whose own coach line already says that pick direction is the
+ * player's to keep (acceptance P1-4, 2026-11-18): on their ready screen the
+ * app's caveat would say it a second time, a line under the coach saying it.
+ * Ids, not wording, so the check holds in every language; `caveats.test.ts`
+ * reads the English packs and fails when a coach line says it and is not here.
+ */
+const COACH_SAYS_PICK = new Set([
+  "even-eighths.open-string",
+  "crossing.outside-shuttle",
+  "crossing.outside-pairs",
+  "economy.ascending-economy",
+  "economy.descending-economy",
+]);
+
+export function coachSaysPick(exercise: Pick<Exercise, "id">): boolean {
+  return COACH_SAYS_PICK.has(exercise.id);
+}
+
+/** The caveat for a ready screen: as `honestLineKey`, but never twice with the coach's own line. */
+export function readyHonestLineKey(
+  exercise: Pick<Exercise, "id" | "pickPlan" | "notes" | "grading" | "graded">,
+): "session.run.honest" | "session.run.honestTiming" | null {
+  return coachSaysPick(exercise) ? null : honestLineKey(exercise);
+}

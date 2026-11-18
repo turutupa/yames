@@ -90,6 +90,7 @@ import {
   canGoBack,
   currentStep,
   eventForBigAction,
+  leaveNeedsAsking,
   runReducer,
   timedBpm,
   timedTempoAdjustable,
@@ -1413,17 +1414,24 @@ export function useSessionRun(input: SessionRunInput) {
   /**
    * Escape in a Session (UX audit NAV-2, 2026-11-17). A running Take is
    * stopped first, and kept: that is one press. Leaving is the next one, and
-   * once this Session has Takes in it, it asks ("Your Takes are saved") rather
-   * than walking out on a key that sits next to the ones a player is using.
-   * With nothing played yet, or on the recap, it leaves at once.
+   * once there is anything to lose (a Take, or a warm-up running) it asks
+   * rather than walking out on a key that sits next to the ones a player is
+   * using (acceptance P2-1). With nothing played yet, or on the recap, it
+   * leaves at once.
    */
   const escape = useCallback(() => {
     const phase = runRef.current.phase;
     if (phase === "playing") return endTake();
     if (phase === "listening") return;
-    if (phase === "recap" || runRef.current.outcomes.length === 0) return exit();
+    if (!leaveNeedsAsking(runRef.current)) return exit();
     setLeaveAsked(true);
   }, [endTake, exit]);
+
+  /** The Exit button: the same question as Escape, by the same rule (acceptance P2-2). */
+  const requestExit = useCallback(() => {
+    if (!leaveNeedsAsking(runRef.current)) return exit();
+    setLeaveAsked(true);
+  }, [exit]);
 
   const stayInSession = useCallback(() => setLeaveAsked(false), []);
   useEffect(() => {
@@ -1483,6 +1491,7 @@ export function useSessionRun(input: SessionRunInput) {
       findEdge,
       exit,
       escape,
+      requestExit,
       stayInSession,
       subscribe,
       startPath,

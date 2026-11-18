@@ -14,7 +14,7 @@ function firstRun(): SessionRun {
     setMinutes: vi.fn(),
     paths: [],
     myPaths: [],
-    progress: { takes: [] },
+    progress: { states: [], takes: [], ceilings: [] },
     actions: { startToday: vi.fn() },
   } as unknown as SessionRun;
 }
@@ -134,7 +134,9 @@ describe("the plan as a list", () => {
 
   it("says what a first Session is for", () => {
     render(<TodayView session={planned()} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} />);
-    expect(screen.queryByText("First session · finds where you start")).not.toBeNull();
+    // Broken only between its parts, never "START" alone (acceptance P1-11).
+    expect(screen.getByTestId("today-lead").textContent).toBe("First session · finds where you start");
+    expect(screen.getByTestId("today-lead").querySelectorAll(".session-kick-part")).toHaveLength(2);
   });
 });
 

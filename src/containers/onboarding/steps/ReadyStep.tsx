@@ -51,6 +51,9 @@ export function ReadyStep(_props: WizardStepProps) {
   const start = defaultStart(learning.paths, learning.progress, machineContext.startPathId);
   const startPath = start ? learning.paths.find((p) => p.id === start.pathId) : undefined;
   const plan = learning.plan;
+  // A player with Takes behind them is not about to play their first Session
+  // (acceptance P2-15: "Run setup again" said so to a returning player).
+  const returning = learning.progress.takes.length > 0;
   const planSteps = plan?.steps ?? [];
 
   const rows: SummaryRow[] = [
@@ -127,7 +130,7 @@ export function ReadyStep(_props: WizardStepProps) {
       <h2 className="onboarding-step-title" id="onboarding-title">
         {t("onboarding.ready.title")}
       </h2>
-      <p className="onboarding-step-subtitle">{t("onboarding.ready.subtitle")}</p>
+      <p className="onboarding-step-subtitle">{t(returning ? "onboarding.ready.subtitleNext" : "onboarding.ready.subtitle")}</p>
 
       <ul className="onboarding-summary">
         {rows.map((row) => {
@@ -184,7 +187,7 @@ export function ReadyStep(_props: WizardStepProps) {
       {planSteps.length > 0 && plan && (
         <section className="onboarding-first-session" data-testid="onboarding-first-session">
           <div className="onboarding-first-session-head">
-            <span className="onboarding-first-session-title">{t("session.today.leadFirst")}</span>
+            <span className="onboarding-first-session-title">{t(returning ? "onboarding.ready.nextSession" : "session.today.leadFirst")}</span>
             <span className="onboarding-first-session-total">
               {t("session.today.minutes", { minutes: plan.minutes })}
             </span>

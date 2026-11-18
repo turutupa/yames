@@ -10,6 +10,7 @@ import {
   edgeOf,
   eventForBigAction,
   isEdgeStep,
+  leaveNeedsAsking,
   minutesLeft,
   runReducer,
   stepRemainingMs,
@@ -511,5 +512,20 @@ describe("a Session started from a Step has no countdown (UX audit SES-11)", () 
     // The same Session with a countdown moves on once its time is up.
     const timed = { ...s, untimed: false };
     expect(bigAction(timed, EX).kind).not.toBe("again");
+  });
+});
+
+describe("leaving asks once there is anything to lose (acceptance P2-1, P2-2)", () => {
+  const base = { ...IDLE, plan: { minutes: 10, mood: "returning" as const, daysAway: null, steps: [] } };
+  it("asks with a Take in the Session, a Take running, or a timed block running", () => {
+    expect(leaveNeedsAsking({ ...base, phase: "ready" })).toBe(false);
+    expect(leaveNeedsAsking({ ...base, phase: "timedReady" })).toBe(false);
+    expect(leaveNeedsAsking({ ...base, phase: "timed", ended: false })).toBe(true);
+    expect(leaveNeedsAsking({ ...base, phase: "timed", ended: true })).toBe(false);
+    expect(leaveNeedsAsking({ ...base, phase: "playing" })).toBe(true);
+    expect(leaveNeedsAsking({ ...base, phase: "ready", outcomes: [{} as never] })).toBe(true);
+  });
+  it("never on the recap", () => {
+    expect(leaveNeedsAsking({ ...base, phase: "recap", outcomes: [{} as never] })).toBe(false);
   });
 });

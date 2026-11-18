@@ -109,7 +109,9 @@
         "keepWarmYesterday": "Keeping it warm, last played yesterday.",
         "keepWarmToday": "Keeping it warm, played earlier today.",
         "keepWarmNew": "A first taste."
-      }
+      },
+      "from": "{{path}} · {{level}} · Step {{step}}",
+      "fromNoLevel": "{{path}} · Step {{step}}"
     },
     "why": {
       "firstEver": "Your first one, so it starts at {{bpm}} BPM. This is about time, not speed.",
@@ -405,7 +407,8 @@
       "finishHow": "Pass {{need}} of {{count}} to finish this Step.",
       "tabPreview": "The first bars, as tab",
       "exerciseCount": "{{count}} exercise",
-      "exerciseCount_other": "{{count}} exercises"
+      "exerciseCount_other": "{{count}} exercises",
+      "levelSubscribed": "Subscribed · starting at Step {{n}}"
     },
     "progress": {
       "title": "Progress",
@@ -525,7 +528,8 @@
       "title": "Leave this Session?",
       "body": "Your Takes so far are saved.",
       "stay": "Keep going",
-      "leave": "Leave"
+      "leave": "Leave",
+      "bodyNothingSaved": "No Takes yet, so only what's running stops."
     },
     "placement": {
       "result": "You start at Step {{n}}: {{step}}"
