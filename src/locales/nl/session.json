@@ -372,7 +372,13 @@
       "setlist": "Een routine die je zelf bouwt en op volgorde speelt.",
       "drill": "Voert het tempo op terwijl je speelt, en oefent een plan dat je zelf schrijft.",
       "jam": "Een band en jouw akkoorden. Nooit beoordeeld.",
-      "songs": "Lees de tab van een nummer en speel mee."
+      "songs": "Lees de tab van een nummer en speel mee.",
+      "last": "Laatst",
+      "ramp": "Tempo-opbouw",
+      "tempo": "Tempo",
+      "target": "Doel",
+      "steps": "{{count}} stap",
+      "steps_other": "{{count}} stappen"
     },
     "view": {
       "label": "Oefenweergave",

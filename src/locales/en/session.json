@@ -372,7 +372,13 @@
       "setlist": "A routine you build yourself, played in order.",
       "drill": "Climbs the tempo while you play, and drills a plan you write.",
       "jam": "A band and your chords. Never graded.",
-      "songs": "Read a song's tab and play along with it."
+      "songs": "Read a song's tab and play along with it.",
+      "last": "Last",
+      "ramp": "Ramp",
+      "tempo": "Tempo",
+      "target": "Target",
+      "steps": "{{count}} step",
+      "steps_other": "{{count}} steps"
     },
     "view": {
       "label": "Practice view",

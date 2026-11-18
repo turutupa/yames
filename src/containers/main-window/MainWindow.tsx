@@ -129,6 +129,7 @@ import { ProgressView } from "../session/ProgressView";
 import { ToolsView } from "../session/ToolsView";
 import { LearningNeck } from "../session/NeckGate";
 import { useJamTakes } from "./hooks/useJamTakes";
+import { useToolEscape } from "./hooks/useToolEscape";
 /* W32 — the camera comes to Jam. The hook and the preview are eager, like the
    take's machinery is, because they run while a jam is happening; the
    compositor behind "save as a video" is the only lazy thing on this tab. */
@@ -1428,6 +1429,17 @@ export function MainWindow() {
     return () => window.removeEventListener("keydown", onKey);
   }, [view, jamLoaded, jamScreen]);
 
+  // Escape in a tool, with nothing in it left to put away, goes back to Tools
+  // (UX audit TOOL-3). What counts as "left to put away" is the hook's.
+  const leaveToTools = useCallback(() => setView("tools"), [setView]);
+  useToolEscape({
+    view,
+    onLeave: leaveToTools,
+    blocked: isFullscreen || inputTestMode || inputTestOpen || !!bindingFor || onboarding.isOpen || !!tour?.isOpen,
+    jamBusy:
+      !!jamScreen?.editorOpen || jamScreen?.editingBar != null || !!jamScreen?.setupOpen || !!jamScreen?.chordsOpen,
+  });
+
   const activeBeat = currentBeat ? currentBeat.measureBeat : -1;
   const activeSub = currentBeat ? currentBeat.subdivision : -1;
   const isDownbeat = currentBeat?.isDownbeat ?? false;
@@ -2385,7 +2397,21 @@ export function MainWindow() {
         ) : view === "progress" ? (
           <ProgressView session={sessionRun} />
         ) : view === "tools" ? (
-          <ToolsView onOpen={setView} />
+          <ToolsView
+            onOpen={setView}
+            keyBindings={keyBindings}
+            info={{
+              bpm: state.bpm,
+              groups: state.beatGroups ?? [state.timeSignature],
+              freeMode: state.freeMode,
+              ramp: state.speedRamp,
+              setlist: setlistSession.setlist
+                ? { name: setlistSession.setlist.name, steps: setlistSession.setlist.steps.length }
+                : null,
+              jam: jamSession.jam?.name ?? null,
+              song: songsSession.song?.name ?? null,
+            }}
+          />
         ) : view === "session" ? (
           <SessionView
             session={sessionRun}

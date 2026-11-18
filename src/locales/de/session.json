@@ -372,7 +372,13 @@
       "setlist": "Eine Routine, die du selbst baust und der Reihe nach spielst.",
       "drill": "Steigert das Tempo, während du spielst, und übt einen Plan, den du schreibst.",
       "jam": "Eine Band und deine Akkorde. Nie bewertet.",
-      "songs": "Lies die Tabulatur eines Songs und spiel dazu."
+      "songs": "Lies die Tabulatur eines Songs und spiel dazu.",
+      "last": "Zuletzt",
+      "ramp": "Steigerung",
+      "tempo": "Tempo",
+      "target": "Ziel",
+      "steps": "{{count}} Schritt",
+      "steps_other": "{{count}} Schritte"
     },
     "view": {
       "label": "Übungsansicht",

@@ -380,7 +380,14 @@
       "setlist": "Una rutina que montas tú y que suena en orden.",
       "drill": "Sube el tempo mientras tocas y practica un plan que escribes tú.",
       "jam": "Una banda y tus acordes. Nunca se califica.",
-      "songs": "Lee la tablatura de una canción y toca con ella."
+      "songs": "Lee la tablatura de una canción y toca con ella.",
+      "last": "Último",
+      "ramp": "Rampa",
+      "tempo": "Tempo",
+      "target": "Objetivo",
+      "steps": "{{count}} paso",
+      "steps_many": "{{count}} pasos",
+      "steps_other": "{{count}} pasos"
     },
     "view": {
       "label": "Vista de práctica",

@@ -372,7 +372,13 @@
       "setlist": "Một lộ trình bạn tự xây và chơi theo thứ tự.",
       "drill": "Tăng tốc độ khi bạn chơi, và luyện một kế hoạch bạn tự viết.",
       "jam": "Một ban nhạc và hợp âm của bạn. Không bao giờ chấm điểm.",
-      "songs": "Đọc tab của một bài hát và chơi theo."
+      "songs": "Đọc tab của một bài hát và chơi theo.",
+      "last": "Gần đây",
+      "ramp": "Tăng tốc",
+      "tempo": "Nhịp độ",
+      "target": "Mục tiêu",
+      "steps": "{{count}} bước",
+      "steps_other": "{{count}} bước"
     },
     "view": {
       "label": "Chế độ xem luyện tập",

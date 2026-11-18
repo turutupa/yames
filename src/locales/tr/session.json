@@ -372,7 +372,13 @@
       "setlist": "Kendin kurduğun, sırayla çalınan bir rutin.",
       "drill": "Sen çalarken tempoyu yükseltir ve yazdığın bir planı çalıştırır.",
       "jam": "Bir grup ve senin akorların. Asla notlanmaz.",
-      "songs": "Bir şarkının tabını oku ve onunla birlikte çal."
+      "songs": "Bir şarkının tabını oku ve onunla birlikte çal.",
+      "last": "Son",
+      "ramp": "Hızlanma",
+      "tempo": "Tempo",
+      "target": "Hedef",
+      "steps": "{{count}} adım",
+      "steps_other": "{{count}} adım"
     },
     "view": {
       "label": "Çalışma görünümü",
