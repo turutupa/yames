@@ -177,6 +177,7 @@
       "exit": "Çık",
       "stepOf": "Adım {{n}} / {{of}}",
       "minutesLeft": "{{minutes}} dk kaldı",
+      "played": "{{time}} çalındı",
       "timeUp": "Süre doldu",
       "pathStep": "{{path}}, adım {{step}}",
       "bpm": "BPM",

@@ -177,6 +177,7 @@
       "exit": "Thoát",
       "stepOf": "Bước {{n}} / {{of}}",
       "minutesLeft": "Còn {{minutes}} phút",
+      "played": "Đã chơi {{time}}",
       "timeUp": "Hết giờ",
       "pathStep": "{{path}}, bước {{step}}",
       "bpm": "BPM",

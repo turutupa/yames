@@ -177,6 +177,7 @@
       "exit": "Stoppen",
       "stepOf": "Stap {{n}} van {{of}}",
       "minutesLeft": "Nog {{minutes}} min",
+      "played": "{{time}} gespeeld",
       "timeUp": "De tijd is om",
       "pathStep": "{{path}}, stap {{step}}",
       "bpm": "BPM",

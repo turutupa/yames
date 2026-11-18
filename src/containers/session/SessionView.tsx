@@ -28,6 +28,7 @@ import {
   minutesLeft,
   stepRemainingMs,
   timedTempoAdjustable,
+  timedTempoLive,
 } from "../../session/runner";
 import type { RunState, TakeOutcome } from "../../session/runner";
 import { CoachLine, TempoNudges, bigLabel, timedHowKey } from "./parts";
@@ -99,12 +100,16 @@ function SessionBar({
       <button className="session-exit" onClick={onExit} data-testid="session-exit">
         {t("session.run.exit")}
       </button>
+      {/* One step is no progress to show: its single pip, lit, read as a
+          full bar over a clock counting up (acceptance pass 2). The empty row
+          keeps the clock where it was. */}
       <div
         className="session-pips"
-        role="img"
-        aria-label={t("session.run.stepOf", { n: run.stepIndex + 1, of: steps.length })}
+        role={steps.length > 1 ? "img" : undefined}
+        aria-label={steps.length > 1 ? t("session.run.stepOf", { n: run.stepIndex + 1, of: steps.length }) : undefined}
+        data-testid="session-pips"
       >
-        {steps.map((step, i) => (
+        {steps.length > 1 && steps.map((step, i) => (
           <i
             key={step.id}
             data-state={
@@ -118,7 +123,7 @@ function SessionBar({
           spent so far (UX audit SES-11). */}
       <span className="session-quiet session-bar-left" data-untimed={run.untimed ? "" : undefined}>
         {run.untimed
-          ? clockText(Math.max(0, run.now - run.startedAt))
+          ? t("session.run.played", { time: clockText(Math.max(0, run.now - run.startedAt)) })
           : left > 0
             ? t("session.run.minutesLeft", { minutes: left })
             : t("session.run.timeUp")}
@@ -1036,8 +1041,8 @@ function TimedScreen({
             {bpm > 0 && (
               <MetaTempo
                 bpm={bpm}
-                onSlower={adjustable && (ready || paused || ended) ? actions.slower : undefined}
-                onFaster={adjustable && (ready || paused || ended) ? actions.faster : undefined}
+                onSlower={adjustable && (ready || paused || ended || timedTempoLive(step)) ? actions.slower : undefined}
+                onFaster={adjustable && (ready || paused || ended || timedTempoLive(step)) ? actions.faster : undefined}
                 slowerKey="↓"
                 fasterKey="↑"
               />

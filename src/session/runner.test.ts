@@ -18,6 +18,7 @@ import {
   canGoBack,
   timedBpm,
   timedTempoAdjustable,
+  timedTempoLive,
   TIMED_BPM_STEP,
 } from "./runner";
 import type { RunEvent, RunState, TakeOutcome } from "./runner";
@@ -451,18 +452,32 @@ describe("a timed step: pause, resume, restart, tempo, back (owner, beta 5)", ()
     expect(stepRemainingMs(s)).toBe((currentStep(s)?.minutes ?? 0) * MIN);
   });
 
-  it("the tempo moves before the start and while paused, not mid-run", () => {
+  it("a warm-up's tempo moves before the start, while paused, and while it plays (acceptance pass 2)", () => {
     let s = run(IDLE, { type: "start", plan: plan(), now: NOW });
+    expect(currentStep(s)?.kind).toBe("metronome");
     expect(timedTempoAdjustable(currentStep(s))).toBe(true);
     const bpm = s.bpm;
     s = run(s, { type: "setBpm", bpm: timedBpm(bpm, -TIMED_BPM_STEP), now: NOW });
     expect(s.bpm).toBe(timedBpm(bpm, -TIMED_BPM_STEP));
-    s = run(s, { type: "timedStart", now: NOW }, { type: "setBpm", bpm: 200, now: NOW });
-    expect(s.bpm).not.toBe(200);
+    // Ungraded: slowing down to learn the pattern mid-run is the point of it.
+    s = run(s, { type: "timedStart", now: NOW }, { type: "setBpm", bpm: 70, now: NOW });
+    expect(s.bpm).toBe(70);
+    expect(s.paused).toBe(false);
     s = run(s, { type: "pause", now: NOW }, { type: "setBpm", bpm: 200, now: NOW });
     expect(s.bpm).toBe(200);
     expect(timedBpm(31, -5)).toBe(30);
     expect(timedBpm(30, -5)).toBe(30);
+  });
+
+  it("a jam's tempo moves only between runs: mid-run would move the band under the player", () => {
+    const jam = { id: "j", kind: "jam", minutes: 3, bpm: 90, title: "Jam", why: { code: "jam" } } as unknown as PlanStep;
+    const s0 = run(IDLE, { type: "start", plan: plan(), now: NOW });
+    let s: RunState = { ...s0, phase: "timed", paused: false, ended: false, bpm: 90, plan: { ...s0.plan!, steps: [jam] }, stepIndex: 0 };
+    expect(timedTempoLive(currentStep(s))).toBe(false);
+    s = run(s, { type: "setBpm", bpm: 60, now: NOW });
+    expect(s.bpm).toBe(90);
+    s = run(s, { type: "pause", now: NOW }, { type: "setBpm", bpm: 60, now: NOW });
+    expect(s.bpm).toBe(60);
   });
 
   it("the step after a warm-up can go back to it, until something is played there", () => {

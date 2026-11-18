@@ -177,6 +177,7 @@
       "exit": "나가기",
       "stepOf": "{{of}}단계 중 {{n}}단계",
       "minutesLeft": "{{minutes}}분 남음",
+      "played": "{{time}} 연주",
       "timeUp": "시간 끝",
       "pathStep": "{{path}}, {{step}}단계",
       "bpm": "BPM",

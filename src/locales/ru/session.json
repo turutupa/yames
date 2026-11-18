@@ -179,6 +179,7 @@
       "exit": "Выйти",
       "stepOf": "Шаг {{n}} из {{of}}",
       "minutesLeft": "Осталось {{minutes}} мин",
+      "played": "Сыграно: {{time}}",
       "timeUp": "Время вышло",
       "pathStep": "{{path}}, шаг {{step}}",
       "bpm": "BPM",

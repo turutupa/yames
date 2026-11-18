@@ -177,6 +177,7 @@
       "exit": "Beenden",
       "stepOf": "Schritt {{n}} von {{of}}",
       "minutesLeft": "Noch {{minutes}} Min.",
+      "played": "{{time}} gespielt",
       "timeUp": "Die Zeit ist um",
       "pathStep": "{{path}}, Schritt {{step}}",
       "bpm": "BPM",

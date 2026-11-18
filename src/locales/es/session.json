@@ -178,6 +178,7 @@
       "exit": "Salir",
       "stepOf": "Paso {{n}} de {{of}}",
       "minutesLeft": "Quedan {{minutes}} min",
+      "played": "Tocado: {{time}}",
       "timeUp": "Se acabó el tiempo",
       "pathStep": "{{path}}, paso {{step}}",
       "bpm": "BPM",

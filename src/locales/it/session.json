@@ -178,6 +178,7 @@
       "exit": "Esci",
       "stepOf": "Tappa {{n}} di {{of}}",
       "minutesLeft": "Mancano {{minutes}} min",
+      "played": "Suonato: {{time}}",
       "timeUp": "Tempo scaduto",
       "pathStep": "{{path}}, tappa {{step}}",
       "bpm": "BPM",

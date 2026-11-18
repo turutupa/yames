@@ -177,6 +177,7 @@
       "exit": "退出",
       "stepOf": "第 {{n}} 步，共 {{of}} 步",
       "minutesLeft": "還剩 {{minutes}} 分鐘",
+      "played": "已彈 {{time}}",
       "timeUp": "時間到",
       "pathStep": "{{path}}，第 {{step}} 步",
       "bpm": "BPM",

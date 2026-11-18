@@ -178,6 +178,7 @@
       "exit": "Quitter",
       "stepOf": "Étape {{n}} sur {{of}}",
       "minutesLeft": "Encore {{minutes}} min",
+      "played": "Joué : {{time}}",
       "timeUp": "C'est l'heure",
       "pathStep": "{{path}}, étape {{step}}",
       "bpm": "BPM",

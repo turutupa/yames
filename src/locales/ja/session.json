@@ -177,6 +177,7 @@
       "exit": "終了",
       "stepOf": "ステップ {{n}} / {{of}}",
       "minutesLeft": "残り {{minutes}} 分",
+      "played": "{{time}} 演奏",
       "timeUp": "時間です",
       "pathStep": "{{path}}、ステップ {{step}}",
       "bpm": "BPM",
