@@ -77,7 +77,8 @@
     "coachOnPlay": "Coach listens when you press play",
     "coachQuiet": "Coach stays quiet mid-step",
     "countIn": "Count-in",
-    "backToStart": "Back to the start"
+    "backToStart": "Back to the start",
+    "setUpInput": "Set up input"
   },
   "rail": {
     "label": "Modes and library",

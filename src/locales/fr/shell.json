@@ -77,7 +77,8 @@
     "coachOnPlay": "Le coach écoute dès que vous lancez la lecture",
     "coachQuiet": "Le coach se tait pendant une étape",
     "countIn": "Décompte",
-    "backToStart": "Revenir au début"
+    "backToStart": "Revenir au début",
+    "setUpInput": "Configurer l'entrée"
   },
   "rail": {
     "label": "Modes et bibliothèque",

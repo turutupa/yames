@@ -77,7 +77,8 @@
     "coachOnPlay": "再生するとコーチが聴き始めます",
     "coachQuiet": "ステップの途中ではコーチは黙っています",
     "countIn": "カウントイン",
-    "backToStart": "最初に戻る"
+    "backToStart": "最初に戻る",
+    "setUpInput": "入力を設定"
   },
   "rail": {
     "label": "モードとライブラリ",

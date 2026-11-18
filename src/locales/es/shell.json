@@ -77,7 +77,8 @@
     "coachOnPlay": "El entrenador escucha al pulsar reproducir",
     "coachQuiet": "El entrenador calla durante cada paso",
     "countIn": "Cuenta de entrada",
-    "backToStart": "Volver al principio"
+    "backToStart": "Volver al principio",
+    "setUpInput": "Configurar entrada"
   },
   "rail": {
     "label": "Modos y biblioteca",

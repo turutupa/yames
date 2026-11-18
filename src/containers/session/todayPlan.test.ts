@@ -85,7 +85,7 @@ describe("every row's words exist in all fifteen languages", () => {
     for (const r of ROLE_WORDS) expect(typeof today.role[r], `${lang} role.${r}`).toBe("string");
     for (const r of reasons) expect(typeof today.reason[r], `${lang} reason.${r}`).toBe("string");
     for (const c of contexts) expect(typeof today.context[c], `${lang} context.${c}`).toBe("string");
-    for (const k of ["leadFirstOutcome", "parts", "noMic", "setUpInput", "toolsAsk", "openTools", "moreBelow", "bpm", "bpmRange"]) {
+    for (const k of ["leadFirstOutcome", "parts", "toolsAsk", "openTools", "moreBelow", "bpm", "bpmRange"]) {
       expect(typeof today[k], `${lang} ${k}`).toBe("string");
     }
   });

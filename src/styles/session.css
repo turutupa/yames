@@ -76,6 +76,8 @@
   --l-quiet: #c9bba6;
   --l-faint: #94866f;
   --l-amber: #ffb454;
+  /* The accent's deeper tone: the second of two kinds, still the same family. */
+  --l-copper: #d9793a;
   --l-tone: #4ee08a;
   --l-tens: #5aa9ff;
   --l-clash: #ff5d6c;
@@ -484,13 +486,15 @@
   text-wrap: balance;
   overflow-wrap: anywhere;
 }
-.session-tag[data-kind="theory"] {
+/* Two tones of the accent (UX audit PATH-12): Technique the accent, Styles
+   its copper. The word is on the tag, so colour is never the only cue. */
+.session-tag[data-kind="mechanics"] {
   color: var(--l-amber);
   border-color: rgba(255, 180, 84, 0.45);
 }
-.session-tag[data-kind="mechanics"] {
-  color: #8cc2ff;
-  border-color: rgba(90, 169, 255, 0.5);
+.session-tag[data-kind="theory"] {
+  color: color-mix(in srgb, var(--l-copper) 55%, var(--l-ink));
+  border-color: color-mix(in srgb, var(--l-copper) 55%, transparent);
 }
 /* A role ("Find your level", "Review"): plain caps, no pill. The kind is a
    colour elsewhere, never this label's words. */
@@ -588,33 +592,27 @@
 .session-today {
   --today-hero: 340px;
   --today-plan: 640px;
-  --k-mechanics: #8cc2ff;
-  --k-theory: var(--l-amber);
+  /* The kinds are two tones of the accent, never a second hue (UX audit
+     TODAY-7): Technique the accent itself, Styles its deeper copper. */
+  --k-mechanics: var(--l-amber);
+  --k-theory: var(--l-copper);
   --k-plain: var(--l-faint);
   display: grid;
-  /* The pair is centred by the two outer tracks, so the neck's slot still
-     spans the whole width above it (the stage frames the neck to the slot). */
+  /* The pair is centred by the two outer tracks. No neck above it any more:
+     an empty one pushed the plan below the fold (UX audit TODAY-9). */
   grid-template-columns:
     minmax(0, 1fr) minmax(280px, var(--today-hero)) clamp(28px, 4vw, 56px)
     minmax(0, var(--today-plan)) minmax(0, 1fr);
-  grid-template-rows: auto auto;
+  grid-template-rows: auto;
   align-content: center;
   column-gap: 0;
   row-gap: clamp(10px, 2.4vh, 26px);
   flex: 1;
-}
-.session-today > .session-slot {
-  grid-column: 1 / -1;
-  grid-row: 1;
-  flex: none;
-  height: clamp(130px, 26vh, 250px);
-  margin: 0 -14px;
-  min-height: 0;
-  pointer-events: none;
+  padding-bottom: 3vh;
 }
 .session-today-hero {
   grid-column: 2;
-  grid-row: 2;
+  grid-row: 1;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -643,7 +641,7 @@
 }
 .session-today-plan {
   grid-column: 4;
-  grid-row: 2;
+  grid-row: 1;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -683,23 +681,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* "No mic yet? Set up input", by Start, only while nothing is listening. */
-.session-today-mic {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px 6px;
-  margin-top: -4px;
-  color: var(--l-ink);
-  font-size: 14px;
-}
-.session-page .session-today-mic .session-link {
-  align-self: baseline;
-  color: var(--l-amber);
-  text-decoration-color: rgba(255, 180, 84, 0.5);
-  font-size: 14px;
-}
-
 /* The plan's header: what it is on the left, how much on the right. */
 .session-plan-head {
   display: flex;
@@ -732,15 +713,22 @@
   min-width: 6px;
   border-radius: 3px;
   background: var(--k-plain);
-  opacity: 0.6;
+  opacity: 0.55;
+  /* A new plan's stretches grow into place rather than jump (TODAY-11). */
+  transition: flex-grow 0.45s var(--l-ease), background-color 0.3s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .session-timebar-bar > span {
+    transition: none;
+  }
 }
 .session-timebar-bar > span[data-kind="mechanics"] {
   background: var(--k-mechanics);
-  opacity: 0.88;
+  opacity: 0.9;
 }
 .session-timebar-bar > span[data-kind="theory"] {
   background: var(--k-theory);
-  opacity: 0.88;
+  opacity: 0.9;
 }
 .session-timebar-ticks {
   position: relative;
@@ -881,8 +869,23 @@
 .session-today-tools {
   margin: 4px 0 0;
 }
-.session-page .session-today-tools .session-link,
-.session-page .session-today-mic .session-link {
+/* A plan coming in: quick, a row after the row, so a change of minutes reads
+   as the plan being rebuilt rather than text swapping in place (TODAY-11). */
+.session-plan-swap {
+  animation: session-swap 0.34s var(--l-ease) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+@keyframes session-swap {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.session-page .session-today-tools .session-link {
   display: inline;
   padding: 0;
   vertical-align: baseline;
@@ -907,11 +910,8 @@
   }
   .session-today-page > .session-today {
     min-height: 0;
-    grid-template-rows: auto minmax(0, 1fr);
-    align-content: stretch;
-  }
-  .session-today > .session-slot {
-    height: min(250px, 26vh, max(56px, 100vh - 560px));
+    /* Grows to its content and no further: a longer plan scrolls in its panel. */
+    grid-template-rows: minmax(0, max-content);
   }
   .session-today-hero {
     position: static;
@@ -985,15 +985,11 @@
 .main-window.is-mobile .session-today .session-seg {
   order: 3;
 }
-.main-window.is-mobile .session-today-mic {
-  order: 4;
-  margin-top: 0;
-}
-.main-window.is-mobile .session-today-running {
-  order: 5;
-}
 .main-window.is-mobile .session-today-plan {
   order: 6;
+  /* Room for Start's fade: scrolled to the end, the plan's last line sits
+     clear of the bar instead of under its shadow (UX audit PHONE-1). */
+  margin-bottom: 26px;
 }
 .main-window.is-mobile .session-today-headline {
   flex-direction: row;
@@ -1053,8 +1049,7 @@
 .main-window.is-mobile .session-plan-more {
   display: none;
 }
-.main-window.is-mobile .session-page .session-today-tools .session-link,
-.main-window.is-mobile .session-page .session-today-mic .session-link {
+.main-window.is-mobile .session-page .session-today-tools .session-link {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
@@ -1586,12 +1581,48 @@
 .session-page .session-later button:hover {
   color: var(--l-ink);
 }
+/* A page's one-line summary under its title: a reading measure, not the window's. */
+.session-lede {
+  max-width: 72ch;
+  margin-top: 2px;
+}
+/*
+ * A Path: the Steps on the left, and on the right what to do about them —
+ * where you are with Continue, the Level, the subscription, what grading can
+ * be trusted with. The side comes first in the markup, so on a narrow window
+ * or a phone Continue is right under the title (UX audit PHONE-3), and on a
+ * wide one it stays in view while eighteen Steps scroll past.
+ */
 .session-pathgrid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(250px, 320px);
-  gap: 22px;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+  gap: 18px 28px;
   min-height: 0;
   align-items: start;
+  margin-top: 8px;
+}
+.session-path-side {
+  grid-column: 2;
+  grid-row: 1;
+  position: sticky;
+  top: 12px;
+  gap: 10px;
+}
+.session-pathgrid > .session-step-list {
+  grid-column: 1;
+  grid-row: 1;
+}
+.session-where-title {
+  margin: 5px 0 2px;
+  font: 600 22px/1.12 var(--l-display);
+  letter-spacing: 0.01em;
+}
+.session-page .session-where .session-big {
+  margin-top: 12px;
+  /* One line in every language: "Продолжить · шаг 1" is half again "Continue · Step 1". */
+  font-size: 25px;
+  text-wrap: balance;
+  padding-inline: 10px;
 }
 .session-step-list {
   display: flex;
@@ -1601,95 +1632,319 @@
   padding: 0;
   list-style: none;
 }
-.session-page .session-step-row {
+/* A Level's first Step gets a heading: the list reads as three parts. */
+.session-level-divider {
   display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin: 16px 0 4px;
+  padding: 0 10px 6px;
+  border-bottom: 1px solid var(--l-line);
+}
+.session-level-divider:first-child {
+  margin-top: 0;
+}
+.session-level-divider .session-kick {
+  color: var(--l-amber);
+}
+.session-page .session-step-row {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 9px;
+  gap: 12px;
   width: 100%;
-  min-height: 48px;
-  padding: 4px 10px;
+  min-height: 52px;
+  padding: 6px 12px 6px 8px;
   text-align: left;
   border-radius: 10px;
   border: 1px solid transparent;
-  color: var(--l-quiet);
+  color: var(--l-ink);
+  transition: background 0.2s, border-color 0.2s;
 }
 .session-page .session-step-row:hover {
   background: rgba(255, 232, 200, 0.05);
 }
-.session-page .session-step-row[data-passed] {
+.session-page .session-step-row:hover .session-step-chev {
   color: var(--l-ink);
+  transform: translateX(2px);
+}
+/* Ahead of you: open, never locked, only quieter. */
+.session-page .session-step-row[data-state="ahead"] .session-step-name {
+  color: color-mix(in srgb, var(--l-ink) 82%, var(--l-quiet));
 }
 .session-page .session-step-row[data-current] {
-  color: var(--l-ink);
-  background: rgba(255, 180, 84, 0.11);
-  border-color: rgba(255, 180, 84, 0.6);
+  background: color-mix(in srgb, var(--l-amber) 10%, transparent);
+  border-color: color-mix(in srgb, var(--l-amber) 55%, transparent);
 }
 /* Below the chosen Level: skipped, not done, and still a button. */
 .session-page .session-step-row[data-skipped] {
   color: var(--l-faint);
 }
 .session-page .session-step-row[data-skipped] .session-step-name {
+  color: var(--l-faint);
   font-weight: 500;
 }
 .session-step-num {
-  flex: none;
-  width: 22px;
-  font: 700 19px/1 var(--l-display);
-  color: var(--l-faint);
-  text-align: right;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid var(--l-line2);
+  font: 700 14px/1 var(--l-display);
+  color: var(--l-quiet);
   font-variant-numeric: lining-nums tabular-nums;
 }
 .session-step-row[data-passed] .session-step-num {
-  color: var(--l-tone);
+  border-color: transparent;
+  background: var(--l-tone);
+  color: var(--l-bg);
 }
 .session-step-row[data-current] .session-step-num {
+  border: 2px solid var(--l-amber);
   color: var(--l-amber);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--l-amber) 30%, transparent);
+}
+.session-step-row[data-skipped] .session-step-num {
+  border-style: dashed;
+  color: var(--l-faint);
 }
 .session-step-text {
   display: flex;
   flex-direction: column;
+  gap: 2px;
   min-width: 0;
 }
 .session-step-name {
-  font: 600 19px/1.08 var(--l-display);
+  font: 600 19px/1.1 var(--l-display);
   letter-spacing: 0.012em;
+  overflow-wrap: anywhere;
 }
-.session-step-text small {
-  font: 500 12px/1.2 var(--l-body);
+.session-step-meta {
+  font: 500 12.5px/1.25 var(--l-body);
+  color: var(--l-faint);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.session-step-row[data-current] .session-step-meta {
   color: var(--l-quiet);
-  margin-top: 1px;
 }
-/* Like the recap's rows: the text keeps a readable measure, and on a phone
-   (or in a long language) Play this / Find my edge drop under it on the right
-   instead of squeezing it to a word a line. */
-.session-exercise {
+.session-step-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.session-step-here {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font: 600 13px/1.15 var(--l-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--l-amber);
+  white-space: nowrap;
+}
+.session-step-here small {
+  font: 500 12px/1.3 var(--l-body);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--l-quiet);
+}
+.session-step-chev {
+  font-size: 22px;
+  line-height: 1;
+  color: var(--l-faint);
+  transition: transform 0.2s var(--l-ease), color 0.2s;
+}
+/* The Level: a segmented control, then who the chosen one is for and where it starts. */
+.session-level .session-level-seg {
+  /* Each Level as wide as its name, and a long one ("Продвинутый") wraps the
+     control to a second row rather than breaking mid-word or spilling out. */
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 10px;
-  align-items: center;
-  padding: 9px 12px;
+  margin-top: 8px;
 }
-.session-exercise > .session-col {
-  margin-left: auto;
+.session-page .session-level .session-level-seg button {
+  flex: 1 1 auto;
+  font-size: 16px;
+  padding: 9px 8px;
+  white-space: nowrap;
+  line-height: 1.05;
+}
+.session-level-about {
+  margin-top: 10px;
+}
+.session-level-title {
+  font: 600 19px/1.15 var(--l-display);
+  letter-spacing: 0.01em;
+}
+.session-level-start {
+  margin-top: 2px;
+  color: var(--l-amber);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.session-level-who {
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid var(--l-line);
+}
+.session-level-who ul {
+  margin: 5px 0 0;
+  padding: 0 0 0 16px;
+  color: var(--l-quiet);
+  font-size: 13px;
+  line-height: 1.38;
+}
+.session-level-who li + li {
+  margin-top: 4px;
+}
+.session-level-who li::marker {
+  color: var(--l-faint);
+}
+/* What grading can be trusted with: a line, and the Path's own account behind "Why?". */
+.session-limits > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  color: var(--l-quiet);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.session-limits > summary::-webkit-details-marker {
+  display: none;
+}
+.session-limits-why {
+  color: var(--l-amber);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, var(--l-amber) 50%, transparent);
+  white-space: nowrap;
+}
+.session-limits[open] > .session-card {
+  margin-top: 8px;
+}
+/*
+ * A Step: the Exercises first, each with a small tab of what it asks, and the
+ * reading behind "Technique notes" (UX audit PATH-6). Test out and choosing
+ * the Step sit in a column of their own beside them.
+ */
+.session-stepgrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  gap: 18px 28px;
+  align-items: start;
+  margin-top: 8px;
+}
+/* Under ~1180 px the side column would squeeze the cards until each tab
+   drops under its words and one card fills the window: one column instead,
+   the cards at full width, Test out after them. */
+@media (max-width: 1180px) {
+  .session-stepgrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .session-step-side {
+    position: static;
+    max-width: 640px;
+  }
+}
+.session-step-side {
+  position: sticky;
+  top: 12px;
+}
+.session-step-main {
+  gap: 10px;
+  /* The cards' width, not the window's, decides their layout: a container
+     cannot query itself, so the column is the container. */
+  container-type: inline-size;
+  width: 100%;
+  min-width: 0;
+}
+.session-exercise {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) minmax(180px, 290px);
+  grid-template-areas:
+    "tick text prev"
+    "tick act prev";
+  grid-template-rows: auto 1fr;
+  gap: 8px 14px;
+  align-items: start;
+  padding: 13px 14px 13px 13px;
 }
 .session-exercise[data-current] {
   border-color: rgba(255, 180, 84, 0.6);
   background: rgba(50, 35, 18, 0.84);
 }
+.session-exercise > .session-tick {
+  grid-area: tick;
+  margin-top: 1px;
+}
 .session-exercise-text {
-  flex: 1 1 13rem;
+  grid-area: text;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 .session-exercise-text .session-plan-title {
-  font-size: 19px;
+  font-size: 20px;
+}
+.session-exercise-purpose {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 2px;
+}
+.session-exercise-tempo {
+  color: var(--l-ink);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.session-exercise-actions {
+  grid-area: act;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  align-self: end;
 }
 .session-exercise .session-secondary {
   font-size: 16px;
-  min-height: 36px;
-  padding: 4px 12px;
+  min-height: 40px;
+  padding: 4px 14px;
+}
+.session-tabpreview {
+  grid-area: prev;
+  align-self: start;
+  display: flex;
+  /* One bar at the smallest numbers, cut under the low string: the beat row
+     is the practice screen's, a glance does not need it. */
+  height: 142px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--l-bg) 50%, transparent);
+  border: 1px solid var(--l-line);
+  overflow: hidden;
+  pointer-events: none;
+}
+.session-tabpreview > .tabstrip {
+  flex: 1 1 auto;
+  height: auto;
+}
+.session-tabpreview .tabstrip-fill {
+  overflow: hidden;
+  justify-content: flex-start;
+}
+/* A narrow column: the tab goes under the words, full width, then the buttons. */
+@container (max-width: 620px) {
+  .session-exercise {
+    grid-template-columns: 22px minmax(0, 1fr);
+    grid-template-areas:
+      "tick text"
+      "tick prev"
+      "tick act";
+    grid-template-rows: auto;
+  }
 }
 .session-tick {
   flex: none;
@@ -1714,34 +1969,116 @@
   color: transparent;
   box-shadow: 0 0 10px rgba(255, 180, 84, 0.5);
 }
+.session-notes > summary {
+  list-style: none;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  padding: 13px 15px;
+  cursor: pointer;
+}
+.session-notes > summary::-webkit-details-marker {
+  display: none;
+}
+.session-notes > summary::before {
+  content: "›";
+  display: inline-block;
+  width: 10px;
+  color: var(--l-amber);
+  font-size: 20px;
+  line-height: 0.8;
+  transition: transform 0.2s var(--l-ease);
+}
+.session-notes[open] > summary::before {
+  transform: rotate(90deg);
+}
+.session-notes > summary:hover .session-kick {
+  color: var(--l-ink);
+}
+.session-notes-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-width: 72ch;
+  padding: 0 15px 15px 37px;
+}
+.session-notes-body > .session-kick:not(:first-child) {
+  margin-top: 8px;
+}
 
 /* ── Progress ──────────────────────────────────────────────────────────── */
-.session-prog {
+/* The top row: three numbers, read at a glance (UX audit PROG-1). */
+/* One column, as wide as the widest card wants: the totals, the Paths and the
+   footnote line up on both edges instead of each stopping somewhere else. */
+.session-progress-page > :not(.session-rise:first-child) {
+  width: 100%;
+  max-width: 980px;
+}
+.session-stat-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
-  gap: 22px;
-  flex: 1;
-  min-height: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 }
-.session-prog > .session-col:last-child {
-  gap: 7px;
+.session-stat-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 18px 13px;
 }
-/* Centred by auto margins: a list longer than its column must not spill up
-   over the neck and the clean-tempo heading (QA 2026-11-17 #5). */
-.session-prog > .session-col:last-child > :first-child {
-  margin-top: auto;
+.session-stat-tile .session-num {
+  font-size: clamp(38px, 5.4vh, 52px);
+  line-height: 0.95;
+  color: var(--l-ink);
 }
-.session-prog > .session-col:last-child > :last-child {
-  margin-bottom: auto;
+.session-stat-label {
+  color: var(--l-quiet);
+  font: 600 13px/1.2 var(--l-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
-/* A name keeps a readable measure: when the card is narrow the spark and the
-   number go under it rather than squeezing it to one word a line (QA #5). */
+.session-prog-paths {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
+  gap: 12px;
+  align-items: start;
+}
+.session-prog-path {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 16px 6px;
+}
+.session-prog-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  padding-bottom: 12px;
+}
+.session-prog-head .session-exercise-text {
+  flex: 1 1 12em;
+}
+.session-prog-title {
+  margin: 0;
+  font: 500 26px/1.08 var(--l-serif);
+  letter-spacing: -0.01em;
+}
+.session-prog-head .session-progress-value {
+  font-size: 30px;
+}
+.session-prog-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
 .session-skill {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px 10px;
-  padding: 10px 13px;
+  gap: 6px 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--l-line);
 }
 .session-skill .session-exercise-text {
   gap: 1px;
@@ -1751,75 +2088,109 @@
 .session-skill .session-spark-none {
   margin-left: auto;
 }
+/* A narrow card (a phone): the number stays beside the name it belongs to,
+   the trend goes under them, instead of the row wrapping wherever it breaks. */
+@container (max-width: 460px) {
+  .session-skill {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+  .session-skill > .session-exercise-text {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .session-skill .session-spark,
+  .session-skill .session-spark-none {
+    grid-column: 1;
+    grid-row: 2;
+    margin-left: 0;
+  }
+  .session-skill .session-progress-value {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+}
 .session-skill-name {
   font: 600 18px/1.12 var(--l-display);
   letter-spacing: 0.01em;
 }
 .session-progress-value {
   flex: none;
-  min-width: 58px;
+  min-width: 64px;
   text-align: right;
   font: 700 25px/1 var(--l-display);
   font-variant-numeric: lining-nums tabular-nums;
 }
 .session-progress-value small {
   display: block;
+  margin-top: 2px;
   color: var(--l-quiet);
   font: 500 11px/1.3 var(--l-body);
+}
+/* Nothing measured: words, quiet, never a dash that reads like a score (PROG-3). */
+.session-progress-value[data-none] {
+  color: var(--l-faint);
+}
+.session-progress-value[data-none] small {
+  color: var(--l-faint);
+  font-size: 12px;
 }
 .session-spark {
   flex: none;
 }
 .session-spark path {
   stroke: var(--l-amber);
-  stroke-width: 1.6;
+  stroke-width: 2;
   stroke-linejoin: round;
   stroke-linecap: round;
 }
 .session-spark circle {
   fill: var(--l-amber);
 }
+.session-spark .session-spark-hit {
+  fill: transparent;
+}
 .session-spark-none {
   flex: none;
   width: 120px;
 }
-.session-chart {
-  width: 100%;
-  height: auto;
-  max-height: 46vh;
-}
-.session-chart-grid {
-  stroke: rgba(255, 232, 200, 0.18);
-  stroke-width: 1;
-}
-.session-chart-axis {
-  fill: var(--l-quiet);
-  font: 500 11px var(--l-body);
-}
-.session-chart-line {
-  stroke: var(--l-amber);
-  stroke-width: 2.4;
-  stroke-linejoin: round;
-  filter: drop-shadow(0 0 6px rgba(255, 170, 70, 0.6));
-}
-.session-chart-dot {
-  fill: #ffd089;
-  stroke: #1e1305;
-  stroke-width: 2;
-}
-.session-chart-end {
-  fill: var(--l-ink);
-  font: 700 20px var(--l-display);
-}
-.session-headline {
+/* Nothing played yet: what will be here, and the one way to get it there (PROG-2). */
+.session-prog-empty {
+  align-self: flex-start;
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 10px;
+  width: min(100%, 560px);
+  margin-top: 4vh;
+  padding: 26px 28px 28px;
 }
-.session-headline .session-num {
-  font-size: clamp(60px, 10vh, 96px);
-  line-height: 0.95;
+.session-prog-empty .session-why {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 15px;
+}
+.session-prog-empty .session-big {
+  width: auto;
+  margin-top: 8px;
+  padding: 8px 28px;
+}
+.session-prog-empty-art {
+  width: 180px;
+  height: auto;
+  margin-bottom: 4px;
+}
+.session-prog-empty-art path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--l-amber) 55%, transparent);
+  stroke-width: 2.5;
+  stroke-dasharray: 5 6;
+  stroke-linecap: round;
+}
+.session-prog-empty-art circle {
+  fill: var(--l-amber);
 }
 
 /* ── Tools ─────────────────────────────────────────────────────────────── */
@@ -1942,15 +2313,11 @@
     flex-direction: column;
     gap: 10px;
   }
-  .session-today > .session-slot {
-    height: clamp(90px, 18vh, 160px);
-    margin: 0 -6px;
-  }
   .session-split,
   .session-between,
   .session-result-low,
   .session-pathgrid,
-  .session-prog,
+  .session-stepgrid,
   .session-mechlow {
     display: flex;
     flex-direction: column;
@@ -1959,6 +2326,13 @@
   .session-path-card {
     grid-template-columns: minmax(0, 1fr);
     gap: 4px;
+  }
+  .session-path-side,
+  .session-step-side {
+    position: static;
+  }
+  .session-stat-tile {
+    padding: 11px 13px 10px;
   }
   .session-takerow {
     flex-wrap: wrap;
@@ -2059,6 +2433,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .session-rise,
+  .session-plan-swap,
   .session-fade,
   .session-moved-value,
   .session-count {
