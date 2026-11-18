@@ -1,0 +1,519 @@
+/* tools-chrome.css — the five tools (Metronome, Setlist, Drill, Jam, Songs) in
+ * the app's one design language (UX audit TOOL-1, 2026-11-18).
+ *
+ * The audit: "the tools look like a different app: different fonts, accent,
+ * header and buttons." They wore the theme's `--font-family` for everything,
+ * 10px heavy-tracked kickers, pill buttons, three different segmented
+ * controls and a soft orange wash for "chosen", while Today, Paths, Settings
+ * and the Tools page beside them had moved to the learning side's language.
+ *
+ * Same rule as `chrome.css` and `tools-page.css`: TYPE from the theme's faces
+ * (`--font-display` kickers, `--font-heading` titles, `--font-body` prose,
+ * `--font-num` for the big numbers), GEOMETRY from the learning side (hairline
+ * panels, radius 14, a segmented well, a secondary button), COLOUR from the
+ * theme's tokens only — so it reads in all thirteen themes.
+ *
+ * A visual layer and nothing else: no rule here changes what a control does,
+ * hides one, or moves one between rows. Sizes that the layout suite measures
+ * (the songs strip, the transport, the phone's rows) are left alone; the
+ * desktop-only sizes are scoped to `.main-window:not(.is-mobile)`.
+ *
+ * Imported last by `MainWindow.tsx`, after every tool's own stylesheet, and
+ * every rule is scoped to a tool's `.main-content[data-view]`, so the
+ * learning side, Settings and Zen are untouched. */
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) {
+  --tk-display: var(--font-display, "Barlow Condensed", "Arial Narrow", system-ui, sans-serif);
+  --tk-serif: var(--font-heading, Fraunces, Georgia, "Times New Roman", serif);
+  --tk-body: var(--font-body, Inter, system-ui, -apple-system, "Segoe UI", sans-serif);
+  --tk-num: var(--font-num, "Barlow Condensed", "Arial Narrow", system-ui, sans-serif);
+  --tk-mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+  /* Hairlines and surfaces as the Tools page and Settings draw them. Opaque
+     surfaces: Aurora and Prism paint a gradient behind see-through cards. */
+  --tk-line: color-mix(in srgb, var(--text-primary) 11%, transparent);
+  --tk-line-strong: color-mix(in srgb, var(--text-primary) 18%, transparent);
+  --tk-panel: color-mix(in srgb, var(--bg-card-solid) 62%, var(--bg-solid));
+  --tk-well: color-mix(in srgb, var(--bg-solid) 72%, var(--bg-card-solid));
+  --tk-raised: color-mix(in srgb, var(--bg-raised-solid) 60%, var(--bg-card-solid));
+  --tk-chosen: color-mix(in srgb, var(--accent) 12%, var(--tk-panel));
+  --tk-lift:
+    0 1px 0 color-mix(in srgb, var(--text-primary) 4%, transparent) inset,
+    0 1px 3px rgba(0, 0, 0, 0.08);
+
+  font-family: var(--tk-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Kickers: the learning side's condensed caps ──────────────────────── */
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .stage-label,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .setlist-paragraph-title,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .setlist-repeat-label,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-climb-title,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .songs-strip-label,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-practice > .stage-label {
+  color: var(--text-tertiary);
+  font-family: var(--tk-display);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.main-window:not(.is-mobile) .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .stage-label,
+.main-window:not(.is-mobile) .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .setlist-paragraph-title,
+.main-window:not(.is-mobile) .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .setlist-repeat-label,
+.main-window:not(.is-mobile) .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-climb-title {
+  font-size: 14px;
+  line-height: 1.1;
+}
+
+/* Units and small labels beside a value: the same face, quieter. */
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .tempo-unit,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .tempo-marking,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-plan-unit,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-current-label,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-label,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-dropdown-label,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .songs-fact dt,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-mode-badge,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-now-fretboard {
+  font-family: var(--tk-display);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.main-window:not(.is-mobile) .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .tempo-unit,
+.main-window:not(.is-mobile) .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .tempo-marking,
+.main-window:not(.is-mobile) .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-current-label {
+  font-size: 15px;
+}
+
+.main-window:not(.is-mobile) .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-plan-unit,
+.main-window:not(.is-mobile) .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-label,
+.main-window:not(.is-mobile) .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-dropdown-label {
+  font-size: 13px;
+}
+
+/* The ruler's numbers and names: the same caps, at the ruler's own size. */
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .tempo-scale span {
+  font-family: var(--tk-display);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+/* The marking ("Allegro") is a word, not a dimmed caption: theme ink, never
+   an opacity, which would undo the theme's tuned contrast. */
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .tempo-marking {
+  opacity: 1;
+}
+
+/* ── The big numbers: the theme's figures ─────────────────────────────── */
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .bpm-input,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-now-name,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-plan-value,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-current-bpm,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-value,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-of,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .setlist-step-no,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .beat-stepper-value,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .meter-chip,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-timeline-number,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-grid-bpm {
+  font-family: var(--tk-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .bpm-input,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-now-name,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-current-bpm {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-plan-value {
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-value,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-of {
+  font-weight: 600;
+}
+
+/* ── The head: a serif name, as Today's and Settings' ────────────────── */
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .main-header .preset-active-name,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .main-header .songs-title {
+  font-family: var(--tk-serif);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  font-optical-sizing: auto;
+}
+
+.main-window:not(.is-mobile) .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .main-header .preset-active-name,
+.main-window:not(.is-mobile) .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .main-header .songs-title {
+  font-size: 20px;
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .main-header .songs-sub-artist {
+  color: var(--text-tertiary);
+}
+
+/* "Setlist", "Jam": the kicker as a tag. */
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .setlist-badge {
+  border-radius: 6px;
+  border-color: var(--tk-line-strong);
+  font-family: var(--tk-display);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.main-window:not(.is-mobile) .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .setlist-badge {
+  font-size: 11px;
+}
+
+/* The head's actions: Settings' secondary button. */
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .preset-save-btn,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .preset-text-btn,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-sheet-btn,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-vibe-chip,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .songs-track-chip {
+  border: 1px solid var(--tk-line-strong);
+  border-radius: 10px;
+  background: var(--tk-raised);
+  color: var(--text-primary);
+  font-family: var(--tk-body);
+  font-weight: 600;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .preset-save-btn:disabled,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .preset-text-btn:disabled {
+  background: transparent;
+  color: var(--text-muted);
+}
+
+@media (hover: hover) {
+  .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .preset-save-btn:hover:not(:disabled),
+  .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .preset-text-btn:hover:not(:disabled),
+  .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-sheet-btn:hover,
+  .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-vibe-chip:hover,
+  .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .songs-track-chip:hover {
+    border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
+    background: color-mix(in srgb, var(--accent) 8%, var(--tk-raised));
+    color: var(--text-primary);
+  }
+}
+
+/* ── Segmented controls: one well, everywhere ─────────────────────────── */
+
+/* Metronome's Accent, Jam's Band feel and Drum intensity, Drill's modes. They
+   were three drawings of the same control (a 16% wash, a solid pill, a
+   bordered strip); now they are Settings' and Today's well. */
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .accent-options,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-modes {
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--tk-line);
+  border-radius: 11px;
+  background: var(--tk-well);
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .accent-option,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-modes .toggle-btn {
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--tk-body);
+  font-weight: 600;
+  box-shadow: none;
+}
+
+@media (hover: hover) {
+  .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .accent-option:hover:not(.active):not(:disabled),
+  .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-modes .toggle-btn:hover:not(.active):not(:disabled) {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .accent-option.active,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-modes .toggle-btn.active {
+  background: var(--accent);
+  color: var(--accent-text, #fff);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+
+/* The badge inside a chosen mode has to read on the accent. */
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-modes .toggle-btn.active .drill-mode-badge {
+  border-color: color-mix(in srgb, var(--accent-text, #fff) 45%, transparent);
+  color: var(--accent-text, #fff);
+}
+
+/* ── Fields: a well with a hairline ──────────────────────────────────── */
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .meter-chip,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .beat-stepper,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .setlist-stepper-field,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-dropdown,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .songs-range-field input {
+  border: 1px solid var(--tk-line-strong);
+  border-radius: 10px;
+  background: var(--tk-well);
+}
+
+@media (hover: hover) {
+  .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .meter-chip:hover,
+  .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-dropdown:hover {
+    border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+    background: var(--tk-well);
+  }
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .beat-stepper-btn,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .setlist-stepper-field button {
+  border-radius: 7px;
+  color: var(--text-secondary);
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────── */
+
+/* Tap and the tempo nudges: Settings' secondary button. The nudges stay
+   round, because they are a pair of keys and not a pair of words. */
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .tap-btn {
+  border: 1px solid var(--tk-line-strong);
+  border-radius: 12px;
+  background: var(--tk-raised);
+  color: var(--text-primary);
+  font-family: var(--tk-body);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .bpm-btn {
+  border: 1px solid var(--tk-line-strong);
+  background: var(--tk-raised);
+  color: var(--text-primary);
+}
+
+@media (hover: hover) {
+  .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .tap-btn:hover,
+  .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .bpm-btn:hover {
+    border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
+    background: color-mix(in srgb, var(--accent) 8%, var(--tk-raised));
+    color: var(--text-primary);
+  }
+}
+
+/* Songs' chips: the same button, smaller. Padding and size are the strip's
+   own (the layout suite holds the strip to one row); only the drawing moves. */
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .songs-chip {
+  border-color: var(--tk-line-strong);
+  border-radius: 8px;
+  background: var(--tk-raised);
+  color: var(--text-primary);
+  font-family: var(--tk-body);
+  font-weight: 600;
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .songs-chip[data-active] {
+  border-color: var(--accent);
+  background: var(--tk-chosen);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* Add a step / Add a jam: an offer, so dashed; the secondary button's type. */
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .setlist-add-row {
+  border-color: var(--tk-line-strong);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-family: var(--tk-body);
+  font-weight: 600;
+}
+
+/* ── Panels ───────────────────────────────────────────────────────────── */
+
+/* Subdivisions: the Tools page's cards in miniature. */
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .sub-row-btn {
+  border: 1px solid var(--tk-line);
+  border-radius: 14px;
+  background: var(--tk-panel);
+  box-shadow: var(--tk-lift);
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .sub-row-btn.active {
+  border-color: var(--accent);
+  background: var(--tk-chosen);
+  box-shadow:
+    0 0 0 1px var(--accent),
+    var(--tk-lift);
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .sub-row-label {
+  font-family: var(--tk-body);
+  font-weight: 600;
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .group-display {
+  border-color: var(--tk-line);
+  border-radius: 14px;
+  background: var(--tk-panel);
+}
+
+/* Drill's plan sentence: the values in the figures, the words in prose. */
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-plan-detail-token,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-run-stats,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-current-step {
+  font-family: var(--tk-body);
+}
+
+/* Setlist: the steps are one list in a hairline panel, as Today's plan. The
+   panel takes the height of its steps and scrolls inside once they are more
+   than the window holds. */
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .setlist-paragraph-list {
+  flex: 0 1 auto;
+  margin: 0;
+  padding: 6px;
+  border: 1px solid var(--tk-line);
+  border-radius: 14px;
+  background: var(--tk-panel);
+  box-shadow: var(--tk-lift);
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .setlist-paragraph-head {
+  border-bottom: 0;
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .setlist-step + .setlist-step {
+  border-top-color: var(--tk-line);
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .setlist-step.selected {
+  background: var(--tk-chosen);
+}
+
+/* A folded step's small values ("8 bars", "count in 2 bars") are words at
+   reading size; the condensed figures are for the big numbers only. */
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-plan-value.setlist-plan-mid {
+  font-family: var(--tk-body);
+  font-variant-numeric: normal;
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .setlist-folded-name,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .setlist-plan-glue {
+  font-family: var(--tk-body);
+}
+
+/* Jam: the band's lanes, the practice row and the form are panels too. */
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-band-lane {
+  border-color: var(--tk-line);
+  border-radius: 12px;
+  background: var(--tk-panel);
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-practice-chip {
+  border-color: var(--tk-line);
+  border-radius: 12px;
+  background: var(--tk-panel);
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-practice-chip[data-on] {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--tk-line));
+  background: var(--tk-chosen);
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-timeline-cell {
+  border-color: var(--tk-line);
+  border-radius: 10px;
+  background: var(--tk-panel);
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-band-name,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-practice-text,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-now-next {
+  font-family: var(--tk-body);
+}
+
+/* Songs: the tab sits on the page's panel, drawn by alphaTab as before. */
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .songs-tab-viewport {
+  border-color: var(--tk-line);
+  border-radius: 14px;
+  box-shadow: var(--tk-lift);
+}
+
+/* ── Switches: Settings' switch ───────────────────────────────────────── */
+
+/* The track keeps its 34 x 20 (the transport's row is measured); the border
+   is an inset ring so it costs no size. */
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-switch-track {
+  background: color-mix(in srgb, var(--text-muted) 22%, var(--tk-well));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-muted) 45%, transparent);
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-switch-track::after {
+  background: var(--text-secondary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-switch.on .transport-switch-track,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) [aria-checked="true"] > .transport-switch-track {
+  background: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-switch.on .transport-switch-track::after,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) [aria-checked="true"] > .transport-switch-track::after {
+  background: var(--accent-text, #fff);
+}
+
+/* ── The transport ────────────────────────────────────────────────────── */
+
+/* Play is the page's one primary button: the accent, the theme's type, the
+   learning side's radius instead of a pill. */
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-play {
+  border-radius: 14px;
+  font-family: var(--tk-body);
+  font-weight: 700;
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-play.playing {
+  border-color: var(--tk-line-strong);
+  background: var(--tk-raised);
+}
+
+/* A key, drawn as one: the rail's keycap. */
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-key {
+  border: 1px solid var(--tk-line-strong);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: var(--tk-raised);
+  color: var(--text-secondary);
+  font-family: var(--tk-mono);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-rewind,
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-skip {
+  border-color: var(--tk-line-strong);
+  border-radius: 10px;
+  background: var(--tk-raised);
+  font-family: var(--tk-body);
+  font-weight: 600;
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-skip:disabled {
+  background: transparent;
+}
+
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-note {
+  border-color: var(--tk-line-strong);
+  border-radius: 10px;
+  font-family: var(--tk-body);
+}

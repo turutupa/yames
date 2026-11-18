@@ -180,6 +180,9 @@ import {
 } from "../../hotkeys";
 import type { HotkeyAction } from "../../hotkeys";
 import "../../styles/audio-input-test.css";
+// Last: the five tools in the app's design language, over every tool's own
+// stylesheet (UX audit TOOL-1). Every rule is scoped to a tool's view.
+import "../../styles/tools-chrome.css";
 
 /**
  * Action ids that only mean something on one tab.
