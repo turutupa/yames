@@ -4395,8 +4395,10 @@ button.session-input-chip:hover {
 .session-input-chip[data-state="starting"] {
   cursor: progress;
 }
-.session-input-chip .session-link {
-  font-size: 13px;
+.session-input-chip-fix {
+  color: var(--l-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 /* Under a Take's ready screen: what the input is doing, in words. */

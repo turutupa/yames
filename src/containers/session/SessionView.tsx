@@ -203,14 +203,22 @@ function InputChip({
   const { t } = useTranslation();
   const { run, inputStart, actions } = session;
   if (run.ungraded) {
+    // Not graded; one press turns the input on and grades from the next Take.
     return (
-      <span className="session-input-chip" data-state="ungraded" data-testid="session-input-chip">
+      <button
+        className="session-input-chip"
+        data-state="ungraded"
+        onClick={actions.gradeAgain}
+        aria-label={`${t("session.input.notGraded")}. ${t("session.input.turnOn")}`}
+        data-tip={t("session.input.turnOn")}
+        data-testid="session-input-chip"
+      >
         <MicGlyph off />
         <span className="session-input-chip-word">{t("session.input.notGraded")}</span>
-        <button className="session-link" onClick={actions.gradeAgain} data-testid="session-grade-again">
+        <span className="session-input-chip-fix" data-testid="session-grade-again">
           {t("session.input.turnOn")}
-        </button>
-      </span>
+        </span>
+      </button>
     );
   }
   const state = listening ? (hasSignal ? "on" : "quiet") : inputStart.status === "starting" ? "starting" : "off";

@@ -289,7 +289,7 @@ body:has(.main-window.is-mobile .session-body:is([data-testid="session-result"],
   order: 10;
   flex: 1 1 0;
   /* Too wide for the first row, so it starts the second; the chip beside it. */
-  min-width: calc(100% - 190px);
+  min-width: calc(100% - 52px);
 }
 .main-window.is-mobile .session-page .session-bar .session-input-chip {
   order: 11;
@@ -298,7 +298,8 @@ body:has(.main-window.is-mobile .session-body:is([data-testid="session-result"],
   justify-content: center;
 }
 /* The chip says its state by colour and mic; its words are its label. */
-.main-window.is-mobile .session-page .session-bar .session-input-chip:not([data-state="ungraded"]) .session-input-chip-word {
+.main-window.is-mobile .session-page .session-bar .session-input-chip-word,
+.main-window.is-mobile .session-page .session-bar .session-input-chip-fix {
   display: none;
 }
 .main-window.is-mobile .session-page .session-bar-left {
