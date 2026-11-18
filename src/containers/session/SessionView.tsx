@@ -560,9 +560,10 @@ function BarByBar({ session, outcome }: { session: SessionRun; outcome: TakeOutc
 
 /**
  * The Take the recap asks "fair?" about, or null (acceptance P1-9): the last
- * graded one, at most once a Session. A player who already answered for
- * another Take of this Session (on a borderline result) is not asked again;
- * an answer given on the recap itself stays on screen with its thanks.
+ * graded one, at most once a Session. A player who already answered on any
+ * Take's result this Session, the last one's included, is not asked again.
+ * The recap decides this once, as it opens, so an answer given on the recap
+ * itself stays on screen with its thanks.
  */
 export function recapFairOutcome(
   outcomes: readonly TakeOutcome[],
@@ -575,8 +576,10 @@ export function recapFairOutcome(
     const row = takes.find((take) => take.id === id);
     return !!row && factsOf(row).fair !== undefined;
   };
-  const elsewhere = graded.some((o) => o !== last && answered(o.takeId));
-  return elsewhere ? null : last;
+  // Any Take of this Session, the last one included: a "Yes" on its own
+  // result is the answer (acceptance pass 2, P1-9). Called once, as the recap
+  // opens, so an answer given on the recap does not take the question away.
+  return graded.some((o) => answered(o.takeId)) ? null : last;
 }
 
 /**
@@ -1264,7 +1267,10 @@ function RecapScreen({ session }: { session: SessionRun }) {
   const raised = [...run.outcomes]
     .reverse()
     .find((o) => o.grade.cleanBpm !== null && (o.cleanBefore === null || o.grade.cleanBpm > o.cleanBefore));
-  const lastGraded = recapFairOutcome(run.outcomes, session.progress.takes);
+  // Decided once, as the recap opens: an answer given on a result earlier in
+  // the Session means no question here, and an answer given here keeps its
+  // thanks on screen rather than taking the question away.
+  const [lastGraded] = useState(() => recapFairOutcome(run.outcomes, session.progress.takes));
   const tomorrow = planSession({
     minutes: session.minutes,
     now: Date.now(),
