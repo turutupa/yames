@@ -3,6 +3,7 @@
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildSync } from "esbuild";
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const CLEAN_TEMPO_MIN_BARS = 8; // src/session/grade.ts
@@ -56,6 +57,33 @@ export function exerciseOnScreen({ heading, page, pathTitle }, paths) {
     .filter((h) => page.includes(h.exercise.title))
     .sort((a, b) => b.exercise.title.length - a.exercise.title.length);
   return inPage.length ? prefer(inPage.filter((h) => h.exercise.title === inPage[0].exercise.title)) : null;
+}
+
+/**
+ * The planner itself (`src/session/planner.ts`), bundled on the fly, so the
+ * suite asks it what placement climbs through instead of copying the rule
+ * (UX audit TODAY-3: 75%, 100% and 120% of the pass tempo, on graded rungs).
+ */
+let planner = null;
+async function plannerModule() {
+  if (planner) return planner;
+  const built = buildSync({
+    entryPoints: [join(repo, "src", "session", "planner.ts")],
+    bundle: true,
+    format: "esm",
+    platform: "node",
+    write: false,
+    logLevel: "error",
+  });
+  planner = await import(`data:text/javascript;base64,${Buffer.from(built.outputFiles[0].text).toString("base64")}`);
+  return planner;
+}
+
+/** `placementLadder` in src/session/planner.ts: the tempos placement climbs, ascending. */
+export async function placementLadder(exercise) {
+  const { placementLadder: ladder } = await plannerModule();
+  const passAt = exercise.tempo.passAtBpm ?? exercise.tempo.rungs[0].bpm;
+  return ladder(exercise, passAt);
 }
 
 /** `takeBarsOf` in src/session/grade.ts. */

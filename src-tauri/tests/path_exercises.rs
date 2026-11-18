@@ -293,28 +293,62 @@ fn exercise_bars(path: &str, exercise: &str, looping_only: bool) -> Option<Vec<P
     // A variant (`id#key=A,…`) is graded by its own bars when it has them,
     // and its Exercise's otherwise; grading and looping are the Exercise's.
     let (base, variant) = (exercise.split('#').next().unwrap_or(exercise), exercise);
-    let file = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../src/paths/packs")
-        .join(format!("{path}.json"));
-    let pack: serde_json::Value = serde_json::from_str(&fs::read_to_string(&file).ok()?).ok()?;
-    fn find<'a>(v: &'a serde_json::Value, id: &str) -> Option<&'a serde_json::Value> {
-        match v {
-            serde_json::Value::Object(m) => {
-                if m.get("id").and_then(|i| i.as_str()) == Some(id) && m.contains_key("passBars") {
-                    return Some(v);
-                }
-                m.values().find_map(|x| find(x, id))
-            }
-            serde_json::Value::Array(a) => a.iter().find_map(|x| find(x, id)),
-            _ => None,
-        }
-    }
-    let exercise = find(&pack, base)?;
+    let pack = pack(path)?;
+    let exercise = find_exercise(&pack, base)?;
     if exercise["grading"] != "graded" || (looping_only && exercise["loops"] != true) {
         return None;
     }
-    let own = (variant != base).then(|| find(exercise, variant)).flatten().unwrap_or(exercise);
+    let own = (variant != base).then(|| find_exercise(exercise, variant)).flatten().unwrap_or(exercise);
     serde_json::from_value(own["passBars"].clone()).ok()
+}
+
+fn pack(path: &str) -> Option<serde_json::Value> {
+    let file = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../src/paths/packs")
+        .join(format!("{path}.json"));
+    serde_json::from_str(&fs::read_to_string(&file).ok()?).ok()
+}
+
+fn find_exercise<'a>(v: &'a serde_json::Value, id: &str) -> Option<&'a serde_json::Value> {
+    match v {
+        serde_json::Value::Object(m) => {
+            if m.get("id").and_then(|i| i.as_str()) == Some(id) && m.contains_key("passBars") {
+                return Some(v);
+            }
+            m.values().find_map(|x| find_exercise(x, id))
+        }
+        serde_json::Value::Array(a) => a.iter().find_map(|x| find_exercise(x, id)),
+        _ => None,
+    }
+}
+
+/// The tempos a Session plays a graded Exercise at, from its ladder: the first
+/// graded rung (where a new Exercise starts, about 0.6x the pass tempo), and
+/// placement's climb (`placementLadder` in `src/session/planner.ts`: the rung at
+/// or under 75% of the pass tempo, the pass tempo, the rung at or under 120%).
+fn ladder_tempos(path: &str, exercise: &str, pass_at: f64) -> Vec<f64> {
+    let base = exercise.split('#').next().unwrap_or(exercise);
+    let Some(ex) = pack(path).and_then(|p| find_exercise(&p, base).cloned()) else {
+        return vec![pass_at];
+    };
+    let mut rungs: Vec<f64> = ex["tempo"]["rungs"]
+        .as_array()
+        .map(|a| a.iter().filter(|r| r["grading"] == "graded").filter_map(|r| r["bpm"].as_f64()).collect())
+        .unwrap_or_default();
+    rungs.sort_by(f64::total_cmp);
+    let Some(&first) = rungs.first() else {
+        return vec![pass_at];
+    };
+    let at_or_under = |t: f64| rungs.iter().copied().filter(|&r| r <= t).last().unwrap_or(first);
+    let easy = pass_at.min(first.max(at_or_under(0.75 * pass_at)));
+    let high = at_or_under(1.2 * pass_at);
+    let mut out = vec![first, easy, pass_at];
+    if high > pass_at {
+        out.push(high);
+    }
+    out.sort_by(f64::total_cmp);
+    out.dedup();
+    out
 }
 
 /// Bars a Session Take has past the stretch it is judged over:
@@ -531,6 +565,9 @@ fn play_take(
 /// clean tempo. Looping or not, and every variant: this is the check that a
 /// Path is fit to be runnable.
 ///
+/// At every tempo of its ladder a Session plays it at (`ladder_tempos`): the
+/// first rung, and placement's climb around the pass tempo.
+///
 /// And with the slack, the owner's rule of 2026-11-17: the first bar fluffed
 /// (every note of it missed) or the last, the Take still passes and still
 /// earns the clean tempo from the clean bars in a row that are left.
@@ -547,16 +584,18 @@ fn every_graded_exercise_of_a_runnable_path_passes_as_a_session_take() {
         let name = format!("{}/{}", row.path, row.exercise);
         let (written, take_bars) = session_take(row, &bars);
         let seed = 900 + index as u64;
-        let pass = play_take(&written, &bars, row.bpm, seed, |_| false);
-        assert_eq!(pass.verdict, PassVerdict::Passed, "{name}: {pass:?}");
-        assert!(pass.counts_for_clean_tempo, "{name}: {pass:?}");
-        assert_eq!(pass.finished_bars, take_bars, "{name}");
-
         let total = written.length_beats;
-        for (which, fluffed) in [("first", 0.0..4.0), ("last", total - 4.0..total)] {
-            let pass = play_take(&written, &bars, row.bpm, seed, |o| fluffed.contains(&o.beat));
-            assert_eq!(pass.verdict, PassVerdict::Passed, "{name}, {which} bar fluffed: {pass:?}");
-            assert!(pass.counts_for_clean_tempo, "{name}, {which} bar fluffed: {pass:?}");
+        for bpm in ladder_tempos(&row.path, &row.exercise, row.bpm) {
+            let pass = play_take(&written, &bars, bpm, seed, |_| false);
+            assert_eq!(pass.verdict, PassVerdict::Passed, "{name} at {bpm}: {pass:?}");
+            assert!(pass.counts_for_clean_tempo, "{name} at {bpm}: {pass:?}");
+            assert_eq!(pass.finished_bars, take_bars, "{name} at {bpm}");
+
+            for (which, fluffed) in [("first", 0.0..4.0), ("last", total - 4.0..total)] {
+                let pass = play_take(&written, &bars, bpm, seed, |o| fluffed.contains(&o.beat));
+                assert_eq!(pass.verdict, PassVerdict::Passed, "{name} at {bpm}, {which} bar fluffed: {pass:?}");
+                assert!(pass.counts_for_clean_tempo, "{name} at {bpm}, {which} bar fluffed: {pass:?}");
+            }
         }
         *checked.entry(row.path.clone()).or_default() += 1;
     }

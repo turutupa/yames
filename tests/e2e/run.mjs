@@ -18,6 +18,7 @@ import {
   exerciseOnScreen,
   loadPath,
   placementExercise,
+  placementLadder,
   takeBars,
 } from "./lib/exercises.mjs";
 
@@ -203,7 +204,14 @@ async function launchApp() {
   driverProc = null;
   await startDriver();
   const d = await new Driver().start(app);
-  await d.waitText(/Today/, 30000);
+  // The shell (the top bar's "Vol | Voice") paints before Today; on a busy
+  // machine the GPU X server's first launch has taken over 30 s to get there.
+  try {
+    await d.waitText(/Today/, 60000);
+  } catch (e) {
+    await shot(d, `no-today-launch-${launch}`);
+    throw e;
+  }
   // "What's new" is offered on every new version; it is not what this tests.
   await d.clickText(/^Got it$/, { timeoutMs: 3000 }).catch(() => {});
   return d;
@@ -392,38 +400,52 @@ function anyTakes() {
 
 /**
  * The first Session on a fresh profile. No Path is started yet, so the planner
- * puts the player on the first Path (Shred) and the Session is placement: one
- * easy Take at the first Exercise's first rung, then one at its pass tempo.
- * One good easy Take here; the pass-tempo Take is offered and not played, so
- * the Sessions after this one still start on the first Step.
+ * puts the player on the first Path (Shred) and the Session is placement
+ * ("Find your level"): a climb on the first Exercise through the tempos
+ * `placementLadder` gives (about 75%, 100% and 120% of the pass tempo, UX audit
+ * TODAY-3), one Take each, stopping at the first miss. One good Take at the
+ * bottom of the climb here; the pass-tempo Take is offered and not played, so
+ * the Sessions after this one still start on the first Step. The Session
+ * screen does not say why a block was picked (TODAY-8), so that it is
+ * placement is read off Today's row and the saved Take's role.
  */
 async function scenarioPlacement() {
   const d = await launchApp();
   const first = placementExercise(PATHS[0]);
-  const firstRung = first.exercise.tempo.rungs[0].bpm;
-  const passAt = first.exercise.tempo.passAtBpm;
+  const ladder = await placementLadder(first.exercise);
   try {
     const today = await d.text();
     await shot(d, "today-first-run");
     check("Today opens for a returning player", /Today/.test(today));
     check("a fresh profile's Today plans a first Session", /FIRST SESSION · FINDS WHERE YOU START/i.test(today), firstLines(today, /SESSION/i));
+    await d.clickText(/^5$/);
+    await sleep(800);
+    const now = await d.text();
+    const plan = now.slice(Math.max(0, now.search(/What's in it/i)));
+    check(`Today's first block is "Find your level" on ${first.exercise.title}`,
+      /Find your level/i.test(plan) && plan.includes(first.exercise.title), firstLines(plan, /What's in it/i, 8));
     await startSession(d, 5);
     const m = await d.waitText(/Start take, (\d+) BPM/, 20000);
     const { page, hit } = await exerciseHere(d);
-    check(`the first Session is placement on ${first.path.title}'s first Exercise`,
-      hit?.path.id === first.path.id && hit?.exercise.id === first.exercise.id && /New here\?/i.test(page),
-      hit ? `${hit.path.id}/${hit.exercise.id}; ${firstLines(page, /New here|Placement/i)}` : page.slice(0, 300));
-    check("placement starts at the first rung", Number(m[1]) === firstRung, `${m[1]} BPM, first rung ${firstRung}`);
-    info.placement = { exercise: first.exercise.title, pathId: first.path.id, startBpm: Number(m[1]) };
-    if (!hit) return;
+    const onFirst = hit?.path.id === first.path.id && hit?.exercise.id === first.exercise.id;
+    check("placement starts at the bottom of its climb", Number(m[1]) === ladder[0],
+      `${m[1]} BPM, the climb ${ladder.join(" → ")}`);
+    info.placement = { exercise: first.exercise.title, pathId: first.path.id, startBpm: Number(m[1]), ladder };
+    if (!hit) {
+      check(`the first Session is placement on ${first.path.title}'s first Exercise`, false, page.slice(0, 300));
+      return;
+    }
     const t0 = Date.now() - 1000;
     const good = await playTake(d, hit.exercise, "good", "placement easy take");
     const row = takesSince(t0).at(-1);
+    check(`the first Session is placement on ${first.path.title}'s first Exercise`,
+      onFirst && row?.facts?.role === "placement",
+      `${hit.path.id}/${hit.exercise.id}, role ${row?.facts?.role}`);
     check("placement: the easy Take passes and is saved on the first Path",
       PASSED.test(good.text) && row?.passed === 1 && row?.path_id === first.path.id,
       row ? `${row.path_id}/${row.exercise_id} at ${row.bpm}, evenness ${fmt(row.facts.measures.evenness)}` : "no row");
-    check("placement: the next Take offered is at the pass tempo",
-      new RegExp(`Go again, (up to )?${passAt} BPM`, "i").test(good.text), firstLines(good.text, /Go again|Next|Move on/i));
+    check("placement: the next Take offered is the next tempo of the climb",
+      new RegExp(`Go again, (up to )?${ladder[1]} BPM`, "i").test(good.text), firstLines(good.text, /Go again|Next|Move on/i));
     info.placementTake = row?.facts?.measures;
     await d.clickText(/^Exit$/);
     await d.waitText(/How long have you got/, 15000);
@@ -435,7 +457,10 @@ async function scenarioPlacement() {
 
 /**
  * The second Session: the first Path is started, so it is an ordinary focus
- * block on its first Exercise. A good Take, a sloppy one, a silent one.
+ * block on its first Exercise. First a Take whose first bar is fluffed, pinned
+ * to the tempo placement's good Take was played at (one the virtual guitar
+ * plays reliably, not whatever the planner offers), then a good Take at the
+ * tempo offered next, a sloppy one and a silent one.
  */
 async function scenarioSession() {
   // Run alone on a fresh profile, the first Session would be placement.
@@ -445,8 +470,8 @@ async function scenarioSession() {
     await startSession(d, 5);
     const m = await d.waitText(/Start take, (\d+) BPM/, 20000);
     const { page, hit } = await exerciseHere(d);
-    check("a returning 5-minute Session starts on a graded Exercise, not placement",
-      !!hit && hit.exercise.grading === "graded" && !/New here\?/i.test(page),
+    check("a returning 5-minute Session starts on a graded Exercise",
+      !!hit && hit.exercise.grading === "graded",
       hit ? `${hit.path.id}/${hit.exercise.id} at ${m[1]} BPM` : page.slice(0, 300));
     if (!hit) return;
     const { exercise, path } = hit;
@@ -454,8 +479,40 @@ async function scenarioSession() {
     info.session = { exercise: exercise.title, pathId: path.id, startBpm: Number(m[1]) };
     info.neck_session = await neckKind(d);
 
-    // 1. A good take: passes, and counts toward the clean tempo.
-    const good = await playTake(d, exercise, "good", "good take");
+    // 1. The first bar fluffed (80 ms of scatter), the rest clean: the Take's
+    //    two bars of slack (owner, 2026-11-17) leave the bad bar behind, and
+    //    the clean bars in a row after it pass and earn the clean tempo.
+    //    Pinned with Slower/Faster to the tempo placement's good Take was
+    //    played at (the bottom of its climb, 75 BPM today): one the virtual
+    //    guitar plays reliably. At 110, 80 ms of scatter on sixteenths throws
+    //    the live take's lag estimate off for the bars after it; the scorer
+    //    itself passes a fluffed first bar at every tempo of the ladder
+    //    (`path_exercises.rs`, every_graded_exercise_..._as_a_session_take).
+    const cleanBefore = cleanTempo(ceilingKey);
+    const pinAt = info.placement?.ladder?.[0] ?? (await placementLadder(exercise))[0];
+    const pinned = await setTakeTempo(d, pinAt);
+    check(`fluffed first bar: the Take is pinned to ${pinAt} BPM`, pinned === pinAt, `${pinned} BPM`);
+    const fluffed = await playTake(d, exercise, "fluffed", "fluffed first bar");
+    const fluffedRow = takesOf(exercise.id).at(-1);
+    const fluffedPass = fluffedRow?.facts?.measures?.pass;
+    const firstBar = fluffedRow?.facts?.measures?.barEvenness?.[0];
+    check("a returning Session's block is not placement", !!fluffedRow && fluffedRow.facts?.role !== "placement",
+      `role ${fluffedRow?.facts?.role}`);
+    check("fluffed first bar: the Take is the new length", fluffedPass?.finishedBars === takeBars(exercise),
+      `finished ${fluffedPass?.finishedBars} of ${takeBars(exercise)} bars`);
+    check("fluffed first bar: the result says the bar was met", PASSED.test(fluffed.text) && fluffedRow?.passed === 1,
+      firstLines(fluffed.text, /BPM ·/));
+    check("fluffed first bar: it counts toward the clean tempo, from the bars after it",
+      fluffedPass?.countsForCleanTempo === true && fluffedPass.heldBars >= 8 && (fluffedPass.heldFromBar ?? 0) >= 1,
+      `heldBars ${fluffedPass?.heldBars} from bar ${fluffedPass?.heldFromBar}, first bar's evenness ${fmt(firstBar)}`);
+    check("fluffed first bar: the clean tempo stands at its tempo",
+      cleanTempo(ceilingKey) === Math.max(fluffed.bpm, cleanBefore ?? 0),
+      `clean tempo ${cleanBefore} -> ${cleanTempo(ceilingKey)}, take ${fluffed.bpm} BPM`);
+    info.fluffedTake = fluffedRow?.facts?.measures;
+
+    // 2. A good take at the tempo offered next: passes, and counts toward the
+    //    clean tempo.
+    const good = await playTake(d, exercise, "good", "good take", { again: true });
     const goodRow = takesOf(exercise.id).at(-1);
     check("good take: the result says the bar was met", PASSED.test(good.text), firstLines(good.text, /BPM ·/));
     check("good take: a Take row was saved, passed", goodRow?.passed === 1 && goodRow?.caught === 1,
@@ -464,10 +521,9 @@ async function scenarioSession() {
       `heldBars ${goodRow?.facts?.measures?.pass?.heldBars}`);
     const clean = cleanTempo(ceilingKey);
     check("good take: the clean tempo is stored at the Take's tempo", clean === good.bpm, `clean tempo ${clean}, take ${good.bpm} BPM`);
-    info.session.cleanBpm = clean;
     info.goodTake = goodRow?.facts?.measures;
 
-    // 2. A sloppy take at the next tempo: fails on evenness.
+    // 3. A sloppy take at the next tempo: fails on evenness.
     const sloppy = await playTake(d, exercise, "sloppy", "sloppy take", { again: true });
     const sloppyRow = takesOf(exercise.id).at(-1);
     const evenCheck = sloppyRow?.facts?.measures?.pass?.checks?.find((c) => c.metric === "timingEvenness");
@@ -479,34 +535,15 @@ async function scenarioSession() {
     check("sloppy take: saved, caught, not passed, evenness under the bar",
       sloppyRow?.passed === 0 && sloppyRow?.caught === 1 && evenCheck && evenCheck.held === false,
       sloppyRow ? `evenness ${fmt(sloppyRow.facts.measures.evenness)}, heard ${sloppyRow.facts.measures.heard}/${sloppyRow.facts.measures.expected}` : "no row");
-    check("sloppy take: the clean tempo did not move", cleanTempo(ceilingKey) === good.bpm);
+    check("sloppy take: the clean tempo did not move", cleanTempo(ceilingKey) === clean);
     info.sloppyTake = sloppyRow?.facts?.measures;
 
-    // 3. Silence: "didn't catch enough", and it does not count.
+    // 4. Silence: "didn't catch enough", and it does not count.
     const silent = await playTake(d, exercise, "silent", "silent take", { again: true });
     const silentRow = takesOf(exercise.id).at(-1);
     check("silent take: the result says it didn't catch enough", /didn.t catch enough/i.test(silent.text), firstLines(silent.text, /catch/));
     check("silent take: saved as not caught", silentRow?.caught === 0 && silentRow?.passed === 0,
       silentRow ? `noCatchReason ${silentRow.facts.measures.noCatchReason}` : "no row");
-
-    // 4. The first bar fluffed (80 ms of scatter), the rest clean, at the tempo
-    //    the sloppy take failed: the Take's two bars of slack (owner,
-    //    2026-11-17) leave the bad bar behind, and the clean bars in a row
-    //    after it pass and earn the clean tempo.
-    const fluffed = await playTake(d, exercise, "fluffed", "fluffed first bar", { again: true });
-    const fluffedRow = takesOf(exercise.id).at(-1);
-    const fluffedPass = fluffedRow?.facts?.measures?.pass;
-    const firstBar = fluffedRow?.facts?.measures?.barEvenness?.[0];
-    check("fluffed first bar: the Take is the new length", fluffedPass?.finishedBars === takeBars(exercise),
-      `finished ${fluffedPass?.finishedBars} of ${takeBars(exercise)} bars`);
-    check("fluffed first bar: the result says the bar was met", PASSED.test(fluffed.text) && fluffedRow?.passed === 1,
-      firstLines(fluffed.text, /BPM ·/));
-    check("fluffed first bar: it counts toward the clean tempo, from the bars after it",
-      fluffedPass?.countsForCleanTempo === true && fluffedPass.heldBars >= 8 && (fluffedPass.heldFromBar ?? 0) >= 1,
-      `heldBars ${fluffedPass?.heldBars} from bar ${fluffedPass?.heldFromBar}, first bar's evenness ${fmt(firstBar)}`);
-    check("fluffed first bar: the clean tempo moved up to its tempo",
-      cleanTempo(ceilingKey) === fluffed.bpm && fluffed.bpm > good.bpm, `clean tempo ${cleanTempo(ceilingKey)}, take ${fluffed.bpm} BPM`);
-    info.fluffedTake = fluffedRow?.facts?.measures;
     // What Progress must show after a restart: the clean tempo as it now stands.
     info.session.cleanBpm = cleanTempo(ceilingKey);
 
@@ -516,6 +553,19 @@ async function scenarioSession() {
     const report = await quitApp(d, "session");
     if (report) printProbe("session (3D neck on screen)", report);
   }
+}
+
+/** Slower or Faster on a Take's ready screen until it reads `target` BPM. */
+async function setTakeTempo(d, target) {
+  let bpm = Number((await d.waitText(/Start take, (\d+) BPM/, 20000))[1]);
+  for (let i = 0; i < 20 && bpm !== target; i++) {
+    await d.clickText(bpm > target ? /^Slower$/ : /^Faster$/);
+    await sleep(400);
+    const next = Number((await d.waitText(/Start take, (\d+) BPM/))[1]);
+    if (next === bpm) break; // at the end of the ladder
+    bpm = next;
+  }
+  return bpm;
 }
 
 async function scenarioRelaunch() {
@@ -687,7 +737,13 @@ async function scenarioTwoPaths() {
     check("20 minutes: Today runs both Paths", new RegExp(firstPath.title, "i").test(today) && new RegExp(secondPath.title, "i").test(today),
       firstLines(today, /Running/i));
     check("20 minutes: the plan has a block from each Path", inPlan(firstPath) && inPlan(secondPath), firstLines(plan, /What's in it/i, 12));
-    check(`20 minutes: ${secondPath.title}, new, comes in as placement`, /Find your level/i.test(plan) && /Pass both and you skip ahead/i.test(plan));
+    // Its row: "Find your level · Alternate Picking", on its placement Exercise.
+    const secondFirst = placementExercise(secondPath).exercise.title;
+    const rowAt = plan.indexOf(secondFirst);
+    const secondRow = rowAt < 0 ? "" : plan.slice(rowAt, rowAt + 300);
+    check(`20 minutes: ${secondPath.title}, new, comes in as placement`,
+      new RegExp(`Find your level · ${secondPath.title}`, "i").test(secondRow) && /skip ahead/i.test(secondRow),
+      firstLines(secondRow, /./, 3) || firstLines(plan, /What's in it/i, 14));
 
     const t0 = Date.now() - 1000;
     await d.clickText(/^Start(\n|$)/);
@@ -728,7 +784,7 @@ async function scenarioTwoPaths() {
     }
     const rows = takesSince(t0);
     const paths = [...new Set(rows.map((r) => r.path_id))];
-    info.twoPaths = rows.map((r) => ({ path: r.path_id, exercise: r.exercise_id, bpm: r.bpm, passed: r.passed }));
+    info.twoPaths = rows.map((r) => ({ path: r.path_id, exercise: r.exercise_id, bpm: r.bpm, role: r.facts?.role, passed: r.passed }));
     check("20 minutes: the Session saved Takes on both Paths", paths.includes(firstPath.id) && paths.includes(secondPath.id),
       JSON.stringify(info.twoPaths));
     // Advisory: this is the run's fourth launch and its longest stretch of
