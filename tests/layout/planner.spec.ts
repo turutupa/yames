@@ -131,7 +131,8 @@ for (const size of SHORT_SIZES) {
         expect(pageScroll, `${where}: the page scrolls, and the neck goes up under the title bar`).toBeLessThanOrEqual(1);
         await insideViewport(page, '[data-testid="today-start"]', where, size);
         await insideViewport(page, ".session-seg", where, size);
-        await insideViewport(page, ".session-slot", where, size);
+        // No neck on Today any more (UX audit TODAY-9): nothing to keep in view.
+        expect(await page.locator(".session-today .session-slot").count()).toBe(0);
         expect(await page.locator('ol.session-plan-list[role="list"]').count()).toBe(1);
         expect(await overlapping(page)).toEqual([]);
 

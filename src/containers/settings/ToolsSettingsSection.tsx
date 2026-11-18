@@ -31,6 +31,7 @@ export function ToolsSettingsSection({
   return (
     <section className="settings-section" id="settings-tools">
       <h2>{t("settings.tools.title")}</h2>
+      <p className="settings-section-intro">{t("settings.tools.hint")}</p>
       <div className="setting-row">
         <div className="setting-label">
           <label>{t("settings.general.buttonFlash")}</label>

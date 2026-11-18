@@ -22,16 +22,10 @@ function firstRun(): SessionRun {
 afterEach(cleanup);
 
 describe("Today without an input", () => {
-  it("asks for one by Start, and the link opens the input settings", () => {
-    const onSetUpInput = vi.fn();
-    render(<TodayView session={firstRun()} onOpenTools={vi.fn()} onSetUpInput={onSetUpInput} onOpenPaths={vi.fn()} listening={false} />);
-    expect(screen.queryByText("No mic yet?")).not.toBeNull();
-    fireEvent.click(screen.getByText("Set up input"));
-    expect(onSetUpInput).toHaveBeenCalledTimes(1);
-  });
-
-  it("does not, while the input is listening", () => {
-    render(<TodayView session={firstRun()} onOpenTools={vi.fn()} onSetUpInput={vi.fn()} onOpenPaths={vi.fn()} listening />);
+  // The input's state is the header's chip now, one accurate status with the
+  // way to set it up (UX audit TODAY-10); Today no longer says "No mic yet?".
+  it("leaves the input to the header", () => {
+    render(<TodayView session={firstRun()} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} />);
     expect(screen.queryByText("No mic yet?")).toBeNull();
     expect(screen.queryByTestId("today-no-mic")).toBeNull();
   });
@@ -93,7 +87,7 @@ describe("the plan as a list", () => {
   }
 
   it("is a numbered list with list semantics, a row per step", () => {
-    render(<TodayView session={planned()} onOpenTools={vi.fn()} onSetUpInput={vi.fn()} onOpenPaths={vi.fn()} listening />);
+    render(<TodayView session={planned()} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} />);
     const list = document.querySelector("ol.session-plan-list")!;
     expect(list.getAttribute("role")).toBe("list");
     const rows = [...list.querySelectorAll("li")];
@@ -104,25 +98,34 @@ describe("the plan as a list", () => {
   });
 
   it("puts the tempo on the right, \"60 → 110 BPM\" for placement, and the Path on the meta line", () => {
-    render(<TodayView session={planned()} onOpenTools={vi.fn()} onSetUpInput={vi.fn()} onOpenPaths={vi.fn()} listening />);
+    render(<TodayView session={planned()} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} />);
     const rows = [...document.querySelectorAll("li.session-plan-item")];
     expect(rows[0].querySelector(".session-plan-bpm")!.textContent).toBe("70 BPM");
     expect(rows[1].querySelector(".session-plan-bpm")!.textContent).toBe("60 → 110 BPM");
-    expect(rows[1].querySelector(".session-plan-meta")!.textContent).toBe("Find your level · Shred");
+    // One Path: its name on every row says nothing (UX audit TODAY-6).
+    expect(rows[1].querySelector(".session-plan-meta")!.textContent).toBe("Find your level");
     expect(rows[0].querySelector(".session-plan-meta")!.textContent).toContain("Warm-up · not graded");
   });
 
+  it("names the Path on the meta line once two or more are active", () => {
+    const run = planned();
+    const two = { ...run, myPaths: [...run.myPaths, { id: "blues", title: "Blues" }] } as unknown as SessionRun;
+    render(<TodayView session={two} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} />);
+    const rows = [...document.querySelectorAll("li.session-plan-item")];
+    expect(rows[1].querySelector(".session-plan-meta")!.textContent).toBe("Find your level · Shred");
+  });
+
   it("gives every row its own short reason, without the BPM (the owner's screenshot)", () => {
-    render(<TodayView session={planned()} onOpenTools={vi.fn()} onSetUpInput={vi.fn()} onOpenPaths={vi.fn()} listening />);
+    render(<TodayView session={planned()} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} />);
     const reasons = [...document.querySelectorAll(".session-plan-why")].map((r) => r.textContent);
     expect(new Set(reasons).size).toBe(reasons.length);
-    expect(reasons[2]).toBe("Next in One-string sixteenths.");
+    expect(reasons[2]).toBe("The next one in One-string sixteenths.");
     for (const r of reasons) expect(r).not.toMatch(/BPM/);
   });
 
   it("names row 1 under Start, and offers Tools with one link", () => {
     const onOpenTools = vi.fn();
-    render(<TodayView session={planned()} onOpenTools={onOpenTools} onSetUpInput={vi.fn()} onOpenPaths={vi.fn()} listening />);
+    render(<TodayView session={planned()} onOpenTools={onOpenTools} onOpenPaths={vi.fn()} />);
     expect(screen.getByTestId("today-start").textContent).toBe("StartA melody up one string");
     expect(screen.queryByText("Always open there")).toBeNull();
     fireEvent.click(screen.getByText("Open Tools"));
@@ -130,7 +133,7 @@ describe("the plan as a list", () => {
   });
 
   it("says what a first Session is for", () => {
-    render(<TodayView session={planned()} onOpenTools={vi.fn()} onSetUpInput={vi.fn()} onOpenPaths={vi.fn()} listening />);
+    render(<TodayView session={planned()} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} />);
     expect(screen.queryByText("First session · finds where you start")).not.toBeNull();
   });
 });
@@ -147,7 +150,7 @@ describe("Today with no Path subscribed (QA 2026-11-17 #7)", () => {
 
   it("offers the Paths as its one big action, and opens them", () => {
     const onOpenPaths = vi.fn();
-    render(<TodayView session={noPaths()} onOpenTools={vi.fn()} onSetUpInput={vi.fn()} onOpenPaths={onOpenPaths} listening />);
+    render(<TodayView session={noPaths()} onOpenTools={vi.fn()} onOpenPaths={onOpenPaths} />);
     expect(screen.queryByTestId("today-start")).toBeNull();
     fireEvent.click(screen.getByTestId("today-choose-path"));
     expect(onOpenPaths).toHaveBeenCalledTimes(1);
@@ -155,7 +158,7 @@ describe("Today with no Path subscribed (QA 2026-11-17 #7)", () => {
   });
 
   it("keeps Start while the Paths are still loading", () => {
-    render(<TodayView session={firstRun()} onOpenTools={vi.fn()} onSetUpInput={vi.fn()} onOpenPaths={vi.fn()} listening />);
+    render(<TodayView session={firstRun()} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} />);
     expect(screen.queryByTestId("today-start")).not.toBeNull();
     expect(screen.queryByTestId("today-choose-path")).toBeNull();
   });

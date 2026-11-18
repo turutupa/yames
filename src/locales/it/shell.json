@@ -77,7 +77,8 @@
     "coachOnPlay": "Il coach ascolta quando avvii",
     "coachQuiet": "Il coach tace durante ogni step",
     "countIn": "Conteggio iniziale",
-    "backToStart": "Torna all'inizio"
+    "backToStart": "Torna all'inizio",
+    "setUpInput": "Imposta l'ingresso"
   },
   "rail": {
     "label": "Modalità e libreria",

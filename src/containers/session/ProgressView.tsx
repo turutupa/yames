@@ -1,75 +1,147 @@
 /**
  * Progress: only what was measured, and it says so.
  *
- * One headline chart, clean tempo over time for the Exercise most recently moved,
- * and one row per Exercise played with its own trend. A single series each, so no
- * legend: the heading names it. The rows are the table view of the same numbers.
+ * A top row of three numbers anyone reads at a glance (minutes played, Sessions,
+ * the streak), then one card per Path: its clean tempos as a sparkline and the
+ * Exercises played on it, each with its own evenness trend (UX audit PROG-1).
+ * Single series everywhere, so no legends: the heading names each one. The
+ * rows are the table view of the same numbers.
+ *
+ * "Export my practice data" lives in Settings › Support.
  */
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { PathTakeRow } from "../../ipc";
-import { factsOf } from "../../session/progress";
+import type { PathDoc } from "../../paths/format";
+import { barLengthTicks } from "../../paths/format";
+import { calendarDaysBetween, currentStepOf, factsOf, sessionKeyOf } from "../../session/progress";
 import { findExercise } from "../../session/packs";
 import { CLEAN_TEMPO_MIN_BARS } from "../../session/grade";
 import type { SessionRun } from "./hooks/useSessionRun";
-import { useNeck3d, useNeckSlot } from "./hooks/useNeck";
-import type { NeckView } from "../../stage3d/api";
+import { useNeck3d } from "./hooks/useNeck";
 import { rise } from "./TodayView";
-import { ExportPracticeButton } from "./ExportPracticeButton";
 import "../../styles/session.css";
 
-const WHOLE: NeckView = { kind: "whole" };
+type Point = { at: number; bpm: number };
 
 type Series = {
   exerciseId: string;
   title: string;
   /** Clean tempo as it rose, oldest first. */
-  clean: Array<{ at: number; bpm: number }>;
+  clean: Point[];
   /** Evenness per heard Take, oldest first. */
   evenness: number[];
   takes: number;
+  lastAt: number;
 };
 
-function seriesFrom(session: SessionRun): Series[] {
-  const byExercise = new Map<string, PathTakeRow[]>();
-  for (const take of [...session.progress.takes].reverse()) {
-    const list = byExercise.get(take.exerciseId) ?? [];
-    list.push(take);
-    byExercise.set(take.exerciseId, list);
-  }
-  const out: Series[] = [];
-  for (const [exerciseId, takes] of byExercise) {
-    const path = session.paths.find((p) => p.id === takes[0].pathId);
-    const found = path ? findExercise(path, exerciseId) : null;
-    const clean: Series["clean"] = [];
-    const evenness: number[] = [];
-    for (const take of takes) {
-      const measured = factsOf(take).measures?.evenness;
-      if (take.caught && typeof measured === "number") evenness.push(measured);
-      const best = clean[clean.length - 1]?.bpm ?? 0;
-      // Clean is 8 bars in a row that held, not 8 bars played: the scorer's own
-      // word when the row kept it, and the bars played for an older row.
-      const counted = factsOf(take).measures?.pass?.countsForCleanTempo ?? take.bars >= CLEAN_TEMPO_MIN_BARS;
-      if (take.passed && counted && take.bpm > best) {
-        clean.push({ at: take.startedAt, bpm: take.bpm });
-      }
-    }
-    out.push({
-      exerciseId,
-      title: found?.exercise.title ?? exerciseId,
-      clean,
-      evenness,
-      takes: takes.length,
-    });
-  }
-  return out;
+type PathGroup = {
+  path: PathDoc;
+  exercises: Series[];
+  /** The Path's top clean tempo each time it rose, oldest first, whichever Exercise set it. */
+  clean: Point[];
+  takes: number;
+  lastAt: number;
+};
+
+/** Does this Take count for a clean tempo: eight bars in a row that held. */
+function countsClean(take: PathTakeRow): boolean {
+  return factsOf(take).measures?.pass?.countsForCleanTempo ?? take.bars >= CLEAN_TEMPO_MIN_BARS;
 }
 
-/** A value's trend in a row. Decorative beside the number it sits next to. */
-function Spark({ values, label }: { values: readonly number[]; label: string }) {
-  if (values.length < 2) return <span className="session-spark-none" />;
-  const W = 120;
-  const H = 34;
+export function groupsFrom(takes: readonly PathTakeRow[], paths: readonly PathDoc[]): PathGroup[] {
+  const byPath = new Map<string, Map<string, PathTakeRow[]>>();
+  for (const take of [...takes].reverse()) {
+    const ex = byPath.get(take.pathId) ?? new Map<string, PathTakeRow[]>();
+    const list = ex.get(take.exerciseId) ?? [];
+    list.push(take);
+    ex.set(take.exerciseId, list);
+    byPath.set(take.pathId, ex);
+  }
+  const out: PathGroup[] = [];
+  for (const [pathId, exercises] of byPath) {
+    const path = paths.find((p) => p.id === pathId);
+    if (!path) continue;
+    const series: Series[] = [];
+    const pathClean: Point[] = [];
+    for (const [exerciseId, list] of exercises) {
+      const found = findExercise(path, exerciseId);
+      const clean: Point[] = [];
+      const evenness: number[] = [];
+      for (const take of list) {
+        const measured = factsOf(take).measures?.evenness;
+        if (take.caught && typeof measured === "number") evenness.push(measured);
+        const best = clean[clean.length - 1]?.bpm ?? 0;
+        if (take.passed && countsClean(take) && take.bpm > best) {
+          clean.push({ at: take.startedAt, bpm: take.bpm });
+          pathClean.push({ at: take.startedAt, bpm: take.bpm });
+        }
+      }
+      series.push({
+        exerciseId,
+        title: found?.exercise.title ?? exerciseId,
+        clean,
+        evenness,
+        takes: list.length,
+        lastAt: list[list.length - 1].startedAt,
+      });
+    }
+    series.sort((a, b) => b.lastAt - a.lastAt);
+    pathClean.sort((a, b) => a.at - b.at);
+    // The Path's top clean tempo as it rose: a new point only when an Exercise
+    // beats the best so far, so the line never drops because the next one
+    // played was a slower Exercise.
+    const rising: Point[] = [];
+    for (const p of pathClean) if (p.bpm > (rising[rising.length - 1]?.bpm ?? 0)) rising.push(p);
+    out.push({
+      path,
+      exercises: series,
+      clean: rising,
+      takes: series.reduce((n, s) => n + s.takes, 0),
+      lastAt: Math.max(...series.map((s) => s.lastAt)),
+    });
+  }
+  return out.sort((a, b) => b.lastAt - a.lastAt);
+}
+
+/**
+ * The top row. Minutes are the Takes' own length, from their bars and tempo,
+ * so a warm-up or a pause is not counted: played, not "spent in the app".
+ */
+export function totalsFrom(takes: readonly PathTakeRow[], paths: readonly PathDoc[], now = Date.now()) {
+  let seconds = 0;
+  for (const take of takes) {
+    const path = paths.find((p) => p.id === take.pathId);
+    const meter = (path && findExercise(path, take.exerciseId)?.exercise.meter) ?? { numerator: 4, denominator: 4 };
+    if (take.bpm > 0) seconds += (take.bars * (barLengthTicks(meter) / 960) * 60) / take.bpm;
+  }
+  const sessions = new Set(takes.map(sessionKeyOf)).size;
+  // Days back from today with a Take on them; a streak still counts until a
+  // whole day has gone by without one.
+  const days = new Set(takes.map((t) => calendarDaysBetween(t.startedAt, now)));
+  const start = days.has(0) ? 0 : days.has(1) ? 1 : -1;
+  let streak = 0;
+  if (start >= 0) while (days.has(start + streak)) streak += 1;
+  return { minutes: Math.round(seconds / 60), seconds, sessions, streak };
+}
+
+/** A value's trend in a row. Decorative beside the number it sits next to; each point says its value on hover. */
+function Spark({
+  values,
+  label,
+  width = 120,
+  height = 34,
+  titles,
+}: {
+  values: readonly number[];
+  label: string;
+  width?: number;
+  height?: number;
+  titles?: readonly string[];
+}) {
+  if (values.length < 2) return <span className="session-spark-none" style={{ width }} />;
+  const W = width;
+  const H = height;
   const lo = Math.min(...values);
   const hi = Math.max(...values);
   const x = (i: number) => 5 + (i * (W - 12)) / (values.length - 1);
@@ -81,157 +153,135 @@ function Spark({ values, label }: { values: readonly number[]; label: string }) 
       <title>{label}</title>
       <path d={d} fill="none" />
       <circle cx={x(end)} cy={y(values[end])} r="4" />
+      {titles &&
+        values.map((v, i) => (
+          <circle key={i} className="session-spark-hit" cx={x(i)} cy={y(v)} r="9">
+            <title>{titles[i]}</title>
+          </circle>
+        ))}
     </svg>
   );
 }
 
-/** Clean tempo only ever steps up, so it is drawn as steps, on one axis. */
-function CleanChart({ series, label }: { series: Series; label: string }) {
-  const { i18n } = useTranslation();
-  const points = series.clean;
-  const W = 520;
-  const H = 200;
-  const left = 36;
-  const bottom = 22;
-  const top = 12;
-  const right = 14;
-  const lo = Math.min(...points.map((p) => p.bpm)) - 10;
-  const hi = Math.max(...points.map((p) => p.bpm)) + 10;
-  const first = points[0].at;
-  const last = Math.max(points[points.length - 1].at, first + 1);
-  const x = (at: number) => left + ((at - first) / (last - first)) * (W - left - right);
-  const y = (bpm: number) => top + ((hi - bpm) / (hi - lo)) * (H - top - bottom);
-  let d = `M${x(points[0].at).toFixed(1)} ${y(points[0].bpm).toFixed(1)}`;
-  for (let i = 1; i < points.length; i += 1) {
-    d += `H${x(points[i].at).toFixed(1)}V${y(points[i].bpm).toFixed(1)}`;
-  }
+function Stat({ value, label, i, testId }: { value: string; label: string; i: number; testId: string }) {
+  return (
+    <div className="session-stat-tile session-glass session-rise" style={rise(i)} data-testid={testId}>
+      <span className="session-num">{value}</span>
+      <span className="session-stat-label">{label}</span>
+    </div>
+  );
+}
+
+function PathCard({ group, session, i }: { group: PathGroup; session: SessionRun; i: number }) {
+  const { t, i18n } = useTranslation();
+  const { path } = group;
+  const current = currentStepOf(session.progress, path);
+  const top = group.clean.length ? Math.max(...group.clean.map((p) => p.bpm)) : null;
   const date = new Intl.DateTimeFormat(i18n.language, { month: "short", day: "numeric" });
   return (
-    <svg className="session-chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label}>
-      {[lo, hi].map((v) => (
-        <g key={v}>
-          <line x1={left} x2={W - right} y1={y(v)} y2={y(v)} className="session-chart-grid" />
-          <text x={left - 6} y={y(v) + 4} textAnchor="end" className="session-chart-axis">
-            {v}
-          </text>
-        </g>
-      ))}
-      <text x={left} y={H - 5} className="session-chart-axis">
-        {date.format(first)}
-      </text>
-      <text x={W - right} y={H - 5} textAnchor="end" className="session-chart-axis">
-        {date.format(last)}
-      </text>
-      <path d={d} className="session-chart-line" fill="none" />
-      <text
-        x={x(points[points.length - 1].at)}
-        y={y(points[points.length - 1].bpm) - 12}
-        textAnchor="end"
-        className="session-chart-end"
-      >
-        {points[points.length - 1].bpm}
-      </text>
-      {points.map((p) => (
-        <g key={p.at}>
-          <circle cx={x(p.at)} cy={y(p.bpm)} r="4" className="session-chart-dot" />
-          {/* A bigger target than the mark, carrying the value on hover. */}
-          <circle cx={x(p.at)} cy={y(p.bpm)} r="12" fill="transparent">
-            <title>{`${p.bpm} BPM · ${date.format(p.at)}`}</title>
-          </circle>
-        </g>
-      ))}
-    </svg>
+    <section className="session-prog-path session-glass session-rise" style={rise(i)} data-testid={`progress-path-${path.id}`}>
+      <header className="session-prog-head">
+        <div className="session-exercise-text">
+          <h2 className="session-prog-title">{path.title}</h2>
+          <div className="session-quiet">
+            {t("session.paths.onStep", { n: current.order, title: current.title })}
+          </div>
+        </div>
+        <Spark
+          values={group.clean.map((p) => p.bpm)}
+          titles={group.clean.map((p) => `${p.bpm} BPM · ${date.format(p.at)}`)}
+          width={132}
+          height={40}
+          label={t("session.progress.pathSparkLabel", { title: path.title })}
+        />
+        <div className="session-progress-value" data-none={top === null ? "" : undefined}>
+          {top === null ? "–" : top}
+          <small>{top === null ? t("session.progress.noCleanShort") : t("session.progress.topClean")}</small>
+        </div>
+      </header>
+      <ul className="session-prog-rows" role="list">
+        {group.exercises.map((s) => {
+          const last = s.evenness[s.evenness.length - 1];
+          const clean = s.clean[s.clean.length - 1]?.bpm;
+          return (
+            <li className="session-skill" key={s.exerciseId} data-testid={`progress-exercise-${s.exerciseId}`}>
+              <div className="session-exercise-text">
+                <div className="session-skill-name">{s.title}</div>
+                <div className="session-quiet">
+                  {clean === undefined
+                    ? t("session.paths.playedNoClean", { count: s.takes })
+                    : t("session.paths.playedClean", { count: s.takes, bpm: clean })}
+                </div>
+              </div>
+              <Spark values={s.evenness} label={t("session.progress.sparkLabel", { title: s.title })} />
+              {last === undefined ? (
+                <div className="session-progress-value" data-none="">
+                  <small>{t("session.progress.notGraded")}</small>
+                </div>
+              ) : (
+                <div className="session-progress-value">
+                  {`${Math.round(last * 100)}%`}
+                  <small>{t("session.metric.even")}</small>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }
 
-export function ProgressView({ session }: { session: SessionRun }) {
+/** Nothing played yet: what will be here, and the one way to get it there (PROG-2). */
+function EmptyProgress({ onStart }: { onStart?: () => void }) {
   const { t } = useTranslation();
-  const slot = useNeckSlot(WHOLE, [], { sweep: true });
-  const neck3d = useNeck3d();
-  const series = useMemo(() => seriesFrom(session), [session.progress, session.paths]); // eslint-disable-line react-hooks/exhaustive-deps
+  return (
+    <div className="session-prog-empty session-glass session-rise" data-testid="progress-empty">
+      <svg className="session-prog-empty-art" viewBox="0 0 220 64" aria-hidden="true">
+        <path d="M6 54 H54 V42 H102 V30 H150 V18 H214" />
+        <circle cx="214" cy="18" r="5" />
+      </svg>
+      <h2 className="session-h2">{t("session.progress.emptyTitle")}</h2>
+      <p className="session-why">{t("session.progress.emptyBody")}</p>
+      {onStart && (
+        <button className="session-big" data-size="mid" onClick={onStart} data-testid="progress-start">
+          {t("session.progress.emptyStart")}
+        </button>
+      )}
+    </div>
+  );
+}
 
-  // The one that moved last gets the chart.
-  const headline = useMemo(() => {
-    let best: Series | null = null;
-    for (const s of series) {
-      const at = s.clean[s.clean.length - 1]?.at ?? -1;
-      if (at >= 0 && (!best || at > (best.clean[best.clean.length - 1]?.at ?? -1))) best = s;
-    }
-    return best;
-  }, [series]);
+export function ProgressView({ session, onStart }: { session: SessionRun; onStart?: () => void }) {
+  const { t } = useTranslation();
+  const neck3d = useNeck3d();
+  const takes = session.progress.takes;
+  const groups = useMemo(() => groupsFrom(takes, session.paths), [takes, session.paths]);
+  const totals = useMemo(() => totalsFrom(takes, session.paths), [takes, session.paths]);
+  const minutes = totals.seconds > 0 && totals.minutes < 1 ? "<1" : String(totals.minutes);
 
   return (
-    <div className="session-page" data-testid="progress" data-neck3d={neck3d}>
+    <div className="session-page session-progress-page" data-testid="progress" data-neck3d={neck3d}>
       <div className="session-rise">
         <h1 className="session-h1">{t("session.progress.title")}</h1>
         <div className="session-why">{t("session.progress.intro")}</div>
       </div>
-      <div className="session-slot" data-band="" ref={slot} aria-hidden="true" />
-      {series.length === 0 ? (
-        <div className="session-glass session-card session-rise" data-testid="progress-empty">
-          <div className="session-why">{t("session.progress.empty")}</div>
-        </div>
+      {groups.length === 0 ? (
+        <EmptyProgress onStart={onStart} />
       ) : (
-        <div className="session-prog">
-          <div className="session-col">
-            <div className="session-kick session-rise">{t("session.progress.cleanTempo")}</div>
-            {headline ? (
-              <>
-                <div className="session-headline session-rise" style={rise(1)}>
-                  <span className="session-num">
-                    {headline.clean[headline.clean.length - 1].bpm}
-                  </span>
-                  <span className="session-why">
-                    {t("session.progress.bpmOn", { title: headline.title })}
-                  </span>
-                </div>
-                {headline.clean.length > 1 && (
-                  <CleanChart
-                    series={headline}
-                    label={t("session.progress.chartLabel", { title: headline.title })}
-                  />
-                )}
-                <div className="session-why">{t("session.progress.cleanMeans")}</div>
-              </>
-            ) : (
-              <div className="session-why">{t("session.progress.noClean")}</div>
-            )}
+        <>
+          <div className="session-stat-row" data-testid="progress-totals">
+            <Stat i={1} value={minutes} label={t("session.progress.statMinutes")} testId="progress-minutes" />
+            <Stat i={2} value={String(totals.sessions)} label={t("session.progress.statSessions")} testId="progress-sessions" />
+            <Stat i={3} value={String(totals.streak)} label={t("session.progress.statStreak")} testId="progress-streak" />
           </div>
-          <div className="session-col">
-            <div className="session-kick session-rise">{t("session.progress.exercises")}</div>
-            {series.map((s, i) => {
-              const last = s.evenness[s.evenness.length - 1];
-              const clean = s.clean[s.clean.length - 1]?.bpm;
-              return (
-                <div
-                  className="session-skill session-glass session-rise"
-                  style={rise(i + 1)}
-                  key={s.exerciseId}
-                >
-                  <div className="session-exercise-text">
-                    <div className="session-skill-name">{s.title}</div>
-                    <div className="session-quiet">
-                      {clean === undefined
-                        ? t("session.paths.playedNoClean", { count: s.takes })
-                        : t("session.paths.playedClean", { count: s.takes, bpm: clean })}
-                    </div>
-                  </div>
-                  <Spark
-                    values={s.evenness}
-                    label={t("session.progress.sparkLabel", { title: s.title })}
-                  />
-                  <div className="session-progress-value">
-                    {last === undefined ? "–" : `${Math.round(last * 100)}%`}
-                    <small>{t("session.metric.even")}</small>
-                  </div>
-                </div>
-              );
-            })}
-            <div className="session-glass session-card session-rise">
-              <ExportPracticeButton />
-            </div>
+          <div className="session-prog-paths">
+            {groups.map((g, i) => (
+              <PathCard key={g.path.id} group={g} session={session} i={i + 4} />
+            ))}
           </div>
-        </div>
+          <p className="session-footnote">{t("session.progress.cleanMeans")}</p>
+        </>
       )}
     </div>
   );

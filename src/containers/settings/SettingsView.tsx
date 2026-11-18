@@ -28,6 +28,7 @@ import { WidgetSettingsSection } from "./WidgetSettingsSection";
 import { HotkeysSettingsSection } from "./HotkeysSettingsSection";
 import { SupportSection } from "./SupportSection";
 import { AboutSection } from "./AboutSection";
+import { PracticeSettingsSection, type PracticeSettings } from "./PracticeSettingsSection";
 
 type ShareOption = (typeof SHARE_OPTIONS)[number];
 
@@ -140,6 +141,9 @@ interface SettingsViewProps {
   setInputTestMode: Dispatch<SetStateAction<boolean>>;
   onResetRequest: () => void;
 
+  /** The learning side's defaults (UX audit SET-1). Absent: no Practice panel. */
+  practice?: PracticeSettings;
+
   // Support
   shareTooltip: boolean;
   onShareOption: (opt: ShareOption) => void;
@@ -229,6 +233,7 @@ export function SettingsView({
   inputTestMode,
   setInputTestMode,
   onResetRequest,
+  practice,
   shareTooltip,
   onShareOption,
 }: SettingsViewProps) {
@@ -278,6 +283,10 @@ export function SettingsView({
         onRunSetupAgain={onRunSetupAgain}
         onTakeTour={onTakeTour}
       />
+
+      {/* What a Session does by default, right under General: the learning
+          side is the front door now (UX audit SET-1). */}
+      {practice && <PracticeSettingsSection practice={practice} />}
 
       <DevicesSettingsSection
         audioOutputDevices={audioOutputDevices}

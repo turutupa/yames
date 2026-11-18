@@ -8,19 +8,15 @@ import { useTranslation } from "react-i18next";
 import { PLAN_MINUTES } from "../../session/planner";
 import type { PlanStep } from "../../session/planner";
 import { leftOffLine, reasonLine } from "../../session/coachWords";
-import { currentStepOf, factsOf } from "../../session/progress";
+import { factsOf } from "../../session/progress";
 import { FIRST_PATH_ID } from "../../session/packs";
 import type { PathDoc } from "../../paths/format";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { lineText } from "./lineText";
 import { bpmLine, pathTitleOf, roleKey, roleOf, rowKind, shortContext, shortReason, ticksOf } from "./todayPlan";
 import { InstrumentNote } from "./InstrumentNote";
-import { useNeckSlot, useNeck3d } from "./hooks/useNeck";
-import { useNeck } from "../../stage3d/api";
-import type { NeckView } from "../../stage3d/api";
+import { useNeck3d } from "./hooks/useNeck";
 import "../../styles/session.css";
-
-const WHOLE: NeckView = { kind: "whole" };
 
 /** The staggered entrance the mocks give each block. */
 export function rise(i: number): CSSProperties {
@@ -89,23 +85,26 @@ function PlanRow({
   index,
   earlier,
   paths,
+  showPath,
   rowRef,
 }: {
   step: PlanStep;
   index: number;
   earlier: readonly PlanStep[];
   paths: readonly PathDoc[];
+  /** Name the Path on the meta line: only when more than one is active (UX audit TODAY-6). */
+  showPath: boolean;
   rowRef?: (el: HTMLElement | null) => void;
 }) {
   const { t } = useTranslation();
-  const pathTitle = pathTitleOf(step, paths);
+  const pathTitle = showPath ? pathTitleOf(step, paths) : null;
   const bpm = bpmLine(step);
   const context = step.kind === "exercise" && step.context ? shortContext(step.context) : null;
   return (
     <li
       ref={rowRef}
-      className="session-plan-item session-rise"
-      style={rise(index + 4)}
+      className="session-plan-item session-plan-swap"
+      style={rise(index)}
       data-kind={rowKind(step, paths)}
       data-role={roleOf(step)}
       data-first={index === 0 ? "" : undefined}
@@ -166,9 +165,7 @@ function TimeBar({ steps, paths, total }: { steps: readonly PlanStep[]; paths: r
 export function TodayView({
   session,
   onOpenTools,
-  onSetUpInput,
   onOpenPaths,
-  listening = false,
   instrument,
   onOpenToolsList,
   onChangeInstrument,
@@ -184,20 +181,15 @@ export function TodayView({
   onOpenToolsList?: () => void;
   /** To the instrument setting, from that note. */
   onChangeInstrument?: () => void;
-  /** The input is on and listening: grading needs nothing more, so Today does not ask for it. */
-  listening?: boolean;
   /** "Open Tools": the Tools list. Opening on the last tool is a setting (Settings › General). */
   onOpenTools: () => void;
-  /** "Set up input": Settings at its devices, when nothing is listening. */
-  onSetUpInput: () => void;
   /** To the Paths list: the way on when no Path is subscribed (QA 2026-11-17 #7). */
   onOpenPaths: () => void;
 }) {
   const { t, i18n } = useTranslation();
   const { plan, minutes, setMinutes, myPaths, progress, actions } = session;
-  // The whole neck, swept warm on arrival and again when the minutes change.
-  const slot = useNeckSlot(WHOLE, [], { sweep: true });
-  const neck = useNeck();
+  // No neck here: an empty one pushed the plan below the fold (UX audit
+  // TODAY-9). The input's state is the header's chip (TODAY-10).
   const neck3d = useNeck3d();
   const [endRef, endInView] = useEndInView();
 
@@ -217,11 +209,12 @@ export function TodayView({
   const leftOff = last ? leftOffLine(factsOf(last), last.bpm) : null;
   const steps = plan.steps;
   const planned = steps.reduce((sum, s) => sum + s.minutes, 0);
+  // A Path's name on each row only says something when there are two or more.
+  const showPath = myPaths.length > 1;
 
   return (
     <div className="session-page session-today-page" data-testid="today" data-neck3d={neck3d}>
       <div className="session-today" data-steps={steps.length}>
-        <div className="session-slot" ref={slot} aria-hidden="true" />
         <div className="session-today-hero">
           {instrument && (
             <InstrumentNote
@@ -264,14 +257,6 @@ export function TodayView({
               {steps[0] && <small className="session-today-start-next">{stepTitle(steps[0], t)}</small>}
             </button>
           )}
-          {!noPaths && !listening && (
-            <div className="session-today-mic" data-testid="today-no-mic">
-              <span>{t("session.today.noMic")}</span>{" "}
-              <button className="session-link" onClick={onSetUpInput}>
-                {t("session.today.setUpInput")}
-              </button>
-            </div>
-          )}
           {!noPaths && (
             <>
               <div className="session-today-seg-label" id="session-minutes-label">
@@ -283,25 +268,13 @@ export function TodayView({
                     key={m}
                     className={m === minutes ? "on" : ""}
                     aria-pressed={m === minutes}
-                    onClick={() => {
-                      setMinutes(m);
-                      neck.sweep();
-                    }}
+                    onClick={() => setMinutes(m)}
                   >
                     {m}
                   </button>
                 ))}
               </div>
             </>
-          )}
-          {plan.mood !== "first" && myPaths.length > 0 && (
-            <div className="session-quiet session-today-running">
-              {t("session.today.running", {
-                paths: myPaths
-                  .map((p) => `${p.title}, ${currentStepOf(progress, p).title}`)
-                  .join(" · "),
-              })}
-            </div>
           )}
         </div>
 
@@ -324,7 +297,9 @@ export function TodayView({
           )}
           {steps.length > 0 && <TimeBar steps={steps} paths={session.paths} total={planned} />}
           {steps.length > 0 && (
-            <ol className="session-plan-list" role="list">
+            // Keyed on the minutes: a new plan comes in as one, rows settling
+            // in turn, rather than swapping under the pointer (TODAY-11).
+            <ol className="session-plan-list" role="list" key={minutes} data-testid="today-plan">
               {steps.map((step, i) => (
                 <PlanRow
                   key={step.id}
@@ -332,6 +307,7 @@ export function TodayView({
                   index={i}
                   earlier={steps.slice(0, i)}
                   paths={session.paths}
+                  showPath={showPath}
                   rowRef={i === steps.length - 1 ? endRef : undefined}
                 />
               ))}

@@ -77,7 +77,8 @@
     "coachOnPlay": "Koç, oynata bastığınızda dinler",
     "coachQuiet": "Koç adım sürerken susar",
     "countIn": "Giriş sayımı",
-    "backToStart": "Başa dön"
+    "backToStart": "Başa dön",
+    "setUpInput": "Girişi ayarla"
   },
   "rail": {
     "label": "Modlar ve kitaplık",
