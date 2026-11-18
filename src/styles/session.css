@@ -4142,6 +4142,7 @@
   font: 600 clamp(26px, 4vh, 40px) / 1 var(--l-display);
   letter-spacing: 0.02em;
   color: var(--l-quiet);
+}
 
 /* The phone's scrolling tab (acceptance 2, N-P1-2): the staff spreads its
    lines to the panel, and what height is left is shared above and below. */
