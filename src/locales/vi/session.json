@@ -425,6 +425,10 @@
       "bass": "Lộ trình hiện được viết cho guitar, lộ trình cho bass đang được lên kế hoạch. Các công cụ đã dùng được với bass.",
       "openTools": "Mở công cụ",
       "change": "Đổi nhạc cụ"
+    },
+    "tabstrip": {
+      "label": "Tab: {{notes}}",
+      "bar": "ô nhịp {{n}}"
     }
   }
 }

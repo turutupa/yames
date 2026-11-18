@@ -426,6 +426,12 @@ export interface Shot {
    * string rings. `?nogl=1` on any of them draws the SVG fallback instead.
    */
   stage?: "whole" | "zoom" | "pluck" | "flat";
+  /**
+   * The Session's tab strip alone (`containers/session/tabstrip/`), in the
+   * chosen theme, drawing a real Exercise from a Path pack. See
+   * `src/shots/tabstrip.tsx` for what each kind holds.
+   */
+  tabstrip?: "preview" | "follow" | "playing" | "dense";
 }
 
 /**
@@ -1319,6 +1325,11 @@ export const SHOTS: Shot[] = [
   { id: "stage-pluck", suffix: "stage-pluck", window: "main", stage: "pluck", width: 1400, height: 900, settleMs: 0 },
   // The straight-on neck the practice runway sits under (M6).
   { id: "stage-flat", suffix: "stage-flat", window: "main", stage: "flat", width: 1400, height: 900, settleMs: 200 },
+  // The Session's tab strip (mvp-tabstrip): before a Take, and during one.
+  { id: "tabstrip-preview", suffix: "tabstrip-preview", window: "main", tabstrip: "preview", width: 1400, height: 900, settleMs: 100 },
+  { id: "tabstrip-follow", suffix: "tabstrip-follow", window: "main", tabstrip: "follow", width: 1400, height: 900, settleMs: 100 },
+  { id: "tabstrip-playing", suffix: "tabstrip-playing", window: "main", tabstrip: "playing", width: 1400, height: 900, settleMs: 100 },
+  { id: "tabstrip-dense", suffix: "tabstrip-dense", window: "main", tabstrip: "dense", width: 1400, height: 900, settleMs: 100 },
 ];
 
 /**

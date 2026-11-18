@@ -425,6 +425,10 @@
       "bass": "Pfade sind vorerst für Gitarre geschrieben, Pfade für Bass sind geplant. Die Werkzeuge funktionieren schon jetzt mit Bass.",
       "openTools": "Zu den Werkzeugen",
       "change": "Instrument ändern"
+    },
+    "tabstrip": {
+      "label": "Tabulatur: {{notes}}",
+      "bar": "Takt {{n}}"
     }
   }
 }

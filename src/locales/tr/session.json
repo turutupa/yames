@@ -425,6 +425,10 @@
       "bass": "Yollar şimdilik gitar için yazıldı; bas için Yollar planlanıyor. Araçlar bas ile bugün de çalışır.",
       "openTools": "Araçları aç",
       "change": "Enstrümanı değiştir"
+    },
+    "tabstrip": {
+      "label": "Tab: {{notes}}",
+      "bar": "{{n}}. ölçü"
     }
   }
 }
