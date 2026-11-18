@@ -25,7 +25,7 @@ export type HintCardProps = {
   inline?: boolean;
   /** Optional primary action. The label comes from `…<key>.action`. */
   onAction?: () => void;
-  /** Called for the dismiss button, Escape, and after the action runs. */
+  /** Called for the dismiss button, after the action runs, and on any other key or click. */
   onDismiss: () => void;
   /**
    * False suppresses the entrance animation. `hints.css` already covers the OS
@@ -99,17 +99,35 @@ export function HintCard({
     };
   }, [id, inline]);
 
-  // --- Escape dismisses ---------------------------------------------------
+  // --- Any action dismisses; nothing is swallowed ---------------------------
+  // A hint used to take the first Escape for itself (capture phase, stopped
+  // there), so in the Jam the first Escape only put "Got it" away and the
+  // second left the tool (acceptance P2-19, 2026-11-18). A hint is a note
+  // beside the work, not a dialog: the player doing anything — a key, a
+  // click elsewhere — has read it or does not need it. So it goes, and the
+  // key or the click goes on to do what it does: Escape still closes the
+  // menu that is open, or leaves the tool.
   const dismiss = useCallback(() => onDismiss(), [onDismiss]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.stopPropagation();
+      // Moving focus, or a modifier on its own, is not doing anything yet.
+      if (e.key === "Tab" || e.key === "Shift" || e.key === "Control" || e.key === "Alt" || e.key === "Meta") {
+        return;
+      }
+      if (cardRef.current?.contains(e.target as Node)) return; // its own buttons
       dismiss();
     };
-    // Capture, so the hint eats the key before Zen/Settings act on it.
-    document.addEventListener("keydown", onKey, true);
-    return () => document.removeEventListener("keydown", onKey, true);
+    const onPointer = (e: PointerEvent) => {
+      if (cardRef.current?.contains(e.target as Node)) return;
+      dismiss();
+    };
+    // Bubble, and passive in effect: nothing here prevents or stops anything.
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onPointer);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onPointer);
+    };
   }, [dismiss]);
 
   const actionLabel = onAction ? t(`onboarding.hints.${key}.action`) : null;

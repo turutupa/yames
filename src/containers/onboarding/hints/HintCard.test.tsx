@@ -4,8 +4,8 @@
  * The placement maths itself lives in `../anchor` and is covered exhaustively
  * by `anchor.test.ts` — the tour card and the hint card share it, so it is
  * tested once. What is tested here is the DOM half: the copy comes from i18n,
- * the action button only exists when there is an action, both buttons plus
- * Escape end the hint, and the card finds (or fails to find) `data-hint`.
+ * the action button only exists when there is an action, both buttons and
+ * any other key or click end the hint (without swallowing it), and the card finds (or fails to find) `data-hint`.
  */
 import { describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
@@ -37,10 +37,26 @@ describe("HintCard", () => {
     expect(onDismiss).toHaveBeenCalledTimes(1);
   });
 
-  it("dismisses on Escape", () => {
+  it("dismisses on Escape without swallowing it (P2-19)", () => {
+    const onDismiss = vi.fn();
+    const after = vi.fn();
+    render(<HintCard id="coach-ask" inline onDismiss={onDismiss} />);
+    window.addEventListener("keydown", after);
+    fireEvent.keyDown(document, { key: "Escape" });
+    window.removeEventListener("keydown", after);
+    expect(onDismiss).toHaveBeenCalledTimes(1);
+    // The key reaches the rest of the app: Escape still leaves the tool.
+    expect(after).toHaveBeenCalledTimes(1);
+    expect(after.mock.calls[0][0].defaultPrevented).toBe(false);
+  });
+
+  it("dismisses on any other action, but not on Tab or a click inside it", () => {
     const onDismiss = vi.fn();
     render(<HintCard id="coach-ask" inline onDismiss={onDismiss} />);
-    fireEvent.keyDown(document, { key: "Escape" });
+    fireEvent.keyDown(document, { key: "Tab" });
+    fireEvent.pointerDown(screen.getByText(/./, { selector: ".hint-card-body" }));
+    expect(onDismiss).not.toHaveBeenCalled();
+    fireEvent.pointerDown(document.body);
     expect(onDismiss).toHaveBeenCalledTimes(1);
   });
 
