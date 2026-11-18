@@ -445,6 +445,12 @@
     "tabstrip": {
       "label": "Tablatura: {{notes}}",
       "bar": "compás {{n}}"
+    },
+    "leave": {
+      "title": "¿Salir de esta sesión?",
+      "body": "Tus tomas hasta ahora están guardadas.",
+      "stay": "Seguir",
+      "leave": "Salir"
     }
   }
 }

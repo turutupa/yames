@@ -437,6 +437,12 @@
     "tabstrip": {
       "label": "Tab: {{notes}}",
       "bar": "ô nhịp {{n}}"
+    },
+    "leave": {
+      "title": "Rời buổi tập này?",
+      "body": "Các lượt chơi đến giờ đã được lưu.",
+      "stay": "Tiếp tục",
+      "leave": "Rời đi"
     }
   }
 }

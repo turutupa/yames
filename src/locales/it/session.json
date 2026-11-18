@@ -445,6 +445,12 @@
     "tabstrip": {
       "label": "Intavolatura: {{notes}}",
       "bar": "battuta {{n}}"
+    },
+    "leave": {
+      "title": "Uscire da questa sessione?",
+      "body": "Le tue take finora sono salvate.",
+      "stay": "Continua",
+      "leave": "Esci"
     }
   }
 }

@@ -437,6 +437,12 @@
     "tabstrip": {
       "label": "Tab: {{notes}}",
       "bar": "maat {{n}}"
+    },
+    "leave": {
+      "title": "Deze sessie verlaten?",
+      "body": "Je takes tot nu toe zijn bewaard.",
+      "stay": "Doorgaan",
+      "leave": "Verlaten"
     }
   }
 }

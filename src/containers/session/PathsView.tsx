@@ -191,8 +191,8 @@ function PathDetail({
   return (
     <div className="session-page" data-testid="path-detail" data-neck3d={neck3d}>
       <div className="session-rise">
-        <button className="session-link" onClick={onBack}>
-          {t("session.paths.back")}
+        <button className="session-back" onClick={onBack} data-testid="paths-back">
+          <span aria-hidden="true">‹</span> {t("session.paths.back")}
         </button>
         <div className="session-row" data-wrap="" style={{ gap: 9 }}>
           <h1 className="session-h1">{path.title}</h1>
@@ -469,8 +469,8 @@ function StepDetail({
       data-scrim="split"
     >
       <div className="session-rise">
-        <button className="session-link" onClick={onBack}>
-          {path.title}
+        <button className="session-back" onClick={onBack} data-testid="paths-back">
+          <span aria-hidden="true">‹</span> {path.title}
         </button>
         <div className="session-kick">
           {t("session.paths.stepOf", { n: step.order, of: path.steps.length })}
@@ -574,13 +574,16 @@ export function PathsView({
   const path = session.paths.find((p) => p.id === at.pathId) ?? null;
   const step = path?.steps.find((s) => s.id === at.stepId) ?? null;
 
-  // Escape goes one page up: a Step to its Path, a Path to the list. On the
-  // window, after everything else has had its turn: whatever is open over the
-  // page (a sheet, a menu, the help) claims the key first.
+  // Back goes one page up: a Step to its Path, a Path to the list (UX audit
+  // NAV-4). Escape, Alt+Left and the mouse's back button, as anywhere else on
+  // a computer. On the window, after everything else has had its turn:
+  // whatever is open over the page (a sheet, a menu, the help) claims the key
+  // first.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape" || e.defaultPrevented) return;
-      if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      const isBack = (e.key === "Escape" && !e.altKey) || (e.key === "ArrowLeft" && e.altKey);
+      if (!isBack) return;
       // Not from a text field: Escape there is the field's. (Not `hotkeys.ts`'s
       // `isTypingTarget`: the hotkey table stays out of the phone's bundle.)
       const el = e.target as HTMLElement | null;
@@ -588,8 +591,25 @@ export function PathsView({
       if (document.querySelector('[role="dialog"], [role="alertdialog"]')) return;
       if (back()) e.preventDefault();
     };
+    // The mouse's back button is button 3. Taken on `mouseup`, the event the
+    // webview would otherwise turn into a history step.
+    const onMouse = (e: MouseEvent) => {
+      if (e.button !== 3 || e.defaultPrevented) return;
+      if (document.querySelector('[role="dialog"], [role="alertdialog"]')) return;
+      e.preventDefault();
+      back();
+    };
+    const swallow = (e: MouseEvent) => {
+      if (e.button === 3) e.preventDefault();
+    };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("mouseup", onMouse);
+    window.addEventListener("mousedown", swallow);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("mouseup", onMouse);
+      window.removeEventListener("mousedown", swallow);
+    };
   }, [back]);
 
   if (path && step) {

@@ -110,6 +110,13 @@ change the input in **Settings > Devices**.
    still be there, and Today should plan from them.
 8. **The tools still work:** **Tools** in the rail opens Metronome, Setlist,
    Drill, Jam and Songs. Play with each for a minute.
+9. **Keys:** **Ctrl+1** Today, **Ctrl+2** Paths, **Ctrl+3** Progress,
+   **Ctrl+4** Tools; the tools are **Ctrl+Shift+1** to **Ctrl+Shift+5**
+   (Metronome, Setlist, Drill, Jam, Songs), and **Ctrl+,** is Settings. On a
+   Mac it is ⌘ instead of Ctrl. If you had changed any of these keys, yours
+   are kept. **Escape** goes back: out of a Session to where you started it,
+   from a Step to its Path, from a Path to the list. In a Session, the first
+   Escape stops a running Take and the next one asks before leaving.
 
 Things worth telling us: anything that looked wrong, a grade that did not
 match what you played, a click that stuttered or drifted, a screen that did
@@ -130,6 +137,9 @@ not fit your window, setup steps that confused you.
 - **Thresholds are first guesses.** Pass bars and grades have not been tuned
   on many real guitars yet. That is part of what you are helping with.
 - **No account, no cloud, no sync.** Progress lives on this computer only.
+- **On a Mac, ⌘⇧3, ⌘⇧4 and ⌘⇧5 are the system's screenshot keys,** so they
+  take a screenshot instead of opening Drill, Jam or Songs. Click the tool in
+  the rail, or give it another key in Settings → Hotkeys.
 - The coach's optional AI model is a large download; you can skip it, the
   grading does not depend on it.
 

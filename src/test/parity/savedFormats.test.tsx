@@ -269,7 +269,10 @@ describe("a player's bindings (section 4.4)", () => {
     const { result } = renderHook(() => useKeybindings());
     await waitFor(() => expect(result.current.keyBindings.play).toBe("P"));
     expect(result.current.keyBindings["songs-loop"]).toBe("⇧L");
-    expect(result.current.keyBindings["tab-3"]).toBe("⌘3");
+    // 2026-11-17 (owner-approved): the tools' ⌘1–⌘5 were this file's defaults
+    // and moved with them, to ⌘⇧1–⌘⇧5 (`hooks/keybindingMigration.ts`). Keys the
+    // player chose (P, ⇧L) are theirs and stay.
+    expect(result.current.keyBindings["tab-3"]).toBe("⌘⇧3");
     // Every action has a key, stored or default, so nothing goes dead.
     for (const h of HOTKEYS) expect(result.current.keyBindings).toHaveProperty(h.id);
     expect(result.current.footBindings).toEqual(settings.footBindings);
@@ -312,7 +315,15 @@ describe("the whole file, through the whole app", () => {
       expect(store.values.get(key), key).toEqual(SAVED[key]);
     }
     // New defaults get merged in and written, but what a player chose stays.
-    expect(store.values.get("keyBindings")).toMatchObject(settings.keyBindings);
+    // The old navigation defaults in it moved once (2026-11-17, see above).
+    const tabs = ["tab-1", "tab-2", "tab-3", "tab-4", "tab-5"];
+    const chosen = Object.fromEntries(
+      Object.entries(settings.keyBindings as Record<string, string>).filter(([id]) => !tabs.includes(id)),
+    );
+    expect(store.values.get("keyBindings")).toMatchObject({
+      ...chosen,
+      ...Object.fromEntries(tabs.map((id, i) => [id, `⌘⇧${i + 1}`])),
+    });
     expect(store.values.get("globalBindings")).toMatchObject(settings.globalBindings);
     expect(store.values.get("footBindings")).toEqual(settings.footBindings);
   });

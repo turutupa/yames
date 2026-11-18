@@ -1,4 +1,4 @@
-// ⌘1 ⌘2 ⌘3 count down the rail.
+// ⌘⇧1 ⌘⇧2 ⌘⇧3 count down the tools (⌘1 ⌘2 ⌘3 until 2026-11-17).
 //
 // The numbers are positional or they are arbitrary. When setlists became a
 // mode they arrived second in the rail, which moved Drill from ⌘2 to ⌘3 —
@@ -41,7 +41,7 @@ describe("the tab hotkeys", () => {
 
   it("binds them to consecutive digits", () => {
     expect(tabHotkeys().map((h) => h.key)).toEqual(
-      PLAY_TABS.map((_, i) => `⌘${i + 1}`),
+      PLAY_TABS.map((_, i) => `⌘⇧${i + 1}`),
     );
   });
 
@@ -50,34 +50,38 @@ describe("the tab hotkeys", () => {
   });
 });
 
-// The rail's learning side has keys of its own (owner, 2026-11-17): Today kept
-// ⌘0, the tools kept ⌘1–⌘5, and Paths, Progress and Tools come after them.
+// The rail's learning side: ⌘1–⌘4, Today first (owner, 2026-11-17). They were
+// ⌘0 and ⌘6–⌘8 behind the tools' ⌘1–⌘5; the tools moved to ⌘⇧1–⌘⇧5.
 describe("the learning side's keys", () => {
   const key = (id: string) => HOTKEYS.find((h) => h.id === id)?.key;
+  const LEARN = ["tab-today", "tab-paths", "tab-progress", "tab-tools"];
 
-  it("are ⌘6, ⌘7 and ⌘8, after the tools, leaving ⌘0 and ⌘1–⌘5 as they were", () => {
-    expect(key("tab-today")).toBe("⌘0");
-    expect(["tab-1", "tab-2", "tab-3", "tab-4", "tab-5"].map(key)).toEqual(["⌘1", "⌘2", "⌘3", "⌘4", "⌘5"]);
-    expect(["tab-paths", "tab-progress", "tab-tools"].map(key)).toEqual(["⌘6", "⌘7", "⌘8"]);
+  it("are ⌘1 to ⌘4 in the rail's order, and the tools ⌘⇧1 to ⌘⇧5", () => {
+    expect(LEARN.map(key)).toEqual(["⌘1", "⌘2", "⌘3", "⌘4"]);
+    expect(["tab-1", "tab-2", "tab-3", "tab-4", "tab-5"].map(key)).toEqual(["⌘⇧1", "⌘⇧2", "⌘⇧3", "⌘⇧4", "⌘⇧5"]);
   });
 
   it("claim no key anything else in the table has", () => {
     const keys = HOTKEYS.map((h) => h.key).filter(Boolean);
-    for (const k of ["⌘6", "⌘7", "⌘8"]) expect(keys.filter((x) => x === k), k).toHaveLength(1);
-  });
-
-  it("leave the webview's own shortcuts alone", () => {
-    for (const k of ["⌘P", "⌘R", "⌘F", "⌘W", "⌘Q", "⌘N", "⌘T"]) {
-      expect(HOTKEYS.some((h) => ["tab-paths", "tab-progress", "tab-tools"].includes(h.id) && h.key === k)).toBe(false);
+    for (const k of ["⌘1", "⌘2", "⌘3", "⌘4", "⌘⇧1", "⌘⇧2", "⌘⇧3", "⌘⇧4", "⌘⇧5"]) {
+      expect(keys.filter((x) => x === k), k).toHaveLength(1);
     }
   });
 
-  it("are app-wide, on every tab", () => {
+  it("leave the webview's own shortcuts alone, ⌘0 (actual size) included", () => {
+    for (const k of ["⌘0", "⌘P", "⌘R", "⌘F", "⌘W", "⌘Q", "⌘N", "⌘T"]) {
+      expect(HOTKEYS.some((h) => h.id.startsWith("tab-") && h.key === k), k).toBe(false);
+    }
+  });
+
+  it("mean the same action on every tab (the dispatcher ignores them in a running Session)", () => {
     const defaults = Object.fromEntries(HOTKEYS.map((h) => [h.id, h.key]));
     for (const view of ["beat", "jam", "songs", "today", "session", "settings"]) {
-      expect(actionForCombo(defaults, "⌘6", view), view).toBe("tab-paths");
-      expect(actionForCombo(defaults, "⌘7", view), view).toBe("tab-progress");
-      expect(actionForCombo(defaults, "⌘8", view), view).toBe("tab-tools");
+      expect(actionForCombo(defaults, "⌘1", view), view).toBe("tab-today");
+      expect(actionForCombo(defaults, "⌘2", view), view).toBe("tab-paths");
+      expect(actionForCombo(defaults, "⌘3", view), view).toBe("tab-progress");
+      expect(actionForCombo(defaults, "⌘4", view), view).toBe("tab-tools");
+      expect(actionForCombo(defaults, "⌘⇧3", view), view).toBe("tab-3");
     }
   });
 });

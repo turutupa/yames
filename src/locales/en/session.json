@@ -437,6 +437,12 @@
     "tabstrip": {
       "label": "Tab: {{notes}}",
       "bar": "bar {{n}}"
+    },
+    "leave": {
+      "title": "Leave this Session?",
+      "body": "Your Takes so far are saved.",
+      "stay": "Keep going",
+      "leave": "Leave"
     }
   }
 }

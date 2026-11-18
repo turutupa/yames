@@ -445,6 +445,12 @@
     "tabstrip": {
       "label": "Tablatura: {{notes}}",
       "bar": "compasso {{n}}"
+    },
+    "leave": {
+      "title": "Sair desta sessão?",
+      "body": "Seus takes até agora estão salvos.",
+      "stay": "Continuar",
+      "leave": "Sair"
     }
   }
 }

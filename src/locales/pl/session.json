@@ -453,6 +453,12 @@
     "tabstrip": {
       "label": "Tabulatura: {{notes}}",
       "bar": "takt {{n}}"
+    },
+    "leave": {
+      "title": "Opuścić tę sesję?",
+      "body": "Twoje dotychczasowe podejścia są zapisane.",
+      "stay": "Graj dalej",
+      "leave": "Wyjdź"
     }
   }
 }

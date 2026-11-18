@@ -437,6 +437,12 @@
     "tabstrip": {
       "label": "Tab: {{notes}}",
       "bar": "{{n}}. ölçü"
+    },
+    "leave": {
+      "title": "Bu oturumdan çıkılsın mı?",
+      "body": "Şimdiye kadarki kayıtların kaydedildi.",
+      "stay": "Devam et",
+      "leave": "Çık"
     }
   }
 }

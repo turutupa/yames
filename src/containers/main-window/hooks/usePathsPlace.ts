@@ -16,19 +16,15 @@ import type { MainView } from "../MainHeader";
  *
  * - Deeper (list -> Path -> Step) starts the new page at the top.
  * - Back (Escape, the page's back link) comes back to where that page was.
- * - Leaving for a Session or Settings and coming back keeps the place and the
- *   scroll.
- * - Leaving for anywhere else (Today, Progress, a tool) forgets it: the next
- *   visit starts at the list, as it always did.
- * - The rail's (or the tab bar's) Paths, pressed on Paths, is the list again
- *   (QA 2026-11-17 #8): `reset`.
+ * - Leaving and coming back, by any door (a Session, Settings, Today and the
+ *   rail), keeps the place and the scroll (UX audit NAV-3: Paths -> Today ->
+ *   Paths used to land on the list).
+ * - The rail's (or the tab bar's, or the hotkey's) Paths, pressed on Paths,
+ *   goes one page up: `back`. Pressed again it is the list.
  */
 export type PathsAt = { pathId: string | null; stepId: string | null };
 
 export const PATHS_LIST: PathsAt = { pathId: null, stepId: null };
-
-/** The views that are opened from Paths and come back to it with its place kept. */
-const KEEPS_PLACE: readonly MainView[] = ["paths", "session", "settings"];
 
 export function placeKey(at: PathsAt): string {
   if (at.pathId && at.stepId) return `step:${at.pathId}/${at.stepId}`;
@@ -116,18 +112,13 @@ export function usePathsPlace(
     setAt(PATHS_LIST);
   }, []);
 
-  // Coming back, or leaving for good.
+  // Coming back: the page is put back where it was scrolled.
   useLayoutEffect(() => {
     const from = lastView.current;
     lastView.current = view;
     if (from === view) return;
     if (view === "paths") {
       pending.current = scrolls.current.get(placeKey(atRef.current)) ?? 0;
-    } else if (!KEEPS_PLACE.includes(view)) {
-      scrolls.current.clear();
-      pending.current = null;
-      atRef.current = PATHS_LIST;
-      setAt(PATHS_LIST);
     }
   }, [view]);
 

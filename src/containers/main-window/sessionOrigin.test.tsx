@@ -166,13 +166,15 @@ describe("leaving a Session", () => {
     expect(on("step-detail")).toBe(true);
   });
 
-  it("from a Step, then Today by the rail: the next Paths visit starts at the list", async () => {
+  it("a view key does not walk out of a running Session (NAV-2)", async () => {
     await openReturning();
     await toStep();
-    await railTo("session.nav.today");
-    await railTo("session.nav.paths");
-    expect(on("paths")).toBe(true);
-    expect(on("step-detail")).toBe(false);
+    await click(testid("play-even-eighths.open-string"));
+    await inSession();
+    await act(async () => press("⌘1"));
+    await act(async () => press("⌘⇧1"));
+    await settle();
+    expect(on("session-exit")).toBe(true);
   });
 });
 
@@ -191,11 +193,52 @@ describe("back inside Paths", () => {
     expect(on("paths")).toBe(true);
   });
 
-  it("the rail's Paths, pressed on a Step, is the list", async () => {
+  it("Alt+Left goes one page up too (NAV-4)", async () => {
     await openReturning();
     await toStep();
+    await act(async () => {
+      fireEvent.keyDown(document.body, { key: "ArrowLeft", altKey: true });
+    });
+    await settle();
+    expect(on("path-detail")).toBe(true);
+  });
+
+  it("the mouse's back button goes one page up (NAV-4)", async () => {
+    await openReturning();
+    await toStep();
+    await act(async () => {
+      fireEvent.mouseUp(document.body, { button: 3 });
+    });
+    await settle();
+    expect(on("path-detail")).toBe(true);
+  });
+
+  it("the Back control names where it goes", async () => {
+    await openReturning();
+    await toStep();
+    expect(testid("paths-back")?.textContent).toContain("Alternate Picking");
+    await click(testid("paths-back"));
+    expect(on("path-detail")).toBe(true);
+  });
+
+  it("Paths reopens the Step it was on after Today, and the rail's Paths then goes up a page at a time (NAV-3)", async () => {
+    await openReturning();
+    await toStep();
+    await railTo("session.nav.today");
+    await railTo("session.nav.paths");
+    expect(on("step-detail")).toBe(true);
+    await railTo("session.nav.paths");
+    expect(on("path-detail")).toBe(true);
     await railTo("session.nav.paths");
     expect(on("paths")).toBe(true);
+  });
+
+  it("the Paths key does the same as the rail", async () => {
+    await openReturning();
+    await toStep();
+    await act(async () => press("⌘2"));
+    await settle();
+    expect(on("path-detail")).toBe(true);
   });
 
   it("Settings over a Step, closed by Escape, is the same Step", async () => {

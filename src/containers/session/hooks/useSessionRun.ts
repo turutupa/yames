@@ -1135,11 +1135,34 @@ export function useSessionRun(input: SessionRunInput) {
     setPracticeView(nextPracticeView(practiceViewRef.current));
   }, [setPracticeView]);
 
+  const [leaveAsked, setLeaveAsked] = useState(false);
+
   const exit = useCallback(() => {
+    setLeaveAsked(false);
     teardown();
     dispatch({ type: "cancel" });
     setView(origin.current);
   }, [teardown, setView]);
+
+  /**
+   * Escape in a Session (UX audit NAV-2, 2026-11-17). A running Take is
+   * stopped first, and kept: that is one press. Leaving is the next one, and
+   * once this Session has Takes in it, it asks ("Your Takes are saved") rather
+   * than walking out on a key that sits next to the ones a player is using.
+   * With nothing played yet, or on the recap, it leaves at once.
+   */
+  const escape = useCallback(() => {
+    const phase = runRef.current.phase;
+    if (phase === "playing") return endTake();
+    if (phase === "listening") return;
+    if (phase === "recap" || runRef.current.outcomes.length === 0) return exit();
+    setLeaveAsked(true);
+  }, [endTake, exit]);
+
+  const stayInSession = useCallback(() => setLeaveAsked(false), []);
+  useEffect(() => {
+    if (run.phase === "idle") setLeaveAsked(false);
+  }, [run.phase]);
 
   return {
     run,
@@ -1167,6 +1190,8 @@ export function useSessionRun(input: SessionRunInput) {
     lights,
     big,
     working: run.phase === "listening",
+    /** Escape asked "Leave this Session?" and it has not been answered. */
+    leaveAsked,
     actions: {
       startToday,
       playExercise,
@@ -1180,6 +1205,8 @@ export function useSessionRun(input: SessionRunInput) {
       findEdgeFromHere,
       findEdge,
       exit,
+      escape,
+      stayInSession,
       subscribe,
       unsubscribe,
       testOut,

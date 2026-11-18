@@ -445,6 +445,12 @@
     "tabstrip": {
       "label": "Tablature : {{notes}}",
       "bar": "mesure {{n}}"
+    },
+    "leave": {
+      "title": "Quitter cette séance ?",
+      "body": "Tes prises jusqu’ici sont enregistrées.",
+      "stay": "Continuer",
+      "leave": "Quitter"
     }
   }
 }

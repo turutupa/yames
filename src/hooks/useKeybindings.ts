@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { storeLoad, storeSave } from "../ipc";
 import { HOTKEYS, eventToCombo } from "../hotkeys";
+import { KEYMAP_VERSION, KEYMAP_VERSION_KEY, migrateNavKeys } from "./keybindingMigration";
 import type {
   BindingTarget,
   PendingKeyConflict,
@@ -66,7 +67,18 @@ export function useKeybindings() {
     );
     (async () => {
       const kb = await storeLoad<Bindings>("keyBindings");
-      if (kb && typeof kb === "object") setKeyBindings({ ...defaults, ...kb });
+      // The navigation keys moved on 2026-11-17: a map still on the old
+      // defaults is moved over once (`keybindingMigration.ts`).
+      const version = await storeLoad<number>(KEYMAP_VERSION_KEY).catch(() => null);
+      if (kb && typeof kb === "object") {
+        const merged = { ...defaults, ...kb };
+        const moved = (version ?? 1) < KEYMAP_VERSION ? migrateNavKeys(merged) : merged;
+        setKeyBindings(moved);
+        // Saved here, not by the effect above: that one stands aside until the
+        // restore has finished, and the mark below must not outlive the keys.
+        if (moved !== merged) await storeSave("keyBindings", moved).catch(() => {});
+      }
+      if (version !== KEYMAP_VERSION) await storeSave(KEYMAP_VERSION_KEY, KEYMAP_VERSION).catch(() => {});
       const gb = await storeLoad<Bindings>("globalBindings");
       if (gb && typeof gb === "object")
         setGlobalBindings({ ...globalDefaults, ...gb });

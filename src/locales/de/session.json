@@ -437,6 +437,12 @@
     "tabstrip": {
       "label": "Tabulatur: {{notes}}",
       "bar": "Takt {{n}}"
+    },
+    "leave": {
+      "title": "Diese Session verlassen?",
+      "body": "Deine bisherigen Takes sind gespeichert.",
+      "stay": "Weiterspielen",
+      "leave": "Verlassen"
     }
   }
 }
