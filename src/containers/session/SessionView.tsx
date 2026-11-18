@@ -204,20 +204,26 @@ function InputChip({
   const { t } = useTranslation();
   const { run, inputStart, actions } = session;
   if (run.ungraded) {
-    // Not graded; one press turns the input on and grades from the next Take.
+    // Not graded; one press grades from the next Take. With grading off in
+    // Settings that is what it says and what it turns on (acceptance 4,
+    // P2-4): "Turn on input" blamed an input that was never the cause.
+    const off = run.ungraded === "gradingOff";
+    const word = t(off ? "session.input.gradingOff" : "session.input.notGraded");
+    const fix = t(off ? "session.input.turnOnGrading" : "session.input.turnOn");
     return (
       <button
         className="session-input-chip"
         data-state="ungraded"
+        data-why={run.ungraded}
         onClick={actions.gradeAgain}
-        aria-label={`${t("session.input.notGraded")}. ${t("session.input.turnOn")}`}
-        data-tip={t("session.input.turnOn")}
+        aria-label={`${word}. ${fix}`}
+        data-tip={fix}
         data-testid="session-input-chip"
       >
         <MicGlyph off />
-        <span className="session-input-chip-word">{t("session.input.notGraded")}</span>
+        <span className="session-input-chip-word">{word}</span>
         <span className="session-input-chip-fix" data-testid="session-grade-again">
-          {t("session.input.turnOn")}
+          {fix}
         </span>
       </button>
     );
@@ -517,6 +523,19 @@ function TakeScreen({
 
     </div>
   );
+}
+
+/**
+ * A " · " line with its short parts held together: "10 bars" and "80 BPM"
+ * never split across a line end, which on a phone left "BARS" alone on the
+ * result's second line (acceptance 4, P2-11). A long part (a title) may
+ * still wrap inside itself.
+ */
+export function keepShortParts(line: string, longest = 14): string {
+  return line
+    .split(" · ")
+    .map((part) => (part.length <= longest ? part.replace(/ /g, "\u00a0") : part))
+    .join(" · ");
 }
 
 /**
@@ -916,12 +935,14 @@ function ResultScreen({ session, pedalMapped }: { session: SessionRun; pedalMapp
       <div className="session-between">
         <div className="session-col">
           <div className="session-kick session-fade" style={rise(1)}>
-            {t("session.result.kick", {
-              take: outcome.takeNumber,
-              title: outcome.title,
-              bpm: outcome.bpm,
-              bars: outcome.measures.barsPlayed,
-            })}
+            {keepShortParts(
+              t("session.result.kick", {
+                take: outcome.takeNumber,
+                title: outcome.title,
+                bpm: outcome.bpm,
+                bars: outcome.measures.barsPlayed,
+              }),
+            )}
           </div>
           <DecidingNumber outcome={outcome} />
           <CleanTempoLine outcome={outcome} />
@@ -1043,12 +1064,14 @@ function UngradedResultScreen({ session }: { session: SessionRun }) {
     <div className="session-body" data-testid="session-ungraded" data-verdict="ungraded">
       <div className="session-center" data-top="">
         <div className="session-kick session-rise">
-          {t("session.result.kick", {
-            take: outcome.takeNumber,
-            title: outcome.title,
-            bpm: outcome.bpm,
-            bars: outcome.measures.barsPlayed,
-          })}
+          {keepShortParts(
+            t("session.result.kick", {
+              take: outcome.takeNumber,
+              title: outcome.title,
+              bpm: outcome.bpm,
+              bars: outcome.measures.barsPlayed,
+            }),
+          )}
         </div>
         <h1 className="session-h1 session-rise" style={rise(1)}>
           {t(outcome.ungraded === "gradingOff" ? "session.ungraded.resultOff" : "session.ungraded.result")}

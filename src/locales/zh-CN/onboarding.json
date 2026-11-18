@@ -53,7 +53,8 @@
         "next": "下一步",
         "or": "或",
         "tempo": "更快或更慢（两遍之间）",
-        "view": "切换视图：{{neck}}、{{runway}}或{{tab}}"
+        "view": "切换视图：{{neck}}、{{runway}}或{{tab}}",
+        "watch": "Take 之前，按顺序看各音（{{neck}}）"
       },
       "pedal": {
         "title": "一个脚踏开关",
@@ -182,7 +183,7 @@
       "inputNone": "未设置",
       "alwaysOnTop": "总在最前",
       "start": "前往今天",
-      "tour": "带我逛一圈（30 秒）",
+      "tour": "逛逛工具（30 秒）",
       "moreOnToday": "「今天」里还有 {{count}} 项",
       "subtitleNext": "你的下一节课已在「今天」准备好。可以在这里修改，也可以稍后在设置中修改。",
       "nextSession": "你的下一节课"
@@ -259,7 +260,7 @@
     },
     "help": {
       "title": "帮助",
-      "takeTour": "看看导览",
+      "takeTour": "逛逛工具",
       "runSetup": "重新运行设置",
       "shortcuts": "键盘快捷键",
       "sendFeedback": "发送反馈",

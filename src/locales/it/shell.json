@@ -58,8 +58,8 @@
       "shortcut": "Premi {{shortcut}} per aprire e chiudere questo pannello."
     },
     "history": {
-      "title": "Ancora nessuna sessione.",
-      "hint": "Le tue sessioni compaiono qui quando fermi il metronomo."
+      "title": "Ancora niente qui.",
+      "hint": "Ogni volta che premi Termina o fermi il metronomo, compare qui. Le tue sessioni di Oggi sono in Progressi."
     },
     "drill": {
       "linear": "Lineare: il tempo sale dal BPM iniziale all'obiettivo, un passo alla volta.",

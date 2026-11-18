@@ -113,6 +113,36 @@ for (const [where, size] of [
   });
 }
 
+// Acceptance 4, P2-1: in a real browser the menu opens hidden while it is
+// placed, and a hidden button refuses focus, so the keyboard stayed on Swap.
+test("Today's Swap by keyboard: focus goes in, arrows move, Tab stays in, Escape hands it back", async ({ page }) => {
+  test.slow();
+  await openShot(page, "today-returning", DESKTOP);
+  await settleAnimations(page);
+  const swap = page.locator('[data-testid="today-swap-1"]');
+  await swap.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByTestId("swap-menu")).toBeVisible();
+  const focused = () => page.evaluate(() => document.activeElement?.getAttribute("data-testid") ?? null);
+  const enabled = await page.locator(".session-swap-choice:not(:disabled)").evaluateAll((els) => els.map((e) => e.getAttribute("data-testid")));
+  expect(enabled.length).toBeGreaterThan(1);
+  await expect.poll(focused).toBe(enabled[0]);
+  await page.keyboard.press("ArrowDown");
+  expect(await focused()).toBe(enabled[1]);
+  await page.keyboard.press("ArrowUp");
+  expect(await focused()).toBe(enabled[0]);
+  // Tab walks the menu's buttons and wraps, never leaving it.
+  const inside = await page.locator(".session-swap-menu button:not(:disabled)").count();
+  for (let i = 0; i < inside + 1; i++) {
+    await page.keyboard.press("Tab");
+    expect(await page.evaluate(() => !!document.activeElement?.closest(".session-swap-menu"))).toBe(true);
+  }
+  await shot(page, "menu-keyboard");
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("swap-menu")).toHaveCount(0);
+  expect(await focused()).toBe("today-swap-1");
+});
+
 test.describe("on a phone", () => {
   test.use({ baseURL: MOBILE_URL, isMobile: true, hasTouch: true });
 test("Today's Swap on a 390x844 phone: 44 px targets, the menu fits the screen", async ({ page }) => {

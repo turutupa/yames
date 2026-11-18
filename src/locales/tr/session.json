@@ -145,7 +145,11 @@
         "another": "Başkasını göster",
         "cancel": "Vazgeç",
         "undo": "{{title}} geri al",
-        "swapped": "Değiştirildi"
+        "swapped": "Değiştirildi",
+        "tempo": {
+          "busier": "{{bpm}} BPM, ama vuruş başına daha çok nota: buradaki {{was}} BPM’den daha yoğun.",
+          "startsSlow": "{{bpm}} BPM’den başlar, buradaki {{was}}’ın altında: yeni bir egzersiz yavaş başlar, temiz çaldıkça hızlanır."
+        }
       }
     },
     "why": {
@@ -565,7 +569,8 @@
       "next": "sonra · {{where}}",
       "barBeat": "ölçü {{n}}, vuruş {{beat}}",
       "barBeats": "ölçü {{n}}, vuruşlar {{from}}–{{to}}",
-      "pausedHere": "burada duraklatıldı · {{where}}"
+      "pausedHere": "burada duraklatıldı · {{where}}",
+      "barAgain": "yine {{n}}. ölçü"
     },
     "leave": {
       "title": "Bu oturumdan çıkılsın mı?",
@@ -610,7 +615,9 @@
         "noAnswer": "Giriş yanıt vermedi. Açık bir izin penceresi varsa yanıtla, sonra Başla'ya yeniden bas.",
         "busy": "Girişini başka bir uygulama kullanıyor. Onu kapat, sonra Başla'ya yeniden bas.",
         "other": "Giriş başlamadı. Kontrol et ya da başka birini seç."
-      }
+      },
+      "gradingOff": "Değerlendirme kapalı",
+      "turnOnGrading": "Değerlendirmeyi aç"
     },
     "ungraded": {
       "ready": "Değerlendirilmiyor: giriş kapalı, bu oturumda dinlemiyorum.",

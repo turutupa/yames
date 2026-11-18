@@ -58,8 +58,8 @@
       "shortcut": "Mit {{shortcut}} öffnest und schließt du dieses Panel."
     },
     "history": {
-      "title": "Noch keine Sessions.",
-      "hint": "Deine Sessions erscheinen hier, sobald du das Metronom stoppst."
+      "title": "Noch nichts hier.",
+      "hint": "Jedes Mal, wenn du auf Beenden drückst oder das Metronom stoppst, erscheint es hier. Deine Sessions von „Heute“ findest du unter Fortschritt."
     },
     "drill": {
       "linear": "Linear: das Tempo steigt Schritt für Schritt vom Start-BPM zum Ziel.",

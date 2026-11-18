@@ -53,7 +53,8 @@
         "next": "Volgende stap",
         "or": "of",
         "tempo": "Sneller of langzamer, tussen takes",
-        "view": "Weergave wisselen: {{neck}}, {{runway}} of {{tab}}"
+        "view": "Weergave wisselen: {{neck}}, {{runway}} of {{tab}}",
+        "watch": "Vóór een take de noten op volgorde zien ({{neck}})"
       },
       "pedal": {
         "title": "Eén voetschakelaar",
@@ -182,7 +183,7 @@
       "inputNone": "Niet ingesteld",
       "alwaysOnTop": "Altijd op voorgrond",
       "start": "Naar Vandaag",
-      "tour": "Laat me rondkijken (30 s)",
+      "tour": "Rondleiding door de tools (30 s)",
       "moreOnToday": "+{{count}} meer op Vandaag",
       "subtitleNext": "Je volgende sessie staat klaar op Vandaag. Wijzig hier iets, of later in Instellingen.",
       "nextSession": "Je volgende sessie"
@@ -259,7 +260,7 @@
     },
     "help": {
       "title": "Help",
-      "takeTour": "Rondleiding starten",
+      "takeTour": "Rondleiding door de tools",
       "runSetup": "Setup opnieuw doorlopen",
       "shortcuts": "Sneltoetsen",
       "sendFeedback": "Feedback sturen",

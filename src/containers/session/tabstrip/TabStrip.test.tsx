@@ -96,6 +96,14 @@ describe("TabStrip", () => {
     expect(Math.max(...ids)).toBeLessThan(10 * 8);
   });
 
+  // Acceptance 4, P2-11: "now · bar 2 … bar 1" read backwards.
+  it("says the pattern starts over: next · bar 1 again", () => {
+    const { container } = render(
+      <TabStrip notes={lick} barTicks={BAR} patternBars={2} takeBars={10} position={5 * BAR + 10} playing={false} mode="follow" />,
+    );
+    expect(seg(container, "next")!.querySelector(".tabstrip-label")?.textContent).toBe("next · bar 1 again");
+  });
+
   it("colours played notes by their result", () => {
     const results = new Map<number, TabResult>([
       [0, "good"],

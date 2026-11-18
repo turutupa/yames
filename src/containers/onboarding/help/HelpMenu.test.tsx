@@ -34,7 +34,7 @@ describe("HelpMenu — items by feature availability", () => {
         onReportProblem={async () => "/tmp/logs.json"}
       />,
     );
-    expect(screen.getByRole("button", { name: /take the tour/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /tour the tools/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /run setup again/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /keyboard shortcuts/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /report a problem/i })).toBeInTheDocument();
@@ -43,14 +43,14 @@ describe("HelpMenu — items by feature availability", () => {
 
   it("hides the tour item when the tour is not mounted", () => {
     render(<HelpMenu {...base} onRunSetupAgain={() => {}} />);
-    expect(screen.queryByRole("button", { name: /take the tour/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /tour the tools/i })).toBeNull();
     expect(screen.getByRole("button", { name: /run setup again/i })).toBeInTheDocument();
   });
 
   it("hides the setup item when the wizard is not mounted", () => {
     render(<HelpMenu {...base} onTakeTour={() => {}} />);
     expect(screen.queryByRole("button", { name: /run setup again/i })).toBeNull();
-    expect(screen.getByRole("button", { name: /take the tour/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /tour the tools/i })).toBeInTheDocument();
   });
 
   it("Send feedback closes the menu and hands off, and is hidden when not wired", () => {
@@ -88,7 +88,7 @@ describe("HelpMenu — actions", () => {
     const onTakeTour = vi.fn();
     const onClose = vi.fn();
     render(<HelpMenu {...base} onClose={onClose} onTakeTour={onTakeTour} />);
-    await user.click(screen.getByRole("button", { name: /take the tour/i }));
+    await user.click(screen.getByRole("button", { name: /tour the tools/i }));
     expect(onClose).toHaveBeenCalled();
     expect(onTakeTour).toHaveBeenCalled();
   });

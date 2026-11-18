@@ -53,7 +53,8 @@
         "next": "Nächster Schritt",
         "or": "oder",
         "tempo": "Schneller oder langsamer, zwischen Takes",
-        "view": "Ansicht wechseln: {{neck}}, {{runway}} oder {{tab}}"
+        "view": "Ansicht wechseln: {{neck}}, {{runway}} oder {{tab}}",
+        "watch": "Vor einem Take die Töne der Reihe nach sehen ({{neck}})"
       },
       "pedal": {
         "title": "Ein Fußschalter",
@@ -182,7 +183,7 @@
       "inputNone": "Nicht eingerichtet",
       "alwaysOnTop": "Immer im Vordergrund",
       "start": "Weiter zu Heute",
-      "tour": "Kurze Tour (30 s)",
+      "tour": "Tour durch die Werkzeuge (30 s)",
       "moreOnToday": "+{{count}} weitere unter Heute",
       "subtitleNext": "Deine nächste Session wartet unter Heute. Ändere hier etwas – oder später in den Einstellungen.",
       "nextSession": "Deine nächste Session"
@@ -259,7 +260,7 @@
     },
     "help": {
       "title": "Hilfe",
-      "takeTour": "Rundgang starten",
+      "takeTour": "Tour durch die Werkzeuge",
       "runSetup": "Einrichtung erneut starten",
       "shortcuts": "Tastenkürzel",
       "sendFeedback": "Feedback senden",

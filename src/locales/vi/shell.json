@@ -58,8 +58,8 @@
       "shortcut": "Nhấn {{shortcut}} để mở và đóng bảng này."
     },
     "history": {
-      "title": "Chưa có buổi tập nào.",
-      "hint": "Các buổi tập sẽ hiện ở đây sau khi bạn dừng máy đếm nhịp."
+      "title": "Chưa có gì ở đây.",
+      "hint": "Mỗi lần bạn nhấn Kết thúc hoặc dừng máy đếm nhịp, nó sẽ hiện ở đây. Các buổi tập từ Hôm nay nằm trong Tiến bộ."
     },
     "drill": {
       "linear": "Tuyến tính: nhịp độ tăng dần từ BPM đầu đến mục tiêu, từng bậc một.",

@@ -9,6 +9,7 @@ import {
   avoidSet,
   dayKey,
   forgetSwap,
+  harderTempoNote,
   readSwapMemory,
   rememberSwap,
   swapMemoryOn,
@@ -261,5 +262,39 @@ describe("remembering swaps", () => {
     const nextFocus = next.steps.find((s) => s.id === "focus") as ExStep;
     expect(nextFocus.exerciseId).not.toBe((base.steps[focusAt] as ExStep).exerciseId);
     expect(total(next)).toBe(total(base));
+  });
+});
+
+// Acceptance 4, P2-5: Harder offered 60 BPM for an 80 BPM block and said nothing.
+describe("Harder's tempo note", () => {
+  it("says nothing when the tempo is the same or higher", () => {
+    for (const c of swapOptions(plan, focusAt, "harder", ctx).candidates) {
+      const note = harderTempoNote(focus, c, ctx.allPaths);
+      if ((c as ExStep).bpm >= focus.bpm) expect(note).toBeNull();
+    }
+    expect(harderTempoNote(focus, { ...focus, bpm: focus.bpm + 10 }, ctx.allPaths)).toBeNull();
+  });
+
+  it("explains a lower tempo: busier at more notes a beat, else a new Exercise starting slow", () => {
+    const slower = { ...focus, bpm: focus.bpm - 20 };
+    expect(harderTempoNote(focus, slower, ctx.allPaths)).toEqual({
+      key: "startsSlow",
+      values: { bpm: focus.bpm - 20, was: focus.bpm },
+    });
+    // The same Exercise at half the tempo with a rate check that cannot be made: still explained.
+    const unknown = { ...slower, pathId: "nowhere" } as PlanStep;
+    expect(harderTempoNote(focus, unknown, ctx.allPaths)?.key).toBe("startsSlow");
+    // A candidate whose notes come faster at its lower tempo is busier.
+    const own = notesPerSecond(exerciseOf([ALT], ALT.id, focus.exerciseId), focus.bpm)!;
+    const busy = ALT.steps
+      .flatMap((s) => s.exercises)
+      .find((e) => {
+        const r = notesPerSecond(e, focus.bpm - 10);
+        return r !== null && r > own;
+      });
+    if (busy) {
+      const step = { ...focus, exerciseId: busy.id, bpm: focus.bpm - 10 } as PlanStep;
+      expect(harderTempoNote(focus, step, ctx.allPaths)?.key).toBe("busier");
+    }
   });
 });

@@ -146,7 +146,11 @@
         "another": "En voir un autre",
         "cancel": "Annuler",
         "undo": "Remettre {{title}}",
-        "swapped": "Échangé"
+        "swapped": "Échangé",
+        "tempo": {
+          "busier": "{{bpm}} BPM, mais plus de notes par temps : plus dense que {{was}} BPM ici.",
+          "startsSlow": "Il commence à {{bpm}} BPM, sous les {{was}} d’ici : un nouvel exercice commence lentement et monte quand tu le joues proprement."
+        }
       }
     },
     "why": {
@@ -578,7 +582,8 @@
       "next": "ensuite · {{where}}",
       "barBeat": "mesure {{n}}, temps {{beat}}",
       "barBeats": "mesure {{n}}, temps {{from}}–{{to}}",
-      "pausedHere": "en pause ici · {{where}}"
+      "pausedHere": "en pause ici · {{where}}",
+      "barAgain": "mesure {{n}} à nouveau"
     },
     "leave": {
       "title": "Quitter cette séance ?",
@@ -623,7 +628,9 @@
         "noAnswer": "L'entrée n'a pas répondu. Si une demande d'autorisation est ouverte, répondez-y, puis appuyez de nouveau sur Commencer.",
         "busy": "Une autre app utilise votre entrée. Fermez-la, puis appuyez de nouveau sur Commencer.",
         "other": "Votre entrée n'a pas démarré. Vérifiez-la ou choisissez-en une autre."
-      }
+      },
+      "gradingOff": "Évaluation désactivée",
+      "turnOnGrading": "Activer l’évaluation"
     },
     "ungraded": {
       "ready": "Non évalué : l'entrée est coupée, je n'écoute pas pendant cette séance.",

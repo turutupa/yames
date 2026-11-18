@@ -145,7 +145,11 @@
         "another": "Etwas anderes zeigen",
         "cancel": "Abbrechen",
         "undo": "{{title}} zurückholen",
-        "swapped": "Getauscht"
+        "swapped": "Getauscht",
+        "tempo": {
+          "busier": "{{bpm}} BPM, aber mehr Noten pro Schlag: dichter als {{was}} BPM hier.",
+          "startsSlow": "Es beginnt bei {{bpm}} BPM, unter den {{was}} hier: Eine neue Übung beginnt langsam und steigt, sobald du sie sauber spielst."
+        }
       }
     },
     "why": {
@@ -565,7 +569,8 @@
       "next": "danach · {{where}}",
       "barBeat": "Takt {{n}}, Schlag {{beat}}",
       "barBeats": "Takt {{n}}, Schläge {{from}}–{{to}}",
-      "pausedHere": "hier pausiert · {{where}}"
+      "pausedHere": "hier pausiert · {{where}}",
+      "barAgain": "wieder Takt {{n}}"
     },
     "leave": {
       "title": "Diese Session verlassen?",
@@ -610,7 +615,9 @@
         "noAnswer": "Der Eingang hat nicht geantwortet. Ist eine Berechtigungsabfrage offen, beantworte sie und drück dann noch einmal Start.",
         "busy": "Eine andere App benutzt deinen Eingang. Schließ sie und drück dann noch einmal Start.",
         "other": "Dein Eingang ließ sich nicht starten. Prüf ihn oder wähle einen anderen."
-      }
+      },
+      "gradingOff": "Bewertung aus",
+      "turnOnGrading": "Bewertung einschalten"
     },
     "ungraded": {
       "ready": "Nicht bewertet: Der Eingang ist aus, ich höre in dieser Session nicht zu.",

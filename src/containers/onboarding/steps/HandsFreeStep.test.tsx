@@ -126,6 +126,8 @@ describe("W3 — the Session leads", () => {
     expect(keysOn(card, "Pause / resume")).toEqual(keysFor("session-pause"));
     expect(keysOn(card, "Restart the Take")).toEqual(keysFor("session-restart"));
     expect(keysOn(card, "Switch view: Neck, Runway or Tab")).toEqual(keysFor("session-view"));
+    // Watch, where the neck is met (acceptance 4, P2-6).
+    expect(keysOn(card, "Watch the notes light up in order on the Neck, before a Take")).toEqual(keysFor("session-watch"));
     expect(keysOn(card, "Leave the Session")).toEqual(keysFor("session-exit"));
     expect(within(card).getByText("Every key is remappable in Settings → Hotkeys.")).toBeInTheDocument();
   });

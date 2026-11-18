@@ -53,7 +53,8 @@
         "next": "Bước tiếp theo",
         "or": "hoặc",
         "tempo": "Nhanh hơn hoặc chậm hơn, giữa các lượt",
-        "view": "Đổi chế độ xem: {{neck}}, {{runway}} hoặc {{tab}}"
+        "view": "Đổi chế độ xem: {{neck}}, {{runway}} hoặc {{tab}}",
+        "watch": "Trước một lượt, xem các nốt theo thứ tự ({{neck}})"
       },
       "pedal": {
         "title": "Một bàn đạp",
@@ -182,7 +183,7 @@
       "inputNone": "Chưa thiết lập",
       "alwaysOnTop": "Luôn ở trên cùng",
       "start": "Đến Hôm nay",
-      "tour": "Giới thiệu nhanh (30 giây)",
+      "tour": "Xem nhanh các công cụ (30 giây)",
       "moreOnToday": "Thêm {{count}} mục ở Hôm nay",
       "subtitleNext": "Buổi tập tiếp theo đã sẵn sàng ở Hôm nay. Thay đổi tại đây, hoặc sau này trong Cài đặt.",
       "nextSession": "Buổi tập tiếp theo của bạn"
@@ -259,7 +260,7 @@
     },
     "help": {
       "title": "Trợ giúp",
-      "takeTour": "Xem hướng dẫn nhanh",
+      "takeTour": "Xem nhanh các công cụ",
       "runSetup": "Chạy lại phần thiết lập",
       "shortcuts": "Phím tắt",
       "sendFeedback": "Gửi góp ý",

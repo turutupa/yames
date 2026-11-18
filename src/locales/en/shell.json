@@ -58,8 +58,8 @@
       "shortcut": "Press {{shortcut}} to open and close this panel."
     },
     "history": {
-      "title": "No sessions yet.",
-      "hint": "Your sessions show up here after you stop the metronome."
+      "title": "Nothing here yet.",
+      "hint": "Each time you press End or stop the metronome, it shows up here. Your Sessions from Today are in Progress."
     },
     "drill": {
       "linear": "Linear: the tempo climbs from the start BPM to the target, one step at a time.",

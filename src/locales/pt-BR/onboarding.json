@@ -53,7 +53,8 @@
         "next": "Próximo passo",
         "or": "ou",
         "tempo": "Mais rápido ou mais lento, entre takes",
-        "view": "Trocar vista: {{neck}}, {{runway}} ou {{tab}}"
+        "view": "Trocar vista: {{neck}}, {{runway}} ou {{tab}}",
+        "watch": "Antes de um take, ver as notas em ordem ({{neck}})"
       },
       "pedal": {
         "title": "Um pedal só",
@@ -182,7 +183,7 @@
       "inputNone": "Não configurada",
       "alwaysOnTop": "Sempre visível",
       "start": "Ir para Hoje",
-      "tour": "Me mostre o app (30 s)",
+      "tour": "Tour pelas ferramentas (30 s)",
       "moreOnToday": "+{{count}} em Hoje",
       "subtitleNext": "Sua próxima sessão está pronta em Hoje. Mude o que quiser aqui, ou depois em Configurações.",
       "nextSession": "Sua próxima sessão"
@@ -259,7 +260,7 @@
     },
     "help": {
       "title": "Ajuda",
-      "takeTour": "Fazer o tour",
+      "takeTour": "Tour pelas ferramentas",
       "runSetup": "Refazer a configuração",
       "shortcuts": "Atalhos de teclado",
       "sendFeedback": "Enviar feedback",

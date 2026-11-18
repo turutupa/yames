@@ -46,9 +46,9 @@ exports[`session history empty state > says where sessions come from 1`] = `
   <p
     class="coach-card-empty-text"
   >
-    No sessions yet.
+    Nothing here yet.
     <br />
-    Your sessions show up here after you stop the metronome.
+    Each time you press End or stop the metronome, it shows up here. Your Sessions from Today are in Progress.
   </p>
 </div>
 `;

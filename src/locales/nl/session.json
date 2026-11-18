@@ -145,7 +145,11 @@
         "another": "Toon een andere",
         "cancel": "Annuleren",
         "undo": "{{title}} terugzetten",
-        "swapped": "Gewisseld"
+        "swapped": "Gewisseld",
+        "tempo": {
+          "busier": "{{bpm}} BPM, maar meer noten per tel: drukker dan {{was}} BPM hier.",
+          "startsSlow": "Het begint op {{bpm}} BPM, onder de {{was}} hier: een nieuwe oefening begint langzaam en klimt zodra je hem schoon speelt."
+        }
       }
     },
     "why": {
@@ -565,7 +569,8 @@
       "next": "hierna · {{where}}",
       "barBeat": "maat {{n}}, tel {{beat}}",
       "barBeats": "maat {{n}}, tellen {{from}}–{{to}}",
-      "pausedHere": "hier gepauzeerd · {{where}}"
+      "pausedHere": "hier gepauzeerd · {{where}}",
+      "barAgain": "weer maat {{n}}"
     },
     "leave": {
       "title": "Deze sessie verlaten?",
@@ -610,7 +615,9 @@
         "noAnswer": "De ingang gaf geen antwoord. Staat er een toestemmingsvraag open, beantwoord die en druk dan opnieuw op Start.",
         "busy": "Een andere app gebruikt je ingang. Sluit die en druk dan opnieuw op Start.",
         "other": "Je ingang wilde niet starten. Controleer hem of kies een andere."
-      }
+      },
+      "gradingOff": "Beoordeling uit",
+      "turnOnGrading": "Beoordeling aanzetten"
     },
     "ungraded": {
       "ready": "Niet beoordeeld: de ingang staat uit, dus ik luister deze sessie niet.",

@@ -334,7 +334,10 @@ describe("the shared keys", () => {
     ["]", { beat: "sub-next", setlist: "sub-next", drill: "sub-next", jam: "sub-next", songs: "songs-loop-end" }],
     ["L", { jam: "jam-loop-section", songs: "songs-loop" }],
     ["R", { jam: "jam-take", songs: "songs-take" }],
-    ["C", { beat: "toggle-coach", drill: "toggle-coach", jam: "jam-camera", songs: "songs-camera" }],
+    // C is the coach's on every tab since acceptance 4 (it was the camera's in
+    // Jam and Songs, which left the coach unreachable there); the camera is ⇧R.
+    ["C", { beat: "toggle-coach", drill: "toggle-coach", jam: "toggle-coach", songs: "toggle-coach" }],
+    ["⇧R", { jam: "jam-camera", songs: "songs-camera" }],
     ["Space", { beat: "play", setlist: "play", drill: "play", jam: "play", songs: "play" }],
   ];
 

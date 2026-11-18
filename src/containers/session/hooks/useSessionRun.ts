@@ -1537,12 +1537,18 @@ export function useSessionRun(input: SessionRunInput) {
     if (runRef.current.phase === "ready") autoStart.current = true;
   }, []);
 
-  /** "Turn on input": graded again from the next Take, with the input asked for now. */
+  /**
+   * "Turn on input": graded again from the next Take, with the input asked for
+   * now. Not graded because grading is off in Settings, the same press turns
+   * grading back on there too (acceptance 4, P2-4): the input was never the
+   * cause.
+   */
   const gradeAgain = useCallback(() => {
+    if (runRef.current.ungraded === "gradingOff") setGrade(true);
     dispatch({ type: "setUngraded", why: null });
     autoInputFailed.current = false;
     if (!latest.current.listening) void startInputNow();
-  }, [startInputNow]);
+  }, [startInputNow, setGrade]);
 
   /**
    * To a block of the bar, or Previous (owner, 2026-11-18). From a ready

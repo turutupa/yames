@@ -92,6 +92,12 @@ export type TabStripProps = {
   className?: string;
 };
 
+/** Does segment `segment` begin the pattern again (a pass after the first)? */
+export function startsPass(model: Pick<PatternModel, "barTicks" | "patternBars">, segment: number, segTicks: number): boolean {
+  const start = segment * segTicks;
+  return segment > 0 && start % (model.barTicks * model.patternBars) === 0;
+}
+
 /** Ticks a note stays current after it is due: a thirty-second of a bar. */
 const graceOf = (m: PatternModel) => m.barTicks / 32;
 
@@ -423,10 +429,17 @@ export function TabStrip({
    * `px` the label's font size; the words are measured at about 0.56 em a
    * character, with the "now · " or "next · " they are put in.
    */
-  const fitPlace = (where: { bar: number; fromBeat: number; toBeat: number; whole: boolean }, room: number, px: number, rel: "now" | "next" | "other") => {
+  const fitPlace = (
+    where: { bar: number; fromBeat: number; toBeat: number; whole: boolean },
+    room: number,
+    px: number,
+    rel: "now" | "next" | "other",
+    again = false,
+  ) => {
     const wrap = (w: string) => (rel === "now" ? t("session.tabstrip.now", { where: w }) : rel === "next" ? t("session.tabstrip.next", { where: w }) : w);
     const fits = (text: string) => text.length * px * 0.56 <= room - 14;
-    for (const w of [place(where), t("session.tabstrip.bar", { n: where.bar }), String(where.bar)]) {
+    const first = again ? t("session.tabstrip.barAgain", { n: where.bar }) : place(where);
+    for (const w of [first, t("session.tabstrip.bar", { n: where.bar }), String(where.bar)]) {
       if (fits(wrap(w))) return wrap(w);
     }
     return wrap(String(where.bar));
@@ -658,7 +671,15 @@ export function TabStrip({
                   geo={geo}
                   notes={segmentNotes(model, s, fl.segTicks, takeBars)}
                   rel={rel}
-                  label={s > page ? t("session.tabstrip.bar", { n: segmentPlace(model, s, fl.segTicks).bar }) : ""}
+                  // The pattern starting over reads "bar 1 again", not a bar 1
+                  // after bar 2 (acceptance 4, P2-11).
+                  label={
+                    s > page
+                      ? t(startsPass(model, s, fl.segTicks) ? "session.tabstrip.barAgain" : "session.tabstrip.bar", {
+                          n: segmentPlace(model, s, fl.segTicks).bar,
+                        })
+                      : ""
+                  }
                   left={s * fl.segWidth}
                 />
               );
@@ -708,7 +729,7 @@ export function TabStrip({
                   rel={rel}
                   label={
                     rel === "now" || rel === "next"
-                      ? fitPlace(spot, fl.segWidth, labelPx, rel)
+                      ? fitPlace(spot, fl.segWidth, labelPx, rel, rel === "next" && startsPass(model, s, fl.segTicks))
                       : where
                   }
                   left={(s - page) * fl.segWidth}

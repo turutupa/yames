@@ -13,7 +13,7 @@ import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { PathDoc } from "../../paths/format";
 import type { PlanStep } from "../../session/planner";
-import { SWAP_CHOICES } from "../../session/swap";
+import { SWAP_CHOICES, harderTempoNote } from "../../session/swap";
 import type { SwapChoice, SwapOptions } from "../../session/swap";
 import { lineText } from "./lineText";
 import { bpmLine, pathTitleOf, shortReason } from "./todayPlan";
@@ -157,12 +157,17 @@ export function SwapMenu({
     return () => document.removeEventListener("pointerdown", down, true);
   }, [anchor, onClose]);
 
-  // Focus the first thing to press, each time the view changes.
+  // Focus the first thing to press, each time the view changes, once the menu
+  // is placed: until then it is `visibility: hidden`, and a hidden button
+  // refuses focus, which left it on Swap with the arrows and Tab going nowhere
+  // (acceptance 4, P2-1).
+  const placed = pos !== null;
   useEffect(() => {
+    if (!placed) return;
     const first = menuRef.current?.querySelector<HTMLElement>("[data-autofocus]:not(:disabled)")
       ?? menuRef.current?.querySelector<HTMLElement>("button:not(:disabled)");
     first?.focus();
-  }, [view]);
+  }, [view, placed]);
 
   const onKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
     e.stopPropagation();
@@ -200,15 +205,16 @@ export function SwapMenu({
     const candidate = list[view.at % list.length];
     const bpm = bpmLine(candidate);
     const pathTitle = pathTitleOf(candidate, paths);
+    // Harder is never quietly slower: a tempo under the block's says why.
+    const tempoNote = view.choice === "harder" ? harderTempoNote(step, candidate, paths) : null;
     body = (
       <div className="session-swap-preview" data-testid="swap-preview">
         <div className="session-swap-head">
           <span className="session-kick">{choiceLabel(view.choice)}</span>
-          {list.length > 1 && (
-            <span className="session-swap-count">
-              {t("session.today.swap.count", { n: (view.at % list.length) + 1, count: list.length })}
-            </span>
-          )}
+          {/* Always, "1 of 1" too: every choice reads the same way (acceptance 4). */}
+          <span className="session-swap-count" data-testid="swap-count">
+            {t("session.today.swap.count", { n: (view.at % list.length) + 1, count: list.length })}
+          </span>
         </div>
         <div className="session-swap-name" data-testid="swap-preview-title">
           {candidate.title}
@@ -219,6 +225,11 @@ export function SwapMenu({
           <span>{t("session.today.minutes", { minutes: candidate.minutes })}</span>
         </div>
         <p className="session-why session-swap-why">{lineText(t, shortReason(candidate))}</p>
+        {tempoNote && (
+          <p className="session-why session-swap-tempo" data-testid="swap-tempo-note">
+            {t(`session.today.swap.tempo.${tempoNote.key}`, tempoNote.values)}
+          </p>
+        )}
         <div className="session-swap-actions">
           <button
             type="button"

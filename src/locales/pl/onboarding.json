@@ -53,7 +53,8 @@
         "next": "Następny krok",
         "or": "lub",
         "tempo": "Szybciej lub wolniej, między podejściami",
-        "view": "Zmień widok: {{neck}}, {{runway}} lub {{tab}}"
+        "view": "Zmień widok: {{neck}}, {{runway}} lub {{tab}}",
+        "watch": "Przed nagraniem zobacz dźwięki po kolei ({{neck}})"
       },
       "pedal": {
         "title": "Jeden przełącznik nożny",
@@ -182,7 +183,7 @@
       "inputNone": "Nie skonfigurowano",
       "alwaysOnTop": "Zawsze na wierzchu",
       "start": "Przejdź do Dzisiaj",
-      "tour": "Oprowadź mnie (30 s)",
+      "tour": "Przewodnik po narzędziach (30 s)",
       "moreOnToday": "+{{count}} więcej w Dzisiaj",
       "subtitleNext": "Twoja następna sesja czeka w Dzisiaj. Zmień coś tutaj albo później w Ustawieniach.",
       "nextSession": "Twoja następna sesja"
@@ -259,7 +260,7 @@
     },
     "help": {
       "title": "Pomoc",
-      "takeTour": "Zobacz przewodnik",
+      "takeTour": "Przewodnik po narzędziach",
       "runSetup": "Uruchom konfigurację ponownie",
       "shortcuts": "Skróty klawiszowe",
       "sendFeedback": "Wyślij opinię",

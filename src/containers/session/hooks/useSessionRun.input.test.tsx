@@ -130,4 +130,18 @@ describe("useSessionRun — the input at a Take's ready screen", () => {
     expect(h.result.current.inputStart.status).toBe("idle");
     expect(startInput).toHaveBeenCalledTimes(1);
   });
+
+  // Acceptance 4, P2-4: with grading off in Settings the chip's press turns
+  // grading on, not only the input.
+  it("grading off in Settings: the Session is not graded, and the chip's press turns grading back on", async () => {
+    const startInput = vi.fn(() => Promise.resolve({ device: null, fellBack: false }));
+    const h = mount(startInput);
+    await waitFor(() => expect(h.result.current.paths.length).toBeGreaterThan(0));
+    act(() => h.result.current.setGrade(false));
+    await playOne(h);
+    expect(h.result.current.run.ungraded).toBe("gradingOff");
+    act(() => h.result.current.actions.gradeAgain());
+    expect(h.result.current.grade).toBe(true);
+    expect(h.result.current.run.ungraded).toBeNull();
+  });
 });

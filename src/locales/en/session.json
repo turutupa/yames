@@ -145,7 +145,11 @@
         "another": "Show another",
         "cancel": "Cancel",
         "undo": "Put back {{title}}",
-        "swapped": "Swapped in"
+        "swapped": "Swapped in",
+        "tempo": {
+          "busier": "{{bpm}} BPM, but more notes to each beat: busier than {{was}} BPM here.",
+          "startsSlow": "It starts at {{bpm}} BPM, under the {{was}} here: a new exercise starts slow and climbs as you play it clean."
+        }
       }
     },
     "why": {
@@ -565,7 +569,8 @@
       "next": "next · {{where}}",
       "barBeat": "bar {{n}}, beat {{beat}}",
       "barBeats": "bar {{n}}, beats {{from}}–{{to}}",
-      "pausedHere": "paused here · {{where}}"
+      "pausedHere": "paused here · {{where}}",
+      "barAgain": "bar {{n}} again"
     },
     "leave": {
       "title": "Leave this Session?",
@@ -610,7 +615,9 @@
         "noAnswer": "The input didn't answer. If a permission prompt is open, answer it, then press Start again.",
         "busy": "Another app is using your input. Close it, then press Start again.",
         "other": "Your input wouldn't start. Check it, or choose another one."
-      }
+      },
+      "gradingOff": "Grading off",
+      "turnOnGrading": "Turn on grading"
     },
     "ungraded": {
       "ready": "Not graded: the input is off, so I'm not listening this Session.",

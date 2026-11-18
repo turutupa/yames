@@ -58,8 +58,8 @@
       "shortcut": "Bu paneli açıp kapatmak için {{shortcut}} tuşuna basın."
     },
     "history": {
-      "title": "Henüz seans yok.",
-      "hint": "Metronomu durdurduğunuzda seanslarınız burada görünür."
+      "title": "Henüz burada bir şey yok.",
+      "hint": "Her Bitir’e bastığında ya da metronomu durdurduğunda burada görünür. Bugün’deki seansların İlerleme’de."
     },
     "drill": {
       "linear": "Doğrusal: tempo başlangıç BPM'inden hedefe adım adım yükselir.",

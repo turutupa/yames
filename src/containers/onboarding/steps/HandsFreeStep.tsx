@@ -48,6 +48,8 @@ const SESSION_ROWS: Array<{ key: string; actions: HotkeyAction[]; label: string 
   { key: "prev", actions: ["session-prev"], label: "settings.hotkeys.actions.session-prev" },
   { key: "tempo", actions: ["session-faster", "session-slower"], label: "onboarding.handsFree.session.tempo" },
   { key: "view", actions: ["session-view"], label: "onboarding.handsFree.session.view" },
+  // Where the neck is met, so is Watch (acceptance 4, P2-6).
+  { key: "watch", actions: ["session-watch"], label: "onboarding.handsFree.session.watch" },
   { key: "exit", actions: ["session-exit"], label: "settings.hotkeys.actions.session-exit" },
 ];
 

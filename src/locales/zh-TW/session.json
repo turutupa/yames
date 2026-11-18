@@ -145,7 +145,11 @@
         "another": "再看一個",
         "cancel": "取消",
         "undo": "換回 {{title}}",
-        "swapped": "已換"
+        "swapped": "已換",
+        "tempo": {
+          "busier": "{{bpm}} BPM，但每拍音符更多：比這裡的 {{was}} BPM 更密。",
+          "startsSlow": "從 {{bpm}} BPM 開始，低於這裡的 {{was}}：新練習先慢後快，彈乾淨了就會提速。"
+        }
       }
     },
     "why": {
@@ -565,7 +569,8 @@
       "next": "接下來 · {{where}}",
       "barBeat": "第 {{n}} 小節第 {{beat}} 拍",
       "barBeats": "第 {{n}} 小節第 {{from}}–{{to}} 拍",
-      "pausedHere": "在此暫停 · {{where}}"
+      "pausedHere": "在此暫停 · {{where}}",
+      "barAgain": "再次第 {{n}} 小節"
     },
     "leave": {
       "title": "離開這次練習？",
@@ -610,7 +615,9 @@
         "noAnswer": "輸入沒有回應。如果有權限對話框，請先回應，然後再按一次開始。",
         "busy": "另一個 App 正在使用你的輸入。請關閉它，然後再按一次開始。",
         "other": "輸入無法啟動。請檢查，或選擇其他輸入。"
-      }
+      },
+      "gradingOff": "評分已關閉",
+      "turnOnGrading": "開啟評分"
     },
     "ungraded": {
       "ready": "未評分：輸入已關閉，這次練習我不會聆聽。",

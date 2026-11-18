@@ -58,8 +58,8 @@
       "shortcut": "Aperte {{shortcut}} para abrir e fechar este painel."
     },
     "history": {
-      "title": "Ainda não há sessões.",
-      "hint": "Suas sessões aparecem aqui depois que você para o metrônomo."
+      "title": "Nada aqui ainda.",
+      "hint": "Cada vez que você toca em Encerrar ou para o metrônomo, aparece aqui. Suas sessões de Hoje ficam em Progresso."
     },
     "drill": {
       "linear": "Linear: o andamento sobe do BPM inicial até o alvo, um passo por vez.",
