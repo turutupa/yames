@@ -101,7 +101,7 @@
         "reviewDueSlipped": "Ostatnio nie wyszło, więc szczebel niżej.",
         "reviewDueLeft": "Zostało z kroku {{step}}, który jest skończony.",
         "finisher": "Z zespołem, w tempie, które już zaliczyłeś.",
-        "placement": "Łatwe podejście, potem jedno w tempie zaliczenia. Zalicz oba, a przeskoczysz krok.",
+        "placement": "Krótka wspinaczka: około 75%, 100% i 120% tempa zaliczenia, do pierwszego pudła. Zalicz w tempie zaliczenia, a przeskoczysz krok.",
         "testOut": "Jedno podejście w tempie zaliczenia. Zalicz je, a krok jest zrobiony.",
         "benchmark": "Dzień {{day}}: za każdym razem to samo podejście, do porównania.",
         "yourTurn": "Jeszcze niesprawdzane, więc oceniasz sam.",
@@ -167,10 +167,11 @@
       "skippedTodayYesterday": "{{path}} dziś odpoczywa: grane wczoraj.",
       "skippedTodayNever": "{{path}} dziś odpoczywa: jeszcze nie grane.",
       "finisher": "Na koniec: {{exercise}} z zespołem w {{bpm}} BPM, tempie już zaliczonym. Bez oceny.",
-      "placement": "Nowy tutaj? Jedno łatwe podejście w {{bpm}} BPM, potem jedno w {{pass}}. Zalicz oba, a przeskoczysz do następnego kroku.",
+      "placement": "Nowy tutaj? Krótka wspinaczka od {{bpm}} BPM przez {{pass}}, po jednym podejściu, do pierwszego pudła. Zalicz przy {{pass}}, a przejdziesz do następnego kroku.",
       "testOut": "Zalicz {{step}}: jedno podejście w tempie zaliczenia, {{bpm}} BPM.",
       "benchmark": "Punkt odniesienia, dzień {{day}}: za każdym razem to samo ćwiczenie w {{bpm}} BPM, do porównania.",
-      "yourTurn": "Twoja kolej: {{exercise}}. Jeszcze niesprawdzane, więc oceniasz sam."
+      "yourTurn": "Twoja kolej: {{exercise}}. Jeszcze niesprawdzane, więc oceniasz sam.",
+      "newFromSibling": "Nowe. Zaczyna się od {{bpm}} BPM, około 80% twojego czystego tempa {{clean}} BPM w {{sibling}}."
     },
     "bar": {
       "summary": "Poprzeczka: {{even}}% równości i {{heard}}% usłyszanych nut, przy {{bpm}} BPM."
@@ -205,7 +206,8 @@
       "listeningBack": "Odsłuch",
       "band": "Zespół",
       "bandHint": "Zespół nie jest oceniany. Przy mikrofonie ścisz go albo użyj słuchawek.",
-      "bandMicHint": "Przez mikrofon słyszałbym zespół jako twoje dźwięki, więc startuje wyciszony. W słuchawkach podgłoś go."
+      "bandMicHint": "Przez mikrofon słyszałbym zespół jako twoje dźwięki, więc startuje wyciszony. W słuchawkach podgłoś go.",
+      "skip": "Pomiń to"
     },
     "result": {
       "kick": "Podejście {{take}} · {{title}} · {{bpm}} BPM · takty: {{bars}}",
@@ -363,7 +365,7 @@
       "subscribeCap": "W tym teście możesz śledzić do {{cap}} ścieżek. Najpierw anuluj jedną; jej historia zostanie.",
       "unsubscribedNote": "Nie ma w dzisiejszym planie. Historia zostaje; subskrybuj ponownie w każdej chwili.",
       "testOut": "Zalicz krok",
-      "testOutHow": "Jedno podejście w tempie zaliczenia każdego ćwiczenia, którego jeszcze nie zaliczyłeś. Zalicz około trzech z czterech i krok jest ukończony.",
+      "testOutHow": "Jedno podejście w tempie zaliczenia każdego ćwiczenia, którego jeszcze nie zaliczyłeś. Zalicz {{need}} z {{count}} i krok jest zrobiony.",
       "testOutRetests": "Zaliczyłeś tu każde ćwiczenie, więc to sprawdzi je wszystkie ponownie: po jednym podejściu w tempie zaliczenia.",
       "levelName": {
         "beginner": "Początkujący",
@@ -459,6 +461,9 @@
       "body": "Twoje dotychczasowe podejścia są zapisane.",
       "stay": "Graj dalej",
       "leave": "Wyjdź"
+    },
+    "placement": {
+      "result": "Zaczynasz od kroku {{n}}: {{step}}"
     }
   }
 }

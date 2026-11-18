@@ -99,7 +99,7 @@
         "reviewDueSlipped": "上次没稳住，所以降一档。",
         "reviewDueLeft": "{{step}} 已完成，这是剩下的。",
         "finisher": "和乐队一起，用你已通过的速度。",
-        "placement": "先轻松练一遍，再以通过速度练一遍。两遍都通过就跳过一步。",
+        "placement": "一段短爬升：通过速度的约 75%、100% 和 120%，第一次没过就停。在通过速度上通过，就跳过一步。",
         "testOut": "以通过速度练一遍。通过了这一步就完成。",
         "benchmark": "第 {{day}} 天：每次同样的一遍，用来对比。",
         "yourTurn": "还不能检查，所以由你来判断。",
@@ -165,10 +165,11 @@
       "skippedTodayYesterday": "{{path}}今天休息：昨天练过。",
       "skippedTodayNever": "{{path}}今天休息：还没练过。",
       "finisher": "收尾：和乐队一起以 {{bpm}} BPM 演奏{{exercise}}，这是你已经通过的速度。不评分。",
-      "placement": "刚来？先以 {{bpm}} BPM 轻松练一遍，再以 {{pass}} 练一遍。两遍都通过就直接跳到下一步。",
+      "placement": "新来的？从 {{bpm}} BPM 起，经过 {{pass}} 往上爬，每档一遍，第一次没过就停。在 {{pass}} 通过，就跳到下一步。",
       "testOut": "{{step}}测试：以通过速度 {{bpm}} BPM 练一遍。",
       "benchmark": "基准测试，第{{day}}天：每次都以 {{bpm}} BPM 练同一个练习，用来对比。",
-      "yourTurn": "轮到你：{{exercise}}。暂不检查，由你自己判断。"
+      "yourTurn": "轮到你：{{exercise}}。暂不检查，由你自己判断。",
+      "newFromSibling": "新练习。从 {{bpm}} BPM 开始，约为你在“{{sibling}}”上干净速度 {{clean}} BPM 的 80%。"
     },
     "bar": {
       "summary": "及格线：{{bpm}} BPM 时均匀度 {{even}}%，听到 {{heard}}% 的音。"
@@ -203,7 +204,8 @@
       "listeningBack": "正在回听",
       "band": "乐队",
       "bandHint": "乐队不计分。用麦克风时请调小音量或戴耳机。",
-      "bandMicHint": "用麦克风时我会把乐队当成你的音，所以默认关闭。戴上耳机再调大。"
+      "bandMicHint": "用麦克风时我会把乐队当成你的音，所以默认关闭。戴上耳机再调大。",
+      "skip": "跳过这个"
     },
     "result": {
       "kick": "第 {{take}} 遍 · {{title}} · {{bpm}} BPM · {{bars}} 小节",
@@ -347,7 +349,7 @@
       "subscribeCap": "本次测试最多可订阅{{cap}}条路径。请先取消一条；它的记录会保留。",
       "unsubscribedNote": "不在今天的计划里。你的记录会保留，随时可以重新订阅。",
       "testOut": "测试跳过",
-      "testOutHow": "每个还没通过的练习以通过速度练一遍。大约四个通过三个，这一步就完成了。",
+      "testOutHow": "还没通过的每个练习，用通过速度各弹一遍。通过 {{count}} 个中的 {{need}} 个，这一步就完成了。",
       "testOutRetests": "这里的练习你都已通过，所以这次会全部重测：每个以通过速度练一遍。",
       "levelName": {
         "beginner": "初级",
@@ -443,6 +445,9 @@
       "body": "你到目前为止的录音都已保存。",
       "stay": "继续练",
       "leave": "离开"
+    },
+    "placement": {
+      "result": "你从第 {{n}} 步开始：{{step}}"
     }
   }
 }

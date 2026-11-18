@@ -247,7 +247,8 @@ describe("spaced reviews", () => {
     expect(dueReviews([ALT], passedOpen(0), NOW)).toEqual([]);
     const due = dueReviews([ALT], passedOpen(1), NOW);
     expect(due[0]).toMatchObject({ kind: "review", bpm: 100, intervalDays: 1 });
-    const s = plan(10, passedOpen(1), [ALT]);
+    // Fifteen minutes: with one Path, ten is a single long lead and no review.
+    const s = plan(15, passedOpen(1), [ALT]);
     const review = exerciseSteps(s).find((x) => x.role === "review")!;
     expect(review).toMatchObject({ exerciseId: OPEN.id, bpm: 100 });
     expect(review.why.code).toBe("reviewDue");
@@ -287,7 +288,7 @@ describe("spaced reviews", () => {
     expect(state.intervalDays).toBe(1);
     expect(state.bpm).toBe(rungBelow(OPEN, 100));
     // Due a day after the slipped review.
-    const s = plan(10, p, [ALT], NOW + DAY + 60_000);
+    const s = plan(15, p, [ALT], NOW + DAY + 60_000);
     const review = exerciseSteps(s).find((x) => x.role === "review")!;
     expect(review.bpm).toBe(rungBelow(OPEN, 100));
     expect(review.why.values.slipped).toBe(1);
@@ -418,11 +419,11 @@ describe("parking", () => {
 });
 
 describe("placement on a new Path", () => {
-  it("the first Session tries the early Steps' first Exercises: easy Take, then the pass tempo", () => {
+  it("the first Session tries the early Steps' first Exercises: a climb from about 75% of the pass tempo", () => {
     const s = plan(10, subscribed([ALT]), [ALT]);
     const lead = exerciseSteps(s).find((x) => x.role === "placement")!;
     expect(lead.exerciseId).toBe(ALT.steps[0].exercises[0].id);
-    expect(lead.bpm).toBe(gradedRungs(ALT.steps[0].exercises[0])[0]);
+    expect(lead.bpm).toBe(Math.max(...gradedRungs(ALT.steps[0].exercises[0]).filter((r) => r <= 75)));
     expect(lead.placement?.passAtBpm).toBe(100);
     expect(lead.placement?.then).toMatchObject({ exerciseId: ALT.steps[1].exercises[0].id, role: "placement" });
     expect(lead.why.code).toBe("placement");
@@ -450,6 +451,10 @@ describe("placement on a new Path", () => {
       ].reduce(runReducer, state);
     r = take(r, "passed");
     expect(bigAction(r, ex)).toEqual({ kind: "again", bpm: 100 });
+    r = runReducer(r, eventForBigAction(bigAction(r, ex), NOW)!);
+    r = take(r, "passed");
+    // Past the pass tempo: one more, at about 120% (UX audit TODAY-3).
+    expect(bigAction(r, ex)).toEqual({ kind: "again", bpm: 120 });
     r = runReducer(r, eventForBigAction(bigAction(r, ex), NOW)!);
     r = take(r, "passed");
     const next = bigAction(r, ex);

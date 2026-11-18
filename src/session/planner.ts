@@ -18,6 +18,9 @@
  * | 15      | warm-up 2, lead 5, 4, 4           | recap 3, lead 4, 4, 4            |
  * | 20      | warm-up 2, lead 6, 4, 4, last 4   | recap 3, lead 5, 4, 4, last 4    |
  *
+ * With a single Path the lead is one long block: 10 is warm-up 2, lead 8; 15 is
+ * warm-up 2, lead 9, 4; 20 is warm-up 2, lead 9, 5, last 4 (UX audit TODAY-4).
+ *
  * Across every subscribed Path (`plans/tasks/mvp/CONTENT.md`, the adopted
  * algorithm; the questions it asks of the history are in `rotation.ts`):
  *
@@ -45,7 +48,7 @@
  * (the mocks' open question 11).
  */
 import type { Exercise, PathDoc, Step } from "../paths/format";
-import { firstRung, hasRungBelow, rungAbove, rungBelow } from "./ladder";
+import { firstRung, gradedRungs, hasRungBelow, rungAbove, rungBelow } from "./ladder";
 import {
   calendarDaysBetween,
   cleanTempoOf,
@@ -95,6 +98,8 @@ const MIN_WARMUP_BPM = 40;
 export type ReasonCode =
   | "firstEver"
   | "newExercise"
+  /** New, but started from a sibling's clean tempo rather than the first rung. */
+  | "newFromSibling"
   | "newStep"
   | "belowBar"
   | "easing"
@@ -163,8 +168,13 @@ export type PlanStep =
       why: Reason;
       /** Why this Path is here today (whose turn it is), beside why this tempo. */
       context?: Reason;
-      /** Placement: passing at this tempo moves on to `then`, the next Step's try. */
-      placement?: { passAtBpm: number; then: PlanStep | null };
+      /**
+       * Placement: a climb through `ladder` (about 75%, 100% and 120% of the
+       * pass tempo), one Take each, stopping at the first miss (UX audit
+       * TODAY-3). Passing at `passAtBpm` places the player past this Step; the
+       * last rung passed moves on to `then`, the next Step's try.
+       */
+      placement?: { passAtBpm: number; ladder?: number[]; then: PlanStep | null };
       /** A benchmark Take's tag, written into its facts. */
       benchmark?: { day: number };
     }
@@ -178,6 +188,8 @@ export type PlanStep =
       /** An Exercise to play over it, shown but not graded. */
       pathId?: string;
       exerciseId?: string;
+      /** Which notes of that Exercise, when it has variants: a warm-up's change each Session. */
+      variantSeed?: number | null;
       minutes: number;
       why: Reason;
     }
@@ -247,6 +259,54 @@ function pct(value: number): number {
 
 type Tempo = { bpm: number; why: Reason };
 
+/** A new Exercise starts at this share of a sibling's clean tempo (UX audit TODAY-4). */
+export const SIBLING_START_SHARE = 0.8;
+
+/** Beats between the two closest notes: the note grid, as a number. Null: unknown. */
+function beatsPerNote(exercise: Exercise): number | null {
+  const gap = exercise.computed?.minGapMsAtTop;
+  const top = Math.max(0, ...exercise.tempo.rungs.map((r) => r.bpm));
+  return gap && top ? (gap * top) / 60_000 : null;
+}
+
+/**
+ * Where a new Exercise starts when the player is already clean on another in
+ * the same Step: about 80% of that clean tempo, as notes per second, so a
+ * sixteenth-note sibling at 100 starts an eighth-note Exercise near 160 and
+ * not at the ladder's first rung (UX audit TODAY-4: "50 BPM whatever the note
+ * grid"). The sibling is the one practised last. A graded rung at or under
+ * that, never under the first rung and never over the pass tempo. Null when
+ * there is no sibling with a clean tempo, or it would start at the first rung
+ * anyway.
+ */
+function siblingStart(
+  path: PathDoc,
+  exercise: Exercise,
+  progress: PlayerProgress,
+): { bpm: number; clean: number; title: string } | null {
+  const step = path.steps.find((s) => s.exercises.some((e) => e.id === exercise.id));
+  const own = beatsPerNote(exercise);
+  if (!step || own === null) return null;
+  const siblings = step.exercises
+    .filter((e) => e.id !== exercise.id && isGradable(e))
+    .flatMap((e) => {
+      const row = progress.ceilings.find((c) => c.exerciseKey === `${path.id}/${e.id}`);
+      const grid = beatsPerNote(e);
+      return row && grid !== null ? [{ e, clean: row.cleanBpm, at: row.lastPracticed ?? 0, grid }] : [];
+    })
+    .sort((a, b) => b.at - a.at);
+  const sibling = siblings[0];
+  if (!sibling) return null;
+  // The same notes per second on this Exercise's grid, then 80% of that.
+  const target = SIBLING_START_SHARE * sibling.clean * (own / sibling.grid);
+  const rungs = gradedRungs(exercise);
+  const passAt = exercise.tempo.passAtBpm ?? Infinity;
+  const under = rungs.filter((r) => r <= target && r <= passAt);
+  const bpm = under.length > 0 ? under[under.length - 1] : firstRung(exercise);
+  if (bpm <= firstRung(exercise)) return null;
+  return { bpm, clean: sibling.clean, title: sibling.e.title };
+}
+
 /**
  * What tempo to play an Exercise at next, from its own history.
  *
@@ -262,6 +322,16 @@ export function tempoFor(path: PathDoc, exercise: Exercise, progress: PlayerProg
   const values = { exercise: exercise.title };
 
   if (takes.length === 0) {
+    const sibling = siblingStart(path, exercise, progress);
+    if (sibling) {
+      return {
+        bpm: sibling.bpm,
+        why: {
+          code: "newFromSibling",
+          values: { ...values, bpm: sibling.bpm, clean: sibling.clean, sibling: sibling.title },
+        },
+      };
+    }
     return { bpm: firstRung(exercise), why: { code: "newExercise", values } };
   }
 
@@ -393,21 +463,54 @@ export function warmupBpm(exercise: Exercise, clean: number | null): number {
   return Math.max(MIN_WARMUP_BPM, Math.round((clean * WARMUP_SHARE) / 5) * 5);
 }
 
-function warmupStep(focus: Pick, progress: PlayerProgress, minutes: number): PlanStep {
+/**
+ * How much faster, in notes a second, a pack warm-up may be than the focus
+ * block before the focus Exercise takes its place. A little over is a warm-up;
+ * three times over (triplets at 60 before a Step at under a note a second) is
+ * the hardest thing in the Session.
+ */
+const WARMUP_HARDER_THAN = 1.25;
+
+/** Notes per second at a tempo, from the note grid; null when it is unknown. */
+function notesPerSecond(exercise: Exercise, bpm: number): number | null {
+  const grid = beatsPerNote(exercise);
+  return grid ? bpm / 60 / grid : null;
+}
+
+function warmupStep(focus: Pick, progress: PlayerProgress, minutes: number, focusBpm?: number): PlanStep {
   const { path, exercise } = focus;
-  // A pack's own warm-ups go first, in turn, so the notes change from day to
-  // day. Without them it is the focus Exercise, slower, and not graded.
+  // The focus Exercise itself at 80% of its clean tempo, once there is one: the
+  // warm-up is then the day's own material, under the speed it is played at
+  // (UX audit TODAY-5). Before that, a pack's own warm-ups, in turn so the
+  // notes change from day to day, with a variant of their own each Session.
+  const focusClean = cleanTempoOf(progress, path.id, exercise.id);
   const own = warmupsOf(path, focus.step.id);
-  const warmup = own.length > 0 ? own[progress.takes.length % own.length] : exercise;
+  const sessions = sessionCount(progress);
+  let warmup = focusClean === null && own.length > 0 ? own[sessions % own.length] : exercise;
   // A pack's warm-up says whose clean tempo it reads and what share of it to
   // start at; with no history it has a tempo of its own.
-  const plan = warmup.warmup;
-  const clean = cleanTempoOf(progress, path.id, plan?.referenceExercise ?? exercise.id);
-  const bpm = plan
+  let plan = warmup.warmup;
+  let clean = cleanTempoOf(progress, path.id, plan?.referenceExercise ?? exercise.id);
+  let bpm = plan
     ? clean === null
       ? plan.fallbackBpm
       : Math.max(MIN_WARMUP_BPM, Math.round((clean * plan.startAtCleanRatio) / 5) * 5)
     : warmupBpm(exercise, clean);
+  // A warm-up is never harder than what it warms up for: a pack warm-up that
+  // asks for more notes a second than the focus block does gives way to the
+  // focus Exercise, slower (Sweep Beginner warmed up in triplets at 60 for a
+  // Step played at under one note a second).
+  if (warmup !== exercise && focusBpm !== undefined) {
+    const warmRate = notesPerSecond(warmup, bpm);
+    const focusRate = notesPerSecond(exercise, focusBpm);
+    if (warmRate !== null && focusRate !== null && warmRate > focusRate * WARMUP_HARDER_THAN) {
+      warmup = exercise;
+      plan = undefined;
+      clean = focusClean;
+      bpm = warmupBpm(exercise, clean);
+    }
+  }
+  const variantSeed = pickVariantSeed(warmup, sessions, undefined);
   // Its own backing: a warm-up's grid need not be the focus Exercise's.
   const backing = warmup.backing.kind === "click" ? warmup.backing.subdivision : 1;
   return {
@@ -418,6 +521,7 @@ function warmupStep(focus: Pick, progress: PlayerProgress, minutes: number): Pla
     subdivision: backing,
     pathId: path.id,
     exerciseId: warmup.id,
+    ...(variantSeed === null ? {} : { variantSeed }),
     minutes,
     why:
       clean === null
@@ -522,14 +626,23 @@ const PLACEMENT_NEXT_MINUTES = 2;
  * How the chosen minutes are split. See the table at the top of this file.
  * `blocks[0]` is the focus Path's; the others are one each for the rest.
  */
-function shape(minutes: PlanMinutes, back: boolean): { warm: number; blocks: number[] } {
+function shape(minutes: PlanMinutes, back: boolean, single = false): { warm: number; blocks: number[] } {
   const table: Record<PlanMinutes, { warm: number; blocks: number[] }> = {
     5: { warm: 0, blocks: [5] },
     10: { warm: 2, blocks: [4, 4] },
     15: { warm: 2, blocks: [5, 4, 4] },
     20: { warm: 2, blocks: [6, 4, 4, 4] },
   };
-  const row = table[minutes];
+  // One Path: one long focus block (UX audit TODAY-4). Four minutes is two
+  // Takes and a breath, too short to climb to a pass; with nobody else to keep
+  // warm the time is better spent there, then a review, then the finisher.
+  const single_: Record<PlanMinutes, { warm: number; blocks: number[] }> = {
+    5: { warm: 0, blocks: [5] },
+    10: { warm: 2, blocks: [8] },
+    15: { warm: 2, blocks: [9, 4] },
+    20: { warm: 2, blocks: [9, 5, 4] },
+  };
+  const row = (single ? single_ : table)[minutes];
   // The recap takes the warm-up's place and a minute of the focus, so it is a
   // block of its own length.
   if (back && row.warm > 0) {
@@ -551,7 +664,59 @@ function openWork(path: PathDoc, progress: PlayerProgress, now: number) {
   return { list: [...fresh, ...parked], parkedHead: parked.includes(list[0]) ? list[0] : null };
 }
 
-/** Placement on a new Path: one easy Take, then one at the pass tempo, Step by Step. */
+/** The shares of the pass tempo placement climbs through, one Take each. */
+export const PLACEMENT_SHARES = [0.75, 1, 1.2] as const;
+
+/**
+ * Placement's tempos on one Exercise: the graded rung at or under 75% of the
+ * pass tempo (never under the first), the pass tempo, and the rung at or under
+ * 120% of it when the ladder goes that high. Ascending, no repeats.
+ */
+export function placementLadder(exercise: Exercise, passAt: number): number[] {
+  const rungs = gradedRungs(exercise);
+  const atOrUnder = (target: number) => {
+    const under = rungs.filter((r) => r <= target);
+    return under.length > 0 ? under[under.length - 1] : firstRung(exercise);
+  };
+  const easy = Math.min(passAt, Math.max(firstRung(exercise), atOrUnder(PLACEMENT_SHARES[0] * passAt)));
+  const high = atOrUnder(PLACEMENT_SHARES[2] * passAt);
+  return [...new Set([easy, passAt, ...(high > passAt ? [high] : [])])];
+}
+
+/**
+ * The rest of a Session, planned again after placement moved the player on a
+ * Path (UX audit TODAY-3: later blocks still served Step 1 after a skip). Each
+ * later block of that Path that was the Path's next work ("focus" or "next")
+ * takes the next open Exercise from where the player now is, keeping its id
+ * and minutes. Everything else stays as it was.
+ */
+export function replanRest(
+  rest: readonly PlanStep[],
+  path: PathDoc,
+  progress: PlayerProgress,
+  now: number,
+  played: ReadonlySet<string> = new Set(),
+): PlanStep[] {
+  const used = new Set(played);
+  const list = openWork(path, progress, now).list;
+  return rest.map((step) => {
+    if (step.kind !== "exercise" || step.pathId !== path.id) return step;
+    if (step.role !== "focus" && step.role !== "next") return step;
+    const pick = list.find((p) => !used.has(p.exercise.id));
+    if (!pick) return step;
+    used.add(pick.exercise.id);
+    const tempo = tempoFor(path, pick.exercise, progress);
+    const why: Reason =
+      takesOf(progress, path.id, pick.exercise.id).length > 0
+        ? tempo.why
+        : tempo.why.code === "newFromSibling"
+          ? tempo.why
+          : { code: "newStep", values: { step: pick.step.title, bpm: tempo.bpm } };
+    return exerciseStep(pick, step.id, step.role, { bpm: tempo.bpm, why }, step.minutes, progress);
+  });
+}
+
+/** Placement on a new Path: a climb to the pass tempo and past it, Step by Step. */
 function placementStep(
   picks: Pick[],
   progress: PlayerProgress,
@@ -563,7 +728,8 @@ function placementStep(
     const pick = picks[at];
     if (!pick) return null;
     const passAt = pick.exercise.tempo.passAtBpm ?? firstRung(pick.exercise);
-    const bpm = firstRung(pick.exercise);
+    const ladder = placementLadder(pick.exercise, passAt);
+    const bpm = ladder[0];
     const step = exerciseStep(
       pick,
       at === 0 ? id : `${id}-${at}`,
@@ -582,7 +748,7 @@ function placementStep(
     return {
       ...step,
       ...(context && at === 0 ? { context } : {}),
-      placement: { passAtBpm: passAt, then: build(at + 1) },
+      placement: { passAtBpm: passAt, ladder, then: build(at + 1) },
     };
   };
   return build(0);
@@ -632,7 +798,7 @@ export function planSession(input: PlannerInput): SessionPlan {
   const work = new Map(paths.map((path) => [path.id, openWork(path, progress, now)]));
   const focusWork = work.get(focusPath.id)!;
   let focus = focusWork.list[0];
-  const row = shape(minutes, back);
+  const row = shape(minutes, back, paths.length === 1);
   const used = new Set<string>();
   const firstEver = mood === "first";
 
@@ -690,7 +856,7 @@ export function planSession(input: PlannerInput): SessionPlan {
       );
       steps.push(step.kind === "exercise" ? { ...step, benchmark: { day: bench.day } } : step);
     } else {
-      steps.push(warmupStep(focus, progress, row.warm));
+      steps.push(warmupStep(focus, progress, row.warm, tempoOf(focus).bpm));
     }
   }
 

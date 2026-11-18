@@ -99,7 +99,7 @@
         "reviewDueSlipped": "Geçen sefer kaydı, o yüzden bir basamak aşağı.",
         "reviewDueLeft": "Biten {{step}} adımından kalan.",
         "finisher": "Grupla, daha önce geçtiğin bir tempoda.",
-        "placement": "Kolay bir kayıt, sonra geçme temposunda bir tane. İkisini de geçersen bir adım atlarsın.",
+        "placement": "Kısa bir tırmanış: geçme temposunun yaklaşık %75, %100 ve %120'si, ilk kaçırmada durulur. Geçme temposunda geçersen bir adım atlarsın.",
         "testOut": "Geçme temposunda tek kayıt. Geçersen adım tamam.",
         "benchmark": "Gün {{day}}: karşılaştırmak için her seferinde aynı kayıt.",
         "yourTurn": "Henüz kontrol edilmiyor, o yüzden sen değerlendir.",
@@ -165,10 +165,11 @@
       "skippedTodayYesterday": "{{path}} bugün dinleniyor: dün çalındı.",
       "skippedTodayNever": "{{path}} bugün dinleniyor: henüz çalınmadı.",
       "finisher": "Bitirirken: {{exercise}} grupla {{bpm}} BPM'de, zaten geçtiğin bir tempo. Notlanmaz.",
-      "placement": "Yeni misin? {{bpm}} BPM'de kolay bir kayıt, sonra {{pass}}'da bir tane. İkisini de geçersen sonraki adıma atlarsın.",
+      "placement": "Yeni misin? {{bpm}} BPM'den {{pass}} ve ötesine kısa bir tırmanış, her biri bir kez, ilk kaçırmada durulur. {{pass}}'de geçersen sonraki adıma atlarsın.",
       "testOut": "{{step}} sınavı: geçme temposunda bir kayıt, {{bpm}} BPM.",
       "benchmark": "Ölçüt, {{day}}. gün: karşılaştırmak için her seferinde aynı egzersiz, {{bpm}} BPM.",
-      "yourTurn": "Sıra sende: {{exercise}}. Henüz kontrol edilmiyor, kendin değerlendir."
+      "yourTurn": "Sıra sende: {{exercise}}. Henüz kontrol edilmiyor, kendin değerlendir.",
+      "newFromSibling": "Yeni. {{sibling}} üzerindeki temiz {{clean}} BPM temponun yaklaşık %80'i olan {{bpm}} BPM'den başlar."
     },
     "bar": {
       "summary": "Çıta: {{bpm}} BPM'de %{{even}} düzgünlük ve notaların %{{heard}} kadarı duyulmuş."
@@ -203,7 +204,8 @@
       "listeningBack": "Geri dinleniyor",
       "band": "Grup",
       "bandHint": "Grup notlanmaz. Mikrofonla çalıyorsan sesini kıs ya da kulaklık tak.",
-      "bandMicHint": "Mikrofonla grubu senin notaların sanırım, o yüzden kapalı başlar. Kulaklık takınca sesini aç."
+      "bandMicHint": "Mikrofonla grubu senin notaların sanırım, o yüzden kapalı başlar. Kulaklık takınca sesini aç.",
+      "skip": "Bunu atla"
     },
     "result": {
       "kick": "Deneme {{take}} · {{title}} · {{bpm}} BPM · {{bars}} ölçü",
@@ -347,7 +349,7 @@
       "subscribeCap": "Bu testte en fazla {{cap}} yol takip edebilirsin. Önce birinden çık; geçmişi kalır.",
       "unsubscribedNote": "Bugünün planında yok. Geçmişin duruyor; istediğin zaman yeniden abone ol.",
       "testOut": "Sınava gir",
-      "testOutHow": "Henüz geçmediğin her egzersizin geçme temposunda bir kayıt. Dörtte üç kadarını geçersen adım tamam.",
+      "testOutHow": "Henüz geçmediğin her alıştırmayı geçme temposunda bir kez çal. {{count}} alıştırmadan {{need}} tanesini geç, adım tamamlansın.",
       "testOutRetests": "Buradaki her egzersizi geçtin, bu yüzden hepsini yeniden sınar: her biri için geçme temposunda bir kayıt.",
       "levelName": {
         "beginner": "Başlangıç",
@@ -443,6 +445,9 @@
       "body": "Şimdiye kadarki kayıtların kaydedildi.",
       "stay": "Devam et",
       "leave": "Çık"
+    },
+    "placement": {
+      "result": "Adım {{n}}'den başlıyorsun: {{step}}"
     }
   }
 }

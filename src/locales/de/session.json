@@ -99,7 +99,7 @@
         "reviewDueSlipped": "Lief letztes Mal nicht, also eine Stufe tiefer.",
         "reviewDueLeft": "Übrig aus {{step}}, das abgeschlossen ist.",
         "finisher": "Mit der Band, in einem Tempo, das du schon bestanden hast.",
-        "placement": "Ein leichter Take, dann einer im Bestehens-Tempo. Besteh beide und du springst einen Schritt weiter.",
+        "placement": "Ein kurzer Anstieg: etwa 75 %, 100 % und 120 % des Bestehenstempos, Schluss beim ersten Fehlversuch. Bestehst du im Bestehenstempo, springst du einen Schritt weiter.",
         "testOut": "Ein Take im Bestehens-Tempo. Bestanden, und der Schritt ist erledigt.",
         "benchmark": "Tag {{day}}: jedes Mal derselbe Take, zum Vergleichen.",
         "yourTurn": "Noch nicht geprüft, also beurteilst du es.",
@@ -165,10 +165,11 @@
       "skippedTodayYesterday": "{{path}} pausiert heute: gestern gespielt.",
       "skippedTodayNever": "{{path}} pausiert heute: noch nicht gespielt.",
       "finisher": "Zum Schluss: {{exercise}} mit der Band bei {{bpm}} BPM, einem Tempo, das du schon bestanden hast. Nicht bewertet.",
-      "placement": "Neu hier? Ein leichter Take bei {{bpm}} BPM, dann einer bei {{pass}}. Besteh beide und du springst zum nächsten Schritt.",
+      "placement": "Neu hier? Ein kurzer Anstieg von {{bpm}} BPM über {{pass}}, ein Take pro Stufe, Schluss beim ersten Fehlversuch. Bestehst du bei {{pass}}, springst du zum nächsten Schritt.",
       "testOut": "Teste dich aus {{step}} heraus: ein Take im Bestehenstempo, {{bpm}} BPM.",
       "benchmark": "Benchmark, Tag {{day}}: jedes Mal dieselbe Übung bei {{bpm}} BPM, zum Vergleichen.",
-      "yourTurn": "Du bist dran: {{exercise}}. Noch nicht geprüft, also beurteilst du es selbst."
+      "yourTurn": "Du bist dran: {{exercise}}. Noch nicht geprüft, also beurteilst du es selbst.",
+      "newFromSibling": "Neu. Sie beginnt bei {{bpm}} BPM, etwa 80 % deines sauberen Tempos von {{clean}} BPM bei {{sibling}}."
     },
     "bar": {
       "summary": "Die Messlatte: {{even}} % gleichmäßig und {{heard}} % der Töne gehört, bei {{bpm}} BPM."
@@ -203,7 +204,8 @@
       "listeningBack": "Wiedergabe",
       "band": "Band",
       "bandHint": "Die Band wird nicht bewertet. Mit Mikrofon leise halten oder Kopfhörer nutzen.",
-      "bandMicHint": "Mit Mikrofon würde ich die Band als deine Töne hören, darum ist sie aus. Mit Kopfhörern kannst du sie aufdrehen."
+      "bandMicHint": "Mit Mikrofon würde ich die Band als deine Töne hören, darum ist sie aus. Mit Kopfhörern kannst du sie aufdrehen.",
+      "skip": "Überspringen"
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} Takte",
@@ -347,7 +349,7 @@
       "subscribeCap": "In diesem Test kannst du bis zu {{cap}} Pfaden folgen. Beende erst ein Abo; sein Verlauf bleibt erhalten.",
       "unsubscribedNote": "Nicht im heutigen Plan. Dein Verlauf bleibt; du kannst jederzeit wieder abonnieren.",
       "testOut": "Austesten",
-      "testOutHow": "Ein Take im Bestehenstempo jeder Übung, die du noch nicht bestanden hast. Besteh etwa drei von vier, und der Schritt ist erledigt.",
+      "testOutHow": "Ein Take im Bestehenstempo jeder Übung, die du noch nicht bestanden hast. Besteh {{need}} von {{count}}, und der Schritt ist erledigt.",
       "testOutRetests": "Du hast hier jede Übung bestanden, also prüft das alle noch einmal: je ein Take im Bestehenstempo.",
       "levelName": {
         "beginner": "Einsteiger",
@@ -443,6 +445,9 @@
       "body": "Deine bisherigen Takes sind gespeichert.",
       "stay": "Weiterspielen",
       "leave": "Verlassen"
+    },
+    "placement": {
+      "result": "Du startest bei Schritt {{n}}: {{step}}"
     }
   }
 }

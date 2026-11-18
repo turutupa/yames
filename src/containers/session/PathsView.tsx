@@ -23,6 +23,7 @@ import {
   isStepPassed,
   isStepSkipped,
   isSubscribed,
+  passesNeeded,
   takesOf,
 } from "../../session/progress";
 import { SUBSCRIPTION_CAP } from "../../session/rotation";
@@ -535,7 +536,13 @@ function StepDetail({
                 {t("session.paths.testOut")}
               </button>
               <div className="session-why" data-testid="step-test-out-how">
-                {t(testOutRetests(path, step, progress) ? "session.paths.testOutRetests" : "session.paths.testOutHow")}
+                {testOutRetests(path, step, progress)
+                  ? t("session.paths.testOutRetests")
+                  : t("session.paths.testOutHow", {
+                      // The real count, not "about three of four" (UX audit PATH-5).
+                      need: passesNeeded(step.exercises.filter(isGradable).length),
+                      count: step.exercises.filter(isGradable).length,
+                    })}
               </div>
             </div>
           )}

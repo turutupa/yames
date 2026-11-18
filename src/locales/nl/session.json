@@ -99,7 +99,7 @@
         "reviewDueSlipped": "Vorige keer ging het mis, dus een trede lager.",
         "reviewDueLeft": "Over van {{step}}, dat klaar is.",
         "finisher": "Met de band, op een tempo dat je al haalde.",
-        "placement": "Een makkelijke take, dan één op het slaagtempo. Haal ze allebei en je slaat een stap over.",
+        "placement": "Een korte klim: ongeveer 75%, 100% en 120% van het slaagtempo, met stoppen bij de eerste misser. Haal je het slaagtempo, dan sla je een stap over.",
         "testOut": "Eén take op het slaagtempo. Gehaald, en de stap is klaar.",
         "benchmark": "Dag {{day}}: elke keer dezelfde take, om te vergelijken.",
         "yourTurn": "Nog niet gecontroleerd, dus jij beoordeelt het.",
@@ -165,10 +165,11 @@
       "skippedTodayYesterday": "{{path}} rust vandaag: gisteren gespeeld.",
       "skippedTodayNever": "{{path}} rust vandaag: nog niet gespeeld.",
       "finisher": "Als afsluiter: {{exercise}} met de band op {{bpm}} BPM, een tempo dat je al haalde. Niet beoordeeld.",
-      "placement": "Nieuw hier? Eén makkelijke take op {{bpm}} BPM, dan één op {{pass}}. Haal ze allebei en je springt naar de volgende stap.",
+      "placement": "Nieuw hier? Een korte klim van {{bpm}} BPM via {{pass}}, één take per trede, stoppen bij de eerste misser. Haal je {{pass}}, dan ga je door naar de volgende stap.",
       "testOut": "Test jezelf uit {{step}}: één take op het slaagtempo, {{bpm}} BPM.",
       "benchmark": "Meetpunt, dag {{day}}: elke keer dezelfde oefening op {{bpm}} BPM, om te vergelijken.",
-      "yourTurn": "Jouw beurt: {{exercise}}. Nog niet gecontroleerd, dus jij beoordeelt het."
+      "yourTurn": "Jouw beurt: {{exercise}}. Nog niet gecontroleerd, dus jij beoordeelt het.",
+      "newFromSibling": "Nieuw. Hij begint op {{bpm}} BPM, ongeveer 80% van je schone {{clean}} BPM op {{sibling}}."
     },
     "bar": {
       "summary": "De lat: {{even}}% gelijkmatig en {{heard}}% van de noten gehoord, op {{bpm}} BPM."
@@ -203,7 +204,8 @@
       "listeningBack": "Terugluisteren",
       "band": "Band",
       "bandHint": "De band wordt niet beoordeeld. Met een microfoon: zacht houden of koptelefoon op.",
-      "bandMicHint": "Met een microfoon zou ik de band als jouw noten horen, dus hij begint uit. Met een koptelefoon op: zet hem hoger."
+      "bandMicHint": "Met een microfoon zou ik de band als jouw noten horen, dus hij begint uit. Met een koptelefoon op: zet hem hoger.",
+      "skip": "Deze overslaan"
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} maten",
@@ -347,7 +349,7 @@
       "subscribeCap": "In deze test kun je tot {{cap}} paden volgen. Zeg er eerst een op; de geschiedenis blijft bewaard.",
       "unsubscribedNote": "Niet in het plan van vandaag. Je geschiedenis blijft; abonneer je wanneer je wilt opnieuw.",
       "testOut": "Uittesten",
-      "testOutHow": "Eén take op het slaagtempo van elke oefening die je nog niet hebt gehaald. Haal er ongeveer drie van de vier en de stap is klaar.",
+      "testOutHow": "Eén take op het slaagtempo van elke oefening die je nog niet hebt gehaald. Haal er {{need}} van de {{count}} en de stap is klaar.",
       "testOutRetests": "Je hebt hier elke oefening gehaald, dus dit test ze allemaal opnieuw: één take per oefening op het slaagtempo.",
       "levelName": {
         "beginner": "Beginner",
@@ -443,6 +445,9 @@
       "body": "Je takes tot nu toe zijn bewaard.",
       "stay": "Doorgaan",
       "leave": "Verlaten"
+    },
+    "placement": {
+      "result": "Je begint bij stap {{n}}: {{step}}"
     }
   }
 }

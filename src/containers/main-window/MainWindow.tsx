@@ -2408,6 +2408,11 @@ export function MainWindow() {
           <ToolsView onOpen={setView} />
         ) : view === "session" ? (
           <>
+          {sessionRun.placed && (
+            <div className="session-placed" role="status" data-testid="session-placed">
+              {t("session.placement.result", sessionRun.placed)}
+            </div>
+          )}
           {sessionRun.leaveAsked && (
             <LeaveSessionDialog onLeave={sessionRun.actions.exit} onStay={sessionRun.actions.stayInSession} />
           )}
@@ -2420,6 +2425,7 @@ export function MainWindow() {
             hasSignal={evaluation.hasSignal}
             bpmNow={state.bpm}
             viewKey={platformKey(keyBindings["session-view"] || "")}
+            skipKey={platformKey(keyBindings["session-next"] || "")}
             onCheckSound={openAudioSettings}
           />
           </>

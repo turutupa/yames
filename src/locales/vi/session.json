@@ -99,7 +99,7 @@
         "reviewDueSlipped": "Lần trước bị tuột, nên thấp hơn một bậc.",
         "reviewDueLeft": "Còn lại từ {{step}}, bước đã xong.",
         "finisher": "Cùng ban nhạc, ở tempo bạn đã đạt.",
-        "placement": "Một lượt dễ, rồi một lượt ở tempo đạt. Đạt cả hai là bạn nhảy qua một bước.",
+        "placement": "Leo ngắn: khoảng 75%, 100% và 120% tempo đạt, dừng ở lần trượt đầu tiên. Đạt ở tempo đạt là bạn nhảy lên một bước.",
         "testOut": "Một lượt ở tempo đạt. Đạt là xong bước này.",
         "benchmark": "Ngày {{day}}: mỗi lần cùng một lượt, để so sánh.",
         "yourTurn": "Chưa kiểm tra được, nên bạn tự đánh giá.",
@@ -165,10 +165,11 @@
       "skippedTodayYesterday": "{{path}} nghỉ hôm nay: đã chơi hôm qua.",
       "skippedTodayNever": "{{path}} nghỉ hôm nay: chưa chơi.",
       "finisher": "Để kết thúc: {{exercise}} cùng ban nhạc ở {{bpm}} BPM, tempo bạn đã đạt. Không chấm.",
-      "placement": "Mới đến? Một lượt dễ ở {{bpm}} BPM, rồi một lượt ở {{pass}}. Đạt cả hai là bạn nhảy sang bước tiếp theo.",
+      "placement": "Mới đến? Leo ngắn từ {{bpm}} BPM qua {{pass}}, mỗi mức một lượt, dừng ở lần trượt đầu tiên. Đạt ở {{pass}} là bạn sang bước tiếp theo.",
       "testOut": "Kiểm tra vượt {{step}}: một lượt ở tempo đạt, {{bpm}} BPM.",
       "benchmark": "Mốc so sánh, ngày {{day}}: cùng một bài ở {{bpm}} BPM mỗi lần, để so sánh.",
-      "yourTurn": "Đến lượt bạn: {{exercise}}. Chưa được kiểm tra, bạn tự đánh giá."
+      "yourTurn": "Đến lượt bạn: {{exercise}}. Chưa được kiểm tra, bạn tự đánh giá.",
+      "newFromSibling": "Mới. Bắt đầu ở {{bpm}} BPM, khoảng 80% tempo sạch {{clean}} BPM của bạn ở {{sibling}}."
     },
     "bar": {
       "summary": "Mức đạt: đều {{even}}% và nghe được {{heard}}% số nốt, ở {{bpm}} BPM."
@@ -203,7 +204,8 @@
       "listeningBack": "Đang nghe lại",
       "band": "Ban nhạc",
       "bandHint": "Ban nhạc không được chấm. Dùng micro thì để nhỏ hoặc đeo tai nghe.",
-      "bandMicHint": "Qua micro tôi sẽ nghe ban nhạc như nốt của bạn, nên ban đầu tắt. Đeo tai nghe thì vặn lên."
+      "bandMicHint": "Qua micro tôi sẽ nghe ban nhạc như nốt của bạn, nên ban đầu tắt. Đeo tai nghe thì vặn lên.",
+      "skip": "Bỏ qua bài này"
     },
     "result": {
       "kick": "Lượt {{take}} · {{title}} · {{bpm}} BPM · {{bars}} ô nhịp",
@@ -347,7 +349,7 @@
       "subscribeCap": "Trong bản thử này bạn theo được tối đa {{cap}} lộ trình. Hãy hủy một cái trước; lịch sử vẫn được giữ.",
       "unsubscribedNote": "Không có trong kế hoạch hôm nay. Lịch sử vẫn còn; đăng ký lại bất cứ lúc nào.",
       "testOut": "Kiểm tra vượt",
-      "testOutHow": "Một lượt ở tempo đạt cho mỗi bài bạn chưa đạt. Đạt khoảng ba trên bốn là bước hoàn thành.",
+      "testOutHow": "Một lượt ở tempo đạt cho mỗi bài bạn chưa đạt. Đạt {{need}} trên {{count}} là xong bước này.",
       "testOutRetests": "Bạn đã đạt mọi bài ở đây, nên lần này kiểm tra lại tất cả: mỗi bài một lượt ở tempo đạt.",
       "levelName": {
         "beginner": "Cơ bản",
@@ -443,6 +445,9 @@
       "body": "Các lượt chơi đến giờ đã được lưu.",
       "stay": "Tiếp tục",
       "leave": "Rời đi"
+    },
+    "placement": {
+      "result": "Bạn bắt đầu từ Bước {{n}}: {{step}}"
     }
   }
 }

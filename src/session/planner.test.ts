@@ -59,19 +59,31 @@ describe("how the minutes are spent", () => {
   });
 
   it("more time adds blocks, and only twenty ends on the band", () => {
-    expect(plan(10).steps.map((s) => s.kind)).toEqual(["metronome", "exercise", "exercise"]);
-    expect(plan(15).steps.map((s) => s.kind)).toEqual(["metronome", "exercise", "exercise", "exercise"]);
-    expect(plan(20).steps.map((s) => s.kind)).toEqual([
+    // Two Paths: a lead, one block for the other, then reviews or the lead again.
+    const two = (m: PlanMinutes) => plan(m, progress({ states: [state(), state({ pathId: SWEEP.id })] }), [ALT, SWEEP]);
+    expect(two(10).steps.map((s) => s.kind)).toEqual(["metronome", "exercise", "exercise"]);
+    expect(two(15).steps.map((s) => s.kind)).toEqual(["metronome", "exercise", "exercise", "exercise"]);
+    expect(two(20).steps.map((s) => s.kind)).toEqual([
       "metronome",
       "exercise",
       "exercise",
       "exercise",
       "jam",
     ]);
-    // warm 2, then 4 4 / 5 4 4 / 6 4 4 4.
-    expect(plan(10).steps.map((s) => s.minutes)).toEqual([2, 4, 4]);
-    expect(plan(15).steps.map((s) => s.minutes)).toEqual([2, 5, 4, 4]);
-    expect(plan(20).steps.map((s) => s.minutes)).toEqual([2, 6, 4, 4, 4]);
+  });
+
+  it("with one Path, the lead is one long block of 8 or 9 minutes (UX audit TODAY-4)", () => {
+    expect(plan(10).steps.map((s) => [s.kind, s.minutes])).toEqual([["metronome", 2], ["exercise", 8]]);
+    expect(plan(15).steps.map((s) => s.minutes)).toEqual([2, 9, 4]);
+    expect(plan(20).steps.map((s) => s.minutes)).toEqual([2, 9, 5, 4]);
+    expect(plan(20).steps[plan(20).steps.length - 1].kind).toBe("jam");
+  });
+
+  it("with more than one Path: warm 2, then 4 4 / 5 4 4 / 6 4 4 4", () => {
+    const two = (m: PlanMinutes) => plan(m, progress({ states: [state(), state({ pathId: SWEEP.id })] }), [ALT, SWEEP]);
+    expect(two(10).steps.map((s) => s.minutes)).toEqual([2, 4, 4]);
+    expect(two(15).steps.map((s) => s.minutes)).toEqual([2, 5, 4, 4]);
+    expect(two(20).steps.map((s) => s.minutes)).toEqual([2, 6, 4, 4, 4]);
   });
 
   it("gives no Session with no Path that can be graded", () => {
@@ -120,11 +132,13 @@ describe("the mood", () => {
 });
 
 describe("what gets chosen", () => {
-  it("a first Session is placement: the first Exercise at its first rung, then its pass tempo", () => {
+  it("a first Session is placement: a climb through 75%, 100% and 120% of the pass tempo (UX audit TODAY-3)", () => {
     const [focus] = exerciseSteps(plan(5, { ...NO_PROGRESS }));
     expect(focus.exerciseId).toBe(OPEN);
     expect(focus.role).toBe("placement");
-    expect(focus.bpm).toBe(60);
+    // Pass 100: rungs 60..120 by ten. 75 -> 70, 100, 120 -> 120.
+    expect(focus.bpm).toBe(70);
+    expect(focus.placement?.ladder).toEqual([70, 100, 120]);
     expect(focus.why.code).toBe("placement");
     expect(focus.placement?.passAtBpm).toBe(100);
   });
@@ -337,7 +351,8 @@ describe("coming back after a break", () => {
     const s = plan(10, again);
     const focus = exerciseSteps(s).find((x) => x.role === "focus");
     expect(s.steps[0]).toMatchObject({ kind: "exercise", role: "recap", minutes: 3 });
-    expect(focus?.minutes).toBe(3);
+    // One Path: the long lead, a minute shorter for the recap.
+    expect(focus?.minutes).toBe(7);
   });
 });
 
@@ -487,9 +502,12 @@ describe("two runnable Paths", () => {
     const s = plan(15, both(), [ALT, SWEEP]);
     const steps = exerciseSteps(s);
     expect(steps.map((x) => x.pathId).slice(0, 2)).toEqual([SWEEP.id, ALT.id]);
-    // Sweep has never been played: its first Exercise, at its first rung.
+    // Sweep has never been played: placement on its first Exercise, from about
+    // 75% of its pass tempo (UX audit TODAY-3).
     const first = SWEEP.steps[0].exercises[0];
-    expect(steps[0]).toMatchObject({ exerciseId: first.id, bpm: first.tempo.rungs[0].bpm });
+    expect(steps[0]).toMatchObject({ exerciseId: first.id, role: "placement" });
+    expect(steps[0].bpm).toBe(steps[0].placement!.ladder![0]);
+    expect(steps[0].bpm).toBeLessThanOrEqual(0.75 * first.tempo.passAtBpm!);
     expect(steps[0].why.code).not.toBe("firstEver");
   });
 

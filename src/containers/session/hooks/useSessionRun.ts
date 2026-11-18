@@ -63,7 +63,7 @@ import { gradeTake } from "../../../session/grade";
 import type { BarCheck, TakeGrade } from "../../../session/grade";
 import { measureTake } from "../../../session/takeMeasures";
 import type { TakeMeasures } from "../../../session/takeMeasures";
-import { PLAN_MINUTES, TEST_OUT_MINUTES, edgeStep, planSession, testOutSteps } from "../../../session/planner";
+import { PLAN_MINUTES, TEST_OUT_MINUTES, edgeStep, planSession, replanRest, testOutSteps } from "../../../session/planner";
 import { SUBSCRIPTION_CAP } from "../../../session/rotation";
 import type { PlanMinutes, PlanStep, SessionPlan } from "../../../session/planner";
 import {
@@ -72,6 +72,7 @@ import {
   cleanTempoOf,
   currentStepOf,
   factsOf,
+  isStepPassed,
   isSubscribed,
   lastCaughtTake,
   levelEntryStep,
@@ -88,6 +89,7 @@ import {
   currentStep,
   eventForBigAction,
   runReducer,
+  tempoNudges,
 } from "../../../session/runner";
 import type { BigAction, RunState, TakeOutcome } from "../../../session/runner";
 import { TAKE_COUNT_IN_BARS, buildTake } from "../../../session/take";
@@ -202,6 +204,31 @@ export type SubscribeRefusal = "cap" | null;
  * (`usePathsPlace`). Anything that is not a learning screen, or a Session
  * started from inside a Session, goes back to Today, the front door.
  */
+/**
+ * The gradable Exercise after this one on its Step, or the first of the Steps
+ * after it. Null at the end of the Path.
+ */
+export function followingExercise(
+  paths: readonly PathDoc[],
+  pathId: string,
+  exerciseId: string,
+): { path: PathDoc; step: Step; exercise: Exercise } | null {
+  const path = paths.find((p) => p.id === pathId);
+  if (!path) return null;
+  const all = path.steps.flatMap((step) =>
+    step.exercises.filter((e) => e.grading === "graded" && e.tempo.passAtBpm !== null).map((exercise) => ({ path, step, exercise })),
+  );
+  const at = all.findIndex((x) => x.exercise.id === exerciseId);
+  return at >= 0 ? all[at + 1] ?? null : null;
+}
+
+/** The variant a step plays: an Exercise's, or a warm-up's. */
+function seedOf(step: PlanStep | null): number | null {
+  if (step?.kind === "exercise") return step.variantSeed;
+  if (step?.kind === "metronome") return step.variantSeed ?? null;
+  return null;
+}
+
 export function sessionOrigin(view: MainView): MainView {
   return view === "today" || view === "paths" || view === "progress" || view === "tools"
     ? view
@@ -414,11 +441,12 @@ export function useSessionRun(input: SessionRunInput) {
     // A metronome step shows its Exercise at its own tempo, and is not a Take.
     const bpm =
       run.bpm || (step?.kind === "metronome" ? step.bpm : step?.kind === "jam" ? (step.bpm ?? 0) : 0);
-    const variantSeed = step?.kind === "exercise" ? step.variantSeed : null;
+    // A warm-up carries a variant too, so its notes change from Session to Session.
+    const variantSeed = seedOf(step);
     return bpm > 0 ? buildTake(current.path, current.exercise, bpm, variantSeed) : null;
     // `run.bpm`, the Exercise and its variant are the whole of what a Take is built from.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current, run.bpm, step?.kind === "exercise" ? step.variantSeed : null]);
+  }, [current, run.bpm, seedOf(step)]);
   // Which Take of this step it is: Go again at the same tempo is the same
   // notes, and still a new Take that has to be loaded before it can start.
   const takeRef = useRef(take);
@@ -778,10 +806,19 @@ export function useSessionRun(input: SessionRunInput) {
         : null;
     const currentAt = (id: string | undefined) => path.steps.findIndex((s) => s.id === id);
     const storedStep = currentStepOf(progress, path).id;
-    const moved =
-      placedPast && currentAt(placedPast.id) > currentAt(storedStep)
-        ? placedPast
-        : nextStepAfterPass(nextProgress, path);
+    // Test out of a Step that passes moves the player past it, to the first
+    // Step after it not passed yet, even when it was not the Step they were on
+    // (UX audit PATH-5). Only ever forward.
+    const testedPast =
+      stepNow.role === "test" && isStepPassed(nextProgress, path.id, pathStep)
+        ? path.steps
+            .slice(path.steps.findIndex((s) => s.id === pathStep.id) + 1)
+            .find((s) => !isStepPassed(nextProgress, path.id, s)) ?? null
+        : null;
+    const ahead = [placedPast, testedPast].find(
+      (s): s is Step => !!s && currentAt(s.id) > currentAt(storedStep),
+    );
+    const moved = ahead ?? nextStepAfterPass(nextProgress, path);
     const state0 = progress.states.find((s) => s.pathId === path.id);
     const nextState: PathStateRow | null = moved
       ? {
@@ -792,14 +829,23 @@ export function useSessionRun(input: SessionRunInput) {
           updatedAt: now,
         }
       : null;
-    setProgress(
-      nextState
-        ? {
-            ...nextProgress,
-            states: [...nextProgress.states.filter((s) => s.pathId !== path.id), nextState],
-          }
-        : nextProgress,
-    );
+    const progressAfter = nextState
+      ? { ...nextProgress, states: [...nextProgress.states.filter((s) => s.pathId !== path.id), nextState] }
+      : nextProgress;
+    setProgress(progressAfter);
+    // Placement moved the player: the rest of today's Session follows them
+    // (UX audit TODAY-3), rather than serving the Step they just skipped.
+    if (nextState && stepNow.role === "placement") {
+      const r = runRef.current;
+      const plan = r.plan;
+      if (plan) {
+        const played = new Set(
+          plan.steps.slice(0, r.stepIndex + 1).flatMap((x) => (x.kind === "exercise" ? [x.exerciseId] : [])),
+        );
+        const rest = plan.steps.slice(r.stepIndex + 1);
+        dispatch({ type: "replaceRest", steps: replanRest(rest, path, progressAfter, now, played) });
+      }
+    }
     void savePathTake(row, cleanBpm).catch((err) => {
       console.warn("[yames] could not keep the Take", err);
     });
@@ -1063,6 +1109,19 @@ export function useSessionRun(input: SessionRunInput) {
   const exercise = current?.exercise ?? null;
   const big: BigAction = useMemo(() => bigAction(run, exercise), [run, exercise]);
 
+  /**
+   * Where placement put the player, once its climb is over (UX audit TODAY-3):
+   * the result says "You start at Step 2" rather than moving on in silence.
+   */
+  const placed = useMemo(() => {
+    if (run.phase !== "result" || step?.kind !== "exercise" || step.role !== "placement") return null;
+    if (big.kind === "again" || (big.kind === "next" && big.insert)) return null;
+    const path = paths.find((p) => p.id === step.pathId);
+    if (!path) return null;
+    const at = currentStepOf(progress, path);
+    return { path: path.title, n: at.order, step: at.title };
+  }, [run.phase, step, big, paths, progress]);
+
   const playTake = useCallback(() => {
     if (!prepared || !listening) return;
     void enqueue(() => setPlaying(true));
@@ -1082,12 +1141,17 @@ export function useSessionRun(input: SessionRunInput) {
     if (event.type === "close") setView(origin.current);
   }, [big, playTake, endTake, setView]);
 
+  // Locked on a Test out, whose Take has to be at the pass tempo (`tempoNudges`).
   const slower = useCallback(() => {
-    if (exercise) dispatch({ type: "slower", exercise, now: Date.now() });
+    if (exercise && tempoNudges(runRef.current, exercise).slower) {
+      dispatch({ type: "slower", exercise, now: Date.now() });
+    }
   }, [exercise]);
 
   const faster = useCallback(() => {
-    if (exercise) dispatch({ type: "faster", exercise, now: Date.now() });
+    if (exercise && tempoNudges(runRef.current, exercise).faster) {
+      dispatch({ type: "faster", exercise, now: Date.now() });
+    }
   }, [exercise]);
 
   /** Go again at this tempo, whatever the big button is offering. */
@@ -1095,9 +1159,43 @@ export function useSessionRun(input: SessionRunInput) {
     dispatch({ type: "again", now: Date.now() });
   }, []);
 
+  /**
+   * The next step: Skip this, or N. A Session started with Play this on a
+   * Step's page is one Exercise long, so the next step there is the next
+   * Exercise on that Step (then the Step after), not the end (UX audit
+   * TODAY-2). Anywhere else it is the plan's next step.
+   */
   const next = useCallback(() => {
-    dispatch({ type: "next", now: Date.now() });
-  }, []);
+    const r = runRef.current;
+    const here = currentStep(r);
+    const now = Date.now();
+    if (here?.kind === "exercise" && here.why.code === "chosen" && !r.plan?.steps[r.stepIndex + 1]) {
+      const following = followingExercise(paths, here.pathId, here.exerciseId);
+      if (following) {
+        const takes = takesOf(progress, following.path.id, following.exercise.id);
+        const last = lastCaughtTake(takes);
+        dispatch({
+          type: "next",
+          now,
+          insert: {
+            kind: "exercise",
+            id: `chosen-${r.stepIndex + 1}`,
+            role: "focus",
+            pathId: following.path.id,
+            stepId: following.step.id,
+            exerciseId: following.exercise.id,
+            title: following.exercise.title,
+            bpm: last?.bpm ?? following.exercise.tempo.rungs[0]?.bpm ?? 60,
+            minutes: 5,
+            variantSeed: null,
+            why: { code: "chosen", values: { step: following.step.title } },
+          },
+        });
+        return;
+      }
+    }
+    dispatch({ type: "next", now });
+  }, [paths, progress]);
 
   /** Find my edge on this Exercise, from the tempo reached, then back to the plan. */
   const findEdgeFromHere = useCallback(() => {
@@ -1192,6 +1290,8 @@ export function useSessionRun(input: SessionRunInput) {
     working: run.phase === "listening",
     /** Escape asked "Leave this Session?" and it has not been answered. */
     leaveAsked,
+    /** Placement's verdict, on the result that ended its climb. */
+    placed,
     actions: {
       startToday,
       playExercise,

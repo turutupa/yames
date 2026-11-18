@@ -109,3 +109,15 @@ SHL-10 (library auto-close under 620 px: needs `test:layout`), SHL-11, SHL-16, S
 SHL-20, SHL-22, SHL-24, SHL-25, SHL-33 to SHL-43; KEY-11, KEY-16; ONB-05 to ONB-16,
 ONB-18, ONB-24 to ONB-27, ONB-29, ONB-30; ZEN-02 to ZEN-22 beyond opening and closing;
 WID-02, WID-05 to WID-15.
+
+## Navigation keys moved (2026-11-17, owner-approved)
+
+- `manifest.json` changed by hand for nine defaults: `tab-today`, `tab-paths`,
+  `tab-progress`, `tab-tools` are ⌘1–⌘4 (were ⌘0, ⌘6, ⌘7, ⌘8) and `tab-1` to
+  `tab-5` are ⌘⇧1–⌘⇧5 (were ⌘1–⌘5). One settings key added: `keyBindingsVersion`.
+- Players still on the old defaults are moved once (`src/hooks/keybindingMigration.ts`,
+  tested in `keybindingMigration.test.ts`); a key anyone remapped is kept. P3's
+  v1.2.2 fixture stores the old tool keys, so `savedFormats.test.tsx` now expects them
+  moved and everything else the player chose unchanged.
+- The dispatcher table: view keys (`tab-*`) do nothing on a running Session (UX
+  audit NAV-2), so they no longer end it silently.

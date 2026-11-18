@@ -1188,6 +1188,31 @@
   color: var(--l-quiet);
   white-space: nowrap;
 }
+/* Skip this, on a Take's ready screen (UX audit TODAY-2): N does the same. */
+.session-page .session-skip-this {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: none;
+  min-height: 30px;
+  padding: 3px 6px 3px 12px;
+  border: 1px solid var(--l-line);
+  border-radius: 999px;
+  color: var(--l-ink);
+  font: 600 13px/1 var(--l-body);
+  white-space: nowrap;
+}
+.session-page .session-skip-this:hover {
+  background: rgba(255, 232, 200, 0.06);
+  border-color: var(--l-line2);
+}
+.session-page .session-skip-this kbd {
+  padding: 2px 6px;
+  border: 1px solid var(--l-line2);
+  border-radius: 5px;
+  font: 700 11px/1.2 var(--l-body);
+  color: var(--l-quiet);
+}
 .session-body {
   position: relative;
   display: flex;
@@ -2634,4 +2659,22 @@
 .runway[data-lanes="2"],
 .runway[data-lanes="3"] {
   margin-block: auto;
+}
+
+/* Placement's verdict, over the result that ended its climb (UX audit TODAY-3). */
+.session-placed {
+  position: fixed;
+  z-index: 40;
+  top: 92px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: min(560px, calc(100vw - 32px));
+  padding: 9px 18px;
+  border: 1px solid rgba(255, 180, 84, 0.6);
+  border-radius: 999px;
+  background: rgba(22, 16, 11, 0.92);
+  color: #fbf5ea;
+  font: 600 15px/1.3 var(--font-body, inherit);
+  text-align: center;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
 }

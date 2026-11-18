@@ -118,6 +118,8 @@ export type RunEvent =
   | { type: "tick"; now: number }
   /** Reached from a result: a step played next, then back to the plan. */
   | { type: "insertStep"; step: PlanStep; now: number }
+  /** The steps after this one, planned again (placement moved the player). */
+  | { type: "replaceRest"; steps: PlanStep[] }
   /** Leave. From any state. */
   | { type: "cancel" }
   /** The recap has been read. */
@@ -165,6 +167,11 @@ function enter(state: RunState, index: number, now: number): RunState {
 
 export function runReducer(state: RunState, event: RunEvent): RunState {
   if (event.type === "cancel") return IDLE;
+  if (event.type === "replaceRest") {
+    if (!state.plan || state.phase === "idle" || state.phase === "recap") return state;
+    const steps = [...state.plan.steps.slice(0, state.stepIndex + 1), ...event.steps];
+    return { ...state, plan: { ...state.plan, steps } };
+  }
 
   switch (state.phase) {
     case "idle":
@@ -184,8 +191,15 @@ export function runReducer(state: RunState, event: RunEvent): RunState {
           return { ...state, bpm: rungBelow(event.exercise, state.bpm), now: event.now };
         case "faster":
           return { ...state, bpm: rungAbove(event.exercise, state.bpm), now: event.now };
-        case "next":
-          return enter(state, state.stepIndex + 1, event.now);
+        case "next": {
+          // Skip this. With `insert`, that step is played next (from a Step's
+          // page, the next Exercise there: UX audit TODAY-2).
+          const plan = state.plan;
+          if (!event.insert || !plan) return enter(state, state.stepIndex + 1, event.now);
+          const steps = [...plan.steps];
+          steps.splice(state.stepIndex + 1, 0, event.insert);
+          return enter({ ...state, plan: { ...plan, steps } }, state.stepIndex + 1, event.now);
+        }
         case "tick":
           return { ...state, now: event.now };
         default:
@@ -416,10 +430,12 @@ function decidingAction(
     case "test":
       return onward();
     case "placement": {
+      // A climb, one Take a rung, stopping at the first miss (UX audit TODAY-3).
       const plan = step.placement;
       if (!passed || !plan) return onward();
-      // The easy Take passed: now the one at the pass tempo.
-      if (state.bpm < plan.passAtBpm) return { kind: "again", bpm: plan.passAtBpm };
+      const ladder = plan.ladder ?? [plan.passAtBpm];
+      const higher = ladder.find((bpm) => bpm > state.bpm);
+      if (higher !== undefined) return { kind: "again", bpm: higher };
       return plan.then ? { kind: "next", step: plan.then, insert: true } : onward();
     }
     default:
@@ -480,7 +496,11 @@ export function bigAction(state: RunState, exercise: Exercise | null): BigAction
 
 /** Whether "slower" and "faster" mean anything right now. */
 export function tempoNudges(state: RunState, exercise: Exercise | null) {
-  const can = state.phase === "ready" || state.phase === "result";
+  // A Test out is a Take at the pass tempo, or it tests nothing (UX audit
+  // PATH-5): its tempo is locked.
+  const step = currentStep(state);
+  const locked = step?.kind === "exercise" && step.role === "test";
+  const can = !locked && (state.phase === "ready" || state.phase === "result");
   return {
     slower: can && !!exercise && hasRungBelow(exercise, state.bpm),
     faster: can && !!exercise && hasRungAbove(exercise, state.bpm),
