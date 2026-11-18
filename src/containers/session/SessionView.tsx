@@ -352,6 +352,9 @@ function TakeScreen({
             {t(hasSignal ? "session.run.hearing" : "session.run.waitingForSignal")}
           </span>
         )}
+        {/* Back to the warm-up before anything is played here (the e2e
+            `warmup` scenario; lost with acceptance P1-4's first pass). */}
+        {!running && session.canGoBack && <BackLink session={session} />}
         {/* The tempo nudges and the button travel together: on a phone the
             pair is what sticks to the bottom, so Slower and Faster are never
             under the button (acceptance P1-5). A plain run of the row on a

@@ -26,7 +26,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, "..", "..");
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 /** A result that met its bar: the pass leads with its closest call (UX audit SES-3). */
-const PASSED = /PASS BAR MET|CLOSEST TO THE BAR/i;
+// A pass heads its result "Passed · Bar …" (acceptance pass 2; it was "Closest to the bar").
+const PASSED = /PASS BAR MET|PASSED · /i;
 /** The Paths the suite plays: the one a new player starts on, and a second. */
 const PATHS = [loadPath(FIRST_PATH), loadPath(SECOND_PATH)];
 
