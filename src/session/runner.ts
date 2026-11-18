@@ -119,6 +119,12 @@ export type RunState = {
   ended: boolean;
   /** Steps left before they were played out: shown as skipped, never as done. */
   skipped: string[];
+  /**
+   * Started from a Step's page (Play this, Find my edge, Test out): no
+   * countdown (UX audit SES-11). Its Exercise waits for the player however
+   * long it takes, so time never turns "Go again" into "Next".
+   */
+  untimed: boolean;
 };
 
 /** A warm-up's or a jam's tempo, one press of - or +: not graded, so any tempo is fine. */
@@ -138,7 +144,7 @@ export function timedTempoAdjustable(step: PlanStep | null): boolean {
 }
 
 export type RunEvent =
-  | { type: "start"; plan: SessionPlan; now: number }
+  | { type: "start"; plan: SessionPlan; now: number; untimed?: boolean }
   | { type: "takeStarted"; now: number }
   /** A timed step's Start was pressed: its clock begins now. */
   | { type: "timedStart"; now: number }
@@ -190,6 +196,7 @@ export const IDLE: RunState = {
   restarts: 0,
   ended: false,
   skipped: [],
+  untimed: false,
 };
 
 export function currentStep(state: RunState): PlanStep | null {
@@ -232,7 +239,7 @@ export function runReducer(state: RunState, event: RunEvent): RunState {
       if (event.type !== "start") return state;
       if (event.plan.steps.length === 0) return state;
       return enter(
-        { ...IDLE, plan: event.plan, startedAt: event.now, now: event.now },
+        { ...IDLE, plan: event.plan, startedAt: event.now, now: event.now, untimed: event.untimed === true },
         0,
         event.now,
       );
@@ -416,6 +423,11 @@ export function stepRemainingMs(state: RunState): number {
   return Math.max(0, state.stepStartedAt + step.minutes * 60_000 - state.now);
 }
 
+/** Whether the current step still has time: always, on a Session with no countdown. */
+export function hasTimeLeft(state: RunState): boolean {
+  return state.untimed || stepRemainingMs(state) > 0;
+}
+
 /** Whole minutes left of the Session as planned, rounded up, floored at zero. */
 export function minutesLeft(state: RunState): number {
   const plan = state.plan;
@@ -444,7 +456,8 @@ export type BigAction =
   /** Start a timed step's clock, and whatever it plays. */
   | { kind: "startTimed"; step: PlanStep }
   | { kind: "endTake" }
-  | { kind: "again"; bpm: number }
+  /** Go again; `up` when it is a rung faster than the Take just played. */
+  | { kind: "again"; bpm: number; up?: boolean }
   | { kind: "next"; step: PlanStep; insert?: boolean }
   | { kind: "finish" }
   | { kind: "close" };
@@ -501,7 +514,7 @@ export function edgeOf(state: RunState, exercise: Exercise | null): Edge {
 function edgeAction(state: RunState, exercise: Exercise | null, onward: () => BigAction): BigAction {
   const last = state.outcomes[state.outcomes.length - 1];
   if (!last) return onward();
-  const timeLeft = stepRemainingMs(state) > 0;
+  const timeLeft = hasTimeLeft(state);
   switch (last.grade.verdict) {
     case "notCaught":
       return { kind: "again", bpm: state.bpm };
@@ -513,7 +526,7 @@ function edgeAction(state: RunState, exercise: Exercise | null, onward: () => Bi
     case "belowBar": {
       if (!timeLeft || edgeOf(state, exercise).done) return onward();
       return last.grade.verdict === "passed" && exercise
-        ? { kind: "again", bpm: rungAbove(exercise, state.bpm) }
+        ? { kind: "again", bpm: rungAbove(exercise, state.bpm), up: true }
         : { kind: "again", bpm: state.bpm };
     }
   }
@@ -549,7 +562,7 @@ function decidingAction(
       if (!passed || !plan) return onward();
       const ladder = plan.ladder ?? [plan.passAtBpm];
       const higher = ladder.find((bpm) => bpm > state.bpm);
-      if (higher !== undefined) return { kind: "again", bpm: higher };
+      if (higher !== undefined) return { kind: "again", bpm: higher, up: true };
       return plan.then ? { kind: "next", step: plan.then, insert: true } : onward();
     }
     default:
@@ -590,7 +603,7 @@ export function bigAction(state: RunState, exercise: Exercise | null): BigAction
   }
   const last = state.outcomes[state.outcomes.length - 1];
   if (!last) return onward();
-  const timeLeft = stepRemainingMs(state) > 0;
+  const timeLeft = hasTimeLeft(state);
   switch (last.grade.verdict) {
     case "notCaught":
       return { kind: "again", bpm: state.bpm };
@@ -602,7 +615,7 @@ export function bigAction(state: RunState, exercise: Exercise | null): BigAction
     case "passed": {
       if (last.grade.passesExercise || !timeLeft || !exercise) return onward();
       return hasRungAbove(exercise, state.bpm)
-        ? { kind: "again", bpm: rungAbove(exercise, state.bpm) }
+        ? { kind: "again", bpm: rungAbove(exercise, state.bpm), up: true }
         : onward();
     }
   }
@@ -615,9 +628,17 @@ export function tempoNudges(state: RunState, exercise: Exercise | null) {
   const step = currentStep(state);
   const locked = step?.kind === "exercise" && step.role === "test";
   const can = !locked && (state.phase === "ready" || state.phase === "result");
+  const below = !!exercise && hasRungBelow(exercise, state.bpm);
+  const above = !!exercise && hasRungAbove(exercise, state.bpm);
   return {
-    slower: can && !!exercise && hasRungBelow(exercise, state.bpm),
-    faster: can && !!exercise && hasRungAbove(exercise, state.bpm),
+    slower: can && below,
+    faster: can && above,
+    /**
+     * Why one is off, so a disabled button can say (UX audit SES-13):
+     * "locked" on a Test out, "floor" or "ceiling" at the ladder's ends.
+     */
+    slowerWhy: locked ? ("locked" as const) : can && !below ? ("floor" as const) : null,
+    fasterWhy: locked ? ("locked" as const) : can && !above ? ("ceiling" as const) : null,
   };
 }
 

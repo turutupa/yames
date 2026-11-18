@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { Exercise } from "../paths/format";
 import { CLEAN_TEMPO_MIN_BARS, TAKE_SLACK_BARS, gradeTake, takeBarsOf } from "./grade";
+import type { TakeGrade } from "./grade";
 import type { TakeMeasures } from "./takeMeasures";
 import { MIN_HEARD_NOTES, measureTake, withRightNotes } from "./takeMeasures";
-import { takeLine } from "./coachWords";
+import { barStrip, decidingCheck, takeLine } from "./coachWords";
 import type { ScorerReport } from "./takeMeasures";
 import type { ScorerTakeGrade } from "../ipc";
 import { ALT } from "./testKit";
@@ -475,5 +476,65 @@ describe("right notes", () => {
     const take = buildTake(ALT, WITH_PITCH, 100);
     expect(take.pitches.length).toBe(take.score.notes.length);
     expect(take.pitches[0]).toEqual({ id: take.score.notes[0].id, midi: take.score.notes[0].midi });
+  });
+});
+
+describe("the result's words and numbers (UX audit SES-2, SES-3)", () => {
+  const checks = (even: number, heard: number) => [
+    { metric: "timingEvenness", value: even, min: 0.85, met: even >= 0.85 },
+    { metric: "notesHeard", value: heard, min: 0.9, met: heard >= 0.9 },
+  ];
+  const measures = (heard: number, perBar?: TakeMeasures["perBar"]): TakeMeasures => ({
+    expected: 160,
+    heard,
+    extras: 0,
+    evenness: 0.87,
+    accent: null,
+    noteIdentity: null,
+    barsPlayed: 10,
+    barEvenness: null,
+    caught: true,
+    ...(perBar ? { perBar } : {}),
+  });
+  const passed = (c: TakeGrade["checks"], unmeasured: string[] = []): TakeGrade => ({
+    verdict: "passed",
+    checks: c,
+    headline: c[0],
+    unmeasured,
+    cleanBpm: 80,
+    passesExercise: false,
+  });
+
+  it("leads a miss with what failed, and a pass with its closest call", () => {
+    expect(decidingCheck({ ...passed(checks(0.8, 1)), verdict: "belowBar" })?.metric).toBe("timingEvenness");
+    expect(decidingCheck({ ...passed(checks(0.95, 0.5)), verdict: "belowBar" })?.metric).toBe("notesHeard");
+    // 87 against 85 is closer than 100 against 90.
+    expect(decidingCheck(passed(checks(0.87, 1)))?.metric).toBe("timingEvenness");
+    expect(decidingCheck(passed(checks(0.99, 0.92)))?.metric).toBe("notesHeard");
+  });
+
+  it("says once, in one sentence, that the pitches were not checked", () => {
+    const line = takeLine(passed(checks(0.9, 1), ["noteIdentity"]), measures(160), 80);
+    expect(line.key).toBe("session.coach.passedTiming");
+    expect(takeLine(passed(checks(0.9, 1), ["noteIdentity"]), measures(150), 80).key).toBe("session.coach.passedTimingSome");
+    expect(takeLine(passed(checks(0.9, 1)), measures(160), 80).key).toBe("session.coach.passed");
+  });
+
+  it("draws every bar against the floors, and marks the stretch that held", () => {
+    const strip = barStrip(
+      { passBars: [{ metric: "timingEvenness", min: 0.85, overBars: 8 }, { metric: "notesHeard", min: 0.9, overBars: 8 }] } as never,
+      {
+        ...measures(160, [
+          { due: 16, heard: 16, evenness: 0.9 },
+          { due: 16, heard: 10, evenness: 0.9 },
+          { due: 16, heard: 16, evenness: 0.7 },
+          { due: 2, heard: 2, evenness: null },
+        ]),
+        pass: { verdict: "failed", windowBars: 8, finishedBars: 4, heldBars: 1, heldFromBar: 0, countsForCleanTempo: false, checks: [], notAssessed: [] },
+      },
+    );
+    expect(strip?.cells.map((c) => c.state)).toEqual(["met", "missed", "missed", "thin"]);
+    expect(strip?.held).toEqual({ from: 1, count: 1 });
+    expect(barStrip({ passBars: [] } as never, measures(160))).toBeNull();
   });
 });

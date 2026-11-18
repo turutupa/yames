@@ -146,7 +146,7 @@
       "edge": "도달한 템포인 {{bpm}} BPM에서 시작합니다. 통과 기준을 넘는 테이크마다 한 단계씩 올라갑니다.",
       "edgeCheck": "클린 템포를 확인합니다. 지난번에는 {{clean}} BPM이었습니다.",
       "edgeFirst": "클린 템포를 찾습니다. {{bpm}} BPM에서 시작해 통과 기준을 넘는 동안 계속 올라갑니다.",
-      "chosen": "{{step}}에서 직접 고른 과제입니다.",
+      "chosen": "{{step}}에서 고른 과제.",
       "focusTurn": "오늘은 {{path}} 차례입니다.",
       "focusTurnAway": "오늘은 {{path}}이(가) 중심입니다. {{days}}일 동안 연주하지 않았어요.",
       "keepWarm": "{{path}} 감 유지: 마지막 연주는 {{days}}일 전입니다.",
@@ -192,7 +192,7 @@
       "early": "빠름",
       "stripLabel": "최근 음과 그리드 비교",
       "countIn": "카운트인 중",
-      "honest": "음과 타이밍은 들립니다. 다운업은 직접 챙기세요. 피킹 방향은 들리지 않습니다.",
+      "honest": "음과 그 타이밍을 듣고 있어요. 피킹 방향은 들을 수 없으니 그건 직접 챙겨 주세요.",
       "noInput": "아직 기타 소리가 들리지 않습니다. 채점하려면 마이크나 다이렉트 입력이 필요합니다.",
       "checkSound": "소리 확인",
       "engineTrouble": "사운드 엔진이 이 과제를 불러오지 못했습니다. 나갔다가 다시 시작하세요.",
@@ -204,23 +204,36 @@
       "bandMicHint": "마이크로는 밴드 소리를 당신의 음으로 듣게 되므로 꺼진 채 시작합니다. 헤드폰을 쓰면 올리세요.",
       "skip": "건너뛰기",
       "skipped": "건너뜀",
-      "honestTiming": "타이밍은 듣지만 어떤 음인지는 듣지 않아요. 다운-업은 당신 몫이에요: 피킹 방향은 들을 수 없어요."
+      "honestTiming": "타이밍을 듣고 있고, 음높이는 듣지 않아요. 피킹 방향은 들을 수 없으니 그건 직접 챙겨 주세요.",
+      "goAgainUp": "다시, {{bpm}} BPM으로 올려서",
+      "slowerFloor": "이 과제에서 가장 느린 템포예요",
+      "fasterCeiling": "이 과제에서 가장 빠른 템포예요",
+      "tempoLocked": "테스트는 통과 템포로 연주하므로 바꿀 수 없어요"
     },
     "result": {
       "kick": "테이크 {{take}} · {{title}} · {{bpm}} BPM · {{bars}}마디",
       "barMet": "통과 기준 달성",
-      "barIs": "통과 기준은 {{bar}}%",
-      "barIsCount": "통과 기준은 {{bar}}",
       "cleanFirst": "클린 템포: {{bpm}} BPM.",
       "cleanMoved": "클린 템포: {{from}} → {{bpm}} BPM.",
-      "unmeasuredNotes": "타이밍은 확인했습니다. 음이 충분히 또렷하게 들리지 않아 맞는 음이었는지 말할 수 없어서, 이번에는 채점하지 않았습니다.",
-      "againSame": "다시, {{bpm}} BPM",
       "moveOn": "넘어가기",
       "fairAsk": "이 평가는 공정했나요?",
       "fairYes": "예",
       "fairNo": "아니요",
       "fairThanksYes": "감사합니다: '공정함'으로 저장했어요. 바꾸려면 아니요를 누르세요.",
-      "fairThanksNo": "감사합니다: '공정하지 않음'으로 저장했어요. 바꾸려면 예를 누르세요."
+      "fairThanksNo": "감사합니다: '공정하지 않음'으로 저장했어요. 바꾸려면 예를 누르세요.",
+      "barChip": "기준 {{bar}}%",
+      "barChipCount": "기준: {{bar}}개 이하",
+      "barMissed": "기준 미달",
+      "decidedPass": "기준에 가장 가까웠던 것",
+      "decidedMiss": "발목을 잡은 것",
+      "notesNotChecked": "맞는 음: 이번엔 확인 못 함",
+      "barsTitle": "마디별",
+      "barsHeld": "{{count}}마디 연속 유지",
+      "barsHeld_other": "{{count}}마디 연속 유지",
+      "barsMet": "{{of}}마디 중 {{count}}마디 유지",
+      "barHeld": "{{n}}마디: 유지",
+      "barSlipped": "{{n}}마디: 흔들림",
+      "barThin": "{{n}}마디: 판단하기엔 음이 너무 적음"
     },
     "edge": {
       "kick": "한계 찾기",
@@ -233,22 +246,27 @@
       "offerTitle": "여기서 한계 찾기",
       "offerBody": "{{bpm}} BPM부터 통과 기준을 넘는 동안 올라가며, 클린 템포는 유지됩니다. {{minutes}}분이 추가됩니다.",
       "start": "한계 찾기",
-      "recap": "한계"
+      "recap": "한계",
+      "rungLabel": "{{bpm}} BPM: 달성 {{met}}, 미달 {{missed}}"
     },
     "coach": {
-      "passed": "{{expected}}음 중 {{heard}}음이 들렸고, {{bpm}} BPM에서 {{bars}}마디 연속으로 고릅니다.",
-      "passedExtras": "{{expected}}음 중 {{heard}}음이 들렸고 {{bars}}마디 연속으로 고르지만, 불필요한 음이 {{extras}}개 있었습니다.",
+      "passed": "모든 음이 제자리에, {{bpm}} BPM에서 {{bars}}마디 연속으로 고르게.",
+      "passedExtras": "{{bars}}마디 연속으로 고르게, 중간에 군음 {{extras}}개.",
       "heardNothing": "아무것도 들리지 않았습니다.",
       "heardLittle": "{{expected}}음 중 {{heard}}음만 들렸습니다.",
       "tooShort": "{{bars}}마디는 판단하기에 너무 짧습니다. 테이크를 끝까지 연주해야 합니다.",
       "ungraded": "이건 채점하지 않습니다. 판단은 직접 하세요.",
       "below": {
-        "even": "고르기는 {{value}}%. {{expected}}음 중 {{heard}}음이 들렸습니다. 같은 음, 같은 템포로 다시.",
+        "even": "고르기 {{value}}%, 기준은 {{bar}}%. 음은 다 있었고, 문제는 음 사이 간격이에요. 같은 음, 같은 템포로 다시.",
         "heard": "{{expected}}음 중 {{heard}}음만 들렸고, 음이 없으면 타이밍도 통과할 수 없습니다.",
         "extras": "예상하지 못한 음이 {{extras}}개 있었습니다. 안 치는 줄이 울리면 뮤트하세요.",
         "accents": "표시된 액센트 중 {{value}}%가 앞뒤 음보다 크게 나왔습니다.",
-        "notes": "음정을 알아들은 음 중 {{value}}%가 악보대로였습니다. 같은 음, 같은 템포로, 프렛을 잘 보며 다시."
-      }
+        "notes": "음정을 알아들은 음 중 {{value}}%가 악보대로였습니다. 같은 음, 같은 템포로, 프렛을 잘 보며 다시.",
+        "evenSome": "고르기 {{value}}%, 기준은 {{bar}}%, 그리고 {{missed}}음이 안 났어요. 같은 음, 같은 템포로, 한 음도 빠짐없이."
+      },
+      "passedSome": "{{expected}}음 중 {{heard}}음이 들어갔고, {{bpm}} BPM에서 {{bars}}마디 연속으로 고르게.",
+      "passedTiming": "{{heard}}음 모두 타이밍에 맞게, {{bars}}마디 연속. 이번엔 음높이는 확인하지 못했어요.",
+      "passedTimingSome": "{{expected}}음 중 {{heard}}음이 타이밍에 맞게, {{bars}}마디 연속. 이번엔 음높이는 확인하지 못했어요."
     },
     "noCatch": {
       "kick": "이 테이크는 채점 없음",
@@ -275,11 +293,11 @@
         "drill": "템포 올리기 시작"
       },
       "how": {
-        "warmUp": "클릭에 맞춰 연주하세요. 여기서는 채점하지 않으니 편하게 하세요.",
-        "yourTurn": "클릭에 맞춰 내 방식대로 연주하세요. 여기서는 확인하지 않습니다.",
-        "jam": "밴드와 함께 연주하세요. 여기서는 채점하지 않습니다.",
-        "finisher": "밴드 위에서 반복하며 연주하세요. 여기서는 채점하지 않습니다.",
-        "drill": "연주하는 동안 클릭이 빨라집니다. 여기서는 채점하지 않습니다."
+        "warmUp": "클릭에 맞춰 연주하며 몸을 풀어요.",
+        "yourTurn": "클릭에 맞춰, 당신 방식대로 연주하세요.",
+        "jam": "밴드와 함께 연주하세요.",
+        "finisher": "밴드 위에서 반복해서 연주하세요.",
+        "drill": "연주할수록 클릭이 빨라져요."
       },
       "skip": "건너뛰기",
       "startKeys": "Enter, Space 또는 페달로 시작합니다."
@@ -305,7 +323,20 @@
       "takesAt_other": "테이크 {{count}}개, 마지막은 {{bpm}} BPM",
       "noTakes": "이번 세션에는 테이크가 없습니다.",
       "notGraded": "워밍업과 잼은 채점하지 않았습니다.",
-      "nextSession": "다음 세션, {{minutes}}분"
+      "nextSession": "다음 세션, {{minutes}}분",
+      "headClean": "{{title}}의 클린 템포가 {{bpm}} BPM으로 올랐어요.",
+      "headPlayed": "{{count}}분 연습, 다 쌓이고 있어요.",
+      "headPlayed_other": "{{count}}분 연습, 다 쌓이고 있어요.",
+      "statMinutesLabel": "연습 시간",
+      "statMinutes": "{{count}}분",
+      "statTakesLabel": "테이크",
+      "statStreakLabel": "연속",
+      "statStreak": "{{count}}일",
+      "statStreak_other": "{{count}}일",
+      "fairAsk": "오늘 채점이 공정했나요?",
+      "backTo": "{{place}}(으)로 돌아가기",
+      "more": "5분 더",
+      "keepGoing": "계속하기: {{title}}"
     },
     "paths": {
       "title": "코스",
@@ -431,8 +462,8 @@
       "handOpen": "손: 개방 포지션, 검지는 1프렛 위.",
       "viewHint": "언제든지 보기를 바꿀 수 있어요",
       "left": "남음",
-      "notGraded": "채점 없음. {{time}} 후 끝나요. 그다음 다시, 또는 다음으로.",
-      "notChecked": "확인 없음. {{time}} 후 끝나요. 그다음 다시, 또는 다음으로.",
+      "notGraded": "{{time}} 후 끝나요. 그다음 다시, 또는 다음으로.",
+      "notChecked": "{{time}} 후 끝나요. 그다음 다시, 또는 다음으로.",
       "pausedFoot": "일시정지됨. 시계가 기다려요. 더 느리게 또는 빠르게 한 뒤 다시 시작하세요.",
       "pausedFootNeck": "일시정지됨. 모든 마디는 탭 보기({{key}})에 있어요. 더 느리게 또는 빠르게 한 뒤 다시 시작하세요.",
       "switchAny": "워밍업 중에는 언제든 보기를 바꿀 수 있어요",
@@ -445,7 +476,7 @@
       "restart": "처음부터",
       "back": "다시: {{title}}",
       "ended": "끝났어요. 다시, 또는 다음으로.",
-      "endedFoot": "채점 없음. 준비되면 다시 하거나 넘어가세요.",
+      "endedFoot": "다시 하거나, 준비되면 다음으로.",
       "again": "다시",
       "beatOf": "{{of}}박 중 {{n}}박"
     },

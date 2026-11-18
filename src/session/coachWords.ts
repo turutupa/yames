@@ -93,15 +93,88 @@ export function displayBar(check: Pick<BarCheck, "metric" | "min" | "max">): num
   return check.min === undefined ? null : Math.round(check.min * 100);
 }
 
-/** One sentence after a Take: the thing that matters most. */
+/**
+ * The check that decided a Take (UX audit SES-3): on a miss, the first bar not
+ * met; on a pass, the one that came closest to its bar. The result leads with
+ * it whichever way the Take went, so the big number always means "this is what
+ * the verdict turned on", never "% even" on one screen and "% heard" on the next.
+ */
+export function decidingCheck(grade: TakeGrade): BarCheck | null {
+  const measured = grade.checks.filter((c) => c.met !== null && c.value !== null);
+  const failed = measured.find((c) => c.met === false);
+  if (failed) return failed;
+  let best: BarCheck | null = null;
+  let bestMargin = Number.POSITIVE_INFINITY;
+  for (const c of measured) {
+    const value = displayValue(c);
+    const bar = displayBar(c);
+    if (value === null || bar === null) continue;
+    const margin = c.metric === "extraNotes" ? bar - value : value - bar;
+    if (margin < bestMargin) {
+      best = c;
+      bestMargin = margin;
+    }
+  }
+  return best ?? grade.headline;
+}
+
+/** One bar of a Take as the result's strip draws it. */
+export type BarCell = {
+  /** From 1, as the player counts. */
+  n: number;
+  /** Held its bars; slipped; or too few notes in it to say. */
+  state: "met" | "missed" | "thin";
+};
+
+/**
+ * Bar by bar (UX audit SES-3): each finished bar against the Exercise's
+ * evenness and notes-heard floors, from the scorer's own per-bar figures, and
+ * the stretch the scorer judged as held. Null when the Take has no per-bar data.
+ */
+export function barStrip(
+  exercise: Pick<Exercise, "passBars">,
+  measures: TakeMeasures,
+): { cells: BarCell[]; held: { from: number; count: number } | null } | null {
+  const bars = measures.perBar;
+  if (!bars || bars.length === 0) return null;
+  const even = exercise.passBars.find((b) => b.metric === "timingEvenness")?.min;
+  const heard = exercise.passBars.find((b) => b.metric === "notesHeard")?.min;
+  const cells: BarCell[] = bars.map((bar, i) => {
+    if (bar.due === 0) return { n: i + 1, state: "thin" };
+    const heardOk = heard === undefined || bar.heard / bar.due >= heard;
+    if (bar.evenness === null) {
+      // Too few notes due to read evenness from: judged on the notes alone.
+      if (bar.due < 3) return { n: i + 1, state: heardOk ? "thin" : "missed" };
+      return { n: i + 1, state: "missed" };
+    }
+    const evenOk = even === undefined || bar.evenness >= even;
+    return { n: i + 1, state: heardOk && evenOk ? "met" : "missed" };
+  });
+  const pass = measures.pass;
+  const held =
+    pass && pass.heldBars > 0 && pass.heldFromBar !== undefined
+      ? { from: pass.heldFromBar + 1, count: pass.heldBars }
+      : null;
+  return { cells, held };
+}
+
+/**
+ * One sentence after a Take: why it went the way it went, in words.
+ *
+ * Honest about what was checked (UX audit SES-2): when the pitches could not
+ * be checked, the same sentence says so, rather than "heard 160 of 160" beside
+ * a second paragraph that says the notes could not be heard.
+ */
 export function takeLine(grade: TakeGrade, measures: TakeMeasures, bpm: number): Line {
   const values = {
     bpm,
     heard: measures.heard,
     expected: measures.expected,
+    missed: Math.max(0, measures.expected - measures.heard),
     bars: measures.barsPlayed,
     extras: measures.extras,
   };
+  const pitchUnchecked = grade.unmeasured.includes("noteIdentity");
   switch (grade.verdict) {
     case "notCaught":
       return {
@@ -112,18 +185,35 @@ export function takeLine(grade: TakeGrade, measures: TakeMeasures, bpm: number):
       return { key: "session.coach.tooShort", values };
     case "ungraded":
       return { key: "session.coach.ungraded", values };
-    case "passed":
+    case "passed": {
       // "Even across" is the stretch that held, which with a Take's slack bars
       // (`grade.ts` `TAKE_SLACK_BARS`) can be shorter than the Take.
+      const held = { ...values, bars: measures.pass?.heldBars || measures.barsPlayed };
+      if (pitchUnchecked) {
+        return {
+          key: measures.heard >= measures.expected ? "session.coach.passedTiming" : "session.coach.passedTimingSome",
+          values: held,
+        };
+      }
       return {
-        key: measures.extras > 0 ? "session.coach.passedExtras" : "session.coach.passed",
-        values: { ...values, bars: measures.pass?.heldBars || measures.barsPlayed },
+        key:
+          measures.extras > 0
+            ? "session.coach.passedExtras"
+            : measures.heard >= measures.expected
+              ? "session.coach.passed"
+              : "session.coach.passedSome",
+        values: held,
       };
+    }
     case "belowBar": {
-      const check = grade.headline;
+      const check = decidingCheck(grade);
       const metric = check ? metricKey(check.metric) : "even";
+      const key =
+        metric === "even" && measures.heard < measures.expected
+          ? "session.coach.below.evenSome"
+          : `session.coach.below.${metric}`;
       return {
-        key: `session.coach.below.${metric}`,
+        key,
         values: {
           ...values,
           value: (check && displayValue(check)) ?? 0,

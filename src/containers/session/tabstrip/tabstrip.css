@@ -235,3 +235,31 @@
   stroke-width: 1;
 }
 
+
+/* Technique marks (card #40): the letters on the line, haloed like the
+   numbers so the line breaks round them; quieter than the numbers, which are
+   what the hand reads first. */
+.tabstrip-tech {
+  font-family: var(--ts-num);
+  font-weight: 700;
+  fill: var(--ts-quiet);
+  stroke: var(--ts-bg);
+  stroke-width: calc(var(--ts-fret) * 0.18);
+  stroke-linejoin: round;
+  paint-order: stroke;
+}
+/* Above the line (a bend's target): nothing to break, so no halo. */
+.tabstrip-tech[data-free] {
+  stroke: none;
+}
+.tabstrip-slur,
+.tabstrip-vib {
+  fill: none;
+  stroke: var(--ts-quiet);
+  stroke-linecap: round;
+}
+.tabstrip-seg[data-rel="next"] .tabstrip-techs { opacity: 0.6; }
+.tabstrip-seg[data-rel="past"] .tabstrip-techs,
+.tabstrip-seg[data-rel="later"] .tabstrip-techs { opacity: 0.3; }
+/* Inside the amber column: the halo in the column's colour, as the number's is. */
+.tabstrip-note[data-current] .tabstrip-tech:not([data-free]) { stroke: var(--ts-col); }

@@ -44,6 +44,11 @@ export type TakeMeasures = {
   barsPlayed: number;
   /** Evenness per bar, when the scorer reports it. */
   barEvenness: number[] | null;
+  /**
+   * Each finished bar as the scorer saw it, for the result's bar-by-bar strip
+   * (UX audit SES-3). Absent from a build, or a Take, without per-bar data.
+   */
+  perBar?: Array<{ due: number; heard: number; evenness: number | null }>;
   /** Enough was heard to give a grade at all. */
   caught: boolean;
   /** Why not, when the scorer said. Absent from a build that does not say. */
@@ -143,6 +148,9 @@ function fromGrade(
     noteIdentity: caught ? noteIdentityOf(grade.pass) : null,
     barsPlayed: context.barsPlayed,
     barEvenness: caught ? barsOf(grade) : null,
+    ...(caught && grade.bars.length > 0
+      ? { perBar: grade.bars.map((b) => ({ due: b.due, heard: b.heard, evenness: b.evenness })) }
+      : {}),
     caught,
     ...(grade.noCatchReason ? { noCatchReason: grade.noCatchReason } : {}),
     ...(grade.pass ? { pass: grade.pass } : {}),

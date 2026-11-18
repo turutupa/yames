@@ -44,6 +44,15 @@ const DELIBERATELY_REMOVED: readonly string[] = [
   "session.progress.chartLabel",
   "session.progress.noClean",
   "session.progress.exercises",
+  // The Session's result polish (UX audit SES-2 to SES-4, 2026-11-18). "The
+  // bar is 85%" is the ✓/✗ bar chip beside the number now; the paragraph
+  // saying the notes could not be heard is one honest clause in the coach's
+  // line plus a "Right notes: not checked" row; "Again, 80 BPM" is "Go again,
+  // 80 BPM", the same words as the big button.
+  "session.result.barIs",
+  "session.result.barIsCount",
+  "session.result.unmeasuredNotes",
+  "session.result.againSame",
 ];
 
 function englishKeys(): string[] {

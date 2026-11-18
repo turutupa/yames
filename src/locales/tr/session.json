@@ -146,7 +146,7 @@
       "edge": "Ulaştığın tempodan, {{bpm}} BPM. Çıtayı geçen her denemeden sonra bir basamak yükselir.",
       "edgeCheck": "Temiz temponu kontrol etmek için. Geçen sefer {{clean}} BPM idi.",
       "edgeFirst": "Temiz temponu bulmak için. {{bpm}} BPM'den başlar ve çıtayı geçtikçe yükselir.",
-      "chosen": "Bunu sen seçtin, {{step}} içinden.",
+      "chosen": "Senin seçimin, {{step}} içinden.",
       "focusTurn": "Bugün {{path}} önde: sıra onda.",
       "focusTurnAway": "Bugün {{path}} önde: {{days}} gündür çalmadın.",
       "keepWarm": "{{path}}, unutmamak için: en son {{days}} gün önce çalındı.",
@@ -192,7 +192,7 @@
       "early": "erken",
       "stripLabel": "Son notalar, ızgaraya göre",
       "countIn": "Sayım",
-      "honest": "Notaları ve zamanlamayı duyuyorum. Aşağı-yukarı sana kalmış: pena yönünü duyamam.",
+      "honest": "Notaları ve zamanlamalarını dinliyorum. Pena yönünü duyamam, onu sen takip et.",
       "noInput": "Gitarını henüz duyamıyorum. Notlama için mikrofon ya da doğrudan giriş gerekir.",
       "checkSound": "Sesimi kontrol et",
       "engineTrouble": "Ses motoru bu alıştırmayı alamadı. Çık ve yeniden başla.",
@@ -204,23 +204,36 @@
       "bandMicHint": "Mikrofonla grubu senin notaların sanırım, o yüzden kapalı başlar. Kulaklık takınca sesini aç.",
       "skip": "Bunu atla",
       "skipped": "Atlandı",
-      "honestTiming": "Zamanlamanı duyuyorum, hangi notalar olduğunu değil. Aşağı-yukarı sende: pena yönünü duyamıyorum."
+      "honestTiming": "Zamanlamanı dinliyorum, perdeleri değil. Pena yönünü duyamam, onu sen takip et.",
+      "goAgainUp": "Tekrar, {{bpm}} BPM'ye çıkarak",
+      "slowerFloor": "Bu alıştırmanın en yavaş temposu zaten bu",
+      "fasterCeiling": "Bu alıştırmanın en hızlı temposu zaten bu",
+      "tempoLocked": "Sınav geçme temposunda çalınır, bu yüzden sabit kalır"
     },
     "result": {
       "kick": "Deneme {{take}} · {{title}} · {{bpm}} BPM · {{bars}} ölçü",
       "barMet": "Çıta geçildi",
-      "barIs": "Çıta %{{bar}}",
-      "barIsCount": "Çıta {{bar}}",
       "cleanFirst": "Temiz tempo: {{bpm}} BPM.",
       "cleanMoved": "Temiz tempo: {{from}} → {{bpm}} BPM.",
-      "unmeasuredNotes": "Zamanlamaya baktım. Notaları doğru olup olmadıklarını söyleyecek kadar net duyamadım, bu yüzden bu sefer notlanmadı.",
-      "againSame": "Tekrar, {{bpm}} BPM",
       "moveOn": "Devam et",
       "fairAsk": "Bu not adil miydi?",
       "fairYes": "Evet",
       "fairNo": "Hayır",
       "fairThanksYes": "Teşekkürler: adil olarak saklandı. Değiştirmek için Hayır'a dokun.",
-      "fairThanksNo": "Teşekkürler: adil değil olarak saklandı. Değiştirmek için Evet'e dokun."
+      "fairThanksNo": "Teşekkürler: adil değil olarak saklandı. Değiştirmek için Evet'e dokun.",
+      "barChip": "Çıta %{{bar}}",
+      "barChipCount": "Çıta: en fazla {{bar}}",
+      "barMissed": "Çıta geçilmedi",
+      "decidedPass": "Çıtaya en yakın olan",
+      "decidedMiss": "Geri tutan",
+      "notesNotChecked": "Doğru notalar: bu sefer kontrol edilmedi",
+      "barsTitle": "Ölçü ölçü",
+      "barsHeld": "Art arda {{count}} ölçü tutuldu",
+      "barsHeld_other": "Art arda {{count}} ölçü tutuldu",
+      "barsMet": "{{of}} ölçüden {{count}} tanesi tutuldu",
+      "barHeld": "{{n}}. ölçü: tutuldu",
+      "barSlipped": "{{n}}. ölçü: kaydı",
+      "barThin": "{{n}}. ölçü: değerlendirmek için nota az"
     },
     "edge": {
       "kick": "Sınırımı bul",
@@ -233,22 +246,27 @@
       "offerTitle": "Buradan sınırımı bul",
       "offerBody": "Çıtayı geçtikçe {{bpm}} BPM'den yükselir ve temiz temponu korur. {{minutes}} dakika ekler.",
       "start": "Sınırımı bul",
-      "recap": "Sınır"
+      "recap": "Sınır",
+      "rungLabel": "{{bpm}} BPM: {{met}} geçti, {{missed}} kaldı"
     },
     "coach": {
-      "passed": "{{expected}} notadan {{heard}} tanesi duyuldu, {{bpm}} BPM'de art arda {{bars}} ölçü boyunca düzgün.",
-      "passedExtras": "{{expected}} notadan {{heard}} tanesi duyuldu, art arda {{bars}} ölçü boyunca düzgün, {{extras}} fazla nota ile.",
+      "passed": "Her nota yerinde, {{bpm}} BPM'de art arda {{bars}} ölçü boyunca düzgün.",
+      "passedExtras": "Art arda {{bars}} ölçü boyunca düzgün, yol boyunca {{extras}} fazla nota.",
       "heardNothing": "Hiçbir şey duymadım.",
       "heardLittle": "{{expected}} notadan {{heard}} tanesini duydum.",
       "tooShort": "Bu {{bars}} ölçüydü, değerlendirmek için çok kısa. Denemenin tamamı gerekiyor.",
       "ungraded": "Bu notlanmıyor. Hakem sensin.",
       "below": {
-        "even": "Düzgünlük %{{value}} idi. {{expected}} notadan {{heard}} tanesi duyuldu. Aynı notalar, aynı tempo.",
+        "even": "Çıta %{{bar}} iken düzgünlük %{{value}}. Notaların hepsi vardı; sorun aralarındaki boşlukta. Aynı notalar, aynı tempo.",
         "heard": "{{expected}} notadan {{heard}} tanesini duydum; onlar olmadan zamanlama geçemez.",
         "extras": "Beklemediğim {{extras}} nota. Boştaki teller çınlıyorsa onları sustur.",
         "accents": "İşaretli aksanların %{{value}} kadarı çevresindeki notalardan yüksek çıktı.",
-        "notes": "Perdesini seçebildiğim notaların %{{value}}'i yazılanlardı. Aynı notalar, aynı tempo, perdelere dikkat."
-      }
+        "notes": "Perdesini seçebildiğim notaların %{{value}}'i yazılanlardı. Aynı notalar, aynı tempo, perdelere dikkat.",
+        "evenSome": "Çıta %{{bar}} iken düzgünlük %{{value}}, ve {{missed}} nota çıkmadı. Aynı notalar, aynı tempo, her biri."
+      },
+      "passedSome": "{{expected}} notadan {{heard}} tanesi yerinde, {{bpm}} BPM'de art arda {{bars}} ölçü boyunca düzgün.",
+      "passedTiming": "{{heard}} notanın hepsi zamanında, art arda {{bars}} ölçü. Bu sefer perdeleri kontrol edemedim.",
+      "passedTimingSome": "{{expected}} notadan {{heard}} tanesi zamanında, art arda {{bars}} ölçü. Bu sefer perdeleri kontrol edemedim."
     },
     "noCatch": {
       "kick": "Bu denemeye not yok",
@@ -275,11 +293,11 @@
         "drill": "Hız rampasını başlat"
       },
       "how": {
-        "warmUp": "Klikle birlikte çal. Burada hiçbir şey puanlanmaz, rahatla.",
-        "yourTurn": "Klikle birlikte, kendi tarzınla çal. Burada hiçbir şey kontrol edilmez.",
-        "jam": "Grupla birlikte çal. Burada hiçbir şey puanlanmaz.",
-        "finisher": "Grubun üzerinde, döngüde çal. Burada hiçbir şey puanlanmaz.",
-        "drill": "Sen çaldıkça klik hızlanır. Burada hiçbir şey puanlanmaz."
+        "warmUp": "Klikle birlikte çal ve gevşe.",
+        "yourTurn": "Klikle birlikte, kendi tarzında çal.",
+        "jam": "Grupla birlikte çal.",
+        "finisher": "Grubun üstünde, döngüde çal.",
+        "drill": "Çaldıkça klik hızlanır."
       },
       "skip": "Atla",
       "startKeys": "Enter, Boşluk veya pedal başlatır."
@@ -305,7 +323,20 @@
       "takesAt_other": "{{count}} deneme, sonuncusu {{bpm}} BPM'de",
       "noTakes": "Bu seansta deneme yok.",
       "notGraded": "Isınma ve jam notlanmadı.",
-      "nextSession": "Sonraki seans, {{minutes}} dk"
+      "nextSession": "Sonraki seans, {{minutes}} dk",
+      "headClean": "{{title}} için temiz tempo {{bpm}} BPM'ye çıktı.",
+      "headPlayed": "{{count}} dakika çalındı, ve sayılır.",
+      "headPlayed_other": "{{count}} dakika çalındı, ve sayılır.",
+      "statMinutesLabel": "Çalınan",
+      "statMinutes": "{{count}} dk",
+      "statTakesLabel": "Denemeler",
+      "statStreakLabel": "Seri",
+      "statStreak": "{{count}} gün",
+      "statStreak_other": "{{count}} gün",
+      "fairAsk": "Bugünkü puanlar adil miydi?",
+      "backTo": "{{place}} ekranına dön",
+      "more": "5 dakika daha",
+      "keepGoing": "Devam et: {{title}}"
     },
     "paths": {
       "title": "Yollar",
@@ -431,8 +462,8 @@
       "handOpen": "El: açık pozisyon, işaret parmağı 1. perdenin üstünde.",
       "viewHint": "Görünümü istediğin zaman değiştir",
       "left": "kaldı",
-      "notGraded": "Notlanmaz. {{time}} sonra biter; sonra yeniden ya da devam.",
-      "notChecked": "Kontrol edilmez. {{time}} sonra biter; sonra yeniden ya da devam.",
+      "notGraded": "{{time}} sonra biter; sonra tekrar ya da devam.",
+      "notChecked": "{{time}} sonra biter; sonra tekrar ya da devam.",
       "pausedFoot": "Duraklatıldı. Saat seni bekliyor; daha yavaş ya da hızlı, sonra Devam.",
       "pausedFootNeck": "Duraklatıldı. Bütün ölçüler Tab görünümünde ({{key}}); daha yavaş ya da hızlı, sonra Devam.",
       "switchAny": "Isınmada görünümü istediğin zaman değiştir",
@@ -445,8 +476,8 @@
       "restart": "Baştan",
       "back": "Yeniden: {{title}}",
       "ended": "Bitti. Yeniden ya da sıradakine.",
-      "endedFoot": "Notlanmaz. Yeniden çal ya da hazır olunca devam et.",
-      "again": "Yeniden",
+      "endedFoot": "Tekrar, ya da hazır olunca devam.",
+      "again": "Tekrar",
       "beatOf": "Vuruş {{n}} / {{of}}"
     },
     "runway": {
