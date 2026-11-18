@@ -111,7 +111,9 @@
         "keepWarmYesterday": "Żeby nie wystygło, grane wczoraj.",
         "keepWarmToday": "Żeby nie wystygło, już grane dzisiaj.",
         "keepWarmNew": "Pierwszy przedsmak."
-      }
+      },
+      "from": "{{path}} · {{level}} · Krok {{step}}",
+      "fromNoLevel": "{{path}} · Krok {{step}}"
     },
     "why": {
       "firstEver": "To twoja pierwsza, więc zaczyna się od {{bpm}} BPM. Chodzi o rytm, nie o szybkość.",

@@ -110,7 +110,9 @@
         "keepWarmYesterday": "Para não esfriar, tocado ontem.",
         "keepWarmToday": "Para não esfriar, já tocado hoje.",
         "keepWarmNew": "Uma primeira provada."
-      }
+      },
+      "from": "{{path}} · {{level}} · Etapa {{step}}",
+      "fromNoLevel": "{{path}} · Etapa {{step}}"
     },
     "why": {
       "firstEver": "É a sua primeira, então começa a {{bpm}} BPM. Aqui o que conta é o tempo, não a velocidade.",

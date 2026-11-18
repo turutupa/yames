@@ -109,7 +109,9 @@
         "keepWarmYesterday": "Bleibt warm, zuletzt gestern gespielt.",
         "keepWarmToday": "Bleibt warm, heute schon gespielt.",
         "keepWarmNew": "Ein erster Vorgeschmack."
-      }
+      },
+      "from": "{{path}} · {{level}} · Schritt {{step}}",
+      "fromNoLevel": "{{path}} · Schritt {{step}}"
     },
     "why": {
       "firstEver": "Deine erste, deshalb geht es bei {{bpm}} BPM los. Hier geht es ums Timing, nicht ums Tempo.",

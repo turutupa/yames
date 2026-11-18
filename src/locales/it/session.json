@@ -110,7 +110,9 @@
         "keepWarmYesterday": "Per tenerlo caldo, suonato ieri.",
         "keepWarmToday": "Per tenerlo caldo, già suonato oggi.",
         "keepWarmNew": "Un primo assaggio."
-      }
+      },
+      "from": "{{path}} · {{level}} · Tappa {{step}}",
+      "fromNoLevel": "{{path}} · Tappa {{step}}"
     },
     "why": {
       "firstEver": "È la tua prima, quindi si parte a {{bpm}} BPM. Qui conta il tempo, non la velocità.",

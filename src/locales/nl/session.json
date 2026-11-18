@@ -109,7 +109,9 @@
         "keepWarmYesterday": "Warm houden, gisteren gespeeld.",
         "keepWarmToday": "Warm houden, vandaag al gespeeld.",
         "keepWarmNew": "Een eerste kennismaking."
-      }
+      },
+      "from": "{{path}} · {{level}} · Stap {{step}}",
+      "fromNoLevel": "{{path}} · Stap {{step}}"
     },
     "why": {
       "firstEver": "Je eerste, dus hij begint op {{bpm}} BPM. Het gaat hier om timing, niet om snelheid.",

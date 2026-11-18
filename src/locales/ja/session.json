@@ -109,7 +109,9 @@
         "keepWarmYesterday": "感覚を保つため、最後は昨日。",
         "keepWarmToday": "感覚を保つため、今日すでに弾きました。",
         "keepWarmNew": "まずはお試し。"
-      }
+      },
+      "from": "{{path}} · {{level}} · ステップ {{step}}",
+      "fromNoLevel": "{{path}} · ステップ {{step}}"
     },
     "why": {
       "firstEver": "はじめてなので {{bpm}} BPM から。速さではなく、タイミングの練習です。",

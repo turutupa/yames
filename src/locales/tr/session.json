@@ -109,7 +109,9 @@
         "keepWarmYesterday": "Sıcak kalsın, en son dün çalındı.",
         "keepWarmToday": "Sıcak kalsın, bugün zaten çalındı.",
         "keepWarmNew": "İlk tadımlık."
-      }
+      },
+      "from": "{{path}} · {{level}} · Adım {{step}}",
+      "fromNoLevel": "{{path}} · Adım {{step}}"
     },
     "why": {
       "firstEver": "İlk seferin, o yüzden {{bpm}} BPM'den başlıyor. Mesele hız değil, zamanlama.",

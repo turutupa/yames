@@ -109,7 +109,9 @@
         "keepWarmYesterday": "Keeping it warm, last played yesterday.",
         "keepWarmToday": "Keeping it warm, played earlier today.",
         "keepWarmNew": "A first taste."
-      }
+      },
+      "from": "{{path}} · {{level}} · Step {{step}}",
+      "fromNoLevel": "{{path}} · Step {{step}}"
     },
     "why": {
       "firstEver": "Your first one, so it starts at {{bpm}} BPM. This is about time, not speed.",

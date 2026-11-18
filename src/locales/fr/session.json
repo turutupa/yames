@@ -110,7 +110,9 @@
         "keepWarmYesterday": "Pour garder la main, joué hier.",
         "keepWarmToday": "Pour garder la main, déjà joué aujourd'hui.",
         "keepWarmNew": "Un premier aperçu."
-      }
+      },
+      "from": "{{path}} · {{level}} · Étape {{step}}",
+      "fromNoLevel": "{{path}} · Étape {{step}}"
     },
     "why": {
       "firstEver": "C'est ta première, donc on commence à {{bpm}} BPM. Ici, c'est le placement qui compte, pas la vitesse.",

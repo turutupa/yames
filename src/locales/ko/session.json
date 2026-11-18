@@ -109,7 +109,9 @@
         "keepWarmYesterday": "감 유지, 마지막 연주는 어제.",
         "keepWarmToday": "감 유지, 오늘 이미 연주했어요.",
         "keepWarmNew": "첫 맛보기."
-      }
+      },
+      "from": "{{path}} · {{level}} · {{step}}단계",
+      "fromNoLevel": "{{path}} · {{step}}단계"
     },
     "why": {
       "firstEver": "처음이니 {{bpm}} BPM에서 시작합니다. 속도가 아니라 타이밍 연습입니다.",

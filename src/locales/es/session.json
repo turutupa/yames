@@ -110,7 +110,9 @@
         "keepWarmYesterday": "Para no perderlo: tocado ayer.",
         "keepWarmToday": "Para no perderlo: ya tocado hoy.",
         "keepWarmNew": "Una primera probada."
-      }
+      },
+      "from": "{{path}} · {{level}} · Paso {{step}}",
+      "fromNoLevel": "{{path}} · Paso {{step}}"
     },
     "why": {
       "firstEver": "Es tu primera, así que empieza a {{bpm}} BPM. Esto va de tiempo, no de velocidad.",

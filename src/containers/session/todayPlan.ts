@@ -17,6 +17,8 @@ import type { Line } from "../../session/coachWords";
 import { reasonLine } from "../../session/coachWords";
 import { kindOfPath } from "../../session/kind";
 import type { PlanStep, Reason } from "../../session/planner";
+import { chosenLevelOf, currentStepOf, levelOfStep } from "../../session/progress";
+import type { PlayerProgress } from "../../session/progress";
 
 export type RoleWord =
   | "warmUp"
@@ -178,4 +180,28 @@ export function ticksOf(total: number): number[] {
   for (let m = 0; m < total; m += 5) ticks.push(m);
   ticks.push(total);
   return ticks;
+}
+
+/**
+ * Where today's plan comes from, one line a Path (acceptance P1-11): "Sweep
+ * Picking · Beginner · Step 1". The Paths in the order the plan first meets
+ * them; a Path in the plan the player no longer follows is left out.
+ */
+export function planSources(
+  steps: readonly PlanStep[],
+  paths: readonly PathDoc[],
+  progress: PlayerProgress,
+): Array<{ pathId: string; title: string; levelId: string | null; step: number }> {
+  const seen: string[] = [];
+  for (const step of steps) {
+    const id = "pathId" in step ? step.pathId : undefined;
+    if (id && !seen.includes(id)) seen.push(id);
+  }
+  return seen.flatMap((id) => {
+    const path = paths.find((p) => p.id === id);
+    if (!path || !path.steps?.length) return [];
+    const current = currentStepOf(progress, path);
+    const level = chosenLevelOf(progress, path) ?? levelOfStep(path, current.id);
+    return [{ pathId: id, title: path.title, levelId: level?.id ?? null, step: current.order }];
+  });
 }

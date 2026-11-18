@@ -109,7 +109,9 @@
         "keepWarmYesterday": "Giữ phong độ, chơi lần cuối hôm qua.",
         "keepWarmToday": "Giữ phong độ, đã chơi hôm nay.",
         "keepWarmNew": "Làm quen trước."
-      }
+      },
+      "from": "{{path}} · {{level}} · Bước {{step}}",
+      "fromNoLevel": "{{path}} · Bước {{step}}"
     },
     "why": {
       "firstEver": "Đây là lần đầu, nên bắt đầu ở {{bpm}} BPM. Trọng tâm là nhịp, không phải tốc độ.",
