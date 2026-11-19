@@ -1,29 +1,30 @@
 /**
- * The Paths screen's groups: the curriculum map's three tracks and the one
- * start (plans/paths/NEW_PATHS.md, "Three tracks, one start").
+ * The Paths screen's groups: the curriculum map's start and its tracks
+ * (plans/paths/NEW_PATHS.md, "Three tracks, one start"), read from each Path's
+ * `category` ("Categories in the format"; `categoryOf` answers for a pack
+ * written before it existed).
  *
- * Rhythm Foundations is the start: time, the click and clean notes, which the
- * Technique and Styles tracks both build on. "How harmony works" is the
- * owner's route and has its own first Path, Know the Neck. A Path the map does
- * not name yet goes with its kind: mechanics to Technique, theory to Styles.
+ * Top to bottom: Foundations (Rhythm Foundations, the one start), then How
+ * harmony works (its own first Path, Know the Neck: a beginner's two Paths are
+ * the first two groups), then Technique and Styles.
  *
- * Inside a track the Paths keep the map's order, and `curriculumOrder` makes
+ * Inside a group the Paths keep the map's order, and `curriculumOrder` makes
  * sure none sits above a Path it builds on. Nothing here locks or hides one.
  */
-import { curriculumOrder } from "../paths/curriculum";
-import type { PathDoc } from "../paths/format";
+import { categoryOf, curriculumOrder } from "../paths/curriculum";
+import type { PathCategory, PathDoc } from "../paths/format";
 
-export type TrackId = "start" | "technique" | "styles" | "harmony";
+export type TrackId = PathCategory;
 
 /** Top to bottom on the Paths screen. */
-export const TRACK_IDS: readonly TrackId[] = ["start", "technique", "styles", "harmony"];
+export const TRACK_IDS: readonly TrackId[] = ["foundations", "harmony", "technique", "style"];
 
 /** The first Path for a beginner: the one the screen marks "Start here". */
 export const START_HERE_PATH_ID = "rhythm-foundations";
 
-/** Each track's Paths in the map's order. */
+/** Each group's Paths in the map's order; a Path not named here comes after them. */
 const TRACK_ORDER: Readonly<Record<TrackId, readonly string[]>> = {
-  start: [START_HERE_PATH_ID],
+  foundations: [START_HERE_PATH_ID],
   technique: [
     "alternate-picking",
     "legato",
@@ -33,20 +34,21 @@ const TRACK_ORDER: Readonly<Record<TrackId, readonly string[]>> = {
     "metal-rhythm",
     "funk-lines",
   ],
-  styles: ["blues-pentatonics", "classic-rock"],
+  style: ["blues-pentatonics", "classic-rock"],
   harmony: ["know-the-neck", "scales-and-modes", "triads", "chords-in-a-key", "arpeggios-over-changes"],
 };
 
-/** Which track a Path is in. */
-export function trackOf(path: Pick<PathDoc, "id" | "kind">): TrackId {
-  for (const id of TRACK_IDS) if (TRACK_ORDER[id].includes(path.id)) return id;
-  return path.kind === "mechanics" ? "technique" : "styles";
+type Grouped = Pick<PathDoc, "id" | "kind" | "category" | "prerequisites">;
+
+/** Which group a Path is in: its category. */
+export function trackOf(path: Pick<PathDoc, "kind" | "category">): TrackId {
+  return categoryOf(path);
 }
 
 export type Track<T> = { id: TrackId; paths: T[] };
 
-/** The Paths by track, in screen order, empty tracks left out. */
-export function pathTracks<T extends Pick<PathDoc, "id" | "kind" | "prerequisites">>(paths: readonly T[]): Track<T>[] {
+/** The Paths by group, in screen order, empty groups left out. */
+export function pathTracks<T extends Grouped>(paths: readonly T[]): Track<T>[] {
   return TRACK_IDS.map((id) => {
     const order = TRACK_ORDER[id];
     const rank = (p: T) => {

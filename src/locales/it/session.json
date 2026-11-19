@@ -487,12 +487,12 @@
       "offerNo": "Non ora",
       "offerAdded": "{{list}} aggiunto ai tuoi percorsi.",
       "tracks": {
-        "start": "Fondamenta",
-        "startLine": "Nuovo alla chitarra? Inizia qui: il tempo, il clic e note pulite. Gli altri percorsi si basano su questo.",
-        "technique": "Tecnica",
-        "styles": "Stili",
+        "foundations": "Fondamenta",
+        "foundationsLine": "Nuovo alla chitarra? Inizia qui: il tempo, il clic e note pulite. Gli altri percorsi si basano su questo.",
         "harmony": "Come funziona l'armonia",
-        "harmonyLine": "Dai nomi delle note agli accordi di una tonalità, un percorso dopo l'altro. Per iniziare non serve teoria."
+        "harmonyLine": "Dai nomi delle note agli accordi di una tonalità, un percorso dopo l'altro. Per iniziare non serve teoria.",
+        "technique": "Tecnica",
+        "style": "Stili"
       }
     },
     "progress": {
@@ -695,6 +695,12 @@
       "low": "Livello d'ingresso: basso",
       "good": "Livello d'ingresso: buono",
       "high": "Livello d'ingresso: alto"
+    },
+    "category": {
+      "foundations": "Fondamenta",
+      "harmony": "Armonia",
+      "technique": "Tecnica",
+      "style": "Stili"
     }
   }
 }

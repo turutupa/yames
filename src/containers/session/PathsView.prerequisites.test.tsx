@@ -163,11 +163,11 @@ describe("Subscribe offers what a Path builds on, never forces it", () => {
 });
 
 describe("the Paths list, by track", () => {
-  it("the start, Technique, Styles and How harmony works, each with a line; Start here on Rhythm Foundations", () => {
+  it("Foundations, How harmony works, Technique, Styles, each with a line; Start here on Rhythm Foundations", () => {
     render(<PathsView session={fake().session} />);
     const names = [...document.querySelectorAll(".session-pathgroup-name")].map((h) => h.textContent);
-    expect(names).toEqual(["Foundations", "Technique", "Styles", "How harmony works"]);
-    expect(within(screen.getByTestId("path-track-start")).getByTestId("path-start-here")).toHaveTextContent("Start here");
+    expect(names).toEqual(["Foundations", "How harmony works", "Technique", "Styles"]);
+    expect(within(screen.getByTestId("path-track-foundations")).getByTestId("path-start-here")).toHaveTextContent("Start here");
     expect(screen.getAllByTestId("path-start-here")).toHaveLength(1);
     const harmony = screen.getByTestId("path-track-harmony");
     expect(harmony).toHaveTextContent("No theory needed to start.");
@@ -176,6 +176,7 @@ describe("the Paths list, by track", () => {
       "path-card-scales-and-modes",
       "path-card-triads",
       "path-card-chords-in-a-key",
+      "path-card-arpeggios-over-changes",
     ]);
   });
 
@@ -187,5 +188,16 @@ describe("the Paths list, by track", () => {
     expect(card).not.toHaveTextContent(/locked/i);
     fireEvent.click(within(card).getByTestId("builds-on-card-tapping-legato"));
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Legato");
+  });
+});
+
+describe("the Path page's tag is its category", () => {
+  it("Triads and Chords in a Key say Harmony, never Styles; Blues says Styles", () => {
+    for (const [id, word] of [["triads", "Harmony"], ["chords-in-a-key", "Harmony"], ["blues-pentatonics", "Styles"], ["rhythm-foundations", "Foundations"], ["legato", "Technique"]]) {
+      render(<PathsView session={fake().session} />);
+      open(id);
+      expect(screen.getByTestId("path-track-tag")).toHaveTextContent(word);
+      cleanup();
+    }
   });
 });

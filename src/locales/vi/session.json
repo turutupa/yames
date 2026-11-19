@@ -474,12 +474,12 @@
       "offerNo": "Để sau",
       "offerAdded": "Đã thêm {{list}} vào lộ trình của bạn.",
       "tracks": {
-        "start": "Nền tảng",
-        "startLine": "Mới chơi guitar? Bắt đầu ở đây: nhịp, tiếng click và nốt sạch. Các lộ trình khác dựa trên phần này.",
-        "technique": "Kỹ thuật",
-        "styles": "Phong cách",
+        "foundations": "Nền tảng",
+        "foundationsLine": "Mới chơi guitar? Bắt đầu ở đây: nhịp, tiếng click và nốt sạch. Các lộ trình khác dựa trên phần này.",
         "harmony": "Hòa âm hoạt động thế nào",
-        "harmonyLine": "Từ tên các nốt đến hợp âm trong một giọng, lần lượt từng lộ trình. Không cần lý thuyết để bắt đầu."
+        "harmonyLine": "Từ tên các nốt đến hợp âm trong một giọng, lần lượt từng lộ trình. Không cần lý thuyết để bắt đầu.",
+        "technique": "Kỹ thuật",
+        "style": "Phong cách"
       }
     },
     "progress": {
@@ -681,6 +681,12 @@
       "low": "Mức đầu vào: thấp",
       "good": "Mức đầu vào: tốt",
       "high": "Mức đầu vào: cao"
+    },
+    "category": {
+      "foundations": "Nền tảng",
+      "harmony": "Hòa âm",
+      "technique": "Kỹ thuật",
+      "style": "Phong cách"
     }
   }
 }

@@ -7,7 +7,7 @@
  * - `basics`, new to the guitar: Rhythm Foundations and Know the Neck, the
  *   first Path of each route.
  * - `harmony`: Know the Neck, the first of the route through Scales and
- *   Modes, Triads and Chords in a Key.
+ *   Modes, Triads, Chords in a Key and Arpeggios over Changes.
  * - `technique`, faster and cleaner: Alternate Picking.
  * - `speed`, for a player who says their technique is already solid: Shred.
  *

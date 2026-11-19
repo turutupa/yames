@@ -239,7 +239,7 @@ describe("Where do you start? — the recommendation from what the player wants"
     const { startPath } = mount();
     fireEvent.click(goal("harmony"));
     expect(pressed()).toEqual(["know-the-neck"]);
-    expect(screen.getByTestId("onboarding-start-why")).toHaveTextContent(/scales, triads and chords in a key/);
+    expect(screen.getByTestId("onboarding-start-why")).toHaveTextContent(/scales, triads, chords in a key and arpeggios over the changes/);
     act(() => next().click());
     expect(startPath.mock.calls.map(([p]) => p.id)).toEqual(["know-the-neck"]);
   });

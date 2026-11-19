@@ -500,12 +500,12 @@
       "offerNo": "Nie teraz",
       "offerAdded": "Dodano {{list}} do twoich ścieżek.",
       "tracks": {
-        "start": "Podstawy",
-        "startLine": "Dopiero zaczynasz grać? Zacznij tutaj: rytm, klik i czyste dźwięki. Pozostałe ścieżki się na tym opierają.",
-        "technique": "Technika",
-        "styles": "Style",
+        "foundations": "Podstawy",
+        "foundationsLine": "Dopiero zaczynasz grać? Zacznij tutaj: rytm, klik i czyste dźwięki. Pozostałe ścieżki się na tym opierają.",
         "harmony": "Jak działa harmonia",
-        "harmonyLine": "Od nazw dźwięków po akordy w tonacji, ścieżka po ścieżce. Na start nie potrzebujesz teorii."
+        "harmonyLine": "Od nazw dźwięków po akordy w tonacji, ścieżka po ścieżce. Na start nie potrzebujesz teorii.",
+        "technique": "Technika",
+        "style": "Style"
       }
     },
     "progress": {
@@ -709,6 +709,12 @@
       "low": "Poziom wejścia: niski",
       "good": "Poziom wejścia: dobry",
       "high": "Poziom wejścia: wysoki"
+    },
+    "category": {
+      "foundations": "Podstawy",
+      "harmony": "Harmonia",
+      "technique": "Technika",
+      "style": "Style"
     }
   }
 }

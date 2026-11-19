@@ -474,12 +474,12 @@
       "offerNo": "Not now",
       "offerAdded": "Added {{list}} to your Paths.",
       "tracks": {
-        "start": "Foundations",
-        "startLine": "New to the guitar? Start here: time, the click and clean notes. The other Paths build on it.",
-        "technique": "Technique",
-        "styles": "Styles",
+        "foundations": "Foundations",
+        "foundationsLine": "New to the guitar? Start here: time, the click and clean notes. The other Paths build on it.",
         "harmony": "How harmony works",
-        "harmonyLine": "From the names of the notes to chords in a key, one Path after another. No theory needed to start."
+        "harmonyLine": "From the names of the notes to chords in a key, one Path after another. No theory needed to start.",
+        "technique": "Technique",
+        "style": "Styles"
       }
     },
     "progress": {
@@ -681,6 +681,12 @@
       "low": "Input level: low",
       "good": "Input level: good",
       "high": "Input level: high"
+    },
+    "category": {
+      "foundations": "Foundations",
+      "harmony": "Harmony",
+      "technique": "Technique",
+      "style": "Styles"
     }
   }
 }

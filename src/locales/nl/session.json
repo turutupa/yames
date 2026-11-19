@@ -474,12 +474,12 @@
       "offerNo": "Nu niet",
       "offerAdded": "{{list}} toegevoegd aan je paden.",
       "tracks": {
-        "start": "Basis",
-        "startLine": "Nieuw op gitaar? Begin hier: timing, de klik en schone noten. De andere paden bouwen hierop.",
-        "technique": "Techniek",
-        "styles": "Stijlen",
+        "foundations": "Basis",
+        "foundationsLine": "Nieuw op gitaar? Begin hier: timing, de klik en schone noten. De andere paden bouwen hierop.",
         "harmony": "Hoe harmonie werkt",
-        "harmonyLine": "Van de namen van de noten tot de akkoorden van een toonsoort, het ene pad na het andere. Geen theorie nodig om te beginnen."
+        "harmonyLine": "Van de namen van de noten tot de akkoorden van een toonsoort, het ene pad na het andere. Geen theorie nodig om te beginnen.",
+        "technique": "Techniek",
+        "style": "Stijlen"
       }
     },
     "progress": {
@@ -681,6 +681,12 @@
       "low": "Ingangsniveau: laag",
       "good": "Ingangsniveau: goed",
       "high": "Ingangsniveau: hoog"
+    },
+    "category": {
+      "foundations": "Basis",
+      "harmony": "Harmonie",
+      "technique": "Techniek",
+      "style": "Stijlen"
     }
   }
 }

@@ -487,12 +487,12 @@
       "offerNo": "Ahora no",
       "offerAdded": "{{list}} añadida a tus rutas.",
       "tracks": {
-        "start": "Fundamentos",
-        "startLine": "¿Nuevo con la guitarra? Empieza aquí: el tiempo, el clic y notas limpias. Las demás rutas se apoyan en esto.",
-        "technique": "Técnica",
-        "styles": "Estilos",
+        "foundations": "Fundamentos",
+        "foundationsLine": "¿Nuevo con la guitarra? Empieza aquí: el tiempo, el clic y notas limpias. Las demás rutas se apoyan en esto.",
         "harmony": "Cómo funciona la armonía",
-        "harmonyLine": "De los nombres de las notas a los acordes de una tonalidad, una ruta tras otra. No necesitas teoría para empezar."
+        "harmonyLine": "De los nombres de las notas a los acordes de una tonalidad, una ruta tras otra. No necesitas teoría para empezar.",
+        "technique": "Técnica",
+        "style": "Estilos"
       }
     },
     "progress": {
@@ -695,6 +695,12 @@
       "low": "Nivel de entrada: bajo",
       "good": "Nivel de entrada: bueno",
       "high": "Nivel de entrada: alto"
+    },
+    "category": {
+      "foundations": "Fundamentos",
+      "harmony": "Armonía",
+      "technique": "Técnica",
+      "style": "Estilos"
     }
   }
 }

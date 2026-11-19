@@ -474,12 +474,12 @@
       "offerNo": "Şimdi değil",
       "offerAdded": "{{list}} yollarına eklendi.",
       "tracks": {
-        "start": "Temeller",
-        "startLine": "Gitarda yeni misin? Buradan başla: zamanlama, klik ve temiz notalar. Diğer yollar bunun üzerine kurulu.",
-        "technique": "Teknik",
-        "styles": "Stiller",
+        "foundations": "Temeller",
+        "foundationsLine": "Gitarda yeni misin? Buradan başla: zamanlama, klik ve temiz notalar. Diğer yollar bunun üzerine kurulu.",
         "harmony": "Armoni nasıl işler",
-        "harmonyLine": "Nota adlarından bir tondaki akorlara, bir yoldan ötekine. Başlamak için teori gerekmez."
+        "harmonyLine": "Nota adlarından bir tondaki akorlara, bir yoldan ötekine. Başlamak için teori gerekmez.",
+        "technique": "Teknik",
+        "style": "Stiller"
       }
     },
     "progress": {
@@ -681,6 +681,12 @@
       "low": "Giriş seviyesi: düşük",
       "good": "Giriş seviyesi: iyi",
       "high": "Giriş seviyesi: yüksek"
+    },
+    "category": {
+      "foundations": "Temeller",
+      "harmony": "Armoni",
+      "technique": "Teknik",
+      "style": "Stiller"
     }
   }
 }

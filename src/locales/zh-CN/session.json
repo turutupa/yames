@@ -474,12 +474,12 @@
       "offerNo": "暂不",
       "offerAdded": "已把{{list}}加到你的路线。",
       "tracks": {
-        "start": "基础",
-        "startLine": "刚开始弹吉他？从这里开始：节奏、节拍器和干净的音。其他路线都建立在它上面。",
-        "technique": "技术",
-        "styles": "风格",
+        "foundations": "基础",
+        "foundationsLine": "刚开始弹吉他？从这里开始：节奏、节拍器和干净的音。其他路线都建立在它上面。",
         "harmony": "和声如何运作",
-        "harmonyLine": "从音名到调内和弦，一条路线接一条。开始不需要乐理。"
+        "harmonyLine": "从音名到调内和弦，一条路线接一条。开始不需要乐理。",
+        "technique": "技术",
+        "style": "风格"
       }
     },
     "progress": {
@@ -681,6 +681,12 @@
       "low": "输入电平：低",
       "good": "输入电平：良好",
       "high": "输入电平：高"
+    },
+    "category": {
+      "foundations": "基础",
+      "harmony": "和声",
+      "technique": "技术",
+      "style": "风格"
     }
   }
 }

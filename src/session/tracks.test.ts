@@ -9,13 +9,13 @@ const PATHS = Object.values(PACKS)
   .filter((p) => RUNNABLE_PATH_IDS.includes(p.id));
 
 describe("the Paths screen's tracks (the curriculum map)", () => {
-  it("one start, then Technique, Styles and How harmony works, every Path in exactly one", () => {
+  it("by category: the one start, How harmony works, Technique, Styles; every Path in exactly one", () => {
     const tracks = pathTracks(PATHS);
     expect(tracks.map((t) => [t.id, t.paths.map((p) => p.id)])).toEqual([
-      ["start", ["rhythm-foundations"]],
+      ["foundations", ["rhythm-foundations"]],
+      ["harmony", ["know-the-neck", "scales-and-modes", "triads", "chords-in-a-key", "arpeggios-over-changes"]],
       ["technique", ["alternate-picking", "legato", "tapping", "sweep-picking", "shred", "metal-rhythm", "funk-lines"]],
-      ["styles", ["blues-pentatonics", "classic-rock"]],
-      ["harmony", ["know-the-neck", "scales-and-modes", "triads", "chords-in-a-key"]],
+      ["style", ["blues-pentatonics", "classic-rock"]],
     ]);
     expect(tracks.flatMap((t) => t.paths).length).toBe(PATHS.length);
   });
@@ -32,9 +32,11 @@ describe("the Paths screen's tracks (the curriculum map)", () => {
     }
   });
 
-  it("a Path the map does not name goes with its kind; empty tracks are left out", () => {
-    expect(trackOf({ id: "new-one", kind: "mechanics" })).toBe("technique");
-    expect(trackOf({ id: "new-two", kind: "theory" })).toBe("styles");
+  it("a pack without a category goes with its kind; Triads is harmony, never a style; empty groups are left out", () => {
+    expect(trackOf({ kind: "mechanics" })).toBe("technique");
+    expect(trackOf({ kind: "theory" })).toBe("style");
+    expect(trackOf(PATHS.find((p) => p.id === "triads")!)).toBe("harmony");
+    expect(trackOf(PATHS.find((p) => p.id === "chords-in-a-key")!)).toBe("harmony");
     const only = PATHS.filter((p) => p.id === "legato");
     expect(pathTracks(only).map((t) => t.id)).toEqual(["technique"]);
   });

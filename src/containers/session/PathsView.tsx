@@ -68,12 +68,12 @@ export function stepTempoRange(step: Step): { from: number; to: number | null } 
   return { from, to: to !== null && to > from ? to : null };
 }
 
-/** The Path's track on the Paths screen, as a tag: "Technique", "How harmony works". */
+/** The Path's category as a tag: "Foundations", "Harmony", "Technique", "Styles". */
 function TrackTag({ path }: { path: PathDoc }) {
   const { t } = useTranslation();
   return (
     <span className="session-tag" data-kind={path.kind} data-testid="path-track-tag">
-      {t(`session.paths.tracks.${trackOf(path)}`)}
+      {t(`session.category.${trackOf(path)}`)}
     </span>
   );
 }
@@ -151,10 +151,10 @@ function PathBadgeTag({ session, path }: { session: SessionRun; path: PathDoc })
 
 /** A track's name and its one line on the Paths screen (`session/tracks.ts`). */
 const TRACK_LINE_KEY: Readonly<Record<TrackId, string>> = {
-  start: "session.paths.tracks.startLine",
-  technique: "session.paths.mechanicsSub",
-  styles: "session.paths.theorySub",
+  foundations: "session.paths.tracks.foundationsLine",
   harmony: "session.paths.tracks.harmonyLine",
+  technique: "session.paths.mechanicsSub",
+  style: "session.paths.theorySub",
 };
 
 /** One Path on the list: what it is for, what it builds on, where you are in it. */

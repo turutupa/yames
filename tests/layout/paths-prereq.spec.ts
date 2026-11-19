@@ -96,8 +96,8 @@ async function pathsFit(page: Page, where: string, columnsAtLeast: number) {
   await noSidewaysScroll(page, where);
   expect(await overlapping(page), `${where}: blocks drawn over each other`).toEqual([]);
   await expect(page.locator(".session-pathgroup")).toHaveCount(4);
-  await allInside(page, ".session-path-card", ".session-pathgroup-cards", where, 14);
-  await allInside(page, '.session-prereq-line[data-where="card"]', ".session-path-card", where, 12);
+  await allInside(page, ".session-path-card", ".session-pathgroup-cards", where, 15);
+  await allInside(page, '.session-prereq-line[data-where="card"]', ".session-path-card", where, 13);
   // The names run inline in the card's quiet line: each inside its card.
   await allInside(page, ".session-prereq-link", ".session-path-card", where, 13);
   // The Technique track's seven cards in as many columns as the width gives.
@@ -105,7 +105,7 @@ async function pathsFit(page: Page, where: string, columnsAtLeast: number) {
     getComputedStyle(el).gridTemplateColumns.split(" ").filter(Boolean).length,
   );
   expect(columns, `${where}: Technique in ${columns} columns`).toBeGreaterThanOrEqual(columnsAtLeast);
-  // "Start here" on the one start, at the top.
+  // "Start here" on the one start, at the top, above every other group.
   const start = await page.$eval('[data-testid="path-start-here"]', (el) => el.getBoundingClientRect().top);
   const technique = await page.$eval('[data-testid="path-track-technique"]', (el) => el.getBoundingClientRect().top);
   expect(start, `${where}: Start here is not above the tracks`).toBeLessThan(technique);
@@ -193,7 +193,7 @@ test.describe("on a phone", () => {
     await openShot(page, "phone-firstrun-start-basics", PHONE);
     await landed(page);
     await allInside(page, ".onboarding-start-goal", ".onboarding-card", "phone start", 4);
-    await allInside(page, ".onboarding-start-path", ".onboarding-card", "phone start", 14);
+    await allInside(page, ".onboarding-start-path", ".onboarding-card", "phone start", 15);
     await allInside(page, '[data-testid="onboarding-start-why"]', ".onboarding-card", "phone start");
     await shot(page, "wizard-start-basics-390-ember");
   });
@@ -208,7 +208,7 @@ for (const goal of ["basics", "harmony", "technique"] as const) {
       await landed(page);
       await expect(page.locator(`[data-goal="${goal}"]`)).toHaveAttribute("aria-pressed", "true");
       await allInside(page, ".onboarding-start-goal", ".onboarding-card", `start ${goal}`, 4);
-      await allInside(page, ".onboarding-start-path", ".onboarding-card", `start ${goal}`, 14);
+      await allInside(page, ".onboarding-start-path", ".onboarding-card", `start ${goal}`, 15);
       await allInside(page, '[data-testid="onboarding-start-why"]', ".onboarding-card", `start ${goal}`);
       await contrastIn(page, ".onboarding-start", `start ${goal} ${theme}`);
       await shot(page, `wizard-start-${goal}-1400-${theme}`);

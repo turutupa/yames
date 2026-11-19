@@ -54,6 +54,7 @@ export const START_PATH_ORDER = [
   "funk-lines",
   "triads",
   "chords-in-a-key",
+  "arpeggios-over-changes",
 ];
 
 /** The Paths a player can start, in the step's order (unknown runnable ones last). */

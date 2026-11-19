@@ -474,12 +474,12 @@
       "offerNo": "Jetzt nicht",
       "offerAdded": "{{list}} zu deinen Pfaden hinzugefügt.",
       "tracks": {
-        "start": "Grundlagen",
-        "startLine": "Neu an der Gitarre? Fang hier an: Timing, der Klick und saubere Töne. Die anderen Pfade bauen darauf auf.",
-        "technique": "Technik",
-        "styles": "Stile",
+        "foundations": "Grundlagen",
+        "foundationsLine": "Neu an der Gitarre? Fang hier an: Timing, der Klick und saubere Töne. Die anderen Pfade bauen darauf auf.",
         "harmony": "Wie Harmonie funktioniert",
-        "harmonyLine": "Von den Tonnamen bis zu den Akkorden einer Tonart, ein Pfad nach dem anderen. Ohne Theorie zum Einstieg."
+        "harmonyLine": "Von den Tonnamen bis zu den Akkorden einer Tonart, ein Pfad nach dem anderen. Ohne Theorie zum Einstieg.",
+        "technique": "Technik",
+        "style": "Stile"
       }
     },
     "progress": {
@@ -681,6 +681,12 @@
       "low": "Eingangspegel: niedrig",
       "good": "Eingangspegel: gut",
       "high": "Eingangspegel: hoch"
+    },
+    "category": {
+      "foundations": "Grundlagen",
+      "harmony": "Harmonie",
+      "technique": "Technik",
+      "style": "Stile"
     }
   }
 }
