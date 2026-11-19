@@ -19,6 +19,11 @@
 //!   not found dead by the next Play — reopens it through
 //!   `MetronomeEngine::set_device` with the same name — the path a desktop
 //!   device switch takes, which re-decodes what was decoded for the old rate.
+//! * **Output dead, route unchanged** (a resume that would not start even
+//!   after `output_park`'s retries, or `start` finding the stream dead):
+//!   reopened through `MetronomeEngine::reopen_output`, which keeps the
+//!   loaded song, the jam's kit and the coach's line when the new stream
+//!   runs at the old rate, and announces no route change (card #14).
 //! * **Input lost:** sends the input list again and `audio-route-changed`
 //!   `{ kind: "input" }`. The input is reopened by the frontend
 //!   (`src/mobile/inputRoute.ts`) through stop/start evaluation, because the
@@ -36,14 +41,29 @@ use std::time::Duration;
 
 use tauri::{AppHandle, Emitter, Manager};
 
-static OUTPUT_LOST: AtomicBool = AtomicBool::new(false);
+/// What the output side has asked for: a route the system moved, or a dead
+/// stream to reopen on the route it was on (`output_park::RouteRequests`).
+static OUTPUT: crate::output_park::RouteRequests = crate::output_park::RouteRequests::new();
 static INPUT_LOST: AtomicBool = AtomicBool::new(false);
 static WATCHER: OnceLock<Thread> = OnceLock::new();
 
-/// From the output stream's error thread. A flag and an unpark: no lock, no
-/// allocation, nothing that waits.
+/// From the output stream's error thread: the system closed the stream, so
+/// the route moved. A flag and an unpark: no lock, no allocation, nothing
+/// that waits.
 pub(crate) fn output_lost() {
-    OUTPUT_LOST.store(true, Ordering::Release);
+    OUTPUT.note_route_lost();
+    if let Some(t) = WATCHER.get() {
+        t.unpark();
+    }
+}
+
+/// From the event loop (a resume that would not start, even after its
+/// retries) or `start` (a stream found dead): reopen it, but the route did
+/// not move, so nothing decoded for it is dropped when the rate has not
+/// moved either, and no `audio-route-changed` goes to the screen (card #14,
+/// items 2 and 3). Same shape as `output_lost`.
+pub(crate) fn output_dead() {
+    OUTPUT.note_dead();
     if let Some(t) = WATCHER.get() {
         t.unpark();
     }
@@ -69,25 +89,54 @@ pub(crate) fn spawn(app: AppHandle) {
         .name("yames-route".into())
         .spawn(move || loop {
             thread::park();
-            if OUTPUT_LOST.swap(false, Ordering::AcqRel) {
-                // Let the system finish rerouting before asking it for a new
-                // stream: an open in the middle of a route change is refused.
-                thread::sleep(Duration::from_millis(300));
-                crate::engine::forget_output_rate();
+            let req = OUTPUT.take();
+            if req.route_changed || req.reopen {
+                if req.route_changed {
+                    // Let the system finish rerouting before asking it for a
+                    // new stream: an open in the middle of a route change is
+                    // refused.
+                    thread::sleep(Duration::from_millis(300));
+                    crate::engine::forget_output_rate();
+                }
                 let state = app.state::<crate::state::SharedState>().inner().clone();
+                let mut emit_route_changed = req.route_changed;
                 if let Some(engine_state) = app.try_state::<crate::commands::EngineState>() {
                     if let Ok(mut engine) = engine_state.0.lock() {
-                        if engine.output_needs_reopen() {
-                            let name = engine.device_name().map(String::from);
-                            if let Err(e) = engine.set_device(name, state, app.clone()) {
-                                eprintln!("[yames][android] reopening the output after a route change failed: {e}");
-                            } else {
-                                eprintln!("[yames][android] output reopened after a route change");
+                        let plan = crate::output_park::route_plan(req, engine.output_needs_reopen());
+                        emit_route_changed = plan.emit_route_changed;
+                        match plan.reopen {
+                            Some(crate::output_park::Reopen::NewRoute) => {
+                                let name = engine.device_name().map(String::from);
+                                match engine.set_device(name, state, app.clone()) {
+                                    Err(e) => eprintln!("[yames][android] reopening the output after a route change failed: {e}"),
+                                    Ok(()) => eprintln!("[yames][android] output reopened after a route change"),
+                                }
                             }
+                            Some(crate::output_park::Reopen::SameRoute) => {
+                                // Bounded: a probe opens a stream, and this
+                                // thread holds the engine's lock.
+                                let probe = |d| {
+                                    crate::output_park::with_deadline(d, || {
+                                        crate::android_audio::probe_output_format().ok()
+                                    })
+                                    .flatten()
+                                };
+                                match engine.reopen_output(state, Some(app.clone()), probe) {
+                                    Err(e) => eprintln!("[yames][android] reopening a dead output failed: {e}"),
+                                    Ok(outcome) => eprintln!(
+                                        "[yames][android] dead output reopened on the same route: {outcome:?}"
+                                    ),
+                                }
+                            }
+                            None => {}
                         }
                     }
                 }
-                let _ = app.emit("audio-route-changed", RouteChanged { kind: "output" });
+                // Only a route the system moved is news to the screen; a
+                // dead stream reopened where it was is not (card #14, item 3).
+                if emit_route_changed {
+                    let _ = app.emit("audio-route-changed", RouteChanged { kind: "output" });
+                }
             }
             if INPUT_LOST.swap(false, Ordering::AcqRel) {
                 thread::sleep(Duration::from_millis(300));

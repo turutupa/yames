@@ -35,6 +35,8 @@ import { IS_MOBILE } from "../../platform";
 
 const FOCUSABLE =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+/** A step's option that is the one chosen. */
+const SELECTED = '[aria-pressed="true"], [aria-checked="true"], [aria-selected="true"], input:checked';
 
 /**
  * Stand-in for the app's MIDI hook when the wizard is rendered outside
@@ -302,10 +304,14 @@ export function OnboardingWizard({
 
   useEffect(() => {
     if (!open) return;
-    // Focus the first control of the step that just became visible.
+    // Focus the step that just became visible: its chosen option when it has
+    // one, else its first control. On the first was a ring on "Click" while
+    // "Drum" was the one selected, which read as two choices (acceptance 5,
+    // P2-6).
     const card = cardRef.current;
     if (!card) return;
-    const first = card.querySelector<HTMLElement>(FOCUSABLE);
+    const chosen = [...card.querySelectorAll<HTMLElement>(SELECTED)].find((el) => el.matches(FOCUSABLE));
+    const first = chosen ?? card.querySelector<HTMLElement>(FOCUSABLE);
     (first ?? card).focus({ preventScroll: true });
   }, [open, current]);
 

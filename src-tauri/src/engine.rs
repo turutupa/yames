@@ -4977,6 +4977,107 @@ impl CallbackProbe {
 #[derive(Clone)]
 struct EventSink(Option<AppHandle>);
 
+/// `take-playback-ended`'s payload: which playback ended, so a listener
+/// can tell an ending from the take it just started (review of card #14,
+/// item 2). The screens ignore it today; it costs nothing to carry.
+#[derive(Clone, serde::Serialize)]
+pub(crate) struct TakeEnded {
+    pub generation: u64,
+}
+
+/// What `reopen_output` probes and hands to the next spawn: Oboe's format
+/// on a phone. A bare rate elsewhere, where only the tests call it.
+#[cfg(target_os = "android")]
+pub(crate) type OutputFormatHint = crate::android_audio::OutputFormat;
+#[cfg(not(target_os = "android"))]
+pub(crate) type OutputFormatHint = u32;
+
+/// The setup's rate check (re-review of card #14, item B): `false`, with the
+/// open failed through `exit`, when a reopen demanded a rate the device no
+/// longer opens at.
+fn setup_rate_or_fail(exit: &mut AudioThreadExit, expected: Option<u32>, actual: u32) -> bool {
+    if crate::output_park::setup_rate_matches(expected, actual) {
+        return true;
+    }
+    exit.fail(format!(
+        "the device now opens at {actual} Hz; what is loaded was decoded at {} Hz",
+        expected.unwrap_or(0)
+    ));
+    false
+}
+
+/// How long `reopen_output` waits for one open's verdict, and for all of
+/// its probing and opening together. Both while holding the engine's lock
+/// on the route thread — which the main thread's commands also take — so
+/// both sit well inside Android's 5 s ANR threshold (final re-review of
+/// card #14). Past the budget the reopen stops trying to keep anything and
+/// takes the plain open, which waits for nothing.
+const REOPEN_WAIT: Duration = Duration::from_millis(750);
+const REOPEN_BUDGET: Duration = Duration::from_millis(2_000);
+/// How long `reopen_output` waits for a finished audio thread to be joined
+/// before detaching it instead.
+const REOPEN_SHUTDOWN_WAIT: Duration = Duration::from_millis(300);
+
+/// What a waited open came back with.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) enum SetupError {
+    /// The setup said no (or its thread died): it has returned, and joining
+    /// it is immediate.
+    Refused(String),
+    /// No verdict in time. The setup thread may be stuck inside the device
+    /// open, so it must NOT be joined: it is detached with its `alive`
+    /// lowered, and if the open ever returns the thread drops the stream
+    /// unplayed (see the `alive` check after the open).
+    TimedOut,
+}
+
+impl From<SetupError> for String {
+    fn from(e: SetupError) -> String {
+        match e {
+            SetupError::Refused(r) => r,
+            SetupError::TimedOut => "audio output device did not respond".to_string(),
+        }
+    }
+}
+
+/// See `MetronomeEngine::next_spawn`.
+#[derive(Default)]
+pub(crate) struct SpawnHints {
+    pub format: Option<OutputFormatHint>,
+    pub expected_rate: Option<u32>,
+    pub quiet: bool,
+}
+
+/// Tests: what one of `reopen_output`'s spawns was asked.
+#[cfg(test)]
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct SpawnRecord {
+    pub format_rate: Option<u32>,
+    pub expected_rate: Option<u32>,
+    pub quiet: bool,
+    pub waited: bool,
+}
+
+/// What `reopen_output` did.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum ReopenOutcome {
+    /// Reopened at the rate the loaded material was decoded at: kept.
+    Kept,
+    /// The rate moved, or every open at the old rate was refused: the
+    /// material is dropped and the output reopened the way `set_device`
+    /// does it.
+    Dropped,
+}
+
+#[cfg(target_os = "android")]
+fn hint_rate(h: &OutputFormatHint) -> u32 {
+    h.sample_rate
+}
+#[cfg(not(target_os = "android"))]
+fn hint_rate(h: &OutputFormatHint) -> u32 {
+    *h
+}
+
 impl EventSink {
     fn emit<S: serde::Serialize + Clone>(
         &self,
@@ -5050,6 +5151,13 @@ struct AudioThreadExit {
     /// by `ready`, by `fail`, or by `Drop` if the thread died without
     /// saying anything (a panic), so `start` can never hang on it.
     setup: Option<mpsc::SyncSender<Result<(), String>>>,
+    /// A setup failure is the CALLER's to handle, not the screen's:
+    /// `reopen_output` waits for the verdict and falls back to another open
+    /// when this one is refused. So a failed setup only lowers this thread's
+    /// own flags and answers the caller — no `audio-error`, and the
+    /// transport the caller is carrying across is left alone. Once the
+    /// stream is up (`ready`) a failure is reported as usual.
+    quiet_setup: bool,
 }
 
 impl AudioThreadExit {
@@ -5068,6 +5176,7 @@ impl AudioThreadExit {
             sink,
             tempo,
             setup: Some(setup),
+            quiet_setup: false,
         }
     }
 
@@ -5090,6 +5199,13 @@ impl AudioThreadExit {
     fn fail(&mut self, reason: String) {
         self.alive.store(false, Ordering::SeqCst);
         self.playing.store(false, Ordering::SeqCst);
+        if self.quiet_setup {
+            if let Some(tx) = self.setup.take() {
+                eprintln!("[yames] audio output refused, the caller falls back: {reason}");
+                let _ = tx.send(Err(reason));
+                return;
+            }
+        }
         eprintln!("[yames] audio output unavailable: {reason}");
         // The transport must stop claiming to play. Without this the button
         // sits on "Stop" over silence and the user's only clue is a line on
@@ -5142,6 +5258,15 @@ pub struct MetronomeEngine {
     /// has already been replaced reopens nothing. See `output_park`.
     #[cfg(target_os = "android")]
     output_dead: Arc<AtomicBool>,
+    /// What `reopen_output` tells the next spawn (review of card #14): the
+    /// format it probed, the rate the loaded material was decoded at, and
+    /// that a refusal is its to handle. Taken by `ensure_thread`; empty for
+    /// every other spawn, which probes and reports as it always has.
+    next_spawn: SpawnHints,
+    /// Tests: stand in for `reopen_output`'s spawns — the outcomes to
+    /// return, in order, and a record of what each was asked.
+    #[cfg(test)]
+    reopen_spawns: Option<(std::collections::VecDeque<Result<(), SetupError>>, Vec<SpawnRecord>)>,
     thread_handle: Option<thread::JoinHandle<()>>,
     beat_log: BeatLog,
     device_name: Option<String>,
@@ -5223,6 +5348,14 @@ pub struct MetronomeEngine {
     /// machine that has a perfectly good sound card.
     #[cfg(test)]
     force_setup_failure: bool,
+    /// Tests: the setup thread sleeps this long first — a device open that
+    /// hangs.
+    #[cfg(test)]
+    setup_delay: Option<Duration>,
+    /// Tests: stand in for the device's rate, go through the real rate
+    /// check, then fail as a host with no device does.
+    #[cfg(test)]
+    fake_setup_rate: Option<u32>,
 }
 
 impl MetronomeEngine {
@@ -5232,6 +5365,9 @@ impl MetronomeEngine {
             playing: Arc::new(AtomicBool::new(false)),
             #[cfg(target_os = "android")]
             output_dead: Arc::new(AtomicBool::new(false)),
+            next_spawn: SpawnHints::default(),
+            #[cfg(test)]
+            reopen_spawns: None,
             thread_handle: None,
             beat_log,
             device_name: None,
@@ -5249,6 +5385,10 @@ impl MetronomeEngine {
             dropped_notifications: Arc::new(AtomicU64::new(0)),
             #[cfg(test)]
             force_setup_failure: false,
+            #[cfg(test)]
+            setup_delay: None,
+            #[cfg(test)]
+            fake_setup_rate: None,
         }
     }
 
@@ -5433,6 +5573,39 @@ impl MetronomeEngine {
     ) -> Result<(), String> {
         eprintln!("[yames] Setting audio output device: {:?}", name);
         let was_playing = self.playing.load(Ordering::SeqCst);
+        let keep_playing = self.drop_decoded_for_new_rate(
+            was_playing,
+            &state,
+            &EventSink(Some(app_handle.clone())),
+        );
+        self.device_name = name;
+        // Fully tear down the old thread/stream
+        self.shutdown();
+        self.settle_take_end(&EventSink(Some(app_handle.clone())));
+        // Create fresh atomics so the old cpal callback (if still lingering
+        // in CoreAudio) can never be reactivated by a shared flag. `playing`
+        // carries the old state across *before* the spawn rather than being
+        // restored after it: `ensure_thread` no longer waits, so a device
+        // that fails instantly would otherwise have its `playing = false`
+        // overwritten by a restore running a moment later.
+        self.alive = Arc::new(AtomicBool::new(false));
+        self.playing = Arc::new(AtomicBool::new(keep_playing));
+        // Brief pause to let CoreAudio fully release the old device
+        thread::sleep(Duration::from_millis(100));
+        // Restart on the new device
+        self.ensure_thread(state, Some(app_handle), SetupWait::No)
+    }
+
+    /// What a new rate takes with it: the jam's folder kit, the song, and a
+    /// song's transport. `set_device` always, `reopen_output` only when the
+    /// stream it is about to open runs at another rate. Returns whether the
+    /// transport keeps playing.
+    fn drop_decoded_for_new_rate(
+        &self,
+        was_playing: bool,
+        state: &SharedState,
+        sink: &EventSink,
+    ) -> bool {
         // A table built on a folder of the musician's own drums was decoded
         // at the OLD device's rate and would play flat or sharp on the new
         // one. Taking it away makes the next bar-ahead `set_jam` decode it
@@ -5462,7 +5635,7 @@ impl MetronomeEngine {
                 "[yames] the song was decoded for the old device and has been taken \
                  away; load it again to play it on this one"
             );
-            let _ = app_handle.emit("song-dropped", ());
+            let _ = sink.emit("song-dropped", ());
         }
         // A SONG THAT WAS PLAYING DOES NOT GO ON PLAYING AS A METRONOME.
         // Carried across, `playing` ran the plain click (logging beats as if
@@ -5480,23 +5653,174 @@ impl MetronomeEngine {
             if let Some(ref tempo) = self.tempo_ctx {
                 tempo.set_playing(false);
             }
-            let _ = app_handle.emit("state-changed", &snapshot);
+            let _ = sink.emit("state-changed", &snapshot);
         }
-        self.device_name = name;
-        // Fully tear down the old thread/stream
-        self.shutdown();
-        // Create fresh atomics so the old cpal callback (if still lingering
-        // in CoreAudio) can never be reactivated by a shared flag. `playing`
-        // carries the old state across *before* the spawn rather than being
-        // restored after it: `ensure_thread` no longer waits, so a device
-        // that fails instantly would otherwise have its `playing = false`
-        // overwritten by a restore running a moment later.
+        keep_playing
+    }
+
+    /// After a shutdown: report a take's ending the old event loop had not
+    /// got to yet, here, before the new callback can pick the take up. The
+    /// report acknowledges it (`TakeHandoff::take_ended`), so the new
+    /// callback skips the finished take instead of playing it again and the
+    /// new loop does not announce it a second time (review of card #14,
+    /// item 1). The thread is joined, so nothing else is reading the flag.
+    fn settle_take_end(&self, sink: &EventSink) -> Option<u64> {
+        let generation = self.take.take_ended()?;
+        let _ = sink.emit("take-playback-ended", TakeEnded { generation });
+        Some(generation)
+    }
+
+    /// Android: reopen the output where it was, after its stream died
+    /// WITHOUT the route moving — a resume that would not start even after
+    /// `output_park`'s retries, or `start` finding the stream dead (card #14,
+    /// item 2). Called from `android_route`'s thread, never an audio one.
+    ///
+    /// `set_device` is the route-change path and takes away everything
+    /// decoded for the old device: the song (the screen must load it again),
+    /// the jam's folder kit and the coach's line in flight. None of that is
+    /// stale when the rate has not moved, so:
+    ///
+    /// 1. The format is probed (after the old stream is closed; again after
+    ///    50 ms if that fails). A rate that moved goes straight to step 3.
+    /// 2. The output is opened with that format, or — with no format — with
+    ///    the old rate as the one the setup must find, and this WAITS for the
+    ///    verdict, quietly (`SpawnHints::quiet`). Refused: the cached probe
+    ///    is forgotten, the format probed fresh, and if it still matches the
+    ///    old rate one more such open is tried. Either open up: kept.
+    /// 3. Otherwise exactly `set_device`'s path: the speech cut, the decoded
+    ///    material dropped, and an open that probes for itself and reports
+    ///    to the screen as any open does. The output is never left closed
+    ///    by this function without the screen being told.
+    ///
+    /// A line of speech kept in its slot is picked up from the top by the
+    /// new callback; it cannot have been heard, because a stream is only
+    /// parked with nothing in flight and a dead one sounds nothing.
+    ///
+    /// All of this runs under the engine's lock on the route thread, so it
+    /// is bounded: each probe and each wait by [`REOPEN_WAIT`], all of them
+    /// together by [`REOPEN_BUDGET`], and a timed-out open is detached, never
+    /// joined, and ends the attempts to keep anything.
+    #[cfg_attr(not(target_os = "android"), allow(dead_code))]
+    pub(crate) fn reopen_output(
+        &mut self,
+        state: SharedState,
+        app_handle: Option<AppHandle>,
+        mut probe: impl FnMut(Duration) -> Option<OutputFormatHint>,
+    ) -> Result<ReopenOutcome, String> {
+        let started = std::time::Instant::now();
+        let left = || REOPEN_BUDGET.saturating_sub(started.elapsed());
+        let sink = EventSink(app_handle.clone());
+        let was_playing = self.playing.load(Ordering::SeqCst);
+        let old_rate = self.output_sample_rate();
+        // Bounded, and inside the budget: a server that hangs closing the
+        // dead stream must not hold the engine's lock.
+        self.shutdown_within(false, Some(REOPEN_SHUTDOWN_WAIT));
+        self.settle_take_end(&sink);
+        let mut probed = probe(left().min(REOPEN_WAIT));
+        if probed.is_none() && left() > REOPEN_WAIT {
+            thread::sleep(Duration::from_millis(50));
+            probed = probe(left().min(REOPEN_WAIT));
+        }
+        if old_rate.is_none() && probed.is_none() {
+            // A dead stream under a live thread has published its rate, so
+            // this should not happen; if it does, nothing can vouch for what
+            // is loaded, and `reopen_keeps_loaded` drops it.
+            eprintln!("[yames] reopen: no rate known for the old stream or the new one; dropping what is loaded");
+        }
+        if crate::output_park::reopen_keeps_loaded(old_rate, probed.as_ref().map(hint_rate)) {
+            let expected_rate = if probed.is_none() { old_rate } else { None };
+            let first = SpawnHints { format: probed, expected_rate, quiet: true };
+            match self.spawn_for_reopen(&state, &app_handle, was_playing, first, Some(left())) {
+                Ok(()) => return Ok(ReopenOutcome::Kept),
+                // A hung open: nothing more is tried at the old rate.
+                Err(SetupError::TimedOut) => {}
+                Err(SetupError::Refused(_)) => {
+                    // Whatever was cached about this device is suspect now.
+                    #[cfg(target_os = "android")]
+                    forget_output_rate();
+                    let fresh =
+                        if left().is_zero() { None } else { probe(left().min(REOPEN_WAIT)) };
+                    if !left().is_zero()
+                        && fresh.as_ref().map(hint_rate).is_some_and(|r| Some(r) == old_rate)
+                    {
+                        let second = SpawnHints { format: fresh, expected_rate: None, quiet: true };
+                        if self
+                            .spawn_for_reopen(&state, &app_handle, was_playing, second, Some(left()))
+                            .is_ok()
+                        {
+                            return Ok(ReopenOutcome::Kept);
+                        }
+                    }
+                }
+            }
+        }
+        // The rate moved, nothing would open at the old one, or the budget
+        // is spent: `set_device`'s path, which waits for nothing.
+        self.speech.cut();
+        #[cfg(target_os = "android")]
+        forget_output_rate();
+        let keep_playing = self.drop_decoded_for_new_rate(was_playing, &state, &sink);
+        self.spawn_for_reopen(&state, &app_handle, keep_playing, SpawnHints::default(), None)
+            .map_err(String::from)?;
+        Ok(ReopenOutcome::Dropped)
+    }
+
+    /// One of `reopen_output`'s opens: fresh flags (the old thread may still
+    /// be unwinding, as in `set_device`), the hints, and either the verdict
+    /// within `wait` (capped at [`REOPEN_WAIT`]) or, with `None`, the app
+    /// path's "it is trying".
+    ///
+    /// A refused open has returned and is joined, so two streams can never
+    /// be up. A timed-out one is NOT joined — its thread may be stuck in the
+    /// device open, and joining it would hold the engine's lock for as long
+    /// as the device likes: it is detached with its own `alive` lowered, and
+    /// drops its stream unplayed if the open ever returns.
+    fn spawn_for_reopen(
+        &mut self,
+        state: &SharedState,
+        app_handle: &Option<AppHandle>,
+        playing: bool,
+        hints: SpawnHints,
+        wait: Option<Duration>,
+    ) -> Result<(), SetupError> {
         self.alive = Arc::new(AtomicBool::new(false));
-        self.playing = Arc::new(AtomicBool::new(keep_playing));
-        // Brief pause to let CoreAudio fully release the old device
-        thread::sleep(Duration::from_millis(100));
-        // Restart on the new device
-        self.ensure_thread(state, Some(app_handle), SetupWait::No)
+        self.playing = Arc::new(AtomicBool::new(playing));
+        #[cfg(test)]
+        if let Some((outcomes, record)) = self.reopen_spawns.as_mut() {
+            record.push(SpawnRecord {
+                format_rate: hints.format.as_ref().map(hint_rate),
+                expected_rate: hints.expected_rate,
+                quiet: hints.quiet,
+                waited: wait.is_some(),
+            });
+            return outcomes.pop_front().unwrap_or(Ok(()));
+        }
+        self.next_spawn = hints;
+        let r = self.ensure_thread_typed(
+            state.clone(),
+            app_handle.clone(),
+            match wait {
+                Some(d) => SetupWait::UpTo(d.min(REOPEN_WAIT)),
+                None => SetupWait::No,
+            },
+        );
+        match r {
+            Err(SetupError::TimedOut) => self.abandon_spawn(),
+            Err(SetupError::Refused(_)) => self.shutdown_within(false, Some(REOPEN_SHUTDOWN_WAIT)),
+            Ok(()) => {}
+        }
+        r
+    }
+
+    /// Let go of a spawn whose setup has not answered, without waiting for
+    /// it: its flags down (they are its own `Arc`s), its handle dropped —
+    /// which detaches the thread — and no rate or width left behind for it.
+    fn abandon_spawn(&mut self) {
+        self.playing.store(false, Ordering::SeqCst);
+        self.alive.store(false, Ordering::SeqCst);
+        self.stream_channels.store(0, Ordering::Release);
+        drop(self.thread_handle.take());
+        self.sample_rate.store(0, Ordering::Release);
     }
 
     /// `set_device`'s half that needs no app: take a loaded song away, since
@@ -5657,6 +5981,17 @@ impl MetronomeEngine {
         app_handle: Option<AppHandle>,
         wait: SetupWait,
     ) -> Result<(), String> {
+        self.ensure_thread_typed(state, app_handle, wait).map_err(String::from)
+    }
+
+    /// `ensure_thread`, telling a refusal from a timeout: `reopen_output`
+    /// joins a refused setup and must never join a timed-out one.
+    fn ensure_thread_typed(
+        &mut self,
+        state: SharedState,
+        app_handle: Option<AppHandle>,
+        wait: SetupWait,
+    ) -> Result<(), SetupError> {
         if self.alive.load(Ordering::SeqCst) {
             return Ok(());
         }
@@ -5691,6 +6026,11 @@ impl MetronomeEngine {
         let playing = self.playing.clone();
         #[cfg(target_os = "android")]
         let output_dead = self.output_dead.clone();
+        let hints = std::mem::take(&mut self.next_spawn);
+        #[cfg(target_os = "android")]
+        let format_hint = hints.format;
+        let expected_rate = hints.expected_rate;
+        let quiet_setup = hints.quiet;
         let beat_log = self.beat_log.clone();
         let device_name = self.device_name.clone();
         let adaptive_score = self.adaptive_score.clone();
@@ -5710,6 +6050,8 @@ impl MetronomeEngine {
         let app_handle = EventSink(app_handle);
         #[cfg(test)]
         let force_setup_failure = self.force_setup_failure;
+        #[cfg(test)]
+        let (setup_delay, fake_setup_rate) = (self.setup_delay, self.fake_setup_rate);
         // Rendezvous for the setup outcome. Bounded at 1 and never waited on
         // by the sender, so the audio thread does not block on it even when
         // the receiver is dropped unread (which is what `SetupWait::No` does).
@@ -5735,7 +6077,19 @@ impl MetronomeEngine {
                 exit_tempo,
                 setup_tx,
             );
+            exit.quiet_setup = quiet_setup;
 
+            #[cfg(test)]
+            if let Some(d) = setup_delay {
+                thread::sleep(d);
+            }
+            #[cfg(test)]
+            if let Some(rate) = fake_setup_rate {
+                if setup_rate_or_fail(&mut exit, expected_rate, rate) {
+                    exit.fail("test: no device past the rate check".to_string());
+                }
+                return;
+            }
             #[cfg(test)]
             if force_setup_failure {
                 exit.fail("forced setup failure (test)".to_string());
@@ -5908,7 +6262,10 @@ impl MetronomeEngine {
             #[cfg(target_os = "android")]
             let (android_format, sample_rate, channels) = {
                 let _ = &device_name;
-                match crate::android_audio::probe_output_format() {
+                // `reopen_output`'s probe when there was one: the stream then
+                // opens at the rate the loaded material was judged by
+                // (`open_output_stream` refuses any other).
+                match format_hint.map(Ok).unwrap_or_else(crate::android_audio::probe_output_format) {
                     Ok(f) => {
                         let (sr, ch) = (f.sample_rate, f.channels);
                         (f, sr, ch)
@@ -5919,6 +6276,20 @@ impl MetronomeEngine {
                     }
                 }
             };
+
+            // A reopen that kept material decoded at `expected_rate` without
+            // a probed format to open at: a device that now runs at another
+            // rate would play it detuned, so this open is refused and the
+            // reopen falls back to dropping it (review of card #14, item B).
+            if !setup_rate_or_fail(&mut exit, expected_rate, sample_rate) {
+                return;
+            }
+            // Abandoned while probing (a timed-out reopen): decode nothing,
+            // publish nothing. The checks below repeat this at each point a
+            // late thread could still touch something shared.
+            if !alive.load(Ordering::SeqCst) {
+                return;
+            }
 
             // What the callback will actually be handed. A pair the stream
             // turned out to be too narrow for becomes the first pair, and
@@ -5970,6 +6341,9 @@ impl MetronomeEngine {
             // The rate a take is written at. Published before the stream
             // opens rather than after, so a `start_take` racing the first
             // buffer finds a rate rather than nothing.
+            if !alive.load(Ordering::SeqCst) {
+                return;
+            }
             take_sr_out.store(sample_rate, Ordering::Release);
 
             // Audio-safety probe (ROADMAP §4). `None` in the app.
@@ -6639,7 +7013,11 @@ impl MetronomeEngine {
                             // event thread emits `take-playback-ended`;
                             // saying it here would mean an `emit` on the
                             // audio thread, which locks and allocates.
-                            take_shared.note_ended();
+                            // Pinned to the generation this playback was
+                            // picked up at, so an ending that races a new
+                            // `set_play` cannot end the new take (card #14).
+                            // One relaxed-cost store of a `u64` copy.
+                            take_shared.note_ended(cached.take_play_generation);
                         }
                         // The transport is where it was; the band starts
                         // from the top when the listening is over.
@@ -8113,6 +8491,18 @@ impl MetronomeEngine {
                 }
             };
 
+            // An open that came back after its caller stopped waiting
+            // (`reopen_output` timed out, lowered `alive` and detached this
+            // thread, and another stream may already be up): drop this one
+            // unplayed rather than sound a second stream or publish over the
+            // live one's slots.
+            // Checked immediately before `play`, the last moment before the
+            // stream would sound, so the window left after a timeout is the
+            // gap between this load and the start call.
+            if !alive.load(Ordering::SeqCst) {
+                drop(stream);
+                return;
+            }
             if let Err(e) = stream.play() {
                 exit.fail(format!("could not start the audio output stream: {e}"));
                 return;
@@ -8126,7 +8516,9 @@ impl MetronomeEngine {
             // How wide the stream really is, published only now that there
             // IS one — `set_output_pair` reads it to decide whether a new
             // pair fits without reopening the device.
-            stream_channels_pub.store(channels as u32, Ordering::Release);
+            if alive.load(Ordering::SeqCst) {
+                stream_channels_pub.store(channels as u32, Ordering::Release);
+            }
 
             // The musician asked for a pair this device would not give.
             // Correct the stored pair here rather than leaving the callback
@@ -8191,16 +8583,13 @@ impl MetronomeEngine {
             // forever after.
             let mut dropped_said: u64 = 0;
             // Whether this loop has paused the output stream because the app
-            // is away with nothing needing it, and the playback generation
-            // whose end it has already seen (a take that ran off its end
-            // keeps its slot until the screen stops it, and the screen may be
-            // asleep). See `output_park`.
+            // is away with nothing needing it. (Which take's end has been
+            // seen lives on the take handoff, so a reopen that replaces this
+            // loop does not forget it.) See `output_park`.
             #[cfg(target_os = "android")]
             let mut output_parked = false;
             #[cfg(target_os = "android")]
-            let mut take_ended_generation: Option<u64> = None;
-            #[cfg(target_os = "android")]
-            crate::output_park::register_event_loop();
+            crate::output_park::register_event_loop(&alive);
 
             while alive.load(Ordering::SeqCst) {
                 // THE OUTPUT STREAM SLEEPS WHILE THE APP IS AWAY AND NOTHING
@@ -8215,17 +8604,20 @@ impl MetronomeEngine {
                 #[cfg(target_os = "android")]
                 {
                     use crate::output_park::{
-                        park_step, resume_outcome, should_park, ParkStep, ResumeOutcome,
+                        park_step, resume_with_retries, should_park, ParkStep, ResumeOutcome,
                     };
                     let away = crate::output_park::app_in_background();
                     if away || output_parked {
-                        let needs = || crate::output_park::OutputNeeds {
-                            app_in_background: crate::output_park::app_in_background(),
-                            transport_playing: playing.load(Ordering::SeqCst),
-                            take_playing_back: take_event.is_playing_back()
-                                && take_ended_generation != Some(take_event.play_generation()),
-                            take_recording: take_event.is_recording(),
-                            speech_in_flight: speech_event.in_flight(),
+                        // Atomic loads only: this runs every pass while the
+                        // app is away and must never wait on the command or
+                        // the speaking thread (card #14, item 4).
+                        let needs = || {
+                            crate::output_park::read_needs(
+                                crate::output_park::app_in_background(),
+                                playing.load(Ordering::SeqCst),
+                                &take_event,
+                                &speech_event,
+                            )
                         };
                         let dead = output_dead.load(Ordering::SeqCst);
                         let step = park_step(output_parked, should_park(needs()), dead);
@@ -8248,21 +8640,30 @@ impl MetronomeEngine {
                         }
                         if resume {
                             output_parked = false;
-                            let started = stream.play();
-                            if let Err(ref e) = started {
-                                eprintln!("[yames][android] {e}");
-                            }
-                            // A stream that will not start again is a dead
-                            // stream: mark it so nothing more is asked of it,
-                            // and hand it to the route thread, which reopens a
-                            // dead stream whether or not the transport is
-                            // running. Unless the system closed it, in which
-                            // case its error callback has already done both
-                            // (asking again would be the double reopen).
-                            let closed = output_dead.load(Ordering::SeqCst);
-                            if resume_outcome(started.is_ok(), closed) == ResumeOutcome::Reopen {
+                            // A refusal is often transient, and a reopen is
+                            // not free, so it is retried a few times, briefly,
+                            // here on the event loop (card #14, item 2).
+                            // Unless the system closed the stream — its error
+                            // callback has already marked it dead and asked
+                            // for the reopen — or the engine is going away.
+                            let outcome = resume_with_retries(
+                                || stream.play(),
+                                || {
+                                    output_dead.load(Ordering::SeqCst)
+                                        || !alive.load(Ordering::SeqCst)
+                                },
+                                thread::sleep,
+                            );
+                            // A stream that will not start even then is a
+                            // dead stream: mark it so nothing more is asked of
+                            // it, and hand it to the route thread, which
+                            // reopens a dead stream whether or not the
+                            // transport is running — as a reopen on the SAME
+                            // route, which keeps what is loaded, and without
+                            // announcing a route change that did not happen.
+                            if outcome == ResumeOutcome::Reopen {
                                 output_dead.store(true, Ordering::SeqCst);
-                                crate::android_route::output_lost();
+                                crate::android_route::output_dead();
                             }
                         }
                     }
@@ -8293,16 +8694,15 @@ impl MetronomeEngine {
                 // only one that runs while a take plays with the band
                 // stopped — because the audio thread cannot emit: an
                 // `emit` locks and allocates.
-                // The generation is read BEFORE the flag, so an ending is
-                // never pinned on a playback started after it.
-                #[cfg(target_os = "android")]
-                let play_generation = take_event.play_generation();
-                if take_event.take_ended() {
-                    #[cfg(target_os = "android")]
-                    {
-                        take_ended_generation = Some(play_generation);
-                    }
-                    let _ = app_handle.emit("take-playback-ended", ());
+                // The ending carries the generation of the playback it
+                // belongs to, and `take_ended` drops one that is not the
+                // playback in the slot now — so an old take running off its
+                // end while a new one is handed over neither tells the
+                // screen the new one ended nor lets the stream park under it.
+                // Reporting it is what acknowledges it (`take_ended`), on the
+                // handoff, where a reopen cannot forget it.
+                if let Some(generation) = take_event.take_ended() {
+                    let _ = app_handle.emit("take-playback-ended", TakeEnded { generation });
                 }
                 // And a take that ran into the twenty-minute cap. Raised by
                 // the WRITER thread rather than the callback, but read here
@@ -8708,14 +9108,12 @@ impl MetronomeEngine {
         // afterwards and must not start measuring a stream that never opened.
         match setup_rx.recv_timeout(timeout) {
             Ok(Ok(())) => Ok(()),
-            Ok(Err(e)) => Err(e),
-            Err(mpsc::RecvTimeoutError::Timeout) => {
-                Err("audio output device did not respond".to_string())
-            }
+            Ok(Err(e)) => Err(SetupError::Refused(e)),
+            Err(mpsc::RecvTimeoutError::Timeout) => Err(SetupError::TimedOut),
             // The thread is gone without a word; `AudioThreadExit` has
             // already lowered the flags, so the next Play tries again.
             Err(mpsc::RecvTimeoutError::Disconnected) => {
-                Err("audio thread stopped unexpectedly".to_string())
+                Err(SetupError::Refused("audio thread stopped unexpectedly".to_string()))
             }
         }
     }
@@ -8756,7 +9154,9 @@ impl MetronomeEngine {
             self.alive.load(Ordering::SeqCst),
             self.output_dead.load(Ordering::SeqCst),
         ) {
-            crate::android_route::output_lost();
+            // A dead stream, not a route change: reopened without
+            // re-announcing `audio-route-changed` (card #14, item 3).
+            crate::android_route::output_dead();
         }
     }
 
@@ -8791,6 +9191,24 @@ impl MetronomeEngine {
 
     /// Fully stop playback and tear down the audio thread.
     pub fn shutdown(&mut self) {
+        self.shutdown_inner(true);
+    }
+
+    /// `shutdown`, with the coach's line left in its slot when `cut_speech`
+    /// is false — `reopen_output` on a stream whose rate is not moving.
+    fn shutdown_inner(&mut self, cut_speech: bool) {
+        self.shutdown_within(cut_speech, None);
+    }
+
+    /// `shutdown_inner` whose join gives up after `join_within`: the thread
+    /// is then detached rather than waited for (`reopen_output`, which runs
+    /// under the engine's lock and must not wait on an audio server that
+    /// hangs closing a dead stream). Detaching is safe for the same reasons
+    /// `abandon_spawn` is: the thread's flags are its own `Arc`s and are
+    /// already down, so its loop ends at the next check and it drops its
+    /// stream on its own thread — never an audio one — whenever the close
+    /// returns; its setup checks `alive` before publishing anything.
+    fn shutdown_within(&mut self, cut_speech: bool, join_within: Option<Duration>) {
         self.playing.store(false, Ordering::SeqCst);
         self.alive.store(false, Ordering::SeqCst);
         // No stream, so no width. Cleared here rather than left behind, so
@@ -8800,13 +9218,34 @@ impl MetronomeEngine {
         // and is half-spoken. Take it back rather than let the next stream
         // replay it from the top at the wrong speed; the speaking thread
         // reports `Interrupted`, which is what a device change is.
-        self.speech.cut();
+        if cut_speech {
+            self.speech.cut();
+        }
         if let Some(handle) = self.thread_handle.take() {
             // The event loop sleeps in `park_timeout` between beats now, so
             // it is woken rather than waited out: without this the join
             // costs up to the 50 ms backstop on every device change.
             handle.thread().unpark();
-            let _ = handle.join();
+            match join_within {
+                None => {
+                    let _ = handle.join();
+                }
+                Some(d) => {
+                    let started = std::time::Instant::now();
+                    while !handle.is_finished() && started.elapsed() < d {
+                        thread::sleep(Duration::from_millis(2));
+                    }
+                    if handle.is_finished() {
+                        let _ = handle.join();
+                    } else {
+                        eprintln!(
+                            "[yames] the old audio thread did not finish within {d:?}; \
+                             detached rather than waited for"
+                        );
+                        drop(handle);
+                    }
+                }
+            }
         }
         // AND NO RATE: it was the old device's. Left behind, a song reloaded
         // after `song-dropped` read it before the new stream had published
@@ -12595,6 +13034,326 @@ mod tests {
         assert!(playing_survives_device_change(true, false));
         assert!(!playing_survives_device_change(false, true));
         assert!(!playing_survives_device_change(false, false));
+    }
+
+    /// An engine whose `reopen_output` spawns are scripted: each open
+    /// returns the next outcome (`Ok` when the script runs out) and records
+    /// what it was asked. No device opens on a test host; what is under test
+    /// is what the reopen decides and keeps.
+    fn engine_with_scripted_reopens(
+        outcomes: &[Result<(), &str>],
+    ) -> MetronomeEngine {
+        let mut engine = MetronomeEngine::new(crate::timing::create_beat_log());
+        engine.reopen_spawns = Some((
+            outcomes
+                .iter()
+                .map(|r| {
+                    r.map_err(|e| match e {
+                        "timeout" => SetupError::TimedOut,
+                        e => SetupError::Refused(e.to_string()),
+                    })
+                })
+                .collect(),
+            Vec::new(),
+        ));
+        engine
+    }
+
+    fn spawns(engine: &MetronomeEngine) -> Vec<SpawnRecord> {
+        engine.reopen_spawns.as_ref().unwrap().1.clone()
+    }
+
+    fn load_song_kit_and_speech(engine: &MetronomeEngine, sr: u32) -> crate::synth::SynthPlayer {
+        engine.sample_rate.store(sr, Ordering::Release);
+        let (table, player) = song_with_its_renderer(sr);
+        engine.set_song_table(Some(table));
+        engine.set_jam_table(Some(Arc::new(crate::jam::compile(&rock_16ths()).unwrap())));
+        engine.speech.set_clip(Some(SpeechClip { pcm: Arc::new(vec![0.0; 8]) }));
+        player
+    }
+
+    fn all_kept(engine: &MetronomeEngine, player: &crate::synth::SynthPlayer) {
+        assert!(engine.song_loaded(), "the song was dropped");
+        assert!(!player.is_finished(), "the song's renderer was stopped");
+        assert!(engine.jam_form_bars().is_some(), "the jam's kit was dropped");
+        assert!(engine.speech.in_flight(), "the coach's line was taken away");
+        assert!(!engine.speech.was_cut(), "the speaking thread was told it was cut");
+    }
+
+    fn all_dropped(engine: &MetronomeEngine, player: &crate::synth::SynthPlayer) {
+        assert!(!engine.song_loaded(), "a song decoded at the old rate survived");
+        assert!(renderer_stops(player));
+        assert!(engine.jam_form_bars().is_none(), "a kit decoded at the old rate survived");
+        assert!(!engine.speech.in_flight());
+        assert!(engine.speech.was_cut(), "the speaking thread was not told");
+    }
+
+    /// Card #14, item 2: a dead stream reopened on the SAME route at the SAME
+    /// rate keeps the song, the jam's kit and the coach's line, where the
+    /// device-switch path used to take all three — opened with the probed
+    /// format, waited for, quietly.
+    #[test]
+    fn a_reopen_at_the_same_rate_keeps_the_song_the_kit_and_the_speech() {
+        let sr = 48_000u32;
+        let mut engine = engine_with_scripted_reopens(&[Ok(())]);
+        let state = crate::state::create_shared_state();
+        let player = load_song_kit_and_speech(&engine, sr);
+        let outcome = engine.reopen_output(state, None, |_| Some(sr)).unwrap();
+        assert_eq!(outcome, ReopenOutcome::Kept);
+        all_kept(&engine, &player);
+        assert_eq!(
+            spawns(&engine),
+            vec![SpawnRecord { format_rate: Some(sr), expected_rate: None, quiet: true, waited: true }]
+        );
+    }
+
+    /// The rate moved: exactly the device-switch drop, and an open that
+    /// probes for itself and reports as any open does.
+    #[test]
+    fn a_reopen_at_a_new_rate_drops_what_was_decoded_for_the_old_one() {
+        let sr = 48_000u32;
+        let mut engine = engine_with_scripted_reopens(&[]);
+        let state = crate::state::create_shared_state();
+        let player = load_song_kit_and_speech(&engine, sr);
+        let outcome = engine.reopen_output(state, None, |_| Some(44_100)).unwrap();
+        assert_eq!(outcome, ReopenOutcome::Dropped);
+        all_dropped(&engine, &player);
+        assert_eq!(
+            spawns(&engine),
+            vec![SpawnRecord { format_rate: None, expected_rate: None, quiet: false, waited: false }]
+        );
+    }
+
+    /// Re-review of card #14, item A: the hinted open is REFUSED. The output
+    /// must not be left closed: a fresh probe at the same rate gets one more
+    /// quiet open, which comes up, and nothing is dropped.
+    #[test]
+    fn a_refused_hinted_open_falls_back_and_keeps_material_at_the_same_rate() {
+        let sr = 48_000u32;
+        let mut engine = engine_with_scripted_reopens(&[Err("refused"), Ok(())]);
+        let state = crate::state::create_shared_state();
+        let player = load_song_kit_and_speech(&engine, sr);
+        let outcome = engine.reopen_output(state, None, |_| Some(sr)).unwrap();
+        assert_eq!(outcome, ReopenOutcome::Kept);
+        all_kept(&engine, &player);
+        let quiet = SpawnRecord { format_rate: Some(sr), expected_rate: None, quiet: true, waited: true };
+        assert_eq!(spawns(&engine), vec![quiet.clone(), quiet]);
+    }
+
+    /// The same, but the fresh probe answers another rate: the material goes,
+    /// and the plain open is what brings the output up.
+    #[test]
+    fn a_refused_hinted_open_at_a_moved_rate_drops_and_opens_plainly() {
+        let sr = 48_000u32;
+        let mut engine = engine_with_scripted_reopens(&[Err("refused")]);
+        let state = crate::state::create_shared_state();
+        let player = load_song_kit_and_speech(&engine, sr);
+        let mut answers = vec![Some(sr), Some(44_100)].into_iter();
+        let outcome = engine.reopen_output(state, None, move |_| answers.next().flatten()).unwrap();
+        assert_eq!(outcome, ReopenOutcome::Dropped);
+        all_dropped(&engine, &player);
+        let s = spawns(&engine);
+        assert_eq!(s.len(), 2);
+        assert_eq!(s[1], SpawnRecord { format_rate: None, expected_rate: None, quiet: false, waited: false });
+    }
+
+    /// And when every open at the old rate is refused, the last resort is
+    /// the plain open — never a closed output nobody was told about.
+    #[test]
+    fn every_refusal_at_the_old_rate_ends_in_the_plain_open() {
+        let sr = 48_000u32;
+        let mut engine = engine_with_scripted_reopens(&[Err("refused"), Err("refused")]);
+        let state = crate::state::create_shared_state();
+        let player = load_song_kit_and_speech(&engine, sr);
+        let outcome = engine.reopen_output(state, None, |_| Some(sr)).unwrap();
+        assert_eq!(outcome, ReopenOutcome::Dropped);
+        all_dropped(&engine, &player);
+        let s = spawns(&engine);
+        assert_eq!(s.len(), 3);
+        assert!(s[..2].iter().all(|r| r.quiet && r.waited));
+        assert!(!s[2].quiet && !s[2].waited);
+    }
+
+    /// Re-review of card #14, item B: kept without a probed format (both
+    /// probes failed), the open is told the old rate, so a setup whose own
+    /// probe answers another rate is refused and takes item A's fallback
+    /// instead of playing the material detuned.
+    #[test]
+    fn kept_without_a_format_the_open_must_find_the_old_rate() {
+        let sr = 48_000u32;
+        let mut engine = engine_with_scripted_reopens(&[Err("the device now opens at 44100 Hz")]);
+        let state = crate::state::create_shared_state();
+        let player = load_song_kit_and_speech(&engine, sr);
+        let outcome = engine.reopen_output(state, None, |_| None).unwrap();
+        let s = spawns(&engine);
+        assert_eq!(
+            s[0],
+            SpawnRecord { format_rate: None, expected_rate: Some(sr), quiet: true, waited: true }
+        );
+        // The fresh probe failed too, so nothing at the old rate is known to
+        // open: the material goes and the plain open runs.
+        assert_eq!(outcome, ReopenOutcome::Dropped);
+        all_dropped(&engine, &player);
+        assert!(crate::output_park::setup_rate_matches(Some(sr), sr));
+        assert!(!crate::output_park::setup_rate_matches(Some(sr), 44_100));
+        assert!(crate::output_park::setup_rate_matches(None, 44_100));
+    }
+
+    /// Final re-review of card #14: a timed-out open ends the attempts to
+    /// keep anything — no second quiet open after it — and goes straight to
+    /// the plain open, which waits for nothing.
+    #[test]
+    fn a_timed_out_open_goes_straight_to_the_plain_open() {
+        let sr = 48_000u32;
+        let mut engine = engine_with_scripted_reopens(&[Err("timeout")]);
+        let state = crate::state::create_shared_state();
+        let player = load_song_kit_and_speech(&engine, sr);
+        let outcome = engine.reopen_output(state, None, |_| Some(sr)).unwrap();
+        assert_eq!(outcome, ReopenOutcome::Dropped);
+        all_dropped(&engine, &player);
+        let s = spawns(&engine);
+        assert_eq!(s.len(), 2, "something was tried after a hung open: {s:?}");
+        assert!(s[0].quiet && s[0].waited);
+        assert!(!s[1].quiet && !s[1].waited);
+    }
+
+    /// The same with REAL threads and a device open that hangs for two
+    /// seconds: the reopen runs under the engine's lock, as the route thread
+    /// runs it, and the lock must come free well inside the ANR threshold —
+    /// the timed-out setup is detached, not joined.
+    #[test]
+    fn a_hung_open_does_not_hold_the_engine_lock() {
+        let sr = 48_000u32;
+        let mut engine =
+            MetronomeEngine::new_with_forced_setup_failure(crate::timing::create_beat_log());
+        engine.setup_delay = Some(Duration::from_secs(2));
+        engine.sample_rate.store(sr, Ordering::Release);
+        let engine = Arc::new(std::sync::Mutex::new(engine));
+        let state = crate::state::create_shared_state();
+
+        let started = std::time::Instant::now();
+        let (e, st) = (engine.clone(), state.clone());
+        let route = thread::spawn(move || {
+            let mut g = e.lock().unwrap();
+            g.reopen_output(st, None, |_| Some(sr))
+        });
+        // Let the route thread take the lock first.
+        while started.elapsed() < Duration::from_millis(50) {
+            thread::yield_now();
+        }
+        let held_for = loop {
+            if let Ok(g) = engine.try_lock() {
+                drop(g);
+                break started.elapsed();
+            }
+            assert!(
+                started.elapsed() < Duration::from_secs(5),
+                "the route thread held the engine past the ANR threshold"
+            );
+            thread::yield_now();
+        };
+        let outcome = route.join().unwrap().unwrap();
+        assert_eq!(outcome, ReopenOutcome::Dropped, "a hung open was treated as kept");
+        assert!(held_for < REOPEN_BUDGET, "the engine's lock was held {held_for:?}");
+    }
+
+    /// The opening shutdown is bounded too: an old audio thread that will
+    /// not finish (here, a setup asleep for two seconds) is detached after
+    /// `REOPEN_SHUTDOWN_WAIT`, not joined.
+    #[test]
+    fn a_reopen_does_not_wait_on_an_old_thread_that_will_not_finish() {
+        let sr = 48_000u32;
+        let mut engine = engine_with_scripted_reopens(&[Ok(())]);
+        engine.force_setup_failure = true;
+        engine.setup_delay = Some(Duration::from_secs(2));
+        let state = crate::state::create_shared_state();
+        engine.ensure_thread(state.clone(), None, SetupWait::No).unwrap();
+        assert!(engine.thread_handle.is_some());
+        engine.sample_rate.store(sr, Ordering::Release);
+        let started = std::time::Instant::now();
+        let outcome = engine.reopen_output(state, None, |_| Some(sr)).unwrap();
+        let took = started.elapsed();
+        assert_eq!(outcome, ReopenOutcome::Kept);
+        assert!(took < REOPEN_SHUTDOWN_WAIT + Duration::from_millis(400), "waited {took:?}");
+    }
+
+    /// A REAL setup thread: a reopen that demands its old rate is refused,
+    /// through `ensure_thread`, by a device that answers another one — and
+    /// passes the check when the device agrees.
+    #[test]
+    fn a_setup_that_finds_another_rate_than_demanded_is_refused() {
+        let state = crate::state::create_shared_state();
+        let mut engine = MetronomeEngine::new(crate::timing::create_beat_log());
+        engine.fake_setup_rate = Some(44_100);
+        engine.next_spawn = SpawnHints { format: None, expected_rate: Some(48_000), quiet: true };
+        let err = engine
+            .ensure_thread(state.clone(), None, SetupWait::UpTo(AUDIO_SETUP_TIMEOUT))
+            .unwrap_err();
+        assert!(err.contains("now opens at 44100 Hz"), "{err}");
+
+        engine.next_spawn = SpawnHints { format: None, expected_rate: Some(44_100), quiet: true };
+        let err = engine
+            .ensure_thread(state, None, SetupWait::UpTo(AUDIO_SETUP_TIMEOUT))
+            .unwrap_err();
+        assert!(err.contains("past the rate check"), "a matching rate was refused: {err}");
+        engine.shutdown();
+    }
+
+    /// A REAL thread this time: a quiet open that fails answers the caller
+    /// with `Err` and leaves the transport the caller carries alone — no
+    /// `is_playing = false` written behind the fallback's back.
+    #[test]
+    fn a_quiet_setup_failure_leaves_the_transport_to_the_caller() {
+        let mut engine =
+            MetronomeEngine::new_with_forced_setup_failure(crate::timing::create_beat_log());
+        let state = crate::state::create_shared_state();
+        state.lock().unwrap().is_playing = true;
+        engine.next_spawn = SpawnHints { format: None, expected_rate: None, quiet: true };
+        let r = engine.ensure_thread(state.clone(), None, SetupWait::UpTo(AUDIO_SETUP_TIMEOUT));
+        assert!(r.is_err(), "a refused quiet open reported success");
+        assert!(state.lock().unwrap().is_playing, "a quiet failure stopped the transport");
+        assert!(!engine.alive.load(Ordering::SeqCst));
+        // The next, ordinary, open reports as it always has.
+        let r = engine.ensure_thread(state.clone(), None, SetupWait::UpTo(AUDIO_SETUP_TIMEOUT));
+        assert!(r.is_err());
+        assert!(!state.lock().unwrap().is_playing, "an ordinary failure left the transport up");
+        engine.shutdown();
+    }
+
+    /// Review of card #14, items 1 and 3, at the engine: a reopen settles a
+    /// take's unreported ending before the new callback exists, so the
+    /// finished take is not handed over again; and a probe that fails once
+    /// is asked again.
+    #[test]
+    fn a_reopen_settles_a_finished_take_and_asks_a_failed_probe_again() {
+        let sr = 48_000u32;
+        let mut engine = engine_with_scripted_reopens(&[]);
+        let state = crate::state::create_shared_state();
+        engine.take.set_play(Some(crate::take::TakePlayback {
+            pcm: Arc::new(vec![0.0; 16]),
+            sample_rate: sr,
+        }));
+        let mut seen = 0u64;
+        engine.take.poll_play(&mut seen).unwrap().unwrap();
+        engine.take.note_ended(seen); // the old loop never got to it
+
+        let player = load_song_kit_and_speech(&engine, sr);
+        let mut asked = 0;
+        let outcome = engine
+            .reopen_output(state, None, |_| {
+                asked += 1;
+                if asked == 1 { None } else { Some(sr) }
+            })
+            .unwrap();
+        assert_eq!(asked, 2, "a failed probe was not asked again");
+        assert_eq!(outcome, ReopenOutcome::Kept);
+        all_kept(&engine, &player);
+        assert_eq!(engine.take.take_ended(), None, "the end was left for the new loop to announce again");
+        let mut fresh = 0u64;
+        assert!(
+            engine.take.poll_play(&mut fresh).unwrap().is_none(),
+            "the new callback would replay the finished take"
+        );
     }
 
     /// Eight bars of a two-guitar song, for the ear and for the meter.

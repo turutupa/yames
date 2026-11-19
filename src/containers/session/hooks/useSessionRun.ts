@@ -54,6 +54,8 @@ import type { MainView } from "../../main-window/MainHeader";
 import { useSongAttempt } from "../../songs/review/useSongAttempt";
 import { useLiveNoteLights } from "../../songs/review/useLiveNoteLights";
 import { useListenDemo } from "./useListenDemo";
+import { NO_DEMO, demoEdge, playedMs } from "../../../session/playedClock";
+import type { DemoClock } from "../../../session/playedClock";
 import { newAttemptId } from "../../../songs/attempt";
 import { DEFAULT_MIX_SETTING, engineMix } from "../../../songs/songEngine";
 import type { BeatPosition } from "../../../songs/position";
@@ -667,6 +669,11 @@ export function useSessionRun(input: SessionRunInput) {
     },
   });
   const demoOn = listen.active;
+  // The "played" clock leaves out the time the demo played (acceptance 5, P2-11).
+  const [demoClock, setDemoClock] = useState<DemoClock>(NO_DEMO);
+  useEffect(() => {
+    setDemoClock((c) => demoEdge(c, listen.playing, Date.now(), runRef.current.startedAt));
+  }, [listen.playing]);
   // A move of the slider (or the input changing) is heard at once, on the band loaded now.
   useEffect(() => {
     void enqueue(async () => {
@@ -1905,6 +1912,8 @@ export function useSessionRun(input: SessionRunInput) {
     working: run.phase === "listening",
     /** Watch with Sound: one pass heard before it is played (card #28). */
     listen,
+    /** Milliseconds played this Session, less the time the Watch demo played. */
+    playedMs: playedMs(run.startedAt, run.now, demoClock),
     // The tour's look shows a first ready screen, with nothing to go back to.
     canGoBack: !preview && canGoBack(run),
     /** Escape asked "Leave this Session?" and it has not been answered. */

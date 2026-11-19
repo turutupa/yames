@@ -228,7 +228,7 @@
       "next": "Volgende",
       "done": "Klaar",
       "skip": "Rondleiding overslaan",
-      "offer": "Nieuw: een korte rondleiding door Vandaag, Leerpaden en een sessie.",
+      "offer": "Nieuw: een korte rondleiding door Vandaag, Leerpaden, een sessie en Voortgang.",
       "offerAccept": "Laat me rondkijken",
       "offerDismiss": "Sluiten",
       "stops": {
@@ -276,7 +276,7 @@
         },
         "watch": {
           "title": "Eerst bekijken",
-          "body": "Bekijk speelt de noten op volgorde op tempo, zodat je de vorm ziet voordat je hem probeert."
+          "body": "Bekijk speelt het één keer voor je voor, met geluid, na een maat aftellen, elke noot verlicht als hij klinkt: je hoort en ziet het voordat je het probeert."
         },
         "take": {
           "title": "Take starten",
@@ -284,7 +284,7 @@
         },
         "blocks": {
           "title": "De blokken van vandaag",
-          "body": "Elk blok van de sessie staat hierboven. Druk op een blok om erheen te gaan. Vorige gaat er een terug, Deze overslaan gaat verder."
+          "body": "Elk blok van de sessie staat hierboven. Druk op een blok om erheen te gaan. ‹ Vorige gaat er een terug, Deze overslaan gaat verder."
         },
         "progress": {
           "title": "Schoon tempo",

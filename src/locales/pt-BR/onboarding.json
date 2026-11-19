@@ -228,7 +228,7 @@
       "next": "Avançar",
       "done": "Concluir",
       "skip": "Pular o tour",
-      "offer": "Novo: um tour curto por Hoje, Trilhas e uma sessão.",
+      "offer": "Novo: um tour curto por Hoje, Trilhas, uma sessão e Progresso.",
       "offerAccept": "Me mostre",
       "offerDismiss": "Dispensar",
       "stops": {
@@ -276,7 +276,7 @@
         },
         "watch": {
           "title": "Veja primeiro",
-          "body": "Ver toca as notas em ordem, no andamento, para você ver o desenho antes de tentar."
+          "body": "Ver toca uma vez para você, com som, depois de um compasso de contagem, cada nota acesa quando soa: você ouve e vê antes de tentar."
         },
         "take": {
           "title": "Começar tomada",
@@ -284,7 +284,7 @@
         },
         "blocks": {
           "title": "Os blocos de hoje",
-          "body": "Cada bloco da sessão fica aqui em cima. Toque em um para ir até ele. Anterior volta um, Pular este segue em frente."
+          "body": "Cada bloco da sessão fica aqui em cima. Toque em um para ir até ele. ‹ Anterior volta um, Pular este segue em frente."
         },
         "progress": {
           "title": "Andamento limpo",
