@@ -38,6 +38,10 @@
  *   Sessions without a new clean rung is parked for two days. A Path with
  *   nothing today says why in `skipped`.
  *
+ * Which Paths it is given is Today's choice (`focus.ts`): the daily mix, or
+ * one Path for the day (`focused`), which plans that Path alone and fills time
+ * it has no fresh work for with its passed Exercises at a higher tempo.
+ *
  * Five minutes is one thing rather than two thin slices: splitting it leaves no
  * time for a second Take of anything (the mocks' open question 12).
  *

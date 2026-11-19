@@ -1302,6 +1302,11 @@
 .main-window.is-mobile .session-today-focus {
   order: 4;
 }
+/* Its label and control keep their own order inside it: the minutes' order
+   rules above match them too. */
+.main-window.is-mobile .session-today .session-today-focus > * {
+  order: 0;
+}
 .main-window.is-mobile .session-today-plan {
   order: 6;
   /* Room for Start's fade: scrolled to the end, the plan's last line sits

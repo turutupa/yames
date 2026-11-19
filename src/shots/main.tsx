@@ -255,10 +255,14 @@ async function drive() {
         `.rail button[data-view="${place}"], .mobile-tabs button[data-tab="${place}"]`,
       );
     await until("Today", () => !!byId("today"));
-    // A plan, or (subscribed to nothing) the way to the Paths instead of one.
+    // A plan, or (subscribed to nothing) the way to the Paths instead of one,
+    // or (nothing in the daily mix) the line that says so.
     await until(
       "a plan",
-      () => !!document.querySelector('.session-plan-item, [data-testid="today-choose-path"]'),
+      () =>
+        !!document.querySelector(
+          '.session-plan-item, [data-testid="today-choose-path"], [data-testid="today-nothing-why"]',
+        ),
     );
     if (stop === "paths" || stop === "path" || stop === "step" || stop === "edge" || stop === "edgeDone") {
       rail("paths")?.click();

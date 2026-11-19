@@ -64,6 +64,12 @@ export interface Shot {
      * Path is subscribed (QA 2026-11-17 #7).
      */
     seed: "first" | "returning" | "back" | "three" | "none" | "ungraded";
+    /** Today's focus (`session.todayFocus`): "mix" or a Path's id. Absent: the mix. */
+    focus?: string;
+    /** Paths switched out of the daily mix (`session.offMix`). */
+    offMix?: string[];
+    /** Paths unsubscribed from (`session.unsubscribed`), on top of what the seed says. */
+    unsubscribed?: string[];
     /** On a result, answer "Was this grade fair?" before the photograph. */
     fair?: "yes" | "no";
     minutes?: 5 | 10 | 15 | 20;
@@ -1025,6 +1031,77 @@ export const SHOTS: Shot[] = [
     height: 900,
     settleMs: 300,
   },
+  // Today's "Paths:" (owner, 2026-11-18): the daily mix or one Path. Two
+  // Paths is a segmented row; three is a menu.
+  {
+    id: "today-focus-two",
+    suffix: "today-focus-two",
+    window: "main",
+    session: { seed: "three", minutes: 15, stop: "today", unsubscribed: ["sweep-picking"] },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "today-focus-two-one",
+    suffix: "today-focus-two-one",
+    window: "main",
+    session: { seed: "three", minutes: 15, stop: "today", unsubscribed: ["sweep-picking"], focus: "blues-pentatonics" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "today-focus-three",
+    suffix: "today-focus-three",
+    window: "main",
+    session: { seed: "three", minutes: 20, stop: "today" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "today-focus-three-one",
+    suffix: "today-focus-three-one",
+    window: "main",
+    session: { seed: "three", minutes: 20, stop: "today", focus: "blues-pentatonics" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "today-focus-one-path",
+    suffix: "today-focus-one-path",
+    window: "main",
+    session: { seed: "returning", minutes: 15, stop: "today" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "today-mix-empty",
+    suffix: "today-mix-empty",
+    window: "main",
+    session: {
+      seed: "three",
+      minutes: 15,
+      stop: "today",
+      offMix: ["alternate-picking", "sweep-picking", "blues-pentatonics"],
+    },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  // "In my daily mix" on each subscribed Path's card; Blues switched off.
+  {
+    id: "paths-mix",
+    suffix: "paths-mix",
+    window: "main",
+    session: { seed: "three", stop: "paths", offMix: ["blues-pentatonics"] },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
   // A Step's page with Test out.
   {
     id: "step-test-out",
@@ -1691,6 +1768,10 @@ export const PHONE_LEARNING_SCENES = [
   "today-drums",
   "today-returning",
   "today-no-paths",
+  "today-focus-two",
+  "today-focus-three-one",
+  "today-mix-empty",
+  "paths-mix",
   "session-ready",
   "session-playing",
   "session-playing-neck",
