@@ -66,6 +66,28 @@ describe("the neck palette, every theme", () => {
   });
 });
 
+describe("the neck reads, every theme (WCAG, owner 2026-11-18)", () => {
+  // Numerals on a dot are text: 4.5:1 against the dot's fill. Rings, notes,
+  // strings and frets are marks: 3:1 against the board. Fret numbers are text
+  // on the page.
+  it.each(THEMES.map((t) => t.id))("%s: every finger digit clears 4.5:1 on its dot", (id) => {
+    const p = paletteOf(id);
+    for (const kind of ["now", "next", "aim", "tone", "tens", "clash", "box", "dim"] as const) {
+      const look = noteLook(kind, p);
+      expect(contrast(look.fill, look.ink), `${kind}: ${look.ink} on ${look.fill}`).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+  it.each(THEMES.map((t) => t.id))("%s: every mark clears 3:1 on the board", (id) => {
+    const p = paletteOf(id);
+    const marks = { accent: p.accent, hit: p.hit, miss: p.miss, ghost: p.ghost, dim: p.dim, string: p.string, wound: p.wound, fret: p.fret };
+    for (const [name, c] of Object.entries(marks)) {
+      expect(contrast(c, p.board), `${name} ${c} on board ${p.board}`).toBeGreaterThanOrEqual(3);
+    }
+    expect(contrast(p.num, p.bg), "marker fret numbers").toBeGreaterThanOrEqual(4.5);
+    expect(contrast(p.numFaint, p.bg), "the other fret numbers").toBeGreaterThanOrEqual(4.5);
+  });
+});
+
 describe("live: the palette follows the theme", () => {
   it("reads the root and notices a theme change", () => {
     applyTheme(getThemeById("ember"));

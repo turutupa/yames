@@ -520,7 +520,7 @@ export function createGuitar({ tier, overlay, palette }: { tier: number; overlay
       n.disc.visible = v > 0.004;
       n.label.visible = v > 0.004 && !!n.text;
       const glow = n.kind === "now";
-      n.halo.material.opacity = (glow ? v * P.glowA : 0) + n.flash * 0.6;
+      n.halo.material.opacity = (glow ? v * P.glowA : 0) + n.flash * 0.6 * P.flashA;
       n.halo.visible = n.halo.material.opacity > 0.004;
       n.halo.scale.setScalar(GLOW_SCALE + (n.flash > 0 ? (1 - n.flash) * 0.12 : 0));
       if (n.o <= 0 && n.to === 0) {
@@ -584,7 +584,7 @@ export function createGuitar({ tier, overlay, palette }: { tier: number; overlay
     const z = strZ(s, x);
     F.m.position.set(x, crown(z) + 0.003, z);
     F.m.material.color.set(col);
-    F.v = 0.6;
+    F.v = 0.6 * P.flashA;
     F.m.visible = true;
     F.m.scale.setScalar(0.3);
   }

@@ -327,6 +327,9 @@ async function drive() {
         await until("an Exercise to play", () => !!document.querySelector(play));
         document.querySelector<HTMLElement>(play)?.click();
       } else {
+        // The plan can be drawn a beat before the Start button is (Today's
+        // focus planner answers asynchronously): wait for the button itself.
+        await until("Today's Start", () => !!byId("today-start") && !(byId("today-start") as HTMLButtonElement).disabled);
         byId("today-start")?.click();
       }
       await until("the Session", () => !!byId("session"));
