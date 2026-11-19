@@ -75,9 +75,9 @@
 .main-content[data-view="settings"] .settings-head-title {
   margin: 0;
   color: var(--text-primary);
-  font: 500 clamp(34px, 5vh, 46px) / 1.04 var(--ui-serif);
+  font: var(--heading-weight, 500) calc(clamp(34px, 5vh, 46px) * var(--heading-scale, 1)) / 1.04 var(--ui-serif);
   font-optical-sizing: auto;
-  letter-spacing: -0.02em;
+  letter-spacing: calc(-0.02em * var(--heading-tracking, 1));
 }
 
 /* The first panel follows the head now, not the top of the sheet. */
@@ -1149,8 +1149,8 @@
 
 .main-content[data-view="settings"] .about-summary-name {
   color: var(--text-primary);
-  font: 500 24px/1.1 var(--ui-serif);
-  letter-spacing: -0.01em;
+  font: var(--heading-weight, 500) calc(24px * var(--heading-scale, 1)) / 1.1 var(--ui-serif);
+  letter-spacing: calc(-0.01em * var(--heading-tracking, 1));
 }
 
 .main-content[data-view="settings"] .about-summary-meta {

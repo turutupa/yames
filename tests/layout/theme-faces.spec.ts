@@ -131,3 +131,44 @@ for (const theme of [...FACE_THEMES, "aurora", "prism"]) {
     });
   }
 }
+
+/**
+ * The big headlines wear the theme's heading face, in all thirteen themes
+ * (owner, 2026-11-18: "I still see the word TODAY ... without the theme's
+ * fonts"). Ember's heading face is its display face, Barlow Condensed, like
+ * its titles and clocks; Ivory and Manuscript keep their serif by design.
+ * Measured on the element itself, so a rule that pins a face on one
+ * headline (rather than the token) fails here even if the token is right.
+ */
+const ALL_THEMES = "mono obsidian velvet neon aurora ash ember ivory arctic sand lavender prism manuscript".split(" ");
+const HEADLINES: [scene: string, selector: string][] = [
+  ["today-returning", ".session-today .session-mega"],
+  ["paths", ".session-page .session-h1"],
+  ["progress", ".session-page .session-h1"],
+  ["session-recap", ".session-recap-head .session-h1"],
+  ["session-ungraded-result", ".session-page .session-h1"],
+];
+for (const theme of ALL_THEMES) {
+  test(`headlines in ${theme}: Today, Paths, Progress and the result wear the theme's heading face`, async ({ page }) => {
+    test.setTimeout(120_000);
+    for (const [scene, selector] of HEADLINES) {
+      await openShot(page, scene, SIZE, theme);
+      const got = await page.locator(selector).first().evaluate((el) => {
+        const norm = (s: string) => s.replace(/["']/g, "").replace(/\s*,\s*/g, ",").trim().toLowerCase();
+        const cs = getComputedStyle(el);
+        return {
+          face: norm(cs.fontFamily),
+          heading: norm(getComputedStyle(document.documentElement).getPropertyValue("--font-heading")),
+          weight: Number(cs.fontWeight),
+        };
+      });
+      expect(got.face, `${scene} ${selector}`).toBe(got.heading);
+      if (theme === "ember") {
+        expect(got.face, `${scene}: Ember's headlines are Barlow Condensed`).toMatch(/^barlow condensed/);
+        // A condensed face set at 500 reads thin next to its own 700 clocks.
+        expect(got.weight, `${scene}: Ember's headline weight`).toBeGreaterThanOrEqual(600);
+      }
+      if (theme === "ivory" || theme === "manuscript") expect(got.face).toMatch(/^fraunces/);
+    }
+  });
+}
