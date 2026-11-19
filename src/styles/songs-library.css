@@ -132,6 +132,6 @@
    the card so it beats `.unsaved-discard` in shell.css, which is imported
    after this file and is otherwise the same weight of selector. */
 .song-remove-card .song-remove-confirm {
-  border-color: color-mix(in srgb, var(--danger, #e5484d) 45%, transparent);
-  color: var(--danger, #e5484d);
+  background: var(--btn-danger);
+  color: var(--btn-danger-ink);
 }

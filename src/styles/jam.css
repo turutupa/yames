@@ -1176,9 +1176,11 @@
 }
 
 .jam-key.active {
-  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  color: var(--accent);
+  /* Chosen: tonal inside the accent\'s ring ("B · Tonal", global.css). */
+  border-color: transparent;
+  background: var(--btn-sel);
+  color: var(--btn-tint-ink);
+  box-shadow: var(--btn-sel-ring);
 }
 
 /* ── The groove section's head, with the EDIT link ─────────────────────── */
@@ -1467,9 +1469,11 @@
 }
 
 .jam-chord-quality.active {
-  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  color: var(--accent);
+  /* Chosen: tonal inside the accent\'s ring ("B · Tonal", global.css). */
+  border-color: transparent;
+  background: var(--btn-sel);
+  color: var(--btn-tint-ink);
+  box-shadow: var(--btn-sel-ring);
 }
 
 .jam-chord-clear {
@@ -1517,9 +1521,11 @@
 }
 
 .jam-meter.active {
-  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  color: var(--accent);
+  /* Chosen: tonal inside the accent\'s ring ("B · Tonal", global.css). */
+  border-color: transparent;
+  background: var(--btn-sel);
+  color: var(--btn-tint-ink);
+  box-shadow: var(--btn-sel-ring);
 }
 
 /* Said plainly, and not in red: the drummer playing the rule is a working
@@ -1663,8 +1669,10 @@
 }
 
 .jam-keys-style-btn.active {
-  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
-  color: var(--accent);
+  border-color: transparent;
+  background: var(--btn-sel);
+  color: var(--btn-tint-ink);
+  box-shadow: var(--btn-sel-ring);
 }
 
 .jam-keys-style-btn:disabled {
@@ -2105,9 +2113,11 @@
 }
 
 .jam-sheet-btn.active {
-  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  color: var(--accent);
+  /* Chosen: tonal inside the accent\'s ring ("B · Tonal", global.css). */
+  border-color: transparent;
+  background: var(--btn-sel);
+  color: var(--btn-tint-ink);
+  box-shadow: var(--btn-sel-ring);
 }
 
 /* ── The dock ──────────────────────────────────────────────────────────────
@@ -2863,9 +2873,11 @@
 }
 
 .jam-chip.active {
-  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
-  color: var(--accent);
+  /* Chosen: tonal inside the accent\'s ring ("B · Tonal", global.css). */
+  border-color: transparent;
+  background: var(--btn-sel);
+  color: var(--btn-tint-ink);
+  box-shadow: var(--btn-sel-ring);
 }
 
 /* "One of yours", set off by a rule: your saved jams are a different KIND of

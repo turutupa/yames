@@ -212,30 +212,30 @@
    dark ink on the dark accent, about 2:1 (acceptance 5, P1-4). */
 .tour-btn-primary,
 .tour-card .tour-btn.tour-btn-primary {
-  background: var(--accent);
-  color: var(--accent-text, #fff);
+  background: var(--btn-fill);
+  color: var(--btn-fill-ink);
 }
 
 @media (hover: hover) {
-  .tour-btn-primary:hover {
-    filter: brightness(1.08);
+  .tour-btn-primary:hover:not(:disabled) {
+    background: var(--btn-fill-hover);
   }
 }
 
+/* "B · Tonal" (global.css): everything but Next is the accent's tint. */
 .tour-btn-ghost {
-  border-color: var(--border);
-  color: var(--text-secondary);
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
 }
 
 @media (hover: hover) {
   .tour-btn-ghost:hover:not(:disabled) {
-    color: var(--text-primary);
-    border-color: var(--accent);
+    background: var(--btn-tint-hover);
   }
 }
 
 .tour-btn:disabled {
-  opacity: 0.35;
+  opacity: 0.6;
   cursor: default;
 }
 
@@ -275,32 +275,27 @@
   flex: 0 0 auto;
   border: none;
   border-radius: 999px;
-  background: transparent;
+  /* Tonal ("B · Tonal", global.css). */
+  background: var(--btn-tint);
   font-family: inherit;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--btn-tint-ink);
   padding: 5px 10px;
-  transition: background 120ms ease, color 120ms ease;
+  transition: transform 0.12s ease;
 }
 
 @media (hover: hover) {
-  .tour-offer-accept:hover {
-    background: var(--accent-subtle);
+  .tour-offer-accept:hover,
+  .tour-offer-dismiss:hover {
+    background: var(--btn-tint-hover);
   }
 }
 
 .tour-offer-dismiss {
   display: flex;
   align-items: center;
-  color: var(--text-secondary);
   padding: 5px 8px;
-}
-
-@media (hover: hover) {
-  .tour-offer-dismiss:hover {
-    color: var(--text-primary);
-  }
 }
 
 @keyframes tour-fade-in {

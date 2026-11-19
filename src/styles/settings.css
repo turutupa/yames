@@ -607,17 +607,17 @@
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  background: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
-  transition: background 0.15s, color 0.15s;
+  /* "B · Tonal" (global.css). */
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
+  border: 1px solid transparent;
   width: 100%;
+  transition: transform 0.12s ease;
 }
 
 @media (hover: hover) {
   .download-confirm-cancel:hover {
-    background: color-mix(in srgb, var(--border) 30%, transparent);
-    color: var(--text-primary);
+    background: var(--btn-tint-hover);
   }
 }
 
@@ -627,33 +627,30 @@
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  background: transparent;
-  color: var(--accent);
-  border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  /* Each tier's own "get this one": tonal, as one of several. */
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
+  border: 1px solid transparent;
   margin-top: auto;
+  transition: transform 0.12s ease;
   padding-top: 10px;
   width: 100%;
 }
 
 @media (hover: hover) {
   .download-confirm-go:hover {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--accent-text, white);
+    background: var(--btn-tint-hover);
   }
 }
 
 .download-confirm-go-installed {
+  background: var(--btn-disabled-bg);
   color: var(--text-secondary);
-  border-color: var(--border);
 }
 
 @media (hover: hover) {
   .download-confirm-go-installed:hover {
-    background: color-mix(in srgb, var(--border) 30%, transparent);
-    border-color: var(--border);
-    color: var(--text-primary);
+    background: var(--btn-disabled-bg);
   }
 }
 
@@ -684,9 +681,11 @@
   text-transform: capitalize;
 }
 
+/* The chosen one, as every segmented control ("B · Tonal", global.css). */
 .toggle-btn.active {
-  background: var(--accent);
-  color: var(--accent-text, white);
+  background: var(--btn-sel);
+  color: var(--btn-tint-ink);
+  box-shadow: var(--btn-sel-ring);
 }
 
 .toggle-btn:disabled {
@@ -697,8 +696,9 @@
 }
 
 .toggle-btn:disabled.active {
-  background: color-mix(in srgb, var(--accent) 25%, transparent);
-  color: color-mix(in srgb, var(--accent-text, white) 50%, transparent);
+  background: var(--btn-disabled-bg);
+  color: var(--btn-disabled-ink);
+  box-shadow: none;
 }
 
 .toggle-btn[data-tooltip] {

@@ -65,25 +65,27 @@
   outline-offset: 2px;
 }
 
+/* "B · Tonal" (owner, 2026-11-19, global.css). */
 .hint-card-btn-action {
-  background: var(--accent);
-  color: var(--accent-text, #fff);
+  background: var(--btn-fill);
+  color: var(--btn-fill-ink);
 }
 
 @media (hover: hover) {
   .hint-card-btn-action:hover {
-    filter: brightness(1.08);
+    background: var(--btn-fill-hover);
   }
 }
 
 .hint-card-btn-dismiss {
-  border-color: var(--border);
+  border-color: transparent;
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
 }
 
 @media (hover: hover) {
   .hint-card-btn-dismiss:hover {
-    color: var(--text-primary);
-    border-color: var(--accent);
+    background: var(--btn-tint-hover);
   }
 }
 
