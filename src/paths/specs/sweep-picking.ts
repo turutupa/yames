@@ -907,9 +907,29 @@ const OLD_STEPS: StepSpec[] = [
 function linkedVariant(strings: readonly number[], near: number, rhythm: string, extra = false) {
   return (p: VariantParams) => {
     const { chart, chords } = keyed(p);
-    const tab = linkedSweep({ chords, strings, near: nearFor(strings, near, p.key), rhythm, extra });
-    return { tab, position: handAt(tab), chords: chart };
+    const raw = linkedSweep({ chords, strings, near: nearFor(strings, near, p.key), rhythm, extra });
+    const tab = strings.length === 6 ? sixStringMinorFingers(raw) : raw;
+    // The six-string shape starts with the little finger on the low E: the index is three frets below it.
+    const position = strings.length === 6 ? Number(/6:(\d+)/.exec(tab)![1]) - 3 : handAt(tab);
+    return { tab, position, chords: chart };
   };
+}
+
+/**
+ * The minor shape from the low E (A minor: 17, 15, 14, 14, 13, 12) is wider than
+ * a hand, so it is written with its shift (fingering audit 2): little, middle,
+ * then the index rolling across the D and G strings at 14, and the hand moves
+ * down three frets so ring and middle take the B and top strings. The middle
+ * finger on the top note leaves the index free for the pull or hammer into the
+ * next chord. Bar 1 is always this shape.
+ */
+function sixStringMinorFingers(tab: string): string {
+  const bars = tab.split("|");
+  let k = 0;
+  const fingers = [4, 2, 1, 1, 3, 2];
+  bars[0] = bars[0].replace(/\d:\d+\S*/g, (note) => note.replace(/^(\d:\d+)/, `$1f${fingers[k++]}`));
+  if (k !== 6) throw new Error(`the six-string minor shape has ${k} notes, not 6`);
+  return bars.join("|");
 }
 
 /** Voice-led loops, one chord a bar, over a progression in a key. */

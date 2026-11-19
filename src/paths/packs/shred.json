@@ -18064,7 +18064,8 @@
           "title": "Am, F, C, G: one pass a chord (timing only)",
           "purpose": "Up five strings on Am, link, down F, link, up C, link, down G: every chord change is a single small step on an outer string.",
           "howTo": [
-            "Quarter-note triplets, six notes a bar, three to every two clicks: one pass across five strings and one more note on the last string. In bars 2 to 4 the first note is a hammer or pull from the last bar's final note, not a pick; bar 1's first note is picked each time round.",
+            "Quarter-note triplets, six notes a bar, three to every two clicks: one pass across five strings and one more note on the last string. In bars 2 to 4 the first note comes from the last bar's final note without a pick, by hammer, pull or slide; bar 1's first note is picked each time round.",
+            "Where the last note is four frets away, it is a slide on one finger, not a hammer: the top string's 8 to 12 is the index, and the hand arrives over the F. In bar 2 the pull lands on the ring finger, which slides down into C.",
             "At 150 this is the note rate of eighth-note triplets at 75: slow on purpose, because the links are what you are learning. Bar 4's G rolls a barre across the D, G and B strings at fret 12.",
             "Sing the top notes if you can. They make a tune, and the tune is how you keep your place."
           ],
@@ -18089,26 +18090,26 @@
             {"string":4,"fret":10,"midi":60,"tick":640,"dur":640,"tech":[],"pick":"d"},
             {"string":3,"fret":9,"midi":64,"tick":1280,"dur":640,"tech":[],"pick":"d"},
             {"string":2,"fret":10,"midi":69,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-            {"string":1,"fret":8,"midi":72,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-            {"string":1,"fret":12,"midi":76,"tick":3200,"dur":640,"tech":["hammer"]},
+            {"string":1,"fret":8,"midi":72,"tick":2560,"dur":640,"tech":["slide"],"pick":"d"},
+            {"string":1,"fret":12,"midi":76,"tick":3200,"dur":640,"tech":[]},
             {"string":1,"fret":13,"midi":77,"tick":3840,"dur":640,"tech":["hammer"]},
             {"string":2,"fret":13,"midi":72,"tick":4480,"dur":640,"tech":[],"pick":"u"},
             {"string":3,"fret":14,"midi":69,"tick":5120,"dur":640,"tech":[],"pick":"u"},
             {"string":4,"fret":15,"midi":65,"tick":5760,"dur":640,"tech":[],"pick":"u"},
             {"string":5,"fret":15,"midi":60,"tick":6400,"dur":640,"tech":[],"pick":"u"},
-            {"string":5,"fret":12,"midi":57,"tick":7040,"dur":640,"tech":["pull"]},
-            {"string":5,"fret":10,"midi":55,"tick":7680,"dur":640,"tech":["pull"]},
+            {"string":5,"fret":12,"midi":57,"tick":7040,"dur":640,"tech":["pull","slide"],"finger":3},
+            {"string":5,"fret":10,"midi":55,"tick":7680,"dur":640,"tech":[]},
             {"string":4,"fret":10,"midi":60,"tick":8320,"dur":640,"tech":[],"pick":"d"},
             {"string":3,"fret":9,"midi":64,"tick":8960,"dur":640,"tech":[],"pick":"d"},
             {"string":2,"fret":8,"midi":67,"tick":9600,"dur":640,"tech":[],"pick":"d"},
-            {"string":1,"fret":8,"midi":72,"tick":10240,"dur":640,"tech":[],"pick":"d"},
-            {"string":1,"fret":12,"midi":76,"tick":10880,"dur":640,"tech":["hammer"]},
+            {"string":1,"fret":8,"midi":72,"tick":10240,"dur":640,"tech":["slide"],"finger":2,"pick":"d"},
+            {"string":1,"fret":12,"midi":76,"tick":10880,"dur":640,"tech":[]},
             {"string":1,"fret":10,"midi":74,"tick":11520,"dur":640,"tech":["pull"]},
             {"string":2,"fret":12,"midi":71,"tick":12160,"dur":640,"tech":[],"pick":"u"},
             {"string":3,"fret":12,"midi":67,"tick":12800,"dur":640,"tech":[],"pick":"u"},
             {"string":4,"fret":12,"midi":62,"tick":13440,"dur":640,"tech":[],"pick":"u"},
-            {"string":5,"fret":14,"midi":59,"tick":14080,"dur":640,"tech":[],"pick":"u"},
-            {"string":5,"fret":10,"midi":55,"tick":14720,"dur":640,"tech":["pull"]}
+            {"string":5,"fret":14,"midi":59,"tick":14080,"dur":640,"tech":["slide"],"pick":"u"},
+            {"string":5,"fret":10,"midi":55,"tick":14720,"dur":640,"tech":[]}
           ],
           "rests": [],
           "tempo": {
@@ -18131,7 +18132,7 @@
             },
             {
               "metric": "notesHeard",
-              "min": 0.85,
+              "min": 0.8,
               "overBars": 4
             },
             {
@@ -18164,7 +18165,7 @@
             "subdivision": 1
           },
           "estimatedMinutes": 6,
-          "tab": "/4t 5:12 4:10 3:9 2:10 1:8 1:12h | /4t 1:13h 2:13 3:14 4:15 5:15 5:12p | /4t 5:10p 4:10 3:9 2:8 1:8 1:12h | /4t 1:10p 2:12 3:12 4:12 5:14 5:10p",
+          "tab": "/4t 5:12 4:10 3:9 2:10 1:8s 1:12 | /4t 1:13h 2:13 3:14 4:15 5:15 5:12f3ps | /4t 5:10 4:10 3:9 2:8 1:8f2s 1:12 | /4t 1:10p 2:12 3:12 4:12 5:14s 5:10",
           "subdivision": "quarterTriplets",
           "computed": {
             "noteCount": 24,
@@ -18197,7 +18198,7 @@
                   "key": "A"
                 },
                 "pool": "all",
-                "tab": "/4t 5:12 4:10 3:9 2:10 1:8 1:12h | /4t 1:13h 2:13 3:14 4:15 5:15 5:12p | /4t 5:10p 4:10 3:9 2:8 1:8 1:12h | /4t 1:10p 2:12 3:12 4:12 5:14 5:10p",
+                "tab": "/4t 5:12 4:10 3:9 2:10 1:8s 1:12 | /4t 1:13h 2:13 3:14 4:15 5:15 5:12f3ps | /4t 5:10 4:10 3:9 2:8 1:8f2s 1:12 | /4t 1:10p 2:12 3:12 4:12 5:14s 5:10",
                 "position": {
                   "fret": 8,
                   "shifts": "allowed"
@@ -18208,26 +18209,26 @@
                   {"string":4,"fret":10,"midi":60,"tick":640,"dur":640,"tech":[],"pick":"d"},
                   {"string":3,"fret":9,"midi":64,"tick":1280,"dur":640,"tech":[],"pick":"d"},
                   {"string":2,"fret":10,"midi":69,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":8,"midi":72,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":12,"midi":76,"tick":3200,"dur":640,"tech":["hammer"]},
+                  {"string":1,"fret":8,"midi":72,"tick":2560,"dur":640,"tech":["slide"],"pick":"d"},
+                  {"string":1,"fret":12,"midi":76,"tick":3200,"dur":640,"tech":[]},
                   {"string":1,"fret":13,"midi":77,"tick":3840,"dur":640,"tech":["hammer"]},
                   {"string":2,"fret":13,"midi":72,"tick":4480,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":14,"midi":69,"tick":5120,"dur":640,"tech":[],"pick":"u"},
                   {"string":4,"fret":15,"midi":65,"tick":5760,"dur":640,"tech":[],"pick":"u"},
                   {"string":5,"fret":15,"midi":60,"tick":6400,"dur":640,"tech":[],"pick":"u"},
-                  {"string":5,"fret":12,"midi":57,"tick":7040,"dur":640,"tech":["pull"]},
-                  {"string":5,"fret":10,"midi":55,"tick":7680,"dur":640,"tech":["pull"]},
+                  {"string":5,"fret":12,"midi":57,"tick":7040,"dur":640,"tech":["pull","slide"],"finger":3},
+                  {"string":5,"fret":10,"midi":55,"tick":7680,"dur":640,"tech":[]},
                   {"string":4,"fret":10,"midi":60,"tick":8320,"dur":640,"tech":[],"pick":"d"},
                   {"string":3,"fret":9,"midi":64,"tick":8960,"dur":640,"tech":[],"pick":"d"},
                   {"string":2,"fret":8,"midi":67,"tick":9600,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":8,"midi":72,"tick":10240,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":12,"midi":76,"tick":10880,"dur":640,"tech":["hammer"]},
+                  {"string":1,"fret":8,"midi":72,"tick":10240,"dur":640,"tech":["slide"],"finger":2,"pick":"d"},
+                  {"string":1,"fret":12,"midi":76,"tick":10880,"dur":640,"tech":[]},
                   {"string":1,"fret":10,"midi":74,"tick":11520,"dur":640,"tech":["pull"]},
                   {"string":2,"fret":12,"midi":71,"tick":12160,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":12,"midi":67,"tick":12800,"dur":640,"tech":[],"pick":"u"},
                   {"string":4,"fret":12,"midi":62,"tick":13440,"dur":640,"tech":[],"pick":"u"},
-                  {"string":5,"fret":14,"midi":59,"tick":14080,"dur":640,"tech":[],"pick":"u"},
-                  {"string":5,"fret":10,"midi":55,"tick":14720,"dur":640,"tech":["pull"]}
+                  {"string":5,"fret":14,"midi":59,"tick":14080,"dur":640,"tech":["slide"],"pick":"u"},
+                  {"string":5,"fret":10,"midi":55,"tick":14720,"dur":640,"tech":[]}
                 ],
                 "rests": [],
                 "backing": {
@@ -18254,7 +18255,7 @@
                   "key": "G"
                 },
                 "pool": "all",
-                "tab": "/4t 5:10 4:8 3:7 2:8 1:6 1:10h | /4t 1:11h 2:11 3:12 4:13 5:13 5:10p | /4t 5:8p 4:8 3:7 2:6 1:6 1:10h | /4t 1:8p 2:10 3:10 4:10 5:12 5:8p",
+                "tab": "/4t 5:10 4:8 3:7 2:8 1:6s 1:10 | /4t 1:11h 2:11 3:12 4:13 5:13 5:10f3ps | /4t 5:8 4:8 3:7 2:6 1:6f2s 1:10 | /4t 1:8p 2:10 3:10 4:10 5:12s 5:8",
                 "position": {
                   "fret": 6,
                   "shifts": "allowed"
@@ -18265,26 +18266,26 @@
                   {"string":4,"fret":8,"midi":58,"tick":640,"dur":640,"tech":[],"pick":"d"},
                   {"string":3,"fret":7,"midi":62,"tick":1280,"dur":640,"tech":[],"pick":"d"},
                   {"string":2,"fret":8,"midi":67,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":6,"midi":70,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":10,"midi":74,"tick":3200,"dur":640,"tech":["hammer"]},
+                  {"string":1,"fret":6,"midi":70,"tick":2560,"dur":640,"tech":["slide"],"pick":"d"},
+                  {"string":1,"fret":10,"midi":74,"tick":3200,"dur":640,"tech":[]},
                   {"string":1,"fret":11,"midi":75,"tick":3840,"dur":640,"tech":["hammer"]},
                   {"string":2,"fret":11,"midi":70,"tick":4480,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":12,"midi":67,"tick":5120,"dur":640,"tech":[],"pick":"u"},
                   {"string":4,"fret":13,"midi":63,"tick":5760,"dur":640,"tech":[],"pick":"u"},
                   {"string":5,"fret":13,"midi":58,"tick":6400,"dur":640,"tech":[],"pick":"u"},
-                  {"string":5,"fret":10,"midi":55,"tick":7040,"dur":640,"tech":["pull"]},
-                  {"string":5,"fret":8,"midi":53,"tick":7680,"dur":640,"tech":["pull"]},
+                  {"string":5,"fret":10,"midi":55,"tick":7040,"dur":640,"tech":["pull","slide"],"finger":3},
+                  {"string":5,"fret":8,"midi":53,"tick":7680,"dur":640,"tech":[]},
                   {"string":4,"fret":8,"midi":58,"tick":8320,"dur":640,"tech":[],"pick":"d"},
                   {"string":3,"fret":7,"midi":62,"tick":8960,"dur":640,"tech":[],"pick":"d"},
                   {"string":2,"fret":6,"midi":65,"tick":9600,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":6,"midi":70,"tick":10240,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":10,"midi":74,"tick":10880,"dur":640,"tech":["hammer"]},
+                  {"string":1,"fret":6,"midi":70,"tick":10240,"dur":640,"tech":["slide"],"finger":2,"pick":"d"},
+                  {"string":1,"fret":10,"midi":74,"tick":10880,"dur":640,"tech":[]},
                   {"string":1,"fret":8,"midi":72,"tick":11520,"dur":640,"tech":["pull"]},
                   {"string":2,"fret":10,"midi":69,"tick":12160,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":10,"midi":65,"tick":12800,"dur":640,"tech":[],"pick":"u"},
                   {"string":4,"fret":10,"midi":60,"tick":13440,"dur":640,"tech":[],"pick":"u"},
-                  {"string":5,"fret":12,"midi":57,"tick":14080,"dur":640,"tech":[],"pick":"u"},
-                  {"string":5,"fret":8,"midi":53,"tick":14720,"dur":640,"tech":["pull"]}
+                  {"string":5,"fret":12,"midi":57,"tick":14080,"dur":640,"tech":["slide"],"pick":"u"},
+                  {"string":5,"fret":8,"midi":53,"tick":14720,"dur":640,"tech":[]}
                 ],
                 "rests": [],
                 "backing": {
@@ -18295,7 +18296,7 @@
                   "noteCount": 24,
                   "minGapMsAtTop": 210.53,
                   "handShifts": 5,
-                  "maxPlayableBpm": 267,
+                  "maxPlayableBpm": 400,
                   "difficulty": 6.8
                 },
                 "chords": ["Gm", "Eb", "Bb", "F"],
@@ -18311,7 +18312,7 @@
                   "key": "C"
                 },
                 "pool": "all",
-                "tab": "/4t 5:15 4:13 3:12 2:13 1:11 1:15h | /4t 1:16h 2:16 3:17 4:18 5:18 5:15p | /4t 5:13p 4:13 3:12 2:11 1:11 1:15h | /4t 1:13p 2:15 3:15 4:15 5:17 5:13p",
+                "tab": "/4t 5:15 4:13 3:12 2:13 1:11s 1:15 | /4t 1:16h 2:16 3:17 4:18 5:18 5:15f3ps | /4t 5:13 4:13 3:12 2:11 1:11f2s 1:15 | /4t 1:13p 2:15 3:15 4:15 5:17s 5:13",
                 "position": {
                   "fret": 11,
                   "shifts": "allowed"
@@ -18322,26 +18323,26 @@
                   {"string":4,"fret":13,"midi":63,"tick":640,"dur":640,"tech":[],"pick":"d"},
                   {"string":3,"fret":12,"midi":67,"tick":1280,"dur":640,"tech":[],"pick":"d"},
                   {"string":2,"fret":13,"midi":72,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":11,"midi":75,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":15,"midi":79,"tick":3200,"dur":640,"tech":["hammer"]},
+                  {"string":1,"fret":11,"midi":75,"tick":2560,"dur":640,"tech":["slide"],"pick":"d"},
+                  {"string":1,"fret":15,"midi":79,"tick":3200,"dur":640,"tech":[]},
                   {"string":1,"fret":16,"midi":80,"tick":3840,"dur":640,"tech":["hammer"]},
                   {"string":2,"fret":16,"midi":75,"tick":4480,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":17,"midi":72,"tick":5120,"dur":640,"tech":[],"pick":"u"},
                   {"string":4,"fret":18,"midi":68,"tick":5760,"dur":640,"tech":[],"pick":"u"},
                   {"string":5,"fret":18,"midi":63,"tick":6400,"dur":640,"tech":[],"pick":"u"},
-                  {"string":5,"fret":15,"midi":60,"tick":7040,"dur":640,"tech":["pull"]},
-                  {"string":5,"fret":13,"midi":58,"tick":7680,"dur":640,"tech":["pull"]},
+                  {"string":5,"fret":15,"midi":60,"tick":7040,"dur":640,"tech":["pull","slide"],"finger":3},
+                  {"string":5,"fret":13,"midi":58,"tick":7680,"dur":640,"tech":[]},
                   {"string":4,"fret":13,"midi":63,"tick":8320,"dur":640,"tech":[],"pick":"d"},
                   {"string":3,"fret":12,"midi":67,"tick":8960,"dur":640,"tech":[],"pick":"d"},
                   {"string":2,"fret":11,"midi":70,"tick":9600,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":11,"midi":75,"tick":10240,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":15,"midi":79,"tick":10880,"dur":640,"tech":["hammer"]},
+                  {"string":1,"fret":11,"midi":75,"tick":10240,"dur":640,"tech":["slide"],"finger":2,"pick":"d"},
+                  {"string":1,"fret":15,"midi":79,"tick":10880,"dur":640,"tech":[]},
                   {"string":1,"fret":13,"midi":77,"tick":11520,"dur":640,"tech":["pull"]},
                   {"string":2,"fret":15,"midi":74,"tick":12160,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":15,"midi":70,"tick":12800,"dur":640,"tech":[],"pick":"u"},
                   {"string":4,"fret":15,"midi":65,"tick":13440,"dur":640,"tech":[],"pick":"u"},
-                  {"string":5,"fret":17,"midi":62,"tick":14080,"dur":640,"tech":[],"pick":"u"},
-                  {"string":5,"fret":13,"midi":58,"tick":14720,"dur":640,"tech":["pull"]}
+                  {"string":5,"fret":17,"midi":62,"tick":14080,"dur":640,"tech":["slide"],"pick":"u"},
+                  {"string":5,"fret":13,"midi":58,"tick":14720,"dur":640,"tech":[]}
                 ],
                 "rests": [],
                 "backing": {

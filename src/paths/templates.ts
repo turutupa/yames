@@ -403,6 +403,8 @@ export function linkedSweep(args: {
   };
   const bars: string[] = [];
   let previous: FretCell | null = null;
+  /** The note before `previous`, when the last pass ended with two on one string. */
+  let before: FretCell | null = null;
   chords.forEach((chord, index) => {
     const pcs = pcsOf(chord);
     const ascending = index % 2 === 0;
@@ -415,7 +417,9 @@ export function linkedSweep(args: {
     const tokensOut: string[] = [];
     const arrive = (cell: FretCell, from: FretCell | null) => {
       if (!from || from.string !== cell.string) return token(cell);
-      if (Math.abs(from.fret - cell.fret) > 3) {
+      // A legato run on one string wider than the hand (15, 12, then 10) slides instead.
+      const run = before && before.string === cell.string ? [before.fret, from.fret, cell.fret] : [from.fret, cell.fret];
+      if (Math.abs(from.fret - cell.fret) > 3 || Math.max(...run) - Math.min(...run) > 4) {
         // Too far to hammer: the last pass ends by sliding out to this note.
         bars[bars.length - 1] = bars[bars.length - 1].replace(/(\S+)$/, "$1s");
         return token(cell);
@@ -424,6 +428,7 @@ export function linkedSweep(args: {
     };
     let cell: FretCell = { string: startString, fret: startFret };
     tokensOut.push(arrive(cell, previous));
+    let last: FretCell | null = null;
     let midi = open(cell.string) + cell.fret;
     if (doubleStart) {
       midi = step(pcs, midi, direction);
@@ -440,10 +445,19 @@ export function linkedSweep(args: {
     if (extra) {
       midi = step(pcs, midi, direction);
       const next = { string: cell.string, fret: midi - open(cell.string) };
-      tokensOut.push(token(next, direction > 0 ? "h" : "p"));
+      if (Math.abs(next.fret - cell.fret) > 3) {
+        // Too far for a hammer inside the hand (8 to 12 on the top string): slide to it
+        // on the same finger, and the hand arrives where the next chord is (fingering audit 2).
+        tokensOut[tokensOut.length - 1] += "s";
+        tokensOut.push(token(next));
+      } else {
+        tokensOut.push(token(next, direction > 0 ? "h" : "p"));
+        last = cell;
+      }
       cell = next;
     }
     bars.push(`${rhythm} ${tokensOut.join(" ")}`);
+    before = last;
     previous = cell;
   });
   return bars.join(" | ");

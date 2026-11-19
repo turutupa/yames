@@ -1485,7 +1485,8 @@ const ADVANCED: StepSpec[] = [
         title: "Am, F, C, G: one pass a chord (timing only)",
         purpose: "Up five strings on Am, link, down F, link, up C, link, down G: every chord change is a single small step on an outer string.",
         howTo: [
-          "Quarter-note triplets, six notes a bar, three to every two clicks: one pass across five strings and one more note on the last string. In bars 2 to 4 the first note is a hammer or pull from the last bar's final note, not a pick; bar 1's first note is picked each time round.",
+          "Quarter-note triplets, six notes a bar, three to every two clicks: one pass across five strings and one more note on the last string. In bars 2 to 4 the first note comes from the last bar's final note without a pick, by hammer, pull or slide; bar 1's first note is picked each time round.",
+          "Where the last note is four frets away, it is a slide on one finger, not a hammer: the top string's 8 to 12 is the index, and the hand arrives over the F. In bar 2 the pull lands on the ring finger, which slides down into C.",
           "At 150 this is the note rate of eighth-note triplets at 75: slow on purpose, because the links are what you are learning. Bar 4's G rolls a barre across the D, G and B strings at fret 12.",
           "Sing the top notes if you can. They make a tune, and the tune is how you keep your place.",
         ],
@@ -1498,11 +1499,11 @@ const ADVANCED: StepSpec[] = [
             const chart = moveChart("Am | F | C | G", SWEEP_SHIFT[p.key]);
             const chords = chart.split("|").map((c) => c.trim());
             const near = p.key === "A" ? 12 : p.key === "G" ? 10 : 15;
-            const tab = linkedSweep({ chords, strings: [5, 4, 3, 2, 1], near, rhythm: "/4t", extra: true });
+            const tab = onePassFingers(linkedSweep({ chords, strings: [5, 4, 3, 2, 1], near, rhythm: "/4t", extra: true }));
             return { tab, position: handAt(tab), shifts: true, chords: chart };
           },
         },
-        tab: linkedSweep({ chords: ["Am", "F", "C", "G"], strings: [5, 4, 3, 2, 1], near: 12, rhythm: "/4t", extra: true }),
+        tab: onePassFingers(linkedSweep({ chords: ["Am", "F", "C", "G"], strings: [5, 4, 3, 2, 1], near: 12, rhythm: "/4t", extra: true })),
         chain: { maxJointFrets: 5 },
         position: 12,
         shifts: true,
@@ -1739,6 +1740,22 @@ function burstsOn(figure: Figure) {
 }
 
 /** Octaves, each twice, up the scale and back. */
+/**
+ * The two fingers the one-pass chain needs written (fingering audit 2): F's last
+ * pull lands on the ring finger, which slides down into C's shape at its own fret,
+ * and C's top note is the middle finger, which slides up so the index is free for
+ * the pull into G. Bar 2's last note and bar 3's fifth.
+ */
+function onePassFingers(tab: string): string {
+  const bars = tab.split("|").map((bar) => bar.trim().split(/\s+/));
+  const mark = (bar: number, index: number, finger: number) => {
+    bars[bar][index] = bars[bar][index].replace(/^(\d:\d+)/, `$1f${finger}`);
+  };
+  mark(1, bars[1].length - 1, 3);
+  mark(2, 5, 2);
+  return bars.map((bar) => bar.join(" ")).join(" | ");
+}
+
 function octavesTab(set: string): string {
   const shapes: Record<string, { low: number; high: number; gap: number; frets: number[] }> = {
     "A and G": { low: 5, high: 3, gap: 2, frets: [7, 8, 10, 12] },
