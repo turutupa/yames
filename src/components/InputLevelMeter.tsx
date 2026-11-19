@@ -93,12 +93,14 @@ export function InputLevelMeter({ rms, label, className }: InputLevelMeterProps)
           style={{ width: `${levelPct}%` }}
           data-testid="input-level-fill"
         />
-        <div className="input-test-meter-ticks">
-          <span>-60</span>
-          <span>-40</span>
-          <span>-20</span>
-          <span>0 dB</span>
-        </div>
+      </div>
+      {/* Under the bar, not on it: 8px ink over the green fill read at about
+          1.1:1 in every theme (2026-11-18). */}
+      <div className="input-test-meter-ticks" aria-hidden="true">
+        <span>-60</span>
+        <span>-40</span>
+        <span>-20</span>
+        <span>0 dB</span>
       </div>
     </div>
   );
