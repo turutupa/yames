@@ -515,6 +515,8 @@
       "hand": "手：食指在第 {{fret}} 品，一指一品。",
       "handShifts": "手：食指从第 {{fret}} 品开始，沿琴颈移动。",
       "handOpen": "手：开放把位，食指在第 1 品上方。",
+      "handChord": "手：开放 {{chord}} 和弦指型。",
+      "handChordShifts": "手：从开放 {{chord}} 和弦指型开始，沿琴颈移动。",
       "viewHint": "随时可以切换视图",
       "left": "剩余",
       "notGraded": "{{time}} 后结束；然后再来一遍，或继续。",

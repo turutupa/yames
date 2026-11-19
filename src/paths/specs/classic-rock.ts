@@ -651,6 +651,8 @@ export default definePath({
           coach: "Notes ring into each other here, so I time them and count them heard, and don't pitch-check them.",
           // The open E chord's own fingers: index on the G string, middle on the A, ring on the D.
           tab: "/8 6:0 4:2f3 3:0 3:1hf1 2:0 3:1f1 4:2f3 3:1f1 | /8 5:2f2 4:2f3 4:0 4:2hf3 3:1f1 2:0 /4 3:1f1",
+          // An open E chord shape, not one finger per fret: the Hand line says so.
+          chordShape: "E",
           position: 1,
           chords: "E | E",
           jam: { groove: "ballad", key: "E" },
@@ -691,6 +693,8 @@ export default definePath({
           coach: "Ringing notes again: timing and notes heard, not pitch.",
           // The E bars in the open E chord's own fingers; the A bar is the rules' (index at 4 for the B).
           tab: "/8 6:0 4:2f3 3:0 3:1hf1 2:0 3:1f1 4:2f3 3:1f1 | /8 6:5 4:7 3:4 3:6h 2:5 3:6 4:7 3:6 | /8 6:0 4:2f3 3:0 3:1hf1 2:0 3:1f1 4:2f3 3:1f1 | /8 6:0 4:2f3 3:1f1 2:0 /2 1:0",
+          // An open E chord shape, not one finger per fret: the Hand line says so.
+          chordShape: "E",
           position: 1,
           shifts: true,
           chords: "E | A | E | E",

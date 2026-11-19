@@ -515,6 +515,8 @@
       "hand": "Hand: wijsvinger op fret {{fret}}, één vinger per fret.",
       "handShifts": "Hand: begin met de wijsvinger op fret {{fret}}; hij schuift langs de hals.",
       "handOpen": "Hand: open positie, wijsvinger boven fret 1.",
+      "handChord": "Hand: de vorm van het open {{chord}}-akkoord.",
+      "handChordShifts": "Hand: begin in de vorm van het open {{chord}}-akkoord; hij beweegt over de hals.",
       "viewHint": "Wissel wanneer je wilt van weergave",
       "left": "over",
       "notGraded": "Klaar over {{time}}; dan nog een keer, of verder.",

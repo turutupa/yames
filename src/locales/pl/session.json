@@ -541,6 +541,8 @@
       "hand": "Ręka: palec wskazujący na progu {{fret}}, jeden palec na próg.",
       "handShifts": "Ręka: zacznij palcem wskazującym na progu {{fret}}; przesuwa się wzdłuż gryfu.",
       "handOpen": "Ręka: pozycja otwarta, palec wskazujący nad progiem 1.",
+      "handChord": "Ręka: kształt otwartego akordu {{chord}}.",
+      "handChordShifts": "Ręka: zacznij w kształcie otwartego akordu {{chord}}; przesuwa się po gryfie.",
       "viewHint": "Zmieniaj widok, kiedy chcesz",
       "left": "zostało",
       "notGraded": "Koniec za {{time}}; potem jeszcze raz albo dalej.",

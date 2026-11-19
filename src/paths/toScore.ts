@@ -15,6 +15,7 @@ import { TICKS_PER_QUARTER } from "../songs/types";
 import type { SongNote, SongScore, SongTechnique } from "../songs/types";
 import type { Exercise, PathNote } from "./format";
 import { STANDARD_TUNING, barLengthTicks } from "./format";
+import { fromNowhere } from "./tabDsl";
 
 export function exerciseScore(pathId: string, ex: Exercise, bpm: number): SongScore {
   const barTicks = barLengthTicks(ex.meter);
@@ -84,8 +85,10 @@ function durationToken(ticks: number): string {
   return token;
 }
 
-function noteEffects(note: PathNote, next: PathNote | undefined): string {
+function noteEffects(note: PathNote, next: PathNote | undefined, previous?: PathNote): string {
   const effects: string[] = [];
+  // A hammer-on from nowhere is Guitar Pro's left-hand tap: the slur arrives from nothing.
+  if (fromNowhere(note, previous)) effects.push("lht");
   if (next && next.string === note.string) {
     if (next.tech.includes("hammer") || next.tech.includes("pull")) effects.push("h");
   }
@@ -111,10 +114,19 @@ export function exerciseAlphaTex(ex: Exercise, bpm: number): string {
     const later = ex.notes.slice(index + 1).filter((n) => n.tick > note.tick);
     return later.find((n) => n.tick === later[0].tick && n.string === note.string) ?? later[0];
   };
+  // The note sounding just before, preferring one on the same string: no such note makes a hammer one from nowhere.
+  const previousOnset = (index: number) => {
+    const note = ex.notes[index];
+    const earlier = ex.notes.filter((n) => n.tick < note.tick);
+    if (earlier.length === 0) return undefined;
+    const last = Math.max(...earlier.map((n) => n.tick));
+    const at = earlier.filter((n) => n.tick === last);
+    return at.find((n) => n.string === note.string) ?? at[0];
+  };
   const byTick = new Map<number, number[]>();
   ex.notes.forEach((note, index) => byTick.set(note.tick, [...(byTick.get(note.tick) ?? []), index]));
   for (const [tick, indexes] of byTick) {
-    const parts = indexes.map((i) => `${ex.notes[i].fret}.${ex.notes[i].string}${noteEffects(ex.notes[i], nextOnString(i))}`);
+    const parts = indexes.map((i) => `${ex.notes[i].fret}.${ex.notes[i].string}${noteEffects(ex.notes[i], nextOnString(i), previousOnset(i))}`);
     // A tap is a beat effect in alphaTex: it joins the duration's braces.
     const tapped = indexes.some((i) => ex.notes[i].tech.includes("tap"));
     const plain = durationToken(ex.notes[indexes[0]].dur);

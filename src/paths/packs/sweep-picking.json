@@ -18465,19 +18465,19 @@
           "bars": 4,
           "loops": true,
           "position": {
-            "fret": 12,
+            "fret": 14,
             "shifts": "allowed"
           },
           "pickPlan": "sweep",
           "crossing": "none",
           "notesRole": "target",
           "notes": [
-            {"string":6,"fret":17,"midi":57,"tick":0,"dur":640,"tech":[],"pick":"d"},
-            {"string":5,"fret":15,"midi":60,"tick":640,"dur":640,"tech":[],"pick":"d"},
-            {"string":4,"fret":14,"midi":64,"tick":1280,"dur":640,"tech":[],"pick":"d"},
-            {"string":3,"fret":14,"midi":69,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-            {"string":2,"fret":13,"midi":72,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-            {"string":1,"fret":12,"midi":76,"tick":3200,"dur":640,"tech":[],"pick":"d"},
+            {"string":6,"fret":17,"midi":57,"tick":0,"dur":640,"tech":[],"finger":4,"pick":"d"},
+            {"string":5,"fret":15,"midi":60,"tick":640,"dur":640,"tech":[],"finger":2,"pick":"d"},
+            {"string":4,"fret":14,"midi":64,"tick":1280,"dur":640,"tech":[],"finger":1,"pick":"d"},
+            {"string":3,"fret":14,"midi":69,"tick":1920,"dur":640,"tech":[],"finger":1,"pick":"d"},
+            {"string":2,"fret":13,"midi":72,"tick":2560,"dur":640,"tech":[],"finger":3,"pick":"d"},
+            {"string":1,"fret":12,"midi":76,"tick":3200,"dur":640,"tech":[],"finger":2,"pick":"d"},
             {"string":1,"fret":10,"midi":74,"tick":3840,"dur":640,"tech":["pull"]},
             {"string":2,"fret":12,"midi":71,"tick":4480,"dur":640,"tech":[],"pick":"u"},
             {"string":3,"fret":12,"midi":67,"tick":5120,"dur":640,"tech":[],"pick":"u"},
@@ -18551,13 +18551,13 @@
             "subdivision": 1
           },
           "estimatedMinutes": 8,
-          "tab": "/4t 6:17 5:15 4:14 3:14 2:13 1:12 | /4t 1:10p 2:12 3:12 4:12 5:14 6:15 | /4t 6:13p 5:12 4:10 3:10 2:10 1:8 | /4t 1:7p 2:8 3:7 4:9 5:10 6:10",
+          "tab": "/4t 6:17f4 5:15f2 4:14f1 3:14f1 2:13f3 1:12f2 | /4t 1:10p 2:12 3:12 4:12 5:14 6:15 | /4t 6:13p 5:12 4:10 3:10 2:10 1:8 | /4t 1:7p 2:8 3:7 4:9 5:10 6:10",
           "subdivision": "quarterTriplets",
           "computed": {
             "noteCount": 24,
             "minGapMsAtTop": 222.22,
             "handShifts": 3,
-            "maxPlayableBpm": 400,
+            "maxPlayableBpm": 393,
             "difficulty": 5.24
           },
           "chords": ["Am", "G", "F", "G"],
@@ -18585,19 +18585,19 @@
                   "progression": "i-VII-VI-VII"
                 },
                 "pool": "all",
-                "tab": "/4t 6:17 5:15 4:14 3:14 2:13 1:12 | /4t 1:10p 2:12 3:12 4:12 5:14 6:15 | /4t 6:13p 5:12 4:10 3:10 2:10 1:8 | /4t 1:7p 2:8 3:7 4:9 5:10 6:10",
+                "tab": "/4t 6:17f4 5:15f2 4:14f1 3:14f1 2:13f3 1:12f2 | /4t 1:10p 2:12 3:12 4:12 5:14 6:15 | /4t 6:13p 5:12 4:10 3:10 2:10 1:8 | /4t 1:7p 2:8 3:7 4:9 5:10 6:10",
                 "position": {
-                  "fret": 12,
+                  "fret": 14,
                   "shifts": "allowed"
                 },
                 "crossing": "none",
                 "notes": [
-                  {"string":6,"fret":17,"midi":57,"tick":0,"dur":640,"tech":[],"pick":"d"},
-                  {"string":5,"fret":15,"midi":60,"tick":640,"dur":640,"tech":[],"pick":"d"},
-                  {"string":4,"fret":14,"midi":64,"tick":1280,"dur":640,"tech":[],"pick":"d"},
-                  {"string":3,"fret":14,"midi":69,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-                  {"string":2,"fret":13,"midi":72,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":12,"midi":76,"tick":3200,"dur":640,"tech":[],"pick":"d"},
+                  {"string":6,"fret":17,"midi":57,"tick":0,"dur":640,"tech":[],"finger":4,"pick":"d"},
+                  {"string":5,"fret":15,"midi":60,"tick":640,"dur":640,"tech":[],"finger":2,"pick":"d"},
+                  {"string":4,"fret":14,"midi":64,"tick":1280,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":3,"fret":14,"midi":69,"tick":1920,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":2,"fret":13,"midi":72,"tick":2560,"dur":640,"tech":[],"finger":3,"pick":"d"},
+                  {"string":1,"fret":12,"midi":76,"tick":3200,"dur":640,"tech":[],"finger":2,"pick":"d"},
                   {"string":1,"fret":10,"midi":74,"tick":3840,"dur":640,"tech":["pull"]},
                   {"string":2,"fret":12,"midi":71,"tick":4480,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":12,"midi":67,"tick":5120,"dur":640,"tech":[],"pick":"u"},
@@ -18626,7 +18626,7 @@
                   "noteCount": 24,
                   "minGapMsAtTop": 222.22,
                   "handShifts": 3,
-                  "maxPlayableBpm": 400,
+                  "maxPlayableBpm": 393,
                   "difficulty": 5.24
                 },
                 "chords": ["Am", "G", "F", "G"],
@@ -18643,19 +18643,19 @@
                   "progression": "i-VI-III-VII"
                 },
                 "pool": "all",
-                "tab": "/4t 6:17 5:15 4:14 3:14 2:13 1:12 | /4t 1:13h 2:13 3:14 4:15 5:15 6:17 | /4t 6:15p 5:15 4:14 3:12 2:13 1:12 | /4t 1:10p 2:12 3:12 4:12 5:14 6:15",
+                "tab": "/4t 6:17f4 5:15f2 4:14f1 3:14f1 2:13f3 1:12f2 | /4t 1:13h 2:13 3:14 4:15 5:15 6:17 | /4t 6:15p 5:15 4:14 3:12 2:13 1:12 | /4t 1:10p 2:12 3:12 4:12 5:14 6:15",
                 "position": {
-                  "fret": 12,
+                  "fret": 14,
                   "shifts": "allowed"
                 },
                 "crossing": "none",
                 "notes": [
-                  {"string":6,"fret":17,"midi":57,"tick":0,"dur":640,"tech":[],"pick":"d"},
-                  {"string":5,"fret":15,"midi":60,"tick":640,"dur":640,"tech":[],"pick":"d"},
-                  {"string":4,"fret":14,"midi":64,"tick":1280,"dur":640,"tech":[],"pick":"d"},
-                  {"string":3,"fret":14,"midi":69,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-                  {"string":2,"fret":13,"midi":72,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":12,"midi":76,"tick":3200,"dur":640,"tech":[],"pick":"d"},
+                  {"string":6,"fret":17,"midi":57,"tick":0,"dur":640,"tech":[],"finger":4,"pick":"d"},
+                  {"string":5,"fret":15,"midi":60,"tick":640,"dur":640,"tech":[],"finger":2,"pick":"d"},
+                  {"string":4,"fret":14,"midi":64,"tick":1280,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":3,"fret":14,"midi":69,"tick":1920,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":2,"fret":13,"midi":72,"tick":2560,"dur":640,"tech":[],"finger":3,"pick":"d"},
+                  {"string":1,"fret":12,"midi":76,"tick":3200,"dur":640,"tech":[],"finger":2,"pick":"d"},
                   {"string":1,"fret":13,"midi":77,"tick":3840,"dur":640,"tech":["hammer"]},
                   {"string":2,"fret":13,"midi":72,"tick":4480,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":14,"midi":69,"tick":5120,"dur":640,"tech":[],"pick":"u"},
@@ -18683,9 +18683,9 @@
                 "computed": {
                   "noteCount": 24,
                   "minGapMsAtTop": 222.22,
-                  "handShifts": 2,
+                  "handShifts": 3,
                   "maxPlayableBpm": 400,
-                  "difficulty": 5.2
+                  "difficulty": 5.24
                 },
                 "chords": ["Am", "F", "C", "G"],
                 "harmony": {
@@ -18701,19 +18701,19 @@
                   "progression": "i-iv-V-i"
                 },
                 "pool": "all",
-                "tab": "/4t 6:17 5:15 4:14 3:14 2:13 1:12 | /4t 1:13h 2:15 3:14 4:15 5:17 6:17 | /4t 6:16p 5:14 4:14 3:13 2:12 1:12s | /4t 1:8 2:10 3:9 4:10 5:12 6:12",
+                "tab": "/4t 6:17f4 5:15f2 4:14f1 3:14f1 2:13f3 1:12f2 | /4t 1:13h 2:15 3:14 4:15 5:17 6:17 | /4t 6:16p 5:14 4:14 3:13 2:12 1:12s | /4t 1:8 2:10 3:9 4:10 5:12 6:12",
                 "position": {
-                  "fret": 12,
+                  "fret": 14,
                   "shifts": "allowed"
                 },
                 "crossing": "none",
                 "notes": [
-                  {"string":6,"fret":17,"midi":57,"tick":0,"dur":640,"tech":[],"pick":"d"},
-                  {"string":5,"fret":15,"midi":60,"tick":640,"dur":640,"tech":[],"pick":"d"},
-                  {"string":4,"fret":14,"midi":64,"tick":1280,"dur":640,"tech":[],"pick":"d"},
-                  {"string":3,"fret":14,"midi":69,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-                  {"string":2,"fret":13,"midi":72,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":12,"midi":76,"tick":3200,"dur":640,"tech":[],"pick":"d"},
+                  {"string":6,"fret":17,"midi":57,"tick":0,"dur":640,"tech":[],"finger":4,"pick":"d"},
+                  {"string":5,"fret":15,"midi":60,"tick":640,"dur":640,"tech":[],"finger":2,"pick":"d"},
+                  {"string":4,"fret":14,"midi":64,"tick":1280,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":3,"fret":14,"midi":69,"tick":1920,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":2,"fret":13,"midi":72,"tick":2560,"dur":640,"tech":[],"finger":3,"pick":"d"},
+                  {"string":1,"fret":12,"midi":76,"tick":3200,"dur":640,"tech":[],"finger":2,"pick":"d"},
                   {"string":1,"fret":13,"midi":77,"tick":3840,"dur":640,"tech":["hammer"]},
                   {"string":2,"fret":15,"midi":74,"tick":4480,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":14,"midi":69,"tick":5120,"dur":640,"tech":[],"pick":"u"},
@@ -18741,9 +18741,9 @@
                 "computed": {
                   "noteCount": 24,
                   "minGapMsAtTop": 222.22,
-                  "handShifts": 3,
+                  "handShifts": 4,
                   "maxPlayableBpm": 400,
-                  "difficulty": 5.24
+                  "difficulty": 5.28
                 },
                 "chords": ["Am", "Dm", "E", "Am"],
                 "harmony": {
@@ -18759,19 +18759,19 @@
                   "progression": "i-VII-VI-VII"
                 },
                 "pool": "all",
-                "tab": "/4t 6:15 5:13 4:12 3:12 2:11 1:10 | /4t 1:8p 2:10 3:10 4:10 5:12 6:13 | /4t 6:11p 5:10 4:8 3:8 2:8 1:6 | /4t 1:5p 2:6 3:5 4:7 5:8 6:8",
+                "tab": "/4t 6:15f4 5:13f2 4:12f1 3:12f1 2:11f3 1:10f2 | /4t 1:8p 2:10 3:10 4:10 5:12 6:13 | /4t 6:11p 5:10 4:8 3:8 2:8 1:6 | /4t 1:5p 2:6 3:5 4:7 5:8 6:8",
                 "position": {
-                  "fret": 10,
+                  "fret": 12,
                   "shifts": "allowed"
                 },
                 "crossing": "none",
                 "notes": [
-                  {"string":6,"fret":15,"midi":55,"tick":0,"dur":640,"tech":[],"pick":"d"},
-                  {"string":5,"fret":13,"midi":58,"tick":640,"dur":640,"tech":[],"pick":"d"},
-                  {"string":4,"fret":12,"midi":62,"tick":1280,"dur":640,"tech":[],"pick":"d"},
-                  {"string":3,"fret":12,"midi":67,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-                  {"string":2,"fret":11,"midi":70,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":10,"midi":74,"tick":3200,"dur":640,"tech":[],"pick":"d"},
+                  {"string":6,"fret":15,"midi":55,"tick":0,"dur":640,"tech":[],"finger":4,"pick":"d"},
+                  {"string":5,"fret":13,"midi":58,"tick":640,"dur":640,"tech":[],"finger":2,"pick":"d"},
+                  {"string":4,"fret":12,"midi":62,"tick":1280,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":3,"fret":12,"midi":67,"tick":1920,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":2,"fret":11,"midi":70,"tick":2560,"dur":640,"tech":[],"finger":3,"pick":"d"},
+                  {"string":1,"fret":10,"midi":74,"tick":3200,"dur":640,"tech":[],"finger":2,"pick":"d"},
                   {"string":1,"fret":8,"midi":72,"tick":3840,"dur":640,"tech":["pull"]},
                   {"string":2,"fret":10,"midi":69,"tick":4480,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":10,"midi":65,"tick":5120,"dur":640,"tech":[],"pick":"u"},
@@ -18800,7 +18800,7 @@
                   "noteCount": 24,
                   "minGapMsAtTop": 222.22,
                   "handShifts": 4,
-                  "maxPlayableBpm": 400,
+                  "maxPlayableBpm": 381,
                   "difficulty": 5.28
                 },
                 "chords": ["Gm", "F", "Eb", "F"],
@@ -18817,19 +18817,19 @@
                   "progression": "i-VI-III-VII"
                 },
                 "pool": "all",
-                "tab": "/4t 6:15 5:13 4:12 3:12 2:11 1:10 | /4t 1:11h 2:11 3:12 4:13 5:13 6:15 | /4t 6:13p 5:13 4:12 3:10 2:11 1:10 | /4t 1:8p 2:10 3:10 4:10 5:12 6:13",
+                "tab": "/4t 6:15f4 5:13f2 4:12f1 3:12f1 2:11f3 1:10f2 | /4t 1:11h 2:11 3:12 4:13 5:13 6:15 | /4t 6:13p 5:13 4:12 3:10 2:11 1:10 | /4t 1:8p 2:10 3:10 4:10 5:12 6:13",
                 "position": {
-                  "fret": 10,
+                  "fret": 12,
                   "shifts": "allowed"
                 },
                 "crossing": "none",
                 "notes": [
-                  {"string":6,"fret":15,"midi":55,"tick":0,"dur":640,"tech":[],"pick":"d"},
-                  {"string":5,"fret":13,"midi":58,"tick":640,"dur":640,"tech":[],"pick":"d"},
-                  {"string":4,"fret":12,"midi":62,"tick":1280,"dur":640,"tech":[],"pick":"d"},
-                  {"string":3,"fret":12,"midi":67,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-                  {"string":2,"fret":11,"midi":70,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":10,"midi":74,"tick":3200,"dur":640,"tech":[],"pick":"d"},
+                  {"string":6,"fret":15,"midi":55,"tick":0,"dur":640,"tech":[],"finger":4,"pick":"d"},
+                  {"string":5,"fret":13,"midi":58,"tick":640,"dur":640,"tech":[],"finger":2,"pick":"d"},
+                  {"string":4,"fret":12,"midi":62,"tick":1280,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":3,"fret":12,"midi":67,"tick":1920,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":2,"fret":11,"midi":70,"tick":2560,"dur":640,"tech":[],"finger":3,"pick":"d"},
+                  {"string":1,"fret":10,"midi":74,"tick":3200,"dur":640,"tech":[],"finger":2,"pick":"d"},
                   {"string":1,"fret":11,"midi":75,"tick":3840,"dur":640,"tech":["hammer"]},
                   {"string":2,"fret":11,"midi":70,"tick":4480,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":12,"midi":67,"tick":5120,"dur":640,"tech":[],"pick":"u"},
@@ -18857,9 +18857,9 @@
                 "computed": {
                   "noteCount": 24,
                   "minGapMsAtTop": 222.22,
-                  "handShifts": 2,
+                  "handShifts": 3,
                   "maxPlayableBpm": 400,
-                  "difficulty": 5.2
+                  "difficulty": 5.24
                 },
                 "chords": ["Gm", "Eb", "Bb", "F"],
                 "harmony": {
@@ -18875,19 +18875,19 @@
                   "progression": "i-iv-V-i"
                 },
                 "pool": "all",
-                "tab": "/4t 6:15 5:13 4:12 3:12 2:11 1:10 | /4t 1:11h 2:13 3:12 4:13 5:15 6:15 | /4t 6:14p 5:12 4:12 3:11 2:10 1:10s | /4t 1:6 2:8 3:7 4:8 5:10 6:10",
+                "tab": "/4t 6:15f4 5:13f2 4:12f1 3:12f1 2:11f3 1:10f2 | /4t 1:11h 2:13 3:12 4:13 5:15 6:15 | /4t 6:14p 5:12 4:12 3:11 2:10 1:10s | /4t 1:6 2:8 3:7 4:8 5:10 6:10",
                 "position": {
-                  "fret": 10,
+                  "fret": 12,
                   "shifts": "allowed"
                 },
                 "crossing": "none",
                 "notes": [
-                  {"string":6,"fret":15,"midi":55,"tick":0,"dur":640,"tech":[],"pick":"d"},
-                  {"string":5,"fret":13,"midi":58,"tick":640,"dur":640,"tech":[],"pick":"d"},
-                  {"string":4,"fret":12,"midi":62,"tick":1280,"dur":640,"tech":[],"pick":"d"},
-                  {"string":3,"fret":12,"midi":67,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-                  {"string":2,"fret":11,"midi":70,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":10,"midi":74,"tick":3200,"dur":640,"tech":[],"pick":"d"},
+                  {"string":6,"fret":15,"midi":55,"tick":0,"dur":640,"tech":[],"finger":4,"pick":"d"},
+                  {"string":5,"fret":13,"midi":58,"tick":640,"dur":640,"tech":[],"finger":2,"pick":"d"},
+                  {"string":4,"fret":12,"midi":62,"tick":1280,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":3,"fret":12,"midi":67,"tick":1920,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":2,"fret":11,"midi":70,"tick":2560,"dur":640,"tech":[],"finger":3,"pick":"d"},
+                  {"string":1,"fret":10,"midi":74,"tick":3200,"dur":640,"tech":[],"finger":2,"pick":"d"},
                   {"string":1,"fret":11,"midi":75,"tick":3840,"dur":640,"tech":["hammer"]},
                   {"string":2,"fret":13,"midi":72,"tick":4480,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":12,"midi":67,"tick":5120,"dur":640,"tech":[],"pick":"u"},
@@ -18915,9 +18915,9 @@
                 "computed": {
                   "noteCount": 24,
                   "minGapMsAtTop": 222.22,
-                  "handShifts": 3,
+                  "handShifts": 4,
                   "maxPlayableBpm": 400,
-                  "difficulty": 5.24
+                  "difficulty": 5.28
                 },
                 "chords": ["Gm", "Cm", "D", "Gm"],
                 "harmony": {
@@ -18933,19 +18933,19 @@
                   "progression": "i-VII-VI-VII"
                 },
                 "pool": "all",
-                "tab": "/4t 6:12 5:10 4:9 3:9 2:8 1:7 | /4t 1:5p 2:7 3:7 4:7 5:9 6:10 | /4t 6:8p 5:7 4:5 3:5 2:5 1:3 | /4t 1:2p 2:3 3:2 4:4 5:5 6:5",
+                "tab": "/4t 6:12f4 5:10f2 4:9f1 3:9f1 2:8f3 1:7f2 | /4t 1:5p 2:7 3:7 4:7 5:9 6:10 | /4t 6:8p 5:7 4:5 3:5 2:5 1:3 | /4t 1:2p 2:3 3:2 4:4 5:5 6:5",
                 "position": {
-                  "fret": 8,
+                  "fret": 9,
                   "shifts": "allowed"
                 },
                 "crossing": "none",
                 "notes": [
-                  {"string":6,"fret":12,"midi":52,"tick":0,"dur":640,"tech":[],"pick":"d"},
-                  {"string":5,"fret":10,"midi":55,"tick":640,"dur":640,"tech":[],"pick":"d"},
-                  {"string":4,"fret":9,"midi":59,"tick":1280,"dur":640,"tech":[],"pick":"d"},
-                  {"string":3,"fret":9,"midi":64,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-                  {"string":2,"fret":8,"midi":67,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":7,"midi":71,"tick":3200,"dur":640,"tech":[],"pick":"d"},
+                  {"string":6,"fret":12,"midi":52,"tick":0,"dur":640,"tech":[],"finger":4,"pick":"d"},
+                  {"string":5,"fret":10,"midi":55,"tick":640,"dur":640,"tech":[],"finger":2,"pick":"d"},
+                  {"string":4,"fret":9,"midi":59,"tick":1280,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":3,"fret":9,"midi":64,"tick":1920,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":2,"fret":8,"midi":67,"tick":2560,"dur":640,"tech":[],"finger":3,"pick":"d"},
+                  {"string":1,"fret":7,"midi":71,"tick":3200,"dur":640,"tech":[],"finger":2,"pick":"d"},
                   {"string":1,"fret":5,"midi":69,"tick":3840,"dur":640,"tech":["pull"]},
                   {"string":2,"fret":7,"midi":66,"tick":4480,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":7,"midi":62,"tick":5120,"dur":640,"tech":[],"pick":"u"},
@@ -18974,7 +18974,7 @@
                   "noteCount": 24,
                   "minGapMsAtTop": 222.22,
                   "handShifts": 6,
-                  "maxPlayableBpm": 390,
+                  "maxPlayableBpm": 366,
                   "difficulty": 5.35
                 },
                 "chords": ["Em", "D", "C", "D"],
@@ -18991,19 +18991,19 @@
                   "progression": "i-VI-III-VII"
                 },
                 "pool": "all",
-                "tab": "/4t 6:12 5:10 4:9 3:9 2:8 1:7 | /4t 1:8h 2:8 3:9 4:10 5:10 6:12 | /4t 6:10p 5:10 4:9 3:7 2:8 1:7 | /4t 1:5p 2:7 3:7 4:7 5:9 6:10",
+                "tab": "/4t 6:12f4 5:10f2 4:9f1 3:9f1 2:8f3 1:7f2 | /4t 1:8h 2:8 3:9 4:10 5:10 6:12 | /4t 6:10p 5:10 4:9 3:7 2:8 1:7 | /4t 1:5p 2:7 3:7 4:7 5:9 6:10",
                 "position": {
-                  "fret": 8,
+                  "fret": 9,
                   "shifts": "allowed"
                 },
                 "crossing": "none",
                 "notes": [
-                  {"string":6,"fret":12,"midi":52,"tick":0,"dur":640,"tech":[],"pick":"d"},
-                  {"string":5,"fret":10,"midi":55,"tick":640,"dur":640,"tech":[],"pick":"d"},
-                  {"string":4,"fret":9,"midi":59,"tick":1280,"dur":640,"tech":[],"pick":"d"},
-                  {"string":3,"fret":9,"midi":64,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-                  {"string":2,"fret":8,"midi":67,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":7,"midi":71,"tick":3200,"dur":640,"tech":[],"pick":"d"},
+                  {"string":6,"fret":12,"midi":52,"tick":0,"dur":640,"tech":[],"finger":4,"pick":"d"},
+                  {"string":5,"fret":10,"midi":55,"tick":640,"dur":640,"tech":[],"finger":2,"pick":"d"},
+                  {"string":4,"fret":9,"midi":59,"tick":1280,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":3,"fret":9,"midi":64,"tick":1920,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":2,"fret":8,"midi":67,"tick":2560,"dur":640,"tech":[],"finger":3,"pick":"d"},
+                  {"string":1,"fret":7,"midi":71,"tick":3200,"dur":640,"tech":[],"finger":2,"pick":"d"},
                   {"string":1,"fret":8,"midi":72,"tick":3840,"dur":640,"tech":["hammer"]},
                   {"string":2,"fret":8,"midi":67,"tick":4480,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":9,"midi":64,"tick":5120,"dur":640,"tech":[],"pick":"u"},
@@ -19049,19 +19049,19 @@
                   "progression": "i-iv-V-i"
                 },
                 "pool": "all",
-                "tab": "/4t 6:12 5:10 4:9 3:9 2:8 1:7 | /4t 1:8h 2:10 3:9 4:10 5:12 6:12 | /4t 6:11p 5:9 4:9 3:8 2:7 1:7s | /4t 1:3 2:5 3:4 4:5 5:7 6:7",
+                "tab": "/4t 6:12f4 5:10f2 4:9f1 3:9f1 2:8f3 1:7f2 | /4t 1:8h 2:10 3:9 4:10 5:12 6:12 | /4t 6:11p 5:9 4:9 3:8 2:7 1:7s | /4t 1:3 2:5 3:4 4:5 5:7 6:7",
                 "position": {
-                  "fret": 8,
+                  "fret": 9,
                   "shifts": "allowed"
                 },
                 "crossing": "none",
                 "notes": [
-                  {"string":6,"fret":12,"midi":52,"tick":0,"dur":640,"tech":[],"pick":"d"},
-                  {"string":5,"fret":10,"midi":55,"tick":640,"dur":640,"tech":[],"pick":"d"},
-                  {"string":4,"fret":9,"midi":59,"tick":1280,"dur":640,"tech":[],"pick":"d"},
-                  {"string":3,"fret":9,"midi":64,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-                  {"string":2,"fret":8,"midi":67,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":7,"midi":71,"tick":3200,"dur":640,"tech":[],"pick":"d"},
+                  {"string":6,"fret":12,"midi":52,"tick":0,"dur":640,"tech":[],"finger":4,"pick":"d"},
+                  {"string":5,"fret":10,"midi":55,"tick":640,"dur":640,"tech":[],"finger":2,"pick":"d"},
+                  {"string":4,"fret":9,"midi":59,"tick":1280,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":3,"fret":9,"midi":64,"tick":1920,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":2,"fret":8,"midi":67,"tick":2560,"dur":640,"tech":[],"finger":3,"pick":"d"},
+                  {"string":1,"fret":7,"midi":71,"tick":3200,"dur":640,"tech":[],"finger":2,"pick":"d"},
                   {"string":1,"fret":8,"midi":72,"tick":3840,"dur":640,"tech":["hammer"]},
                   {"string":2,"fret":10,"midi":69,"tick":4480,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":9,"midi":64,"tick":5120,"dur":640,"tech":[],"pick":"u"},
@@ -23425,19 +23425,19 @@
           "bars": 4,
           "loops": true,
           "position": {
-            "fret": 12,
+            "fret": 14,
             "shifts": "allowed"
           },
           "pickPlan": "sweep",
           "crossing": "none",
           "notesRole": "target",
           "notes": [
-            {"string":6,"fret":17,"midi":57,"tick":0,"dur":640,"tech":[],"pick":"d"},
-            {"string":5,"fret":15,"midi":60,"tick":640,"dur":640,"tech":[],"pick":"d"},
-            {"string":4,"fret":14,"midi":64,"tick":1280,"dur":640,"tech":[],"pick":"d"},
-            {"string":3,"fret":14,"midi":69,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-            {"string":2,"fret":13,"midi":72,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-            {"string":1,"fret":12,"midi":76,"tick":3200,"dur":640,"tech":[],"pick":"d"},
+            {"string":6,"fret":17,"midi":57,"tick":0,"dur":640,"tech":[],"finger":4,"pick":"d"},
+            {"string":5,"fret":15,"midi":60,"tick":640,"dur":640,"tech":[],"finger":2,"pick":"d"},
+            {"string":4,"fret":14,"midi":64,"tick":1280,"dur":640,"tech":[],"finger":1,"pick":"d"},
+            {"string":3,"fret":14,"midi":69,"tick":1920,"dur":640,"tech":[],"finger":1,"pick":"d"},
+            {"string":2,"fret":13,"midi":72,"tick":2560,"dur":640,"tech":[],"finger":3,"pick":"d"},
+            {"string":1,"fret":12,"midi":76,"tick":3200,"dur":640,"tech":[],"finger":2,"pick":"d"},
             {"string":1,"fret":10,"midi":74,"tick":3840,"dur":640,"tech":["pull"]},
             {"string":2,"fret":12,"midi":71,"tick":4480,"dur":640,"tech":[],"pick":"u"},
             {"string":3,"fret":12,"midi":67,"tick":5120,"dur":640,"tech":[],"pick":"u"},
@@ -23515,13 +23515,13 @@
             "chart": "Am | G | F | G"
           },
           "estimatedMinutes": 7,
-          "tab": "/4t 6:17 5:15 4:14 3:14 2:13 1:12 | /4t 1:10p 2:12 3:12 4:12 5:14 6:15 | /4t 6:13p 5:12 4:10 3:10 2:10 1:8 | /4t 1:7p 2:8 3:7 4:9 5:10 6:10",
+          "tab": "/4t 6:17f4 5:15f2 4:14f1 3:14f1 2:13f3 1:12f2 | /4t 1:10p 2:12 3:12 4:12 5:14 6:15 | /4t 6:13p 5:12 4:10 3:10 2:10 1:8 | /4t 1:7p 2:8 3:7 4:9 5:10 6:10",
           "subdivision": "quarterTriplets",
           "computed": {
             "noteCount": 24,
             "minGapMsAtTop": 222.22,
             "handShifts": 3,
-            "maxPlayableBpm": 400,
+            "maxPlayableBpm": 393,
             "difficulty": 5.24
           },
           "chords": ["Am", "G", "F", "G"],
@@ -23548,19 +23548,19 @@
                   "progression": "i-VII-VI-VII"
                 },
                 "pool": "all",
-                "tab": "/4t 6:17 5:15 4:14 3:14 2:13 1:12 | /4t 1:10p 2:12 3:12 4:12 5:14 6:15 | /4t 6:13p 5:12 4:10 3:10 2:10 1:8 | /4t 1:7p 2:8 3:7 4:9 5:10 6:10",
+                "tab": "/4t 6:17f4 5:15f2 4:14f1 3:14f1 2:13f3 1:12f2 | /4t 1:10p 2:12 3:12 4:12 5:14 6:15 | /4t 6:13p 5:12 4:10 3:10 2:10 1:8 | /4t 1:7p 2:8 3:7 4:9 5:10 6:10",
                 "position": {
-                  "fret": 12,
+                  "fret": 14,
                   "shifts": "allowed"
                 },
                 "crossing": "none",
                 "notes": [
-                  {"string":6,"fret":17,"midi":57,"tick":0,"dur":640,"tech":[],"pick":"d"},
-                  {"string":5,"fret":15,"midi":60,"tick":640,"dur":640,"tech":[],"pick":"d"},
-                  {"string":4,"fret":14,"midi":64,"tick":1280,"dur":640,"tech":[],"pick":"d"},
-                  {"string":3,"fret":14,"midi":69,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-                  {"string":2,"fret":13,"midi":72,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":12,"midi":76,"tick":3200,"dur":640,"tech":[],"pick":"d"},
+                  {"string":6,"fret":17,"midi":57,"tick":0,"dur":640,"tech":[],"finger":4,"pick":"d"},
+                  {"string":5,"fret":15,"midi":60,"tick":640,"dur":640,"tech":[],"finger":2,"pick":"d"},
+                  {"string":4,"fret":14,"midi":64,"tick":1280,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":3,"fret":14,"midi":69,"tick":1920,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":2,"fret":13,"midi":72,"tick":2560,"dur":640,"tech":[],"finger":3,"pick":"d"},
+                  {"string":1,"fret":12,"midi":76,"tick":3200,"dur":640,"tech":[],"finger":2,"pick":"d"},
                   {"string":1,"fret":10,"midi":74,"tick":3840,"dur":640,"tech":["pull"]},
                   {"string":2,"fret":12,"midi":71,"tick":4480,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":12,"midi":67,"tick":5120,"dur":640,"tech":[],"pick":"u"},
@@ -23592,7 +23592,7 @@
                   "noteCount": 24,
                   "minGapMsAtTop": 222.22,
                   "handShifts": 3,
-                  "maxPlayableBpm": 400,
+                  "maxPlayableBpm": 393,
                   "difficulty": 5.24
                 },
                 "chords": ["Am", "G", "F", "G"],
@@ -23609,19 +23609,19 @@
                   "progression": "i-VI-III-VII"
                 },
                 "pool": "all",
-                "tab": "/4t 6:17 5:15 4:14 3:14 2:13 1:12 | /4t 1:13h 2:13 3:14 4:15 5:15 6:17 | /4t 6:15p 5:15 4:14 3:12 2:13 1:12 | /4t 1:10p 2:12 3:12 4:12 5:14 6:15",
+                "tab": "/4t 6:17f4 5:15f2 4:14f1 3:14f1 2:13f3 1:12f2 | /4t 1:13h 2:13 3:14 4:15 5:15 6:17 | /4t 6:15p 5:15 4:14 3:12 2:13 1:12 | /4t 1:10p 2:12 3:12 4:12 5:14 6:15",
                 "position": {
-                  "fret": 12,
+                  "fret": 14,
                   "shifts": "allowed"
                 },
                 "crossing": "none",
                 "notes": [
-                  {"string":6,"fret":17,"midi":57,"tick":0,"dur":640,"tech":[],"pick":"d"},
-                  {"string":5,"fret":15,"midi":60,"tick":640,"dur":640,"tech":[],"pick":"d"},
-                  {"string":4,"fret":14,"midi":64,"tick":1280,"dur":640,"tech":[],"pick":"d"},
-                  {"string":3,"fret":14,"midi":69,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-                  {"string":2,"fret":13,"midi":72,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":12,"midi":76,"tick":3200,"dur":640,"tech":[],"pick":"d"},
+                  {"string":6,"fret":17,"midi":57,"tick":0,"dur":640,"tech":[],"finger":4,"pick":"d"},
+                  {"string":5,"fret":15,"midi":60,"tick":640,"dur":640,"tech":[],"finger":2,"pick":"d"},
+                  {"string":4,"fret":14,"midi":64,"tick":1280,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":3,"fret":14,"midi":69,"tick":1920,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":2,"fret":13,"midi":72,"tick":2560,"dur":640,"tech":[],"finger":3,"pick":"d"},
+                  {"string":1,"fret":12,"midi":76,"tick":3200,"dur":640,"tech":[],"finger":2,"pick":"d"},
                   {"string":1,"fret":13,"midi":77,"tick":3840,"dur":640,"tech":["hammer"]},
                   {"string":2,"fret":13,"midi":72,"tick":4480,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":14,"midi":69,"tick":5120,"dur":640,"tech":[],"pick":"u"},
@@ -23652,9 +23652,9 @@
                 "computed": {
                   "noteCount": 24,
                   "minGapMsAtTop": 222.22,
-                  "handShifts": 2,
+                  "handShifts": 3,
                   "maxPlayableBpm": 400,
-                  "difficulty": 5.2
+                  "difficulty": 5.24
                 },
                 "chords": ["Am", "F", "C", "G"],
                 "harmony": {
@@ -23670,19 +23670,19 @@
                   "progression": "i-VII-VI-VII"
                 },
                 "pool": "all",
-                "tab": "/4t 6:15 5:13 4:12 3:12 2:11 1:10 | /4t 1:8p 2:10 3:10 4:10 5:12 6:13 | /4t 6:11p 5:10 4:8 3:8 2:8 1:6 | /4t 1:5p 2:6 3:5 4:7 5:8 6:8",
+                "tab": "/4t 6:15f4 5:13f2 4:12f1 3:12f1 2:11f3 1:10f2 | /4t 1:8p 2:10 3:10 4:10 5:12 6:13 | /4t 6:11p 5:10 4:8 3:8 2:8 1:6 | /4t 1:5p 2:6 3:5 4:7 5:8 6:8",
                 "position": {
-                  "fret": 10,
+                  "fret": 12,
                   "shifts": "allowed"
                 },
                 "crossing": "none",
                 "notes": [
-                  {"string":6,"fret":15,"midi":55,"tick":0,"dur":640,"tech":[],"pick":"d"},
-                  {"string":5,"fret":13,"midi":58,"tick":640,"dur":640,"tech":[],"pick":"d"},
-                  {"string":4,"fret":12,"midi":62,"tick":1280,"dur":640,"tech":[],"pick":"d"},
-                  {"string":3,"fret":12,"midi":67,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-                  {"string":2,"fret":11,"midi":70,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":10,"midi":74,"tick":3200,"dur":640,"tech":[],"pick":"d"},
+                  {"string":6,"fret":15,"midi":55,"tick":0,"dur":640,"tech":[],"finger":4,"pick":"d"},
+                  {"string":5,"fret":13,"midi":58,"tick":640,"dur":640,"tech":[],"finger":2,"pick":"d"},
+                  {"string":4,"fret":12,"midi":62,"tick":1280,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":3,"fret":12,"midi":67,"tick":1920,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":2,"fret":11,"midi":70,"tick":2560,"dur":640,"tech":[],"finger":3,"pick":"d"},
+                  {"string":1,"fret":10,"midi":74,"tick":3200,"dur":640,"tech":[],"finger":2,"pick":"d"},
                   {"string":1,"fret":8,"midi":72,"tick":3840,"dur":640,"tech":["pull"]},
                   {"string":2,"fret":10,"midi":69,"tick":4480,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":10,"midi":65,"tick":5120,"dur":640,"tech":[],"pick":"u"},
@@ -23714,7 +23714,7 @@
                   "noteCount": 24,
                   "minGapMsAtTop": 222.22,
                   "handShifts": 4,
-                  "maxPlayableBpm": 400,
+                  "maxPlayableBpm": 381,
                   "difficulty": 5.28
                 },
                 "chords": ["Gm", "F", "Eb", "F"],
@@ -23731,19 +23731,19 @@
                   "progression": "i-VI-III-VII"
                 },
                 "pool": "all",
-                "tab": "/4t 6:15 5:13 4:12 3:12 2:11 1:10 | /4t 1:11h 2:11 3:12 4:13 5:13 6:15 | /4t 6:13p 5:13 4:12 3:10 2:11 1:10 | /4t 1:8p 2:10 3:10 4:10 5:12 6:13",
+                "tab": "/4t 6:15f4 5:13f2 4:12f1 3:12f1 2:11f3 1:10f2 | /4t 1:11h 2:11 3:12 4:13 5:13 6:15 | /4t 6:13p 5:13 4:12 3:10 2:11 1:10 | /4t 1:8p 2:10 3:10 4:10 5:12 6:13",
                 "position": {
-                  "fret": 10,
+                  "fret": 12,
                   "shifts": "allowed"
                 },
                 "crossing": "none",
                 "notes": [
-                  {"string":6,"fret":15,"midi":55,"tick":0,"dur":640,"tech":[],"pick":"d"},
-                  {"string":5,"fret":13,"midi":58,"tick":640,"dur":640,"tech":[],"pick":"d"},
-                  {"string":4,"fret":12,"midi":62,"tick":1280,"dur":640,"tech":[],"pick":"d"},
-                  {"string":3,"fret":12,"midi":67,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-                  {"string":2,"fret":11,"midi":70,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":10,"midi":74,"tick":3200,"dur":640,"tech":[],"pick":"d"},
+                  {"string":6,"fret":15,"midi":55,"tick":0,"dur":640,"tech":[],"finger":4,"pick":"d"},
+                  {"string":5,"fret":13,"midi":58,"tick":640,"dur":640,"tech":[],"finger":2,"pick":"d"},
+                  {"string":4,"fret":12,"midi":62,"tick":1280,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":3,"fret":12,"midi":67,"tick":1920,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":2,"fret":11,"midi":70,"tick":2560,"dur":640,"tech":[],"finger":3,"pick":"d"},
+                  {"string":1,"fret":10,"midi":74,"tick":3200,"dur":640,"tech":[],"finger":2,"pick":"d"},
                   {"string":1,"fret":11,"midi":75,"tick":3840,"dur":640,"tech":["hammer"]},
                   {"string":2,"fret":11,"midi":70,"tick":4480,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":12,"midi":67,"tick":5120,"dur":640,"tech":[],"pick":"u"},
@@ -23774,9 +23774,9 @@
                 "computed": {
                   "noteCount": 24,
                   "minGapMsAtTop": 222.22,
-                  "handShifts": 2,
+                  "handShifts": 3,
                   "maxPlayableBpm": 400,
-                  "difficulty": 5.2
+                  "difficulty": 5.24
                 },
                 "chords": ["Gm", "Eb", "Bb", "F"],
                 "harmony": {
@@ -23792,19 +23792,19 @@
                   "progression": "i-VII-VI-VII"
                 },
                 "pool": "all",
-                "tab": "/4t 6:12 5:10 4:9 3:9 2:8 1:7 | /4t 1:5p 2:7 3:7 4:7 5:9 6:10 | /4t 6:8p 5:7 4:5 3:5 2:5 1:3 | /4t 1:2p 2:3 3:2 4:4 5:5 6:5",
+                "tab": "/4t 6:12f4 5:10f2 4:9f1 3:9f1 2:8f3 1:7f2 | /4t 1:5p 2:7 3:7 4:7 5:9 6:10 | /4t 6:8p 5:7 4:5 3:5 2:5 1:3 | /4t 1:2p 2:3 3:2 4:4 5:5 6:5",
                 "position": {
-                  "fret": 8,
+                  "fret": 9,
                   "shifts": "allowed"
                 },
                 "crossing": "none",
                 "notes": [
-                  {"string":6,"fret":12,"midi":52,"tick":0,"dur":640,"tech":[],"pick":"d"},
-                  {"string":5,"fret":10,"midi":55,"tick":640,"dur":640,"tech":[],"pick":"d"},
-                  {"string":4,"fret":9,"midi":59,"tick":1280,"dur":640,"tech":[],"pick":"d"},
-                  {"string":3,"fret":9,"midi":64,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-                  {"string":2,"fret":8,"midi":67,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":7,"midi":71,"tick":3200,"dur":640,"tech":[],"pick":"d"},
+                  {"string":6,"fret":12,"midi":52,"tick":0,"dur":640,"tech":[],"finger":4,"pick":"d"},
+                  {"string":5,"fret":10,"midi":55,"tick":640,"dur":640,"tech":[],"finger":2,"pick":"d"},
+                  {"string":4,"fret":9,"midi":59,"tick":1280,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":3,"fret":9,"midi":64,"tick":1920,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":2,"fret":8,"midi":67,"tick":2560,"dur":640,"tech":[],"finger":3,"pick":"d"},
+                  {"string":1,"fret":7,"midi":71,"tick":3200,"dur":640,"tech":[],"finger":2,"pick":"d"},
                   {"string":1,"fret":5,"midi":69,"tick":3840,"dur":640,"tech":["pull"]},
                   {"string":2,"fret":7,"midi":66,"tick":4480,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":7,"midi":62,"tick":5120,"dur":640,"tech":[],"pick":"u"},
@@ -23836,7 +23836,7 @@
                   "noteCount": 24,
                   "minGapMsAtTop": 222.22,
                   "handShifts": 6,
-                  "maxPlayableBpm": 390,
+                  "maxPlayableBpm": 366,
                   "difficulty": 5.35
                 },
                 "chords": ["Em", "D", "C", "D"],
@@ -23853,19 +23853,19 @@
                   "progression": "i-VI-III-VII"
                 },
                 "pool": "all",
-                "tab": "/4t 6:12 5:10 4:9 3:9 2:8 1:7 | /4t 1:8h 2:8 3:9 4:10 5:10 6:12 | /4t 6:10p 5:10 4:9 3:7 2:8 1:7 | /4t 1:5p 2:7 3:7 4:7 5:9 6:10",
+                "tab": "/4t 6:12f4 5:10f2 4:9f1 3:9f1 2:8f3 1:7f2 | /4t 1:8h 2:8 3:9 4:10 5:10 6:12 | /4t 6:10p 5:10 4:9 3:7 2:8 1:7 | /4t 1:5p 2:7 3:7 4:7 5:9 6:10",
                 "position": {
-                  "fret": 8,
+                  "fret": 9,
                   "shifts": "allowed"
                 },
                 "crossing": "none",
                 "notes": [
-                  {"string":6,"fret":12,"midi":52,"tick":0,"dur":640,"tech":[],"pick":"d"},
-                  {"string":5,"fret":10,"midi":55,"tick":640,"dur":640,"tech":[],"pick":"d"},
-                  {"string":4,"fret":9,"midi":59,"tick":1280,"dur":640,"tech":[],"pick":"d"},
-                  {"string":3,"fret":9,"midi":64,"tick":1920,"dur":640,"tech":[],"pick":"d"},
-                  {"string":2,"fret":8,"midi":67,"tick":2560,"dur":640,"tech":[],"pick":"d"},
-                  {"string":1,"fret":7,"midi":71,"tick":3200,"dur":640,"tech":[],"pick":"d"},
+                  {"string":6,"fret":12,"midi":52,"tick":0,"dur":640,"tech":[],"finger":4,"pick":"d"},
+                  {"string":5,"fret":10,"midi":55,"tick":640,"dur":640,"tech":[],"finger":2,"pick":"d"},
+                  {"string":4,"fret":9,"midi":59,"tick":1280,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":3,"fret":9,"midi":64,"tick":1920,"dur":640,"tech":[],"finger":1,"pick":"d"},
+                  {"string":2,"fret":8,"midi":67,"tick":2560,"dur":640,"tech":[],"finger":3,"pick":"d"},
+                  {"string":1,"fret":7,"midi":71,"tick":3200,"dur":640,"tech":[],"finger":2,"pick":"d"},
                   {"string":1,"fret":8,"midi":72,"tick":3840,"dur":640,"tech":["hammer"]},
                   {"string":2,"fret":8,"midi":67,"tick":4480,"dur":640,"tech":[],"pick":"u"},
                   {"string":3,"fret":9,"midi":64,"tick":5120,"dur":640,"tech":[],"pick":"u"},

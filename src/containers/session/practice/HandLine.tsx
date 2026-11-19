@@ -5,10 +5,18 @@
 import { useTranslation } from "react-i18next";
 import type { HandPosition } from "../../../paths/format";
 
-/** "Index finger at fret 5", from the Exercise's own hand position. Nothing when it has none. */
+/** "Index finger at fret 5", or "open E chord shape", from the Exercise's own hand position. Nothing when it has none. */
 export function HandLine({ position }: { position: HandPosition | undefined }) {
   const { t } = useTranslation();
   if (!position) return null;
+  if (position.chord) {
+    const chordKey = position.shifts === "allowed" ? "session.practice.handChordShifts" : "session.practice.handChord";
+    return (
+      <span className="session-why practice-hand" data-testid="practice-hand">
+        {t(chordKey, { chord: position.chord })}
+      </span>
+    );
+  }
   const key =
     position.fret <= 0
       ? "session.practice.handOpen"

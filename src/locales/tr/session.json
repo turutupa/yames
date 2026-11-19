@@ -515,6 +515,8 @@
       "hand": "El: işaret parmağı {{fret}}. perdede, her perdeye bir parmak.",
       "handShifts": "El: işaret parmağıyla {{fret}}. perdeden başla; sap boyunca kayar.",
       "handOpen": "El: açık pozisyon, işaret parmağı 1. perdenin üstünde.",
+      "handChord": "El: açık {{chord}} akor şekli.",
+      "handChordShifts": "El: açık {{chord}} akor şekliyle başla; sap boyunca hareket eder.",
       "viewHint": "Görünümü istediğin zaman değiştir",
       "left": "kaldı",
       "notGraded": "{{time}} sonra biter; sonra tekrar ya da devam.",

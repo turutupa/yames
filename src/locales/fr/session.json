@@ -528,6 +528,8 @@
       "hand": "Main : index sur la case {{fret}}, un doigt par case.",
       "handShifts": "Main : index d'abord sur la case {{fret}} ; elle se déplace le long du manche.",
       "handOpen": "Main : position ouverte, index au-dessus de la case 1.",
+      "handChord": "Main : forme de l'accord ouvert de {{chord}}.",
+      "handChordShifts": "Main : commence dans la forme de l'accord ouvert de {{chord}} ; elle se déplace sur le manche.",
       "viewHint": "Change de vue quand tu veux",
       "left": "restant",
       "notGraded": "Se termine dans {{time}} ; ensuite encore, ou on continue.",

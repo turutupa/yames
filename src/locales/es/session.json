@@ -528,6 +528,8 @@
       "hand": "Mano: índice en el traste {{fret}}, un dedo por traste.",
       "handShifts": "Mano: empieza con el índice en el traste {{fret}}; se desplaza por el mástil.",
       "handOpen": "Mano: posición abierta, índice sobre el traste 1.",
+      "handChord": "Mano: forma del acorde abierto de {{chord}}.",
+      "handChordShifts": "Mano: empieza en la forma del acorde abierto de {{chord}}; se desplaza por el mástil.",
       "viewHint": "Cambia de vista cuando quieras",
       "left": "restantes",
       "notGraded": "Termina en {{time}}; luego otra vez, o sigue.",
