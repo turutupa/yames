@@ -6,6 +6,7 @@
  * `bigAction`, so they cannot disagree.
  */
 import { useEffect, useRef, useState } from "react";
+import { useFitOneLine } from "./hooks/useFitOneLine";
 import { useTranslation } from "react-i18next";
 import {
   barLine,
@@ -927,6 +928,10 @@ function ResultScreen({ session, pedalMapped }: { session: SessionRun; pedalMapp
   // A phone hides the neck here (phone-learning.css, PHONE-4).
   // Clipped to its own column: never behind the result's words (acceptance P1-2).
   const slot = useExerciseSlot(session, passed ? "tone" : "aim", true, true);
+  // One line in every theme's face (see useFitOneLine).
+  const bigText = bigLabel(big, t);
+  const bigRef = useRef<HTMLButtonElement>(null);
+  useFitOneLine(bigRef, bigText);
   if (!outcome) return null;
   const onEdge = isEdgeStep(currentStep(run));
   const edgeDone = onEdge && edgeOf(run, exercise).done;
@@ -953,8 +958,8 @@ function ResultScreen({ session, pedalMapped }: { session: SessionRun; pedalMapp
           <BarByBar session={session} outcome={outcome} />
           {/* There at once, with no fade: a pedal tap the moment the result
               lands must find it (UX audit SES-15). */}
-          <button className="session-big" data-size="mid" onClick={actions.go} data-testid="session-big">
-            {bigLabel(big, t)}
+          <button ref={bigRef} className="session-big" data-size="mid" data-fit="" onClick={actions.go} data-testid="session-big">
+            {bigText}
           </button>
           <div className="session-nudges">
             <TempoNudges run={run} exercise={exercise} session={session} />
@@ -1060,6 +1065,9 @@ function UngradedResultScreen({ session }: { session: SessionRun }) {
   const { run, big, actions } = session;
   const outcome = run.outcomes[run.outcomes.length - 1];
   const slot = useExerciseSlot(session, "dim");
+  const bigText = bigLabel(big, t);
+  const bigRef = useRef<HTMLButtonElement>(null);
+  useFitOneLine(bigRef, bigText);
   if (!outcome) return null;
   return (
     <div className="session-body" data-testid="session-ungraded" data-verdict="ungraded">
@@ -1083,8 +1091,8 @@ function UngradedResultScreen({ session }: { session: SessionRun }) {
       </div>
       <div className="session-slot" ref={slot} aria-hidden="true" data-exercise="" />
       <div className="session-center">
-        <button className="session-big" data-size="mid" onClick={actions.go} data-testid="session-big">
-          {bigLabel(big, t)}
+        <button ref={bigRef} className="session-big" data-size="mid" data-fit="" onClick={actions.go} data-testid="session-big">
+          {bigText}
         </button>
         <div className="session-nudges">
           {big.kind !== "again" && (
