@@ -334,7 +334,23 @@
       "subtitle": "Bir Yol ve seviyeni seç. Bugün ilk seansını buradan kurar; ikisini de Yol sayfasında değiştirebilirsin.",
       "pathHeading": "Yol",
       "loading": "Yollar yükleniyor…",
-      "subtitleNext": "Bir Yol ve seviyeni seç. Bugün sıradaki seansını buradan kurar; ikisini de Yol sayfasında değiştirebilirsin."
+      "subtitleNext": "Bir Yol ve seviyeni seç. Bugün sıradaki seansını buradan kurar; ikisini de Yol sayfasında değiştirebilirsin.",
+      "goalQuestion": "Şu an en çok ne istiyorsun?",
+      "goalOptional": "isteğe bağlı",
+      "levelFor": "{{path}} seviyesi",
+      "goals": {
+        "basics": "Yeniyim: temeller, zamanında",
+        "harmony": "Akorları ve tonları anlamak",
+        "technique": "Daha temiz, daha hızlı pena",
+        "speed": "Hız: tekniğim sağlam"
+      },
+      "why": {
+        "none": "Çoğu kişinin başladığı yer: zamanlama, klik ve temiz notalar.",
+        "basics": "Gitarda yeniysen: zamanlama ve temiz notalar, bir de klavyedeki nota adları.",
+        "harmony": "Akorlar ve tonlar klavyedeki notalarla başlar, sonra diziler, üçlü akorlar, bir tondaki akorlar ve akor değişimleri üzerinde arpejler gelir.",
+        "technique": "Düzenli, temiz pena her hızlı cümlenin temelidir.",
+        "speed": "Tekniğin zaten sağlam, o yüzden doğrudan hıza geçiyorsun."
+      }
     }
   },
   "whatsNew": {

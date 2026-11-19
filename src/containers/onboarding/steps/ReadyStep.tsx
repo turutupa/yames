@@ -12,7 +12,7 @@ import { getThemeById } from "../../../themes";
 import { useWizardEnv } from "../WizardContext";
 import type { StepId } from "../onboardingMachine";
 import type { WizardStepProps } from "./types";
-import { defaultStart } from "./StartStep";
+import { defaultStart, joinTitles } from "./StartStep";
 import { stepTitle } from "../../session/TodayView";
 import { roleKey } from "../../session/todayPlan";
 import "../../../styles/onboarding-learning.css";
@@ -25,10 +25,12 @@ type SummaryRow = {
   label: string;
   value: string;
   target: StepId;
+  /** One line under the value: why this was picked. */
+  why?: string | null;
 };
 
 export function ReadyStep(_props: WizardStepProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const {
     instrument,
     soundType,
@@ -50,6 +52,13 @@ export function ReadyStep(_props: WizardStepProps) {
   // "Where do you start?" wrote, or the default a skipped step leaves.
   const start = defaultStart(learning.paths, learning.progress, machineContext.startPathId);
   const startPath = start ? learning.paths.find((p) => p.id === start.pathId) : undefined;
+  // Every Path the step started on this run (a recommendation can be two),
+  // and the answer that chose them: the row says what and why in one line.
+  const startedIds = machineContext.startPathIds?.includes(start?.pathId ?? "") ? machineContext.startPathIds : null;
+  const startTitles = (startedIds ?? (startPath ? [startPath.id] : []))
+    .map((id) => learning.paths.find((p) => p.id === id)?.title)
+    .filter((title): title is string => !!title);
+  const startWhy = startedIds && machineContext.startGoal ? t(`onboarding.start.why.${machineContext.startGoal}`) : null;
   const plan = learning.plan;
   // A player with Takes behind them is not about to play their first Session
   // (acceptance P2-15: "Run setup again" said so to a returning player).
@@ -62,9 +71,13 @@ export function ReadyStep(_props: WizardStepProps) {
           {
             key: "path",
             label: t("onboarding.ready.rows.path"),
-            value: start?.levelId
-              ? `${startPath.title} · ${t(`session.paths.levelName.${start.levelId}`)}`
-              : startPath.title,
+            value:
+              startTitles.length > 1
+                ? joinTitles(startTitles, i18n.language)
+                : start?.levelId
+                  ? `${startPath.title} · ${t(`session.paths.levelName.${start.levelId}`)}`
+                  : startPath.title,
+            why: startWhy,
             target: "start" as StepId,
           },
         ]
@@ -153,7 +166,14 @@ export function ReadyStep(_props: WizardStepProps) {
           const body = (
             <>
               <span className="onboarding-summary-label">{row.label}</span>
-              <span className="onboarding-summary-value">{row.value}</span>
+              <span className="onboarding-summary-value">
+                {row.value}
+                {row.why && (
+                  <span className="onboarding-summary-why" data-testid={`onboarding-summary-why-${row.key}`}>
+                    {row.why}
+                  </span>
+                )}
+              </span>
             </>
           );
           return (

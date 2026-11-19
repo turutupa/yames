@@ -5,7 +5,7 @@
  * does: it answers a question the Paths screen may ask ("should I suggest
  * something first?") and the answer is a list that is empty for most players.
  */
-import { unmetPrerequisites } from "../paths/curriculum";
+import { prerequisitePaths, unmetPrerequisites } from "../paths/curriculum";
 import type { LevelId, PathDoc, PathPrerequisite } from "../paths/format";
 import { LEVEL_IDS } from "../paths/format";
 import { currentStepOf, isStepPassed } from "./progress";
@@ -43,4 +43,48 @@ export function unmetPathPrerequisites(
     const other = byId.get(id)!;
     return level ? isThroughLevel(progress, other, level) : hasStartedPath(progress, id);
   });
+}
+
+/** A prerequisite with its Path, for a screen to name and link. */
+export type ShownPrerequisite = { path: PathDoc; level?: LevelId };
+
+/** What `path` builds on, the Paths that are in the app, in the order it lists them ("Builds on: …"). */
+export function buildsOnPaths(paths: readonly PathDoc[], path: PathDoc): ShownPrerequisite[] {
+  const byId = new Map(paths.map((p) => [p.id, p]));
+  return prerequisitePaths(path).flatMap((need) => {
+    const other = byId.get(need.path);
+    if (!other || other.id === path.id) return [];
+    return [need.level ? { path: other, level: need.level } : { path: other }];
+  });
+}
+
+/**
+ * "Start with X first, or start anyway": the first prerequisite not reached,
+ * only while the player has not started this Path. Once they have, they have
+ * decided, and the suggestion is gone for good.
+ */
+export function startFirstSuggestion(
+  progress: PlayerProgress,
+  paths: readonly PathDoc[],
+  path: PathDoc,
+): PathDoc | null {
+  if (hasStartedPath(progress, path.id)) return null;
+  const first = unmetPathPrerequisites(progress, paths, path)[0];
+  return first ? (paths.find((p) => p.id === first.path) ?? null) : null;
+}
+
+/**
+ * What Subscribe offers to add as well: the prerequisites not reached that the
+ * player has not started at all. One they started and left is their call, and
+ * is not offered again. An offer, never a condition: the Path is subscribed
+ * whatever the answer.
+ */
+export function prerequisitesToOffer(
+  progress: PlayerProgress,
+  paths: readonly PathDoc[],
+  path: PathDoc,
+): PathDoc[] {
+  return unmetPathPrerequisites(progress, paths, path)
+    .filter((need) => !hasStartedPath(progress, need.path))
+    .flatMap((need) => paths.filter((p) => p.id === need.path));
 }

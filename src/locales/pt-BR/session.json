@@ -475,7 +475,25 @@
       "focusToday": "Praticar só esta hoje",
       "playedUngraded": "{{count}} tomada, até {{bpm}} BPM.",
       "playedUngraded_many": "{{count}} tomadas, até {{bpm}} BPM.",
-      "playedUngraded_other": "{{count}} tomadas, até {{bpm}} BPM."
+      "playedUngraded_other": "{{count}} tomadas, até {{bpm}} BPM.",
+      "buildsOn": "Parte de: {{list}}",
+      "buildsOnLevel": "{{path}} ({{level}})",
+      "startFirst": "Comece primeiro por {{path}}, ou comece assim mesmo.",
+      "startHere": "Comece aqui",
+      "offerOne": "{{list}} vem antes desta. Adicionar também às suas trilhas?",
+      "offerMany": "{{list}} vêm antes desta. Adicionar também às suas trilhas?",
+      "offerAddOne": "Adicionar {{path}}",
+      "offerAddMany": "Adicionar",
+      "offerNo": "Agora não",
+      "offerAdded": "{{list}} adicionada às suas trilhas.",
+      "tracks": {
+        "foundations": "Fundamentos",
+        "foundationsLine": "Começando na guitarra? Comece aqui: tempo, o clique e notas limpas. As outras trilhas partem disso.",
+        "harmony": "Como a harmonia funciona",
+        "harmonyLine": "Dos nomes das notas aos acordes de um tom, uma trilha depois da outra. Não precisa de teoria para começar.",
+        "technique": "Técnica",
+        "style": "Estilos"
+      }
     },
     "progress": {
       "title": "Progresso",
@@ -677,6 +695,12 @@
       "low": "Nível de entrada: baixo",
       "good": "Nível de entrada: bom",
       "high": "Nível de entrada: alto"
+    },
+    "category": {
+      "foundations": "Fundamentos",
+      "harmony": "Harmonia",
+      "technique": "Técnica",
+      "style": "Estilos"
     }
   }
 }

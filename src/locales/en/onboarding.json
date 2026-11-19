@@ -334,7 +334,23 @@
       "subtitle": "Pick a Path and your Level. Today builds your first Session from there; change either on the Path page.",
       "pathHeading": "Path",
       "loading": "Loading the Paths…",
-      "subtitleNext": "Pick a Path and your Level. Today builds your next Session from there; change either on the Path page."
+      "subtitleNext": "Pick a Path and your Level. Today builds your next Session from there; change either on the Path page.",
+      "goalQuestion": "What do you want most right now?",
+      "goalOptional": "optional",
+      "levelFor": "Level in {{path}}",
+      "goals": {
+        "basics": "I'm new: the basics, in time",
+        "harmony": "Understand chords and keys",
+        "technique": "Cleaner, faster picking",
+        "speed": "Speed: my technique is solid"
+      },
+      "why": {
+        "none": "Where most players start: time, the click and clean notes.",
+        "basics": "New to the guitar: time and clean notes, and the names of the notes on the neck.",
+        "harmony": "Chords and keys start with the notes on the neck, then scales, triads, chords in a key and arpeggios over the changes.",
+        "technique": "Even, clean picking is what every fast line is built on.",
+        "speed": "Your technique is already solid, so you go straight to speed."
+      }
     }
   },
   "whatsNew": {

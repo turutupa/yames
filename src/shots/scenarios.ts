@@ -110,6 +110,10 @@ export interface Shot {
     path?: "blues-pentatonics" | "sweep-picking" | "alternate-picking" | "legato" | "rhythm-foundations" | "metal-rhythm" | "know-the-neck" | "scales-and-modes" | "tapping" | "funk-lines" | "triads" | "chords-in-a-key" | "arpeggios-over-changes";
     /** With `path`: play this Exercise rather than the first Step's first. */
     exercise?: string;
+    /** With `stop: "path"`: open this Path rather than Alternate Picking. */
+    open?: string;
+    /** With `stop: "path"`: press Subscribe on it (the offer to add what it builds on). */
+    subscribe?: true;
     /** With `exercise`: it plays over the band, so wait for the band before the photograph. */
     band?: boolean;
     /**
@@ -370,7 +374,7 @@ export interface Shot {
       | "welcome"
       /** W1, before anything is picked: what a new player first sees. */
       | "instrument"
-      /** "Where do you start?", Shred at its first Level preselected. */
+      /** "Where do you start?": Rhythm Foundations staged, or what `goal` recommends. */
       | "start"
       /** W5's question, "Should Yames listen to your playing and grade it?" (2026-11-18). */
       | "inputAsk"
@@ -382,6 +386,8 @@ export interface Shot {
       /** W3, reached by skipping the steps before it. */
       | "handsFree"
       | "ready";
+    /** "What do you want most right now?", answered on the start step (`startRecommendation.ts`). */
+    goal?: "basics" | "harmony" | "technique" | "speed";
   };
 
   /**
@@ -774,6 +780,28 @@ export const SHOTS: Shot[] = [
       settleMs: 300,
     }),
   ),
+  // The start step answered, and the summary it leads to, for three players:
+  // a beginner, one who wants harmony, one who wants cleaner picking.
+  ...(["basics", "harmony", "technique"] as const).flatMap((goal): Shot[] => [
+    {
+      id: `firstrun-start-${goal}`,
+      suffix: `firstrun-start-${goal}`,
+      window: "main",
+      firstRun: { stop: "start", goal },
+      width: 1400,
+      height: 900,
+      settleMs: 300,
+    },
+    {
+      id: `firstrun-ready-${goal}`,
+      suffix: `firstrun-ready-${goal}`,
+      window: "main",
+      firstRun: { stop: "ready", goal },
+      width: 1400,
+      height: 900,
+      settleMs: 300,
+    },
+  ]),
   // The learning side. Not on the site yet: the layout suite is what opens them.
   {
     id: "today-first",
@@ -1458,6 +1486,27 @@ export const SHOTS: Shot[] = [
     height: 900,
     settleMs: 300,
   },
+  // What a Path builds on (plans/paths/NEW_PATHS.md, "UI spec for
+  // prerequisites"): Shred for a new player, "Builds on" and "Start with
+  // Alternate Picking first"; then Subscribe pressed, and the offer.
+  {
+    id: "path-unmet",
+    suffix: "path-unmet",
+    window: "main",
+    session: { seed: "first", stop: "path", open: "shred" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "path-offer",
+    suffix: "path-offer",
+    window: "main",
+    session: { seed: "first", stop: "path", open: "shred", subscribe: true },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
   {
     id: "path-alternate",
     suffix: "path-alternate",
@@ -1890,6 +1939,9 @@ export const PHONE_LEARNING_SCENES = [
   "progress-ungraded",
   "paths",
   "path-alternate",
+  "path-unmet",
+  "path-offer",
+  "firstrun-start-basics",
   "step-detail",
   "progress",
   "tools",

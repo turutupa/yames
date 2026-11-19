@@ -334,7 +334,23 @@
       "subtitle": "Wähle einen Pfad und dein Level. Heute baut daraus deine erste Session; beides änderst du auf der Seite des Pfads.",
       "pathHeading": "Pfad",
       "loading": "Pfade werden geladen…",
-      "subtitleNext": "Wähle einen Pfad und dein Level. Heute baut daraus deine nächste Session; beides änderst du auf der Seite des Pfads."
+      "subtitleNext": "Wähle einen Pfad und dein Level. Heute baut daraus deine nächste Session; beides änderst du auf der Seite des Pfads.",
+      "goalQuestion": "Was willst du gerade am meisten?",
+      "goalOptional": "optional",
+      "levelFor": "Niveau in {{path}}",
+      "goals": {
+        "basics": "Ich bin neu: die Grundlagen, im Timing",
+        "harmony": "Akkorde und Tonarten verstehen",
+        "technique": "Sauberer, schneller anschlagen",
+        "speed": "Tempo: meine Technik sitzt"
+      },
+      "why": {
+        "none": "Wo die meisten anfangen: Timing, der Klick und saubere Töne.",
+        "basics": "Neu an der Gitarre: Timing und saubere Töne, dazu die Tonnamen auf dem Griffbrett.",
+        "harmony": "Akkorde und Tonarten beginnen mit den Tönen auf dem Griffbrett, dann Tonleitern, Dreiklänge, die Akkorde einer Tonart und Arpeggios über die Wechsel.",
+        "technique": "Gleichmäßiger, sauberer Anschlag ist die Basis jeder schnellen Linie.",
+        "speed": "Deine Technik sitzt schon, also geht es direkt ums Tempo."
+      }
     }
   },
   "whatsNew": {

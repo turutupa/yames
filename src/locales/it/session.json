@@ -475,7 +475,25 @@
       "focusToday": "Oggi esercitati solo su questo",
       "playedUngraded": "{{count}} take, fino a {{bpm}} BPM.",
       "playedUngraded_many": "{{count}} take, fino a {{bpm}} BPM.",
-      "playedUngraded_other": "{{count}} take, fino a {{bpm}} BPM."
+      "playedUngraded_other": "{{count}} take, fino a {{bpm}} BPM.",
+      "buildsOn": "Si basa su: {{list}}",
+      "buildsOnLevel": "{{path}} ({{level}})",
+      "startFirst": "Inizia prima con {{path}}, oppure inizia comunque.",
+      "startHere": "Inizia qui",
+      "offerOne": "{{list}} viene prima di questo. Lo aggiungi anche ai tuoi percorsi?",
+      "offerMany": "{{list}} vengono prima di questo. Li aggiungi anche ai tuoi percorsi?",
+      "offerAddOne": "Aggiungi {{path}}",
+      "offerAddMany": "Aggiungili",
+      "offerNo": "Non ora",
+      "offerAdded": "{{list}} aggiunto ai tuoi percorsi.",
+      "tracks": {
+        "foundations": "Fondamenta",
+        "foundationsLine": "Nuovo alla chitarra? Inizia qui: il tempo, il clic e note pulite. Gli altri percorsi si basano su questo.",
+        "harmony": "Come funziona l'armonia",
+        "harmonyLine": "Dai nomi delle note agli accordi di una tonalità, un percorso dopo l'altro. Per iniziare non serve teoria.",
+        "technique": "Tecnica",
+        "style": "Stili"
+      }
     },
     "progress": {
       "title": "Progressi",
@@ -677,6 +695,12 @@
       "low": "Livello d'ingresso: basso",
       "good": "Livello d'ingresso: buono",
       "high": "Livello d'ingresso: alto"
+    },
+    "category": {
+      "foundations": "Fondamenta",
+      "harmony": "Armonia",
+      "technique": "Tecnica",
+      "style": "Stili"
     }
   }
 }

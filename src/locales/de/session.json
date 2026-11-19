@@ -462,7 +462,25 @@
       "inMixHelp": "Aus: Heute lässt ihn aus deinem täglichen Mix. Dein Fortschritt bleibt, und du kannst ihn trotzdem für einen Tag wählen.",
       "focusToday": "Heute nur diesen üben",
       "playedUngraded": "{{count}} Take, bis {{bpm}} BPM.",
-      "playedUngraded_other": "{{count}} Takes, bis {{bpm}} BPM."
+      "playedUngraded_other": "{{count}} Takes, bis {{bpm}} BPM.",
+      "buildsOn": "Baut auf: {{list}}",
+      "buildsOnLevel": "{{path}} ({{level}})",
+      "startFirst": "Fang zuerst mit {{path}} an, oder leg trotzdem los.",
+      "startHere": "Hier anfangen",
+      "offerOne": "{{list}} kommt vor diesem Pfad. Auch zu deinen Pfaden hinzufügen?",
+      "offerMany": "{{list}} kommen vor diesem Pfad. Auch zu deinen Pfaden hinzufügen?",
+      "offerAddOne": "{{path}} hinzufügen",
+      "offerAddMany": "Hinzufügen",
+      "offerNo": "Jetzt nicht",
+      "offerAdded": "{{list}} zu deinen Pfaden hinzugefügt.",
+      "tracks": {
+        "foundations": "Grundlagen",
+        "foundationsLine": "Neu an der Gitarre? Fang hier an: Timing, der Klick und saubere Töne. Die anderen Pfade bauen darauf auf.",
+        "harmony": "Wie Harmonie funktioniert",
+        "harmonyLine": "Von den Tonnamen bis zu den Akkorden einer Tonart, ein Pfad nach dem anderen. Ohne Theorie zum Einstieg.",
+        "technique": "Technik",
+        "style": "Stile"
+      }
     },
     "progress": {
       "title": "Fortschritt",
@@ -663,6 +681,12 @@
       "low": "Eingangspegel: niedrig",
       "good": "Eingangspegel: gut",
       "high": "Eingangspegel: hoch"
+    },
+    "category": {
+      "foundations": "Grundlagen",
+      "harmony": "Harmonie",
+      "technique": "Technik",
+      "style": "Stile"
     }
   }
 }

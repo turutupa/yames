@@ -488,7 +488,25 @@
       "playedUngraded": "{{count}} дубль, до {{bpm}} BPM.",
       "playedUngraded_few": "{{count}} дубля, до {{bpm}} BPM.",
       "playedUngraded_many": "{{count}} дублей, до {{bpm}} BPM.",
-      "playedUngraded_other": "{{count}} дубля, до {{bpm}} BPM."
+      "playedUngraded_other": "{{count}} дубля, до {{bpm}} BPM.",
+      "buildsOn": "Опирается на: {{list}}",
+      "buildsOnLevel": "{{path}} ({{level}})",
+      "startFirst": "Сначала начните с курса {{path}} или начните всё равно.",
+      "startHere": "Начните здесь",
+      "offerOne": "{{list}} идёт перед этим курсом. Добавить его тоже?",
+      "offerMany": "{{list}} идут перед этим курсом. Добавить их тоже?",
+      "offerAddOne": "Добавить {{path}}",
+      "offerAddMany": "Добавить их",
+      "offerNo": "Не сейчас",
+      "offerAdded": "Добавлено: {{list}}.",
+      "tracks": {
+        "foundations": "Основы",
+        "foundationsLine": "Только начинаете играть? Начните здесь: ритм, клик и чистые ноты. Остальные курсы опираются на это.",
+        "harmony": "Как устроена гармония",
+        "harmonyLine": "От названий нот до аккордов тональности, курс за курсом. Чтобы начать, теория не нужна.",
+        "technique": "Техника",
+        "style": "Стили"
+      }
     },
     "progress": {
       "title": "Прогресс",
@@ -691,6 +709,12 @@
       "low": "Уровень входа: низкий",
       "good": "Уровень входа: хороший",
       "high": "Уровень входа: высокий"
+    },
+    "category": {
+      "foundations": "Основы",
+      "harmony": "Гармония",
+      "technique": "Техника",
+      "style": "Стили"
     }
   }
 }

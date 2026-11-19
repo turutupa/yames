@@ -205,8 +205,14 @@ async function drive() {
       document.querySelector<HTMLButtonElement>(".instrument-picker-card")!.click();
       await until("Next", () => !!button(i18n.t("onboarding.next")) && !button(i18n.t("onboarding.next"))!.disabled);
       button(i18n.t("onboarding.next"))!.click();
-      // "Where do you start?": the Paths load, Shred is preselected, Next starts it.
+      // "Where do you start?": the Paths load, Rhythm Foundations is staged
+      // (or what the answer recommends), Next starts it.
       await until("the Paths to start on", () => !!document.querySelector(".onboarding-start-path.selected"), 20000);
+      const { goal } = shot!.firstRun;
+      if (goal) {
+        document.querySelector<HTMLButtonElement>(`[data-goal="${goal}"]`)!.click();
+        await until("the answer", () => document.querySelector(`[data-goal="${goal}"]`)?.getAttribute("aria-pressed") === "true");
+      }
       if (stop !== "start") {
         button(i18n.t("onboarding.next"))!.click();
         await until("the input step", () => !!document.querySelector('[data-step="audio-input"]'));
@@ -268,8 +274,13 @@ async function drive() {
       rail("paths")?.click();
       await until("the Paths list", () => !!byId("path-card-alternate-picking"));
       if (stop !== "paths") {
-        byId("path-card-alternate-picking")?.click();
+        const { open = "alternate-picking", subscribe } = shot!.session;
+        byId(`path-card-${open}`)?.click();
         await until("the Path", () => !!byId("path-detail"));
+        if (subscribe) {
+          byId("path-subscribe")?.click();
+          await until("the offer", () => !!byId("path-offer"));
+        }
       }
       if (stop !== "paths" && stop !== "path") {
         byId("step-row-even-eighths")?.click();

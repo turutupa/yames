@@ -45,6 +45,14 @@ export type OnboardingContext = {
    */
   startPathId?: string;
   /**
+   * Every Path that step started on this run, `startPathId` first: the
+   * recommendation for a new player can be two (Rhythm Foundations and Know
+   * the Neck). W7 names them all.
+   */
+  startPathIds?: string[];
+  /** The answer to "What do you want most right now?", when there was one: W7 says why. */
+  startGoal?: "basics" | "harmony" | "technique" | "speed";
+  /**
    * Opened again by the player ("Run setup again"), not by a first launch.
    * Esc on the welcome screen then closes the wizard, back where it was
    * opened from; on a first run it does nothing (acceptance P1-6).

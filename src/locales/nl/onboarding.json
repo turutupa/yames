@@ -334,7 +334,23 @@
       "subtitle": "Kies een leerpad en je niveau. Vandaag bouwt daar je eerste sessie mee; beide wijzig je op de pagina van het leerpad.",
       "pathHeading": "Leerpad",
       "loading": "Leerpaden laden…",
-      "subtitleNext": "Kies een leerpad en je niveau. Vandaag bouwt daar je volgende sessie mee; beide wijzig je op de pagina van het leerpad."
+      "subtitleNext": "Kies een leerpad en je niveau. Vandaag bouwt daar je volgende sessie mee; beide wijzig je op de pagina van het leerpad.",
+      "goalQuestion": "Wat wil je nu het liefst?",
+      "goalOptional": "optioneel",
+      "levelFor": "Niveau in {{path}}",
+      "goals": {
+        "basics": "Ik ben nieuw: de basis, in de maat",
+        "harmony": "Akkoorden en toonsoorten begrijpen",
+        "technique": "Schoner en sneller aanslaan",
+        "speed": "Snelheid: mijn techniek zit goed"
+      },
+      "why": {
+        "none": "Waar de meeste spelers beginnen: timing, de klik en schone noten.",
+        "basics": "Nieuw op gitaar: timing en schone noten, en de namen van de noten op de hals.",
+        "harmony": "Akkoorden en toonsoorten beginnen bij de noten op de hals, dan toonladders, drieklanken, de akkoorden van een toonsoort en arpeggio's over de wisselingen.",
+        "technique": "Gelijkmatig, schoon aanslaan is waar elke snelle lijn op rust.",
+        "speed": "Je techniek zit al goed, dus je gaat meteen voor snelheid."
+      }
     }
   },
   "whatsNew": {

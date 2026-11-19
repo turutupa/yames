@@ -462,7 +462,25 @@
       "inMixHelp": "关闭后，「今天」不会把它排进每日组合。进度会保留，也仍可选它练一天。",
       "focusToday": "今天只练这条",
       "playedUngraded": "{{count}} 遍，最快 {{bpm}} BPM。",
-      "playedUngraded_other": "{{count}} 遍，最快 {{bpm}} BPM。"
+      "playedUngraded_other": "{{count}} 遍，最快 {{bpm}} BPM。",
+      "buildsOn": "基于：{{list}}",
+      "buildsOnLevel": "{{path}}（{{level}}）",
+      "startFirst": "先从{{path}}开始，或者直接开始也可以。",
+      "startHere": "从这里开始",
+      "offerOne": "{{list}}在这条路线之前。也加到你的路线里吗？",
+      "offerMany": "{{list}}在这条路线之前。也加到你的路线里吗？",
+      "offerAddOne": "添加{{path}}",
+      "offerAddMany": "一起添加",
+      "offerNo": "暂不",
+      "offerAdded": "已把{{list}}加到你的路线。",
+      "tracks": {
+        "foundations": "基础",
+        "foundationsLine": "刚开始弹吉他？从这里开始：节奏、节拍器和干净的音。其他路线都建立在它上面。",
+        "harmony": "和声如何运作",
+        "harmonyLine": "从音名到调内和弦，一条路线接一条。开始不需要乐理。",
+        "technique": "技术",
+        "style": "风格"
+      }
     },
     "progress": {
       "title": "进度",
@@ -663,6 +681,12 @@
       "low": "输入电平：低",
       "good": "输入电平：良好",
       "high": "输入电平：高"
+    },
+    "category": {
+      "foundations": "基础",
+      "harmony": "和声",
+      "technique": "技术",
+      "style": "风格"
     }
   }
 }
