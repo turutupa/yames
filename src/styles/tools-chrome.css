@@ -147,8 +147,8 @@
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .main-header .preset-active-name,
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .main-header .songs-title {
   font-family: var(--tk-serif);
-  font-weight: 500;
-  letter-spacing: -0.01em;
+  font-weight: var(--heading-weight, 500);
+  letter-spacing: calc(-0.01em * var(--heading-tracking, 1));
   font-optical-sizing: auto;
 }
 

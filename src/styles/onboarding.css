@@ -1239,12 +1239,12 @@
 .onboarding-overlay .onboarding-welcome-title {
   font-family: var(--l-serif);
   font-optical-sizing: auto;
-  font-weight: 500;
-  letter-spacing: -0.015em;
+  font-weight: var(--heading-weight, 500);
+  letter-spacing: calc(-0.015em * var(--heading-tracking, 1));
   overflow-wrap: break-word;
 }
 .onboarding-overlay .onboarding-step-title {
-  font-size: clamp(26px, 3.6vh, 34px);
+  font-size: calc(clamp(26px, 3.6vh, 34px) * var(--heading-scale, 1));
   line-height: 1.08;
 }
 

@@ -164,7 +164,9 @@
   --l-tone-text: color-mix(in oklab, var(--l-tone) 72%, var(--text-primary));
 }
 /* Ember is the learning side's own palette, kept to the value: the theme this
-   design was drawn in, and the regression check for everything above. */
+   design was drawn in, and the regression check for everything above. Its
+   accent is the theme's own burnt orange (#ff7a3c, 2026-11-18), the colour
+   the approved neck mocks draw NOW, NEXT and Start in, not the older amber. */
 :root[data-theme="ember"] .session-page {
   --l-bg: #0a0705;
   --l-panel-solid: #16100b;
@@ -175,37 +177,37 @@
   --l-ink: #fbf5ea;
   --l-quiet: #c9bba6;
   --l-faint: #94866f;
-  --l-amber: #ffb454;
-  --l-amber-ink: #1e1305;
-  --l-amber-hi: #ffd089;
-  --l-amber-lo: #f19f38;
-  --l-amber-deep: #78420a;
-  --l-copper: #d9793a;
-  --l-tone: #4ee08a;
+  --l-amber: #ff7a3c;
+  --l-amber-ink: #1a0d05;
+  --l-amber-hi: #ffa071;
+  --l-amber-lo: #f06a2c;
+  --l-amber-deep: #7a3212;
+  --l-copper: #d35a24;
+  --l-tone: #5fd08a;
   --l-tens: #5aa9ff;
-  --l-clash: #ff5d6c;
+  --l-clash: #ff4f7b;
   --l-mech: #8cc2ff;
-  --l-on-tone: #07190f;
+  --l-on-tone: #06170d;
   --l-on-tens: #06162a;
   --l-gloss: rgba(255, 245, 220, 0.75);
   --l-btn: rgba(40, 30, 20, 0.7);
   --l-panel-on: rgba(50, 35, 18, 0.84);
   --l-met-fill: rgba(22, 84, 52, 0.88);
   --l-miss-fill: rgba(100, 28, 38, 0.9);
-  --l-tag-ink: #ffd9a0;
+  --l-tag-ink: #ffd2b8;
   --l-tag-pill: rgba(14, 9, 6, 0.78);
   --l-tag-shadow: rgba(0, 0, 0, 0.85);
-  --l-held-ink: #ffb454;
+  --l-held-ink: #ff7a3c;
   --l-held-opacity: 0.6;
   --l-held-small: var(--l-ink);
-  --l-tag-accent: #ffb454;
+  --l-tag-accent: #ff9a66;
   --l-halo: #000;
   --l-status: #d8c8b0;
-  --l-switch-ink: #2a1606;
+  --l-switch-ink: #1a0d05;
   --l-tab-bg: #160f0b;
   --l-off: #fbbf24;
-  --l-tab-now: #ffd38a;
-  --l-start-next-opacity: 0.72;
+  --l-tab-now: #ffb08a;
+  --l-start-next-opacity: 0.88;
 }
 :root[data-theme="ember"] .main-content {
   --l-header-edge: rgba(255, 232, 200, 0.08);
@@ -244,20 +246,20 @@
 }
 .session-mega {
   margin: 0;
-  font: 500 clamp(84px, 15vh, 164px) / 0.92 var(--l-serif);
-  letter-spacing: -0.035em;
+  font: var(--heading-weight, 500) calc(clamp(84px, 15vh, 164px) * var(--heading-scale, 1)) / 0.92 var(--l-serif);
+  letter-spacing: calc(-0.035em * var(--heading-tracking, 1));
 }
 .session-h1 {
   margin: 0;
   text-wrap: balance;
-  font: 500 clamp(38px, 5.4vh, 58px) / 1.02 var(--l-serif);
-  letter-spacing: -0.02em;
+  font: var(--heading-weight, 500) calc(clamp(38px, 5.4vh, 58px) * var(--heading-scale, 1)) / 1.02 var(--l-serif);
+  letter-spacing: calc(-0.02em * var(--heading-tracking, 1));
 }
 .session-h2 {
   margin: 0;
   text-wrap: balance;
-  font: 500 clamp(26px, 3.6vh, 36px) / 1.08 var(--l-serif);
-  letter-spacing: -0.012em;
+  font: var(--heading-weight, 500) calc(clamp(26px, 3.6vh, 36px) * var(--heading-scale, 1)) / 1.08 var(--l-serif);
+  letter-spacing: calc(-0.012em * var(--heading-tracking, 1));
 }
 .session-h3 {
   margin: 0;
@@ -835,7 +837,7 @@
 }
 /* "Today" is a title, not the screen: the minutes and Start lead. */
 .session-today .session-mega {
-  font-size: clamp(56px, 9.5vh, 88px);
+  font-size: calc(clamp(56px, 9.5vh, 88px) * var(--heading-scale, 1));
 }
 .session-today-plan {
   grid-column: 4;
@@ -1169,7 +1171,7 @@
       minmax(0, var(--today-plan)) minmax(0, 1fr);
   }
   .session-today .session-mega {
-    font-size: clamp(88px, 10.5vh, 124px);
+    font-size: calc(clamp(88px, 10.5vh, 124px) * var(--heading-scale, 1));
   }
   .session-today-minutes {
     font-size: clamp(48px, 5.6vh, 64px);
@@ -1263,7 +1265,7 @@
 /* A short window: the hero's type steps down before anything leaves it. */
 @media (max-height: 760px) {
   .session-today .session-mega {
-    font-size: clamp(52px, 9vh, 68px);
+    font-size: calc(clamp(52px, 9vh, 68px) * var(--heading-scale, 1));
   }
   .session-page .session-today-hero .session-today-start {
     min-height: 70px;
@@ -1279,7 +1281,7 @@
     gap: 8px;
   }
   .session-today .session-mega {
-    font-size: 52px;
+    font-size: calc(52px * var(--heading-scale, 1));
   }
   .session-today-minutes {
     font-size: 34px;
@@ -1333,7 +1335,7 @@
   gap: 0 14px;
 }
 .main-window.is-mobile .session-today .session-mega {
-  font-size: 52px;
+  font-size: calc(52px * var(--heading-scale, 1));
 }
 .main-window.is-mobile .session-today-minutes {
   font-size: 30px;
@@ -1979,7 +1981,7 @@
   text-shadow: none;
 }
 .session-recap-head .session-h1 {
-  font-size: clamp(40px, 8vh, 76px);
+  font-size: calc(clamp(40px, 8vh, 76px) * var(--heading-scale, 1));
 }
 /* The name and its details keep a readable measure; when that and the number
    do not both fit (a phone, a long language), the number drops under them
@@ -2706,8 +2708,8 @@
 }
 .session-prog-title {
   margin: 0;
-  font: 500 26px/1.08 var(--l-serif);
-  letter-spacing: -0.01em;
+  font: var(--heading-weight, 500) calc(26px * var(--heading-scale, 1)) / 1.08 var(--l-serif);
+  letter-spacing: calc(-0.01em * var(--heading-tracking, 1));
 }
 .session-prog-head .session-progress-value {
   font-size: 30px;
@@ -3040,13 +3042,13 @@
     order: 9;
   }
   .session-mega {
-    font-size: 82px;
+    font-size: calc(82px * var(--heading-scale, 1));
   }
   .session-h1 {
-    font-size: 33px;
+    font-size: calc(33px * var(--heading-scale, 1));
   }
   .session-h2 {
-    font-size: 25px;
+    font-size: calc(25px * var(--heading-scale, 1));
   }
   .session-page .session-big {
     min-height: 66px;
@@ -4792,7 +4794,7 @@
   margin-bottom: auto;
 }
 .session-page .session-recap .session-recap-head .session-h1 {
-  font-size: clamp(30px, 5.6vh, 54px);
+  font-size: calc(clamp(30px, 5.6vh, 54px) * var(--heading-scale, 1));
   text-wrap: balance;
   max-width: 26ch;
 }
@@ -4840,7 +4842,7 @@
     width: 100%;
   }
   .session-page .session-recap .session-recap-head .session-h1 {
-    font-size: 32px;
+    font-size: calc(32px * var(--heading-scale, 1));
   }
 }
 /* Placed by the centre of a gap between two strings, clear of every dot

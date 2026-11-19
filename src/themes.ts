@@ -74,7 +74,25 @@ export const TOKEN_CONTRACT = [
  * `applyTheme` clears the ones a theme leaves out, so a value never leaks
  * from the previous theme.
  */
-export const OPTIONAL_TOKENS = ["--neck-board", "--neck-fret", "--neck-string", "--neck-hit"] as const;
+export const OPTIONAL_TOKENS = [
+  "--neck-board",
+  "--neck-fret",
+  "--neck-string",
+  "--neck-hit",
+  /**
+   * How the big headlines (Today's, a Path's, a result's) are set in this
+   * theme's heading face. The defaults suit a text face (Fraunces, Inter):
+   * weight 500, tight tracking, sizes as drawn. A condensed face (Ember's
+   * Barlow Condensed) wants more weight, almost no negative tracking (its
+   * letters already sit close) and a little more size, or its headlines look
+   * thin and small next to the clocks set in the same face.
+   */
+  "--heading-weight",
+  /** A multiplier on each headline's negative letter-spacing (1 = as drawn). */
+  "--heading-tracking",
+  /** A multiplier on each headline's size (1 = as drawn). */
+  "--heading-scale",
+] as const;
 
 export interface Theme {
   id: string;
@@ -166,6 +184,9 @@ const mono: Theme = {
     "--feedback-ok": "#f59e0b",
     "--feedback-miss": "#9399a4",
     "--neck-miss": "#ff5d6c",
+    // A grey accent on a grey board: the strings step down to a mid grey so
+    // NOW, the one white thing on the neck, is the loudest (no mock for Mono).
+    "--neck-string": "#8c8c8c",
   },
 };
 
@@ -526,6 +547,9 @@ const sand: Theme = {
     "--feedback-ok": "#931818",
     "--feedback-miss": "#4e4946",
     "--neck-miss": "#b3213f",
+    "--heading-weight": "600",
+    "--heading-tracking": "0.3",
+    "--heading-scale": "1.04",
   },
 };
 
@@ -735,7 +759,10 @@ const ember: Theme = {
     "--shadow": "0 8px 32px rgba(0, 0, 0, 0.55)",
     "--font-family": "'Outfit', 'Segoe UI', system-ui, sans-serif",
     "--font-display": "'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif",
-    "--font-heading": "'Fraunces', Georgia, 'Times New Roman', serif",
+    // Ember's headlines are its display face: Barlow Condensed, like its
+    // titles, clocks and buttons (owner, 2026-11-18: the serif "Today" did not
+    // look like the theme). Set heavier and a touch larger (below).
+    "--font-heading": "'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif",
     "--font-body": "'Outfit', 'Segoe UI', system-ui, sans-serif",
     "--font-num": "'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif",
     "--font-weight": "500",
@@ -746,6 +773,9 @@ const ember: Theme = {
     "--feedback-ok": "#f5b53d",
     "--feedback-miss": "#838a97",
     "--neck-miss": "#ff4f7b",
+    "--heading-weight": "600",
+    "--heading-tracking": "0.15",
+    "--heading-scale": "1.06",
   },
 };
 

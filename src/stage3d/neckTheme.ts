@@ -63,6 +63,11 @@ export type NeckPalette = {
   dim: string;
   /** NOW's glow, as an alpha of the accent. */
   glowA: number;
+  /**
+   * A played note's flash, as a multiple of its full strength. On paper the
+   * flash is a dark ink, and at full strength it reads as a smudge, not light.
+   */
+  flashA: number;
   /** The backdrop's pool of accent light behind the neck, as an alpha. */
   poolA: number;
   /** The board's shadow, as an alpha of black (0 on light themes). */
@@ -137,6 +142,26 @@ export function hue(hex: string): number | null {
   return h < 0 ? h + 360 : h;
 }
 
+/** WCAG contrast ratio between two opaque colours. */
+export function contrastRatio(a: string, b: string): number {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+/**
+ * `base` mixed toward `toward`, at `from` or as much further as it takes to
+ * reach `ratio` against `base` (WCAG: 3 for a mark, 4.5 for a numeral). The
+ * derivations below are the designer's; this only lifts the ones that fall
+ * short in a theme (a pale board's frets, the quiet shape's rings).
+ */
+export function reach(base: string, toward: string, from: number, ratio: number): string {
+  for (let t = from; t < 1; t += 0.02) {
+    const c = mix(base, toward, t);
+    if (contrastRatio(c, base) >= ratio) return c;
+  }
+  return toward;
+}
+
 /** The ink for a numeral on a filled disc: near-black on a light fill, white on a dark one. */
 function inkOn(fill: string): string {
   return luminance(fill) > 0.2 ? mix(fill, "#000000", 0.86) : "#ffffff";
@@ -168,7 +193,8 @@ export function paletteFrom(read: (name: string) => string, light: boolean): Nec
   const over = (n: string) => (get(n) ? solid(get(n), bg) : null);
 
   const board = over("--neck-board") ?? (dark ? mix(card, accent, 0.07) : mix(card, bg, 0.25));
-  const fret = over("--neck-fret") ?? mix(board, ink, dark ? 0.46 : 0.45);
+  // Frets are marks: at least 3:1 on the board (a pale board's 45% fell short).
+  const fret = over("--neck-fret") ?? reach(board, ink, dark ? 0.46 : 0.45, 3);
   const string = over("--neck-string") ?? mix(board, ink2, dark ? 0.92 : 0.95);
   const wound = mix(mix(board, string, 0.92), accent, 0.35);
   const hit = over("--neck-hit") ?? flat("--feedback-perfect", "#5fd08a");
@@ -192,10 +218,14 @@ export function paletteFrom(read: (name: string) => string, light: boolean): Nec
     hitInk: inkOn(hit),
     miss,
     missInk: inkOn(miss),
-    ghost: mix(board, ink, 0.35),
-    ghostInk: mix(board, ink, 0.7),
-    dim: mix(board, ink, 0.2),
-    glowA: dark ? 0.45 : 0.28,
+    // The quiet shape's rings are marks (3:1 on the board) and its finger
+    // numbers are text (4.5:1): quiet by size and weight, never by fading
+    // below what reads.
+    ghost: reach(board, ink, 0.35, 3),
+    ghostInk: reach(board, ink, 0.7, 4.5),
+    dim: reach(board, ink, 0.2, 3),
+    glowA: dark ? 0.45 : 0.1,
+    flashA: dark ? 1 : 0.45,
     poolA: dark ? 0.08 : 0.05,
     shadowA: dark ? 0.45 : 0,
     numFont: get("--font-num") || DEFAULT_NUM_FONT,
@@ -270,7 +300,7 @@ export function noteLook(kind: NeckKind, p: NeckPalette): NoteLook {
     case "clash":
       return { fill: p.miss, stroke: null, strokeW: 0, ink: p.missInk, size: 1, glow: false };
     case "dim":
-      return { fill: p.board, stroke: p.dim, strokeW: 0.1, ink: p.ghost, size: QUIET_SIZE, glow: false };
+      return { fill: p.board, stroke: p.dim, strokeW: 0.1, ink: p.ghostInk, size: QUIET_SIZE, glow: false };
     case "box":
     default:
       return { fill: p.board, stroke: p.ghost, strokeW: 0.11, ink: p.ghostInk, size: QUIET_SIZE, glow: false };
