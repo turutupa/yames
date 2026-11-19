@@ -884,7 +884,7 @@ export default definePath({
         {
           id: "fives",
           title: "Five from one pick",
-          purpose: "C, B, A, B, C as a quintuplet, one pick a beat, three times, then a five-note fall onto the B string. Then the same on the B string.",
+          purpose: "C, B, A, B, C as a quintuplet, one pick a beat, three times, then a five-note fall onto the B string. Bar 2 is the same figure on the B string, falling onto the G string.",
           howTo: [
             "Quintuplets, five to the click. Pick fret 8, pull off to 7 and 5, hammer 7 and 8. The next pick is the same fret 8 again, on the beat.",
             "The last beat of each bar leaves the pattern: three notes on one string, then two on the string below, with a second pick for the new string.",
