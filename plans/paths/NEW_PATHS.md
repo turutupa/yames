@@ -52,6 +52,17 @@ combines two. Advanced adds length (16-bar takes, a stamina minute) and a band.
 Ladders are paced from the pass tempo (`paceLadders`): the first rung near 0.6 of
 the pass, so a four-minute block can reach it.
 
+### Warm-ups
+
+The planner takes a Level's warm-ups in turn, one a Session (`planner.ts`
+`warmupStep`: `own[sessions % own.length]`), until the focus Exercise has a clean
+tempo of its own. One warm-up a Level means the same figure every day for the
+first week, in a new key. So Rhythm Foundations and Legato carry two a Level, and
+Metal Rhythm two in Intermediate and Advanced: the second works the Level's other
+idea (pull-offs beside hammer-ons, rests beside steady notes, the reverse gallop
+beside the gallop). Each has twelve to fifteen variants, a reference Exercise on
+the same note grid, and printed fingers where the hand moves every bar.
+
 ## Rhythm Foundations (`rhythm-foundations`, mechanics)
 
 **Who for:** the player who can fret a note and hold a pick and has never practised
@@ -192,6 +203,11 @@ cliff, does Advanced go further than Intermediate.
   each, no frets or fingers) now say the subdivision, the notes and fingers, and
   what to listen for: `outside-moving`, `inside-moving`, `six-note-up`,
   `one-beat`, `two-beats`, `box-minute`, `etude-eighths`. Words only.
+
+- **Sweep Picking, how-to text:** six one-sentence how-tos now say the
+  subdivision, how many loops a chord, and what to listen for:
+  `with-the-v-three`, `the-pull`, `chain-four`, `band-big-chain`, `i-iv-dim-i`,
+  `link-chains.one-pass-each`. Words only.
 
 ### How progress is keyed (why these are safe)
 
