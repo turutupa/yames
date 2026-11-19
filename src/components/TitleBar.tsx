@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { IS_MAC, IS_WINDOWS, IS_LINUX } from "../hotkeys";
 import { APP_NAME } from "../brand";
 import { AppMark } from "./AppMark";
@@ -32,7 +33,8 @@ import { WindowControls } from "./WindowControls";
  * macOS keeps its decorations, so it drags itself — and marking it there
  * would fight the native titlebar rather than help it.
  */
-export function TitleBar() {
+export const TitleBar = memo(function TitleBar() {
+  // Memoised: it takes nothing, and the window around it re-renders at every beat.
   return (
     <div className="app-titlebar" {...(!IS_MAC && { "data-tauri-drag-region": "" })}>
       <AppMark />
@@ -40,4 +42,4 @@ export function TitleBar() {
       {(IS_WINDOWS || IS_LINUX) && <WindowControls />}
     </div>
   );
-}
+});
