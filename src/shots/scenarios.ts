@@ -101,7 +101,7 @@ export interface Shot {
      * Today's plan. The harness makes it runnable for the scene, so a Theory
      * Take can be photographed before any Theory Path ships as runnable.
      */
-    path?: "blues-pentatonics" | "sweep-picking" | "alternate-picking";
+    path?: "blues-pentatonics" | "sweep-picking" | "alternate-picking" | "legato" | "rhythm-foundations" | "metal-rhythm";
     /** With `path`: play this Exercise rather than the first Step's first. */
     exercise?: string;
     /** With `exercise`: it plays over the band, so wait for the band before the photograph. */
@@ -854,6 +854,35 @@ export const SHOTS: Shot[] = [
     suffix: "session-neck-box",
     window: "main",
     session: { seed: "returning", stop: "ready", practiceView: "neck", path: "blues-pentatonics", exercise: "box-one.first-lick" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  // The Paths added on mvp-paths-content (plans/paths/NEW_PATHS.md): one ready
+  // neck each, for a person to look at the fingers on.
+  {
+    id: "session-neck-legato",
+    suffix: "session-neck-legato",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "legato", exercise: "rolls.roll-up" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  {
+    id: "session-neck-rhythm",
+    suffix: "session-neck-rhythm",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "rhythm-foundations", exercise: "eighths.fifth-tune" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  {
+    id: "session-neck-metal",
+    suffix: "session-neck-metal",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "metal-rhythm", exercise: "chug-and-chord.chug-riff" },
     width: 1400,
     height: 900,
     settleMs: 1800,
