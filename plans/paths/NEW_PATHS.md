@@ -23,7 +23,9 @@ which Paths are worth writing now:
 
 | Fretboard knowledge (note names, octaves, thirds, triads, the boxes joined up) | Yes | Slow written single notes are what the right-notes check is surest of. The app cannot hear a name said out loud or tell which string a pitch came from, and the Path says so. |
 
-So four new Paths: **Rhythm Foundations**, **Legato**, **Metal Rhythm**, and **Know the Neck**.
+| Scales and modes (major, relative minor, sequences, harmonic minor, Dorian, Mixolydian) | Yes | The same right-notes check, and the validator already holds every written note to its declared scale and every downbeat to its chord, so a mode lesson cannot contain a wrong note. |
+
+So five new Paths: **Rhythm Foundations**, **Legato**, **Metal Rhythm**, **Know the Neck** and **Scales and Modes**.
 
 ## The shape every Path keeps
 
@@ -118,6 +120,25 @@ point: no pass tempo is above eighths at 100. Fingers are printed nearly
 everywhere, because the shapes are the lesson: the second finger guides thirds on
 the G string, the first finger walks a string, triads use chord fingerings.
 
+## Scales and Modes (`scales-and-modes`, theory)
+
+**Who for:** the player who has the pentatonic box and some chords and wants the
+seven-note scales: what a major scale is, why A minor has the notes of C major, and
+what people mean by Dorian and Mixolydian.
+
+| Level | Steps | What it unlocks |
+|---|---|---|
+| Beginner: the major scale and its minor | The major scale in open position and as a formula on one string; one movable shape; the relative minor | A major and a minor scale in any key from one shape each, and a tune over three chords. |
+| Intermediate: patterns, positions and one raised note | Sequences in threes, fours and thirds; two positions and three notes per string; harmonic minor over Am and E7 | A scale the fingers know in any order and beyond one position, and the first "one changed note" lesson. |
+| Advanced: the modes over a band | Dorian over Am and D; Mixolydian over A and G; choosing the scale from the chords | The two modes a rock or blues player meets first, heard as one note against the scale already known. |
+
+Every mode is taught the same way: the shape, then the same phrase with the old
+note and the new one side by side, then a phrase over the two chords that ask for
+it. The movable major shape is written in A at fret 4, not G at fret 2, because the
+reach model (and a beginner's hand) refuses frets 2 to 5 at an early level. Know
+the Neck comes first for a player who cannot name notes; this Path assumes nothing
+from it but is easier after it.
+
 ## How they fit Today's planner
 
 Nothing in the planner changes: it reads `steps`, `levels`, warm-ups and
@@ -125,7 +146,7 @@ Nothing in the planner changes: it reads `steps`, `levels`, warm-ups and
 `RUNNABLE_PATH_IDS`, and to the first-run order after the owner's five (his order
 is kept; whether Rhythm Foundations should come first for a beginner is his call).
 Legato and Metal Rhythm are deep dives like Alternate Picking and Sweep Picking;
-Know the Neck sits with the Styles. Every graded
+Know the Neck and Scales and Modes sit with the Styles. Every graded
 Exercise goes through `path_exercises` as a Session Take, as the others do.
 
 ## The five existing Paths: level audit
