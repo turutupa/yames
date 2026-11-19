@@ -26,7 +26,7 @@ export function exerciseByTitle(title, path = loadPath()) {
  * (`FIRST_PATH_ID` in src/session/packs.ts; the planner places a player on a
  * newly subscribed Path with its first Step's first graded Exercise).
  */
-export const FIRST_PATH = "shred";
+export const FIRST_PATH = "rhythm-foundations";
 export const SECOND_PATH = "alternate-picking";
 
 /** A pack's first Step's first graded Exercise: what placement starts with. */

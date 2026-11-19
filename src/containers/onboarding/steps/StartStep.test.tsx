@@ -9,7 +9,9 @@
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import type { PathDoc } from "../../../paths/format";
-import { loadAllPacks } from "../../../session/packs";
+import { FIRST_PATH_ID, isRunnable, loadAllPacks } from "../../../session/packs";
+import { START_HERE_PATH_ID, pathTracks } from "../../../session/tracks";
+import { playerPaths } from "../../session/hooks/useSessionRun";
 import { NO_PROGRESS, type PlayerProgress } from "../../../session/progress";
 import { OnboardingWizard } from "../OnboardingWizard";
 import type { OnboardingState } from "../onboardingMachine";
@@ -59,25 +61,33 @@ const pathCard = (id: string) => document.querySelector<HTMLButtonElement>(`[dat
 const levelButton = (id: string) => document.querySelector<HTMLButtonElement>(`[data-level="${id}"]`)!;
 
 describe("Where do you start? — what it offers", () => {
-  it("offers the Paths in the owner's order, the newer ones after his five", () => {
+  it("offers the Paths in the Paths screen's order: Foundations, How harmony works, Technique, Styles", () => {
     expect(startablePaths(PATHS).map((p) => p.id)).toEqual([
-      "shred",
-      "blues-pentatonics",
-      "classic-rock",
-      "alternate-picking",
-      "sweep-picking",
       "rhythm-foundations",
-      "legato",
-      "metal-rhythm",
       "know-the-neck",
       "scales-and-modes",
-      "tapping",
-      "funk-lines",
       "triads",
       "chords-in-a-key",
-      // Not in the step's own order yet: a runnable Path it does not know comes last.
       "arpeggios-over-changes",
+      "alternate-picking",
+      "legato",
+      "tapping",
+      "sweep-picking",
+      "shred",
+      "metal-rhythm",
+      "funk-lines",
+      "blues-pentatonics",
+      "classic-rock",
     ]);
+    expect(startablePaths(PATHS).map((p) => p.id)).toEqual(
+      pathTracks(PATHS.filter((p) => isRunnable(p.id))).flatMap((t) => t.paths.map((p) => p.id)),
+    );
+  });
+
+  it("starts a player who skips the step on the Path it recommends with no answer", () => {
+    expect(FIRST_PATH_ID).toBe(START_HERE_PATH_ID);
+    expect(playerPaths(PATHS, NO_PROGRESS).map((p) => p.id)).toEqual([START_HERE_PATH_ID]);
+    expect(defaultStart(PATHS, NO_PROGRESS)?.pathId).toBe(START_HERE_PATH_ID);
   });
 
   it("stages Rhythm Foundations at its first Level on a first run with no answer, not Shred", () => {
