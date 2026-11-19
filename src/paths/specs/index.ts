@@ -11,6 +11,7 @@ import knowTheNeck from "./know-the-neck";
 import scalesAndModes from "./scales-and-modes";
 import tapping from "./tapping";
 import funkLines from "./funk-lines";
+import triads from "./triads";
 import type { PathSpec } from "../spec";
 
 export const SPECS: readonly PathSpec[] = [
@@ -26,5 +27,6 @@ export const SPECS: readonly PathSpec[] = [
   scalesAndModes,
   tapping,
   funkLines,
+  triads,
   // new paths go above this line
 ];

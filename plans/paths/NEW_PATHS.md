@@ -220,7 +220,8 @@ HOW HARMONY WORKS (the owner's route)
   Know the Neck ──(B)──> Scales and Modes ──(B)──┐
        └──────────────(B)────────────────────────┴─> Triads*  ──(I)──> Chords in a Key* ──(B)──┐
                                                         └──────────────(I)────────────────────┴─> Arpeggios over Changes* ··> Sweep Picking
-  * to be written. (B), (I): through that Level of the Path the arrow leaves.
+  * Triads is written; the other two are to be written.
+  (B), (I): through that Level of the Path the arrow leaves.
 ```
 
 An arrow is a recommendation and never a lock: the app may say "before this,
@@ -240,7 +241,7 @@ do X, or start anyway". Arrows are data now (`prerequisites.paths`, below).
 | Style | Classic Rock | Rhythm Foundations (Beginner) | 7 weeks | written |
 | Harmony | Know the Neck | nothing: the first Path for the harmony route | 6 weeks | written |
 | Harmony | Scales and Modes | Know the Neck (Beginner) | 6 weeks | written |
-| Harmony | **Triads** | Know the Neck (Beginner), Scales and Modes (Beginner) | long, about 12 weeks | to write |
+| Harmony | **Triads** | Know the Neck (Beginner), Scales and Modes (Beginner) | 10 Steps, 32 Exercises now, about 6 weeks; meant to grow to about 12 | written (first version) |
 | Harmony | **Chords in a Key** | Triads (Intermediate) | long, about 12 weeks | to write |
 | Harmony | **Arpeggios over Changes** | Triads (Intermediate), Chords in a Key (Beginner) | about 8 weeks | to write |
 
@@ -297,6 +298,29 @@ written single notes, where the right-notes check is at its best. Two- and
 three-note chord stabs are graded on timing only. A strummed chord is several
 onsets smeared together and is not graded: where a Path needs a strum, it is a
 self-checked Exercise that says so. Nothing on the route depends on strumming.
+
+### Triads (`triads`, theory): the first Path of the route, written
+
+**Who for:** the owner's player: plays some chords from shapes, knows no
+theory, wants to know what a chord *is*. It assumes eighth notes at 60 BPM and
+nothing else; the first Exercise counts the C major scale along one string.
+
+| Level | Steps | What it unlocks |
+|---|---|---|
+| Beginner: what a triad is | One, three, five (the scale counted on the B string; notes 1, 3, 5; the same three under one hand). Three shapes for one chord. One shape, three chords (C, F, G by moving one shape; by staying put in two places; in D, E and B flat) | What a chord is made of, C major in three places, and three chords over a band. |
+| Intermediate: minor, and the nearest shape | One note makes it minor. The four chords of a thousand songs (C, Am, F, G low and mid; C, Dm, Em, F; other keys). The top note is a melody | Minor as one lowered note, a whole progression under one hand, and voice leading as a choice of shape. |
+| Advanced: more strings, and whole chords | The same triads on the D, G and B strings. Two sets joined into four-string shapes; one chord along the whole neck. The triads inside an open C and a barre chord; sevenths. An eight-bar song in three keys | A second register, the link to the big chord shapes he already plays, and a first look at seventh chords. |
+
+Every tab is generated from a three-fret shape (`top(5, 5, 3)`), with fingers
+worked out once by rule, so the notes, the fingering and the transpositions
+cannot drift apart. Warm-ups stay behind the lessons on purpose: the Beginner
+one uses only shape one, the Intermediate one the three major shapes learned in
+Beginner, the Advanced one the minor shapes learned in Intermediate.
+
+Still to add to reach the intended length: the diminished triad; the A, D and
+G string set; every shape of F and G drilled the way C is; minor triads on the
+middle strings in other keys; a second song form. They belong in this Path, as
+consolidation Steps, in the way Blues was extended.
 
 ### Other foundations a beginner needs, not built
 

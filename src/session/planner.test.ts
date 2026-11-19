@@ -485,7 +485,7 @@ describe("Find my edge in a plan", () => {
 
 describe("two runnable Paths", () => {
   it("the Mechanics and Theory Paths all run; an unknown one says why it waits", () => {
-    expect([...RUNNABLE_PATH_IDS].sort()).toEqual(["alternate-picking", "blues-pentatonics", "classic-rock", "funk-lines", "know-the-neck", "legato", "metal-rhythm", "rhythm-foundations", "scales-and-modes", "shred", "sweep-picking", "tapping"]);
+    expect([...RUNNABLE_PATH_IDS].sort()).toEqual(["alternate-picking", "blues-pentatonics", "classic-rock", "funk-lines", "know-the-neck", "legato", "metal-rhythm", "rhythm-foundations", "scales-and-modes", "shred", "sweep-picking", "tapping", "triads"]);
     expect(isRunnable(SWEEP.id)).toBe(true);
     expect(isRunnable("blues-pentatonics")).toBe(true);
     expect(isRunnable("classic-rock")).toBe(true);

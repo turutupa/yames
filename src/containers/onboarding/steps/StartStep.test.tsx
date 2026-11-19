@@ -72,6 +72,7 @@ describe("Where do you start? — what it offers", () => {
       "scales-and-modes",
       "tapping",
       "funk-lines",
+      "triads",
     ]);
   });
 

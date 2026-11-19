@@ -614,4 +614,5 @@ fn every_graded_exercise_of_a_runnable_path_passes_as_a_session_take() {
     assert!(checked.get("scales-and-modes").copied().unwrap_or(0) >= 50, "{checked:?}");
     assert!(checked.get("tapping").copied().unwrap_or(0) >= 40, "{checked:?}");
     assert!(checked.get("funk-lines").copied().unwrap_or(0) >= 30, "{checked:?}");
+    assert!(checked.get("triads").copied().unwrap_or(0) >= 40, "{checked:?}");
 }
