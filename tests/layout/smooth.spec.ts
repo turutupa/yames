@@ -8,7 +8,7 @@ import { installPerf, samplePerf, type PerfSample } from "./perf";
  *
  * What a running Take may not do to the frame it shares with the click's
  * visuals: hold the main thread for a long task, redraw what did not change,
- * force a layout per note, or let the lane fall behind the display. And what
+ * restart an animation with a forced reflow, or let the lane fall behind the display. And what
  * the screens around it may not do: build the 3D engine in the frame a
  * Session opens on.
  *
@@ -114,28 +114,36 @@ test("the lane keeps the display's beat: a frame for every frame, or exactly eve
   expect(low.runwayFrames, "the lane still moves at 30").toBeGreaterThan(10);
 });
 
-test("a Take on the neck does not force a layout per note", async ({ page }) => {
+test("the level meter pulses without reading the layout", async ({ page }) => {
   test.slow();
   /*
-   * Two things did, until this pass: the level meter restarted its pulse with
-   * "attribute off, read offsetWidth, attribute on" at every note heard, and
-   * the neck's overlay read the "next" tag's size after it had moved the
-   * ring. Each is a style-and-layout pass over the whole Take screen, inside
-   * the frame. Measured here (SwiftShader, where the page gets fewer frames
-   * and so fewer layouts of its own): 31 layouts in 64 commits with them, 10
-   * to 17 in 61 to 65 without. (On a GPU: 1.1 a commit, and 0.6.)
-   *
-   * Counted by the browser (its own layout counter) against React's commits
-   * in the same window, so a busy machine moves neither: frames it drops
-   * only merge the layouts a frame would have done anyway.
+   * It restarted its pulse with "attribute off, read offsetWidth, attribute
+   * on" at every note heard: a style-and-layout pass over the whole Take
+   * screen each time, the top of the profile of a running Take. It plays an
+   * `el.animate` now. Asked of the read itself, by who made it, because the
+   * count of layouts a second moves with how many frames a busy machine
+   * gives the page (0.16 to 0.55 a commit for one build, measured), and a
+   * gate that moves with the machine is not one.
    */
-  await installPerf(page);
+  await page.addInitScript(() => {
+    const w = window as unknown as { __METER_READS__: number };
+    w.__METER_READS__ = 0;
+    const d = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "offsetWidth")!;
+    Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+      configurable: true,
+      get(this: HTMLElement) {
+        if (this.classList?.contains("live-level") || /LiveLevelBars/.test(String(new Error().stack ?? ""))) w.__METER_READS__ += 1;
+        return d.get!.call(this);
+      },
+    });
+  });
   await openShot(page, "session-playing", WIDE);
   await takeRunning(page);
-  const s = await samplePerf(page, WINDOW_MS * 2);
-  const layouts = Math.round((s.layoutsPerSec * s.ms) / 1000);
-  expect(s.commits, "the Take is running").toBeGreaterThan(10);
-  expect(layouts / s.commits, `${layouts} layouts in ${s.commits} commits`).toBeLessThan(0.38);
+  // The meter is on screen and has pulsed: notes have been heard and lit.
+  await expect(page.locator(".live-level").first()).toBeVisible();
+  await page.waitForFunction(() => document.querySelectorAll(".live-level[data-pulse]").length > 0, undefined, { timeout: 20_000 });
+  await page.waitForTimeout(1500);
+  expect(await page.evaluate(() => (window as unknown as { __METER_READS__: number }).__METER_READS__)).toBe(0);
 });
 
 test("the 3D neck is ready before the first Start: a Session does not open on the engine being built", async ({ page }) => {

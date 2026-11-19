@@ -91,8 +91,8 @@ apart, or counting on a wall clock. The patterns this suite uses instead:
 
 `smooth.spec.ts` is the gate: during a running Take (neck, runway, tab; desktop
 and the phone build) no long task in the best of three windows, the tab's notes
-and the overview strip not redrawn per beat, no forced layout per note (the
-browser's layout counter against React's commits), the lane on every frame the
+and the overview strip not redrawn per beat, the level meter pulsing without
+reading the layout, the lane on every frame the
 page gets (or exactly every other, held to 30), and the 3D engine built while
 Today is idle rather than in the frame a Session opens on. `stage.spec.ts`
 holds the Take's frame-rate rules (`src/stage3d/takeRate.ts`): `?takefps=30`

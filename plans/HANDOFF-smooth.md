@@ -196,13 +196,29 @@ transitions, the meter and now the Take's rate.
    measure by writing a style and reading a width in a loop. They run when a
    label changes, not per beat; they showed up at Start take (17 ms).
 
-## Gates run on the final tree
+## Gates run on the final tree (after `git merge revamp` a342505f)
 
-See the last commit's message for the counts. `TabStage.render.test.tsx`
-fails only in worktrees. The e2e Take scenarios (`npm run test:e2e`) were
-not run to completion: with the machine this busy the harness's own
-calibration fails ("heard 3 of 8 pulses"). They belong with the probe in
-step 1 above.
+- `tsc --noEmit`: clean. `npm run build`: clean.
+- vitest: 10842 passed; `TabStage.render.test.tsx` fails only in worktrees.
+  (Before the merge, at load 90, three tests timed out at 20 s and passed
+  alone: `paths/generate`, `session/packs`, `useSessionRun.preview`.)
+- layout, `--workers=2`, neck / stage / runway / tabstrip / session* / smooth
+  / today* / phone-learning / tour / rail / swap / phone-tabs / phone-header:
+  512 passed, 1 failed, and that one was a gate of this pass that turned out
+  to move with the machine (layouts counted per commit: 0.16 to 0.55 for one
+  build). It was replaced by a check of the read itself ("the level meter
+  pulses without reading the layout"), which passes here and fails on
+  642b03a1, as do five of the other `smooth.spec.ts` tests.
+- **Not run: the e2e probe as a gate, and the e2e Take scenarios.** With the
+  machine this busy the harness's own calibration fails ("heard 3 of 8
+  pulses") and the headless baseline misses beats with no app running. They
+  belong with step 1 at the top. Since the neck's rate during a Take is
+  unchanged (the switch is off) and the lane's is unchanged on any machine
+  the old code ran at the display's rate, nothing that shipped moved what the
+  probe measures; the prewarm happens on Today, not during a Take.
+- `global.css` still has `button { transition: all 0.15s }`. Left alone: a
+  property list would be the smoother rule, and it needs the phone row-fit
+  specs in de, ru and pt at 360 (the coordinator's note of 2026-11-19).
 
 ## Cleaning up
 

@@ -424,8 +424,8 @@ The rest of "smooth" is held by the layout suite, and found with it:
 
 - `tests/layout/smooth.spec.ts` fails on a long task during a running Take
   (best of three windows), on the tab's notes or the overview strip being
-  redrawn per beat, on a forced layout per note, on the lane missing display
-  frames, and on the 3D engine being built in the frame a Session opens on
+  redrawn per beat, on the level meter reading the layout to pulse, on the
+  lane missing display frames, and on the 3D engine being built in the frame a Session opens on
   (it is built while Today, Paths or Progress sit idle: `NeckStage.prewarm`).
 - `tests/layout/smooth-measure.spec.ts` is the survey (frame gaps, long
   tasks, React commits and who rendered, layouts, running animations; with
