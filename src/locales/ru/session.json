@@ -467,6 +467,8 @@
       "onStep": "Шаг {{n}}: {{title}}",
       "stepsDone": "Пройдено шагов: {{done}} из {{of}}",
       "continue": "Продолжить · шаг {{n}}",
+      "startStep": "Начать · шаг {{n}}",
+      "whereYouStart": "С чего начать",
       "stateDone": "Пройден",
       "stateHere": "Вы здесь",
       "passedOf": "Сдано {{done}} из {{count}}",

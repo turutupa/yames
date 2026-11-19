@@ -445,6 +445,8 @@
       "onStep": "第 {{n}} 步：{{title}}",
       "stepsDone": "已完成 {{done}}/{{of}} 步",
       "continue": "繼續 · 第 {{n}} 步",
+      "startStep": "開始 · 第 {{n}} 步",
+      "whereYouStart": "你的起點",
       "stateDone": "已完成",
       "stateHere": "你在這裡",
       "passedOf": "已通過 {{done}}/{{count}}",

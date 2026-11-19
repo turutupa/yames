@@ -445,6 +445,8 @@
       "onStep": "Bij stap {{n}}: {{title}}",
       "stepsDone": "{{done}} van {{of}} stappen klaar",
       "continue": "Verder · Stap {{n}}",
+      "startStep": "Start · Stap {{n}}",
+      "whereYouStart": "Waar je begint",
       "stateDone": "Klaar",
       "stateHere": "Je bent hier",
       "passedOf": "{{done}} van {{count}} gehaald",

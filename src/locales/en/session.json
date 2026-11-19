@@ -445,6 +445,8 @@
       "onStep": "On Step {{n}}: {{title}}",
       "stepsDone": "{{done}} of {{of}} Steps done",
       "continue": "Continue · Step {{n}}",
+      "startStep": "Start · Step {{n}}",
+      "whereYouStart": "Where you start",
       "stateDone": "Done",
       "stateHere": "You're here",
       "passedOf": "{{done}} of {{count}} passed",

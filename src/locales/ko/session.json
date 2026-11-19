@@ -445,6 +445,8 @@
       "onStep": "{{n}}단계: {{title}}",
       "stepsDone": "{{of}}단계 중 {{done}}단계 완료",
       "continue": "계속하기 · {{n}}단계",
+      "startStep": "시작하기 · {{n}}단계",
+      "whereYouStart": "시작 위치",
       "stateDone": "완료",
       "stateHere": "현재 위치",
       "passedOf": "{{count}}개 중 {{done}}개 통과",

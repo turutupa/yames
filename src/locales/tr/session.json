@@ -445,6 +445,8 @@
       "onStep": "Adım {{n}}: {{title}}",
       "stepsDone": "{{of}} adımdan {{done}} tamam",
       "continue": "Devam · Adım {{n}}",
+      "startStep": "Başla · Adım {{n}}",
+      "whereYouStart": "Nereden başlarsın",
       "stateDone": "Tamam",
       "stateHere": "Buradasın",
       "passedOf": "{{count}} içinden {{done}} geçildi",

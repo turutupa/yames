@@ -467,6 +467,8 @@
       "onStep": "Krok {{n}}: {{title}}",
       "stepsDone": "Ukończone kroki: {{done}} z {{of}}",
       "continue": "Dalej · Krok {{n}}",
+      "startStep": "Zacznij · Krok {{n}}",
+      "whereYouStart": "Gdzie zaczynasz",
       "stateDone": "Zrobione",
       "stateHere": "Tu jesteś",
       "passedOf": "Zaliczone: {{done}} z {{count}}",

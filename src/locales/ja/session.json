@@ -445,6 +445,8 @@
       "onStep": "ステップ{{n}}：{{title}}",
       "stepsDone": "{{of}}ステップ中{{done}}完了",
       "continue": "続ける · ステップ{{n}}",
+      "startStep": "始める · ステップ{{n}}",
+      "whereYouStart": "スタート地点",
       "stateDone": "完了",
       "stateHere": "現在地",
       "passedOf": "{{count}}中{{done}}合格",

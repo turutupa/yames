@@ -445,6 +445,8 @@
       "onStep": "Đang ở bước {{n}}: {{title}}",
       "stepsDone": "Xong {{done}} / {{of}} bước",
       "continue": "Tiếp tục · Bước {{n}}",
+      "startStep": "Bắt đầu · Bước {{n}}",
+      "whereYouStart": "Bạn bắt đầu từ đâu",
       "stateDone": "Xong",
       "stateHere": "Bạn ở đây",
       "passedOf": "Đạt {{done}} / {{count}}",
