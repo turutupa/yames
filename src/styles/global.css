@@ -187,3 +187,43 @@ kbd {
   [data-theme-group="light"] .preset-save-btn:hover { background: var(--accent); color: var(--accent-text, white); }
 }
 [data-theme-group="light"] .preset-active-name { color: var(--text-muted); }
+
+/* The input's live level (LiveLevelBars, owner 2026-11-18): four small bars in
+   the chip's own colour, a fixed size so nothing moves, and a short pulse for
+   each note picked up. */
+.live-level {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  flex: none;
+  width: 17px;
+  height: 13px;
+}
+.live-level > i {
+  display: block;
+  width: 3px;
+  border-radius: 1px;
+  background: color-mix(in srgb, currentColor 28%, transparent);
+  transition: background-color 90ms linear;
+}
+.live-level > i[data-i="1"] { height: 4px; }
+.live-level > i[data-i="2"] { height: 7px; }
+.live-level > i[data-i="3"] { height: 10px; }
+.live-level > i[data-i="4"] { height: 13px; }
+.live-level[data-bars="1"] > i[data-i="1"],
+.live-level[data-bars="2"] > i:is([data-i="1"], [data-i="2"]),
+.live-level[data-bars="3"] > i:not([data-i="4"]),
+.live-level[data-bars="4"] > i {
+  background: currentColor;
+}
+.live-level[data-pulse] {
+  animation: live-level-pulse 240ms ease-out;
+}
+@keyframes live-level-pulse {
+  0% { transform: scale(1.18); filter: brightness(1.35); }
+  100% { transform: scale(1); filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-level > i { transition: none; }
+  .live-level[data-pulse] { animation: none; }
+}

@@ -203,7 +203,8 @@
       "testOut": "{{step}}のテストアウト：合格テンポ{{bpm}} BPMで1テイク。",
       "benchmark": "ベンチマーク、{{day}}日目：毎回同じ練習を{{bpm}} BPMで。比べるためです。",
       "yourTurn": "あなたの番：{{exercise}}。まだ判定できないので、自分で確かめてください。",
-      "newFromSibling": "新しい課題です。{{sibling}}のクリーンなテンポ{{clean}} BPMの約80%、{{bpm}} BPMから始めます。"
+      "newFromSibling": "新しい課題です。{{sibling}}のクリーンなテンポ{{clean}} BPMの約80%、{{bpm}} BPMから始めます。",
+      "playedUngraded": "前回の続きから：{{bpm}} BPM。"
     },
     "bar": {
       "summary": "合格ライン：{{bpm}} BPM で均等さ {{even}}%、聞き取れた音 {{heard}}%。"
@@ -248,7 +249,8 @@
       "fasterCeiling": "この課題のいちばん速いテンポです",
       "tempoLocked": "テストは合格テンポで弾くので、ここは変えられません",
       "previous": "前へ",
-      "previousFirst": "最初のブロックなので、前はありません"
+      "previousFirst": "最初のブロックなので、前はありません",
+      "playUngraded": "開始、{{bpm}} BPM"
     },
     "result": {
       "kick": "テイク {{take}} · {{title}} · {{bpm}} BPM · {{bars}} 小節",
@@ -447,7 +449,9 @@
       "tabPreview": "最初の小節のタブ譜",
       "exerciseCount_other": "{{count}} 課題",
       "exerciseCount": "{{count}} 課題",
-      "levelSubscribed": "登録しました · ステップ{{n}}から開始"
+      "levelSubscribed": "登録しました · ステップ{{n}}から開始",
+      "playedUngraded": "{{count}} テイク、最高 {{bpm}} BPM。",
+      "playedUngraded_other": "{{count}} テイク、最高 {{bpm}} BPM。"
     },
     "progress": {
       "title": "上達",
@@ -463,7 +467,10 @@
       "notGraded": "まだ採点されていません",
       "emptyTitle": "上達の記録は1回のセッションから",
       "emptyBody": "今日のセッションを弾くとここに表示されます：演奏した分数、連続日数、各課題のクリーンテンポ。すべてあなたの演奏から測ったものです。",
-      "emptyStart": "今日のセッションを始める"
+      "emptyStart": "今日のセッションを始める",
+      "introOff": "採点はオフなので、ここには弾いた内容が出ます：練習時間、セッション、弾いたテンポ。",
+      "topPlayed": "弾いた最高 BPM",
+      "ungraded": "採点なし"
     },
     "settings": {
       "openOnLastTool": "前回のツールで開く",
@@ -607,7 +614,7 @@
       "fellBack": "選んだ入力がつながっていないので、このセッションは {{device}} を聴きます。",
       "defaultDevice": "既定の入力",
       "chooseInput": "入力を選ぶ",
-      "playUngraded": "採点なしで弾く",
+      "playUngraded": "この1回だけ弾く",
       "notGraded": "採点なし",
       "turnOn": "入力をオンにする",
       "noSignal": "信号なし",
@@ -617,17 +624,33 @@
         "noAnswer": "入力から応答がありません。許可のダイアログが開いていれば答えてから、もう一度開始を押してください。",
         "busy": "別のアプリが入力を使っています。そのアプリを閉じてから、もう一度開始を押してください。",
         "other": "入力を開始できませんでした。確認するか、別の入力を選んでください。"
-      },
-      "gradingOff": "採点オフ",
-      "turnOnGrading": "採点をオンにする"
+      }
     },
     "ungraded": {
       "ready": "採点なし：入力がオフなので、このセッションは聴いていません。",
-      "readyOff": "採点なし：設定で採点がオフになっています。",
       "result": "採点なし：入力がオフでした",
-      "resultOff": "採点なし：設定で採点がオフになっています",
+      "resultOff": "演奏済み、採点なし",
       "body": "練習としてカウントされます（練習時間と連続記録）。クリーンテンポとステップは採点されたテイクでだけ進みます。",
-      "recap": "採点なし"
+      "recap": "採点なし",
+      "bodyOff": "練習時間と連続記録にカウントされます。"
+    },
+    "ask": {
+      "graded": "テイク開始、{{bpm}} BPM・採点あり",
+      "justPlay": "ただ弾く",
+      "remember": "この選択を記憶する",
+      "line": "採点ありなら、マイクか入力で聴きます。ただ弾くなら、クリックと画面だけで採点はしません。"
+    },
+    "grademe": {
+      "fix": "採点する",
+      "why": "マイクか入力で聴いて、タイミングと音を採点します。",
+      "session": "このセッション",
+      "always": "いつも"
+    },
+    "meter": {
+      "silent": "入力レベル：信号なし",
+      "low": "入力レベル：低い",
+      "good": "入力レベル：良好",
+      "high": "入力レベル：高い"
     }
   }
 }

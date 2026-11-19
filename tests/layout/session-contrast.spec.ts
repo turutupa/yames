@@ -28,6 +28,8 @@ const SCENES = [
   "session-input-failed",
   "session-ungraded-ready",
   "session-ungraded-result",
+  "session-ask-ready",
+  "progress-ungraded",
 ];
 const SIZE = { width: 1400, height: 900 };
 

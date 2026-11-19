@@ -203,7 +203,8 @@
       "testOut": "{{step}} überspringen: ein Take im Bestehenstempo, {{bpm}} BPM.",
       "benchmark": "Benchmark, Tag {{day}}: jedes Mal dieselbe Übung bei {{bpm}} BPM, zum Vergleichen.",
       "yourTurn": "Du bist dran: {{exercise}}. Noch nicht geprüft, also beurteilst du es selbst.",
-      "newFromSibling": "Neu. Sie beginnt bei {{bpm}} BPM, etwa 80 % deines sauberen Tempos von {{clean}} BPM bei {{sibling}}."
+      "newFromSibling": "Neu. Sie beginnt bei {{bpm}} BPM, etwa 80 % deines sauberen Tempos von {{clean}} BPM bei {{sibling}}.",
+      "playedUngraded": "Da, wo du aufgehört hast: {{bpm}} BPM."
     },
     "bar": {
       "summary": "Die Messlatte: {{even}} % gleichmäßig und {{heard}} % der Töne gehört, bei {{bpm}} BPM."
@@ -248,7 +249,8 @@
       "fasterCeiling": "Schon das schnellste Tempo dieser Übung",
       "tempoLocked": "Ein Test läuft im Bestehens-Tempo, darum bleibt es fest",
       "previous": "Zurück",
-      "previousFirst": "Das ist der erste Block, davor gibt es nichts"
+      "previousFirst": "Das ist der erste Block, davor gibt es nichts",
+      "playUngraded": "Start, {{bpm}} BPM"
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} Takte",
@@ -447,7 +449,9 @@
       "tabPreview": "Die ersten Takte als Tab",
       "exerciseCount": "{{count}} Übung",
       "exerciseCount_other": "{{count}} Übungen",
-      "levelSubscribed": "Abonniert · Start bei Schritt {{n}}"
+      "levelSubscribed": "Abonniert · Start bei Schritt {{n}}",
+      "playedUngraded": "{{count}} Take, bis {{bpm}} BPM.",
+      "playedUngraded_other": "{{count}} Takes, bis {{bpm}} BPM."
     },
     "progress": {
       "title": "Fortschritt",
@@ -463,7 +467,10 @@
       "notGraded": "Noch nicht bewertet",
       "emptyTitle": "Dein Fortschritt beginnt mit einer Session",
       "emptyBody": "Spiel die heutige Session, dann steht es hier: gespielte Minuten, deine Serie und das saubere Tempo jeder Übung, alles aus deinem Spiel gemessen.",
-      "emptyStart": "Heutige Session starten"
+      "emptyStart": "Heutige Session starten",
+      "introOff": "Die Bewertung ist aus, also siehst du hier, was du gespielt hast: deine Minuten, deine Sessions und deine Tempos.",
+      "topPlayed": "höchstes gespieltes BPM",
+      "ungraded": "Nicht bewertet"
     },
     "settings": {
       "openOnLastTool": "Mit meinem letzten Werkzeug öffnen",
@@ -607,7 +614,7 @@
       "fellBack": "Dein gewählter Eingang ist nicht verbunden, deshalb höre ich in dieser Session {{device}}.",
       "defaultDevice": "deinen Standard-Eingang",
       "chooseInput": "Eingang wählen",
-      "playUngraded": "Ohne Bewertung spielen",
+      "playUngraded": "Nur diesen spielen",
       "notGraded": "Nicht bewertet",
       "turnOn": "Eingang einschalten",
       "noSignal": "Kein Signal",
@@ -617,17 +624,33 @@
         "noAnswer": "Der Eingang hat nicht geantwortet. Ist eine Berechtigungsabfrage offen, beantworte sie und drück dann noch einmal Start.",
         "busy": "Eine andere App benutzt deinen Eingang. Schließ sie und drück dann noch einmal Start.",
         "other": "Dein Eingang ließ sich nicht starten. Prüf ihn oder wähle einen anderen."
-      },
-      "gradingOff": "Bewertung aus",
-      "turnOnGrading": "Bewertung einschalten"
+      }
     },
     "ungraded": {
       "ready": "Nicht bewertet: Der Eingang ist aus, ich höre in dieser Session nicht zu.",
-      "readyOff": "Nicht bewertet: Die Bewertung ist in den Einstellungen aus.",
       "result": "Nicht bewertet: Der Eingang war aus",
-      "resultOff": "Nicht bewertet: Die Bewertung ist in den Einstellungen aus",
+      "resultOff": "Gespielt, nicht bewertet",
       "body": "Es zählt als Übung, für deine Minuten und deine Serie. Sauberes Tempo und Steps bewegen sich nur bei bewerteten Takes.",
-      "recap": "nicht bewertet"
+      "recap": "nicht bewertet",
+      "bodyOff": "Es zählt für deine Minuten und deine Serie."
+    },
+    "ask": {
+      "graded": "Take starten, {{bpm}} BPM · bewertet",
+      "justPlay": "Einfach spielen",
+      "remember": "Meine Wahl merken",
+      "line": "Bewertet höre ich über dein Mikrofon oder deinen Eingang zu. Oder spiel einfach: Klick und Bild, ohne Bewertung."
+    },
+    "grademe": {
+      "fix": "Bewerte mich",
+      "why": "Ich höre über dein Mikrofon oder deinen Eingang zu und bewerte Timing und Töne.",
+      "session": "Diese Session",
+      "always": "Immer"
+    },
+    "meter": {
+      "silent": "Eingangspegel: kein Signal",
+      "low": "Eingangspegel: niedrig",
+      "good": "Eingangspegel: gut",
+      "high": "Eingangspegel: hoch"
     }
   }
 }

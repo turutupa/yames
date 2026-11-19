@@ -450,7 +450,15 @@
       "view": "Pratik görünümü",
       "viewHint": "Sen çalarken bir seansın gösterdiği şey.",
       "grade": "Çalışımı değerlendir",
-      "gradeHint": "Kapalı: oturumlar dinlemez ve hiçbir şeyi değerlendirmez. Dakikaların ve serin yine sayılır."
+      "gradeHint": "Yames'in çalışını dinleyip dinlemeyeceği. Her oturumda da değiştirebilirsin.",
+      "grading": {
+        "on": "Beni değerlendir",
+        "onHint": "Yames mikrofonundan ya da girişinden dinler, zamanlamanı ve notalarını değerlendirir.",
+        "off": "Sadece çal",
+        "offHint": "Klik ve görüntü. Hiçbir şey dinlemez, hiçbir şey değerlendirilmez.",
+        "ask": "Bana sor",
+        "askHint": "Sen seçene kadar her oturum ilk denemeden önce sorar."
+      }
     }
   },
   "keybindings": {

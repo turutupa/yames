@@ -1282,8 +1282,10 @@ export function MainWindow() {
       progress: sessionRun.progress,
       plan: sessionRun.plan,
       startPath: sessionRun.actions.startPath,
+      grading: sessionRun.grading,
+      setGrading: sessionRun.setGrading,
     }),
-    [sessionRun.paths, sessionRun.progress, sessionRun.plan, sessionRun.actions.startPath],
+    [sessionRun.paths, sessionRun.progress, sessionRun.plan, sessionRun.actions.startPath, sessionRun.grading, sessionRun.setGrading],
   );
   const wizardEvaluation: WizardEvaluationEnv = useMemo(
     () => ({
@@ -2336,6 +2338,8 @@ export function MainWindow() {
              band the click starts off, and what it sounds like when it is on
              is a metronome setting. Which modes want the picker is the
              shell's question, so it is answered here. */
+          inputChip={!(sessionRun.grading === "off" && isLearnTab(view))}
+          levelMeter={sessionRun.grading !== "off"}
           soundPicker={view !== "songs" && !isLearnTab(view)}
           modeBar={view === "songs"}
           soundOpen={soundOpen}
@@ -2764,8 +2768,8 @@ export function MainWindow() {
               setMinutes: sessionRun.setMinutes,
               practiceView: sessionRun.practiceView,
               setPracticeView: sessionRun.setPracticeView,
-              grade: sessionRun.grade,
-              setGrade: sessionRun.setGrade,
+              grading: sessionRun.grading,
+              setGrading: sessionRun.setGrading,
             }}
             shareTooltip={shareTooltip}
             onShareOption={handleShareOption}
@@ -3112,6 +3116,7 @@ export function MainWindow() {
       onClose={tour.close}
       keyBindings={keyBindings}
       animate={!reducedMotion}
+      grading={sessionRun.grading}
     />
     {!IS_MOBILE && help && (
       <HelpMenu

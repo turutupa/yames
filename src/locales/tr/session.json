@@ -203,7 +203,8 @@
       "testOut": "{{step}} sınavı: geçme temposunda bir kayıt, {{bpm}} BPM.",
       "benchmark": "Ölçüt, {{day}}. gün: karşılaştırmak için her seferinde aynı egzersiz, {{bpm}} BPM.",
       "yourTurn": "Sıra sende: {{exercise}}. Henüz kontrol edilmiyor, kendin değerlendir.",
-      "newFromSibling": "Yeni. {{sibling}} üzerindeki temiz {{clean}} BPM temponun yaklaşık %80'i olan {{bpm}} BPM'den başlar."
+      "newFromSibling": "Yeni. {{sibling}} üzerindeki temiz {{clean}} BPM temponun yaklaşık %80'i olan {{bpm}} BPM'den başlar.",
+      "playedUngraded": "Kaldığın yerden: {{bpm}} BPM."
     },
     "bar": {
       "summary": "Çıta: {{bpm}} BPM'de %{{even}} düzgünlük ve notaların %{{heard}} kadarı duyulmuş."
@@ -248,7 +249,8 @@
       "fasterCeiling": "Bu alıştırmanın en hızlı temposu zaten bu",
       "tempoLocked": "Sınav geçme temposunda çalınır, bu yüzden sabit kalır",
       "previous": "Önceki",
-      "previousFirst": "Bu ilk blok, öncesinde bir şey yok"
+      "previousFirst": "Bu ilk blok, öncesinde bir şey yok",
+      "playUngraded": "Başlat, {{bpm}} BPM"
     },
     "result": {
       "kick": "Deneme {{take}} · {{title}} · {{bpm}} BPM · {{bars}} ölçü",
@@ -447,7 +449,9 @@
       "tabPreview": "İlk ölçüler, tab olarak",
       "exerciseCount": "{{count}} alıştırma",
       "exerciseCount_other": "{{count}} alıştırma",
-      "levelSubscribed": "Abone olundu · Adım {{n}}'den başlıyor"
+      "levelSubscribed": "Abone olundu · Adım {{n}}'den başlıyor",
+      "playedUngraded": "{{count}} deneme, en fazla {{bpm}} BPM.",
+      "playedUngraded_other": "{{count}} deneme, en fazla {{bpm}} BPM."
     },
     "progress": {
       "title": "İlerleme",
@@ -463,7 +467,10 @@
       "notGraded": "Henüz notlanmadı",
       "emptyTitle": "İlerlemen tek bir oturumla başlar",
       "emptyBody": "Bugünün oturumunu çal, burada görünsün: çalınan dakikalar, serin ve her alıştırmanın temiz temposu, hepsi çalışından ölçülür.",
-      "emptyStart": "Bugünün oturumunu başlat"
+      "emptyStart": "Bugünün oturumunu başlat",
+      "introOff": "Değerlendirme kapalı, bu yüzden burada çaldıkların var: dakikaların, oturumların ve çaldığın tempolar.",
+      "topPlayed": "çalınan en yüksek BPM",
+      "ungraded": "Değerlendirilmedi"
     },
     "settings": {
       "openOnLastTool": "Son aracımda aç",
@@ -607,7 +614,7 @@
       "fellBack": "Seçtiğin giriş bağlı değil, bu yüzden bu oturumda {{device}} dinliyorum.",
       "defaultDevice": "varsayılan girişin",
       "chooseInput": "Giriş seç",
-      "playUngraded": "Değerlendirmeden çal",
+      "playUngraded": "Sadece bunu çal",
       "notGraded": "Değerlendirilmedi",
       "turnOn": "Girişi aç",
       "noSignal": "Sinyal yok",
@@ -617,17 +624,33 @@
         "noAnswer": "Giriş yanıt vermedi. Açık bir izin penceresi varsa yanıtla, sonra Başla'ya yeniden bas.",
         "busy": "Girişini başka bir uygulama kullanıyor. Onu kapat, sonra Başla'ya yeniden bas.",
         "other": "Giriş başlamadı. Kontrol et ya da başka birini seç."
-      },
-      "gradingOff": "Değerlendirme kapalı",
-      "turnOnGrading": "Değerlendirmeyi aç"
+      }
     },
     "ungraded": {
       "ready": "Değerlendirilmiyor: giriş kapalı, bu oturumda dinlemiyorum.",
-      "readyOff": "Değerlendirilmiyor: değerlendirme Ayarlar'da kapalı.",
       "result": "Değerlendirilmedi: giriş kapalıydı",
-      "resultOff": "Değerlendirilmedi: değerlendirme Ayarlar'da kapalı",
+      "resultOff": "Çalındı, değerlendirilmedi",
       "body": "Pratik olarak sayılır, dakikalarına ve serine. Temiz tempo ve adımlar yalnızca değerlendirilen kayıtlarla ilerler.",
-      "recap": "değerlendirilmedi"
+      "recap": "değerlendirilmedi",
+      "bodyOff": "Dakikalarına ve serine sayılır."
+    },
+    "ask": {
+      "graded": "Denemeyi başlat, {{bpm}} BPM · değerlendirmeli",
+      "justPlay": "Sadece çal",
+      "remember": "Seçimimi hatırla",
+      "line": "Değerlendirmeli olursa mikrofonundan ya da girişinden dinlerim. Ya da sadece çal: klik ve görüntü, değerlendirme yok."
+    },
+    "grademe": {
+      "fix": "Beni değerlendir",
+      "why": "Mikrofonundan ya da girişinden dinleyip zamanlamanı ve notalarını değerlendiririm.",
+      "session": "Bu oturum",
+      "always": "Her zaman"
+    },
+    "meter": {
+      "silent": "Giriş seviyesi: sinyal yok",
+      "low": "Giriş seviyesi: düşük",
+      "good": "Giriş seviyesi: iyi",
+      "high": "Giriş seviyesi: yüksek"
     }
   }
 }

@@ -149,6 +149,15 @@
         "guidance": "Een interface of jack-adapter is beter, maar de microfoon van de telefoon werkt: leg hem dicht bij de gitaar, niet in je zak.",
         "noDevices": "Geen ingang gevonden. Sluit de interface of adapter aan; verschijnt hij niet, haal hem eruit en steek hem opnieuw in.",
         "permission": "Microfoontoegang: Android-instellingen › Apps › Yames › Rechten › Microfoon, dan Toestaan. Een USB-interface of jack-adapter heeft hetzelfde recht nodig."
+      },
+      "ask": {
+        "title": "Moet Yames naar je spel luisteren en het beoordelen?",
+        "subtitle": "Hoe dan ook krijg je je plan, de klik en het beeld. Je kunt het altijd wijzigen in Instellingen.",
+        "yes": "Ja, beoordeel mijn spel",
+        "yesDesc": "Yames luistert via een microfoon of directe ingang en controleert je timing en noten. Daarna stel je het in.",
+        "no": "Nee, alleen de klik en het beeld",
+        "noDesc": "Niets luistert en er wordt geen microfoon gevraagd. Je minuten en reeks tellen gewoon mee.",
+        "noNote": "Sessies worden zonder beoordeling gespeeld. Je kunt het aanzetten vanuit elke sessie of in Instellingen."
       }
     },
     "hearItWork": {
@@ -175,7 +184,8 @@
         "sound": "Klikgeluid",
         "theme": "Thema",
         "control": "Bediening",
-        "input": "Audio-invoer"
+        "input": "Audio-invoer",
+        "grading": "Beoordeling"
       },
       "controlKeyboard": "Toetsenbord",
       "controlFootswitch": "Voetschakelaar",
@@ -186,7 +196,12 @@
       "tour": "Laat me rondkijken",
       "moreOnToday": "+{{count}} meer op Vandaag",
       "subtitleNext": "Je volgende sessie staat klaar op Vandaag. Wijzig hier iets, of later in Instellingen.",
-      "nextSession": "Je volgende sessie"
+      "nextSession": "Je volgende sessie",
+      "grading": {
+        "on": "Beoordeelt mijn spel",
+        "off": "Gewoon spelen, niet beoordeeld",
+        "ask": "Elke sessie vragen"
+      }
     },
     "hints": {
       "dismiss": "Duidelijk",
@@ -280,7 +295,9 @@
         },
         "take": {
           "title": "Take starten",
-          "body": "Als je klaar bent, start je een take. Yames luistert en beoordeelt je timing en noten. Langzamer en Sneller veranderen het tempo."
+          "body": "Als je klaar bent, start je een take. Yames luistert en beoordeelt je timing en noten. Langzamer en Sneller veranderen het tempo.",
+          "bodyOff": "Als je klaar bent, start je. Beoordelen staat uit: de klik en het beeld, niets beoordeeld. Langzamer en Sneller veranderen het tempo.",
+          "bodyAsk": "Als je klaar bent, start je een take: beoordeeld, met Yames die luistert, of gewoon gespeeld. Jij kiest. Langzamer en Sneller veranderen het tempo."
         },
         "blocks": {
           "title": "De blokken van vandaag",
@@ -288,7 +305,9 @@
         },
         "progress": {
           "title": "Schoon tempo",
-          "body": "Voortgang telt schoon tempo: het snelste waarop je de lat haalde, niet alleen het snelste dat je speelde. Dat is het getal om te laten groeien."
+          "body": "Voortgang telt schoon tempo: het snelste waarop je de lat haalde, niet alleen het snelste dat je speelde. Dat is het getal om te laten groeien.",
+          "bodyOff": "Voortgang houdt je minuten, je reeks en je gespeelde tempo's bij. Met beoordelen aan komt je schone tempo erbij.",
+          "bodyAsk": "Voortgang telt schoon tempo: het snelste waarop je de lat haalde, niet alleen het snelste dat je speelde. Dat is het getal om te laten groeien."
         }
       }
     },

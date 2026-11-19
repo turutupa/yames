@@ -1486,6 +1486,34 @@
 .session-takeinfo .session-kick {
   font-size: 15px;
 }
+/* The runway's head: kicker, title and purpose stacked, the switch beside. */
+.session-takeinfo:has(> .session-takeinfo-text) {
+  flex-wrap: nowrap;
+  align-items: center;
+}
+.session-takeinfo-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.session-takeinfo-text > .session-h3 {
+  margin: 0;
+  text-wrap: balance;
+}
+.session-takeinfo:has(> .session-takeinfo-text) > .session-viewswitch {
+  flex: none;
+}
+.main-window.is-mobile .session-takeinfo:has(> .session-takeinfo-text) {
+  flex-wrap: wrap;
+}
+@media (max-width: 600px) {
+  .session-takeinfo:has(> .session-takeinfo-text) {
+    flex-wrap: wrap;
+  }
+}
 .session-takerow {
   flex: none;
   display: flex;
@@ -2941,6 +2969,13 @@
     justify-self: start;
     margin: -4px 0 -10px;
   }
+  .session-go > [data-place="footer"].session-input-note > .session-secondary {
+    grid-column: 2;
+    justify-self: start;
+    min-height: 40px;
+    margin-top: 4px;
+    font-size: 14px;
+  }
   .session-go > [data-place="footer"].session-input-failed {
     gap: 6px;
     padding: 8px 10px;
@@ -3813,6 +3848,36 @@
 .practice-grow {
   flex: 1 1 0;
 }
+/* The kicker over the title (owner, 2026-11-18): two short lines read better
+   than one long one. The column may shrink; a long title wraps in it. */
+.practice-head-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.practice-head-row:has(> .practice-head-text) {
+  align-items: center;
+  flex-wrap: nowrap;
+}
+/* A phone, or a window as narrow as one: the switch takes a row of its own
+   under the title, as before. */
+.main-window.is-mobile .practice-head-row:has(> .practice-head-text) {
+  flex-wrap: wrap;
+}
+@media (max-width: 600px) {
+  .practice-head-row:has(> .practice-head-text) {
+    flex-wrap: wrap;
+  }
+  .practice-head-row > .practice-head-text {
+    flex: 1 1 100%;
+  }
+}
+.practice-head-text > .practice-title {
+  text-wrap: balance;
+}
 .practice-kick {
   font-size: 12px;
   letter-spacing: 0.18em;
@@ -3914,8 +3979,7 @@
 .practice-head-row[data-tight] {
   flex-wrap: nowrap;
 }
-.practice-head-row[data-tight] > .practice-kick,
-.practice-head-row[data-tight] > .practice-title {
+.practice-head-row[data-tight] > .practice-head-text {
   flex: 0 1 auto;
   min-width: 0;
 }
@@ -5217,4 +5281,148 @@ button.session-input-chip:hover {
   .practice-watchrow {
     margin-top: 6px;
   }
+}
+
+/* ══ Grading is a choice (owner, 2026-11-18) ══════════════════════════════
+ * Not decided yet: the graded Take and "Just play", the same size, side by
+ * side, with "Remember my choice" under them. Nothing red, no input words. */
+/* On a desktop one row: "Remember my choice" before the two answers, so the
+   footer is no taller than with one Start (a 1024x700 window has no room). */
+.session-ask {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px 14px;
+  min-width: 0;
+}
+.session-ask > .session-ask-remember {
+  order: -1;
+}
+/* Two columns of one width: the wider label sets both. */
+.session-ask-buttons {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 10px;
+}
+.session-actions .session-ask .session-big {
+  min-width: 0;
+}
+.session-page .session-ask-buttons > .session-big {
+  white-space: nowrap;
+  font-size: 22px;
+  padding-inline: 22px;
+}
+/* A short or narrow desktop window: the pair keeps one row beside the nudges. */
+@media (max-width: 1180px) {
+  .session-page .session-ask-buttons > .session-big {
+    font-size: 18px;
+    padding-inline: 16px;
+  }
+}
+.session-ask-remember {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--l-quiet);
+  cursor: pointer;
+}
+.session-ask-remember {
+  position: relative;
+  min-height: 44px;
+  padding-inline: 2px;
+}
+.session-ask-remember input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.session-ask-box {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--l-line2);
+  border-radius: 4px;
+}
+.session-ask-remember input:checked + .session-ask-box {
+  background: var(--l-amber);
+  border-color: var(--l-amber);
+}
+.session-ask-remember input:checked + .session-ask-box::after {
+  content: "";
+  width: 5px;
+  height: 9px;
+  margin-top: -2px;
+  border: solid var(--l-bg);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.session-ask-remember input:focus-visible + .session-ask-box {
+  outline: 2px solid var(--l-amber);
+  outline-offset: 2px;
+}
+@media (orientation: portrait) and (max-width: 480px) {
+  .session-go > .session-ask {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .session-ask > .session-ask-remember {
+    order: 0;
+  }
+  .session-ask-buttons {
+    grid-auto-flow: row;
+  }
+  .session-page .session-ask-buttons > .session-big {
+    font-size: 20px;
+    white-space: normal;
+  }
+  .session-ask-remember {
+    align-self: center;
+  }
+}
+
+/* "Not graded · Grade me": quiet, in the bar, for a player who chose to just
+   play. Its press asks for how long, in a small panel under it. */
+.session-grademe {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+.session-input-chip[data-state="ungraded"]:is([data-why="gradingOff"], [data-why="chosen"]) {
+  color: var(--l-quiet);
+  border-color: var(--l-line);
+}
+.session-grademe-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: max-content;
+  max-width: min(300px, 80vw);
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--l-bg);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--l-shade) 55%, transparent);
+}
+.session-grademe-why {
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--l-quiet);
+  white-space: normal;
+}
+.session-page .session-grademe-menu .session-secondary {
+  min-height: 38px;
+  font-size: 15px;
 }

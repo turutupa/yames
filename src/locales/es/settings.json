@@ -450,7 +450,15 @@
       "view": "Vista de práctica",
       "viewHint": "Lo que muestra una sesión mientras tocas.",
       "grade": "Evaluar cómo toco",
-      "gradeHint": "Desactivado: las sesiones no escuchan ni evalúan nada. Tus minutos y tu racha siguen contando."
+      "gradeHint": "Si Yames escucha cómo tocas. También puedes cambiarlo en cualquier sesión.",
+      "grading": {
+        "on": "Evalúame",
+        "onHint": "Yames escucha por tu micrófono o tu entrada y evalúa tu tiempo y tus notas.",
+        "off": "Solo tocar",
+        "offHint": "El clic y la imagen. Nada escucha y nada se evalúa.",
+        "ask": "Pregúntame",
+        "askHint": "Cada sesión pregunta antes de su primera toma, hasta que elijas."
+      }
     }
   },
   "keybindings": {

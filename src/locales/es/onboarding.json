@@ -149,6 +149,15 @@
         "guidance": "Una interfaz o un adaptador de minijack es mejor, pero el micrófono del móvil funciona: ponlo cerca de la guitarra, no en el bolsillo.",
         "noDevices": "No se encontró ninguna entrada. Conecta la interfaz o el adaptador; si no aparece, desconéctalo y vuelve a conectarlo.",
         "permission": "Acceso al micrófono: Ajustes de Android › Aplicaciones › Yames › Permisos › Micrófono, y Permitir. Una interfaz USB o un adaptador de minijack necesitan el mismo permiso."
+      },
+      "ask": {
+        "title": "¿Quieres que Yames escuche cómo tocas y lo evalúe?",
+        "subtitle": "En los dos casos tienes tu plan, el clic y la imagen. Puedes cambiarlo en Ajustes cuando quieras.",
+        "yes": "Sí, evalúa cómo toco",
+        "yesDesc": "Yames escucha por un micrófono o una entrada directa y revisa tu tiempo y tus notas. Ahora lo configuras.",
+        "no": "No, solo el clic y la imagen",
+        "noDesc": "Nada escucha y no se pide el micrófono. Tus minutos y tu racha cuentan igual.",
+        "noNote": "Las sesiones se tocarán sin evaluar. Puedes activarlo desde cualquier sesión o en Ajustes."
       }
     },
     "hearItWork": {
@@ -175,7 +184,8 @@
         "sound": "Sonido del clic",
         "theme": "Tema",
         "control": "Control",
-        "input": "Entrada de audio"
+        "input": "Entrada de audio",
+        "grading": "Evaluación"
       },
       "controlKeyboard": "Teclado",
       "controlFootswitch": "Pedal",
@@ -186,7 +196,12 @@
       "tour": "Enséñame",
       "moreOnToday": "+{{count}} más en Hoy",
       "subtitleNext": "Tu próxima Sesión te espera en Hoy. Cambia lo que quieras aquí o luego en Ajustes.",
-      "nextSession": "Tu próxima sesión"
+      "nextSession": "Tu próxima sesión",
+      "grading": {
+        "on": "Evalúa cómo toco",
+        "off": "Solo tocar, sin evaluar",
+        "ask": "Preguntar en cada sesión"
+      }
     },
     "hints": {
       "dismiss": "Entendido",
@@ -280,7 +295,9 @@
         },
         "take": {
           "title": "Empezar toma",
-          "body": "Cuando estés listo, empieza una toma. Yames escucha y califica tu tiempo y tus notas. Más lento y Más rápido cambian el tempo."
+          "body": "Cuando estés listo, empieza una toma. Yames escucha y califica tu tiempo y tus notas. Más lento y Más rápido cambian el tempo.",
+          "bodyOff": "Cuando estés listo, empieza. La evaluación está desactivada: el clic y la imagen, nada se evalúa. Más lento y Más rápido cambian el tempo.",
+          "bodyAsk": "Cuando estés listo, empieza una toma: evaluada, con Yames escuchando, o solo tocada. Tú eliges. Más lento y Más rápido cambian el tempo."
         },
         "blocks": {
           "title": "Los bloques de hoy",
@@ -288,7 +305,9 @@
         },
         "progress": {
           "title": "Tempo limpio",
-          "body": "Progreso cuenta el tempo limpio: el más rápido al que alcanzaste el listón, no solo el más rápido que tocaste. Ese es el número que hay que subir."
+          "body": "Progreso cuenta el tempo limpio: el más rápido al que alcanzaste el listón, no solo el más rápido que tocaste. Ese es el número que hay que subir.",
+          "bodyOff": "Progreso guarda tus minutos, tu racha y los tempos que tocaste. Con la evaluación activada suma tu tempo limpio.",
+          "bodyAsk": "Progreso cuenta el tempo limpio: el más rápido al que alcanzaste el listón, no solo el más rápido que tocaste. Ese es el número que hay que subir."
         }
       }
     },

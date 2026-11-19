@@ -149,6 +149,15 @@
         "guidance": "Interfejs lub adapter jack jest lepszy, ale mikrofon telefonu działa: połóż go blisko gitary, nie w kieszeni.",
         "noDevices": "Nie znaleziono wejścia. Podłącz interfejs lub adapter; jeśli się nie pojawi, odłącz go i podłącz ponownie.",
         "permission": "Dostęp do mikrofonu: Ustawienia Androida › Aplikacje › Yames › Uprawnienia › Mikrofon, potem Zezwól. Interfejs USB lub adapter jack potrzebują tego samego uprawnienia."
+      },
+      "ask": {
+        "title": "Czy Yames ma słuchać twojej gry i ją oceniać?",
+        "subtitle": "Tak czy inaczej masz swój plan, klik i obraz. Możesz to zmienić w Ustawieniach w każdej chwili.",
+        "yes": "Tak, oceniaj moją grę",
+        "yesDesc": "Yames słucha przez mikrofon lub wejście bezpośrednie i sprawdza timing i dźwięki. Teraz to ustawisz.",
+        "no": "Nie, tylko klik i obraz",
+        "noDesc": "Nic nie słucha i nikt nie prosi o mikrofon. Minuty i seria liczą się tak samo.",
+        "noNote": "Sesje będą grane bez oceny. Możesz ją włączyć w każdej sesji albo w Ustawieniach."
       }
     },
     "hearItWork": {
@@ -175,7 +184,8 @@
         "sound": "Dźwięk kliknięcia",
         "theme": "Motyw",
         "control": "Sterowanie",
-        "input": "Wejście audio"
+        "input": "Wejście audio",
+        "grading": "Ocena"
       },
       "controlKeyboard": "Klawiatura",
       "controlFootswitch": "Przełącznik nożny",
@@ -186,7 +196,12 @@
       "tour": "Oprowadź mnie",
       "moreOnToday": "+{{count}} więcej w Dzisiaj",
       "subtitleNext": "Twoja następna sesja czeka w Dzisiaj. Zmień coś tutaj albo później w Ustawieniach.",
-      "nextSession": "Twoja następna sesja"
+      "nextSession": "Twoja następna sesja",
+      "grading": {
+        "on": "Ocenia moją grę",
+        "off": "Po prostu graj, bez oceny",
+        "ask": "Pytaj w każdej sesji"
+      }
     },
     "hints": {
       "dismiss": "Jasne",
@@ -280,7 +295,9 @@
         },
         "take": {
           "title": "Zacznij podejście",
-          "body": "Kiedy będziesz gotowy, zacznij podejście. Yames słucha i ocenia rytm i nuty. Wolniej i Szybciej zmieniają tempo."
+          "body": "Kiedy będziesz gotowy, zacznij podejście. Yames słucha i ocenia rytm i nuty. Wolniej i Szybciej zmieniają tempo.",
+          "bodyOff": "Kiedy jesteś gotowy, zacznij. Ocena jest wyłączona: klik i obraz, bez oceny. Wolniej i Szybciej zmieniają tempo.",
+          "bodyAsk": "Kiedy jesteś gotowy, zacznij podejście: z oceną, gdy Yames słucha, albo po prostu zagrane. Ty wybierasz. Wolniej i Szybciej zmieniają tempo."
         },
         "blocks": {
           "title": "Dzisiejsze bloki",
@@ -288,7 +305,9 @@
         },
         "progress": {
           "title": "Czyste tempo",
-          "body": "Postępy liczą czyste tempo: najszybsze, przy którym spełniłeś wymaganie, a nie tylko najszybsze, jakie zagrałeś. To tę liczbę warto podnosić."
+          "body": "Postępy liczą czyste tempo: najszybsze, przy którym spełniłeś wymaganie, a nie tylko najszybsze, jakie zagrałeś. To tę liczbę warto podnosić.",
+          "bodyOff": "Postępy pokazują twoje minuty, serię i zagrane tempa. Z włączoną oceną dochodzi czyste tempo.",
+          "bodyAsk": "Postępy liczą czyste tempo: najszybsze, przy którym spełniłeś wymaganie, a nie tylko najszybsze, jakie zagrałeś. To tę liczbę warto podnosić."
         }
       }
     },
