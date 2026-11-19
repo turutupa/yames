@@ -22,7 +22,7 @@
  */
 import type { NeckKind, NeckNote, NeckView } from "../../../stage3d/api";
 import type { HandPosition } from "../../../paths/format";
-import { fingersByPlace, type FingerNote } from "../../../paths/fingering";
+import { fingerPlan, fingersByPlace, type FingerNote } from "../../../paths/fingering";
 import type { BeatPosition } from "../../../songs/position";
 import type { RunwayModel } from "../highway/runwayModel";
 
@@ -48,6 +48,8 @@ export function nowNextNeck(
   verdicts: ReadonlyMap<number, NeckKind> | null = null,
   theory = false,
   fingers: ReadonlyMap<string, string> | null = null,
+  /** The fingers an onset is played with, where they differ from the place's usual one (`onsetFingers`). */
+  byOnset: readonly (ReadonlyMap<string, string> | undefined)[] | null = null,
 ): NeckNote[] {
   const kinds = new Map<string, { kind: NeckKind; label?: string }>();
   const put = (places: readonly Place[] | undefined, kind: NeckKind, label?: (p: Place) => string | undefined) => {
@@ -56,14 +58,15 @@ export function nowNextNeck(
       if (!kinds.has(k)) kinds.set(k, { kind, label: label?.(p) });
     }
   };
-  const finger = (p: Place) => fingers?.get(key(p));
-  put(onsets[index]?.places, "now", finger);
-  put(onsets[index + 1]?.places, "next", finger);
+  // The finger used at that moment: on a one-string run one fret can take two fingers.
+  const fingerAt = (i: number) => (p: Place) => byOnset?.[i]?.get(key(p)) ?? fingers?.get(key(p));
+  put(onsets[index]?.places, "now", fingerAt(index));
+  put(onsets[index + 1]?.places, "next", fingerAt(index + 1));
   if (verdicts) {
     for (let i = index - 1; i >= Math.max(0, index - PLAYED_SHOWN); i--) {
       const kind = verdicts.get(onsets[i].id);
       // A played note keeps its finger: the colour is the verdict, the number the hand.
-      if (kind) put(onsets[i].places, kind, finger);
+      if (kind) put(onsets[i].places, kind, fingerAt(i));
     }
   }
   const out: NeckNote[] = shape.map((n) => {
@@ -122,6 +125,39 @@ export function fingering(
   position: HandPosition | undefined,
 ): Map<string, string> {
   return fingersByPlace(notes, position);
+}
+
+/**
+ * The finger each onset of a Take is played with, place by place: the Exercise's
+ * own fingering note by note (`fingerPlan`), found again in the Take by the
+ * onset's tick within the pattern. The quiet shape shows a place's usual finger
+ * (`fingering`); NOW, NEXT and the notes just played show this one, so a fret
+ * played by two fingers in a one-string run lights the right one at its moment
+ * (fingering audit 2).
+ */
+export function onsetFingers(
+  notes: readonly FingerNote[],
+  position: HandPosition | undefined,
+  onsets: Onsets,
+  startTick: number,
+  passTicks: number,
+): (Map<string, string> | undefined)[] {
+  const plan = fingerPlan(notes, position);
+  const perNote = new Map<string, string>();
+  notes.forEach((n, i) => {
+    const f = plan[i].finger;
+    if (f !== null) perNote.set(`${n.tick ?? 0}|${key(n)}`, String(f));
+  });
+  const span = Math.max(1, passTicks);
+  return onsets.map((o) => {
+    const rel = (((o.tick - startTick) % span) + span) % span;
+    const out = new Map<string, string>();
+    for (const p of o.places) {
+      const f = perNote.get(`${rel}|${key(p)}`);
+      if (f !== undefined) out.set(key(p), f);
+    }
+    return out.size ? out : undefined;
+  });
 }
 
 /**

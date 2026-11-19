@@ -40,7 +40,7 @@ const right = (min: number, overBars = 4): PassBar => ({ metric: "noteIdentity",
 const accent = (min: number): PassBar => ({ metric: "accentPlacement", min, overBars: 4 });
 
 /** One string, slow enough to be strict: evenness 0.9. */
-/** Hammers from nowhere are attacks that must be heard, and they are quiet. */
+/** Hammers from nowhere are soft like any hammer: an unheard one costs nothing, so the bar on the rest stays firm. */
 const LEGATO_TAPPED = [even(0.8), heard(0.85), extras(3), right(0.85)];
 const TIGHT = [even(0.9), heard(0.95), extras(2)];
 const TIGHT_NOTES = [...TIGHT, right(0.9)];
@@ -1226,7 +1226,7 @@ const ADVANCED: StepSpec[] = [
     goal: "Run three-note-per-string scales with one pick a string or less, hammering from nowhere going up and pulling off coming down.",
     why: "Three notes per string is where legato becomes a way to play scales fast with almost no picking. Going up, the first note of each new string has nothing to hammer from, so the finger hammers onto it from the air: the hammer-on from nowhere, and the skill that makes or breaks a legato run. Coming down, each string's first note is picked and the rest pulled.",
     howTo: [
-      "Hammer-on from nowhere: the finger comes down hard and fast on the new string with no pick. The tab marks it T. It has to be loud, because there is no pick to help.",
+      "Hammer-on from nowhere: the finger comes down hard and fast on the new string with no pick. The tab marks it h with no note before it on that string. It has to be loud, because there is no pick to help.",
       "Sextuplets: six to the click, two strings to each beat.",
       "Each Exercise is a picked bar, then the same notes legato. Match the legato bar to the picked one: same rhythm, same volume.",
     ],
@@ -1239,10 +1239,10 @@ const ADVANCED: StepSpec[] = [
         title: "Up with hammers, from nowhere",
         purpose: "Twelve notes up four strings, held at the top. Bar 1 picked; bar 2 picks the first note only, then hammers everything, the first note of each string from nowhere.",
         howTo: [
-          "Sextuplets. Bar 1: alternate-pick the twelve notes from the low E's fret 5 up to the G string's fret 9 and hold the last one to the bar line. Bar 2: pick the first note, hammer the rest; on the A, D and G strings the first note is a hammer-on from nowhere (marked T).",
+          "Sextuplets. Bar 1: alternate-pick the twelve notes from the low E's fret 5 up to the G string's fret 9 and hold the last one to the bar line. Bar 2: pick the first note, hammer the rest; on the A, D and G strings the first note is a hammer-on from nowhere (an h with no note before it on that string).",
           "Fingers 1-3-4 on the low E (5, 7, 8) and the A (5, 7, 8); 1-2-4 on the D and G (5, 7, 9), so each hammer to the little finger comes from the second finger with the stretch in front of it.",
         ],
-        coach: "The hammer-ons from nowhere count as attacks here, so one too quiet for me to catch shows up as missed. Make them loud; the bar allows for a few.",
+        coach: "A hammer-on from nowhere is graded like any hammer-on: one too quiet for me to catch costs nothing, so your ear decides whether it spoke. Make them loud.",
         vary: {
           values: { key: ["A", "B", "C", "D", "E"] },
           pooled: ["key"],
@@ -1816,7 +1816,8 @@ function pentPullsTab(): string {
 function hammerAscent(): string {
   const cells = nps(6, 4);
   const picked = cellsTab(cells);
-  const legato = cellsTab(cells, (_c, i) => (i === 0 ? "" : i % 3 === 0 ? "t" : "h"));
+  // Every note after the first hammered; a string's first one is a hammer from nowhere (`fromNowhere`).
+  const legato = cellsTab(cells, (_c, i) => (i === 0 ? "" : "h"));
   return `/16t ${picked} hold | ${legato} hold`;
 }
 

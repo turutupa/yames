@@ -15086,7 +15086,7 @@
       "goal": "Run three-note-per-string scales with one pick a string or less, hammering from nowhere going up and pulling off coming down.",
       "why": "Three notes per string is where legato becomes a way to play scales fast with almost no picking. Going up, the first note of each new string has nothing to hammer from, so the finger hammers onto it from the air: the hammer-on from nowhere, and the skill that makes or breaks a legato run. Coming down, each string's first note is picked and the rest pulled.",
       "howTo": [
-        "Hammer-on from nowhere: the finger comes down hard and fast on the new string with no pick. The tab marks it T. It has to be loud, because there is no pick to help.",
+        "Hammer-on from nowhere: the finger comes down hard and fast on the new string with no pick. The tab marks it h with no note before it on that string. It has to be loud, because there is no pick to help.",
         "Sextuplets: six to the click, two strings to each beat.",
         "Each Exercise is a picked bar, then the same notes legato. Match the legato bar to the picked one: same rhythm, same volume."
       ],
@@ -15099,10 +15099,10 @@
           "title": "Up with hammers, from nowhere",
           "purpose": "Twelve notes up four strings, held at the top. Bar 1 picked; bar 2 picks the first note only, then hammers everything, the first note of each string from nowhere.",
           "howTo": [
-            "Sextuplets. Bar 1: alternate-pick the twelve notes from the low E's fret 5 up to the G string's fret 9 and hold the last one to the bar line. Bar 2: pick the first note, hammer the rest; on the A, D and G strings the first note is a hammer-on from nowhere (marked T).",
+            "Sextuplets. Bar 1: alternate-pick the twelve notes from the low E's fret 5 up to the G string's fret 9 and hold the last one to the bar line. Bar 2: pick the first note, hammer the rest; on the A, D and G strings the first note is a hammer-on from nowhere (an h with no note before it on that string).",
             "Fingers 1-3-4 on the low E (5, 7, 8) and the A (5, 7, 8); 1-2-4 on the D and G (5, 7, 9), so each hammer to the little finger comes from the second finger with the stretch in front of it."
           ],
-          "coachLine": "The hammer-ons from nowhere count as attacks here, so one too quiet for me to catch shows up as missed. Make them loud; the bar allows for a few.",
+          "coachLine": "A hammer-on from nowhere is graded like any hammer-on: one too quiet for me to catch costs nothing, so your ear decides whether it spoke. Make them loud.",
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -15134,13 +15134,13 @@
             {"string":6,"fret":5,"midi":45,"tick":3840,"dur":160,"tech":[],"pick":"d"},
             {"string":6,"fret":7,"midi":47,"tick":4000,"dur":160,"tech":["hammer"]},
             {"string":6,"fret":8,"midi":48,"tick":4160,"dur":160,"tech":["hammer"]},
-            {"string":5,"fret":5,"midi":50,"tick":4320,"dur":160,"tech":["tap"]},
+            {"string":5,"fret":5,"midi":50,"tick":4320,"dur":160,"tech":["hammer"]},
             {"string":5,"fret":7,"midi":52,"tick":4480,"dur":160,"tech":["hammer"]},
             {"string":5,"fret":8,"midi":53,"tick":4640,"dur":160,"tech":["hammer"]},
-            {"string":4,"fret":5,"midi":55,"tick":4800,"dur":160,"tech":["tap"]},
+            {"string":4,"fret":5,"midi":55,"tick":4800,"dur":160,"tech":["hammer"]},
             {"string":4,"fret":7,"midi":57,"tick":4960,"dur":160,"tech":["hammer"]},
             {"string":4,"fret":9,"midi":59,"tick":5120,"dur":160,"tech":["hammer"]},
-            {"string":3,"fret":5,"midi":60,"tick":5280,"dur":160,"tech":["tap"]},
+            {"string":3,"fret":5,"midi":60,"tick":5280,"dur":160,"tech":["hammer"]},
             {"string":3,"fret":7,"midi":62,"tick":5440,"dur":160,"tech":["hammer"]},
             {"string":3,"fret":9,"midi":64,"tick":5600,"dur":1920,"tech":["hammer"]}
           ],
@@ -15205,7 +15205,7 @@
             "subdivision": 1
           },
           "estimatedMinutes": 6,
-          "tab": "/16t 6:5 6:7 6:8 5:5 5:7 5:8 4:5 4:7 4:9 3:5 3:7 3:9 hold | 6:5 6:7h 6:8h 5:5t 5:7h 5:8h 4:5t 4:7h 4:9h 3:5t 3:7h 3:9h hold",
+          "tab": "/16t 6:5 6:7 6:8 5:5 5:7 5:8 4:5 4:7 4:9 3:5 3:7 3:9 hold | 6:5 6:7h 6:8h 5:5h 5:7h 5:8h 4:5h 4:7h 4:9h 3:5h 3:7h 3:9h hold",
           "subdivision": "sextuplets",
           "computed": {
             "noteCount": 24,
@@ -15237,7 +15237,7 @@
                   "key": "A"
                 },
                 "pool": "all",
-                "tab": "/16t 6:5 6:7 6:8 5:5 5:7 5:8 4:5 4:7 4:9 3:5 3:7 3:9 hold | 6:5 6:7h 6:8h 5:5t 5:7h 5:8h 4:5t 4:7h 4:9h 3:5t 3:7h 3:9h hold",
+                "tab": "/16t 6:5 6:7 6:8 5:5 5:7 5:8 4:5 4:7 4:9 3:5 3:7 3:9 hold | 6:5 6:7h 6:8h 5:5h 5:7h 5:8h 4:5h 4:7h 4:9h 3:5h 3:7h 3:9h hold",
                 "position": {
                   "fret": 5,
                   "shifts": "none"
@@ -15259,13 +15259,13 @@
                   {"string":6,"fret":5,"midi":45,"tick":3840,"dur":160,"tech":[],"pick":"d"},
                   {"string":6,"fret":7,"midi":47,"tick":4000,"dur":160,"tech":["hammer"]},
                   {"string":6,"fret":8,"midi":48,"tick":4160,"dur":160,"tech":["hammer"]},
-                  {"string":5,"fret":5,"midi":50,"tick":4320,"dur":160,"tech":["tap"]},
+                  {"string":5,"fret":5,"midi":50,"tick":4320,"dur":160,"tech":["hammer"]},
                   {"string":5,"fret":7,"midi":52,"tick":4480,"dur":160,"tech":["hammer"]},
                   {"string":5,"fret":8,"midi":53,"tick":4640,"dur":160,"tech":["hammer"]},
-                  {"string":4,"fret":5,"midi":55,"tick":4800,"dur":160,"tech":["tap"]},
+                  {"string":4,"fret":5,"midi":55,"tick":4800,"dur":160,"tech":["hammer"]},
                   {"string":4,"fret":7,"midi":57,"tick":4960,"dur":160,"tech":["hammer"]},
                   {"string":4,"fret":9,"midi":59,"tick":5120,"dur":160,"tech":["hammer"]},
-                  {"string":3,"fret":5,"midi":60,"tick":5280,"dur":160,"tech":["tap"]},
+                  {"string":3,"fret":5,"midi":60,"tick":5280,"dur":160,"tech":["hammer"]},
                   {"string":3,"fret":7,"midi":62,"tick":5440,"dur":160,"tech":["hammer"]},
                   {"string":3,"fret":9,"midi":64,"tick":5600,"dur":1920,"tech":["hammer"]}
                 ],
@@ -15299,7 +15299,7 @@
                   "key": "B"
                 },
                 "pool": "all",
-                "tab": "/16t 6:7 6:9 6:10 5:7 5:9 5:10 4:7 4:9 4:11 3:7 3:9 3:11 hold | 6:7 6:9h 6:10h 5:7t 5:9h 5:10h 4:7t 4:9h 4:11h 3:7t 3:9h 3:11h hold",
+                "tab": "/16t 6:7 6:9 6:10 5:7 5:9 5:10 4:7 4:9 4:11 3:7 3:9 3:11 hold | 6:7 6:9h 6:10h 5:7h 5:9h 5:10h 4:7h 4:9h 4:11h 3:7h 3:9h 3:11h hold",
                 "position": {
                   "fret": 7,
                   "shifts": "none"
@@ -15321,13 +15321,13 @@
                   {"string":6,"fret":7,"midi":47,"tick":3840,"dur":160,"tech":[],"pick":"d"},
                   {"string":6,"fret":9,"midi":49,"tick":4000,"dur":160,"tech":["hammer"]},
                   {"string":6,"fret":10,"midi":50,"tick":4160,"dur":160,"tech":["hammer"]},
-                  {"string":5,"fret":7,"midi":52,"tick":4320,"dur":160,"tech":["tap"]},
+                  {"string":5,"fret":7,"midi":52,"tick":4320,"dur":160,"tech":["hammer"]},
                   {"string":5,"fret":9,"midi":54,"tick":4480,"dur":160,"tech":["hammer"]},
                   {"string":5,"fret":10,"midi":55,"tick":4640,"dur":160,"tech":["hammer"]},
-                  {"string":4,"fret":7,"midi":57,"tick":4800,"dur":160,"tech":["tap"]},
+                  {"string":4,"fret":7,"midi":57,"tick":4800,"dur":160,"tech":["hammer"]},
                   {"string":4,"fret":9,"midi":59,"tick":4960,"dur":160,"tech":["hammer"]},
                   {"string":4,"fret":11,"midi":61,"tick":5120,"dur":160,"tech":["hammer"]},
-                  {"string":3,"fret":7,"midi":62,"tick":5280,"dur":160,"tech":["tap"]},
+                  {"string":3,"fret":7,"midi":62,"tick":5280,"dur":160,"tech":["hammer"]},
                   {"string":3,"fret":9,"midi":64,"tick":5440,"dur":160,"tech":["hammer"]},
                   {"string":3,"fret":11,"midi":66,"tick":5600,"dur":1920,"tech":["hammer"]}
                 ],
@@ -15361,7 +15361,7 @@
                   "key": "C"
                 },
                 "pool": "all",
-                "tab": "/16t 6:8 6:10 6:11 5:8 5:10 5:11 4:8 4:10 4:12 3:8 3:10 3:12 hold | 6:8 6:10h 6:11h 5:8t 5:10h 5:11h 4:8t 4:10h 4:12h 3:8t 3:10h 3:12h hold",
+                "tab": "/16t 6:8 6:10 6:11 5:8 5:10 5:11 4:8 4:10 4:12 3:8 3:10 3:12 hold | 6:8 6:10h 6:11h 5:8h 5:10h 5:11h 4:8h 4:10h 4:12h 3:8h 3:10h 3:12h hold",
                 "position": {
                   "fret": 8,
                   "shifts": "none"
@@ -15383,13 +15383,13 @@
                   {"string":6,"fret":8,"midi":48,"tick":3840,"dur":160,"tech":[],"pick":"d"},
                   {"string":6,"fret":10,"midi":50,"tick":4000,"dur":160,"tech":["hammer"]},
                   {"string":6,"fret":11,"midi":51,"tick":4160,"dur":160,"tech":["hammer"]},
-                  {"string":5,"fret":8,"midi":53,"tick":4320,"dur":160,"tech":["tap"]},
+                  {"string":5,"fret":8,"midi":53,"tick":4320,"dur":160,"tech":["hammer"]},
                   {"string":5,"fret":10,"midi":55,"tick":4480,"dur":160,"tech":["hammer"]},
                   {"string":5,"fret":11,"midi":56,"tick":4640,"dur":160,"tech":["hammer"]},
-                  {"string":4,"fret":8,"midi":58,"tick":4800,"dur":160,"tech":["tap"]},
+                  {"string":4,"fret":8,"midi":58,"tick":4800,"dur":160,"tech":["hammer"]},
                   {"string":4,"fret":10,"midi":60,"tick":4960,"dur":160,"tech":["hammer"]},
                   {"string":4,"fret":12,"midi":62,"tick":5120,"dur":160,"tech":["hammer"]},
-                  {"string":3,"fret":8,"midi":63,"tick":5280,"dur":160,"tech":["tap"]},
+                  {"string":3,"fret":8,"midi":63,"tick":5280,"dur":160,"tech":["hammer"]},
                   {"string":3,"fret":10,"midi":65,"tick":5440,"dur":160,"tech":["hammer"]},
                   {"string":3,"fret":12,"midi":67,"tick":5600,"dur":1920,"tech":["hammer"]}
                 ],
@@ -15423,7 +15423,7 @@
                   "key": "D"
                 },
                 "pool": "all",
-                "tab": "/16t 6:10 6:12 6:13 5:10 5:12 5:13 4:10 4:12 4:14 3:10 3:12 3:14 hold | 6:10 6:12h 6:13h 5:10t 5:12h 5:13h 4:10t 4:12h 4:14h 3:10t 3:12h 3:14h hold",
+                "tab": "/16t 6:10 6:12 6:13 5:10 5:12 5:13 4:10 4:12 4:14 3:10 3:12 3:14 hold | 6:10 6:12h 6:13h 5:10h 5:12h 5:13h 4:10h 4:12h 4:14h 3:10h 3:12h 3:14h hold",
                 "position": {
                   "fret": 10,
                   "shifts": "none"
@@ -15445,13 +15445,13 @@
                   {"string":6,"fret":10,"midi":50,"tick":3840,"dur":160,"tech":[],"pick":"d"},
                   {"string":6,"fret":12,"midi":52,"tick":4000,"dur":160,"tech":["hammer"]},
                   {"string":6,"fret":13,"midi":53,"tick":4160,"dur":160,"tech":["hammer"]},
-                  {"string":5,"fret":10,"midi":55,"tick":4320,"dur":160,"tech":["tap"]},
+                  {"string":5,"fret":10,"midi":55,"tick":4320,"dur":160,"tech":["hammer"]},
                   {"string":5,"fret":12,"midi":57,"tick":4480,"dur":160,"tech":["hammer"]},
                   {"string":5,"fret":13,"midi":58,"tick":4640,"dur":160,"tech":["hammer"]},
-                  {"string":4,"fret":10,"midi":60,"tick":4800,"dur":160,"tech":["tap"]},
+                  {"string":4,"fret":10,"midi":60,"tick":4800,"dur":160,"tech":["hammer"]},
                   {"string":4,"fret":12,"midi":62,"tick":4960,"dur":160,"tech":["hammer"]},
                   {"string":4,"fret":14,"midi":64,"tick":5120,"dur":160,"tech":["hammer"]},
-                  {"string":3,"fret":10,"midi":65,"tick":5280,"dur":160,"tech":["tap"]},
+                  {"string":3,"fret":10,"midi":65,"tick":5280,"dur":160,"tech":["hammer"]},
                   {"string":3,"fret":12,"midi":67,"tick":5440,"dur":160,"tech":["hammer"]},
                   {"string":3,"fret":14,"midi":69,"tick":5600,"dur":1920,"tech":["hammer"]}
                 ],
@@ -15485,7 +15485,7 @@
                   "key": "E"
                 },
                 "pool": "all",
-                "tab": "/16t 6:12 6:14 6:15 5:12 5:14 5:15 4:12 4:14 4:16 3:12 3:14 3:16 hold | 6:12 6:14h 6:15h 5:12t 5:14h 5:15h 4:12t 4:14h 4:16h 3:12t 3:14h 3:16h hold",
+                "tab": "/16t 6:12 6:14 6:15 5:12 5:14 5:15 4:12 4:14 4:16 3:12 3:14 3:16 hold | 6:12 6:14h 6:15h 5:12h 5:14h 5:15h 4:12h 4:14h 4:16h 3:12h 3:14h 3:16h hold",
                 "position": {
                   "fret": 12,
                   "shifts": "none"
@@ -15507,13 +15507,13 @@
                   {"string":6,"fret":12,"midi":52,"tick":3840,"dur":160,"tech":[],"pick":"d"},
                   {"string":6,"fret":14,"midi":54,"tick":4000,"dur":160,"tech":["hammer"]},
                   {"string":6,"fret":15,"midi":55,"tick":4160,"dur":160,"tech":["hammer"]},
-                  {"string":5,"fret":12,"midi":57,"tick":4320,"dur":160,"tech":["tap"]},
+                  {"string":5,"fret":12,"midi":57,"tick":4320,"dur":160,"tech":["hammer"]},
                   {"string":5,"fret":14,"midi":59,"tick":4480,"dur":160,"tech":["hammer"]},
                   {"string":5,"fret":15,"midi":60,"tick":4640,"dur":160,"tech":["hammer"]},
-                  {"string":4,"fret":12,"midi":62,"tick":4800,"dur":160,"tech":["tap"]},
+                  {"string":4,"fret":12,"midi":62,"tick":4800,"dur":160,"tech":["hammer"]},
                   {"string":4,"fret":14,"midi":64,"tick":4960,"dur":160,"tech":["hammer"]},
                   {"string":4,"fret":16,"midi":66,"tick":5120,"dur":160,"tech":["hammer"]},
-                  {"string":3,"fret":12,"midi":67,"tick":5280,"dur":160,"tech":["tap"]},
+                  {"string":3,"fret":12,"midi":67,"tick":5280,"dur":160,"tech":["hammer"]},
                   {"string":3,"fret":14,"midi":69,"tick":5440,"dur":160,"tech":["hammer"]},
                   {"string":3,"fret":16,"midi":71,"tick":5600,"dur":1920,"tech":["hammer"]}
                 ],

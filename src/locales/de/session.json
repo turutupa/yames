@@ -511,6 +511,8 @@
       "hand": "Hand: Zeigefinger am {{fret}}. Bund, ein Finger pro Bund.",
       "handShifts": "Hand: Zeigefinger zuerst am {{fret}}. Bund; sie wandert den Hals entlang.",
       "handOpen": "Hand: offene Lage, Zeigefinger über dem 1. Bund.",
+      "handChord": "Hand: Griffbild des offenen {{chord}}-Akkords.",
+      "handChordShifts": "Hand: beginne im Griffbild des offenen {{chord}}-Akkords; sie wandert über das Griffbrett.",
       "viewHint": "Ansicht jederzeit wechseln",
       "left": "übrig",
       "notGraded": "Endet in {{time}}; dann noch mal oder weiter.",

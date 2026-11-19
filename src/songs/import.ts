@@ -294,7 +294,10 @@ function techniquesOf(note: AtNote): SongTechnique[] {
   if (note.vibrato !== model.VibratoType.None) out.push("vibrato");
   if (note.isPalmMute) out.push("palmMute");
   if (note.harmonicType !== model.HarmonicType.None) out.push("harmonic");
-  if (note.isLeftHandTapped || note.beat.tap) out.push("tap");
+  // A left-hand tap is a hammer-on from nowhere: the fretting hand's, soft like
+  // any hammer. Only the picking hand's tap is a tap (fingering audit 2).
+  if (note.beat.tap) out.push("tap");
+  else if (note.isLeftHandTapped && !out.includes("hammer")) out.push("hammer");
   if (note.isLetRing) out.push("letRing");
   return out;
 }

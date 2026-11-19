@@ -42,6 +42,7 @@ import {
   cameraPlan,
   fingering,
   nowNextNeck,
+  onsetFingers,
   readyNeck,
   SPAN_FRETS,
   windowOver,
@@ -117,6 +118,11 @@ export function NeckInstruction({
   const beats = Math.max(1, Math.round(model.barLength / perQuarter));
   const position = take.exercise.position;
   const fingers = useMemo(() => fingering(notes, position), [notes, position]);
+  // The finger at each onset, where a place is played by more than one (a one-string run).
+  const byOnset = useMemo(
+    () => onsetFingers(notes, position, model.onsets, model.barTicks[0] ?? 0, Math.max(1, take.exercise.bars) * model.barLength),
+    [notes, position, model, take.exercise.bars],
+  );
   const hasFingers = useMemo(() => [...fingers.values()].some((f) => f !== "0"), [fingers]);
 
   // Ready: the whole pattern in view. Running: the bar's window.
@@ -143,8 +149,8 @@ export function NeckInstruction({
     return map;
   }, [lights]);
   const [watching, setWatching] = useState(false);
-  const latest = useRef({ verdicts, model, shape, theory, running, fingers, watching });
-  latest.current = { verdicts, model, shape, theory, running, fingers, watching };
+  const latest = useRef({ verdicts, model, shape, theory, running, fingers, byOnset, watching });
+  latest.current = { verdicts, model, shape, theory, running, fingers, byOnset, watching };
 
   /**
    * "start here", before the start: a pill in the gap between two strings,
@@ -367,8 +373,8 @@ export function NeckInstruction({
   /** NOW moved on: the neck, the tags' words, the ring. */
   const showIndex = useCallback(
     (index: number, tick: number | null) => {
-      const { model: m, shape: sh, verdicts: v, theory: th, fingers: fg } = latest.current;
-      neck.setNotes(nowNextNeck(sh, m.onsets, index, v, th, fg), { fade: 0.12 });
+      const { model: m, shape: sh, verdicts: v, theory: th, fingers: fg, byOnset: bo } = latest.current;
+      neck.setNotes(nowNextNeck(sh, m.onsets, index, v, th, fg, bo), { fade: 0.12 });
       // The finger is on the dot itself now; the tag under NOW says nothing.
       if (nowTag.current) nowTag.current.textContent = "";
       const due = m.onsets[index]?.tick;
@@ -419,12 +425,12 @@ export function NeckInstruction({
     let shownBeat = -1;
     const t0 = performance.now();
     const step = () => {
-      const { model: m, shape: sh, theory: th, fingers: fg } = latest.current;
+      const { model: m, shape: sh, theory: th, fingers: fg, byOnset: bo } = latest.current;
       const { index, tick } = watchIndex(m, performance.now() - t0, take.bpm, perQuarter);
       if (index !== shownIndex) {
         shownIndex = index;
         const at = Math.max(0, index);
-        neck.setNotes(nowNextNeck(sh, m.onsets, at, null, th, fg), { fade: 0.08 });
+        neck.setNotes(nowNextNeck(sh, m.onsets, at, null, th, fg, bo), { fade: 0.08 });
         placeOverlay(at, null);
       }
       const b = beatInBar(m, tick, perQuarter);
@@ -452,8 +458,8 @@ export function NeckInstruction({
   // A new verdict: the played notes take its colour, NOW and NEXT unchanged.
   useEffect(() => {
     if (!running || shown.current.index < 0) return;
-    const { model: m, shape: sh, theory: th, fingers: fg } = latest.current;
-    neck.setNotes(nowNextNeck(sh, m.onsets, shown.current.index, verdicts, th, fg), { fade: 0.12 });
+    const { model: m, shape: sh, theory: th, fingers: fg, byOnset: bo } = latest.current;
+    neck.setNotes(nowNextNeck(sh, m.onsets, shown.current.index, verdicts, th, fg, bo), { fade: 0.12 });
   }, [verdicts, running, neck]);
 
   // The beat counter's row sits just over the overview strip, in the room the

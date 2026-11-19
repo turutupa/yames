@@ -10,6 +10,7 @@ import {
   fingerFor,
   fingering,
   nowNextNeck,
+  onsetFingers,
   readyNeck,
   SPAN_FRETS,
   warmupPosition,
@@ -17,6 +18,7 @@ import {
   windowOver,
 } from "./practiceModel";
 import { warmupClockOf } from "./useWarmupBeat";
+import { fingerPlan } from "../../../paths/fingering";
 
 const exercise = ALT.steps[0].exercises[0];
 const take = buildTake(ALT, exercise, 80, null);
@@ -274,5 +276,32 @@ describe("the runway's lanes", () => {
     const used = usedStrings(model);
     expect(used).toEqual([...new Set(model.notes.map((n) => n.string))].sort((a, b) => a - b));
     expect(usedStrings({ notes: [] })).toEqual([1, 2, 3, 4, 5, 6]);
+  });
+});
+
+describe("the finger at each moment (fingering audit 2)", () => {
+  // A one-string run: fret 7 is the ring finger going up from 5 and the index after the shift.
+  const P = (fret: number, tick: number) => ({ string: 1, fret, tick, tech: [] as string[] });
+  const run = [P(5, 0), P(7, 480), P(8, 960), P(10, 1440), P(12, 1920), P(10, 2400), P(8, 2880), P(7, 3360)];
+  const at = { fret: 5, shifts: "allowed" as const };
+  const plan = fingerPlan(run, at).map((s) => String(s.finger));
+  const pattern = run.map((n, i) => ({ id: i + 1, tick: n.tick, places: [{ string: 1, fret: n.fret }] }));
+  // Two passes of the one-bar pattern, as a Take writes it out.
+  const take = [...pattern, ...pattern.map((o) => ({ ...o, id: o.id + 8, tick: o.tick + 3840 }))];
+
+  it("finds each onset's own finger, pass after pass", () => {
+    const by = onsetFingers(run, at, take, 0, 3840);
+    expect(by.map((m) => m?.get(`1:${take[by.indexOf(m)].places[0].fret}`))).toEqual([...plan, ...plan]);
+    expect(new Set(plan.filter((_, i) => run[i].fret === 7)).size).toBe(2);
+  });
+
+  it("lights NOW with the finger used then, not the place's usual one", () => {
+    const by = onsetFingers(run, at, take, 0, 3840);
+    const usual = fingering(run, at);
+    const shape = run.map((n) => N(1, n.fret));
+    for (let i = 0; i < take.length; i++) {
+      const now = nowNextNeck(shape, take, i, null, false, usual, by).find((n) => n.kind === "now")!;
+      expect(now.label).toBe(plan[i % 8]);
+    }
   });
 });

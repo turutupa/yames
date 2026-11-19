@@ -370,3 +370,20 @@ describe("the phone's scrolling view (acceptance 2, N-P1-2)", () => {
     expect(l.geo.height).toBeLessThanOrEqual(400);
   });
 });
+
+describe("a hammer-on from nowhere", () => {
+  it("is marked h before its number, with no slur from the string's last note", () => {
+    const m = patternModel(
+      [
+        { string: 6, fret: 8, tick: 0, dur: 160 },
+        { string: 5, fret: 5, tick: 160, dur: 160, tech: ["hammer"] },
+        { string: 5, fret: 7, tick: 320, dur: 160, tech: ["hammer"] },
+      ],
+      BAR,
+      1,
+    );
+    const [, nowhere, after] = m.notes;
+    expect(nowhere.link).toEqual({ mark: "h", fromTicks: m.passTicks });
+    expect(after.link).toEqual({ mark: "h", fromTicks: 160 });
+  });
+});
