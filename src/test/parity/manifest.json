@@ -1567,6 +1567,11 @@
       "store": "settings.json",
       "read": true,
       "written": true
+    },
+    "stage.takeFps": {
+      "store": "settings.json",
+      "read": true,
+      "written": false
     }
   },
   "tools": [

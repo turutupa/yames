@@ -151,7 +151,7 @@ export function useNeckSlot(
 }
 
 /**
- * A Take on the neck while it runs: the frame rate capped, and every note the
+ * A Take on the neck while it runs: the frame rate the governor's (`stage3d/takeRate.ts`), and every note the
  * analyzer rules on plucked in the colour of its verdict.
  *
  * Reads `lights`, the same provisional per-note verdicts the tab is lit with,
@@ -215,6 +215,38 @@ export function useNeckOffLearning(view: MainView): void {
   useEffect(() => {
     if (!on) neck.setView({ kind: "hidden" }, null);
   }, [neck, on]);
+}
+
+/** The screens a Session is started from: the neck is not on them, and is about to be wanted. */
+const WARM_VIEWS: readonly MainView[] = ["today", "paths", "progress"];
+/** After the screen's own entrance has played. */
+const WARM_AFTER_MS = 1200;
+
+/**
+ * On Today, Paths and Progress, once the screen has settled and the browser is
+ * idle, get the 3D neck ready (`NeckStage.prewarm`), so that pressing Start
+ * does not pay for the engine in the frame the Session opens on. Never on a
+ * tool or in Settings: a player who only uses the metronome never loads it.
+ */
+export function useNeckPrewarm(view: MainView): void {
+  const neck = useNeck();
+  const warm = WARM_VIEWS.includes(view);
+  useEffect(() => {
+    if (!warm || !neck.prewarm) return;
+    let idle: number | undefined;
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    const timer = setTimeout(() => {
+      if (w.requestIdleCallback) idle = w.requestIdleCallback(() => neck.prewarm?.(), { timeout: 2000 });
+      else neck.prewarm?.();
+    }, WARM_AFTER_MS);
+    return () => {
+      clearTimeout(timer);
+      if (idle !== undefined) w.cancelIdleCallback?.(idle);
+    };
+  }, [neck, warm]);
 }
 
 /**

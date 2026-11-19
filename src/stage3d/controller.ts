@@ -13,6 +13,7 @@ import { neckPalette, subscribeNeckPalette } from "./neckTheme";
 import { Adaptive } from "./quality";
 import { FrameScheduler, type SchedulerDeps } from "./scheduler";
 import { PROBE_FRAMES, judgeProbe, type ProbeVerdict } from "./speed";
+import { TAKE_FPS_MAX, takeRate, type TakeRate } from "./takeRate";
 
 export type StageMode = "idle" | "loading" | "3d" | "fallback";
 
@@ -30,9 +31,12 @@ export type StageSnapshot = {
 export const HIDE_DELAY_MS = 120;
 /** How long a lost WebGL context may stay lost before the fallback takes over. */
 export const LOST_GRACE_MS = 3000;
-/** Frames per second while a Take runs (rule 1). */
-export const TAKE_FPS = 30;
-export const CALM_FPS = 60;
+/**
+ * Frames per second off a Take: the display's own, up to this. During a Take
+ * the governor decides (`takeRate.ts`, rule 1): the display's rate where the
+ * machine holds it, `TAKE_FPS_LOW` where it does not or should not be asked.
+ */
+export const CALM_FPS = TAKE_FPS_MAX;
 
 /**
  * Room a slot keeps between the framed neck and the overview strip, for its
@@ -70,6 +74,15 @@ export type ControllerDeps = {
   probe?: boolean;
   /** The probe found the frames too slow: remember it. */
   onSlow?: (v: ProbeVerdict) => void;
+  /**
+   * This machine cannot draw the 3D neck: no WebGL2 on a GPU, or the frame-time
+   * guard found it too slow. (Not "the player chose the flat neck".) A Take is
+   * then held to the low rate, as on the stage's lowest tier: what draws the
+   * neck on the CPU is likely to composite the runway there too.
+   */
+  slow?: () => boolean;
+  /** The Take's frame-rate governor (the app's one, unless a test brings its own). */
+  takeRate?: TakeRate;
 };
 
 /** The last controller built, for the `?shot=` scenes and their tests. */
@@ -101,12 +114,17 @@ export class StageController {
   lastProbe: ProbeVerdict | null = null;
   readonly scheduler: FrameScheduler;
   private readonly adaptive: Adaptive;
+  private readonly rate: TakeRate;
+  private readonly now: () => number;
   /** Errors from loading or running the engine, newest last (for the shot scenes). */
   readonly errors: string[] = [];
 
   constructor(private readonly deps: ControllerDeps) {
     this.scheduler = new FrameScheduler((dt, info) => this.frame(dt, info.gapMs), deps.scheduler);
+    this.scheduler.setMaxFps(CALM_FPS);
     this.adaptive = new Adaptive((step, scale) => this.engine?.lowerQuality(step, scale) ?? false);
+    this.rate = deps.takeRate ?? takeRate;
+    this.now = deps.scheduler?.now ?? (() => performance.now());
   }
 
   // ─── For React ───
@@ -132,6 +150,11 @@ export class StageController {
   get tier(): number | null {
     return this.engine?.tier ?? null;
   }
+  /** Why the Take's rate is what it is (`takeRate.ts`), for the shot scenes and the e2e. */
+  get takeRateWhy(): string {
+    void this.rate.fps; // `why` is of the rate last read: the neck's
+    return this.rate.why;
+  }
 
   /**
    * The provider's layer exists. A fresh canvas goes into it (never a canvas
@@ -148,6 +171,8 @@ export class StageController {
     host.appendChild(canvas);
     this.canvas = canvas;
     stageDebug.current = this;
+    // Reachable from outside the bundle too: the e2e reads the Take's rate and the frames drawn off it.
+    (window as unknown as { __NECK__?: typeof stageDebug }).__NECK__ = stageDebug;
     document.addEventListener("visibilitychange", this.onVisibility);
     window.addEventListener("resize", this.onResize);
     window.addEventListener("scroll", this.onScroll, { capture: true, passive: true });
@@ -255,9 +280,18 @@ export class StageController {
     this.scheduler.invalidate();
   }
 
+  /**
+   * Load and build the backend now, with nothing to show (`NeckStage.prewarm`).
+   * The view stays hidden, so the scheduler stays paused and no frame is drawn
+   * beyond the frame-time guard's own.
+   */
+  prewarm(): void {
+    if (this.attached && this.snap.mode === "idle") this.ensureBackend(true);
+  }
+
   setTakeRunning(on: boolean): void {
     this.takeRunning = on;
-    this.scheduler.setMaxFps(on ? TAKE_FPS : CALM_FPS);
+    this.scheduler.setMaxFps(on ? this.rate.begin({ tier: this.engine?.tier ?? (this.deps.slow?.() ? 0 : null) }) : CALM_FPS);
     this.adaptive.reset();
   }
 
@@ -313,6 +347,7 @@ export class StageController {
       pluck: (s, f, k) => this.pluck(s, f, k),
       sweep: () => this.sweep(),
       setTakeRunning: (on) => this.setTakeRunning(on),
+      prewarm: () => this.prewarm(),
       project: (s, f) => this.project(s, f),
       is3d,
     };
@@ -367,7 +402,12 @@ export class StageController {
     this.canvas = canvas;
   }
 
-  private ensureBackend() {
+  /**
+   * `inPieces`: building ahead of need (`prewarm`), so nobody is waiting and
+   * the work is cut where it can be: the engine is made in one task and the
+   * frame-time guard's frames are drawn in the next, each under a long task.
+   */
+  private ensureBackend(inPieces = false) {
     if (this.snap.mode !== "idle" || !this.canvas || !this.attached) return;
     if (this.deps.flat?.()) {
       this.flatFallback = true;
@@ -400,6 +440,7 @@ export class StageController {
           onRestored: this.onRestored,
         });
       })
+      .then((engine) => (engine && inPieces ? new Promise<StageEngine>((r) => setTimeout(() => r(engine), 0)) : engine))
       .then((engine) => {
         if (!engine) return;
         if (stale()) {
@@ -538,10 +579,16 @@ export class StageController {
   private frame(dt: number, gapMs: number | null): boolean {
     const engine = this.engine;
     if (!engine || this.snap.view.kind === "hidden") return false;
-    if (gapMs !== null && this.scheduler.fpsCap >= 50) this.adaptive.sample(gapMs);
+    // Off a Take, slow frames cost quality (`Adaptive`); in one they cost the rate (`takeRate.ts`).
+    if (gapMs !== null && !this.takeRunning) this.adaptive.sample(gapMs);
     else this.adaptive.reset();
     try {
-      return engine.frame(dt);
+      if (!this.takeRunning || gapMs === null) return engine.frame(dt);
+      const began = this.now();
+      const more = engine.frame(dt);
+      const expected = Math.max(this.scheduler.displayMs, 1000 / this.scheduler.fpsCap);
+      if (this.rate.sample(gapMs, expected, this.now() - began)) this.scheduler.setMaxFps(this.rate.fps);
+      return more;
     } catch (e) {
       this.toFallback(e);
       return false;

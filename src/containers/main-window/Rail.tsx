@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { forwardRef, memo } from "react";
 import { useTranslation } from "react-i18next";
 import { showFloating } from "../../ipc.desktop";
 import { IS_MOBILE } from "../../platform";
@@ -293,8 +293,12 @@ export const MODES = [
  *
  * Settings is not a mode: it opens as a sheet over the whole window (U1.5), so
  * its row is a button here rather than a fourth entry in the mode list.
+ *
+ * Memoised: the window that renders it re-renders at every beat, and nothing
+ * here follows the beat. `MainWindow` hands it handlers that do not change
+ * (`useStableHandlers`); a new inline closure in its props would undo that.
  */
-export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
+export const Rail = memo(forwardRef<PresetSidebarHandle, RailProps>(function Rail(
   {
     state,
     view,
@@ -670,4 +674,4 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
       </div>
     </nav>
   );
-});
+}));
