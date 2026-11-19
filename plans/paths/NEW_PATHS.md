@@ -240,7 +240,7 @@ do X, or start anyway". Arrows are data now (`prerequisites.paths`, below).
 | Technique | Metal Rhythm | Rhythm Foundations (Beginner) | 6 weeks | written |
 | Technique | Funk Lines | Rhythm Foundations (Intermediate) | 5 weeks | written |
 | Style | Blues and Pentatonics | Rhythm Foundations (Beginner) | 14 weeks | written |
-| Style | Classic Rock | Rhythm Foundations (Beginner) | 7 weeks | written |
+| Style | Classic Rock | Rhythm Foundations (Beginner) | 13 Steps, 46 Exercises, about 9 weeks | written, extended once (2026-11-19) |
 | Harmony | Know the Neck | nothing: the first Path for the harmony route | 6 weeks | written |
 | Harmony | Scales and Modes | Know the Neck (Beginner) | 6 weeks | written |
 | Harmony | **Triads** | Know the Neck (Beginner), Scales and Modes (Beginner) | 18 Steps, 60 Exercises, about 12 weeks | written, extended twice (2026-11-19) |
@@ -600,6 +600,21 @@ untouched, so nobody's progress moves.
 Still to do for Blues, in the same spirit: box 5 and a line that enters box 4;
 the form in E in open position with its turnarounds; a jump or uptempo shuffle;
 slow blues in a second key; a three-chorus solo with a shape.
+
+### Classic Rock, extended (2026-11-19)
+
+Two Steps and 7 Exercises added (`src/paths/specs/classic-rock-more.ts`), none
+replacing anything: 11 Steps and 39 Exercises became 13 and 46.
+
+| Level | New Step | What it consolidates |
+|---|---|---|
+| Beginner | The same riffs in E | The root line five frets lower, where half its notes become open strings; the fourths and the pedal riff on the same frets one string lower. Two ways to move a riff: by frets, or by strings. |
+| Intermediate | The next box up | Box 2 of A minor pentatonic, which the two-string extension was the top of: the shape, a four-bar line through box 1 into box 2 and home, a lick that lives in box 2, a your-turn. |
+
+Still to do for Classic Rock, in the same spirit: the licks of `box-extension`
+and `repeating-licks` in E at the twelfth fret; double stops over a second
+progression; a chord-tone Step over I, IV, V (the Path only has I, flat VII,
+IV); a second, shorter solo in E that uses box 2 and the open-position riffs.
 
 ## Proof-reading (2026-11-18)
 
