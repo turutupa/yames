@@ -22,6 +22,7 @@ import { definePath } from "../spec";
 import type { ExerciseSpec, VariantParams } from "../spec";
 import type { PassBar } from "../format";
 import { ladder } from "../templates";
+import { SEVENTHS_BLUES, SIXTEENTH_STRUMS, STRUMS_BETWEEN_BEATS } from "./first-chords-more";
 
 const even = (min: number, overBars = 4): PassBar => ({ metric: "timingEvenness", min, overBars });
 const heard = (min: number, overBars = 4): PassBar => ({ metric: "notesHeard", min, overBars });
@@ -157,7 +158,7 @@ export default definePath({
   title: "First Chords and Strumming",
   kind: "mechanics",
   category: "foundations",
-  goal: "Play ten open chords that ring, change between them in time, strum them down and up with a pattern, and play a whole song of sixteen bars.",
+  goal: "Play thirteen chords that ring, change between them in time, strum them down and up with a pattern, play a twelve-bar blues, and play a whole song of sixteen bars.",
   level: "beginner",
   assumes:
     "You have a guitar that is in tune, you can hold a pick, and you can press one string down and make it sound. Nothing else: no chords, no reading, no theory. The minutes listed are one pass through the material. Chord changes take weeks of short daily practice to become automatic, and that is normal.",
@@ -167,7 +168,7 @@ export default definePath({
   },
   paceLadders: true,
   orderRationale:
-    "One chord before two, and two before three: the first Step is only E minor, which uses two fingers and all six strings, so the player can attend to making it ring and to the click. Each new chord arrives with the easiest change into it (E minor to A minor, where two fingers move as a pair; A minor to C, where one finger moves), and is first checked one string at a time, the one place the app can hear whether a chord is clean. Strums go from one a bar to four a bar before any upstroke, because time to change is what a beginner lacks. G and D come in the second Level with the hardest changes, then the upstroke, then patterns as the same swing with strokes left out, so that a pattern is never a new movement. The last Level adds A, E and D minor, takes F in three small steps instead of as a wall, and brings dynamics before the song, because a song strummed at one volume is the beginner's sound. Chord theory is left to Triads and Chords in a Key on purpose: this Path is hands.",
+    "One chord before two, and two before three: the first Step is only E minor, which uses two fingers and all six strings, so the player can attend to making it ring and to the click. Each new chord arrives with the easiest change into it (E minor to A minor, where two fingers move as a pair; A minor to C, where one finger moves), and is first checked one string at a time, the one place the app can hear whether a chord is clean. Strums go from one a bar to four a bar before any upstroke, because time to change is what a beginner lacks. G and D come in the second Level with the hardest changes, then the upstroke, then patterns as the same swing with strokes left out, so that a pattern is never a new movement. Strums between the beats closes that Level straight after patterns, because a rest and an off-beat upstroke are the same swing with more strokes left out, and its shorter pattern shows the player how to buy a whole beat for a change before the chords multiply. The last Level adds A, E and D minor, takes F in three small steps instead of as a wall, and brings dynamics before the song, because a song strummed at one volume is the beginner's sound. The seventh chords follow A and E directly: A7 and E7 are those chords with one finger lifted and D7 is D with one note changed, the twelve-bar blues is the A, D, E form of that Step grown from eight bars to twelve, and both come before F so that the first long form is played on easy shapes. Sixteenth strums come after the dynamics and just before the song, as the last new thing the strumming hand learns and at slow tempos; the song then goes back to eighths, so that its sixteen bars ask for nothing new. Chord theory is left to Triads and Chords in a Key on purpose: this Path is hands.",
   gradingLimits:
     "The app times each strum against where it is written and counts the strums it heard. To the app a strum is one attack, however many strings it crosses: it cannot tell which strings rang, whether one buzzed, or whether it was the right chord. That is what the string checks are for. There you pick the chord one string at a time, and each note is checked. Upstrokes are quieter than downstrokes and one may be missed, so the bar on strums heard is forgiving. The direction of each stroke, muting, and how hard you hit are taught here and are yours to keep honest; accents are read roughly, louder or not. None of this has been tried on a real guitar yet: a slow, spread-out strum may be heard as two attacks, and then a take reads worse than you played. Direct input or headphones are the honest way to play the band Exercises. Choosing your own pattern and playing along with a song are 'your turn', self-checked and labelled 'not checked yet'.",
   steps: [
@@ -798,6 +799,7 @@ export default definePath({
         },
       ],
     },
+    STRUMS_BETWEEN_BEATS,
     // ----------------------------------------------------------------- Advanced
     {
       id: "a-and-e",
@@ -894,6 +896,7 @@ export default definePath({
         },
       ],
     },
+    SEVENTHS_BLUES,
     {
       id: "small-f",
       title: "D minor, and the way to F",
@@ -905,7 +908,7 @@ export default definePath({
         "The small F: the same, with the first finger laid flat so that it holds both the B string and the top string at fret 1. Roll it slightly onto its bony edge, and bring the elbow in toward your side.",
         "Play both F chords from the D string. The two low strings stay quiet.",
       ],
-      payoff: "Ten chords, the F that stops most beginners, and one of the great four-chord progressions.",
+      payoff: "Thirteen chords, the F that stops most beginners, and one of the great four-chord progressions.",
       difficultyException:
         "Two of the five Exercises are single notes in quarters, after an eight-bar form with the band, so the note rate falls. The demand is the first finger holding two strings at once.",
       exercises: [
@@ -1088,6 +1091,7 @@ export default definePath({
         },
       ],
     },
+    SIXTEENTH_STRUMS,
     {
       id: "a-whole-song",
       title: "A whole song",
@@ -1098,7 +1102,9 @@ export default definePath({
         "Chorus, bars 9 to 16: C, G, D, E minor, then C, G and two bars of D. Down, down-up, up-down-up.",
         "The two bars of D at the end lead back to the G that starts the verse again.",
       ],
-      payoff: "A whole song, start to finish, in time with a band.",
+      difficultyException:
+        "Eighth-note strums after a Step of sixteenths, so the note rate falls. The demand is sixteen bars in a row with a change of strum in the middle, which the metric does not count.",
+      payoff: "A whole song, start to finish, in time with a band. From here, Rhythm Foundations trains your sense of time on single notes with a click, and Triads explains what your chords are made of.",
       exercises: [
         {
           id: "verse",
@@ -1168,7 +1174,7 @@ export default definePath({
           purpose: "Find the chords of a song you like that uses chords from this Path, and strum along with it or sing over it. The written line is the song from this Step, as a stand-in.",
           howTo: [
             "Straight time, any pattern you like, 55 to 80 BPM for the written song, or the tempo of the song you choose.",
-            "Start with four downstrokes a bar. When the changes are on time, try the pattern. If a chord in your song is not one of your ten, look for an easier version of the song that uses G, C and D, or A, D and E.",
+            "Start with four downstrokes a bar. When the changes are on time, try the pattern. If a chord in your song is not one of your thirteen, look for an easier version of the song that uses G, C and D, or A, D and E.",
             NOT_CHECKED_YET,
           ],
           coach: "Not checked yet. Play it for someone, or record it and listen to the whole thing.",
@@ -1217,13 +1223,13 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: five chords and the upstroke",
-      summary: "G and D, and with them the three chords behind a thousand songs, eighth-note strumming with a hand that never stops, and strumming patterns made by leaving strokes out.",
+      summary: "G and D, and with them the three chords behind a thousand songs, eighth-note strumming with a hand that never stops, strumming patterns made by leaving strokes out, and strums placed between the beats: a rest, the off-beat upstroke, and a pattern that leaves room for the change.",
       startHereIf: [
         "You can change between E minor, A minor and C with 4 strums a bar at 70 BPM.",
         "You only strum downward.",
         "You know a few chords, and your strumming stumbles or speeds up at the change.",
       ],
-      steps: ["g-major", "d-major", "down-up", "patterns"],
+      steps: ["g-major", "d-major", "down-up", "patterns", "strums-between-beats"],
       warmups: [
         {
           id: "major-walk",
@@ -1242,14 +1248,14 @@ export default definePath({
     },
     {
       id: "advanced",
-      title: "Advanced: ten chords, and a whole song",
-      summary: "A, E and D minor, the small F reached in three steps, accents, stops and bass notes, and a sixteen-bar song with a verse and a chorus.",
+      title: "Advanced: thirteen chords, and a whole song",
+      summary: "A, E and D minor, three seventh chords and a twelve-bar blues in A, the small F reached in three steps, accents, stops and bass notes, sixteenth-note strumming, and a sixteen-bar song with a verse and a chorus. After it, Rhythm Foundations trains your sense of time on single notes with a click, and Triads explains what the chords are made of.",
       startHereIf: [
         "You can strum down, down-up, up-down-up through G, D, E minor and C at 75 BPM.",
         "You know 5 or 6 open chords and avoid songs with an F in them.",
         "Your strumming is steady, and every bar sounds the same.",
       ],
-      steps: ["a-and-e", "small-f", "light-and-shade", "a-whole-song"],
+      steps: ["a-and-e", "sevenths-blues", "small-f", "light-and-shade", "sixteenth-strums", "a-whole-song"],
       warmups: [
         {
           id: "small-barre",
