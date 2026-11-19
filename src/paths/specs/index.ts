@@ -5,6 +5,8 @@ import classicRock from "./classic-rock";
 import shred from "./shred";
 import sweepPicking from "./sweep-picking";
 import legato from "./legato";
+import rhythmFoundations from "./rhythm-foundations";
+import metalRhythm from "./metal-rhythm";
 import type { PathSpec } from "../spec";
 
 export const SPECS: readonly PathSpec[] = [
@@ -14,5 +16,7 @@ export const SPECS: readonly PathSpec[] = [
   classicRock,
   shred,
   legato,
+  rhythmFoundations,
+  metalRhythm,
   // new paths go above this line
 ];

@@ -13,7 +13,7 @@ import { concreteExercises } from "./pipeline";
 import { exerciseAlphaTex, exerciseScore } from "./toScore";
 import { notesForTake, resolveVariant } from "./variants";
 
-const PACKS = ["alternate-picking", "sweep-picking", "blues-pentatonics", "classic-rock", "shred", "legato"];
+const PACKS = ["alternate-picking", "sweep-picking", "blues-pentatonics", "classic-rock", "shred", "legato", "rhythm-foundations", "metal-rhythm"];
 
 function loadPack(id: string): PathDoc {
   return JSON.parse(readFileSync(path.join(process.cwd(), `src/paths/packs/${id}.json`), "utf8")) as PathDoc;

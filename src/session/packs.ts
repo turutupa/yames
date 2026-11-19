@@ -30,8 +30,10 @@ const OVERLAY_FILES = import.meta.glob(["../paths/packs/i18n/*/*.json", "!../pat
  * sweeps the notes usually ring into each other, so right notes are mostly
  * "not checked" there, and the result says so.
  *
- * Legato is graded the same way; an unheard hammer-on or pull-off costs nothing,
- * so its picked notes carry the grade (`plans/paths/NEW_PATHS.md`).
+ * Rhythm Foundations, Legato and Metal Rhythm (`plans/paths/NEW_PATHS.md`) are
+ * graded the same way. In Legato an unheard hammer-on or pull-off costs nothing,
+ * so its picked notes carry the grade; in Metal Rhythm a two-note power chord is
+ * one attack, timed and counted and never pitch-checked.
  *
  * Blues and Classic Rock are Theory Paths taught through written licks,
  * phrases and arpeggios, graded the same way: timing, notes heard, extras and
@@ -46,7 +48,9 @@ export const RUNNABLE_PATH_IDS: readonly string[] = [
   "sweep-picking",
   "blues-pentatonics",
   "classic-rock",
+  "rhythm-foundations",
   "legato",
+  "metal-rhythm",
 ];
 
 /** Why a Path is not runnable yet, as a `session.paths.*` key. */

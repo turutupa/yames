@@ -65,7 +65,9 @@ describe("Where do you start? — what it offers", () => {
       "classic-rock",
       "alternate-picking",
       "sweep-picking",
+      "rhythm-foundations",
       "legato",
+      "metal-rhythm",
     ]);
   });
 
