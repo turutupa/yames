@@ -29,7 +29,11 @@ function generator(seed: number): () => number {
   };
 }
 
-/** The Exercise as one concrete set of notes. Its id gains `#variantId`. */
+/**
+ * The Exercise as one concrete set of notes. Its id gains `#variantId`. The text
+ * is the variant's own where it has some (`purpose`, `howTo`), the Exercise's
+ * otherwise, so what a screen reads off the concrete Exercise fits its notes.
+ */
 export function exerciseWithVariant(ex: Exercise, variant: ExerciseVariant): Exercise {
   const { variation: _variation, ...base } = ex;
   const merged: Exercise = {
@@ -51,6 +55,10 @@ export function exerciseWithVariant(ex: Exercise, variant: ExerciseVariant): Exe
   if (variant.harmony) merged.harmony = variant.harmony;
   if (variant.landings) merged.landings = variant.landings;
   if (variant.passBars) merged.passBars = variant.passBars;
+  // A variant's own words replace the Exercise's, each field whole. An empty
+  // one is not text (the validator refuses it): the Exercise's stays.
+  if (typeof variant.purpose === "string" && variant.purpose.trim()) merged.purpose = variant.purpose;
+  if (Array.isArray(variant.howTo) && variant.howTo.length > 0) merged.howTo = variant.howTo;
   return merged;
 }
 

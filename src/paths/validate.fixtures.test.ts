@@ -2,7 +2,7 @@
 // Path, breaks one thing, and asserts the rule that should catch it does. The
 // last test fails if anyone adds a rule without a row here.
 import { describe, expect, it } from "vitest";
-import { MINIMAL_SPEC, exercise } from "./fixtures/minimal";
+import { MINIMAL_SPEC, VARIANT_TEXT_SPEC, exercise } from "./fixtures/minimal";
 import type { Exercise, PathDoc, Step } from "./format";
 import { buildPath } from "./generate";
 import type { ExerciseSpec, PathSpec } from "./spec";
@@ -495,6 +495,16 @@ const FIXTURES: Record<RuleId, () => unknown> = {
     warm(d).variation!.variants[3].computed.difficulty = 40;
     return d;
   },
+  "variation.text": () => {
+    const d = fresh();
+    warm(d).variation!.variants[1].howTo = ["Play it evenly.", "  "];
+    return d;
+  },
+  "variation.firstText": () => {
+    const d = fresh();
+    warm(d).variation!.variants[0].howTo = ["Play it evenly, in the first key."];
+    return d;
+  },
   "warmup.variants": () => {
     const d = fresh();
     warm(d).variation!.variants.length = 3;
@@ -645,6 +655,65 @@ describe("the honesty lint", () => {
     const d = fresh();
     ex(d, "scale").howTo = ["Mute with your palm, use a downstroke, and keep your hand relaxed."];
     expect(validatePath(d).filter((i) => i.rule === "honesty.banned")).toEqual([]);
+  });
+});
+
+describe("a variant's own text", () => {
+  const withText = (): PathDoc => JSON.parse(JSON.stringify(buildPath(VARIANT_TEXT_SPEC))) as PathDoc;
+  const second = (d: PathDoc) => warm(d).variation!.variants[1];
+  const rulesAt = (d: unknown, rule: RuleId) => validatePath(d).filter((i) => i.rule === rule).map((i) => i.where);
+
+  it("is valid when it says something", () => {
+    const d = withText();
+    expect(second(d).howTo).toEqual(["Play it evenly.", "Start at fret 5."]);
+    expect(validatePath(d).map((i) => `${i.rule} ${i.where} ${i.message}`)).toEqual([]);
+  });
+
+  it("goes through the banned-claims lint, as the words of that variant", () => {
+    const d = withText();
+    second(d).howTo = ["Play it evenly.", "The app detects your muting in this key."];
+    const where = rulesAt(d, "honesty.banned");
+    expect(where).toContain(`${warm(d).id}#key=2.howTo 2`);
+    // Only that variant: the Exercise's own words and the other variants' are clean.
+    expect(where.every((w) => w.startsWith(`${warm(d).id}#key=2.`))).toBe(true);
+    const p = withText();
+    second(p).purpose = "Yames grades your pick direction in this key as well.";
+    expect(rulesAt(p, "honesty.banned")).toContain(`${warm(p).id}#key=2.purpose`);
+  });
+
+  it("goes through the TODO and jargon lints", () => {
+    const d = withText();
+    second(d).howTo = ["Play it evenly.", "TODO: the frets in this key."];
+    expect(rulesAt(d, "schema.todo")).toEqual([`${warm(d).id}#key=2.howTo 2`]);
+    const p = withText();
+    second(p).purpose = "TODO: say what this key is for, and why.";
+    expect(rulesAt(p, "schema.todo")).toEqual([`${warm(p).id}#key=2.purpose`]);
+    const j = withText();
+    second(j).purpose = "Right notes in this key come from pitch.rs.";
+    expect(rulesAt(j, "text.jargon")).toEqual([`${warm(j).id}#key=2.purpose`]);
+  });
+
+  it("may not be empty, thin, or something other than text", () => {
+    const broken: Array<(v: Record<string, unknown>) => void> = [
+      (v) => (v.purpose = ""),
+      (v) => (v.purpose = "Too thin."),
+      (v) => (v.purpose = 7),
+      (v) => (v.howTo = []),
+      (v) => (v.howTo = ["Play it evenly.", ""]),
+      (v) => (v.howTo = "Play it evenly."),
+      (v) => (v.howTo = ["Play it evenly.", 7]),
+    ];
+    for (const [index, breakIt] of broken.entries()) {
+      const d = withText();
+      breakIt(second(d) as unknown as Record<string, unknown>);
+      expect(rulesAt(d, "variation.text").length, `case ${index}`).toBe(1);
+    }
+  });
+
+  it("is not for the first variant, whose text is the Exercise's", () => {
+    const d = withText();
+    warm(d).variation!.variants[0].purpose = "A purpose of its own for the first variant.";
+    expect(rulesAt(d, "variation.firstText")).toEqual([`${warm(d).id}#key=0`]);
   });
 });
 

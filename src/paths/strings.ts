@@ -6,7 +6,8 @@
  * second pack: one file per language and Path,
  * `src/paths/packs/i18n/<lng>/<pathId>.json`, keyed by stable ids (`path.title`,
  * `level.<levelId>.summary`, `step.<stepId>.howTo.0`,
- * `exercise.<exerciseId>.coachLine`, ...). `en/<pathId>.json` is the English
+ * `exercise.<exerciseId>.coachLine`,
+ * `exercise.<exerciseId>.variant.<variantId>.howTo.1`, ...). `en/<pathId>.json` is the English
  * source for translators, written by `npm run paths -- strings` from the pack.
  *
  * Each translated string carries a hash of the English it was translated from
@@ -19,7 +20,7 @@
  * variant labels and author-facing notes (`orderRationale`,
  * `difficultyException`, `feedbackNote`, review history) stay as they are.
  */
-import type { Exercise, Level, PathDoc, Step } from "./format";
+import type { Exercise, Level, PathDoc, Step, Variation } from "./format";
 
 /** Bump if the key scheme changes in a way old overlays cannot follow. */
 export const STRINGS_VERSION = 1;
@@ -72,7 +73,32 @@ function exerciseText(ex: Exercise, lookup: Lookup): Exercise {
     detection: { ...ex.detection, notes: list(lookup, `${k}.detection`, ex.detection.notes) ?? [] },
   };
   if (ex.selfCheck) out.selfCheck = list(lookup, `${k}.selfCheck`, ex.selfCheck);
+  if (ex.variation) out.variation = variationText(ex.variation, k, lookup);
   return out;
+}
+
+/**
+ * A variant's own words (`purpose`, `howTo`), under
+ * `exercise.<exerciseId>.variant.<variantId>.purpose` and `...howTo.<n>`. A
+ * variant id is `dimension=value` pairs joined by commas ("key=F#-minor",
+ * "position=5,key=Bb"); it is used whole and unescaped: a key is one JSON
+ * object key, never split on its dots, in the overlays, the todo files and
+ * here. Variants with no text of their own are shared, not copied, and so is
+ * the whole variation when none has any.
+ */
+function variationText(variation: Variation, exerciseKey: string, lookup: Lookup): Variation {
+  if (!variation.variants.some((v) => v.purpose !== undefined || v.howTo !== undefined)) return variation;
+  return {
+    ...variation,
+    variants: variation.variants.map((variant) => {
+      if (variant.purpose === undefined && variant.howTo === undefined) return variant;
+      const k = `${exerciseKey}.variant.${variant.id}`;
+      const out = { ...variant };
+      if (variant.purpose !== undefined) out.purpose = lookup(`${k}.purpose`, variant.purpose);
+      if (variant.howTo !== undefined) out.howTo = list(lookup, `${k}.howTo`, variant.howTo);
+      return out;
+    }),
+  };
 }
 
 function stepText(step: Step, lookup: Lookup): Step {
@@ -105,7 +131,8 @@ function levelText(level: Level, lookup: Lookup): Level {
 /**
  * The one walk over a pack's player-facing text. Extraction and translation
  * both go through it, so the keys a translator sees are the keys the app reads.
- * Copies only what holds text; notes, variants and grading are shared.
+ * Copies only what holds text; notes, grading and every variant without words
+ * of its own are shared.
  */
 function walk(doc: PathDoc, lookup: Lookup): PathDoc {
   const out: PathDoc = {
