@@ -2,11 +2,13 @@
  * Pieces the Take screens share: the neck view's (`SessionView.tsx`) and the
  * runway's (`highway/RunwayTake.tsx`).
  */
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { Exercise } from "../../paths/format";
 import { tempoNudges } from "../../session/runner";
 import type { BigAction, RunState } from "../../session/runner";
 import type { PlanStep } from "../../session/planner";
+import { useFitPair } from "./hooks/useFitOneLine";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { stepTitle } from "./TodayView";
 
@@ -151,6 +153,29 @@ export function startButton(
 }
 
 /**
+ * A label whose number stays on the line of the unit after it ("80 BPM"):
+ * on a phone the graded answer takes two lines, and it broke as "Start take,
+ * 80 / BPM · graded". The words are the same string; only the pair is held.
+ */
+function NumberWithUnit({ text }: { text: string }) {
+  const parts = text.split(/(\d+\s+[^\s·・,，、]+)/);
+  if (parts.length === 1) return <>{text}</>;
+  return (
+    <>
+      {parts.map((part, i) =>
+        i % 2 === 1 ? (
+          <span key={i} className="session-keep">
+            {part}
+          </span>
+        ) : (
+          part
+        ),
+      )}
+    </>
+  );
+}
+
+/**
  * Grading not decided yet (owner, 2026-11-18): the graded Take and "Just play"
  * side by side, the same size, and "Remember my choice" under them. Neither
  * is the right answer; nothing here is red.
@@ -170,9 +195,13 @@ export function AskStart({
 }) {
   const { t } = useTranslation();
   const { run, actions } = session;
+  const justPlay = t("session.ask.justPlay", { bpm: run.bpm });
+  // On a phone the two answers share a row while each fits two lines (card #67).
+  const pair = useRef<HTMLDivElement>(null);
+  useFitPair(pair, `${label}|${justPlay}`);
   return (
     <div className="session-ask" data-place={compact ? "footer" : undefined} data-testid="session-ask">
-      <div className="session-ask-buttons">
+      <div className="session-ask-buttons" ref={pair}>
         <button
           className="session-big"
           data-size="mid"
@@ -180,7 +209,7 @@ export function AskStart({
           aria-disabled={canStart ? undefined : true}
           data-testid="session-big"
         >
-          {label}
+          <NumberWithUnit text={label} />
         </button>
         <button
           className="session-big"
@@ -189,7 +218,7 @@ export function AskStart({
           aria-disabled={canStart ? undefined : true}
           data-testid="session-just-play"
         >
-          {t("session.ask.justPlay", { bpm: run.bpm })}
+          {justPlay}
         </button>
       </div>
       <label className="session-ask-remember" data-testid="session-ask-remember">

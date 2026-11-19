@@ -1043,6 +1043,36 @@
   color: var(--l-faint);
   letter-spacing: 0.06em;
 }
+/* A line of short facts with dots between them, which wraps between facts and
+   never leaves a dot at the end of a line or the start of the next (card #67:
+   "WARM-UP ·" over "NOT GRADED" on a 390 px phone in Ivory). Every part
+   leads with one dot's width, the dot in it; the line starts that width to
+   the left of its column and clips it, so the dot of a part that begins a
+   line is not drawn and its words start at the column's edge. */
+.session-dotline,
+.session-plan-go .session-plan-meta.session-dotline {
+  display: flex;
+  flex-wrap: wrap;
+  --dot-w: 1.1em;
+  width: calc(100% + var(--dot-w));
+  margin-left: calc(-1 * var(--dot-w));
+  clip-path: inset(0 0 0 var(--dot-w));
+}
+.session-dot-part {
+  min-width: 0;
+  max-width: 100%;
+  padding-left: var(--dot-w);
+}
+.session-dot-part:has(> .session-dot-sep) {
+  padding-left: 0;
+}
+.session-dot-sep {
+  display: inline-block;
+  width: var(--dot-w);
+  text-align: center;
+  white-space: pre;
+  letter-spacing: 0;
+}
 .session-today-plan .session-plan-why {
   margin-top: 2px;
   font-size: 14px;
@@ -5853,20 +5883,44 @@ button.session-input-chip:hover {
   outline: 2px solid var(--l-amber);
   outline-offset: 2px;
 }
+.session-keep {
+  white-space: nowrap;
+}
+/* A phone: the two answers share one row, each on two lines at most, so the
+   footer is one button shorter and the picture is on the first screen of a
+   360x640 phone (card #67). `fitPair` answers for the language and the
+   face: `small` when a label needs a third line, `stack` when it still does,
+   one over the other as it was, a little lower than a lone Start. */
 @media (orientation: portrait) and (max-width: 480px) {
   .session-go > .session-ask {
     flex-direction: column;
     align-items: stretch;
+    gap: 2px;
   }
   .session-ask > .session-ask-remember {
     order: 0;
   }
   .session-ask-buttons {
+    gap: 8px;
+  }
+  .session-ask-buttons[data-fit="stack"] {
     grid-auto-flow: row;
   }
   .session-page .session-ask-buttons > .session-big {
-    font-size: 20px;
+    min-height: 58px;
+    padding: 6px 10px;
+    font-size: 18px;
+    line-height: 1.15;
     white-space: normal;
+    text-wrap: balance;
+  }
+  .session-page .session-ask-buttons[data-fit="small"] > .session-big {
+    padding-inline: 8px;
+    font-size: 15.5px;
+  }
+  .session-page .session-ask-buttons[data-fit="stack"] > .session-big {
+    min-height: 50px;
+    font-size: 20px;
   }
   .session-ask-remember {
     align-self: center;

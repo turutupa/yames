@@ -189,3 +189,80 @@ export function useFitRow(ref: RefObject<HTMLElement>, label: string): void {
     };
   }, [ref, label]);
 }
+
+/**
+ * Two answers side by side, each on two lines at most (the ask-first footer
+ * on a phone: "Start take, 80 BPM · graded" and "Just play"). Side by side
+ * the footer is one button shorter, which on a 360x640 phone is the
+ * difference between seeing the picture and not (card #67). Whether the words
+ * fit two lines depends on the language and the theme's face, so the pair is
+ * measured: `data-fit="small"` (smaller words) when a label needs a third
+ * line or a word does not fit its column, and `stack` when it still does:
+ * the stylesheet then puts one over the other.
+ */
+export const PAIR_FITS = ["small", "stack"] as const;
+
+function pairFits(pair: HTMLElement, maxLines: number): boolean {
+  for (const child of Array.from(pair.children) as HTMLElement[]) {
+    const range = document.createRange();
+    range.selectNodeContents(child);
+    const tops = new Set<number>();
+    for (const rect of Array.from(range.getClientRects())) {
+      if (rect.width > 0) tops.add(Math.round(rect.top));
+    }
+    const cs = getComputedStyle(child);
+    const pad = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+    const tooWide = range.getBoundingClientRect().width > child.clientWidth - pad + 0.5;
+    if (tops.size > maxLines || tooWide) return false;
+  }
+  return true;
+}
+
+export function fitPair(pair: HTMLElement, maxLines = 2): void {
+  pair.removeAttribute("data-fit");
+  if (!(pair.clientWidth > 0) || typeof document.createRange !== "function") return;
+  for (const fit of PAIR_FITS) {
+    if (pairFits(pair, maxLines)) return;
+    pair.setAttribute("data-fit", fit);
+  }
+}
+
+/** Re-fits when `label` changes, on resize, when the pair's width moves, and once the web fonts land. */
+export function useFitPair(ref: RefObject<HTMLElement>, label: string, on = true): void {
+  useLayoutEffect(() => {
+    const pair = ref.current;
+    if (!pair || typeof window === "undefined") return;
+    if (!on) {
+      pair.removeAttribute("data-fit");
+      return;
+    }
+    let alive = true;
+    let width = -1;
+    const fit = () => {
+      if (alive && ref.current) fitPair(ref.current);
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    const fonts = typeof document !== "undefined" ? document.fonts : undefined;
+    void fonts?.ready.then(fit);
+    fonts?.addEventListener?.("loadingdone", fit);
+    // A theme changes the face with no resize: the pair's own box says so.
+    // Only a new width is a reason (the fit itself changes the height).
+    const sizes =
+      typeof ResizeObserver === "function"
+        ? new ResizeObserver(() => {
+            const now = pair.clientWidth;
+            if (now === width) return;
+            width = now;
+            fit();
+          })
+        : null;
+    sizes?.observe(pair);
+    return () => {
+      alive = false;
+      sizes?.disconnect();
+      window.removeEventListener("resize", fit);
+      fonts?.removeEventListener?.("loadingdone", fit);
+    };
+  }, [ref, label, on]);
+}

@@ -88,6 +88,56 @@ test.describe("a Take's ready screen on a phone", () => {
     expect(Math.abs(rows.chip! - rows.exit!)).toBeLessThanOrEqual(2);
     expect(Math.abs(rows.chip! - rows.skip!)).toBeLessThanOrEqual(2);
   });
+
+  // Card #67: Exit 85 + clock 76 + chip 44 + Skip 109 + gaps was 338 px in a
+  // 302 px bar in Russian, and Skip went to a row of its own.
+  for (const [lng, size] of [
+    ["ru", { width: 360, height: 640 }],
+    ["ru", { width: 390, height: 844 }],
+    ["de", { width: 360, height: 640 }],
+  ] as const) {
+    test(`Skip stays on the bar's first row in ${lng} at ${size.width}`, async ({ page }) => {
+      await openShot(page, "session-ready", size, "ember", { lng });
+      await settleAnimations(page);
+      // The bar is measured as its width and its faces land: wait for its answer.
+      await expect(async () => {
+        const tops = await page.evaluate(() =>
+          ['[data-testid="session-exit"]', '[data-testid="session-skip-this"]'].map((s) => document.querySelector(s)!.getBoundingClientRect().top),
+        );
+        expect(Math.abs(tops[0] - tops[1])).toBeLessThanOrEqual(4);
+      }, "Skip is on a row of its own").toPass({ timeout: 5000 });
+      const bar = await page.evaluate(() => {
+        const box = (s: string) => {
+          const r = document.querySelector(s)!.getBoundingClientRect();
+          return { top: r.top, left: r.left, right: r.right, height: r.height };
+        };
+        const left = document.querySelector<HTMLElement>(".session-bar-left")!;
+        const range = document.createRange();
+        range.selectNodeContents(left);
+        return {
+          vw: innerWidth,
+          exit: box('[data-testid="session-exit"]'),
+          chip: box('[data-testid="session-input-chip"]'),
+          skip: box('[data-testid="session-skip-this"]'),
+          clock: box(".session-bar-left"),
+          clockWords: range.getBoundingClientRect().width,
+          clockLines: new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size,
+        };
+      });
+      expect(Math.abs(bar.skip.top - bar.exit.top), "Skip is on a row of its own").toBeLessThanOrEqual(4);
+      expect(Math.abs(bar.chip.top - bar.exit.top)).toBeLessThanOrEqual(4);
+      expect(bar.skip.right).toBeLessThanOrEqual(bar.vw);
+      // Nothing squeezed to get there: a thumb of height, the clock's words whole.
+      // (Exit is 43.4 px in every language; its thumb is `phone-learning`'s to measure.)
+      expect(bar.exit.height).toBeGreaterThanOrEqual(43);
+      expect(bar.skip.height).toBeGreaterThanOrEqual(43);
+      expect(bar.clockWords).toBeLessThanOrEqual(bar.clock.right - bar.clock.left + 1);
+      expect(bar.clockLines).toBeLessThanOrEqual(2);
+      expect(bar.clock.left).toBeGreaterThanOrEqual(bar.exit.right);
+      expect(bar.chip.left).toBeGreaterThanOrEqual(bar.clock.right - 1);
+      expect(bar.skip.left).toBeGreaterThanOrEqual(bar.chip.right - 1);
+    });
+  }
 });
 
 test.describe("a Take's ready screen at 390 in the desktop build", () => {
@@ -157,6 +207,44 @@ test.describe("Today", () => {
         const last = (await page.locator(".session-plan-row").last().boundingBox())!;
         const start = (await page.locator(".session-today-start").boundingBox())!;
         expect(last.y + last.height, "the last row is under Start").toBeLessThanOrEqual(start.y + 1);
+      });
+    }
+
+    // Card #67: "WARM-UP ·" over "NOT GRADED" in Ivory at 390.
+    for (const [theme, lng] of [["ivory", "en"], ["ember", "en"], ["ember", "de"], ["aurora", "ru"]] as const) {
+      test(`a row's facts wrap whole, with no dot at a line's end or start, in ${theme} (${lng})`, async ({ page }) => {
+        test.slow();
+        await openShot(page, "today-three-paths", PHONE, theme, { lng });
+        await settleAnimations(page);
+        const lines = await page.locator(".session-plan-meta.session-dotline").evaluateAll((els) =>
+          els.map((line) => {
+            const edge = line.getBoundingClientRect().left + parseFloat(getComputedStyle(line).getPropertyValue("--dot-w")) * parseFloat(getComputedStyle(line).fontSize);
+            const parts = [...line.querySelectorAll<HTMLElement>(".session-dot-part")].map((part) => {
+              const range = document.createRange();
+              range.selectNodeContents(part);
+              const sep = part.querySelector<HTMLElement>(".session-dot-sep")?.getBoundingClientRect() ?? null;
+              const words = [...range.getClientRects()].filter((r) => r.width > 0);
+              return {
+                text: part.textContent ?? "",
+                top: Math.round(part.getBoundingClientRect().top),
+                sepShown: sep ? sep.right > edge + 1 : false,
+                sepTop: sep ? Math.round(sep.top) : null,
+                // The words: nothing of them in the clipped margin.
+                left: Math.min(...words.filter((r) => !sep || r.left >= sep.right - 0.5).map((r) => r.left)),
+              };
+            });
+            return { text: line.textContent ?? "", edge, right: line.getBoundingClientRect().right, parts };
+          }),
+        );
+        expect(lines.length).toBeGreaterThan(1);
+        expect(lines.some((l) => l.parts.length > 1), "no row with two facts to wrap").toBe(true);
+        for (const line of lines) {
+          line.parts.forEach((part, i) => {
+            const startsLine = i === 0 || line.parts[i - 1].top !== part.top;
+            expect(part.sepShown, `"${line.text}": a dot ${startsLine ? "starts a line" : "is missing between two facts"}`).toBe(!startsLine);
+            expect(part.left, `"${line.text}": "${part.text}" starts under the clip`).toBeGreaterThanOrEqual(line.edge - 1);
+          });
+        }
       });
     }
   });

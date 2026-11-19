@@ -1412,6 +1412,17 @@ export const SHOTS: Shot[] = [
     height: 900,
     settleMs: 900,
   },
+  // The same question under the runway's notes, where Watch is in the page
+  // above the footer rather than in it (card #67).
+  {
+    id: "session-ask-ready-runway",
+    suffix: "session-ask-ready-runway",
+    window: "main",
+    session: { seed: "returning", minutes: 5, stop: "ready", grading: "ask", practiceView: "runway" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
   // Graded, the input on and a guitar playing: the chip's live level.
   {
     id: "session-ready-signal",
@@ -1935,6 +1946,7 @@ export const PHONE_LEARNING_SCENES = [
   "session-ungraded-result",
   "session-ungraded-recap",
   "session-ask-ready",
+  "session-ask-ready-runway",
   "session-ready-signal",
   "progress-ungraded",
   "paths",
