@@ -124,7 +124,7 @@ Beginner Level of Legato.
 |---|---|---|
 | Beginner: one tap, one chord at a time | The first tap (tap and pull, the three-note cell, four notes from one tap); moving the tap; changing the chord | The tapped arpeggio in triplets through Am, G, F, E over a band. |
 | Intermediate: sixteenths, strings and scales | Four-note loops and two taps a beat; the cell across three strings; a scale shape under the tap | Sixteenth-note tapping, string changes with the muting they need, and six notes from one tap. |
-| Advanced: speed, two taps and a band | The cell in sextuplets; two tapped notes and string skips; an eight-bar tapped line and a stamina minute | Tapping at the speed it is known for, and for long enough to be a solo section. |
+| Advanced: speed, two taps and a band | The cell in sextuplets; two tapped notes and string skips; two four-bar tapped lines over a band and a stamina minute | Tapping at the speed it is known for, and for long enough to be a solo section. |
 
 Difficulty rises by subdivision (eighths, triplets, sixteenths, sextuplets), by
 which hand moves (the tap first, then the fretting hand, then both), by strings
@@ -168,6 +168,31 @@ it. The movable major shape is written in A at fret 4, not G at fret 2, because 
 reach model (and a beginner's hand) refuses frets 2 to 5 at an early level. Know
 the Neck comes first for a player who cannot name notes; this Path assumes nothing
 from it but is easier after it.
+
+## Proof-reading (2026-11-18)
+
+Four independent readers checked the words of every new Exercise against its
+notes by script: note names from MIDI, frets, fingers against the pinned
+fingering, counting text against onsets, counts and shapes against the tab,
+theory statements, tempo sentences against the ladders. About ninety confirmed
+defects were fixed, most of them a sentence that was true of one bar and written
+as if of all (a count, a "throughout", a "twice round"), a few real ones: a
+double tap described in a way no hand can play, "fifths and sixths" that were
+fourths and thirds, a Mixolydian rule stated as Dorian's, an example line that
+broke its own rule, two finger descriptions that disagreed with the neck.
+
+One finding is structural and only softened: a varied Exercise has one text,
+written for its first variant, so its frets and note names are wrong for the
+others. Legato, Tapping and two Know the Neck Exercises now end their how-to with
+one sentence saying so; Rhythm Foundations dropped the key variants on four lines
+that are named "at the fifth fret"; Metal Rhythm names both strings. The real fix
+is text per variant in the format, which is a pipeline change and not made here.
+The five older Paths have the same seam.
+
+Two defects found in older content and left: `neoclassical.i-iv-dim-i` spells the
+diminished chord of E minor as Ebdim7 (the notes are D#, F#, A, C), and
+`over-a-heavy-band.band-big-chain` promises a V chord that three of its variants
+do not have.
 
 ## How they fit Today's planner
 
