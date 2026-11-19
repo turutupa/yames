@@ -7,10 +7,12 @@
 import { describe, expect, it } from "vitest";
 import { loadAllPacks } from "./packs";
 import { takeBarsOf } from "./grade";
-import { buildTake, writtenOut } from "./take";
+import { buildTake, withVariant, writtenOut } from "./take";
 import { buildTakeBand } from "./takeBand";
 import { buildTransport } from "../songs/import";
 import { barLengthTicks } from "../paths/format";
+import { VARIANT_TEXT_SPEC } from "../paths/fixtures/minimal";
+import { buildPath } from "../paths/generate";
 
 describe("a Take's song ends on the Take's last bar", () => {
   it("for every Exercise and every variant in every pack", async () => {
@@ -61,5 +63,24 @@ describe("a Take's song ends on the Take's last bar", () => {
       }
     }
     expect(checked).toBeGreaterThan(20);
+  });
+});
+
+describe("a Take's Exercise carries the words of the variant it plays", () => {
+  const path = buildPath(VARIANT_TEXT_SPEC);
+  const warm = path.levels![0].warmups[0];
+
+  it("the variant's own why and how-to, under the Exercise's own id", () => {
+    const take = buildTake(path, warm, 60, 1);
+    expect(take.exercise.id).toBe(warm.id);
+    expect(take.exercise.purpose).toBe("A purpose of its own for the line moved up 2 frets.");
+    expect(take.exercise.howTo).toEqual(["Play it evenly.", "Start at fret 5."]);
+    expect(take.exercise.notes).toEqual(warm.variation!.variants[1].notes);
+  });
+
+  it("the Exercise's for the first variant, and with no variant picked", () => {
+    expect(withVariant(warm, 0).howTo).toEqual(warm.howTo);
+    expect(withVariant(warm, 0).purpose).toBe(warm.purpose);
+    expect(withVariant(warm, null)).toBe(warm);
   });
 });

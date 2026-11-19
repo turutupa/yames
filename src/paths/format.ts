@@ -314,6 +314,20 @@ export type ExerciseVariant = {
    * and clean tempo. Built from the values of the `notPooled` dimensions.
    */
   pool: string;
+  /**
+   * This variant's own why, when the Exercise's does not fit its notes (another
+   * key's chord names, another position's frets). Present: it replaces
+   * `Exercise.purpose` for this variant. Absent: the Exercise's applies. Never
+   * on the first variant, whose text is the Exercise's own. Added 2026-11-19,
+   * additive; translated under `exercise.<id>.variant.<variantId>.purpose`.
+   */
+  purpose?: string;
+  /**
+   * This variant's own how-to, whole: when present it replaces `Exercise.howTo`
+   * for this variant, line for line (it is not appended to it). Absent: the
+   * Exercise's applies. Never on the first variant.
+   */
+  howTo?: string[];
   tab: string;
   position: HandPosition;
   crossing: Crossing;

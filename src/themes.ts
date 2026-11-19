@@ -92,6 +92,12 @@ export const OPTIONAL_TOKENS = [
   "--heading-tracking",
   /** A multiplier on each headline's size (1 = as drawn). */
   "--heading-scale",
+  /**
+   * The label of a tonal (tinted) button, where the accent itself does not
+   * clear WCAG AA on the hover tint (`global.css`, "B · Tonal"): the same hue,
+   * a little deeper. Defaults to `--accent`.
+   */
+  "--accent-ink-on-tint",
 ] as const;
 
 export interface Theme {
@@ -433,6 +439,7 @@ const ivory: Theme = {
     "--accent-subtle": "rgba(114, 82, 7, 0.1)",
     "--accent-subtle-hover": "rgba(114, 82, 7, 0.18)",
     "--accent-text": "#ffffff",
+    "--accent-ink-on-tint": "#624706",
     "--accent-2": "#0d645e",
     "--accent-2-subtle": "rgba(13, 100, 94, 0.10)",
     "--accent-2-text": "#ffffff",
@@ -483,6 +490,7 @@ const arctic: Theme = {
     "--accent-subtle": "rgba(2, 83, 128, 0.08)",
     "--accent-subtle-hover": "rgba(2, 83, 128, 0.15)",
     "--accent-text": "#ffffff",
+    "--accent-ink-on-tint": "#02466c",
     "--accent-2": "#813b06",
     "--accent-2-subtle": "rgba(129, 59, 6, 0.10)",
     "--accent-2-text": "#ffffff",
@@ -534,6 +542,7 @@ const sand: Theme = {
     "--accent-subtle": "rgba(124, 54, 12, 0.08)",
     "--accent-subtle-hover": "rgba(124, 54, 12, 0.15)",
     "--accent-text": "#ffffff",
+    "--accent-ink-on-tint": "#682d0a",
     "--accent-2": "#0b534e",
     "--accent-2-subtle": "rgba(11, 83, 78, 0.10)",
     "--accent-2-text": "#ffffff",
@@ -587,6 +596,7 @@ const lavender: Theme = {
     "--accent-subtle": "rgba(91, 33, 182, 0.08)",
     "--accent-subtle-hover": "rgba(91, 33, 182, 0.15)",
     "--accent-text": "#ffffff",
+    "--accent-ink-on-tint": "#521ea4",
     "--accent-2": "#0c5c56",
     "--accent-2-subtle": "rgba(12, 92, 86, 0.10)",
     "--accent-2-text": "#ffffff",

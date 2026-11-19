@@ -16,6 +16,9 @@ import {
   stringsToTranslate,
 } from "./strings";
 import type { StringsOverlay } from "./strings";
+import { MINIMAL_SPEC, VARIANT_TEXT_SPEC } from "./fixtures/minimal";
+import { buildPath } from "./generate";
+import { exerciseWithVariant } from "./variants";
 
 const PACKS = import.meta.glob("./packs/*.json", { eager: true, import: "default" }) as Record<string, PathDoc>;
 const ENGLISH = import.meta.glob("./packs/i18n/en/*.json", { eager: true, import: "default" }) as Record<
@@ -140,6 +143,101 @@ describe("todo and merge", () => {
     expect(o.from.a).toBe(sourceHash("Same"));
     expect(stringsToTranslate(en, o)).toEqual({ c: "Other" });
     expect(readOverlay(JSON.parse(serializeOverlay(o)))).toEqual(o);
+  });
+});
+
+describe("a variant's own text", () => {
+  const doc = buildPath(VARIANT_TEXT_SPEC);
+  const warm = doc.levels![0].warmups[0];
+  const english = extractStrings(doc);
+  const k = (variantId: string, field: string) => `exercise.${warm.id}.variant.${variantId}.${field}`;
+
+  it("has stable keys: the Exercise id, the variant id, the field", () => {
+    expect(english[k("key=2", "purpose")]).toBe("A purpose of its own for the line moved up 2 frets.");
+    expect(english[k("key=2", "howTo.0")]).toBe("Play it evenly.");
+    expect(english[k("key=9", "howTo.1")]).toBe("Start at fret 12.");
+    // The first variant reads the Exercise's text, so it has no keys of its own.
+    expect(Object.keys(english).filter((key) => key.includes(".variant.key=0."))).toEqual([]);
+    // After the Exercise's own strings, in variant order.
+    const keys = Object.keys(english);
+    expect(keys.indexOf(k("key=2", "purpose"))).toBeGreaterThan(keys.indexOf(`exercise.${warm.id}.coachLine`));
+    expect(keys.indexOf(k("key=3", "purpose"))).toBeGreaterThan(keys.indexOf(k("key=2", "howTo.1")));
+    // A pack with no variant text has exactly the keys it had before.
+    const plain = Object.keys(extractStrings(buildPath(MINIMAL_SPEC)));
+    expect(keys.filter((key) => !key.includes(".variant."))).toEqual(plain);
+  });
+
+  it("round-trips through an overlay file, todo and merge included", () => {
+    const todo = stringsToTranslate(english, null);
+    expect(todo[k("key=5", "howTo.1")]).toBe("Start at fret 8.");
+    const translated = Object.fromEntries(
+      Object.entries(todo)
+        .filter(([key]) => key.includes(".variant."))
+        .map(([key, text]) => [key, `[xx] ${text}`]),
+    );
+    const merged = mergeTranslations(english, null, doc.id, "xx", translated);
+    expect(merged.refused).toEqual([]);
+    // As bytes and back: what the app reads is what merge wrote.
+    const overlay = readOverlay(JSON.parse(serializeOverlay(merged.overlay)))!;
+    expect(overlay.strings[k("key=2", "purpose")]).toBe("[xx] A purpose of its own for the line moved up 2 frets.");
+    const report = checkOverlay(english, overlay);
+    expect(report.stale).toEqual([]);
+    expect(report.outdated).toEqual([]);
+    expect(Object.keys(stringsToTranslate(english, overlay)).some((key) => key.includes(".variant."))).toBe(false);
+
+    const localized = localizePack(doc, overlay);
+    const variants = localized.levels![0].warmups[0].variation!.variants;
+    expect(variants[1].purpose).toBe("[xx] A purpose of its own for the line moved up 2 frets.");
+    expect(variants[5].howTo).toEqual(["[xx] Play it evenly.", "[xx] Start at fret 12."]);
+    // Notes and ids are the pack's own, and the pack is not written to.
+    expect(variants[1].notes).toBe(warm.variation!.variants[1].notes);
+    expect(variants[1].id).toBe("key=2");
+    expect(variants[0]).toBe(warm.variation!.variants[0]);
+    expect(warm.variation!.variants[1].purpose).toBe("A purpose of its own for the line moved up 2 frets.");
+    // What a Take is handed: the variant's words, in the language on screen.
+    const take = exerciseWithVariant(localized.levels![0].warmups[0], variants[1]);
+    expect(take.howTo).toEqual(["[xx] Play it evenly.", "[xx] Start at fret 5."]);
+    // Extraction of the localized pack gives the same keys: the walk is one walk.
+    expect(Object.keys(extractStrings(localized))).toEqual(Object.keys(english));
+  });
+
+  it("shows the English when a variant's English changed, and counts it outdated", () => {
+    const key = k("key=3", "howTo.1");
+    const overlay: StringsOverlay = {
+      version: 1,
+      path: doc.id,
+      lng: "xx",
+      strings: { [key]: "Alt" },
+      from: { [key]: sourceHash("Start at fret 7.") },
+    };
+    expect(localizePack(doc, overlay).levels![0].warmups[0].variation!.variants[2].howTo![1]).toBe("Start at fret 6.");
+    expect(checkOverlay(english, overlay).outdated).toEqual([key]);
+    expect(stringsToTranslate(english, overlay)[key]).toBe("Start at fret 6.");
+  });
+
+  it("calls a key for a variant that has no text stale, and merge refuses it", () => {
+    const gone = k("key=0", "purpose");
+    const overlay: StringsOverlay = { version: 1, path: doc.id, lng: "xx", strings: { [gone]: "Weg" }, from: { [gone]: "deadbeef" } };
+    expect(checkOverlay(english, overlay).stale).toEqual([gone]);
+    expect(mergeTranslations(english, null, doc.id, "xx", { [gone]: "Weg" }).refused).toEqual([gone]);
+  });
+
+  it("takes a variant id as it is: '=', ',', ':', '#' and '.' in a key", () => {
+    const odd: PathDoc = JSON.parse(JSON.stringify(doc));
+    const id = "stringSet=top-E:-12.5,key=F#-minor";
+    odd.levels![0].warmups[0].variation!.variants[1].id = id;
+    const strings = extractStrings(odd);
+    expect(strings[k(id, "howTo.1")]).toBe("Start at fret 5.");
+    const merged = mergeTranslations(strings, null, odd.id, "xx", { [k(id, "howTo.1")]: "Ab Bund 5." });
+    const overlay = readOverlay(JSON.parse(serializeOverlay(merged.overlay)))!;
+    expect(localizePack(odd, overlay).levels![0].warmups[0].variation!.variants[1].howTo![1]).toBe("Ab Bund 5.");
+    expect(checkOverlay(strings, overlay).stale).toEqual([]);
+  });
+
+  it("shares a variation that has no text of its own", () => {
+    const plain = buildPath(MINIMAL_SPEC);
+    const localized = localizePack(plain, { version: 1, path: plain.id, lng: "xx", strings: {}, from: {} });
+    expect(localized.levels![0].warmups[0].variation).toBe(plain.levels![0].warmups[0].variation);
   });
 });
 

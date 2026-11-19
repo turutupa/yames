@@ -160,9 +160,11 @@
     color: var(--text-primary);
   }
 }
+/* The chosen Level, as every segmented control ("B · Tonal"). */
 .onboarding-start-level.selected {
-  background: var(--accent);
-  color: var(--accent-text);
+  background: var(--btn-sel);
+  color: var(--btn-tint-ink);
+  box-shadow: var(--btn-sel-ring);
 }
 .onboarding-start-about {
   margin: 0;

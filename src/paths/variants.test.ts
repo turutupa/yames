@@ -113,3 +113,40 @@ describe("exerciseWithVariant", () => {
     expect(exerciseWithVariant(base(), { ...v, passBars: bars }).passBars).toEqual(bars);
   });
 });
+
+describe("a variant's own text", () => {
+  const words = { purpose: "Why the Exercise exists.", howTo: ["Eighth notes.", "In C: frets 5, 5, 3."] };
+
+  it("replaces the Exercise's on the concrete Exercise, each field whole", () => {
+    const v = { ...variant("key=D", 7), purpose: "Why, in D.", howTo: ["Eighth notes.", "In D: frets 7, 7, 5."] };
+    const merged = exerciseWithVariant({ ...base(), ...words }, v);
+    expect(merged.purpose).toBe("Why, in D.");
+    expect(merged.howTo).toEqual(["Eighth notes.", "In D: frets 7, 7, 5."]);
+    const howOnly = exerciseWithVariant({ ...base(), ...words }, { ...variant("key=D", 7), howTo: ["One line."] });
+    expect(howOnly.purpose).toBe(words.purpose);
+    expect(howOnly.howTo).toEqual(["One line."]);
+  });
+
+  it("is the Exercise's when the variant has none, or has nothing in it", () => {
+    const ex = { ...base(), ...words };
+    expect(exerciseWithVariant(ex, variant("key=D", 7)).purpose).toBe(words.purpose);
+    expect(exerciseWithVariant(ex, variant("key=D", 7)).howTo).toBe(words.howTo);
+    const empty = exerciseWithVariant(ex, { ...variant("key=D", 7), purpose: "  ", howTo: [] });
+    expect(empty.purpose).toBe(words.purpose);
+    expect(empty.howTo).toBe(words.howTo);
+  });
+
+  it("comes with the notes of a Take, and back from what was stored", () => {
+    const ex = {
+      ...base([variant("key=C", 5), { ...variant("key=D", 7), howTo: ["Eighth notes.", "In D: frets 7, 7, 5."] }]),
+      ...words,
+    } as Exercise;
+    const takes = [0, 1].map((i) => notesForTake(ex, 3, i));
+    const inD = takes.find((t) => t.variantId === "key=D")!;
+    const inC = takes.find((t) => t.variantId === "key=C")!;
+    expect(inD.exercise.howTo[1]).toBe("In D: frets 7, 7, 5.");
+    expect(inD.exercise.purpose).toBe(words.purpose);
+    expect(inC.exercise.howTo).toEqual(words.howTo);
+    expect(resolveVariant(ex, "key=D")!.howTo).toEqual(inD.exercise.howTo);
+  });
+});

@@ -260,18 +260,17 @@
   height: 32px;
   padding: 0 10px;
   border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg-card);
-  color: var(--text-secondary);
+  /* Tonal ("B · Tonal", owner 2026-11-19, global.css): the accent's tint,
+     the label in the accent. The clear border keeps the chip's size. */
+  border: 1px solid transparent;
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
   font-size: 12.5px;
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
   position: relative;
-  transition:
-    color 0.15s,
-    border-color 0.15s,
-    background 0.15s;
+  transition: transform 0.12s ease;
 }
 
 /* Icon-only chips (the overflow) are square rather than a stubby pill. */
@@ -281,44 +280,35 @@
   justify-content: center;
 }
 
-.context-chip-open {
-  color: var(--text-primary);
-  background: var(--bg-raised);
-  border-color: color-mix(in srgb, var(--text-secondary) 35%, var(--border));
-}
-
 @media (hover: hover) {
   button.context-chip:hover {
-    color: var(--text-primary);
-    background: var(--bg-raised);
-    border-color: color-mix(in srgb, var(--text-secondary) 35%, var(--border));
+    background: var(--btn-tint-hover);
   }
 }
 
+/* Open (its menu showing): the chosen-segment look. */
 .context-chip-open {
-  color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: var(--btn-sel);
+  box-shadow: var(--btn-sel-ring);
 }
 
 /* A readout wearing the chip shape. It must not light up under the cursor —
-   there is nothing behind it to press. */
+   there is nothing behind it to press — so it is not tinted either. */
 .context-chip-static {
   cursor: default;
   color: var(--text-tertiary);
+  background: transparent;
+  border-color: var(--border);
 }
 
 .context-chip-input.listening {
   color: var(--feedback-perfect);
-  border-color: color-mix(in srgb, var(--feedback-perfect) 35%, transparent);
-  background: color-mix(in srgb, var(--feedback-perfect) 8%, transparent);
+  background: color-mix(in srgb, var(--feedback-perfect) 14%, var(--tint-base));
 }
 
-/* Off, on a screen that grades: the same chip, now the way to set it up. A
-   warm edge says "this wants you" without reading as an error. */
+/* Off, on a screen that grades: the same chip, now the way to set it up. */
 button.context-chip-input[data-off] {
   cursor: pointer;
-  color: var(--text-secondary);
-  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
 }
 /* On a phone it is an icon alone, and still a thumb's width. */
 .main-window.is-mobile button.context-chip-input[data-off] {
@@ -327,8 +317,7 @@ button.context-chip-input[data-off] {
 }
 @media (hover: hover) {
   button.context-chip-input[data-off]:hover {
-    color: var(--text-primary);
-    border-color: color-mix(in srgb, var(--accent) 70%, var(--border));
+    background: var(--btn-tint-hover);
   }
 }
 
@@ -487,9 +476,16 @@ button.context-chip-input[data-off] {
 }
 
 /* Disabled means "there is no voice set up yet", not "this is broken", so it
-   dims rather than disappearing — the tooltip carries the reason. */
+   dims rather than disappearing — the tooltip carries the reason. Dimmed as
+   every disabled button is ("B · Tonal"): no tint, the quietest ink a theme
+   holds at AA, so its word stays legible (at 45% opacity it measured 2.1 to
+   3.3:1). */
 .context-chip-volume-off {
-  opacity: 0.45;
+  background: var(--btn-disabled-bg);
+  color: var(--text-muted);
+}
+.context-chip-volume-off .context-chip-range {
+  opacity: 0.5;
 }
 
 
@@ -1736,38 +1732,45 @@ body[data-sheet-maximized] .rail {
   min-width: 150px;
   height: 46px;
   padding: 0 24px;
-  border: none;
+  /* Primary, "B · Tonal" (global.css): a solid accent, no glow. Stop, its
+     other state, is tonal. The clear border keeps the two the same size. */
+  border: 1.5px solid transparent;
   border-radius: 23px;
-  background: var(--accent);
-  color: var(--accent-text);
+  background: var(--btn-fill);
+  color: var(--btn-fill-ink);
   font-family: inherit;
   font-size: 0.98rem;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.2s ease;
-  box-shadow: 0 8px 24px -10px var(--accent-glow-strong);
+  transition: transform 0.12s ease;
+  box-shadow: none;
 }
 
 @media (hover: hover) {
   .transport-play:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 12px 28px -10px var(--accent-glow-strong);
+    background: var(--btn-fill-hover);
+  }
+  .transport-play.playing:hover {
+    background: var(--btn-tint-hover);
   }
 }
 
 .transport-play:active {
-  transform: translateY(0);
+  transform: translateY(1px);
 }
 
 .transport-play.playing {
-  background: transparent;
-  border: 1.5px solid var(--border);
-  color: var(--text-primary);
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
   box-shadow: none;
 }
 
+/* The beat (a tap of the tempo): the button lifts a shade, no halo. */
 .transport-play.pulse {
-  box-shadow: 0 0 0 6px var(--accent-glow);
+  background: var(--btn-fill-hover);
+}
+.transport-play.playing.pulse {
+  background: var(--btn-tint-hover);
 }
 
 /* Back to the start, beside Play (W37 item 1). Square, quiet, and the same
@@ -1782,12 +1785,12 @@ body[data-sheet-maximized] .rail {
   height: 32px;
   flex: 0 0 auto;
   padding: 0;
-  border: 1px solid var(--border);
+  border: 1px solid transparent;
   border-radius: 7px;
-  background: transparent;
-  color: var(--text-secondary);
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
   cursor: pointer;
-  transition: color 0.12s ease, border-color 0.12s ease;
+  transition: transform 0.12s ease;
 }
 
 .transport-rewind svg {
@@ -1799,10 +1802,8 @@ body[data-sheet-maximized] .rail {
   stroke-linejoin: round;
 }
 
-.transport-rewind:hover,
-.transport-rewind:focus-visible {
-  color: var(--text-primary);
-  border-color: var(--text-tertiary);
+.transport-rewind:hover {
+  background: var(--btn-tint-hover);
 }
 
 .transport-key {
@@ -2430,35 +2431,33 @@ body[data-sheet-maximized] .rail {
   gap: 7px;
   height: 32px;
   padding: 0 14px;
-  border: 1px solid var(--accent-subtle-hover);
+  /* Tonal; solid (the primary) while the step waits on you ("B · Tonal"). */
+  border: 1px solid transparent;
   border-radius: 16px;
-  background: transparent;
-  color: var(--accent);
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
   font: inherit;
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition: transform 0.12s ease;
 }
 
 @media (hover: hover) {
   .transport-skip:hover:not(:disabled) {
-    background: var(--accent-subtle);
-    border-color: var(--accent);
+    background: var(--btn-tint-hover);
   }
 }
 
 .transport-skip[data-waiting]:not(:disabled) {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-text);
-  box-shadow: 0 0 0 4px var(--accent-subtle);
+  background: var(--btn-fill);
+  color: var(--btn-fill-ink);
 }
 
 @media (hover: hover) {
   .transport-skip[data-waiting]:not(:disabled):hover {
-    filter: brightness(1.08);
+    background: var(--btn-fill-hover);
   }
 }
 
@@ -2975,28 +2974,28 @@ body[data-sheet-maximized] .rail {
   border-radius: 9px;
   cursor: pointer;
   border: 1px solid transparent;
-  background: none;
-  color: var(--text-muted);
+  /* "B · Tonal" (global.css): Cancel tonal, Discard the danger red's tint,
+     Save a solid accent. */
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: transform 0.12s ease;
 }
 
 @media (hover: hover) {
   .unsaved-actions .unsaved-cancel:hover {
-    color: var(--text-primary);
-    background: var(--surface-hover, rgba(255, 255, 255, 0.05));
+    background: var(--btn-tint-hover);
   }
 }
 
 .unsaved-actions .unsaved-discard {
-  border-color: var(--border);
-  color: var(--text-secondary);
+  background: var(--btn-danger-tint);
+  color: var(--btn-danger-tint-ink);
 }
 
 @media (hover: hover) {
   .unsaved-actions .unsaved-discard:hover {
-    color: var(--accent);
-    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    background: var(--btn-danger-tint-hover);
   }
 }
 
@@ -3005,14 +3004,13 @@ body[data-sheet-maximized] .rail {
    primary button drew with no fill and dark ink on a dark panel, which
    rendered as an empty box. */
 .unsaved-actions .unsaved-save {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-text);
+  background: var(--btn-fill);
+  color: var(--btn-fill-ink);
 }
 
 @media (hover: hover) {
   .unsaved-actions .unsaved-save:hover {
-    filter: brightness(1.08);
+    background: var(--btn-fill-hover);
   }
 }
 

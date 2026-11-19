@@ -198,25 +198,26 @@
   transition: background 0.15s ease;
 }
 
+/* "B · Tonal" (global.css): Cancel tonal, Delete the danger red, solid. */
 .eval-confirm-cancel {
-  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
-  color: var(--text-secondary);
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
 }
 
 @media (hover: hover) {
   .eval-confirm-cancel:hover {
-    background: color-mix(in srgb, var(--text-primary) 14%, transparent);
+    background: var(--btn-tint-hover);
   }
 }
 
 .eval-confirm-delete {
-  background: #dc2626;
-  color: #fff;
+  background: var(--btn-danger);
+  color: var(--btn-danger-ink);
 }
 
 @media (hover: hover) {
   .eval-confirm-delete:hover {
-    background: #b91c1c;
+    background: color-mix(in srgb, var(--btn-danger) 86%, #000);
   }
 }
 

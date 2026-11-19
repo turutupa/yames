@@ -300,10 +300,11 @@
   }
 }
 
+/* The chosen choice, as every segmented control ("B · Tonal", global.css). */
 .main-content[data-view="settings"] .toggle-group .toggle-btn.active {
-  background: var(--accent);
-  color: var(--accent-text, #fff);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  background: var(--btn-sel);
+  color: var(--btn-tint-ink);
+  box-shadow: var(--btn-sel-ring);
 }
 
 .main-content[data-view="settings"] .toggle-group .toggle-btn:disabled.active {
@@ -327,16 +328,15 @@
   min-height: 34px;
   padding: 0 14px;
   border-radius: 10px;
-  border: 1px solid var(--ui-line-strong);
-  background: var(--ui-raised);
-  color: var(--text-primary);
+  /* Tonal ("B · Tonal", global.css); the clear border keeps the size. */
+  border: 1px solid transparent;
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
   font: 600 13px/1.2 var(--ui-body);
   letter-spacing: 0;
   text-transform: none;
   white-space: nowrap;
-  transition:
-    border-color 0.15s ease,
-    background 0.15s ease;
+  transition: transform 0.12s ease;
 }
 
 @media (hover: hover) {
@@ -349,9 +349,7 @@
   .main-content[data-view="settings"] .update-check-btn:hover,
   .main-content[data-view="settings"] .calibration-recalibrate-btn:hover,
   .main-content[data-view="settings"] .midi-refresh-btn:hover {
-    border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
-    background: color-mix(in srgb, var(--accent) 8%, var(--ui-raised));
-    color: var(--text-primary);
+    background: var(--btn-tint-hover);
   }
 }
 
@@ -360,23 +358,27 @@
   padding: 0 11px;
 }
 
-/* The offers worth taking: an update, a coach to download. */
+/* The offers worth taking: an update, a coach to download. Primary: a
+   solid accent. */
 .main-content[data-view="settings"] .update-available-btn,
 .main-content[data-view="settings"] .about-newer-get,
 .main-content[data-view="settings"] .coach-download-btn {
-  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
-  background: color-mix(in srgb, var(--accent) 12%, var(--ui-raised));
-  color: var(--text-primary);
+  background: var(--btn-fill);
+  color: var(--btn-fill-ink);
+}
+@media (hover: hover) {
+  .main-content[data-view="settings"] :is(.update-available-btn, .about-newer-get, .coach-download-btn):hover:not(:disabled) {
+    background: var(--btn-fill-hover);
+  }
+}
+.main-content[data-view="settings"] .coach-download-btn:disabled {
+  background: var(--btn-disabled-bg);
+  color: var(--btn-disabled-ink);
 }
 
 .main-content[data-view="settings"] .input-test-btn.active {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 14%, var(--ui-raised));
-}
-
-/* Support's heart keeps its colour, on the same button shape. */
-.main-content[data-view="settings"] .about-link-btn.support-btn {
-  color: var(--text-primary);
+  background: var(--btn-sel);
+  box-shadow: var(--btn-sel-ring);
 }
 
 .main-content[data-view="settings"] .about-link-btn.support-btn svg {
@@ -745,7 +747,6 @@
 
 .context-chip {
   border-radius: 10px;
-  border-color: var(--ui-line-strong);
   font-family: var(--ui-body);
   font-weight: 600;
 }
@@ -995,18 +996,18 @@
   padding: 0 18px;
   border: 0;
   border-radius: 10px;
-  background: var(--accent);
-  color: var(--accent-text, #fff);
+  /* Primary, "B · Tonal": a solid accent, no shadow. */
+  background: var(--btn-fill);
+  color: var(--btn-fill-ink);
   font: 650 13.5px/1.2 var(--ui-body);
   white-space: nowrap;
   cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
-  transition: filter 0.15s ease;
+  transition: transform 0.12s ease;
 }
 
 @media (hover: hover) {
   .main-content[data-view="settings"] .support-primary-btn:hover {
-    filter: brightness(1.08);
+    background: var(--btn-fill-hover);
   }
 }
 
@@ -1097,9 +1098,9 @@
   min-height: 32px;
   padding: 0 12px;
   border-radius: 999px;
-  border: 1px solid var(--ui-line-strong);
-  background: transparent;
-  color: var(--text-secondary);
+  border: 1px solid transparent;
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
   font: 600 12.5px/1.2 var(--ui-body);
   white-space: nowrap;
   cursor: pointer;
@@ -1107,14 +1108,13 @@
 
 @media (hover: hover) {
   .main-content[data-view="settings"] .support-share-chip:hover {
-    border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
-    color: var(--text-primary);
+    background: var(--btn-tint-hover);
   }
 }
 
 .main-content[data-view="settings"] .support-share-chip.copied {
-  border-color: var(--accent);
-  color: var(--text-primary);
+  background: var(--btn-sel);
+  box-shadow: var(--btn-sel-ring);
 }
 
 /* ── About ────────────────────────────────────────────────────────────── */
@@ -1281,9 +1281,9 @@
   min-height: 30px;
   padding: 0 12px;
   border-radius: 9px;
-  border: 1px solid var(--ui-line-strong);
-  background: var(--ui-raised);
-  color: var(--text-primary);
+  border: 1px solid transparent;
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
   font: 600 12.5px/1.2 var(--ui-body);
 }
 
