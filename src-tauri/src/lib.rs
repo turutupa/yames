@@ -188,7 +188,7 @@ use commands::{
     analyze_attempt, analyze_take_pitch,
     get_waveform, is_coach_loaded, list_audio_input_devices, list_audio_output_devices,
     list_calibration_cache, list_midi_devices, list_presets, list_session_logs, load_coach_model,
-    clear_score_schedule, close_open_segment, get_take_grade, get_take_grade_with_notes, load_score_schedule, notify_settings_change,
+    clear_score_schedule, close_open_segment, get_take_grade, get_take_grade_with_notes, load_score_schedule, notify_settings_change, set_listen_demo,
     // W12 — the bands the review colours a note by, from the scorer's own rule.
     score_timing_bands,
     open_url, reveal_in_folder, reorder_presets, save_drill_run, save_preset, save_session,
@@ -929,6 +929,7 @@ pub fn run() {
             stop_evaluation,
             get_evaluation_state,
             notify_settings_change,
+            set_listen_demo,
             close_open_segment,
             get_take_grade,
             get_take_grade_with_notes,

@@ -155,7 +155,8 @@
     "refresh_audio_devices",
     "callback_probe_report",
     "export_practice_data",
-    "set_app_in_background"
+    "set_app_in_background",
+    "set_listen_demo"
   ],
   "ipcCommands": [
     "analyze_attempt",
@@ -311,7 +312,8 @@
     "refresh_audio_devices",
     "callback_probe_report",
     "export_practice_data",
-    "set_app_in_background"
+    "set_app_in_background",
+    "set_listen_demo"
   ],
   "commandsInvokedOutsideIpc": [
     "app_ready",
@@ -521,7 +523,8 @@
     "setAppInBackground",
     "androidBetaDownload",
     "androidBetaInstall",
-    "androidBetaProbe"
+    "androidBetaProbe",
+    "setListenDemo"
   ],
   "ipcWrappersWithoutCaller": [
     "clearSessionLogs",

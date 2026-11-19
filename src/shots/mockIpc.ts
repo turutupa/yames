@@ -1900,6 +1900,8 @@ export function installShotMock(shot: Shot, theme: string): void {
       onsetsSaid = 0;
       return null;
     }
+    // Listen first (card #28): the engine ignores the input while a demo plays.
+    if (cmd === "set_listen_demo") return null;
     if (cmd === "clear_score_schedule") {
       // The schedule itself is kept: `analyze_attempt` is asked for a pass
       // over it after the transport has already cleared it, and a review

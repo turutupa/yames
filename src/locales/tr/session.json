@@ -505,6 +505,7 @@
       "watchSoundTitle": "Bir ölçü sayıştan sonra bu tempoda bir geçişi dinle, notalar çaldıkça yanar. Notlandırma yok.",
       "sound": "Ses",
       "soundTitle": "İzle notaları sesli çalar. Kapalı: yalnızca yakar.",
+      "demoPlaying": "Senin için çalıyorum. Hazır olduğunda denemeyi başlat.",
       "legendPlayed": "az önce çalındı",
       "beats": "Ölçünün vuruşları",
       "beatLabel": "vuruş",

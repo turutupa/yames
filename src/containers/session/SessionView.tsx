@@ -1653,7 +1653,7 @@ export function SessionView({
   beat,
   isPlaying,
   listening,
-  hasSignal,
+  hasSignal: heardSignal,
   bpmNow,
   viewKey = "V",
   pauseKey = "K",
@@ -1697,6 +1697,8 @@ export function SessionView({
 }) {
   const { t } = useTranslation();
   const { run, actions } = session;
+  // A listen demo through the speakers is not a signal from the player (card #28).
+  const hasSignal = heardSignal && !session.listen?.active;
   const testInput = onTestInput ?? onCheckSound;
   const chooseInput = onChooseInput ?? onCheckSound;
   const asked = session.jumpAsked;

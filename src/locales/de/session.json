@@ -505,6 +505,7 @@
       "watchSoundTitle": "Einmal in diesem Tempo hören, nach einem Takt Einzählen, die Töne leuchten beim Klingen. Nichts wird bewertet.",
       "sound": "Ton",
       "soundTitle": "Ansehen spielt die Töne hörbar. Aus: sie leuchten nur.",
+      "demoPlaying": "Ich spiele es dir vor. Starte den Take, wenn du so weit bist.",
       "legendPlayed": "gerade gespielt",
       "beats": "Die Schläge des Takts",
       "beatLabel": "Schlag",

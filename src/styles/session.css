@@ -4682,6 +4682,11 @@ button.session-input-chip:hover {
 .session-input-dot[data-state="off"] {
   background: var(--l-clash);
 }
+/* A listen demo is playing (card #28): the app's sound, not the player's. */
+.session-input-dot[data-state="demo"] {
+  background: var(--l-amber);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--l-amber) 60%, transparent);
+}
 .session-input-failed {
   display: flex;
   flex-direction: column;

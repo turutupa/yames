@@ -35,13 +35,18 @@ for (const size of [
     await expect(watch).toHaveAttribute("aria-pressed", "true");
     await expect(page.locator('[data-testid="session-live"]')).toHaveCount(0);
     await expect(page.locator('[data-testid="session-take"]')).toHaveAttribute("data-phase", "ready");
-    // Start take stays pressable while it plays: it stops the demo, then starts the Take.
+    // The input line says the app is playing it, not "Play a note to check."
+    await expect(page.locator('[data-testid="session-listen-note"]')).toContainText("Playing it for you");
+    await expect(page.locator('[data-testid="session-input-on"]')).toHaveCount(0);
+        // Start take stays pressable while it plays: it stops the demo, then starts the Take.
     await expect(page.locator('[data-testid="session-big"]')).toBeEnabled();
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/mid-listen-${size.width}.png` });
 
     // One pass, then it stops itself and offers it again.
     await expect(watch).toHaveAttribute("aria-pressed", "false", { timeout: 40_000 });
     await expect(watch).toContainText("Watch again");
+    await expect(page.locator('[data-testid="session-listen-note"]')).toHaveCount(0);
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/after-listen-${size.width}.png` });
     await expect(page.locator('[data-testid="practice-now-tag"]')).toBeVisible();
     await expect(page.locator('[data-testid="session-take"]')).toHaveAttribute("data-phase", "ready");
   });

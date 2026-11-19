@@ -751,6 +751,30 @@ export async function notifySettingsChange(): Promise<void> {
 }
 
 /**
+ * Listen first (card #28): the Session is playing a demo of the Exercise
+ * through the speakers (`true`, `lengthMs` long with its count-in), or has
+ * stopped (`false`). While it plays, what the input HEARS (a microphone or an
+ * interface) is not the player: the engine drops those onsets before the
+ * timing analyzer (no segment, beat feedback, coach tip or practice stat
+ * counts the demo, and no `onset-detected` reaches the page), closing the
+ * open segment first. MIDI is never gated: a keyboard cannot hear speakers.
+ *
+ * Off, heard onsets count again half a second later, once the demo's last
+ * note has rung out (`tail`, the default), or at once with `tail: false` (a
+ * demo stopped to start something the player plays straight away). The
+ * engine bounds the gate by `lengthMs` plus that tail, and by three minutes
+ * whatever is said, and lifts it when the input stops: a page that reloads
+ * mid-demo cannot leave the input deaf.
+ */
+export async function setListenDemo(on: boolean, options: { lengthMs?: number; tail?: boolean } = {}): Promise<void> {
+  return invoke("set_listen_demo", {
+    on,
+    lengthMs: options.lengthMs !== undefined ? Math.max(0, Math.round(options.lengthMs)) : null,
+    tail: options.tail ?? null,
+  });
+}
+
+/**
  * Force-close the open practice segment so `getSessionReport()` returns
  * the IC/GA formula score instead of the legacy fallback. The analyzer
  * loop picks this up within 5ms, emits `practice-segment-ended` with

@@ -104,6 +104,8 @@ export type ListenDemo = {
   /** The tick the last bar ends on. */
   endTick: number;
   countInBars: number;
+  /** How long it plays, count-in included, in milliseconds at its tempo. */
+  lengthMs: number;
 };
 
 /**
@@ -133,6 +135,9 @@ export function buildListenDemo(
   const tracks = [...(band?.tracks ?? []), guitar];
   const under = takeMix(band, options.bandVolume ?? 0.8, options.click ?? LISTEN_CLICK);
   const last = score.bars[score.bars.length - 1];
+  const endTick = last ? last.startTick + last.lengthTicks : 0;
+  const countInTicks = (score.bars[0]?.lengthTicks ?? 0) * LISTEN_COUNT_IN_BARS;
+  const lengthMs = Math.round(((countInTicks + endTick) / score.ticksPerQuarter) * (60_000 / Math.max(1, take.bpm)));
   return {
     score,
     range: wholeSong(score),
@@ -140,7 +145,8 @@ export function buildListenDemo(
     mix: { ...under, tracks: [...under.tracks, LISTEN_GUITAR_GAIN] },
     guitarTrack: tracks.length - 1,
     bars,
-    endTick: last ? last.startTick + last.lengthTicks : 0,
+    endTick,
     countInBars: LISTEN_COUNT_IN_BARS,
+    lengthMs,
   };
 }

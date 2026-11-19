@@ -1,5 +1,5 @@
 use std::collections::VecDeque;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -324,6 +324,19 @@ pub struct TimingAnalyzer {
     /// SettingsChange goes via Signal A"). The analysis loop polls
     /// this once per iteration and clears it on close.
     settings_changed: Arc<AtomicBool>,
+    /// Listen first (card #28): heard onsets stamped before this instant
+    /// (`crate::clock::now_ns`) are not the player's. While the app plays a
+    /// demo of the Exercise through the speakers it is the demo's own end
+    /// plus [`DEMO_TAIL_NS`] (never more than [`MAX_DEMO_NS`] away), so a
+    /// microphone hearing the demo feeds nothing to the analyzer, the
+    /// segment, the coach's beat feedback or the telemetry. Set to "now plus
+    /// the tail" when the demo stops, or to 0 when what follows it must be
+    /// heard at once. 0 is "everything counts": what it starts at, and what
+    /// [`Self::stop`] leaves. Bounded on purpose: a page that reloads in the
+    /// middle of a demo cannot leave the input deaf. One atomic, read on the
+    /// onset detector's thread ([`forward_heard_onset`]): never by the audio
+    /// callback. MIDI is not gated: a keyboard cannot hear the speakers.
+    ignore_input_until_ns: Arc<AtomicU64>,
     /// Falling-edge close flag. The JS layer sets this via
     /// `close_open_segment()` just before calling `getSessionReport()`
     /// so the open segment is scored and emitted (`UserStopped`) before
@@ -331,6 +344,12 @@ pub struct TimingAnalyzer {
     /// iteration; when set it fires the full Signal-B path (score +
     /// emit + push_segment) without resetting activity state.
     close_segment_now: Arc<AtomicBool>,
+    /// Listen first (card #28): a demo began, so the segment the player was
+    /// in (if any) ends here. Scored and kept, but not surfaced as a
+    /// `practice-segment-ended` (`emit_ui = false`), and nothing of a loaded
+    /// schedule is graded by it: that is `close_segment_now`'s job, for a
+    /// Take that stopped.
+    demo_close_now: Arc<AtomicBool>,
     /// Per-session raw telemetry — populated by the analysis loop,
     /// drained by `drain_telemetry()` at session end. See
     /// `SessionTelemetry` for the schema and why it exists.
@@ -409,6 +428,37 @@ pub struct NotesSlot {
 /// loaded onto a transport that has already been running.
 const LIVE_VERDICT_BUFFER: usize = 64;
 
+/// How long after a listen demo stops its sound is still not the player's:
+/// the last note's release through the speakers and the room. Half a second
+/// is longer than the synth's guitar release and shorter than anybody takes
+/// to put a hand on the strings after pressing Start.
+pub const DEMO_TAIL_NS: u64 = 500_000_000;
+
+/// The longest a listen demo may keep the input deaf, however long the page
+/// says it is: a ceiling, so a page that never says "off" (a reload, a crash,
+/// a lost message) costs at most this. Three minutes is longer than any
+/// Exercise's one pass at the slowest tempo the app offers.
+pub const MAX_DEMO_NS: u64 = 180_000_000_000;
+
+/// The onset detector's forwarder (`commands::start_evaluation`), as a
+/// function: an onset heard while a listen demo plays (or rings out) goes
+/// nowhere, neither to the page (`emit`) nor to the analyzer (`log`).
+/// Returns whether it was forwarded. The gate is read without the analyzer's
+/// lock.
+pub fn forward_heard_onset(
+    gate: &AtomicU64,
+    onset: Onset,
+    emit: impl FnOnce(&Onset),
+    log: impl FnOnce(Onset),
+) -> bool {
+    if onset.ts_ns < gate.load(Ordering::SeqCst) {
+        return false;
+    }
+    emit(&onset);
+    log(onset);
+    true
+}
+
 impl TimingAnalyzer {
     pub fn new(beat_log: BeatLog) -> Self {
         Self {
@@ -417,7 +467,9 @@ impl TimingAnalyzer {
             onset_log: Arc::new(Mutex::new(VecDeque::with_capacity(64))),
             beat_log,
             settings_changed: Arc::new(AtomicBool::new(false)),
+            ignore_input_until_ns: Arc::new(AtomicU64::new(0)),
             close_segment_now: Arc::new(AtomicBool::new(false)),
+            demo_close_now: Arc::new(AtomicBool::new(false)),
             telemetry: Arc::new(Mutex::new(SessionTelemetry::default())),
             tempo_ctx: None,
             schedule: Arc::new(Mutex::new(None)),
@@ -519,6 +571,9 @@ impl TimingAnalyzer {
     }
 
     /// Feed an onset into the analyzer (called from onset detector callback).
+    ///
+    /// Not gated: MIDI arrives here directly and a keyboard cannot hear a
+    /// listen demo. A HEARD onset comes through [`Self::log_heard_onset`].
     pub fn log_onset(&self, onset: Onset) {
         let mut log = self.onset_log.lock().unwrap();
         log.push_back(onset);
@@ -526,6 +581,72 @@ impl TimingAnalyzer {
         while log.len() > 256 {
             log.pop_front();
         }
+    }
+
+    /// An onset the input HEARD (the microphone or an interface): dropped
+    /// while a listen demo plays and through its tail. Checked again here,
+    /// under the lock, so an onset that passed the forwarder's check just
+    /// before a demo began is not queued after [`Self::start_demo`] cleared
+    /// the queue.
+    pub fn log_heard_onset(&self, onset: Onset) {
+        if self.ignores_onset_at(onset.ts_ns) {
+            return;
+        }
+        self.log_onset(onset);
+    }
+
+    /// Listen first (card #28): the app starts playing a demo of the Exercise
+    /// through the speakers, `length_ms` long (count-in included). Heard
+    /// onsets are ignored until it ends and its last note has rung out, never
+    /// more than [`MAX_DEMO_NS`] from now; any already queued are thrown
+    /// away, and the open segment is closed, so what the player played before
+    /// it is scored as it was and nothing of the demo is added to it.
+    pub fn start_demo(&self, length_ms: Option<u64>) {
+        self.start_demo_at(length_ms, crate::clock::now_ns());
+    }
+
+    fn start_demo_at(&self, length_ms: Option<u64>, now_ns: u64) {
+        let length_ns = length_ms
+            .map(|ms| ms.saturating_mul(1_000_000))
+            .unwrap_or(MAX_DEMO_NS)
+            .saturating_add(DEMO_TAIL_NS)
+            .min(MAX_DEMO_NS);
+        self.ignore_input_until_ns
+            .store(now_ns.saturating_add(length_ns), Ordering::SeqCst);
+        self.onset_log.lock().unwrap().clear();
+        self.demo_close_now.store(true, Ordering::SeqCst);
+    }
+
+    /// The demo stopped. `tail`: onsets count again once its last note has
+    /// rung out ([`DEMO_TAIL_NS`]), for a demo that ended or was stopped by
+    /// the player. Without it they count at once, for a demo stopped to start
+    /// something the player plays straight away (a warm-up's Start).
+    pub fn end_demo(&self, tail: bool) {
+        self.end_demo_at(tail, crate::clock::now_ns());
+    }
+
+    fn end_demo_at(&self, tail: bool, now_ns: u64) {
+        let until = if tail { now_ns.saturating_add(DEMO_TAIL_NS) } else { 0 };
+        self.ignore_input_until_ns.store(until, Ordering::SeqCst);
+    }
+
+    /// Lift a demo gate whose deadline has passed; leave a live one.
+    fn lift_expired_demo_gate(&self, now_ns: u64) {
+        let until = self.ignore_input_until_ns.load(Ordering::SeqCst);
+        if until <= now_ns {
+            let _ = self.ignore_input_until_ns.compare_exchange(until, 0, Ordering::SeqCst, Ordering::SeqCst);
+        }
+    }
+
+    /// Is a heard onset at `ts_ns` the demo's rather than the player's?
+    pub fn ignores_onset_at(&self, ts_ns: u64) -> bool {
+        ts_ns < self.ignore_input_until_ns.load(Ordering::SeqCst)
+    }
+
+    /// The flag itself, for a caller that decides before it takes the
+    /// analyzer's lock (the onset detector's forwarder in `commands.rs`).
+    pub fn demo_gate(&self) -> Arc<AtomicU64> {
+        self.ignore_input_until_ns.clone()
     }
 
     /// D4 — Signal A entry point. Tell the analyzer the user changed
@@ -616,11 +737,14 @@ impl TimingAnalyzer {
         I: Fn(InferredGridChanged) + Send + 'static,
         J: Fn(LiveOnset) + Send + 'static,
     {
+        // A listen demo playing when the input (re)starts keeps its gate:
+        // `stop` only lifts one that has run out.
         self.stop();
         // Clear any stale Signal A / close flags from a prior session so a
         // brand-new segment isn't immediately closed by leftover state.
         self.settings_changed.store(false, Ordering::SeqCst);
         self.close_segment_now.store(false, Ordering::SeqCst);
+        self.demo_close_now.store(false, Ordering::SeqCst);
         // Reset telemetry buffer so the new session starts fresh.
         // `stop()` deliberately preserves it so `drain_telemetry()` can
         // still extract the prior session's data; the responsibility
@@ -632,6 +756,7 @@ impl TimingAnalyzer {
         let beat_log = self.beat_log.clone();
         let settings_changed = self.settings_changed.clone();
         let close_segment_now = self.close_segment_now.clone();
+        let demo_close_now = self.demo_close_now.clone();
         let telemetry = self.telemetry.clone();
         let tempo_ctx = self.tempo_ctx.clone();
         let schedule = self.schedule.clone();
@@ -646,6 +771,7 @@ impl TimingAnalyzer {
                 onset_log,
                 settings_changed,
                 close_segment_now,
+                demo_close_now,
                 telemetry,
                 tempo_ctx,
                 schedule,
@@ -677,6 +803,10 @@ impl TimingAnalyzer {
         // Reset Signal A and close flags so the next session starts clean.
         self.settings_changed.store(false, Ordering::SeqCst);
         self.close_segment_now.store(false, Ordering::SeqCst);
+        // A listen demo's gate outlives the input only while it is still
+        // in the future (an input restarted mid-demo stays deaf to it); one
+        // that has run out is lifted. Bounded either way (`MAX_DEMO_NS`).
+        self.lift_expired_demo_gate(crate::clock::now_ns());
         // Roadmap 1.3 — hand the detector's refractory back to the
         // click. Leaving the last session's divisor published would
         // carry a 16th-note refractory into somebody's next session of
@@ -697,6 +827,7 @@ impl TimingAnalyzer {
         onset_log: Arc<Mutex<VecDeque<Onset>>>,
         settings_changed: Arc<AtomicBool>,
         close_segment_now: Arc<AtomicBool>,
+        demo_close_now: Arc<AtomicBool>,
         telemetry: Arc<Mutex<SessionTelemetry>>,
         tempo_ctx: Option<crate::onset::SharedTempoContext>,
         schedule_slot: Arc<Mutex<Option<LoadedSchedule>>>,
@@ -1015,7 +1146,12 @@ impl TimingAnalyzer {
             // of the legacy-formula fallback. Activity state is preserved
             // (player can resume after the report is shown).
             if close_segment_now.swap(false, Ordering::SeqCst) {
-                if let Some(run) = schedule_run.as_mut() {
+                // The run is graded only if it is still the schedule loaded
+                // now. A `clear_score_schedule` (a listen demo's, or the next
+                // Take's load) landing between the pick-up above and this
+                // close must not re-grade the previous Take.
+                let current = schedule_version.load(Ordering::SeqCst) == seen_schedule_version;
+                if let Some(run) = schedule_run.as_mut().filter(|_| current) {
                     // Before the segment, because there may not be one.
                     let weights = if coach_mode == CoachMode::Default {
                         profile.default_score_weights
@@ -1041,6 +1177,32 @@ impl TimingAnalyzer {
                         ),
                         true,
                     );
+                }
+            }
+
+            // Listen first (card #28): a demo began. The player's segment
+            // ends here, scored and kept like a settings change (no UI event,
+            // `emit_ui = false`), and the next one opens fresh after it.
+            // Nothing of a schedule is graded: the demo cleared it.
+            if demo_close_now.swap(false, Ordering::SeqCst) {
+                if let Some(seg) = segment.take() {
+                    on_segment_end(
+                        build_segment_ended(
+                            &seg,
+                            &instrument_id,
+                            &preset_id,
+                            SegmentEndReason::UserStopped,
+                            rhythm_inference.current_divisor(),
+                            rhythm_inference.confidence(),
+                            schedule_run.as_ref(),
+                        ),
+                        false,
+                    );
+                    prev_onset_ns = None;
+                    pending_onsets.clear();
+                    consecutive_misses = 0;
+                    activity = Activity::Idle;
+                    signal_b_silence_baseline_ms = 0;
                 }
             }
 
@@ -6086,5 +6248,165 @@ mod notes_pass_tests {
         ta.clear_score_schedule();
         let s = slot.lock().unwrap();
         assert!(s.serial > 7 && !s.pending && s.grade.is_none());
+    }
+}
+
+/// Listen first (card #28): while the app plays a demo of the Exercise
+/// through the speakers, a microphone hearing it is not the player.
+#[cfg(test)]
+mod listen_demo_tests {
+    use super::*;
+
+    fn onset(ts_ns: u64) -> Onset {
+        Onset { ts_ns, amplitude: 0.5, centroid: 0.0, confidence: 1.0 }
+    }
+
+    fn queued(ta: &TimingAnalyzer) -> Vec<u64> {
+        ta.onset_log.lock().unwrap().iter().map(|o| o.ts_ns).collect()
+    }
+
+    const MS: u64 = 1_000_000;
+
+    #[test]
+    fn every_onset_counts_until_a_demo_plays() {
+        let ta = TimingAnalyzer::new(create_beat_log());
+        assert!(!ta.ignores_onset_at(0));
+        assert!(!ta.ignores_onset_at(u64::MAX - 1));
+        ta.log_heard_onset(onset(10));
+        assert_eq!(queued(&ta), vec![10]);
+    }
+
+    #[test]
+    fn a_demo_drops_what_is_queued_and_what_is_heard_while_it_plays() {
+        let ta = TimingAnalyzer::new(create_beat_log());
+        ta.log_heard_onset(onset(100));
+        ta.start_demo_at(Some(10_000), 200);
+        assert!(queued(&ta).is_empty(), "onsets queued when the demo starts are thrown away");
+        ta.log_heard_onset(onset(300));
+        ta.log_heard_onset(onset(200 + 10_000 * MS));
+        assert!(queued(&ta).is_empty(), "nothing heard during the demo reaches the analyzer");
+        assert!(ta.demo_gate().load(Ordering::SeqCst) > 300);
+    }
+
+    #[test]
+    fn a_demo_closes_the_open_segment_on_its_own_flag_never_the_takes() {
+        let ta = TimingAnalyzer::new(create_beat_log());
+        assert!(!ta.demo_close_now.load(Ordering::SeqCst));
+        ta.start_demo_at(Some(1_000), 0);
+        assert!(ta.demo_close_now.load(Ordering::SeqCst));
+        // The Take's close (which grades a loaded schedule) is not asked for.
+        assert!(!ta.close_segment_now.load(Ordering::SeqCst));
+    }
+
+    #[test]
+    fn re_arming_moves_the_deadline_to_the_new_length() {
+        let ta = TimingAnalyzer::new(create_beat_log());
+        ta.start_demo_at(Some(10_000), 0);
+        // Loading took two seconds: armed again as it starts to sound.
+        ta.start_demo_at(Some(10_000), 2_000 * MS);
+        let end = 2_000 * MS + 10_000 * MS + DEMO_TAIL_NS;
+        assert_eq!(ta.demo_gate().load(Ordering::SeqCst), end);
+        ta.log_heard_onset(onset(end - 1));
+        assert!(queued(&ta).is_empty(), "the last note, late because loading was slow, is still the demo");
+    }
+
+    #[test]
+    fn a_demo_the_page_never_ends_expires_after_its_length_and_tail() {
+        let ta = TimingAnalyzer::new(create_beat_log());
+        let t0 = 1_000 * MS;
+        ta.start_demo_at(Some(12_000), t0);
+        let end = t0 + 12_000 * MS + DEMO_TAIL_NS;
+        ta.log_heard_onset(onset(end - 1));
+        assert!(queued(&ta).is_empty());
+        ta.log_heard_onset(onset(end));
+        assert_eq!(queued(&ta), vec![end], "nobody said off, and the input is the player's again");
+    }
+
+    #[test]
+    fn a_length_past_the_ceiling_or_none_is_held_to_the_ceiling() {
+        let ta = TimingAnalyzer::new(create_beat_log());
+        ta.start_demo_at(Some(u64::MAX), 5);
+        assert_eq!(ta.demo_gate().load(Ordering::SeqCst), 5 + MAX_DEMO_NS);
+        ta.start_demo_at(None, 7);
+        assert_eq!(ta.demo_gate().load(Ordering::SeqCst), 7 + MAX_DEMO_NS);
+        ta.log_heard_onset(onset(7 + MAX_DEMO_NS));
+        assert_eq!(queued(&ta).len(), 1);
+    }
+
+    #[test]
+    fn after_the_demo_its_tail_is_ignored_then_the_player_counts_again() {
+        let ta = TimingAnalyzer::new(create_beat_log());
+        ta.start_demo_at(Some(60_000), 1_000);
+        let stop = 5_000_000_000u64;
+        ta.end_demo_at(true, stop);
+        ta.log_heard_onset(onset(stop + DEMO_TAIL_NS / 2));
+        assert!(queued(&ta).is_empty(), "the last note ringing out is still the demo");
+        ta.log_heard_onset(onset(stop + DEMO_TAIL_NS));
+        ta.log_heard_onset(onset(stop + DEMO_TAIL_NS + 1));
+        assert_eq!(queued(&ta), vec![stop + DEMO_TAIL_NS, stop + DEMO_TAIL_NS + 1]);
+    }
+
+    #[test]
+    fn stopped_to_start_something_the_input_counts_at_once() {
+        let ta = TimingAnalyzer::new(create_beat_log());
+        ta.start_demo_at(Some(60_000), 1_000);
+        ta.end_demo_at(false, 2_000);
+        assert_eq!(ta.demo_gate().load(Ordering::SeqCst), 0);
+        ta.log_heard_onset(onset(2_001));
+        assert_eq!(queued(&ta), vec![2_001]);
+    }
+
+    #[test]
+    fn stopping_the_input_mid_demo_keeps_the_gate() {
+        let mut ta = TimingAnalyzer::new(create_beat_log());
+        ta.start_demo(Some(60_000));
+        ta.stop();
+        assert!(ta.ignores_onset_at(crate::clock::now_ns()), "an input restarted mid-demo is still deaf to it");
+    }
+
+    #[test]
+    fn stopping_the_input_lifts_a_gate_that_has_run_out() {
+        let mut ta = TimingAnalyzer::new(create_beat_log());
+        ta.start_demo_at(Some(1), 0);
+        ta.stop();
+        assert_eq!(ta.demo_gate().load(Ordering::SeqCst), 0);
+    }
+
+    #[test]
+    fn midi_is_not_gated_a_keyboard_cannot_hear_the_speakers() {
+        let ta = TimingAnalyzer::new(create_beat_log());
+        ta.start_demo_at(Some(60_000), 0);
+        ta.log_onset(onset(10));
+        assert_eq!(queued(&ta), vec![10]);
+    }
+
+    #[test]
+    fn the_forwarder_emits_and_logs_nothing_the_demo_made() {
+        let gate = AtomicU64::new(1_000);
+        let emitted = std::cell::Cell::new(0);
+        let logged = std::cell::Cell::new(0);
+        let fwd = |ts| {
+            forward_heard_onset(&gate, onset(ts), |_| emitted.set(emitted.get() + 1), |_| logged.set(logged.get() + 1))
+        };
+        assert!(!fwd(999));
+        assert_eq!((emitted.get(), logged.get()), (0, 0));
+        assert!(fwd(1_000));
+        assert_eq!((emitted.get(), logged.get()), (1, 1));
+        gate.store(0, Ordering::SeqCst);
+        assert!(fwd(5));
+        assert_eq!((emitted.get(), logged.get()), (2, 2));
+    }
+
+    #[test]
+    fn the_real_clock_entry_points_gate_onsets_stamped_now() {
+        let ta = TimingAnalyzer::new(create_beat_log());
+        ta.start_demo(Some(60_000));
+        ta.log_heard_onset(onset(crate::clock::now_ns()));
+        assert!(queued(&ta).is_empty());
+        ta.end_demo(true);
+        ta.log_heard_onset(onset(crate::clock::now_ns()));
+        assert!(queued(&ta).is_empty(), "still inside the tail");
+        ta.log_heard_onset(onset(crate::clock::now_ns() + DEMO_TAIL_NS + MS));
+        assert_eq!(queued(&ta).len(), 1);
     }
 }

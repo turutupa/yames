@@ -43,6 +43,9 @@ describe("buildListenDemo", () => {
     expect(transport.countInBars).toBe(1);
     expect(transport.loops).toBe(false);
     expect(transport.range).toEqual({ startBar: 0, endBar: exercise.bars - 1 });
+    // How long it plays, count-in included: (1 + bars) bars of 4/4 at 87.
+    const quarters = (demo.endTick + demo.score.bars[0].lengthTicks) / 960;
+    expect(demo.lengthMs).toBe(Math.round(quarters * (60_000 / 87)));
     // Every note sounds inside the pass.
     expect(Math.max(...guitar.notes.map((n) => n.tick))).toBeLessThan(demo.endTick);
     // A click Exercise: the click and the count-in at the Take's level, then the guitar.

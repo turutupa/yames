@@ -518,6 +518,7 @@
       "watchSoundTitle": "Ascolta un passaggio a questo tempo dopo una battuta di conteggio, con le note illuminate mentre suonano. Nessun voto.",
       "sound": "Suono",
       "soundTitle": "Guarda suona le note ad alta voce. Spento: le illumina soltanto.",
+      "demoPlaying": "Te lo suono io. Avvia la take quando sei pronto.",
       "legendPlayed": "appena suonata",
       "beats": "I movimenti della battuta",
       "beatLabel": "battito",
