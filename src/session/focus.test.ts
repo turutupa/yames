@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import type { PathDoc } from "../paths/format";
 import { PLAN_MINUTES, planSession } from "./planner";
 import type { PlanStep, SessionPlan } from "./planner";
-import { MIX, mixPaths, readFocus, readOffMix, showsFocusPicker, todayPaths } from "./focus";
+import { MIX, focusOn, mixPaths, readFocus, readOffMix, readStoredFocus, showsFocusPicker, storedFocus, todayPaths } from "./focus";
 import { applySwaps, readSwapMemory, rememberSwap, swapMemoryOn, swapsIn, withScope } from "./swap";
 import { ALT, DAY, NOW, SWEEP, progress, state, take } from "./testKit";
 import type { PlayerProgress } from "./progress";
@@ -52,6 +52,35 @@ describe("reading the settings", () => {
     expect(readFocus(7)).toBe(MIX);
     expect(readFocus("all")).toBe(MIX);
     expect(readFocus(BLUES.id)).toBe(BLUES.id);
+  });
+
+  it("a focus is for the day it was chosen on, and the mix the day after", () => {
+    const kept = storedFocus(BLUES.id, NOW);
+    expect(kept).not.toBe(MIX);
+    const stored = readStoredFocus(JSON.parse(JSON.stringify(kept)));
+    expect(stored?.focus).toBe(BLUES.id);
+    expect(focusOn(stored, NOW)).toBe(BLUES.id);
+    // Later the same day (the end of it, wherever NOW falls in it).
+    const endOfDay = new Date(NOW);
+    endOfDay.setHours(23, 59, 59, 0);
+    expect(focusOn(stored, endOfDay.getTime())).toBe(BLUES.id);
+    // The next morning, and any day after: the mix, with nothing to undo.
+    expect(focusOn(stored, endOfDay.getTime() + 2000)).toBe(MIX);
+    expect(focusOn(stored, NOW + 9 * DAY)).toBe(MIX);
+    // A clock set back does not bring it back either.
+    expect(focusOn(stored, NOW - 2 * DAY)).toBe(MIX);
+  });
+
+  it("the mix is kept as the mix, and only a Path with its day is a focus", () => {
+    expect(storedFocus(MIX, NOW)).toBe(MIX);
+    expect(readStoredFocus(MIX)).toBeNull();
+    expect(readStoredFocus(undefined)).toBeNull();
+    // The build that kept a focus until changed stored the bare id: no day, so the mix.
+    expect(readStoredFocus(BLUES.id)).toBeNull();
+    expect(readStoredFocus({ focus: BLUES.id })).toBeNull();
+    expect(readStoredFocus({ focus: BLUES.id, day: "tomorrow" })).toBeNull();
+    expect(readStoredFocus({ focus: "all", day: "2026-11-18" })).toBeNull();
+    expect(focusOn(null, NOW)).toBe(MIX);
   });
 
   it("migration: nothing stored means every subscribed Path is in the mix", () => {

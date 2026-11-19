@@ -598,15 +598,28 @@
   gap: 12px;
   min-width: 0;
 }
+/* Equal cells wherever the names fit them. A cell is never narrower than its
+   longest word (`break-word`, which leaves the word whole when the row can
+   give it room, where `anywhere` let a third of a phone cut "Wechselschlag"
+   as "Wechselschl / ag"); cells that cannot all have theirs go onto a
+   second row rather than out of the well. */
+.session-page .session-today .session-today-focus .session-seg[data-focus] {
+  display: flex;
+  flex-wrap: wrap;
+}
 .session-page .session-today .session-today-focus .session-seg[data-focus] button {
+  /* From a little under a third: three names that fit share the row evenly,
+     and one squeezed below that goes to the next row before it is stacked a
+     word to a line. */
+  flex: 1 1 28%;
   min-height: 44px;
-  min-width: 0;
+  min-width: min-content;
+  max-width: 100%;
   padding: 6px 8px;
   font: 650 14.5px/1.2 var(--l-body);
   letter-spacing: 0;
   white-space: normal;
-  overflow-wrap: anywhere;
-  hyphens: auto;
+  overflow-wrap: break-word;
 }
 .session-focus-select {
   position: relative;
@@ -1034,6 +1047,38 @@
 .session-plan-path {
   color: var(--l-faint);
   letter-spacing: 0.06em;
+}
+/* A line of short facts with dots between them, which wraps between facts and
+   never leaves a dot at the end of a line or the start of the next (card #67:
+   "WARM-UP ·" over "NOT GRADED" on a 390 px phone in Ivory). Every part
+   leads with one dot's width, the dot in it; the line starts that width to
+   the left of its column and clips it, so the dot of a part that begins a
+   line is not drawn and its words start at the column's edge. */
+/* Inline blocks, not flex items: `innerText` (and a copy of the line) still
+   reads "A · B" on one line. */
+.session-dotline {
+  display: block;
+  --dot-w: 1.1em;
+  width: calc(100% + var(--dot-w));
+  margin-left: calc(-1 * var(--dot-w));
+  clip-path: inset(0 0 0 var(--dot-w));
+}
+.session-dot-part {
+  display: inline-block;
+  vertical-align: top;
+  box-sizing: border-box;
+  max-width: 100%;
+  padding-left: var(--dot-w);
+}
+.session-dot-part:has(> .session-dot-sep) {
+  padding-left: 0;
+}
+.session-dot-sep {
+  display: inline-block;
+  width: var(--dot-w);
+  text-align: center;
+  white-space: pre;
+  letter-spacing: 0;
 }
 .session-today-plan .session-plan-why {
   margin-top: 2px;
@@ -2098,8 +2143,20 @@
   min-width: 0;
 }
 .session-page .session-path-focus {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   min-height: 36px;
   text-align: left;
+}
+/* Today is on this Path: said in the accent, with a tick, no longer a link to follow. */
+.session-page .session-path-focus[aria-pressed="true"] {
+  color: var(--l-tag-accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+.session-page .session-path-focus svg {
+  flex: none;
 }
 .session-page .session-mixswitch {
   display: inline-flex;
@@ -2797,12 +2854,18 @@
   width: 100%;
   max-width: 980px;
 }
+/* Three equal tiles wherever their words fit. A tile is never narrower than
+   its longest word: in a wide face on a 360 px phone (Neon's Orbitron)
+   "SESSIONS" ran out of a third of the row and over the next tile, so there
+   the third tile takes a row of its own instead. */
 .session-stat-row {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 12px;
 }
 .session-stat-tile {
+  flex: 1 1 0;
+  min-width: min-content;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -2889,6 +2952,28 @@
     margin-left: 0;
   }
   .session-skill .session-progress-value {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+  /* The Path's own row the same way: its "100 top clean BPM" wrapped under
+     the name beside the trend and sat mid-card, out of the column the rows'
+     numbers keep at the right edge. */
+  .session-prog-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+  .session-prog-head > .session-exercise-text {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .session-prog-head .session-spark,
+  .session-prog-head .session-spark-none {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .session-prog-head .session-progress-value {
     grid-column: 2;
     grid-row: 1 / span 2;
     align-self: center;
@@ -3311,6 +3396,46 @@
   .session-body:not([data-phase="playing"]) > .session-actions > .session-go > .session-big:is(:disabled, [aria-disabled="true"]) {
     background: var(--l-btn);
     box-shadow: 0 0 0 1px var(--l-line2) inset;
+  }
+  /* A warm-up's ready screen, the same way (owner, 2026-11-18): Start was
+     under the fold in every view (the neck with the pattern's bar under it,
+     the tab two bars tall). The foot's note stays in the page; "↺ Again",
+     Skip and Start stick, one block over a fade of the page's colour. Once it
+     runs the screen is held to the window and ends on its button already. */
+  .session-body[data-phase="timedReady"] > .practice-foot {
+    display: contents;
+  }
+  /* In the page's column now: its row basis would be a height here. */
+  .session-body[data-phase="timedReady"] > .practice-foot > .practice-note {
+    flex: none;
+  }
+  .session-body[data-phase="timedReady"] > .practice-foot > .practice-go {
+    position: sticky;
+    bottom: calc(10px + var(--safe-bottom, 0px));
+    z-index: 4;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0 14px;
+    background: var(--l-bg);
+    box-shadow:
+      0 0 0 10px var(--l-bg),
+      0 -18px 22px 10px var(--l-bg);
+  }
+  /* "↺ Again: <the step before>" may be long: it takes the room Skip leaves
+     and breaks inside itself rather than push Skip off the row. */
+  .session-body[data-phase="timedReady"] > .practice-foot > .practice-go > [data-testid="session-back"] {
+    flex: 1 1 0;
+    min-width: 0;
+    white-space: normal;
+    text-align: left;
+  }
+  .session-body[data-phase="timedReady"] > .practice-foot > .practice-go > .session-big {
+    box-shadow:
+      0 1px 0 var(--l-gloss) inset,
+      0 -2px 0 color-mix(in srgb, var(--l-amber-deep) 45%, transparent) inset,
+      0 2px 8px color-mix(in srgb, var(--l-shade) 50%, transparent);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -3838,7 +3963,15 @@
   cursor: pointer;
 }
 .practice-watch svg {
+  flex: none;
   fill: var(--l-amber);
+}
+.practice-watch .practice-watch-replay {
+  fill: none;
+  stroke: var(--l-amber);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .practice-watch[aria-pressed="true"] {
   border-color: var(--l-amber);
@@ -3998,23 +4131,84 @@
     width: 16px;
     height: 16px;
   }
-  /* The footer's row: Watch and Sound, then Slower and Faster on the right. */
+  /* The footer's row: Watch and Sound, then Slower and Faster on the right.
+     One row (owner, 2026-11-18: "Watch again" pushed the pair onto a second
+     line at 390 px). The row is measured (`useFitRow`): Watch gives up its
+     word for its icon where a language or a face runs wide (`tight`), and
+     only past that does the pair take a line of its own (`wrap`). */
   .practice-watchrow[data-place="footer"] {
     margin: 0;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 8px;
+    min-width: 0;
+  }
+  .practice-watchrow[data-place="footer"] > * {
+    flex: none;
   }
   .practice-watchrow[data-place="footer"] .practice-watch,
   .practice-watchrow[data-place="footer"] .practice-sound {
     order: 0;
+    white-space: nowrap;
   }
   .practice-watchrow[data-place="footer"] .session-nudges .session-secondary {
     padding-left: 14px;
     padding-right: 14px;
+    white-space: nowrap;
   }
   .practice-watchrow[data-place="footer"] .session-nudges {
     margin-left: auto;
+    flex-wrap: nowrap;
     justify-content: flex-end;
+  }
+  /* A warm-up's footer row ends on its links ("↺ Again", Skip) instead. */
+  .practice-watchrow[data-place="footer"] .practice-footlinks {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    margin-left: auto;
+  }
+  .practice-go > .practice-watchrow[data-place="footer"] {
+    flex: 1 1 100%;
+  }
+  .practice-watchrow[data-place="footer"]:is([data-fit="tight"], [data-fit="snug"]) .practice-watch {
+    min-width: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+  .practice-watchrow[data-place="footer"]:is([data-fit="tight"], [data-fit="snug"]) .practice-watch-word {
+    display: none;
+  }
+  .practice-watchrow[data-place="footer"]:is([data-fit="tight"], [data-fit="snug"]) .practice-watch svg {
+    width: 14px;
+    height: 14px;
+  }
+  .practice-watchrow[data-place="footer"][data-fit="snug"] {
+    gap: 6px;
+  }
+  .practice-watchrow[data-place="footer"][data-fit="snug"] .session-nudges {
+    gap: 6px;
+  }
+  .practice-watchrow[data-place="footer"][data-fit="snug"] .session-nudges .session-secondary {
+    padding-left: 6px;
+    padding-right: 6px;
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+  .practice-watchrow[data-place="footer"][data-fit="snug"] .practice-footlinks {
+    gap: 10px;
+    font-size: 13px;
+  }
+  .practice-watchrow[data-place="footer"][data-fit="wrap"],
+  .practice-watchrow[data-place="footer"][data-fit="wrap"] .session-nudges {
+    flex-wrap: wrap;
+  }
+  .practice-watchrow[data-place="footer"][data-fit="wrap"] > :is(.session-nudges, .practice-footlinks) {
+    flex-shrink: 1;
+    min-width: 0;
+  }
+  .practice-watchrow[data-place="footer"][data-fit="wrap"] .practice-footlinks .session-link {
+    white-space: normal;
+    text-align: left;
   }
   /* A phone keeps the keys the dots need: what their numbers and the shift bar are. */
   .practice-legend > :not([data-k="fingers"]):not([data-k="shift"]) {
@@ -4442,6 +4636,11 @@
 .practice-foot .session-big svg {
   vertical-align: -1px;
   margin-right: 4px;
+}
+/* The links and the big button: one group so a phone can stick them to the
+   bottom of the window; a desktop lays them out as part of the row. */
+.practice-go {
+  display: contents;
 }
 @media (max-width: 700px) {
   .practice-num {
@@ -5691,20 +5890,44 @@ button.session-input-chip:hover {
   outline: 2px solid var(--l-amber);
   outline-offset: 2px;
 }
+.session-keep {
+  white-space: nowrap;
+}
+/* A phone: the two answers share one row, each on two lines at most, so the
+   footer is one button shorter and the picture is on the first screen of a
+   360x640 phone (card #67). `fitPair` answers for the language and the
+   face: `small` when a label needs a third line, `stack` when it still does,
+   one over the other as it was, a little lower than a lone Start. */
 @media (orientation: portrait) and (max-width: 480px) {
   .session-go > .session-ask {
     flex-direction: column;
     align-items: stretch;
+    gap: 2px;
   }
   .session-ask > .session-ask-remember {
     order: 0;
   }
   .session-ask-buttons {
+    gap: 8px;
+  }
+  .session-ask-buttons[data-fit="stack"] {
     grid-auto-flow: row;
   }
   .session-page .session-ask-buttons > .session-big {
-    font-size: 20px;
+    min-height: 58px;
+    padding: 6px 10px;
+    font-size: 18px;
+    line-height: 1.15;
     white-space: normal;
+    text-wrap: balance;
+  }
+  .session-page .session-ask-buttons[data-fit="small"] > .session-big {
+    padding-inline: 8px;
+    font-size: 15.5px;
+  }
+  .session-page .session-ask-buttons[data-fit="stack"] > .session-big {
+    min-height: 50px;
+    font-size: 20px;
   }
   .session-ask-remember {
     align-self: center;

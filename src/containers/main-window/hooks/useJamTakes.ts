@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPlaybackGate } from "../../../takes/playbackGate";
 import { storeLoad, storeSave } from "../../../ipc";
 import {
   deleteTake,
@@ -152,6 +153,8 @@ export function useJamTakes({
   const [recording, setRecording] = useState(false);
   const [recordedSeconds, setRecordedSeconds] = useState(0);
   const [playingId, setPlayingId] = useState<string | null>(null);
+  /** Which playback `playingId` is lit for: see `takes/playbackGate`. */
+  const gate = useRef(createPlaybackGate());
   const [dirBytes, setDirBytes] = useState(0);
   const [introOpen, setIntroOpen] = useState(false);
   const soundSource = useTakeSound();
@@ -278,8 +281,14 @@ export function useJamTakes({
    * subscription taken after it would leave the controls disabled for ever,
    * and the engine is under no obligation to wait for us.
    */
+  // The other takes list started a take: the engine's one slot is its now.
+  useEffect(() => gate.current.onReplaced(() => setPlayingId(null)), []);
+
   useEffect(() => {
-    const unlisten = onTakePlaybackEnded(() => setPlayingId(null));
+    // Only the ending of the playback this row is lit for (card #53).
+    const unlisten = onTakePlaybackEnded((generation) => {
+      if (gate.current.ended(generation)) setPlayingId(null);
+    });
     return () => {
       void unlisten.then((off) => off()).catch(() => {});
     };
@@ -412,13 +421,23 @@ export function useJamTakes({
     // file, and the controls have to go quiet with it rather than a round
     // trip later. A rejection puts them straight back.
     setPlayingId(id);
-    void playTake(id).catch(() => {
-      setPlayingId(null);
-      setAvailable(false);
-    });
+    const token = gate.current.starting();
+    void playTake(id)
+      .then((generation) => {
+        // A take that ran out before the engine answered: its ending came
+        // first and was held, and the row goes out now.
+        if (!gate.current.started(token, generation)) setPlayingId(null);
+      })
+      .catch(() => {
+        // A refusal for a play that has since been replaced is not this row's.
+        if (!gate.current.failed(token)) return;
+        setPlayingId(null);
+        setAvailable(false);
+      });
   }, []);
 
   const stopPlayback = useCallback(() => {
+    gate.current.stopped();
     setPlayingId(null);
     void stopTakePlayback().catch(() => {});
   }, []);
@@ -434,6 +453,7 @@ export function useJamTakes({
         // Clearing `playingId` on its own left the engine playing a file that
         // was about to be deleted, with no row on the screen to stop it from
         // and the band still muted behind it.
+        gate.current.stopped();
         setPlayingId(null);
         void stopTakePlayback().catch(() => {});
       }

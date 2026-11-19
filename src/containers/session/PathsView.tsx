@@ -6,6 +6,7 @@
  * chosen from any point, and a Path the app cannot grade yet says "later".
  */
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { MIX } from "../../session/focus";
 import type { CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import type { Exercise, Level, PathDoc, Step } from "../../paths/format";
@@ -133,6 +134,45 @@ export function MixSwitch({ session, path }: { session: SessionRun; path: PathDo
   );
 }
 
+/**
+ * "Practise only this today" on a card. A toggle: once this Path is today's
+ * focus the card says so ("Only this today", pressed), and pressing it again
+ * goes back to the daily mix without leaving the page. It used to read the
+ * same before and after, so nothing on Paths said which Path today was on.
+ */
+function FocusToday({
+  session,
+  path,
+  onFocusToday,
+}: {
+  session: SessionRun;
+  path: PathDoc;
+  onFocusToday: (path: PathDoc) => void;
+}) {
+  const { t } = useTranslation();
+  const on = session.todayFocus === path.id;
+  return (
+    <button
+      type="button"
+      className="session-link session-path-focus"
+      aria-pressed={on}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (on) session.setTodayFocus(MIX);
+        else onFocusToday(path);
+      }}
+      data-testid={`path-focus-${path.id}`}
+    >
+      {on && (
+        <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+          <path d="M2 6.4 L4.8 9 L10 3.2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )}
+      {t(on ? "session.paths.focusedToday" : "session.paths.focusToday")}
+    </button>
+  );
+}
+
 /** Whether this Path is one Today plans from: subscribed and runnable. */
 function isMine(session: SessionRun, path: PathDoc): boolean {
   return (session.myPaths ?? []).some((p) => p.id === path.id);
@@ -251,17 +291,7 @@ function PathCard({
           <span className="session-path-today" data-testid={`path-today-${path.id}`}>
             <MixSwitch session={session} path={path} />
             {onFocusToday && (session.myPaths.length > 1 || (session.offMix ?? []).includes(path.id)) && (
-              <button
-                type="button"
-                className="session-link session-path-focus"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onFocusToday(path);
-                }}
-                data-testid={`path-focus-${path.id}`}
-              >
-                {t("session.paths.focusToday")}
-              </button>
+              <FocusToday session={session} path={path} onFocusToday={onFocusToday} />
             )}
           </span>
         )}
@@ -374,6 +404,8 @@ function StepRow({
   const { progress } = session;
   const passed = isStepPassed(progress, path.id, step);
   const skipped = isStepSkipped(progress, path, step);
+  // Followed or played: until then the row is where the Path starts, not where the player is.
+  const started = progress.states.some((s) => s.pathId === path.id);
   const gradable = step.exercises.filter(isGradable);
   const done = gradable.filter((e) => isExercisePassed(progress, path.id, e)).length;
   const range = stepTempoRange(step);
@@ -411,8 +443,10 @@ function StepRow({
           {state === "done" && <span className="session-tag" data-met="">{t("session.paths.stateDone")}</span>}
           {state === "current" && (
             <span className="session-step-here">
-              {t("session.paths.stateHere")}
-              {gradable.length > 0 && <small>{t("session.paths.passedOf", { done, count: gradable.length })}</small>}
+              {t(started ? "session.paths.stateHere" : "session.paths.startHere")}
+              {started && gradable.length > 0 && (
+                <small>{t("session.paths.passedOf", { done, count: gradable.length })}</small>
+              )}
             </span>
           )}
           {state === "skipped" && (
@@ -623,11 +657,14 @@ function PathDetail({
         <aside className="session-col session-path-side">
           {runnable && (
             <div className="session-glass session-card session-rise session-where" data-testid="path-where">
-              <div className="session-kick">{t("session.paths.whereYouAre")}</div>
+              {/* A Path not started yet is not somewhere the player "is" (15
+                  Paths, 14 of them new to anyone): where it starts, and Start. */}
+              <div className="session-kick">{t(started ? "session.paths.whereYouAre" : "session.paths.whereYouStart")}</div>
               <div className="session-where-title">{current.title}</div>
               <div className="session-quiet">
                 {t("session.paths.stepOf", { n: current.order, of: path.steps.length })}
-                {gradableNow.length > 0 &&
+                {started &&
+                  gradableNow.length > 0 &&
                   ` · ${t("session.paths.exercisesPassed", { done: doneNow, count: gradableNow.length })}`}
               </div>
               <StartFirstLine session={session} path={path} onOpenPath={onOpenPath} />
@@ -637,7 +674,7 @@ function PathDetail({
                 onClick={() => onOpenStep(current)}
                 data-testid="path-open-current"
               >
-                {t("session.paths.continue", { n: current.order })}
+                {t(started ? "session.paths.continue" : "session.paths.startStep", { n: current.order })}
               </button>
             </div>
           )}

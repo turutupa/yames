@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import i18n from "../../i18n";
 import type { PathDoc } from "../../paths/format";
+import { FIRST_PATH_ID } from "../../session/packs";
 import type { PlanStep } from "../../session/planner";
 import { StepTag, TodayView } from "./TodayView";
 import type { SessionRun } from "./hooks/useSessionRun";
@@ -137,7 +138,9 @@ describe("the plan as a list", () => {
 
   it("names row 1 under Start, and offers Tools with one link", () => {
     const onOpenTools = vi.fn();
-    render(<TodayView session={planned()} onOpenTools={onOpenTools} onOpenPaths={vi.fn()} />);
+    // The Tools line is for a player on the Path everybody starts on.
+    const session = { ...planned(), myPaths: [{ id: FIRST_PATH_ID, title: "Rhythm Foundations" }] } as unknown as SessionRun;
+    render(<TodayView session={session} onOpenTools={onOpenTools} onOpenPaths={vi.fn()} />);
     expect(screen.getByTestId("today-start").textContent).toBe("StartA melody up one string");
     expect(screen.queryByText("Always open there")).toBeNull();
     fireEvent.click(screen.getByText("Open Tools"));

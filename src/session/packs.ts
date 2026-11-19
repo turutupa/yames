@@ -76,11 +76,14 @@ export function laterWhyKey(pathId: string): string {
 }
 
 /**
- * The Path a player with none yet starts on: Shred, the base Mechanics Path for
- * the first testers (`plans/tasks/mvp/CONTENT.md`). Alternate Picking and Sweep
- * Picking stay as optional deep dives.
+ * The Path a player with none yet starts on: Rhythm Foundations, the
+ * curriculum map's one start (plans/paths/NEW_PATHS.md) and the Path the Paths
+ * screen marks "Start here" (`START_HERE_PATH_ID`, `session/tracks.ts`; a test
+ * keeps the two the same). A player who skips the wizard gets what the wizard
+ * recommends with no answer. It was Shred for the first testers; a player who
+ * has started any Path is not moved (`playerPaths`).
  */
-export const FIRST_PATH_ID = "shred";
+export const FIRST_PATH_ID = "rhythm-foundations";
 
 export function isRunnable(pathId: string): boolean {
   return RUNNABLE_PATH_IDS.includes(pathId);

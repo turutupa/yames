@@ -6,14 +6,19 @@
  * click in under ten seconds). The mark pulses with the soft preview click so
  * the app demonstrates itself before it explains anything.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useWizardEnv } from "../WizardContext";
 import type { WizardStepProps } from "./types";
 import { IS_MOBILE } from "../../../platform";
+import { useFitOneLine } from "../../session/hooks/useFitOneLine";
 
 export function WelcomeStep({ isActive }: WizardStepProps) {
   const { t } = useTranslation();
+  // "Set me up (about two minutes)" on one line in a wide face (Obsidian's
+  // monospace broke it over two): stepped down just enough, never below 80%.
+  const setupButton = useRef<HTMLButtonElement>(null);
+  useFitOneLine(setupButton, t("onboarding.welcome.setup"), 0.8);
   const {
     appVersion,
     beatTick,
@@ -73,6 +78,7 @@ export function WelcomeStep({ isActive }: WizardStepProps) {
           type="button"
           className="onboarding-btn onboarding-btn-primary"
           onClick={startSetup}
+          ref={setupButton}
         >
           {t("onboarding.welcome.setup")}
         </button>

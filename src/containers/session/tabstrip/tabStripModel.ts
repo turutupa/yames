@@ -38,7 +38,50 @@ export type TabStripNoteInput = {
   tech?: readonly PathTechnique[];
   /** Semitones, with `bend`. */
   bend?: number;
+  /** The pick's stroke, where the content writes one (`PathNote.pick`). */
+  pick?: "d" | "u";
 };
+
+/** Which way a strum goes: down toward the floor, or up. */
+export type Strum = "d" | "u";
+
+/**
+ * The direction of every strum of a pattern, by its tick (card #74).
+ *
+ * A strum is an onset of three strings or more. Its direction is the pick
+ * mark the content wrote on it, else the one every strumming teacher starts
+ * with: the hand swings down on the beat and up between beats, so on the
+ * pattern's own grid (quarters, eighths or sixteenths, the finest any strum
+ * sits on) the even places are down and the odd ones up. A pattern of
+ * quarter-note strums is all down. A strum off that grid (a triplet) gets no
+ * mark rather than a guess. A pattern with no strum has none.
+ */
+export function strumDirections(
+  notes: readonly Pick<TabStripNoteInput, "string" | "tick" | "pick">[],
+  beatTicks: number = TICKS,
+): Map<number, Strum> {
+  const out = new Map<number, Strum>();
+  const strings = new Map<number, Set<number>>();
+  const written = new Map<number, Strum>();
+  for (const n of notes) {
+    if (!Number.isFinite(n.tick)) continue;
+    if (!strings.has(n.tick)) strings.set(n.tick, new Set());
+    strings.get(n.tick)!.add(n.string);
+    if (n.pick && !written.has(n.tick)) written.set(n.tick, n.pick);
+  }
+  const strums = [...strings].filter(([, set]) => set.size >= 3).map(([tick]) => tick);
+  if (strums.length === 0 || !(beatTicks > 0)) return out;
+  const on = (grid: number) => strums.every((tick) => tick % grid === 0);
+  const grid = on(beatTicks) ? beatTicks : on(beatTicks / 2) ? beatTicks / 2 : on(beatTicks / 4) ? beatTicks / 4 : 0;
+  for (const tick of strums) {
+    const pick = written.get(tick);
+    if (pick) out.set(tick, pick);
+    else if (grid === beatTicks) out.set(tick, "d");
+    else if (grid > 0) out.set(tick, Math.round(tick / grid) % 2 === 0 ? "d" : "u");
+    else if (tick % beatTicks === 0) out.set(tick, "d");
+  }
+  return out;
+}
 
 /**
  * A technique mark between two notes on one string, drawn the standard tab
@@ -67,6 +110,8 @@ export type PatternModel = {
   notes: PatternNote[];
   /** The pattern's onsets, in ticks from its start, ascending and distinct. */
   onsets: number[];
+  /** Each strum's direction, by its tick in the pattern (`strumDirections`). Empty without strums. */
+  strums: ReadonlyMap<number, Strum>;
   barTicks: number;
   beatTicks: number;
   patternBars: number;
@@ -108,6 +153,7 @@ export function patternModel(
       dur: n.dur,
       ...(n.tech && n.tech.length > 0 ? { tech: n.tech } : {}),
       ...(n.bend !== undefined ? { bend: n.bend } : {}),
+      ...(n.pick ? { pick: n.pick } : {}),
     }))
     .sort((a, b) => a.tick - b.tick || a.string - b.string);
   const onsets: number[] = [];
@@ -127,6 +173,7 @@ export function patternModel(
   return {
     notes,
     onsets,
+    strums: strumDirections(sorted, beatTicks > 0 ? beatTicks : TICKS),
     barTicks: bar,
     beatTicks: beatTicks > 0 ? beatTicks : TICKS,
     patternBars: bars,

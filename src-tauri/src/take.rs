@@ -522,15 +522,24 @@ impl TakeHandoff {
     /// started. `poll_play` reads the generation under the same lock, so
     /// what it hands the callback is labelled with exactly the generation
     /// that wrote it.
-    pub fn set_play(&self, play: Option<TakePlayback>) {
+    ///
+    /// Returns that generation — the one `take-playback-ended` will carry
+    /// when THIS playback runs off its end — so the screen that asked can
+    /// tell its own take's ending from an older one still in the event queue
+    /// (card #53). `None` only if the slot's lock is poisoned, in which case
+    /// nothing was handed over.
+    pub fn set_play(&self, play: Option<TakePlayback>) -> Option<u64> {
         self.drain_retired();
-        if let Ok(mut slot) = self.play.lock() {
+        let generation = self.play.lock().ok().map(|mut slot| {
             self.bump_play_generation();
             self.write_play(&mut slot, play);
             self.clear_play_endings();
-        }
+            // Read under the lock: no other `set_play` can have moved it.
+            self.play_generation.load(Ordering::Acquire)
+        });
         #[cfg(target_os = "android")]
         crate::output_park::wake();
+        generation
     }
 
     /// `set_play`'s three steps, apart so a test can interleave the other
@@ -3495,6 +3504,27 @@ mod tests {
             pcm: Arc::new(vec![0.0; len]),
             sample_rate: 48_000,
         }
+    }
+
+    /// Card #53: `set_play` answers with the generation its playback's
+    /// ending will carry, which is what `play_take` hands the screen. Each
+    /// playback gets its own, a stop included, and the ending the event
+    /// thread reports for a take is the number that take was started with.
+    #[test]
+    fn set_play_names_the_playback_its_ending_will_carry() {
+        let handoff = TakeHandoff::new();
+        let mut seen = 0u64;
+        let first = handoff.set_play(Some(a_playback(10))).expect("a generation");
+        assert_eq!(first, handoff.play_generation());
+        handoff.poll_play(&mut seen).expect("the take").expect("is some");
+        assert_eq!(seen, first, "the callback plays under another generation");
+        handoff.note_ended(seen);
+        assert_eq!(handoff.take_ended(), Some(first), "the ending names another playback");
+
+        let second = handoff.set_play(Some(a_playback(10))).expect("a generation");
+        assert_ne!(second, first, "two playbacks share a generation");
+        let stopped = handoff.set_play(None).expect("a generation");
+        assert_ne!(stopped, second, "a stop did not move the generation");
     }
 
     /// Card #14, item 1. The old take runs off its end in the same instant

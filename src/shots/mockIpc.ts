@@ -15,6 +15,7 @@
 import { mockIPC, mockWindows } from "@tauri-apps/api/mocks";
 import type { Shot } from "./scenarios";
 import { RUNNABLE_PATH_IDS } from "../session/packs";
+import { storedFocus } from "../session/focus";
 import { STARTER_JAMS } from "../jam/jams";
 import { jamToSetlistStep } from "../setlist/setlists";
 import { bandStateForBar } from "../jam/practice";
@@ -1041,7 +1042,8 @@ export function installShotMock(shot: Shot, theme: string): void {
   // Played Alternate Picking, then unsubscribed from it: no Path at all.
   if (shot.session?.seed === "none") store.set("session.unsubscribed", ["alternate-picking"]);
   if (shot.session?.unsubscribed) store.set("session.unsubscribed", shot.session.unsubscribed);
-  if (shot.session?.focus) store.set("session.todayFocus", shot.session.focus);
+  // A focus is kept with the day it was chosen on: the scene's is today's.
+  if (shot.session?.focus) store.set("session.todayFocus", storedFocus(shot.session.focus, Date.now()));
   if (shot.session?.offMix) store.set("session.offMix", shot.session.offMix);
   const pathStore = sessionSeed(shot.session?.seed ?? "first");
   (window as unknown as { __SHOT_PATHS__: PathStoreSeed }).__SHOT_PATHS__ = pathStore;

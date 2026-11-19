@@ -41,6 +41,7 @@ import { kindOfMark, neckNotesOf, useNeckTake } from "../hooks/useNeck";
 import { nextOnsetIndex, runwayModel } from "../highway/runwayModel";
 import {
   barAt,
+  barShapes,
   beatInBar,
   cameraPlan,
   fingering,
@@ -135,6 +136,30 @@ export function NeckInstruction({
     [notes, position, model, take.exercise.bars],
   );
   const hasFingers = useMemo(() => [...fingers.values()].some((f) => f !== "0"), [fingers]);
+  // Strummed chords that change (card #74): the shape and its fingers are the
+  // bar's own, never every chord of the Exercise at once. NOW is the strum,
+  // NEXT the next one, which on the last strum of a bar is the next chord's
+  // outline: where the fingers go, shown as the change comes.
+  const chords = useMemo(() => {
+    const by = barShapes(notes, model.onsets, model.barTicks[0] ?? 0, model.barLength, take.exercise.bars);
+    if (!by) return null;
+    return {
+      barOf: by.barOf,
+      shapes: by.bars.map((bar) => neckNotesOf(bar, "aim")),
+      fingers: by.bars.map((bar) => fingering(bar, position)),
+    };
+  }, [notes, model, take.exercise.bars, position]);
+  /** The quiet shape and its fingers while onset `index` is NOW. */
+  const shapeAt = useCallback(
+    (index: number) => {
+      if (!chords) return { sh: shape, fg: fingers };
+      const b = chords.barOf(index);
+      return { sh: chords.shapes[b] ?? shape, fg: chords.fingers[b] ?? fingers };
+    },
+    [chords, shape, fingers],
+  );
+  /** The shape on the neck now: what the overlay's pills keep clear of. */
+  const drawn = useRef(shape);
 
   // Ready: the whole pattern in view. Running: the bar's window.
   const whole = useMemo<NeckView>(() => {
@@ -161,8 +186,8 @@ export function NeckInstruction({
   }, [lights]);
   /** Watch: the demo or the silent preview, and the neck follows its position. */
   const showing = !running && !!watch?.showing;
-  const latest = useRef({ verdicts, model, shape, theory, running, fingers, byOnset });
-  latest.current = { verdicts, model, shape, theory, running, fingers, byOnset };
+  const latest = useRef({ verdicts, model, shapeAt, theory, running, byOnset });
+  latest.current = { verdicts, model, shapeAt, theory, running, byOnset };
 
   /**
    * "start here", before the start: a pill in the gap between two strings,
@@ -172,7 +197,8 @@ export function NeckInstruction({
    */
   const placeStart = useCallback(
     (tag: HTMLElement, box: DOMRect, now: { x: number; y: number; r: number }) => {
-      const { model: m, shape: sh } = latest.current;
+      const m = latest.current.model;
+      const sh = drawn.current;
       const first = m.onsets[0]?.places[0];
       const k0 = first ? `${first.string}:${first.fret}` : "";
       const second = m.onsets.map((o) => o.places[0]).find((p) => p && `${p.string}:${p.fret}` !== k0);
@@ -304,7 +330,7 @@ export function NeckInstruction({
           })();
           const nextKey = `${place.string}:${place.fret}`;
           const blocks: { x: number; y: number; r: number }[] = [];
-          for (const n of latest.current.shape) {
+          for (const n of drawn.current) {
             const pt = neck.project(n.string, n.fret);
             if (!pt) continue;
             const k = `${n.string}:${n.fret}`;
@@ -385,7 +411,9 @@ export function NeckInstruction({
   /** NOW moved on: the neck, the tags' words, the ring. */
   const showIndex = useCallback(
     (index: number, tick: number | null) => {
-      const { model: m, shape: sh, verdicts: v, theory: th, fingers: fg, byOnset: bo } = latest.current;
+      const { model: m, verdicts: v, theory: th, byOnset: bo } = latest.current;
+      const { sh, fg } = latest.current.shapeAt(index);
+      drawn.current = sh;
       neck.setNotes(nowNextNeck(sh, m.onsets, index, v, th, fg, bo), { fade: 0.12 });
       // The finger is on the dot itself now; the tag under NOW says nothing.
       if (nowTag.current) nowTag.current.textContent = "";
@@ -407,12 +435,15 @@ export function NeckInstruction({
   const showReady = useCallback(() => {
     shown.current = { index: -1, bar: -1, beat: -1, view: whole };
     neck.setView(whole, slot.current);
-    neck.setNotes(readyNeck(shape, model.onsets, fingers, theory));
+    // A chord Exercise shows its first chord: the bar "start here" is in.
+    const { sh, fg } = shapeAt(0);
+    drawn.current = sh;
+    neck.setNotes(readyNeck(sh, model.onsets, fg, theory));
     if (nowTag.current) nowTag.current.textContent = t("session.practice.start");
     dots.current?.querySelectorAll("i").forEach((d) => d.removeAttribute("data-on"));
     // Once the camera is there (an instant cut or the end of a flight).
     placeOverlay(0, null);
-  }, [whole, shape, model, theory, fingers, neck, placeOverlay, t]);
+  }, [whole, shapeAt, model, theory, neck, placeOverlay, t]);
 
   useLayoutEffect(() => {
     if (running || showing) return;
@@ -430,18 +461,22 @@ export function NeckInstruction({
     if (!showing) return;
     heard.current = { index: -2, beat: -1 };
     if (nowTag.current) nowTag.current.textContent = "";
-    const { model: m, shape: sh, theory: th, fingers: fg, byOnset: bo } = latest.current;
+    const { model: m, theory: th, byOnset: bo } = latest.current;
+    const { sh, fg } = latest.current.shapeAt(0);
+    drawn.current = sh;
     neck.setNotes(nowNextNeck(sh, m.onsets, 0, null, th, fg, bo), { fade: 0.08 });
     placeOverlay(0, null);
   }, [showing, neck, placeOverlay]);
   const onHeardTick = useCallback(
     (tick: number) => {
-      const { model: m, shape: sh, theory: th, fingers: fg, byOnset: bo } = latest.current;
+      const { model: m, theory: th, byOnset: bo } = latest.current;
       const index = soundingIndex(m.onsets, tick);
       const h = heard.current;
       if (index !== h.index) {
         h.index = index;
         const at = Math.max(0, index);
+        const { sh, fg } = latest.current.shapeAt(at);
+        drawn.current = sh;
         neck.setNotes(nowNextNeck(sh, m.onsets, at, null, th, fg, bo), { fade: 0.08 });
         placeOverlay(at, null);
       }
@@ -475,7 +510,8 @@ export function NeckInstruction({
   // A new verdict: the played notes take its colour, NOW and NEXT unchanged.
   useEffect(() => {
     if (!running || shown.current.index < 0) return;
-    const { model: m, shape: sh, theory: th, fingers: fg, byOnset: bo } = latest.current;
+    const { model: m, theory: th, byOnset: bo } = latest.current;
+    const { sh, fg } = latest.current.shapeAt(shown.current.index);
     neck.setNotes(nowNextNeck(sh, m.onsets, shown.current.index, verdicts, th, fg, bo), { fade: 0.12 });
   }, [verdicts, running, neck]);
 

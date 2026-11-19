@@ -10,14 +10,19 @@
  *   setting existed is in it too, with nothing to migrate.
  * - Today's focus (`session.todayFocus`): "mix", the planner across every Path
  *   in the mix as it always was, or one subscribed Path's id, which plans from
- *   that Path alone, in the mix or not. Kept until the player changes it; a
- *   Path no longer subscribed falls back to the mix.
+ *   that Path alone, in the mix or not. It is today's, as every word on the
+ *   screen says ("Practise only this today", "Only this Path today"): kept
+ *   with the day it was chosen on, and the mix again the day after. A focus
+ *   that stayed until changed starved the other Paths in silence for as long
+ *   as the player forgot it; leaving a Path out for good is what the mix's
+ *   switch is for. A Path no longer subscribed falls back to the mix.
  *
  * Plain deterministic code. The planner is not told about either: it is given
  * the Paths, so with every Path in the mix and the focus on the mix it gets the
  * same input it always did.
  */
 import type { PathDoc } from "../paths/format";
+import { dayKey } from "./swap";
 
 export const FOCUS_KEY = "session.todayFocus";
 export const OFF_MIX_KEY = "session.offMix";
@@ -31,6 +36,32 @@ export type TodayFocus = string;
 export function readFocus(raw: unknown): TodayFocus {
   if (typeof raw !== "string" || raw.length === 0 || raw === "all") return MIX;
   return raw;
+}
+
+/** What is kept under `session.todayFocus`: one Path, and the day it was chosen for. */
+export type StoredFocus = { focus: TodayFocus; day: string };
+
+/**
+ * A stored focus, checked. Only a Path with its day is one: "mix", nothing,
+ * and a bare id from the build that kept a focus until changed all read as
+ * the mix.
+ */
+export function readStoredFocus(raw: unknown): StoredFocus | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as { focus?: unknown; day?: unknown };
+  const focus = readFocus(r.focus);
+  if (focus === MIX || typeof r.day !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(r.day)) return null;
+  return { focus, day: r.day };
+}
+
+/** What to keep for a choice made at `now`: a Path with its day, or the mix. */
+export function storedFocus(focus: TodayFocus, now: number): StoredFocus | typeof MIX {
+  return focus === MIX ? MIX : { focus, day: dayKey(now) };
+}
+
+/** The focus in force at `now`: the stored Path on the day it was chosen for, the mix on any other. */
+export function focusOn(stored: StoredFocus | null, now: number): TodayFocus {
+  return stored && stored.day === dayKey(now) ? stored.focus : MIX;
 }
 
 /** The Paths switched out of the mix, checked. Nothing stored: every Path is in. */

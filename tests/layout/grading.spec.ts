@@ -110,6 +110,95 @@ test.describe("on a phone", () => {
       });
     }
   }
+
+  /**
+   * Card #67: on a 360x640 phone the ask-first footer was about 235 px of two
+   * stacked buttons, and covered Watch (the runway) or all but a sliver of
+   * the tab. The two answers share a row where their words fit two lines.
+   */
+  const SMALL = { width: 360, height: 640 };
+  async function askFooter(page: Page) {
+    return page.evaluate(() => {
+      const box = (sel: string) => {
+        const el = document.querySelector(sel);
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width, height: r.height };
+      };
+      const lines = (sel: string) => {
+        const el = document.querySelector(sel)!;
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        return new Set([...range.getClientRects()].filter((r) => r.width > 0).map((r) => Math.round(r.top))).size;
+      };
+      return {
+        vh: innerHeight,
+        fit: document.querySelector(".session-ask-buttons")?.getAttribute("data-fit") ?? null,
+        go: box('[data-testid="session-go"]'),
+        ask: box('[data-testid="session-ask"]'),
+        big: box('[data-testid="session-big"]'),
+        justPlay: box('[data-testid="session-just-play"]'),
+        watch: box('[data-testid="practice-watch"]'),
+        picture: box(".practice-tab, .session-practice-hero"),
+        bigLines: lines('[data-testid="session-big"]'),
+        justPlayLines: lines('[data-testid="session-just-play"]'),
+        clipped: [...document.querySelectorAll<HTMLElement>('[data-testid="session-ask"] .session-big')].filter(
+          (b) => b.scrollWidth > b.clientWidth + 1,
+        ).length,
+        scrollY,
+      };
+    });
+  }
+
+  for (const theme of ["ember", "ivory"]) {
+    test(`grading ask: the two answers share a row on a 360x640 phone in ${theme}`, async ({ page }) => {
+      test.slow();
+      await openShot(page, "session-ask-ready", SMALL, theme);
+      await settleAnimations(page);
+      await noSidewaysScroll(page, `ask small ${theme}`);
+      const f = await askFooter(page);
+      expect(f.scrollY).toBe(0);
+      expect(Math.abs(f.big!.top - f.justPlay!.top), "the answers are stacked").toBeLessThanOrEqual(1);
+      expect(Math.abs(f.big!.width - f.justPlay!.width)).toBeLessThanOrEqual(1);
+      expect(Math.abs(f.big!.height - f.justPlay!.height)).toBeLessThanOrEqual(1);
+      expect(f.big!.height).toBeGreaterThanOrEqual(44);
+      expect(f.bigLines).toBeLessThanOrEqual(2);
+      expect(f.justPlayLines).toBeLessThanOrEqual(2);
+      expect(f.clipped).toBe(0);
+      // The answers and "Remember my choice": under 130 px (it was 180).
+      expect(f.ask!.height, `the ask block is ${f.ask!.height}px`).toBeLessThanOrEqual(130);
+      // The picture has a hundred pixels of the first screen above the footer.
+      expect(f.picture, "no picture").not.toBeNull();
+      expect(f.go!.top - f.picture!.top, "the footer covers the picture").toBeGreaterThanOrEqual(100);
+      expect(
+        await notHitTestable(page, '[data-testid="session-big"], [data-testid="session-just-play"], [data-testid="session-ask-remember"], [data-testid="practice-watch"]'),
+      ).toEqual([]);
+    });
+  }
+
+  test("grading ask: Watch is not under the footer on a 360x640 phone's runway", async ({ page }) => {
+    test.slow();
+    await openShot(page, "session-ask-ready-runway", SMALL, "ember");
+    await settleAnimations(page);
+    const f = await askFooter(page);
+    expect(f.scrollY).toBe(0);
+    expect(f.watch, "no Watch").not.toBeNull();
+    expect(f.watch!.bottom, "Watch is under the footer").toBeLessThanOrEqual(f.go!.top + 1);
+    expect(await notHitTestable(page, '[data-testid="practice-watch"], [data-testid="session-just-play"]')).toEqual([]);
+  });
+
+  test("grading ask: a long pair goes one over the other, whole (Russian at 360)", async ({ page }) => {
+    test.slow();
+    await openShot(page, "session-ask-ready", SMALL, "ember", { lng: "ru" });
+    await settleAnimations(page);
+    const f = await askFooter(page);
+    expect(f.fit).toBe("stack");
+    expect(f.justPlay!.top).toBeGreaterThanOrEqual(f.big!.bottom);
+    expect(Math.abs(f.big!.width - f.justPlay!.width)).toBeLessThanOrEqual(1);
+    expect(f.clipped).toBe(0);
+    expect(f.bigLines).toBeLessThanOrEqual(2);
+    expect(f.justPlay!.bottom).toBeLessThanOrEqual(f.vh + 1);
+  });
 });
 
 test("Grade me opens a small choice, inside the window", async ({ page }) => {

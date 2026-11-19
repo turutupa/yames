@@ -200,6 +200,46 @@ describe("the take the review is handed", () => {
   });
 });
 
+describe("playing a take back", () => {
+  it("an older take's ending does not put out the row of the take just started (card #53)", async () => {
+    let ended: ((generation?: number) => void) | null = null;
+    ipc.onTakePlaybackEnded.mockImplementation((cb: (generation?: number) => void) => {
+      ended = cb;
+      return Promise.resolve(() => {});
+    });
+    let generation = 0;
+    ipc.playTake.mockImplementation(() => Promise.resolve(++generation));
+    ipc.listTakes.mockResolvedValue([take(), take({ id: "t2" })]);
+    const { result } = mount();
+    await settle();
+    act(() => result.current.play("t1"));
+    await settle();
+    act(() => result.current.play("t2"));
+    act(() => ended!(1));
+    expect(result.current.playingId).toBe("t2");
+    await settle();
+    act(() => ended!(1));
+    expect(result.current.playingId).toBe("t2");
+    act(() => ended!(2));
+    expect(result.current.playingId).toBeNull();
+  });
+
+  it("an ending that names no playback still brings the controls back", async () => {
+    let ended: ((generation?: number) => void) | null = null;
+    ipc.onTakePlaybackEnded.mockImplementation((cb: (generation?: number) => void) => {
+      ended = cb;
+      return Promise.resolve(() => {});
+    });
+    ipc.listTakes.mockResolvedValue([take()]);
+    const { result } = mount();
+    await settle();
+    act(() => result.current.play("t1"));
+    await settle();
+    act(() => ended!());
+    expect(result.current.playingId).toBeNull();
+  });
+});
+
 describe("asking before the first recording", () => {
   it("opens the dialog rather than the microphone", async () => {
     const view = mount({ enabled: false });

@@ -43,6 +43,19 @@ export function StepTag({ step, paths }: { step: PlanStep; paths: readonly PathD
   );
 }
 
+/** The separator of a one-line list of short facts. */
+const DOT = " · ";
+
+/**
+ * The dot before a part of a `.session-dotline`. Real text, so the line
+ * reads "A · B" to a screen reader and to `textContent`; the stylesheet puts
+ * it in the part's left margin, where the line's own edge clips the one that
+ * would start a wrapped line.
+ */
+function DotSep() {
+  return <span className="session-dot-sep">{DOT}</span>;
+}
+
 /** Whose turn it is, above why this tempo. Only an Exercise step has one. */
 export function ContextLine({ step }: { step: PlanStep | null }) {
   const { t } = useTranslation();
@@ -126,13 +139,27 @@ function PlanRow({
       </span>
       <span className="session-plan-body">
         <span className="session-plan-title">{stepTitle(step, t)}</span>
-        <span className="session-plan-meta">
-          <span className="session-plan-role">{t(roleKey(step))}</span>
-          {pathTitle && <span className="session-plan-path"> · {pathTitle}</span>}
+        {/* "WARM-UP · NOT GRADED · Alternate Picking": its parts wrap whole,
+            and a dot is never left at a line's end or start (card #67). */}
+        <span className="session-plan-meta session-dotline">
+          {t(roleKey(step))
+            .split(DOT)
+            .map((part, i) => (
+              <span key={i} className="session-dot-part session-plan-role">
+                {i > 0 && <DotSep />}
+                {part}
+              </span>
+            ))}
+          {pathTitle && (
+            <span className="session-dot-part session-plan-path">
+              <DotSep />
+              {pathTitle}
+            </span>
+          )}
           {"swappedFrom" in step && step.swappedFrom && (
-            <span className="session-plan-swapped" data-testid={`today-swapped-${index}`}>
-              {" "}
-              · {t("session.today.swap.swapped")}
+            <span className="session-dot-part session-plan-swapped" data-testid={`today-swapped-${index}`}>
+              <DotSep />
+              {t("session.today.swap.swapped")}
             </span>
           )}
         </span>

@@ -4,8 +4,14 @@
  * owner delegated it). One optional question, "What do you want most right
  * now?", and four plain answers, two of which say the player's level:
  *
- * - `basics`, new to the guitar: Rhythm Foundations and Know the Neck, the
- *   first Path of each route.
+ * - `basics`, new to the guitar: Rhythm Foundations and First Chords and
+ *   Strumming, the two Foundations Paths (2026-11-19, when First Chords
+ *   arrived). A beginner needs time, and something that sounds like music in
+ *   the first week: three open chords and a strum do that, and the note
+ *   names of Know the Neck (the second Path here until then) mean more once
+ *   there are chords to hang them on. Two Paths, not three: ten minutes a
+ *   day split three ways moves nothing. Know the Neck is one answer away
+ *   (`harmony`) and one card down on the Paths screen.
  * - `harmony`: Know the Neck, the first of the route through Scales and
  *   Modes, Triads, Chords in a Key and Arpeggios over Changes.
  * - `technique`, faster and cleaner: Alternate Picking.
@@ -24,7 +30,7 @@ export const START_GOALS: readonly StartGoal[] = ["basics", "harmony", "techniqu
 
 /** The Paths each answer starts, first one first (its Level is the one the step shows). */
 export const GOAL_PATHS: Readonly<Record<StartGoal, readonly string[]>> = {
-  basics: [START_HERE_PATH_ID, "know-the-neck"],
+  basics: [START_HERE_PATH_ID, "first-chords"],
   harmony: ["know-the-neck"],
   technique: ["alternate-picking"],
   speed: ["shred"],

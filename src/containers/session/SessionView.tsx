@@ -42,10 +42,10 @@ import { exerciseNeck, useNeck3d, useNeckSlot } from "./hooks/useNeck";
 import { PracticeViewSwitch } from "./practice/PracticeViewSwitch";
 import { NeckInstruction } from "./practice/NeckInstruction";
 import { useWatch } from "./practice/useWatch";
-import { WatchControls, WatchRow } from "./practice/WatchControls";
+import { WatchFooterRow, WatchRow } from "./practice/WatchControls";
 import { hideTipUntilLeft, showTipAgain, usePreviousWordFits } from "./sessionBarParts";
 import { PracticeTab } from "./practice/PracticeTab";
-import { HandLine } from "./practice/HandLine";
+import { HandLine, handOf } from "./practice/HandLine";
 import { resumeBeats, useWarmupBeat, warmupClockOf } from "./practice/useWarmupBeat";
 import { Key, MetaClock, MetaTempo, PracticeHead, clockText } from "./practice/PracticeChrome";
 import type { PracticeBeat } from "./practice/useWarmupBeat";
@@ -168,7 +168,7 @@ function SessionBar({
         {run.untimed
           ? t("session.run.played", { time: clockText(session.playedMs) })
           : left > 0
-            ? t("session.run.minutesLeft", { minutes: left })
+            ? keepNumberWithUnit(t("session.run.minutesLeft", { minutes: left }))
             : t("session.run.timeUp")}
       </span>
       {steps.length > 1 && (
@@ -574,7 +574,7 @@ function TakeScreen({
 
       <div className="session-mechlow" data-single="">
         <div className="session-col">
-          {!running && <HandLine position={exercise.position} />}
+          {!running && <HandLine position={handOf(exercise)} />}
           {/* Ready: what is graded. Running: the Exercise's own tip. */}
           <CoachLine>{running ? exercise.coachLine : gradedLine}</CoachLine>
           {/* One hand line, one coach line, one "how", folded: the how-to, the
@@ -623,10 +623,9 @@ function TakeScreen({
             />
           )}
           {!running && tabView && portraitPhone && watch.canWatch ? (
-            <div className="practice-watchrow" data-place="footer" data-testid="practice-watchrow">
-              <WatchControls watch={watch} />
+            <WatchFooterRow watch={watch}>
               <TempoNudges run={run} exercise={exercise} session={session} />
-            </div>
+            </WatchFooterRow>
           ) : (
             !running && <TempoNudges run={run} exercise={exercise} session={session} />
           )}
@@ -656,6 +655,15 @@ function TakeScreen({
 
     </div>
   );
+}
+
+/**
+ * A number stays on the line of the unit after it. A phone's Session bar
+ * lets "Осталось 5 мин" take two short lines, and it broke as "Осталось 5 /
+ * мин": the unit alone under the number it belongs to.
+ */
+export function keepNumberWithUnit(text: string): string {
+  return text.replace(/(\d)\s+(?=\S)/g, "$1\u00a0");
 }
 
 /**
@@ -1368,6 +1376,10 @@ function TimedScreen({
     view: session.practiceView,
   });
 
+  // On a phone held upright the tab runs down the page, so Watch rides in the
+  // sticky footer, as on a Take's ready screen.
+  const portraitPhone = useMediaQuery(PORTRAIT_PHONE_QUERY);
+
   if (!step) return null;
   const kick =
     step.kind === "metronome"
@@ -1396,6 +1408,16 @@ function TimedScreen({
         : where
           ? t("session.practice.barOf", { n: where.n, of: where.of })
           : null;
+
+  const watchInFooter = portraitPhone && ready && !!pattern && view === "tab" && watch.canWatch;
+  const readyLinks = ready && (
+    <>
+      {session.canGoBack && <BackLink session={session} />}
+      <button className="session-link" onClick={actions.next} data-testid="session-skip">
+        {t("session.timed.skip")}
+      </button>
+    </>
+  );
 
   const picture = !pattern ? (
     <WholeNeckSlot />
@@ -1467,7 +1489,7 @@ function TimedScreen({
         statusTone={ready || ended ? "quiet" : paused ? "hold" : "live"}
       />
       {picture}
-      {pattern && view !== "neck" && ready && <WatchRow watch={watch} />}
+      {pattern && view !== "neck" && ready && !watchInFooter && <WatchRow watch={watch} />}
       {/* The whole pattern under the neck or the runway before the start:
           learn the sequence before keeping up (owner, beta 5). Paused, the
           neck holds where it was and the Tab view (V) has every bar marked;
@@ -1478,7 +1500,7 @@ function TimedScreen({
       <div className="practice-foot">
         {ready ? (
           <span className="practice-note" data-testid="session-timed-how">
-            {pattern && <HandLine position={pattern.exercise.position} />} {t(timedHowKey(step))}
+            {pattern && <HandLine position={handOf(pattern.exercise)} />} {t(timedHowKey(step))}
           </span>
         ) : ended ? (
           <span className="practice-note" data-testid="session-timed-ended">{t("session.practice.endedFoot")}</span>
@@ -1492,59 +1514,66 @@ function TimedScreen({
           </span>
         )}
         <span className="practice-grow" />
-        {ready && session.canGoBack && <BackLink session={session} />}
-        {ready && (
-          <button className="session-link" onClick={actions.next} data-testid="session-skip">
-            {t("session.timed.skip")}
-          </button>
-        )}
-        {pattern && (ready || live) && (
-          <span className="practice-note practice-switchhint">
-            {t("session.practice.switchAny")} · <b>{viewKey}</b>
-          </span>
-        )}
-        {running && (
-          <button
-            className="session-secondary practice-control"
-            onClick={actions.restart}
-            data-testid="session-restart"
-            title={t("session.practice.restart")}
-          >
-            <RestartIcon /> {t(ended ? "session.practice.again" : "session.practice.restart")} <Key k={restartKey} />
-          </button>
-        )}
-        {/* The big button is what Space, Enter and the pedal do (SES-1): while
-            it runs that is Pause, so moving on is a link and never a slip. */}
-        {(live || paused) && (
-          <button className="session-link practice-next-link" onClick={actions.go} data-testid="session-next-link">
-            {bigLabel(big, t)} →
-          </button>
-        )}
-        {live ? (
-          <button
-            className="session-big practice-pausebig"
-            data-size="mid"
-            onClick={actions.togglePause}
-            data-testid="session-pause"
-            title={t("session.practice.pauseKeys", { key: pauseKey })}
-          >
-            <PauseIcon /> {t("session.practice.pause")}
-          </button>
-        ) : paused ? (
-          <button className="session-big" data-size="mid" onClick={actions.togglePause} data-testid="session-resume">
-            <PlayIcon /> {t("session.practice.resume")}
-          </button>
-        ) : (
-          <button
-            className="session-big"
-            data-size={ready ? undefined : "mid"}
-            onClick={actions.go}
-            data-testid="session-big"
-            title={ready ? t("session.timed.startKeys") : undefined}
-          >
-            {bigLabel(big, t)}
-          </button>
-        )}
+        {/* Everything a thumb presses, as one group: a plain run of the row
+            on a desktop, and on a phone's ready screen the block that sticks
+            to the bottom of the window, so Start is on the first screen
+            whichever view is on (owner, 2026-11-18). */}
+        <div className="practice-go" data-testid="practice-go">
+          {watchInFooter ? (
+            <WatchFooterRow watch={watch}>
+              <span className="practice-footlinks">{readyLinks}</span>
+            </WatchFooterRow>
+          ) : (
+            readyLinks
+          )}
+          {pattern && (ready || live) && (
+            <span className="practice-note practice-switchhint">
+              {t("session.practice.switchAny")} · <b>{viewKey}</b>
+            </span>
+          )}
+          {running && (
+            <button
+              className="session-secondary practice-control"
+              onClick={actions.restart}
+              data-testid="session-restart"
+              title={t("session.practice.restart")}
+            >
+              <RestartIcon /> {t(ended ? "session.practice.again" : "session.practice.restart")} <Key k={restartKey} />
+            </button>
+          )}
+          {/* The big button is what Space, Enter and the pedal do (SES-1): while
+              it runs that is Pause, so moving on is a link and never a slip. */}
+          {(live || paused) && (
+            <button className="session-link practice-next-link" onClick={actions.go} data-testid="session-next-link">
+              {bigLabel(big, t)} →
+            </button>
+          )}
+          {live ? (
+            <button
+              className="session-big practice-pausebig"
+              data-size="mid"
+              onClick={actions.togglePause}
+              data-testid="session-pause"
+              title={t("session.practice.pauseKeys", { key: pauseKey })}
+            >
+              <PauseIcon /> {t("session.practice.pause")}
+            </button>
+          ) : paused ? (
+            <button className="session-big" data-size="mid" onClick={actions.togglePause} data-testid="session-resume">
+              <PlayIcon /> {t("session.practice.resume")}
+            </button>
+          ) : (
+            <button
+              className="session-big"
+              data-size={ready ? undefined : "mid"}
+              onClick={actions.go}
+              data-testid="session-big"
+              title={ready ? t("session.timed.startKeys") : undefined}
+            >
+              {bigLabel(big, t)}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

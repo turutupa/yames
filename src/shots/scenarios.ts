@@ -991,6 +991,16 @@ export const SHOTS: Shot[] = [
     height: 900,
     settleMs: 1800,
   },
+  // Strums that go down and up (card #74): the Tab view draws which.
+  {
+    id: "session-tab-first-chords",
+    suffix: "session-tab-first-chords",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "tab", path: "first-chords", exercise: "down-up.down-down-up" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
   {
     id: "session-neck-funk",
     suffix: "session-neck-funk",
@@ -1417,6 +1427,17 @@ export const SHOTS: Shot[] = [
     suffix: "session-ask-ready",
     window: "main",
     session: { seed: "returning", minutes: 5, stop: "ready", grading: "ask" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  // The same question under the runway's notes, where Watch is in the page
+  // above the footer rather than in it (card #67).
+  {
+    id: "session-ask-ready-runway",
+    suffix: "session-ask-ready-runway",
+    window: "main",
+    session: { seed: "returning", minutes: 5, stop: "ready", grading: "ask", practiceView: "runway" },
     width: 1400,
     height: 900,
     settleMs: 900,
@@ -1944,6 +1965,7 @@ export const PHONE_LEARNING_SCENES = [
   "session-ungraded-result",
   "session-ungraded-recap",
   "session-ask-ready",
+  "session-ask-ready-runway",
   "session-ready-signal",
   "progress-ungraded",
   "paths",

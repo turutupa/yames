@@ -262,14 +262,17 @@ async function drive() {
       );
     await until("Today", () => !!byId("today"));
     // A plan, or (subscribed to nothing) the way to the Paths instead of one,
-    // or (nothing in the daily mix) the line that says so.
-    await until(
-      "a plan",
-      () =>
-        !!document.querySelector(
-          '.session-plan-item, [data-testid="today-choose-path"], [data-testid="today-nothing-why"]',
-        ),
-    );
+    // or (nothing in the daily mix) the line that says so. That line only in
+    // a scene that switched Paths out of the mix and stops on Today: Today
+    // shows the same "nothing to play" card for a moment while the player's
+    // progress loads, and waiting for it in every scene pressed Start on that
+    // empty plan, where it is disabled, so no Session scene ever built ("timed
+    // out waiting for the Session", every one of them, on revamp 7a3ab9b2).
+    const emptyMix = stop === "today" && !!shot?.session.offMix?.length && !shot.session.focus;
+    const planned = `.session-plan-item, [data-testid="today-choose-path"]${
+      emptyMix ? ', [data-testid="today-nothing-why"]' : ""
+    }`;
+    await until("a plan", () => !!document.querySelector(planned));
     if (stop === "paths" || stop === "path" || stop === "step" || stop === "edge" || stop === "edgeDone") {
       rail("paths")?.click();
       await until("the Paths list", () => !!byId("path-card-alternate-picking"));

@@ -273,10 +273,13 @@ export class Env {
     this.vars.DBUS_SESSION_BUS_ADDRESS = `unix:path=${bus}`;
 
     // --- audio -----------------------------------------------------------
-    this.spawnLogged("pipewire", "pipewire", []);
+    // Log level 3 (info) on the two that carry the audio: it is the level at
+    // which a node that missed a cycle is named (see `graphTrouble`).
+    const logged = { env: { PIPEWIRE_DEBUG: "3" } };
+    this.spawnLogged("pipewire", "pipewire", [], logged);
     await this.waitFor(() => existsSync(join(this.dirs.run, "pipewire-0")), "PipeWire");
     this.spawnLogged("wireplumber", "wireplumber", []);
-    this.spawnLogged("pipewire-pulse", "pipewire-pulse", []);
+    this.spawnLogged("pipewire-pulse", "pipewire-pulse", [], logged);
     await this.waitFor(() => spawnSync("pactl", ["info"], { env: this.env() }).status === 0, "pipewire-pulse");
     const load = (...a) => this.sh("pactl", ["load-module", ...a]);
     load("module-null-sink", "sink_name=yames_out", "sink_properties=device.description=YamesOut");
@@ -317,6 +320,44 @@ export class Env {
       }
     }
     return promoted;
+  }
+
+  /**
+   * What the graph itself says went wrong, counted from the daemons' logs
+   * and less what `since` (an earlier answer with no `since`) already held.
+   *
+   *   "<node> missed wakeups"  cycles the node's thread did not wake for. For
+   *                            the capture (`parec`) each one is a quantum of
+   *                            audio that never reached the player.
+   *   "<node> too slow"        times the node had not finished when the next
+   *                            cycle began. PipeWire rate-limits the line, so
+   *                            this is a floor.
+   *
+   * Read together they say whose thread was held up (measured by stopping
+   * each process in turn, 2026-11-18): `parec` alone in both lines is
+   * pipewire-pulse, and only the capture lost audio; `parec` with the app's
+   * node too slow beside it is pipewire itself, and the whole graph skipped
+   * those cycles; the app's node too slow alone is the app, which puts
+   * silence into its own output and costs the capture nothing. A node's
+   * missed wakeups are logged by the process it lives in, so the app's own
+   * are not here.
+   */
+  graphTrouble(since = {}) {
+    const total = {};
+    const add = (key, n) => (total[key] = (total[key] ?? 0) + n);
+    for (const name of ["pipewire", "pipewire-pulse"]) {
+      let text = "";
+      try {
+        text = readFileSync(join(this.dirs.logs, `${name}.log`), "utf8");
+      } catch {
+        continue;
+      }
+      for (const m of text.matchAll(/\(([^()]+)-\d+\) client missed (\d+) wakeups/g)) add(`${m[1]} missed wakeups`, Number(m[2]));
+      for (const m of text.matchAll(/\(([^()]+)-\d+\) client too slow/g)) add(`${m[1]} too slow`, 1);
+    }
+    const out = {};
+    for (const [key, n] of Object.entries(total)) if (n - (since[key] ?? 0) > 0) out[key] = n - (since[key] ?? 0);
+    return out;
   }
 
   async waitFor(test, what, timeoutMs = 15000) {

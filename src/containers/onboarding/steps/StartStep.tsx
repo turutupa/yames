@@ -10,11 +10,11 @@
  *
  * Selection is never navigation (`types.ts`): a card or a Level only stages
  * the choice; the commit runs on Next. Skip writes nothing, which leaves the
- * defaults a player who never opened the wizard gets: Shred, from its first
- * Level (`playerPaths`, `FIRST_PATH_ID`).
+ * defaults a player who never opened the wizard gets: Rhythm Foundations, from
+ * its first Level (`playerPaths`, `FIRST_PATH_ID`), the same Path the step
+ * stages with no answer.
  *
- * What is staged on a first run is no longer Shred for everyone: one optional
- * question, "What do you want most right now?", and the curriculum map's
+ * What is staged on a first run: one optional question, "What do you want most right now?", and the curriculum map's
  * answer to it (`startRecommendation.ts`), Rhythm Foundations with no answer.
  * A recommendation can be two Paths; Next starts both, the first at the
  * Level shown. Any Path under it can be picked instead.
@@ -30,6 +30,7 @@ import { FIRST_PATH_ID, isRunnable } from "../../../session/packs";
 import { chosenLevelOf, isSubscribed, levelEntryStep } from "../../../session/progress";
 import type { PlayerProgress } from "../../../session/progress";
 import { SUBSCRIPTION_CAP } from "../../../session/rotation";
+import { pathTracks } from "../../../session/tracks";
 import { levelsOf } from "../../../session/variants";
 import { levelSubtitle } from "../../session/PathsView";
 import { useWizardEnv } from "../WizardContext";
@@ -38,32 +39,13 @@ import { START_GOALS, recommendStart } from "./startRecommendation";
 import type { StartGoal } from "./startRecommendation";
 import "../../../styles/onboarding-learning.css";
 
-/** The order the step offers the Paths in: the one everybody starts on first. */
-export const START_PATH_ORDER = [
-  FIRST_PATH_ID,
-  "blues-pentatonics",
-  "classic-rock",
-  "alternate-picking",
-  "sweep-picking",
-  "rhythm-foundations",
-  "legato",
-  "metal-rhythm",
-  "know-the-neck",
-  "scales-and-modes",
-  "tapping",
-  "funk-lines",
-  "triads",
-  "chords-in-a-key",
-  "arpeggios-over-changes",
-];
-
-/** The Paths a player can start, in the step's order (unknown runnable ones last). */
+/**
+ * The Paths a player can start, in the Paths screen's order: Foundations, How
+ * harmony works, Technique, Styles, each in the curriculum map's order
+ * (`pathTracks`). The wizard and the screen it leads to read the same way.
+ */
 export function startablePaths(paths: readonly PathDoc[]): PathDoc[] {
-  const rank = (id: string) => {
-    const i = START_PATH_ORDER.indexOf(id);
-    return i < 0 ? START_PATH_ORDER.length : i;
-  };
-  return paths.filter((p) => isRunnable(p.id)).sort((a, b) => rank(a.id) - rank(b.id));
+  return pathTracks(paths.filter((p) => isRunnable(p.id))).flatMap((track) => track.paths);
 }
 
 export type StartChoice = { pathId: string; levelId: string | null };

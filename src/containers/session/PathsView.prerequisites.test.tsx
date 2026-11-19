@@ -73,6 +73,11 @@ describe("Start with X first, or start anyway", () => {
     // Above Start, never instead of it.
     const start = within(where).getByTestId("path-open-current");
     expect(line.compareDocumentPosition(start) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    // A Path not started is where you start, not where you are.
+    expect(where).toHaveTextContent("Where you start");
+    expect(where).not.toHaveTextContent("exercises passed");
+    expect(start).toHaveTextContent("Start · Step 1");
+    expect(document.querySelector(".session-step-here")).toHaveTextContent(/^Start here$/);
     fireEvent.click(start);
     expect(screen.getByTestId("step-detail")).toBeInTheDocument();
   });

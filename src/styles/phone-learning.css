@@ -330,6 +330,22 @@ body:has(.main-window.is-mobile .session-body:is([data-testid="session-result"],
 .main-window.is-mobile .session-page .session-bar[data-prev-short] .session-prev .session-prev-word {
   display: none;
 }
+/* Skip still on a row of its own (card #67: Russian at 360 and 390 px,
+   German at 360, with the input's chip on the first row). The clock's box
+   was its 76 px cap, 14 px wider than its two lines of words: no wider than
+   its longest word now, and the words get less air. Each control keeps its
+   thumb of height. */
+.main-window.is-mobile .session-page .session-bar[data-tight] {
+  column-gap: 6px;
+}
+.main-window.is-mobile .session-page .session-bar[data-tight] .session-bar-left {
+  width: min-content;
+}
+.main-window.is-mobile .session-page .session-bar[data-tight] :is(.session-exit, .session-skip-this) {
+  padding-left: 8px;
+  padding-right: 8px;
+  letter-spacing: 0;
+}
 .main-window.is-mobile .session-page .session-input-actions .session-secondary {
   min-height: 44px;
 }

@@ -232,15 +232,37 @@ impl RouteRequests {
     }
 }
 
-/// How `android_route` reopens a dead stream.
+/// Why `android_route` is reopening a dead stream. Both go through
+/// `MetronomeEngine::reopen_output`, which keeps the song and the jam's kit
+/// when the new stream runs at the old rate and drops them, as a device
+/// switch does, when it does not.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Reopen {
-    /// The route moved: the device-switch path (`set_device`), which drops
-    /// what was decoded for the old route's rate.
+    /// The system closed the stream: the route moved (headphones in or out,
+    /// a USB interface). The format is probed on the new route. The coach's
+    /// line in flight is cut and a song that was playing stops, whatever the
+    /// rate (card #53; see [`playing_survives_reopen`]).
     NewRoute,
-    /// The route did not move: `MetronomeEngine::reopen_output`, which keeps
-    /// the song, the kit and the coach's line when the rate has not moved.
+    /// The route did not move. The coach's line is kept as well, and the
+    /// transport comes back as it was.
     SameRoute,
+}
+
+/// Does the transport come back up playing after a reopen that kept what was
+/// loaded?
+///
+/// On the same route, yes: the stream died under a press of Play (or a
+/// resume), and playing is what was asked for. On a moved route, only
+/// without a song: a stream that opens with `playing` set is a press of Play
+/// to its callback, so a song would begin again with a count-in in the middle
+/// of a Take, on a speaker the player may not have meant (the headphones
+/// came out). The song stays loaded and waits for Play. The click and a jam
+/// have no place to lose and carry on, as they do across a device switch.
+pub(crate) fn playing_survives_reopen(route: Reopen, was_playing: bool, song_loaded: bool) -> bool {
+    match route {
+        Reopen::SameRoute => was_playing,
+        Reopen::NewRoute => was_playing && !song_loaded,
+    }
 }
 
 /// What the route thread does with one pass's requests.
@@ -283,6 +305,19 @@ pub(crate) fn reopen_keeps_loaded(old_rate: Option<u32>, new_rate: Option<u32>) 
         (None, None) => false,
         _ => true,
     }
+}
+
+/// [`reopen_keeps_loaded`] for a reopen on `route`. A route that MOVED with
+/// no rate known for the old stream takes the drop path: the new route's
+/// rate is a fact about another device, and "unknown is not moved" holds
+/// only while the device is the same one (engine review of card #53). The
+/// dead stream publishes its rate, so this arm should not be reached; if it
+/// is, a reloaded song is a smaller lie than one played at the wrong pitch.
+pub(crate) fn reopen_keeps_loaded_on(route: Reopen, old_rate: Option<u32>, new_rate: Option<u32>) -> bool {
+    if route == Reopen::NewRoute && old_rate.is_none() {
+        return false;
+    }
+    reopen_keeps_loaded(old_rate, new_rate)
 }
 
 /// The setup's check for a reopen that kept material decoded at `expected`
@@ -546,8 +581,22 @@ mod tests {
         assert_eq!(requests.take(), RouteRequest::default());
     }
 
+    /// Card #53: what `playing` a reopen that kept the song comes up under.
     #[test]
-    fn a_route_the_system_moved_is_announced_once_and_takes_the_device_path() {
+    fn a_moved_route_stops_a_song_and_nothing_else() {
+        // The same route: the transport is whatever it was.
+        assert!(playing_survives_reopen(Reopen::SameRoute, true, true));
+        assert!(playing_survives_reopen(Reopen::SameRoute, true, false));
+        assert!(!playing_survives_reopen(Reopen::SameRoute, false, true));
+        // A moved route: the click and a jam carry on, a song waits for Play.
+        assert!(playing_survives_reopen(Reopen::NewRoute, true, false));
+        assert!(!playing_survives_reopen(Reopen::NewRoute, true, true));
+        assert!(!playing_survives_reopen(Reopen::NewRoute, false, false));
+        assert!(!playing_survives_reopen(Reopen::NewRoute, false, true));
+    }
+
+    #[test]
+    fn a_route_the_system_moved_is_announced_once_and_reopens_as_a_new_route() {
         let requests = RouteRequests::new();
         requests.note_route_lost();
         requests.note_dead(); // the loop's failed start racing the callback
@@ -571,6 +620,20 @@ mod tests {
         assert!(reopen_keeps_loaded(None, Some(48_000)));
         assert!(reopen_keeps_loaded(Some(48_000), None));
         assert!(!reopen_keeps_loaded(None, None), "kept with no rate known at all");
+    }
+
+    #[test]
+    fn a_moved_route_with_no_old_rate_keeps_nothing() {
+        assert!(!reopen_keeps_loaded_on(Reopen::NewRoute, None, Some(48_000)));
+        assert!(!reopen_keeps_loaded_on(Reopen::NewRoute, None, None));
+        // The same route: unknown is not "moved", as before.
+        assert!(reopen_keeps_loaded_on(Reopen::SameRoute, None, Some(48_000)));
+        // A known old rate decides on either route.
+        for route in [Reopen::NewRoute, Reopen::SameRoute] {
+            assert!(reopen_keeps_loaded_on(route, Some(48_000), Some(48_000)));
+            assert!(!reopen_keeps_loaded_on(route, Some(48_000), Some(44_100)));
+            assert!(reopen_keeps_loaded_on(route, Some(48_000), None));
+        }
     }
 
     #[test]
