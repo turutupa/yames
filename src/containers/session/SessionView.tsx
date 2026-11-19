@@ -168,7 +168,7 @@ function SessionBar({
         {run.untimed
           ? t("session.run.played", { time: clockText(session.playedMs) })
           : left > 0
-            ? t("session.run.minutesLeft", { minutes: left })
+            ? keepNumberWithUnit(t("session.run.minutesLeft", { minutes: left }))
             : t("session.run.timeUp")}
       </span>
       {steps.length > 1 && (
@@ -655,6 +655,15 @@ function TakeScreen({
 
     </div>
   );
+}
+
+/**
+ * A number stays on the line of the unit after it. A phone's Session bar
+ * lets "Осталось 5 мин" take two short lines, and it broke as "Осталось 5 /
+ * мин": the unit alone under the number it belongs to.
+ */
+export function keepNumberWithUnit(text: string): string {
+  return text.replace(/(\d)\s+(?=\S)/g, "$1\u00a0");
 }
 
 /**
