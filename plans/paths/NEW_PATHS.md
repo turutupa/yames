@@ -25,7 +25,9 @@ which Paths are worth writing now:
 
 | Scales and modes (major, relative minor, sequences, harmonic minor, Dorian, Mixolydian) | Yes | The same right-notes check, and the validator already holds every written note to its declared scale and every downbeat to its chord, so a mode lesson cannot contain a wrong note. |
 
-So five new Paths: **Rhythm Foundations**, **Legato**, **Metal Rhythm**, **Know the Neck** and **Scales and Modes**.
+| Tapping | Yes | A tap is a loud attack with no stroke, which the schedule already expects to hear; the pull-offs and hammer-ons between taps are soft and cost nothing. So the taps carry the timing, exactly as picked notes do in Legato. Shred has one tapping Step and nothing below or above it. |
+
+So six new Paths: **Rhythm Foundations**, **Legato**, **Metal Rhythm**, **Tapping**, **Know the Neck** and **Scales and Modes**.
 
 ## The shape every Path keeps
 
@@ -111,6 +113,23 @@ and no Path taught it.
 Strokes are taught in words (the plan is `free`): a gallop is down, down-up, which
 strict alternation cannot print. Palm muting and stroke direction are on the
 not-graded list and the coach says so.
+
+## Tapping (`tapping`, mechanics)
+
+**Who for:** players who can hammer on and pull off and have never tapped, and
+players who know the one famous triplet lick and nothing else. It assumes the
+Beginner Level of Legato.
+
+| Level | Steps | What it unlocks |
+|---|---|---|
+| Beginner: one tap, one chord at a time | The first tap (tap and pull, the three-note cell, four notes from one tap); moving the tap; changing the chord | The tapped arpeggio in triplets through Am, G, F, E over a band. |
+| Intermediate: sixteenths, strings and scales | Four-note loops and two taps a beat; the cell across three strings; a scale shape under the tap | Sixteenth-note tapping, string changes with the muting they need, and six notes from one tap. |
+| Advanced: speed, two taps and a band | The cell in sextuplets; two tapped notes and string skips; an eight-bar tapped line and a stamina minute | Tapping at the speed it is known for, and for long enough to be a solo section. |
+
+Difficulty rises by subdivision (eighths, triplets, sixteenths, sextuplets), by
+which hand moves (the tap first, then the fretting hand, then both), by strings
+(one, two, three, a skip), and by how many notes each tap has to carry (one, two,
+three, five). Every line is graded on timing and notes heard and none on pitch.
 
 ## Know the Neck (`know-the-neck`, theory)
 
