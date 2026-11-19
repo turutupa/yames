@@ -3500,6 +3500,33 @@
   font: 700 11px/1.4 var(--l-display);
   color: var(--l-quiet);
 }
+/* Sound: Watch plays the notes as well (card #28). Beside Watch, its own quiet switch. */
+.practice-sound {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border: 1px solid var(--l-line2);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--l-quiet);
+  font: 600 12px/1.4 var(--l-body);
+  cursor: pointer;
+}
+.practice-sound svg {
+  fill: currentColor;
+  stroke: currentColor;
+}
+.practice-sound svg path:first-child {
+  stroke: none;
+}
+.practice-sound[aria-pressed="true"] {
+  color: var(--l-ink);
+}
+.practice-sound[aria-pressed="true"] svg {
+  color: var(--l-amber);
+}
 .practice-legend {
   display: flex;
   gap: 14px;
@@ -3551,6 +3578,19 @@
     font-size: 14px;
   }
   .practice-watch kbd {
+    display: none;
+  }
+  /* Sound beside Watch: the speaker alone, a thumb's 44 px square. */
+  .practice-sound {
+    order: -1;
+    min-width: 44px;
+    min-height: 44px;
+    margin-block: -10px;
+    margin-left: -6px;
+    padding: 0;
+    justify-content: center;
+  }
+  .practice-sound-word {
     display: none;
   }
   /* A phone keeps the one key the dots need: what their numbers are. */
