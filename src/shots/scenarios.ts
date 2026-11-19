@@ -110,6 +110,8 @@ export interface Shot {
     path?: "blues-pentatonics" | "sweep-picking" | "alternate-picking" | "legato" | "rhythm-foundations" | "metal-rhythm" | "know-the-neck" | "scales-and-modes" | "tapping" | "funk-lines" | "triads" | "chords-in-a-key" | "arpeggios-over-changes" | "first-chords";
     /** With `path`: play this Exercise rather than the first Step's first. */
     exercise?: string;
+    /** With `exercise`: play this variant of it (an index into its variants), not the Exercise as written. */
+    variant?: number;
     /** With `stop: "path"`: open this Path rather than Alternate Picking. */
     open?: string;
     /** With `stop: "path"`: press Subscribe on it (the offer to add what it builds on). */
@@ -960,6 +962,44 @@ export const SHOTS: Shot[] = [
     suffix: "session-neck-triads",
     window: "main",
     session: { seed: "returning", stop: "ready", practiceView: "neck", path: "triads", exercise: "four-chords.low" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  // A key-moved Exercise in two of its keys (card #79): the variant's own
+  // how-to, its key and frets on the second line, in the HOW fold.
+  {
+    id: "session-variant-e",
+    suffix: "session-variant-e",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "triads", exercise: "three-chords.stay-put-keys", variant: 1 },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  {
+    id: "session-variant-bb",
+    suffix: "session-variant-bb",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "triads", exercise: "three-chords.stay-put-keys", variant: 2 },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  {
+    id: "session-variant-runway",
+    suffix: "session-variant-runway",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "runway", path: "triads", exercise: "three-chords.stay-put-keys", variant: 2 },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  {
+    id: "session-variant-playing",
+    suffix: "session-variant-playing",
+    window: "main",
+    session: { seed: "returning", stop: "playing", practiceView: "neck", path: "triads", exercise: "three-chords.stay-put-keys", variant: 1 },
     width: 1400,
     height: 900,
     settleMs: 1800,
@@ -1983,6 +2023,15 @@ for (const id of PHONE_LEARNING_SCENES) {
   if (desktop) {
     SHOTS.push({ ...desktop, id: `phone-${id}`, suffix: `phone-${id}`, width: 360, height: 800 });
   }
+}
+
+// A key-moved Exercise's own how-to on a phone (card #79), measured by
+// `tests/layout/session-variant-text.spec.ts`. Not in the list above: a Triads
+// Take's band slider is under a thumb's size there, as on every Exercise
+// played over the band (a follow-up of its own).
+for (const id of ["session-variant-e", "session-variant-runway"]) {
+  const desktop = SHOTS.find((s) => s.id === id);
+  if (desktop) SHOTS.push({ ...desktop, id: `phone-${id}`, suffix: `phone-${id}`, width: 360, height: 800 });
 }
 
 export function shotById(id: string): Shot | undefined {
