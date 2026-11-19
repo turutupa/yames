@@ -75,8 +75,7 @@ test.describe("the phone's top bar", () => {
 
     const name = await page.$(".jam-save-area .preset-active-name");
     expect(name, "no jam name in the bar").toBeTruthy();
-    const box = (await name!.boundingBox())!;
-    expect(Math.round(box.width), "the jam's name has no width").toBeGreaterThan(80);
+    await expectWholeName(page, ".jam-save-area .preset-active-name", "the jam's name");
 
     // The two that were being clipped are not drawn at all on a phone.
     expect(await page.$(".jam-save-area .jam-badge:visible"), "the JAM badge is still drawn").toBeNull();
@@ -134,8 +133,7 @@ test.describe("the phone's top bar", () => {
     await openSetlist(page, { width: 360, height: 800 });
 
     const name = await page.waitForSelector(".setlist-save-area .preset-active-name");
-    const box = (await name.boundingBox())!;
-    expect(Math.round(box.width), "the setlist's name has no width").toBeGreaterThan(80);
+    await expectWholeName(page, ".setlist-save-area .preset-active-name", "the setlist's name");
     expect((await name.textContent())?.trim()).toBe("Daily routine");
     expect(await isClipped(page, ".setlist-save-area .preset-active-name")).toBe(false);
 
@@ -212,6 +210,30 @@ async function openSetlist(page: Page, size: { width: number; height: number }) 
 }
 
 /** Is this element's text being cut off with an ellipsis? */
+/**
+ * The name is drawn whole: its box is as wide as its own words, and that is
+ * more than an initial.
+ *
+ * These asked for "wider than 80 px", which was the old face's width for
+ * these two names and no more than that: when Ember's headings moved to a
+ * condensed face (mvp-theme-stage) "Daily routine" became 67 px wide, whole
+ * and unclipped, and failed. What was ever meant is the name, not a number.
+ */
+async function expectWholeName(page: Page, selector: string, what: string) {
+  const m = await page.$eval(selector, (el) => {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    return {
+      box: el.getBoundingClientRect().width,
+      words: range.getBoundingClientRect().width,
+      text: (el.textContent ?? "").trim(),
+    };
+  });
+  expect(m.text.length, `${what} is empty`).toBeGreaterThan(3);
+  expect(m.words, `${what} has no width`).toBeGreaterThan(40);
+  expect(m.box, `${what} is squeezed: ${Math.round(m.box)}px for ${Math.round(m.words)}px of words`).toBeGreaterThanOrEqual(m.words - 1);
+}
+
 async function isClipped(page: Page, selector: string) {
   return page.$eval(selector, (el) => el.scrollWidth > el.clientWidth + 1);
 }
