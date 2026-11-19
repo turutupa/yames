@@ -27,7 +27,8 @@ So four new Paths: **Rhythm Foundations**, **Legato**, **Metal Rhythm**, and **K
 
 ## The shape every Path keeps
 
-Three open Levels, three Steps each (nine Steps), three or four Exercises a Step,
+Three open Levels, three Steps each to start with (Legato's and Metal Rhythm's
+Advanced Levels have since grown a fourth), three or four Exercises a Step,
 one warm-up a Level with at least six variants. A player can start at any Level; the
 "start here if" lines are things they can check on their own guitar, one with a
 number in it.
@@ -75,7 +76,7 @@ legato Steps, which start at sextuplets.
 |---|---|---|
 | Beginner: one hammer, one pull | Hammer-ons; pull-offs; hammer and pull together | Two notes from one stroke, as loud as a picked note, at eighths and triplets. |
 | Intermediate: three fingers | Rolls on one string; pentatonic legato across strings; three notes per string with one pick a string | A scale run with a third of the picking. Ready for Shred's Legato I. |
-| Advanced: almost no pick | Hammer-ons from nowhere; six-string runs with shifts; long lines in sextuplets and over a band | A full legato line, both directions, held for sixteen bars. |
+| Advanced: almost no pick | Hammer-ons from nowhere; six-string runs with shifts; fives and sixes from one pick; long lines over a band and for a minute | A full legato line in both directions, odd groupings, and a roll held for a minute. |
 
 Every legato figure is paired with its picked twin first (the picked bar sets the
 rhythm and volume the legato bar has to match). The pick is always on the beat while
@@ -92,7 +93,7 @@ and no Path taught it.
 |---|---|---|
 | Beginner: the chug | Palm-muted eighths in downstrokes; power chords and stops; chug against chord | A riff of muted low notes and open accents that sits on the click. |
 | Intermediate: the gallop | Gallop; reverse gallop and sixteenth pairs; alternate-picked sixteenths with accents | The three sixteenth figures heavy riffs are built from. |
-| Advanced: speed and stamina | Triplet gallops and tremolo bursts; pedal riffs with skips; a riff over the band and a stamina minute | A full riff at tempo for a minute, and with a band. |
+| Advanced: speed and stamina | Triplet chugs, bursts and tremolo; pedal riffs with skips; stop-start riffs with silent sixteenths; a riff over the band and a stamina minute | A full riff at tempo for a minute, and with a band. |
 
 Strokes are taught in words (the plan is `free`): a gallop is down, down-up, which
 strict alternation cannot print. Palm muting and stroke direction are on the
@@ -165,6 +166,11 @@ cliff, does Advanced go further than Intermediate.
   variants. The ids after it are unchanged.
 - **Shred:** `assumes` names the tempo the first Step passes at and points a player
   below it to Rhythm Foundations or Alternate Picking's Beginner Level.
+
+- **Alternate Picking, how-to text:** the seven thinnest how-tos (one sentence
+  each, no frets or fingers) now say the subdivision, the notes and fingers, and
+  what to listen for: `outside-moving`, `inside-moving`, `six-note-up`,
+  `one-beat`, `two-beats`, `box-minute`, `etude-eighths`. Words only.
 
 ### How progress is keyed (why these are safe)
 
