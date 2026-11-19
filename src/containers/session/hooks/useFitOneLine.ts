@@ -117,3 +117,50 @@ export function useFitScale(
     };
   }, [box, content, label, minScale]);
 }
+
+/**
+ * A row of controls that must stay one row (the phone footer's Watch, Sound,
+ * Slower and Faster). How wide they are depends on the language and on the
+ * theme's face, so no breakpoint knows: the row is measured, and given the
+ * first of these it fits in. `data-fit` is unset while everything fits as
+ * drawn; `tight` is the stylesheet's shorter forms (Watch as its icon);
+ * `snug` is those with less padding and smaller words; `wrap` is when even
+ * that is too wide, the one case where a second line is right (a long Russian
+ * pair in a wide face on a 360 px phone).
+ */
+export const ROW_FITS = ["tight", "snug", "wrap"] as const;
+
+export function fitRow(row: HTMLElement): void {
+  row.removeAttribute("data-fit");
+  if (!(row.clientWidth > 0)) return;
+  for (const fit of ROW_FITS) {
+    if (row.scrollWidth <= row.clientWidth + 0.5) return;
+    row.setAttribute("data-fit", fit);
+  }
+}
+
+/** Re-fits when `label` changes, on resize, and once the web fonts land. */
+export function useFitRow(ref: RefObject<HTMLElement>, label: string): void {
+  useLayoutEffect(() => {
+    if (!ref.current || typeof window === "undefined") return;
+    let alive = true;
+    const fit = () => {
+      if (alive && ref.current) fitRow(ref.current);
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    const fonts = typeof document !== "undefined" ? document.fonts : undefined;
+    void fonts?.ready.then(fit);
+    fonts?.addEventListener?.("loadingdone", fit);
+    // A theme changes the face without a resize or a new font landing: the
+    // controls' own widths say so. A fit that changes nothing ends the loop.
+    const sizes = typeof ResizeObserver === "function" ? new ResizeObserver(fit) : null;
+    for (const child of Array.from(ref.current.children)) sizes?.observe(child);
+    return () => {
+      alive = false;
+      sizes?.disconnect();
+      window.removeEventListener("resize", fit);
+      fonts?.removeEventListener?.("loadingdone", fit);
+    };
+  }, [ref, label]);
+}

@@ -2968,6 +2968,46 @@
     background: var(--l-btn);
     box-shadow: 0 0 0 1px var(--l-line2) inset;
   }
+  /* A warm-up's ready screen, the same way (owner, 2026-11-18): Start was
+     under the fold in every view (the neck with the pattern's bar under it,
+     the tab two bars tall). The foot's note stays in the page; "↺ Again",
+     Skip and Start stick, one block over a fade of the page's colour. Once it
+     runs the screen is held to the window and ends on its button already. */
+  .session-body[data-phase="timedReady"] > .practice-foot {
+    display: contents;
+  }
+  /* In the page's column now: its row basis would be a height here. */
+  .session-body[data-phase="timedReady"] > .practice-foot > .practice-note {
+    flex: none;
+  }
+  .session-body[data-phase="timedReady"] > .practice-foot > .practice-go {
+    position: sticky;
+    bottom: calc(10px + var(--safe-bottom, 0px));
+    z-index: 4;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0 14px;
+    background: var(--l-bg);
+    box-shadow:
+      0 0 0 10px var(--l-bg),
+      0 -18px 22px 10px var(--l-bg);
+  }
+  /* "↺ Again: <the step before>" may be long: it takes the room Skip leaves
+     and breaks inside itself rather than push Skip off the row. */
+  .session-body[data-phase="timedReady"] > .practice-foot > .practice-go > [data-testid="session-back"] {
+    flex: 1 1 0;
+    min-width: 0;
+    white-space: normal;
+    text-align: left;
+  }
+  .session-body[data-phase="timedReady"] > .practice-foot > .practice-go > .session-big {
+    box-shadow:
+      0 1px 0 var(--l-gloss) inset,
+      0 -2px 0 color-mix(in srgb, var(--l-amber-deep) 45%, transparent) inset,
+      0 2px 8px color-mix(in srgb, var(--l-shade) 50%, transparent);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .session-rise,
@@ -3494,7 +3534,15 @@
   cursor: pointer;
 }
 .practice-watch svg {
+  flex: none;
   fill: var(--l-amber);
+}
+.practice-watch .practice-watch-replay {
+  fill: none;
+  stroke: var(--l-amber);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .practice-watch[aria-pressed="true"] {
   border-color: var(--l-amber);
@@ -3641,23 +3689,84 @@
     width: 16px;
     height: 16px;
   }
-  /* The footer's row: Watch and Sound, then Slower and Faster on the right. */
+  /* The footer's row: Watch and Sound, then Slower and Faster on the right.
+     One row (owner, 2026-11-18: "Watch again" pushed the pair onto a second
+     line at 390 px). The row is measured (`useFitRow`): Watch gives up its
+     word for its icon where a language or a face runs wide (`tight`), and
+     only past that does the pair take a line of its own (`wrap`). */
   .practice-watchrow[data-place="footer"] {
     margin: 0;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 8px;
+    min-width: 0;
+  }
+  .practice-watchrow[data-place="footer"] > * {
+    flex: none;
   }
   .practice-watchrow[data-place="footer"] .practice-watch,
   .practice-watchrow[data-place="footer"] .practice-sound {
     order: 0;
+    white-space: nowrap;
   }
   .practice-watchrow[data-place="footer"] .session-nudges .session-secondary {
     padding-left: 14px;
     padding-right: 14px;
+    white-space: nowrap;
   }
   .practice-watchrow[data-place="footer"] .session-nudges {
     margin-left: auto;
+    flex-wrap: nowrap;
     justify-content: flex-end;
+  }
+  /* A warm-up's footer row ends on its links ("↺ Again", Skip) instead. */
+  .practice-watchrow[data-place="footer"] .practice-footlinks {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    margin-left: auto;
+  }
+  .practice-go > .practice-watchrow[data-place="footer"] {
+    flex: 1 1 100%;
+  }
+  .practice-watchrow[data-place="footer"]:is([data-fit="tight"], [data-fit="snug"]) .practice-watch {
+    min-width: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+  .practice-watchrow[data-place="footer"]:is([data-fit="tight"], [data-fit="snug"]) .practice-watch-word {
+    display: none;
+  }
+  .practice-watchrow[data-place="footer"]:is([data-fit="tight"], [data-fit="snug"]) .practice-watch svg {
+    width: 14px;
+    height: 14px;
+  }
+  .practice-watchrow[data-place="footer"][data-fit="snug"] {
+    gap: 6px;
+  }
+  .practice-watchrow[data-place="footer"][data-fit="snug"] .session-nudges {
+    gap: 6px;
+  }
+  .practice-watchrow[data-place="footer"][data-fit="snug"] .session-nudges .session-secondary {
+    padding-left: 6px;
+    padding-right: 6px;
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+  .practice-watchrow[data-place="footer"][data-fit="snug"] .practice-footlinks {
+    gap: 10px;
+    font-size: 13px;
+  }
+  .practice-watchrow[data-place="footer"][data-fit="wrap"],
+  .practice-watchrow[data-place="footer"][data-fit="wrap"] .session-nudges {
+    flex-wrap: wrap;
+  }
+  .practice-watchrow[data-place="footer"][data-fit="wrap"] > :is(.session-nudges, .practice-footlinks) {
+    flex-shrink: 1;
+    min-width: 0;
+  }
+  .practice-watchrow[data-place="footer"][data-fit="wrap"] .practice-footlinks .session-link {
+    white-space: normal;
+    text-align: left;
   }
   /* A phone keeps the one key the dots need: what their numbers are. */
   .practice-legend > :not([data-k="fingers"]) {
@@ -4056,6 +4165,11 @@
 .practice-foot .session-big svg {
   vertical-align: -1px;
   margin-right: 4px;
+}
+/* The links and the big button: one group so a phone can stick them to the
+   bottom of the window; a desktop lays them out as part of the row. */
+.practice-go {
+  display: contents;
 }
 @media (max-width: 700px) {
   .practice-num {

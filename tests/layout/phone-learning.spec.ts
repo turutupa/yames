@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { openShot, noSidewaysScroll, MOBILE_URL, notHitTestable, overlapping, spillingLabels, settleAnimations } from "./fits";
+import { openShot, noSidewaysScroll, MOBILE_URL, notHitTestable, overlapping, spillingLabels, settleAnimations, IN_ENGLISH } from "./fits";
 import { PHONE_LEARNING_SCENES } from "../../src/shots/scenarios";
 
 /**
@@ -282,6 +282,101 @@ test.describe("the learning side on a phone", () => {
       test.slow();
       await openShot(page, "phone-progress", size);
       expect(await overlapping(page)).toEqual([]);
+    });
+  }
+
+  // Owner, 2026-11-18: Start is on the first screen of every ready view, with
+  // nothing to scroll to find it. The warm-up had no sticky footer at all and
+  // the runway Take's stuck nothing (its row had no group to stick), so on a
+  // 360x640 phone the one button the screen is for was 200 px under the fold.
+  const READY_SIZES = [
+    { width: 360, height: 640 },
+    { width: 390, height: 844 },
+    { width: 412, height: 915 },
+  ];
+  for (const scene of ["session-ready", "session-warmup-ready"]) {
+    for (const view of ["neck", "runway", "tab"] as const) {
+      for (const size of READY_SIZES) {
+        test(`phone-${scene}, ${view} view: Start is on the first screen at ${size.width}x${size.height}`, async ({ page }) => {
+          test.slow();
+          await openShot(page, `phone-${scene}`, size);
+          await page.locator(`[data-testid="practice-view-${view}"]`).first().tap();
+          await settleAnimations(page);
+          const big = page.locator('[data-testid="session-big"]');
+          await expect(big).toBeVisible();
+          const box = (await big.boundingBox())!;
+          expect(Math.round(box.y), "Start begins above the window").toBeGreaterThanOrEqual(0);
+          expect(Math.round(box.y + box.height), "Start is under the fold").toBeLessThanOrEqual(size.height);
+          expect(await notHitTestable(page, '[data-testid="session-big"]')).toEqual([]);
+          // What rides with it: a Take's Slower and Faster, a warm-up's Skip.
+          const beside = scene === "session-ready" ? ".session-nudges button" : '[data-testid="session-skip"]';
+          for (const b of await page.locator(beside).all()) {
+            const r = (await b.boundingBox())!;
+            expect(Math.round(r.y + r.height), "a footer control is under the fold").toBeLessThanOrEqual(Math.round(box.y) + 1);
+            expect(Math.round(r.y), "a footer control is above the window").toBeGreaterThanOrEqual(0);
+          }
+          expect(await notHitTestable(page, beside)).toEqual([]);
+          await noSidewaysScroll(page, `phone-${scene} ${view} at ${size.width}px`);
+        });
+      }
+    }
+  }
+
+  // Owner, 2026-11-18: after the first Watch the Tab view's footer wrapped to
+  // two rows at 390 px ("Watch again" pushed Slower and Faster down). One row:
+  // the word stays "Watch", and gives way to the icon before the row breaks.
+  for (const scene of ["session-ready", "session-warmup-ready"]) {
+    for (const size of [{ width: 360, height: 800 }, { width: 390, height: 844 }, { width: 412, height: 915 }]) {
+      test(`phone-${scene}, Tab view: the footer is one row after a Watch at ${size.width}px`, async ({ page }) => {
+        test.slow();
+        await openShot(page, `phone-${scene}`, size);
+        await page.locator('[data-testid="practice-view-tab"]').first().tap();
+        const watch = page.locator('[data-testid="practice-watch"]');
+        await watch.tap();
+        await expect(watch).toHaveAttribute("aria-pressed", "true");
+        await watch.tap();
+        await expect(watch).toHaveAttribute("data-again", "");
+        await settleAnimations(page);
+        const row = page.locator('.practice-watchrow[data-place="footer"]');
+        const rects = await row.locator("button").evaluateAll((els) =>
+          els.map((e) => {
+            const r = e.getBoundingClientRect();
+            return { top: Math.round(r.top), left: Math.round(r.left), right: Math.round(r.right), w: Math.round(r.width), h: Math.round(r.height) };
+          }),
+        );
+        expect(rects.length, "Watch, Sound and what the footer carries").toBeGreaterThanOrEqual(3);
+        const rowBox = (await row.boundingBox())!;
+        for (const r of rects) {
+          // Centred on one line: a taller control may start a few px higher.
+          expect(Math.abs(r.top + r.h / 2 - (rects[0].top + rects[0].h / 2)), "the footer's row broke into two").toBeLessThanOrEqual(2);
+          expect(r.right, "a control runs off the row").toBeLessThanOrEqual(Math.round(rowBox.x + rowBox.width) + 1);
+          expect(r.w, "a control is smaller than a thumb").toBeGreaterThanOrEqual(44);
+        }
+        for (let i = 1; i < rects.length; i++) {
+          expect(rects[i].left, "two footer controls overlap").toBeGreaterThanOrEqual(rects[i - 1].right);
+        }
+        // English in the default face has the room for the word.
+        if (IN_ENGLISH && size.width >= 390) {
+          await expect(watch.locator(".practice-watch-word")).toBeVisible();
+          await expect(watch.locator(".practice-watch-word")).toHaveText("Watch");
+        }
+        await expect(watch).toHaveAttribute("aria-label", /.+/);
+      });
+    }
+  }
+
+  // The same row in the long languages: still one row, by its shorter forms.
+  for (const lng of ["de", "ru", "pt-BR"]) {
+    test(`phone-session-ready, Tab view in ${lng}: the footer's row holds at 360px`, async ({ page }) => {
+      test.slow();
+      await openShot(page, "phone-session-ready", { width: 360, height: 800 }, "ember", { lng });
+      await page.locator('[data-testid="practice-view-tab"]').first().tap();
+      await settleAnimations(page);
+      const row = page.locator('.practice-watchrow[data-place="footer"]');
+      const tops = await row.locator("button").evaluateAll((els) => els.map((e) => { const r = e.getBoundingClientRect(); return Math.round(r.top + r.height / 2); }));
+      expect(Math.max(...tops) - Math.min(...tops), `the footer's row broke into two in ${lng}`).toBeLessThanOrEqual(2);
+      await noSidewaysScroll(page, `phone-session-ready tab in ${lng}`);
+      expect(await notHitTestable(page, '.practice-watchrow[data-place="footer"] button')).toEqual([]);
     });
   }
 });
