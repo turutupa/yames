@@ -1820,6 +1820,11 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
+                  "In E, on the G, B and top strings: E is 13, 12, 12. A is 14, 14, 12. B is 11, 12, 11.",
+                  "The four bars are E, A, B and E."
+                ],
                 "tab": "/8 3:13f2 2:12f1 1:12f1 2:12f1 3:13f2 2:12f1 1:12f1 2:12f1 | /8 3:14f3 2:14f4 1:12f1 2:14f4 3:14f3 2:14f4 1:12f1 2:14f4 | /8 3:11f1 2:12f2 1:11f1 2:12f2 3:11f1 2:12f2 1:11f1 2:12f2 | /8 3:13f2 2:12f1 1:12f1 2:12f1 3:13f2 2:12f1 1:12f1 2:12f1",
                 "position": {
                   "fret": 12,
@@ -1888,6 +1893,11 @@
                   "key": "Bb"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
+                  "In B flat, on the G, B and top strings: B flat is 7, 6, 6. E flat is 8, 8, 6. F is 5, 6, 5.",
+                  "The four bars are B flat, E flat, F and B flat."
+                ],
                 "tab": "/8 3:7f2 2:6f1 1:6f1 2:6f1 3:7f2 2:6f1 1:6f1 2:6f1 | /8 3:8f3 2:8f4 1:6f1 2:8f4 3:8f3 2:8f4 1:6f1 2:8f4 | /8 3:5f1 2:6f2 1:5f1 2:6f2 3:5f1 2:6f2 1:5f1 2:6f2 | /8 3:7f2 2:6f1 1:6f1 2:6f1 3:7f2 2:6f1 1:6f1 2:6f1",
                 "position": {
                   "fret": 6,
@@ -3401,6 +3411,10 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
+                  "In E, on the G, B and top strings: E is 9, 9, 7. C sharp minor is 9, 9, 9. A is 9, 10, 9. B is 8, 7, 7."
+                ],
                 "tab": "/8 3:9f3 2:9f4 1:7f1 2:9f4 3:9f3 2:9f4 1:7f1 2:9f4 | /8 3:9f1 2:9f1 1:9f1 2:9f1 3:9f1 2:9f1 1:9f1 2:9f1 | /8 3:9f1 2:10f2 1:9f1 2:10f2 3:9f1 2:10f2 1:9f1 2:10f2 | /8 3:8f2 2:7f1 1:7f1 2:7f1 3:8f2 2:7f1 1:7f1 2:7f1",
                 "position": {
                   "fret": 7,
@@ -3469,6 +3483,10 @@
                   "key": "Bb"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
+                  "In B flat, on the G, B and top strings: B flat is 3, 3, 1. G minor is 3, 3, 3. E flat is 3, 4, 3. F is 2, 1, 1."
+                ],
                 "tab": "/8 3:3f3 2:3f4 1:1f1 2:3f4 3:3f3 2:3f4 1:1f1 2:3f4 | /8 3:3f1 2:3f1 1:3f1 2:3f1 3:3f1 2:3f1 1:3f1 2:3f1 | /8 3:3f1 2:4f2 1:3f1 2:4f2 3:3f1 2:4f2 1:3f1 2:4f2 | /8 3:2f2 2:1f1 1:1f1 2:1f1 3:2f2 2:1f1 1:1f1 2:1f1",
                 "position": {
                   "fret": 1,
@@ -4951,6 +4969,11 @@
                   "key": "A"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
+                  "In A, on the D, G and B strings: A is 7, 6, 5. D is 7, 7, 7. E is 6, 4, 5.",
+                  "The four bars are A, D, E and A."
+                ],
                 "tab": "/8 4:7f3 3:6f2 2:5f1 3:6f2 4:7f3 3:6f2 2:5f1 3:6f2 | /8 4:7f1 3:7f1 2:7f1 3:7f1 4:7f1 3:7f1 2:7f1 3:7f1 | /8 4:6f3 3:4f1 2:5f2 3:4f1 4:6f3 3:4f1 2:5f2 3:4f1 | /8 4:7f3 3:6f2 2:5f1 3:6f2 4:7f3 3:6f2 2:5f1 3:6f2",
                 "position": {
                   "fret": 5,
@@ -5019,6 +5042,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
+                  "In D, on the D, G and B strings: D is 12, 11, 10. G is 12, 12, 12. A is 11, 9, 10.",
+                  "The four bars are D, G, A and D."
+                ],
                 "tab": "/8 4:12f3 3:11f2 2:10f1 3:11f2 4:12f3 3:11f2 2:10f1 3:11f2 | /8 4:12f1 3:12f1 2:12f1 3:12f1 4:12f1 3:12f1 2:12f1 3:12f1 | /8 4:11f3 3:9f1 2:10f2 3:9f1 4:11f3 3:9f1 2:10f2 3:9f1 | /8 4:12f3 3:11f2 2:10f1 3:11f2 4:12f3 3:11f2 2:10f1 3:11f2",
                 "position": {
                   "fret": 10,
@@ -5707,6 +5735,10 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
+                  "In E, on the D, G and B strings: E is 9, 9, 9. C sharp minor is 11, 9, 9. A is 11, 9, 10. B is 9, 8, 7."
+                ],
                 "tab": "/8 4:9f1 3:9f1 2:9f1 3:9f1 4:9f1 3:9f1 2:9f1 3:9f1 | /8 4:11f3 3:9f1 2:9f1 3:9f1 4:11f3 3:9f1 2:9f1 3:9f1 | /8 4:11f3 3:9f1 2:10f2 3:9f1 4:11f3 3:9f1 2:10f2 3:9f1 | /8 4:9f3 3:8f2 2:7f1 3:8f2 4:9f3 3:8f2 2:7f1 3:8f2",
                 "position": {
                   "fret": 9,
@@ -5775,6 +5807,10 @@
                   "key": "Bb"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
+                  "In B flat, on the D, G and B strings: B flat is 3, 3, 3. G minor is 5, 3, 3. E flat is 5, 3, 4. F is 3, 2, 1."
+                ],
                 "tab": "/8 4:3f1 3:3f1 2:3f1 3:3f1 4:3f1 3:3f1 2:3f1 3:3f1 | /8 4:5f3 3:3f1 2:3f1 3:3f1 4:5f3 3:3f1 2:3f1 3:3f1 | /8 4:5f3 3:3f1 2:4f2 3:3f1 4:5f3 3:3f1 2:4f2 3:3f1 | /8 4:3f3 3:2f2 2:1f1 3:2f2 4:3f3 3:2f2 2:1f1 3:2f2",
                 "position": {
                   "fret": 3,
@@ -7018,6 +7054,10 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
+                  "In E, on the A, D and G strings: E is 11, 9, 9. C sharp minor is 11, 11, 9. A is 12, 11, 9. B is 9, 9, 8."
+                ],
                 "tab": "/8 5:11f3 4:9f1 3:9f1 4:9f1 5:11f3 4:9f1 3:9f1 4:9f1 | /8 5:11f3 4:11f3 3:9f1 4:11f3 5:11f3 4:11f3 3:9f1 4:11f3 | /8 5:12f4 4:11f3 3:9f1 4:11f3 5:12f4 4:11f3 3:9f1 4:11f3 | /8 5:9f2 4:9f3 3:8f1 4:9f3 5:9f2 4:9f3 3:8f1 4:9f3",
                 "position": {
                   "fret": 9,
@@ -7086,6 +7126,10 @@
                   "key": "Bb"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
+                  "In B flat, on the A, D and G strings: B flat is 5, 3, 3. G minor is 5, 5, 3. E flat is 6, 5, 3. F is 3, 3, 2."
+                ],
                 "tab": "/8 5:5f3 4:3f1 3:3f1 4:3f1 5:5f3 4:3f1 3:3f1 4:3f1 | /8 5:5f3 4:5f3 3:3f1 4:5f3 5:5f3 4:5f3 3:3f1 4:5f3 | /8 5:6f4 4:5f3 3:3f1 4:5f3 5:6f4 4:5f3 3:3f1 4:5f3 | /8 5:3f2 4:3f3 3:2f1 4:3f3 5:3f2 4:3f3 3:2f1 4:3f3",
                 "position": {
                   "fret": 3,
@@ -8519,6 +8563,11 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
+                  "In E, bars 1 to 4, on the G, B and top strings: E is 9, 9, 7. B is 8, 7, 7. C sharp minor is 9, 9, 9. A is 9, 10, 9.",
+                  "Bars 5 to 8, higher on the neck: E is 13, 12, 12. B is 11, 12, 11. C sharp minor is 13, 14, 12. A is 14, 14, 12."
+                ],
                 "tab": "/8 3:9f3 2:9f4 1:7f1 2:9f4 3:9f3 2:9f4 1:7f1 2:9f4 | /8 3:8f2 2:7f1 1:7f1 2:7f1 3:8f2 2:7f1 1:7f1 2:7f1 | /8 3:9f1 2:9f1 1:9f1 2:9f1 3:9f1 2:9f1 1:9f1 2:9f1 | /8 3:9f1 2:10f2 1:9f1 2:10f2 3:9f1 2:10f2 1:9f1 2:10f2 | /8 3:13f2 2:12f1 1:12f1 2:12f1 3:13f2 2:12f1 1:12f1 2:12f1 | /8 3:11f1 2:12f2 1:11f1 2:12f2 3:11f1 2:12f2 1:11f1 2:12f2 | /8 3:13f2 2:14f3 1:12f1 2:14f3 3:13f2 2:14f3 1:12f1 2:14f3 | /8 3:14f3 2:14f4 1:12f1 2:14f4 3:14f3 2:14f4 1:12f1 2:14f4",
                 "position": {
                   "fret": 7,
@@ -8619,6 +8668,11 @@
                   "key": "Bb"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
+                  "In B flat, bars 1 to 4, on the G, B and top strings: B flat is 3, 3, 1. F is 2, 1, 1. G minor is 3, 3, 3. E flat is 3, 4, 3.",
+                  "Bars 5 to 8, higher on the neck: B flat is 7, 6, 6. F is 5, 6, 5. G minor is 7, 8, 6. E flat is 8, 8, 6."
+                ],
                 "tab": "/8 3:3f3 2:3f4 1:1f1 2:3f4 3:3f3 2:3f4 1:1f1 2:3f4 | /8 3:2f2 2:1f1 1:1f1 2:1f1 3:2f2 2:1f1 1:1f1 2:1f1 | /8 3:3f1 2:3f1 1:3f1 2:3f1 3:3f1 2:3f1 1:3f1 2:3f1 | /8 3:3f1 2:4f2 1:3f1 2:4f2 3:3f1 2:4f2 1:3f1 2:4f2 | /8 3:7f2 2:6f1 1:6f1 2:6f1 3:7f2 2:6f1 1:6f1 2:6f1 | /8 3:5f1 2:6f2 1:5f1 2:6f2 3:5f1 2:6f2 1:5f1 2:6f2 | /8 3:7f2 2:8f3 1:6f1 2:8f3 3:7f2 2:8f3 1:6f1 2:8f3 | /8 3:8f3 2:8f4 1:6f1 2:8f4 3:8f3 2:8f4 1:6f1 2:8f4",
                 "position": {
                   "fret": 1,
@@ -9861,6 +9915,12 @@
                   "key": "F"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, 60 BPM up to a pass at 85. One bar on each chord.",
+                  "In F, the verse, bars 1 to 4, on the D, G and B strings: F is 3, 2, 1. D minor is 3, 2, 3. B flat is 3, 3, 3. C is 5, 5, 5. Bars 5 to 8 are the same.",
+                  "The chorus, bars 9 to 12, on the G, B and top strings: B flat is 3, 3, 1. C is 5, 5, 3. F is 5, 6, 5. D minor is 7, 6, 5.",
+                  "Bars 13 to 16, higher on the neck: B flat is 7, 6, 6. C is 9, 8, 8. F is 10, 10, 8, for two bars."
+                ],
                 "tab": "/8 4:3f3 3:2f2 2:1f1 3:2f2 4:3f3 3:2f2 2:1f1 3:2f2 | /8 4:3f3 3:2f2 2:3f4 3:2f2 4:3f3 3:2f2 2:3f4 3:2f2 | /8 4:3f1 3:3f1 2:3f1 3:3f1 4:3f1 3:3f1 2:3f1 3:3f1 | /8 4:5f1 3:5f1 2:5f1 3:5f1 4:5f1 3:5f1 2:5f1 3:5f1 | /8 4:3f3 3:2f2 2:1f1 3:2f2 4:3f3 3:2f2 2:1f1 3:2f2 | /8 4:3f3 3:2f2 2:3f4 3:2f2 4:3f3 3:2f2 2:3f4 3:2f2 | /8 4:3f1 3:3f1 2:3f1 3:3f1 4:3f1 3:3f1 2:3f1 3:3f1 | /8 4:5f1 3:5f1 2:5f1 3:5f1 4:5f1 3:5f1 2:5f1 3:5f1 | /8 3:3f3 2:3f4 1:1f1 2:3f4 3:3f3 2:3f4 1:1f1 2:3f4 | /8 3:5f3 2:5f4 1:3f1 2:5f4 3:5f3 2:5f4 1:3f1 2:5f4 | /8 3:5f1 2:6f2 1:5f1 2:6f2 3:5f1 2:6f2 1:5f1 2:6f2 | /8 3:7f3 2:6f2 1:5f1 2:6f2 3:7f3 2:6f2 1:5f1 2:6f2 | /8 3:7f2 2:6f1 1:6f1 2:6f1 3:7f2 2:6f1 1:6f1 2:6f1 | /8 3:9f2 2:8f1 1:8f1 2:8f1 3:9f2 2:8f1 1:8f1 2:8f1 | /8 3:10f3 2:10f4 1:8f1 2:10f4 3:10f3 2:10f4 1:8f1 2:10f4 | /8 3:10f3 2:10f4 1:8f1 2:10f4 3:10f3 2:10f4 1:8f1 2:10f4",
                 "position": {
                   "fret": 1,
@@ -10042,6 +10102,12 @@
                   "key": "Bb"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, 60 BPM up to a pass at 85. One bar on each chord.",
+                  "In B flat, the verse, bars 1 to 4, on the D, G and B strings: B flat is 8, 7, 6. G minor is 8, 7, 8. E flat is 8, 8, 8. F is 10, 10, 10. Bars 5 to 8 are the same.",
+                  "The chorus, bars 9 to 12, on the G, B and top strings: E flat is 8, 8, 6. F is 10, 10, 8. B flat is 10, 11, 10. G minor is 12, 11, 10.",
+                  "Bars 13 to 16, higher on the neck: E flat is 12, 11, 11. F is 14, 13, 13. B flat is 15, 15, 13, for two bars."
+                ],
                 "tab": "/8 4:8f3 3:7f2 2:6f1 3:7f2 4:8f3 3:7f2 2:6f1 3:7f2 | /8 4:8f3 3:7f2 2:8f4 3:7f2 4:8f3 3:7f2 2:8f4 3:7f2 | /8 4:8f1 3:8f1 2:8f1 3:8f1 4:8f1 3:8f1 2:8f1 3:8f1 | /8 4:10f1 3:10f1 2:10f1 3:10f1 4:10f1 3:10f1 2:10f1 3:10f1 | /8 4:8f3 3:7f2 2:6f1 3:7f2 4:8f3 3:7f2 2:6f1 3:7f2 | /8 4:8f3 3:7f2 2:8f4 3:7f2 4:8f3 3:7f2 2:8f4 3:7f2 | /8 4:8f1 3:8f1 2:8f1 3:8f1 4:8f1 3:8f1 2:8f1 3:8f1 | /8 4:10f1 3:10f1 2:10f1 3:10f1 4:10f1 3:10f1 2:10f1 3:10f1 | /8 3:8f3 2:8f4 1:6f1 2:8f4 3:8f3 2:8f4 1:6f1 2:8f4 | /8 3:10f3 2:10f4 1:8f1 2:10f4 3:10f3 2:10f4 1:8f1 2:10f4 | /8 3:10f1 2:11f2 1:10f1 2:11f2 3:10f1 2:11f2 1:10f1 2:11f2 | /8 3:12f3 2:11f2 1:10f1 2:11f2 3:12f3 2:11f2 1:10f1 2:11f2 | /8 3:12f2 2:11f1 1:11f1 2:11f1 3:12f2 2:11f1 1:11f1 2:11f1 | /8 3:14f2 2:13f1 1:13f1 2:13f1 3:14f2 2:13f1 1:13f1 2:13f1 | /8 3:15f3 2:15f4 1:13f1 2:15f4 3:15f3 2:15f4 1:13f1 2:15f4 | /8 3:15f3 2:15f4 1:13f1 2:15f4 3:15f3 2:15f4 1:13f1 2:15f4",
                 "position": {
                   "fret": 6,
