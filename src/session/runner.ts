@@ -87,8 +87,13 @@ export type TakeOutcome = {
   ungraded?: UngradedWhy;
 };
 
-/** Why a Take was played without grading: the player chose to, or grading is off in Settings. */
-export type UngradedWhy = "inputOff" | "gradingOff";
+/**
+ * Why a Take is played without grading. `gradingOff`: the player's choice in
+ * Settings or the wizard. `chosen`: asked at the ready screen, they picked
+ * "Just play". `inputOff`: graded, but the input would not come on and they
+ * played this one anyway.
+ */
+export type UngradedWhy = "inputOff" | "gradingOff" | "chosen";
 
 export type RunState = {
   phase: RunPhase;
@@ -134,8 +139,8 @@ export type RunState = {
    */
   done: string[];
   /**
-   * The rest of this Session is played without grading: the player chose
-   * "Play without grading", or Settings has grading off. Null: graded.
+   * The rest of this Session is played without grading: grading is off, the
+   * player chose "Just play", or the input would not come on. Null: graded.
    */
   ungraded: UngradedWhy | null;
   /**

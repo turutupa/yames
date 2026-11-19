@@ -294,7 +294,7 @@ async function playTake(d, exercise, style, label, { band = false, again = false
   // the player is armed before the press, and the press is the start.
   const m = again
     ? await d.waitText(/Go again, (?:up to )?(\d+) BPM/)
-    : await d.waitText(/Start take, (\d+) BPM/);
+    : await d.waitText(/Start(?: take)?, (\d+) BPM/);
   const bpm = Number(m[1]);
   const take = renderTake({
     bpm,
@@ -315,7 +315,8 @@ async function playTake(d, exercise, style, label, { band = false, again = false
   // The app's PipeWire threads exist once its streams are open (see Env).
   env.promoteAudioThreads();
   try {
-    await d.clickText(again ? /^Go again/ : /^Start take/, { timeoutMs: 20000 });
+    // "Start, 80 BPM" when the player chose to play without grading.
+    await d.clickText(again ? /^Go again/ : /^Start(?: take)?, \d+ BPM/, { timeoutMs: 20000 });
   } catch (e) {
     const why = await d.exec(`const b = document.querySelector('[data-testid="session-big"]');
       return { phase: document.querySelector('[data-testid="session-take"]')?.dataset.phase ?? null, big: b?.innerText,
@@ -869,9 +870,12 @@ function patchSettings(changes) {
  *    interface's name changes with its port): the coach session's start of the
  *    input fails, as it did for the owner. The Session must turn the input on
  *    by itself, on the system default, say so, and the Take must be heard.
- * 2. Settings → Practice → "Grade my playing" off: the Session never turns the
- *    input on, a Take runs anyway, its result says it was not graded, and its
+ * 2. Settings → Practice → "Grade my playing": "Just play" (grading off,
+ *    2026-11-18): the Session never turns the input on and never mentions it,
+ *    Start reads "Start, N BPM", the result says "Played, not graded", and the
  *    row is kept as ungraded practice that moves no clean tempo.
+ * 3. Not decided yet ("ask", a player from before the choice): the ready
+ *    screen asks, nothing is turned on, and "Just play" starts the Take.
  */
 async function scenarioInputOff() {
   const title = "Four fingers, one string";
@@ -905,18 +909,22 @@ async function scenarioInputOff() {
     await quitApp(d, "input-off");
   }
 
-  patchSettings({ evaluationDevice: undefined, "session.grade": false });
+  patchSettings({ evaluationDevice: undefined, "session.grading": "off" });
   const cleanBefore = cleanTempo(key);
   d = await launchApp();
   try {
     await openIt(d);
-    await d.waitText(/Not graded/, 30000);
+    await d.waitText(/Start, (\d+) BPM/, 30000);
     const on = await d.invoke("get_evaluation_state");
     check("ungraded: the Session does not turn the input on", on === false, `listening ${on}`);
+    const inputWords = await d
+      .exec(`return !!document.querySelector('[data-testid="session-no-input"], [data-testid="session-input-failed"], [data-testid="session-ungraded-note"]')`)
+      .catch(() => null);
+    check("ungraded: the ready screen says nothing about the input", inputWords === false, `input line shown: ${inputWords}`);
     const quiet = await playTake(d, exercise, "good", "ungraded");
     await shot(d, "ungraded-result");
     const row = takesOf(exercise.id).at(-1);
-    check("ungraded: the result says it was not graded", /Not graded: grading is off in Settings/.test(quiet.text), firstLines(quiet.text, /Not graded/));
+    check("ungraded: the result says it was not graded", /Played, not graded/.test(quiet.text), firstLines(quiet.text, /not graded/));
     check("ungraded: kept as ungraded practice, not an attempt at the bar",
       row?.facts?.ungraded === "gradingOff" && row?.facts?.verdict === "ungraded" && row?.caught === 0 && row?.passed === 0 && row?.bars > 0,
       row ? JSON.stringify({ ungraded: row.facts.ungraded, verdict: row.facts.verdict, caught: row.caught, passed: row.passed, bars: row.bars }) : "no row");
@@ -924,7 +932,29 @@ async function scenarioInputOff() {
     await d.leaveSession();
   } finally {
     await quitApp(d, "ungraded");
-    patchSettings({ "session.grade": undefined });
+  }
+
+  // Not decided: the ready screen asks, and "Just play" plays.
+  patchSettings({ "session.grading": undefined, "session.grade": undefined });
+  d = await launchApp();
+  try {
+    await openIt(d);
+    await d.waitText(/Start take, (\d+) BPM · graded/, 30000);
+    const on = await d.invoke("get_evaluation_state");
+    check("ask: nothing is turned on before the player answers", on === false, `listening ${on}`);
+    const both = await d
+      .exec(`return !!document.querySelector('[data-testid="session-just-play"]') && !!document.querySelector('[data-testid="session-ask-remember"]')`)
+      .catch(() => null);
+    check("ask: the ready screen offers both, and Remember my choice", both === true, `both ${both}`);
+    await d.clickText(/^Just play$/, { timeoutMs: 20000 });
+    await d.waitText(/Played, not graded/, 60000);
+    const row = takesOf(exercise.id).at(-1);
+    check("ask: Just play is kept as ungraded practice", row?.facts?.ungraded === "chosen" && row?.passed === 0,
+      row ? JSON.stringify({ ungraded: row.facts.ungraded, passed: row.passed }) : "no row");
+    await d.leaveSession();
+  } finally {
+    await quitApp(d, "ask");
+    patchSettings({ "session.grading": "on" });
   }
 }
 

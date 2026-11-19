@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { storeLoad } from "../../ipc";
-import { SwitchFace } from "./SwitchFace";
 import { IS_MOBILE } from "../../platform";
 import { PLAN_MINUTES, type PlanMinutes } from "../../session/planner";
 import {
@@ -9,20 +8,26 @@ import {
   isPracticeView,
   type PracticeView,
 } from "../session/highway/runwayModel";
+import {
+  GRADING_CHOICES,
+  GRADING_KEY,
+  LEGACY_GRADE_KEY,
+  readGradingChoice,
+  type GradingChoice,
+} from "../../session/grading";
 
 /** The store keys `useSessionRun` reads; the setters it hands us write them. */
 const MINUTES_KEY = "session.minutes";
 const PRACTICE_VIEW_KEY = "practiceView";
-const GRADE_KEY = "session.grade";
 
 export interface PracticeSettings {
   minutes: PlanMinutes;
   setMinutes: (next: PlanMinutes) => void;
   practiceView: PracticeView;
   setPracticeView: (next: PracticeView) => void;
-  /** "Grade my playing" (owner, 2026-11-18). Optional: older callers leave it out. */
-  grade?: boolean;
-  setGrade?: (next: boolean) => void;
+  /** "Grade my playing": on, off or ask (owner, 2026-11-18). Optional: older callers leave it out. */
+  grading?: GradingChoice;
+  setGrading?: (next: GradingChoice) => void;
 }
 
 /**
@@ -42,20 +47,22 @@ export interface PracticeSettings {
  */
 export function PracticeSettingsSection({ practice }: { practice: PracticeSettings }) {
   const { t } = useTranslation();
-  const [stored, setStored] = useState<{ minutes?: PlanMinutes; view?: PracticeView; grade?: boolean }>({});
+  const [stored, setStored] = useState<{ minutes?: PlanMinutes; view?: PracticeView; grading?: GradingChoice }>({});
 
   useEffect(() => {
     let live = true;
     void Promise.all([
       storeLoad<number>(MINUTES_KEY).catch(() => undefined),
       storeLoad<string>(PRACTICE_VIEW_KEY).catch(() => undefined),
-      storeLoad<boolean>(GRADE_KEY).catch(() => undefined),
-    ]).then(([m, v, g]) => {
+      storeLoad<unknown>(GRADING_KEY).catch(() => undefined),
+      storeLoad<unknown>(LEGACY_GRADE_KEY).catch(() => undefined),
+    ]).then(([m, v, g, legacy]) => {
       if (!live) return;
       setStored({
         minutes: PLAN_MINUTES.includes(m as PlanMinutes) ? (m as PlanMinutes) : undefined,
         view: isPracticeView(v) ? v : undefined,
-        grade: typeof g === "boolean" ? g : undefined,
+        // Nothing stored at all: what the hook holds (it reads the same keys).
+        grading: g === undefined && legacy === undefined ? undefined : readGradingChoice(g, legacy),
       });
     });
     return () => {
@@ -65,7 +72,7 @@ export function PracticeSettingsSection({ practice }: { practice: PracticeSettin
 
   const minutes = stored.minutes ?? practice.minutes;
   const view = stored.view ?? practice.practiceView;
-  const grade = stored.grade ?? practice.grade ?? true;
+  const grading = stored.grading ?? practice.grading ?? "ask";
 
   return (
     <section className="settings-section" id="settings-practice">
@@ -116,26 +123,38 @@ export function PracticeSettingsSection({ practice }: { practice: PracticeSettin
           ))}
         </div>
       </div>
-      {practice.setGrade && (
-        <div className="setting-row">
+      {/* A choice, not a switch (owner, 2026-11-18): playing ungraded is a
+          way to practise of its own, so each answer says what it means. */}
+      {practice.setGrading && (
+        <div className="setting-row setting-row-block">
           <div className="setting-label">
-            <label>{t("settings.practice.grade")}</label>
+            <label id="settings-grading-label">{t("settings.practice.grade")}</label>
             <span className="setting-hint">{t("settings.practice.gradeHint")}</span>
           </div>
-          <button
-            className={`toggle-btn setting-switch ${grade ? "active" : ""}`}
-            role="switch"
-            aria-checked={grade}
-            aria-label={t("settings.practice.grade")}
-            data-testid="settings-grade"
-            onClick={() => {
-              const next = !grade;
-              setStored((s) => ({ ...s, grade: next }));
-              practice.setGrade?.(next);
-            }}
+          <div
+            className="setting-choices"
+            role="radiogroup"
+            aria-labelledby="settings-grading-label"
+            data-testid="settings-grading"
           >
-            <SwitchFace label={grade ? t("common.on") : t("common.off")} />
-          </button>
+            {GRADING_CHOICES.map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                role="radio"
+                aria-checked={grading === choice}
+                className={`setting-choice${grading === choice ? " active" : ""}`}
+                data-testid={`settings-grading-${choice}`}
+                onClick={() => {
+                  setStored((s) => ({ ...s, grading: choice }));
+                  practice.setGrading?.(choice);
+                }}
+              >
+                <b>{t(`settings.practice.grading.${choice}`)}</b>
+                <span>{t(`settings.practice.grading.${choice}Hint`)}</span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </section>

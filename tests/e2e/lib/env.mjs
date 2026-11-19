@@ -41,7 +41,7 @@ export function appDataDir(dirs) {
  * A returning player who finished setup, so the app opens on Today rather
  * than the first-run wizard (M1 owns the wizard; this suite is about the
  * Session). Only the keys `useOnboarding` reads to decide it is not a first
- * run, plus the instrument.
+ * run, plus the instrument and the grading choice.
  */
 export function seedSettings(dirs, extra = {}) {
   const dir = appDataDir(dirs);
@@ -51,6 +51,10 @@ export function seedSettings(dirs, extra = {}) {
     "onboarding.completedAt": "2026-11-01T00:00:00.000Z",
     "onboarding.chipDismissed": 99,
     instrument: "guitar",
+    // Grading is a choice now (owner, 2026-11-18); this suite is about the
+    // graded Session, so its player chose it. The "input off" scenario
+    // patches it for the other answers.
+    "session.grading": "on",
     ...extra,
   };
   writeFileSync(join(dir, "settings.json"), JSON.stringify(settings, null, 2));

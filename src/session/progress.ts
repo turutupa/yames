@@ -38,7 +38,7 @@ export type TakeFacts = {
    * player chose to play anyway, or Settings has grading off. Practice, so it
    * counts toward minutes and the streak; never an attempt at the bar.
    */
-  ungraded?: "inputOff" | "gradingOff";
+  ungraded?: "inputOff" | "gradingOff" | "chosen";
 };
 
 export type PlayerProgress = {

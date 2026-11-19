@@ -204,7 +204,8 @@
       "testOut": "Valider « {{step}} » : une prise au tempo de réussite, {{bpm}} BPM.",
       "benchmark": "Repère, jour {{day}} : le même exercice à {{bpm}} BPM à chaque fois, pour comparer.",
       "yourTurn": "À toi : {{exercise}}. Pas encore vérifié, c'est toi qui juges.",
-      "newFromSibling": "Nouveau. Il commence à {{bpm}} BPM, environ 80 % de ton tempo propre de {{clean}} BPM sur {{sibling}}."
+      "newFromSibling": "Nouveau. Il commence à {{bpm}} BPM, environ 80 % de ton tempo propre de {{clean}} BPM sur {{sibling}}.",
+      "playedUngraded": "Là où tu t'es arrêté : {{bpm}} BPM."
     },
     "bar": {
       "summary": "Le seuil : {{even}} % de régularité et {{heard}} % des notes entendues, à {{bpm}} BPM."
@@ -249,7 +250,8 @@
       "fasterCeiling": "C'est déjà le tempo le plus rapide de cet exercice",
       "tempoLocked": "Un test se joue au tempo de validation, il ne bouge donc pas",
       "previous": "Précédent",
-      "previousFirst": "C'est le premier bloc : il n'y a rien avant"
+      "previousFirst": "C'est le premier bloc : il n'y a rien avant",
+      "playUngraded": "Commencer, {{bpm}} BPM"
     },
     "result": {
       "kick": "Prise {{take}} · {{title}} · {{bpm}} BPM · {{bars}} mesures",
@@ -459,7 +461,10 @@
       "exerciseCount": "{{count}} exercice",
       "exerciseCount_many": "{{count}} exercices",
       "exerciseCount_other": "{{count}} exercices",
-      "levelSubscribed": "Abonné · départ à l’étape {{n}}"
+      "levelSubscribed": "Abonné · départ à l’étape {{n}}",
+      "playedUngraded": "{{count}} prise, jusqu'à {{bpm}} BPM.",
+      "playedUngraded_many": "{{count}} prises, jusqu'à {{bpm}} BPM.",
+      "playedUngraded_other": "{{count}} prises, jusqu'à {{bpm}} BPM."
     },
     "progress": {
       "title": "Progrès",
@@ -475,7 +480,10 @@
       "notGraded": "Pas encore noté",
       "emptyTitle": "Tes progrès commencent avec une session",
       "emptyBody": "Joue la session du jour et tout arrive ici : minutes jouées, ta série et le tempo propre de chaque exercice, mesurés sur ton jeu.",
-      "emptyStart": "Lancer la session du jour"
+      "emptyStart": "Lancer la session du jour",
+      "introOff": "L'évaluation est désactivée, voici donc ce que tu as joué : tes minutes, tes séances et les tempos joués.",
+      "topPlayed": "BPM le plus haut joué",
+      "ungraded": "Non évalué"
     },
     "settings": {
       "openOnLastTool": "Ouvrir sur mon dernier outil",
@@ -621,7 +629,7 @@
       "fellBack": "L'entrée choisie n'est pas branchée : j'écoute {{device}} pour cette séance.",
       "defaultDevice": "votre entrée par défaut",
       "chooseInput": "Choisir l'entrée",
-      "playUngraded": "Jouer sans évaluation",
+      "playUngraded": "Jouer juste celle-ci",
       "notGraded": "Non évalué",
       "turnOn": "Activer l'entrée",
       "noSignal": "Aucun signal",
@@ -631,17 +639,33 @@
         "noAnswer": "L'entrée n'a pas répondu. Si une demande d'autorisation est ouverte, répondez-y, puis appuyez de nouveau sur Commencer.",
         "busy": "Une autre app utilise votre entrée. Fermez-la, puis appuyez de nouveau sur Commencer.",
         "other": "Votre entrée n'a pas démarré. Vérifiez-la ou choisissez-en une autre."
-      },
-      "gradingOff": "Évaluation désactivée",
-      "turnOnGrading": "Activer l’évaluation"
+      }
     },
     "ungraded": {
       "ready": "Non évalué : l'entrée est coupée, je n'écoute pas pendant cette séance.",
-      "readyOff": "Non évalué : l'évaluation est désactivée dans les Réglages.",
       "result": "Non évalué : l'entrée était coupée",
-      "resultOff": "Non évalué : l'évaluation est désactivée dans les Réglages",
+      "resultOff": "Jouée, non évaluée",
       "body": "Cela compte comme de la pratique, pour vos minutes et votre série. Le tempo propre et les étapes n'avancent qu'avec des prises évaluées.",
-      "recap": "non évalué"
+      "recap": "non évalué",
+      "bodyOff": "Elle compte pour tes minutes et ta série."
+    },
+    "ask": {
+      "graded": "Lancer la prise, {{bpm}} BPM · évaluée",
+      "justPlay": "Juste jouer",
+      "remember": "Retenir mon choix",
+      "line": "Évaluée, j'écoute par ton micro ou ton entrée. Ou joue simplement : le clic et l'image, rien d'évalué."
+    },
+    "grademe": {
+      "fix": "Évalue-moi",
+      "why": "J'écouterai par ton micro ou ton entrée et j'évaluerai ton timing et tes notes.",
+      "session": "Cette séance",
+      "always": "Toujours"
+    },
+    "meter": {
+      "silent": "Niveau d'entrée : aucun signal",
+      "low": "Niveau d'entrée : faible",
+      "good": "Niveau d'entrée : bon",
+      "high": "Niveau d'entrée : élevé"
     }
   }
 }

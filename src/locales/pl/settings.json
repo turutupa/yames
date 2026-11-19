@@ -450,7 +450,15 @@
       "view": "Widok ćwiczenia",
       "viewHint": "Co sesja pokazuje, gdy grasz.",
       "grade": "Oceniaj moją grę",
-      "gradeHint": "Wyłączone: sesje nie słuchają i niczego nie oceniają. Minuty i seria nadal się liczą."
+      "gradeHint": "Czy Yames słucha twojej gry. Możesz to też zmienić w każdej sesji.",
+      "grading": {
+        "on": "Oceń mnie",
+        "onHint": "Yames słucha przez twój mikrofon lub wejście i ocenia timing i dźwięki.",
+        "off": "Po prostu graj",
+        "offHint": "Klik i obraz. Nic nie słucha i nic nie jest oceniane.",
+        "ask": "Pytaj mnie",
+        "askHint": "Sesja pyta przed pierwszym podejściem, dopóki nie wybierzesz."
+      }
     }
   },
   "keybindings": {

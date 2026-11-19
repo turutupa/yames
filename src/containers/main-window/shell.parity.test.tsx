@@ -152,9 +152,14 @@ describe("where the wizard lands (ONB-08)", () => {
     await click(new RegExp(i18n.t("instrument.electric-guitar")));
     await click(i18n.t("onboarding.next"));
     for (let i = 0; i < 8 && !screen.queryByRole("button", { name: i18n.t("onboarding.ready.start") }); i++) {
-      // The input step's way past is its own "Skip, I'll set this up later".
-      if (document.querySelector('[data-step="audio-input"]')) await click(i18n.t("onboarding.audioInput.skip"));
-      else await click(i18n.t("onboarding.skip"));
+      // The input step asks first (owner, 2026-11-18): "No, just the click
+      // and the visuals" skips the input, and Next goes on.
+      if (document.querySelector('[data-step="audio-input"]')) {
+        await act(async () => {
+          fireEvent.click(await screen.findByRole("radio", { name: new RegExp(i18n.t("onboarding.audioInput.ask.no")) }));
+        });
+        await click(i18n.t("onboarding.next"));
+      } else await click(i18n.t("onboarding.skip"));
     }
     await click(i18n.t("onboarding.ready.start"));
     await waitFor(() => expect(wizard()).toBeNull());

@@ -450,7 +450,15 @@
       "view": "Oefenweergave",
       "viewHint": "Wat een sessie toont terwijl je speelt.",
       "grade": "Mijn spel beoordelen",
-      "gradeHint": "Uit: sessies luisteren niet en beoordelen niets. Je minuten en reeks tellen nog steeds."
+      "gradeHint": "Of Yames naar je spel luistert. Je kunt het ook in elke sessie wisselen.",
+      "grading": {
+        "on": "Beoordeel me",
+        "onHint": "Yames luistert via je microfoon of ingang en beoordeelt je timing en noten.",
+        "off": "Gewoon spelen",
+        "offHint": "De klik en het beeld. Niets luistert en niets wordt beoordeeld.",
+        "ask": "Vraag het me",
+        "askHint": "Een sessie vraagt het voor de eerste take, tot je kiest."
+      }
     }
   },
   "keybindings": {

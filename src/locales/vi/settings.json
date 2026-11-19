@@ -450,7 +450,15 @@
       "view": "Chế độ xem khi tập",
       "viewHint": "Những gì buổi tập hiển thị khi bạn chơi.",
       "grade": "Chấm điểm phần chơi của tôi",
-      "gradeHint": "Tắt: buổi tập không nghe và không chấm gì. Số phút và chuỗi ngày vẫn được tính."
+      "gradeHint": "Yames có nghe bạn chơi hay không. Bạn cũng có thể đổi trong bất kỳ buổi nào.",
+      "grading": {
+        "on": "Chấm điểm tôi",
+        "onHint": "Yames nghe qua micro hoặc đầu vào của bạn và chấm nhịp và nốt.",
+        "off": "Chỉ chơi",
+        "offHint": "Tiếng click và hình ảnh. Không gì nghe và không gì được chấm.",
+        "ask": "Hỏi tôi",
+        "askHint": "Mỗi buổi hỏi trước lượt đầu tiên, cho đến khi bạn chọn."
+      }
     }
   },
   "keybindings": {

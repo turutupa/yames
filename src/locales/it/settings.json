@@ -450,7 +450,15 @@
       "view": "Vista di pratica",
       "viewHint": "Cosa mostra una sessione mentre suoni.",
       "grade": "Valuta come suono",
-      "gradeHint": "Disattivato: le sessioni non ascoltano e non valutano nulla. Minuti e serie contano comunque."
+      "gradeHint": "Se Yames ascolta come suoni. Puoi cambiarlo anche in ogni sessione.",
+      "grading": {
+        "on": "Valutami",
+        "onHint": "Yames ascolta dal tuo microfono o ingresso e valuta tempo e note.",
+        "off": "Suona e basta",
+        "offHint": "Il clic e l'immagine. Niente ascolta, niente viene valutato.",
+        "ask": "Chiedimelo",
+        "askHint": "Ogni sessione chiede prima della prima take, finché non scegli."
+      }
     }
   },
   "keybindings": {

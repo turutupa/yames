@@ -120,23 +120,90 @@ export function TempoNudges({
 }
 
 /**
- * What the Take's Start says and does with the input in mind (owner, beta 6:
- * "I hit start take but nothing happens"). Never a dead button: with the input
- * off it offers to turn it on and start, and while that happens it says so.
+ * What the Take's Start says and does with grading in mind (owner, 2026-11-18:
+ * "what if they don't want to turn on input?").
+ *
+ * - Not graded (grading off, or "Just play"): "Start, 80 BPM". The input is
+ *   never mentioned.
+ * - Not decided ("ask"): `ask`, and the ready screen shows two equal buttons,
+ *   this one the graded Take.
+ * - Graded with the input off: never a dead button (owner, beta 6). It offers
+ *   to turn the input on and start, and while that happens it says so.
  */
 export function startButton(
   session: SessionRun,
   listening: boolean,
   t: T,
-): { label: string; busy: boolean; needsInput: boolean } {
+): { label: string; busy: boolean; needsInput: boolean; ask: boolean } {
   const { run, big, inputStart } = session;
-  const graded = !run.ungraded;
+  const none = { busy: false, needsInput: false, ask: false };
   // The tour's look at a ready screen (card #50) is the calm one: no input
-  // was asked for, so none is missing.
-  const needsInput = big.kind === "playTake" && graded && !listening && !session.preview;
-  if (!needsInput) return { label: bigLabel(big, t), busy: false, needsInput: false };
-  if (inputStart.status === "starting") return { label: t("session.input.starting"), busy: true, needsInput };
-  return { label: t("session.input.turnOnAndStart"), busy: false, needsInput };
+  // was asked for, so none is missing, and nothing is asked.
+  if (big.kind !== "playTake" || session.preview) return { label: bigLabel(big, t), ...none };
+  if (run.ungraded) return { label: t("session.run.playUngraded", { bpm: big.bpm }), ...none };
+  if (session.asking) {
+    if (inputStart.status === "starting") return { label: t("session.input.starting"), busy: true, needsInput: true, ask: false };
+    return { label: t("session.ask.graded", { bpm: big.bpm }), ...none, ask: true };
+  }
+  if (listening) return { label: bigLabel(big, t), ...none };
+  if (inputStart.status === "starting") return { label: t("session.input.starting"), busy: true, needsInput: true, ask: false };
+  return { label: t("session.input.turnOnAndStart"), busy: false, needsInput: true, ask: false };
+}
+
+/**
+ * Grading not decided yet (owner, 2026-11-18): the graded Take and "Just play"
+ * side by side, the same size, and "Remember my choice" under them. Neither
+ * is the right answer; nothing here is red.
+ */
+export function AskStart({
+  session,
+  label,
+  canStart,
+  compact = false,
+}: {
+  session: SessionRun;
+  /** The graded button's words (`startButton`). */
+  label: string;
+  canStart: boolean;
+  /** A phone's sticky footer. */
+  compact?: boolean;
+}) {
+  const { t } = useTranslation();
+  const { run, actions } = session;
+  return (
+    <div className="session-ask" data-place={compact ? "footer" : undefined} data-testid="session-ask">
+      <div className="session-ask-buttons">
+        <button
+          className="session-big"
+          data-size="mid"
+          onClick={canStart ? () => actions.decide(true) : undefined}
+          aria-disabled={canStart ? undefined : true}
+          data-testid="session-big"
+        >
+          {label}
+        </button>
+        <button
+          className="session-big"
+          data-size="mid"
+          onClick={canStart ? () => actions.decide(false) : undefined}
+          aria-disabled={canStart ? undefined : true}
+          data-testid="session-just-play"
+        >
+          {t("session.ask.justPlay", { bpm: run.bpm })}
+        </button>
+      </div>
+      <label className="session-ask-remember" data-testid="session-ask-remember">
+        {/* The whole line is the hit area (a thumb's size); the box is drawn. */}
+        <input
+          type="checkbox"
+          checked={session.askRemember}
+          onChange={(e) => session.setAskRemember(e.currentTarget.checked)}
+        />
+        <span className="session-ask-box" aria-hidden="true" />
+        <span>{t("session.ask.remember")}</span>
+      </label>
+    </div>
+  );
 }
 
 /** The Take's own state: whether pressing Start would start it now. */
@@ -151,8 +218,9 @@ export function takeCanStart(session: SessionRun, _listening: boolean): boolean 
 /**
  * Under a Take's ready screen: what the input is doing, in words, and the
  * ways out when it will not come on (owner, beta 6). Graded with the input
- * off, "Play without grading" is always offered; refused, the screen says what
- * went wrong and offers "Check my sound" and "Choose input".
+ * off, "Just play this one" is always offered; refused, the screen says what
+ * went wrong and offers "Check my sound" and "Choose input". Not graded by
+ * choice, or not decided yet, it says nothing about the input.
  */
 export function ReadyInput({
   session,
@@ -186,11 +254,22 @@ export function ReadyInput({
       </div>
     );
   }
+  // Played without grading by choice: nothing about the input at all. The
+  // bar's quiet "Not graded" chip is the one way back.
+  if (run.ungraded === "gradingOff" || run.ungraded === "chosen") return null;
   if (run.ungraded) {
     return (
       <div className="session-input-note" role="status" data-place={place} data-testid="session-ungraded-note">
         <span className="session-input-dot" data-state="ungraded" aria-hidden="true" />
-        <span>{t(run.ungraded === "gradingOff" ? "session.ungraded.readyOff" : "session.ungraded.ready")}</span>
+        <span>{t("session.ungraded.ready")}</span>
+      </div>
+    );
+  }
+  // Not decided yet: one plain line over the two buttons, no input state.
+  if (session.asking && !listening && inputStart.status !== "starting") {
+    return (
+      <div className="session-input-note" role="status" data-place={place} data-testid="session-ask-note">
+        <span>{t("session.ask.line")}</span>
       </div>
     );
   }
@@ -220,7 +299,7 @@ export function ReadyInput({
           <button className="session-secondary" onClick={onChooseInput} data-testid="session-choose-input">
             {t("session.input.chooseInput")}
           </button>
-          <button className="session-link" onClick={actions.playUngraded} data-testid="session-play-ungraded">
+          <button className="session-secondary" onClick={actions.playUngraded} data-testid="session-play-ungraded">
             {t("session.input.playUngraded")}
           </button>
         </div>
@@ -233,7 +312,7 @@ export function ReadyInput({
       <span>
         {inputStart.status === "starting" ? t("session.input.startingLong") : t("session.run.noInput")}
       </span>
-      <button className="session-link" onClick={actions.playUngraded} data-testid="session-play-ungraded">
+      <button className="session-secondary" onClick={actions.playUngraded} data-testid="session-play-ungraded">
         {t("session.input.playUngraded")}
       </button>
     </div>
