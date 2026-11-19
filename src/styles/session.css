@@ -1709,12 +1709,14 @@
   color: var(--l-quiet);
 }
 @media (max-width: 480px) {
+  /* `--fit` (useFitScale) brings the pair inside the screen when the theme's
+     face is a wide one: Neon's "87%" ran off a 390 px phone. */
   .session-page .session-moved-before {
-    font-size: clamp(36px, 12vw, 52px);
+    font-size: calc(clamp(36px, 12vw, 52px) * var(--fit, 1));
   }
   .session-page .session-moved-value,
   .session-page .session-between .session-moved-value {
-    font-size: clamp(64px, 24vw, 104px);
+    font-size: calc(clamp(64px, 24vw, 104px) * var(--fit, 1));
   }
 }
 .session-moved-value {
@@ -5081,5 +5083,29 @@ button.session-input-chip:hover {
     font-size: 11px;
     line-height: 1.1;
     padding: 3px 7px;
+  }
+}
+
+/* A result's Slower, Faster and Move on share one row on a phone, in every
+   theme's face (owner, 2026-11-18: in Neon "Move on" wrapped to a row of its
+   own). Each takes its share of the row and a tighter side padding; a fourth
+   ("Go again, 80 BPM", when the big button is something else) still wraps,
+   and the rows it makes are filled rather than ragged. */
+@media (max-width: 480px) {
+  .session-page .session-between .session-nudges {
+    gap: 6px;
+  }
+  .session-page .session-between .session-nudges > * {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .session-page .session-between .session-nudges .session-nudge-wrap > .session-secondary {
+    width: 100%;
+  }
+  .session-page .session-between .session-nudges .session-secondary {
+    padding-left: 8px;
+    padding-right: 8px;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
   }
 }

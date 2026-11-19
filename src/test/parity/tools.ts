@@ -9,6 +9,7 @@
  * hotkeys must not move:** `beat` is the Metronome in
  * users' saved `activeTab`, and `tab-1` to `tab-5` are stored in their bindings.
  */
+import { TOUR_VERSION } from "../../containers/onboarding/tour/stops";
 import { fireEvent, waitFor } from "@testing-library/react";
 import { IS_MAC, type HotkeyAction } from "../../hotkeys";
 import type { PlayTab } from "../../containers/main-window/hooks/useTabRouting";
@@ -47,7 +48,8 @@ export const RETURNING_PLAYER: Record<string, unknown> = {
   instrument: "electric-guitar",
   "onboarding.version": 1,
   "onboarding.completedAt": "2026-01-01T00:00:00.000Z",
-  "tour.seenVersion": 1,
+  // The current learning tour, so a returning player is not offered it.
+  "tour.seenVersion": TOUR_VERSION,
   "whatsNew.seenVersion": "0.9.0",
 };
 

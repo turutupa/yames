@@ -183,7 +183,7 @@
       "inputNone": "Non configurato",
       "alwaysOnTop": "Sempre in primo piano",
       "start": "Vai a Oggi",
-      "tour": "Giro degli strumenti (30 s)",
+      "tour": "Mostrami in giro",
       "moreOnToday": "+{{count}} in Oggi",
       "subtitleNext": "La tua prossima sessione ti aspetta in Oggi. Cambia quello che vuoi qui, o più tardi nelle Impostazioni.",
       "nextSession": "La tua prossima sessione"
@@ -228,7 +228,7 @@
       "next": "Avanti",
       "done": "Fatto",
       "skip": "Salta il tour",
-      "offer": "Sei nuovo? Fai il tour di 30 secondi.",
+      "offer": "Novità: un breve giro di Oggi, dei Percorsi e di una sessione.",
       "offerAccept": "Mostrami in giro",
       "offerDismiss": "Chiudi",
       "stops": {
@@ -256,10 +256,45 @@
           "title": "Zen e widget",
           "body": "Visuali a schermo intero, o un piccolo widget sempre in primo piano."
         }
+      },
+      "learn": {
+        "plan": {
+          "title": "Il piano di oggi",
+          "body": "Oggi costruisce una sessione dai tuoi Percorsi, su misura per i tuoi minuti. Ogni riga dice cos'è e perché c'è. Tocca una riga per iniziare da lì, o Cambia per sostituirla."
+        },
+        "start": {
+          "title": "I tuoi minuti, poi Inizia",
+          "body": "Scegli quanto tempo hai e il piano si adatta. Inizia lo suona dall'inizio, e puoi uscire quando vuoi."
+        },
+        "paths": {
+          "title": "Percorsi",
+          "body": "Scegli qui un obiettivo. Niente è bloccato: apri qualsiasi Percorso e inizia da qualsiasi tappa."
+        },
+        "neck": {
+          "title": "Leggere il manico",
+          "body": "I numeri sono dita: 1 è l'indice, 4 il mignolo. La tua prima nota è dove c'è scritto «inizia qui»."
+        },
+        "watch": {
+          "title": "Prima guarda",
+          "body": "Guarda suona le note in ordine, a tempo, così vedi la forma prima di provarla."
+        },
+        "take": {
+          "title": "Avvia la take",
+          "body": "Quando sei pronto, avvia una take. Yames ascolta e valuta tempo e note. Più lento e Più veloce cambiano il tempo."
+        },
+        "blocks": {
+          "title": "I blocchi di oggi",
+          "body": "Qui in alto c'è ogni blocco della sessione. Toccane uno per andarci. Precedente torna indietro di uno, Salta questo va avanti."
+        },
+        "progress": {
+          "title": "Tempo pulito",
+          "body": "Progressi conta il tempo pulito: il più veloce a cui hai raggiunto la soglia, non solo il più veloce che hai suonato. È questo il numero da far crescere."
+        }
       }
     },
     "help": {
       "title": "Aiuto",
+      "showAround": "Mostrami in giro",
       "takeTour": "Giro degli strumenti",
       "runSetup": "Rifai la configurazione",
       "shortcuts": "Scorciatoie da tastiera",

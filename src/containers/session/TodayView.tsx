@@ -330,6 +330,7 @@ export function TodayView({
               style={rise(3)}
               onClick={onOpenPaths}
               data-testid="today-choose-path"
+              data-tour="today-start"
             >
               {t("session.today.choosePath")}
             </button>
@@ -340,6 +341,7 @@ export function TodayView({
               onClick={actions.startToday}
               disabled={steps.length === 0}
               data-testid="today-start"
+              data-tour="today-start"
             >
               <span className="session-today-start-word">{t("session.today.start")}</span>
               {steps[0] && <small className="session-today-start-next">{stepTitle(steps[0], t)}</small>}
@@ -347,10 +349,10 @@ export function TodayView({
           )}
           {!noPaths && (
             <>
-              <div className="session-today-seg-label" id="session-minutes-label">
+              <div className="session-today-seg-label" id="session-minutes-label" data-tour="today-start">
                 {t("session.today.howLong")}
               </div>
-              <div className="session-seg" role="group" aria-labelledby="session-minutes-label">
+              <div className="session-seg" role="group" aria-labelledby="session-minutes-label" data-tour="today-start">
                 {PLAN_MINUTES.map((m) => (
                   <button
                     key={m}

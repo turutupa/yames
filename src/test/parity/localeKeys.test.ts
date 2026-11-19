@@ -68,6 +68,15 @@ const DELIBERATELY_REMOVED: readonly string[] = [
   // 2026-11-18): "next" no longer says "then 8, 7", frets the player read as
   // fingers. It says "next" alone.
   "session.practice.then",
+  // Read by nothing since Today became the front door (card #23, 2026-11-18):
+  // the "Here for the tools?" offer and its two buttons went with the tools
+  // door on the rail, and the Session says what grading needs on its big
+  // button (`session.input.turnOnAndStart`), not in a line of its own.
+  // `session.today.leadFirst` stays: W7's first-session card reads it.
+  "session.today.needsInput",
+  "session.today.toolsOffer",
+  "session.today.toolsOfferOpen",
+  "session.today.toolsOfferAlways",
 ];
 
 function englishKeys(): string[] {

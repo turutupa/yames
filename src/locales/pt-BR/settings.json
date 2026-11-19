@@ -151,9 +151,11 @@
       "resetHintsHint": "Mostrar de novo as dicas de uma vez só",
       "resetHintsAction": "Redefinir",
       "resetHintsDone": "Pronto",
-      "takeTour": "Tour pelas ferramentas",
-      "takeTourHint": "Um passeio de 30 segundos pelo Metrônomo e pelo Treino",
-      "takeTourAction": "Iniciar"
+      "takeTour": "Me mostre",
+      "takeTourHint": "Um passeio curto por Hoje, Trilhas, uma sessão e Progresso",
+      "takeTourAction": "Iniciar",
+      "takeToolsTour": "Tour pelas ferramentas",
+      "takeToolsTourHint": "Um passeio de 30 segundos pelo Metrônomo e pelo Treino"
     },
     "devices": {
       "title": "Dispositivos",

@@ -386,6 +386,12 @@ export interface Shot {
   /** Enter Zen once the app has mounted. */
   zen?: boolean;
   /**
+   * Open a tour from Settings, the way a player does, and walk it to its
+   * stop. The stop is the page's `?tourStop=` (0-based, default 0), so one
+   * scene covers every stop; the layout suite walks them all.
+   */
+  tour?: "learn" | "tools";
+  /**
    * Which Zen visual. Read from the store by `FullscreenView`, which defaults
    * to "focus" — a deliberately empty screen, and not the one the files are
    * named after.
@@ -1272,6 +1278,28 @@ export const SHOTS: Shot[] = [
     width: 1400,
     height: 900,
     settleMs: 300,
+  },
+  // The tours (card #50): Today with a three-part plan, then "Show me
+  // around" from Settings. `?tourStop=N` walks to stop N.
+  {
+    id: "tour-learn",
+    suffix: "tour-learn",
+    window: "main",
+    session: { seed: "returning", minutes: 15, stop: "today" },
+    tour: "learn",
+    width: 1400,
+    height: 900,
+    settleMs: 600,
+  },
+  {
+    id: "tour-tools",
+    suffix: "tour-tools",
+    window: "main",
+    tab: "beat",
+    tour: "tools",
+    width: 1400,
+    height: 900,
+    settleMs: 600,
   },
   {
     id: "tools",

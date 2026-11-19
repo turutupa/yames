@@ -6,6 +6,7 @@
  * `bigAction`, so they cannot disagree.
  */
 import { useEffect, useRef, useState } from "react";
+import { useFitOneLine, useFitScale } from "./hooks/useFitOneLine";
 import { useTranslation } from "react-i18next";
 import {
   barLine,
@@ -204,6 +205,8 @@ function InputChip({
 }) {
   const { t } = useTranslation();
   const { run, inputStart, actions } = session;
+  // The tour's look (card #50) asked for no input: no chip saying one is off.
+  if (session.preview) return null;
   if (run.ungraded) {
     // Not graded; one press grades from the next Take. With grading off in
     // Settings that is what it says and what it turns on (acceptance 4,
@@ -594,6 +597,10 @@ function barText(check: Pick<BarCheck, "metric" | "min" | "max">, t: ReturnType<
 function DecidingNumber({ outcome }: { outcome: TakeOutcome }) {
   const { t } = useTranslation();
   const check = decidingCheck(outcome.grade);
+  // The pair on the screen's width in every theme's face (see useFitScale).
+  const movedRef = useRef<HTMLDivElement>(null);
+  const pairRef = useRef<HTMLSpanElement>(null);
+  useFitScale(movedRef, pairRef, `${outcome.previousValue}|${check?.metric}|${check?.value}`);
   if (!check) return null;
   const value = displayValue(check);
   const metric = metricKey(check.metric);
@@ -617,10 +624,10 @@ function DecidingNumber({ outcome }: { outcome: TakeOutcome }) {
           ? [t("session.result.decidedPass"), bar].filter(Boolean).join(" · ")
           : t("session.result.decidedMiss")}
       </div>
-      <div className="session-moved">
+      <div className="session-moved" ref={movedRef}>
         {/* The two numbers never part: "78 →" alone on a line above the
             result read as a heading (acceptance P1-2). */}
-        <span className="session-moved-pair">
+        <span className="session-moved-pair" ref={pairRef}>
           {moved && (
             <span className="session-moved-before" data-testid="session-moved-before">
               <small>{t("session.result.lastTime")}</small>
@@ -928,6 +935,10 @@ function ResultScreen({ session, pedalMapped }: { session: SessionRun; pedalMapp
   // A phone hides the neck here (phone-learning.css, PHONE-4).
   // Clipped to its own column: never behind the result's words (acceptance P1-2).
   const slot = useExerciseSlot(session, passed ? "tone" : "aim", true, true);
+  // One line in every theme's face (see useFitOneLine).
+  const bigText = bigLabel(big, t);
+  const bigRef = useRef<HTMLButtonElement>(null);
+  useFitOneLine(bigRef, bigText);
   if (!outcome) return null;
   const onEdge = isEdgeStep(currentStep(run));
   const edgeDone = onEdge && edgeOf(run, exercise).done;
@@ -954,8 +965,8 @@ function ResultScreen({ session, pedalMapped }: { session: SessionRun; pedalMapp
           <BarByBar session={session} outcome={outcome} />
           {/* There at once, with no fade: a pedal tap the moment the result
               lands must find it (UX audit SES-15). */}
-          <button className="session-big" data-size="mid" onClick={actions.go} data-testid="session-big">
-            {bigLabel(big, t)}
+          <button ref={bigRef} className="session-big" data-size="mid" data-fit="" onClick={actions.go} data-testid="session-big">
+            {bigText}
           </button>
           <div className="session-nudges">
             <TempoNudges run={run} exercise={exercise} session={session} />
@@ -1061,6 +1072,9 @@ function UngradedResultScreen({ session }: { session: SessionRun }) {
   const { run, big, actions } = session;
   const outcome = run.outcomes[run.outcomes.length - 1];
   const slot = useExerciseSlot(session, "dim");
+  const bigText = bigLabel(big, t);
+  const bigRef = useRef<HTMLButtonElement>(null);
+  useFitOneLine(bigRef, bigText);
   if (!outcome) return null;
   return (
     <div className="session-body" data-testid="session-ungraded" data-verdict="ungraded">
@@ -1084,8 +1098,8 @@ function UngradedResultScreen({ session }: { session: SessionRun }) {
       </div>
       <div className="session-slot" ref={slot} aria-hidden="true" data-exercise="" />
       <div className="session-center">
-        <button className="session-big" data-size="mid" onClick={actions.go} data-testid="session-big">
-          {bigLabel(big, t)}
+        <button ref={bigRef} className="session-big" data-size="mid" data-fit="" onClick={actions.go} data-testid="session-big">
+          {bigText}
         </button>
         <div className="session-nudges">
           {big.kind !== "again" && (

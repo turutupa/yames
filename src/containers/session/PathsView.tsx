@@ -133,7 +133,7 @@ function PathList({
           <KindTag kind={kind} />
           <span className="session-why">{sub}</span>
         </div>
-        {runnable.map((path) => {
+        {runnable.map((path, n) => {
           const current = currentStepOf(progress, path);
           // Real progress, not "Step 1 of N" on every card (UX audit PATH-4).
           const started = progress.states.some((s) => s.pathId === path.id);
@@ -150,6 +150,8 @@ function PathList({
               style={rise(i + 1)}
               onClick={() => onOpen(path)}
               data-testid={`path-card-${path.id}`}
+              // The tour's Paths stop: the page's promise and one goal under it.
+              data-tour={i === 1 && n === 0 ? "paths" : undefined}
             >
               <span className="session-col session-path-card-main">
                 <span className="session-row" data-wrap="">
@@ -210,7 +212,7 @@ function PathList({
   };
   return (
     <div className="session-page" data-testid="paths" data-neck3d={neck3d}>
-      <div className="session-rise">
+      <div className="session-rise" data-tour="paths">
         <h1 className="session-h1">{t("session.paths.title")}</h1>
         <div className="session-why">{t("session.paths.intro")}</div>
       </div>

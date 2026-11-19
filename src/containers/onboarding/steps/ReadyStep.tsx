@@ -234,10 +234,8 @@ export function ReadyStep(_props: WizardStepProps) {
         >
           {t("onboarding.ready.start")}
         </button>
-        {/* The tour is written around a desktop layout and its hotkeys, and
-            is cut on a phone (plan §1) -- Settings already drops its "Take
-            the tour" row. An offer that leads nowhere belongs nowhere. */}
-        {!IS_MOBILE && onRequestTour && (
+        {/* "Show me around": the learning tour (card #50), on a phone too. */}
+        {onRequestTour && (
           <button
             type="button"
             className="onboarding-btn onboarding-btn-ghost"

@@ -151,9 +151,11 @@
       "resetHintsHint": "一度きりのヒントをもう一度表示します",
       "resetHintsAction": "リセット",
       "resetHintsDone": "完了",
-      "takeTour": "ツールを見て回る",
-      "takeTourHint": "メトロノームとテンポ練習を30秒でひと巡り",
-      "takeTourAction": "開始"
+      "takeTour": "案内してもらう",
+      "takeTourHint": "「今日」、コース、セッション、上達を手短に案内します",
+      "takeTourAction": "開始",
+      "takeToolsTour": "ツールを見て回る",
+      "takeToolsTourHint": "メトロノームとテンポ練習を30秒でひと巡り"
     },
     "devices": {
       "title": "デバイス",

@@ -698,12 +698,12 @@ describe("W7 — ready", () => {
     expect(dispatch).toHaveBeenCalledWith({ type: "CLOSE" });
   });
 
-  it("hides the tour button until O6 wires one up", () => {
+  it("hides the tour button until the shell wires one up, and it is Show me around", () => {
     setup(ready);
-    expect(screen.queryByRole("button", { name: /Tour the tools/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Show me around/ })).toBeNull();
     const onRequestTour = vi.fn();
     setup({ ...ready, onRequestTour });
-    fireEvent.click(screen.getByRole("button", { name: /Tour the tools/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Show me around/ }));
     expect(onRequestTour).toHaveBeenCalled();
   });
 });

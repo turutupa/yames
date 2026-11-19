@@ -25,7 +25,8 @@ import {
   type Anchor,
   type Rect,
 } from "../anchor";
-import type { TourStop } from "./stops";
+import { IS_MOBILE } from "../../../platform";
+import { targetOf, type TourStop } from "./stops";
 import "../../../styles/tour.css";
 
 /** How far the cut-out is grown past the target's own box. */
@@ -37,6 +38,13 @@ const SPOTLIGHT_RADIUS = 12;
  * transition, short enough not to be a permanent rAF loop.
  */
 const SETTLE_MS = 420;
+/**
+ * A stop whose target is not there yet keeps looking for this long: a
+ * Session's ready screen mounts its neck a beat after the screen itself, and a
+ * card left centred because the first frame had nothing to point at would
+ * stay centred.
+ */
+const FIND_MS = 2500;
 
 export type TourProps = {
   open: boolean;
@@ -60,14 +68,68 @@ function rectOf(el: Element): Rect {
   return { x: r.left, y: r.top, width: r.width, height: r.height };
 }
 
-/** Union of every visible element carrying this `data-tour` id. */
-export function measureTarget(id: string): Rect | null {
-  if (typeof document === "undefined") return null;
+/** Every element a stop spotlights. */
+function targetsOf(stop: TourStop | string): Element[] {
+  if (typeof document === "undefined") return [];
+  if (typeof stop !== "string") return Array.from(document.querySelectorAll(targetOf(stop)));
   // Tour ids are our own literals, but escape anyway — and don't assume
   // `CSS.escape` exists (happy-dom in the test env does not ship it).
-  const safe = typeof CSS !== "undefined" && CSS.escape ? CSS.escape(id) : id;
-  const nodes = Array.from(document.querySelectorAll(`[data-tour="${safe}"]`));
-  return unionRects(nodes.map(rectOf));
+  const safe = typeof CSS !== "undefined" && CSS.escape ? CSS.escape(stop) : stop;
+  return Array.from(document.querySelectorAll(`[data-tour="${safe}"]`));
+}
+
+/**
+ * Union of every visible element a stop spotlights: its selector, or the
+ * elements carrying a `data-tour` id when given a bare id.
+ */
+export function measureTarget(stop: TourStop | string): Rect | null {
+  return unionRects(targetsOf(stop).map(rectOf));
+}
+
+/**
+ * Cut-outs that close (twice the padding, so their rings would touch) are
+ * drawn as one.
+ */
+const CLUSTER_GAP = 2 * 8;
+
+/**
+ * Merge rects that lie within `gap` of each other. Order is kept: the group
+ * holding the first rect comes first.
+ */
+export function clusterRects(rects: Rect[], gap = CLUSTER_GAP): Rect[] {
+  const groups = rects.filter((r) => r.width > 0 && r.height > 0).map((r) => ({ ...r }));
+  const near = (a: Rect, b: Rect) =>
+    a.x - gap < b.x + b.width && b.x - gap < a.x + a.width && a.y - gap < b.y + b.height && b.y - gap < a.y + a.height;
+  let merged = true;
+  while (merged) {
+    merged = false;
+    outer: for (let i = 0; i < groups.length; i++) {
+      for (let j = i + 1; j < groups.length; j++) {
+        if (near(groups[i], groups[j])) {
+          groups[i] = unionRects([groups[i], groups[j]])!;
+          groups.splice(j, 1);
+          merged = true;
+          break outer;
+        }
+      }
+    }
+  }
+  return groups;
+}
+
+/** What a stop lights: the cut-outs, and the one the card points at. */
+export function measureHoles(stop: TourStop): { anchor: Rect | null; holes: Rect[] } {
+  if (!stop.groups) {
+    const all = unionRects(targetsOf(stop).map(rectOf));
+    return { anchor: all, holes: all ? [all] : [] };
+  }
+  // A phone's minutes and Start, with the plan between them; the bar's blocks
+  // and its Previous/Skip, with Exit and the input between.
+  const each = stop.groups
+    .map((sel) => unionRects(Array.from(document.querySelectorAll(sel)).map(rectOf)))
+    .filter((r): r is Rect => r !== null);
+  const holes = clusterRects(each);
+  return { anchor: holes[0] ?? null, holes };
 }
 
 function sameRect(a: Rect | null, b: Rect | null): boolean {
@@ -104,7 +166,7 @@ export function Tour({
 }: TourProps) {
   const { t } = useTranslation();
   const cardRef = useRef<HTMLDivElement>(null);
-  const [target, setTarget] = useState<Rect | null>(null);
+  const [target, setTarget] = useState<{ anchor: Rect | null; holes: Rect[] }>({ anchor: null, holes: [] });
   const [viewport, setViewport] = useState(() => ({
     width: typeof window === "undefined" ? 0 : window.innerWidth,
     height: typeof window === "undefined" ? 0 : window.innerHeight,
@@ -114,8 +176,14 @@ export function Tour({
   // --- Measurement ---------------------------------------------------------
   const measure = useCallback(() => {
     if (!stop) return;
-    const next = measureTarget(stop.id);
-    setTarget((prev) => (sameRect(prev, next) ? prev : next));
+    const next = measureHoles(stop);
+    setTarget((prev) =>
+      sameRect(prev.anchor, next.anchor) &&
+      prev.holes.length === next.holes.length &&
+      prev.holes.every((h, i) => sameRect(h, next.holes[i]))
+        ? prev
+        : next,
+    );
     setViewport((prev) =>
       prev.width === window.innerWidth && prev.height === window.innerHeight
         ? prev
@@ -141,25 +209,45 @@ export function Tour({
 
   // Settling window: the tab transition and the sidebar are still moving for a
   // few hundred ms after a stop change, so keep measuring until they stop.
+  // A target that is not there yet is looked for a little longer (FIND_MS),
+  // and one below the fold of its page is scrolled into view once found.
   useEffect(() => {
-    if (!open) return;
+    if (!open || !stop) return;
     let raf = 0;
-    const until = Date.now() + SETTLE_MS;
+    const started = Date.now();
+    let scrolled = false;
     const loop = () => {
       measure();
-      if (Date.now() < until) raf = requestAnimationFrame(loop);
+      const found = targetsOf(stop).find((el) => {
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+      });
+      if (found && !scrolled) {
+        scrolled = true;
+        const r = found.getBoundingClientRect();
+        if (r.top < 0 || r.bottom > window.innerHeight) {
+          found.scrollIntoView?.({ block: "nearest", behavior: "auto" });
+        }
+      }
+      const elapsed = Date.now() - started;
+      if (elapsed < SETTLE_MS || (!found && elapsed < FIND_MS)) raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [open, index, measure]);
+  }, [open, index, stop, measure]);
 
   useEffect(() => {
     if (!open) return;
     const onChange = () => measure();
+    // And a slow beat while it is up: a page that moves without a resize or a
+    // scroll (a phone's screen fading in, a line of text arriving) would
+    // otherwise leave the cut-out where the target used to be.
+    const beat = window.setInterval(onChange, 300);
     window.addEventListener("resize", onChange);
     // Capture phase: the app scrolls an inner container, not the window.
     window.addEventListener("scroll", onChange, true);
     return () => {
+      window.clearInterval(beat);
       window.removeEventListener("resize", onChange);
       window.removeEventListener("scroll", onChange, true);
     };
@@ -189,7 +277,31 @@ export function Tour({
         onPrev();
         return;
       }
-      if (e.key === "Tab" || e.key === " " || e.key === "Enter") return;
+      // Focus stays on the card: Tab walks its own buttons and wraps, so it
+      // never lands on the dimmed page behind it.
+      if (e.key === "Tab") {
+        const card = cardRef.current;
+        if (!card) return;
+        const items = Array.from(
+          card.querySelectorAll<HTMLElement>("button:not(:disabled)"),
+        );
+        if (items.length === 0) return;
+        const at = items.indexOf(document.activeElement as HTMLElement);
+        e.preventDefault();
+        e.stopPropagation();
+        const step = e.shiftKey ? -1 : 1;
+        const nextAt = at < 0 ? (e.shiftKey ? items.length - 1 : 0) : (at + step + items.length) % items.length;
+        items[nextAt].focus();
+        return;
+      }
+      if (e.key === " " || e.key === "Enter") {
+        // A focused button's own press. On the card itself, nothing behind it.
+        if (document.activeElement instanceof HTMLButtonElement && cardRef.current?.contains(document.activeElement)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.key === "Enter") onNext();
+        return;
+      }
       e.stopPropagation();
     };
     document.addEventListener("keydown", handler, true);
@@ -206,9 +318,9 @@ export function Tour({
 
   if (!open || !stop) return null;
 
-  const hole = target
-    ? clipToViewport(padRect(target, SPOTLIGHT_PAD), viewport)
-    : null;
+  const lit = (r: Rect) => clipToViewport(padRect(r, SPOTLIGHT_PAD), viewport);
+  const hole = target.anchor ? lit(target.anchor) : null;
+  const holes = target.holes.map(lit).filter((h) => h.width > 0 && h.height > 0);
   const anchor: Anchor = computeAnchor(hole, cardSize, viewport);
   const isLast = index === total - 1;
   const maskId = "tour-spotlight-mask";
@@ -218,6 +330,7 @@ export function Tour({
       className={`tour-overlay${animate ? "" : " no-motion"}`}
       data-testid="tour-overlay"
       data-stop={stop.id}
+      data-index={index}
     >
       <svg
         className="tour-mask"
@@ -236,17 +349,18 @@ export function Tour({
               height={viewport.height}
               fill="#fff"
             />
-            {hole && (
+            {holes.map((h, n) => (
               <rect
+                key={n}
                 className="tour-hole"
-                x={hole.x}
-                y={hole.y}
-                width={hole.width}
-                height={hole.height}
+                x={h.x}
+                y={h.y}
+                width={h.width}
+                height={h.height}
                 rx={SPOTLIGHT_RADIUS}
                 fill="#000"
               />
-            )}
+            ))}
           </mask>
         </defs>
         <rect
@@ -259,19 +373,20 @@ export function Tour({
         />
       </svg>
 
-      {hole && (
+      {holes.map((h, n) => (
         <div
+          key={n}
           className="tour-ring"
           aria-hidden="true"
           style={{
-            left: hole.x,
-            top: hole.y,
-            width: hole.width,
-            height: hole.height,
+            left: h.x,
+            top: h.y,
+            width: h.width,
+            height: h.height,
             borderRadius: SPOTLIGHT_RADIUS,
           }}
         />
-      )}
+      ))}
 
       <div
         ref={cardRef}
@@ -280,6 +395,7 @@ export function Tour({
         role="dialog"
         aria-modal="true"
         aria-labelledby="tour-title"
+        aria-describedby="tour-body"
         tabIndex={-1}
         style={{ left: anchor.x, top: anchor.y }}
       >
@@ -297,7 +413,7 @@ export function Tour({
 
         <div className="tour-card-head">
           <h3 className="tour-card-title" id="tour-title">
-            {t(`onboarding.tour.stops.${stop.i18nKey}.title`)}
+            {t(`onboarding.tour.${stop.i18nKey}.title`)}
           </h3>
           <span className="tour-progress">
             {t("onboarding.tour.progress", {
@@ -307,11 +423,12 @@ export function Tour({
           </span>
         </div>
 
-        <p className="tour-card-body">
-          {t(`onboarding.tour.stops.${stop.i18nKey}.body`)}
+        <p className="tour-card-body" id="tour-body">
+          {t(`onboarding.tour.${stop.i18nKey}.body`)}
         </p>
 
-        {stop.keys.length > 0 && (
+        {/* A phone has no keyboard to print keys for. */}
+        {!IS_MOBILE && stop.keys.length > 0 && (
           <p className="tour-card-keys">
             <span className="tour-keys-label">{t("onboarding.tour.keys")}</span>
             {stop.keys.map((action) => (
