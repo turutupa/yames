@@ -17,7 +17,7 @@ which Paths are worth writing now:
 | Rhythm on single notes (rests, ties, syncopation, sixteenth figures, triplets) | Yes | It is exactly what onset timing measures, and it is the missing true-beginner Path. |
 | Metal rhythm (palm-muted downstrokes, gallops, pedal riffs) | Yes | Single low notes and two-note power chords are one attack each; timing and notes heard grade them. Palm muting itself is taught in words and listed as not graded. |
 | String skipping | Yes, later | The difficulty metric already prices a skip. Narrow; a good fourth. |
-| Strumming, funk ghost strokes | Not yet | A strummed chord is several onsets smeared together, and the app does not separate a muted stroke from a loud neighbour (`muting` is on the not-graded list). |
+| Strumming, funk ghost strokes | Timing only, since 2026-11-19 | A strummed chord is several strings struck within a few tens of milliseconds. Written as notes on one tick it is ONE expected onset (`schedule.ts`), and the detector's refractory window (40 to 50 ms at least, wider at slow tempos) is meant to keep it one heard onset. So a strum can be timed and counted, as a power chord is; it cannot be checked for which strings rang or for pitch, and nobody has tried it on a real guitar. First Chords and Strumming is built on exactly that (below). Ghost strokes still cannot be told from loud ones. |
 | Fingerstyle / Travis | Not yet | Ringing notes make the note check give up, and thumb-and-finger pairs are one onset. Timing-only would work; it needs its own profile and a real-guitar test first. |
 | Arpeggios across the neck | Covered | Sweep Picking and Classic Rock already teach them. |
 
@@ -207,6 +207,7 @@ arpeggios work on the guitar, and use that in their playing, with structure.*
 
 ```
 START HERE
+  First Chords and Strumming   (open chords, changes, strumming: the other first Path)
   Rhythm Foundations ──┬─> Alternate Picking ──┬─> Sweep Picking
   (time, the click,    │        (I)            └─> Shred
    clean notes)        ├─> Legato ──(B)──┬────────> Tapping
@@ -230,6 +231,7 @@ do X, or start anyway". Arrows are data now (`prerequisites.paths`, below).
 | Track | Path | Builds on | Length | State |
 |---|---|---|---|---|
 | Foundations | Rhythm Foundations | nothing: the first Path for a beginner | 6 weeks | written |
+| Foundations | **First Chords and Strumming** | nothing: the first Path for a beginner who wants songs | 11 Steps, 42 Exercises, about 8 weeks | written 2026-11-19 |
 | Technique | Alternate Picking | Rhythm Foundations (Beginner) | 9 weeks | written |
 | Technique | Legato | Rhythm Foundations (Beginner) | 6 weeks | written |
 | Technique | Tapping | Legato (Beginner) | 5 weeks | written |
@@ -405,12 +407,51 @@ more minor keys, a your-turn); and two more swept fingerings before the song
 (the one-finger barre that has to roll, and the root-lowest minor shape Sweep
 Picking starts from). Levels are now 3 / 5 / 5.
 
+### First Chords and Strumming (`first-chords`, mechanics, foundations): written 2026-11-19
+
+**Who for:** the true beginner who wants to play songs: no chords yet, or two
+that buzz. Builds on nothing. It was "not built" until the scorer was read
+closely: a strum written on one tick is one expected onset, so it can be timed
+and counted today. What cannot be heard is taught in words, checked another
+way, or left to the player and labelled so.
+
+| What a teacher wants to know | How this Path finds out |
+|---|---|
+| Does every string of the chord ring? | "Check every string": the chord held and picked one string at a time in slow quarter notes, graded on right notes. A dead or muted string is a missing note. One for each of the ten chords that needs it (E minor, A minor, C, G, D, A, D minor, the small F). |
+| Is the strum on the beat, and is the next chord there in time? | Strums graded on timing, strums heard and extras (`grade: "timing"`, evenness 0.75, heard 0.85 because upstrokes are quiet, extras 6). A late change is a late or missing strum. |
+| Did the hand keep its down-up swing through the strokes left out? | Not hearable. Taught in the text, asked in a self-check question. |
+| Louder on two and four? | `accents` profile, with a low bar (0.6): the readout is rough. |
+| Can they choose a pattern, play a real song? | Two "your turn" Exercises, self-checked. |
+
+| Level | Steps | What it unlocks |
+|---|---|---|
+| Beginner: three chords and a steady hand | E minor (strings, one strum a bar, four); A minor and the first change (one, two, then four strums a bar, with the band); C, one finger from A minor, and an eight-bar tune | Three chords that ring, changes that land on the beat, a first tune. |
+| Intermediate: five chords and the upstroke | G (held with fingers 2, 3 and 4, so E minor keeps one finger and C is the same two-finger move as E minor to A minor); D, and G, C, D two ways; eighth notes down and up; patterns as the swing with strokes left out, ending on down, down-up, up-down-up through G, D, E minor, C | The three chords of a thousand songs and the strum of a thousand more. |
+| Advanced: ten chords, and a whole song | A and E (A to D on a sliding third finger), an eight-bar A, D, E form; D minor, F major seven, then the small F, and A minor, F, C, G; accents, a stop, bass note and strum; a sixteen-bar song with a different strum for verse and chorus, and "a song you know" | Ten chords including the F that stops beginners, dynamics, a whole song. |
+
+Decisions a teacher should look at first: the 2-3-4 G fingering; E minor with
+fingers 2 and 3; upstrokes written as the top three strings only; the small F
+(four strings) instead of the full barre; the pass tempos (70, 80, then 85 to
+90). Warm-ups cannot be chord changes, because the validator wants a warm-up to
+move along the neck (`warmup.moves`) and open chords sit under one hand: they
+are a one-finger scale walk along one string (minor in quarters, major in
+eighths, six strings each) and, in the last Level, a two-string first-finger
+barre moved up the neck, which is strength work for F.
+
+Known wart: `difficulty.ts` counts notes per second, and a six-string strum is
+six notes, so strummed Exercises read 9 to 18 where a single-note line at the
+same rate reads 2. The Step order is a teacher's, and the exceptions say so.
+The honest fix is to count onsets, not notes, in the metric; it would move the
+numbers of every Path with double stops, so it was not done here.
+
+For the UI (not built here): strum direction is not drawn. `pickPlan` is
+`free`, so no stroke marks are printed; a down or up arrow over each strum
+would help a beginner more than anything else on the screen. And the first-run
+step does not know this Path (it comes last, through the unknown-runnable
+rule): a player who says they want to play songs should be offered it first.
+
 ### Other foundations a beginner needs, not built
 
-- **First chords and strumming** (open chords, changing between them, strumming
-  patterns). The obvious hole for a true beginner, and the one the grader is
-  worst at. It needs a real-guitar test of whether a strum can be timed as one
-  onset before it is designed. Until then it could only be self-checked.
 - **Ear training** as its own Path: not gradable today.
 - **Fingerstyle**: same limit as before (ringing notes).
 

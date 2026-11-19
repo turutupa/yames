@@ -171,6 +171,8 @@ test.describe("on a phone", () => {
       await openShot(page, "phone-paths", PHONE, theme);
       await pathsFit(page, `phone-paths ${theme}`, 1);
       await contrastIn(page, ".session-pathgroup-head", `phone-paths heads ${theme}`);
+      // Foundations holds two Paths that build on nothing, so the first "Builds on" line starts below the fold.
+      await page.locator(".session-prereq-line").first().scrollIntoViewIfNeeded();
       await contrastIn(page, ".session-prereq-line", `phone-paths builds-on ${theme}`);
       await shot(page, `paths-390-${theme}`, true);
     });

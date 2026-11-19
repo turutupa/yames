@@ -36,7 +36,9 @@ const OVERLAY_FILES = import.meta.glob(["../paths/packs/i18n/*/*.json", "!../pat
  * graded the same way. In Legato an unheard hammer-on or pull-off costs nothing,
  * so its picked notes carry the grade; in Metal Rhythm a two-note power chord is
  * one attack, timed and counted and never pitch-checked; in Tapping the taps
- * carry the grade the same way. Know the Neck and
+ * carry the grade the same way. In First Chords and Strumming a strum is one
+ * attack too (notes sharing a tick are one onset), timed and counted, and each
+ * chord is also picked one string at a time where its notes can be checked. Know the Neck and
  * Scales and Modes are Theory Paths of written lines, graded on right notes above all.
  *
  * Blues and Classic Rock are Theory Paths taught through written licks,
@@ -62,6 +64,7 @@ export const RUNNABLE_PATH_IDS: readonly string[] = [
   "triads",
   "chords-in-a-key",
   "arpeggios-over-changes",
+  "first-chords",
 ];
 
 /** Why a Path is not runnable yet, as a `session.paths.*` key. */
