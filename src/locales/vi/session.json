@@ -462,7 +462,25 @@
       "inMixHelp": "Tắt: Hôm nay sẽ bỏ lộ trình này khỏi bài trộn hằng ngày. Tiến độ vẫn giữ, và bạn vẫn có thể chọn nó cho một ngày.",
       "focusToday": "Hôm nay chỉ tập lộ trình này",
       "playedUngraded": "{{count}} lượt, tối đa {{bpm}} BPM.",
-      "playedUngraded_other": "{{count}} lượt, tối đa {{bpm}} BPM."
+      "playedUngraded_other": "{{count}} lượt, tối đa {{bpm}} BPM.",
+      "buildsOn": "Dựa trên: {{list}}",
+      "buildsOnLevel": "{{path}} ({{level}})",
+      "startFirst": "Hãy bắt đầu với {{path}} trước, hoặc cứ bắt đầu.",
+      "startHere": "Bắt đầu ở đây",
+      "offerOne": "{{list}} đi trước lộ trình này. Thêm nó vào lộ trình của bạn luôn nhé?",
+      "offerMany": "{{list}} đi trước lộ trình này. Thêm chúng vào lộ trình của bạn luôn nhé?",
+      "offerAddOne": "Thêm {{path}}",
+      "offerAddMany": "Thêm vào",
+      "offerNo": "Để sau",
+      "offerAdded": "Đã thêm {{list}} vào lộ trình của bạn.",
+      "tracks": {
+        "start": "Nền tảng",
+        "startLine": "Mới chơi guitar? Bắt đầu ở đây: nhịp, tiếng click và nốt sạch. Các lộ trình khác dựa trên phần này.",
+        "technique": "Kỹ thuật",
+        "styles": "Phong cách",
+        "harmony": "Hòa âm hoạt động thế nào",
+        "harmonyLine": "Từ tên các nốt đến hợp âm trong một giọng, lần lượt từng lộ trình. Không cần lý thuyết để bắt đầu."
+      }
     },
     "progress": {
       "title": "Tiến bộ",

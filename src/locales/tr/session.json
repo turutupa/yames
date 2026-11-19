@@ -462,7 +462,25 @@
       "inMixHelp": "Kapalı: Bugün bu yolu günlük karışımına almaz. İlerlemen kalır, yine de bir günlüğüne seçebilirsin.",
       "focusToday": "Bugün yalnızca bunu çalış",
       "playedUngraded": "{{count}} deneme, en fazla {{bpm}} BPM.",
-      "playedUngraded_other": "{{count}} deneme, en fazla {{bpm}} BPM."
+      "playedUngraded_other": "{{count}} deneme, en fazla {{bpm}} BPM.",
+      "buildsOn": "Üzerine kurulu: {{list}}",
+      "buildsOnLevel": "{{path}} ({{level}})",
+      "startFirst": "Önce {{path}} ile başla ya da yine de başla.",
+      "startHere": "Buradan başla",
+      "offerOne": "{{list}} bundan önce gelir. Onu da yollarına ekleyelim mi?",
+      "offerMany": "{{list}} bundan önce gelir. Onları da yollarına ekleyelim mi?",
+      "offerAddOne": "{{path}} ekle",
+      "offerAddMany": "Onları ekle",
+      "offerNo": "Şimdi değil",
+      "offerAdded": "{{list}} yollarına eklendi.",
+      "tracks": {
+        "start": "Temeller",
+        "startLine": "Gitarda yeni misin? Buradan başla: zamanlama, klik ve temiz notalar. Diğer yollar bunun üzerine kurulu.",
+        "technique": "Teknik",
+        "styles": "Stiller",
+        "harmony": "Armoni nasıl işler",
+        "harmonyLine": "Nota adlarından bir tondaki akorlara, bir yoldan ötekine. Başlamak için teori gerekmez."
+      }
     },
     "progress": {
       "title": "İlerleme",

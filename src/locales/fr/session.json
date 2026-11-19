@@ -475,7 +475,25 @@
       "focusToday": "Travailler seulement celui-ci aujourd'hui",
       "playedUngraded": "{{count}} prise, jusqu'à {{bpm}} BPM.",
       "playedUngraded_many": "{{count}} prises, jusqu'à {{bpm}} BPM.",
-      "playedUngraded_other": "{{count}} prises, jusqu'à {{bpm}} BPM."
+      "playedUngraded_other": "{{count}} prises, jusqu'à {{bpm}} BPM.",
+      "buildsOn": "S'appuie sur : {{list}}",
+      "buildsOnLevel": "{{path}} ({{level}})",
+      "startFirst": "Commence d'abord par {{path}}, ou commence quand même.",
+      "startHere": "Commence ici",
+      "offerOne": "{{list}} vient avant celui-ci. L'ajouter aussi à tes parcours ?",
+      "offerMany": "{{list}} viennent avant celui-ci. Les ajouter aussi à tes parcours ?",
+      "offerAddOne": "Ajouter {{path}}",
+      "offerAddMany": "Les ajouter",
+      "offerNo": "Pas maintenant",
+      "offerAdded": "{{list}} ajouté à tes parcours.",
+      "tracks": {
+        "start": "Les bases",
+        "startLine": "Débutant à la guitare ? Commence ici : le temps, le clic et des notes propres. Les autres parcours s'appuient dessus.",
+        "technique": "Technique",
+        "styles": "Styles",
+        "harmony": "Comment marche l'harmonie",
+        "harmonyLine": "Du nom des notes aux accords d'une tonalité, un parcours après l'autre. Pas besoin de théorie pour commencer."
+      }
     },
     "progress": {
       "title": "Progrès",

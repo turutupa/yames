@@ -2151,6 +2151,167 @@
 .main-window.is-mobile .session-page .session-path-focus {
   min-height: 44px;
 }
+/* The Paths by track (plans/paths/NEW_PATHS.md, "Three tracks, one start"):
+   each track a name and one line, its cards in as many columns as fit, so
+   fourteen Paths are three or four rows on a desktop instead of fourteen. */
+.session-pathgroup-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+  margin-top: 8px;
+  min-width: 0;
+}
+.session-pathgroup-name {
+  margin: 0;
+  color: var(--l-ink);
+  font: 600 15px/1.2 var(--l-display);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.session-pathgroup-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: 10px;
+  align-items: stretch;
+}
+/* A card in a column: what it is over where you are, the title a size down. */
+.session-pathgroup-cards:not([data-count="1"]) .session-path-card {
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 4px;
+}
+.session-pathgroup-cards:not([data-count="1"]) .session-path-card .session-h2 {
+  font-size: calc(clamp(22px, 2.9vh, 27px) * var(--heading-scale, 1));
+}
+.session-pathgroup-cards:not([data-count="1"]) .session-path-card-side {
+  margin-top: auto;
+}
+/* The one start is a card across the row, and the accent's border says so. */
+.session-pathgroup-cards[data-count="1"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+/* Its words get the room: the title on one line, the bar of Steps beside. */
+@media (min-width: 981px) {
+  .session-pathgroup-cards[data-count="1"] .session-path-card {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+}
+.session-path-card[data-start-here] {
+  border-color: color-mix(in srgb, var(--l-amber) 45%, transparent);
+}
+.session-tag[data-start-here] {
+  color: var(--l-amber-ink);
+  border-color: transparent;
+  background: linear-gradient(180deg, var(--l-amber-hi), var(--l-amber-lo));
+}
+/* "Builds on: …": a quiet line, each name a link to its Path, above the
+   card's own hit box so a press on a name opens that Path. */
+.session-prereq-line {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.session-list-item {
+  white-space: nowrap;
+}
+.session-list-item > .session-prereq-link {
+  white-space: normal;
+}
+.session-page .session-prereq-link {
+  position: relative;
+  z-index: 1;
+  display: inline;
+  padding: 0;
+  color: var(--l-ink);
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, var(--l-wash) 45%, transparent);
+  cursor: pointer;
+}
+.session-page .session-prereq-link:hover {
+  text-decoration-color: currentColor;
+}
+.session-prereq-line[data-where="page"] {
+  margin-top: 6px;
+  font-size: 14px;
+}
+/* "Start with X first, or start anyway.": above Start, never instead of it. */
+.session-prereq-first {
+  margin: 6px 0 2px;
+  color: var(--l-quiet);
+  font-size: 13.5px;
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+/* After Subscribe: the Paths this one builds on, one press to add them. */
+.session-prereq-offer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--l-amber) 35%, transparent);
+  background: color-mix(in srgb, var(--l-amber) 6%, transparent);
+  color: var(--l-ink);
+  font-size: 14px;
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+.session-prereq-offer b {
+  font-weight: 600;
+}
+.session-prereq-line[data-where="card"] {
+  display: inline;
+}
+/* A thumb's reach for every name and button, on a phone or a touch screen.
+   The names stay in their line of text: the reach grows above and below
+   them, not the line. */
+@media (max-width: 480px), (pointer: coarse) {
+  .session-page .session-prereq-link::before {
+    content: "";
+    position: absolute;
+    top: -13px;
+    bottom: -13px;
+    left: 0;
+    right: 0;
+  }
+  .session-prereq-offer .session-secondary,
+  .session-prereq-offer .session-link {
+    min-height: 44px;
+  }
+}
+.main-window.is-mobile .session-page .session-prereq-link::before {
+  content: "";
+  position: absolute;
+  top: -13px;
+  bottom: -13px;
+  left: 0;
+  right: 0;
+}
+.main-window.is-mobile .session-prereq-offer .session-secondary,
+.main-window.is-mobile .session-prereq-offer .session-link {
+  min-height: 44px;
+}
+.session-prereq-offer .session-link {
+  align-self: center;
+}
+/* Fourteen cards on a phone: a size down, and no empty bar of Steps on a
+   Path not started ("Not started yet" says it). */
+@media (max-width: 480px) {
+  .session-pathgroup-cards .session-path-card {
+    padding: 10px 13px;
+  }
+  .session-pathgroup-cards .session-path-card .session-h2 {
+    font-size: calc(22px * var(--heading-scale, 1));
+  }
+  .session-pathgroup-cards .session-path-card:not([data-started]) .session-pips {
+    display: none;
+  }
+}
 .session-path-card .session-pips {
   margin: 7px 0 5px;
 }

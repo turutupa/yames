@@ -488,7 +488,25 @@
       "playedUngraded": "{{count}} podejście, do {{bpm}} BPM.",
       "playedUngraded_few": "{{count}} podejścia, do {{bpm}} BPM.",
       "playedUngraded_many": "{{count}} podejść, do {{bpm}} BPM.",
-      "playedUngraded_other": "{{count}} podejścia, do {{bpm}} BPM."
+      "playedUngraded_other": "{{count}} podejścia, do {{bpm}} BPM.",
+      "buildsOn": "Opiera się na: {{list}}",
+      "buildsOnLevel": "{{path}} ({{level}})",
+      "startFirst": "Zacznij najpierw od {{path}} albo zacznij mimo to.",
+      "startHere": "Zacznij tutaj",
+      "offerOne": "{{list}} jest przed tą ścieżką. Dodać ją też do twoich ścieżek?",
+      "offerMany": "{{list}} są przed tą ścieżką. Dodać je też do twoich ścieżek?",
+      "offerAddOne": "Dodaj {{path}}",
+      "offerAddMany": "Dodaj je",
+      "offerNo": "Nie teraz",
+      "offerAdded": "Dodano {{list}} do twoich ścieżek.",
+      "tracks": {
+        "start": "Podstawy",
+        "startLine": "Dopiero zaczynasz grać? Zacznij tutaj: rytm, klik i czyste dźwięki. Pozostałe ścieżki się na tym opierają.",
+        "technique": "Technika",
+        "styles": "Style",
+        "harmony": "Jak działa harmonia",
+        "harmonyLine": "Od nazw dźwięków po akordy w tonacji, ścieżka po ścieżce. Na start nie potrzebujesz teorii."
+      }
     },
     "progress": {
       "title": "Postępy",

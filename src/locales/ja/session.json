@@ -462,7 +462,25 @@
       "inMixHelp": "オフ：「今日」はいつものミックスから外します。進み具合はそのままで、1日だけ選ぶこともできます。",
       "focusToday": "今日はこれだけ練習",
       "playedUngraded": "{{count}} テイク、最高 {{bpm}} BPM。",
-      "playedUngraded_other": "{{count}} テイク、最高 {{bpm}} BPM。"
+      "playedUngraded_other": "{{count}} テイク、最高 {{bpm}} BPM。",
+      "buildsOn": "前提：{{list}}",
+      "buildsOnLevel": "{{path}}（{{level}}）",
+      "startFirst": "先に{{path}}から始めましょう。このまま始めてもかまいません。",
+      "startHere": "ここから",
+      "offerOne": "{{list}}はこのコースの前に学ぶ内容です。一緒に追加しますか？",
+      "offerMany": "{{list}}はこのコースの前に学ぶ内容です。一緒に追加しますか？",
+      "offerAddOne": "{{path}}を追加",
+      "offerAddMany": "まとめて追加",
+      "offerNo": "今はしない",
+      "offerAdded": "{{list}}をコースに追加しました。",
+      "tracks": {
+        "start": "基礎",
+        "startLine": "ギターは初めてですか？ここから始めましょう：リズム、クリック、きれいな音。ほかのコースはこの上に積み上がります。",
+        "technique": "テクニック",
+        "styles": "スタイル",
+        "harmony": "ハーモニーのしくみ",
+        "harmonyLine": "音名からキーの中のコードまで、コースを一つずつ。始めるのに理論はいりません。"
+      }
     },
     "progress": {
       "title": "上達",

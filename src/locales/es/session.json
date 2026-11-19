@@ -475,7 +475,25 @@
       "focusToday": "Practicar solo esta hoy",
       "playedUngraded": "{{count}} toma, hasta {{bpm}} BPM.",
       "playedUngraded_many": "{{count}} tomas, hasta {{bpm}} BPM.",
-      "playedUngraded_other": "{{count}} tomas, hasta {{bpm}} BPM."
+      "playedUngraded_other": "{{count}} tomas, hasta {{bpm}} BPM.",
+      "buildsOn": "Se apoya en: {{list}}",
+      "buildsOnLevel": "{{path}} ({{level}})",
+      "startFirst": "Empieza primero con {{path}}, o empieza igualmente.",
+      "startHere": "Empieza aquí",
+      "offerOne": "{{list}} va antes que esta. ¿La añades también a tus rutas?",
+      "offerMany": "{{list}} van antes que esta. ¿Las añades también a tus rutas?",
+      "offerAddOne": "Añadir {{path}}",
+      "offerAddMany": "Añadirlas",
+      "offerNo": "Ahora no",
+      "offerAdded": "{{list}} añadida a tus rutas.",
+      "tracks": {
+        "start": "Fundamentos",
+        "startLine": "¿Nuevo con la guitarra? Empieza aquí: el tiempo, el clic y notas limpias. Las demás rutas se apoyan en esto.",
+        "technique": "Técnica",
+        "styles": "Estilos",
+        "harmony": "Cómo funciona la armonía",
+        "harmonyLine": "De los nombres de las notas a los acordes de una tonalidad, una ruta tras otra. No necesitas teoría para empezar."
+      }
     },
     "progress": {
       "title": "Progreso",

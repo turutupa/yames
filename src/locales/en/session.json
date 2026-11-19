@@ -462,7 +462,25 @@
       "inMixHelp": "Off: Today leaves it out of your daily mix. Your progress stays, and you can still pick it for a day.",
       "focusToday": "Practise only this today",
       "playedUngraded": "{{count}} take, up to {{bpm}} BPM.",
-      "playedUngraded_other": "{{count}} takes, up to {{bpm}} BPM."
+      "playedUngraded_other": "{{count}} takes, up to {{bpm}} BPM.",
+      "buildsOn": "Builds on: {{list}}",
+      "buildsOnLevel": "{{path}} ({{level}})",
+      "startFirst": "Start with {{path}} first, or start anyway.",
+      "startHere": "Start here",
+      "offerOne": "{{list}} comes before this one. Add it to your Paths too?",
+      "offerMany": "{{list}} come before this one. Add them to your Paths too?",
+      "offerAddOne": "Add {{path}}",
+      "offerAddMany": "Add them",
+      "offerNo": "Not now",
+      "offerAdded": "Added {{list}} to your Paths.",
+      "tracks": {
+        "start": "Foundations",
+        "startLine": "New to the guitar? Start here: time, the click and clean notes. The other Paths build on it.",
+        "technique": "Technique",
+        "styles": "Styles",
+        "harmony": "How harmony works",
+        "harmonyLine": "From the names of the notes to chords in a key, one Path after another. No theory needed to start."
+      }
     },
     "progress": {
       "title": "Progress",

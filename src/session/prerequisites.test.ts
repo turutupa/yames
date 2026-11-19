@@ -3,7 +3,14 @@ import type { PathDoc } from "../paths/format";
 import { RUNNABLE_PATH_IDS } from "./packs";
 import { NO_PROGRESS } from "./progress";
 import type { PlayerProgress } from "./progress";
-import { hasStartedPath, isThroughLevel, unmetPathPrerequisites } from "./prerequisites";
+import {
+  buildsOnPaths,
+  hasStartedPath,
+  isThroughLevel,
+  prerequisitesToOffer,
+  startFirstSuggestion,
+  unmetPathPrerequisites,
+} from "./prerequisites";
 
 const PACKS = import.meta.glob("../paths/packs/*.json", { eager: true });
 const RUNNABLE_PATHS = Object.values(PACKS)
@@ -48,5 +55,39 @@ describe("prerequisite Paths, for one player", () => {
     for (const path of RUNNABLE_PATHS) {
       for (const need of path.prerequisites.paths) expect(ids.has(need.path), `${path.id} -> ${need.path}`).toBe(true);
     }
+  });
+});
+
+describe("what the Paths screen says about prerequisites", () => {
+  const SHRED = byId("shred");
+  const LEGATO = byId("legato");
+
+  it("buildsOnPaths names each prerequisite with its Path and Level, in the Path's order", () => {
+    expect(buildsOnPaths(RUNNABLE_PATHS, SHRED).map((s) => [s.path.id, s.level])).toEqual([
+      ["alternate-picking", "intermediate"],
+      ["legato", "beginner"],
+    ]);
+    expect(buildsOnPaths(RUNNABLE_PATHS, RHYTHM)).toEqual([]);
+    // A prerequisite that is not in the app is not named: nowhere to link.
+    expect(buildsOnPaths([SHRED, LEGATO], SHRED).map((s) => s.path.id)).toEqual(["legato"]);
+  });
+
+  it("startFirstSuggestion: the first unmet one, only while this Path is not started", () => {
+    expect(startFirstSuggestion(NO_PROGRESS, RUNNABLE_PATHS, SHRED)?.id).toBe("alternate-picking");
+    // Alternate Picking through Intermediate: Legato is next to suggest.
+    expect(startFirstSuggestion(on(ALT, undefined, "advanced"), RUNNABLE_PATHS, SHRED)?.id).toBe("legato");
+    // Started Shred: the player has decided, and the line is gone for good.
+    expect(startFirstSuggestion(on(SHRED), RUNNABLE_PATHS, SHRED)).toBeNull();
+    expect(startFirstSuggestion(NO_PROGRESS, RUNNABLE_PATHS, RHYTHM)).toBeNull();
+  });
+
+  it("prerequisitesToOffer: unmet and never started; one started and left is the player's call", () => {
+    expect(prerequisitesToOffer(NO_PROGRESS, RUNNABLE_PATHS, SHRED).map((p) => p.id)).toEqual([
+      "alternate-picking",
+      "legato",
+    ]);
+    // Alternate Picking started (on its first Step, so not through Intermediate): not offered again.
+    expect(prerequisitesToOffer(on(ALT), RUNNABLE_PATHS, SHRED).map((p) => p.id)).toEqual(["legato"]);
+    expect(prerequisitesToOffer(NO_PROGRESS, RUNNABLE_PATHS, RHYTHM)).toEqual([]);
   });
 });

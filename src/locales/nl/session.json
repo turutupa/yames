@@ -462,7 +462,25 @@
       "inMixHelp": "Uit: Vandaag laat het buiten je dagelijkse mix. Je voortgang blijft, en je kunt het nog steeds voor een dag kiezen.",
       "focusToday": "Vandaag alleen dit oefenen",
       "playedUngraded": "{{count}} take, tot {{bpm}} BPM.",
-      "playedUngraded_other": "{{count}} takes, tot {{bpm}} BPM."
+      "playedUngraded_other": "{{count}} takes, tot {{bpm}} BPM.",
+      "buildsOn": "Bouwt op: {{list}}",
+      "buildsOnLevel": "{{path}} ({{level}})",
+      "startFirst": "Begin eerst met {{path}}, of begin toch.",
+      "startHere": "Begin hier",
+      "offerOne": "{{list}} komt vóór dit pad. Ook aan je paden toevoegen?",
+      "offerMany": "{{list}} komen vóór dit pad. Ook aan je paden toevoegen?",
+      "offerAddOne": "{{path}} toevoegen",
+      "offerAddMany": "Allebei toevoegen",
+      "offerNo": "Nu niet",
+      "offerAdded": "{{list}} toegevoegd aan je paden.",
+      "tracks": {
+        "start": "Basis",
+        "startLine": "Nieuw op gitaar? Begin hier: timing, de klik en schone noten. De andere paden bouwen hierop.",
+        "technique": "Techniek",
+        "styles": "Stijlen",
+        "harmony": "Hoe harmonie werkt",
+        "harmonyLine": "Van de namen van de noten tot de akkoorden van een toonsoort, het ene pad na het andere. Geen theorie nodig om te beginnen."
+      }
     },
     "progress": {
       "title": "Voortgang",

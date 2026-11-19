@@ -39,6 +39,10 @@ import { rise } from "./TodayView";
 import { InstrumentNote } from "./InstrumentNote";
 import { PATHS_LIST, pathsUp } from "../main-window/hooks/usePathsPlace";
 import type { PathsAt, PathsPlace } from "../main-window/hooks/usePathsPlace";
+import { BuildsOnLine, StartFirstLine, SubscribeOffer } from "./PathPrerequisites";
+import { buildsOnPaths, prerequisitesToOffer } from "../../session/prerequisites";
+import { START_HERE_PATH_ID, pathTracks, trackOf } from "../../session/tracks";
+import type { TrackId } from "../../session/tracks";
 import "../../styles/session.css";
 
 /*
@@ -64,11 +68,12 @@ export function stepTempoRange(step: Step): { from: number; to: number | null } 
   return { from, to: to !== null && to > from ? to : null };
 }
 
-function KindTag({ kind }: { kind: PathDoc["kind"] }) {
+/** The Path's track on the Paths screen, as a tag: "Technique", "How harmony works". */
+function TrackTag({ path }: { path: PathDoc }) {
   const { t } = useTranslation();
   return (
-    <span className="session-tag" data-kind={kind}>
-      {t(`session.kind.${kind}`)}
+    <span className="session-tag" data-kind={path.kind} data-testid="path-track-tag">
+      {t(`session.paths.tracks.${trackOf(path)}`)}
     </span>
   );
 }
@@ -144,6 +149,133 @@ function PathBadgeTag({ session, path }: { session: SessionRun; path: PathDoc })
   );
 }
 
+/** A track's name and its one line on the Paths screen (`session/tracks.ts`). */
+const TRACK_LINE_KEY: Readonly<Record<TrackId, string>> = {
+  start: "session.paths.tracks.startLine",
+  technique: "session.paths.mechanicsSub",
+  styles: "session.paths.theorySub",
+  harmony: "session.paths.tracks.harmonyLine",
+};
+
+/** One Path on the list: what it is for, what it builds on, where you are in it. */
+function PathCard({
+  session,
+  path,
+  style,
+  tour,
+  onOpen,
+  onOpenStep,
+  onFocusToday,
+}: {
+  session: SessionRun;
+  path: PathDoc;
+  style?: CSSProperties;
+  tour?: boolean;
+  onOpen: (path: PathDoc) => void;
+  onOpenStep?: (path: PathDoc, step: Step) => void;
+  onFocusToday?: (path: PathDoc) => void;
+}) {
+  const { t } = useTranslation();
+  const { progress } = session;
+  const current = currentStepOf(progress, path);
+  // Real progress, not "Step 1 of N" on every card (UX audit PATH-4).
+  const started = progress.states.some((s) => s.pathId === path.id);
+  const stepsDone = path.steps.filter((s) => isStepPassed(progress, path.id, s)).length;
+  const subscribed = isSubscribed(progress, path.id);
+  const startHere = path.id === START_HERE_PATH_ID;
+  return (
+    // The card opens the Path: a click anywhere on it, or its title, which is
+    // the button a keyboard reaches. Continue, on a Path you follow, goes
+    // straight to the Step you are on (acceptance P2-9). The "Builds on"
+    // names open their own Paths. Buttons side by side, never one inside
+    // another.
+    <div
+      className="session-path-card session-glass session-rise"
+      style={style}
+      onClick={() => onOpen(path)}
+      data-testid={`path-card-${path.id}`}
+      data-start-here={startHere ? "" : undefined}
+      data-started={started ? "" : undefined}
+      // The tour's Paths stop: the page's promise and one goal under it.
+      data-tour={tour ? "paths" : undefined}
+    >
+      <span className="session-col session-path-card-main">
+        <span className="session-row" data-wrap="">
+          <button type="button" className="session-path-open" data-testid={`path-open-${path.id}`}>
+            <span className="session-h2">{path.title}</span>
+          </button>
+          {startHere && (
+            <span className="session-tag" data-start-here="" data-testid="path-start-here">
+              {t("session.paths.startHere")}
+            </span>
+          )}
+          <PathBadgeTag session={session} path={path} />
+        </span>
+        <span className="session-why session-path-goal">{path.goal}</span>
+        {/* "11 steps · Builds on: Rhythm Foundations (Beginner)": one quiet line. */}
+        <span className="session-quiet session-path-meta">
+          {t("session.paths.stepCount", { count: path.steps.length })}
+          {buildsOnPaths(session.paths, path).length > 0 && (
+            <>
+              {" · "}
+              <BuildsOnLine session={session} path={path} onOpenPath={onOpen} where="card" />
+            </>
+          )}
+        </span>
+      </span>
+      <span className="session-col session-path-card-side">
+        <StepPips session={session} path={path} />
+        <span className="session-why" data-testid={`path-card-progress-${path.id}`}>
+          {started ? (
+            <>
+              <b>{t("session.paths.onStep", { n: current.order, title: current.title })}</b>
+              {stepsDone > 0 && <> · {t("session.paths.stepsDone", { done: stepsDone, of: path.steps.length })}</>}
+            </>
+          ) : (
+            t("session.paths.notStarted")
+          )}
+        </span>
+        {started && subscribed && onOpenStep && (
+          <button
+            className="session-secondary session-path-continue"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenStep(path, current);
+            }}
+            data-testid={`path-continue-${path.id}`}
+          >
+            {t("session.paths.continue", { n: current.order })}
+          </button>
+        )}
+        {isMine(session, path) && (
+          <span className="session-path-today" data-testid={`path-today-${path.id}`}>
+            <MixSwitch session={session} path={path} />
+            {onFocusToday && (session.myPaths.length > 1 || (session.offMix ?? []).includes(path.id)) && (
+              <button
+                type="button"
+                className="session-link session-path-focus"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onFocusToday(path);
+                }}
+                data-testid={`path-focus-${path.id}`}
+              >
+                {t("session.paths.focusToday")}
+              </button>
+            )}
+          </span>
+        )}
+      </span>
+    </div>
+  );
+}
+
+/**
+ * The Paths, by the curriculum map's tracks (plans/paths/NEW_PATHS.md): the
+ * start, then Technique, Styles and How harmony works, each with one line. No
+ * badge and no lock for a Path whose prerequisites are not reached: its card
+ * says what it builds on, and that is all.
+ */
 function PathList({
   session,
   onOpen,
@@ -160,113 +292,9 @@ function PathList({
   note?: InstrumentNoteProps;
 }) {
   const { t } = useTranslation();
-  const { paths, progress } = session;
+  const { paths } = session;
   const neck3d = useNeck3d();
-  const group = (kind: PathDoc["kind"], sub: string, i: number) => {
-    const mine = paths.filter((p) => p.kind === kind);
-    const runnable = mine.filter((p) => isRunnable(p.id));
-    const later = mine.filter((p) => !isRunnable(p.id));
-    return (
-      <div className="session-pathgroup" key={kind}>
-        <div className="session-row session-rise" style={rise(i)}>
-          <KindTag kind={kind} />
-          <span className="session-why">{sub}</span>
-        </div>
-        {runnable.map((path, n) => {
-          const current = currentStepOf(progress, path);
-          // Real progress, not "Step 1 of N" on every card (UX audit PATH-4).
-          const started = progress.states.some((s) => s.pathId === path.id);
-          const stepsDone = path.steps.filter((s) => isStepPassed(progress, path.id, s)).length;
-          const subscribed = isSubscribed(progress, path.id);
-          return (
-            // The card opens the Path: a click anywhere on it, or its title,
-            // which is the button a keyboard reaches. Continue, on a Path you
-            // follow, goes straight to the Step you are on (acceptance P2-9).
-            // Two buttons, never one inside the other.
-            <div
-              key={path.id}
-              className="session-path-card session-glass session-rise"
-              style={rise(i + 1)}
-              onClick={() => onOpen(path)}
-              data-testid={`path-card-${path.id}`}
-              // The tour's Paths stop: the page's promise and one goal under it.
-              data-tour={i === 1 && n === 0 ? "paths" : undefined}
-            >
-              <span className="session-col session-path-card-main">
-                <span className="session-row" data-wrap="">
-                  <button type="button" className="session-path-open" data-testid={`path-open-${path.id}`}>
-                    <span className="session-h2">{path.title}</span>
-                  </button>
-                  <PathBadgeTag session={session} path={path} />
-                </span>
-                <span className="session-why session-path-goal">{path.goal}</span>
-                <span className="session-quiet">
-                  {t("session.paths.stepCount", { count: path.steps.length })}
-                </span>
-              </span>
-              <span className="session-col session-path-card-side">
-                <StepPips session={session} path={path} />
-                <span className="session-why" data-testid={`path-card-progress-${path.id}`}>
-                  {started ? (
-                    <>
-                      <b>{t("session.paths.onStep", { n: current.order, title: current.title })}</b>
-                      {stepsDone > 0 && <> · {t("session.paths.stepsDone", { done: stepsDone, of: path.steps.length })}</>}
-                    </>
-                  ) : (
-                    t("session.paths.notStarted")
-                  )}
-                </span>
-                {started && subscribed && onOpenStep && (
-                  <button
-                    className="session-secondary session-path-continue"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onOpenStep(path, current);
-                    }}
-                    data-testid={`path-continue-${path.id}`}
-                  >
-                    {t("session.paths.continue", { n: current.order })}
-                  </button>
-                )}
-                {isMine(session, path) && (
-                  <span className="session-path-today" data-testid={`path-today-${path.id}`}>
-                    <MixSwitch session={session} path={path} />
-                    {onFocusToday && (session.myPaths.length > 1 || (session.offMix ?? []).includes(path.id)) && (
-                      <button
-                        type="button"
-                        className="session-link session-path-focus"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onFocusToday(path);
-                        }}
-                        data-testid={`path-focus-${path.id}`}
-                      >
-                        {t("session.paths.focusToday")}
-                      </button>
-                    )}
-                  </span>
-                )}
-              </span>
-            </div>
-          );
-        })}
-        {later.length > 0 && (
-          <div className="session-later session-rise" style={rise(i + 2)}>
-            {later.map((path) => (
-              <button
-                key={path.id}
-                onClick={() => onOpen(path)}
-                data-testid={`path-card-${path.id}`}
-              >
-                {path.title}
-                <PathBadgeTag session={session} path={path} />
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
+  const tracks = useMemo(() => pathTracks(paths), [paths]);
   return (
     <div className="session-page" data-testid="paths" data-neck3d={neck3d}>
       <div className="session-rise" data-tour="paths">
@@ -274,8 +302,54 @@ function PathList({
         <div className="session-why">{t("session.paths.intro")}</div>
       </div>
       {note && <InstrumentNote {...note} />}
-      {group("theory", t("session.paths.theorySub"), 1)}
-      {group("mechanics", t("session.paths.mechanicsSub"), 4)}
+      {tracks.map((track, i) => {
+        const runnable = track.paths.filter((p) => isRunnable(p.id));
+        const later = track.paths.filter((p) => !isRunnable(p.id));
+        return (
+          <section
+            className="session-pathgroup"
+            key={track.id}
+            data-track={track.id}
+            data-testid={`path-track-${track.id}`}
+            aria-labelledby={`path-track-${track.id}-name`}
+          >
+            <div className="session-pathgroup-head session-rise" style={rise(i + 1)}>
+              <h2 className="session-pathgroup-name" id={`path-track-${track.id}-name`}>
+                {t(`session.paths.tracks.${track.id}`)}
+              </h2>
+              <span className="session-why">{t(TRACK_LINE_KEY[track.id])}</span>
+            </div>
+            <div className="session-pathgroup-cards" data-count={runnable.length}>
+              {runnable.map((path, n) => (
+                <PathCard
+                  key={path.id}
+                  session={session}
+                  path={path}
+                  style={rise(Math.min(i + 1 + n, 12))}
+                  tour={i === 0 && n === 0}
+                  onOpen={onOpen}
+                  onOpenStep={onOpenStep}
+                  onFocusToday={onFocusToday}
+                />
+              ))}
+            </div>
+            {later.length > 0 && (
+              <div className="session-later session-rise" style={rise(i + 2)}>
+                {later.map((path) => (
+                  <button
+                    key={path.id}
+                    onClick={() => onOpen(path)}
+                    data-testid={`path-card-${path.id}`}
+                  >
+                    {path.title}
+                    <PathBadgeTag session={session} path={path} />
+                  </button>
+                ))}
+              </div>
+            )}
+          </section>
+        );
+      })}
     </div>
   );
 }
@@ -507,11 +581,14 @@ function PathDetail({
   path,
   onBack,
   onOpenStep,
+  onOpenPath,
 }: {
   session: SessionRun;
   path: PathDoc;
   onBack: () => void;
   onOpenStep: (step: Step) => void;
+  /** A "Builds on" name or "Start with X first": that Path's page. */
+  onOpenPath: (path: PathDoc) => void;
 }) {
   const { t } = useTranslation();
   const { progress, actions } = session;
@@ -523,6 +600,8 @@ function PathDetail({
   const subscribed = isSubscribed(progress, path.id);
   const started = progress.states.some((s) => s.pathId === path.id);
   const [refused, setRefused] = useState(false);
+  // What Subscribe offered to add as well (its prerequisites not started).
+  const [offer, setOffer] = useState<PathDoc[]>([]);
   return (
     <div className="session-page" data-testid="path-detail" data-neck3d={neck3d}>
       <div className="session-rise">
@@ -531,10 +610,11 @@ function PathDetail({
         </button>
         <div className="session-row" data-wrap="" style={{ gap: 9 }}>
           <h1 className="session-h1">{path.title}</h1>
-          <KindTag kind={path.kind} />
+          <TrackTag path={path} />
           {!runnable && <PathBadgeTag session={session} path={path} />}
         </div>
         <div className="session-why session-lede">{path.goal}</div>
+        <BuildsOnLine session={session} path={path} onOpenPath={onOpenPath} where="page" />
         {!runnable && <div className="session-why">{t(laterWhyKey(path.id))}</div>}
       </div>
       <div className="session-pathgrid">
@@ -550,6 +630,7 @@ function PathDetail({
                 {gradableNow.length > 0 &&
                   ` · ${t("session.paths.exercisesPassed", { done: doneNow, count: gradableNow.length })}`}
               </div>
+              <StartFirstLine session={session} path={path} onOpenPath={onOpenPath} />
               <button
                 className="session-big"
                 data-size="mid"
@@ -579,9 +660,15 @@ function PathDetail({
                   onClick={() => {
                     if (subscribed) {
                       setRefused(false);
+                      setOffer([]);
                       actions.unsubscribe(path);
                     } else {
-                      setRefused(actions.subscribe(path) === "cap");
+                      // Read before the subscribe: what it builds on that the
+                      // player has not started. Offered, never required.
+                      const before = prerequisitesToOffer(progress, session.paths, path).filter((p) => isRunnable(p.id));
+                      const capped = actions.subscribe(path) === "cap";
+                      setRefused(capped);
+                      setOffer(capped ? [] : before);
                     }
                   }}
                 >
@@ -605,6 +692,7 @@ function PathDetail({
                   {t("session.paths.subscribeCap", { cap: SUBSCRIPTION_CAP })}
                 </div>
               )}
+              <SubscribeOffer session={session} offer={offer} onClose={() => setOffer([])} />
             </div>
           )}
           <LimitsLine path={path} />
@@ -799,7 +887,7 @@ function StepDetail({
         </div>
         <div className="session-row" data-wrap="" style={{ gap: 9 }}>
           <h1 className="session-h1">{step.title}</h1>
-          <KindTag kind={path.kind} />
+          <TrackTag path={path} />
         </div>
         <div className="session-why session-lede">{step.goal}</div>
         {skippedBy && (
@@ -976,10 +1064,13 @@ export function PathsView({
   if (path) {
     return (
       <PathDetail
+        // Its own state per Path: a "Builds on" link opens another Path here.
+        key={path.id}
         session={session}
         path={path}
         onBack={() => move(PATHS_LIST)}
         onOpenStep={(s) => move({ pathId: path.id, stepId: s.id })}
+        onOpenPath={(p) => move({ pathId: p.id, stepId: null })}
       />
     );
   }
