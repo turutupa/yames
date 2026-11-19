@@ -2641,12 +2641,18 @@
   width: 100%;
   max-width: 980px;
 }
+/* Three equal tiles wherever their words fit. A tile is never narrower than
+   its longest word: in a wide face on a 360 px phone (Neon's Orbitron)
+   "SESSIONS" ran out of a third of the row and over the next tile, so there
+   the third tile takes a row of its own instead. */
 .session-stat-row {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 12px;
 }
 .session-stat-tile {
+  flex: 1 1 0;
+  min-width: min-content;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -2733,6 +2739,28 @@
     margin-left: 0;
   }
   .session-skill .session-progress-value {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+  /* The Path's own row the same way: its "100 top clean BPM" wrapped under
+     the name beside the trend and sat mid-card, out of the column the rows'
+     numbers keep at the right edge. */
+  .session-prog-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+  .session-prog-head > .session-exercise-text {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .session-prog-head .session-spark,
+  .session-prog-head .session-spark-none {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .session-prog-head .session-progress-value {
     grid-column: 2;
     grid-row: 1 / span 2;
     align-self: center;
