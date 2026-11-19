@@ -3314,10 +3314,10 @@
         {
           "id": "embellishment.e-to-a",
           "title": "E to A, embellished",
-          "purpose": "The open E move, then the same move on an A chord at fret 5: B hammered to C# on the G string. Two chords, one idea.",
+          "purpose": "The open E move, then the same move on an A chord at fret 5: C hammered to C# on the G string. Two chords, one idea.",
           "howTo": [
             "Straight eighths, 60 BPM up to a pass at 80.",
-            "Bar 1 is the open E move from the first Exercise. Bar 2 moves it to A: A at 5 on the low E, A at 7 on the D string, B at 4 on the G hammered to C# at 6, E at 5 on the B, C#, A, C#. Bar 3 is the E move again. Bar 4: low E, E on the D string, G#, open B, and the open high E held."
+            "Bar 1 is the open E move from the first Exercise. Bar 2 moves it to A, the E shape barred at fret 5 with the first finger: A at 5 on the low E, A at 7 on the D string, C at 5 on the G hammered to C# at 6, E at 5 on the B, C#, A, C#. Bar 3 is the E move again. Bar 4: low E, E on the D string, G#, open B, and the open high E held."
           ],
           "coachLine": "Ringing notes again: timing and notes heard, not pitch.",
           "grading": "graded",
@@ -3345,14 +3345,14 @@
             {"string":3,"fret":1,"midi":56,"tick":2400,"dur":480,"tech":[],"finger":1},
             {"string":4,"fret":2,"midi":52,"tick":2880,"dur":480,"tech":[],"finger":3},
             {"string":3,"fret":1,"midi":56,"tick":3360,"dur":480,"tech":[],"finger":1},
-            {"string":6,"fret":5,"midi":45,"tick":3840,"dur":480,"tech":[]},
-            {"string":4,"fret":7,"midi":57,"tick":4320,"dur":480,"tech":[]},
-            {"string":3,"fret":4,"midi":59,"tick":4800,"dur":480,"tech":[]},
-            {"string":3,"fret":6,"midi":61,"tick":5280,"dur":480,"tech":["hammer"]},
-            {"string":2,"fret":5,"midi":64,"tick":5760,"dur":480,"tech":[]},
-            {"string":3,"fret":6,"midi":61,"tick":6240,"dur":480,"tech":[]},
-            {"string":4,"fret":7,"midi":57,"tick":6720,"dur":480,"tech":[]},
-            {"string":3,"fret":6,"midi":61,"tick":7200,"dur":480,"tech":[]},
+            {"string":6,"fret":5,"midi":45,"tick":3840,"dur":480,"tech":[],"finger":1},
+            {"string":4,"fret":7,"midi":57,"tick":4320,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":5,"midi":60,"tick":4800,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":6,"midi":61,"tick":5280,"dur":480,"tech":["hammer"],"finger":2},
+            {"string":2,"fret":5,"midi":64,"tick":5760,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":6,"midi":61,"tick":6240,"dur":480,"tech":[],"finger":2},
+            {"string":4,"fret":7,"midi":57,"tick":6720,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":6,"midi":61,"tick":7200,"dur":480,"tech":[],"finger":2},
             {"string":6,"fret":0,"midi":40,"tick":7680,"dur":480,"tech":[]},
             {"string":4,"fret":2,"midi":52,"tick":8160,"dur":480,"tech":[],"finger":3},
             {"string":3,"fret":0,"midi":55,"tick":8640,"dur":480,"tech":[]},
@@ -3424,7 +3424,7 @@
             "chart": "E | A | E | E"
           },
           "estimatedMinutes": 5,
-          "tab": "/8 6:0 4:2f3 3:0 3:1hf1 2:0 3:1f1 4:2f3 3:1f1 | /8 6:5 4:7 3:4 3:6h 2:5 3:6 4:7 3:6 | /8 6:0 4:2f3 3:0 3:1hf1 2:0 3:1f1 4:2f3 3:1f1 | /8 6:0 4:2f3 3:1f1 2:0 /2 1:0",
+          "tab": "/8 6:0 4:2f3 3:0 3:1hf1 2:0 3:1f1 4:2f3 3:1f1 | /8 6:5f1 4:7f3 3:5f1 3:6hf2 2:5f1 3:6f2 4:7f3 3:6f2 | /8 6:0 4:2f3 3:0 3:1hf1 2:0 3:1f1 4:2f3 3:1f1 | /8 6:0 4:2f3 3:1f1 2:0 /2 1:0",
           "subdivision": "eighths",
           "computed": {
             "noteCount": 29,
@@ -3440,7 +3440,7 @@
             "scale": "mixolydian",
             "spelled": ["E", "F#", "G#", "A", "B", "C#", "D"],
             "cover": false,
-            "allowed": ["G"]
+            "allowed": ["G", "C"]
           }
         }
       ],

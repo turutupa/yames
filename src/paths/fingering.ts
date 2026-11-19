@@ -32,6 +32,21 @@
  *    8), and the programme prefers a hand that puts a bend under the ring or
  *    middle finger.
  *
+ * 8. One finger never plays two notes in a row at different frets (a teacher's
+ *    first objection: the finger has to jump), unless the content slides it
+ *    there or the line turns round on it: the little finger moving up a fret to
+ *    start the Petrucci climb's way down, the index moving back to start the
+ *    next pass. Across strings it is a hop, allowed where the shape changes at
+ *    the bar line and the hand moves with it (a G grip at 12 to the same grip
+ *    at 10).
+ * 9. A shift goes where it is needed and nowhere earlier: on the note the old
+ *    hand cannot reach, best where the line turns (the 9 of a 5-to-9 run), or at
+ *    a string change, never in the middle of a string's notes. Rule 4 spreads a
+ *    string the same way wherever the hand sits at one fret, so a run down a
+ *    string mirrors the run up it (9-7-5 is 4-2-1 after 1-2-4).
+ * (Round 3, after acceptance 5; the audit is in the round-3 section of the
+ * fingering-audit report.)
+ *
  * A place ("string:fret") shows one finger. When the same place is played by
  * different fingers in one Exercise, the content's own finger wins, then a
  * bend's, then the finger used most often.
@@ -157,6 +172,18 @@ function walk(notes: readonly FingerNote[], groups: Group[], start: number, usua
     const bar = Math.floor(g.tick / BAR_TICKS);
     for (const i of g.notes) low.set(bar, Math.min(low.get(bar) ?? Infinity, notes[i].fret));
   }
+  // Each string's frets in each bar: what rule 4 spreads, so the programme sees the fingers spread will give.
+  const stringBar = new Map<string, number[]>();
+  const sbKey = (i: number) => `${notes[i].string}@${Math.floor((notes[i].tick ?? 0) / BAR_TICKS)}`;
+  for (const g of groups) for (const i of g.notes) stringBar.set(sbKey(i), [...(stringBar.get(sbKey(i)) ?? []), notes[i].fret]);
+  const fingerOf = (i: number, base: number): Finger | null => {
+    const own = explicitFinger(notes[i]);
+    if (own !== null) return own;
+    const plain = fingerAt(base, notes[i].fret);
+    if (plain === null) return null;
+    const spread = spreadRanks((stringBar.get(sbKey(i)) ?? []).map((f) => f - base).filter((d) => fingerAt(base, d + base) !== null));
+    return spread?.get(notes[i].fret - base) ?? plain;
+  };
   const groupCost = (g: Group, b: number) => {
     const idle = Math.max(0, (low.get(Math.floor(g.tick / BAR_TICKS)) ?? b) - b);
     return g.notes.reduce((s, i) => s + noteCost(notes[i], b, usual?.get(placeKey(notes[i]))) + 0.1 * idle, 0);
@@ -172,12 +199,12 @@ function walk(notes: readonly FingerNote[], groups: Group[], start: number, usua
         cost[0][b] = here + (b === start ? 0 : 5 + 3 * Math.abs(b - start));
         continue;
       }
-      const link = linkOf(notes, groups[gi - 1], g);
+      const link = linkOf(notes, groups[gi - 1], g, groups[gi + 1], groups[gi - 2]);
       const barLine = Math.floor(g.tick / BAR_TICKS) !== Math.floor(groups[gi - 1].tick / BAR_TICKS);
       for (let p = 1; p <= MAX_BASE; p++) {
         const before = cost[gi - 1][p];
         if (!Number.isFinite(before)) continue;
-        const c = before + here + moveCost(notes, link, p, b, barLine);
+        const c = before + here + moveCost(notes, link, p, b, barLine, fingerOf);
         if (c < cost[gi][b]) {
           cost[gi][b] = c;
           from[gi][b] = p;
@@ -219,12 +246,20 @@ type Link = {
   pinkyRoll: number | null;
   /** Hammer and pull pairs, [from, to]: they need two different fingers. */
   legatoPairs: [number, number][];
-  /** One note to the next on another string and fret: the same finger for both is a jump. */
+  /** One note to the next, single notes both: the same finger for both at another fret is a jump. */
   step: [number, number] | null;
+  /** The two notes are on one string. */
+  sameString: boolean;
+  /** The line turns round on this note (up then down, or down then up, on one string): where a shift belongs. */
+  turn: boolean;
+  /** The line turns on the note it arrives at (the Petrucci climb's 9): the shift that note needs belongs there. */
+  turnHere: boolean;
+  /** Both notes are inside one run of notes on a string: a shift here splits the run. */
+  midRun: boolean;
 };
 
 /** How one group follows the last: a hammer or pull on the same string, or a slide into it. */
-function linkOf(notes: readonly FingerNote[], prev: Group, cur: Group): Link {
+function linkOf(notes: readonly FingerNote[], prev: Group, cur: Group, after?: Group, before?: Group): Link {
   let legato = false;
   let slide: Link["slide"] = null;
   const legatoPairs: [number, number][] = [];
@@ -242,32 +277,73 @@ function linkOf(notes: readonly FingerNote[], prev: Group, cur: Group): Link {
   }
   const a = prev.notes.length === 1 ? notes[prev.notes[0]] : null;
   const z = cur.notes.length === 1 ? notes[cur.notes[0]] : null;
+  const y = after && after.notes.length === 1 ? notes[after.notes[0]] : null;
   const pinkyRoll = a && z && a.fret === z.fret && Math.abs(a.string - z.string) === 1 ? z.fret : null;
-  const step = a && z && a.fret !== z.fret && a.string !== z.string ? ([prev.notes[0], cur.notes[0]] as [number, number]) : null;
-  return { legato, slide, pinkyRoll, legatoPairs, step };
+  const step = a && z && a.fret !== z.fret ? ([prev.notes[0], cur.notes[0]] as [number, number]) : null;
+  const sameString = !!a && !!z && a.string === z.string;
+  const w = before && before.notes.length === 1 ? notes[before.notes[0]] : null;
+  const turnsAt = (u: FingerNote | null, v: FingerNote, x: FingerNote | null) =>
+    !!u && !!x && u.string === v.string && x.string === v.string && Math.sign(v.fret - u.fret) * Math.sign(x.fret - v.fret) < 0;
+  // The line turns on the note it arrives at, or on the one it leaves (the Petrucci climb's 9, and its low 6).
+  const turn = !!(a && z && sameString && (turnsAt(a, z, y) || turnsAt(w, a, z)));
+  const turnHere = !!(a && z && sameString && turnsAt(a, z, y));
+  // Inside a run of notes on one string (not a chord shape's last note meeting the next one's first).
+  const midRun = !!(a && z && sameString && (w?.string === a.string || y?.string === z.string));
+  return { legato, slide, pinkyRoll, legatoPairs, step, sameString, turn, turnHere, midRun };
 }
 
-function moveCost(notes: readonly FingerNote[], link: Link, p: number, b: number, barLine: boolean): number {
+/** What the same finger on two notes in a row at different frets costs: a jump, unless the line turns there. */
+const SAME_FINGER = 3;
+
+function moveCost(
+  notes: readonly FingerNote[],
+  link: Link,
+  p: number,
+  b: number,
+  barLine: boolean,
+  finger: (i: number, base: number) => Finger | null,
+): number {
   if (link.slide) {
     // The finger that slides is the finger that arrives.
     const a = explicitFinger(notes[link.slide.from]) ?? fingerAt(p, notes[link.slide.from].fret);
     const z = explicitFinger(notes[link.slide.to]) ?? fingerAt(b, notes[link.slide.to].fret);
     return a !== null && a === z ? 0.3 : 50;
   }
-  const finger = (i: number, base: number) => explicitFinger(notes[i]) ?? fingerAt(base, notes[i].fret);
-  // A hammer or pull from a finger to itself is no hammer or pull.
-  // (Two stretched notes past the ring finger are spread apart afterwards: rule 4.)
-  const spreadable = (x: number, y: number) => p === b && notes[x].fret - p >= 3 && notes[y].fret - b >= 3;
-  if (link.legatoPairs.some(([x, y]) => notes[x].fret !== notes[y].fret && finger(x, p) === finger(y, b) && !spreadable(x, y))) return 50;
+  // A hammer or pull from a finger to itself is no hammer or pull (the fingers as rule 4 spreads them).
+  if (link.legatoPairs.some(([x, y]) => notes[x].fret !== notes[y].fret && finger(x, p) === finger(y, b))) return 50;
+  let c = 0;
+  // Rule 8: one finger on two notes in a row at different frets is a jump. On one
+  // string it is allowed only where the line turns (the little finger moving up
+  // a fret to start back down: the Petrucci climb's 8 to 9); across strings a
+  // short jump costs less, a position change to a new shape (the index landing
+  // on it) costs nothing more. Two of the content's own fingers are its choice.
+  if (link.step) {
+    const [x, y] = link.step;
+    const fx = finger(x, p);
+    const both = explicitFinger(notes[x]) !== null && explicitFinger(notes[y]) !== null;
+    if (fx !== null && fx === finger(y, b) && !both) {
+      const jump = Math.abs(notes[x].fret - notes[y].fret);
+      if (link.sameString) c += link.turn && p !== b && (jump === 1 || (jump === 2 && (fx === 1 || fx === 4))) ? 0.1 * jump : SAME_FINGER;
+      else c += p === b ? 0.8 : jump <= 2 && !barLine ? 1.5 : 0.2;
+    }
+  }
   if (p === b) {
-    let c = link.pinkyRoll && fingerAt(b, link.pinkyRoll) === 4 ? 0.6 : 0;
-    // One finger jumping to another fret while the hand stays (two stretches on one finger).
-    if (link.step && finger(link.step[0], p) === finger(link.step[1], b)) c += 0.8;
+    if (link.pinkyRoll && fingerAt(b, link.pinkyRoll) === 4) c += 0.6;
     return c;
   }
   if (link.legato) return 50;
-  // A shape changes at the bar line, and so does the hand.
-  return (barLine ? 0.3 : 1.2) + 0.001 * Math.abs(p - b);
+  // A shape changes at the bar line, and so does the hand; inside a run on one
+  // string it moves where the line turns, else at a string change, never in the
+  // middle of a string's notes (rule 9).
+  let move = barLine && !(link.step && link.midRun) ? 0.3 : 1.2;
+  if (link.step && link.midRun) {
+    // Needed: the note is out of the old hand's reach, or, where the line turns, only in it by a stretch.
+    const fret = notes[link.step[1]].fret;
+    const needed = fingerAt(p, fret) === null || (link.turnHere && (fret < p || fret > p + 3));
+    if (needed && link.turnHere) move = Math.min(move, 0.6);
+    else if (!needed) move += 0.8;
+  }
+  return c + move + 0.001 * Math.abs(p - b);
 }
 
 /** Runs of groups under one base: one hand position each. */
@@ -289,6 +365,31 @@ function segments(groups: Group[], bases: number[]): { base: number; notes: numb
  * hand position do not spread each other.
  */
 function spread(notes: readonly FingerNote[], groups: Group[], bases: number[], out: FingerStep[]) {
+  const apply = (list: number[], base: number) => {
+    const finger = spreadRanks(list.map((i) => notes[i].fret - base));
+    if (!finger) return false;
+    for (const i of list) {
+      const f = finger.get(notes[i].fret - base);
+      if (f !== undefined && explicitFinger(notes[i]) === null) out[i].finger = f;
+    }
+    return true;
+  };
+  // A string spreads the same way wherever the hand sits at the same fret, so a
+  // run down it mirrors the run up, and a sequence's groups agree (round 3).
+  const byHand = new Map<string, number[]>();
+  groups.forEach((g, gi) => {
+    for (const i of g.notes) {
+      if (out[i].finger === null) continue;
+      const k = `${notes[i].string}@${bases[gi]}`;
+      byHand.set(k, [...(byHand.get(k) ?? []), i]);
+    }
+  });
+  const done = new Set<number>();
+  for (const [k, list] of byHand) {
+    if (new Set(list.map((i) => notes[i].fret)).size > 4) continue;
+    if (apply(list, Number(k.split("@")[1]))) for (const i of list) done.add(i);
+  }
+  // A string with too many frets to spread at once is read a bar at a time.
   for (const seg of segments(groups, bases)) {
     const byString = new Map<string, number[]>();
     // A hammer or pull stays with the note it comes from, across a bar line too.
@@ -300,29 +401,33 @@ function spread(notes: readonly FingerNote[], groups: Group[], bases: number[], 
       const k = tied ? keyOf.get(last!)! : `${n.string}@${Math.floor((n.tick ?? 0) / BAR_TICKS)}`;
       keyOf.set(i, k);
       // Only notes the hand reaches spread; one out of reach stays unnumbered.
-      if (out[i].finger !== null) byString.set(k, [...(byString.get(k) ?? []), i]);
+      if (out[i].finger !== null && !done.has(i)) byString.set(k, [...(byString.get(k) ?? []), i]);
       last = i;
     }
-    for (const list of byString.values()) {
-      const ds = [...new Set(list.map((i) => notes[i].fret - seg.base))].sort((a, b) => a - b);
-      if (ds[ds.length - 1] < 4 || ds.length > 4) continue;
-      // The top fret is the little finger's; the others close up beneath it, the index's own at 1.
-      const finger = new Map<number, Finger>();
-      const ranks: Finger[] =
-        ds[0] > 0
-          ? ([...ds.slice(0, -1).map((d) => Math.min(3, d + 1)), 4] as Finger[])
-          : ds.length === 2
-            ? [1, 4]
-            : ds.length === 3
-              ? [1, ds[1] >= 3 ? 3 : 2, 4]
-              : [1, 2, 3, 4];
-      ds.slice(-ranks.length).forEach((d, k) => finger.set(d, ranks[k]));
-      for (const i of list) {
-        const f = finger.get(notes[i].fret - seg.base);
-        if (f !== undefined && explicitFinger(notes[i]) === null) out[i].finger = f;
-      }
-    }
+    for (const list of byString.values()) apply(list, seg.base);
   }
+}
+
+/**
+ * Rule 4's fingers for one string's frets under a hand (as distances from the
+ * index's fret), or null when the string takes no stretch and keeps one finger
+ * per fret. The top fret is the little finger's; the others close up beneath
+ * it, the index's own at 1.
+ */
+function spreadRanks(frets: readonly number[]): Map<number, Finger> | null {
+  const ds = [...new Set(frets)].sort((a, b) => a - b);
+  if (ds.length === 0 || ds[ds.length - 1] < 4 || ds.length > 4) return null;
+  const ranks: Finger[] =
+    ds[0] > 0
+      ? ([...ds.slice(0, -1).map((d) => Math.min(3, d + 1)), 4] as Finger[])
+      : ds.length === 2
+        ? [1, 4]
+        : ds.length === 3
+          ? [1, ds[1] >= 3 ? 3 : 2, 4]
+          : [1, 2, 3, 4];
+  const finger = new Map<number, Finger>();
+  ds.slice(-ranks.length).forEach((d, k) => finger.set(d, ranks[k]));
+  return finger;
 }
 
 /** Rule 7: a bend at the top of the box goes to the ring finger, the others behind it. */
@@ -367,6 +472,43 @@ export function fingersByPlace(notes: readonly FingerNote[], position: HandAt | 
       for (const [f, c] of v.counts) if (c > most) [pick, most] = [f, c];
     }
     out.set(k, String(pick));
+  }
+  return out;
+}
+
+/**
+ * Where the hand shifts with one finger ("string:fret" to that finger): the
+ * note before it is the same finger at another fret on the same string and the
+ * hand moved under it, as the little finger moves up to the Petrucci climb's 9
+ * or the index back down to start the next pass. The resting neck marks these,
+ * so two neighbouring frets that both read 4 say where the hand moved
+ * (acceptance 5, P2-4). A slide is the same move written out, and marked too.
+ */
+export function shiftPlaces(notes: readonly FingerNote[], position: HandAt | undefined): Map<string, string> {
+  const plan = fingerPlan(notes, position);
+  const order = notes.map((_, i) => i).sort((a, b) => (notes[a].tick ?? a) - (notes[b].tick ?? b) || a - b);
+  const out = new Map<string, string>();
+  let last: number | null = null;
+  for (const i of order) {
+    if (!fretted(notes[i])) {
+      last = null;
+      continue;
+    }
+    if (last !== null) {
+      const a = plan[last];
+      const z = plan[i];
+      if (
+        notes[last].string === notes[i].string &&
+        notes[last].fret !== notes[i].fret &&
+        a.finger !== null &&
+        a.finger === z.finger &&
+        a.base !== null &&
+        z.base !== null &&
+        a.base !== z.base
+      )
+        out.set(placeKey(notes[i]), String(z.finger));
+    }
+    last = i;
   }
   return out;
 }
