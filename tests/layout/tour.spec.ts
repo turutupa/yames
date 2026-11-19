@@ -87,27 +87,37 @@ async function walk(page: Page, where: string) {
     const stop = LEARN_STOPS[i];
     const at = `${stop.id} (${i + 1} of ${LEARN_STOPS.length}) at ${where}`;
     await stopSettled(page, i);
-    const m = await measureStop(page, targetOf(stop));
-    const screen = { x: 0, y: 0, ...m.viewport };
-    expect(inside(m.card, screen, 0.5), `${at}: the bubble leaves the window ${JSON.stringify(m.card)}`).toBe(true);
-    expect(m.placement, `${at}: the bubble points at nothing`).not.toBe("center");
-    expect(m.targets.length, `${at}: no visible target`).toBeGreaterThan(0);
-    const onScreen = m.targets.filter((t) => overlaps(t, screen));
-    expect(onScreen.length, `${at}: the target is off screen`).toBeGreaterThan(0);
-    // Each target sits in a ring: its box grown by the padding, clipped to the
-    // window. A `separate` stop has one ring per group of targets.
-    for (const t of onScreen) {
-      const clipped = {
-        x: Math.max(0, t.x),
-        y: Math.max(0, t.y),
-        width: Math.min(screen.width, t.x + t.width) - Math.max(0, t.x),
-        height: Math.min(screen.height, t.y + t.height) - Math.max(0, t.y),
-      };
-      expect(
-        m.rings.some((ring) => inside(clipped, ring, 1.5)),
-        `${at}: a target sits outside the spotlight`,
-      ).toBe(true);
-    }
+    // The tour measures its target again on a 300 ms beat (and on scroll and
+    // resize), so a page that moves under it (a list arriving, a card still
+    // rising into place) is followed a beat later. A stop is judged once the
+    // spotlight has caught up, not in the one frame after the page moved:
+    // "the card and the ring agree with themselves" (stopSettled) says
+    // nothing about the target, and on a busy machine the phone's Paths stop
+    // was read in that frame about one run in two.
+    let m!: Awaited<ReturnType<typeof measureStop>>;
+    await expect(async () => {
+      m = await measureStop(page, targetOf(stop));
+      const screen = { x: 0, y: 0, ...m.viewport };
+      expect(inside(m.card, screen, 0.5), `${at}: the bubble leaves the window ${JSON.stringify(m.card)}`).toBe(true);
+      expect(m.placement, `${at}: the bubble points at nothing`).not.toBe("center");
+      expect(m.targets.length, `${at}: no visible target`).toBeGreaterThan(0);
+      const onScreen = m.targets.filter((t) => overlaps(t, screen));
+      expect(onScreen.length, `${at}: the target is off screen`).toBeGreaterThan(0);
+      // Each target sits in a ring: its box grown by the padding, clipped to the
+      // window. A `separate` stop has one ring per group of targets.
+      for (const t of onScreen) {
+        const clipped = {
+          x: Math.max(0, t.x),
+          y: Math.max(0, t.y),
+          width: Math.min(screen.width, t.x + t.width) - Math.max(0, t.x),
+          height: Math.min(screen.height, t.y + t.height) - Math.max(0, t.y),
+        };
+        expect(
+          m.rings.some((ring) => inside(clipped, ring, 1.5)),
+          `${at}: a target sits outside the spotlight`,
+        ).toBe(true);
+      }
+    }).toPass({ timeout: 8_000, intervals: [150, 350, 350, 700] });
     // The tour's Session is the calm ready screen: it asked for no input, so
     // nothing says one is missing, and the big button is the ordinary Start.
     if (stop.view === "session") {
