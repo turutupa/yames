@@ -3,7 +3,7 @@
  *
  * The result's big button ("Go again, up to 90 BPM") is sized for the
  * learning side's condensed face. A theme with a wide one (Aurora's Inter,
- * Obsidian's monospace, Neon's Orbitron) broke it over two lines on a 390 px
+ * Obsidian's monospace, Neon's Orbitron until 2026-11-18) broke it over two lines on a 390 px
  * phone, and no single font size suits both: the condensed themes would lose a
  * quarter of their size for nothing. So the button keeps its size where the
  * words fit and steps down just enough where they do not, never below

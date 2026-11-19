@@ -325,11 +325,15 @@ const neon: Theme = {
     "--surface-hover": "rgba(6, 182, 212, 0.06)",
     "--surface-active": "rgba(6, 182, 212, 0.12)",
     "--shadow": "0 8px 32px rgba(0, 0, 0, 0.5)",
-    "--font-family": "'Orbitron', 'Rajdhani', 'Exo 2', monospace",
-    "--font-display": "'Orbitron', 'Rajdhani', 'Exo 2', system-ui, sans-serif",
-    "--font-heading": "'Orbitron', 'Rajdhani', 'Exo 2', system-ui, sans-serif",
+    // Inter throughout, not Orbitron (owner, 2026-11-18: "the colors weren't
+    // so bad but I'd rather something more readable and simple"). Orbitron's
+    // wide, squared digits were hard to tell apart on the neck's fingers, the
+    // clocks and the BPM. Neon is its colours now, not a futuristic face.
+    "--font-family": "'Inter', system-ui, sans-serif",
+    "--font-display": "'Inter', system-ui, sans-serif",
+    "--font-heading": "'Inter', system-ui, sans-serif",
     "--font-body": "'Inter', system-ui, sans-serif",
-    "--font-num": "'Orbitron', 'Rajdhani', system-ui, sans-serif",
+    "--font-num": "'Inter', system-ui, sans-serif",
     "--font-weight": "500",
     "--radius": "10px",
     "--radius-sm": "8px",
