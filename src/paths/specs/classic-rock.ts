@@ -649,7 +649,8 @@ export default definePath({
             "Bar 1: low E, E at fret 2 on the D string, open G, hammer to fret 1, open B, G#, E, G#. Bar 2: B at fret 2 on the A string, E on the D string, open D, hammer to E, G#, open B, and G# held.",
           ],
           coach: "Notes ring into each other here, so I time them and count them heard, and don't pitch-check them.",
-          tab: "/8 6:0 4:2 3:0 3:1h 2:0 3:1 4:2 3:1 | /8 5:2 4:2 4:0 4:2h 3:1 2:0 /4 3:1",
+          // The open E chord's own fingers: index on the G string, middle on the A, ring on the D.
+          tab: "/8 6:0 4:2f3 3:0 3:1hf1 2:0 3:1f1 4:2f3 3:1f1 | /8 5:2f2 4:2f3 4:0 4:2hf3 3:1f1 2:0 /4 3:1f1",
           position: 1,
           chords: "E | E",
           jam: { groove: "ballad", key: "E" },
@@ -688,7 +689,8 @@ export default definePath({
             "Bar 1 is the open E move from the first Exercise. Bar 2 moves it to A: A at 5 on the low E, A at 7 on the D string, B at 4 on the G hammered to C# at 6, E at 5 on the B, C#, A, C#. Bar 3 is the E move again. Bar 4: low E, E on the D string, G#, open B, and the open high E held.",
           ],
           coach: "Ringing notes again: timing and notes heard, not pitch.",
-          tab: "/8 6:0 4:2 3:0 3:1h 2:0 3:1 4:2 3:1 | /8 6:5 4:7 3:4 3:6h 2:5 3:6 4:7 3:6 | /8 6:0 4:2 3:0 3:1h 2:0 3:1 4:2 3:1 | /8 6:0 4:2 3:1 2:0 /2 1:0",
+          // The E bars in the open E chord's own fingers; the A bar is the rules' (index at 4 for the B).
+          tab: "/8 6:0 4:2f3 3:0 3:1hf1 2:0 3:1f1 4:2f3 3:1f1 | /8 6:5 4:7 3:4 3:6h 2:5 3:6 4:7 3:6 | /8 6:0 4:2f3 3:0 3:1hf1 2:0 3:1f1 4:2f3 3:1f1 | /8 6:0 4:2f3 3:1f1 2:0 /2 1:0",
           position: 1,
           shifts: true,
           chords: "E | A | E | E",
