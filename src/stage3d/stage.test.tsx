@@ -211,6 +211,44 @@ describe("the stage with an engine", () => {
     expect(screen.getByTestId("neck-stage").querySelector("canvas")).not.toBeNull();
   });
 
+  it("tells an engine that arrives after a window resize the size it missed", async () => {
+    let release: () => void = () => {};
+    const gate = new Promise<void>((r) => (release = r));
+    const c = new StageController({
+      loadEngine: async () => {
+        await gate;
+        return fake.mod;
+      },
+      webgl2: () => true,
+    });
+    render(
+      <NeckStageHost controllerFactory={() => c}>
+        <Screen view={{ kind: "whole" }} notes={D7} />
+      </NeckStageHost>,
+    );
+    await flush();
+    expect(c.mode).toBe("loading");
+    // The window is restored or maximised while the engine loads.
+    act(() => void window.dispatchEvent(new Event("resize")));
+    release();
+    await flush();
+    expect(c.mode).toBe("3d");
+    const calls = fake.engines[0].calls;
+    expect(calls).toContain("resize");
+    expect(calls.indexOf("resize")).toBeLessThan(calls.indexOf("view:whole:cut"));
+  });
+
+  it("does not resize an engine that missed nothing", async () => {
+    const c = controller();
+    render(
+      <NeckStageHost controllerFactory={() => c}>
+        <Screen view={{ kind: "whole" }} notes={D7} />
+      </NeckStageHost>,
+    );
+    await flush();
+    expect(fake.engines[0].calls).not.toContain("resize");
+  });
+
   it("passes changes through and flies between views on the same screen", async () => {
     const c = controller();
     const { rerender } = render(

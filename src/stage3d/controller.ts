@@ -89,6 +89,8 @@ export class StageController {
   private wasHidden = true;
   private lastRect: SlotRect | null = null;
   private slotObserver: ResizeObserver | null = null;
+  /** A window resize arrived while no engine was there to take it. */
+  private resizedWhileLoading = false;
   private rectCheck: number | null = null;
   private takeRunning = false;
   private pluckSeq = 0;
@@ -377,6 +379,7 @@ export class StageController {
       return;
     }
     this.set({ mode: "loading" });
+    this.resizedWhileLoading = false;
     const canvas = this.canvas;
     const gen = this.gen;
     const stale = () => gen !== this.gen;
@@ -403,6 +406,13 @@ export class StageController {
           engine.dispose();
           return;
         }
+        // The window was resized while the engine loaded (a window restored
+        // or maximised as the app starts): the renderer still has the size
+        // it was made at, and nothing else would tell it. Without this the
+        // neck was drawn at the old size, small in a corner of its slot with
+        // its overlay somewhere else, until the next resize.
+        if (this.resizedWhileLoading) engine.resize(window.innerWidth, window.innerHeight);
+        this.resizedWhileLoading = false;
         engine.setPalette(neckPalette());
         engine.setNotes(this.snap.notes.slice(), 0);
         if (this.snap.view.kind !== "hidden") {
@@ -471,6 +481,9 @@ export class StageController {
   private onVisibility = () => this.updatePaused();
 
   private onResize = () => {
+    // No engine yet (it is loading or compiling): it read the window's size
+    // when it was made, so it is told the new one when it arrives.
+    if (!this.engine) this.resizedWhileLoading = true;
     this.engine?.resize(window.innerWidth, window.innerHeight);
     this.lastRect = null;
     this.queueRectCheck();
