@@ -529,6 +529,8 @@
       "hand": "Mano: indice al tasto {{fret}}, un dito per tasto.",
       "handShifts": "Mano: inizia con l'indice al tasto {{fret}}; si sposta lungo il manico.",
       "handOpen": "Mano: posizione aperta, indice sopra il tasto 1.",
+      "handChord": "Mano: forma dell'accordo aperto di {{chord}}.",
+      "handChordShifts": "Mano: parti dalla forma dell'accordo aperto di {{chord}}; si sposta lungo il manico.",
       "viewHint": "Cambia vista quando vuoi",
       "left": "rimasti",
       "notGraded": "Finisce tra {{time}}; poi ancora, o avanti.",

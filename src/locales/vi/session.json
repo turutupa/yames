@@ -516,6 +516,8 @@
       "hand": "Tay: ngón trỏ ở phím {{fret}}, mỗi ngón một phím.",
       "handShifts": "Tay: bắt đầu với ngón trỏ ở phím {{fret}}; tay di chuyển dọc cần đàn.",
       "handOpen": "Tay: thế bấm mở, ngón trỏ trên phím 1.",
+      "handChord": "Tay: thế hợp âm {{chord}} mở.",
+      "handChordShifts": "Tay: bắt đầu ở thế hợp âm {{chord}} mở; tay di chuyển dọc cần đàn.",
       "viewHint": "Đổi chế độ xem bất cứ lúc nào",
       "left": "còn lại",
       "notGraded": "Kết thúc sau {{time}}; rồi chơi lại, hoặc tiếp.",

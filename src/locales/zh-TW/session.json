@@ -516,6 +516,8 @@
       "hand": "手：食指在第 {{fret}} 格，一指一格。",
       "handShifts": "手：食指從第 {{fret}} 格開始，沿琴頸移動。",
       "handOpen": "手：開放把位，食指在第 1 格上方。",
+      "handChord": "手：開放 {{chord}} 和弦把型。",
+      "handChordShifts": "手：從開放 {{chord}} 和弦把型開始，沿琴頸移動。",
       "viewHint": "隨時可以切換檢視",
       "left": "剩餘",
       "notGraded": "{{time}} 後結束；然後再來一遍，或繼續。",

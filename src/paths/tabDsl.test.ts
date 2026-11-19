@@ -140,3 +140,24 @@ describe("strokes", () => {
     expect(isPicked(notes[2], notes[1])).toBe(true);
   });
 });
+
+describe("the hammer-on from nowhere", () => {
+  it("is an h with no note before it on its string: a hammer, not picked, not a tap", async () => {
+    const { fromNowhere } = await import("./tabDsl");
+    const { notes } = parseTab("/16 6:8 5:5h 5:7h", STANDARD_TUNING, 3840);
+    expect(notes[1].tech).toEqual(["hammer"]);
+    expect(fromNowhere(notes[1], notes[0])).toBe(true);
+    expect(fromNowhere(notes[2], notes[1])).toBe(false);
+    expect(isPicked(notes[1], notes[0])).toBe(false);
+  });
+
+  it("goes to alphaTex as a left-hand tap and comes back a hammer", async () => {
+    const { exerciseAlphaTex } = await import("./toScore");
+    const pack = (await import("./packs/shred.json")).default as unknown as { steps: { exercises: Parameters<typeof exerciseAlphaTex>[0][] }[] };
+    const ex = pack.steps.flatMap((s) => s.exercises).find((e) => e.id === "legato-two.hammer-ascent")!;
+    const tex = exerciseAlphaTex(ex, 90);
+    // Three strings start from nowhere in the legato bar: A, D and G.
+    expect(tex.match(/\{[^}]*lht[^}]*\}/g)?.length).toBe(3);
+    expect(tex).not.toMatch(/tt\}/);
+  });
+});

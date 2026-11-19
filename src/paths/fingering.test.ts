@@ -79,10 +79,10 @@ describe("the fingering rules", () => {
     expect(fingersOf(seq(N(3, 7, ["bend"], { bend: 2 })), STILL(5))).toEqual([3]);
   });
 
-  it("gives a tap past the hand no number, and a hammer from nowhere under it its finger", () => {
+  it("gives a tap no number, and a hammer from nowhere its finger", () => {
     const tap = seq(N(1, 12, ["tap"]), N(1, 5, ["pull"]), N(1, 8, ["hammer"]));
     expect(fingersOf(tap, STILL(5))).toEqual([null, 1, 4]);
-    const nowhere = seq(N(6, 8), N(5, 5, ["tap"]), N(5, 7, ["hammer"]));
+    const nowhere = seq(N(6, 8), N(5, 5, ["hammer"]), N(5, 7, ["hammer"]));
     expect(fingersOf(nowhere, STILL(5))).toEqual([4, 1, 3]);
   });
 
@@ -145,6 +145,7 @@ function variantsOf(ex: Exercise): Variantish[] {
 }
 
 function handLine(position: Exercise["position"]): string {
+  if (position.chord) return `Hand: open ${position.chord} chord shape${position.shifts === "allowed" ? ", moves" : ""}`;
   if (position.fret <= 0) return "Hand: open position";
   return position.shifts === "allowed" ? `Hand: index at ${position.fret}, moves` : `Hand: index at ${position.fret}, stays`;
 }

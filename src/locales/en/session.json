@@ -516,6 +516,8 @@
       "hand": "Hand: index finger at fret {{fret}}, one finger per fret.",
       "handShifts": "Hand: start with the index finger at fret {{fret}}; it moves along the neck.",
       "handOpen": "Hand: open position, index finger over fret 1.",
+      "handChord": "Hand: open {{chord}} chord shape.",
+      "handChordShifts": "Hand: start in the open {{chord}} chord shape; it moves along the neck.",
       "viewHint": "Switch views any time",
       "left": "left",
       "notGraded": "Ends in {{time}}; then go again, or move on.",

@@ -159,7 +159,11 @@ function techMarks(notes: PatternNote[], passTicks: number): void {
         : tech.includes("pull")
           ? "p"
           : null;
-    if (arrive && !n.link) n.link = { mark: arrive, fromTicks: prev ? back(prev) : passTicks };
+    // A hammer from nowhere: the note before it in time is on another string. Its
+    // "h" stands before the number with no slur, as from nowhere (fingering audit 2).
+    const before = notes[(notes.indexOf(n) - 1 + notes.length) % notes.length];
+    const nowhere = arrive === "h" && (!before || before === n || (before.string !== n.string && before.tick !== n.tick));
+    if (arrive && !n.link) n.link = { mark: arrive, fromTicks: prev && !nowhere ? back(prev) : passTicks };
     const after: TechAfter = {};
     if (tech.includes("bend") && n.bend !== undefined && n.bend > 0) after.bendTo = n.fret + Math.round(n.bend);
     if (tech.includes("vibrato")) after.vibrato = true;

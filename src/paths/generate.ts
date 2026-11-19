@@ -150,6 +150,7 @@ function compile(spec: ExerciseSpec, build: VariantBuild, where: string): Omit<C
   const fret = build.position ?? spec.position;
   if (fret === undefined) throw new Error(`${where}: no position`);
   const shifts = build.shifts ?? spec.shifts;
+  const chordShape = spec.chordShape;
   const compiled: Omit<Compiled, "crossing" | "landings" | "backing" | "harmony"> = {
     build,
     notes: parsed.notes,
@@ -162,6 +163,7 @@ function compile(spec: ExerciseSpec, build: VariantBuild, where: string): Omit<C
     tab: build.tab.trim().replace(/\s+/g, " "),
     shiftsAsked: !!shifts,
   };
+  if (chordShape) compiled.position = { ...compiled.position, chord: chordShape };
   if (chords) compiled.chords = chords;
   if (guideText) compiled.guide = parseTab(guideText, STANDARD_TUNING, barTicks).notes;
   return compiled;

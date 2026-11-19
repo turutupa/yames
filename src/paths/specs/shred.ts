@@ -40,7 +40,7 @@ const right = (min: number, overBars = 4): PassBar => ({ metric: "noteIdentity",
 const accent = (min: number): PassBar => ({ metric: "accentPlacement", min, overBars: 4 });
 
 /** One string, slow enough to be strict: evenness 0.9. */
-/** Hammers from nowhere are attacks that must be heard, and they are quiet. */
+/** Hammers from nowhere are soft like any hammer: an unheard one costs nothing, so the bar on the rest stays firm. */
 const LEGATO_TAPPED = [even(0.8), heard(0.85), extras(3), right(0.85)];
 const TIGHT = [even(0.9), heard(0.95), extras(2)];
 const TIGHT_NOTES = [...TIGHT, right(0.9)];
@@ -1226,7 +1226,7 @@ const ADVANCED: StepSpec[] = [
     goal: "Run three-note-per-string scales with one pick a string or less, hammering from nowhere going up and pulling off coming down.",
     why: "Three notes per string is where legato becomes a way to play scales fast with almost no picking. Going up, the first note of each new string has nothing to hammer from, so the finger hammers onto it from the air: the hammer-on from nowhere, and the skill that makes or breaks a legato run. Coming down, each string's first note is picked and the rest pulled.",
     howTo: [
-      "Hammer-on from nowhere: the finger comes down hard and fast on the new string with no pick. The tab marks it T. It has to be loud, because there is no pick to help.",
+      "Hammer-on from nowhere: the finger comes down hard and fast on the new string with no pick. The tab marks it h with no note before it on that string. It has to be loud, because there is no pick to help.",
       "Sextuplets: six to the click, two strings to each beat.",
       "Each Exercise is a picked bar, then the same notes legato. Match the legato bar to the picked one: same rhythm, same volume.",
     ],
@@ -1239,10 +1239,10 @@ const ADVANCED: StepSpec[] = [
         title: "Up with hammers, from nowhere",
         purpose: "Twelve notes up four strings, held at the top. Bar 1 picked; bar 2 picks the first note only, then hammers everything, the first note of each string from nowhere.",
         howTo: [
-          "Sextuplets. Bar 1: alternate-pick the twelve notes from the low E's fret 5 up to the G string's fret 9 and hold the last one to the bar line. Bar 2: pick the first note, hammer the rest; on the A, D and G strings the first note is a hammer-on from nowhere (marked T).",
+          "Sextuplets. Bar 1: alternate-pick the twelve notes from the low E's fret 5 up to the G string's fret 9 and hold the last one to the bar line. Bar 2: pick the first note, hammer the rest; on the A, D and G strings the first note is a hammer-on from nowhere (an h with no note before it on that string).",
           "Fingers 1-3-4 on the low E (5, 7, 8) and the A (5, 7, 8); 1-2-4 on the D and G (5, 7, 9), so each hammer to the little finger comes from the second finger with the stretch in front of it.",
         ],
-        coach: "The hammer-ons from nowhere count as attacks here, so one too quiet for me to catch shows up as missed. Make them loud; the bar allows for a few.",
+        coach: "A hammer-on from nowhere is graded like any hammer-on: one too quiet for me to catch costs nothing, so your ear decides whether it spoke. Make them loud.",
         vary: {
           values: { key: ["A", "B", "C", "D", "E"] },
           pooled: ["key"],
@@ -1485,7 +1485,8 @@ const ADVANCED: StepSpec[] = [
         title: "Am, F, C, G: one pass a chord (timing only)",
         purpose: "Up five strings on Am, link, down F, link, up C, link, down G: every chord change is a single small step on an outer string.",
         howTo: [
-          "Quarter-note triplets, six notes a bar, three to every two clicks: one pass across five strings and one more note on the last string. In bars 2 to 4 the first note is a hammer or pull from the last bar's final note, not a pick; bar 1's first note is picked each time round.",
+          "Quarter-note triplets, six notes a bar, three to every two clicks: one pass across five strings and one more note on the last string. In bars 2 to 4 the first note comes from the last bar's final note without a pick, by hammer, pull or slide; bar 1's first note is picked each time round.",
+          "Where the last note is four frets away, it is a slide on one finger, not a hammer: the top string's 8 to 12 is the index, and the hand arrives over the F. In bar 2 the pull lands on the ring finger, which slides down into C.",
           "At 150 this is the note rate of eighth-note triplets at 75: slow on purpose, because the links are what you are learning. Bar 4's G rolls a barre across the D, G and B strings at fret 12.",
           "Sing the top notes if you can. They make a tune, and the tune is how you keep your place.",
         ],
@@ -1498,11 +1499,11 @@ const ADVANCED: StepSpec[] = [
             const chart = moveChart("Am | F | C | G", SWEEP_SHIFT[p.key]);
             const chords = chart.split("|").map((c) => c.trim());
             const near = p.key === "A" ? 12 : p.key === "G" ? 10 : 15;
-            const tab = linkedSweep({ chords, strings: [5, 4, 3, 2, 1], near, rhythm: "/4t", extra: true });
+            const tab = onePassFingers(linkedSweep({ chords, strings: [5, 4, 3, 2, 1], near, rhythm: "/4t", extra: true }));
             return { tab, position: handAt(tab), shifts: true, chords: chart };
           },
         },
-        tab: linkedSweep({ chords: ["Am", "F", "C", "G"], strings: [5, 4, 3, 2, 1], near: 12, rhythm: "/4t", extra: true }),
+        tab: onePassFingers(linkedSweep({ chords: ["Am", "F", "C", "G"], strings: [5, 4, 3, 2, 1], near: 12, rhythm: "/4t", extra: true })),
         chain: { maxJointFrets: 5 },
         position: 12,
         shifts: true,
@@ -1739,6 +1740,22 @@ function burstsOn(figure: Figure) {
 }
 
 /** Octaves, each twice, up the scale and back. */
+/**
+ * The two fingers the one-pass chain needs written (fingering audit 2): F's last
+ * pull lands on the ring finger, which slides down into C's shape at its own fret,
+ * and C's top note is the middle finger, which slides up so the index is free for
+ * the pull into G. Bar 2's last note and bar 3's fifth.
+ */
+function onePassFingers(tab: string): string {
+  const bars = tab.split("|").map((bar) => bar.trim().split(/\s+/));
+  const mark = (bar: number, index: number, finger: number) => {
+    bars[bar][index] = bars[bar][index].replace(/^(\d:\d+)/, `$1f${finger}`);
+  };
+  mark(1, bars[1].length - 1, 3);
+  mark(2, 5, 2);
+  return bars.map((bar) => bar.join(" ")).join(" | ");
+}
+
 function octavesTab(set: string): string {
   const shapes: Record<string, { low: number; high: number; gap: number; frets: number[] }> = {
     "A and G": { low: 5, high: 3, gap: 2, frets: [7, 8, 10, 12] },
@@ -1799,7 +1816,8 @@ function pentPullsTab(): string {
 function hammerAscent(): string {
   const cells = nps(6, 4);
   const picked = cellsTab(cells);
-  const legato = cellsTab(cells, (_c, i) => (i === 0 ? "" : i % 3 === 0 ? "t" : "h"));
+  // Every note after the first hammered; a string's first one is a hammer from nowhere (`fromNowhere`).
+  const legato = cellsTab(cells, (_c, i) => (i === 0 ? "" : "h"));
   return `/16t ${picked} hold | ${legato} hold`;
 }
 
