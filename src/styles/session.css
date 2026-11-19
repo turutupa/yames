@@ -1049,17 +1049,19 @@
    leads with one dot's width, the dot in it; the line starts that width to
    the left of its column and clips it, so the dot of a part that begins a
    line is not drawn and its words start at the column's edge. */
-.session-dotline,
-.session-plan-go .session-plan-meta.session-dotline {
-  display: flex;
-  flex-wrap: wrap;
+/* Inline blocks, not flex items: `innerText` (and a copy of the line) still
+   reads "A · B" on one line. */
+.session-dotline {
+  display: block;
   --dot-w: 1.1em;
   width: calc(100% + var(--dot-w));
   margin-left: calc(-1 * var(--dot-w));
   clip-path: inset(0 0 0 var(--dot-w));
 }
 .session-dot-part {
-  min-width: 0;
+  display: inline-block;
+  vertical-align: top;
+  box-sizing: border-box;
   max-width: 100%;
   padding-left: var(--dot-w);
 }
