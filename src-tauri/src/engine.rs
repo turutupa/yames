@@ -5059,6 +5059,16 @@ pub(crate) struct SpawnRecord {
     pub waited: bool,
 }
 
+/// Tests: the transport one of `reopen_output`'s spawns came up under.
+#[cfg(test)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct SpawnTransport {
+    /// The `playing` flag the new stream's callback starts with.
+    pub playing: bool,
+    /// `is_playing` in the shared state when the open began.
+    pub screen_playing: bool,
+}
+
 /// What `reopen_output` did.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum ReopenOutcome {
@@ -5085,10 +5095,34 @@ impl EventSink {
         event: &str,
         payload: S,
     ) -> Result<(), tauri::Error> {
+        #[cfg(test)]
+        test_emits::note(event);
         match self.0 {
             Some(ref h) => h.emit(event, payload),
             None => Ok(()),
         }
+    }
+}
+
+/// Tests: the events this thread's sinks were asked to emit, by name, so a
+/// test can say "the screen was told once" of a path that has two places to
+/// tell it from. Per thread: each test runs on its own, and `reopen_output`
+/// emits on its caller's.
+#[cfg(test)]
+pub(crate) mod test_emits {
+    use std::cell::RefCell;
+    thread_local! {
+        static SEEN: RefCell<Vec<String>> = const { RefCell::new(Vec::new()) };
+    }
+    pub(crate) fn note(event: &str) {
+        SEEN.with(|s| s.borrow_mut().push(event.to_string()));
+    }
+    /// How many times `event` was emitted on this thread since the last `clear`.
+    pub(crate) fn count(event: &str) -> usize {
+        SEEN.with(|s| s.borrow().iter().filter(|e| e.as_str() == event).count())
+    }
+    pub(crate) fn clear() {
+        SEEN.with(|s| s.borrow_mut().clear());
     }
 }
 
@@ -5268,6 +5302,11 @@ pub struct MetronomeEngine {
     /// return, in order, and a record of what each was asked.
     #[cfg(test)]
     reopen_spawns: Option<(std::collections::VecDeque<Result<(), SetupError>>, Vec<SpawnRecord>)>,
+    /// Tests: the transport each scripted spawn came up under, beside
+    /// `reopen_spawns`' record: the `playing` it was handed, and what the
+    /// shared state (the screen) said at that moment.
+    #[cfg(test)]
+    reopen_spawn_transport: Vec<SpawnTransport>,
     thread_handle: Option<thread::JoinHandle<()>>,
     beat_log: BeatLog,
     device_name: Option<String>,
@@ -5369,6 +5408,8 @@ impl MetronomeEngine {
             next_spawn: SpawnHints::default(),
             #[cfg(test)]
             reopen_spawns: None,
+            #[cfg(test)]
+            reopen_spawn_transport: Vec::new(),
             thread_handle: None,
             beat_log,
             device_name: None,
@@ -5772,8 +5813,13 @@ impl MetronomeEngine {
             // this should not happen; if it does, nothing can vouch for what
             // is loaded, and `reopen_keeps_loaded` drops it.
             eprintln!("[yames] reopen: no rate known for the old stream or the new one; dropping what is loaded");
+        } else if route_moved && old_rate.is_none() {
+            // The same "should not happen", on a route that moved: the new
+            // route's rate is known and nothing says it is the rate the
+            // material was decoded at. Dropped, as a device switch drops it.
+            eprintln!("[yames] reopen: the route moved and the old stream's rate is unknown; dropping what is loaded");
         }
-        if crate::output_park::reopen_keeps_loaded(old_rate, probed.as_ref().map(hint_rate)) {
+        if crate::output_park::reopen_keeps_loaded_on(route, old_rate, probed.as_ref().map(hint_rate)) {
             let expected_rate = if probed.is_none() { old_rate } else { None };
             let first = SpawnHints { format: probed, expected_rate, quiet: true };
             match self.spawn_for_reopen(&state, &app_handle, keep_playing, first, Some(left())) {
@@ -5833,6 +5879,10 @@ impl MetronomeEngine {
         self.playing = Arc::new(AtomicBool::new(playing));
         #[cfg(test)]
         if let Some((outcomes, record)) = self.reopen_spawns.as_mut() {
+            self.reopen_spawn_transport.push(SpawnTransport {
+                playing,
+                screen_playing: state.lock().unwrap_or_else(|e| e.into_inner()).is_playing,
+            });
             record.push(SpawnRecord {
                 format_rate: hints.format.as_ref().map(hint_rate),
                 expected_rate: hints.expected_rate,
@@ -13202,6 +13252,59 @@ mod tests {
         }
     }
 
+    /// The stream a moved route opens under a song that was playing comes up
+    /// stopped, and the screen has been told before the open begins: a
+    /// callback handed `playing` would start the song from the top.
+    #[test]
+    fn a_moved_route_opens_its_stream_stopped_under_a_song_that_was_playing() {
+        let sr = 48_000u32;
+        let mut engine = engine_with_scripted_reopens(&[Ok(())]);
+        let state = crate::state::create_shared_state();
+        state.lock().unwrap().is_playing = true;
+        engine.playing.store(true, Ordering::SeqCst);
+        let _player = load_song_kit_and_speech(&engine, sr);
+        test_emits::clear();
+        engine.reopen_output(state.clone(), None, NEW_ROUTE, |_| Some(sr)).unwrap();
+        assert_eq!(
+            engine.reopen_spawn_transport,
+            vec![SpawnTransport { playing: false, screen_playing: false }],
+            "the first open of a moved route was handed a playing transport"
+        );
+        assert_eq!(test_emits::count("state-changed"), 1, "the stop was not reported exactly once");
+    }
+
+    /// A moved route whose old stream never published a rate: the new
+    /// route's rate is known, and nothing vouches that the song and the kit
+    /// were decoded at it. The drop path, as for a rate that moved; on the
+    /// same route the same unknown keeps them (a failed probe is not a move).
+    #[test]
+    fn a_moved_route_with_no_old_rate_known_drops_what_is_loaded() {
+        let sr = 48_000u32;
+        let mut engine = engine_with_scripted_reopens(&[]);
+        let state = crate::state::create_shared_state();
+        state.lock().unwrap().is_playing = true;
+        engine.playing.store(true, Ordering::SeqCst);
+        let player = load_song_kit_and_speech(&engine, sr);
+        // The dead stream published nothing.
+        engine.sample_rate.store(0, Ordering::Release);
+        assert_eq!(engine.output_sample_rate(), None);
+        test_emits::clear();
+        let outcome = engine.reopen_output(state.clone(), None, NEW_ROUTE, |_| Some(sr)).unwrap();
+        assert_eq!(outcome, ReopenOutcome::Dropped);
+        all_dropped(&engine, &player);
+        assert!(!engine.is_running());
+        assert!(!state.lock().unwrap().is_playing);
+        assert_eq!(
+            spawns(&engine),
+            vec![SpawnRecord { format_rate: None, expected_rate: None, quiet: false, waited: false }]
+        );
+        assert_eq!(
+            engine.reopen_spawn_transport,
+            vec![SpawnTransport { playing: false, screen_playing: false }]
+        );
+        assert_eq!(test_emits::count("state-changed"), 1, "the stop was reported twice, or not at all");
+    }
+
     /// The click and a jam have no place to lose: they carry on across a
     /// moved route, as they do across a device switch.
     #[test]
@@ -13231,11 +13334,20 @@ mod tests {
         state.lock().unwrap().is_playing = true;
         engine.playing.store(true, Ordering::SeqCst);
         let player = load_song_kit_and_speech(&engine, sr);
+        test_emits::clear();
         let outcome = engine.reopen_output(state.clone(), None, NEW_ROUTE, |_| Some(44_100)).unwrap();
         assert_eq!(outcome, ReopenOutcome::Dropped);
         all_dropped(&engine, &player);
         assert!(!engine.is_running(), "a dropped song went on as a metronome");
         assert!(!state.lock().unwrap().is_playing);
+        // One stop, reported before the open: the drop path is handed the
+        // lowered flag and does not report it again.
+        assert_eq!(test_emits::count("state-changed"), 1, "the stop was reported twice, or not at all");
+        assert_eq!(test_emits::count("song-dropped"), 1);
+        assert_eq!(
+            engine.reopen_spawn_transport,
+            vec![SpawnTransport { playing: false, screen_playing: false }]
+        );
         assert_eq!(
             spawns(&engine),
             vec![SpawnRecord { format_rate: None, expected_rate: None, quiet: false, waited: false }]

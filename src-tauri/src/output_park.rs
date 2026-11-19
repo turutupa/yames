@@ -307,6 +307,19 @@ pub(crate) fn reopen_keeps_loaded(old_rate: Option<u32>, new_rate: Option<u32>) 
     }
 }
 
+/// [`reopen_keeps_loaded`] for a reopen on `route`. A route that MOVED with
+/// no rate known for the old stream takes the drop path: the new route's
+/// rate is a fact about another device, and "unknown is not moved" holds
+/// only while the device is the same one (engine review of card #53). The
+/// dead stream publishes its rate, so this arm should not be reached; if it
+/// is, a reloaded song is a smaller lie than one played at the wrong pitch.
+pub(crate) fn reopen_keeps_loaded_on(route: Reopen, old_rate: Option<u32>, new_rate: Option<u32>) -> bool {
+    if route == Reopen::NewRoute && old_rate.is_none() {
+        return false;
+    }
+    reopen_keeps_loaded(old_rate, new_rate)
+}
+
 /// The setup's check for a reopen that kept material decoded at `expected`
 /// without a probed format to open at (re-review of card #14, item B): a
 /// stream at any other rate would play it detuned. No expectation, no check.
@@ -607,6 +620,20 @@ mod tests {
         assert!(reopen_keeps_loaded(None, Some(48_000)));
         assert!(reopen_keeps_loaded(Some(48_000), None));
         assert!(!reopen_keeps_loaded(None, None), "kept with no rate known at all");
+    }
+
+    #[test]
+    fn a_moved_route_with_no_old_rate_keeps_nothing() {
+        assert!(!reopen_keeps_loaded_on(Reopen::NewRoute, None, Some(48_000)));
+        assert!(!reopen_keeps_loaded_on(Reopen::NewRoute, None, None));
+        // The same route: unknown is not "moved", as before.
+        assert!(reopen_keeps_loaded_on(Reopen::SameRoute, None, Some(48_000)));
+        // A known old rate decides on either route.
+        for route in [Reopen::NewRoute, Reopen::SameRoute] {
+            assert!(reopen_keeps_loaded_on(route, Some(48_000), Some(48_000)));
+            assert!(!reopen_keeps_loaded_on(route, Some(48_000), Some(44_100)));
+            assert!(reopen_keeps_loaded_on(route, Some(48_000), None));
+        }
     }
 
     #[test]
