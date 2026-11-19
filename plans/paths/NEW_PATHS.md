@@ -196,6 +196,168 @@ reach model (and a beginner's hand) refuses frets 2 to 5 at an early level. Know
 the Neck comes first for a player who cannot name notes; this Path assumes nothing
 from it but is easier after it.
 
+## The curriculum map (2026-11-18)
+
+The owner's correction: the Path names in his notes were examples. The set of
+Paths is a teacher's call, inside what the grader can judge. His real goal, as
+intent: *someone with no theory who wants to understand how chords, keys and
+arpeggios work on the guitar, and use that in their playing, with structure.*
+
+### Three tracks, one start
+
+```
+START HERE
+  Rhythm Foundations ──┬─> Alternate Picking ──┬─> Sweep Picking
+  (time, the click,    │        (I)            └─> Shred
+   clean notes)        ├─> Legato ──(B)──┬────────> Tapping
+                       │                 └──(B)──> Sweep Picking, Shred
+                       ├─> Metal Rhythm
+                       ├─(I)─> Funk Lines
+                       ├─> Blues and Pentatonics
+                       └─> Classic Rock
+
+HOW HARMONY WORKS (the owner's route)
+  Know the Neck ──(B)──> Scales and Modes ──(B)──┐
+       └──────────────(B)────────────────────────┴─> Triads*  ──(I)──> Chords in a Key* ──(B)──┐
+                                                        └──────────────(I)────────────────────┴─> Arpeggios over Changes* ··> Sweep Picking
+  * to be written. (B), (I): through that Level of the Path the arrow leaves.
+```
+
+An arrow is a recommendation and never a lock: the app may say "before this,
+do X, or start anyway". Arrows are data now (`prerequisites.paths`, below).
+
+| Track | Path | Builds on | Length | State |
+|---|---|---|---|---|
+| Foundations | Rhythm Foundations | nothing: the first Path for a beginner | 6 weeks | written |
+| Technique | Alternate Picking | Rhythm Foundations (Beginner) | 9 weeks | written |
+| Technique | Legato | Rhythm Foundations (Beginner) | 6 weeks | written |
+| Technique | Tapping | Legato (Beginner) | 5 weeks | written |
+| Technique | Sweep Picking | Alternate Picking (Intermediate), Legato (Beginner) | 12 weeks | written |
+| Technique | Shred | Alternate Picking (Intermediate), Legato (Beginner) | 10 weeks | written |
+| Technique | Metal Rhythm | Rhythm Foundations (Beginner) | 6 weeks | written |
+| Technique | Funk Lines | Rhythm Foundations (Intermediate) | 5 weeks | written |
+| Style | Blues and Pentatonics | Rhythm Foundations (Beginner) | 14 weeks | written |
+| Style | Classic Rock | Rhythm Foundations (Beginner) | 7 weeks | written |
+| Harmony | Know the Neck | nothing: the first Path for the harmony route | 6 weeks | written |
+| Harmony | Scales and Modes | Know the Neck (Beginner) | 6 weeks | written |
+| Harmony | **Triads** | Know the Neck (Beginner), Scales and Modes (Beginner) | long, about 12 weeks | to write |
+| Harmony | **Chords in a Key** | Triads (Intermediate) | long, about 12 weeks | to write |
+| Harmony | **Arpeggios over Changes** | Triads (Intermediate), Chords in a Key (Beginner) | about 8 weeks | to write |
+
+Nothing is renamed, split or merged: every existing Path teaches one thing a
+teacher would teach as one thing, and its Exercise ids carry progress. Know the
+Neck keeps its short triads Step as a first look; the Triads Path is where they
+are learned.
+
+### The owner's route, and where a teacher's differs from his wording
+
+He wrote: what a triad is, moving it around the neck, building chords from it,
+playing in a key, moving chords within the key, sweep arpeggios on top. The
+intent is right and the destination is right. The order a teacher would use:
+
+1. **Note names on the neck** (Know the Neck, Beginner). Not in his list, and
+   first: a triad is three named notes, and "move it" means "find those names
+   somewhere else". Without names, shapes are all there is.
+2. **The major scale, and counting its steps** (Scales and Modes, Beginner).
+   Also not in his list. A triad is defined as steps 1, 3 and 5 of a scale, and
+   a key *is* a major scale. So "playing in a key" is not a late topic: the
+   scale comes before the triad, and the key is met here for the first time.
+3. **Triads** (new Path): 1-3-5; major, minor and diminished as one changed
+   note; the three shapes each triad has on a set of three strings; the same
+   triad in three places; then other string sets. This is his "what a triad is"
+   and "move it around the neck", and it is the longest part, with every shape
+   revisited in new keys before the next arrives.
+4. **Chords from triads** (the Advanced Level of Triads): the open and barre
+   chords he already plays are these same three notes with some doubled, and a
+   seventh chord is a triad with one more third on top. His "build chords from
+   it". It sits inside Triads, not in its own Path, because it is the payoff of
+   that Path and not a new subject.
+5. **Chords in a Key** (new Path): stack 1-3-5 on every note of the scale and
+   seven triads come out, always major, minor, minor, major, major, minor,
+   diminished. Roman numerals; I-IV-V; the vi and the ii; the progressions most
+   songs use; the same progression in another key; the minor key. His "play in
+   a key" and "move chords within that key" are one subject, in that order.
+6. **Arpeggios over Changes** (new Path): each chord of a progression played one
+   note at a time, in time, changing to the nearest note of the next chord. His
+   "sweep arpeggios on top", with one correction: sweeping is a picking
+   technique and has its own Path with its own entry (Alternate Picking first).
+   This Path teaches *which notes*, slowly, with any picking; it ends on two-
+   and three-string shapes that are the first Steps of Sweep Picking, and sends
+   the player there for speed.
+
+Running alongside, and missing from his list: **rhythm** (Rhythm Foundations
+from the first day: harmony played out of time teaches nothing) and **the
+ear**. The app cannot grade singing or naming a chord by ear, so ear work is
+written into these Paths as self-checked "your turn" Exercises (play the third,
+then sing it; play I-IV-V and say which is which), labelled "not checked yet"
+like every other one.
+
+What the grader can carry on this route: arpeggiated triads and scales are slow
+written single notes, where the right-notes check is at its best. Two- and
+three-note chord stabs are graded on timing only. A strummed chord is several
+onsets smeared together and is not graded: where a Path needs a strum, it is a
+self-checked Exercise that says so. Nothing on the route depends on strumming.
+
+### Other foundations a beginner needs, not built
+
+- **First chords and strumming** (open chords, changing between them, strumming
+  patterns). The obvious hole for a true beginner, and the one the grader is
+  worst at. It needs a real-guitar test of whether a strum can be timed as one
+  onset before it is designed. Until then it could only be self-checked.
+- **Ear training** as its own Path: not gradable today.
+- **Fingerstyle**: same limit as before (ringing notes).
+
+### Dependencies in the format
+
+`PathDoc.prerequisites.paths` is now `PathPrerequisite[]`: `{ path, level? }`.
+`level` means "through that Level of that Path"; without it, having started the
+Path counts. A spec writes `prerequisites: { paths: ["legato"] }` or
+`{ path: "legato", level: "beginner" }`. Guidance only.
+
+- `src/paths/curriculum.ts`: `checkCurriculum(docs)` (every reference exists, no
+  Path builds on itself, no duplicates, Levels are real, no cycles, each loop
+  reported once and spelled out), `curriculumOrder(docs)` (every Path after
+  what it builds on), `unmetPrerequisites`, `buildsOn`. Twelve tests, one of
+  which runs the check over the shipped specs.
+- `npm run paths -- check` runs it over every pack and prints a `curriculum:`
+  line; a bad graph fails the check like any other error.
+- `src/session/prerequisites.ts`: `unmetPathPrerequisites(progress, paths,
+  path)` for one player. Through a Level means being on a Step after its last,
+  or on its last with that Step passed; choosing a higher Level counts, because
+  that is the player saying they know the lower one. Four tests.
+- Ten of the twelve Paths now name what they build on (table above). The pack
+  schema version is unchanged: every pack before this had an empty list.
+
+### UI spec for prerequisites (not built: for a UI worker)
+
+Small, and all the data is ready. Nothing below touches Today or the daily mix.
+
+1. **Path page (`PathDetail` in `src/containers/session/PathsView.tsx`), under
+   the goal line.** If `path.prerequisites.paths` is not empty, one quiet line:
+   "Builds on: Rhythm Foundations (Beginner), Legato (Beginner)". Each name is a
+   link that opens that Path's page (`place.move({ pathId })`). The Level name in
+   brackets only when the prerequisite has a `level`; use the Level's short name
+   (`levelSubtitle`'s first part), not its full title.
+2. **Same page, only when `unmetPathPrerequisites(progress, session.paths,
+   path)` is not empty and the player has not started this Path.** A calm
+   one-line suggestion above the Start button, never instead of it: "Start with
+   Rhythm Foundations first, or start anyway." "Rhythm Foundations" opens that
+   Path; Start stays exactly as it is. Name only the first unmet one. Once the
+   Path is started the line goes away for good: the player has decided.
+3. **Paths list (`PathList`).** No badge and no lock. Optionally order the list
+   with `curriculumOrder(session.paths)` inside each group so a Path never sits
+   above what it builds on; the owner's first-run order (`START_PATH_ORDER`) is
+   his and stays.
+4. **Strings** (15 locales, `session.paths.*`): `buildsOn` ("Builds on: {{list}}"),
+   `startFirst` ("Start with {{path}} first, or start anyway."), and the list
+   joiner if the locale files have none.
+5. **Tests**: `PathsView.test.tsx` (line shows with links; suggestion shows only
+   when unmet and not started; Start still starts), a layout check that the
+   line wraps inside the page at the four widths, and one screenshot per theme.
+6. **Planner (reading only, for whoever owns it)**: when the mix has room for
+   one more Path, prefer one whose `unmetPathPrerequisites` is empty. Not done
+   here: Today focus and the daily mix were just merged and are under review.
+
 ## How long each Path is (owner's note, 2026-11-18)
 
 Paths are not the same length and are not meant to be. A narrow technique is
@@ -260,20 +422,6 @@ untouched, so nobody's progress moves.
 Still to do for Blues, in the same spirit: box 5 and a line that enters box 4;
 the form in E in open position with its turnarounds; a jump or uptempo shuffle;
 slow blues in a second key; a three-chorus solo with a shape.
-
-### Triads and Chords: a strong candidate, not built tonight
-
-What fits the grader: triads played one note at a time (the right-notes check is
-at its best on slow written single notes), on each string set, in root position
-and both inversions, through I-IV-V and I-vi-IV-V in several keys, then the same
-shapes as two-note and three-note stabs graded on timing only. What does not fit
-yet: a strummed chord's notes (several onsets smeared together, not
-pitch-checked), so "did all three notes ring" stays with the player's ear, and
-the Path would have to say so. Know the Neck already has a first triads Step on
-the top three strings. The proposal is a long Path, about 14 Steps: three string
-sets by three inversions, each revisited in new keys and progressions before the
-next, then seventh-chord shells and voice-leading through a twelve-bar. It is on
-the board as its own card.
 
 ## Proof-reading (2026-11-18)
 

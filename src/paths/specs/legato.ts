@@ -198,7 +198,7 @@ export default definePath({
   level: "early-intermediate",
   assumes:
     "You can fret single notes cleanly with all four fingers and play eighth notes with a click at 80 BPM. No speed is assumed. The minutes listed are one pass through the material; expect to come back to each Step for days or weeks.",
-  prerequisites: { skills: ["Clean single notes with all four fingers", "Eighth notes with a click at 80 BPM"] },
+  prerequisites: { paths: [{ path: "rhythm-foundations", level: "beginner" }], skills: ["Clean single notes with all four fingers", "Eighth notes with a click at 80 BPM"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
   orderRationale:

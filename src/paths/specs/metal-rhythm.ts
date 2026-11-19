@@ -135,7 +135,7 @@ export default definePath({
   level: "early-intermediate",
   assumes:
     "You can play eighth notes with a click at 80 BPM and fret a note on the low strings cleanly. An electric guitar with some distortion helps, but every Exercise works clean. The minutes listed are one pass through the material; expect to come back to each Step for days or weeks.",
-  prerequisites: { skills: ["Eighth notes with a click at 80 BPM", "Clean single notes on the low strings"] },
+  prerequisites: { paths: [{ path: "rhythm-foundations", level: "beginner" }], skills: ["Eighth notes with a click at 80 BPM", "Clean single notes on the low strings"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
   orderRationale:

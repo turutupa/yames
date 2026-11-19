@@ -129,7 +129,7 @@ export default definePath({
   level: "early-intermediate",
   assumes:
     "You can fret and pick single notes and play eighth notes with a click at 70 BPM. Knowing the pentatonic box helps and isn't needed. The minutes listed are one pass through the material; a scale is learned when your ear knows it, which takes many short visits.",
-  prerequisites: { skills: ["Clean single notes", "Eighth notes with a click at 70 BPM"] },
+  prerequisites: { paths: [{ path: "know-the-neck", level: "beginner" }], skills: ["Clean single notes", "Eighth notes with a click at 70 BPM"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
   orderRationale:

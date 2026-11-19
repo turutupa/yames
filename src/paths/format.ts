@@ -457,6 +457,14 @@ export type ReviewEvent = {
   note: string;
 };
 
+/**
+ * A Path this one builds on. Guidance, never a lock: the app says "before this,
+ * do X, or start anyway" and the player decides. `level` is how far into that
+ * Path the player should be: through that Level. Left out, any start counts.
+ * `curriculum.ts` checks that the Path exists and that no chain leads back.
+ */
+export type PathPrerequisite = { path: string; level?: LevelId };
+
 export type PathDoc = {
   schemaVersion: typeof PATH_SCHEMA_VERSION;
   id: string;
@@ -465,7 +473,7 @@ export type PathDoc = {
   goal: string;
   level: PathLevel;
   assumes: string;
-  prerequisites: { paths: string[]; skills: string[] };
+  prerequisites: { paths: PathPrerequisite[]; skills: string[] };
   /** MIDI per string, string 1 first. */
   tuning: number[];
   review: { status: ReviewStatus; history: ReviewEvent[] };

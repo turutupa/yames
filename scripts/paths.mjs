@@ -93,8 +93,24 @@ function check(pipeline, id) {
     errors += bad;
     console.log(`${bad === 0 ? "ok  " : "FAIL"} ${pipeline.summary(JSON.parse(onDisk))} ${bad} errors, ${issues.length - bad} warnings.`);
   }
+  errors += checkCurriculumOnDisk(pipeline);
   if (errors === 0) errors += checkStrings(pipeline, id);
   if (errors > 0) fail(`${errors} errors.`);
+}
+
+// How the Paths build on each other is a property of all of them together,
+// so it is checked over every pack on disk whatever `id` was asked for.
+function checkCurriculumOnDisk(pipeline) {
+  const docs = pipeline
+    .allSpecs()
+    .map((spec) => path.join(packsDir, `${spec.id}.json`))
+    .filter((file) => existsSync(file))
+    .map((file) => JSON.parse(readFileSync(file, "utf8")));
+  const issues = pipeline.checkCurriculum(docs);
+  for (const issue of issues) console.log(`ERROR ${issue.rule}  ${issue.where}\n      ${issue.message}`);
+  const linked = docs.filter((d) => (d.prerequisites?.paths ?? []).length > 0).length;
+  console.log(`${issues.length === 0 ? "ok  " : "FAIL"} curriculum: ${docs.length} Paths, ${linked} build on another. ${issues.length} errors.`);
+  return issues.length;
 }
 
 function validateFile(pipeline, file) {

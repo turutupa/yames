@@ -121,7 +121,7 @@ export default definePath({
   level: "intermediate",
   assumes:
     "You can play a hammer-on and a pull-off that sound as loud as a picked note (the Beginner Level of Legato covers this), and triplets with a click at 70 BPM. An electric guitar with a little gain makes tapping easier, but every Exercise works clean. The minutes listed are one pass through the material.",
-  prerequisites: { skills: ["Hammer-ons and pull-offs", "Triplets with a click at 70 BPM"] },
+  prerequisites: { paths: [{ path: "legato", level: "beginner" }], skills: ["Hammer-ons and pull-offs", "Triplets with a click at 70 BPM"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
   orderRationale:

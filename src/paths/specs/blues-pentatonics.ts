@@ -181,7 +181,7 @@ export default definePath({
   level: "early-intermediate",
   assumes:
     "You know the open chords and can fret and pick single notes, and you can play eighth notes with a click at 70 BPM. Nothing about scales or blues is assumed. New ideas arrive in A, on purpose, so that theory is the only new thing, and the Steps after them move to other keys. This is a long Path: about three months at fifteen to twenty minutes a day.",
-  prerequisites: { skills: ["Clean single notes", "Eighth notes with a click at 70 BPM"] },
+  prerequisites: { paths: [{ path: "rhythm-foundations", level: "beginner" }], skills: ["Clean single notes", "Eighth notes with a click at 70 BPM"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
   orderRationale:

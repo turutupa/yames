@@ -1758,7 +1758,7 @@ export default definePath({
   level: "intermediate",
   assumes:
     "You can alternate-pick single notes evenly at sixteenths around 80 BPM (Alternate Picking through its Intermediate Level covers this) and you can hammer on and pull off cleanly. You don't need any sweeping yet, and you can start at whichever Level suits you.",
-  prerequisites: { skills: ["Even alternate picking at sixteenths, 80 BPM", "Clean hammer-ons and pull-offs"] },
+  prerequisites: { paths: [{ path: "alternate-picking", level: "intermediate" }, { path: "legato", level: "beginner" }], skills: ["Even alternate picking at sixteenths, 80 BPM", "Clean hammer-ons and pull-offs"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
   orderRationale:

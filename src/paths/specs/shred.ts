@@ -1842,7 +1842,7 @@ export default definePath({
   level: "intermediate",
   assumes:
     "You can play the A minor pentatonic box at fret 5 and eighth notes with a click at 90 BPM. No speed is assumed, but the first Step passes at sixteenths around 110 BPM: if sixteenths at 90 are not there yet, start with Rhythm Foundations or the Beginner Level of Alternate Picking. The minutes are one pass through the material; the drills are meant to be repeated for weeks, and their variants change keys and strings so the repetition stays fresh.",
-  prerequisites: { skills: ["The A minor pentatonic box", "Eighth notes with a click at 90 BPM"] },
+  prerequisites: { paths: [{ path: "alternate-picking", level: "intermediate" }, { path: "legato", level: "beginner" }], skills: ["The A minor pentatonic box", "Eighth notes with a click at 90 BPM"] },
   labelSubdivisions: true,
   paceLadders: true,
   orderRationale:

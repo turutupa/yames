@@ -140,7 +140,7 @@ export default definePath({
   level: "early-intermediate",
   assumes:
     "You can play sixteenth notes with a click at 70 BPM and stop a note cleanly (the Intermediate Level of Rhythm Foundations covers both). A clean tone is the right one here. The minutes listed are one pass through the material; a groove is something you come back to for weeks.",
-  prerequisites: { skills: ["Sixteenth notes with a click at 70 BPM", "Stopping a note cleanly"] },
+  prerequisites: { paths: [{ path: "rhythm-foundations", level: "intermediate" }], skills: ["Sixteenth notes with a click at 70 BPM", "Stopping a note cleanly"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
   orderRationale:

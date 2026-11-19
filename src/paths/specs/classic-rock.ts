@@ -199,7 +199,7 @@ export default definePath({
   level: "early-intermediate",
   assumes:
     "You can play power chords and single notes cleanly, and eighth notes with a click at 80 BPM. Knowing the A minor pentatonic box helps and isn't required: Step 2 goes through it. Most of the Path is in A, so that theory is the only new thing; licks a player repeats for weeks move to other keys and positions.",
-  prerequisites: { skills: ["Power chords", "Clean single notes", "Eighth notes with a click at 80 BPM"] },
+  prerequisites: { paths: [{ path: "rhythm-foundations", level: "beginner" }], skills: ["Power chords", "Clean single notes", "Eighth notes with a click at 80 BPM"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
   orderRationale:

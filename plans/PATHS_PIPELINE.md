@@ -213,6 +213,7 @@ new fields:
 | Offer a starting point | `doc.levels[].title`, `.summary`, `.placement.startHereIf` |
 | Know where a Step belongs | `levelOfStep(doc, stepId)`, or `level.stepIds` |
 | Suggest an order | `step.prerequisites`, as guidance: nothing may be locked |
+| Say what a Path builds on | `path.prerequisites.paths`: `{ path, level? }`, as guidance. `curriculum.ts` checks that each exists and that no chain leads back; `npm run paths -- check` prints a `curriculum:` line |
 | Start a Session | `warmupsFor(doc, levelId)`, then `warmupStartBpm(warmup, cleanBpmOfReference)` |
 | Find the reference's clean tempo | `warmup.referenceExercise`, then `progressKey` on that Exercise |
 | Choose notes for a Take | `notesForTake(exercise, seed, takeIndex)`: use `.exercise` for scoring, the tab and the coach |
