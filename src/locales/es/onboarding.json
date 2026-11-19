@@ -334,7 +334,23 @@
       "subtitle": "Elige una Ruta y tu nivel. Hoy arma tu primera Sesión a partir de ahí; puedes cambiar ambos en la página de la Ruta.",
       "pathHeading": "Ruta",
       "loading": "Cargando las Rutas…",
-      "subtitleNext": "Elige una Ruta y tu nivel. Hoy arma tu próxima Sesión a partir de ahí; puedes cambiar ambos en la página de la Ruta."
+      "subtitleNext": "Elige una Ruta y tu nivel. Hoy arma tu próxima Sesión a partir de ahí; puedes cambiar ambos en la página de la Ruta.",
+      "goalQuestion": "¿Qué quieres ahora mismo, sobre todo?",
+      "goalOptional": "opcional",
+      "levelFor": "Nivel en {{path}}",
+      "goals": {
+        "basics": "Soy nuevo: lo básico, a tiempo",
+        "harmony": "Entender acordes y tonalidades",
+        "technique": "Púa más limpia y rápida",
+        "speed": "Velocidad: mi técnica es sólida"
+      },
+      "why": {
+        "none": "Donde empieza casi todo el mundo: el tiempo, el clic y notas limpias.",
+        "basics": "Nuevo con la guitarra: tiempo y notas limpias, y los nombres de las notas en el mástil.",
+        "harmony": "Los acordes y las tonalidades empiezan por las notas del mástil, luego escalas, tríadas y acordes de una tonalidad.",
+        "technique": "Una púa pareja y limpia es la base de cualquier frase rápida.",
+        "speed": "Tu técnica ya es sólida, así que vas directo a la velocidad."
+      }
     }
   },
   "whatsNew": {

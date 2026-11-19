@@ -334,7 +334,23 @@
       "subtitle": "Scegli un Percorso e il tuo livello. Oggi ci costruisce la tua prima sessione; puoi cambiarli entrambi nella pagina del Percorso.",
       "pathHeading": "Percorso",
       "loading": "Caricamento dei Percorsi…",
-      "subtitleNext": "Scegli un Percorso e il tuo livello. Oggi ci costruisce la tua prossima sessione; puoi cambiarli entrambi nella pagina del Percorso."
+      "subtitleNext": "Scegli un Percorso e il tuo livello. Oggi ci costruisce la tua prossima sessione; puoi cambiarli entrambi nella pagina del Percorso.",
+      "goalQuestion": "Cosa vuoi di più in questo momento?",
+      "goalOptional": "facoltativo",
+      "levelFor": "Livello in {{path}}",
+      "goals": {
+        "basics": "Sono nuovo: le basi, a tempo",
+        "harmony": "Capire accordi e tonalità",
+        "technique": "Plettrata più pulita e veloce",
+        "speed": "Velocità: la mia tecnica è solida"
+      },
+      "why": {
+        "none": "Da dove parte quasi tutti: il tempo, il clic e note pulite.",
+        "basics": "Nuovo alla chitarra: tempo e note pulite, e i nomi delle note sul manico.",
+        "harmony": "Accordi e tonalità iniziano dalle note sul manico, poi scale, triadi e accordi di una tonalità.",
+        "technique": "Una plettrata regolare e pulita è la base di ogni frase veloce.",
+        "speed": "La tua tecnica è già solida, quindi vai dritto alla velocità."
+      }
     }
   },
   "whatsNew": {

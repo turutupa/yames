@@ -334,7 +334,23 @@
       "subtitle": "Choisis un Parcours et ton niveau. Aujourd'hui en tire ta première séance ; tu peux changer les deux sur la page du Parcours.",
       "pathHeading": "Parcours",
       "loading": "Chargement des Parcours…",
-      "subtitleNext": "Choisis un Parcours et ton niveau. Aujourd'hui en tire ta prochaine séance ; tu peux changer les deux sur la page du Parcours."
+      "subtitleNext": "Choisis un Parcours et ton niveau. Aujourd'hui en tire ta prochaine séance ; tu peux changer les deux sur la page du Parcours.",
+      "goalQuestion": "Qu'est-ce que tu veux le plus en ce moment ?",
+      "goalOptional": "facultatif",
+      "levelFor": "Niveau dans {{path}}",
+      "goals": {
+        "basics": "Je débute : les bases, en rythme",
+        "harmony": "Comprendre les accords et les tonalités",
+        "technique": "Un médiator plus propre et plus rapide",
+        "speed": "La vitesse : ma technique est solide"
+      },
+      "why": {
+        "none": "Là où la plupart commencent : le temps, le clic et des notes propres.",
+        "basics": "Débutant : le temps et des notes propres, et le nom des notes sur le manche.",
+        "harmony": "Les accords et les tonalités commencent par les notes du manche, puis les gammes, les triades et les accords d'une tonalité.",
+        "technique": "Un aller-retour régulier et propre est la base de toute phrase rapide.",
+        "speed": "Ta technique est déjà solide, alors tu passes directement à la vitesse."
+      }
     }
   },
   "whatsNew": {

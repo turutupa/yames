@@ -334,7 +334,23 @@
       "subtitle": "Escolha uma Trilha e seu nível. Hoje monta sua primeira sessão a partir daí; dá para mudar os dois na página da Trilha.",
       "pathHeading": "Trilha",
       "loading": "Carregando as Trilhas…",
-      "subtitleNext": "Escolha uma Trilha e seu nível. Hoje monta sua próxima sessão a partir daí; dá para mudar os dois na página da Trilha."
+      "subtitleNext": "Escolha uma Trilha e seu nível. Hoje monta sua próxima sessão a partir daí; dá para mudar os dois na página da Trilha.",
+      "goalQuestion": "O que você mais quer agora?",
+      "goalOptional": "opcional",
+      "levelFor": "Nível em {{path}}",
+      "goals": {
+        "basics": "Sou iniciante: o básico, no tempo",
+        "harmony": "Entender acordes e tons",
+        "technique": "Palhetada mais limpa e rápida",
+        "speed": "Velocidade: minha técnica é sólida"
+      },
+      "why": {
+        "none": "Onde a maioria começa: tempo, o clique e notas limpas.",
+        "basics": "Começando na guitarra: tempo e notas limpas, e os nomes das notas no braço.",
+        "harmony": "Acordes e tons começam pelas notas no braço, depois escalas, tríades e os acordes de um tom.",
+        "technique": "Uma palhetada regular e limpa é a base de toda frase rápida.",
+        "speed": "Sua técnica já é sólida, então você vai direto para a velocidade."
+      }
     }
   },
   "whatsNew": {

@@ -334,7 +334,23 @@
       "subtitle": "Wybierz ścieżkę i swój poziom. Dzisiaj ułoży z tego pierwszą sesję; oba zmienisz na stronie ścieżki.",
       "pathHeading": "Ścieżka",
       "loading": "Wczytywanie ścieżek…",
-      "subtitleNext": "Wybierz ścieżkę i swój poziom. Dzisiaj ułoży z tego następną sesję; oba zmienisz na stronie ścieżki."
+      "subtitleNext": "Wybierz ścieżkę i swój poziom. Dzisiaj ułoży z tego następną sesję; oba zmienisz na stronie ścieżki.",
+      "goalQuestion": "Czego teraz chcesz najbardziej?",
+      "goalOptional": "opcjonalnie",
+      "levelFor": "Poziom w {{path}}",
+      "goals": {
+        "basics": "Jestem nowy: podstawy, w rytmie",
+        "harmony": "Zrozumieć akordy i tonacje",
+        "technique": "Czystsze, szybsze kostkowanie",
+        "speed": "Szybkość: moja technika jest solidna"
+      },
+      "why": {
+        "none": "Tu zaczyna większość: rytm, klik i czyste dźwięki.",
+        "basics": "Dopiero zaczynasz: rytm i czyste dźwięki oraz nazwy dźwięków na gryfie.",
+        "harmony": "Akordy i tonacje zaczynają się od dźwięków na gryfie, potem skale, trójdźwięki i akordy w tonacji.",
+        "technique": "Równe, czyste kostkowanie to podstawa każdej szybkiej frazy.",
+        "speed": "Twoja technika jest już solidna, więc od razu przechodzisz do szybkości."
+      }
     }
   },
   "whatsNew": {

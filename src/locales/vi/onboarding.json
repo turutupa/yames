@@ -334,7 +334,23 @@
       "subtitle": "Chọn một Lộ trình và cấp độ. Hôm nay sẽ dựng buổi tập đầu tiên từ đó; đổi cả hai trong trang Lộ trình.",
       "pathHeading": "Lộ trình",
       "loading": "Đang tải các Lộ trình…",
-      "subtitleNext": "Chọn một Lộ trình và cấp độ. Hôm nay sẽ dựng buổi tập tiếp theo từ đó; đổi cả hai trong trang Lộ trình."
+      "subtitleNext": "Chọn một Lộ trình và cấp độ. Hôm nay sẽ dựng buổi tập tiếp theo từ đó; đổi cả hai trong trang Lộ trình.",
+      "goalQuestion": "Lúc này bạn muốn gì nhất?",
+      "goalOptional": "không bắt buộc",
+      "levelFor": "Cấp độ trong {{path}}",
+      "goals": {
+        "basics": "Tôi mới chơi: phần cơ bản, đúng nhịp",
+        "harmony": "Hiểu hợp âm và giọng",
+        "technique": "Gảy sạch hơn, nhanh hơn",
+        "speed": "Tốc độ: kỹ thuật tôi đã vững"
+      },
+      "why": {
+        "none": "Nơi hầu hết người chơi bắt đầu: nhịp, tiếng click và nốt sạch.",
+        "basics": "Mới chơi guitar: nhịp và nốt sạch, cùng tên các nốt trên cần đàn.",
+        "harmony": "Hợp âm và giọng bắt đầu từ các nốt trên cần đàn, rồi đến âm giai, hợp âm ba và hợp âm trong một giọng.",
+        "technique": "Gảy đều và sạch là nền của mọi câu nhạc nhanh.",
+        "speed": "Kỹ thuật của bạn đã vững, nên bạn đi thẳng vào tốc độ."
+      }
     }
   },
   "whatsNew": {

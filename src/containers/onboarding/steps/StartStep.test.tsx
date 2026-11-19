@@ -14,7 +14,8 @@ import { NO_PROGRESS, type PlayerProgress } from "../../../session/progress";
 import { OnboardingWizard } from "../OnboardingWizard";
 import type { OnboardingState } from "../onboardingMachine";
 import type { WizardLearningEnv } from "../WizardContext";
-import { defaultStart, startablePaths } from "./StartStep";
+import { defaultStart, stagedStart, startablePaths } from "./StartStep";
+import { recommendStart } from "./startRecommendation";
 
 let PATHS: PathDoc[] = [];
 beforeAll(async () => {
@@ -77,14 +78,18 @@ describe("Where do you start? — what it offers", () => {
     ]);
   });
 
-  it("preselects Shred at its first Level on a first run, Next open", () => {
+  it("stages Rhythm Foundations at its first Level on a first run with no answer, not Shred", () => {
     mount();
-    expect(pathCard("shred")).toHaveAttribute("aria-pressed", "true");
+    expect(pathCard("rhythm-foundations")).toHaveAttribute("aria-pressed", "true");
+    expect(pathCard("shred")).toHaveAttribute("aria-pressed", "false");
     expect(levelButton("beginner")).toHaveAttribute("aria-pressed", "true");
     expect(next()).toBeEnabled();
+    // What is staged and why, in one line.
+    expect(screen.getByTestId("onboarding-start-why")).toHaveTextContent(
+      "Rhythm Foundations · Where most players start: time, the click and clean notes.",
+    );
     // The Level's own words and where it starts, as the Path page says them.
     const about = screen.getByTestId("onboarding-start-about");
-    expect(about.textContent).toContain("One string, then two");
     expect(about.textContent).toMatch(/Starts at Step 1/);
   });
 
@@ -127,7 +132,10 @@ describe("Where do you start? — selection is not navigation", () => {
     expect(path.id).toBe("classic-rock");
     expect(level).toBe("advanced");
     // W7 and a Back here show this Path, whatever else the player follows.
-    expect(dispatch).toHaveBeenCalledWith({ type: "SET_CONTEXT", patch: { startPathId: "classic-rock" } });
+    expect(dispatch).toHaveBeenCalledWith({
+      type: "SET_CONTEXT",
+      patch: { startPathId: "classic-rock", startPathIds: ["classic-rock"], startGoal: undefined },
+    });
     expect(dispatch).toHaveBeenCalledWith({ type: "NEXT" });
   });
 
@@ -180,5 +188,180 @@ describe("Where do you start? — the step's place", () => {
     expect(dots).toHaveLength(7);
     expect(dots[1]).toHaveClass("active");
     expect(within(screen.getByRole("dialog")).getByText("Where do you start?")).toBeInTheDocument();
+  });
+});
+
+const goal = (id: string) => document.querySelector<HTMLButtonElement>(`[data-goal="${id}"]`)!;
+const pressed = () =>
+  [...document.querySelectorAll<HTMLButtonElement>(".onboarding-start-path")]
+    .filter((b) => b.getAttribute("aria-pressed") === "true")
+    .map((b) => b.dataset.path);
+
+describe("Where do you start? — the recommendation from what the player wants", () => {
+  it("asks one optional question with four plain answers, none chosen", () => {
+    mount();
+    expect(screen.getByText("What do you want most right now?")).toBeInTheDocument();
+    const answers = [...document.querySelectorAll("[data-goal]")];
+    expect(answers.map((a) => a.textContent)).toEqual([
+      "I'm new: the basics, in time",
+      "Understand chords and keys",
+      "Cleaner, faster picking",
+      "Speed: my technique is solid",
+    ]);
+    expect(answers.every((a) => a.getAttribute("aria-pressed") === "false")).toBe(true);
+  });
+
+  it("a beginner gets Rhythm Foundations and Know the Neck, and Next starts both", () => {
+    const { dispatch, startPath } = mount();
+    fireEvent.click(goal("basics"));
+    expect(pressed()).toEqual(["rhythm-foundations", "know-the-neck"]);
+    expect(screen.getByTestId("onboarding-start-why")).toHaveTextContent(
+      "Rhythm Foundations and Know the Neck · New to the guitar",
+    );
+    // The Level is the first Path's, and says so.
+    expect(screen.getByText("Level in Rhythm Foundations")).toBeInTheDocument();
+    fireEvent.click(levelButton("intermediate"));
+    expect(pressed()).toEqual(["rhythm-foundations", "know-the-neck"]);
+    act(() => next().click());
+    expect(startPath.mock.calls.map(([p, l]) => [p.id, l])).toEqual([
+      ["rhythm-foundations", "intermediate"],
+      ["know-the-neck", "beginner"],
+    ]);
+    expect(dispatch).toHaveBeenCalledWith({
+      type: "SET_CONTEXT",
+      patch: { startPathId: "rhythm-foundations", startPathIds: ["rhythm-foundations", "know-the-neck"], startGoal: "basics" },
+    });
+  });
+
+  it("harmony starts the route at Know the Neck and names the route", () => {
+    const { startPath } = mount();
+    fireEvent.click(goal("harmony"));
+    expect(pressed()).toEqual(["know-the-neck"]);
+    expect(screen.getByTestId("onboarding-start-why")).toHaveTextContent(/scales, triads and chords in a key/);
+    act(() => next().click());
+    expect(startPath.mock.calls.map(([p]) => p.id)).toEqual(["know-the-neck"]);
+  });
+
+  it("technique is Alternate Picking; Shred only for a player who says their technique is solid", () => {
+    mount();
+    fireEvent.click(goal("technique"));
+    expect(pressed()).toEqual(["alternate-picking"]);
+    fireEvent.click(goal("speed"));
+    expect(pressed()).toEqual(["shred"]);
+    expect(goal("technique")).toHaveAttribute("aria-pressed", "false");
+    // Again on the chosen answer: no answer, back to the one start.
+    fireEvent.click(goal("speed"));
+    expect(pressed()).toEqual(["rhythm-foundations"]);
+  });
+
+  it("any Path can be picked instead; the line is then that Path's own goal", () => {
+    const { startPath } = mount();
+    fireEvent.click(goal("basics"));
+    fireEvent.click(pathCard("legato"));
+    expect(pressed()).toEqual(["legato"]);
+    const legato = PATHS.find((p) => p.id === "legato")!;
+    expect(screen.getByTestId("onboarding-start-why")).toHaveTextContent(`Legato · ${legato.goal}`);
+    // The answer stays lit: it is what the player said, not what was picked.
+    expect(goal("basics")).toHaveAttribute("aria-pressed", "true");
+    act(() => next().click());
+    expect(startPath.mock.calls.map(([p]) => p.id)).toEqual(["legato"]);
+  });
+
+  it("a recommendation of two that the cap has no room for is refused, and Next waits", () => {
+    const ids = ["shred", "alternate-picking", "sweep-picking"];
+    mount({ ...NO_PROGRESS, states: ids.map((pathId) => ({ pathId, startedAt: 1, updatedAt: 1 })) });
+    fireEvent.click(goal("basics"));
+    expect(screen.getByTestId("onboarding-start-cap")).toBeInTheDocument();
+    expect(next()).toBeDisabled();
+    fireEvent.click(goal("harmony"));
+    expect(screen.queryByTestId("onboarding-start-cap")).toBeNull();
+  });
+
+  it("a Path already followed in a recommendation is not started again", () => {
+    const progress: PlayerProgress = {
+      ...NO_PROGRESS,
+      states: [{ pathId: "know-the-neck", level: "beginner", startedAt: 1, updatedAt: 1 }],
+    };
+    const { startPath } = mount(progress);
+    fireEvent.click(goal("basics"));
+    act(() => next().click());
+    expect(startPath.mock.calls.map(([p]) => p.id)).toEqual(["rhythm-foundations"]);
+  });
+});
+
+describe("Where do you start? — the pure parts", () => {
+  it("recommendStart follows the curriculum map, and never offers what is not there", () => {
+    const offered = startablePaths(PATHS);
+    expect(recommendStart(null, offered)).toEqual({ pathIds: ["rhythm-foundations"], whyKey: "onboarding.start.why.none" });
+    expect(recommendStart("basics", offered)?.pathIds).toEqual(["rhythm-foundations", "know-the-neck"]);
+    expect(recommendStart("harmony", offered)?.pathIds).toEqual(["know-the-neck"]);
+    expect(recommendStart("technique", offered)?.pathIds).toEqual(["alternate-picking"]);
+    expect(recommendStart("speed", offered)?.pathIds).toEqual(["shred"]);
+    // Know the Neck missing: the beginner still gets the start.
+    const fewer = offered.filter((p) => p.id !== "know-the-neck");
+    expect(recommendStart("basics", fewer)?.pathIds).toEqual(["rhythm-foundations"]);
+    // Nothing the answer names: the first Path offered.
+    expect(recommendStart("speed", [{ id: "blues-pentatonics" }])?.pathIds).toEqual(["blues-pentatonics"]);
+    expect(recommendStart("speed", [])).toBeNull();
+  });
+
+  it("stagedStart: a pick beats an answer, an answer beats a re-run's Path", () => {
+    const follows: PlayerProgress = {
+      ...NO_PROGRESS,
+      states: [{ pathId: "classic-rock", level: "advanced", startedAt: 1, updatedAt: 1 }],
+    };
+    const none = { goal: null, pickedPathId: null, levelId: null };
+    expect(stagedStart(PATHS, follows, none)).toEqual({ pathIds: ["classic-rock"], levelId: "advanced", whyKey: null });
+    expect(stagedStart(PATHS, follows, { ...none, goal: "technique" })?.pathIds).toEqual(["alternate-picking"]);
+    expect(stagedStart(PATHS, follows, { ...none, goal: "technique", pickedPathId: "tapping" })).toEqual({
+      pathIds: ["tapping"],
+      levelId: "beginner",
+      whyKey: null,
+    });
+  });
+});
+
+describe("You're ready — the Path row says what and why", () => {
+  it("names both Paths of a beginner's start, and why, in one row", () => {
+    const progress: PlayerProgress = {
+      ...NO_PROGRESS,
+      states: [
+        { pathId: "rhythm-foundations", level: "beginner", startedAt: 1, updatedAt: 1 },
+        { pathId: "know-the-neck", level: "beginner", startedAt: 1, updatedAt: 1 },
+      ],
+    };
+    render(
+      <OnboardingWizard
+        state={{
+          status: "step",
+          stepId: "ready",
+          context: {
+            skipped: [],
+            visited: ["welcome", "instrument", "start", "ready"],
+            startPathId: "rhythm-foundations",
+            startPathIds: ["rhythm-foundations", "know-the-neck"],
+            startGoal: "basics",
+          },
+        }}
+        dispatch={vi.fn()}
+        appVersion="1.0.0"
+        instrument="electric-guitar"
+        instrumentChosen
+        onInstrumentChange={vi.fn()}
+        soundType="click"
+        themeId="obsidian"
+        coachTier="off"
+        alwaysOnTop={false}
+        onAlwaysOnTopChange={vi.fn()}
+        startSoftClick={vi.fn()}
+        stopSoftClick={vi.fn()}
+        softClickPlaying={false}
+        onFinish={vi.fn()}
+        learning={{ paths: PATHS, progress, plan: null, startPath: vi.fn(() => null) }}
+      />,
+    );
+    const why = screen.getByTestId("onboarding-summary-why-path");
+    expect(why.parentElement).toHaveTextContent("Rhythm Foundations and Know the Neck");
+    expect(why).toHaveTextContent("New to the guitar: time and clean notes, and the names of the notes on the neck.");
   });
 });

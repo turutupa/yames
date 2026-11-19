@@ -13,6 +13,12 @@
  * defaults a player who never opened the wizard gets: Shred, from its first
  * Level (`playerPaths`, `FIRST_PATH_ID`).
  *
+ * What is staged on a first run is no longer Shred for everyone: one optional
+ * question, "What do you want most right now?", and the curriculum map's
+ * answer to it (`startRecommendation.ts`), Rhythm Foundations with no answer.
+ * A recommendation can be two Paths; Next starts both, the first at the
+ * Level shown. Any Path under it can be picked instead.
+ *
  * A re-run starts on the Path the player follows (the first of them) at the
  * Level they chose, and Next with nothing changed writes nothing, so a player
  * who walked past this step keeps the Step they were on.
@@ -28,6 +34,8 @@ import { levelsOf } from "../../../session/variants";
 import { levelSubtitle } from "../../session/PathsView";
 import { useWizardEnv } from "../WizardContext";
 import type { WizardStepProps } from "./types";
+import { START_GOALS, recommendStart } from "./startRecommendation";
+import type { StartGoal } from "./startRecommendation";
 import "../../../styles/onboarding-learning.css";
 
 /** The order the step offers the Paths in: the one everybody starts on first. */
@@ -83,24 +91,71 @@ export function defaultStart(
   return { pathId: path.id, levelId: levelFor(path, progress) };
 }
 
+/** The Paths this step will start, the first at `levelId`, and why (when it is a recommendation). */
+export type StartPlan = { pathIds: string[]; levelId: string | null; whyKey: string | null };
+
+/**
+ * What the step stages: a Path the player picked; else the answer's
+ * recommendation; else, on a re-run, the Path they follow; else the map's one
+ * start (`recommendStart`).
+ */
+export function stagedStart(
+  paths: readonly PathDoc[],
+  progress: PlayerProgress,
+  opts: { goal: StartGoal | null; pickedPathId: string | null; levelId: string | null; startedNow?: string },
+): StartPlan | null {
+  const offered = startablePaths(paths);
+  const levelOf = (id: string) => {
+    const p = offered.find((x) => x.id === id);
+    return p ? levelFor(p, progress) : null;
+  };
+  const plan = (pathIds: string[], whyKey: string | null): StartPlan => ({
+    pathIds,
+    levelId: opts.levelId ?? levelOf(pathIds[0]),
+    whyKey,
+  });
+  if (opts.pickedPathId && offered.some((p) => p.id === opts.pickedPathId)) return plan([opts.pickedPathId], null);
+  if (opts.goal) {
+    const rec = recommendStart(opts.goal, offered);
+    return rec ? plan(rec.pathIds, rec.whyKey) : null;
+  }
+  const follows = progress.states.some((s) => isSubscribed(progress, s.pathId) && offered.some((p) => p.id === s.pathId));
+  if (follows) {
+    const back = defaultStart(paths, progress, opts.startedNow);
+    return back ? { pathIds: [back.pathId], levelId: opts.levelId ?? back.levelId, whyKey: null } : null;
+  }
+  const rec = recommendStart(null, offered);
+  return rec ? plan(rec.pathIds, rec.whyKey) : null;
+}
+
 export function StartStep(_props: WizardStepProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { learning, setStepCommit, setNextEnabled, setMachineContext, machineContext } = useWizardEnv();
   const { paths, progress, startPath } = learning;
   const offered = useMemo(() => startablePaths(paths), [paths]);
 
-  // Null until the player picks: the default follows the store as it loads,
-  // so a re-run whose progress arrives a moment late still starts on their Path.
-  const [picked, setPicked] = useState<StartChoice | null>(null);
+  // Nothing staged by hand until the player picks: the default follows the
+  // store as it loads, so a re-run whose progress arrives a moment late still
+  // starts on their Path. A Back to this step finds what was answered.
+  const [goal, setGoal] = useState<StartGoal | null>(machineContext.startGoal ?? null);
+  const [pickedPathId, setPickedPathId] = useState<string | null>(null);
+  const [levelId, setLevelId] = useState<string | null>(null);
   const startedNow = machineContext.startPathId;
-  const fallback = useMemo(() => defaultStart(paths, progress, startedNow), [paths, progress, startedNow]);
-  const choice = picked ?? fallback;
-  const path = choice ? offered.find((p) => p.id === choice.pathId) ?? null : null;
+  const staged = useMemo(
+    () => stagedStart(paths, progress, { goal, pickedPathId, levelId, startedNow }),
+    [paths, progress, goal, pickedPathId, levelId, startedNow],
+  );
+  const chosen = useMemo(
+    () => (staged?.pathIds ?? []).map((id) => offered.find((p) => p.id === id)).filter((p): p is PathDoc => !!p),
+    [staged, offered],
+  );
+  const path = chosen[0] ?? null;
   const levels = path ? levelsOf(path) : [];
-  const level = levels.find((l) => l.id === choice?.levelId) ?? levels[0] ?? null;
+  const level = levels.find((l) => l.id === staged?.levelId) ?? levels[0] ?? null;
 
   const following = progress.states.filter((s) => isSubscribed(progress, s.pathId)).length;
-  const refused = !!path && !isSubscribed(progress, path.id) && following >= SUBSCRIPTION_CAP;
+  const fresh = chosen.filter((p) => !isSubscribed(progress, p.id));
+  const refused = fresh.length > 0 && following + fresh.length > SUBSCRIPTION_CAP;
   // Already followed at this Level: nothing to write, and writing would move
   // the player back to the Level's first open Step.
   const unchanged =
@@ -112,13 +167,22 @@ export function StartStep(_props: WizardStepProps) {
       path && !refused
         ? () => {
             if (!unchanged) startPath(path, level?.id ?? null);
-            setMachineContext({ startPathId: path.id });
+            // The second of a recommendation, at its own first Level.
+            for (const other of chosen.slice(1)) {
+              if (!isSubscribed(progress, other.id)) startPath(other, levelFor(other, progress));
+            }
+            setMachineContext({
+              startPathId: path.id,
+              startPathIds: chosen.map((p) => p.id),
+              startGoal: goal ?? undefined,
+            });
           }
         : null,
     );
-  }, [path, level, refused, unchanged, startPath, setNextEnabled, setStepCommit, setMachineContext]);
+  }, [path, chosen, level, refused, unchanged, goal, progress, startPath, setNextEnabled, setStepCommit, setMachineContext]);
 
   const entry = path && level ? levelEntryStep(progress, path, level) : null;
+  const names = joinTitles(chosen.map((p) => p.title), i18n.language);
 
   return (
     <div className="onboarding-step onboarding-start" data-testid="onboarding-start">
@@ -136,12 +200,41 @@ export function StartStep(_props: WizardStepProps) {
       ) : (
         <>
           <div className="onboarding-start-group">
+            <h3 className="onboarding-choice-heading" id="onboarding-start-goal">
+              {t("onboarding.start.goalQuestion")}{" "}
+              <span className="onboarding-start-optional">{t("onboarding.start.goalOptional")}</span>
+            </h3>
+            <div className="onboarding-start-goals" role="group" aria-labelledby="onboarding-start-goal">
+              {START_GOALS.map((g) => {
+                const on = g === goal;
+                return (
+                  <button
+                    key={g}
+                    type="button"
+                    className={`onboarding-start-goal${on ? " selected" : ""}`}
+                    aria-pressed={on}
+                    data-goal={g}
+                    // Again on the chosen answer: no answer.
+                    onClick={() => {
+                      setGoal(on ? null : g);
+                      setPickedPathId(null);
+                      setLevelId(null);
+                    }}
+                  >
+                    {t(`onboarding.start.goals.${g}`)}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="onboarding-start-group">
             <h3 className="onboarding-choice-heading" id="onboarding-start-paths">
               {t("onboarding.start.pathHeading")}
             </h3>
             <div className="onboarding-start-paths" role="group" aria-labelledby="onboarding-start-paths">
               {offered.map((p) => {
-                const on = p.id === path?.id;
+                const on = chosen.some((c) => c.id === p.id);
                 return (
                   <button
                     key={p.id}
@@ -149,20 +242,32 @@ export function StartStep(_props: WizardStepProps) {
                     className={`onboarding-start-path${on ? " selected" : ""}`}
                     aria-pressed={on}
                     data-path={p.id}
-                    onClick={() => setPicked({ pathId: p.id, levelId: levelFor(p, progress) })}
+                    title={p.goal}
+                    onClick={() => {
+                      setPickedPathId(p.id);
+                      setLevelId(null);
+                    }}
                   >
                     <span className="onboarding-start-path-title">{p.title}</span>
-                    <span className="onboarding-start-path-goal">{p.goal}</span>
                   </button>
                 );
               })}
             </div>
+            {path && (
+              <p className="onboarding-start-why" data-testid="onboarding-start-why">
+                <b>{names}</b>
+                {" · "}
+                {staged?.whyKey ? t(staged.whyKey) : path.goal}
+              </p>
+            )}
           </div>
 
           {path && level && (
             <div className="onboarding-start-group">
               <h3 className="onboarding-choice-heading" id="onboarding-start-level">
-                {t("session.paths.level")}
+                {chosen.length > 1
+                  ? t("onboarding.start.levelFor", { path: path.title })
+                  : t("session.paths.level")}
               </h3>
               <div className="onboarding-start-levels" role="group" aria-labelledby="onboarding-start-level">
                 {levels.map((l) => (
@@ -172,7 +277,10 @@ export function StartStep(_props: WizardStepProps) {
                     className={`onboarding-start-level${l.id === level.id ? " selected" : ""}`}
                     aria-pressed={l.id === level.id}
                     data-level={l.id}
-                    onClick={() => setPicked({ pathId: path.id, levelId: l.id })}
+                    onClick={() => {
+                      // The Paths staged stay staged: only the Level changes.
+                      setLevelId(l.id);
+                    }}
                   >
                     {t(`session.paths.levelName.${l.id}`)}
                   </button>
@@ -198,4 +306,17 @@ export function StartStep(_props: WizardStepProps) {
       )}
     </div>
   );
+}
+
+type ListFormatCtor = new (locale?: string, options?: { type?: "conjunction" }) => { format(list: string[]): string };
+
+/** "Rhythm Foundations and Know the Neck", the way this language joins a list (as in `JamView`). */
+export function joinTitles(titles: string[], language: string): string {
+  const ListFormat = (Intl as unknown as { ListFormat?: ListFormatCtor }).ListFormat;
+  if (!ListFormat) return titles.join(", ");
+  try {
+    return new ListFormat(language, { type: "conjunction" }).format(titles);
+  } catch {
+    return titles.join(", ");
+  }
 }
