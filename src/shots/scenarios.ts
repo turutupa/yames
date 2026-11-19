@@ -101,7 +101,7 @@ export interface Shot {
      * Today's plan. The harness makes it runnable for the scene, so a Theory
      * Take can be photographed before any Theory Path ships as runnable.
      */
-    path?: "blues-pentatonics" | "sweep-picking" | "alternate-picking" | "legato" | "rhythm-foundations" | "metal-rhythm" | "know-the-neck" | "scales-and-modes" | "tapping" | "funk-lines" | "triads";
+    path?: "blues-pentatonics" | "sweep-picking" | "alternate-picking" | "legato" | "rhythm-foundations" | "metal-rhythm" | "know-the-neck" | "scales-and-modes" | "tapping" | "funk-lines" | "triads" | "chords-in-a-key";
     /** With `path`: play this Exercise rather than the first Step's first. */
     exercise?: string;
     /** With `exercise`: it plays over the band, so wait for the band before the photograph. */
@@ -919,6 +919,15 @@ export const SHOTS: Shot[] = [
     suffix: "session-neck-triads",
     window: "main",
     session: { seed: "returning", stop: "ready", practiceView: "neck", path: "triads", exercise: "four-chords.low" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  {
+    id: "session-neck-chords",
+    suffix: "session-neck-chords",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "chords-in-a-key", exercise: "the-minors.one-six-two-five" },
     width: 1400,
     height: 900,
     settleMs: 1800,

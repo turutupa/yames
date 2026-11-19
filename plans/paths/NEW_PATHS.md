@@ -220,7 +220,7 @@ HOW HARMONY WORKS (the owner's route)
   Know the Neck ──(B)──> Scales and Modes ──(B)──┐
        └──────────────(B)────────────────────────┴─> Triads*  ──(I)──> Chords in a Key* ──(B)──┐
                                                         └──────────────(I)────────────────────┴─> Arpeggios over Changes* ··> Sweep Picking
-  * Triads is written; the other two are to be written.
+  * Triads and Chords in a Key are written; Arpeggios over Changes is to be written.
   (B), (I): through that Level of the Path the arrow leaves.
 ```
 
@@ -242,7 +242,7 @@ do X, or start anyway". Arrows are data now (`prerequisites.paths`, below).
 | Harmony | Know the Neck | nothing: the first Path for the harmony route | 6 weeks | written |
 | Harmony | Scales and Modes | Know the Neck (Beginner) | 6 weeks | written |
 | Harmony | **Triads** | Know the Neck (Beginner), Scales and Modes (Beginner) | 10 Steps, 32 Exercises now, about 6 weeks; meant to grow to about 12 | written (first version) |
-| Harmony | **Chords in a Key** | Triads (Intermediate) | long, about 12 weeks | to write |
+| Harmony | **Chords in a Key** | Triads (Intermediate) | 9 Steps, 27 Exercises now, about 5 weeks; meant to grow to about 12 | written (first version) |
 | Harmony | **Arpeggios over Changes** | Triads (Intermediate), Chords in a Key (Beginner) | about 8 weeks | to write |
 
 Nothing is renamed, split or merged: every existing Path teaches one thing a
@@ -321,6 +321,26 @@ Still to add to reach the intended length: the diminished triad; the A, D and
 G string set; every shape of F and G drilled the way C is; minor triads on the
 middle strings in other keys; a second song form. They belong in this Path, as
 consolidation Steps, in the way Blues was extended.
+
+### Chords in a Key (`chords-in-a-key`, theory): the second Path of the route, written
+
+**Who for:** a player who has the first two Levels of Triads and asks the next
+question: which chords go together, and why.
+
+| Level | Steps | What it unlocks |
+|---|---|---|
+| Beginner: seven chords from one scale | A chord on every note (the upper four, all seven, three major and three minor). Chords have numbers (one, four, five on the middle strings; an eight-bar form; other keys). Two, three and six (each minor chord as the partner of a major one; one, six, two, five) | The pattern major, minor, minor, major, major, minor, diminished, and chords named by number. |
+| Intermediate: progressions, keys, and the minor key | Two, five, one; six, four, one, five; one, three, four, five. The seven chords of D; progressions in keys that change. The minor key (i, iv, v; VI and VII; the major V) | A handful of progressions by name, in any key, and the main chords of a minor key. |
+| Advanced: forms, and songs of your own | One progression in two parts of the neck. The twelve-bar form, low, high and in other keys. A verse and a chorus from four chords, in other keys, then the player's own eight bars | Forms longer than four bars, and numbers used to build something. |
+
+It reuses the shape helpers of Triads, so the same rule fingers both Paths.
+Chord numbers are written as words in the copy ("one, four, five") because
+that is how they are said, with the Roman numerals named once.
+
+Still to add to reach the intended length: the same route in G and A as full
+Steps and not only as variants; seventh chords on every degree; the minor key
+in a second key; secondary chords that songs borrow (the major two, the flat
+seven); a second form (sixteen bars, AABA).
 
 ### Other foundations a beginner needs, not built
 

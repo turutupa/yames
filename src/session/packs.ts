@@ -31,7 +31,7 @@ const OVERLAY_FILES = import.meta.glob(["../paths/packs/i18n/*/*.json", "!../pat
  * "not checked" there, and the result says so.
  *
  * Rhythm Foundations, Legato, Metal Rhythm, Tapping, Funk Lines, Know the Neck,
- * Scales and Modes and Triads (`plans/paths/NEW_PATHS.md`) are
+ * Scales and Modes, Triads and Chords in a Key (`plans/paths/NEW_PATHS.md`) are
  * graded the same way. In Legato an unheard hammer-on or pull-off costs nothing,
  * so its picked notes carry the grade; in Metal Rhythm a two-note power chord is
  * one attack, timed and counted and never pitch-checked; in Tapping the taps
@@ -59,6 +59,7 @@ export const RUNNABLE_PATH_IDS: readonly string[] = [
   "tapping",
   "funk-lines",
   "triads",
+  "chords-in-a-key",
 ];
 
 /** Why a Path is not runnable yet, as a `session.paths.*` key. */

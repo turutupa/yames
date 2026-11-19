@@ -9,6 +9,7 @@ import bluesPentatonics from "./blues-pentatonics";
 import classicRock from "./classic-rock";
 import knowTheNeck from "./know-the-neck";
 import scalesAndModes from "./scales-and-modes";
+import chordsInAKey from "./chords-in-a-key";
 import triads from "./triads";
 
 const UNBUILT = new Set(METRICS.filter((m) => m.status === "new-grader" && m.id !== "evennessHold").map((m) => m.id));
@@ -19,6 +20,7 @@ describe.each([
   ["know-the-neck", knowTheNeck, 25, 0.9],
   ["scales-and-modes", scalesAndModes, 25, 0.9],
   ["triads", triads, 28, 0.9],
+  ["chords-in-a-key", chordsInAKey, 24, 0.9],
 ] as const)("%s", (_id, spec, minGraded, minShare) => {
   const doc = buildPath(spec);
   const exercises: Exercise[] = doc.steps.flatMap((s) => s.exercises);

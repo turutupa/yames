@@ -73,6 +73,7 @@ describe("Where do you start? — what it offers", () => {
       "tapping",
       "funk-lines",
       "triads",
+      "chords-in-a-key",
     ]);
   });
 

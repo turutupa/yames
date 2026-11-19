@@ -18,7 +18,7 @@ import { handAt, ladder, moveChart, shiftFrets } from "../templates";
 
 type Grading = Pick<ExerciseSpec, "grade" | "alsoGraded" | "pass">;
 
-function named(evenness = 0.75, overBars = 4): Grading {
+export function named(evenness = 0.75, overBars = 4): Grading {
   const bars: PassBar[] = [
     { metric: "noteIdentity", min: 0.9, overBars },
     { metric: "notesHeard", min: 0.9, overBars },
@@ -34,7 +34,7 @@ const NOT_CHECKED_YET =
 const VARIANT_NOTE =
   "The frets and note names here are for the first version. On other days the same line comes in another key, higher or lower on the neck.";
 
-const ROCK = (key: string) => ({ groove: "rock8", key });
+export const ROCK = (key: string) => ({ groove: "rock8", key });
 
 // ---------------------------------------------------------------------------
 // Shapes. A triad shape is three frets on three neighbouring strings, written
@@ -43,15 +43,15 @@ const ROCK = (key: string) => ({ groove: "rock8", key });
 // above takes the finger its fret asks for, or the next free one.
 // ---------------------------------------------------------------------------
 
-type Strings = readonly [number, number, number];
-type Shape = { strings: Strings; frets: readonly [number, number, number] };
+export type Strings = readonly [number, number, number];
+export type Shape = { strings: Strings; frets: readonly [number, number, number] };
 
-const TOP: Strings = [3, 2, 1];
-const MID: Strings = [4, 3, 2];
-const top = (g: number, b: number, e: number): Shape => ({ strings: TOP, frets: [g, b, e] });
-const mid = (d: number, g: number, b: number): Shape => ({ strings: MID, frets: [d, g, b] });
+export const TOP: Strings = [3, 2, 1];
+export const MID: Strings = [4, 3, 2];
+export const top = (g: number, b: number, e: number): Shape => ({ strings: TOP, frets: [g, b, e] });
+export const mid = (d: number, g: number, b: number): Shape => ({ strings: MID, frets: [d, g, b] });
 
-function tokens(shape: Shape): [string, string, string] {
+export function tokens(shape: Shape): [string, string, string] {
   const fretted = shape.frets.filter((f) => f > 0);
   const low = Math.min(...fretted);
   const order = shape.frets
@@ -72,25 +72,25 @@ function tokens(shape: Shape): [string, string, string] {
 }
 
 /** Low, middle, high, middle: half a bar of eighths. */
-const roll = (shape: Shape) => {
+export const roll = (shape: Shape) => {
   const [l, m, h] = tokens(shape);
   return `${l} ${m} ${h} ${m}`;
 };
 /** One bar of eighths: the roll twice. */
-const bar = (shape: Shape) => `/8 ${roll(shape)} ${roll(shape)}`;
+export const bar = (shape: Shape) => `/8 ${roll(shape)} ${roll(shape)}`;
 /** One bar of quarter notes: low, middle, high, middle. */
 const slow = (shape: Shape) => `/4 ${roll(shape)}`;
 /** One bar that ends on the top note, held for a beat. */
-const toTop = (shape: Shape) => {
+export const toTop = (shape: Shape) => {
   const [l, m, h] = tokens(shape);
   return `/8 ${l} ${m} ${h} ${m} ${l} ${m} /4 ${h}`;
 };
 /** The last bar of a line: low, middle, and the top note held. */
-const ending = (shape: Shape) => {
+export const ending = (shape: Shape) => {
   const [l, m, h] = tokens(shape);
   return `/4 ${l} ${m} /2 ${h}`;
 };
-const bars = (...shapes: Shape[]) => shapes.map(bar).join(" | ");
+export const bars = (...shapes: Shape[]) => shapes.map(bar).join(" | ");
 
 // The chords of C major on the top three strings, by which note is lowest.
 const C_ROOT = top(5, 5, 3);

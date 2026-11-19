@@ -12,6 +12,7 @@ import scalesAndModes from "./scales-and-modes";
 import tapping from "./tapping";
 import funkLines from "./funk-lines";
 import triads from "./triads";
+import chordsInAKey from "./chords-in-a-key";
 import type { PathSpec } from "../spec";
 
 export const SPECS: readonly PathSpec[] = [
@@ -28,5 +29,6 @@ export const SPECS: readonly PathSpec[] = [
   tapping,
   funkLines,
   triads,
+  chordsInAKey,
   // new paths go above this line
 ];
