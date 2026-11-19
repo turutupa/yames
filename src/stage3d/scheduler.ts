@@ -8,6 +8,18 @@
  * with a timer rather than by skipping animation frames, so a capped loop
  * does not wake 60 times a second to do nothing. Paused, it does nothing at
  * all and remembers that a frame is owed.
+ *
+ * Two clocks, on purpose. A frame's `dt` comes from the animation-frame
+ * stamps, which is the display's own time. The cap is spaced from when a
+ * frame was actually DRAWN (`deps.now()`), because a stamp is not that: an
+ * animation frame asked for just after a vsync is run at once by Chromium and
+ * stamped with the vsync already gone, up to 16.7 ms stale. Spaced from the
+ * stamp, the next frame was then let through a vsync early, every other
+ * frame: gaps of 31, 17, 31, 17 ms, which is 41 frames a second under a cap
+ * of 30 (measured in the layout suite on a busy machine, 2026-11-18, where
+ * the timer rarely beats the vsync). The calm 60 fps loop keeps the stamps:
+ * its gap IS a vsync, and timing it from the draw would walk it off the
+ * display's beat.
  */
 export type SchedulerDeps = {
   raf: (cb: (now: number) => void) => number;
@@ -27,13 +39,19 @@ export function browserDeps(): SchedulerDeps {
   };
 }
 
+/** At this many frames a second and up the loop runs on the display's vsync, and nothing is capped. */
+const UNCAPPED_FPS = 50;
+
 /** `dt` in seconds since the last frame (1/60 after an idle spell); `gapMs` is set only between consecutive frames. */
 export type FrameFn = (dt: number, info: { gapMs: number | null }) => boolean;
 
 export class FrameScheduler {
   private rafId: number | null = null;
   private timerId: number | null = null;
+  /** The last frame's animation-frame stamp: `dt`, and the calm loop's spacing. */
   private lastFrame = -Infinity;
+  /** When the last frame was drawn, on `deps.now()`: a cap's spacing. */
+  private lastDrawn = -Infinity;
   private continuing = false;
   private owed = false;
   private paused = false;
@@ -72,6 +90,7 @@ export class FrameScheduler {
       this.continuing = false;
     } else if (this.owed) {
       this.lastFrame = -Infinity;
+      this.lastDrawn = -Infinity;
       this.schedule();
     }
   }
@@ -96,7 +115,9 @@ export class FrameScheduler {
   private schedule(): void {
     if (this.rafId !== null || this.timerId !== null || this.paused || this.disposed) return;
     const minGap = 1000 / this.maxFps;
-    const wait = this.lastFrame + minGap - this.deps.now();
+    // Under a cap, from the draw itself; at the display's rate, from its stamp.
+    const from = this.maxFps < UNCAPPED_FPS ? this.lastDrawn : this.lastFrame;
+    const wait = from + minGap - this.deps.now();
     // A frame inside the cap's window waits on a timer, then on the next vsync.
     if (wait > 2) {
       this.timerId = this.deps.setTimeout(() => {
@@ -115,6 +136,7 @@ export class FrameScheduler {
     const consecutive = this.continuing && gap < 250;
     const dt = consecutive ? Math.min(gap, 100) / 1000 : 1 / 60;
     this.lastFrame = now;
+    this.lastDrawn = this.deps.now();
     this.owed = false;
     this.frames += 1;
     const more = this.frame(dt, { gapMs: consecutive ? gap : null });

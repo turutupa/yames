@@ -3,16 +3,24 @@
  * foot row, and the row under the Tab and the Runway): acceptance 5, P1-1.
  * What they do is `useWatch`'s; this only draws them.
  */
-import { useSyncExternalStore } from "react";
+import { useRef, useSyncExternalStore, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { WatchControl } from "./useWatch";
 import { subscribeWatchKeyLabel, watchKeyLabel } from "./watchBus";
+import { useFitRow } from "../hooks/useFitOneLine";
 
-export function WatchControls({ watch }: { watch: WatchControl }) {
+export function WatchControls({ watch, compact = false }: { watch: WatchControl; compact?: boolean }) {
   const { t } = useTranslation();
   const watchKey = useSyncExternalStore(subscribeWatchKeyLabel, watchKeyLabel, watchKeyLabel);
   if (!watch.canWatch) return null;
   const { showing, soundOn, hasSound } = watch;
+  const full = t(showing ? "session.practice.watchStop" : watch.again ? "session.practice.watchAgain" : "session.practice.watch");
+  // In a phone's footer the row is shared with Slower and Faster, and "Watch
+  // again" pushed them onto a second line at 390 px. There the word stays
+  // "Watch" and the icon turns into a replay; the whole name is still what a
+  // screen reader hears.
+  const again = compact && !showing && watch.again;
+  const word = again ? t("session.practice.watch") : full;
   return (
     <>
       <button
@@ -20,14 +28,23 @@ export function WatchControls({ watch }: { watch: WatchControl }) {
         className="practice-watch"
         data-testid="practice-watch"
         aria-pressed={showing}
+        aria-label={compact ? full : undefined}
         data-sound={hasSound && soundOn ? "" : undefined}
+        data-again={again ? "" : undefined}
         onClick={watch.toggle}
         title={t(hasSound && soundOn ? "session.practice.watchSoundTitle" : "session.practice.watchTitle")}
       >
-        <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
-          {showing ? <rect x="1.5" y="1.5" width="7" height="7" rx="1" /> : <path d="M2 1 L9 5 L2 9 Z" />}
-        </svg>
-        {t(showing ? "session.practice.watchStop" : watch.again ? "session.practice.watchAgain" : "session.practice.watch")}
+        {again ? (
+          <svg className="practice-watch-replay" viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+            <path d="M1 4 V10 H7" />
+            <path d="M3.51 15 a9 9 0 1 0 2.13 -9.36 L1 10" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
+            {showing ? <rect x="1.5" y="1.5" width="7" height="7" rx="1" /> : <path d="M2 1 L9 5 L2 9 Z" />}
+          </svg>
+        )}
+        <span className="practice-watch-word">{word}</span>
         {watchKey && <kbd>{watchKey}</kbd>}
       </button>
       {hasSound && (
@@ -64,6 +81,25 @@ export function WatchRow({ watch }: { watch: WatchControl }) {
   return (
     <div className="practice-watchrow" data-testid="practice-watchrow">
       <WatchControls watch={watch} />
+    </div>
+  );
+}
+
+/**
+ * The same two buttons in a phone's sticky footer, on one row with what else
+ * the footer carries (Slower and Faster). One row at 360 px and up: Watch
+ * keeps its short name, and gives up the word for its icon when the language
+ * or the theme's face runs wide (`useFitRow`).
+ */
+export function WatchFooterRow({ watch, children }: { watch: WatchControl; children?: ReactNode }) {
+  const { i18n } = useTranslation();
+  const row = useRef<HTMLDivElement>(null);
+  useFitRow(row, `${i18n.language}|${watch.showing}|${watch.again}|${watch.hasSound}`);
+  if (!watch.canWatch) return null;
+  return (
+    <div className="practice-watchrow" data-place="footer" data-testid="practice-watchrow" ref={row}>
+      <WatchControls watch={watch} compact />
+      {children}
     </div>
   );
 }

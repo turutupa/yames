@@ -461,6 +461,7 @@
       "inMix": "In mijn dagelijkse mix",
       "inMixHelp": "Uit: Vandaag laat het buiten je dagelijkse mix. Je voortgang blijft, en je kunt het nog steeds voor een dag kiezen.",
       "focusToday": "Vandaag alleen dit oefenen",
+      "focusedToday": "Vandaag alleen dit",
       "playedUngraded": "{{count}} take, tot {{bpm}} BPM.",
       "playedUngraded_other": "{{count}} takes, tot {{bpm}} BPM.",
       "buildsOn": "Bouwt op: {{list}}",

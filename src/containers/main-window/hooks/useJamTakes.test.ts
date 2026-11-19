@@ -283,6 +283,51 @@ describe("playing one back", () => {
     expect(ipc.stopTakePlayback).toHaveBeenCalledTimes(1);
   });
 
+  it("an older take's ending does not put out the row of the take just started (card #53)", async () => {
+    // Take A runs out as the player presses play on B: A's ending is already
+    // on its way and lands after B's row lit. Each playback has the engine's
+    // generation, which `play_take` answers with and the ending carries.
+    let ended: ((generation?: number) => void) | null = null;
+    ipc.onTakePlaybackEnded.mockImplementation((cb: (generation?: number) => void) => {
+      ended = cb;
+      return Promise.resolve(() => {});
+    });
+    let generation = 0;
+    ipc.playTake.mockImplementation(() => Promise.resolve(++generation));
+    ipc.listTakes.mockResolvedValue([take(), take({ id: "t2" })]);
+    const { result } = mount();
+    await settle();
+    act(() => result.current.play("t1"));
+    await settle();
+    act(() => result.current.play("t2"));
+    // Before `play_take` has answered for t2 ...
+    act(() => ended!(1));
+    expect(result.current.playingId).toBe("t2");
+    await settle();
+    // ... and after.
+    act(() => ended!(1));
+    expect(result.current.playingId).toBe("t2");
+    act(() => ended!(2));
+    expect(result.current.playingId).toBeNull();
+  });
+
+  it("a take that ran out before the engine answered goes out when it answers", async () => {
+    let ended: ((generation?: number) => void) | null = null;
+    ipc.onTakePlaybackEnded.mockImplementation((cb: (generation?: number) => void) => {
+      ended = cb;
+      return Promise.resolve(() => {});
+    });
+    ipc.playTake.mockImplementation(() => Promise.resolve(5));
+    ipc.listTakes.mockResolvedValue([take()]);
+    const { result } = mount();
+    await settle();
+    act(() => result.current.play("t1"));
+    act(() => ended!(5));
+    expect(result.current.playingId).toBe("t1");
+    await settle();
+    expect(result.current.playingId).toBeNull();
+  });
+
   it("brings the controls back when the take reaches its end by itself", async () => {
     // The engine says so on `take-playback-ended`. Without it the row would
     // stay lit and the other takes disabled for ever.

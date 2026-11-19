@@ -266,22 +266,28 @@ export function RunwayTakeScreen({
             </div>
           )}
         </div>
-        {!running && <TempoNudges run={run} exercise={exercise} session={session} />}
-        {!running && start.ask ? (
-          <AskStart session={session} label={start.label} canStart={canStart} />
-        ) : (
-          <button
-            className="session-big"
-            data-size="mid"
-            onClick={!running && !canStart ? undefined : actions.go}
-            aria-disabled={!running && !canStart ? true : undefined}
-            aria-busy={start.busy ? true : undefined}
-            data-input={!running && start.needsInput ? (start.busy ? "starting" : "off") : undefined}
-            data-testid="session-big"
-          >
-            {running ? bigLabel(big, t) : start.label}
-          </button>
-        )}
+        {/* The nudges and the button travel together, as on the other views:
+            on a phone the pair sticks to the bottom of the window, so Start
+            is on the first screen under the runway's notes too (owner,
+            2026-11-18). A plain run of the row on a desktop. */}
+        <div className="session-go" data-testid="session-go">
+          {!running && <TempoNudges run={run} exercise={exercise} session={session} />}
+          {!running && start.ask ? (
+            <AskStart session={session} label={start.label} canStart={canStart} />
+          ) : (
+            <button
+              className="session-big"
+              data-size="mid"
+              onClick={!running && !canStart ? undefined : actions.go}
+              aria-disabled={!running && !canStart ? true : undefined}
+              aria-busy={start.busy ? true : undefined}
+              data-input={!running && start.needsInput ? (start.busy ? "starting" : "off") : undefined}
+              data-testid="session-big"
+            >
+              {running ? bigLabel(big, t) : start.label}
+            </button>
+          )}
+        </div>
       </div>
 
       {live.countingIn && running && (

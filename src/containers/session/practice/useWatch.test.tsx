@@ -131,6 +131,19 @@ describe("the Watch and Sound buttons", () => {
     expect(getByTestId("practice-watch").textContent).toContain("Watch again");
   });
 
+  it("in a phone's footer the word stays Watch after a demo, and the name still says again", () => {
+    const { getByTestId, rerender } = render(<WatchControls watch={control({ again: true })} compact />);
+    const watch = getByTestId("practice-watch");
+    expect(watch.querySelector(".practice-watch-word")?.textContent).toBe("Watch");
+    expect(watch).toHaveAttribute("aria-label", "Watch again");
+    expect(watch).toHaveAttribute("data-again", "");
+    expect(watch.querySelector(".practice-watch-replay")).not.toBeNull();
+    rerender(<WatchControls watch={control({ again: true, showing: true })} compact />);
+    expect(getByTestId("practice-watch").querySelector(".practice-watch-word")?.textContent).toBe("Stop");
+    expect(getByTestId("practice-watch")).toHaveAttribute("aria-label", "Stop");
+    expect(getByTestId("practice-watch").querySelector(".practice-watch-replay")).toBeNull();
+  });
+
   it("nothing to watch, nothing drawn", () => {
     const { container } = render(<WatchControls watch={control({ canWatch: false })} />);
     expect(container.innerHTML).toBe("");

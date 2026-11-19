@@ -50,6 +50,7 @@
  * milliseconds, against notes hundreds of milliseconds long.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPlaybackGate } from "../../takes/playbackGate";
 import {
   deleteTake,
   listTakes,
@@ -157,6 +158,8 @@ export function useSongTakes({
   const [recording, setRecording] = useState(false);
   const [recordedSeconds, setRecordedSeconds] = useState(0);
   const [playingId, setPlayingId] = useState<string | null>(null);
+  /** Which playback `playingId` is lit for: see `takes/playbackGate`. */
+  const gate = useRef(createPlaybackGate());
   const [dirBytes, setDirBytes] = useState(0);
   const [details, setDetails] = useState<Map<string, TakeDetail>>(() => new Map());
   const [introOpen, setIntroOpen] = useState(false);
@@ -284,7 +287,10 @@ export function useSongTakes({
   }, []);
 
   useEffect(() => {
-    const unlisten = onTakePlaybackEnded(() => setPlayingId(null));
+    // Only the ending of the playback this row is lit for (card #53).
+    const unlisten = onTakePlaybackEnded((generation) => {
+      if (gate.current.ended(generation)) setPlayingId(null);
+    });
     return () => {
       void unlisten.then((off) => off()).catch(() => {});
     };
@@ -413,13 +419,23 @@ export function useSongTakes({
 
   const play = useCallback((id: string) => {
     setPlayingId(id);
-    void playTake(id).catch(() => {
-      setPlayingId(null);
-      setAvailable(false);
-    });
+    const token = gate.current.starting();
+    void playTake(id)
+      .then((generation) => {
+        // A take that ran out before the engine answered: its ending came
+        // first and was held, and the row goes out now.
+        if (!gate.current.started(token, generation)) setPlayingId(null);
+      })
+      .catch(() => {
+        // A refusal for a play that has since been replaced is not this row's.
+        if (!gate.current.failed(token)) return;
+        setPlayingId(null);
+        setAvailable(false);
+      });
   }, []);
 
   const stopPlayback = useCallback(() => {
+    gate.current.stopped();
     setPlayingId(null);
     void stopTakePlayback().catch(() => {});
   }, []);
@@ -430,6 +446,7 @@ export function useSongTakes({
       // The review must not go on naming notes out of a file that is gone.
       setLastTake((current) => (current?.takeId === id ? undefined : current));
       if (playingId === id) {
+        gate.current.stopped();
         setPlayingId(null);
         void stopTakePlayback().catch(() => {});
       }

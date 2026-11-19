@@ -473,6 +473,7 @@
       "inMix": "En mi mezcla diaria",
       "inMixHelp": "Desactivado: Hoy la deja fuera de tu mezcla diaria. Tu progreso se queda, y aún puedes elegirla para un día.",
       "focusToday": "Practicar solo esta hoy",
+      "focusedToday": "Hoy solo esta",
       "playedUngraded": "{{count}} toma, hasta {{bpm}} BPM.",
       "playedUngraded_many": "{{count}} tomas, hasta {{bpm}} BPM.",
       "playedUngraded_other": "{{count}} tomas, hasta {{bpm}} BPM.",

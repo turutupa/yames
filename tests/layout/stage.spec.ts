@@ -164,21 +164,56 @@ test("a pluck animates for a moment, then the stage stops again", async ({ page 
 test("during a Take the stage draws at most 30 frames a second", async ({ page }) => {
   await openShot(page, "stage-zoom", SIZES[0]);
   await settled(page);
-  const counted = await page.evaluate(async () => {
+  /*
+   * Measured on the frames themselves, not on a second of wall clock.
+   *
+   * It used to count the frames drawn in "one second" of a loop that slept 50
+   * ms at a time. On a busy machine that second ran long (the last sleep
+   * alone can overshoot by hundreds of ms), or the page was starved and five
+   * frames failed "more than 5". And one failure was the app's: on a busy
+   * machine the cap really did let 41 frames a second through (see
+   * `FrameScheduler` on its two clocks), which a count over a stretchy second
+   * could not tell from its own noise.
+   *
+   * The cap is a spacing rule, so the spacing is what is read: when each
+   * frame the stage drew while strings rang began. Load can only stretch
+   * those gaps, never shrink them. Uncapped, they are a vsync (16.7 ms).
+   */
+  const times = await page.evaluate(async () => {
     const c = window.__NECK__!.current!;
+    const drawn: number[] = [];
+    const raf = window.requestAnimationFrame.bind(window);
+    // The scheduler asks `window.requestAnimationFrame` by name each time, so
+    // its tick runs inside this wrapper and a frame it draws is seen here.
+    window.requestAnimationFrame = (cb) =>
+      raf((stamp) => {
+        const before = c.frames;
+        const began = performance.now();
+        cb(stamp);
+        if (c.frames > before) drawn.push(began);
+      });
     c.setTakeRunning(true);
-    const f0 = c.frames;
-    const end = performance.now() + 1000;
-    // Keep strings ringing for the whole second.
-    while (performance.now() < end) {
+    const WANT = 40;
+    const giveUp = performance.now() + 30_000;
+    // Keep strings ringing until that many frames have been drawn.
+    while (drawn.length < WANT && performance.now() < giveUp) {
       c.facade(true).pluck(1 + Math.floor(Math.random() * 6), 5, "aim");
       await new Promise((r) => setTimeout(r, 50));
     }
     c.setTakeRunning(false);
-    return c.frames - f0;
+    window.requestAnimationFrame = raf;
+    return drawn;
   });
-  expect(counted).toBeLessThanOrEqual(32);
-  expect(counted).toBeGreaterThan(5);
+  expect(times.length, "the stage stopped drawing while strings rang").toBeGreaterThanOrEqual(40);
+  const gaps = times.slice(1).map((t, i) => t - times[i]);
+  const CAP_MS = 1000 / 30;
+  // Every frame waited out the cap, less the scheduler's own slack (it wakes
+  // a millisecond early to catch the vsync, and takes a frame under 2 ms out).
+  const tightest = Math.min(...gaps);
+  expect(tightest, `two frames ${tightest.toFixed(1)} ms apart`).toBeGreaterThanOrEqual(CAP_MS - 2.5);
+  // And over the run: 30 a second, with that slack.
+  const perSecond = (gaps.length * 1000) / (times[times.length - 1] - times[0]);
+  expect(perSecond, `${perSecond.toFixed(1)} frames a second`).toBeLessThanOrEqual(31);
 });
 
 for (const scene of ["stage-whole", "stage-zoom"]) {

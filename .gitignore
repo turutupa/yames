@@ -106,3 +106,7 @@ tab-clips/
 # and a title far wider than the panel — three themes, two languages, two
 # widths. Written by `tests/layout/songs-library-shots.spec.ts`; never committed.
 .songs-library-shots/
+
+# The layout suite's own Vite dependency cache, one per checkout
+# (playwright.config.ts): rebuilt whenever it is missing.
+/.layout-cache/

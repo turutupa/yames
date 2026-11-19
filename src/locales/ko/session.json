@@ -461,6 +461,7 @@
       "inMix": "일일 믹스에 포함",
       "inMixHelp": "끄면 오늘 화면이 일일 믹스에서 뺍니다. 진행 상황은 그대로이고, 하루만 골라 연습할 수도 있어요.",
       "focusToday": "오늘은 이것만 연습",
+      "focusedToday": "오늘은 이것만",
       "playedUngraded": "테이크 {{count}}개, 최고 {{bpm}} BPM.",
       "playedUngraded_other": "테이크 {{count}}개, 최고 {{bpm}} BPM.",
       "buildsOn": "바탕: {{list}}",

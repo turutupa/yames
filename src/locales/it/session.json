@@ -473,6 +473,7 @@
       "inMix": "Nel mio mix quotidiano",
       "inMixHelp": "Spento: Oggi lo lascia fuori dal tuo mix quotidiano. I tuoi progressi restano, e puoi comunque sceglierlo per un giorno.",
       "focusToday": "Oggi esercitati solo su questo",
+      "focusedToday": "Oggi solo questo",
       "playedUngraded": "{{count}} take, fino a {{bpm}} BPM.",
       "playedUngraded_many": "{{count}} take, fino a {{bpm}} BPM.",
       "playedUngraded_other": "{{count}} take, fino a {{bpm}} BPM.",

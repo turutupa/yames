@@ -177,7 +177,24 @@ test.describe("a click on the tab goes where it was clicked", () => {
       await openShot(page, "songs", WINDOW, "ember", LONG);
       await setZoom(page, zoom);
 
-      const box = (await barBox(page, 59))!;
+      // A bar that starts under the first screenful, found by where it is
+      // engraved and not by its number. It used to be printed bar 60 at
+      // every zoom, and at 0.8 that bar is drawn at y=686–772 in an 870 px
+      // frame: whole, on the first screen, with the page at the top. The
+      // "scrolled so it hangs off" below then clamped to 0, nothing was
+      // half-shown, the app (rightly) did not move, and the test failed on
+      // its own premise. The premise is asserted now, so it cannot go
+      // missing quietly again.
+      const frame = await page.evaluate(
+        () => (document.querySelector(".songs-tab-viewport")! as HTMLElement).clientHeight,
+      );
+      let box: NonNullable<Awaited<ReturnType<typeof barBox>>> | null = null;
+      for (let printed = 59; printed < 120 && !box; printed++) {
+        const at = await barBox(page, printed);
+        if (at && at.y >= frame) box = at;
+      }
+      expect(box, `no bar of the long song starts under a ${String(frame)}px frame at zoom ${String(zoom)}`).not.toBeNull();
+      if (!box) return;
       // Scrolled so the bar hangs off the bottom by a third of its height.
       const before = await page.evaluate(
         ({ y, h }: { y: number; h: number }) => {
@@ -192,6 +209,13 @@ test.describe("a click on the tab goes where it was clicked", () => {
           };
         },
         { y: box.y, h: box.h },
+      );
+      // The premise: the page is scrolled, the bar's top is showing and its
+      // foot is under the frame's edge.
+      expect(before.scrollTop, "the page could not be scrolled to hang the bar off the frame").toBeGreaterThan(0);
+      expect(box.y, "the bar's top is not on screen").toBeLessThan(before.scrollTop + before.clientHeight);
+      expect(box.y + box.h, "the bar is not hanging off the bottom").toBeGreaterThan(
+        before.scrollTop + before.clientHeight + 1,
       );
 
       // Clicked on the part of it that IS showing.

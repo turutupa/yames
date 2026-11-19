@@ -132,8 +132,18 @@ import {
   swapsIn,
   withScope,
 } from "../../../session/swap";
-import { FOCUS_KEY, MIX, OFF_MIX_KEY, readFocus, readOffMix, todayPaths as todayPathsOf } from "../../../session/focus";
-import type { TodayFocus } from "../../../session/focus";
+import {
+  FOCUS_KEY,
+  MIX,
+  OFF_MIX_KEY,
+  focusOn,
+  readFocus,
+  readOffMix,
+  readStoredFocus,
+  storedFocus,
+  todayPaths as todayPathsOf,
+} from "../../../session/focus";
+import type { StoredFocus, TodayFocus } from "../../../session/focus";
 import type { SwapChoice, SwapMemory, SwapOptions } from "../../../session/swap";
 
 /** How many Takes are read back for planning. More than any plan looks at. */
@@ -414,7 +424,7 @@ export function useSessionRun(input: SessionRunInput) {
   /** Today's swaps as kept (`session/swap.ts`); undefined until the store has answered. */
   const [swapStored, setSwapStored] = useState<SwapMemory | null | undefined>(undefined);
   /** Today's focus, "mix" or one Path (`focus.ts`), and the Paths switched out of the mix. */
-  const [focusStored, setFocusStored] = useState<TodayFocus>(MIX);
+  const [focusStored, setFocusStored] = useState<StoredFocus | null>(null);
   const [offMix, setOffMix] = useState<string[]>([]);
 
   const latest = useRef(input);
@@ -525,7 +535,7 @@ export function useSessionRun(input: SessionRunInput) {
       .then((saved) => setSwapStored(readSwapMemory(saved)))
       .catch(() => setSwapStored(null));
     void storeLoad<unknown>(FOCUS_KEY)
-      .then((saved) => setFocusStored(readFocus(saved)))
+      .then((saved) => setFocusStored(readStoredFocus(saved)))
       .catch(() => {});
     void storeLoad<unknown>(OFF_MIX_KEY)
       .then((saved) => setOffMix(readOffMix(saved)))
@@ -596,7 +606,11 @@ export function useSessionRun(input: SessionRunInput) {
 
   const myPaths = useMemo(() => playerPaths(paths, progress), [paths, progress]);
   // What Today plans from: the daily mix, or the one Path chosen for today.
-  const today = useMemo(() => todayPathsOf(myPaths, offMix, focusStored), [myPaths, offMix, focusStored]);
+  // A focus is for the day it was chosen on: on the plan's next day, the mix.
+  const today = useMemo(
+    () => todayPathsOf(myPaths, offMix, focusOn(focusStored, planClock)),
+    [myPaths, offMix, focusStored, planClock],
+  );
   const todayFocus = today.focus;
 
   // The swaps as they stand today: yesterday's become this plan's penalty.
@@ -647,11 +661,13 @@ export function useSessionRun(input: SessionRunInput) {
   const setTodayFocus = useCallback(
     (next: TodayFocus) => {
       const focus = readFocus(next);
-      setFocusStored(focus);
-      void storeSave(FOCUS_KEY, focus).catch(() => {});
+      // Stamped with the plan's own day, so it lapses when the plan's day does.
+      const kept = storedFocus(focus, planClock);
+      setFocusStored(kept === MIX ? null : kept);
+      void storeSave(FOCUS_KEY, kept).catch(() => {});
       if (focus !== todayFocus) keepSwaps(withScope(swapMemory, focus));
     },
-    [todayFocus, swapMemory, keepSwaps],
+    [todayFocus, swapMemory, keepSwaps, planClock],
   );
 
   /** "In my daily mix" on one subscribed Path. Its progress stays either way. */
@@ -1532,7 +1548,7 @@ export function useSessionRun(input: SessionRunInput) {
       setProgress((p) => ({ ...p, unsubscribed }));
       void storeSave(UNSUBSCRIBED_KEY, unsubscribed).catch(() => {});
       // Today was on this Path alone: back to the mix.
-      if (focusStored === path.id) setTodayFocus(MIX);
+      if (focusStored?.focus === path.id) setTodayFocus(MIX);
     },
     [progress.unsubscribed, focusStored, setTodayFocus],
   );

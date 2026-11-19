@@ -59,6 +59,34 @@ laptop never ask for the same number, and this worktree always asks for the
 same number — and a port that is already answering fails the run out loud
 rather than being borrowed. Set `YAMES_LAYOUT_PORT` to pin it.
 
+Its dependency cache is its own as well: `.layout-cache/desktop` and
+`.layout-cache/phone` in this checkout (ignored by git, rebuilt when missing),
+handed to Vite through `YAMES_VITE_CACHE_DIR`. Vite's default is
+`node_modules/.vite`, and a worktree's `node_modules` is a link to the main
+checkout's, so every worktree's suite wrote one folder. That cache is keyed on
+the checkout's root: each suite that started re-bundled the folder under the
+ones already running, whose next lazy import then failed (the 3D neck fell
+back to its SVG: "expected 3d, received fallback") or reloaded the page under
+a test ("execution context was destroyed"). It read as machine load.
+
+## When the machine is busy
+
+A check that fails only under load is usually reading two things a round trip
+apart, or counting on a wall clock. The patterns this suite uses instead:
+
+- **Read what you compare in one task.** `neck.spec.ts` reads the ring, the
+  "next" tag and the dots in a single `evaluate` (`READ_OVERLAY`); read one
+  call apart, the neck had moved on between them.
+- **Sample states, not ticks.** A sample is "NOW moved to another note" or
+  "the ring sits on its dot", waited for with `waitForFunction` on the page's
+  own frames, not "every 170 ms".
+- **Measure the thing itself.** The stage's 30 fps cap is checked on the
+  spacing of the frames it drew (`stage.spec.ts`), not on a count over a
+  second that a busy machine stretches.
+- **Let the app catch up where it is built to.** The tour re-measures on a
+  300 ms beat, so its stops are judged inside `toPass`: a spotlight that never
+  lands still fails.
+
 ## Another language
 
 ```bash

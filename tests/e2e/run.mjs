@@ -310,6 +310,7 @@ async function playTake(d, exercise, style, label, { band = false, again = false
   await d.exec(`window.__e2eOnsets = [];
     window.__e2eOff?.then?.((f) => f());
     window.__e2eOff = window.__TAURI__.event.listen('score-onset', (e) => window.__e2eOnsets.push(e.payload));`);
+  const troubleBefore = env.graphTrouble();
   const playing = band ? player.playOverBand(take) : player.playOnCountIn(take);
   playing.catch(() => {}); // awaited below; a Take that never started must not crash the run
   // The app's PipeWire threads exist once its streams are open (see Env).
@@ -326,6 +327,8 @@ async function playTake(d, exercise, style, label, { band = false, again = false
     throw new Error(`${e.message}; the Take screen: ${JSON.stringify(why)}`);
   }
   const heard = await playing;
+  // Which node missed cycles while this Take played (see `Env.graphTrouble`).
+  heard.graphTrouble = env.graphTrouble(troubleBefore);
   info.players ??= {};
   info.players[label] = heard;
   // Played out, the engine stops the Take on its last bar line by itself.
@@ -1416,6 +1419,8 @@ try {
   check("the run finished", false, e.message.split("\n").slice(0, 6).join(" | "));
   exitCode = 1;
 } finally {
+  // The logs go with the profile; what they said about the audio stays.
+  info.graphTrouble = env.graphTrouble();
   if (driverProc) driverProc.kill("SIGTERM");
   await env.down().catch(() => {});
   if (stopX) await stopX();

@@ -461,6 +461,7 @@
       "inMix": "加入每日组合",
       "inMixHelp": "关闭后，「今天」不会把它排进每日组合。进度会保留，也仍可选它练一天。",
       "focusToday": "今天只练这条",
+      "focusedToday": "今天只练这条",
       "playedUngraded": "{{count}} 遍，最快 {{bpm}} BPM。",
       "playedUngraded_other": "{{count}} 遍，最快 {{bpm}} BPM。",
       "buildsOn": "基于：{{list}}",
