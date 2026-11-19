@@ -289,6 +289,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "Il galoppo su una corda: la fondamentale e la sua terza minore, poi la quarta e la quinta una mano più in alto. Ogni volta una tonalità e una corda diverse.",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "Parti ben sotto il tuo clean tempo. Giù, giù-su, in palm mute. La mano sale di cinque tasti alla stanghetta e torna giù.",
     "exercise.warmup-intermediate.root-gallop.coachLine": "Questo è un riscaldamento. Ti dice com'è andata, e non decide nulla.",
+    "exercise.warmup-intermediate.root-reverse.title": "Un galoppo inverso sulla fondamentale",
+    "exercise.warmup-intermediate.root-reverse.purpose": "Il galoppo inverso su una corda: la fondamentale e la sua terza minore, poi la quarta e la quinta una mano più in alto. Ogni volta una tonalità e una corda diverse.",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "Parti ben sotto il tuo clean tempo. Giù-su, giù, in palm mute, la prima nota breve sul clic. La mano sale di cinque tasti alla stanghetta e torna giù.",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "Questo è un riscaldamento. Ti dice com'è andata, e non decide nulla.",
     "level.advanced.title": "Avanzato: velocità e resistenza",
     "level.advanced.summary": "Chug in terzine, raffiche di sestine e tremolo picking, riff con pedal tone attraverso le corde, riff stop-start con sedicesimi muti, poi un riff sopra una band e un minuto intero.",
     "level.advanced.startHereIf.0": "Sai suonare il galoppo e il galoppo inverso con regolarità a 100 BPM.",
@@ -298,7 +302,11 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "Quattro sedicesimi smorzati per nota, a pennata alternata: la fondamentale e la sua terza minore, poi la quarta e la quinta una mano più in alto. Ogni volta una tonalità e una corda diverse.",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "Parti ben sotto il tuo clean tempo. Giù-su rigoroso, in palm mute. La mano sale di cinque tasti alla stanghetta e torna giù.",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "Questo è un riscaldamento. Ti dice com'è andata, e non decide nulla.",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "A questa velocità il ritardo d'ingresso di un impianto vero può spingere le note fuori dalla loro finestra di abbinamento, il che si legge come in ritardo o mancate. Qui la regolarità è il numero di cui fidarsi, e solo dopo aver calibrato il ritardo."
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "A questa velocità il ritardo d'ingresso di un impianto vero può spingere le note fuori dalla loro finestra di abbinamento, il che si legge come in ritardo o mancate. Qui la regolarità è il numero di cui fidarsi, e solo dopo aver calibrato il ritardo.",
+    "exercise.warmup-advanced.root-triplets.title": "Terzine sulla fondamentale",
+    "exercise.warmup-advanced.root-triplets.purpose": "Tre note smorzate per movimento, a pennata alternata: la fondamentale e la sua terza minore, poi la quarta e la quinta una mano più in alto. Ogni volta una tonalità e una corda diverse.",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "Parti ben sotto il tuo clean tempo. Giù-su rigoroso, quindi un movimento su due parte con una pennata in su; appoggiati sulla prima nota di ogni movimento. La mano sale di cinque tasti alla stanghetta e torna giù.",
+    "exercise.warmup-advanced.root-triplets.coachLine": "Questo è un riscaldamento. Ti dice com'è andata, e non decide nulla."
   },
   "from": {
     "path.title": "e6bd3564",
@@ -587,6 +595,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "f5514f11",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "4bb32d12",
     "exercise.warmup-intermediate.root-gallop.coachLine": "bd8c330a",
+    "exercise.warmup-intermediate.root-reverse.title": "4ddb5737",
+    "exercise.warmup-intermediate.root-reverse.purpose": "0bf7fdbf",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "16c4c90f",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "bd8c330a",
     "level.advanced.title": "49d1f044",
     "level.advanced.summary": "d261b039",
     "level.advanced.startHereIf.0": "4a565307",
@@ -596,6 +608,10 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "c0aac01e",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "d749d7c7",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "bd8c330a",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "da676e77"
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "da676e77",
+    "exercise.warmup-advanced.root-triplets.title": "c2bed93e",
+    "exercise.warmup-advanced.root-triplets.purpose": "90ed26e5",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "c1f564ab",
+    "exercise.warmup-advanced.root-triplets.coachLine": "bd8c330a"
   }
 }

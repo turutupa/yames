@@ -289,6 +289,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "Tek telde gallop: kök ve minör üçlüsü, sonra bir el yukarıda dörtlüsü ve beşlisi. Her seferinde farklı bir tonalite ve tel.",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "Temiz temponun epey altında başla. Aşağı, aşağı-yukarı, palm mute'lu. El ölçü çizgisinde beş perde yukarı çıkar ve geri gelir.",
     "exercise.warmup-intermediate.root-gallop.coachLine": "Bu bir ısınma. Nasıl geçtiğini söyler ve hiçbir şeye karar vermez.",
+    "exercise.warmup-intermediate.root-reverse.title": "Kökte ters gallop",
+    "exercise.warmup-intermediate.root-reverse.purpose": "Tek telde ters gallop: kök ve minör üçlüsü, sonra bir el yukarıda dörtlüsü ve beşlisi. Her seferinde farklı bir tonalite ve tel.",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "Temiz temponun epey altında başla. Aşağı-yukarı, aşağı, palm mute'lu, ilk kısa nota klikte. El ölçü çizgisinde beş perde yukarı çıkar ve geri gelir.",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "Bu bir ısınma. Nasıl geçtiğini söyler ve hiçbir şeye karar vermez.",
     "level.advanced.title": "İleri: hız ve dayanıklılık",
     "level.advanced.summary": "Triole chug'lar, sekstol patlamalar ve tremolo vuruş, tellere yayılan pedal tonlu riff'ler, sessiz on altılıklı stop-start riff'ler, sonra grupla bir riff ve tam bir dakika.",
     "level.advanced.startHereIf.0": "Gallop'u ve ters gallop'u 100 BPM'de düzgün çalabiliyorsun.",
@@ -298,7 +302,11 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "Nota başına dört mute'lu on altılık, alternate picking: kök ve minör üçlüsü, sonra bir el yukarıda dörtlüsü ve beşlisi. Her seferinde farklı bir tonalite ve tel.",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "Temiz temponun epey altında başla. Katı aşağı-yukarı, palm mute'lu. El ölçü çizgisinde beş perde yukarı çıkar ve geri gelir.",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "Bu bir ısınma. Nasıl geçtiğini söyler ve hiçbir şeye karar vermez.",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "Bu hızda gerçek bir kurulumun giriş gecikmesi notaları eşleşme penceresinin dışına itebilir; bu da geç ya da kaçırılmış gibi okunur. Burada güvenilecek sayı düzgünlüktür, o da ancak gecikme kalibre edildikten sonra."
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "Bu hızda gerçek bir kurulumun giriş gecikmesi notaları eşleşme penceresinin dışına itebilir; bu da geç ya da kaçırılmış gibi okunur. Burada güvenilecek sayı düzgünlüktür, o da ancak gecikme kalibre edildikten sonra.",
+    "exercise.warmup-advanced.root-triplets.title": "Kökte triyoleler",
+    "exercise.warmup-advanced.root-triplets.purpose": "Vuruş başına üç mute'lu nota, alternate picking: kök ve minör üçlüsü, sonra bir el yukarıda dörtlüsü ve beşlisi. Her seferinde farklı bir tonalite ve tel.",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "Temiz temponun epey altında başla. Katı aşağı-yukarı, yani her ikinci vuruş bir yukarı vuruşla başlar; her vuruşun ilk notasına yüklen. El ölçü çizgisinde beş perde yukarı çıkar ve geri gelir.",
+    "exercise.warmup-advanced.root-triplets.coachLine": "Bu bir ısınma. Nasıl geçtiğini söyler ve hiçbir şeye karar vermez."
   },
   "from": {
     "path.title": "e6bd3564",
@@ -587,6 +595,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "f5514f11",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "4bb32d12",
     "exercise.warmup-intermediate.root-gallop.coachLine": "bd8c330a",
+    "exercise.warmup-intermediate.root-reverse.title": "4ddb5737",
+    "exercise.warmup-intermediate.root-reverse.purpose": "0bf7fdbf",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "16c4c90f",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "bd8c330a",
     "level.advanced.title": "49d1f044",
     "level.advanced.summary": "d261b039",
     "level.advanced.startHereIf.0": "4a565307",
@@ -596,6 +608,10 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "c0aac01e",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "d749d7c7",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "bd8c330a",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "da676e77"
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "da676e77",
+    "exercise.warmup-advanced.root-triplets.title": "c2bed93e",
+    "exercise.warmup-advanced.root-triplets.purpose": "90ed26e5",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "c1f564ab",
+    "exercise.warmup-advanced.root-triplets.coachLine": "bd8c330a"
   }
 }

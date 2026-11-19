@@ -289,6 +289,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "Галоп на одной струне: основной тон и его малая терция, затем кварта и квинта на руку выше. Каждый раз другая тональность и струна.",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "Начните заметно ниже своего чистого темпа. Вниз, вниз-вверх, с приглушением ладонью. Рука поднимается на пять ладов на тактовой черте и возвращается.",
     "exercise.warmup-intermediate.root-gallop.coachLine": "Это разминка. Она показывает, как прошло, и ничего не решает.",
+    "exercise.warmup-intermediate.root-reverse.title": "Обратный галоп на основном тоне",
+    "exercise.warmup-intermediate.root-reverse.purpose": "Обратный галоп на одной струне: основной тон и его малая терция, затем кварта и квинта на руку выше. Каждый раз другая тональность и струна.",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "Начните заметно ниже своего чистого темпа. Вниз-вверх, вниз, с приглушением ладонью, первая короткая нота на клик. Рука поднимается на пять ладов на тактовой черте и возвращается.",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "Это разминка. Она показывает, как прошло, и ничего не решает.",
     "level.advanced.title": "Продвинутый: скорость и выносливость",
     "level.advanced.summary": "Чаги триолями, серии секстолей и тремоло, рифы с педальным тоном по струнам, рифы с остановками и немыми шестнадцатыми, затем рифф под группу и целая минута.",
     "level.advanced.startHereIf.0": "Вы умеете ровно играть галоп и обратный галоп на 100 BPM.",
@@ -298,7 +302,11 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "По четыре приглушённые шестнадцатые на ноту, переменным штрихом: основной тон и его малая терция, затем кварта и квинта на руку выше. Каждый раз другая тональность и струна.",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "Начните заметно ниже своего чистого темпа. Строго вниз-вверх, с приглушением ладонью. Рука поднимается на пять ладов на тактовой черте и возвращается.",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "Это разминка. Она показывает, как прошло, и ничего не решает.",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "На такой скорости задержка входа на настоящей установке может выталкивать ноты из окна сопоставления, и это читается как поздно или пропущено. Здесь стоит доверять ровности, и только после калибровки задержки."
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "На такой скорости задержка входа на настоящей установке может выталкивать ноты из окна сопоставления, и это читается как поздно или пропущено. Здесь стоит доверять ровности, и только после калибровки задержки.",
+    "exercise.warmup-advanced.root-triplets.title": "Триоли на основном тоне",
+    "exercise.warmup-advanced.root-triplets.purpose": "Три приглушённые ноты на долю, переменным штрихом: основной тон и его малая терция, затем кварта и квинта на руку выше. Каждый раз другая тональность и струна.",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "Начните заметно ниже своего чистого темпа. Строго вниз-вверх, так что каждая вторая доля начинается с удара вверх; нажимайте на первую ноту каждой доли. Рука поднимается на пять ладов на тактовой черте и возвращается.",
+    "exercise.warmup-advanced.root-triplets.coachLine": "Это разминка. Она показывает, как прошло, и ничего не решает."
   },
   "from": {
     "path.title": "e6bd3564",
@@ -587,6 +595,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "f5514f11",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "4bb32d12",
     "exercise.warmup-intermediate.root-gallop.coachLine": "bd8c330a",
+    "exercise.warmup-intermediate.root-reverse.title": "4ddb5737",
+    "exercise.warmup-intermediate.root-reverse.purpose": "0bf7fdbf",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "16c4c90f",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "bd8c330a",
     "level.advanced.title": "49d1f044",
     "level.advanced.summary": "d261b039",
     "level.advanced.startHereIf.0": "4a565307",
@@ -596,6 +608,10 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "c0aac01e",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "d749d7c7",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "bd8c330a",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "da676e77"
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "da676e77",
+    "exercise.warmup-advanced.root-triplets.title": "c2bed93e",
+    "exercise.warmup-advanced.root-triplets.purpose": "90ed26e5",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "c1f564ab",
+    "exercise.warmup-advanced.root-triplets.coachLine": "bd8c330a"
   }
 }

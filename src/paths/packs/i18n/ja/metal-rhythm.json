@@ -289,6 +289,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "1本の弦でギャロップ：ルートとその短3度、そして1つ上の手の位置で4度と5度。そのつどキーと弦が変わります。",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "クリーンテンポよりずっと下から始めてください。ダウン、ダウン・アップ、パームミュート。手は小節線で5フレット上へ動き、また戻ります。",
     "exercise.warmup-intermediate.root-gallop.coachLine": "これはウォームアップです。どうだったかは伝えますが、何も決めません。",
+    "exercise.warmup-intermediate.root-reverse.title": "ルートの逆ギャロップ",
+    "exercise.warmup-intermediate.root-reverse.purpose": "1本の弦で逆ギャロップ：ルートとその短3度、そして1つ上の手の位置で4度と5度。そのつどキーと弦が変わります。",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "クリーンテンポよりずっと下から始めてください。ダウン・アップ、ダウン、パームミュート、最初の短い音をクリックに。手は小節線で5フレット上へ動き、また戻ります。",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "これはウォームアップです。どうだったかは伝えますが、何も決めません。",
     "level.advanced.title": "上級：スピードとスタミナ",
     "level.advanced.summary": "3連符のチャグ、6連符のバーストとトレモロピッキング、弦をまたぐペダルトーンのリフ、無音の16分音符をはさむストップ＆スタートのリフ、そしてバンドに合わせたリフと丸1分間。",
     "level.advanced.startHereIf.0": "ギャロップと逆ギャロップを 100 BPM で均等に弾ける。",
@@ -298,7 +302,11 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "1音につきミュートした16分音符を4つ、オルタネイトピッキングで：ルートとその短3度、そして1つ上の手の位置で4度と5度。そのつどキーと弦が変わります。",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "クリーンテンポよりずっと下から始めてください。厳密にダウン・アップ、パームミュート。手は小節線で5フレット上へ動き、また戻ります。",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "これはウォームアップです。どうだったかは伝えますが、何も決めません。",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "この速さでは、実際の機材の入力遅延で音がマッチングの範囲から外れ、遅れや抜けと判定されることがあります。ここで信頼できる数字は均等さで、それも遅延を補正してからです。"
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "この速さでは、実際の機材の入力遅延で音がマッチングの範囲から外れ、遅れや抜けと判定されることがあります。ここで信頼できる数字は均等さで、それも遅延を補正してからです。",
+    "exercise.warmup-advanced.root-triplets.title": "ルートの3連符",
+    "exercise.warmup-advanced.root-triplets.purpose": "1拍にミュートした音を3つ、オルタネイトピッキングで：ルートとその短3度、そして1つ上の手の位置で4度と5度。そのつどキーと弦が変わります。",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "クリーンテンポよりずっと下から始めてください。厳密にダウン・アップ、だから1拍おきにアップストロークから始まります。各拍の最初の音に重みをかけます。手は小節線で5フレット上へ動き、また戻ります。",
+    "exercise.warmup-advanced.root-triplets.coachLine": "これはウォームアップです。どうだったかは伝えますが、何も決めません。"
   },
   "from": {
     "path.title": "e6bd3564",
@@ -587,6 +595,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "f5514f11",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "4bb32d12",
     "exercise.warmup-intermediate.root-gallop.coachLine": "bd8c330a",
+    "exercise.warmup-intermediate.root-reverse.title": "4ddb5737",
+    "exercise.warmup-intermediate.root-reverse.purpose": "0bf7fdbf",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "16c4c90f",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "bd8c330a",
     "level.advanced.title": "49d1f044",
     "level.advanced.summary": "d261b039",
     "level.advanced.startHereIf.0": "4a565307",
@@ -596,6 +608,10 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "c0aac01e",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "d749d7c7",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "bd8c330a",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "da676e77"
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "da676e77",
+    "exercise.warmup-advanced.root-triplets.title": "c2bed93e",
+    "exercise.warmup-advanced.root-triplets.purpose": "90ed26e5",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "c1f564ab",
+    "exercise.warmup-advanced.root-triplets.coachLine": "bd8c330a"
   }
 }

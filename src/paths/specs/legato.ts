@@ -1053,6 +1053,28 @@ export default definePath({
           rungs: ladder(50, 110, 10),
           minutes: 3,
         },
+        {
+          id: "pull-climb",
+          title: "Pull-offs up one string",
+          purpose: "A scale climbing one string in pull-offs: pick a note and pull off to the one below it, then the same a step higher. A different key and string each time.",
+          howTo: ["Start well under your clean tempo. Both fingers down, pick the upper note, pull off to the first finger, and move the hand up one note for each pair."],
+          coach: "This is a warm-up. It tells you how it went, and it decides nothing.",
+          vary: {
+            values: { key: ["A", "C", "D", "E", "G"], stringSet: ["2", "3", "4"] },
+            pooled: ["key", "stringSet"],
+            label: (p) => `${p.key} minor on string ${p.stringSet}`,
+            build: (p) => {
+              const built = climb(p, "/8", [1, 0, 2, 1, 3, 2, 4, 3], ["", "p"], 3);
+              // Every pair is the first finger below and the next one along above it.
+              const tab = built.tab.replace(/(\d):(\d+) \1:(\d+)p/g, (_all, s, hi, lo) => `${s}:${hi}f${Number(hi) - Number(lo) === 1 ? 2 : 3} ${s}:${lo}pf1`);
+              return { ...built, tab };
+            },
+          },
+          grade: "warmup",
+          warmup: { start: 0.6, top: 0.8, reference: "first-pulls.pick-then-pull", fallback: 60 },
+          rungs: ladder(50, 110, 10),
+          minutes: 3,
+        },
       ],
     },
     {
@@ -1081,6 +1103,23 @@ export default definePath({
           },
           grade: "warmup",
           warmup: { start: 0.6, top: 0.8, reference: "rolls.roll-up", fallback: 50 },
+          rungs: ladder(40, 90, 5),
+          minutes: 3,
+        },
+        {
+          id: "roll-down-climb",
+          title: "The roll from the top, up one string",
+          purpose: "The roll started from the highest of three scale notes (pick, pull, pull, hammer), climbing a scale step each bar. A different key and string each time.",
+          howTo: ["Start well under your clean tempo. One pick a beat, with all three fingers down before it. The shape under the fingers changes as it climbs."],
+          coach: "This is a warm-up. It tells you how it went, and it decides nothing.",
+          vary: {
+            values: { key: ["A", "C", "D", "E", "G"], stringSet: ["1", "2", "3"] },
+            pooled: ["key", "stringSet"],
+            label: (p) => `${p.key} minor on string ${p.stringSet}`,
+            build: (p) => climb(p, "/16", [2, 1, 0, 1, 2, 1, 0, 1, 2, 1, 0, 1, 2, 1, 0, 1], ["", "p", "p", "h"], 7),
+          },
+          grade: "warmup",
+          warmup: { start: 0.6, top: 0.8, reference: "rolls.roll-down", fallback: 50 },
           rungs: ladder(40, 90, 5),
           minutes: 3,
         },
@@ -1123,6 +1162,23 @@ export default definePath({
           warmup: { start: 0.6, top: 0.8, reference: "from-nowhere.nowhere-two", fallback: 45 },
           rungs: ladder(40, 70, 5),
           minutes: 4,
+        },
+        {
+          id: "six-roll-climb",
+          title: "Six from one pick, up one string",
+          purpose: "The six-note roll on three scale notes, one pick a beat, climbing a scale step each bar. A different key and string each time.",
+          howTo: ["Start well under your clean tempo. Pick, hammer, hammer, pull, pull, hammer, six to the click. Look a bar ahead: the shape changes as it climbs."],
+          coach: "This is a warm-up. It tells you how it went, and it decides nothing.",
+          vary: {
+            values: { key: ["A", "C", "D", "E", "G"], stringSet: ["1", "2", "3"] },
+            pooled: ["key", "stringSet"],
+            label: (p) => `${p.key} minor on string ${p.stringSet}`,
+            build: (p) => climb(p, "/16t", [0, 1, 2, 1, 0, 1, 0, 1, 2, 1, 0, 1, 0, 1, 2, 1, 0, 1, 0, 1, 2, 1, 0, 1], ["", "h", "h", "p", "p", "h"], 7),
+          },
+          grade: "warmup",
+          warmup: { start: 0.6, top: 0.8, reference: "odd-groups.six-roll", fallback: 45 },
+          rungs: ladder(40, 70, 5),
+          minutes: 3,
         },
       ],
     },

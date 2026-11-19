@@ -278,6 +278,10 @@
     "exercise.warmup-beginner.walk-up.purpose": "Bir minör gamın iki notasında uzun, kısa-kısa, uzun, kısa-kısa, her ölçüde bir adım yukarı. Her seferinde farklı bir ton ve tel.",
     "exercise.warmup-beginner.walk-up.howTo.0": "Temiz temponun epey altında başla. '1, 2 and, 3, 4 and' diye say. Birinci parmak alt notada ve eli her ölçü çizgisinde bir nota yukarı taşı.",
     "exercise.warmup-beginner.walk-up.coachLine": "Bu bir ısınma. Nasıl geçtiğini söyler ve hiçbir şeye karar vermez.",
+    "exercise.warmup-beginner.three-and-rest.title": "Üç nota ve bir es",
+    "exercise.warmup-beginner.three-and-rest.purpose": "Bir minör gamın iki notasında üç dörtlük nota ve bir vuruşluk sessizlik, her ölçüde bir adım yukarı. Her seferinde farklı bir ton ve tel.",
+    "exercise.warmup-beginner.three-and-rest.howTo.0": "Temiz temponun epey altında başla. '1, 2, 3, (4)' diye sesli say ve 4'te teli sustur. Eli es sırasında bir nota yukarı taşı.",
+    "exercise.warmup-beginner.three-and-rest.coachLine": "Bu bir ısınma. Nasıl geçtiğini söyler ve hiçbir şeye karar vermez.",
     "level.intermediate.title": "Orta: vuruşların arasında",
     "level.intermediate.summary": "Zayıf vuruşlar ve noktalı notalar, on altılık figürler ve shuffle'lı triyoleler.",
     "level.intermediate.startHereIf.0": "Klikle 85 BPM'de, vuruşta aşağı ve 'and'de yukarı, düzgün sekizlik notalar çalabiliyorsun.",
@@ -287,6 +291,10 @@
     "exercise.warmup-intermediate.gallop-up.purpose": "Bir minör gamın üç notasında uzun-kısa-kısa ve inmek için bir dörtlük nota, her ölçüde bir adım yukarı. Her seferinde farklı bir ton ve tel.",
     "exercise.warmup-intermediate.gallop-up.howTo.0": "Temiz temponun epey altında başla. '1, and a, 2, and a, 3, and a, 4' diye say ve eli her ölçü çizgisinde bir nota yukarı taşı.",
     "exercise.warmup-intermediate.gallop-up.coachLine": "Bu bir ısınma. Nasıl geçtiğini söyler ve hiçbir şeye karar vermez.",
+    "exercise.warmup-intermediate.off-beat-walk.title": "Tek telde yukarı zayıf vuruşlar",
+    "exercise.warmup-intermediate.off-beat-walk.purpose": "Vuruşta bir nota, sonra yalnızca her vuruşun 'and'i, bir minör gamın iki notasında, her ölçüde bir adım yukarı. Her seferinde farklı bir ton ve tel.",
+    "exercise.warmup-intermediate.off-beat-walk.howTo.0": "Temiz temponun epey altında başla. '1 and, (2) and, (3) and, (4) and' diye say, her klikte ayak. Eli her ölçü çizgisinde bir nota yukarı taşı.",
+    "exercise.warmup-intermediate.off-beat-walk.coachLine": "Bu bir ısınma. Nasıl geçtiğini söyler ve hiçbir şeye karar vermez.",
     "level.advanced.title": "İleri: vites değiştirmek",
     "level.advanced.summary": "İçinde es olan on altılıklar, sekizlik, triyole ve on altılık arasında geçişler ve bir gruba karşı tutulan riffler.",
     "level.advanced.startHereIf.0": "Dörtnala figürünü, bir sekizlik ve iki on altılığı, 70 BPM'de düzgün çalabiliyorsun.",
@@ -295,7 +303,11 @@
     "exercise.warmup-advanced.pyramid-up.title": "Tek telde yukarı piramit",
     "exercise.warmup-advanced.pyramid-up.purpose": "Bir minör gamın üç notasında bir dörtlük, iki sekizlik, bir triyole ve dört on altılık, her ölçüde bir adım yukarı. Her seferinde farklı bir ton ve tel.",
     "exercise.warmup-advanced.pyramid-up.howTo.0": "Temiz temponun epey altında başla. '1, 2 and, 3-trip-let, 4 e and a' diye say ve eli her ölçü çizgisinde bir nota yukarı taşı.",
-    "exercise.warmup-advanced.pyramid-up.coachLine": "Bu bir ısınma. Nasıl geçtiğini söyler ve hiçbir şeye karar vermez."
+    "exercise.warmup-advanced.pyramid-up.coachLine": "Bu bir ısınma. Nasıl geçtiğini söyler ve hiçbir şeye karar vermez.",
+    "exercise.warmup-advanced.skip-up.title": "Tek telde yukarı sekme figürü",
+    "exercise.warmup-advanced.skip-up.purpose": "Bir minör gamın üç notasının her birinde bir, e, (and), a ve inmek için bir dörtlük nota, her ölçüde bir adım yukarı. Her seferinde farklı bir ton ve tel.",
+    "exercise.warmup-advanced.skip-up.howTo.0": "Temiz temponun epey altında başla. Her vuruşta '1 e (and) a' diye say: aşağı, yukarı, boş, yukarı. Eli her ölçü çizgisinde bir nota yukarı taşı.",
+    "exercise.warmup-advanced.skip-up.coachLine": "Bu bir ısınma. Nasıl geçtiğini söyler ve hiçbir şeye karar vermez."
   },
   "from": {
     "path.title": "b76cf8e7",
@@ -573,6 +585,10 @@
     "exercise.warmup-beginner.walk-up.purpose": "901257c3",
     "exercise.warmup-beginner.walk-up.howTo.0": "43740fd8",
     "exercise.warmup-beginner.walk-up.coachLine": "bd8c330a",
+    "exercise.warmup-beginner.three-and-rest.title": "99d83ad6",
+    "exercise.warmup-beginner.three-and-rest.purpose": "fe6c17d8",
+    "exercise.warmup-beginner.three-and-rest.howTo.0": "ef5d56cb",
+    "exercise.warmup-beginner.three-and-rest.coachLine": "bd8c330a",
     "level.intermediate.title": "a56dcb74",
     "level.intermediate.summary": "d11d31fd",
     "level.intermediate.startHereIf.0": "7f289b11",
@@ -582,6 +598,10 @@
     "exercise.warmup-intermediate.gallop-up.purpose": "004af3ea",
     "exercise.warmup-intermediate.gallop-up.howTo.0": "979bbb50",
     "exercise.warmup-intermediate.gallop-up.coachLine": "bd8c330a",
+    "exercise.warmup-intermediate.off-beat-walk.title": "0fb2db8c",
+    "exercise.warmup-intermediate.off-beat-walk.purpose": "35674105",
+    "exercise.warmup-intermediate.off-beat-walk.howTo.0": "6d7c7726",
+    "exercise.warmup-intermediate.off-beat-walk.coachLine": "bd8c330a",
     "level.advanced.title": "4f572219",
     "level.advanced.summary": "25a652c5",
     "level.advanced.startHereIf.0": "2b077c36",
@@ -590,6 +610,10 @@
     "exercise.warmup-advanced.pyramid-up.title": "cc2d9152",
     "exercise.warmup-advanced.pyramid-up.purpose": "894d17e9",
     "exercise.warmup-advanced.pyramid-up.howTo.0": "8d35d084",
-    "exercise.warmup-advanced.pyramid-up.coachLine": "bd8c330a"
+    "exercise.warmup-advanced.pyramid-up.coachLine": "bd8c330a",
+    "exercise.warmup-advanced.skip-up.title": "f0ac6acf",
+    "exercise.warmup-advanced.skip-up.purpose": "e58d3e36",
+    "exercise.warmup-advanced.skip-up.howTo.0": "456b9760",
+    "exercise.warmup-advanced.skip-up.coachLine": "bd8c330a"
   }
 }

@@ -278,6 +278,10 @@
     "exercise.warmup-beginner.walk-up.purpose": "Long, court-court, long, court-court sur deux notes d'une gamme mineure, un degré plus haut à chaque mesure. Une tonalité et une corde différentes à chaque fois.",
     "exercise.warmup-beginner.walk-up.howTo.0": "Commence bien en dessous de ton tempo propre. Compte « 1, 2 et, 3, 4 et ». Index sur la note grave, et monte la main d'une note à chaque barre de mesure.",
     "exercise.warmup-beginner.walk-up.coachLine": "C'est un échauffement. Il te dit comment ça s'est passé, et il ne décide de rien.",
+    "exercise.warmup-beginner.three-and-rest.title": "Trois notes et un silence",
+    "exercise.warmup-beginner.three-and-rest.purpose": "Trois noires et un temps de silence sur deux notes d'une gamme mineure, un degré plus haut à chaque mesure. Une tonalité et une corde différentes à chaque fois.",
+    "exercise.warmup-beginner.three-and-rest.howTo.0": "Commence bien en dessous de ton tempo propre. Compte « 1, 2, 3, (4) » à voix haute et étouffe la corde sur le 4. Monte la main d'une note pendant le silence.",
+    "exercise.warmup-beginner.three-and-rest.coachLine": "C'est un échauffement. Il te dit comment ça s'est passé, et il ne décide de rien.",
     "level.intermediate.title": "Intermédiaire : entre les temps",
     "level.intermediate.summary": "Les contretemps et les notes pointées, les figures en doubles croches, et les triolets avec le shuffle.",
     "level.intermediate.startHereIf.0": "Tu sais jouer des croches régulières avec un clic à 85 BPM, vers le bas sur le temps et vers le haut sur le « et ».",
@@ -287,6 +291,10 @@
     "exercise.warmup-intermediate.gallop-up.purpose": "Long-court-court sur trois notes d'une gamme mineure et une noire pour se poser, un degré plus haut à chaque mesure. Une tonalité et une corde différentes à chaque fois.",
     "exercise.warmup-intermediate.gallop-up.howTo.0": "Commence bien en dessous de ton tempo propre. Compte « 1, et a, 2, et a, 3, et a, 4 » et monte la main d'une note à chaque barre de mesure.",
     "exercise.warmup-intermediate.gallop-up.coachLine": "C'est un échauffement. Il te dit comment ça s'est passé, et il ne décide de rien.",
+    "exercise.warmup-intermediate.off-beat-walk.title": "Les contretemps en montant une corde",
+    "exercise.warmup-intermediate.off-beat-walk.purpose": "Une note sur le temps, puis seulement le « et » de chaque temps, sur deux notes d'une gamme mineure, un degré plus haut à chaque mesure. Une tonalité et une corde différentes à chaque fois.",
+    "exercise.warmup-intermediate.off-beat-walk.howTo.0": "Commence bien en dessous de ton tempo propre. Compte « 1 et, (2) et, (3) et, (4) et », le pied sur chaque clic. Monte la main d'une note à chaque barre de mesure.",
+    "exercise.warmup-intermediate.off-beat-walk.coachLine": "C'est un échauffement. Il te dit comment ça s'est passé, et il ne décide de rien.",
     "level.advanced.title": "Avancé : changer de vitesse",
     "level.advanced.summary": "Des doubles croches avec des silences dedans, des changements entre croches, triolets et doubles croches, et des riffs tenus contre un groupe.",
     "level.advanced.startHereIf.0": "Tu sais jouer la figure du galop, une croche et deux doubles croches, de façon régulière à 70 BPM.",
@@ -295,7 +303,11 @@
     "exercise.warmup-advanced.pyramid-up.title": "La pyramide en montant sur une corde",
     "exercise.warmup-advanced.pyramid-up.purpose": "Une noire, deux croches, un triolet et quatre doubles croches sur trois notes d'une gamme mineure, un degré plus haut à chaque mesure. Une tonalité et une corde différentes à chaque fois.",
     "exercise.warmup-advanced.pyramid-up.howTo.0": "Commence bien en dessous de ton tempo propre. Compte « 1, 2 et, 3-trio-let, 4 e et a » et monte la main d'une note à chaque barre de mesure.",
-    "exercise.warmup-advanced.pyramid-up.coachLine": "C'est un échauffement. Il te dit comment ça s'est passé, et il ne décide de rien."
+    "exercise.warmup-advanced.pyramid-up.coachLine": "C'est un échauffement. Il te dit comment ça s'est passé, et il ne décide de rien.",
+    "exercise.warmup-advanced.skip-up.title": "La figure sautée en montant une corde",
+    "exercise.warmup-advanced.skip-up.purpose": "Un, e, (et), a sur chacune de trois notes d'une gamme mineure et une noire pour se poser, un degré plus haut à chaque mesure. Une tonalité et une corde différentes à chaque fois.",
+    "exercise.warmup-advanced.skip-up.howTo.0": "Commence bien en dessous de ton tempo propre. Compte « 1 e (et) a » sur chaque temps : bas, haut, dans le vide, haut. Monte la main d'une note à chaque barre de mesure.",
+    "exercise.warmup-advanced.skip-up.coachLine": "C'est un échauffement. Il te dit comment ça s'est passé, et il ne décide de rien."
   },
   "from": {
     "path.title": "b76cf8e7",
@@ -573,6 +585,10 @@
     "exercise.warmup-beginner.walk-up.purpose": "901257c3",
     "exercise.warmup-beginner.walk-up.howTo.0": "43740fd8",
     "exercise.warmup-beginner.walk-up.coachLine": "bd8c330a",
+    "exercise.warmup-beginner.three-and-rest.title": "99d83ad6",
+    "exercise.warmup-beginner.three-and-rest.purpose": "fe6c17d8",
+    "exercise.warmup-beginner.three-and-rest.howTo.0": "ef5d56cb",
+    "exercise.warmup-beginner.three-and-rest.coachLine": "bd8c330a",
     "level.intermediate.title": "a56dcb74",
     "level.intermediate.summary": "d11d31fd",
     "level.intermediate.startHereIf.0": "7f289b11",
@@ -582,6 +598,10 @@
     "exercise.warmup-intermediate.gallop-up.purpose": "004af3ea",
     "exercise.warmup-intermediate.gallop-up.howTo.0": "979bbb50",
     "exercise.warmup-intermediate.gallop-up.coachLine": "bd8c330a",
+    "exercise.warmup-intermediate.off-beat-walk.title": "0fb2db8c",
+    "exercise.warmup-intermediate.off-beat-walk.purpose": "35674105",
+    "exercise.warmup-intermediate.off-beat-walk.howTo.0": "6d7c7726",
+    "exercise.warmup-intermediate.off-beat-walk.coachLine": "bd8c330a",
     "level.advanced.title": "4f572219",
     "level.advanced.summary": "25a652c5",
     "level.advanced.startHereIf.0": "2b077c36",
@@ -590,6 +610,10 @@
     "exercise.warmup-advanced.pyramid-up.title": "cc2d9152",
     "exercise.warmup-advanced.pyramid-up.purpose": "894d17e9",
     "exercise.warmup-advanced.pyramid-up.howTo.0": "8d35d084",
-    "exercise.warmup-advanced.pyramid-up.coachLine": "bd8c330a"
+    "exercise.warmup-advanced.pyramid-up.coachLine": "bd8c330a",
+    "exercise.warmup-advanced.skip-up.title": "f0ac6acf",
+    "exercise.warmup-advanced.skip-up.purpose": "e58d3e36",
+    "exercise.warmup-advanced.skip-up.howTo.0": "456b9760",
+    "exercise.warmup-advanced.skip-up.coachLine": "bd8c330a"
   }
 }

@@ -289,6 +289,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "한 줄에서 치는 갤럽. 근음과 그 단3도, 그다음 한 뼘 위의 4도와 5도. 매번 다른 키와 다른 줄에서.",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "클린 템포보다 한참 낮게 시작하세요. 다운, 다운-업, 팜 뮤트. 손은 마디선에서 다섯 프렛 올라갔다가 돌아옵니다.",
     "exercise.warmup-intermediate.root-gallop.coachLine": "워밍업입니다. 어땠는지 알려 줄 뿐, 아무것도 결정하지 않습니다.",
+    "exercise.warmup-intermediate.root-reverse.title": "근음 리버스 갤럽",
+    "exercise.warmup-intermediate.root-reverse.purpose": "한 줄에서 치는 리버스 갤럽. 근음과 그 단3도, 그다음 한 뼘 위의 4도와 5도. 매번 다른 키와 다른 줄에서.",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "클린 템포보다 한참 낮게 시작하세요. 다운-업, 다운, 팜 뮤트, 첫 짧은 음을 클릭에. 손은 마디선에서 다섯 프렛 올라갔다가 돌아옵니다.",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "워밍업입니다. 어땠는지 알려 줄 뿐, 아무것도 결정하지 않습니다.",
     "level.advanced.title": "고급: 속도와 지구력",
     "level.advanced.summary": "셋잇단음표 처그, 여섯잇단음표 버스트와 트레몰로 피킹, 줄을 넘나드는 페달 톤 리프, 무음 16분음표가 있는 스톱-스타트 리프, 그다음 밴드 위의 리프와 꽉 찬 1분.",
     "level.advanced.startHereIf.0": "100 BPM에서 갤럽과 리버스 갤럽을 고르게 칠 수 있어요.",
@@ -298,7 +302,11 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "음마다 뮤트한 16분음표 넷, 얼터네이트 피킹. 근음과 그 단3도, 그다음 한 뼘 위의 4도와 5도. 매번 다른 키와 다른 줄에서.",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "클린 템포보다 한참 낮게 시작하세요. 엄격한 다운-업, 팜 뮤트. 손은 마디선에서 다섯 프렛 올라갔다가 돌아옵니다.",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "워밍업입니다. 어땠는지 알려 줄 뿐, 아무것도 결정하지 않습니다.",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "이 속도에서는 실제 장비의 입력 지연 때문에 음이 매칭 범위 밖으로 밀려, 늦거나 놓친 것으로 읽힐 수 있습니다. 여기서는 고르기 수치를 믿으세요. 단, 지연을 보정한 뒤에만 그렇습니다."
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "이 속도에서는 실제 장비의 입력 지연 때문에 음이 매칭 범위 밖으로 밀려, 늦거나 놓친 것으로 읽힐 수 있습니다. 여기서는 고르기 수치를 믿으세요. 단, 지연을 보정한 뒤에만 그렇습니다.",
+    "exercise.warmup-advanced.root-triplets.title": "근음 셋잇단음표",
+    "exercise.warmup-advanced.root-triplets.purpose": "박마다 뮤트한 음 셋, 얼터네이트 피킹. 근음과 그 단3도, 그다음 한 뼘 위의 4도와 5도. 매번 다른 키와 다른 줄에서.",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "클린 템포보다 한참 낮게 시작하세요. 엄격한 다운-업이라 한 박씩 걸러 업스트로크로 시작합니다. 박마다 첫 음에 힘을 실으세요. 손은 마디선에서 다섯 프렛 올라갔다가 돌아옵니다.",
+    "exercise.warmup-advanced.root-triplets.coachLine": "워밍업입니다. 어땠는지 알려 줄 뿐, 아무것도 결정하지 않습니다."
   },
   "from": {
     "path.title": "e6bd3564",
@@ -587,6 +595,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "f5514f11",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "4bb32d12",
     "exercise.warmup-intermediate.root-gallop.coachLine": "bd8c330a",
+    "exercise.warmup-intermediate.root-reverse.title": "4ddb5737",
+    "exercise.warmup-intermediate.root-reverse.purpose": "0bf7fdbf",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "16c4c90f",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "bd8c330a",
     "level.advanced.title": "49d1f044",
     "level.advanced.summary": "d261b039",
     "level.advanced.startHereIf.0": "4a565307",
@@ -596,6 +608,10 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "c0aac01e",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "d749d7c7",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "bd8c330a",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "da676e77"
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "da676e77",
+    "exercise.warmup-advanced.root-triplets.title": "c2bed93e",
+    "exercise.warmup-advanced.root-triplets.purpose": "90ed26e5",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "c1f564ab",
+    "exercise.warmup-advanced.root-triplets.coachLine": "bd8c330a"
   }
 }

@@ -278,6 +278,10 @@
     "exercise.warmup-beginner.walk-up.purpose": "Long, short-short, long, short-short on two notes of a minor scale, a step higher each bar. A different key and string each time.",
     "exercise.warmup-beginner.walk-up.howTo.0": "Start well under your clean tempo. Count '1, 2 and, 3, 4 and'. First finger on the lower note, and move the hand up a note at each bar line.",
     "exercise.warmup-beginner.walk-up.coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
+    "exercise.warmup-beginner.three-and-rest.title": "Three notes and a rest",
+    "exercise.warmup-beginner.three-and-rest.purpose": "Three quarter notes and a beat of silence on two notes of a minor scale, a step higher each bar. A different key and string each time.",
+    "exercise.warmup-beginner.three-and-rest.howTo.0": "Start well under your clean tempo. Count '1, 2, 3, (4)' out loud and stop the string on 4. Move the hand up a note in the rest.",
+    "exercise.warmup-beginner.three-and-rest.coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
     "level.intermediate.title": "Intermediate: between the beats",
     "level.intermediate.summary": "Off-beats and dotted notes, the sixteenth-note figures, and triplets with the shuffle.",
     "level.intermediate.startHereIf.0": "You can play steady eighth notes with a click at 85 BPM, down on the beat and up on the 'and'.",
@@ -287,6 +291,10 @@
     "exercise.warmup-intermediate.gallop-up.purpose": "Long-short-short on three notes of a minor scale and a quarter note to land on, a step higher each bar. A different key and string each time.",
     "exercise.warmup-intermediate.gallop-up.howTo.0": "Start well under your clean tempo. Count '1, and a, 2, and a, 3, and a, 4' and move the hand up a note at each bar line.",
     "exercise.warmup-intermediate.gallop-up.coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
+    "exercise.warmup-intermediate.off-beat-walk.title": "Off-beats up one string",
+    "exercise.warmup-intermediate.off-beat-walk.purpose": "One note on the beat and then only the 'and' of every beat, on two notes of a minor scale, a step higher each bar. A different key and string each time.",
+    "exercise.warmup-intermediate.off-beat-walk.howTo.0": "Start well under your clean tempo. Count '1 and, (2) and, (3) and, (4) and', foot on every click. Move the hand up a note at each bar line.",
+    "exercise.warmup-intermediate.off-beat-walk.coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
     "level.advanced.title": "Advanced: changing gear",
     "level.advanced.summary": "Sixteenths with rests in them, changes between eighths, triplets and sixteenths, and riffs held against a band.",
     "level.advanced.startHereIf.0": "You can play the gallop figure, an eighth and two sixteenths, evenly at 70 BPM.",
@@ -295,6 +303,10 @@
     "exercise.warmup-advanced.pyramid-up.title": "The pyramid up one string",
     "exercise.warmup-advanced.pyramid-up.purpose": "A quarter, two eighths, a triplet and four sixteenths on three notes of a minor scale, a step higher each bar. A different key and string each time.",
     "exercise.warmup-advanced.pyramid-up.howTo.0": "Start well under your clean tempo. Count '1, 2 and, 3-trip-let, 4 e and a' and move the hand up a note at each bar line.",
-    "exercise.warmup-advanced.pyramid-up.coachLine": "This is a warm-up. It tells you how it went, and it decides nothing."
+    "exercise.warmup-advanced.pyramid-up.coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
+    "exercise.warmup-advanced.skip-up.title": "The skipping figure up one string",
+    "exercise.warmup-advanced.skip-up.purpose": "One, e, (and), a on each of three notes of a minor scale and a quarter note to land on, a step higher each bar. A different key and string each time.",
+    "exercise.warmup-advanced.skip-up.howTo.0": "Start well under your clean tempo. Count '1 e (and) a' on each beat: down, up, miss, up. Move the hand up a note at each bar line.",
+    "exercise.warmup-advanced.skip-up.coachLine": "This is a warm-up. It tells you how it went, and it decides nothing."
   }
 }

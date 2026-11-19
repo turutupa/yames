@@ -278,6 +278,10 @@
     "exercise.warmup-beginner.walk-up.purpose": "Dài, ngắn-ngắn, dài, ngắn-ngắn trên hai nốt của một gam thứ, mỗi ô nhịp cao hơn một bậc. Mỗi lần một giọng và một dây khác nhau.",
     "exercise.warmup-beginner.walk-up.howTo.0": "Bắt đầu thấp hơn nhiều so với tempo sạch của bạn. Đếm '1, 2 và, 3, 4 và'. Ngón một ở nốt thấp, và dời tay lên một nốt ở mỗi vạch nhịp.",
     "exercise.warmup-beginner.walk-up.coachLine": "Đây là phần khởi động. Nó cho bạn biết kết quả thế nào, và không quyết định gì cả.",
+    "exercise.warmup-beginner.three-and-rest.title": "Ba nốt và một nghỉ",
+    "exercise.warmup-beginner.three-and-rest.purpose": "Ba nốt đen và một phách lặng trên hai nốt của một gam thứ, mỗi ô nhịp cao hơn một bậc. Mỗi lần một giọng và một dây khác nhau.",
+    "exercise.warmup-beginner.three-and-rest.howTo.0": "Bắt đầu thấp hơn nhiều so với tempo sạch của bạn. Đếm to '1, 2, 3, (4)' và chặn dây ở nhịp 4. Dời tay lên một nốt trong lúc nghỉ.",
+    "exercise.warmup-beginner.three-and-rest.coachLine": "Đây là phần khởi động. Nó cho bạn biết kết quả thế nào, và không quyết định gì cả.",
     "level.intermediate.title": "Trung cấp: giữa các phách",
     "level.intermediate.summary": "Nốt lệch phách và nốt chấm dôi, các hình tiết tấu nốt móc kép, và chùm ba cùng shuffle.",
     "level.intermediate.startHereIf.0": "Bạn chơi được nốt móc đơn đều với click ở 85 BPM, xuống ở phách và lên ở 'và'.",
@@ -287,6 +291,10 @@
     "exercise.warmup-intermediate.gallop-up.purpose": "Dài-ngắn-ngắn trên ba nốt của một gam thứ và một nốt đen để đáp xuống, mỗi ô nhịp cao hơn một bậc. Mỗi lần một giọng và một dây khác nhau.",
     "exercise.warmup-intermediate.gallop-up.howTo.0": "Bắt đầu thấp hơn nhiều so với tempo sạch của bạn. Đếm '1, và a, 2, và a, 3, và a, 4' và dời tay lên một nốt ở mỗi vạch nhịp.",
     "exercise.warmup-intermediate.gallop-up.coachLine": "Đây là phần khởi động. Nó cho bạn biết kết quả thế nào, và không quyết định gì cả.",
+    "exercise.warmup-intermediate.off-beat-walk.title": "Phách yếu đi lên trên một dây",
+    "exercise.warmup-intermediate.off-beat-walk.purpose": "Một nốt đúng phách rồi chỉ có tiếng 'và' của mỗi phách, trên hai nốt của một gam thứ, mỗi ô nhịp cao hơn một bậc. Mỗi lần một giọng và một dây khác nhau.",
+    "exercise.warmup-intermediate.off-beat-walk.howTo.0": "Bắt đầu thấp hơn nhiều so với tempo sạch của bạn. Đếm '1 và, (2) và, (3) và, (4) và', chân gõ theo mỗi tiếng click. Dời tay lên một nốt ở mỗi vạch nhịp.",
+    "exercise.warmup-intermediate.off-beat-walk.coachLine": "Đây là phần khởi động. Nó cho bạn biết kết quả thế nào, và không quyết định gì cả.",
     "level.advanced.title": "Nâng cao: sang số",
     "level.advanced.summary": "Nốt móc kép có dấu lặng, chuyển giữa nốt móc đơn, chùm ba và nốt móc kép, và các riff giữ nhịp cùng ban nhạc.",
     "level.advanced.startHereIf.0": "Bạn chơi đều được hình gallop, một nốt móc đơn và hai nốt móc kép, ở 70 BPM.",
@@ -295,7 +303,11 @@
     "exercise.warmup-advanced.pyramid-up.title": "Kim tự tháp đi lên trên một dây",
     "exercise.warmup-advanced.pyramid-up.purpose": "Một nốt đen, hai nốt móc đơn, một chùm ba và bốn nốt móc kép trên ba nốt của một gam thứ, mỗi ô nhịp cao hơn một bậc. Mỗi lần một giọng và một dây khác nhau.",
     "exercise.warmup-advanced.pyramid-up.howTo.0": "Bắt đầu thấp hơn nhiều so với tempo sạch của bạn. Đếm '1, 2 và, 3-tri-plet, 4 e và a' và dời tay lên một nốt ở mỗi vạch nhịp.",
-    "exercise.warmup-advanced.pyramid-up.coachLine": "Đây là phần khởi động. Nó cho bạn biết kết quả thế nào, và không quyết định gì cả."
+    "exercise.warmup-advanced.pyramid-up.coachLine": "Đây là phần khởi động. Nó cho bạn biết kết quả thế nào, và không quyết định gì cả.",
+    "exercise.warmup-advanced.skip-up.title": "Nhịp nhảy đi lên trên một dây",
+    "exercise.warmup-advanced.skip-up.purpose": "Một, e, (và), a trên mỗi nốt trong ba nốt của một gam thứ và một nốt đen để đáp xuống, mỗi ô nhịp cao hơn một bậc. Mỗi lần một giọng và một dây khác nhau.",
+    "exercise.warmup-advanced.skip-up.howTo.0": "Bắt đầu thấp hơn nhiều so với tempo sạch của bạn. Đếm '1 e (và) a' trên mỗi phách: xuống, lên, bỏ qua, lên. Dời tay lên một nốt ở mỗi vạch nhịp.",
+    "exercise.warmup-advanced.skip-up.coachLine": "Đây là phần khởi động. Nó cho bạn biết kết quả thế nào, và không quyết định gì cả."
   },
   "from": {
     "path.title": "b76cf8e7",
@@ -573,6 +585,10 @@
     "exercise.warmup-beginner.walk-up.purpose": "901257c3",
     "exercise.warmup-beginner.walk-up.howTo.0": "43740fd8",
     "exercise.warmup-beginner.walk-up.coachLine": "bd8c330a",
+    "exercise.warmup-beginner.three-and-rest.title": "99d83ad6",
+    "exercise.warmup-beginner.three-and-rest.purpose": "fe6c17d8",
+    "exercise.warmup-beginner.three-and-rest.howTo.0": "ef5d56cb",
+    "exercise.warmup-beginner.three-and-rest.coachLine": "bd8c330a",
     "level.intermediate.title": "a56dcb74",
     "level.intermediate.summary": "d11d31fd",
     "level.intermediate.startHereIf.0": "7f289b11",
@@ -582,6 +598,10 @@
     "exercise.warmup-intermediate.gallop-up.purpose": "004af3ea",
     "exercise.warmup-intermediate.gallop-up.howTo.0": "979bbb50",
     "exercise.warmup-intermediate.gallop-up.coachLine": "bd8c330a",
+    "exercise.warmup-intermediate.off-beat-walk.title": "0fb2db8c",
+    "exercise.warmup-intermediate.off-beat-walk.purpose": "35674105",
+    "exercise.warmup-intermediate.off-beat-walk.howTo.0": "6d7c7726",
+    "exercise.warmup-intermediate.off-beat-walk.coachLine": "bd8c330a",
     "level.advanced.title": "4f572219",
     "level.advanced.summary": "25a652c5",
     "level.advanced.startHereIf.0": "2b077c36",
@@ -590,6 +610,10 @@
     "exercise.warmup-advanced.pyramid-up.title": "cc2d9152",
     "exercise.warmup-advanced.pyramid-up.purpose": "894d17e9",
     "exercise.warmup-advanced.pyramid-up.howTo.0": "8d35d084",
-    "exercise.warmup-advanced.pyramid-up.coachLine": "bd8c330a"
+    "exercise.warmup-advanced.pyramid-up.coachLine": "bd8c330a",
+    "exercise.warmup-advanced.skip-up.title": "f0ac6acf",
+    "exercise.warmup-advanced.skip-up.purpose": "e58d3e36",
+    "exercise.warmup-advanced.skip-up.howTo.0": "456b9760",
+    "exercise.warmup-advanced.skip-up.coachLine": "bd8c330a"
   }
 }

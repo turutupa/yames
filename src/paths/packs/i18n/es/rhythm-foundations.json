@@ -278,6 +278,10 @@
     "exercise.warmup-beginner.walk-up.purpose": "Larga, corta-corta, larga, corta-corta en dos notas de una escala menor, un grado más alto en cada compás. Una tonalidad y una cuerda distintas cada vez.",
     "exercise.warmup-beginner.walk-up.howTo.0": "Empieza muy por debajo de tu tempo limpio. Cuenta «1, 2 y, 3, 4 y». Dedo 1 en la nota más grave, y sube la mano una nota en cada barra de compás.",
     "exercise.warmup-beginner.walk-up.coachLine": "Esto es un calentamiento. Te dice cómo ha ido, y no decide nada.",
+    "exercise.warmup-beginner.three-and-rest.title": "Tres notas y un silencio",
+    "exercise.warmup-beginner.three-and-rest.purpose": "Tres negras y un pulso de silencio en dos notas de una escala menor, un grado más alto en cada compás. Una tonalidad y una cuerda distintas cada vez.",
+    "exercise.warmup-beginner.three-and-rest.howTo.0": "Empieza muy por debajo de tu tempo limpio. Cuenta «1, 2, 3, (4)» en voz alta y apaga la cuerda en el 4. Sube la mano una nota durante el silencio.",
+    "exercise.warmup-beginner.three-and-rest.coachLine": "Esto es un calentamiento. Te dice cómo ha ido, y no decide nada.",
     "level.intermediate.title": "Intermedio: entre los pulsos",
     "level.intermediate.summary": "Contratiempos y notas con puntillo, las figuras de semicorcheas, y tresillos con el shuffle.",
     "level.intermediate.startHereIf.0": "Puedes tocar corcheas constantes con un clic a 85 BPM, abajo en el pulso y arriba en la «y».",
@@ -287,6 +291,10 @@
     "exercise.warmup-intermediate.gallop-up.purpose": "Larga-corta-corta en tres notas de una escala menor y una negra donde aterrizar, un grado más alto en cada compás. Una tonalidad y una cuerda distintas cada vez.",
     "exercise.warmup-intermediate.gallop-up.howTo.0": "Empieza muy por debajo de tu tempo limpio. Cuenta «1, y a, 2, y a, 3, y a, 4» y sube la mano una nota en cada barra de compás.",
     "exercise.warmup-intermediate.gallop-up.coachLine": "Esto es un calentamiento. Te dice cómo ha ido, y no decide nada.",
+    "exercise.warmup-intermediate.off-beat-walk.title": "Contratiempos subiendo por una cuerda",
+    "exercise.warmup-intermediate.off-beat-walk.purpose": "Una nota en el pulso y luego solo la «y» de cada pulso, en dos notas de una escala menor, un grado más alto en cada compás. Una tonalidad y una cuerda distintas cada vez.",
+    "exercise.warmup-intermediate.off-beat-walk.howTo.0": "Empieza muy por debajo de tu tempo limpio. Cuenta «1 y, (2) y, (3) y, (4) y», con el pie en cada clic. Sube la mano una nota en cada barra de compás.",
+    "exercise.warmup-intermediate.off-beat-walk.coachLine": "Esto es un calentamiento. Te dice cómo ha ido, y no decide nada.",
     "level.advanced.title": "Avanzado: cambio de marcha",
     "level.advanced.summary": "Semicorcheas con silencios dentro, cambios entre corcheas, tresillos y semicorcheas, y riffs mantenidos contra una banda.",
     "level.advanced.startHereIf.0": "Puedes tocar la figura del galope, una corchea y dos semicorcheas, con regularidad a 70 BPM.",
@@ -295,7 +303,11 @@
     "exercise.warmup-advanced.pyramid-up.title": "La pirámide subiendo por una cuerda",
     "exercise.warmup-advanced.pyramid-up.purpose": "Una negra, dos corcheas, un tresillo y cuatro semicorcheas en tres notas de una escala menor, un grado más alto en cada compás. Una tonalidad y una cuerda distintas cada vez.",
     "exercise.warmup-advanced.pyramid-up.howTo.0": "Empieza muy por debajo de tu tempo limpio. Cuenta «1, 2 y, 3-tri-ple, 4 e y a» y sube la mano una nota en cada barra de compás.",
-    "exercise.warmup-advanced.pyramid-up.coachLine": "Esto es un calentamiento. Te dice cómo ha ido, y no decide nada."
+    "exercise.warmup-advanced.pyramid-up.coachLine": "Esto es un calentamiento. Te dice cómo ha ido, y no decide nada.",
+    "exercise.warmup-advanced.skip-up.title": "La figura saltada subiendo por una cuerda",
+    "exercise.warmup-advanced.skip-up.purpose": "Uno, e, (y), a en cada una de tres notas de una escala menor y una negra donde aterrizar, un grado más alto en cada compás. Una tonalidad y una cuerda distintas cada vez.",
+    "exercise.warmup-advanced.skip-up.howTo.0": "Empieza muy por debajo de tu tempo limpio. Cuenta «1 e (y) a» en cada pulso: abajo, arriba, al aire, arriba. Sube la mano una nota en cada barra de compás.",
+    "exercise.warmup-advanced.skip-up.coachLine": "Esto es un calentamiento. Te dice cómo ha ido, y no decide nada."
   },
   "from": {
     "path.title": "b76cf8e7",
@@ -573,6 +585,10 @@
     "exercise.warmup-beginner.walk-up.purpose": "901257c3",
     "exercise.warmup-beginner.walk-up.howTo.0": "43740fd8",
     "exercise.warmup-beginner.walk-up.coachLine": "bd8c330a",
+    "exercise.warmup-beginner.three-and-rest.title": "99d83ad6",
+    "exercise.warmup-beginner.three-and-rest.purpose": "fe6c17d8",
+    "exercise.warmup-beginner.three-and-rest.howTo.0": "ef5d56cb",
+    "exercise.warmup-beginner.three-and-rest.coachLine": "bd8c330a",
     "level.intermediate.title": "a56dcb74",
     "level.intermediate.summary": "d11d31fd",
     "level.intermediate.startHereIf.0": "7f289b11",
@@ -582,6 +598,10 @@
     "exercise.warmup-intermediate.gallop-up.purpose": "004af3ea",
     "exercise.warmup-intermediate.gallop-up.howTo.0": "979bbb50",
     "exercise.warmup-intermediate.gallop-up.coachLine": "bd8c330a",
+    "exercise.warmup-intermediate.off-beat-walk.title": "0fb2db8c",
+    "exercise.warmup-intermediate.off-beat-walk.purpose": "35674105",
+    "exercise.warmup-intermediate.off-beat-walk.howTo.0": "6d7c7726",
+    "exercise.warmup-intermediate.off-beat-walk.coachLine": "bd8c330a",
     "level.advanced.title": "4f572219",
     "level.advanced.summary": "25a652c5",
     "level.advanced.startHereIf.0": "2b077c36",
@@ -590,6 +610,10 @@
     "exercise.warmup-advanced.pyramid-up.title": "cc2d9152",
     "exercise.warmup-advanced.pyramid-up.purpose": "894d17e9",
     "exercise.warmup-advanced.pyramid-up.howTo.0": "8d35d084",
-    "exercise.warmup-advanced.pyramid-up.coachLine": "bd8c330a"
+    "exercise.warmup-advanced.pyramid-up.coachLine": "bd8c330a",
+    "exercise.warmup-advanced.skip-up.title": "f0ac6acf",
+    "exercise.warmup-advanced.skip-up.purpose": "e58d3e36",
+    "exercise.warmup-advanced.skip-up.howTo.0": "456b9760",
+    "exercise.warmup-advanced.skip-up.coachLine": "bd8c330a"
   }
 }

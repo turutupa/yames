@@ -289,6 +289,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "The gallop on one string: the root and its minor third, then the fourth and fifth a hand higher. A different key and string each time.",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "Start well under your clean tempo. Down, down-up, palm-muted. The hand moves up five frets at the bar line and back.",
     "exercise.warmup-intermediate.root-gallop.coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
+    "exercise.warmup-intermediate.root-reverse.title": "A reverse gallop on the root",
+    "exercise.warmup-intermediate.root-reverse.purpose": "The reverse gallop on one string: the root and its minor third, then the fourth and fifth a hand higher. A different key and string each time.",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "Start well under your clean tempo. Down-up, down, palm-muted, the first short note on the click. The hand moves up five frets at the bar line and back.",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
     "level.advanced.title": "Advanced: speed and stamina",
     "level.advanced.summary": "Triplet chugs, sextuplet bursts and tremolo picking, pedal-tone riffs across strings, stop-start riffs with silent sixteenths, then a riff over a band and a full minute.",
     "level.advanced.startHereIf.0": "You can play the gallop and the reverse gallop evenly at 100 BPM.",
@@ -298,6 +302,10 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "Four muted sixteenths a note, alternate picked: the root and its minor third, then the fourth and fifth a hand higher. A different key and string each time.",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "Start well under your clean tempo. Strict down-up, palm-muted. The hand moves up five frets at the bar line and back.",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "At this speed a real rig's input delay can push notes out of their matching window, which reads as late or missed. Evenness is the number to trust here, and only once the delay is calibrated."
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "At this speed a real rig's input delay can push notes out of their matching window, which reads as late or missed. Evenness is the number to trust here, and only once the delay is calibrated.",
+    "exercise.warmup-advanced.root-triplets.title": "Triplets on the root",
+    "exercise.warmup-advanced.root-triplets.purpose": "Three muted notes to a beat, alternate picked: the root and its minor third, then the fourth and fifth a hand higher. A different key and string each time.",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "Start well under your clean tempo. Strict down-up, so every other beat starts on an upstroke; lean on the first note of each beat. The hand moves up five frets at the bar line and back.",
+    "exercise.warmup-advanced.root-triplets.coachLine": "This is a warm-up. It tells you how it went, and it decides nothing."
   }
 }

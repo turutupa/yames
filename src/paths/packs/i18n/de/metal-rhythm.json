@@ -289,6 +289,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "Der Galopp auf einer Saite: der Grundton und seine kleine Terz, dann die Quarte und die Quinte eine Handbreit höher. Jedes Mal eine andere Tonart und Saite.",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "Fang deutlich unter deinem sauberen Tempo an. Ab, ab-auf, mit Palm Mute. Die Hand rückt am Taktstrich fünf Bünde hoch und wieder zurück.",
     "exercise.warmup-intermediate.root-gallop.coachLine": "Das ist Aufwärmen. Du erfährst, wie es lief, und es entscheidet nichts.",
+    "exercise.warmup-intermediate.root-reverse.title": "Ein umgekehrter Galopp auf dem Grundton",
+    "exercise.warmup-intermediate.root-reverse.purpose": "Der umgekehrte Galopp auf einer Saite: der Grundton und seine kleine Terz, dann die Quarte und die Quinte eine Handbreit höher. Jedes Mal eine andere Tonart und Saite.",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "Fang deutlich unter deinem sauberen Tempo an. Ab-auf, ab, mit Palm Mute, der erste kurze Ton auf dem Klick. Die Hand rückt am Taktstrich fünf Bünde hoch und wieder zurück.",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "Das ist Aufwärmen. Du erfährst, wie es lief, und es entscheidet nichts.",
     "level.advanced.title": "Fortgeschritten: Tempo und Ausdauer",
     "level.advanced.summary": "Triolen-Chugs, Sextolen-Salven und Tremolo Picking, Pedalton-Riffs über mehrere Saiten, Stop-Start-Riffs mit stummen Sechzehnteln, dann ein Riff über einer Band und eine volle Minute.",
     "level.advanced.startHereIf.0": "Du kannst den Galopp und den umgekehrten Galopp bei 100 BPM gleichmäßig spielen.",
@@ -298,7 +302,11 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "Vier gedämpfte Sechzehntel pro Ton, im Wechselschlag: der Grundton und seine kleine Terz, dann die Quarte und die Quinte eine Handbreit höher. Jedes Mal eine andere Tonart und Saite.",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "Fang deutlich unter deinem sauberen Tempo an. Striktes Ab-Auf, mit Palm Mute. Die Hand rückt am Taktstrich fünf Bünde hoch und wieder zurück.",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "Das ist Aufwärmen. Du erfährst, wie es lief, und es entscheidet nichts.",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "Bei diesem Tempo kann die Eingangsverzögerung eines echten Setups Töne aus ihrem Zuordnungsfenster schieben, was als zu spät oder verpasst gewertet wird. Die Gleichmäßigkeit ist hier der Wert, dem du trauen kannst, und erst, wenn die Verzögerung kalibriert ist."
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "Bei diesem Tempo kann die Eingangsverzögerung eines echten Setups Töne aus ihrem Zuordnungsfenster schieben, was als zu spät oder verpasst gewertet wird. Die Gleichmäßigkeit ist hier der Wert, dem du trauen kannst, und erst, wenn die Verzögerung kalibriert ist.",
+    "exercise.warmup-advanced.root-triplets.title": "Triolen auf dem Grundton",
+    "exercise.warmup-advanced.root-triplets.purpose": "Drei gedämpfte Töne pro Schlag, im Wechselschlag: der Grundton und seine kleine Terz, dann die Quarte und die Quinte eine Handbreit höher. Jedes Mal eine andere Tonart und Saite.",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "Fang deutlich unter deinem sauberen Tempo an. Striktes Ab-Auf, also beginnt jeder zweite Schlag mit einem Aufschlag; betone den ersten Ton jedes Schlags. Die Hand rückt am Taktstrich fünf Bünde hoch und wieder zurück.",
+    "exercise.warmup-advanced.root-triplets.coachLine": "Das ist Aufwärmen. Du erfährst, wie es lief, und es entscheidet nichts."
   },
   "from": {
     "path.title": "e6bd3564",
@@ -587,6 +595,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "f5514f11",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "4bb32d12",
     "exercise.warmup-intermediate.root-gallop.coachLine": "bd8c330a",
+    "exercise.warmup-intermediate.root-reverse.title": "4ddb5737",
+    "exercise.warmup-intermediate.root-reverse.purpose": "0bf7fdbf",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "16c4c90f",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "bd8c330a",
     "level.advanced.title": "49d1f044",
     "level.advanced.summary": "d261b039",
     "level.advanced.startHereIf.0": "4a565307",
@@ -596,6 +608,10 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "c0aac01e",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "d749d7c7",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "bd8c330a",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "da676e77"
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "da676e77",
+    "exercise.warmup-advanced.root-triplets.title": "c2bed93e",
+    "exercise.warmup-advanced.root-triplets.purpose": "90ed26e5",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "c1f564ab",
+    "exercise.warmup-advanced.root-triplets.coachLine": "bd8c330a"
   }
 }

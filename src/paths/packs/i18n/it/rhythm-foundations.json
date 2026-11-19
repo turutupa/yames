@@ -278,6 +278,10 @@
     "exercise.warmup-beginner.walk-up.purpose": "Lunga, corta-corta, lunga, corta-corta su due note di una scala minore, un grado più in alto a ogni battuta. Ogni volta una tonalità e una corda diverse.",
     "exercise.warmup-beginner.walk-up.howTo.0": "Parti ben sotto il tuo tempo pulito. Conta '1, 2 e, 3, 4 e'. Primo dito sulla nota più bassa, e sposta la mano su di una nota a ogni stanghetta.",
     "exercise.warmup-beginner.walk-up.coachLine": "Questo è un riscaldamento. Ti dice com'è andata, e non decide nulla.",
+    "exercise.warmup-beginner.three-and-rest.title": "Tre note e una pausa",
+    "exercise.warmup-beginner.three-and-rest.purpose": "Tre quarti e un movimento di pausa su due note di una scala minore, un grado più in alto a ogni battuta. Ogni volta una tonalità e una corda diverse.",
+    "exercise.warmup-beginner.three-and-rest.howTo.0": "Parti ben sotto il tuo tempo pulito. Conta '1, 2, 3, (4)' ad alta voce e smorza la corda sul 4. Sposta la mano su di una nota durante la pausa.",
+    "exercise.warmup-beginner.three-and-rest.coachLine": "Questo è un riscaldamento. Ti dice com'è andata, e non decide nulla.",
     "level.intermediate.title": "Intermedio: tra i movimenti",
     "level.intermediate.summary": "Levare e note puntate, le figure di sedicesimi, e le terzine con lo shuffle.",
     "level.intermediate.startHereIf.0": "Sai suonare ottavi regolari con un clic a 85 BPM, giù sul battere e su sulla 'e'.",
@@ -287,6 +291,10 @@
     "exercise.warmup-intermediate.gallop-up.purpose": "Lunga-corta-corta su tre note di una scala minore e un quarto su cui arrivare, un grado più in alto a ogni battuta. Ogni volta una tonalità e una corda diverse.",
     "exercise.warmup-intermediate.gallop-up.howTo.0": "Parti ben sotto il tuo tempo pulito. Conta '1, e a, 2, e a, 3, e a, 4' e sposta la mano su di una nota a ogni stanghetta.",
     "exercise.warmup-intermediate.gallop-up.coachLine": "Questo è un riscaldamento. Ti dice com'è andata, e non decide nulla.",
+    "exercise.warmup-intermediate.off-beat-walk.title": "Controtempi su una corda",
+    "exercise.warmup-intermediate.off-beat-walk.purpose": "Una nota sul movimento e poi solo la 'e' di ogni movimento, su due note di una scala minore, un grado più in alto a ogni battuta. Ogni volta una tonalità e una corda diverse.",
+    "exercise.warmup-intermediate.off-beat-walk.howTo.0": "Parti ben sotto il tuo tempo pulito. Conta '1 e, (2) e, (3) e, (4) e', con il piede a ogni clic. Sposta la mano su di una nota a ogni stanghetta.",
+    "exercise.warmup-intermediate.off-beat-walk.coachLine": "Questo è un riscaldamento. Ti dice com'è andata, e non decide nulla.",
     "level.advanced.title": "Avanzato: cambiare marcia",
     "level.advanced.summary": "Sedicesimi con pause dentro, cambi tra ottavi, terzine e sedicesimi, e riff tenuti contro una band.",
     "level.advanced.startHereIf.0": "Sai suonare la figura del galoppo, un ottavo e due sedicesimi, con regolarità a 70 BPM.",
@@ -295,7 +303,11 @@
     "exercise.warmup-advanced.pyramid-up.title": "La piramide su una corda",
     "exercise.warmup-advanced.pyramid-up.purpose": "Un quarto, due ottavi, una terzina e quattro sedicesimi su tre note di una scala minore, un grado più in alto a ogni battuta. Ogni volta una tonalità e una corda diverse.",
     "exercise.warmup-advanced.pyramid-up.howTo.0": "Parti ben sotto il tuo tempo pulito. Conta '1, 2 e, 3-tri-ple, 4 e e a' e sposta la mano su di una nota a ogni stanghetta.",
-    "exercise.warmup-advanced.pyramid-up.coachLine": "Questo è un riscaldamento. Ti dice com'è andata, e non decide nulla."
+    "exercise.warmup-advanced.pyramid-up.coachLine": "Questo è un riscaldamento. Ti dice com'è andata, e non decide nulla.",
+    "exercise.warmup-advanced.skip-up.title": "La figura saltata su una corda",
+    "exercise.warmup-advanced.skip-up.purpose": "Uno, e, (e), a su ciascuna di tre note di una scala minore e un quarto su cui arrivare, un grado più in alto a ogni battuta. Ogni volta una tonalità e una corda diverse.",
+    "exercise.warmup-advanced.skip-up.howTo.0": "Parti ben sotto il tuo tempo pulito. Conta '1 e (e) a' su ogni movimento: giù, su, a vuoto, su. Sposta la mano su di una nota a ogni stanghetta.",
+    "exercise.warmup-advanced.skip-up.coachLine": "Questo è un riscaldamento. Ti dice com'è andata, e non decide nulla."
   },
   "from": {
     "path.title": "b76cf8e7",
@@ -573,6 +585,10 @@
     "exercise.warmup-beginner.walk-up.purpose": "901257c3",
     "exercise.warmup-beginner.walk-up.howTo.0": "43740fd8",
     "exercise.warmup-beginner.walk-up.coachLine": "bd8c330a",
+    "exercise.warmup-beginner.three-and-rest.title": "99d83ad6",
+    "exercise.warmup-beginner.three-and-rest.purpose": "fe6c17d8",
+    "exercise.warmup-beginner.three-and-rest.howTo.0": "ef5d56cb",
+    "exercise.warmup-beginner.three-and-rest.coachLine": "bd8c330a",
     "level.intermediate.title": "a56dcb74",
     "level.intermediate.summary": "d11d31fd",
     "level.intermediate.startHereIf.0": "7f289b11",
@@ -582,6 +598,10 @@
     "exercise.warmup-intermediate.gallop-up.purpose": "004af3ea",
     "exercise.warmup-intermediate.gallop-up.howTo.0": "979bbb50",
     "exercise.warmup-intermediate.gallop-up.coachLine": "bd8c330a",
+    "exercise.warmup-intermediate.off-beat-walk.title": "0fb2db8c",
+    "exercise.warmup-intermediate.off-beat-walk.purpose": "35674105",
+    "exercise.warmup-intermediate.off-beat-walk.howTo.0": "6d7c7726",
+    "exercise.warmup-intermediate.off-beat-walk.coachLine": "bd8c330a",
     "level.advanced.title": "4f572219",
     "level.advanced.summary": "25a652c5",
     "level.advanced.startHereIf.0": "2b077c36",
@@ -590,6 +610,10 @@
     "exercise.warmup-advanced.pyramid-up.title": "cc2d9152",
     "exercise.warmup-advanced.pyramid-up.purpose": "894d17e9",
     "exercise.warmup-advanced.pyramid-up.howTo.0": "8d35d084",
-    "exercise.warmup-advanced.pyramid-up.coachLine": "bd8c330a"
+    "exercise.warmup-advanced.pyramid-up.coachLine": "bd8c330a",
+    "exercise.warmup-advanced.skip-up.title": "f0ac6acf",
+    "exercise.warmup-advanced.skip-up.purpose": "e58d3e36",
+    "exercise.warmup-advanced.skip-up.howTo.0": "456b9760",
+    "exercise.warmup-advanced.skip-up.coachLine": "bd8c330a"
   }
 }

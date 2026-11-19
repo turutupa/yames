@@ -278,6 +278,10 @@
     "exercise.warmup-beginner.walk-up.purpose": "长，短短，长，短短，用小调音阶的两个音，每小节高一个音。每次换一个调和一根弦。",
     "exercise.warmup-beginner.walk-up.howTo.0": "从远低于你干净速度的地方开始。数“1, 2 and, 3, 4 and”。食指按低音，每过一条小节线，手往上移一个音。",
     "exercise.warmup-beginner.walk-up.coachLine": "这是热身。它会告诉你弹得怎样，但不决定任何事。",
+    "exercise.warmup-beginner.three-and-rest.title": "三个音和一个休止",
+    "exercise.warmup-beginner.three-and-rest.purpose": "小调音阶的两个音上，三个四分音符加一拍的静默，每小节高一个音。每次换一个调和一根弦。",
+    "exercise.warmup-beginner.three-and-rest.howTo.0": "从远低于你干净速度的地方开始。大声数“1, 2, 3, (4)”，在 4 上按停琴弦。在休止里把手往上移一个音。",
+    "exercise.warmup-beginner.three-and-rest.coachLine": "这是热身。它会告诉你弹得怎样，但不决定任何事。",
     "level.intermediate.title": "中级：拍与拍之间",
     "level.intermediate.summary": "反拍和附点音符，十六分音符节奏型，以及三连音和 shuffle。",
     "level.intermediate.startHereIf.0": "你能跟着 85 BPM 的节拍声弹稳定的八分音符，拍上下拨，“and”上上拨。",
@@ -287,6 +291,10 @@
     "exercise.warmup-intermediate.gallop-up.purpose": "长短短，用小调音阶的三个音，加一个四分音符落点，每小节高一个音。每次换一个调和一根弦。",
     "exercise.warmup-intermediate.gallop-up.howTo.0": "从远低于你干净速度的地方开始。数“1, and a, 2, and a, 3, and a, 4”，每过一条小节线，手往上移一个音。",
     "exercise.warmup-intermediate.gallop-up.coachLine": "这是热身。它会告诉你弹得怎样，但不决定任何事。",
+    "exercise.warmup-intermediate.off-beat-walk.title": "沿一根弦往上的反拍",
+    "exercise.warmup-intermediate.off-beat-walk.purpose": "拍点上一个音，然后每拍只弹“and”，用小调音阶的两个音，每小节高一个音。每次换一个调和一根弦。",
+    "exercise.warmup-intermediate.off-beat-walk.howTo.0": "从远低于你干净速度的地方开始。数“1 and, (2) and, (3) and, (4) and”，每个节拍声都踩一下脚。每过一条小节线，手往上移一个音。",
+    "exercise.warmup-intermediate.off-beat-walk.coachLine": "这是热身。它会告诉你弹得怎样，但不决定任何事。",
     "level.advanced.title": "高级：换挡",
     "level.advanced.summary": "带休止的十六分音符，八分音符、三连音和十六分音符之间的切换，以及跟着乐队保持的 riff。",
     "level.advanced.startHereIf.0": "你能以 70 BPM 均匀地弹奔马节奏型，也就是一个八分音符加两个十六分音符。",
@@ -295,7 +303,11 @@
     "exercise.warmup-advanced.pyramid-up.title": "沿一根弦往上的金字塔",
     "exercise.warmup-advanced.pyramid-up.purpose": "一个四分音符，两个八分音符，一组三连音和四个十六分音符，用小调音阶的三个音，每小节高一个音。每次换一个调和一根弦。",
     "exercise.warmup-advanced.pyramid-up.howTo.0": "从远低于你干净速度的地方开始。数“1, 2 and, 3-trip-let, 4 e and a”，每过一条小节线，手往上移一个音。",
-    "exercise.warmup-advanced.pyramid-up.coachLine": "这是热身。它会告诉你弹得怎样，但不决定任何事。"
+    "exercise.warmup-advanced.pyramid-up.coachLine": "这是热身。它会告诉你弹得怎样，但不决定任何事。",
+    "exercise.warmup-advanced.skip-up.title": "沿一根弦往上的跳跃型",
+    "exercise.warmup-advanced.skip-up.purpose": "小调音阶的三个音上，每个音弹 1、e、(and)、a，再加一个四分音符作为落点，每小节高一个音。每次换一个调和一根弦。",
+    "exercise.warmup-advanced.skip-up.howTo.0": "从远低于你干净速度的地方开始。每拍数“1 e (and) a”：下、上、空挥、上。每过一条小节线，手往上移一个音。",
+    "exercise.warmup-advanced.skip-up.coachLine": "这是热身。它会告诉你弹得怎样，但不决定任何事。"
   },
   "from": {
     "path.title": "b76cf8e7",
@@ -573,6 +585,10 @@
     "exercise.warmup-beginner.walk-up.purpose": "901257c3",
     "exercise.warmup-beginner.walk-up.howTo.0": "43740fd8",
     "exercise.warmup-beginner.walk-up.coachLine": "bd8c330a",
+    "exercise.warmup-beginner.three-and-rest.title": "99d83ad6",
+    "exercise.warmup-beginner.three-and-rest.purpose": "fe6c17d8",
+    "exercise.warmup-beginner.three-and-rest.howTo.0": "ef5d56cb",
+    "exercise.warmup-beginner.three-and-rest.coachLine": "bd8c330a",
     "level.intermediate.title": "a56dcb74",
     "level.intermediate.summary": "d11d31fd",
     "level.intermediate.startHereIf.0": "7f289b11",
@@ -582,6 +598,10 @@
     "exercise.warmup-intermediate.gallop-up.purpose": "004af3ea",
     "exercise.warmup-intermediate.gallop-up.howTo.0": "979bbb50",
     "exercise.warmup-intermediate.gallop-up.coachLine": "bd8c330a",
+    "exercise.warmup-intermediate.off-beat-walk.title": "0fb2db8c",
+    "exercise.warmup-intermediate.off-beat-walk.purpose": "35674105",
+    "exercise.warmup-intermediate.off-beat-walk.howTo.0": "6d7c7726",
+    "exercise.warmup-intermediate.off-beat-walk.coachLine": "bd8c330a",
     "level.advanced.title": "4f572219",
     "level.advanced.summary": "25a652c5",
     "level.advanced.startHereIf.0": "2b077c36",
@@ -590,6 +610,10 @@
     "exercise.warmup-advanced.pyramid-up.title": "cc2d9152",
     "exercise.warmup-advanced.pyramid-up.purpose": "894d17e9",
     "exercise.warmup-advanced.pyramid-up.howTo.0": "8d35d084",
-    "exercise.warmup-advanced.pyramid-up.coachLine": "bd8c330a"
+    "exercise.warmup-advanced.pyramid-up.coachLine": "bd8c330a",
+    "exercise.warmup-advanced.skip-up.title": "f0ac6acf",
+    "exercise.warmup-advanced.skip-up.purpose": "e58d3e36",
+    "exercise.warmup-advanced.skip-up.howTo.0": "456b9760",
+    "exercise.warmup-advanced.skip-up.coachLine": "bd8c330a"
   }
 }

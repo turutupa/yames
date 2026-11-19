@@ -289,6 +289,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "一根弦上的奔马节奏：根音和它的小三度，然后是高一个手位的四度和五度。每次换一个调和一根弦。",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "从远低于你干净速度的地方开始。下、下上，手掌闷音。手在小节线处向上移五品，再回来。",
     "exercise.warmup-intermediate.root-gallop.coachLine": "这是热身。它会告诉你弹得怎样，但不决定任何事。",
+    "exercise.warmup-intermediate.root-reverse.title": "根音上的反向奔马节奏",
+    "exercise.warmup-intermediate.root-reverse.purpose": "一根弦上的反向奔马节奏：根音和它的小三度，然后是高一个手位的四度和五度。每次换一个调和一根弦。",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "从远低于你干净速度的地方开始。下上、下，手掌闷音，第一个短音落在节拍声上。手在小节线处向上移五品，再回来。",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "这是热身。它会告诉你弹得怎样，但不决定任何事。",
     "level.advanced.title": "高级：速度与耐力",
     "level.advanced.summary": "三连音 chug、六连音连发和 tremolo 拨弦、跨弦的持续低音 riff、带静音十六分音符的停停走走 riff，然后是乐队伴奏上的一段 riff 和整整一分钟。",
     "level.advanced.startHereIf.0": "你能以 100 BPM 均匀地弹奔马和反向奔马。",
@@ -298,7 +302,11 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "每个音四个闷住的十六分音符，交替拨弦：根音和它的小三度，然后是高一个手位的四度和五度。每次换一个调和一根弦。",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "从远低于你干净速度的地方开始。严格下上，手掌闷音。手在小节线处向上移五品，再回来。",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "这是热身。它会告诉你弹得怎样，但不决定任何事。",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "在这个速度下，真实设备的输入延迟可能把音推出匹配窗口，读起来就是晚了或漏了。这里应该相信的是均匀度，而且只有在延迟校准之后才行。"
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "在这个速度下，真实设备的输入延迟可能把音推出匹配窗口，读起来就是晚了或漏了。这里应该相信的是均匀度，而且只有在延迟校准之后才行。",
+    "exercise.warmup-advanced.root-triplets.title": "根音上的三连音",
+    "exercise.warmup-advanced.root-triplets.purpose": "每拍三个闷住的音，交替拨弦：根音和它的小三度，然后是高一个手位的四度和五度。每次换一个调和一根弦。",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "从远低于你干净速度的地方开始。严格下上，所以每隔一拍就从上拨开始；重心放在每拍的第一个音上。手在小节线处向上移五品，再回来。",
+    "exercise.warmup-advanced.root-triplets.coachLine": "这是热身。它会告诉你弹得怎样，但不决定任何事。"
   },
   "from": {
     "path.title": "e6bd3564",
@@ -587,6 +595,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "f5514f11",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "4bb32d12",
     "exercise.warmup-intermediate.root-gallop.coachLine": "bd8c330a",
+    "exercise.warmup-intermediate.root-reverse.title": "4ddb5737",
+    "exercise.warmup-intermediate.root-reverse.purpose": "0bf7fdbf",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "16c4c90f",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "bd8c330a",
     "level.advanced.title": "49d1f044",
     "level.advanced.summary": "d261b039",
     "level.advanced.startHereIf.0": "4a565307",
@@ -596,6 +608,10 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "c0aac01e",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "d749d7c7",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "bd8c330a",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "da676e77"
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "da676e77",
+    "exercise.warmup-advanced.root-triplets.title": "c2bed93e",
+    "exercise.warmup-advanced.root-triplets.purpose": "90ed26e5",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "c1f564ab",
+    "exercise.warmup-advanced.root-triplets.coachLine": "bd8c330a"
   }
 }

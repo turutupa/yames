@@ -278,6 +278,10 @@
     "exercise.warmup-beginner.walk-up.purpose": "Lang, kurz-kurz, lang, kurz-kurz auf zwei Tönen einer Moll-Tonleiter, in jedem Takt einen Schritt höher. Jedes Mal eine andere Tonart und Saite.",
     "exercise.warmup-beginner.walk-up.howTo.0": "Fang deutlich unter deinem cleanen Tempo an. Zähl „1, 2 und, 3, 4 und“. Zeigefinger auf dem tieferen Ton, und versetze die Hand an jedem Taktstrich um einen Ton nach oben.",
     "exercise.warmup-beginner.walk-up.coachLine": "Das ist Aufwärmen. Du erfährst, wie es lief, und es entscheidet nichts.",
+    "exercise.warmup-beginner.three-and-rest.title": "Drei Töne und eine Pause",
+    "exercise.warmup-beginner.three-and-rest.purpose": "Drei Viertel und ein Schlag Stille auf zwei Tönen einer Moll-Tonleiter, in jedem Takt einen Schritt höher. Jedes Mal eine andere Tonart und Saite.",
+    "exercise.warmup-beginner.three-and-rest.howTo.0": "Fang deutlich unter deinem cleanen Tempo an. Zähl „1, 2, 3, (4)“ laut und dämpfe die Saite auf 4. Versetze die Hand in der Pause um einen Ton nach oben.",
+    "exercise.warmup-beginner.three-and-rest.coachLine": "Das ist Aufwärmen. Du erfährst, wie es lief, und es entscheidet nichts.",
     "level.intermediate.title": "Mittelstufe: zwischen den Schlägen",
     "level.intermediate.summary": "Off-Beats und punktierte Noten, die Sechzehntel-Figuren und Triolen mit dem Shuffle.",
     "level.intermediate.startHereIf.0": "Du kannst gleichmäßige Achtel mit Klick bei 85 BPM spielen, ab auf dem Schlag und auf auf dem „und“.",
@@ -287,6 +291,10 @@
     "exercise.warmup-intermediate.gallop-up.purpose": "Lang-kurz-kurz auf drei Tönen einer Moll-Tonleiter und ein Viertel zum Landen, in jedem Takt einen Schritt höher. Jedes Mal eine andere Tonart und Saite.",
     "exercise.warmup-intermediate.gallop-up.howTo.0": "Fang deutlich unter deinem cleanen Tempo an. Zähl „1, und a, 2, und a, 3, und a, 4“ und versetze die Hand an jedem Taktstrich um einen Ton nach oben.",
     "exercise.warmup-intermediate.gallop-up.coachLine": "Das ist Aufwärmen. Du erfährst, wie es lief, und es entscheidet nichts.",
+    "exercise.warmup-intermediate.off-beat-walk.title": "Off-Beats eine Saite hinauf",
+    "exercise.warmup-intermediate.off-beat-walk.purpose": "Ein Ton auf dem Schlag und danach nur das „und“ jedes Schlags, auf zwei Tönen einer Moll-Tonleiter, in jedem Takt einen Schritt höher. Jedes Mal eine andere Tonart und Saite.",
+    "exercise.warmup-intermediate.off-beat-walk.howTo.0": "Fang deutlich unter deinem cleanen Tempo an. Zähl „1 und, (2) und, (3) und, (4) und“, den Fuß auf jedem Klick. Versetze die Hand an jedem Taktstrich um einen Ton nach oben.",
+    "exercise.warmup-intermediate.off-beat-walk.coachLine": "Das ist Aufwärmen. Du erfährst, wie es lief, und es entscheidet nichts.",
     "level.advanced.title": "Fortgeschritten: Gang wechseln",
     "level.advanced.summary": "Sechzehntel mit Pausen darin, Wechsel zwischen Achteln, Triolen und Sechzehnteln und Riffs gegen eine Band.",
     "level.advanced.startHereIf.0": "Du kannst die Galopp-Figur, ein Achtel und zwei Sechzehntel, gleichmäßig bei 70 BPM spielen.",
@@ -295,7 +303,11 @@
     "exercise.warmup-advanced.pyramid-up.title": "Die Pyramide eine Saite hinauf",
     "exercise.warmup-advanced.pyramid-up.purpose": "Ein Viertel, zwei Achtel, eine Triole und vier Sechzehntel auf drei Tönen einer Moll-Tonleiter, in jedem Takt einen Schritt höher. Jedes Mal eine andere Tonart und Saite.",
     "exercise.warmup-advanced.pyramid-up.howTo.0": "Fang deutlich unter deinem cleanen Tempo an. Zähl „1, 2 und, 3-tri-ole, 4 e und a“ und versetze die Hand an jedem Taktstrich um einen Ton nach oben.",
-    "exercise.warmup-advanced.pyramid-up.coachLine": "Das ist Aufwärmen. Du erfährst, wie es lief, und es entscheidet nichts."
+    "exercise.warmup-advanced.pyramid-up.coachLine": "Das ist Aufwärmen. Du erfährst, wie es lief, und es entscheidet nichts.",
+    "exercise.warmup-advanced.skip-up.title": "Die Sprungfigur eine Saite hinauf",
+    "exercise.warmup-advanced.skip-up.purpose": "Eins, e, (und), a auf jedem von drei Tönen einer Moll-Tonleiter und ein Viertel zum Landen, in jedem Takt einen Schritt höher. Jedes Mal eine andere Tonart und Saite.",
+    "exercise.warmup-advanced.skip-up.howTo.0": "Fang deutlich unter deinem cleanen Tempo an. Zähl „1 e (und) a“ auf jedem Schlag: ab, auf, vorbei, auf. Versetze die Hand an jedem Taktstrich um einen Ton nach oben.",
+    "exercise.warmup-advanced.skip-up.coachLine": "Das ist Aufwärmen. Du erfährst, wie es lief, und es entscheidet nichts."
   },
   "from": {
     "path.title": "b76cf8e7",
@@ -573,6 +585,10 @@
     "exercise.warmup-beginner.walk-up.purpose": "901257c3",
     "exercise.warmup-beginner.walk-up.howTo.0": "43740fd8",
     "exercise.warmup-beginner.walk-up.coachLine": "bd8c330a",
+    "exercise.warmup-beginner.three-and-rest.title": "99d83ad6",
+    "exercise.warmup-beginner.three-and-rest.purpose": "fe6c17d8",
+    "exercise.warmup-beginner.three-and-rest.howTo.0": "ef5d56cb",
+    "exercise.warmup-beginner.three-and-rest.coachLine": "bd8c330a",
     "level.intermediate.title": "a56dcb74",
     "level.intermediate.summary": "d11d31fd",
     "level.intermediate.startHereIf.0": "7f289b11",
@@ -582,6 +598,10 @@
     "exercise.warmup-intermediate.gallop-up.purpose": "004af3ea",
     "exercise.warmup-intermediate.gallop-up.howTo.0": "979bbb50",
     "exercise.warmup-intermediate.gallop-up.coachLine": "bd8c330a",
+    "exercise.warmup-intermediate.off-beat-walk.title": "0fb2db8c",
+    "exercise.warmup-intermediate.off-beat-walk.purpose": "35674105",
+    "exercise.warmup-intermediate.off-beat-walk.howTo.0": "6d7c7726",
+    "exercise.warmup-intermediate.off-beat-walk.coachLine": "bd8c330a",
     "level.advanced.title": "4f572219",
     "level.advanced.summary": "25a652c5",
     "level.advanced.startHereIf.0": "2b077c36",
@@ -590,6 +610,10 @@
     "exercise.warmup-advanced.pyramid-up.title": "cc2d9152",
     "exercise.warmup-advanced.pyramid-up.purpose": "894d17e9",
     "exercise.warmup-advanced.pyramid-up.howTo.0": "8d35d084",
-    "exercise.warmup-advanced.pyramid-up.coachLine": "bd8c330a"
+    "exercise.warmup-advanced.pyramid-up.coachLine": "bd8c330a",
+    "exercise.warmup-advanced.skip-up.title": "f0ac6acf",
+    "exercise.warmup-advanced.skip-up.purpose": "e58d3e36",
+    "exercise.warmup-advanced.skip-up.howTo.0": "456b9760",
+    "exercise.warmup-advanced.skip-up.coachLine": "bd8c330a"
   }
 }

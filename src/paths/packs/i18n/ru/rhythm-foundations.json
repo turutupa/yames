@@ -278,6 +278,10 @@
     "exercise.warmup-beginner.walk-up.purpose": "Длинная, короткая-короткая, длинная, короткая-короткая на двух нотах минорной гаммы, каждый такт на ступень выше. Каждый раз другая тональность и струна.",
     "exercise.warmup-beginner.walk-up.howTo.0": "Начните заметно ниже своего чистого темпа. Считайте «1, 2 и, 3, 4 и». Указательный палец на нижней ноте, а рука поднимается на ноту на каждой тактовой черте.",
     "exercise.warmup-beginner.walk-up.coachLine": "Это разминка. Она показывает, как прошло, и ничего не решает.",
+    "exercise.warmup-beginner.three-and-rest.title": "Три ноты и пауза",
+    "exercise.warmup-beginner.three-and-rest.purpose": "Три четверти и доля тишины на двух нотах минорной гаммы, каждый такт на ступень выше. Каждый раз другая тональность и струна.",
+    "exercise.warmup-beginner.three-and-rest.howTo.0": "Начните заметно ниже своего чистого темпа. Считайте вслух «1, 2, 3, (4)» и заглушите струну на 4. Поднимайте руку на ноту во время паузы.",
+    "exercise.warmup-beginner.three-and-rest.coachLine": "Это разминка. Она показывает, как прошло, и ничего не решает.",
     "level.intermediate.title": "Средний: между долями",
     "level.intermediate.summary": "Ноты не на доле и ноты с точкой, фигуры из шестнадцатых, а также триоли и шаффл.",
     "level.intermediate.startHereIf.0": "Вы можете играть ровные восьмые под клик на 85 BPM, вниз на долю и вверх на «и».",
@@ -287,6 +291,10 @@
     "exercise.warmup-intermediate.gallop-up.purpose": "Длинная-короткая-короткая на трёх нотах минорной гаммы и четверть, чтобы приземлиться, каждый такт на ступень выше. Каждый раз другая тональность и струна.",
     "exercise.warmup-intermediate.gallop-up.howTo.0": "Начните заметно ниже своего чистого темпа. Считайте «1, и а, 2, и а, 3, и а, 4» и поднимайте руку на ноту на каждой тактовой черте.",
     "exercise.warmup-intermediate.gallop-up.coachLine": "Это разминка. Она показывает, как прошло, и ничего не решает.",
+    "exercise.warmup-intermediate.off-beat-walk.title": "Слабые доли вверх по одной струне",
+    "exercise.warmup-intermediate.off-beat-walk.purpose": "Одна нота на долю, а затем только «и» каждой доли, на двух нотах минорной гаммы, каждый такт на ступень выше. Каждый раз другая тональность и струна.",
+    "exercise.warmup-intermediate.off-beat-walk.howTo.0": "Начните заметно ниже своего чистого темпа. Считайте «1 и, (2) и, (3) и, (4) и», нога на каждый клик. Поднимайте руку на ноту на каждой тактовой черте.",
+    "exercise.warmup-intermediate.off-beat-walk.coachLine": "Это разминка. Она показывает, как прошло, и ничего не решает.",
     "level.advanced.title": "Продвинутый: смена передачи",
     "level.advanced.summary": "Шестнадцатые с паузами внутри, переходы между восьмыми, триолями и шестнадцатыми и рифы, удерживаемые против группы.",
     "level.advanced.startHereIf.0": "Вы можете играть фигуру-галоп, восьмую и две шестнадцатые, ровно на 70 BPM.",
@@ -295,7 +303,11 @@
     "exercise.warmup-advanced.pyramid-up.title": "Пирамида вверх по одной струне",
     "exercise.warmup-advanced.pyramid-up.purpose": "Четверть, две восьмые, триоль и четыре шестнадцатые на трёх нотах минорной гаммы, каждый такт на ступень выше. Каждый раз другая тональность и струна.",
     "exercise.warmup-advanced.pyramid-up.howTo.0": "Начните заметно ниже своего чистого темпа. Считайте «1, 2 и, 3-три-оль, 4 е и а» и поднимайте руку на ноту на каждой тактовой черте.",
-    "exercise.warmup-advanced.pyramid-up.coachLine": "Это разминка. Она показывает, как прошло, и ничего не решает."
+    "exercise.warmup-advanced.pyramid-up.coachLine": "Это разминка. Она показывает, как прошло, и ничего не решает.",
+    "exercise.warmup-advanced.skip-up.title": "Прыгающая фигура вверх по одной струне",
+    "exercise.warmup-advanced.skip-up.purpose": "Раз, е, (и), а на каждой из трёх нот минорной гаммы и четверть, чтобы приземлиться, каждый такт на ступень выше. Каждый раз другая тональность и струна.",
+    "exercise.warmup-advanced.skip-up.howTo.0": "Начните заметно ниже своего чистого темпа. Считайте «1 е (и) а» на каждую долю: вниз, вверх, мимо, вверх. Поднимайте руку на ноту на каждой тактовой черте.",
+    "exercise.warmup-advanced.skip-up.coachLine": "Это разминка. Она показывает, как прошло, и ничего не решает."
   },
   "from": {
     "path.title": "b76cf8e7",
@@ -573,6 +585,10 @@
     "exercise.warmup-beginner.walk-up.purpose": "901257c3",
     "exercise.warmup-beginner.walk-up.howTo.0": "43740fd8",
     "exercise.warmup-beginner.walk-up.coachLine": "bd8c330a",
+    "exercise.warmup-beginner.three-and-rest.title": "99d83ad6",
+    "exercise.warmup-beginner.three-and-rest.purpose": "fe6c17d8",
+    "exercise.warmup-beginner.three-and-rest.howTo.0": "ef5d56cb",
+    "exercise.warmup-beginner.three-and-rest.coachLine": "bd8c330a",
     "level.intermediate.title": "a56dcb74",
     "level.intermediate.summary": "d11d31fd",
     "level.intermediate.startHereIf.0": "7f289b11",
@@ -582,6 +598,10 @@
     "exercise.warmup-intermediate.gallop-up.purpose": "004af3ea",
     "exercise.warmup-intermediate.gallop-up.howTo.0": "979bbb50",
     "exercise.warmup-intermediate.gallop-up.coachLine": "bd8c330a",
+    "exercise.warmup-intermediate.off-beat-walk.title": "0fb2db8c",
+    "exercise.warmup-intermediate.off-beat-walk.purpose": "35674105",
+    "exercise.warmup-intermediate.off-beat-walk.howTo.0": "6d7c7726",
+    "exercise.warmup-intermediate.off-beat-walk.coachLine": "bd8c330a",
     "level.advanced.title": "4f572219",
     "level.advanced.summary": "25a652c5",
     "level.advanced.startHereIf.0": "2b077c36",
@@ -590,6 +610,10 @@
     "exercise.warmup-advanced.pyramid-up.title": "cc2d9152",
     "exercise.warmup-advanced.pyramid-up.purpose": "894d17e9",
     "exercise.warmup-advanced.pyramid-up.howTo.0": "8d35d084",
-    "exercise.warmup-advanced.pyramid-up.coachLine": "bd8c330a"
+    "exercise.warmup-advanced.pyramid-up.coachLine": "bd8c330a",
+    "exercise.warmup-advanced.skip-up.title": "f0ac6acf",
+    "exercise.warmup-advanced.skip-up.purpose": "e58d3e36",
+    "exercise.warmup-advanced.skip-up.howTo.0": "456b9760",
+    "exercise.warmup-advanced.skip-up.coachLine": "bd8c330a"
   }
 }

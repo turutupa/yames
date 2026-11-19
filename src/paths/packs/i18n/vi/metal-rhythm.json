@@ -289,6 +289,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "Gallop trên một dây: nốt gốc và quãng ba thứ của nó, rồi quãng bốn và quãng năm cao hơn một bàn tay. Mỗi lần một giọng và một dây khác.",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "Bắt đầu thấp hơn hẳn tempo sạch của bạn. Xuống, xuống-lên, palm mute. Bàn tay dời lên năm phím ở vạch ô nhịp rồi về lại.",
     "exercise.warmup-intermediate.root-gallop.coachLine": "Đây là phần khởi động. Nó cho bạn biết kết quả ra sao, và không quyết định điều gì.",
+    "exercise.warmup-intermediate.root-reverse.title": "Gallop ngược trên nốt gốc",
+    "exercise.warmup-intermediate.root-reverse.purpose": "Gallop ngược trên một dây: nốt gốc và quãng ba thứ của nó, rồi quãng bốn và quãng năm cao hơn một bàn tay. Mỗi lần một giọng và một dây khác.",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "Bắt đầu thấp hơn hẳn tempo sạch của bạn. Xuống-lên, xuống, palm mute, nốt ngắn đầu tiên rơi vào tiếng click. Bàn tay dời lên năm phím ở vạch ô nhịp rồi về lại.",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "Đây là phần khởi động. Nó cho bạn biết kết quả ra sao, và không quyết định điều gì.",
     "level.advanced.title": "Nâng cao: tốc độ và sức bền",
     "level.advanced.summary": "Chug chùm ba, tràng chùm sáu và tremolo picking, riff pedal tone qua nhiều dây, riff ngắt-chạy với nốt móc kép im lặng, rồi một riff cùng ban nhạc và trọn một phút.",
     "level.advanced.startHereIf.0": "Bạn chơi đều gallop và gallop ngược ở 100 BPM.",
@@ -298,7 +302,11 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "Bốn nốt móc kép mute cho mỗi nốt, gảy luân phiên: nốt gốc và quãng ba thứ của nó, rồi quãng bốn và quãng năm cao hơn một bàn tay. Mỗi lần một giọng và một dây khác.",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "Bắt đầu thấp hơn hẳn tempo sạch của bạn. Xuống-lên nghiêm ngặt, palm mute. Bàn tay dời lên năm phím ở vạch ô nhịp rồi về lại.",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "Đây là phần khởi động. Nó cho bạn biết kết quả ra sao, và không quyết định điều gì.",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "Ở tốc độ này, độ trễ đầu vào của một bộ thiết bị thật có thể đẩy nốt ra khỏi khung so khớp, bị đọc là trễ hoặc trượt. Độ đều là con số đáng tin ở đây, và chỉ khi độ trễ đã được hiệu chỉnh."
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "Ở tốc độ này, độ trễ đầu vào của một bộ thiết bị thật có thể đẩy nốt ra khỏi khung so khớp, bị đọc là trễ hoặc trượt. Độ đều là con số đáng tin ở đây, và chỉ khi độ trễ đã được hiệu chỉnh.",
+    "exercise.warmup-advanced.root-triplets.title": "Chùm ba trên nốt gốc",
+    "exercise.warmup-advanced.root-triplets.purpose": "Ba nốt mute mỗi phách, gảy luân phiên: nốt gốc và quãng ba thứ của nó, rồi quãng bốn và quãng năm cao hơn một bàn tay. Mỗi lần một giọng và một dây khác.",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "Bắt đầu thấp hơn hẳn tempo sạch của bạn. Xuống-lên nghiêm ngặt, nên cứ cách một phách lại bắt đầu bằng nhát gảy lên; nhấn vào nốt đầu của mỗi phách. Bàn tay dời lên năm phím ở vạch ô nhịp rồi về lại.",
+    "exercise.warmup-advanced.root-triplets.coachLine": "Đây là phần khởi động. Nó cho bạn biết kết quả ra sao, và không quyết định điều gì."
   },
   "from": {
     "path.title": "e6bd3564",
@@ -587,6 +595,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "f5514f11",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "4bb32d12",
     "exercise.warmup-intermediate.root-gallop.coachLine": "bd8c330a",
+    "exercise.warmup-intermediate.root-reverse.title": "4ddb5737",
+    "exercise.warmup-intermediate.root-reverse.purpose": "0bf7fdbf",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "16c4c90f",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "bd8c330a",
     "level.advanced.title": "49d1f044",
     "level.advanced.summary": "d261b039",
     "level.advanced.startHereIf.0": "4a565307",
@@ -596,6 +608,10 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "c0aac01e",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "d749d7c7",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "bd8c330a",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "da676e77"
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "da676e77",
+    "exercise.warmup-advanced.root-triplets.title": "c2bed93e",
+    "exercise.warmup-advanced.root-triplets.purpose": "90ed26e5",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "c1f564ab",
+    "exercise.warmup-advanced.root-triplets.coachLine": "bd8c330a"
   }
 }

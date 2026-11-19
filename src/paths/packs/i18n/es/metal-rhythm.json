@@ -289,6 +289,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "El galope en una cuerda: la fundamental y su tercera menor, luego la cuarta y la quinta una mano más arriba. Una tonalidad y una cuerda distintas cada vez.",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "Empieza bastante por debajo de tu tempo limpio. Abajo, abajo-arriba, con palm mute. La mano sube cinco trastes en la barra de compás y vuelve.",
     "exercise.warmup-intermediate.root-gallop.coachLine": "Esto es un calentamiento. Te dice cómo ha ido, y no decide nada.",
+    "exercise.warmup-intermediate.root-reverse.title": "Un galope inverso sobre la fundamental",
+    "exercise.warmup-intermediate.root-reverse.purpose": "El galope inverso en una cuerda: la fundamental y su tercera menor, luego la cuarta y la quinta una mano más arriba. Una tonalidad y una cuerda distintas cada vez.",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "Empieza bastante por debajo de tu tempo limpio. Abajo-arriba, abajo, con palm mute, la primera nota corta en el clic. La mano sube cinco trastes en la barra de compás y vuelve.",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "Esto es un calentamiento. Te dice cómo ha ido, y no decide nada.",
     "level.advanced.title": "Avanzado: velocidad y resistencia",
     "level.advanced.summary": "Chug en tresillos, ráfagas de seisillos y tremolo picking, riffs con nota pedal entre cuerdas, riffs de parar y arrancar con semicorcheas en silencio, luego un riff sobre una banda y un minuto entero.",
     "level.advanced.startHereIf.0": "Sabes tocar el galope y el galope inverso con regularidad a 100 BPM.",
@@ -298,7 +302,11 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "Cuatro semicorcheas apagadas por nota, con púa alterna: la fundamental y su tercera menor, luego la cuarta y la quinta una mano más arriba. Una tonalidad y una cuerda distintas cada vez.",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "Empieza bastante por debajo de tu tempo limpio. Abajo-arriba estricto, con palm mute. La mano sube cinco trastes en la barra de compás y vuelve.",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "Esto es un calentamiento. Te dice cómo ha ido, y no decide nada.",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "A esta velocidad, el retardo de entrada de un equipo real puede sacar las notas de su ventana de coincidencia, y eso se lee como tarde o fallada. Aquí el número de fiar es la regularidad, y solo una vez calibrado el retardo."
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "A esta velocidad, el retardo de entrada de un equipo real puede sacar las notas de su ventana de coincidencia, y eso se lee como tarde o fallada. Aquí el número de fiar es la regularidad, y solo una vez calibrado el retardo.",
+    "exercise.warmup-advanced.root-triplets.title": "Tresillos sobre la fundamental",
+    "exercise.warmup-advanced.root-triplets.purpose": "Tres notas apagadas por pulso, con púa alterna: la fundamental y su tercera menor, luego la cuarta y la quinta una mano más arriba. Una tonalidad y una cuerda distintas cada vez.",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "Empieza bastante por debajo de tu tempo limpio. Abajo-arriba estricto, así que un pulso de cada dos empieza con un golpe hacia arriba; apoya la primera nota de cada pulso. La mano sube cinco trastes en la barra de compás y vuelve.",
+    "exercise.warmup-advanced.root-triplets.coachLine": "Esto es un calentamiento. Te dice cómo ha ido, y no decide nada."
   },
   "from": {
     "path.title": "e6bd3564",
@@ -587,6 +595,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "f5514f11",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "4bb32d12",
     "exercise.warmup-intermediate.root-gallop.coachLine": "bd8c330a",
+    "exercise.warmup-intermediate.root-reverse.title": "4ddb5737",
+    "exercise.warmup-intermediate.root-reverse.purpose": "0bf7fdbf",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "16c4c90f",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "bd8c330a",
     "level.advanced.title": "49d1f044",
     "level.advanced.summary": "d261b039",
     "level.advanced.startHereIf.0": "4a565307",
@@ -596,6 +608,10 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "c0aac01e",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "d749d7c7",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "bd8c330a",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "da676e77"
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "da676e77",
+    "exercise.warmup-advanced.root-triplets.title": "c2bed93e",
+    "exercise.warmup-advanced.root-triplets.purpose": "90ed26e5",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "c1f564ab",
+    "exercise.warmup-advanced.root-triplets.coachLine": "bd8c330a"
   }
 }

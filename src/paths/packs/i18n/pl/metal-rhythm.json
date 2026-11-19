@@ -289,6 +289,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "Galop na jednej strunie: pryma i jej tercja mała, potem kwarta i kwinta o rękę wyżej. Za każdym razem inna tonacja i struna.",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "Zacznij dużo poniżej twojego czystego tempa. W dół, dół-góra, z palm mute. Ręka przesuwa się o pięć progów w górę na kresce taktowej i wraca.",
     "exercise.warmup-intermediate.root-gallop.coachLine": "To rozgrzewka. Powie ci, jak poszło, i niczego nie rozstrzyga.",
+    "exercise.warmup-intermediate.root-reverse.title": "Odwrócony galop na prymie",
+    "exercise.warmup-intermediate.root-reverse.purpose": "Odwrócony galop na jednej strunie: pryma i jej tercja mała, potem kwarta i kwinta o rękę wyżej. Za każdym razem inna tonacja i struna.",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "Zacznij dużo poniżej twojego czystego tempa. Dół-góra, dół, z palm mute, pierwsza krótka nuta na kliku. Ręka przesuwa się o pięć progów w górę na kresce taktowej i wraca.",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "To rozgrzewka. Powie ci, jak poszło, i niczego nie rozstrzyga.",
     "level.advanced.title": "Zaawansowany: szybkość i wytrzymałość",
     "level.advanced.summary": "Chugi w triolach, zryw w sekstolach i tremolo, riffy z tonem pedałowym przez struny, riffy stop-start z cichymi szesnastkami, a potem riff z zespołem i pełna minuta.",
     "level.advanced.startHereIf.0": "Umiesz grać galop i odwrócony galop równo przy 100 BPM.",
@@ -298,7 +302,11 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "Cztery wytłumione szesnastki na nutę, grane naprzemiennie: pryma i jej tercja mała, potem kwarta i kwinta o rękę wyżej. Za każdym razem inna tonacja i struna.",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "Zacznij dużo poniżej twojego czystego tempa. Ścisłe dół-góra, z palm mute. Ręka przesuwa się o pięć progów w górę na kresce taktowej i wraca.",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "To rozgrzewka. Powie ci, jak poszło, i niczego nie rozstrzyga.",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "Przy tej szybkości opóźnienie wejścia prawdziwego sprzętu może wypchnąć nuty poza ich okno dopasowania, co wygląda na spóźnienie albo pominięcie. Tu ufaj równości, i to dopiero po skalibrowaniu opóźnienia."
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "Przy tej szybkości opóźnienie wejścia prawdziwego sprzętu może wypchnąć nuty poza ich okno dopasowania, co wygląda na spóźnienie albo pominięcie. Tu ufaj równości, i to dopiero po skalibrowaniu opóźnienia.",
+    "exercise.warmup-advanced.root-triplets.title": "Triole na prymie",
+    "exercise.warmup-advanced.root-triplets.purpose": "Trzy wytłumione nuty na miarę, grane naprzemiennie: pryma i jej tercja mała, potem kwarta i kwinta o rękę wyżej. Za każdym razem inna tonacja i struna.",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "Zacznij dużo poniżej twojego czystego tempa. Ścisłe dół-góra, więc co druga miara zaczyna się od uderzenia w górę; oprzyj się na pierwszej nucie każdej miary. Ręka przesuwa się o pięć progów w górę na kresce taktowej i wraca.",
+    "exercise.warmup-advanced.root-triplets.coachLine": "To rozgrzewka. Powie ci, jak poszło, i niczego nie rozstrzyga."
   },
   "from": {
     "path.title": "e6bd3564",
@@ -587,6 +595,10 @@
     "exercise.warmup-intermediate.root-gallop.purpose": "f5514f11",
     "exercise.warmup-intermediate.root-gallop.howTo.0": "4bb32d12",
     "exercise.warmup-intermediate.root-gallop.coachLine": "bd8c330a",
+    "exercise.warmup-intermediate.root-reverse.title": "4ddb5737",
+    "exercise.warmup-intermediate.root-reverse.purpose": "0bf7fdbf",
+    "exercise.warmup-intermediate.root-reverse.howTo.0": "16c4c90f",
+    "exercise.warmup-intermediate.root-reverse.coachLine": "bd8c330a",
     "level.advanced.title": "49d1f044",
     "level.advanced.summary": "d261b039",
     "level.advanced.startHereIf.0": "4a565307",
@@ -596,6 +608,10 @@
     "exercise.warmup-advanced.root-sixteenths.purpose": "c0aac01e",
     "exercise.warmup-advanced.root-sixteenths.howTo.0": "d749d7c7",
     "exercise.warmup-advanced.root-sixteenths.coachLine": "bd8c330a",
-    "exercise.warmup-advanced.root-sixteenths.detection.0": "da676e77"
+    "exercise.warmup-advanced.root-sixteenths.detection.0": "da676e77",
+    "exercise.warmup-advanced.root-triplets.title": "c2bed93e",
+    "exercise.warmup-advanced.root-triplets.purpose": "90ed26e5",
+    "exercise.warmup-advanced.root-triplets.howTo.0": "c1f564ab",
+    "exercise.warmup-advanced.root-triplets.coachLine": "bd8c330a"
   }
 }
