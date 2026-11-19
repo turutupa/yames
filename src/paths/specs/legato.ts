@@ -159,6 +159,12 @@ function sixRound(): string {
 
 const POSITION_RUN = `/16t 2:5 2:6h 2:8h 1:5 1:7h 1:8h 2:8 2:10h 2:12h 1:8 1:10h 1:12h 2:10 2:12h 2:13h 1:10 1:12h 1:13h /4 1:12 | /16t 1:13 1:12p 1:10p 2:13 2:12p 2:10p 1:12 1:10p 1:8p 2:12 2:10p 2:8p 1:8 1:7p 1:5p 2:8 2:6p 2:5p /4 3:7`;
 
+// Odd groupings: five to a beat, and a six-note roll on one pick.
+const FIVE = (s: number, [a, b, c]: number[]) => `${s}:${c} ${s}:${b}p ${s}:${a}p ${s}:${b}h ${s}:${c}h`;
+const FIVES = `/16q ${repeat(FIVE(1, [5, 7, 8]), 3)} 1:8 1:7p 1:5p 2:8 2:6p | ${repeat(FIVE(2, [5, 6, 8]), 3)} 2:8 2:6p 2:5p 3:7 3:5p`;
+const sixRoll = (s: number, [a, b, c]: number[]) => `/16t ${repeat(`${s}:${a} ${s}:${b}h ${s}:${c}h ${s}:${b}p ${s}:${a}p ${s}:${b}h`, 4)}`;
+const FIVES_DOWN = `/16q 1:8 1:7p 1:5p 2:8 2:6p 1:7 1:5p 2:8 2:6p 2:5p 1:5 2:8 2:6p 2:5p 3:7 2:8 2:6p 2:5p 3:7 3:5p`;
+
 // The line over the band: one pick a beat, and every bar starts on a tone of its chord.
 const ETUDE = `/16
   1:5 1:7h 1:8h 1:7p 2:5 2:6h 2:8h 2:6p 1:5 1:7h 1:8h 1:7p 2:8 2:6p 2:5p 2:6h |
@@ -864,6 +870,80 @@ export default definePath({
       ],
     },
     {
+      id: "odd-groups",
+      title: "Fives and sixes",
+      goal: "Play five and six legato notes from one pick stroke, evenly, so the beat stays where it is while the fingers divide it differently.",
+      why: "Legato players are known for lines that seem to float over the beat. Most of that is odd groupings: five notes where you expect four, six rolled from a single pick. The fretting hand has to count for itself, because the pick is only there once a beat and the groups no longer match the fingers' habits.",
+      howTo: [
+        "A quintuplet is five even notes in one beat. Say a five-syllable word on each click, like 'hip-po-pot-a-mus', before you play.",
+        "The pick marks the beat and nothing else. Give that note a small accent, and keep the notes after it level.",
+        "If five turns into four and a pause, slow down a rung. The gap after the fourth note is the usual fault.",
+      ],
+      payoff: "A rolling five that sits squarely on the click, and a scale that falls in fives across three strings.",
+      exercises: [
+        {
+          id: "fives",
+          title: "Five from one pick",
+          purpose: "C, B, A, B, C as a quintuplet, one pick a beat, three times, then a five-note fall onto the B string. Then the same on the B string.",
+          howTo: [
+            "Quintuplets, five to the click. Pick fret 8, pull off to 7 and 5, hammer 7 and 8. The next pick is the same fret 8 again, on the beat.",
+            "The last beat of each bar leaves the pattern: three notes on one string, then two on the string below, with a second pick for the new string.",
+          ],
+          coach: "The picked note on each beat is my anchor. Whether the five between were even is for a recording and your ear.",
+          tab: FIVES,
+          position: 5,
+          harmony: { scale: ["A", "naturalMinor"] },
+          rungs: ladder(40, 100, 5),
+          passAt: 70,
+          grade: "timingNotes",
+          pass: LEGATO,
+          selfCheck: ["Were the five notes of each beat even, with no gap before the next pick?"],
+          minutes: 7,
+        },
+        {
+          id: "six-roll",
+          title: "Six from one pick",
+          purpose: "The roll stretched to six notes: up three, back two, up one, and the pick comes round on the beat. A sextuplet from a single stroke.",
+          howTo: [
+            "Sextuplets, six to the click. Pick fret 5, hammer 7 and 8, pull off to 7 and 5, hammer 7. Then pick 5 again.",
+            "Lean a little on the fourth note of each six. It is the halfway point of the beat, and it keeps the six from turning into two uneven threes.",
+          ],
+          coach: "One picked note a beat is what I time most firmly. The rest is yours to hear: six notes, all present.",
+          vary: onStrings(["top E 5-7-8", "B 5-6-8", "G 4-5-7", "A 5-7-8"], sixRoll),
+          tab: sixRoll(1, [5, 7, 8]),
+          position: 5,
+          harmony: { scale: ["A", "naturalMinor"] },
+          rungs: ladder(40, 90, 5),
+          passAt: 65,
+          grade: "timingNotes",
+          pass: LEGATO,
+          selfCheck: ["Was the sixth note of each beat still clearly a note?"],
+          minutes: 6,
+        },
+        {
+          id: "fives-down",
+          title: "The scale, falling in fives",
+          purpose: "Five notes down A minor from C, then five from B, from A and from G: each beat starts one note lower and spills onto the next string. A pick on every new string.",
+          howTo: [
+            "Quintuplets. Beat 1: top string 8, 7, 5, then B string 8 and 6. Beat 2 starts on the top string's 7, beat 3 on its 5, beat 4 on the B string's 8.",
+            "Every string change is a picked note; everything else is a pull-off. Have the fingers down on the new string before the pick gets there.",
+          ],
+          coach: "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
+          vary: inKeys(FIVES_DOWN, ["A", "B", "C", "D", "E"]),
+          tab: FIVES_DOWN,
+          position: 5,
+          // Nine picked notes a bar, one for each new string: which stroke is the player's choice.
+          pick: "free",
+          harmony: { scale: ["A", "naturalMinor"] },
+          rungs: ladder(40, 90, 5),
+          passAt: 60,
+          grade: "timingNotes",
+          pass: LEGATO,
+          minutes: 7,
+        },
+      ],
+    },
+    {
       id: "long-lines",
       title: "Long lines",
       goal: "Hold a legato line for four bars over a band, run the whole neck both ways in one take, and keep a roll going for a minute.",
@@ -1009,14 +1089,14 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: almost no pick",
-      summary: "Hammer-ons from nowhere, six-string runs in sextuplets with shifts, and lines held over a band and for a minute.",
+      summary: "Hammer-ons from nowhere, six-string runs in sextuplets with shifts, fives and sixes from one pick, and lines held over a band and for a minute.",
       reachLevel: "advanced",
       startHereIf: [
         "You can run a minor scale three notes per string with one pick a string, in triplets at 110 BPM.",
         "Your rolls stay even at sixteenths, 80 BPM, for a whole bar on one pick.",
         "You still pick the first note of every string, or your legato fades over a long line.",
       ],
-      steps: ["from-nowhere", "six-string-runs", "long-lines"],
+      steps: ["from-nowhere", "six-string-runs", "odd-groups", "long-lines"],
       warmups: [
         {
           id: "nowhere-round",

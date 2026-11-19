@@ -92,6 +92,11 @@ const PEDAL_A = `/16 5:7 6:0m 6:0m 5:9 6:0m 6:0m 5:10 6:0m 6:0m 5:9 6:0m 6:0m 5:
 const PEDAL_SKIP = `/16 4:9 6:0m 6:0m 4:7 6:0m 6:0m 4:10 6:0m 6:0m 4:9 6:0m 6:0m 4:7 6:0m 4:9 6:0m | 4:10 6:0m 6:0m 4:9 6:0m 6:0m 4:7 6:0m 6:0m 4:9 6:0m 6:0m 4:10 6:0m 4:9 6:0m`;
 const PEDAL_BOTH = `/16 5:7 6:0m 6:0m 4:7 6:0m 6:0m 5:9 6:0m 6:0m 4:9 6:0m 6:0m 5:10 6:0m 4:10 6:0m | 4:9 6:0m 6:0m 5:10 6:0m 6:0m 4:7 6:0m 6:0m 5:9 6:0m 6:0m 5:7 6:0m 4:7 6:0m`;
 
+// Sixteenths with rests in them: the stop-start riff of modern metal.
+const CHUG_REST = `/16 ${repeat("6:0m 6:0m r", 4)} 6:0m 6:0m 6:0m r | ${repeat("6:0m 6:0m r", 4)} /8 6:3 6:5`;
+const STOP_START = `/8 ${E5} r /16 ${repeat("6:0m", 4)} /8 r ${G5} /16 6:0m 6:0m r r | /8 ${E5} r /16 ${repeat("6:0m", 4)} /8 r ${A5} ${G5} r`;
+const GALLOP_HOLES = `${gallop("6:0m")} /16 r 6:0m 6:0m r /8 6:3f1 /16 r 6:0m /8 6:5f3 r | ${gallop("6:0m")} /16 r 6:0m 6:0m r /8 6:6f4 /16 r 6:0m /8 6:5f3 6:3f1`;
+
 // Four bars over the band: gallops on E, a climb, then G and A with the chords on their downbeats.
 const BAND_RIFF = `${repeat(gallop("6:0m"), 2)} /8 6:3f1 6:5f3 ${gallop("6:0m")} | ${repeat(gallop("6:0m"), 2)} /8 6:5f3 6:6f4 /16 6:5f3 6:0m 6:0m 6:0m | ${repeat(gallop("6:3mf1"), 3)} /8 6:5f3 6:3f1 | ${repeat(gallop("5:0m"), 2)} /8 5:3f1 5:5f3 /4 5:0`;
 const DOWN_MINUTE = `/8 ${repeat("6:0m", 6)} 6:3m 6:5m | ${repeat("6:0m", 6)} 6:5m 6:3m`;
@@ -705,6 +710,83 @@ export default definePath({
       ],
     },
     {
+      id: "stop-start",
+      title: "Chugs with holes in them",
+      goal: "Play sixteenth-note riffs where some of the sixteenths are silent, so the riff starts and stops inside the beat.",
+      why: "Modern heavy riffs are as much silence as sound: a burst of chugs, a hole, a chord, another hole. The holes are what make it heavy, and they only work if the strings are completely dead in them and the next note comes in exactly on its sixteenth.",
+      howTo: [
+        "The picking hand swings in sixteenths the whole time, down-up, and only touches the string on the written notes.",
+        "In a rest, the palm presses down a little harder and the fretting hand relaxes on the strings. Nothing rings.",
+        "Count '1 e and a' out loud at the first rung and say the played syllables louder.",
+      ],
+      payoff: "A stop-start riff that sounds like a machine switching on and off.",
+      difficultyException:
+        "The rests bring the note count down from the pedal riffs. The demand is dead silence on a sixteenth and coming back in on the next, which a note-rate metric does not count.",
+      exercises: [
+        {
+          id: "chug-rest",
+          title: "Two on, one off",
+          purpose: "Chug, chug, rest, in sixteenths: a three-sixteenth figure that rolls across the beat, on the muted low E string, with two open eighths to end the second bar.",
+          howTo: [
+            "Count the sixteenths '1 2 3, 1 2 3' and play on 1 and 2. Four times, then three chugs and a rest to fill the bar.",
+            "The hand keeps swinging down-up, so the figure starts on a downstroke, then an upstroke, in turn.",
+          ],
+          coach: "I time each chug against where it is written. A sound in a rest counts as an extra note.",
+          ...FREE,
+          vary: onLowStrings(CHUG_REST, 3),
+          tab: CHUG_REST,
+          position: 3,
+          rungs: ladder(50, 130, 10),
+          passAt: 90,
+          grade: "timing",
+          pass: FAST,
+          selfCheck: [TIGHT_CHECK],
+          minutes: 6,
+        },
+        {
+          id: "chord-and-burst",
+          title: "Chord, hole, burst",
+          purpose: "A power chord on the beat, half a beat of silence, four muted sixteenths, another hole, a chord off the beat. Two bars, E, G and A.",
+          howTo: [
+            "Bar 1: E chord on 1, rest, four chugs on beat 2, rest, G chord on the 'and' of 3, two chugs and half a beat of rest.",
+            "Kill each chord with both hands. The chugs after a hole start exactly on the beat, not a hair before.",
+          ],
+          coach: "I time every attack, chord and chug alike. A chord's pitch is not something I check.",
+          ...FREE,
+          tab: STOP_START,
+          position: 2,
+          shifts: true,
+          chords: "E5 | E5",
+          ...CHORDS,
+          pass: FAST,
+          rungs: ladder(50, 130, 10),
+          passAt: 90,
+          selfCheck: [TIGHT_CHECK],
+          minutes: 7,
+        },
+        {
+          id: "gallop-holes",
+          title: "A gallop with holes",
+          purpose: "A gallop, then sixteenths with the first and last one missing, then open notes on frets 3, 5 and 6 with a single chug between them. E blues on one string.",
+          howTo: [
+            "Bar 1: '1, and a, (2) e and, 3, a, 4'. The open notes on frets 3 and 5 are eighths; the single chug before beat 4 is on the 'a'.",
+            "First finger on fret 3, third on 5, little finger on 6. Let the hand lean up a fret for the little finger.",
+          ],
+          coach: "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
+          ...FREE,
+          tab: GALLOP_HOLES,
+          position: 3,
+          shifts: true,
+          harmony: E_BLUES,
+          rungs: ladder(50, 130, 10),
+          passAt: 90,
+          grade: "timingNotes",
+          pass: [...FAST, { metric: "noteIdentity", min: 0.85, overBars: 4 }],
+          minutes: 7,
+        },
+      ],
+    },
+    {
       id: "riffs-at-length",
       title: "The band, and a full minute",
       goal: "Hold a galloping riff over a rock band for four bars, and keep downstrokes and gallops going for sixty seconds.",
@@ -715,8 +797,6 @@ export default definePath({
         SAFETY,
       ],
       payoff: "A four-bar riff that sits on a band, and a minute of downstrokes that ends as tight as it began.",
-      difficultyException:
-        "The minute-long takes come down in tempo on purpose: holding the motion for sixty seconds is the demand, and the note-rate metric does not count it.",
       exercises: [
         {
           id: "band-riff",
@@ -850,14 +930,14 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: speed and stamina",
-      summary: "Triplet chugs, sextuplet bursts and tremolo picking, pedal-tone riffs across strings, then a riff over a band and a full minute.",
+      summary: "Triplet chugs, sextuplet bursts and tremolo picking, pedal-tone riffs across strings, stop-start riffs with silent sixteenths, then a riff over a band and a full minute.",
       reachLevel: "intermediate",
       startHereIf: [
         "You can play the gallop and the reverse gallop evenly at 100 BPM.",
         "You can alternate-pick muted sixteenths at 95 BPM with an accent on each beat.",
         "Your riffs fall apart when they leave the low string, or your picking arm tires before a song is over.",
       ],
-      steps: ["triplets-and-bursts", "pedal-riffs", "riffs-at-length"],
+      steps: ["triplets-and-bursts", "pedal-riffs", "stop-start", "riffs-at-length"],
       warmups: [
         {
           id: "root-sixteenths",
