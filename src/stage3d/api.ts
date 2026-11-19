@@ -23,7 +23,19 @@ import { NeckStageContext } from "./context";
 export type NeckKind = "aim" | "tone" | "tens" | "clash" | "box" | "dim" | "now" | "next";
 
 /** String 1 is high E, 6 is low E (as in the packs). Fret 0 is the open string. */
-export type NeckNote = { string: 1 | 2 | 3 | 4 | 5 | 6; fret: number; kind: NeckKind; label?: string };
+export type NeckNote = {
+  string: 1 | 2 | 3 | 4 | 5 | 6;
+  fret: number;
+  kind: NeckKind;
+  label?: string;
+  /**
+   * The hand shifts on this note with the finger it shows (the Petrucci climb's
+   * little finger moving up to the 9): a short bar under the number, so two
+   * neighbouring frets that both read 4 say which one the hand moved for
+   * (acceptance 5, P2-4).
+   */
+  shift?: boolean;
+};
 
 export type NeckView =
   | { kind: "whole" } //                           Today, Paths, Progress: the hero angle

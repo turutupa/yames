@@ -10,7 +10,8 @@
  */
 import { describe, expect, it } from "vitest";
 import type { Exercise, LearningPath, PathNote } from "./format";
-import { fingerPlan, fingersByPlace, firstBase, handMoves, type FingerNote, type HandAt } from "./fingering";
+import { fingerPlan, fingersByPlace, firstBase, handMoves, shiftPlaces, type FingerNote, type HandAt } from "./fingering";
+import { sweepChain } from "./templates";
 import { parseTab } from "./tabDsl";
 import { STANDARD_TUNING } from "./format";
 
@@ -114,6 +115,60 @@ describe("the fingering rules", () => {
     expect(handMoves(box, 5)).toBe(false);
     expect(handMoves([...box, ...seq(N(4, 12), N(3, 10))].map((n, i) => ({ ...n, tick: i * 240 })), 5)).toBe(true);
     expect(firstBase(seq(N(6, 12), N(5, 10), N(4, 9)), MOVING(7))).toBe(8);
+  });
+
+  // Round 3 (acceptance 5): a teacher's objections, one rule each.
+  const tab = (t: string) => parseTab(t, STANDARD_TUNING, 3840).notes;
+  const fingersOfTab = (t: string, at: HandAt) => fingerPlan(tab(t), at).map((s) => s.finger);
+
+  it("never puts one finger on two notes in a row at different frets, unless it slides there or the line turns", () => {
+    // Up the top string and over: 5-6-7-8 is 1-2-3-4, the hand moves on the 9 (the turn), 4-3-2-1 back.
+    const climb = "/16 1:5 1:6 1:7 1:8 1:9 1:8 1:7 1:6";
+    expect(fingersOfTab(climb, MOVING(5))).toEqual([1, 2, 3, 4, 4, 3, 2, 1]);
+    expect(fingerPlan(tab(climb), MOVING(5)).map((s) => s.base)).toEqual([5, 5, 5, 5, 6, 6, 6, 6]);
+    // A slide keeps its finger: that is the one written exception.
+    expect(fingersOfTab("/16 3:5 3:7s 3:9 2:8", MOVING(5))).toEqual([1, 3, 3, 2]);
+    // No run of the same finger anywhere in a long one-string line.
+    const line = fingersOfTab("/16 2:10 2:8 2:6 2:8 2:5 2:6 2:8 2:10 2:12 2:10 2:8 2:10 2:6 2:8 2:10 2:8", MOVING(7));
+    const notes = tab("/16 2:10 2:8 2:6 2:8 2:5 2:6 2:8 2:10 2:12 2:10 2:8 2:10 2:6 2:8 2:10 2:8");
+    const jumps = line.filter((f, i) => i > 0 && f === line[i - 1] && notes[i].fret !== notes[i - 1].fret && Math.abs(notes[i].fret - notes[i - 1].fret) > (f === 1 || f === 4 ? 2 : 1));
+    expect(jumps).toEqual([]);
+  });
+
+  it("plays the 1-3-2-4 permutation in its own order, and shifts on the turn note, not the second", () => {
+    // Top string up at 5 (1-3-2-4), then the turn: 9-7-8-6 a fret higher (4-2-3-1).
+    const perm = "/16 1:5 1:7 1:6 1:8 1:9 1:7 1:8 1:6 2:9 2:7 2:8 2:6";
+    const plan = fingerPlan(tab(perm), MOVING(5));
+    expect(plan.map((s) => s.finger)).toEqual([1, 3, 2, 4, 4, 2, 3, 1, 4, 2, 3, 1]);
+    expect(plan.map((s) => s.base)).toEqual([5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6]);
+  });
+
+  it("descends a string with the fingers it went up with (3nps 5-7-9 is 1-2-4 both ways)", () => {
+    const run = "/16 4:5 4:7 4:9 3:5 3:7 3:9 2:6 2:8 2:10 2:8 2:6 3:9 3:7 3:5 4:9 4:7";
+    const f = fingersOfTab(run, MOVING(5));
+    expect(f.slice(3, 6)).toEqual([1, 2, 4]);
+    expect(f.slice(11, 14)).toEqual([4, 2, 1]);
+  });
+
+  it("keeps the hand at 10 for 10-12-10 on one string: 1-3-1, not 1-3-4", () => {
+    const f = fingersOfTab("/16 2:10 2:8 2:6 2:8 2:5 2:6 2:8 2:10 2:12 2:10 2:8 2:10 2:6 2:8 2:10 2:8", MOVING(7));
+    expect(f.slice(7, 10)).toEqual([1, 3, 1]);
+  });
+
+  it("fingers a chord shape the same in a chain as on its own: the G at 10 hammers its top with the little finger", () => {
+    // Before round 3 a chain slid the index 10 to 15 where the loop on its own hammered with the little finger.
+    const chain = sweepChain({ chords: ["Am", "G"], strings: [3, 2, 1], near: 14, perBar: 2, rhythm: "/8t" });
+    expect(chain).toContain("1:10 1:15h 1:10p");
+    const g = fingerPlan(tab(chain), MOVING(12)).slice(12, 16).map((s) => s.finger);
+    expect(g).toEqual([3, 3, 1, 4]);
+    // F at 8 is wider (102 mm): it still slides.
+    expect(sweepChain({ chords: ["F"], strings: [3, 2, 1], near: 10, rhythm: "/8t" })).toContain("1:8s 1:13s");
+  });
+
+  it("marks where the hand shifts with one finger, for the resting neck", () => {
+    const climb = tab("/16 1:5 1:6 1:7 1:8 1:9 1:8 1:7 1:6");
+    expect([...shiftPlaces(climb, MOVING(5))]).toEqual([["1:9", "4"]]);
+    expect(shiftPlaces(climb, STILL(5)).size).toBe(0);
   });
 
   it("reads the tab's f1..f4 as the content's finger", () => {
