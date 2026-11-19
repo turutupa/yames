@@ -9,6 +9,7 @@ import rhythmFoundations from "./rhythm-foundations";
 import metalRhythm from "./metal-rhythm";
 import knowTheNeck from "./know-the-neck";
 import scalesAndModes from "./scales-and-modes";
+import tapping from "./tapping";
 import type { PathSpec } from "../spec";
 
 export const SPECS: readonly PathSpec[] = [
@@ -22,5 +23,6 @@ export const SPECS: readonly PathSpec[] = [
   metalRhythm,
   knowTheNeck,
   scalesAndModes,
+  tapping,
   // new paths go above this line
 ];

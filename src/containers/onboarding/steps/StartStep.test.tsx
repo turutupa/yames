@@ -70,6 +70,7 @@ describe("Where do you start? — what it offers", () => {
       "metal-rhythm",
       "know-the-neck",
       "scales-and-modes",
+      "tapping",
     ]);
   });
 

@@ -42,6 +42,7 @@ export const START_PATH_ORDER = [
   "metal-rhythm",
   "know-the-neck",
   "scales-and-modes",
+  "tapping",
 ];
 
 /** The Paths a player can start, in the step's order (unknown runnable ones last). */

@@ -101,7 +101,7 @@ export interface Shot {
      * Today's plan. The harness makes it runnable for the scene, so a Theory
      * Take can be photographed before any Theory Path ships as runnable.
      */
-    path?: "blues-pentatonics" | "sweep-picking" | "alternate-picking" | "legato" | "rhythm-foundations" | "metal-rhythm" | "know-the-neck" | "scales-and-modes";
+    path?: "blues-pentatonics" | "sweep-picking" | "alternate-picking" | "legato" | "rhythm-foundations" | "metal-rhythm" | "know-the-neck" | "scales-and-modes" | "tapping";
     /** With `path`: play this Exercise rather than the first Step's first. */
     exercise?: string;
     /** With `exercise`: it plays over the band, so wait for the band before the photograph. */
@@ -901,6 +901,15 @@ export const SHOTS: Shot[] = [
     suffix: "session-neck-scales",
     window: "main",
     session: { seed: "returning", stop: "ready", practiceView: "neck", path: "scales-and-modes", exercise: "movable-major.two-octaves" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  {
+    id: "session-neck-tapping",
+    suffix: "session-neck-tapping",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "tapping", exercise: "first-taps.tap-pull-hammer" },
     width: 1400,
     height: 900,
     settleMs: 1800,
