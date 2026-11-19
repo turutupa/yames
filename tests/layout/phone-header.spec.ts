@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { openShot, openTool, switchLanguage, MOBILE_URL } from "./fits";
+import { openShot, openTool, switchLanguage, MOBILE_URL, IN_ENGLISH } from "./fits";
 
 /**
  * The bar above the stage, on a phone (M09).
@@ -120,7 +120,11 @@ test.describe("the phone's top bar", () => {
      */
     await openShot(page, "metronome", { width: 360, height: 800 });
     const name = await page.waitForSelector(".preset-save-area .preset-active-name");
-    expect((await name.textContent())?.trim(), "the bar still names the mode").toBe("Unsaved");
+    // One word in every language ("Unsaved", "Ungespeichert"): the word itself
+    // only in an English run (the suite also runs with YAMES_LAYOUT_LOCALE).
+    const word = (await name.textContent())?.trim() ?? "";
+    if (IN_ENGLISH) expect(word, "the bar still names the mode").toBe("Unsaved");
+    expect(word, "the bar still names the mode").toMatch(/^\S+$/);
     expect(await isClipped(page, ".preset-save-area .preset-active-name")).toBe(false);
   });
 
