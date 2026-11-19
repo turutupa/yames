@@ -2,9 +2,9 @@
  *
  * "Where do you start?", W2's theme preview and W7's first Session. Kept out
  * of onboarding.css so the selectable cards' shared rules there stay one
- * owner's. Every colour here is the wizard's own token (onboarding.css sets
- * all of them on the overlay), except inside `.onboarding-theme-preview`,
- * which wears the previewed theme's tokens inline.
+ * owner's. Every colour here is a theme token, read through from `:root`
+ * like the rest of the wizard (onboarding.css), except inside
+ * `.onboarding-theme-preview`, which wears the previewed theme's tokens inline.
  */
 
 /* ---- Where do you start? ---- */

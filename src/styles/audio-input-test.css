@@ -212,18 +212,15 @@
 }
 
 .input-test-meter-ticks {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
   display: flex;
   justify-content: space-between;
-  padding: 0 4px;
-  font-size: 8px;
+  margin-top: 3px;
+  padding: 0 2px;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
   color: var(--text-tertiary);
-  opacity: 0.6;
   pointer-events: none;
-  line-height: 18px;
+  line-height: 1.2;
 }
 
 /* Spectrum analyzer */
@@ -278,7 +275,7 @@
 }
 
 .input-test-status.active {
-  color: #22c55e;
+  color: var(--feedback-perfect, #22c55e);
 }
 
 .input-test-status-dot {
@@ -466,13 +463,13 @@
 
 /* Stop button styling */
 .input-test-rec-btn.stop {
-  border-color: color-mix(in srgb, #ef4444 30%, transparent);
-  color: #ef4444;
+  border-color: color-mix(in srgb, var(--neck-miss, #ef4444) 30%, transparent);
+  color: var(--neck-miss, #ef4444);
 }
 
 @media (hover: hover) {
   .input-test-rec-btn.stop:hover {
-    background: color-mix(in srgb, #ef4444 10%, transparent);
+    background: color-mix(in srgb, var(--neck-miss, #ef4444) 10%, transparent);
   }
 }
 

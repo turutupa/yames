@@ -124,6 +124,9 @@
   );
   color: var(--accent-text, white);
   font-size: 0.9rem;
+  /* Not the theme's face on purpose: the button holds only the ▶ / ■ glyphs,
+     which no theme face carries, and a system face draws them the same size
+     and on the same baseline everywhere. */
   font-family: system-ui, sans-serif;
   line-height: 1;
   display: flex;
