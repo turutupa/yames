@@ -14,6 +14,7 @@ import { definePath } from "../spec";
 import type { ExerciseSpec, VariantParams } from "../spec";
 import type { PassBar } from "../format";
 import { handAt, ladder, moveChart, pentatonic, shiftFrets, swing } from "../templates";
+import { BOX_KEYS, LANDING_REVIEW, MINOR_BLUES, QUICK_CHANGE, SIXTHS, STRAIGHT_FEEL, UP_THE_NECK } from "./blues-more";
 
 const TWELVE = "A7 | A7 | A7 | A7 | D7 | D7 | A7 | A7 | E7 | D7 | A7 | E7";
 const VAMP_A = "A7 | A7 | A7 | A7";
@@ -179,12 +180,12 @@ export default definePath({
   goal: "Solo over a twelve-bar blues in A, knowing where the changes are and landing on notes that belong to them.",
   level: "early-intermediate",
   assumes:
-    "You know the open chords and can fret and pick single notes, and you can play eighth notes with a click at 70 BPM. Nothing about scales or blues is assumed. The early Exercises are all in A, on purpose, so that theory is the only new thing; later ones move to other keys.",
+    "You know the open chords and can fret and pick single notes, and you can play eighth notes with a click at 70 BPM. Nothing about scales or blues is assumed. New ideas arrive in A, on purpose, so that theory is the only new thing, and the Steps after them move to other keys. This is a long Path: about three months at fifteen to twenty minutes a day.",
   prerequisites: { skills: ["Clean single notes", "Eighth notes with a click at 70 BPM"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
   orderRationale:
-    "Theory arrives as written lines you can be graded on, and choosing your own notes comes after, as a short 'your turn' at the end of a Step. Chord tones arrive in Step 2 as arpeggios of A7, D7 and E7 in box 1, each followed by a lick that ends on the chord's third, before the blue notes: knowing where the chord is matters more than knowing an extra note. Call and response is Step 3 because written answers to one call teach phrase length and endings with almost no theory. The blues scale and bends come after the player can find the chord tones, so neither becomes a thing to sit on. A second box comes late on purpose: more notes before good choices makes for faster bad solos. Guide tones are Step 9 because they are the most abstract idea here and easiest once the form is in the ear. Slow blues comes last as it hides nothing.",
+    "Theory arrives as written lines you can be graded on, and choosing your own notes comes after, as a short 'your turn' at the end of a Step. Chord tones arrive early, as soon as the box is in the hand, as arpeggios of A7, D7 and E7 in box 1, each followed by a lick that ends on the chord's third, before the blue notes: knowing where the chord is matters more than knowing an extra note. Call and response follows because written answers to one call teach phrase length and endings with almost no theory. The blues scale and bends come after the player can find the chord tones, so neither becomes a thing to sit on. A second box comes late on purpose: more notes before good choices makes for faster bad solos. Guide tones come near the end because they are the most abstract idea here and easiest once the form is in the ear. Slow blues comes last as it hides nothing. Between the ideas sit Steps that add little or nothing new: the box in other keys, the same notes over a straight band, the thirds in new keys, the quick change, the minor blues, two more boxes, and sixths. The blues is a style a player stays in for months, and each of those Steps takes what was just learned somewhere new before the next idea arrives.",
   gradingLimits:
     "Graded Exercises are written lines: the app checks timing evenness, notes heard and extra notes, and right notes after the take where the notes are single, far enough apart and not ringing into each other; elsewhere right notes read 'not checked'. Timing over the shuffle band is judged against the written triplet with a looser bar, so a lighter or heavier swing is not marked down, and a constant lean behind the beat costs nothing at all. The right-note check has only been tried on computer-made guitar sound with no band in the mix, so direct input or headphones are the honest way to play anything with a band; with a microphone and speakers it is untested. A bent note would read as a wrong one, so bends are timed and never pitch-checked: the unison bends are double stops, which the note check leaves alone. Landing on chord tones, staying in the scale, keeping rests and choosing your own notes are not measured today: those Exercises are 'your turn', self-checked and labelled 'not checked yet'. Nothing here grades feel.",
   steps: [
@@ -298,6 +299,8 @@ export default definePath({
         },
       ],
     },
+    BOX_KEYS,
+    STRAIGHT_FEEL,
     {
       id: "landing",
       title: "Chord tones: A7, D7 and E7",
@@ -513,6 +516,7 @@ export default definePath({
         },
       ],
     },
+    LANDING_REVIEW,
     {
       id: "blues-scale",
       title: "The blues scale and the blue notes",
@@ -723,6 +727,7 @@ export default definePath({
         },
       ],
     },
+    QUICK_CHANGE,
     {
       id: "bends",
       title: "Bends that land",
@@ -734,6 +739,8 @@ export default definePath({
         "The app times your bends and doesn't measure how far they go, so your ear judges the pitch on every one of these. Keep your strings fresh: old strings make this much harder.",
       ],
       payoff: "A bent note that sits on the band's chord tone and arrives on the beat.",
+      difficultyException:
+        "The note rate sits under the quick-change chorus before it. The new demand is pitch: pushing a string up to a note and holding it there, which the rate does not count.",
       exercises: [
         {
           id: "reference",
@@ -935,6 +942,7 @@ export default definePath({
         },
       ],
     },
+    MINOR_BLUES,
     {
       id: "two-boxes",
       title: "Connecting box 1 and box 2",
@@ -946,6 +954,8 @@ export default definePath({
         "Box 1 and box 2 are the same notes. A on the D string, fret 7, is the same in both, and you've already found it.",
       ],
       payoff: "Your lick climbs out of the box, reaches a new high note, and comes home again.",
+      difficultyException:
+        "A new Level and a new shape, played plain at first, so the note rate sits a little under the minor blues chorus before it. The new demand is a second layout of the same notes and a slide between the two, which the rate does not count.",
       exercises: [
         {
           id: "box-two",
@@ -1029,6 +1039,7 @@ export default definePath({
         },
       ],
     },
+    UP_THE_NECK,
     {
       id: "major-and-minor",
       title: "Major and minor together",
@@ -1124,6 +1135,7 @@ export default definePath({
         },
       ],
     },
+    SIXTHS,
     {
       id: "guide-tones",
       title: "Guide tones through the changes",
@@ -1341,13 +1353,13 @@ export default definePath({
     {
       id: "beginner",
       title: "Beginner: one box, and the chord tones",
-      summary: "One pentatonic box, the arpeggios of A7, D7 and E7, and phrases that answer. All in A, so the theory is the only new thing.",
+      summary: "One pentatonic box, moved to other keys and played over a shuffle and a straight band; the arpeggios of A7, D7 and E7; phrases that answer; and a chorus that lands on the thirds.",
       startHereIf: [
         "You can play eighth notes with a click at 70 BPM.",
         "You don't yet know box 1 from memory, or you know it and can't make it sound like a phrase.",
         "You couldn't name the notes of A7 yet.",
       ],
-      steps: ["box-one", "landing", "call-response"],
+      steps: ["box-one", "box-keys", "straight-feel", "landing", "call-response", "landing-review"],
       warmups: [
         {
           id: "box-around",
@@ -1376,13 +1388,13 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: the form and the voice",
-      summary: "The blues scale, all twelve bars with a written chorus, bends that land on time, and phrases that ask and answer.",
+      summary: "The blues scale, all twelve bars with a written chorus, the quick change, bends that land on time, phrases that ask and answer, and the minor blues.",
       startHereIf: [
         "You can play box 1 from memory, up and down, at 80 BPM eighths.",
         "You can play the A7, D7 and E7 arpeggios in box 1 at 80 BPM.",
         "You get lost in the twelve-bar form, or your solos run together with no shape to them.",
       ],
-      steps: ["blues-scale", "twelve-bar", "bends", "question-answer"],
+      steps: ["blues-scale", "twelve-bar", "quick-change", "bends", "question-answer", "minor-blues"],
       warmups: [
         {
           id: "boogie-keys",
@@ -1413,13 +1425,13 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: more neck, more harmony, less noise",
-      summary: "A second box, major and minor pentatonic mixed over the changes, guide tones, and slow blues with nothing to hide behind.",
+      summary: "Four boxes up to the twelfth fret, major and minor pentatonic mixed over the changes, sixths, guide tones, and slow blues with nothing to hide behind.",
       startHereIf: [
         "You can follow all 12 bars without losing your place.",
         "You can bend a whole tone up to pitch by ear, and hold it there.",
         "Your phrases work, and you're stuck in one box playing the same notes over every chord.",
       ],
-      steps: ["two-boxes", "major-and-minor", "guide-tones", "slow-blues"],
+      steps: ["two-boxes", "up-the-neck", "major-and-minor", "sixths", "guide-tones", "slow-blues"],
       warmups: [
         {
           id: "two-boxes-keys",

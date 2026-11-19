@@ -196,6 +196,85 @@ reach model (and a beginner's hand) refuses frets 2 to 5 at an early level. Know
 the Neck comes first for a player who cannot name notes; this Path assumes nothing
 from it but is easier after it.
 
+## How long each Path is (owner's note, 2026-11-18)
+
+Paths are not the same length and are not meant to be. A narrow technique is
+done when the technique is in the hand; a style is something a player lives in
+for months, and it needs Steps that add nothing new and take the last idea to
+another key, feel, form or position before the next idea arrives. So length is
+set per Path from what it teaches.
+
+The weeks below are a rough model, not a measurement: an Exercise takes about
+four Sessions to pass, a fifteen-to-twenty-minute Session holds three or four
+of them, six Sessions a week. That comes to about a week for every five
+Exercises. A teacher should correct it once real players have been through.
+
+| Path | Kind of thing | Steps (B / I / A) | Exercises | Intended length |
+|---|---|---|---|---|
+| Blues and Pentatonics | A style | 6 / 6 / 6 | 74 | Long: about 14 weeks. Extended on purpose (below). |
+| Sweep Picking | A deep technique | 5 / 9 / 4 | 65 | Long: about 12 weeks. The middle Level is the technique. |
+| Shred | Several techniques joined | 3 / 7 / 5 | 54 | About 10 weeks. |
+| Alternate Picking | A core technique | 3 / 3 / 5 | 45 | About 9 weeks. |
+| Classic Rock | A style | 3 / 4 / 4 | 39 | About 7 weeks. A candidate to grow the way Blues did. |
+| Rhythm Foundations | Fundamentals | 3 / 3 / 3 | 34 | About 6 weeks. |
+| Legato | A technique | 3 / 3 / 4 | 34 | About 6 weeks. |
+| Metal Rhythm | A technique in a style | 3 / 3 / 4 | 30 | About 6 weeks. |
+| Know the Neck | Knowledge | 3 / 3 / 3 | 30 | About 6 weeks; should grow (triads on every string set, below). |
+| Scales and Modes | Knowledge | 3 / 3 / 3 | 30 | About 6 weeks. |
+| Funk Lines | A narrow technique | 3 / 3 / 3 | 27 | Short: about 5 weeks. |
+| Tapping | A narrow technique | 3 / 3 / 3 | 27 | Short: about 5 weeks. |
+
+**What the pipeline assumes about length: nothing that blocks a long Path.**
+Checked in `validate.ts`, `difficulty.ts`, `pace.ts` and the planner:
+
+- There is no limit on Steps in a Path or in a Level. The only count rule is
+  three to five Exercises in a Step. Sweep Picking already had eighteen Steps
+  and a nine-Step Level before this work; Blues now has eighteen in three sixes.
+- `progress.difficulty` asks each Step's median to be no lower than the one
+  before. A consolidation Step often is lower, because it replays known material
+  somewhere new, and the rule already has the answer: `difficultyException`
+  with the reason written down. Blues needed two new ones (`bends`, after the
+  quick-change chorus, and `two-boxes`, the plain start of a new Level). No
+  rule was loosened.
+- `pace.ts` works on one Exercise's ladder, and the planner walks `steps`,
+  `levels` and warm-ups by id. Neither reads a Path's length.
+- One test was tied to the old order (`rotation.test.ts` took "Blues' second
+  Step" by index to find a self-checked Exercise). It now names the Step.
+
+### Blues and Pentatonics, extended
+
+Seven Steps and 26 Exercises added (`src/paths/specs/blues-more.ts`), none
+replacing anything: 11 Steps and 48 Exercises became 18 and 74. Existing ids are
+untouched, so nobody's progress moves.
+
+| Level | New Step | What it consolidates |
+|---|---|---|
+| Beginner | The box in other keys | Box 1 in G, C and E, and the first chorus in a key that changes. |
+| Beginner | The same notes, a straight feel | The box over a straight rock band: even eighths, a low-string riff, twelve bars of riffs. |
+| Beginner | Landing on the third, in new keys | The arpeggio-and-lick in G and C, and a chorus whose phrases stop on C#, F# and G#, then in G, C or D. |
+| Intermediate | The quick change | The same form with D7 in bar 2: roots, the boogie line, a written chorus. |
+| Intermediate | The minor blues | Am7, Dm7, E7: the F the box does not have, the turn, a written minor chorus, a your-turn. |
+| Advanced | Boxes 3 and 4 | Two more shapes, the second door, one line from the fifth fret to the twelfth. |
+| Advanced | Sixths | Two-note sixths for A7, D7 and E7, the form in sixths, a lick that ends on one (timing only: double stops are not pitch-checked). |
+
+Still to do for Blues, in the same spirit: box 5 and a line that enters box 4;
+the form in E in open position with its turnarounds; a jump or uptempo shuffle;
+slow blues in a second key; a three-chorus solo with a shape.
+
+### Triads and Chords: a strong candidate, not built tonight
+
+What fits the grader: triads played one note at a time (the right-notes check is
+at its best on slow written single notes), on each string set, in root position
+and both inversions, through I-IV-V and I-vi-IV-V in several keys, then the same
+shapes as two-note and three-note stabs graded on timing only. What does not fit
+yet: a strummed chord's notes (several onsets smeared together, not
+pitch-checked), so "did all three notes ring" stays with the player's ear, and
+the Path would have to say so. Know the Neck already has a first triads Step on
+the top three strings. The proposal is a long Path, about 14 Steps: three string
+sets by three inversions, each revisited in new keys and progressions before the
+next, then seventh-chord shells and voice-leading through a twelve-bar. It is on
+the board as its own card.
+
 ## Proof-reading (2026-11-18)
 
 Four independent readers checked the words of every new Exercise against its
