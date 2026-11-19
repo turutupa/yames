@@ -5014,6 +5014,9 @@ fn setup_rate_or_fail(exit: &mut AudioThreadExit, expected: Option<u32>, actual:
 /// takes the plain open, which waits for nothing.
 const REOPEN_WAIT: Duration = Duration::from_millis(750);
 const REOPEN_BUDGET: Duration = Duration::from_millis(2_000);
+/// How long `reopen_output` waits for a finished audio thread to be joined
+/// before detaching it instead.
+const REOPEN_SHUTDOWN_WAIT: Duration = Duration::from_millis(300);
 
 /// What a waited open came back with.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -5709,21 +5712,22 @@ impl MetronomeEngine {
         let sink = EventSink(app_handle.clone());
         let was_playing = self.playing.load(Ordering::SeqCst);
         let old_rate = self.output_sample_rate();
-        self.shutdown_inner(false);
+        // Bounded, and inside the budget: a server that hangs closing the
+        // dead stream must not hold the engine's lock.
+        self.shutdown_within(false, Some(REOPEN_SHUTDOWN_WAIT));
         self.settle_take_end(&sink);
         let mut probed = probe(left().min(REOPEN_WAIT));
         if probed.is_none() && left() > REOPEN_WAIT {
             thread::sleep(Duration::from_millis(50));
             probed = probe(left().min(REOPEN_WAIT));
         }
+        if old_rate.is_none() && probed.is_none() {
+            // A dead stream under a live thread has published its rate, so
+            // this should not happen; if it does, nothing can vouch for what
+            // is loaded, and `reopen_keeps_loaded` drops it.
+            eprintln!("[yames] reopen: no rate known for the old stream or the new one; dropping what is loaded");
+        }
         if crate::output_park::reopen_keeps_loaded(old_rate, probed.as_ref().map(hint_rate)) {
-            // Keeping with neither rate known would keep material nobody can
-            // vouch for. A dead stream under a live thread has published its
-            // rate, so this does not happen; say so loudly if it ever does.
-            debug_assert!(
-                old_rate.is_some() || probed.is_some(),
-                "a reopen kept material with no rate known on either side"
-            );
             let expected_rate = if probed.is_none() { old_rate } else { None };
             let first = SpawnHints { format: probed, expected_rate, quiet: true };
             match self.spawn_for_reopen(&state, &app_handle, was_playing, first, Some(left())) {
@@ -5802,7 +5806,7 @@ impl MetronomeEngine {
         );
         match r {
             Err(SetupError::TimedOut) => self.abandon_spawn(),
-            Err(SetupError::Refused(_)) => self.shutdown_inner(false),
+            Err(SetupError::Refused(_)) => self.shutdown_within(false, Some(REOPEN_SHUTDOWN_WAIT)),
             Ok(()) => {}
         }
         r
@@ -6280,6 +6284,12 @@ impl MetronomeEngine {
             if !setup_rate_or_fail(&mut exit, expected_rate, sample_rate) {
                 return;
             }
+            // Abandoned while probing (a timed-out reopen): decode nothing,
+            // publish nothing. The checks below repeat this at each point a
+            // late thread could still touch something shared.
+            if !alive.load(Ordering::SeqCst) {
+                return;
+            }
 
             // What the callback will actually be handed. A pair the stream
             // turned out to be too narrow for becomes the first pair, and
@@ -6331,6 +6341,9 @@ impl MetronomeEngine {
             // The rate a take is written at. Published before the stream
             // opens rather than after, so a `start_take` racing the first
             // buffer finds a rate rather than nothing.
+            if !alive.load(Ordering::SeqCst) {
+                return;
+            }
             take_sr_out.store(sample_rate, Ordering::Release);
 
             // Audio-safety probe (ROADMAP §4). `None` in the app.
@@ -8483,11 +8496,13 @@ impl MetronomeEngine {
             // thread, and another stream may already be up): drop this one
             // unplayed rather than sound a second stream or publish over the
             // live one's slots.
+            // Checked immediately before `play`, the last moment before the
+            // stream would sound, so the window left after a timeout is the
+            // gap between this load and the start call.
             if !alive.load(Ordering::SeqCst) {
                 drop(stream);
                 return;
             }
-
             if let Err(e) = stream.play() {
                 exit.fail(format!("could not start the audio output stream: {e}"));
                 return;
@@ -8574,7 +8589,7 @@ impl MetronomeEngine {
             #[cfg(target_os = "android")]
             let mut output_parked = false;
             #[cfg(target_os = "android")]
-            crate::output_park::register_event_loop();
+            crate::output_park::register_event_loop(&alive);
 
             while alive.load(Ordering::SeqCst) {
                 // THE OUTPUT STREAM SLEEPS WHILE THE APP IS AWAY AND NOTHING
@@ -9182,6 +9197,18 @@ impl MetronomeEngine {
     /// `shutdown`, with the coach's line left in its slot when `cut_speech`
     /// is false — `reopen_output` on a stream whose rate is not moving.
     fn shutdown_inner(&mut self, cut_speech: bool) {
+        self.shutdown_within(cut_speech, None);
+    }
+
+    /// `shutdown_inner` whose join gives up after `join_within`: the thread
+    /// is then detached rather than waited for (`reopen_output`, which runs
+    /// under the engine's lock and must not wait on an audio server that
+    /// hangs closing a dead stream). Detaching is safe for the same reasons
+    /// `abandon_spawn` is: the thread's flags are its own `Arc`s and are
+    /// already down, so its loop ends at the next check and it drops its
+    /// stream on its own thread — never an audio one — whenever the close
+    /// returns; its setup checks `alive` before publishing anything.
+    fn shutdown_within(&mut self, cut_speech: bool, join_within: Option<Duration>) {
         self.playing.store(false, Ordering::SeqCst);
         self.alive.store(false, Ordering::SeqCst);
         // No stream, so no width. Cleared here rather than left behind, so
@@ -9199,7 +9226,26 @@ impl MetronomeEngine {
             // it is woken rather than waited out: without this the join
             // costs up to the 50 ms backstop on every device change.
             handle.thread().unpark();
-            let _ = handle.join();
+            match join_within {
+                None => {
+                    let _ = handle.join();
+                }
+                Some(d) => {
+                    let started = std::time::Instant::now();
+                    while !handle.is_finished() && started.elapsed() < d {
+                        thread::sleep(Duration::from_millis(2));
+                    }
+                    if handle.is_finished() {
+                        let _ = handle.join();
+                    } else {
+                        eprintln!(
+                            "[yames] the old audio thread did not finish within {d:?}; \
+                             detached rather than waited for"
+                        );
+                        drop(handle);
+                    }
+                }
+            }
         }
         // AND NO RATE: it was the old device's. Left behind, a song reloaded
         // after `song-dropped` read it before the new stream had published
@@ -13208,10 +13254,27 @@ mod tests {
         };
         let outcome = route.join().unwrap().unwrap();
         assert_eq!(outcome, ReopenOutcome::Dropped, "a hung open was treated as kept");
-        assert!(
-            held_for < REOPEN_WAIT + Duration::from_millis(600),
-            "the engine's lock was held {held_for:?}"
-        );
+        assert!(held_for < REOPEN_BUDGET, "the engine's lock was held {held_for:?}");
+    }
+
+    /// The opening shutdown is bounded too: an old audio thread that will
+    /// not finish (here, a setup asleep for two seconds) is detached after
+    /// `REOPEN_SHUTDOWN_WAIT`, not joined.
+    #[test]
+    fn a_reopen_does_not_wait_on_an_old_thread_that_will_not_finish() {
+        let sr = 48_000u32;
+        let mut engine = engine_with_scripted_reopens(&[Ok(())]);
+        engine.force_setup_failure = true;
+        engine.setup_delay = Some(Duration::from_secs(2));
+        let state = crate::state::create_shared_state();
+        engine.ensure_thread(state.clone(), None, SetupWait::No).unwrap();
+        assert!(engine.thread_handle.is_some());
+        engine.sample_rate.store(sr, Ordering::Release);
+        let started = std::time::Instant::now();
+        let outcome = engine.reopen_output(state, None, |_| Some(sr)).unwrap();
+        let took = started.elapsed();
+        assert_eq!(outcome, ReopenOutcome::Kept);
+        assert!(took < REOPEN_SHUTDOWN_WAIT + Duration::from_millis(400), "waited {took:?}");
     }
 
     /// A REAL setup thread: a reopen that demands its old rate is refused,

@@ -279,6 +279,8 @@ pub(crate) fn route_plan(req: RouteRequest, needs_reopen: bool) -> RoutePlan {
 pub(crate) fn reopen_keeps_loaded(old_rate: Option<u32>, new_rate: Option<u32>) -> bool {
     match (old_rate, new_rate) {
         (Some(a), Some(b)) => a == b,
+        // Neither known: nothing to vouch for the material with.
+        (None, None) => false,
         _ => true,
     }
 }
@@ -333,13 +335,20 @@ mod android {
         APP_IN_BACKGROUND.load(Ordering::SeqCst)
     }
 
-    /// From the event loop, once, as it starts.
-    pub(crate) fn register_event_loop() {
+    /// From the event loop, once, as it starts — and only while its own
+    /// `alive` is up, checked under the slot's lock. A thread abandoned by a
+    /// timed-out reopen whose open returned late must not take the slot from
+    /// the live loop: either it checked before its `alive` was lowered, which
+    /// happened before the replacing thread was spawned and so before that
+    /// one registers over it, or it checks after and stays out.
+    pub(crate) fn register_event_loop(alive: &AtomicBool) -> bool {
         let me = std::thread::current();
-        match EVENT_LOOP.lock() {
-            Ok(mut slot) => *slot = Some(me),
-            Err(e) => *e.into_inner() = Some(me),
+        let mut slot = EVENT_LOOP.lock().unwrap_or_else(|e| e.into_inner());
+        if !alive.load(Ordering::SeqCst) {
+            return false;
         }
+        *slot = Some(me);
+        true
     }
 
     /// Something may need the output now: let the loop look.
@@ -561,6 +570,7 @@ mod tests {
         // Unknown is not "moved": a failed probe keeps the song.
         assert!(reopen_keeps_loaded(None, Some(48_000)));
         assert!(reopen_keeps_loaded(Some(48_000), None));
+        assert!(!reopen_keeps_loaded(None, None), "kept with no rate known at all");
     }
 
     #[test]
