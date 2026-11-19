@@ -186,3 +186,57 @@ to string; "half step" = one fret. The Path names "Triads", "Chords in a Key", "
 titles: use the translated titles from those packs (path.title). Fret lists like "10, 9, 8, 8" stay
 as digits. Keep sentences as plain as the English. IMPORTANT: write scratch files only under
 /tmp/yames-i18n/round13/work_<lng>/ and write only your own language's output file.
+
+Round 14 notes (folder /tmp/yp2/i18n/round14/ (the working copy of this brief was /tmp/yp2/i18n/BRIEF.md) ): THREE path ids in one todo file, 443 strings:
+"triads" (141), "chords-in-a-key" (190), "arpeggios-over-changes" (112). All three packs are ALREADY
+translated in your language: src/paths/packs/i18n/<lng>/triads.json, chords-in-a-key.json and
+arpeggios-over-changes.json (English beside them in src/paths/packs/i18n/en/). The todo holds new
+consolidation Steps for each Path plus about thirty sentences whose English changed.
+
+OUTPUT: write ONE FILE PER PATH ID, each shaped { "<pathId>": { "<key>": "<translation>" } }:
+  /tmp/yp2/i18n/round14/done.<lng>.triads.json
+  /tmp/yp2/i18n/round14/done.<lng>.chords-in-a-key.json
+  /tmp/yp2/i18n/round14/done.<lng>.arpeggios-over-changes.json
+Finish and verify one path before starting the next. Scratch files only under
+/tmp/yp2/i18n/round14/work_<lng>/ . Do not touch any other language's files.
+
+How to work:
+1. Read the existing translation of the same pack FIRST and reuse its words exactly: triad, shape,
+   "shape one / two / three", root, third, fifth, seventh, string names ("the D, G and B strings",
+   "top string", "low E string"), fret, band, key, chord numbers as number WORDS in the same order
+   ("one, six, two, five"), chord names in prose ("A minor", "B flat", "F sharp minor", "C major
+   seven", "D minor seven", "G seven", "B diminished"), the coach lines, "Your turn, and not checked
+   yet…", the variant-note sentence, level names, arpeggio, two octaves, sweep, "one push / one pull",
+   "Timed and counted", "the pitch is for your ear".
+2. For a key that ALREADY EXISTS in your language's pack file (its English changed): start from the
+   existing translation and change only what the English changed.
+3. Where the English of a new string is identical to an English string that is already translated in
+   that pack (coach lines, "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
+   "The letters are … every time.", the variant note), copy that translation verbatim. A small script
+   that maps identical English to the existing translation saves you most of this work: build it from
+   i18n/en/<pathId>.json and i18n/<lng>/<pathId>.json before translating by hand.
+4. New vocabulary in this round, to translate the same way everywhere:
+   - "set of strings" / "the low set" / "the A, D and G strings": a group of three neighbouring strings.
+   - "verse", "chorus", "bridge", "A section", the form "A, A, B, A" (keep the letters A and B).
+   - "from outside the key", "the flat seven" (the major chord a whole step below home, e.g. B flat in
+     C), "the major two", "the minor four": spoken names of chords, keep them as number words.
+   - Seventh chords: "major seven", "minor seven", "seven" (the dominant seventh, as in "G seven"),
+     "half-diminished" (written Bm7b5; keep "Bm7b5" as written). Use your language's standard names
+     and stay consistent with how the arpeggios-over-changes pack already names "C major seven",
+     "A minor seven", "G seven".
+   - "root on the A string / on the low E string", "leave out the A string", "the first finger laid
+     flat / across fret 5" (a small barre), "lean on a string so it stays quiet" (muting).
+   - "relative minor", "home" (the tonic chord: use the word the chords-in-a-key pack already uses),
+     "the way home", "the pull" (of a leading note).
+   - "pentatonic box" (as blues-pentatonics names it), "roll / rock the finger" (as the existing
+     arpeggios-over-changes sweeps Step says it).
+   - Path titles "Triads", "Chords in a Key", "Arpeggios over Changes", "Sweep Picking": use the
+     translated titles (path.title of each pack).
+5. Digits stay digits (frets "7, 5, 5", BPM, bar numbers "Bars 1 to 4"), spelled-out English numbers
+   stay words. Chord symbols in charts or after "written" (Bm7b5, Cmaj7) stay as written. No
+   exclamation marks. Keep sentences as plain as the English: the reader is new to theory.
+
+Finish: for each output file verify with python that it has exactly the todo's keys for that path id
+and that no value contains "!" or "！" and no value is empty or identical to the English (unless it is
+only chord names and digits). Then reply with one line: the language, strings per path, and any key you
+were unsure about.

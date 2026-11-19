@@ -241,9 +241,9 @@ do X, or start anyway". Arrows are data now (`prerequisites.paths`, below).
 | Style | Classic Rock | Rhythm Foundations (Beginner) | 7 weeks | written |
 | Harmony | Know the Neck | nothing: the first Path for the harmony route | 6 weeks | written |
 | Harmony | Scales and Modes | Know the Neck (Beginner) | 6 weeks | written |
-| Harmony | **Triads** | Know the Neck (Beginner), Scales and Modes (Beginner) | 13 Steps, 41 Exercises, about 8 weeks; meant to grow to about 12 | written, extended once |
-| Harmony | **Chords in a Key** | Triads (Intermediate) | 10 Steps, 30 Exercises, about 6 weeks; meant to grow to about 12 | written, extended once |
-| Harmony | **Arpeggios over Changes** | Triads (Advanced), Chords in a Key (Beginner) | 9 Steps, 27 Exercises, about 5 weeks; meant to grow to about 8 | written (first version) |
+| Harmony | **Triads** | Know the Neck (Beginner), Scales and Modes (Beginner) | 18 Steps, 60 Exercises, about 12 weeks | written, extended twice (2026-11-19) |
+| Harmony | **Chords in a Key** | Triads (Intermediate) | 17 Steps, 57 Exercises, about 11 weeks | written, extended twice (2026-11-19) |
+| Harmony | **Arpeggios over Changes** | Triads (Advanced), Chords in a Key (Beginner) | 13 Steps, 42 Exercises, about 8 weeks | written, extended once (2026-11-19) |
 
 Nothing is renamed, split or merged: every existing Path teaches one thing a
 teacher would teach as one thing, and its Exercise ids carry progress. Know the
@@ -317,10 +317,21 @@ cannot drift apart. Warm-ups stay behind the lessons on purpose: the Beginner
 one uses only shape one, the Intermediate one the three major shapes learned in
 Beginner, the Advanced one the minor shapes learned in Intermediate.
 
-Still to add to reach the intended length: the diminished triad; the A, D and
-G string set; every shape of F and G drilled the way C is; minor triads on the
-middle strings in other keys; a second song form. They belong in this Path, as
-consolidation Steps, in the way Blues was extended.
+**Grown to its intended length (2026-11-19, `src/paths/specs/triads-more.ts`).**
+Five more Steps, 19 Exercises, all new ids: F and G on the middle strings and
+D minor and E minor there (both in the Intermediate Level, with `middle-strings`
+moved down to open them, because Chords in a Key's Beginner Level already plays
+middle-string shapes and builds on Triads only through Intermediate); the A, D
+and G strings (C and A minor in three shapes, the four chords); C, F and G and
+the four chords in other keys down there, and one C chord on three sets of
+strings in one place (the barre chord seen as three triads); a second song,
+sixteen bars in G with the verse on the middle strings and the chorus climbing
+the top strings, in four keys. A second Advanced warm-up rolls the middle-string
+shapes. Levels are now 4 / 7 / 7 Steps.
+
+Left for later, if a teacher wants more: the low E, A and D strings (same
+fingerings as A, D and G, said in the text and not drilled); augmented triads;
+triads in 3/4 (the pipeline writes 4/4 only).
 
 ### Chords in a Key (`chords-in-a-key`, theory): the second Path of the route, written
 
@@ -337,10 +348,29 @@ It reuses the shape helpers of Triads, so the same rule fingers both Paths.
 Chord numbers are written as words in the copy ("one, four, five") because
 that is how they are said, with the Roman numerals named once.
 
-Still to add to reach the intended length: the same route in G and A as full
-Steps and not only as variants; seventh chords on every degree; the minor key
-in a second key; secondary chords that songs borrow (the major two, the flat
-seven); a second form (sixteen bars, AABA).
+**Grown to its intended length (2026-11-19, `src/paths/specs/chords-more.ts`).**
+Seven more Steps, 27 Exercises, all new ids. Intermediate: the key of A in
+full; one, five, six, four by number in G, A and keys that change, with one,
+six, four, five beside it; the minor key a second time in E minor, ending on
+eight bars that put the same four chords under two homes (G major, then E
+minor). Advanced: sixteen bars, AABA, with a bridge that starts on four; three
+chords from outside the key (the flat seven, the major two, the minor four),
+each found from a chord the player knows by moving one note; the seventh chords
+of the key as four-string shapes with the root on the A string and on the low
+E string (triad, then the same chord with one finger moved, for each of the
+four kinds; all seven in order: C, D, E, F on the A string and G, A, B, C on
+the low E string at the same four frets); two, five, one and one, six, two,
+five in those sevenths, in four keys, ending on a self-checked "play them as
+chords". That last Step is the hand-off to Arpeggios over Changes, whose
+Intermediate Level opens on the same four chords. Levels are now 3 / 7 / 7.
+
+Fingering decisions worth a teacher's eye: A-string-root shapes are fingered so
+a triad and its seventh share fingers (C `1 3 3 3` to Cmaj7 `1 3 2 4`, Dm
+`1 3 4 2` to Dm7 `1 3 1 2`, Bdim `1 2 4 3` to Bm7b5 `1 2 1 3`); the low-E-root
+minor seven is one first-finger barre, which works because the roll never
+sounds the A string and would need muting when strummed (the "your turn" says
+so). E minor to C at frets 3 to 5 is fingered 2-3-1 to 2-3-1 so one finger
+slides.
 
 ### Arpeggios over Changes (`arpeggios-over-changes`, theory): the third Path, written 2026-11-19
 
@@ -364,6 +394,16 @@ whoever writes it (the helpers in `triads.ts` are exported for this):
 | Beginner: one chord, one octave | A triad as a line, not a shape: root, third, fifth, root up one octave across three strings, and back (C, then A minor). The same over I-vi-IV-V with the band, one bar each, starting each bar on its root. Then starting on the nearest note instead of the root | Quarter notes then eighths. `harmony: { chordTones: true }` holds every note to its chord. Lift each finger as the next lands: these are lines, so the note check wants them not to ring together. |
 | Intermediate: two octaves, and sevenths | Two-octave major and minor arpeggios in the E and A shapes. Add the seventh (maj7, m7, 7) on ii-V-I. Arpeggio up one chord, down the next. A written chorus of arpeggios over the twelve-bar form | Reuse the keys of Chords in a Key through `inKeys`. A "your turn" that connects two chords by the nearest note. |
 | Advanced: the first sweeps | Three-string triad shapes played with one pick stroke per direction, slowly, as the same notes the player already knows. Two-string and three-string shapes over I-V-vi-IV. Hand-off: the last Step's Exercises are the first Step of Sweep Picking at half its tempo, and its payoff sends the player there | Sweep Picking grades ringing sweeps with a looser note bar (see its `gradingLimits`); copy its grading for these three Exercises only. Do not teach speed here. |
+
+**Arpeggios over Changes, grown (2026-11-19, `src/paths/specs/arpeggios-more.ts`).**
+Four more Steps, 15 Exercises: the two-octave shapes on G, D minor and through
+one, four, five of G and of A minor; seventh arpeggios across six strings (A
+minor seven as the pentatonic box with D left out, C major seven, G seven) and
+a two, five, one that crosses the neck; two, five, one in a minor key (B
+half-diminished, E seven, A minor seven: the arpeggios, a written line, three
+more minor keys, a your-turn); and two more swept fingerings before the song
+(the one-finger barre that has to roll, and the root-lowest minor shape Sweep
+Picking starts from). Levels are now 3 / 5 / 5.
 
 ### Other foundations a beginner needs, not built
 

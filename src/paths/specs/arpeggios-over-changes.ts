@@ -12,6 +12,7 @@ import { definePath } from "../spec";
 import type { ExerciseSpec, VariantParams } from "../spec";
 import { handAt, ladder, moveChart, shiftFrets } from "../templates";
 import { ROCK, named, tokens, top } from "./triadShapes";
+import { MINOR_TWO_FIVE_ONE, MORE_SWEEPS, SEVENTHS_ACROSS, TWO_OCTAVES_MORE } from "./arpeggios-more";
 import type { Shape } from "./triadShapes";
 
 const YOUR_TURN = { grade: "selfChecked", example: true } as const;
@@ -519,6 +520,8 @@ export default definePath({
         },
       ],
     },
+    TWO_OCTAVES_MORE,
+    SEVENTHS_ACROSS,
     {
       id: "a-whole-form",
       title: "Arpeggios through a whole form",
@@ -681,6 +684,7 @@ export default definePath({
         },
       ],
     },
+    MINOR_TWO_FIVE_ONE,
     {
       id: "first-sweeps",
       title: "The first sweeps",
@@ -754,6 +758,7 @@ export default definePath({
         },
       ],
     },
+    MORE_SWEEPS,
     {
       id: "sweeps-in-a-song",
       title: "Sweeps in a song, and where to go next",
@@ -878,13 +883,13 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: sevenths, two octaves, a whole form",
-      summary: "Seventh chords as one changed note, a two, five, one line, arpeggios across six strings, and twelve bars of chord notes.",
+      summary: "Seventh chords as one changed note, a two, five, one line, arpeggios across six strings on six chords, seventh arpeggios across the neck, and twelve bars of chord notes.",
       startHereIf: [
         "You can play one-octave arpeggios through 4 chords at 80 BPM.",
         "You can move from one chord to the next without jumping back to the root.",
         "You have not yet played a seventh chord as an arpeggio.",
       ],
-      steps: ["sevenths", "two-octaves", "a-whole-form"],
+      steps: ["sevenths", "two-octaves", "two-octaves-more", "sevenths-across", "a-whole-form"],
       warmups: [
         {
           id: "sevenths-round",
@@ -913,13 +918,13 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: playing the changes, and the first sweeps",
-      summary: "A line through four seventh chords in more than one key, three-string triads swept slowly, an eight-bar song in sweeps, and the hand-off to Sweep Picking.",
+      summary: "A line through four seventh chords in more than one key, two, five, one in a minor key, three-string triads swept slowly in four fingerings, an eight-bar song in sweeps, and the hand-off to Sweep Picking.",
       startHereIf: [
         "You can play C major seven, A minor seven, D minor seven and G seven as arpeggios at 80 BPM.",
         "You can follow a 12-bar form with arpeggios without getting lost.",
         "You have never swept, or you sweep fast and can't play the same notes slowly and clean.",
       ],
-      steps: ["joined-sevenths", "first-sweeps", "sweeps-in-a-song"],
+      steps: ["joined-sevenths", "minor-two-five-one", "first-sweeps", "more-sweeps", "sweeps-in-a-song"],
       warmups: [
         {
           id: "slow-sweeps",
