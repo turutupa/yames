@@ -5739,7 +5739,7 @@ impl MetronomeEngine {
     /// headphones nearly always share one — so:
     ///
     /// 1. The format is probed (after the old stream is closed; again after
-    ///    50 ms if that fails). A rate that moved goes straight to step 3.
+    ///    50 ms if that fails). A rate that moved, or a moved route whose old rate is unknown, goes straight to step 3.
     /// 2. The output is opened with that format, or — with no format — with
     ///    the old rate as the one the setup must find, and this WAITS for the
     ///    verdict, quietly (`SpawnHints::quiet`). Refused: the cached probe
@@ -5811,7 +5811,7 @@ impl MetronomeEngine {
         if old_rate.is_none() && probed.is_none() {
             // A dead stream under a live thread has published its rate, so
             // this should not happen; if it does, nothing can vouch for what
-            // is loaded, and `reopen_keeps_loaded` drops it.
+            // is loaded, and `reopen_keeps_loaded_on` drops it.
             eprintln!("[yames] reopen: no rate known for the old stream or the new one; dropping what is loaded");
         } else if route_moved && old_rate.is_none() {
             // The same "should not happen", on a route that moved: the new
