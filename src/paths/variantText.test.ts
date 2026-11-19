@@ -103,15 +103,17 @@ describe("variants read by hand", () => {
     });
   });
 
+  // Five frets up, 12 to 16 is a much shorter reach than 7 to 11: "at full stretch" is not said there (round 2, rule 6).
   it("Legato (key): three notes a string in E minor, five frets up", () => {
     expect(said("legato", "three-per-string.three-up", "key=E")).toEqual({
       purpose:
         "E minor from the low E string to the D string, then round again through the A string. One bar picked, one bar with a pick on each string and two hammer-ons.",
-      howTo: [
-        "Triplets. Low E string 12, 14, 15; A string 12, 14, 15; D string 12, 14, 16; A string again. Bar 2 picks only the first note of each string.",
-        "The D string's 16 is the little finger at full stretch. Hammer it from the second finger on 14, not from the first.",
-      ],
+      howTo: ["Triplets. Low E string 12, 14, 15; A string 12, 14, 15; D string 12, 14, 16; A string again. Bar 2 picks only the first note of each string."],
     });
+    // One fret up it is still a full stretch.
+    expect(said("legato", "three-per-string.three-up", "key=C")!.howTo![1]).toBe(
+      "The D string's 12 is the little finger at full stretch. Hammer it from the second finger on 10, not from the first.",
+    );
   });
 
   it("Legato (key): the hammered box in E", () => {
@@ -187,7 +189,8 @@ describe("variants read by hand", () => {
         "A single-note riff on the two low strings that walks the roots a power chord would play: D, F, G and the E below F. The riff a band locks to.",
       howTo: [
         "Straight eighths, 80 BPM up to a pass at 110, over a rock beat.",
-        "Bar 1: D at fret 10 on the low E twice (muted), F at 13, D, G at fret 10 on the A string, D, F, E at 12. Bar 2: D, D, A and G on the A string, then F and E as quarter notes.",
+        // Bar 2 would say "D, D, A and G on the A string": an A on the A string, at fret 12. Not written (round 2, rule 4).
+        "Bar 1: D at fret 10 on the low E twice (muted), F at 13, D, G at fret 10 on the A string, D, F, E at 12.",
         "First finger on fret 10, third on 12, fourth on 13. The hand doesn't move.",
       ],
     });
@@ -204,6 +207,61 @@ describe("variants read by hand", () => {
 
   it("Blues (key): a sentence that lists every key ('in G, C or D') is not rewritten, so the variant has no text", () => {
     expect(said("blues-pentatonics", "box-keys.chorus-in-keys", "key=C")).toBeNull();
+  });
+});
+
+// What three proof-readers found in the first 329 variants: two false sentences and four patterns.
+describe("round 2: rules closed after the proof-read", () => {
+  const text = (own: VariantText | null) => [own?.purpose ?? "", ...(own?.howTo ?? [])].join(" ");
+
+  it("1. a/an is never repaired on a capital 'A' that is a string or a note", () => {
+    const own = said("legato", "six-string-runs.six-up", "key=C");
+    expect(own!.howTo![0]).toBe("Sextuplets. Low E 8, 10, 11; A 8, 10, 11; D 8, 10, 12; G 8, 10, 12; B 9, 11, 13; top E 10, 11, 13, and hold the last note.");
+    for (const spec of SPECS.filter((s) => s.variantText)) {
+      for (const ex of exercisesOf(doc(spec.id))) {
+        for (const v of ex.variation?.variants ?? []) expect(text(v), `${ex.id}#${v.id}`).not.toMatch(/\bAn \d/);
+      }
+    }
+  });
+
+  it("2. 'the strings below' is where the figure lies: kept only on the same strings", () => {
+    // Octaves on the A and G strings moved to the low E and D: there is no string below the low E.
+    expect(text(said("shred", "string-skipping.octaves", "stringSet=low-E-and-D"))).not.toMatch(/below|between/);
+  });
+
+  it("3. 'the fret-12 figure' is a name: it is not renumbered, and stays only where the fret does", () => {
+    for (const exerciseId of ["speed-bursts.one-beat", "speed-bursts.two-beats", "speed-bursts.expanding"]) {
+      for (const stringSet of ["3", "4"]) expect(text(said("shred", exerciseId, `stringSet=${stringSet}`)), exerciseId).not.toMatch(/fret-\d/);
+    }
+    // On the B string the frets are the same ones, and the name stays.
+    expect(text(said("shred", "speed-bursts.one-beat", "stringSet=2"))).toContain("the fret-12 figure from its top, 15, 13, 12, 13 on the B string");
+  });
+
+  it("4. a note with the name of the string it is on, at a fret, reads as the open string: not written", () => {
+    // In D the phrase ends on the A string's fret 12, an A.
+    expect(text(said("legato", "first-hammers.hammer-tune", "key=D"))).not.toMatch(/\bA on the A string/);
+    expect(text(said("legato", "first-pulls.pull-tune", "key=D"))).not.toMatch(/\bA on the A string/);
+    expect(text(said("legato", "hammer-and-pull.triplet-tune", "key=D"))).not.toMatch(/\bG on the G string/);
+    expect(text(said("classic-rock", "riffs.root-riff", "key=D"))).not.toMatch(/A and G on the A string/);
+    // In E it is a B on the A string: said.
+    expect(text(said("legato", "first-hammers.hammer-tune", "key=E"))).toContain("The phrase ends on a picked B on the A string.");
+  });
+
+  it("5. a key put where 'A' may have been the article takes 'The' before a thing, nothing when it stands alone", () => {
+    expect(said("know-the-neck", "warmup-advanced.two-boxes-up", "key=G,position=boxes-1-and-2")!.purpose).toBe(
+      "The G minor pentatonic box going up and the box above it coming down. A different key and pair of boxes each time.",
+    );
+    expect(said("scales-and-modes", "relative-minor.minor-shape", "key=B")!.purpose).toBe(
+      "B natural minor on the low three strings, up and back. A different key comes round on each Take.",
+    );
+    expect(said("scales-and-modes", "dorian.dorian-shape", "key=C")!.purpose).toMatch(/^C Dorian, one octave/);
+  });
+
+  it("6. a stretch or a reach is not said five frets or more away", () => {
+    expect(text(said("legato", "three-per-string.three-up", "key=E"))).not.toMatch(/stretch/);
+    expect(text(said("legato", "three-per-string.three-up", "key=D"))).toContain("at full stretch");
+    // Blues, the walking line: three frets up it is still first finger to fourth over five frets.
+    expect(text(said("blues-pentatonics", "twelve-bar.walking", "key=C"))).toContain("It's a stretch from fret 8 to 12");
   });
 });
 
@@ -307,6 +365,48 @@ describe("the rules, on small made-up lines", () => {
     const d = describeVariant(ex, side([[3, 5], [3, 7], [3, 7], [3, 7]]));
     expect(d.refusals.map((r) => r.reason)).toEqual(["a finger, and the fingers differ"]);
     expect(d.text).toBeNull();
+  });
+
+  it("round 2, on made-up lines: labels, names, neighbours, open-sounding notes, articles, stretches", () => {
+    const scale = (root: string, spelled: string[]) => ({ kind: "scale" as const, root, scale: "naturalMinor", spelled, cover: false });
+    const two = [[6, 5], [6, 7], [5, 5], [5, 7]] as Array<[number, number]>;
+    const up3 = [[6, 8], [6, 10], [5, 8], [5, 10]] as Array<[number, number]>;
+    const up7 = [[6, 12], [6, 14], [5, 12], [5, 14]] as Array<[number, number]>;
+    const inA = { harmony: scale("A", ["A", "B", "C", "D", "E", "F", "G"]), params: { key: "A" } };
+    const inC = { harmony: scale("C", ["C", "D", "Eb", "F", "G", "Ab", "Bb"]), params: { key: "C" } };
+    const inE = { harmony: scale("E", ["E", "F#", "G", "A", "B", "C", "D"]), params: { key: "E" } };
+    const ex = (purpose: string, howTo: string[]): ExerciseText => ({ ...base(purpose, howTo, two), ...inA });
+    const v3: TextSide = { ...side(up3, 8), ...inC };
+    const v7: TextSide = { ...side(up7, 12), ...inE };
+    const how = "Play it evenly and let every note ring.";
+
+    // 1. "A 5 and 7" is the A string; "a D" is an article and a note.
+    expect(variantText(ex("Four notes on two strings, round and round.", ["Low E 5 and 7; A 5 and 7.", "It ends on a D."]), v3)).toEqual({
+      howTo: ["Low E 8 and 10; A 8 and 10.", "It ends on an F."],
+    });
+    // 3. A figure's name keeps its fret or is not said.
+    expect(variantText(ex("Four notes on two strings, round and round.", ["The fret-5 figure, twice.", how]), v3)).toEqual({ howTo: [how] });
+    // 2. Neighbours among the strings: the same strings, or not said.
+    const lower: TextSide = { ...side([[5, 5], [5, 7], [4, 5], [4, 7]]), harmony: inA.harmony, params: inA.params };
+    expect(describeVariant(ex("Four notes on two strings, round and round.", ["The palm damps the strings below.", how]), lower).refusals[0].reason).toBe(
+      "strings named by where they lie, on other strings",
+    );
+    expect(describeVariant(ex("Four notes on two strings, round and round.", ["The palm damps the strings below.", how]), v3).refusals).toEqual([]);
+    // 4. Seven frets up the D on the A string is an A on the A string, at fret 12.
+    expect(describeVariant(ex("Four notes on two strings, round and round.", ["It ends on a picked D on the A string.", how]), v7).refusals[0].reason).toBe(
+      "a note with the name of the string it is on, not open",
+    );
+    expect(variantText(ex("Four notes on two strings, round and round.", ["It ends on a picked D on the A string.", how]), v3)!.howTo![0]).toBe(
+      "It ends on a picked F on the A string.",
+    );
+    // 5. "A minor box ..." in C: "The C minor box"; "A minor on two strings": "C minor on two strings"; otherwise nothing.
+    expect(variantText(ex("A minor box on two strings, round and round.", [how]), v3)).toEqual({ purpose: "The C minor box on two strings, round and round." });
+    expect(variantText(ex("A minor on two strings, round and round.", [how]), v3)).toEqual({ purpose: "C minor on two strings, round and round." });
+    expect(variantText(ex("A minor boxes for two strings, round and round.", [how]), v3)).toBeNull();
+    // 6. Three frets up it is still a stretch; seven frets up it is not said.
+    const reach = ex("Four notes on two strings, round and round.", ["Fret 7 is a stretch for the third finger.", how]);
+    expect(variantText(reach, v3)!.howTo![0]).toBe("Fret 10 is a stretch for the third finger.");
+    expect(variantText(reach, v7)).toEqual({ howTo: [how] });
   });
 
   it("text that would only repeat the Exercise's is not written", () => {
