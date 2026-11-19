@@ -3850,11 +3850,11 @@
     min-width: 0;
     font-size: 12.5px;
   }
-  /* And the neck gives up a little of its floor for the band's row: a longer
-     language wraps the hint onto a second line. Its slot stays well above the
-     140 px that keeps the finger numbers 13 px and up. */
+  /* And the neck gives up a little of its floor for the band's row, down to
+     the 240 px neck.spec holds it to at 1024x700 (its finger numbers 13 px
+     and up). */
   .session-body:has(.session-band-row) > .practice-neck {
-    min-height: 210px;
+    min-height: 240px;
   }
 }
 .session-band input[type="range"] {
