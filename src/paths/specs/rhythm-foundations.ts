@@ -126,6 +126,7 @@ export default definePath({
   id: "rhythm-foundations",
   title: "Rhythm Foundations",
   kind: "mechanics",
+  category: "foundations",
   goal: "Play quarters, eighths, triplets and sixteenths, with rests and off-beats, in time with a click and then with a band.",
   level: "beginner",
   assumes:

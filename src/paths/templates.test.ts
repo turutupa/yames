@@ -117,3 +117,15 @@ describe("spelling", () => {
     expect(spellChord("Cm")).toEqual(["C", "Eb", "G"]);
   });
 });
+
+describe("moving a chart to another key", () => {
+  it("spells a diminished chord on its leading tone as a sharp", async () => {
+    const { moveChart } = await import("./templates");
+    expect(moveChart("Am | Dm | G#dim7 | Am", 0)).toContain("G#dim7");
+    // E minor's leading tone is D#: "Ebdim7" names notes the chord does not have.
+    expect(moveChart("Am | Dm | G#dim7 | Am", -5)).toContain("D#dim7");
+    expect(moveChart("Am | Dm | G#dim7 | Am", -5)).not.toContain("Ebdim7");
+    // Other chords on those roots keep their flats.
+    expect(moveChart("C | F", 3)).toContain("Eb");
+  });
+});

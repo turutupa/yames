@@ -3,6 +3,7 @@
   "id": "classic-rock",
   "title": "Classic Rock",
   "kind": "theory",
+  "category": "style",
   "goal": "Play riffs, licks and a written solo in the classic rock style over a band, and know why each note fits the chord under it.",
   "level": "early-intermediate",
   "assumes": "You can play power chords and single notes cleanly, and eighth notes with a click at 80 BPM. Knowing the A minor pentatonic box helps and isn't required: Step 2 goes through it. Most of the Path is in A, so that theory is the only new thing; licks a player repeats for weeks move to other keys and positions.",

@@ -194,6 +194,7 @@ export default definePath({
   id: "legato",
   title: "Legato",
   kind: "mechanics",
+  category: "technique",
   goal: "Play a smooth A minor line with hammer-ons and pull-offs as loud and as even as picked notes, up and down all six strings.",
   level: "early-intermediate",
   assumes:

@@ -318,8 +318,10 @@ export function moveChord(symbol: string, semitones: number): string {
   const match = /^([A-G][#b]?)(.*)$/.exec(symbol.trim());
   if (!match) throw new Error(`not a chord symbol: ${symbol}`);
   const pc = (pcOfName(match[1]) + semitones + 120) % 12;
-  // A dominant's leading tone reads better as a sharp in a minor key.
-  const name = match[2].startsWith("dim") && ROOTS[pc] === "Ab" ? "G#" : ROOTS[pc];
+  // A diminished chord is nearly always built on a leading tone, which is a
+  // sharp: G# in A minor, D# in E minor. "Ebdim7" there names notes it lacks.
+  const leading: Readonly<Record<string, string>> = { Ab: "G#", Eb: "D#" };
+  const name = match[2].startsWith("dim") ? (leading[ROOTS[pc]] ?? ROOTS[pc]) : ROOTS[pc];
   return `${name}${match[2]}`;
 }
 

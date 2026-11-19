@@ -27,6 +27,16 @@ export const STANDARD_TUNING: readonly number[] = [64, 59, 55, 50, 45, 40];
 export type PathKind = "mechanics" | "theory";
 
 /**
+ * Where a Path sits in the curriculum, for a list a person reads. `kind` says
+ * how a Path is graded and built (how hands play, or what to play) and has two
+ * values; this says what the Path is about and has four. A theory Path about
+ * chords is "harmony", not a "style". Optional in a pack: `categoryOf` in
+ * `curriculum.ts` gives the answer for one written before this existed.
+ */
+export const PATH_CATEGORIES = ["foundations", "technique", "style", "harmony"] as const;
+export type PathCategory = (typeof PATH_CATEGORIES)[number];
+
+/**
  * How far a Path's content has got. A status is a claim about who has looked
  * at it: nothing moves past `draft` without an entry in `review.history`, and
  * no text may claim more than this says.
@@ -470,6 +480,7 @@ export type PathDoc = {
   id: string;
   title: string;
   kind: PathKind;
+  category?: PathCategory;
   goal: string;
   level: PathLevel;
   assumes: string;

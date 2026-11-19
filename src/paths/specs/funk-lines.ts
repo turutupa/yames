@@ -136,6 +136,7 @@ export default definePath({
   id: "funk-lines",
   title: "Funk Lines",
   kind: "mechanics",
+  category: "technique",
   goal: "Play sixteenth-note funk rhythm as single-note lines, two-note stabs and octaves, locked to a band, with the picking hand never stopping.",
   level: "early-intermediate",
   assumes:

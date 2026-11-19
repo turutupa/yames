@@ -88,6 +88,7 @@ export default definePath({
   id: "alternate-picking",
   title: "Alternate Picking",
   kind: "mechanics",
+  category: "technique",
   goal: "Pick a clean, even line in A minor across all six strings, and hold it over a band for eight bars.",
   level: "early-intermediate",
   assumes:
