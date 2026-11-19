@@ -344,6 +344,12 @@ pub struct TimingAnalyzer {
     /// iteration; when set it fires the full Signal-B path (score +
     /// emit + push_segment) without resetting activity state.
     close_segment_now: Arc<AtomicBool>,
+    /// Listen first (card #28): a demo began, so the segment the player was
+    /// in (if any) ends here. Scored and kept, but not surfaced as a
+    /// `practice-segment-ended` (`emit_ui = false`), and nothing of a loaded
+    /// schedule is graded by it: that is `close_segment_now`'s job, for a
+    /// Take that stopped.
+    demo_close_now: Arc<AtomicBool>,
     /// Per-session raw telemetry — populated by the analysis loop,
     /// drained by `drain_telemetry()` at session end. See
     /// `SessionTelemetry` for the schema and why it exists.
@@ -463,6 +469,7 @@ impl TimingAnalyzer {
             settings_changed: Arc::new(AtomicBool::new(false)),
             ignore_input_until_ns: Arc::new(AtomicU64::new(0)),
             close_segment_now: Arc::new(AtomicBool::new(false)),
+            demo_close_now: Arc::new(AtomicBool::new(false)),
             telemetry: Arc::new(Mutex::new(SessionTelemetry::default())),
             tempo_ctx: None,
             schedule: Arc::new(Mutex::new(None)),
@@ -607,7 +614,7 @@ impl TimingAnalyzer {
         self.ignore_input_until_ns
             .store(now_ns.saturating_add(length_ns), Ordering::SeqCst);
         self.onset_log.lock().unwrap().clear();
-        self.close_segment_now.store(true, Ordering::SeqCst);
+        self.demo_close_now.store(true, Ordering::SeqCst);
     }
 
     /// The demo stopped. `tail`: onsets count again once its last note has
@@ -621,6 +628,14 @@ impl TimingAnalyzer {
     fn end_demo_at(&self, tail: bool, now_ns: u64) {
         let until = if tail { now_ns.saturating_add(DEMO_TAIL_NS) } else { 0 };
         self.ignore_input_until_ns.store(until, Ordering::SeqCst);
+    }
+
+    /// Lift a demo gate whose deadline has passed; leave a live one.
+    fn lift_expired_demo_gate(&self, now_ns: u64) {
+        let until = self.ignore_input_until_ns.load(Ordering::SeqCst);
+        if until <= now_ns {
+            let _ = self.ignore_input_until_ns.compare_exchange(until, 0, Ordering::SeqCst, Ordering::SeqCst);
+        }
     }
 
     /// Is a heard onset at `ts_ns` the demo's rather than the player's?
@@ -722,15 +737,14 @@ impl TimingAnalyzer {
         I: Fn(InferredGridChanged) + Send + 'static,
         J: Fn(LiveOnset) + Send + 'static,
     {
-        // A listen demo already playing when the input comes on is still
-        // the demo: its gate survives this restart (and is bounded anyway).
-        let demo_gate = self.ignore_input_until_ns.load(Ordering::SeqCst);
+        // A listen demo playing when the input (re)starts keeps its gate:
+        // `stop` only lifts one that has run out.
         self.stop();
-        self.ignore_input_until_ns.store(demo_gate, Ordering::SeqCst);
         // Clear any stale Signal A / close flags from a prior session so a
         // brand-new segment isn't immediately closed by leftover state.
         self.settings_changed.store(false, Ordering::SeqCst);
         self.close_segment_now.store(false, Ordering::SeqCst);
+        self.demo_close_now.store(false, Ordering::SeqCst);
         // Reset telemetry buffer so the new session starts fresh.
         // `stop()` deliberately preserves it so `drain_telemetry()` can
         // still extract the prior session's data; the responsibility
@@ -742,6 +756,7 @@ impl TimingAnalyzer {
         let beat_log = self.beat_log.clone();
         let settings_changed = self.settings_changed.clone();
         let close_segment_now = self.close_segment_now.clone();
+        let demo_close_now = self.demo_close_now.clone();
         let telemetry = self.telemetry.clone();
         let tempo_ctx = self.tempo_ctx.clone();
         let schedule = self.schedule.clone();
@@ -756,6 +771,7 @@ impl TimingAnalyzer {
                 onset_log,
                 settings_changed,
                 close_segment_now,
+                demo_close_now,
                 telemetry,
                 tempo_ctx,
                 schedule,
@@ -787,8 +803,10 @@ impl TimingAnalyzer {
         // Reset Signal A and close flags so the next session starts clean.
         self.settings_changed.store(false, Ordering::SeqCst);
         self.close_segment_now.store(false, Ordering::SeqCst);
-        // A listen demo's gate does not outlive the input it was guarding.
-        self.ignore_input_until_ns.store(0, Ordering::SeqCst);
+        // A listen demo's gate outlives the input only while it is still
+        // in the future (an input restarted mid-demo stays deaf to it); one
+        // that has run out is lifted. Bounded either way (`MAX_DEMO_NS`).
+        self.lift_expired_demo_gate(crate::clock::now_ns());
         // Roadmap 1.3 — hand the detector's refractory back to the
         // click. Leaving the last session's divisor published would
         // carry a 16th-note refractory into somebody's next session of
@@ -809,6 +827,7 @@ impl TimingAnalyzer {
         onset_log: Arc<Mutex<VecDeque<Onset>>>,
         settings_changed: Arc<AtomicBool>,
         close_segment_now: Arc<AtomicBool>,
+        demo_close_now: Arc<AtomicBool>,
         telemetry: Arc<Mutex<SessionTelemetry>>,
         tempo_ctx: Option<crate::onset::SharedTempoContext>,
         schedule_slot: Arc<Mutex<Option<LoadedSchedule>>>,
@@ -1127,7 +1146,12 @@ impl TimingAnalyzer {
             // of the legacy-formula fallback. Activity state is preserved
             // (player can resume after the report is shown).
             if close_segment_now.swap(false, Ordering::SeqCst) {
-                if let Some(run) = schedule_run.as_mut() {
+                // The run is graded only if it is still the schedule loaded
+                // now. A `clear_score_schedule` (a listen demo's, or the next
+                // Take's load) landing between the pick-up above and this
+                // close must not re-grade the previous Take.
+                let current = schedule_version.load(Ordering::SeqCst) == seen_schedule_version;
+                if let Some(run) = schedule_run.as_mut().filter(|_| current) {
                     // Before the segment, because there may not be one.
                     let weights = if coach_mode == CoachMode::Default {
                         profile.default_score_weights
@@ -1153,6 +1177,32 @@ impl TimingAnalyzer {
                         ),
                         true,
                     );
+                }
+            }
+
+            // Listen first (card #28): a demo began. The player's segment
+            // ends here, scored and kept like a settings change (no UI event,
+            // `emit_ui = false`), and the next one opens fresh after it.
+            // Nothing of a schedule is graded: the demo cleared it.
+            if demo_close_now.swap(false, Ordering::SeqCst) {
+                if let Some(seg) = segment.take() {
+                    on_segment_end(
+                        build_segment_ended(
+                            &seg,
+                            &instrument_id,
+                            &preset_id,
+                            SegmentEndReason::UserStopped,
+                            rhythm_inference.current_divisor(),
+                            rhythm_inference.confidence(),
+                            schedule_run.as_ref(),
+                        ),
+                        false,
+                    );
+                    prev_onset_ns = None;
+                    pending_onsets.clear();
+                    consecutive_misses = 0;
+                    activity = Activity::Idle;
+                    signal_b_silence_baseline_ms = 0;
                 }
             }
 
@@ -6239,11 +6289,25 @@ mod listen_demo_tests {
     }
 
     #[test]
-    fn the_open_segment_is_closed_when_a_demo_starts() {
+    fn a_demo_closes_the_open_segment_on_its_own_flag_never_the_takes() {
         let ta = TimingAnalyzer::new(create_beat_log());
-        assert!(!ta.close_segment_now.load(Ordering::SeqCst));
+        assert!(!ta.demo_close_now.load(Ordering::SeqCst));
         ta.start_demo_at(Some(1_000), 0);
-        assert!(ta.close_segment_now.load(Ordering::SeqCst));
+        assert!(ta.demo_close_now.load(Ordering::SeqCst));
+        // The Take's close (which grades a loaded schedule) is not asked for.
+        assert!(!ta.close_segment_now.load(Ordering::SeqCst));
+    }
+
+    #[test]
+    fn re_arming_moves_the_deadline_to_the_new_length() {
+        let ta = TimingAnalyzer::new(create_beat_log());
+        ta.start_demo_at(Some(10_000), 0);
+        // Loading took two seconds: armed again as it starts to sound.
+        ta.start_demo_at(Some(10_000), 2_000 * MS);
+        let end = 2_000 * MS + 10_000 * MS + DEMO_TAIL_NS;
+        assert_eq!(ta.demo_gate().load(Ordering::SeqCst), end);
+        ta.log_heard_onset(onset(end - 1));
+        assert!(queued(&ta).is_empty(), "the last note, late because loading was slow, is still the demo");
     }
 
     #[test]
@@ -6293,13 +6357,19 @@ mod listen_demo_tests {
     }
 
     #[test]
-    fn stopping_the_analyzer_lifts_the_gate() {
+    fn stopping_the_input_mid_demo_keeps_the_gate() {
         let mut ta = TimingAnalyzer::new(create_beat_log());
         ta.start_demo(Some(60_000));
-        assert!(ta.ignores_onset_at(crate::clock::now_ns()));
+        ta.stop();
+        assert!(ta.ignores_onset_at(crate::clock::now_ns()), "an input restarted mid-demo is still deaf to it");
+    }
+
+    #[test]
+    fn stopping_the_input_lifts_a_gate_that_has_run_out() {
+        let mut ta = TimingAnalyzer::new(create_beat_log());
+        ta.start_demo_at(Some(1), 0);
         ta.stop();
         assert_eq!(ta.demo_gate().load(Ordering::SeqCst), 0);
-        assert!(!ta.ignores_onset_at(crate::clock::now_ns()));
     }
 
     #[test]

@@ -115,6 +115,18 @@ describe("useSessionRun — listen first", () => {
     expect(on.lengthMs).toBeLessThan(180_000);
   });
 
+  it("arms the gate again once the demo sounds, so a slow load cannot let its end through", async () => {
+    const h = mount();
+    await playOne(h);
+    act(() => h.result.current.listen.start());
+    await waitFor(() => expect(gates().filter((g) => g.on)).toHaveLength(2));
+    const [first, again] = gates().filter((g) => g.on);
+    const play = lastAt("set_playing", { playing: true });
+    expect(first.at).toBeLessThan(lastAt("load_song"));
+    expect(again.at).toBeGreaterThan(play);
+    expect(again.lengthMs).toBe(first.lengthMs);
+  });
+
   it("a fresh page tells the engine the input is the player's, at once", async () => {
     mount();
     await waitFor(() => expect(gates()[0]).toMatchObject({ on: false, tail: false }));

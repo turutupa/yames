@@ -169,6 +169,11 @@ export function useListenDemo(input: ListenDemoInput): ListenDemoControl {
         await setSongMix(demo.mix);
         if (generation.current !== mine) return;
         await setPlaying(true);
+        // Armed again as it starts to sound: the deadline is from now, so a
+        // slow load cannot let the last note through.
+        await setListenDemo(true, { lengthMs: demo.lengthMs }).catch((err) => {
+          console.warn("[yames] the engine was not told the listen demo started", err);
+        });
       } catch (err) {
         console.warn("[yames] the listen demo would not load", err);
         if (generation.current === mine) {
