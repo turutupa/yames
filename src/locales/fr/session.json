@@ -105,7 +105,8 @@
         "keepWarm": "Pour garder la main, joué il y a {{days}} jours.",
         "keepWarmYesterday": "Pour garder la main, joué hier.",
         "keepWarmToday": "Pour garder la main, déjà joué aujourd'hui.",
-        "keepWarmNew": "Un premier aperçu."
+        "keepWarmNew": "Un premier aperçu.",
+        "focusChosen": "Seulement ce parcours aujourd'hui, comme tu l'as choisi."
       },
       "from": "{{path}} · {{level}} · Étape {{step}}",
       "fromNoLevel": "{{path}} · Étape {{step}}",
@@ -147,6 +148,12 @@
           "busier": "{{bpm}} BPM, mais plus de notes par temps : plus dense que {{was}} BPM ici.",
           "startsSlow": "Il commence à {{bpm}} BPM, sous les {{was}} d’ici : un nouvel exercice commence lentement et monte quand tu le joues proprement."
         }
+      },
+      "focus": {
+        "label": "Parcours :",
+        "mix": "Mon mélange du jour",
+        "emptyMix": "Ton mélange du jour est vide. Choisis un parcours pour aujourd'hui, ou ajoutes-en un au mélange dans Parcours.",
+        "nothingIn": "{{path}} n'a rien à jouer aujourd'hui. Choisis un autre parcours ou ton mélange du jour."
       }
     },
     "why": {
@@ -205,6 +212,7 @@
       "benchmark": "Repère, jour {{day}} : le même exercice à {{bpm}} BPM à chaque fois, pour comparer.",
       "yourTurn": "À toi : {{exercise}}. Pas encore vérifié, c'est toi qui juges.",
       "newFromSibling": "Nouveau. Il commence à {{bpm}} BPM, environ 80 % de ton tempo propre de {{clean}} BPM sur {{sibling}}.",
+      "focusChosen": "Tu as choisi {{path}} pour aujourd'hui, donc toute la séance en vient.",
       "playedUngraded": "Là où tu t'es arrêté : {{bpm}} BPM."
     },
     "bar": {
@@ -462,6 +470,9 @@
       "exerciseCount_many": "{{count}} exercices",
       "exerciseCount_other": "{{count}} exercices",
       "levelSubscribed": "Abonné · départ à l’étape {{n}}",
+      "inMix": "Dans mon mélange du jour",
+      "inMixHelp": "Désactivé : Aujourd'hui le laisse hors de ton mélange du jour. Ta progression reste, et tu peux toujours le choisir pour une journée.",
+      "focusToday": "Travailler seulement celui-ci aujourd'hui",
       "playedUngraded": "{{count}} prise, jusqu'à {{bpm}} BPM.",
       "playedUngraded_many": "{{count}} prises, jusqu'à {{bpm}} BPM.",
       "playedUngraded_other": "{{count}} prises, jusqu'à {{bpm}} BPM."

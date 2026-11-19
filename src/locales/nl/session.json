@@ -104,7 +104,8 @@
         "keepWarm": "Warm houden, {{days}} dagen geleden gespeeld.",
         "keepWarmYesterday": "Warm houden, gisteren gespeeld.",
         "keepWarmToday": "Warm houden, vandaag al gespeeld.",
-        "keepWarmNew": "Een eerste kennismaking."
+        "keepWarmNew": "Een eerste kennismaking.",
+        "focusChosen": "Vandaag alleen dit pad, zoals je koos."
       },
       "from": "{{path}} · {{level}} · Stap {{step}}",
       "fromNoLevel": "{{path}} · Stap {{step}}",
@@ -146,6 +147,12 @@
           "busier": "{{bpm}} BPM, maar meer noten per tel: drukker dan {{was}} BPM hier.",
           "startsSlow": "Het begint op {{bpm}} BPM, onder de {{was}} hier: een nieuwe oefening begint langzaam en klimt zodra je hem schoon speelt."
         }
+      },
+      "focus": {
+        "label": "Paden:",
+        "mix": "Mijn dagelijkse mix",
+        "emptyMix": "Je dagelijkse mix is leeg. Kies een pad voor vandaag, of zet er een in de mix bij Paden.",
+        "nothingIn": "{{path}} heeft vandaag niets om te spelen. Kies een ander pad of je dagelijkse mix."
       }
     },
     "why": {
@@ -204,6 +211,7 @@
       "benchmark": "Meetpunt, dag {{day}}: elke keer dezelfde oefening op {{bpm}} BPM, om te vergelijken.",
       "yourTurn": "Jouw beurt: {{exercise}}. Nog niet gecontroleerd, dus jij beoordeelt het.",
       "newFromSibling": "Nieuw. Hij begint op {{bpm}} BPM, ongeveer 80% van je schone {{clean}} BPM op {{sibling}}.",
+      "focusChosen": "Je koos vandaag {{path}}, dus de hele sessie komt daaruit.",
       "playedUngraded": "Waar je was gebleven: {{bpm}} BPM."
     },
     "bar": {
@@ -450,6 +458,9 @@
       "exerciseCount": "{{count}} oefening",
       "exerciseCount_other": "{{count}} oefeningen",
       "levelSubscribed": "Geabonneerd · je begint bij stap {{n}}",
+      "inMix": "In mijn dagelijkse mix",
+      "inMixHelp": "Uit: Vandaag laat het buiten je dagelijkse mix. Je voortgang blijft, en je kunt het nog steeds voor een dag kiezen.",
+      "focusToday": "Vandaag alleen dit oefenen",
       "playedUngraded": "{{count}} take, tot {{bpm}} BPM.",
       "playedUngraded_other": "{{count}} takes, tot {{bpm}} BPM."
     },

@@ -1557,6 +1557,16 @@
       "store": "settings.json",
       "read": true,
       "written": true
+    },
+    "session.offMix": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "session.todayFocus": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
     }
   },
   "tools": [

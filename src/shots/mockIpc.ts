@@ -1040,6 +1040,9 @@ export function installShotMock(shot: Shot, theme: string): void {
   if (shot.session?.input === "missing") store.set("evaluationDevice", "Scarlett 2i2 USB");
   // Played Alternate Picking, then unsubscribed from it: no Path at all.
   if (shot.session?.seed === "none") store.set("session.unsubscribed", ["alternate-picking"]);
+  if (shot.session?.unsubscribed) store.set("session.unsubscribed", shot.session.unsubscribed);
+  if (shot.session?.focus) store.set("session.todayFocus", shot.session.focus);
+  if (shot.session?.offMix) store.set("session.offMix", shot.session.offMix);
   const pathStore = sessionSeed(shot.session?.seed ?? "first");
   (window as unknown as { __SHOT_PATHS__: PathStoreSeed }).__SHOT_PATHS__ = pathStore;
 

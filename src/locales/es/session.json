@@ -105,7 +105,8 @@
         "keepWarm": "Para no perderlo: tocado hace {{days}} días.",
         "keepWarmYesterday": "Para no perderlo: tocado ayer.",
         "keepWarmToday": "Para no perderlo: ya tocado hoy.",
-        "keepWarmNew": "Una primera probada."
+        "keepWarmNew": "Una primera probada.",
+        "focusChosen": "Hoy solo esta ruta, como elegiste."
       },
       "from": "{{path}} · {{level}} · Paso {{step}}",
       "fromNoLevel": "{{path}} · Paso {{step}}",
@@ -147,6 +148,12 @@
           "busier": "{{bpm}} BPM, pero con más notas por pulso: más denso que {{was}} BPM aquí.",
           "startsSlow": "Empieza a {{bpm}} BPM, por debajo de los {{was}} de aquí: un ejercicio nuevo empieza lento y sube cuando lo tocas limpio."
         }
+      },
+      "focus": {
+        "label": "Rutas:",
+        "mix": "Mi mezcla diaria",
+        "emptyMix": "Tu mezcla diaria está vacía. Elige una ruta para hoy o añade una a la mezcla en Rutas.",
+        "nothingIn": "{{path}} no tiene nada para hoy. Elige otra ruta o tu mezcla diaria."
       }
     },
     "why": {
@@ -205,6 +212,7 @@
       "benchmark": "Referencia, día {{day}}: el mismo ejercicio a {{bpm}} BPM cada vez, para comparar.",
       "yourTurn": "Tu turno: {{exercise}}. Aún no se comprueba, así que lo juzgas tú.",
       "newFromSibling": "Nuevo. Empieza a {{bpm}} BPM, cerca del 80 % de tu tempo limpio de {{clean}} BPM en {{sibling}}.",
+      "focusChosen": "Elegiste {{path}} para hoy, así que toda la sesión sale de ahí.",
       "playedUngraded": "Donde lo dejaste: {{bpm}} BPM."
     },
     "bar": {
@@ -462,6 +470,9 @@
       "exerciseCount_many": "{{count}} ejercicios",
       "exerciseCount_other": "{{count}} ejercicios",
       "levelSubscribed": "Suscrito · empiezas en el paso {{n}}",
+      "inMix": "En mi mezcla diaria",
+      "inMixHelp": "Desactivado: Hoy la deja fuera de tu mezcla diaria. Tu progreso se queda, y aún puedes elegirla para un día.",
+      "focusToday": "Practicar solo esta hoy",
       "playedUngraded": "{{count}} toma, hasta {{bpm}} BPM.",
       "playedUngraded_many": "{{count}} tomas, hasta {{bpm}} BPM.",
       "playedUngraded_other": "{{count}} tomas, hasta {{bpm}} BPM."

@@ -1695,8 +1695,9 @@ function RecapScreen({ session }: { session: SessionRun }) {
   const tomorrow = planSession({
     minutes: session.minutes,
     now: Date.now(),
-    paths: session.myPaths,
+    paths: session.today.paths,
     progress: session.progress,
+    ...(session.today.focusedPath ? { focused: true } : {}),
     ungraded: session.grading === "off",
   });
   const origin = session.origin;

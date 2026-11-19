@@ -19,6 +19,8 @@ import { useNeck3d } from "./hooks/useNeck";
 import { SwapButton, SwapMenu } from "./SwapMenu";
 import { canSwap } from "../../session/swap";
 import type { SwapChoice } from "../../session/swap";
+import { showsFocusPicker } from "../../session/focus";
+import { TodayFocusPicker } from "./TodayFocusPicker";
 import "../../styles/session.css";
 
 /** The staggered entrance the mocks give each block. */
@@ -263,8 +265,13 @@ export function TodayView({
   const leftOff = last ? leftOffLine(factsOf(last), last.bpm) : null;
   const steps = plan.steps;
   const planned = steps.reduce((sum, s) => sum + s.minutes, 0);
+  // What Today plans from: the daily mix, or one Path chosen for today. Tests
+  // and scenes that predate it plan from every subscribed Path.
+  const today = session.today ?? { focus: "mix", paths: myPaths, focusedPath: null, emptyMix: false };
+  const offMix = session.offMix ?? [];
+  const picker = !noPaths && typeof session.setTodayFocus === "function" && showsFocusPicker(myPaths, offMix);
   // A Path's name on each row only says something when there are two or more.
-  const showPath = myPaths.length > 1;
+  const showPath = today.paths.length > 1 || new Set(steps.flatMap((s) => ("pathId" in s && s.pathId ? [s.pathId] : []))).size > 1;
   // Which Path, Level and Step the plan is built from (acceptance P1-11).
   const sources = planSources(steps, session.paths, progress);
   // The row whose Swap menu is open, and the button it opened from.
@@ -364,6 +371,9 @@ export function TodayView({
                   </button>
                 ))}
               </div>
+              {picker && (
+                <TodayFocusPicker paths={myPaths} focus={today.focus} onChange={session.setTodayFocus} />
+              )}
             </>
           )}
         </div>
@@ -439,8 +449,14 @@ export function TodayView({
           )}
           {steps.length === 0 && (
             <div className="session-glass session-card session-col" data-testid="today-nothing" style={{ gap: 6 }}>
-              <div className="session-why">
-                {t(noPaths ? "session.today.noPaths" : "session.today.nothing")}
+              <div className="session-why" data-testid="today-nothing-why">
+                {noPaths
+                  ? t("session.today.noPaths")
+                  : today.emptyMix
+                    ? t("session.today.focus.emptyMix")
+                    : today.focusedPath
+                      ? t("session.today.focus.nothingIn", { path: today.focusedPath.title })
+                      : t("session.today.nothing")}
               </div>
               {!noPaths && (
                 <button className="session-link" onClick={onOpenPaths}>

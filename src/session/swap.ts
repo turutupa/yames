@@ -53,6 +53,13 @@ export type SwapMemory = {
   /** Every `path/exercise` swapped away on `day`: the next plan's light penalty. */
   away: string[];
   avoid: { day: string; keys: string[] } | null;
+  /**
+   * Which plan `swaps` were made in: Today's focus (`focus.ts`), "mix" or a
+   * Path's id. Absent on memories from before the focus existed, which were
+   * all made in the mix. Changing the focus rebuilds the plan, and the swaps
+   * of the old one go (`withScope`).
+   */
+  scope?: string;
 };
 
 /** The settings-store key. */
@@ -445,7 +452,26 @@ export function readSwapMemory(raw: unknown): SwapMemory | null {
     r.avoid && isDay(r.avoid.day) && Array.isArray(r.avoid.keys)
       ? { day: r.avoid.day, keys: r.avoid.keys.filter((k): k is string => typeof k === "string") }
       : null;
-  return { day: r.day, swaps, away, avoid };
+  const scope = typeof r.scope === "string" && r.scope.length > 0 ? r.scope : undefined;
+  return { day: r.day, swaps, away, avoid, ...(scope ? { scope } : {}) };
+}
+
+/** The plan a memory's swaps belong to: the mix, unless it says otherwise. */
+const scopeOf = (memory: SwapMemory) => memory.scope ?? "mix";
+
+/** Today's swaps for the plan of `scope`: none when they were made in another one. */
+export function swapsIn(memory: SwapMemory, scope: string): SwapRecord[] {
+  return scopeOf(memory) === scope ? memory.swaps : [];
+}
+
+/**
+ * The memory for a plan of `scope`: as it is when the swaps were made in that
+ * plan; otherwise its swaps go, since their rows belong to a plan no longer on
+ * screen. What was swapped away still counts against tomorrow's plan.
+ */
+export function withScope(memory: SwapMemory, scope: string): SwapMemory {
+  if (scopeOf(memory) === scope) return memory.scope === scope ? memory : { ...memory, scope };
+  return { ...memory, swaps: [], scope };
 }
 
 /**

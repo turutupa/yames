@@ -2585,6 +2585,10 @@ export function MainWindow() {
           <PathsView
             session={sessionRun}
             place={pathsPlace}
+            onFocusToday={(p) => {
+              sessionRun.setTodayFocus(p.id);
+              setView("today");
+            }}
             instrumentNote={{
               instrument,
               onOpenTools: () => setView("tools"),

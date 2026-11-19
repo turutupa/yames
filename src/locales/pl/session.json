@@ -106,7 +106,8 @@
         "keepWarm": "Żeby nie wystygło, grane {{days}} dni temu.",
         "keepWarmYesterday": "Żeby nie wystygło, grane wczoraj.",
         "keepWarmToday": "Żeby nie wystygło, już grane dzisiaj.",
-        "keepWarmNew": "Pierwszy przedsmak."
+        "keepWarmNew": "Pierwszy przedsmak.",
+        "focusChosen": "Dziś tylko ta ścieżka, tak jak wybrano."
       },
       "from": "{{path}} · {{level}} · Krok {{step}}",
       "fromNoLevel": "{{path}} · Krok {{step}}",
@@ -148,6 +149,12 @@
           "busier": "{{bpm}} BPM, ale więcej nut na uderzenie: gęściej niż {{was}} BPM tutaj.",
           "startsSlow": "Zaczyna się od {{bpm}} BPM, poniżej tutejszych {{was}}: nowe ćwiczenie zaczyna się wolno i przyspiesza, gdy grasz je czysto."
         }
+      },
+      "focus": {
+        "label": "Ścieżki:",
+        "mix": "Mój codzienny miks",
+        "emptyMix": "Codzienny miks jest pusty. Wybierz ścieżkę na dziś albo dodaj jakąś do miksu w Ścieżkach.",
+        "nothingIn": "{{path}} nie ma dziś nic do grania. Wybierz inną ścieżkę albo codzienny miks."
       }
     },
     "why": {
@@ -206,6 +213,7 @@
       "benchmark": "Punkt odniesienia, dzień {{day}}: za każdym razem to samo ćwiczenie w {{bpm}} BPM, do porównania.",
       "yourTurn": "Twoja kolej: {{exercise}}. Jeszcze niesprawdzane, więc oceniasz sam.",
       "newFromSibling": "Nowe. Zaczyna się od {{bpm}} BPM, około 80% twojego czystego tempa {{clean}} BPM w {{sibling}}.",
+      "focusChosen": "Na dziś wybrano {{path}}, więc cała sesja pochodzi z tej ścieżki.",
       "playedUngraded": "Tam, gdzie skończyłeś: {{bpm}} BPM."
     },
     "bar": {
@@ -474,6 +482,9 @@
       "exerciseCount_many": "{{count}} ćwiczeń",
       "exerciseCount_other": "{{count}} ćwiczenia",
       "levelSubscribed": "Subskrybowane · start od kroku {{n}}",
+      "inMix": "W moim codziennym miksie",
+      "inMixHelp": "Wyłączone: Dziś pomija tę ścieżkę w codziennym miksie. Postępy zostają i nadal można ją wybrać na jeden dzień.",
+      "focusToday": "Ćwicz dziś tylko tę",
       "playedUngraded": "{{count}} podejście, do {{bpm}} BPM.",
       "playedUngraded_few": "{{count}} podejścia, do {{bpm}} BPM.",
       "playedUngraded_many": "{{count}} podejść, do {{bpm}} BPM.",

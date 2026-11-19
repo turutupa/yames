@@ -104,7 +104,8 @@
         "keepWarm": "Keeping it warm, last played {{days}} days ago.",
         "keepWarmYesterday": "Keeping it warm, last played yesterday.",
         "keepWarmToday": "Keeping it warm, played earlier today.",
-        "keepWarmNew": "A first taste."
+        "keepWarmNew": "A first taste.",
+        "focusChosen": "Only this Path today, as you chose."
       },
       "from": "{{path}} · {{level}} · Step {{step}}",
       "fromNoLevel": "{{path}} · Step {{step}}",
@@ -146,6 +147,12 @@
           "busier": "{{bpm}} BPM, but more notes to each beat: busier than {{was}} BPM here.",
           "startsSlow": "It starts at {{bpm}} BPM, under the {{was}} here: a new exercise starts slow and climbs as you play it clean."
         }
+      },
+      "focus": {
+        "label": "Paths:",
+        "mix": "My daily mix",
+        "emptyMix": "Nothing is in your daily mix. Pick a Path for today, or add one to the mix on Paths.",
+        "nothingIn": "{{path}} has nothing to play today. Pick another Path or your daily mix."
       }
     },
     "why": {
@@ -204,6 +211,7 @@
       "benchmark": "Benchmark, day {{day}}: the same Exercise at {{bpm}} BPM each time, to compare.",
       "yourTurn": "Your turn: {{exercise}}. Not checked yet, so you judge it.",
       "newFromSibling": "New. It starts at {{bpm}} BPM, about 80% of your clean {{clean}} BPM on {{sibling}}.",
+      "focusChosen": "You chose {{path}} for today, so the whole Session comes from it.",
       "playedUngraded": "Where you left it: {{bpm}} BPM."
     },
     "bar": {
@@ -450,6 +458,9 @@
       "exerciseCount": "{{count}} exercise",
       "exerciseCount_other": "{{count}} exercises",
       "levelSubscribed": "Subscribed · starting at Step {{n}}",
+      "inMix": "In my daily mix",
+      "inMixHelp": "Off: Today leaves it out of your daily mix. Your progress stays, and you can still pick it for a day.",
+      "focusToday": "Practise only this today",
       "playedUngraded": "{{count}} take, up to {{bpm}} BPM.",
       "playedUngraded_other": "{{count}} takes, up to {{bpm}} BPM."
     },
