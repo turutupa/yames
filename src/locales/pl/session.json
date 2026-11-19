@@ -504,7 +504,7 @@
       "offerAdded": "Dodano {{list}} do twoich ścieżek.",
       "tracks": {
         "foundations": "Podstawy",
-        "foundationsLine": "Dopiero zaczynasz grać? Zacznij tutaj: rytm, klik i czyste dźwięki. Pozostałe ścieżki się na tym opierają.",
+        "foundationsLine": "Dopiero zaczynasz grać? Zacznij tutaj: rytm, klik i czyste dźwięki, potem pierwsze akordy. Pozostałe ścieżki się na tym opierają.",
         "harmony": "Jak działa harmonia",
         "harmonyLine": "Od nazw dźwięków po akordy w tonacji, ścieżka po ścieżce. Na start nie potrzebujesz teorii.",
         "technique": "Technika",
@@ -634,6 +634,8 @@
     },
     "tabstrip": {
       "label": "Tabulatura: {{notes}}",
+      "strumDown": "w dół",
+      "strumUp": "w górę",
       "bar": "takt {{n}}",
       "now": "teraz · {{where}}",
       "next": "dalej · {{where}}",

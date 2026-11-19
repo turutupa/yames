@@ -491,7 +491,7 @@
       "offerAdded": "{{list}} adicionada às suas trilhas.",
       "tracks": {
         "foundations": "Fundamentos",
-        "foundationsLine": "Começando na guitarra? Comece aqui: tempo, o clique e notas limpas. As outras trilhas partem disso.",
+        "foundationsLine": "Começando na guitarra? Comece aqui: tempo, o clique e notas limpas, depois seus primeiros acordes. As outras trilhas partem disso.",
         "harmony": "Como a harmonia funciona",
         "harmonyLine": "Dos nomes das notas aos acordes de um tom, uma trilha depois da outra. Não precisa de teoria para começar.",
         "technique": "Técnica",
@@ -620,6 +620,8 @@
     },
     "tabstrip": {
       "label": "Tablatura: {{notes}}",
+      "strumDown": "para baixo",
+      "strumUp": "para cima",
       "bar": "compasso {{n}}",
       "now": "agora · {{where}}",
       "next": "depois · {{where}}",

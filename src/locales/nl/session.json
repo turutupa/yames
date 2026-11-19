@@ -478,7 +478,7 @@
       "offerAdded": "{{list}} toegevoegd aan je paden.",
       "tracks": {
         "foundations": "Basis",
-        "foundationsLine": "Nieuw op gitaar? Begin hier: timing, de klik en schone noten. De andere paden bouwen hierop.",
+        "foundationsLine": "Nieuw op gitaar? Begin hier: timing, de klik en schone noten, daarna je eerste akkoorden. De andere paden bouwen hierop.",
         "harmony": "Hoe harmonie werkt",
         "harmonyLine": "Van de namen van de noten tot de akkoorden van een toonsoort, het ene pad na het andere. Geen theorie nodig om te beginnen.",
         "technique": "Techniek",
@@ -606,6 +606,8 @@
     },
     "tabstrip": {
       "label": "Tab: {{notes}}",
+      "strumDown": "neer",
+      "strumUp": "op",
       "bar": "maat {{n}}",
       "now": "nu · {{where}}",
       "next": "hierna · {{where}}",

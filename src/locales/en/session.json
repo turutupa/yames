@@ -478,7 +478,7 @@
       "offerAdded": "Added {{list}} to your Paths.",
       "tracks": {
         "foundations": "Foundations",
-        "foundationsLine": "New to the guitar? Start here: time, the click and clean notes. The other Paths build on it.",
+        "foundationsLine": "New to the guitar? Start here: time, the click and clean notes, then your first chords. The other Paths build on these.",
         "harmony": "How harmony works",
         "harmonyLine": "From the names of the notes to chords in a key, one Path after another. No theory needed to start.",
         "technique": "Technique",
@@ -606,6 +606,8 @@
     },
     "tabstrip": {
       "label": "Tab: {{notes}}",
+      "strumDown": "down",
+      "strumUp": "up",
       "bar": "bar {{n}}",
       "now": "now · {{where}}",
       "next": "next · {{where}}",

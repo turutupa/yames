@@ -1635,6 +1635,8 @@
 "session.tabstrip.next",
 "session.tabstrip.now",
 "session.tabstrip.pausedHere",
+"session.tabstrip.strumDown",
+"session.tabstrip.strumUp",
 "session.timed.drillKick",
 "session.timed.finisherKick",
 "session.timed.how.drill",

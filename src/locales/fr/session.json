@@ -491,7 +491,7 @@
       "offerAdded": "{{list}} ajouté à tes parcours.",
       "tracks": {
         "foundations": "Les bases",
-        "foundationsLine": "Débutant à la guitare ? Commence ici : le temps, le clic et des notes propres. Les autres parcours s'appuient dessus.",
+        "foundationsLine": "Débutant à la guitare ? Commence ici : le temps, le clic et des notes propres, puis tes premiers accords. Les autres parcours s'appuient dessus.",
         "harmony": "Comment marche l'harmonie",
         "harmonyLine": "Du nom des notes aux accords d'une tonalité, un parcours après l'autre. Pas besoin de théorie pour commencer.",
         "technique": "Technique",
@@ -620,6 +620,8 @@
     },
     "tabstrip": {
       "label": "Tablature : {{notes}}",
+      "strumDown": "bas",
+      "strumUp": "haut",
       "bar": "mesure {{n}}",
       "now": "maintenant · {{where}}",
       "next": "ensuite · {{where}}",

@@ -478,7 +478,7 @@
       "offerAdded": "{{list}} zu deinen Pfaden hinzugefügt.",
       "tracks": {
         "foundations": "Grundlagen",
-        "foundationsLine": "Neu an der Gitarre? Fang hier an: Timing, der Klick und saubere Töne. Die anderen Pfade bauen darauf auf.",
+        "foundationsLine": "Neu an der Gitarre? Fang hier an: Timing, der Klick und saubere Töne, dann deine ersten Akkorde. Die anderen Pfade bauen darauf auf.",
         "harmony": "Wie Harmonie funktioniert",
         "harmonyLine": "Von den Tonnamen bis zu den Akkorden einer Tonart, ein Pfad nach dem anderen. Ohne Theorie zum Einstieg.",
         "technique": "Technik",
@@ -606,6 +606,8 @@
     },
     "tabstrip": {
       "label": "Tabulatur: {{notes}}",
+      "strumDown": "ab",
+      "strumUp": "auf",
       "bar": "Takt {{n}}",
       "now": "jetzt · {{where}}",
       "next": "danach · {{where}}",

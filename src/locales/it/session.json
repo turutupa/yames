@@ -491,7 +491,7 @@
       "offerAdded": "{{list}} aggiunto ai tuoi percorsi.",
       "tracks": {
         "foundations": "Fondamenta",
-        "foundationsLine": "Nuovo alla chitarra? Inizia qui: il tempo, il clic e note pulite. Gli altri percorsi si basano su questo.",
+        "foundationsLine": "Nuovo alla chitarra? Inizia qui: il tempo, il clic e note pulite, poi i tuoi primi accordi. Gli altri percorsi si basano su questo.",
         "harmony": "Come funziona l'armonia",
         "harmonyLine": "Dai nomi delle note agli accordi di una tonalità, un percorso dopo l'altro. Per iniziare non serve teoria.",
         "technique": "Tecnica",
@@ -620,6 +620,8 @@
     },
     "tabstrip": {
       "label": "Intavolatura: {{notes}}",
+      "strumDown": "giù",
+      "strumUp": "su",
       "bar": "battuta {{n}}",
       "now": "ora · {{where}}",
       "next": "dopo · {{where}}",

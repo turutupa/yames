@@ -478,7 +478,7 @@
       "offerAdded": "{{list}} yollarına eklendi.",
       "tracks": {
         "foundations": "Temeller",
-        "foundationsLine": "Gitarda yeni misin? Buradan başla: zamanlama, klik ve temiz notalar. Diğer yollar bunun üzerine kurulu.",
+        "foundationsLine": "Gitarda yeni misin? Buradan başla: zamanlama, klik ve temiz notalar, sonra ilk akorların. Diğer yollar bunun üzerine kurulu.",
         "harmony": "Armoni nasıl işler",
         "harmonyLine": "Nota adlarından bir tondaki akorlara, bir yoldan ötekine. Başlamak için teori gerekmez.",
         "technique": "Teknik",
@@ -606,6 +606,8 @@
     },
     "tabstrip": {
       "label": "Tab: {{notes}}",
+      "strumDown": "aşağı",
+      "strumUp": "yukarı",
       "bar": "{{n}}. ölçü",
       "now": "şimdi · {{where}}",
       "next": "sonra · {{where}}",

@@ -478,7 +478,7 @@
       "offerAdded": "已把{{list}}加到你的路線。",
       "tracks": {
         "foundations": "基礎",
-        "foundationsLine": "剛開始彈吉他？從這裡開始：節奏、節拍器和乾淨的音。其他路線都建立在它上面。",
+        "foundationsLine": "剛開始彈吉他？從這裡開始：節奏、節拍器和乾淨的音，然後是你的第一批和弦。其他路線都建立在它上面。",
         "harmony": "和聲如何運作",
         "harmonyLine": "從音名到調內和弦，一條路線接一條。開始不需要樂理。",
         "technique": "技術",
@@ -606,6 +606,8 @@
     },
     "tabstrip": {
       "label": "六線譜：{{notes}}",
+      "strumDown": "下刷",
+      "strumUp": "上刷",
       "bar": "第 {{n}} 小節",
       "now": "現在 · {{where}}",
       "next": "接下來 · {{where}}",

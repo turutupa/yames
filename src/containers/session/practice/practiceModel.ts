@@ -108,13 +108,16 @@ export function readyNeck(
   fingers: ReadonlyMap<string, string>,
   theory = false,
 ): NeckNote[] {
-  const first = onsets[0]?.places[0];
+  // A strum starts on all of its strings: the whole first chord is NOW, as
+  // it is once the pattern runs. A single note or a double stop: its first place.
+  const firstPlaces = onsets[0]?.places ?? [];
+  const first = new Set((firstPlaces.length >= 3 ? firstPlaces : firstPlaces.slice(0, 1)).map(key));
   const played = new Set<string>();
   for (const o of onsets) for (const p of o.places) played.add(key(p));
   return shape.map((note) => {
     const k = key(note);
     if (!played.has(k)) return { ...note, kind: "dim", label: theory ? note.label : undefined };
-    const kind: NeckKind = first && key(first) === k ? "now" : "box";
+    const kind: NeckKind = first.has(k) ? "now" : "box";
     return {
       ...note,
       kind,
@@ -189,6 +192,55 @@ export function onsetFingers(
     }
     return out.size ? out : undefined;
   });
+}
+
+/**
+ * A chord Exercise, bar by bar (card #74): the notes of each bar of one pass,
+ * and which bar an onset is in.
+ *
+ * "E minor, A minor, C" drew all three shapes on the neck at once, one over
+ * another: the neck's quiet shape was every place the Exercise ever plays.
+ * That is right for a scale or a lick, where the shape is one hand position,
+ * and wrong for strummed chords, where each bar is a different grip. So for
+ * an Exercise with strums in it (an onset of three strings or more) whose
+ * bars do not all hold the same places, the shape is the bar's own.
+ *
+ * Null for everything else: a single-note pattern, or one chord throughout.
+ */
+export type BarShapes<N> = {
+  /** The notes of each bar of one pass, in bar order. */
+  bars: N[][];
+  /** The bar of the pass an onset falls in (the Take's later passes wrap). */
+  barOf: (onsetIndex: number) => number;
+};
+
+export function barShapes<N extends { string: number; fret: number; tick?: number }>(
+  notes: readonly N[],
+  onsets: Onsets,
+  startTick: number,
+  barLength: number,
+  barCount: number,
+): BarShapes<N> | null {
+  const count = Math.max(1, Math.floor(barCount));
+  if (!(barLength > 0) || count < 2) return null;
+  if (!onsets.some((o) => o.places.length >= 3)) return null;
+  const bars: N[][] = Array.from({ length: count }, () => []);
+  for (const n of notes) {
+    const b = Math.floor((n.tick ?? 0) / barLength);
+    if (b >= 0 && b < count) bars[b].push(n);
+  }
+  const places = (bar: readonly N[]) => [...new Set(bar.map(key))].sort().join(" ");
+  const first = places(bars[0]);
+  if (bars.every((bar) => places(bar) === first)) return null;
+  const span = count * barLength;
+  return {
+    bars,
+    barOf: (i) => {
+      const tick = onsets[Math.max(0, Math.min(i, onsets.length - 1))]?.tick ?? startTick;
+      const rel = (((tick - startTick) % span) + span) % span;
+      return Math.min(count - 1, Math.floor(rel / barLength));
+    },
+  };
 }
 
 /**

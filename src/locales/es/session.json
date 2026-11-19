@@ -491,7 +491,7 @@
       "offerAdded": "{{list}} añadida a tus rutas.",
       "tracks": {
         "foundations": "Fundamentos",
-        "foundationsLine": "¿Nuevo con la guitarra? Empieza aquí: el tiempo, el clic y notas limpias. Las demás rutas se apoyan en esto.",
+        "foundationsLine": "¿Nuevo con la guitarra? Empieza aquí: el tiempo, el clic y notas limpias, y luego tus primeros acordes. Las demás rutas se apoyan en esto.",
         "harmony": "Cómo funciona la armonía",
         "harmonyLine": "De los nombres de las notas a los acordes de una tonalidad, una ruta tras otra. No necesitas teoría para empezar.",
         "technique": "Técnica",
@@ -620,6 +620,8 @@
     },
     "tabstrip": {
       "label": "Tablatura: {{notes}}",
+      "strumDown": "abajo",
+      "strumUp": "arriba",
       "bar": "compás {{n}}",
       "now": "ahora · {{where}}",
       "next": "después · {{where}}",

@@ -261,6 +261,41 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+/* A strum's direction (card #74): the bracket and the V of guitar notation,
+   over the strum, in the quiet ink of the technique marks. */
+.tabstrip-strum {
+  fill: none;
+  stroke: color-mix(in srgb, var(--ts-ink) 82%, var(--ts-quiet));
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tabstrip-seg[data-rel="next"] .tabstrip-strum { stroke-opacity: 0.5; }
+.tabstrip-seg[data-rel="past"] .tabstrip-strum,
+.tabstrip-seg[data-rel="later"] .tabstrip-strum { stroke-opacity: 0.3; }
+/* The two marks in words, in the strip's top right corner, on the labels' row. */
+.tabstrip-strumkey {
+  position: absolute;
+  top: 3px;
+  right: 8px;
+  display: flex;
+  gap: 10px;
+  font: 600 11px/1.3 var(--ts-face);
+  color: var(--ts-quiet);
+  pointer-events: none;
+}
+.tabstrip-strumkey span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.tabstrip-strumkey svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 /* Dimmed with their numbers, by the same amount: the letters already take
    the numbers' fill-opacity (`.tabstrip-note text`), and a group opacity on
    top of it left a bend's target in the next bar at a fifth of its ink. */

@@ -43,7 +43,7 @@ import {
   segmentPlace,
   takeEnd,
 } from "./tabStripModel";
-import type { PatternModel, StaffGeometry, StripNote, TabResult, TabStripMode, TabStripNoteInput } from "./tabStripModel";
+import type { PatternModel, StaffGeometry, StripNote, Strum, TabResult, TabStripMode, TabStripNoteInput } from "./tabStripModel";
 import "./tabstrip.css";
 
 export type { TabResult, TabStripMode, TabStripNoteInput } from "./tabStripModel";
@@ -225,6 +225,9 @@ const Segment = memo(function Segment({ model, segment, segTicks, width, ppt, ge
           {Math.floor((b % model.barTicks) / model.beatTicks) + 1}
         </text>
       ))}
+      {strumsIn(model, notes).map(({ at, strum }) => (
+        <StrumMark key={`s${at}`} strum={strum} x={x(at - start)} geo={geo} />
+      ))}
       {notes.map((n) => {
         const nx = x(n.at - start);
         const ly = geo.top + (n.string - 1) * geo.gap;
@@ -247,6 +250,39 @@ const Segment = memo(function Segment({ model, segment, segTicks, width, ppt, ge
     </svg>
   );
 });
+
+/** The strums among a segment's notes: once each, where it is in the Take, and which way it goes. */
+function strumsIn(model: PatternModel, notes: readonly StripNote[]): { at: number; strum: Strum }[] {
+  if (model.strums.size === 0) return [];
+  const out = new Map<number, Strum>();
+  for (const n of notes) {
+    const strum = model.strums.get(n.tick);
+    if (strum && !out.has(n.at)) out.set(n.at, strum);
+  }
+  return [...out].map(([at, strum]) => ({ at, strum }));
+}
+
+/**
+ * Which way a strum goes (card #74), the way guitar music has always written
+ * it: a bracket open at the bottom for a downstroke, a V for an upstroke,
+ * over the strum, above the staff. Not an arrow: on a tab the low E is the
+ * bottom line, so an arrow for "down" would have to point up the page, and
+ * nothing on these screens is an arrow. The Tab view's key says the two
+ * words (`PracticeTab`).
+ */
+function StrumMark({ strum, x, geo }: { strum: Strum; x: number; geo: StaffGeometry }) {
+  const f = geo.fretPx;
+  const w = Math.max(7, f * 0.34);
+  const h = Math.max(7, f * 0.36);
+  // In the band between the bar's label and the high e's line.
+  const bottom = geo.top - Math.max(9, f * 0.62);
+  const top = bottom - h;
+  const d =
+    strum === "d"
+      ? `M${x - w / 2} ${bottom} V${top} H${x + w / 2} V${bottom}`
+      : `M${x - w / 2} ${top} L${x} ${bottom} L${x + w / 2} ${top}`;
+  return <path className="tabstrip-strum" data-strum={strum} d={d} style={{ strokeWidth: Math.max(1.6, f * 0.075) }} />;
+}
 
 /**
  * A note's technique marks, the standard tab way (card #40): "h", "p" and
@@ -824,6 +860,19 @@ export function TabStrip({
       <div className="tabstrip-view" ref={viewRef} aria-hidden="true">
         <div className="tabstrip-fill">{body}</div>
       </div>
+      {/* What the two marks over the strums mean: said once, in words. */}
+      {model.strums.size > 0 && (
+        <div className="tabstrip-strumkey" data-testid="tabstrip-strumkey">
+          {[...new Set(model.strums.values())].sort().map((strum) => (
+            <span key={strum} data-strum={strum}>
+              <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
+                <path d={strum === "d" ? "M1.5 9 V1.5 H8.5 V9" : "M1.5 1.5 L5 9 L8.5 1.5"} />
+              </svg>
+              {t(strum === "d" ? "session.tabstrip.strumDown" : "session.tabstrip.strumUp")}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
