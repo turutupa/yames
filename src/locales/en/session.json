@@ -461,6 +461,7 @@
       "inMix": "In my daily mix",
       "inMixHelp": "Off: Today leaves it out of your daily mix. Your progress stays, and you can still pick it for a day.",
       "focusToday": "Practise only this today",
+      "focusedToday": "Only this today",
       "playedUngraded": "{{count}} take, up to {{bpm}} BPM.",
       "playedUngraded_other": "{{count}} takes, up to {{bpm}} BPM."
     },

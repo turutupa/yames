@@ -461,6 +461,7 @@
       "inMix": "Günlük karışımımda",
       "inMixHelp": "Kapalı: Bugün bu yolu günlük karışımına almaz. İlerlemen kalır, yine de bir günlüğüne seçebilirsin.",
       "focusToday": "Bugün yalnızca bunu çalış",
+      "focusedToday": "Bugün yalnızca bu",
       "playedUngraded": "{{count}} deneme, en fazla {{bpm}} BPM.",
       "playedUngraded_other": "{{count}} deneme, en fazla {{bpm}} BPM."
     },

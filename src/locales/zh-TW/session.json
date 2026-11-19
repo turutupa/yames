@@ -461,6 +461,7 @@
       "inMix": "加入每日組合",
       "inMixHelp": "關閉後，「今天」不會把它排進每日組合。進度會保留，也仍可選它練一天。",
       "focusToday": "今天只練這條",
+      "focusedToday": "今天只練這條",
       "playedUngraded": "{{count}} 遍，最快 {{bpm}} BPM。",
       "playedUngraded_other": "{{count}} 遍，最快 {{bpm}} BPM。"
     },

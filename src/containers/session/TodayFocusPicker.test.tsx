@@ -125,6 +125,24 @@ describe("In my daily mix, on a Path card", () => {
     expect(onFocusToday).toHaveBeenCalledWith(ALT);
   });
 
+  it("the Path today is on says so, pressed, and pressing it goes back to the mix on the spot", () => {
+    const onFocusToday = vi.fn();
+    const session = { ...pathsSession([]), todayFocus: ALT.id } as unknown as SessionRun;
+    render(<PathsView session={session} onFocusToday={onFocusToday} />);
+    const on = screen.getByTestId(`path-focus-${ALT.id}`);
+    expect(on.getAttribute("aria-pressed")).toBe("true");
+    expect(on.textContent).toBe(i18n.t("session.paths.focusedToday"));
+    // The other Path still offers itself.
+    const other = screen.getByTestId(`path-focus-${SWEEP.id}`);
+    expect(other.getAttribute("aria-pressed")).toBe("false");
+    expect(other.textContent).toBe(i18n.t("session.paths.focusToday"));
+    fireEvent.click(on);
+    expect(session.setTodayFocus).toHaveBeenCalledWith("mix");
+    expect(onFocusToday).not.toHaveBeenCalled();
+    // Still the list of Paths: undoing it does not open Today or the Path.
+    expect(screen.getByTestId("paths")).toBeTruthy();
+  });
+
   it("a Path not subscribed has neither", () => {
     render(<PathsView session={pathsSession([])} onFocusToday={vi.fn()} />);
     expect(screen.queryByTestId(`path-mix-${BLUES.id}`)).toBeNull();

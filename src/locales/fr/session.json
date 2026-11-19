@@ -473,6 +473,7 @@
       "inMix": "Dans mon mélange du jour",
       "inMixHelp": "Désactivé : Aujourd'hui le laisse hors de ton mélange du jour. Ta progression reste, et tu peux toujours le choisir pour une journée.",
       "focusToday": "Travailler seulement celui-ci aujourd'hui",
+      "focusedToday": "Seulement celui-ci aujourd'hui",
       "playedUngraded": "{{count}} prise, jusqu'à {{bpm}} BPM.",
       "playedUngraded_many": "{{count}} prises, jusqu'à {{bpm}} BPM.",
       "playedUngraded_other": "{{count}} prises, jusqu'à {{bpm}} BPM."

@@ -6,6 +6,7 @@
  * chosen from any point, and a Path the app cannot grade yet says "later".
  */
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { MIX } from "../../session/focus";
 import type { CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import type { Exercise, Level, PathDoc, Step } from "../../paths/format";
@@ -128,6 +129,45 @@ export function MixSwitch({ session, path }: { session: SessionRun; path: PathDo
   );
 }
 
+/**
+ * "Practise only this today" on a card. A toggle: once this Path is today's
+ * focus the card says so ("Only this today", pressed), and pressing it again
+ * goes back to the daily mix without leaving the page. It used to read the
+ * same before and after, so nothing on Paths said which Path today was on.
+ */
+function FocusToday({
+  session,
+  path,
+  onFocusToday,
+}: {
+  session: SessionRun;
+  path: PathDoc;
+  onFocusToday: (path: PathDoc) => void;
+}) {
+  const { t } = useTranslation();
+  const on = session.todayFocus === path.id;
+  return (
+    <button
+      type="button"
+      className="session-link session-path-focus"
+      aria-pressed={on}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (on) session.setTodayFocus(MIX);
+        else onFocusToday(path);
+      }}
+      data-testid={`path-focus-${path.id}`}
+    >
+      {on && (
+        <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+          <path d="M2 6.4 L4.8 9 L10 3.2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )}
+      {t(on ? "session.paths.focusedToday" : "session.paths.focusToday")}
+    </button>
+  );
+}
+
 /** Whether this Path is one Today plans from: subscribed and runnable. */
 function isMine(session: SessionRun, path: PathDoc): boolean {
   return (session.myPaths ?? []).some((p) => p.id === path.id);
@@ -232,17 +272,7 @@ function PathList({
                   <span className="session-path-today" data-testid={`path-today-${path.id}`}>
                     <MixSwitch session={session} path={path} />
                     {onFocusToday && (session.myPaths.length > 1 || (session.offMix ?? []).includes(path.id)) && (
-                      <button
-                        type="button"
-                        className="session-link session-path-focus"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onFocusToday(path);
-                        }}
-                        data-testid={`path-focus-${path.id}`}
-                      >
-                        {t("session.paths.focusToday")}
-                      </button>
+                      <FocusToday session={session} path={path} onFocusToday={onFocusToday} />
                     )}
                   </span>
                 )}

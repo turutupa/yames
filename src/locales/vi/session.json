@@ -461,6 +461,7 @@
       "inMix": "Trong bài trộn hằng ngày",
       "inMixHelp": "Tắt: Hôm nay sẽ bỏ lộ trình này khỏi bài trộn hằng ngày. Tiến độ vẫn giữ, và bạn vẫn có thể chọn nó cho một ngày.",
       "focusToday": "Hôm nay chỉ tập lộ trình này",
+      "focusedToday": "Hôm nay chỉ lộ trình này",
       "playedUngraded": "{{count}} lượt, tối đa {{bpm}} BPM.",
       "playedUngraded_other": "{{count}} lượt, tối đa {{bpm}} BPM."
     },

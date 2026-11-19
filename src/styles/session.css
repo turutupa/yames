@@ -2091,8 +2091,20 @@
   min-width: 0;
 }
 .session-page .session-path-focus {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   min-height: 36px;
   text-align: left;
+}
+/* Today is on this Path: said in the accent, with a tick, no longer a link to follow. */
+.session-page .session-path-focus[aria-pressed="true"] {
+  color: var(--l-tag-accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+.session-page .session-path-focus svg {
+  flex: none;
 }
 .session-page .session-mixswitch {
   display: inline-flex;

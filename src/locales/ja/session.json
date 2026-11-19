@@ -461,6 +461,7 @@
       "inMix": "いつものミックスに入れる",
       "inMixHelp": "オフ：「今日」はいつものミックスから外します。進み具合はそのままで、1日だけ選ぶこともできます。",
       "focusToday": "今日はこれだけ練習",
+      "focusedToday": "今日はこれだけ",
       "playedUngraded": "{{count}} テイク、最高 {{bpm}} BPM。",
       "playedUngraded_other": "{{count}} テイク、最高 {{bpm}} BPM。"
     },

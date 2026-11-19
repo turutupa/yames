@@ -1346,6 +1346,7 @@
 "session.paths.exercisesPassed_other",
 "session.paths.finishHow",
 "session.paths.focusToday",
+"session.paths.focusedToday",
 "session.paths.howTo",
 "session.paths.inMix",
 "session.paths.inMixHelp",

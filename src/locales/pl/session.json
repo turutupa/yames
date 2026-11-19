@@ -485,6 +485,7 @@
       "inMix": "W moim codziennym miksie",
       "inMixHelp": "Wyłączone: Dziś pomija tę ścieżkę w codziennym miksie. Postępy zostają i nadal można ją wybrać na jeden dzień.",
       "focusToday": "Ćwicz dziś tylko tę",
+      "focusedToday": "Dziś tylko ta",
       "playedUngraded": "{{count}} podejście, do {{bpm}} BPM.",
       "playedUngraded_few": "{{count}} podejścia, do {{bpm}} BPM.",
       "playedUngraded_many": "{{count}} podejść, do {{bpm}} BPM.",
