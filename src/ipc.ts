@@ -751,6 +751,18 @@ export async function notifySettingsChange(): Promise<void> {
 }
 
 /**
+ * Listen first (card #28): the Session is playing a demo of the Exercise
+ * through the speakers (`true`), or has stopped (`false`). While it plays the
+ * input is not the player: the engine drops every onset before the timing
+ * analyzer (no segment, beat feedback, coach tip or practice stat counts the
+ * demo, and no `onset-detected` reaches the page), and for half a second
+ * after it stops while its last note rings out.
+ */
+export async function setListenDemo(on: boolean): Promise<void> {
+  return invoke("set_listen_demo", { on });
+}
+
+/**
  * Force-close the open practice segment so `getSessionReport()` returns
  * the IC/GA formula score instead of the legacy fallback. The analyzer
  * loop picks this up within 5ms, emits `practice-segment-ended` with

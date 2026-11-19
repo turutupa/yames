@@ -94,6 +94,27 @@ describe("useSessionRun — listen first", () => {
     expect(h.result.current.run.phase).toBe("ready");
     expect(h.startInput.mock.calls.length).toBe(inputAsks);
     expect(calls("save_attempt")).toHaveLength(0);
+    // The engine is told the input is not the player before the demo sounds.
+    const order = mockInvoke.mock.calls.map(([c, a]) => `${c}:${JSON.stringify(a ?? null)}`);
+    const muted = order.indexOf('set_listen_demo:{"on":true}');
+    expect(muted).toBeGreaterThanOrEqual(0);
+    expect(muted).toBeLessThan(order.lastIndexOf('set_playing:{"playing":true}'));
+  });
+
+  it("the input counts again only once the demo is silent", async () => {
+    const h = mount();
+    await playOne(h);
+    act(() => h.result.current.listen.start());
+    await waitFor(() => expect(playing(true)).toHaveLength(1));
+    h.set({ isPlaying: true });
+    act(() => h.result.current.listen.stop());
+    await waitFor(() =>
+      expect(calls("set_listen_demo").map(([, a]) => (a as { on: boolean }).on)).toEqual([true, false]),
+    );
+    const order = mockInvoke.mock.calls.map(([c, a]) => `${c}:${JSON.stringify(a ?? null)}`);
+    const unmuted = order.indexOf('set_listen_demo:{"on":false}');
+    expect(order.lastIndexOf("clear_song:null")).toBeLessThan(unmuted);
+    expect(order.lastIndexOf('set_playing:{"playing":false}')).toBeLessThan(unmuted);
   });
 
   it("Start take stops it, loads the Take again, then starts the Take", async () => {

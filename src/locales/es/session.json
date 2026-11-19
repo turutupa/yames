@@ -522,6 +522,7 @@
       "watchSoundTitle": "Escucha una pasada a este tempo tras un compás de entrada, con las notas iluminadas al sonar. No se califica.",
       "sound": "Sonido",
       "soundTitle": "Ver toca las notas en voz alta. Apagado: solo las ilumina.",
+      "demoPlaying": "Te lo toco yo. Empieza la toma cuando estés listo.",
       "legendPlayed": "recién tocada",
       "beats": "Los pulsos del compás",
       "beatLabel": "pulso",

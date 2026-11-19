@@ -8,6 +8,9 @@
  *   scorer's schedule) is taken off, the demo's song goes on with its mix, and
  *   the transport starts. Nothing asks for the input and nothing is scheduled
  *   for the scorer, so nothing is heard as playing or graded.
+ * - **the input**: the engine is told a demo is playing (`setListenDemo`)
+ *   before it sounds and told it stopped after it is silent, so a
+ *   microphone hearing the speakers is never counted as the player.
  * - **stop** (Watch again, its key, Start take, another view, a new step, the
  *   song's own end): the transport stops and the song goes. `active` stays up
  *   until the engine has said it stopped (`isPlaying` false), so the Session
@@ -17,7 +20,17 @@
  * `active` is the Session's gate; `playing` is what the Watch button shows.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { clearScoreSchedule, clearSong, loadSong, onJamEnded, setPlaying, setSongMix, storeLoad, storeSave } from "../../../ipc";
+import {
+  clearScoreSchedule,
+  clearSong,
+  loadSong,
+  onJamEnded,
+  setListenDemo,
+  setPlaying,
+  setSongMix,
+  storeLoad,
+  storeSave,
+} from "../../../ipc";
 import type { JamBand } from "../../../jam";
 import { LISTEN_SOUND_KEY, buildListenDemo } from "../../../session/listenDemo";
 import type { TakePlan } from "../../../session/take";
@@ -89,6 +102,8 @@ export function useListenDemo(input: ListenDemoInput): ListenDemoControl {
     void latest.current.enqueue(async () => {
       await setPlaying(false).catch(() => {});
       await clearSong().catch(() => {});
+      // Silent now: the input is the player's again (after the last note's tail).
+      await setListenDemo(false).catch(() => {});
       if (generation.current === mine) {
         phaseRef.current = "stopped";
         setPhase("stopped");
@@ -109,8 +124,10 @@ export function useListenDemo(input: ListenDemoInput): ListenDemoControl {
       if (generation.current !== mine) return;
       try {
         await setPlaying(false).catch(() => {});
-        // Nothing for the scorer: the demo is never heard as a Take.
+        // Nothing for the scorer, and nothing the input hears counts: the
+        // demo is never heard as a Take, nor as practice.
         await clearScoreSchedule().catch(() => {});
+        await setListenDemo(true).catch(() => {});
         const importer = await import("../../../songs/import");
         const transport = importer.buildTransport(demo.score, demo.range, {
           loops: false,
@@ -126,6 +143,7 @@ export function useListenDemo(input: ListenDemoInput): ListenDemoControl {
         console.warn("[yames] the listen demo would not load", err);
         if (generation.current === mine) {
           await clearSong().catch(() => {});
+          await setListenDemo(false).catch(() => {});
           phaseRef.current = "stopped";
           setPhase("stopped");
         }

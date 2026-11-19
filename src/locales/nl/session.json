@@ -509,6 +509,7 @@
       "watchSoundTitle": "Hoor één keer in dit tempo na een maat aftellen, de noten lichten op terwijl ze klinken. Er wordt niets beoordeeld.",
       "sound": "Geluid",
       "soundTitle": "Bekijk speelt de noten hoorbaar. Uit: ze lichten alleen op.",
+      "demoPlaying": "Ik speel het je voor. Start de take als je klaar bent.",
       "legendPlayed": "net gespeeld",
       "beats": "De tellen van de maat",
       "beatLabel": "tel",

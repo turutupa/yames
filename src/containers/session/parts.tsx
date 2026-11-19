@@ -172,6 +172,16 @@ export function ReadyInput({
   const { run, inputStart, actions } = session;
   if (run.phase !== "ready") return null;
   const place = compact ? "footer" : undefined;
+  // Listen first (card #28): while the demo plays, the input is not listening
+  // for the player (the engine ignores it), so the line says what is going on.
+  if (session.listen?.active) {
+    return (
+      <div className="session-input-note" role="status" data-place={place} data-testid="session-listen-note">
+        <span className="session-input-dot" data-state="demo" aria-hidden="true" />
+        <span>{t("session.practice.demoPlaying")}</span>
+      </div>
+    );
+  }
   if (run.ungraded) {
     return (
       <div className="session-input-note" role="status" data-place={place} data-testid="session-ungraded-note">

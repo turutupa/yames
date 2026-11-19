@@ -509,6 +509,7 @@
       "watchSoundTitle": "先數一小節，再以此速度聽一遍，音符隨聲音亮起。不評分。",
       "sound": "聲音",
       "soundTitle": "觀看時把音符彈出來。關閉：只亮起音符。",
+      "demoPlaying": "正在為你演奏。準備好後開始這一遍。",
       "legendPlayed": "剛彈過",
       "beats": "這一小節的拍子",
       "beatLabel": "拍",

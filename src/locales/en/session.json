@@ -508,6 +508,7 @@
       "watchSoundTitle": "Hear one pass at this tempo after a bar of count-in, the notes lit as they sound. Nothing graded.",
       "sound": "Sound",
       "soundTitle": "Watch plays the notes aloud. Off: it only lights them.",
+      "demoPlaying": "Playing it for you. Start take when you're ready.",
       "legendFingers": "1–4 = fingers",
       "legendPlayed": "just played",
       "beats": "The bar's beats",

@@ -1600,7 +1600,14 @@ pub async fn start_evaluation(
     // `ta` is still held from above: locking the analyzer again here would
     // deadlock.
     od.set_take_tap(ta.take_audio_tap());
+    // Listen first (card #28): while the app plays a demo of the Exercise, a
+    // microphone hearing it is not the player. Read without the analyzer's
+    // lock, so the page's onset dots stay quiet too.
+    let demo_gate = ta.demo_gate();
     od.start(ai_shared, profile, tempo_for_onset, move |onset| {
+        if onset.ts_ns < demo_gate.load(std::sync::atomic::Ordering::SeqCst) {
+            return;
+        }
         let _ = app_for_onset.emit("onset-detected", &onset);
         // Feed into timing analyzer for beat matching
         if let Ok(ta) = ta_shared.lock() {
@@ -1899,6 +1906,20 @@ pub fn notify_settings_change(timing_analyzer: State<SharedTimingAnalyzer>) -> R
         .lock()
         .map_err(|e| format!("Lock failed: {e}"))?;
     ta.notify_settings_change();
+    Ok(())
+}
+
+/// Listen first (card #28): the Session is playing a demo of the Exercise
+/// through the speakers (`on`), or has stopped (`!on`). While it plays, the
+/// input is not the player: onsets are dropped before the analyzer, so no
+/// segment, beat feedback, coach tip or practice stat counts the demo.
+/// Off, they count again once its last note has rung out.
+#[tauri::command]
+pub fn set_listen_demo(on: bool, timing_analyzer: State<SharedTimingAnalyzer>) -> Result<(), String> {
+    let ta = timing_analyzer
+        .lock()
+        .map_err(|e| format!("Lock failed: {e}"))?;
+    ta.set_demo_playing(on);
     Ok(())
 }
 

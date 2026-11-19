@@ -522,6 +522,7 @@
       "watchSoundTitle": "Ouça uma passada neste andamento após um compasso de contagem, com as notas acesas enquanto soam. Nada é avaliado.",
       "sound": "Som",
       "soundTitle": "Ver toca as notas em voz alta. Desligado: só as acende.",
+      "demoPlaying": "Tocando para você. Comece a tomada quando estiver pronto.",
       "legendPlayed": "acabou de tocar",
       "beats": "Os tempos do compasso",
       "beatLabel": "tempo",

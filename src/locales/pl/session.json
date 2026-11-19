@@ -535,6 +535,7 @@
       "watchSoundTitle": "Posłuchaj jednego przebiegu w tym tempie po takcie odliczania, nuty podświetlają się, gdy brzmią. Bez oceniania.",
       "sound": "Dźwięk",
       "soundTitle": "Pokaż gra nuty na głos. Wyłączone: tylko je podświetla.",
+      "demoPlaying": "Gram to dla ciebie. Zacznij podejście, gdy będziesz gotowy.",
       "legendPlayed": "właśnie zagrana",
       "beats": "Miary taktu",
       "beatLabel": "miara",
