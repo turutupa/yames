@@ -22,6 +22,7 @@
  */
 import type { NeckKind, NeckNote, NeckView } from "../../../stage3d/api";
 import type { HandPosition } from "../../../paths/format";
+import { fingersByPlace, type FingerNote } from "../../../paths/fingering";
 import type { BeatPosition } from "../../../songs/position";
 import type { RunwayModel } from "../highway/runwayModel";
 
@@ -108,39 +109,19 @@ export function readyNeck(
 
 /**
  * The fingers, by place ("string:fret" to "1".."4", or "0" for an open
- * string), as a chord or scale diagram writes them. Only what the Exercise
- * makes certain:
- *
- * - its hand position is the index finger's fret, one finger per fret, so a
- *   fret one to three above it is the middle, ring and little finger;
- * - a fret past the four is the little finger's stretch, but only when it is
- *   the one fret out there and the little finger's own fret is not used (the
- *   C major sweep at 8: 8, 9, 10 and the 12 above them);
- * - a hand that may shift gets fingers only when every note is under the four
- *   fingers where it starts; otherwise which finger takes a note after a shift
- *   is a choice, and a dot with a guessed number is worse than one without.
- *
- * A tapped note is the picking hand's, and gets no number.
+ * string), as a chord or scale diagram writes them. The rules are a
+ * teacher's, written out in `paths/fingering.ts`: one finger per fret from the
+ * hand's position, the little finger's stretch, 1-2-4 on a stretched string,
+ * the fewest shifts for a hand that moves (never inside a hammer or pull, a
+ * slide keeping its finger), bends on the ring finger, and the content's own
+ * finger (`PathNote.finger`) over all of them. A tapped note is the picking
+ * hand's and gets no number; a note a still hand cannot reach gets none.
  */
 export function fingering(
-  notes: readonly { string: number; fret: number; tech?: readonly string[] }[],
+  notes: readonly FingerNote[],
   position: HandPosition | undefined,
 ): Map<string, string> {
-  const out = new Map<string, string>();
-  for (const n of notes) if (n.fret === 0) out.set(key(n), "0");
-  if (!position) return out;
-  const fretted = notes.filter((n) => n.fret > 0 && !n.tech?.includes("tap"));
-  const base = Math.max(1, position.fret);
-  const frets = new Set(fretted.map((n) => n.fret));
-  const beyond = [...frets].filter((f) => f > base + 3);
-  if (position.shifts !== "none" && (beyond.length > 0 || [...frets].some((f) => f < base))) return out;
-  const stretch = beyond.length === 1 && beyond[0] - base <= 5 && !frets.has(base + 3) ? beyond[0] : null;
-  for (const n of fretted) {
-    const d = n.fret - base;
-    const finger = d >= 0 && d <= 3 ? d + 1 : n.fret === stretch ? 4 : null;
-    if (finger !== null) out.set(key(n), String(finger));
-  }
-  return out;
+  return fingersByPlace(notes, position);
 }
 
 /**

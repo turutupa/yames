@@ -72,6 +72,12 @@ export type PathNote = {
   accent?: true;
   /** Semitones. Only with the `bend` technique. */
   bend?: number;
+  /**
+   * The fretting finger, 1 index to 4 little finger, where the content says it
+   * (the tab's `f1`..`f4`). Used in preference to the rules in `fingering.ts`
+   * (the fingering audit, 2026-11-18). Absent: the rules decide.
+   */
+  finger?: 1 | 2 | 3 | 4;
 };
 
 export type PathRest = { tick: number; dur: number };

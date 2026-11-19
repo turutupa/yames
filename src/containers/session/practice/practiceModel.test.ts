@@ -133,26 +133,28 @@ describe("the fingers on the dots", () => {
     expect([f.get("1:5"), f.get("3:7"), f.get("1:8"), f.get("4:5")]).toEqual(["1", "3", "4", "1"]);
   });
 
-  it("does not guess a stretch when the little finger's own fret is used too, or two frets are out there", () => {
-    expect(fingering([P(1, 5), P(1, 8), P(1, 9)], { fret: 5, shifts: "none" }).get("1:9")).toBeUndefined();
-    const two = fingering([P(1, 5), P(1, 9), P(1, 10)], { fret: 5, shifts: "none" });
-    expect(two.get("1:9")).toBeUndefined();
-    expect(two.get("1:10")).toBeUndefined();
+  it("spreads a stretched string 1-3-4 or 1-2-4, and leaves two frets past the stretch unnumbered", () => {
+    const f = fingering([P(1, 5), P(1, 8), P(1, 9)], { fret: 5, shifts: "none" });
+    expect([f.get("1:5"), f.get("1:8"), f.get("1:9")]).toEqual(["1", "3", "4"]);
+    const wide = fingering([P(1, 5), P(1, 11)], { fret: 5, shifts: "none" });
+    expect(wide.get("1:11")).toBeUndefined();
   });
 
-  it("marks an open string 0, a tap nothing, and a fret below the hand nothing", () => {
+  it("marks an open string 0, a tap past the hand nothing, and a fret just below the hand the index's reach", () => {
     const f = fingering([P(5, 0), P(1, 12, ["tap"]), P(1, 4), P(1, 5)], { fret: 5, shifts: "none" });
     expect(f.get("5:0")).toBe("0");
     expect(f.has("1:12")).toBe(false);
-    expect(f.has("1:4")).toBe(false);
+    expect(f.get("1:4")).toBe("1");
     expect(f.get("1:5")).toBe("1");
+    expect(fingering([P(1, 3)], { fret: 5, shifts: "none" }).has("1:3")).toBe(false);
   });
 
-  it("numbers a hand that may shift only when every note is under its first four fingers", () => {
+  it("numbers a hand that shifts too, moving it as little as it can", () => {
     const inHand = fingering([P(3, 5), P(3, 7)], { fret: 5, shifts: "allowed" });
     expect(inHand.get("3:7")).toBe("3");
     const moves = fingering([P(3, 5), P(3, 7), P(3, 12)], { fret: 5, shifts: "allowed" });
-    expect(moves.size).toBe(0);
+    expect([moves.get("3:5"), moves.get("3:7")]).toEqual(["1", "3"]);
+    expect(moves.has("3:12")).toBe(true);
   });
 
   it("has open strings and nothing else without a hand position", () => {
