@@ -151,9 +151,11 @@
       "resetHintsHint": "Die einmaligen Tipps wieder anzeigen",
       "resetHintsAction": "Zurücksetzen",
       "resetHintsDone": "Fertig",
-      "takeTour": "Tour durch die Werkzeuge",
-      "takeTourHint": "Ein 30-Sekunden-Rundgang durch Metronom und Tempo-Training",
-      "takeTourAction": "Start"
+      "takeTour": "Zeig mir alles",
+      "takeTourHint": "Ein kurzer Rundgang durch Heute, Pfade, eine Session und Fortschritt",
+      "takeTourAction": "Start",
+      "takeToolsTour": "Tour durch die Werkzeuge",
+      "takeToolsTourHint": "Ein 30-Sekunden-Rundgang durch Metronom und Tempo-Training"
     },
     "devices": {
       "title": "Geräte",

@@ -183,7 +183,7 @@
       "inputNone": "Not set up",
       "alwaysOnTop": "Always on top",
       "start": "Go to Today",
-      "tour": "Tour the tools (30 s)",
+      "tour": "Show me around",
       "moreOnToday": "+{{count}} more on Today",
       "subtitleNext": "Your next Session is ready on Today. Change anything here, or later in Settings.",
       "nextSession": "Your next session"
@@ -228,7 +228,7 @@
       "next": "Next",
       "done": "Done",
       "skip": "Skip tour",
-      "offer": "New here? Take the 30-second tour.",
+      "offer": "New: a short tour of Today, Paths and a Session.",
       "offerAccept": "Show me around",
       "offerDismiss": "Dismiss",
       "stops": {
@@ -256,10 +256,45 @@
           "title": "Zen & widget",
           "body": "Fullscreen visuals, or a tiny always-on-top widget."
         }
+      },
+      "learn": {
+        "plan": {
+          "title": "Today's plan",
+          "body": "Today builds a Session from your Paths to fit your minutes. Each row says what it is and why it is in. Press a row to start there, or Swap to trade it for another."
+        },
+        "start": {
+          "title": "Your minutes, then Start",
+          "body": "Pick how long you have and the plan refits. Start plays it from the top, and you can leave whenever you like."
+        },
+        "paths": {
+          "title": "Paths",
+          "body": "Pick a goal here. Nothing is locked: open any Path and start at any Step."
+        },
+        "neck": {
+          "title": "Read the neck",
+          "body": "The numbers are fingers: 1 is your index, 4 your little finger. Your first note is where it says “start here”."
+        },
+        "watch": {
+          "title": "Watch it first",
+          "body": "Watch plays the notes in order at the tempo, so you see the shape before you try it."
+        },
+        "take": {
+          "title": "Start take",
+          "body": "When you are ready, start a take. Yames listens and grades your timing and notes. Slower and Faster change the tempo."
+        },
+        "blocks": {
+          "title": "Today's blocks",
+          "body": "Each block of the Session is up here. Press one to go to it. Previous goes back one, Skip moves on."
+        },
+        "progress": {
+          "title": "Clean tempo",
+          "body": "Progress counts clean tempo: the fastest you met the bar, not just the fastest you played. That is the number to grow."
+        }
       }
     },
     "help": {
       "title": "Help",
+      "showAround": "Show me around",
       "takeTour": "Tour the tools",
       "runSetup": "Run setup again",
       "shortcuts": "Keyboard shortcuts",

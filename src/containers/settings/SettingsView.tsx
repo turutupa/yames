@@ -70,8 +70,10 @@ interface SettingsViewProps {
   setDrillAutoCollapse: Dispatch<SetStateAction<boolean>>;
   /** Re-opens the first-run wizard at W0 (O1). */
   onRunSetupAgain: () => void;
-  /** Re-opens the six-stop spotlight tour (O6). */
-  onTakeTour: () => void;
+  /** "Show me around": the learning tour (card #50). Absent from a Session's Settings. */
+  onTakeTour?: () => void;
+  /** The six-stop tour of the tools (O6). */
+  onTakeToolsTour?: () => void;
 
   // Appearance
   themeId: string;
@@ -177,6 +179,7 @@ export function SettingsView({
   drillAutoCollapse,
   onRunSetupAgain,
   onTakeTour,
+  onTakeToolsTour,
   setDrillAutoCollapse,
   themeId,
   setTheme,
@@ -282,6 +285,7 @@ export function SettingsView({
         setAlwaysOnTop={setAlwaysOnTop}
         onRunSetupAgain={onRunSetupAgain}
         onTakeTour={onTakeTour}
+        onTakeToolsTour={onTakeToolsTour}
       />
 
       {/* What a Session does by default, right under General: the learning

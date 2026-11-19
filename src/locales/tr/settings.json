@@ -151,9 +151,11 @@
       "resetHintsHint": "Tek seferlik ipuçlarını yeniden göster",
       "resetHintsAction": "Sıfırla",
       "resetHintsDone": "Tamam",
-      "takeTour": "Araçları gez",
-      "takeTourHint": "Metronom ve Tempo Antrenmanı'nda 30 saniyelik bir tur",
-      "takeTourAction": "Başlat"
+      "takeTour": "Etrafı gezdir",
+      "takeTourHint": "Bugün, Yollar, bir seans ve İlerleme içinde kısa bir gezinti",
+      "takeTourAction": "Başlat",
+      "takeToolsTour": "Araçları gez",
+      "takeToolsTourHint": "Metronom ve Tempo Antrenmanı'nda 30 saniyelik bir tur"
     },
     "devices": {
       "title": "Cihazlar",

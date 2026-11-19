@@ -61,9 +61,12 @@
   gap: 8px;
   padding: 14px 16px 12px;
   border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--bg-secondary);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  border-radius: var(--radius-sm, 12px);
+  /* Solid: the card sits on the dim, and a translucent theme card would let
+     the dimmed page show through the words. */
+  background: var(--bg-raised-solid, var(--bg-secondary));
+  box-shadow: var(--shadow, 0 16px 40px rgba(0, 0, 0, 0.5));
+  font-family: var(--font-body, inherit);
   outline: none;
   transition:
     left 220ms cubic-bezier(0.2, 0.8, 0.3, 1),
@@ -76,7 +79,7 @@
   position: absolute;
   width: 10px;
   height: 10px;
-  background: var(--bg-secondary);
+  background: var(--bg-raised-solid, var(--bg-secondary));
   border: 1px solid var(--border);
   transform: rotate(45deg);
 }
@@ -118,7 +121,9 @@
 
 .tour-card-title {
   margin: 0;
-  font-size: 0.9375rem;
+  font-family: var(--font-heading, inherit);
+  font-size: 1.0625rem;
+  line-height: 1.25;
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -135,6 +140,7 @@
   font-size: 0.8125rem;
   line-height: 1.5;
   color: var(--text-secondary);
+  overflow-wrap: break-word;
 }
 
 .tour-card-keys {
@@ -162,7 +168,7 @@
   border-radius: 5px;
   background: var(--bg-card);
   color: var(--text-primary);
-  font-family: inherit;
+  font-family: var(--ui-mono, inherit);
   font-size: 0.6875rem;
   font-weight: 500;
 }
@@ -336,14 +342,34 @@
   }
 }
 
-/* Minimum window (480x780). */
+/* A thumb, not a pointer: the card's buttons are the phone's 44px. */
+@media (pointer: coarse) {
+  .tour-btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 8px 14px;
+    font-size: 0.875rem;
+  }
+}
+
+/* Minimum window (480x780), and a phone. */
 @media (max-width: 560px) {
   .tour-card {
-    width: 272px;
+    width: 300px;
     padding: 12px 13px 10px;
   }
 
   .tour-card-body {
     font-size: 0.78125rem;
+  }
+
+  /* The offer says its whole sentence on a phone, over two lines if need be,
+     rather than an ellipsis where "and a Session" was. */
+  .tour-offer {
+    width: max-content;
+    border-radius: 16px;
+  }
+  .tour-offer-text {
+    white-space: normal;
   }
 }

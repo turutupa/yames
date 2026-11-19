@@ -131,7 +131,9 @@ export function startButton(
 ): { label: string; busy: boolean; needsInput: boolean } {
   const { run, big, inputStart } = session;
   const graded = !run.ungraded;
-  const needsInput = big.kind === "playTake" && graded && !listening;
+  // The tour's look at a ready screen (card #50) is the calm one: no input
+  // was asked for, so none is missing.
+  const needsInput = big.kind === "playTake" && graded && !listening && !session.preview;
   if (!needsInput) return { label: bigLabel(big, t), busy: false, needsInput: false };
   if (inputStart.status === "starting") return { label: t("session.input.starting"), busy: true, needsInput };
   return { label: t("session.input.turnOnAndStart"), busy: false, needsInput };
@@ -171,6 +173,8 @@ export function ReadyInput({
   const { t } = useTranslation();
   const { run, inputStart, actions } = session;
   if (run.phase !== "ready") return null;
+  // The tour's look (card #50): nothing about the input, which it never asked for.
+  if (session.preview) return null;
   const place = compact ? "footer" : undefined;
   // Listen first (card #28): while the demo plays, the input is not listening
   // for the player (the engine ignores it), so the line says what is going on.
