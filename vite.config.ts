@@ -37,6 +37,15 @@ export default defineConfig(async () => ({
     // the beta feed's address is not in dist/ (src/platform.ts).
     __YAMES_BETA__: JSON.stringify(process.env.YAMES_CHANNEL === "beta"),
   },
+  // Where Vite keeps its pre-bundled dependencies. The default is
+  // `node_modules/.vite`, and a worktree's `node_modules` is a link to the
+  // main checkout's (CLAUDE.md), so every worktree's server shared one
+  // folder. The cache is keyed on the checkout's root: each server that
+  // started re-bundled the folder under the ones already running, whose next
+  // lazy import (the 3D neck's engine, the tab's) then failed or reloaded the
+  // page. The layout suite gives its servers a folder of their own through
+  // this variable (playwright.config.ts); unset, nothing changes.
+  cacheDir: process.env.YAMES_VITE_CACHE_DIR || undefined,
   clearScreen: false,
   server: {
     port: 1420,

@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import path from "node:path";
 import { defineConfig, devices } from "@playwright/test";
 
 /**
@@ -61,6 +62,24 @@ export const LAYOUT_ORIGIN = `http://localhost:${PORT}`;
 const MOBILE_PORT = PORT + 2000;
 export const MOBILE_ORIGIN = `http://localhost:${MOBILE_PORT}`;
 
+/**
+ * A dependency cache belonging to this checkout, one per build.
+ *
+ * Vite's default is `node_modules/.vite`, and worktrees link `node_modules`
+ * to the main checkout's, so every worktree's servers wrote one folder. Its
+ * key includes the checkout's root, so each suite that started re-bundled
+ * the folder under the suites already running: their next lazy import (the
+ * 3D neck's engine) was answered "outdated" and the neck fell back to its SVG
+ * ("expected 3d, received fallback"), or the page reloaded under a test
+ * ("execution context was destroyed"). Two workers on one machine was all it
+ * took, and it read as load. The same lesson as the port above: nothing the
+ * suite measures may be shared with another checkout.
+ *
+ * One folder per build as well, so the two servers below, started together
+ * on a cold cache, do not write the same files at once.
+ */
+const viteCache = (build: "desktop" | "phone") => path.join(process.cwd(), ".layout-cache", build);
+
 export default defineConfig({
   testDir: "tests/layout",
   fullyParallel: true,
@@ -114,6 +133,7 @@ export default defineConfig({
       url: `${LAYOUT_ORIGIN}/shots.html?manifest=1`,
       reuseExistingServer: false,
       timeout: 120_000,
+      env: { YAMES_VITE_CACHE_DIR: viteCache("desktop") },
     },
     /*
      * The same harness, built for a phone (M09, from the `mobile` branch).
@@ -132,7 +152,7 @@ export default defineConfig({
       url: `${MOBILE_ORIGIN}/shots.html?manifest=1`,
       reuseExistingServer: false,
       timeout: 120_000,
-      env: { YAMES_MOBILE: "1" },
+      env: { YAMES_MOBILE: "1", YAMES_VITE_CACHE_DIR: viteCache("phone") },
     },
   ],
 });
