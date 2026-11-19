@@ -290,7 +290,10 @@
       "barSlipped": "Compasso {{n}}: escapou",
       "barThin": "Compasso {{n}}: poucas notas para julgar",
       "legatoAll": "Hammer-ons, pull-offs e taps: {{sounded}} de {{due}} soaram. Informado, não avaliado.",
-      "legatoSome": "Hammer-ons, pull-offs e taps: {{sounded}} de {{due}} soaram, {{silent}} não. Informado, não avaliado."
+      "legatoSome": "Hammer-ons, pull-offs e taps: {{sounded}} de {{due}} soaram, {{silent}} não. Informado, não avaliado.",
+      "bendsAll": "Bends: {{onPitch}} de {{due}} chegaram à nota. Informado, não avaliado.",
+      "bendsSomeFlat": "Bends: {{onPitch}} de {{due}} chegaram à nota, {{flat}} ficaram curtos. Informado, não avaliado.",
+      "vibratoHeard": "Vibrato: ouvido em {{present}} de {{due}} notas. Informado, não avaliado."
     },
     "edge": {
       "kick": "Achar meu limite",

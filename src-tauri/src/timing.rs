@@ -565,7 +565,8 @@ impl TimingAnalyzer {
         self.notes.forget();
         let wanted = pass_bars.iter().any(|b| b.metric == "noteIdentity")
             || crate::detect::model::enabled()
-            || self.notes.diagnostics.enabled();
+            || self.notes.diagnostics.enabled()
+            || details.iter().any(|d| d.bend > 0.0 || d.tech.iter().any(|t| t == "vibrato"));
         if !pitches.is_empty() && wanted {
             self.notes.tap.arm(input_rate);
         } else {
@@ -2924,20 +2925,7 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass,
                     start_ms,
                     detection_delay_ms: audio.detection_delay_ns as f64 / 1e6,
                 };
-                // The note model's second look (`score::verify`), then the
-                // grade with right notes from both witnesses in it. With no
-                // model in the build this is `report_with_notes`, as before.
-                let verified = if run.wants_verifier() {
-                    run.report(&weights).map(|timed| {
-                        crate::detect::model::with_shared(|model| match model {
-                            Some(m) => run.verify(&timed, &take, m.as_mut()),
-                            None => crate::score::verify::VerifierReport::status(crate::score::verify::VerifierStatus::NoModel),
-                        })
-                    })
-                } else {
-                    None
-                };
-                let grade = run.report_late(&weights, &take, verified.as_ref()).map(|r| r.grade);
+                let grade = late_grade(&run, &weights, &take).map(|r| r.grade);
                 if diagnostics.enabled() {
                     diagnostics.write(&audio.samples, audio.rate, run.diagnostic_job(start_ms, &instrument_id));
                 }
@@ -2964,6 +2952,26 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass,
     Some(serial)
 }
 
+/// The whole of the post-Take pass, as the `yames-take-notes` thread runs it:
+/// the note model's second look (`score::verify`), then the grade with right
+/// notes from both witnesses in it, with bends and vibrato read as curves.
+/// With no model in the build this is `report_with_notes` plus the curves.
+/// Public for the click-jitter probe (`--late-pass`), which loops exactly this
+/// under the click.
+pub fn late_grade(run: &ScheduleRun, weights: &ScoreWeights, take: &crate::score::notes::TakeAudio<'_>) -> Option<crate::score::ScheduleReport> {
+    let verified = if run.wants_verifier() {
+        run.report(weights).map(|timed| {
+            crate::detect::model::with_shared(|model| match model {
+                Some(m) => run.verify(&timed, take, m.as_mut()),
+                None => crate::score::verify::VerifierReport::status(crate::score::verify::VerifierStatus::NoModel),
+            })
+        })
+    } else {
+        None
+    };
+    run.report_late(weights, take, verified.as_ref())
+}
+
 /// A close of a Take whose notes are checked: start the pitch pass over its
 /// audio, or, when an earlier close of the same run already did (the tap hands
 /// its audio over once), keep saying that one is coming. `started` is the
@@ -2975,7 +2983,7 @@ fn close_take_notes(
     started: &mut Option<u64>,
     instrument_id: &str,
 ) -> Option<u64> {
-    if !run.wants_notes() && !run.wants_verifier() && !(notes.diagnostics.enabled() && run.has_pitches()) {
+    if !run.wants_notes() && !run.wants_verifier() && !run.wants_curves() && !(notes.diagnostics.enabled() && run.has_pitches()) {
         return None;
     }
     if notes.midi_seen.load(std::sync::atomic::Ordering::Acquire) {

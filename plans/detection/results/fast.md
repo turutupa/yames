@@ -215,6 +215,109 @@ The same for the verifier's own start times.
 | harmonic | 109 | 2.1 | 1.7 | 2.3 | 1.8 | 1.7 | 2.2 | 2.2 | 1.8 |
 | sweep | 224 | 1.7 | 1.6 | 1.3 | 2.2 | 1.7 | 1.7 | 1.5 | 1.5 |
 
+## Bends and vibrato, read as curves (M5; reported, not graded)
+
+### Bends read at all
+
+Bent notes the matcher heard and the curve reading gave a verdict on (the rest: not heard, or couldn't tell).
+
+| kind | n | all | di | di_gain | laptop_mic | phone_mic | phone_agc | laptop_noisy | laptop_reverb |
+|---|---|---|---|---|---|---|---|---|---|
+| bend | 175 | 93% | 100% | 100% | 100% | 100% | 48% | 100% | 100% |
+| bend_release | 112 | 87% | 100% | 100% | 100% | 100% | 12% | 94% | 100% |
+
+### Bend held within 25 cents of what was played
+
+M5 acceptance: at least 90%.
+
+| kind | n | all | di | di_gain | laptop_mic | phone_mic | phone_agc | laptop_noisy | laptop_reverb |
+|---|---|---|---|---|---|---|---|---|---|
+| bend | 58 | 100% | 100% | 100% | 100% | 100% | 100% | 100% | 100% |
+| bend_release | 47 | 98% | 100% | 100% | 100% | 100% | - | 86% | 100% |
+
+### Bend amount error, median, cents
+
+Held pitch against the bend played.
+
+| kind | n | all | di | di_gain | laptop_mic | phone_mic | phone_agc | laptop_noisy | laptop_reverb |
+|---|---|---|---|---|---|---|---|---|---|
+| bend | 58 | 1.8 | 1.5 | 1.5 | 1.8 | 2.1 | 3.2 | 2.9 | 1.2 |
+| bend_release | 47 | 1.0 | 1.0 | 1.0 | 1.1 | 0.7 | - | 6.2 | 0.5 |
+
+### A bend 50 cents flat called flat
+
+M5 acceptance: at least 80%.
+
+| kind | n | all | di | di_gain | laptop_mic | phone_mic | phone_agc | laptop_noisy | laptop_reverb |
+|---|---|---|---|---|---|---|---|---|---|
+| bend | 33 | 100% | 100% | 100% | 100% | 100% | 100% | 100% | 100% |
+| bend_release | 25 | 100% | 100% | 100% | 100% | 100% | 100% | 100% | 100% |
+
+### A good bend called flat
+
+M5 acceptance: under 5%.
+
+| kind | n | all | di | di_gain | laptop_mic | phone_mic | phone_agc | laptop_noisy | laptop_reverb |
+|---|---|---|---|---|---|---|---|---|---|
+| bend | 58 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| bend_release | 47 | 2% | 0% | 0% | 0% | 0% | - | 14% | 0% |
+
+### A bend and release heard coming back down
+
+The rest: couldn't tell (the quiet tail was lost), or the next row.
+
+| kind | n | all | di | di_gain | laptop_mic | phone_mic | phone_agc | laptop_noisy | laptop_reverb |
+|---|---|---|---|---|---|---|---|---|---|
+| bend_release | 47 | 62% | 100% | 100% | 62% | 0% | - | 0% | 100% |
+
+### A bend and release called held up
+
+It came down; the reading says it did not. Lower is better.
+
+| kind | n | all | di | di_gain | laptop_mic | phone_mic | phone_agc | laptop_noisy | laptop_reverb |
+|---|---|---|---|---|---|---|---|---|---|
+| bend_release | 47 | 0% | 0% | 0% | 0% | 0% | - | 0% | 0% |
+
+### Written vibrato found
+
+Vibrato played at 35 cents, 5.5 Hz.
+
+| kind | n | all | di | di_gain | laptop_mic | phone_mic | phone_agc | laptop_noisy | laptop_reverb |
+|---|---|---|---|---|---|---|---|---|---|
+| vibrato | 13 | 100% | 100% | 100% | 100% | 100% | 100% | 100% | 100% |
+
+### Written vibrato called absent when it was played
+
+Lower is better.
+
+| kind | n | all | di | di_gain | laptop_mic | phone_mic | phone_agc | laptop_noisy | laptop_reverb |
+|---|---|---|---|---|---|---|---|---|---|
+| vibrato | 13 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+
+### Vibrato left out, called absent
+
+
+
+| kind | n | all | di | di_gain | laptop_mic | phone_mic | phone_agc | laptop_noisy | laptop_reverb |
+|---|---|---|---|---|---|---|---|---|---|
+| vibrato | 6 | 83% | 100% | - | 100% | 100% | 100% | 0% | 100% |
+
+### Vibrato left out, called present
+
+Lower is better.
+
+| kind | n | all | di | di_gain | laptop_mic | phone_mic | phone_agc | laptop_noisy | laptop_reverb |
+|---|---|---|---|---|---|---|---|---|---|
+| vibrato | 6 | 0% | 0% | - | 0% | 0% | 0% | 0% | 0% |
+
+### Vibrato depth error, median, cents
+
+Information: the synth's depth against the reading.
+
+| kind | n | all | di | di_gain | laptop_mic | phone_mic | phone_agc | laptop_noisy | laptop_reverb |
+|---|---|---|---|---|---|---|---|---|---|
+| vibrato | 13 | 5.6 | 3.6 | 3.7 | 6.3 | 7.7 | 7.7 | 6.4 | 12.4 |
+
 ## Mistakes let through
 
 ### A left-out note counted as heard by the matcher
@@ -417,9 +520,9 @@ Milliseconds of work per second of audio, wall clock on the machine that ran thi
 
 | stage | ms per s of audio | a 30 s Take |
 |---|---|---|
-| onset detector | 3.03 | 91 ms |
-| scorer and right-notes pass | 8.32 | 250 ms |
-| note model | 21.06 | 632 ms |
+| onset detector | 3.08 | 92 ms |
+| scorer and right-notes pass | 8.98 | 269 ms |
+| note model | 20.39 | 612 ms |
 | verifier rule | 0.01 | 0 ms |
 
 329 Takes, 86.3 minutes of audio.

@@ -288,7 +288,10 @@
       "barSlipped": "Takt {{n}}: verrutscht",
       "barThin": "Takt {{n}}: zu wenige Töne zum Beurteilen",
       "legatoAll": "Hammer-ons, Pull-offs und Taps: {{sounded}} von {{due}} klangen. Nur zur Info, nicht bewertet.",
-      "legatoSome": "Hammer-ons, Pull-offs und Taps: {{sounded}} von {{due}} klangen, {{silent}} nicht. Nur zur Info, nicht bewertet."
+      "legatoSome": "Hammer-ons, Pull-offs und Taps: {{sounded}} von {{due}} klangen, {{silent}} nicht. Nur zur Info, nicht bewertet.",
+      "bendsAll": "Bendings: {{onPitch}} von {{due}} erreichten den Ton. Nur zur Info, nicht bewertet.",
+      "bendsSomeFlat": "Bendings: {{onPitch}} von {{due}} erreichten den Ton, {{flat}} blieben zu tief. Nur zur Info, nicht bewertet.",
+      "vibratoHeard": "Vibrato: auf {{present}} von {{due}} Tönen gehört. Nur zur Info, nicht bewertet."
     },
     "edge": {
       "kick": "Mein Limit finden",

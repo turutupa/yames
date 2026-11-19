@@ -823,7 +823,9 @@ function OtherChecks({ outcome }: { outcome: TakeOutcome }) {
   // Hammer-ons, pull-offs and taps the note verifier heard: reported, not
   // graded (owner decision 3), so it carries no ✓ or ✗.
   const legato = outcome.measures.legato;
-  if (others.length === 0 && !unchecked && !legato) return null;
+  // Bends and vibrato read as curves: reported, not graded either (M5).
+  const { bends, vibrato } = outcome.measures;
+  if (others.length === 0 && !unchecked && !legato && !bends && !vibrato) return null;
   return (
     <ul className="session-checks" data-testid="session-checks">
       {others.map((c, i) => {
@@ -859,6 +861,24 @@ function OtherChecks({ outcome }: { outcome: TakeOutcome }) {
               silent: legato.notSounded,
             })}
           </span>
+        </li>
+      )}
+      {bends && (
+        <li data-reported="" data-testid="session-bends">
+          <span className="session-check-mark" aria-hidden="true">·</span>
+          <span>
+            {t(bends.flat > 0 ? "session.result.bendsSomeFlat" : "session.result.bendsAll", {
+              onPitch: bends.onPitch,
+              due: bends.due,
+              flat: bends.flat,
+            })}
+          </span>
+        </li>
+      )}
+      {vibrato && (
+        <li data-reported="" data-testid="session-vibrato">
+          <span className="session-check-mark" aria-hidden="true">·</span>
+          <span>{t("session.result.vibratoHeard", { present: vibrato.present, due: vibrato.due })}</span>
         </li>
       )}
     </ul>

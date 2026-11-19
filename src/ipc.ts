@@ -850,6 +850,8 @@ export type ScorerNoteDetail = {
   id: number;
   durBeats: number;
   bend?: number;
+  /** `release` or `prebend` (`score/curves.rs` `BendShape`); absent: up and held. */
+  bendShape?: "release" | "prebend";
   string?: number;
   tech?: string[];
 };
@@ -902,6 +904,30 @@ export type VerifierReport = {
   modelMs: number;
   ruleMs: number;
   audioS: number;
+};
+
+/** Bends and vibrato of a Take read from the pitch track (`score/curves.rs` `CurveReport`). */
+export type CurveReport = {
+  bends: { due: number; onPitch: number; flat: number; sharp: number; unsure: number };
+  vibrato: { due: number; present: number; absent: number; unsure: number };
+  notes: {
+    result: number;
+    noteId: number;
+    bendWritten: number;
+    shape: "up" | "release" | "prebend";
+    vibratoWritten: boolean;
+    frames: number;
+    startCents?: number;
+    peakCents?: number;
+    holdCents?: number;
+    endCents?: number;
+    vibratoCents?: number;
+    vibratoHz?: number;
+    bend?: "onPitch" | "flat" | "sharp" | "unsure";
+    released?: boolean;
+    vibrato?: "present" | "absent" | "unsure";
+  }[];
+  ms: number;
 };
 
 /**
@@ -1086,6 +1112,8 @@ export type ScorerTakeGrade = {
   notesSerial?: number;
   /** The note verifier's account of the Take, on the late grade (`VerifierReport`). */
   verifier?: VerifierReport;
+  /** Bends and vibrato read as curves (`score/curves.rs`), on the late grade. Information only. */
+  curves?: CurveReport;
 };
 
 /** Whether right notes could be measured on a Take (`score/pass.rs` `NotesStatus`). */

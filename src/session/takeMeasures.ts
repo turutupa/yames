@@ -13,6 +13,7 @@
 import { getTakeGradeWithNotes } from "../ipc";
 import type {
   VerifierReport,
+  CurveReport,
   NoCatchReason,
   PracticeSegmentEndedPayload,
   ScorerPassResult,
@@ -68,6 +69,13 @@ export type TakeMeasures = {
    * is never a miss (decision 4).
    */
   legato?: { due: number; sounded: number; notSounded: number };
+  /**
+   * Bends and vibrato read as curves (`score/curves.rs`, M5), when the Take
+   * had any the scorer heard. Reported, never graded; "couldn't tell" is in
+   * `due` only.
+   */
+  bends?: { due: number; onPitch: number; flat: number; sharp: number };
+  vibrato?: { due: number; present: number; absent: number };
 };
 
 /**
@@ -124,6 +132,16 @@ export function legatoOf(verifier: VerifierReport | undefined): TakeMeasures["le
   };
 }
 
+/** The curve reading's bends and vibrato, when there were any to read. */
+export function curvesOf(curves: CurveReport | undefined): Pick<TakeMeasures, "bends" | "vibrato"> {
+  if (!curves) return {};
+  const { bends: b, vibrato: v } = curves;
+  return {
+    ...(b.due > 0 && b.due > b.unsure ? { bends: { due: b.due, onPitch: b.onPitch, flat: b.flat, sharp: b.sharp } } : {}),
+    ...(v.due > 0 && v.due > v.unsure ? { vibrato: { due: v.due, present: v.present, absent: v.absent } } : {}),
+  };
+}
+
 /** The scorer's right-notes value, when it measured one. */
 function noteIdentityOf(pass: ScorerPassResult | undefined): number | null {
   if (pass?.notes?.status !== "measured") return null;
@@ -158,6 +176,7 @@ export async function withRightNotes(
     ...grade,
     pass: withNotes.pass,
     ...(withNotes.verifier ? { verifier: withNotes.verifier } : {}),
+    ...(withNotes.curves ? { curves: withNotes.curves } : {}),
     notesPending: false,
   };
 }
@@ -184,6 +203,7 @@ function fromGrade(
     ...(grade.noCatchReason ? { noCatchReason: grade.noCatchReason } : {}),
     ...(grade.pass ? { pass: grade.pass } : {}),
     ...(caught && legatoOf(grade.verifier) ? { legato: legatoOf(grade.verifier) } : {}),
+    ...(caught ? curvesOf(grade.curves) : {}),
   };
 }
 

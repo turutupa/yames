@@ -288,7 +288,10 @@
       "barSlipped": "第 {{n}} 小节：乱了",
       "barThin": "第 {{n}} 小节：音太少，无法判断",
       "legatoAll": "击弦、勾弦和点弦：{{due}} 个音中响了 {{sounded}} 个。仅供参考，不计分。",
-      "legatoSome": "击弦、勾弦和点弦：{{due}} 个音中响了 {{sounded}} 个，{{silent}} 个没响。仅供参考，不计分。"
+      "legatoSome": "击弦、勾弦和点弦：{{due}} 个音中响了 {{sounded}} 个，{{silent}} 个没响。仅供参考，不计分。",
+      "bendsAll": "推弦：{{due}} 次中有 {{onPitch}} 次推到了目标音高。仅供参考，不计分。",
+      "bendsSomeFlat": "推弦：{{due}} 次中有 {{onPitch}} 次推到了目标音高，{{flat}} 次没推够。仅供参考，不计分。",
+      "vibratoHeard": "揉弦：{{due}} 个音中有 {{present}} 个听到了揉弦。仅供参考，不计分。"
     },
     "edge": {
       "kick": "挑战极限",

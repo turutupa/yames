@@ -290,7 +290,10 @@
       "barSlipped": "Battuta {{n}}: scivolata",
       "barThin": "Battuta {{n}}: troppe poche note per giudicare",
       "legatoAll": "Hammer-on, pull-off e tapping: {{sounded}} su {{due}} hanno suonato. Solo segnalato, non valutato.",
-      "legatoSome": "Hammer-on, pull-off e tapping: {{sounded}} su {{due}} hanno suonato, {{silent}} no. Solo segnalato, non valutato."
+      "legatoSome": "Hammer-on, pull-off e tapping: {{sounded}} su {{due}} hanno suonato, {{silent}} no. Solo segnalato, non valutato.",
+      "bendsAll": "Bending: {{onPitch}} su {{due}} hanno raggiunto la nota. Solo segnalato, non valutato.",
+      "bendsSomeFlat": "Bending: {{onPitch}} su {{due}} hanno raggiunto la nota, {{flat}} sono rimasti corti. Solo segnalato, non valutato.",
+      "vibratoHeard": "Vibrato: sentito su {{present}} note su {{due}}. Solo segnalato, non valutato."
     },
     "edge": {
       "kick": "Trova il mio limite",

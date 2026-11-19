@@ -44,6 +44,9 @@ pub struct NoteDetail {
     /// letRing, tap, and Songs' harmonic, dead, ghost.
     #[serde(default)]
     pub tech: Vec<String>,
+    /// How a bend is shaped (`curves.rs`): up and held when absent.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bend_shape: Option<super::curves::BendShape>,
 }
 
 /// How a note is produced, for the per-technique tally. One per note, the
@@ -364,6 +367,8 @@ impl ScheduleRun {
             (false, _) => self.report(weights)?,
         };
         report.grade.verifier = verified.cloned();
+        // Bends and vibrato, read as curves: information only (M5).
+        report.grade.curves = self.curves(&report, audio);
         Some(report)
     }
 

@@ -88,7 +88,11 @@ Metric names are `group|chain|kind|metric`; `all` pools a dimension.
 | `weak` | `onset_heard`, `verifier_yes` | very weak legato | info |
 | `takes` | `good_passed` | correct Takes that pass their Exercise's own bars | higher |
 | `takes` | `good_not_caught`, `faulty_passed` | "I didn't catch enough" on a correct Take; a Take with scripted mistakes passing | info |
-| `bends` | see `PROGRESS.md` M5 | bend amount error, flat bends caught, false flags | |
+| `bends` | `read` | bent notes heard and given a verdict by `score::curves` | info |
+| `bends` | `within_25c`, `abs_err_cents` | good bends: held within 25 cents of what was played; median error | higher; lower (tolerance 3 cents) |
+| `bends` | `flat_caught`, `false_flat` | a bend 50 cents flat called flat; a good one called flat | higher; lower |
+| `bends` | `released`, `release_called_held` | a bend and release heard coming down (the rest: couldn't tell); called held up when it came down | info; lower |
+| `bends` | `vibrato` `found`, `called_absent`, `missing_caught`, `false_present`, `depth_err_cents` | written vibrato played / left out | higher, lower, higher, lower, info |
 
 Every accuracy comes as two numbers: sounded notes confirmed, and mistakes let
 through. Quote both.

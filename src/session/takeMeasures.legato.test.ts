@@ -41,3 +41,22 @@ describe("withRightNotes", () => {
     expect(got?.notesPending).toBe(false);
   });
 });
+
+describe("curvesOf", () => {
+  const curves = (b: [number, number, number, number, number], v: [number, number, number, number]) =>
+    ({
+      bends: { due: b[0], onPitch: b[1], flat: b[2], sharp: b[3], unsure: b[4] },
+      vibrato: { due: v[0], present: v[1], absent: v[2], unsure: v[3] },
+      notes: [],
+      ms: 1,
+    }) as const;
+  it("reports bends and vibrato it could read, and nothing when it could read none", async () => {
+    const { curvesOf } = await import("./takeMeasures");
+    expect(curvesOf(curves([4, 3, 1, 0, 0], [2, 2, 0, 0]))).toEqual({
+      bends: { due: 4, onPitch: 3, flat: 1, sharp: 0 },
+      vibrato: { due: 2, present: 2, absent: 0 },
+    });
+    expect(curvesOf(curves([3, 0, 0, 0, 3], [0, 0, 0, 0]))).toEqual({});
+    expect(curvesOf(undefined)).toEqual({});
+  });
+});

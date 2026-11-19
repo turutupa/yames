@@ -45,6 +45,18 @@ pub struct Row {
     pub verifier_t: Option<f64>,
     pub verifier_alt: Option<i32>,
     pub verifier_act: Option<f32>,
+    /// Bends and vibrato (`score::curves`, M5): the truth, and what the
+    /// curve reading said.
+    pub bend_written: f64,
+    pub bend_played: f64,
+    pub vibrato_played: f64,
+    pub bend_hold_cents: Option<f64>,
+    pub bend_verdict: Option<String>,
+    pub released: Option<bool>,
+    pub bend_end_cents: Option<f64>,
+    pub curve_frames: Option<u32>,
+    pub vibrato_verdict: Option<String>,
+    pub vibrato_cents: Option<f64>,
 }
 
 /// One Take's summary.
@@ -76,6 +88,10 @@ pub fn rows(meta: &TakeMeta, out: &Outcome) -> (Vec<Row>, TakeRow) {
         .map(|r| r.results.iter().enumerate().filter(|(_, x)| x.pass == 0).map(|(k, x)| (x.id, k)).collect())
         .unwrap_or_default();
     let verified: BTreeMap<u32, &yames_lib::score::verify::VerifiedNote> = out.verifier.notes.iter().filter(|n| n.pass == 0).map(|n| (n.note_id, n)).collect();
+    let curves: BTreeMap<u32, &yames_lib::score::curves::CurveNote> = report
+        .and_then(|r| r.grade.curves.as_ref().map(|c| (r, c)))
+        .map(|(r, c)| c.notes.iter().filter(|n| r.results.get(n.result as usize).is_some_and(|x| x.pass == 0)).map(|n| (n.note_id, n)).collect())
+        .unwrap_or_default();
     let mut rows = Vec::with_capacity(meta.truth.len());
     for n in &meta.truth {
         let k = result_of.get(&n.onset_id).copied();
@@ -100,6 +116,7 @@ pub fn rows(meta: &TakeMeta, out: &Outcome) -> (Vec<Row>, TakeRow) {
         let pitch = k.and_then(|k| out.pitch_states.get(k).copied().flatten()).map(name);
         let final_state = k.and_then(|k| out.final_states.get(k).copied().flatten()).map(name);
         let v = verified.get(&n.note_id);
+        let c = curves.get(&n.note_id);
         rows.push(Row {
             take: meta.name.clone(),
             category: meta.category.clone(),
@@ -120,6 +137,16 @@ pub fn rows(meta: &TakeMeta, out: &Outcome) -> (Vec<Row>, TakeRow) {
             verifier_t: v.and_then(|v| v.deviation_ms).map(|d| n.t_written + d / 1000.0),
             verifier_alt: v.and_then(|v| v.heard_midi),
             verifier_act: v.map(|v| v.strength),
+            bend_written: n.bend_written,
+            bend_played: n.bend,
+            vibrato_played: n.vibrato_cents,
+            bend_hold_cents: c.and_then(|c| c.hold_cents),
+            bend_verdict: c.and_then(|c| c.bend).map(|b| json_name(&b)),
+            released: c.and_then(|c| c.released),
+            bend_end_cents: c.and_then(|c| c.end_cents),
+            curve_frames: c.map(|c| c.frames),
+            vibrato_verdict: c.and_then(|c| c.vibrato).map(|b| json_name(&b)),
+            vibrato_cents: c.and_then(|c| c.vibrato_cents),
         });
     }
     let grade = report.map(|r| &r.grade);
@@ -180,6 +207,8 @@ struct Acc {
     shares: BTreeMap<String, (Share, Option<Better>)>,
     errors: BTreeMap<String, Vec<f64>>,
     biases: BTreeMap<String, Vec<f64>>,
+    /// Absolute errors in cents, reported as their median.
+    cents: BTreeMap<String, Vec<f64>>,
 }
 
 impl Acc {
@@ -252,6 +281,48 @@ pub fn metrics(rows: &[Row], takes: &[TakeRow], has_verifier: bool) -> BTreeMap<
                 if let (Some(t), Some(truth)) = (get(r), r.t_played) {
                     acc.bias(format!("good|{}|all|{name}", r.chain), (t - truth) * 1000.0);
                     acc.bias(format!("good|all|all|{name}"), (t - truth) * 1000.0);
+                }
+            }
+        }
+    }
+    // Bends and vibrato read as curves (M5). Only notes the matcher heard are
+    // read, so `read` says how many got a reading at all.
+    for r in rows.iter().filter(|r| r.present && r.kind != "chord_tone") {
+        for chain in [r.chain.as_str(), "all"] {
+            let good = r.style == "good" && r.fault.is_none();
+            if r.bend_written > 0.0 {
+                let kind = if r.kind == "bend_release" { "bend_release" } else { "bend" };
+                let key = |m: &str| format!("bends|{chain}|{kind}|{m}");
+                let read = r.bend_verdict.as_deref().is_some_and(|v| v != "unsure");
+                acc.share(key("read"), read, Better::Info);
+                if let (true, Some(hold)) = (read, r.bend_hold_cents) {
+                    let err = hold - r.bend_played * 100.0;
+                    if good {
+                        acc.share(key("within_25c"), err.abs() <= 25.0, Better::Higher);
+                        acc.share(key("false_flat"), r.bend_verdict.as_deref() == Some("flat"), Better::Lower);
+                        acc.cents.entry(key("abs_err_cents")).or_default().push(err.abs());
+                        if kind == "bend_release" {
+                            acc.share(key("released"), r.released == Some(true), Better::Info);
+                            acc.share(key("release_called_held"), r.released == Some(false), Better::Lower);
+                        }
+                    }
+                    if r.fault.as_deref() == Some("flat") {
+                        acc.share(key("flat_caught"), r.bend_verdict.as_deref() == Some("flat"), Better::Higher);
+                    }
+                }
+            }
+            if let Some(v) = r.vibrato_verdict.as_deref() {
+                let key = |m: &str| format!("bends|{chain}|vibrato|{m}");
+                if good && r.vibrato_played > 0.0 {
+                    acc.share(key("found"), v == "present", Better::Higher);
+                    acc.share(key("called_absent"), v == "absent", Better::Lower);
+                    if let Some(c) = r.vibrato_cents {
+                        acc.cents.entry(key("depth_err_cents")).or_default().push((c - r.vibrato_played).abs());
+                    }
+                }
+                if r.fault.as_deref() == Some("noVibrato") {
+                    acc.share(key("missing_caught"), v == "absent", Better::Higher);
+                    acc.share(key("false_present"), v == "present", Better::Lower);
                 }
             }
         }
@@ -343,6 +414,11 @@ pub fn metrics(rows: &[Row], takes: &[TakeRow], has_verifier: bool) -> BTreeMap<
         let n = v.len() as u32;
         out.insert(key, Metric { value: scatter(&mut v), n, better: Better::Lower });
     }
+    for (key, mut v) in acc.cents {
+        let n = v.len() as u32;
+        let better = if key.contains("depth_err") { Better::Info } else { Better::Lower };
+        out.insert(key, Metric { value: median(&mut v), n, better });
+    }
     for (key, mut v) in acc.biases {
         let n = v.len() as u32;
         // gated on its size: early is as wrong as late
@@ -367,6 +443,8 @@ pub struct Baseline {
 pub fn tolerance(key: &str, n: u32) -> f64 {
     if key.ends_with("_ms") {
         1.0
+    } else if key.ends_with("_cents") {
+        3.0
     } else {
         (2.0 / n.max(1) as f64).max(0.02)
     }
@@ -407,6 +485,8 @@ pub fn check(now: &BTreeMap<String, Metric>, base: &Baseline) -> CheckOutcome {
 pub fn fmt_value(key: &str, v: f64) -> String {
     if key.ends_with("_ms") {
         format!("{v:.1} ms")
+    } else if key.ends_with("_cents") {
+        format!("{v:.1} cents")
     } else {
         format!("{:.1}%", v * 100.0)
     }
@@ -420,7 +500,7 @@ const KIND_ORDER: [&str; 13] = [
 
 fn cell(m: Option<&Metric>, key: &str) -> String {
     match m {
-        Some(m) if key.ends_with("_ms") => format!("{:.1}", m.value),
+        Some(m) if key.ends_with("_ms") || key.ends_with("_cents") => format!("{:.1}", m.value),
         Some(m) => format!("{:.0}%", m.value * 100.0),
         None => "-".into(),
     }
@@ -480,6 +560,20 @@ pub fn markdown(about: &serde_json::Value, metrics: &BTreeMap<String, Metric>, t
     if has_verifier {
         table(&mut s, "Timing scatter of the verifier, ms", "The same for the verifier's own start times.", metrics, "good", "verifier_scatter_ms", k, chains);
     }
+    s.push_str("## Bends and vibrato, read as curves (M5; reported, not graded)\n\n");
+    let bk: &[&str] = &["bend", "bend_release"];
+    table(&mut s, "Bends read at all", "Bent notes the matcher heard and the curve reading gave a verdict on (the rest: not heard, or couldn't tell).", metrics, "bends", "read", bk, chains);
+    table(&mut s, "Bend held within 25 cents of what was played", "M5 acceptance: at least 90%.", metrics, "bends", "within_25c", bk, chains);
+    table(&mut s, "Bend amount error, median, cents", "Held pitch against the bend played.", metrics, "bends", "abs_err_cents", bk, chains);
+    table(&mut s, "A bend 50 cents flat called flat", "M5 acceptance: at least 80%.", metrics, "bends", "flat_caught", bk, chains);
+    table(&mut s, "A good bend called flat", "M5 acceptance: under 5%.", metrics, "bends", "false_flat", bk, chains);
+    table(&mut s, "A bend and release heard coming back down", "The rest: couldn't tell (the quiet tail was lost), or the next row.", metrics, "bends", "released", &["bend_release"], chains);
+    table(&mut s, "A bend and release called held up", "It came down; the reading says it did not. Lower is better.", metrics, "bends", "release_called_held", &["bend_release"], chains);
+    table(&mut s, "Written vibrato found", "Vibrato played at 35 cents, 5.5 Hz.", metrics, "bends", "found", &["vibrato"], chains);
+    table(&mut s, "Written vibrato called absent when it was played", "Lower is better.", metrics, "bends", "called_absent", &["vibrato"], chains);
+    table(&mut s, "Vibrato left out, called absent", "", metrics, "bends", "missing_caught", &["vibrato"], chains);
+    table(&mut s, "Vibrato left out, called present", "Lower is better.", metrics, "bends", "false_present", &["vibrato"], chains);
+    table(&mut s, "Vibrato depth error, median, cents", "Information: the synth's depth against the reading.", metrics, "bends", "depth_err_cents", &["vibrato"], chains);
     s.push_str("## Mistakes let through\n\n");
     let all_and = |extra: &[&'static str]| -> Vec<&'static str> { std::iter::once("all").chain(extra.iter().copied()).collect() };
     let kk = all_and(&KIND_ORDER);

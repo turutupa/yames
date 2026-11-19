@@ -290,7 +290,10 @@
       "barSlipped": "Compás {{n}}: se escapó",
       "barThin": "Compás {{n}}: muy pocas notas para juzgar",
       "legatoAll": "Ligados y tapping: sonaron {{sounded}} de {{due}}. Se informa, no se califica.",
-      "legatoSome": "Ligados y tapping: sonaron {{sounded}} de {{due}}, {{silent}} no. Se informa, no se califica."
+      "legatoSome": "Ligados y tapping: sonaron {{sounded}} de {{due}}, {{silent}} no. Se informa, no se califica.",
+      "bendsAll": "Bends: {{onPitch}} de {{due}} llegaron a la nota. Se informa, no se califica.",
+      "bendsSomeFlat": "Bends: {{onPitch}} de {{due}} llegaron a la nota, {{flat}} se quedaron cortos. Se informa, no se califica.",
+      "vibratoHeard": "Vibrato: se oyó en {{present}} de {{due}} notas. Se informa, no se califica."
     },
     "edge": {
       "kick": "Buscar mi límite",

@@ -1020,6 +1020,10 @@ pub struct TakeGrade {
     /// (`verify`). `None` when it did not run.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub verifier: Option<verify::VerifierReport>,
+    /// Bends and vibrato of the Take read as curves from the pitch track
+    /// (`curves`), on the late grade only. Information; no bar reads it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub curves: Option<curves::CurveReport>,
 }
 
 /// Under this share of the notes due, the Take says "I didn't catch enough"
@@ -1728,6 +1732,7 @@ fn grade_take(input: GradeInputs<'_>, score: f32, calibration: TakeCalibration) 
         notes_pending: false,
         notes_serial: None,
         verifier: None,
+        curves: None,
     }
 }
 
@@ -2698,6 +2703,7 @@ fn median(sorted: &[f64]) -> f64 {
     }
 }
 
+pub mod curves;
 pub mod notes;
 pub mod pass;
 pub mod verify;

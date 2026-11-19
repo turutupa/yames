@@ -95,6 +95,7 @@ fn job_of(meta: &TakeMeta) -> Job {
                 string: n.string,
                 // the bench marks the slid-TO note; the app's DSL marks the one it leaves
                 tech: n.tech.iter().filter(|t| *t != "slide" && *t != "dead").cloned().collect(),
+                bend_shape: (n.bend_written > 0.0 && n.release).then_some(yames_lib::score::curves::BendShape::Release),
             })
             .collect::<Vec<_>>()
             .pipe(|d| mark_slides(meta, d)),

@@ -93,7 +93,11 @@ function noteEffects(note: PathNote, next: PathNote | undefined, previous?: Path
     if (next.tech.includes("hammer") || next.tech.includes("pull")) effects.push("h");
   }
   if (note.tech.includes("slide")) effects.push("ss");
-  if (note.tech.includes("bend") && note.bend) effects.push(`b (0 ${note.bend * 2})`);
+  if (note.tech.includes("bend") && note.bend) {
+    // alphaTex bend points, in quarter tones
+    const q = note.bend * 2;
+    effects.push(note.bendShape === "release" ? `b (0 ${q} 0)` : note.bendShape === "prebend" ? `b (${q} ${q} 0)` : `b (0 ${q})`);
+  }
   if (note.tech.includes("vibrato")) effects.push("v");
   if (note.tech.includes("palmMute")) effects.push("pm");
   if (note.tech.includes("letRing")) effects.push("lr");

@@ -26,6 +26,13 @@ describe("parseTab", () => {
     expect(parse("/4 3:5s 3:7").notes[0].tech).toEqual(["slide"]);
   });
 
+  it("writes a bend and release and a pre-bend", () => {
+    const [up, release, pre] = parse("/4 3:7b2 3:7b2rv 3:7B1").notes;
+    expect(up.bendShape).toBeUndefined();
+    expect([release.bend, release.bendShape, release.tech]).toEqual([2, "release", ["bend", "vibrato"]]);
+    expect([pre.bend, pre.bendShape, pre.tech]).toEqual([1, "prebend", ["bend"]]);
+  });
+
   it("sixteenth quintuplets are five to the beat, and only sixteenths can be", () => {
     const { notes, totalTicks } = parse("/16q 1:5 1:8 2:5 2:6 2:8");
     expect(notes.map((n) => [n.tick, n.dur])).toEqual([

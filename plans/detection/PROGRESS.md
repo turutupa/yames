@@ -195,3 +195,48 @@ verifier: none (no correct note is counted wrong). Pass bars stay as they are
 **Not done here:** shipped builds do not have the model (`release.yml` builds
 without `detect-ort`), so in the app all of this waits for that switch, which
 is the owner's (bundle +20 MB; no prebuilt ONNX Runtime for Intel macOS).
+
+## M5. Bends and vibrato as curves (done on the bench; reported, not graded)
+
+**What.** `src-tauri/src/score/curves.rs`: for every bent or vibrato single
+note the matcher heard, the shipped pitch track's frames (`pitch::track`,
+octave errors folded back) between attack + 30 ms and the next attack - 30 ms,
+read as start / peak / hold / end in cents against the fretted pitch, and a
+wobble (linear trend removed; depth = half the 10-90 spread, rate from
+crossings). Verdicts, thresholds at the top of the file: bend on pitch within
+25 cents, flat below, sharp more than 35 over; released when it ends within 50
+cents of the fret; vibrato present at >= 12 cents and 3-10 Hz, absent under 8.
+Fewer than 10 voiced frames, or a release whose quiet tail the tracker loses
+(under 75% of the note followed), is "couldn't tell", never a fault. Shapes:
+up (median of the note's second half), release (median near the peak),
+pre-bend (the start). On the late grade as `grade.curves`
+(`ScheduleRun::report_late`), so the bench and the app read the same thing;
+the late pass now also runs for a Take with bends or vibrato in it
+(`wants_curves`). Result: one reported line each for bends and vibrato in the
+checks list (15 locales). DSL: `b2r` (bend and release) and `B2` (pre-bend) ->
+`PathNote.bendShape` -> `details.bendShape` (alphaTex `b (0 q 0)` /
+`b (q q 0)`). No pack uses them yet (content is `mvp-paths3`'s).
+
+**Numbers** (fast bench, 7 chains, `results/fast.md` "Bends and vibrato"):
+
+| | Bend | Bend and release | M5 acceptance |
+|---|---|---|---|
+| Good bends within 25 cents | 100% (n=58) | 97.9% (n=47) | >= 90% |
+| Median error | 1.8 cents | 1.0 cents | |
+| 50-cent-flat bend called flat | 100% (n=33) | 100% (n=25) | >= 80% |
+| Good bend called flat | 0% | 2.1% (1 of 47, laptop_noisy) | < 5% |
+| Release heard coming down / called held | | 61.7% / 0% (the rest couldn't tell: phone_mic and laptop_noisy lose the quiet tail) | |
+| Bends read at all | 92.6% (phone_agc 48%: the matcher misses them, M6) | 86.6% | |
+
+Vibrato (n small in the fast bench): written vibrato found 100% (n=13),
+called absent 0%; left out and called absent 83% (5 of 6), called present 0%.
+Before M5 none of this was measured: the right-notes pass called 88.9% of
+correct bends wrong (M4 table). The acceptance is on the recorded corpus
+(#85); these are synthetic. All 1,464 earlier metrics unchanged; 129 `bends|*`
+added to both baselines.
+
+**Audio safety.** New background compute is one more pitch track per Take on
+the post-Take thread. `click-jitter-probe --late-pass` (new) loops
+`timing::late_grade` (verifier + right notes + curves, exactly the
+`yames-take-notes` body, now one public function) on a demoted thread under
+the click. **Not run yet**: the box was at load 10-11 every time.

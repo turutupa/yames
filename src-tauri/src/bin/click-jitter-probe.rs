@@ -279,6 +279,9 @@ struct Args {
     /// not compiled into the binary: decoded on the command thread, handed
     /// over inside the table, and retired with it.
     jam_kit: Option<String>,
+    /// `--late-pass`: loop the post-Take pass (note verifier, right notes,
+    /// bend curves) on a below-normal thread for the whole run.
+    late_pass: bool,
     /// Whether the tempo / resolution came from the command line, so `--jam`
     /// can supply its own 240 BPM sixteenths without overruling a run that
     /// asked for something else.
@@ -307,6 +310,7 @@ impl Default for Args {
             song: false,
             song_loop: false,
             jam_kit: None,
+            late_pass: false,
             jam_voice: None,
             bpm_set: false,
             subdivision_set: false,
@@ -409,6 +413,10 @@ fn parse_args() -> Result<Args, String> {
                 a.jam = true;
                 a.jam_kit = Some(value(i)?.to_string());
             }
+            "--late-pass" => {
+                a.late_pass = true;
+                consumed = 1;
+            }
             "-h" | "--help" => return Err("help".into()),
             other => return Err(format!("unknown flag {other}")),
         }
@@ -496,6 +504,11 @@ click-jitter-probe — ROADMAP §4 audio-safety gate
                      stream is open, handed to the callback inside the
                      table, and swapped and retired with it. Combines
                      with all three above.
+  --late-pass        loop the post-Take pass (timing::late_grade: the note
+                     verifier with --features detect-ort, the right-notes
+                     pass, the bend curves) over a 30 s Take on a thread
+                     demoted like yames-take-notes, for the whole run.
+                     Combines with everything
   --song             play an imported SONG instead of the click or the
                      band: twelve bars at 240 with a 7/8 at bar 4 and a
                      tempo step at bar 5, every drum on every sixteenth,
@@ -1162,6 +1175,9 @@ fn main() -> ExitCode {
         }
     }
 
+    // ---- The post-Take pass, looped ----
+    let late = args.late_pass.then(|| start_late_pass(stop.clone()));
+
     // ---- Engine ----
     let capacity = (total_s as usize + 2) * MAX_CALLBACKS_PER_SEC;
     let cb_probe = Arc::new(CallbackProbe::new(capacity));
@@ -1813,6 +1829,11 @@ fn main() -> ExitCode {
 
     // Joining can take one generation (up to a few seconds); do it after
     // the audio measurement is already captured.
+    let late_summary = late.map(|(handle, passes, ms)| {
+        let _ = handle.join();
+        let n = passes.load(Ordering::Relaxed);
+        (n, if n > 0 { ms.load(Ordering::Relaxed) as f64 / n as f64 } else { 0.0 })
+    });
     let llm_summary = llm.take().map(|mut run| {
         if let Some(h) = run.handle.take() {
             let _ = h.join();
@@ -1920,9 +1941,15 @@ fn main() -> ExitCode {
     if let Some(ref dir) = args.jam_kit {
         mode.push_str(&format!(" + --jam-kit ({dir})"));
     }
+    if args.late_pass {
+        mode.push_str(" + --late-pass");
+    }
 
     println!("\n=== click-jitter-probe ===");
     println!("mode              {mode}");
+    if let Some((n, ms)) = &late_summary {
+        println!("late passes       {n} over a 30 s Take, {ms:.0} ms each (verifier {})", if yames_lib::detect::model::enabled() { "on" } else { "off: no model in this build" });
+    }
     if let Some((_, load_secs, gens, fails)) = &llm_summary {
         println!("model load        {load_secs:.1} s");
         println!("generations       {gens} completed, {fails} failed");
@@ -2049,4 +2076,74 @@ fn main() -> ExitCode {
         println!("\nRESULT FAIL");
         ExitCode::from(1)
     }
+}
+
+/// `--late-pass`: a 30 s Take of plucked notes (eighths at 120 BPM, some
+/// bent, some with vibrato) graded over and over by `timing::late_grade`, the
+/// function the `yames-take-notes` thread runs, on a thread demoted the same
+/// way. Returns the thread, the passes done and their total milliseconds.
+fn start_late_pass(stop: Arc<AtomicBool>) -> (std::thread::JoinHandle<()>, Arc<AtomicU64>, Arc<AtomicU64>) {
+    use yames_lib::instrument::Instrument;
+    use yames_lib::pitch::ScoreNote;
+    use yames_lib::score::notes::TakeAudio;
+    use yames_lib::score::verify::NoteDetail;
+    use yames_lib::score::{ExpectedOnset, PlayedOnset, ScheduleRun, ScoreSchedule};
+    let passes = Arc::new(AtomicU64::new(0));
+    let total_ms = Arc::new(AtomicU64::new(0));
+    let (p, t) = (passes.clone(), total_ms.clone());
+    let handle = std::thread::Builder::new()
+        .name("probe-late-pass".into())
+        .spawn(move || {
+            yames_lib::probe::lower_current_thread_priority();
+            const RATE: u32 = 48_000;
+            let q_ms = 500.0;
+            let first = 1_000.0;
+            let n = 112u32;
+            let mut samples = vec![0.0f32; RATE as usize * 30];
+            let mut onsets = Vec::new();
+            let mut pitches = Vec::new();
+            let mut details = Vec::new();
+            for i in 0..n {
+                let midi = 52.0 + (i % 12) as f64;
+                let bent = i % 8 == 3;
+                let start = ((first + i as f64 * q_ms / 2.0) * RATE as f64 / 1000.0) as usize;
+                let mut phase = 0.0f64;
+                for k in 0..(RATE as usize / 4) {
+                    let Some(s) = samples.get_mut(start + k) else { break };
+                    let tt = k as f64 / RATE as f64;
+                    let m = midi + if bent { 2.0 * (tt / 0.08).min(1.0) } else { 0.0 } + if i % 8 == 6 { 0.3 * (2.0 * std::f64::consts::PI * 5.5 * tt).sin() } else { 0.0 };
+                    phase += 440.0 * 2f64.powf((m - 69.0) / 12.0) / RATE as f64;
+                    let w = 2.0 * std::f64::consts::PI * phase;
+                    *s += (0.5 * (-tt * 6.0).exp() * (w.sin() + 0.5 * (2.0 * w).sin() + 0.25 * (3.0 * w).sin())) as f32;
+                }
+                onsets.push(ExpectedOnset { id: i, beat: i as f64 / 2.0, note_ids: vec![i], soft: false, accent: false });
+                pitches.push(ScoreNote { id: i, midi });
+                details.push(NoteDetail {
+                    id: i,
+                    dur_beats: 0.5,
+                    bend: if bent { 2.0 } else { 0.0 },
+                    string: 3,
+                    tech: if bent { vec!["bend".into()] } else if i % 8 == 6 { vec!["vibrato".into()] } else { vec![] },
+                    bend_shape: None,
+                });
+            }
+            let schedule = ScoreSchedule { onsets, length_beats: n as f64 / 2.0, loops: false };
+            let mut run = ScheduleRun::new(schedule).with_lag_correction(true).with_note_pitches(pitches).with_note_details(details);
+            for b in 0..(n / 2 + 4) {
+                run.note_quarter_in_bar(b % 4 == 0, first + b as f64 * q_ms, 4);
+            }
+            for i in 0..n {
+                run.note_onset(PlayedOnset { time_ms: first + i as f64 * q_ms / 2.0 + 25.0, amplitude: 0.5, confidence: 1.0 });
+            }
+            let weights = Instrument::ElectricGuitar.profile().score_weights;
+            let take = TakeAudio { samples: &samples, rate: RATE, start_ms: 0.0, detection_delay_ms: 25.0 };
+            while !stop.load(Ordering::Relaxed) {
+                let started = std::time::Instant::now();
+                let _ = std::hint::black_box(yames_lib::probe::late_grade(&run, &weights, &take));
+                t.fetch_add(started.elapsed().as_millis() as u64, Ordering::Relaxed);
+                p.fetch_add(1, Ordering::Relaxed);
+            }
+        })
+        .expect("spawn the late pass");
+    (handle, passes, total_ms)
 }

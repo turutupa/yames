@@ -288,7 +288,10 @@
       "barSlipped": "Ô nhịp {{n}}: bị lệch",
       "barThin": "Ô nhịp {{n}}: quá ít nốt để đánh giá",
       "legatoAll": "Hammer-on, pull-off và tap: {{sounded}}/{{due}} nốt đã kêu. Chỉ thông báo, không chấm điểm.",
-      "legatoSome": "Hammer-on, pull-off và tap: {{sounded}}/{{due}} nốt đã kêu, {{silent}} nốt không kêu. Chỉ thông báo, không chấm điểm."
+      "legatoSome": "Hammer-on, pull-off và tap: {{sounded}}/{{due}} nốt đã kêu, {{silent}} nốt không kêu. Chỉ thông báo, không chấm điểm.",
+      "bendsAll": "Bend: {{onPitch}}/{{due}} lần lên tới cao độ. Chỉ thông báo, không chấm điểm.",
+      "bendsSomeFlat": "Bend: {{onPitch}}/{{due}} lần lên tới cao độ, {{flat}} lần bị thiếu. Chỉ thông báo, không chấm điểm.",
+      "vibratoHeard": "Vibrato: nghe thấy ở {{present}}/{{due}} nốt. Chỉ thông báo, không chấm điểm."
     },
     "edge": {
       "kick": "Tìm giới hạn",

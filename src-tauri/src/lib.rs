@@ -103,6 +103,10 @@ mod voices;
 /// implementation details of the Tauri command surface — this facade
 /// re-exports the exact handful of symbols the audio-safety gate uses.
 pub mod probe {
+    /// `--late-pass`: the post-Take pass, on a thread demoted the way
+    /// `yames-take-notes` is.
+    pub use crate::coach::lower_current_thread_priority;
+    pub use crate::timing::late_grade;
     /// The other half of the audio-safety gate: the callback raises this for
     /// the span of its own body and the probe's `#[global_allocator]` counts
     /// every allocation and free made while it is up. See `alloc_probe`.

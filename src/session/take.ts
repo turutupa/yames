@@ -55,7 +55,7 @@ export type TakePlan = {
    * (`score/verify.rs`): it listens differently for a hammer-on, a chord
    * tone and a bent note, and reports per technique.
    */
-  details: { id: number; durBeats: number; bend?: number; string: number; tech: string[] }[];
+  details: { id: number; durBeats: number; bend?: number; bendShape?: "release" | "prebend"; string: number; tech: string[] }[];
 };
 
 /**
@@ -132,10 +132,12 @@ function noteDetails(whole: Exercise, score: SongScore): TakePlan["details"] {
   const written = [...whole.notes].sort((a, b) => a.tick - b.tick || a.string - b.string);
   return score.notes.map((n) => {
     const bend = written[n.id]?.bend;
+    const shape = written[n.id]?.bendShape;
     return {
       id: n.id,
       durBeats: n.durTicks / score.ticksPerQuarter,
       ...(typeof bend === "number" && bend > 0 ? { bend } : {}),
+      ...(typeof bend === "number" && bend > 0 && shape ? { bendShape: shape } : {}),
       string: n.string,
       tech: [...n.techniques],
     };

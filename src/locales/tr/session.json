@@ -288,7 +288,10 @@
       "barSlipped": "{{n}}. ölçü: kaydı",
       "barThin": "{{n}}. ölçü: değerlendirmek için nota az",
       "legatoAll": "Hammer-on, pull-off ve tap: {{due}} notadan {{sounded}} tanesi duyuldu. Bilgi amaçlı, puanlanmaz.",
-      "legatoSome": "Hammer-on, pull-off ve tap: {{due}} notadan {{sounded}} tanesi duyuldu, {{silent}} tanesi duyulmadı. Bilgi amaçlı, puanlanmaz."
+      "legatoSome": "Hammer-on, pull-off ve tap: {{due}} notadan {{sounded}} tanesi duyuldu, {{silent}} tanesi duyulmadı. Bilgi amaçlı, puanlanmaz.",
+      "bendsAll": "Bend: {{due}} bend'den {{onPitch}} tanesi hedef sese ulaştı. Bilgi amaçlı, puanlanmaz.",
+      "bendsSomeFlat": "Bend: {{due}} bend'den {{onPitch}} tanesi hedef sese ulaştı, {{flat}} tanesi kısa kaldı. Bilgi amaçlı, puanlanmaz.",
+      "vibratoHeard": "Vibrato: {{due}} notadan {{present}} tanesinde duyuldu. Bilgi amaçlı, puanlanmaz."
     },
     "edge": {
       "kick": "Sınırımı bul",

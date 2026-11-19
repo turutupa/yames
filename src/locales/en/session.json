@@ -288,7 +288,10 @@
       "barSlipped": "Bar {{n}}: slipped",
       "barThin": "Bar {{n}}: too few notes to judge",
       "legatoAll": "Hammer-ons, pull-offs and taps: {{sounded}} of {{due}} sounded. Reported, not graded.",
-      "legatoSome": "Hammer-ons, pull-offs and taps: {{sounded}} of {{due}} sounded, {{silent}} didn't. Reported, not graded."
+      "legatoSome": "Hammer-ons, pull-offs and taps: {{sounded}} of {{due}} sounded, {{silent}} didn't. Reported, not graded.",
+      "bendsAll": "Bends: {{onPitch}} of {{due}} reached the pitch. Reported, not graded.",
+      "bendsSomeFlat": "Bends: {{onPitch}} of {{due}} reached the pitch, {{flat}} fell short. Reported, not graded.",
+      "vibratoHeard": "Vibrato: heard on {{present}} of {{due}} notes. Reported, not graded."
     },
     "edge": {
       "kick": "Find my edge",
