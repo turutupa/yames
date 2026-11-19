@@ -93,7 +93,17 @@ function usesIn(css: string): Use[] {
  */
 const SHELL_LAYOUT_TOKENS = ["--safe-top", "--safe-right", "--safe-bottom", "--safe-left"];
 
-const CONTRACT = new Set<string>([...TOKEN_CONTRACT, ...SHELL_LAYOUT_TOKENS]);
+/**
+ * The buttons' tokens ("B · Tonal", owner 2026-11-19): declared once on
+ * `:root` in global.css, each a mix of the theme's own, for every stylesheet
+ * to use. Read from the file, so a name counts only while global.css really
+ * declares it.
+ */
+const BUTTON_TOKENS = [...declaredIn(fs.readFileSync(path.join(ROOT, "styles", "global.css"), "utf8"))].filter(
+  (t) => t.startsWith("--btn-") || t === "--tint-base",
+);
+
+const CONTRACT = new Set<string>([...TOKEN_CONTRACT, ...SHELL_LAYOUT_TOKENS, ...BUTTON_TOKENS]);
 
 /** Every token one stylesheet reaches for that nothing will define. */
 function missingIn(css: string, where: string): string[] {

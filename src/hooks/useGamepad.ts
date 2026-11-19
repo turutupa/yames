@@ -49,6 +49,15 @@ export function useGamepad({ onButtonPress, bindings, onAction, onActionRelease,
       return;
     }
     const gamepads = navigator.getGamepads();
+    // No pad, no loop: this used to run on every animation frame of the app's
+    // life, pad or no pad, so the main thread never slept. A browser shows a
+    // pad only once a button on it is pressed, and says so (`gamepadconnected`),
+    // which is what starts the loop again below.
+    if (!Array.from(gamepads).some((gp) => !!gp)) {
+      prevPressed.current = new Set();
+      rafId.current = 0;
+      return;
+    }
     const nowPressed = new Set<string>();
 
     for (const gp of gamepads) {
@@ -88,7 +97,16 @@ export function useGamepad({ onButtonPress, bindings, onAction, onActionRelease,
 
   useEffect(() => {
     if (!enabled) return;
+    // One poll now (a pad already connected), and one whenever a pad arrives.
+    const start = () => {
+      if (rafId.current === 0) rafId.current = requestAnimationFrame(poll);
+    };
     rafId.current = requestAnimationFrame(poll);
-    return () => cancelAnimationFrame(rafId.current);
+    window.addEventListener("gamepadconnected", start);
+    return () => {
+      window.removeEventListener("gamepadconnected", start);
+      cancelAnimationFrame(rafId.current);
+      rafId.current = 0;
+    };
   }, [enabled, poll]);
 }

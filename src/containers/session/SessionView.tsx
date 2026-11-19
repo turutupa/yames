@@ -53,6 +53,7 @@ import type { TimingMark } from "../songs/review/marks";
 import type { BeatPosition } from "../../songs/position";
 import type { NeckKind, NeckView } from "../../stage3d/api";
 import { lineText } from "./lineText";
+import { exerciseWords, plannedPurpose } from "../../session/exerciseWords";
 import { readyHonestLineKey } from "../../session/caveats";
 import { ContextLine, StepTag, rise, stepTitle } from "./TodayView";
 import { roleKey } from "./todayPlan";
@@ -84,7 +85,7 @@ function purposeOf(session: SessionRun, step: PlanStep): string | null {
   const path = session.paths.find((p) => p.id === step.pathId);
   for (const s of path?.steps ?? []) {
     const found = s.exercises.find((e) => e.id === step.exerciseId);
-    if (found) return found.purpose;
+    if (found) return plannedPurpose(found, step.variantSeed);
   }
   return null;
 }
@@ -476,9 +477,13 @@ function TakeScreen({
   // fold, and any sentence naming the fret or the tempo the screen already
   // shows is left out of it.
   const gradedLine = bar && !byChoice ? lineText(t, bar) : exercise.coachLine;
+  // The words of the notes on screen: the Take's variant's own when it has
+  // some (a key-moved Exercise names its key), the Exercise's otherwise.
+  const played = take.exercise ?? exercise;
+  const words = exerciseWords(exercise, played);
   const how = howText(
-    exercise.howTo[0],
-    exercise.position,
+    words.howTo[0],
+    played.position,
     [bar && !byChoice ? exercise.coachLine : null, honest ? t(honest) : null],
     [exercise.tempo.passAtBpm, exercise.tempo.rungs[0]?.bpm, run.bpm],
   );
@@ -574,15 +579,22 @@ function TakeScreen({
 
       <div className="session-mechlow" data-single="">
         <div className="session-col">
-          {!running && <HandLine position={handOf(exercise)} />}
+          {!running && <HandLine position={handOf(played)} />}
           {/* Ready: what is graded. Running: the Exercise's own tip. */}
           <CoachLine>{running ? exercise.coachLine : gradedLine}</CoachLine>
           {/* One hand line, one coach line, one "how", folded: the how-to, the
               tip and the pick caveat, with nothing the lines above or the
               picture already said (acceptance P1-4). */}
-          {!running && how && (
+          {!running && (how || words.howTo.length > 1) && (
             <HowLines>
-              <div className="session-why session-how-text" data-testid="session-how-text">{how}</div>
+              {how && <div className="session-why session-how-text" data-testid="session-how-text">{how}</div>}
+              {/* The how-to's further lines (a variant's key and frets among
+                  them), whole and quieter: the numbers in them are the point. */}
+              {words.howTo.slice(1).map((line, i) => (
+                <div key={i} className="session-why session-how-more" data-testid="session-how-more">
+                  {line}
+                </div>
+              ))}
             </HowLines>
           )}
           <BandVolume session={session} hint={!running} />
@@ -1396,7 +1408,8 @@ function TimedScreen({
   const checked = step.kind === "metronome" && step.why.code === "yourTurn";
 
   const status = ready
-    ? (session.exercise?.purpose ?? lineText(t, reasonLine(step.why)))
+    ? (session.exercise ? exerciseWords(session.exercise, playedExercise(session)).purpose : null) ||
+      lineText(t, reasonLine(step.why))
     : ended
       ? t("session.practice.ended")
       : paused

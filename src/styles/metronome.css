@@ -947,9 +947,10 @@
 }
 
 .time-sig-btn.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-text, white);
+  background: var(--btn-sel);
+  border-color: transparent;
+  color: var(--btn-tint-ink);
+  box-shadow: var(--btn-sel-ring);
   font-weight: 600;
 }
 
@@ -1413,21 +1414,22 @@ span.meter-grouping-chip {
    supposed to be the tempo — and it forced dark ink on the accent, which is
    the one contrast pair the themes cannot all satisfy. */
 .sub-row-btn.active {
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
-  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
-  color: var(--accent);
+  background: var(--btn-sel);
+  border-color: transparent;
+  box-shadow: var(--btn-sel-ring);
+  color: var(--btn-tint-ink);
   font-weight: 800;
 }
 
 @media (hover: hover) {
   .sub-row-btn.active:hover {
-    background: color-mix(in srgb, var(--accent) 12%, transparent);
-    color: var(--accent);
+    background: var(--btn-tint-hover);
+    color: var(--btn-tint-ink);
   }
 }
 
 .sub-row-btn.active .sub-row-label {
-  color: var(--accent);
+  color: var(--btn-tint-ink);
   font-weight: 800;
 }
 

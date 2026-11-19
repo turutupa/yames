@@ -30,7 +30,9 @@ exercises for those 20 minutes."
 
 1. **The click is sacred.** The canvas renders on demand: on a change, and for a short animation
    after it. No continuous loop on calm screens. During a Take, at most 30 fps, and only while
-   something moves. Pause when the window is hidden. Lazy-load three.js (dynamic `import`); it
+   something moves. *(2026-11-19: "at most 30" is now "the display's rate, measured against the
+   click's gates, and 30 where the machine should not be asked or does not hold it":
+   `src/stage3d/takeRate.ts`, and "Frame rate during a Take" in `AGENTS.md`.)* Pause when the window is hidden. Lazy-load three.js (dynamic `import`); it
    must not be in the main chunk. Changes under `src-tauri/` are out of scope for this wave.
 2. **Tools lose nothing.** The tool screens stay as they are. Tab hotkeys `tab-1`..`tab-5` keep
    their meaning, `tab-today` too. Every parity test stays green; update a parity test only where

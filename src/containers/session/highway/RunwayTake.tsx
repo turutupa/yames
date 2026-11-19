@@ -31,6 +31,7 @@ import { useWatch } from "../practice/useWatch";
 import { WatchRow } from "../practice/WatchControls";
 import { usePracticeCursor } from "../practice/usePracticeCursor";
 import { nextOnsetIndex } from "./runwayModel";
+import { exerciseWords } from "../../../session/exerciseWords";
 
 /** The neck is told verdicts as colours here, not plucks (see `ghostNeck`). */
 const NO_PLUCKS: ReadonlyMap<number, TimingMark> = new Map();
@@ -153,6 +154,9 @@ export function RunwayTakeScreen({
   const pathTitle = session.paths.find((p) => p.id === take.pathId);
   const stepNumber = pathTitle?.steps.find((s) => s.exercises.some((e) => e.id === exercise.id))?.order;
   const bar = barLine(exercise, run.bpm);
+  // The played variant's words and hand, the Exercise's where it has none.
+  const playedEx = take.exercise ?? exercise;
+  const words = exerciseWords(exercise, playedEx);
   const scored = live.heard + live.missed;
   const canStart = takeCanStart(session, listening);
   const start = startButton(session, listening, t);
@@ -179,7 +183,7 @@ export function RunwayTakeScreen({
           </span>
           <h2 className="session-h3">{exercise.title}</h2>
           {/* What the Exercise is, not the planner's reason (UX audit TODAY-8). */}
-          {!running && <span className="session-why">{exercise.purpose}</span>}
+          {!running && words.purpose && <span className="session-why">{words.purpose}</span>}
         </div>
         <PracticeViewSwitch
           view={session.practiceView}
@@ -245,8 +249,15 @@ export function RunwayTakeScreen({
               {t("session.runway.later")}
             </span>
           )}
-          {!running && <HandLine position={handOf(exercise)} />}
-          {!running && exercise.howTo[0] && <span className="session-why">{exercise.howTo[0]}</span>}
+          {!running && <HandLine position={handOf(playedEx)} />}
+          {!running && words.howTo[0] && <span className="session-why">{words.howTo[0]}</span>}
+          {/* Further how-to lines (a variant's key and frets), quieter. */}
+          {!running &&
+            words.howTo.slice(1).map((line, i) => (
+              <span key={i} className="session-why session-how-more" data-testid="session-how-more">
+                {line}
+              </span>
+            ))}
           {/* The bar is what is graded: not said to a player who chose to just play. */}
           {!running && bar && run.ungraded !== "gradingOff" && run.ungraded !== "chosen" && (
             <span className="session-why">{lineText(t, bar)}</span>

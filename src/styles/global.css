@@ -27,6 +27,77 @@
   --graph-line: rgba(255, 255, 255, 0.25);
 }
 
+/* =================== Buttons: "B · Tonal" (owner, 2026-11-19) ===================
+ * One language for every button in the app, picked from a mock of five:
+ *
+ * - Primary (Start, Start take, Next, Save…): a SOLID accent fill in the
+ *   theme's own on-accent ink. No gradient, no glow, no ring around it.
+ * - Secondary (Slower, Faster, Back, Skip, Not now, chips, icon buttons):
+ *   TONAL. The accent mixed into a solid surface, the label in the accent.
+ * - Segmented controls: the track is the card; the chosen segment is tonal
+ *   with a 1.5px accent ring inside it.
+ *
+ * The tint is mixed into a SOLID token, never into a page that may be a
+ * gradient (Aurora, Prism). On a dark theme that is the page (`--bg-solid`),
+ * as drawn in the mock; on a light theme the page is near-white and the
+ * cards are darker than it, so a page-based tint vanished into a card: there
+ * it is mixed into the card.
+ *
+ * The label is the accent where the accent clears WCAG AA on the stronger
+ * (hover) tint; a theme where it does not names a deeper ink of the same hue
+ * as `--accent-ink-on-tint` (`themes.ts`, held by `themes.test.ts`). */
+:root {
+  --tint-base: var(--bg-solid, var(--bg-primary));
+  --btn-fill: var(--accent);
+  --btn-fill-ink: var(--accent-text);
+  --btn-fill-hover: color-mix(in srgb, var(--accent) 88%, #fff);
+  --btn-fill-active: color-mix(in srgb, var(--accent) 88%, #000);
+  --btn-tint: color-mix(in srgb, var(--accent) 16%, var(--tint-base));
+  --btn-tint-hover: color-mix(in srgb, var(--accent) 24%, var(--tint-base));
+  --btn-tint-ink: var(--accent-ink-on-tint, var(--accent));
+  --btn-sel: color-mix(in srgb, var(--accent) 22%, var(--tint-base));
+  --btn-sel-ring: inset 0 0 0 1.5px var(--accent);
+  /* Destructive: the same two shapes in a red every theme can read. */
+  --btn-danger: #d13438;
+  --btn-danger-ink: #fff;
+  --btn-danger-tint: color-mix(in srgb, var(--btn-danger) 16%, var(--tint-base));
+  --btn-danger-tint-hover: color-mix(in srgb, var(--btn-danger) 24%, var(--tint-base));
+  --btn-danger-tint-ink: #ff8a8e;
+  --btn-disabled-ink: var(--text-muted);
+  --btn-disabled-bg: color-mix(in srgb, var(--text-primary) 7%, var(--tint-base));
+}
+:root[data-theme-group="light"] {
+  --tint-base: var(--bg-card-solid, var(--bg-primary));
+  --btn-fill-hover: color-mix(in srgb, var(--accent) 86%, #000);
+  --btn-fill-active: color-mix(in srgb, var(--accent) 76%, #000);
+  --btn-danger: #b4232a;
+  --btn-danger-tint-ink: #7f1419;
+}
+
+/* The shared classes, for a button that has no family of its own. */
+.btn-primary {
+  background: var(--btn-fill);
+  color: var(--btn-fill-ink);
+  border: 0;
+  box-shadow: none;
+}
+.btn-tonal {
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
+  border: 0;
+  box-shadow: none;
+}
+@media (hover: hover) {
+  .btn-primary:hover:not(:disabled) { background: var(--btn-fill-hover); }
+  .btn-tonal:hover:not(:disabled) { background: var(--btn-tint-hover); }
+}
+.btn-primary:active:not(:disabled) { background: var(--btn-fill-active); }
+:is(.btn-primary, .btn-tonal):disabled {
+  background: var(--btn-disabled-bg);
+  color: var(--btn-disabled-ink);
+  cursor: default;
+}
+
 /* Tell the engine which way round the page is.
  *
  * Without this the property is `normal`, and every scrollbar we have not
@@ -129,21 +200,18 @@ kbd {
 
 /* =================== Light theme overrides =================== */
 [data-theme-group="light"] { --graph-grid: rgba(0, 0, 0, 0.12); --graph-line: rgba(0, 0, 0, 0.3); }
-/* Not inside the learning side or the first-run wizard: both colour their own
-   buttons from the theme's tokens (accent ink on the accent), and this rule
+/* Not inside the learning side or the first-run wizard, nor on a button that
+   wears the "B · Tonal" tokens above: all of them colour their own labels
+   (the accent's ink on a solid accent, the accent on its tint), and this rule
    outranked them, so a light theme's primary button wore dark ink on its dark
-   accent (2026-11-18). */
-[data-theme-group="light"] button:not(.session-page *, .onboarding-overlay *) { color: var(--text-primary); }
+   accent (2026-11-18) and a tonal one lost its accent label. */
+[data-theme-group="light"] button:not(.session-page *, .onboarding-overlay *, .btn-primary, .btn-tonal, .context-chip, .tour-btn, .tour-offer-accept, .tour-offer-dismiss, .transport-play, .transport-rewind, .transport-skip, .unsaved-actions *, .eval-confirm-actions *, .coach-confirm-actions *, .download-confirm-go, .download-confirm-cancel, .fs-play-btn, .fs-ctrl-btn, .songs-btn, .songs-chip, .songs-offer-btn, .help-btn, .hint-card-btn, .toggle-btn.active, .time-sig-btn.active) { color: var(--text-primary); }
 [data-theme-group="light"] .main-header h1 { color: var(--text-primary); }
-/* The tools' Play is an accent-filled button outside both, and the rule above
-   gave it the page's ink on a light theme: "Play" at 2:1 on Ivory's gold
-   (themes polish, 2026-11-19). Stop, its other state, is a plain button. */
-[data-theme-group="light"] .transport-play:not(.playing) { color: var(--accent-text); }
-[data-theme-group="light"] .play-btn { background: var(--accent); color: var(--accent-text); box-shadow: none; }
+[data-theme-group="light"] .play-btn { background: var(--btn-fill); color: var(--btn-fill-ink); box-shadow: none; }
 @media (hover: hover) {
   [data-theme-group="light"] .play-btn:hover { filter: brightness(1.1); }
 }
-[data-theme-group="light"] .floating-play-btn { background: var(--accent); color: var(--accent-text); box-shadow: 0 4px 16px var(--accent-glow); }
+[data-theme-group="light"] .floating-play-btn { background: var(--btn-fill); color: var(--btn-fill-ink); box-shadow: none; }
 [data-theme-group="light"] .floating-play-btn.playing { background: var(--accent); color: var(--accent-text); }
 [data-theme-group="light"] .main-sub-btn { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); color: var(--text-primary); }
 @media (hover: hover) {
@@ -160,9 +228,9 @@ kbd {
 @media (hover: hover) {
   [data-theme-group="light"] .time-sig-btn:hover { background: rgba(0,0,0,0.08); color: var(--text-primary); }
 }
-[data-theme-group="light"] .time-sig-btn.active { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+[data-theme-group="light"] .time-sig-btn.active { background: var(--btn-sel); color: var(--btn-tint-ink); border-color: transparent; box-shadow: var(--btn-sel-ring); }
 [data-theme-group="light"] .toggle-group .toggle-btn { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.08); color: var(--text-secondary); }
-[data-theme-group="light"] .toggle-group .toggle-btn.active { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+[data-theme-group="light"] .toggle-group .toggle-btn.active { background: var(--btn-sel); color: var(--btn-tint-ink); border-color: transparent; box-shadow: var(--btn-sel-ring); }
 [data-theme-group="light"] .hotkey-table { border-color: rgba(0,0,0,0.08); }
 [data-theme-group="light"] .hotkey-row { border-color: rgba(0,0,0,0.05); }
 [data-theme-group="light"] .hotkey-bind-btn { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08); color: var(--text-secondary); }
@@ -199,7 +267,7 @@ kbd {
 [data-theme-group="light"] .sub-row-btn[data-tooltip]::after { background: var(--bg-secondary); border-color: var(--border); color: var(--text-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 [data-theme-group="light"] .preset-save-btn { background: transparent; color: var(--text-muted); }
 @media (hover: hover) {
-  [data-theme-group="light"] .preset-save-btn:hover { background: var(--accent); color: var(--accent-text, white); }
+  [data-theme-group="light"] .preset-save-btn:hover { background: var(--btn-tint-hover); color: var(--btn-tint-ink); }
 }
 [data-theme-group="light"] .preset-active-name { color: var(--text-muted); }
 
@@ -231,14 +299,8 @@ kbd {
 .live-level[data-bars="4"] > i {
   background: currentColor;
 }
-.live-level[data-pulse] {
-  animation: live-level-pulse 240ms ease-out;
-}
-@keyframes live-level-pulse {
-  0% { transform: scale(1.18); filter: brightness(1.35); }
-  100% { transform: scale(1); filter: none; }
-}
+/* The pulse itself is played from LiveLevelBars.tsx (`el.animate`): a CSS
+   animation can only be restarted with a forced reflow. */
 @media (prefers-reduced-motion: reduce) {
   .live-level > i { transition: none; }
-  .live-level[data-pulse] { animation: none; }
 }

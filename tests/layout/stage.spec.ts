@@ -161,27 +161,24 @@ test("a pluck animates for a moment, then the stage stops again", async ({ page 
   expect(await page.evaluate(() => window.__NECK__!.current!.frames)).toBe(f2);
 });
 
-test("during a Take the stage draws at most 30 frames a second", async ({ page }) => {
-  await openShot(page, "stage-zoom", SIZES[0]);
-  await settled(page);
-  /*
-   * Measured on the frames themselves, not on a second of wall clock.
-   *
-   * It used to count the frames drawn in "one second" of a loop that slept 50
-   * ms at a time. On a busy machine that second ran long (the last sleep
-   * alone can overshoot by hundreds of ms), or the page was starved and five
-   * frames failed "more than 5". And one failure was the app's: on a busy
-   * machine the cap really did let 41 frames a second through (see
-   * `FrameScheduler` on its two clocks), which a count over a stretchy second
-   * could not tell from its own noise.
-   *
-   * The cap is a spacing rule, so the spacing is what is read: when each
-   * frame the stage drew while strings rang began. Load can only stretch
-   * those gaps, never shrink them. Uncapped, they are a vsync (16.7 ms).
-   */
-  const times = await page.evaluate(async () => {
+/**
+ * The frames the stage drew while strings rang during a Take, and the page's
+ * own animation frames beside them: when each began.
+ *
+ * Measured on the frames themselves, not on a second of wall clock. It used
+ * to count the frames drawn in "one second" of a loop that slept 50 ms at a
+ * time. On a busy machine that second ran long (the last sleep alone can
+ * overshoot by hundreds of ms), or the page was starved and five frames
+ * failed "more than 5". And one failure was the app's: on a busy machine the
+ * cap really did let 41 frames a second through (see `FrameScheduler` on its
+ * two clocks), which a count over a stretchy second could not tell from its
+ * own noise.
+ */
+async function takeFrames(page: Page) {
+  return page.evaluate(async () => {
     const c = window.__NECK__!.current!;
     const drawn: number[] = [];
+    const frames: number[] = [];
     const raf = window.requestAnimationFrame.bind(window);
     // The scheduler asks `window.requestAnimationFrame` by name each time, so
     // its tick runs inside this wrapper and a frame it draws is seen here.
@@ -192,7 +189,16 @@ test("during a Take the stage draws at most 30 frames a second", async ({ page }
         cb(stamp);
         if (c.frames > before) drawn.push(began);
       });
+    // The display's own beat, for comparison: every animation frame the page gets.
+    let watching = true;
+    const watch = () => {
+      frames.push(performance.now());
+      if (watching) raf(watch);
+    };
+    raf(watch);
     c.setTakeRunning(true);
+    const cap = c.fpsCap;
+    const why = (c as unknown as { takeRateWhy: string }).takeRateWhy;
     const WANT = 40;
     const giveUp = performance.now() + 30_000;
     // Keep strings ringing until that many frames have been drawn.
@@ -200,10 +206,26 @@ test("during a Take the stage draws at most 30 frames a second", async ({ page }
       c.facade(true).pluck(1 + Math.floor(Math.random() * 6), 5, "aim");
       await new Promise((r) => setTimeout(r, 50));
     }
+    const capAfter = c.fpsCap;
     c.setTakeRunning(false);
+    watching = false;
     window.requestAnimationFrame = raf;
-    return drawn;
+    return { drawn, frames, cap, capAfter, why };
   });
+}
+
+test("a Take held to 30 draws at most 30 frames a second", async ({ page }) => {
+  // `?takefps=30`: the rate a Take gets on a machine that should not be asked
+  // for more (`src/stage3d/takeRate.ts`), forced here because this one would.
+  await openShot(page, "stage-zoom", SIZES[0], "ember", { takefps: "30" });
+  await settled(page);
+  /*
+   * The cap is a spacing rule, so the spacing is what is read: when each
+   * frame the stage drew while strings rang began. Load can only stretch
+   * those gaps, never shrink them. Uncapped, they are a vsync (16.7 ms).
+   */
+  const { drawn: times, cap } = await takeFrames(page);
+  expect(cap).toBe(30);
   expect(times.length, "the stage stopped drawing while strings rang").toBeGreaterThanOrEqual(40);
   const gaps = times.slice(1).map((t, i) => t - times[i]);
   const CAP_MS = 1000 / 30;
@@ -214,6 +236,36 @@ test("during a Take the stage draws at most 30 frames a second", async ({ page }
   // And over the run: 30 a second, with that slack.
   const perSecond = (gaps.length * 1000) / (times[times.length - 1] - times[0]);
   expect(perSecond, `${perSecond.toFixed(1)} frames a second`).toBeLessThanOrEqual(31);
+});
+
+test("a Take at the display's rate draws on every frame the display gives it", async ({ page }) => {
+  // Forced, so the fallback cannot step in: SwiftShader misses frames by
+  // design and the governor would (rightly) take this Take down to 30.
+  await openShot(page, "stage-zoom", SIZES[0], "ember", { takefps: "120" });
+  await settled(page);
+  const { drawn, frames, cap } = await takeFrames(page);
+  expect(cap).toBe(120);
+  expect(drawn.length, "the stage stopped drawing while strings rang").toBeGreaterThanOrEqual(40);
+  /*
+   * Counted against the page's own animation frames over the same stretch,
+   * not against a clock: however few frames a busy machine (or SwiftShader)
+   * gets through, the stage drew on nearly all of them. Capped at 30 on a 60
+   * Hz display it draws on half.
+   */
+  const offered = frames.filter((t) => t >= drawn[0] - 1 && t <= drawn[drawn.length - 1] + 1).length;
+  expect(drawn.length / Math.max(1, offered), `${drawn.length} frames drawn of ${offered} the display offered`).toBeGreaterThan(0.8);
+});
+
+test("left to itself, a Take on the stage's lowest tier is held to 30", async ({ page }) => {
+  await openShot(page, "stage-zoom", SIZES[0]);
+  await settled(page);
+  const { cap, capAfter, why } = await takeFrames(page);
+  // SwiftShader is tier 0 (`quality.ts`): a renderer that should not be asked
+  // for the display's rate while the click plays, whatever the display is.
+  expect(await page.evaluate(() => window.__NECK__!.current!.tier)).toBe(0);
+  expect(why).toBe("low-tier");
+  expect(cap).toBe(30);
+  expect(capAfter).toBe(30);
 });
 
 for (const scene of ["stage-whole", "stage-zoom"]) {

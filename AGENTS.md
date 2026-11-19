@@ -338,6 +338,110 @@ Two things the numbers depend on, and one that is not a Yames bug:
   with voices ringing across it, and a take over the top. Neither run covers
   the other.
 
+## Frame rate during a Take, and the smoothness gates
+
+Rule 1 of the 3D neck's brief (`plans/tasks/revamp-3d/BRIEF.md`) is "the
+click is sacred": the canvas draws on demand, never on a calm screen, and
+while a Take runs it must not cost the click anything. For the neck that has
+been written as a number since it was built: **30 frames a second at most
+during a Take**. The runway's lane and the tab's cursor never had that cap
+(they moved on every display frame, 30 only on WebKitGTK). Since 2026-11-19
+the three read one governor, `src/stage3d/takeRate.ts`:
+
+- **The lane and the cursor follow the display**, up to 120 frames a second
+  (`TAKE_FPS_MAX`; a 144 or 165 Hz display is drawn in full, a 240 Hz one
+  every other frame, so the spacing is always even).
+- **The neck is still held to 30 (`TAKE_FPS_LOW`) during a Take**, behind one
+  switch: `NECK_FOLLOWS_DISPLAY` in `takeRate.ts`. On, it follows the display
+  as the lane does, and everything below applies to it. **It is off because
+  the gate that may turn it on has not been passed**, not because a
+  measurement said no: see the numbers under this list.
+  `"stage.takeFps": "display"` in a machine's settings store turns it on for
+  that machine alone (`?takefps=display` in the shot harness).
+- **Everything starts at 30 where the machine says it should**
+  (`takeCeiling`): a webview that likely composites on the CPU (WebKitGTK,
+  which is every Linux build), the stage's lowest quality tier or a machine
+  that cannot draw the 3D neck at all (software rendering, old phone GPUs),
+  four cores or fewer, 2 GB or less, the player's reduced-motion or data-saver
+  setting, a battery at 20% or under while discharging. There is no web API
+  for an OS battery-saver switch; that last one is the nearest a webview has.
+- **And falls back to 30 during the Take on what the frames do**
+  (`TakeRate.sample`): a window of 30 frames in which a quarter came more
+  than 1.6 display frames late, or in which drawing took over half the
+  frame's budget on the main thread, and the rest of that Take runs at 30.
+  Twice, and it stays at 30 until the app is restarted.
+- **`stage.takeFps` as a number** forces that rate for all three, past the
+  hints and the fallback. No switch in Settings yet. `?takefps=<n>` does the
+  same in the shot harness.
+
+**The gate for `NECK_FOLLOWS_DISPLAY`**: the e2e probe with the Take forced
+to the display's rate, against the same Take forced to 30, on a quiet
+machine (load average under 6): zero missed beats, zero callback
+allocations and frees, zero dropped notifications, and p99 jitter no worse
+than the 30 run's.
+
+```sh
+npm run test:e2e:probe -- --no-build --take-fps 30    # the control
+npm run test:e2e:probe -- --no-build --take-fps 60    # the neck at the display's rate
+```
+
+`summary.md` names the rate asked for and how far apart the neck's frames
+really were (`info.neck.frames` in `results.json`: also the stage's mode, its
+tier and the frame-time guard's verdict). Three things to know before
+reading a run on the DGX Spark:
+
+- **Only the GPU leg shows a 60 Hz Take.** Under Xvfb, WebKitGTK serves the
+  page an animation frame every 43 ms whatever is asked for (measured: the
+  neck's frames 43 ms apart at "30" and at "60" alike). On the X server on
+  the GB10 the page's frame is 16 to 17 ms, and a Take forced to 60 drew the
+  3D neck 18 ms apart (median; tier 2, the guard at 1 ms a frame).
+- **A busy machine makes every number meaningless, in both directions.** The
+  runs of 2026-11-19, all with other agents' suites running (hard gates 0 in
+  every one of them):
+
+  | Take | leg | neck | load (1 min) at start, after | p99 jitter ms | max ms | PipeWire "too slow" |
+  |---|---|---|---|---|---|---|
+  | 30 | Xvfb | 3D, frames 43 ms apart | 8.2, 13.3 | 1.32 | 4.6 | 0 |
+  | 30 | GPU | SVG (no 3D frame drawn) | 13.3, 10.1 | 5.24 | 20.8 | 3 |
+  | 60 | GPU | 3D, frames 18 ms apart | 14.7, 29.5 | 21.72 | 82.6 | 14 |
+  | 60 | Xvfb | not run: calibration heard 3 of 8 pulses | 96.8 | - | - | - |
+
+  The 60 row is not evidence against 60 (the load doubled under it, and the
+  30 row beside it drew no 3D frame at all), and it is not evidence for it.
+  For scale, on a quiet day the same probe with the neck at 30 read p99
+  0.374 ms on Xvfb and 0.676 ms on the GPU (`plans/HANDOFF-finisher.md`).
+- `~/projects/.preview/smooth/scripts/probe-ab.sh <out> 30 60 30 60` runs the
+  pair twice, waits for the load to fall under 6 before each run, and skips
+  a run rather than make it on a busy machine.
+
+**Before raising, lowering or removing any of these limits, measure**, with
+that command. Linux is the only platform the probe runs on, and it is the
+one platform the app holds to 30 by itself: a pass here is the gate, and a
+Take on Windows, macOS and Android with the switch on is still worth a
+player's ear.
+
+The rest of "smooth" is held by the layout suite, and found with it:
+
+- `tests/layout/smooth.spec.ts` fails on a long task during a running Take
+  (best of three windows), on the tab's notes or the overview strip being
+  redrawn per beat, on the level meter reading the layout to pulse, on the
+  lane missing display frames, and on the 3D engine being built in the frame a Session opens on
+  (it is built while Today, Paths or Progress sit idle: `NeckStage.prewarm`).
+- `tests/layout/smooth-measure.spec.ts` is the survey (frame gaps, long
+  tasks, React commits and who rendered, layouts, running animations; with
+  `YAMES_PERF_GL` on the machine's GPU). Run it before and after anything
+  that touches a per-frame or per-beat path; see `tests/layout/README.md`.
+- **The app's shell still re-renders at every beat.** `MainWindow` holds
+  `currentBeat` in state and passes it down, so every report from the engine
+  (about nine a second in a Take) renders the window. A child spared that
+  needs `memo` and props that do not change: `useStableHandlers` wraps a set
+  of inline handlers for exactly that (the rail). A new per-beat cost belongs
+  in a ref and a direct DOM write, as the runway, the tab's cursor and the
+  neck's overlay do it, not in state.
+- **Never restart a CSS animation with "class off, read `offsetWidth`, class
+  on"** on a screen that is animating: it is a style-and-layout pass over the
+  whole screen. Use `el.animate`, or check the class is there first.
+
 ## Coaching pipeline — latency tiers
 
 Every coach feature belongs to exactly one tier. When adding pitch analysis,
