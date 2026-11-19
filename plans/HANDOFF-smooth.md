@@ -222,8 +222,6 @@ transitions, the meter and now the Take's rate.
 
 ## Cleaning up
 
-- `~/projects/.smooth-base`: a detached worktree at 642b03a1 used for the
-  "before" survey. `git worktree remove ~/projects/.smooth-base` (its
-  `node_modules` is a link: unlink it first, as `AGENTS.md` says).
-- `~/projects/.target-smooth`: the e2e build (about 12 GB). Delete it once
+- `~/projects/.smooth-base` (the "before" worktree at 642b03a1) has been removed.
+- `~/projects/.target-smooth`: the e2e build (2.7 GB). Delete it once
   the probe has been run from it.
