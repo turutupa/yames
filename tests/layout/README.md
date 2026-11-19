@@ -87,6 +87,36 @@ apart, or counting on a wall clock. The patterns this suite uses instead:
   300 ms beat, so its stops are judged inside `toPass`: a spotlight that never
   lands still fails.
 
+## Smoothness
+
+`smooth.spec.ts` is the gate: during a running Take (neck, runway, tab; desktop
+and the phone build) no long task in the best of three windows, the tab's notes
+and the overview strip not redrawn per beat, no forced layout per note (the
+browser's layout counter against React's commits), the lane on every frame the
+page gets (or exactly every other, held to 30), and the 3D engine built while
+Today is idle rather than in the frame a Session opens on. `stage.spec.ts`
+holds the Take's frame-rate rules (`src/stage3d/takeRate.ts`): `?takefps=30`
+is spaced 33 ms apart, `?takefps=120` draws on every frame the display gives,
+and left alone SwiftShader (the stage's tier 0) is held to 30.
+
+`smooth-measure.spec.ts` is the survey those came from, and how to look for
+the next thing. It is skipped unless asked for:
+
+```bash
+YAMES_PERF_OUT=/tmp/perf npx playwright test smooth-measure --workers=1
+# on the machine's GPU instead of SwiftShader (ANGLE over Vulkan):
+YAMES_PERF_GL='--use-angle=vulkan --enable-features=Vulkan --ignore-gpu-blocklist' ...
+YAMES_PERF_ONLY=session-playing,paths   # those scenes
+YAMES_PERF_TRACE=1     # main-thread time by trace event, and what invalidated style
+YAMES_PERF_PROFILE=1   # the functions the window was spent in
+```
+
+One JSON per scene (`perf.ts` says what each number is): frame gaps and
+dropped frames, long tasks, the neck's and the lane's own frames, React
+commits with which components rendered and for how long, running animations,
+layouts and style recalcs a second. `--workers=1`, or the scenes measure each
+other; and read the load average beside any number that looks wrong.
+
 ## Another language
 
 ```bash
