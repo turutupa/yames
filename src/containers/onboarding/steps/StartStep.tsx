@@ -41,6 +41,7 @@ export const START_PATH_ORDER = [
   "legato",
   "metal-rhythm",
   "know-the-neck",
+  "scales-and-modes",
 ];
 
 /** The Paths a player can start, in the step's order (unknown runnable ones last). */

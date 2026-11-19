@@ -8,6 +8,7 @@ import legato from "./legato";
 import rhythmFoundations from "./rhythm-foundations";
 import metalRhythm from "./metal-rhythm";
 import knowTheNeck from "./know-the-neck";
+import scalesAndModes from "./scales-and-modes";
 import type { PathSpec } from "../spec";
 
 export const SPECS: readonly PathSpec[] = [
@@ -20,5 +21,6 @@ export const SPECS: readonly PathSpec[] = [
   rhythmFoundations,
   metalRhythm,
   knowTheNeck,
+  scalesAndModes,
   // new paths go above this line
 ];

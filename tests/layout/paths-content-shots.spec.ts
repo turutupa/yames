@@ -12,7 +12,7 @@ import { openShot } from "./fits";
 
 const OUT = process.env.PATHS_SHOTS_OUT ? path.resolve(process.env.PATHS_SHOTS_OUT) : null;
 const SIZE = { width: 1400, height: 900 };
-const SCENES = ["paths", "session-neck-legato", "session-neck-rhythm", "session-neck-metal", "session-neck-know"];
+const SCENES = ["paths", "session-neck-legato", "session-neck-rhythm", "session-neck-metal", "session-neck-know", "session-neck-scales"];
 const THEMES = ["ember", "ivory"];
 
 test.skip(!OUT, "set PATHS_SHOTS_OUT to take the pictures");
