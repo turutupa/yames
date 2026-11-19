@@ -283,6 +283,13 @@ pub(crate) fn reopen_keeps_loaded(old_rate: Option<u32>, new_rate: Option<u32>) 
     }
 }
 
+/// The setup's check for a reopen that kept material decoded at `expected`
+/// without a probed format to open at (re-review of card #14, item B): a
+/// stream at any other rate would play it detuned. No expectation, no check.
+pub(crate) fn setup_rate_matches(expected: Option<u32>, actual: u32) -> bool {
+    expected.map_or(true, |e| e == actual)
+}
+
 #[cfg(target_os = "android")]
 mod android {
     use std::sync::atomic::{AtomicBool, Ordering};

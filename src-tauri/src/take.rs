@@ -3614,6 +3614,7 @@ mod tests {
                         }
                         h.note_ended(seen);
                     }
+                    std::thread::yield_now();
                 }
             })
         };
@@ -3625,6 +3626,7 @@ mod tests {
                     if let Some(g) = h.take_ended() {
                         reported.push(g);
                     }
+                    std::thread::yield_now();
                 }
                 reported
             })

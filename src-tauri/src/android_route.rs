@@ -116,9 +116,8 @@ pub(crate) fn spawn(app: AppHandle) {
                                 let probe = || crate::android_audio::probe_output_format().ok();
                                 match engine.reopen_output(state, Some(app.clone()), probe) {
                                     Err(e) => eprintln!("[yames][android] reopening a dead output failed: {e}"),
-                                    Ok(kept) => eprintln!(
-                                        "[yames][android] dead output reopened on the same route ({})",
-                                        if kept { "song, kit and speech kept" } else { "the rate moved: decoded material dropped" }
+                                    Ok(outcome) => eprintln!(
+                                        "[yames][android] dead output reopened on the same route: {outcome:?}"
                                     ),
                                 }
                             }
