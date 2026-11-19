@@ -286,6 +286,9 @@ export function useSongTakes({
     };
   }, []);
 
+  // The other takes list started a take: the engine's one slot is its now.
+  useEffect(() => gate.current.onReplaced(() => setPlayingId(null)), []);
+
   useEffect(() => {
     // Only the ending of the playback this row is lit for (card #53).
     const unlisten = onTakePlaybackEnded((generation) => {

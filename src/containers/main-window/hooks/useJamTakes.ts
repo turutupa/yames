@@ -281,6 +281,9 @@ export function useJamTakes({
    * subscription taken after it would leave the controls disabled for ever,
    * and the engine is under no obligation to wait for us.
    */
+  // The other takes list started a take: the engine's one slot is its now.
+  useEffect(() => gate.current.onReplaced(() => setPlayingId(null)), []);
+
   useEffect(() => {
     // Only the ending of the playback this row is lit for (card #53).
     const unlisten = onTakePlaybackEnded((generation) => {

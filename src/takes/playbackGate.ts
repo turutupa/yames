@@ -14,6 +14,16 @@
  *
  * An ending with no generation (an engine or a mock that names none) is
  * believed, as before.
+ *
+ * ONE SLOT, TWO LISTS. The engine has one take slot, and the jam's list
+ * (`useJamTakes`, mounted with the main window) and the Songs list
+ * (`useSongTakes`) are both there on a desktop. A take started from one list
+ * replaces the other's in the slot, and the engine sends no ending for a take
+ * that was replaced; the ending that does come carries the new generation,
+ * which the first list's gate rightly says is not its own. So the first row
+ * would stay lit for good. The gates therefore know which of them holds the
+ * slot: a gate that starts a playback tells the one that held it, which
+ * forgets its playback and puts its row out (`onReplaced`).
  */
 export interface PlaybackGate {
   /** Play was pressed. The token is for `started`, when `play_take` answers. */
@@ -32,7 +42,15 @@ export interface PlaybackGate {
   stopped(): void;
   /** An ending arrived. True when it ends the playback the row is lit for. */
   ended(generation?: number): boolean;
+  /**
+   * What to do when another list's take replaces this one's in the engine's
+   * slot: put the row out. Returns the undo, for the list's unmount.
+   */
+  onReplaced(putRowOut: () => void): () => void;
 }
+
+/** The gate whose playback is in the engine's one take slot, if any. */
+let slotHolder: { replaced(): void } | null = null;
 
 export function createPlaybackGate(): PlaybackGate {
   /** The last play asked for. */
@@ -43,9 +61,18 @@ export function createPlaybackGate(): PlaybackGate {
   let known: number | null = null;
   /** Endings that arrived while waiting: one of them may be ours. */
   const early = new Set<number>();
+  let putRowOut: (() => void) | null = null;
+  const self = {
+    replaced() {
+      gate.stopped();
+      putRowOut?.();
+    },
+  };
 
-  return {
+  const gate: PlaybackGate = {
     starting() {
+      if (slotHolder && slotHolder !== self) slotHolder.replaced();
+      slotHolder = self;
       latest += 1;
       waiting = true;
       known = null;
@@ -63,7 +90,7 @@ export function createPlaybackGate(): PlaybackGate {
     },
     failed(token) {
       if (token !== latest) return false;
-      this.stopped();
+      gate.stopped();
       return true;
     },
     stopped() {
@@ -84,5 +111,13 @@ export function createPlaybackGate(): PlaybackGate {
       known = null;
       return true;
     },
+    onReplaced(fn) {
+      putRowOut = fn;
+      return () => {
+        if (putRowOut === fn) putRowOut = null;
+        if (slotHolder === self) slotHolder = null;
+      };
+    },
   };
+  return gate;
 }

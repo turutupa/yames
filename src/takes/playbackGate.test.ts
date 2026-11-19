@@ -69,4 +69,45 @@ describe("whose ending is this", () => {
     expect(gate.started(gate.starting(), null)).toBe(true);
     expect(gate.ended(9)).toBe(true);
   });
+
+  it("a take started from another list puts this list's row out, and its ending is not taken for ours", () => {
+    // The jam's list and the Songs list: two gates, one engine slot.
+    const jam = createPlaybackGate();
+    const songs = createPlaybackGate();
+    let jamRowLit = true;
+    const forget = jam.onReplaced(() => { jamRowLit = false; });
+    expect(jam.started(jam.starting(), 4)).toBe(true);
+    // Songs plays one: the engine replaces the jam's take and sends no ending for it.
+    const token = songs.starting();
+    expect(jamRowLit).toBe(false);
+    expect(songs.started(token, 5)).toBe(true);
+    expect(songs.ended(5)).toBe(true);
+    // The jam's own next take is its own again.
+    jamRowLit = true;
+    expect(jam.started(jam.starting(), 6)).toBe(true);
+    expect(jamRowLit).toBe(true);
+    expect(jam.ended(6)).toBe(true);
+    forget();
+  });
+
+  it("a list starting its own next take is not told it was replaced", () => {
+    const gate = createPlaybackGate();
+    let told = 0;
+    const forget = gate.onReplaced(() => { told += 1; });
+    gate.started(gate.starting(), 1);
+    gate.started(gate.starting(), 2);
+    expect(told).toBe(0);
+    forget();
+  });
+
+  it("a list that has gone is not called", () => {
+    const gone = createPlaybackGate();
+    let told = 0;
+    const forget = gone.onReplaced(() => { told += 1; });
+    gone.started(gone.starting(), 1);
+    forget();
+    const other = createPlaybackGate();
+    other.starting();
+    expect(told).toBe(0);
+  });
 });
