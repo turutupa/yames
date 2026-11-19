@@ -1904,7 +1904,8 @@ export function useSessionRun(input: SessionRunInput) {
     working: run.phase === "listening",
     /** Watch with Sound: one pass heard before it is played (card #28). */
     listen,
-    canGoBack: canGoBack(run),
+    // The tour's look shows a first ready screen, with nothing to go back to.
+    canGoBack: !preview && canGoBack(run),
     /** Escape asked "Leave this Session?" and it has not been answered. */
     leaveAsked,
     /** A block asked for from the bar while something runs: "Go there?" waits on this. */

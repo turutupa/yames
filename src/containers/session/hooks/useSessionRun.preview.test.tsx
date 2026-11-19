@@ -8,6 +8,8 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { DEFAULT_TEST_STATE, mockInvoke, setInvokeResponse } from "../../../test/mocks";
 import type { MainView } from "../../main-window/MainHeader";
 import { useSessionRun } from "./useSessionRun";
+import { startButton } from "../parts";
+import i18n from "../../../i18n";
 
 function mount() {
   setInvokeResponse("list_path_states", [{ pathId: "alternate-picking", startedAt: 1, updatedAt: 1 }]);
@@ -62,6 +64,11 @@ describe("useSessionRun — the tour's preview", () => {
     expect(h.startSession).not.toHaveBeenCalled();
     expect(h.startInput).not.toHaveBeenCalled();
     expect(mockInvoke.mock.calls.filter(([cmd]) => cmd === "save_path_state")).toHaveLength(0);
+    // The calm ready screen: the ordinary Start, nothing to go back to.
+    const start = startButton(h.result.current, false, i18n.t.bind(i18n));
+    expect(start.needsInput).toBe(false);
+    expect(start.label).toMatch(/^Start take, \d+ BPM$/);
+    expect(h.result.current.canGoBack).toBe(false);
     // The player's own view is not overwritten by the look.
     expect(
       mockInvoke.mock.calls.some(

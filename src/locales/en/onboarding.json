@@ -280,7 +280,7 @@
         },
         "take": {
           "title": "Start take",
-          "body": "When you are ready, the big button starts a take. Yames listens and grades your timing and notes. Slower and Faster change the tempo."
+          "body": "When you are ready, start a take. Yames listens and grades your timing and notes. Slower and Faster change the tempo."
         },
         "blocks": {
           "title": "Today's blocks",

@@ -9,7 +9,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { HOTKEYS } from "../../../hotkeys";
-import { Tour, comboFor, measureTarget, type TourProps } from "./Tour";
+import { Tour, clusterRects, comboFor, measureTarget, type TourProps } from "./Tour";
 import { LEARN_STOPS, TOUR_STOPS } from "./stops";
 import i18n from "../../../i18n";
 
@@ -256,6 +256,14 @@ describe("Tour — measurement", () => {
     const watch = LEARN_STOPS.find((s) => s.id === "session-watch")!;
     expect(measureTarget(watch)).toEqual({ x: 10, y: 20, width: 50, height: 20 });
     el.remove();
+  });
+
+  it("clusterRects keeps far groups apart and draws near ones as one", () => {
+    const start = { x: 20, y: 700, width: 340, height: 60 };
+    const minutes = { x: 20, y: 180, width: 340, height: 60 };
+    expect(clusterRects([start, minutes])).toEqual([start, minutes]);
+    const seg = { x: 20, y: 770, width: 340, height: 40 };
+    expect(clusterRects([start, seg])).toEqual([{ x: 20, y: 700, width: 340, height: 110 }]);
   });
 
   it("measureTarget is null when the target is not on screen", () => {

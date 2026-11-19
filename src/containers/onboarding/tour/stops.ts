@@ -50,6 +50,13 @@ export type TourStop = {
    * Every visible match is in the cut-out.
    */
   target?: string;
+  /**
+   * Light these as separate cut-outs, one per selector (the union of its
+   * matches), rather than one box around everything: what sits between them
+   * stays dimmed. Groups that end up next to each other are drawn as one.
+   * The card points at the first. `target` still lists everything.
+   */
+  groups?: string[];
 };
 
 /** The selector a stop spotlights. */
@@ -76,6 +83,8 @@ export const LEARN_STOPS: TourStop[] = [
     view: "today",
     i18nKey: "learn.start",
     keys: [],
+    // On a phone the plan sits between the minutes and Start.
+    groups: ['[data-testid="today-start"], [data-testid="today-choose-path"]', ".session-today-seg-label, .session-seg"],
   },
   {
     id: "paths",
@@ -109,8 +118,16 @@ export const LEARN_STOPS: TourStop[] = [
     view: "session",
     i18nKey: "learn.blocks",
     keys: ["session-prev", "session-next"],
+    // The bar's blocks and its Previous/Skip, without Exit or the input
+    // between them.
+    groups: [
+      '[data-testid="session-pips"] > .session-pip > i',
+      '[data-testid="session-previous"], [data-testid="session-skip-this"]',
+    ],
     target:
-      '[data-testid="session-pips"], [data-testid="session-previous"], [data-testid="session-skip-this"]',
+      // The blocks' drawn bars, not their 44 px hit boxes, which on a phone
+      // reach up to Exit's row.
+      '[data-testid="session-pips"] > .session-pip > i, [data-testid="session-previous"], [data-testid="session-skip-this"]',
   },
   {
     id: "progress",

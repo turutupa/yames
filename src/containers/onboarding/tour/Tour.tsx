@@ -86,6 +86,52 @@ export function measureTarget(stop: TourStop | string): Rect | null {
   return unionRects(targetsOf(stop).map(rectOf));
 }
 
+/**
+ * Cut-outs that close (twice the padding, so their rings would touch) are
+ * drawn as one.
+ */
+const CLUSTER_GAP = 2 * 8;
+
+/**
+ * Merge rects that lie within `gap` of each other. Order is kept: the group
+ * holding the first rect comes first.
+ */
+export function clusterRects(rects: Rect[], gap = CLUSTER_GAP): Rect[] {
+  const groups = rects.filter((r) => r.width > 0 && r.height > 0).map((r) => ({ ...r }));
+  const near = (a: Rect, b: Rect) =>
+    a.x - gap < b.x + b.width && b.x - gap < a.x + a.width && a.y - gap < b.y + b.height && b.y - gap < a.y + a.height;
+  let merged = true;
+  while (merged) {
+    merged = false;
+    outer: for (let i = 0; i < groups.length; i++) {
+      for (let j = i + 1; j < groups.length; j++) {
+        if (near(groups[i], groups[j])) {
+          groups[i] = unionRects([groups[i], groups[j]])!;
+          groups.splice(j, 1);
+          merged = true;
+          break outer;
+        }
+      }
+    }
+  }
+  return groups;
+}
+
+/** What a stop lights: the cut-outs, and the one the card points at. */
+export function measureHoles(stop: TourStop): { anchor: Rect | null; holes: Rect[] } {
+  if (!stop.groups) {
+    const all = unionRects(targetsOf(stop).map(rectOf));
+    return { anchor: all, holes: all ? [all] : [] };
+  }
+  // A phone's minutes and Start, with the plan between them; the bar's blocks
+  // and its Previous/Skip, with Exit and the input between.
+  const each = stop.groups
+    .map((sel) => unionRects(Array.from(document.querySelectorAll(sel)).map(rectOf)))
+    .filter((r): r is Rect => r !== null);
+  const holes = clusterRects(each);
+  return { anchor: holes[0] ?? null, holes };
+}
+
 function sameRect(a: Rect | null, b: Rect | null): boolean {
   if (a === b) return true;
   if (!a || !b) return false;
@@ -120,7 +166,7 @@ export function Tour({
 }: TourProps) {
   const { t } = useTranslation();
   const cardRef = useRef<HTMLDivElement>(null);
-  const [target, setTarget] = useState<Rect | null>(null);
+  const [target, setTarget] = useState<{ anchor: Rect | null; holes: Rect[] }>({ anchor: null, holes: [] });
   const [viewport, setViewport] = useState(() => ({
     width: typeof window === "undefined" ? 0 : window.innerWidth,
     height: typeof window === "undefined" ? 0 : window.innerHeight,
@@ -130,8 +176,14 @@ export function Tour({
   // --- Measurement ---------------------------------------------------------
   const measure = useCallback(() => {
     if (!stop) return;
-    const next = measureTarget(stop);
-    setTarget((prev) => (sameRect(prev, next) ? prev : next));
+    const next = measureHoles(stop);
+    setTarget((prev) =>
+      sameRect(prev.anchor, next.anchor) &&
+      prev.holes.length === next.holes.length &&
+      prev.holes.every((h, i) => sameRect(h, next.holes[i]))
+        ? prev
+        : next,
+    );
     setViewport((prev) =>
       prev.width === window.innerWidth && prev.height === window.innerHeight
         ? prev
@@ -266,9 +318,9 @@ export function Tour({
 
   if (!open || !stop) return null;
 
-  const hole = target
-    ? clipToViewport(padRect(target, SPOTLIGHT_PAD), viewport)
-    : null;
+  const lit = (r: Rect) => clipToViewport(padRect(r, SPOTLIGHT_PAD), viewport);
+  const hole = target.anchor ? lit(target.anchor) : null;
+  const holes = target.holes.map(lit).filter((h) => h.width > 0 && h.height > 0);
   const anchor: Anchor = computeAnchor(hole, cardSize, viewport);
   const isLast = index === total - 1;
   const maskId = "tour-spotlight-mask";
@@ -297,17 +349,18 @@ export function Tour({
               height={viewport.height}
               fill="#fff"
             />
-            {hole && (
+            {holes.map((h, n) => (
               <rect
+                key={n}
                 className="tour-hole"
-                x={hole.x}
-                y={hole.y}
-                width={hole.width}
-                height={hole.height}
+                x={h.x}
+                y={h.y}
+                width={h.width}
+                height={h.height}
                 rx={SPOTLIGHT_RADIUS}
                 fill="#000"
               />
-            )}
+            ))}
           </mask>
         </defs>
         <rect
@@ -320,19 +373,20 @@ export function Tour({
         />
       </svg>
 
-      {hole && (
+      {holes.map((h, n) => (
         <div
+          key={n}
           className="tour-ring"
           aria-hidden="true"
           style={{
-            left: hole.x,
-            top: hole.y,
-            width: hole.width,
-            height: hole.height,
+            left: h.x,
+            top: h.y,
+            width: h.width,
+            height: h.height,
             borderRadius: SPOTLIGHT_RADIUS,
           }}
         />
-      )}
+      ))}
 
       <div
         ref={cardRef}

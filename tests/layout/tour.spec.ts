@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { openShot, MOBILE_URL } from "./fits";
+import { openShot, MOBILE_URL, IN_ENGLISH } from "./fits";
 import { LEARN_STOPS, targetOf } from "../../src/containers/onboarding/tour/stops";
 import { SHOT_THEMES } from "../../src/shots/scenarios";
 
@@ -62,7 +62,7 @@ async function measureStop(page: Page, selector: string) {
     return {
       card: box(card),
       placement: card.getAttribute("data-placement"),
-      ring: box(document.querySelector(".tour-ring")!),
+      rings: [...document.querySelectorAll(".tour-ring")].map(box),
       targets,
       viewport: { width: innerWidth, height: innerHeight },
     };
@@ -94,7 +94,8 @@ async function walk(page: Page, where: string) {
     expect(m.targets.length, `${at}: no visible target`).toBeGreaterThan(0);
     const onScreen = m.targets.filter((t) => overlaps(t, screen));
     expect(onScreen.length, `${at}: the target is off screen`).toBeGreaterThan(0);
-    // The ring is the target's box grown by its padding, clipped to the window.
+    // Each target sits in a ring: its box grown by the padding, clipped to the
+    // window. A `separate` stop has one ring per group of targets.
     for (const t of onScreen) {
       const clipped = {
         x: Math.max(0, t.x),
@@ -102,7 +103,25 @@ async function walk(page: Page, where: string) {
         width: Math.min(screen.width, t.x + t.width) - Math.max(0, t.x),
         height: Math.min(screen.height, t.y + t.height) - Math.max(0, t.y),
       };
-      expect(inside(clipped, m.ring, 1.5), `${at}: a target sits outside the spotlight`).toBe(true);
+      expect(
+        m.rings.some((ring) => inside(clipped, ring, 1.5)),
+        `${at}: a target sits outside the spotlight`,
+      ).toBe(true);
+    }
+    // The tour's Session is the calm ready screen: it asked for no input, so
+    // nothing says one is missing, and the big button is the ordinary Start.
+    if (stop.view === "session") {
+      const calm = await page.evaluate(() => ({
+        alarms: ['session-input-chip', 'session-input-failed', 'session-no-input', 'session-back']
+          .filter((id) => document.querySelector(`[data-testid="${id}"]`)),
+        big: document.querySelector('[data-testid="session-big"]')?.textContent ?? "",
+      }));
+      expect(calm.alarms, `${at}: an input alarm in the tour's Session`).toEqual([]);
+      if (IN_ENGLISH) expect(calm.big, `${at}: the big button`).toMatch(/^Start take, \d+ BPM$/);
+    }
+    // The bubble never covers what it points at.
+    for (const ring of m.rings) {
+      expect(overlaps(m.card, { x: ring.x + 2, y: ring.y + 2, width: ring.width - 4, height: ring.height - 4 }), `${at}: the bubble covers a spotlight`).toBe(false);
     }
     await page.locator(".tour-btn-primary").click();
   }
@@ -129,26 +148,41 @@ test.describe("Show me around, on a phone", () => {
 });
 
 /**
- * The result's big button on one line on a phone, in every theme (owner,
- * 2026-11-18: "Go again, up to 90 BPM" took two lines in Aurora at 390 px).
+ * The result on a phone, in every theme (owner, 2026-11-18): the big button on
+ * one line ("Go again, up to 90 BPM" took two in Aurora at 390 px), the
+ * number inside its column (Neon's "87%" ran off the screen), and Slower,
+ * Faster and Move on sharing a row ("Move on" wrapped alone in Neon).
  */
 test.describe("the result's big button on a phone", () => {
   test.use({ baseURL: MOBILE_URL, isMobile: true, hasTouch: true });
   for (const width of [360, 390]) {
-    test(`is one line in every theme at ${width}px`, async ({ page }) => {
+    test(`fits in every theme at ${width}px`, async ({ page }) => {
       test.slow();
       const wrapped: string[] = [];
       for (const theme of SHOT_THEMES) {
         await openShot(page, "session-result", { width, height: 844 }, theme);
         await page.evaluate(() => document.fonts.ready);
         await page.waitForTimeout(150);
-        const lines = await page.evaluate(() => {
+        const m = await page.evaluate(() => {
           const el = document.querySelector('[data-testid="session-big"]')!;
           const range = document.createRange();
           range.selectNodeContents(el);
-          return new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size;
+          const lines = new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size;
+          // "78 → 87%": its words inside its own column, not off the screen.
+          const moved = document.querySelector(".session-moved")!.getBoundingClientRect();
+          const pair = document.createRange();
+          pair.selectNodeContents(document.querySelector(".session-moved-pair")!);
+          const numberRight = pair.getBoundingClientRect().right;
+          // Slower, Faster and Move on: one row, none of them cut.
+          const nudges = [...document.querySelectorAll<HTMLElement>(".session-between .session-nudges button")];
+          const rows = new Set(nudges.map((b) => Math.round(b.getBoundingClientRect().top))).size;
+          const cut = nudges.filter((b) => b.scrollWidth > b.clientWidth + 1).map((b) => b.textContent);
+          return { lines, numberOut: numberRight - moved.right, count: nudges.length, rows, cut };
         });
-        if (lines !== 1) wrapped.push(`${theme}: ${lines} lines`);
+        if (m.lines !== 1) wrapped.push(`${theme}: the big button takes ${m.lines} lines`);
+        if (m.numberOut > 1) wrapped.push(`${theme}: the number runs ${Math.round(m.numberOut)}px past its column`);
+        if (m.count <= 3 && m.rows !== 1) wrapped.push(`${theme}: the ${m.count} nudges take ${m.rows} rows`);
+        if (m.cut.length) wrapped.push(`${theme}: cut nudges ${m.cut.join(", ")}`);
       }
       expect(wrapped).toEqual([]);
     });

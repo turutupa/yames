@@ -66,3 +66,54 @@ export function useFitOneLine(ref: RefObject<HTMLElement>, label: string, minSca
     };
   }, [ref, label, minScale]);
 }
+
+/**
+ * The same idea for a row that must stay whole but is not one string: the
+ * result's "78 → 87%" (owner, 2026-11-18: in Neon's Orbitron the "87%" ran
+ * off a 390 px phone). Sets `--fit` on `box` to the scale at which `content`
+ * fits its width, never below `minScale`; the stylesheet multiplies the sizes
+ * by it.
+ */
+export function fitScale(box: HTMLElement, content: HTMLElement, minScale = 0.6): void {
+  box.style.setProperty("--fit", "1");
+  const room = box.clientWidth;
+  if (!(room > 0)) return;
+  let scale = 1;
+  // The words' extent, not the box's: a flex item that may shrink reports the
+  // width it was given, and its text runs on past it.
+  const range = typeof document.createRange === "function" ? document.createRange() : null;
+  range?.selectNodeContents(content);
+  const left = box.getBoundingClientRect().left;
+  for (let pass = 0; pass < 4; pass++) {
+    const width = range ? range.getBoundingClientRect().right - left : content.getBoundingClientRect().width;
+    if (width <= room) return;
+    if (scale <= minScale) return;
+    scale = Math.max(minScale, Math.floor(((scale * room) / width) * 0.985 * 1000) / 1000);
+    box.style.setProperty("--fit", String(scale));
+  }
+}
+
+export function useFitScale(
+  box: RefObject<HTMLElement>,
+  content: RefObject<HTMLElement>,
+  label: string,
+  minScale = 0.6,
+): void {
+  useLayoutEffect(() => {
+    if (!box.current || !content.current || typeof window === "undefined") return;
+    let alive = true;
+    const fit = () => {
+      if (alive && box.current && content.current) fitScale(box.current, content.current, minScale);
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    const fonts = typeof document !== "undefined" ? document.fonts : undefined;
+    void fonts?.ready.then(fit);
+    fonts?.addEventListener?.("loadingdone", fit);
+    return () => {
+      alive = false;
+      window.removeEventListener("resize", fit);
+      fonts?.removeEventListener?.("loadingdone", fit);
+    };
+  }, [box, content, label, minScale]);
+}

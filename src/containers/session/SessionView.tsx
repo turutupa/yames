@@ -6,7 +6,7 @@
  * `bigAction`, so they cannot disagree.
  */
 import { useEffect, useRef, useState } from "react";
-import { useFitOneLine } from "./hooks/useFitOneLine";
+import { useFitOneLine, useFitScale } from "./hooks/useFitOneLine";
 import { useTranslation } from "react-i18next";
 import {
   barLine,
@@ -205,6 +205,8 @@ function InputChip({
 }) {
   const { t } = useTranslation();
   const { run, inputStart, actions } = session;
+  // The tour's look (card #50) asked for no input: no chip saying one is off.
+  if (session.preview) return null;
   if (run.ungraded) {
     // Not graded; one press grades from the next Take. With grading off in
     // Settings that is what it says and what it turns on (acceptance 4,
@@ -595,6 +597,10 @@ function barText(check: Pick<BarCheck, "metric" | "min" | "max">, t: ReturnType<
 function DecidingNumber({ outcome }: { outcome: TakeOutcome }) {
   const { t } = useTranslation();
   const check = decidingCheck(outcome.grade);
+  // The pair on the screen's width in every theme's face (see useFitScale).
+  const movedRef = useRef<HTMLDivElement>(null);
+  const pairRef = useRef<HTMLSpanElement>(null);
+  useFitScale(movedRef, pairRef, `${outcome.previousValue}|${check?.metric}|${check?.value}`);
   if (!check) return null;
   const value = displayValue(check);
   const metric = metricKey(check.metric);
@@ -618,10 +624,10 @@ function DecidingNumber({ outcome }: { outcome: TakeOutcome }) {
           ? [t("session.result.decidedPass"), bar].filter(Boolean).join(" · ")
           : t("session.result.decidedMiss")}
       </div>
-      <div className="session-moved">
+      <div className="session-moved" ref={movedRef}>
         {/* The two numbers never part: "78 →" alone on a line above the
             result read as a heading (acceptance P1-2). */}
-        <span className="session-moved-pair">
+        <span className="session-moved-pair" ref={pairRef}>
           {moved && (
             <span className="session-moved-before" data-testid="session-moved-before">
               <small>{t("session.result.lastTime")}</small>
