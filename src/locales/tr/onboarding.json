@@ -228,7 +228,7 @@
       "next": "İleri",
       "done": "Bitti",
       "skip": "Turu atla",
-      "offer": "Yeni: Bugün, Yollar ve bir seans için kısa bir tur.",
+      "offer": "Yeni: Bugün, Yollar, bir seans ve İlerleme için kısa bir tur.",
       "offerAccept": "Etrafı gezdir",
       "offerDismiss": "Kapat",
       "stops": {
@@ -276,7 +276,7 @@
         },
         "watch": {
           "title": "Önce izle",
-          "body": "İzle notaları sırayla, tempoda çalar; denemeden önce şekli görürsün."
+          "body": "İzle, bir ölçü saymadan sonra sesli olarak bir kez çalar ve her notayı çalarken yakar: denemeden önce duyar ve görürsün."
         },
         "take": {
           "title": "Denemeyi başlat",
@@ -284,7 +284,7 @@
         },
         "blocks": {
           "title": "Bugünün blokları",
-          "body": "Seansın her bloğu burada, üstte. Gitmek için birine bas. Önceki bir geri gider, Bunu atla ileri geçer."
+          "body": "Seansın her bloğu burada, üstte. Gitmek için birine bas. ‹ Önceki bir geri gider, Bunu atla ileri geçer."
         },
         "progress": {
           "title": "Temiz tempo",

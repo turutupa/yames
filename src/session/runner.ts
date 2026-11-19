@@ -322,7 +322,16 @@ export function hasPrevious(state: RunState): boolean {
 function jumpTo(state: RunState, index: number, now: number): RunState {
   const steps = state.plan?.steps ?? [];
   if (!canJump(state) || index < 0 || index >= steps.length || index === state.stepIndex) return state;
-  const marked = { ...state, ...leaving(state) };
+  // Back to an earlier block, this one is still ahead and still to come: it
+  // is not "skipped" unless it is passed by later (acceptance 5, P2-5). Played
+  // out, it is done either way.
+  const back = index < state.stepIndex;
+  const left = leaving(state);
+  const step = currentStep(state);
+  const marked = {
+    ...state,
+    ...(back && step && !state.skipped.includes(step.id) ? { done: left.done, skipped: left.skipped.filter((id) => id !== step.id) } : left),
+  };
   const target = steps[index];
   // A block jumped back to is being played again: no longer "skipped".
   return enter({ ...marked, skipped: marked.skipped.filter((id) => id !== target.id) }, index, now);

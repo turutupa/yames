@@ -228,7 +228,7 @@
       "next": "Avanti",
       "done": "Fatto",
       "skip": "Salta il tour",
-      "offer": "Novità: un breve giro di Oggi, dei Percorsi e di una sessione.",
+      "offer": "Novità: un breve giro di Oggi, dei Percorsi, di una sessione e dei Progressi.",
       "offerAccept": "Mostrami in giro",
       "offerDismiss": "Chiudi",
       "stops": {
@@ -276,7 +276,7 @@
         },
         "watch": {
           "title": "Prima guarda",
-          "body": "Guarda suona le note in ordine, a tempo, così vedi la forma prima di provarla."
+          "body": "Guarda te lo suona una volta con il suono, dopo una battuta di conteggio, ogni nota accesa mentre suona: lo senti e lo vedi prima di provarlo."
         },
         "take": {
           "title": "Avvia la take",
@@ -284,7 +284,7 @@
         },
         "blocks": {
           "title": "I blocchi di oggi",
-          "body": "Qui in alto c'è ogni blocco della sessione. Toccane uno per andarci. Precedente torna indietro di uno, Salta questo va avanti."
+          "body": "Qui in alto c'è ogni blocco della sessione. Toccane uno per andarci. ‹ Precedente torna indietro di uno, Salta questo va avanti."
         },
         "progress": {
           "title": "Tempo pulito",

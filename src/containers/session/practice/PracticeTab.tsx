@@ -19,6 +19,7 @@ import type { TimingMark } from "../../songs/review/marks";
 import { TabStrip } from "../tabstrip/TabStrip";
 import { IS_MOBILE } from "../../../platform";
 import { resultsFromLights, tabStripInputOfTake } from "../tabstrip/tabStripModel";
+import type { WatchControl } from "./useWatch";
 
 /**
  * Ticks from the Take's start, as the strip counts them: negative through the
@@ -46,6 +47,7 @@ export function PracticeTab({
   paused = false,
   fretStrip = true,
   compact = false,
+  watch,
 }: {
   take: TakePlan;
   running: boolean;
@@ -60,6 +62,12 @@ export function PracticeTab({
   fretStrip?: boolean;
   /** A small overview under another picture: numbers held small, no panel padding. */
   compact?: boolean;
+  /**
+   * Watch is on, before the start (acceptance 5, P1-1): the strip follows its
+   * position (the demo's on the engine, or the silent preview's) the way it
+   * follows a Take's, the amber column going note to note.
+   */
+  watch?: Pick<WatchControl, "beat" | "playing" | "loopTicks">;
 }) {
   const input = useMemo(() => tabStripInputOfTake(take), [take]);
   const results = useMemo(
@@ -67,9 +75,13 @@ export function PracticeTab({
     [lights, take.schedule],
   );
   const start = take.score.bars[take.range.startBar]?.startTick ?? 0;
-  const live = running && playing && !paused;
-  const position = running && beat ? stripPosition(beat, start, input.barTicks, loopTicks) : -input.barTicks;
-  const follow = running && !paused;
+  const watching = !running && !!watch;
+  const at = watching ? watch.beat : beat;
+  const live = watching ? watch.playing : running && playing && !paused;
+  const position = (running || watching) && at
+    ? stripPosition(at, start, input.barTicks, watching ? watch.loopTicks : loopTicks)
+    : -input.barTicks;
+  const follow = (running && !paused) || watching;
   const neckNotes = useMemo(() => neckNotesOf(take.exercise.notes, "aim"), [take.exercise.notes]);
   const frets = take.exercise.notes.map((n) => n.fret).filter((f) => f > 0);
   const lo = frets.length ? Math.min(...frets) : 0;
@@ -81,21 +93,22 @@ export function PracticeTab({
         data-testid="practice-tab"
         data-running={running ? "" : undefined}
         data-paused={paused ? "" : undefined}
+        data-watching={watching ? "" : undefined}
         data-compact={compact ? "" : undefined}
       >
         <TabStrip
           notes={input.notes}
           barTicks={input.barTicks}
           patternBars={input.patternBars}
-          takeBars={loopTicks ? undefined : input.takeBars}
+          takeBars={loopTicks || watching ? undefined : input.takeBars}
           position={position}
           bpm={input.bpm}
           // Not through the count-in: its position stands still at -1 bar, and
           // smoothing it forward would run the column into the pattern early.
-          playing={live && !!beat && !beat.songCountIn}
+          playing={live && !!at && !at.songCountIn}
           results={results}
           mode={follow ? "follow" : "preview"}
-          marker={paused && beat && !beat.songCountIn ? position : null}
+          marker={!watching && paused && beat && !beat.songCountIn ? position : null}
           maxFretPx={compact ? 18 : undefined}
           growToFit={IS_MOBILE && !running && !compact}
         />

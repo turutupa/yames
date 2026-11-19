@@ -407,7 +407,7 @@ export function TabStrip({
   const follow = mode === "follow";
   const scroll = follow && size.width > 0 && size.width < SCROLL_BELOW;
   const fl = useMemo(() => {
-    if (!scroll) return { ...followLayout(model, size.width), scroll: false as const, cursorX: 0, windowWidth: 0 };
+    if (!scroll) return { ...followLayout(model, size.width, size.height), scroll: false as const, cursorX: 0, windowWidth: 0 };
     const sl = scrollLayout(model, size.width, size.height);
     return { ...sl, split: 1, fits: true, scroll: true as const };
   }, [model, size.width, size.height, scroll]);

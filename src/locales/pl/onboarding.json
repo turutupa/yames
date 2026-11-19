@@ -228,7 +228,7 @@
       "next": "Dalej",
       "done": "Gotowe",
       "skip": "Pomiń przewodnik",
-      "offer": "Nowość: krótki przewodnik po Dzisiaj, Ścieżkach i sesji.",
+      "offer": "Nowość: krótki przewodnik po Dzisiaj, Ścieżkach, sesji i Postępach.",
       "offerAccept": "Oprowadź mnie",
       "offerDismiss": "Zamknij",
       "stops": {
@@ -276,7 +276,7 @@
         },
         "watch": {
           "title": "Najpierw zobacz",
-          "body": "Pokaż odtwarza nuty po kolei w tempie, żebyś zobaczył kształt, zanim spróbujesz."
+          "body": "Pokaż zagra to raz z dźwiękiem, po takcie odliczania, podświetlając każdą nutę, gdy brzmi: usłyszysz i zobaczysz, zanim spróbujesz."
         },
         "take": {
           "title": "Zacznij podejście",
@@ -284,7 +284,7 @@
         },
         "blocks": {
           "title": "Dzisiejsze bloki",
-          "body": "Tu na górze jest każdy blok sesji. Naciśnij jeden, żeby do niego przejść. Wstecz cofa o jeden, Pomiń to idzie dalej."
+          "body": "Tu na górze jest każdy blok sesji. Naciśnij jeden, żeby do niego przejść. ‹ Wstecz cofa o jeden, Pomiń to idzie dalej."
         },
         "progress": {
           "title": "Czyste tempo",

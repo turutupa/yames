@@ -1721,6 +1721,11 @@
 }
 .session-moved-value {
   font: 700 clamp(100px, 20vh, 190px) / 0.84 var(--l-display);
+  /* Set tight, the digits reach above the line box by however tall the
+     theme's face draws them: Velvet's rose into "Passed · Bar 85%" over it
+     (acceptance 5, P1-5). The room is in the number's own size, so it holds
+     at every width (tests/layout/result-number.spec.ts). */
+  padding-top: 0.08em;
   font-variant-numeric: lining-nums tabular-nums;
   animation: session-fall 0.9s var(--l-ease) 0.5s both;
 }
@@ -3529,6 +3534,19 @@
 .practice-sound[aria-pressed="true"] svg {
   color: var(--l-amber);
 }
+.practice-sound[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--l-amber) 55%, transparent);
+}
+/* Under the Tab and the Runway: the Watch and Sound the Neck has in its foot
+   row (acceptance 5, P1-1), on the same side. */
+.practice-watchrow {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 10px;
+}
 .practice-legend {
   display: flex;
   gap: 14px;
@@ -3582,22 +3600,80 @@
   .practice-watch kbd {
     display: none;
   }
-  /* Sound beside Watch: the speaker alone, a thumb's 44 px square. */
+  /* Sound beside Watch, a thumb tall, its word kept (acceptance 5, P2-7): the
+     speaker alone did not say what it switched. */
   .practice-sound {
     order: -1;
-    min-width: 44px;
     min-height: 44px;
     margin-block: -10px;
     margin-left: -6px;
-    padding: 0;
+    padding: 0 12px;
     justify-content: center;
+    font-size: 14px;
   }
-  .practice-sound-word {
+  .practice-watchrow {
+    justify-content: flex-start;
+    gap: 12px;
+  }
+  .practice-watchrow .practice-watch,
+  .practice-watchrow .practice-sound {
+    margin: 0;
+  }
+  /* In the neck's foot row and the footer there is no room for the word: the
+     speaker says on or off by itself, a filled ring or a muted one. */
+  .practice-neck-foot .practice-sound,
+  .practice-watchrow[data-place="footer"] .practice-sound {
+    min-width: 44px;
+    padding: 0;
+  }
+  .practice-neck-foot .practice-sound-word,
+  .practice-watchrow[data-place="footer"] .practice-sound-word {
     display: none;
+  }
+  .practice-sound[aria-pressed="true"] {
+    background: color-mix(in srgb, var(--l-amber) 18%, transparent);
+    border-color: var(--l-amber);
+  }
+  .practice-sound[aria-pressed="false"] {
+    border-style: dashed;
+  }
+  .practice-sound svg {
+    width: 16px;
+    height: 16px;
+  }
+  /* The footer's row: Watch and Sound, then Slower and Faster on the right. */
+  .practice-watchrow[data-place="footer"] {
+    margin: 0;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .practice-watchrow[data-place="footer"] .practice-watch,
+  .practice-watchrow[data-place="footer"] .practice-sound {
+    order: 0;
+  }
+  .practice-watchrow[data-place="footer"] .session-nudges .session-secondary {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .practice-watchrow[data-place="footer"] .session-nudges {
+    margin-left: auto;
+    justify-content: flex-end;
   }
   /* A phone keeps the one key the dots need: what their numbers are. */
   .practice-legend > :not([data-k="fingers"]) {
     display: none;
+  }
+}
+@media (max-width: 380px) {
+  /* A small phone: Watch, Sound, the dots and "1–4 = fingers" on one line. */
+  .practice-neck-foot {
+    gap: 8px;
+  }
+  .practice-beats {
+    gap: 7px;
+  }
+  .practice-legend {
+    white-space: nowrap;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -4586,6 +4662,11 @@
   box-shadow: 0 6px 18px color-mix(in srgb, var(--l-shade) 35%, transparent);
   pointer-events: none;
 }
+/* Pressed: the tip has done its job until the pointer leaves (SessionView). */
+.session-pip[data-tip-off]::after,
+.session-prev[data-tip-off]::after {
+  display: none;
+}
 .session-pip[data-edge="start"]:hover::after,
 .session-pip[data-edge="start"]:focus-visible::after {
   left: 0;
@@ -5112,5 +5193,28 @@ button.session-input-chip:hover {
     padding-right: 8px;
     letter-spacing: 0.01em;
     white-space: nowrap;
+  }
+}
+
+/* A short desktop window (acceptance 5, P1-6): at 1024x700 with the input
+   failed, Start was cut by the window's bottom. Below 760 px of height, while
+   the input's trouble and its ways out are on the ready screen, the bar and
+   the folded "how" step aside for them (the bar is back the moment the input
+   is), and the Tab's panel gives up some of its room. Nothing of the footer
+   is ever under the fold (tests/layout/short-window.spec.ts). */
+@media (min-width: 481px) and (max-height: 760px) {
+  .session-mechlow:has(.session-input-failed) .session-how,
+  .session-mechlow:has(.session-input-failed) .session-coach {
+    display: none;
+  }
+  .session-runway-notes:has(.session-input-failed) > .session-runway-later {
+    display: none;
+  }
+  .session-page .practice-tab:not([data-compact]) {
+    min-height: 140px;
+    margin-top: 8px;
+  }
+  .practice-watchrow {
+    margin-top: 6px;
   }
 }

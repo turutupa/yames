@@ -228,7 +228,7 @@
       "next": "Weiter",
       "done": "Fertig",
       "skip": "Tour überspringen",
-      "offer": "Neu: eine kurze Tour durch Heute, Pfade und eine Session.",
+      "offer": "Neu: eine kurze Tour durch Heute, Pfade, eine Session und Fortschritt.",
       "offerAccept": "Zeig mir alles",
       "offerDismiss": "Schließen",
       "stops": {
@@ -276,7 +276,7 @@
         },
         "watch": {
           "title": "Erst ansehen",
-          "body": "Ansehen spielt die Töne der Reihe nach im Tempo vor, damit du die Form siehst, bevor du sie spielst."
+          "body": "Ansehen spielt es dir einmal mit Ton vor, nach einem Takt Einzählen, jeder Ton leuchtet, wenn er klingt: hören und sehen, bevor du es spielst."
         },
         "take": {
           "title": "Take starten",
@@ -284,7 +284,7 @@
         },
         "blocks": {
           "title": "Die Blöcke von heute",
-          "body": "Hier oben steht jeder Block der Session. Tippe einen an, um dorthin zu gehen. Zurück geht einen zurück, Überspringen geht weiter."
+          "body": "Hier oben steht jeder Block der Session. Tippe einen an, um dorthin zu gehen. ‹ Zurück geht einen zurück, Überspringen geht weiter."
         },
         "progress": {
           "title": "Sauberes Tempo",

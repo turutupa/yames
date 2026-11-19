@@ -77,8 +77,13 @@ describe("starting at block N (Today's rows)", () => {
     const back = run(s, { type: "jump", index: 1, now: NOW + 1000 });
     expect(back.stepIndex).toBe(1);
     expect(["ready", "timedReady"]).toContain(back.phase);
-    // Left before it was played: skipped, and still there to come back to.
-    expect(blockState(back, 2)).toBe("skipped");
+    // Gone back from before it was played: still ahead, not skipped
+    // (acceptance 5, P2-5: its tooltip said "· skipped").
+    expect(blockState(back, 2)).toBe("todo");
+    expect(back.skipped).toEqual([]);
+    // Passed by with Next, it is skipped then.
+    const passed = run(back, { type: "next", now: NOW + 2000 }, { type: "next", now: NOW + 3000 });
+    expect(blockState(passed, 2)).toBe("skipped");
   });
 
   it("the main Start still begins at block 1", () => {
@@ -99,6 +104,20 @@ describe("jumping between blocks", () => {
     expect(ahead.stepIndex).toBe(2);
     expect(blockState(ahead, 0)).toBe("skipped");
     expect(blockState(ahead, 1)).toBe("todo");
+  });
+
+  it("back from a block that was played out keeps it done", () => {
+    let s = run(start(), { type: "next", now: NOW });
+    const focus = s.stepIndex;
+    const stepId = s.plan!.steps[focus].id;
+    s = run(
+      s,
+      { type: "takeStarted", now: NOW },
+      { type: "takeStopped", now: NOW + 10_000 },
+      { type: "takeResult", outcome: ungradedOutcome(stepId), now: NOW + 11_000 },
+      { type: "jump", index: 0, now: NOW + 12_000 },
+    );
+    expect(blockState(s, focus)).toBe("done");
   });
 
   it("back to a block that was played keeps its Takes, and it is on again", () => {

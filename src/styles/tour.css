@@ -206,7 +206,12 @@
   outline-offset: 2px;
 }
 
-.tour-btn-primary {
+/* The accent's own ink, as the Session's Start button has it (`--l-amber-ink`
+   is `--accent-text`). Said with the card's class too: the light themes'
+   "every button is ink" rule (global.css) out-ranked the bare class and put
+   dark ink on the dark accent, about 2:1 (acceptance 5, P1-4). */
+.tour-btn-primary,
+.tour-card .tour-btn.tour-btn-primary {
   background: var(--accent);
   color: var(--accent-text, #fff);
 }

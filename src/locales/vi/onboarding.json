@@ -228,7 +228,7 @@
       "next": "Tiếp",
       "done": "Xong",
       "skip": "Bỏ qua hướng dẫn",
-      "offer": "Mới: xem nhanh Hôm nay, Lộ trình và một buổi tập.",
+      "offer": "Mới: xem nhanh Hôm nay, Lộ trình, một buổi tập và Tiến bộ.",
       "offerAccept": "Dẫn tôi đi xem",
       "offerDismiss": "Đóng",
       "stops": {
@@ -276,7 +276,7 @@
         },
         "watch": {
           "title": "Xem trước",
-          "body": "Xem phát các nốt theo thứ tự, đúng tempo, để bạn thấy hình thế trước khi thử."
+          "body": "Xem phát một lần có tiếng, sau một ô nhịp đếm vào, mỗi nốt sáng lên khi vang: bạn nghe và thấy trước khi thử."
         },
         "take": {
           "title": "Bắt đầu lượt",
@@ -284,7 +284,7 @@
         },
         "blocks": {
           "title": "Các khối hôm nay",
-          "body": "Mọi khối của buổi tập nằm ở đây, phía trên. Nhấn một khối để tới đó. Trước lùi lại một, Bỏ qua bài này đi tiếp."
+          "body": "Mọi khối của buổi tập nằm ở đây, phía trên. Nhấn một khối để tới đó. ‹ Trước lùi lại một, Bỏ qua bài này đi tiếp."
         },
         "progress": {
           "title": "Tempo sạch",

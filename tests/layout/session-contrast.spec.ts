@@ -75,3 +75,30 @@ for (const theme of ["ivory", "ember"]) {
     expect(bad, JSON.stringify(bad, null, 1)).toEqual([]);
   });
 }
+
+/**
+ * The tour's card over the Session, every stop, in all thirteen themes
+ * (acceptance 5, P1-4): its Next and Done sat at about 2:1 in six of them,
+ * dark ink on a dark accent, where the Session's own Start button was fine.
+ */
+const ALL_THEMES = "mono obsidian velvet neon aurora ash ember ivory arctic sand lavender prism manuscript".split(" ");
+for (const theme of ALL_THEMES) {
+  test(`the tour card in ${theme}: every stop clears AA`, async ({ page }) => {
+    test.setTimeout(60_000);
+    await openShot(page, "tour-learn", SIZE, theme);
+    const bad: unknown[] = [];
+    let stops = 0;
+    for (;;) {
+      await page.waitForTimeout(500);
+      const card = page.locator(".tour-card");
+      if ((await card.count()) === 0) break;
+      stops += 1;
+      bad.push(...belowAA(await textContrast(page, ".tour-card")).map((h) => ({ stop: stops, ...h })));
+      const next = page.locator(".tour-btn-primary");
+      if ((await next.count()) === 0 || stops > 12) break;
+      await next.click();
+    }
+    expect(stops, "the tour showed no stops").toBeGreaterThan(3);
+    expect(bad, JSON.stringify(bad, null, 1)).toEqual([]);
+  });
+}
