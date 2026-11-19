@@ -201,6 +201,11 @@ export type HandPosition = {
   /** The fret under the index finger where the Exercise starts. */
   fret: number;
   shifts: "none" | "allowed";
+  /**
+   * The hand holds this chord's shape rather than one finger per fret, as
+   * "E" for the open E chord (fingering audit 2): the Hand line names the shape.
+   */
+  chord?: string;
 };
 
 /**

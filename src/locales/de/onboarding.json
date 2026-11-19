@@ -183,7 +183,7 @@
       "inputNone": "Nicht eingerichtet",
       "alwaysOnTop": "Immer im Vordergrund",
       "start": "Weiter zu Heute",
-      "tour": "Tour durch die Werkzeuge (30 s)",
+      "tour": "Zeig mir alles",
       "moreOnToday": "+{{count}} weitere unter Heute",
       "subtitleNext": "Deine nächste Session wartet unter Heute. Ändere hier etwas – oder später in den Einstellungen.",
       "nextSession": "Deine nächste Session"
@@ -228,7 +228,7 @@
       "next": "Weiter",
       "done": "Fertig",
       "skip": "Tour überspringen",
-      "offer": "Neu hier? Sieh dir die 30-Sekunden-Tour an.",
+      "offer": "Neu: eine kurze Tour durch Heute, Pfade und eine Session.",
       "offerAccept": "Zeig mir alles",
       "offerDismiss": "Schließen",
       "stops": {
@@ -256,10 +256,45 @@
           "title": "Zen & Widget",
           "body": "Vollbild-Visuals oder ein winziges Widget, immer im Vordergrund."
         }
+      },
+      "learn": {
+        "plan": {
+          "title": "Dein Plan für heute",
+          "body": "Heute baut aus deinen Pfaden eine Session, die in deine Minuten passt. Jede Zeile sagt, was sie ist und warum sie drin ist. Tippe eine Zeile an, um dort zu beginnen, oder tausche sie mit Tauschen gegen eine andere."
+        },
+        "start": {
+          "title": "Deine Minuten, dann los",
+          "body": "Wähle, wie viel Zeit du hast, und der Plan passt sich an. Der Start-Knopf spielt ihn von vorn, und du kannst jederzeit aufhören."
+        },
+        "paths": {
+          "title": "Pfade",
+          "body": "Such dir hier ein Ziel aus. Nichts ist gesperrt: Öffne jeden Pfad und beginne bei jedem Schritt."
+        },
+        "neck": {
+          "title": "Das Griffbrett lesen",
+          "body": "Die Zahlen sind Finger: 1 ist der Zeigefinger, 4 der kleine Finger. Dein erster Ton liegt dort, wo „hier beginnen“ steht."
+        },
+        "watch": {
+          "title": "Erst ansehen",
+          "body": "Ansehen spielt die Töne der Reihe nach im Tempo vor, damit du die Form siehst, bevor du sie spielst."
+        },
+        "take": {
+          "title": "Take starten",
+          "body": "Wenn du so weit bist, starte einen Take. Yames hört zu und bewertet Timing und Töne. Langsamer und Schneller ändern das Tempo."
+        },
+        "blocks": {
+          "title": "Die Blöcke von heute",
+          "body": "Hier oben steht jeder Block der Session. Tippe einen an, um dorthin zu gehen. Zurück geht einen zurück, Überspringen geht weiter."
+        },
+        "progress": {
+          "title": "Sauberes Tempo",
+          "body": "Fortschritt zählt sauberes Tempo: das schnellste, bei dem du die Latte geschafft hast, nicht nur das schnellste, das du gespielt hast. Diese Zahl soll wachsen."
+        }
       }
     },
     "help": {
       "title": "Hilfe",
+      "showAround": "Zeig mir alles",
       "takeTour": "Tour durch die Werkzeuge",
       "runSetup": "Einrichtung erneut starten",
       "shortcuts": "Tastenkürzel",

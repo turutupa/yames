@@ -15,6 +15,7 @@
  */
 import type { Exercise, PathLevel, PathNote } from "./format";
 import { TICKS, barLengthTicks } from "./format";
+import { fromNowhere } from "./tabDsl";
 
 const SCALE_MM = 648;
 
@@ -63,13 +64,13 @@ type Group = {
 function fretGroups(notes: readonly PathNote[]): Group[] {
   const groups: Group[] = [];
   notes.forEach((note, index) => {
-    // A tap is played by the picking hand, or (a hammer-on from nowhere) by a
-    // fretting finger already over its fret: it asks nothing of the hand's span.
+    // A tap is played by the picking hand: it asks nothing of the hand's span.
     if (note.fret === 0 || note.tech.includes("tap")) return;
     const previous = notes[index - 1];
     // While a tap sounds the fretting hand is free, so the note after it may move.
     const afterTap = !!previous && previous.tech.includes("tap") && previous.string === note.string;
-    const legato = (note.tech.includes("hammer") || note.tech.includes("pull")) && !afterTap;
+    // A hammer from nowhere (`fromNowhere`) holds no finger down on its string: the hand may arrive with it.
+    const legato = (note.tech.includes("hammer") || note.tech.includes("pull")) && !afterTap && !fromNowhere(note, previous);
     const slideIn = !!previous && previous.tech.includes("slide") && previous.string === note.string;
     const last = groups[groups.length - 1];
     if (last && last.tick === note.tick) {

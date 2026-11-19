@@ -183,7 +183,7 @@
       "inputNone": "Ayarlanmadı",
       "alwaysOnTop": "Her zaman üstte",
       "start": "Bugün'e git",
-      "tour": "Araçları gez (30 sn)",
+      "tour": "Etrafı gezdir",
       "moreOnToday": "Bugün'de {{count}} tane daha",
       "subtitleNext": "Sıradaki seansın Bugün'de hazır. Buradan ya da sonra Ayarlar'dan değiştirebilirsin.",
       "nextSession": "Sıradaki seansın"
@@ -228,7 +228,7 @@
       "next": "İleri",
       "done": "Bitti",
       "skip": "Turu atla",
-      "offer": "Yeni misin? 30 saniyelik turu yap.",
+      "offer": "Yeni: Bugün, Yollar ve bir seans için kısa bir tur.",
       "offerAccept": "Etrafı gezdir",
       "offerDismiss": "Kapat",
       "stops": {
@@ -256,10 +256,45 @@
           "title": "Zen ve widget",
           "body": "Tam ekran görseller ya da hep üstte duran minik bir widget."
         }
+      },
+      "learn": {
+        "plan": {
+          "title": "Bugünün planı",
+          "body": "Bugün, yollarından dakikalarına sığan bir seans kurar. Her satır ne olduğunu ve neden orada olduğunu söyler. Oradan başlamak için bir satıra bas ya da Değiştir ile başka bir şeyle değiştir."
+        },
+        "start": {
+          "title": "Dakikaların, sonra Başla",
+          "body": "Ne kadar vaktin olduğunu seç, plan yeniden ayarlansın. Başla planı baştan çalar, istediğin an çıkabilirsin."
+        },
+        "paths": {
+          "title": "Yollar",
+          "body": "Hedefini burada seç. Hiçbir şey kilitli değil: istediğin Yolu aç, istediğin adımdan başla."
+        },
+        "neck": {
+          "title": "Sapı okumak",
+          "body": "Rakamlar parmaklardır: 1 işaret parmağın, 4 serçe parmağın. İlk notan “buradan başla” yazan yerde."
+        },
+        "watch": {
+          "title": "Önce izle",
+          "body": "İzle notaları sırayla, tempoda çalar; denemeden önce şekli görürsün."
+        },
+        "take": {
+          "title": "Denemeyi başlat",
+          "body": "Hazır olunca bir deneme başlat. Yames dinler, zamanlamanı ve notalarını puanlar. Daha yavaş ve Daha hızlı tempoyu değiştirir."
+        },
+        "blocks": {
+          "title": "Bugünün blokları",
+          "body": "Seansın her bloğu burada, üstte. Gitmek için birine bas. Önceki bir geri gider, Bunu atla ileri geçer."
+        },
+        "progress": {
+          "title": "Temiz tempo",
+          "body": "İlerleme temiz tempoyu sayar: sadece çaldığın en hızlı tempoyu değil, çıtayı geçtiğin en hızlı tempoyu. Büyütmen gereken sayı bu."
+        }
       }
     },
     "help": {
       "title": "Yardım",
+      "showAround": "Etrafı gezdir",
       "takeTour": "Araçları gez",
       "runSetup": "Kurulumu yeniden çalıştır",
       "shortcuts": "Klavye kısayolları",

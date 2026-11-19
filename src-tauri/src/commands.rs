@@ -1600,12 +1600,24 @@ pub async fn start_evaluation(
     // `ta` is still held from above: locking the analyzer again here would
     // deadlock.
     od.set_take_tap(ta.take_audio_tap());
+    // Listen first (card #28): while the app plays a demo of the Exercise, a
+    // microphone hearing it is not the player. Read without the analyzer's
+    // lock, so the page's onset dots stay quiet too.
+    let demo_gate = ta.demo_gate();
     od.start(ai_shared, profile, tempo_for_onset, move |onset| {
-        let _ = app_for_onset.emit("onset-detected", &onset);
-        // Feed into timing analyzer for beat matching
-        if let Ok(ta) = ta_shared.lock() {
-            ta.log_onset(onset);
-        }
+        crate::timing::forward_heard_onset(
+            &demo_gate,
+            onset,
+            |onset| {
+                let _ = app_for_onset.emit("onset-detected", onset);
+            },
+            // Feed into timing analyzer for beat matching
+            |onset| {
+                if let Ok(ta) = ta_shared.lock() {
+                    ta.log_heard_onset(onset);
+                }
+            },
+        );
     });
 
     // Set MIDI onset callback — forward NoteOn events as onsets for timing
@@ -1900,6 +1912,40 @@ pub fn notify_settings_change(timing_analyzer: State<SharedTimingAnalyzer>) -> R
         .map_err(|e| format!("Lock failed: {e}"))?;
     ta.notify_settings_change();
     Ok(())
+}
+
+/// Listen first (card #28): the Session is playing a demo of the Exercise
+/// through the speakers (`on`, `length_ms` long with its count-in), or has
+/// stopped (`!on`). While it plays, what the input HEARS is not the player:
+/// heard onsets are dropped before the analyzer, so no segment, beat
+/// feedback, coach tip or practice stat counts the demo, and the open
+/// segment is closed first. Off, they count again once its last note has rung
+/// out (`tail`, the default), or at once (`tail: false`, a demo stopped to
+/// start something). The gate never lasts past the demo's length and tail,
+/// nor past `timing::MAX_DEMO_NS`, and stopping the input lifts it. MIDI is
+/// never gated.
+///
+/// Async, and the lock taken on a blocking thread, so the UI thread never
+/// waits behind `stop_evaluation` joining the analysis thread.
+#[tauri::command]
+pub async fn set_listen_demo(
+    on: bool,
+    length_ms: Option<u64>,
+    tail: Option<bool>,
+    timing_analyzer: State<'_, SharedTimingAnalyzer>,
+) -> Result<(), String> {
+    let shared = timing_analyzer.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let ta = shared.lock().map_err(|e| format!("Lock failed: {e}"))?;
+        if on {
+            ta.start_demo(length_ms);
+        } else {
+            ta.end_demo(tail.unwrap_or(true));
+        }
+        Ok(())
+    })
+    .await
+    .map_err(|e| format!("set_listen_demo join failed: {e}"))?
 }
 
 /// Force-close the open practice segment so that `get_session_report`

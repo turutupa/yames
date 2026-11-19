@@ -1130,6 +1130,8 @@ export function installShotMock(shot: Shot, theme: string): void {
    * that is what happens below.
    */
   let songTransport: SongTransport | null = null;
+  /** The song on the engine is a listen demo, heard at its tempo (card #28). */
+  let songDemo = false;
 
   /** Which onsets of the pushed schedule have already been reported. */
   let onsetsSaid = 0;
@@ -1347,7 +1349,8 @@ export function installShotMock(shot: Shot, theme: string): void {
     // warm-up at 15 ms a beat moved the camera every 60 ms and hid what the
     // neck does at a real tempo (acceptance P0-1).
     const fast = shot.session && shot.session.stop !== "playing" && shot.session.stop !== "timed" && !!songTransport;
-    beatTimer = setTimeout(beatLoop, fast ? 15 : 60000 / (STATE.bpm as number));
+    const demoBpm = songDemo ? songTransport?.tempoMap[0]?.bpm : undefined;
+    beatTimer = setTimeout(beatLoop, fast && !songDemo ? 15 : 60000 / (demoBpm || (STATE.bpm as number)));
   }
 
   function setPlaying(next: boolean) {
@@ -1710,6 +1713,10 @@ export function installShotMock(shot: Shot, theme: string): void {
      */
     load_song: (a) => {
       songTransport = (a?.transport as SongTransport | undefined) ?? null;
+      // A listen demo (card #28) carries the guitar as a guide synth track,
+      // which no Take's band does: it plays at its own tempo, never hurried.
+      const tracks = (a?.backing as { tracks?: { role: string; guide: boolean }[] } | null)?.tracks ?? [];
+      songDemo = tracks.some((t) => t.role === "synth" && t.guide);
       return { bars: 8, passMs: 20_000, playedNotes: 96, droppedNotes: 0 };
     },
     /*
@@ -1893,6 +1900,8 @@ export function installShotMock(shot: Shot, theme: string): void {
       onsetsSaid = 0;
       return null;
     }
+    // Listen first (card #28): the engine ignores the input while a demo plays.
+    if (cmd === "set_listen_demo") return null;
     if (cmd === "clear_score_schedule") {
       // The schedule itself is kept: `analyze_attempt` is asked for a pass
       // over it after the transport has already cleared it, and a review

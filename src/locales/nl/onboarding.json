@@ -183,7 +183,7 @@
       "inputNone": "Niet ingesteld",
       "alwaysOnTop": "Altijd op voorgrond",
       "start": "Naar Vandaag",
-      "tour": "Rondleiding door de tools (30 s)",
+      "tour": "Laat me rondkijken",
       "moreOnToday": "+{{count}} meer op Vandaag",
       "subtitleNext": "Je volgende sessie staat klaar op Vandaag. Wijzig hier iets, of later in Instellingen.",
       "nextSession": "Je volgende sessie"
@@ -228,7 +228,7 @@
       "next": "Volgende",
       "done": "Klaar",
       "skip": "Rondleiding overslaan",
-      "offer": "Nieuw hier? Doe de rondleiding van 30 seconden.",
+      "offer": "Nieuw: een korte rondleiding door Vandaag, Leerpaden en een sessie.",
       "offerAccept": "Laat me rondkijken",
       "offerDismiss": "Sluiten",
       "stops": {
@@ -256,10 +256,45 @@
           "title": "Zen en widget",
           "body": "Beeldvullende visuals, of een piepklein widget altijd bovenop."
         }
+      },
+      "learn": {
+        "plan": {
+          "title": "Het plan voor vandaag",
+          "body": "Vandaag maakt van je leerpaden een sessie die in je minuten past. Elke regel zegt wat het is en waarom het erin zit. Druk op een regel om daar te beginnen, of op Wisselen om hem te ruilen."
+        },
+        "start": {
+          "title": "Je minuten, dan Starten",
+          "body": "Kies hoeveel tijd je hebt en het plan past zich aan. Starten speelt het vanaf het begin, en je kunt stoppen wanneer je wilt."
+        },
+        "paths": {
+          "title": "Leerpaden",
+          "body": "Kies hier een doel. Niets zit op slot: open elk leerpad en begin bij elke stap."
+        },
+        "neck": {
+          "title": "De hals lezen",
+          "body": "De cijfers zijn vingers: 1 is je wijsvinger, 4 je pink. Je eerste noot staat waar „begin hier” staat."
+        },
+        "watch": {
+          "title": "Eerst bekijken",
+          "body": "Bekijk speelt de noten op volgorde op tempo, zodat je de vorm ziet voordat je hem probeert."
+        },
+        "take": {
+          "title": "Take starten",
+          "body": "Als je klaar bent, start je een take. Yames luistert en beoordeelt je timing en noten. Langzamer en Sneller veranderen het tempo."
+        },
+        "blocks": {
+          "title": "De blokken van vandaag",
+          "body": "Elk blok van de sessie staat hierboven. Druk op een blok om erheen te gaan. Vorige gaat er een terug, Deze overslaan gaat verder."
+        },
+        "progress": {
+          "title": "Schoon tempo",
+          "body": "Voortgang telt schoon tempo: het snelste waarop je de lat haalde, niet alleen het snelste dat je speelde. Dat is het getal om te laten groeien."
+        }
       }
     },
     "help": {
       "title": "Help",
+      "showAround": "Laat me rondkijken",
       "takeTour": "Rondleiding door de tools",
       "runSetup": "Setup opnieuw doorlopen",
       "shortcuts": "Sneltoetsen",

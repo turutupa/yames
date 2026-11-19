@@ -183,7 +183,7 @@
       "inputNone": "Nie skonfigurowano",
       "alwaysOnTop": "Zawsze na wierzchu",
       "start": "Przejdź do Dzisiaj",
-      "tour": "Przewodnik po narzędziach (30 s)",
+      "tour": "Oprowadź mnie",
       "moreOnToday": "+{{count}} więcej w Dzisiaj",
       "subtitleNext": "Twoja następna sesja czeka w Dzisiaj. Zmień coś tutaj albo później w Ustawieniach.",
       "nextSession": "Twoja następna sesja"
@@ -228,7 +228,7 @@
       "next": "Dalej",
       "done": "Gotowe",
       "skip": "Pomiń przewodnik",
-      "offer": "Nowy tutaj? Zobacz 30-sekundowy przewodnik.",
+      "offer": "Nowość: krótki przewodnik po Dzisiaj, Ścieżkach i sesji.",
       "offerAccept": "Oprowadź mnie",
       "offerDismiss": "Zamknij",
       "stops": {
@@ -256,10 +256,45 @@
           "title": "Zen i widżet",
           "body": "Wizualizacje na pełnym ekranie albo mały widżet zawsze na wierzchu."
         }
+      },
+      "learn": {
+        "plan": {
+          "title": "Plan na dziś",
+          "body": "Dzisiaj składa sesję z twoich ścieżek tak, żeby zmieściła się w twoich minutach. Każdy wiersz mówi, co to jest i dlaczego tu jest. Naciśnij wiersz, żeby zacząć od niego, albo Zamień, żeby wziąć coś innego."
+        },
+        "start": {
+          "title": "Twoje minuty, potem start",
+          "body": "Wybierz, ile masz czasu, a plan się dopasuje. Przycisk startu gra go od początku, a przerwać możesz w każdej chwili."
+        },
+        "paths": {
+          "title": "Ścieżki",
+          "body": "Tu wybierasz cel. Nic nie jest zablokowane: otwórz dowolną ścieżkę i zacznij od dowolnego kroku."
+        },
+        "neck": {
+          "title": "Jak czytać gryf",
+          "body": "Liczby to palce: 1 to palec wskazujący, 4 to mały palec. Pierwsza nuta jest tam, gdzie napisano „zacznij tutaj”."
+        },
+        "watch": {
+          "title": "Najpierw zobacz",
+          "body": "Pokaż odtwarza nuty po kolei w tempie, żebyś zobaczył kształt, zanim spróbujesz."
+        },
+        "take": {
+          "title": "Zacznij podejście",
+          "body": "Kiedy będziesz gotowy, zacznij podejście. Yames słucha i ocenia rytm i nuty. Wolniej i Szybciej zmieniają tempo."
+        },
+        "blocks": {
+          "title": "Dzisiejsze bloki",
+          "body": "Tu na górze jest każdy blok sesji. Naciśnij jeden, żeby do niego przejść. Wstecz cofa o jeden, Pomiń to idzie dalej."
+        },
+        "progress": {
+          "title": "Czyste tempo",
+          "body": "Postępy liczą czyste tempo: najszybsze, przy którym spełniłeś wymaganie, a nie tylko najszybsze, jakie zagrałeś. To tę liczbę warto podnosić."
+        }
       }
     },
     "help": {
       "title": "Pomoc",
+      "showAround": "Oprowadź mnie",
       "takeTour": "Przewodnik po narzędziach",
       "runSetup": "Uruchom konfigurację ponownie",
       "shortcuts": "Skróty klawiszowe",

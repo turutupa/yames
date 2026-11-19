@@ -6,7 +6,8 @@
  *
  * The rules, in the order they decide (the fingering audit, 2026-11-18):
  *
- * 1. An open string is 0. A tapped note is the picking hand's: no number.
+ * 1. An open string is 0. A tapped note is the picking hand's: no number. (A
+ *    hammer-on from nowhere is a hammer, `h`, and gets its finger like one.)
  * 2. A note the content fingers itself (`finger`, the tab's `f1`..`f4`) keeps
  *    that finger, and the hand is placed to match it.
  * 3. The hand sits with the index at a fret (its "base") and plays one finger
@@ -141,24 +142,9 @@ export function fingerPlan(notes: readonly FingerNote[], position: HandAt | unde
   });
   spread(notes, groups, bases, out);
   bends(notes, groups, bases, out);
-  fromNowhere(notes, order, out);
   return out;
 }
 
-/**
- * A "tap" under the fretting hand's own four fingers is a hammer-on from
- * nowhere (the fretting finger already over its fret, as `reach.ts` reads it):
- * it gets that finger. A tap past the hand is the picking hand's: no number.
- */
-function fromNowhere(notes: readonly FingerNote[], order: number[], out: FingerStep[]) {
-  let base: number | null = null;
-  for (const i of order) {
-    if (out[i].base !== null) base = out[i].base;
-    if (!isTap(notes[i]) || notes[i].fret === 0 || base === null) continue;
-    const d = notes[i].fret - base;
-    if (d >= 0 && d <= 3) out[i] = { finger: (d + 1) as Finger, base };
-  }
-}
 
 /** The cheapest bases, group by group: few, short shifts, none inside legato, a slide keeps its finger. */
 function walk(notes: readonly FingerNote[], groups: Group[], start: number, usual?: Map<string, Finger>): number[] {

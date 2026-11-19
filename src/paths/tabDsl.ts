@@ -8,7 +8,8 @@
  *   of four). `/16t` is a sextuplet note, `/16q` a sixteenth quintuplet, five
  *   to the beat.
  * - `s:f` is string and fret, string 1 the highest. Suffixes, in any order:
- *   `h` hammer-on, `p` pull-off (on the note arrived at), `s` slides out to the
+ *   `h` hammer-on, `p` pull-off (on the note arrived at; an `h` whose note
+ *   before it is on another string is a hammer-on from nowhere, `fromNowhere`), `s` slides out to the
  *   next note, `b2` bends two semitones, `v` vibrato, `>` accent, `m` palm
  *   mute, `l` let ring, `t` tapped with the picking hand (a loud attack with
  *   no stroke), `d` or `u` a printed stroke, `f1`..`f4` the fretting finger
@@ -175,6 +176,18 @@ export function parseTab(tab: string, tuning: readonly number[], barTicks: numbe
 }
 
 const isLegatoArrival = (n: PathNote) => n.tech.includes("hammer") || n.tech.includes("pull");
+
+/**
+ * A hammer-on from nowhere: a hammer whose note before it sounds on another
+ * string (or there is none), so the fretting finger hammers onto a silent
+ * string. Played by the fretting hand, never picked, and as soft as any hammer:
+ * a quiet one that is not heard costs nothing. The conventional tab mark, an
+ * `h` with no note before it on its string (fingering audit 2: it used to be
+ * written as a tap, and drew a T and no finger).
+ */
+export function fromNowhere(note: PathNote, previous: PathNote | undefined): boolean {
+  return note.tech.includes("hammer") && (!previous || previous.string !== note.string);
+}
 
 /** Is this note picked? A hammer, a pull, a tap or a slid-to note is not. */
 export function isPicked(note: PathNote, previous: PathNote | undefined): boolean {

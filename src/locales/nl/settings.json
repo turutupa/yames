@@ -151,9 +151,11 @@
       "resetHintsHint": "De eenmalige tips opnieuw tonen",
       "resetHintsAction": "Resetten",
       "resetHintsDone": "Klaar",
-      "takeTour": "Rondleiding door de tools",
-      "takeTourHint": "Een rondleiding van 30 seconden door Metronoom en Tempotraining",
-      "takeTourAction": "Start"
+      "takeTour": "Laat me rondkijken",
+      "takeTourHint": "Een korte rondleiding door Vandaag, Leerpaden, een sessie en Voortgang",
+      "takeTourAction": "Start",
+      "takeToolsTour": "Rondleiding door de tools",
+      "takeToolsTourHint": "Een rondleiding van 30 seconden door Metronoom en Tempotraining"
     },
     "devices": {
       "title": "Apparaten",

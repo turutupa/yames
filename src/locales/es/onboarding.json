@@ -183,7 +183,7 @@
       "inputNone": "Sin configurar",
       "alwaysOnTop": "Siempre visible",
       "start": "Ir a Hoy",
-      "tour": "Recorrer las herramientas (30 s)",
+      "tour": "Enséñame",
       "moreOnToday": "+{{count}} más en Hoy",
       "subtitleNext": "Tu próxima Sesión te espera en Hoy. Cambia lo que quieras aquí o luego en Ajustes.",
       "nextSession": "Tu próxima sesión"
@@ -228,7 +228,7 @@
       "next": "Siguiente",
       "done": "Listo",
       "skip": "Omitir el tour",
-      "offer": "¿Eres nuevo? Haz el tour de 30 segundos.",
+      "offer": "Nuevo: un recorrido corto por Hoy, Rutas y una Sesión.",
       "offerAccept": "Enséñame",
       "offerDismiss": "Descartar",
       "stops": {
@@ -256,10 +256,45 @@
           "title": "Zen y widget",
           "body": "Visuales a pantalla completa, o un widget diminuto siempre visible."
         }
+      },
+      "learn": {
+        "plan": {
+          "title": "El plan de hoy",
+          "body": "Hoy arma una Sesión con tus Rutas para que quepa en tus minutos. Cada fila dice qué es y por qué está. Pulsa una fila para empezar ahí, o Cambiar para cambiarla por otra."
+        },
+        "start": {
+          "title": "Tus minutos, y a empezar",
+          "body": "Elige cuánto tiempo tienes y el plan se reajusta. Empezar lo toca desde el principio, y puedes salir cuando quieras."
+        },
+        "paths": {
+          "title": "Rutas",
+          "body": "Elige aquí un objetivo. No hay nada bloqueado: abre cualquier Ruta y empieza en cualquier paso."
+        },
+        "neck": {
+          "title": "Leer el mástil",
+          "body": "Los números son dedos: 1 es el índice, 4 el meñique. Tu primera nota está donde pone «empieza aquí»."
+        },
+        "watch": {
+          "title": "Míralo primero",
+          "body": "Ver toca las notas en orden y a tempo, para que veas la forma antes de intentarlo."
+        },
+        "take": {
+          "title": "Empezar toma",
+          "body": "Cuando estés listo, empieza una toma. Yames escucha y califica tu tiempo y tus notas. Más lento y Más rápido cambian el tempo."
+        },
+        "blocks": {
+          "title": "Los bloques de hoy",
+          "body": "Aquí arriba está cada bloque de la Sesión. Pulsa uno para ir a él. Anterior vuelve uno atrás y Saltar este pasa al siguiente."
+        },
+        "progress": {
+          "title": "Tempo limpio",
+          "body": "Progreso cuenta el tempo limpio: el más rápido al que alcanzaste el listón, no solo el más rápido que tocaste. Ese es el número que hay que subir."
+        }
       }
     },
     "help": {
       "title": "Ayuda",
+      "showAround": "Enséñame",
       "takeTour": "Recorrer las herramientas",
       "runSetup": "Volver a la configuración inicial",
       "shortcuts": "Atajos de teclado",

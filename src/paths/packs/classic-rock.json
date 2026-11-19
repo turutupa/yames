@@ -3092,7 +3092,8 @@
           "loops": true,
           "position": {
             "fret": 1,
-            "shifts": "none"
+            "shifts": "none",
+            "chord": "E"
           },
           "pickPlan": "free",
           "crossing": "none",
@@ -3329,7 +3330,8 @@
           "loops": true,
           "position": {
             "fret": 1,
-            "shifts": "allowed"
+            "shifts": "allowed",
+            "chord": "E"
           },
           "pickPlan": "free",
           "crossing": "none",

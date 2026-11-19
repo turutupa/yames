@@ -151,9 +151,11 @@
       "resetHintsHint": "Réafficher les astuces uniques",
       "resetHintsAction": "Réinitialiser",
       "resetHintsDone": "Terminé",
-      "takeTour": "Visiter les outils",
-      "takeTourHint": "Une visite de 30 secondes du Métronome et de la Rampe",
-      "takeTourAction": "Démarrer"
+      "takeTour": "Faites-moi visiter",
+      "takeTourHint": "Une courte visite d'Aujourd'hui, des Parcours, d'une séance et des Progrès",
+      "takeTourAction": "Démarrer",
+      "takeToolsTour": "Visiter les outils",
+      "takeToolsTourHint": "Une visite de 30 secondes du Métronome et de la Rampe"
     },
     "devices": {
       "title": "Périphériques",

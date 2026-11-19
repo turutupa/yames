@@ -1709,12 +1709,14 @@
   color: var(--l-quiet);
 }
 @media (max-width: 480px) {
+  /* `--fit` (useFitScale) brings the pair inside the screen when the theme's
+     face is a wide one: Neon's "87%" ran off a 390 px phone. */
   .session-page .session-moved-before {
-    font-size: clamp(36px, 12vw, 52px);
+    font-size: calc(clamp(36px, 12vw, 52px) * var(--fit, 1));
   }
   .session-page .session-moved-value,
   .session-page .session-between .session-moved-value {
-    font-size: clamp(64px, 24vw, 104px);
+    font-size: calc(clamp(64px, 24vw, 104px) * var(--fit, 1));
   }
 }
 .session-moved-value {
@@ -3500,6 +3502,33 @@
   font: 700 11px/1.4 var(--l-display);
   color: var(--l-quiet);
 }
+/* Sound: Watch plays the notes as well (card #28). Beside Watch, its own quiet switch. */
+.practice-sound {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border: 1px solid var(--l-line2);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--l-quiet);
+  font: 600 12px/1.4 var(--l-body);
+  cursor: pointer;
+}
+.practice-sound svg {
+  fill: currentColor;
+  stroke: currentColor;
+}
+.practice-sound svg path:first-child {
+  stroke: none;
+}
+.practice-sound[aria-pressed="true"] {
+  color: var(--l-ink);
+}
+.practice-sound[aria-pressed="true"] svg {
+  color: var(--l-amber);
+}
 .practice-legend {
   display: flex;
   gap: 14px;
@@ -3551,6 +3580,19 @@
     font-size: 14px;
   }
   .practice-watch kbd {
+    display: none;
+  }
+  /* Sound beside Watch: the speaker alone, a thumb's 44 px square. */
+  .practice-sound {
+    order: -1;
+    min-width: 44px;
+    min-height: 44px;
+    margin-block: -10px;
+    margin-left: -6px;
+    padding: 0;
+    justify-content: center;
+  }
+  .practice-sound-word {
     display: none;
   }
   /* A phone keeps the one key the dots need: what their numbers are. */
@@ -4640,6 +4682,11 @@ button.session-input-chip:hover {
 .session-input-dot[data-state="off"] {
   background: var(--l-clash);
 }
+/* A listen demo is playing (card #28): the app's sound, not the player's. */
+.session-input-dot[data-state="demo"] {
+  background: var(--l-amber);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--l-amber) 60%, transparent);
+}
 .session-input-failed {
   display: flex;
   flex-direction: column;
@@ -5041,5 +5088,29 @@ button.session-input-chip:hover {
     font-size: 11px;
     line-height: 1.1;
     padding: 3px 7px;
+  }
+}
+
+/* A result's Slower, Faster and Move on share one row on a phone, in every
+   theme's face (owner, 2026-11-18: in Neon "Move on" wrapped to a row of its
+   own). Each takes its share of the row and a tighter side padding; a fourth
+   ("Go again, 80 BPM", when the big button is something else) still wraps,
+   and the rows it makes are filled rather than ragged. */
+@media (max-width: 480px) {
+  .session-page .session-between .session-nudges {
+    gap: 6px;
+  }
+  .session-page .session-between .session-nudges > * {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .session-page .session-between .session-nudges .session-nudge-wrap > .session-secondary {
+    width: 100%;
+  }
+  .session-page .session-between .session-nudges .session-secondary {
+    padding-left: 8px;
+    padding-right: 8px;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
   }
 }

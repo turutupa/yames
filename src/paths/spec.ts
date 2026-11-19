@@ -106,6 +106,8 @@ export type ExerciseSpec = {
   position?: number;
   /** Set when the hand moves. Default: it stays put. */
   shifts?: boolean;
+  /** The hand holds this chord's shape (its open position), not one finger per fret: "E". */
+  chordShape?: string;
   pick?: PickPlan;
   pickStart?: PickMark;
   pickFlipsOnLoop?: true;

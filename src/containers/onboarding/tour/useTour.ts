@@ -1,6 +1,6 @@
 /**
- * Tour lifecycle: which stop is showing, which tab has to be visible for it,
- * and the `tour.seenVersion` bookkeeping.
+ * Tour lifecycle: which tour, which stop is showing, which screen has to be
+ * visible for it, and the `tour.seenVersion` bookkeeping.
  *
  * Deliberately DOM-free — measuring the target and drawing the cut-out is
  * `Tour.tsx`'s job. What lives here is the part with rules worth testing:
@@ -15,7 +15,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { storeLoad, storeSave } from "../../../ipc";
-import { TOUR_SEEN_KEY, TOUR_STOPS, TOUR_VERSION, type TourStop, type TourView } from "./stops";
+import { TOUR_SEEN_KEY, TOUR_VERSION, TOURS, type TourKind, type TourStop, type TourView } from "./stops";
 
 /** Anywhere a tour can be opened from, and so has to put you back. */
 type TourHome =
@@ -30,8 +30,11 @@ type TourHome =
   | "tools";
 
 export type UseTourArgs = {
-  /** Overridable for tests; defaults to the six stops. */
-  stops?: TourStop[];
+  /**
+   * Overridable per tour; defaults to `TOURS`. The shell passes the learning
+   * tour without its Session stops when there is no plan to open one from.
+   */
+  tours?: Partial<Record<TourKind, TourStop[]>>;
   /** The tab showing right now ("settings" is never a tour stop's home). */
   /**
    * `setlist` and `jam` are here because the app has those tabs, not because
@@ -47,30 +50,34 @@ export type UseTourArgs = {
    */
   setView: (view: TourHome) => void;
   /**
-   * O1's `migratedExistingUser`. When true and the tour has never been seen,
-   * `offerVisible` turns on once.
+   * Whether this launch may offer the tour: anything but a first run with
+   * the wizard still to come (O1's `migratedExistingUser` included). When
+   * true and the learning tour's version has not been seen, `offerVisible`
+   * turns on once.
    */
   offerWhen?: boolean;
 };
 
 export type UseTourResult = {
   isOpen: boolean;
+  /** Which tour is running ("learn" while closed). */
+  kind: TourKind;
   /** 0-based index of the current stop; -1 while closed. */
   index: number;
   stop: TourStop | null;
   stops: TourStop[];
   total: number;
   /**
-   * Start at stop 1. `restoreView` overrides the tab the tour returns to —
-   * needed when the caller is leaving Settings in the same tick and the hook
-   * would otherwise capture "settings".
+   * Start `kind` (the learning tour unless asked) at stop 1. `restoreView`
+   * overrides the tab the tour returns to — needed when the caller is leaving
+   * Settings in the same tick and the hook would otherwise capture "settings".
    */
-  open: (restoreView?: TourHome) => void;
-  /** End the tour and record `tour.seenVersion`. */
+  open: (restoreView?: TourHome, kind?: TourKind) => void;
+  /** End the tour; the learning tour records `tour.seenVersion`. */
   close: () => void;
   next: () => void;
   prev: () => void;
-  /** Toast offering the tour to a migrated existing user. */
+  /** Toast offering the learning tour, once, to a returning user. */
   offerVisible: boolean;
   acceptOffer: () => void;
   dismissOffer: () => void;
@@ -80,12 +87,14 @@ export type UseTourResult = {
 };
 
 export function useTour({
-  stops = TOUR_STOPS,
+  tours,
   view,
   setView,
   offerWhen = false,
 }: UseTourArgs): UseTourResult {
   const [index, setIndex] = useState(-1);
+  const [kind, setKind] = useState<TourKind>("learn");
+  const stops = tours?.[kind] ?? TOURS[kind];
   const [seenVersion, setSeenVersion] = useState<number | undefined>(undefined);
   const [hydrated, setHydrated] = useState(false);
   const [offerDismissed, setOfferDismissed] = useState(false);
@@ -99,6 +108,8 @@ export function useTour({
   /** Tab to return to when the tour ends. */
   const restoreRef = useRef<TourHome | null>(null);
 
+  const kindRef = useRef(kind);
+  kindRef.current = kind;
   const isOpen = index >= 0 && index < stops.length;
   const stop = isOpen ? stops[index] : null;
   const indexRef = useRef(index);
@@ -127,11 +138,13 @@ export function useTour({
   }, []);
 
   // --- Lifecycle -----------------------------------------------------------
-  const open = useCallback((restoreView?: TourHome) => {
+  const open = useCallback((restoreView?: TourHome, which: TourKind = "learn") => {
     const current = viewRef.current;
     restoreRef.current =
-      restoreView ?? (current === "settings" ? "beat" : current);
+      restoreView ?? (current === "settings" ? (which === "learn" ? "today" : "beat") : current);
     setOfferDismissed(true);
+    kindRef.current = which;
+    setKind(which);
     indexRef.current = 0;
     setIndex(0);
   }, []);
@@ -145,7 +158,9 @@ export function useTour({
     const back = restoreRef.current;
     restoreRef.current = null;
     if (back && viewRef.current !== back) setViewRef.current(back);
-    markSeen();
+    // Only the learning tour is versioned: walking the tools says nothing
+    // about whether the player has seen Today, Paths and a Session.
+    if (kindRef.current === "learn") markSeen();
   }, [markSeen]);
 
   const next = useCallback(() => {
@@ -172,12 +187,14 @@ export function useTour({
   }, [stop]);
 
   // --- One-time offer for existing users -----------------------------------
+  // `<`, not `!==`: a store written by a newer build (or the screenshots'
+  // 99) is not a reason to offer an older tour.
   const offerVisible =
-    offerWhen && hydrated && !offerDismissed && seenVersion !== TOUR_VERSION && !isOpen;
+    offerWhen && hydrated && !offerDismissed && (seenVersion ?? 0) < TOUR_VERSION && !isOpen;
 
   const acceptOffer = useCallback(() => {
     setOfferDismissed(true);
-    open();
+    open(undefined, "learn");
   }, [open]);
 
   const dismissOffer = useCallback(() => {
@@ -188,6 +205,7 @@ export function useTour({
 
   return {
     isOpen,
+    kind,
     index,
     stop,
     stops,

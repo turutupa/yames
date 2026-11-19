@@ -183,7 +183,7 @@
       "inputNone": "Não configurada",
       "alwaysOnTop": "Sempre visível",
       "start": "Ir para Hoje",
-      "tour": "Tour pelas ferramentas (30 s)",
+      "tour": "Me mostre",
       "moreOnToday": "+{{count}} em Hoje",
       "subtitleNext": "Sua próxima sessão está pronta em Hoje. Mude o que quiser aqui, ou depois em Configurações.",
       "nextSession": "Sua próxima sessão"
@@ -228,7 +228,7 @@
       "next": "Avançar",
       "done": "Concluir",
       "skip": "Pular o tour",
-      "offer": "É novo por aqui? Faça o tour de 30 segundos.",
+      "offer": "Novo: um tour curto por Hoje, Trilhas e uma sessão.",
       "offerAccept": "Me mostre",
       "offerDismiss": "Dispensar",
       "stops": {
@@ -256,10 +256,45 @@
           "title": "Zen e widget",
           "body": "Visuais em tela cheia, ou um widget minúsculo sempre no topo."
         }
+      },
+      "learn": {
+        "plan": {
+          "title": "O plano de hoje",
+          "body": "Hoje monta uma sessão com as suas Trilhas, do tamanho dos seus minutos. Cada linha diz o que é e por que está ali. Toque numa linha para começar dali, ou em Trocar para pôr outra no lugar."
+        },
+        "start": {
+          "title": "Seus minutos, depois Começar",
+          "body": "Escolha quanto tempo você tem e o plano se ajusta. Começar toca desde o início, e você pode sair quando quiser."
+        },
+        "paths": {
+          "title": "Trilhas",
+          "body": "Escolha um objetivo aqui. Nada está bloqueado: abra qualquer Trilha e comece em qualquer etapa."
+        },
+        "neck": {
+          "title": "Lendo o braço",
+          "body": "Os números são dedos: 1 é o indicador, 4 o mindinho. Sua primeira nota está onde diz “comece aqui”."
+        },
+        "watch": {
+          "title": "Veja primeiro",
+          "body": "Ver toca as notas em ordem, no andamento, para você ver o desenho antes de tentar."
+        },
+        "take": {
+          "title": "Começar tomada",
+          "body": "Quando estiver pronto, comece uma tomada. O Yames escuta e avalia seu tempo e suas notas. Mais devagar e Mais rápido mudam o andamento."
+        },
+        "blocks": {
+          "title": "Os blocos de hoje",
+          "body": "Cada bloco da sessão fica aqui em cima. Toque em um para ir até ele. Anterior volta um, Pular este segue em frente."
+        },
+        "progress": {
+          "title": "Andamento limpo",
+          "body": "Progresso conta o andamento limpo: o mais rápido em que você bateu a meta, não só o mais rápido que tocou. É esse o número para fazer crescer."
+        }
       }
     },
     "help": {
       "title": "Ajuda",
+      "showAround": "Me mostre",
       "takeTour": "Tour pelas ferramentas",
       "runSetup": "Refazer a configuração",
       "shortcuts": "Atalhos de teclado",

@@ -102,16 +102,23 @@ describe("GeneralSettingsSection language select", () => {
     expect(cleared).not.toContain("appSessionCount");
   });
 
-  it('shows "Tour the tools" only when the handler is wired, and calls it', () => {
+  it('shows "Show me around" and "Tour the tools" only when wired, and calls each', () => {
     render(<GeneralSettingsSection {...baseProps} />);
+    expect(screen.queryByText("Show me around")).toBeNull();
     expect(screen.queryByText("Tour the tools")).toBeNull();
     cleanup();
 
     const onTakeTour = vi.fn();
-    render(<GeneralSettingsSection {...baseProps} onTakeTour={onTakeTour} />);
+    const onTakeToolsTour = vi.fn();
+    render(<GeneralSettingsSection {...baseProps} onTakeTour={onTakeTour} onTakeToolsTour={onTakeToolsTour} />);
+    expect(screen.getByText("Show me around")).toBeInTheDocument();
     expect(screen.getByText("Tour the tools")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Start" }));
+    const [learn, tools] = screen.getAllByRole("button", { name: "Start" });
+    fireEvent.click(learn);
     expect(onTakeTour).toHaveBeenCalled();
+    expect(onTakeToolsTour).not.toHaveBeenCalled();
+    fireEvent.click(tools);
+    expect(onTakeToolsTour).toHaveBeenCalled();
   });
 
   it("clicking outside closes the list without changing language", async () => {
