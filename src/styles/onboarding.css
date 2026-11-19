@@ -181,6 +181,8 @@
   font-size: 0.9375rem;
   line-height: 1.55;
   color: var(--text-secondary);
+  /* No last line of one word ("have." alone, in a wide face). */
+  text-wrap: balance;
 }
 
 .onboarding-welcome-actions {
