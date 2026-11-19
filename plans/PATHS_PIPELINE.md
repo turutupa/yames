@@ -240,6 +240,17 @@ tests, so it is gradable. `notes` on the Exercise is always variant 0.
     that harmony spells it), or stays when the variant declares the same harmony. A
     sentence about the other variants ("in G, C or D", "the variants move it") is not
     rewritten.
+  - **What a proof-read closed** (three readers, the first 329 variants, two false
+    sentences). "a" and "an" are agreed only for a lower-case article, never a capital
+    "A" (it is a string or a note: "A 8, 10, 11"). "The strings below", "the string
+    between", "above", "beside" said of strings are kept only on the same strings. A
+    figure's name with a fret in it ("the fret-12 figure") is a name: kept where that
+    fret is unchanged, never renumbered. A note that gets the name of the string it is
+    said to be on, at a fret ("a picked A on the A string" at 12), reads as the open
+    string and is not written. A key put where a sentence opened with "A" takes "The"
+    before a thing ("The G minor pentatonic box ..."), nothing when it stands alone
+    ("B natural minor on ..."), and is otherwise not written. A stretch or a reach is
+    not said five frets or more away.
   - **Prefix rule.** The purpose, and each how-to line, is kept up to its first
     sentence that cannot be written. A line whose first sentence falls is dropped. A
     purpose whose first sentence falls leaves the variant with no text at all: it reads
@@ -247,8 +258,8 @@ tests, so it is gradable. `notes` on the Exercise is always variant 0.
     a variant's own how-to. A how-to with next to nothing left is not written either.
 
   It is on for Alternate Picking, Blues, Classic Rock, Know the Neck, Legato, Rhythm
-  Foundations, Scales and Modes, Shred, Sweep and Tapping: 329 variants read their own
-  text (698 strings, 250 of them word for word a line of the Exercise's, kept because a
+  Foundations, Scales and Modes, Shred, Sweep and Tapping: 320 variants read their own
+  text (674 strings, 246 of them word for word a line of the Exercise's, kept because a
   variant how-to is whole). About 320 more need none: every sentence of the Exercise's
   is already true of them. The rest are refused or do not align, and read the
   Exercise's text as before. `describeVariant` returns what was refused and why.

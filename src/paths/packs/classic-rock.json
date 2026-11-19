@@ -344,7 +344,7 @@
                 "purpose": "A single-note riff on the two low strings that walks the roots a power chord would play: D, F, G and the E below F. The riff a band locks to.",
                 "howTo": [
                   "Straight eighths, 80 BPM up to a pass at 110, over a rock beat.",
-                  "Bar 1: D at fret 10 on the low E twice (muted), F at 13, D, G at fret 10 on the A string, D, F, E at 12. Bar 2: D, D, A and G on the A string, then F and E as quarter notes.",
+                  "Bar 1: D at fret 10 on the low E twice (muted), F at 13, D, G at fret 10 on the A string, D, F, E at 12.",
                   "First finger on fret 10, third on 12, fourth on 13. The hand doesn't move."
                 ],
                 "tab": "/8 6:10m 6:10m 6:13 6:10m 5:10 6:10m 6:13 6:12 | /8 6:10m 6:10m 5:12 5:10 /4 6:13 6:12",
@@ -1240,10 +1240,7 @@
                 },
                 "pool": "all",
                 "purpose": "Four-note groups down the top of the box: E, D, B, A, then D, B, A, G, then down a string. The fast, flowing descent of a lot of seventies solos.",
-                "howTo": [
-                  "Straight sixteenths, four to a click, 60 BPM up to a pass at 80.",
-                  "Bar 1: E at 12 on the high E, D at 15 and B at 12 on the B, A at 14 on the G, twice; then D, B, A, G twice. Bar 2: A, G on the G string, E, D on the D string, twice, then B on the A string and E to finish."
-                ],
+                "howTo": ["Straight sixteenths, four to a click, 60 BPM up to a pass at 80."],
                 "tab": "/16 1:12 2:15 2:12 3:14 1:12 2:15 2:12 3:14 2:15 2:12 3:14 3:12 2:15 2:12 3:14 3:12 | /16 3:14 3:12 4:14 4:12 3:14 3:12 4:14 4:12 /4 5:14 4:14",
                 "position": {
                   "fret": 12,
@@ -1380,10 +1377,7 @@
                 },
                 "pool": "all",
                 "purpose": "Four-note groups down the top of the box: D, C, A, G, then C, A, G, F, then down a string. The fast, flowing descent of a lot of seventies solos.",
-                "howTo": [
-                  "Straight sixteenths, four to a click, 60 BPM up to a pass at 80.",
-                  "Bar 1: D at 10 on the high E, C at 13 and A at 10 on the B, G at 12 on the G, twice; then C, A, G, F twice. Bar 2: G, F on the G string, D, C on the D string, twice, then A on the A string and D to finish."
-                ],
+                "howTo": ["Straight sixteenths, four to a click, 60 BPM up to a pass at 80."],
                 "tab": "/16 1:10 2:13 2:10 3:12 1:10 2:13 2:10 3:12 2:13 2:10 3:12 3:10 2:13 2:10 3:12 3:10 | /16 3:12 3:10 4:12 4:10 3:12 3:10 4:12 4:10 /4 5:12 4:12",
                 "position": {
                   "fret": 10,
@@ -5709,7 +5703,7 @@
                 "purpose": "Each chord's three notes, up and down the top four strings, one bar each, then home to D.",
                 "howTo": [
                   "Straight eighths, 70 BPM up to a pass at 100.",
-                  "D: frets 12, 11, 10, 10 from the D string up and back. C: the same shape two frets lower, 10, 9, 8, 8. G: B at 9 and D at 12 on the D string, G at 12 on the G, B at 12 on the B, D at 10 on the high E, and back. Then D."
+                  "D: frets 12, 11, 10, 10 from the D string up and back. C: the same shape two frets lower, 10, 9, 8, 8."
                 ],
                 "tab": "/8 4:12 3:11 2:10 1:10 2:10 3:11 4:12 3:11 | /8 4:10 3:9 2:8 1:8 2:8 3:9 4:10 3:9 | /8 4:9 4:12 3:12 2:12 1:10 2:12 3:12 4:12 | /8 3:11 2:10 1:10 2:10 /2 4:12",
                 "position": {
@@ -6104,10 +6098,7 @@
                 },
                 "pool": "all",
                 "purpose": "Four short licks, one a chord, each ending on that chord's root: D, C, G and D. The line follows the bass without playing it.",
-                "howTo": [
-                  "Straight eighths, then a half note, 70 BPM up to a pass at 100.",
-                  "D: A, G, F#, E, then D on the D string. C: G, E, D, E, then C at 10 on the D string. G: B, D, B, A, then G at 12 on the G. D: F#, A, G, F#, then D."
-                ],
+                "howTo": ["Straight eighths, then a half note, 70 BPM up to a pass at 100."],
                 "tab": "/8 2:10 3:12 3:11 3:9 /2 4:12 | /8 3:12 3:9 4:12 3:9 /2 4:10 | /8 2:12 1:10 2:12 2:10 /2 3:12 | /8 3:11 2:10 3:12 3:11 /2 4:12",
                 "position": {
                   "fret": 9,

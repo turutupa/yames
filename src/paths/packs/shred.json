@@ -3651,7 +3651,6 @@
                 },
                 "pool": "all",
                 "howTo": [
-                  "Sixteenths, the lick twice a bar: D on the D string, F and G on the G string, A on the B string, back down G and F, then D and C on the D string.",
                   "Start on a downstroke on the D string. Every string change works out as outside; keep it that way by never adding a stroke."
                 ],
                 "tab": "/16 4:12 3:10 3:12 2:10 3:12 3:10 4:12 4:10 4:12 3:10 3:12 2:10 3:12 3:10 4:12 4:10",
@@ -3706,7 +3705,6 @@
                 },
                 "pool": "all",
                 "howTo": [
-                  "Sixteenths, the lick twice a bar: E on the D string, G and A on the G string, B on the B string, back down A and G, then E and D on the D string.",
                   "Start on a downstroke on the D string. Every string change works out as outside; keep it that way by never adding a stroke."
                 ],
                 "tab": "/16 4:14 3:12 3:14 2:12 3:14 3:12 4:14 4:12 4:14 3:12 3:14 2:12 3:14 3:12 4:14 4:12",
@@ -5965,11 +5963,6 @@
                   "key": "E"
                 },
                 "pool": "all",
-                "purpose": "B, D on the B string, E, G, E on the top string, D again: six notes, all inside crossings, looped.",
-                "howTo": [
-                  "Sextuplets. B string fret 12 then 15, top string 12, 15, 12, then B string 15, and round again from the B string's 12.",
-                  "Down, up, down, up, down, up: six is even, so every loop starts on a downstroke."
-                ],
                 "tab": "/16t 2:12 2:15 1:12 1:15 1:12 2:15 2:12 2:15 1:12 1:15 1:12 2:15 2:12 2:15 1:12 1:15 1:12 2:15 2:12 2:15 1:12 1:15 1:12 2:15",
                 "position": {
                   "fret": 12,
@@ -7729,11 +7722,6 @@
                   "key": "E"
                 },
                 "pool": "all",
-                "purpose": "G, F#, E on the top string, then D, C, B on the B string, twice, landing on A. A real lick, with both crossings inside while it loops.",
-                "howTo": [
-                  "Sixteenths: the six notes twice (three beats), then a quarter note on the G string's fret 14.",
-                  "Starting on a downstroke, the change from the top string to the B string is inside both times. The landing note is a downstroke on the G string, an outside crossing."
-                ],
                 "tab": "/16 1:15 1:14 1:12 2:15 2:13 2:12 1:15 1:14 1:12 2:15 2:13 2:12 /4 3:14",
                 "position": {
                   "fret": 12,
@@ -10633,9 +10621,6 @@
                   "stringSet": "3"
                 },
                 "pool": "all",
-                "howTo": [
-                  "Sixteenths: the fret-9 figure twice (9, 10, 12, 10, 9, 10, 12, 10), then a half note on 9. The halfway point of the run is where the time usually moves."
-                ],
                 "tab": "/16 3:9 3:10 3:12 3:10 3:9 3:10 3:12 3:10 /2 3:9",
                 "position": {
                   "fret": 9,
@@ -10680,9 +10665,6 @@
                   "stringSet": "4"
                 },
                 "pool": "all",
-                "howTo": [
-                  "Sixteenths: the fret-9 figure twice (9, 10, 12, 10, 9, 10, 12, 10), then a half note on 9. The halfway point of the run is where the time usually moves."
-                ],
                 "tab": "/16 4:9 4:10 4:12 4:10 4:9 4:10 4:12 4:10 /2 4:9",
                 "position": {
                   "fret": 9,
@@ -11041,7 +11023,6 @@
                   "stringSet": "3"
                 },
                 "pool": "all",
-                "howTo": ["Sixteenths on the fret-9 figure."],
                 "tab": "/16 3:9 3:10 3:12 3:10 /4 3:9 r r | /16 3:9 3:10 3:12 3:10 3:9 3:10 3:12 3:10 /4 3:9 r | /16 3:9 3:10 3:12 3:10 3:9 3:10 3:12 3:10 3:9 3:10 3:12 3:10 /4 3:9 | /16 3:9 3:10 3:12 3:10 3:9 3:10 3:12 3:10 3:9 3:10 3:12 3:10 3:9 3:10 3:12 3:10",
                 "position": {
                   "fret": 9,
@@ -11124,7 +11105,6 @@
                   "stringSet": "4"
                 },
                 "pool": "all",
-                "howTo": ["Sixteenths on the fret-9 figure."],
                 "tab": "/16 4:9 4:10 4:12 4:10 /4 4:9 r r | /16 4:9 4:10 4:12 4:10 4:9 4:10 4:12 4:10 /4 4:9 r | /16 4:9 4:10 4:12 4:10 4:9 4:10 4:12 4:10 4:9 4:10 4:12 4:10 /4 4:9 | /16 4:9 4:10 4:12 4:10 4:9 4:10 4:12 4:10 4:9 4:10 4:12 4:10 4:9 4:10 4:12 4:10",
                 "position": {
                   "fret": 9,
@@ -11832,9 +11812,6 @@
                   "stringSet": "low E and D"
                 },
                 "pool": "all",
-                "howTo": [
-                  "Muting is the technique here: the underside of the first finger damps the string between the octave notes, and the picking hand's palm damps the strings below."
-                ],
                 "tab": "/16 6:5f1 4:7f3 6:5f1 4:7f3 6:7f1 4:9f3 6:7f1 4:9f3 6:8f1 4:10f3 6:8f1 4:10f3 6:10f1 4:12f3 6:10f1 4:12f3 | 6:10f1 4:12f3 6:10f1 4:12f3 6:8f1 4:10f3 6:8f1 4:10f3 6:7f1 4:9f3 6:7f1 4:9f3 6:5f1 4:7f3 6:5f1 4:7f3",
                 "position": {
                   "fret": 5,
@@ -12604,12 +12581,6 @@
                   "key": "B"
                 },
                 "pool": "all",
-                "purpose": "B, D on the D string, B, D on the B string, F# on top, and back: an arpeggio with a skip in the middle, picked note by note.",
-                "howTo": [
-                  "Sixteenths, the eight notes twice a bar: D string 9 and 12, B string 12 and 15, top string 14, then B 15, B 12, D 12.",
-                  "First finger on the D string's 9, then let the hand sit at fret 12: little finger for 15, ring for 14.",
-                  "Every string change is an inside crossing."
-                ],
                 "tab": "/16 4:9 4:12 2:12 2:15 1:14 2:15 2:12 4:12 4:9 4:12 2:12 2:15 1:14 2:15 2:12 4:12",
                 "position": {
                   "fret": 9,
@@ -13253,11 +13224,6 @@
                   "key": "E"
                 },
                 "pool": "all",
-                "purpose": "B, C, D on the B string, E, G on the top string: five notes to the click. Economy going up, so every group starts on a downstroke, which is exactly why players use a five-note group.",
-                "howTo": [
-                  "Quintuplets: five notes to the click. Count 'one-two-three-four-five' evenly against the beat; it should feel slightly lopsided at first.",
-                  "B string 12, 13, 15 (fingers 1, 2, 4), top string 12, 15 (fingers 1, 4). Strokes: down, up, down, then down again straight through to the top string, up. The return to the B string is a downstroke after that upstroke: an outside crossing, so the next group starts down again."
-                ],
                 "tab": "/16q 2:12d 2:13 2:15 1:12 1:15 2:12d 2:13 2:15 1:12 1:15 2:12d 2:13 2:15 1:12 1:15 2:12d 2:13 2:15 1:12 1:15",
                 "position": {
                   "fret": 12,

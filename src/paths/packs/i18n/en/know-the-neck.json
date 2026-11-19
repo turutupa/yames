@@ -288,7 +288,7 @@
     "exercise.warmup-advanced.two-boxes-up.purpose": "A minor pentatonic box going up and the box above it coming down. A different key and pair of boxes each time.",
     "exercise.warmup-advanced.two-boxes-up.howTo.0": "Straight eighths, well under your clean tempo. Hold the top note, move the hand up to the next box, and come down.",
     "exercise.warmup-advanced.two-boxes-up.coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
-    "exercise.warmup-advanced.two-boxes-up.variant.key=G,position=boxes-1-and-2.purpose": "G minor pentatonic box going up and the box above it coming down. A different key and pair of boxes each time.",
-    "exercise.warmup-advanced.two-boxes-up.variant.key=C,position=boxes-1-and-2.purpose": "C minor pentatonic box going up and the box above it coming down. A different key and pair of boxes each time."
+    "exercise.warmup-advanced.two-boxes-up.variant.key=G,position=boxes-1-and-2.purpose": "The G minor pentatonic box going up and the box above it coming down. A different key and pair of boxes each time.",
+    "exercise.warmup-advanced.two-boxes-up.variant.key=C,position=boxes-1-and-2.purpose": "The C minor pentatonic box going up and the box above it coming down. A different key and pair of boxes each time."
   }
 }

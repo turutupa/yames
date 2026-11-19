@@ -231,7 +231,7 @@
     "exercise.dorian.dorian-shape.variant.key=C.howTo.1": "Low E string 8, 10, 11; A string 8 and 10; D string 7, 8 and 10. The first finger reaches back one fret for the A.",
     "exercise.dorian.dorian-shape.variant.key=D.purpose": "D Dorian, one octave up and back: D, E, F, G, A, B, C, D, with B at the D string's fret 9.",
     "exercise.dorian.dorian-shape.variant.key=D.howTo.0": "Straight eighths, 50 BPM up to a pass at 80.",
-    "exercise.dorian.dorian-shape.variant.key=D.howTo.1": "Low E string 10, 12, 13; A string 10 and 12; D string 9, 10 and 12. The first finger reaches back one fret for the B.",
+    "exercise.dorian.dorian-shape.variant.key=D.howTo.1": "Low E string 10, 12, 13; A string 10 and 12; D string 9, 10 and 12.",
     "exercise.dorian.minor-vs-dorian.title": "Minor, then Dorian",
     "exercise.dorian.minor-vs-dorian.purpose": "Two phrases, each played with F and then with F#. The first of each pair is natural minor and the second is Dorian.",
     "exercise.dorian.minor-vs-dorian.howTo.0": "Eighths and half notes, 50 BPM up to a pass at 80.",

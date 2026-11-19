@@ -399,6 +399,13 @@ const QUALITY = new Set([
 const WIDTH = new Set(["wide", "wider", "narrow", "narrower"]);
 const WIDTH_OF = ["fret", "frets", "finger", "fingers", "hand", "string", "strings", "shape", "reach", "stretch", "neck"];
 const NECK_WHERE = ["high", "higher", "low", "lower", "middle", "top", "bottom", "end", "whole", "width"];
+/** After a key's name at the start of a sentence: a thing that takes "The" ("The G minor pentatonic box"). */
+const KEY_THINGS = new Set(["box", "scale", "shape", "chord", "arpeggio", "triad", "lick", "run", "riff", "pattern", "line", "phrase", "figure", "sweep"]);
+/** After a key's name that stands alone: "B natural minor on the low three strings", "B minor climbing". */
+const KEY_ALONE = new Set(["on", "in", "from", "across", "over", "up", "down", "climbing", "one", "with", "at", "through", "to", "and", "is", "as", "for"]);
+/** Where the figure lies among the strings: true only on the same strings. */
+const BESIDE = new Set(["below", "above", "beside", "between", "beneath", "underneath"]);
+const STRETCH = new Set(["stretch", "stretches", "stretched", "reach", "reaches", "reaching"]);
 const HAND = new Set(["shift", "shifts", "shifted", "shifting", "position", "positions"]);
 const HAND_MOVES = new Set(["move", "moves", "moving", "moved", "stay", "stays", "travel", "travels", "drop", "drops", "jump", "jumps", "goes", "stretch"]);
 const STRING_KIND = new Set(["wound", "thick", "thicker", "thickest", "thin", "thinner", "thinnest", "heavy", "heavier", "bass", "treble"]);
@@ -468,6 +475,9 @@ function rewriteSentence(sentence: string, ctx: Ctx, countCarried: boolean): Wri
   const sentenceStrings = new Map<number, number>();
   const sentencePcs = new Map<number, number>();
   const classes = new Map<number, string>();
+  /** What was said, by the token it starts at: to catch "a picked A on the A string" at fret 12. */
+  const saidStrings = new Map<number, { target: number; changed: boolean; letter: string }>();
+  const saidNotes = new Map<number, { out: string; changed: boolean }>();
   /** Token indices that name a fret, a string, a note or a key, to catch "X or Y". */
   const named = new Set<number>();
   const keyish = new Set<number>();
@@ -496,11 +506,15 @@ function rewriteSentence(sentence: string, ctx: Ctx, countCarried: boolean): Wri
     const claimString = (from: number, to: number, s: number, full: boolean, possessive = false) => {
       const target = mapString(s);
       // The same string keeps the words it had ("top E string", "the high E").
+      let said = sentence.slice(toks[from].start, toks[to].end);
       if (target !== s) {
         let text = full ? STRING_FULL[target] + (possessive ? "'s" : "") : shortName(target);
         if (/^[A-Z]/.test(toks[from].text) && (toks[from].kind === "word" || from === 0)) text = text[0].toUpperCase() + text.slice(1);
         edits.push({ start: toks[from].start, end: toks[to].end, text, article: true });
+        said = text;
       }
+      // The letter the words give the string, if any: "B string", "low E"; "top string" gives none.
+      saidStrings.set(from, { target, changed: target !== s, letter: /(?:^| )([A-G])(?: |'|$)/.exec(said)?.[1] ?? "" });
       for (let k = from; k <= to; k += 1) {
         toks[k].used = true;
         named.add(k);
@@ -726,7 +740,16 @@ function rewriteSentence(sentence: string, ctx: Ctx, countCarried: boolean): Wri
           if (!ex.harmony && !ex.chords) refuse("'A' that may be a key or an article");
           continue;
         }
-        const root = mapName(pc, family, scaleWord, ofNotes, original);
+        let root = mapName(pc, family, scaleWord, ofNotes, original);
+        if (article && root !== original) {
+          // "A minor pentatonic box going up": that "A" may have been the article. With another key
+          // in its place a countable thing needs "The"; a key standing alone ("B natural minor on the
+          // low three strings", "C Dorian, one octave") needs nothing; anything else is not written.
+          const next = at(after);
+          const follows = next && !next.quoted ? next.low : "";
+          if (KEY_THINGS.has(follows)) root = `${i === 0 ? "The" : "the"} ${root}`;
+          else if (next && next.kind !== "punct" && !KEY_ALONE.has(follows)) refuse("a key name where 'A' may have been the article");
+        }
         if (root !== original) edits.push({ start: toks[i].start, end: toks[end].end, text: root, article: true });
         for (let k = i; k <= end + words.length; k += 1) {
           toks[k].used = true;
@@ -780,6 +803,7 @@ function rewriteSentence(sentence: string, ctx: Ctx, countCarried: boolean): Wri
       }
       if (outputs.size !== 1) refuse("a letter that could be a note, a string or a key, and they moved differently");
       const out = [...outputs][0];
+      saidNotes.set(i, { out, changed: out !== original });
       if (out !== original) edits.push({ start: toks[i].start, end: toks[end].end, text: out, article: true });
       for (let k = i; k <= end; k += 1) toks[k].used = true;
       named.add(i);
@@ -838,7 +862,8 @@ function rewriteSentence(sentence: string, ctx: Ctx, countCarried: boolean): Wri
       }
       const fretsSoFar = [...numClass.values()].includes("fret");
       if (p1 === "its" && fretsSoFar) return "fret";
-      if (is(i - 1, "-") && word(i - 2) === "fret") return "fret";
+      // "the fret-12 figure": a name, not a place. It may stay only if that fret did.
+      if (is(i - 1, "-") && word(i - 2) === "fret" && adjacent(i - 2, i - 1) && adjacent(i - 1, i)) return "fretName";
       const fingerWord = (w: string) => ORDINAL_OF[w] !== undefined || FINGER_NAMES.has(w) || w === "finger";
       if (["on", "for", "at", "takes"].includes(p1) && fingerWord(p2)) return "fret";
       if (is(i + 1, "with") && is(i + 2, "the", "your") && (fingerWord(word(i + 3)) || word(i + 4) === "finger")) return "fret";
@@ -914,6 +939,9 @@ function rewriteSentence(sentence: string, ctx: Ctx, countCarried: boolean): Wri
         if (word(i - 1) === "frets" && is(i + 1, "to") && at(i + 2)?.kind === "num" && move.fretShift === null) refuse("a range of frets, and the frets moved differently");
         if (to !== value) edits.push({ start: t.start, end: t.end, text: String(to), article: true });
         named.add(i);
+      } else if (cls === "fretName") {
+        specific = true;
+        if (!ctx.exFrets.has(value) || move.frets.get(value) !== value) refuse("a figure's name with a fret in it, and the fret moved");
       } else if (cls === "finger") {
         specific = true;
         if (!move.sameFingers) refuse("a finger, and the fingers differ");
@@ -1042,6 +1070,21 @@ function rewriteSentence(sentence: string, ctx: Ctx, countCarried: boolean): Wri
         specific = true;
         if (!rigid) refuse("a box or shape, and the move is not a uniform transposition");
       }
+      if (STRETCH.has(w)) {
+        // A full stretch at fret 7 is an easy reach at fret 12: the frets are that much closer.
+        specific = true;
+        if (!rigid || Math.abs(move.fretShift ?? 0) >= 5) refuse("a stretch or a reach, and the frets are much wider or closer");
+      }
+      if (BESIDE.has(w)) {
+        // "the strings below", "the string between": said of strings, it is where the figure lies.
+        const stringAt = (k: number) => /^strings?('s)?$/.test(word(k)) || classes.get(k) === "string" || saidStrings.has(k);
+        let ofStrings = stringAt(i - 1) || stringAt(i - 2);
+        for (let k = i + 1; k <= i + 5 && at(k) && !(toks[k].kind === "punct" && toks[k].text !== "'"); k += 1) ofStrings = ofStrings || stringAt(k);
+        if (ofStrings) {
+          specific = true;
+          if (move.stringShift !== 0) refuse("strings named by where they lie, on other strings");
+        }
+      }
       if (QUALITY.has(w)) {
         specific = true;
         if (move.pcShift === null && !ctx.qualities) refuse("a kind of chord or scale, and the variant declares another");
@@ -1083,6 +1126,31 @@ function rewriteSentence(sentence: string, ctx: Ctx, countCarried: boolean): Wri
     for (const i of keyish) if (["in", "for"].includes(word(i - 1))) keyLetters.add(toks[i].text);
     if (keyLetters.size >= 2) refuse("a sentence about the other variants");
 
+    // "a picked A on the A string" at fret 12 reads as the open string. Not written, unless it is the open string.
+    for (const [from, string] of saidStrings) {
+      let j = from - 1;
+      if (is(j, "the")) j -= 1;
+      if (!is(j, "on")) continue;
+      // Which notes are said to be on it: "B at 9 and D at 12 on the D string" (each with its fret), or a plain
+      // list, "D, D, A and G on the A string". Not the notes before a "then", nor a list before a placed note.
+      let placed = false;
+      for (j -= 1; j >= 0; j -= 1) {
+        const t = toks[j];
+        const note = saidNotes.get(j);
+        if (note) {
+          const hasFret = is(j + 1, "at");
+          if (placed && !hasFret) break;
+          placed = placed || hasFret;
+          const open = v.notes.some((n) => n.string === string.target && n.fret === 0);
+          if (note.out === string.letter && (note.changed || string.changed) && !open) refuse("a note with the name of the string it is on, not open");
+          continue;
+        }
+        if (t.quoted) break;
+        if (t.kind === "num" || [",", "and", "at", "fret", "a", "an", "picked", "held", "long", "the"].includes(t.low)) continue;
+        break;
+      }
+    }
+
     const distinct = (map: Map<number, number>) => new Set(map.values()).size === map.size;
     if (!distinct(sentenceFrets)) refuse("two frets that become one fret");
     if (!distinct(sentenceStrings)) refuse("two strings that become one string");
@@ -1097,7 +1165,8 @@ function rewriteSentence(sentence: string, ctx: Ctx, countCarried: boolean): Wri
   for (const edit of [...edits].sort((a, b) => b.start - a.start)) {
     out = out.slice(0, edit.start) + edit.text + out.slice(edit.end);
     if (edit.article) {
-      const before = /(^|[^A-Za-z])(a|an|A|An) $/.exec(out.slice(0, edit.start));
+      // Never a capital "A": before a number or a letter that is a string or a note ("A 5, 7, 8"), not an article.
+      const before = /(^|[^A-Za-z])(a|an|An) $/.exec(out.slice(0, edit.start));
       const quoted = toks.find((t) => t.end === edit.start - 1 && t.quoted);
       if (before && !quoted) {
         const was = before[2];

@@ -780,7 +780,7 @@
                 "purpose": "The D minor pentatonic box, two notes a string, each pair one pick and one hammer-on. It already sounds like a blues-rock phrase.",
                 "howTo": [
                   "Eighths. Pick the lower note on each string and hammer the upper: D string 10 to 12, G string 10 to 12, B string 10 to 13, and back.",
-                  "Third finger hammers the frets at 12, little finger the 13 on the B string. The phrase ends on a picked A on the A string."
+                  "Third finger hammers the frets at 12, little finger the 13 on the B string."
                 ],
                 "tab": "/8 4:10 4:12h 3:10 3:12h 2:10 2:13h 3:10 3:12h | 2:10 2:13h 3:10 3:12h 4:10 4:12h /4 5:12",
                 "position": {
@@ -1755,7 +1755,7 @@
                 "pool": "all",
                 "purpose": "Down the D minor pentatonic box, two notes a string, each pair one pick and one pull-off.",
                 "howTo": [
-                  "Eighths. Top E string 13 to 10, B string 13 to 10, G string 12 to 10, D string 12 to 10, then from the B string down again to a picked A on the A string.",
+                  "Eighths.",
                   "First finger lies ready on fret 10 of the next string before you get there. The little finger pulls from the 13s, the third finger from the 12s."
                 ],
                 "tab": "/8 1:13 1:10p 2:13 2:10p 3:12 3:10p 4:12 4:10p | 2:13 2:10p 3:12 3:10p 4:12 4:10p /4 5:12",
@@ -3336,7 +3336,7 @@
                 },
                 "pool": "all",
                 "howTo": [
-                  "Triplets, one pick a beat. Bar 1: B string 10, 11, 13 then top string 10, 12, 13, twice. Bar 2: top string 13, 12, 10, B string 13, 11, 10, then a held G on the G string.",
+                  "Triplets, one pick a beat. Bar 1: B string 10, 11, 13 then top string 10, 12, 13, twice.",
                   "At the top of bar 1 you hammer onto fret 13, then pick it again to start bar 2. Keep the little finger down across the bar line."
                 ],
                 "tab": "/8t 2:10 2:11h 2:13h 1:10 1:12h 1:13h 2:10 2:11h 2:13h 1:10 1:12h 1:13h | 1:13 1:12p 1:10p 2:13 2:11p 2:10p /2 3:12",
@@ -6545,8 +6545,7 @@
                 "pool": "all",
                 "purpose": "E minor from the low E string to the D string, then round again through the A string. One bar picked, one bar with a pick on each string and two hammer-ons.",
                 "howTo": [
-                  "Triplets. Low E string 12, 14, 15; A string 12, 14, 15; D string 12, 14, 16; A string again. Bar 2 picks only the first note of each string.",
-                  "The D string's 16 is the little finger at full stretch. Hammer it from the second finger on 14, not from the first."
+                  "Triplets. Low E string 12, 14, 15; A string 12, 14, 15; D string 12, 14, 16; A string again. Bar 2 picks only the first note of each string."
                 ],
                 "tab": "/8t 6:12 6:14 6:15 5:12 5:14 5:15 4:12 4:14 4:16 5:12 5:14 5:15 | 6:12 6:14h 6:15h 5:12 5:14h 5:15h 4:12 4:14h 4:16h 5:12 5:14h 5:15h",
                 "position": {
@@ -9211,7 +9210,7 @@
                 "pool": "all",
                 "purpose": "Eighteen notes from the low C to the top F. Bar 1 picked; bar 2 with a pick on each string and two hammer-ons.",
                 "howTo": [
-                  "Sextuplets. Low E 8, 10, 11; An 8, 10, 11; D 8, 10, 12; G 8, 10, 12; B 9, 11, 13; top E 10, 11, 13, and hold the last note.",
+                  "Sextuplets. Low E 8, 10, 11; A 8, 10, 11; D 8, 10, 12; G 8, 10, 12; B 9, 11, 13; top E 10, 11, 13, and hold the last note.",
                   "Every string's first note falls on a beat or halfway through one. Let the pick mark those and keep the hammer-ons between them even."
                 ],
                 "tab": "/16t 6:8 6:10 6:11 5:8 5:10 5:11 4:8 4:10 4:12 3:8 3:10 3:12 2:9 2:11 2:13 1:10 1:11 1:13 hold | 6:8 6:10h 6:11h 5:8 5:10h 5:11h 4:8 4:10h 4:12h 3:8 3:10h 3:12h 2:9 2:11h 2:13h 1:10 1:11h 1:13h hold",
