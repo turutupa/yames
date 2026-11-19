@@ -96,7 +96,7 @@ export default definePath({
   labelSubdivisions: "mostly",
   paceLadders: true,
   orderRationale:
-    "Time first, then speed of the same motion, then control of it (accents), then one problem at a time across strings. It departs from the starting order in one place: pentatonic patterns move up to Step 5, before three notes per string, and bursts follow them. Two notes per string gives the same crossing over and over, so it is the natural first application, while three per string changes crossing type on every string. Bursts come after both so they can use real shapes rather than chromatic fingers. Outside picking is taught before inside because most players find it easier, and both are named so a teacher can overrule that.",
+    "Time first, then speed of the same motion, then control of it (accents), then one problem at a time across strings. It departs from the starting order in one place: pentatonic patterns move up to Step 5, before three notes per string, and bursts follow them. Two notes per string gives the same crossing over and over, so it is the natural first application, while three per string changes crossing type on every string. Bursts come after both so they can use real shapes rather than chromatic fingers. Outside picking is taught before inside because most players find it easier, and both are named so a teacher can overrule that. Up to tempo (added 2026-11-18) sits after the cross-string runs: the Advanced Level otherwise passed no faster than the Intermediate one, and its figures are ones the player already knows, so speed is the only new thing.",
   gradingLimits:
     "Everything here is graded on timing and notes for single picked notes, which is what the app is built for, and none of it has been tried on a real guitar yet. The faster the line, the less sure the grade. Your setup adds a small delay between playing a note and the app hearing it; up to sixteenths at 100 BPM that makes no difference, and above that, read the evenness score as provisional. Heavy distortion and compression blur where each note starts, so a clean or light-crunch tone is the honest setting for a graded take. Nothing faster than sixteenths at 200 BPM is graded, and no Exercise here goes that far.",
   steps: [
@@ -767,6 +767,111 @@ export default definePath({
       ],
     },
     {
+      id: "up-to-tempo",
+      title: "Up to tempo",
+      goal: "Take the lick, the three-string scale and the six-note pattern you already know up to the tempo real lines are played at.",
+      why: "Everything so far was passed at a moderate tempo, where a slightly big stroke still works. Twenty clicks higher it doesn't: the motion has to get smaller, not faster, and the crossings you could think about now have to happen by themselves. These are figures you know, so the only new thing is the speed.",
+      howTo: [
+        "Start two rungs below the tempo you passed the figure at, and listen for the first rung where it stops sounding easy. That rung is today's work; stay on it.",
+        "Make the stroke smaller as the tempo rises. If the forearm tightens, drop a rung and find the small stroke again.",
+        "Use the bursts from the Step before: play one beat at the new tempo and stop, then two beats, before you try the loop.",
+      ],
+      payoff: "The A minor lick at a tempo that sounds fast, and a two-octave scale run that holds together.",
+      exercises: [
+        {
+          id: "licks-at-tempo",
+          title: "Both licks, faster",
+          purpose: "The all-outside lick for a bar, then its mirror with every crossing inside, for a bar. Side by side at speed, the weaker crossing has nowhere to hide.",
+          howTo: [
+            "Sixteenths. Bar 1 is the outside lick twice, starting on the D string. Bar 2 stays on the G and B strings, starting on a downstroke on the G string, and every crossing in it is inside.",
+            "If one bar is clean and the other is not, practise the other alone for a minute and come back.",
+          ],
+          coach: "I'll say how even each bar was and check the notes after the take. At this speed evenness is the number to trust.",
+          vary: inKeys(`/16 ${repeat(A_MINOR_LICK, 2)} | ${repeat("3:5 3:7 2:5 2:8 2:5 3:7 3:5 3:7", 2)}`, ["A", "C", "D", "E"]),
+          tab: `/16 ${repeat(A_MINOR_LICK, 2)} | ${repeat("3:5 3:7 2:5 2:8 2:5 3:7 3:5 3:7", 2)}`,
+          position: 5,
+          crossing: "both",
+          harmony: { scale: ["A", "minorPentatonic"] },
+          rungs: ladder(60, 130, 10),
+          passAt: 105,
+          grade: "timingNotes",
+          minutes: 6,
+        },
+        {
+          id: "three-strings-at-tempo",
+          title: "Three strings, faster",
+          purpose: "The three-notes-per-string run up and back, from three different starting strings, at a tempo where the stretch and the crossings have to be automatic.",
+          howTo: [
+            "Sixteenths, sixteen notes, strictly down-up. The crossings alternate outside and inside going up.",
+            "Keep the fingers close to the strings. At this tempo a finger that lifts high arrives late.",
+          ],
+          coach: "I'll say how even it was and check the notes after the take.",
+          vary: {
+            values: { stringSet: ["from the low E string", "from the A string", "from the D string"] },
+            pooled: ["stringSet"],
+            label: (p) => p.stringSet,
+            build: (p) => {
+              const string = p.stringSet === "from the low E string" ? 6 : p.stringSet === "from the A string" ? 5 : 4;
+              const tab = `/16 ${threeNps({ root: "A", scale: "naturalMinor", string, fret: 5, strings: 3, sequence: "updown" })}`;
+              return { tab, position: handAt(tab), shifts: true };
+            },
+          },
+          tab: `/16 ${threeNps({ root: "A", scale: "naturalMinor", string: 6, fret: 5, strings: 3, sequence: "updown" })}`,
+          position: 5,
+          shifts: true,
+          crossing: "both",
+          harmony: { scale: ["A", "naturalMinor"] },
+          rungs: ladder(60, 120, 10),
+          passAt: 100,
+          grade: "timingNotes",
+          minutes: 6,
+        },
+        {
+          id: "sextuplet-loop",
+          title: "The six-note lick, six to a click",
+          purpose: "C, B, A, G, F, E on the top two strings as sextuplets, round and round. The burst from the Step before, now without the rest after it.",
+          howTo: [
+            "Six notes to the click, starting on a downstroke; the pattern is even, so every repeat starts down too.",
+            "Lean on the first note of each beat a little. Without it six fast notes turn into a blur with no beat in it.",
+          ],
+          coach: "Fast notes are the hardest for me to place, so read the evenness as provisional and trust a recording as well.",
+          vary: inKeys(`/16t ${repeat("1:8 1:7 1:5 2:8 2:6 2:5", 4)}`, ["A", "B", "C", "D", "E"]),
+          tab: `/16t ${repeat("1:8 1:7 1:5 2:8 2:6 2:5", 4)}`,
+          position: 5,
+          crossing: "inside",
+          harmony: { scale: ["A", "naturalMinor"] },
+          rungs: ladder(45, 100, 5),
+          passAt: 75,
+          grade: "timingNotes",
+          selfCheck: ["On a recording, can you still hear all six notes as six?"],
+          minutes: 6,
+        },
+        {
+          id: "two-octave-run",
+          title: "Two and a half octaves in sixteenths",
+          purpose: "All six strings of A minor, three notes per string, up and back in sixteenths, with a held note to finish. The long run from the Intermediate Level, a third faster.",
+          howTo: [
+            "The hand moves up one fret at the B string and again at the top string, and back on the way down. Move during the string change.",
+            "Read it in strings, not in notes: three, three, three. The beat falls on a different finger each time, so keep the click in your ear.",
+          ],
+          coach: "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
+          // Fingers printed where the descent has to mirror the climb: 1-2-4 on the top two strings, 4-3-1 coming back down the low two.
+          tab: `/16 ${threeNps({ root: "A", scale: "naturalMinor", string: 6, fret: 5, strings: 6, sequence: "updown" })
+            .replace("2:6 2:8 2:10 1:7 1:8 1:10 1:8 1:7 2:10 2:8 2:6", "2:6f1 2:8f2 2:10f4 1:7f1 1:8f2 1:10f4 1:8f2 1:7f1 2:10f4 2:8f2 2:6f1")
+            .replace("5:8 5:7 5:5 6:8 6:7", "5:8f4 5:7f3 5:5f1 6:8f4 6:7f3")} hold`,
+          position: 5,
+          shifts: true,
+          loops: false,
+          crossing: "both",
+          harmony: { scale: ["A", "naturalMinor"], cover: true },
+          rungs: ladder(55, 110, 5),
+          passAt: 90,
+          grade: "timingNotes",
+          minutes: 7,
+        },
+      ],
+    },
+    {
       id: "stamina-minute",
       title: "The stamina minute",
       goal: "Hold an even line for sixty seconds at a tempo you could play for ten.",
@@ -997,13 +1102,13 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: speed, length and a band",
-      summary: "Bursts above your clean tempo, string skips and long lines, a full minute without letting up, then a composed run over a band.",
+      summary: "Bursts above your clean tempo, string skips and long lines, the figures you know taken up to tempo, a full minute without letting up, then a composed run over a band.",
       startHereIf: [
         "You can run A minor three notes per string, across three strings, even at sixteenths 80 BPM.",
         "You can name which crossing is your weaker one.",
         "Clean is fine at a moderate tempo and you've hit a speed wall, or you've never played with a band.",
       ],
-      steps: ["speed-bursts", "cross-string-runs", "stamina-minute", "over-the-band"],
+      steps: ["speed-bursts", "cross-string-runs", "up-to-tempo", "stamina-minute", "over-the-band"],
       warmups: [
         {
           id: "scale-round",

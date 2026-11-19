@@ -5,7 +5,7 @@
   "strings": {
     "path.title": "Shred",
     "path.goal": "Aller-retour, economy picking, legato, sweeps et tapping en A mineur, construits une technique à la fois, pour finir par un run de huit mesures en doubles croches avec le groupe à 100 BPM.",
-    "path.assumes": "Tu sais jouer la position de la pentatonique de A mineur à la case 5 et des croches au clic à 90 BPM. Aucune vitesse n'est supposée. Les minutes correspondent à un passage dans le contenu ; les exercices sont faits pour être répétés pendant des semaines, et leurs variantes changent de tonalité et de cordes pour que la répétition reste fraîche.",
+    "path.assumes": "Sai suonare il box della pentatonica di A minore al tasto 5 e crome con il clic a 90 BPM. Non si dà per scontata nessuna velocità, ma la prima tappa passa in sedicesimi intorno a 110 BPM: se i sedicesimi a 90 non ci sono ancora, parti da Rhythm Foundations o dal Livello principiante di Alternate Picking. I minuti indicati sono un solo passaggio sul materiale; gli esercizi vanno ripetuti per settimane, e le loro varianti cambiano tonalità e corde perché la ripetizione resti fresca.",
     "path.gradingLimits": "Les notes simples attaquées au médiator, en doubles croches jusqu'à environ 120 BPM et en sextolets jusqu'à environ 90, sont le cas pour lequel l'appli est conçue : régularité du placement, notes entendues et notes en trop, plus les bonnes notes quand elles sont espacées d'au moins 75 ms et que la hauteur est nette, après la prise. Rien de tout cela n'a été essayé sur une vraie guitare. Legato : un hammer-on ou un pull-off que l'appli n'entend pas ne coûte rien, donc le placement s'appuie sur les notes attaquées et le volume des notes legato est à vérifier toi-même ; un hammer-on de nulle part et un tap comptent comme des attaques qui doivent être entendues. Les sweeps sont notés sur le placement uniquement : les notes balayées résonnent les unes dans les autres, les bonnes notes affichent le plus souvent « non vérifié », et leurs titres le disent ; seuls les crans avec au moins 150 ms entre les notes sont notés. Les accents sont approximatifs : plus fort ou pas. Le sens du médiator n'est jamais entendu : c'est un point de la liste de vérification partout où les coups comptent. Au-delà des doubles croches à 100 BPM, considère le placement comme provisoire tant que la latence d'entrée n'est pas calibrée, et utilise un son clair ou légèrement crunch pour les prises notées.",
     "path.skills.0": "La position de la pentatonique de A mineur",
     "path.skills.1": "Des croches au clic à 90 BPM",
@@ -523,7 +523,7 @@
   "from": {
     "path.title": "4e93ed55",
     "path.goal": "0f5c209b",
-    "path.assumes": "5156cb08",
+    "path.assumes": "3dd6c154",
     "path.gradingLimits": "6c37c5aa",
     "path.skills.0": "f46936f6",
     "path.skills.1": "342dd813",

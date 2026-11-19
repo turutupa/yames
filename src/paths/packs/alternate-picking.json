@@ -15,9 +15,9 @@
     "status": "draft",
     "history": []
   },
-  "orderRationale": "Time first, then speed of the same motion, then control of it (accents), then one problem at a time across strings. It departs from the starting order in one place: pentatonic patterns move up to Step 5, before three notes per string, and bursts follow them. Two notes per string gives the same crossing over and over, so it is the natural first application, while three per string changes crossing type on every string. Bursts come after both so they can use real shapes rather than chromatic fingers. Outside picking is taught before inside because most players find it easier, and both are named so a teacher can overrule that.",
+  "orderRationale": "Time first, then speed of the same motion, then control of it (accents), then one problem at a time across strings. It departs from the starting order in one place: pentatonic patterns move up to Step 5, before three notes per string, and bursts follow them. Two notes per string gives the same crossing over and over, so it is the natural first application, while three per string changes crossing type on every string. Bursts come after both so they can use real shapes rather than chromatic fingers. Outside picking is taught before inside because most players find it easier, and both are named so a teacher can overrule that. Up to tempo (added 2026-11-18) sits after the cross-string runs: the Advanced Level otherwise passed no faster than the Intermediate one, and its figures are ones the player already knows, so speed is the only new thing.",
   "gradingLimits": "Everything here is graded on timing and notes for single picked notes, which is what the app is built for, and none of it has been tried on a real guitar yet. The faster the line, the less sure the grade. Your setup adds a small delay between playing a note and the app hearing it; up to sixteenths at 100 BPM that makes no difference, and above that, read the evenness score as provisional. Heavy distortion and compression blur where each note starts, so a clean or light-crunch tone is the honest setting for a graded take. Nothing faster than sixteenths at 200 BPM is graded, and no Exercise here goes that far.",
-  "estimatedMinutes": 230,
+  "estimatedMinutes": 255,
   "steps": [
     {
       "id": "even-eighths",
@@ -7080,8 +7080,1271 @@
       ]
     },
     {
-      "id": "stamina-minute",
+      "id": "up-to-tempo",
       "order": 9,
+      "title": "Up to tempo",
+      "goal": "Take the lick, the three-string scale and the six-note pattern you already know up to the tempo real lines are played at.",
+      "why": "Everything so far was passed at a moderate tempo, where a slightly big stroke still works. Twenty clicks higher it doesn't: the motion has to get smaller, not faster, and the crossings you could think about now have to happen by themselves. These are figures you know, so the only new thing is the speed.",
+      "howTo": [
+        "Start two rungs below the tempo you passed the figure at, and listen for the first rung where it stops sounding easy. That rung is today's work; stay on it.",
+        "Make the stroke smaller as the tempo rises. If the forearm tightens, drop a rung and find the small stroke again.",
+        "Use the bursts from the Step before: play one beat at the new tempo and stop, then two beats, before you try the loop."
+      ],
+      "payoff": "The A minor lick at a tempo that sounds fast, and a two-octave scale run that holds together.",
+      "prerequisites": ["cross-string-runs"],
+      "difficulty": 7.86,
+      "exercises": [
+        {
+          "id": "up-to-tempo.licks-at-tempo",
+          "title": "Both licks, faster",
+          "purpose": "The all-outside lick for a bar, then its mirror with every crossing inside, for a bar. Side by side at speed, the weaker crossing has nowhere to hide.",
+          "howTo": [
+            "Sixteenths. Bar 1 is the outside lick twice, starting on the D string. Bar 2 stays on the G and B strings, starting on a downstroke on the G string, and every crossing in it is inside.",
+            "If one bar is clean and the other is not, practise the other alone for a minute and come back."
+          ],
+          "coachLine": "I'll say how even each bar was and check the notes after the take. At this speed evenness is the number to trust.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 2,
+          "loops": true,
+          "position": {
+            "fret": 5,
+            "shifts": "none"
+          },
+          "pickPlan": "alternate",
+          "crossing": "both",
+          "notesRole": "target",
+          "notes": [
+            {"string":4,"fret":7,"midi":57,"tick":0,"dur":240,"tech":[],"pick":"d"},
+            {"string":3,"fret":5,"midi":60,"tick":240,"dur":240,"tech":[],"pick":"u"},
+            {"string":3,"fret":7,"midi":62,"tick":480,"dur":240,"tech":[],"pick":"d"},
+            {"string":2,"fret":5,"midi":64,"tick":720,"dur":240,"tech":[],"pick":"u"},
+            {"string":3,"fret":7,"midi":62,"tick":960,"dur":240,"tech":[],"pick":"d"},
+            {"string":3,"fret":5,"midi":60,"tick":1200,"dur":240,"tech":[],"pick":"u"},
+            {"string":4,"fret":7,"midi":57,"tick":1440,"dur":240,"tech":[],"pick":"d"},
+            {"string":4,"fret":5,"midi":55,"tick":1680,"dur":240,"tech":[],"pick":"u"},
+            {"string":4,"fret":7,"midi":57,"tick":1920,"dur":240,"tech":[],"pick":"d"},
+            {"string":3,"fret":5,"midi":60,"tick":2160,"dur":240,"tech":[],"pick":"u"},
+            {"string":3,"fret":7,"midi":62,"tick":2400,"dur":240,"tech":[],"pick":"d"},
+            {"string":2,"fret":5,"midi":64,"tick":2640,"dur":240,"tech":[],"pick":"u"},
+            {"string":3,"fret":7,"midi":62,"tick":2880,"dur":240,"tech":[],"pick":"d"},
+            {"string":3,"fret":5,"midi":60,"tick":3120,"dur":240,"tech":[],"pick":"u"},
+            {"string":4,"fret":7,"midi":57,"tick":3360,"dur":240,"tech":[],"pick":"d"},
+            {"string":4,"fret":5,"midi":55,"tick":3600,"dur":240,"tech":[],"pick":"u"},
+            {"string":3,"fret":5,"midi":60,"tick":3840,"dur":240,"tech":[],"pick":"d"},
+            {"string":3,"fret":7,"midi":62,"tick":4080,"dur":240,"tech":[],"pick":"u"},
+            {"string":2,"fret":5,"midi":64,"tick":4320,"dur":240,"tech":[],"pick":"d"},
+            {"string":2,"fret":8,"midi":67,"tick":4560,"dur":240,"tech":[],"pick":"u"},
+            {"string":2,"fret":5,"midi":64,"tick":4800,"dur":240,"tech":[],"pick":"d"},
+            {"string":3,"fret":7,"midi":62,"tick":5040,"dur":240,"tech":[],"pick":"u"},
+            {"string":3,"fret":5,"midi":60,"tick":5280,"dur":240,"tech":[],"pick":"d"},
+            {"string":3,"fret":7,"midi":62,"tick":5520,"dur":240,"tech":[],"pick":"u"},
+            {"string":3,"fret":5,"midi":60,"tick":5760,"dur":240,"tech":[],"pick":"d"},
+            {"string":3,"fret":7,"midi":62,"tick":6000,"dur":240,"tech":[],"pick":"u"},
+            {"string":2,"fret":5,"midi":64,"tick":6240,"dur":240,"tech":[],"pick":"d"},
+            {"string":2,"fret":8,"midi":67,"tick":6480,"dur":240,"tech":[],"pick":"u"},
+            {"string":2,"fret":5,"midi":64,"tick":6720,"dur":240,"tech":[],"pick":"d"},
+            {"string":3,"fret":7,"midi":62,"tick":6960,"dur":240,"tech":[],"pick":"u"},
+            {"string":3,"fret":5,"midi":60,"tick":7200,"dur":240,"tech":[],"pick":"d"},
+            {"string":3,"fret":7,"midi":62,"tick":7440,"dur":240,"tech":[],"pick":"u"}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":65,"grading":"graded"},
+              {"bpm":75,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":105,"grading":"graded"},
+              {"bpm":120,"grading":"graded"},
+              {"bpm":130,"grading":"graded"}
+            ],
+            "passAtBpm": 105
+          },
+          "passBars": [
+            {
+              "metric": "timingEvenness",
+              "min": 0.85,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.95,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 2,
+              "overBars": 4
+            },
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            }
+          ],
+          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo", "noteIdentity"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["fastPicking"],
+            "notes": [
+              "At this speed a real rig's input delay can push notes out of their matching window, which reads as late or missed. Evenness is the number to trust here, and only once the delay is calibrated."
+            ]
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 6,
+          "tab": "/16 4:7 3:5 3:7 2:5 3:7 3:5 4:7 4:5 4:7 3:5 3:7 2:5 3:7 3:5 4:7 4:5 | 3:5 3:7 2:5 2:8 2:5 3:7 3:5 3:7 3:5 3:7 2:5 2:8 2:5 3:7 3:5 3:7",
+          "subdivision": "sixteenths",
+          "computed": {
+            "noteCount": 32,
+            "minGapMsAtTop": 115.38,
+            "handShifts": 0,
+            "maxPlayableBpm": 178,
+            "difficulty": 8.14
+          },
+          "harmony": {
+            "kind": "scale",
+            "root": "A",
+            "scale": "naturalMinor",
+            "spelled": ["A", "B", "C", "D", "E", "F", "G"],
+            "cover": false
+          },
+          "variation": {
+            "dimensions": ["key"],
+            "pooled": ["key"],
+            "notPooled": [],
+            "variants": [
+              {
+                "id": "key=A",
+                "label": "A minor",
+                "params": {
+                  "key": "A"
+                },
+                "pool": "all",
+                "tab": "/16 4:7 3:5 3:7 2:5 3:7 3:5 4:7 4:5 4:7 3:5 3:7 2:5 3:7 3:5 4:7 4:5 | 3:5 3:7 2:5 2:8 2:5 3:7 3:5 3:7 3:5 3:7 2:5 2:8 2:5 3:7 3:5 3:7",
+                "position": {
+                  "fret": 5,
+                  "shifts": "none"
+                },
+                "crossing": "both",
+                "notes": [
+                  {"string":4,"fret":7,"midi":57,"tick":0,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":5,"midi":60,"tick":240,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":7,"midi":62,"tick":480,"dur":240,"tech":[],"pick":"d"},
+                  {"string":2,"fret":5,"midi":64,"tick":720,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":7,"midi":62,"tick":960,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":5,"midi":60,"tick":1200,"dur":240,"tech":[],"pick":"u"},
+                  {"string":4,"fret":7,"midi":57,"tick":1440,"dur":240,"tech":[],"pick":"d"},
+                  {"string":4,"fret":5,"midi":55,"tick":1680,"dur":240,"tech":[],"pick":"u"},
+                  {"string":4,"fret":7,"midi":57,"tick":1920,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":5,"midi":60,"tick":2160,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":7,"midi":62,"tick":2400,"dur":240,"tech":[],"pick":"d"},
+                  {"string":2,"fret":5,"midi":64,"tick":2640,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":7,"midi":62,"tick":2880,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":5,"midi":60,"tick":3120,"dur":240,"tech":[],"pick":"u"},
+                  {"string":4,"fret":7,"midi":57,"tick":3360,"dur":240,"tech":[],"pick":"d"},
+                  {"string":4,"fret":5,"midi":55,"tick":3600,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":5,"midi":60,"tick":3840,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":7,"midi":62,"tick":4080,"dur":240,"tech":[],"pick":"u"},
+                  {"string":2,"fret":5,"midi":64,"tick":4320,"dur":240,"tech":[],"pick":"d"},
+                  {"string":2,"fret":8,"midi":67,"tick":4560,"dur":240,"tech":[],"pick":"u"},
+                  {"string":2,"fret":5,"midi":64,"tick":4800,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":7,"midi":62,"tick":5040,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":5,"midi":60,"tick":5280,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":7,"midi":62,"tick":5520,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":5,"midi":60,"tick":5760,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":7,"midi":62,"tick":6000,"dur":240,"tech":[],"pick":"u"},
+                  {"string":2,"fret":5,"midi":64,"tick":6240,"dur":240,"tech":[],"pick":"d"},
+                  {"string":2,"fret":8,"midi":67,"tick":6480,"dur":240,"tech":[],"pick":"u"},
+                  {"string":2,"fret":5,"midi":64,"tick":6720,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":7,"midi":62,"tick":6960,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":5,"midi":60,"tick":7200,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":7,"midi":62,"tick":7440,"dur":240,"tech":[],"pick":"u"}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 32,
+                  "minGapMsAtTop": 115.38,
+                  "handShifts": 0,
+                  "maxPlayableBpm": 178,
+                  "difficulty": 8.14
+                },
+                "harmony": {
+                  "kind": "scale",
+                  "root": "A",
+                  "scale": "naturalMinor",
+                  "spelled": ["A", "B", "C", "D", "E", "F", "G"],
+                  "cover": false
+                }
+              },
+              {
+                "id": "key=C",
+                "label": "C minor",
+                "params": {
+                  "key": "C"
+                },
+                "pool": "all",
+                "tab": "/16 4:10 3:8 3:10 2:8 3:10 3:8 4:10 4:8 4:10 3:8 3:10 2:8 3:10 3:8 4:10 4:8 | 3:8 3:10 2:8 2:11 2:8 3:10 3:8 3:10 3:8 3:10 2:8 2:11 2:8 3:10 3:8 3:10",
+                "position": {
+                  "fret": 8,
+                  "shifts": "none"
+                },
+                "crossing": "both",
+                "notes": [
+                  {"string":4,"fret":10,"midi":60,"tick":0,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":8,"midi":63,"tick":240,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":10,"midi":65,"tick":480,"dur":240,"tech":[],"pick":"d"},
+                  {"string":2,"fret":8,"midi":67,"tick":720,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":10,"midi":65,"tick":960,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":8,"midi":63,"tick":1200,"dur":240,"tech":[],"pick":"u"},
+                  {"string":4,"fret":10,"midi":60,"tick":1440,"dur":240,"tech":[],"pick":"d"},
+                  {"string":4,"fret":8,"midi":58,"tick":1680,"dur":240,"tech":[],"pick":"u"},
+                  {"string":4,"fret":10,"midi":60,"tick":1920,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":8,"midi":63,"tick":2160,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":10,"midi":65,"tick":2400,"dur":240,"tech":[],"pick":"d"},
+                  {"string":2,"fret":8,"midi":67,"tick":2640,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":10,"midi":65,"tick":2880,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":8,"midi":63,"tick":3120,"dur":240,"tech":[],"pick":"u"},
+                  {"string":4,"fret":10,"midi":60,"tick":3360,"dur":240,"tech":[],"pick":"d"},
+                  {"string":4,"fret":8,"midi":58,"tick":3600,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":8,"midi":63,"tick":3840,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":10,"midi":65,"tick":4080,"dur":240,"tech":[],"pick":"u"},
+                  {"string":2,"fret":8,"midi":67,"tick":4320,"dur":240,"tech":[],"pick":"d"},
+                  {"string":2,"fret":11,"midi":70,"tick":4560,"dur":240,"tech":[],"pick":"u"},
+                  {"string":2,"fret":8,"midi":67,"tick":4800,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":10,"midi":65,"tick":5040,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":8,"midi":63,"tick":5280,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":10,"midi":65,"tick":5520,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":8,"midi":63,"tick":5760,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":10,"midi":65,"tick":6000,"dur":240,"tech":[],"pick":"u"},
+                  {"string":2,"fret":8,"midi":67,"tick":6240,"dur":240,"tech":[],"pick":"d"},
+                  {"string":2,"fret":11,"midi":70,"tick":6480,"dur":240,"tech":[],"pick":"u"},
+                  {"string":2,"fret":8,"midi":67,"tick":6720,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":10,"midi":65,"tick":6960,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":8,"midi":63,"tick":7200,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":10,"midi":65,"tick":7440,"dur":240,"tech":[],"pick":"u"}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 32,
+                  "minGapMsAtTop": 115.38,
+                  "handShifts": 0,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 8.14
+                },
+                "harmony": {
+                  "kind": "scale",
+                  "root": "C",
+                  "scale": "naturalMinor",
+                  "spelled": ["C", "D", "Eb", "F", "G", "Ab", "Bb"],
+                  "cover": false
+                }
+              },
+              {
+                "id": "key=D",
+                "label": "D minor",
+                "params": {
+                  "key": "D"
+                },
+                "pool": "all",
+                "tab": "/16 4:12 3:10 3:12 2:10 3:12 3:10 4:12 4:10 4:12 3:10 3:12 2:10 3:12 3:10 4:12 4:10 | 3:10 3:12 2:10 2:13 2:10 3:12 3:10 3:12 3:10 3:12 2:10 2:13 2:10 3:12 3:10 3:12",
+                "position": {
+                  "fret": 10,
+                  "shifts": "none"
+                },
+                "crossing": "both",
+                "notes": [
+                  {"string":4,"fret":12,"midi":62,"tick":0,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":10,"midi":65,"tick":240,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":12,"midi":67,"tick":480,"dur":240,"tech":[],"pick":"d"},
+                  {"string":2,"fret":10,"midi":69,"tick":720,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":12,"midi":67,"tick":960,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":10,"midi":65,"tick":1200,"dur":240,"tech":[],"pick":"u"},
+                  {"string":4,"fret":12,"midi":62,"tick":1440,"dur":240,"tech":[],"pick":"d"},
+                  {"string":4,"fret":10,"midi":60,"tick":1680,"dur":240,"tech":[],"pick":"u"},
+                  {"string":4,"fret":12,"midi":62,"tick":1920,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":10,"midi":65,"tick":2160,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":12,"midi":67,"tick":2400,"dur":240,"tech":[],"pick":"d"},
+                  {"string":2,"fret":10,"midi":69,"tick":2640,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":12,"midi":67,"tick":2880,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":10,"midi":65,"tick":3120,"dur":240,"tech":[],"pick":"u"},
+                  {"string":4,"fret":12,"midi":62,"tick":3360,"dur":240,"tech":[],"pick":"d"},
+                  {"string":4,"fret":10,"midi":60,"tick":3600,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":10,"midi":65,"tick":3840,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":12,"midi":67,"tick":4080,"dur":240,"tech":[],"pick":"u"},
+                  {"string":2,"fret":10,"midi":69,"tick":4320,"dur":240,"tech":[],"pick":"d"},
+                  {"string":2,"fret":13,"midi":72,"tick":4560,"dur":240,"tech":[],"pick":"u"},
+                  {"string":2,"fret":10,"midi":69,"tick":4800,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":12,"midi":67,"tick":5040,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":10,"midi":65,"tick":5280,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":12,"midi":67,"tick":5520,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":10,"midi":65,"tick":5760,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":12,"midi":67,"tick":6000,"dur":240,"tech":[],"pick":"u"},
+                  {"string":2,"fret":10,"midi":69,"tick":6240,"dur":240,"tech":[],"pick":"d"},
+                  {"string":2,"fret":13,"midi":72,"tick":6480,"dur":240,"tech":[],"pick":"u"},
+                  {"string":2,"fret":10,"midi":69,"tick":6720,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":12,"midi":67,"tick":6960,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":10,"midi":65,"tick":7200,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":12,"midi":67,"tick":7440,"dur":240,"tech":[],"pick":"u"}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 32,
+                  "minGapMsAtTop": 115.38,
+                  "handShifts": 0,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 8.14
+                },
+                "harmony": {
+                  "kind": "scale",
+                  "root": "D",
+                  "scale": "naturalMinor",
+                  "spelled": ["D", "E", "F", "G", "A", "Bb", "C"],
+                  "cover": false
+                }
+              },
+              {
+                "id": "key=E",
+                "label": "E minor",
+                "params": {
+                  "key": "E"
+                },
+                "pool": "all",
+                "tab": "/16 4:2 3:0 3:2 2:0 3:2 3:0 4:2 4:0 4:2 3:0 3:2 2:0 3:2 3:0 4:2 4:0 | 3:0 3:2 2:0 2:3 2:0 3:2 3:0 3:2 3:0 3:2 2:0 2:3 2:0 3:2 3:0 3:2",
+                "position": {
+                  "fret": 2,
+                  "shifts": "none"
+                },
+                "crossing": "both",
+                "notes": [
+                  {"string":4,"fret":2,"midi":52,"tick":0,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":0,"midi":55,"tick":240,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":2,"midi":57,"tick":480,"dur":240,"tech":[],"pick":"d"},
+                  {"string":2,"fret":0,"midi":59,"tick":720,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":2,"midi":57,"tick":960,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":0,"midi":55,"tick":1200,"dur":240,"tech":[],"pick":"u"},
+                  {"string":4,"fret":2,"midi":52,"tick":1440,"dur":240,"tech":[],"pick":"d"},
+                  {"string":4,"fret":0,"midi":50,"tick":1680,"dur":240,"tech":[],"pick":"u"},
+                  {"string":4,"fret":2,"midi":52,"tick":1920,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":0,"midi":55,"tick":2160,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":2,"midi":57,"tick":2400,"dur":240,"tech":[],"pick":"d"},
+                  {"string":2,"fret":0,"midi":59,"tick":2640,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":2,"midi":57,"tick":2880,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":0,"midi":55,"tick":3120,"dur":240,"tech":[],"pick":"u"},
+                  {"string":4,"fret":2,"midi":52,"tick":3360,"dur":240,"tech":[],"pick":"d"},
+                  {"string":4,"fret":0,"midi":50,"tick":3600,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":0,"midi":55,"tick":3840,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":2,"midi":57,"tick":4080,"dur":240,"tech":[],"pick":"u"},
+                  {"string":2,"fret":0,"midi":59,"tick":4320,"dur":240,"tech":[],"pick":"d"},
+                  {"string":2,"fret":3,"midi":62,"tick":4560,"dur":240,"tech":[],"pick":"u"},
+                  {"string":2,"fret":0,"midi":59,"tick":4800,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":2,"midi":57,"tick":5040,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":0,"midi":55,"tick":5280,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":2,"midi":57,"tick":5520,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":0,"midi":55,"tick":5760,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":2,"midi":57,"tick":6000,"dur":240,"tech":[],"pick":"u"},
+                  {"string":2,"fret":0,"midi":59,"tick":6240,"dur":240,"tech":[],"pick":"d"},
+                  {"string":2,"fret":3,"midi":62,"tick":6480,"dur":240,"tech":[],"pick":"u"},
+                  {"string":2,"fret":0,"midi":59,"tick":6720,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":2,"midi":57,"tick":6960,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":0,"midi":55,"tick":7200,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":2,"midi":57,"tick":7440,"dur":240,"tech":[],"pick":"u"}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 32,
+                  "minGapMsAtTop": 115.38,
+                  "handShifts": 0,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 8.14
+                },
+                "harmony": {
+                  "kind": "scale",
+                  "root": "E",
+                  "scale": "naturalMinor",
+                  "spelled": ["E", "F#", "G", "A", "B", "C", "D"],
+                  "cover": false
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "up-to-tempo.three-strings-at-tempo",
+          "title": "Three strings, faster",
+          "purpose": "The three-notes-per-string run up and back, from three different starting strings, at a tempo where the stretch and the crossings have to be automatic.",
+          "howTo": [
+            "Sixteenths, sixteen notes, strictly down-up. The crossings alternate outside and inside going up.",
+            "Keep the fingers close to the strings. At this tempo a finger that lifts high arrives late."
+          ],
+          "coachLine": "I'll say how even it was and check the notes after the take.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 1,
+          "loops": true,
+          "position": {
+            "fret": 5,
+            "shifts": "allowed"
+          },
+          "pickPlan": "alternate",
+          "crossing": "both",
+          "notesRole": "target",
+          "notes": [
+            {"string":6,"fret":5,"midi":45,"tick":0,"dur":240,"tech":[],"pick":"d"},
+            {"string":6,"fret":7,"midi":47,"tick":240,"dur":240,"tech":[],"pick":"u"},
+            {"string":6,"fret":8,"midi":48,"tick":480,"dur":240,"tech":[],"pick":"d"},
+            {"string":5,"fret":5,"midi":50,"tick":720,"dur":240,"tech":[],"pick":"u"},
+            {"string":5,"fret":7,"midi":52,"tick":960,"dur":240,"tech":[],"pick":"d"},
+            {"string":5,"fret":8,"midi":53,"tick":1200,"dur":240,"tech":[],"pick":"u"},
+            {"string":4,"fret":5,"midi":55,"tick":1440,"dur":240,"tech":[],"pick":"d"},
+            {"string":4,"fret":7,"midi":57,"tick":1680,"dur":240,"tech":[],"pick":"u"},
+            {"string":4,"fret":9,"midi":59,"tick":1920,"dur":240,"tech":[],"pick":"d"},
+            {"string":4,"fret":7,"midi":57,"tick":2160,"dur":240,"tech":[],"pick":"u"},
+            {"string":4,"fret":5,"midi":55,"tick":2400,"dur":240,"tech":[],"pick":"d"},
+            {"string":5,"fret":8,"midi":53,"tick":2640,"dur":240,"tech":[],"pick":"u"},
+            {"string":5,"fret":7,"midi":52,"tick":2880,"dur":240,"tech":[],"pick":"d"},
+            {"string":5,"fret":5,"midi":50,"tick":3120,"dur":240,"tech":[],"pick":"u"},
+            {"string":6,"fret":8,"midi":48,"tick":3360,"dur":240,"tech":[],"pick":"d"},
+            {"string":6,"fret":7,"midi":47,"tick":3600,"dur":240,"tech":[],"pick":"u"}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"},
+              {"bpm":120,"grading":"graded"}
+            ],
+            "passAtBpm": 100
+          },
+          "passBars": [
+            {
+              "metric": "timingEvenness",
+              "min": 0.85,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.95,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 2,
+              "overBars": 4
+            },
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            }
+          ],
+          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo", "noteIdentity"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["fastPicking"],
+            "notes": [
+              "At this speed a real rig's input delay can push notes out of their matching window, which reads as late or missed. Evenness is the number to trust here, and only once the delay is calibrated."
+            ]
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 6,
+          "tab": "/16 6:5 6:7 6:8 5:5 5:7 5:8 4:5 4:7 4:9 4:7 4:5 5:8 5:7 5:5 6:8 6:7",
+          "subdivision": "sixteenths",
+          "computed": {
+            "noteCount": 16,
+            "minGapMsAtTop": 125,
+            "handShifts": 2,
+            "maxPlayableBpm": 120,
+            "difficulty": 7.58
+          },
+          "harmony": {
+            "kind": "scale",
+            "root": "A",
+            "scale": "naturalMinor",
+            "spelled": ["A", "B", "C", "D", "E", "F", "G"],
+            "cover": false
+          },
+          "variation": {
+            "dimensions": ["stringSet"],
+            "pooled": ["stringSet"],
+            "notPooled": [],
+            "variants": [
+              {
+                "id": "stringSet=from-the-low-E-string",
+                "label": "from the low E string",
+                "params": {
+                  "stringSet": "from the low E string"
+                },
+                "pool": "all",
+                "tab": "/16 6:5 6:7 6:8 5:5 5:7 5:8 4:5 4:7 4:9 4:7 4:5 5:8 5:7 5:5 6:8 6:7",
+                "position": {
+                  "fret": 5,
+                  "shifts": "allowed"
+                },
+                "crossing": "both",
+                "notes": [
+                  {"string":6,"fret":5,"midi":45,"tick":0,"dur":240,"tech":[],"pick":"d"},
+                  {"string":6,"fret":7,"midi":47,"tick":240,"dur":240,"tech":[],"pick":"u"},
+                  {"string":6,"fret":8,"midi":48,"tick":480,"dur":240,"tech":[],"pick":"d"},
+                  {"string":5,"fret":5,"midi":50,"tick":720,"dur":240,"tech":[],"pick":"u"},
+                  {"string":5,"fret":7,"midi":52,"tick":960,"dur":240,"tech":[],"pick":"d"},
+                  {"string":5,"fret":8,"midi":53,"tick":1200,"dur":240,"tech":[],"pick":"u"},
+                  {"string":4,"fret":5,"midi":55,"tick":1440,"dur":240,"tech":[],"pick":"d"},
+                  {"string":4,"fret":7,"midi":57,"tick":1680,"dur":240,"tech":[],"pick":"u"},
+                  {"string":4,"fret":9,"midi":59,"tick":1920,"dur":240,"tech":[],"pick":"d"},
+                  {"string":4,"fret":7,"midi":57,"tick":2160,"dur":240,"tech":[],"pick":"u"},
+                  {"string":4,"fret":5,"midi":55,"tick":2400,"dur":240,"tech":[],"pick":"d"},
+                  {"string":5,"fret":8,"midi":53,"tick":2640,"dur":240,"tech":[],"pick":"u"},
+                  {"string":5,"fret":7,"midi":52,"tick":2880,"dur":240,"tech":[],"pick":"d"},
+                  {"string":5,"fret":5,"midi":50,"tick":3120,"dur":240,"tech":[],"pick":"u"},
+                  {"string":6,"fret":8,"midi":48,"tick":3360,"dur":240,"tech":[],"pick":"d"},
+                  {"string":6,"fret":7,"midi":47,"tick":3600,"dur":240,"tech":[],"pick":"u"}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 16,
+                  "minGapMsAtTop": 125,
+                  "handShifts": 2,
+                  "maxPlayableBpm": 120,
+                  "difficulty": 7.58
+                },
+                "harmony": {
+                  "kind": "scale",
+                  "root": "A",
+                  "scale": "naturalMinor",
+                  "spelled": ["A", "B", "C", "D", "E", "F", "G"],
+                  "cover": false
+                }
+              },
+              {
+                "id": "stringSet=from-the-A-string",
+                "label": "from the A string",
+                "params": {
+                  "stringSet": "from the A string"
+                },
+                "pool": "all",
+                "tab": "/16 5:5 5:7 5:8 4:5 4:7 4:9 3:5 3:7 3:9 3:7 3:5 4:9 4:7 4:5 5:8 5:7",
+                "position": {
+                  "fret": 5,
+                  "shifts": "allowed"
+                },
+                "crossing": "both",
+                "notes": [
+                  {"string":5,"fret":5,"midi":50,"tick":0,"dur":240,"tech":[],"pick":"d"},
+                  {"string":5,"fret":7,"midi":52,"tick":240,"dur":240,"tech":[],"pick":"u"},
+                  {"string":5,"fret":8,"midi":53,"tick":480,"dur":240,"tech":[],"pick":"d"},
+                  {"string":4,"fret":5,"midi":55,"tick":720,"dur":240,"tech":[],"pick":"u"},
+                  {"string":4,"fret":7,"midi":57,"tick":960,"dur":240,"tech":[],"pick":"d"},
+                  {"string":4,"fret":9,"midi":59,"tick":1200,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":5,"midi":60,"tick":1440,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":7,"midi":62,"tick":1680,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":9,"midi":64,"tick":1920,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":7,"midi":62,"tick":2160,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":5,"midi":60,"tick":2400,"dur":240,"tech":[],"pick":"d"},
+                  {"string":4,"fret":9,"midi":59,"tick":2640,"dur":240,"tech":[],"pick":"u"},
+                  {"string":4,"fret":7,"midi":57,"tick":2880,"dur":240,"tech":[],"pick":"d"},
+                  {"string":4,"fret":5,"midi":55,"tick":3120,"dur":240,"tech":[],"pick":"u"},
+                  {"string":5,"fret":8,"midi":53,"tick":3360,"dur":240,"tech":[],"pick":"d"},
+                  {"string":5,"fret":7,"midi":52,"tick":3600,"dur":240,"tech":[],"pick":"u"}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 16,
+                  "minGapMsAtTop": 125,
+                  "handShifts": 6,
+                  "maxPlayableBpm": 120,
+                  "difficulty": 8.08
+                },
+                "harmony": {
+                  "kind": "scale",
+                  "root": "A",
+                  "scale": "naturalMinor",
+                  "spelled": ["A", "B", "C", "D", "E", "F", "G"],
+                  "cover": false
+                }
+              },
+              {
+                "id": "stringSet=from-the-D-string",
+                "label": "from the D string",
+                "params": {
+                  "stringSet": "from the D string"
+                },
+                "pool": "all",
+                "tab": "/16 4:5 4:7 4:9 3:5 3:7 3:9 2:6 2:8 2:10 2:8 2:6 3:9 3:7 3:5 4:9 4:7",
+                "position": {
+                  "fret": 5,
+                  "shifts": "allowed"
+                },
+                "crossing": "both",
+                "notes": [
+                  {"string":4,"fret":5,"midi":55,"tick":0,"dur":240,"tech":[],"pick":"d"},
+                  {"string":4,"fret":7,"midi":57,"tick":240,"dur":240,"tech":[],"pick":"u"},
+                  {"string":4,"fret":9,"midi":59,"tick":480,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":5,"midi":60,"tick":720,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":7,"midi":62,"tick":960,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":9,"midi":64,"tick":1200,"dur":240,"tech":[],"pick":"u"},
+                  {"string":2,"fret":6,"midi":65,"tick":1440,"dur":240,"tech":[],"pick":"d"},
+                  {"string":2,"fret":8,"midi":67,"tick":1680,"dur":240,"tech":[],"pick":"u"},
+                  {"string":2,"fret":10,"midi":69,"tick":1920,"dur":240,"tech":[],"pick":"d"},
+                  {"string":2,"fret":8,"midi":67,"tick":2160,"dur":240,"tech":[],"pick":"u"},
+                  {"string":2,"fret":6,"midi":65,"tick":2400,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":9,"midi":64,"tick":2640,"dur":240,"tech":[],"pick":"u"},
+                  {"string":3,"fret":7,"midi":62,"tick":2880,"dur":240,"tech":[],"pick":"d"},
+                  {"string":3,"fret":5,"midi":60,"tick":3120,"dur":240,"tech":[],"pick":"u"},
+                  {"string":4,"fret":9,"midi":59,"tick":3360,"dur":240,"tech":[],"pick":"d"},
+                  {"string":4,"fret":7,"midi":57,"tick":3600,"dur":240,"tech":[],"pick":"u"}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 16,
+                  "minGapMsAtTop": 125,
+                  "handShifts": 8,
+                  "maxPlayableBpm": 120,
+                  "difficulty": 8.33
+                },
+                "harmony": {
+                  "kind": "scale",
+                  "root": "A",
+                  "scale": "naturalMinor",
+                  "spelled": ["A", "B", "C", "D", "E", "F", "G"],
+                  "cover": false
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "up-to-tempo.sextuplet-loop",
+          "title": "The six-note lick, six to a click",
+          "purpose": "C, B, A, G, F, E on the top two strings as sextuplets, round and round. The burst from the Step before, now without the rest after it.",
+          "howTo": [
+            "Six notes to the click, starting on a downstroke; the pattern is even, so every repeat starts down too.",
+            "Lean on the first note of each beat a little. Without it six fast notes turn into a blur with no beat in it."
+          ],
+          "coachLine": "Fast notes are the hardest for me to place, so read the evenness as provisional and trust a recording as well.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 1,
+          "loops": true,
+          "position": {
+            "fret": 5,
+            "shifts": "none"
+          },
+          "pickPlan": "alternate",
+          "crossing": "inside",
+          "notesRole": "target",
+          "notes": [
+            {"string":1,"fret":8,"midi":72,"tick":0,"dur":160,"tech":[],"pick":"d"},
+            {"string":1,"fret":7,"midi":71,"tick":160,"dur":160,"tech":[],"pick":"u"},
+            {"string":1,"fret":5,"midi":69,"tick":320,"dur":160,"tech":[],"pick":"d"},
+            {"string":2,"fret":8,"midi":67,"tick":480,"dur":160,"tech":[],"pick":"u"},
+            {"string":2,"fret":6,"midi":65,"tick":640,"dur":160,"tech":[],"pick":"d"},
+            {"string":2,"fret":5,"midi":64,"tick":800,"dur":160,"tech":[],"pick":"u"},
+            {"string":1,"fret":8,"midi":72,"tick":960,"dur":160,"tech":[],"pick":"d"},
+            {"string":1,"fret":7,"midi":71,"tick":1120,"dur":160,"tech":[],"pick":"u"},
+            {"string":1,"fret":5,"midi":69,"tick":1280,"dur":160,"tech":[],"pick":"d"},
+            {"string":2,"fret":8,"midi":67,"tick":1440,"dur":160,"tech":[],"pick":"u"},
+            {"string":2,"fret":6,"midi":65,"tick":1600,"dur":160,"tech":[],"pick":"d"},
+            {"string":2,"fret":5,"midi":64,"tick":1760,"dur":160,"tech":[],"pick":"u"},
+            {"string":1,"fret":8,"midi":72,"tick":1920,"dur":160,"tech":[],"pick":"d"},
+            {"string":1,"fret":7,"midi":71,"tick":2080,"dur":160,"tech":[],"pick":"u"},
+            {"string":1,"fret":5,"midi":69,"tick":2240,"dur":160,"tech":[],"pick":"d"},
+            {"string":2,"fret":8,"midi":67,"tick":2400,"dur":160,"tech":[],"pick":"u"},
+            {"string":2,"fret":6,"midi":65,"tick":2560,"dur":160,"tech":[],"pick":"d"},
+            {"string":2,"fret":5,"midi":64,"tick":2720,"dur":160,"tech":[],"pick":"u"},
+            {"string":1,"fret":8,"midi":72,"tick":2880,"dur":160,"tech":[],"pick":"d"},
+            {"string":1,"fret":7,"midi":71,"tick":3040,"dur":160,"tech":[],"pick":"u"},
+            {"string":1,"fret":5,"midi":69,"tick":3200,"dur":160,"tech":[],"pick":"d"},
+            {"string":2,"fret":8,"midi":67,"tick":3360,"dur":160,"tech":[],"pick":"u"},
+            {"string":2,"fret":6,"midi":65,"tick":3520,"dur":160,"tech":[],"pick":"d"},
+            {"string":2,"fret":5,"midi":64,"tick":3680,"dur":160,"tech":[],"pick":"u"}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":45,"grading":"graded"},
+              {"bpm":55,"grading":"graded"},
+              {"bpm":65,"grading":"graded"},
+              {"bpm":75,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"}
+            ],
+            "passAtBpm": 75
+          },
+          "passBars": [
+            {
+              "metric": "timingEvenness",
+              "min": 0.85,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.95,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 2,
+              "overBars": 4
+            },
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            }
+          ],
+          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo", "noteIdentity"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["fastPicking"],
+            "notes": [
+              "At this speed a real rig's input delay can push notes out of their matching window, which reads as late or missed. Evenness is the number to trust here, and only once the delay is calibrated."
+            ]
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 6,
+          "tab": "/16t 1:8 1:7 1:5 2:8 2:6 2:5 1:8 1:7 1:5 2:8 2:6 2:5 1:8 1:7 1:5 2:8 2:6 2:5 1:8 1:7 1:5 2:8 2:6 2:5",
+          "subdivision": "sextuplets",
+          "computed": {
+            "noteCount": 24,
+            "minGapMsAtTop": 100,
+            "handShifts": 0,
+            "maxPlayableBpm": 119,
+            "difficulty": 8.38
+          },
+          "harmony": {
+            "kind": "scale",
+            "root": "A",
+            "scale": "naturalMinor",
+            "spelled": ["A", "B", "C", "D", "E", "F", "G"],
+            "cover": false
+          },
+          "selfCheck": ["On a recording, can you still hear all six notes as six?"],
+          "variation": {
+            "dimensions": ["key"],
+            "pooled": ["key"],
+            "notPooled": [],
+            "variants": [
+              {
+                "id": "key=A",
+                "label": "A minor",
+                "params": {
+                  "key": "A"
+                },
+                "pool": "all",
+                "tab": "/16t 1:8 1:7 1:5 2:8 2:6 2:5 1:8 1:7 1:5 2:8 2:6 2:5 1:8 1:7 1:5 2:8 2:6 2:5 1:8 1:7 1:5 2:8 2:6 2:5",
+                "position": {
+                  "fret": 5,
+                  "shifts": "none"
+                },
+                "crossing": "inside",
+                "notes": [
+                  {"string":1,"fret":8,"midi":72,"tick":0,"dur":160,"tech":[],"pick":"d"},
+                  {"string":1,"fret":7,"midi":71,"tick":160,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":5,"midi":69,"tick":320,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":8,"midi":67,"tick":480,"dur":160,"tech":[],"pick":"u"},
+                  {"string":2,"fret":6,"midi":65,"tick":640,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":5,"midi":64,"tick":800,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":8,"midi":72,"tick":960,"dur":160,"tech":[],"pick":"d"},
+                  {"string":1,"fret":7,"midi":71,"tick":1120,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":5,"midi":69,"tick":1280,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":8,"midi":67,"tick":1440,"dur":160,"tech":[],"pick":"u"},
+                  {"string":2,"fret":6,"midi":65,"tick":1600,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":5,"midi":64,"tick":1760,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":8,"midi":72,"tick":1920,"dur":160,"tech":[],"pick":"d"},
+                  {"string":1,"fret":7,"midi":71,"tick":2080,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":5,"midi":69,"tick":2240,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":8,"midi":67,"tick":2400,"dur":160,"tech":[],"pick":"u"},
+                  {"string":2,"fret":6,"midi":65,"tick":2560,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":5,"midi":64,"tick":2720,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":8,"midi":72,"tick":2880,"dur":160,"tech":[],"pick":"d"},
+                  {"string":1,"fret":7,"midi":71,"tick":3040,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":5,"midi":69,"tick":3200,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":8,"midi":67,"tick":3360,"dur":160,"tech":[],"pick":"u"},
+                  {"string":2,"fret":6,"midi":65,"tick":3520,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":5,"midi":64,"tick":3680,"dur":160,"tech":[],"pick":"u"}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 24,
+                  "minGapMsAtTop": 100,
+                  "handShifts": 0,
+                  "maxPlayableBpm": 119,
+                  "difficulty": 8.38
+                },
+                "harmony": {
+                  "kind": "scale",
+                  "root": "A",
+                  "scale": "naturalMinor",
+                  "spelled": ["A", "B", "C", "D", "E", "F", "G"],
+                  "cover": false
+                }
+              },
+              {
+                "id": "key=B",
+                "label": "B minor",
+                "params": {
+                  "key": "B"
+                },
+                "pool": "all",
+                "tab": "/16t 1:10 1:9 1:7 2:10 2:8 2:7 1:10 1:9 1:7 2:10 2:8 2:7 1:10 1:9 1:7 2:10 2:8 2:7 1:10 1:9 1:7 2:10 2:8 2:7",
+                "position": {
+                  "fret": 7,
+                  "shifts": "none"
+                },
+                "crossing": "inside",
+                "notes": [
+                  {"string":1,"fret":10,"midi":74,"tick":0,"dur":160,"tech":[],"pick":"d"},
+                  {"string":1,"fret":9,"midi":73,"tick":160,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":7,"midi":71,"tick":320,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":10,"midi":69,"tick":480,"dur":160,"tech":[],"pick":"u"},
+                  {"string":2,"fret":8,"midi":67,"tick":640,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":7,"midi":66,"tick":800,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":10,"midi":74,"tick":960,"dur":160,"tech":[],"pick":"d"},
+                  {"string":1,"fret":9,"midi":73,"tick":1120,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":7,"midi":71,"tick":1280,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":10,"midi":69,"tick":1440,"dur":160,"tech":[],"pick":"u"},
+                  {"string":2,"fret":8,"midi":67,"tick":1600,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":7,"midi":66,"tick":1760,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":10,"midi":74,"tick":1920,"dur":160,"tech":[],"pick":"d"},
+                  {"string":1,"fret":9,"midi":73,"tick":2080,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":7,"midi":71,"tick":2240,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":10,"midi":69,"tick":2400,"dur":160,"tech":[],"pick":"u"},
+                  {"string":2,"fret":8,"midi":67,"tick":2560,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":7,"midi":66,"tick":2720,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":10,"midi":74,"tick":2880,"dur":160,"tech":[],"pick":"d"},
+                  {"string":1,"fret":9,"midi":73,"tick":3040,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":7,"midi":71,"tick":3200,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":10,"midi":69,"tick":3360,"dur":160,"tech":[],"pick":"u"},
+                  {"string":2,"fret":8,"midi":67,"tick":3520,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":7,"midi":66,"tick":3680,"dur":160,"tech":[],"pick":"u"}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 24,
+                  "minGapMsAtTop": 100,
+                  "handShifts": 0,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 8.38
+                },
+                "harmony": {
+                  "kind": "scale",
+                  "root": "B",
+                  "scale": "naturalMinor",
+                  "spelled": ["B", "C#", "D", "E", "F#", "G", "A"],
+                  "cover": false
+                }
+              },
+              {
+                "id": "key=C",
+                "label": "C minor",
+                "params": {
+                  "key": "C"
+                },
+                "pool": "all",
+                "tab": "/16t 1:11 1:10 1:8 2:11 2:9 2:8 1:11 1:10 1:8 2:11 2:9 2:8 1:11 1:10 1:8 2:11 2:9 2:8 1:11 1:10 1:8 2:11 2:9 2:8",
+                "position": {
+                  "fret": 8,
+                  "shifts": "none"
+                },
+                "crossing": "inside",
+                "notes": [
+                  {"string":1,"fret":11,"midi":75,"tick":0,"dur":160,"tech":[],"pick":"d"},
+                  {"string":1,"fret":10,"midi":74,"tick":160,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":8,"midi":72,"tick":320,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":11,"midi":70,"tick":480,"dur":160,"tech":[],"pick":"u"},
+                  {"string":2,"fret":9,"midi":68,"tick":640,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":8,"midi":67,"tick":800,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":11,"midi":75,"tick":960,"dur":160,"tech":[],"pick":"d"},
+                  {"string":1,"fret":10,"midi":74,"tick":1120,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":8,"midi":72,"tick":1280,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":11,"midi":70,"tick":1440,"dur":160,"tech":[],"pick":"u"},
+                  {"string":2,"fret":9,"midi":68,"tick":1600,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":8,"midi":67,"tick":1760,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":11,"midi":75,"tick":1920,"dur":160,"tech":[],"pick":"d"},
+                  {"string":1,"fret":10,"midi":74,"tick":2080,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":8,"midi":72,"tick":2240,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":11,"midi":70,"tick":2400,"dur":160,"tech":[],"pick":"u"},
+                  {"string":2,"fret":9,"midi":68,"tick":2560,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":8,"midi":67,"tick":2720,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":11,"midi":75,"tick":2880,"dur":160,"tech":[],"pick":"d"},
+                  {"string":1,"fret":10,"midi":74,"tick":3040,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":8,"midi":72,"tick":3200,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":11,"midi":70,"tick":3360,"dur":160,"tech":[],"pick":"u"},
+                  {"string":2,"fret":9,"midi":68,"tick":3520,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":8,"midi":67,"tick":3680,"dur":160,"tech":[],"pick":"u"}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 24,
+                  "minGapMsAtTop": 100,
+                  "handShifts": 0,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 8.38
+                },
+                "harmony": {
+                  "kind": "scale",
+                  "root": "C",
+                  "scale": "naturalMinor",
+                  "spelled": ["C", "D", "Eb", "F", "G", "Ab", "Bb"],
+                  "cover": false
+                }
+              },
+              {
+                "id": "key=D",
+                "label": "D minor",
+                "params": {
+                  "key": "D"
+                },
+                "pool": "all",
+                "tab": "/16t 1:13 1:12 1:10 2:13 2:11 2:10 1:13 1:12 1:10 2:13 2:11 2:10 1:13 1:12 1:10 2:13 2:11 2:10 1:13 1:12 1:10 2:13 2:11 2:10",
+                "position": {
+                  "fret": 10,
+                  "shifts": "none"
+                },
+                "crossing": "inside",
+                "notes": [
+                  {"string":1,"fret":13,"midi":77,"tick":0,"dur":160,"tech":[],"pick":"d"},
+                  {"string":1,"fret":12,"midi":76,"tick":160,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":10,"midi":74,"tick":320,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":13,"midi":72,"tick":480,"dur":160,"tech":[],"pick":"u"},
+                  {"string":2,"fret":11,"midi":70,"tick":640,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":10,"midi":69,"tick":800,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":13,"midi":77,"tick":960,"dur":160,"tech":[],"pick":"d"},
+                  {"string":1,"fret":12,"midi":76,"tick":1120,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":10,"midi":74,"tick":1280,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":13,"midi":72,"tick":1440,"dur":160,"tech":[],"pick":"u"},
+                  {"string":2,"fret":11,"midi":70,"tick":1600,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":10,"midi":69,"tick":1760,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":13,"midi":77,"tick":1920,"dur":160,"tech":[],"pick":"d"},
+                  {"string":1,"fret":12,"midi":76,"tick":2080,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":10,"midi":74,"tick":2240,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":13,"midi":72,"tick":2400,"dur":160,"tech":[],"pick":"u"},
+                  {"string":2,"fret":11,"midi":70,"tick":2560,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":10,"midi":69,"tick":2720,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":13,"midi":77,"tick":2880,"dur":160,"tech":[],"pick":"d"},
+                  {"string":1,"fret":12,"midi":76,"tick":3040,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":10,"midi":74,"tick":3200,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":13,"midi":72,"tick":3360,"dur":160,"tech":[],"pick":"u"},
+                  {"string":2,"fret":11,"midi":70,"tick":3520,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":10,"midi":69,"tick":3680,"dur":160,"tech":[],"pick":"u"}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 24,
+                  "minGapMsAtTop": 100,
+                  "handShifts": 0,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 8.38
+                },
+                "harmony": {
+                  "kind": "scale",
+                  "root": "D",
+                  "scale": "naturalMinor",
+                  "spelled": ["D", "E", "F", "G", "A", "Bb", "C"],
+                  "cover": false
+                }
+              },
+              {
+                "id": "key=E",
+                "label": "E minor",
+                "params": {
+                  "key": "E"
+                },
+                "pool": "all",
+                "tab": "/16t 1:3 1:2 1:0 2:3 2:1 2:0 1:3 1:2 1:0 2:3 2:1 2:0 1:3 1:2 1:0 2:3 2:1 2:0 1:3 1:2 1:0 2:3 2:1 2:0",
+                "position": {
+                  "fret": 1,
+                  "shifts": "none"
+                },
+                "crossing": "inside",
+                "notes": [
+                  {"string":1,"fret":3,"midi":67,"tick":0,"dur":160,"tech":[],"pick":"d"},
+                  {"string":1,"fret":2,"midi":66,"tick":160,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":0,"midi":64,"tick":320,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":3,"midi":62,"tick":480,"dur":160,"tech":[],"pick":"u"},
+                  {"string":2,"fret":1,"midi":60,"tick":640,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":0,"midi":59,"tick":800,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":3,"midi":67,"tick":960,"dur":160,"tech":[],"pick":"d"},
+                  {"string":1,"fret":2,"midi":66,"tick":1120,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":0,"midi":64,"tick":1280,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":3,"midi":62,"tick":1440,"dur":160,"tech":[],"pick":"u"},
+                  {"string":2,"fret":1,"midi":60,"tick":1600,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":0,"midi":59,"tick":1760,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":3,"midi":67,"tick":1920,"dur":160,"tech":[],"pick":"d"},
+                  {"string":1,"fret":2,"midi":66,"tick":2080,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":0,"midi":64,"tick":2240,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":3,"midi":62,"tick":2400,"dur":160,"tech":[],"pick":"u"},
+                  {"string":2,"fret":1,"midi":60,"tick":2560,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":0,"midi":59,"tick":2720,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":3,"midi":67,"tick":2880,"dur":160,"tech":[],"pick":"d"},
+                  {"string":1,"fret":2,"midi":66,"tick":3040,"dur":160,"tech":[],"pick":"u"},
+                  {"string":1,"fret":0,"midi":64,"tick":3200,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":3,"midi":62,"tick":3360,"dur":160,"tech":[],"pick":"u"},
+                  {"string":2,"fret":1,"midi":60,"tick":3520,"dur":160,"tech":[],"pick":"d"},
+                  {"string":2,"fret":0,"midi":59,"tick":3680,"dur":160,"tech":[],"pick":"u"}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 24,
+                  "minGapMsAtTop": 100,
+                  "handShifts": 0,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 8.38
+                },
+                "harmony": {
+                  "kind": "scale",
+                  "root": "E",
+                  "scale": "naturalMinor",
+                  "spelled": ["E", "F#", "G", "A", "B", "C", "D"],
+                  "cover": false
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "up-to-tempo.two-octave-run",
+          "title": "Two and a half octaves in sixteenths",
+          "purpose": "All six strings of A minor, three notes per string, up and back in sixteenths, with a held note to finish. The long run from the Intermediate Level, a third faster.",
+          "howTo": [
+            "The hand moves up one fret at the B string and again at the top string, and back on the way down. Move during the string change.",
+            "Read it in strings, not in notes: three, three, three. The beat falls on a different finger each time, so keep the click in your ear."
+          ],
+          "coachLine": "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 3,
+          "loops": false,
+          "position": {
+            "fret": 5,
+            "shifts": "allowed"
+          },
+          "pickPlan": "alternate",
+          "crossing": "both",
+          "notesRole": "target",
+          "notes": [
+            {"string":6,"fret":5,"midi":45,"tick":0,"dur":240,"tech":[],"pick":"d"},
+            {"string":6,"fret":7,"midi":47,"tick":240,"dur":240,"tech":[],"pick":"u"},
+            {"string":6,"fret":8,"midi":48,"tick":480,"dur":240,"tech":[],"pick":"d"},
+            {"string":5,"fret":5,"midi":50,"tick":720,"dur":240,"tech":[],"pick":"u"},
+            {"string":5,"fret":7,"midi":52,"tick":960,"dur":240,"tech":[],"pick":"d"},
+            {"string":5,"fret":8,"midi":53,"tick":1200,"dur":240,"tech":[],"pick":"u"},
+            {"string":4,"fret":5,"midi":55,"tick":1440,"dur":240,"tech":[],"pick":"d"},
+            {"string":4,"fret":7,"midi":57,"tick":1680,"dur":240,"tech":[],"pick":"u"},
+            {"string":4,"fret":9,"midi":59,"tick":1920,"dur":240,"tech":[],"pick":"d"},
+            {"string":3,"fret":5,"midi":60,"tick":2160,"dur":240,"tech":[],"pick":"u"},
+            {"string":3,"fret":7,"midi":62,"tick":2400,"dur":240,"tech":[],"pick":"d"},
+            {"string":3,"fret":9,"midi":64,"tick":2640,"dur":240,"tech":[],"pick":"u"},
+            {"string":2,"fret":6,"midi":65,"tick":2880,"dur":240,"tech":[],"finger":1,"pick":"d"},
+            {"string":2,"fret":8,"midi":67,"tick":3120,"dur":240,"tech":[],"finger":2,"pick":"u"},
+            {"string":2,"fret":10,"midi":69,"tick":3360,"dur":240,"tech":[],"finger":4,"pick":"d"},
+            {"string":1,"fret":7,"midi":71,"tick":3600,"dur":240,"tech":[],"finger":1,"pick":"u"},
+            {"string":1,"fret":8,"midi":72,"tick":3840,"dur":240,"tech":[],"finger":2,"pick":"d"},
+            {"string":1,"fret":10,"midi":74,"tick":4080,"dur":240,"tech":[],"finger":4,"pick":"u"},
+            {"string":1,"fret":8,"midi":72,"tick":4320,"dur":240,"tech":[],"finger":2,"pick":"d"},
+            {"string":1,"fret":7,"midi":71,"tick":4560,"dur":240,"tech":[],"finger":1,"pick":"u"},
+            {"string":2,"fret":10,"midi":69,"tick":4800,"dur":240,"tech":[],"finger":4,"pick":"d"},
+            {"string":2,"fret":8,"midi":67,"tick":5040,"dur":240,"tech":[],"finger":2,"pick":"u"},
+            {"string":2,"fret":6,"midi":65,"tick":5280,"dur":240,"tech":[],"finger":1,"pick":"d"},
+            {"string":3,"fret":9,"midi":64,"tick":5520,"dur":240,"tech":[],"pick":"u"},
+            {"string":3,"fret":7,"midi":62,"tick":5760,"dur":240,"tech":[],"pick":"d"},
+            {"string":3,"fret":5,"midi":60,"tick":6000,"dur":240,"tech":[],"pick":"u"},
+            {"string":4,"fret":9,"midi":59,"tick":6240,"dur":240,"tech":[],"pick":"d"},
+            {"string":4,"fret":7,"midi":57,"tick":6480,"dur":240,"tech":[],"pick":"u"},
+            {"string":4,"fret":5,"midi":55,"tick":6720,"dur":240,"tech":[],"pick":"d"},
+            {"string":5,"fret":8,"midi":53,"tick":6960,"dur":240,"tech":[],"finger":4,"pick":"u"},
+            {"string":5,"fret":7,"midi":52,"tick":7200,"dur":240,"tech":[],"finger":3,"pick":"d"},
+            {"string":5,"fret":5,"midi":50,"tick":7440,"dur":240,"tech":[],"finger":1,"pick":"u"},
+            {"string":6,"fret":8,"midi":48,"tick":7680,"dur":240,"tech":[],"finger":4,"pick":"d"},
+            {"string":6,"fret":7,"midi":47,"tick":7920,"dur":2880,"tech":[],"finger":3,"pick":"u"}
+          ],
+          "rests": [
+            {"tick":10800,"dur":720}
+          ],
+          "tempo": {
+            "rungs": [
+              {"bpm":55,"grading":"graded"},
+              {"bpm":65,"grading":"graded"},
+              {"bpm":75,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"}
+            ],
+            "passAtBpm": 90
+          },
+          "passBars": [
+            {
+              "metric": "timingEvenness",
+              "min": 0.85,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.95,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 2,
+              "overBars": 4
+            },
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            }
+          ],
+          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo", "noteIdentity"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["fastPicking"],
+            "notes": [
+              "At this speed a real rig's input delay can push notes out of their matching window, which reads as late or missed. Evenness is the number to trust here, and only once the delay is calibrated."
+            ]
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 7,
+          "tab": "/16 6:5 6:7 6:8 5:5 5:7 5:8 4:5 4:7 4:9 3:5 3:7 3:9 2:6f1 2:8f2 2:10f4 1:7f1 1:8f2 1:10f4 1:8f2 1:7f1 2:10f4 2:8f2 2:6f1 3:9 3:7 3:5 4:9 4:7 4:5 5:8f4 5:7f3 5:5f1 6:8f4 6:7f3 hold",
+          "subdivision": "sixteenths",
+          "computed": {
+            "noteCount": 34,
+            "minGapMsAtTop": 136.36,
+            "handShifts": 8,
+            "maxPlayableBpm": 120,
+            "difficulty": 5.05
+          },
+          "harmony": {
+            "kind": "scale",
+            "root": "A",
+            "scale": "naturalMinor",
+            "spelled": ["A", "B", "C", "D", "E", "F", "G"],
+            "cover": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "stamina-minute",
+      "order": 10,
       "title": "The stamina minute",
       "goal": "Hold an even line for sixty seconds at a tempo you could play for ten.",
       "why": "Speed that lasts four bars is a party trick. Holding a tempo for a minute is what shows you are not playing on tension, because tension is what runs out. It also gives you honest information: the last ten seconds show the real state of your technique.",
@@ -7091,7 +8354,7 @@
         "Stop at any pain in the hand, wrist or forearm. A tired forearm is one thing and pain is another; pain ends the set."
       ],
       "payoff": "A full minute of sixteenths that sounds the same at the end as at the start.",
-      "prerequisites": ["cross-string-runs"],
+      "prerequisites": ["up-to-tempo"],
       "difficulty": 4.67,
       "exercises": [
         {
@@ -8166,7 +9429,7 @@
     },
     {
       "id": "over-the-band",
-      "order": 10,
+      "order": 11,
       "title": "A clean run over the band",
       "goal": "Play an eight-bar line over Am, F, C, G with a real band behind you, and stay even when the click is no longer the only thing in your ears.",
       "why": "A click forgives nothing and a band hides everything, which is why this is a separate skill. The drums give you a pulse with a feel to it, the bass tells you where the changes are, and your line has to fit between them. This is the reason you did all of the rest.",
@@ -11165,7 +12428,7 @@
     {
       "id": "advanced",
       "title": "Advanced: speed, length and a band",
-      "summary": "Bursts above your clean tempo, string skips and long lines, a full minute without letting up, then a composed run over a band.",
+      "summary": "Bursts above your clean tempo, string skips and long lines, the figures you know taken up to tempo, a full minute without letting up, then a composed run over a band.",
       "entry": "open",
       "placement": {
         "startHereIf": [
@@ -11174,7 +12437,7 @@
           "Clean is fine at a moderate tempo and you've hit a speed wall, or you've never played with a band."
         ]
       },
-      "stepIds": ["speed-bursts", "cross-string-runs", "stamina-minute", "over-the-band"],
+      "stepIds": ["speed-bursts", "cross-string-runs", "up-to-tempo", "stamina-minute", "over-the-band"],
       "warmups": [
         {
           "id": "warmup-advanced.scale-round",

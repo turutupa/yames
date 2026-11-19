@@ -5,7 +5,7 @@
   "strings": {
     "path.title": "Shred",
     "path.goal": "Alternate, economy, legato, sweep và tapping ở A thứ, xây dựng từng kỹ thuật một, kết thúc bằng một đoạn chạy nốt móc kép dài tám ô nhịp cùng ban nhạc ở 100 BPM.",
-    "path.assumes": "Bạn chơi được box ngũ cung A thứ ở phím 5 và nốt móc đơn theo tiếng click ở 90 BPM. Không yêu cầu tốc độ. Số phút là một lượt qua toàn bộ nội dung; các bài luyện được thiết kế để lặp lại nhiều tuần, và các biến thể đổi giọng và đổi dây để việc lặp lại không nhàm chán.",
+    "path.assumes": "Bạn chơi được box ngũ cung A thứ ở phím 5 và nốt móc đơn theo tiếng click ở 90 BPM. Không yêu cầu tốc độ, nhưng Bước đầu tiên đạt ở nốt móc kép quanh 110 BPM: nếu nốt móc kép ở 90 chưa có, hãy bắt đầu với Nền tảng nhịp điệu hoặc cấp Cơ bản của Alternate picking. Số phút là một lượt qua toàn bộ nội dung; các bài luyện được thiết kế để lặp lại nhiều tuần, và các biến thể đổi giọng và đổi dây để việc lặp lại không nhàm chán.",
     "path.gradingLimits": "Nốt đơn gảy bằng pick, móc kép đến khoảng 120 BPM và chùm sáu đến khoảng 90, là trường hợp ứng dụng được xây dựng cho: độ đều của nhịp, số nốt nghe được và nốt thừa, cộng với đúng nốt khi các nốt cách nhau ít nhất 75 ms và cao độ rõ, sau lượt chơi. Chưa phần nào được thử trên đàn guitar thật. Legato: một hammer-on hay pull-off mà ứng dụng không nghe thấy thì không bị trừ, nên phần nhịp dựa vào các nốt gảy và âm lượng của nốt legato là phần tự kiểm tra; hammer-on từ hư không và tap được tính là nốt tấn công phải nghe được. Sweep chỉ được chấm về nhịp: các nốt sweep ngân chồng lên nhau, đúng nốt phần lớn hiện 'không kiểm tra', và tiêu đề bài có ghi rõ; chỉ những nấc có ít nhất 150 ms giữa các nốt mới được chấm. Nhấn chỉ đo thô, to hơn hay không. Chiều gảy không bao giờ nghe được: nó là một mục trong danh sách tự kiểm tra ở bất cứ đâu chiều gảy quan trọng. Trên móc kép ở 100 BPM, hãy coi phần nhịp là tạm thời cho đến khi độ trễ đầu vào được hiệu chỉnh, và dùng tiếng clean hoặc crunch nhẹ cho các lượt được chấm.",
     "path.skills.0": "Box ngũ cung A thứ",
     "path.skills.1": "Nốt móc đơn theo tiếng click ở 90 BPM",
@@ -523,7 +523,7 @@
   "from": {
     "path.title": "4e93ed55",
     "path.goal": "0f5c209b",
-    "path.assumes": "5156cb08",
+    "path.assumes": "3dd6c154",
     "path.gradingLimits": "6c37c5aa",
     "path.skills.0": "f46936f6",
     "path.skills.1": "342dd813",

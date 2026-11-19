@@ -17,7 +17,7 @@
   },
   "orderRationale": "Theory arrives as written lines you can be graded on, and choosing your own notes comes after, as a short 'your turn' at the end of a Step. Chord tones arrive in Step 2 as arpeggios of A7, D7 and E7 in box 1, each followed by a lick that ends on the chord's third, before the blue notes: knowing where the chord is matters more than knowing an extra note. Call and response is Step 3 because written answers to one call teach phrase length and endings with almost no theory. The blues scale and bends come after the player can find the chord tones, so neither becomes a thing to sit on. A second box comes late on purpose: more notes before good choices makes for faster bad solos. Guide tones are Step 9 because they are the most abstract idea here and easiest once the form is in the ear. Slow blues comes last as it hides nothing.",
   "gradingLimits": "Graded Exercises are written lines: the app checks timing evenness, notes heard and extra notes, and right notes after the take where the notes are single, far enough apart and not ringing into each other; elsewhere right notes read 'not checked'. Timing over the shuffle band is judged against the written triplet with a looser bar, so a lighter or heavier swing is not marked down, and a constant lean behind the beat costs nothing at all. The right-note check has only been tried on computer-made guitar sound with no band in the mix, so direct input or headphones are the honest way to play anything with a band; with a microphone and speakers it is untested. A bent note would read as a wrong one, so bends are timed and never pitch-checked: the unison bends are double stops, which the note check leaves alone. Landing on chord tones, staying in the scale, keeping rests and choosing your own notes are not measured today: those Exercises are 'your turn', self-checked and labelled 'not checked yet'. Nothing here grades feel.",
-  "estimatedMinutes": 222,
+  "estimatedMinutes": 242,
   "steps": [
     {
       "id": "box-one",
@@ -5584,8 +5584,484 @@
       ]
     },
     {
-      "id": "guide-tones",
+      "id": "major-and-minor",
       "order": 9,
+      "title": "Major and minor together",
+      "goal": "Play the sweet major pentatonic over the A7 chord and go back to the minor one when the D7 arrives, and hear why.",
+      "why": "The minor pentatonic over a blues is the sound you already have: tough, a little sour. The players people call sweet mix in the major pentatonic over the first chord, because its C# is the third of A7. Then the D7 arrives, C# clashes with it, and C natural, the minor note, is suddenly the right one. Changing one note with the chord is the first step from playing a scale to playing the changes.",
+      "howTo": [
+        "A major pentatonic is A, B, C#, E, F#. At the fifth fret it sits a fret lower than box 1: the first finger moves back to fret 4 on the A, D and G strings.",
+        "Over A7, aim for C# (G string, fret 6). Over D7, aim for C (G string, fret 5). One fret apart, and each is a note of its own chord.",
+        "The high position at fret 10, with the first finger on A on the B string, is where a lot of the sweetest blues phrases live. Nothing in it needs a stretch."
+      ],
+      "payoff": "A phrase that smiles over the A7 and frowns over the D7, and a high lick at the tenth fret with the sixth in it.",
+      "prerequisites": ["two-boxes"],
+      "difficulty": 2.88,
+      "exercises": [
+        {
+          "id": "major-and-minor.major-box",
+          "title": "A major pentatonic at the fifth fret",
+          "purpose": "The new scale on its own, in the same part of the neck as box 1, so you can hear and feel what changed: three strings start a fret lower.",
+          "howTo": [
+            "Straight eighths, two to a click, 60 BPM up to a pass at 80.",
+            "Low E string 5 and 7, A string 4 and 7, D string 4 and 7, G string 4 and 6, B string 5 and 7, top string 5 and 7, then back down. First finger takes the frets at 4, and reaches up one fret for the 5s on the low E, B and top strings."
+          ],
+          "coachLine": "Same bar as box 1: right notes and even eighths after the take.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 3,
+          "loops": false,
+          "position": {
+            "fret": 4,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":6,"fret":5,"midi":45,"tick":0,"dur":480,"tech":[]},
+            {"string":6,"fret":7,"midi":47,"tick":480,"dur":480,"tech":[]},
+            {"string":5,"fret":4,"midi":49,"tick":960,"dur":480,"tech":[]},
+            {"string":5,"fret":7,"midi":52,"tick":1440,"dur":480,"tech":[]},
+            {"string":4,"fret":4,"midi":54,"tick":1920,"dur":480,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":2400,"dur":480,"tech":[]},
+            {"string":3,"fret":4,"midi":59,"tick":2880,"dur":480,"tech":[]},
+            {"string":3,"fret":6,"midi":61,"tick":3360,"dur":480,"tech":[]},
+            {"string":2,"fret":5,"midi":64,"tick":3840,"dur":480,"tech":[]},
+            {"string":2,"fret":7,"midi":66,"tick":4320,"dur":480,"tech":[]},
+            {"string":1,"fret":5,"midi":69,"tick":4800,"dur":480,"tech":[]},
+            {"string":1,"fret":7,"midi":71,"tick":5280,"dur":480,"tech":[]},
+            {"string":1,"fret":5,"midi":69,"tick":5760,"dur":480,"tech":[]},
+            {"string":2,"fret":7,"midi":66,"tick":6240,"dur":480,"tech":[]},
+            {"string":2,"fret":5,"midi":64,"tick":6720,"dur":480,"tech":[]},
+            {"string":3,"fret":6,"midi":61,"tick":7200,"dur":480,"tech":[]},
+            {"string":3,"fret":4,"midi":59,"tick":7680,"dur":480,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":8160,"dur":480,"tech":[]},
+            {"string":4,"fret":4,"midi":54,"tick":8640,"dur":480,"tech":[]},
+            {"string":5,"fret":7,"midi":52,"tick":9120,"dur":480,"tech":[]},
+            {"string":5,"fret":4,"midi":49,"tick":9600,"dur":480,"tech":[]},
+            {"string":6,"fret":7,"midi":47,"tick":10080,"dur":480,"tech":[]},
+            {"string":6,"fret":5,"midi":45,"tick":10560,"dur":960,"tech":[]}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":105,"grading":"graded"},
+              {"bpm":110,"grading":"graded"}
+            ],
+            "passAtBpm": 80
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.75,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": [],
+            "notes": []
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 2
+          },
+          "estimatedMinutes": 5,
+          "tab": "/8 6:5 6:7 5:4 5:7 4:4 4:7 3:4 3:6 | 2:5 2:7 1:5 1:7 1:5 2:7 2:5 3:6 | 3:4 4:7 4:4 5:7 5:4 6:7 /4 6:5",
+          "subdivision": "eighths",
+          "computed": {
+            "noteCount": 23,
+            "minGapMsAtTop": 272.73,
+            "handShifts": 0,
+            "maxPlayableBpm": 278,
+            "difficulty": 3
+          },
+          "harmony": {
+            "kind": "scale",
+            "root": "A",
+            "scale": "majorPentatonic",
+            "spelled": ["A", "B", "C#", "E", "F#"],
+            "cover": true
+          }
+        },
+        {
+          "id": "major-and-minor.sweet-then-sour",
+          "title": "Sweet over A7, sour over D7",
+          "purpose": "Four bars: a major pentatonic phrase over two bars of A7, then nearly the same phrase with C natural over two bars of D7. The one note that moves is the lesson.",
+          "howTo": [
+            "Shuffle eighths, 70 BPM up to a pass at 90.",
+            "Bars 1 and 2: E, F#, A, F#, E, then C#, E, C#, B, A. Bars 3 and 4: C, D, E, D, C, then D, C, A, G, A. The hand moves up one fret between bar 2 and bar 3, back into box 1."
+          ],
+          "coachLine": "Notes and the shuffle after the take. Listen for the C# turning into C when the chord changes.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 4,
+          "loops": true,
+          "position": {
+            "fret": 4,
+            "shifts": "allowed"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":2,"fret":5,"midi":64,"tick":0,"dur":640,"tech":[]},
+            {"string":2,"fret":7,"midi":66,"tick":640,"dur":320,"tech":[]},
+            {"string":1,"fret":5,"midi":69,"tick":960,"dur":640,"tech":[]},
+            {"string":2,"fret":7,"midi":66,"tick":1600,"dur":320,"tech":[]},
+            {"string":2,"fret":5,"midi":64,"tick":1920,"dur":1920,"tech":[]},
+            {"string":3,"fret":6,"midi":61,"tick":3840,"dur":640,"tech":[]},
+            {"string":2,"fret":5,"midi":64,"tick":4480,"dur":320,"tech":[]},
+            {"string":3,"fret":6,"midi":61,"tick":4800,"dur":640,"tech":[]},
+            {"string":3,"fret":4,"midi":59,"tick":5440,"dur":320,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":5760,"dur":1920,"tech":[]},
+            {"string":3,"fret":5,"midi":60,"tick":7680,"dur":640,"tech":[]},
+            {"string":3,"fret":7,"midi":62,"tick":8320,"dur":320,"tech":[]},
+            {"string":2,"fret":5,"midi":64,"tick":8640,"dur":640,"tech":[]},
+            {"string":3,"fret":7,"midi":62,"tick":9280,"dur":320,"tech":[]},
+            {"string":3,"fret":5,"midi":60,"tick":9600,"dur":1920,"tech":[]},
+            {"string":3,"fret":7,"midi":62,"tick":11520,"dur":640,"tech":[]},
+            {"string":3,"fret":5,"midi":60,"tick":12160,"dur":320,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":12480,"dur":640,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":13120,"dur":320,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":13440,"dur":1920,"tech":[]}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":70,"grading":"graded"},
+              {"bpm":75,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":100,"grading":"graded"}
+            ],
+            "passAtBpm": 90
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.6,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["bandBleed"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "bluesTexas",
+            "feel": "shuffle",
+            "key": "A blues",
+            "chart": "A7 | A7 | D7 | D7"
+          },
+          "estimatedMinutes": 6,
+          "tab": "/4t 2:5 /8t 2:7 /4t 1:5 /8t 2:7 /2 2:5 | /4t 3:6 /8t 2:5 /4t 3:6 /8t 3:4 /2 4:7 | /4t 3:5 /8t 3:7 /4t 2:5 /8t 3:7 /2 3:5 | /4t 3:7 /8t 3:5 /4t 4:7 /8t 4:5 /2 4:7",
+          "computed": {
+            "noteCount": 20,
+            "minGapMsAtTop": 200,
+            "handShifts": 0,
+            "maxPlayableBpm": 185,
+            "difficulty": 2.75
+          },
+          "chords": ["A7", "A7", "D7", "D7"],
+          "harmony": {
+            "kind": "scaleOverChords",
+            "root": "A",
+            "scale": "minorPentatonic",
+            "spelled": ["A", "C", "D", "E", "G"],
+            "cover": false,
+            "allowed": ["C#", "F#", "B"]
+          }
+        },
+        {
+          "id": "major-and-minor.tenth-fret",
+          "title": "The tenth-fret box",
+          "purpose": "A two-bar phrase high on the B and top strings, around the A at fret 10, that ends on F#, the sixth: the note that makes a blues phrase sound sweet without leaving the chord.",
+          "howTo": [
+            "Shuffle eighths, 70 BPM up to a pass at 90.",
+            "First finger on fret 10, third finger on fret 12, on both strings. Bar 1: A, B, D, B, A. Bar 2: E, D, B, A, then the second finger takes F# on the G string, fret 11."
+          ],
+          "coachLine": "Notes and the shuffle after the take. The last note is the one to listen for.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 2,
+          "loops": true,
+          "position": {
+            "fret": 10,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":2,"fret":10,"midi":69,"tick":0,"dur":640,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":640,"dur":320,"tech":[],"finger":3},
+            {"string":1,"fret":10,"midi":74,"tick":960,"dur":640,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":1600,"dur":320,"tech":[],"finger":3},
+            {"string":2,"fret":10,"midi":69,"tick":1920,"dur":1920,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":3840,"dur":640,"tech":[],"finger":3},
+            {"string":1,"fret":10,"midi":74,"tick":4480,"dur":320,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":4800,"dur":640,"tech":[],"finger":3},
+            {"string":2,"fret":10,"midi":69,"tick":5440,"dur":320,"tech":[],"finger":1},
+            {"string":3,"fret":11,"midi":66,"tick":5760,"dur":1920,"tech":[],"finger":2}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":70,"grading":"graded"},
+              {"bpm":75,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":100,"grading":"graded"}
+            ],
+            "passAtBpm": 90
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.6,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["bandBleed"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "bluesTexas",
+            "feel": "shuffle",
+            "key": "A blues",
+            "chart": "A7 | A7"
+          },
+          "estimatedMinutes": 5,
+          "tab": "/4t 2:10f1 /8t 2:12f3 /4t 1:10f1 /8t 2:12f3 /2 2:10f1 | /4t 1:12f3 /8t 1:10f1 /4t 2:12f3 /8t 2:10f1 /2 3:11f2",
+          "computed": {
+            "noteCount": 10,
+            "minGapMsAtTop": 200,
+            "handShifts": 0,
+            "maxPlayableBpm": 400,
+            "difficulty": 2.25
+          },
+          "chords": ["A7", "A7"],
+          "harmony": {
+            "kind": "scaleOverChords",
+            "root": "A",
+            "scale": "mixolydian",
+            "spelled": ["A", "B", "C#", "D", "E", "F#", "G"],
+            "cover": false,
+            "allowed": []
+          }
+        },
+        {
+          "id": "major-and-minor.your-mix",
+          "title": "Your turn: change the third with the chord",
+          "purpose": "Free playing over A7 and D7 with one rule: C# while the band is on A7, C natural while it is on D7.",
+          "howTo": [
+            "Shuffle, 70 to 90 BPM, two bars of A7 and two of D7.",
+            "Play as little as you like. One C# held over the A7 and one C held over the D7 is a complete answer. The written line is an example.",
+            "Your turn, and not checked yet: the app can't judge notes you choose, so you tick it off yourself."
+          ],
+          "coachLine": "Not checked yet. Record it and listen for the third changing when the chord does.",
+          "grading": "selfChecked",
+          "feedback": "none",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 4,
+          "loops": true,
+          "position": {
+            "fret": 4,
+            "shifts": "allowed"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "example",
+          "notes": [
+            {"string":3,"fret":6,"midi":61,"tick":0,"dur":1920,"tech":[]},
+            {"string":2,"fret":5,"midi":64,"tick":1920,"dur":640,"tech":[]},
+            {"string":2,"fret":7,"midi":66,"tick":2560,"dur":320,"tech":[]},
+            {"string":2,"fret":5,"midi":64,"tick":2880,"dur":640,"tech":[]},
+            {"string":3,"fret":6,"midi":61,"tick":3520,"dur":320,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":3840,"dur":1920,"tech":[]},
+            {"string":3,"fret":4,"midi":59,"tick":5760,"dur":640,"tech":[]},
+            {"string":3,"fret":6,"midi":61,"tick":6400,"dur":320,"tech":[]},
+            {"string":2,"fret":5,"midi":64,"tick":6720,"dur":640,"tech":[]},
+            {"string":3,"fret":6,"midi":61,"tick":7360,"dur":320,"tech":[]},
+            {"string":3,"fret":5,"midi":60,"tick":7680,"dur":1920,"tech":[]},
+            {"string":3,"fret":7,"midi":62,"tick":9600,"dur":640,"tech":[]},
+            {"string":2,"fret":5,"midi":64,"tick":10240,"dur":320,"tech":[]},
+            {"string":3,"fret":7,"midi":62,"tick":10560,"dur":640,"tech":[]},
+            {"string":3,"fret":5,"midi":60,"tick":11200,"dur":320,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":11520,"dur":1920,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":13440,"dur":640,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":14080,"dur":320,"tech":[]},
+            {"string":3,"fret":5,"midi":60,"tick":14400,"dur":640,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":15040,"dur":320,"tech":[]}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":70,"grading":"selfChecked"},
+              {"bpm":75,"grading":"selfChecked"},
+              {"bpm":80,"grading":"selfChecked"},
+              {"bpm":85,"grading":"selfChecked"},
+              {"bpm":90,"grading":"selfChecked"}
+            ],
+            "passAtBpm": null
+          },
+          "passBars": [],
+          "graded": [],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel",
+            "noteChoice",
+            "notesWritten"
+          ],
+          "detection": {
+            "flags": ["bandBleed"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "bluesTexas",
+            "feel": "shuffle",
+            "key": "A blues",
+            "chart": "A7 | A7 | D7 | D7"
+          },
+          "estimatedMinutes": 4,
+          "tab": "/2 3:6 /4t 2:5 /8t 2:7 /4t 2:5 /8t 3:6 | /2 4:7 /4t 3:4 /8t 3:6 /4t 2:5 /8t 3:6 | /2 3:5 /4t 3:7 /8t 2:5 /4t 3:7 /8t 3:5 | /2 4:7 /4t 4:5 /8t 4:7 /4t 3:5 /8t 4:7",
+          "computed": {
+            "noteCount": 20,
+            "minGapMsAtTop": 222.22,
+            "handShifts": 0,
+            "maxPlayableBpm": 185,
+            "difficulty": 3.03
+          },
+          "chords": ["A7", "A7", "D7", "D7"],
+          "selfCheck": [
+            "Did you play C# over A7 and C natural over D7, at least once each?",
+            "Could you hear the phrase turn from sweet to sour at the change?"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "guide-tones",
+      "order": 10,
       "title": "Guide tones through the changes",
       "goal": "Hear and play the thirds and sevenths that make each chord what it is, and move between them by half steps.",
       "why": "If you only play two notes per chord, these are the two. The third and seventh of a dominant chord tell the ear exactly what's happening, and from one chord to the next they barely move: G falls a half step to F#, C# falls to C. Play that, and the changes appear in a single line with no band at all. It's the moment theory turns into something you can hear.",
@@ -5595,7 +6071,7 @@
         "Sing the line. If you can sing it, you can play over the changes."
       ],
       "payoff": "A single slow line that spells the whole twelve-bar form without any other notes.",
-      "prerequisites": ["two-boxes"],
+      "prerequisites": ["major-and-minor"],
       "difficulty": 1.94,
       "exercises": [
         {
@@ -6451,7 +6927,7 @@
     },
     {
       "id": "slow-blues",
-      "order": 10,
+      "order": 11,
       "title": "Slow blues",
       "goal": "Play a full written chorus at a slow tempo, where every note you play is on display.",
       "why": "At 60 BPM there's nowhere to hide and nothing to run to. Everything in this Path is a tool for this moment: chord tones to land on, bends that arrive, questions and answers, and rests. Slow blues is the hardest thing on the Path, and it isn't because of the notes.",
@@ -8472,7 +8948,7 @@
     {
       "id": "advanced",
       "title": "Advanced: more neck, more harmony, less noise",
-      "summary": "A second box, guide tones through the changes, and slow blues with nothing to hide behind.",
+      "summary": "A second box, major and minor pentatonic mixed over the changes, guide tones, and slow blues with nothing to hide behind.",
       "entry": "open",
       "placement": {
         "startHereIf": [
@@ -8481,7 +8957,7 @@
           "Your phrases work, and you're stuck in one box playing the same notes over every chord."
         ]
       },
-      "stepIds": ["two-boxes", "guide-tones", "slow-blues"],
+      "stepIds": ["two-boxes", "major-and-minor", "guide-tones", "slow-blues"],
       "warmups": [
         {
           "id": "warmup-advanced.two-boxes-keys",

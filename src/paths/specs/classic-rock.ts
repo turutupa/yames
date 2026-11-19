@@ -125,6 +125,13 @@ const FOURTHS_RIFF = "/8 4:7+3:7 4:7+3:7 r 4:5+3:5 /4 4:7+3:7 4:10+3:10 | /8 4:1
 // An open A pedal under a moving line on the D string.
 const PEDAL_RIFF = "/8 5:0m 5:0m 4:2 5:0m 5:0m 4:5 5:0m 4:4 | /8 5:0m 5:0m 4:2 5:0m 4:5 4:4 4:2 4:0";
 
+// The fast moves of the Advanced Level's climax Step, all in box 1.
+const REPEAT_CELL = "2:8 1:5 1:8 1:5p";
+const RUN_UP = "/16 6:5 6:8 5:5 5:7 4:5 4:7 3:5 3:7 2:5 2:8 1:5 1:8 1:5 2:8 1:5 1:8 | /2 1:8v /2 r";
+const FAST_REPEAT = `/16 ${REPEAT_CELL} ${REPEAT_CELL} ${REPEAT_CELL} ${REPEAT_CELL} | ${REPEAT_CELL} ${REPEAT_CELL} /2 2:8v`;
+const TUMBLE_DOWN = "/16 1:8 1:5p 2:8 2:5p 3:7 3:5p 4:7 4:5p 5:7 5:5p 6:8 6:5p /4 5:7";
+const THE_PEAK = `/16 ${REPEAT_CELL} ${REPEAT_CELL} ${REPEAT_CELL} ${REPEAT_CELL} | ${REPEAT_CELL} ${REPEAT_CELL} 2:8 2:5p 3:7 3:5p 4:7 4:5p 5:7 5:5p | 6:8 5:5 5:7 4:5 4:7 3:5 3:7 2:5 2:8 1:5 1:8 1:5 2:8 1:5 1:8 2:8 | /1 1:5v`;
+
 // Box 1, descending, for the six-note sequence.
 const DOWN_BOX = ["1:8", "1:5", "2:8", "2:5", "3:7", "3:5", "4:7", "4:5", "5:7", "5:5", "6:8", "6:5"];
 const sixFrom = (start: number) => DOWN_BOX.slice(start, start + 6).join(" ");
@@ -292,7 +299,7 @@ export default definePath({
           title: "A descending sixteenth run",
           purpose: "Four-note groups down the top of the box: A, G, E, D, then G, E, D, C, then down a string. The fast, flowing descent of a lot of seventies solos.",
           howTo: [
-            "Straight sixteenths, four to a click, 60 BPM up to a pass at 90.",
+            "Straight sixteenths, four to a click, 60 BPM up to a pass at 80.",
             "Bar 1: A at 5 on the high E, G at 8 and E at 5 on the B, D at 7 on the G, twice; then G, E, D, C twice. Bar 2: D, C on the G string, A, G on the D string, twice, then E on the A string and A to finish.",
           ],
           coach: "Right notes, notes heard and even sixteenths after the take.",
@@ -303,7 +310,7 @@ export default definePath({
           jam: ROCK("A minor"),
           harmony: { scale: ["A", "minorPentatonic"] },
           rungs: ladder(60, 110, 10),
-          passAt: 90,
+          passAt: 80,
           ...lick("early"),
           minutes: 5,
         },
@@ -331,7 +338,7 @@ export default definePath({
           title: "Sixes down the box",
           purpose: "Six notes down the box, then start one note lower and play six more. A sequence that sounds faster than it is, the way hard rock players of the eighties loved to run it.",
           howTo: [
-            "Sixteenth-note sextuplets, six to a click, 50 BPM up to a pass at 70.",
+            "Sixteenth-note sextuplets, six to a click, 50 BPM up to a pass at 60.",
             "Group 1 starts at C, fret 8 on the high E: C, A, G, E, D, C. Group 2 starts one box note lower, on A. Four groups in bar 1, two in bar 2, then the low A held.",
             "Say 'one-two-three-four-five-six' on every beat; the first note of each group falls on the click.",
           ],
@@ -343,7 +350,7 @@ export default definePath({
           jam: ROCK("A minor"),
           harmony: { scale: ["A", "minorPentatonic"] },
           rungs: ladder(50, 90, 5),
-          passAt: 70,
+          passAt: 60,
           ...lick("straight"),
           minutes: 5,
         },
@@ -987,6 +994,98 @@ export default definePath({
       ],
     },
     {
+      id: "climax",
+      title: "Building to a peak",
+      goal: "Play the fast runs and repeating licks a rock solo peaks on, in sixteenths at tempo, and come out of them on a long note.",
+      why: "A solo needs somewhere to go. After the melody and the conversation comes the part where the notes get fast, and in classic rock that part is nearly always the same few moves: a run up the box, a lick that repeats, a tumble down in pull-offs. They work because they stop, on one long note at the top of the phrase.",
+      howTo: [
+        "Every figure here stays in box 1 of A minor pentatonic at the fifth fret. Nothing is new for the fretting hand except the speed.",
+        "Pick lightly. Fast pentatonic lines choke when the pick digs in; let the amp do the work.",
+        "The long note at the end is half the lick. Arrive on it in time and give it vibrato.",
+      ],
+      payoff: "A four-bar climax: the repeating lick, the tumble down, the run back up, and a held high A.",
+      exercises: [
+        {
+          id: "run-up",
+          title: "The run up the box",
+          purpose: "Box 1 from the low A to the top C in sixteenths, a turn on the top two strings, and a held C. The rising run that opens a hundred solos.",
+          howTo: [
+            "Straight sixteenths, four to a click, 60 BPM up to a pass at 95.",
+            "Two notes a string, strictly down-up. After the top C the last beat rocks between the top two strings (A, G, A, C) and bar 2 holds the C with vibrato, then rests.",
+          ],
+          coach: "Right notes, notes heard and time after the take. The held note is where I'd listen: is it on the beat.",
+          vary: inKeys({ tab: RUN_UP, keys: ["A", "C", "D"], chords: "A5 | A5", scale: "minorPentatonic", jam: (k) => HARD(`${k} minor`) }),
+          tab: RUN_UP,
+          position: 5,
+          loops: false,
+          chords: "A5 | A5",
+          jam: HARD("A minor"),
+          harmony: { scale: ["A", "minorPentatonic"] },
+          rungs: ladder(60, 120, 10),
+          passAt: 95,
+          ...lick("straight"),
+          minutes: 6,
+        },
+        {
+          id: "fast-repeat",
+          title: "The repeating lick, at speed",
+          purpose: "Four notes round and round on the top two strings: G on the B string, then A, C and a pull-off back to A. Six times, then out to a held G.",
+          howTo: [
+            "Straight sixteenths, 60 BPM up to a pass at 95.",
+            "Third finger on the B string at fret 8, first finger on the top string at fret 5, little finger at fret 8. Pick three and pull off one in every beat. In bar 2 the lick comes twice more and the G is held.",
+          ],
+          coach: "The picked notes are checked for pitch and time. A pulled-off note that is too quiet for me doesn't count against you.",
+          tab: FAST_REPEAT,
+          position: 5,
+          chords: "A5 | A5",
+          jam: HARD("A minor"),
+          harmony: { scale: ["A", "minorPentatonic"] },
+          rungs: ladder(60, 120, 10),
+          passAt: 95,
+          ...lick("straight"),
+          minutes: 6,
+        },
+        {
+          id: "tumble-down",
+          title: "The tumble down",
+          purpose: "Down all six strings of the box with a pull-off on every string, twelve notes in three beats, landing on E. Half the picking of the run up, and twice as smooth.",
+          howTo: [
+            "Straight sixteenths, 60 BPM up to a pass at 95.",
+            "Pick the upper note of each string and pull off to the first finger at fret 5. Lay the first finger on the next string before you get there.",
+          ],
+          coach: "The picked notes are checked for pitch and time; the pull-offs count only if I hear them.",
+          tab: TUMBLE_DOWN,
+          position: 5,
+          chords: "A5",
+          jam: HARD("A minor"),
+          harmony: { scale: ["A", "minorPentatonic"], cover: true },
+          rungs: ladder(60, 120, 10),
+          passAt: 95,
+          ...lick("straight"),
+          minutes: 5,
+        },
+        {
+          id: "the-peak",
+          title: "Four bars to the peak",
+          purpose: "The three moves joined: a bar of the repeating lick, the lick twice more and the tumble down, the run back up, and a whole bar of high A.",
+          howTo: [
+            "Straight sixteenths, 60 BPM up to a pass at 90.",
+            "Bar 3 starts on the low C at fret 8, not on the A: the tumble left you on the A string, and the run picks up from the string below. Hold the last A for the whole of bar 4.",
+          ],
+          coach: "Sixteen bars of practice in four. Right notes, notes heard and time after the take.",
+          tab: THE_PEAK,
+          position: 5,
+          chords: "A5 | A5 | A5 | A5",
+          jam: HARD("A minor"),
+          harmony: { scale: ["A", "minorPentatonic"], cover: true },
+          rungs: ladder(60, 110, 10),
+          passAt: 90,
+          ...lick("straight"),
+          minutes: 7,
+        },
+      ],
+    },
+    {
       id: "solo-etude",
       title: "A sixteen-bar solo",
       goal: "Play a sixteen-bar written solo with the band, from the first note to the last, then play one of your own.",
@@ -997,6 +1096,8 @@ export default definePath({
         "Count the rests in bars 3 and 16. The band fills them.",
       ],
       payoff: "A whole solo, played with a band, that you could play at a jam tomorrow.",
+      difficultyException:
+        "The Step before is fast licks alone. The solo has rests, long notes and sixteen bars to hold together, so its note rate is lower; length and shape are the demand.",
       exercises: [
         {
           id: "etude-a",
@@ -1154,13 +1255,13 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: melody, conversation and a whole solo",
-      summary: "A slow melody with bends and vibrato, call and response with the band, and a sixteen-bar written solo.",
+      summary: "A slow melody with bends and vibrato, call and response with the band, the fast licks a solo peaks on, and a sixteen-bar written solo.",
       startHereIf: [
         "You can play chord tones over A, G and D at 100 BPM eighths.",
         "You can bend a whole step to pitch by ear and hold it.",
         "Your licks are fine, and your solos don't yet have a shape from start to end.",
       ],
-      steps: ["melody", "call-response", "solo-etude"],
+      steps: ["melody", "call-response", "climax", "solo-etude"],
       warmups: [
         {
           id: "run-around",

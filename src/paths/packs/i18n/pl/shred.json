@@ -5,7 +5,7 @@
   "strings": {
     "path.title": "Shred",
     "path.goal": "Alternate, economy, legato, sweepy i tapping w A-moll, budowane technika po technice, a na koniec ośmiotaktowy przebieg szesnastkami z zespołem przy 100 BPM.",
-    "path.assumes": "Umiesz zagrać box pentatoniki A-moll na 5. progu i ósemki z klikiem przy 90 BPM. Nie zakładamy żadnej szybkości. Podane minuty to jedno przejście przez materiał; ćwiczenia są do powtarzania tygodniami, a ich warianty zmieniają tonacje i struny, żeby powtórki się nie opatrzyły.",
+    "path.assumes": "Umiesz zagrać box pentatoniki A-moll na 5. progu i ósemki z klikiem przy 90 BPM. Nie zakładamy żadnej szybkości, ale pierwszy Krok zalicza się w szesnastkach około 110 BPM: jeśli szesnastek przy 90 jeszcze nie ma, zacznij od Rhythm Foundations albo od Poziomu początkującego w Alternate Picking. Podane minuty to jedno przejście przez materiał; ćwiczenia są do powtarzania tygodniami, a ich warianty zmieniają tonacje i struny, żeby powtórki się nie opatrzyły.",
     "path.gradingLimits": "Pojedyncze nuty grane kostką, szesnastki do około 120 BPM i sekstole do około 90, to przypadek, dla którego aplikacja jest zbudowana: równość rytmu, usłyszane nuty i dodatkowe nuty, a także właściwe nuty tam, gdzie nuty są oddalone o co najmniej 75 ms i wysokość jest wyraźna, po podejściu. Nic z tego nie było jeszcze sprawdzone na prawdziwej gitarze. Legato: hammer-on lub pull-off, którego aplikacja nie usłyszy, nic nie kosztuje, więc rytm opiera się na nutach granych kostką, a głośność nut legato to samoocena; hammer-on znikąd i tapping liczą się jako ataki, które muszą być słyszalne. Sweepy są oceniane tylko pod kątem rytmu: nuty sweepowane wybrzmiewają jedna w drugą, właściwe nuty przeważnie mają status „niesprawdzane” i ich tytuły to mówią; oceniane są tylko szczeble z co najmniej 150 ms między nutami. Akcenty są zgrubne: głośniej albo nie. Kierunku kostki nigdy nie słychać: tam, gdzie kierunek uderzeń ma znaczenie, jest to punkt listy kontrolnej. Powyżej szesnastek przy 100 BPM traktuj rytm jako wstępny, dopóki opóźnienie wejścia nie zostanie skalibrowane, a do ocenianych podejść używaj czystego albo lekko przesterowanego brzmienia.",
     "path.skills.0": "Box pentatoniki A-moll",
     "path.skills.1": "Ósemki z klikiem przy 90 BPM",
@@ -523,7 +523,7 @@
   "from": {
     "path.title": "4e93ed55",
     "path.goal": "0f5c209b",
-    "path.assumes": "5156cb08",
+    "path.assumes": "3dd6c154",
     "path.gradingLimits": "6c37c5aa",
     "path.skills.0": "f46936f6",
     "path.skills.1": "342dd813",

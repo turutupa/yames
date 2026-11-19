@@ -17,7 +17,7 @@
   },
   "orderRationale": "Three Levels, each open from the start, rebuilt on 2026-11-17 after the owner played the old Step 1 (two notes, mostly rests, at 50 BPM) and called it a beginner exercise nobody should have to sit through. Beginner now starts on a real sweep: a three-string A minor triad up and down in triplets, with one beat of rest only where it teaches the muting reset. It is the standard first drill in most sweep courses (one push per click, the top note repeated where the pick turns), and it already sounds like an arpeggio. Major and minor come together in the first Step because they differ by one note and hearing that note is the point. Then the turn at the top with a hammer and a pull, which is what removes the repeated note; then the three inversions and diminished; and the Level ends with a four-bar solo over a band. Intermediate skips everything under four strings: four-string shapes, then the five-string A-shape, then the E-shape with a hammer or a tap at the top, then inversions and position shifts with those shapes, and only then linking, which the owner asked for as the backbone, on three strings first because a long shape makes a bad link worse. It ends on an eight-bar etude over a band. Advanced adds six strings, wide shifts and neoclassical sequences. The comparison was against common practice (Gambale's economy and sweep method, Becker- and Malmsteen-style arpeggio studies, Troy Grady's work on pick paths): triads before long shapes, the turnaround as its own skill, the tap as an extension of the five-string shape. Chains change chord once a bar because Jam's grid is one chord to a bar. The progressions are common vocabulary and every line is written for this Path: nothing is transcribed from a song or copied from a course.",
   "gradingLimits": "Grading stops being trustworthy at about 150 ms between notes: sixteenths at 100 BPM, eighth triplets at 133, sextuplets at 66. Rungs faster than that are self-checked, whatever they look like, and the card says where grading stops. That line is a cautious policy, not a measurement. What a sweep is graded on is timing: how even the notes are, whether each one arrived, and whether extra notes crept in. Right notes are not graded anywhere on this Path: swept notes ring into each other, and a pitch read on ringing strings can fail a take that was played right, so nothing here promises them. The tests behind these numbers used synthetic tones, and no real guitar has been through them yet. The note after a slide counts as missed if it isn't heard, so bars on sliding shapes are lower; a tap counts as a note that must be heard, and a hammer or pull that isn't heard costs nothing. In practice: Beginner is graded at every rung. In Intermediate the sixteenth-note shapes stop at 100 BPM, triplet shapes at 130, and the sextuplet pickup at 65. In Advanced most of what makes the playing hard can't be graded. Sound never tells us the two things that matter most here, muting and pick path, and the Exercises say so.",
-  "estimatedMinutes": 416,
+  "estimatedMinutes": 421,
   "steps": [
     {
       "id": "triads",
@@ -33,8 +33,266 @@
       ],
       "payoff": "A minor and C major arpeggios that sound like chords being spelled out, and a four-chord progression played as sweeps, in your first session.",
       "prerequisites": [],
-      "difficulty": 7.65,
+      "difficulty": 7.62,
       "exercises": [
+        {
+          "id": "triads.two-string-push",
+          "title": "Two strings: the push and the pull",
+          "purpose": "The smallest sweep there is: two notes of the triad in one push of the pick, a beat to stop them, then the same two notes in one pull back. Everything a bigger sweep needs is here, the rest stroke and the mute, with nothing else to think about.",
+          "howTo": [
+            "Triplets: two notes, then a silent third. Push down through both strings in one motion; the pick lands on the second string, rests there for a moment, then goes through it. Coming back, one pull up through both.",
+            "A minor at fret 12: middle finger on the B string at 13, index on the top string at 12. Let go of the first note as the second sounds, without lifting the finger off the string.",
+            "Use the silent third to stop both strings. If you can hear them in the gap, the mute is what to work on, not the speed."
+          ],
+          "coachLine": "Timing only: I time the notes and say if one went missing or rang on as an extra. Whether it was one push or two strokes is yours to keep honest.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 1,
+          "loops": true,
+          "position": {
+            "fret": 12,
+            "shifts": "none"
+          },
+          "pickPlan": "sweep",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":2,"fret":13,"midi":72,"tick":0,"dur":320,"tech":[],"pick":"d"},
+            {"string":1,"fret":12,"midi":76,"tick":320,"dur":320,"tech":[],"pick":"d"},
+            {"string":1,"fret":12,"midi":76,"tick":960,"dur":320,"tech":[],"pick":"u"},
+            {"string":2,"fret":13,"midi":72,"tick":1280,"dur":320,"tech":[],"pick":"u"},
+            {"string":2,"fret":13,"midi":72,"tick":1920,"dur":320,"tech":[],"pick":"d"},
+            {"string":1,"fret":12,"midi":76,"tick":2240,"dur":320,"tech":[],"pick":"d"},
+            {"string":1,"fret":12,"midi":76,"tick":2880,"dur":320,"tech":[],"pick":"u"},
+            {"string":2,"fret":13,"midi":72,"tick":3200,"dur":320,"tech":[],"pick":"u"}
+          ],
+          "rests": [
+            {"tick":640,"dur":320},
+            {"tick":1600,"dur":320},
+            {"tick":2560,"dur":320},
+            {"tick":3520,"dur":320}
+          ],
+          "tempo": {
+            "rungs": [
+              {"bpm":55,"grading":"graded"},
+              {"bpm":65,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"},
+              {"bpm":120,"grading":"graded"}
+            ],
+            "passAtBpm": 90
+          },
+          "passBars": [
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 3,
+              "overBars": 4
+            }
+          ],
+          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel",
+            "notesWritten"
+          ],
+          "detection": {
+            "flags": ["fastSweep"],
+            "notes": [
+              "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked."
+            ]
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 5,
+          "tab": "/8t 2:13 1:12 r 1:12 2:13 r 2:13 1:12 r 1:12 2:13 r",
+          "subdivision": "eighthTriplets",
+          "computed": {
+            "noteCount": 8,
+            "minGapMsAtTop": 166.67,
+            "handShifts": 0,
+            "maxPlayableBpm": 400,
+            "difficulty": 4.35
+          },
+          "harmony": {
+            "kind": "arpeggio",
+            "chord": "Am",
+            "spelled": ["A", "C", "E"],
+            "cover": false
+          },
+          "selfCheck": ["In each silent beat, were both strings quiet?"],
+          "variation": {
+            "dimensions": ["stringSet"],
+            "pooled": ["stringSet"],
+            "notPooled": [],
+            "variants": [
+              {
+                "id": "stringSet=B-and-top-E,-A-minor",
+                "label": "B and top E, A minor",
+                "params": {
+                  "stringSet": "B and top E, A minor"
+                },
+                "pool": "all",
+                "tab": "/8t 2:13 1:12 r 1:12 2:13 r 2:13 1:12 r 1:12 2:13 r",
+                "position": {
+                  "fret": 12,
+                  "shifts": "none"
+                },
+                "crossing": "none",
+                "notes": [
+                  {"string":2,"fret":13,"midi":72,"tick":0,"dur":320,"tech":[],"pick":"d"},
+                  {"string":1,"fret":12,"midi":76,"tick":320,"dur":320,"tech":[],"pick":"d"},
+                  {"string":1,"fret":12,"midi":76,"tick":960,"dur":320,"tech":[],"pick":"u"},
+                  {"string":2,"fret":13,"midi":72,"tick":1280,"dur":320,"tech":[],"pick":"u"},
+                  {"string":2,"fret":13,"midi":72,"tick":1920,"dur":320,"tech":[],"pick":"d"},
+                  {"string":1,"fret":12,"midi":76,"tick":2240,"dur":320,"tech":[],"pick":"d"},
+                  {"string":1,"fret":12,"midi":76,"tick":2880,"dur":320,"tech":[],"pick":"u"},
+                  {"string":2,"fret":13,"midi":72,"tick":3200,"dur":320,"tech":[],"pick":"u"}
+                ],
+                "rests": [
+                  {"tick":640,"dur":320},
+                  {"tick":1600,"dur":320},
+                  {"tick":2560,"dur":320},
+                  {"tick":3520,"dur":320}
+                ],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 8,
+                  "minGapMsAtTop": 166.67,
+                  "handShifts": 0,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 4.35
+                },
+                "harmony": {
+                  "kind": "arpeggio",
+                  "chord": "Am",
+                  "spelled": ["A", "C", "E"],
+                  "cover": false
+                }
+              },
+              {
+                "id": "stringSet=G-and-B,-A-minor",
+                "label": "G and B, A minor",
+                "params": {
+                  "stringSet": "G and B, A minor"
+                },
+                "pool": "all",
+                "tab": "/8t 3:14 2:13 r 2:13 3:14 r 3:14 2:13 r 2:13 3:14 r",
+                "position": {
+                  "fret": 12,
+                  "shifts": "none"
+                },
+                "crossing": "none",
+                "notes": [
+                  {"string":3,"fret":14,"midi":69,"tick":0,"dur":320,"tech":[],"pick":"d"},
+                  {"string":2,"fret":13,"midi":72,"tick":320,"dur":320,"tech":[],"pick":"d"},
+                  {"string":2,"fret":13,"midi":72,"tick":960,"dur":320,"tech":[],"pick":"u"},
+                  {"string":3,"fret":14,"midi":69,"tick":1280,"dur":320,"tech":[],"pick":"u"},
+                  {"string":3,"fret":14,"midi":69,"tick":1920,"dur":320,"tech":[],"pick":"d"},
+                  {"string":2,"fret":13,"midi":72,"tick":2240,"dur":320,"tech":[],"pick":"d"},
+                  {"string":2,"fret":13,"midi":72,"tick":2880,"dur":320,"tech":[],"pick":"u"},
+                  {"string":3,"fret":14,"midi":69,"tick":3200,"dur":320,"tech":[],"pick":"u"}
+                ],
+                "rests": [
+                  {"tick":640,"dur":320},
+                  {"tick":1600,"dur":320},
+                  {"tick":2560,"dur":320},
+                  {"tick":3520,"dur":320}
+                ],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 8,
+                  "minGapMsAtTop": 166.67,
+                  "handShifts": 0,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 4.35
+                },
+                "harmony": {
+                  "kind": "arpeggio",
+                  "chord": "Am",
+                  "spelled": ["A", "C", "E"],
+                  "cover": false
+                }
+              },
+              {
+                "id": "stringSet=G-and-B,-C-major",
+                "label": "G and B, C major",
+                "params": {
+                  "stringSet": "G and B, C major"
+                },
+                "pool": "all",
+                "tab": "/8t 3:12 2:13 r 2:13 3:12 r 3:12 2:13 r 2:13 3:12 r",
+                "position": {
+                  "fret": 12,
+                  "shifts": "none"
+                },
+                "crossing": "none",
+                "notes": [
+                  {"string":3,"fret":12,"midi":67,"tick":0,"dur":320,"tech":[],"pick":"d"},
+                  {"string":2,"fret":13,"midi":72,"tick":320,"dur":320,"tech":[],"pick":"d"},
+                  {"string":2,"fret":13,"midi":72,"tick":960,"dur":320,"tech":[],"pick":"u"},
+                  {"string":3,"fret":12,"midi":67,"tick":1280,"dur":320,"tech":[],"pick":"u"},
+                  {"string":3,"fret":12,"midi":67,"tick":1920,"dur":320,"tech":[],"pick":"d"},
+                  {"string":2,"fret":13,"midi":72,"tick":2240,"dur":320,"tech":[],"pick":"d"},
+                  {"string":2,"fret":13,"midi":72,"tick":2880,"dur":320,"tech":[],"pick":"u"},
+                  {"string":3,"fret":12,"midi":67,"tick":3200,"dur":320,"tech":[],"pick":"u"}
+                ],
+                "rests": [
+                  {"tick":640,"dur":320},
+                  {"tick":1600,"dur":320},
+                  {"tick":2560,"dur":320},
+                  {"tick":3520,"dur":320}
+                ],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 8,
+                  "minGapMsAtTop": 166.67,
+                  "handShifts": 0,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 4.35
+                },
+                "harmony": {
+                  "kind": "arpeggio",
+                  "chord": "C",
+                  "spelled": ["C", "E", "G"],
+                  "cover": false
+                }
+              }
+            ]
+          }
+        },
         {
           "id": "triads.triad-rolls",
           "title": "Triad rolls: two chords",

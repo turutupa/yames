@@ -5,7 +5,7 @@
   "strings": {
     "path.title": "Shred",
     "path.goal": "A minörde alternate, economy, legato, sweep ve tapping; her seferinde bir teknik eklenerek kurulur ve 100 BPM'de grupla sekiz ölçülük on altılık bir koşuyla biter.",
-    "path.assumes": "5. perdedeki A minör pentatonik kutuyu ve 90 BPM'de klikle sekizlik notaları çalabildiğini varsayar. Hız varsayılmaz. Dakikalar malzemenin tek bir turudur; alıştırmalar haftalarca tekrarlanmak için yapıldı ve varyantları ton ve tel değiştirir, böylece tekrar taze kalır.",
+    "path.assumes": "5. perdedeki A minör pentatonik kutuyu ve 90 BPM'de klikle sekizlik notaları çalabiliyorsun. Hız varsayılmıyor, ama ilk Adım 110 BPM civarında on altılıklarla geçiliyor: 90'da on altılıklar henüz yoksa Rhythm Foundations ya da Alternate Picking'in Başlangıç seviyesiyle başla. Dakikalar malzemeden tek bir geçiştir; alıştırmalar haftalarca tekrarlanmak için yapıldı ve varyantları ton ve tel değiştirir, böylece tekrar taze kalır.",
     "path.gradingLimits": "Penayla çalınan tek notalar, yaklaşık 120 BPM'e kadar on altılıklar ve yaklaşık 90'a kadar sekstoleler, uygulamanın asıl yapıldığı durumdur: zamanlama düzgünlüğü, duyulan notalar ve fazla notalar, ayrıca notalar arasında en az 75 ms olup perde netse denemeden sonra doğru notalar. Bunların hiçbiri henüz gerçek bir gitarda denenmedi. Legato: uygulamanın duymadığı bir hammer-on ya da pull-off sana bir şey kaybettirmez, bu yüzden zamanlama penayla çalınan notalara dayanır ve legato notalarının ses düzeyi kendi kontrolündür; boşluktan hammer-on ve tap duyulması gereken vuruşlar sayılır. Sweep'ler yalnızca zamanlamadan notlanır: sweep notaları birbirinin içine çınlar, doğru notalar çoğunlukla 'kontrol edilmedi' görünür ve başlıkları da bunu söyler; yalnızca notalar arasında en az 150 ms olan basamaklar notlanır. Aksanlar kabaca ölçülür: daha yüksek ya da değil. Pena yönü hiç duyulmaz: vuruşların önemli olduğu her yerde bir kontrol listesi maddesidir. 100 BPM'de on altılıkların üstünde, giriş gecikmesi kalibre edilene kadar zamanlamayı geçici say ve notlanan denemeler için temiz ya da hafif crunch bir ton kullan.",
     "path.skills.0": "A minör pentatonik kutu",
     "path.skills.1": "90 BPM'de klikle sekizlik notalar",
@@ -523,7 +523,7 @@
   "from": {
     "path.title": "4e93ed55",
     "path.goal": "0f5c209b",
-    "path.assumes": "5156cb08",
+    "path.assumes": "3dd6c154",
     "path.gradingLimits": "6c37c5aa",
     "path.skills.0": "f46936f6",
     "path.skills.1": "342dd813",

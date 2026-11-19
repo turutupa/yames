@@ -5,7 +5,7 @@
   "strings": {
     "path.title": "Shred",
     "path.goal": "Wechselschlag, Economy Picking, Legato, Sweeps und Tapping in A-Moll, Technik für Technik aufgebaut, zum Schluss ein achttaktiger Sechzehntel-Lauf mit Band bei 100 BPM.",
-    "path.assumes": "Du kannst die A-Moll-Pentatonik-Box im 5. Bund spielen und Achtel mit Klick bei 90 BPM. Tempo wird keins vorausgesetzt. Die Minuten entsprechen einem Durchgang durch das Material; die Drills sind dafür gedacht, wochenlang wiederholt zu werden, und ihre Varianten wechseln Tonarten und Saiten, damit die Wiederholung frisch bleibt.",
+    "path.assumes": "Du kannst die A-Moll-Pentatonik-Box im 5. Bund spielen und Achtel mit Klick bei 90 BPM. Tempo wird keins vorausgesetzt, aber der erste Schritt wird in Sechzehnteln bei etwa 110 BPM bestanden: Wenn Sechzehntel bei 90 noch nicht sitzen, fang mit Rhythmus-Grundlagen oder dem Einsteiger-Niveau des Pfads Wechselschlag an. Die Minuten entsprechen einem Durchgang durch das Material; die Drills sind dafür gedacht, wochenlang wiederholt zu werden, und ihre Varianten wechseln Tonarten und Saiten, damit die Wiederholung frisch bleibt.",
     "path.gradingLimits": "Angeschlagene Einzeltöne, Sechzehntel bis etwa 120 BPM und Sextolen bis etwa 90, sind der Fall, für den die App gebaut ist: Gleichmäßigkeit im Timing, gehörte Töne und zusätzliche Töne, dazu richtige Töne, wo die Töne mindestens 75 ms auseinanderliegen und die Tonhöhe klar ist, nach dem Take. Nichts davon wurde an einer echten Gitarre getestet. Legato: Ein Hammer-on oder Pull-off, den die App nicht hört, kostet nichts, das Timing stützt sich also auf die angeschlagenen Töne, und die Lautstärke der Legato-Töne ist ein Selbstcheck; ein Hammer-on aus dem Nichts und ein Tap zählen als Anschläge, die gehört werden müssen. Sweeps werden nur nach Timing bewertet: Gesweepte Töne klingen ineinander, richtige Töne stehen meist auf „nicht geprüft“, und ihre Titel sagen das; nur Stufen mit mindestens 150 ms zwischen den Tönen werden bewertet. Akzente sind grob, lauter oder nicht. Die Anschlagsrichtung wird nie gehört: Sie ist ein Punkt auf der Checkliste, wo immer die Anschläge zählen. Über Sechzehnteln bei 100 BPM gilt das Timing als vorläufig, bis die Eingangsverzögerung kalibriert ist, und nimm für bewertete Takes einen cleanen oder leicht angezerrten Sound.",
     "path.skills.0": "Die A-Moll-Pentatonik-Box",
     "path.skills.1": "Achtel mit Klick bei 90 BPM",
@@ -523,7 +523,7 @@
   "from": {
     "path.title": "4e93ed55",
     "path.goal": "0f5c209b",
-    "path.assumes": "5156cb08",
+    "path.assumes": "3dd6c154",
     "path.gradingLimits": "6c37c5aa",
     "path.skills.0": "f46936f6",
     "path.skills.1": "342dd813",

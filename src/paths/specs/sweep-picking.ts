@@ -177,6 +177,35 @@ const OLD_STEPS: StepSpec[] = [
       payoff: "A minor and C major arpeggios that sound like chords being spelled out, and a four-chord progression played as sweeps, in your first session.",
       exercises: [
         sweepExercise({
+          id: "two-string-push",
+          title: "Two strings: the push and the pull",
+          purpose: "The smallest sweep there is: two notes of the triad in one push of the pick, a beat to stop them, then the same two notes in one pull back. Everything a bigger sweep needs is here, the rest stroke and the mute, with nothing else to think about.",
+          howTo: [
+            "Triplets: two notes, then a silent third. Push down through both strings in one motion; the pick lands on the second string, rests there for a moment, then goes through it. Coming back, one pull up through both.",
+            "A minor at fret 12: middle finger on the B string at 13, index on the top string at 12. Let go of the first note as the second sounds, without lifting the finger off the string.",
+            "Use the silent third to stop both strings. If you can hear them in the gap, the mute is what to work on, not the speed.",
+          ],
+          coach: "Timing only: I time the notes and say if one went missing or rang on as an extra. Whether it was one push or two strokes is yours to keep honest.",
+          vary: {
+            values: { stringSet: ["B and top E, A minor", "G and B, A minor", "G and B, C major"] },
+            pooled: ["stringSet"],
+            label: (p) => p.stringSet,
+            build: (p) => {
+              const [lo, hi] = p.stringSet === "B and top E, A minor" ? ["2:13", "1:12"] : p.stringSet === "G and B, A minor" ? ["3:14", "2:13"] : ["3:12", "2:13"];
+              const tab = `/8t ${repeat(`${lo} ${hi} r ${hi} ${lo} r`, 2)}`;
+              return { tab, position: 12, harmony: { arpeggio: p.stringSet.endsWith("C major") ? "C" : "Am", cover: false } };
+            },
+          },
+          tab: `/8t ${repeat("2:13 1:12 r 1:12 2:13 r", 2)}`,
+          position: 12,
+          harmony: { arpeggio: "Am", cover: false },
+          rungs: ladder(50, 120, 10),
+          passAt: 90,
+          pass: TRIAD_BARS,
+          selfCheck: ["In each silent beat, were both strings quiet?"],
+          minutes: 5,
+        }),
+        sweepExercise({
           id: "triad-rolls",
           title: "Triad rolls: two chords",
           purpose: "Continuous triplet rolls on a pair of chords, a bar each: up the strings, back down, up, back. Each pair changes one or two notes, so you hear minor and major under your own fingers, and a different pair comes round on each Take.",

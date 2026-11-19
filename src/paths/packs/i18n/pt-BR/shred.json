@@ -5,7 +5,7 @@
   "strings": {
     "path.title": "Shred",
     "path.goal": "Palhetada alternada, economy picking, legato, sweeps e tapping em A menor, construídos uma técnica de cada vez, terminando com uma frase de oito compassos em semicolcheias sobre uma banda a 100 BPM.",
-    "path.assumes": "Você consegue tocar o shape da pentatônica de A menor na casa 5 e colcheias com o clique a 90 BPM. Nenhuma velocidade é pressuposta. Os minutos são uma passada pelo material; os exercícios técnicos são para repetir por semanas, e as variações mudam de tom e de corda para a repetição continuar fresca.",
+    "path.assumes": "Você consegue tocar o shape da pentatônica de A menor na casa 5 e colcheias com o clique a 90 BPM. Nenhuma velocidade é pressuposta, mas a primeira Etapa passa em semicolcheias por volta de 110 BPM: se semicolcheias a 90 ainda não estão ali, comece por Fundamentos de Ritmo ou pelo nível Iniciante de Palhetada alternada. Os minutos são uma passada pelo material; os exercícios técnicos são para repetir por semanas, e as variações mudam de tom e de corda para a repetição continuar fresca.",
     "path.gradingLimits": "Notas simples palhetadas, semicolcheias até uns 120 BPM e sextinas até uns 90, são o caso para o qual o app foi feito: regularidade do tempo, notas ouvidas e notas a mais, e também notas certas quando as notas estão a pelo menos 75 ms uma da outra e a altura é clara, depois da tomada. Nada disso foi testado numa guitarra de verdade. Legato: um hammer-on ou pull-off que o app não ouve não custa nada, então o tempo se apoia nas notas palhetadas e o volume das notas em legato é uma autoavaliação; um hammer-on do nada e um tap contam como ataques que precisam ser ouvidos. Sweeps são avaliados só pelo tempo: as notas do sweep soam umas sobre as outras, as notas certas aparecem quase sempre como 'não verificado', e os títulos dizem isso; só são avaliados os degraus com pelo menos 150 ms entre as notas. Os acentos são uma medida grosseira: mais forte ou não. A direção da palheta nunca é ouvida: ela vira um item da checklist sempre que as palhetadas importam. Acima de semicolcheias a 100 BPM, considere o tempo provisório até a latência da entrada ser calibrada, e use um timbre limpo ou com pouco drive nas tomadas avaliadas.",
     "path.skills.0": "O shape da pentatônica de A menor",
     "path.skills.1": "Colcheias com o clique a 90 BPM",
@@ -523,7 +523,7 @@
   "from": {
     "path.title": "4e93ed55",
     "path.goal": "0f5c209b",
-    "path.assumes": "5156cb08",
+    "path.assumes": "3dd6c154",
     "path.gradingLimits": "6c37c5aa",
     "path.skills.0": "f46936f6",
     "path.skills.1": "342dd813",

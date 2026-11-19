@@ -5,7 +5,7 @@
   "strings": {
     "path.title": "Shred",
     "path.goal": "Pennata alternata, economy picking, legato, sweep e tapping in A minore, costruiti una tecnica alla volta, per finire con un run di otto battute in sedicesimi sopra una band a 100 BPM.",
-    "path.assumes": "Sai suonare il box della pentatonica di A minore al tasto 5 e gli ottavi con il clic a 90 BPM. Non si dà per scontata nessuna velocità. I minuti indicati sono un solo passaggio sul materiale; gli esercizi vanno ripetuti per settimane, e le loro varianti cambiano tonalità e corde perché la ripetizione resti fresca.",
+    "path.assumes": "Sai suonare il box della pentatonica di A minore al tasto 5 e gli ottavi con il clic a 90 BPM. Non si dà per scontata nessuna velocità, ma la prima tappa passa in sedicesimi intorno a 110 BPM: se i sedicesimi a 90 non ci sono ancora, parti da Rhythm Foundations o dal Livello Principiante di Alternate Picking. I minuti indicati sono un solo passaggio sul materiale; gli esercizi vanno ripetuti per settimane, e le loro varianti cambiano tonalità e corde perché la ripetizione resti fresca.",
     "path.gradingLimits": "Le note singole pennate, i sedicesimi fino a circa 120 BPM e le sestine fino a circa 90, sono il caso per cui l'app è fatta: regolarità del tempo, note sentite e note in più, più le note giuste quando le note distano almeno 75 ms e l'altezza è chiara, dopo la take. Niente di tutto questo è stato provato su una chitarra vera. Legato: un hammer-on o un pull-off che l'app non sente non costa nulla, quindi il tempo si basa sulle note pennate e il volume delle note in legato è un'autoverifica; un hammer-on dal nulla e un tap contano come attacchi che devono essere sentiti. Gli sweep vengono valutati solo sul tempo: le note in sweep risuonano l'una nell'altra, le note giuste risultano quasi sempre 'non controllate', e i loro titoli lo dicono; vengono valutati solo i gradini con almeno 150 ms tra le note. Gli accenti sono approssimativi: più forte o no. La direzione del plettro non si sente mai: è una voce della lista di controllo dove le pennate contano. Sopra i sedicesimi a 100 BPM, considera il tempo provvisorio finché il ritardo d'ingresso non è calibrato, e usa un suono pulito o un leggero crunch per le take valutate.",
     "path.skills.0": "Il box della pentatonica di A minore",
     "path.skills.1": "Ottavi con il clic a 90 BPM",
@@ -523,7 +523,7 @@
   "from": {
     "path.title": "4e93ed55",
     "path.goal": "0f5c209b",
-    "path.assumes": "5156cb08",
+    "path.assumes": "3dd6c154",
     "path.gradingLimits": "6c37c5aa",
     "path.skills.0": "f46936f6",
     "path.skills.1": "342dd813",
