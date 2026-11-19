@@ -247,6 +247,8 @@
       "waitingForSignal": "Đang nghe. Chơi một nốt để kiểm tra.",
       "listeningBack": "Đang nghe lại",
       "band": "Ban nhạc",
+      "key": "Giọng",
+      "keyInTurn": "Mỗi lần một giọng mới",
       "bandHint": "Ban nhạc không được chấm. Dùng micro thì để nhỏ hoặc đeo tai nghe.",
       "bandMicHint": "Qua micro tôi sẽ nghe ban nhạc như nốt của bạn, nên ban đầu tắt. Đeo tai nghe thì vặn lên.",
       "skip": "Bỏ qua bài này",

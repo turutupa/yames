@@ -8,6 +8,7 @@
  * engine position the neck view reads.
  */
 import { categoryTagKey, kindOfPath } from "../../../session/kind";
+import { KeyChooser } from "../practice/KeyChooser";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { barLine } from "../../../session/coachWords";
@@ -179,7 +180,17 @@ export function RunwayTakeScreen({
             {kind}
             {pathTitle && ` · ${t("session.run.pathStep", { path: pathTitle.title, step: stepNumber ?? 1 })}`}
           </span>
-          <h2 className="session-h3">{exercise.title}</h2>
+          <div className="practice-title-row">
+            <h2 className="session-h3">{exercise.title}</h2>
+            {!running && (
+              <KeyChooser
+                choices={session.keyChoices}
+                seed={session.keySeed}
+                chosen={session.keyChosen}
+                onChoose={session.chooseKey}
+              />
+            )}
+          </div>
           {/* What the Exercise is, not the planner's reason (UX audit TODAY-8). */}
           {!running && words.purpose && <span className="session-why">{words.purpose}</span>}
         </div>

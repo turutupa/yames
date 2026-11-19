@@ -249,6 +249,8 @@
       "waitingForSignal": "Słucham. Zagraj nutę, żeby sprawdzić.",
       "listeningBack": "Odsłuch",
       "band": "Zespół",
+      "key": "Tonacja",
+      "keyInTurn": "Za każdym razem nowa tonacja",
       "bandHint": "Zespół nie jest oceniany. Przy mikrofonie ścisz go albo użyj słuchawek.",
       "bandMicHint": "Przez mikrofon słyszałbym zespół jako twoje dźwięki, więc startuje wyciszony. W słuchawkach podgłoś go.",
       "skip": "Pomiń to",

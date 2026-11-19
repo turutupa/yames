@@ -84,7 +84,14 @@ import {
   nextStepAfterPass,
   takesOf,
 } from "../../../session/progress";
-import { levelsOf } from "../../../session/variants";
+import {
+  CHOSEN_KEYS_KEY,
+  chosenKeyId,
+  keyChoicesOf,
+  levelsOf,
+  readChosenKeys,
+  stepPageSeed,
+} from "../../../session/variants";
 import type { PlayerProgress, TakeFacts } from "../../../session/progress";
 import {
   IDLE,
@@ -402,6 +409,10 @@ export function useSessionRun(input: SessionRunInput) {
   const [jumpAsked, setJumpAsked] = useState<number | null>(null);
   /** The player's band volume, or null for "never set" (the default then depends on the input). */
   const [bandChoice, setBandChoice] = useState<number | null>(null);
+  /** The key chosen for an Exercise on its ready screen, by `chosenKeyId` (card #93). */
+  const [chosenKeys, setChosenKeys] = useState<Record<string, string>>({});
+  const chosenKeysRef = useRef(chosenKeys);
+  chosenKeysRef.current = chosenKeys;
   /** The band on the engine now (a Take's, or the finisher's), for live volume moves. */
   const loadedBand = useRef<SongBacking | null>(null);
   /** The song on the engine is the finisher's, which its step's stop clears. */
@@ -535,6 +546,9 @@ export function useSessionRun(input: SessionRunInput) {
     void storeLoad<number>(BAND_VOLUME_KEY).then((saved) => {
       setBandChoice(readBandVolume(saved));
     });
+    void storeLoad<unknown>(CHOSEN_KEYS_KEY)
+      .then((saved) => setChosenKeys(readChosenKeys(saved)))
+      .catch(() => {});
     void Promise.all([
       storeLoad<unknown>(GRADING_KEY).catch(() => undefined),
       storeLoad<unknown>(LEGACY_GRADE_KEY).catch(() => undefined),
@@ -1414,7 +1428,11 @@ export function useSessionRun(input: SessionRunInput) {
             title: exercise.title,
             bpm: last?.bpm ?? exercise.tempo.rungs[0]?.bpm ?? 60,
             minutes: 5,
-            variantSeed: CHOSEN_VARIANT.seed,
+            // The key chosen for it, else the next in turn, as Today picks
+            // it (card #93). The harness pins one for its pictures.
+            variantSeed:
+              CHOSEN_VARIANT.seed ??
+              stepPageSeed(exercise, takes, chosenKeysRef.current[chosenKeyId(path.id, exercise.id)]),
             why: { code: "chosen", values: { step: pathStep.title } },
           },
         ],
@@ -2054,6 +2072,35 @@ export function useSessionRun(input: SessionRunInput) {
     setLeaveAsked(true);
   }, [exit]);
 
+  /**
+   * The ready screen's key chooser (card #93): this Take in the key chosen, and
+   * the choice kept for this Exercise until it is changed. `null`: back to a
+   * new key each time, the one due next.
+   */
+  const chooseKey = useCallback(
+    (seed: number | null) => {
+      const at = currentStep(runRef.current);
+      if (runRef.current.phase !== "ready" || at?.kind !== "exercise" || !at.pathId || !at.exerciseId) return;
+      const found = exerciseOf(at, paths);
+      if (!found) return;
+      const id = chosenKeyId(at.pathId, at.exerciseId);
+      const next = { ...chosenKeysRef.current };
+      let to = seed;
+      if (seed === null) {
+        delete next[id];
+        to = stepPageSeed(found.exercise, takesOf(progress, at.pathId, at.exerciseId), undefined);
+      } else {
+        const variant = found.exercise.variation?.variants[seed];
+        if (!variant) return;
+        next[id] = variant.id;
+      }
+      setChosenKeys(next);
+      void storeSave(CHOSEN_KEYS_KEY, next).catch(() => {});
+      if (to !== null) dispatch({ type: "setVariant", seed: to });
+    },
+    [paths, progress],
+  );
+
   const stayInSession = useCallback(() => setLeaveAsked(false), []);
   useEffect(() => {
     if (run.phase === "idle") setLeaveAsked(false);
@@ -2072,6 +2119,18 @@ export function useSessionRun(input: SessionRunInput) {
     dismissViewHint,
     bandVolume,
     setBandVolume,
+    /**
+     * The keys the Exercise on the stage can be played in, and which is on
+     * (card #93). Empty for an Exercise without key variants.
+     */
+    keyChoices: exercise ? keyChoicesOf(exercise) : [],
+    keySeed: seedOf(step),
+    /** The key was chosen by the player, not picked in turn. */
+    keyChosen:
+      step?.kind === "exercise" && !!step.pathId && !!step.exerciseId
+        ? chosenKeyId(step.pathId, step.exerciseId) in chosenKeys
+        : false,
+    chooseKey,
     directInput: input.directInput === true,
     /** The Take on the stage has a band under it. */
     hasBand: take?.exercise.backing.kind === "jam",

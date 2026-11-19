@@ -4498,6 +4498,76 @@
 .practice-head-text > .practice-title {
   text-wrap: balance;
 }
+/* The title and, quiet beside it, a key-moved Exercise's key (card #93). */
+.practice-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 14px;
+  row-gap: 2px;
+  min-width: 0;
+}
+.practice-title-row > .session-h3 {
+  margin: 0;
+  text-wrap: balance;
+}
+.session-keychoice {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  font: 500 13px/1.3 var(--l-body);
+  color: var(--l-quiet);
+  white-space: nowrap;
+}
+.session-keychoice-field {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 5px 1px 4px;
+  border-radius: 6px;
+  color: var(--l-ink);
+  font-weight: 600;
+}
+.session-keychoice-field:hover {
+  background: var(--l-btn);
+}
+.session-keychoice-field:has(select:focus-visible) {
+  outline: 2px solid var(--l-amber);
+  outline-offset: 1px;
+}
+.session-keychoice select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  font: 500 14px/1.3 var(--l-body);
+}
+.session-keychoice select option {
+  background: var(--l-bg);
+  color: var(--l-ink);
+}
+.session-keychoice-field svg {
+  flex: none;
+  fill: none;
+  stroke: var(--l-quiet);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* A thumb's 44 px on a touch screen; the row keeps its height. */
+@media (pointer: coarse) {
+  .session-keychoice select {
+    inset: -12px -8px;
+    width: auto;
+    height: auto;
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
 .practice-kick {
   font-size: 12px;
   letter-spacing: 0.18em;

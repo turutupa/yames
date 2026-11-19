@@ -37,6 +37,7 @@ import { PORTRAIT_PHONE_QUERY, useMediaQuery } from "../../hooks/useMediaQuery";
 import { AskStart, CoachLine, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart, timedHowKey } from "./parts";
 import { RunwayTakeScreen, isTheoryTake } from "./highway/RunwayTake";
 import { categoryTagKey } from "../../session/kind";
+import { KeyChooser } from "./practice/KeyChooser";
 import { Runway } from "./highway/Runway";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { exerciseNeck, useNeck3d, useNeckSlot } from "./hooks/useNeck";
@@ -501,6 +502,16 @@ function TakeScreen({
           </>
         }
         title={exercise.title}
+        titleAside={
+          !running && (
+            <KeyChooser
+              choices={session.keyChoices}
+              seed={session.keySeed}
+              chosen={session.keyChosen}
+              onChoose={session.chooseKey}
+            />
+          )
+        }
         aside={
           <PracticeViewSwitch
             view={session.practiceView}
