@@ -17,13 +17,17 @@
 //!   dead (`output_park::route_should_reopen`) — whether or not anything is
 //!   playing, so a stream lost while stopped or parked in the background is
 //!   not found dead by the next Play — reopens it through
-//!   `MetronomeEngine::set_device` with the same name — the path a desktop
-//!   device switch takes, which re-decodes what was decoded for the old rate.
+//!   `MetronomeEngine::reopen_output` as a new route (card #53). The loaded
+//!   song and the jam's kit are kept when the new route runs at the old rate,
+//!   which a phone's speaker and its headphones nearly always do; at another
+//!   rate they are dropped, as a desktop device switch drops them, and the
+//!   screen loads the song again. Either way the coach's line in flight is
+//!   cut and a song that was playing stops and waits for Play.
 //! * **Output dead, route unchanged** (a resume that would not start even
 //!   after `output_park`'s retries, or `start` finding the stream dead):
-//!   reopened through `MetronomeEngine::reopen_output`, which keeps the
-//!   loaded song, the jam's kit and the coach's line when the new stream
-//!   runs at the old rate, and announces no route change (card #14).
+//!   the same `reopen_output`, as the same route: it keeps the coach's line
+//!   as well, brings the transport back as it was, and announces no route
+//!   change (card #14).
 //! * **Input lost:** sends the input list again and `audio-route-changed`
 //!   `{ kind: "input" }`. The input is reopened by the frontend
 //!   (`src/mobile/inputRoute.ts`) through stop/start evaluation, because the
@@ -104,31 +108,23 @@ pub(crate) fn spawn(app: AppHandle) {
                     if let Ok(mut engine) = engine_state.0.lock() {
                         let plan = crate::output_park::route_plan(req, engine.output_needs_reopen());
                         emit_route_changed = plan.emit_route_changed;
-                        match plan.reopen {
-                            Some(crate::output_park::Reopen::NewRoute) => {
-                                let name = engine.device_name().map(String::from);
-                                match engine.set_device(name, state, app.clone()) {
-                                    Err(e) => eprintln!("[yames][android] reopening the output after a route change failed: {e}"),
-                                    Ok(()) => eprintln!("[yames][android] output reopened after a route change"),
+                        if let Some(route) = plan.reopen {
+                            // Bounded: a probe opens a stream, and this
+                            // thread holds the engine's lock. After a route
+                            // change the cached format was forgotten above,
+                            // so the probe asks the new route.
+                            let probe = |d| {
+                                crate::output_park::with_deadline(d, || {
+                                    crate::android_audio::probe_output_format().ok()
+                                })
+                                .flatten()
+                            };
+                            match engine.reopen_output(state, Some(app.clone()), route, probe) {
+                                Err(e) => eprintln!("[yames][android] reopening the output ({route:?}) failed: {e}"),
+                                Ok(outcome) => {
+                                    eprintln!("[yames][android] output reopened ({route:?}): {outcome:?}")
                                 }
                             }
-                            Some(crate::output_park::Reopen::SameRoute) => {
-                                // Bounded: a probe opens a stream, and this
-                                // thread holds the engine's lock.
-                                let probe = |d| {
-                                    crate::output_park::with_deadline(d, || {
-                                        crate::android_audio::probe_output_format().ok()
-                                    })
-                                    .flatten()
-                                };
-                                match engine.reopen_output(state, Some(app.clone()), probe) {
-                                    Err(e) => eprintln!("[yames][android] reopening a dead output failed: {e}"),
-                                    Ok(outcome) => eprintln!(
-                                        "[yames][android] dead output reopened on the same route: {outcome:?}"
-                                    ),
-                                }
-                            }
-                            None => {}
                         }
                     }
                 }
