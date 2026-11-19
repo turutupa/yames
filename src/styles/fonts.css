@@ -11,9 +11,12 @@
  * fetches the subsets a page actually draws. font-display: swap, so text
  * never waits on a face. Licenses: ../assets/fonts/OFL.txt (SIL OFL 1.1).
  *
- * Nunito and Rajdhani are not here on purpose: they only ever appeared as
- * second choices behind Comfortaa / Quicksand / Orbitron, which cover every
- * script they would have.
+ * Nunito is not here on purpose: it only ever appears as a second choice
+ * behind Comfortaa / Quicksand, which cover every script it would have.
+ *
+ * Orbitron is gone (owner, 2026-11-18: Neon's futuristic face was hard to
+ * read, its digits most of all: "I'd rather something more readable and
+ * simple"). Neon wears Inter now, already bundled here.
  */
 /* Archivo 400 800, vietnamese */
 @font-face {
@@ -220,15 +223,6 @@
   font-weight: 400 800;
   font-display: swap;
   src: url('../assets/fonts/inter-400-800-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-/* Orbitron 400 800, latin */
-@font-face {
-  font-family: 'Orbitron';
-  font-style: normal;
-  font-weight: 400 800;
-  font-display: swap;
-  src: url('../assets/fonts/orbitron-400-800-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 /* Outfit 300 800, latin-ext */

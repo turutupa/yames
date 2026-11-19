@@ -1249,8 +1249,8 @@
 }
 
 /* W0: the mock's wordmark. "Yames" in the display face, wide and tall. Sized
-   by the card as well as the window: Orbitron (Neon) is half as wide again as
-   Barlow Condensed, and a phone's card is 300px. */
+   by the card as well as the window: a theme's display face can be much wider
+   than Barlow Condensed (Obsidian's monospace, Aurora's Inter), and a phone's card is 300px. */
 .onboarding-overlay .onboarding-welcome-title {
   font: 700 clamp(44px, min(11vh, 17vw), 96px) / 0.95 var(--l-display);
   letter-spacing: 0.09em;
@@ -1286,10 +1286,6 @@
   font-size: 22px;
   padding: 13px 20px;
   text-wrap: balance;
-}
-/* Orbitron is half as wide again as a sans: a size down keeps it one line. */
-[data-theme="neon"] .onboarding-overlay .onboarding-welcome-actions .onboarding-btn-primary {
-  font-size: 18px;
 }
 .onboarding-overlay .onboarding-dot.active {
   background: var(--l-amber);
