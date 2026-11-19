@@ -2,7 +2,8 @@
 
 Branch `mvp-dev2`, worktree `~/projects/yames-mvp-dev2`. Nothing is pushed; the
 orchestrator merges into `revamp`. Cards: #68 (this pass), #57 (e2e capture,
-validated), #67 (the finisher's polish list), #70, #72, #73 (left open).
+validated), #67 (the finisher's polish list), #74 (chord Path on screen),
+and left open: #70, #72, #73, #78, #79.
 Evidence: `~/projects/.preview/dev2/` (`before-*`, `after-*`, `sheet-*.png`,
 `hunt/`, `e2e-1` to `e2e-3`, `logs/`). Read `plans/HANDOFF-finisher.md` first;
 this continues it.
@@ -23,6 +24,10 @@ this continues it.
 | a2ee99ee | `phone-header.spec.ts` passes under `YAMES_LAYOUT_LOCALE=de` (card #67, item 6). |
 | fbf696d1 | The dot line is inline blocks, not flex items: `innerText` reads the row on one line again (the e2e's reading of the plan). |
 | 97b0ce13 | `tests/e2e/README.md`: the first Path is Rhythm Foundations. |
+| d8029849 | Merge of `revamp` a0e028f8 (16 Paths, First Chords and Strumming). This file went in with it. |
+| c6d873ca | "I'm new" recommends Rhythm Foundations and First Chords and Strumming (was Know the Neck). The why line in 15 locales. |
+| ed44a8a2 | **Card #74.** Neck: a strummed Exercise whose bars differ shows the bar's own chord (`barShapes`), never every chord at once. Tab: a bracket (down) or a V (up) over each strum, the two words once in the corner (`strumDirections`; keys `session.tabstrip.strumDown`, `strumUp`). The Foundations line mentions first chords. Scene `session-tab-first-chords`, `tests/layout/chords.spec.ts`. |
+| 9ed65aec | The Hand line of open chords that change: "Hand: open Em chord shape." (`handOf`). |
 
 ## Gates
 
@@ -35,7 +40,8 @@ this continues it.
 | `npm run test:rust` | 1065 passed, 0 failed, 3 ignored (on 0e8f5e21; no Rust change since) |
 | `cargo check --lib --target aarch64-linux-android` | ok, 7 warnings, none in the changed files |
 | layout, full suite, merge commit f5c6baaa | 1138 passed, 22 skipped, 0 failed (29.5 min, `--workers=2`) |
-| layout, full suite, HEAD | see "The last full layout run" below |
+| layout, full suite, 97b0ce13 | 1151 passed, 165 skipped, 0 failed (27.0 min) |
+| layout, full suite, HEAD 9ed65aec | 1157 passed, 167 skipped, 0 failed (40.3 min; the box went to load 97 from another lane mid-run) |
 | e2e and probe | below |
 
 The click-jitter probe was not rerun as a headless pair: the Rust diff of this
@@ -70,8 +76,14 @@ HOME.
 | `test:e2e` | a2ee99ee (first Path Rhythm Foundations) | 74 passed, 1 failed | 4.30, 0.99 | 12 | 0 | 16 max | {} |
 | `--scenarios placement,session,relaunch,two-paths` | fbf696d1 | 42 passed, 0 failed | 4.20, 7.53 | | | | |
 
+| `--scenarios placement,session,relaunch,two-paths` | 9ed65aec (HEAD, after `revamp` a0e028f8 and card #74) | 42 passed, 0 failed | 5.46 (a layout suite running) | | | | |
+
 The one failure was this pass's own (the dot line's `innerText`), fixed in
-fbf696d1 and covered by the third run.
+fbf696d1 and covered by the third run. A full `test:e2e` on 9ed65aec died
+at its start ("fetch failed" before the first check) while the box's load
+went to 85 from another lane; the four first-Path scenarios were rerun on
+the same binary straight after and passed. A full run on a quiet box is
+still owed for HEAD.
 
 `test:e2e:probe` on 0e8f5e21:
 
@@ -84,6 +96,39 @@ fbf696d1 and covered by the third run.
 Xvfb part 12 checks passed, GPU part 8. The headless number is the one the
 finisher's handoff explains (this box does not meet 1 ms headless on `revamp`
 either); it ran straight after the e2e.
+
+## Card #74, what was chosen and why
+
+- **One chord at a time, by the bar.** The condition is in the data, not a
+  flag: an onset of three strings or more somewhere, and bars that do not all
+  hold the same places. Single-note patterns and one-chord Exercises are
+  untouched. NEXT stays "the next strum", so the next chord's outline shows
+  on the last strum of a bar (the whole bar when there is one strum a bar).
+  Nothing is drawn between the dots.
+- **Strum marks are the bracket and the V of guitar notation, not arrows.**
+  On a tab the low E is the bottom line, so an arrow for "down" would point up
+  the page. The key says the two words once.
+- **Direction is derived, with the content's `pick` on a note winning.**
+  Down on the beat, up between beats, on the finest grid the strums sit on
+  (quarters all down; eighths d u; sixteenths d u d u). That matches the
+  pack's own convention (the three-string groups are the ups). A triplet strum
+  gets no mark.
+- **The wizard: Rhythm Foundations and First Chords for "I'm new".** Time, and
+  something that sounds like music in the first week. Know the Neck is the
+  harmony answer's start. Two Paths, not three.
+- Not done: marks on the Runway and the neck; the kicker says TECHNIQUE on a
+  Foundations Path (card #78).
+
+## Next, already asked for (card #79)
+
+Per-variant text on the Take screen, **once the paths agent's merge is in
+`revamp`** (look for per-variant text / `variation.text` in
+`src/paths/validate.ts`; not there at a0e028f8). `SessionView.tsx` (Take
+screen, near L440 and L480) and `highway/RunwayTake.tsx` (L182, L249) read
+`session.exercise`; use `playedExercise(session)` (`SessionView.tsx:70`) for
+the words, keep the base for id lookups, and show `howTo[1]` where the
+variant adds one, as a quiet second line, with the short-window and phone
+footers intact. The card has the details and the tests wanted.
 
 ## Decisions a reviewer may want to undo
 
@@ -122,6 +167,8 @@ either); it ran straight after the e2e.
 
 ## How this pass worked, for the next one
 
+- **`git add -A` during a merge commits whatever is untracked.** This file
+  went into d8029849 that way. Add paths by name.
 - **Long suites run from a detached snapshot worktree**, so `src/` can be
   edited meanwhile (a layout run serves its own checkout):
   `git worktree add --detach ~/projects/.yames-dev2-snap HEAD`, link
