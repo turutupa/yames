@@ -155,6 +155,9 @@ for (const theme of ["ember", "ivory"]) {
       await openShot(page, "paths-mix", size, theme);
       await mixSwitchesFit(page, `paths-mix ${size.width} ${theme}`);
       await noSidewaysScroll(page, `paths-mix ${size.width} ${theme}`);
+      // The subscribed cards sit under Foundations and How harmony works
+      // (the Paths screen by category): in view first, contrast is measured on screen.
+      await page.locator(".session-path-today").first().scrollIntoViewIfNeeded();
       await contrastIn(page, ".session-path-today", `paths-mix ${theme}`);
       await shot(page, `paths-mix-${size.width}-${theme}`);
     });
