@@ -482,7 +482,7 @@ export const SECOND_SONG: StepSpec = {
         VARIANT_NOTE,
       ],
       coach: "A key that changes from day to day. Right notes and time after the take.",
-      vary: inKeys(SONG_TWO, SONG_TWO_CHART, { A: 2, F: -2, Bb: 3 }),
+      vary: inKeys(SONG_TWO, SONG_TWO_CHART, { A: 2, F: -2, Bb: 3 }, ROCK, { home: "G" }),
       tab: shiftFrets(SONG_TWO, 2),
       position: 5,
       shifts: true,

@@ -17,6 +17,7 @@ import { KEY_OF_G } from "./harmony-more";
 import { BORROWED, FOUR_CHORD_SONGS, KEY_OF_A, MINOR_KEY_E, SEVENTHS, SEVENTHS_IN_SONGS, SIXTEEN_BARS } from "./chords-more";
 import { chartIn as chartInKey } from "./triadShapes";
 import { ROCK, bars, mid, named, toTop, top } from "./triadShapes";
+import { keyHowTo } from "./keyText";
 
 const YOUR_TURN = { grade: "selfChecked", example: true } as const;
 const NOT_CHECKED_YET =
@@ -68,13 +69,16 @@ function inKeys(tab: string, chart: string, shifts: Readonly<Record<string, numb
     label: (p: VariantParams) => `In ${p.key}`,
     build: (p: VariantParams) => {
       const moved = shiftFrets(tab, shifts[p.key]);
+      const chords = chartIn(chart, shifts[p.key], p.key);
       return {
         tab: moved,
         position: handAt(moved),
         shifts: true,
-        chords: chartIn(chart, shifts[p.key], p.key),
+        chords,
         jam: ROCK(p.key),
         harmony: { chordTones: true as const },
+        // Every key after the first reads its own frets and chords (`keyText.ts`).
+        howTo: keyHowTo({ kind: "shapes", key: p.key, tab: moved, chords, shift: shifts[p.key], home: "C" }),
       };
     },
   };

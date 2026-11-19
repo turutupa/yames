@@ -191,6 +191,13 @@ tests, so it is gradable. `notes` on the Exercise is always variant 0.
   (`variation.firstText`). `variation.text` refuses an empty or thin one, and the
   banned-claims, TODO and jargon lints read variant text like any other.
 
+  First use: the lines the harmony Paths move to other keys (`inKeys` in Triads, Chords
+  in a Key and Arpeggios over Changes). Every key after the first keeps the Exercise's
+  tempo sentence and gets a second line made from its own tab and chart by
+  `specs/keyText.ts` ("In E: G string 9, B string 9, top string 7; then 9, 9, 9; ..."),
+  never typed. `keyLine` answers null for a line it cannot describe truthfully, and
+  that variant then reads the Exercise's text as before.
+
 In a spec, `vary` gives the values and a `build` function from one combination to its
 notes (and, optionally, its `purpose` and `howTo`):
 
