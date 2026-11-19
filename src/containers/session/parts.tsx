@@ -141,8 +141,9 @@ export function startButton(
 export function takeCanStart(session: SessionRun, _listening: boolean): boolean {
   // Off and graded, Start turns the input on first; while it comes on, a press
   // is kept and the Take starts once it is on. Pressable either way, never
-  // dead: only a Take still loading holds it.
-  return session.prepared;
+  // dead: only a Take still loading holds it. A listen demo playing (card
+  // #28) is not loading: Start stops it, and the Take starts once it is back.
+  return session.prepared || session.listen?.active === true;
 }
 
 /**

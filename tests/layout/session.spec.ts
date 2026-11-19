@@ -281,7 +281,7 @@ for (const scene of NECK_SCENES) {
       // The neck's foot (the beat, the key, Watch) is drawn in the room its
       // slot keeps for it (FOOT_PX), so Watch is inside the slot by design;
       // anything else on top of anything is not.
-      const inFoot = (o: string) => o.startsWith("div.session-slot") && (o.includes("× button.practice-watch") || o.endsWith("× svg. \"\" (10×10)"));
+      const inFoot = (o: string) => o.startsWith("div.session-slot") && (o.includes("× button.practice-watch") || o.includes("× button.practice-sound") || o.endsWith("× svg. \"\" (10×10)") || o.endsWith("× svg. \"\" (12×12)"));
       expect((await overlapping(page)).filter((o) => !inFoot(o))).toEqual([]);
       await noSidewaysScroll(page, `${scene} at ${size.width}px`);
     });

@@ -125,6 +125,19 @@ export function fingering(
 }
 
 /**
+ * Which onset is sounding at `tick`: the last one at or before it, -1 before
+ * the first (a count-in). The listen demo's NOW, from the engine's position.
+ */
+export function soundingIndex(onsets: readonly { tick: number }[], tick: number): number {
+  let index = -1;
+  for (let i = 0; i < onsets.length; i++) {
+    if (onsets[i].tick <= tick) index = i;
+    else break;
+  }
+  return index;
+}
+
+/**
  * The Watch preview's position: which onset sounds at `ms` into the preview,
  * looping over the pattern from its first bar to its end at `bpm`. -1 before
  * the first note of a pass.

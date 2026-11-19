@@ -53,6 +53,7 @@ import { clearJam, pushJam } from "../../main-window/hooks/jamEngine";
 import type { MainView } from "../../main-window/MainHeader";
 import { useSongAttempt } from "../../songs/review/useSongAttempt";
 import { useLiveNoteLights } from "../../songs/review/useLiveNoteLights";
+import { useListenDemo } from "./useListenDemo";
 import { newAttemptId } from "../../../songs/attempt";
 import { DEFAULT_MIX_SETTING, engineMix } from "../../../songs/songEngine";
 import type { BeatPosition } from "../../../songs/position";
@@ -395,6 +396,9 @@ export function useSessionRun(input: SessionRunInput) {
     return next;
   }, []);
 
+  /** Which prepare of a Take is the current one: a later one, a demo or a teardown makes it moot. */
+  const prepareId = useRef(0);
+
   const snapshot = useRef<EngineSnapshot | null>(null);
   /** What the last teardown handed back: a Session begun from the recap keeps it. */
   const restoredTo = useRef<EngineSnapshot | null>(null);
@@ -633,6 +637,27 @@ export function useSessionRun(input: SessionRunInput) {
   const bandVolume = bandVolumeFor(bandChoice, input.directInput === true, onExercise);
   const bandVolumeRef = useRef(bandVolume);
   bandVolumeRef.current = bandVolume;
+
+  // Listen first (card #28): Watch with Sound plays one pass on the engine.
+  // While it has the engine (`demoOn`) the transport is the demo's, never a Take's.
+  const listen = useListenDemo({
+    enqueue,
+    isPlaying,
+    take,
+    ready: !!take && ((run.phase === "ready" && onExercise) || run.phase === "timedReady"),
+    shown: view === "session",
+    instrument: input.state.instrument,
+    lineup: input.lineup,
+    bandVolume,
+    onTakeOff: () => {
+      // The Take's song is about to leave the engine: it is not prepared now,
+      // and a prepare still in the queue must not say it is.
+      prepareId.current += 1;
+      setPreparedTake(null);
+      loadedBand.current = null;
+    },
+  });
+  const demoOn = listen.active;
   // A move of the slider (or the input changing) is heard at once, on the band loaded now.
   useEffect(() => {
     void enqueue(async () => {
@@ -648,15 +673,15 @@ export function useSessionRun(input: SessionRunInput) {
     loop: false,
     tempoPercent: 100,
     bpm: take?.bpm ?? 120,
-    // Only a Take's own edge. A warm-up's click stopping is not a pass.
-    isPlaying: isPlaying && onExercise,
+    // Only a Take's own edge. A warm-up's click stopping is not a pass, nor a demo.
+    isPlaying: isPlaying && onExercise && !demoOn,
     listening,
   });
 
   const lights = useLiveNoteLights({
     schedule: onExercise ? (take?.schedule ?? null) : null,
     beatInRange: beat && !beat.songCountIn ? beat.songTick / 960 : 0,
-    isPlaying: isPlaying && onExercise,
+    isPlaying: isPlaying && onExercise && !demoOn,
     bpm: take?.bpm,
   });
 
@@ -682,11 +707,10 @@ export function useSessionRun(input: SessionRunInput) {
 
   /** The timed step whose sound is on: which step, and which of its runs (Start, Resume, Restart). */
   const lastEntered = useRef<{ index: number; kind: PlanStep["kind"]; runs: number } | null>(null);
-  const prepareId = useRef(0);
 
-  /** Get a Take onto the engine: the song, the mix, then the schedule. */
+  /** Get a Take onto the engine: the song, the mix, then the schedule. Again once a demo lets go. */
   useEffect(() => {
-    if (run.phase !== "ready" || !take || !onExercise) return;
+    if (run.phase !== "ready" || !take || !onExercise || demoOn) return;
     const mine = ++prepareId.current;
     setPreparedTake(null);
     setEngineTrouble(null);
@@ -718,7 +742,7 @@ export function useSessionRun(input: SessionRunInput) {
         setEngineTrouble(typeof err === "string" ? err : "load");
       }
     });
-  }, [run.phase, take, onExercise, enqueue]);
+  }, [run.phase, take, onExercise, enqueue, demoOn]);
 
   /** Start whatever a timed step is. It moves on by the clock, in the reducer. */
   useEffect(() => {
@@ -842,7 +866,8 @@ export function useSessionRun(input: SessionRunInput) {
   useEffect(() => {
     const was = wasPlaying.current;
     wasPlaying.current = isPlaying;
-    if (isPlaying && !was && run.phase === "ready" && onExercise) {
+    // A listen demo's start is not a Take's (`useListenDemo`).
+    if (isPlaying && !was && run.phase === "ready" && onExercise && !demoOn) {
       barsReached.current = 0;
       playedOut.current = false;
       takeStartedAt.current = Date.now();
@@ -850,7 +875,7 @@ export function useSessionRun(input: SessionRunInput) {
     } else if (!isPlaying && was && run.phase === "playing") {
       dispatch({ type: "takeStopped", now: Date.now() });
     }
-  }, [isPlaying, run.phase, onExercise]);
+  }, [isPlaying, run.phase, onExercise, demoOn]);
 
   // A piece that plays to its end stops itself, and says so here. The stop is
   // idempotent, and a toggle would start the click again (`useJamSession`).
@@ -1514,6 +1539,16 @@ export function useSessionRun(input: SessionRunInput) {
 
   /** The one big next action, from the button, the keyboard or the pedal. */
   const go = useCallback(() => {
+    // Start (a Take's or a timed block's) ends a listen demo first, in the queue
+    // ahead of whatever Start sends; a Take then starts once it is loaded again.
+    if (listen.active && (big.kind === "playTake" || runRef.current.phase === "timedReady")) {
+      listen.stop();
+      if (big.kind === "playTake") {
+        autoStart.current = true;
+        if (!runRef.current.ungraded && !listening && inputStartRef.current.status !== "starting") void startInputNow();
+        return;
+      }
+    }
     if (big.kind === "playTake") {
       if (runRef.current.ungraded || listening) return playTake();
       // Never a dead button (owner, beta 6): turn the input on, then start.
@@ -1527,7 +1562,7 @@ export function useSessionRun(input: SessionRunInput) {
     if (event.type === "again") autoStart.current = true;
     dispatch(event);
     if (event.type === "close") setView(origin.current);
-  }, [big, listening, playTake, endTake, setView, startInputNow]);
+  }, [big, listening, playTake, endTake, setView, startInputNow, listen]);
 
   /** "Play without grading": this Take and the rest of the Session, input or not. */
   const playUngraded = useCallback(() => {
@@ -1836,6 +1871,8 @@ export function useSessionRun(input: SessionRunInput) {
     lights,
     big,
     working: run.phase === "listening",
+    /** Watch with Sound: one pass heard before it is played (card #28). */
+    listen,
     canGoBack: canGoBack(run),
     /** Escape asked "Leave this Session?" and it has not been answered. */
     leaveAsked,

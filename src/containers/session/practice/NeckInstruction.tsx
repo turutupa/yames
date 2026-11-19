@@ -9,6 +9,9 @@
  *   "start here" pill on the first note, nothing else drawn (the owner,
  *   2026-11-18: an order line was confusing). The order is shown in time:
  *   the Watch preview lights the notes in order at the tempo, looping.
+ *   With Sound on (card #28, the default) Watch plays them too: one pass on
+ *   the engine after a bar of count-in, the neck lit from the engine's song
+ *   position rather than a timer, then it stops and offers "Watch again".
  * - While it runs, the note to play NOW is solid amber; an approach ring
  *   closes on it as its beat arrives. NEXT is an amber outline marked "next"
  *   (no fret numbers after it: a number on the neck is a finger). The notes
@@ -44,12 +47,14 @@ import {
   nowNextNeck,
   readyNeck,
   SPAN_FRETS,
+  soundingIndex,
   windowOver,
   watchIndex,
   windowView,
 } from "./practiceModel";
 import { usePracticeCursor } from "./usePracticeCursor";
 import { onToggleWatch, subscribeWatchKeyLabel, watchKeyLabel } from "./watchBus";
+import type { ListenDemoControl } from "../hooks/useListenDemo";
 
 /** The row under the neck for the beat counter and the key, kept out of the neck's frame. */
 const FOOT_PX = 34;
@@ -87,6 +92,11 @@ export type NeckInstructionProps = {
   theory?: boolean;
   /** Extra class on the wrapper (flex sizing per screen). */
   className?: string;
+  /**
+   * Watch with Sound (card #28): the Session's demo on the engine. Absent,
+   * Watch is the silent preview alone and there is no Sound switch.
+   */
+  listen?: ListenDemoControl;
 };
 
 export function NeckInstruction({
@@ -98,6 +108,7 @@ export function NeckInstruction({
   pluck = false,
   theory = false,
   className,
+  listen,
 }: NeckInstructionProps) {
   const { t } = useTranslation();
   const neck = useNeck();
@@ -143,8 +154,12 @@ export function NeckInstruction({
     return map;
   }, [lights]);
   const [watching, setWatching] = useState(false);
-  const latest = useRef({ verdicts, model, shape, theory, running, fingers, watching });
-  latest.current = { verdicts, model, shape, theory, running, fingers, watching };
+  /** Watch with Sound: the engine is playing the demo, and the neck follows it. */
+  const soundOn = !!listen?.sound;
+  const hearing = !running && !!listen?.playing;
+  const showing = watching || hearing;
+  const latest = useRef({ verdicts, model, shape, theory, running, fingers, watching, listen });
+  latest.current = { verdicts, model, shape, theory, running, fingers, watching, listen };
 
   /**
    * "start here", before the start: a pill in the gap between two strings,
@@ -397,11 +412,11 @@ export function NeckInstruction({
   }, [whole, shape, model, theory, fingers, neck, placeOverlay, t]);
 
   useLayoutEffect(() => {
-    if (running || watching) return;
+    if (running || showing) return;
     showReady();
     const id = window.setTimeout(() => placeOverlay(0, null), 1500);
     return () => window.clearTimeout(id);
-  }, [running, watching, showReady, placeOverlay]);
+  }, [running, showing, showReady, placeOverlay]);
 
   // The Watch preview: the whole order, note by note at the set tempo, in the
   // run's own NOW and NEXT, looping until Watch again, Start or another view
@@ -410,7 +425,69 @@ export function NeckInstruction({
   useEffect(() => {
     if (running) setWatching(false);
   }, [running]);
-  useEffect(() => onToggleWatch(() => latest.current.running || setWatching((w) => !w)), []);
+  /** Watch, or stop watching: the demo with Sound on, the silent preview with it off. */
+  const toggleWatch = useCallback(() => {
+    const { running: isRunning, listen: demo } = latest.current;
+    if (isRunning) return;
+    if (demo?.sound) {
+      setWatching(false);
+      if (demo.playing) demo.stop();
+      else if (!demo.active) demo.start();
+      return;
+    }
+    setWatching((w) => !w);
+  }, []);
+  useEffect(() => onToggleWatch(toggleWatch), [toggleWatch]);
+  /** Sound on or off. Whatever was being watched stops, so the switch is never half-applied. */
+  const toggleSound = useCallback(() => {
+    const demo = latest.current.listen;
+    if (!demo) return;
+    setWatching(false);
+    if (demo.active) demo.stop();
+    demo.setSound(!demo.sound);
+  }, []);
+  // Another view, or leaving: a demo this neck started does not outlive it.
+  useEffect(() => () => latest.current.listen?.stop(), []);
+
+  // The demo, lit from the engine's own position: the song's tick through the
+  // count-in and the pass, smoothed between reports (`usePracticeCursor`), the
+  // run's NOW and NEXT, the beat dots counting the count-in too.
+  const heard = useRef({ index: -2, beat: -1 });
+  useEffect(() => {
+    if (!hearing) return;
+    heard.current = { index: -2, beat: -1 };
+    if (nowTag.current) nowTag.current.textContent = "";
+    const { model: m, shape: sh, theory: th, fingers: fg } = latest.current;
+    neck.setNotes(nowNextNeck(sh, m.onsets, 0, null, th, fg), { fade: 0.08 });
+    placeOverlay(0, null);
+  }, [hearing, neck, placeOverlay]);
+  const onHeardTick = useCallback(
+    (tick: number) => {
+      const { model: m, shape: sh, theory: th, fingers: fg } = latest.current;
+      const index = soundingIndex(m.onsets, tick);
+      const h = heard.current;
+      if (index !== h.index) {
+        h.index = index;
+        const at = Math.max(0, index);
+        neck.setNotes(nowNextNeck(sh, m.onsets, at, null, th, fg), { fade: 0.08 });
+        placeOverlay(at, null);
+      }
+      const b = beatInBar(m, tick, perQuarter);
+      if (b !== h.beat) {
+        h.beat = b;
+        dots.current?.querySelectorAll("i").forEach((d, i) => d.toggleAttribute("data-on", i === b));
+      }
+    },
+    [neck, placeOverlay, perQuarter],
+  );
+  usePracticeCursor({
+    score: take.score,
+    countInTicks: model.countInTicks,
+    endTick: model.endTick,
+    beat,
+    playing: hearing && playing,
+    onTick: onHeardTick,
+  });
   useEffect(() => {
     if (!watching) return;
     if (nowTag.current) nowTag.current.textContent = "";
@@ -556,15 +633,43 @@ export function NeckInstruction({
             type="button"
             className="practice-watch"
             data-testid="practice-watch"
-            aria-pressed={watching}
-            onClick={() => setWatching((w) => !w)}
-            title={t("session.practice.watchTitle")}
+            aria-pressed={showing}
+            data-sound={soundOn ? "" : undefined}
+            onClick={toggleWatch}
+            title={t(soundOn ? "session.practice.watchSoundTitle" : "session.practice.watchTitle")}
           >
             <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
-              {watching ? <rect x="1.5" y="1.5" width="7" height="7" rx="1" /> : <path d="M2 1 L9 5 L2 9 Z" />}
+              {showing ? <rect x="1.5" y="1.5" width="7" height="7" rx="1" /> : <path d="M2 1 L9 5 L2 9 Z" />}
             </svg>
-            {t(watching ? "session.practice.watchStop" : "session.practice.watch")}
+            {t(
+              showing
+                ? "session.practice.watchStop"
+                : soundOn && (listen?.heard ?? 0) > 0
+                  ? "session.practice.watchAgain"
+                  : "session.practice.watch",
+            )}
             {watchKey && <kbd>{watchKey}</kbd>}
+          </button>
+        )}
+        {canWatch && listen && (
+          <button
+            type="button"
+            className="practice-sound"
+            data-testid="practice-sound"
+            aria-pressed={soundOn}
+            aria-label={t("session.practice.sound")}
+            onClick={toggleSound}
+            title={t("session.practice.soundTitle")}
+          >
+            <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+              <path d="M1.5 4.5 H4 L7 2 V10 L4 7.5 H1.5 Z" />
+              {soundOn ? (
+                <path d="M8.6 4.2 Q9.8 6 8.6 7.8 M9.9 3 Q11.8 6 9.9 9" fill="none" strokeWidth="1.1" />
+              ) : (
+                <path d="M8.5 4.3 L11 7.7 M11 4.3 L8.5 7.7" fill="none" strokeWidth="1.1" />
+              )}
+            </svg>
+            <span className="practice-sound-word">{t("session.practice.sound")}</span>
           </button>
         )}
         <span className="practice-legend" aria-hidden="true">
@@ -575,7 +680,7 @@ export function NeckInstruction({
               {pluck && <span data-k="played">{t("session.practice.legendPlayed")}</span>}
             </>
           ) : (
-            watching && (
+            showing && (
               <>
                 <span data-k="now">{t("session.practice.legendNow")}</span>
                 <span data-k="next">{t("session.practice.legendNext")}</span>
