@@ -4,6 +4,7 @@ import bluesPentatonics from "./blues-pentatonics";
 import classicRock from "./classic-rock";
 import shred from "./shred";
 import sweepPicking from "./sweep-picking";
+import legato from "./legato";
 import type { PathSpec } from "../spec";
 
 export const SPECS: readonly PathSpec[] = [
@@ -12,5 +13,6 @@ export const SPECS: readonly PathSpec[] = [
   bluesPentatonics,
   classicRock,
   shred,
+  legato,
   // new paths go above this line
 ];
