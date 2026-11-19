@@ -17,7 +17,9 @@ export type HelpMenuProps = {
   open: boolean;
   onClose: () => void;
   appVersion: string;
-  /** O6's spotlight tour. Omit to hide the item. */
+  /** "Show me around": the learning tour (card #50). Omit to hide the item. */
+  onShowAround?: () => void;
+  /** O6's spotlight tour of the tools, "Tour the tools". Omit to hide the item. */
   onTakeTour?: () => void;
   /** O1's wizard. Omit to hide the item. */
   onRunSetupAgain?: () => void;
@@ -85,6 +87,7 @@ export function HelpMenu({
   open,
   onClose,
   appVersion,
+  onShowAround,
   onTakeTour,
   onRunSetupAgain,
   onShowShortcuts,
@@ -141,6 +144,22 @@ export function HelpMenu({
         <h2 className="help-card-title">{t("onboarding.help.title")}</h2>
 
         <ul className="help-menu-list">
+          {onShowAround && (
+            <li>
+              <button
+                ref={focusRef()}
+                type="button"
+                className="help-menu-item"
+                onClick={() => {
+                  onClose();
+                  onShowAround();
+                }}
+              >
+                <TourIcon />
+                <span>{t("onboarding.help.showAround")}</span>
+              </button>
+            </li>
+          )}
           {onTakeTour && (
             <li>
               <button

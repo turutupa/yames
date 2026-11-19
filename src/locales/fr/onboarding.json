@@ -183,7 +183,7 @@
       "inputNone": "Non configurée",
       "alwaysOnTop": "Toujours au premier plan",
       "start": "Aller à Aujourd'hui",
-      "tour": "Visiter les outils (30 s)",
+      "tour": "Faites-moi visiter",
       "moreOnToday": "+{{count}} de plus dans Aujourd'hui",
       "subtitleNext": "Ta prochaine séance t'attend dans Aujourd'hui. Modifie ce que tu veux ici, ou plus tard dans les Réglages.",
       "nextSession": "Ta prochaine séance"
@@ -228,7 +228,7 @@
       "next": "Suivant",
       "done": "Terminé",
       "skip": "Passer la visite",
-      "offer": "Nouveau ici ? Faites la visite de 30 secondes.",
+      "offer": "Nouveau : une courte visite d'Aujourd'hui, des Parcours et d'une séance.",
       "offerAccept": "Faites-moi visiter",
       "offerDismiss": "Fermer",
       "stops": {
@@ -256,10 +256,45 @@
           "title": "Zen et widget",
           "body": "Visuels en plein écran, ou un minuscule widget toujours visible."
         }
+      },
+      "learn": {
+        "plan": {
+          "title": "Le plan du jour",
+          "body": "Aujourd'hui compose une séance à partir de tes Parcours, à la taille de tes minutes. Chaque ligne dit ce qu'elle est et pourquoi elle est là. Appuie sur une ligne pour commencer là, ou sur Échanger pour la remplacer."
+        },
+        "start": {
+          "title": "Tes minutes, puis Commencer",
+          "body": "Choisis combien de temps tu as, et le plan s'ajuste. Commencer le joue depuis le début, et tu peux t'arrêter quand tu veux."
+        },
+        "paths": {
+          "title": "Parcours",
+          "body": "Choisis un objectif ici. Rien n'est verrouillé : ouvre n'importe quel Parcours et commence à n'importe quelle étape."
+        },
+        "neck": {
+          "title": "Lire le manche",
+          "body": "Les chiffres sont des doigts : 1 est l'index, 4 l'auriculaire. Ta première note est là où il est écrit « commence ici »."
+        },
+        "watch": {
+          "title": "Regarde d'abord",
+          "body": "Voir joue les notes dans l'ordre, au tempo, pour que tu voies la forme avant d'essayer."
+        },
+        "take": {
+          "title": "Lancer la prise",
+          "body": "Quand tu es prêt, lance une prise. Yames écoute et note ton placement et tes notes. Plus lent et Plus vite changent le tempo."
+        },
+        "blocks": {
+          "title": "Les blocs du jour",
+          "body": "Chaque bloc de la séance est ici, en haut. Appuie sur l'un d'eux pour y aller. Précédent revient d'un cran, Passer celui-ci avance."
+        },
+        "progress": {
+          "title": "Tempo propre",
+          "body": "Progrès compte le tempo propre : le plus rapide auquel tu as atteint la barre, pas seulement le plus rapide que tu as joué. C'est ce chiffre qu'il faut faire monter."
+        }
       }
     },
     "help": {
       "title": "Aide",
+      "showAround": "Faites-moi visiter",
       "takeTour": "Visiter les outils",
       "runSetup": "Relancer la configuration",
       "shortcuts": "Raccourcis clavier",

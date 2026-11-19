@@ -23,6 +23,7 @@ export function GeneralSettingsSection({
   setAlwaysOnTop,
   onRunSetupAgain,
   onTakeTour,
+  onTakeToolsTour,
 }: {
   autoCheckUpdates: boolean;
   setAutoCheckUpdates: Dispatch<SetStateAction<boolean>>;
@@ -31,8 +32,10 @@ export function GeneralSettingsSection({
   /** Re-opens the first-run wizard at W0. Optional so existing tests and
    *  any other mount of this section keep working without it. */
   onRunSetupAgain?: () => void;
-  /** Re-opens the six-stop spotlight tour (O6). Optional, like the row above. */
+  /** "Show me around": the learning tour (card #50). Optional, like the row above. */
   onTakeTour?: () => void;
+  /** The six-stop tour of the tools (O6). Desktop only: it is about keys. */
+  onTakeToolsTour?: () => void;
 }) {
   const { t, i18n } = useTranslation();
   const [language, setLanguage] = useState("en");
@@ -195,7 +198,9 @@ export function GeneralSettingsSection({
       )}
       {/* The three first-run rows sit together, in the order a user meets
           them: rerun the wizard, retake the tour, bring the hints back. */}
-      {!IS_MOBILE && onTakeTour && (
+      {/* "Show me around" is the learning side's, and a phone has that side
+          too; the tools' tour is about keys, so it stays on the desktop. */}
+      {onTakeTour && (
         <div className="setting-row">
           <div className="setting-label">
             <label>{t("settings.general.takeTour")}</label>
@@ -204,6 +209,19 @@ export function GeneralSettingsSection({
             </span>
           </div>
           <button className="toggle-btn" onClick={onTakeTour}>
+            {t("settings.general.takeTourAction")}
+          </button>
+        </div>
+      )}
+      {!IS_MOBILE && onTakeToolsTour && (
+        <div className="setting-row">
+          <div className="setting-label">
+            <label>{t("settings.general.takeToolsTour")}</label>
+            <span className="setting-hint">
+              {t("settings.general.takeToolsTourHint")}
+            </span>
+          </div>
+          <button className="toggle-btn" onClick={onTakeToolsTour}>
             {t("settings.general.takeTourAction")}
           </button>
         </div>

@@ -25,7 +25,8 @@ import {
   type Anchor,
   type Rect,
 } from "../anchor";
-import type { TourStop } from "./stops";
+import { IS_MOBILE } from "../../../platform";
+import { targetOf, type TourStop } from "./stops";
 import "../../../styles/tour.css";
 
 /** How far the cut-out is grown past the target's own box. */
@@ -37,6 +38,13 @@ const SPOTLIGHT_RADIUS = 12;
  * transition, short enough not to be a permanent rAF loop.
  */
 const SETTLE_MS = 420;
+/**
+ * A stop whose target is not there yet keeps looking for this long: a
+ * Session's ready screen mounts its neck a beat after the screen itself, and a
+ * card left centred because the first frame had nothing to point at would
+ * stay centred.
+ */
+const FIND_MS = 2500;
 
 export type TourProps = {
   open: boolean;
@@ -60,14 +68,22 @@ function rectOf(el: Element): Rect {
   return { x: r.left, y: r.top, width: r.width, height: r.height };
 }
 
-/** Union of every visible element carrying this `data-tour` id. */
-export function measureTarget(id: string): Rect | null {
-  if (typeof document === "undefined") return null;
+/** Every element a stop spotlights. */
+function targetsOf(stop: TourStop | string): Element[] {
+  if (typeof document === "undefined") return [];
+  if (typeof stop !== "string") return Array.from(document.querySelectorAll(targetOf(stop)));
   // Tour ids are our own literals, but escape anyway — and don't assume
   // `CSS.escape` exists (happy-dom in the test env does not ship it).
-  const safe = typeof CSS !== "undefined" && CSS.escape ? CSS.escape(id) : id;
-  const nodes = Array.from(document.querySelectorAll(`[data-tour="${safe}"]`));
-  return unionRects(nodes.map(rectOf));
+  const safe = typeof CSS !== "undefined" && CSS.escape ? CSS.escape(stop) : stop;
+  return Array.from(document.querySelectorAll(`[data-tour="${safe}"]`));
+}
+
+/**
+ * Union of every visible element a stop spotlights: its selector, or the
+ * elements carrying a `data-tour` id when given a bare id.
+ */
+export function measureTarget(stop: TourStop | string): Rect | null {
+  return unionRects(targetsOf(stop).map(rectOf));
 }
 
 function sameRect(a: Rect | null, b: Rect | null): boolean {
@@ -114,7 +130,7 @@ export function Tour({
   // --- Measurement ---------------------------------------------------------
   const measure = useCallback(() => {
     if (!stop) return;
-    const next = measureTarget(stop.id);
+    const next = measureTarget(stop);
     setTarget((prev) => (sameRect(prev, next) ? prev : next));
     setViewport((prev) =>
       prev.width === window.innerWidth && prev.height === window.innerHeight
@@ -141,25 +157,45 @@ export function Tour({
 
   // Settling window: the tab transition and the sidebar are still moving for a
   // few hundred ms after a stop change, so keep measuring until they stop.
+  // A target that is not there yet is looked for a little longer (FIND_MS),
+  // and one below the fold of its page is scrolled into view once found.
   useEffect(() => {
-    if (!open) return;
+    if (!open || !stop) return;
     let raf = 0;
-    const until = Date.now() + SETTLE_MS;
+    const started = Date.now();
+    let scrolled = false;
     const loop = () => {
       measure();
-      if (Date.now() < until) raf = requestAnimationFrame(loop);
+      const found = targetsOf(stop).find((el) => {
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+      });
+      if (found && !scrolled) {
+        scrolled = true;
+        const r = found.getBoundingClientRect();
+        if (r.top < 0 || r.bottom > window.innerHeight) {
+          found.scrollIntoView?.({ block: "nearest", behavior: "auto" });
+        }
+      }
+      const elapsed = Date.now() - started;
+      if (elapsed < SETTLE_MS || (!found && elapsed < FIND_MS)) raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [open, index, measure]);
+  }, [open, index, stop, measure]);
 
   useEffect(() => {
     if (!open) return;
     const onChange = () => measure();
+    // And a slow beat while it is up: a page that moves without a resize or a
+    // scroll (a phone's screen fading in, a line of text arriving) would
+    // otherwise leave the cut-out where the target used to be.
+    const beat = window.setInterval(onChange, 300);
     window.addEventListener("resize", onChange);
     // Capture phase: the app scrolls an inner container, not the window.
     window.addEventListener("scroll", onChange, true);
     return () => {
+      window.clearInterval(beat);
       window.removeEventListener("resize", onChange);
       window.removeEventListener("scroll", onChange, true);
     };
@@ -189,7 +225,31 @@ export function Tour({
         onPrev();
         return;
       }
-      if (e.key === "Tab" || e.key === " " || e.key === "Enter") return;
+      // Focus stays on the card: Tab walks its own buttons and wraps, so it
+      // never lands on the dimmed page behind it.
+      if (e.key === "Tab") {
+        const card = cardRef.current;
+        if (!card) return;
+        const items = Array.from(
+          card.querySelectorAll<HTMLElement>("button:not(:disabled)"),
+        );
+        if (items.length === 0) return;
+        const at = items.indexOf(document.activeElement as HTMLElement);
+        e.preventDefault();
+        e.stopPropagation();
+        const step = e.shiftKey ? -1 : 1;
+        const nextAt = at < 0 ? (e.shiftKey ? items.length - 1 : 0) : (at + step + items.length) % items.length;
+        items[nextAt].focus();
+        return;
+      }
+      if (e.key === " " || e.key === "Enter") {
+        // A focused button's own press. On the card itself, nothing behind it.
+        if (document.activeElement instanceof HTMLButtonElement && cardRef.current?.contains(document.activeElement)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.key === "Enter") onNext();
+        return;
+      }
       e.stopPropagation();
     };
     document.addEventListener("keydown", handler, true);
@@ -218,6 +278,7 @@ export function Tour({
       className={`tour-overlay${animate ? "" : " no-motion"}`}
       data-testid="tour-overlay"
       data-stop={stop.id}
+      data-index={index}
     >
       <svg
         className="tour-mask"
@@ -280,6 +341,7 @@ export function Tour({
         role="dialog"
         aria-modal="true"
         aria-labelledby="tour-title"
+        aria-describedby="tour-body"
         tabIndex={-1}
         style={{ left: anchor.x, top: anchor.y }}
       >
@@ -297,7 +359,7 @@ export function Tour({
 
         <div className="tour-card-head">
           <h3 className="tour-card-title" id="tour-title">
-            {t(`onboarding.tour.stops.${stop.i18nKey}.title`)}
+            {t(`onboarding.tour.${stop.i18nKey}.title`)}
           </h3>
           <span className="tour-progress">
             {t("onboarding.tour.progress", {
@@ -307,11 +369,12 @@ export function Tour({
           </span>
         </div>
 
-        <p className="tour-card-body">
-          {t(`onboarding.tour.stops.${stop.i18nKey}.body`)}
+        <p className="tour-card-body" id="tour-body">
+          {t(`onboarding.tour.${stop.i18nKey}.body`)}
         </p>
 
-        {stop.keys.length > 0 && (
+        {/* A phone has no keyboard to print keys for. */}
+        {!IS_MOBILE && stop.keys.length > 0 && (
           <p className="tour-card-keys">
             <span className="tour-keys-label">{t("onboarding.tour.keys")}</span>
             {stop.keys.map((action) => (

@@ -183,7 +183,7 @@
       "inputNone": "Chưa thiết lập",
       "alwaysOnTop": "Luôn ở trên cùng",
       "start": "Đến Hôm nay",
-      "tour": "Xem nhanh các công cụ (30 giây)",
+      "tour": "Dẫn tôi đi xem",
       "moreOnToday": "Thêm {{count}} mục ở Hôm nay",
       "subtitleNext": "Buổi tập tiếp theo đã sẵn sàng ở Hôm nay. Thay đổi tại đây, hoặc sau này trong Cài đặt.",
       "nextSession": "Buổi tập tiếp theo của bạn"
@@ -228,7 +228,7 @@
       "next": "Tiếp",
       "done": "Xong",
       "skip": "Bỏ qua hướng dẫn",
-      "offer": "Mới dùng? Xem hướng dẫn 30 giây.",
+      "offer": "Mới: xem nhanh Hôm nay, Lộ trình và một buổi tập.",
       "offerAccept": "Dẫn tôi đi xem",
       "offerDismiss": "Đóng",
       "stops": {
@@ -256,10 +256,45 @@
           "title": "Zen và widget",
           "body": "Hình ảnh toàn màn hình, hoặc một widget nhỏ luôn nổi lên trên."
         }
+      },
+      "learn": {
+        "plan": {
+          "title": "Kế hoạch hôm nay",
+          "body": "Hôm nay ghép một buổi tập từ các Lộ trình của bạn, vừa với số phút bạn có. Mỗi dòng cho biết đó là gì và vì sao có nó. Nhấn một dòng để bắt đầu từ đó, hoặc Đổi để thay bằng bài khác."
+        },
+        "start": {
+          "title": "Số phút, rồi Bắt đầu",
+          "body": "Chọn bạn có bao nhiêu thời gian, kế hoạch sẽ tự điều chỉnh. Bắt đầu chạy từ đầu, và bạn có thể dừng bất cứ lúc nào."
+        },
+        "paths": {
+          "title": "Lộ trình",
+          "body": "Chọn mục tiêu ở đây. Không có gì bị khóa: mở Lộ trình nào cũng được, bắt đầu ở bước nào cũng được."
+        },
+        "neck": {
+          "title": "Đọc cần đàn",
+          "body": "Các con số là ngón tay: 1 là ngón trỏ, 4 là ngón út. Nốt đầu tiên nằm ở chỗ ghi “bắt đầu ở đây”."
+        },
+        "watch": {
+          "title": "Xem trước",
+          "body": "Xem phát các nốt theo thứ tự, đúng tempo, để bạn thấy hình thế trước khi thử."
+        },
+        "take": {
+          "title": "Bắt đầu lượt",
+          "body": "Khi sẵn sàng, hãy bắt đầu một lượt. Yames lắng nghe và chấm nhịp và nốt của bạn. Chậm hơn và Nhanh hơn đổi tempo."
+        },
+        "blocks": {
+          "title": "Các khối hôm nay",
+          "body": "Mọi khối của buổi tập nằm ở đây, phía trên. Nhấn một khối để tới đó. Trước lùi lại một, Bỏ qua bài này đi tiếp."
+        },
+        "progress": {
+          "title": "Tempo sạch",
+          "body": "Tiến bộ tính tempo sạch: tempo nhanh nhất bạn đạt chuẩn, không chỉ tempo nhanh nhất bạn đã chơi. Đó là con số cần tăng."
+        }
       }
     },
     "help": {
       "title": "Trợ giúp",
+      "showAround": "Dẫn tôi đi xem",
       "takeTour": "Xem nhanh các công cụ",
       "runSetup": "Chạy lại phần thiết lập",
       "shortcuts": "Phím tắt",

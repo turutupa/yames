@@ -1080,6 +1080,39 @@ async function drive() {
     );
   }
 
+  if (shot!.tour) {
+    // From Settings, as a player does: the rail (or the phone's tab bar),
+    // then the tour's own row. Then Next, one press per stop.
+    const kind = shot!.tour;
+    const settingsButton = () =>
+      document.querySelector<HTMLElement>('.rail-action[data-action="settings"], .mobile-tabs button[data-tab="settings"]') ??
+      [...document.querySelectorAll<HTMLElement>(".rail-action")].find((b) =>
+        (b.getAttribute("aria-label") ?? "").toLowerCase().includes(i18n.t("tooltip.settings").toLowerCase()),
+      ) ??
+      null;
+    await pressUntil("Settings", () => settingsButton()?.click(), () => !!document.querySelector(".settings-section"));
+    const label = i18n.t(kind === "learn" ? "settings.general.takeTour" : "settings.general.takeToolsTour");
+    const row = () =>
+      [...document.querySelectorAll<HTMLElement>(".setting-row")].find(
+        (r) => r.querySelector("label")?.textContent === label,
+      );
+    await pressUntil(
+      "the tour",
+      () => row()?.querySelector<HTMLButtonElement>("button")?.click(),
+      () => !!document.querySelector('[data-testid="tour-overlay"]'),
+    );
+    const want = Number(params.get("tourStop") ?? 0);
+    for (let n = 0; n < want; n++) {
+      const at = () => document.querySelector('[data-testid="tour-overlay"]')?.getAttribute("data-index");
+      const before = at();
+      document.querySelector<HTMLButtonElement>(".tour-btn-primary")?.click();
+      await until(`tour stop ${n + 2}`, () => at() !== before);
+    }
+    // The stop's target is found and the card has stopped moving.
+    await until("the tour's target", () => !!document.querySelector(".tour-ring"));
+    await new Promise((r) => setTimeout(r, 500));
+  }
+
   // Web fonts decide the metrics of every label in the picture, and a capture
   // taken before they land is a screenshot of the fallback stack.
   await document.fonts.ready;

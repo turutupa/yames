@@ -10,7 +10,8 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { HOTKEYS } from "../../../hotkeys";
 import { Tour, comboFor, measureTarget, type TourProps } from "./Tour";
-import { TOUR_STOPS } from "./stops";
+import { LEARN_STOPS, TOUR_STOPS } from "./stops";
+import i18n from "../../../i18n";
 
 function setup(overrides: Partial<TourProps> = {}) {
   const props: TourProps = {
@@ -118,7 +119,7 @@ describe("Tour — hotkeys on the card", () => {
   });
 
   it("every stop names actions that exist in hotkeys.ts", () => {
-    for (const stop of TOUR_STOPS) {
+    for (const stop of [...TOUR_STOPS, ...LEARN_STOPS]) {
       for (const action of stop.keys) {
         expect(
           HOTKEYS.find((h) => h.id === action),
@@ -129,7 +130,66 @@ describe("Tour — hotkeys on the card", () => {
   });
 });
 
+describe("Tour — the learning tour's words (card #50)", () => {
+  it("every stop has a title and a body in English, plain, with no exclamation marks", () => {
+    for (const stop of LEARN_STOPS) {
+      for (const part of ["title", "body"]) {
+        const key = `onboarding.tour.${stop.i18nKey}.${part}`;
+        const text = i18n.t(key);
+        expect(text, key).not.toBe(key);
+        expect(text, key).not.toMatch(/!/);
+      }
+    }
+  });
+
+  it("every locale has every stop's words, none with an exclamation mark", () => {
+    for (const lng of Object.keys(i18n.options.resources ?? {})) {
+      const t = i18n.getFixedT(lng);
+      for (const stop of LEARN_STOPS) {
+        for (const part of ["title", "body"]) {
+          const key = `onboarding.tour.${stop.i18nKey}.${part}`;
+          const text = t(key);
+          expect(text, `${lng} ${key}`).not.toBe(key);
+          expect(text, `${lng} ${key}`).not.toMatch(/[!！]/);
+        }
+      }
+    }
+  });
+
+  it("renders a learning stop's words", () => {
+    setup({ stop: LEARN_STOPS[0], total: LEARN_STOPS.length });
+    expect(screen.getByRole("heading", { name: i18n.t("onboarding.tour.learn.plan.title") })).toBeInTheDocument();
+    expect(screen.getByText(`1 of ${LEARN_STOPS.length}`)).toBeInTheDocument();
+  });
+});
+
 describe("Tour — keyboard navigation", () => {
+  it("Tab stays on the card's buttons and wraps, both ways", () => {
+    const { container } = setup({ index: 1, stop: TOUR_STOPS[1] });
+    const buttons = [...container.querySelectorAll<HTMLButtonElement>(".tour-card button")];
+    expect(buttons.length).toBe(3);
+    fireEvent.keyDown(document, { key: "Tab" });
+    expect(document.activeElement).toBe(buttons[0]);
+    fireEvent.keyDown(document, { key: "Tab" });
+    fireEvent.keyDown(document, { key: "Tab" });
+    expect(document.activeElement).toBe(buttons[2]);
+    fireEvent.keyDown(document, { key: "Tab" });
+    expect(document.activeElement).toBe(buttons[0]);
+    fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(buttons[2]);
+  });
+
+  it("Enter on the card itself is Next, and Space does nothing behind it", () => {
+    const behind = vi.fn();
+    document.addEventListener("keydown", behind);
+    const { props } = setup();
+    fireEvent.keyDown(document, { key: "Enter" });
+    fireEvent.keyDown(document, { key: " " });
+    document.removeEventListener("keydown", behind);
+    expect(props.onNext).toHaveBeenCalledTimes(1);
+    expect(behind).not.toHaveBeenCalled();
+  });
+
   it("→ advances, ← goes back, Esc closes", () => {
     const { props } = setup({ index: 2, stop: TOUR_STOPS[2] });
     fireEvent.keyDown(document, { key: "ArrowRight" });
@@ -185,6 +245,17 @@ describe("Tour — measurement", () => {
     });
     a.remove();
     b.remove();
+  });
+
+  it("measureTarget takes a stop's own selector when it has one", () => {
+    const el = document.createElement("div");
+    el.setAttribute("data-testid", "practice-watch");
+    el.getBoundingClientRect = () =>
+      ({ left: 10, top: 20, right: 60, bottom: 40, width: 50, height: 20, x: 10, y: 20, toJSON: () => ({}) }) as DOMRect;
+    document.body.appendChild(el);
+    const watch = LEARN_STOPS.find((s) => s.id === "session-watch")!;
+    expect(measureTarget(watch)).toEqual({ x: 10, y: 20, width: 50, height: 20 });
+    el.remove();
   });
 
   it("measureTarget is null when the target is not on screen", () => {

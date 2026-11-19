@@ -151,9 +151,11 @@
       "resetHintsHint": "Pokaż ponownie jednorazowe wskazówki",
       "resetHintsAction": "Resetuj",
       "resetHintsDone": "Gotowe",
-      "takeTour": "Przewodnik po narzędziach",
-      "takeTourHint": "30-sekundowy spacer po Metronomie i Rozbiegu",
-      "takeTourAction": "Start"
+      "takeTour": "Oprowadź mnie",
+      "takeTourHint": "Krótki spacer po Dzisiaj, Ścieżkach, sesji i Postępach",
+      "takeTourAction": "Start",
+      "takeToolsTour": "Przewodnik po narzędziach",
+      "takeToolsTourHint": "30-sekundowy spacer po Metronomie i Rozbiegu"
     },
     "devices": {
       "title": "Urządzenia",

@@ -361,6 +361,15 @@ export function useSessionRun(input: SessionRunInput) {
   const loadedBand = useRef<SongBacking | null>(null);
   /** The song on the engine is the finisher's, which its step's stop clears. */
   const finisherLoaded = useRef(false);
+  /**
+   * A Session opened by the tour to show its ready screen (card #50): nothing
+   * is subscribed, the coach is not started, the input is not asked for, and
+   * the neck is shown whatever view the player keeps. Leaving it (the tour
+   * moving on) cancels it like any Session walked away from.
+   */
+  const [preview, setPreview] = useState(false);
+  const previewRef = useRef(false);
+  previewRef.current = preview;
   const practiceViewRef = useRef(practiceView);
   practiceViewRef.current = practiceView;
   /**
@@ -1163,8 +1172,11 @@ export function useSessionRun(input: SessionRunInput) {
 
   // --- what the player can do ----------------------------------------------
   const begin = useCallback(
-    (next: SessionPlan, options: { untimed?: boolean; at?: number } = {}) => {
+    (next: SessionPlan, options: { untimed?: boolean; at?: number; preview?: boolean } = {}) => {
       if (next.steps.length === 0) return;
+      const isPreview = options.preview === true;
+      previewRef.current = isPreview;
+      setPreview(isPreview);
       const { state, coach } = latest.current;
       inputWasOn.current = latest.current.listening;
       turnedOnInput.current = false;
@@ -1191,7 +1203,9 @@ export function useSessionRun(input: SessionRunInput) {
       // first time it is shown, so looking at Today writes nothing. Past the cap
       // it is played without subscribing; its Takes are kept all the same.
       let subscribed = progress.states.filter((s) => isSubscribed(progress, s.pathId)).length;
-      for (const pathId of new Set(next.steps.flatMap((s) => ("pathId" in s && s.pathId ? [s.pathId] : [])))) {
+      // The tour's look at a ready screen is not playing: nothing is started.
+      const played = isPreview ? [] : next.steps;
+      for (const pathId of new Set(played.flatMap((s) => ("pathId" in s && s.pathId ? [s.pathId] : [])))) {
         if (!progress.states.some((s) => s.pathId === pathId) && subscribed < SUBSCRIPTION_CAP) {
           subscribed += 1;
           const row: PathStateRow = { pathId, startedAt: now, updatedAt: now };
@@ -1202,7 +1216,7 @@ export function useSessionRun(input: SessionRunInput) {
       dispatch({ type: "start", plan: next, now, untimed: options.untimed === true, at: options.at, ungraded });
       origin.current = sessionOrigin(latest.current.view);
       setView("session");
-      if (!theirs) {
+      if (!theirs && !isPreview) {
         ownsCoach.current = true;
         // Quiet: the Session listens and saves through the coach, but the
         // player never pressed the coach's Start, so its feed is left alone.
@@ -1214,6 +1228,21 @@ export function useSessionRun(input: SessionRunInput) {
   );
 
   const startToday = useCallback(() => begin(plan), [begin, plan]);
+
+  /**
+   * The tour's Session (card #50): Today's plan, on the ready screen of its
+   * first graded Take so Watch, Start take and the blocks are all there.
+   */
+  const previewToday = useCallback(() => {
+    const at = plan.steps.findIndex((s) => s.kind === "exercise");
+    begin(plan, { at: Math.max(0, at), preview: true });
+  }, [begin, plan]);
+  useEffect(() => {
+    if (run.phase === "idle" && previewRef.current) {
+      previewRef.current = false;
+      setPreview(false);
+    }
+  }, [run.phase]);
 
   /**
    * Today's plan, from its row `index` (owner, 2026-11-18). The same Session as
@@ -1473,7 +1502,7 @@ export function useSessionRun(input: SessionRunInput) {
    * device is not asked for again on every screen.
    */
   useEffect(() => {
-    if (run.phase !== "ready" || run.ungraded || listening) return;
+    if (run.phase !== "ready" || run.ungraded || listening || previewRef.current) return;
     if (autoInputFailed.current || inputStartRef.current.status === "starting") return;
     void startInputNow();
     // Each ready screen, and a change of mind about grading.
@@ -1815,8 +1844,10 @@ export function useSessionRun(input: SessionRunInput) {
     plan,
     minutes,
     setMinutes,
-    practiceView,
+    practiceView: preview ? ("neck" as PracticeView) : practiceView,
     setPracticeView,
+    /** The tour's look at a ready screen, not a Session being played. */
+    preview,
     viewHintSeen,
     dismissViewHint,
     bandVolume,
@@ -1852,6 +1883,7 @@ export function useSessionRun(input: SessionRunInput) {
     origin: origin.current,
     actions: {
       startToday,
+      previewToday,
       startTodayAt,
       swapOptionsAt,
       confirmSwap,

@@ -69,6 +69,7 @@ import { markWidgetOpened } from "../onboarding/hints/hintRuntime";
 import { Tour } from "../onboarding/tour/Tour";
 import { TourOfferToast } from "../onboarding/tour/TourOfferToast";
 import { useTour } from "../onboarding/tour/useTour";
+import { LEARN_STOPS } from "../onboarding/tour/stops";
 import { HelpMenu } from "../onboarding/help/HelpMenu";
 import { ShortcutsSheet } from "../onboarding/help/ShortcutsSheet";
 import { useHelpMenu } from "../onboarding/help/useHelpMenu";
@@ -316,21 +317,6 @@ export function MainWindow() {
   // detection and the store keys; the wizard replaces the old
   // `InstrumentPickerModal` mount (the picker's grid is now W1's body).
   const onboarding = useOnboarding();
-  // Spotlight tour (O6). It owns the tab while it runs — stop 4 is the drill
-  // tab — and puts the user back where they were when it ends. Existing users
-  // (O1's migration case) are offered it once through a toast.
-  const tour = IS_MOBILE ? null : useTour({
-    view,
-    setView,
-    offerWhen: onboarding.migratedExistingUser,
-  });
-
-  /** W7's "Show me around": finish the wizard, then start the tour. */
-  const handleRequestTour = useCallback(() => {
-    // CLOSE on W7 counts as completion, so the wizard tidies up as usual.
-    onboarding.dispatch({ type: "CLOSE" });
-    tour?.open("beat");
-  }, [onboarding.dispatch, tour?.open]);
 
   /** Persist an instrument choice + push the DSP profile to the backend. */
   const applyInstrument = useCallback((id: string) => {
@@ -607,6 +593,48 @@ export function MainWindow() {
     // "Where do you start?" lists the Paths, over whichever screen the wizard opened on.
     preload: onboarding.isOpen,
   });
+
+  // The tours (O6, card #50). "Show me around" walks Today, Paths, a Session
+  // and Progress; "Tour the tools" the Metronome and the Drill. Either owns the
+  // screen while it runs and puts the player back where they were when it
+  // ends. A returning player is offered the learning tour once, by a toast:
+  // anybody but a first run, whose wizard offers it itself.
+  //
+  // Going to a stop's screen is not always a tab switch: the Session stops
+  // open a look at Today's first Take (nothing played, saved or listened to),
+  // and Paths opens on its list. With no plan to look at, there are no
+  // Session stops.
+  const tourSetView = useCallback(
+    (next: MainView) => {
+      if (next === "session") {
+        if (view !== "session") sessionRun.actions.previewToday();
+        return;
+      }
+      if (next === "paths") pathsPlace.reset();
+      setView(next);
+    },
+    [view, setView, pathsPlace.reset, sessionRun.actions.previewToday],
+  );
+  const tourHasPlan = sessionRun.plan.steps.length > 0;
+  const tours = useMemo(
+    () => ({
+      learn: tourHasPlan ? LEARN_STOPS : LEARN_STOPS.filter((s) => s.view !== "session"),
+    }),
+    [tourHasPlan],
+  );
+  const tour = useTour({
+    tours,
+    view,
+    setView: tourSetView,
+    offerWhen: onboarding.hydrated && !onboarding.firstRun && !onboarding.isOpen,
+  });
+
+  /** W7's "Show me around": finish the wizard, then start the learning tour. */
+  const handleRequestTour = useCallback(() => {
+    // CLOSE on W7 counts as completion, so the wizard tidies up as usual.
+    onboarding.dispatch({ type: "CLOSE" });
+    tour.open("today", "learn");
+  }, [onboarding.dispatch, tour.open]);
 
   /**
    * The one-time nudges (the tour offer, the voice question, the Finish-setup
@@ -2100,7 +2128,7 @@ export function MainWindow() {
         )
       )}
 
-      {!IS_MOBILE && tour?.offerVisible && view !== "settings" && !holdNudges && (
+      {tour.offerVisible && view !== "settings" && !holdNudges && (
         <TourOfferToast
           onAccept={tour.acceptOffer}
           onDismiss={tour.dismissOffer}
@@ -2657,12 +2685,25 @@ export function MainWindow() {
               wizardFromSettingsRef.current = true;
               onboarding.open();
             }}
-            onTakeTour={() => {
-              // Leave settings first: no stop lives there, and the tour must
-              // restore a real tab rather than the settings overlay.
-              setView(prevTab.current);
-              tour?.open(prevTab.current);
-            }}
+            // Leave settings first: no stop lives there, and the tour must
+            // restore a real tab rather than the settings overlay. Not from a
+            // Session's Settings: the tour's first stop would walk out of it.
+            onTakeTour={
+              mode === "session"
+                ? undefined
+                : () => {
+                    setView(prevTab.current);
+                    tour.open(prevTab.current, "learn");
+                  }
+            }
+            onTakeToolsTour={
+              mode === "session"
+                ? undefined
+                : () => {
+                    setView(prevTab.current);
+                    tour.open(prevTab.current, "tools");
+                  }
+            }
             themeId={state.theme}
             setTheme={setTheme}
             viewTransitions={viewTransitions}
@@ -3058,32 +3099,37 @@ export function MainWindow() {
       onRequestTour={handleRequestTour}
       animate={!reducedMotion}
     />
-    {/* The tour, the help menu and the shortcuts sheet are written for a
-        desktop layout with hotkeys, so a phone gets none of them (plan §6). */}
-    {!IS_MOBILE && tour && (
-      <Tour
-        open={tour.isOpen}
-        index={tour.index}
-        stop={tour.stop}
-        total={tour.total}
-        onNext={tour.next}
-        onPrev={tour.prev}
-        onClose={tour.close}
-        keyBindings={keyBindings}
-        animate={!reducedMotion}
-      />
-    )}
+    {/* The learning tour runs on a phone too (card #50); the help menu and
+        the shortcuts sheet are written for a desktop with hotkeys, so a phone
+        gets neither (plan §6), and so has no way to the tools' tour. */}
+    <Tour
+      open={tour.isOpen}
+      index={tour.index}
+      stop={tour.stop}
+      total={tour.total}
+      onNext={tour.next}
+      onPrev={tour.prev}
+      onClose={tour.close}
+      keyBindings={keyBindings}
+      animate={!reducedMotion}
+    />
     {!IS_MOBILE && help && (
       <HelpMenu
         open={help.panel === "menu"}
         onClose={help.close}
         appVersion={appVersion}
-        onTakeTour={() => {
-          // The tour has no stop in Settings, so leave first and hand it the
-          // tab it must restore — same contract the Settings entry uses.
+        // The tour has no stop in Settings, so leave first and hand it the
+        // tab it must restore — same contract the Settings entry uses. Not
+        // from inside a Session: the first stop would walk out of it.
+        onShowAround={inSession ? undefined : () => {
           const back = view === "settings" ? prevTab.current : view;
           if (view === "settings") setView(back);
-          tour?.open(back);
+          tour.open(back, "learn");
+        }}
+        onTakeTour={inSession ? undefined : () => {
+          const back = view === "settings" ? prevTab.current : view;
+          if (view === "settings") setView(back);
+          tour.open(back, "tools");
         }}
         onRunSetupAgain={() => {
           wizardFromSettingsRef.current = view === "settings";

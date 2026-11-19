@@ -151,9 +151,11 @@
       "resetHintsHint": "Hiện lại các mẹo chỉ xuất hiện một lần",
       "resetHintsAction": "Đặt lại",
       "resetHintsDone": "Xong",
-      "takeTour": "Xem nhanh các công cụ",
-      "takeTourHint": "Một vòng 30 giây qua Máy đếm nhịp và Luyện tempo",
-      "takeTourAction": "Bắt đầu"
+      "takeTour": "Dẫn tôi đi xem",
+      "takeTourHint": "Dạo nhanh qua Hôm nay, Lộ trình, một buổi tập và Tiến bộ",
+      "takeTourAction": "Bắt đầu",
+      "takeToolsTour": "Xem nhanh các công cụ",
+      "takeToolsTourHint": "Một vòng 30 giây qua Máy đếm nhịp và Luyện tempo"
     },
     "devices": {
       "title": "Thiết bị",

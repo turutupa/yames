@@ -10,6 +10,7 @@ import { describe, expect, it } from "vitest";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { IS_MAC } from "../../hotkeys";
 import { HINT_IDS } from "./hints";
+import { TOUR_VERSION } from "./tour/stops";
 import { hintShownKey } from "./hints/types";
 import i18n from "../../i18n";
 import { onTool, openSettings, openShell, settle } from "../../test/parity/shell";
@@ -124,6 +125,7 @@ describe("the Help menu", () => {
     await openShell();
     await onTool(METRONOME);
     await openHelpFromOverflow();
+    helpItem("onboarding.help.showAround");
     helpItem("onboarding.help.takeTour");
     helpItem("onboarding.help.runSetup");
     helpItem("onboarding.help.shortcuts");
@@ -180,6 +182,19 @@ describe("the tour", () => {
     await expectOnTool(DRILL);
   }
 
+  it("card #50: Show me around starts the learning tour on Today; Escape puts the player back", async () => {
+    const { store } = await openShell({}, { "tour.seenVersion": undefined });
+    await onTool(METRONOME);
+    await openHelpFromOverflow();
+    fireEvent.click(helpItem("onboarding.help.showAround"));
+    await waitFor(() => expect(tour()?.getAttribute("data-stop")).toBe("today-plan"));
+    await waitFor(() => expect(screen.queryByTestId("today")).not.toBeNull());
+    fireEvent.keyDown(document, { key: "Escape" });
+    await waitFor(() => expect(tour()).toBeNull());
+    await expectOnTool(METRONOME);
+    expect(store.values.get("tour.seenVersion")).toBe(TOUR_VERSION);
+  });
+
   it("ONB-19, ONB-20: starts from Help and visits the Drill at its fourth stop", async () => {
     await startTourFrom(METRONOME);
     await toDrillStop();
@@ -191,7 +206,8 @@ describe("the tour", () => {
     fireEvent.click(skip());
     await waitFor(() => expect(tour()).toBeNull());
     await expectOnTool(JAM);
-    expect(store.values.get("tour.seenVersion")).toBeDefined();
+    // The tools' tour is not the versioned one: the learning tour still waits.
+    expect(store.values.get("tour.seenVersion")).toBeUndefined();
   });
 
   it("ONB-22: Escape ends it the same way", async () => {
@@ -200,7 +216,8 @@ describe("the tour", () => {
     fireEvent.keyDown(document, { key: "Escape" });
     await waitFor(() => expect(tour()).toBeNull());
     await expectOnTool(JAM);
-    expect(store.values.get("tour.seenVersion")).toBeDefined();
+    // The tools' tour is not the versioned one: the learning tour still waits.
+    expect(store.values.get("tour.seenVersion")).toBeUndefined();
   });
 
   // TOOLS_PARITY section 6.1 item 8: the Drill stop named `tab-2`, which has been

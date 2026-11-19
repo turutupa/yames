@@ -151,9 +151,11 @@
       "resetHintsHint": "Show the one-time tips again",
       "resetHintsAction": "Reset",
       "resetHintsDone": "Done",
-      "takeTour": "Tour the tools",
-      "takeTourHint": "A 30-second walk around the Metronome and Drill",
-      "takeTourAction": "Start"
+      "takeTour": "Show me around",
+      "takeTourHint": "A short walk through Today, Paths, a Session and Progress",
+      "takeTourAction": "Start",
+      "takeToolsTour": "Tour the tools",
+      "takeToolsTourHint": "A 30-second walk around the Metronome and Drill"
     },
     "devices": {
       "title": "Devices",
