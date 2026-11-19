@@ -592,7 +592,7 @@ export const MINOR_BLUES: StepSpec = {
         "Shuffle eighths and half notes, 50 BPM up to a pass at 70.",
         "Bar 1, over E7: E, D, B, D, and G# held (D string, fret 6). Bar 2, over Dm7: D, F, A, D, and F held. Bar 3, over Am7: E, C, A, C, and A held. Bar 4, over E7: E and G# as quarter notes, then E on the A string held.",
       ],
-      coach: "Four bars, four chords. Notes and the shuffle after the take.",
+      coach: "Four bars, one chord in each. Notes and the shuffle after the take.",
       tab: swing(MINOR_TURN),
       position: 4,
       shifts: true,

@@ -431,13 +431,23 @@ const STRING_OF: Record<string, number> = { top: 1, "top E": 1, "high E": 1, B: 
 
 const flagged = SPECS.filter((s) => s.variantText);
 
+// What a variant's text says about its own notes. Hand-written text may also name the other Takes
+// ("On other Takes the three chords are G, C and D.") or what an earlier walk had ("with F sharp at
+// fret 7 where F was at fret 6"), or a string it leaves out ("The low E string is not played."); those
+// are read by the proof-reader, not here.
+const aboutItself = (text: string) =>
+  sentencesOf(text)
+    .filter((s) => !/\bother Takes\b|\bis not played\b|\bkeeps? the [^.]*string quiet\b/i.test(s))
+    .map((s) => s.replace(/,? where [A-G](?: sharp| flat)? was at fret \d+/g, "").replace(/:? the (?:low E|[ADGB]) string's notes (?:an octave|two octaves) higher/g, ""))
+    .join(" ");
+
 describe.each(flagged.map((s) => [s.id, s] as const))("%s: what its variants are told is true of their notes", (id) => {
   const pack = JSON.parse(readFileSync(packPath(id), "utf8")) as PathDoc;
   const withText: Array<{ ex: Exercise; v: ExerciseVariant; text: string; where: string }> = [];
   for (const ex of exercisesOf(pack)) {
     for (const v of ex.variation?.variants ?? []) {
       if (v.purpose === undefined && v.howTo === undefined) continue;
-      withText.push({ ex, v, text: [v.purpose ?? "", ...(v.howTo ?? [])].join(" "), where: `${ex.id}#${v.id}` });
+      withText.push({ ex, v, text: aboutItself([v.purpose ?? "", ...(v.howTo ?? [])].join(" ")), where: `${ex.id}#${v.id}` });
     }
   }
 
@@ -504,7 +514,8 @@ describe.each(flagged.map((s) => [s.id, s] as const))("%s: what its variants are
           if (/^(?:(?:,| and|, and) (?:[ADGB]|top|low E|top E))* strings\b/.test(after)) continue;
           // The article: "A different key", "A major scale walked up one string".
           if (m[1] === "A" && (at === 0 || /: $/.test(before)) && /^ [a-z]/.test(after) && !/^ (?:at|to|on|and|then|twice|again)\b/.test(after)) continue;
-          expect(pcs.has(pcOfLetter(m[1])), `${where}: the letter ${m[1]} in "${sentence}"`).toBe(true);
+          const spelled = /^ sharp\b/.test(after) ? m[1] + "#" : /^ flat\b/.test(after) ? m[1] + "b" : m[1];
+          expect(pcs.has(pcOfLetter(spelled)), `${where}: the letter ${spelled} in "${sentence}"`).toBe(true);
         }
       }
     }

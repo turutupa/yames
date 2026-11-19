@@ -21,6 +21,7 @@ import {
   RIFFS_IN_E,
   SOLO_IN_E,
 } from "./classic-rock-more";
+import { EMBELLISHMENT_IN_A, SIXES_AT_TWELVE } from "./classic-rock-encore";
 
 // ---------------------------------------------------------------------------
 // Grading. Every written line carries a timing bar. Tighter on the early
@@ -207,12 +208,13 @@ export default definePath({
   goal: "Play riffs, licks and a written solo in the classic rock style over a band, and know why each note fits the chord under it.",
   level: "early-intermediate",
   assumes:
-    "You can play power chords and single notes cleanly, and eighth notes with a click at 80 BPM. Knowing the A minor pentatonic box helps and isn't required: Step 2 goes through it. Most of the Path is in A, so that theory is the only new thing; licks a player repeats for weeks move to other keys and positions.",
+    "You can play power chords and single notes cleanly, and eighth notes with a click at 80 BPM. Knowing the A minor pentatonic box helps and isn't required: Step 3 goes through it. Most of the Path is in A, so that theory is the only new thing; licks a player repeats for weeks move to other keys and positions.",
   prerequisites: { paths: [{ path: "rhythm-foundations", level: "beginner" }], skills: ["Power chords", "Clean single notes", "Eighth notes with a click at 80 BPM"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
+  variantText: true,
   orderRationale:
-    "Riffs come first because they are what a rock player plays most, and they put time in the hands before any theory. The minor pentatonic box and its extension come next, with the licks the style is built on; the major pentatonic follows at once, because hearing minor against major over the same chord is the theory that separates rock from blues. Repeating licks come after the box, since they are box notes played as loops. Double stops and chord embellishment move from one note to two and into the chord, then chord tones over A, G and D (I, flat VII, IV) show why the same box works over those changes. The slow melody needs control more than speed, so it comes late; call and response with a band uses everything before it, and the sixteen-bar etude puts it all in one solo.",
+    "Riffs come first because they are what a rock player plays most, and they put time in the hands before any theory. The minor pentatonic box and its extension come next, with the licks the style is built on, and then the same box at fret 12 in E, ending with the sextuplet run and its turn back up; the major pentatonic follows, because hearing minor against major over the same chord is the theory that separates rock from blues. Repeating licks come after the box, since they are box notes played as loops. Double stops and chord embellishment, on E and then on open A and D, move from one note to two and into the chord, then chord tones over A, G and D (I, flat VII, IV) show why the same box works over those changes. The slow melody needs control more than speed, so it comes late; call and response with a band uses everything before it, and the sixteen-bar etude puts it all in one solo.",
   gradingLimits:
     "Graded Exercises are written lines. The app checks timing evenness, notes heard and extra notes on every one, and right notes after the take on single notes that are far enough apart and don't ring into each other; elsewhere right notes read 'not checked'. Double stops, the chord embellishments and riffs with open strings ringing are timed and counted, and not pitch-checked, because a single-note tracker can't tell two notes apart. A bent note would read as a wrong one, so bends are timed and never pitch-checked, and their pitch is a self-check. The right-note check has only been tried on computer-made guitar sound with no band in the mix, so direct input or headphones are the honest way to play anything with a band, and with a microphone and speakers it is untested. Choosing your own notes, landing on chord tones and phrasing are not measured today: those Exercises are 'your turn', self-checked and labelled 'not checked yet'. Nothing here grades feel or tone.",
   steps: [
@@ -389,6 +391,7 @@ export default definePath({
       ],
     },
     BOX_AT_TWELVE,
+    SIXES_AT_TWELVE,
     {
       id: "major-pentatonic",
       title: "Major pentatonic, and minor against major",
@@ -656,7 +659,7 @@ export default definePath({
       why: "The most melodic rock rhythm guitar never just strums: it hammers onto the chord's third, slides a double stop into the chord, and fills between the beats. It turns a chord into a little tune, and it is a lesson in where the chord tones live.",
       howTo: [
         "Hold the shape of the chord and lift single fingers to decorate it. Your hand stays in the chord.",
-        "The hammer-on goes to the third: G to G# over E, B to C# over A. That half step or whole step is the sound.",
+        "The hammer-on goes to the third: G to G# over E, C to C# over A. That half step is the sound.",
         "Let notes ring into each other, and keep the time steady underneath.",
       ],
       payoff: "An E and an A that sing, with a fill between them, instead of two strummed chords.",
@@ -730,6 +733,7 @@ export default definePath({
         },
       ],
     },
+    EMBELLISHMENT_IN_A,
     {
       id: "chord-tones",
       title: "Chord tones over A, G and D",
@@ -1119,7 +1123,7 @@ export default definePath({
           purpose: "The first half: a rising opening, a double stop, a riff-like answer over G5 and D5, then sixteenths and the way home.",
           howTo: [
             "Straight eighths and sixteenths, 60 BPM up to a pass at 85.",
-            "Bar 1 climbs A, C, D, E, G, A. Bar 2 holds the E and A double stop, then G, E, D, C. Bars 3 and 4 answer low. Bars 5 and 6 are the sixteenth runs from Step 2. Bars 7 and 8 come home to the high A.",
+            "Bar 1 climbs A, C, D, E, G, A. Bar 2 holds the E and A double stop, then G, E, D, C. Bars 3 and 4 answer low. Bars 5 and 6 are the sixteenth runs from Step 3. Bars 7 and 8 come home to the high A.",
           ],
           coach: "Written notes: right notes, notes heard and time over any eight bars in a row, after the take.",
           tab: etude(0, 8),
@@ -1199,13 +1203,13 @@ export default definePath({
     {
       id: "beginner",
       title: "Beginner: riffs, the box and its major twin",
-      summary: "Riffs in time with a band, in A and then in E, the minor pentatonic box and its classic licks at fret 5 and again at fret 12, and the major pentatonic.",
+      summary: "Riffs in time with a band, in A and then in E, the minor pentatonic box and its classic licks at fret 5 and again at fret 12, the sextuplet run down the box and back up, and the major pentatonic.",
       startHereIf: [
         "You can play power chords and single notes cleanly at 80 BPM eighths.",
         "You don't yet know a rock lick you could play over a band.",
         "You couldn't say which notes change between minor and major pentatonic.",
       ],
-      steps: ["riffs", "riffs-in-e", "box-extension", "box-at-twelve", "major-pentatonic"],
+      steps: ["riffs", "riffs-in-e", "box-extension", "box-at-twelve", "sixes-at-twelve", "major-pentatonic"],
       warmups: [
         {
           id: "riff-around",
@@ -1234,13 +1238,13 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: loops, double stops and the changes",
-      summary: "The second pentatonic box, repeating licks, rock and roll double stops in A and in E, chord embellishment, and chord tones over A, G and D and then over A, D and E.",
+      summary: "The second pentatonic box, repeating licks, rock and roll double stops in A and in E, chord embellishment on E and then on open A and D, and chord tones over A, G and D and then over A, D and E.",
       startHereIf: [
         "You can play box 1 of A minor pentatonic from memory at 90 BPM eighths.",
-        "You can play a sixteenth-note lick in the box at 80 BPM.",
+        "You can play a sixteenth-note lick in the box at 80 BPM, at fret 5 or at fret 12.",
         "Your solos stay in one box and don't follow the chords.",
       ],
-      steps: ["box-two", "repeating-licks", "double-stops", "double-stops-in-e", "embellishment", "chord-tones", "chord-tones-ade"],
+      steps: ["box-two", "repeating-licks", "double-stops", "double-stops-in-e", "embellishment", "embellishment-in-a", "chord-tones", "chord-tones-ade"],
       warmups: [
         {
           id: "loop-around",

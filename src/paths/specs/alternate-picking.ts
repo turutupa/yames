@@ -96,6 +96,7 @@ export default definePath({
   prerequisites: { paths: [{ path: "rhythm-foundations", level: "beginner" }], skills: ["Clean single notes", "Eighth notes with a click at 80 BPM"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
+  variantText: true,
   orderRationale:
     "Time first, then speed of the same motion, then control of it (accents), then one problem at a time across strings. It departs from the starting order in one place: pentatonic patterns move up to Step 5, before three notes per string, and bursts follow them. Two notes per string gives the same crossing over and over, so it is the natural first application, while three per string changes crossing type on every string. Bursts come after both so they can use real shapes rather than chromatic fingers. Outside picking is taught before inside because most players find it easier, and both are named so a teacher can overrule that. Up to tempo (added 2026-11-18) sits after the cross-string runs: the Advanced Level otherwise passed no faster than the Intermediate one, and its figures are ones the player already knows, so speed is the only new thing.",
   gradingLimits:

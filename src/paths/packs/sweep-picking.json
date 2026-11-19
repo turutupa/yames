@@ -897,6 +897,10 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "purpose": "A real four-chord progression played as sweeps, one bar per chord.",
+                "howTo": [
+                  "Before you start, play the four chords once as ordinary strums so your ear knows where the music is going."
+                ],
                 "tab": "/8t 3:12 2:12 1:12 1:12 2:12 3:12 3:12 2:12 1:12 1:12 2:12 3:12 | /8t 3:12 2:13 1:12 1:12 2:13 3:12 3:12 2:13 1:12 1:12 2:13 3:12 | /8t 3:12 2:12 1:10 1:10 2:12 3:12 3:12 2:12 1:10 1:10 2:12 3:12 | /8t 3:11 2:10 1:10 1:10 2:10 3:11 3:11 2:10 1:10 1:10 2:10 3:11",
                 "position": {
                   "fret": 12,
@@ -978,6 +982,10 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "A real four-chord progression played as sweeps, one bar per chord.",
+                "howTo": [
+                  "Before you start, play the four chords once as ordinary strums so your ear knows where the music is going."
+                ],
                 "tab": "/8t 3:10 2:10 1:10 1:10 2:10 3:10 3:10 2:10 1:10 1:10 2:10 3:10 | /8t 3:10 2:11 1:10 1:10 2:11 3:10 3:10 2:11 1:10 1:10 2:11 3:10 | /8t 3:10 2:10 1:8 1:8 2:10 3:10 3:10 2:10 1:8 1:8 2:10 3:10 | /8t 3:9 2:8 1:8 1:8 2:8 3:9 3:9 2:8 1:8 1:8 2:8 3:9",
                 "position": {
                   "fret": 10,
@@ -1059,6 +1067,10 @@
                   "key": "G"
                 },
                 "pool": "all",
+                "purpose": "A real four-chord progression played as sweeps, one bar per chord.",
+                "howTo": [
+                  "Before you start, play the four chords once as ordinary strums so your ear knows where the music is going."
+                ],
                 "tab": "/8t 3:15 2:15 1:15 1:15 2:15 3:15 3:15 2:15 1:15 1:15 2:15 3:15 | /8t 3:15 2:16 1:15 1:15 2:16 3:15 3:15 2:16 1:15 1:15 2:16 3:15 | /8t 3:15 2:15 1:13 1:13 2:15 3:15 3:15 2:15 1:13 1:13 2:15 3:15 | /8t 3:14 2:13 1:13 1:13 2:13 3:14 3:14 2:13 1:13 1:13 2:13 3:14",
                 "position": {
                   "fret": 15,
@@ -6863,6 +6875,10 @@
                   "progression": "Am to G"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets that take a whole bar for three notes.",
+                  "Every note on an outer string after the first is legato. If you hear a pick attack at a link, that's the thing to fix."
+                ],
                 "tab": "/2t 3:12 2:12 1:12 | /2t 1:10p 2:10 3:11",
                 "position": {
                   "fret": 12,
@@ -6903,6 +6919,10 @@
                   "progression": "Am to E"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets that take a whole bar for three notes.",
+                  "Every note on an outer string after the first is legato. If you hear a pick attack at a link, that's the thing to fix."
+                ],
                 "tab": "/2t 3:12 2:12 1:12 | /2t 1:11p 2:12 3:11",
                 "position": {
                   "fret": 12,
@@ -7023,6 +7043,10 @@
                   "progression": "Am to G"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets that take a whole bar for three notes.",
+                  "Every note on an outer string after the first is legato. If you hear a pick attack at a link, that's the thing to fix."
+                ],
                 "tab": "/2t 3:10 2:10 1:10 | /2t 1:8p 2:8 3:9",
                 "position": {
                   "fret": 10,
@@ -7063,6 +7087,10 @@
                   "progression": "Am to E"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets that take a whole bar for three notes.",
+                  "Every note on an outer string after the first is legato. If you hear a pick attack at a link, that's the thing to fix."
+                ],
                 "tab": "/2t 3:10 2:10 1:10 | /2t 1:9p 2:10 3:9",
                 "position": {
                   "fret": 10,
@@ -7183,6 +7211,10 @@
                   "progression": "Am to G"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets that take a whole bar for three notes.",
+                  "Every note on an outer string after the first is legato. If you hear a pick attack at a link, that's the thing to fix."
+                ],
                 "tab": "/2t 3:15 2:15 1:15 | /2t 1:13p 2:13 3:14",
                 "position": {
                   "fret": 15,
@@ -7223,6 +7255,10 @@
                   "progression": "Am to E"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets that take a whole bar for three notes.",
+                  "Every note on an outer string after the first is legato. If you hear a pick attack at a link, that's the thing to fix."
+                ],
                 "tab": "/2t 3:15 2:15 1:15 | /2t 1:14p 2:15 3:14",
                 "position": {
                   "fret": 15,
@@ -14531,6 +14567,11 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "Only two chords, so all of your attention goes on the half step from B to C, on three strings.",
+                "howTo": [
+                  "Triplets. One bar of the i chord and one of the V, twice round; each bar is its three-string loop played twice.",
+                  "Go slowly enough to hear the one note that moves by a half step: in C minor, the B of the V chord rising to the C of the i chord."
+                ],
                 "tab": "/8t 3:17 2:16 1:15 1:20h 1:15p 2:16 3:17 2:16 1:15 1:20h 1:15p 2:16 | /8t 3:16 2:15 1:15 1:19h 1:15p 2:15 3:16 2:15 1:15 1:19h 1:15p 2:15 | /8t 3:17 2:16 1:15 1:20h 1:15p 2:16 3:17 2:16 1:15 1:20h 1:15p 2:16 | /8t 3:16 2:15 1:15 1:19h 1:15p 2:15 3:16 2:15 1:15 1:19h 1:15p 2:15",
                 "position": {
                   "fret": 15,
@@ -18937,6 +18978,7 @@
                   "progression": "i-VII-VI-VII"
                 },
                 "pool": "all",
+                "howTo": ["Six notes a bar, starting up near fret 15."],
                 "tab": "/4t 6:15f4 5:13f2 4:12f1 3:12f1 2:11f3 1:10f2 | /4t 1:8p 2:10 3:10 4:10 5:12 6:13 | /4t 6:11p 5:10 4:8 3:8 2:8 1:6 | /4t 1:5p 2:6 3:5 4:7 5:8 6:8",
                 "position": {
                   "fret": 12,
@@ -19111,6 +19153,7 @@
                   "progression": "i-VII-VI-VII"
                 },
                 "pool": "all",
+                "howTo": ["Six notes a bar, starting up near fret 12."],
                 "tab": "/4t 6:12f4 5:10f2 4:9f1 3:9f1 2:8f3 1:7f2 | /4t 1:5p 2:7 3:7 4:7 5:9 6:10 | /4t 6:8p 5:7 4:5 3:5 2:5 1:3 | /4t 1:2p 2:3 3:2 4:4 5:5 6:5",
                 "position": {
                   "fret": 9,
@@ -21038,6 +21081,10 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets, two three-string loops a bar: the i chord, the iv, the diminished seventh, and home.",
+                  "In C minor, hear the B in the third bar rise to the C at the start of the fourth. That half step is the whole cadence."
+                ],
                 "tab": "/8t 3:17 2:16 1:15 1:20h 1:15p 2:16 3:17 2:16 1:15 1:20h 1:15p 2:16 | /8t 3:17 2:18 1:16 1:20h 1:16p 2:18 3:17 2:18 1:16 1:20h 1:16p 2:18 | /8t 3:16 2:15 1:13 1:16h 1:13p 2:15 3:16 2:15 1:13 1:16h 1:13p 2:15 | /8t 3:17 2:16 1:15 1:20h 1:15p 2:16 3:17 2:16 1:15 1:20h 1:15p 2:16",
                 "position": {
                   "fret": 15,
@@ -22014,6 +22061,9 @@
                   "key": "G"
                 },
                 "pool": "all",
+                "howTo": [
+                  "One chord a bar, and each shape sits higher than the last. Note the two chords the harmonic minor changes: D major and F# diminished. This one runs once through and stops."
+                ],
                 "tab": "/8t 3:3 2:3 1:3 1:6h 1:3p 2:3 3:3 2:3 1:3 1:6h 1:3p 2:3 | /8t 3:5 2:4 1:2 1:5h 1:2p 2:4 3:5 2:4 1:2 1:5h 1:2p 2:4 | /8t 3:8 2:8 1:8 1:11h 1:8p 2:8 3:8 2:8 1:8 1:11h 1:8p 2:8 | /8t 3:11 2:10 1:10 1:14h 1:10p 2:10 3:11 2:10 1:10 1:14h 1:10p 2:10 | /8t 3:12 2:11 1:11 1:15h 1:11p 2:11 3:12 2:11 1:11 1:15h 1:11p 2:11 | /8t 3:14 2:13 1:11 1:14h 1:11p 2:13 3:14 2:13 1:11 1:14h 1:11p 2:13 | /8t 3:15 2:15 1:15 1:18h 1:15p 2:15 3:15 2:15 1:15 1:18h 1:15p 2:15 | /8t 3:14 2:15 1:14 1:17h 1:14p 2:15 3:14 2:15 1:14 1:17h 1:14p 2:15",
                 "position": {
                   "fret": 3,
@@ -22143,6 +22193,9 @@
                   "key": "Bb"
                 },
                 "pool": "all",
+                "howTo": [
+                  "One chord a bar, and each shape sits higher than the last. Note the two chords the harmonic minor changes: F major and A diminished. This one runs once through and stops."
+                ],
                 "tab": "/8t 3:6 2:6 1:6 1:9h 1:6p 2:6 3:6 2:6 1:6 1:9h 1:6p 2:6 | /8t 3:8 2:7 1:5 1:8h 1:5p 2:7 3:8 2:7 1:5 1:8h 1:5p 2:7 | /8t 3:11 2:11 1:11 1:14h 1:11p 2:11 3:11 2:11 1:11 1:14h 1:11p 2:11 | /8t 3:14 2:13 1:13 1:17h 1:13p 2:13 3:14 2:13 1:13 1:17h 1:13p 2:13 | /8t 3:15 2:14 1:14 1:18h 1:14p 2:14 3:15 2:14 1:14 1:18h 1:14p 2:14 | /8t 3:17 2:16 1:14 1:17h 1:14p 2:16 3:17 2:16 1:14 1:17h 1:14p 2:16 | /8t 3:18 2:18 1:18 1:21h 1:18p 2:18 3:18 2:18 1:18 1:21h 1:18p 2:18 | /8t 3:17 2:18 1:17 1:20h 1:17p 2:18 3:17 2:18 1:17 1:20h 1:17p 2:18",
                 "position": {
                   "fret": 6,

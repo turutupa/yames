@@ -10,6 +10,7 @@ import { definePath } from "../spec";
 import type { ExerciseSpec, VariantParams } from "../spec";
 import type { PassBar } from "../format";
 import { ladder, repeat, shiftFrets } from "../templates";
+import { CELL_IN_E_MINOR, SECOND_SOLO, TWO_TAPS_THROUGH_CHORDS } from "./tapping-more";
 
 const even = (min: number, overBars = 4): PassBar => ({ metric: "timingEvenness", min, overBars });
 const heard = (min: number, overBars = 4): PassBar => ({ metric: "notesHeard", min, overBars });
@@ -118,15 +119,16 @@ export default definePath({
   title: "Tapping",
   kind: "mechanics",
   category: "technique",
-  goal: "Tap an arpeggio in triplets, sixteenths and sextuplets, move it through chord changes, and hold a tapped line over a band.",
+  goal: "Tap an arpeggio in triplets, sixteenths and sextuplets, move it through chord changes in A minor and E minor, and hold an eight-bar tapped line over a band.",
   level: "intermediate",
   assumes:
     "You can play a hammer-on and a pull-off that sound as loud as a picked note (the Beginner Level of Legato covers this), and triplets with a click at 70 BPM. An electric guitar with a little gain makes tapping easier, but every Exercise works clean. The minutes listed are one pass through the material.",
   prerequisites: { paths: [{ path: "legato", level: "beginner" }], skills: ["Hammer-ons and pull-offs", "Triplets with a click at 70 BPM"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
+  variantText: true,
   orderRationale:
-    "One tap and one pull-off first, then the three-note cell every tapping lick is built on. Moving the tap comes before moving the fretting hand, because the tapping finger is the easier of the two to aim. Sixteenths and two strings follow, then a scale under the tap, which needs the legato strength the earlier Steps build. Sextuplets and two tapped notes come last, and the band after that.",
+    "One tap and one pull-off first, then the three-note cell every tapping lick is built on. Moving the tap comes before moving the fretting hand, because the tapping finger is the easier of the two to aim. The Beginner Level ends with the same cell through four chords in a second key, E minor on the B string, so that a new key and a new string arrive before a new rhythm. Sixteenths and two strings follow, then a scale under the tap, which needs the legato strength the earlier Steps build. Sextuplets and two tapped notes come last, first on one chord and then through the chords of E minor. The band follows: a solo in triplets in A minor, a full minute, and a second solo in sixteenths in E minor, which is last for its length, eight bars, not its speed.",
   gradingLimits:
     "The app times the notes it hears and counts them. A tap is a loud attack and is expected to be heard; a pull-off or a hammer-on that is too quiet to catch costs nothing. So the taps carry the grade, and a pass does not prove the notes between them were even or loud: that is for your ear and a recording. Pitch is not checked on tapped lines. Heavy gain makes every note sound present whether it was or not; a light crunch is the honest setting. None of this has been tried on a real guitar yet.",
   steps: [
@@ -341,6 +343,7 @@ export default definePath({
         },
       ],
     },
+    CELL_IN_E_MINOR,
     {
       id: "sixteenths",
       title: "Sixteenths",
@@ -697,6 +700,7 @@ export default definePath({
         },
       ],
     },
+    TWO_TAPS_THROUGH_CHORDS,
     {
       id: "over-the-band",
       title: "A tapped solo, and a full minute",
@@ -717,7 +721,7 @@ export default definePath({
           purpose: "Am, G, F, E in tapped triplets with the band, the tap on the fifth or the root of each chord.",
           howTo: [
             "Triplets, four cells a bar.",
-            "This is the progression from the Beginner Level. Play it until the moves need no thought.",
+            "This is the A minor progression from the Beginner Level. Play it until the moves need no thought.",
           ],
           coach: "Band on. The taps carry the timing.",
           tab: ETUDE_A,
@@ -774,19 +778,20 @@ export default definePath({
         },
       ],
     },
+    SECOND_SOLO,
   ],
   levels: [
     {
       id: "beginner",
       title: "Beginner: one tap, one chord at a time",
-      summary: "The tap and the pull-off, the three-note cell, a melody in the taps, and the cell through four chords.",
+      summary: "The tap and the pull-off, the three-note cell, a melody in the taps, and the cell through four chords in A minor and then in E minor.",
       reachLevel: "early-intermediate",
       startHereIf: [
         "You can hammer on and pull off between frets 5 and 8 so both notes sound.",
         "You can play triplets with a click at 70 BPM.",
         "You've never tapped, or your taps sound and the notes after them don't.",
       ],
-      steps: ["first-taps", "moving-the-tap", "changing-the-chord"],
+      steps: ["first-taps", "moving-the-tap", "changing-the-chord", "cell-in-e-minor"],
       warmups: [
         {
           id: "cell-around",
@@ -814,7 +819,7 @@ export default definePath({
       reachLevel: "intermediate",
       startHereIf: [
         "You can play tap, pull, hammer in triplets at 85 BPM with all three notes the same size.",
-        "You can move the cell through Am, F and E without stopping.",
+        "You can move the cell through four chords, such as Am, G, F and E or Em, C, D and B, without stopping.",
         "Your tapping only works on one string, or only in triplets.",
       ],
       steps: ["sixteenths", "two-strings", "scale-under-the-tap"],
@@ -841,14 +846,14 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: speed, two taps and a band",
-      summary: "The cell in sextuplets, two tapped notes and string skips, then four-bar tapped lines over a band and a full minute.",
+      summary: "The cell in sextuplets, two tapped notes and string skips, on one chord and then through the chords of E minor, then four-bar tapped lines over a band, a full minute, and an eight-bar solo in E minor.",
       reachLevel: "intermediate",
       startHereIf: [
         "You can play the four-note loop in sixteenths at 85 BPM.",
         "You can play six notes from one tap at 60 BPM and hear all six.",
         "You can tap a lick, and not yet 4 bars of one over chords.",
       ],
-      steps: ["sextuplet-taps", "two-taps-and-skips", "over-the-band"],
+      steps: ["sextuplet-taps", "two-taps-and-skips", "two-taps-through-chords", "over-the-band", "second-solo"],
       warmups: [
         {
           id: "fast-around",

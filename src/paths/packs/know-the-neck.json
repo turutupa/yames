@@ -4,7 +4,7 @@
   "title": "Know the Neck",
   "kind": "theory",
   "category": "harmony",
-  "goal": "Find any natural note on any string, see octaves, thirds and triads as shapes, and follow a chord progression in one position by name.",
+  "goal": "Find any natural note on any string, name the sharps and flats between them, see octaves, thirds and triads as shapes, play in G major and F major on the top three strings, and follow a chord progression in one position by name.",
   "level": "beginner",
   "assumes": "You can fret and pick single notes and play quarter notes with a click at 70 BPM. You don't need to read music or know any scales. The minutes listed are one pass through the material; this is knowledge, and it sticks when you come back to it for a few minutes on many days.",
   "prerequisites": {
@@ -18,7 +18,7 @@
   },
   "orderRationale": "The two low strings first, because chords and scales are named from them. Octave shapes next: they turn two known strings into six. Thirds, roots and triads are the smallest pieces of harmony and each is one shape. Only then the five pentatonic boxes, which most players learn first and never connect; here they arrive as places on a neck the player can already name. Arpeggios through the changes and landing on chord tones come last because they use all of it at once.",
   "gradingLimits": "The app checks that the notes you played were the written ones, after the take, and times them loosely. It cannot hear you say a note's name, and it cannot tell which string you played a pitch on: the same C on two strings sounds alike to it. So the saying and the place are yours to keep honest. The 'your turn' Exercises are not checked at all. None of this has been tried on a real guitar yet.",
-  "estimatedMinutes": 164,
+  "estimatedMinutes": 227,
   "steps": [
     {
       "id": "low-strings",
@@ -1225,8 +1225,580 @@
       ]
     },
     {
-      "id": "upper-strings",
+      "id": "chord-roots",
       "order": 3,
+      "title": "The root of a chord you know",
+      "goal": "Find the root of E, A, D, G and C in the open chords you play, and the same root higher up the neck by the two octave shapes.",
+      "why": "A chord is named after one of its notes, the root. In the open chords E, A, D, G and C it is the lowest note you strum, on one of the three low strings, and you can name those now. The octave shapes then find the same root higher up, on the strings where the small chord shapes of later Steps sit. E minor, A minor and D minor have the same roots as E, A and D: the letter is the root, and the word after it says what kind of chord is built on it.",
+      "howTo": [
+        "E, A and D have their roots on open strings: the low E string, the A string and the D string. G is the low E string at fret 3. C is the A string at fret 3.",
+        "From a root on the low E or A string, the octave is two strings over and two frets up. From the D or G string it is two strings over and three frets up.",
+        "Say the chord's name as you play its root, and again for each octave. It is one note in several places."
+      ],
+      "payoff": "You can point to the root of every open chord here in two or three places, and walk the roots of three chords up the neck in time.",
+      "prerequisites": ["octaves"],
+      "difficulty": 1.87,
+      "exercises": [
+        {
+          "id": "chord-roots.open-chord-roots",
+          "title": "Five roots, where the chords have them",
+          "purpose": "E, A, D, G and C: the lowest note of each open chord, played alone and named. Three are open strings and two are at fret 3.",
+          "howTo": [
+            "Quarter notes, one to a click, 50 BPM up to a pass at 80.",
+            "Each root twice: the open low E string, the open A string, the open D string, the low E string at fret 3 for G, the A string at fret 3 for C. Then G twice more, and D, A and E once each, with that E held for two clicks.",
+            "Use the third finger for both notes at fret 3. In the open G and C chords that finger is already on the root."
+          ],
+          "coachLine": "Right notes and steady quarters after the take. Say the chord's name on each new root.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 4,
+          "loops": true,
+          "position": {
+            "fret": 1,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":6,"fret":0,"midi":40,"tick":0,"dur":960,"tech":[]},
+            {"string":6,"fret":0,"midi":40,"tick":960,"dur":960,"tech":[]},
+            {"string":5,"fret":0,"midi":45,"tick":1920,"dur":960,"tech":[]},
+            {"string":5,"fret":0,"midi":45,"tick":2880,"dur":960,"tech":[]},
+            {"string":4,"fret":0,"midi":50,"tick":3840,"dur":960,"tech":[]},
+            {"string":4,"fret":0,"midi":50,"tick":4800,"dur":960,"tech":[]},
+            {"string":6,"fret":3,"midi":43,"tick":5760,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":3,"midi":43,"tick":6720,"dur":960,"tech":[],"finger":3},
+            {"string":5,"fret":3,"midi":48,"tick":7680,"dur":960,"tech":[],"finger":3},
+            {"string":5,"fret":3,"midi":48,"tick":8640,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":3,"midi":43,"tick":9600,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":3,"midi":43,"tick":10560,"dur":960,"tech":[],"finger":3},
+            {"string":4,"fret":0,"midi":50,"tick":11520,"dur":960,"tech":[]},
+            {"string":5,"fret":0,"midi":45,"tick":12480,"dur":960,"tech":[]},
+            {"string":6,"fret":0,"midi":40,"tick":13440,"dur":1920,"tech":[]}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"}
+            ],
+            "passAtBpm": 80
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": [],
+            "notes": []
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 4,
+          "tab": "/4 6:0 6:0 5:0 5:0 | 4:0 4:0 6:3f3 6:3f3 | 5:3f3 5:3f3 6:3f3 6:3f3 | 4:0 5:0 /2 6:0",
+          "subdivision": "quarters",
+          "computed": {
+            "noteCount": 15,
+            "minGapMsAtTop": 545.45,
+            "handShifts": 0,
+            "maxPlayableBpm": 400,
+            "difficulty": 1.55
+          },
+          "harmony": {
+            "kind": "scale",
+            "root": "C",
+            "scale": "major",
+            "spelled": ["C", "D", "E", "F", "G", "A", "B"],
+            "cover": false
+          },
+          "selfCheck": ["Did you say each note's name out loud as you played it?"]
+        },
+        {
+          "id": "chord-roots.roots-octave-up",
+          "title": "Each root, an octave up",
+          "purpose": "E, A, G and C, each followed by the same note an octave higher: two strings over and two frets up. For E and A, that higher note is one you already hold in the open chord.",
+          "howTo": [
+            "Quarter notes, 50 BPM up to a pass at 80.",
+            "E: the open low E string, then the D string at fret 2. A: the open A string, then the G string at fret 2. G: low E string 3, D string 5. C: A string 3, G string 5. Then G and A again, and E once more with both notes held for two clicks.",
+            "Second finger for the two notes at fret 2, whichever finger holds them in the chord. For G and C the root goes under the first finger here, so the third finger can reach the octave two frets up.",
+            "The G on the D string at fret 5 is the same note as the open G string, and the C on the G string at fret 5 is the same note as the B string at fret 1. So the open G and C chords hold these octaves too, in another place."
+          ],
+          "coachLine": "Right notes and steady quarters after the take. Each pair is one chord name, said twice.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 4,
+          "loops": true,
+          "position": {
+            "fret": 1,
+            "shifts": "allowed"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":6,"fret":0,"midi":40,"tick":0,"dur":960,"tech":[]},
+            {"string":4,"fret":2,"midi":52,"tick":960,"dur":960,"tech":[],"finger":2},
+            {"string":5,"fret":0,"midi":45,"tick":1920,"dur":960,"tech":[]},
+            {"string":3,"fret":2,"midi":57,"tick":2880,"dur":960,"tech":[],"finger":2},
+            {"string":6,"fret":3,"midi":43,"tick":3840,"dur":960,"tech":[],"finger":1},
+            {"string":4,"fret":5,"midi":55,"tick":4800,"dur":960,"tech":[],"finger":3},
+            {"string":5,"fret":3,"midi":48,"tick":5760,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":5,"midi":60,"tick":6720,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":3,"midi":43,"tick":7680,"dur":960,"tech":[],"finger":1},
+            {"string":4,"fret":5,"midi":55,"tick":8640,"dur":960,"tech":[],"finger":3},
+            {"string":5,"fret":0,"midi":45,"tick":9600,"dur":960,"tech":[]},
+            {"string":3,"fret":2,"midi":57,"tick":10560,"dur":960,"tech":[],"finger":2},
+            {"string":6,"fret":0,"midi":40,"tick":11520,"dur":1920,"tech":[]},
+            {"string":4,"fret":2,"midi":52,"tick":13440,"dur":1920,"tech":[],"finger":2}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"}
+            ],
+            "passAtBpm": 80
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": [],
+            "notes": []
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 5,
+          "tab": "/4 6:0 4:2f2 5:0 3:2f2 | 6:3f1 4:5f3 5:3f1 3:5f3 | 6:3f1 4:5f3 5:0 3:2f2 | /2 6:0 4:2f2",
+          "subdivision": "quarters",
+          "computed": {
+            "noteCount": 14,
+            "minGapMsAtTop": 545.45,
+            "handShifts": 2,
+            "maxPlayableBpm": 400,
+            "difficulty": 1.82
+          },
+          "harmony": {
+            "kind": "scale",
+            "root": "C",
+            "scale": "major",
+            "spelled": ["C", "D", "E", "F", "G", "A", "B"],
+            "cover": false
+          }
+        },
+        {
+          "id": "chord-roots.roots-wide-shape",
+          "title": "Higher again: the wider shape",
+          "purpose": "From the D or G string the octave is two strings over and three frets up. That gives D its octave on the B string, and gives E, A, G and C a second octave on the B and top strings.",
+          "howTo": [
+            "Quarter notes, 50 BPM up to a pass at 80.",
+            "D: the open D string, then the B string at fret 3. E: D string 2, B string 5. A: G string 2, top string 5. G: D string 5, B string 8. C: G string 5, top string 8. Then G again, and D once more with both notes held for two clicks.",
+            "First finger on the lower note and little finger on the upper one, as in the octave shape from the D and G strings. The D at fret 3 takes the third finger, which is where it sits in an open D chord."
+          ],
+          "coachLine": "Right notes and steady quarters after the take. The hand moves only between pairs, never inside one.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 4,
+          "loops": true,
+          "position": {
+            "fret": 1,
+            "shifts": "allowed"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":4,"fret":0,"midi":50,"tick":0,"dur":960,"tech":[]},
+            {"string":2,"fret":3,"midi":62,"tick":960,"dur":960,"tech":[],"finger":3},
+            {"string":4,"fret":2,"midi":52,"tick":1920,"dur":960,"tech":[],"finger":1},
+            {"string":2,"fret":5,"midi":64,"tick":2880,"dur":960,"tech":[],"finger":4},
+            {"string":3,"fret":2,"midi":57,"tick":3840,"dur":960,"tech":[],"finger":1},
+            {"string":1,"fret":5,"midi":69,"tick":4800,"dur":960,"tech":[],"finger":4},
+            {"string":4,"fret":5,"midi":55,"tick":5760,"dur":960,"tech":[],"finger":1},
+            {"string":2,"fret":8,"midi":67,"tick":6720,"dur":960,"tech":[],"finger":4},
+            {"string":3,"fret":5,"midi":60,"tick":7680,"dur":960,"tech":[],"finger":1},
+            {"string":1,"fret":8,"midi":72,"tick":8640,"dur":960,"tech":[],"finger":4},
+            {"string":4,"fret":5,"midi":55,"tick":9600,"dur":960,"tech":[],"finger":1},
+            {"string":2,"fret":8,"midi":67,"tick":10560,"dur":960,"tech":[],"finger":4},
+            {"string":4,"fret":0,"midi":50,"tick":11520,"dur":1920,"tech":[]},
+            {"string":2,"fret":3,"midi":62,"tick":13440,"dur":1920,"tech":[],"finger":3}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"}
+            ],
+            "passAtBpm": 80
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": [],
+            "notes": []
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 5,
+          "tab": "/4 4:0 2:3f3 4:2f1 2:5f4 | 3:2f1 1:5f4 4:5f1 2:8f4 | 3:5f1 1:8f4 4:5f1 2:8f4 | /2 4:0 2:3f3",
+          "subdivision": "quarters",
+          "computed": {
+            "noteCount": 14,
+            "minGapMsAtTop": 545.45,
+            "handShifts": 5,
+            "maxPlayableBpm": 400,
+            "difficulty": 1.91
+          },
+          "harmony": {
+            "kind": "scale",
+            "root": "C",
+            "scale": "major",
+            "spelled": ["C", "D", "E", "F", "G", "A", "B"],
+            "cover": false
+          }
+        },
+        {
+          "id": "chord-roots.roots-walk",
+          "title": "Three chords, roots low to high",
+          "purpose": "The roots of G, C and D, each one climbing through its octaves, then G coming back down. G and C have three places here. D starts on the open D string, so it has two.",
+          "howTo": [
+            "Quarter notes and half notes, 50 BPM up to a pass at 80.",
+            "G: low E string 3, D string 5, then the B string at fret 8, held for two clicks. C: A string 3, G string 5, then the top string at fret 8, held. D: the open D string and the B string at fret 3, two clicks each. Then G back down: B string 8, D string 5, then the low E string at fret 3, held for two clicks.",
+            "First finger, third finger, then the hand moves up two frets so the little finger takes fret 8. Coming down, move back two frets before the D string so the third finger takes fret 5.",
+            "On other Takes the three chords are A minor, D minor and E."
+          ],
+          "coachLine": "Right notes and time after the take. Say each chord's name once, on its lowest root.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 4,
+          "loops": true,
+          "position": {
+            "fret": 3,
+            "shifts": "allowed"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":6,"fret":3,"midi":43,"tick":0,"dur":960,"tech":[],"finger":1},
+            {"string":4,"fret":5,"midi":55,"tick":960,"dur":960,"tech":[],"finger":3},
+            {"string":2,"fret":8,"midi":67,"tick":1920,"dur":1920,"tech":[],"finger":4},
+            {"string":5,"fret":3,"midi":48,"tick":3840,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":5,"midi":60,"tick":4800,"dur":960,"tech":[],"finger":3},
+            {"string":1,"fret":8,"midi":72,"tick":5760,"dur":1920,"tech":[],"finger":4},
+            {"string":4,"fret":0,"midi":50,"tick":7680,"dur":1920,"tech":[]},
+            {"string":2,"fret":3,"midi":62,"tick":9600,"dur":1920,"tech":[],"finger":3},
+            {"string":2,"fret":8,"midi":67,"tick":11520,"dur":960,"tech":[],"finger":4},
+            {"string":4,"fret":5,"midi":55,"tick":12480,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":3,"midi":43,"tick":13440,"dur":1920,"tech":[],"finger":1}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"}
+            ],
+            "passAtBpm": 80
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.7,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": [],
+            "notes": []
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 6,
+          "tab": "/4 6:3f1 4:5f3 /2 2:8f4 | /4 5:3f1 3:5f3 /2 1:8f4 | /2 4:0 2:3f3 | /4 2:8f4 4:5f3 /2 6:3f1",
+          "subdivision": "quarters",
+          "computed": {
+            "noteCount": 11,
+            "minGapMsAtTop": 545.45,
+            "handShifts": 6,
+            "maxPlayableBpm": 400,
+            "difficulty": 3.02
+          },
+          "chords": ["G", "C", "D", "G"],
+          "harmony": {
+            "kind": "chordTones",
+            "cover": false
+          },
+          "selfCheck": ["Could you play it once without looking at the neck?"],
+          "variation": {
+            "dimensions": ["progression"],
+            "pooled": ["progression"],
+            "notPooled": [],
+            "variants": [
+              {
+                "id": "progression=G,-C-and-D",
+                "label": "G, C and D",
+                "params": {
+                  "progression": "G, C and D"
+                },
+                "pool": "all",
+                "tab": "/4 6:3f1 4:5f3 /2 2:8f4 | /4 5:3f1 3:5f3 /2 1:8f4 | /2 4:0 2:3f3 | /4 2:8f4 4:5f3 /2 6:3f1",
+                "position": {
+                  "fret": 3,
+                  "shifts": "allowed"
+                },
+                "crossing": "none",
+                "notes": [
+                  {"string":6,"fret":3,"midi":43,"tick":0,"dur":960,"tech":[],"finger":1},
+                  {"string":4,"fret":5,"midi":55,"tick":960,"dur":960,"tech":[],"finger":3},
+                  {"string":2,"fret":8,"midi":67,"tick":1920,"dur":1920,"tech":[],"finger":4},
+                  {"string":5,"fret":3,"midi":48,"tick":3840,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":5,"midi":60,"tick":4800,"dur":960,"tech":[],"finger":3},
+                  {"string":1,"fret":8,"midi":72,"tick":5760,"dur":1920,"tech":[],"finger":4},
+                  {"string":4,"fret":0,"midi":50,"tick":7680,"dur":1920,"tech":[]},
+                  {"string":2,"fret":3,"midi":62,"tick":9600,"dur":1920,"tech":[],"finger":3},
+                  {"string":2,"fret":8,"midi":67,"tick":11520,"dur":960,"tech":[],"finger":4},
+                  {"string":4,"fret":5,"midi":55,"tick":12480,"dur":960,"tech":[],"finger":3},
+                  {"string":6,"fret":3,"midi":43,"tick":13440,"dur":1920,"tech":[],"finger":1}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 11,
+                  "minGapMsAtTop": 545.45,
+                  "handShifts": 6,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 3.02
+                },
+                "chords": ["G", "C", "D", "G"],
+                "harmony": {
+                  "kind": "chordTones",
+                  "cover": false
+                }
+              },
+              {
+                "id": "progression=A-minor,-D-minor-and-E",
+                "label": "A minor, D minor and E",
+                "params": {
+                  "progression": "A minor, D minor and E"
+                },
+                "pool": "all",
+                "purpose": "The roots of A minor, D minor and E, each one climbing through its octaves, then A coming back down. A and E have three places here. D starts on the open D string, so it has two.",
+                "howTo": [
+                  "Quarter notes and half notes, 50 BPM up to a pass at 80.",
+                  "A: the open A string, G string 2, then the top string at fret 5, held for two clicks. D: the open D string and the B string at fret 3, two clicks each. E: the open low E string, D string 2, then the B string at fret 5, held. Then A back down: top string 5, G string 2, then the open A string, held for two clicks.",
+                  "Open string, first finger at fret 2, little finger at fret 5. The D at fret 3 takes the second finger, and the hand does not move.",
+                  "On other Takes the three chords are G, C and D."
+                ],
+                "tab": "/4 5:0 3:2f1 /2 1:5f4 | /2 4:0 2:3f2 | /4 6:0 4:2f1 /2 2:5f4 | /4 1:5f4 3:2f1 /2 5:0",
+                "position": {
+                  "fret": 2,
+                  "shifts": "allowed"
+                },
+                "crossing": "none",
+                "notes": [
+                  {"string":5,"fret":0,"midi":45,"tick":0,"dur":960,"tech":[]},
+                  {"string":3,"fret":2,"midi":57,"tick":960,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":5,"midi":69,"tick":1920,"dur":1920,"tech":[],"finger":4},
+                  {"string":4,"fret":0,"midi":50,"tick":3840,"dur":1920,"tech":[]},
+                  {"string":2,"fret":3,"midi":62,"tick":5760,"dur":1920,"tech":[],"finger":2},
+                  {"string":6,"fret":0,"midi":40,"tick":7680,"dur":960,"tech":[]},
+                  {"string":4,"fret":2,"midi":52,"tick":8640,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":5,"midi":64,"tick":9600,"dur":1920,"tech":[],"finger":4},
+                  {"string":1,"fret":5,"midi":69,"tick":11520,"dur":960,"tech":[],"finger":4},
+                  {"string":3,"fret":2,"midi":57,"tick":12480,"dur":960,"tech":[],"finger":1},
+                  {"string":5,"fret":0,"midi":45,"tick":13440,"dur":1920,"tech":[]}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 11,
+                  "minGapMsAtTop": 545.45,
+                  "handShifts": 4,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 3
+                },
+                "chords": ["Am", "Dm", "E", "Am"],
+                "harmony": {
+                  "kind": "chordTones",
+                  "cover": false
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "difficultyException": "Three of the five roots are open strings, so there is less to fret and less distance to cover than in the octave shapes before it. The demand is tying each note to a chord the player already holds, which the metric does not count."
+    },
+    {
+      "id": "upper-strings",
+      "order": 4,
       "title": "The D, G and B strings",
       "goal": "Name and play the natural notes on the D, G and B strings, and find one note on all six strings.",
       "why": "The octave shape gets you to these strings; walking them by name makes them familiar. The B string is the odd one, tuned a fret lower than the pattern of the others, which is why every shape changes when it crosses onto it.",
@@ -1236,7 +1808,7 @@
         "The top E string has the same notes as the low E string, two octaves up. You already know it."
       ],
       "payoff": "C on all six strings, one after another, with no hesitation.",
-      "prerequisites": ["octaves"],
+      "prerequisites": ["chord-roots"],
       "difficulty": 1.57,
       "exercises": [
         {
@@ -1950,8 +2522,690 @@
       "difficultyException": "One string at a time again, so fewer string changes than the octave shapes before it. The demand is three new strings to know by name, which the metric does not count."
     },
     {
+      "id": "in-between",
+      "order": 5,
+      "title": "The notes in between",
+      "goal": "Name the notes that sit between the natural notes, by both of their names, on the low E and A strings, and find four of them on the D and G strings by octave shape.",
+      "why": "Every note in the Steps so far has been a plain letter, and every walk up a string has skipped frets. The skipped frets are notes too. Each one sits between two letters and takes its name from either neighbour: one fret above F is F sharp, and the same fret is one below G, so it is also G flat. Between E and F, and between B and C, there is no fret to skip, so there is no note in between. Chords and scales away from the natural notes need these: the scale of G major has an F sharp in it, and the scale of F major has a B flat.",
+      "howTo": [
+        "Sharp means one fret higher than the letter. Flat means one fret lower. Fret 2 of the low E string is F sharp and G flat: one fret, two names.",
+        "Four come first here: F sharp, B flat, C sharp and E flat. The key of G has one sharp, F sharp, and the key of D adds C sharp. The key of F has one flat, B flat, and the key of B flat adds E flat.",
+        "Say each name out loud, as before. The app checks the fret you played and cannot hear which of its two names you gave it."
+      ],
+      "payoff": "You can name every fret of the low E and A strings up to fret 12, and find F sharp, B flat, C sharp and E flat an octave higher by shape.",
+      "prerequisites": ["upper-strings"],
+      "difficulty": 1.4,
+      "exercises": [
+        {
+          "id": "in-between.between-low-e",
+          "title": "Four notes between, on the low E string",
+          "purpose": "F sharp, B flat, C sharp and E flat on the low E string. The first three are played between the natural notes on either side of them, and E flat next to the E above it.",
+          "howTo": [
+            "Quarter notes, 50 BPM up to a pass at 80.",
+            "Bar 1: frets 1, 2, 3, 2, which is F, F sharp, G, F sharp. Bar 2: frets 7, 6, 5, 6, which is B, B flat, A, B flat. Bar 3: frets 8, 9, 10, 9, which is C, C sharp, D, C sharp. Bar 4: frets 12, 11, 12, which is E, E flat, E, with the last E held for two clicks.",
+            "First, second and third fingers on three frets in a row, and the hand moves at each bar line. B at fret 7 and C at fret 8 are next door, with nothing between them.",
+            "Each of the four has a second name. Fret 2 is also G flat, fret 6 is also A sharp, fret 9 is also D flat and fret 11 is also D sharp."
+          ],
+          "coachLine": "Right notes and steady quarters after the take. The names are yours to say.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 4,
+          "loops": true,
+          "position": {
+            "fret": 1,
+            "shifts": "allowed"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":6,"fret":1,"midi":41,"tick":0,"dur":960,"tech":[],"finger":1},
+            {"string":6,"fret":2,"midi":42,"tick":960,"dur":960,"tech":[],"finger":2},
+            {"string":6,"fret":3,"midi":43,"tick":1920,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":2,"midi":42,"tick":2880,"dur":960,"tech":[],"finger":2},
+            {"string":6,"fret":7,"midi":47,"tick":3840,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":6,"midi":46,"tick":4800,"dur":960,"tech":[],"finger":2},
+            {"string":6,"fret":5,"midi":45,"tick":5760,"dur":960,"tech":[],"finger":1},
+            {"string":6,"fret":6,"midi":46,"tick":6720,"dur":960,"tech":[],"finger":2},
+            {"string":6,"fret":8,"midi":48,"tick":7680,"dur":960,"tech":[],"finger":1},
+            {"string":6,"fret":9,"midi":49,"tick":8640,"dur":960,"tech":[],"finger":2},
+            {"string":6,"fret":10,"midi":50,"tick":9600,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":9,"midi":49,"tick":10560,"dur":960,"tech":[],"finger":2},
+            {"string":6,"fret":12,"midi":52,"tick":11520,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":11,"midi":51,"tick":12480,"dur":960,"tech":[],"finger":2},
+            {"string":6,"fret":12,"midi":52,"tick":13440,"dur":1920,"tech":[],"finger":3}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"}
+            ],
+            "passAtBpm": 80
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": [],
+            "notes": []
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 5,
+          "tab": "/4 6:1f1 6:2f2 6:3f3 6:2f2 | 6:7f3 6:6f2 6:5f1 6:6f2 | 6:8f1 6:9f2 6:10f3 6:9f2 | 6:12f3 6:11f2 /2 6:12f3",
+          "subdivision": "quarters",
+          "computed": {
+            "noteCount": 15,
+            "minGapMsAtTop": 545.45,
+            "handShifts": 6,
+            "maxPlayableBpm": 385,
+            "difficulty": 1.4
+          },
+          "selfCheck": ["Did you say each note's name out loud as you played it?"]
+        },
+        {
+          "id": "in-between.between-a-string",
+          "title": "The same four on the A string",
+          "purpose": "B flat, C sharp, E flat and F sharp on the A string, in the order they come up the string. The same four names, at different frets.",
+          "howTo": [
+            "Quarter notes, 50 BPM up to a pass at 80.",
+            "Bar 1: open, 1, 2, 1, which is A, B flat, B, B flat. Bar 2: frets 5, 4, 3, 4, which is D, C sharp, C, C sharp. Bar 3: frets 5, 6, 7, 6, which is D, E flat, E, E flat. Bar 4: frets 10, 9, 10, which is G, F sharp, G, with the last G held for two clicks.",
+            "Bar 1 uses the open string and the first two fingers. After that it is three fingers on three frets in a row again. D at fret 5 is under the third finger in bar 2 and under the first finger in bar 3, because the hand has moved up two frets.",
+            "The second names: fret 1 is also A sharp, fret 4 is also D flat, fret 6 is also D sharp and fret 9 is also G flat."
+          ],
+          "coachLine": "Right notes and steady quarters after the take. The names are yours to say.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 4,
+          "loops": true,
+          "position": {
+            "fret": 1,
+            "shifts": "allowed"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":5,"fret":0,"midi":45,"tick":0,"dur":960,"tech":[]},
+            {"string":5,"fret":1,"midi":46,"tick":960,"dur":960,"tech":[],"finger":1},
+            {"string":5,"fret":2,"midi":47,"tick":1920,"dur":960,"tech":[],"finger":2},
+            {"string":5,"fret":1,"midi":46,"tick":2880,"dur":960,"tech":[],"finger":1},
+            {"string":5,"fret":5,"midi":50,"tick":3840,"dur":960,"tech":[],"finger":3},
+            {"string":5,"fret":4,"midi":49,"tick":4800,"dur":960,"tech":[],"finger":2},
+            {"string":5,"fret":3,"midi":48,"tick":5760,"dur":960,"tech":[],"finger":1},
+            {"string":5,"fret":4,"midi":49,"tick":6720,"dur":960,"tech":[],"finger":2},
+            {"string":5,"fret":5,"midi":50,"tick":7680,"dur":960,"tech":[],"finger":1},
+            {"string":5,"fret":6,"midi":51,"tick":8640,"dur":960,"tech":[],"finger":2},
+            {"string":5,"fret":7,"midi":52,"tick":9600,"dur":960,"tech":[],"finger":3},
+            {"string":5,"fret":6,"midi":51,"tick":10560,"dur":960,"tech":[],"finger":2},
+            {"string":5,"fret":10,"midi":55,"tick":11520,"dur":960,"tech":[],"finger":3},
+            {"string":5,"fret":9,"midi":54,"tick":12480,"dur":960,"tech":[],"finger":2},
+            {"string":5,"fret":10,"midi":55,"tick":13440,"dur":1920,"tech":[],"finger":3}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"}
+            ],
+            "passAtBpm": 80
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": [],
+            "notes": []
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 5,
+          "tab": "/4 5:0 5:1f1 5:2f2 5:1f1 | 5:5f3 5:4f2 5:3f1 5:4f2 | 5:5f1 5:6f2 5:7f3 5:6f2 | 5:10f3 5:9f2 /2 5:10f3",
+          "subdivision": "quarters",
+          "computed": {
+            "noteCount": 15,
+            "minGapMsAtTop": 545.45,
+            "handShifts": 4,
+            "maxPlayableBpm": 379,
+            "difficulty": 1.35
+          },
+          "selfCheck": ["Did you say each note's name out loud as you played it?"]
+        },
+        {
+          "id": "in-between.every-fret",
+          "title": "Every fret, both names",
+          "purpose": "Every fret of the low E string from the open string to fret 12 and back, one at a time. Going up, name the in-between notes as sharps. Coming down, name them as flats.",
+          "howTo": [
+            "Quarter notes, 50 BPM up to a pass at 80.",
+            "Up: E, F, F sharp, G, G sharp, A, A sharp, B, C, C sharp, D, D sharp, E. Down from that E: E flat, D, D flat, C, B, B flat, A, A flat, G, G flat, F, E.",
+            "One finger to a fret. Going up, the first finger takes fret 1, then fret 5, then fret 9. Coming down, the little finger takes fret 12, then fret 8, then fret 4. End on the open string, held for a whole bar.",
+            "Fret 4 is the fifth in-between note: G sharp or A flat.",
+            "On other Takes the same climb is on the A string."
+          ],
+          "coachLine": "Right notes and steady quarters after the take. Sharps on the way up, flats on the way down.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 7,
+          "loops": true,
+          "position": {
+            "fret": 1,
+            "shifts": "allowed"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":6,"fret":0,"midi":40,"tick":0,"dur":960,"tech":[]},
+            {"string":6,"fret":1,"midi":41,"tick":960,"dur":960,"tech":[],"finger":1},
+            {"string":6,"fret":2,"midi":42,"tick":1920,"dur":960,"tech":[],"finger":2},
+            {"string":6,"fret":3,"midi":43,"tick":2880,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":4,"midi":44,"tick":3840,"dur":960,"tech":[],"finger":4},
+            {"string":6,"fret":5,"midi":45,"tick":4800,"dur":960,"tech":[],"finger":1},
+            {"string":6,"fret":6,"midi":46,"tick":5760,"dur":960,"tech":[],"finger":2},
+            {"string":6,"fret":7,"midi":47,"tick":6720,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":8,"midi":48,"tick":7680,"dur":960,"tech":[],"finger":4},
+            {"string":6,"fret":9,"midi":49,"tick":8640,"dur":960,"tech":[],"finger":1},
+            {"string":6,"fret":10,"midi":50,"tick":9600,"dur":960,"tech":[],"finger":2},
+            {"string":6,"fret":11,"midi":51,"tick":10560,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":12,"midi":52,"tick":11520,"dur":960,"tech":[],"finger":4},
+            {"string":6,"fret":11,"midi":51,"tick":12480,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":10,"midi":50,"tick":13440,"dur":960,"tech":[],"finger":2},
+            {"string":6,"fret":9,"midi":49,"tick":14400,"dur":960,"tech":[],"finger":1},
+            {"string":6,"fret":8,"midi":48,"tick":15360,"dur":960,"tech":[],"finger":4},
+            {"string":6,"fret":7,"midi":47,"tick":16320,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":6,"midi":46,"tick":17280,"dur":960,"tech":[],"finger":2},
+            {"string":6,"fret":5,"midi":45,"tick":18240,"dur":960,"tech":[],"finger":1},
+            {"string":6,"fret":4,"midi":44,"tick":19200,"dur":960,"tech":[],"finger":4},
+            {"string":6,"fret":3,"midi":43,"tick":20160,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":2,"midi":42,"tick":21120,"dur":960,"tech":[],"finger":2},
+            {"string":6,"fret":1,"midi":41,"tick":22080,"dur":960,"tech":[],"finger":1},
+            {"string":6,"fret":0,"midi":40,"tick":23040,"dur":3840,"tech":[]}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"}
+            ],
+            "passAtBpm": 80
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": [],
+            "notes": []
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 6,
+          "tab": "/4 6:0 6:1f1 6:2f2 6:3f3 | 6:4f4 6:5f1 6:6f2 6:7f3 | 6:8f4 6:9f1 6:10f2 6:11f3 | 6:12f4 6:11f3 6:10f2 6:9f1 | 6:8f4 6:7f3 6:6f2 6:5f1 | 6:4f4 6:3f3 6:2f2 6:1f1 | /1 6:0",
+          "subdivision": "quarters",
+          "computed": {
+            "noteCount": 25,
+            "minGapMsAtTop": 545.45,
+            "handShifts": 14,
+            "maxPlayableBpm": 400,
+            "difficulty": 1.39
+          },
+          "selfCheck": ["Did you say each note's name out loud as you played it?"],
+          "variation": {
+            "dimensions": ["stringSet"],
+            "pooled": ["stringSet"],
+            "notPooled": [],
+            "variants": [
+              {
+                "id": "stringSet=low-E-string",
+                "label": "Every fret of the low E string",
+                "params": {
+                  "stringSet": "low E string"
+                },
+                "pool": "all",
+                "tab": "/4 6:0 6:1f1 6:2f2 6:3f3 | 6:4f4 6:5f1 6:6f2 6:7f3 | 6:8f4 6:9f1 6:10f2 6:11f3 | 6:12f4 6:11f3 6:10f2 6:9f1 | 6:8f4 6:7f3 6:6f2 6:5f1 | 6:4f4 6:3f3 6:2f2 6:1f1 | /1 6:0",
+                "position": {
+                  "fret": 1,
+                  "shifts": "allowed"
+                },
+                "crossing": "none",
+                "notes": [
+                  {"string":6,"fret":0,"midi":40,"tick":0,"dur":960,"tech":[]},
+                  {"string":6,"fret":1,"midi":41,"tick":960,"dur":960,"tech":[],"finger":1},
+                  {"string":6,"fret":2,"midi":42,"tick":1920,"dur":960,"tech":[],"finger":2},
+                  {"string":6,"fret":3,"midi":43,"tick":2880,"dur":960,"tech":[],"finger":3},
+                  {"string":6,"fret":4,"midi":44,"tick":3840,"dur":960,"tech":[],"finger":4},
+                  {"string":6,"fret":5,"midi":45,"tick":4800,"dur":960,"tech":[],"finger":1},
+                  {"string":6,"fret":6,"midi":46,"tick":5760,"dur":960,"tech":[],"finger":2},
+                  {"string":6,"fret":7,"midi":47,"tick":6720,"dur":960,"tech":[],"finger":3},
+                  {"string":6,"fret":8,"midi":48,"tick":7680,"dur":960,"tech":[],"finger":4},
+                  {"string":6,"fret":9,"midi":49,"tick":8640,"dur":960,"tech":[],"finger":1},
+                  {"string":6,"fret":10,"midi":50,"tick":9600,"dur":960,"tech":[],"finger":2},
+                  {"string":6,"fret":11,"midi":51,"tick":10560,"dur":960,"tech":[],"finger":3},
+                  {"string":6,"fret":12,"midi":52,"tick":11520,"dur":960,"tech":[],"finger":4},
+                  {"string":6,"fret":11,"midi":51,"tick":12480,"dur":960,"tech":[],"finger":3},
+                  {"string":6,"fret":10,"midi":50,"tick":13440,"dur":960,"tech":[],"finger":2},
+                  {"string":6,"fret":9,"midi":49,"tick":14400,"dur":960,"tech":[],"finger":1},
+                  {"string":6,"fret":8,"midi":48,"tick":15360,"dur":960,"tech":[],"finger":4},
+                  {"string":6,"fret":7,"midi":47,"tick":16320,"dur":960,"tech":[],"finger":3},
+                  {"string":6,"fret":6,"midi":46,"tick":17280,"dur":960,"tech":[],"finger":2},
+                  {"string":6,"fret":5,"midi":45,"tick":18240,"dur":960,"tech":[],"finger":1},
+                  {"string":6,"fret":4,"midi":44,"tick":19200,"dur":960,"tech":[],"finger":4},
+                  {"string":6,"fret":3,"midi":43,"tick":20160,"dur":960,"tech":[],"finger":3},
+                  {"string":6,"fret":2,"midi":42,"tick":21120,"dur":960,"tech":[],"finger":2},
+                  {"string":6,"fret":1,"midi":41,"tick":22080,"dur":960,"tech":[],"finger":1},
+                  {"string":6,"fret":0,"midi":40,"tick":23040,"dur":3840,"tech":[]}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 25,
+                  "minGapMsAtTop": 545.45,
+                  "handShifts": 14,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 1.39
+                }
+              },
+              {
+                "id": "stringSet=A-string",
+                "label": "Every fret of the A string",
+                "params": {
+                  "stringSet": "A string"
+                },
+                "pool": "all",
+                "purpose": "Every fret of the A string from the open string to fret 12 and back, one at a time. Going up, name the in-between notes as sharps. Coming down, name them as flats.",
+                "howTo": [
+                  "Quarter notes, 50 BPM up to a pass at 80.",
+                  "Up: A, A sharp, B, C, C sharp, D, D sharp, E, F, F sharp, G, G sharp, A. Down from that A: A flat, G, G flat, F, E, E flat, D, D flat, C, B, B flat, A.",
+                  "One finger to a fret. Going up, the first finger takes fret 1, then fret 5, then fret 9. Coming down, the little finger takes fret 12, then fret 8, then fret 4. End on the open string, held for a whole bar.",
+                  "Fret 11 is the fifth in-between note: G sharp or A flat.",
+                  "On other Takes the same climb is on the low E string."
+                ],
+                "tab": "/4 5:0 5:1f1 5:2f2 5:3f3 | 5:4f4 5:5f1 5:6f2 5:7f3 | 5:8f4 5:9f1 5:10f2 5:11f3 | 5:12f4 5:11f3 5:10f2 5:9f1 | 5:8f4 5:7f3 5:6f2 5:5f1 | 5:4f4 5:3f3 5:2f2 5:1f1 | /1 5:0",
+                "position": {
+                  "fret": 1,
+                  "shifts": "allowed"
+                },
+                "crossing": "none",
+                "notes": [
+                  {"string":5,"fret":0,"midi":45,"tick":0,"dur":960,"tech":[]},
+                  {"string":5,"fret":1,"midi":46,"tick":960,"dur":960,"tech":[],"finger":1},
+                  {"string":5,"fret":2,"midi":47,"tick":1920,"dur":960,"tech":[],"finger":2},
+                  {"string":5,"fret":3,"midi":48,"tick":2880,"dur":960,"tech":[],"finger":3},
+                  {"string":5,"fret":4,"midi":49,"tick":3840,"dur":960,"tech":[],"finger":4},
+                  {"string":5,"fret":5,"midi":50,"tick":4800,"dur":960,"tech":[],"finger":1},
+                  {"string":5,"fret":6,"midi":51,"tick":5760,"dur":960,"tech":[],"finger":2},
+                  {"string":5,"fret":7,"midi":52,"tick":6720,"dur":960,"tech":[],"finger":3},
+                  {"string":5,"fret":8,"midi":53,"tick":7680,"dur":960,"tech":[],"finger":4},
+                  {"string":5,"fret":9,"midi":54,"tick":8640,"dur":960,"tech":[],"finger":1},
+                  {"string":5,"fret":10,"midi":55,"tick":9600,"dur":960,"tech":[],"finger":2},
+                  {"string":5,"fret":11,"midi":56,"tick":10560,"dur":960,"tech":[],"finger":3},
+                  {"string":5,"fret":12,"midi":57,"tick":11520,"dur":960,"tech":[],"finger":4},
+                  {"string":5,"fret":11,"midi":56,"tick":12480,"dur":960,"tech":[],"finger":3},
+                  {"string":5,"fret":10,"midi":55,"tick":13440,"dur":960,"tech":[],"finger":2},
+                  {"string":5,"fret":9,"midi":54,"tick":14400,"dur":960,"tech":[],"finger":1},
+                  {"string":5,"fret":8,"midi":53,"tick":15360,"dur":960,"tech":[],"finger":4},
+                  {"string":5,"fret":7,"midi":52,"tick":16320,"dur":960,"tech":[],"finger":3},
+                  {"string":5,"fret":6,"midi":51,"tick":17280,"dur":960,"tech":[],"finger":2},
+                  {"string":5,"fret":5,"midi":50,"tick":18240,"dur":960,"tech":[],"finger":1},
+                  {"string":5,"fret":4,"midi":49,"tick":19200,"dur":960,"tech":[],"finger":4},
+                  {"string":5,"fret":3,"midi":48,"tick":20160,"dur":960,"tech":[],"finger":3},
+                  {"string":5,"fret":2,"midi":47,"tick":21120,"dur":960,"tech":[],"finger":2},
+                  {"string":5,"fret":1,"midi":46,"tick":22080,"dur":960,"tech":[],"finger":1},
+                  {"string":5,"fret":0,"midi":45,"tick":23040,"dur":3840,"tech":[]}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 25,
+                  "minGapMsAtTop": 545.45,
+                  "handShifts": 14,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 1.39
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "in-between.between-by-octave",
+          "title": "The same four, an octave up",
+          "purpose": "F sharp, B flat, C sharp and E flat on the low E string, each answered by its octave on the D string. The octave shape works from any fret, whatever the note is called.",
+          "howTo": [
+            "Quarter notes, 50 BPM up to a pass at 80.",
+            "First finger on the low E string, third finger on the D string two frets up: 2 and 4, 6 and 8, 9 and 11, 11 and 13, and back, with the last pair held for two clicks each. Fret 13 on the D string is fret 1 again, an octave higher.",
+            "Say the name once for each pair: F sharp, B flat, C sharp, E flat.",
+            "On other Takes the same four notes start on the A string."
+          ],
+          "coachLine": "Right notes and steady quarters after the take.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 4,
+          "loops": true,
+          "position": {
+            "fret": 2,
+            "shifts": "allowed"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":6,"fret":2,"midi":42,"tick":0,"dur":960,"tech":[],"finger":1},
+            {"string":4,"fret":4,"midi":54,"tick":960,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":6,"midi":46,"tick":1920,"dur":960,"tech":[],"finger":1},
+            {"string":4,"fret":8,"midi":58,"tick":2880,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":9,"midi":49,"tick":3840,"dur":960,"tech":[],"finger":1},
+            {"string":4,"fret":11,"midi":61,"tick":4800,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":11,"midi":51,"tick":5760,"dur":960,"tech":[],"finger":1},
+            {"string":4,"fret":13,"midi":63,"tick":6720,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":9,"midi":49,"tick":7680,"dur":960,"tech":[],"finger":1},
+            {"string":4,"fret":11,"midi":61,"tick":8640,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":6,"midi":46,"tick":9600,"dur":960,"tech":[],"finger":1},
+            {"string":4,"fret":8,"midi":58,"tick":10560,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":2,"midi":42,"tick":11520,"dur":1920,"tech":[],"finger":1},
+            {"string":4,"fret":4,"midi":54,"tick":13440,"dur":1920,"tech":[],"finger":3}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"}
+            ],
+            "passAtBpm": 80
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": [],
+            "notes": []
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 5,
+          "tab": "/4 6:2f1 4:4f3 6:6f1 4:8f3 | 6:9f1 4:11f3 6:11f1 4:13f3 | 6:9f1 4:11f3 6:6f1 4:8f3 | /2 6:2f1 4:4f3",
+          "subdivision": "quarters",
+          "computed": {
+            "noteCount": 14,
+            "minGapMsAtTop": 545.45,
+            "handShifts": 8,
+            "maxPlayableBpm": 350,
+            "difficulty": 2.02
+          },
+          "variation": {
+            "dimensions": ["stringSet"],
+            "pooled": ["stringSet"],
+            "notPooled": [],
+            "variants": [
+              {
+                "id": "stringSet=low-E-and-D-strings",
+                "label": "Low E and D strings",
+                "params": {
+                  "stringSet": "low E and D strings"
+                },
+                "pool": "all",
+                "tab": "/4 6:2f1 4:4f3 6:6f1 4:8f3 | 6:9f1 4:11f3 6:11f1 4:13f3 | 6:9f1 4:11f3 6:6f1 4:8f3 | /2 6:2f1 4:4f3",
+                "position": {
+                  "fret": 2,
+                  "shifts": "allowed"
+                },
+                "crossing": "none",
+                "notes": [
+                  {"string":6,"fret":2,"midi":42,"tick":0,"dur":960,"tech":[],"finger":1},
+                  {"string":4,"fret":4,"midi":54,"tick":960,"dur":960,"tech":[],"finger":3},
+                  {"string":6,"fret":6,"midi":46,"tick":1920,"dur":960,"tech":[],"finger":1},
+                  {"string":4,"fret":8,"midi":58,"tick":2880,"dur":960,"tech":[],"finger":3},
+                  {"string":6,"fret":9,"midi":49,"tick":3840,"dur":960,"tech":[],"finger":1},
+                  {"string":4,"fret":11,"midi":61,"tick":4800,"dur":960,"tech":[],"finger":3},
+                  {"string":6,"fret":11,"midi":51,"tick":5760,"dur":960,"tech":[],"finger":1},
+                  {"string":4,"fret":13,"midi":63,"tick":6720,"dur":960,"tech":[],"finger":3},
+                  {"string":6,"fret":9,"midi":49,"tick":7680,"dur":960,"tech":[],"finger":1},
+                  {"string":4,"fret":11,"midi":61,"tick":8640,"dur":960,"tech":[],"finger":3},
+                  {"string":6,"fret":6,"midi":46,"tick":9600,"dur":960,"tech":[],"finger":1},
+                  {"string":4,"fret":8,"midi":58,"tick":10560,"dur":960,"tech":[],"finger":3},
+                  {"string":6,"fret":2,"midi":42,"tick":11520,"dur":1920,"tech":[],"finger":1},
+                  {"string":4,"fret":4,"midi":54,"tick":13440,"dur":1920,"tech":[],"finger":3}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 14,
+                  "minGapMsAtTop": 545.45,
+                  "handShifts": 8,
+                  "maxPlayableBpm": 350,
+                  "difficulty": 2.02
+                }
+              },
+              {
+                "id": "stringSet=A-and-G-strings",
+                "label": "A and G strings",
+                "params": {
+                  "stringSet": "A and G strings"
+                },
+                "pool": "all",
+                "purpose": "B flat, C sharp, E flat and F sharp on the A string, each answered by its octave on the G string. The octave shape works from any fret, whatever the note is called.",
+                "howTo": [
+                  "Quarter notes, 50 BPM up to a pass at 80.",
+                  "First finger on the A string, third finger on the G string two frets up: 1 and 3, 4 and 6, 6 and 8, 9 and 11, and back, with the last pair held for two clicks each.",
+                  "Say the name once for each pair: B flat, C sharp, E flat, F sharp.",
+                  "On other Takes the same four notes start on the low E string."
+                ],
+                "tab": "/4 5:1f1 3:3f3 5:4f1 3:6f3 | 5:6f1 3:8f3 5:9f1 3:11f3 | 5:6f1 3:8f3 5:4f1 3:6f3 | /2 5:1f1 3:3f3",
+                "position": {
+                  "fret": 1,
+                  "shifts": "allowed"
+                },
+                "crossing": "none",
+                "notes": [
+                  {"string":5,"fret":1,"midi":46,"tick":0,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":3,"midi":58,"tick":960,"dur":960,"tech":[],"finger":3},
+                  {"string":5,"fret":4,"midi":49,"tick":1920,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":6,"midi":61,"tick":2880,"dur":960,"tech":[],"finger":3},
+                  {"string":5,"fret":6,"midi":51,"tick":3840,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":8,"midi":63,"tick":4800,"dur":960,"tech":[],"finger":3},
+                  {"string":5,"fret":9,"midi":54,"tick":5760,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":11,"midi":66,"tick":6720,"dur":960,"tech":[],"finger":3},
+                  {"string":5,"fret":6,"midi":51,"tick":7680,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":8,"midi":63,"tick":8640,"dur":960,"tech":[],"finger":3},
+                  {"string":5,"fret":4,"midi":49,"tick":9600,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":6,"midi":61,"tick":10560,"dur":960,"tech":[],"finger":3},
+                  {"string":5,"fret":1,"midi":46,"tick":11520,"dur":1920,"tech":[],"finger":1},
+                  {"string":3,"fret":3,"midi":58,"tick":13440,"dur":1920,"tech":[],"finger":3}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 14,
+                  "minGapMsAtTop": 545.45,
+                  "handShifts": 8,
+                  "maxPlayableBpm": 379,
+                  "difficulty": 2.02
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "difficultyException": "Quarter notes on one string, mostly with fingers on next-door frets, so less distance to cover than the string walks before it. The demand is five new notes with two names each, which the metric does not count."
+    },
+    {
       "id": "thirds",
-      "order": 4,
+      "order": 6,
       "title": "Thirds",
       "goal": "See a major third and a minor third as two small shapes, and play a scale in thirds on two strings.",
       "why": "A third is two notes of a scale with one skipped between them: C and E, D and F. Chords are stacked thirds, and whether the bottom one is major (four frets) or minor (three) is what makes a chord happy or sad. On two neighbouring strings each is a shape you can see.",
@@ -1961,13 +3215,13 @@
         "Play the lower note, then the upper, and say major or minor for each pair."
       ],
       "payoff": "A scale in thirds up the neck that sounds like two guitars, and a phrase that follows three chords with them.",
-      "prerequisites": ["upper-strings"],
+      "prerequisites": ["in-between"],
       "difficulty": 2.99,
       "exercises": [
         {
           "id": "thirds.thirds-g-b",
           "title": "Thirds on the G and B strings",
-          "purpose": "A major scale in broken thirds: a scale note on the G string, then the third above it on the B string, five pairs up and back.",
+          "purpose": "The major scale in broken thirds: a scale note on the G string, then the third above it on the B string, five pairs up and back.",
           "howTo": [
             "Straight eighths, two to a click, 50 BPM up to a pass at 80.",
             "In C: frets 5 and 5, 7 and 6, 9 and 8, 10 and 10, 12 and 12. Same fret is major; one fret back on the B string is minor."
@@ -2144,6 +3398,10 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, two to a click, 50 BPM up to a pass at 80.",
+                  "In D: frets 7 and 7, 9 and 8, 11 and 10, 12 and 12, 14 and 14. Same fret is major; one fret back on the B string is minor."
+                ],
                 "tab": "/8 3:7f2 2:7f3 3:9f2 2:8f1 3:11f2 2:10f1 3:12f2 2:12f3 | 3:14f2 2:14f3 3:12f2 2:12f3 3:11f2 2:10f1 3:9f2 2:8f1 | /2 3:7f2 2:7f3",
                 "position": {
                   "fret": 7,
@@ -2197,6 +3455,10 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, two to a click, 50 BPM up to a pass at 80.",
+                  "In E: frets 9 and 9, 11 and 10, 13 and 12, 14 and 14, 16 and 16. Same fret is major; one fret back on the B string is minor."
+                ],
                 "tab": "/8 3:9f2 2:9f3 3:11f2 2:10f1 3:13f2 2:12f1 3:14f2 2:14f3 | 3:16f2 2:16f3 3:14f2 2:14f3 3:13f2 2:12f1 3:11f2 2:10f1 | /2 3:9f2 2:9f3",
                 "position": {
                   "fret": 9,
@@ -2250,6 +3512,10 @@
                   "key": "F"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, two to a click, 50 BPM up to a pass at 80.",
+                  "In F: frets 10 and 10, 12 and 11, 14 and 13, 15 and 15, 17 and 17. Same fret is major; one fret back on the B string is minor."
+                ],
                 "tab": "/8 3:10f2 2:10f3 3:12f2 2:11f1 3:14f2 2:13f1 3:15f2 2:15f3 | 3:17f2 2:17f3 3:15f2 2:15f3 3:14f2 2:13f1 3:12f2 2:11f1 | /2 3:10f2 2:10f3",
                 "position": {
                   "fret": 10,
@@ -2303,6 +3569,10 @@
                   "key": "A"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, two to a click, 50 BPM up to a pass at 80.",
+                  "In A: frets 2 and 2, 4 and 3, 6 and 5, 7 and 7, 9 and 9. Same fret is major; one fret back on the B string is minor."
+                ],
                 "tab": "/8 3:2f2 2:2f3 3:4f2 2:3f1 3:6f2 2:5f1 3:7f2 2:7f3 | 3:9f2 2:9f3 3:7f2 2:7f3 3:6f2 2:5f1 3:4f2 2:3f1 | /2 3:2f2 2:2f3",
                 "position": {
                   "fret": 2,
@@ -2601,8 +3871,995 @@
       ]
     },
     {
+      "id": "top-strings-keys",
+      "order": 7,
+      "title": "The top three strings in other keys",
+      "goal": "Name and play the notes of G major and of F major on the G, B and top strings, one string at a time and then across all three in fifth position.",
+      "why": "The walks up each string used the natural notes, and those seven are the notes of C major. Change one of them and you are in another key. G major is C major with F sharp in place of F. F major is C major with B flat in place of B. On each of the top three strings that is one fret moved, except that in F major the open B string itself drops out. Knowing which fret moves lets you name what you play in three keys instead of one.",
+      "howTo": [
+        "G major: G, A, B, C, D, E, F sharp. Only F has moved, one fret up.",
+        "F major: F, G, A, B flat, C, D, E. Only B has moved, one fret down, so the open B string is not in this key.",
+        "Say each name as you play it. F sharp and B flat are the two notes that tell these keys apart from C."
+      ],
+      "payoff": "A tune in G over a band, on three strings you can name in G major and in F major.",
+      "prerequisites": ["thirds"],
+      "difficulty": 2.14,
+      "exercises": [
+        {
+          "id": "top-strings-keys.g-major-strings",
+          "title": "G major, one string at a time",
+          "purpose": "G, A, B, C, D, E, F sharp, G up the G string and back: the walk you know, with F sharp at fret 11 where F was at fret 10.",
+          "howTo": [
+            "Quarter notes, 50 BPM up to a pass at 85.",
+            "Open, 2, 4, 5, 7, 9, 11, 12, with the first finger walking, then back down to the open string. B to C is frets 4 to 5, and F sharp to G is frets 11 to 12. The key note, G, is the open string and fret 12.",
+            "The frets and note names here are for the G string. Other Takes walk the B string and the top string in the same key."
+          ],
+          "coachLine": "Right notes and steady quarters after the take. The names are yours to say.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 4,
+          "loops": true,
+          "position": {
+            "fret": 2,
+            "shifts": "allowed"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":3,"fret":0,"midi":55,"tick":0,"dur":960,"tech":[]},
+            {"string":3,"fret":2,"midi":57,"tick":960,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":4,"midi":59,"tick":1920,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":5,"midi":60,"tick":2880,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":7,"midi":62,"tick":3840,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":9,"midi":64,"tick":4800,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":11,"midi":66,"tick":5760,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":12,"midi":67,"tick":6720,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":11,"midi":66,"tick":7680,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":9,"midi":64,"tick":8640,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":7,"midi":62,"tick":9600,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":5,"midi":60,"tick":10560,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":4,"midi":59,"tick":11520,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":2,"midi":57,"tick":12480,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":0,"midi":55,"tick":13440,"dur":1920,"tech":[]}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":75,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"}
+            ],
+            "passAtBpm": 85
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": [],
+            "notes": []
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 5,
+          "tab": "/4 3:0 3:2f1 3:4f1 3:5f1 | 3:7f1 3:9f1 3:11f1 3:12f1 | 3:11f1 3:9f1 3:7f1 3:5f1 | 3:4f1 3:2f1 /2 3:0",
+          "subdivision": "quarters",
+          "computed": {
+            "noteCount": 15,
+            "minGapMsAtTop": 545.45,
+            "handShifts": 10,
+            "maxPlayableBpm": 400,
+            "difficulty": 1.59
+          },
+          "harmony": {
+            "kind": "scale",
+            "root": "G",
+            "scale": "major",
+            "spelled": ["G", "A", "B", "C", "D", "E", "F#"],
+            "cover": true
+          },
+          "selfCheck": ["Did you say each note's name out loud as you played it?"],
+          "variation": {
+            "dimensions": ["stringSet"],
+            "pooled": ["stringSet"],
+            "notPooled": [],
+            "variants": [
+              {
+                "id": "stringSet=G-string",
+                "label": "G major on the G string",
+                "params": {
+                  "stringSet": "G string"
+                },
+                "pool": "all",
+                "tab": "/4 3:0 3:2f1 3:4f1 3:5f1 | 3:7f1 3:9f1 3:11f1 3:12f1 | 3:11f1 3:9f1 3:7f1 3:5f1 | 3:4f1 3:2f1 /2 3:0",
+                "position": {
+                  "fret": 2,
+                  "shifts": "allowed"
+                },
+                "crossing": "none",
+                "notes": [
+                  {"string":3,"fret":0,"midi":55,"tick":0,"dur":960,"tech":[]},
+                  {"string":3,"fret":2,"midi":57,"tick":960,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":4,"midi":59,"tick":1920,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":5,"midi":60,"tick":2880,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":7,"midi":62,"tick":3840,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":9,"midi":64,"tick":4800,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":11,"midi":66,"tick":5760,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":12,"midi":67,"tick":6720,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":11,"midi":66,"tick":7680,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":9,"midi":64,"tick":8640,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":7,"midi":62,"tick":9600,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":5,"midi":60,"tick":10560,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":4,"midi":59,"tick":11520,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":2,"midi":57,"tick":12480,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":0,"midi":55,"tick":13440,"dur":1920,"tech":[]}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 15,
+                  "minGapMsAtTop": 545.45,
+                  "handShifts": 10,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 1.59
+                },
+                "harmony": {
+                  "kind": "scale",
+                  "root": "G",
+                  "scale": "major",
+                  "spelled": ["G", "A", "B", "C", "D", "E", "F#"],
+                  "cover": true
+                }
+              },
+              {
+                "id": "stringSet=B-string",
+                "label": "G major on the B string",
+                "params": {
+                  "stringSet": "B string"
+                },
+                "pool": "all",
+                "purpose": "B, C, D, E, F sharp, G, A, B up the B string and back: the walk you know, with F sharp at fret 7 where F was at fret 6.",
+                "howTo": [
+                  "Quarter notes, 50 BPM up to a pass at 85.",
+                  "Open, 1, 3, 5, 7, 8, 10, 12, with the first finger walking, then back down to the open string. B to C is the open string to fret 1, and F sharp to G is frets 7 to 8. The key note, G, is at fret 8.",
+                  "Other Takes walk the other two of the G, B and top strings in the same key."
+                ],
+                "tab": "/4 2:0 2:1f1 2:3f1 2:5f1 | 2:7f1 2:8f1 2:10f1 2:12f1 | 2:10f1 2:8f1 2:7f1 2:5f1 | 2:3f1 2:1f1 /2 2:0",
+                "position": {
+                  "fret": 1,
+                  "shifts": "allowed"
+                },
+                "crossing": "none",
+                "notes": [
+                  {"string":2,"fret":0,"midi":59,"tick":0,"dur":960,"tech":[]},
+                  {"string":2,"fret":1,"midi":60,"tick":960,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":3,"midi":62,"tick":1920,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":5,"midi":64,"tick":2880,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":7,"midi":66,"tick":3840,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":8,"midi":67,"tick":4800,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":10,"midi":69,"tick":5760,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":12,"midi":71,"tick":6720,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":10,"midi":69,"tick":7680,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":8,"midi":67,"tick":8640,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":7,"midi":66,"tick":9600,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":5,"midi":64,"tick":10560,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":3,"midi":62,"tick":11520,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":1,"midi":60,"tick":12480,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":0,"midi":59,"tick":13440,"dur":1920,"tech":[]}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 15,
+                  "minGapMsAtTop": 545.45,
+                  "handShifts": 10,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 1.59
+                },
+                "harmony": {
+                  "kind": "scale",
+                  "root": "G",
+                  "scale": "major",
+                  "spelled": ["G", "A", "B", "C", "D", "E", "F#"],
+                  "cover": true
+                }
+              },
+              {
+                "id": "stringSet=top-E-string",
+                "label": "G major on the top E string",
+                "params": {
+                  "stringSet": "top E string"
+                },
+                "pool": "all",
+                "purpose": "E, F sharp, G, A, B, C, D, E up the top string and back: the low E string's notes two octaves higher, with F sharp at fret 2 where F was at fret 1.",
+                "howTo": [
+                  "Quarter notes, 50 BPM up to a pass at 85.",
+                  "Open, 2, 3, 5, 7, 8, 10, 12, with the first finger walking, then back down to the open string. F sharp to G is frets 2 to 3, and B to C is frets 7 to 8. The key note, G, is at fret 3.",
+                  "Other Takes walk the other two of the G, B and top strings in the same key."
+                ],
+                "tab": "/4 1:0 1:2f1 1:3f1 1:5f1 | 1:7f1 1:8f1 1:10f1 1:12f1 | 1:10f1 1:8f1 1:7f1 1:5f1 | 1:3f1 1:2f1 /2 1:0",
+                "position": {
+                  "fret": 2,
+                  "shifts": "allowed"
+                },
+                "crossing": "none",
+                "notes": [
+                  {"string":1,"fret":0,"midi":64,"tick":0,"dur":960,"tech":[]},
+                  {"string":1,"fret":2,"midi":66,"tick":960,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":3,"midi":67,"tick":1920,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":5,"midi":69,"tick":2880,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":7,"midi":71,"tick":3840,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":8,"midi":72,"tick":4800,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":10,"midi":74,"tick":5760,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":12,"midi":76,"tick":6720,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":10,"midi":74,"tick":7680,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":8,"midi":72,"tick":8640,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":7,"midi":71,"tick":9600,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":5,"midi":69,"tick":10560,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":3,"midi":67,"tick":11520,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":2,"midi":66,"tick":12480,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":0,"midi":64,"tick":13440,"dur":1920,"tech":[]}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 15,
+                  "minGapMsAtTop": 545.45,
+                  "handShifts": 10,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 1.59
+                },
+                "harmony": {
+                  "kind": "scale",
+                  "root": "G",
+                  "scale": "major",
+                  "spelled": ["G", "A", "B", "C", "D", "E", "F#"],
+                  "cover": true
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "top-strings-keys.f-major-strings",
+          "title": "F major, one string at a time",
+          "purpose": "G, A, B flat, C, D, E, F, G up the G string and back: the natural notes again, with B flat at fret 3 where B was at fret 4.",
+          "howTo": [
+            "Quarter notes, 50 BPM up to a pass at 85.",
+            "Open, 2, 3, 5, 7, 9, 10, 12, with the first finger walking, then back down to the open string. A to B flat is frets 2 to 3, and E to F is frets 9 to 10. The key note, F, is at fret 10.",
+            "The frets and note names here are for the G string. Other Takes walk the B string and the top string in the same key."
+          ],
+          "coachLine": "Right notes and steady quarters after the take. The names are yours to say.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 4,
+          "loops": true,
+          "position": {
+            "fret": 2,
+            "shifts": "allowed"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":3,"fret":0,"midi":55,"tick":0,"dur":960,"tech":[]},
+            {"string":3,"fret":2,"midi":57,"tick":960,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":3,"midi":58,"tick":1920,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":5,"midi":60,"tick":2880,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":7,"midi":62,"tick":3840,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":9,"midi":64,"tick":4800,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":10,"midi":65,"tick":5760,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":12,"midi":67,"tick":6720,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":10,"midi":65,"tick":7680,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":9,"midi":64,"tick":8640,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":7,"midi":62,"tick":9600,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":5,"midi":60,"tick":10560,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":3,"midi":58,"tick":11520,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":2,"midi":57,"tick":12480,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":0,"midi":55,"tick":13440,"dur":1920,"tech":[]}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":75,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"}
+            ],
+            "passAtBpm": 85
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": [],
+            "notes": []
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 5,
+          "tab": "/4 3:0 3:2f1 3:3f1 3:5f1 | 3:7f1 3:9f1 3:10f1 3:12f1 | 3:10f1 3:9f1 3:7f1 3:5f1 | 3:3f1 3:2f1 /2 3:0",
+          "subdivision": "quarters",
+          "computed": {
+            "noteCount": 15,
+            "minGapMsAtTop": 545.45,
+            "handShifts": 10,
+            "maxPlayableBpm": 400,
+            "difficulty": 1.59
+          },
+          "harmony": {
+            "kind": "scale",
+            "root": "F",
+            "scale": "major",
+            "spelled": ["F", "G", "A", "Bb", "C", "D", "E"],
+            "cover": true
+          },
+          "selfCheck": ["Did you say each note's name out loud as you played it?"],
+          "variation": {
+            "dimensions": ["stringSet"],
+            "pooled": ["stringSet"],
+            "notPooled": [],
+            "variants": [
+              {
+                "id": "stringSet=G-string",
+                "label": "F major on the G string",
+                "params": {
+                  "stringSet": "G string"
+                },
+                "pool": "all",
+                "tab": "/4 3:0 3:2f1 3:3f1 3:5f1 | 3:7f1 3:9f1 3:10f1 3:12f1 | 3:10f1 3:9f1 3:7f1 3:5f1 | 3:3f1 3:2f1 /2 3:0",
+                "position": {
+                  "fret": 2,
+                  "shifts": "allowed"
+                },
+                "crossing": "none",
+                "notes": [
+                  {"string":3,"fret":0,"midi":55,"tick":0,"dur":960,"tech":[]},
+                  {"string":3,"fret":2,"midi":57,"tick":960,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":3,"midi":58,"tick":1920,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":5,"midi":60,"tick":2880,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":7,"midi":62,"tick":3840,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":9,"midi":64,"tick":4800,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":10,"midi":65,"tick":5760,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":12,"midi":67,"tick":6720,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":10,"midi":65,"tick":7680,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":9,"midi":64,"tick":8640,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":7,"midi":62,"tick":9600,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":5,"midi":60,"tick":10560,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":3,"midi":58,"tick":11520,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":2,"midi":57,"tick":12480,"dur":960,"tech":[],"finger":1},
+                  {"string":3,"fret":0,"midi":55,"tick":13440,"dur":1920,"tech":[]}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 15,
+                  "minGapMsAtTop": 545.45,
+                  "handShifts": 10,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 1.59
+                },
+                "harmony": {
+                  "kind": "scale",
+                  "root": "F",
+                  "scale": "major",
+                  "spelled": ["F", "G", "A", "Bb", "C", "D", "E"],
+                  "cover": true
+                }
+              },
+              {
+                "id": "stringSet=B-string",
+                "label": "F major on the B string",
+                "params": {
+                  "stringSet": "B string"
+                },
+                "pool": "all",
+                "purpose": "C, D, E, F, G, A, B flat, C up the B string and back, with B flat at fret 11 where B was at fret 12. The open B string is not in this key, so the walk starts at fret 1 and tops out at fret 13.",
+                "howTo": [
+                  "Quarter notes, 50 BPM up to a pass at 85.",
+                  "Frets 1, 3, 5, 6, 8, 10, 11, 13, with the first finger walking, then back down to fret 1. E to F is frets 5 to 6, and A to B flat is frets 10 to 11. The key note, F, is at fret 6. Fret 13 is fret 1 again, an octave higher.",
+                  "Other Takes walk the other two of the G, B and top strings in the same key."
+                ],
+                "tab": "/4 2:1f1 2:3f1 2:5f1 2:6f1 | 2:8f1 2:10f1 2:11f1 2:13f1 | 2:11f1 2:10f1 2:8f1 2:6f1 | 2:5f1 2:3f1 /2 2:1f1",
+                "position": {
+                  "fret": 1,
+                  "shifts": "allowed"
+                },
+                "crossing": "none",
+                "notes": [
+                  {"string":2,"fret":1,"midi":60,"tick":0,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":3,"midi":62,"tick":960,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":5,"midi":64,"tick":1920,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":6,"midi":65,"tick":2880,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":8,"midi":67,"tick":3840,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":10,"midi":69,"tick":4800,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":11,"midi":70,"tick":5760,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":13,"midi":72,"tick":6720,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":11,"midi":70,"tick":7680,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":10,"midi":69,"tick":8640,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":8,"midi":67,"tick":9600,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":6,"midi":65,"tick":10560,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":5,"midi":64,"tick":11520,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":3,"midi":62,"tick":12480,"dur":960,"tech":[],"finger":1},
+                  {"string":2,"fret":1,"midi":60,"tick":13440,"dur":1920,"tech":[],"finger":1}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 15,
+                  "minGapMsAtTop": 545.45,
+                  "handShifts": 8,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 1.54
+                },
+                "harmony": {
+                  "kind": "scale",
+                  "root": "F",
+                  "scale": "major",
+                  "spelled": ["F", "G", "A", "Bb", "C", "D", "E"],
+                  "cover": true
+                }
+              },
+              {
+                "id": "stringSet=top-E-string",
+                "label": "F major on the top E string",
+                "params": {
+                  "stringSet": "top E string"
+                },
+                "pool": "all",
+                "purpose": "E, F, G, A, B flat, C, D, E up the top string and back: the natural notes again, with B flat at fret 6 where B was at fret 7.",
+                "howTo": [
+                  "Quarter notes, 50 BPM up to a pass at 85.",
+                  "Open, 1, 3, 5, 6, 8, 10, 12, with the first finger walking, then back down to the open string. E to F is the open string to fret 1, and A to B flat is frets 5 to 6. The key note, F, is at fret 1.",
+                  "Other Takes walk the other two of the G, B and top strings in the same key."
+                ],
+                "tab": "/4 1:0 1:1f1 1:3f1 1:5f1 | 1:6f1 1:8f1 1:10f1 1:12f1 | 1:10f1 1:8f1 1:6f1 1:5f1 | 1:3f1 1:1f1 /2 1:0",
+                "position": {
+                  "fret": 1,
+                  "shifts": "allowed"
+                },
+                "crossing": "none",
+                "notes": [
+                  {"string":1,"fret":0,"midi":64,"tick":0,"dur":960,"tech":[]},
+                  {"string":1,"fret":1,"midi":65,"tick":960,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":3,"midi":67,"tick":1920,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":5,"midi":69,"tick":2880,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":6,"midi":70,"tick":3840,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":8,"midi":72,"tick":4800,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":10,"midi":74,"tick":5760,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":12,"midi":76,"tick":6720,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":10,"midi":74,"tick":7680,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":8,"midi":72,"tick":8640,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":6,"midi":70,"tick":9600,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":5,"midi":69,"tick":10560,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":3,"midi":67,"tick":11520,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":1,"midi":65,"tick":12480,"dur":960,"tech":[],"finger":1},
+                  {"string":1,"fret":0,"midi":64,"tick":13440,"dur":1920,"tech":[]}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 15,
+                  "minGapMsAtTop": 545.45,
+                  "handShifts": 8,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 1.54
+                },
+                "harmony": {
+                  "kind": "scale",
+                  "root": "F",
+                  "scale": "major",
+                  "spelled": ["F", "G", "A", "Bb", "C", "D", "E"],
+                  "cover": true
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "top-strings-keys.fifth-position-keys",
+          "title": "Three strings in fifth position",
+          "purpose": "G major across the G, B and top strings without moving the hand. The line starts on G, goes up to the C on the top string and down to the C an octave lower on the G string, twice, and comes home to G.",
+          "howTo": [
+            "Straight eighths, two to a click, 50 BPM up to a pass at 80.",
+            "First finger at fret 5, third finger at fret 7, little finger at fret 8. On the G string, C is fret 5 and D is fret 7. On the B string, E is fret 5, F sharp is fret 7 and G is fret 8. On the top string, A is fret 5, B is fret 7 and C is fret 8.",
+            "Start on G, the B string at fret 8. Go up to the C on the top string, down to the C on the G string, up to the top C and down again, then up to G and hold it for two clicks.",
+            "F sharp is the only note here that is not a natural note.",
+            "On other Takes the key is F major, in the same position."
+          ],
+          "coachLine": "Right notes and even eighths after the take. Say the names slowly first, without the click.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 4,
+          "loops": true,
+          "position": {
+            "fret": 5,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":2,"fret":8,"midi":67,"tick":0,"dur":480,"tech":[],"finger":4},
+            {"string":1,"fret":5,"midi":69,"tick":480,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":7,"midi":71,"tick":960,"dur":480,"tech":[],"finger":3},
+            {"string":1,"fret":8,"midi":72,"tick":1440,"dur":480,"tech":[],"finger":4},
+            {"string":1,"fret":7,"midi":71,"tick":1920,"dur":480,"tech":[],"finger":3},
+            {"string":1,"fret":5,"midi":69,"tick":2400,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":8,"midi":67,"tick":2880,"dur":480,"tech":[],"finger":4},
+            {"string":2,"fret":7,"midi":66,"tick":3360,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":5,"midi":64,"tick":3840,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":7,"midi":62,"tick":4320,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":5,"midi":60,"tick":4800,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":7,"midi":62,"tick":5280,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":5,"midi":64,"tick":5760,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":7,"midi":66,"tick":6240,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":8,"midi":67,"tick":6720,"dur":480,"tech":[],"finger":4},
+            {"string":1,"fret":5,"midi":69,"tick":7200,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":7,"midi":71,"tick":7680,"dur":480,"tech":[],"finger":3},
+            {"string":1,"fret":8,"midi":72,"tick":8160,"dur":480,"tech":[],"finger":4},
+            {"string":1,"fret":7,"midi":71,"tick":8640,"dur":480,"tech":[],"finger":3},
+            {"string":1,"fret":5,"midi":69,"tick":9120,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":8,"midi":67,"tick":9600,"dur":480,"tech":[],"finger":4},
+            {"string":2,"fret":7,"midi":66,"tick":10080,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":5,"midi":64,"tick":10560,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":7,"midi":62,"tick":11040,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":5,"midi":60,"tick":11520,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":7,"midi":62,"tick":12000,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":5,"midi":64,"tick":12480,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":7,"midi":66,"tick":12960,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":8,"midi":67,"tick":13440,"dur":1920,"tech":[],"finger":4}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"}
+            ],
+            "passAtBpm": 80
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.75,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": [],
+            "notes": []
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 6,
+          "tab": "/8 2:8f4 1:5f1 1:7f3 1:8f4 1:7f3 1:5f1 2:8f4 2:7f3 | 2:5f1 3:7f3 3:5f1 3:7f3 2:5f1 2:7f3 2:8f4 1:5f1 | 1:7f3 1:8f4 1:7f3 1:5f1 2:8f4 2:7f3 2:5f1 3:7f3 | 3:5f1 3:7f3 2:5f1 2:7f3 /2 2:8f4",
+          "subdivision": "eighths",
+          "computed": {
+            "noteCount": 29,
+            "minGapMsAtTop": 272.73,
+            "handShifts": 0,
+            "maxPlayableBpm": 357,
+            "difficulty": 2.68
+          },
+          "harmony": {
+            "kind": "scale",
+            "root": "G",
+            "scale": "major",
+            "spelled": ["G", "A", "B", "C", "D", "E", "F#"],
+            "cover": true
+          },
+          "variation": {
+            "dimensions": ["key"],
+            "pooled": ["key"],
+            "notPooled": [],
+            "variants": [
+              {
+                "id": "key=G",
+                "label": "G major",
+                "params": {
+                  "key": "G"
+                },
+                "pool": "all",
+                "tab": "/8 2:8f4 1:5f1 1:7f3 1:8f4 1:7f3 1:5f1 2:8f4 2:7f3 | 2:5f1 3:7f3 3:5f1 3:7f3 2:5f1 2:7f3 2:8f4 1:5f1 | 1:7f3 1:8f4 1:7f3 1:5f1 2:8f4 2:7f3 2:5f1 3:7f3 | 3:5f1 3:7f3 2:5f1 2:7f3 /2 2:8f4",
+                "position": {
+                  "fret": 5,
+                  "shifts": "none"
+                },
+                "crossing": "none",
+                "notes": [
+                  {"string":2,"fret":8,"midi":67,"tick":0,"dur":480,"tech":[],"finger":4},
+                  {"string":1,"fret":5,"midi":69,"tick":480,"dur":480,"tech":[],"finger":1},
+                  {"string":1,"fret":7,"midi":71,"tick":960,"dur":480,"tech":[],"finger":3},
+                  {"string":1,"fret":8,"midi":72,"tick":1440,"dur":480,"tech":[],"finger":4},
+                  {"string":1,"fret":7,"midi":71,"tick":1920,"dur":480,"tech":[],"finger":3},
+                  {"string":1,"fret":5,"midi":69,"tick":2400,"dur":480,"tech":[],"finger":1},
+                  {"string":2,"fret":8,"midi":67,"tick":2880,"dur":480,"tech":[],"finger":4},
+                  {"string":2,"fret":7,"midi":66,"tick":3360,"dur":480,"tech":[],"finger":3},
+                  {"string":2,"fret":5,"midi":64,"tick":3840,"dur":480,"tech":[],"finger":1},
+                  {"string":3,"fret":7,"midi":62,"tick":4320,"dur":480,"tech":[],"finger":3},
+                  {"string":3,"fret":5,"midi":60,"tick":4800,"dur":480,"tech":[],"finger":1},
+                  {"string":3,"fret":7,"midi":62,"tick":5280,"dur":480,"tech":[],"finger":3},
+                  {"string":2,"fret":5,"midi":64,"tick":5760,"dur":480,"tech":[],"finger":1},
+                  {"string":2,"fret":7,"midi":66,"tick":6240,"dur":480,"tech":[],"finger":3},
+                  {"string":2,"fret":8,"midi":67,"tick":6720,"dur":480,"tech":[],"finger":4},
+                  {"string":1,"fret":5,"midi":69,"tick":7200,"dur":480,"tech":[],"finger":1},
+                  {"string":1,"fret":7,"midi":71,"tick":7680,"dur":480,"tech":[],"finger":3},
+                  {"string":1,"fret":8,"midi":72,"tick":8160,"dur":480,"tech":[],"finger":4},
+                  {"string":1,"fret":7,"midi":71,"tick":8640,"dur":480,"tech":[],"finger":3},
+                  {"string":1,"fret":5,"midi":69,"tick":9120,"dur":480,"tech":[],"finger":1},
+                  {"string":2,"fret":8,"midi":67,"tick":9600,"dur":480,"tech":[],"finger":4},
+                  {"string":2,"fret":7,"midi":66,"tick":10080,"dur":480,"tech":[],"finger":3},
+                  {"string":2,"fret":5,"midi":64,"tick":10560,"dur":480,"tech":[],"finger":1},
+                  {"string":3,"fret":7,"midi":62,"tick":11040,"dur":480,"tech":[],"finger":3},
+                  {"string":3,"fret":5,"midi":60,"tick":11520,"dur":480,"tech":[],"finger":1},
+                  {"string":3,"fret":7,"midi":62,"tick":12000,"dur":480,"tech":[],"finger":3},
+                  {"string":2,"fret":5,"midi":64,"tick":12480,"dur":480,"tech":[],"finger":1},
+                  {"string":2,"fret":7,"midi":66,"tick":12960,"dur":480,"tech":[],"finger":3},
+                  {"string":2,"fret":8,"midi":67,"tick":13440,"dur":1920,"tech":[],"finger":4}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 29,
+                  "minGapMsAtTop": 272.73,
+                  "handShifts": 0,
+                  "maxPlayableBpm": 357,
+                  "difficulty": 2.68
+                },
+                "harmony": {
+                  "kind": "scale",
+                  "root": "G",
+                  "scale": "major",
+                  "spelled": ["G", "A", "B", "C", "D", "E", "F#"],
+                  "cover": true
+                }
+              },
+              {
+                "id": "key=F",
+                "label": "F major",
+                "params": {
+                  "key": "F"
+                },
+                "pool": "all",
+                "purpose": "F major across the G, B and top strings without moving the hand. The line starts on F, goes up to the C on the top string and down to the C an octave lower on the G string, twice, and comes home to F.",
+                "howTo": [
+                  "Straight eighths, two to a click, 50 BPM up to a pass at 80.",
+                  "First finger at fret 5, second finger at fret 6, third finger at fret 7, little finger at fret 8. On the G string, C is fret 5 and D is fret 7. On the B string, E is fret 5, F is fret 6 and G is fret 8. On the top string, A is fret 5, B flat is fret 6 and C is fret 8.",
+                  "Start on F, the B string at fret 6. Go up to the C on the top string, down to the C on the G string, up to the top C and down again, then up to F and hold it for two clicks.",
+                  "B flat is the only note here that is not a natural note.",
+                  "On other Takes the key is G major, in the same position."
+                ],
+                "tab": "/8 2:6f2 2:8f4 1:5f1 1:6f2 1:8f4 1:6f2 1:5f1 2:8f4 | 2:6f2 2:5f1 3:7f3 3:5f1 3:7f3 2:5f1 2:6f2 2:8f4 | 1:5f1 1:6f2 1:8f4 1:6f2 1:5f1 2:8f4 2:6f2 2:5f1 | 3:7f3 3:5f1 3:7f3 2:5f1 /2 2:6f2",
+                "position": {
+                  "fret": 5,
+                  "shifts": "none"
+                },
+                "crossing": "none",
+                "notes": [
+                  {"string":2,"fret":6,"midi":65,"tick":0,"dur":480,"tech":[],"finger":2},
+                  {"string":2,"fret":8,"midi":67,"tick":480,"dur":480,"tech":[],"finger":4},
+                  {"string":1,"fret":5,"midi":69,"tick":960,"dur":480,"tech":[],"finger":1},
+                  {"string":1,"fret":6,"midi":70,"tick":1440,"dur":480,"tech":[],"finger":2},
+                  {"string":1,"fret":8,"midi":72,"tick":1920,"dur":480,"tech":[],"finger":4},
+                  {"string":1,"fret":6,"midi":70,"tick":2400,"dur":480,"tech":[],"finger":2},
+                  {"string":1,"fret":5,"midi":69,"tick":2880,"dur":480,"tech":[],"finger":1},
+                  {"string":2,"fret":8,"midi":67,"tick":3360,"dur":480,"tech":[],"finger":4},
+                  {"string":2,"fret":6,"midi":65,"tick":3840,"dur":480,"tech":[],"finger":2},
+                  {"string":2,"fret":5,"midi":64,"tick":4320,"dur":480,"tech":[],"finger":1},
+                  {"string":3,"fret":7,"midi":62,"tick":4800,"dur":480,"tech":[],"finger":3},
+                  {"string":3,"fret":5,"midi":60,"tick":5280,"dur":480,"tech":[],"finger":1},
+                  {"string":3,"fret":7,"midi":62,"tick":5760,"dur":480,"tech":[],"finger":3},
+                  {"string":2,"fret":5,"midi":64,"tick":6240,"dur":480,"tech":[],"finger":1},
+                  {"string":2,"fret":6,"midi":65,"tick":6720,"dur":480,"tech":[],"finger":2},
+                  {"string":2,"fret":8,"midi":67,"tick":7200,"dur":480,"tech":[],"finger":4},
+                  {"string":1,"fret":5,"midi":69,"tick":7680,"dur":480,"tech":[],"finger":1},
+                  {"string":1,"fret":6,"midi":70,"tick":8160,"dur":480,"tech":[],"finger":2},
+                  {"string":1,"fret":8,"midi":72,"tick":8640,"dur":480,"tech":[],"finger":4},
+                  {"string":1,"fret":6,"midi":70,"tick":9120,"dur":480,"tech":[],"finger":2},
+                  {"string":1,"fret":5,"midi":69,"tick":9600,"dur":480,"tech":[],"finger":1},
+                  {"string":2,"fret":8,"midi":67,"tick":10080,"dur":480,"tech":[],"finger":4},
+                  {"string":2,"fret":6,"midi":65,"tick":10560,"dur":480,"tech":[],"finger":2},
+                  {"string":2,"fret":5,"midi":64,"tick":11040,"dur":480,"tech":[],"finger":1},
+                  {"string":3,"fret":7,"midi":62,"tick":11520,"dur":480,"tech":[],"finger":3},
+                  {"string":3,"fret":5,"midi":60,"tick":12000,"dur":480,"tech":[],"finger":1},
+                  {"string":3,"fret":7,"midi":62,"tick":12480,"dur":480,"tech":[],"finger":3},
+                  {"string":2,"fret":5,"midi":64,"tick":12960,"dur":480,"tech":[],"finger":1},
+                  {"string":2,"fret":6,"midi":65,"tick":13440,"dur":1920,"tech":[],"finger":2}
+                ],
+                "rests": [],
+                "backing": {
+                  "kind": "click",
+                  "subdivision": 1
+                },
+                "computed": {
+                  "noteCount": 29,
+                  "minGapMsAtTop": 272.73,
+                  "handShifts": 0,
+                  "maxPlayableBpm": 357,
+                  "difficulty": 2.68
+                },
+                "harmony": {
+                  "kind": "scale",
+                  "root": "F",
+                  "scale": "major",
+                  "spelled": ["F", "G", "A", "Bb", "C", "D", "E"],
+                  "cover": true
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "top-strings-keys.g-tune",
+          "title": "A tune in G",
+          "purpose": "Four bars over G, C, D and G with a band, in the same fifth position. Bar 3 is bar 2 moved up one note of the scale, and that puts F sharp on the first beat of the D chord.",
+          "howTo": [
+            "Quarter notes and straight eighths, 60 BPM up to a pass at 90.",
+            "Each bar starts on a quarter note on the B string: G at fret 8, E at fret 5, F sharp at fret 7, and G at fret 8 again. They are the root of G, the third of C, the third of D and the root of G.",
+            "First finger at fret 5, third finger at fret 7, little finger at fret 8, as in the Exercise before. The only note on the G string is D at fret 7, once in bar 1 and once in bar 2. The last G is held for two clicks."
+          ],
+          "coachLine": "Band on. Right notes and time after the take.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 4,
+          "loops": true,
+          "position": {
+            "fret": 5,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":2,"fret":8,"midi":67,"tick":0,"dur":960,"tech":[],"finger":4},
+            {"string":3,"fret":7,"midi":62,"tick":960,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":5,"midi":64,"tick":1440,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":8,"midi":67,"tick":1920,"dur":960,"tech":[],"finger":4},
+            {"string":2,"fret":7,"midi":66,"tick":2880,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":8,"midi":67,"tick":3360,"dur":480,"tech":[],"finger":4},
+            {"string":2,"fret":5,"midi":64,"tick":3840,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":7,"midi":62,"tick":4800,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":5,"midi":64,"tick":5280,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":8,"midi":67,"tick":5760,"dur":960,"tech":[],"finger":4},
+            {"string":1,"fret":5,"midi":69,"tick":6720,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":8,"midi":67,"tick":7200,"dur":480,"tech":[],"finger":4},
+            {"string":2,"fret":7,"midi":66,"tick":7680,"dur":960,"tech":[],"finger":3},
+            {"string":2,"fret":5,"midi":64,"tick":8640,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":7,"midi":66,"tick":9120,"dur":480,"tech":[],"finger":3},
+            {"string":1,"fret":5,"midi":69,"tick":9600,"dur":960,"tech":[],"finger":1},
+            {"string":1,"fret":7,"midi":71,"tick":10560,"dur":480,"tech":[],"finger":3},
+            {"string":1,"fret":5,"midi":69,"tick":11040,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":8,"midi":67,"tick":11520,"dur":960,"tech":[],"finger":4},
+            {"string":1,"fret":7,"midi":71,"tick":12480,"dur":480,"tech":[],"finger":3},
+            {"string":1,"fret":5,"midi":69,"tick":12960,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":8,"midi":67,"tick":13440,"dur":1920,"tech":[],"finger":4}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":75,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"}
+            ],
+            "passAtBpm": 90
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.75,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["bandBleed"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "rock8",
+            "feel": "straight",
+            "key": "G",
+            "chart": "G | C | D | G"
+          },
+          "estimatedMinutes": 6,
+          "tab": "/4 2:8f4 /8 3:7f3 2:5f1 /4 2:8f4 /8 2:7f3 2:8f4 | /4 2:5f1 /8 3:7f3 2:5f1 /4 2:8f4 /8 1:5f1 2:8f4 | /4 2:7f3 /8 2:5f1 2:7f3 /4 1:5f1 /8 1:7f3 1:5f1 | /4 2:8f4 /8 1:7f3 1:5f1 /2 2:8f4",
+          "subdivision": "eighths",
+          "computed": {
+            "noteCount": 22,
+            "minGapMsAtTop": 272.73,
+            "handShifts": 0,
+            "maxPlayableBpm": 357,
+            "difficulty": 3.94
+          },
+          "chords": ["G", "C", "D", "G"],
+          "harmony": {
+            "kind": "scaleOverChords",
+            "root": "G",
+            "scale": "major",
+            "spelled": ["G", "A", "B", "C", "D", "E", "F#"],
+            "cover": false,
+            "allowed": []
+          }
+        }
+      ],
+      "difficultyException": "Two of the four lines are one string at a time in quarter notes, slower than the thirds in eighths before them. The demand is the names of two new keys on three strings, which the metric does not count."
+    },
+    {
       "id": "roots",
-      "order": 5,
+      "order": 8,
       "title": "Roots, fourths and fifths",
       "goal": "Find the roots of a I-IV-V and of a minor progression on the low strings, by shape, and play them under a band.",
       "why": "Most songs move between a handful of chords, and their roots sit in a pattern on the two low strings: the fourth is the same fret one string higher, the fifth two frets above that. Seeing that pattern is how players follow a song they have never heard.",
@@ -2612,7 +4869,7 @@
         "Say the chord names as you change. In A the three are A, D and E."
       ],
       "payoff": "You play the roots of a three-chord song in any key, and of a minor four-chord song, in time with a band.",
-      "prerequisites": ["thirds"],
+      "prerequisites": ["top-strings-keys"],
       "difficulty": 3.94,
       "exercises": [
         {
@@ -3236,7 +5493,7 @@
     },
     {
       "id": "triads",
-      "order": 6,
+      "order": 9,
       "title": "Triads on the top strings",
       "goal": "Play a major and a minor triad in three places on the top three strings, and move between three chords with the nearest shapes.",
       "why": "A triad is a root, a third and a fifth: the whole chord in three notes. On the top three strings there are three shapes for each one, depending on which note is on top, and together they cover the neck. They are the bridge between knowing notes and playing harmony.",
@@ -3609,7 +5866,7 @@
     },
     {
       "id": "five-boxes",
-      "order": 7,
+      "order": 10,
       "title": "The five boxes, joined up",
       "goal": "Play all five boxes of A minor pentatonic and move between them along two strings.",
       "why": "The pentatonic scale is five notes, and up the neck they make five overlapping shapes. Most players know the first and get stuck in it. The boxes are not five scales: they are one scale, and each box shares a wall with the next. Walking that wall on two strings is how the neck opens up.",
@@ -4279,7 +6536,7 @@
     },
     {
       "id": "arpeggios",
-      "order": 8,
+      "order": 11,
       "title": "Arpeggios up the neck",
       "goal": "Play an A minor and a C major arpeggio from the low strings to the top, and four chords as arpeggios in one position.",
       "why": "An arpeggio is a chord played one note at a time, and it is the surest way to sound like you know where you are in a song. Up the neck it links the triad shapes you know; in one position it shows that every chord of a song is already under your hand.",
@@ -4725,6 +6982,11 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "purpose": "Four chords as four small arpeggios on the top four strings at the seventh fret, over a band. Between Bm and G one note moves.",
+                "howTo": [
+                  "Straight eighths, 60 BPM up to a pass at 90.",
+                  "Each bar goes up its four notes and back. Bm: 9, 7, 7, 7. G: 9, 7, 8, 7. D: 7, 7, 7, 10. A: 7, 9, 10, 9, from the D string to the top string."
+                ],
                 "tab": "/8 4:9 3:7 2:7 1:7 2:7 3:7 4:9 3:7 | 4:9 3:7 2:8 1:7 2:8 3:7 4:9 3:7 | 4:7 3:7 2:7 1:10 2:7 3:7 4:7 3:7 | 4:7 3:9 2:10 1:9 2:10 3:9 4:7 3:9",
                 "position": {
                   "fret": 7,
@@ -4793,6 +7055,11 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "Four chords as four small arpeggios on the top four strings at the eighth fret, over a band. Between Cm and Ab one note moves.",
+                "howTo": [
+                  "Straight eighths, 60 BPM up to a pass at 90.",
+                  "Each bar goes up its four notes and back. Cm: 10, 8, 8, 8. Ab: 10, 8, 9, 8. Eb: 8, 8, 8, 11. Bb: 8, 10, 11, 10, from the D string to the top string."
+                ],
                 "tab": "/8 4:10 3:8 2:8 1:8 2:8 3:8 4:10 3:8 | 4:10 3:8 2:9 1:8 2:9 3:8 4:10 3:8 | 4:8 3:8 2:8 1:11 2:8 3:8 4:8 3:8 | 4:8 3:10 2:11 1:10 2:11 3:10 4:8 3:10",
                 "position": {
                   "fret": 8,
@@ -4861,6 +7128,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "Four chords as four small arpeggios on the top four strings at the tenth fret, over a band. Between Dm and Bb one note moves.",
+                "howTo": [
+                  "Straight eighths, 60 BPM up to a pass at 90.",
+                  "Each bar goes up its four notes and back. Dm: 12, 10, 10, 10. Bb: 12, 10, 11, 10. F: 10, 10, 10, 13. C: 10, 12, 13, 12, from the D string to the top string."
+                ],
                 "tab": "/8 4:12 3:10 2:10 1:10 2:10 3:10 4:12 3:10 | 4:12 3:10 2:11 1:10 2:11 3:10 4:12 3:10 | 4:10 3:10 2:10 1:13 2:10 3:10 4:10 3:10 | 4:10 3:12 2:13 1:12 2:13 3:12 4:10 3:12",
                 "position": {
                   "fret": 10,
@@ -4930,7 +7202,7 @@
     },
     {
       "id": "the-changes",
-      "order": 9,
+      "order": 12,
       "title": "Following the changes",
       "goal": "Land on a note of each chord as a progression goes by, in one position, and know which note of the chord it is.",
       "why": "This is what the whole Path is for. A solo that follows the chords sounds like music; one that ignores them sounds like a scale. The trick is small: know where the root, third and fifth of each chord are under your hand, and be on one of them when the chord arrives.",
@@ -5276,7 +7548,7 @@
     {
       "id": "beginner",
       "title": "Beginner: the notes by name",
-      "summary": "The natural notes on every string, and the octave shapes that connect them.",
+      "summary": "The natural notes on every string, the octave shapes that connect them, the roots of the open chords, and the sharps and flats in between.",
       "entry": "open",
       "placement": {
         "startHereIf": [
@@ -5285,7 +7557,7 @@
           "You know chord shapes and box shapes, and not the names of the notes in them."
         ]
       },
-      "stepIds": ["low-strings", "octaves", "upper-strings"],
+      "stepIds": ["low-strings", "octaves", "chord-roots", "upper-strings", "in-between"],
       "warmups": [
         {
           "id": "warmup-beginner.walk-a-string",
@@ -6034,7 +8306,7 @@
     {
       "id": "intermediate",
       "title": "Intermediate: the shapes of harmony",
-      "summary": "Thirds on two strings, roots and fifths on the low strings, and triads on the top three.",
+      "summary": "Thirds on two strings, the top three strings in G major and F major, roots and fifths on the low strings, and triads on the top three.",
       "entry": "open",
       "placement": {
         "startHereIf": [
@@ -6043,12 +8315,12 @@
           "You play chords without knowing which note is the third."
         ]
       },
-      "stepIds": ["thirds", "roots", "triads"],
+      "stepIds": ["thirds", "top-strings-keys", "roots", "triads"],
       "warmups": [
         {
           "id": "warmup-intermediate.thirds-around",
           "title": "Thirds in a new key",
-          "purpose": "A major scale in broken thirds on the G and B strings, five pairs up and back. A different key each time.",
+          "purpose": "The major scale in broken thirds on the G and B strings, five pairs up and back. A different key each time.",
           "howTo": [
             "Straight eighths, well under your clean tempo. Lower note, then upper; say major or minor for each pair."
           ],
@@ -6821,6 +9093,7 @@
                   "position": "boxes 1 and 2"
                 },
                 "pool": "all",
+                "purpose": "The G minor pentatonic box going up and the box above it coming down. A different key and pair of boxes each time.",
                 "tab": "/8 6:3 6:6 5:3 5:5 4:3 4:5 3:3 3:5 2:3 2:6 1:3 1:6 hold | /8 1:8 1:6 2:8 2:6 3:7 3:5 4:8 4:5 5:8 5:5 6:8 6:6 hold",
                 "position": {
                   "fret": 3,
@@ -7010,6 +9283,7 @@
                   "position": "boxes 1 and 2"
                 },
                 "pool": "all",
+                "purpose": "The C minor pentatonic box going up and the box above it coming down. A different key and pair of boxes each time.",
                 "tab": "/8 6:8 6:11 5:8 5:10 4:8 4:10 3:8 3:10 2:8 2:11 1:8 1:11 hold | /8 1:13 1:11 2:13 2:11 3:12 3:10 4:13 4:10 5:13 5:10 6:13 6:11 hold",
                 "position": {
                   "fret": 8,

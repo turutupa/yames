@@ -1846,6 +1846,7 @@ export default definePath({
   prerequisites: { paths: [{ path: "alternate-picking", level: "intermediate" }, { path: "legato", level: "beginner" }], skills: ["The A minor pentatonic box", "Eighth notes with a click at 90 BPM"] },
   labelSubdivisions: true,
   paceLadders: true,
+  variantText: true,
   orderRationale:
     "The teacher's fifteen-Step outline, in its order: one string, then accents and groupings, then four-finger independence, then crossings, so that by Step 5 every later technique has its parts. The Path rotates techniques instead of finishing one before the next, because a shredder needs them together and because a rotation keeps a daily Session from being one drill. Picking comes first and stays the backbone: economy picking (Step 10) is taught only after strict alternate picking is reliable across strings and skips, so it is a choice and not a crutch. Legato and sweeps come late because both lean on a fretting hand built by the chromatic Step, and because the app can grade them least: legato is tied to picked notes, and sweeps say 'timing only' in their titles. Tapping and the eight-bar run close it. Where it departs from the outline: Step 1 adds Alternate Picking's 'four of each' as a fourth graded Exercise, Step 6 lands the six-note licks on a quarter note so they stay in sixteenths, Step 10 keeps the alternate-picked arpeggios beside the economy ones for contrast, and every legato Exercise is a picked bar followed by the same notes legato.",
   gradingLimits:
