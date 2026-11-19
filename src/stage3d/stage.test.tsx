@@ -2,7 +2,8 @@ import { act, render, screen } from "@testing-library/react";
 import { useEffect, useRef } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NOOP_STAGE, useNeck, type NeckNote, type NeckStage, type NeckView } from "./api";
-import { CALM_FPS, HIDE_DELAY_MS, LOST_GRACE_MS, StageController, TAKE_FPS, stripHeight } from "./controller";
+import { CALM_FPS, HIDE_DELAY_MS, LOST_GRACE_MS, StageController, stripHeight } from "./controller";
+import { TAKE_FPS_LOW, TAKE_FPS_MAX, TakeRate } from "./takeRate";
 import type { EngineModule, EngineOptions, StageEngine } from "./engineTypes";
 import { fallbackRange, pitchOf } from "./FallbackNeck";
 import { NeckStageHost, NeckStageProvider } from "./NeckStageProvider";
@@ -192,6 +193,36 @@ describe("the stage with an engine", () => {
     expect(loads).toBe(0);
   });
 
+  it("prewarm builds the engine with nothing on screen, draws no frame, and the first view uses it", async () => {
+    const c = controller();
+    render(<NeckStageHost controllerFactory={() => c}>{null}</NeckStageHost>);
+    await flush();
+    act(() => c.prewarm());
+    // The engine is made in one task and handed on in the next.
+    await flush();
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 5));
+    });
+    await flush();
+    expect(loads).toBe(1);
+    expect(c.mode).toBe("3d");
+    expect(c.getSnapshot().view.kind).toBe("hidden");
+    const e = fake.engines[0];
+    expect(e.calls).not.toContain("frame");
+    expect(e.calls.some((x) => x.startsWith("view:"))).toBe(false);
+    expect(c.scheduler.active).toBe(false);
+    expect(screen.getByTestId("neck-stage").dataset.on).toBe("false");
+    // Asked twice, it does nothing more.
+    act(() => c.prewarm());
+    await flush();
+    expect(loads).toBe(1);
+    // And the Session's first view is a cut on the engine already there.
+    act(() => c.setView({ kind: "zoom", from: 3, to: 8 }, null));
+    await flush();
+    expect(fake.engines.length).toBe(1);
+    expect(e.calls).toContain("view:zoom:cut");
+  });
+
   it("loads on the first view, reports is3d, and hands over the state asked for while loading", async () => {
     const c = controller();
     let stage: NeckStage | null = null;
@@ -276,13 +307,47 @@ describe("the stage with an engine", () => {
     expect(c.getSnapshot().view.kind).toBe("zoom");
   });
 
-  it("caps at 30 fps while a Take runs", () => {
-    const c = controller();
-    expect(c.fpsCap).toBe(CALM_FPS);
-    c.setTakeRunning(true);
-    expect(c.fpsCap).toBe(TAKE_FPS);
-    c.setTakeRunning(false);
-    expect(c.fpsCap).toBe(CALM_FPS);
+  it("a Take follows the display where the machine holds it (the neck's switch on), and is capped at 30 where it should not be asked", () => {
+    const rate = (ua: string) => new TakeRate(() => ({ ua, reducedMotion: false, cores: 8 }), true);
+    const fast = new StageController({ loadEngine: async () => fake.mod, webgl2: () => true, takeRate: rate("Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 Chrome/130 Edg/130") });
+    expect(fast.fpsCap).toBe(CALM_FPS);
+    fast.setTakeRunning(true);
+    expect(fast.fpsCap).toBe(TAKE_FPS_MAX);
+    expect(fast.takeRateWhy).toBe("display");
+    fast.setTakeRunning(false);
+    expect(fast.fpsCap).toBe(CALM_FPS);
+
+    // WebKitGTK: transforms are likely painted on the CPU.
+    const slow = new StageController({ loadEngine: async () => fake.mod, webgl2: () => true, takeRate: rate("Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15") });
+    slow.setTakeRunning(true);
+    expect(slow.fpsCap).toBe(TAKE_FPS_LOW);
+    expect(slow.takeRateWhy).toBe("cpu-compositing");
+    slow.setTakeRunning(false);
+    expect(slow.fpsCap).toBe(CALM_FPS);
+  });
+
+  it("with the neck's switch off, a Take holds the neck to 30 whatever the machine", () => {
+    const held = new StageController({
+      loadEngine: async () => fake.mod,
+      webgl2: () => true,
+      takeRate: new TakeRate(() => ({ ua: "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 Chrome/130", reducedMotion: false, cores: 8 }), false),
+    });
+    held.setTakeRunning(true);
+    expect(held.fpsCap).toBe(TAKE_FPS_LOW);
+    expect(held.takeRateWhy).toBe("neck-held");
+    held.setTakeRunning(false);
+    expect(held.fpsCap).toBe(CALM_FPS);
+  });
+
+  it("a machine that cannot draw the 3D neck is held to 30 for a Take; a player who chose the flat neck is not", () => {
+    const rate = () => new TakeRate(() => ({ ua: "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 Chrome/130", reducedMotion: false, cores: 8 }), true);
+    const cannot = new StageController({ loadEngine: async () => fake.mod, webgl2: () => false, slow: () => true, takeRate: rate() });
+    cannot.setTakeRunning(true);
+    expect(cannot.fpsCap).toBe(TAKE_FPS_LOW);
+    expect(cannot.takeRateWhy).toBe("low-tier");
+    const chose = new StageController({ loadEngine: async () => fake.mod, webgl2: () => true, flat: () => true, slow: () => false, takeRate: rate() });
+    chose.setTakeRunning(true);
+    expect(chose.fpsCap).toBe(TAKE_FPS_MAX);
   });
 
   it("stops rendering when the view goes hidden, and cuts (no flight) when it comes back", async () => {

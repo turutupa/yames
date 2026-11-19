@@ -18,7 +18,7 @@ import { NeckStageContext } from "./context";
 import { StageController, footReserve, stripHeight } from "./controller";
 import { FallbackNeck } from "./FallbackNeck";
 import { OverviewStrip } from "./OverviewStrip";
-import { setForceFlat, stagePrefsReady, subscribeStagePrefs, wantsFlat } from "./prefs";
+import { getStagePrefs, setForceFlat, stagePrefsReady, subscribeStagePrefs, wantsFlat } from "./prefs";
 import { webgl2Available } from "./webgl";
 import "./stage.css";
 
@@ -55,6 +55,7 @@ export function createStageController(): StageController {
     forcedTier: forcedTier(),
     ready: prefsReady,
     flat: () => wantsFlat(),
+    slow: () => getStagePrefs().forceFlat || !(new URLSearchParams(window.location.search).get("nogl") !== "1" && webgl2Available()),
     // The `?shot=` harness and the layout suite run on SwiftShader on purpose; `?probe=1` puts the
     // guard back there, which is a WebKitGTK machine exactly: a renderer whose name says nothing.
     probe: !window.__YAMES_ALLOW_SOFTWARE_GL__ || new URLSearchParams(window.location.search).get("probe") === "1",

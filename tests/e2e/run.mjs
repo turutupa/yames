@@ -51,6 +51,8 @@ if (flag("--help")) {
   --bleed <dB>        blues-band: also feed the app's output back into its input at this
                       level (e.g. -20), as speakers into a microphone would
   --neck-takes <n>    Takes the neck scenario plays back to back (default 3)
+  --take-fps <n>      force the frame rate a Take is drawn at (the store's stage.takeFps;
+                      default: the app's own choice, 30 on WebKitGTK). See src/stage3d/takeRate.ts
   --baseline-seconds <n>  length of the headless probe run (default 60)
   --out <dir>         where results, screenshots and the probe reports go
                       (default: a new temp dir, printed at the end)
@@ -1297,6 +1299,19 @@ async function scenarioNeck() {
     await d.clickIn(/Four fingers, one string/, /^Play this$/);
     await d.waitText(/Start take, (\d+) BPM/, 20000);
     info.neck = { kind: await neckKind(d), takes: [] };
+    // When each frame the neck drew began, and the page's own animation frames
+    // (the display's rate as the webview serves it), read off the stage.
+    await d.exec(`const c = window.__NECK__ && window.__NECK__.current;
+      const st = (window.__e2eNeck = { neck: [], page: [], f0: c ? c.frames : null });
+      const raf = window.requestAnimationFrame.bind(window);
+      window.requestAnimationFrame = (cb) => raf((stamp) => {
+        const before = c ? c.frames : 0;
+        const began = performance.now();
+        cb(stamp);
+        if (c && c.frames > before) st.neck.push(began);
+      });
+      const tick = (t) => { if (st.page.length < 20000) st.page.push(t); raf(tick); };
+      raf(tick);`);
     const before = cpuByName();
     const t0 = Date.now();
     for (let i = 0; i < takes; i++) {
@@ -1308,6 +1323,15 @@ async function scenarioNeck() {
     info.neck.cpuCoresWhilePlaying = Object.fromEntries(
       Object.keys(after).map((k) => [k, Number(((after[k] - (before[k] ?? 0)) / wall).toFixed(2))]).filter(([, v]) => v > 0.01),
     );
+    // The rate the Takes were drawn at: asked for, and measured on the frames.
+    info.neck.frames = await d.exec(`const c = window.__NECK__ && window.__NECK__.current;
+      const st = window.__e2eNeck;
+      const med = (xs) => { const g = xs.slice(1).map((t, i) => t - xs[i]).filter((x) => x < 100).sort((a, b) => a - b); return g.length ? Math.round(g[g.length >> 1] * 10) / 10 : null; };
+      const p95 = (xs) => { const g = xs.slice(1).map((t, i) => t - xs[i]).filter((x) => x < 100).sort((a, b) => a - b); return g.length ? Math.round(g[Math.floor(g.length * 0.95)] * 10) / 10 : null; };
+      return { mode: c ? c.mode : null, tier: c ? c.tier : null, guard: c ? c.lastProbe : null, errors: c ? c.errors : null,
+        capNow: c ? c.fpsCap : null, takeRateWhy: c ? c.takeRateWhy : null, drawn: c && st.f0 !== null ? c.frames - st.f0 : null,
+        neckGapMedianMs: med(st.neck), neckGapP95Ms: p95(st.neck), pageFrameMedianMs: med(st.page), pageFrameP95Ms: p95(st.page) };`).catch((e) => ({ error: String(e) }));
+    console.log(`neck: frames ${JSON.stringify(info.neck.frames)}`);
     info.neck.glLibraries = glLibraries();
     // Which of our processes the NVIDIA driver has a graphics context for.
     const smi = spawnSync("nvidia-smi", ["--query-compute-apps=pid,process_name", "--format=csv,noheader"], { encoding: "utf8" });
@@ -1385,7 +1409,10 @@ function printProbe(label, r) {
 let exitCode = 0;
 try {
   await env.up();
-  seedSettings(env.dirs);
+  // The rate a Take is drawn at, when the run is measuring one the app would not pick here.
+  const takeFps = Number(opt("--take-fps", ""));
+  seedSettings(env.dirs, takeFps > 0 ? { "stage.takeFps": takeFps } : {});
+  info.takeFpsAsked = takeFps > 0 ? takeFps : "auto";
   info.rtThreads = env.rtThreads;
   if (!env.rtThreads) console.warn("PipeWire is not real-time (no passwordless sudo): a busy machine will glitch the audio");
   info.calibration = await player.calibrate();
