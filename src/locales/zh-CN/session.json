@@ -211,7 +211,8 @@
       "benchmark": "基准测试，第{{day}}天：每次都以 {{bpm}} BPM 练同一个练习，用来对比。",
       "yourTurn": "轮到你：{{exercise}}。暂不检查，由你自己判断。",
       "newFromSibling": "新练习。从 {{bpm}} BPM 开始，约为你在“{{sibling}}”上干净速度 {{clean}} BPM 的 80%。",
-      "focusChosen": "今天你选了{{path}}，整节练习都从这里来。"
+      "focusChosen": "今天你选了{{path}}，整节练习都从这里来。",
+      "playedUngraded": "从你上次停下的地方：{{bpm}} BPM。"
     },
     "bar": {
       "summary": "及格线：{{bpm}} BPM 时均匀度 {{even}}%，听到 {{heard}}% 的音。"
@@ -256,7 +257,8 @@
       "fasterCeiling": "已经是这个练习最快的速度",
       "tempoLocked": "测验要用及格速度弹，所以速度不变",
       "previous": "上一个",
-      "previousFirst": "这是第一个练习块，前面没有了"
+      "previousFirst": "这是第一个练习块，前面没有了",
+      "playUngraded": "开始，{{bpm}} BPM"
     },
     "result": {
       "kick": "第 {{take}} 遍 · {{title}} · {{bpm}} BPM · {{bars}} 小节",
@@ -458,7 +460,9 @@
       "levelSubscribed": "已订阅 · 从第 {{n}} 步开始",
       "inMix": "加入每日组合",
       "inMixHelp": "关闭后，「今天」不会把它排进每日组合。进度会保留，也仍可选它练一天。",
-      "focusToday": "今天只练这条"
+      "focusToday": "今天只练这条",
+      "playedUngraded": "{{count}} 遍，最快 {{bpm}} BPM。",
+      "playedUngraded_other": "{{count}} 遍，最快 {{bpm}} BPM。"
     },
     "progress": {
       "title": "进度",
@@ -474,7 +478,10 @@
       "notGraded": "还没打分",
       "emptyTitle": "你的进度从一次练习开始",
       "emptyBody": "弹完今天的练习，这里就会出现：弹了多少分钟、连续天数，以及每个练习的干净速度，全部来自你的演奏。",
-      "emptyStart": "开始今天的练习"
+      "emptyStart": "开始今天的练习",
+      "introOff": "评分已关闭，所以这里是你弹过的内容：练习分钟、练习次数和你弹过的速度。",
+      "topPlayed": "弹过的最高 BPM",
+      "ungraded": "未评分"
     },
     "settings": {
       "openOnLastTool": "打开上次用的工具",
@@ -619,7 +626,7 @@
       "fellBack": "你选择的输入未连接，本次练习改为聆听 {{device}}。",
       "defaultDevice": "默认输入",
       "chooseInput": "选择输入",
-      "playUngraded": "不评分弹奏",
+      "playUngraded": "这一遍直接弹",
       "notGraded": "未评分",
       "turnOn": "打开输入",
       "noSignal": "无信号",
@@ -629,17 +636,33 @@
         "noAnswer": "输入没有响应。如果有权限对话框，请先回应，然后再按一次开始。",
         "busy": "另一个应用正在使用你的输入。请关闭它，然后再按一次开始。",
         "other": "输入无法启动。请检查，或选择其他输入。"
-      },
-      "gradingOff": "评分已关闭",
-      "turnOnGrading": "开启评分"
+      }
     },
     "ungraded": {
       "ready": "未评分：输入已关闭，本次练习我不会聆听。",
-      "readyOff": "未评分：已在设置中关闭评分。",
       "result": "未评分：当时输入已关闭",
-      "resultOff": "未评分：已在设置中关闭评分",
+      "resultOff": "已弹，未评分",
       "body": "这算作练习，计入练习时长和连续天数。干净速度和步骤只会因评分过的录音而前进。",
-      "recap": "未评分"
+      "recap": "未评分",
+      "bodyOff": "会计入你的练习分钟和连续天数。"
+    },
+    "ask": {
+      "graded": "开始这一遍，{{bpm}} BPM · 评分",
+      "justPlay": "直接弹",
+      "remember": "记住我的选择",
+      "line": "评分时，我会通过你的麦克风或输入来听。也可以直接弹：只有节拍声和画面，不评分。"
+    },
+    "grademe": {
+      "fix": "给我评分",
+      "why": "我会通过你的麦克风或输入来听，并为你的节奏和音符评分。",
+      "session": "这次练习",
+      "always": "一直"
+    },
+    "meter": {
+      "silent": "输入电平：无信号",
+      "low": "输入电平：低",
+      "good": "输入电平：良好",
+      "high": "输入电平：高"
     }
   }
 }

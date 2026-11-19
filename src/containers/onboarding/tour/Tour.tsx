@@ -27,6 +27,7 @@ import {
 } from "../anchor";
 import { IS_MOBILE } from "../../../platform";
 import { targetOf, type TourStop } from "./stops";
+import type { GradingChoice } from "../../../session/grading";
 import "../../../styles/tour.css";
 
 /** How far the cut-out is grown past the target's own box. */
@@ -61,6 +62,8 @@ export type TourProps = {
   keyBindings?: Record<string, string>;
   /** `viewTransitions !== "off"`; reduced motion is honoured on top of it. */
   animate?: boolean;
+  /** The player's grading choice, for the stops whose words depend on it. */
+  grading?: GradingChoice;
 };
 
 function rectOf(el: Element): Rect {
@@ -163,6 +166,7 @@ export function Tour({
   onClose,
   keyBindings,
   animate = true,
+  grading,
 }: TourProps) {
   const { t } = useTranslation();
   const cardRef = useRef<HTMLDivElement>(null);
@@ -424,7 +428,11 @@ export function Tour({
         </div>
 
         <p className="tour-card-body" id="tour-body">
-          {t(`onboarding.tour.${stop.i18nKey}.body`)}
+          {t(
+            `onboarding.tour.${stop.i18nKey}.${
+              stop.byGrading && grading === "off" ? "bodyOff" : stop.byGrading && grading === "ask" ? "bodyAsk" : "body"
+            }`,
+          )}
         </p>
 
         {/* A phone has no keyboard to print keys for. */}

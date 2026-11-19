@@ -143,6 +143,23 @@ describe("what gets chosen", () => {
     expect(focus.placement?.passAtBpm).toBe(100);
   });
 
+  it("grading off: no placement climb, a new Path starts on its first Exercise (owner, 2026-11-18)", () => {
+    const s = planSession({ minutes: 5, now: NOW, paths: [ALT], progress: { ...NO_PROGRESS }, ungraded: true });
+    const [focus] = exerciseSteps(s);
+    expect(focus.exerciseId).toBe(OPEN);
+    expect(focus.role).not.toBe("placement");
+    expect(focus.placement).toBeUndefined();
+  });
+
+  it("played only without grading: not new, and where the player left it", () => {
+    const p = progress({
+      takes: [take(OPEN, { bpm: 90, caught: false, facts: { verdict: "ungraded", ungraded: "gradingOff" } })],
+    });
+    const tempo = tempoFor(ALT, exercise(OPEN), p);
+    expect(tempo.bpm).toBe(90);
+    expect(tempo.why.code).toBe("playedUngraded");
+  });
+
   it("a first Take on a Path already started (no placement) says it is the first", () => {
     const p = progress({ takes: [take("even-sixteenths.gear-change", { caught: false })] });
     const [focus] = exerciseSteps(plan(5, { ...p, takes: [] }));

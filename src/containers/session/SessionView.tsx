@@ -34,7 +34,7 @@ import {
 } from "../../session/runner";
 import type { TakeOutcome } from "../../session/runner";
 import { PORTRAIT_PHONE_QUERY, useMediaQuery } from "../../hooks/useMediaQuery";
-import { CoachLine, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart, timedHowKey } from "./parts";
+import { AskStart, CoachLine, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart, timedHowKey } from "./parts";
 import { RunwayTakeScreen, isTheoryTake } from "./highway/RunwayTake";
 import { Runway } from "./highway/Runway";
 import type { SessionRun } from "./hooks/useSessionRun";
@@ -61,6 +61,7 @@ import type { PathTakeRow } from "../../ipc";
 import { totalsFrom } from "./ProgressView";
 import type { MainView } from "../main-window/MainHeader";
 import { LeaveSessionDialog } from "./LeaveSessionDialog";
+import { LiveLevelBars } from "../../components/LiveLevelBars";
 import "../../styles/session.css";
 
 const WHOLE: NeckView = { kind: "whole" };
@@ -224,19 +225,21 @@ function InputChip({
   const { run, inputStart, actions } = session;
   // The tour's look (card #50) asked for no input: no chip saying one is off.
   if (session.preview) return null;
+  // Not graded by choice: a quiet "Not graded · Grade me", nothing about the
+  // input (owner, 2026-11-18).
+  if (run.ungraded === "gradingOff" || run.ungraded === "chosen") return <GradeMeChip session={session} />;
+  // Not decided yet: the ready screen asks; the bar says nothing.
+  if (session.asking && !listening) return null;
   if (run.ungraded) {
-    // Not graded; one press grades from the next Take. With grading off in
-    // Settings that is what it says and what it turns on (acceptance 4,
-    // P2-4): "Turn on input" blamed an input that was never the cause.
-    const off = run.ungraded === "gradingOff";
-    const word = t(off ? "session.input.gradingOff" : "session.input.notGraded");
-    const fix = t(off ? "session.input.turnOnGrading" : "session.input.turnOn");
+    // Graded, but this one played without the input: one press turns it on.
+    const word = t("session.input.notGraded");
+    const fix = t("session.input.turnOn");
     return (
       <button
         className="session-input-chip"
         data-state="ungraded"
         data-why={run.ungraded}
-        onClick={actions.gradeAgain}
+        onClick={() => actions.gradeAgain()}
         aria-label={`${word}. ${fix}`}
         data-tip={fix}
         data-testid="session-input-chip"
@@ -271,9 +274,80 @@ function InputChip({
       data-tip={hint}
       data-testid="session-input-chip"
     >
-      <MicGlyph off={!listening} />
+      {/* On: the level, live, and a pulse for each note heard (owner,
+          2026-11-18). Off or starting: the mic. */}
+      {listening ? (
+        <LiveLevelBars active label={(w) => t(`session.meter.${w}`)} />
+      ) : (
+        <MicGlyph off />
+      )}
       <span className="session-input-chip-word">{word}</span>
     </button>
+  );
+}
+
+/**
+ * "Not graded · Grade me" (owner, 2026-11-18): small and quiet, for a player
+ * who chose to just play. A press asks whether for this Session or always;
+ * either turns the input on for the next Take.
+ */
+function GradeMeChip({ session }: { session: SessionRun }) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const wrap = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const away = (e: Event) => {
+      if (wrap.current && !wrap.current.contains(e.target as Node)) setOpen(false);
+    };
+    const esc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        setOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", away);
+    document.addEventListener("keydown", esc, true);
+    return () => {
+      document.removeEventListener("pointerdown", away);
+      document.removeEventListener("keydown", esc, true);
+    };
+  }, [open]);
+  const word = t("session.input.notGraded");
+  const fix = t("session.grademe.fix");
+  const choose = (always: boolean) => {
+    setOpen(false);
+    session.actions.gradeAgain({ always });
+  };
+  return (
+    <span className="session-grademe" ref={wrap}>
+      <button
+        className="session-input-chip"
+        data-state="ungraded"
+        data-why={session.run.ungraded ?? undefined}
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-haspopup="true"
+        aria-label={`${word}. ${fix}`}
+        data-testid="session-input-chip"
+      >
+        <span className="session-input-chip-word">{word}</span>
+        <span className="session-input-chip-fix" data-testid="session-grade-again">
+          {fix}
+        </span>
+      </button>
+      {open && (
+        <span className="session-grademe-menu session-glass" role="group" aria-label={fix} data-testid="session-grademe-menu">
+          <span className="session-grademe-why">{t("session.grademe.why")}</span>
+          <button className="session-secondary" onClick={() => choose(false)} data-testid="session-grademe-session">
+            {t("session.grademe.session")}
+          </button>
+          <button className="session-secondary" onClick={() => choose(true)} data-testid="session-grademe-always">
+            {t("session.grademe.always")}
+          </button>
+        </span>
+      )}
+    </span>
   );
 }
 
@@ -392,17 +466,20 @@ function TakeScreen({
   const start = startButton(session, listening, t);
   // Said once a Session, before its first Take (UX audit SES-14), and not at
   // all where the coach's own line already says it (acceptance P1-4).
-  const honest = run.outcomes.length === 0 ? readyHonestLineKey(exercise) : null;
+  // Played without grading by choice: no bar to meet and nothing listening,
+  // so the coach's line is the Exercise's own tip (owner, 2026-11-18).
+  const byChoice = run.ungraded === "gradingOff" || run.ungraded === "chosen";
+  const honest = run.outcomes.length === 0 && !byChoice ? readyHonestLineKey(exercise) : null;
   // The ready screen says three things (acceptance pass 2, P1-4): where the
   // hand goes, what is graded, and a folded "how". The bar IS what is graded,
   // so it is the coach's line; the Exercise's own tip and caveat go in the
   // fold, and any sentence naming the fret or the tempo the screen already
   // shows is left out of it.
-  const gradedLine = bar ? lineText(t, bar) : exercise.coachLine;
+  const gradedLine = bar && !byChoice ? lineText(t, bar) : exercise.coachLine;
   const how = howText(
     exercise.howTo[0],
     exercise.position,
-    [bar ? exercise.coachLine : null, honest ? t(honest) : null],
+    [bar && !byChoice ? exercise.coachLine : null, honest ? t(honest) : null],
     [exercise.tempo.passAtBpm, exercise.tempo.rungs[0]?.bpm, run.bpm],
   );
 
@@ -558,17 +635,22 @@ function TakeScreen({
               to the page (acceptance pass 2, P2-9). */}
           {/* With the input off it says so and turns it on (owner, beta 6):
               never a button that does nothing when pressed. */}
-          <button
-            className="session-big"
-            data-size="mid"
-            onClick={!running && !canStart ? undefined : actions.go}
-            aria-disabled={!running && !canStart ? true : undefined}
-            aria-busy={start.busy ? true : undefined}
-            data-input={!running && start.needsInput ? (start.busy ? "starting" : "off") : undefined}
-            data-testid="session-big"
-          >
-            {running ? bigLabel(session.big, t) : start.label}
-          </button>
+          {/* Grading not decided: two equal answers (owner, 2026-11-18). */}
+          {!running && start.ask ? (
+            <AskStart session={session} label={start.label} canStart={canStart} compact={inputInFooter} />
+          ) : (
+            <button
+              className="session-big"
+              data-size="mid"
+              onClick={!running && !canStart ? undefined : actions.go}
+              aria-disabled={!running && !canStart ? true : undefined}
+              aria-busy={start.busy ? true : undefined}
+              data-input={!running && start.needsInput ? (start.busy ? "starting" : "off") : undefined}
+              data-testid="session-big"
+            >
+              {running ? bigLabel(session.big, t) : start.label}
+            </button>
+          )}
         </div>
       </div>
 
@@ -1135,11 +1217,13 @@ function UngradedResultScreen({ session }: { session: SessionRun }) {
             }),
           )}
         </div>
+        {/* By choice it is simply practice, said as such: no word of the
+            input, and nothing about what grading would have done. */}
         <h1 className="session-h1 session-rise" style={rise(1)}>
-          {t(outcome.ungraded === "gradingOff" ? "session.ungraded.resultOff" : "session.ungraded.result")}
+          {t(outcome.ungraded === "inputOff" ? "session.ungraded.result" : "session.ungraded.resultOff")}
         </h1>
         <div className="session-why session-rise" style={rise(2)}>
-          {t("session.ungraded.body")}
+          {t(outcome.ungraded === "inputOff" ? "session.ungraded.body" : "session.ungraded.bodyOff")}
         </div>
       </div>
       <div className="session-slot" ref={slot} aria-hidden="true" data-exercise="" />
@@ -1614,6 +1698,7 @@ function RecapScreen({ session }: { session: SessionRun }) {
     paths: session.today.paths,
     progress: session.progress,
     ...(session.today.focusedPath ? { focused: true } : {}),
+    ungraded: session.grading === "off",
   });
   const origin = session.origin;
   const lastExercise = [...steps].reverse().find((s) => s.kind === "exercise");

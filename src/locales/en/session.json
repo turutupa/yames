@@ -211,7 +211,8 @@
       "benchmark": "Benchmark, day {{day}}: the same Exercise at {{bpm}} BPM each time, to compare.",
       "yourTurn": "Your turn: {{exercise}}. Not checked yet, so you judge it.",
       "newFromSibling": "New. It starts at {{bpm}} BPM, about 80% of your clean {{clean}} BPM on {{sibling}}.",
-      "focusChosen": "You chose {{path}} for today, so the whole Session comes from it."
+      "focusChosen": "You chose {{path}} for today, so the whole Session comes from it.",
+      "playedUngraded": "Where you left it: {{bpm}} BPM."
     },
     "bar": {
       "summary": "The bar: {{even}}% even and {{heard}}% of the notes heard, at {{bpm}} BPM."
@@ -256,7 +257,8 @@
       "fasterCeiling": "Already the fastest tempo this Exercise has",
       "tempoLocked": "A Test out is played at the pass tempo, so this one stays put",
       "previous": "Previous",
-      "previousFirst": "This is the first block, so there is nothing before it"
+      "previousFirst": "This is the first block, so there is nothing before it",
+      "playUngraded": "Start, {{bpm}} BPM"
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} bars",
@@ -458,7 +460,9 @@
       "levelSubscribed": "Subscribed · starting at Step {{n}}",
       "inMix": "In my daily mix",
       "inMixHelp": "Off: Today leaves it out of your daily mix. Your progress stays, and you can still pick it for a day.",
-      "focusToday": "Practise only this today"
+      "focusToday": "Practise only this today",
+      "playedUngraded": "{{count}} take, up to {{bpm}} BPM.",
+      "playedUngraded_other": "{{count}} takes, up to {{bpm}} BPM."
     },
     "progress": {
       "title": "Progress",
@@ -474,7 +478,10 @@
       "notGraded": "Not graded yet",
       "emptyTitle": "Your progress starts with one Session",
       "emptyBody": "Play today's Session and it shows up here: minutes played, your streak, and the clean tempo on every Exercise, all measured from your playing.",
-      "emptyStart": "Start today's Session"
+      "emptyStart": "Start today's Session",
+      "introOff": "Grading is off, so this is what you played: your minutes, your Sessions and the tempos you took on.",
+      "topPlayed": "top BPM played",
+      "ungraded": "Not graded"
     },
     "settings": {
       "openOnLastTool": "Open on my last tool",
@@ -619,7 +626,7 @@
       "fellBack": "Your chosen input isn't connected, so I'm listening to {{device}} this Session.",
       "defaultDevice": "your default input",
       "chooseInput": "Choose input",
-      "playUngraded": "Play without grading",
+      "playUngraded": "Just play this one",
       "notGraded": "Not graded",
       "turnOn": "Turn on input",
       "noSignal": "No signal",
@@ -629,17 +636,33 @@
         "noAnswer": "The input didn't answer. If a permission prompt is open, answer it, then press Start again.",
         "busy": "Another app is using your input. Close it, then press Start again.",
         "other": "Your input wouldn't start. Check it, or choose another one."
-      },
-      "gradingOff": "Grading off",
-      "turnOnGrading": "Turn on grading"
+      }
     },
     "ungraded": {
       "ready": "Not graded: the input is off, so I'm not listening this Session.",
-      "readyOff": "Not graded: grading is off in Settings.",
       "result": "Not graded: the input was off",
-      "resultOff": "Not graded: grading is off in Settings",
+      "resultOff": "Played, not graded",
       "body": "It counts as practice, for your minutes and your streak. Your clean tempo and Steps only move on graded Takes.",
-      "recap": "not graded"
+      "recap": "not graded",
+      "bodyOff": "It counts toward your minutes and your streak."
+    },
+    "ask": {
+      "graded": "Start take, {{bpm}} BPM · graded",
+      "justPlay": "Just play",
+      "remember": "Remember my choice",
+      "line": "Graded, I listen through your mic or input. Or just play: the click and the picture, nothing graded."
+    },
+    "grademe": {
+      "fix": "Grade me",
+      "why": "I'll listen through your mic or input and grade your timing and notes.",
+      "session": "This Session",
+      "always": "Always"
+    },
+    "meter": {
+      "silent": "Input level: no signal",
+      "low": "Input level: low",
+      "good": "Input level: good",
+      "high": "Input level: high"
     }
   }
 }

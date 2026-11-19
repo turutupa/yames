@@ -340,3 +340,23 @@ body:has(.main-window.is-mobile .session-body:is([data-testid="session-result"],
 .main-window.is-mobile .session-today-plan .session-plan-go {
   min-height: 44px;
 }
+
+/* "Not graded · Grade me" (owner, 2026-11-18) keeps a word on a phone: it has
+   no mic to say its state with, and it is a choice, not a fault. */
+.main-window.is-mobile .session-page .session-bar > .session-grademe {
+  order: 11;
+}
+.main-window.is-mobile .session-page .session-bar:has(> .session-pips:empty) > .session-grademe {
+  order: 0;
+}
+.main-window.is-mobile .session-page .session-bar .session-grademe .session-input-chip {
+  padding-inline: 12px;
+}
+/* "Grade me" alone fits the first row beside Skip; "Not graded" stays its label. */
+.main-window.is-mobile .session-page .session-bar .session-grademe .session-input-chip-fix {
+  display: inline;
+}
+.main-window.is-mobile .session-page .session-bar .session-grademe-menu {
+  left: auto;
+  right: 0;
+}

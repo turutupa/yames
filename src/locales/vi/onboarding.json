@@ -149,6 +149,15 @@
         "guidance": "Interface hoặc bộ chuyển cổng tai nghe tốt hơn, nhưng micro điện thoại vẫn được: đặt gần đàn, đừng để trong túi.",
         "noDevices": "Không tìm thấy đầu vào. Cắm interface hoặc bộ chuyển; nếu không hiện, rút ra rồi cắm lại.",
         "permission": "Quyền micro: Cài đặt Android › Ứng dụng › Yames › Quyền › Micro, rồi Cho phép. Interface USB hoặc bộ chuyển cổng tai nghe cũng cần quyền này."
+      },
+      "ask": {
+        "title": "Yames có nên nghe bạn chơi và chấm điểm không?",
+        "subtitle": "Dù chọn gì bạn vẫn có kế hoạch, tiếng click và hình ảnh. Bạn có thể đổi trong Cài đặt bất cứ lúc nào.",
+        "yes": "Có, chấm điểm phần chơi của tôi",
+        "yesDesc": "Yames nghe qua micro hoặc cắm trực tiếp và kiểm tra nhịp và nốt. Tiếp theo, bạn thiết lập nó.",
+        "no": "Không, chỉ tiếng click và hình ảnh",
+        "noDesc": "Không gì nghe và không xin quyền micro. Số phút và chuỗi ngày vẫn được tính.",
+        "noNote": "Các buổi sẽ chơi không chấm điểm. Bạn có thể bật trong bất kỳ buổi nào hoặc trong Cài đặt."
       }
     },
     "hearItWork": {
@@ -175,7 +184,8 @@
         "sound": "Âm thanh click",
         "theme": "Giao diện",
         "control": "Điều khiển",
-        "input": "Đầu vào âm thanh"
+        "input": "Đầu vào âm thanh",
+        "grading": "Chấm điểm"
       },
       "controlKeyboard": "Bàn phím",
       "controlFootswitch": "Bàn đạp",
@@ -186,7 +196,12 @@
       "tour": "Dẫn tôi đi xem",
       "moreOnToday": "Thêm {{count}} mục ở Hôm nay",
       "subtitleNext": "Buổi tập tiếp theo đã sẵn sàng ở Hôm nay. Thay đổi tại đây, hoặc sau này trong Cài đặt.",
-      "nextSession": "Buổi tập tiếp theo của bạn"
+      "nextSession": "Buổi tập tiếp theo của bạn",
+      "grading": {
+        "on": "Chấm điểm phần chơi của tôi",
+        "off": "Chỉ chơi, không chấm điểm",
+        "ask": "Hỏi mỗi buổi"
+      }
     },
     "hints": {
       "dismiss": "Đã hiểu",
@@ -280,7 +295,9 @@
         },
         "take": {
           "title": "Bắt đầu lượt",
-          "body": "Khi sẵn sàng, hãy bắt đầu một lượt. Yames lắng nghe và chấm nhịp và nốt của bạn. Chậm hơn và Nhanh hơn đổi tempo."
+          "body": "Khi sẵn sàng, hãy bắt đầu một lượt. Yames lắng nghe và chấm nhịp và nốt của bạn. Chậm hơn và Nhanh hơn đổi tempo.",
+          "bodyOff": "Khi sẵn sàng, hãy bắt đầu. Chấm điểm đang tắt: tiếng click và hình ảnh, không chấm gì. Chậm hơn và Nhanh hơn đổi tempo.",
+          "bodyAsk": "Khi sẵn sàng, hãy bắt đầu một lượt: có chấm điểm khi Yames nghe, hoặc chỉ chơi. Bạn chọn. Chậm hơn và Nhanh hơn đổi tempo."
         },
         "blocks": {
           "title": "Các khối hôm nay",
@@ -288,7 +305,9 @@
         },
         "progress": {
           "title": "Tempo sạch",
-          "body": "Tiến bộ tính tempo sạch: tempo nhanh nhất bạn đạt chuẩn, không chỉ tempo nhanh nhất bạn đã chơi. Đó là con số cần tăng."
+          "body": "Tiến bộ tính tempo sạch: tempo nhanh nhất bạn đạt chuẩn, không chỉ tempo nhanh nhất bạn đã chơi. Đó là con số cần tăng.",
+          "bodyOff": "Tiến bộ giữ số phút, chuỗi ngày và các tempo bạn đã chơi. Khi bật chấm điểm, có thêm tempo sạch của bạn.",
+          "bodyAsk": "Tiến bộ tính tempo sạch: tempo nhanh nhất bạn đạt chuẩn, không chỉ tempo nhanh nhất bạn đã chơi. Đó là con số cần tăng."
         }
       }
     },

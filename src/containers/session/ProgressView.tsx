@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 import type { PathTakeRow } from "../../ipc";
 import type { PathDoc } from "../../paths/format";
 import { barLengthTicks } from "../../paths/format";
-import { calendarDaysBetween, currentStepOf, factsOf, sessionKeyOf } from "../../session/progress";
+import { calendarDaysBetween, currentStepOf, factsOf, isUngradedTake, sessionKeyOf } from "../../session/progress";
 import { findExercise } from "../../session/packs";
 import { CLEAN_TEMPO_MIN_BARS } from "../../session/grade";
 import type { SessionRun } from "./hooks/useSessionRun";
@@ -32,6 +32,10 @@ type Series = {
   /** Evenness per heard Take, oldest first. */
   evenness: number[];
   takes: number;
+  /** Takes played without grading, by choice or not. */
+  ungraded: number;
+  /** The fastest tempo played, graded or not: what an ungraded player has to go by. */
+  topPlayed: number;
   lastAt: number;
 };
 
@@ -41,6 +45,10 @@ type PathGroup = {
   /** The Path's top clean tempo each time it rose, oldest first, whichever Exercise set it. */
   clean: Point[];
   takes: number;
+  /** Every Take on it was played without grading. */
+  allUngraded: boolean;
+  /** The fastest tempo played on it, graded or not. */
+  topPlayed: number;
   lastAt: number;
 };
 
@@ -83,6 +91,8 @@ export function groupsFrom(takes: readonly PathTakeRow[], paths: readonly PathDo
         clean,
         evenness,
         takes: list.length,
+        ungraded: list.filter(isUngradedTake).length,
+        topPlayed: Math.max(0, ...list.map((t) => t.bpm)),
         lastAt: list[list.length - 1].startedAt,
       });
     }
@@ -98,6 +108,8 @@ export function groupsFrom(takes: readonly PathTakeRow[], paths: readonly PathDo
       exercises: series,
       clean: rising,
       takes: series.reduce((n, s) => n + s.takes, 0),
+      allUngraded: series.every((s) => s.ungraded === s.takes),
+      topPlayed: Math.max(0, ...series.map((s) => s.topPlayed)),
       lastAt: Math.max(...series.map((s) => s.lastAt)),
     });
   }
@@ -205,10 +217,19 @@ function PathCard({
           height={40}
           label={t("session.progress.pathSparkLabel", { title: path.title })}
         />
-        <div className="session-progress-value" data-none={top === null ? "" : undefined}>
-          {top === null ? "–" : top}
-          <small>{top === null ? t("session.progress.noCleanShort") : t("session.progress.topClean")}</small>
-        </div>
+        {/* Played only without grading: the fastest tempo played, said as
+            that, not an empty clean tempo (owner, 2026-11-18). */}
+        {top === null && group.allUngraded && group.topPlayed > 0 ? (
+          <div className="session-progress-value" data-testid="progress-top-played">
+            {group.topPlayed}
+            <small>{t("session.progress.topPlayed")}</small>
+          </div>
+        ) : (
+          <div className="session-progress-value" data-none={top === null ? "" : undefined}>
+            {top === null ? "–" : top}
+            <small>{top === null ? t("session.progress.noCleanShort") : t("session.progress.topClean")}</small>
+          </div>
+        )}
       </header>
       <ul className="session-prog-rows" role="list">
         {group.exercises.map((s) => {
@@ -219,15 +240,17 @@ function PathCard({
               <div className="session-exercise-text">
                 <div className="session-skill-name">{s.title}</div>
                 <div className="session-quiet">
-                  {clean === undefined
-                    ? t("session.paths.playedNoClean", { count: s.takes })
-                    : t("session.paths.playedClean", { count: s.takes, bpm: clean })}
+                  {s.ungraded === s.takes
+                    ? t("session.paths.playedUngraded", { count: s.takes, bpm: s.topPlayed })
+                    : clean === undefined
+                      ? t("session.paths.playedNoClean", { count: s.takes })
+                      : t("session.paths.playedClean", { count: s.takes, bpm: clean })}
                 </div>
               </div>
               <Spark values={s.evenness} label={t("session.progress.sparkLabel", { title: s.title })} />
               {last === undefined ? (
                 <div className="session-progress-value" data-none="">
-                  <small>{t("session.progress.notGraded")}</small>
+                  <small>{t(s.ungraded === s.takes ? "session.progress.ungraded" : "session.progress.notGraded")}</small>
                 </div>
               ) : (
                 <div className="session-progress-value">
@@ -280,7 +303,11 @@ export function ProgressView({ session, onStart }: { session: SessionRun; onStar
     <div className="session-page session-progress-page" data-testid="progress" data-neck3d={neck3d}>
       <div className="session-rise">
         <h1 className="session-h1">{t("session.progress.title")}</h1>
-        <div className="session-why">{t("session.progress.intro")}</div>
+        {/* Grading off is a way to practise, so the page says what it shows
+            then, plainly, rather than an empty promise of measurements. */}
+        <div className="session-why" data-testid="progress-intro">
+          {t(session.grading === "off" ? "session.progress.introOff" : "session.progress.intro")}
+        </div>
       </div>
       {groups.length === 0 ? (
         <EmptyProgress onStart={onStart} />
@@ -300,7 +327,7 @@ export function ProgressView({ session, onStart }: { session: SessionRun; onStar
                 i={i + 4}
                 // Inside the card whose number it explains, not floating under
                 // the stack (acceptance P2-12).
-                footnote={i === 0 ? t("session.progress.cleanMeans") : undefined}
+                footnote={i === 0 && groups.some((g) => !g.allUngraded) ? t("session.progress.cleanMeans") : undefined}
               />
             ))}
           </div>

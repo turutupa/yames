@@ -20,6 +20,7 @@ import type { PathDoc } from "../../paths/format";
 import type { SessionPlan } from "../../session/planner";
 import type { PlayerProgress } from "../../session/progress";
 import type { SubscribeRefusal } from "../session/hooks/useSessionRun";
+import type { GradingChoice } from "../../session/grading";
 import type { OnboardingContext, StepId } from "./onboardingMachine";
 
 /**
@@ -95,6 +96,13 @@ export type WizardLearningEnv = {
   plan: SessionPlan | null;
   /** Subscribe to a Path and start it at a Level, in one write. */
   startPath: (path: PathDoc, level: string | null) => SubscribeRefusal;
+  /**
+   * Whether Yames grades the player (`session/grading.ts`), asked on W5:
+   * "Should Yames listen to your playing and grade it?". Optional: a caller
+   * with no Session leaves both out, and W5 then asks without keeping it.
+   */
+  grading?: GradingChoice;
+  setGrading?: (next: GradingChoice) => void;
 };
 
 export type WizardEnv = {

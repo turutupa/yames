@@ -3,8 +3,13 @@
  * (`.preview/practice-review/designer/mock.html`, owner 2026-11-17: "looks
  * very good"; beta 5 did not look like it):
  *
- *   WARM-UP · NOT GRADED   A melody up one string            [Neck|Runway|Tab]
+ *   WARM-UP · NOT GRADED                                       [Neck|Runway|Tab]
+ *   A melody up one string
  *   1:43 left   70 BPM                      • Bar 2 of 4 · let the click carry you.
+ *
+ * The kicker over the title, on every width (owner, 2026-11-18: "on desktop
+ * the title could be split onto 2 lines for better readability"); the phone
+ * already read that way. A long title wraps inside its column.
  *
  * A compact head, so the picture under it gets the height; the big clock and
  * the big tempo of beta 5 are gone while it plays. The tempo has its - and +
@@ -17,10 +22,12 @@ import type { ReactNode, RefObject } from "react";
 
 /** The head row's column gap (session.css `.practice-head-row`). */
 const ROW_GAP = 18;
+/** Width the kicker and title may take before the switch gives up its words; past it the title wraps. */
+const TEXT_ROOM = 420;
 
 /**
- * Keeps Neck · Runway · Tab on the title's row (acceptance pass 3 P2-3): where
- * the kicker, the title and the switch with its words do not fit on one line
+ * Keeps Neck · Runway · Tab beside the kicker and title (acceptance pass 3
+ * P2-3): where the switch with its words would leave the title too little room
  * (1024 px in Russian, say), the switch drops its words and keeps its icons,
  * rather than wrapping onto a line of its own and taking the neck's height.
  * Measured, not guessed from a breakpoint: what fits depends on the language.
@@ -45,11 +52,13 @@ function useTightHead(row: RefObject<HTMLDivElement>) {
       // Measured with its words, then set.
       el.removeAttribute("data-tight");
       sw.removeAttribute("data-compact");
-      const need =
-        natural(el.querySelector<HTMLElement>(".practice-kick")) +
-        natural(el.querySelector<HTMLElement>(".practice-title")) +
-        sw.scrollWidth +
-        ROW_GAP * 3;
+      // Stacked, the text needs only its longer line, and a long title may
+      // wrap: room for it up to TEXT_ROOM is enough.
+      const text = Math.max(
+        natural(el.querySelector<HTMLElement>(".practice-kick")),
+        natural(el.querySelector<HTMLElement>(".practice-title")),
+      );
+      const need = Math.min(text, TEXT_ROOM) + sw.scrollWidth + ROW_GAP * 2;
       const tight = need > el.clientWidth;
       el.toggleAttribute("data-tight", tight);
       sw.toggleAttribute("data-compact", tight);
@@ -99,8 +108,10 @@ export function PracticeHead({
   return (
     <div className="practice-head" data-testid="practice-head">
       <div className="practice-head-row" ref={top}>
-        <span className="session-kick practice-kick">{kick}</span>
-        <h2 className="practice-title">{title}</h2>
+        <div className="practice-head-text">
+          <span className="session-kick practice-kick">{kick}</span>
+          <h2 className="practice-title">{title}</h2>
+        </div>
         <span className="practice-grow" />
         {aside}
       </div>

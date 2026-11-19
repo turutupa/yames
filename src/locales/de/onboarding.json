@@ -149,6 +149,15 @@
         "guidance": "Ein Interface oder ein Klinkenadapter ist besser, aber das Mikrofon des Handys geht auch: leg es nah an die Gitarre, nicht in die Tasche.",
         "noDevices": "Kein Eingang gefunden. Steck das Interface oder den Adapter ein; erscheint es nicht, zieh es ab und steck es neu ein.",
         "permission": "Mikrofonzugriff: Android-Einstellungen › Apps › Yames › Berechtigungen › Mikrofon, dann Zulassen. Ein USB-Interface oder Klinkenadapter braucht dieselbe Berechtigung."
+      },
+      "ask": {
+        "title": "Soll Yames deinem Spiel zuhören und es bewerten?",
+        "subtitle": "So oder so bekommst du deinen Plan, den Klick und das Bild. Du kannst es jederzeit in den Einstellungen ändern.",
+        "yes": "Ja, bewerte mein Spiel",
+        "yesDesc": "Yames hört über ein Mikrofon oder einen direkten Eingang zu und prüft Timing und Töne. Als Nächstes richtest du es ein.",
+        "no": "Nein, nur Klick und Bild",
+        "noDesc": "Nichts hört zu, und kein Mikrofon wird angefragt. Minuten und Serie zählen trotzdem.",
+        "noNote": "Sessions laufen ohne Bewertung. Du kannst sie in jeder Session oder in den Einstellungen einschalten."
       }
     },
     "hearItWork": {
@@ -175,7 +184,8 @@
         "sound": "Klick-Sound",
         "theme": "Design",
         "control": "Steuerung",
-        "input": "Audioeingang"
+        "input": "Audioeingang",
+        "grading": "Bewertung"
       },
       "controlKeyboard": "Tastatur",
       "controlFootswitch": "Fußschalter",
@@ -186,7 +196,12 @@
       "tour": "Zeig mir alles",
       "moreOnToday": "+{{count}} weitere unter Heute",
       "subtitleNext": "Deine nächste Session wartet unter Heute. Ändere hier etwas – oder später in den Einstellungen.",
-      "nextSession": "Deine nächste Session"
+      "nextSession": "Deine nächste Session",
+      "grading": {
+        "on": "Bewertet mein Spiel",
+        "off": "Einfach spielen, ohne Bewertung",
+        "ask": "In jeder Session fragen"
+      }
     },
     "hints": {
       "dismiss": "Verstanden",
@@ -280,7 +295,9 @@
         },
         "take": {
           "title": "Take starten",
-          "body": "Wenn du so weit bist, starte einen Take. Yames hört zu und bewertet Timing und Töne. Langsamer und Schneller ändern das Tempo."
+          "body": "Wenn du so weit bist, starte einen Take. Yames hört zu und bewertet Timing und Töne. Langsamer und Schneller ändern das Tempo.",
+          "bodyOff": "Wenn du so weit bist, starte. Die Bewertung ist aus: Klick und Bild, nichts wird bewertet. Langsamer und Schneller ändern das Tempo.",
+          "bodyAsk": "Wenn du so weit bist, starte einen Take: bewertet, mit Yames als Zuhörer, oder einfach gespielt. Du entscheidest. Langsamer und Schneller ändern das Tempo."
         },
         "blocks": {
           "title": "Die Blöcke von heute",
@@ -288,7 +305,9 @@
         },
         "progress": {
           "title": "Sauberes Tempo",
-          "body": "Fortschritt zählt sauberes Tempo: das schnellste, bei dem du die Latte geschafft hast, nicht nur das schnellste, das du gespielt hast. Diese Zahl soll wachsen."
+          "body": "Fortschritt zählt sauberes Tempo: das schnellste, bei dem du die Latte geschafft hast, nicht nur das schnellste, das du gespielt hast. Diese Zahl soll wachsen.",
+          "bodyOff": "Fortschritt zeigt deine Minuten, deine Serie und die Tempos, die du gespielt hast. Mit Bewertung kommt dein sauberes Tempo dazu.",
+          "bodyAsk": "Fortschritt zählt sauberes Tempo: das schnellste, bei dem du die Latte geschafft hast, nicht nur das schnellste, das du gespielt hast. Diese Zahl soll wachsen."
         }
       }
     },

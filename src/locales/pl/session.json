@@ -213,7 +213,8 @@
       "benchmark": "Punkt odniesienia, dzień {{day}}: za każdym razem to samo ćwiczenie w {{bpm}} BPM, do porównania.",
       "yourTurn": "Twoja kolej: {{exercise}}. Jeszcze niesprawdzane, więc oceniasz sam.",
       "newFromSibling": "Nowe. Zaczyna się od {{bpm}} BPM, około 80% twojego czystego tempa {{clean}} BPM w {{sibling}}.",
-      "focusChosen": "Na dziś wybrano {{path}}, więc cała sesja pochodzi z tej ścieżki."
+      "focusChosen": "Na dziś wybrano {{path}}, więc cała sesja pochodzi z tej ścieżki.",
+      "playedUngraded": "Tam, gdzie skończyłeś: {{bpm}} BPM."
     },
     "bar": {
       "summary": "Poprzeczka: {{even}}% równości i {{heard}}% usłyszanych nut, przy {{bpm}} BPM."
@@ -258,7 +259,8 @@
       "fasterCeiling": "To już najszybsze tempo tego ćwiczenia",
       "tempoLocked": "Test gra się w tempie zaliczenia, więc się nie zmienia",
       "previous": "Wstecz",
-      "previousFirst": "To pierwszy blok, przed nim nic nie ma"
+      "previousFirst": "To pierwszy blok, przed nim nic nie ma",
+      "playUngraded": "Start, {{bpm}} BPM"
     },
     "result": {
       "kick": "Podejście {{take}} · {{title}} · {{bpm}} BPM · takty: {{bars}}",
@@ -482,7 +484,11 @@
       "levelSubscribed": "Subskrybowane · start od kroku {{n}}",
       "inMix": "W moim codziennym miksie",
       "inMixHelp": "Wyłączone: Dziś pomija tę ścieżkę w codziennym miksie. Postępy zostają i nadal można ją wybrać na jeden dzień.",
-      "focusToday": "Ćwicz dziś tylko tę"
+      "focusToday": "Ćwicz dziś tylko tę",
+      "playedUngraded": "{{count}} podejście, do {{bpm}} BPM.",
+      "playedUngraded_few": "{{count}} podejścia, do {{bpm}} BPM.",
+      "playedUngraded_many": "{{count}} podejść, do {{bpm}} BPM.",
+      "playedUngraded_other": "{{count}} podejścia, do {{bpm}} BPM."
     },
     "progress": {
       "title": "Postępy",
@@ -498,7 +504,10 @@
       "notGraded": "Jeszcze nieoceniane",
       "emptyTitle": "Twoje postępy zaczynają się od jednej sesji",
       "emptyBody": "Zagraj dzisiejszą sesję, a pojawi się tutaj: minuty gry, twoja seria i czyste tempo każdego ćwiczenia, wszystko zmierzone z twojej gry.",
-      "emptyStart": "Zacznij dzisiejszą sesję"
+      "emptyStart": "Zacznij dzisiejszą sesję",
+      "introOff": "Ocena jest wyłączona, więc tu jest to, co grałeś: twoje minuty, sesje i zagrane tempa.",
+      "topPlayed": "najwyższe zagrane BPM",
+      "ungraded": "Bez oceny"
     },
     "settings": {
       "openOnLastTool": "Otwieraj na ostatnim narzędziu",
@@ -645,7 +654,7 @@
       "fellBack": "Wybrane wejście nie jest podłączone, więc w tej sesji słucham: {{device}}.",
       "defaultDevice": "domyślne wejście",
       "chooseInput": "Wybierz wejście",
-      "playUngraded": "Graj bez oceny",
+      "playUngraded": "Zagraj tylko to",
       "notGraded": "Bez oceny",
       "turnOn": "Włącz wejście",
       "noSignal": "Brak sygnału",
@@ -655,17 +664,33 @@
         "noAnswer": "Wejście nie odpowiedziało. Jeśli jest otwarte okno z prośbą o zgodę, odpowiedz, a potem naciśnij Start jeszcze raz.",
         "busy": "Inna aplikacja używa wejścia. Zamknij ją, a potem naciśnij Start jeszcze raz.",
         "other": "Wejście się nie uruchomiło. Sprawdź je albo wybierz inne."
-      },
-      "gradingOff": "Ocena wyłączona",
-      "turnOnGrading": "Włącz ocenę"
+      }
     },
     "ungraded": {
       "ready": "Bez oceny: wejście jest wyłączone, więc w tej sesji nie słucham.",
-      "readyOff": "Bez oceny: ocena jest wyłączona w Ustawieniach.",
       "result": "Bez oceny: wejście było wyłączone",
-      "resultOff": "Bez oceny: ocena jest wyłączona w Ustawieniach",
+      "resultOff": "Zagrane, bez oceny",
       "body": "Liczy się jako ćwiczenie, do minut i serii. Czyste tempo i kroki rosną tylko po ocenionych podejściach.",
-      "recap": "bez oceny"
+      "recap": "bez oceny",
+      "bodyOff": "Liczy się do twoich minut i serii."
+    },
+    "ask": {
+      "graded": "Zacznij podejście, {{bpm}} BPM · z oceną",
+      "justPlay": "Po prostu graj",
+      "remember": "Zapamiętaj mój wybór",
+      "line": "Z oceną słucham przez twój mikrofon lub wejście. Albo po prostu graj: klik i obraz, bez oceny."
+    },
+    "grademe": {
+      "fix": "Oceń mnie",
+      "why": "Będę słuchać przez twój mikrofon lub wejście i ocenię timing i dźwięki.",
+      "session": "Ta sesja",
+      "always": "Zawsze"
+    },
+    "meter": {
+      "silent": "Poziom wejścia: brak sygnału",
+      "low": "Poziom wejścia: niski",
+      "good": "Poziom wejścia: dobry",
+      "high": "Poziom wejścia: wysoki"
     }
   }
 }

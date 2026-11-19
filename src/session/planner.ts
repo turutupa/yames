@@ -99,6 +99,8 @@ const MIN_WARMUP_BPM = 40;
 export type ReasonCode =
   | "firstEver"
   | "newExercise"
+  /** Played only without grading: where the player left it (owner, 2026-11-18). */
+  | "playedUngraded"
   /** New, but started from a sibling's clean tempo rather than the first rung. */
   | "newFromSibling"
   | "newStep"
@@ -262,6 +264,12 @@ export type PlannerInput = {
    * focus block grows. Absent: the plan is exactly what it always was.
    */
   focused?: boolean;
+  /**
+   * The player chose to play without grading (owner, 2026-11-18): no
+   * placement climb, which only means anything when it is graded. A new Path
+   * starts on its first Exercise like any other.
+   */
+  ungraded?: boolean;
 };
 
 /** How many rungs to come down after this long away. */
@@ -341,6 +349,14 @@ export function tempoFor(path: PathDoc, exercise: Exercise, progress: PlayerProg
   const takes = takesOf(progress, path.id, exercise.id).filter((t) => !isUngradedTake(t));
   const passAt = exercise.tempo.passAtBpm ?? firstRung(exercise);
   const values = { exercise: exercise.title };
+
+  // Played, but only without grading: not new, and the tempo is the one the
+  // player chose last time. Practice is practice (owner, 2026-11-18).
+  const played = takesOf(progress, path.id, exercise.id);
+  if (takes.length === 0 && played.length > 0) {
+    const bpm = played[0].bpm;
+    return { bpm, why: { code: "playedUngraded", values: { ...values, bpm } } };
+  }
 
   if (takes.length === 0) {
     const sibling = siblingStart(path, exercise, progress);
@@ -948,7 +964,7 @@ export function planSession(input: PlannerInput): SessionPlan {
   if (yourPick && focusMinutes - YOUR_TURN_MINUTES >= MIN_BLOCK_MINUTES) focusMinutes -= YOUR_TURN_MINUTES;
 
   const focusIndex = steps.length;
-  if (isNewPath(progress, focusPath.id)) {
+  if (isNewPath(progress, focusPath.id) && !input.ungraded) {
     const placed = placementStep(placementPicks(focusPath, progress), progress, focusMinutes, "focus", turn);
     if (placed) steps.push(placed);
   } else {
@@ -1066,7 +1082,7 @@ export function planSession(input: PlannerInput): SessionPlan {
       if (head) {
         used.add(key(head));
         const context = mood === "first" ? undefined : headContext(other, false);
-        if (isNewPath(progress, other.id)) {
+        if (isNewPath(progress, other.id) && !input.ungraded) {
           const placed = placementStep(placementPicks(other, progress), progress, mins, id, context);
           if (placed) {
             steps.push(placed);

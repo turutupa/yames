@@ -450,7 +450,15 @@
       "view": "Visualização de prática",
       "viewHint": "O que uma sessão mostra enquanto você toca.",
       "grade": "Avaliar meu toque",
-      "gradeHint": "Desligado: as sessões não ouvem e não avaliam nada. Seus minutos e sua sequência continuam contando."
+      "gradeHint": "Se o Yames escuta o seu toque. Você também pode mudar em qualquer sessão.",
+      "grading": {
+        "on": "Me avalie",
+        "onHint": "O Yames escuta pelo seu microfone ou entrada e avalia seu tempo e suas notas.",
+        "off": "Só tocar",
+        "offHint": "O clique e a imagem. Nada escuta e nada é avaliado.",
+        "ask": "Pergunte",
+        "askHint": "Cada sessão pergunta antes da primeira tomada, até você escolher."
+      }
     }
   },
   "keybindings": {

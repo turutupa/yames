@@ -2736,3 +2736,53 @@
     padding: 16px 14px;
   }
 }
+
+/* Settings → Practice → Grade my playing: three answers, each with its line
+   (owner, 2026-11-18). The label above, the choices across the row's width. */
+.setting-row-block {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+.setting-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+}
+.setting-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 10px 12px;
+  text-align: left;
+  font: inherit;
+  border-radius: var(--radius, 8px);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 14%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.setting-choice b {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.setting-choice span {
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
+.setting-choice.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+@media (hover: hover) {
+  .setting-choice:not(.active):hover {
+    border-color: color-mix(in srgb, var(--text-primary) 30%, transparent);
+  }
+}
+.setting-choice:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

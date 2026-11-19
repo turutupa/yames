@@ -57,6 +57,12 @@ export type TourStop = {
    * The card points at the first. `target` still lists everything.
    */
   groups?: string[];
+  /**
+   * Its body depends on whether the player is graded (owner, 2026-11-18):
+   * `.bodyOff` for a player who chose to just play, `.bodyAsk` for one who has
+   * not chosen yet, `.body` otherwise.
+   */
+  byGrading?: boolean;
 };
 
 /** The selector a stop spotlights. */
@@ -110,6 +116,7 @@ export const LEARN_STOPS: TourStop[] = [
     id: "session-take",
     view: "session",
     i18nKey: "learn.take",
+    byGrading: true,
     keys: ["session-go", "session-slower", "session-faster"],
     target: '[data-testid="session-big"], .session-nudges',
   },
@@ -133,6 +140,7 @@ export const LEARN_STOPS: TourStop[] = [
     id: "progress",
     view: "progress",
     i18nKey: "learn.progress",
+    byGrading: true,
     keys: ["tab-progress"],
     target: '.session-prog-paths > :first-child, [data-testid="progress-empty"]',
   },

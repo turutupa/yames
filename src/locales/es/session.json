@@ -212,7 +212,8 @@
       "benchmark": "Referencia, día {{day}}: el mismo ejercicio a {{bpm}} BPM cada vez, para comparar.",
       "yourTurn": "Tu turno: {{exercise}}. Aún no se comprueba, así que lo juzgas tú.",
       "newFromSibling": "Nuevo. Empieza a {{bpm}} BPM, cerca del 80 % de tu tempo limpio de {{clean}} BPM en {{sibling}}.",
-      "focusChosen": "Elegiste {{path}} para hoy, así que toda la sesión sale de ahí."
+      "focusChosen": "Elegiste {{path}} para hoy, así que toda la sesión sale de ahí.",
+      "playedUngraded": "Donde lo dejaste: {{bpm}} BPM."
     },
     "bar": {
       "summary": "El listón: {{even}}% de regularidad y {{heard}}% de las notas oídas, a {{bpm}} BPM."
@@ -257,7 +258,8 @@
       "fasterCeiling": "Ya es el tempo más rápido de este ejercicio",
       "tempoLocked": "Una prueba se toca al tempo de aprobado, así que no cambia",
       "previous": "Anterior",
-      "previousFirst": "Este es el primer bloque: no hay nada antes"
+      "previousFirst": "Este es el primer bloque: no hay nada antes",
+      "playUngraded": "Empezar, {{bpm}} BPM"
     },
     "result": {
       "kick": "Toma {{take}} · {{title}} · {{bpm}} BPM · {{bars}} compases",
@@ -470,7 +472,10 @@
       "levelSubscribed": "Suscrito · empiezas en el paso {{n}}",
       "inMix": "En mi mezcla diaria",
       "inMixHelp": "Desactivado: Hoy la deja fuera de tu mezcla diaria. Tu progreso se queda, y aún puedes elegirla para un día.",
-      "focusToday": "Practicar solo esta hoy"
+      "focusToday": "Practicar solo esta hoy",
+      "playedUngraded": "{{count}} toma, hasta {{bpm}} BPM.",
+      "playedUngraded_many": "{{count}} tomas, hasta {{bpm}} BPM.",
+      "playedUngraded_other": "{{count}} tomas, hasta {{bpm}} BPM."
     },
     "progress": {
       "title": "Progreso",
@@ -486,7 +491,10 @@
       "notGraded": "Aún sin calificar",
       "emptyTitle": "Tu progreso empieza con una sesión",
       "emptyBody": "Toca la sesión de hoy y aparecerá aquí: minutos tocados, tu racha y el tempo limpio de cada ejercicio, todo medido de lo que tocas.",
-      "emptyStart": "Empezar la sesión de hoy"
+      "emptyStart": "Empezar la sesión de hoy",
+      "introOff": "La evaluación está desactivada, así que esto es lo que tocaste: tus minutos, tus sesiones y los tempos que tocaste.",
+      "topPlayed": "BPM más alto tocado",
+      "ungraded": "Sin evaluar"
     },
     "settings": {
       "openOnLastTool": "Abrir en mi última herramienta",
@@ -632,7 +640,7 @@
       "fellBack": "Tu entrada elegida no está conectada, así que en esta sesión escucho {{device}}.",
       "defaultDevice": "tu entrada predeterminada",
       "chooseInput": "Elegir entrada",
-      "playUngraded": "Tocar sin evaluar",
+      "playUngraded": "Tocar solo esta",
       "notGraded": "Sin evaluar",
       "turnOn": "Activar la entrada",
       "noSignal": "Sin señal",
@@ -642,17 +650,33 @@
         "noAnswer": "La entrada no respondió. Si hay un aviso de permisos abierto, respóndelo y pulsa Empezar de nuevo.",
         "busy": "Otra app está usando tu entrada. Ciérrala y pulsa Empezar de nuevo.",
         "other": "Tu entrada no arrancó. Revísala o elige otra."
-      },
-      "gradingOff": "Evaluación desactivada",
-      "turnOnGrading": "Activar la evaluación"
+      }
     },
     "ungraded": {
       "ready": "Sin evaluar: la entrada está apagada, así que no escucho en esta sesión.",
-      "readyOff": "Sin evaluar: la evaluación está desactivada en Ajustes.",
       "result": "Sin evaluar: la entrada estaba apagada",
-      "resultOff": "Sin evaluar: la evaluación está desactivada en Ajustes",
+      "resultOff": "Tocada, sin evaluar",
       "body": "Cuenta como práctica, para tus minutos y tu racha. El tempo limpio y los pasos solo avanzan con tomas evaluadas.",
-      "recap": "sin evaluar"
+      "recap": "sin evaluar",
+      "bodyOff": "Cuenta para tus minutos y tu racha."
+    },
+    "ask": {
+      "graded": "Empezar toma, {{bpm}} BPM · evaluada",
+      "justPlay": "Solo tocar",
+      "remember": "Recordar mi elección",
+      "line": "Evaluada, escucho por tu micrófono o tu entrada. O solo toca: el clic y la imagen, sin evaluar."
+    },
+    "grademe": {
+      "fix": "Evalúame",
+      "why": "Escucharé por tu micrófono o tu entrada y evaluaré tu tiempo y tus notas.",
+      "session": "Esta sesión",
+      "always": "Siempre"
+    },
+    "meter": {
+      "silent": "Nivel de entrada: sin señal",
+      "low": "Nivel de entrada: bajo",
+      "good": "Nivel de entrada: bueno",
+      "high": "Nivel de entrada: alto"
     }
   }
 }

@@ -56,6 +56,8 @@ type Options = {
   selectedChannel?: number;
   spectrum?: AudioSpectrum | null;
   instrument?: string;
+  /** The player's grading choice going in; graded unless a test says otherwise. */
+  grading?: "on" | "off" | "ask";
 };
 
 function makeEvaluation(options: Options = {}): WizardEvaluationEnv {
@@ -76,6 +78,15 @@ function makeEvaluation(options: Options = {}): WizardEvaluationEnv {
 
 function harness(options: Options = {}) {
   const dispatch = vi.fn();
+  const setGrading = vi.fn();
+  const learning = {
+    paths: [],
+    progress: { states: [], takes: [], ceilings: [], unsubscribed: [] },
+    plan: null,
+    startPath: () => null,
+    grading: options.grading ?? "on",
+    setGrading,
+  };
   const evaluation = makeEvaluation(options);
   const ui = (evalEnv: WizardEvaluationEnv) => (
     <OnboardingWizard
@@ -95,9 +106,10 @@ function harness(options: Options = {}) {
       softClickPlaying={false}
       onFinish={vi.fn()}
       evaluation={evalEnv}
+      learning={learning}
     />
   );
-  return { dispatch, evaluation, ui };
+  return { dispatch, evaluation, ui, setGrading };
 }
 
 /** Mount, then optionally feed the meter and let the hold timer run. */
@@ -468,6 +480,63 @@ describe("W5 — when the guitar is not heard", () => {
       vi.advanceTimersByTime(SIGNAL_HOLD_MS + 200);
     });
     expect(screen.queryByTestId("audio-input-trouble")).toBeNull();
+    expect(next()).toBeEnabled();
+  });
+});
+
+describe("W5 — should Yames listen and grade? (owner, 2026-11-18)", () => {
+  it("a new player is asked first: two equal answers, no stream opened, Next off", () => {
+    const { evaluation } = mount({ grading: "ask" });
+    expect(screen.getByText("Should Yames listen to your playing and grade it?")).toBeInTheDocument();
+    expect(screen.getByTestId("audio-input-grade-yes")).toHaveTextContent("Yes, grade my playing");
+    expect(screen.getByTestId("audio-input-grade-no")).toHaveTextContent("No, just the click and the visuals");
+    expect(screen.queryByTestId("audio-input-setup")).toBeNull();
+    expect(evaluation.setListening).not.toHaveBeenCalled();
+    expect(next()).toBeDisabled();
+  });
+
+  it("No skips the input setup entirely, asks for no microphone, and Next sets grading off", () => {
+    const { evaluation, dispatch, setGrading } = mount({ grading: "ask" });
+    act(() => {
+      screen.getByTestId("audio-input-grade-no").click();
+    });
+    expect(screen.queryByTestId("audio-input-setup")).toBeNull();
+    expect(evaluation.setListening).not.toHaveBeenCalled();
+    // Selecting is never navigating.
+    expect(dispatch).not.toHaveBeenCalledWith({ type: "NEXT" });
+    expect(next()).toBeEnabled();
+    act(() => {
+      next().click();
+    });
+    expect(setGrading).toHaveBeenCalledWith("off");
+    expect(dispatch).toHaveBeenCalledWith({ type: "SET_CONTEXT", patch: { inputConfigured: false } });
+    expect(dispatch).toHaveBeenCalledWith({ type: "NEXT" });
+  });
+
+  it("Yes opens the input setup, and Next once heard sets grading on", () => {
+    const h = harness({ grading: "ask" });
+    const view = render(h.ui(h.evaluation));
+    act(() => {
+      screen.getByTestId("audio-input-grade-yes").click();
+    });
+    expect(screen.getByTestId("audio-input-setup")).toBeInTheDocument();
+    expect(h.evaluation.setListening).toHaveBeenCalledWith(true);
+    expect(next()).toBeDisabled();
+    view.rerender(h.ui({ ...h.evaluation, spectrum: LOUD }));
+    act(() => {
+      vi.advanceTimersByTime(SIGNAL_HOLD_MS);
+    });
+    act(() => {
+      next().click();
+    });
+    expect(h.setGrading).toHaveBeenCalledWith("on");
+    expect(h.dispatch).toHaveBeenCalledWith({ type: "SET_CONTEXT", patch: { inputConfigured: true } });
+  });
+
+  it("a re-run starts on the answer that is live: off shows No, with no setup", () => {
+    mount({ grading: "off" });
+    expect(screen.getByTestId("audio-input-grade-no").getAttribute("aria-checked")).toBe("true");
+    expect(screen.queryByTestId("audio-input-setup")).toBeNull();
     expect(next()).toBeEnabled();
   });
 });

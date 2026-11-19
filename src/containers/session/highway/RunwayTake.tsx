@@ -21,7 +21,7 @@ import type { SessionRun } from "../hooks/useSessionRun";
 import { fingeredNotes, kindOfMark, useNeckSlot, useNeckTake, zoomOf } from "../hooks/useNeck";
 import type { TimingMark } from "../../songs/review/marks";
 import { lineText } from "../lineText";
-import { CoachLine, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart } from "../parts";
+import { AskStart, CoachLine, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart } from "../parts";
 import { Runway } from "./Runway";
 import { ghostNeck, runwayModel } from "./runwayModel";
 import type { Judged } from "./runwayModel";
@@ -170,14 +170,17 @@ export function RunwayTakeScreen({
       data-view="runway"
       data-theory={theory ? "" : undefined}
     >
+      {/* The kicker over the title, as on the neck's head (owner, 2026-11-18). */}
       <div className="session-takeinfo">
-        <span className="session-kick">
-          {kind}
-          {pathTitle && ` · ${t("session.run.pathStep", { path: pathTitle.title, step: stepNumber ?? 1 })}`}
-        </span>
-        <h2 className="session-h3">{exercise.title}</h2>
-        {/* What the Exercise is, not the planner's reason (UX audit TODAY-8). */}
-        {!running && <span className="session-why">{exercise.purpose}</span>}
+        <div className="session-takeinfo-text">
+          <span className="session-kick">
+            {kind}
+            {pathTitle && ` · ${t("session.run.pathStep", { path: pathTitle.title, step: stepNumber ?? 1 })}`}
+          </span>
+          <h2 className="session-h3">{exercise.title}</h2>
+          {/* What the Exercise is, not the planner's reason (UX audit TODAY-8). */}
+          {!running && <span className="session-why">{exercise.purpose}</span>}
+        </div>
         <PracticeViewSwitch
           view={session.practiceView}
           onChange={session.setPracticeView}
@@ -244,7 +247,10 @@ export function RunwayTakeScreen({
           )}
           {!running && <HandLine position={exercise.position} />}
           {!running && exercise.howTo[0] && <span className="session-why">{exercise.howTo[0]}</span>}
-          {!running && bar && <span className="session-why">{lineText(t, bar)}</span>}
+          {/* The bar is what is graded: not said to a player who chose to just play. */}
+          {!running && bar && run.ungraded !== "gradingOff" && run.ungraded !== "chosen" && (
+            <span className="session-why">{lineText(t, bar)}</span>
+          )}
           {!running && (
             <ReadyInput
               session={session}
@@ -261,17 +267,21 @@ export function RunwayTakeScreen({
           )}
         </div>
         {!running && <TempoNudges run={run} exercise={exercise} session={session} />}
-        <button
-          className="session-big"
-          data-size="mid"
-          onClick={!running && !canStart ? undefined : actions.go}
-          aria-disabled={!running && !canStart ? true : undefined}
-          aria-busy={start.busy ? true : undefined}
-          data-input={!running && start.needsInput ? (start.busy ? "starting" : "off") : undefined}
-          data-testid="session-big"
-        >
-          {running ? bigLabel(big, t) : start.label}
-        </button>
+        {!running && start.ask ? (
+          <AskStart session={session} label={start.label} canStart={canStart} />
+        ) : (
+          <button
+            className="session-big"
+            data-size="mid"
+            onClick={!running && !canStart ? undefined : actions.go}
+            aria-disabled={!running && !canStart ? true : undefined}
+            aria-busy={start.busy ? true : undefined}
+            data-input={!running && start.needsInput ? (start.busy ? "starting" : "off") : undefined}
+            data-testid="session-big"
+          >
+            {running ? bigLabel(big, t) : start.label}
+          </button>
+        )}
       </div>
 
       {live.countingIn && running && (

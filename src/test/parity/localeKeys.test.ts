@@ -26,6 +26,13 @@ const SNAPSHOT = path.resolve(process.cwd(), "src/test/parity/locale-keys.en.jso
  * in the commit. A key listed here must really be gone, so this cannot go stale.
  */
 const DELIBERATELY_REMOVED: readonly string[] = [
+  // Grading is a choice, not a switch (owner, 2026-11-18). Played ungraded
+  // on purpose, the ready screen says nothing about the input ("Not graded:
+  // grading is off in Settings." is gone), and the bar's chip is the quiet
+  // "Not graded · Grade me", so "Grading off" / "Turn on grading" went with it.
+  "session.ungraded.readyOff",
+  "session.input.gradingOff",
+  "session.input.turnOnGrading",
   // W3 leads with the Session's keys under "In a Session" (2026-11-17); the
   // old "Keyboard" heading over the tools' keys has nothing left to head.
   "onboarding.handsFree.keyboard.title",

@@ -149,6 +149,15 @@
         "guidance": "An interface or a jack adapter is better, but the phone's mic works: put it close to the guitar, not in your pocket.",
         "noDevices": "No input found. Plug in the interface or the adapter; if it still does not appear, unplug it and plug it in again.",
         "permission": "Microphone access: Android Settings › Apps › Yames › Permissions › Microphone, then Allow. A USB interface or a jack adapter needs the same permission."
+      },
+      "ask": {
+        "title": "Should Yames listen to your playing and grade it?",
+        "subtitle": "Either way you get your plan, the click and the visuals. You can change this in Settings any time.",
+        "yes": "Yes, grade my playing",
+        "yesDesc": "Yames listens through a mic or direct input and checks your timing and notes. Next, set it up.",
+        "no": "No, just the click and the visuals",
+        "noDesc": "Nothing listens and no microphone is asked for. Your minutes and streak still count.",
+        "noNote": "Sessions will play without grading. You can turn it on from any Session or in Settings."
       }
     },
     "hearItWork": {
@@ -175,7 +184,8 @@
         "sound": "Click sound",
         "theme": "Theme",
         "control": "Control",
-        "input": "Audio input"
+        "input": "Audio input",
+        "grading": "Grading"
       },
       "controlKeyboard": "Keyboard",
       "controlFootswitch": "Footswitch",
@@ -186,7 +196,12 @@
       "tour": "Show me around",
       "moreOnToday": "+{{count}} more on Today",
       "subtitleNext": "Your next Session is ready on Today. Change anything here, or later in Settings.",
-      "nextSession": "Your next session"
+      "nextSession": "Your next session",
+      "grading": {
+        "on": "Grades my playing",
+        "off": "Just play, not graded",
+        "ask": "Ask each Session"
+      }
     },
     "hints": {
       "dismiss": "Got it",
@@ -280,7 +295,9 @@
         },
         "take": {
           "title": "Start take",
-          "body": "When you are ready, start a take. Yames listens and grades your timing and notes. Slower and Faster change the tempo."
+          "body": "When you are ready, start a take. Yames listens and grades your timing and notes. Slower and Faster change the tempo.",
+          "bodyOff": "When you are ready, start. Grading is off, so it's the click and the picture, nothing graded. Slower and Faster change the tempo.",
+          "bodyAsk": "When you are ready, start a take: graded, with Yames listening, or just played. Your choice. Slower and Faster change the tempo."
         },
         "blocks": {
           "title": "Today's blocks",
@@ -288,7 +305,9 @@
         },
         "progress": {
           "title": "Clean tempo",
-          "body": "Progress counts clean tempo: the fastest you met the bar, not just the fastest you played. That is the number to grow."
+          "body": "Progress counts clean tempo: the fastest you met the bar, not just the fastest you played. That is the number to grow.",
+          "bodyOff": "Progress keeps your minutes, your streak and the tempos you played. With grading on it adds your clean tempo.",
+          "bodyAsk": "Progress counts clean tempo: the fastest you met the bar, not just the fastest you played. That is the number to grow."
         }
       }
     },

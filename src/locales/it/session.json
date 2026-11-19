@@ -212,7 +212,8 @@
       "benchmark": "Riferimento, giorno {{day}}: lo stesso esercizio a {{bpm}} BPM ogni volta, per confrontare.",
       "yourTurn": "Tocca a te: {{exercise}}. Non ancora controllato, quindi giudichi tu.",
       "newFromSibling": "Nuovo. Parte da {{bpm}} BPM, circa l’80% del tuo tempo pulito di {{clean}} BPM su {{sibling}}.",
-      "focusChosen": "Hai scelto {{path}} per oggi, quindi tutta la sessione viene da lì."
+      "focusChosen": "Hai scelto {{path}} per oggi, quindi tutta la sessione viene da lì.",
+      "playedUngraded": "Dove l'hai lasciato: {{bpm}} BPM."
     },
     "bar": {
       "summary": "L'asticella: {{even}}% di regolarità e {{heard}}% delle note sentite, a {{bpm}} BPM."
@@ -257,7 +258,8 @@
       "fasterCeiling": "È già il tempo più veloce di questo esercizio",
       "tempoLocked": "Un test si suona al tempo di superamento, quindi resta fisso",
       "previous": "Precedente",
-      "previousFirst": "Questo è il primo blocco, prima non c'è niente"
+      "previousFirst": "Questo è il primo blocco, prima non c'è niente",
+      "playUngraded": "Inizia, {{bpm}} BPM"
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} battute",
@@ -470,7 +472,10 @@
       "levelSubscribed": "Iscritto · si parte dal passo {{n}}",
       "inMix": "Nel mio mix quotidiano",
       "inMixHelp": "Spento: Oggi lo lascia fuori dal tuo mix quotidiano. I tuoi progressi restano, e puoi comunque sceglierlo per un giorno.",
-      "focusToday": "Oggi esercitati solo su questo"
+      "focusToday": "Oggi esercitati solo su questo",
+      "playedUngraded": "{{count}} take, fino a {{bpm}} BPM.",
+      "playedUngraded_many": "{{count}} take, fino a {{bpm}} BPM.",
+      "playedUngraded_other": "{{count}} take, fino a {{bpm}} BPM."
     },
     "progress": {
       "title": "Progressi",
@@ -486,7 +491,10 @@
       "notGraded": "Non ancora valutato",
       "emptyTitle": "I tuoi progressi iniziano con una sessione",
       "emptyBody": "Suona la sessione di oggi e la trovi qui: minuti suonati, la tua serie e il tempo pulito di ogni esercizio, tutto misurato da come suoni.",
-      "emptyStart": "Inizia la sessione di oggi"
+      "emptyStart": "Inizia la sessione di oggi",
+      "introOff": "La valutazione è spenta, quindi qui c'è quello che hai suonato: i minuti, le sessioni e i tempi che hai affrontato.",
+      "topPlayed": "BPM più alto suonato",
+      "ungraded": "Non valutato"
     },
     "settings": {
       "openOnLastTool": "Apri sul mio ultimo strumento",
@@ -632,7 +640,7 @@
       "fellBack": "L'ingresso scelto non è collegato, quindi in questa sessione ascolto {{device}}.",
       "defaultDevice": "il tuo ingresso predefinito",
       "chooseInput": "Scegli l'ingresso",
-      "playUngraded": "Suona senza valutazione",
+      "playUngraded": "Suona solo questa",
       "notGraded": "Non valutato",
       "turnOn": "Attiva l'ingresso",
       "noSignal": "Nessun segnale",
@@ -642,17 +650,33 @@
         "noAnswer": "L'ingresso non ha risposto. Se c'è una richiesta di permesso aperta, rispondi, poi premi di nuovo Inizia.",
         "busy": "Un'altra app sta usando l'ingresso. Chiudila, poi premi di nuovo Inizia.",
         "other": "L'ingresso non è partito. Controllalo o scegline un altro."
-      },
-      "gradingOff": "Valutazione disattivata",
-      "turnOnGrading": "Attiva la valutazione"
+      }
     },
     "ungraded": {
       "ready": "Non valutato: l'ingresso è spento, in questa sessione non ascolto.",
-      "readyOff": "Non valutato: la valutazione è disattivata nelle Impostazioni.",
       "result": "Non valutato: l'ingresso era spento",
-      "resultOff": "Non valutato: la valutazione è disattivata nelle Impostazioni",
+      "resultOff": "Suonata, senza valutazione",
       "body": "Conta come pratica, per i tuoi minuti e la tua serie. Il tempo pulito e gli step avanzano solo con take valutati.",
-      "recap": "non valutato"
+      "recap": "non valutato",
+      "bodyOff": "Conta per i tuoi minuti e la tua serie."
+    },
+    "ask": {
+      "graded": "Avvia la take, {{bpm}} BPM · valutata",
+      "justPlay": "Suona e basta",
+      "remember": "Ricorda la mia scelta",
+      "line": "Valutata, ascolto dal tuo microfono o ingresso. Oppure suona e basta: il clic e l'immagine, niente voto."
+    },
+    "grademe": {
+      "fix": "Valutami",
+      "why": "Ascolterò dal tuo microfono o ingresso e valuterò tempo e note.",
+      "session": "Questa sessione",
+      "always": "Sempre"
+    },
+    "meter": {
+      "silent": "Livello d'ingresso: nessun segnale",
+      "low": "Livello d'ingresso: basso",
+      "good": "Livello d'ingresso: buono",
+      "high": "Livello d'ingresso: alto"
     }
   }
 }

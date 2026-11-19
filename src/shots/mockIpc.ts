@@ -753,8 +753,22 @@ function seededTake(
   };
 }
 
-function sessionSeed(seed: "first" | "returning" | "back" | "three" | "none"): PathStoreSeed {
+function sessionSeed(seed: "first" | "returning" | "back" | "three" | "none" | "ungraded"): PathStoreSeed {
   if (seed === "first") return { states: [], takes: [], ceilings: [] };
+  // The same Takes, every one played without grading (owner, 2026-11-18).
+  if (seed === "ungraded") {
+    const base = sessionSeed("returning");
+    return {
+      states: base.states,
+      takes: base.takes.map((t) => ({
+        ...t,
+        caught: false,
+        passed: false,
+        facts: { verdict: "ungraded", ungraded: "gradingOff", measures: { barsPlayed: t.bars } },
+      })),
+      ceilings: [],
+    };
+  }
   if (seed === "none") return sessionSeed("returning");
   if (seed === "three") return threePaths();
   const away = seed === "back" ? 12 : 1;
@@ -1018,8 +1032,10 @@ export function installShotMock(shot: Shot, theme: string): void {
   }
   if (shot.session?.minutes) store.set("session.minutes", shot.session.minutes);
   if (shot.session?.practiceView) store.set("practiceView", shot.session.practiceView);
-  // Settings → Practice → "Grade my playing", off (owner, 2026-11-18).
-  if (shot.session?.grade === false) store.set("session.grade", false);
+  // Settings → Practice → "Grade my playing" (owner, 2026-11-18). A scene
+  // that does not say is a graded player, as every scene was before the choice;
+  // a first run has not been asked yet.
+  if (!shot.firstRun) store.set("session.grading", shot.session?.grading ?? "on");
   // A Windows interface that came back on another port with another name.
   if (shot.session?.input === "missing") store.set("evaluationDevice", "Scarlett 2i2 USB");
   // Played Alternate Picking, then unsubscribed from it: no Path at all.
@@ -1890,13 +1906,37 @@ export function installShotMock(shot: Shot, theme: string): void {
      * unit tests use, so a green suite and a picture cannot disagree.
      */
     // The first run's level meter: a plucked note every 600 ms, decaying,
-    // while the input is open. Silent on the scene about hearing nothing.
+    // while the input is open. Silent on the scenes about hearing nothing.
+    // A Session scene with a guitar playing into the input (the live level,
+    // owner 2026-11-18): the same plucked notes, with an onset on each.
+    if (cmd === "start_evaluation" && shot.session?.signal) {
+      clearInterval(firstRunMeter);
+      let t = 0;
+      firstRunMeter = setInterval(() => {
+        t += 1;
+        const rms = 0.03 + 0.14 * Math.exp(-((t % 6) / 2));
+        emit("audio-spectrum", { bands: new Array(16).fill(0).map((_, i) => rms * (1.6 - i / 12)), rms });
+        if (t % 6 === 0) emit("beat-feedback", {
+            beatIndex: t / 6,
+            deviationMs: 4,
+            intervalErrorMs: 2,
+            classification: "good",
+            amplitude: 0.2,
+            calibrationOffsetMs: 0,
+            calibrationConfidence: 1,
+            gridCorrelation: 0.9,
+          });
+      }, 100);
+      return null;
+    }
     if (cmd === "start_evaluation" && shot.firstRun) {
       clearInterval(firstRunMeter);
       let t = 0;
       firstRunMeter = setInterval(() => {
         t += 1;
-        const rms = shot.firstRun!.stop === "inputSilent" ? 0.0004 : 0.03 + 0.14 * Math.exp(-((t % 6) / 2));
+        // No device at all hears nothing either: the scene is the trouble panel,
+        // and a meter proving itself under it raced the photograph.
+        const rms = shot.firstRun!.stop === "inputSilent" || shot.firstRun!.stop === "inputNone" ? 0.0004 : 0.03 + 0.14 * Math.exp(-((t % 6) / 2));
         emit("audio-spectrum", { bands: new Array(16).fill(0).map((_, i) => rms * (1.6 - i / 12)), rms });
       }, 100);
       return null;
