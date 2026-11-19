@@ -4992,6 +4992,51 @@ pub(crate) type OutputFormatHint = crate::android_audio::OutputFormat;
 #[cfg(not(target_os = "android"))]
 pub(crate) type OutputFormatHint = u32;
 
+/// The setup's rate check (re-review of card #14, item B): `false`, with the
+/// open failed through `exit`, when a reopen demanded a rate the device no
+/// longer opens at.
+fn setup_rate_or_fail(exit: &mut AudioThreadExit, expected: Option<u32>, actual: u32) -> bool {
+    if crate::output_park::setup_rate_matches(expected, actual) {
+        return true;
+    }
+    exit.fail(format!(
+        "the device now opens at {actual} Hz; what is loaded was decoded at {} Hz",
+        expected.unwrap_or(0)
+    ));
+    false
+}
+
+/// How long `reopen_output` waits for one open's verdict, and for all of
+/// its probing and opening together. Both while holding the engine's lock
+/// on the route thread — which the main thread's commands also take — so
+/// both sit well inside Android's 5 s ANR threshold (final re-review of
+/// card #14). Past the budget the reopen stops trying to keep anything and
+/// takes the plain open, which waits for nothing.
+const REOPEN_WAIT: Duration = Duration::from_millis(750);
+const REOPEN_BUDGET: Duration = Duration::from_millis(2_000);
+
+/// What a waited open came back with.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) enum SetupError {
+    /// The setup said no (or its thread died): it has returned, and joining
+    /// it is immediate.
+    Refused(String),
+    /// No verdict in time. The setup thread may be stuck inside the device
+    /// open, so it must NOT be joined: it is detached with its `alive`
+    /// lowered, and if the open ever returns the thread drops the stream
+    /// unplayed (see the `alive` check after the open).
+    TimedOut,
+}
+
+impl From<SetupError> for String {
+    fn from(e: SetupError) -> String {
+        match e {
+            SetupError::Refused(r) => r,
+            SetupError::TimedOut => "audio output device did not respond".to_string(),
+        }
+    }
+}
+
 /// See `MetronomeEngine::next_spawn`.
 #[derive(Default)]
 pub(crate) struct SpawnHints {
@@ -5218,7 +5263,7 @@ pub struct MetronomeEngine {
     /// Tests: stand in for `reopen_output`'s spawns — the outcomes to
     /// return, in order, and a record of what each was asked.
     #[cfg(test)]
-    reopen_spawns: Option<(std::collections::VecDeque<Result<(), String>>, Vec<SpawnRecord>)>,
+    reopen_spawns: Option<(std::collections::VecDeque<Result<(), SetupError>>, Vec<SpawnRecord>)>,
     thread_handle: Option<thread::JoinHandle<()>>,
     beat_log: BeatLog,
     device_name: Option<String>,
@@ -5300,6 +5345,14 @@ pub struct MetronomeEngine {
     /// machine that has a perfectly good sound card.
     #[cfg(test)]
     force_setup_failure: bool,
+    /// Tests: the setup thread sleeps this long first — a device open that
+    /// hangs.
+    #[cfg(test)]
+    setup_delay: Option<Duration>,
+    /// Tests: stand in for the device's rate, go through the real rate
+    /// check, then fail as a host with no device does.
+    #[cfg(test)]
+    fake_setup_rate: Option<u32>,
 }
 
 impl MetronomeEngine {
@@ -5329,6 +5382,10 @@ impl MetronomeEngine {
             dropped_notifications: Arc::new(AtomicU64::new(0)),
             #[cfg(test)]
             force_setup_failure: false,
+            #[cfg(test)]
+            setup_delay: None,
+            #[cfg(test)]
+            fake_setup_rate: None,
         }
     }
 
@@ -5634,63 +5691,94 @@ impl MetronomeEngine {
     ///
     /// A line of speech kept in its slot is picked up from the top by the
     /// new callback; it cannot have been heard, because a stream is only
-    /// parked with nothing in flight and a dead one sounds nothing. The
-    /// waits hold the engine's lock on the route thread for up to
-    /// `AUDIO_SETUP_TIMEOUT` each, at most two, and only on this path.
+    /// parked with nothing in flight and a dead one sounds nothing.
+    ///
+    /// All of this runs under the engine's lock on the route thread, so it
+    /// is bounded: each probe and each wait by [`REOPEN_WAIT`], all of them
+    /// together by [`REOPEN_BUDGET`], and a timed-out open is detached, never
+    /// joined, and ends the attempts to keep anything.
     #[cfg_attr(not(target_os = "android"), allow(dead_code))]
     pub(crate) fn reopen_output(
         &mut self,
         state: SharedState,
         app_handle: Option<AppHandle>,
-        mut probe: impl FnMut() -> Option<OutputFormatHint>,
+        mut probe: impl FnMut(Duration) -> Option<OutputFormatHint>,
     ) -> Result<ReopenOutcome, String> {
+        let started = std::time::Instant::now();
+        let left = || REOPEN_BUDGET.saturating_sub(started.elapsed());
         let sink = EventSink(app_handle.clone());
         let was_playing = self.playing.load(Ordering::SeqCst);
         let old_rate = self.output_sample_rate();
         self.shutdown_inner(false);
         self.settle_take_end(&sink);
-        let probed = probe().or_else(|| {
+        let mut probed = probe(left().min(REOPEN_WAIT));
+        if probed.is_none() && left() > REOPEN_WAIT {
             thread::sleep(Duration::from_millis(50));
-            probe()
-        });
+            probed = probe(left().min(REOPEN_WAIT));
+        }
         if crate::output_park::reopen_keeps_loaded(old_rate, probed.as_ref().map(hint_rate)) {
+            // Keeping with neither rate known would keep material nobody can
+            // vouch for. A dead stream under a live thread has published its
+            // rate, so this does not happen; say so loudly if it ever does.
+            debug_assert!(
+                old_rate.is_some() || probed.is_some(),
+                "a reopen kept material with no rate known on either side"
+            );
             let expected_rate = if probed.is_none() { old_rate } else { None };
             let first = SpawnHints { format: probed, expected_rate, quiet: true };
-            if self.spawn_for_reopen(&state, &app_handle, was_playing, first, true).is_ok() {
-                return Ok(ReopenOutcome::Kept);
-            }
-            // Refused. Whatever was cached about this device is suspect now.
-            #[cfg(target_os = "android")]
-            forget_output_rate();
-            let fresh = probe();
-            if fresh.as_ref().map(hint_rate).is_some_and(|r| Some(r) == old_rate) {
-                let second = SpawnHints { format: fresh, expected_rate: None, quiet: true };
-                if self.spawn_for_reopen(&state, &app_handle, was_playing, second, true).is_ok() {
-                    return Ok(ReopenOutcome::Kept);
+            match self.spawn_for_reopen(&state, &app_handle, was_playing, first, Some(left())) {
+                Ok(()) => return Ok(ReopenOutcome::Kept),
+                // A hung open: nothing more is tried at the old rate.
+                Err(SetupError::TimedOut) => {}
+                Err(SetupError::Refused(_)) => {
+                    // Whatever was cached about this device is suspect now.
+                    #[cfg(target_os = "android")]
+                    forget_output_rate();
+                    let fresh =
+                        if left().is_zero() { None } else { probe(left().min(REOPEN_WAIT)) };
+                    if !left().is_zero()
+                        && fresh.as_ref().map(hint_rate).is_some_and(|r| Some(r) == old_rate)
+                    {
+                        let second = SpawnHints { format: fresh, expected_rate: None, quiet: true };
+                        if self
+                            .spawn_for_reopen(&state, &app_handle, was_playing, second, Some(left()))
+                            .is_ok()
+                        {
+                            return Ok(ReopenOutcome::Kept);
+                        }
+                    }
                 }
             }
         }
-        // The rate moved, or nothing would open at the old one.
+        // The rate moved, nothing would open at the old one, or the budget
+        // is spent: `set_device`'s path, which waits for nothing.
         self.speech.cut();
         #[cfg(target_os = "android")]
         forget_output_rate();
         let keep_playing = self.drop_decoded_for_new_rate(was_playing, &state, &sink);
-        self.spawn_for_reopen(&state, &app_handle, keep_playing, SpawnHints::default(), false)?;
+        self.spawn_for_reopen(&state, &app_handle, keep_playing, SpawnHints::default(), None)
+            .map_err(String::from)?;
         Ok(ReopenOutcome::Dropped)
     }
 
     /// One of `reopen_output`'s opens: fresh flags (the old thread may still
     /// be unwinding, as in `set_device`), the hints, and either the verdict
-    /// (`wait`) or the app path's "it is trying". A refused waited open is
-    /// joined before the next attempt, so two streams can never be up.
+    /// within `wait` (capped at [`REOPEN_WAIT`]) or, with `None`, the app
+    /// path's "it is trying".
+    ///
+    /// A refused open has returned and is joined, so two streams can never
+    /// be up. A timed-out one is NOT joined — its thread may be stuck in the
+    /// device open, and joining it would hold the engine's lock for as long
+    /// as the device likes: it is detached with its own `alive` lowered, and
+    /// drops its stream unplayed if the open ever returns.
     fn spawn_for_reopen(
         &mut self,
         state: &SharedState,
         app_handle: &Option<AppHandle>,
         playing: bool,
         hints: SpawnHints,
-        wait: bool,
-    ) -> Result<(), String> {
+        wait: Option<Duration>,
+    ) -> Result<(), SetupError> {
         self.alive = Arc::new(AtomicBool::new(false));
         self.playing = Arc::new(AtomicBool::new(playing));
         #[cfg(test)]
@@ -5699,20 +5787,36 @@ impl MetronomeEngine {
                 format_rate: hints.format.as_ref().map(hint_rate),
                 expected_rate: hints.expected_rate,
                 quiet: hints.quiet,
-                waited: wait,
+                waited: wait.is_some(),
             });
             return outcomes.pop_front().unwrap_or(Ok(()));
         }
         self.next_spawn = hints;
-        let r = self.ensure_thread(
+        let r = self.ensure_thread_typed(
             state.clone(),
             app_handle.clone(),
-            if wait { SetupWait::UpTo(AUDIO_SETUP_TIMEOUT) } else { SetupWait::No },
+            match wait {
+                Some(d) => SetupWait::UpTo(d.min(REOPEN_WAIT)),
+                None => SetupWait::No,
+            },
         );
-        if r.is_err() && wait {
-            self.shutdown_inner(false);
+        match r {
+            Err(SetupError::TimedOut) => self.abandon_spawn(),
+            Err(SetupError::Refused(_)) => self.shutdown_inner(false),
+            Ok(()) => {}
         }
         r
+    }
+
+    /// Let go of a spawn whose setup has not answered, without waiting for
+    /// it: its flags down (they are its own `Arc`s), its handle dropped —
+    /// which detaches the thread — and no rate or width left behind for it.
+    fn abandon_spawn(&mut self) {
+        self.playing.store(false, Ordering::SeqCst);
+        self.alive.store(false, Ordering::SeqCst);
+        self.stream_channels.store(0, Ordering::Release);
+        drop(self.thread_handle.take());
+        self.sample_rate.store(0, Ordering::Release);
     }
 
     /// `set_device`'s half that needs no app: take a loaded song away, since
@@ -5873,6 +5977,17 @@ impl MetronomeEngine {
         app_handle: Option<AppHandle>,
         wait: SetupWait,
     ) -> Result<(), String> {
+        self.ensure_thread_typed(state, app_handle, wait).map_err(String::from)
+    }
+
+    /// `ensure_thread`, telling a refusal from a timeout: `reopen_output`
+    /// joins a refused setup and must never join a timed-out one.
+    fn ensure_thread_typed(
+        &mut self,
+        state: SharedState,
+        app_handle: Option<AppHandle>,
+        wait: SetupWait,
+    ) -> Result<(), SetupError> {
         if self.alive.load(Ordering::SeqCst) {
             return Ok(());
         }
@@ -5931,6 +6046,8 @@ impl MetronomeEngine {
         let app_handle = EventSink(app_handle);
         #[cfg(test)]
         let force_setup_failure = self.force_setup_failure;
+        #[cfg(test)]
+        let (setup_delay, fake_setup_rate) = (self.setup_delay, self.fake_setup_rate);
         // Rendezvous for the setup outcome. Bounded at 1 and never waited on
         // by the sender, so the audio thread does not block on it even when
         // the receiver is dropped unread (which is what `SetupWait::No` does).
@@ -5958,6 +6075,17 @@ impl MetronomeEngine {
             );
             exit.quiet_setup = quiet_setup;
 
+            #[cfg(test)]
+            if let Some(d) = setup_delay {
+                thread::sleep(d);
+            }
+            #[cfg(test)]
+            if let Some(rate) = fake_setup_rate {
+                if setup_rate_or_fail(&mut exit, expected_rate, rate) {
+                    exit.fail("test: no device past the rate check".to_string());
+                }
+                return;
+            }
             #[cfg(test)]
             if force_setup_failure {
                 exit.fail("forced setup failure (test)".to_string());
@@ -6145,23 +6273,19 @@ impl MetronomeEngine {
                 }
             };
 
+            // A reopen that kept material decoded at `expected_rate` without
+            // a probed format to open at: a device that now runs at another
+            // rate would play it detuned, so this open is refused and the
+            // reopen falls back to dropping it (review of card #14, item B).
+            if !setup_rate_or_fail(&mut exit, expected_rate, sample_rate) {
+                return;
+            }
+
             // What the callback will actually be handed. A pair the stream
             // turned out to be too narrow for becomes the first pair, and
             // the screen is told so below. Computed after both arms: the
             // phone's stream is whatever AAudio granted, and a saved pair
             // that does not fit it falls back exactly as a desktop one does.
-            // A reopen that kept material decoded at `expected_rate` without
-            // a probed format to open at: a device that now runs at another
-            // rate would play it detuned, so this open is refused and the
-            // reopen falls back to dropping it (review of card #14, item B).
-            if !crate::output_park::setup_rate_matches(expected_rate, sample_rate) {
-                exit.fail(format!(
-                    "the device now opens at {sample_rate} Hz; what is loaded was decoded at {} Hz",
-                    expected_rate.unwrap_or(0)
-                ));
-                return;
-            }
-
             let effective_pair_now = effective_pair(requested_pair, channels);
 
             // Pre-decode all sounds at the output sample rate
@@ -8354,6 +8478,16 @@ impl MetronomeEngine {
                 }
             };
 
+            // An open that came back after its caller stopped waiting
+            // (`reopen_output` timed out, lowered `alive` and detached this
+            // thread, and another stream may already be up): drop this one
+            // unplayed rather than sound a second stream or publish over the
+            // live one's slots.
+            if !alive.load(Ordering::SeqCst) {
+                drop(stream);
+                return;
+            }
+
             if let Err(e) = stream.play() {
                 exit.fail(format!("could not start the audio output stream: {e}"));
                 return;
@@ -8367,7 +8501,9 @@ impl MetronomeEngine {
             // How wide the stream really is, published only now that there
             // IS one — `set_output_pair` reads it to decide whether a new
             // pair fits without reopening the device.
-            stream_channels_pub.store(channels as u32, Ordering::Release);
+            if alive.load(Ordering::SeqCst) {
+                stream_channels_pub.store(channels as u32, Ordering::Release);
+            }
 
             // The musician asked for a pair this device would not give.
             // Correct the stored pair here rather than leaving the callback
@@ -8957,14 +9093,12 @@ impl MetronomeEngine {
         // afterwards and must not start measuring a stream that never opened.
         match setup_rx.recv_timeout(timeout) {
             Ok(Ok(())) => Ok(()),
-            Ok(Err(e)) => Err(e),
-            Err(mpsc::RecvTimeoutError::Timeout) => {
-                Err("audio output device did not respond".to_string())
-            }
+            Ok(Err(e)) => Err(SetupError::Refused(e)),
+            Err(mpsc::RecvTimeoutError::Timeout) => Err(SetupError::TimedOut),
             // The thread is gone without a word; `AudioThreadExit` has
             // already lowered the flags, so the next Play tries again.
             Err(mpsc::RecvTimeoutError::Disconnected) => {
-                Err("audio thread stopped unexpectedly".to_string())
+                Err(SetupError::Refused("audio thread stopped unexpectedly".to_string()))
             }
         }
     }
@@ -12865,7 +12999,15 @@ mod tests {
     ) -> MetronomeEngine {
         let mut engine = MetronomeEngine::new(crate::timing::create_beat_log());
         engine.reopen_spawns = Some((
-            outcomes.iter().map(|r| r.map_err(String::from)).collect(),
+            outcomes
+                .iter()
+                .map(|r| {
+                    r.map_err(|e| match e {
+                        "timeout" => SetupError::TimedOut,
+                        e => SetupError::Refused(e.to_string()),
+                    })
+                })
+                .collect(),
             Vec::new(),
         ));
         engine
@@ -12910,7 +13052,7 @@ mod tests {
         let mut engine = engine_with_scripted_reopens(&[Ok(())]);
         let state = crate::state::create_shared_state();
         let player = load_song_kit_and_speech(&engine, sr);
-        let outcome = engine.reopen_output(state, None, || Some(sr)).unwrap();
+        let outcome = engine.reopen_output(state, None, |_| Some(sr)).unwrap();
         assert_eq!(outcome, ReopenOutcome::Kept);
         all_kept(&engine, &player);
         assert_eq!(
@@ -12927,7 +13069,7 @@ mod tests {
         let mut engine = engine_with_scripted_reopens(&[]);
         let state = crate::state::create_shared_state();
         let player = load_song_kit_and_speech(&engine, sr);
-        let outcome = engine.reopen_output(state, None, || Some(44_100)).unwrap();
+        let outcome = engine.reopen_output(state, None, |_| Some(44_100)).unwrap();
         assert_eq!(outcome, ReopenOutcome::Dropped);
         all_dropped(&engine, &player);
         assert_eq!(
@@ -12945,7 +13087,7 @@ mod tests {
         let mut engine = engine_with_scripted_reopens(&[Err("refused"), Ok(())]);
         let state = crate::state::create_shared_state();
         let player = load_song_kit_and_speech(&engine, sr);
-        let outcome = engine.reopen_output(state, None, || Some(sr)).unwrap();
+        let outcome = engine.reopen_output(state, None, |_| Some(sr)).unwrap();
         assert_eq!(outcome, ReopenOutcome::Kept);
         all_kept(&engine, &player);
         let quiet = SpawnRecord { format_rate: Some(sr), expected_rate: None, quiet: true, waited: true };
@@ -12961,7 +13103,7 @@ mod tests {
         let state = crate::state::create_shared_state();
         let player = load_song_kit_and_speech(&engine, sr);
         let mut answers = vec![Some(sr), Some(44_100)].into_iter();
-        let outcome = engine.reopen_output(state, None, move || answers.next().flatten()).unwrap();
+        let outcome = engine.reopen_output(state, None, move |_| answers.next().flatten()).unwrap();
         assert_eq!(outcome, ReopenOutcome::Dropped);
         all_dropped(&engine, &player);
         let s = spawns(&engine);
@@ -12977,7 +13119,7 @@ mod tests {
         let mut engine = engine_with_scripted_reopens(&[Err("refused"), Err("refused")]);
         let state = crate::state::create_shared_state();
         let player = load_song_kit_and_speech(&engine, sr);
-        let outcome = engine.reopen_output(state, None, || Some(sr)).unwrap();
+        let outcome = engine.reopen_output(state, None, |_| Some(sr)).unwrap();
         assert_eq!(outcome, ReopenOutcome::Dropped);
         all_dropped(&engine, &player);
         let s = spawns(&engine);
@@ -12996,7 +13138,7 @@ mod tests {
         let mut engine = engine_with_scripted_reopens(&[Err("the device now opens at 44100 Hz")]);
         let state = crate::state::create_shared_state();
         let player = load_song_kit_and_speech(&engine, sr);
-        let outcome = engine.reopen_output(state, None, || None).unwrap();
+        let outcome = engine.reopen_output(state, None, |_| None).unwrap();
         let s = spawns(&engine);
         assert_eq!(
             s[0],
@@ -13009,6 +13151,89 @@ mod tests {
         assert!(crate::output_park::setup_rate_matches(Some(sr), sr));
         assert!(!crate::output_park::setup_rate_matches(Some(sr), 44_100));
         assert!(crate::output_park::setup_rate_matches(None, 44_100));
+    }
+
+    /// Final re-review of card #14: a timed-out open ends the attempts to
+    /// keep anything — no second quiet open after it — and goes straight to
+    /// the plain open, which waits for nothing.
+    #[test]
+    fn a_timed_out_open_goes_straight_to_the_plain_open() {
+        let sr = 48_000u32;
+        let mut engine = engine_with_scripted_reopens(&[Err("timeout")]);
+        let state = crate::state::create_shared_state();
+        let player = load_song_kit_and_speech(&engine, sr);
+        let outcome = engine.reopen_output(state, None, |_| Some(sr)).unwrap();
+        assert_eq!(outcome, ReopenOutcome::Dropped);
+        all_dropped(&engine, &player);
+        let s = spawns(&engine);
+        assert_eq!(s.len(), 2, "something was tried after a hung open: {s:?}");
+        assert!(s[0].quiet && s[0].waited);
+        assert!(!s[1].quiet && !s[1].waited);
+    }
+
+    /// The same with REAL threads and a device open that hangs for two
+    /// seconds: the reopen runs under the engine's lock, as the route thread
+    /// runs it, and the lock must come free well inside the ANR threshold —
+    /// the timed-out setup is detached, not joined.
+    #[test]
+    fn a_hung_open_does_not_hold_the_engine_lock() {
+        let sr = 48_000u32;
+        let mut engine =
+            MetronomeEngine::new_with_forced_setup_failure(crate::timing::create_beat_log());
+        engine.setup_delay = Some(Duration::from_secs(2));
+        engine.sample_rate.store(sr, Ordering::Release);
+        let engine = Arc::new(std::sync::Mutex::new(engine));
+        let state = crate::state::create_shared_state();
+
+        let started = std::time::Instant::now();
+        let (e, st) = (engine.clone(), state.clone());
+        let route = thread::spawn(move || {
+            let mut g = e.lock().unwrap();
+            g.reopen_output(st, None, |_| Some(sr))
+        });
+        // Let the route thread take the lock first.
+        while started.elapsed() < Duration::from_millis(50) {
+            thread::yield_now();
+        }
+        let held_for = loop {
+            if let Ok(g) = engine.try_lock() {
+                drop(g);
+                break started.elapsed();
+            }
+            assert!(
+                started.elapsed() < Duration::from_secs(5),
+                "the route thread held the engine past the ANR threshold"
+            );
+            thread::yield_now();
+        };
+        let outcome = route.join().unwrap().unwrap();
+        assert_eq!(outcome, ReopenOutcome::Dropped, "a hung open was treated as kept");
+        assert!(
+            held_for < REOPEN_WAIT + Duration::from_millis(600),
+            "the engine's lock was held {held_for:?}"
+        );
+    }
+
+    /// A REAL setup thread: a reopen that demands its old rate is refused,
+    /// through `ensure_thread`, by a device that answers another one — and
+    /// passes the check when the device agrees.
+    #[test]
+    fn a_setup_that_finds_another_rate_than_demanded_is_refused() {
+        let state = crate::state::create_shared_state();
+        let mut engine = MetronomeEngine::new(crate::timing::create_beat_log());
+        engine.fake_setup_rate = Some(44_100);
+        engine.next_spawn = SpawnHints { format: None, expected_rate: Some(48_000), quiet: true };
+        let err = engine
+            .ensure_thread(state.clone(), None, SetupWait::UpTo(AUDIO_SETUP_TIMEOUT))
+            .unwrap_err();
+        assert!(err.contains("now opens at 44100 Hz"), "{err}");
+
+        engine.next_spawn = SpawnHints { format: None, expected_rate: Some(44_100), quiet: true };
+        let err = engine
+            .ensure_thread(state, None, SetupWait::UpTo(AUDIO_SETUP_TIMEOUT))
+            .unwrap_err();
+        assert!(err.contains("past the rate check"), "a matching rate was refused: {err}");
+        engine.shutdown();
     }
 
     /// A REAL thread this time: a quiet open that fails answers the caller
@@ -13052,7 +13277,7 @@ mod tests {
         let player = load_song_kit_and_speech(&engine, sr);
         let mut asked = 0;
         let outcome = engine
-            .reopen_output(state, None, || {
+            .reopen_output(state, None, |_| {
                 asked += 1;
                 if asked == 1 { None } else { Some(sr) }
             })

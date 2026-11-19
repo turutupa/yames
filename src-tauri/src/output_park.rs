@@ -290,6 +290,24 @@ pub(crate) fn setup_rate_matches(expected: Option<u32>, actual: u32) -> bool {
     expected.map_or(true, |e| e == actual)
 }
 
+/// Run `f` on a thread of its own and wait for it at most `d`; `None` if it
+/// had not finished by then (the thread is detached and its answer thrown
+/// away when it comes). For a device probe that `reopen_output` must not
+/// let hang while holding the engine's lock (final re-review of card #14).
+pub(crate) fn with_deadline<T: Send + 'static>(
+    d: std::time::Duration,
+    f: impl FnOnce() -> T + Send + 'static,
+) -> Option<T> {
+    let (tx, rx) = std::sync::mpsc::sync_channel(1);
+    std::thread::Builder::new()
+        .name("yames-probe".into())
+        .spawn(move || {
+            let _ = tx.send(f());
+        })
+        .ok()?;
+    rx.recv_timeout(d).ok()
+}
+
 #[cfg(target_os = "android")]
 mod android {
     use std::sync::atomic::{AtomicBool, Ordering};
@@ -543,6 +561,18 @@ mod tests {
         // Unknown is not "moved": a failed probe keeps the song.
         assert!(reopen_keeps_loaded(None, Some(48_000)));
         assert!(reopen_keeps_loaded(Some(48_000), None));
+    }
+
+    #[test]
+    fn a_probe_that_hangs_is_abandoned_at_its_deadline() {
+        let t = std::time::Instant::now();
+        let got = with_deadline(Duration::from_millis(100), || {
+            std::thread::sleep(Duration::from_secs(3));
+            7
+        });
+        assert_eq!(got, None);
+        assert!(t.elapsed() < Duration::from_secs(1), "waited {:?}", t.elapsed());
+        assert_eq!(with_deadline(Duration::from_secs(2), || 7), Some(7));
     }
 
     /// End to end over the pure parts: away and stopped, a reroute closes the
