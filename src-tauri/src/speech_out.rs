@@ -57,6 +57,10 @@ pub struct SpeechHandoff {
     /// speaking thread turns it into `Interrupted` rather than waiting out a
     /// completion that is never coming.
     cut: AtomicBool,
+    /// "Is a line in the slot", kept in step with `clip` under its lock and
+    /// read with one load by the event loop's park check, which must never
+    /// wait on the speaking thread's lock (card #14, item 4).
+    occupied: AtomicBool,
     retired: Mutex<Vec<Retired>>,
 }
 
@@ -96,6 +100,7 @@ impl SpeechHandoff {
             generation: AtomicU64::new(0),
             done: AtomicBool::new(false),
             cut: AtomicBool::new(false),
+            occupied: AtomicBool::new(false),
             retired: Mutex::new(Vec::with_capacity(SPEECH_RETIRED_CAP)),
         }
     }
@@ -114,6 +119,7 @@ impl SpeechHandoff {
         self.drain_retired();
         self.done.store(false, Ordering::Release);
         if let Ok(mut slot) = self.clip.lock() {
+            self.occupied.store(clip.is_some(), Ordering::Release);
             *slot = clip;
             // Bumped AFTER the write, so a callback that sees the new
             // generation is guaranteed to find the new value behind the
@@ -131,11 +137,17 @@ impl SpeechHandoff {
     /// when the line ends, is cut, or times out, so this is "speech in
     /// flight" for `output_park`.
     #[cfg_attr(not(target_os = "android"), allow(dead_code))]
+    ///
+    /// One atomic load: asked on every pass of the event loop while the app
+    /// is away, which must not block on the speaking thread.
     pub(crate) fn in_flight(&self) -> bool {
-        self.clip
-            .lock()
-            .map(|c| c.is_some())
-            .unwrap_or_else(|e| e.into_inner().is_some())
+        self.occupied.load(Ordering::Acquire)
+    }
+
+    /// Tests: hold the slot's lock, as the speaking thread mid-handover would.
+    #[cfg(test)]
+    pub(crate) fn hold_slot_for_test(&self) -> std::sync::MutexGuard<'_, Option<SpeechClip>> {
+        self.clip.lock().unwrap()
     }
 
     /// Speaking thread: has the line finished since anyone last asked?
@@ -159,6 +171,7 @@ impl SpeechHandoff {
     /// error: the musician asked for the device change.
     pub fn cut(&self) {
         if let Ok(mut slot) = self.clip.lock() {
+            self.occupied.store(false, Ordering::Release);
             *slot = None;
             drop(slot);
             self.generation.fetch_add(1, Ordering::Release);

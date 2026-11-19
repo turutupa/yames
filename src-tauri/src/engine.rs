@@ -5433,6 +5433,38 @@ impl MetronomeEngine {
     ) -> Result<(), String> {
         eprintln!("[yames] Setting audio output device: {:?}", name);
         let was_playing = self.playing.load(Ordering::SeqCst);
+        let keep_playing = self.drop_decoded_for_new_rate(
+            was_playing,
+            &state,
+            &EventSink(Some(app_handle.clone())),
+        );
+        self.device_name = name;
+        // Fully tear down the old thread/stream
+        self.shutdown();
+        // Create fresh atomics so the old cpal callback (if still lingering
+        // in CoreAudio) can never be reactivated by a shared flag. `playing`
+        // carries the old state across *before* the spawn rather than being
+        // restored after it: `ensure_thread` no longer waits, so a device
+        // that fails instantly would otherwise have its `playing = false`
+        // overwritten by a restore running a moment later.
+        self.alive = Arc::new(AtomicBool::new(false));
+        self.playing = Arc::new(AtomicBool::new(keep_playing));
+        // Brief pause to let CoreAudio fully release the old device
+        thread::sleep(Duration::from_millis(100));
+        // Restart on the new device
+        self.ensure_thread(state, Some(app_handle), SetupWait::No)
+    }
+
+    /// What a new rate takes with it: the jam's folder kit, the song, and a
+    /// song's transport. `set_device` always, `reopen_output` only when the
+    /// stream it is about to open runs at another rate. Returns whether the
+    /// transport keeps playing.
+    fn drop_decoded_for_new_rate(
+        &self,
+        was_playing: bool,
+        state: &SharedState,
+        sink: &EventSink,
+    ) -> bool {
         // A table built on a folder of the musician's own drums was decoded
         // at the OLD device's rate and would play flat or sharp on the new
         // one. Taking it away makes the next bar-ahead `set_jam` decode it
@@ -5462,7 +5494,7 @@ impl MetronomeEngine {
                 "[yames] the song was decoded for the old device and has been taken \
                  away; load it again to play it on this one"
             );
-            let _ = app_handle.emit("song-dropped", ());
+            let _ = sink.emit("song-dropped", ());
         }
         // A SONG THAT WAS PLAYING DOES NOT GO ON PLAYING AS A METRONOME.
         // Carried across, `playing` ran the plain click (logging beats as if
@@ -5480,23 +5512,53 @@ impl MetronomeEngine {
             if let Some(ref tempo) = self.tempo_ctx {
                 tempo.set_playing(false);
             }
-            let _ = app_handle.emit("state-changed", &snapshot);
+            let _ = sink.emit("state-changed", &snapshot);
         }
-        self.device_name = name;
-        // Fully tear down the old thread/stream
-        self.shutdown();
-        // Create fresh atomics so the old cpal callback (if still lingering
-        // in CoreAudio) can never be reactivated by a shared flag. `playing`
-        // carries the old state across *before* the spawn rather than being
-        // restored after it: `ensure_thread` no longer waits, so a device
-        // that fails instantly would otherwise have its `playing = false`
-        // overwritten by a restore running a moment later.
+        keep_playing
+    }
+
+    /// Android: reopen the output where it was, after its stream died
+    /// WITHOUT the route moving — a resume that would not start even after
+    /// `output_park`'s retries, or `start` finding the stream dead (card #14,
+    /// item 2). Called from `android_route`'s thread, never an audio one.
+    ///
+    /// `set_device` is the route-change path and takes away everything
+    /// decoded for the old device: the song (the screen must load it again),
+    /// the jam's folder kit and the coach's line in flight. None of that is
+    /// stale when the rate has not moved, so here the new stream's rate is
+    /// asked first (`probe_rate`, after the old stream is closed — the same
+    /// probe the stream's own setup runs) and the loaded material is kept
+    /// when it matches. A line of speech kept in its slot is picked up from
+    /// the top by the new callback; it cannot have been heard, because a
+    /// stream is only parked with nothing in flight and a dead one sounds
+    /// nothing. When the rate DID move, this is `set_device`'s drop exactly.
+    ///
+    /// `Ok(true)` when everything loaded was kept.
+    #[cfg_attr(not(target_os = "android"), allow(dead_code))]
+    pub(crate) fn reopen_output(
+        &mut self,
+        state: SharedState,
+        app_handle: Option<AppHandle>,
+        probe_rate: impl FnOnce() -> Option<u32>,
+    ) -> Result<bool, String> {
+        let was_playing = self.playing.load(Ordering::SeqCst);
+        let old_rate = self.output_sample_rate();
+        self.shutdown_inner(false);
+        let kept = crate::output_park::reopen_keeps_loaded(old_rate, probe_rate());
+        let keep_playing = if kept {
+            was_playing
+        } else {
+            // The line was resampled for the old rate: take it back, the way
+            // `shutdown` does for a device change.
+            self.speech.cut();
+            self.drop_decoded_for_new_rate(was_playing, &state, &EventSink(app_handle.clone()))
+        };
+        // Fresh flags for the fresh thread, as `set_device` does and for the
+        // same reason: the old thread may still be unwinding.
         self.alive = Arc::new(AtomicBool::new(false));
         self.playing = Arc::new(AtomicBool::new(keep_playing));
-        // Brief pause to let CoreAudio fully release the old device
-        thread::sleep(Duration::from_millis(100));
-        // Restart on the new device
-        self.ensure_thread(state, Some(app_handle), SetupWait::No)
+        self.ensure_thread(state, app_handle, SetupWait::No)?;
+        Ok(kept)
     }
 
     /// `set_device`'s half that needs no app: take a loaded song away, since
@@ -6639,7 +6701,11 @@ impl MetronomeEngine {
                             // event thread emits `take-playback-ended`;
                             // saying it here would mean an `emit` on the
                             // audio thread, which locks and allocates.
-                            take_shared.note_ended();
+                            // Pinned to the generation this playback was
+                            // picked up at, so an ending that races a new
+                            // `set_play` cannot end the new take (card #14).
+                            // One relaxed-cost store of a `u64` copy.
+                            take_shared.note_ended(cached.take_play_generation);
                         }
                         // The transport is where it was; the band starts
                         // from the top when the listening is over.
@@ -8215,17 +8281,21 @@ impl MetronomeEngine {
                 #[cfg(target_os = "android")]
                 {
                     use crate::output_park::{
-                        park_step, resume_outcome, should_park, ParkStep, ResumeOutcome,
+                        park_step, resume_with_retries, should_park, ParkStep, ResumeOutcome,
                     };
                     let away = crate::output_park::app_in_background();
                     if away || output_parked {
-                        let needs = || crate::output_park::OutputNeeds {
-                            app_in_background: crate::output_park::app_in_background(),
-                            transport_playing: playing.load(Ordering::SeqCst),
-                            take_playing_back: take_event.is_playing_back()
-                                && take_ended_generation != Some(take_event.play_generation()),
-                            take_recording: take_event.is_recording(),
-                            speech_in_flight: speech_event.in_flight(),
+                        // Atomic loads only: this runs every pass while the
+                        // app is away and must never wait on the command or
+                        // the speaking thread (card #14, item 4).
+                        let needs = || {
+                            crate::output_park::read_needs(
+                                crate::output_park::app_in_background(),
+                                playing.load(Ordering::SeqCst),
+                                &take_event,
+                                take_ended_generation,
+                                &speech_event,
+                            )
                         };
                         let dead = output_dead.load(Ordering::SeqCst);
                         let step = park_step(output_parked, should_park(needs()), dead);
@@ -8248,21 +8318,30 @@ impl MetronomeEngine {
                         }
                         if resume {
                             output_parked = false;
-                            let started = stream.play();
-                            if let Err(ref e) = started {
-                                eprintln!("[yames][android] {e}");
-                            }
-                            // A stream that will not start again is a dead
-                            // stream: mark it so nothing more is asked of it,
-                            // and hand it to the route thread, which reopens a
-                            // dead stream whether or not the transport is
-                            // running. Unless the system closed it, in which
-                            // case its error callback has already done both
-                            // (asking again would be the double reopen).
-                            let closed = output_dead.load(Ordering::SeqCst);
-                            if resume_outcome(started.is_ok(), closed) == ResumeOutcome::Reopen {
+                            // A refusal is often transient, and a reopen is
+                            // not free, so it is retried a few times, briefly,
+                            // here on the event loop (card #14, item 2).
+                            // Unless the system closed the stream — its error
+                            // callback has already marked it dead and asked
+                            // for the reopen — or the engine is going away.
+                            let outcome = resume_with_retries(
+                                || stream.play(),
+                                || {
+                                    output_dead.load(Ordering::SeqCst)
+                                        || !alive.load(Ordering::SeqCst)
+                                },
+                                thread::sleep,
+                            );
+                            // A stream that will not start even then is a
+                            // dead stream: mark it so nothing more is asked of
+                            // it, and hand it to the route thread, which
+                            // reopens a dead stream whether or not the
+                            // transport is running — as a reopen on the SAME
+                            // route, which keeps what is loaded, and without
+                            // announcing a route change that did not happen.
+                            if outcome == ResumeOutcome::Reopen {
                                 output_dead.store(true, Ordering::SeqCst);
-                                crate::android_route::output_lost();
+                                crate::android_route::output_dead();
                             }
                         }
                     }
@@ -8293,14 +8372,15 @@ impl MetronomeEngine {
                 // only one that runs while a take plays with the band
                 // stopped — because the audio thread cannot emit: an
                 // `emit` locks and allocates.
-                // The generation is read BEFORE the flag, so an ending is
-                // never pinned on a playback started after it.
-                #[cfg(target_os = "android")]
-                let play_generation = take_event.play_generation();
-                if take_event.take_ended() {
+                // The ending carries the generation of the playback it
+                // belongs to, and `take_ended` drops one that is not the
+                // playback in the slot now — so an old take running off its
+                // end while a new one is handed over neither tells the
+                // screen the new one ended nor lets the stream park under it.
+                if let Some(_ended_generation) = take_event.take_ended() {
                     #[cfg(target_os = "android")]
                     {
-                        take_ended_generation = Some(play_generation);
+                        take_ended_generation = Some(_ended_generation);
                     }
                     let _ = app_handle.emit("take-playback-ended", ());
                 }
@@ -8756,7 +8836,9 @@ impl MetronomeEngine {
             self.alive.load(Ordering::SeqCst),
             self.output_dead.load(Ordering::SeqCst),
         ) {
-            crate::android_route::output_lost();
+            // A dead stream, not a route change: reopened without
+            // re-announcing `audio-route-changed` (card #14, item 3).
+            crate::android_route::output_dead();
         }
     }
 
@@ -8791,6 +8873,12 @@ impl MetronomeEngine {
 
     /// Fully stop playback and tear down the audio thread.
     pub fn shutdown(&mut self) {
+        self.shutdown_inner(true);
+    }
+
+    /// `shutdown`, with the coach's line left in its slot when `cut_speech`
+    /// is false — `reopen_output` on a stream whose rate is not moving.
+    fn shutdown_inner(&mut self, cut_speech: bool) {
         self.playing.store(false, Ordering::SeqCst);
         self.alive.store(false, Ordering::SeqCst);
         // No stream, so no width. Cleared here rather than left behind, so
@@ -8800,7 +8888,9 @@ impl MetronomeEngine {
         // and is half-spoken. Take it back rather than let the next stream
         // replay it from the top at the wrong speed; the speaking thread
         // reports `Interrupted`, which is what a device change is.
-        self.speech.cut();
+        if cut_speech {
+            self.speech.cut();
+        }
         if let Some(handle) = self.thread_handle.take() {
             // The event loop sleeps in `park_timeout` between beats now, so
             // it is woken rather than waited out: without this the join
@@ -12595,6 +12685,47 @@ mod tests {
         assert!(playing_survives_device_change(true, false));
         assert!(!playing_survives_device_change(false, true));
         assert!(!playing_survives_device_change(false, false));
+    }
+
+    /// Card #14, item 2: a dead stream reopened on the SAME route at the SAME
+    /// rate keeps the song, the jam's kit and the coach's line, where the
+    /// device-switch path used to take all three. No device opens here (the
+    /// forced setup failure stands in for the stream); what is under test
+    /// is what `reopen_output` decides before it spawns.
+    #[test]
+    fn a_reopen_at_the_same_rate_keeps_the_song_the_kit_and_the_speech() {
+        let sr = 48_000u32;
+        let mut engine =
+            MetronomeEngine::new_with_forced_setup_failure(crate::timing::create_beat_log());
+        let state = crate::state::create_shared_state();
+        engine.sample_rate.store(sr, Ordering::Release);
+        let (table, player) = song_with_its_renderer(sr);
+        engine.set_song_table(Some(table));
+        engine.set_jam_table(Some(Arc::new(crate::jam::compile(&rock_16ths()).unwrap())));
+        engine.speech.set_clip(Some(SpeechClip { pcm: Arc::new(vec![0.0; 8]) }));
+
+        let kept = engine
+            .reopen_output(state.clone(), None, || Some(sr))
+            .expect("the reopen spawns");
+        assert!(kept, "the rate did not move and the material was dropped");
+        assert!(engine.song_loaded(), "the song was dropped by a reopen on the same route");
+        assert!(!player.is_finished(), "the song's renderer was stopped");
+        assert!(engine.jam_form_bars().is_some(), "the jam's kit was dropped");
+        assert!(engine.speech.in_flight(), "the coach's line was taken away");
+        assert!(!engine.speech.was_cut(), "the speaking thread was told it was cut");
+
+        // The rate moved: exactly the device-switch drop.
+        engine.sample_rate.store(sr, Ordering::Release);
+        let kept = engine
+            .reopen_output(state, None, || Some(44_100))
+            .expect("the reopen spawns");
+        assert!(!kept);
+        assert!(!engine.song_loaded(), "a song decoded at 48k survived onto 44.1k");
+        assert!(renderer_stops(&player));
+        assert!(engine.jam_form_bars().is_none(), "a kit decoded at 48k survived onto 44.1k");
+        assert!(!engine.speech.in_flight());
+        assert!(engine.speech.was_cut(), "the speaking thread was not told");
+        engine.shutdown();
     }
 
     /// Eight bars of a two-guitar song, for the ear and for the meter.
