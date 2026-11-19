@@ -423,6 +423,11 @@ describe("W2 — sound & look", () => {
     expect(startSoftClick).toHaveBeenCalled();
   });
 
+  it("opens with the chosen sound focused, not the first card (acceptance 5, P2-6)", () => {
+    setup(at);
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Wood" }));
+  });
+
   it("the shell's opening focus does not change the user's sound", () => {
     setup(at);
     settle();

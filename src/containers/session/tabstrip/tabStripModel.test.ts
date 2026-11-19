@@ -387,3 +387,15 @@ describe("a hammer-on from nowhere", () => {
     expect(after.link).toEqual({ mark: "h", fromTicks: 160 });
   });
 });
+
+describe("a follow panel's numbers fit its height (acceptance 5: cut off at 1024x700)", () => {
+  it("are held to the panel, never under 18, and by the width alone when it is unknown", async () => {
+    const { followFretPx, staffGeometry, FOLLOW_TOP_PX } = await import("./tabStripModel");
+    expect(followFretPx(34, 0)).toBe(34);
+    expect(followFretPx(34, 1000)).toBe(34);
+    const f = followFretPx(34, 263);
+    expect(f).toBeLessThan(34);
+    expect(staffGeometry(f).height + FOLLOW_TOP_PX).toBeLessThanOrEqual(263);
+    expect(followFretPx(34, 40)).toBe(18);
+  });
+});

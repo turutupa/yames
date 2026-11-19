@@ -228,7 +228,7 @@
       "next": "Suivant",
       "done": "Terminé",
       "skip": "Passer la visite",
-      "offer": "Nouveau : une courte visite d'Aujourd'hui, des Parcours et d'une séance.",
+      "offer": "Nouveau : une courte visite d'Aujourd'hui, des Parcours, d'une séance et des Progrès.",
       "offerAccept": "Faites-moi visiter",
       "offerDismiss": "Fermer",
       "stops": {
@@ -276,7 +276,7 @@
         },
         "watch": {
           "title": "Regarde d'abord",
-          "body": "Voir joue les notes dans l'ordre, au tempo, pour que tu voies la forme avant d'essayer."
+          "body": "Voir te le joue une fois avec le son, après une mesure de décompte, chaque note éclairée quand elle sonne : tu l'entends et le vois avant d'essayer."
         },
         "take": {
           "title": "Lancer la prise",
@@ -284,7 +284,7 @@
         },
         "blocks": {
           "title": "Les blocs du jour",
-          "body": "Chaque bloc de la séance est ici, en haut. Appuie sur l'un d'eux pour y aller. Précédent revient d'un cran, Passer celui-ci avance."
+          "body": "Chaque bloc de la séance est ici, en haut. Appuie sur l'un d'eux pour y aller. ‹ Précédent revient d'un cran, Passer celui-ci avance."
         },
         "progress": {
           "title": "Tempo propre",

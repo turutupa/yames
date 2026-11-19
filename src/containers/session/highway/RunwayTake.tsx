@@ -13,6 +13,7 @@ import { useTranslation } from "react-i18next";
 import { barLine } from "../../../session/coachWords";
 import { currentStep, isEdgeStep } from "../../../session/runner";
 import type { BeatPosition } from "../../../songs/position";
+import type { SongScore } from "../../../songs/types";
 import { TAKE_COUNT_IN_BARS } from "../../../session/take";
 import { useNeck } from "../../../stage3d/api";
 import type { NeckView } from "../../../stage3d/api";
@@ -26,9 +27,16 @@ import { ghostNeck, runwayModel } from "./runwayModel";
 import type { Judged } from "./runwayModel";
 import { PracticeViewSwitch } from "../practice/PracticeViewSwitch";
 import { HandLine } from "../practice/HandLine";
+import { useWatch } from "../practice/useWatch";
+import { WatchRow } from "../practice/WatchControls";
+import { usePracticeCursor } from "../practice/usePracticeCursor";
+import { nextOnsetIndex } from "./runwayModel";
 
 /** The neck is told verdicts as colours here, not plucks (see `ghostNeck`). */
 const NO_PLUCKS: ReadonlyMap<number, TimingMark> = new Map();
+
+/** A score for the cursor hook while there is no Take (it does not run then). */
+const EMPTY_SCORE = { bars: [], notes: [], ticksPerQuarter: 960 } as unknown as SongScore;
 
 /** A Theory Exercise is about WHERE: the runway folds to one lane and the neck takes the room. */
 export function isTheoryTake(session: SessionRun): boolean {
@@ -59,6 +67,15 @@ export function RunwayTakeScreen({
   const running = run.phase === "playing";
   const theory = isTheoryTake(session);
   const neck = useNeck();
+  // Watch and Sound, as on the other views (acceptance 5, P1-1).
+  const watch = useWatch({
+    take: run.phase === "ready" ? take : null,
+    running,
+    listen: session.listen,
+    beat,
+    isPlaying,
+    view: session.practiceView,
+  });
 
   // The neck straight-on over the Exercise's frets; its shape quiet, the next
   // note amber and the one after a ghost (the runway moves those on).
@@ -70,9 +87,10 @@ export function RunwayTakeScreen({
   // One picture at a time (the owner, 2026-11-16: "users only have one pair of
   // eyes"). Before the Take the neck shows where the hand goes; while it runs
   // the runway alone says what comes next. Theory is about where, so it keeps
-  // the neck and has no runway.
-  const neckOn = !running || theory;
-  const runwayOn = running && !theory;
+  // the neck and has no runway. Watch shows what the Take will: the runway
+  // moving, from Watch's own position.
+  const runwayOn = (running || watch.showing) && !theory;
+  const neckOn = !runwayOn;
   const view: NeckView = useMemo(
     () => (neckOn ? ({ ...zoomOf(played), flat: true } as NeckView) : ({ kind: "hidden" } as NeckView)),
     [played, neckOn],
@@ -106,6 +124,28 @@ export function RunwayTakeScreen({
     shown.current.judged = judged;
     draw();
   }, [lights, model, draw]);
+
+  // Theory has no runway: Watch moves NEXT along the neck itself.
+  const theoryWatch = theory && watch.showing;
+  const onWatchTick = useCallback(
+    (tick: number) => {
+      if (!model) return;
+      const index = nextOnsetIndex(model.onsets, tick, model.barLength / 32);
+      if (index !== shown.current.index) onNext(index);
+    },
+    [model, onNext],
+  );
+  useEffect(() => {
+    if (!theoryWatch && !running) onNext(0);
+  }, [theoryWatch, running, onNext]);
+  usePracticeCursor({
+    score: take?.score ?? EMPTY_SCORE,
+    countInTicks: model?.countInTicks ?? 0,
+    endTick: model?.endTick ?? 0,
+    beat: watch.beat,
+    playing: theoryWatch && watch.playing,
+    onTick: onWatchTick,
+  });
 
   const step = currentStep(run);
   if (!exercise || !take || !step) return null;
@@ -179,14 +219,17 @@ export function RunwayTakeScreen({
 
       {runwayOn && (
         <Runway
+          key={running ? "take" : "watch"}
           take={take}
-          beat={beat}
-          playing={isPlaying}
+          beat={running ? beat : watch.beat}
+          playing={running ? isPlaying : watch.playing}
           lights={lights}
           collapsed={false}
           onNext={onNext}
         />
       )}
+
+      {!running && <WatchRow watch={watch} />}
 
       <div className="session-actions">
         <div className="session-runway-notes">
@@ -194,7 +237,7 @@ export function RunwayTakeScreen({
               plays, the neck (WHERE). The runway is WHEN, so it has nothing to
               say until the Take runs, and a frozen strip beside the neck would
               be two pictures at once (QA 2026-11-17 #19). Theory has no runway. */}
-          {!running && !theory && (
+          {!running && !theory && !watch.showing && (
             <span className="session-why session-runway-later" data-testid="runway-later">
               {t("session.runway.later")}
             </span>

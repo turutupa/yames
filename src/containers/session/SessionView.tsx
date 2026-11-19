@@ -41,6 +41,9 @@ import type { SessionRun } from "./hooks/useSessionRun";
 import { exerciseNeck, useNeck3d, useNeckSlot } from "./hooks/useNeck";
 import { PracticeViewSwitch } from "./practice/PracticeViewSwitch";
 import { NeckInstruction } from "./practice/NeckInstruction";
+import { useWatch } from "./practice/useWatch";
+import { WatchControls, WatchRow } from "./practice/WatchControls";
+import { hideTipUntilLeft, showTipAgain, usePreviousWordFits } from "./sessionBarParts";
 import { PracticeTab } from "./practice/PracticeTab";
 import { HandLine } from "./practice/HandLine";
 import { resumeBeats, useWarmupBeat, warmupClockOf } from "./practice/useWarmupBeat";
@@ -110,8 +113,10 @@ function SessionBar({
   const steps = run.plan?.steps ?? [];
   const left = minutesLeft(run);
   const first = run.stepIndex === 0;
+  const bar = useRef<HTMLDivElement>(null);
+  usePreviousWordFits(bar, `${t("session.run.previous")}|${steps.length}|${!!onSkip}|${left}`);
   return (
-    <div className="session-bar" data-testid="session-bar">
+    <div className="session-bar" data-testid="session-bar" ref={bar}>
       <button className="session-exit" onClick={actions.requestExit} data-testid="session-exit">
         {t("session.run.exit")}
       </button>
@@ -143,7 +148,11 @@ function SessionBar({
                 data-tip={tip}
                 aria-label={tip}
                 aria-current={state === "on" ? "step" : undefined}
-                onClick={() => actions.jump(i)}
+                onClick={(e) => {
+                  hideTipUntilLeft(e.currentTarget);
+                  actions.jump(i);
+                }}
+                onMouseLeave={showTipAgain}
                 data-testid={`session-pip-${i}`}
               >
                 <i aria-hidden="true" />
@@ -156,7 +165,7 @@ function SessionBar({
           spent so far (UX audit SES-11). */}
       <span className="session-quiet session-bar-left" data-untimed={run.untimed ? "" : undefined}>
         {run.untimed
-          ? t("session.run.played", { time: clockText(Math.max(0, run.now - run.startedAt)) })
+          ? t("session.run.played", { time: clockText(session.playedMs) })
           : left > 0
             ? t("session.run.minutesLeft", { minutes: left })
             : t("session.run.timeUp")}
@@ -166,7 +175,15 @@ function SessionBar({
         // shows no tooltip and drops the keyboard's focus.
         <button
           className="session-skip-this session-prev"
-          onClick={first ? undefined : actions.previous}
+          onClick={
+            first
+              ? undefined
+              : (e) => {
+                  hideTipUntilLeft(e.currentTarget);
+                  actions.previous();
+                }
+          }
+          onMouseLeave={showTipAgain}
           aria-label={first ? `${t("session.run.previous")}. ${t("session.run.previousFirst")}` : t("session.run.previous")}
           aria-disabled={first ? true : undefined}
           data-tip={first ? t("session.run.previousFirst") : undefined}
@@ -354,7 +371,17 @@ function TakeScreen({
   // sticky footer, above Slower and Faster (acceptance 4, P1-3): under the
   // page's flow they sat below the fold, behind the footer, and the first
   // screen showed a Start that would not start with no word of why.
-  const inputInFooter = useMediaQuery(PORTRAIT_PHONE_QUERY) && !running;
+  const portraitPhone = useMediaQuery(PORTRAIT_PHONE_QUERY);
+  const inputInFooter = portraitPhone && !running;
+  // Watch and Sound under whichever picture is on (acceptance 5, P1-1).
+  const watch = useWatch({
+    take: run.phase === "ready" ? take : null,
+    running,
+    listen: session.listen,
+    beat,
+    isPlaying,
+    view: session.practiceView,
+  });
   if (!exercise || !take || !step) return null;
 
   const pathTitle = session.paths.find((p) => p.id === take.pathId);
@@ -441,7 +468,19 @@ function TakeScreen({
           before the start and leading note by note while it runs, or the
           tab, large, its cursor following. Never both. */}
       {tabView ? (
-        <PracticeTab take={take} running={running} beat={beat} playing={isPlaying} lights={lights} />
+        <>
+          <PracticeTab
+            take={take}
+            running={running}
+            beat={beat}
+            playing={isPlaying}
+            lights={lights}
+            watch={watch.showing ? watch : undefined}
+          />
+          {/* On a phone held upright the tab's overview runs down the page,
+              so Watch rides in the sticky footer instead (below). */}
+          {!portraitPhone && <WatchRow watch={watch} />}
+        </>
       ) : (
         <NeckInstruction
           take={take}
@@ -452,7 +491,7 @@ function TakeScreen({
           pluck
           theory={isTheoryTake(session)}
           className="session-practice-hero"
-          listen={session.listen}
+          watch={watch}
         />
       )}
 
@@ -506,7 +545,14 @@ function TakeScreen({
               compact
             />
           )}
-          {!running && <TempoNudges run={run} exercise={exercise} session={session} />}
+          {!running && tabView && portraitPhone && watch.canWatch ? (
+            <div className="practice-watchrow" data-place="footer" data-testid="practice-watchrow">
+              <WatchControls watch={watch} />
+              <TempoNudges run={run} exercise={exercise} session={session} />
+            </div>
+          ) : (
+            !running && <TempoNudges run={run} exercise={exercise} session={session} />
+          )}
           {/* `aria-disabled`, not `disabled`, while the next Take loads: ↓ or
               ↑ reloads it, and a disabled button drops the keyboard's focus
               to the page (acceptance pass 2, P2-9). */}
@@ -1228,6 +1274,15 @@ function TimedScreen({
     setFromBeats(0);
   }, [run.restarts, run.stepIndex]);
   const position = paused ? frozen : livePos;
+  // Watch and Sound before the start, under whichever picture is on (acceptance 5, P1-1).
+  const watch = useWatch({
+    take: ready ? pattern : null,
+    running,
+    listen: ready ? session.listen : undefined,
+    beat,
+    isPlaying,
+    view: session.practiceView,
+  });
 
   if (!step) return null;
   const kick =
@@ -1268,19 +1323,27 @@ function TimedScreen({
       beat={ended ? null : position}
       playing={live && isPlaying}
       loopTicks={warmup ? warmupClockOf(pattern).passTicks : takeTicks(pattern)}
+      watch={watch.showing ? watch : undefined}
     />
   ) : view === "runway" ? (
-    <Runway take={pattern} beat={position} playing={live && isPlaying} lights={NO_LIGHTS} />
+    // Watch moves the lanes from its own position, and when it stops they are
+    // back at the start (a new Runway, not one left mid-pattern).
+    <Runway
+      key={watch.showing ? "watch" : "run"}
+      take={pattern}
+      beat={watch.showing ? watch.beat : position}
+      playing={watch.showing ? watch.playing : live && isPlaying}
+      lights={NO_LIGHTS}
+    />
   ) : (
     <NeckInstruction
       take={pattern}
       running={running}
-      // Ready, the engine's own report: a listen demo is a song (card #28).
-      beat={ready ? beat : position}
-      playing={(live || ready) && isPlaying}
+      beat={position}
+      playing={live && isPlaying}
       theory={isTheoryTake(session)}
       className="session-practice-hero"
-      listen={ready ? session.listen : undefined}
+      watch={ready ? watch : undefined}
     />
   );
 
@@ -1320,6 +1383,7 @@ function TimedScreen({
         statusTone={ready || ended ? "quiet" : paused ? "hold" : "live"}
       />
       {picture}
+      {pattern && view !== "neck" && ready && <WatchRow watch={watch} />}
       {/* The whole pattern under the neck or the runway before the start:
           learn the sequence before keeping up (owner, beta 5). Paused, the
           neck holds where it was and the Tab view (V) has every bar marked;
@@ -1527,7 +1591,8 @@ function RecapScreen({ session }: { session: SessionRun }) {
   ).size;
   const takes = run.outcomes.length;
   const notGraded = run.timedSteps.length > 0;
-  const minutes = Math.max(1, Math.round((run.now - run.startedAt) / 60_000));
+  // Played, not watched: the Watch demo's time is left out (acceptance 5, P2-11).
+  const minutes = Math.max(1, Math.round(session.playedMs / 60_000));
   const streak = totalsFrom(session.progress.takes, session.paths).streak;
   // The best news first: a clean tempo that rose, then a pass, then the time put in.
   const raised = [...run.outcomes]

@@ -26,7 +26,7 @@
  * on-demand and capped at 30 fps for the run (`useNeckTake`). The overlay is
  * DOM hung on `project()`, so the SVG fallback gets exactly the same states.
  */
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useNeck } from "../../../stage3d/api";
 import { stripHeight } from "../../../stage3d/controller";
@@ -50,12 +50,11 @@ import {
   SPAN_FRETS,
   soundingIndex,
   windowOver,
-  watchIndex,
   windowView,
 } from "./practiceModel";
 import { usePracticeCursor } from "./usePracticeCursor";
-import { onToggleWatch, subscribeWatchKeyLabel, watchKeyLabel } from "./watchBus";
-import type { ListenDemoControl } from "../hooks/useListenDemo";
+import { WatchControls } from "./WatchControls";
+import type { WatchControl } from "./useWatch";
 
 /** The row under the neck for the beat counter and the key, kept out of the neck's frame. */
 const FOOT_PX = 34;
@@ -94,10 +93,11 @@ export type NeckInstructionProps = {
   /** Extra class on the wrapper (flex sizing per screen). */
   className?: string;
   /**
-   * Watch with Sound (card #28): the Session's demo on the engine. Absent,
-   * Watch is the silent preview alone and there is no Sound switch.
+   * Watch (the screen's, `useWatch`): the demo on the engine with Sound on,
+   * the silent preview with it off; either way a position this neck follows.
+   * Absent, there is no Watch.
    */
-  listen?: ListenDemoControl;
+  watch?: WatchControl;
 };
 
 export function NeckInstruction({
@@ -109,7 +109,7 @@ export function NeckInstruction({
   pluck = false,
   theory = false,
   className,
-  listen,
+  watch,
 }: NeckInstructionProps) {
   const { t } = useTranslation();
   const neck = useNeck();
@@ -159,13 +159,10 @@ export function NeckInstruction({
     }
     return map;
   }, [lights]);
-  const [watching, setWatching] = useState(false);
-  /** Watch with Sound: the engine is playing the demo, and the neck follows it. */
-  const soundOn = !!listen?.sound;
-  const hearing = !running && !!listen?.playing;
-  const showing = watching || hearing;
-  const latest = useRef({ verdicts, model, shape, theory, running, fingers, byOnset, watching, listen });
-  latest.current = { verdicts, model, shape, theory, running, fingers, byOnset, watching, listen };
+  /** Watch: the demo or the silent preview, and the neck follows its position. */
+  const showing = !running && !!watch?.showing;
+  const latest = useRef({ verdicts, model, shape, theory, running, fingers, byOnset });
+  latest.current = { verdicts, model, shape, theory, running, fingers, byOnset };
 
   /**
    * "start here", before the start: a pill in the gap between two strings,
@@ -424,49 +421,19 @@ export function NeckInstruction({
     return () => window.clearTimeout(id);
   }, [running, showing, showReady, placeOverlay]);
 
-  // The Watch preview: the whole order, note by note at the set tempo, in the
-  // run's own NOW and NEXT, looping until Watch again, Start or another view
-  // (which unmounts this). Nothing but the picture: no input, no Take.
-  const canWatch = !running && model.onsets.length > 1;
-  useEffect(() => {
-    if (running) setWatching(false);
-  }, [running]);
-  /** Watch, or stop watching: the demo with Sound on, the silent preview with it off. */
-  const toggleWatch = useCallback(() => {
-    const { running: isRunning, listen: demo } = latest.current;
-    if (isRunning) return;
-    if (demo?.sound) {
-      setWatching(false);
-      if (demo.playing) demo.stop();
-      else if (!demo.active) demo.start();
-      return;
-    }
-    setWatching((w) => !w);
-  }, []);
-  useEffect(() => onToggleWatch(toggleWatch), [toggleWatch]);
-  /** Sound on or off. Whatever was being watched stops, so the switch is never half-applied. */
-  const toggleSound = useCallback(() => {
-    const demo = latest.current.listen;
-    if (!demo) return;
-    setWatching(false);
-    if (demo.active) demo.stop();
-    demo.setSound(!demo.sound);
-  }, []);
-  // Another view, or leaving: a demo this neck started does not outlive it.
-  useEffect(() => () => latest.current.listen?.stop(), []);
-
-  // The demo, lit from the engine's own position: the song's tick through the
-  // count-in and the pass, smoothed between reports (`usePracticeCursor`), the
-  // run's NOW and NEXT, the beat dots counting the count-in too.
+  // Watch, lit from its position (the engine's for the demo, the preview's own
+  // with Sound off): the tick through the count-in and the pass, smoothed
+  // between reports (`usePracticeCursor`), the run's NOW and NEXT, the beat
+  // dots counting the count-in too.
   const heard = useRef({ index: -2, beat: -1 });
   useEffect(() => {
-    if (!hearing) return;
+    if (!showing) return;
     heard.current = { index: -2, beat: -1 };
     if (nowTag.current) nowTag.current.textContent = "";
     const { model: m, shape: sh, theory: th, fingers: fg, byOnset: bo } = latest.current;
     neck.setNotes(nowNextNeck(sh, m.onsets, 0, null, th, fg, bo), { fade: 0.08 });
     placeOverlay(0, null);
-  }, [hearing, neck, placeOverlay]);
+  }, [showing, neck, placeOverlay]);
   const onHeardTick = useCallback(
     (tick: number) => {
       const { model: m, shape: sh, theory: th, fingers: fg, byOnset: bo } = latest.current;
@@ -490,37 +457,10 @@ export function NeckInstruction({
     score: take.score,
     countInTicks: model.countInTicks,
     endTick: model.endTick,
-    beat,
-    playing: hearing && playing,
+    beat: watch?.beat ?? null,
+    playing: showing && !!watch?.playing,
     onTick: onHeardTick,
   });
-  useEffect(() => {
-    if (!watching) return;
-    if (nowTag.current) nowTag.current.textContent = "";
-    let frame = 0;
-    let shownIndex = -2;
-    let shownBeat = -1;
-    const t0 = performance.now();
-    const step = () => {
-      const { model: m, shape: sh, theory: th, fingers: fg, byOnset: bo } = latest.current;
-      const { index, tick } = watchIndex(m, performance.now() - t0, take.bpm, perQuarter);
-      if (index !== shownIndex) {
-        shownIndex = index;
-        const at = Math.max(0, index);
-        neck.setNotes(nowNextNeck(sh, m.onsets, at, null, th, fg, bo), { fade: 0.08 });
-        placeOverlay(at, null);
-      }
-      const b = beatInBar(m, tick, perQuarter);
-      if (b !== shownBeat) {
-        shownBeat = b;
-        dots.current?.querySelectorAll("i").forEach((d, i) => d.toggleAttribute("data-on", i === b));
-      }
-      frame = requestAnimationFrame(step);
-    };
-    frame = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frame);
-  }, [watching, neck, placeOverlay, take.bpm, perQuarter]);
-  const watchKey = useSyncExternalStore(subscribeWatchKeyLabel, watchKeyLabel, watchKeyLabel);
 
   // Running, before the first report: the first note is NOW, the first bar framed.
   useLayoutEffect(() => {
@@ -634,50 +574,7 @@ export function NeckInstruction({
           ))}
         </div>
         <div className="practice-foot-end">
-        {canWatch && (
-          <button
-            type="button"
-            className="practice-watch"
-            data-testid="practice-watch"
-            aria-pressed={showing}
-            data-sound={soundOn ? "" : undefined}
-            onClick={toggleWatch}
-            title={t(soundOn ? "session.practice.watchSoundTitle" : "session.practice.watchTitle")}
-          >
-            <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
-              {showing ? <rect x="1.5" y="1.5" width="7" height="7" rx="1" /> : <path d="M2 1 L9 5 L2 9 Z" />}
-            </svg>
-            {t(
-              showing
-                ? "session.practice.watchStop"
-                : soundOn && (listen?.heard ?? 0) > 0
-                  ? "session.practice.watchAgain"
-                  : "session.practice.watch",
-            )}
-            {watchKey && <kbd>{watchKey}</kbd>}
-          </button>
-        )}
-        {canWatch && listen && (
-          <button
-            type="button"
-            className="practice-sound"
-            data-testid="practice-sound"
-            aria-pressed={soundOn}
-            aria-label={t("session.practice.sound")}
-            onClick={toggleSound}
-            title={t("session.practice.soundTitle")}
-          >
-            <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
-              <path d="M1.5 4.5 H4 L7 2 V10 L4 7.5 H1.5 Z" />
-              {soundOn ? (
-                <path d="M8.6 4.2 Q9.8 6 8.6 7.8 M9.9 3 Q11.8 6 9.9 9" fill="none" strokeWidth="1.1" />
-              ) : (
-                <path d="M8.5 4.3 L11 7.7 M11 4.3 L8.5 7.7" fill="none" strokeWidth="1.1" />
-              )}
-            </svg>
-            <span className="practice-sound-word">{t("session.practice.sound")}</span>
-          </button>
-        )}
+        {watch && <WatchControls watch={watch} />}
         <span className="practice-legend" aria-hidden="true">
           {running ? (
             <>

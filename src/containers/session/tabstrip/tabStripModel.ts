@@ -285,6 +285,17 @@ export function fretPxFor(viewWidth: number): number {
   return Math.round(18 + k * (FRET_PX - 18));
 }
 
+/** Room a follow panel keeps over its staff (the fill's top padding). */
+export const FOLLOW_TOP_PX = 26;
+
+/** The largest numbers, no larger than `fretPx`, whose staff fits `height` (never under 18). */
+export function followFretPx(fretPx: number, height: number): number {
+  if (!(height > 0)) return fretPx;
+  let f = fretPx;
+  while (f > 18 && staffGeometry(f).height + FOLLOW_TOP_PX > height) f -= 1;
+  return f;
+}
+
 /** The closest two neighbouring numbers may sit, centre to centre: about twice a number (65 px at 34). */
 export function minGapPxFor(fretPx: number): number {
   return Math.round(fretPx * 1.9);
@@ -379,8 +390,14 @@ export type FollowLayout = {
 export function followLayout(
   model: Pick<PatternModel, "barTicks" | "minGap" | "beatTicks">,
   viewWidth: number,
+  /**
+   * The panel's height, when known: the numbers are held to a size whose
+   * staff fits it, so a short window (1024x700) does not cut the low strings'
+   * numbers off at the panel's foot. Unknown (0): by the width alone.
+   */
+  viewHeight = 0,
 ): FollowLayout {
-  const base = fretPxFor(viewWidth);
+  const base = followFretPx(fretPxFor(viewWidth), viewHeight);
   // Never much smaller than the width allows: a dense bar splits instead.
   const sizes = base - 4 >= 18 ? [base, base - 4] : [base];
   let last: FollowLayout | null = null;

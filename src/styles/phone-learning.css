@@ -273,7 +273,7 @@ body:has(.main-window.is-mobile .session-body:is([data-testid="session-result"],
    takes the overview's own height (TabStrip's growToFit), every bar with its
    staff, rather than 200 px with "bar 2" peeking over nothing. The page
    scrolls; the panel does not. While a Take runs it is held to the window. */
-.main-window.is-mobile .session-page .practice-tab:not([data-compact]):not([data-running]) {
+.main-window.is-mobile .session-page .practice-tab:not([data-compact]):not([data-running]):not([data-watching]) {
   flex: none;
   max-height: none;
 }
@@ -324,7 +324,10 @@ body:has(.main-window.is-mobile .session-body:is([data-testid="session-result"],
   height: 44px;
   margin: 0;
 }
-.main-window.is-mobile .session-page .session-prev .session-prev-word {
+/* "‹ Previous" where the first row has room for it (acceptance 5, P2-8);
+   where the word would push Skip onto a row of its own, the chevron alone,
+   which the tour names (`usePreviousWordFits`). */
+.main-window.is-mobile .session-page .session-bar[data-prev-short] .session-prev .session-prev-word {
   display: none;
 }
 .main-window.is-mobile .session-page .session-input-actions .session-secondary {

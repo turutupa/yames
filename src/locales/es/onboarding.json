@@ -228,7 +228,7 @@
       "next": "Siguiente",
       "done": "Listo",
       "skip": "Omitir el tour",
-      "offer": "Nuevo: un recorrido corto por Hoy, Rutas y una Sesión.",
+      "offer": "Nuevo: un recorrido corto por Hoy, Rutas, una Sesión y Progreso.",
       "offerAccept": "Enséñame",
       "offerDismiss": "Descartar",
       "stops": {
@@ -276,7 +276,7 @@
         },
         "watch": {
           "title": "Míralo primero",
-          "body": "Ver toca las notas en orden y a tempo, para que veas la forma antes de intentarlo."
+          "body": "Ver te lo toca una vez con sonido, tras un compás de cuenta, cada nota iluminada al sonar: lo oyes y lo ves antes de intentarlo."
         },
         "take": {
           "title": "Empezar toma",
@@ -284,7 +284,7 @@
         },
         "blocks": {
           "title": "Los bloques de hoy",
-          "body": "Aquí arriba está cada bloque de la Sesión. Pulsa uno para ir a él. Anterior vuelve uno atrás y Saltar este pasa al siguiente."
+          "body": "Aquí arriba está cada bloque de la Sesión. Pulsa uno para ir a él. ‹ Anterior vuelve uno atrás y Saltar este pasa al siguiente."
         },
         "progress": {
           "title": "Tempo limpio",

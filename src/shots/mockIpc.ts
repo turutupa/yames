@@ -1857,6 +1857,17 @@ export function installShotMock(shot: Shot, theme: string): void {
     // The phone build's microphone prompt (M7): the harness has said yes.
     if (cmd === "plugin:yames-mobile|request_microphone") return true;
 
+    // The window's place and size: a dragged title bar asks for them
+    // (`useDrag`), and Tauri builds a PhysicalPosition from the answer, which
+    // threw on the null below (acceptance 5, P2-12: harness-only, a real
+    // window always has a place).
+    if (cmd === "plugin:window|outer_position" || cmd === "plugin:window|inner_position") {
+      return { x: 0, y: 0 };
+    }
+    if (cmd === "plugin:window|outer_size" || cmd === "plugin:window|inner_size") {
+      return { width: window.innerWidth, height: window.innerHeight };
+    }
+    if (cmd === "plugin:window|scale_factor") return window.devicePixelRatio || 1;
     if (cmd.startsWith("plugin:")) return null;
 
     // The input, made to misbehave (owner, beta 6): it never answers, it is
