@@ -248,6 +248,8 @@
       "waitingForSignal": "Ouvindo. Toque uma nota para testar.",
       "listeningBack": "Reproduzindo",
       "band": "Banda",
+      "key": "Tom",
+      "keyInTurn": "Um tom novo a cada vez",
       "bandHint": "A banda não é avaliada. No microfone, deixe baixo ou use fones.",
       "bandMicHint": "No microfone eu ouviria a banda como notas suas, então ela começa desligada. De fones, aumente.",
       "skip": "Pular este",

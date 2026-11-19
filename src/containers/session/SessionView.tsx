@@ -36,6 +36,8 @@ import type { TakeOutcome } from "../../session/runner";
 import { PORTRAIT_PHONE_QUERY, useMediaQuery } from "../../hooks/useMediaQuery";
 import { AskStart, CoachLine, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart, timedHowKey } from "./parts";
 import { RunwayTakeScreen, isTheoryTake } from "./highway/RunwayTake";
+import { categoryTagKey } from "../../session/kind";
+import { KeyChooser } from "./practice/KeyChooser";
 import { Runway } from "./highway/Runway";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { exerciseNeck, useNeck3d, useNeckSlot } from "./hooks/useNeck";
@@ -495,13 +497,21 @@ function TakeScreen({
           <>
             {isEdgeStep(step)
               ? t("session.edge.kick")
-              : isTheoryTake(session)
-                ? t("session.kind.theory")
-                : t("session.kind.mechanics")}
+              : t(categoryTagKey(session.paths, session.take?.pathId))}
             {pathTitle && ` · ${t("session.run.pathStep", { path: pathTitle.title, step: stepNumber ?? 1 })}`}
           </>
         }
         title={exercise.title}
+        titleAside={
+          !running && (
+            <KeyChooser
+              choices={session.keyChoices}
+              seed={session.keySeed}
+              chosen={session.keyChosen}
+              onChoose={session.chooseKey}
+            />
+          )
+        }
         aside={
           <PracticeViewSwitch
             view={session.practiceView}
@@ -1267,8 +1277,9 @@ function UngradedResultScreen({ session }: { session: SessionRun }) {
 export function BandVolume({ session, hint }: { session: SessionRun; hint: boolean }) {
   const { t } = useTranslation();
   if (!session.hasBand) return null;
+  // One row in a short window (card #93): the slider and its hint side by side.
   return (
-    <>
+    <div className="session-band-row">
       <label className="session-band" data-testid="session-band">
         <span>{t("session.run.band")}</span>
         <input
@@ -1281,11 +1292,11 @@ export function BandVolume({ session, hint }: { session: SessionRun; hint: boole
         />
       </label>
       {hint && (
-        <div className="session-why">
+        <div className="session-why session-band-hint">
           {t(session.directInput ? "session.run.bandHint" : "session.run.bandMicHint")}
         </div>
       )}
-    </>
+    </div>
   );
 }
 

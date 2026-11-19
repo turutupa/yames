@@ -544,3 +544,38 @@ describe("leaving asks once there is anything to lose (acceptance P2-1, P2-2)", 
     expect(leaveNeedsAsking({ ...base, phase: "recap", outcomes: [{} as never] })).toBe(false);
   });
 });
+
+describe("the ready screen's key chooser (card #93)", () => {
+  const chosen: SessionPlan = {
+    minutes: 5,
+    mood: "returning",
+    daysAway: null,
+    steps: [
+      {
+        kind: "exercise",
+        id: "chosen",
+        role: "focus",
+        pathId: ALT.id,
+        stepId: ALT.steps[0].id,
+        exerciseId: EX.id,
+        title: EX.title,
+        bpm: 60,
+        minutes: 5,
+        variantSeed: 0,
+        why: { code: "chosen", values: {} },
+      } as PlanStep,
+    ],
+  } as SessionPlan;
+
+  it("plays the key chosen, on the ready screen only", () => {
+    const ready = run(IDLE, { type: "start", plan: chosen, now: NOW, untimed: true });
+    expect(ready.phase).toBe("ready");
+    const moved = run(ready, { type: "setVariant", seed: 2 });
+    const step = currentStep(moved);
+    expect(step?.kind === "exercise" && step.variantSeed).toBe(2);
+    // The same key again changes nothing; a running Take is not touched.
+    expect(run(moved, { type: "setVariant", seed: 2 })).toBe(moved);
+    const playing = run(moved, { type: "takeStarted", now: NOW });
+    expect(run(playing, { type: "setVariant", seed: 1 })).toBe(playing);
+  });
+});

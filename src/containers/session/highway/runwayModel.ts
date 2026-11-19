@@ -10,7 +10,10 @@
 import type { NeckNote } from "../../../stage3d/api";
 import { IS_MOBILE } from "../../../platform";
 import type { TakePlan } from "../../../session/take";
+import { TICKS, barLengthTicks } from "../../../paths/format";
 import { TICKS_PER_QUARTER } from "../../../songs/types";
+import { strumDirections } from "../tabstrip/tabStripModel";
+import type { Strum } from "../tabstrip/tabStripModel";
 import type { SongScore } from "../../../songs/types";
 
 /** Bars shown ahead of the hit line, and behind it. */
@@ -57,8 +60,11 @@ export type LaneNote = {
 
 export type RunwayModel = {
   notes: LaneNote[];
-  /** Onsets in time order: when each is due, and the places it asks for. */
-  onsets: { id: number; tick: number; places: { string: number; fret: number }[] }[];
+  /**
+   * Onsets in time order: when each is due, the places it asks for, and, on a
+   * strum, which way it goes (the Tab view's marks, `strumDirections`).
+   */
+  onsets: { id: number; tick: number; places: { string: number; fret: number }[]; strum?: Strum }[];
   /** Every bar line, in ticks. */
   barTicks: number[];
   /** The first bar's length: the unit the lane's window is measured in. */
@@ -121,6 +127,9 @@ export function runwayModel(take: TakePlan, countInBars = 1): RunwayModel {
   const byId = new Map(score.notes.map((n) => [n.id, n]));
   const notes: LaneNote[] = [];
   const onsets: RunwayModel["onsets"] = [];
+  // The strums are the pattern's, by its own tick: the Take repeats it.
+  const strums = strumDirections(take.exercise.notes, TICKS);
+  const passTicks = barLengthTicks(take.exercise.meter) * Math.max(1, take.exercise.bars);
   for (const onset of schedule.onsets) {
     const tick = start + Math.round(onset.beat * tpq);
     const places: { string: number; fret: number }[] = [];
@@ -130,7 +139,9 @@ export function runwayModel(take: TakePlan, countInBars = 1): RunwayModel {
       notes.push({ onsetId: onset.id, noteId, tick, string: n.string, fret: n.fret });
       places.push({ string: n.string, fret: n.fret });
     }
-    onsets.push({ id: onset.id, tick, places });
+    const inPattern = passTicks > 0 ? ((Math.round(onset.beat * TICKS) % passTicks) + passTicks) % passTicks : -1;
+    const strum = strums.size > 0 ? strums.get(inPattern) : undefined;
+    onsets.push(strum ? { id: onset.id, tick, places, strum } : { id: onset.id, tick, places });
   }
   onsets.sort((a, b) => a.tick - b.tick);
   let minGap = 0;

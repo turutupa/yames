@@ -49,6 +49,29 @@ test("the runway's ready notes carry the variant's lines", async ({ page }) => {
   await expect(page.locator('.session-runway-notes [data-testid="session-how-more"]').first()).toHaveText(/^In B flat\b/);
 });
 
+test("the key chooser beside the title plays another key, from the keyboard too (card #93)", async ({ page }) => {
+  await openShot(page, "session-variant-bb", { width: 1024, height: 700 });
+  const chooser = page.getByTestId("session-keychoice");
+  await expect(chooser).toBeVisible();
+  await expect(chooser).toContainText("B\u266d");
+  // Beside the title, on its line, and small: never wider than a few letters.
+  const geo = await page.evaluate(() => {
+    const c = document.querySelector('[data-testid="session-keychoice"]')!.getBoundingClientRect();
+    const t = document.querySelector(".practice-title")!.getBoundingClientRect();
+    return { gap: c.left - t.right, mid: Math.abs((c.top + c.bottom) / 2 - (t.top + t.bottom) / 2), w: c.width };
+  });
+  expect(geo.gap).toBeGreaterThanOrEqual(0);
+  expect(geo.mid).toBeLessThan(10);
+  expect(geo.w).toBeLessThan(120);
+  // The keyboard reaches it and changes it.
+  const select = page.getByTestId("session-keychoice-select");
+  await select.focus();
+  await select.selectOption("1");
+  await expect(chooser).toContainText("E");
+  const { texts } = await howLines(page);
+  expect(texts[0]).toMatch(/^In E\b/);
+});
+
 test.describe("on a phone", () => {
   test.use({ baseURL: MOBILE_URL, isMobile: true, hasTouch: true });
   test("the variant's second how-to line fits the HOW panel at 390x844", async ({ page }) => {

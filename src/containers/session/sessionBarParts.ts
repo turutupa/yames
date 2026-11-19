@@ -21,7 +21,8 @@ export function showTipAgain(e: Pick<React.MouseEvent<HTMLElement>, "currentTarg
  * "‹ Previous" with its word where the bar's first row has room for it, the
  * chevron alone where the word would push Skip onto a row of its own (a
  * phone, in German or Russian): acceptance 5, P2-8. Measured with the word
- * shown, then `data-prev-short` hides it; again on every resize. When Skip
+ * shown, then `data-prev-short` hides it; again whenever the bar changes size
+ * (its width with the window, its height when Skip drops a row). When Skip
  * is on a row of its own even so, `data-tight` (card #67).
  */
 export function usePreviousWordFits(ref: React.RefObject<HTMLDivElement>, key: string) {
@@ -53,15 +54,28 @@ export function usePreviousWordFits(ref: React.RefObject<HTMLDivElement>, key: s
       if (ref.current === bar) check();
     });
     fonts?.addEventListener?.("loadingdone", check);
-    let width = bar.getBoundingClientRect().width;
+    // Measured again when the bar's width changes, and when its height does.
+    // The words can widen after the last check with the window the same
+    // width: in Russian the last check ran on the fallback face, the real
+    // Cyrillic glyphs swapped in after it (no event this hook saw) and pushed
+    // Skip onto a row of its own. Watching the width alone left that standing:
+    // the "Skip stays on the bar's first row" layout test failed one run in
+    // ten or so. Skip dropping a row makes the bar taller, so it is seen now.
+    // A check ends in the state it ended in last time when nothing else moved,
+    // so the observer does not chase itself.
+    const sizeOf = () => {
+      const r = bar.getBoundingClientRect();
+      return { width: r.width, height: r.height };
+    };
+    let size = sizeOf();
     const ro =
       typeof ResizeObserver === "undefined"
         ? null
         : new ResizeObserver(() => {
-            const now = bar.getBoundingClientRect().width;
-            if (Math.abs(now - width) < 1) return;
-            width = now;
+            const now = sizeOf();
+            if (Math.abs(now.width - size.width) < 1 && Math.abs(now.height - size.height) < 1) return;
             check();
+            size = sizeOf();
           });
     ro?.observe(bar);
     return () => {

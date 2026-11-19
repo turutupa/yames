@@ -247,6 +247,8 @@
       "waitingForSignal": "正在聽。彈一個音來檢查。",
       "listeningBack": "正在回聽",
       "band": "樂團",
+      "key": "調",
+      "keyInTurn": "每次換一個新調",
       "bandHint": "樂團不計分。用麥克風時請調小音量或戴耳機。",
       "bandMicHint": "用麥克風時我會把樂團當成你的音，所以預設關閉。戴上耳機再調大。",
       "skip": "跳過這個",

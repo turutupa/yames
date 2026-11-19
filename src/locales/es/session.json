@@ -248,6 +248,8 @@
       "waitingForSignal": "Escuchando. Toca una nota para comprobarlo.",
       "listeningBack": "Reproduciendo",
       "band": "Banda",
+      "key": "Tonalidad",
+      "keyInTurn": "Una tonalidad nueva cada vez",
       "bandHint": "La banda no se califica. Con micrófono, bájala o usa auriculares.",
       "bandMicHint": "Con micrófono oiría la banda como si fueran tus notas, así que empieza apagada. Con auriculares, súbela.",
       "skip": "Saltar este",

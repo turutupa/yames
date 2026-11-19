@@ -87,6 +87,7 @@ export function clockText(ms: number): string {
 export function PracticeHead({
   kick,
   title,
+  titleAside,
   aside,
   meta,
   status,
@@ -94,6 +95,8 @@ export function PracticeHead({
 }: {
   kick: ReactNode;
   title: ReactNode;
+  /** Beside the title, quiet: the key chooser of a key-moved Exercise (card #93). */
+  titleAside?: ReactNode;
   /** Top right: the view switch. */
   aside?: ReactNode;
   /** The small row under the title: the clock, the tempo, a Take's numbers. */
@@ -110,7 +113,14 @@ export function PracticeHead({
       <div className="practice-head-row" ref={top}>
         <div className="practice-head-text">
           <span className="session-kick practice-kick">{kick}</span>
-          <h2 className="practice-title">{title}</h2>
+          {titleAside ? (
+            <div className="practice-title-row">
+              <h2 className="practice-title">{title}</h2>
+              {titleAside}
+            </div>
+          ) : (
+            <h2 className="practice-title">{title}</h2>
+          )}
         </div>
         <span className="practice-grow" />
         {aside}
