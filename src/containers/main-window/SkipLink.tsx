@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import { memo, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import { focusPagePrimary } from "./hooks/usePageFocus";
 
@@ -10,7 +10,7 @@ import { focusPagePrimary } from "./hooks/usePageFocus";
  *
  * Out of sight until it has keyboard focus, so it costs a mouse user nothing.
  */
-export function SkipLink({ root, view }: { root: RefObject<HTMLElement>; view: string }) {
+export const SkipLink = memo(function SkipLink({ root, view }: { root: RefObject<HTMLElement>; view: string }) {
   const { t } = useTranslation();
   return (
     <a
@@ -34,4 +34,4 @@ export function SkipLink({ root, view }: { root: RefObject<HTMLElement>; view: s
       {t("skipLink")}
     </a>
   );
-}
+});

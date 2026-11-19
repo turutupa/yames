@@ -10,6 +10,7 @@ import {
 } from "../../hooks/useGamepad";
 import { useMidi } from "../../hooks/useMidi";
 import { useMetronome } from "../../hooks/useMetronome";
+import { useStableHandlers } from "../../hooks/useStableHandlers";
 import { useKeybindings } from "../../hooks/useKeybindings";
 import { useCoachDownload } from "../../hooks/useCoachDownload";
 import { useActionDispatcher } from "../../hooks/useActionDispatcher";
@@ -56,7 +57,7 @@ import CoachCard from "../practice-coach/CoachCard";
 import "../../styles/main-window.css";
 import "../../styles/transitions.css";
 import "../../styles/evaluation.css";
-import type { BrainTier, InstrumentId, ModelTier, Preset, Subdivision } from "../../types";
+import type { BrainTier, InstrumentId, ModelTier, Preset, Setlist, Subdivision } from "../../types";
 import { OnboardingWizard } from "../onboarding/OnboardingWizard";
 import type { WizardCoachEnv, WizardEvaluationEnv, WizardLearningEnv } from "../onboarding/WizardContext";
 import { FinishSetupChip } from "../onboarding/FinishSetupChip";
@@ -2019,6 +2020,61 @@ export function MainWindow() {
   const settingsBack = useCallback(() => setView(prevTab.current), [setView, prevTab]);
   if (IS_MOBILE) useBackDismiss(view === "settings", settingsBack);
 
+  /*
+   * The rail's handlers, stable across renders (`useStableHandlers`): the rail
+   * is memoised, and this window re-renders at every beat.
+   */
+  const railHandlers = useStableHandlers({
+    setView: navigate,
+    onToggleLibrary: () => setSidebarOpen((o) => !o),
+    // Loading a preset closes any open setlist, so it can discard a
+    // setlist's edits as easily as a preset's own.
+    onLoadPreset: (preset: Preset) => guarded(() => void handleLoadPreset(preset)),
+    onActivePresetChange: handleActivePresetChange,
+    onLoadSetlist: (next: Setlist) => {
+      // Clicking the setlist you are already in used to be the way out
+      // of it; there is no out any more, so it is the row saying what
+      // is already true. Any OTHER setlist replaces this one — which is
+      // the commonest way to lose edits, so it goes through the gate.
+      if (next.id === setlistSession.setlist?.id) return;
+      guarded(() => setlistSession.loadSetlist(next));
+    },
+    onNewSetlist: newSetlistGuarded,
+    onDeleteSetlist: setlistSession.deleteSetlist,
+    onRenameSetlist: setlistSession.renameSetlist,
+    onDuplicateSetlist: setlistSession.duplicateSetlist,
+    onReorderSetlists: setlistSession.reorderSetlists,
+    // And the same for a jam: the row you are on is where you are.
+    onLoadJam: (next: Jam) => {
+      if (next.id === jamSession.jam?.id) return;
+      guarded(() => {
+        jamSession.loadJam(next);
+        releaseSidebarFocus();
+      });
+    },
+    onNewJam: newJamGuarded,
+    onDeleteJam: jamSession.deleteJam,
+    onRenameJam: jamSession.renameJam,
+    onDuplicateJam: jamSession.duplicateJam,
+    onReorderJams: jamSession.reorderJams,
+    onAddJamToSetlist: (jamId: string, setlistId: string) => {
+      const jam = jamSession.jams.find((j) => j.id === jamId);
+      if (jam) void setlistSession.addJamToSetlist(setlistId, jam);
+    },
+    onLoadSong: songsSession.loadSong,
+    /* The library's "+" reaches the same file input the stage owns.
+       There is only one, on the view, so the picker and the drop
+       target cannot drift apart. */
+    onImportSong: () => {
+      setView("songs");
+      window.dispatchEvent(new CustomEvent("yames:songs-import"));
+    },
+    onDeleteSong: songsSession.deleteSong,
+    onRenameSong: songsSession.renameSong,
+    onToggleCoach: session.toggleCard,
+    onZen: () => setIsFullscreen(true),
+  });
+
   return (
     <>
     <ZenTransition isActive={isFullscreen} themeId={state.theme} disabled={viewTransitions === "off"} level={viewTransitions} animStyle={animationStyle}>
@@ -2166,70 +2222,25 @@ export function MainWindow() {
           state={state}
           view={view}
           mode={mode}
-          setView={navigate}
           prevTab={prevTab}
           libraryOpen={sidebarOpen}
-          onToggleLibrary={() => setSidebarOpen((o) => !o)}
-          // Loading a preset closes any open setlist, so it can discard a
-          // setlist's edits as easily as a preset's own.
-          onLoadPreset={(preset) => guarded(() => void handleLoadPreset(preset))}
-          onActivePresetChange={handleActivePresetChange}
           presetShortcut={platformKey(keyBindings["toggle-sidebar"] || "")}
           setlists={setlistSession.setlists}
           activeSetlistId={setlistSession.setlist?.id ?? null}
-          onLoadSetlist={(next) => {
-            // Clicking the setlist you are already in used to be the way out
-            // of it; there is no out any more, so it is the row saying what
-            // is already true. Any OTHER setlist replaces this one — which is
-            // the commonest way to lose edits, so it goes through the gate.
-            if (next.id === setlistSession.setlist?.id) return;
-            guarded(() => setlistSession.loadSetlist(next));
-          }}
-          onNewSetlist={newSetlistGuarded}
-          onDeleteSetlist={setlistSession.deleteSetlist}
-          onRenameSetlist={setlistSession.renameSetlist}
-          onDuplicateSetlist={setlistSession.duplicateSetlist}
-          onReorderSetlists={setlistSession.reorderSetlists}
           jams={jamSession.jams}
           activeJamId={jamSession.jam?.id ?? null}
-          // And the same for a jam: the row you are on is where you are.
-          onLoadJam={(next) => {
-            if (next.id === jamSession.jam?.id) return;
-            guarded(() => {
-              jamSession.loadJam(next);
-              releaseSidebarFocus();
-            });
-          }}
-          onNewJam={newJamGuarded}
-          onDeleteJam={jamSession.deleteJam}
-          onRenameJam={jamSession.renameJam}
-          onDuplicateJam={jamSession.duplicateJam}
-          onReorderJams={jamSession.reorderJams}
-          onAddJamToSetlist={(jamId, setlistId) => {
-            const jam = jamSession.jams.find((j) => j.id === jamId);
-            if (jam) void setlistSession.addJamToSetlist(setlistId, jam);
-          }}
           /* One row per FILE (W35). `activeSongId` is still the PART on the
              stage; the row it lights is the file that part belongs to. */
           songFiles={songsSession.songFiles}
           activeSongId={songsSession.song?.id ?? null}
           dueSongs={songsDue}
-          onLoadSong={songsSession.loadSong}
-          /* The library's "+" reaches the same file input the stage owns.
-             There is only one, on the view, so the picker and the drop
-             target cannot drift apart. */
-          onImportSong={() => {
-            setView("songs");
-            window.dispatchEvent(new CustomEvent("yames:songs-import"));
-          }}
-          onDeleteSong={songsSession.deleteSong}
-          onRenameSong={songsSession.renameSong}
           coachOpen={session.cardOpen}
           coachActive={session.active}
           coachListening={evaluation.enabled}
-          onToggleCoach={session.toggleCard}
-          onZen={() => setIsFullscreen(true)}
           keyBindings={keyBindings}
+          // Every handler, behind functions that do not change (`railHandlers`
+          // above), so the rail is not rendered again at every beat.
+          {...railHandlers}
         />
         )}
       <div

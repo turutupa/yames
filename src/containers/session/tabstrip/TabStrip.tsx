@@ -26,7 +26,7 @@ import { cursorTickAt, leadFromFrame, onReport } from "../../../songs/cursor";
 import type { CursorMotion } from "../../../songs/cursor";
 import type { SongScore } from "../../../songs/types";
 import { TICKS_PER_QUARTER } from "../../../songs/types";
-import { likelyCpuCompositing } from "../highway/Runway";
+import { DisplayClock, dueAt, takeRate } from "../../../stage3d/takeRate";
 import {
   FOLLOW_SEGMENTS,
   SCROLL_BELOW,
@@ -618,20 +618,24 @@ export function TabStrip({
   // The frame loop: only in follow mode, only while it runs.
   useEffect(() => {
     if (!playing || !follow) return;
-    const slow = likelyCpuCompositing(navigator.userAgent);
+    // At the Take's rate (`stage3d/takeRate.ts`), as the runway: the display's
+    // where the machine holds it, 30 where it does not.
+    const display = new DisplayClock();
     let frame = 0;
     let previous = 0;
     let frameMs = 0;
-    let odd = false;
+    let drawn = -Infinity;
     const step = (now: number) => {
       frame = requestAnimationFrame(step);
       if (previous > 0) {
         const delta = now - previous;
         frameMs = frameMs > 0 ? frameMs * 0.9 + delta * 0.1 : delta;
+        display.sample(delta);
+        if (delta < 250) takeRate.sample(delta, display.ms);
       }
       previous = now;
-      odd = !odd;
-      if (slow && odd) return;
+      if (!dueAt(now, drawn, takeRate.laneFps, display.ms)) return;
+      drawn = now;
       let tick: number;
       if (typeof position === "function") tick = position();
       else if (clock && motion.current) {
@@ -661,6 +665,33 @@ export function TabStrip({
     for (let s = Math.max(0, page - 1); s <= page + ahead; s++) if (s <= lastSegment) out.push(s);
     return out;
   }, [follow, size.width, page, lastSegment, fl]);
+
+  // Each segment's notes, made once. `Segment` is memoised on them: a fresh
+  // array per render redrew every bar on screen at every beat of a Take
+  // (thirty `TechMarks` nine times a second, measured 2026-11-19).
+  const followNotes = useMemo(() => {
+    const cache = new Map<number, StripNote[]>();
+    return (s: number): StripNote[] => {
+      let list = cache.get(s);
+      if (!list) {
+        list = segmentNotes(model, s, fl.segTicks, takeBars);
+        cache.set(s, list);
+      }
+      return list;
+    };
+  }, [model, fl.segTicks, takeBars]);
+  const overviewNotes = useMemo(() => {
+    const all = occurrences(model, 0, 0);
+    const cache = new Map<number, StripNote[]>();
+    return (s: number): StripNote[] => {
+      let list = cache.get(s);
+      if (!list) {
+        list = all.filter((n) => n.at >= s * ov.segTicks && n.at < (s + 1) * ov.segTicks);
+        cache.set(s, list);
+      }
+      return list;
+    };
+  }, [model, ov.segTicks]);
 
   const markTick = marker === null || marker === undefined || marker < 0 ? null : marker % model.passTicks;
   const markOnset = useMemo(() => {
@@ -718,7 +749,7 @@ export function TabStrip({
                   width={fl.segWidth}
                   ppt={fl.ppt}
                   geo={geo}
-                  notes={segmentNotes(model, s, fl.segTicks, takeBars)}
+                  notes={followNotes(s)}
                   rel={rel}
                   // The pattern starting over reads "bar 1 again", not a bar 1
                   // after bar 2 (acceptance 4, P2-11).
@@ -774,7 +805,7 @@ export function TabStrip({
                   width={fl.segWidth}
                   ppt={fl.ppt}
                   geo={geo}
-                  notes={segmentNotes(model, s, fl.segTicks, takeBars)}
+                  notes={followNotes(s)}
                   rel={rel}
                   label={
                     rel === "now" || rel === "next"
@@ -794,7 +825,6 @@ export function TabStrip({
     );
   } else if (size.width > 0) {
     const geo = ov.geo;
-    const all = occurrences(model, 0, 0);
     const rows: number[][] = [];
     for (let s = 0; s < ov.segments; s++) {
       const r = Math.floor(s / ov.perRow);
@@ -810,7 +840,7 @@ export function TabStrip({
               {row.map((s, i) => {
                 const where = segmentPlace(model, s, ov.segTicks);
                 const startsBar = (s * ov.segTicks) % model.barTicks === 0;
-                const segNotes = all.filter((n) => n.at >= s * ov.segTicks && n.at < (s + 1) * ov.segTicks);
+                const segNotes = overviewNotes(s);
                 const marked = markSeg === s;
                 return (
                   <Segment

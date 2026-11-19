@@ -8,14 +8,18 @@
  * a flat board with crisp frets, the inlays, the notes in their kinds' colours,
  * and the window in the accent.
  */
-import { useLayoutEffect, useRef, useState } from "react";
+import { memo, useLayoutEffect, useRef, useState } from "react";
 import type { NeckNote } from "./api";
 import { noteLook, useNeckPalette } from "./neckTheme";
 
 const DOTS = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24];
 const fx = (n: number) => 1 - Math.pow(2, -n / 12);
 
-export function OverviewStrip({
+/**
+ * Memoised: its host (`NeckStageHost`) re-renders with the app's shell, at
+ * every beat of a Take, and the strip only changes with the notes or the zoom.
+ */
+export const OverviewStrip = memo(function OverviewStrip({
   from,
   to,
   notes,
@@ -126,4 +130,4 @@ export function OverviewStrip({
       {W > 0 && <i className="neck-strip-win" style={{ left: winA, width: winB - winA, height: cy * 2 }} />}
     </div>
   );
-}
+});

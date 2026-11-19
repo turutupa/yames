@@ -139,7 +139,8 @@ describe("TabStrip", () => {
     step(16);
     const x0 = colX(container);
     tick = 1000;
-    step(32);
+    // Far enough on for a strip held to 30 frames a second (`stage3d/takeRate.ts`), as this DOM's agent is.
+    step(64);
     const x1 = colX(container);
     expect(x1).toBeGreaterThan(x0);
     expect(container.querySelector(".tabstrip-note")).toBe(before);

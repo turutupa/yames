@@ -3,7 +3,10 @@
 # headless probe in the same PipeWire. One command; re-run it on a quiet
 # machine (the numbers are only a gate result when nothing else is running).
 #
-#   tests/e2e/probe.sh [--no-build] [out-dir]
+#   tests/e2e/probe.sh [--no-build] [--take-fps N] [out-dir]
+#
+# --take-fps N forces the rate a Take is drawn at (the app's own choice on
+# WebKitGTK is 30): how a faster Take is held against the same gates.
 #
 # 1. Xvfb: the headless click-jitter-probe (60 s), then the app with the neck
 #    on screen for three Takes (compositing in software; WebGL still reaches
@@ -14,7 +17,9 @@
 set -u
 here="$(cd "$(dirname "$0")" && pwd)"
 build=()
+fps=()
 if [ "${1:-}" = "--no-build" ]; then build=(--no-build); shift; fi
+if [ "${1:-}" = "--take-fps" ]; then fps=(--take-fps "$2"); shift 2; fi
 out="${1:-$(mktemp -d /tmp/yames-probe-XXXXXX)}"
 mkdir -p "$out"
 
@@ -24,10 +29,10 @@ load() {
 
 status=0
 load "before Xvfb"
-node "$here/run.mjs" "${build[@]}" --scenarios gpu-info,baseline,neck --out "$out/xvfb" || status=1
+node "$here/run.mjs" "${build[@]}" "${fps[@]}" --scenarios gpu-info,baseline,neck --out "$out/xvfb" || status=1
 load "after Xvfb"
 if command -v nvidia-smi >/dev/null && sudo -n true 2>/dev/null; then
-  node "$here/run.mjs" --no-build --gpu --scenarios gpu-info,neck --out "$out/gpu" || status=1
+  node "$here/run.mjs" --no-build --gpu "${fps[@]}" --scenarios gpu-info,neck --out "$out/gpu" || status=1
   load "after GPU"
 else
   echo "no NVIDIA GPU or no passwordless sudo: GPU part skipped" | tee -a "$out/load.txt"
@@ -47,7 +52,8 @@ for (const part of ["xvfb", "gpu"]) {
   }
   const p = info.probe_neck;
   if (p) {
-    rows.push([`app, neck ${info.neck?.kind} (${part})`, p.jitter_p99_ms, p.missed_beats, `${p.callback_allocs}/${p.callback_frees}`, p.dropped_notifications,
+    const f = info.neck?.frames ?? {};
+    rows.push([`app, neck ${info.neck?.kind} (${part}), Take fps ${info.takeFpsAsked ?? "auto"}: frames ${f.neckGapMedianMs ?? "?"} ms apart (page ${f.pageFrameMedianMs ?? "?"})`, p.jitter_p99_ms, p.missed_beats, `${p.callback_allocs}/${p.callback_frees}`, p.dropped_notifications,
       JSON.stringify(info.neck?.cpuCoresWhilePlaying ?? {}), info.loadAtStart]);
   }
 }

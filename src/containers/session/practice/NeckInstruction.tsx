@@ -23,7 +23,8 @@
  * Cheap on purpose: the position runs on `requestAnimationFrame` as
  * arithmetic, and the neck is told something only when it changes, once per
  * note (`setNotes`) and at most once per bar (`setView`). The stage stays
- * on-demand and capped at 30 fps for the run (`useNeckTake`). The overlay is
+ * on-demand, at the Take's rate for the run (`useNeckTake`, `stage3d/takeRate.ts`:
+ * the display's, or 30 where the machine should not be asked). The overlay is
  * DOM hung on `project()`, so the SVG fallback gets exactly the same states.
  */
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
@@ -258,6 +259,11 @@ export function NeckInstruction({
   const placeOverlay = useCallback(
     (index: number, msToDue: number | null) => {
       const box = wrap.current?.getBoundingClientRect();
+      // Everything measured is read here, before anything below is written:
+      // the "next" tag's size, read after the ring had been moved, was a
+      // forced layout of the whole Take screen at every note (2026-11-19).
+      const nextW = nextTag.current?.offsetWidth || 40;
+      const nextH = nextTag.current?.offsetHeight || 18;
       const m = latest.current.model;
       const hide = (el: HTMLElement | null) => el && (el.style.visibility = "hidden");
       if (!box) return;
@@ -326,8 +332,8 @@ export function NeckInstruction({
             if (pt) yAt.set(d, pt.y - box.top);
           }
           nt.style.visibility = "hidden";
-          const w = nt.offsetWidth || 40;
-          const h = nt.offsetHeight || 18;
+          const w = nextW;
+          const h = nextH;
           const H = box.height;
           const W = box.width;
           // Every dot of the pattern, at the size it is drawn (NOW with its ring).
@@ -423,7 +429,7 @@ export function NeckInstruction({
       drawn.current = sh;
       neck.setNotes(nowNextNeck(sh, m.onsets, index, v, th, fg, bo), { fade: 0.12 });
       // The finger is on the dot itself now; the tag under NOW says nothing.
-      if (nowTag.current) nowTag.current.textContent = "";
+      if (nowTag.current && nowTag.current.textContent) nowTag.current.textContent = "";
       const strum = m.onsets[index]?.strum;
       if (strumNow.current && strumNow.current.dataset.strum !== (strum ?? "")) strumNow.current.dataset.strum = strum ?? "";
       const due = m.onsets[index]?.tick;

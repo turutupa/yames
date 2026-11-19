@@ -4,20 +4,34 @@
  * - `stage.neck3d`: "auto" (the 3D neck where the machine can draw it) or
  *   "off" (always the flat SVG neck). Settings > Appearance.
  * - `stage.forceFlat`: set by the frame-time guard (`speed.ts`) when this
- *   machine drew the neck too slowly for a GPU. Kept across restarts, so the
- *   probe runs once, not every launch; Settings offers to try again.
+ *   machine drew the neck too slowly for a GPU on two launches in a row
+ *   (`stage.slowStrikes` counts them; a fast probe resets it). One slow probe
+ *   only flattens that session: a busy moment must not take the 3D neck away
+ *   for good (card #97). Settings offers to try again.
  *
- * Both live in the settings store. The stage waits for them (`ready`) before
+ * - `stage.takeFps`: absent, or a number of frames a second that a Take is
+ *   drawn at whatever the machine's hints say, or `"display"` for the 3D neck
+ *   to follow the display during a Take on this machine (`takeRate.ts`). No
+ *   switch in Settings yet: it is how the e2e probe measures a rate, and a
+ *   way out on a machine the hints misjudge.
+ *
+ * All live in the settings store. The stage waits for them (`ready`) before
  * it picks a backend, so a flat machine never shows a 3D frame first.
  */
 import { useSyncExternalStore } from "react";
 import { storeLoad, storeSave } from "../ipc";
+import { setTakeFpsOverride } from "./takeRate";
 
 export type Neck3dMode = "auto" | "off";
 export type StagePrefs = { readonly neck3d: Neck3dMode; readonly forceFlat: boolean };
 
 export const NECK3D_KEY = "stage.neck3d";
 export const FORCE_FLAT_KEY = "stage.forceFlat";
+export const TAKE_FPS_KEY = "stage.takeFps";
+export const SLOW_STRIKES_KEY = "stage.slowStrikes";
+/** Slow probes on separate launches before the flat neck is remembered. */
+export const STRIKES_TO_REMEMBER = 2;
+let strikes = 0;
 
 let prefs: StagePrefs = { neck3d: "auto", forceFlat: false };
 let loading: Promise<void> | null = null;
@@ -31,8 +45,12 @@ function set(patch: Partial<StagePrefs>) {
 /** Load once from the store; resolves (never rejects) when the prefs are known. */
 export function stagePrefsReady(): Promise<void> {
   if (!loading) {
-    loading = Promise.all([storeLoad<string>(NECK3D_KEY), storeLoad<boolean>(FORCE_FLAT_KEY)])
-      .then(([mode, flat]) => set({ neck3d: mode === "off" ? "off" : "auto", forceFlat: flat === true }))
+    loading = Promise.all([storeLoad<string>(NECK3D_KEY), storeLoad<boolean>(FORCE_FLAT_KEY), storeLoad<number | string>(TAKE_FPS_KEY).catch(() => null), storeLoad<number>(SLOW_STRIKES_KEY).catch(() => null)])
+      .then(([mode, flat, fps, s]) => {
+        setTakeFpsOverride(fps);
+        strikes = typeof s === "number" && Number.isFinite(s) ? s : 0;
+        set({ neck3d: mode === "off" ? "off" : "auto", forceFlat: flat === true });
+      })
       .catch(() => {
         /* no store (a browser, a test): the defaults */
       });
@@ -65,6 +83,26 @@ export function setForceFlat(on: boolean): void {
   void storeSave(FORCE_FLAT_KEY, on).catch(() => {});
 }
 
+/**
+ * The frame-time guard judged this launch too slow. Flat for this session; remembered
+ * only once it has happened on `STRIKES_TO_REMEMBER` launches in a row.
+ */
+export function noteSlowProbe(): { remembered: boolean } {
+  strikes += 1;
+  void storeSave(SLOW_STRIKES_KEY, strikes).catch(() => {});
+  const remembered = strikes >= STRIKES_TO_REMEMBER;
+  if (remembered) setForceFlat(true);
+  else set({ forceFlat: true });
+  return { remembered };
+}
+
+/** The guard judged this launch fast enough: the count starts again. */
+export function noteFastProbe(): void {
+  if (strikes === 0) return;
+  strikes = 0;
+  void storeSave(SLOW_STRIKES_KEY, 0).catch(() => {});
+}
+
 export function useStagePrefs(): StagePrefs {
   return useSyncExternalStore(subscribeStagePrefs, getStagePrefs);
 }
@@ -72,6 +110,7 @@ export function useStagePrefs(): StagePrefs {
 /** For tests: back to the defaults, not loaded. */
 export function resetStagePrefsForTest(p: Partial<StagePrefs> = {}): void {
   prefs = { neck3d: "auto", forceFlat: false, ...p };
+  strikes = 0;
   loading = null;
   listeners.clear();
 }

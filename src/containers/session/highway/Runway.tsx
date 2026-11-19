@@ -10,6 +10,8 @@
  * - The position is the engine's, smoothed between reports by
  *   `songs/cursor.ts` the same way the tab cursor is: re-anchored on every
  *   report, never backwards, snapped on a seek.
+ * - It moves at the Take's rate (`stage3d/takeRate.ts`): the display's, or 30
+ *   where the machine should not be asked for more.
  * - Through the count-in it pre-rolls from the Take's own tempo, so bar one
  *   is already arriving when the click says "one".
  * - A verdict colours its note with a data attribute and moves its early/late
@@ -25,6 +27,7 @@ import type { BeatPosition } from "../../../songs/position";
 import type { TakePlan } from "../../../session/take";
 import { TAKE_COUNT_IN_BARS } from "../../../session/take";
 import type { TimingMark } from "../../songs/review/marks";
+import { DisplayClock, dueAt, takeRate } from "../../../stage3d/takeRate";
 import { kindOfMark } from "../hooks/useNeck";
 import { StrumGlyph } from "../tabstrip/TabStrip";
 import {
@@ -46,14 +49,6 @@ declare global {
     /** Frames the runway has moved its strip on, for the layout suite. */
     __RUNWAY_FRAMES__?: number;
   }
-}
-
-/**
- * A webview that is likely to paint transforms on the CPU: WebKitGTK (Linux,
- * no Chrome in the agent). There the lane moves at 30 frames a second.
- */
-export function likelyCpuCompositing(ua: string): boolean {
-  return /Linux/.test(ua) && /AppleWebKit/.test(ua) && !/Chrome|Chromium|Android/.test(ua);
 }
 
 export type RunwayProps = {
@@ -217,20 +212,25 @@ export function Runway({ take, beat, playing, lights, collapsed = false, onNext 
       place(shown.current > model.countInTicks ? shown.current : model.countInTicks);
       return;
     }
-    const slow = likelyCpuCompositing(navigator.userAgent);
+    // The Take's rate (`takeRate.ts`): the display's where the machine holds
+    // it, 30 where it does not. With the runway alone on screen the neck draws
+    // nothing, so this loop is what tells the governor how the frames go.
+    const display = new DisplayClock();
     let frame = 0;
     let previous = 0;
     let frameMs = 0;
-    let odd = false;
+    let drawn = -Infinity;
     const step = (now: number) => {
       frame = requestAnimationFrame(step);
       if (previous > 0) {
         const delta = now - previous;
         frameMs = frameMs > 0 ? frameMs * 0.9 + delta * 0.1 : delta;
+        display.sample(delta);
+        if (delta < 250) takeRate.sample(delta, display.ms);
       }
       previous = now;
-      odd = !odd;
-      if (slow && odd) return;
+      if (!dueAt(now, drawn, takeRate.laneFps, display.ms)) return;
+      drawn = now;
       const m = motion.current;
       if (!m) return;
       const next = cursorTickAt(take.score, m, now, {

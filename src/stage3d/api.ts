@@ -53,7 +53,7 @@ export interface NeckStage {
   pluck(string: number, fret: number, kind: NeckKind): void;
   /** The warm sweep along the frets, for arrivals and results. */
   sweep(): void;
-  /** A Take is running: cap the frame rate (rule 1). */
+  /** A Take is running: the frame rate is the governor's for as long as it does (rule 1, `takeRate.ts`). */
   setTakeRunning(on: boolean): void;
   /**
    * Where a place on the neck is on screen, in viewport CSS px: the centre of
@@ -64,6 +64,14 @@ export interface NeckStage {
    * sized to the note it rings.
    */
   project(string: number, fret: number): { x: number; y: number; r: number } | null;
+  /**
+   * Get the 3D engine ready while nothing is asked of it (a learning screen
+   * with no neck on it): the chunk loaded, the context made, the frame-time
+   * guard run. Without it the first Start of a launch paid for all of that in
+   * the frame the Session opened on (a 115 ms task, measured 2026-11-19).
+   * Draws nothing; does nothing once a backend is up.
+   */
+  prewarm?(): void;
   /** True when WebGL2 is up; false means the SVG fallback is drawing. */
   readonly is3d: boolean;
 }
