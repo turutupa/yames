@@ -180,21 +180,19 @@
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-sheet-btn,
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-vibe-chip,
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .songs-track-chip {
-  border: 1px solid var(--tk-line-strong);
+  /* Tonal ("B · Tonal", owner 2026-11-19, global.css). */
+  border: 1px solid transparent;
   border-radius: 10px;
-  background: var(--tk-raised);
-  color: var(--text-primary);
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
   font-family: var(--tk-body);
   font-weight: 600;
-  transition:
-    border-color 0.15s ease,
-    background 0.15s ease;
 }
 
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .preset-save-btn:disabled,
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .preset-text-btn:disabled {
-  background: transparent;
-  color: var(--text-muted);
+  background: var(--btn-disabled-bg);
+  color: var(--btn-disabled-ink);
 }
 
 @media (hover: hover) {
@@ -203,9 +201,7 @@
   .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-sheet-btn:hover,
   .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .jam-vibe-chip:hover,
   .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .songs-track-chip:hover {
-    border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
-    background: color-mix(in srgb, var(--accent) 8%, var(--tk-raised));
-    color: var(--text-primary);
+    background: var(--btn-tint-hover);
   }
 }
 
@@ -242,17 +238,17 @@
   }
 }
 
+/* The chosen one, as every segmented control ("B · Tonal"). */
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .accent-option.active,
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-modes .toggle-btn.active {
-  background: var(--accent);
-  color: var(--accent-text, #fff);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  background: var(--btn-sel);
+  color: var(--btn-tint-ink);
+  box-shadow: var(--btn-sel-ring);
 }
 
-/* The badge inside a chosen mode has to read on the accent. */
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-modes .toggle-btn.active .drill-mode-badge {
-  border-color: color-mix(in srgb, var(--accent-text, #fff) 45%, transparent);
-  color: var(--accent-text, #fff);
+  border-color: color-mix(in srgb, var(--btn-tint-ink) 45%, transparent);
+  color: var(--btn-tint-ink);
 }
 
 /* ── Fields: a well with a hairline ──────────────────────────────────── */
@@ -286,46 +282,44 @@
 /* Tap and the tempo nudges: Settings' secondary button. The nudges stay
    round, because they are a pair of keys and not a pair of words. */
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .tap-btn {
-  border: 1px solid var(--tk-line-strong);
+  border: 1px solid transparent;
   border-radius: 12px;
-  background: var(--tk-raised);
-  color: var(--text-primary);
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
   font-family: var(--tk-body);
   font-weight: 600;
   letter-spacing: 0.06em;
 }
 
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .bpm-btn {
-  border: 1px solid var(--tk-line-strong);
-  background: var(--tk-raised);
-  color: var(--text-primary);
+  border: 1px solid transparent;
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
 }
 
 @media (hover: hover) {
   .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .tap-btn:hover,
   .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .bpm-btn:hover {
-    border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
-    background: color-mix(in srgb, var(--accent) 8%, var(--tk-raised));
-    color: var(--text-primary);
+    background: var(--btn-tint-hover);
   }
 }
 
 /* Songs' chips: the same button, smaller. Padding and size are the strip's
    own (the layout suite holds the strip to one row); only the drawing moves. */
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .songs-chip {
-  border-color: var(--tk-line-strong);
+  border-color: transparent;
   border-radius: 8px;
-  background: var(--tk-raised);
-  color: var(--text-primary);
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
   font-family: var(--tk-body);
   font-weight: 600;
 }
 
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .songs-chip[data-active] {
-  border-color: var(--accent);
-  background: var(--tk-chosen);
-  color: var(--text-primary);
-  box-shadow: 0 0 0 1px var(--accent);
+  border-color: transparent;
+  background: var(--btn-sel);
+  color: var(--btn-tint-ink);
+  box-shadow: var(--btn-sel-ring);
 }
 
 /* Add a step / Add a jam: an offer, so dashed; the secondary button's type. */
@@ -347,12 +341,12 @@
   box-shadow: var(--tk-lift);
 }
 
+/* The chosen one: tonal inside the accent's ring ("B · Tonal"). */
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .sub-row-btn.active {
-  border-color: var(--accent);
-  background: var(--tk-chosen);
-  box-shadow:
-    0 0 0 1px var(--accent),
-    var(--tk-lift);
+  border-color: transparent;
+  background: var(--btn-sel);
+  color: var(--btn-tint-ink);
+  box-shadow: var(--btn-sel-ring);
 }
 
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .sub-row-label {
@@ -483,8 +477,7 @@
 }
 
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-play.playing {
-  border-color: var(--tk-line-strong);
-  background: var(--tk-raised);
+  background: var(--btn-tint);
 }
 
 /* A key, drawn as one: the rail's keycap. */
@@ -501,15 +494,16 @@
 
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-rewind,
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-skip {
-  border-color: var(--tk-line-strong);
+  border-color: transparent;
   border-radius: 10px;
-  background: var(--tk-raised);
   font-family: var(--tk-body);
   font-weight: 600;
 }
 
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-rewind:disabled,
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-skip:disabled {
-  background: transparent;
+  background: var(--btn-disabled-bg);
+  color: var(--btn-disabled-ink);
 }
 
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-note {

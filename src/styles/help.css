@@ -78,25 +78,27 @@
   outline-offset: 2px;
 }
 
+/* "B · Tonal" (owner, 2026-11-19, global.css). */
 .help-btn-ghost {
-  border-color: var(--border);
+  border-color: transparent;
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
 }
 
 @media (hover: hover) {
   .help-btn-ghost:hover {
-    color: var(--text-primary);
-    background: var(--bg-hover, rgba(255, 255, 255, 0.04));
+    background: var(--btn-tint-hover);
   }
 }
 
 .help-btn-primary {
-  background: var(--accent);
-  color: var(--accent-text, #fff);
+  background: var(--btn-fill);
+  color: var(--btn-fill-ink);
 }
 
 @media (hover: hover) {
   .help-btn-primary:hover {
-    filter: brightness(1.08);
+    background: var(--btn-fill-hover);
   }
 }
 

@@ -1080,30 +1080,29 @@
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  border: 1px solid var(--border);
-  transition: background 0.15s;
+  border: 1px solid transparent;
 }
 
+/* "B · Tonal" (global.css): Cancel tonal, Delete the danger red, solid. */
 .coach-confirm-cancel {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
 }
 
 @media (hover: hover) {
   .coach-confirm-cancel:hover {
-    background: color-mix(in srgb, var(--border) 30%, transparent);
+    background: var(--btn-tint-hover);
   }
 }
 
 .coach-confirm-delete {
-  background: var(--feedback-miss);
-  color: white;
-  border-color: var(--feedback-miss);
+  background: var(--btn-danger);
+  color: var(--btn-danger-ink);
 }
 
 @media (hover: hover) {
   .coach-confirm-delete:hover {
-    opacity: 0.9;
+    background: color-mix(in srgb, var(--btn-danger) 86%, #000);
   }
 }
 

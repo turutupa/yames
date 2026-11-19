@@ -119,10 +119,12 @@
 
 /* ── Buttons and chips ────────────────────────────────────────────────── */
 
+/* "B · Tonal" (owner, 2026-11-19, global.css): a solid accent for the
+   primary, the accent's tint for the rest. */
 .songs-btn {
-  border: 1px solid var(--border);
-  background: var(--bg-raised);
-  color: var(--text-primary);
+  border: 1px solid transparent;
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
   border-radius: var(--radius-sm);
   padding: 8px 14px;
   font-family: inherit;
@@ -132,13 +134,13 @@
 }
 
 .songs-btn:hover {
-  background: var(--surface-hover);
+  background: var(--btn-tint-hover);
 }
 
 .songs-btn-primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-text);
+  background: var(--btn-fill);
+  border-color: transparent;
+  color: var(--btn-fill-ink);
   padding: 10px 20px;
   font-size: 14px;
 }
@@ -148,24 +150,21 @@
  * `.songs-btn:hover` above swaps the ground for `--surface-hover`, which is
  * right for a quiet button and wrong for this one: the ink here is
  * `--accent-text`, chosen to sit on the accent, so on hover "Import a song"
- * became dark words on a dark ground — the owner sent the picture. The app's
- * other filled button, Play, answers the pointer by lifting and glowing
- * (`.transport-play:hover`); this says the same thing the same way. */
+ * became dark words on a dark ground — the owner sent the picture. Like
+ * every primary ("B · Tonal"), it answers with a shade of its own fill. */
 .songs-btn-primary:hover {
-  background: var(--accent);
-  color: var(--accent-text);
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px -10px var(--accent-glow-strong);
+  background: var(--btn-fill-hover);
+  color: var(--btn-fill-ink);
 }
 
 .songs-btn-primary:active {
-  transform: translateY(0);
+  background: var(--btn-fill-active);
 }
 
 .songs-chip {
-  border: 1px solid var(--border);
-  background: var(--bg-raised);
-  color: var(--text-secondary);
+  border: 1px solid transparent;
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
   border-radius: var(--radius-sm);
   padding: 6px 12px;
   font-family: inherit;
@@ -176,8 +175,7 @@
 }
 
 .songs-chip:hover {
-  background: var(--surface-hover);
-  color: var(--text-primary);
+  background: var(--btn-tint-hover);
 }
 
 /* `--accent-subtle` is a translucent tint of the accent over the page, so the
@@ -213,18 +211,18 @@
  * two pixels strong — as a ring in `box-shadow`, because a thicker real border
  * is a wider chip, and a wider chip is the row moving under the hand that
  * pressed it (the layout suite watches for exactly that). Flat, no depth. */
+/* 2026-11-19, "B · Tonal": the chosen chip is every segmented control's
+   chosen one, tonal inside a 1.5px accent ring (inset: no width either). */
 .songs-chip[data-active] {
-  background: var(--accent-subtle);
-  border-color: var(--accent);
-  color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent);
+  background: var(--btn-sel);
+  border-color: transparent;
+  color: var(--btn-tint-ink);
+  box-shadow: var(--btn-sel-ring);
 }
 
-/* The bar belongs to the chip, not to the press: a chip being held down or
-   hovered is still the chip that is chosen. */
 .songs-chip[data-active]:hover {
-  background: var(--accent-subtle-hover);
-  color: var(--accent);
+  background: var(--btn-tint-hover);
+  color: var(--btn-tint-ink);
 }
 
 .songs-chip-wide {
