@@ -270,6 +270,7 @@
   line-height: 1;
   white-space: nowrap;
   position: relative;
+  transition: transform 0.12s ease;
 }
 
 /* Icon-only chips (the overflow) are square rather than a stubby pill. */
@@ -1789,6 +1790,7 @@ body[data-sheet-maximized] .rail {
   background: var(--btn-tint);
   color: var(--btn-tint-ink);
   cursor: pointer;
+  transition: transform 0.12s ease;
 }
 
 .transport-rewind svg {
@@ -2439,6 +2441,7 @@ body[data-sheet-maximized] .rail {
   font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
+  transition: transform 0.12s ease;
 }
 
 @media (hover: hover) {
@@ -2976,6 +2979,7 @@ body[data-sheet-maximized] .rail {
   background: var(--btn-tint);
   color: var(--btn-tint-ink);
   white-space: nowrap;
+  transition: transform 0.12s ease;
 }
 
 @media (hover: hover) {

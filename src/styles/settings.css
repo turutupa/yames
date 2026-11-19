@@ -612,6 +612,7 @@
   color: var(--btn-tint-ink);
   border: 1px solid transparent;
   width: 100%;
+  transition: transform 0.12s ease;
 }
 
 @media (hover: hover) {
@@ -631,6 +632,7 @@
   color: var(--btn-tint-ink);
   border: 1px solid transparent;
   margin-top: auto;
+  transition: transform 0.12s ease;
   padding-top: 10px;
   width: 100%;
 }

@@ -187,6 +187,7 @@
   color: var(--btn-tint-ink);
   font-family: var(--tk-body);
   font-weight: 600;
+  transition: transform 0.12s ease;
 }
 
 .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .preset-save-btn:disabled,

@@ -1081,6 +1081,7 @@
   font-weight: 500;
   cursor: pointer;
   border: 1px solid transparent;
+  transition: transform 0.12s ease;
 }
 
 /* "B · Tonal" (global.css): Cancel tonal, Delete the danger red, solid. */

@@ -282,6 +282,7 @@
   font-weight: 600;
   color: var(--btn-tint-ink);
   padding: 5px 10px;
+  transition: transform 0.12s ease;
 }
 
 @media (hover: hover) {

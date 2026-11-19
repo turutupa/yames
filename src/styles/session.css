@@ -498,6 +498,9 @@
   border: 1px solid transparent;
   font: 600 18px/1.1 var(--l-display);
   letter-spacing: 0.03em;
+  /* Only the press moves: a size or colour animated under `button`'s
+     `transition: all` was measured mid-way by the fit hooks. */
+  transition: transform 0.12s ease;
 }
 .session-page .session-secondary:hover:not(:disabled) {
   background: var(--l-btn-hover);
@@ -567,6 +570,7 @@
   color: var(--l-quiet);
   font-variant-numeric: lining-nums tabular-nums;
   white-space: nowrap;
+  transition: transform 0.12s ease;
 }
 .session-page .session-seg button:hover:not(.on) {
   color: var(--l-ink);
@@ -4111,13 +4115,6 @@
   .practice-watchrow[data-place="footer"] .practice-sound-word {
     display: none;
   }
-  .practice-sound[aria-pressed="true"] {
-    background: color-mix(in srgb, var(--l-amber) 18%, transparent);
-    border-color: var(--l-amber);
-  }
-  .practice-sound[aria-pressed="false"] {
-    border-style: dashed;
-  }
   .practice-sound svg {
     width: 16px;
     height: 16px;
@@ -5499,6 +5496,7 @@ button.session-input-chip:hover {
   color: var(--l-btn-ink);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s ease;
 }
 .session-swap-btn-word {
   font: 600 10.5px/1 var(--l-display);

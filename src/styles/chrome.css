@@ -336,6 +336,7 @@
   letter-spacing: 0;
   text-transform: none;
   white-space: nowrap;
+  transition: transform 0.12s ease;
 }
 
 @media (hover: hover) {
@@ -1001,6 +1002,7 @@
   font: 650 13.5px/1.2 var(--ui-body);
   white-space: nowrap;
   cursor: pointer;
+  transition: transform 0.12s ease;
 }
 
 @media (hover: hover) {
