@@ -74,6 +74,8 @@ describe("Where do you start? — what it offers", () => {
       "funk-lines",
       "triads",
       "chords-in-a-key",
+      // Not in the step's own order yet: a runnable Path it does not know comes last.
+      "arpeggios-over-changes",
     ]);
   });
 

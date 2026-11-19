@@ -220,7 +220,7 @@ HOW HARMONY WORKS (the owner's route)
   Know the Neck ──(B)──> Scales and Modes ──(B)──┐
        └──────────────(B)────────────────────────┴─> Triads*  ──(I)──> Chords in a Key* ──(B)──┐
                                                         └──────────────(I)────────────────────┴─> Arpeggios over Changes* ··> Sweep Picking
-  * Triads and Chords in a Key are written; Arpeggios over Changes is to be written.
+  * All three are written (first versions).
   (B), (I): through that Level of the Path the arrow leaves.
 ```
 
@@ -241,9 +241,9 @@ do X, or start anyway". Arrows are data now (`prerequisites.paths`, below).
 | Style | Classic Rock | Rhythm Foundations (Beginner) | 7 weeks | written |
 | Harmony | Know the Neck | nothing: the first Path for the harmony route | 6 weeks | written |
 | Harmony | Scales and Modes | Know the Neck (Beginner) | 6 weeks | written |
-| Harmony | **Triads** | Know the Neck (Beginner), Scales and Modes (Beginner) | 10 Steps, 32 Exercises now, about 6 weeks; meant to grow to about 12 | written (first version) |
-| Harmony | **Chords in a Key** | Triads (Intermediate) | 9 Steps, 27 Exercises now, about 5 weeks; meant to grow to about 12 | written (first version) |
-| Harmony | **Arpeggios over Changes** | Triads (Intermediate), Chords in a Key (Beginner) | about 8 weeks | to write |
+| Harmony | **Triads** | Know the Neck (Beginner), Scales and Modes (Beginner) | 13 Steps, 41 Exercises, about 8 weeks; meant to grow to about 12 | written, extended once |
+| Harmony | **Chords in a Key** | Triads (Intermediate) | 10 Steps, 30 Exercises, about 6 weeks; meant to grow to about 12 | written, extended once |
+| Harmony | **Arpeggios over Changes** | Triads (Advanced), Chords in a Key (Beginner) | 9 Steps, 27 Exercises, about 5 weeks; meant to grow to about 8 | written (first version) |
 
 Nothing is renamed, split or merged: every existing Path teaches one thing a
 teacher would teach as one thing, and its Exercise ids carry progress. Know the
@@ -342,7 +342,19 @@ Steps and not only as variants; seventh chords on every degree; the minor key
 in a second key; secondary chords that songs borrow (the major two, the flat
 seven); a second form (sixteen bars, AABA).
 
-### Arpeggios over Changes (`arpeggios-over-changes`, theory): the third Path, designed, not written
+### Arpeggios over Changes (`arpeggios-over-changes`, theory): the third Path, written 2026-11-19
+
+Written to the plan below, with three differences: one-octave arpeggios run from
+a root on the D string (the four-string shapes Triads ends on, so nothing new
+for the hand); the Path builds on Triads through its Advanced Level for that
+reason; and the sweeps are timed and counted but not pitch-checked
+(`sweepTiming`, as in Sweep Picking). Consolidation Steps added to the other two
+Paths the same night are in `src/paths/specs/harmony-more.ts`: F and G in three
+places, D minor and E minor in three places, the diminished triad (Triads), and
+the key of G in full (Chords in a Key). The shape helpers moved to
+`src/paths/specs/triadShapes.ts` so a Path and its extra Steps can share them.
+
+The original plan
 
 Builds on Triads (Intermediate) and Chords in a Key (Beginner). The plan, for
 whoever writes it (the helpers in `triads.ts` are exported for this):

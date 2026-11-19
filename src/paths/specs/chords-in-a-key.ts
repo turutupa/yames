@@ -13,7 +13,8 @@
 import { definePath } from "../spec";
 import type { VariantParams } from "../spec";
 import { handAt, ladder, moveChart, shiftFrets } from "../templates";
-import { ROCK, bars, mid, named, toTop, top } from "./triads";
+import { KEY_OF_G } from "./harmony-more";
+import { ROCK, bars, mid, named, toTop, top } from "./triadShapes";
 
 const YOUR_TURN = { grade: "selfChecked", example: true } as const;
 const NOT_CHECKED_YET =
@@ -487,6 +488,7 @@ export default definePath({
         },
       ],
     },
+    KEY_OF_G,
     {
       id: "minor-key",
       title: "The minor key",
@@ -837,13 +839,13 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: progressions, keys, and the minor key",
-      summary: "Two, five, one and two more named progressions, the seven chords of D, progressions in keys that change, and the main chords of a minor key.",
+      summary: "Two, five, one and two more named progressions, the seven chords of D, progressions in keys that change, the key of G in full, and the main chords of a minor key.",
       startHereIf: [
         "You can name the 7 chords of C major and say which are minor.",
         "You can play one, six, two, five in C with triads at 90 BPM.",
         "You can't yet move a progression to another key without working out every chord.",
       ],
-      steps: ["progressions", "other-keys", "minor-key"],
+      steps: ["progressions", "other-keys", "key-of-g", "minor-key"],
       warmups: [
         {
           id: "one-six-two-five-warm",
