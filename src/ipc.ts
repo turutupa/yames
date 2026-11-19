@@ -2631,8 +2631,13 @@ export async function deleteTake(id: string): Promise<void> {
   return invoke("delete_take", { id });
 }
 
-/** Play a take through the engine; the band is silent while it plays. */
-export async function playTake(id: string): Promise<void> {
+/**
+ * Play a take through the engine; the band is silent while it plays.
+ *
+ * Resolves to the playback's generation, the number `take-playback-ended`
+ * will carry when THIS playback runs off its end (see `takes/playbackGate`).
+ */
+export async function playTake(id: string): Promise<number> {
   return invoke("play_take", { id });
 }
 
@@ -2642,9 +2647,10 @@ export async function stopTakePlayback(): Promise<void> {
 
 /**
  * A take ran off its end. The payload names the playback (the engine's
- * generation counter), so a listener can tell an ending from a take it has
- * just started; the engine already drops endings of anything but the take
- * in its slot. Optional for listeners that only need "it stopped".
+ * generation counter, the number `playTake` resolved to), so a listener can
+ * tell an ending from a take it has just started; the engine already drops
+ * endings of anything but the take in its slot, and `takes/playbackGate`
+ * drops one that was already on its way.
  */
 export function onTakePlaybackEnded(callback: (generation?: number) => void) {
   return listen<{ generation: number } | null>("take-playback-ended", (e) =>

@@ -5143,13 +5143,17 @@ pub fn delete_take(
 ///
 /// The file is decoded here, on the command thread, and handed to the audio
 /// thread as one buffer; `take-playback-ended` arrives when it runs out.
+///
+/// Returns the playback's generation, which is what that event carries: a
+/// screen that starts take B as take A's ending is still on its way can tell
+/// the two apart instead of clearing B's row (card #53).
 #[tauri::command]
 pub fn play_take(
     id: String,
     engine_state: State<EngineState>,
     take_state: State<TakeState>,
     app_handle: AppHandle,
-) -> Result<(), String> {
+) -> Result<u64, String> {
     {
         let session = take_state.0.lock().unwrap_or_else(|e| e.into_inner());
         if session.is_recording() {
@@ -5158,8 +5162,9 @@ pub fn play_take(
     }
     let play = crate::take::load_take(&takes_home(&app_handle)?, &id)?;
     let handoff = engine_state.0.lock().unwrap().take_handoff();
-    handoff.set_play(Some(play));
-    Ok(())
+    handoff
+        .set_play(Some(play))
+        .ok_or_else(|| "the take could not be handed to the audio engine".to_string())
 }
 
 /// Stop a take playing back and give the band the output again.
