@@ -104,7 +104,8 @@
         "keepWarm": "Sıcak kalsın, en son {{days}} gün önce çalındı.",
         "keepWarmYesterday": "Sıcak kalsın, en son dün çalındı.",
         "keepWarmToday": "Sıcak kalsın, bugün zaten çalındı.",
-        "keepWarmNew": "İlk tadımlık."
+        "keepWarmNew": "İlk tadımlık.",
+        "focusChosen": "Seçtiğin gibi, bugün yalnızca bu yol."
       },
       "from": "{{path}} · {{level}} · Adım {{step}}",
       "fromNoLevel": "{{path}} · Adım {{step}}",
@@ -146,6 +147,12 @@
           "busier": "{{bpm}} BPM, ama vuruş başına daha çok nota: buradaki {{was}} BPM’den daha yoğun.",
           "startsSlow": "{{bpm}} BPM’den başlar, buradaki {{was}}’ın altında: yeni bir egzersiz yavaş başlar, temiz çaldıkça hızlanır."
         }
+      },
+      "focus": {
+        "label": "Yollar:",
+        "mix": "Günlük karışımım",
+        "emptyMix": "Günlük karışımın boş. Bugün için bir yol seç ya da Yollar'dan karışıma bir yol ekle.",
+        "nothingIn": "{{path}} yolunda bugün çalınacak bir şey yok. Başka bir yol ya da günlük karışımını seç."
       }
     },
     "why": {
@@ -203,7 +210,8 @@
       "testOut": "{{step}} sınavı: geçme temposunda bir kayıt, {{bpm}} BPM.",
       "benchmark": "Ölçüt, {{day}}. gün: karşılaştırmak için her seferinde aynı egzersiz, {{bpm}} BPM.",
       "yourTurn": "Sıra sende: {{exercise}}. Henüz kontrol edilmiyor, kendin değerlendir.",
-      "newFromSibling": "Yeni. {{sibling}} üzerindeki temiz {{clean}} BPM temponun yaklaşık %80'i olan {{bpm}} BPM'den başlar."
+      "newFromSibling": "Yeni. {{sibling}} üzerindeki temiz {{clean}} BPM temponun yaklaşık %80'i olan {{bpm}} BPM'den başlar.",
+      "focusChosen": "Bugün için {{path}} yolunu seçtin, oturumun tamamı oradan."
     },
     "bar": {
       "summary": "Çıta: {{bpm}} BPM'de %{{even}} düzgünlük ve notaların %{{heard}} kadarı duyulmuş."
@@ -447,7 +455,10 @@
       "tabPreview": "İlk ölçüler, tab olarak",
       "exerciseCount": "{{count}} alıştırma",
       "exerciseCount_other": "{{count}} alıştırma",
-      "levelSubscribed": "Abone olundu · Adım {{n}}'den başlıyor"
+      "levelSubscribed": "Abone olundu · Adım {{n}}'den başlıyor",
+      "inMix": "Günlük karışımımda",
+      "inMixHelp": "Kapalı: Bugün bu yolu günlük karışımına almaz. İlerlemen kalır, yine de bir günlüğüne seçebilirsin.",
+      "focusToday": "Bugün yalnızca bunu çalış"
     },
     "progress": {
       "title": "İlerleme",

@@ -104,7 +104,8 @@
         "keepWarm": "感覚を保つため、最後は{{days}}日前。",
         "keepWarmYesterday": "感覚を保つため、最後は昨日。",
         "keepWarmToday": "感覚を保つため、今日すでに弾きました。",
-        "keepWarmNew": "まずはお試し。"
+        "keepWarmNew": "まずはお試し。",
+        "focusChosen": "選んだとおり、今日はこのコースだけ。"
       },
       "from": "{{path}} · {{level}} · ステップ {{step}}",
       "fromNoLevel": "{{path}} · ステップ {{step}}",
@@ -146,6 +147,12 @@
           "busier": "{{bpm}} BPMですが、1拍あたりの音が多く、ここの{{was}} BPMより密です。",
           "startsSlow": "{{bpm}} BPMから始まり、ここの{{was}}より遅めです。新しい練習はゆっくり始め、きれいに弾けたら上がります。"
         }
+      },
+      "focus": {
+        "label": "コース：",
+        "mix": "いつものミックス",
+        "emptyMix": "いつものミックスが空です。今日のコースを選ぶか、「コース」でミックスに入れてください。",
+        "nothingIn": "{{path}}には今日弾くものがありません。別のコースか、いつものミックスを選んでください。"
       }
     },
     "why": {
@@ -203,7 +210,8 @@
       "testOut": "{{step}}のテストアウト：合格テンポ{{bpm}} BPMで1テイク。",
       "benchmark": "ベンチマーク、{{day}}日目：毎回同じ練習を{{bpm}} BPMで。比べるためです。",
       "yourTurn": "あなたの番：{{exercise}}。まだ判定できないので、自分で確かめてください。",
-      "newFromSibling": "新しい課題です。{{sibling}}のクリーンなテンポ{{clean}} BPMの約80%、{{bpm}} BPMから始めます。"
+      "newFromSibling": "新しい課題です。{{sibling}}のクリーンなテンポ{{clean}} BPMの約80%、{{bpm}} BPMから始めます。",
+      "focusChosen": "今日は{{path}}を選んだので、セッションはすべてそこから組まれます。"
     },
     "bar": {
       "summary": "合格ライン：{{bpm}} BPM で均等さ {{even}}%、聞き取れた音 {{heard}}%。"
@@ -447,7 +455,10 @@
       "tabPreview": "最初の小節のタブ譜",
       "exerciseCount_other": "{{count}} 課題",
       "exerciseCount": "{{count}} 課題",
-      "levelSubscribed": "登録しました · ステップ{{n}}から開始"
+      "levelSubscribed": "登録しました · ステップ{{n}}から開始",
+      "inMix": "いつものミックスに入れる",
+      "inMixHelp": "オフ：「今日」はいつものミックスから外します。進み具合はそのままで、1日だけ選ぶこともできます。",
+      "focusToday": "今日はこれだけ練習"
     },
     "progress": {
       "title": "上達",

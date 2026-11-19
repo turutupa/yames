@@ -264,7 +264,7 @@
         },
         "start": {
           "title": "Số phút, rồi Bắt đầu",
-          "body": "Chọn bạn có bao nhiêu thời gian, kế hoạch sẽ tự điều chỉnh. Bắt đầu chạy từ đầu, và bạn có thể dừng bất cứ lúc nào."
+          "body": "Chọn bạn có bao nhiêu thời gian, hoặc một lộ trình, kế hoạch sẽ tự điều chỉnh. Bắt đầu chạy từ đầu, và bạn có thể dừng bất cứ lúc nào."
         },
         "paths": {
           "title": "Lộ trình",

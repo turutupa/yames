@@ -105,7 +105,8 @@
         "keepWarm": "Per tenerlo caldo, suonato {{days}} giorni fa.",
         "keepWarmYesterday": "Per tenerlo caldo, suonato ieri.",
         "keepWarmToday": "Per tenerlo caldo, già suonato oggi.",
-        "keepWarmNew": "Un primo assaggio."
+        "keepWarmNew": "Un primo assaggio.",
+        "focusChosen": "Oggi solo questo percorso, come hai scelto."
       },
       "from": "{{path}} · {{level}} · Tappa {{step}}",
       "fromNoLevel": "{{path}} · Tappa {{step}}",
@@ -147,6 +148,12 @@
           "busier": "{{bpm}} BPM, ma più note per battito: più fitto di {{was}} BPM qui.",
           "startsSlow": "Parte da {{bpm}} BPM, sotto i {{was}} di qui: un esercizio nuovo parte lento e sale quando lo suoni pulito."
         }
+      },
+      "focus": {
+        "label": "Percorsi:",
+        "mix": "Il mio mix quotidiano",
+        "emptyMix": "Il tuo mix quotidiano è vuoto. Scegli un percorso per oggi, o aggiungine uno al mix in Percorsi.",
+        "nothingIn": "{{path}} oggi non ha niente da suonare. Scegli un altro percorso o il tuo mix quotidiano."
       }
     },
     "why": {
@@ -204,7 +211,8 @@
       "testOut": "Supera «{{step}}»: una take al tempo di superamento, {{bpm}} BPM.",
       "benchmark": "Riferimento, giorno {{day}}: lo stesso esercizio a {{bpm}} BPM ogni volta, per confrontare.",
       "yourTurn": "Tocca a te: {{exercise}}. Non ancora controllato, quindi giudichi tu.",
-      "newFromSibling": "Nuovo. Parte da {{bpm}} BPM, circa l’80% del tuo tempo pulito di {{clean}} BPM su {{sibling}}."
+      "newFromSibling": "Nuovo. Parte da {{bpm}} BPM, circa l’80% del tuo tempo pulito di {{clean}} BPM su {{sibling}}.",
+      "focusChosen": "Hai scelto {{path}} per oggi, quindi tutta la sessione viene da lì."
     },
     "bar": {
       "summary": "L'asticella: {{even}}% di regolarità e {{heard}}% delle note sentite, a {{bpm}} BPM."
@@ -459,7 +467,10 @@
       "exerciseCount": "{{count}} esercizio",
       "exerciseCount_many": "{{count}} esercizi",
       "exerciseCount_other": "{{count}} esercizi",
-      "levelSubscribed": "Iscritto · si parte dal passo {{n}}"
+      "levelSubscribed": "Iscritto · si parte dal passo {{n}}",
+      "inMix": "Nel mio mix quotidiano",
+      "inMixHelp": "Spento: Oggi lo lascia fuori dal tuo mix quotidiano. I tuoi progressi restano, e puoi comunque sceglierlo per un giorno.",
+      "focusToday": "Oggi esercitati solo su questo"
     },
     "progress": {
       "title": "Progressi",

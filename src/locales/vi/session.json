@@ -104,7 +104,8 @@
         "keepWarm": "Giữ phong độ, chơi lần cuối {{days}} ngày trước.",
         "keepWarmYesterday": "Giữ phong độ, chơi lần cuối hôm qua.",
         "keepWarmToday": "Giữ phong độ, đã chơi hôm nay.",
-        "keepWarmNew": "Làm quen trước."
+        "keepWarmNew": "Làm quen trước.",
+        "focusChosen": "Hôm nay chỉ lộ trình này, như bạn đã chọn."
       },
       "from": "{{path}} · {{level}} · Bước {{step}}",
       "fromNoLevel": "{{path}} · Bước {{step}}",
@@ -146,6 +147,12 @@
           "busier": "{{bpm}} BPM, nhưng nhiều nốt hơn mỗi phách: dày hơn {{was}} BPM ở đây.",
           "startsSlow": "Bắt đầu ở {{bpm}} BPM, dưới mức {{was}} ở đây: bài mới bắt đầu chậm và tăng dần khi bạn chơi sạch."
         }
+      },
+      "focus": {
+        "label": "Lộ trình:",
+        "mix": "Bài trộn hằng ngày",
+        "emptyMix": "Bài trộn hằng ngày đang trống. Chọn một lộ trình cho hôm nay, hoặc thêm vào bài trộn ở mục Lộ trình.",
+        "nothingIn": "{{path}} hôm nay không có gì để chơi. Hãy chọn lộ trình khác hoặc bài trộn hằng ngày."
       }
     },
     "why": {
@@ -203,7 +210,8 @@
       "testOut": "Kiểm tra vượt {{step}}: một lượt ở tempo đạt, {{bpm}} BPM.",
       "benchmark": "Mốc so sánh, ngày {{day}}: cùng một bài ở {{bpm}} BPM mỗi lần, để so sánh.",
       "yourTurn": "Đến lượt bạn: {{exercise}}. Chưa được kiểm tra, bạn tự đánh giá.",
-      "newFromSibling": "Mới. Bắt đầu ở {{bpm}} BPM, khoảng 80% tempo sạch {{clean}} BPM của bạn ở {{sibling}}."
+      "newFromSibling": "Mới. Bắt đầu ở {{bpm}} BPM, khoảng 80% tempo sạch {{clean}} BPM của bạn ở {{sibling}}.",
+      "focusChosen": "Hôm nay bạn chọn {{path}}, nên cả buổi tập đều lấy từ đó."
     },
     "bar": {
       "summary": "Mức đạt: đều {{even}}% và nghe được {{heard}}% số nốt, ở {{bpm}} BPM."
@@ -447,7 +455,10 @@
       "tabPreview": "Mấy ô nhịp đầu, dạng tab",
       "exerciseCount_other": "{{count}} bài tập",
       "exerciseCount": "{{count}} bài tập",
-      "levelSubscribed": "Đã đăng ký · bắt đầu từ Bước {{n}}"
+      "levelSubscribed": "Đã đăng ký · bắt đầu từ Bước {{n}}",
+      "inMix": "Trong bài trộn hằng ngày",
+      "inMixHelp": "Tắt: Hôm nay sẽ bỏ lộ trình này khỏi bài trộn hằng ngày. Tiến độ vẫn giữ, và bạn vẫn có thể chọn nó cho một ngày.",
+      "focusToday": "Hôm nay chỉ tập lộ trình này"
     },
     "progress": {
       "title": "Tiến bộ",

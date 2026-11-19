@@ -168,7 +168,7 @@ export function shortReason(step: PlanStep, earlier: readonly PlanStep[] = []): 
 /** Whose turn it is, without the Path's name (the meta line has it). */
 export function shortContext(context: Reason): Line {
   const full = reasonLine(context);
-  if (context.code === "focusTurn" || context.code === "keepWarm") {
+  if (context.code === "focusTurn" || context.code === "keepWarm" || context.code === "focusChosen") {
     return { key: full.key.replace(/^session\.why\./, "session.today.context."), values: full.values };
   }
   return full;

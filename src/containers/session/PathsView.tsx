@@ -97,6 +97,42 @@ function StepPips({ session, path }: { session: SessionRun; path: PathDoc }) {
 }
 
 /** Subscribed, Coming soon, or nothing (`session/badges.ts`). Never the pack's review status. */
+/**
+ * "In my daily mix" on a subscribed Path (owner, 2026-11-18): subscribing and
+ * being in the everyday plan are separate. Off, Today's mix leaves the Path
+ * out; its progress stays and it can still be chosen for a day (`focus.ts`).
+ */
+export function MixSwitch({ session, path }: { session: SessionRun; path: PathDoc }) {
+  const { t } = useTranslation();
+  const setInMix = session.setInMix;
+  if (typeof setInMix !== "function") return null;
+  const on = !(session.offMix ?? []).includes(path.id);
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      className="session-mixswitch"
+      data-on={on ? "" : undefined}
+      onClick={(e) => {
+        e.stopPropagation();
+        setInMix(path.id, !on);
+      }}
+      data-testid={`path-mix-${path.id}`}
+    >
+      <span className="session-mixswitch-track" aria-hidden="true">
+        <span className="session-mixswitch-thumb" />
+      </span>
+      <span className="session-mixswitch-label">{t("session.paths.inMix")}</span>
+    </button>
+  );
+}
+
+/** Whether this Path is one Today plans from: subscribed and runnable. */
+function isMine(session: SessionRun, path: PathDoc): boolean {
+  return (session.myPaths ?? []).some((p) => p.id === path.id);
+}
+
 function PathBadgeTag({ session, path }: { session: SessionRun; path: PathDoc }) {
   const { t } = useTranslation();
   const badge = pathBadge(path.id, session.progress);
@@ -112,10 +148,13 @@ function PathList({
   session,
   onOpen,
   onOpenStep,
+  onFocusToday,
   note,
 }: {
   session: SessionRun;
   onOpen: (path: PathDoc) => void;
+  /** "Practise only this today": Today's focus on this Path, then Today. */
+  onFocusToday?: (path: PathDoc) => void;
   /** Continue on a card: straight to the Step the player is on. */
   onOpenStep?: (path: PathDoc, step: Step) => void;
   note?: InstrumentNoteProps;
@@ -188,6 +227,24 @@ function PathList({
                   >
                     {t("session.paths.continue", { n: current.order })}
                   </button>
+                )}
+                {isMine(session, path) && (
+                  <span className="session-path-today" data-testid={`path-today-${path.id}`}>
+                    <MixSwitch session={session} path={path} />
+                    {onFocusToday && (session.myPaths.length > 1 || (session.offMix ?? []).includes(path.id)) && (
+                      <button
+                        type="button"
+                        className="session-link session-path-focus"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onFocusToday(path);
+                        }}
+                        data-testid={`path-focus-${path.id}`}
+                      >
+                        {t("session.paths.focusToday")}
+                      </button>
+                    )}
+                  </span>
                 )}
               </span>
             </div>
@@ -534,6 +591,12 @@ function PathDetail({
               <div className="session-quiet">
                 {t("session.paths.subscribeHow", { cap: SUBSCRIPTION_CAP })}
               </div>
+              {isMine(session, path) && typeof session.setInMix === "function" && (
+                <div className="session-col session-path-mix" style={{ gap: 4 }}>
+                  <MixSwitch session={session} path={path} />
+                  <div className="session-quiet">{t("session.paths.inMixHelp")}</div>
+                </div>
+              )}
               {!subscribed && started && (
                 <div className="session-quiet">{t("session.paths.unsubscribedNote")}</div>
               )}
@@ -842,8 +905,11 @@ export function PathsView({
   session,
   instrumentNote,
   place: given,
+  onFocusToday,
 }: {
   session: SessionRun;
+  /** "Practise only this today" on a card: the window sets the focus and opens Today. */
+  onFocusToday?: (path: PathDoc) => void;
   /** Guitar first: the same note Today shows, on the list of Paths only. */
   instrumentNote?: InstrumentNoteProps;
   /**
@@ -922,6 +988,7 @@ export function PathsView({
       session={session}
       onOpen={(p) => move({ pathId: p.id, stepId: null })}
       onOpenStep={(p, s) => move({ pathId: p.id, stepId: s.id })}
+      onFocusToday={onFocusToday}
       note={instrumentNote}
     />
   );

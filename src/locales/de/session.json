@@ -104,7 +104,8 @@
         "keepWarm": "Bleibt warm, zuletzt vor {{days}} Tagen gespielt.",
         "keepWarmYesterday": "Bleibt warm, zuletzt gestern gespielt.",
         "keepWarmToday": "Bleibt warm, heute schon gespielt.",
-        "keepWarmNew": "Ein erster Vorgeschmack."
+        "keepWarmNew": "Ein erster Vorgeschmack.",
+        "focusChosen": "Heute nur dieser Pfad, wie du gewählt hast."
       },
       "from": "{{path}} · {{level}} · Schritt {{step}}",
       "fromNoLevel": "{{path}} · Schritt {{step}}",
@@ -146,6 +147,12 @@
           "busier": "{{bpm}} BPM, aber mehr Noten pro Schlag: dichter als {{was}} BPM hier.",
           "startsSlow": "Es beginnt bei {{bpm}} BPM, unter den {{was}} hier: Eine neue Übung beginnt langsam und steigt, sobald du sie sauber spielst."
         }
+      },
+      "focus": {
+        "label": "Pfade:",
+        "mix": "Mein täglicher Mix",
+        "emptyMix": "Dein täglicher Mix ist leer. Wähle einen Pfad für heute oder nimm unter Pfade einen in den Mix.",
+        "nothingIn": "{{path}} hat heute nichts zu spielen. Wähle einen anderen Pfad oder deinen täglichen Mix."
       }
     },
     "why": {
@@ -203,7 +210,8 @@
       "testOut": "{{step}} überspringen: ein Take im Bestehenstempo, {{bpm}} BPM.",
       "benchmark": "Benchmark, Tag {{day}}: jedes Mal dieselbe Übung bei {{bpm}} BPM, zum Vergleichen.",
       "yourTurn": "Du bist dran: {{exercise}}. Noch nicht geprüft, also beurteilst du es selbst.",
-      "newFromSibling": "Neu. Sie beginnt bei {{bpm}} BPM, etwa 80 % deines sauberen Tempos von {{clean}} BPM bei {{sibling}}."
+      "newFromSibling": "Neu. Sie beginnt bei {{bpm}} BPM, etwa 80 % deines sauberen Tempos von {{clean}} BPM bei {{sibling}}.",
+      "focusChosen": "Du hast heute {{path}} gewählt, also kommt die ganze Session daraus."
     },
     "bar": {
       "summary": "Die Messlatte: {{even}} % gleichmäßig und {{heard}} % der Töne gehört, bei {{bpm}} BPM."
@@ -447,7 +455,10 @@
       "tabPreview": "Die ersten Takte als Tab",
       "exerciseCount": "{{count}} Übung",
       "exerciseCount_other": "{{count}} Übungen",
-      "levelSubscribed": "Abonniert · Start bei Schritt {{n}}"
+      "levelSubscribed": "Abonniert · Start bei Schritt {{n}}",
+      "inMix": "In meinem täglichen Mix",
+      "inMixHelp": "Aus: Heute lässt ihn aus deinem täglichen Mix. Dein Fortschritt bleibt, und du kannst ihn trotzdem für einen Tag wählen.",
+      "focusToday": "Heute nur diesen üben"
     },
     "progress": {
       "title": "Fortschritt",

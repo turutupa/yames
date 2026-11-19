@@ -105,7 +105,8 @@
         "keepWarm": "Para não esfriar, tocado há {{days}} dias.",
         "keepWarmYesterday": "Para não esfriar, tocado ontem.",
         "keepWarmToday": "Para não esfriar, já tocado hoje.",
-        "keepWarmNew": "Uma primeira provada."
+        "keepWarmNew": "Uma primeira provada.",
+        "focusChosen": "Hoje só esta trilha, como você escolheu."
       },
       "from": "{{path}} · {{level}} · Etapa {{step}}",
       "fromNoLevel": "{{path}} · Etapa {{step}}",
@@ -147,6 +148,12 @@
           "busier": "{{bpm}} BPM, mas com mais notas por tempo: mais denso que {{was}} BPM aqui.",
           "startsSlow": "Começa em {{bpm}} BPM, abaixo dos {{was}} daqui: um exercício novo começa devagar e sobe quando você toca limpo."
         }
+      },
+      "focus": {
+        "label": "Trilhas:",
+        "mix": "Meu mix diário",
+        "emptyMix": "Seu mix diário está vazio. Escolha uma trilha para hoje ou coloque uma no mix em Trilhas.",
+        "nothingIn": "{{path}} não tem nada para tocar hoje. Escolha outra trilha ou seu mix diário."
       }
     },
     "why": {
@@ -204,7 +211,8 @@
       "testOut": "Teste para pular «{{step}}»: um take no tempo de aprovação, {{bpm}} BPM.",
       "benchmark": "Referência, dia {{day}}: o mesmo exercício a {{bpm}} BPM toda vez, para comparar.",
       "yourTurn": "Sua vez: {{exercise}}. Ainda não verificado, então você avalia.",
-      "newFromSibling": "Novo. Começa em {{bpm}} BPM, cerca de 80% do seu tempo limpo de {{clean}} BPM em {{sibling}}."
+      "newFromSibling": "Novo. Começa em {{bpm}} BPM, cerca de 80% do seu tempo limpo de {{clean}} BPM em {{sibling}}.",
+      "focusChosen": "Você escolheu {{path}} para hoje, então a sessão inteira vem dele."
     },
     "bar": {
       "summary": "A meta: {{even}}% de regularidade e {{heard}}% das notas ouvidas, a {{bpm}} BPM."
@@ -459,7 +467,10 @@
       "exerciseCount": "{{count}} exercício",
       "exerciseCount_many": "{{count}} exercícios",
       "exerciseCount_other": "{{count}} exercícios",
-      "levelSubscribed": "Inscrito · começando no passo {{n}}"
+      "levelSubscribed": "Inscrito · começando no passo {{n}}",
+      "inMix": "No meu mix diário",
+      "inMixHelp": "Desligado: Hoje deixa a trilha fora do seu mix diário. Seu progresso fica, e você ainda pode escolhê-la por um dia.",
+      "focusToday": "Praticar só esta hoje"
     },
     "progress": {
       "title": "Progresso",

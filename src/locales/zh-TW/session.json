@@ -104,7 +104,8 @@
         "keepWarm": "保持手感，上次是 {{days}} 天前。",
         "keepWarmYesterday": "保持手感，上次是昨天。",
         "keepWarmToday": "保持手感，今天已經練過。",
-        "keepWarmNew": "先嚐個鮮。"
+        "keepWarmNew": "先嚐個鮮。",
+        "focusChosen": "依你的選擇，今天只練這條路線。"
       },
       "from": "{{path}} · {{level}} · 第 {{step}} 步",
       "fromNoLevel": "{{path}} · 第 {{step}} 步",
@@ -146,6 +147,12 @@
           "busier": "{{bpm}} BPM，但每拍音符更多：比這裡的 {{was}} BPM 更密。",
           "startsSlow": "從 {{bpm}} BPM 開始，低於這裡的 {{was}}：新練習先慢後快，彈乾淨了就會提速。"
         }
+      },
+      "focus": {
+        "label": "路線：",
+        "mix": "我的每日組合",
+        "emptyMix": "每日組合是空的。選一條今天練的路線，或在「路線」裡把一條加進組合。",
+        "nothingIn": "{{path}}今天沒有可練的內容。換一條路線，或選每日組合。"
       }
     },
     "why": {
@@ -203,7 +210,8 @@
       "testOut": "{{step}}測試：以通過速度 {{bpm}} BPM 練一遍。",
       "benchmark": "基準測試，第{{day}}天：每次都以 {{bpm}} BPM 練同一個練習，用來對比。",
       "yourTurn": "輪到你：{{exercise}}。暫不檢查，由你自己判斷。",
-      "newFromSibling": "新練習。從 {{bpm}} BPM 開始，約為你在「{{sibling}}」上乾淨速度 {{clean}} BPM 的 80%。"
+      "newFromSibling": "新練習。從 {{bpm}} BPM 開始，約為你在「{{sibling}}」上乾淨速度 {{clean}} BPM 的 80%。",
+      "focusChosen": "今天你選了{{path}}，整節練習都從這裡來。"
     },
     "bar": {
       "summary": "及格線：{{bpm}} BPM 時均勻度 {{even}}%，聽到 {{heard}}% 的音。"
@@ -447,7 +455,10 @@
       "tabPreview": "前幾小節的六線譜",
       "exerciseCount_other": "{{count}} 個練習",
       "exerciseCount": "{{count}} 個練習",
-      "levelSubscribed": "已訂閱 · 從第 {{n}} 步開始"
+      "levelSubscribed": "已訂閱 · 從第 {{n}} 步開始",
+      "inMix": "加入每日組合",
+      "inMixHelp": "關閉後，「今天」不會把它排進每日組合。進度會保留，也仍可選它練一天。",
+      "focusToday": "今天只練這條"
     },
     "progress": {
       "title": "進度",

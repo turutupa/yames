@@ -121,6 +121,8 @@ export type ReasonCode =
   | "chosen"
   // Play now across every subscribed Path (`rotation.ts`).
   | "focusTurn"
+  /** The player chose this one Path for today (`focus.ts`). */
+  | "focusChosen"
   | "keepWarm"
   | "reviewDue"
   | "parked"
@@ -253,6 +255,13 @@ export type PlannerInput = {
    * not serve straight back what was just turned down.
    */
   avoid?: ReadonlySet<string>;
+  /**
+   * The player chose this one Path for today (`focus.ts`): `paths` is that Path
+   * alone. The focus block says so, and time the Path has no fresh work for
+   * goes to its passed Exercises at a higher tempo (Find my edge) before the
+   * focus block grows. Absent: the plan is exactly what it always was.
+   */
+  focused?: boolean;
 };
 
 /** How many rungs to come down after this long away. */
@@ -924,7 +933,10 @@ export function planSession(input: PlannerInput): SessionPlan {
 
   // --- the focus block ---
   let focusMinutes = row.blocks[0];
-  const turn = mood === "returning" && paths.length > 1 ? headContext(focusPath, true) : undefined;
+  const chosen: Reason | undefined = input.focused
+    ? { code: "focusChosen", values: { path: focusPath.title } }
+    : undefined;
+  const turn = chosen ?? (mood === "returning" && paths.length > 1 ? headContext(focusPath, true) : undefined);
   const sessions = sessionCount(progress);
   const yourTurn =
     minutes >= 15 && sessions % YOUR_TURN_EVERY === YOUR_TURN_EVERY - 1
@@ -1089,6 +1101,16 @@ export function planSession(input: PlannerInput): SessionPlan {
       steps.push(exerciseStep(next, id, "next", { bpm: tempo.bpm, why }, mins, progress));
       return;
     }
+    // One Path chosen and nothing fresh left in it: an Exercise already passed,
+    // the one played longest ago, pushed past its clean tempo.
+    if (input.focused && steps.filter((x) => x.kind === "exercise").length < MAX_GRADED) {
+      const again = passedEarlier(focusPath, progress).find((p) => !used.has(key(p)));
+      if (again) {
+        used.add(key(again));
+        steps.push(edgeStep(again, progress, { id, minutes: mins }));
+        return;
+      }
+    }
     const lead = steps[focusIndex];
     if (lead) steps[focusIndex] = { ...lead, minutes: lead.minutes + mins };
   });
@@ -1114,6 +1136,19 @@ export function planSession(input: PlannerInput): SessionPlan {
     focusPathId: focusPath.id,
     skipped: skippedOf(paths, kept, progress, now),
   };
+}
+
+/**
+ * A Path's passed Exercises with a clean tempo, the one played longest ago
+ * first: what a day on one Path fills its spare time with (`focused`).
+ */
+function passedEarlier(path: PathDoc, progress: PlayerProgress): Pick[] {
+  const lastPlayed = (pick: Pick) => takesOf(progress, path.id, pick.exercise.id)[0]?.startedAt ?? 0;
+  return path.steps
+    .flatMap((step) => step.exercises.filter(isGradable).map((exercise) => ({ path, step, exercise })))
+    .filter((pick) => isExercisePassed(progress, path.id, pick.exercise))
+    .filter((pick) => cleanTempoOf(progress, path.id, pick.exercise.id) !== null)
+    .sort((a, b) => lastPlayed(a) - lastPlayed(b));
 }
 
 /** Subscribed Paths with no block today, and why: when they were last played. */

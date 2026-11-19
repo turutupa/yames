@@ -264,7 +264,7 @@
         },
         "start": {
           "title": "Your minutes, then Start",
-          "body": "Pick how long you have and the plan refits. Start plays it from the top, and you can leave whenever you like."
+          "body": "Pick how long you have, or one Path, and the plan refits. Start plays it from the top, and you can leave whenever you like."
         },
         "paths": {
           "title": "Paths",

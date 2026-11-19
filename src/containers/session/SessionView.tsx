@@ -1611,8 +1611,9 @@ function RecapScreen({ session }: { session: SessionRun }) {
   const tomorrow = planSession({
     minutes: session.minutes,
     now: Date.now(),
-    paths: session.myPaths,
+    paths: session.today.paths,
     progress: session.progress,
+    ...(session.today.focusedPath ? { focused: true } : {}),
   });
   const origin = session.origin;
   const lastExercise = [...steps].reverse().find((s) => s.kind === "exercise");
