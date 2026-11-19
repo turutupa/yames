@@ -606,7 +606,10 @@
   flex-wrap: wrap;
 }
 .session-page .session-today .session-today-focus .session-seg[data-focus] button {
-  flex: 1 1 0;
+  /* From a little under a third: three names that fit share the row evenly,
+     and one squeezed below that goes to the next row before it is stacked a
+     word to a line. */
+  flex: 1 1 28%;
   min-height: 44px;
   min-width: min-content;
   max-width: 100%;
