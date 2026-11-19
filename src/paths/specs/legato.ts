@@ -145,7 +145,9 @@ function sixUp(): string {
 
 function sixDown(): string {
   const cells = [...nps(6)].reverse();
-  return `/16t ${cellsTab(cells)} hold | ${cellsTab(cells, (_c, i) => (i % 3 === 0 ? "" : "p"))} hold`;
+  // 10, 8, 7 on the top string is fingers 4, 2, 1, the same in the picked bar as in the legato one.
+  const finger = (i: number) => (i < 3 ? ["f4", "f2", "f1"][i] : "");
+  return `/16t ${cellsTab(cells, (_c, i) => finger(i))} hold | ${cellsTab(cells, (_c, i) => `${i % 3 === 0 ? "" : "p"}${finger(i)}`)} hold`;
 }
 
 /** Up six strings with hammers, down with pulls, a pick on each string, and a held A to finish. */
@@ -160,9 +162,9 @@ const POSITION_RUN = `/16t 2:5 2:6h 2:8h 1:5 1:7h 1:8h 2:8 2:10h 2:12h 1:8 1:10h
 // The line over the band: one pick a beat, and every bar starts on a tone of its chord.
 const ETUDE = `/16
   1:5 1:7h 1:8h 1:7p 2:5 2:6h 2:8h 2:6p 1:5 1:7h 1:8h 1:7p 2:8 2:6p 2:5p 2:6h |
-  2:6 2:8h 2:6p 2:5p 3:5 3:7h 3:5p 3:7h 2:6 2:8h 2:6p 2:5p 3:7 3:5p 3:4p 3:5h |
-  3:5 3:7h 3:5p 3:4p 2:5 2:6h 2:8h 2:6p 1:8 1:7p 1:5p 1:7h 2:8 2:6p 2:5p 2:6h |
-  2:8 2:6p 2:5p 2:6h 3:7 3:5p 3:4p 3:5h 3:4 3:5h 3:7h 3:5p 3:4 3:5h 3:7h 3:5p`;
+  2:6 2:8h 2:6p 2:5p 3:5 3:7h 3:5p 3:7h 2:6 2:8h 2:6p 2:5p 3:7 3:5p 3:7h 3:5p |
+  2:5 2:6h 2:8h 2:6p 1:5 1:7h 1:8h 1:7p 1:8 1:7p 1:5p 1:7h 2:8 2:6p 2:5p 2:6h |
+  2:8 2:6p 2:5p 2:6h 3:7 3:5p 3:7h 3:5p 2:5 2:6h 2:8h 2:6p 3:7 3:5p 3:7h 3:5p`;
 
 /** A warm-up cell climbing one string: `marks` are the suffixes of the cell's notes. */
 function climb(p: VariantParams, value: string, cell: readonly number[], marks: readonly string[], lowest: number) {
@@ -325,7 +327,7 @@ export default definePath({
           ],
           coach: "After the take I'll say how even it was and whether the notes were the written ones. Open strings left ringing are yours to quiet.",
           tab: `/8 1:3 1:0p 2:3 2:0p 3:2 3:0p 4:2 4:0p | 4:2 4:0p 3:2 3:0p 2:3 2:0p /4 1:0`,
-          position: 2,
+          position: 1,
           harmony: { scale: ["E", "minorPentatonic"] },
           rungs: ladder(50, 120, 10),
           passAt: 90,
@@ -879,12 +881,11 @@ export default definePath({
           purpose: "A legato line over Am, F, C and G: one pick a beat, the rolls from earlier bent to fit each chord. Every bar starts on a note of its chord.",
           howTo: [
             "Sixteenths, a pick on each beat and three legato notes after it. Play it dry first and hear each bar land on its chord.",
-            "It stays in fifth position on the top three strings; the first finger drops to fret 4 on the G string for the B.",
+            "It stays in fifth position on the top three strings, so the hand never moves. Only the string under the pick changes.",
           ],
           coach: "With the band on I time your picked notes against it and check the notes after the take. Direct input or headphones make that fair.",
           tab: ETUDE,
           position: 5,
-          shifts: true,
           chords: "Am | F | C | G",
           jam: { groove: "rock8", key: "A minor" },
           harmony: { scaleOverChords: ["A", "naturalMinor"] },
@@ -960,7 +961,12 @@ export default definePath({
             values: { key: ["A", "C", "D", "E", "G"], stringSet: ["2", "3", "4"] },
             pooled: ["key", "stringSet"],
             label: (p) => `${p.key} minor on string ${p.stringSet}`,
-            build: (p) => climb(p, "/8", [0, 1, 1, 2, 2, 3, 3, 4], ["", "h"], 3),
+            build: (p) => {
+              const built = climb(p, "/8", [0, 1, 1, 2, 2, 3, 3, 4], ["", "h"], 3);
+              // Every pair is the first finger and the next one along: the second for a fret, the third for two.
+              const tab = built.tab.replace(/(\d):(\d+) \1:(\d+)h/g, (_all, s, lo, hi) => `${s}:${lo}f1 ${s}:${hi}hf${Number(hi) - Number(lo) === 1 ? 2 : 3}`);
+              return { ...built, tab };
+            },
           },
           grade: "warmup",
           warmup: { start: 0.6, top: 0.8, reference: "first-hammers.pick-then-hammer", fallback: 60 },
@@ -1028,7 +1034,7 @@ export default definePath({
               // The root's fret on the lower string, then the iv and v chords wherever they stay on the neck.
               const root = (((KEY_SHIFT[p.key] + (low ? 5 : 0) - 3) % 12) + 12) % 12 + 3;
               const near = (up: number) => (root + up + 3 <= 15 ? root + up : root + up - 12);
-              const bar = `/16t ${repeat(cell, 3)} /4 ${cell.split(" ")[2].replace("h", "")}`;
+              const bar = `/16t ${repeat(cell, 3)} /4 ${cell.split(" ")[2].replace("h", "f4")}`;
               const tab = [root, near(5), near(7), root].map((fret) => shiftFrets(bar, fret - 5)).join(" | ");
               return { tab, position: handAt(tab), shifts: true, chords: moveChart("Am | Dm | Em | Am", KEY_SHIFT[p.key]) };
             },

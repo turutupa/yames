@@ -30,6 +30,9 @@ const OVERLAY_FILES = import.meta.glob(["../paths/packs/i18n/*/*.json", "!../pat
  * sweeps the notes usually ring into each other, so right notes are mostly
  * "not checked" there, and the result says so.
  *
+ * Legato is graded the same way; an unheard hammer-on or pull-off costs nothing,
+ * so its picked notes carry the grade (`plans/paths/NEW_PATHS.md`).
+ *
  * Blues and Classic Rock are Theory Paths taught through written licks,
  * phrases and arpeggios, graded the same way: timing, notes heard, extras and
  * right notes, every graded Exercise passing as a Session Take when played
@@ -43,6 +46,7 @@ export const RUNNABLE_PATH_IDS: readonly string[] = [
   "sweep-picking",
   "blues-pentatonics",
   "classic-rock",
+  "legato",
 ];
 
 /** Why a Path is not runnable yet, as a `session.paths.*` key. */

@@ -37,6 +37,7 @@ export const START_PATH_ORDER = [
   "classic-rock",
   "alternate-picking",
   "sweep-picking",
+  "legato",
 ];
 
 /** The Paths a player can start, in the step's order (unknown runnable ones last). */

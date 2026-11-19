@@ -606,4 +606,6 @@ fn every_graded_exercise_of_a_runnable_path_passes_as_a_session_take() {
     // The Theory Paths: written licks, phrases and arpeggios, with timing bars.
     assert!(checked.get("blues-pentatonics").copied().unwrap_or(0) >= 30, "{checked:?}");
     assert!(checked.get("classic-rock").copied().unwrap_or(0) >= 24, "{checked:?}");
+    // The Paths added on mvp-paths-content (`plans/paths/NEW_PATHS.md`).
+    assert!(checked.get("legato").copied().unwrap_or(0) > 100, "{checked:?}");
 }

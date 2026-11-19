@@ -58,13 +58,14 @@ const pathCard = (id: string) => document.querySelector<HTMLButtonElement>(`[dat
 const levelButton = (id: string) => document.querySelector<HTMLButtonElement>(`[data-level="${id}"]`)!;
 
 describe("Where do you start? — what it offers", () => {
-  it("offers the five Paths in the owner's order", () => {
+  it("offers the Paths in the owner's order, the newer ones after his five", () => {
     expect(startablePaths(PATHS).map((p) => p.id)).toEqual([
       "shred",
       "blues-pentatonics",
       "classic-rock",
       "alternate-picking",
       "sweep-picking",
+      "legato",
     ]);
   });
 
