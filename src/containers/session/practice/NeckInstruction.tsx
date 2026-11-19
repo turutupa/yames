@@ -23,7 +23,8 @@
  * Cheap on purpose: the position runs on `requestAnimationFrame` as
  * arithmetic, and the neck is told something only when it changes, once per
  * note (`setNotes`) and at most once per bar (`setView`). The stage stays
- * on-demand and capped at 30 fps for the run (`useNeckTake`). The overlay is
+ * on-demand, at the Take's rate for the run (`useNeckTake`, `stage3d/takeRate.ts`:
+ * the display's, or 30 where the machine should not be asked). The overlay is
  * DOM hung on `project()`, so the SVG fallback gets exactly the same states.
  */
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";

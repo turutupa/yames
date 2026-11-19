@@ -3,15 +3,17 @@
  *
  * The provider wraps the window's body, so one stage sits behind every learning
  * screen and survives moving between them; the gate inside it puts the stage to
- * sleep (`hidden`) whenever a tool or Settings is showing.
+ * sleep (`hidden`) whenever a tool or Settings is showing, and gets its engine
+ * ready ahead of the first Session while a learning screen is idle.
  */
 import type { ReactNode } from "react";
 import { NeckStageProvider } from "../../stage3d/api";
 import type { MainView } from "../main-window/MainHeader";
-import { useNeckOffLearning } from "./hooks/useNeck";
+import { useNeckOffLearning, useNeckPrewarm } from "./hooks/useNeck";
 
 function Gate({ view }: { view: MainView }) {
   useNeckOffLearning(view);
+  useNeckPrewarm(view);
   return null;
 }
 

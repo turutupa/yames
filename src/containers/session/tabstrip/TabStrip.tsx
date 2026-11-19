@@ -26,7 +26,7 @@ import { cursorTickAt, leadFromFrame, onReport } from "../../../songs/cursor";
 import type { CursorMotion } from "../../../songs/cursor";
 import type { SongScore } from "../../../songs/types";
 import { TICKS_PER_QUARTER } from "../../../songs/types";
-import { likelyCpuCompositing } from "../highway/Runway";
+import { DisplayClock, dueAt, takeRate } from "../../../stage3d/takeRate";
 import {
   FOLLOW_SEGMENTS,
   SCROLL_BELOW,
@@ -605,20 +605,24 @@ export function TabStrip({
   // The frame loop: only in follow mode, only while it runs.
   useEffect(() => {
     if (!playing || !follow) return;
-    const slow = likelyCpuCompositing(navigator.userAgent);
+    // At the Take's rate (`stage3d/takeRate.ts`), as the runway: the display's
+    // where the machine holds it, 30 where it does not.
+    const display = new DisplayClock();
     let frame = 0;
     let previous = 0;
     let frameMs = 0;
-    let odd = false;
+    let drawn = -Infinity;
     const step = (now: number) => {
       frame = requestAnimationFrame(step);
       if (previous > 0) {
         const delta = now - previous;
         frameMs = frameMs > 0 ? frameMs * 0.9 + delta * 0.1 : delta;
+        display.sample(delta);
+        if (delta < 250) takeRate.sample(delta, display.ms);
       }
       previous = now;
-      odd = !odd;
-      if (slow && odd) return;
+      if (!dueAt(now, drawn, takeRate.laneFps, display.ms)) return;
+      drawn = now;
       let tick: number;
       if (typeof position === "function") tick = position();
       else if (clock && motion.current) {

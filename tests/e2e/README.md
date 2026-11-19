@@ -165,6 +165,13 @@ build. `--gpu` also needs `xserver-xorg-video-nvidia-*` and passwordless sudo.
 npm run test:e2e:probe            # = bash tests/e2e/probe.sh; add -- --no-build to skip the build
 ```
 
+`-- --take-fps 60` (after `--no-build`, if both) forces the rate a Take is
+drawn at through the store's `stage.takeFps`: WebKitGTK is one of the webviews
+the app holds to 30 by itself (`src/stage3d/takeRate.ts`), so this is how a
+Take at the display's rate is held against the click's gates on this machine.
+`summary.md` says what was asked for and how far apart the neck's frames
+actually were (`info.neck.frames` in `results.json`).
+
 Runs the headless `click-jitter-probe` (60 s) and the app with the neck for
 three Takes on Xvfb, then, when there is an NVIDIA GPU and passwordless sudo,
 the same three Takes on an X server on the GPU. Writes `summary.md` (one row
