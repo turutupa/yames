@@ -62,27 +62,34 @@ impl TakeAudio<'_> {
 /// needs a window of it after the attack.
 const END_MARGIN_MS: f64 = 40.0;
 
-/// What the pitch pass says of each result of `report`, in step with
-/// `report.results`. `None` for everything it gives no verdict on: a miss, a
-/// soft note, a chord, a note outside the audio. All `None` when there is no
-/// audio or nothing to check against.
-pub(super) fn identify(run: &ScheduleRun, report: &ScheduleReport, audio: &TakeAudio<'_>) -> Vec<Option<NoteState>> {
-    let mut out = vec![None; report.results.len()];
+/// Where one hit of a report is read in the Take's audio.
+pub(super) struct Lookup<'a> {
+    /// Index into `report.results`.
+    pub result: usize,
+    pub onset: &'a ExpectedOnset,
+    /// Where the note was due, ms into the audio, on the attacks' clock.
+    pub due_ms: f64,
+    /// Where it was struck, ms into the audio: `due_ms` plus its deviation.
+    /// This is the time the pitch pass reads the note from, and it has to be
+    /// the ATTACK: a few ms off is harmless, the detector's 25 ms is not.
+    pub attack_ms: f64,
+}
+
+/// Every hit of `report` that falls inside `audio`, placed in it. The one
+/// place the detector's delay is taken out of a look-up: `identify` reads
+/// from here, and so does `ScheduleRun::pitch_lookups_ms`, which is what the
+/// bench compares with the true attack times (so taking the delay out twice,
+/// or not at all, moves a gated number).
+pub(super) fn lookups<'a>(run: &'a ScheduleRun, report: &ScheduleReport, audio: &TakeAudio<'_>) -> Vec<Lookup<'a>> {
     let span = audio.span_ms();
-    if span <= END_MARGIN_MS || run.pitches.is_empty() {
-        return out;
-    }
     let length = pass_length(&run.schedule);
     let by_id: HashMap<u32, &ExpectedOnset> = run.schedule.onsets.iter().map(|o| (o.id, o)).collect();
     // The deviations are measured from the scoring offset, so a hit was
     // stamped at `due + offset + deviation` on the onsets' own clock
     // (`match_attempt_calibrated`, "what gets reported"), and struck the
-    // detector's delay before that. Every time below is moved back by it, the
-    // look-ups and the cuts alike, so the track is cut at the attacks and each
-    // note is read from its own attack (plus `pitch::ATTACK_BLANK_MS`).
+    // detector's delay before that.
     let offset = report.grade.calibration.offset_ms - audio.detection_delay_ms;
-    let mut matched: Vec<MatchedOnset> = Vec::new();
-    let mut single: Vec<bool> = vec![false; report.results.len()];
+    let mut out = Vec::new();
     for (k, r) in report.results.iter().enumerate() {
         if r.state != OnsetState::Hit {
             continue;
@@ -93,20 +100,56 @@ pub(super) fn identify(run: &ScheduleRun, report: &ScheduleReport, audio: &TakeA
         let Some(due) = run.beats.time_at_beat(r.pass as f64 * length + onset.beat) else {
             continue;
         };
-        let due_in_audio = due + offset - audio.start_ms;
-        let heard = due_in_audio + r.deviation_ms.unwrap_or(0.0);
-        if heard < 0.0 || heard > span - END_MARGIN_MS {
+        let due_ms = due + offset - audio.start_ms;
+        let attack_ms = due_ms + r.deviation_ms.unwrap_or(0.0);
+        if attack_ms < 0.0 || attack_ms > span - END_MARGIN_MS {
             continue;
         }
-        single[k] = onset.note_ids.len() == 1;
+        out.push(Lookup { result: k, onset, due_ms, attack_ms });
+    }
+    out
+}
+
+/// Where the pitch track is cut into notes, ms into `audio`: every onset the
+/// detector heard, moved back to its attack. The other place the detector's
+/// delay is taken out, and the bench holds it against the truth too.
+pub(super) fn cuts(run: &ScheduleRun, audio: &TakeAudio<'_>) -> Vec<f64> {
+    let span = audio.span_ms();
+    run.played
+        .iter()
+        .map(|p| p.time_ms - audio.detection_delay_ms - audio.start_ms)
+        .filter(|t| *t >= 0.0 && *t < span)
+        .collect()
+}
+
+/// What the pitch pass says of each result of `report`, in step with
+/// `report.results`. `None` for everything it gives no verdict on: a miss, a
+/// soft note, a chord, a note outside the audio. All `None` when there is no
+/// audio or nothing to check against.
+pub(super) fn identify(run: &ScheduleRun, report: &ScheduleReport, audio: &TakeAudio<'_>) -> Vec<Option<NoteState>> {
+    let mut out = vec![None; report.results.len()];
+    let span = audio.span_ms();
+    if span <= END_MARGIN_MS || run.pitches.is_empty() {
+        return out;
+    }
+    // The deviations are measured from the scoring offset, so a hit was
+    // stamped at `due + offset + deviation` on the onsets' own clock
+    // (`match_attempt_calibrated`, "what gets reported"), and struck the
+    // detector's delay before that. Every time below is moved back by it, the
+    // look-ups and the cuts alike, so the track is cut at the attacks and each
+    // note is read from its own attack (plus `pitch::ATTACK_BLANK_MS`).
+    let mut matched: Vec<MatchedOnset> = Vec::new();
+    let mut single: Vec<bool> = vec![false; report.results.len()];
+    for look in lookups(run, report, audio) {
+        single[look.result] = look.onset.note_ids.len() == 1;
         // The result's index is its id here, so a verdict comes back to it
         // whichever time round a loop it was.
         matched.push(MatchedOnset::from_result(
-            k as u32,
-            onset.note_ids.clone(),
+            look.result as u32,
+            look.onset.note_ids.clone(),
             PitchState::Hit,
-            due_in_audio,
-            r.deviation_ms,
+            look.due_ms,
+            report.results[look.result].deviation_ms,
         ));
     }
     if matched.is_empty() {
@@ -115,12 +158,7 @@ pub(super) fn identify(run: &ScheduleRun, report: &ScheduleReport, audio: &TakeA
 
     // Every note the detector heard is where the track is cut, written or not:
     // an extra note left out would be folded into the note before it.
-    let cuts: Vec<f64> = run
-        .played
-        .iter()
-        .map(|p| p.time_ms - audio.detection_delay_ms - audio.start_ms)
-        .filter(|t| *t >= 0.0 && *t < span)
-        .collect();
+    let cuts = cuts(run, audio);
     let wanted: std::collections::HashSet<u32> =
         matched.iter().flat_map(|m| m.note_ids.iter().copied()).collect();
     let notes: Vec<ScoreNote> = run.pitches.iter().filter(|n| wanted.contains(&n.id)).copied().collect();

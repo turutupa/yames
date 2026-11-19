@@ -110,3 +110,8 @@ tab-clips/
 # The layout suite's own Vite dependency cache, one per checkout
 # (playwright.config.ts): rebuilt whenever it is missing.
 /.layout-cache/
+
+# detection bench output (plans/detection/MEASURE.md)
+.detect-bench/
+*.replay.json
+*.replay.html

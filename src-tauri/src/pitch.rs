@@ -618,7 +618,7 @@ impl Biquad {
 /// The one-pole high-pass at 20 Hz last is for rumble: a mic in a room with
 /// a fridge in it has energy under the lowest note anyone can play, and
 /// `d(τ)` at a long lag will happily lock onto it.
-fn to_analysis_rate(samples: &[f32], from: u32) -> Vec<f64> {
+pub(crate) fn to_analysis_rate(samples: &[f32], from: u32) -> Vec<f64> {
     let from = from.max(1);
     let filtered: Vec<f64> = if from > ANALYSIS_RATE {
         let fc = 0.45 * ANALYSIS_RATE as f64;

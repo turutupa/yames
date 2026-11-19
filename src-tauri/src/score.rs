@@ -988,6 +988,12 @@ pub struct TakeGrade {
     /// made it. A caller checks the two match before taking one for the other.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub notes_serial: Option<u64>,
+    /// The note verifier's account of the Take, on the late grade only: which
+    /// written notes the note model confirmed, per technique. Information,
+    /// except where `pass.notes` says the right-notes count came from it
+    /// (`verify`). `None` when it did not run.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub verifier: Option<verify::VerifierReport>,
 }
 
 /// Under this share of the notes due, the Take says "I didn't catch enough"
@@ -1690,6 +1696,7 @@ fn grade_take(input: GradeInputs<'_>, score: f32, calibration: TakeCalibration) 
         pass,
         notes_pending: false,
         notes_serial: None,
+        verifier: None,
     }
 }
 
@@ -2086,6 +2093,9 @@ pub struct ScheduleRun {
     /// The written pitch of every note the schedule names, when the Exercise
     /// has a `noteIdentity` bar for the pitch pass to check (`notes`).
     pitches: Vec<crate::pitch::ScoreNote>,
+    /// What else is known of each written note (length, bend, technique), for
+    /// the verifier (`verify`). Empty when the caller sent none.
+    details: Vec<verify::NoteDetail>,
     /// Said on the grade: the pitch pass with this serial is running and its
     /// grade will follow.
     notes_pending: Option<u64>,
@@ -2186,6 +2196,7 @@ impl ScheduleRun {
             pass_bars: Vec::new(),
             correct_lag: false,
             pitches: Vec::new(),
+            details: Vec::new(),
             notes_pending: None,
         }
     }
@@ -2226,6 +2237,30 @@ impl ScheduleRun {
             &self.pass_bars,
             Some(&states),
         ))
+    }
+
+    /// What the pitch pass says of each result of `report`, in step with
+    /// `report.results` (`notes::identify`): the per-note half of
+    /// [`Self::report_with_notes`], for tools that show it note by note.
+    pub fn pitch_states(&self, report: &ScheduleReport, audio: &notes::TakeAudio<'_>) -> Vec<Option<crate::pitch::NoteState>> {
+        notes::identify(self, report, audio)
+    }
+
+    /// Where the pitch pass reads each result of `report` from, ms into
+    /// `audio`: the attack time of every hit inside it, `None` for the rest.
+    /// For tools: the bench holds these against the true attack times.
+    pub fn pitch_lookups_ms(&self, report: &ScheduleReport, audio: &notes::TakeAudio<'_>) -> Vec<Option<f64>> {
+        let mut out = vec![None; report.results.len()];
+        for look in notes::lookups(self, report, audio) {
+            out[look.result] = Some(look.attack_ms);
+        }
+        out
+    }
+
+    /// Where the pitch pass cuts its track into notes, ms into `audio`. For
+    /// tools, like [`Self::pitch_lookups_ms`].
+    pub fn pitch_cuts_ms(&self, audio: &notes::TakeAudio<'_>) -> Vec<f64> {
+        notes::cuts(self, audio)
     }
 
     fn policy(&self) -> CalibrationPolicy {
@@ -2618,6 +2653,7 @@ fn median(sorted: &[f64]) -> f64 {
 
 pub mod notes;
 pub mod pass;
+pub mod verify;
 pub use pass::{NotesCheck, NotesStatus, PassBar, PassResult, PassVerdict};
 
 #[cfg(test)]

@@ -49,6 +49,7 @@ mod kit;
 #[cfg_attr(target_os = "android", path = "midi_android.rs")]
 mod midi;
 mod models;
+pub mod detect;
 pub mod onset;
 /// The score a player is playing against, and — roadmap 2.4 — what came
 /// back from a pass at it. `pub` for the same reason the three below are.

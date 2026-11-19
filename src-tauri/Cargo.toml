@@ -87,6 +87,15 @@ rusqlite = { version = "0.37", features = ["bundled"] }
 # under tauri itself, so this adds NO package to Cargo.lock and NOTHING to
 # the installer. MIT OR Apache-2.0.
 base64 = "0.22"
+# ONNX Runtime, for the note verifier (`src/detect/model.rs`): Basic Pitch run
+# over a Take's audio after it closes, never on an audio thread. Optional and
+# behind `detect-ort`, so a plain `cargo build` or `cargo test` neither
+# downloads nor links it. Pinned to ONE release candidate on purpose: the 2.0
+# line breaks its API between candidates. `download-binaries` fetches pyke's
+# prebuilt static ONNX Runtime for the target (Windows MSVC, macOS arm64,
+# Linux, Android arm64/x86_64 are all in its table); `tls-rustls` keeps that
+# download off the system's OpenSSL. MIT OR Apache-2.0; ONNX Runtime is MIT.
+ort = { version = "=2.0.0-rc.15", optional = true, default-features = false, features = ["std", "download-binaries", "tls-rustls"] }
 
 [features]
 default = []
@@ -103,6 +112,11 @@ coach-llm-vulkan = ["coach-llm", "llama-cpp-2/vulkan"]
 # never for a build anyone plays on. The probe itself is armed at run time by
 # `YAMES_CALLBACK_PROBE=1`, with or without this.
 callback-probe-alloc = []
+# The note verifier's model runtime (ONNX Runtime through `ort`). Off by
+# default; `scripts/tauri.mjs` and the release workflow turn it on for builds
+# people play on, and `npm run detect:bench` for the bench. Without it the
+# verifier reports `noModel` and grading is exactly what it was.
+detect-ort = ["dep:ort"]
 
 # ---------------------------------------------------------------------------
 # Desktop only (MOBILE_IMPLEMENTATION_PLAN §3, revised for the MVP by M7).
