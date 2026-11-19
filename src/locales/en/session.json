@@ -506,6 +506,7 @@
       "soundTitle": "Watch plays the notes aloud. Off: it only lights them.",
       "demoPlaying": "Playing it for you. Start take when you're ready.",
       "legendFingers": "1–4 = fingers",
+      "legendShift": "= the hand moves",
       "legendPlayed": "just played",
       "beats": "The bar's beats",
       "beatLabel": "beat",

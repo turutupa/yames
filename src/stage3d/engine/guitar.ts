@@ -15,7 +15,7 @@
  */
 import * as THREE from "three";
 import type { NeckKind } from "../api";
-import { MARKER_SCALE, noteLook, type NeckPalette } from "../neckTheme";
+import { MARKER_SCALE, markerExtent, noteLook, type NeckPalette } from "../neckTheme";
 import * as T from "./textures";
 
 export const L = 6.5;
@@ -302,7 +302,33 @@ type Note = {
   text: string;
 };
 
-export type GuitarNote = { s: number; f: number; kind: NeckKind; t: string };
+/** A marker's drawn radius on the board (`markerExtent`), and the clear gap two neighbours keep. */
+const markerR = (kind: NeckKind) => NOTE_R * markerExtent(kind);
+const MARKER_GAP = 0.004;
+
+/**
+ * The markers that step aside toward the nut ("string:fret"). Same-fret
+ * markers stay in line, as a chord box draws them: one steps aside only when it
+ * would really touch the one on the next string up (NOW's large disc beside
+ * another that is not quiet). The old stagger zig-zagged every box shape and
+ * read as different frets (acceptance 5, P2-10).
+ */
+export function steppedAside(list: readonly { s: number; f: number; kind: NeckKind }[]): Set<string> {
+  const out = new Set<string>();
+  const kindAt = new Map(list.map((d) => [d.s + ":" + d.f, d.kind] as const));
+  for (const d of [...list].sort((a, b) => a.s - b.s)) {
+    if (d.f <= 0) continue;
+    const above = d.s - 1 + ":" + d.f;
+    const up = kindAt.get(above);
+    if (up === undefined || out.has(above)) continue;
+    const x = noteX(d.f);
+    if (markerR(d.kind) + markerR(up) + MARKER_GAP > Math.abs(strZ(d.s, x) - strZ(d.s - 1, x))) out.add(d.s + ":" + d.f);
+  }
+  return out;
+}
+
+/** `sh`: the shift mark under the number (`NeckNote.shift`). */
+export type GuitarNote = { s: number; f: number; kind: NeckKind; t: string; sh?: boolean };
 
 const flat = (color: string, extra: THREE.MeshBasicMaterialParameters = {}) =>
   new THREE.MeshBasicMaterial({ color, toneMapped: false, side: THREE.DoubleSide, ...extra });
@@ -408,7 +434,7 @@ export function createGuitar({ tier, overlay, palette }: { tier: number; overlay
     overlayGroup.add(disc, label);
     return { disc, halo, label, o: 0, to: 0, fade: 0.25, flash: 0, kind: null, text: "" };
   }
-  /** Places shared by a note on the next string up, this setNotes: staggered so neither hides the other. */
+  /** Places whose marker would touch the one on the next string up, this setNotes: stepped aside so neither hides the other. */
   let crowded = new Set<string>();
   function placeNote(n: Note, d: GuitarNote) {
     // Two markers on one fret, neighbouring strings: the lower string's sits a
@@ -423,6 +449,7 @@ export function createGuitar({ tier, overlay, palette }: { tier: number; overlay
   }
   const GLOW_SCALE = 0.36;
   /** Paint a note for its kind and text in the current palette. `force` repaints after a theme change. */
+  /** `text` carries the shift mark as a trailing "\u0001" (`labelOf`), so a mark change repaints. */
   function styleNote(n: Note, kind: NeckKind, text: string, force = false) {
     if (force || n.kind !== kind) {
       const open = n.disc.position.x < 0;
@@ -438,15 +465,15 @@ export function createGuitar({ tier, overlay, palette }: { tier: number; overlay
     }
     if (n.text !== text) {
       n.text = text;
-      n.label.material.map = text ? T.noteLabel(text, noteLook(kind, P).ink) : null;
+      const mark = text.endsWith("\u0001");
+      const digits = mark ? text.slice(0, -1) : text;
+      n.label.material.map = digits ? T.noteLabel(digits, noteLook(kind, P).ink, 700, null, mark) : null;
       n.label.material.needsUpdate = true;
     }
   }
   function setNotes(list: GuitarNote[], fade = 0.25) {
     const keep = new Set<string>();
-    const at = new Set(list.map((d) => d.s + ":" + d.f));
-    const next = new Set<string>();
-    for (const d of list) if (d.f > 0 && at.has(d.s - 1 + ":" + d.f) && (d.s % 2 === 0 || !at.has(d.s - 2 + ":" + d.f))) next.add(d.s + ":" + d.f);
+    const next = steppedAside(list);
     const moved = [...next].some((k) => !crowded.has(k)) || [...crowded].some((k) => !next.has(k));
     crowded = next;
     list.forEach((d) => {
@@ -460,7 +487,7 @@ export function createGuitar({ tier, overlay, palette }: { tier: number; overlay
         placeNote(n, d);
         n.o = fade ? 0 : 1;
       } else if (moved) placeNote(n, d);
-      styleNote(n, d.kind, d.t);
+      styleNote(n, d.kind, d.t + (d.sh && d.t ? "\u0001" : ""));
       n.to = 1;
       n.fade = fade;
     });

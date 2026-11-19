@@ -22,7 +22,7 @@
  */
 import type { NeckKind, NeckNote, NeckView } from "../../../stage3d/api";
 import type { HandPosition } from "../../../paths/format";
-import { fingerPlan, fingersByPlace, type FingerNote } from "../../../paths/fingering";
+import { fingerPlan, fingersByPlace, shiftPlaces, type FingerNote } from "../../../paths/fingering";
 import type { BeatPosition } from "../../../songs/position";
 import type { RunwayModel } from "../highway/runwayModel";
 
@@ -30,6 +30,17 @@ type Place = { string: number; fret: number };
 type Onsets = RunwayModel["onsets"];
 
 const key = (p: Place) => `${p.string}:${p.fret}`;
+
+/**
+ * The fingers by place (`fingering`), and the places the hand shifts on with
+ * the finger the place shows (`shifts`): the quiet shape marks those
+ * (`NeckNote.shift`, acceptance 5, P2-4).
+ */
+export type PlaceFingers = Map<string, string> & { shifts?: ReadonlySet<string> };
+
+/** Whether a quiet dot carries the shift mark: only under the finger it shows. */
+const shiftAt = (fingers: ReadonlyMap<string, string> | null, k: string) =>
+  !!(fingers as PlaceFingers | null)?.shifts?.has(k) && fingers?.has(k) === true;
 
 /** How many notes behind NOW keep their verdict's colour. */
 export const PLAYED_SHOWN = 2;
@@ -72,7 +83,8 @@ export function nowNextNeck(
   const out: NeckNote[] = shape.map((n) => {
     const hit = kinds.get(key(n));
     if (hit) return { ...n, kind: hit.kind, label: hit.label };
-    return { ...n, kind: "box", label: fingers?.get(key(n)) ?? (theory ? n.label : undefined) };
+    const label = fingers?.get(key(n)) ?? (theory ? n.label : undefined);
+    return { ...n, kind: "box", label, ...(shiftAt(fingers, key(n)) ? { shift: true } : {}) };
   });
   // NOW and NEXT are on the neck even when the shape somehow lacks them.
   const seen = new Set(shape.map(key));
@@ -102,10 +114,12 @@ export function readyNeck(
   return shape.map((note) => {
     const k = key(note);
     if (!played.has(k)) return { ...note, kind: "dim", label: theory ? note.label : undefined };
+    const kind: NeckKind = first && key(first) === k ? "now" : "box";
     return {
       ...note,
-      kind: first && key(first) === k ? "now" : "box",
+      kind,
       label: fingers.get(k) ?? (theory ? note.label : undefined),
+      ...(kind === "box" && shiftAt(fingers, k) ? { shift: true } : {}),
     };
   });
 }
@@ -123,8 +137,12 @@ export function readyNeck(
 export function fingering(
   notes: readonly FingerNote[],
   position: HandPosition | undefined,
-): Map<string, string> {
-  return fingersByPlace(notes, position);
+): PlaceFingers {
+  const out: PlaceFingers = fingersByPlace(notes, position);
+  const shifts = new Set<string>();
+  for (const [k, f] of shiftPlaces(notes, position)) if (out.get(k) === f) shifts.add(k);
+  if (shifts.size) out.shifts = shifts;
+  return out;
 }
 
 /**
