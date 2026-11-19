@@ -153,12 +153,37 @@ export function useFitRow(ref: RefObject<HTMLElement>, label: string): void {
     void fonts?.ready.then(fit);
     fonts?.addEventListener?.("loadingdone", fit);
     // A theme changes the face without a resize or a new font landing: the
-    // controls' own widths say so. A fit that changes nothing ends the loop.
+    // row's and the controls' own widths say so. A fit that changes nothing
+    // ends the loop.
+    const row = ref.current;
     const sizes = typeof ResizeObserver === "function" ? new ResizeObserver(fit) : null;
-    for (const child of Array.from(ref.current.children)) sizes?.observe(child);
+    const watchSizes = () => {
+      sizes?.disconnect();
+      sizes?.observe(row);
+      for (const child of Array.from(row.children)) sizes?.observe(child);
+    };
+    watchSizes();
+    // And what the controls say: a label or an icon swapped by a render this
+    // hook's caller did not key on is measured as it lands, not a frame
+    // later. `data-fit` is the row's own answer and is not listened for.
+    const words =
+      typeof MutationObserver === "function"
+        ? new MutationObserver(() => {
+            watchSizes();
+            fit();
+          })
+        : null;
+    words?.observe(row, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["aria-pressed", "data-again", "disabled", "hidden"],
+    });
     return () => {
       alive = false;
       sizes?.disconnect();
+      words?.disconnect();
       window.removeEventListener("resize", fit);
       fonts?.removeEventListener?.("loadingdone", fit);
     };
