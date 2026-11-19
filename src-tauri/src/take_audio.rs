@@ -39,11 +39,15 @@ pub struct CapturedAudio {
     pub rate: u32,
     /// `clock::now_ns` of `samples[0]`.
     pub first_ns: u64,
+    /// How far the detector's onset stamps sit behind the attacks in these
+    /// samples (`OnsetCore::detection_delay_ns`).
+    pub detection_delay_ns: u64,
 }
 
 #[derive(Default)]
 struct TapState {
     rate: u32,
+    detection_delay_ns: u64,
     samples: Vec<f32>,
     scratch: Vec<f32>,
     cursor: Option<usize>,
@@ -77,6 +81,14 @@ impl TakeAudioTap {
         }
     }
 
+    /// The detector's delay, from its thread as it starts: what the pitch
+    /// pass takes off an onset's stamp to find the attack in these samples.
+    pub fn set_detection_delay_ns(&self, delay_ns: u64) {
+        if let Ok(mut s) = self.state.lock() {
+            s.detection_delay_ns = delay_ns;
+        }
+    }
+
     /// Get ready to keep the next Take. Allocates, so a command thread's job.
     /// `device_rate` is the input's rate when the caller knows it; otherwise
     /// the last rate the detector reported, or 48 kHz.
@@ -88,7 +100,10 @@ impl TakeAudioTap {
     /// with the ring's lock held, where the input callback's `try_lock` would
     /// miss and drop a buffer.
     pub fn arm(&self, device_rate: Option<u32>) {
-        let stored = self.state.lock().unwrap().rate;
+        let (stored, detection_delay_ns) = {
+            let s = self.state.lock().unwrap();
+            (s.rate, s.detection_delay_ns)
+        };
         let rate = device_rate.filter(|r| *r > 0).unwrap_or(if stored > 0 { stored } else { 48_000 });
         let cap = ((rate as f64 * MAX_TAKE_SECS) as usize).min(MAX_SAMPLES);
         let prefaulted = |n: usize| {
@@ -101,6 +116,7 @@ impl TakeAudioTap {
         // is never kept waiting on a page fault either.
         let fresh = TapState {
             rate,
+            detection_delay_ns,
             samples: prefaulted(cap),
             scratch: prefaulted((rate as f64 * SCRATCH_SECS) as usize),
             ..TapState::default()
@@ -115,11 +131,12 @@ impl TakeAudioTap {
         self.armed.store(false, Ordering::Release);
         let old = {
             let mut s = self.state.lock().unwrap();
-            let rate = s.rate;
+            let (rate, detection_delay_ns) = (s.rate, s.detection_delay_ns);
             std::mem::replace(
                 &mut *s,
                 TapState {
                     rate,
+                    detection_delay_ns,
                     ..TapState::default()
                 },
             )
@@ -209,6 +226,7 @@ impl TakeAudioTap {
             samples: std::mem::take(&mut s.samples),
             rate: s.rate,
             first_ns,
+            detection_delay_ns: s.detection_delay_ns,
         })
     }
 }
@@ -246,6 +264,25 @@ mod tests {
         assert_eq!(got.first_ns, 1_995_000_000);
         // Once: a second close does not grade the same audio again.
         assert!(tap.capture().is_none());
+    }
+
+    /// The detector says its delay once, as it starts, and Takes come and go
+    /// after that: every capture still carries it.
+    #[test]
+    fn the_detectors_delay_outlives_arming_and_disarming() {
+        let tap = TakeAudioTap::new();
+        tap.set_rate(1000);
+        tap.set_detection_delay_ns(24_520_833);
+        tap.arm(None);
+        tap.disarm();
+        tap.arm(None);
+        let mut ring = RingBuffer::new(4000);
+        ring_with(10, 0.0, &mut ring);
+        tap.pull(&ring, 1_000_000_000);
+        ring_with(5, 100.0, &mut ring);
+        tap.pull(&ring, 2_000_000_000);
+        let got = tap.capture().expect("a capture");
+        assert_eq!(got.detection_delay_ns, 24_520_833);
     }
 
     #[test]

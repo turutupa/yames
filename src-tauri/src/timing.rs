@@ -2875,6 +2875,7 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass)
                     samples: &audio.samples,
                     rate: audio.rate,
                     start_ms,
+                    detection_delay_ms: audio.detection_delay_ns as f64 / 1e6,
                 };
                 run.report_with_notes(&weights, &take).map(|r| r.grade)
             }));

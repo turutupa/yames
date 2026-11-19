@@ -13,7 +13,10 @@ use aubio::Onset as AubioOnset;
 /// A detected onset event.
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct Onset {
-    /// Monotonic timestamp in nanoseconds (from Instant)
+    /// Monotonic timestamp in nanoseconds (from Instant): the end of the
+    /// hop in which aubio called the peak, which is
+    /// [`OnsetCore::detection_delay_ns`] after the attack. Timing calibrates
+    /// that out; the pitch pass subtracts it.
     #[serde(rename = "tsNs")]
     pub ts_ns: u64,
     /// Peak amplitude at onset (0.0–1.0)
@@ -450,10 +453,11 @@ impl OnsetDetector {
             let ai = audio_input.lock().unwrap();
             ai.sample_rate()
         };
+        let mut core = OnsetCore::new(&profile, sample_rate);
         if let Some(tap) = take_tap.as_ref() {
             tap.set_rate(sample_rate);
+            tap.set_detection_delay_ns(core.detection_delay_ns());
         }
-        let mut core = OnsetCore::new(&profile, sample_rate);
         let mut emit = |onset: Onset| on_onset(onset);
 
         while alive.load(Ordering::SeqCst) {
@@ -601,6 +605,30 @@ impl OnsetCore {
             debug_enabled,
             hops_since_log: 0,
         }
+    }
+
+    /// How far an [`Onset::ts_ns`] is behind the attack it reports: aubio's
+    /// own delay (`aubio_onset_get_delay`, 4.6 hops for `complex`, 4.3 for
+    /// the others: 24.5 ms at 48 kHz on a guitar).
+    ///
+    /// aubio puts an onset it fires on in hop `h` at `h_start + round(v x
+    /// hop) - delay` (`aubio_onset_get_last`), with `v` the peak picker's
+    /// interpolated position, which sits at about one hop; `ts_ns` is
+    /// `h_end`, which is `h_start + hop`. So the attack is `ts_ns - delay`,
+    /// to within half a hop.
+    ///
+    /// **Only the pitch pass applies this.** `ts_ns` stays the moment aubio
+    /// called the peak, because everything that times a note is calibrated
+    /// against that: the scorer's per-Take lag (`estimate_constant_lag_ms`,
+    /// `NOMINAL_LAG_MS`), the calibration cache, free play's running offset
+    /// and every deadline that waits for an onset to arrive. A constant
+    /// shift changes no deviation's spread, so evenness and notes heard
+    /// gain nothing from moving it, and every cached offset would be wrong
+    /// by this much. The pitch pass is the one consumer that puts an
+    /// onset's time onto the input's own samples (`score::notes`), and it
+    /// is where reading at `ts_ns` meant reading 25 ms into the note.
+    pub fn detection_delay_ns(&self) -> u64 {
+        (self.detector.get_delay() as f64 * 1e9 / self.sample_rate as f64) as u64
     }
 
     /// The click stopped. Flush any in-flight cluster so stale events don't

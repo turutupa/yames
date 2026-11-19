@@ -38,6 +38,15 @@ pub struct TakeAudio<'a> {
     /// Where `samples[0]` falls, in the milliseconds the beat map and the
     /// played onsets are in.
     pub start_ms: f64,
+    /// How far each played onset's time is behind the attack it stands for:
+    /// the detector's peak-picking delay (`OnsetCore::detection_delay_ns`,
+    /// about 25 ms on a guitar at 48 kHz). The onsets' clock and the
+    /// samples' clock are the same clock, but an onset is stamped when aubio
+    /// called it, not when the string was struck, so a note read at its
+    /// stamp is read 25 ms in, and at sixteenths above about 135 BPM that is
+    /// inside the next note (research M0, 2026-11). Zero for onsets that are
+    /// already attack times, such as MIDI or a test's own truth.
+    pub detection_delay_ms: f64,
 }
 
 impl TakeAudio<'_> {
@@ -65,10 +74,13 @@ pub(super) fn identify(run: &ScheduleRun, report: &ScheduleReport, audio: &TakeA
     }
     let length = pass_length(&run.schedule);
     let by_id: HashMap<u32, &ExpectedOnset> = run.schedule.onsets.iter().map(|o| (o.id, o)).collect();
-    // The deviations are measured from the scoring offset, so a hit was played
-    // at `due + offset + deviation` on the onsets' own clock
-    // (`match_attempt_calibrated`, "what gets reported").
-    let offset = report.grade.calibration.offset_ms;
+    // The deviations are measured from the scoring offset, so a hit was
+    // stamped at `due + offset + deviation` on the onsets' own clock
+    // (`match_attempt_calibrated`, "what gets reported"), and struck the
+    // detector's delay before that. Every time below is moved back by it, the
+    // look-ups and the cuts alike, so the track is cut at the attacks and each
+    // note is read from its own attack (plus `pitch::ATTACK_BLANK_MS`).
+    let offset = report.grade.calibration.offset_ms - audio.detection_delay_ms;
     let mut matched: Vec<MatchedOnset> = Vec::new();
     let mut single: Vec<bool> = vec![false; report.results.len()];
     for (k, r) in report.results.iter().enumerate() {
@@ -106,7 +118,7 @@ pub(super) fn identify(run: &ScheduleRun, report: &ScheduleReport, audio: &TakeA
     let cuts: Vec<f64> = run
         .played
         .iter()
-        .map(|p| p.time_ms - audio.start_ms)
+        .map(|p| p.time_ms - audio.detection_delay_ms - audio.start_ms)
         .filter(|t| *t >= 0.0 && *t < span)
         .collect();
     let wanted: std::collections::HashSet<u32> =
