@@ -27,7 +27,9 @@ which Paths are worth writing now:
 
 | Tapping | Yes | A tap is a loud attack with no stroke, which the schedule already expects to hear; the pull-offs and hammer-ons between taps are soft and cost nothing. So the taps carry the timing, exactly as picked notes do in Legato. Shred has one tapping Step and nothing below or above it. |
 
-So six new Paths: **Rhythm Foundations**, **Legato**, **Metal Rhythm**, **Tapping**, **Know the Neck** and **Scales and Modes**.
+| Funk single-note lines (sixteenths with strokes left out, two-note stabs, octaves) | Yes | The strummed, scratched funk part still cannot be graded (row above), but its single-note cousin can: every sound is one picked note or one double stop, and a stroke left out is a rest the schedule already knows. The hand keeps swinging through the holes; the app hears only what is played, and the Path says so. |
+
+So seven new Paths: **Rhythm Foundations**, **Legato**, **Metal Rhythm**, **Tapping**, **Funk Lines**, **Know the Neck** and **Scales and Modes**.
 
 ## The shape every Path keeps
 
@@ -131,6 +133,31 @@ which hand moves (the tap first, then the fretting hand, then both), by strings
 (one, two, three, a skip), and by how many notes each tap has to carry (one, two,
 three, five). Every line is graded on timing and notes heard and none on pitch.
 
+## Funk Lines (`funk-lines`, mechanics)
+
+**Who for:** players who can pick steady sixteenths and whose rhythm playing is
+still all chords. It assumes sixteenth notes with a click at 70 BPM and stopping
+a note cleanly (the Intermediate Level of Rhythm Foundations covers both). Am7 and
+D9, A minor with the Dorian F# late on, a funk band groove.
+
+| Level | Steps | What it unlocks |
+|---|---|---|
+| Beginner: the hand that never stops | The engine (sixteenths on one note with the accent on the beat, the 'and', two and four); leaving strokes out (the three one-hole figures); two lines with the band | A sixteenth-note hand that keeps its down-up while notes go missing, and a first two-bar line over a groove. |
+| Intermediate: stabs and octaves | Two-note stabs on two and four, on the 'and', on single sixteenths; a line answered by a stab, Am7 to D9, the vamp with the band; octaves in eighths and sixteenths | The two sounds a funk rhythm part is made of besides the line, and the change between the two chords. |
+| Advanced: across the beat, and the pocket | Three-sixteenth figures that slide across the beat, lines that start on the 'e', a two-bar phrase; the Dorian sixth and hammer-ons; four bars of everything and two one-minute Takes | Displacement, the F# that makes it Dorian, and holding one bar still for a minute. |
+
+Difficulty rises by how many strokes are left out and where (none, one a beat,
+most of the bar), by what is played (one note, a line, a double stop, an octave
+with a muted string between), and last by where the figure sits against the beat.
+Tempo rises little: funk is not a speed style, and the Advanced Level is harder
+in placement, not in bpm. The three engine Exercises are graded on accents; lines
+on timing and notes; stabs and octaves, being two notes at once, on timing only;
+the two minutes on stamina. Pick direction is taught in the text (down on the
+beat and the 'and', up on the 'e' and the 'a') and is not graded, so Exercises
+with holes are `pick: "free"`. The muted scratch between notes is written as a
+rest: if the app hears one it is an extra note, so the bar on extras is loose
+(six), and the Path says the scratch is for the ear.
+
 ## Know the Neck (`know-the-neck`, theory)
 
 **Who for:** the player who knows chord shapes and box 1 and could not say what
@@ -200,7 +227,7 @@ Nothing in the planner changes: it reads `steps`, `levels`, warm-ups and
 `progressKey` as it does for the five Paths. The new Paths are added to
 `RUNNABLE_PATH_IDS`, and to the first-run order after the owner's five (his order
 is kept; whether Rhythm Foundations should come first for a beginner is his call).
-Legato and Metal Rhythm are deep dives like Alternate Picking and Sweep Picking;
+Legato, Tapping, Funk Lines and Metal Rhythm are deep dives like Alternate Picking and Sweep Picking;
 Know the Neck and Scales and Modes sit with the Styles. Every graded
 Exercise goes through `path_exercises` as a Session Take, as the others do.
 

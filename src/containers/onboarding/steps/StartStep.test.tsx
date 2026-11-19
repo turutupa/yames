@@ -71,6 +71,7 @@ describe("Where do you start? — what it offers", () => {
       "know-the-neck",
       "scales-and-modes",
       "tapping",
+      "funk-lines",
     ]);
   });
 

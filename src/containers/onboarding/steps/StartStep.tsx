@@ -43,6 +43,7 @@ export const START_PATH_ORDER = [
   "know-the-neck",
   "scales-and-modes",
   "tapping",
+  "funk-lines",
 ];
 
 /** The Paths a player can start, in the step's order (unknown runnable ones last). */
