@@ -1202,7 +1202,7 @@
       ],
       "payoff": "A bass note and stabs that sound like a rhythm section by themselves.",
       "prerequisites": ["first-lines"],
-      "difficulty": 4.39,
+      "difficulty": 2.05,
       "exercises": [
         {
           "id": "stabs.stab-backbeat",
@@ -1297,7 +1297,7 @@
             "minGapMsAtTop": 500,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 3.05
+            "difficulty": 2.05
           },
           "chords": ["Am7"],
           "selfCheck": ["Were the notes short, with silence between them?"]
@@ -1398,7 +1398,7 @@
             "minGapMsAtTop": 250,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 4.39
+            "difficulty": 1.98
           },
           "chords": ["Am7"],
           "selfCheck": ["Were the notes short, with silence between them?"]
@@ -1510,12 +1510,13 @@
             "minGapMsAtTop": 272.73,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 6
+            "difficulty": 2.53
           },
           "chords": ["Am7"],
           "selfCheck": ["Did the picking hand keep swinging in sixteenths through the rests?"]
         }
-      ]
+      ],
+      "difficultyException": "A new Level opens with fewer attacks in a bar than the lines before it: a bass note and stabs on the backbeat, then on the off-beats. A two-note stab is one attack. The demand is a stroke that crosses two strings and stops, with both notes cut off together, which the metric does not count."
     },
     {
       "id": "line-and-stab",
@@ -1530,7 +1531,7 @@
       ],
       "payoff": "A two-chord vamp, Am7 to D9, with a line and stabs in every bar.",
       "prerequisites": ["stabs"],
-      "difficulty": 3.87,
+      "difficulty": 2.93,
       "exercises": [
         {
           "id": "line-and-stab.call-and-stab",
@@ -1636,7 +1637,7 @@
             "minGapMsAtTop": 136.36,
             "handShifts": 0,
             "maxPlayableBpm": 178,
-            "difficulty": 3.87
+            "difficulty": 2.93
           },
           "chords": ["Am7"],
           "selfCheck": ["Were the notes short, with silence between them?"]
@@ -1745,7 +1746,7 @@
             "minGapMsAtTop": 250,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 3.71
+            "difficulty": 1.84
           },
           "chords": ["Am7", "D9"]
         },
@@ -1875,12 +1876,11 @@
             "minGapMsAtTop": 136.36,
             "handShifts": 2,
             "maxPlayableBpm": 178,
-            "difficulty": 4.03
+            "difficulty": 3.07
           },
           "chords": ["Am7", "D9"]
         }
-      ],
-      "difficultyException": "Fewer attacks a bar than the stab Exercises before it, because half the bar is now a low line with space in it. The jump between registers is the demand."
+      ]
     },
     {
       "id": "octaves",
@@ -1895,7 +1895,7 @@
       ],
       "payoff": "A disco octave part that moves through three notes over a band.",
       "prerequisites": ["line-and-stab"],
-      "difficulty": 8.5,
+      "difficulty": 2.83,
       "exercises": [
         {
           "id": "octaves.octave-eighths",
@@ -2007,7 +2007,7 @@
             "minGapMsAtTop": 230.77,
             "handShifts": 4,
             "maxPlayableBpm": 201,
-            "difficulty": 6.45
+            "difficulty": 2.22
           },
           "chords": ["Am7", "Am7"],
           "selfCheck": ["Was the string between the two fingers silent?"]
@@ -2122,7 +2122,7 @@
             "minGapMsAtTop": 125,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 8.85
+            "difficulty": 2.83
           },
           "chords": ["Am7"],
           "selfCheck": ["Did the picking hand keep swinging in sixteenths through the rests?"]
@@ -2265,11 +2265,12 @@
             "minGapMsAtTop": 136.36,
             "handShifts": 2,
             "maxPlayableBpm": 360,
-            "difficulty": 8.5
+            "difficulty": 2.83
           },
           "chords": ["Am7", "Am7"]
         }
-      ]
+      ],
+      "difficultyException": "An octave is one attack, and these figures have rests in them, so the rate sits just under the line-and-stab bars before it. The demand is the shape: two fingers with a dead string between them, struck through all three strings and stopped together, which the metric does not count."
     },
     {
       "id": "displaced",
@@ -2649,8 +2650,7 @@
             "cover": false
           }
         }
-      ],
-      "difficultyException": "The metric counts an octave as two notes and a string skip, so the Step before reads very high. These are single notes again; the displacement is the demand."
+      ]
     },
     {
       "id": "the-sixth",
@@ -3099,7 +3099,7 @@
       ],
       "payoff": "A four-bar funk guitar part with everything in it, and a line you can sit on for as long as the band plays.",
       "prerequisites": ["the-sixth"],
-      "difficulty": 4.39,
+      "difficulty": 2.93,
       "exercises": [
         {
           "id": "the-pocket.groove",
@@ -3271,7 +3271,7 @@
             "minGapMsAtTop": 136.36,
             "handShifts": 2,
             "maxPlayableBpm": 291,
-            "difficulty": 5.62
+            "difficulty": 2.97
           },
           "chords": ["Am7", "D9", "Am7", "D9"]
         },
@@ -3493,13 +3493,14 @@
             "minGapMsAtTop": 250,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 4.39
+            "difficulty": 1.98
           },
           "holdSeconds": 60,
           "chords": ["Am7"],
           "selfCheck": ["Were the notes short, with silence between them?"]
         }
-      ]
+      ],
+      "difficultyException": "Nothing new for the hands: lines, stabs and octaves from the earlier Steps, two of them one bar long, so the number falls back to theirs. The demand is length: four bars of everything in a row, and one bar kept identical for a minute, which the metric does not count."
     }
   ],
   "levels": [

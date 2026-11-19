@@ -1154,8 +1154,6 @@ export default definePath({
         "Sing the line. If you can sing it, you can play over the changes.",
       ],
       payoff: "A single slow line that spells the whole twelve-bar form without any other notes.",
-      difficultyException:
-        "One or two notes a bar, so the rate falls right down. Hearing the harmony is the demand here, and it is the most abstract idea on the Path.",
       exercises: [
         {
           id: "sevenths-line",
