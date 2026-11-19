@@ -224,6 +224,8 @@ export default definePath({
         "To stop a chord, relax the fretting fingers without lifting them off the strings, and lay the picking hand down at the same time.",
       ],
       payoff: "Three chords, E, G and A, that move in time and stop as one.",
+      difficultyException:
+        "Chords in quarters, and in eighths with rests between them, after eight chugs to the bar; a two-note chord is one attack, so the rate falls. The demand is both fingers landing as one shape and both strings stopping together, which the metric does not count.",
       exercises: [
         {
           id: "two-note-chords",
@@ -370,8 +372,6 @@ export default definePath({
         "Stay palm-muted and keep the strokes small. The gallop gets its sound from being tight, not loud.",
       ],
       payoff: "A galloping riff on the low E string that holds its shape as the tempo climbs.",
-      difficultyException:
-        "The metric counts a two-note chord as two notes and a string crossing, so the chord Steps before this one read high. The gallop is single notes again, and its sixteenth-note figure is the new demand.",
       exercises: [
         {
           id: "gallop-one",

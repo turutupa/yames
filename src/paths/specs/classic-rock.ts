@@ -586,6 +586,8 @@ export default definePath({
         "Play the double stops short and punchy, and let the single notes sing.",
       ],
       payoff: "Two bars of double stops into a single-note run: the sound of rock and roll lead guitar.",
+      difficultyException:
+        "Eighth notes after a Step of sixteenth and triplet loops, and two strings struck together are one attack, so the rate falls. The demand is hitting two strings and only two, short as a drum hit, and going from double stops to single notes inside a phrase, which a rate can't count.",
       exercises: [
         {
           id: "stops-and-run",
@@ -658,8 +660,6 @@ export default definePath({
         "Let notes ring into each other, and keep the time steady underneath.",
       ],
       payoff: "An E and an A that sing, with a fill between them, instead of two strummed chords.",
-      difficultyException:
-        "Slow and ringing on purpose: holding a chord shape while single fingers move inside it is the demand, not the rate.",
       exercises: [
         {
           id: "open-e",
@@ -741,8 +741,6 @@ export default definePath({
         "Aim for the root at the end of each lick, and hear it match the bass.",
       ],
       payoff: "A four-bar line that follows A, G, D and A, and sounds like it knows where the band is.",
-      difficultyException:
-        "The rate eases so the ear can follow a chord change every bar, which is the new demand here.",
       exercises: [
         {
           id: "arpeggios",
