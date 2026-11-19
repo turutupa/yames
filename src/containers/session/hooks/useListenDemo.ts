@@ -64,8 +64,31 @@ export type ListenDemoControl = {
   /** How many demos have finished on this screen: Watch says "again" after one. */
   heard: number;
   start: () => void;
-  stop: () => void;
+  /**
+   * Stop it. `tail: false` when something the player plays starts straight
+   * after (a warm-up's Start): the input counts at once rather than after the
+   * demo's last note has rung out.
+   */
+  stop: (options?: { tail?: boolean }) => void;
 };
+
+/**
+ * Give the input back to the player. Never silently: a lost "off" would leave
+ * the input deaf until the engine's own bound runs out, so a failure is said
+ * and tried once more.
+ */
+async function liftGate(tail: boolean): Promise<void> {
+  try {
+    await setListenDemo(false, { tail });
+  } catch (err) {
+    console.warn("[yames] the engine did not take the listen demo's end; trying again", err);
+    try {
+      await setListenDemo(false, { tail });
+    } catch (again) {
+      console.error("[yames] the input stays ignored until the demo's own bound runs out", again);
+    }
+  }
+}
 
 export function useListenDemo(input: ListenDemoInput): ListenDemoControl {
   const { isPlaying, take, ready, shown } = input;
@@ -85,6 +108,9 @@ export function useListenDemo(input: ListenDemoInput): ListenDemoControl {
     void storeLoad<boolean>(LISTEN_SOUND_KEY).then((saved) => {
       if (saved === false) setSoundState(false);
     });
+    // A page that reloaded in the middle of a demo left the engine ignoring
+    // the input: this page plays no demo yet, so it hears the player at once.
+    void latest.current.enqueue(() => liftGate(false));
   }, []);
 
   const setSound = useCallback((on: boolean) => {
@@ -92,7 +118,8 @@ export function useListenDemo(input: ListenDemoInput): ListenDemoControl {
     void storeSave(LISTEN_SOUND_KEY, on).catch(() => {});
   }, []);
 
-  const stop = useCallback(() => {
+  const stop = useCallback((options?: { tail?: boolean }) => {
+    const tail = options?.tail ?? true;
     const now = phaseRef.current;
     if (now === "off" || now === "stopping" || now === "stopped") return;
     const mine = ++generation.current;
@@ -102,8 +129,9 @@ export function useListenDemo(input: ListenDemoInput): ListenDemoControl {
     void latest.current.enqueue(async () => {
       await setPlaying(false).catch(() => {});
       await clearSong().catch(() => {});
-      // Silent now: the input is the player's again (after the last note's tail).
-      await setListenDemo(false).catch(() => {});
+      // Silent now: the input is the player's again (after the last note's
+      // tail, unless what comes next is the player's own).
+      await liftGate(tail);
       if (generation.current === mine) {
         phaseRef.current = "stopped";
         setPhase("stopped");
@@ -127,7 +155,9 @@ export function useListenDemo(input: ListenDemoInput): ListenDemoControl {
         // Nothing for the scorer, and nothing the input hears counts: the
         // demo is never heard as a Take, nor as practice.
         await clearScoreSchedule().catch(() => {});
-        await setListenDemo(true).catch(() => {});
+        await setListenDemo(true, { lengthMs: demo.lengthMs }).catch((err) => {
+          console.warn("[yames] the engine was not told a listen demo is playing", err);
+        });
         const importer = await import("../../../songs/import");
         const transport = importer.buildTransport(demo.score, demo.range, {
           loops: false,
@@ -143,7 +173,7 @@ export function useListenDemo(input: ListenDemoInput): ListenDemoControl {
         console.warn("[yames] the listen demo would not load", err);
         if (generation.current === mine) {
           await clearSong().catch(() => {});
-          await setListenDemo(false).catch(() => {});
+          await liftGate(false);
           phaseRef.current = "stopped";
           setPhase("stopped");
         }

@@ -65,6 +65,18 @@ async function playOne(h: ReturnType<typeof mount>) {
   await waitFor(() => expect(h.result.current.prepared).toBe(true));
 }
 
+type Gate = { on: boolean; lengthMs: number | null; tail: boolean | null };
+/** Every `set_listen_demo`, with where it fell among all the engine's calls. */
+const gates = () =>
+  mockInvoke.mock.calls
+    .map(([c, a], at) => ({ c, a: a as Gate, at }))
+    .filter((x) => x.c === "set_listen_demo")
+    .map(({ a, at }) => ({ ...a, at }));
+const lastAt = (cmd: string, args?: unknown) =>
+  mockInvoke.mock.calls.reduce(
+    (found, [c, a], at) => (c === cmd && (args === undefined || JSON.stringify(a) === JSON.stringify(args)) ? at : found),
+    -1,
+  );
 const calls = (cmd: string) => mockInvoke.mock.calls.filter(([c]) => c === cmd);
 const playing = (on: boolean) =>
   mockInvoke.mock.calls.filter(([c, a]) => c === "set_playing" && (a as { playing: boolean }).playing === on);
@@ -94,11 +106,18 @@ describe("useSessionRun — listen first", () => {
     expect(h.result.current.run.phase).toBe("ready");
     expect(h.startInput.mock.calls.length).toBe(inputAsks);
     expect(calls("save_attempt")).toHaveLength(0);
-    // The engine is told the input is not the player before the demo sounds.
-    const order = mockInvoke.mock.calls.map(([c, a]) => `${c}:${JSON.stringify(a ?? null)}`);
-    const muted = order.indexOf('set_listen_demo:{"on":true}');
-    expect(muted).toBeGreaterThanOrEqual(0);
-    expect(muted).toBeLessThan(order.lastIndexOf('set_playing:{"playing":true}'));
+    // The engine is told the input is not the player before the demo sounds,
+    // and for how long, so the gate ends by itself if nobody says "off".
+    const on = gates().find((g) => g.on)!;
+    expect(on).toBeDefined();
+    expect(on.at).toBeLessThan(lastAt("set_playing", { playing: true }));
+    expect(on.lengthMs).toBeGreaterThan(1000);
+    expect(on.lengthMs).toBeLessThan(180_000);
+  });
+
+  it("a fresh page tells the engine the input is the player's, at once", async () => {
+    mount();
+    await waitFor(() => expect(gates()[0]).toMatchObject({ on: false, tail: false }));
   });
 
   it("the input counts again only once the demo is silent", async () => {
@@ -107,14 +126,38 @@ describe("useSessionRun — listen first", () => {
     act(() => h.result.current.listen.start());
     await waitFor(() => expect(playing(true)).toHaveLength(1));
     h.set({ isPlaying: true });
+    const before = gates().length;
     act(() => h.result.current.listen.stop());
-    await waitFor(() =>
-      expect(calls("set_listen_demo").map(([, a]) => (a as { on: boolean }).on)).toEqual([true, false]),
-    );
-    const order = mockInvoke.mock.calls.map(([c, a]) => `${c}:${JSON.stringify(a ?? null)}`);
-    const unmuted = order.indexOf('set_listen_demo:{"on":false}');
-    expect(order.lastIndexOf("clear_song:null")).toBeLessThan(unmuted);
-    expect(order.lastIndexOf('set_playing:{"playing":false}')).toBeLessThan(unmuted);
+    await waitFor(() => expect(gates().length).toBe(before + 1));
+    const off = gates().at(-1)!;
+    // Watch stopped it: the last note's tail is still the demo.
+    expect(off).toMatchObject({ on: false, tail: true });
+    expect(lastAt("clear_song")).toBeLessThan(off.at);
+    expect(lastAt("set_playing", { playing: false })).toBeLessThan(off.at);
+  });
+
+  it("a lost end is said and tried again", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const h = mount();
+    await playOne(h);
+    act(() => h.result.current.listen.start());
+    await waitFor(() => expect(playing(true)).toHaveLength(1));
+    h.set({ isPlaying: true });
+    let refused = 0;
+    setInvokeResponse("set_listen_demo", (a) => {
+      if (!(a as Gate).on && refused === 0) {
+        refused += 1;
+        throw new Error("engine busy");
+      }
+      return null;
+    });
+    const before = gates().length;
+    act(() => h.result.current.listen.stop());
+    await waitFor(() => expect(gates().length).toBe(before + 2));
+    expect(gates().slice(-2).every((g) => !g.on)).toBe(true);
+    expect(warn).toHaveBeenCalled();
+    setInvokeResponse("set_listen_demo", null);
+    warn.mockRestore();
   });
 
   it("Start take stops it, loads the Take again, then starts the Take", async () => {
@@ -126,6 +169,8 @@ describe("useSessionRun — listen first", () => {
     h.set({ isPlaying: true });
 
     act(() => h.result.current.actions.go());
+    // The Take is the player's: the input counts at once, no tail.
+    await waitFor(() => expect(gates().at(-1)).toMatchObject({ on: false, tail: false }));
     await waitFor(() => expect(playing(false).length).toBeGreaterThan(1));
     await waitFor(() => expect(calls("clear_song").length).toBeGreaterThan(0));
     // Still the demo's until the engine says it stopped: the Take does not start on it.

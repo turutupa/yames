@@ -324,15 +324,18 @@ pub struct TimingAnalyzer {
     /// SettingsChange goes via Signal A"). The analysis loop polls
     /// this once per iteration and clears it on close.
     settings_changed: Arc<AtomicBool>,
-    /// Listen first (card #28): onsets stamped before this instant
+    /// Listen first (card #28): heard onsets stamped before this instant
     /// (`crate::clock::now_ns`) are not the player's. While the app plays a
-    /// demo of the Exercise through the speakers it is `u64::MAX`, so a
+    /// demo of the Exercise through the speakers it is the demo's own end
+    /// plus [`DEMO_TAIL_NS`] (never more than [`MAX_DEMO_NS`] away), so a
     /// microphone hearing the demo feeds nothing to the analyzer, the
-    /// segment, the coach's beat feedback or the telemetry. Cleared to "now
-    /// plus [`DEMO_TAIL_NS`]" when the demo stops, so its last note ringing
-    /// out is not counted either. 0 is "everything counts", and is what it
-    /// starts at. One atomic, read by `log_onset` on the onset detector's
-    /// thread: never by the audio callback.
+    /// segment, the coach's beat feedback or the telemetry. Set to "now plus
+    /// the tail" when the demo stops, or to 0 when what follows it must be
+    /// heard at once. 0 is "everything counts": what it starts at, and what
+    /// [`Self::stop`] leaves. Bounded on purpose: a page that reloads in the
+    /// middle of a demo cannot leave the input deaf. One atomic, read on the
+    /// onset detector's thread ([`forward_heard_onset`]): never by the audio
+    /// callback. MIDI is not gated: a keyboard cannot hear the speakers.
     ignore_input_until_ns: Arc<AtomicU64>,
     /// Falling-edge close flag. The JS layer sets this via
     /// `close_open_segment()` just before calling `getSessionReport()`
@@ -424,6 +427,31 @@ const LIVE_VERDICT_BUFFER: usize = 64;
 /// is longer than the synth's guitar release and shorter than anybody takes
 /// to put a hand on the strings after pressing Start.
 pub const DEMO_TAIL_NS: u64 = 500_000_000;
+
+/// The longest a listen demo may keep the input deaf, however long the page
+/// says it is: a ceiling, so a page that never says "off" (a reload, a crash,
+/// a lost message) costs at most this. Three minutes is longer than any
+/// Exercise's one pass at the slowest tempo the app offers.
+pub const MAX_DEMO_NS: u64 = 180_000_000_000;
+
+/// The onset detector's forwarder (`commands::start_evaluation`), as a
+/// function: an onset heard while a listen demo plays (or rings out) goes
+/// nowhere, neither to the page (`emit`) nor to the analyzer (`log`).
+/// Returns whether it was forwarded. The gate is read without the analyzer's
+/// lock.
+pub fn forward_heard_onset(
+    gate: &AtomicU64,
+    onset: Onset,
+    emit: impl FnOnce(&Onset),
+    log: impl FnOnce(Onset),
+) -> bool {
+    if onset.ts_ns < gate.load(Ordering::SeqCst) {
+        return false;
+    }
+    emit(&onset);
+    log(onset);
+    true
+}
 
 impl TimingAnalyzer {
     pub fn new(beat_log: BeatLog) -> Self {
@@ -537,12 +565,9 @@ impl TimingAnalyzer {
 
     /// Feed an onset into the analyzer (called from onset detector callback).
     ///
-    /// Dropped while a listen demo plays, and for its tail
-    /// ([`Self::set_demo_playing`]): what the speakers play is not the player.
+    /// Not gated: MIDI arrives here directly and a keyboard cannot hear a
+    /// listen demo. A HEARD onset comes through [`Self::log_heard_onset`].
     pub fn log_onset(&self, onset: Onset) {
-        if self.ignores_onset_at(onset.ts_ns) {
-            return;
-        }
         let mut log = self.onset_log.lock().unwrap();
         log.push_back(onset);
         // Keep bounded
@@ -551,25 +576,54 @@ impl TimingAnalyzer {
         }
     }
 
-    /// Listen first (card #28): the app is (or stops) playing a demo of the
-    /// Exercise through the speakers. On, every onset from now is ignored and
-    /// any already queued is thrown away; off, onsets count again once the
-    /// demo's last note has rung out ([`DEMO_TAIL_NS`]).
-    pub fn set_demo_playing(&self, on: bool) {
-        self.set_demo_playing_at(on, crate::clock::now_ns());
-    }
-
-    fn set_demo_playing_at(&self, on: bool, now_ns: u64) {
-        if on {
-            self.ignore_input_until_ns.store(u64::MAX, Ordering::SeqCst);
-            self.onset_log.lock().unwrap().clear();
-        } else {
-            self.ignore_input_until_ns
-                .store(now_ns.saturating_add(DEMO_TAIL_NS), Ordering::SeqCst);
+    /// An onset the input HEARD (the microphone or an interface): dropped
+    /// while a listen demo plays and through its tail. Checked again here,
+    /// under the lock, so an onset that passed the forwarder's check just
+    /// before a demo began is not queued after [`Self::start_demo`] cleared
+    /// the queue.
+    pub fn log_heard_onset(&self, onset: Onset) {
+        if self.ignores_onset_at(onset.ts_ns) {
+            return;
         }
+        self.log_onset(onset);
     }
 
-    /// Is an onset at `ts_ns` the demo's rather than the player's?
+    /// Listen first (card #28): the app starts playing a demo of the Exercise
+    /// through the speakers, `length_ms` long (count-in included). Heard
+    /// onsets are ignored until it ends and its last note has rung out, never
+    /// more than [`MAX_DEMO_NS`] from now; any already queued are thrown
+    /// away, and the open segment is closed, so what the player played before
+    /// it is scored as it was and nothing of the demo is added to it.
+    pub fn start_demo(&self, length_ms: Option<u64>) {
+        self.start_demo_at(length_ms, crate::clock::now_ns());
+    }
+
+    fn start_demo_at(&self, length_ms: Option<u64>, now_ns: u64) {
+        let length_ns = length_ms
+            .map(|ms| ms.saturating_mul(1_000_000))
+            .unwrap_or(MAX_DEMO_NS)
+            .saturating_add(DEMO_TAIL_NS)
+            .min(MAX_DEMO_NS);
+        self.ignore_input_until_ns
+            .store(now_ns.saturating_add(length_ns), Ordering::SeqCst);
+        self.onset_log.lock().unwrap().clear();
+        self.close_segment_now.store(true, Ordering::SeqCst);
+    }
+
+    /// The demo stopped. `tail`: onsets count again once its last note has
+    /// rung out ([`DEMO_TAIL_NS`]), for a demo that ended or was stopped by
+    /// the player. Without it they count at once, for a demo stopped to start
+    /// something the player plays straight away (a warm-up's Start).
+    pub fn end_demo(&self, tail: bool) {
+        self.end_demo_at(tail, crate::clock::now_ns());
+    }
+
+    fn end_demo_at(&self, tail: bool, now_ns: u64) {
+        let until = if tail { now_ns.saturating_add(DEMO_TAIL_NS) } else { 0 };
+        self.ignore_input_until_ns.store(until, Ordering::SeqCst);
+    }
+
+    /// Is a heard onset at `ts_ns` the demo's rather than the player's?
     pub fn ignores_onset_at(&self, ts_ns: u64) -> bool {
         ts_ns < self.ignore_input_until_ns.load(Ordering::SeqCst)
     }
@@ -668,7 +722,11 @@ impl TimingAnalyzer {
         I: Fn(InferredGridChanged) + Send + 'static,
         J: Fn(LiveOnset) + Send + 'static,
     {
+        // A listen demo already playing when the input comes on is still
+        // the demo: its gate survives this restart (and is bounded anyway).
+        let demo_gate = self.ignore_input_until_ns.load(Ordering::SeqCst);
         self.stop();
+        self.ignore_input_until_ns.store(demo_gate, Ordering::SeqCst);
         // Clear any stale Signal A / close flags from a prior session so a
         // brand-new segment isn't immediately closed by leftover state.
         self.settings_changed.store(false, Ordering::SeqCst);
@@ -729,6 +787,8 @@ impl TimingAnalyzer {
         // Reset Signal A and close flags so the next session starts clean.
         self.settings_changed.store(false, Ordering::SeqCst);
         self.close_segment_now.store(false, Ordering::SeqCst);
+        // A listen demo's gate does not outlive the input it was guarding.
+        self.ignore_input_until_ns.store(0, Ordering::SeqCst);
         // Roadmap 1.3 — hand the detector's refractory back to the
         // click. Leaving the last session's divisor published would
         // carry a 16th-note refractory into somebody's next session of
@@ -6155,51 +6215,128 @@ mod listen_demo_tests {
         ta.onset_log.lock().unwrap().iter().map(|o| o.ts_ns).collect()
     }
 
+    const MS: u64 = 1_000_000;
+
     #[test]
     fn every_onset_counts_until_a_demo_plays() {
         let ta = TimingAnalyzer::new(create_beat_log());
         assert!(!ta.ignores_onset_at(0));
         assert!(!ta.ignores_onset_at(u64::MAX - 1));
-        ta.log_onset(onset(10));
+        ta.log_heard_onset(onset(10));
         assert_eq!(queued(&ta), vec![10]);
     }
 
     #[test]
-    fn a_demo_drops_what_is_queued_and_everything_it_plays() {
+    fn a_demo_drops_what_is_queued_and_what_is_heard_while_it_plays() {
         let ta = TimingAnalyzer::new(create_beat_log());
-        ta.log_onset(onset(100));
-        ta.set_demo_playing_at(true, 200);
+        ta.log_heard_onset(onset(100));
+        ta.start_demo_at(Some(10_000), 200);
         assert!(queued(&ta).is_empty(), "onsets queued when the demo starts are thrown away");
-        ta.log_onset(onset(300));
-        ta.log_onset(onset(u64::MAX - 1));
+        ta.log_heard_onset(onset(300));
+        ta.log_heard_onset(onset(200 + 10_000 * MS));
         assert!(queued(&ta).is_empty(), "nothing heard during the demo reaches the analyzer");
-        // The forwarder's own check reads the same flag.
         assert!(ta.demo_gate().load(Ordering::SeqCst) > 300);
+    }
+
+    #[test]
+    fn the_open_segment_is_closed_when_a_demo_starts() {
+        let ta = TimingAnalyzer::new(create_beat_log());
+        assert!(!ta.close_segment_now.load(Ordering::SeqCst));
+        ta.start_demo_at(Some(1_000), 0);
+        assert!(ta.close_segment_now.load(Ordering::SeqCst));
+    }
+
+    #[test]
+    fn a_demo_the_page_never_ends_expires_after_its_length_and_tail() {
+        let ta = TimingAnalyzer::new(create_beat_log());
+        let t0 = 1_000 * MS;
+        ta.start_demo_at(Some(12_000), t0);
+        let end = t0 + 12_000 * MS + DEMO_TAIL_NS;
+        ta.log_heard_onset(onset(end - 1));
+        assert!(queued(&ta).is_empty());
+        ta.log_heard_onset(onset(end));
+        assert_eq!(queued(&ta), vec![end], "nobody said off, and the input is the player's again");
+    }
+
+    #[test]
+    fn a_length_past_the_ceiling_or_none_is_held_to_the_ceiling() {
+        let ta = TimingAnalyzer::new(create_beat_log());
+        ta.start_demo_at(Some(u64::MAX), 5);
+        assert_eq!(ta.demo_gate().load(Ordering::SeqCst), 5 + MAX_DEMO_NS);
+        ta.start_demo_at(None, 7);
+        assert_eq!(ta.demo_gate().load(Ordering::SeqCst), 7 + MAX_DEMO_NS);
+        ta.log_heard_onset(onset(7 + MAX_DEMO_NS));
+        assert_eq!(queued(&ta).len(), 1);
     }
 
     #[test]
     fn after_the_demo_its_tail_is_ignored_then_the_player_counts_again() {
         let ta = TimingAnalyzer::new(create_beat_log());
-        ta.set_demo_playing_at(true, 1_000);
+        ta.start_demo_at(Some(60_000), 1_000);
         let stop = 5_000_000_000u64;
-        ta.set_demo_playing_at(false, stop);
-        ta.log_onset(onset(stop + DEMO_TAIL_NS / 2));
+        ta.end_demo_at(true, stop);
+        ta.log_heard_onset(onset(stop + DEMO_TAIL_NS / 2));
         assert!(queued(&ta).is_empty(), "the last note ringing out is still the demo");
-        ta.log_onset(onset(stop + DEMO_TAIL_NS));
-        ta.log_onset(onset(stop + DEMO_TAIL_NS + 1));
+        ta.log_heard_onset(onset(stop + DEMO_TAIL_NS));
+        ta.log_heard_onset(onset(stop + DEMO_TAIL_NS + 1));
         assert_eq!(queued(&ta), vec![stop + DEMO_TAIL_NS, stop + DEMO_TAIL_NS + 1]);
     }
 
     #[test]
-    fn the_real_clock_entry_point_gates_onsets_stamped_now() {
+    fn stopped_to_start_something_the_input_counts_at_once() {
         let ta = TimingAnalyzer::new(create_beat_log());
-        ta.set_demo_playing(true);
-        ta.log_onset(onset(crate::clock::now_ns()));
+        ta.start_demo_at(Some(60_000), 1_000);
+        ta.end_demo_at(false, 2_000);
+        assert_eq!(ta.demo_gate().load(Ordering::SeqCst), 0);
+        ta.log_heard_onset(onset(2_001));
+        assert_eq!(queued(&ta), vec![2_001]);
+    }
+
+    #[test]
+    fn stopping_the_analyzer_lifts_the_gate() {
+        let mut ta = TimingAnalyzer::new(create_beat_log());
+        ta.start_demo(Some(60_000));
+        assert!(ta.ignores_onset_at(crate::clock::now_ns()));
+        ta.stop();
+        assert_eq!(ta.demo_gate().load(Ordering::SeqCst), 0);
+        assert!(!ta.ignores_onset_at(crate::clock::now_ns()));
+    }
+
+    #[test]
+    fn midi_is_not_gated_a_keyboard_cannot_hear_the_speakers() {
+        let ta = TimingAnalyzer::new(create_beat_log());
+        ta.start_demo_at(Some(60_000), 0);
+        ta.log_onset(onset(10));
+        assert_eq!(queued(&ta), vec![10]);
+    }
+
+    #[test]
+    fn the_forwarder_emits_and_logs_nothing_the_demo_made() {
+        let gate = AtomicU64::new(1_000);
+        let emitted = std::cell::Cell::new(0);
+        let logged = std::cell::Cell::new(0);
+        let fwd = |ts| {
+            forward_heard_onset(&gate, onset(ts), |_| emitted.set(emitted.get() + 1), |_| logged.set(logged.get() + 1))
+        };
+        assert!(!fwd(999));
+        assert_eq!((emitted.get(), logged.get()), (0, 0));
+        assert!(fwd(1_000));
+        assert_eq!((emitted.get(), logged.get()), (1, 1));
+        gate.store(0, Ordering::SeqCst);
+        assert!(fwd(5));
+        assert_eq!((emitted.get(), logged.get()), (2, 2));
+    }
+
+    #[test]
+    fn the_real_clock_entry_points_gate_onsets_stamped_now() {
+        let ta = TimingAnalyzer::new(create_beat_log());
+        ta.start_demo(Some(60_000));
+        ta.log_heard_onset(onset(crate::clock::now_ns()));
         assert!(queued(&ta).is_empty());
-        ta.set_demo_playing(false);
-        ta.log_onset(onset(crate::clock::now_ns()));
+        ta.end_demo(true);
+        ta.log_heard_onset(onset(crate::clock::now_ns()));
         assert!(queued(&ta).is_empty(), "still inside the tail");
-        ta.log_onset(onset(crate::clock::now_ns() + DEMO_TAIL_NS + 1_000_000));
+        ta.log_heard_onset(onset(crate::clock::now_ns() + DEMO_TAIL_NS + MS));
         assert_eq!(queued(&ta).len(), 1);
     }
 }

@@ -1542,7 +1542,8 @@ export function useSessionRun(input: SessionRunInput) {
     // Start (a Take's or a timed block's) ends a listen demo first, in the queue
     // ahead of whatever Start sends; a Take then starts once it is loaded again.
     if (listen.active && (big.kind === "playTake" || runRef.current.phase === "timedReady")) {
-      listen.stop();
+      // What starts next is the player's: the input counts at once, no tail.
+      listen.stop({ tail: false });
       if (big.kind === "playTake") {
         autoStart.current = true;
         if (!runRef.current.ungraded && !listening && inputStartRef.current.status !== "starting") void startInputNow();
