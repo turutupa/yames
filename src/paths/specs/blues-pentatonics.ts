@@ -744,8 +744,10 @@ export default definePath({
             "Hold the top of the bend without moving it. Use your ear and nothing else.",
           ],
           coach: "I can't measure how far a bend goes, so your ear decides this one. Compare it to the note you just played.",
-          tab: `/2 3:9 3:7b2 | /2 2:10 2:8b2 | /2 1:10 1:8b2 | /2 3:9 3:7b2`,
+          // The ring finger frets the target, then bends from two frets below it, the fingers behind pushing.
+          tab: `/2 3:9f3 3:7b2f3 | /2 2:10f3 2:8b2f3 | /2 1:10f3 1:8b2f3 | /2 3:9f3 3:7b2f3`,
           position: 7,
+          shifts: true,
           harmony: { scale: ["A", "minorPentatonic"] },
           rungs: ladder(50, 80, 5),
           grade: "selfChecked",
@@ -764,8 +766,10 @@ export default definePath({
             "Fret 9 on the top string is your C#: play that first. Then fret 8 bent a half step. A half step feels like almost nothing, which is why it often overshoots.",
           ],
           coach: "Half-step bends tend to go sharp, and it takes your ear to catch it.",
-          tab: swing(`/2 1:9 1:8b1 | /2 1:9 1:8b1v`),
+          // Ring finger for the C# and for the bend, the middle and index behind it.
+          tab: swing(`/2 1:9f3 1:8b1f3 | /2 1:9f3 1:8b1vf3`),
           position: 7,
+          shifts: true,
           chords: "A7 | A7",
           jam: TEXAS,
           rungs: ladder(60, 90, 5),
@@ -783,7 +787,8 @@ export default definePath({
           ],
           coach: "I time the bends and count them heard. How far they travelled, you judge.",
           tab: `/4 3:7b2 2:8b2 3:7b2 2:8b2 | /2 3:7b2v /2 r`,
-          position: 7,
+          // Box one: both bends on the ring finger. At 7 the G string bend fell on the index.
+          position: 5,
           harmony: { scale: ["A", "minorPentatonic"] },
           rungs: ladder(60, 90, 5),
           passAt: 75,

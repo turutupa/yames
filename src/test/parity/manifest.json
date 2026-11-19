@@ -1544,6 +1544,11 @@
       "store": "settings.json",
       "read": true,
       "written": true
+    },
+    "session.listenSound": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
     }
   },
   "tools": [

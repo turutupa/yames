@@ -450,6 +450,7 @@ function TakeScreen({
           pluck
           theory={isTheoryTake(session)}
           className="session-practice-hero"
+          listen={session.listen}
         />
       )}
 
@@ -1268,10 +1269,12 @@ function TimedScreen({
     <NeckInstruction
       take={pattern}
       running={running}
-      beat={position}
-      playing={live && isPlaying}
+      // Ready, the engine's own report: a listen demo is a song (card #28).
+      beat={ready ? beat : position}
+      playing={(live || ready) && isPlaying}
       theory={isTheoryTake(session)}
       className="session-practice-hero"
+      listen={ready ? session.listen : undefined}
     />
   );
 
