@@ -383,6 +383,36 @@ Path counts. A spec writes `prerequisites: { paths: ["legato"] }` or
 - Ten of the twelve Paths now name what they build on (table above). The pack
   schema version is unchanged: every pack before this had an empty list.
 
+### Categories in the format
+
+The app shows a Path's `kind`: "Technique" for mechanics and "Styles" for
+theory. That is right for Blues and Classic Rock and wrong for Triads, Chords
+in a Key, Know the Neck and Scales and Modes, which are theory and are not
+styles. `kind` cannot simply gain a value: it decides how a Path is graded and
+measured (the difficulty metric, the Theory Path tests), and those four are
+theory in that sense.
+
+So `PathDoc.category` is new and separate: `foundations`, `technique`, `style`
+or `harmony` (`PATH_CATEGORIES` in `format.ts`). It is optional in a pack;
+`categoryOf(doc)` in `curriculum.ts` falls back to the old split. Every shipped
+Path now declares one, `paths check` refuses a value outside the list, and a
+test holds the four harmony Paths to "harmony".
+
+| Category | Paths |
+|---|---|
+| foundations | Rhythm Foundations |
+| technique | Alternate Picking, Legato, Tapping, Sweep Picking, Shred, Metal Rhythm, Funk Lines |
+| style | Blues and Pentatonics, Classic Rock |
+| harmony | Know the Neck, Scales and Modes, Triads, Chords in a Key, Arpeggios over Changes |
+
+For the UI worker (not built here): the tag on a Path and the groups on the
+Paths list should read `categoryOf(path)`, with four strings
+(`session.category.foundations` "Foundations", `.technique` "Technique",
+`.style` "Styles", `.harmony` "Harmony") in 15 locales, in the order
+foundations, harmony, technique, style or as the first-run recommendation
+needs. `session.kind.theory` ("Styles") should stop being used as a Path's
+label; the Take screen's Mechanics/Theory distinction can stay on `kind`.
+
 ### UI spec for prerequisites (not built: for a UI worker)
 
 Small, and all the data is ready. Nothing below touches Today or the daily mix.
@@ -498,10 +528,11 @@ that are named "at the fifth fret"; Metal Rhythm names both strings. The real fi
 is text per variant in the format, which is a pipeline change and not made here.
 The five older Paths have the same seam.
 
-Two defects found in older content and left: `neoclassical.i-iv-dim-i` spells the
-diminished chord of E minor as Ebdim7 (the notes are D#, F#, A, C), and
-`over-a-heavy-band.band-big-chain` promises a V chord that three of its variants
-do not have.
+Two defects found in older content are fixed (2026-11-19):
+`neoclassical.i-iv-dim-i` spelled the diminished chord of E minor as Ebdim7 (the
+notes are D#, F#, A, C); `moveChord` now spells a diminished chord on a leading
+tone as a sharp, with a test. `over-a-heavy-band.band-big-chain` promised a V
+chord that one of its progressions does not have; its purpose now says so.
 
 ## How they fit Today's planner
 

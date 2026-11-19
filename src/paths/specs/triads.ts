@@ -185,6 +185,7 @@ export default definePath({
   id: "triads",
   title: "Triads",
   kind: "theory",
+  category: "harmony",
   goal: "Know what a triad is, play major and minor triads in three places on the top strings and on the middle strings, and move between the chords of a song with the nearest shapes.",
   level: "beginner",
   assumes:

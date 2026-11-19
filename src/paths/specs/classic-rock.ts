@@ -195,6 +195,7 @@ export default definePath({
   id: "classic-rock",
   title: "Classic Rock",
   kind: "theory",
+  category: "style",
   goal: "Play riffs, licks and a written solo in the classic rock style over a band, and know why each note fits the chord under it.",
   level: "early-intermediate",
   assumes:

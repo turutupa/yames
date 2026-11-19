@@ -121,6 +121,7 @@ export default definePath({
   id: "know-the-neck",
   title: "Know the Neck",
   kind: "theory",
+  category: "harmony",
   goal: "Find any natural note on any string, see octaves, thirds and triads as shapes, and follow a chord progression in one position by name.",
   level: "beginner",
   assumes:

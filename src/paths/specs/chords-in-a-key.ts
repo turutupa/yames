@@ -81,6 +81,7 @@ export default definePath({
   id: "chords-in-a-key",
   title: "Chords in a Key",
   kind: "theory",
+  category: "harmony",
   goal: "Know the seven chords of a major key by number, play the progressions a great many songs are made of with small shapes, and move any of them to another key.",
   level: "early-intermediate",
   assumes:

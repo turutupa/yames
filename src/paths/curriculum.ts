@@ -10,7 +10,7 @@
  * prerequisites a given player has not reached yet.
  */
 import { LEVEL_IDS } from "./format";
-import type { LevelId, PathDoc, PathPrerequisite } from "./format";
+import type { LevelId, PathCategory, PathDoc, PathPrerequisite } from "./format";
 
 export const CURRICULUM_RULES = {
   "curriculum.shape": "a prerequisite that is not { path, level? }",
@@ -134,4 +134,9 @@ export function unmetPrerequisites(
 /** Every Path that names `id` as a prerequisite, directly. */
 export function buildsOn(docs: readonly Linked[], id: string): string[] {
   return docs.filter((d) => prerequisitePaths(d).some((p) => p.path === id)).map((d) => d.id);
+}
+
+/** What a Path is about: its own `category`, or the old two-way split for a pack without one. */
+export function categoryOf(doc: Pick<PathDoc, "kind" | "category">): PathCategory {
+  return doc.category ?? (doc.kind === "theory" ? "style" : "technique");
 }

@@ -177,6 +177,7 @@ export default definePath({
   id: "blues-pentatonics",
   title: "Blues and Pentatonics",
   kind: "theory",
+  category: "style",
   goal: "Solo over a twelve-bar blues in A, knowing where the changes are and landing on notes that belong to them.",
   level: "early-intermediate",
   assumes:

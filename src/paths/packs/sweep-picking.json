@@ -3,6 +3,7 @@
   "id": "sweep-picking",
   "title": "Sweep Picking",
   "kind": "mechanics",
+  "category": "technique",
   "goal": "Sweep clean, separated arpeggios from three-string triads to six-string shapes, and link them through minor-key progressions so they sound like a solo.",
   "level": "intermediate",
   "assumes": "You can alternate-pick single notes evenly at sixteenths around 80 BPM (Alternate Picking through its Intermediate Level covers this) and you can hammer on and pull off cleanly. You don't need any sweeping yet, and you can start at whichever Level suits you.",
@@ -20862,7 +20863,7 @@
                   "maxPlayableBpm": 281,
                   "difficulty": 8.22
                 },
-                "chords": ["Em", "Am", "Ebdim7", "Em"],
+                "chords": ["Em", "Am", "D#dim7", "Em"],
                 "harmony": {
                   "kind": "chordTones",
                   "cover": false
@@ -22413,7 +22414,7 @@
         {
           "id": "over-a-heavy-band.band-big-chain",
           "title": "Five-string chain with the band",
-          "purpose": "One big loop per chord, over a triplet-feel band, with the V chord in the mix.",
+          "purpose": "One big loop per chord, over a triplet-feel band. Most of the progressions here have the major V chord in them; one stays inside the natural minor.",
           "howTo": [
             "Triplets over the band: one five-string loop to a bar, one chord a bar.",
             "Lock the first note of each bar to the kick drum and let the band carry you round. If a shape is late, drop it and catch the next bar line."

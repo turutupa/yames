@@ -10,6 +10,7 @@ import type {
   LevelId,
   LandingAccept,
   PassBar,
+  PathCategory,
   PathKind,
   PathLevel,
   PathPrerequisite,
@@ -170,6 +171,8 @@ export type PathSpec = {
   id: string;
   title: string;
   kind: PathKind;
+  /** What the Path is about, for the list of Paths. Default: technique for mechanics, style for theory. */
+  category?: PathCategory;
   goal: string;
   level: PathLevel;
   assumes: string;

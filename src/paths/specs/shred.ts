@@ -1838,6 +1838,7 @@ export default definePath({
   id: "shred",
   title: "Shred",
   kind: "mechanics",
+  category: "technique",
   goal: "Alternate, economy, legato, sweeps and tapping in A minor, built up one technique at a time, finishing with an eight-bar sixteenth-note run over a band at 100 BPM.",
   level: "intermediate",
   assumes:

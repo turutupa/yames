@@ -15,6 +15,7 @@ import {
   CROSSINGS,
   FEEDBACK_TIMINGS,
   GRADING_MODES,
+  PATH_CATEGORIES,
   PATH_LEVELS,
   PATH_SCHEMA_VERSION,
   PICK_PLANS,
@@ -259,6 +260,7 @@ function checkEnums(doc: PathDoc, report: Report) {
     if (!list.includes(value)) report("schema.enum", where, `"${value}" is not one of: ${list.join(", ")}`);
   };
   inList(doc.kind, ["mechanics", "theory"], "path.kind");
+  if (doc.category !== undefined) inList(doc.category, PATH_CATEGORIES, "path.category");
   inList(doc.level, PATH_LEVELS, "path.level");
   inList(doc.review.status, REVIEW_STATUSES, "path.review.status");
   for (const step of doc.steps) {

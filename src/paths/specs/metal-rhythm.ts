@@ -131,6 +131,7 @@ export default definePath({
   id: "metal-rhythm",
   title: "Metal Rhythm",
   kind: "mechanics",
+  category: "technique",
   goal: "Play a tight palm-muted riff with power chords, gallops and a pedal tone, at tempo with a band and for a full minute.",
   level: "early-intermediate",
   assumes:
