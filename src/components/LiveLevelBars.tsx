@@ -81,11 +81,26 @@ export function LiveLevelBars({
       }, wait);
     };
     let pulseTimer: number | null = null;
+    let anim: Animation | null = null;
     const pulse = () => {
       if (calm || document.hidden) return;
-      // Restart the animation: off, a reflow, on.
-      el.removeAttribute("data-pulse");
-      void el.offsetWidth;
+      // A fresh animation per pulse, on the compositor. (It used to restart a
+      // CSS animation with "off, a reflow, on": a forced style-and-layout of
+      // the whole Take screen at every note heard, 27 ms in three seconds of
+      // a Take, measured 2026-11-19.)
+      anim?.cancel();
+      anim =
+        typeof el.animate === "function"
+          ? el.animate(
+              [
+                { transform: "scale(1.18)", filter: "brightness(1.35)" },
+                { transform: "scale(1)", filter: "brightness(1)" },
+              ],
+              { duration: 240, easing: "ease-out" },
+            )
+          : null;
+      // A cancelled animation rejects `finished`; browsers mark that handled, not every DOM does.
+      anim?.finished?.catch?.(() => {});
       el.setAttribute("data-pulse", "");
       if (pulseTimer !== null) window.clearTimeout(pulseTimer);
       pulseTimer = window.setTimeout(() => el.removeAttribute("data-pulse"), 260);
@@ -109,6 +124,7 @@ export function LiveLevelBars({
     };
     document.addEventListener("visibilitychange", onVisible);
     return () => {
+      anim?.cancel();
       live = false;
       offs.forEach((off) => off());
       if (frame !== null) window.clearTimeout(frame);

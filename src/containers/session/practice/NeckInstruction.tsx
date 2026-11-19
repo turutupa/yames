@@ -251,6 +251,11 @@ export function NeckInstruction({
   const placeOverlay = useCallback(
     (index: number, msToDue: number | null) => {
       const box = wrap.current?.getBoundingClientRect();
+      // Everything measured is read here, before anything below is written:
+      // the "next" tag's size, read after the ring had been moved, was a
+      // forced layout of the whole Take screen at every note (2026-11-19).
+      const nextW = nextTag.current?.offsetWidth || 40;
+      const nextH = nextTag.current?.offsetHeight || 18;
       const m = latest.current.model;
       const hide = (el: HTMLElement | null) => el && (el.style.visibility = "hidden");
       if (!box) return;
@@ -319,8 +324,8 @@ export function NeckInstruction({
             if (pt) yAt.set(d, pt.y - box.top);
           }
           nt.style.visibility = "hidden";
-          const w = nt.offsetWidth || 40;
-          const h = nt.offsetHeight || 18;
+          const w = nextW;
+          const h = nextH;
           const H = box.height;
           const W = box.width;
           // Every dot of the pattern, at the size it is drawn (NOW with its ring).
@@ -416,7 +421,7 @@ export function NeckInstruction({
       drawn.current = sh;
       neck.setNotes(nowNextNeck(sh, m.onsets, index, v, th, fg, bo), { fade: 0.12 });
       // The finger is on the dot itself now; the tag under NOW says nothing.
-      if (nowTag.current) nowTag.current.textContent = "";
+      if (nowTag.current && nowTag.current.textContent) nowTag.current.textContent = "";
       const due = m.onsets[index]?.tick;
       const ms = tick !== null && due !== undefined ? ((due - tick) / perQuarter) * (60_000 / Math.max(1, take.bpm)) : null;
       placeOverlay(index, ms);

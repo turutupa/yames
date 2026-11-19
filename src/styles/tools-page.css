@@ -562,23 +562,38 @@
   height: 5px;
   opacity: 0.55;
 }
+/* The playhead crosses the tile on the compositor: the element is the whole
+   of its travel and moves by its own width, and the line is drawn at its left
+   edge. (It used to animate `left`, a layout sixty times a second for as long
+   as the Tools page was open.) */
 .tr-jam .tr-ph {
   position: absolute;
   top: 10px;
   bottom: 10px;
-  left: 40%;
+  left: 42px;
+  right: 16px;
+  pointer-events: none;
+  /* Where it stands when nothing moves (reduced motion). */
+  transform: translateX(40%);
+  animation: tr-sweep 6s linear infinite;
+}
+.tr-jam .tr-ph::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
   width: 2px;
   border-radius: 1px;
   background: var(--text-primary);
   box-shadow: 0 0 10px color-mix(in srgb, var(--text-primary) 60%, transparent);
-  animation: tr-sweep 6s linear infinite;
 }
 @keyframes tr-sweep {
   from {
-    left: 42px;
+    transform: translateX(0);
   }
   to {
-    left: calc(100% - 16px);
+    transform: translateX(100%);
   }
 }
 

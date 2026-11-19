@@ -231,14 +231,8 @@ kbd {
 .live-level[data-bars="4"] > i {
   background: currentColor;
 }
-.live-level[data-pulse] {
-  animation: live-level-pulse 240ms ease-out;
-}
-@keyframes live-level-pulse {
-  0% { transform: scale(1.18); filter: brightness(1.35); }
-  100% { transform: scale(1); filter: none; }
-}
+/* The pulse itself is played from LiveLevelBars.tsx (`el.animate`): a CSS
+   animation can only be restarted with a forced reflow. */
 @media (prefers-reduced-motion: reduce) {
   .live-level > i { transition: none; }
-  .live-level[data-pulse] { animation: none; }
 }
