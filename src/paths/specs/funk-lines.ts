@@ -12,6 +12,7 @@ import { definePath } from "../spec";
 import type { ExerciseSpec } from "../spec";
 import type { PassBar } from "../format";
 import { ladder, repeat } from "../templates";
+import { DISPLACED_SHAPES, LONG_FORM, SECOND_PAIR } from "./funk-lines-more";
 
 const even = (min: number, overBars = 4): PassBar => ({ metric: "timingEvenness", min, overBars });
 const heard = (min: number, overBars = 4): PassBar => ({ metric: "notesHeard", min, overBars });
@@ -144,8 +145,9 @@ export default definePath({
   prerequisites: { paths: [{ path: "rhythm-foundations", level: "intermediate" }], skills: ["Sixteenth notes with a click at 70 BPM", "Stopping a note cleanly"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
+  variantText: true,
   orderRationale:
-    "The constant sixteenth-note swing of the picking hand first, with accents, because every funk part is that swing with some strokes left out. Then leaving strokes out, one figure at a time, then whole lines over a band. Stabs come after lines because two strings are harder to hit short than one. Octaves follow: the same idea across three strings with one of them muted. Displaced patterns and the Dorian sixth come last, and then long grooves.",
+    "The constant sixteenth-note swing of the picking hand first, with accents, because every funk part is that swing with some strokes left out. Then leaving strokes out, one figure at a time, then whole lines over a band. Stabs come after lines because two strings are harder to hit short than one, and the vamp then moves to a second pair of chords while it is fresh. Octaves follow: the same idea across three strings with one of them muted. Displaced patterns come next, on single notes and then on stabs and octaves, then the Dorian sixth, and then long grooves: four bars, a minute, and last an eight-bar form with a change of part.",
   gradingLimits:
     "The app times the notes it hears against where they are written, counts them, and checks single notes for pitch after the take. Two-note stabs and octaves are one attack each: timed and counted, never pitch-checked. The muted scratch strokes that funk players put between the notes are written as rests here. If the app hears one it counts as an extra note, so the bar on extras is loose, and how good your scratches sound is for your ear. Whether your notes were short enough is not measured either. None of this has been tried on a real guitar yet.",
   steps: [
@@ -374,6 +376,8 @@ export default definePath({
         "The low A on beat 1 is the first finger's tip on the low E string at fret 5: the same finger, moved across.",
       ],
       payoff: "A bass note and stabs that sound like a rhythm section by themselves.",
+      difficultyException:
+        "A new Level opens with fewer attacks in a bar than the lines before it: a bass note and stabs on the backbeat, then on the off-beats. A two-note stab is one attack. The demand is a stroke that crosses two strings and stops, with both notes cut off together, which the metric does not count.",
       exercises: [
         {
           id: "stab-backbeat",
@@ -445,8 +449,6 @@ export default definePath({
         "Keep the swing small. The pick only travels as far as the next string it needs.",
       ],
       payoff: "A two-chord vamp, Am7 to D9, with a line and stabs in every bar.",
-      difficultyException:
-        "Fewer attacks a bar than the stab Exercises before it, because half the bar is now a low line with space in it. The jump between registers is the demand.",
       exercises: [
         {
           id: "call-and-stab",
@@ -507,6 +509,7 @@ export default definePath({
         },
       ],
     },
+    SECOND_PAIR,
     {
       id: "octaves",
       title: "Octaves",
@@ -518,6 +521,8 @@ export default definePath({
         "Stop the octave by relaxing both fingers together.",
       ],
       payoff: "A disco octave part that moves through three notes over a band.",
+      difficultyException:
+        "An octave is one attack, and these figures have rests in them, so the rate sits just under the line-and-stab bars before it. The demand is the shape: two fingers with a dead string between them, struck through all three strings and stopped together, which the metric does not count.",
       exercises: [
         {
           id: "octave-eighths",
@@ -591,8 +596,6 @@ export default definePath({
         "The hand's strokes are unchanged: down, up, down, up. The figure starts on a downstroke one time and an upstroke the next.",
       ],
       payoff: "A two-note figure that rolls across the bar line of your foot and lands back on beat 1.",
-      difficultyException:
-        "The metric counts an octave as two notes and a string skip, so the Step before reads very high. These are single notes again; the displacement is the demand.",
       exercises: [
         {
           id: "threes",
@@ -652,6 +655,7 @@ export default definePath({
         },
       ],
     },
+    DISPLACED_SHAPES,
     {
       id: "the-sixth",
       title: "The Dorian sixth, and hammer-ons",
@@ -735,6 +739,8 @@ export default definePath({
         SAFETY,
       ],
       payoff: "A four-bar funk guitar part with everything in it, and a line you can sit on for as long as the band plays.",
+      difficultyException:
+        "Nothing new for the hands: lines, stabs and octaves from the earlier Steps, two of them one bar long, so the number falls back to theirs. The demand is length: four bars of everything in a row, and one bar kept identical for a minute, which the metric does not count.",
       exercises: [
         {
           id: "groove",
@@ -800,6 +806,7 @@ export default definePath({
         },
       ],
     },
+    LONG_FORM,
   ],
   levels: [
     {
@@ -837,14 +844,14 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: stabs and octaves",
-      summary: "Two-note stabs on and off the beat, a line and stabs in one bar over Am7 and D9, and octaves.",
+      summary: "Two-note stabs on and off the beat, a line and stabs in one bar over Am7 and D9, a new line on the same shapes over Bm7 and E9, and octaves.",
       reachLevel: "early-intermediate",
       startHereIf: [
         "You can play '1 e (and) a' and '(1) e and a' figures at 85 BPM with the hand swinging through the rests.",
         "You can play a two-bar single-note line over a band and keep the notes short.",
         "Hitting two strings at once comes out late, or rings on.",
       ],
-      steps: ["stabs", "line-and-stab", "octaves"],
+      steps: ["stabs", "line-and-stab", "second-pair", "octaves"],
       warmups: [
         {
           id: "hole-up",
@@ -869,14 +876,14 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: across the beat, and the pocket",
-      summary: "Three-sixteenth figures and lines that start off the beat, the Dorian sixth and hammer-ons, then four-bar grooves and a full minute.",
+      summary: "Three-sixteenth figures and lines that start off the beat, as single notes and then as stabs and octaves, the Dorian sixth and hammer-ons, then a four-bar groove, a full minute, and an eight-bar form with a change of part.",
       reachLevel: "intermediate",
       startHereIf: [
         "You can play a line and stabs in one bar at 80 BPM with a band.",
         "You can play octaves in a sixteenth-note rhythm with the middle string silent.",
         "Your parts work for 2 bars and drift over a whole song.",
       ],
-      steps: ["displaced", "the-sixth", "the-pocket"],
+      steps: ["displaced", "displaced-shapes", "the-sixth", "the-pocket", "long-form"],
       warmups: [
         {
           id: "threes-up",

@@ -14,6 +14,7 @@ import { STANDARD_TUNING } from "../format";
 import type { PassBar } from "../format";
 import { pcOfName, scalePcs } from "../theory";
 import { handAt, ladder, moveChart, oneStringClimb, pentatonic, repeat, shiftFrets } from "../templates";
+import { CHORD_ROOTS, IN_BETWEEN, TOP_STRINGS_KEYS } from "./know-the-neck-more";
 
 type Grading = Pick<ExerciseSpec, "grade" | "alsoGraded" | "pass">;
 
@@ -122,13 +123,14 @@ export default definePath({
   title: "Know the Neck",
   kind: "theory",
   category: "harmony",
-  goal: "Find any natural note on any string, see octaves, thirds and triads as shapes, and follow a chord progression in one position by name.",
+  goal: "Find any natural note on any string, name the sharps and flats between them, see octaves, thirds and triads as shapes, play in G major and F major on the top three strings, and follow a chord progression in one position by name.",
   level: "beginner",
   assumes:
     "You can fret and pick single notes and play quarter notes with a click at 70 BPM. You don't need to read music or know any scales. The minutes listed are one pass through the material; this is knowledge, and it sticks when you come back to it for a few minutes on many days.",
   prerequisites: { skills: ["Clean single notes", "Quarter notes with a click at 70 BPM"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
+  variantText: true,
   orderRationale:
     "The two low strings first, because chords and scales are named from them. Octave shapes next: they turn two known strings into six. Thirds, roots and triads are the smallest pieces of harmony and each is one shape. Only then the five pentatonic boxes, which most players learn first and never connect; here they arrive as places on a neck the player can already name. Arpeggios through the changes and landing on chord tones come last because they use all of it at once.",
   gradingLimits:
@@ -335,6 +337,7 @@ export default definePath({
         },
       ],
     },
+    CHORD_ROOTS,
     {
       id: "upper-strings",
       title: "The D, G and B strings",
@@ -441,6 +444,7 @@ export default definePath({
         },
       ],
     },
+    IN_BETWEEN,
     {
       id: "thirds",
       title: "Thirds",
@@ -456,7 +460,7 @@ export default definePath({
         {
           id: "thirds-g-b",
           title: "Thirds on the G and B strings",
-          purpose: "A major scale in broken thirds: a scale note on the G string, then the third above it on the B string, five pairs up and back.",
+          purpose: "The major scale in broken thirds: a scale note on the G string, then the third above it on the B string, five pairs up and back.",
           howTo: [
             "Straight eighths, two to a click, 50 BPM up to a pass at 80.",
             "In C: frets 5 and 5, 7 and 6, 9 and 8, 10 and 10, 12 and 12. Same fret is major; one fret back on the B string is minor.",
@@ -520,6 +524,7 @@ export default definePath({
         },
       ],
     },
+    TOP_STRINGS_KEYS,
     {
       id: "roots",
       title: "Roots, fourths and fifths",
@@ -911,14 +916,14 @@ export default definePath({
     {
       id: "beginner",
       title: "Beginner: the notes by name",
-      summary: "The natural notes on every string, and the octave shapes that connect them.",
+      summary: "The natural notes on every string, the octave shapes that connect them, the roots of the open chords, and the sharps and flats in between.",
       reachLevel: "early-intermediate",
       startHereIf: [
         "You can play quarter notes with a click at 70 BPM.",
         "You couldn't say what note is at fret 8 of the low E string without counting up.",
         "You know chord shapes and box shapes, and not the names of the notes in them.",
       ],
-      steps: ["low-strings", "octaves", "upper-strings"],
+      steps: ["low-strings", "octaves", "chord-roots", "upper-strings", "in-between"],
       warmups: [
         {
           id: "walk-a-string",
@@ -946,19 +951,19 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: the shapes of harmony",
-      summary: "Thirds on two strings, roots and fifths on the low strings, and triads on the top three.",
+      summary: "Thirds on two strings, the top three strings in G major and F major, roots and fifths on the low strings, and triads on the top three.",
       reachLevel: "early-intermediate",
       startHereIf: [
         "You can name any natural note on the low E and A strings within 2 seconds.",
         "You can find a note's octave by shape.",
         "You play chords without knowing which note is the third.",
       ],
-      steps: ["thirds", "roots", "triads"],
+      steps: ["thirds", "top-strings-keys", "roots", "triads"],
       warmups: [
         {
           id: "thirds-around",
           title: "Thirds in a new key",
-          purpose: "A major scale in broken thirds on the G and B strings, five pairs up and back. A different key each time.",
+          purpose: "The major scale in broken thirds on the G and B strings, five pairs up and back. A different key each time.",
           howTo: ["Straight eighths, well under your clean tempo. Lower note, then upper; say major or minor for each pair."],
           coach: "This is a warm-up. It tells you how it went, and it decides nothing.",
           vary: {

@@ -592,7 +592,7 @@ export const MINOR_BLUES: StepSpec = {
         "Shuffle eighths and half notes, 50 BPM up to a pass at 70.",
         "Bar 1, over E7: E, D, B, D, and G# held (D string, fret 6). Bar 2, over Dm7: D, F, A, D, and F held. Bar 3, over Am7: E, C, A, C, and A held. Bar 4, over E7: E and G# as quarter notes, then E on the A string held.",
       ],
-      coach: "Four bars, four chords. Notes and the shuffle after the take.",
+      coach: "Four bars, one chord in each. Notes and the shuffle after the take.",
       tab: swing(MINOR_TURN),
       position: 4,
       shifts: true,
@@ -757,6 +757,8 @@ export const SIXTHS: StepSpec = {
     "Up the neck, the A7 sixths walk: frets 6 and 5, then 7 and 7, then 9 and 9. The first is slanted, the next two are straight across.",
   ],
   payoff: "The twelve bars played in sixths, and a lick that ends on one.",
+  difficultyException:
+    "Sixths in quarter and half notes, each one a single attack on two strings, after the faster single-note lines of the Step before, so the rate falls. The demand is two notes sounding together with the string between them silent, and a shape that changes with the chord, which the rate does not count.",
   exercises: [
     {
       id: "a7-sixths",

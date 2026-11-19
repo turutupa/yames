@@ -51,6 +51,13 @@ const COACH_SAYS_PICK = new Set([
   "economy.descending-economy",
   "eighths.eighth-riff",
   "gallop.gallop-one",
+  "gallop-changes.gallop-bar-changes",
+  "gallop-changes.reverse-bar-changes",
+  "gallop-changes.two-beat-changes",
+  "gallop-changes.band-changes",
+  "two-part-riff.pedal-part",
+  "two-part-riff.gallop-part",
+  "two-part-riff.two-parts-joined",
 ]);
 
 export function coachSaysPick(exercise: Pick<Exercise, "id">): boolean {

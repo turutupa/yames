@@ -421,3 +421,60 @@ this session's; the working copy was `/tmp/yp2/i18n/BRIEF.md`). What worked:
   on the D string. Deliberate (chords low, lines high), and never said in
   either Path.
 - The week estimates are still a model: about one week per five Exercises.
+
+## Opus interlude (2026-11-19, afternoon PST)
+
+An Opus 5.5 session picked this worktree up after the previous agent hit a
+rate limit, and stopped at a safe point when told the original agent was
+coming back. What it did since `4325617e`:
+
+- **Trailers rewritten**: the two commits before it said "Claude Fable 5.2";
+  `git filter-branch --msg-filter` over `revamp..HEAD` made them Opus 5.5
+  (`85cac670` the onset metric, `56734390` the describer). Old hashes
+  `509578c7` and `4325617e` no longer exist on this branch.
+- `4b0326d1` fix(paths): the six describer rules (the content of
+  `eb1a5e71` on `mvp-paths3-vt`, code and tests only; gated there).
+- `f4f37e10` feat(paths): wave 1 (Rhythm Foundations 46, Know the Neck 42,
+  Legato 46, Tapping 38, Scales and Modes 42 Exercises) and wave 2 (Funk
+  Lines 38, Classic Rock 69, Blues 100, Metal Rhythm 41), ported from
+  `~/projects/yames-mvp-paths3-w2` by patch; `variantText: true` in twelve
+  Paths; translations round 17 (14 locales, three groups per locale; brief,
+  prefill, ctx and merge files in `/tmp/yp3/i18n/r17/`). Wave 2's Funk Lines
+  and Classic Rock fix rounds were re-run to completion; a final read-only
+  proof of wave 2 (`/tmp/yp3/proof/w2-final.md`) found 3 errors (one tempo
+  sentence) and 11 suggestions, applied except: finger values (the engine
+  already fingers those notes as the text says), "Eb"/"E flat" spelling in
+  generated variant text, and the Metal `two-beat-changes` chord strip
+  (below). Gates at `f4f37e10`: check 16 Paths 0/0, curriculum 0, strings
+  complete; tsc; vitest 11131 tests (TabStage only); build; cargo
+  path_exercises 11 passed.
+- Test changes: `variantText.test.ts` truth test skips sentences about other
+  Takes, "where F was at fret 6" comparisons and strings a variant leaves out,
+  and reads "B flat" as Bb; `caveats.ts` lists seven new Metal coach lines.
+
+Not done, exactly where:
+- **`git merge revamp` not done** (revamp has the Take screen's variant
+  text, tonal buttons, smoothness, the 25 ms notes fix). Then re-run all
+  gates plus `npm run test:layout -- paths-prereq planner phone-learning
+  chords --workers=2` (Path lists did not change, so layout was not run).
+- The describer's three known holes are still open (bare "A" after a colon
+  taken for the article; "the low E" without "string" taken for the string;
+  sentences about another Exercise get their letters moved). Authors wrote
+  around them.
+- With the Take screen now showing variant text (revamp `66f73ca6`), the
+  `VARIANT_NOTE` line could go from Exercises whose variants all have text;
+  not done.
+- UI notes: Classic Rock `fourth-and-back` / `a-and-d-part` say "Hand: open A
+  chord shape" over D bars (HandLine.tsx needs a wording for two open
+  shapes); Metal `gallop-changes.two-beat-changes` changes chord mid-bar but
+  the chord strip has one symbol a bar.
+- Translation doubts worth a native read: "push" (Rhythm Foundations) was a
+  new term in every language; some g1 translators spelled finger and fret
+  numbers out ("primer dedo") where the packs write digits, because of an
+  over-strict digit check in the brief (fixed for g2 and g3). nl
+  `relative-minor.minor-shape.purpose` reads "A natural minor" as the
+  article (the English is ambiguous).
+- Scratch left: `/tmp/yp3/` (briefs, proofs, dumps), worktrees
+  `yames-mvp-paths3-w2`, `-vt`, `-metric` (all superseded by `f4f37e10`),
+  and `CARGO_TARGET_DIR=/home/dgx-personal/projects/.target-paths3` (delete
+  when done).

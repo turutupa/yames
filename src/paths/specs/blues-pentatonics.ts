@@ -16,6 +16,7 @@ import type { PassBar } from "../format";
 import { handAt, ladder, moveChart, pentatonic, shiftFrets, swing } from "../templates";
 import { BOX_KEYS, LANDING_REVIEW, MINOR_BLUES, QUICK_CHANGE, SIXTHS, STRAIGHT_FEEL, UP_THE_NECK } from "./blues-more";
 import { BOX_FIVE_STEP, FAST_SHUFFLE, OPEN_E_BLUES, SLOW_IN_C, THREE_CHORUSES } from "./blues-encore";
+import { MINOR_BLUES_IN_D, THREE_CHORUSES_IN_E } from "./blues-finale";
 
 const TWELVE = "A7 | A7 | A7 | A7 | D7 | D7 | A7 | A7 | E7 | D7 | A7 | E7";
 const VAMP_A = "A7 | A7 | A7 | A7";
@@ -186,8 +187,9 @@ export default definePath({
   prerequisites: { paths: [{ path: "rhythm-foundations", level: "beginner" }], skills: ["Clean single notes", "Eighth notes with a click at 70 BPM"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
+  variantText: true,
   orderRationale:
-    "Theory arrives as written lines you can be graded on, and choosing your own notes comes after, as a short 'your turn' at the end of a Step. Chord tones arrive early, as soon as the box is in the hand, as arpeggios of A7, D7 and E7 in box 1, each followed by a lick that ends on the chord's third, before the blue notes: knowing where the chord is matters more than knowing an extra note. Call and response follows because written answers to one call teach phrase length and endings with almost no theory. The blues scale and bends come after the player can find the chord tones, so neither becomes a thing to sit on. A second box comes late on purpose: more notes before good choices makes for faster bad solos. Guide tones come near the end because they are the most abstract idea here and easiest once the form is in the ear. Slow blues comes last as it hides nothing. Between the ideas sit Steps that add little or nothing new: the box in other keys, the same notes over a straight band, the thirds in new keys, the quick change, the minor blues, two more boxes, and sixths. The blues is a style a player stays in for months, and each of those Steps takes what was just learned somewhere new before the next idea arrives. A second round of such Steps sits the same way. In the Intermediate Level the form in E at the nut, with its turnarounds, and a faster shuffle follow bends: by then the twelve bars, the walking line and the riffs are known, so a new key and a quicker tempo each arrive on lines the player already has. In the Advanced Level box 5 follows boxes 3 and 4 and completes the five shapes; the three-chorus solo sits after guide tones, once every tool it puts in order has been taught, and just before the slow blues; and the slow blues in C comes last, as the hardest Step taken to a second key.",
+    "Theory arrives as written lines you can be graded on, and choosing your own notes comes after, as a short 'your turn' at the end of a Step. Chord tones arrive early, as soon as the box is in the hand, as arpeggios of A7, D7 and E7 in box 1, each followed by a lick that ends on the chord's third, before the blue notes: knowing where the chord is matters more than knowing an extra note. Call and response follows because written answers to one call teach phrase length and endings with almost no theory. The blues scale and bends come after the player can find the chord tones, so neither becomes a thing to sit on. A second box comes late on purpose: more notes before good choices makes for faster bad solos. Guide tones come near the end because they are the most abstract idea here and easiest once the form is in the ear. Slow blues comes last as it hides nothing. Between the ideas sit Steps that add little or nothing new: the box in other keys, the same notes over a straight band, the thirds in new keys, the quick change, the minor blues, two more boxes, and sixths. The blues is a style a player stays in for months, and each of those Steps takes what was just learned somewhere new before the next idea arrives. A second round of such Steps sits the same way. Two finished pieces are also taken to a second key straight after they are learned: the minor blues moves to D minor at the end of the Intermediate Level, and the three-chorus solo is built again in E, from the nut to the twelfth fret. In the Intermediate Level the form in E at the nut, with its turnarounds, and a faster shuffle follow bends: by then the twelve bars, the walking line and the riffs are known, so a new key and a quicker tempo each arrive on lines the player already has. In the Advanced Level box 5 follows boxes 3 and 4 and completes the five shapes; the three-chorus solo sits after guide tones, once every tool it puts in order has been taught, and just before the slow blues; and the slow blues in C comes last, as the hardest Step taken to a second key.",
   gradingLimits:
     "Graded Exercises are written lines: the app checks timing evenness, notes heard and extra notes, and right notes after the take where the notes are single, far enough apart and not ringing into each other; elsewhere right notes read 'not checked'. Timing over the shuffle band is judged against the written triplet with a looser bar, so a lighter or heavier swing is not marked down, and a constant lean behind the beat costs nothing at all. The right-note check has only been tried on computer-made guitar sound with no band in the mix, so direct input or headphones are the honest way to play anything with a band; with a microphone and speakers it is untested. A bent note would read as a wrong one, so bends are timed and never pitch-checked: the unison bends are double stops, which the note check leaves alone. Landing on chord tones, staying in the scale, keeping rests and choosing your own notes are not measured today: those Exercises are 'your turn', self-checked and labelled 'not checked yet'. Nothing here grades feel.",
   steps: [
@@ -947,6 +949,7 @@ export default definePath({
       ],
     },
     MINOR_BLUES,
+    MINOR_BLUES_IN_D,
     {
       id: "two-boxes",
       title: "Connecting box 1 and box 2",
@@ -1154,8 +1157,6 @@ export default definePath({
         "Sing the line. If you can sing it, you can play over the changes.",
       ],
       payoff: "A single slow line that spells the whole twelve-bar form without any other notes.",
-      difficultyException:
-        "One or two notes a bar, so the rate falls right down. Hearing the harmony is the demand here, and it is the most abstract idea on the Path.",
       exercises: [
         {
           id: "sevenths-line",
@@ -1259,6 +1260,7 @@ export default definePath({
       ],
     },
     THREE_CHORUSES,
+    THREE_CHORUSES_IN_E,
     {
       id: "slow-blues",
       title: "Slow blues",
@@ -1399,13 +1401,13 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: the form and the voice",
-      summary: "The blues scale, all twelve bars with a written chorus, the quick change, bends that land on time, the form in E at the nut with its turnarounds, a faster shuffle, phrases that ask and answer, and the minor blues.",
+      summary: "The blues scale, all twelve bars with a written chorus, the quick change, bends that land on time, the form in E at the nut with its turnarounds, a faster shuffle, phrases that ask and answer, and the minor blues in A minor and in D minor.",
       startHereIf: [
         "You can play box 1 from memory, up and down, at 80 BPM eighths.",
         "You can play the A7, D7 and E7 arpeggios in box 1 at 80 BPM.",
         "You get lost in the twelve-bar form, or your solos run together with no shape to them.",
       ],
-      steps: ["blues-scale", "twelve-bar", "quick-change", "bends", "open-e-blues", "fast-shuffle", "question-answer", "minor-blues"],
+      steps: ["blues-scale", "twelve-bar", "quick-change", "bends", "open-e-blues", "fast-shuffle", "question-answer", "minor-blues", "minor-blues-in-d"],
       warmups: [
         {
           id: "boogie-keys",
@@ -1436,13 +1438,13 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: more neck, more harmony, less noise",
-      summary: "All five boxes, from the second fret to the fifteenth, major and minor pentatonic mixed over the changes, sixths, guide tones, a solo built over three choruses, and slow blues in two keys with nothing to hide behind.",
+      summary: "All five boxes, from the second fret to the fifteenth, major and minor pentatonic mixed over the changes, sixths, guide tones, a solo built over three choruses, in A and then in E from the nut to the twelfth fret, and slow blues in two keys with nothing to hide behind.",
       startHereIf: [
         "You can follow all 12 bars without losing your place.",
         "You can bend a whole tone up to pitch by ear, and hold it there.",
         "Your phrases work, and you're stuck in one box playing the same notes over every chord.",
       ],
-      steps: ["two-boxes", "up-the-neck", "box-five", "major-and-minor", "sixths", "guide-tones", "three-choruses", "slow-blues", "slow-blues-in-c"],
+      steps: ["two-boxes", "up-the-neck", "box-five", "major-and-minor", "sixths", "guide-tones", "three-choruses", "three-choruses-in-e", "slow-blues", "slow-blues-in-c"],
       warmups: [
         {
           id: "two-boxes-keys",

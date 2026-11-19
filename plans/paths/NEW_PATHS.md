@@ -438,11 +438,13 @@ are a one-finger scale walk along one string (minor in quarters, major in
 eighths, six strings each) and, in the last Level, a two-string first-finger
 barre moved up the neck, which is strength work for F.
 
-Known wart: `difficulty.ts` counts notes per second, and a six-string strum is
-six notes, so strummed Exercises read 9 to 18 where a single-note line at the
-same rate reads 2. The Step order is a teacher's, and the exceptions say so.
-The honest fix is to count onsets, not notes, in the metric; it would move the
-numbers of every Path with double stops, so it was not done here.
+`difficulty.ts` counts onsets, not notes (since 2026-11-19; before that a
+six-string strum was six notes, and strummed Exercises read 9 to 18 where a
+single-note line at the same rate read 2). A strum is one attack, so the
+strummed Exercises now read 0.3 to 4, and the Steps run from 0.9 to 2.7. The
+metric still does not see the fretting hand's work inside a strum, so the Step
+order is a teacher's where a new chord arrives on fewer strums a bar, and the
+exceptions say so.
 
 For the UI (not built here): strum direction is not drawn. `pickPlan` is
 `free`, so no stroke marks are printed; a down or up arrow over each strum

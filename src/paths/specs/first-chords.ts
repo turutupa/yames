@@ -11,7 +11,9 @@
  *   timed and counted exactly as a two-note power chord is in Metal Rhythm,
  *   and the detector's refractory window (40 to 50 ms at the least, wider at
  *   slow tempos) is what keeps one stroke across six strings from reading as
- *   six. Graded on timing, strums heard and extras. Never on pitch.
+ *   six. Graded on timing, strums heard and extras. Never on pitch. The
+ *   difficulty metric counts it the same way (`../difficulty.ts`): a strum
+ *   is one onset, so four strums a bar read what four notes a bar read.
  * - Whether every string of a chord rings is checked where it can be: the
  *   chord picked one string at a time, slowly, as written single notes.
  * - Stroke direction, muting and tone are taught in words and listed as not
@@ -260,6 +262,8 @@ export default definePath({
         "Start moving a little before the bar line. A chord cut short is better than a strum that comes late.",
       ],
       payoff: "Two chords, and a change that arrives on the beat.",
+      difficultyException:
+        "Two of the four Exercises are one strum and two strums a bar, so that the change has three beats and then one beat to happen in, before the Step reaches the four strums a bar the Step before ended on. The strum rate is lower on purpose. The demand is the change: every finger on the next chord before the next strum, which the metric does not count.",
       exercises: [
         {
           id: "am-strings",
@@ -450,8 +454,6 @@ export default definePath({
         "Many players hold G with the first three fingers. Learn this way first: its changes are shorter, and the little finger gets strong.",
       ],
       payoff: "The most-used chord on the guitar, with short changes to two chords you know.",
-      difficultyException:
-        "A new Level opens on one new chord picked a string at a time and on two strums a bar, after a Step that ends on eight bars of four. The demand is a three-finger shape across six strings and the change to C.",
       exercises: [
         {
           id: "g-strings",
@@ -715,7 +717,7 @@ export default definePath({
       ],
       payoff: "The strumming pattern of a thousand songs, and the idea behind every other one.",
       difficultyException:
-        "Fewer strums in a bar than the steady eighths of the Step before, and a self-checked Exercise at the end, so the note rate falls. The demand is keeping the swing through a silent downstroke, which the metric does not count.",
+        "Fewer strums in a bar than the steady eighths of the Step before, and a self-checked Exercise at the end, so the strum rate falls. The demand is keeping the swing through a silent downstroke, which the metric does not count.",
       exercises: [
         {
           id: "pattern-em",
@@ -909,8 +911,6 @@ export default definePath({
         "Play both F chords from the D string. The two low strings stay quiet.",
       ],
       payoff: "Thirteen chords, the F that stops most beginners, and one of the great four-chord progressions.",
-      difficultyException:
-        "Two of the five Exercises are single notes in quarters, after an eight-bar form with the band, so the note rate falls. The demand is the first finger holding two strings at once.",
       exercises: [
         {
           id: "dm-strings",
@@ -1103,7 +1103,7 @@ export default definePath({
         "The two bars of D at the end lead back to the G that starts the verse again.",
       ],
       difficultyException:
-        "Eighth-note strums after a Step of sixteenths, so the note rate falls. The demand is sixteen bars in a row with a change of strum in the middle, which the metric does not count.",
+        "Eighth-note strums after a Step of sixteenths, so the strum rate falls. The demand is sixteen bars in a row with a change of strum in the middle, which the metric does not count.",
       payoff: "A whole song, start to finish, in time with a band. From here, Rhythm Foundations trains your sense of time on single notes with a click, and Triads explains what your chords are made of.",
       exercises: [
         {

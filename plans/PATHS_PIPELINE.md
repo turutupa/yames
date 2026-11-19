@@ -206,6 +206,67 @@ tests, so it is gradable. `notes` on the Exercise is always variant 0.
   `keyLines` answers null for a line it cannot describe truthfully, and that variant
   then reads the Exercise's text as before.
 
+  Second use (2026-11-19): string-set, key and position variants everywhere else, from
+  `variantText.ts`, behind the spec flag `variantText: true` (opt-in like `paceLadders`;
+  a Path without it generates the same bytes). It does not describe a variant from
+  nothing: it says the Exercise's own sentences again for that variant's notes, and it
+  never adds teaching. A variant whose build already gives words (`keyText`, text
+  typed in a spec) is left alone. The rule is the handoff's: **a sentence that is wrong
+  is worse than none.**
+
+  - **Only aligned variants.** Same number of notes, same ticks, lengths, techniques
+    and accents. Anything else gets nothing.
+  - **Maps from the aligned notes.** Where each string, each fret and each pitch class
+    went. A map must be a function (fret 8 is one fret of the variant, not two), and
+    what one sentence names must stay different ("fret 3 ... and fret 2" that would
+    become "fret 2 ... and fret 2" is not written). A fretted note that becomes an open
+    string is never given a fret number.
+  - **Verify, then map.** A specific is rewritten only if it is true of the Exercise's
+    own notes first: a fret it plays, a string it plays, a note letter among its pitch
+    classes ("C at 8" needs a C at fret 8), a key or chord name it declares (harmony,
+    chart, `key` value). A number is a fret only in a fret context ("fret 5", "tap 12",
+    "D string 5 to 7", "12, 5, 8, 5" when the Exercise plays those frets in that
+    order) and not one in a counting context (BPM, bars, beats, anything in quotes,
+    "four times"); a number in neither is unknown, and an unknown refuses the sentence.
+    A letter that could be a string or a note ("on the B") is written only if both
+    readings give the same letter.
+  - **Claims the maps cannot carry** are written only when the move keeps them: finger
+    names when every aligned note has the same finger (`fingerPlan`), distances,
+    intervals, boxes, shapes and stretches when every note moved the same interval and
+    the same number of frets, directions when the line's contour is the same, strokes
+    when the printed strokes are, "the top two strings" on the same strings, hand and
+    position words when the frets moved alike. A key or chord name moves only with a
+    uniform transposition that the variant's declared harmony also made (spelled as
+    that harmony spells it), or stays when the variant declares the same harmony. A
+    sentence about the other variants ("in G, C or D", "the variants move it") is not
+    rewritten.
+  - **What a proof-read closed** (three readers, the first 329 variants, two false
+    sentences). "a" and "an" are agreed only for a lower-case article, never a capital
+    "A" (it is a string or a note: "A 8, 10, 11"). "The strings below", "the string
+    between", "above", "beside" said of strings are kept only on the same strings. A
+    figure's name with a fret in it ("the fret-12 figure") is a name: kept where that
+    fret is unchanged, never renumbered. A note that gets the name of the string it is
+    said to be on, at a fret ("a picked A on the A string" at 12), reads as the open
+    string and is not written. A key put where a sentence opened with "A" takes "The"
+    before a thing ("The G minor pentatonic box ..."), nothing when it stands alone
+    ("B natural minor on ..."), and is otherwise not written. A stretch or a reach is
+    not said five frets or more away.
+  - **Prefix rule.** The purpose, and each how-to line, is kept up to its first
+    sentence that cannot be written. A line whose first sentence falls is dropped. A
+    purpose whose first sentence falls leaves the variant with no text at all: it reads
+    the Exercise's, with its "for the first version" line. That line is never part of
+    a variant's own how-to. A how-to with next to nothing left is not written either.
+
+  It is on for Alternate Picking, Blues, Classic Rock, Know the Neck, Legato, Rhythm
+  Foundations, Scales and Modes, Shred, Sweep and Tapping: 320 variants read their own
+  text (674 strings, 246 of them word for word a line of the Exercise's, kept because a
+  variant how-to is whole). About 320 more need none: every sentence of the Exercise's
+  is already true of them. The rest are refused or do not align, and read the
+  Exercise's text as before. `describeVariant` returns what was refused and why.
+  `variantText.test.ts` holds variants read by hand and a truth test over every
+  flagged pack (frets, strings and note letters named are ones the variant plays). To
+  add a Path: set the flag, `gen`, and have every new line read against its notes.
+
 In a spec, `vary` gives the values and a `build` function from one combination to its
 notes (and, optionally, its `purpose` and `howTo`):
 

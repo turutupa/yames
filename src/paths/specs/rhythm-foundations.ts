@@ -12,6 +12,7 @@ import type { ExerciseSpec, VariantParams } from "../spec";
 import { STANDARD_TUNING } from "../format";
 import { pcOfName } from "../theory";
 import { handAt, ladder, oneStringClimb, swing } from "../templates";
+import { OTHER_STRINGS, THE_PUSH, TWO_STRINGS_AT_ONCE } from "./rhythm-foundations-more";
 
 const E_PENT = { scale: ["E", "minorPentatonic"] as [string, string] };
 const A_PENT = { scale: ["A", "minorPentatonic"] as [string, string] };
@@ -134,10 +135,11 @@ export default definePath({
   prerequisites: { skills: ["One clean note at a time", "Holding a pick"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
+  variantText: true,
   orderRationale:
     "The beat first, then two notes to a beat, then silence, because a rest is harder to place than a note. Off-beats come before sixteenths: they use the same eighth-note count, and a player who can't feel the 'and' will not feel the 'e' or the 'a'. Triplets follow sixteenths so the two ways of dividing a beat can be compared. The Advanced Level mixes them, and the band comes last because a band hides a loose rhythm that a click exposes.",
   gradingLimits:
-    "The app times each note you play against where it is written and counts the notes it heard, and after the take it checks the notes were the written ones. It does not grade silence itself: a note played in a rest counts as an extra note, and a string left ringing through a rest is yours to hear. Counting out loud and tapping your foot are taught here and not checked. Your setup adds a small delay between playing and the app hearing it, which matters little at these tempos. None of this has been tried on a real guitar yet.",
+    "The app times each note you play against where it is written and counts the notes it heard, and in most Exercises it checks after the take that the notes were the written ones. Where a note is written to ring across a bar line, and where two strings are played at once, it times and counts the strokes and does not check which notes they were. It does not grade silence itself: a note played in a rest counts as an extra note, and a string left ringing through a rest is yours to hear. Counting out loud and tapping your foot are taught here and not checked. Your setup adds a small delay between playing and the app hearing it, which matters little at these tempos. None of this has been tried on a real guitar yet.",
   steps: [
     {
       id: "on-the-beat",
@@ -390,6 +392,7 @@ export default definePath({
         },
       ],
     },
+    OTHER_STRINGS,
     {
       id: "off-beats",
       title: "Between the beats",
@@ -401,6 +404,8 @@ export default definePath({
         "A dotted quarter note lasts a beat and a half: count '1 and 2' and play the next note on the 'and' of 2.",
       ],
       payoff: "A syncopated riff that pushes against the click and never turns around.",
+      difficultyException:
+        "Fewer notes a bar than the Step before, on purpose: placing a note on the 'and' with nothing on the beat before it is the demand, and a note-rate metric does not count it.",
       exercises: [
         {
           id: "the-and",
@@ -483,6 +488,7 @@ export default definePath({
         },
       ],
     },
+    THE_PUSH,
     {
       id: "sixteenths",
       title: "Four to a beat",
@@ -844,6 +850,7 @@ export default definePath({
         },
       ],
     },
+    TWO_STRINGS_AT_ONCE,
     {
       id: "with-the-band",
       title: "With the band",
@@ -923,14 +930,14 @@ export default definePath({
     {
       id: "beginner",
       title: "Beginner: on the beat",
-      summary: "Quarter notes, eighth notes and rests with a click: one note a beat, two notes a beat, and silence in time.",
+      summary: "Quarter notes, eighth notes and rests with a click, on the low strings and then higher up: one note a beat, two notes a beat, and silence in time.",
       reachLevel: "beginner",
       startHereIf: [
         "You've never practised with a click, or you find it hard to stay with one.",
         "You can play a single note on an open string and at fret 3.",
         "Eighth notes at 80 BPM are not yet steady for a whole bar.",
       ],
-      steps: ["on-the-beat", "eighths", "rests"],
+      steps: ["on-the-beat", "eighths", "rests", "other-strings"],
       warmups: [
         {
           id: "walk-up",
@@ -972,14 +979,14 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: between the beats",
-      summary: "Off-beats and dotted notes, the sixteenth-note figures, and triplets with the shuffle.",
+      summary: "Off-beats, dotted notes and the push, the sixteenth-note figures, and triplets with the shuffle.",
       reachLevel: "beginner",
       startHereIf: [
         "You can play steady eighth notes with a click at 85 BPM, down on the beat and up on the 'and'.",
         "You can stop for a beat and come back in on time.",
         "A note on the 'and' with nothing on the beat before it throws you off.",
       ],
-      steps: ["off-beats", "sixteenths", "triplets"],
+      steps: ["off-beats", "the-push", "sixteenths", "triplets"],
       warmups: [
         {
           id: "gallop-up",
@@ -1022,14 +1029,14 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: changing gear",
-      summary: "Sixteenths with rests in them, changes between eighths, triplets and sixteenths, and riffs held against a band.",
+      summary: "Sixteenths with rests in them, changes between eighths, triplets and sixteenths, two-string power chords, and riffs held against a band.",
       reachLevel: "early-intermediate",
       startHereIf: [
         "You can play the gallop figure, an eighth and two sixteenths, evenly at 70 BPM.",
         "You can play eighth-note triplets at 80 BPM and a shuffle.",
         "You speed up or slow down when the rhythm changes from one division to another, or you've never played with a band.",
       ],
-      steps: ["sixteenth-syncopation", "gear-changes", "with-the-band"],
+      steps: ["sixteenth-syncopation", "gear-changes", "two-strings-at-once", "with-the-band"],
       warmups: [
         {
           id: "pyramid-up",

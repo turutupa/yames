@@ -13,6 +13,7 @@ import type { PassBar } from "../format";
 import { pcOfName } from "../theory";
 import { handAt, ladder, moveChart, oneStringClimb, repeat, shiftFrets, threeNpsCells } from "../templates";
 import type { FretCell } from "../templates";
+import { NOWHERE_BOX, SECOND_KEY, THREE_PER_STRING_SHAPES } from "./legato-more";
 
 const even = (min: number, overBars = 4): PassBar => ({ metric: "timingEvenness", min, overBars });
 const heard = (min: number, overBars = 4): PassBar => ({ metric: "notesHeard", min, overBars });
@@ -149,8 +150,8 @@ function sixUp(): string {
 
 function sixDown(): string {
   const cells = [...nps(6)].reverse();
-  // 10, 8, 7 on the top string is fingers 4, 2, 1, the same in the picked bar as in the legato one.
-  const finger = (i: number) => (i < 3 ? ["f4", "f2", "f1"][i] : "");
+  // 10, 8, 7 on the top string and 10, 8, 6 on the B string are fingers 4, 2, 1, the same in the picked bar as in the legato one.
+  const finger = (i: number) => (i < 6 ? ["f4", "f2", "f1"][i % 3] : "");
   return `/16t ${cellsTab(cells, (_c, i) => finger(i))} hold | ${cellsTab(cells, (_c, i) => `${i % 3 === 0 ? "" : "p"}${finger(i)}`)} hold`;
 }
 
@@ -202,8 +203,9 @@ export default definePath({
   prerequisites: { paths: [{ path: "rhythm-foundations", level: "beginner" }], skills: ["Clean single notes with all four fingers", "Eighth notes with a click at 80 BPM"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
+  variantText: true,
   orderRationale:
-    "One hammer-on, then one pull-off, then the two joined, all with a picked note on every beat to lean on. Then three fingers on one string, then across strings in the pentatonic box, where every string is one pick and one legato note, then three notes per string. Hammer-ons from nowhere come last because they need the strength the earlier Steps build. Every figure is played picked first, so the ear knows the rhythm before the fretting hand has to make it alone.",
+    "One hammer-on, then one pull-off, then the two joined, all with a picked note on every beat to lean on. Then three fingers on one string, then across strings in the pentatonic box, where every string is one pick and one legato note, then three notes per string, in one shape and then in two more. Hammer-ons from nowhere come after all of that because they need the strength the earlier Steps build, first three notes a string and then in the box. Six-string runs, odd groupings and long lines follow, and the Path ends with phrases over a band in a second key. Most figures are played picked first, so the ear knows the rhythm before the fretting hand has to make it alone.",
   gradingLimits:
     "The app times the notes it hears and checks them against the written ones after the take. A hammer-on or a pull-off that is too quiet to hear costs nothing, so the picked notes carry most of the grade and a pass does not prove the legato notes were loud. That part is for your ear: the picked bar before each legato bar is the sound to match. A clean or light-crunch tone is the honest setting, because heavy gain and compression make every legato note sound even whether it was or not. None of this has been tried on a real guitar yet.",
   steps: [
@@ -669,7 +671,7 @@ export default definePath({
       why: "Three notes per string is the fingering legato players use for scales, because every string is the same move: pick, legato, legato. It asks for a wider hand than the box: on the D and G strings the shape spans five frets, and the little finger has to hammer at the end of that stretch. So this Step is written in B minor at fret 7, where the frets are closer together than at fret 5.",
       howTo: [
         "Triplets: each string is one beat, and the pick lands on every beat.",
-        "On the low E and A strings use fingers 1, 3, 4 (frets 7, 9, 10). On the D and G strings use 1, 2, 4 (frets 7, 9, 11): the stretch goes between the second and little fingers.",
+        "On the low E and A strings use fingers 1, 3, 4 (frets 7, 9, 10). On the D and G strings use 1, 2, 4 (frets 7, 9, 11): the stretch goes between the first and second fingers.",
         "Let the thumb sit behind the neck, about under the second finger, so the hand can open. Don't force a stretch that hurts; move the hand a little with it.",
       ],
       payoff: "An octave and a half of a scale with a third of the picking, every beat on a new string.",
@@ -738,11 +740,12 @@ export default definePath({
         },
       ],
     },
+    THREE_PER_STRING_SHAPES,
     {
       id: "from-nowhere",
       title: "Hammer-ons from nowhere",
       goal: "Change string without picking: the first finger hammers onto the new string from the air, loud enough to carry two more notes.",
-      why: "Going up a scale, the first note of each new string has no note below it to hammer from. Picking it is the easy answer; hammering it from nowhere is what makes a line fully legato. It is a strength skill, and it is the reason this Step comes after all the others.",
+      why: "Going up a scale, the first note of each new string has no note below it to hammer from. Picking it is the easy answer; hammering it from nowhere is what makes a line fully legato. It is a strength skill, and it is the reason this Step comes after the whole Intermediate Level.",
       howTo: [
         "A hammer-on from nowhere is a finger coming down hard and fast on a string that is not sounding. The tab marks it h with no note before it on that string.",
         "Sextuplets: six to the click, two strings to each beat.",
@@ -815,6 +818,7 @@ export default definePath({
         },
       ],
     },
+    NOWHERE_BOX,
     {
       id: "six-string-runs",
       title: "Six-string runs",
@@ -826,8 +830,6 @@ export default definePath({
         "The two six-string runs are a picked bar first, then the legato bar. Hold the last note to the bar line and let the hand go soft.",
       ],
       payoff: "Two and a half octaves in under two beats of picking, and a line that travels up the neck and home.",
-      difficultyException:
-        "The pick comes back on every string, so less of each bar is legato and the metric falls. The new demands are two shifts inside the line and six strings without a stop, which it does not count.",
       exercises: [
         {
           id: "six-up",
@@ -1013,7 +1015,7 @@ export default definePath({
             "At the top you hammer onto fret 10 and pick it again to come down. Coming down, the hand drops back a fret at the B string and again at the G string.",
             VARIANT_NOTE,
           ],
-          coach: "This is the Path's test piece. I'll say how even it was and check the notes after the take.",
+          coach: "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
           vary: inKeys(sixRound(), ["A", "B", "C", "D"]),
           tab: sixRound(),
           position: 5,
@@ -1048,6 +1050,7 @@ export default definePath({
         },
       ],
     },
+    SECOND_KEY,
   ],
   levels: [
     {
@@ -1111,14 +1114,14 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: three fingers",
-      summary: "Rolls on one string, the pentatonic box with one pick a string, and three notes per string in triplets.",
+      summary: "Rolls on one string, the pentatonic box with one pick a string, and three notes per string in triplets, in three shapes.",
       reachLevel: "intermediate",
       startHereIf: [
         "Your hammer-ons and pull-offs are as loud as your picked notes at eighths, 90 BPM.",
         "You can play pick, hammer, hammer as a triplet at 80 BPM.",
         "Three or more legato notes in a row get quieter as they go, or lose the beat.",
       ],
-      steps: ["rolls", "pentatonic-legato", "three-per-string"],
+      steps: ["rolls", "pentatonic-legato", "three-per-string", "three-per-string-shapes"],
       warmups: [
         {
           id: "roll-climb",
@@ -1159,14 +1162,14 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: almost no pick",
-      summary: "Hammer-ons from nowhere, six-string runs in sextuplets with shifts, fives and sixes from one pick, and lines held over a band and for a minute.",
+      summary: "Hammer-ons from nowhere in three-per-string runs and in the box, six-string runs in sextuplets with shifts, fives and sixes from one pick, lines held over a band and for a minute, and phrases over a band in a second key.",
       reachLevel: "advanced",
       startHereIf: [
         "You can run a minor scale three notes per string with one pick a string, in triplets at 110 BPM.",
         "Your rolls stay even at sixteenths, 80 BPM, with one pick a beat.",
         "You still pick the first note of every string, or your legato fades over a long line.",
       ],
-      steps: ["from-nowhere", "six-string-runs", "odd-groups", "long-lines"],
+      steps: ["from-nowhere", "nowhere-box", "six-string-runs", "odd-groups", "long-lines", "second-key"],
       warmups: [
         {
           id: "nowhere-round",

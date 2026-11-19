@@ -4,7 +4,7 @@ You are a guitar teacher and curriculum author working on Yames, a learning-path
 coach. You add Steps to ONE existing Path. Other authors are doing the same for OTHER Paths, at the
 same time, in the same worktree. Stay inside your own files.
 
-Worktree: /home/dgx-personal/projects/yames-mvp-paths2 (branch mvp-paths2). All paths below are in it.
+Worktree: /home/dgx-personal/projects/yames-mvp-paths3 (branch mvp-paths3). All paths below are in it.
 
 ## Read first (in this order, only what is named)
 1. plans/paths/HANDOFF.md: sections 3 ("How to work here": "Adding Steps to an existing Path") and
@@ -51,7 +51,7 @@ Worktree: /home/dgx-personal/projects/yames-mvp-paths2 (branch mvp-paths2). All 
   odd (read the notes' `finger` values in the pack after `gen`).
 
 ## Text must match notes: check it yourself before you report
-Write a small script under /tmp/yp2/<your scratch dir>/ that loads src/paths/packs/<pathId>.json and
+Write a small script under /tmp/yp3/<your scratch dir>/ that loads src/paths/packs/<pathId>.json and
 prints, for each of YOUR Exercises, every bar's notes as string:fret, note name (from midi), finger,
 duration and tech, plus `tempo.rungs[0].bpm`, `passAtBpm`, backing and chords. Then read every
 sentence you wrote against it: frets, strings, note names, bar counts, "twice", which notes are open,

@@ -41,6 +41,7 @@ import { paceLadder } from "./pace";
 import type { ExerciseSpec, HarmonySpec, PathSpec, VariantBuild, VariantParams, VarySpec } from "./spec";
 import { markAlternate, markEconomy, markSweep, parseTab } from "./tabDsl";
 import { canSpellScale, chordRootName, guideTones, spellChord, spellScale } from "./theory";
+import { variantText } from "./variantText";
 import type { ScaleId } from "../jam/scales";
 
 const METER = { numerator: 4, denominator: 4 };
@@ -381,6 +382,7 @@ function buildExercise(
           params,
           pool: poolOf(params, notPooled.map(([d]) => d)),
           ...(index > 0 ? ownText(spec, c.part.build) : {}),
+          ...(index > 0 && pathSpec.variantText ? rewrittenText(spec, concrete[0], paramsList[0], c, params) : {}),
           tab: c.part.tab,
           position: c.part.position,
           crossing: c.crossing,
@@ -414,6 +416,33 @@ function ownText(spec: ExerciseSpec, build: VariantBuild): Pick<ExerciseVariant,
   const howTo = typeof build.howTo === "function" ? build.howTo(spec.howTo) : build.howTo;
   if (howTo !== undefined && JSON.stringify(howTo) !== JSON.stringify(spec.howTo)) own.howTo = [...howTo];
   return own;
+}
+
+type Described = { part: Pick<Compiled, "build" | "notes" | "position" | "chords">; harmony?: Harmony };
+
+/**
+ * `variantText: true`: a variant with no words from its build gets the Exercise's
+ * own sentences said again for its notes (`variantText.ts`), where that can be
+ * done truthfully. A build that says anything keeps what it says: hand-written
+ * text and `keyText` come first. Null from the describer writes nothing, and
+ * the variant reads the Exercise's text as before.
+ */
+function rewrittenText(
+  spec: ExerciseSpec,
+  first: Described,
+  firstParams: VariantParams,
+  variant: Described,
+  params: VariantParams,
+): Pick<ExerciseVariant, "purpose" | "howTo"> {
+  if (variant.part.build.purpose !== undefined || variant.part.build.howTo !== undefined) return {};
+  const side = (d: Described, p: VariantParams) => ({
+    notes: d.part.notes,
+    position: d.part.position,
+    harmony: d.harmony,
+    chords: d.part.chords,
+    params: p,
+  });
+  return variantText({ purpose: spec.purpose, howTo: spec.howTo, ...side(first, firstParams) }, side(variant, params)) ?? {};
 }
 
 /** The pool a variant belongs to, from the values that change difficulty. */
