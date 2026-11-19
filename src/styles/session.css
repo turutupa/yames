@@ -791,7 +791,12 @@
     minmax(0, 1fr) minmax(280px, var(--today-hero)) clamp(28px, 4vw, 56px)
     minmax(0, var(--today-plan)) minmax(0, 1fr);
   grid-template-rows: auto;
-  align-content: center;
+  /* Anchored to a fixed height from the top, never centred: centring moved
+     the hero up and down with the length of the plan beside it (owner,
+     2026-11-19: "the list on the right shouldn't move the content on the
+     left"). The offset is what a typical plan used to centre at. */
+  align-content: start;
+  padding-top: clamp(16px, 12vh, 140px);
   column-gap: 0;
   row-gap: clamp(10px, 2.4vh, 26px);
   flex: 1;
