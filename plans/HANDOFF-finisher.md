@@ -60,9 +60,10 @@ export CARGO_TARGET_DIR=$HOME/projects/.target-<yours>      # delete it when don
 1. **Independent engine review of the Rust diff** (required by CLAUDE.md).
    `git diff 901933de mvp-finisher -- src-tauri/src` (5 files, +273 / -71).
    Summary in the next section.
-2. **Jitter probe on a quiet box.** Only the `--song-loop --song-take` run got
-   one. Rerun the baseline and `--jam-swap --jam-move --jam-take` when
-   `/proc/loadavg` 1- and 5-minute are under 6. Numbers so far below.
+2. **Jitter probe: done after midnight, on a quiet box, paired against
+   `revamp`** (table below). No regression. Open only as a question for the
+   owner: the advisory p99 under 1 ms is not met on this machine by `revamp`
+   itself.
 3. **Full e2e to validate the capture change** (card #57). Not run: the box
    was never quiet. `npm run test:e2e`, then read `info.players.*` in
    results.json (`captureLostMs`, `captureMaxGapMs`, `graphTrouble`).
@@ -145,6 +146,27 @@ notifications) are 0 in every run. p99 under 1 ms is advisory on a busy box.
 
 For scale, the headless probe on this box under load on 2026-11-16 read
 p99 1.02 ms (`tests/e2e/results/2026-11-16-under-load.md`).
+
+**Paired, on a quiet box (00:25 to 00:40, load under 3 and falling).** The
+same probe built from `revamp` fcb4bec5, whose `src-tauri/src` is identical
+to 901933de (none of this branch's Rust), against this branch, one after the
+other:
+
+| Run | Build | Load before, after (1 min) | p50 | p95 | p99 | max |
+|---|---|---|---|---|---|---|
+| baseline | revamp | 1.29, 0.68 | 0.332 | 1.022 | 1.321 | 1.75 |
+| baseline | mvp-finisher | 0.68, 0.31 | 0.373 | 1.099 | 1.361 | 2.05 |
+| `--jam-swap --jam-move --jam-take` | revamp | 0.22, 0.25 | 0.469 | 1.266 | 1.663 | 2.15 |
+| `--jam-swap --jam-move --jam-take` | mvp-finisher | 2.91, 1.29 | 0.410 | 1.192 | 1.582 | 2.33 |
+
+Hard gates 0 in all four. The two builds are the same within the run-to-run
+spread, so the Rust diff costs the click nothing. What the pair also says:
+**on this machine the advisory p99 under 1 ms is not met by `revamp` either**
+(44.1 kHz through PipeWire at 1882 frames a callback), and an idle box reads
+a higher p50 than a moderately busy one (0.33 to 0.47 ms against 0.12 to
+0.20), which looks like the cores sleeping between callbacks. Worth knowing
+before reading a p99 of 1.3 as a regression. (A fifth run, `revamp` jam with
+another suite starting mid-run, read p99 4.04 and is not in the table.)
 
 The 30 fps cap, measured with `~/projects/.preview/finisher/scripts/cap.mjs`:
 before, frames 31 / 17 / 31 / 17 ms apart (about 41 a second); after, mean
