@@ -105,7 +105,8 @@
         "keepWarm": "Para não esfriar, tocado há {{days}} dias.",
         "keepWarmYesterday": "Para não esfriar, tocado ontem.",
         "keepWarmToday": "Para não esfriar, já tocado hoje.",
-        "keepWarmNew": "Uma primeira provada."
+        "keepWarmNew": "Uma primeira provada.",
+        "focusChosen": "Hoje só esta trilha, como você escolheu."
       },
       "from": "{{path}} · {{level}} · Etapa {{step}}",
       "fromNoLevel": "{{path}} · Etapa {{step}}",
@@ -147,6 +148,12 @@
           "busier": "{{bpm}} BPM, mas com mais notas por tempo: mais denso que {{was}} BPM aqui.",
           "startsSlow": "Começa em {{bpm}} BPM, abaixo dos {{was}} daqui: um exercício novo começa devagar e sobe quando você toca limpo."
         }
+      },
+      "focus": {
+        "label": "Trilhas:",
+        "mix": "Meu mix diário",
+        "emptyMix": "Seu mix diário está vazio. Escolha uma trilha para hoje ou coloque uma no mix em Trilhas.",
+        "nothingIn": "{{path}} não tem nada para tocar hoje. Escolha outra trilha ou seu mix diário."
       }
     },
     "why": {
@@ -204,7 +211,9 @@
       "testOut": "Teste para pular «{{step}}»: um take no tempo de aprovação, {{bpm}} BPM.",
       "benchmark": "Referência, dia {{day}}: o mesmo exercício a {{bpm}} BPM toda vez, para comparar.",
       "yourTurn": "Sua vez: {{exercise}}. Ainda não verificado, então você avalia.",
-      "newFromSibling": "Novo. Começa em {{bpm}} BPM, cerca de 80% do seu tempo limpo de {{clean}} BPM em {{sibling}}."
+      "newFromSibling": "Novo. Começa em {{bpm}} BPM, cerca de 80% do seu tempo limpo de {{clean}} BPM em {{sibling}}.",
+      "focusChosen": "Você escolheu {{path}} para hoje, então a sessão inteira vem dele.",
+      "playedUngraded": "De onde você parou: {{bpm}} BPM."
     },
     "bar": {
       "summary": "A meta: {{even}}% de regularidade e {{heard}}% das notas ouvidas, a {{bpm}} BPM."
@@ -249,7 +258,8 @@
       "fasterCeiling": "Já é o andamento mais rápido deste exercício",
       "tempoLocked": "Um teste é tocado no andamento de aprovação, então ele não muda",
       "previous": "Anterior",
-      "previousFirst": "Este é o primeiro bloco, não há nada antes"
+      "previousFirst": "Este é o primeiro bloco, não há nada antes",
+      "playUngraded": "Começar, {{bpm}} BPM"
     },
     "result": {
       "kick": "Tomada {{take}} · {{title}} · {{bpm}} BPM · {{bars}} compassos",
@@ -459,7 +469,13 @@
       "exerciseCount": "{{count}} exercício",
       "exerciseCount_many": "{{count}} exercícios",
       "exerciseCount_other": "{{count}} exercícios",
-      "levelSubscribed": "Inscrito · começando no passo {{n}}"
+      "levelSubscribed": "Inscrito · começando no passo {{n}}",
+      "inMix": "No meu mix diário",
+      "inMixHelp": "Desligado: Hoje deixa a trilha fora do seu mix diário. Seu progresso fica, e você ainda pode escolhê-la por um dia.",
+      "focusToday": "Praticar só esta hoje",
+      "playedUngraded": "{{count}} tomada, até {{bpm}} BPM.",
+      "playedUngraded_many": "{{count}} tomadas, até {{bpm}} BPM.",
+      "playedUngraded_other": "{{count}} tomadas, até {{bpm}} BPM."
     },
     "progress": {
       "title": "Progresso",
@@ -475,7 +491,10 @@
       "notGraded": "Ainda sem avaliação",
       "emptyTitle": "Seu progresso começa com uma sessão",
       "emptyBody": "Toque a sessão de hoje e ela aparece aqui: minutos tocados, sua sequência e o tempo limpo de cada exercício, tudo medido do que você toca.",
-      "emptyStart": "Começar a sessão de hoje"
+      "emptyStart": "Começar a sessão de hoje",
+      "introOff": "A avaliação está desligada, então aqui está o que você tocou: seus minutos, suas sessões e os andamentos que tocou.",
+      "topPlayed": "maior BPM tocado",
+      "ungraded": "Sem avaliação"
     },
     "settings": {
       "openOnLastTool": "Abrir na minha última ferramenta",
@@ -511,6 +530,7 @@
       "legendNow": "toque agora",
       "legendNext": "próxima",
       "legendFingers": "1–4 = dedos",
+      "legendShift": "= a mão se desloca",
       "watch": "Ver",
       "watchStop": "Parar",
       "watchTitle": "Acende as notas em ordem neste andamento. Sem som, sem nota.",
@@ -620,7 +640,7 @@
       "fellBack": "A entrada escolhida não está conectada, então nesta sessão estou ouvindo {{device}}.",
       "defaultDevice": "sua entrada padrão",
       "chooseInput": "Escolher entrada",
-      "playUngraded": "Tocar sem avaliação",
+      "playUngraded": "Tocar só esta",
       "notGraded": "Sem avaliação",
       "turnOn": "Ligar a entrada",
       "noSignal": "Sem sinal",
@@ -630,17 +650,33 @@
         "noAnswer": "A entrada não respondeu. Se houver um pedido de permissão aberto, responda e toque em Começar de novo.",
         "busy": "Outro app está usando sua entrada. Feche-o e toque em Começar de novo.",
         "other": "Sua entrada não ligou. Verifique ou escolha outra."
-      },
-      "gradingOff": "Avaliação desligada",
-      "turnOnGrading": "Ligar a avaliação"
+      }
     },
     "ungraded": {
       "ready": "Sem avaliação: a entrada está desligada, então não estou ouvindo nesta sessão.",
-      "readyOff": "Sem avaliação: a avaliação está desligada nas Configurações.",
       "result": "Sem avaliação: a entrada estava desligada",
-      "resultOff": "Sem avaliação: a avaliação está desligada nas Configurações",
+      "resultOff": "Tocada, sem avaliação",
       "body": "Conta como prática, para seus minutos e sua sequência. O tempo limpo e os passos só avançam com takes avaliados.",
-      "recap": "sem avaliação"
+      "recap": "sem avaliação",
+      "bodyOff": "Conta para seus minutos e sua sequência."
+    },
+    "ask": {
+      "graded": "Começar tomada, {{bpm}} BPM · com avaliação",
+      "justPlay": "Só tocar",
+      "remember": "Lembrar minha escolha",
+      "line": "Com avaliação, eu escuto pelo seu microfone ou entrada. Ou só toque: o clique e a imagem, sem avaliação."
+    },
+    "grademe": {
+      "fix": "Me avalie",
+      "why": "Vou escutar pelo seu microfone ou entrada e avaliar seu tempo e suas notas.",
+      "session": "Esta sessão",
+      "always": "Sempre"
+    },
+    "meter": {
+      "silent": "Nível de entrada: sem sinal",
+      "low": "Nível de entrada: baixo",
+      "good": "Nível de entrada: bom",
+      "high": "Nível de entrada: alto"
     }
   }
 }

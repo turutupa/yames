@@ -46,10 +46,17 @@ export function acrossStrings(args: {
   fret: number;
   /** Frets to move up per string. */
   climb?: number;
+  /**
+   * Write each note's finger, one per fret from the index at `fret` (cell 0 is
+   * the index, 3 the little finger): for a drill whose finger order is the
+   * lesson (the Petrucci climb, the 1-3-2-4 permutation), so the neck shows the
+   * order the How-to names (fingering round 3).
+   */
+  fingered?: boolean;
 }): string {
-  const { cell, strings, fret, climb = 0 } = args;
+  const { cell, strings, fret, climb = 0, fingered = false } = args;
   return strings
-    .map((string, index) => cell.map((f) => `${string}:${fret + f + climb * index}`).join(" "))
+    .map((string, index) => cell.map((f) => `${string}:${fret + f + climb * index}${fingered ? `f${f + 1}` : ""}`).join(" "))
     .join(" ");
 }
 
@@ -338,6 +345,9 @@ export function nearFret(base: number, semitones: number): number {
  * the bass of each shape walks. The upward push out of one shape carries on into
  * the next, with no stop at the bar line. A top note too wide to hammer is a slide.
  */
+/** The widest top note a sweep loop hammers to with the little finger; past it, a slide. */
+export const TOP_HAMMER_MM = 95;
+
 export function sweepChain(args: {
   chords: readonly string[];
   strings: readonly number[];
@@ -358,7 +368,11 @@ export function sweepChain(args: {
       const shape = arpeggioCells({ chord, strings, near: spot, doubleLow, top: true });
       at = shape.up[0].fret;
       const last = shape.up[shape.up.length - 1];
-      const wide = fretMm(shape.top!.fret) - fretMm(last.fret) > 85;
+      // The same reach a loop on its own takes as a hammer (the G shape's 10 to 15,
+      // 91 mm, little finger): wider (F's 8 to 13, 102 mm) slides. One rule, so a
+      // shape is fingered the same in every Exercise (fingering round 3, P2-2).
+      const span = shape.top!.fret - last.fret;
+      const wide = span > 5 || (span === 5 && last.fret < 8) || fretMm(shape.top!.fret) - fretMm(last.fret) > TOP_HAMMER_MM;
       const loop = sweepLoop({ chord, strings, near: spot, doubleLow, slideTop: wide });
       return `${rhythm} ${repeat(loop, perBar)}`;
     })

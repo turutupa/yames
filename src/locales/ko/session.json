@@ -104,7 +104,8 @@
         "keepWarm": "감 유지, 마지막 연주는 {{days}}일 전.",
         "keepWarmYesterday": "감 유지, 마지막 연주는 어제.",
         "keepWarmToday": "감 유지, 오늘 이미 연주했어요.",
-        "keepWarmNew": "첫 맛보기."
+        "keepWarmNew": "첫 맛보기.",
+        "focusChosen": "고른 대로, 오늘은 이 경로만."
       },
       "from": "{{path}} · {{level}} · {{step}}단계",
       "fromNoLevel": "{{path}} · {{step}}단계",
@@ -146,6 +147,12 @@
           "busier": "{{bpm}} BPM이지만 박마다 음이 더 많아서 여기의 {{was}} BPM보다 촘촘합니다.",
           "startsSlow": "{{bpm}} BPM에서 시작해 여기의 {{was}}보다 느립니다. 새 연습은 천천히 시작해 깔끔하게 치면 올라갑니다."
         }
+      },
+      "focus": {
+        "label": "경로:",
+        "mix": "나의 일일 믹스",
+        "emptyMix": "일일 믹스가 비어 있어요. 오늘 할 경로를 고르거나 경로 화면에서 믹스에 넣으세요.",
+        "nothingIn": "{{path}}에는 오늘 연주할 것이 없어요. 다른 경로나 일일 믹스를 고르세요."
       }
     },
     "why": {
@@ -203,7 +210,9 @@
       "testOut": "{{step}} 건너뛰기 테스트: 통과 템포 {{bpm}} BPM으로 한 번.",
       "benchmark": "벤치마크, {{day}}일째: 비교를 위해 매번 같은 연습을 {{bpm}} BPM으로.",
       "yourTurn": "당신 차례: {{exercise}}. 아직 확인 기능이 없어 직접 판단하세요.",
-      "newFromSibling": "새 연습입니다. {{sibling}}의 클린 템포 {{clean}} BPM의 약 80%인 {{bpm}} BPM에서 시작합니다."
+      "newFromSibling": "새 연습입니다. {{sibling}}의 클린 템포 {{clean}} BPM의 약 80%인 {{bpm}} BPM에서 시작합니다.",
+      "focusChosen": "오늘은 {{path}}을(를) 골랐으니 세션 전체가 여기서 나옵니다.",
+      "playedUngraded": "지난번 그대로: {{bpm}} BPM."
     },
     "bar": {
       "summary": "통과 기준: {{bpm}} BPM에서 고르기 {{even}}%, 들린 음 {{heard}}%."
@@ -248,7 +257,8 @@
       "fasterCeiling": "이 과제에서 가장 빠른 템포예요",
       "tempoLocked": "테스트는 통과 템포로 연주하므로 바꿀 수 없어요",
       "previous": "이전",
-      "previousFirst": "첫 블록이라 이전 블록이 없습니다"
+      "previousFirst": "첫 블록이라 이전 블록이 없습니다",
+      "playUngraded": "시작, {{bpm}} BPM"
     },
     "result": {
       "kick": "테이크 {{take}} · {{title}} · {{bpm}} BPM · {{bars}}마디",
@@ -447,7 +457,12 @@
       "tabPreview": "첫 마디들의 타브",
       "exerciseCount_other": "과제 {{count}}개",
       "exerciseCount": "과제 {{count}}개",
-      "levelSubscribed": "구독함 · {{n}}단계부터 시작"
+      "levelSubscribed": "구독함 · {{n}}단계부터 시작",
+      "inMix": "일일 믹스에 포함",
+      "inMixHelp": "끄면 오늘 화면이 일일 믹스에서 뺍니다. 진행 상황은 그대로이고, 하루만 골라 연습할 수도 있어요.",
+      "focusToday": "오늘은 이것만 연습",
+      "playedUngraded": "테이크 {{count}}개, 최고 {{bpm}} BPM.",
+      "playedUngraded_other": "테이크 {{count}}개, 최고 {{bpm}} BPM."
     },
     "progress": {
       "title": "진도",
@@ -463,7 +478,10 @@
       "notGraded": "아직 채점되지 않음",
       "emptyTitle": "진도는 세션 한 번에서 시작해요",
       "emptyBody": "오늘의 세션을 연주하면 여기에 나타나요: 연주한 시간, 연속 일수, 과제마다의 클린 템포. 모두 연주에서 측정한 값이에요.",
-      "emptyStart": "오늘의 세션 시작"
+      "emptyStart": "오늘의 세션 시작",
+      "introOff": "채점이 꺼져 있어서, 여기에는 연주한 내용이 나옵니다: 연습 시간, 세션, 연주한 템포.",
+      "topPlayed": "연주한 최고 BPM",
+      "ungraded": "채점 안 함"
     },
     "settings": {
       "openOnLastTool": "마지막 도구로 열기",
@@ -498,6 +516,7 @@
       "legendNow": "지금 연주",
       "legendNext": "다음",
       "legendFingers": "1–4 = 손가락",
+      "legendShift": "= 손 이동",
       "watch": "보기",
       "watchStop": "정지",
       "watchTitle": "이 템포로 음을 순서대로 비춥니다. 소리 없음, 채점 없음.",
@@ -607,7 +626,7 @@
       "fellBack": "선택한 입력이 연결되어 있지 않아 이번 세션은 {{device}}을(를) 듣습니다.",
       "defaultDevice": "기본 입력",
       "chooseInput": "입력 선택",
-      "playUngraded": "채점 없이 연주",
+      "playUngraded": "이번 것만 그냥 연주",
       "notGraded": "채점 안 함",
       "turnOn": "입력 켜기",
       "noSignal": "신호 없음",
@@ -617,17 +636,33 @@
         "noAnswer": "입력이 응답하지 않았습니다. 권한 요청 창이 열려 있다면 응답한 뒤 다시 시작을 누르세요.",
         "busy": "다른 앱이 입력을 사용 중입니다. 그 앱을 닫고 다시 시작을 누르세요.",
         "other": "입력을 시작하지 못했습니다. 확인하거나 다른 입력을 선택하세요."
-      },
-      "gradingOff": "채점 꺼짐",
-      "turnOnGrading": "채점 켜기"
+      }
     },
     "ungraded": {
       "ready": "채점 안 함: 입력이 꺼져 있어 이번 세션은 듣지 않습니다.",
-      "readyOff": "채점 안 함: 설정에서 채점이 꺼져 있습니다.",
       "result": "채점 안 함: 입력이 꺼져 있었습니다",
-      "resultOff": "채점 안 함: 설정에서 채점이 꺼져 있습니다",
+      "resultOff": "연주함, 채점 안 함",
       "body": "연습으로 계산됩니다(연습 시간과 연속 기록). 클린 템포와 스텝은 채점된 테이크에서만 올라갑니다.",
-      "recap": "채점 안 함"
+      "recap": "채점 안 함",
+      "bodyOff": "연습 시간과 연속 기록에 포함됩니다."
+    },
+    "ask": {
+      "graded": "테이크 시작, {{bpm}} BPM · 채점",
+      "justPlay": "그냥 연주",
+      "remember": "내 선택 기억하기",
+      "line": "채점하면 마이크나 입력으로 듣습니다. 그냥 연주하면 클릭과 화면만, 채점은 없습니다."
+    },
+    "grademe": {
+      "fix": "채점해 줘",
+      "why": "마이크나 입력으로 듣고 타이밍과 음을 채점합니다.",
+      "session": "이번 세션",
+      "always": "항상"
+    },
+    "meter": {
+      "silent": "입력 레벨: 신호 없음",
+      "low": "입력 레벨: 낮음",
+      "good": "입력 레벨: 좋음",
+      "high": "입력 레벨: 높음"
     }
   }
 }

@@ -96,6 +96,7 @@ describe("simple helpers", () => {
     expect(shiftFrets("5:5h 4:7>", 2)).toBe("5:7h 4:9>");
     expect(inPositions("5:5", [0, 5])).toBe("5:5 | 5:10");
     expect(acrossStrings({ cell: [0, 2], strings: [6, 5], fret: 5, climb: 1 })).toBe("6:5 6:7 5:6 5:8");
+    expect(acrossStrings({ cell: [0, 2], strings: [6], fret: 5, fingered: true })).toBe("6:5f1 6:7f3");
     expect(repeat("1:1", 3)).toBe("1:1 1:1 1:1");
     expect(ladder(50, 75, 10)).toEqual([50, 60, 70, 75]);
   });

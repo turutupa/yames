@@ -112,7 +112,19 @@ export function ReadyStep(_props: WizardStepProps) {
           target: "coach",
         },
         ] as SummaryRow[])),
-    {
+    // What W5 asked: graded or not, said as a choice (owner, 2026-11-18).
+    ...(learning.grading
+      ? [
+          {
+            key: "grading",
+            label: t("onboarding.ready.rows.grading"),
+            value: t(`onboarding.ready.grading.${learning.grading}`),
+            target: "audio-input" as StepId,
+          },
+        ]
+      : []),
+    // Playing ungraded, there is no input to report.
+    ...(learning.grading === "off" ? [] : [{
       key: "input",
       label: t("onboarding.ready.rows.input"),
       // The system default has no name to show, but heard on W5 it is set up.
@@ -121,8 +133,8 @@ export function ReadyStep(_props: WizardStepProps) {
         (machineContext.inputConfigured
           ? t("settings.inputTest.systemDefault")
           : t("onboarding.ready.inputNone")),
-      target: "audio-input",
-    },
+      target: "audio-input" as StepId,
+    }]),
   ];
 
   return (

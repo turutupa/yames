@@ -13,7 +13,7 @@
  * has no business being called "set up". "Skip, I'll set this up later" is
  * always there — the metronome works without any of this.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AudioInputDropdown } from "../../../components/AudioInputDropdown";
 import { ChannelDropdown } from "../../../components/ChannelDropdown";
@@ -67,10 +67,98 @@ const GUIDED_INSTRUMENTS = new Set([
   "piano",
 ]);
 
-export function AudioInputStep({ onSkip, isActive }: WizardStepProps) {
+/**
+ * W5 opens on a question (owner, 2026-11-18: "some folks may not wanna opt in
+ * input detection"): "Should Yames listen to your playing and grade it?", with
+ * two equal answers. Yes sets the input up, as below; No skips all of it,
+ * opens no stream and asks for no microphone, and Sessions play ungraded.
+ * Choosing is selection only; Next commits the answer.
+ */
+export function AudioInputStep(props: WizardStepProps) {
   const { t } = useTranslation();
-  const { evaluation, instrument, setMachineContext, setStepCommit, setNextEnabled } =
-    useWizardEnv();
+  const { learning, setMachineContext, setStepCommit, setNextEnabled } = useWizardEnv();
+  const kept = learning.grading;
+  // A re-run starts on the answer that is live today; "ask" has none yet.
+  const [answer, setAnswer] = useState<"yes" | "no" | null>(
+    kept === "on" ? "yes" : kept === "off" ? "no" : null,
+  );
+  const [proven, setProven] = useState(false);
+  const setGrading = learning.setGrading;
+
+  useEffect(() => {
+    if (answer === "no") {
+      setNextEnabled(true);
+      setStepCommit(() => {
+        setGrading?.("off");
+        setMachineContext({ inputConfigured: false });
+      });
+    } else if (answer === "yes") {
+      setNextEnabled(proven);
+      setStepCommit(
+        proven
+          ? () => {
+              setGrading?.("on");
+              setMachineContext({ inputConfigured: true });
+            }
+          : null,
+      );
+    } else {
+      setNextEnabled(false);
+      setStepCommit(null);
+    }
+  }, [answer, proven, setGrading, setMachineContext, setNextEnabled, setStepCommit]);
+
+  return (
+    <div className="onboarding-step">
+      <h2 className="onboarding-step-title" id="onboarding-title">
+        {t("onboarding.audioInput.ask.title")}
+      </h2>
+      <p className="onboarding-step-subtitle">{t("onboarding.audioInput.ask.subtitle")}</p>
+      <div
+        className="onboarding-input-modes onboarding-grading-choice"
+        role="radiogroup"
+        aria-labelledby="onboarding-title"
+      >
+        <button
+          type="button"
+          role="radio"
+          className={`onboarding-input-mode${answer === "yes" ? " selected" : ""}`}
+          aria-checked={answer === "yes"}
+          onClick={() => setAnswer("yes")}
+          data-testid="audio-input-grade-yes"
+        >
+          <b>{t("onboarding.audioInput.ask.yes")}</b>
+          <span>{t("onboarding.audioInput.ask.yesDesc")}</span>
+        </button>
+        <button
+          type="button"
+          role="radio"
+          className={`onboarding-input-mode${answer === "no" ? " selected" : ""}`}
+          aria-checked={answer === "no"}
+          onClick={() => {
+            setAnswer("no");
+            setProven(false);
+          }}
+          data-testid="audio-input-grade-no"
+        >
+          <b>{t("onboarding.audioInput.ask.no")}</b>
+          <span>{t("onboarding.audioInput.ask.noDesc")}</span>
+        </button>
+      </div>
+      {answer === "no" && (
+        <p className="onboarding-input-note" role="status" data-testid="audio-input-grade-no-note">
+          {t("onboarding.audioInput.ask.noNote")}
+        </p>
+      )}
+      {answer === "yes" && <InputSetup {...props} onProven={setProven} />}
+    </div>
+  );
+}
+
+/** The input's own setup, once the player said yes to grading. */
+function InputSetup({ onSkip, isActive, onProven }: WizardStepProps & { onProven: (proven: boolean) => void }) {
+  const { t } = useTranslation();
+  const { evaluation, instrument } = useWizardEnv();
 
   // The env object is rebuilt on every spectrum event (it carries the
   // spectrum), so its callbacks must never appear in an effect's deps — the
@@ -145,16 +233,11 @@ export function AudioInputStep({ onSkip, isActive }: WizardStepProps) {
   // --- What Next means here ------------------------------------------------
   // The device and channel are already persisted by `selectDevice` /
   // `selectChannel` (they write the store as the user picks, exactly as
-  // Settings does). The commit records the one thing only this step knows:
-  // that an input was set up *and* was heard, which is what W6 gates on.
-  const commit = useCallback(() => {
-    setMachineContext({ inputConfigured: true });
-  }, [setMachineContext]);
-
+  // Settings does). The step's commit (above) records the one thing only it
+  // knows: that an input was set up *and* was heard, which is what W6 gates on.
   useEffect(() => {
-    setNextEnabled(proven);
-    setStepCommit(proven ? commit : null);
-  }, [proven, commit, setNextEnabled, setStepCommit]);
+    onProven(proven);
+  }, [proven, onProven]);
 
   const selectedDeviceObj = useMemo(
     () => evaluation.devices.find((d) => d.name === evaluation.selectedDevice),
@@ -198,10 +281,8 @@ export function AudioInputStep({ onSkip, isActive }: WizardStepProps) {
   const holdPct = Math.min(100, Math.round((heldMs / SIGNAL_HOLD_MS) * 100));
 
   return (
-    <div className="onboarding-step">
-      <h2 className="onboarding-step-title" id="onboarding-title">
-        {t("onboarding.audioInput.title")}
-      </h2>
+    <div className="onboarding-input-setup" data-testid="audio-input-setup">
+      <h3 className="onboarding-input-setup-title">{t("onboarding.audioInput.title")}</h3>
       <p className="onboarding-step-subtitle">{t(IS_MOBILE ? "onboarding.audioInput.phone.subtitle" : "onboarding.audioInput.subtitle")}</p>
 
       <div

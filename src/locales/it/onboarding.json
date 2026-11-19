@@ -149,6 +149,15 @@
         "guidance": "Un'interfaccia o un adattatore jack è meglio, ma il microfono del telefono funziona: mettilo vicino alla chitarra, non in tasca.",
         "noDevices": "Nessun ingresso trovato. Collega l'interfaccia o l'adattatore; se non compare, scollegalo e ricollegalo.",
         "permission": "Accesso al microfono: Impostazioni Android › App › Yames › Autorizzazioni › Microfono, poi Consenti. Un'interfaccia USB o un adattatore jack richiedono la stessa autorizzazione."
+      },
+      "ask": {
+        "title": "Yames deve ascoltare come suoni e valutarlo?",
+        "subtitle": "In entrambi i casi hai il tuo piano, il clic e l'immagine. Puoi cambiarlo nelle Impostazioni quando vuoi.",
+        "yes": "Sì, valuta come suono",
+        "yesDesc": "Yames ascolta da un microfono o un ingresso diretto e controlla tempo e note. Ora lo configuri.",
+        "no": "No, solo il clic e l'immagine",
+        "noDesc": "Niente ascolta e non viene chiesto il microfono. Minuti e serie contano lo stesso.",
+        "noNote": "Le sessioni si suoneranno senza valutazione. Puoi attivarla da qualsiasi sessione o nelle Impostazioni."
       }
     },
     "hearItWork": {
@@ -175,7 +184,8 @@
         "sound": "Suono del click",
         "theme": "Tema",
         "control": "Controllo",
-        "input": "Ingresso audio"
+        "input": "Ingresso audio",
+        "grading": "Valutazione"
       },
       "controlKeyboard": "Tastiera",
       "controlFootswitch": "Pedale",
@@ -186,7 +196,12 @@
       "tour": "Mostrami in giro",
       "moreOnToday": "+{{count}} in Oggi",
       "subtitleNext": "La tua prossima sessione ti aspetta in Oggi. Cambia quello che vuoi qui, o più tardi nelle Impostazioni.",
-      "nextSession": "La tua prossima sessione"
+      "nextSession": "La tua prossima sessione",
+      "grading": {
+        "on": "Valuta come suono",
+        "off": "Suona e basta, senza voto",
+        "ask": "Chiedi a ogni sessione"
+      }
     },
     "hints": {
       "dismiss": "Ho capito",
@@ -264,7 +279,7 @@
         },
         "start": {
           "title": "I tuoi minuti, poi Inizia",
-          "body": "Scegli quanto tempo hai e il piano si adatta. Inizia lo suona dall'inizio, e puoi uscire quando vuoi."
+          "body": "Scegli quanto tempo hai, o un solo percorso, e il piano si adatta. Inizia lo suona dall'inizio, e puoi uscire quando vuoi."
         },
         "paths": {
           "title": "Percorsi",
@@ -280,7 +295,9 @@
         },
         "take": {
           "title": "Avvia la take",
-          "body": "Quando sei pronto, avvia una take. Yames ascolta e valuta tempo e note. Più lento e Più veloce cambiano il tempo."
+          "body": "Quando sei pronto, avvia una take. Yames ascolta e valuta tempo e note. Più lento e Più veloce cambiano il tempo.",
+          "bodyOff": "Quando sei pronto, inizia. La valutazione è spenta: il clic e l'immagine, niente voto. Più lento e Più veloce cambiano il tempo.",
+          "bodyAsk": "Quando sei pronto, avvia una take: valutata, con Yames in ascolto, o solo suonata. Scegli tu. Più lento e Più veloce cambiano il tempo."
         },
         "blocks": {
           "title": "I blocchi di oggi",
@@ -288,7 +305,9 @@
         },
         "progress": {
           "title": "Tempo pulito",
-          "body": "Progressi conta il tempo pulito: il più veloce a cui hai raggiunto la soglia, non solo il più veloce che hai suonato. È questo il numero da far crescere."
+          "body": "Progressi conta il tempo pulito: il più veloce a cui hai raggiunto la soglia, non solo il più veloce che hai suonato. È questo il numero da far crescere.",
+          "bodyOff": "Progressi tiene i tuoi minuti, la tua serie e i tempi suonati. Con la valutazione accesa aggiunge il tuo tempo pulito.",
+          "bodyAsk": "Progressi conta il tempo pulito: il più veloce a cui hai raggiunto la soglia, non solo il più veloce che hai suonato. È questo il numero da far crescere."
         }
       }
     },

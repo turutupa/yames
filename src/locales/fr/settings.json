@@ -450,7 +450,15 @@
       "view": "Vue de pratique",
       "viewHint": "Ce qu'une séance affiche pendant que tu joues.",
       "grade": "Évaluer mon jeu",
-      "gradeHint": "Désactivé : les séances n'écoutent pas et n'évaluent rien. Vos minutes et votre série comptent toujours."
+      "gradeHint": "Si Yames écoute ton jeu. Tu peux aussi changer dans n'importe quelle séance.",
+      "grading": {
+        "on": "Évalue-moi",
+        "onHint": "Yames écoute par ton micro ou ton entrée et évalue ton timing et tes notes.",
+        "off": "Juste jouer",
+        "offHint": "Le clic et l'image. Rien n'écoute, rien n'est évalué.",
+        "ask": "Demande-moi",
+        "askHint": "Chaque séance demande avant sa première prise, jusqu'à ce que tu choisisses."
+      }
     }
   },
   "keybindings": {

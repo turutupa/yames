@@ -104,7 +104,8 @@
         "keepWarm": "Keeping it warm, last played {{days}} days ago.",
         "keepWarmYesterday": "Keeping it warm, last played yesterday.",
         "keepWarmToday": "Keeping it warm, played earlier today.",
-        "keepWarmNew": "A first taste."
+        "keepWarmNew": "A first taste.",
+        "focusChosen": "Only this Path today, as you chose."
       },
       "from": "{{path}} · {{level}} · Step {{step}}",
       "fromNoLevel": "{{path}} · Step {{step}}",
@@ -146,6 +147,12 @@
           "busier": "{{bpm}} BPM, but more notes to each beat: busier than {{was}} BPM here.",
           "startsSlow": "It starts at {{bpm}} BPM, under the {{was}} here: a new exercise starts slow and climbs as you play it clean."
         }
+      },
+      "focus": {
+        "label": "Paths:",
+        "mix": "My daily mix",
+        "emptyMix": "Nothing is in your daily mix. Pick a Path for today, or add one to the mix on Paths.",
+        "nothingIn": "{{path}} has nothing to play today. Pick another Path or your daily mix."
       }
     },
     "why": {
@@ -203,7 +210,9 @@
       "testOut": "Test out of {{step}}: one Take at the pass tempo, {{bpm}} BPM.",
       "benchmark": "Benchmark, day {{day}}: the same Exercise at {{bpm}} BPM each time, to compare.",
       "yourTurn": "Your turn: {{exercise}}. Not checked yet, so you judge it.",
-      "newFromSibling": "New. It starts at {{bpm}} BPM, about 80% of your clean {{clean}} BPM on {{sibling}}."
+      "newFromSibling": "New. It starts at {{bpm}} BPM, about 80% of your clean {{clean}} BPM on {{sibling}}.",
+      "focusChosen": "You chose {{path}} for today, so the whole Session comes from it.",
+      "playedUngraded": "Where you left it: {{bpm}} BPM."
     },
     "bar": {
       "summary": "The bar: {{even}}% even and {{heard}}% of the notes heard, at {{bpm}} BPM."
@@ -248,7 +257,8 @@
       "fasterCeiling": "Already the fastest tempo this Exercise has",
       "tempoLocked": "A Test out is played at the pass tempo, so this one stays put",
       "previous": "Previous",
-      "previousFirst": "This is the first block, so there is nothing before it"
+      "previousFirst": "This is the first block, so there is nothing before it",
+      "playUngraded": "Start, {{bpm}} BPM"
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} bars",
@@ -447,7 +457,12 @@
       "tabPreview": "The first bars, as tab",
       "exerciseCount": "{{count}} exercise",
       "exerciseCount_other": "{{count}} exercises",
-      "levelSubscribed": "Subscribed · starting at Step {{n}}"
+      "levelSubscribed": "Subscribed · starting at Step {{n}}",
+      "inMix": "In my daily mix",
+      "inMixHelp": "Off: Today leaves it out of your daily mix. Your progress stays, and you can still pick it for a day.",
+      "focusToday": "Practise only this today",
+      "playedUngraded": "{{count}} take, up to {{bpm}} BPM.",
+      "playedUngraded_other": "{{count}} takes, up to {{bpm}} BPM."
     },
     "progress": {
       "title": "Progress",
@@ -463,7 +478,10 @@
       "notGraded": "Not graded yet",
       "emptyTitle": "Your progress starts with one Session",
       "emptyBody": "Play today's Session and it shows up here: minutes played, your streak, and the clean tempo on every Exercise, all measured from your playing.",
-      "emptyStart": "Start today's Session"
+      "emptyStart": "Start today's Session",
+      "introOff": "Grading is off, so this is what you played: your minutes, your Sessions and the tempos you took on.",
+      "topPlayed": "top BPM played",
+      "ungraded": "Not graded"
     },
     "settings": {
       "openOnLastTool": "Open on my last tool",
@@ -506,6 +524,7 @@
       "soundTitle": "Watch plays the notes aloud. Off: it only lights them.",
       "demoPlaying": "Playing it for you. Start take when you're ready.",
       "legendFingers": "1–4 = fingers",
+      "legendShift": "= the hand moves",
       "legendPlayed": "just played",
       "beats": "The bar's beats",
       "beatLabel": "beat",
@@ -607,7 +626,7 @@
       "fellBack": "Your chosen input isn't connected, so I'm listening to {{device}} this Session.",
       "defaultDevice": "your default input",
       "chooseInput": "Choose input",
-      "playUngraded": "Play without grading",
+      "playUngraded": "Just play this one",
       "notGraded": "Not graded",
       "turnOn": "Turn on input",
       "noSignal": "No signal",
@@ -617,17 +636,33 @@
         "noAnswer": "The input didn't answer. If a permission prompt is open, answer it, then press Start again.",
         "busy": "Another app is using your input. Close it, then press Start again.",
         "other": "Your input wouldn't start. Check it, or choose another one."
-      },
-      "gradingOff": "Grading off",
-      "turnOnGrading": "Turn on grading"
+      }
     },
     "ungraded": {
       "ready": "Not graded: the input is off, so I'm not listening this Session.",
-      "readyOff": "Not graded: grading is off in Settings.",
       "result": "Not graded: the input was off",
-      "resultOff": "Not graded: grading is off in Settings",
+      "resultOff": "Played, not graded",
       "body": "It counts as practice, for your minutes and your streak. Your clean tempo and Steps only move on graded Takes.",
-      "recap": "not graded"
+      "recap": "not graded",
+      "bodyOff": "It counts toward your minutes and your streak."
+    },
+    "ask": {
+      "graded": "Start take, {{bpm}} BPM · graded",
+      "justPlay": "Just play",
+      "remember": "Remember my choice",
+      "line": "Graded, I listen through your mic or input. Or just play: the click and the picture, nothing graded."
+    },
+    "grademe": {
+      "fix": "Grade me",
+      "why": "I'll listen through your mic or input and grade your timing and notes.",
+      "session": "This Session",
+      "always": "Always"
+    },
+    "meter": {
+      "silent": "Input level: no signal",
+      "low": "Input level: low",
+      "good": "Input level: good",
+      "high": "Input level: high"
     }
   }
 }

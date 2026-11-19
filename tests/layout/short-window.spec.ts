@@ -13,7 +13,7 @@ const SIZES = [
   { width: 1024, height: 700 },
   { width: 1280, height: 720 },
 ];
-const SCENES = ["session-ready", "session-input-failed", "session-input-off", "session-ungraded-ready"];
+const SCENES = ["session-ready", "session-input-failed", "session-input-off", "session-ungraded-ready", "session-ask-ready"];
 
 /** Every visible thing in the footer, and Start, that ends below the window. */
 async function belowFold(page: Page): Promise<string[]> {

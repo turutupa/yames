@@ -104,7 +104,8 @@
         "keepWarm": "Giữ phong độ, chơi lần cuối {{days}} ngày trước.",
         "keepWarmYesterday": "Giữ phong độ, chơi lần cuối hôm qua.",
         "keepWarmToday": "Giữ phong độ, đã chơi hôm nay.",
-        "keepWarmNew": "Làm quen trước."
+        "keepWarmNew": "Làm quen trước.",
+        "focusChosen": "Hôm nay chỉ lộ trình này, như bạn đã chọn."
       },
       "from": "{{path}} · {{level}} · Bước {{step}}",
       "fromNoLevel": "{{path}} · Bước {{step}}",
@@ -146,6 +147,12 @@
           "busier": "{{bpm}} BPM, nhưng nhiều nốt hơn mỗi phách: dày hơn {{was}} BPM ở đây.",
           "startsSlow": "Bắt đầu ở {{bpm}} BPM, dưới mức {{was}} ở đây: bài mới bắt đầu chậm và tăng dần khi bạn chơi sạch."
         }
+      },
+      "focus": {
+        "label": "Lộ trình:",
+        "mix": "Bài trộn hằng ngày",
+        "emptyMix": "Bài trộn hằng ngày đang trống. Chọn một lộ trình cho hôm nay, hoặc thêm vào bài trộn ở mục Lộ trình.",
+        "nothingIn": "{{path}} hôm nay không có gì để chơi. Hãy chọn lộ trình khác hoặc bài trộn hằng ngày."
       }
     },
     "why": {
@@ -203,7 +210,9 @@
       "testOut": "Kiểm tra vượt {{step}}: một lượt ở tempo đạt, {{bpm}} BPM.",
       "benchmark": "Mốc so sánh, ngày {{day}}: cùng một bài ở {{bpm}} BPM mỗi lần, để so sánh.",
       "yourTurn": "Đến lượt bạn: {{exercise}}. Chưa được kiểm tra, bạn tự đánh giá.",
-      "newFromSibling": "Mới. Bắt đầu ở {{bpm}} BPM, khoảng 80% tempo sạch {{clean}} BPM của bạn ở {{sibling}}."
+      "newFromSibling": "Mới. Bắt đầu ở {{bpm}} BPM, khoảng 80% tempo sạch {{clean}} BPM của bạn ở {{sibling}}.",
+      "focusChosen": "Hôm nay bạn chọn {{path}}, nên cả buổi tập đều lấy từ đó.",
+      "playedUngraded": "Tiếp từ chỗ bạn dừng: {{bpm}} BPM."
     },
     "bar": {
       "summary": "Mức đạt: đều {{even}}% và nghe được {{heard}}% số nốt, ở {{bpm}} BPM."
@@ -248,7 +257,8 @@
       "fasterCeiling": "Đây đã là tempo nhanh nhất của bài này",
       "tempoLocked": "Bài kiểm tra chơi ở tempo đạt, nên giữ nguyên",
       "previous": "Trước",
-      "previousFirst": "Đây là khối đầu tiên, không có gì phía trước"
+      "previousFirst": "Đây là khối đầu tiên, không có gì phía trước",
+      "playUngraded": "Bắt đầu, {{bpm}} BPM"
     },
     "result": {
       "kick": "Lượt {{take}} · {{title}} · {{bpm}} BPM · {{bars}} ô nhịp",
@@ -447,7 +457,12 @@
       "tabPreview": "Mấy ô nhịp đầu, dạng tab",
       "exerciseCount_other": "{{count}} bài tập",
       "exerciseCount": "{{count}} bài tập",
-      "levelSubscribed": "Đã đăng ký · bắt đầu từ Bước {{n}}"
+      "levelSubscribed": "Đã đăng ký · bắt đầu từ Bước {{n}}",
+      "inMix": "Trong bài trộn hằng ngày",
+      "inMixHelp": "Tắt: Hôm nay sẽ bỏ lộ trình này khỏi bài trộn hằng ngày. Tiến độ vẫn giữ, và bạn vẫn có thể chọn nó cho một ngày.",
+      "focusToday": "Hôm nay chỉ tập lộ trình này",
+      "playedUngraded": "{{count}} lượt, tối đa {{bpm}} BPM.",
+      "playedUngraded_other": "{{count}} lượt, tối đa {{bpm}} BPM."
     },
     "progress": {
       "title": "Tiến bộ",
@@ -463,7 +478,10 @@
       "notGraded": "Chưa được chấm",
       "emptyTitle": "Tiến bộ bắt đầu từ một buổi tập",
       "emptyBody": "Chơi buổi tập hôm nay và nó sẽ hiện ở đây: số phút đã chơi, chuỗi ngày và tempo sạch của từng bài, tất cả đo từ cách bạn chơi.",
-      "emptyStart": "Bắt đầu buổi tập hôm nay"
+      "emptyStart": "Bắt đầu buổi tập hôm nay",
+      "introOff": "Chấm điểm đang tắt, nên đây là những gì bạn đã chơi: số phút, số buổi và các tempo bạn đã chơi.",
+      "topPlayed": "BPM cao nhất đã chơi",
+      "ungraded": "Không chấm điểm"
     },
     "settings": {
       "openOnLastTool": "Mở ở công cụ dùng lần cuối",
@@ -498,6 +516,7 @@
       "legendNow": "chơi ngay",
       "legendNext": "tiếp",
       "legendFingers": "1–4 = ngón",
+      "legendShift": "= tay dịch chuyển",
       "watch": "Xem",
       "watchStop": "Dừng",
       "watchTitle": "Sáng lần lượt từng nốt theo tempo này. Không có tiếng, không chấm điểm.",
@@ -607,7 +626,7 @@
       "fellBack": "Đầu vào bạn chọn chưa được kết nối, nên buổi này tôi nghe {{device}}.",
       "defaultDevice": "đầu vào mặc định",
       "chooseInput": "Chọn đầu vào",
-      "playUngraded": "Chơi không chấm điểm",
+      "playUngraded": "Chỉ chơi lượt này",
       "notGraded": "Không chấm điểm",
       "turnOn": "Bật đầu vào",
       "noSignal": "Không có tín hiệu",
@@ -617,17 +636,33 @@
         "noAnswer": "Đầu vào không phản hồi. Nếu có hộp thoại xin quyền đang mở, hãy trả lời rồi bấm Bắt đầu lại.",
         "busy": "Một ứng dụng khác đang dùng đầu vào. Hãy đóng nó rồi bấm Bắt đầu lại.",
         "other": "Không bật được đầu vào. Hãy kiểm tra hoặc chọn cái khác."
-      },
-      "gradingOff": "Đã tắt chấm điểm",
-      "turnOnGrading": "Bật chấm điểm"
+      }
     },
     "ungraded": {
       "ready": "Không chấm điểm: đầu vào đang tắt nên buổi này tôi không nghe.",
-      "readyOff": "Không chấm điểm: chấm điểm đang tắt trong Cài đặt.",
       "result": "Không chấm điểm: đầu vào đã tắt",
-      "resultOff": "Không chấm điểm: chấm điểm đang tắt trong Cài đặt",
+      "resultOff": "Đã chơi, không chấm điểm",
       "body": "Vẫn tính là luyện tập, cho số phút và chuỗi ngày. Tempo sạch và các Bước chỉ tiến lên với lượt chơi được chấm.",
-      "recap": "không chấm điểm"
+      "recap": "không chấm điểm",
+      "bodyOff": "Vẫn tính vào số phút và chuỗi ngày của bạn."
+    },
+    "ask": {
+      "graded": "Bắt đầu lượt, {{bpm}} BPM · chấm điểm",
+      "justPlay": "Chỉ chơi",
+      "remember": "Nhớ lựa chọn của tôi",
+      "line": "Có chấm điểm, tôi nghe qua micro hoặc đầu vào của bạn. Hoặc chỉ chơi: tiếng click và hình ảnh, không chấm điểm."
+    },
+    "grademe": {
+      "fix": "Chấm điểm tôi",
+      "why": "Tôi sẽ nghe qua micro hoặc đầu vào của bạn và chấm nhịp và nốt.",
+      "session": "Buổi này",
+      "always": "Luôn luôn"
+    },
+    "meter": {
+      "silent": "Mức đầu vào: không có tín hiệu",
+      "low": "Mức đầu vào: thấp",
+      "good": "Mức đầu vào: tốt",
+      "high": "Mức đầu vào: cao"
     }
   }
 }

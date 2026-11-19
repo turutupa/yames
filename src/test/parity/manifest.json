@@ -1518,6 +1518,11 @@
       "read": true,
       "written": true
     },
+    "session.grading": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
     "betaUpdate.checkedAt": {
       "store": "settings.json",
       "read": true,
@@ -1549,6 +1554,16 @@
       "written": true
     },
     "session.listenSound": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "session.offMix": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "session.todayFocus": {
       "store": "settings.json",
       "read": true,
       "written": true

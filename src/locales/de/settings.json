@@ -450,7 +450,15 @@
       "view": "Übungsansicht",
       "viewHint": "Was eine Sitzung beim Spielen zeigt.",
       "grade": "Mein Spiel bewerten",
-      "gradeHint": "Aus: Sessions laufen, ohne zuzuhören, und bewerten nichts. Minuten und Serie zählen trotzdem."
+      "gradeHint": "Ob Yames deinem Spiel zuhört. Du kannst es auch in jeder Session umstellen.",
+      "grading": {
+        "on": "Bewerte mich",
+        "onHint": "Yames hört über dein Mikrofon oder deinen Eingang zu und bewertet Timing und Töne.",
+        "off": "Einfach spielen",
+        "offHint": "Klick und Bild. Nichts hört zu, nichts wird bewertet.",
+        "ask": "Frag mich",
+        "askHint": "Eine Session fragt vor ihrem ersten Take, bis du dich entscheidest."
+      }
     }
   },
   "keybindings": {

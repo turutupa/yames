@@ -149,6 +149,15 @@
         "guidance": "Une interface ou un adaptateur jack, c'est mieux, mais le micro du téléphone marche : pose-le près de la guitare, pas dans ta poche.",
         "noDevices": "Aucune entrée trouvée. Branche l'interface ou l'adaptateur ; s'il n'apparaît pas, débranche-le et rebranche-le.",
         "permission": "Accès au micro : Paramètres Android › Applications › Yames › Autorisations › Micro, puis Autoriser. Une interface USB ou un adaptateur jack demande la même autorisation."
+      },
+      "ask": {
+        "title": "Yames doit-il écouter ton jeu et l'évaluer ?",
+        "subtitle": "Dans les deux cas, tu as ton plan, le clic et l'image. Tu peux changer ça dans les Réglages quand tu veux.",
+        "yes": "Oui, évalue mon jeu",
+        "yesDesc": "Yames écoute par un micro ou une entrée directe et vérifie ton timing et tes notes. Ensuite, tu le configures.",
+        "no": "Non, juste le clic et l'image",
+        "noDesc": "Rien n'écoute et aucun micro n'est demandé. Tes minutes et ta série comptent quand même.",
+        "noNote": "Les séances se joueront sans évaluation. Tu peux l'activer depuis n'importe quelle séance ou dans les Réglages."
       }
     },
     "hearItWork": {
@@ -175,7 +184,8 @@
         "sound": "Son du clic",
         "theme": "Thème",
         "control": "Contrôle",
-        "input": "Entrée audio"
+        "input": "Entrée audio",
+        "grading": "Évaluation"
       },
       "controlKeyboard": "Clavier",
       "controlFootswitch": "Pédale",
@@ -186,7 +196,12 @@
       "tour": "Faites-moi visiter",
       "moreOnToday": "+{{count}} de plus dans Aujourd'hui",
       "subtitleNext": "Ta prochaine séance t'attend dans Aujourd'hui. Modifie ce que tu veux ici, ou plus tard dans les Réglages.",
-      "nextSession": "Ta prochaine séance"
+      "nextSession": "Ta prochaine séance",
+      "grading": {
+        "on": "Évalue mon jeu",
+        "off": "Juste jouer, sans évaluation",
+        "ask": "Demander à chaque séance"
+      }
     },
     "hints": {
       "dismiss": "Compris",
@@ -264,7 +279,7 @@
         },
         "start": {
           "title": "Tes minutes, puis Commencer",
-          "body": "Choisis combien de temps tu as, et le plan s'ajuste. Commencer le joue depuis le début, et tu peux t'arrêter quand tu veux."
+          "body": "Choisis combien de temps tu as, ou un seul parcours, et le plan s'ajuste. Commencer le joue depuis le début, et tu peux t'arrêter quand tu veux."
         },
         "paths": {
           "title": "Parcours",
@@ -280,7 +295,9 @@
         },
         "take": {
           "title": "Lancer la prise",
-          "body": "Quand tu es prêt, lance une prise. Yames écoute et note ton placement et tes notes. Plus lent et Plus vite changent le tempo."
+          "body": "Quand tu es prêt, lance une prise. Yames écoute et note ton placement et tes notes. Plus lent et Plus vite changent le tempo.",
+          "bodyOff": "Quand tu es prêt, lance-toi. L'évaluation est désactivée : le clic et l'image, rien d'évalué. Plus lent et Plus vite changent le tempo.",
+          "bodyAsk": "Quand tu es prêt, lance une prise : évaluée, avec Yames qui écoute, ou juste jouée. À toi de choisir. Plus lent et Plus vite changent le tempo."
         },
         "blocks": {
           "title": "Les blocs du jour",
@@ -288,7 +305,9 @@
         },
         "progress": {
           "title": "Tempo propre",
-          "body": "Progrès compte le tempo propre : le plus rapide auquel tu as atteint la barre, pas seulement le plus rapide que tu as joué. C'est ce chiffre qu'il faut faire monter."
+          "body": "Progrès compte le tempo propre : le plus rapide auquel tu as atteint la barre, pas seulement le plus rapide que tu as joué. C'est ce chiffre qu'il faut faire monter.",
+          "bodyOff": "Progrès garde tes minutes, ta série et les tempos joués. Avec l'évaluation, il ajoute ton tempo propre.",
+          "bodyAsk": "Progrès compte le tempo propre : le plus rapide auquel tu as atteint la barre, pas seulement le plus rapide que tu as joué. C'est ce chiffre qu'il faut faire monter."
         }
       }
     },

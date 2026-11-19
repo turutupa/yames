@@ -104,7 +104,8 @@
         "keepWarm": "Warm houden, {{days}} dagen geleden gespeeld.",
         "keepWarmYesterday": "Warm houden, gisteren gespeeld.",
         "keepWarmToday": "Warm houden, vandaag al gespeeld.",
-        "keepWarmNew": "Een eerste kennismaking."
+        "keepWarmNew": "Een eerste kennismaking.",
+        "focusChosen": "Vandaag alleen dit pad, zoals je koos."
       },
       "from": "{{path}} · {{level}} · Stap {{step}}",
       "fromNoLevel": "{{path}} · Stap {{step}}",
@@ -146,6 +147,12 @@
           "busier": "{{bpm}} BPM, maar meer noten per tel: drukker dan {{was}} BPM hier.",
           "startsSlow": "Het begint op {{bpm}} BPM, onder de {{was}} hier: een nieuwe oefening begint langzaam en klimt zodra je hem schoon speelt."
         }
+      },
+      "focus": {
+        "label": "Paden:",
+        "mix": "Mijn dagelijkse mix",
+        "emptyMix": "Je dagelijkse mix is leeg. Kies een pad voor vandaag, of zet er een in de mix bij Paden.",
+        "nothingIn": "{{path}} heeft vandaag niets om te spelen. Kies een ander pad of je dagelijkse mix."
       }
     },
     "why": {
@@ -203,7 +210,9 @@
       "testOut": "{{step}} overslaan: één take op het slaagtempo, {{bpm}} BPM.",
       "benchmark": "Meetpunt, dag {{day}}: elke keer dezelfde oefening op {{bpm}} BPM, om te vergelijken.",
       "yourTurn": "Jouw beurt: {{exercise}}. Nog niet gecontroleerd, dus jij beoordeelt het.",
-      "newFromSibling": "Nieuw. Hij begint op {{bpm}} BPM, ongeveer 80% van je schone {{clean}} BPM op {{sibling}}."
+      "newFromSibling": "Nieuw. Hij begint op {{bpm}} BPM, ongeveer 80% van je schone {{clean}} BPM op {{sibling}}.",
+      "focusChosen": "Je koos vandaag {{path}}, dus de hele sessie komt daaruit.",
+      "playedUngraded": "Waar je was gebleven: {{bpm}} BPM."
     },
     "bar": {
       "summary": "De lat: {{even}}% gelijkmatig en {{heard}}% van de noten gehoord, op {{bpm}} BPM."
@@ -248,7 +257,8 @@
       "fasterCeiling": "Al het snelste tempo van deze oefening",
       "tempoLocked": "Een test speel je op het slagingstempo, dus dat blijft vast",
       "previous": "Vorige",
-      "previousFirst": "Dit is het eerste blok, er komt niets voor"
+      "previousFirst": "Dit is het eerste blok, er komt niets voor",
+      "playUngraded": "Start, {{bpm}} BPM"
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} maten",
@@ -447,7 +457,12 @@
       "tabPreview": "De eerste maten als tab",
       "exerciseCount": "{{count}} oefening",
       "exerciseCount_other": "{{count}} oefeningen",
-      "levelSubscribed": "Geabonneerd · je begint bij stap {{n}}"
+      "levelSubscribed": "Geabonneerd · je begint bij stap {{n}}",
+      "inMix": "In mijn dagelijkse mix",
+      "inMixHelp": "Uit: Vandaag laat het buiten je dagelijkse mix. Je voortgang blijft, en je kunt het nog steeds voor een dag kiezen.",
+      "focusToday": "Vandaag alleen dit oefenen",
+      "playedUngraded": "{{count}} take, tot {{bpm}} BPM.",
+      "playedUngraded_other": "{{count}} takes, tot {{bpm}} BPM."
     },
     "progress": {
       "title": "Voortgang",
@@ -463,7 +478,10 @@
       "notGraded": "Nog niet beoordeeld",
       "emptyTitle": "Je voortgang begint met één sessie",
       "emptyBody": "Speel de sessie van vandaag en het staat hier: gespeelde minuten, je reeks en het schone tempo van elke oefening, allemaal gemeten aan je spel.",
-      "emptyStart": "Start de sessie van vandaag"
+      "emptyStart": "Start de sessie van vandaag",
+      "introOff": "Beoordelen staat uit, dus dit is wat je speelde: je minuten, je sessies en de tempo's die je speelde.",
+      "topPlayed": "hoogste BPM gespeeld",
+      "ungraded": "Niet beoordeeld"
     },
     "settings": {
       "openOnLastTool": "Openen op mijn laatste tool",
@@ -498,6 +516,7 @@
       "legendNow": "speel nu",
       "legendNext": "volgende",
       "legendFingers": "1–4 = vingers",
+      "legendShift": "= de hand schuift",
       "watch": "Bekijk",
       "watchStop": "Stop",
       "watchTitle": "Laat de noten op volgorde oplichten in dit tempo. Zonder geluid, zonder beoordeling.",
@@ -607,7 +626,7 @@
       "fellBack": "Je gekozen ingang is niet aangesloten, dus deze sessie luister ik naar {{device}}.",
       "defaultDevice": "je standaardingang",
       "chooseInput": "Ingang kiezen",
-      "playUngraded": "Spelen zonder beoordeling",
+      "playUngraded": "Alleen deze spelen",
       "notGraded": "Niet beoordeeld",
       "turnOn": "Ingang aanzetten",
       "noSignal": "Geen signaal",
@@ -617,17 +636,33 @@
         "noAnswer": "De ingang gaf geen antwoord. Staat er een toestemmingsvraag open, beantwoord die en druk dan opnieuw op Start.",
         "busy": "Een andere app gebruikt je ingang. Sluit die en druk dan opnieuw op Start.",
         "other": "Je ingang wilde niet starten. Controleer hem of kies een andere."
-      },
-      "gradingOff": "Beoordeling uit",
-      "turnOnGrading": "Beoordeling aanzetten"
+      }
     },
     "ungraded": {
       "ready": "Niet beoordeeld: de ingang staat uit, dus ik luister deze sessie niet.",
-      "readyOff": "Niet beoordeeld: beoordeling staat uit in Instellingen.",
       "result": "Niet beoordeeld: de ingang stond uit",
-      "resultOff": "Niet beoordeeld: beoordeling staat uit in Instellingen",
+      "resultOff": "Gespeeld, niet beoordeeld",
       "body": "Het telt als oefening, voor je minuten en je reeks. Je schone tempo en stappen bewegen alleen bij beoordeelde takes.",
-      "recap": "niet beoordeeld"
+      "recap": "niet beoordeeld",
+      "bodyOff": "Het telt mee voor je minuten en je reeks."
+    },
+    "ask": {
+      "graded": "Take starten, {{bpm}} BPM · beoordeeld",
+      "justPlay": "Gewoon spelen",
+      "remember": "Mijn keuze onthouden",
+      "line": "Beoordeeld luister ik via je microfoon of ingang. Of speel gewoon: de klik en het beeld, niets beoordeeld."
+    },
+    "grademe": {
+      "fix": "Beoordeel me",
+      "why": "Ik luister via je microfoon of ingang en beoordeel je timing en noten.",
+      "session": "Deze sessie",
+      "always": "Altijd"
+    },
+    "meter": {
+      "silent": "Ingangsniveau: geen signaal",
+      "low": "Ingangsniveau: laag",
+      "good": "Ingangsniveau: goed",
+      "high": "Ingangsniveau: hoog"
     }
   }
 }

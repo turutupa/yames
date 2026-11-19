@@ -38,6 +38,10 @@
  *   Sessions without a new clean rung is parked for two days. A Path with
  *   nothing today says why in `skipped`.
  *
+ * Which Paths it is given is Today's choice (`focus.ts`): the daily mix, or
+ * one Path for the day (`focused`), which plans that Path alone and fills time
+ * it has no fresh work for with its passed Exercises at a higher tempo.
+ *
  * Five minutes is one thing rather than two thin slices: splitting it leaves no
  * time for a second Take of anything (the mocks' open question 12).
  *
@@ -99,6 +103,8 @@ const MIN_WARMUP_BPM = 40;
 export type ReasonCode =
   | "firstEver"
   | "newExercise"
+  /** Played only without grading: where the player left it (owner, 2026-11-18). */
+  | "playedUngraded"
   /** New, but started from a sibling's clean tempo rather than the first rung. */
   | "newFromSibling"
   | "newStep"
@@ -121,6 +127,8 @@ export type ReasonCode =
   | "chosen"
   // Play now across every subscribed Path (`rotation.ts`).
   | "focusTurn"
+  /** The player chose this one Path for today (`focus.ts`). */
+  | "focusChosen"
   | "keepWarm"
   | "reviewDue"
   | "parked"
@@ -253,6 +261,19 @@ export type PlannerInput = {
    * not serve straight back what was just turned down.
    */
   avoid?: ReadonlySet<string>;
+  /**
+   * The player chose this one Path for today (`focus.ts`): `paths` is that Path
+   * alone. The focus block says so, and time the Path has no fresh work for
+   * goes to its passed Exercises at a higher tempo (Find my edge) before the
+   * focus block grows. Absent: the plan is exactly what it always was.
+   */
+  focused?: boolean;
+  /**
+   * The player chose to play without grading (owner, 2026-11-18): no
+   * placement climb, which only means anything when it is graded. A new Path
+   * starts on its first Exercise like any other.
+   */
+  ungraded?: boolean;
 };
 
 /** How many rungs to come down after this long away. */
@@ -332,6 +353,14 @@ export function tempoFor(path: PathDoc, exercise: Exercise, progress: PlayerProg
   const takes = takesOf(progress, path.id, exercise.id).filter((t) => !isUngradedTake(t));
   const passAt = exercise.tempo.passAtBpm ?? firstRung(exercise);
   const values = { exercise: exercise.title };
+
+  // Played, but only without grading: not new, and the tempo is the one the
+  // player chose last time. Practice is practice (owner, 2026-11-18).
+  const played = takesOf(progress, path.id, exercise.id);
+  if (takes.length === 0 && played.length > 0) {
+    const bpm = played[0].bpm;
+    return { bpm, why: { code: "playedUngraded", values: { ...values, bpm } } };
+  }
 
   if (takes.length === 0) {
     const sibling = siblingStart(path, exercise, progress);
@@ -924,7 +953,10 @@ export function planSession(input: PlannerInput): SessionPlan {
 
   // --- the focus block ---
   let focusMinutes = row.blocks[0];
-  const turn = mood === "returning" && paths.length > 1 ? headContext(focusPath, true) : undefined;
+  const chosen: Reason | undefined = input.focused
+    ? { code: "focusChosen", values: { path: focusPath.title } }
+    : undefined;
+  const turn = chosen ?? (mood === "returning" && paths.length > 1 ? headContext(focusPath, true) : undefined);
   const sessions = sessionCount(progress);
   const yourTurn =
     minutes >= 15 && sessions % YOUR_TURN_EVERY === YOUR_TURN_EVERY - 1
@@ -936,7 +968,7 @@ export function planSession(input: PlannerInput): SessionPlan {
   if (yourPick && focusMinutes - YOUR_TURN_MINUTES >= MIN_BLOCK_MINUTES) focusMinutes -= YOUR_TURN_MINUTES;
 
   const focusIndex = steps.length;
-  if (isNewPath(progress, focusPath.id)) {
+  if (isNewPath(progress, focusPath.id) && !input.ungraded) {
     const placed = placementStep(placementPicks(focusPath, progress), progress, focusMinutes, "focus", turn);
     if (placed) steps.push(placed);
   } else {
@@ -1054,7 +1086,7 @@ export function planSession(input: PlannerInput): SessionPlan {
       if (head) {
         used.add(key(head));
         const context = mood === "first" ? undefined : headContext(other, false);
-        if (isNewPath(progress, other.id)) {
+        if (isNewPath(progress, other.id) && !input.ungraded) {
           const placed = placementStep(placementPicks(other, progress), progress, mins, id, context);
           if (placed) {
             steps.push(placed);
@@ -1089,6 +1121,16 @@ export function planSession(input: PlannerInput): SessionPlan {
       steps.push(exerciseStep(next, id, "next", { bpm: tempo.bpm, why }, mins, progress));
       return;
     }
+    // One Path chosen and nothing fresh left in it: an Exercise already passed,
+    // the one played longest ago, pushed past its clean tempo.
+    if (input.focused && steps.filter((x) => x.kind === "exercise").length < MAX_GRADED) {
+      const again = passedEarlier(focusPath, progress).find((p) => !used.has(key(p)));
+      if (again) {
+        used.add(key(again));
+        steps.push(edgeStep(again, progress, { id, minutes: mins }));
+        return;
+      }
+    }
     const lead = steps[focusIndex];
     if (lead) steps[focusIndex] = { ...lead, minutes: lead.minutes + mins };
   });
@@ -1114,6 +1156,19 @@ export function planSession(input: PlannerInput): SessionPlan {
     focusPathId: focusPath.id,
     skipped: skippedOf(paths, kept, progress, now),
   };
+}
+
+/**
+ * A Path's passed Exercises with a clean tempo, the one played longest ago
+ * first: what a day on one Path fills its spare time with (`focused`).
+ */
+function passedEarlier(path: PathDoc, progress: PlayerProgress): Pick[] {
+  const lastPlayed = (pick: Pick) => takesOf(progress, path.id, pick.exercise.id)[0]?.startedAt ?? 0;
+  return path.steps
+    .flatMap((step) => step.exercises.filter(isGradable).map((exercise) => ({ path, step, exercise })))
+    .filter((pick) => isExercisePassed(progress, path.id, pick.exercise))
+    .filter((pick) => cleanTempoOf(progress, path.id, pick.exercise.id) !== null)
+    .sort((a, b) => lastPlayed(a) - lastPlayed(b));
 }
 
 /** Subscribed Paths with no block today, and why: when they were last played. */

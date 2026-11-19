@@ -591,6 +591,7 @@ export function NeckInstruction({
             )
           )}
           {hasFingers && <span data-k="fingers">{t("session.practice.legendFingers")}</span>}
+          {hasFingers && fingers.shifts?.size ? <span data-k="shift">{t("session.practice.legendShift")}</span> : null}
         </span>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type Ref } from "react";
 import { useTranslation } from "react-i18next";
+import { LiveLevelBars } from "../../components/LiveLevelBars";
 import { setSoundType, setVolume } from "../../ipc";
 import { SOUND_TYPES } from "../../constants/metronome";
 import type { AppState, Setlist, Preset } from "../../types";
@@ -325,6 +326,14 @@ interface MainHeaderProps {
    */
   onSetUpInput?: () => void;
   /**
+   * Show the input's chip at all. Off on the learning pages for a player who
+   * chose to play without grading (owner, 2026-11-18): an "Input off" there
+   * reads as something wrong with a choice they made.
+   */
+  inputChip?: boolean;
+  /** Draw the input's live level in the chip while it listens: off when grading is off. */
+  levelMeter?: boolean;
+  /**
    * Show the click's sound picker ("Wood", "Drum", …). W36 item 2.
    *
    * The owner, over a song: *"i don't think we need the audio preset dropdown
@@ -413,6 +422,8 @@ export function MainHeader({
   voiceEnabled = false,
   listening = false,
   onSetUpInput,
+  inputChip = true,
+  levelMeter = false,
   soundPicker = true,
   modeBar = false,
   onOpenHelp,
@@ -594,7 +605,7 @@ export function MainHeader({
         {/* A readout, not a switch — nothing in the bar turns the input on,
             so the chip does not pretend to. Off, and with somewhere to set it
             up, it is the way there instead: the one place that says so. */}
-        {!listening && onSetUpInput ? (
+        {!inputChip ? null : !listening && onSetUpInput ? (
           <button
             type="button"
             className="context-chip context-chip-input"
@@ -613,7 +624,12 @@ export function MainHeader({
               className={`context-chip context-chip-static context-chip-input${listening ? " listening" : ""}`}
               role="status"
             >
-              <MicIcon off={!listening} />
+              {/* Listening, and graded: the level, live (owner, 2026-11-18). */}
+              {listening && levelMeter ? (
+                <LiveLevelBars active label={(w) => t(`session.meter.${w}`)} />
+              ) : (
+                <MicIcon off={!listening} />
+              )}
               <span className="context-chip-label">
                 {listening ? t("transport.listening") : t("transport.inputOff")}
               </span>

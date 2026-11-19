@@ -105,6 +105,13 @@ import {
 } from "../../../session/runner";
 import type { BigAction, RunState, TakeOutcome, UngradedWhy } from "../../../session/runner";
 import { classifyInputError } from "../../../session/inputStart";
+import {
+  GRADING_KEY,
+  LEGACY_GRADE_KEY,
+  legacyGradeFor,
+  readGradingChoice,
+} from "../../../session/grading";
+import type { GradingChoice } from "../../../session/grading";
 import type { InputFailure } from "../../../session/inputStart";
 import { TAKE_COUNT_IN_BARS, buildTake } from "../../../session/take";
 import { GUITAR_BAND, bandVolumeFor, buildTakeBand, readBandVolume, takeMix } from "../../../session/takeBand";
@@ -122,7 +129,11 @@ import {
   rememberSwap,
   swapMemoryOn,
   swapOptions,
+  swapsIn,
+  withScope,
 } from "../../../session/swap";
+import { FOCUS_KEY, MIX, OFF_MIX_KEY, readFocus, readOffMix, todayPaths as todayPathsOf } from "../../../session/focus";
+import type { TodayFocus } from "../../../session/focus";
 import type { SwapChoice, SwapMemory, SwapOptions } from "../../../session/swap";
 
 /** How many Takes are read back for planning. More than any plan looks at. */
@@ -136,8 +147,8 @@ const PRACTICE_VIEW_KEY = "practiceView";
 const VIEW_HINT_KEY = "session.viewHintSeen";
 /** How loud the band is under a jam-backed Take, 0..1.5 (0 is the click alone). */
 const BAND_VOLUME_KEY = "session.bandVolume";
-/** Settings → Practice → "Grade my playing". Off: every Session is played without grading. */
-export const GRADE_KEY = "session.grade";
+/** Settings → Practice → "Grade my playing", now a choice of three (`session/grading.ts`). */
+export { GRADING_KEY } from "../../../session/grading";
 const TICK_MS = 1000;
 /** Minutes per Exercise in Test out: one Take at the pass tempo, and a breath. */
 /** How many recent timing deviations the running screen's strip shows. */
@@ -351,8 +362,21 @@ export function useSessionRun(input: SessionRunInput) {
   const [minutes, setMinutesState] = useState<PlanMinutes>(10);
   const [practiceView, setPracticeViewState] = useState<PracticeView>(DEFAULT_PRACTICE_VIEW);
   const [viewHintSeen, setViewHintSeen] = useState(false);
-  /** Settings → Practice → "Grade my playing", kept. */
-  const [grade, setGradeState] = useState(true);
+  /** Whether Yames grades the player: on, off, or ask at the ready screen (`session/grading.ts`). */
+  const [grading, setGradingState] = useState<GradingChoice>("ask");
+  /**
+   * Grading is "ask" and this Session has not been told yet: a Take's ready
+   * screen offers a graded Take and "Just play", side by side.
+   */
+  const [asking, setAsking] = useState(false);
+  const askingRef = useRef(asking);
+  askingRef.current = asking;
+  /** "Remember my choice", under the two buttons. */
+  const [askRemember, setAskRemember] = useState(false);
+  const askRememberRef = useRef(askRemember);
+  askRememberRef.current = askRemember;
+  /** "Just play this one": the current Take is ungraded, the next is graded again. */
+  const ungradedOnce = useRef(false);
   const [inputStart, setInputStart] = useState<InputStartState>(INPUT_IDLE);
   const inputStartRef = useRef(inputStart);
   inputStartRef.current = inputStart;
@@ -389,6 +413,9 @@ export function useSessionRun(input: SessionRunInput) {
   const [planClock, setPlanClock] = useState(() => Date.now());
   /** Today's swaps as kept (`session/swap.ts`); undefined until the store has answered. */
   const [swapStored, setSwapStored] = useState<SwapMemory | null | undefined>(undefined);
+  /** Today's focus, "mix" or one Path (`focus.ts`), and the Paths switched out of the mix. */
+  const [focusStored, setFocusStored] = useState<TodayFocus>(MIX);
+  const [offMix, setOffMix] = useState<string[]>([]);
 
   const latest = useRef(input);
   latest.current = input;
@@ -442,8 +469,8 @@ export function useSessionRun(input: SessionRunInput) {
   const inputWasOn = useRef(false);
   /** The last ask was refused: no more asking by itself, only from a press. */
   const autoInputFailed = useRef(false);
-  const gradeRef = useRef(grade);
-  gradeRef.current = grade;
+  const gradingRef = useRef(grading);
+  gradingRef.current = grading;
   /**
    * Go again starts the count-in by itself (UX audit SES-4), and so does a
    * Start pressed while the input is still coming on. Either is a request the
@@ -490,12 +517,19 @@ export function useSessionRun(input: SessionRunInput) {
     void storeLoad<number>(BAND_VOLUME_KEY).then((saved) => {
       setBandChoice(readBandVolume(saved));
     });
-    void storeLoad<boolean>(GRADE_KEY).then((saved) => {
-      if (saved === false) setGradeState(false);
-    });
+    void Promise.all([
+      storeLoad<unknown>(GRADING_KEY).catch(() => undefined),
+      storeLoad<unknown>(LEGACY_GRADE_KEY).catch(() => undefined),
+    ]).then(([saved, legacy]) => setGradingState(readGradingChoice(saved, legacy)));
     void storeLoad<unknown>(SWAPS_KEY)
       .then((saved) => setSwapStored(readSwapMemory(saved)))
       .catch(() => setSwapStored(null));
+    void storeLoad<unknown>(FOCUS_KEY)
+      .then((saved) => setFocusStored(readFocus(saved)))
+      .catch(() => {});
+    void storeLoad<unknown>(OFF_MIX_KEY)
+      .then((saved) => setOffMix(readOffMix(saved)))
+      .catch(() => {});
   }, [wantsLearning, refresh]);
 
   // The packs, in the language on screen: loaded with the learning side, and
@@ -530,10 +564,17 @@ export function useSessionRun(input: SessionRunInput) {
     void storeSave(BAND_VOLUME_KEY, level).catch(() => {});
   }, []);
 
-  /** "Grade my playing": the next Session starts graded or not; one running now is left as it is. */
-  const setGrade = useCallback((next: boolean) => {
-    setGradeState(next);
-    void storeSave(GRADE_KEY, next).catch(() => {});
+  /**
+   * The player's choice about grading, kept. The next Session starts by it; one
+   * running now is left as it is (its own buttons change it for itself).
+   */
+  const setGrading = useCallback((next: GradingChoice) => {
+    setGradingState(next);
+    gradingRef.current = next;
+    void storeSave(GRADING_KEY, next).catch(() => {});
+    // The old switch says the same, for a build from before the choice.
+    const legacy = legacyGradeFor(next);
+    if (legacy !== null) void storeSave(LEGACY_GRADE_KEY, legacy).catch(() => {});
   }, []);
 
   /** The one-time hint is done with: switched once, or read once. */
@@ -554,6 +595,9 @@ export function useSessionRun(input: SessionRunInput) {
   );
 
   const myPaths = useMemo(() => playerPaths(paths, progress), [paths, progress]);
+  // What Today plans from: the daily mix, or the one Path chosen for today.
+  const today = useMemo(() => todayPathsOf(myPaths, offMix, focusStored), [myPaths, offMix, focusStored]);
+  const todayFocus = today.focus;
 
   // The swaps as they stand today: yesterday's become this plan's penalty.
   const swapMemory = useMemo(() => swapMemoryOn(swapStored ?? null, planClock), [swapStored, planClock]);
@@ -570,12 +614,23 @@ export function useSessionRun(input: SessionRunInput) {
     [myPaths, paths, progress, planClock],
   );
   const basePlan: SessionPlan = useMemo(
-    () => planSession({ minutes, now: planClock, paths: myPaths, progress, avoid: avoidSet(swapMemory) }),
-    [minutes, planClock, myPaths, progress, swapMemory],
+    () =>
+      planSession({
+        minutes,
+        now: planClock,
+        paths: today.paths,
+        progress,
+        avoid: avoidSet(swapMemory),
+        ungraded: grading === "off",
+        ...(today.focusedPath ? { focused: true } : {}),
+      }),
+    [minutes, planClock, today, progress, swapMemory, grading],
   );
+  // Swaps belong to the plan they were made in: another focus, another plan.
+  const todaySwaps = useMemo(() => swapsIn(swapMemory, todayFocus), [swapMemory, todayFocus]);
   const plan: SessionPlan = useMemo(
-    () => applySwaps(basePlan, swapMemory.swaps, swapContext),
-    [basePlan, swapMemory.swaps, swapContext],
+    () => applySwaps(basePlan, todaySwaps, swapContext),
+    [basePlan, todaySwaps, swapContext],
   );
 
   /** What Today's row `index` can be swapped for (owner, 2026-11-18). */
@@ -586,6 +641,27 @@ export function useSessionRun(input: SessionRunInput) {
   const keepSwaps = useCallback((next: SwapMemory) => {
     setSwapStored(next);
     void storeSave(SWAPS_KEY, next).catch(() => {});
+  }, []);
+
+  /** Today's focus: the mix, or one subscribed Path. The plan is rebuilt and its swaps go. */
+  const setTodayFocus = useCallback(
+    (next: TodayFocus) => {
+      const focus = readFocus(next);
+      setFocusStored(focus);
+      void storeSave(FOCUS_KEY, focus).catch(() => {});
+      if (focus !== todayFocus) keepSwaps(withScope(swapMemory, focus));
+    },
+    [todayFocus, swapMemory, keepSwaps],
+  );
+
+  /** "In my daily mix" on one subscribed Path. Its progress stays either way. */
+  const setInMix = useCallback((pathId: string, inMix: boolean) => {
+    setOffMix((off) => {
+      if (off.includes(pathId) !== inMix) return off;
+      const next = inMix ? off.filter((id) => id !== pathId) : [...off, pathId];
+      void storeSave(OFF_MIX_KEY, next).catch(() => {});
+      return next;
+    });
   }, []);
   /** Row `index` plays `replacement` today, in the same minutes. */
   const confirmSwap = useCallback(
@@ -598,20 +674,20 @@ export function useSessionRun(input: SessionRunInput) {
       if (!shown || !from || !now || !to || replacement.id !== shown.id) return;
       // Back to what the planner had: that is no swap at all.
       if (from.pathId === to.pathId && from.exerciseId === to.exerciseId) {
-        keepSwaps(forgetSwap(swapMemory, shown.id));
+        keepSwaps(forgetSwap(withScope(swapMemory, todayFocus), shown.id));
         return;
       }
-      keepSwaps(rememberSwap(swapMemory, shown.id, from, to, now));
+      keepSwaps(rememberSwap(withScope(swapMemory, todayFocus), shown.id, from, to, now));
     },
-    [plan, basePlan, swapMemory, keepSwaps],
+    [plan, basePlan, swapMemory, keepSwaps, todayFocus],
   );
   /** Row `index` back as the planner had it. */
   const undoSwap = useCallback(
     (index: number) => {
       const shown = plan.steps[index];
-      if (shown) keepSwaps(forgetSwap(swapMemory, shown.id));
+      if (shown) keepSwaps(forgetSwap(withScope(swapMemory, todayFocus), shown.id));
     },
-    [plan, swapMemory, keepSwaps],
+    [plan, swapMemory, keepSwaps, todayFocus],
   );
 
   // --- what is on the stage ------------------------------------------------
@@ -1216,7 +1292,14 @@ export function useSessionRun(input: SessionRunInput) {
       inputAttempt.current += 1;
       setInputStart(INPUT_IDLE);
       setJumpAsked(null);
-      const ungraded: UngradedWhy | null = gradeRef.current ? null : "gradingOff";
+      const choice = gradingRef.current;
+      const ungraded: UngradedWhy | null = choice === "off" ? "gradingOff" : null;
+      // Not decided: the ready screen asks, and nothing turns the input on first.
+      const ask = choice === "ask" && !isPreview;
+      askingRef.current = ask;
+      setAsking(ask);
+      setAskRemember(false);
+      ungradedOnce.current = false;
       snapshot.current = {
         bpm: state.bpm,
         subdivision: state.subdivision,
@@ -1252,8 +1335,8 @@ export function useSessionRun(input: SessionRunInput) {
         ownsCoach.current = true;
         // Quiet: the Session listens and saves through the coach, but the
         // player never pressed the coach's Start, so its feed is left alone.
-        // Grading off: no microphone either.
-        void coach.startSession({ quiet: true, listen: ungraded === null }).catch(() => {});
+        // Grading off, or not decided yet: no microphone either.
+        void coach.startSession({ quiet: true, listen: choice === "on" }).catch(() => {});
       }
     },
     [progress, setView],
@@ -1397,9 +1480,11 @@ export function useSessionRun(input: SessionRunInput) {
       }));
       if (!has) void savePathState(row).catch(() => {});
       void storeSave(UNSUBSCRIBED_KEY, unsubscribed).catch(() => {});
+      // A new subscription is in the daily mix.
+      setInMix(path.id, true);
       return null;
     },
-    [progress],
+    [progress, setInMix],
   );
 
   /**
@@ -1434,9 +1519,10 @@ export function useSessionRun(input: SessionRunInput) {
       if (unsubscribed.length !== (progress.unsubscribed ?? []).length) {
         void storeSave(UNSUBSCRIBED_KEY, unsubscribed).catch(() => {});
       }
+      if (!isSubscribed(progress, path.id)) setInMix(path.id, true);
       return null;
     },
-    [progress],
+    [progress, setInMix],
   );
 
   /** Unsubscribe: Today stops planning it. Its row and every Take stay. */
@@ -1445,8 +1531,10 @@ export function useSessionRun(input: SessionRunInput) {
       const unsubscribed = [...new Set([...(progress.unsubscribed ?? []), path.id])];
       setProgress((p) => ({ ...p, unsubscribed }));
       void storeSave(UNSUBSCRIBED_KEY, unsubscribed).catch(() => {});
+      // Today was on this Path alone: back to the mix.
+      if (focusStored === path.id) setTodayFocus(MIX);
     },
-    [progress.unsubscribed],
+    [progress.unsubscribed, focusStored, setTodayFocus],
   );
 
   /** Test out of a Step: one Take at each graded Exercise's pass tempo. */
@@ -1535,11 +1623,21 @@ export function useSessionRun(input: SessionRunInput) {
    */
   useEffect(() => {
     if (run.phase !== "ready" || run.ungraded || listening || previewRef.current) return;
+    // Not decided yet: the player is asked first, and nothing is turned on.
+    if (asking) return;
     if (autoInputFailed.current || inputStartRef.current.status === "starting") return;
     void startInputNow();
     // Each ready screen, and a change of mind about grading.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [run.phase, run.stepIndex, run.takes, run.ungraded, listening]);
+  }, [run.phase, run.stepIndex, run.takes, run.ungraded, listening, asking]);
+
+  // "Just play this one" covered one Take: once it is heard (its outcome keeps
+  // why), the next ready screen is graded again.
+  useEffect(() => {
+    if (run.phase !== "result" || !ungradedOnce.current) return;
+    ungradedOnce.current = false;
+    if (run.ungraded === "inputOff") dispatch({ type: "setUngraded", why: null });
+  }, [run.phase, run.ungraded]);
 
   // On from anywhere (Settings, the wizard, a late answer): nothing failed any more.
   useEffect(() => {
@@ -1570,11 +1668,48 @@ export function useSessionRun(input: SessionRunInput) {
       return;
     }
     // Waiting on an input nobody is turning on (it was refused before): ask.
-    if (!listening && !run.ungraded && inputStartRef.current.status !== "starting") void startInputNow();
+    if (!listening && !run.ungraded && !askingRef.current && inputStartRef.current.status !== "starting") {
+      void startInputNow();
+    }
   }, [run.phase, run.ungraded, prepared, listening, engineTrouble, playTake, startInputNow]);
+
+  /**
+   * Grading is "ask": the player answered at the ready screen, for the rest of
+   * this Session, and for good with "Remember my choice". Either way the Take
+   * starts: graded once the input is on, or at once without it.
+   */
+  const decide = useCallback(
+    (graded: boolean) => {
+      askingRef.current = false;
+      setAsking(false);
+      if (askRememberRef.current) setGrading(graded ? "on" : "off");
+      if (runRef.current.phase !== "ready") return;
+      if (listen.active) listen.stop({ tail: false });
+      autoStart.current = true;
+      if (!graded) {
+        inputAttempt.current += 1;
+        setInputStart(INPUT_IDLE);
+        dispatch({ type: "setUngraded", why: "chosen" });
+        return;
+      }
+      autoInputFailed.current = false;
+      if (latest.current.listening) {
+        if (prepared && !listen.active) {
+          autoStart.current = false;
+          playTake();
+        }
+        return;
+      }
+      if (inputStartRef.current.status !== "starting") void startInputNow();
+    },
+    [setGrading, listen, prepared, playTake, startInputNow],
+  );
 
   /** The one big next action, from the button, the keyboard or the pedal. */
   const go = useCallback(() => {
+    // Not decided: Start (the button, Space, the pedal) is the graded Take,
+    // the first of the two the ready screen offers.
+    if (big.kind === "playTake" && askingRef.current) return decide(true);
     // Start (a Take's or a timed block's) ends a listen demo first, in the queue
     // ahead of whatever Start sends; a Take then starts once it is loaded again.
     if (listen.active && (big.kind === "playTake" || runRef.current.phase === "timedReady")) {
@@ -1599,12 +1734,17 @@ export function useSessionRun(input: SessionRunInput) {
     if (event.type === "again") autoStart.current = true;
     dispatch(event);
     if (event.type === "close") setView(origin.current);
-  }, [big, listening, playTake, endTake, setView, startInputNow, listen]);
+  }, [big, listening, playTake, endTake, setView, startInputNow, listen, decide]);
 
-  /** "Play without grading": this Take and the rest of the Session, input or not. */
+  /**
+   * "Just play this one": graded, but the input will not come on, so this Take
+   * is played without it. The next one is graded again; a refusal stays said,
+   * so its ready screen offers the same ways out without asking by itself.
+   */
   const playUngraded = useCallback(() => {
     inputAttempt.current += 1;
-    setInputStart(INPUT_IDLE);
+    setInputStart((now) => (now.status === "failed" ? now : INPUT_IDLE));
+    ungradedOnce.current = true;
     dispatch({ type: "setUngraded", why: "inputOff" });
     if (runRef.current.phase === "ready") autoStart.current = true;
   }, []);
@@ -1615,12 +1755,18 @@ export function useSessionRun(input: SessionRunInput) {
    * grading back on there too (acceptance 4, P2-4): the input was never the
    * cause.
    */
-  const gradeAgain = useCallback(() => {
-    if (runRef.current.ungraded === "gradingOff") setGrade(true);
-    dispatch({ type: "setUngraded", why: null });
-    autoInputFailed.current = false;
-    if (!latest.current.listening) void startInputNow();
-  }, [startInputNow, setGrade]);
+  const gradeAgain = useCallback(
+    (options: { always?: boolean } = {}) => {
+      if (options.always) setGrading("on");
+      askingRef.current = false;
+      setAsking(false);
+      ungradedOnce.current = false;
+      dispatch({ type: "setUngraded", why: null });
+      autoInputFailed.current = false;
+      if (!latest.current.listening) void startInputNow();
+    },
+    [startInputNow, setGrading],
+  );
 
   /**
    * To a block of the bar, or Previous (owner, 2026-11-18). From a ready
@@ -1754,14 +1900,21 @@ export function useSessionRun(input: SessionRunInput) {
             steps: [{ ...lastExercise, id: `${lastExercise.id}-more`, bpm: state.outcomes[state.outcomes.length - 1]?.bpm ?? lastExercise.bpm }],
           }
         : null
-      : planSession({ minutes: 5, now: Date.now(), paths: myPaths, progress });
+      : planSession({
+          minutes: 5,
+          now: Date.now(),
+          paths: today.paths,
+          progress,
+          ungraded: gradingRef.current === "off",
+          ...(today.focusedPath ? { focused: true } : {}),
+        });
     if (!next || next.steps.length === 0) return;
     dispatch({ type: "close" });
     endedRef.current = false;
     begin(next, { untimed: state.untimed });
     origin.current = from;
     if (restoredTo.current) snapshot.current = restoredTo.current;
-  }, [begin, myPaths, progress]);
+  }, [begin, today, progress]);
 
   /** Leave the recap for a screen of the player's choosing: where it began, or Progress. */
   const closeTo = useCallback(
@@ -1900,6 +2053,13 @@ export function useSessionRun(input: SessionRunInput) {
     hasBand: take?.exercise.backing.kind === "jam",
     paths,
     myPaths,
+    /** What Today plans from: the mix or one Path (`focus.ts`). */
+    today,
+    todayFocus,
+    setTodayFocus,
+    /** The Paths switched out of the daily mix. */
+    offMix,
+    setInMix,
     progress,
     take,
     exercise,
@@ -1922,9 +2082,14 @@ export function useSessionRun(input: SessionRunInput) {
     jumpAsked,
     /** The Session's own ask for the input. */
     inputStart,
-    /** Settings → Practice → "Grade my playing". */
-    grade,
-    setGrade,
+    /** Grade my playing: on, off, or ask (`session/grading.ts`). */
+    grading,
+    setGrading,
+    /** Grading is "ask" and this Session's ready screen is asking. */
+    asking,
+    /** "Remember my choice", under the ask's two buttons. */
+    askRemember,
+    setAskRemember,
     /** Placement's verdict, on the result that ended its climb. */
     placed,
     /** Where this Session goes back to when it ends. */
@@ -1968,6 +2133,7 @@ export function useSessionRun(input: SessionRunInput) {
       stayHere,
       playUngraded,
       gradeAgain,
+      decide,
       startInput: startInputNow,
     },
   };

@@ -149,6 +149,15 @@
         "guidance": "Arabirim ya da kulaklık adaptörü daha iyidir ama telefonun mikrofonu da çalışır: cebine değil, gitara yakın koy.",
         "noDevices": "Giriş bulunamadı. Arabirimi ya da adaptörü tak; görünmezse çıkarıp yeniden tak.",
         "permission": "Mikrofon izni: Android Ayarları › Uygulamalar › Yames › İzinler › Mikrofon, sonra İzin ver. USB arabirim ya da kulaklık adaptörü de aynı izni ister."
+      },
+      "ask": {
+        "title": "Yames çalışını dinleyip değerlendirsin mi?",
+        "subtitle": "İki durumda da planın, klik ve görüntü seninle. Bunu Ayarlar'dan istediğin zaman değiştirebilirsin.",
+        "yes": "Evet, çalışımı değerlendir",
+        "yesDesc": "Yames bir mikrofon ya da doğrudan girişten dinler, zamanlamanı ve notalarını kontrol eder. Sırada kurulumu var.",
+        "no": "Hayır, sadece klik ve görüntü",
+        "noDesc": "Hiçbir şey dinlemez, mikrofon istenmez. Dakikaların ve serin yine sayılır.",
+        "noNote": "Oturumlar değerlendirmesiz çalınacak. Herhangi bir oturumdan ya da Ayarlar'dan açabilirsin."
       }
     },
     "hearItWork": {
@@ -175,7 +184,8 @@
         "sound": "Klik sesi",
         "theme": "Tema",
         "control": "Kontrol",
-        "input": "Ses girişi"
+        "input": "Ses girişi",
+        "grading": "Değerlendirme"
       },
       "controlKeyboard": "Klavye",
       "controlFootswitch": "Pedal",
@@ -186,7 +196,12 @@
       "tour": "Etrafı gezdir",
       "moreOnToday": "Bugün'de {{count}} tane daha",
       "subtitleNext": "Sıradaki seansın Bugün'de hazır. Buradan ya da sonra Ayarlar'dan değiştirebilirsin.",
-      "nextSession": "Sıradaki seansın"
+      "nextSession": "Sıradaki seansın",
+      "grading": {
+        "on": "Çalışımı değerlendirir",
+        "off": "Sadece çal, değerlendirme yok",
+        "ask": "Her oturumda sor"
+      }
     },
     "hints": {
       "dismiss": "Anlaşıldı",
@@ -264,7 +279,7 @@
         },
         "start": {
           "title": "Dakikaların, sonra Başla",
-          "body": "Ne kadar vaktin olduğunu seç, plan yeniden ayarlansın. Başla planı baştan çalar, istediğin an çıkabilirsin."
+          "body": "Ne kadar vaktin olduğunu ya da tek bir yolu seç, plan yeniden ayarlansın. Başla planı baştan çalar, istediğin an çıkabilirsin."
         },
         "paths": {
           "title": "Yollar",
@@ -280,7 +295,9 @@
         },
         "take": {
           "title": "Denemeyi başlat",
-          "body": "Hazır olunca bir deneme başlat. Yames dinler, zamanlamanı ve notalarını puanlar. Daha yavaş ve Daha hızlı tempoyu değiştirir."
+          "body": "Hazır olunca bir deneme başlat. Yames dinler, zamanlamanı ve notalarını puanlar. Daha yavaş ve Daha hızlı tempoyu değiştirir.",
+          "bodyOff": "Hazır olduğunda başla. Değerlendirme kapalı: klik ve görüntü, değerlendirme yok. Daha yavaş ve Daha hızlı tempoyu değiştirir.",
+          "bodyAsk": "Hazır olduğunda bir deneme başlat: Yames dinleyip değerlendirerek ya da sadece çalarak. Seçim senin. Daha yavaş ve Daha hızlı tempoyu değiştirir."
         },
         "blocks": {
           "title": "Bugünün blokları",
@@ -288,7 +305,9 @@
         },
         "progress": {
           "title": "Temiz tempo",
-          "body": "İlerleme temiz tempoyu sayar: sadece çaldığın en hızlı tempoyu değil, çıtayı geçtiğin en hızlı tempoyu. Büyütmen gereken sayı bu."
+          "body": "İlerleme temiz tempoyu sayar: sadece çaldığın en hızlı tempoyu değil, çıtayı geçtiğin en hızlı tempoyu. Büyütmen gereken sayı bu.",
+          "bodyOff": "İlerleme dakikalarını, serini ve çaldığın tempoları tutar. Değerlendirme açıkken temiz tempon da eklenir.",
+          "bodyAsk": "İlerleme temiz tempoyu sayar: sadece çaldığın en hızlı tempoyu değil, çıtayı geçtiğin en hızlı tempoyu. Büyütmen gereken sayı bu."
         }
       }
     },

@@ -104,7 +104,8 @@
         "keepWarm": "保持手感，上次是 {{days}} 天前。",
         "keepWarmYesterday": "保持手感，上次是昨天。",
         "keepWarmToday": "保持手感，今天已經練過。",
-        "keepWarmNew": "先嚐個鮮。"
+        "keepWarmNew": "先嚐個鮮。",
+        "focusChosen": "依你的選擇，今天只練這條路線。"
       },
       "from": "{{path}} · {{level}} · 第 {{step}} 步",
       "fromNoLevel": "{{path}} · 第 {{step}} 步",
@@ -146,6 +147,12 @@
           "busier": "{{bpm}} BPM，但每拍音符更多：比這裡的 {{was}} BPM 更密。",
           "startsSlow": "從 {{bpm}} BPM 開始，低於這裡的 {{was}}：新練習先慢後快，彈乾淨了就會提速。"
         }
+      },
+      "focus": {
+        "label": "路線：",
+        "mix": "我的每日組合",
+        "emptyMix": "每日組合是空的。選一條今天練的路線，或在「路線」裡把一條加進組合。",
+        "nothingIn": "{{path}}今天沒有可練的內容。換一條路線，或選每日組合。"
       }
     },
     "why": {
@@ -203,7 +210,9 @@
       "testOut": "{{step}}測試：以通過速度 {{bpm}} BPM 練一遍。",
       "benchmark": "基準測試，第{{day}}天：每次都以 {{bpm}} BPM 練同一個練習，用來對比。",
       "yourTurn": "輪到你：{{exercise}}。暫不檢查，由你自己判斷。",
-      "newFromSibling": "新練習。從 {{bpm}} BPM 開始，約為你在「{{sibling}}」上乾淨速度 {{clean}} BPM 的 80%。"
+      "newFromSibling": "新練習。從 {{bpm}} BPM 開始，約為你在「{{sibling}}」上乾淨速度 {{clean}} BPM 的 80%。",
+      "focusChosen": "今天你選了{{path}}，整節練習都從這裡來。",
+      "playedUngraded": "從你上次停下的地方：{{bpm}} BPM。"
     },
     "bar": {
       "summary": "及格線：{{bpm}} BPM 時均勻度 {{even}}%，聽到 {{heard}}% 的音。"
@@ -248,7 +257,8 @@
       "fasterCeiling": "已經是這個練習最快的速度",
       "tempoLocked": "測驗要用及格速度彈，所以速度不變",
       "previous": "上一個",
-      "previousFirst": "這是第一個練習區塊，前面沒有了"
+      "previousFirst": "這是第一個練習區塊，前面沒有了",
+      "playUngraded": "開始，{{bpm}} BPM"
     },
     "result": {
       "kick": "第 {{take}} 遍 · {{title}} · {{bpm}} BPM · {{bars}} 小節",
@@ -447,7 +457,12 @@
       "tabPreview": "前幾小節的六線譜",
       "exerciseCount_other": "{{count}} 個練習",
       "exerciseCount": "{{count}} 個練習",
-      "levelSubscribed": "已訂閱 · 從第 {{n}} 步開始"
+      "levelSubscribed": "已訂閱 · 從第 {{n}} 步開始",
+      "inMix": "加入每日組合",
+      "inMixHelp": "關閉後，「今天」不會把它排進每日組合。進度會保留，也仍可選它練一天。",
+      "focusToday": "今天只練這條",
+      "playedUngraded": "{{count}} 遍，最快 {{bpm}} BPM。",
+      "playedUngraded_other": "{{count}} 遍，最快 {{bpm}} BPM。"
     },
     "progress": {
       "title": "進度",
@@ -463,7 +478,10 @@
       "notGraded": "還沒評分",
       "emptyTitle": "你的進度從一次練習開始",
       "emptyBody": "彈完今天的練習，這裡就會出現：彈了多少分鐘、連續天數，以及每個練習的乾淨速度，全部來自你的演奏。",
-      "emptyStart": "開始今天的練習"
+      "emptyStart": "開始今天的練習",
+      "introOff": "評分已關閉，所以這裡是你彈過的內容：練習分鐘、練習次數和你彈過的速度。",
+      "topPlayed": "彈過的最高 BPM",
+      "ungraded": "未評分"
     },
     "settings": {
       "openOnLastTool": "打開上次用的工具",
@@ -498,6 +516,7 @@
       "legendNow": "現在彈",
       "legendNext": "下一個",
       "legendFingers": "1–4 = 手指",
+      "legendShift": "= 手移位",
       "watch": "觀看",
       "watchStop": "停止",
       "watchTitle": "依此速度逐一點亮各音。沒有聲音，不評分。",
@@ -607,7 +626,7 @@
       "fellBack": "你選擇的輸入未連接，這次練習改為聆聽 {{device}}。",
       "defaultDevice": "預設輸入",
       "chooseInput": "選擇輸入",
-      "playUngraded": "不評分彈奏",
+      "playUngraded": "這一遍直接彈",
       "notGraded": "未評分",
       "turnOn": "開啟輸入",
       "noSignal": "沒有訊號",
@@ -617,17 +636,33 @@
         "noAnswer": "輸入沒有回應。如果有權限對話框，請先回應，然後再按一次開始。",
         "busy": "另一個 App 正在使用你的輸入。請關閉它，然後再按一次開始。",
         "other": "輸入無法啟動。請檢查，或選擇其他輸入。"
-      },
-      "gradingOff": "評分已關閉",
-      "turnOnGrading": "開啟評分"
+      }
     },
     "ungraded": {
       "ready": "未評分：輸入已關閉，這次練習我不會聆聽。",
-      "readyOff": "未評分：已在設定中關閉評分。",
       "result": "未評分：當時輸入已關閉",
-      "resultOff": "未評分：已在設定中關閉評分",
+      "resultOff": "已彈，未評分",
       "body": "這算作練習，計入練習時間和連續天數。乾淨速度和步驟只會因評分過的錄音而前進。",
-      "recap": "未評分"
+      "recap": "未評分",
+      "bodyOff": "會計入你的練習分鐘和連續天數。"
+    },
+    "ask": {
+      "graded": "開始這一遍，{{bpm}} BPM · 評分",
+      "justPlay": "直接彈",
+      "remember": "記住我的選擇",
+      "line": "評分時，我會透過你的麥克風或輸入來聽。也可以直接彈：只有節拍聲和畫面，不評分。"
+    },
+    "grademe": {
+      "fix": "幫我評分",
+      "why": "我會透過你的麥克風或輸入來聽，並為你的節奏和音符評分。",
+      "session": "這次練習",
+      "always": "一直"
+    },
+    "meter": {
+      "silent": "輸入電平：無訊號",
+      "low": "輸入電平：低",
+      "good": "輸入電平：良好",
+      "high": "輸入電平：高"
     }
   }
 }

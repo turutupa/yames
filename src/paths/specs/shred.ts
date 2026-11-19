@@ -1648,14 +1648,15 @@ const ADVANCED: StepSpec[] = [
 
 /** 1-2-3-4 up six strings, up a fret, 4-3-2-1 down; twice, climbing. Six bars. */
 function petrucci(fret: number): string {
-  const up = (f: number) => acrossStrings({ cell: [0, 1, 2, 3], strings: [6, 5, 4, 3, 2, 1], fret: f });
-  const down = (f: number) => acrossStrings({ cell: [3, 2, 1, 0], strings: [1, 2, 3, 4, 5, 6], fret: f });
+  const up = (f: number) => acrossStrings({ cell: [0, 1, 2, 3], strings: [6, 5, 4, 3, 2, 1], fret: f, fingered: true });
+  const down = (f: number) => acrossStrings({ cell: [3, 2, 1, 0], strings: [1, 2, 3, 4, 5, 6], fret: f, fingered: true });
   return `/16 ${up(fret)} ${down(fret + 1)} ${up(fret + 2)} ${down(fret + 3)}`;
 }
 
 /** The spider, a string pair to each beat, crawling across and back. */
 function spider(fret: number): string {
-  const pair = (f: number, low: number, high: number) => `${low}:${f} ${high}:${f + 2} ${low}:${f + 1} ${high}:${f + 3}`;
+  // The fingers are the drill (1-3, then 2-4): written, so the neck shows them.
+  const pair = (f: number, low: number, high: number) => `${low}:${f}f1 ${high}:${f + 2}f3 ${low}:${f + 1}f2 ${high}:${f + 3}f4`;
   const up = (f: number) => [pair(f, 6, 5), pair(f, 5, 4), pair(f, 4, 3), pair(f, 3, 2)].join(" ");
   const back = (f: number) => [pair(f, 2, 1), pair(f, 3, 2), pair(f, 4, 3), pair(f, 5, 4)].join(" ");
   return `/16 ${up(fret)} | ${back(fret + 1)} | ${up(fret + 2)} | ${back(fret + 3)}`;
@@ -1663,8 +1664,8 @@ function spider(fret: number): string {
 
 /** 1-3-2-4 up six strings, then up a fret and 4-2-3-1 down. Three bars. */
 function permutation(fret: number): string {
-  const up = acrossStrings({ cell: [0, 2, 1, 3], strings: [6, 5, 4, 3, 2, 1], fret });
-  const down = acrossStrings({ cell: [3, 1, 2, 0], strings: [1, 2, 3, 4, 5, 6], fret: fret + 1 });
+  const up = acrossStrings({ cell: [0, 2, 1, 3], strings: [6, 5, 4, 3, 2, 1], fret, fingered: true });
+  const down = acrossStrings({ cell: [3, 1, 2, 0], strings: [1, 2, 3, 4, 5, 6], fret: fret + 1, fingered: true });
   return `/16 ${up} ${down}`;
 }
 

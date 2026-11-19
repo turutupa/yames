@@ -450,7 +450,15 @@
       "view": "Practice view",
       "viewHint": "What a Session shows while you play.",
       "grade": "Grade my playing",
-      "gradeHint": "Off: Sessions play without listening and grade nothing. Your minutes and streak still count."
+      "gradeHint": "Whether Yames listens to your playing. You can switch in any Session too.",
+      "grading": {
+        "on": "Grade me",
+        "onHint": "Yames listens through your mic or input and grades your timing and notes.",
+        "off": "Just play",
+        "offHint": "The click and the visuals. Nothing listens and nothing is graded.",
+        "ask": "Ask me",
+        "askHint": "A Session asks before its first Take, until you choose."
+      }
     }
   },
   "keybindings": {

@@ -1426,3 +1426,21 @@
   :is(.instrument-picker-card, .onboarding-sound-card, .onboarding-theme-card, .onboarding-coach-card, .onboarding-input-mode, .onboarding-start-path, .onboarding-start-level):focus-visible {
   outline-offset: -4px;
 }
+
+/* W5's question (owner, 2026-11-18): two equal answers, then, for a yes,
+   the input's setup under its own smaller heading. */
+.onboarding-grading-choice {
+  margin-bottom: 4px;
+}
+.onboarding-input-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.onboarding-input-setup-title {
+  margin: 0;
+  font: 600 17px/1.2 var(--l-display, inherit);
+  color: var(--text-primary);
+}

@@ -214,12 +214,24 @@ async function drive() {
         // The input step has no footer Skip, only its own "Skip, I'll set this up later".
         const skip = () =>
           (button(i18n.t("onboarding.skip")) ?? document.querySelector<HTMLButtonElement>('[data-testid="audio-input-skip"]'))?.click();
-        if (stop === "soundLook" || stop === "handsFree") {
+        // It asks first (owner, 2026-11-18): "Should Yames listen to your
+        // playing and grade it?". The question itself is `inputAsk`; the
+        // tools' steps are reached by "No", the input's own screens by "Yes".
+        const answer = (which: "yes" | "no") =>
+          document.querySelector<HTMLButtonElement>(`[data-testid="audio-input-grade-${which}"]`)?.click();
+        if (stop === "inputAsk") {
+          await until("the question", () => !!document.querySelector('[data-testid="audio-input-grade-yes"]'));
+        } else if (stop === "soundLook" || stop === "handsFree") {
+          answer("no");
+          await until("Next", () => !!button(i18n.t("onboarding.next")) && !button(i18n.t("onboarding.next"))!.disabled);
+          button(i18n.t("onboarding.next"))!.click();
           const id = stop === "soundLook" ? "sound-look" : "hands-free";
           await pressUntil(`Skip to ${id}`, skip, at(id), 20000);
         } else if (stop === "input" || stop === "ready") {
+          answer("yes");
           await until("the guitar heard", () => !!document.querySelector(".onboarding-input-gate.proven"), 20000);
         } else {
+          answer("yes");
           await until("the trouble panel", () => !!document.querySelector('[data-testid="audio-input-trouble"]'), 20000);
         }
         if (stop === "ready") {
@@ -243,10 +255,14 @@ async function drive() {
         `.rail button[data-view="${place}"], .mobile-tabs button[data-tab="${place}"]`,
       );
     await until("Today", () => !!byId("today"));
-    // A plan, or (subscribed to nothing) the way to the Paths instead of one.
+    // A plan, or (subscribed to nothing) the way to the Paths instead of one,
+    // or (nothing in the daily mix) the line that says so.
     await until(
       "a plan",
-      () => !!document.querySelector('.session-plan-item, [data-testid="today-choose-path"]'),
+      () =>
+        !!document.querySelector(
+          '.session-plan-item, [data-testid="today-choose-path"], [data-testid="today-nothing-why"]',
+        ),
     );
     if (stop === "paths" || stop === "path" || stop === "step" || stop === "edge" || stop === "edgeDone") {
       rail("paths")?.click();
@@ -348,7 +364,7 @@ async function drive() {
           if (shot!.session.band) await until("the band", () => !!byId("session-band"));
           if (stop !== "playing") {
             const outcome =
-              shot!.session.grade === false
+              shot!.session.grading === "off"
                 ? "session-ungraded"
                 : stop === "noCatch"
                   ? "session-no-catch"
