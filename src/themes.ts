@@ -237,6 +237,11 @@ const obsidian: Theme = {
     "--feedback-ok": "#f97316",
     "--feedback-miss": "#8c939f",
     "--neck-miss": "#ff5d6c",
+    // JetBrains Mono is a wide face: at the sizes drawn for a text face its
+    // headlines wrapped where no other theme's did ("Arpeggios over Changes",
+    // the wizard's primary button). A little smaller and set closer.
+    "--heading-scale": "0.9",
+    "--heading-tracking": "2.2",
   },
 };
 
@@ -277,17 +282,24 @@ const velvet: Theme = {
     "--font-family": "'Comfortaa', 'Nunito', system-ui, sans-serif",
     "--font-display": "'Comfortaa', 'Nunito', system-ui, sans-serif",
     "--font-heading": "'Comfortaa', 'Nunito', system-ui, sans-serif",
-    "--font-body": "'Comfortaa', 'Nunito', system-ui, sans-serif",
+    // Comfortaa is the voice on titles and labels; a paragraph of it at 12 px
+    // is hard going, so prose is Outfit, the round geometric sans Ember reads in.
+    "--font-body": "'Outfit', 'Nunito', 'Segoe UI', system-ui, sans-serif",
     "--font-num": "'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif",
     "--font-weight": "600",
     "--radius": "16px",
     "--radius-sm": "12px",
-    "--feedback-perfect": "#a78bfa",
+    // Was the accent's own violet, a shade from "good"'s periwinkle: on time
+    // is a green here as it is on the neck, and the four grades tell apart.
+    "--feedback-perfect": "#4ade80",
     "--feedback-good": "#838ef8",
     "--feedback-ok": "#f472b6",
     "--feedback-miss": "#9097a3",
     "--neck-miss": "#ff5d6c",
     "--neck-hit": "#4ade80",
+    // Comfortaa runs wide: a touch smaller, so a Path's title keeps to the
+    // one line it has in the other themes.
+    "--heading-scale": "0.93",
   },
 };
 
@@ -449,7 +461,7 @@ const ivory: Theme = {
     "--feedback-good": "#056178",
     "--feedback-ok": "#874a04",
     "--feedback-miss": "#535a66",
-    "--neck-miss": "#b3213a",
+    "--neck-miss": "#af2039",
   },
 };
 
@@ -499,7 +511,7 @@ const arctic: Theme = {
     "--feedback-good": "#01547f",
     "--feedback-ok": "#8a3407",
     "--feedback-miss": "#425064",
-    "--neck-miss": "#b3261e",
+    "--neck-miss": "#9a211a",
     "--neck-hit": "#15803d",
   },
 };
@@ -550,7 +562,7 @@ const sand: Theme = {
     "--feedback-good": "#644402",
     "--feedback-ok": "#931818",
     "--feedback-miss": "#4e4946",
-    "--neck-miss": "#b3213f",
+    "--neck-miss": "#911b33",
     "--heading-weight": "600",
     "--heading-tracking": "0.3",
     "--heading-scale": "1.04",
@@ -599,11 +611,13 @@ const lavender: Theme = {
     "--font-weight": "600",
     "--radius": "18px",
     "--radius-sm": "12px",
-    "--feedback-perfect": "#5b21b6",
+    // Was the accent itself, so "on time" and "listening" read as any other
+    // accented thing, next to an indigo "good": a green, AA on every surface.
+    "--feedback-perfect": "#0f5d2d",
     "--feedback-good": "#4338ca",
     "--feedback-ok": "#86198f",
     "--feedback-miss": "#594a79",
-    "--neck-miss": "#b3261e",
+    "--neck-miss": "#9f221b",
     "--neck-hit": "#15803d",
   },
 };
@@ -652,7 +666,8 @@ const prism: Theme = {
     "--font-weight": "500",
     "--radius": "20px",
     "--radius-sm": "14px",
-    "--feedback-perfect": "#b01260",
+    // Was a magenta a shade from the accent: a green, as on the neck.
+    "--feedback-perfect": "#10662f",
     "--feedback-good": "#7e22ce",
     "--feedback-ok": "#994104",
     "--feedback-miss": "#6e4e86",
