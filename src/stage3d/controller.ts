@@ -74,6 +74,8 @@ export type ControllerDeps = {
   probe?: boolean;
   /** The probe found the frames too slow: remember it. */
   onSlow?: (v: ProbeVerdict) => void;
+  /** The probe ran and this renderer is fast enough. */
+  onFast?: () => void;
   /**
    * This machine cannot draw the 3D neck: no WebGL2 on a GPU, or the frame-time
    * guard found it too slow. (Not "the player chose the flat neck".) A Take is
@@ -468,6 +470,7 @@ export class StageController {
           if (this.lastProbe) this.deps.onSlow?.(this.lastProbe);
           return;
         }
+        if (this.deps.probe && this.lastProbe) this.deps.onFast?.();
         this.engine = engine;
         this.set({ mode: "3d" });
         this.scheduler.invalidate();
