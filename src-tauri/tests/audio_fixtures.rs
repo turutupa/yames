@@ -115,6 +115,40 @@ fn detect(samples: &[f32], rate: u32, bpm: f64, gap_ms: f64, lag_ms: f64, feed: 
         .collect()
 }
 
+/// What the detector the app runs says its stamps are late by, which the
+/// detector's thread hands the Take's audio tap as it starts.
+fn detection_delay_ms(feed: Feed) -> f64 {
+    let profile = Instrument::ElectricGuitar.profile();
+    OnsetCore::with_hop(&profile, RATE, feed.hop).detection_delay_ns() as f64 / 1e6
+}
+
+/// The delay the pitch pass takes off every onset is the one the stamps
+/// really have: measured against when each note was struck, on clean, damped
+/// and high-gain sixteenths, it is within a few milliseconds of what aubio
+/// says (the rest is the poll and the input buffer, which put the newest
+/// sample a little after it arrived). If aubio's defaults or the hop ever
+/// move, this says so before the pitch pass reads every note in the wrong
+/// place again.
+#[test]
+fn the_detectors_stated_delay_is_what_its_stamps_are_late_by() {
+    let stated = detection_delay_ms(Feed::default());
+    assert!((20.0..30.0).contains(&stated), "aubio's delay for complex at 256: {stated}");
+    for tone in [Tone::Clean, Tone::Damped, Tone::HighGain] {
+        for bpm in [100.0, 160.0] {
+            let mut take = Take::new(tone, bpm, 64);
+            take.jitter_ms = 3.0;
+            let run = run_take(&take);
+            println!("{}: stamps {:.1} ms late, stated {stated:.1}", run.name, run.stamp_mean_ms);
+            assert!(
+                (run.stamp_mean_ms - stated).abs() <= 4.0,
+                "{}: stamps {:.1} ms late, aubio says {stated:.1}",
+                run.name,
+                run.stamp_mean_ms
+            );
+        }
+    }
+}
+
 // ──────────────────────────────────────────────────────────────────────
 // A Take: what the player does, and what the system does to it
 // ──────────────────────────────────────────────────────────────────────
@@ -1062,7 +1096,7 @@ fn a_finished_take_says_which_notes_were_right() {
 /// A Take the way the analyzer grades it once its audio has been through the
 /// pitch pass (`ScheduleRun::report_with_notes`): the same run as `run_take`,
 /// with the written pitches loaded and the Take's own audio, whose first
-/// sample is the detector clock's zero.
+/// sample is at the system's lag on the detector's clock.
 fn run_take_with_notes(take: &Take) -> (GradingRun, ScheduleReport) {
     let run = run_take(take);
     let length = take.schedule.length_beats;
@@ -1083,10 +1117,14 @@ fn run_take_with_notes(take: &Take) -> (GradingRun, ScheduleReport) {
         sr.note_onset(*o);
     }
     let weights = Instrument::ElectricGuitar.profile().score_weights;
+    // The tap stamps its first sample by the rule the detector stamps its
+    // hops by, on the same clock, so the system's lag is on both: the first
+    // sample is at `lag_ms` on the onsets' clock.
     let audio = TakeAudio {
         samples: &run.audio,
         rate: RATE,
-        start_ms: 0.0,
+        start_ms: take.lag_ms,
+        detection_delay_ms: detection_delay_ms(take.feed),
     };
     let t = std::time::Instant::now();
     let report = sr.report_with_notes(&weights, &audio).expect("a beat map");
@@ -1163,6 +1201,85 @@ fn notes_that_ring_into_each_other_leave_right_notes_unassessed() {
     assert_eq!(notes_of(pass).status, NotesStatus::NotesRing, "{pass:?}");
     assert_eq!(pass.not_assessed, vec!["noteIdentity".to_string()]);
     assert_eq!(pass.verdict, PassVerdict::Passed);
+}
+
+/// Correct sixteenths with a `noteIdentity` bar, the way a Session Take is
+/// graded: detector onsets with a system lag on top, the lag measured and
+/// corrected by the scorer, and the pitch pass run by `report_with_notes` over
+/// the Take's own audio. Not `identify`, which looks notes up where they were
+/// played and so cannot see where production looks them up.
+fn sixteenths_with_notes(tone: Tone, pattern: Pattern, bpm: f64) -> (GradingRun, ScheduleReport) {
+    run_take_with_notes(&sixteenths_take(tone, pattern, bpm))
+}
+
+fn sixteenths_take(tone: Tone, pattern: Pattern, bpm: f64) -> Take {
+    let mut take = Take::new(tone, bpm, 96);
+    take.pattern = pattern;
+    take.jitter_ms = 3.0;
+    take.lag_ms = 30.0;
+    take.pass_bars = pack_pass_bars("alternate-picking", "even-eighths.a-minor-one-string");
+    take.pitches = (0..96)
+        .map(|i| ScoreNote {
+            id: i as u32,
+            midi: take.pattern.midi(i),
+        })
+        .collect();
+    take
+}
+
+fn identity_ratio(check: &NotesCheck) -> Option<f64> {
+    let pitched = check.right + check.wrong + check.octave;
+    (pitched > 0).then(|| check.right as f64 / pitched as f64)
+}
+
+/// The research's finding of 2026-11 (M0): the pass looked every note up at
+/// the detector's timestamp, which is aubio's peak-picking delay (about 25 ms)
+/// after the attack, so at sixteenths above about 135 BPM it read each note
+/// from inside the next one and called most of a right Take wrong. Through the
+/// production path, every gap from 150 down to 75 ms: right notes measured,
+/// at least 0.95 right. At 220 BPM (68 ms) the rule says the notes are too
+/// fast to check, which is not a fail.
+#[test]
+fn right_sixteenths_are_right_at_every_speed_the_pass_checks() {
+    let mut failures = Vec::new();
+    for tone in [Tone::Clean, Tone::Damped, Tone::HighGain] {
+        for bpm in [100.0, 120.0, 135.0, 150.0, 160.0, 180.0, 200.0, 220.0] {
+            let (run, report) = sixteenths_with_notes(tone, Pattern::Chromatic, bpm);
+            let pass = report.grade.pass.as_ref().unwrap();
+            let check = notes_of(pass);
+            let ratio = identity_ratio(&check);
+            let gap = 15_000.0 / bpm;
+            println!("{:28} gap {gap:5.1} ms  {check:?}  ratio {ratio:?}", run.name);
+            if gap < 75.0 {
+                if check.status != NotesStatus::TooFast {
+                    failures.push(format!("{}: {:?}, wanted TooFast", run.name, check.status));
+                }
+                continue;
+            }
+            if check.status != NotesStatus::Measured || ratio.is_none_or(|r| r < 0.95) {
+                failures.push(format!("{} (gap {gap:.1} ms): {check:?} ratio {ratio:?}", run.name));
+            }
+        }
+    }
+    assert!(failures.is_empty(), "right notes called wrong:\n{}", failures.join("\n"));
+}
+
+/// Reading at the attack does not make every note right: a quarter of them a
+/// semitone off at 180 BPM still reads as about three in four, and fails.
+#[test]
+fn wrong_sixteenths_are_still_wrong_at_speed() {
+    for tone in [Tone::Clean, Tone::HighGain] {
+        let mut take = sixteenths_take(tone, Pattern::Chromatic, 180.0);
+        take.wrong = (0..96).step_by(4).collect();
+        let (run, report) = run_take_with_notes(&take);
+        let pass = report.grade.pass.as_ref().unwrap();
+        let check = notes_of(pass);
+        let ratio = identity_ratio(&check).unwrap();
+        println!("{}: {check:?} ratio {ratio:.2}", run.name);
+        assert_eq!(check.status, NotesStatus::Measured, "{}", run.name);
+        assert!((0.65..=0.85).contains(&ratio), "{}: {check:?}", run.name);
+        assert_eq!(pass.verdict, PassVerdict::Failed, "{}: {pass:?}", run.name);
+    }
 }
 
 /// A sweep, on the swept tone, is graded on its timing only. On a slow triplet
@@ -1479,26 +1596,29 @@ fn measure_timing_limit_by_signal() {
 #[test]
 #[ignore = "measurement, not a gate: npm run test:grading:measure"]
 fn measure_note_identity_limit_by_signal() {
-    println!("| Signal | gap ms | sixteenths at | right | wrong | octave | unheard | ratio |");
-    println!("|---|---|---|---|---|---|---|---|");
+    // Through the production path (`report_with_notes`, the detector's own
+    // onsets, a 30 ms system lag the scorer corrects), not `identify`, which
+    // looks notes up where they were played. Before 2026-11-19 this table was
+    // `identify`'s, and so could not show the pass reading every note at the
+    // detector's delayed timestamp.
+    println!("| Signal | gap ms | sixteenths at | right | wrong | octave | unpitched | ratio | status |");
+    println!("|---|---|---|---|---|---|---|---|---|");
     for (tone, pattern) in measured_tones() {
         for &gap in &SWEEP_GAPS_MS[..10] {
             let bpm = 15_000.0 / gap;
-            let mut take = Take::new(tone, bpm, 96);
-            take.pattern = pattern;
-            take.jitter_ms = 3.0;
-            let run = run_take(&take);
-            let id = identify(&run, &take);
+            let (_, report) = sixteenths_with_notes(tone, pattern, bpm);
+            let check = notes_of(report.grade.pass.as_ref().unwrap());
             println!(
-                "| {} | {:.1} | {:.0} | {} | {} | {} | {} | {} |",
+                "| {} | {:.1} | {:.0} | {} | {} | {} | {} | {} | {:?} |",
                 tone.name(),
                 gap,
                 bpm,
-                id.right,
-                id.wrong,
-                id.octave,
-                id.unheard,
-                id.ratio.map(|r| format!("{r:.2}")).unwrap_or("-".into()),
+                check.right,
+                check.wrong,
+                check.octave,
+                check.unpitched,
+                identity_ratio(&check).map(|r| format!("{r:.2}")).unwrap_or("-".into()),
+                check.status,
             );
         }
     }
