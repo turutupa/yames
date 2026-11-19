@@ -166,3 +166,26 @@ export const MINIMAL_SPEC: PathSpec = definePath({
     { id: "advanced", title: "A", summary: "Last.", startHereIf: ["You can land on 4 chords in a row.", "You get lost in the form."], steps: ["band"], warmups: [WARM] },
   ],
 });
+
+/**
+ * The minimal Path with words of its own on every warm-up variant: the key in
+ * the why and in the second how-to line. The build says them for the first
+ * variant too, which the generator must not write.
+ */
+export const VARIANT_TEXT_SPEC: PathSpec = {
+  ...MINIMAL_SPEC,
+  levels: MINIMAL_SPEC.levels!.map((level) => ({
+    ...level,
+    warmups: level.warmups.map((warmup) => ({
+      ...warmup,
+      vary: {
+        ...warmup.vary!,
+        build: (p) => ({
+          ...warmup.vary!.build(p),
+          purpose: `A purpose of its own for the line moved up ${p.key} frets.`,
+          howTo: ["Play it evenly.", `Start at fret ${3 + Number(p.key)}.`],
+        }),
+      },
+    })),
+  })),
+};

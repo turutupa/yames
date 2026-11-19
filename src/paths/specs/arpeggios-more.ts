@@ -305,7 +305,7 @@ export const MINOR_TWO_FIVE_ONE: StepSpec = {
         VARIANT_NOTE,
       ],
       coach: "A key that changes from day to day. Right notes and time after the take.",
-      vary: inKeys(MINOR_LINE, MINOR_CHART, { "D minor": 5, "E minor": 7, "G minor": -2 }),
+      vary: inKeys(MINOR_LINE, MINOR_CHART, { "D minor": 5, "E minor": 7, "G minor": -2 }, ROCK, { kind: "line", home: "A minor" }),
       tab: shiftFrets(MINOR_LINE, 5),
       position: 10,
       shifts: true,

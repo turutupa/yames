@@ -290,8 +290,20 @@ function rhythmWords(ex: Exercise): string {
   return words[shortest] ?? "mixed";
 }
 
+/**
+ * A variant's own why and how-to, when it has them: in the app they replace the
+ * card's for this variant, so a reviewer reads them against this variant's tab.
+ */
+function ownText(one: Exercise, base: Exercise): string {
+  const purpose = one.purpose !== base.purpose ? `<p class="line">${esc(one.purpose)}</p>` : "";
+  const howTo =
+    one.howTo !== base.howTo ? `<ul>${one.howTo.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : "";
+  if (!purpose && !howTo) return "";
+  return `<div class="how own"><b>This variant's own text</b> (shown instead of the card's)${purpose}${howTo}</div>`;
+}
+
 /** The part of a card that changes from variant to variant. */
-function variantBody(ex: Exercise): string {
+function variantBody(ex: Exercise, base: Exercise = ex): string {
   const harmony = harmonyText(ex);
   const landing = ex.landings?.length
     ? `<p class="line"><b>Graded moments:</b> ${ex.landings
@@ -301,7 +313,7 @@ function variantBody(ex: Exercise): string {
   const pass = ex.passBars.length
     ? `<p class="line"><b>Pass bar at ${ex.tempo.passAtBpm} BPM:</b> ${ex.passBars.map(passBarText).join("; ")}.</p>`
     : `<p class="line"><b>No metric pass bar.</b> ${ex.grading === "practiceOnly" ? "Nothing to pass." : "The player judges it."}</p>`;
-  return `${harmony ? `<p class="line"><b>Notes:</b> ${harmony}</p>` : ""}${landing}${tabHtml(ex)}${pass}
+  return `${harmony ? `<p class="line"><b>Notes:</b> ${harmony}</p>` : ""}${landing}${tabHtml(ex)}${ownText(ex, base)}${pass}
   <p class="small dim">Fret ${ex.position.fret}${ex.position.shifts === "allowed" ? ", hand moves" : ""}. ${ex.computed.noteCount} notes, tightest gap ${ex.computed.minGapMsAtTop ?? "-"} ms at the top rung, ${ex.computed.handShifts} hand shift${ex.computed.handShifts === 1 ? "" : "s"}, playable by the reach check up to about ${ex.computed.maxPlayableBpm} BPM, difficulty ${ex.computed.difficulty}.</p>`;
 }
 
@@ -367,10 +379,10 @@ function exerciseCard(ex: Exercise, stepOrder: number, exOrder: number): string 
   <header><h3><span class="exnum">${stepOrder}.${exOrder}</span> ${esc(ex.title)}</h3><div class="chips">${chips}</div></header>
   <p class="purpose">${esc(ex.purpose)}</p>
   ${warmupLine(ex)}${variantControls(ex)}
-  <div class="variant-slot">${variantBody(concrete(ex)[0])}</div>
+  <div class="variant-slot">${variantBody(concrete(ex)[0], ex)}</div>
   ${concrete(ex)
     .slice(1)
-    .map((one, i) => `<template data-v="${i + 1}">${variantBody(one)}</template>`)
+    .map((one, i) => `<template data-v="${i + 1}">${variantBody(one, ex)}</template>`)
     .join("")}
   ${gradedLine(ex)}
   <div class="player">
@@ -518,7 +530,7 @@ svg.guide .fret{fill:#7a848d}
 .rung.pass{border-color:var(--ok);border-width:2px;color:var(--ok)}
 .rung.sel{background:var(--play);color:#fff;border-color:var(--play)}
 .opts{display:flex;gap:10px;font-size:13.5px}.opts input{vertical-align:-1px}
-.how{margin:8px 0}.coach{background:#f6f1ea;border-left:3px solid var(--accent);padding:6px 10px;margin:8px 0;border-radius:0 6px 6px 0}
+.how{margin:8px 0}.how.own{background:#f3f0f7;border-radius:8px;padding:8px 10px}.coach{background:#f6f1ea;border-left:3px solid var(--accent);padding:6px 10px;margin:8px 0;border-radius:0 6px 6px 0}
 .grades{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13.5px;margin:8px 0}
 .note-box{background:#fbf3e4;border-radius:6px;padding:6px 10px;font-size:13.5px;margin:8px 0}
 .key{font-size:13.5px}.key .rung{cursor:default;pointer-events:none}

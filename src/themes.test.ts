@@ -285,6 +285,31 @@ describe("theme legibility", () => {
   });
 
   /**
+   * "B · Tonal" (owner, 2026-11-19): every secondary button is the accent
+   * mixed into a solid surface with its label in the accent, or in
+   * `--accent-ink-on-tint` where the accent is too light for it. The mix is
+   * `global.css`'s: 16% at rest, 24% under the pointer, into `--bg-solid` on a
+   * dark theme and `--bg-card-solid` on a light one. Both clear 4.5:1.
+   */
+  it("a tonal button's label clears 4.5:1 on its tint, at rest and hovered", () => {
+    const rgb = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+    const toHex = (c: number[]) => "#" + c.map((v) => Math.round(v).toString(16).padStart(2, "0")).join("");
+    const failures: string[] = [];
+    for (const theme of THEMES) {
+      const accent = theme.vars["--accent"];
+      const base = theme.vars[theme.group === "light" ? "--bg-card-solid" : "--bg-solid"];
+      const ink = theme.vars["--accent-ink-on-tint"] ?? accent;
+      if (!isHex(accent) || !isHex(base) || !isHex(ink)) continue;
+      for (const p of [0.16, 0.24]) {
+        const tint = toHex(rgb(accent).map((a, i) => a * p + rgb(base)[i] * (1 - p)));
+        const ratio = contrast(ink, tint);
+        if (ratio < 4.5) failures.push(`${theme.id} at ${p * 100}%: ${ratio.toFixed(2)}:1`);
+      }
+    }
+    expect(failures).toEqual([]);
+  });
+
+  /**
    * `--beat-accent` fills the dot for an accented beat. It is not text, so
    * the bar is the 3:1 WCAG asks of a UI component — but the light themes
    * were nowhere near it, because their beat colours were pale tints picked

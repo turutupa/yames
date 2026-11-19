@@ -302,3 +302,38 @@ No exclamation marks. No first person.
 Finish: verify with python that each output file has exactly the todo's keys for its path id, no
 value contains "!" or "！", and none is empty; then reply with one line: the language, the number of
 strings per path, and any key you were unsure about.
+
+Round 16 notes (folder /tmp/yp2/i18n/round16/): SIX path ids in the todo, 467 strings, all in packs
+that are ALREADY translated in your language (src/paths/packs/i18n/<lng>/<pathId>.json, English in
+i18n/en/). Rounds 14 and 15 above are finished: ignore their OUTPUT sections, but their vocabulary
+notes still apply.
+- "blues-pentatonics" (169): five new Steps (open-e-blues, fast-shuffle, box-five, three-choruses,
+  slow-blues-in-c). Reuse the pack's words exactly: box, shuffle, "shuffle eighths", lick, chorus,
+  twelve bars, turnaround (if the pack has no word for it, use what blues players of your language
+  say, or keep "turnaround"), boogie line, bend, landing, third, "Your turn", "not checked yet".
+- "classic-rock" (122): four new Steps (box-at-twelve, double-stops-in-e, chord-tones-ade,
+  solo-in-e). Reuse the pack's words: riff, box, extension, lick, double stop, chord tones, root,
+  third, solo, "Your turn".
+- "first-chords" (111): three new Steps (strums-between-beats, sevenths-blues, sixteenth-strums) and
+  a few changed sentences. Reuse the pack's words exactly as round 15 set them in your language:
+  strum, downstroke, upstroke, the change, the pattern, the swing of the hand, "check every string",
+  finger names, string names, the counting convention ('1 e and a' as rhythm-foundations counts
+  sixteenths). "seventh chord" is explained in the text in plain words: keep it plain.
+- "triads" (26), "chords-in-a-key" (25), "arpeggios-over-changes" (14): keys like
+  `exercise.<id>.variant.key=D.howTo.1`. These are the how-to lines a player sees when the same
+  Exercise is played in another key. They are short and formulaic ("In D, on the G, B and top
+  strings: D is 7, 7, 5. B minor is 7, 7, 7. ..."; "The form is four bars of E, two of A, ..."): find
+  how the pack already says the same kind of sentence for the first key (the base Exercise's
+  how-to) and translate each pattern ONE way everywhere. Chord names in prose as the pack writes
+  them; digits stay digits; number words stay words.
+For every key that already exists in your language's pack (its English changed): start from the
+existing translation and change only what the English changed. Copy verbatim where the English is
+identical to an already translated string (build the identical-English map by script first).
+
+OUTPUT: ONE FILE PER PATH ID, each shaped { "<pathId>": { "<key>": "<translation>" } } with exactly
+the todo's keys for that path:
+  /tmp/yp2/i18n/round16/done.<lng>.<pathId>.json     (six files)
+Scratch only under /tmp/yp2/i18n/round16/work_<lng>/ . Do the three small harmony files first, then
+classic-rock, first-chords, blues-pentatonics. Verify each file as before (exact keys, no "!" or "！",
+nothing empty), then reply with one line: the language, strings per path, and any key you were
+unsure about (at most 60 words).

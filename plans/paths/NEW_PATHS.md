@@ -231,7 +231,7 @@ do X, or start anyway". Arrows are data now (`prerequisites.paths`, below).
 | Track | Path | Builds on | Length | State |
 |---|---|---|---|---|
 | Foundations | Rhythm Foundations | nothing: the first Path for a beginner | 6 weeks | written |
-| Foundations | **First Chords and Strumming** | nothing: the first Path for a beginner who wants songs | 11 Steps, 42 Exercises, about 8 weeks | written 2026-11-19 |
+| Foundations | **First Chords and Strumming** | nothing: the first Path for a beginner who wants songs | 14 Steps, 55 Exercises, about 11 weeks | written 2026-11-19, extended the same day |
 | Technique | Alternate Picking | Rhythm Foundations (Beginner) | 9 weeks | written |
 | Technique | Legato | Rhythm Foundations (Beginner) | 6 weeks | written |
 | Technique | Tapping | Legato (Beginner) | 5 weeks | written |
@@ -239,8 +239,8 @@ do X, or start anyway". Arrows are data now (`prerequisites.paths`, below).
 | Technique | Shred | Alternate Picking (Intermediate), Legato (Beginner) | 10 weeks | written |
 | Technique | Metal Rhythm | Rhythm Foundations (Beginner) | 6 weeks | written |
 | Technique | Funk Lines | Rhythm Foundations (Intermediate) | 5 weeks | written |
-| Style | Blues and Pentatonics | Rhythm Foundations (Beginner) | 14 weeks | written |
-| Style | Classic Rock | Rhythm Foundations (Beginner) | 13 Steps, 46 Exercises, about 9 weeks | written, extended once (2026-11-19) |
+| Style | Blues and Pentatonics | Rhythm Foundations (Beginner) | 23 Steps, 92 Exercises, about 18 weeks | written, extended twice |
+| Style | Classic Rock | Rhythm Foundations (Beginner) | 17 Steps, 61 Exercises, about 12 weeks | written, extended twice (2026-11-19) |
 | Harmony | Know the Neck | nothing: the first Path for the harmony route | 6 weeks | written |
 | Harmony | Scales and Modes | Know the Neck (Beginner) | 6 weeks | written |
 | Harmony | **Triads** | Know the Neck (Beginner), Scales and Modes (Beginner) | 18 Steps, 60 Exercises, about 12 weeks | written, extended twice (2026-11-19) |
@@ -615,6 +615,24 @@ Still to do for Classic Rock, in the same spirit: the licks of `box-extension`
 and `repeating-licks` in E at the twelfth fret; double stops over a second
 progression; a chord-tone Step over I, IV, V (the Path only has I, flat VII,
 IV); a second, shorter solo in E that uses box 2 and the open-position riffs.
+
+### The second pass (2026-11-19, evening)
+
+Written by authoring agents from `plans/paths/AUTHOR_BRIEF.md`, each proof-read
+against the pack's notes and corrected before translation.
+
+| Path | New Steps (Level) | Now |
+|---|---|---|
+| Classic Rock | `box-at-twelve` (B): the box licks in E at fret 12. `double-stops-in-e` (I): double stops over E, A, B and a twelve-bar chorus. `chord-tones-ade` (I): chord tones over one, four, five. `solo-in-e` (A): a twelve-bar solo in E before the sixteen-bar one | 17 Steps, 61 Exercises |
+| Blues and Pentatonics | `open-e-blues`: the form in E at the nut with its turnarounds. `fast-shuffle`: known lines at a jump tempo. `box-five`: the last box, joined to boxes 1 and 4. `three-choruses`: a solo with a shape. `slow-blues-in-c`: the slow feel in a second key | 23 Steps, 92 Exercises |
+| First Chords and Strumming | `strums-between-beats` (I): a rest, off-beat upstrokes, a pattern that leaves room for the change. `sevenths-blues` (A): A7, D7, E7 and a twelve-bar blues in A. `sixteenth-strums` (A): four strokes to a beat at slow tempos | 14 Steps, 55 Exercises, thirteen chords |
+
+**Per-variant text.** A variant may now carry its own `purpose` and `howTo`
+(`plans/PATHS_PIPELINE.md`). The key-moved Exercises of Triads, Chords in a
+Key and Arpeggios over Changes use it: 38 variants whose how-to is generated
+from their own notes by `src/paths/specs/keyText.ts`. The Take screen needs a
+UI change to show it (it reads the base Exercise); the review pages show it.
+Every other varied Exercise still has one text for all its variants.
 
 ## Proof-reading (2026-11-18)
 

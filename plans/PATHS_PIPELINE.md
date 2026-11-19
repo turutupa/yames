@@ -123,7 +123,11 @@ and Path: `src/paths/packs/i18n/<lng>/<pathId>.json` (`src/paths/strings.ts`).
 - **Keys** are stable ids and field names: `path.title`, `path.gradingLimits`,
   `level.<levelId>.startHereIf.0`, `step.<stepId>.why`, `step.<stepId>.howTo.1`,
   `exercise.<exerciseId>.coachLine`, `exercise.<id>.selfCheck.0`,
-  `exercise.<id>.detection.0` (warm-ups are Exercises too). One walk over the pack
+  `exercise.<id>.detection.0` (warm-ups are Exercises too), and for a variant with
+  words of its own `exercise.<id>.variant.<variantId>.purpose` and
+  `...variant.<variantId>.howTo.<n>`. A variant id (`key=F#-minor`,
+  `position=5,key=Bb`) goes into the key as it is: a key is one JSON object key and
+  nothing splits it on dots. One walk over the pack
   both extracts and applies them, so they cannot drift. Not translated: ids, tab,
   notes, chords, variant labels, and author-facing text (`orderRationale`,
   `difficultyException`, `feedbackNote`, review history).
@@ -173,8 +177,37 @@ tests, so it is gradable. `notes` on the Exercise is always variant 0.
   validator refuses a pool whose variants differ by more than 30% on the difficulty
   metric. Fret position is the usual `notPooled`: low frets are wider.
 
+- **A variant's own text** (added 2026-11-19, additive, `schemaVersion` still 1). An
+  Exercise has one `purpose` and one `howTo`, written for its first variant, so frets
+  and chord names in them are wrong for the others. A variant may carry its own
+  `purpose` and `howTo`; each, when present, replaces the Exercise's for that variant,
+  whole (a variant how-to is every line, not an addition). Absent means the Exercise's
+  applies. `exerciseWithVariant` does the replacing, so the concrete Exercise of a Take
+  (`TakePlan.exercise`, `notesForTake(...).exercise`) reads right, and a screen must
+  read the text from there and not from the Exercise in the pack. **The first variant
+  never has text of its own:** its notes are the Exercise's, so the Exercise's text is
+  its text. The generator does not write what a build says for it (nor text that only
+  repeats the Exercise's), and the validator refuses a pack that has it
+  (`variation.firstText`). `variation.text` refuses an empty or thin one, and the
+  banned-claims, TODO and jargon lints read variant text like any other.
+
+  First use: the lines the harmony Paths move to other keys (`inKeys` in Triads, Chords
+  in a Key and Arpeggios over Changes). Every key after the first keeps the Exercise's
+  tempo sentence and gets its other lines made from its own tab and chart by
+  `specs/keyText.ts`, never typed. They say only what is true of that key by itself
+  (no "two frets higher than in C": the player is not looking at C), and every shape
+  has its chord's name: "In E, on the G, B and top strings: E is 9, 9, 7. C sharp
+  minor is 9, 9, 9. A is 9, 10, 9. B is 8, 7, 7." A chord that comes back gets a line
+  with the form ("The form is four bars of E, two of A, two of E, then one bar each of
+  B, A, E and B."); a form whose chords move to a second place is said four bars at a
+  time, a line for each four, with the names the spec gives the parts ("The bridge,
+  bars 9 to 12, higher on the neck: ..."); a single-note line says where each chord
+  starts ("In E flat, each chord starts on the D string: E flat at fret 13, ...").
+  `keyLines` answers null for a line it cannot describe truthfully, and that variant
+  then reads the Exercise's text as before.
+
 In a spec, `vary` gives the values and a `build` function from one combination to its
-notes:
+notes (and, optionally, its `purpose` and `howTo`):
 
 ```ts
 vary: {
@@ -321,7 +354,8 @@ also fails if a pack isn't what its spec generates.
   note that can be checked and fits a screen, a warm-up in each.
 - **Variation:** every dimension declared pooled or not pooled, no two variants with the
   same notes, variant 0 is the Exercise's own notes, pools agree with their values and
-  stay within 30% on difficulty. Every variant also passes every rule above.
+  stay within 30% on difficulty. A variant's own text is not empty, and the first
+  variant has none. Every variant also passes every rule above.
 - **Warm-ups:** at least six variants, moving through positions, at most 8 bars and 5
   minutes, a declared scale or chords, a comfortable tempo share, a reference on the same
   note grid, never advancing progress, and only under a Level.

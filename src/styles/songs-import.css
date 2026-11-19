@@ -71,9 +71,9 @@
 }
 
 .songs-offer-btn {
-  border: 1px solid var(--border);
-  background: var(--bg-raised);
-  color: var(--text-primary);
+  border: 1px solid transparent;
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
   border-radius: var(--radius-sm);
   padding: 6px 12px;
   font-family: inherit;
@@ -84,27 +84,24 @@
 }
 
 .songs-offer-btn:hover {
-  background: var(--surface-hover);
+  background: var(--btn-tint-hover);
 }
 
 .songs-offer-btn-primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-text);
+  background: var(--btn-fill);
+  color: var(--btn-fill-ink);
 }
 
 /* Same fault, same answer as `.songs-btn-primary:hover` in `songs.css`: the
    quiet button's hover ground under ink chosen for the accent made "Open it"
    unreadable under the pointer. A filled button stays filled. */
 .songs-offer-btn-primary:hover {
-  background: var(--accent);
-  color: var(--accent-text);
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px -10px var(--accent-glow-strong);
+  background: var(--btn-fill-hover);
+  color: var(--btn-fill-ink);
 }
 
 .songs-offer-btn-primary:active {
-  transform: translateY(0);
+  background: var(--btn-fill-active);
 }
 
 .songs-offer-btn[disabled] {

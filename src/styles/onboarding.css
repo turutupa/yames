@@ -116,32 +116,41 @@
   outline-offset: 2px;
 }
 
+/* "B · Tonal" (owner, 2026-11-19, global.css): Next is a solid accent,
+   Back and Skip the accent's tint. */
 .onboarding-btn-primary {
-  background: var(--accent);
-  color: var(--accent-text, #fff);
+  background: var(--btn-fill);
+  color: var(--btn-fill-ink);
 }
 
 @media (hover: hover) {
-  .onboarding-btn-primary:hover {
-    filter: brightness(1.08);
+  .onboarding-btn-primary:hover:not(:disabled) {
+    background: var(--btn-fill-hover);
   }
+}
+.onboarding-btn-primary:active:not(:disabled) {
+  background: var(--btn-fill-active);
 }
 
 .onboarding-btn-ghost {
-  border-color: var(--border);
-  color: var(--text-secondary);
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
 }
 
 @media (hover: hover) {
   .onboarding-btn-ghost:hover:not(:disabled) {
-    color: var(--text-primary);
-    border-color: var(--accent);
+    background: var(--btn-tint-hover);
   }
 }
 
 .onboarding-btn:disabled {
-  opacity: 0.35;
+  opacity: 0.6;
   cursor: default;
+}
+.onboarding-btn:is(.onboarding-btn-primary, .onboarding-btn-ghost):disabled {
+  opacity: 1;
+  background: var(--btn-disabled-bg);
+  color: var(--btn-disabled-ink);
 }
 
 /* ---- W0 welcome ---- */
@@ -1273,10 +1282,8 @@
   letter-spacing: 0.04em;
   border-radius: 10px;
 }
-.onboarding-overlay .onboarding-btn-primary {
-  background: var(--l-amber);
-  color: var(--l-amber-ink);
-  box-shadow: 0 6px 20px color-mix(in srgb, var(--l-amber) 18%, transparent);
+.onboarding-overlay .onboarding-btn-primary:not(:disabled) {
+  box-shadow: none;
 }
 /* Wide enough for "Set me up (about two minutes)" on one line in a sans
    (Inter, a system face), not only in Barlow Condensed. */

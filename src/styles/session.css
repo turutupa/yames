@@ -86,9 +86,6 @@
   --l-faint: var(--text-tertiary, #94866f);
   --l-amber: var(--accent, #ffb454);
   --l-amber-ink: var(--accent-text, #1e1305);
-  --l-amber-hi: color-mix(in srgb, var(--l-amber) 70%, #fff);
-  --l-amber-lo: color-mix(in srgb, var(--l-amber) 88%, #000);
-  --l-amber-deep: color-mix(in srgb, var(--l-amber) 45%, #000);
   --l-tone: var(--neck-hit, var(--feedback-perfect, #4ee08a));
   --l-tens: var(--accent-2, #5aa9ff);
   --l-clash: var(--neck-miss, #ff5d6c);
@@ -98,9 +95,16 @@
   /* Shadows: black on a dark theme, a soft ink on a light one (below). */
   --l-shade: #000;
   /* The 1 px highlight along a filled button's top edge. */
-  --l-gloss: color-mix(in srgb, var(--l-wash) 75%, transparent);
   /* A plain button, the current exercise, and a found edge's rungs. */
-  --l-btn: var(--l-btn);
+  /* Buttons, "B · Tonal" (global.css): a solid accent for the one thing to
+     do, the accent's tint for everything else. */
+  --l-btn: var(--btn-tint);
+  --l-btn-hover: var(--btn-tint-hover);
+  --l-btn-ink: var(--btn-tint-ink);
+  --l-btn-sel: var(--btn-sel);
+  --l-btn-ring: var(--btn-sel-ring);
+  --l-fill-hover: var(--btn-fill-hover);
+  --l-fill-active: var(--btn-fill-active);
   --l-panel-on: color-mix(in srgb, var(--l-panel-solid) 84%, transparent);
   --l-met-fill: color-mix(in srgb, var(--l-tone) 28%, var(--l-bg));
   --l-miss-fill: color-mix(in srgb, var(--l-clash) 30%, var(--l-bg));
@@ -111,7 +115,6 @@
   --l-tag-edge: transparent;
   --l-tag-shadow: transparent;
   --l-status: var(--l-quiet);
-  --l-switch-ink: var(--l-amber-ink);
   /* Green as words (a met tag, the clean tempo): the hit colour, taken toward
      the ink on paper until it reads as text (below). */
   --l-tone-text: var(--l-tone);
@@ -157,10 +160,6 @@
   --l-shade: color-mix(in srgb, var(--text-primary) 40%, transparent);
   --l-on-tone: #fff;
   --l-on-tens: #fff;
-  --l-gloss: rgba(255, 255, 255, 0.7);
-  /* A light theme's accent is a dark ink that carries white: its gradient's
-     top only just lifts, or the white on it washes out (the Level control). */
-  --l-amber-hi: color-mix(in srgb, var(--l-amber) 88%, #fff);
   --l-tone-text: color-mix(in oklab, var(--l-tone) 72%, var(--text-primary));
 }
 /* Ember is the learning side's own palette, kept to the value: the theme this
@@ -179,9 +178,6 @@
   --l-faint: #94866f;
   --l-amber: #ff7a3c;
   --l-amber-ink: #1a0d05;
-  --l-amber-hi: #ffa071;
-  --l-amber-lo: #f06a2c;
-  --l-amber-deep: #7a3212;
   --l-copper: #d35a24;
   --l-tone: #5fd08a;
   --l-tens: #5aa9ff;
@@ -189,8 +185,6 @@
   --l-mech: #8cc2ff;
   --l-on-tone: #06170d;
   --l-on-tens: #06162a;
-  --l-gloss: rgba(255, 245, 220, 0.75);
-  --l-btn: rgba(40, 30, 20, 0.7);
   --l-panel-on: rgba(50, 35, 18, 0.84);
   --l-met-fill: rgba(22, 84, 52, 0.88);
   --l-miss-fill: rgba(100, 28, 38, 0.9);
@@ -203,7 +197,6 @@
   --l-tag-accent: #ff9a66;
   --l-halo: #000;
   --l-status: #d8c8b0;
-  --l-switch-ink: #1a0d05;
   --l-tab-bg: #160f0b;
   --l-off: #fbbf24;
   --l-tab-now: #ffb08a;
@@ -424,32 +417,37 @@
   min-height: 48px;
   padding: 8px 22px;
   border-radius: 12px;
+  /* Tonal (the owner's "B · Tonal", 2026-11-19). The border stays, clear, so
+     a button keeps the size it had with a drawn one. */
   background: var(--l-btn);
-  border: 1px solid var(--l-line2);
+  color: var(--l-btn-ink);
+  border: 1px solid transparent;
   font: 600 21px/1.1 var(--l-display);
   letter-spacing: 0.03em;
-  transition: transform 0.12s, box-shadow 0.2s, filter 0.2s, border-color 0.2s;
+  transition: transform 0.12s;
 }
 .session-page .session-btn:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--l-wash) 45%, transparent);
+  background: var(--l-btn-hover);
 }
 .session-page .session-btn:active:not(:disabled) {
   transform: translateY(1px) scale(0.992);
 }
 .session-page .session-big,
 .session-page .session-pri {
+  /* Primary: a solid accent in the theme's on-accent ink. No gradient, no
+     glow, no ring ("B · Tonal", owner 2026-11-19). */
   color: var(--l-amber-ink);
   border: 0;
-  background: linear-gradient(180deg, var(--l-amber-hi) 0, var(--l-amber) 48%, var(--l-amber-lo) 100%);
-  box-shadow:
-    0 1px 0 var(--l-gloss) inset,
-    0 -2px 0 color-mix(in srgb, var(--l-amber-deep) 45%, transparent) inset,
-    0 10px 34px color-mix(in srgb, var(--l-amber) 28%, transparent),
-    0 2px 8px color-mix(in srgb, var(--l-shade) 50%, transparent);
+  background: var(--l-amber);
+  box-shadow: none;
 }
-.session-page .session-big:hover:not(:disabled),
-.session-page .session-pri:hover:not(:disabled) {
-  filter: brightness(1.05);
+.session-page .session-big:hover:not(:disabled, [aria-disabled="true"]),
+.session-page .session-pri:hover:not(:disabled, [aria-disabled="true"]) {
+  background: var(--l-fill-hover);
+}
+.session-page .session-big:active:not(:disabled, [aria-disabled="true"]),
+.session-page .session-pri:active:not(:disabled, [aria-disabled="true"]) {
+  background: var(--l-fill-active);
 }
 .session-page .session-big {
   width: 100%;
@@ -463,7 +461,7 @@
   white-space: normal;
   text-wrap: balance;
   overflow-wrap: anywhere;
-  transition: transform 0.12s, filter 0.2s;
+  transition: transform 0.12s;
 }
 .session-page .session-big[data-size="mid"] {
   min-height: 66px;
@@ -480,9 +478,9 @@
   transform: translateY(1px) scale(0.995);
 }
 .session-page .session-big:is(:disabled, [aria-disabled="true"]) {
-  background: var(--l-btn);
+  background: var(--btn-disabled-bg);
   color: var(--l-faint);
-  box-shadow: 0 0 0 1px var(--l-line2) inset;
+  box-shadow: none;
 }
 .session-page .session-secondary {
   /* One line where it fits, two balanced ones where a translation needs
@@ -494,18 +492,25 @@
   min-height: 40px;
   padding: 6px 16px;
   border-radius: 10px;
+  /* Tonal: the accent's tint, its label in the accent. */
   background: var(--l-btn);
-  border: 1px solid var(--l-line2);
+  color: var(--l-btn-ink);
+  border: 1px solid transparent;
   font: 600 18px/1.1 var(--l-display);
   letter-spacing: 0.03em;
-  transition: border-color 0.2s;
+  /* Only the press moves: a size or colour animated under `button`'s
+     `transition: all` was measured mid-way by the fit hooks. */
+  transition: transform 0.12s ease;
 }
 .session-page .session-secondary:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--l-wash) 45%, transparent);
+  background: var(--l-btn-hover);
+}
+.session-page .session-secondary:active:not(:disabled) {
+  transform: translateY(1px);
 }
 .session-page .session-secondary:disabled {
+  background: var(--btn-disabled-bg);
   color: var(--l-faint);
-  border-color: var(--l-line);
 }
 .session-page .session-link {
   align-self: flex-start;
@@ -531,9 +536,10 @@
   min-height: 34px;
   margin: 0 0 6px -4px;
   padding: 4px 12px 4px 8px;
-  border: 1px solid var(--l-line);
+  border: 1px solid transparent;
   border-radius: 999px;
-  color: var(--l-ink);
+  background: var(--l-btn);
+  color: var(--l-btn-ink);
   font: 600 14px/1.1 var(--l-body);
   white-space: nowrap;
   overflow: hidden;
@@ -542,11 +548,9 @@
 .session-page .session-back > span {
   font-size: 19px;
   line-height: 1;
-  color: var(--l-amber);
 }
 .session-page .session-back:hover {
-  background: color-mix(in srgb, var(--l-wash) 6%, transparent);
-  border-color: var(--l-line2);
+  background: var(--l-btn-hover);
 }
 .session-seg {
   display: grid;
@@ -555,9 +559,9 @@
   gap: 4px;
   padding: 4px;
   border-radius: 13px;
-  background: color-mix(in srgb, var(--l-bg) 72%, transparent);
-  border: 1px solid var(--l-line);
-  box-shadow: 0 1px 6px color-mix(in srgb, var(--l-shade) 60%, transparent) inset;
+  /* The track is the card; the chosen segment is tonal ("B · Tonal"). */
+  background: var(--l-panel-solid);
+  border: 1px solid transparent;
 }
 .session-page .session-seg button {
   padding: 10px 8px;
@@ -566,17 +570,16 @@
   color: var(--l-quiet);
   font-variant-numeric: lining-nums tabular-nums;
   white-space: nowrap;
-  transition: all 0.2s var(--l-ease);
+  transition: transform 0.12s ease;
 }
-.session-page .session-seg button:hover {
+.session-page .session-seg button:hover:not(.on) {
   color: var(--l-ink);
+  background: color-mix(in srgb, var(--l-wash) 6%, transparent);
 }
 .session-page .session-seg button.on {
-  color: var(--l-amber-ink);
-  background: linear-gradient(180deg, var(--l-amber-hi), var(--l-amber-lo));
-  box-shadow:
-    0 1px 0 var(--l-gloss) inset,
-    0 0 18px color-mix(in srgb, var(--l-amber) 34%, transparent);
+  color: var(--l-btn-ink);
+  background: var(--l-btn-sel);
+  box-shadow: var(--l-btn-ring);
 }
 .session-seg[data-small] {
   grid-auto-flow: row;
@@ -1388,9 +1391,6 @@
   min-height: 64px;
   font-size: 30px;
   box-shadow:
-    0 1px 0 var(--l-gloss) inset,
-    0 -2px 0 color-mix(in srgb, var(--l-amber-deep) 45%, transparent) inset,
-    0 2px 8px color-mix(in srgb, var(--l-shade) 50%, transparent),
     0 0 0 10px var(--l-bg),
     0 -18px 22px 10px var(--l-bg);
 }
@@ -1502,8 +1502,8 @@
   font-size: 13px;
 }
 .session-fair button[aria-pressed="true"] {
-  border-color: var(--l-amber);
-  color: var(--l-ink);
+  background: var(--l-btn-sel);
+  box-shadow: var(--l-btn-ring);
 }
 .session-subscribe {
   display: flex;
@@ -1532,14 +1532,14 @@
 }
 .session-page .session-exit {
   padding: 4px 12px;
-  border: 1px solid var(--l-line2);
+  border: 1px solid transparent;
   border-radius: 8px;
   font: 600 15px/1.2 var(--l-display);
-  color: var(--l-quiet);
-  background: color-mix(in srgb, var(--l-bg) 60%, transparent);
+  color: var(--l-btn-ink);
+  background: var(--l-btn);
 }
 .session-page .session-exit:hover {
-  color: var(--l-ink);
+  background: var(--l-btn-hover);
 }
 .session-pips {
   flex: 1;
@@ -1573,22 +1573,23 @@
   flex: none;
   min-height: 30px;
   padding: 3px 6px 3px 12px;
-  border: 1px solid var(--l-line);
+  border: 1px solid transparent;
   border-radius: 999px;
-  color: var(--l-ink);
+  background: var(--l-btn);
+  color: var(--l-btn-ink);
   font: 600 13px/1 var(--l-body);
   white-space: nowrap;
 }
 .session-page .session-skip-this:hover {
-  background: color-mix(in srgb, var(--l-wash) 6%, transparent);
-  border-color: var(--l-line2);
+  background: var(--l-btn-hover);
 }
 .session-page .session-skip-this kbd {
   padding: 2px 6px;
-  border: 1px solid var(--l-line2);
+  border: 1px solid color-mix(in srgb, var(--l-btn-ink) 40%, transparent);
   border-radius: 5px;
+  background: transparent;
   font: 700 11px/1.2 var(--l-body);
-  color: var(--l-quiet);
+  color: inherit;
 }
 .session-body {
   position: relative;
@@ -2192,7 +2193,7 @@
 }
 .session-mixswitch[data-on] .session-mixswitch-track {
   border-color: transparent;
-  background: linear-gradient(180deg, var(--l-amber-hi), var(--l-amber-lo));
+  background: var(--l-amber);
 }
 .session-mixswitch[data-on] .session-mixswitch-thumb {
   transform: translateX(16px);
@@ -2265,7 +2266,7 @@
 .session-tag[data-start-here] {
   color: var(--l-amber-ink);
   border-color: transparent;
-  background: linear-gradient(180deg, var(--l-amber-hi), var(--l-amber-lo));
+  background: var(--l-amber);
 }
 /* "Builds on: …": a quiet line, each name a link to its Path, above the
    card's own hit box so a press on a name opens that Path. */
@@ -3388,14 +3389,11 @@
     padding-right: 12px;
   }
   .session-body:not([data-phase="playing"]) > .session-actions > .session-go > .session-big {
-    box-shadow:
-      0 1px 0 var(--l-gloss) inset,
-      0 -2px 0 color-mix(in srgb, var(--l-amber-deep) 45%, transparent) inset,
-      0 2px 8px color-mix(in srgb, var(--l-shade) 50%, transparent);
+    box-shadow: none;
   }
   .session-body:not([data-phase="playing"]) > .session-actions > .session-go > .session-big:is(:disabled, [aria-disabled="true"]) {
-    background: var(--l-btn);
-    box-shadow: 0 0 0 1px var(--l-line2) inset;
+    background: var(--btn-disabled-bg);
+    box-shadow: none;
   }
   /* A warm-up's ready screen, the same way (owner, 2026-11-18): Start was
      under the fold in every view (the neck with the pattern's bar under it,
@@ -3432,10 +3430,7 @@
     text-align: left;
   }
   .session-body[data-phase="timedReady"] > .practice-foot > .practice-go > .session-big {
-    box-shadow:
-      0 1px 0 var(--l-gloss) inset,
-      0 -2px 0 color-mix(in srgb, var(--l-amber-deep) 45%, transparent) inset,
-      0 2px 8px color-mix(in srgb, var(--l-shade) 50%, transparent);
+    box-shadow: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -3461,9 +3456,11 @@
   align-self: center;
   display: inline-flex;
   padding: 2px;
-  border: 1px solid var(--l-line2);
+  /* A segmented control: the card for a track, the chosen view tonal with
+     the accent's ring ("B · Tonal"). The clear border keeps its size. */
+  border: 1px solid transparent;
   border-radius: 9px;
-  background: color-mix(in srgb, var(--l-bg) 60%, transparent);
+  background: var(--l-panel-solid);
 }
 .session-viewswitch button {
   padding: 3px 12px;
@@ -3476,9 +3473,9 @@
   text-transform: uppercase;
   cursor: pointer;
 }
-.session-viewswitch button[data-on] {
-  background: color-mix(in srgb, var(--l-amber) 18%, transparent);
-  color: var(--l-amber);
+.session-viewswitch button:hover:not([data-on], :disabled) {
+  color: var(--l-ink);
+  background: color-mix(in srgb, var(--l-wash) 6%, transparent);
 }
 .session-viewswitch button:disabled {
   cursor: default;
@@ -3489,11 +3486,8 @@
 .session-viewswitch[data-locked] {
   align-items: center;
   border-style: dashed;
+  border-color: var(--l-line2);
   background: transparent;
-}
-.session-viewswitch[data-locked] button[data-on] {
-  background: color-mix(in srgb, var(--l-wash) 8%, transparent);
-  color: var(--l-quiet);
 }
 .session-viewswitch-lock {
   flex: none;
@@ -3832,12 +3826,14 @@
   flex: none;
 }
 .session-viewswitch button[data-on] {
-  background: var(--l-amber);
-  color: var(--l-amber-ink);
+  background: var(--l-btn-sel);
+  color: var(--l-btn-ink);
+  box-shadow: var(--l-btn-ring);
 }
 .session-viewswitch[data-locked] button[data-on] {
   background: color-mix(in srgb, var(--l-wash) 8%, transparent);
   color: var(--l-quiet);
+  box-shadow: none;
 }
 
 /* The neck and its overlay: the slot takes the room, the overlay sits over it
@@ -3955,34 +3951,41 @@
   align-items: center;
   gap: 6px;
   padding: 3px 10px;
-  border: 1px solid var(--l-line2);
+  border: 1px solid transparent;
   border-radius: 999px;
-  background: transparent;
-  color: var(--l-ink);
+  /* Tonal; on, the chosen-segment look ("B · Tonal"). */
+  background: var(--l-btn);
+  color: var(--l-btn-ink);
   font: 600 12px/1.4 var(--l-body);
   cursor: pointer;
 }
+.practice-watch:hover,
+.practice-sound:hover {
+  background: var(--l-btn-hover);
+}
 .practice-watch svg {
   flex: none;
-  fill: var(--l-amber);
+  fill: currentColor;
 }
 .practice-watch .practice-watch-replay {
   fill: none;
-  stroke: var(--l-amber);
+  stroke: currentColor;
   stroke-width: 2.6;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.practice-watch[aria-pressed="true"] {
-  border-color: var(--l-amber);
-  color: var(--l-tag-accent);
+.practice-watch[aria-pressed="true"],
+.practice-sound[aria-pressed="true"] {
+  background: var(--l-btn-sel);
+  box-shadow: var(--l-btn-ring);
 }
 .practice-watch kbd {
   padding: 0 5px;
-  border: 1px solid var(--l-line2);
+  border: 1px solid color-mix(in srgb, var(--l-btn-ink) 40%, transparent);
   border-radius: 4px;
+  background: transparent;
   font: 700 11px/1.4 var(--l-display);
-  color: var(--l-quiet);
+  color: inherit;
 }
 /* Sound: Watch plays the notes as well (card #28). Beside Watch, its own quiet switch. */
 .practice-sound {
@@ -3991,10 +3994,10 @@
   align-items: center;
   gap: 5px;
   padding: 3px 9px;
-  border: 1px solid var(--l-line2);
+  border: 1px solid transparent;
   border-radius: 999px;
-  background: transparent;
-  color: var(--l-quiet);
+  background: var(--l-btn);
+  color: var(--l-btn-ink);
   font: 600 12px/1.4 var(--l-body);
   cursor: pointer;
 }
@@ -4005,15 +4008,7 @@
 .practice-sound svg path:first-child {
   stroke: none;
 }
-.practice-sound[aria-pressed="true"] {
-  color: var(--l-ink);
-}
-.practice-sound[aria-pressed="true"] svg {
-  color: var(--l-amber);
-}
-.practice-sound[aria-pressed="true"] {
-  border-color: color-mix(in srgb, var(--l-amber) 55%, transparent);
-}
+
 /* Under the Tab and the Runway: the Watch and Sound the Neck has in its foot
    row (acceptance 5, P1-1), on the same side. */
 .practice-watchrow {
@@ -4119,13 +4114,6 @@
   .practice-neck-foot .practice-sound-word,
   .practice-watchrow[data-place="footer"] .practice-sound-word {
     display: none;
-  }
-  .practice-sound[aria-pressed="true"] {
-    background: color-mix(in srgb, var(--l-amber) 18%, transparent);
-    border-color: var(--l-amber);
-  }
-  .practice-sound[aria-pressed="false"] {
-    border-style: dashed;
   }
   .practice-sound svg {
     width: 16px;
@@ -4444,15 +4432,14 @@
   height: 30px;
   display: grid;
   place-items: center;
-  border: 1px solid var(--l-line2);
+  border: 1px solid transparent;
   border-radius: 8px;
-  background: color-mix(in srgb, var(--l-bg) 60%, transparent);
-  color: var(--l-ink);
+  background: var(--l-btn);
+  color: var(--l-btn-ink);
   font: 600 20px/1 var(--l-body);
 }
 .session-page .practice-step:hover {
-  border-color: color-mix(in srgb, var(--l-amber) 60%, transparent);
-  color: var(--l-amber);
+  background: var(--l-btn-hover);
 }
 .practice-status {
   display: inline-flex;
@@ -4515,12 +4502,13 @@
   white-space: nowrap;
 }
 
-/* The view switch as the mock draws it: amber edge, the chosen one filled. */
+/* The view switch, a segmented control ("B · Tonal", owner 2026-11-19): the
+   card for a track, the chosen view tonal inside the accent's ring. */
 .session-page .session-viewswitch {
   padding: 3px;
-  border: 1px solid color-mix(in srgb, var(--l-amber) 45%, transparent);
+  border: 1px solid transparent;
   border-radius: 10px;
-  background: color-mix(in srgb, var(--l-shade) 25%, transparent);
+  background: var(--l-panel-solid);
 }
 .session-page .session-viewswitch button {
   display: inline-flex;
@@ -4532,12 +4520,17 @@
   text-transform: none;
 }
 .session-page .session-viewswitch button[data-on] {
-  background: var(--l-amber);
-  color: var(--l-switch-ink);
+  background: var(--l-btn-sel);
+  color: var(--l-btn-ink);
+  box-shadow: var(--l-btn-ring);
+}
+.session-page .session-viewswitch[data-locked] {
+  border-color: var(--l-line2);
 }
 .session-page .session-viewswitch[data-locked] button[data-on] {
   background: color-mix(in srgb, var(--l-wash) 8%, transparent);
   color: var(--l-quiet);
+  box-shadow: none;
 }
 
 /* The tab's panel (mock: 16 px corners, a faint amber edge, nearly black). */
@@ -5297,9 +5290,14 @@
 button.session-input-chip {
   cursor: pointer;
 }
+/* A chip that acts is tonal in its own state's colour ("B · Tonal"). */
+/* Mixed into the page, not the card: a state's red or green is a lighter ink
+   than the accent on a light theme and needs the paler ground. */
+button.session-input-chip {
+  background: color-mix(in srgb, currentColor 12%, var(--l-bg));
+}
 button.session-input-chip:hover {
-  border-color: var(--l-line2);
-  background: color-mix(in srgb, var(--l-wash) 6%, transparent);
+  background: color-mix(in srgb, currentColor 18%, var(--l-bg));
 }
 .session-input-chip[data-state="on"] {
   color: var(--l-tone-text);
@@ -5493,26 +5491,24 @@ button.session-input-chip:hover {
   min-height: 48px;
   padding: 4px 6px;
   border-radius: 10px;
-  border: 1px solid var(--l-line);
-  background: transparent;
-  color: var(--l-quiet);
+  border: 1px solid transparent;
+  background: var(--l-btn);
+  color: var(--l-btn-ink);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition:
-    background 0.14s var(--l-ease, ease),
-    color 0.14s,
-    border-color 0.14s;
+  transition: transform 0.12s ease;
 }
 .session-swap-btn-word {
   font: 600 10.5px/1 var(--l-display);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.session-page .session-swap-btn:hover,
+.session-page .session-swap-btn:hover {
+  background: var(--l-btn-hover);
+}
 .session-page .session-swap-btn[aria-expanded="true"] {
-  color: var(--l-ink);
-  border-color: var(--l-line2);
-  background: color-mix(in srgb, var(--l-wash) 8%, transparent);
+  background: var(--l-btn-sel);
+  box-shadow: var(--l-btn-ring);
 }
 .session-page .session-swap-btn:focus-visible {
   outline: 2px solid var(--l-amber);
@@ -5565,14 +5561,13 @@ button.session-input-chip:hover {
   margin: -8px -6px -8px 0;
   border: 0;
   border-radius: 10px;
-  background: transparent;
-  color: var(--l-quiet);
+  background: var(--l-btn);
+  color: var(--l-btn-ink);
   font: 400 26px/1 var(--l-display);
   cursor: pointer;
 }
 .session-page .session-swap-close:hover {
-  color: var(--l-ink);
-  background: color-mix(in srgb, var(--l-wash) 8%, transparent);
+  background: var(--l-btn-hover);
 }
 .session-swap-choices {
   display: flex;

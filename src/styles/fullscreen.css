@@ -343,9 +343,9 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  color: rgba(255, 255, 255, 0.6);
+  background: var(--btn-tint);
+  border: 1px solid transparent;
+  color: var(--btn-tint-ink);
   font-size: 0.8rem;
   font-weight: 600;
   display: flex;
@@ -357,9 +357,7 @@
 
 @media (hover: hover) {
   .fs-ctrl-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.9);
-    border-color: rgba(255, 255, 255, 0.3);
+    background: var(--btn-tint-hover);
   }
 }
 
@@ -371,32 +369,34 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: var(--accent);
-  color: var(--accent-text);
+  /* "B · Tonal" (global.css): solid accent, no glow; playing, tonal. */
+  background: var(--btn-fill);
+  color: var(--btn-fill-ink);
   font-size: 1.4rem;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   border: none;
-  box-shadow: 0 4px 20px var(--accent-glow);
-  transition: all 0.15s ease;
+  box-shadow: none;
+  transition: transform 0.15s ease;
   line-height: 1;
   padding: 0;
 }
 
 @media (hover: hover) {
   .fs-play-btn:hover {
-    transform: scale(1.08);
-    box-shadow: 0 4px 30px var(--accent-glow-strong);
+    background: var(--btn-fill-hover);
+  }
+  .fs-play-btn.playing:hover {
+    background: var(--btn-tint-hover);
   }
 }
 
 .fs-play-btn.playing {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--accent);
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
   box-shadow: none;
-  border: 2px solid var(--accent);
 }
 
 /* Exit hint */
