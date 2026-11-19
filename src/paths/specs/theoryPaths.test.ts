@@ -9,6 +9,7 @@ import bluesPentatonics from "./blues-pentatonics";
 import classicRock from "./classic-rock";
 import knowTheNeck from "./know-the-neck";
 import scalesAndModes from "./scales-and-modes";
+import arpeggiosOverChanges from "./arpeggios-over-changes";
 import chordsInAKey from "./chords-in-a-key";
 import triads from "./triads";
 
@@ -21,6 +22,7 @@ describe.each([
   ["scales-and-modes", scalesAndModes, 25, 0.9],
   ["triads", triads, 28, 0.9],
   ["chords-in-a-key", chordsInAKey, 24, 0.9],
+  ["arpeggios-over-changes", arpeggiosOverChanges, 22, 0.85],
 ] as const)("%s", (_id, spec, minGraded, minShare) => {
   const doc = buildPath(spec);
   const exercises: Exercise[] = doc.steps.flatMap((s) => s.exercises);

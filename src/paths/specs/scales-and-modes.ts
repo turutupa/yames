@@ -125,6 +125,7 @@ export default definePath({
   id: "scales-and-modes",
   title: "Scales and Modes",
   kind: "theory",
+  category: "harmony",
   goal: "Play the major scale and its relative minor as movable shapes, run sequences through them, and hear Dorian and Mixolydian as one changed note over a band.",
   level: "early-intermediate",
   assumes:

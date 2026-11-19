@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildsOn, checkCurriculum, curriculumOrder, prerequisitePaths, unmetPrerequisites } from "./curriculum";
+import { buildsOn, categoryOf, checkCurriculum, curriculumOrder, prerequisitePaths, unmetPrerequisites } from "./curriculum";
 import type { PathDoc } from "./format";
 import { buildPath } from "./generate";
 import { SPECS } from "./specs/index";
@@ -87,5 +87,20 @@ describe("the shipped Paths", () => {
         expect(typeof need.path, doc.id).toBe("string");
       }
     }
+  });
+
+  it("each say what they are about, and no Path about harmony is filed under styles", () => {
+    const by = Object.fromEntries(docs.map((d) => [d.id, categoryOf(d)]));
+    for (const doc of docs) expect(doc.category, doc.id).toBeDefined();
+    expect(by["rhythm-foundations"]).toBe("foundations");
+    expect(by["blues-pentatonics"]).toBe("style");
+    expect(by["classic-rock"]).toBe("style");
+    for (const id of ["know-the-neck", "scales-and-modes", "triads", "chords-in-a-key"]) expect(by[id], id).toBe("harmony");
+    expect(by["sweep-picking"]).toBe("technique");
+  });
+
+  it("a pack from before categories reads as the old split", () => {
+    expect(categoryOf({ kind: "theory" })).toBe("style");
+    expect(categoryOf({ kind: "mechanics" })).toBe("technique");
   });
 });

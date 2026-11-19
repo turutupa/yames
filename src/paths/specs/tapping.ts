@@ -117,6 +117,7 @@ export default definePath({
   id: "tapping",
   title: "Tapping",
   kind: "mechanics",
+  category: "technique",
   goal: "Tap an arpeggio in triplets, sixteenths and sextuplets, move it through chord changes, and hold a tapped line over a band.",
   level: "intermediate",
   assumes:

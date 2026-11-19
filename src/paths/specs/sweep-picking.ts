@@ -1654,7 +1654,7 @@ const NEW_STEPS: StepSpec[] = [
       sweepExercise({
         id: "band-big-chain",
         title: "Five-string chain with the band",
-        purpose: "One big loop per chord, over a triplet-feel band, with the V chord in the mix.",
+        purpose: "One big loop per chord, over a triplet-feel band. Most of the progressions here have the major V chord in them; one stays inside the natural minor.",
         howTo: [
           "Triplets over the band: one five-string loop to a bar, one chord a bar.",
           "Lock the first note of each bar to the kick drum and let the band carry you round. If a shape is late, drop it and catch the next bar line.",
@@ -1754,6 +1754,7 @@ export default definePath({
   id: "sweep-picking",
   title: "Sweep Picking",
   kind: "mechanics",
+  category: "technique",
   goal: "Sweep clean, separated arpeggios from three-string triads to six-string shapes, and link them through minor-key progressions so they sound like a solo.",
   level: "intermediate",
   assumes:

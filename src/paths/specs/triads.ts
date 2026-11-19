@@ -12,21 +12,9 @@
  * not graded, so nothing here is strummed for a grade.
  */
 import { definePath } from "../spec";
-import type { ExerciseSpec, VariantParams } from "../spec";
-import type { PassBar } from "../format";
+import type { VariantParams } from "../spec";
 import { handAt, ladder, moveChart, shiftFrets } from "../templates";
-
-type Grading = Pick<ExerciseSpec, "grade" | "alsoGraded" | "pass">;
-
-export function named(evenness = 0.75, overBars = 4): Grading {
-  const bars: PassBar[] = [
-    { metric: "noteIdentity", min: 0.9, overBars },
-    { metric: "notesHeard", min: 0.9, overBars },
-    { metric: "extraNotes", max: 4, overBars: 4 },
-    { metric: "timingEvenness", min: evenness, overBars },
-  ];
-  return { grade: "written", alsoGraded: ["timingEvenness"], pass: bars };
-}
+import { DIMINISHED, F_AND_G, MORE_MINORS } from "./harmony-more";
 
 const YOUR_TURN = { grade: "selfChecked", example: true } as const;
 const NOT_CHECKED_YET =
@@ -34,63 +22,10 @@ const NOT_CHECKED_YET =
 const VARIANT_NOTE =
   "The frets and note names here are for the first version. On other days the same line comes in another key, higher or lower on the neck.";
 
-export const ROCK = (key: string) => ({ groove: "rock8", key });
 
-// ---------------------------------------------------------------------------
-// Shapes. A triad shape is three frets on three neighbouring strings, written
-// low string first. Fingers are worked out once, here, the way a hand holds a
-// small chord: notes on the lowest fret share the first finger, and each note
-// above takes the finger its fret asks for, or the next free one.
-// ---------------------------------------------------------------------------
+import { ROCK, bar, bars, ending, mid, named, roll, slow, toTop, top } from "./triadShapes";
+import type { Shape } from "./triadShapes";
 
-export type Strings = readonly [number, number, number];
-export type Shape = { strings: Strings; frets: readonly [number, number, number] };
-
-export const TOP: Strings = [3, 2, 1];
-export const MID: Strings = [4, 3, 2];
-export const top = (g: number, b: number, e: number): Shape => ({ strings: TOP, frets: [g, b, e] });
-export const mid = (d: number, g: number, b: number): Shape => ({ strings: MID, frets: [d, g, b] });
-
-export function tokens(shape: Shape): [string, string, string] {
-  const fretted = shape.frets.filter((f) => f > 0);
-  const low = Math.min(...fretted);
-  const order = shape.frets
-    .map((fret, index) => ({ fret, index }))
-    .filter((n) => n.fret > low)
-    .sort((a, b) => a.fret - b.fret || a.index - b.index);
-  const finger = new Map<number, number>();
-  let next = 2;
-  for (const n of order) {
-    // One finger per fret, counted from the first finger's fret, or the next free finger.
-    const wanted = Math.min(4, Math.max(next, n.fret - low + 1));
-    finger.set(n.index, wanted);
-    next = wanted + 1;
-  }
-  return shape.frets.map((fret, index) =>
-    fret === 0 ? `${shape.strings[index]}:0` : `${shape.strings[index]}:${fret}f${finger.get(index) ?? 1}`,
-  ) as [string, string, string];
-}
-
-/** Low, middle, high, middle: half a bar of eighths. */
-export const roll = (shape: Shape) => {
-  const [l, m, h] = tokens(shape);
-  return `${l} ${m} ${h} ${m}`;
-};
-/** One bar of eighths: the roll twice. */
-export const bar = (shape: Shape) => `/8 ${roll(shape)} ${roll(shape)}`;
-/** One bar of quarter notes: low, middle, high, middle. */
-const slow = (shape: Shape) => `/4 ${roll(shape)}`;
-/** One bar that ends on the top note, held for a beat. */
-export const toTop = (shape: Shape) => {
-  const [l, m, h] = tokens(shape);
-  return `/8 ${l} ${m} ${h} ${m} ${l} ${m} /4 ${h}`;
-};
-/** The last bar of a line: low, middle, and the top note held. */
-export const ending = (shape: Shape) => {
-  const [l, m, h] = tokens(shape);
-  return `/4 ${l} ${m} /2 ${h}`;
-};
-export const bars = (...shapes: Shape[]) => shapes.map(bar).join(" | ");
 
 // The chords of C major on the top three strings, by which note is lowest.
 const C_ROOT = top(5, 5, 3);
@@ -185,6 +120,7 @@ export default definePath({
   id: "triads",
   title: "Triads",
   kind: "theory",
+  category: "harmony",
   goal: "Know what a triad is, play major and minor triads in three places on the top strings and on the middle strings, and move between the chords of a song with the nearest shapes.",
   level: "beginner",
   assumes:
@@ -345,6 +281,7 @@ export default definePath({
         },
       ],
     },
+    F_AND_G,
     {
       id: "three-chords",
       title: "One shape, three chords",
@@ -515,6 +452,7 @@ export default definePath({
         },
       ],
     },
+    MORE_MINORS,
     {
       id: "four-chords",
       title: "The four chords of a thousand songs",
@@ -844,6 +782,7 @@ export default definePath({
         },
       ],
     },
+    DIMINISHED,
     {
       id: "chords-from-triads",
       title: "The chords you know are triads",
@@ -998,13 +937,13 @@ export default definePath({
     {
       id: "beginner",
       title: "Beginner: what a triad is",
-      summary: "The major scale counted as numbers, one, three and five as a chord, the three shapes of C on the top strings, and C, F and G two ways.",
+      summary: "The major scale counted as numbers, one, three and five as a chord, the three shapes of C on the top strings, the same three for F and G, and C, F and G two ways.",
       startHereIf: [
         "You can play eighth notes with a click at 60 BPM.",
         "You play chords from shapes and could not say which 3 notes are in a C chord.",
         "You know the C major scale, or are willing to learn it on 1 string.",
       ],
-      steps: ["one-three-five", "three-shapes", "three-chords"],
+      steps: ["one-three-five", "three-shapes", "f-and-g", "three-chords"],
       warmups: [
         {
           id: "shape-one-keys",
@@ -1023,13 +962,13 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: minor, and the nearest shape",
-      summary: "Minor as one lowered note, the four chords most songs use in two parts of the neck and three keys, and choosing shapes so the top note makes a line.",
+      summary: "Minor as one lowered note, A minor, D minor and E minor in three places each, the four chords most songs use in two parts of the neck and in other keys, and choosing shapes so the top note makes a line.",
       startHereIf: [
         "You can play a C major triad in 3 places on the top strings at 80 BPM.",
         "You can play C, F and G with triads over a band.",
         "You change chord by moving the whole hand, and your parts sound jumpy.",
       ],
-      steps: ["minor", "four-chords", "top-note"],
+      steps: ["minor", "more-minors", "four-chords", "top-note"],
       warmups: [
         {
           id: "major-shapes",
@@ -1048,13 +987,13 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: more strings, and whole chords",
-      summary: "The same triads on the middle strings, two sets joined into four-string shapes, the triads inside open and barre chords, seventh chords, and an eight-bar song.",
+      summary: "The same triads on the middle strings, two sets joined into four-string shapes, the diminished triad, the triads inside open and barre chords, seventh chords, and an eight-bar song.",
       startHereIf: [
         "You can play C, A minor, F and G with the nearest shapes on the top strings at 90 BPM.",
         "You can say the top note of each of the 3 shapes of a triad.",
         "You only know triads on the top 3 strings, or you can't yet see them inside the chords you strum.",
       ],
-      steps: ["middle-strings", "two-sets", "chords-from-triads", "a-song"],
+      steps: ["middle-strings", "two-sets", "diminished", "chords-from-triads", "a-song"],
       warmups: [
         {
           id: "minor-shapes",

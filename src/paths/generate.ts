@@ -454,6 +454,7 @@ export function buildPath(spec: PathSpec): PathDoc {
     id: spec.id,
     title: spec.title,
     kind: spec.kind,
+    ...(spec.category ? { category: spec.category } : {}),
     goal: spec.goal,
     level: spec.level,
     assumes: spec.assumes,
