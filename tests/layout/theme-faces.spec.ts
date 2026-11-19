@@ -8,7 +8,7 @@ import { textContrast, belowAA } from "./contrast";
  * The first-run wizard used to pin its own faces (Barlow Condensed, Fraunces,
  * Inter) and its own warm-dark palette whatever the theme. These tests hold
  * the wizard, the rail and Today to the theme's own faces, in three themes
- * whose faces could not be mistaken for each other (Neon's Orbitron, Ivory's
+ * whose faces could not be mistaken for each other (Neon's Inter, Ivory's
  * serifs, Mono's system sans), and the wizard's text to WCAG AA in those and
  * in the two gradient themes, where every panel must be a solid token.
  */

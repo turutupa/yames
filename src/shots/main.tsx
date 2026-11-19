@@ -156,7 +156,7 @@ function until(what: string, check: () => boolean, timeoutMs = 15000): Promise<v
  */
 const WEB_FONTS = new Set([
   "Archivo", "Comfortaa", "Inter", "Outfit",
-  "Orbitron", "Quicksand", "Source Serif 4",
+  "Quicksand", "Source Serif 4",
 ]);
 
 async function assertThemeFontLoaded() {
