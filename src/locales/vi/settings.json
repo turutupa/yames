@@ -459,6 +459,11 @@
         "ask": "Hỏi tôi",
         "askHint": "Mỗi buổi hỏi trước lượt đầu tiên, cho đến khi bạn chọn."
       }
+    },
+    "keepTakes": {
+      "title": "Giữ các lượt chơi gần nhất để khắc phục sự cố",
+      "hint": "Khi một lượt chơi bị chấm sai, âm thanh của nó và những gì Yames mong đợi có thể được phát lại để tìm nguyên nhân. Giữ 20 lượt gần nhất trên thiết bị này; không gửi gì đi đâu. Mặc định tắt.",
+      "folder": "Thư mục: {{folder}}"
     }
   },
   "keybindings": {

@@ -459,6 +459,11 @@
         "ask": "Vraag het me",
         "askHint": "Een sessie vraagt het voor de eerste take, tot je kiest."
       }
+    },
+    "keepTakes": {
+      "title": "Mijn laatste takes bewaren voor probleemoplossing",
+      "hint": "Als een take verkeerd wordt beoordeeld, kunnen de audio en wat Yames verwachtte opnieuw worden afgespeeld om te zien waarom. Bewaart de laatste 20 op dit apparaat; er wordt niets verzonden. Standaard uit.",
+      "folder": "Map: {{folder}}"
     }
   },
   "keybindings": {

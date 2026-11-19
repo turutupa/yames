@@ -185,10 +185,34 @@ pub enum NotesStatus {
     OctaveUnsure,
 }
 
+/// Who said which notes were right.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub enum NotesSource {
+    /// The monophonic pitch tracker (`pitch.rs`) alone: what shipped first.
+    #[default]
+    PitchPass,
+    /// The note verifier (`super::verify`), with the pitch tracker beside it.
+    /// It reads fast, ringing and soft notes the tracker cannot, so the
+    /// tracker's own give-up rules (too fast, notes ring, octave unsure) do
+    /// not apply to it.
+    Verifier,
+}
+
+impl NotesSource {
+    fn is_pitch_pass(&self) -> bool {
+        *self == NotesSource::PitchPass
+    }
+}
+
 /// The pitch pass over a Take's finished bars, summed.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NotesCheck {
+    /// Absent on the wire for the pitch pass, so grades made without the
+    /// verifier serialize as they always did.
+    #[serde(default, skip_serializing_if = "NotesSource::is_pitch_pass")]
+    pub source: NotesSource,
     pub status: NotesStatus,
     pub right: u32,
     pub wrong: u32,
@@ -248,6 +272,13 @@ fn is_assessed(metric: &str, notes_measured: bool) -> bool {
 /// Plain thresholds, every one of them from `GRADING_LIMITS.md`, and a design
 /// value until a real rig has been through them.
 pub fn notes_status(bars: &[BarSample], gap_ms: f64, ran: bool) -> NotesCheck {
+    notes_status_from(bars, gap_ms, ran.then_some(NotesSource::PitchPass))
+}
+
+/// [`notes_status`], knowing who gave the verdicts (`None`: nobody ran).
+pub fn notes_status_from(bars: &[BarSample], gap_ms: f64, source: Option<NotesSource>) -> NotesCheck {
+    let ran = source.is_some();
+    let tracker = source != Some(NotesSource::Verifier);
     let mut sum = PitchCounts::default();
     for b in bars {
         sum.add(&b.pitch);
@@ -255,18 +286,19 @@ pub fn notes_status(bars: &[BarSample], gap_ms: f64, ran: bool) -> NotesCheck {
     let pitched = sum.pitched();
     let status = if !ran {
         NotesStatus::NotRun
-    } else if gap_ms < NOTES_MIN_GAP_MS {
+    } else if tracker && gap_ms < NOTES_MIN_GAP_MS {
         NotesStatus::TooFast
     } else if pitched < NOTES_MIN_PITCHED {
         NotesStatus::TooFew
-    } else if (pitched as f64) < NOTES_MIN_PITCHED_SHARE * (pitched + sum.unpitched) as f64 {
+    } else if tracker && (pitched as f64) < NOTES_MIN_PITCHED_SHARE * (pitched + sum.unpitched) as f64 {
         NotesStatus::NotesRing
-    } else if sum.octave as f64 > NOTES_MAX_OCTAVE_SHARE * pitched as f64 {
+    } else if tracker && sum.octave as f64 > NOTES_MAX_OCTAVE_SHARE * pitched as f64 {
         NotesStatus::OctaveUnsure
     } else {
         NotesStatus::Measured
     };
     NotesCheck {
+        source: source.unwrap_or_default(),
         status,
         right: sum.right,
         wrong: sum.wrong,
@@ -288,13 +320,25 @@ pub fn evaluate(
     caught: bool,
     notes_ran: bool,
 ) -> Option<PassResult> {
+    evaluate_from(bars, pass_bars, gap_ms, caught, notes_ran.then_some(NotesSource::PitchPass))
+}
+
+/// [`evaluate`], knowing who gave the right-notes verdicts in the bars
+/// (`None`: no pass ran).
+pub fn evaluate_from(
+    bars: &[BarSample],
+    pass_bars: &[PassBar],
+    gap_ms: f64,
+    caught: bool,
+    notes_source: Option<NotesSource>,
+) -> Option<PassResult> {
     if pass_bars.is_empty() {
         return None;
     }
     let notes = pass_bars
         .iter()
         .any(|b| b.metric == NOTE_IDENTITY)
-        .then(|| notes_status(bars, gap_ms, notes_ran));
+        .then(|| notes_status_from(bars, gap_ms, notes_source));
     let measured = notes.is_some_and(|n| n.status == NotesStatus::Measured);
     let (assessed, not_assessed): (Vec<&PassBar>, Vec<&PassBar>) =
         pass_bars.iter().partition(|b| is_assessed(&b.metric, measured));
@@ -766,5 +810,28 @@ mod tests {
         let short = evaluate(&vec![clean(3.0); 4], &alternate_picking(), GAP, true, false).unwrap();
         assert_eq!(clean_tempo([(90.0, &pass), (110.0, &short), (100.0, &pass)]), Some(100.0));
         assert_eq!(clean_tempo([(110.0, &short)]), None);
+    }
+
+    /// M4: the verifier reads fast and ringing notes, so the tracker's give-up
+    /// rules do not apply when its verdicts are merged in; the minimum count
+    /// still does. And a grade from the tracker alone serializes as before.
+    #[test]
+    fn the_verifiers_count_is_not_given_up_on_for_speed_or_ringing() {
+        let fast = evaluate_from(&vec![pitched(8, 0, 0, 0); 8], &with_notes(), 60.0, true, Some(NotesSource::Verifier)).unwrap();
+        assert_eq!(fast.notes.unwrap().status, NotesStatus::Measured);
+        assert_eq!(fast.notes.unwrap().source, NotesSource::Verifier);
+        assert!(!fast.not_assessed.contains(&NOTE_IDENTITY.to_string()));
+        let ringing = evaluate_from(&vec![pitched(3, 0, 0, 5); 8], &with_notes(), GAP, true, Some(NotesSource::Verifier)).unwrap();
+        assert_eq!(ringing.notes.unwrap().status, NotesStatus::Measured);
+        let few = evaluate_from(&vec![pitched(2, 0, 0, 0); 4], &with_notes(), GAP, true, Some(NotesSource::Verifier)).unwrap();
+        assert_eq!(few.notes.unwrap().status, NotesStatus::TooFew);
+        // "couldn't tell" (unpitched) never counts against the player
+        let unsure = evaluate_from(&vec![pitched(6, 0, 0, 2); 8], &with_notes(), GAP, true, Some(NotesSource::Verifier)).unwrap();
+        assert_eq!(unsure.verdict, PassVerdict::Passed, "{unsure:?}");
+        let tracker = evaluate(&vec![pitched(8, 0, 0, 0); 8], &with_notes(), GAP, true, true).unwrap();
+        let wire = serde_json::to_value(tracker.notes.unwrap()).unwrap();
+        assert!(wire.get("source").is_none(), "{wire}");
+        let wire = serde_json::to_value(fast.notes.unwrap()).unwrap();
+        assert_eq!(wire["source"], "verifier");
     }
 }

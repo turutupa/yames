@@ -86,6 +86,44 @@ Correct notes the verifier calls not sounded or wrong. The number that must stay
 | sweep | 224 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
 | chord_tone | 168 | 6% | 12% | 21% | 0% | 0% | 4% | 4% | 0% |
 
+### Right notes as graded: counted right
+
+What `noteIdentity` counts once the pitch pass and the verifier are merged (`score::verify::merge_states`). Only notes the matcher heard can be counted.
+
+| kind | n | all | di | di_gain | laptop_mic | phone_mic | phone_agc | laptop_noisy | laptop_reverb |
+|---|---|---|---|---|---|---|---|---|---|
+| picked | 1897 | 87% | 100% | 78% | 99% | 70% | 65% | 98% | 100% |
+| picked_16ths_160_220 | 2016 | 72% | 100% | 99% | 100% | 10% | 0% | 93% | 100% |
+| palm_mute | 280 | 94% | 100% | 100% | 100% | 80% | 78% | 100% | 100% |
+| hammer | 168 | 36% | 100% | 75% | 62% | 0% | 0% | 0% | 17% |
+| pull | 168 | 51% | 100% | 79% | 75% | 4% | 29% | 0% | 67% |
+| tap | 112 | 72% | 100% | 100% | 100% | 31% | 31% | 44% | 100% |
+| slide_to | 28 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| bend | 63 | 92% | 100% | 100% | 100% | 100% | 44% | 100% | 100% |
+| bend_release | 56 | 86% | 100% | 100% | 100% | 100% | 0% | 100% | 100% |
+| vibrato | 7 | 86% | 100% | 0% | 100% | 100% | 100% | 100% | 100% |
+| harmonic | 112 | 80% | 100% | 100% | 100% | 81% | 6% | 75% | 100% |
+| sweep | 224 | 96% | 100% | 100% | 100% | 78% | 94% | 100% | 100% |
+
+### Right notes as graded: counted wrong
+
+Correct notes the grade counts as wrong. The player is wronged by these.
+
+| kind | n | all | di | di_gain | laptop_mic | phone_mic | phone_agc | laptop_noisy | laptop_reverb |
+|---|---|---|---|---|---|---|---|---|---|
+| picked | 1897 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| picked_16ths_160_220 | 2016 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| palm_mute | 280 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| hammer | 168 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| pull | 168 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| tap | 112 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| slide_to | 28 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| bend | 63 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| bend_release | 56 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| vibrato | 7 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| harmonic | 112 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| sweep | 224 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+
 ### Right-notes pass says right
 
 The pitch tracker's verdict on correct notes, when asked (whether a Take is graded on it depends on its pass bars).
@@ -230,6 +268,40 @@ Called not sounded. The rest are couldn't-tell.
 | sweep | 35 | 43% | 0% | 0% | 60% | 100% | 40% | 60% | 40% |
 | chord_tone | 42 | 33% | 33% | 33% | 17% | 33% | 33% | 50% | 33% |
 
+### A wrong pitch counted right by the grade
+
+Lower is better.
+
+| kind | n | all | di | di_gain | laptop_mic | phone_mic | phone_agc | laptop_noisy | laptop_reverb |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 798 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| picked | 196 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| picked_16ths_160_220 | 406 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| palm_mute | 56 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| hammer | 14 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| pull | 28 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| tap | 21 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| slide_to | 7 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| harmonic | 21 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| sweep | 49 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+
+### A wrong pitch counted wrong by the grade
+
+The rest are not counted either way.
+
+| kind | n | all | di | di_gain | laptop_mic | phone_mic | phone_agc | laptop_noisy | laptop_reverb |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 798 | 75% | 98% | 96% | 97% | 31% | 23% | 85% | 97% |
+| picked | 196 | 82% | 96% | 93% | 96% | 54% | 39% | 96% | 96% |
+| picked_16ths_160_220 | 406 | 72% | 100% | 100% | 100% | 10% | 0% | 93% | 100% |
+| palm_mute | 56 | 93% | 100% | 100% | 100% | 75% | 75% | 100% | 100% |
+| hammer | 14 | 36% | 100% | 50% | 50% | 0% | 0% | 0% | 50% |
+| pull | 28 | 61% | 100% | 100% | 100% | 0% | 25% | 0% | 100% |
+| tap | 21 | 67% | 100% | 100% | 100% | 0% | 67% | 0% | 100% |
+| slide_to | 7 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| harmonic | 21 | 76% | 100% | 100% | 100% | 67% | 0% | 67% | 100% |
+| sweep | 49 | 94% | 100% | 100% | 100% | 86% | 86% | 86% | 100% |
+
 ### A wrong pitch called right by the right-notes pass
 
 Lower is better.
@@ -321,7 +393,7 @@ Higher is better. A correct Take that fails is the app wronging the player.
 
 | kind | n | all | di | di_gain | laptop_mic | phone_mic | phone_agc | laptop_noisy | laptop_reverb |
 |---|---|---|---|---|---|---|---|---|---|
-| all | 105 | 54% | 80% | 53% | 87% | 13% | 13% | 53% | 80% |
+| all | 105 | 59% | 87% | 67% | 87% | 20% | 13% | 53% | 87% |
 
 ### Correctly played Takes answered with "I didn't catch enough"
 
@@ -337,7 +409,7 @@ Information: one note in five or six is wrong or missing in these.
 
 | kind | n | all | di | di_gain | laptop_mic | phone_mic | phone_agc | laptop_noisy | laptop_reverb |
 |---|---|---|---|---|---|---|---|---|---|
-| all | 161 | 15% | 17% | 13% | 22% | 0% | 9% | 13% | 30% |
+| all | 161 | 12% | 17% | 13% | 17% | 0% | 9% | 13% | 17% |
 
 ## Cost
 
@@ -345,9 +417,9 @@ Milliseconds of work per second of audio, wall clock on the machine that ran thi
 
 | stage | ms per s of audio | a 30 s Take |
 |---|---|---|
-| onset detector | 2.77 | 83 ms |
-| scorer and right-notes pass | 4.36 | 131 ms |
-| note model | 17.15 | 514 ms |
+| onset detector | 3.03 | 91 ms |
+| scorer and right-notes pass | 8.32 | 250 ms |
+| note model | 21.06 | 632 ms |
 | verifier rule | 0.01 | 0 ms |
 
 329 Takes, 86.3 minutes of audio.

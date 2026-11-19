@@ -380,7 +380,7 @@ pub struct TimingAnalyzer {
 
 /// What `load_exercise_schedule` was handed: the schedule, the Exercise's pass
 /// bars, and the written pitch of each note for the pitch pass.
-type LoadedSchedule = (ScoreSchedule, Vec<PassBar>, Vec<crate::pitch::ScoreNote>);
+type LoadedSchedule = (ScoreSchedule, Vec<PassBar>, Vec<crate::pitch::ScoreNote>, Vec<crate::score::verify::NoteDetail>);
 
 /// Right notes on a Session Take (`score::notes`), the second half of its
 /// grade.
@@ -396,6 +396,15 @@ type LoadedSchedule = (ScoreSchedule, Vec<PassBar>, Vec<crate::pitch::ScoreNote>
 pub struct NotesPass {
     pub tap: crate::take_audio::SharedTakeAudioTap,
     pub slot: Arc<Mutex<NotesSlot>>,
+    /// "Keep my last Takes for troubleshooting" (`crate::take_diagnostics`).
+    pub diagnostics: Arc<crate::take_diagnostics::TakeDiagnostics>,
+    /// A MIDI note arrived since the schedule was loaded. Its time is the
+    /// attack itself, where a heard onset's is the detector's delay after it,
+    /// and one Take's onsets carry one delay (`TakeAudio::detection_delay_ms`):
+    /// a Take with MIDI notes in it would have them read 25 ms early in the
+    /// input audio, which may not even be that instrument. So such a Take gets
+    /// no pass over its audio; right notes stay "not checked this time".
+    pub midi_seen: Arc<std::sync::atomic::AtomicBool>,
 }
 
 impl NotesPass {
@@ -406,6 +415,7 @@ impl NotesPass {
         slot.serial += 1;
         slot.pending = false;
         slot.grade = None;
+        self.midi_seen.store(false, std::sync::atomic::Ordering::Release);
     }
 }
 
@@ -478,6 +488,8 @@ impl TimingAnalyzer {
             notes: NotesPass {
                 tap: crate::take_audio::TakeAudioTap::new(),
                 slot: Arc::new(Mutex::new(NotesSlot::default())),
+                diagnostics: Arc::new(crate::take_diagnostics::TakeDiagnostics::default()),
+                midi_seen: Arc::new(std::sync::atomic::AtomicBool::new(false)),
             },
         }
     }
@@ -489,6 +501,11 @@ impl TimingAnalyzer {
     }
 
     /// Where the grade with right notes lands. See [`NotesPass`].
+    /// The switch behind "Keep my last Takes for troubleshooting".
+    pub fn take_diagnostics(&self) -> Arc<crate::take_diagnostics::TakeDiagnostics> {
+        self.notes.diagnostics.clone()
+    }
+
     pub fn notes_slot(&self) -> Arc<Mutex<NotesSlot>> {
         self.notes.slot.clone()
     }
@@ -529,13 +546,32 @@ impl TimingAnalyzer {
         pitches: Vec<crate::pitch::ScoreNote>,
         input_rate: Option<u32>,
     ) {
+        self.load_exercise_with_details(schedule, pass_bars, pitches, Vec::new(), input_rate);
+    }
+
+    /// [`Self::load_exercise_with_notes`], with what else is known of each
+    /// note (length, bend, technique) for the note verifier
+    /// (`score::verify`). With pitches loaded and a note model in the build,
+    /// the Take's audio is kept whether or not a bar names `noteIdentity`:
+    /// the verifier's account of the Take is information on every Exercise.
+    pub fn load_exercise_with_details(
+        &self,
+        schedule: ScoreSchedule,
+        pass_bars: Vec<PassBar>,
+        pitches: Vec<crate::pitch::ScoreNote>,
+        details: Vec<crate::score::verify::NoteDetail>,
+        input_rate: Option<u32>,
+    ) {
         self.notes.forget();
-        if !pitches.is_empty() && pass_bars.iter().any(|b| b.metric == "noteIdentity") {
+        let wanted = pass_bars.iter().any(|b| b.metric == "noteIdentity")
+            || crate::detect::model::enabled()
+            || self.notes.diagnostics.enabled();
+        if !pitches.is_empty() && wanted {
             self.notes.tap.arm(input_rate);
         } else {
             self.notes.tap.disarm();
         }
-        *self.schedule.lock().unwrap() = Some((schedule, pass_bars, pitches));
+        *self.schedule.lock().unwrap() = Some((schedule, pass_bars, pitches, details));
         self.schedule_version
             .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
     }
@@ -581,6 +617,14 @@ impl TimingAnalyzer {
         while log.len() > 256 {
             log.pop_front();
         }
+    }
+
+    /// A MIDI NoteOn as an onset. It times like any other, but it marks the
+    /// Take as one whose audio is not read for right notes
+    /// (`NotesPass::midi_seen`).
+    pub fn log_midi_onset(&self, onset: Onset) {
+        self.notes.midi_seen.store(true, std::sync::atomic::Ordering::Release);
+        self.log_onset(onset);
     }
 
     /// An onset the input HEARD (the microphone or an interface): dropped
@@ -1085,7 +1129,7 @@ impl TimingAnalyzer {
                         .lock()
                         .unwrap()
                         .clone()
-                        .map(|(schedule, pass_bars, pitches)| {
+                        .map(|(schedule, pass_bars, pitches, details)| {
                             // A schedule loaded with pass bars is a Session
                             // Take; only those get the lag correction.
                             let session_take = !pass_bars.is_empty();
@@ -1094,6 +1138,7 @@ impl TimingAnalyzer {
                                 .with_lag_correction(session_take)
                                 .with_pass_bars(pass_bars)
                                 .with_note_pitches(pitches)
+                                .with_note_details(details)
                         });
                 }
             }
@@ -1160,7 +1205,7 @@ impl TimingAnalyzer {
                     };
                     // Right notes take a pitch pass, off this loop. The grade
                     // below and the segment's say it is coming.
-                    let serial = close_take_notes(run, weights, &notes, &mut take_notes_serial);
+                    let serial = close_take_notes(run, weights, &notes, &mut take_notes_serial, &instrument_id);
                     run.set_notes_pending(serial);
                     *take_grade.lock().unwrap() = run.report(&weights).map(|r| r.grade);
                 }
@@ -2851,7 +2896,7 @@ pub fn window_thresholds(window_ms: f64) -> WindowThresholds {
 /// and nothing started when no usable audio was kept. Called on the analyzer's
 /// thread; the pitch pass never runs on it, and its own thread runs below
 /// normal priority, like the coach's model worker.
-fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass) -> Option<u64> {
+fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass, instrument_id: &str) -> Option<u64> {
     let audio = notes.tap.capture()?;
     // `clock::now_ns` to the wall milliseconds the beat map is in, the way
     // every onset and beat is converted.
@@ -2866,6 +2911,8 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass)
     };
     let run = run.clone();
     let slot = notes.slot.clone();
+    let diagnostics = notes.diagnostics.clone();
+    let instrument_id = instrument_id.to_string();
     let spawned = thread::Builder::new()
         .name("yames-take-notes".into())
         .spawn(move || {
@@ -2877,7 +2924,24 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass)
                     start_ms,
                     detection_delay_ms: audio.detection_delay_ns as f64 / 1e6,
                 };
-                run.report_with_notes(&weights, &take).map(|r| r.grade)
+                // The note model's second look (`score::verify`), then the
+                // grade with right notes from both witnesses in it. With no
+                // model in the build this is `report_with_notes`, as before.
+                let verified = if run.wants_verifier() {
+                    run.report(&weights).map(|timed| {
+                        crate::detect::model::with_shared(|model| match model {
+                            Some(m) => run.verify(&timed, &take, m.as_mut()),
+                            None => crate::score::verify::VerifierReport::status(crate::score::verify::VerifierStatus::NoModel),
+                        })
+                    })
+                } else {
+                    None
+                };
+                let grade = run.report_late(&weights, &take, verified.as_ref()).map(|r| r.grade);
+                if diagnostics.enabled() {
+                    diagnostics.write(&audio.samples, audio.rate, run.diagnostic_job(start_ms, &instrument_id));
+                }
+                grade
             }));
             let mut grade = graded.ok().flatten();
             if let Some(g) = grade.as_mut() {
@@ -2909,11 +2973,15 @@ fn close_take_notes(
     weights: ScoreWeights,
     notes: &NotesPass,
     started: &mut Option<u64>,
+    instrument_id: &str,
 ) -> Option<u64> {
-    if !run.wants_notes() {
+    if !run.wants_notes() && !run.wants_verifier() && !(notes.diagnostics.enabled() && run.has_pitches()) {
         return None;
     }
-    if let Some(serial) = start_notes_pass(run, weights, notes) {
+    if notes.midi_seen.load(std::sync::atomic::Ordering::Acquire) {
+        return None;
+    }
+    if let Some(serial) = start_notes_pass(run, weights, notes, instrument_id) {
         *started = Some(serial);
         return Some(serial);
     }
@@ -6139,6 +6207,8 @@ mod notes_pass_tests {
         let notes = NotesPass {
             tap: crate::take_audio::TakeAudioTap::new(),
             slot: Arc::new(Mutex::new(NotesSlot::default())),
+            diagnostics: Arc::new(crate::take_diagnostics::TakeDiagnostics::default()),
+            midi_seen: Arc::new(std::sync::atomic::AtomicBool::new(false)),
         };
         notes.tap.arm(Some(RATE));
         let mut ring = RingBuffer::new(RATE as usize * 4);
@@ -6186,12 +6256,12 @@ mod notes_pass_tests {
         assert!(run.wants_notes());
         let weights = Instrument::ElectricGuitar.profile().score_weights;
         let mut started = None;
-        let serial = close_take_notes(&run, weights, &notes, &mut started).expect("a pass started");
+        let serial = close_take_notes(&run, weights, &notes, &mut started, "electric-guitar").expect("a pass started");
         // Once: a second close of the same Take starts nothing...
-        assert!(start_notes_pass(&run, weights, &notes).is_none());
+        assert!(start_notes_pass(&run, weights, &notes, "electric-guitar").is_none());
         // ...and says the first pass is still the one coming, rather than
         // that none ran (B2: the second close used to leave `notRun`).
-        assert_eq!(close_take_notes(&run, weights, &notes, &mut started), Some(serial));
+        assert_eq!(close_take_notes(&run, weights, &notes, &mut started, "electric-guitar"), Some(serial));
         // The timing grade says the notes are coming, and does not count them.
         run.set_notes_pending(Some(serial));
         let timed = run.report(&weights).unwrap().grade;
@@ -6223,7 +6293,33 @@ mod notes_pass_tests {
         // A new Take's load forgets it: no answer for the next Take.
         notes.forget();
         assert!(notes.slot.lock().unwrap().grade.is_none());
-        assert_eq!(close_take_notes(&run, weights, &notes, &mut started), None);
+        assert_eq!(close_take_notes(&run, weights, &notes, &mut started, "electric-guitar"), None);
+    }
+
+    /// A Take with MIDI notes in it gets no pass over its audio: a MIDI note's
+    /// time is its attack, a heard onset's is the detector's delay later, and
+    /// the pass takes one delay out of all of them.
+    #[test]
+    fn a_take_with_midi_notes_in_it_is_not_read_from_the_audio() {
+        let analyzer = TimingAnalyzer::new(Arc::new(Mutex::new(VecDeque::new())));
+        let notes = analyzer.notes.clone();
+        assert!(!notes.midi_seen.load(Ordering::Acquire));
+        analyzer.log_midi_onset(Onset { ts_ns: 1, amplitude: 0.5, centroid: 0.0, confidence: 1.0 });
+        assert!(notes.midi_seen.load(Ordering::Acquire));
+        let schedule = ScoreSchedule {
+            onsets: vec![crate::score::ExpectedOnset { id: 0, beat: 0.0, note_ids: vec![0], soft: false, accent: false }],
+            length_beats: 4.0,
+            loops: false,
+        };
+        let bars = vec![PassBar { metric: "noteIdentity".into(), min: Some(0.9), max: None, over_bars: 1 }];
+        let run = ScheduleRun::new(schedule.clone()).with_pass_bars(bars.clone()).with_note_pitches(vec![crate::pitch::ScoreNote { id: 0, midi: 60.0 }]);
+        assert!(run.wants_notes());
+        let mut started = None;
+        let weights = Instrument::ElectricGuitar.profile().score_weights;
+        assert_eq!(close_take_notes(&run, weights, &notes, &mut started, "electric-guitar"), None);
+        // the next Take's load starts clean
+        analyzer.load_exercise_with_notes(schedule, bars, vec![crate::pitch::ScoreNote { id: 0, midi: 60.0 }], Some(48_000));
+        assert!(!notes.midi_seen.load(Ordering::Acquire));
     }
 
     /// B2, end to end through the analyzer: a Take closed twice, the second

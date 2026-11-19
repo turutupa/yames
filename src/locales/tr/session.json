@@ -284,7 +284,9 @@
       "barsMet": "{{of}} ölçüden {{count}} tanesi tutuldu",
       "barHeld": "{{n}}. ölçü: tutuldu",
       "barSlipped": "{{n}}. ölçü: kaydı",
-      "barThin": "{{n}}. ölçü: değerlendirmek için nota az"
+      "barThin": "{{n}}. ölçü: değerlendirmek için nota az",
+      "legatoAll": "Hammer-on, pull-off ve tap: {{due}} notadan {{sounded}} tanesi duyuldu. Bilgi amaçlı, puanlanmaz.",
+      "legatoSome": "Hammer-on, pull-off ve tap: {{due}} notadan {{sounded}} tanesi duyuldu, {{silent}} tanesi duyulmadı. Bilgi amaçlı, puanlanmaz."
     },
     "edge": {
       "kick": "Sınırımı bul",

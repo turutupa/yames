@@ -286,7 +286,9 @@
       "barsMet": "{{count}} battute su {{of}} tenute",
       "barHeld": "Battuta {{n}}: tenuta",
       "barSlipped": "Battuta {{n}}: scivolata",
-      "barThin": "Battuta {{n}}: troppe poche note per giudicare"
+      "barThin": "Battuta {{n}}: troppe poche note per giudicare",
+      "legatoAll": "Hammer-on, pull-off e tapping: {{sounded}} su {{due}} hanno suonato. Solo segnalato, non valutato.",
+      "legatoSome": "Hammer-on, pull-off e tapping: {{sounded}} su {{due}} hanno suonato, {{silent}} no. Solo segnalato, non valutato."
     },
     "edge": {
       "kick": "Trova il mio limite",

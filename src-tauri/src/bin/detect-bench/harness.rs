@@ -123,6 +123,10 @@ pub struct Outcome {
     pub report: Option<ScheduleReport>,
     /// The right-notes pass, per result, whether or not a bar asks for it.
     pub pitch_states: Vec<Option<NoteState>>,
+    /// The right-notes verdict the late grade counts: the pitch pass and the
+    /// verifier merged (`ScheduleRun::late_states`), or the pitch pass alone
+    /// when the verifier did not run.
+    pub final_states: Vec<Option<NoteState>>,
     /// Where the right-notes pass reads each result from, and where it cuts
     /// its track, ms into the audio (`ScheduleRun::pitch_lookups_ms`).
     pub pitch_lookups_ms: Vec<Option<f64>>,
@@ -167,6 +171,7 @@ pub fn run_take(samples: &[f32], rate: u32, job: &Job, model: Option<&mut Box<dy
         gap_ms,
         report: None,
         pitch_states: Vec::new(),
+        final_states: Vec::new(),
         pitch_lookups_ms: Vec::new(),
         pitch_cuts_ms: Vec::new(),
         verifier: VerifierReport::status(if model.is_some() { VerifierStatus::NoAudio } else { VerifierStatus::NoModel }),
@@ -232,9 +237,11 @@ pub fn run_take(samples: &[f32], rate: u32, job: &Job, model: Option<&mut Box<dy
                 _ => out.verifier.clone(),
             };
             out.cost.rule_ms = rule.elapsed().as_secs_f64() * 1000.0;
-            (pitch_states, verifier)
+            let final_states = if verifier.status == VerifierStatus::Ran { run.late_states(&timed, &audio, &verifier) } else { pitch_states.clone() };
+            (pitch_states, verifier, final_states)
         });
-        if let Some((pitch_states, verifier)) = verified {
+        if let Some((pitch_states, verifier, final_states)) = verified {
+            out.final_states = final_states;
             out.report = run.report_late(&weights, &audio, Some(&verifier));
             out.pitch_states = pitch_states;
             out.verifier = verifier;

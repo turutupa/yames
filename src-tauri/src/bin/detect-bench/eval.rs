@@ -39,6 +39,8 @@ pub struct Row {
     pub cut_t: Option<f64>,
     /// The right-notes pass: "right" | "wrong" | "octave" | "unheard" | none.
     pub pitch: Option<&'static str>,
+    /// What the late grade counts for this note: both passes merged.
+    pub r#final: Option<&'static str>,
     pub verifier: Option<Heard>,
     pub verifier_t: Option<f64>,
     pub verifier_alt: Option<i32>,
@@ -88,13 +90,15 @@ pub fn rows(meta: &TakeMeta, out: &Outcome) -> (Vec<Row>, TakeRow) {
         let cut_t = n.t_played.filter(|_| onset_t.is_some()).and_then(|t| {
             out.pitch_cuts_ms.iter().map(|c| c / 1000.0).filter(|c| (c - t).abs() < 0.06).min_by(|a, b| (a - t).abs().total_cmp(&(b - t).abs()))
         });
-        let pitch = k.and_then(|k| out.pitch_states.get(k).copied().flatten()).map(|s| match s {
+        let name = |s: NoteState| match s {
             NoteState::Right => "right",
             NoteState::Wrong => "wrong",
             NoteState::Octave => "octave",
             NoteState::Unheard => "unheard",
             NoteState::NotAssessed => "notAssessed",
-        });
+        };
+        let pitch = k.and_then(|k| out.pitch_states.get(k).copied().flatten()).map(name);
+        let final_state = k.and_then(|k| out.final_states.get(k).copied().flatten()).map(name);
         let v = verified.get(&n.note_id);
         rows.push(Row {
             take: meta.name.clone(),
@@ -111,6 +115,7 @@ pub fn rows(meta: &TakeMeta, out: &Outcome) -> (Vec<Row>, TakeRow) {
             onset_t,
             cut_t,
             pitch,
+            r#final: final_state,
             verifier: v.map(|v| v.heard),
             verifier_t: v.and_then(|v| v.deviation_ms).map(|d| n.t_written + d / 1000.0),
             verifier_alt: v.and_then(|v| v.heard_midi),
@@ -264,6 +269,10 @@ pub fn metrics(rows: &[Row], takes: &[TakeRow], has_verifier: bool) -> BTreeMap<
                         put("good", r.kind, "pitch_right", r.pitch == Some("right"), Better::Info);
                         put("good", r.kind, "pitch_wrong", matches!(r.pitch, Some("wrong") | Some("octave")), Better::Lower);
                     }
+                    if has_verifier && r.kind != "chord_tone" {
+                        put("good", r.kind, "final_right", r.r#final == Some("right"), Better::Higher);
+                        put("good", r.kind, "final_wrong", matches!(r.r#final, Some("wrong") | Some("octave")), Better::Lower);
+                    }
                     if has_verifier {
                         put("good", r.kind, "verifier_yes", v == Some(Heard::Yes), Better::Higher);
                         put("good", r.kind, "verifier_unsure", v == Some(Heard::Unsure), Better::Info);
@@ -291,6 +300,10 @@ pub fn metrics(rows: &[Row], takes: &[TakeRow], has_verifier: bool) -> BTreeMap<
                         if r.kind != "chord_tone" {
                             put("wrong", kind, "pitch_right", r.pitch == Some("right"), Better::Lower);
                             put("wrong", kind, "pitch_caught", matches!(r.pitch, Some("wrong") | Some("octave")), Better::Info);
+                        }
+                        if has_verifier && r.kind != "chord_tone" {
+                            put("wrong", kind, "final_right", r.r#final == Some("right"), Better::Lower);
+                            put("wrong", kind, "final_caught", matches!(r.r#final, Some("wrong") | Some("octave")), Better::Higher);
                         }
                         if has_verifier {
                             put("wrong", kind, "verifier_yes", v == Some(Heard::Yes), Better::Lower);
@@ -455,6 +468,10 @@ pub fn markdown(about: &serde_json::Value, metrics: &BTreeMap<String, Metric>, t
         table(&mut s, "Verifier: couldn't tell", "Correct notes the verifier gives no verdict on. Never a miss, never blocks a pass.", metrics, "good", "verifier_unsure", k, chains);
         table(&mut s, "Verifier: wrongly declined", "Correct notes the verifier calls not sounded or wrong. The number that must stay near zero.", metrics, "good", "verifier_no", k, chains);
     }
+    if has_verifier {
+        table(&mut s, "Right notes as graded: counted right", "What `noteIdentity` counts once the pitch pass and the verifier are merged (`score::verify::merge_states`). Only notes the matcher heard can be counted.", metrics, "good", "final_right", k, chains);
+        table(&mut s, "Right notes as graded: counted wrong", "Correct notes the grade counts as wrong. The player is wronged by these.", metrics, "good", "final_wrong", k, chains);
+    }
     table(&mut s, "Right-notes pass says right", "The pitch tracker's verdict on correct notes, when asked (whether a Take is graded on it depends on its pass bars).", metrics, "good", "pitch_right", k, chains);
     table(&mut s, "Right-notes pass says wrong", "Correct notes the pitch tracker calls wrong or an octave out.", metrics, "good", "pitch_wrong", k, chains);
     table(&mut s, "Timing scatter of the live detector, ms", "Robust spread of matched onset times against the true note times, each Take's constant lag removed.", metrics, "good", "onset_scatter_ms", k, chains);
@@ -470,6 +487,10 @@ pub fn markdown(about: &serde_json::Value, metrics: &BTreeMap<String, Metric>, t
     if has_verifier {
         table(&mut s, "A left-out note confirmed by the verifier", "Lower is better.", metrics, "omitted", "verifier_yes", &kk, chains);
         table(&mut s, "A left-out note caught by the verifier", "Called not sounded. The rest are couldn't-tell.", metrics, "omitted", "verifier_caught", &kk, chains);
+    }
+    if has_verifier {
+        table(&mut s, "A wrong pitch counted right by the grade", "Lower is better.", metrics, "wrong", "final_right", &kk, chains);
+        table(&mut s, "A wrong pitch counted wrong by the grade", "The rest are not counted either way.", metrics, "wrong", "final_caught", &kk, chains);
     }
     table(&mut s, "A wrong pitch called right by the right-notes pass", "Lower is better.", metrics, "wrong", "pitch_right", &kk, chains);
     if has_verifier {

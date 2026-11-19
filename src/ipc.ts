@@ -824,16 +824,95 @@ export async function loadScoreSchedule(
   schedule: ScoreSchedule,
   passBars?: readonly ScorerPassBar[],
   notes?: readonly ScorerNotePitch[],
+  details?: readonly ScorerNoteDetail[],
 ): Promise<void> {
   // Songs loads a schedule with no bars to judge against; a Session sends its
   // Exercise's, and the scorer's grade then carries `pass` (score/pass.rs).
   // With the written pitches too, a `noteIdentity` bar is checked from the
   // Take's own audio after it (`score/notes.rs`).
   if (!passBars) return invoke("load_score_schedule", { schedule });
+  // `details` (length, bend, technique of each note) is for the note verifier
+  // (`score/verify.rs`), which confirms the written notes one by one after
+  // the Take; it is only worth sending with the pitches.
+  if (!notes || notes.length === 0) return invoke("load_score_schedule", { schedule, passBars });
   return invoke(
     "load_score_schedule",
-    notes && notes.length > 0 ? { schedule, passBars, notes } : { schedule, passBars },
+    details && details.length > 0 ? { schedule, passBars, notes, details } : { schedule, passBars, notes },
   );
+}
+
+/**
+ * What else the scorer may know of a written note (`score/verify.rs`
+ * `NoteDetail`). `string` is 1 for the high E; `tech` are `PathTechnique`
+ * names; `bend` is in semitones.
+ */
+export type ScorerNoteDetail = {
+  id: number;
+  durBeats: number;
+  bend?: number;
+  string?: number;
+  tech?: string[];
+};
+
+/** How a written note is produced, as the verifier tallies it. */
+export type VerifierNoteKind =
+  | "chordTone"
+  | "hammer"
+  | "pull"
+  | "tap"
+  | "slideTo"
+  | "bend"
+  | "harmonic"
+  | "palmMute"
+  | "picked";
+
+/** One technique's line of the verifier's account (`score/verify.rs`). */
+export type VerifierKindTally = {
+  kind: VerifierNoteKind;
+  /** Notes of this kind the Take reached. */
+  due: number;
+  sounded: number;
+  notSounded: number;
+  wrong: number;
+  /** "Couldn't tell": never a miss, never part of a pass. */
+  unsure: number;
+};
+
+/**
+ * The note verifier's account of a Take, on the late grade only: which
+ * written notes the note model confirmed. Information, except that
+ * `pass.notes.source === "verifier"` says the right-notes count used it.
+ */
+export type VerifierReport = {
+  status: "ran" | "noModel" | "noAudio" | "failed";
+  kinds?: VerifierKindTally[];
+  notes?: {
+    result: number;
+    onsetId: number;
+    pass: number;
+    noteId: number;
+    kind: VerifierNoteKind;
+    heard: "yes" | "no" | "wrong" | "unsure";
+    how: "pick" | "soft" | "none";
+    heardMidi?: number;
+    deviationMs?: number;
+    strength: number;
+  }[];
+  lagMs: number;
+  modelMs: number;
+  ruleMs: number;
+  audioS: number;
+};
+
+/**
+ * "Keep my last Takes for troubleshooting": with it on, each graded Take's
+ * input audio and what was expected of it are written under the app's data
+ * folder (the last 20), for `detect-bench replay`
+ * (`plans/detection/MEASURE.md`). Off by default; nothing is sent anywhere.
+ * Resolves to the folder when on.
+ */
+export async function setTakeDiagnostics(enabled: boolean): Promise<string | null> {
+  return invoke<string | null>("set_take_diagnostics", { enabled });
 }
 
 /** The written pitch of one note a schedule names (`pitch.rs` `ScoreNote`). */
@@ -1005,6 +1084,8 @@ export type ScorerTakeGrade = {
    * `notesPending`; the one that made it, on the grade with right notes.
    */
   notesSerial?: number;
+  /** The note verifier's account of the Take, on the late grade (`VerifierReport`). */
+  verifier?: VerifierReport;
 };
 
 /** Whether right notes could be measured on a Take (`score/pass.rs` `NotesStatus`). */
@@ -1018,6 +1099,11 @@ export type ScorerNotesStatus =
 
 /** The pitch pass over a Take's finished bars (`score/pass.rs` `NotesCheck`). */
 export type ScorerNotesCheck = {
+  /**
+   * Who gave the verdicts: absent for the pitch tracker alone, `"verifier"`
+   * when the note verifier's were merged in (`score/verify.rs`).
+   */
+  source?: "pitchPass" | "verifier";
   status: ScorerNotesStatus;
   right: number;
   wrong: number;

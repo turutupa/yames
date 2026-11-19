@@ -108,3 +108,90 @@ from source or the tract fallback; (2) the binary grows about 20 MB. tract
 (pure Rust) was tried on the same model: it loads it, gives the same numbers to
 four decimals, and costs about the same; it is the fallback if either point
 matters, behind the same `NoteModel` trait.
+
+## M4. Grade from the verifier (part 1: the right-notes count; done)
+
+**What.** `noteIdentity` now takes its verdicts from two witnesses, the pitch
+tracker and the verifier, merged by `score::verify::merge_states` (a note is
+right when the verifier confirmed it or the tracker heard it right and nobody
+heard it wrong; wrong only when the verifier named another pitch and the
+tracker did not disagree; anything weaker is "couldn't tell", which counts
+neither way: decision 4). With the verifier in it, the tracker's give-up rules
+(too fast, notes ring, octave unsure) stop applying; the minimum count still
+does. `pass.notes.source` says `"verifier"` on such a grade, and is absent on a
+tracker-only one, so old grades serialize as they did. Only notes the matcher
+heard are counted, as before: a missed note is `notesHeard`'s.
+
+Also in this change:
+
+- The late pass runs whenever pitches are loaded and the build has the model
+  (`ScheduleRun::wants_verifier`), not only on Exercises with a `noteIdentity`
+  bar; the model is loaded once per process (`detect::model::with_shared`),
+  `YAMES_VERIFIER=0` turns it off.
+- The app sends each note's length, bend, string and techniques
+  (`take.ts` `details`, `loadScoreSchedule`) so the verifier listens per
+  technique.
+- **Reported, not graded (decision 3):** the result's checks list carries one
+  line for hammer-ons, pull-offs and taps, "N of M sounded[, K didn't].
+  Reported, not graded." (`OtherChecks`, `takeMeasures.ts` `legatoOf`), 15
+  locales. "Couldn't tell" is in M but never in K.
+- **Repro of real Takes:** "Keep my last Takes for troubleshooting" in
+  Settings, Support (off by default, local only, last 20;
+  `take_diagnostics.rs`, `src/settings/takeDiagnostics.ts`); the sidecar is
+  `detect-bench replay`'s `Job` with the real quarter times
+  (`ScheduleRun::diagnostic_job`).
+- **M0 review nits:** `score::notes::tests::every_look_up_and_cut_lands_on_the_true_attack`
+  (lib, so in `test:rust`) fails at -25 ms (delay taken out twice) and at +25
+  ms (not at all); both mutations were run and failed it. MIDI onsets: a Take
+  with a MIDI note in it gets no pass over its audio (`NotesPass::midi_seen`,
+  test `a_take_with_midi_notes_in_it_is_not_read_from_the_audio`), and the
+  doc on `TakeAudio::detection_delay_ms` says so. `npm run test:detect` runs
+  every production-path gate including `test:grading`.
+- **Card #90:** the three `audio_fixtures` tests assumed
+  `even-eighths.open-string` was two bars with no `noteIdentity` bar; the
+  content pass made it four bars with one. They now build a Take of exactly
+  the bars they mean and judge timing bars only (`timing_take`).
+  `test:grading`: 29 passed, 0 failed.
+
+**Before / after, fast bench, production path, 7 chains pooled**
+(`results/fast.md`; before = the tracker alone, `pitch_*`; after = the grade,
+`final_*`). Correct notes:
+
+| Kind | Counted right, before | after | Counted WRONG, before | after |
+|---|---|---|---|---|
+| Picked | 78.7% | 87.0% | 5.5% | 0% |
+| Picked sixteenths 160-220 | 60.2% | 71.8% | 3.7% | 0% |
+| Palm mute | 94.3% | 93.9% | 0% | 0% |
+| Hammer-on | 27.4% | 36.3% | 8.9% | 0% |
+| Pull-off | 41.7% | 50.6% | 5.4% | 0% |
+| Tap | 26.8% | 72.3% | 42.9% | 0% |
+| Bend | 0% | 92.1% | 88.9% | 0% |
+| Bend and release | 8.9% | 85.7% | 62.5% | 0% |
+| Vibrato (n=7) | 71.4% | 85.7% | 0% | 0% |
+| Harmonic | 47.3% | 80.4% | 0% | 0% |
+| Sweep | 70.5% | 96.0% | 16.5% | 0% |
+
+"Counted right, after" equals `onset_heard` in every row: the right-notes
+count is now capped by what the live detector hears, not by the pitch pass
+(hammer-ons 36%, pull-offs 51%: M6's problem, and why the verifier's own
+account, 98 to 100% confirmed, is what the legato line reports).
+
+Mistakes let through: a wrong pitch counted right 0.3% -> 0% (n=798); a wrong
+pitch counted wrong 66.0% -> 75.4% (DI 97.4% -> 98.2%; phone_mic 30.7%, the
+rest not counted either way). Takes: correct Takes passing their bars 54.3% ->
+59.0% (n=105; DI 80.0 -> 86.7%), Takes with scripted mistakes passing 14.9% ->
+12.4% (n=161; info: most scripted mistakes are timing ones). Without the model
+(`--no-model`) every metric is unchanged, byte for byte
+(`baselines/fast-no-model.json`).
+
+**Against M4's acceptance** (which is on the recorded corpus, #85, not yet
+recorded): on the synthetic bench, sounded picked / hammered / tapped notes
+confirmed by the verifier 100% / 100% / 100% (DI) and 100% / 100% / 100%
+(phone chain) of all correct notes (n = 271 / 24 / 16 per chain); scripted wrong or left-out
+notes accepted 0% / 0.1% (target at most 2%); correct Takes failed by the
+verifier: none (no correct note is counted wrong). Pass bars stay as they are
+("report first").
+
+**Not done here:** shipped builds do not have the model (`release.yml` builds
+without `detect-ort`), so in the app all of this waits for that switch, which
+is the owner's (bundle +20 MB; no prebuilt ONNX Runtime for Intel macOS).

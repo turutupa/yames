@@ -286,7 +286,9 @@
       "barsMet": "{{count}} de {{of}} compassos sustentados",
       "barHeld": "Compasso {{n}}: sustentado",
       "barSlipped": "Compasso {{n}}: escapou",
-      "barThin": "Compasso {{n}}: poucas notas para julgar"
+      "barThin": "Compasso {{n}}: poucas notas para julgar",
+      "legatoAll": "Hammer-ons, pull-offs e taps: {{sounded}} de {{due}} soaram. Informado, não avaliado.",
+      "legatoSome": "Hammer-ons, pull-offs e taps: {{sounded}} de {{due}} soaram, {{silent}} não. Informado, não avaliado."
     },
     "edge": {
       "kick": "Achar meu limite",

@@ -122,6 +122,35 @@ pub fn load() -> Result<Box<dyn NoteModel>, String> {
     Err("this build has no note model (feature `detect-ort` is off)".into())
 }
 
+/// The app's one loaded model, made on first use and kept. `f` gets `None`
+/// when this build has no model, when the player's environment turned the
+/// verifier off (`YAMES_VERIFIER=0`), or when loading failed (said once on
+/// stderr). Inference holds the lock, so callers queue: the post-Take pass is
+/// the only one, and it is one Take at a time.
+pub fn with_shared<R>(f: impl FnOnce(Option<&mut Box<dyn NoteModel>>) -> R) -> R {
+    static SHARED: std::sync::Mutex<Option<Option<Box<dyn NoteModel>>>> = std::sync::Mutex::new(None);
+    let mut slot = SHARED.lock().unwrap_or_else(|e| e.into_inner());
+    let model = slot.get_or_insert_with(|| {
+        if !enabled() {
+            return None;
+        }
+        match load() {
+            Ok(m) => Some(m),
+            Err(e) => {
+                eprintln!("[yames] the note model did not load, so notes are not verified: {e}");
+                None
+            }
+        }
+    });
+    f(model.as_mut())
+}
+
+/// Whether the verifier should run at all in this process: compiled in, and
+/// not turned off with `YAMES_VERIFIER=0` (a troubleshooting switch).
+pub fn enabled() -> bool {
+    compiled() && std::env::var("YAMES_VERIFIER").map(|v| v != "0").unwrap_or(true)
+}
+
 #[cfg(feature = "detect-ort")]
 mod ort_backend {
     use super::{NoteModel, WindowOut, MODEL_BYTES, WINDOW_SAMPLES};

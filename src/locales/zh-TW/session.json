@@ -284,7 +284,9 @@
       "barsMet": "{{of}} 小節裡穩住 {{count}} 小節",
       "barHeld": "第 {{n}} 小節：穩住",
       "barSlipped": "第 {{n}} 小節：亂了",
-      "barThin": "第 {{n}} 小節：音太少，無法判斷"
+      "barThin": "第 {{n}} 小節：音太少，無法判斷",
+      "legatoAll": "搥弦、勾弦和點弦：{{due}} 個音中響了 {{sounded}} 個。僅供參考，不計分。",
+      "legatoSome": "搥弦、勾弦和點弦：{{due}} 個音中響了 {{sounded}} 個，{{silent}} 個沒響。僅供參考，不計分。"
     },
     "edge": {
       "kick": "挑戰極限",

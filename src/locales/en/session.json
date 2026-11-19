@@ -284,7 +284,9 @@
       "barsMet": "{{count}} of {{of}} bars held",
       "barHeld": "Bar {{n}}: held",
       "barSlipped": "Bar {{n}}: slipped",
-      "barThin": "Bar {{n}}: too few notes to judge"
+      "barThin": "Bar {{n}}: too few notes to judge",
+      "legatoAll": "Hammer-ons, pull-offs and taps: {{sounded}} of {{due}} sounded. Reported, not graded.",
+      "legatoSome": "Hammer-ons, pull-offs and taps: {{sounded}} of {{due}} sounded, {{silent}} didn't. Reported, not graded."
     },
     "edge": {
       "kick": "Find my edge",

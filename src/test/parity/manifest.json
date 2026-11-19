@@ -156,7 +156,8 @@
     "callback_probe_report",
     "export_practice_data",
     "set_app_in_background",
-    "set_listen_demo"
+    "set_listen_demo",
+    "set_take_diagnostics"
   ],
   "ipcCommands": [
     "analyze_attempt",
@@ -313,7 +314,8 @@
     "callback_probe_report",
     "export_practice_data",
     "set_app_in_background",
-    "set_listen_demo"
+    "set_listen_demo",
+    "set_take_diagnostics"
   ],
   "commandsInvokedOutsideIpc": [
     "app_ready",
@@ -524,7 +526,8 @@
     "androidBetaDownload",
     "androidBetaInstall",
     "androidBetaProbe",
-    "setListenDemo"
+    "setListenDemo",
+    "setTakeDiagnostics"
   ],
   "ipcWrappersWithoutCaller": [
     "clearSessionLogs",

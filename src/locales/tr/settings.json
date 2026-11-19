@@ -459,6 +459,11 @@
         "ask": "Bana sor",
         "askHint": "Sen seçene kadar her oturum ilk denemeden önce sorar."
       }
+    },
+    "keepTakes": {
+      "title": "Sorun giderme için son çekimlerimi sakla",
+      "hint": "Bir çekim yanlış puanlanırsa, sesi ve Yames'in beklediği şey nedenini bulmak için yeniden oynatılabilir. Son 20'sini bu cihazda saklar; hiçbir şey gönderilmez. Varsayılan olarak kapalı.",
+      "folder": "Klasör: {{folder}}"
     }
   },
   "keybindings": {

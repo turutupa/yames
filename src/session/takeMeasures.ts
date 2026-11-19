@@ -12,6 +12,7 @@
  */
 import { getTakeGradeWithNotes } from "../ipc";
 import type {
+  VerifierReport,
   NoCatchReason,
   PracticeSegmentEndedPayload,
   ScorerPassResult,
@@ -59,6 +60,14 @@ export type TakeMeasures = {
    * decides the verdict; `grade.ts` only falls back to its own reading without.
    */
   pass?: ScorerPassResult;
+  /**
+   * Hammer-ons, pull-offs and taps, as the note verifier heard them
+   * (`score/verify.rs`), when it ran. Reported, never graded (owner decision
+   * 3): `due` counts every one the Take reached, `sounded` the confirmed ones,
+   * `notSounded` the ones it called silent; the rest it could not tell, which
+   * is never a miss (decision 4).
+   */
+  legato?: { due: number; sounded: number; notSounded: number };
 };
 
 /**
@@ -100,6 +109,21 @@ function barsOf(grade: ScorerTakeGrade): number[] | null {
   return out;
 }
 
+const LEGATO_KINDS = new Set(["hammer", "pull", "tap"]);
+
+/** The verifier's legato line, when it ran and the Take had any. */
+export function legatoOf(verifier: VerifierReport | undefined): TakeMeasures["legato"] | undefined {
+  if (verifier?.status !== "ran" || !verifier.kinds) return undefined;
+  const rows = verifier.kinds.filter((k) => LEGATO_KINDS.has(k.kind));
+  const due = rows.reduce((n, k) => n + k.due, 0);
+  if (due === 0) return undefined;
+  return {
+    due,
+    sounded: rows.reduce((n, k) => n + k.sounded, 0),
+    notSounded: rows.reduce((n, k) => n + k.notSounded, 0),
+  };
+}
+
 /** The scorer's right-notes value, when it measured one. */
 function noteIdentityOf(pass: ScorerPassResult | undefined): number | null {
   if (pass?.notes?.status !== "measured") return null;
@@ -130,7 +154,12 @@ export async function withRightNotes(
   // Only the pass this Take started: a grade for another Take is no answer.
   const same = withNotes?.notesSerial !== undefined && withNotes.notesSerial === grade.notesSerial;
   if (!withNotes?.pass || !same) return { ...grade, notesPending: false };
-  return { ...grade, pass: withNotes.pass, notesPending: false };
+  return {
+    ...grade,
+    pass: withNotes.pass,
+    ...(withNotes.verifier ? { verifier: withNotes.verifier } : {}),
+    notesPending: false,
+  };
 }
 
 function fromGrade(
@@ -154,6 +183,7 @@ function fromGrade(
     caught,
     ...(grade.noCatchReason ? { noCatchReason: grade.noCatchReason } : {}),
     ...(grade.pass ? { pass: grade.pass } : {}),
+    ...(caught && legatoOf(grade.verifier) ? { legato: legatoOf(grade.verifier) } : {}),
   };
 }
 

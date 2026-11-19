@@ -72,7 +72,8 @@ Metric names are `group|chain|kind|metric`; `all` pools a dimension.
 | Group | Metric | Meaning | Gate |
 |---|---|---|---|
 | `good` | `onset_heard` | correct notes the live detector and matcher count as heard | higher |
-| `good` | `pitch_right`, `pitch_wrong` | the right-notes pass on correct notes | wrong: lower |
+| `good` | `pitch_right`, `pitch_wrong` | the right-notes pass (pitch tracker alone) on correct notes | wrong: lower |
+| `good` | `final_right`, `final_wrong` | what the late grade's `noteIdentity` counts: tracker and verifier merged (`score::verify::merge_states`, M4); only notes the matcher heard | right: higher, wrong: lower |
 | `good` | `verifier_yes` | correct notes the verifier confirms | higher |
 | `good` | `verifier_no` | correct notes it calls not sounded or wrong | lower |
 | `good` | `verifier_unsure` | correct notes it could not tell | info |
@@ -82,6 +83,7 @@ Metric names are `group|chain|kind|metric`; `all` pools a dimension.
 | `omitted` | `verifier_caught` | a left-out note called not sounded | higher |
 | `wrong` | `pitch_right`, `verifier_yes` | a wrong pitch judged right | lower |
 | `wrong` | `verifier_caught` | a wrong pitch called wrong | higher |
+| `wrong` | `final_right`, `final_caught` | a wrong pitch counted right / wrong by the late grade | right: lower, caught: higher |
 | `dead` | `verifier_yes` | a damped chord string judged sounding | lower |
 | `weak` | `onset_heard`, `verifier_yes` | very weak legato | info |
 | `takes` | `good_passed` | correct Takes that pass their Exercise's own bars | higher |
@@ -123,8 +125,9 @@ failure, but it is a reason to update: the check prints `better` lines.
 
 | Gate | Command | Covers |
 |---|---|---|
-| Unit tests | `npm run test:rust` | everything in the lib, without the model |
-| The same with the model | `npm run test:rust:detect` | `detect::*`, including the real model on a plucked A |
+| **All of the below but the probe** | `npm run test:detect` | `test:rust`, `test:rust:detect`, `test:grading`, `test:pitch`, `test:dsp`, `test:highbpm`, `detect:check`, in that order. Run it for any change to detection or grading |
+| Unit tests | `npm run test:rust` | everything in the lib, without the model (includes `score::notes::tests`, the truth-vs-look-up check with the detector's delay in it) |
+| The same with the model | `npm run test:rust:detect` | the whole lib with `detect-ort`, including the real model on a plucked A |
 | Fixture-level grading | `npm run test:grading` | `tests/audio_fixtures.rs`: the scorer on synthetic plucks, **including the M0 production-path tests**; not part of `test:rust` |
 | Detector goldens | `npm run test:dsp`, `npm run test:highbpm` | onset detector and Songs scoring, byte for byte |
 | Pitch tracker | `npm run test:pitch` | `pitch.rs` fixtures |
@@ -134,11 +137,13 @@ failure, but it is a reason to update: the check prints `better` lines.
 
 ## Reproducing a player's report: "this Take graded wrong"
 
-1. **Get the Take out of the app.** Settings, Advanced, "Keep my last Takes for
-   troubleshooting" (off by default; see below). With it on, every graded Take
+1. **Get the Take out of the app.** Settings, Support, "Keep my last Takes for
+   troubleshooting" (off by default; see below; the choice is kept in the
+   webview's local storage and handed to the engine at start-up,
+   `src/settings/takeDiagnostics.ts`). With it on, every graded Take
    leaves two files in the app's data folder under `diagnostics/takes/`:
-   `take-<time>.wav` (the input exactly as the detector got it, mono, device
-   rate) and `take-<time>.job.json` (what the app was told to expect: the
+   `take-<unix seconds>.wav` (the input exactly as the detector got it, mono
+   float, device rate) and `take-<unix seconds>.job.json` (what the app was told to expect: the
    schedule, the written pitches and techniques, the pass bars, where every
    click fell in the audio, the instrument). The last 20 are kept. Nothing
    leaves the machine; the player sends the two files themselves.
@@ -148,7 +153,7 @@ failure, but it is a reason to update: the check prints `better` lines.
    directory (pull with `adb`).
 2. **Replay it.**
    ```sh
-   npm run detect:bench -- replay take-20261119-141500.job.json --out /tmp/replay
+   npm run detect:bench -- replay take-1795616100.job.json --out /tmp/replay
    ```
    Prints the grade the production path gives it now, and writes
    `<name>.replay.json` (onsets, grade, per-note verdicts of the matcher, the
@@ -166,6 +171,16 @@ failure, but it is a reason to update: the check prints `better` lines.
    a folder outside the repo (never commit audio), run
    `npm run detect:bench -- run --dir <folder>`, fix, re-run. If the case is
    one the synth can produce, add it to `cases.rs` so the fast check carries it.
+
+A kept Take is written whatever the build, but the verifier's verdicts in
+the app need a build with the note model (`--features detect-ort`). Shipped
+builds do not have it yet (`release.yml` passes only the coach feature):
+turning it on is the owner's call (about +20 MB, and no prebuilt ONNX Runtime
+for Intel macOS; `PROGRESS.md` M3). `YAMES_VERIFIER=0` turns the verifier off
+in a build that has it. A Take with MIDI notes in it gets no pass over its
+audio at all (`NotesPass::midi_seen`): a MIDI note's time is its attack, a
+heard onset's is the detector's delay later, and the pass takes one delay out
+of every onset of a Take.
 
 ## Privacy
 

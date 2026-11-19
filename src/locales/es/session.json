@@ -286,7 +286,9 @@
       "barsMet": "{{count}} de {{of}} compases aguantados",
       "barHeld": "Compás {{n}}: aguantado",
       "barSlipped": "Compás {{n}}: se escapó",
-      "barThin": "Compás {{n}}: muy pocas notas para juzgar"
+      "barThin": "Compás {{n}}: muy pocas notas para juzgar",
+      "legatoAll": "Ligados y tapping: sonaron {{sounded}} de {{due}}. Se informa, no se califica.",
+      "legatoSome": "Ligados y tapping: sonaron {{sounded}} de {{due}}, {{silent}} no. Se informa, no se califica."
     },
     "edge": {
       "kick": "Buscar mi límite",

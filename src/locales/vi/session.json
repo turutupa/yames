@@ -284,7 +284,9 @@
       "barsMet": "Giữ được {{count}} trên {{of}} ô nhịp",
       "barHeld": "Ô nhịp {{n}}: giữ được",
       "barSlipped": "Ô nhịp {{n}}: bị lệch",
-      "barThin": "Ô nhịp {{n}}: quá ít nốt để đánh giá"
+      "barThin": "Ô nhịp {{n}}: quá ít nốt để đánh giá",
+      "legatoAll": "Hammer-on, pull-off và tap: {{sounded}}/{{due}} nốt đã kêu. Chỉ thông báo, không chấm điểm.",
+      "legatoSome": "Hammer-on, pull-off và tap: {{sounded}}/{{due}} nốt đã kêu, {{silent}} nốt không kêu. Chỉ thông báo, không chấm điểm."
     },
     "edge": {
       "kick": "Tìm giới hạn",

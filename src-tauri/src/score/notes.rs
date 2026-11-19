@@ -45,7 +45,10 @@ pub struct TakeAudio<'a> {
     /// called it, not when the string was struck, so a note read at its
     /// stamp is read 25 ms in, and at sixteenths above about 135 BPM that is
     /// inside the next note (research M0, 2026-11). Zero for onsets that are
-    /// already attack times, such as MIDI or a test's own truth.
+    /// already attack times, such as a test's own truth. One value for the
+    /// whole Take: a Take with MIDI notes among its onsets (which ARE attack
+    /// times) is not given to this pass at all (`timing.rs`,
+    /// `NotesPass::midi_seen`).
     pub detection_delay_ms: f64,
 }
 
@@ -174,4 +177,62 @@ pub(super) fn identify(run: &ScheduleRun, report: &ScheduleReport, audio: &TakeA
         }
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::instrument::Instrument;
+    use crate::score::{PlayedOnset, ScoreSchedule};
+
+    /// The truth against the look-up, with the delay in it. The player strikes
+    /// 30 ms after each click (the system's lag); the detector stamps each
+    /// attack its 25 ms later still. Every look-up and every cut must land on
+    /// the true attack: not taking the delay out reads +25 ms, taking it out
+    /// twice (here and in the calibration, say) reads -25 ms, and both fail
+    /// this whatever the pitch verdicts would have been (research M0; the
+    /// bench's `lookup_bias_ms` is the same check on rendered audio).
+    #[test]
+    fn every_look_up_and_cut_lands_on_the_true_attack() {
+        const LAG_MS: f64 = 30.0;
+        const DELAY_MS: f64 = 25.0;
+        let bpm = 160.0;
+        let q = 60_000.0 / bpm;
+        let first = 1_000.0;
+        let n = 32u32;
+        // sixteenths, so a 25 ms error is most of a gap (94 ms)
+        let onsets: Vec<ExpectedOnset> = (0..n).map(|i| ExpectedOnset { id: i, beat: i as f64 / 4.0, note_ids: vec![i], soft: false, accent: false }).collect();
+        let schedule = ScoreSchedule { onsets, length_beats: n as f64 / 4.0, loops: false };
+        let mut run = ScheduleRun::new(schedule).with_lag_correction(true);
+        for b in 0..(n / 4 + 4) {
+            run.note_quarter_in_bar(b % 4 == 0, first + b as f64 * q, 4);
+        }
+        // a little scatter, so the calibration is a median and not a constant
+        let scatter = |i: u32| ((i * 7919) % 7) as f64 - 3.0;
+        let truth: Vec<f64> = (0..n).map(|i| first + i as f64 * q / 4.0 + LAG_MS + scatter(i)).collect();
+        for t in &truth {
+            run.note_onset(PlayedOnset { time_ms: t + DELAY_MS, amplitude: 0.5, confidence: 1.0 });
+        }
+        let weights = Instrument::ElectricGuitar.profile().score_weights;
+        let report = run.report(&weights).expect("a report");
+        let rate = 8_000;
+        let samples = vec![0.0f32; (rate as f64 * (first + n as f64 * q / 4.0 + 1_000.0) / 1000.0) as usize];
+        let start_ms = 200.0;
+        let audio = TakeAudio { samples: &samples, rate, start_ms, detection_delay_ms: DELAY_MS };
+
+        let looked = run.pitch_lookups_ms(&report, &audio);
+        let mut checked = 0;
+        for (k, r) in report.results.iter().enumerate() {
+            let Some(at) = looked[k] else { continue };
+            let truth_ms = truth[r.id as usize] - start_ms;
+            assert!((at - truth_ms).abs() < 2.0, "note {}: read at {at:.1} ms, struck at {truth_ms:.1} ms", r.id);
+            checked += 1;
+        }
+        assert_eq!(checked, n as usize, "every note was a hit and was looked up");
+        let cuts = run.pitch_cuts_ms(&audio);
+        assert_eq!(cuts.len(), n as usize);
+        for (c, t) in cuts.iter().zip(&truth) {
+            assert!((c - (t - start_ms)).abs() < 1e-6, "cut at {c:.1}, struck at {:.1}", t - start_ms);
+        }
+    }
 }

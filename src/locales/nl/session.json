@@ -284,7 +284,9 @@
       "barsMet": "{{count}} van de {{of}} maten gehouden",
       "barHeld": "Maat {{n}}: gehouden",
       "barSlipped": "Maat {{n}}: gegleden",
-      "barThin": "Maat {{n}}: te weinig noten om te beoordelen"
+      "barThin": "Maat {{n}}: te weinig noten om te beoordelen",
+      "legatoAll": "Hammer-ons, pull-offs en taps: {{sounded}} van {{due}} klonken. Ter info, niet beoordeeld.",
+      "legatoSome": "Hammer-ons, pull-offs en taps: {{sounded}} van {{due}} klonken, {{silent}} niet. Ter info, niet beoordeeld."
     },
     "edge": {
       "kick": "Mijn grens vinden",

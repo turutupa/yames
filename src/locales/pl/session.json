@@ -288,7 +288,9 @@
       "barsMet": "Utrzymane takty: {{count}} z {{of}}",
       "barHeld": "Takt {{n}}: utrzymany",
       "barSlipped": "Takt {{n}}: rozjechał się",
-      "barThin": "Takt {{n}}: za mało nut, by ocenić"
+      "barThin": "Takt {{n}}: za mało nut, by ocenić",
+      "legatoAll": "Hammer-ony, pull-offy i tapping: zabrzmiało {{sounded}} z {{due}}. Tylko informacja, bez oceny.",
+      "legatoSome": "Hammer-ony, pull-offy i tapping: zabrzmiało {{sounded}} z {{due}}, {{silent}} nie. Tylko informacja, bez oceny."
     },
     "edge": {
       "kick": "Znajdź mój limit",

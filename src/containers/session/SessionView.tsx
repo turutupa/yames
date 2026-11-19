@@ -810,7 +810,10 @@ function OtherChecks({ outcome }: { outcome: TakeOutcome }) {
   // Only the pitch check is ever left unmeasured by this build; it is said
   // plainly here, in one place (UX audit SES-2).
   const unchecked = outcome.grade.unmeasured.includes("noteIdentity");
-  if (others.length === 0 && !unchecked) return null;
+  // Hammer-ons, pull-offs and taps the note verifier heard: reported, not
+  // graded (owner decision 3), so it carries no ✓ or ✗.
+  const legato = outcome.measures.legato;
+  if (others.length === 0 && !unchecked && !legato) return null;
   return (
     <ul className="session-checks" data-testid="session-checks">
       {others.map((c, i) => {
@@ -834,6 +837,18 @@ function OtherChecks({ outcome }: { outcome: TakeOutcome }) {
         <li data-unchecked="">
           <span className="session-check-mark" aria-hidden="true">–</span>
           <span>{t("session.result.notesNotChecked")}</span>
+        </li>
+      )}
+      {legato && (
+        <li data-reported="" data-testid="session-legato">
+          <span className="session-check-mark" aria-hidden="true">·</span>
+          <span>
+            {t(legato.notSounded > 0 ? "session.result.legatoSome" : "session.result.legatoAll", {
+              sounded: legato.sounded,
+              due: legato.due,
+              silent: legato.notSounded,
+            })}
+          </span>
         </li>
       )}
     </ul>

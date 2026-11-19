@@ -87,6 +87,7 @@ mod camera_permission;
 mod loopback;
 mod take;
 pub mod take_audio;
+pub mod take_diagnostics;
 /// The camera's recording, beside the take it belongs to (W21,
 /// `plans/SONGS.md` A9/A10). Nothing in it goes near the audio threads.
 mod take_video;
@@ -189,7 +190,7 @@ use commands::{
     analyze_attempt, analyze_take_pitch,
     get_waveform, is_coach_loaded, list_audio_input_devices, list_audio_output_devices,
     list_calibration_cache, list_midi_devices, list_presets, list_session_logs, load_coach_model,
-    clear_score_schedule, close_open_segment, get_take_grade, get_take_grade_with_notes, load_score_schedule, notify_settings_change, set_listen_demo,
+    clear_score_schedule, close_open_segment, get_take_grade, get_take_grade_with_notes, load_score_schedule, set_take_diagnostics, notify_settings_change, set_listen_demo,
     // W12 — the bands the review colours a note by, from the scorer's own rule.
     score_timing_bands,
     open_url, reveal_in_folder, reorder_presets, save_drill_run, save_preset, save_session,
@@ -936,6 +937,7 @@ pub fn run() {
             get_take_grade_with_notes,
             // Roadmap 2.4 — the score the player is playing against.
             load_score_schedule,
+            set_take_diagnostics,
             clear_score_schedule,
             // W12 — the review's colours, from `timing::window_thresholds`.
             score_timing_bands,

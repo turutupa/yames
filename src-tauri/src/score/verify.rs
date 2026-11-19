@@ -202,7 +202,27 @@ impl ScheduleRun {
     /// written pitches are loaded. Unlike [`Self::wants_notes`] it does not
     /// need a `noteIdentity` bar, because what it reports is information.
     pub fn wants_verifier(&self) -> bool {
-        !self.pitches.is_empty() && crate::detect::model::compiled()
+        !self.pitches.is_empty() && crate::detect::model::enabled()
+    }
+
+    /// What this Take was, as a sidecar `detect-bench replay` reads
+    /// (`harness.rs::Job`): the schedule, pitches, details and pass bars it
+    /// was loaded with, and where every quarter fell in the audio that starts
+    /// at `audio_start_ms`. For `crate::take_diagnostics` only.
+    pub fn diagnostic_job(&self, audio_start_ms: f64, instrument_id: &str) -> serde_json::Value {
+        let quarters: Vec<f64> = self.beats.quarters_ms().iter().map(|t| ((t - audio_start_ms) * 100.0).round() / 100.0).collect();
+        serde_json::json!({
+            "audio": "",
+            "bpm": self.beats.median_bpm(),
+            "firstBeatMs": quarters.first().copied().unwrap_or(0.0),
+            "beatsPerBar": self.beats.beats_per_bar_or(4),
+            "quartersMs": quarters,
+            "instrument": instrument_id,
+            "schedule": self.schedule,
+            "pitches": self.pitches,
+            "details": self.details,
+            "passBars": self.pass_bars,
+        })
     }
 
     /// Every written note of `report` placed in `audio`, in the order of
@@ -317,20 +337,78 @@ impl ScheduleRun {
 }
 
 impl ScheduleRun {
-    /// The grade the player is shown once the late pass is in: right notes
-    /// from the pitch pass when a bar asks for them, and the verifier's
-    /// account beside it. What `timing.rs` runs on the post-Take thread, in
-    /// one place so that offline tools grade exactly as the app does.
+    /// The grade the player is shown once the late pass is in. What
+    /// `timing.rs` runs on the post-Take thread, in one place so that offline
+    /// tools grade exactly as the app does.
+    ///
+    /// Right notes (`noteIdentity`), when a bar asks for them: the pitch
+    /// tracker's verdicts and the verifier's, merged by [`merge_states`].
+    /// With the verifier in it the count is no longer the tracker's alone, so
+    /// the tracker's give-up rules (too fast, notes ring) stop applying:
+    /// `pass.notes.source` says which it was. Without a verifier report this
+    /// is `report_with_notes`, unchanged.
     pub fn report_late(
         &self,
         weights: &crate::instrument::ScoreWeights,
         audio: &TakeAudio<'_>,
         verified: Option<&VerifierReport>,
     ) -> Option<ScheduleReport> {
-        let mut report = if self.wants_notes() { self.report_with_notes(weights, audio)? } else { self.report(weights)? };
+        let ran = verified.filter(|v| v.status == VerifierStatus::Ran);
+        let mut report = match (self.wants_notes(), ran) {
+            (true, Some(v)) => {
+                let timed = self.report(weights)?;
+                let merged = self.late_states(&timed, audio, v);
+                self.report_with_states(weights, &merged, super::NotesSource::Verifier)
+            }
+            (true, None) => self.report_with_notes(weights, audio)?,
+            (false, _) => self.report(weights)?,
+        };
         report.grade.verifier = verified.cloned();
         Some(report)
     }
+
+    /// The right-notes verdict on each result of `timed` that the late grade
+    /// counts: the pitch pass and the verifier merged.
+    pub fn late_states(&self, timed: &ScheduleReport, audio: &TakeAudio<'_>, verified: &VerifierReport) -> Vec<Option<crate::pitch::NoteState>> {
+        let tracker = super::notes::identify(self, timed, audio);
+        merge_states(&tracker, &note_states(timed, verified))
+    }
+}
+
+/// One verdict per note from two witnesses, leaning the player's way
+/// (owner decision 4: weak evidence is "couldn't tell", never a wrong note):
+///
+/// | verifier \ tracker | right | wrong / octave | no pitch / none |
+/// |---|---|---|---|
+/// | confirmed  | right | right | right |
+/// | wrong      | couldn't tell | the tracker's | wrong |
+/// | couldn't tell | right | couldn't tell | couldn't tell |
+/// | none (a chord, a miss) | the tracker's | the tracker's | the tracker's |
+///
+/// So a note is RIGHT when either heard it right and nobody heard it wrong,
+/// or when the verifier (which reads fast and ringing notes) confirmed it; it
+/// is WRONG only when the verifier named another pitch and the tracker did not
+/// disagree. "Couldn't tell" is `Unheard`, which the pass rule counts as
+/// neither.
+pub fn merge_states(
+    tracker: &[Option<crate::pitch::NoteState>],
+    verifier: &[Option<crate::pitch::NoteState>],
+) -> Vec<Option<crate::pitch::NoteState>> {
+    use crate::pitch::NoteState::{Octave, Right, Unheard, Wrong};
+    tracker
+        .iter()
+        .zip(verifier)
+        .map(|(t, v)| match (v, t) {
+            (None, t) => *t,
+            (Some(Right), _) => Some(Right),
+            (Some(Wrong), Some(Right)) => Some(Unheard),
+            (Some(Wrong), Some(Wrong)) => Some(Wrong),
+            (Some(Wrong), Some(Octave)) => Some(Octave),
+            (Some(Wrong), _) => Some(Wrong),
+            (Some(_), Some(Right)) => Some(Right),
+            (Some(_), _) => Some(Unheard),
+        })
+        .collect()
 }
 
 /// What the verifier says of each result of `report`, for the right-notes
@@ -357,4 +435,32 @@ pub fn note_states(report: &ScheduleReport, verified: &VerifierReport) -> Vec<Op
         };
     }
     out
+}
+
+#[cfg(test)]
+mod merge_tests {
+    use super::merge_states;
+    use crate::pitch::NoteState::{self, Octave, Right, Unheard, Wrong};
+
+    fn one(tracker: Option<NoteState>, verifier: Option<NoteState>) -> Option<NoteState> {
+        merge_states(&[tracker], &[verifier])[0]
+    }
+
+    /// The table on `merge_states`, cell by cell (owner decision 4: weak
+    /// evidence is "couldn't tell", never a wrong note).
+    #[test]
+    fn two_witnesses_lean_the_players_way() {
+        for t in [Some(Right), Some(Wrong), Some(Octave), Some(Unheard), None] {
+            assert_eq!(one(t, Some(Right)), Some(Right), "confirmed wins over {t:?}");
+            assert_eq!(one(t, None), t, "no verifier verdict keeps the tracker's {t:?}");
+        }
+        assert_eq!(one(Some(Right), Some(Wrong)), Some(Unheard), "they disagree: couldn't tell");
+        assert_eq!(one(Some(Wrong), Some(Wrong)), Some(Wrong));
+        assert_eq!(one(Some(Octave), Some(Wrong)), Some(Octave));
+        assert_eq!(one(Some(Unheard), Some(Wrong)), Some(Wrong));
+        assert_eq!(one(None, Some(Wrong)), Some(Wrong));
+        assert_eq!(one(Some(Right), Some(Unheard)), Some(Right));
+        assert_eq!(one(Some(Wrong), Some(Unheard)), Some(Unheard), "the verifier could not tell: not a wrong note");
+        assert_eq!(one(None, Some(Unheard)), Some(Unheard));
+    }
 }

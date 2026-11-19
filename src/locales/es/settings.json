@@ -459,6 +459,11 @@
         "ask": "Pregúntame",
         "askHint": "Cada sesión pregunta antes de su primera toma, hasta que elijas."
       }
+    },
+    "keepTakes": {
+      "title": "Guardar mis últimas tomas para diagnosticar",
+      "hint": "Si una toma se califica mal, su audio y lo que Yames esperaba pueden reproducirse para ver por qué. Guarda las 20 últimas en este equipo; no se envía nada. Desactivado por defecto.",
+      "folder": "Carpeta: {{folder}}"
     }
   },
   "keybindings": {

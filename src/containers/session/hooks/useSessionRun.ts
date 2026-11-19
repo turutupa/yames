@@ -851,7 +851,7 @@ export function useSessionRun(input: SessionRunInput) {
             ? takeMix(band, bandVolumeRef.current, DEFAULT_MIX_SETTING.mix.click)
             : engineMix(DEFAULT_MIX_SETTING, 0),
         );
-        await loadScoreSchedule(take.schedule, take.exercise.passBars, take.pitches);
+        await loadScoreSchedule(take.schedule, take.exercise.passBars, take.pitches, take.details);
         if (prepareId.current === mine) setPreparedTake(takeKey(take, takeNumber));
       } catch (err) {
         if (prepareId.current !== mine) return;

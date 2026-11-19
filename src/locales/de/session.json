@@ -284,7 +284,9 @@
       "barsMet": "{{count}} von {{of}} Takten gehalten",
       "barHeld": "Takt {{n}}: gehalten",
       "barSlipped": "Takt {{n}}: verrutscht",
-      "barThin": "Takt {{n}}: zu wenige Töne zum Beurteilen"
+      "barThin": "Takt {{n}}: zu wenige Töne zum Beurteilen",
+      "legatoAll": "Hammer-ons, Pull-offs und Taps: {{sounded}} von {{due}} klangen. Nur zur Info, nicht bewertet.",
+      "legatoSome": "Hammer-ons, Pull-offs und Taps: {{sounded}} von {{due}} klangen, {{silent}} nicht. Nur zur Info, nicht bewertet."
     },
     "edge": {
       "kick": "Mein Limit finden",

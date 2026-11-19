@@ -50,6 +50,12 @@ export type TakePlan = {
   range: BarRange;
   /** The written pitch of every note, for the scorer's right-notes check. */
   pitches: { id: number; midi: number }[];
+  /**
+   * Length, bend and technique of every note, for the note verifier
+   * (`score/verify.rs`): it listens differently for a hammer-on, a chord
+   * tone and a bent note, and reports per technique.
+   */
+  details: { id: number; durBeats: number; bend?: number; string: number; tech: string[] }[];
 };
 
 /**
@@ -113,5 +119,25 @@ export function buildTake(
     schedule: buildSchedule(score, range, { loops: false }),
     range,
     pitches: score.notes.map((n) => ({ id: n.id, midi: n.midi })),
+    details: noteDetails(whole, score),
   };
+}
+
+/**
+ * `exerciseScore` numbers its notes in tick order, then string order; the
+ * bend amount lives only on the Exercise's own notes, so they are walked in
+ * the same order to find it.
+ */
+function noteDetails(whole: Exercise, score: SongScore): TakePlan["details"] {
+  const written = [...whole.notes].sort((a, b) => a.tick - b.tick || a.string - b.string);
+  return score.notes.map((n) => {
+    const bend = written[n.id]?.bend;
+    return {
+      id: n.id,
+      durBeats: n.durTicks / score.ticksPerQuarter,
+      ...(typeof bend === "number" && bend > 0 ? { bend } : {}),
+      string: n.string,
+      tech: [...n.techniques],
+    };
+  });
 }

@@ -1636,7 +1636,7 @@ pub async fn start_evaluation(
             };
             let _ = app_for_midi.emit("onset-detected", &onset);
             if let Ok(ta) = ta_for_midi.lock() {
-                ta.log_onset(onset);
+                ta.log_midi_onset(onset);
             }
         });
     }
@@ -2017,6 +2017,7 @@ pub fn load_score_schedule(
     schedule: crate::score::ScoreSchedule,
     pass_bars: Option<Vec<crate::score::PassBar>>,
     notes: Option<Vec<crate::pitch::ScoreNote>>,
+    details: Option<Vec<crate::score::verify::NoteDetail>>,
     timing_analyzer: State<SharedTimingAnalyzer>,
     audio_input: State<SharedAudioInput>,
 ) -> Result<(), String> {
@@ -2026,13 +2027,37 @@ pub fn load_score_schedule(
     let ta = timing_analyzer
         .lock()
         .map_err(|e| format!("Lock failed: {e}"))?;
-    ta.load_exercise_with_notes(
+    ta.load_exercise_with_details(
         schedule,
         pass_bars.unwrap_or_default(),
         notes.unwrap_or_default(),
+        details.unwrap_or_default(),
         input_rate,
     );
     Ok(())
+}
+
+/// "Keep my last Takes for troubleshooting": with `enabled`, every graded
+/// Take's input audio and a sidecar describing what was expected are written
+/// under the app's data folder (`diagnostics/takes/`, the last 20), to be
+/// replayed with `detect-bench replay`. Off by default; nothing is sent
+/// anywhere. Returns the folder, for the setting to show.
+#[tauri::command]
+pub fn set_take_diagnostics(
+    enabled: bool,
+    app: tauri::AppHandle,
+    timing_analyzer: State<SharedTimingAnalyzer>,
+) -> Result<Option<String>, String> {
+    use tauri::Manager;
+    let dir = if enabled {
+        Some(app.path().app_data_dir().map_err(|e| e.to_string())?.join("diagnostics").join("takes"))
+    } else {
+        None
+    };
+    let shown = dir.as_ref().map(|d| d.display().to_string());
+    let ta = timing_analyzer.lock().map_err(|e| format!("Lock failed: {e}"))?;
+    ta.take_diagnostics().set(dir);
+    Ok(shown)
 }
 
 /// The grade of the Take just closed, with right notes checked, once the pitch

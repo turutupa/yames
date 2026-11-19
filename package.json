@@ -53,7 +53,8 @@
     "test:highbpm:bake": "UPDATE_FIXTURES=1 node scripts/rust-test.mjs --test highbpm_fixtures",
     "detect:bench": "cargo run --release --manifest-path src-tauri/Cargo.toml --features detect-ort --bin detect-bench --",
     "detect:check": "cargo run --release --manifest-path src-tauri/Cargo.toml --features detect-ort --bin detect-bench -- run --fast --check",
-    "test:rust:detect": "node scripts/rust-test.mjs --lib --features detect-ort detect::",
+    "test:rust:detect": "node scripts/rust-test.mjs --lib --features detect-ort",
+    "test:detect": "npm run test:rust && npm run test:rust:detect && npm run test:grading && npm run test:pitch && npm run test:dsp && npm run test:highbpm && npm run detect:check",
     "yames:jitter-probe": "cargo run --release --manifest-path src-tauri/Cargo.toml --bin click-jitter-probe --",
     "yames:debug-bpm": "bash scripts/debug-bpm.sh",
     "dev:debug-bpm": "bash scripts/dev-debug-bpm.sh"
