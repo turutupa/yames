@@ -107,7 +107,7 @@ export interface Shot {
      * Today's plan. The harness makes it runnable for the scene, so a Theory
      * Take can be photographed before any Theory Path ships as runnable.
      */
-    path?: "blues-pentatonics" | "sweep-picking" | "alternate-picking";
+    path?: "blues-pentatonics" | "sweep-picking" | "alternate-picking" | "legato" | "rhythm-foundations" | "metal-rhythm" | "know-the-neck" | "scales-and-modes" | "tapping" | "funk-lines" | "triads" | "chords-in-a-key";
     /** With `path`: play this Exercise rather than the first Step's first. */
     exercise?: string;
     /** With `exercise`: it plays over the band, so wait for the band before the photograph. */
@@ -867,6 +867,89 @@ export const SHOTS: Shot[] = [
     suffix: "session-neck-box",
     window: "main",
     session: { seed: "returning", stop: "ready", practiceView: "neck", path: "blues-pentatonics", exercise: "box-one.first-lick" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  // The Paths added on mvp-paths-content (plans/paths/NEW_PATHS.md): one ready
+  // neck each, for a person to look at the fingers on.
+  {
+    id: "session-neck-legato",
+    suffix: "session-neck-legato",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "legato", exercise: "rolls.roll-up" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  {
+    id: "session-neck-rhythm",
+    suffix: "session-neck-rhythm",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "rhythm-foundations", exercise: "eighths.fifth-tune" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  {
+    id: "session-neck-metal",
+    suffix: "session-neck-metal",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "metal-rhythm", exercise: "chug-and-chord.chug-riff" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  {
+    id: "session-neck-know",
+    suffix: "session-neck-know",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "know-the-neck", exercise: "triads.c-three-places" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  {
+    id: "session-neck-scales",
+    suffix: "session-neck-scales",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "scales-and-modes", exercise: "movable-major.two-octaves" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  {
+    id: "session-neck-tapping",
+    suffix: "session-neck-tapping",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "tapping", exercise: "first-taps.tap-pull-hammer" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  {
+    id: "session-neck-triads",
+    suffix: "session-neck-triads",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "triads", exercise: "four-chords.low" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  {
+    id: "session-neck-chords",
+    suffix: "session-neck-chords",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "chords-in-a-key", exercise: "the-minors.one-six-two-five" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  {
+    id: "session-neck-funk",
+    suffix: "session-neck-funk",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "funk-lines", exercise: "line-and-stab.vamp" },
     width: 1400,
     height: 900,
     settleMs: 1800,

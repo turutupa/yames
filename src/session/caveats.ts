@@ -49,6 +49,8 @@ const COACH_SAYS_PICK = new Set([
   "crossing.outside-pairs",
   "economy.ascending-economy",
   "economy.descending-economy",
+  "eighths.eighth-riff",
+  "gallop.gallop-one",
 ]);
 
 export function coachSaysPick(exercise: Pick<Exercise, "id">): boolean {

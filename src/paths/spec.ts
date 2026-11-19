@@ -12,6 +12,7 @@ import type {
   PassBar,
   PathKind,
   PathLevel,
+  PathPrerequisite,
   PickMark,
   PickPlan,
   ReviewEvent,
@@ -172,7 +173,8 @@ export type PathSpec = {
   goal: string;
   level: PathLevel;
   assumes: string;
-  prerequisites?: { paths?: string[]; skills?: string[] };
+  /** `paths`: Paths this one builds on, as an id or `{ path, level }`. Guidance, never a lock. */
+  prerequisites?: { paths?: Array<string | PathPrerequisite>; skills?: string[] };
   review?: { status: ReviewStatus; history: ReviewEvent[] };
   orderRationale: string;
   gradingLimits: string;

@@ -563,10 +563,10 @@ describe("one Exercise once per Session (QA 2026-11-17 #9)", () => {
 
 describe("your turn, and the finisher", () => {
   it("one Session in three, from fifteen minutes, has a two-minute self-checked block", () => {
-    // Blues' first Step has no self-checked item; its second does.
+    // Blues' first Steps have no self-checked item; the chord-tone Step does.
     const p: PlayerProgress = {
       ...subscribed([BLUES]),
-      states: [{ pathId: BLUES.id, currentStepId: BLUES.steps[1].id, startedAt: NOW - 30 * DAY, updatedAt: NOW }],
+      states: [{ pathId: BLUES.id, currentStepId: "landing", startedAt: NOW - 30 * DAY, updatedAt: NOW }],
       takes: [0, 1].map((d) =>
         row(BLUES, BLUES.steps[0].exercises[0].id, NOW - (d + 1) * DAY, { facts: { session: NOW - (d + 1) * DAY } }),
       ),

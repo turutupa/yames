@@ -37,6 +37,15 @@ export const START_PATH_ORDER = [
   "classic-rock",
   "alternate-picking",
   "sweep-picking",
+  "rhythm-foundations",
+  "legato",
+  "metal-rhythm",
+  "know-the-neck",
+  "scales-and-modes",
+  "tapping",
+  "funk-lines",
+  "triads",
+  "chords-in-a-key",
 ];
 
 /** The Paths a player can start, in the step's order (unknown runnable ones last). */

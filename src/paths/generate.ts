@@ -458,7 +458,7 @@ export function buildPath(spec: PathSpec): PathDoc {
     level: spec.level,
     assumes: spec.assumes,
     prerequisites: {
-      paths: spec.prerequisites?.paths ?? [],
+      paths: (spec.prerequisites?.paths ?? []).map((p) => (typeof p === "string" ? { path: p } : { ...p })),
       skills: spec.prerequisites?.skills ?? [],
     },
     tuning: [...STANDARD_TUNING],

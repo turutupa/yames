@@ -5,7 +5,7 @@
   "strings": {
     "path.title": "Shred",
     "path.goal": "Alternate picking, economy picking, legato, sweeps y tapping en A menor, construidos técnica a técnica, para terminar con una carrera de semicorcheas de ocho compases sobre una banda a 100 BPM.",
-    "path.assumes": "Sabes tocar la caja de la pentatónica menor de A en el traste 5 y corcheas con el clic a 90 BPM. No se da por hecha ninguna velocidad. Los minutos son una pasada por el material; los ejercicios están pensados para repetirse durante semanas, y sus variantes cambian de tonalidad y de cuerdas para que la repetición no se haga rancia.",
+    "path.assumes": "Sabes tocar la caja de la pentatónica menor de A en el traste 5 y corcheas con el clic a 90 BPM. No se da por hecha ninguna velocidad, pero el primer paso aprueba en semicorcheas en torno a 110 BPM: si las semicorcheas a 90 todavía no salen, empieza por Fundamentos del ritmo o por el nivel Principiante de Púa alterna. Los minutos son una pasada por el material; los ejercicios están pensados para repetirse durante semanas, y sus variantes cambian de tonalidad y de cuerdas para que la repetición no se haga rancia.",
     "path.gradingLimits": "Las notas sueltas con púa, semicorcheas hasta unos 120 BPM y seisillos hasta unos 90, son el caso para el que está hecha la app: regularidad del tiempo, notas oídas y notas de más, además de notas correctas cuando las notas están separadas al menos 75 ms y la afinación es clara, después de la toma. Nada de esto se ha probado aún con una guitarra real. Legato: un hammer-on o un pull-off que la app no oye no cuesta nada, así que el tiempo se apoya en las notas con púa y el volumen de las notas ligadas es una autocomprobación; un hammer-on desde la nada y un tap cuentan como ataques que se tienen que oír. Los sweeps se puntúan solo por el tiempo: las notas barridas suenan unas sobre otras, las notas correctas salen casi siempre como «sin comprobar», y sus títulos lo dicen; solo se puntúan los peldaños con al menos 150 ms entre notas. Los acentos son aproximados: más fuerte o no. La dirección de la púa nunca se oye: es un punto de la lista de comprobación siempre que los golpes importan. Por encima de semicorcheas a 100 BPM, toma el tiempo como provisional hasta calibrar el retardo de entrada, y usa un sonido limpio o con un crunch ligero para las tomas puntuadas.",
     "path.skills.0": "La caja de la pentatónica menor de A",
     "path.skills.1": "Corcheas con el clic a 90 BPM",
@@ -523,7 +523,7 @@
   "from": {
     "path.title": "4e93ed55",
     "path.goal": "0f5c209b",
-    "path.assumes": "5156cb08",
+    "path.assumes": "3dd6c154",
     "path.gradingLimits": "6c37c5aa",
     "path.skills.0": "f46936f6",
     "path.skills.1": "342dd813",

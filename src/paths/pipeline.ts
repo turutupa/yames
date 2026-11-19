@@ -24,6 +24,8 @@ import {
 } from "./strings";
 
 export { RULES, errorsIn, runtimeNeeds, serializePath, validatePath, renderReviewPage };
+export { CURRICULUM_RULES, checkCurriculum, curriculumOrder } from "./curriculum";
+export type { CurriculumIssue } from "./curriculum";
 export type { Issue, PathDoc };
 export { checkOverlay, englishStrings, mergeTranslations, readOverlay, serializeOverlay, stringsToTranslate };
 

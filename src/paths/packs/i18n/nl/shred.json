@@ -5,7 +5,7 @@
   "strings": {
     "path.title": "Shred",
     "path.goal": "Alternate, economy, legato, sweeps en tapping in A-mineur, techniek voor techniek opgebouwd, met als afsluiter een run van acht maten in zestienden over een band op 100 BPM.",
-    "path.assumes": "Je kunt de A-mineur pentatonische box op fret 5 spelen, en achtste noten met een klik op 90 BPM. Snelheid wordt niet verondersteld. De minuten zijn één keer door het materiaal; de drills zijn bedoeld om wekenlang te herhalen, en hun varianten wisselen van toonsoort en snaren zodat de herhaling fris blijft.",
+    "path.assumes": "Je kunt de A-mineur pentatonische box op fret 5 spelen, en achtste noten met een klik op 90 BPM. Er wordt geen snelheid verondersteld, maar de eerste stap slaagt op zestienden rond 110 BPM: zijn zestienden op 90 er nog niet, begin dan met Ritmefundamenten of het niveau Beginner van Alternate picking. De minuten zijn één keer door het materiaal; de drills zijn bedoeld om wekenlang te herhalen, en hun varianten wisselen van toonsoort en snaren zodat de herhaling fris blijft.",
     "path.gradingLimits": "Aangeslagen losse noten, zestienden tot ongeveer 120 BPM en sextolen tot ongeveer 90, zijn waar de app voor gebouwd is: gelijkmatigheid van de timing, gehoorde noten en extra noten, plus juiste noten waar de noten minstens 75 ms uit elkaar liggen en de toonhoogte duidelijk is, na de take. Niets hiervan is al op een echte gitaar getest. Legato: een hammer-on of pull-off die de app niet hoort, kost niets, dus de timing leunt op de aangeslagen noten en het volume van de legatonoten is een zelfcontrole; een hammer-on from nowhere en een tap tellen als aanslagen die gehoord moeten worden. Sweeps worden alleen op timing beoordeeld: gesweepte noten klinken in elkaar door, juiste noten staan meestal op 'niet gecontroleerd', en hun titels zeggen dat ook; alleen treden met minstens 150 ms tussen de noten worden beoordeeld. Accenten zijn grof: harder of niet. De aanslagrichting wordt nooit gehoord: die staat op de checklist overal waar de slagen ertoe doen. Boven zestienden op 100 BPM is de timing voorlopig tot de ingangsvertraging gekalibreerd is, en gebruik een clean of licht crunchy klank voor beoordeelde takes.",
     "path.skills.0": "De A-mineur pentatonische box",
     "path.skills.1": "Achtste noten met een klik op 90 BPM",
@@ -523,7 +523,7 @@
   "from": {
     "path.title": "4e93ed55",
     "path.goal": "0f5c209b",
-    "path.assumes": "5156cb08",
+    "path.assumes": "3dd6c154",
     "path.gradingLimits": "6c37c5aa",
     "path.skills.0": "f46936f6",
     "path.skills.1": "342dd813",

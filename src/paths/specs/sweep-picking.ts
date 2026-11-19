@@ -177,6 +177,35 @@ const OLD_STEPS: StepSpec[] = [
       payoff: "A minor and C major arpeggios that sound like chords being spelled out, and a four-chord progression played as sweeps, in your first session.",
       exercises: [
         sweepExercise({
+          id: "two-string-push",
+          title: "Two strings: the push and the pull",
+          purpose: "The smallest sweep there is: two notes of the triad in one push of the pick, a silent triplet to stop them, then the same two notes in one pull back. Everything a bigger sweep needs is here, the rest stroke and the mute, with nothing else to think about.",
+          howTo: [
+            "Triplets: two notes, then a silent third. Push down through both strings in one motion; the pick lands on the second string, rests there for a moment, then goes through it. Coming back, one pull up through both.",
+            "On the B and top strings in A minor: middle finger on the B string at 13, index on the top string at 12. Let go of the first note as the second sounds, without lifting the finger off the string.",
+            "Use the silent third to stop both strings. If you can hear them in the gap, the mute is what to work on, not the speed.",
+          ],
+          coach: "Timing only: I time the notes and say if one went missing or rang on as an extra. Whether it was one push or two strokes is yours to keep honest.",
+          vary: {
+            values: { stringSet: ["B and top E, A minor", "G and B, A minor", "G and B, C major"] },
+            pooled: ["stringSet"],
+            label: (p) => p.stringSet,
+            build: (p) => {
+              const [lo, hi] = p.stringSet === "B and top E, A minor" ? ["2:13", "1:12"] : p.stringSet === "G and B, A minor" ? ["3:14", "2:13"] : ["3:12", "2:13"];
+              const tab = `/8t ${repeat(`${lo} ${hi} r ${hi} ${lo} r`, 2)}`;
+              return { tab, position: 12, harmony: { arpeggio: p.stringSet.endsWith("C major") ? "C" : "Am", cover: false } };
+            },
+          },
+          tab: `/8t ${repeat("2:13 1:12 r 1:12 2:13 r", 2)}`,
+          position: 12,
+          harmony: { arpeggio: "Am", cover: false },
+          rungs: ladder(50, 120, 10),
+          passAt: 90,
+          pass: TRIAD_BARS,
+          selfCheck: ["In each silent beat, were both strings quiet?"],
+          minutes: 5,
+        }),
+        sweepExercise({
           id: "triad-rolls",
           title: "Triad rolls: two chords",
           purpose: "Continuous triplet rolls on a pair of chords, a bar each: up the strings, back down, up, back. Each pair changes one or two notes, so you hear minor and major under your own fingers, and a different pair comes round on each Take.",
@@ -1062,7 +1091,10 @@ const NEW_STEPS: StepSpec[] = [
         id: "one-pass-each",
         title: "One pass per chord",
         purpose: "Up, link, down, link, through four chords. It's the cleanest way to hear a chain: every chord change is a single small step.",
-        howTo: ["Three notes a bar. Sing the progression's top notes if you can: they make a tune."],
+        howTo: [
+          "Half-note triplets, three notes a bar: one pass through each chord's three strings, up in one bar and down in the next.",
+          "At each bar line the last note of one chord moves to the first note of the next on the same string, usually by a fret or two; the jump back to the first chord can be bigger. Sing the top notes if you can: they make a tune.",
+        ],
         coach: "Four links per round. I report evenness and notes heard at these tempos.",
         vary: {
           values: { progression: [...MINOR_LOOP, "i-VII-VI-V"], key: MINOR_KEYS },
@@ -1136,7 +1168,10 @@ const NEW_STEPS: StepSpec[] = [
         id: "chain-four",
         title: "Four strings, in a chain",
         purpose: "Two loops of each four-string shape, voice-led. The band-sized sound with short moves.",
-        howTo: ["Sixteenths. The shift back to the first shape is the fastest move here."],
+        howTo: [
+          "Sixteenths, four to the click. Each chord is a four-string loop played twice, and each new shape starts as near as it can to the last one.",
+          "The shift back to the first shape, at the end of the fourth bar, is often the biggest move here. Look at where it lands before you get there.",
+        ],
         coach: "Graded at every rung here. Even so, a recording tells you things I can't.",
         vary: {
           values: { progression: [...MINOR_LOOP], key: MINOR_KEYS },
@@ -1222,7 +1257,10 @@ const NEW_STEPS: StepSpec[] = [
         id: "the-pull",
         title: "i to V and back",
         purpose: "Only two chords, so all of your attention goes on the half step from G# to A, on three strings.",
-        howTo: ["One bar of each, twice round. Slow enough to hear the note that changes."],
+        howTo: [
+          "Triplets. One bar of the i chord and one of the V, twice round; each bar is its three-string loop played twice.",
+          "Go slowly enough to hear the one note that moves by a half step: in A minor, the G# of the V chord rising to the A of the i chord.",
+        ],
         coach: "Listen for the G# rising to A. I report the timing; the half step is for your ear.",
         vary: {
           values: { key: MINOR_KEYS },
@@ -1245,7 +1283,10 @@ const NEW_STEPS: StepSpec[] = [
         id: "with-the-v-three",
         title: "Three progressions with a V",
         purpose: "i-iv-V-i, i-VI-iv-V and i-V-VI-V, on three strings, in any key. These are the loops this style lives on.",
-        howTo: ["Two loops a chord. The bar with the V is the one to listen to."],
+        howTo: [
+          "Triplets, three to the click. Each chord is a three-string loop on the G, B and top strings, played twice before the chord changes.",
+          "The V chord is major in a minor key: its third is a fret higher than the minor scale would put it. The bar with the V is the one to listen to.",
+        ],
         coach: "Same bar as before. The major chord in a minor key is the new thing.",
         vary: {
           values: { progression: [...WITH_THE_V], key: MINOR_KEYS },
@@ -1504,7 +1545,10 @@ const NEW_STEPS: StepSpec[] = [
         id: "i-iv-dim-i",
         title: "i, iv, vii°, i",
         purpose: "Two loops of each shape through the classic cadence, with the diminished seventh in place of the V. It's the same pull with a sharper edge.",
-        howTo: ["Triplets. Hear the G# in the third bar rise to the A at the start of the fourth."],
+        howTo: [
+          "Triplets, two three-string loops a bar: the i chord, the iv, the diminished seventh, and home.",
+          "In A minor, hear the G# in the third bar rise to the A at the start of the fourth. That half step is the whole cadence.",
+        ],
         coach: "I report timing and notes heard. It sounds grand, I hope, but that part is for you to judge.",
         vary: {
           values: { key: MINOR_KEYS },
@@ -1611,7 +1655,10 @@ const NEW_STEPS: StepSpec[] = [
         id: "band-big-chain",
         title: "Five-string chain with the band",
         purpose: "One big loop per chord, over a triplet-feel band, with the V chord in the mix.",
-        howTo: ["Lock the first note of each bar to the kick. Let the band carry you round."],
+        howTo: [
+          "Triplets over the band: one five-string loop to a bar, one chord a bar.",
+          "Lock the first note of each bar to the kick drum and let the band carry you round. If a shape is late, drop it and catch the next bar line.",
+        ],
         coach: "Graded on slower rungs, and on direct input only. The fast ones are for your ear.",
         vary: {
           values: { progression: [...WITH_THE_V, "i-VI-III-VII"], key: ["A", "E", "D"] },
@@ -1711,7 +1758,7 @@ export default definePath({
   level: "intermediate",
   assumes:
     "You can alternate-pick single notes evenly at sixteenths around 80 BPM (Alternate Picking through its Intermediate Level covers this) and you can hammer on and pull off cleanly. You don't need any sweeping yet, and you can start at whichever Level suits you.",
-  prerequisites: { skills: ["Even alternate picking at sixteenths, 80 BPM", "Clean hammer-ons and pull-offs"] },
+  prerequisites: { paths: [{ path: "alternate-picking", level: "intermediate" }, { path: "legato", level: "beginner" }], skills: ["Even alternate picking at sixteenths, 80 BPM", "Clean hammer-ons and pull-offs"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
   orderRationale:

@@ -4,6 +4,15 @@ import bluesPentatonics from "./blues-pentatonics";
 import classicRock from "./classic-rock";
 import shred from "./shred";
 import sweepPicking from "./sweep-picking";
+import legato from "./legato";
+import rhythmFoundations from "./rhythm-foundations";
+import metalRhythm from "./metal-rhythm";
+import knowTheNeck from "./know-the-neck";
+import scalesAndModes from "./scales-and-modes";
+import tapping from "./tapping";
+import funkLines from "./funk-lines";
+import triads from "./triads";
+import chordsInAKey from "./chords-in-a-key";
 import type { PathSpec } from "../spec";
 
 export const SPECS: readonly PathSpec[] = [
@@ -12,5 +21,14 @@ export const SPECS: readonly PathSpec[] = [
   bluesPentatonics,
   classicRock,
   shred,
+  legato,
+  rhythmFoundations,
+  metalRhythm,
+  knowTheNeck,
+  scalesAndModes,
+  tapping,
+  funkLines,
+  triads,
+  chordsInAKey,
   // new paths go above this line
 ];
