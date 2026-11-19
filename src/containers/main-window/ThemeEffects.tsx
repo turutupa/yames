@@ -15,7 +15,9 @@ interface Particle {
 
 const PARTICLE_THEMES: Record<string, { hues: number[]; count: number; blend: string; particleLightness: number; particleBaseOpacity: number }> = {
   aurora: { hues: [190, 210, 280], count: 85, blend: "screen", particleLightness: 70, particleBaseOpacity: 0.3 },
-  prism:  { hues: [330, 280, 200, 30], count: 90, blend: "multiply", particleLightness: 45, particleBaseOpacity: 0.6 },
+  // Dark dots on paper are louder than light ones on night: fewer and fainter
+  // than Aurora's, so they stay behind the words they drift past.
+  prism:  { hues: [330, 280, 200, 30], count: 64, blend: "multiply", particleLightness: 50, particleBaseOpacity: 0.38 },
 };
 
 export function ThemeEffects({ themeId, currentBeat, isPlaying }: { themeId: string; currentBeat: BeatEvent | null; isPlaying: boolean }) {

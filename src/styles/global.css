@@ -116,6 +116,17 @@ kbd {
   border: 0;
 }
 
+/* =================== Keyboard focus =================== */
+/* One ring for every theme: the accent, which each theme holds at 3:1 or
+   better on its own page. Without it the browser's ring was whatever the
+   platform drew (a blue that fights Ember's orange and vanishes on Arctic).
+   `:where` keeps it at zero specificity, so a control that draws its own
+   focus (the Session's buttons, the sliders) still wins. */
+:where(button, a, select, summary, [role="button"], [role="tab"], [role="switch"], [role="radio"], [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* =================== Light theme overrides =================== */
 [data-theme-group="light"] { --graph-grid: rgba(0, 0, 0, 0.12); --graph-line: rgba(0, 0, 0, 0.3); }
 /* Not inside the learning side or the first-run wizard: both colour their own
@@ -124,6 +135,10 @@ kbd {
    accent (2026-11-18). */
 [data-theme-group="light"] button:not(.session-page *, .onboarding-overlay *) { color: var(--text-primary); }
 [data-theme-group="light"] .main-header h1 { color: var(--text-primary); }
+/* The tools' Play is an accent-filled button outside both, and the rule above
+   gave it the page's ink on a light theme: "Play" at 2:1 on Ivory's gold
+   (themes polish, 2026-11-19). Stop, its other state, is a plain button. */
+[data-theme-group="light"] .transport-play:not(.playing) { color: var(--accent-text); }
 [data-theme-group="light"] .play-btn { background: var(--accent); color: var(--accent-text); box-shadow: none; }
 @media (hover: hover) {
   [data-theme-group="light"] .play-btn:hover { filter: brightness(1.1); }

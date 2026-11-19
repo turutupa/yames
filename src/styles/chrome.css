@@ -604,6 +604,11 @@
 .main-content[data-view="settings"] .update-banner-action {
   color: var(--accent);
 }
+/* The action is the banner's point: full strength (at 80% it measured under
+   4.5:1 on five themes), told from the sentence by its weight. */
+.main-content[data-view="settings"] .update-banner-action {
+  opacity: 1;
+}
 
 /* ── Phone and narrow windows (settings.css stacks a row below 480px) ── */
 
@@ -726,6 +731,9 @@
   font-family: var(--ui-mono);
   font-weight: 600;
   border-bottom-width: 2px;
+  /* `--text-faint` is the quietest ink a theme holds at AA; fading it to 70%
+     took the key caps to 3.2:1 on every dark theme (themes polish). */
+  opacity: 1;
 }
 
 /* The phone's rail: its bottom tab bar. */
