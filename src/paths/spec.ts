@@ -218,6 +218,15 @@ export type PathSpec = {
    * written without it generates the same bytes. See `paceLadder` in `pace.ts`.
    */
   paceLadders?: boolean;
+  /**
+   * Give every variant that has no words from its build the Exercise's own
+   * sentences, said again for that variant's notes: its frets, strings, note
+   * and key names (`variantText.ts`). Only sentences that can be rewritten
+   * truthfully are written; a variant it cannot describe reads the Exercise's
+   * text, as before. Opt-in, so a Path written without it generates the same
+   * bytes.
+   */
+  variantText?: boolean;
 };
 
 export function definePath(spec: PathSpec): PathSpec {
