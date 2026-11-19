@@ -29,7 +29,7 @@ which Paths are worth writing now:
 
 | Funk single-note lines (sixteenths with strokes left out, two-note stabs, octaves) | Yes | The strummed, scratched funk part still cannot be graded (row above), but its single-note cousin can: every sound is one picked note or one double stop, and a stroke left out is a rest the schedule already knows. The hand keeps swinging through the holes; the app hears only what is played, and the Path says so. |
 
-So seven new Paths: **Rhythm Foundations**, **Legato**, **Metal Rhythm**, **Tapping**, **Funk Lines**, **Know the Neck** and **Scales and Modes**.
+So seven new Paths: **Rhythm Foundations**, **Legato**, **Metal Rhythm**, **Tapping**, **Funk Lines**, **Know the Neck** and **Scales and Modes**. Two more came after the owner's note on the harmony route, **Triads** and **Chords in a Key**: see "The curriculum map".
 
 ## The shape every Path keeps
 
@@ -341,6 +341,17 @@ Still to add to reach the intended length: the same route in G and A as full
 Steps and not only as variants; seventh chords on every degree; the minor key
 in a second key; secondary chords that songs borrow (the major two, the flat
 seven); a second form (sixteen bars, AABA).
+
+### Arpeggios over Changes (`arpeggios-over-changes`, theory): the third Path, designed, not written
+
+Builds on Triads (Intermediate) and Chords in a Key (Beginner). The plan, for
+whoever writes it (the helpers in `triads.ts` are exported for this):
+
+| Level | Steps | Notes for the author |
+|---|---|---|
+| Beginner: one chord, one octave | A triad as a line, not a shape: root, third, fifth, root up one octave across three strings, and back (C, then A minor). The same over I-vi-IV-V with the band, one bar each, starting each bar on its root. Then starting on the nearest note instead of the root | Quarter notes then eighths. `harmony: { chordTones: true }` holds every note to its chord. Lift each finger as the next lands: these are lines, so the note check wants them not to ring together. |
+| Intermediate: two octaves, and sevenths | Two-octave major and minor arpeggios in the E and A shapes. Add the seventh (maj7, m7, 7) on ii-V-I. Arpeggio up one chord, down the next. A written chorus of arpeggios over the twelve-bar form | Reuse the keys of Chords in a Key through `inKeys`. A "your turn" that connects two chords by the nearest note. |
+| Advanced: the first sweeps | Three-string triad shapes played with one pick stroke per direction, slowly, as the same notes the player already knows. Two-string and three-string shapes over I-V-vi-IV. Hand-off: the last Step's Exercises are the first Step of Sweep Picking at half its tempo, and its payoff sends the player there | Sweep Picking grades ringing sweeps with a looser note bar (see its `gradingLimits`); copy its grading for these three Exercises only. Do not teach speed here. |
 
 ### Other foundations a beginner needs, not built
 
