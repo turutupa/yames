@@ -120,6 +120,196 @@ pub(crate) fn start_must_report_dead(alive: bool, output_dead: bool) -> bool {
     alive && output_dead
 }
 
+/// The park check's reads, once a pass (card #14, item 4).
+///
+/// Every one is an atomic load: the take's and the speech's slot flags are
+/// mirrors kept under their locks by the command and speaking threads, so
+/// this never waits on either while the app is away and the loop runs it
+/// on every pass. A take whose end has already been reported does not
+/// count: it keeps its slot until the screen stops it, and the screen may be
+/// asleep. That acknowledgement lives on the handoff, so it survives a
+/// reopen that replaces this loop.
+pub(crate) fn read_needs(
+    app_in_background: bool,
+    transport_playing: bool,
+    take: &crate::take::TakeHandoff,
+    speech: &crate::speech_out::SpeechHandoff,
+) -> OutputNeeds {
+    OutputNeeds {
+        app_in_background,
+        transport_playing,
+        take_playing_back: take.is_playing_unfinished(),
+        take_recording: take.is_recording(),
+        speech_in_flight: speech.in_flight(),
+    }
+}
+
+/// How long the event loop waits between attempts to start a paused stream
+/// that refused (card #14, item 2). A refusal is often transient — the
+/// audio server busy with another client for a moment — and the price of
+/// giving up at once was a full reopen, which used to drop the loaded
+/// song, the jam's kit and the coach's line. Bounded and short: 85 ms in
+/// all, on the event loop and never on the audio thread, while a stream
+/// that is not running hands the loop no beats to wait on it.
+pub(crate) const RESUME_RETRY_DELAYS_MS: [u64; 3] = [10, 25, 50];
+
+/// Start a paused stream, retrying a refusal [`RESUME_RETRY_DELAYS_MS`]
+/// apart. `stop_trying` is asked before each retry: the system closed the
+/// stream (its error callback has already asked for the reopen) or the
+/// engine is shutting down, and either way there is nothing to retry. Only
+/// when every attempt failed is the stream given to `android_route`.
+pub(crate) fn resume_with_retries<E: std::fmt::Display>(
+    mut play: impl FnMut() -> Result<(), E>,
+    stop_trying: impl Fn() -> bool,
+    mut wait: impl FnMut(std::time::Duration),
+) -> ResumeOutcome {
+    let mut last = play();
+    for ms in RESUME_RETRY_DELAYS_MS {
+        match last {
+            Ok(()) => return ResumeOutcome::Resumed,
+            Err(ref e) => eprintln!("[yames][android] the output would not start: {e}"),
+        }
+        if stop_trying() {
+            return resume_outcome(false, true);
+        }
+        wait(std::time::Duration::from_millis(ms));
+        last = play();
+    }
+    if let Err(ref e) = last {
+        eprintln!("[yames][android] the output would not start after retries: {e}");
+    }
+    resume_outcome(last.is_ok(), stop_trying())
+}
+
+/// What `android_route` has been asked to do, from any thread: two flags,
+/// set with one store each from an error callback or the event loop and
+/// consumed by the route thread.
+///
+/// Two and not one (card #14, item 3): a stream the SYSTEM closed is a
+/// route change, which the frontend hears about as `audio-route-changed`;
+/// a stream that merely would not start again (a failed resume, or `start`
+/// finding it dead) is not, and re-announcing a route change for it sent
+/// the screen to re-read devices that had not moved.
+pub(crate) struct RouteRequests {
+    route_lost: std::sync::atomic::AtomicBool,
+    dead: std::sync::atomic::AtomicBool,
+}
+
+/// One pass of the route thread over [`RouteRequests`].
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub(crate) struct RouteRequest {
+    /// The system closed the stream: the route moved.
+    pub route_changed: bool,
+    /// The stream is dead and wants reopening; the route did not move.
+    pub reopen: bool,
+}
+
+impl RouteRequests {
+    pub(crate) const fn new() -> Self {
+        Self {
+            route_lost: std::sync::atomic::AtomicBool::new(false),
+            dead: std::sync::atomic::AtomicBool::new(false),
+        }
+    }
+
+    /// The output's error callback: the system closed the stream.
+    pub(crate) fn note_route_lost(&self) {
+        self.route_lost.store(true, std::sync::atomic::Ordering::Release);
+    }
+
+    /// The event loop or `start`: the stream is dead, the route is not news.
+    pub(crate) fn note_dead(&self) {
+        self.dead.store(true, std::sync::atomic::Ordering::Release);
+    }
+
+    /// The route thread: what has been asked since the last pass.
+    pub(crate) fn take(&self) -> RouteRequest {
+        use std::sync::atomic::Ordering;
+        RouteRequest {
+            route_changed: self.route_lost.swap(false, Ordering::AcqRel),
+            reopen: self.dead.swap(false, Ordering::AcqRel),
+        }
+    }
+}
+
+/// How `android_route` reopens a dead stream.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum Reopen {
+    /// The route moved: the device-switch path (`set_device`), which drops
+    /// what was decoded for the old route's rate.
+    NewRoute,
+    /// The route did not move: `MetronomeEngine::reopen_output`, which keeps
+    /// the song, the kit and the coach's line when the rate has not moved.
+    SameRoute,
+}
+
+/// What the route thread does with one pass's requests.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct RoutePlan {
+    pub reopen: Option<Reopen>,
+    /// `audio-route-changed { kind: "output" }`: only for a route that moved.
+    pub emit_route_changed: bool,
+}
+
+/// `needs_reopen` is [`route_should_reopen`]'s answer for the engine now.
+pub(crate) fn route_plan(req: RouteRequest, needs_reopen: bool) -> RoutePlan {
+    let reopen = if !needs_reopen {
+        None
+    } else if req.route_changed {
+        Some(Reopen::NewRoute)
+    } else if req.reopen {
+        Some(Reopen::SameRoute)
+    } else {
+        None
+    };
+    RoutePlan {
+        reopen,
+        emit_route_changed: req.route_changed,
+    }
+}
+
+/// `reopen_output`'s rule: drop what was decoded for the old stream only
+/// when both rates are known and differ.
+///
+/// A probe that failed (twice — `reopen_output` asks again once) is not a
+/// rate that moved, and dropping the song for it was the price of a
+/// transient refusal (review of card #14, item 3). With no probe there is
+/// no format to hand the stream either, so its own setup probes, and a
+/// device that refuses that too does not open: nothing stale gets played.
+pub(crate) fn reopen_keeps_loaded(old_rate: Option<u32>, new_rate: Option<u32>) -> bool {
+    match (old_rate, new_rate) {
+        (Some(a), Some(b)) => a == b,
+        // Neither known: nothing to vouch for the material with.
+        (None, None) => false,
+        _ => true,
+    }
+}
+
+/// The setup's check for a reopen that kept material decoded at `expected`
+/// without a probed format to open at (re-review of card #14, item B): a
+/// stream at any other rate would play it detuned. No expectation, no check.
+pub(crate) fn setup_rate_matches(expected: Option<u32>, actual: u32) -> bool {
+    expected.map_or(true, |e| e == actual)
+}
+
+/// Run `f` on a thread of its own and wait for it at most `d`; `None` if it
+/// had not finished by then (the thread is detached and its answer thrown
+/// away when it comes). For a device probe that `reopen_output` must not
+/// let hang while holding the engine's lock (final re-review of card #14).
+pub(crate) fn with_deadline<T: Send + 'static>(
+    d: std::time::Duration,
+    f: impl FnOnce() -> T + Send + 'static,
+) -> Option<T> {
+    let (tx, rx) = std::sync::mpsc::sync_channel(1);
+    std::thread::Builder::new()
+        .name("yames-probe".into())
+        .spawn(move || {
+            let _ = tx.send(f());
+        })
+        .ok()?;
+    rx.recv_timeout(d).ok()
+}
+
 #[cfg(target_os = "android")]
 mod android {
     use std::sync::atomic::{AtomicBool, Ordering};
@@ -145,13 +335,20 @@ mod android {
         APP_IN_BACKGROUND.load(Ordering::SeqCst)
     }
 
-    /// From the event loop, once, as it starts.
-    pub(crate) fn register_event_loop() {
+    /// From the event loop, once, as it starts — and only while its own
+    /// `alive` is up, checked under the slot's lock. A thread abandoned by a
+    /// timed-out reopen whose open returned late must not take the slot from
+    /// the live loop: either it checked before its `alive` was lowered, which
+    /// happened before the replacing thread was spawned and so before that
+    /// one registers over it, or it checks after and stays out.
+    pub(crate) fn register_event_loop(alive: &AtomicBool) -> bool {
         let me = std::thread::current();
-        match EVENT_LOOP.lock() {
-            Ok(mut slot) => *slot = Some(me),
-            Err(e) => *e.into_inner() = Some(me),
+        let mut slot = EVENT_LOOP.lock().unwrap_or_else(|e| e.into_inner());
+        if !alive.load(Ordering::SeqCst) {
+            return false;
         }
+        *slot = Some(me);
+        true
     }
 
     /// Something may need the output now: let the loop look.
@@ -237,6 +434,155 @@ mod tests {
         assert!(start_must_report_dead(true, true));
         assert!(!start_must_report_dead(true, false));
         assert!(!start_must_report_dead(false, true));
+    }
+
+    use crate::speech_out::{SpeechClip, SpeechHandoff};
+    use crate::take::{TakeHandoff, TakePlayback, TakeRing};
+    use std::cell::Cell;
+    use std::sync::Arc;
+    use std::time::Duration;
+
+    /// Card #14, item 4: the away loop's reads must answer while the
+    /// command thread and the speaking thread hold every slot lock.
+    #[test]
+    fn the_away_loop_reads_need_no_lock() {
+        let take = Arc::new(TakeHandoff::new());
+        let speech = Arc::new(SpeechHandoff::new());
+        take.set_play(Some(TakePlayback { pcm: Arc::new(vec![0.0; 4]), sample_rate: 48_000 }));
+        take.set_record(Some(Arc::new(TakeRing::new(1024))));
+        speech.set_clip(Some(SpeechClip { pcm: Arc::new(vec![0.0; 4]) }));
+        let held = (take.hold_slots_for_test(), speech.hold_slot_for_test());
+        let (t, s) = (take.clone(), speech.clone());
+        let (tx, rx) = std::sync::mpsc::channel();
+        std::thread::spawn(move || {
+            let _ = tx.send(read_needs(true, false, &t, &s));
+        });
+        let needs = rx
+            .recv_timeout(Duration::from_secs(2))
+            .expect("the park check blocked on a slot lock");
+        drop(held);
+        assert!(needs.take_playing_back && needs.take_recording && needs.speech_in_flight);
+        assert!(!should_park(needs));
+
+        // A playback whose end has been reported no longer holds the stream.
+        take.note_ended(take.play_generation());
+        assert!(take.take_ended().is_some());
+        let needs = read_needs(true, false, &take, &speech);
+        assert!(!needs.take_playing_back);
+        take.set_record(None);
+        speech.set_clip(None);
+        assert!(should_park(read_needs(true, false, &take, &speech)));
+    }
+
+    /// Card #14, item 2: a refusal that clears is retried, not reopened.
+    #[test]
+    fn a_transient_refusal_is_retried_and_never_reopened() {
+        let attempts = Cell::new(0);
+        let mut waited = Vec::new();
+        let outcome = resume_with_retries(
+            || {
+                attempts.set(attempts.get() + 1);
+                if attempts.get() < 3 { Err("busy") } else { Ok(()) }
+            },
+            || false,
+            |d| waited.push(d),
+        );
+        assert_eq!(outcome, ResumeOutcome::Resumed);
+        assert_eq!(attempts.get(), 3);
+        assert_eq!(waited, vec![Duration::from_millis(10), Duration::from_millis(25)]);
+    }
+
+    #[test]
+    fn a_stream_that_never_starts_is_reopened_after_a_bounded_wait() {
+        let attempts = Cell::new(0);
+        let mut total = Duration::ZERO;
+        let outcome = resume_with_retries(
+            || {
+                attempts.set(attempts.get() + 1);
+                Err::<(), _>("refused")
+            },
+            || false,
+            |d| total += d,
+        );
+        assert_eq!(outcome, ResumeOutcome::Reopen);
+        assert_eq!(attempts.get(), 1 + RESUME_RETRY_DELAYS_MS.len());
+        assert!(total <= Duration::from_millis(100), "the event loop waited {total:?}");
+    }
+
+    #[test]
+    fn a_stream_the_system_closed_is_not_retried_or_reported_again() {
+        let attempts = Cell::new(0);
+        let outcome = resume_with_retries(
+            || {
+                attempts.set(attempts.get() + 1);
+                Err::<(), _>("closed")
+            },
+            || true,
+            |_| panic!("waited on a stream the system closed"),
+        );
+        assert_eq!(outcome, ResumeOutcome::AlreadyReported);
+        assert_eq!(attempts.get(), 1);
+    }
+
+    /// Card #14, item 3: only a route that moved is announced.
+    #[test]
+    fn a_dead_stream_report_reopens_without_announcing_a_route_change() {
+        let requests = RouteRequests::new();
+        requests.note_dead();
+        let req = requests.take();
+        assert_eq!(req, RouteRequest { route_changed: false, reopen: true });
+        assert_eq!(
+            route_plan(req, true),
+            RoutePlan { reopen: Some(Reopen::SameRoute), emit_route_changed: false }
+        );
+        // `start` re-reporting a stream that has already been replaced:
+        // nothing to reopen and nothing to announce.
+        requests.note_dead();
+        assert_eq!(
+            route_plan(requests.take(), false),
+            RoutePlan { reopen: None, emit_route_changed: false }
+        );
+        // Consumed: the next pass sees nothing.
+        assert_eq!(requests.take(), RouteRequest::default());
+    }
+
+    #[test]
+    fn a_route_the_system_moved_is_announced_once_and_takes_the_device_path() {
+        let requests = RouteRequests::new();
+        requests.note_route_lost();
+        requests.note_dead(); // the loop's failed start racing the callback
+        let req = requests.take();
+        assert_eq!(
+            route_plan(req, true),
+            RoutePlan { reopen: Some(Reopen::NewRoute), emit_route_changed: true }
+        );
+        assert_eq!(
+            route_plan(requests.take(), false),
+            RoutePlan { reopen: None, emit_route_changed: false },
+            "a second pass announced the route again"
+        );
+    }
+
+    #[test]
+    fn loaded_material_survives_a_reopen_only_at_the_same_rate() {
+        assert!(reopen_keeps_loaded(Some(48_000), Some(48_000)));
+        assert!(!reopen_keeps_loaded(Some(48_000), Some(44_100)));
+        // Unknown is not "moved": a failed probe keeps the song.
+        assert!(reopen_keeps_loaded(None, Some(48_000)));
+        assert!(reopen_keeps_loaded(Some(48_000), None));
+        assert!(!reopen_keeps_loaded(None, None), "kept with no rate known at all");
+    }
+
+    #[test]
+    fn a_probe_that_hangs_is_abandoned_at_its_deadline() {
+        let t = std::time::Instant::now();
+        let got = with_deadline(Duration::from_millis(100), || {
+            std::thread::sleep(Duration::from_secs(3));
+            7
+        });
+        assert_eq!(got, None);
+        assert!(t.elapsed() < Duration::from_secs(1), "waited {:?}", t.elapsed());
+        assert_eq!(with_deadline(Duration::from_secs(2), || 7), Some(7));
     }
 
     /// End to end over the pure parts: away and stopped, a reroute closes the

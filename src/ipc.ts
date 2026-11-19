@@ -2640,8 +2640,16 @@ export async function stopTakePlayback(): Promise<void> {
   return invoke("stop_take_playback");
 }
 
-export function onTakePlaybackEnded(callback: () => void) {
-  return listen<null>("take-playback-ended", () => callback());
+/**
+ * A take ran off its end. The payload names the playback (the engine's
+ * generation counter), so a listener can tell an ending from a take it has
+ * just started; the engine already drops endings of anything but the take
+ * in its slot. Optional for listeners that only need "it stopped".
+ */
+export function onTakePlaybackEnded(callback: (generation?: number) => void) {
+  return listen<{ generation: number } | null>("take-playback-ended", (e) =>
+    callback(e.payload?.generation),
+  );
 }
 
 /**
