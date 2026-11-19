@@ -685,21 +685,23 @@ export default definePath({
         {
           id: "e-to-a",
           title: "E to A, embellished",
-          purpose: "The open E move, then the same move on an A chord at fret 5: B hammered to C# on the G string. Two chords, one idea.",
+          purpose: "The open E move, then the same move on an A chord at fret 5: C hammered to C# on the G string. Two chords, one idea.",
           howTo: [
             "Straight eighths, 60 BPM up to a pass at 80.",
-            "Bar 1 is the open E move from the first Exercise. Bar 2 moves it to A: A at 5 on the low E, A at 7 on the D string, B at 4 on the G hammered to C# at 6, E at 5 on the B, C#, A, C#. Bar 3 is the E move again. Bar 4: low E, E on the D string, G#, open B, and the open high E held.",
+            "Bar 1 is the open E move from the first Exercise. Bar 2 moves it to A, the E shape barred at fret 5 with the first finger: A at 5 on the low E, A at 7 on the D string, C at 5 on the G hammered to C# at 6, E at 5 on the B, C#, A, C#. Bar 3 is the E move again. Bar 4: low E, E on the D string, G#, open B, and the open high E held.",
           ],
           coach: "Ringing notes again: timing and notes heard, not pitch.",
-          // The E bars in the open E chord's own fingers; the A bar is the rules' (index at 4 for the B).
-          tab: "/8 6:0 4:2f3 3:0 3:1hf1 2:0 3:1f1 4:2f3 3:1f1 | /8 6:5 4:7 3:4 3:6h 2:5 3:6 4:7 3:6 | /8 6:0 4:2f3 3:0 3:1hf1 2:0 3:1f1 4:2f3 3:1f1 | /8 6:0 4:2f3 3:1f1 2:0 /2 1:0",
+          // The E bars in the open E chord's own fingers. The A bar is the E shape barred at
+          // fret 5 (acceptance 5, P2-3): the index across the 5s, the ring on the D string, and
+          // the open E's open-G-to-G# move becomes the barre's C hammered to C# by the middle finger.
+          tab: "/8 6:0 4:2f3 3:0 3:1hf1 2:0 3:1f1 4:2f3 3:1f1 | /8 6:5f1 4:7f3 3:5f1 3:6hf2 2:5f1 3:6f2 4:7f3 3:6f2 | /8 6:0 4:2f3 3:0 3:1hf1 2:0 3:1f1 4:2f3 3:1f1 | /8 6:0 4:2f3 3:1f1 2:0 /2 1:0",
           // An open E chord shape, not one finger per fret: the Hand line says so.
           chordShape: "E",
           position: 1,
           shifts: true,
           chords: "E | A | E | E",
           jam: { groove: "ballad", key: "E" },
-          harmony: { scaleOverChords: ["E", "mixolydian"], allowed: ["G"] },
+          harmony: { scaleOverChords: ["E", "mixolydian"], allowed: ["G", "C"] },
           rungs: ladder(60, 100, 5),
           passAt: 80,
           ...timedOnly("straight"),

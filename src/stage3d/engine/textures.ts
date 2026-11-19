@@ -79,9 +79,14 @@ function numFace(): string {
   return '"Barlow Condensed","Arial Narrow",system-ui,sans-serif';
 }
 
-export function noteLabel(text: string, color: string, weight = 700, dot: string | null = null): THREE.Texture {
+/**
+ * A marker's number. `dot`: a small dot under it in that colour (the fret
+ * numbers' marked frets). `bar`: a short bar under it in the number's own ink,
+ * the shift mark (`NeckNote.shift`): the hand moves on this note.
+ */
+export function noteLabel(text: string, color: string, weight = 700, dot: string | null = null, bar = false): THREE.Texture {
   const face = numFace();
-  const k = `${text}\u0000${color}\u0000${weight}\u0000${dot}\u0000${face}`;
+  const k = `${text}\u0000${color}\u0000${weight}\u0000${dot}\u0000${face}\u0000${bar}`;
   const hit = labelCache.get(k);
   if (hit) return hit;
   const S = 192;
@@ -91,7 +96,11 @@ export function noteLabel(text: string, color: string, weight = 700, dot: string
   g.textAlign = "center";
   g.textBaseline = "middle";
   g.font = `${weight} ${text.length > 1 ? 96 : 118}px ${face}`;
-  g.fillText(text, S / 2, S / 2 + 6);
+  g.fillText(text, S / 2, S / 2 + (bar ? -4 : 6));
+  if (bar) {
+    // Under the digit, inside the disc: wide enough to see on a quiet dot, short enough not to read as a fret.
+    g.fillRect(S / 2 - 30, S / 2 + 56, 60, 15);
+  }
   if (dot) {
     g.fillStyle = dot;
     g.beginPath();

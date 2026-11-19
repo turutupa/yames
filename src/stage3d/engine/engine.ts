@@ -302,7 +302,7 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
       guitar.setNotes(
         notes
           .filter((n) => n.string >= 1 && n.string <= 6 && n.fret >= 0 && n.fret <= 24)
-          .map((n) => ({ s: n.string, f: Math.round(n.fret), kind: KINDS.has(n.kind) ? n.kind : "box", t: n.label ?? "" })),
+          .map((n) => ({ s: n.string, f: Math.round(n.fret), kind: KINDS.has(n.kind) ? n.kind : "box", t: n.label ?? "", sh: !!n.shift && !!n.label })),
         Math.max(0, fade),
       );
     },
