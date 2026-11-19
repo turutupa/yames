@@ -89,6 +89,19 @@
   min-width: 0;
 }
 
+/*
+ * The box keeps its width; the name beside it is what gives.
+ *
+ * Both were shrinkable, and flex takes the squeeze out of every shrinkable
+ * item in proportion to its size whether or not it can wrap. So a name too
+ * long for one line (a bass shape's, in Obsidian's wide monospace, at the
+ * 380px dock) took three pixels out of the box before it broke its own line:
+ * 94 px of four strings drawn in 91.
+ */
+.coach-block-grip > .chord-diagram {
+  flex: none;
+}
+
 .coach-block-grip-name {
   color: var(--text-secondary);
   font-size: 11px;
