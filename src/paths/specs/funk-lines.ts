@@ -374,6 +374,8 @@ export default definePath({
         "The low A on beat 1 is the first finger's tip on the low E string at fret 5: the same finger, moved across.",
       ],
       payoff: "A bass note and stabs that sound like a rhythm section by themselves.",
+      difficultyException:
+        "A new Level opens with fewer attacks in a bar than the lines before it: a bass note and stabs on the backbeat, then on the off-beats. A two-note stab is one attack. The demand is a stroke that crosses two strings and stops, with both notes cut off together, which the metric does not count.",
       exercises: [
         {
           id: "stab-backbeat",
@@ -445,8 +447,6 @@ export default definePath({
         "Keep the swing small. The pick only travels as far as the next string it needs.",
       ],
       payoff: "A two-chord vamp, Am7 to D9, with a line and stabs in every bar.",
-      difficultyException:
-        "Fewer attacks a bar than the stab Exercises before it, because half the bar is now a low line with space in it. The jump between registers is the demand.",
       exercises: [
         {
           id: "call-and-stab",
@@ -518,6 +518,8 @@ export default definePath({
         "Stop the octave by relaxing both fingers together.",
       ],
       payoff: "A disco octave part that moves through three notes over a band.",
+      difficultyException:
+        "An octave is one attack, and these figures have rests in them, so the rate sits just under the line-and-stab bars before it. The demand is the shape: two fingers with a dead string between them, struck through all three strings and stopped together, which the metric does not count.",
       exercises: [
         {
           id: "octave-eighths",
@@ -591,8 +593,6 @@ export default definePath({
         "The hand's strokes are unchanged: down, up, down, up. The figure starts on a downstroke one time and an upstroke the next.",
       ],
       payoff: "A two-note figure that rolls across the bar line of your foot and lands back on beat 1.",
-      difficultyException:
-        "The metric counts an octave as two notes and a string skip, so the Step before reads very high. These are single notes again; the displacement is the demand.",
       exercises: [
         {
           id: "threes",
@@ -735,6 +735,8 @@ export default definePath({
         SAFETY,
       ],
       payoff: "A four-bar funk guitar part with everything in it, and a line you can sit on for as long as the band plays.",
+      difficultyException:
+        "Nothing new for the hands: lines, stabs and octaves from the earlier Steps, two of them one bar long, so the number falls back to theirs. The demand is length: four bars of everything in a row, and one bar kept identical for a minute, which the metric does not count.",
       exercises: [
         {
           id: "groove",

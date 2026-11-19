@@ -367,6 +367,8 @@ export const DOUBLE_STOPS_IN_E: StepSpec = {
     "Mute the lower strings with the heel of the picking hand and hit only the two strings you want. Keep every double stop short and punchy except the held ones.",
   ],
   payoff: "Twelve bars of double stops that follow E, A and B: a rock and roll chorus.",
+  difficultyException:
+    "The same eighth-note double stops as the Step before, without its single-note runs, whose string crossings the metric counts, so the number sits a little lower. The demand is a figure for each of three chords around the twelfth fret, and twelve bars of them in the order of the form.",
   exercises: [
     {
       id: "stops-on-e",

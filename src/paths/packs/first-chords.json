@@ -36,7 +36,7 @@
       ],
       "payoff": "A chord that rings on all six strings, strummed in time with a click.",
       "prerequisites": [],
-      "difficulty": 2.46,
+      "difficulty": 1.17,
       "exercises": [
         {
           "id": "e-minor.em-strings",
@@ -257,7 +257,7 @@
             "minGapMsAtTop": 2400,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 2.46
+            "difficulty": 0.29
           },
           "chords": ["Em", "Em", "Em", "Em"],
           "harmony": {
@@ -446,7 +446,7 @@
             "minGapMsAtTop": 600,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 9.99
+            "difficulty": 1.17
           },
           "chords": ["Em", "Em", "Em", "Em"],
           "harmony": {
@@ -469,7 +469,7 @@
       ],
       "payoff": "Two chords, and a change that arrives on the beat.",
       "prerequisites": ["e-minor"],
-      "difficulty": 3.41,
+      "difficulty": 0.88,
       "exercises": [
         {
           "id": "a-minor.am-strings",
@@ -683,7 +683,7 @@
             "minGapMsAtTop": 2400,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 2.26
+            "difficulty": 0.29
           },
           "chords": ["Em", "Am", "Em", "Am"],
           "harmony": {
@@ -819,7 +819,7 @@
             "minGapMsAtTop": 1200,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 4.56
+            "difficulty": 0.58
           },
           "chords": ["Em", "Am", "Em", "Am"],
           "harmony": {
@@ -1005,7 +1005,7 @@
             "minGapMsAtTop": 600,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 9.17
+            "difficulty": 1.17
           },
           "chords": ["Em", "Am", "Em", "Am"],
           "harmony": {
@@ -1014,7 +1014,8 @@
           },
           "selfCheck": ["Did every change arrive on the beat, even when a finger was late?"]
         }
-      ]
+      ],
+      "difficultyException": "Two of the four Exercises are one strum and two strums a bar, so that the change has three beats and then one beat to happen in, before the Step reaches the four strums a bar the Step before ended on. The strum rate is lower on purpose. The demand is the change: every finger on the next chord before the next strum, which the metric does not count."
     },
     {
       "id": "c-major",
@@ -1029,7 +1030,7 @@
       ],
       "payoff": "Three chords, a change with anchors, and eight bars that sound like a song.",
       "prerequisites": ["a-minor"],
-      "difficulty": 8.56,
+      "difficulty": 1.17,
       "exercises": [
         {
           "id": "c-major.c-strings",
@@ -1305,7 +1306,7 @@
             "minGapMsAtTop": 600,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 8.36
+            "difficulty": 1.17
           },
           "chords": ["Am", "C", "Am", "C"],
           "harmony": {
@@ -1487,7 +1488,7 @@
             "minGapMsAtTop": 600,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 8.76
+            "difficulty": 1.17
           },
           "chords": ["Em", "Am", "C", "Am"],
           "harmony": {
@@ -1753,7 +1754,7 @@
             "minGapMsAtTop": 600,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 8.79
+            "difficulty": 1.17
           },
           "chords": ["Em", "Em", "Am", "Am", "C", "C", "Am", "Am"],
           "harmony": {
@@ -1778,7 +1779,7 @@
       ],
       "payoff": "The most-used chord on the guitar, with short changes to two chords you know.",
       "prerequisites": ["c-major"],
-      "difficulty": 7.85,
+      "difficulty": 1.33,
       "exercises": [
         {
           "id": "g-major.g-strings",
@@ -2074,7 +2075,7 @@
             "minGapMsAtTop": 545.45,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 11.42
+            "difficulty": 1.33
           },
           "chords": ["G", "Em", "G", "Em"],
           "harmony": {
@@ -2211,7 +2212,7 @@
             "minGapMsAtTop": 1090.91,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 5.22
+            "difficulty": 0.67
           },
           "chords": ["G", "C", "G", "C"],
           "harmony": {
@@ -2396,7 +2397,7 @@
             "minGapMsAtTop": 545.45,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 10.48
+            "difficulty": 1.33
           },
           "chords": ["G", "Em", "C", "C"],
           "harmony": {
@@ -2405,8 +2406,7 @@
           },
           "selfCheck": ["Did every change arrive on the beat, even when a finger was late?"]
         }
-      ],
-      "difficultyException": "A new Level opens on one new chord picked a string at a time and on two strums a bar, after a Step that ends on eight bars of four. The demand is a three-finger shape across six strings and the change to C."
+      ]
     },
     {
       "id": "d-major",
@@ -2421,7 +2421,7 @@
       ],
       "payoff": "G, C and D: three chords that are enough for a great many songs.",
       "prerequisites": ["g-major"],
-      "difficulty": 9.79,
+      "difficulty": 1.33,
       "exercises": [
         {
           "id": "d-major.d-strings",
@@ -2698,7 +2698,7 @@
             "minGapMsAtTop": 545.45,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 9.55
+            "difficulty": 1.33
           },
           "chords": ["G", "D", "G", "D"],
           "harmony": {
@@ -2879,7 +2879,7 @@
             "minGapMsAtTop": 545.45,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 10.02
+            "difficulty": 1.33
           },
           "chords": ["G", "C", "D", "G"],
           "harmony": {
@@ -3060,7 +3060,7 @@
             "minGapMsAtTop": 545.45,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 10.02
+            "difficulty": 1.33
           },
           "chords": ["D", "C", "G", "G"],
           "harmony": {
@@ -3084,7 +3084,7 @@
       ],
       "payoff": "Even eighth-note strumming that keeps going through a chord change.",
       "prerequisites": ["d-major"],
-      "difficulty": 14.89,
+      "difficulty": 2.5,
       "exercises": [
         {
           "id": "down-up.eighths-em",
@@ -3315,7 +3315,7 @@
             "minGapMsAtTop": 272.73,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 17.28
+            "difficulty": 2.67
           },
           "chords": ["Em", "Em", "Em", "Em"],
           "harmony": {
@@ -3519,7 +3519,7 @@
             "minGapMsAtTop": 272.73,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 13.42
+            "difficulty": 2
           },
           "chords": ["Em", "Em", "Am", "Am"],
           "harmony": {
@@ -3749,7 +3749,7 @@
             "minGapMsAtTop": 272.73,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 14.89
+            "difficulty": 2.5
           },
           "chords": ["G", "Em", "C", "D"],
           "harmony": {
@@ -3773,7 +3773,7 @@
       ],
       "payoff": "The strumming pattern of a thousand songs, and the idea behind every other one.",
       "prerequisites": ["down-up"],
-      "difficulty": 12.06,
+      "difficulty": 1.94,
       "exercises": [
         {
           "id": "patterns.pattern-em",
@@ -3973,7 +3973,7 @@
             "minGapMsAtTop": 272.73,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 12.95
+            "difficulty": 2
           },
           "chords": ["Em", "Em", "Em", "Em"],
           "harmony": {
@@ -4178,7 +4178,7 @@
             "minGapMsAtTop": 272.73,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 12.95
+            "difficulty": 2
           },
           "chords": ["G", "G", "Em", "Em"],
           "harmony": {
@@ -4380,7 +4380,7 @@
             "minGapMsAtTop": 272.73,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 11.16
+            "difficulty": 1.88
           },
           "chords": ["G", "D", "Em", "C"],
           "harmony": {
@@ -4567,7 +4567,7 @@
             "minGapMsAtTop": 375,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 8.92
+            "difficulty": 1.5
           },
           "chords": ["G", "D", "Em", "C"],
           "selfCheck": [
@@ -4576,7 +4576,7 @@
           ]
         }
       ],
-      "difficultyException": "Fewer strums in a bar than the steady eighths of the Step before, and a self-checked Exercise at the end, so the note rate falls. The demand is keeping the swing through a silent downstroke, which the metric does not count."
+      "difficultyException": "Fewer strums in a bar than the steady eighths of the Step before, and a self-checked Exercise at the end, so the strum rate falls. The demand is keeping the swing through a silent downstroke, which the metric does not count."
     },
     {
       "id": "strums-between-beats",
@@ -4593,7 +4593,7 @@
       ],
       "payoff": "Strumming with gaps in it that stays in time, and a pattern that leaves room for the change.",
       "prerequisites": ["patterns"],
-      "difficulty": 9.16,
+      "difficulty": 1.45,
       "exercises": [
         {
           "id": "strums-between-beats.rest-beat",
@@ -4756,7 +4756,7 @@
             "minGapMsAtTop": 545.45,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 8.55
+            "difficulty": 1
           },
           "chords": ["G", "G", "Em", "Em"],
           "harmony": {
@@ -4920,7 +4920,7 @@
             "minGapMsAtTop": 285.71,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 6.13
+            "difficulty": 1.33
           },
           "chords": ["Em", "Em", "Em", "Em"],
           "harmony": {
@@ -5111,7 +5111,7 @@
             "minGapMsAtTop": 272.73,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 10.78
+            "difficulty": 1.67
           },
           "chords": ["G", "G", "C", "C"],
           "harmony": {
@@ -5305,7 +5305,7 @@
             "minGapMsAtTop": 272.73,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 9.78
+            "difficulty": 1.56
           },
           "chords": ["C", "G", "D", "Em"],
           "harmony": {
@@ -5318,7 +5318,7 @@
           ]
         }
       ],
-      "difficultyException": "Rests and off-beats take strums out of the bar, so the note rate falls below the pattern of the Step before. The demand is an upstroke with no downstroke before it and a swing kept through silent beats, which the metric does not count."
+      "difficultyException": "Rests and off-beats take strums out of the bar, so the strum rate falls below the pattern of the Step before. The demand is an upstroke with no downstroke before it and a swing kept through silent beats, which the metric does not count."
     },
     {
       "id": "a-and-e",
@@ -5335,7 +5335,7 @@
       ],
       "payoff": "Seven chords, and two sets of three that each carry a great many songs.",
       "prerequisites": ["strums-between-beats"],
-      "difficulty": 12.82,
+      "difficulty": 2.08,
       "exercises": [
         {
           "id": "a-and-e.a-strings",
@@ -5622,7 +5622,7 @@
             "minGapMsAtTop": 500,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 12.84
+            "difficulty": 1.5
           },
           "chords": ["Em", "E", "Em", "E"],
           "harmony": {
@@ -5815,7 +5815,7 @@
             "minGapMsAtTop": 250,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 12.99
+            "difficulty": 2.25
           },
           "chords": ["A", "D", "A", "D"],
           "harmony": {
@@ -6113,7 +6113,7 @@
             "minGapMsAtTop": 272.73,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 12.79
+            "difficulty": 2.13
           },
           "chords": ["A", "A", "D", "D", "E", "D", "A", "A"],
           "harmony": {
@@ -6139,7 +6139,7 @@
       ],
       "payoff": "Three seventh chords, and a twelve-bar blues you can play round and round with a band.",
       "prerequisites": ["a-and-e"],
-      "difficulty": 10.02,
+      "difficulty": 2,
       "exercises": [
         {
           "id": "sevenths-blues.a7-strings",
@@ -6524,7 +6524,7 @@
             "minGapMsAtTop": 500,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 10.74
+            "difficulty": 1.5
           },
           "chords": ["A7", "D7", "A7", "E7"],
           "harmony": {
@@ -6859,7 +6859,7 @@
             "minGapMsAtTop": 545.45,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 10.02
+            "difficulty": 1.42
           },
           "chords": ["A7", "A7", "A7", "A7", "D7", "D7", "A7", "A7", "E7", "D7", "A7", "E7"],
           "harmony": {
@@ -7266,7 +7266,7 @@
             "minGapMsAtTop": 285.71,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 12.36
+            "difficulty": 2
           },
           "chords": ["A7", "A7", "A7", "A7", "D7", "D7", "A7", "A7", "E7", "D7", "A7", "E7"],
           "harmony": {
@@ -7276,7 +7276,7 @@
           "selfCheck": ["Did every change arrive on the beat, even when a finger was late?"]
         }
       ],
-      "difficultyException": "Two of the five Exercises are single notes in quarters and two are four strums a bar, after an eight-bar form in down, down-up, so the note rate falls. The demand is three new shapes with no finger in common, and a twelve-bar form kept in the head."
+      "difficultyException": "Two of the five Exercises are four strums a bar, after an eight-bar form in down, down-up, so the strum rate falls a little. The demand is three new shapes with no finger in common, and a twelve-bar form kept in the head."
     },
     {
       "id": "small-f",
@@ -7292,7 +7292,7 @@
       ],
       "payoff": "Thirteen chords, the F that stops most beginners, and one of the great four-chord progressions.",
       "prerequisites": ["sevenths-blues"],
-      "difficulty": 9.69,
+      "difficulty": 2,
       "exercises": [
         {
           "id": "small-f.dm-strings",
@@ -7561,7 +7561,7 @@
             "minGapMsAtTop": 500,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 9.69
+            "difficulty": 1.5
           },
           "chords": ["Am", "Dm", "Am", "Dm"],
           "harmony": {
@@ -7731,7 +7731,7 @@
             "minGapMsAtTop": 500,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 9.69
+            "difficulty": 1.5
           },
           "chords": ["C", "Fmaj7", "C", "Fmaj7"],
           "harmony": {
@@ -8036,7 +8036,7 @@
             "minGapMsAtTop": 272.73,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 11.55
+            "difficulty": 2
           },
           "chords": ["Am", "F", "C", "G"],
           "harmony": {
@@ -8048,8 +8048,7 @@
             "Did every change arrive on the beat, even when a finger was late?"
           ]
         }
-      ],
-      "difficultyException": "Two of the five Exercises are single notes in quarters, after an eight-bar form with the band, so the note rate falls. The demand is the first finger holding two strings at once."
+      ]
     },
     {
       "id": "light-and-shade",
@@ -8064,7 +8063,7 @@
       ],
       "payoff": "Strumming that has loud and soft, sound and silence, low and high.",
       "prerequisites": ["small-f"],
-      "difficulty": 11.09,
+      "difficulty": 2.27,
       "exercises": [
         {
           "id": "light-and-shade.accents",
@@ -8301,7 +8300,7 @@
             "minGapMsAtTop": 272.73,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 18.36
+            "difficulty": 2.83
           },
           "chords": ["G", "G", "Em", "Em"],
           "harmony": {
@@ -8490,7 +8489,7 @@
             "minGapMsAtTop": 272.73,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 11.09
+            "difficulty": 1.77
           },
           "chords": ["G", "C", "D", "G"],
           "harmony": {
@@ -8620,7 +8619,7 @@
             "minGapMsAtTop": 500,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 4.41
+            "difficulty": 2.27
           },
           "chords": ["G", "C", "D", "G"],
           "harmony": {
@@ -8645,7 +8644,7 @@
       ],
       "payoff": "A sixteenth-note strum that stays even at a slow tempo, and a sixteenth pattern through four chords with a band.",
       "prerequisites": ["light-and-shade"],
-      "difficulty": 19.84,
+      "difficulty": 2.71,
       "exercises": [
         {
           "id": "sixteenth-strums.sixteenths-em",
@@ -9020,7 +9019,7 @@
             "minGapMsAtTop": 214.29,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 25.96
+            "difficulty": 4
           },
           "chords": ["Em", "Em", "Em", "Em"],
           "harmony": {
@@ -9318,7 +9317,7 @@
             "minGapMsAtTop": 200,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 19.84
+            "difficulty": 2.71
           },
           "chords": ["Em", "Em", "Em", "Em"],
           "harmony": {
@@ -9614,7 +9613,7 @@
             "minGapMsAtTop": 200,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 19.84
+            "difficulty": 2.71
           },
           "chords": ["G", "G", "Em", "Em"],
           "harmony": {
@@ -9898,7 +9897,7 @@
             "minGapMsAtTop": 214.29,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 16.48
+            "difficulty": 2.5
           },
           "chords": ["G", "D", "Em", "C"],
           "harmony": {
@@ -9925,7 +9924,7 @@
       ],
       "payoff": "A whole song, start to finish, in time with a band. From here, Rhythm Foundations trains your sense of time on single notes with a click, and Triads explains what your chords are made of.",
       "prerequisites": ["sixteenth-strums"],
-      "difficulty": 12.3,
+      "difficulty": 2.07,
       "exercises": [
         {
           "id": "a-whole-song.verse",
@@ -10231,7 +10230,7 @@
             "minGapMsAtTop": 272.73,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 13.79
+            "difficulty": 2.13
           },
           "chords": ["G", "Em", "C", "D", "G", "Em", "C", "D"],
           "harmony": {
@@ -10530,7 +10529,7 @@
             "minGapMsAtTop": 272.73,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 12.3
+            "difficulty": 2.13
           },
           "chords": ["C", "G", "D", "Em", "C", "G", "D", "D"],
           "harmony": {
@@ -11048,7 +11047,7 @@
             "minGapMsAtTop": 300,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 12.29
+            "difficulty": 2
           },
           "chords": ["G", "Em", "C", "D", "G", "Em", "C", "D", "C", "G", "D", "Em", "C", "G", "D", "D"],
           "harmony": {
@@ -11550,7 +11549,7 @@
             "minGapMsAtTop": 375,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 9.98
+            "difficulty": 1.63
           },
           "chords": ["G", "Em", "C", "D", "G", "Em", "C", "D", "C", "G", "D", "Em", "C", "G", "D", "D"],
           "selfCheck": [
@@ -11559,7 +11558,7 @@
           ]
         }
       ],
-      "difficultyException": "Eighth-note strums after a Step of sixteenths, so the note rate falls. The demand is sixteen bars in a row with a change of strum in the middle, which the metric does not count."
+      "difficultyException": "Eighth-note strums after a Step of sixteenths, so the strum rate falls. The demand is sixteen bars in a row with a change of strum in the middle, which the metric does not count."
     }
   ],
   "levels": [
@@ -12546,7 +12545,7 @@
             "minGapMsAtTop": 666.67,
             "handShifts": 8,
             "maxPlayableBpm": 312,
-            "difficulty": 4.45
+            "difficulty": 1.8
           },
           "harmony": {
             "kind": "scale",
@@ -12617,7 +12616,7 @@
                   "minGapMsAtTop": 666.67,
                   "handShifts": 8,
                   "maxPlayableBpm": 312,
-                  "difficulty": 4.45
+                  "difficulty": 1.8
                 },
                 "harmony": {
                   "kind": "scale",
@@ -12677,7 +12676,7 @@
                   "minGapMsAtTop": 666.67,
                   "handShifts": 9,
                   "maxPlayableBpm": 303,
-                  "difficulty": 4.49
+                  "difficulty": 1.84
                 },
                 "harmony": {
                   "kind": "scale",
@@ -12737,7 +12736,7 @@
                   "minGapMsAtTop": 666.67,
                   "handShifts": 11,
                   "maxPlayableBpm": 312,
-                  "difficulty": 4.56
+                  "difficulty": 1.91
                 },
                 "harmony": {
                   "kind": "scale",
@@ -12797,7 +12796,7 @@
                   "minGapMsAtTop": 666.67,
                   "handShifts": 11,
                   "maxPlayableBpm": 310,
-                  "difficulty": 4.56
+                  "difficulty": 1.91
                 },
                 "harmony": {
                   "kind": "scale",
@@ -12857,7 +12856,7 @@
                   "minGapMsAtTop": 666.67,
                   "handShifts": 8,
                   "maxPlayableBpm": 322,
-                  "difficulty": 4.45
+                  "difficulty": 1.8
                 },
                 "harmony": {
                   "kind": "scale",
@@ -12917,7 +12916,7 @@
                   "minGapMsAtTop": 666.67,
                   "handShifts": 9,
                   "maxPlayableBpm": 310,
-                  "difficulty": 4.49
+                  "difficulty": 1.84
                 },
                 "harmony": {
                   "kind": "scale",
@@ -12977,7 +12976,7 @@
                   "minGapMsAtTop": 666.67,
                   "handShifts": 6,
                   "maxPlayableBpm": 332,
-                  "difficulty": 4.38
+                  "difficulty": 1.73
                 },
                 "harmony": {
                   "kind": "scale",
@@ -13037,7 +13036,7 @@
                   "minGapMsAtTop": 666.67,
                   "handShifts": 8,
                   "maxPlayableBpm": 317,
-                  "difficulty": 4.45
+                  "difficulty": 1.8
                 },
                 "harmony": {
                   "kind": "scale",

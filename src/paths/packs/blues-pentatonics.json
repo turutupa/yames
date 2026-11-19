@@ -6931,7 +6931,7 @@
       ],
       "payoff": "A bent note that sits on the band's chord tone and arrives on the beat.",
       "prerequisites": ["quick-change"],
-      "difficulty": 2.97,
+      "difficulty": 2.64,
       "exercises": [
         {
           "id": "bends.reference",
@@ -7320,7 +7320,7 @@
             "minGapMsAtTop": 200,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 2.97
+            "difficulty": 2.47
           },
           "chords": ["A7", "A7"],
           "harmony": {
@@ -11582,7 +11582,7 @@
       ],
       "payoff": "The twelve bars played in sixths, and a lick that ends on one.",
       "prerequisites": ["major-and-minor"],
-      "difficulty": 3.2,
+      "difficulty": 1.63,
       "exercises": [
         {
           "id": "sixths.a7-sixths",
@@ -11686,7 +11686,7 @@
             "minGapMsAtTop": 600,
             "handShifts": 2,
             "maxPlayableBpm": 400,
-            "difficulty": 3.2
+            "difficulty": 1.1
           },
           "chords": ["A7", "A7"]
         },
@@ -11828,7 +11828,7 @@
             "minGapMsAtTop": 1090.91,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 3.38
+            "difficulty": 1.75
           },
           "chords": ["A7", "A7", "A7", "A7", "D7", "D7", "A7", "A7", "E7", "D7", "A7", "E7"]
         },
@@ -11933,11 +11933,12 @@
             "minGapMsAtTop": 200,
             "handShifts": 2,
             "maxPlayableBpm": 400,
-            "difficulty": 3
+            "difficulty": 1.63
           },
           "chords": ["A7", "A7"]
         }
-      ]
+      ],
+      "difficultyException": "Sixths in quarter and half notes, each one a single attack on two strings, after the faster single-note lines of the Step before, so the rate falls. The demand is two notes sounding together with the string between them silent, and a shape that changes with the chord, which the rate does not count."
     },
     {
       "id": "guide-tones",
@@ -12802,8 +12803,7 @@
             "Could you sing the guide-tone line afterwards?"
           ]
         }
-      ],
-      "difficultyException": "One or two notes a bar, so the rate falls right down. Hearing the harmony is the demand here, and it is the most abstract idea on the Path."
+      ]
     },
     {
       "id": "three-choruses",
@@ -13566,7 +13566,7 @@
       ],
       "payoff": "Twelve slow bars that sound like a blues player, with the space to prove it.",
       "prerequisites": ["three-choruses"],
-      "difficulty": 2.72,
+      "difficulty": 2.59,
       "exercises": [
         {
           "id": "slow-blues.written-chorus",
@@ -13721,7 +13721,7 @@
             "minGapMsAtTop": 277.78,
             "handShifts": 2,
             "maxPlayableBpm": 160,
-            "difficulty": 2.5
+            "difficulty": 2.36
           },
           "chords": ["A7", "A7", "A7", "A7", "D7", "D7", "A7", "A7", "E7", "D7", "A7", "E7"],
           "harmony": {
@@ -14021,7 +14021,7 @@
             "minGapMsAtTop": 333.33,
             "handShifts": 2,
             "maxPlayableBpm": 160,
-            "difficulty": 2.94
+            "difficulty": 2.81
           },
           "chords": ["A7", "A7", "A7", "A7", "D7", "D7", "A7", "A7", "E7", "D7", "A7", "E7"],
           "selfCheck": [
@@ -14157,7 +14157,7 @@
             "minGapMsAtTop": 333.33,
             "handShifts": 2,
             "maxPlayableBpm": 160,
-            "difficulty": 3.94
+            "difficulty": 3.81
           },
           "chords": ["A7", "A7", "A7", "A7", "D7", "D7", "A7", "A7", "E7", "D7", "A7", "E7"]
         }
@@ -14178,7 +14178,7 @@
       ],
       "payoff": "A slow chorus in a key you did not learn it in, with bends that still arrive.",
       "prerequisites": ["slow-blues"],
-      "difficulty": 2.49,
+      "difficulty": 2.41,
       "exercises": [
         {
           "id": "slow-blues-in-c.c-chorus",
@@ -14333,7 +14333,7 @@
             "minGapMsAtTop": 277.78,
             "handShifts": 0,
             "maxPlayableBpm": 168,
-            "difficulty": 2.49
+            "difficulty": 2.35
           },
           "chords": ["C7", "C7", "C7", "C7", "F7", "F7", "C7", "C7", "G7", "F7", "C7", "G7"],
           "harmony": {
@@ -14635,7 +14635,7 @@
             "minGapMsAtTop": 333.33,
             "handShifts": 0,
             "maxPlayableBpm": 168,
-            "difficulty": 2.93
+            "difficulty": 2.8
           },
           "chords": ["C7", "C7", "C7", "C7", "F7", "F7", "C7", "C7", "G7", "F7", "C7", "G7"],
           "selfCheck": [

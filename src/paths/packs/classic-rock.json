@@ -38,7 +38,7 @@
       ],
       "payoff": "You can play a riff with the band and it sounds like a record, tight on the hi-hat.",
       "prerequisites": [],
-      "difficulty": 4.77,
+      "difficulty": 3.58,
       "exercises": [
         {
           "id": "riffs.root-riff",
@@ -488,7 +488,7 @@
             "minGapMsAtTop": 230.77,
             "handShifts": 3,
             "maxPlayableBpm": 400,
-            "difficulty": 5.89
+            "difficulty": 2.27
           },
           "chords": ["A5", "A5"],
           "harmony": {
@@ -634,7 +634,7 @@
       ],
       "payoff": "Three riffs in two keys, and the way to move a riff: by frets, or by strings.",
       "prerequisites": ["riffs"],
-      "difficulty": 4.77,
+      "difficulty": 3.58,
       "exercises": [
         {
           "id": "riffs-in-e.e-root-riff",
@@ -865,7 +865,7 @@
             "minGapMsAtTop": 230.77,
             "handShifts": 3,
             "maxPlayableBpm": 400,
-            "difficulty": 5.89
+            "difficulty": 2.27
           },
           "chords": ["E5", "E5"],
           "harmony": {
@@ -3931,7 +3931,7 @@
       ],
       "payoff": "Two bars of double stops into a single-note run: the sound of rock and roll lead guitar.",
       "prerequisites": ["repeating-licks"],
-      "difficulty": 6.43,
+      "difficulty": 3.53,
       "exercises": [
         {
           "id": "double-stops.stops-and-run",
@@ -4064,7 +4064,7 @@
             "minGapMsAtTop": 214.29,
             "handShifts": 0,
             "maxPlayableBpm": 357,
-            "difficulty": 6.43
+            "difficulty": 3.53
           },
           "chords": ["A7", "A7", "A7", "A7"],
           "harmony": {
@@ -4187,7 +4187,7 @@
             "minGapMsAtTop": 214.29,
             "handShifts": 0,
             "maxPlayableBpm": 357,
-            "difficulty": 6.05
+            "difficulty": 3.4
           },
           "chords": ["A7", "A7"],
           "harmony": {
@@ -4315,7 +4315,7 @@
             "minGapMsAtTop": 214.29,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 7.8
+            "difficulty": 5.2
           },
           "chords": ["A", "D"],
           "harmony": {
@@ -4327,7 +4327,8 @@
             "allowed": ["C#", "F#"]
           }
         }
-      ]
+      ],
+      "difficultyException": "Eighth notes after a Step of sixteenth and triplet loops, and two strings struck together are one attack, so the rate falls. The demand is hitting two strings and only two, short as a drum hit, and going from double stops to single notes inside a phrase, which a rate can't count."
     },
     {
       "id": "double-stops-in-e",
@@ -4342,7 +4343,7 @@
       ],
       "payoff": "Twelve bars of double stops that follow E, A and B: a rock and roll chorus.",
       "prerequisites": ["double-stops"],
-      "difficulty": 9.03,
+      "difficulty": 3.25,
       "exercises": [
         {
           "id": "double-stops-in-e.stops-on-e",
@@ -4460,7 +4461,7 @@
             "minGapMsAtTop": 214.29,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 9.05
+            "difficulty": 3.25
           },
           "chords": ["E7", "E7"],
           "harmony": {
@@ -4588,7 +4589,7 @@
             "minGapMsAtTop": 214.29,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 9
+            "difficulty": 3.25
           },
           "chords": ["A7", "A7"],
           "harmony": {
@@ -4716,7 +4717,7 @@
             "minGapMsAtTop": 214.29,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 9
+            "difficulty": 3.25
           },
           "chords": ["B7", "B7"],
           "harmony": {
@@ -4980,7 +4981,7 @@
             "minGapMsAtTop": 230.77,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 9.47
+            "difficulty": 3.93
           },
           "chords": ["E7", "E7", "E7", "E7", "A7", "A7", "E7", "E7", "B7", "A7", "E7", "E7"],
           "harmony": {
@@ -4992,7 +4993,8 @@
             "allowed": ["G#", "C#", "D#"]
           }
         }
-      ]
+      ],
+      "difficultyException": "The same eighth-note double stops as the Step before, without its single-note runs, whose string crossings the metric counts, so the number sits a little lower. The demand is a figure for each of three chords around the twelfth fret, and twelve bars of them in the order of the form."
     },
     {
       "id": "embellishment",
@@ -5007,7 +5009,7 @@
       ],
       "payoff": "An E and an A that sing, with a fill between them, instead of two strummed chords.",
       "prerequisites": ["double-stops-in-e"],
-      "difficulty": 4.61,
+      "difficulty": 3.7,
       "exercises": [
         {
           "id": "embellishment.open-e",
@@ -5235,7 +5237,7 @@
             "minGapMsAtTop": 300,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 4.61
+            "difficulty": 3.03
           },
           "chords": ["E", "E"],
           "harmony": {
@@ -5379,8 +5381,7 @@
             "allowed": ["G", "C"]
           }
         }
-      ],
-      "difficultyException": "Slow and ringing on purpose: holding a chord shape while single fingers move inside it is the demand, not the rate."
+      ]
     },
     {
       "id": "chord-tones",
@@ -6371,8 +6372,7 @@
             "Did the line still sound like one solo, not four licks?"
           ]
         }
-      ],
-      "difficultyException": "The rate eases so the ear can follow a chord change every bar, which is the new demand here."
+      ]
     },
     {
       "id": "chord-tones-ade",
@@ -9161,7 +9161,7 @@
       ],
       "payoff": "A whole solo, played with a band, that you could play at a jam tomorrow.",
       "prerequisites": ["solo-in-e"],
-      "difficulty": 4.04,
+      "difficulty": 3.92,
       "exercises": [
         {
           "id": "solo-etude.etude-a",
@@ -9308,7 +9308,7 @@
             "minGapMsAtTop": 150,
             "handShifts": 0,
             "maxPlayableBpm": 178,
-            "difficulty": 3.98
+            "difficulty": 3.88
           },
           "chords": ["A5", "A5", "G5", "D5", "A5", "A5", "G5", "D5"],
           "harmony": {
@@ -9464,7 +9464,7 @@
             "minGapMsAtTop": 200,
             "handShifts": 0,
             "maxPlayableBpm": 238,
-            "difficulty": 3.95
+            "difficulty": 3.79
           },
           "chords": ["F5", "G5", "A5", "A5", "F5", "G5", "E5", "E5"],
           "harmony": {
@@ -9672,7 +9672,7 @@
             "minGapMsAtTop": 150,
             "handShifts": 0,
             "maxPlayableBpm": 178,
-            "difficulty": 4.09
+            "difficulty": 3.96
           },
           "chords": [
             "A5",
@@ -9875,7 +9875,7 @@
             "minGapMsAtTop": 166.67,
             "handShifts": 0,
             "maxPlayableBpm": 178,
-            "difficulty": 4.11
+            "difficulty": 4
           },
           "chords": [
             "A5",

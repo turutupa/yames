@@ -362,13 +362,27 @@ also fails if a pack isn't what its spec generates.
 - **Chains:** different chords, checked bar by bar, no stop at a bar line, a join that
   connects and doesn't jump.
 
-**The difficulty metric** (`difficulty.ts`) is notes per second at the pass tempo,
+**The difficulty metric** (`difficulty.ts`) is onsets per second at the pass tempo,
 times `1 + 0.4 crossings + 0.6 skips + 0.3 shifts (+ 0.25 if swept)`, plus 3 × the
-share of legato or bent notes. Theory adds freedom (written 0, self-checked 0.5,
+share of legato or bent onsets. Theory adds freedom (written 0, self-checked 0.5,
 landings or practice-only 1.5) and 0.5 per chord change in four bars. A Step is the
-median of its Exercises. It is a yardstick for ordering: it can't count control,
-stamina, listening or choosing, so Steps that are harder in those ways declare an
-exception, and those exceptions are worth a teacher's eye.
+median of its Exercises.
+
+It counts onsets, not notes (since 2026-11-19): notes on one tick are one onset, as
+they are to the grader, so a six-string strum, a double stop and a power chord each
+weigh one attack, and a strum in quarters reads what a single note in quarters reads.
+Crossings, skips, shifts and the legato-or-bent share are rates per onset. The string
+distance between two onsets is the smallest distance between a string of one and a
+string of the next: zero when they share a string (a strum down and the upstroke
+back, a power chord and the chug under it), 1 a crossing, more a skip. An onset is
+legato or bent when any note in it is. For a line of single notes none of this
+changes a number, and `difficulty.test.ts` holds every pack to that.
+
+It is a yardstick for ordering: it can't count control, stamina, listening or
+choosing, nor the fretting hand's work inside one attack (how many fingers a chord
+takes, a change of chord shape, two strings stopped together), so Steps that are
+harder in those ways declare an exception, and those exceptions are worth a
+teacher's eye.
 
 ## Grading: what can be trusted
 

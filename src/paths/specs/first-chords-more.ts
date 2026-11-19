@@ -125,7 +125,7 @@ export const STRUMS_BETWEEN_BEATS: StepSpec = {
   ],
   payoff: "Strumming with gaps in it that stays in time, and a pattern that leaves room for the change.",
   difficultyException:
-    "Rests and off-beats take strums out of the bar, so the note rate falls below the pattern of the Step before. The demand is an upstroke with no downstroke before it and a swing kept through silent beats, which the metric does not count.",
+    "Rests and off-beats take strums out of the bar, so the strum rate falls below the pattern of the Step before. The demand is an upstroke with no downstroke before it and a swing kept through silent beats, which the metric does not count.",
   exercises: [
     {
       id: "rest-beat",
@@ -231,7 +231,7 @@ export const SEVENTHS_BLUES: StepSpec = {
   ],
   payoff: "Three seventh chords, and a twelve-bar blues you can play round and round with a band.",
   difficultyException:
-    "Two of the five Exercises are single notes in quarters and two are four strums a bar, after an eight-bar form in down, down-up, so the note rate falls. The demand is three new shapes with no finger in common, and a twelve-bar form kept in the head.",
+    "Two of the five Exercises are four strums a bar, after an eight-bar form in down, down-up, so the strum rate falls a little. The demand is three new shapes with no finger in common, and a twelve-bar form kept in the head.",
   exercises: [
     {
       id: "a7-strings",
