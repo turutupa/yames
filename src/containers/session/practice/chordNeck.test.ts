@@ -10,6 +10,7 @@ import { barLengthTicks } from "../../../paths/format";
 import type { Exercise, PathDoc } from "../../../paths/format";
 import { strumDirections, patternModel } from "../tabstrip/tabStripModel";
 import { barShapes, readyNeck } from "./practiceModel";
+import { handOf } from "./HandLine";
 import type { NeckNote } from "../../../stage3d/api";
 
 function exercise(doc: unknown, id: string): Exercise {
@@ -97,5 +98,17 @@ describe("which way a strum goes", () => {
     const triplets = strumDirections([0, 320, 640].flatMap(strum));
     expect(triplets.get(0)).toBe("d");
     expect(triplets.has(320)).toBe(false);
+  });
+});
+
+describe("where the hand starts, in words", () => {
+  it("open chords that change start in the first chord's shape", () => {
+    expect(handOf(exercise(firstChords, "c-major.three-chords"))?.chord).toBe("Em");
+    expect(handOf(exercise(firstChords, "d-major.g-c-d"))?.chord).toBe("G");
+  });
+
+  it("a single-note pattern keeps its own position", () => {
+    const run = exercise(alternate, (alternate as unknown as PathDoc).steps[0].exercises[0].id);
+    expect(handOf(run)).toBe(run.position);
   });
 });

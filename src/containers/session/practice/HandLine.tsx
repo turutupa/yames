@@ -3,7 +3,7 @@
  * note, and the one-time "Switch views any time" hint.
  */
 import { useTranslation } from "react-i18next";
-import type { HandPosition } from "../../../paths/format";
+import type { Exercise, HandPosition } from "../../../paths/format";
 
 /** "Index finger at fret 5", or "open E chord shape", from the Exercise's own hand position. Nothing when it has none. */
 export function HandLine({ position }: { position: HandPosition | undefined }) {
@@ -28,6 +28,28 @@ export function HandLine({ position }: { position: HandPosition | undefined }) {
       {t(key, { fret: position.fret })}
     </span>
   );
+}
+
+/**
+ * The hand position the line speaks of. An Exercise that strums open chords
+ * and names them bar by bar (`chords`) starts in its first chord's shape:
+ * "index finger at fret 1, one finger per fret" is a scale's hand, and wrong
+ * for E minor to A minor to C (card #74). Everything else: its own position.
+ */
+export function handOf(exercise: Pick<Exercise, "position" | "chords" | "notes">): HandPosition | undefined {
+  const position = exercise.position;
+  const first = exercise.chords?.[0];
+  if (!position || position.chord || !first) return position;
+  const strings = new Map<number, Set<number>>();
+  let open = false;
+  for (const n of exercise.notes) {
+    if (n.fret > 3) return position;
+    if (n.fret === 0) open = true;
+    if (!strings.has(n.tick)) strings.set(n.tick, new Set());
+    strings.get(n.tick)!.add(n.string);
+  }
+  const strummed = [...strings.values()].some((set) => set.size >= 3);
+  return open && strummed ? { ...position, chord: first } : position;
 }
 
 /**

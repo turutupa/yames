@@ -45,7 +45,7 @@ import { useWatch } from "./practice/useWatch";
 import { WatchFooterRow, WatchRow } from "./practice/WatchControls";
 import { hideTipUntilLeft, showTipAgain, usePreviousWordFits } from "./sessionBarParts";
 import { PracticeTab } from "./practice/PracticeTab";
-import { HandLine } from "./practice/HandLine";
+import { HandLine, handOf } from "./practice/HandLine";
 import { resumeBeats, useWarmupBeat, warmupClockOf } from "./practice/useWarmupBeat";
 import { Key, MetaClock, MetaTempo, PracticeHead, clockText } from "./practice/PracticeChrome";
 import type { PracticeBeat } from "./practice/useWarmupBeat";
@@ -574,7 +574,7 @@ function TakeScreen({
 
       <div className="session-mechlow" data-single="">
         <div className="session-col">
-          {!running && <HandLine position={exercise.position} />}
+          {!running && <HandLine position={handOf(exercise)} />}
           {/* Ready: what is graded. Running: the Exercise's own tip. */}
           <CoachLine>{running ? exercise.coachLine : gradedLine}</CoachLine>
           {/* One hand line, one coach line, one "how", folded: the how-to, the
@@ -1500,7 +1500,7 @@ function TimedScreen({
       <div className="practice-foot">
         {ready ? (
           <span className="practice-note" data-testid="session-timed-how">
-            {pattern && <HandLine position={pattern.exercise.position} />} {t(timedHowKey(step))}
+            {pattern && <HandLine position={handOf(pattern.exercise)} />} {t(timedHowKey(step))}
           </span>
         ) : ended ? (
           <span className="practice-note" data-testid="session-timed-ended">{t("session.practice.endedFoot")}</span>

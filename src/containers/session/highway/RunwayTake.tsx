@@ -26,7 +26,7 @@ import { Runway } from "./Runway";
 import { ghostNeck, runwayModel } from "./runwayModel";
 import type { Judged } from "./runwayModel";
 import { PracticeViewSwitch } from "../practice/PracticeViewSwitch";
-import { HandLine } from "../practice/HandLine";
+import { HandLine, handOf } from "../practice/HandLine";
 import { useWatch } from "../practice/useWatch";
 import { WatchRow } from "../practice/WatchControls";
 import { usePracticeCursor } from "../practice/usePracticeCursor";
@@ -245,7 +245,7 @@ export function RunwayTakeScreen({
               {t("session.runway.later")}
             </span>
           )}
-          {!running && <HandLine position={exercise.position} />}
+          {!running && <HandLine position={handOf(exercise)} />}
           {!running && exercise.howTo[0] && <span className="session-why">{exercise.howTo[0]}</span>}
           {/* The bar is what is graded: not said to a player who chose to just play. */}
           {!running && bar && run.ungraded !== "gradingOff" && run.ungraded !== "chosen" && (
