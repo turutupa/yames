@@ -35,6 +35,10 @@ const NOT_CHECKED_YET =
 const SAY_CHECK = "Did you say each note's name out loud as you played it?";
 const EYES_CHECK = "Could you play it once without looking at the neck?";
 
+/** Said on every Exercise whose variants move the figure: the words name the first version's frets. */
+const VARIANT_NOTE =
+  "The frets and note names here are for the first version. Other Takes move the same figure to another string or key.";
+
 const C_MAJOR = { scale: ["C", "major"] as [string, string] };
 const ROCK = (key: string) => ({ groove: "rock8", key });
 
@@ -269,10 +273,10 @@ export default definePath({
         {
           id: "octave-d-b",
           title: "Octaves from the D and G strings",
-          purpose: "The wider shape: E, F, G and A on the D string with their octaves on the B string, three frets up.",
+          purpose: "The wider shape, three frets up: from the D string to the B string, and from the G string to the top string.",
           howTo: [
             "Quarter notes, 50 BPM up to a pass at 80.",
-            "First finger on the D string, little finger on the B string three frets up: 2 and 5, 3 and 6, 5 and 8, 7 and 10, and back. The G string to the top string works the same way.",
+            "From the D string: first finger on the D string, little finger on the B string three frets up: 2 and 5, 3 and 6, 5 and 8, 7 and 10, and back. The G string to the top string works the same way.",
           ],
           coach: "Right notes and steady quarters after the take.",
           vary: {
@@ -295,11 +299,12 @@ export default definePath({
         },
         {
           id: "every-a",
-          title: "Every A below the twelfth fret",
+          title: "Every A up to the twelfth fret",
           purpose: "One note, seven places: the low E string's fret 5, its octave on the D string, on up to the top string, then back through the G string and the open A string to the twelfth fret.",
           howTo: [
             "Half notes, two clicks each, 50 BPM up to a pass at 80.",
             "Low E string 5, D string 7, B string 10, top string 5, G string 2, the open A string, then the A string at fret 12. Each one is found from the one before by an octave shape or a same-note pair.",
+            VARIANT_NOTE,
           ],
           coach: "Every note here is an A, so I check that each one is. Finding them without hunting is the skill.",
           vary: {
@@ -572,7 +577,7 @@ export default definePath({
         {
           id: "root-octaves",
           title: "Roots and octaves: Am, F, C, G",
-          purpose: "The roots of a minor four-chord song, each with its octave shape, over a band. Two of them are on the low E string, one on the A string, and the shape is the same.",
+          purpose: "The roots of a minor four-chord song, each with its octave shape, over a band. Three of them are on the low E string, one on the A string, and the shape is the same.",
           howTo: [
             "Quarter notes, 60 BPM up to a pass at 90.",
             "Am: low E string 5 and D string 7. F: fret 1 and fret 3. C: A string 3 and G string 5. G: low E string 3 and D string 5.",
@@ -671,7 +676,7 @@ export default definePath({
         "The top notes of one box are the bottom notes of the next. Look for the frets they share.",
         "Find the A's in each box before you play it. They are your way home.",
       ],
-      payoff: "One phrase that climbs three octaves, and a ladder up two strings through every box.",
+      payoff: "One phrase that climbs three octaves, and a ladder up two strings through four of the boxes.",
       difficultyException:
         "No band and no chord changes here, both of which the metric counts on a Theory Path. The demand is five positions and the shifts between them.",
       exercises: [
@@ -747,7 +752,7 @@ export default definePath({
       why: "An arpeggio is a chord played one note at a time, and it is the surest way to sound like you know where you are in a song. Up the neck it links the triad shapes you know; in one position it shows that every chord of a song is already under your hand.",
       howTo: [
         "Say the letters as you play: A, C, E for A minor; C, E, G for C major. There are only three, repeating.",
-        "Going up the neck, shift with the first finger, on the string change.",
+        "Going up the neck, the hand moves once, on the G string: fret 5 with the first finger, then fret 9 with the second.",
         "In one position, keep the fingers down like a chord where you can and pick one string at a time.",
       ],
       payoff: "Four chords spelled out in fifth position over a band, without the hand leaving.",
@@ -799,6 +804,7 @@ export default definePath({
           howTo: [
             "Straight eighths, 60 BPM up to a pass at 90.",
             "Each bar goes up its four notes and back. Am: 7, 5, 5, 5. F: 7, 5, 6, 5. C: 5, 5, 5, 8. G: 5, 7, 8, 7, from the D string to the top string.",
+            VARIANT_NOTE,
           ],
           coach: "Band on. Right notes and time after the take.",
           vary: {
@@ -829,7 +835,7 @@ export default definePath({
       goal: "Land on a note of each chord as a progression goes by, in one position, and know which note of the chord it is.",
       why: "This is what the whole Path is for. A solo that follows the chords sounds like music; one that ignores them sounds like a scale. The trick is small: know where the root, third and fifth of each chord are under your hand, and be on one of them when the chord arrives.",
       howTo: [
-        "Stay in fifth position. Every chord of Am, F, C, G has its three notes within reach.",
+        "Stay around the fifth fret. Every chord of Am, F, C, G has its three notes within reach of one hand there.",
         "The third is the note that says the most about a chord. Am: C. F: A. C: E. G: B.",
         "Say the chord's name on beat 1 of each bar.",
       ],
@@ -841,7 +847,7 @@ export default definePath({
           purpose: "One note a chord, played twice: C over Am, A over F, E over C, B over G. Four notes that outline the whole progression.",
           howTo: [
             "Half notes, two to a bar, 60 BPM up to a pass at 90.",
-            "G string 5, D string 7, B string 5, G string 4. The first finger reaches back one fret for the B.",
+            "G string 5, D string 7, B string 5, G string 4. Sit a fret low, in fourth position: second finger on the frets at 5, fourth on the D string's 7, first on the B at fret 4.",
           ],
           coach: "Band on. Right notes after the take: each one is the third of its chord.",
           tab: THIRDS_LINE,
@@ -877,7 +883,7 @@ export default definePath({
         {
           id: "land-on-a-chord-tone",
           title: "Your turn: land on a chord tone",
-          purpose: "Free playing in A minor pentatonic over Am, F, C, G, with one rule: on beat 1 of every bar you are on a note of that chord.",
+          purpose: "Free playing in A minor over Am, F, C, G, with one rule: on beat 1 of every bar you are on a note of that chord.",
           howTo: [
             "Straight eighths or longer, 60 to 90 BPM.",
             "Start with only the thirds from the first Exercise, held long. Then add a few notes between them. The written line is an example.",
@@ -916,7 +922,7 @@ export default definePath({
         {
           id: "walk-a-string",
           title: "A walk up one string",
-          purpose: "Four notes of a major scale on one string, a step higher each bar. A different key and string each time.",
+          purpose: "Three notes of a major scale on one string, up and back, a step higher each bar. A different key and string each time.",
           howTo: ["Quarter notes, well under your clean tempo. Say each note's name, and move the hand up a note at each bar line."],
           coach: "This is a warm-up. It tells you how it went, and it decides nothing.",
           vary: {

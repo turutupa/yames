@@ -126,9 +126,10 @@ const FOURTHS_RIFF = "/8 4:7+3:7 4:7+3:7 r 4:5+3:5 /4 4:7+3:7 4:10+3:10 | /8 4:1
 const PEDAL_RIFF = "/8 5:0m 5:0m 4:2 5:0m 5:0m 4:5 5:0m 4:4 | /8 5:0m 5:0m 4:2 5:0m 4:5 4:4 4:2 4:0";
 
 // The fast moves of the Advanced Level's climax Step, all in box 1.
-const REPEAT_CELL = "2:8 1:5 1:8 1:5p";
+// Third finger on the B string, first and little finger on the top string.
+const REPEAT_CELL = "2:8f3 1:5f1 1:8f4 1:5p";
 const RUN_UP = "/16 6:5 6:8 5:5 5:7 4:5 4:7 3:5 3:7 2:5 2:8 1:5 1:8 1:5 2:8 1:5 1:8 | /2 1:8v /2 r";
-const FAST_REPEAT = `/16 ${REPEAT_CELL} ${REPEAT_CELL} ${REPEAT_CELL} ${REPEAT_CELL} | ${REPEAT_CELL} ${REPEAT_CELL} /2 2:8v`;
+const FAST_REPEAT = `/16 ${REPEAT_CELL} ${REPEAT_CELL} ${REPEAT_CELL} ${REPEAT_CELL} | ${REPEAT_CELL} ${REPEAT_CELL} /2 2:8f3v`;
 const TUMBLE_DOWN = "/16 1:8 1:5p 2:8 2:5p 3:7 3:5p 4:7 4:5p 5:7 5:5p 6:8 6:5p /4 5:7";
 const THE_PEAK = `/16 ${REPEAT_CELL} ${REPEAT_CELL} ${REPEAT_CELL} ${REPEAT_CELL} | ${REPEAT_CELL} ${REPEAT_CELL} 2:8 2:5p 3:7 3:5p 4:7 4:5p 5:7 5:5p | 6:8 5:5 5:7 4:5 4:7 3:5 3:7 2:5 2:8 1:5 1:8 1:5 2:8 1:5 1:8 2:8 | /1 1:5v`;
 
@@ -997,9 +998,9 @@ export default definePath({
       id: "climax",
       title: "Building to a peak",
       goal: "Play the fast runs and repeating licks a rock solo peaks on, in sixteenths at tempo, and come out of them on a long note.",
-      why: "A solo needs somewhere to go. After the melody and the conversation comes the part where the notes get fast, and in classic rock that part is nearly always the same few moves: a run up the box, a lick that repeats, a tumble down in pull-offs. They work because they stop, on one long note at the top of the phrase.",
+      why: "A solo needs somewhere to go. After the melody and the conversation comes the part where the notes get fast, and in classic rock that part is nearly always the same few moves: a run up the box, a lick that repeats, a tumble down in pull-offs. They work because they stop, on one long note.",
       howTo: [
-        "Every figure here stays in box 1 of A minor pentatonic at the fifth fret. Nothing is new for the fretting hand except the speed.",
+        "Every figure here is box 1 of the minor pentatonic, at the fifth fret in A. Nothing is new for the fretting hand except the speed.",
         "Pick lightly. Fast pentatonic lines choke when the pick digs in; let the amp do the work.",
         "The long note at the end is half the lick. Arrive on it in time and give it vibrato.",
       ],

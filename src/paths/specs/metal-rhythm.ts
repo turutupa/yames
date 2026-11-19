@@ -115,11 +115,15 @@ function rootRiff(p: VariantParams, value: string, cell: (note: string) => strin
   const note = (up: number, finger: number) => `${string}:${root + up}mf${finger}`;
   const [r, third, fourth, fifth] = [note(0, 1), note(3, 4), note(5, 1), note(7, 3)];
   const bar = (notes: string[]) => `${value} ${notes.map(cell).join(" ")}`;
-  const tab = [bar([r, r, third, r]), bar([fourth, fourth, fifth, fourth]), bar([r, r, third, r]), bar([fourth, fifth, fourth, third])].join(" | ");
+  const tab = [bar([r, r, third, r]), bar([fourth, fourth, fifth, fourth]), bar([r, r, third, r]), bar([fourth, fifth, fourth, fourth])].join(" | ");
   // The key is named from the low E string; the same frets on the A string are a fourth higher.
-  const key = string === 6 ? p.key : ({ "F#": "B", G: "C", A: "D", B: "E", C: "F", D: "G" } as Record<string, string>)[p.key];
+  const key = string === 6 ? p.key : ON_A[p.key];
   return { tab, position: root, shifts: true, harmony: { scale: [key, "minorPentatonic"] as [string, string] } };
 }
+
+/** The root that sounds: the same frets on the A string are a fourth higher than the key they are listed under. */
+const ON_A: Readonly<Record<string, string>> = { "F#": "B", G: "C", A: "D", B: "E", C: "F", D: "G" };
+const warmLabel = (p: VariantParams) => `${p.stringSet === "A string" ? ON_A[p.key] : p.key} on the ${p.stringSet}`;
 
 const WARMUP_VALUES = { key: Object.keys(ROOT_FRET), stringSet: ["low E string", "A string"] } as const;
 
@@ -142,7 +146,7 @@ export default definePath({
     {
       id: "the-chug",
       title: "The chug",
-      goal: "Play palm-muted eighth notes on the low E string in downstrokes, every one the same weight, and lift the mute for an accent.",
+      goal: "Play palm-muted eighth notes on a low string in downstrokes, every one the same weight, and lift the mute for an accent.",
       why: "The palm-muted downstroke is the sound of metal rhythm guitar. It is two skills at once: the picking hand mutes and plays in the same place, and the stroke only ever goes down, so the hand has to come back up between every note without being heard.",
       howTo: [
         "Rest the side of the picking hand on the strings right where they leave the bridge. Too far forward and the note dies; too far back and it rings. Find the spot where it thuds and still has a pitch.",
@@ -154,7 +158,7 @@ export default definePath({
         {
           id: "open-chug",
           title: "Eight to the bar",
-          purpose: "Palm-muted eighths on the open low E string, all downstrokes, with two fretted notes at the end of the second bar. The sound comes first: get the mute right before you worry about speed.",
+          purpose: "Palm-muted eighths on the open low E string (the open A string in the other variant), all downstrokes, with two fretted notes at the end of the second bar. The sound comes first: get the mute right before you worry about speed.",
           howTo: [
             "Eighth notes, two to the click, all down. The last two notes are frets 3 and 5, muted like the rest.",
             "Listen to each note. They should all be as short and as loud as each other, like a machine.",
@@ -192,7 +196,7 @@ export default definePath({
         {
           id: "accent-open",
           title: "Accents in threes",
-          purpose: "The open E string throughout, with the mute lifted on every third eighth: 3 + 3 + 2. The accents make the riff, and the notes never change.",
+          purpose: "The open E string with the mute lifted on every third eighth: 3 + 3 + 2. The accents make the riff; bar 2 ends on two accented fretted notes.",
           howTo: [
             "Lift the palm for the accented notes and dig in a little more. Mute everything else.",
             "Count '1 2 3, 1 2 3, 1 2'. In bar 2 the last two accents are frets 3 and 5.",
@@ -223,7 +227,7 @@ export default definePath({
         {
           id: "two-note-chords",
           title: "E, G and A",
-          purpose: "Three power chords in quarter notes, two of each. Slow enough to land both fingers at once and hear both strings.",
+          purpose: "E, G and A in quarter notes, two strokes on each, and back to G to finish. Slow enough to land both fingers at once and hear both strings.",
           howTo: [
             "E: open low E and fret 2 on the A string. G: fret 3 and fret 5. A: fret 5 and fret 7. Downstrokes through both strings.",
             "Move the hand as one shape. The fingers keep their spacing while the hand slides.",
@@ -298,7 +302,7 @@ export default definePath({
           title: "E chord out of the chug",
           purpose: "The 3 + 3 + 2 accents again, but each accent is now a ringing E power chord and the notes between are muted.",
           howTo: [
-            "First finger stays on fret 2 of the A string throughout. On the accents, lift the palm and strike both strings.",
+            "First finger stays on fret 2 of the A string until the last beat of bar 2. On the accents, lift the palm and strike both strings.",
             "Bar 2 ends with G and A chords on the last two eighths.",
           ],
           coach: "I check that the chords were louder than the chug, roughly, and how even the time was.",
@@ -317,7 +321,7 @@ export default definePath({
           title: "Chords on the move",
           purpose: "Two muted notes, a G chord, two muted notes, an A chord: the chords change while the chug stays on the open string.",
           howTo: [
-            "The fretting hand has two muted notes to get to each chord. Move during them.",
+            "In bar 1 the fretting hand has two muted notes to get to each chord: move during them. In bar 2 the A and G chords come back to back.",
             "The last chord of bar 2 is an E held for a beat. Let it ring.",
           ],
           coach: "I time every attack, chug and chord alike, and say how even they were.",
@@ -338,7 +342,7 @@ export default definePath({
           purpose: "The same idea with holes in it: a rest after the G chord and after the A. Three sounds now, muted, open and silent.",
           howTo: [
             "Count '1 and 2 and, (3) and 4, (and)'. Kill the chord with both hands on each rest.",
-            "Don't let the rest shorten. The muted note after it comes on the 'and', not before.",
+            "Don't let the rest shorten. The attack after it, a chug in bar 1 and the A chord in bar 2, comes on the 'and', not before.",
           ],
           coach: "The note after each rest is the one I'd look at: early is the usual mistake.",
           ...FREE,
@@ -371,7 +375,7 @@ export default definePath({
         {
           id: "gallop-one",
           title: "The gallop on one string",
-          purpose: "Eight gallops on the muted low E string, the last two on frets 3 and 5. Nothing to think about except the three strokes.",
+          purpose: "Eight gallops on one muted low string, the low E or the A, the last two on frets 3 and 5. Nothing to think about except the three strokes.",
           howTo: [
             "Down, down-up, on every beat. The long note is on the click.",
             "If the two short notes sound like one smeared note, slow down a rung until you can hear both.",
@@ -391,7 +395,7 @@ export default definePath({
         {
           id: "gallop-chords",
           title: "A chord, then the gallop",
-          purpose: "A power chord on the first beat of each half bar, and the gallop carrying on underneath on the open string.",
+          purpose: "A power chord on beat 1 of bar 1, and on beats 1 and 3 of bar 2, with the gallop carrying on underneath on the open string.",
           howTo: [
             "The chord takes the place of the gallop's long note: chord, then the two short muted notes, then a full gallop.",
             "E, then G and A in the second bar. Lift the palm for the chord and drop it straight back.",
@@ -413,7 +417,7 @@ export default definePath({
           title: "A galloping riff",
           purpose: "Two gallops, two open eighth notes that climb, and a gallop to answer; the second bar ends on a long note. E blues on one string.",
           howTo: [
-            "The eighth notes on frets 3, 5 and 6 are open, not muted, and all downstrokes. Let the hand lean up a fret for the little finger on 6.",
+            "The eighth notes on frets 3, 5 and 6 are open, not muted, and all downstrokes: first finger on 3, third on 5, little finger on 6.",
             "Keep the sixteenth-note swing going through the eighths, so the next gallop starts in time.",
           ],
           coach: "After the take I'll say how even it was and whether the notes were the written ones.",
@@ -445,7 +449,7 @@ export default definePath({
         {
           id: "reverse-one",
           title: "Short-short-long",
-          purpose: "Eight reverse gallops on the muted low E string, the last two on frets 3 and 5.",
+          purpose: "Eight reverse gallops on one muted low string, the low E or the A, the last two on frets 3 and 5.",
           howTo: [
             "Down-up, down, on every beat. The hand misses the string on the 'a'.",
             "Give the first note of each beat a little weight so you can hear where the beat is.",
@@ -518,7 +522,7 @@ export default definePath({
         {
           id: "straight-sixteenths",
           title: "Sixteen to the bar",
-          purpose: "Two bars of muted sixteenths on the open low E string, with the mute lifted on the first note of every beat.",
+          purpose: "Two bars of muted sixteenths on an open low string, the low E or the A, with the mute lifted on the first note of every beat.",
           howTo: [
             "Down-up-down-up, four to the click. Lift the palm slightly on each beat's first note.",
             "Listen to the upstrokes. If they are thinner than the downstrokes, slow down and even them out.",
@@ -554,7 +558,7 @@ export default definePath({
           purpose: "Sixteenths on the low E string where one note in four is fretted and open: G, A and Bb come up out of the muted pedal.",
           howTo: [
             "First finger on fret 3, third on fret 5, little finger on fret 6. Lift the palm for the fretted notes.",
-            "Strict down-up. Nearly every fretted note falls on a downstroke; the very last note of bar 2 is on an upstroke. The hand leans up a fret for the little finger.",
+            "Strict down-up. Nearly every fretted note falls on a downstroke; the very last note of bar 2 is on an upstroke.",
           ],
           coach: "After the take I'll say how even it was and whether the notes were the written ones.",
           tab: SIXTEENTH_RIFF,
@@ -584,7 +588,7 @@ export default definePath({
         {
           id: "triplet-chug",
           title: "The triplet chug",
-          purpose: "Two bars of muted triplets on the open low E string with the first note of each beat let out.",
+          purpose: "Two bars of muted triplets on an open low string, the low E or the A, with the first note of each beat let out.",
           howTo: [
             "Count '1-trip-let, 2-trip-let'. Strict down-up, so beats 2 and 4 start on an upstroke.",
             "Make the accent on the upstroke beats as strong as on the downstroke ones.",
@@ -655,7 +659,7 @@ export default definePath({
         {
           id: "pedal-a",
           title: "Melody on the A string",
-          purpose: "E, F# and G on the A string, each followed by two muted open E notes: groups of three sixteenths that roll across the beat.",
+          purpose: "E, F# and G on the A string, each followed by two muted open E notes: groups of three sixteenths that roll across the beat, until the last beat, where melody and pedal take turns.",
           howTo: [
             "First finger on fret 7, third on 9, little finger on 10. One melody note, two pedal notes.",
             "The melody notes ring and the open E is muted. Keep the strokes alternating through every crossing.",
@@ -692,10 +696,10 @@ export default definePath({
         {
           id: "pedal-both",
           title: "Melody on both strings",
-          purpose: "The melody now jumps between the A and D strings over the same pedal: fifths and sixths in the tune, a crossing and a skip in every beat.",
+          purpose: "The melody now jumps between the A and D strings over the same pedal: fourths and thirds in the tune, a crossing and a skip in every beat.",
           howTo: [
-            "Bar 1 climbs: the A string note, then the same fret on the D string. Bar 2 comes back down.",
-            "Keep both fingers of each pair down together, like a small chord, and pick one string at a time.",
+            "Bar 1 climbs: the A string note, then the same fret on the D string. Bar 2 comes back down with the D string first: fret 9, then the A string's 10, the D string's 7, the A string's 9, and both 7s to finish.",
+            "In bar 1 each pair is one finger: lay it flat across the A and D strings and pick one string at a time.",
           ],
           coach: "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
           tab: PEDAL_BOTH,
@@ -726,7 +730,7 @@ export default definePath({
         {
           id: "chug-rest",
           title: "Two on, one off",
-          purpose: "Chug, chug, rest, in sixteenths: a three-sixteenth figure that rolls across the beat, on the muted low E string, with two open eighths to end the second bar.",
+          purpose: "Chug, chug, rest, in sixteenths: a three-sixteenth figure that rolls across the beat, on one muted low string, with two open eighths to end the second bar.",
           howTo: [
             "Count the sixteenths '1 2 3, 1 2 3' and play on 1 and 2. Four times, then three chugs and a rest to fill the bar.",
             "The hand keeps swinging down-up, so the figure starts on a downstroke, then an upstroke, in turn.",
@@ -770,7 +774,7 @@ export default definePath({
           purpose: "A gallop, then sixteenths with the first and last one missing, then open notes on frets 3, 5 and 6 with a single chug between them. E blues on one string.",
           howTo: [
             "Bar 1: '1, and a, (2) e and, 3, a, 4'. The open notes on frets 3 and 5 are eighths; the single chug before beat 4 is on the 'a'.",
-            "First finger on fret 3, third on 5, little finger on 6. Let the hand lean up a fret for the little finger.",
+            "First finger on fret 3, third on 5, little finger on 6: one finger per fret, and a real stretch this low on the neck.",
           ],
           coach: "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
           ...FREE,
@@ -823,7 +827,7 @@ export default definePath({
         {
           id: "down-minute",
           title: "A minute of downstrokes",
-          purpose: "Muted eighths on the low E string, every one a downstroke, for sixty seconds. The classic thrash endurance test, at a tempo you choose.",
+          purpose: "Muted eighths on one low string, every one a downstroke, for sixty seconds. The classic thrash endurance test, at a tempo you choose.",
           howTo: [
             "Eighth notes, all down, with frets 3 and 5 at the end of each bar to mark it.",
             "When it starts to burn, make the stroke smaller before you slow down. If it still burns, stop.",
@@ -843,7 +847,7 @@ export default definePath({
         {
           id: "gallop-minute",
           title: "A minute of gallops",
-          purpose: "The gallop on the low E string for sixty seconds, with a fretted gallop at the end of each bar.",
+          purpose: "The gallop on one low string for sixty seconds, with a fretted gallop at the end of each bar.",
           howTo: [
             "Down, down-up, without a break. The two short notes are the first thing to blur when the arm tires.",
             "Breathe, and drop the shoulder at a bar line if it has crept up.",
@@ -885,7 +889,7 @@ export default definePath({
           vary: {
             values: WARMUP_VALUES,
             pooled: ["key", "stringSet"],
-            label: (p) => `${p.key} on the ${p.stringSet}`,
+            label: warmLabel,
             build: (p) => rootRiff(p, "/8", (note) => `${note} ${note}`),
           },
           grade: "warmup",
@@ -917,7 +921,7 @@ export default definePath({
           vary: {
             values: WARMUP_VALUES,
             pooled: ["key", "stringSet"],
-            label: (p) => `${p.key} on the ${p.stringSet}`,
+            label: warmLabel,
             build: (p) => rootRiff(p, "", (note) => gallop(note)),
           },
           grade: "warmup",
@@ -935,7 +939,7 @@ export default definePath({
           vary: {
             values: WARMUP_VALUES,
             pooled: ["key", "stringSet"],
-            label: (p) => `${p.key} on the ${p.stringSet}`,
+            label: warmLabel,
             build: (p) => rootRiff(p, "", (note) => reverse(note)),
           },
           grade: "warmup",
@@ -966,7 +970,7 @@ export default definePath({
           vary: {
             values: WARMUP_VALUES,
             pooled: ["key", "stringSet"],
-            label: (p) => `${p.key} on the ${p.stringSet}`,
+            label: warmLabel,
             build: (p) => rootRiff(p, "/16", (note) => repeat(note, 4)),
           },
           grade: "warmup",
@@ -983,7 +987,7 @@ export default definePath({
           vary: {
             values: WARMUP_VALUES,
             pooled: ["key", "stringSet"],
-            label: (p) => `${p.key} on the ${p.stringSet}`,
+            label: warmLabel,
             build: (p) => rootRiff(p, "/8t", (note) => repeat(note, 3)),
           },
           grade: "warmup",

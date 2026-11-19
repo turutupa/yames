@@ -564,7 +564,7 @@ export default definePath({
           title: "The six-note lick, ascending",
           purpose: "The mirror image, in which both crossings are outside, so the two versions tell you which hop you own.",
           howTo: [
-            "Triplets: E, F, G on the B string (frets 5, 6, 8), then A, B, C on the top string (5, 7, 8), twice. Fingers 1, 2 and 4, then 1, 3 and 4.",
+            "Triplets. In A minor: E, F, G on the B string (frets 5, 6, 8), then A, B, C on the top string (5, 7, 8), twice. Fingers 1, 2 and 4, then 1, 3 and 4.",
             "Start on a downstroke. The B string ends on a downstroke and the top string starts on an upstroke, so the pick travels around the outside of the pair at each change.",
           ],
           coach: "Compare this with the descending take. A big difference is worth a note in your practice.",
@@ -631,7 +631,7 @@ export default definePath({
           title: "One beat on, one beat off",
           purpose: "The shortest honest burst: four notes and a landing, twice a bar.",
           howTo: [
-            "Four sixteenths up one string from fret 5, one finger per fret, then a quarter note on the third finger at fret 7. Twice a bar.",
+            "Four sixteenths up one string, one finger per fret from the first finger, then a quarter note on the third finger. Twice a bar.",
             "Everything relaxes during the quarter note: let the hand go soft before the next burst. Start above the tempo you can hold for a whole bar.",
           ],
           coach: "Landing on time counts more than the run. Timing and missed notes are what I have here.",
@@ -785,13 +785,13 @@ export default definePath({
       id: "up-to-tempo",
       title: "Up to tempo",
       goal: "Take the lick, the three-string scale and the six-note pattern you already know up to the tempo real lines are played at.",
-      why: "Everything so far was passed at a moderate tempo, where a slightly big stroke still works. Twenty clicks higher it doesn't: the motion has to get smaller, not faster, and the crossings you could think about now have to happen by themselves. These are figures you know, so the only new thing is the speed.",
+      why: "Everything so far was passed at a moderate tempo, where a slightly big stroke still works. Fifteen or twenty clicks higher it doesn't: the motion has to get smaller, not faster, and the crossings you could think about now have to happen by themselves. These are figures you know, so the only new thing is the speed.",
       howTo: [
         "Start two rungs below the tempo you passed the figure at, and listen for the first rung where it stops sounding easy. That rung is today's work; stay on it.",
         "Make the stroke smaller as the tempo rises. If the forearm tightens, drop a rung and find the small stroke again.",
-        "Use the bursts from the Step before: play one beat at the new tempo and stop, then two beats, before you try the loop.",
+        "Use the bursts from the Speed bursts Step: play one beat at the new tempo and stop, then two beats, before you try the loop.",
       ],
-      payoff: "The A minor lick at a tempo that sounds fast, and a two-octave scale run that holds together.",
+      payoff: "The A minor lick at a tempo that sounds fast, and a scale run across all six strings that holds together.",
       exercises: [
         {
           id: "licks-at-tempo",
@@ -827,7 +827,8 @@ export default definePath({
             label: (p) => p.stringSet,
             build: (p) => {
               const string = p.stringSet === "from the low E string" ? 6 : p.stringSet === "from the A string" ? 5 : 4;
-              const tab = `/16 ${threeNps({ root: "A", scale: "naturalMinor", string, fret: 5, strings: 3, sequence: "updown" })}`;
+              // From the D string the run reaches the B string, a fret higher: its fingers are printed, 1-2-4 both ways.
+              const tab = `/16 ${threeNps({ root: "A", scale: "naturalMinor", string, fret: 5, strings: 3, sequence: "updown" })}`.replace("2:6 2:8 2:10 2:8 2:6", "2:6f1 2:8f2 2:10f4 2:8f2 2:6f1");
               return { tab, position: handAt(tab), shifts: true };
             },
           },
@@ -844,7 +845,7 @@ export default definePath({
         {
           id: "sextuplet-loop",
           title: "The six-note lick, six to a click",
-          purpose: "C, B, A, G, F, E on the top two strings as sextuplets, round and round. The burst from the Step before, now without the rest after it.",
+          purpose: "C, B, A, G, F, E on the top two strings as sextuplets, round and round. The six-note burst from the Speed bursts Step, now without the rest after it.",
           howTo: [
             "Six notes to the click, starting on a downstroke; the pattern is even, so every repeat starts down too.",
             "Lean on the first note of each beat a little. Without it six fast notes turn into a blur with no beat in it.",
@@ -864,7 +865,7 @@ export default definePath({
         {
           id: "two-octave-run",
           title: "Two and a half octaves in sixteenths",
-          purpose: "All six strings of A minor, three notes per string, up and back in sixteenths, with a held note to finish. The long run from the Intermediate Level, a third faster.",
+          purpose: "All six strings of A minor, three notes per string, up and back in sixteenths, with a held note to finish. The long run from the Intermediate Level, now in sixteenths.",
           howTo: [
             "The hand moves up one fret at the B string and again at the top string, and back on the way down. Move during the string change.",
             "Read it in strings, not in notes: three, three, three. The beat falls on a different finger each time, so keep the click in your ear.",
@@ -970,8 +971,8 @@ export default definePath({
           title: "The eight-bar line, eighths",
           purpose: "A composed line at a rate you can certainly play, so the band is the only new thing.",
           howTo: [
-            "Eighth notes for eight bars: Am, F, C, G, twice round, all in fifth position on the top four strings.",
-            "Every bar starts on a note of its chord, so hear the bar lines land. Bar 8 climbs back toward the A where the line starts again.",
+            "Eighth notes for eight bars: Am, F, C, G, twice round, on the top four strings in fifth position, with the first finger dropping back to fret 4 for the B in bars 4 and 8.",
+            "Every bar starts on a note of its chord, so hear the bar lines land. Bar 8 climbs up the B string, and the line starts again from the A on the D string.",
           ],
           coach: "Band on, and all I need is that you stay with it. I'll report the notes after the take.",
           tab: ETUDE_EIGHTHS,

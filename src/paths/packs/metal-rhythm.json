@@ -23,7 +23,7 @@
       "id": "the-chug",
       "order": 1,
       "title": "The chug",
-      "goal": "Play palm-muted eighth notes on the low E string in downstrokes, every one the same weight, and lift the mute for an accent.",
+      "goal": "Play palm-muted eighth notes on a low string in downstrokes, every one the same weight, and lift the mute for an accent.",
       "why": "The palm-muted downstroke is the sound of metal rhythm guitar. It is two skills at once: the picking hand mutes and plays in the same place, and the stroke only ever goes down, so the hand has to come back up between every note without being heard.",
       "howTo": [
         "Rest the side of the picking hand on the strings right where they leave the bridge. Too far forward and the note dies; too far back and it rings. Find the spot where it thuds and still has a pitch.",
@@ -37,7 +37,7 @@
         {
           "id": "the-chug.open-chug",
           "title": "Eight to the bar",
-          "purpose": "Palm-muted eighths on the open low E string, all downstrokes, with two fretted notes at the end of the second bar. The sound comes first: get the mute right before you worry about speed.",
+          "purpose": "Palm-muted eighths on the open low E string (the open A string in the other variant), all downstrokes, with two fretted notes at the end of the second bar. The sound comes first: get the mute right before you worry about speed.",
           "howTo": [
             "Eighth notes, two to the click, all down. The last two notes are frets 3 and 5, muted like the rest.",
             "Listen to each note. They should all be as short and as loud as each other, like a machine."
@@ -356,7 +356,7 @@
         {
           "id": "the-chug.accent-open",
           "title": "Accents in threes",
-          "purpose": "The open E string throughout, with the mute lifted on every third eighth: 3 + 3 + 2. The accents make the riff, and the notes never change.",
+          "purpose": "The open E string with the mute lifted on every third eighth: 3 + 3 + 2. The accents make the riff; bar 2 ends on two accented fretted notes.",
           "howTo": [
             "Lift the palm for the accented notes and dig in a little more. Mute everything else.",
             "Count '1 2 3, 1 2 3, 1 2'. In bar 2 the last two accents are frets 3 and 5."
@@ -483,7 +483,7 @@
         {
           "id": "power-chords.two-note-chords",
           "title": "E, G and A",
-          "purpose": "Three power chords in quarter notes, two of each. Slow enough to land both fingers at once and hear both strings.",
+          "purpose": "E, G and A in quarter notes, two strokes on each, and back to G to finish. Slow enough to land both fingers at once and hear both strings.",
           "howTo": [
             "E: open low E and fret 2 on the A string. G: fret 3 and fret 5. A: fret 5 and fret 7. Downstrokes through both strings.",
             "Move the hand as one shape. The fingers keep their spacing while the hand slides."
@@ -835,7 +835,7 @@
           "title": "E chord out of the chug",
           "purpose": "The 3 + 3 + 2 accents again, but each accent is now a ringing E power chord and the notes between are muted.",
           "howTo": [
-            "First finger stays on fret 2 of the A string throughout. On the accents, lift the palm and strike both strings.",
+            "First finger stays on fret 2 of the A string until the last beat of bar 2. On the accents, lift the palm and strike both strings.",
             "Bar 2 ends with G and A chords on the last two eighths."
           ],
           "coachLine": "I check that the chords were louder than the chug, roughly, and how even the time was.",
@@ -953,7 +953,7 @@
           "title": "Chords on the move",
           "purpose": "Two muted notes, a G chord, two muted notes, an A chord: the chords change while the chug stays on the open string.",
           "howTo": [
-            "The fretting hand has two muted notes to get to each chord. Move during them.",
+            "In bar 1 the fretting hand has two muted notes to get to each chord: move during them. In bar 2 the A and G chords come back to back.",
             "The last chord of bar 2 is an E held for a beat. Let it ring."
           ],
           "coachLine": "I time every attack, chug and chord alike, and say how even they were.",
@@ -1064,7 +1064,7 @@
           "purpose": "The same idea with holes in it: a rest after the G chord and after the A. Three sounds now, muted, open and silent.",
           "howTo": [
             "Count '1 and 2 and, (3) and 4, (and)'. Kill the chord with both hands on each rest.",
-            "Don't let the rest shorten. The muted note after it comes on the 'and', not before."
+            "Don't let the rest shorten. The attack after it, a chug in bar 1 and the A chord in bar 2, comes on the 'and', not before."
           ],
           "coachLine": "The note after each rest is the one I'd look at: early is the usual mistake.",
           "grading": "graded",
@@ -1191,7 +1191,7 @@
         {
           "id": "gallop.gallop-one",
           "title": "The gallop on one string",
-          "purpose": "Eight gallops on the muted low E string, the last two on frets 3 and 5. Nothing to think about except the three strokes.",
+          "purpose": "Eight gallops on one muted low string, the low E or the A, the last two on frets 3 and 5. Nothing to think about except the three strokes.",
           "howTo": [
             "Down, down-up, on every beat. The long note is on the click.",
             "If the two short notes sound like one smeared note, slow down a rung until you can hear both."
@@ -1416,7 +1416,7 @@
         {
           "id": "gallop.gallop-chords",
           "title": "A chord, then the gallop",
-          "purpose": "A power chord on the first beat of each half bar, and the gallop carrying on underneath on the open string.",
+          "purpose": "A power chord on beat 1 of bar 1, and on beats 1 and 3 of bar 2, with the gallop carrying on underneath on the open string.",
           "howTo": [
             "The chord takes the place of the gallop's long note: chord, then the two short muted notes, then a full gallop.",
             "E, then G and A in the second bar. Lift the palm for the chord and drop it straight back."
@@ -1535,7 +1535,7 @@
           "title": "A galloping riff",
           "purpose": "Two gallops, two open eighth notes that climb, and a gallop to answer; the second bar ends on a long note. E blues on one string.",
           "howTo": [
-            "The eighth notes on frets 3, 5 and 6 are open, not muted, and all downstrokes. Let the hand lean up a fret for the little finger on 6.",
+            "The eighth notes on frets 3, 5 and 6 are open, not muted, and all downstrokes: first finger on 3, third on 5, little finger on 6.",
             "Keep the sixteenth-note swing going through the eighths, so the next gallop starts in time."
           ],
           "coachLine": "After the take I'll say how even it was and whether the notes were the written ones.",
@@ -1671,7 +1671,7 @@
         {
           "id": "reverse-gallop.reverse-one",
           "title": "Short-short-long",
-          "purpose": "Eight reverse gallops on the muted low E string, the last two on frets 3 and 5.",
+          "purpose": "Eight reverse gallops on one muted low string, the low E or the A, the last two on frets 3 and 5.",
           "howTo": [
             "Down-up, down, on every beat. The hand misses the string on the 'a'.",
             "Give the first note of each beat a little weight so you can hear where the beat is."
@@ -2156,7 +2156,7 @@
         {
           "id": "sixteenth-chug.straight-sixteenths",
           "title": "Sixteen to the bar",
-          "purpose": "Two bars of muted sixteenths on the open low E string, with the mute lifted on the first note of every beat.",
+          "purpose": "Two bars of muted sixteenths on an open low string, the low E or the A, with the mute lifted on the first note of every beat.",
           "howTo": [
             "Down-up-down-up, four to the click. Lift the palm slightly on each beat's first note.",
             "Listen to the upstrokes. If they are thinner than the downstrokes, slow down and even them out."
@@ -2526,7 +2526,7 @@
           "purpose": "Sixteenths on the low E string where one note in four is fretted and open: G, A and Bb come up out of the muted pedal.",
           "howTo": [
             "First finger on fret 3, third on fret 5, little finger on fret 6. Lift the palm for the fretted notes.",
-            "Strict down-up. Nearly every fretted note falls on a downstroke; the very last note of bar 2 is on an upstroke. The hand leans up a fret for the little finger."
+            "Strict down-up. Nearly every fretted note falls on a downstroke; the very last note of bar 2 is on an upstroke."
           ],
           "coachLine": "After the take I'll say how even it was and whether the notes were the written ones.",
           "grading": "graded",
@@ -2673,7 +2673,7 @@
         {
           "id": "triplets-and-bursts.triplet-chug",
           "title": "The triplet chug",
-          "purpose": "Two bars of muted triplets on the open low E string with the first note of each beat let out.",
+          "purpose": "Two bars of muted triplets on an open low string, the low E or the A, with the first note of each beat let out.",
           "howTo": [
             "Count '1-trip-let, 2-trip-let'. Strict down-up, so beats 2 and 4 start on an upstroke.",
             "Make the accent on the upstroke beats as strong as on the downstroke ones."
@@ -3175,7 +3175,7 @@
         {
           "id": "pedal-riffs.pedal-a",
           "title": "Melody on the A string",
-          "purpose": "E, F# and G on the A string, each followed by two muted open E notes: groups of three sixteenths that roll across the beat.",
+          "purpose": "E, F# and G on the A string, each followed by two muted open E notes: groups of three sixteenths that roll across the beat, until the last beat, where melody and pedal take turns.",
           "howTo": [
             "First finger on fret 7, third on 9, little finger on 10. One melody note, two pedal notes.",
             "The melody notes ring and the open E is muted. Keep the strokes alternating through every crossing."
@@ -3440,10 +3440,10 @@
         {
           "id": "pedal-riffs.pedal-both",
           "title": "Melody on both strings",
-          "purpose": "The melody now jumps between the A and D strings over the same pedal: fifths and sixths in the tune, a crossing and a skip in every beat.",
+          "purpose": "The melody now jumps between the A and D strings over the same pedal: fourths and thirds in the tune, a crossing and a skip in every beat.",
           "howTo": [
-            "Bar 1 climbs: the A string note, then the same fret on the D string. Bar 2 comes back down.",
-            "Keep both fingers of each pair down together, like a small chord, and pick one string at a time."
+            "Bar 1 climbs: the A string note, then the same fret on the D string. Bar 2 comes back down with the D string first: fret 9, then the A string's 10, the D string's 7, the A string's 9, and both 7s to finish.",
+            "In bar 1 each pair is one finger: lay it flat across the A and D strings and pick one string at a time."
           ],
           "coachLine": "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
           "grading": "graded",
@@ -3589,7 +3589,7 @@
         {
           "id": "stop-start.chug-rest",
           "title": "Two on, one off",
-          "purpose": "Chug, chug, rest, in sixteenths: a three-sixteenth figure that rolls across the beat, on the muted low E string, with two open eighths to end the second bar.",
+          "purpose": "Chug, chug, rest, in sixteenths: a three-sixteenth figure that rolls across the beat, on one muted low string, with two open eighths to end the second bar.",
           "howTo": [
             "Count the sixteenths '1 2 3, 1 2 3' and play on 1 and 2. Four times, then three chugs and a rest to fill the bar.",
             "The hand keeps swinging down-up, so the figure starts on a downstroke, then an upstroke, in turn."
@@ -3955,7 +3955,7 @@
           "purpose": "A gallop, then sixteenths with the first and last one missing, then open notes on frets 3, 5 and 6 with a single chug between them. E blues on one string.",
           "howTo": [
             "Bar 1: '1, and a, (2) e and, 3, a, 4'. The open notes on frets 3 and 5 are eighths; the single chug before beat 4 is on the 'a'.",
-            "First finger on fret 3, third on 5, little finger on 6. Let the hand lean up a fret for the little finger."
+            "First finger on fret 3, third on 5, little finger on 6: one finger per fret, and a real stretch this low on the neck."
           ],
           "coachLine": "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
           "grading": "graded",
@@ -4243,7 +4243,7 @@
         {
           "id": "riffs-at-length.down-minute",
           "title": "A minute of downstrokes",
-          "purpose": "Muted eighths on the low E string, every one a downstroke, for sixty seconds. The classic thrash endurance test, at a tempo you choose.",
+          "purpose": "Muted eighths on one low string, every one a downstroke, for sixty seconds. The classic thrash endurance test, at a tempo you choose.",
           "howTo": [
             "Eighth notes, all down, with frets 3 and 5 at the end of each bar to mark it.",
             "When it starts to burn, make the stroke smaller before you slow down. If it still burns, stop."
@@ -4446,7 +4446,7 @@
         {
           "id": "riffs-at-length.gallop-minute",
           "title": "A minute of gallops",
-          "purpose": "The gallop on the low E string for sixty seconds, with a fretted gallop at the end of each bar.",
+          "purpose": "The gallop on one low string for sixty seconds, with a fretted gallop at the end of each bar.",
           "howTo": [
             "Down, down-up, without a break. The two short notes are the first thing to blur when the arm tires.",
             "Breathe, and drop the shoulder at a bar line if it has crept up."
@@ -4741,8 +4741,8 @@
             {"string":6,"fret":9,"midi":49,"tick":12960,"dur":480,"tech":["palmMute"],"finger":3},
             {"string":6,"fret":7,"midi":47,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
             {"string":6,"fret":7,"midi":47,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-            {"string":6,"fret":5,"midi":45,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-            {"string":6,"fret":5,"midi":45,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+            {"string":6,"fret":7,"midi":47,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+            {"string":6,"fret":7,"midi":47,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
           ],
           "rests": [],
           "tempo": {
@@ -4791,14 +4791,14 @@
             "subdivision": 1
           },
           "estimatedMinutes": 3,
-          "tab": "/8 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:2mf1 6:2mf1 | /8 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:7mf1 6:7mf1 | /8 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:2mf1 6:2mf1 | /8 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:7mf1 6:7mf1 6:5mf4 6:5mf4",
+          "tab": "/8 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:2mf1 6:2mf1 | /8 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:7mf1 6:7mf1 | /8 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:2mf1 6:2mf1 | /8 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:7mf1 6:7mf1 6:7mf1 6:7mf1",
           "subdivision": "eighths",
           "computed": {
             "noteCount": 32,
             "minGapMsAtTop": 230.77,
-            "handShifts": 12,
+            "handShifts": 11,
             "maxPlayableBpm": 192,
-            "difficulty": 4.82
+            "difficulty": 4.78
           },
           "harmony": {
             "kind": "scale",
@@ -4827,7 +4827,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/8 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:2mf1 6:2mf1 | /8 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:7mf1 6:7mf1 | /8 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:2mf1 6:2mf1 | /8 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:7mf1 6:7mf1 6:5mf4 6:5mf4",
+                "tab": "/8 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:2mf1 6:2mf1 | /8 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:7mf1 6:7mf1 | /8 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:2mf1 6:2mf1 | /8 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:7mf1 6:7mf1 6:7mf1 6:7mf1",
                 "position": {
                   "fret": 2,
                   "shifts": "allowed"
@@ -4864,8 +4864,8 @@
                   {"string":6,"fret":9,"midi":49,"tick":12960,"dur":480,"tech":["palmMute"],"finger":3},
                   {"string":6,"fret":7,"midi":47,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":7,"midi":47,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":6,"fret":5,"midi":45,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":5,"midi":45,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":6,"fret":7,"midi":47,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":7,"midi":47,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -4875,9 +4875,9 @@
                 "computed": {
                   "noteCount": 32,
                   "minGapMsAtTop": 230.77,
-                  "handShifts": 12,
+                  "handShifts": 11,
                   "maxPlayableBpm": 192,
-                  "difficulty": 4.82
+                  "difficulty": 4.78
                 },
                 "harmony": {
                   "kind": "scale",
@@ -4889,13 +4889,13 @@
               },
               {
                 "id": "key=F#,stringSet=A-string",
-                "label": "F# on the A string",
+                "label": "B on the A string",
                 "params": {
                   "key": "F#",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/8 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:5mf4 5:5mf4 5:2mf1 5:2mf1 | /8 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:9mf3 5:9mf3 5:7mf1 5:7mf1 | /8 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:5mf4 5:5mf4 5:2mf1 5:2mf1 | /8 5:7mf1 5:7mf1 5:9mf3 5:9mf3 5:7mf1 5:7mf1 5:5mf4 5:5mf4",
+                "tab": "/8 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:5mf4 5:5mf4 5:2mf1 5:2mf1 | /8 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:9mf3 5:9mf3 5:7mf1 5:7mf1 | /8 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:5mf4 5:5mf4 5:2mf1 5:2mf1 | /8 5:7mf1 5:7mf1 5:9mf3 5:9mf3 5:7mf1 5:7mf1 5:7mf1 5:7mf1",
                 "position": {
                   "fret": 2,
                   "shifts": "allowed"
@@ -4932,8 +4932,8 @@
                   {"string":5,"fret":9,"midi":54,"tick":12960,"dur":480,"tech":["palmMute"],"finger":3},
                   {"string":5,"fret":7,"midi":52,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":7,"midi":52,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":5,"fret":5,"midi":50,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":5,"midi":50,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":5,"fret":7,"midi":52,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":7,"midi":52,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -4943,9 +4943,9 @@
                 "computed": {
                   "noteCount": 32,
                   "minGapMsAtTop": 230.77,
-                  "handShifts": 12,
+                  "handShifts": 11,
                   "maxPlayableBpm": 192,
-                  "difficulty": 4.82
+                  "difficulty": 4.78
                 },
                 "harmony": {
                   "kind": "scale",
@@ -4963,7 +4963,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/8 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:6mf4 6:6mf4 6:3mf1 6:3mf1 | /8 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:10mf3 6:10mf3 6:8mf1 6:8mf1 | /8 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:6mf4 6:6mf4 6:3mf1 6:3mf1 | /8 6:8mf1 6:8mf1 6:10mf3 6:10mf3 6:8mf1 6:8mf1 6:6mf4 6:6mf4",
+                "tab": "/8 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:6mf4 6:6mf4 6:3mf1 6:3mf1 | /8 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:10mf3 6:10mf3 6:8mf1 6:8mf1 | /8 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:6mf4 6:6mf4 6:3mf1 6:3mf1 | /8 6:8mf1 6:8mf1 6:10mf3 6:10mf3 6:8mf1 6:8mf1 6:8mf1 6:8mf1",
                 "position": {
                   "fret": 3,
                   "shifts": "allowed"
@@ -5000,8 +5000,8 @@
                   {"string":6,"fret":10,"midi":50,"tick":12960,"dur":480,"tech":["palmMute"],"finger":3},
                   {"string":6,"fret":8,"midi":48,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":8,"midi":48,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":6,"fret":6,"midi":46,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":6,"midi":46,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":6,"fret":8,"midi":48,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":8,"midi":48,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -5011,9 +5011,9 @@
                 "computed": {
                   "noteCount": 32,
                   "minGapMsAtTop": 230.77,
-                  "handShifts": 8,
+                  "handShifts": 7,
                   "maxPlayableBpm": 195,
-                  "difficulty": 4.66
+                  "difficulty": 4.62
                 },
                 "harmony": {
                   "kind": "scale",
@@ -5025,13 +5025,13 @@
               },
               {
                 "id": "key=G,stringSet=A-string",
-                "label": "G on the A string",
+                "label": "C on the A string",
                 "params": {
                   "key": "G",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/8 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:6mf4 5:6mf4 5:3mf1 5:3mf1 | /8 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:10mf3 5:10mf3 5:8mf1 5:8mf1 | /8 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:6mf4 5:6mf4 5:3mf1 5:3mf1 | /8 5:8mf1 5:8mf1 5:10mf3 5:10mf3 5:8mf1 5:8mf1 5:6mf4 5:6mf4",
+                "tab": "/8 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:6mf4 5:6mf4 5:3mf1 5:3mf1 | /8 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:10mf3 5:10mf3 5:8mf1 5:8mf1 | /8 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:6mf4 5:6mf4 5:3mf1 5:3mf1 | /8 5:8mf1 5:8mf1 5:10mf3 5:10mf3 5:8mf1 5:8mf1 5:8mf1 5:8mf1",
                 "position": {
                   "fret": 3,
                   "shifts": "allowed"
@@ -5068,8 +5068,8 @@
                   {"string":5,"fret":10,"midi":55,"tick":12960,"dur":480,"tech":["palmMute"],"finger":3},
                   {"string":5,"fret":8,"midi":53,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":8,"midi":53,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":5,"fret":6,"midi":51,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":6,"midi":51,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":5,"fret":8,"midi":53,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":8,"midi":53,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -5079,9 +5079,9 @@
                 "computed": {
                   "noteCount": 32,
                   "minGapMsAtTop": 230.77,
-                  "handShifts": 8,
+                  "handShifts": 7,
                   "maxPlayableBpm": 195,
-                  "difficulty": 4.66
+                  "difficulty": 4.62
                 },
                 "harmony": {
                   "kind": "scale",
@@ -5099,7 +5099,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/8 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:8mf4 6:8mf4 6:5mf1 6:5mf1 | /8 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:12mf3 6:12mf3 6:10mf1 6:10mf1 | /8 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:8mf4 6:8mf4 6:5mf1 6:5mf1 | /8 6:10mf1 6:10mf1 6:12mf3 6:12mf3 6:10mf1 6:10mf1 6:8mf4 6:8mf4",
+                "tab": "/8 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:8mf4 6:8mf4 6:5mf1 6:5mf1 | /8 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:12mf3 6:12mf3 6:10mf1 6:10mf1 | /8 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:8mf4 6:8mf4 6:5mf1 6:5mf1 | /8 6:10mf1 6:10mf1 6:12mf3 6:12mf3 6:10mf1 6:10mf1 6:10mf1 6:10mf1",
                 "position": {
                   "fret": 5,
                   "shifts": "allowed"
@@ -5136,8 +5136,8 @@
                   {"string":6,"fret":12,"midi":52,"tick":12960,"dur":480,"tech":["palmMute"],"finger":3},
                   {"string":6,"fret":10,"midi":50,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":10,"midi":50,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":6,"fret":8,"midi":48,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":8,"midi":48,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":6,"fret":10,"midi":50,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":10,"midi":50,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -5161,13 +5161,13 @@
               },
               {
                 "id": "key=A,stringSet=A-string",
-                "label": "A on the A string",
+                "label": "D on the A string",
                 "params": {
                   "key": "A",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/8 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:8mf4 5:8mf4 5:5mf1 5:5mf1 | /8 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:12mf3 5:12mf3 5:10mf1 5:10mf1 | /8 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:8mf4 5:8mf4 5:5mf1 5:5mf1 | /8 5:10mf1 5:10mf1 5:12mf3 5:12mf3 5:10mf1 5:10mf1 5:8mf4 5:8mf4",
+                "tab": "/8 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:8mf4 5:8mf4 5:5mf1 5:5mf1 | /8 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:12mf3 5:12mf3 5:10mf1 5:10mf1 | /8 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:8mf4 5:8mf4 5:5mf1 5:5mf1 | /8 5:10mf1 5:10mf1 5:12mf3 5:12mf3 5:10mf1 5:10mf1 5:10mf1 5:10mf1",
                 "position": {
                   "fret": 5,
                   "shifts": "allowed"
@@ -5204,8 +5204,8 @@
                   {"string":5,"fret":12,"midi":57,"tick":12960,"dur":480,"tech":["palmMute"],"finger":3},
                   {"string":5,"fret":10,"midi":55,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":10,"midi":55,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":5,"fret":8,"midi":53,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":8,"midi":53,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":5,"fret":10,"midi":55,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":10,"midi":55,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -5235,7 +5235,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/8 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:10mf4 6:10mf4 6:7mf1 6:7mf1 | /8 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:14mf3 6:14mf3 6:12mf1 6:12mf1 | /8 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:10mf4 6:10mf4 6:7mf1 6:7mf1 | /8 6:12mf1 6:12mf1 6:14mf3 6:14mf3 6:12mf1 6:12mf1 6:10mf4 6:10mf4",
+                "tab": "/8 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:10mf4 6:10mf4 6:7mf1 6:7mf1 | /8 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:14mf3 6:14mf3 6:12mf1 6:12mf1 | /8 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:10mf4 6:10mf4 6:7mf1 6:7mf1 | /8 6:12mf1 6:12mf1 6:14mf3 6:14mf3 6:12mf1 6:12mf1 6:12mf1 6:12mf1",
                 "position": {
                   "fret": 7,
                   "shifts": "allowed"
@@ -5272,8 +5272,8 @@
                   {"string":6,"fret":14,"midi":54,"tick":12960,"dur":480,"tech":["palmMute"],"finger":3},
                   {"string":6,"fret":12,"midi":52,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":12,"midi":52,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":6,"fret":10,"midi":50,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":10,"midi":50,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":6,"fret":12,"midi":52,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":12,"midi":52,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -5297,13 +5297,13 @@
               },
               {
                 "id": "key=B,stringSet=A-string",
-                "label": "B on the A string",
+                "label": "E on the A string",
                 "params": {
                   "key": "B",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/8 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:10mf4 5:10mf4 5:7mf1 5:7mf1 | /8 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:14mf3 5:14mf3 5:12mf1 5:12mf1 | /8 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:10mf4 5:10mf4 5:7mf1 5:7mf1 | /8 5:12mf1 5:12mf1 5:14mf3 5:14mf3 5:12mf1 5:12mf1 5:10mf4 5:10mf4",
+                "tab": "/8 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:10mf4 5:10mf4 5:7mf1 5:7mf1 | /8 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:14mf3 5:14mf3 5:12mf1 5:12mf1 | /8 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:10mf4 5:10mf4 5:7mf1 5:7mf1 | /8 5:12mf1 5:12mf1 5:14mf3 5:14mf3 5:12mf1 5:12mf1 5:12mf1 5:12mf1",
                 "position": {
                   "fret": 7,
                   "shifts": "allowed"
@@ -5340,8 +5340,8 @@
                   {"string":5,"fret":14,"midi":59,"tick":12960,"dur":480,"tech":["palmMute"],"finger":3},
                   {"string":5,"fret":12,"midi":57,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":12,"midi":57,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":5,"fret":10,"midi":55,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":10,"midi":55,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":5,"fret":12,"midi":57,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":12,"midi":57,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -5371,7 +5371,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/8 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:11mf4 6:11mf4 6:8mf1 6:8mf1 | /8 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:15mf3 6:15mf3 6:13mf1 6:13mf1 | /8 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:11mf4 6:11mf4 6:8mf1 6:8mf1 | /8 6:13mf1 6:13mf1 6:15mf3 6:15mf3 6:13mf1 6:13mf1 6:11mf4 6:11mf4",
+                "tab": "/8 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:11mf4 6:11mf4 6:8mf1 6:8mf1 | /8 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:15mf3 6:15mf3 6:13mf1 6:13mf1 | /8 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:11mf4 6:11mf4 6:8mf1 6:8mf1 | /8 6:13mf1 6:13mf1 6:15mf3 6:15mf3 6:13mf1 6:13mf1 6:13mf1 6:13mf1",
                 "position": {
                   "fret": 8,
                   "shifts": "allowed"
@@ -5408,8 +5408,8 @@
                   {"string":6,"fret":15,"midi":55,"tick":12960,"dur":480,"tech":["palmMute"],"finger":3},
                   {"string":6,"fret":13,"midi":53,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":13,"midi":53,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":6,"fret":11,"midi":51,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":11,"midi":51,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":6,"fret":13,"midi":53,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":13,"midi":53,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -5433,13 +5433,13 @@
               },
               {
                 "id": "key=C,stringSet=A-string",
-                "label": "C on the A string",
+                "label": "F on the A string",
                 "params": {
                   "key": "C",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/8 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:11mf4 5:11mf4 5:8mf1 5:8mf1 | /8 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:15mf3 5:15mf3 5:13mf1 5:13mf1 | /8 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:11mf4 5:11mf4 5:8mf1 5:8mf1 | /8 5:13mf1 5:13mf1 5:15mf3 5:15mf3 5:13mf1 5:13mf1 5:11mf4 5:11mf4",
+                "tab": "/8 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:11mf4 5:11mf4 5:8mf1 5:8mf1 | /8 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:15mf3 5:15mf3 5:13mf1 5:13mf1 | /8 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:11mf4 5:11mf4 5:8mf1 5:8mf1 | /8 5:13mf1 5:13mf1 5:15mf3 5:15mf3 5:13mf1 5:13mf1 5:13mf1 5:13mf1",
                 "position": {
                   "fret": 8,
                   "shifts": "allowed"
@@ -5476,8 +5476,8 @@
                   {"string":5,"fret":15,"midi":60,"tick":12960,"dur":480,"tech":["palmMute"],"finger":3},
                   {"string":5,"fret":13,"midi":58,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":13,"midi":58,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":5,"fret":11,"midi":56,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":11,"midi":56,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":5,"fret":13,"midi":58,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":13,"midi":58,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -5507,7 +5507,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/8 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:13mf4 6:13mf4 6:10mf1 6:10mf1 | /8 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:17mf3 6:17mf3 6:15mf1 6:15mf1 | /8 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:13mf4 6:13mf4 6:10mf1 6:10mf1 | /8 6:15mf1 6:15mf1 6:17mf3 6:17mf3 6:15mf1 6:15mf1 6:13mf4 6:13mf4",
+                "tab": "/8 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:13mf4 6:13mf4 6:10mf1 6:10mf1 | /8 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:17mf3 6:17mf3 6:15mf1 6:15mf1 | /8 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:13mf4 6:13mf4 6:10mf1 6:10mf1 | /8 6:15mf1 6:15mf1 6:17mf3 6:17mf3 6:15mf1 6:15mf1 6:15mf1 6:15mf1",
                 "position": {
                   "fret": 10,
                   "shifts": "allowed"
@@ -5544,8 +5544,8 @@
                   {"string":6,"fret":17,"midi":57,"tick":12960,"dur":480,"tech":["palmMute"],"finger":3},
                   {"string":6,"fret":15,"midi":55,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":15,"midi":55,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":6,"fret":13,"midi":53,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":13,"midi":53,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":6,"fret":15,"midi":55,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":15,"midi":55,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -5569,13 +5569,13 @@
               },
               {
                 "id": "key=D,stringSet=A-string",
-                "label": "D on the A string",
+                "label": "G on the A string",
                 "params": {
                   "key": "D",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/8 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:13mf4 5:13mf4 5:10mf1 5:10mf1 | /8 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:17mf3 5:17mf3 5:15mf1 5:15mf1 | /8 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:13mf4 5:13mf4 5:10mf1 5:10mf1 | /8 5:15mf1 5:15mf1 5:17mf3 5:17mf3 5:15mf1 5:15mf1 5:13mf4 5:13mf4",
+                "tab": "/8 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:13mf4 5:13mf4 5:10mf1 5:10mf1 | /8 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:17mf3 5:17mf3 5:15mf1 5:15mf1 | /8 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:13mf4 5:13mf4 5:10mf1 5:10mf1 | /8 5:15mf1 5:15mf1 5:17mf3 5:17mf3 5:15mf1 5:15mf1 5:15mf1 5:15mf1",
                 "position": {
                   "fret": 10,
                   "shifts": "allowed"
@@ -5612,8 +5612,8 @@
                   {"string":5,"fret":17,"midi":62,"tick":12960,"dur":480,"tech":["palmMute"],"finger":3},
                   {"string":5,"fret":15,"midi":60,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":15,"midi":60,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":5,"fret":13,"midi":58,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":13,"midi":58,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":5,"fret":15,"midi":60,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":15,"midi":60,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -5724,9 +5724,9 @@
             {"string":6,"fret":7,"midi":47,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
             {"string":6,"fret":7,"midi":47,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1},
             {"string":6,"fret":7,"midi":47,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1},
-            {"string":6,"fret":5,"midi":45,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-            {"string":6,"fret":5,"midi":45,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4},
-            {"string":6,"fret":5,"midi":45,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4}
+            {"string":6,"fret":7,"midi":47,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+            {"string":6,"fret":7,"midi":47,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1},
+            {"string":6,"fret":7,"midi":47,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1}
           ],
           "rests": [],
           "tempo": {
@@ -5772,7 +5772,7 @@
             "subdivision": 1
           },
           "estimatedMinutes": 3,
-          "tab": "/8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:5mf4 /16 6:5mf4 6:5mf4 /8 6:2mf1 /16 6:2mf1 6:2mf1 | /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:9mf3 /16 6:9mf3 6:9mf3 /8 6:7mf1 /16 6:7mf1 6:7mf1 | /8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:5mf4 /16 6:5mf4 6:5mf4 /8 6:2mf1 /16 6:2mf1 6:2mf1 | /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:9mf3 /16 6:9mf3 6:9mf3 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:5mf4 /16 6:5mf4 6:5mf4",
+          "tab": "/8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:5mf4 /16 6:5mf4 6:5mf4 /8 6:2mf1 /16 6:2mf1 6:2mf1 | /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:9mf3 /16 6:9mf3 6:9mf3 /8 6:7mf1 /16 6:7mf1 6:7mf1 | /8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:5mf4 /16 6:5mf4 6:5mf4 /8 6:2mf1 /16 6:2mf1 6:2mf1 | /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:9mf3 /16 6:9mf3 6:9mf3 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:7mf1 6:7mf1",
           "subdivision": "sixteenths",
           "computed": {
             "noteCount": 48,
@@ -5808,7 +5808,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:5mf4 /16 6:5mf4 6:5mf4 /8 6:2mf1 /16 6:2mf1 6:2mf1 | /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:9mf3 /16 6:9mf3 6:9mf3 /8 6:7mf1 /16 6:7mf1 6:7mf1 | /8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:5mf4 /16 6:5mf4 6:5mf4 /8 6:2mf1 /16 6:2mf1 6:2mf1 | /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:9mf3 /16 6:9mf3 6:9mf3 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:5mf4 /16 6:5mf4 6:5mf4",
+                "tab": "/8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:5mf4 /16 6:5mf4 6:5mf4 /8 6:2mf1 /16 6:2mf1 6:2mf1 | /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:9mf3 /16 6:9mf3 6:9mf3 /8 6:7mf1 /16 6:7mf1 6:7mf1 | /8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:5mf4 /16 6:5mf4 6:5mf4 /8 6:2mf1 /16 6:2mf1 6:2mf1 | /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:9mf3 /16 6:9mf3 6:9mf3 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:7mf1 6:7mf1",
                 "position": {
                   "fret": 2,
                   "shifts": "allowed"
@@ -5860,9 +5860,9 @@
                   {"string":6,"fret":7,"midi":47,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":7,"midi":47,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":7,"midi":47,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1},
-                  {"string":6,"fret":5,"midi":45,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":5,"midi":45,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":5,"midi":45,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4}
+                  {"string":6,"fret":7,"midi":47,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":7,"midi":47,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":7,"midi":47,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -5886,13 +5886,13 @@
               },
               {
                 "id": "key=F#,stringSet=A-string",
-                "label": "F# on the A string",
+                "label": "B on the A string",
                 "params": {
                   "key": "F#",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/8 5:2mf1 /16 5:2mf1 5:2mf1 /8 5:2mf1 /16 5:2mf1 5:2mf1 /8 5:5mf4 /16 5:5mf4 5:5mf4 /8 5:2mf1 /16 5:2mf1 5:2mf1 | /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:9mf3 /16 5:9mf3 5:9mf3 /8 5:7mf1 /16 5:7mf1 5:7mf1 | /8 5:2mf1 /16 5:2mf1 5:2mf1 /8 5:2mf1 /16 5:2mf1 5:2mf1 /8 5:5mf4 /16 5:5mf4 5:5mf4 /8 5:2mf1 /16 5:2mf1 5:2mf1 | /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:9mf3 /16 5:9mf3 5:9mf3 /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:5mf4 /16 5:5mf4 5:5mf4",
+                "tab": "/8 5:2mf1 /16 5:2mf1 5:2mf1 /8 5:2mf1 /16 5:2mf1 5:2mf1 /8 5:5mf4 /16 5:5mf4 5:5mf4 /8 5:2mf1 /16 5:2mf1 5:2mf1 | /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:9mf3 /16 5:9mf3 5:9mf3 /8 5:7mf1 /16 5:7mf1 5:7mf1 | /8 5:2mf1 /16 5:2mf1 5:2mf1 /8 5:2mf1 /16 5:2mf1 5:2mf1 /8 5:5mf4 /16 5:5mf4 5:5mf4 /8 5:2mf1 /16 5:2mf1 5:2mf1 | /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:9mf3 /16 5:9mf3 5:9mf3 /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:7mf1 5:7mf1",
                 "position": {
                   "fret": 2,
                   "shifts": "allowed"
@@ -5944,9 +5944,9 @@
                   {"string":5,"fret":7,"midi":52,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":7,"midi":52,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":7,"midi":52,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1},
-                  {"string":5,"fret":5,"midi":50,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":5,"midi":50,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":5,"midi":50,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4}
+                  {"string":5,"fret":7,"midi":52,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":7,"midi":52,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":7,"midi":52,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -5976,7 +5976,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/8 6:3mf1 /16 6:3mf1 6:3mf1 /8 6:3mf1 /16 6:3mf1 6:3mf1 /8 6:6mf4 /16 6:6mf4 6:6mf4 /8 6:3mf1 /16 6:3mf1 6:3mf1 | /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:10mf3 /16 6:10mf3 6:10mf3 /8 6:8mf1 /16 6:8mf1 6:8mf1 | /8 6:3mf1 /16 6:3mf1 6:3mf1 /8 6:3mf1 /16 6:3mf1 6:3mf1 /8 6:6mf4 /16 6:6mf4 6:6mf4 /8 6:3mf1 /16 6:3mf1 6:3mf1 | /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:10mf3 /16 6:10mf3 6:10mf3 /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:6mf4 /16 6:6mf4 6:6mf4",
+                "tab": "/8 6:3mf1 /16 6:3mf1 6:3mf1 /8 6:3mf1 /16 6:3mf1 6:3mf1 /8 6:6mf4 /16 6:6mf4 6:6mf4 /8 6:3mf1 /16 6:3mf1 6:3mf1 | /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:10mf3 /16 6:10mf3 6:10mf3 /8 6:8mf1 /16 6:8mf1 6:8mf1 | /8 6:3mf1 /16 6:3mf1 6:3mf1 /8 6:3mf1 /16 6:3mf1 6:3mf1 /8 6:6mf4 /16 6:6mf4 6:6mf4 /8 6:3mf1 /16 6:3mf1 6:3mf1 | /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:10mf3 /16 6:10mf3 6:10mf3 /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:8mf1 6:8mf1",
                 "position": {
                   "fret": 3,
                   "shifts": "allowed"
@@ -6028,9 +6028,9 @@
                   {"string":6,"fret":8,"midi":48,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":8,"midi":48,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":8,"midi":48,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1},
-                  {"string":6,"fret":6,"midi":46,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":6,"midi":46,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":6,"midi":46,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4}
+                  {"string":6,"fret":8,"midi":48,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":8,"midi":48,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":8,"midi":48,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -6054,13 +6054,13 @@
               },
               {
                 "id": "key=G,stringSet=A-string",
-                "label": "G on the A string",
+                "label": "C on the A string",
                 "params": {
                   "key": "G",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/8 5:3mf1 /16 5:3mf1 5:3mf1 /8 5:3mf1 /16 5:3mf1 5:3mf1 /8 5:6mf4 /16 5:6mf4 5:6mf4 /8 5:3mf1 /16 5:3mf1 5:3mf1 | /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:10mf3 /16 5:10mf3 5:10mf3 /8 5:8mf1 /16 5:8mf1 5:8mf1 | /8 5:3mf1 /16 5:3mf1 5:3mf1 /8 5:3mf1 /16 5:3mf1 5:3mf1 /8 5:6mf4 /16 5:6mf4 5:6mf4 /8 5:3mf1 /16 5:3mf1 5:3mf1 | /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:10mf3 /16 5:10mf3 5:10mf3 /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:6mf4 /16 5:6mf4 5:6mf4",
+                "tab": "/8 5:3mf1 /16 5:3mf1 5:3mf1 /8 5:3mf1 /16 5:3mf1 5:3mf1 /8 5:6mf4 /16 5:6mf4 5:6mf4 /8 5:3mf1 /16 5:3mf1 5:3mf1 | /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:10mf3 /16 5:10mf3 5:10mf3 /8 5:8mf1 /16 5:8mf1 5:8mf1 | /8 5:3mf1 /16 5:3mf1 5:3mf1 /8 5:3mf1 /16 5:3mf1 5:3mf1 /8 5:6mf4 /16 5:6mf4 5:6mf4 /8 5:3mf1 /16 5:3mf1 5:3mf1 | /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:10mf3 /16 5:10mf3 5:10mf3 /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:8mf1 5:8mf1",
                 "position": {
                   "fret": 3,
                   "shifts": "allowed"
@@ -6112,9 +6112,9 @@
                   {"string":5,"fret":8,"midi":53,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":8,"midi":53,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":8,"midi":53,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1},
-                  {"string":5,"fret":6,"midi":51,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":6,"midi":51,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":6,"midi":51,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4}
+                  {"string":5,"fret":8,"midi":53,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":8,"midi":53,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":8,"midi":53,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -6144,7 +6144,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/8 6:5mf1 /16 6:5mf1 6:5mf1 /8 6:5mf1 /16 6:5mf1 6:5mf1 /8 6:8mf4 /16 6:8mf4 6:8mf4 /8 6:5mf1 /16 6:5mf1 6:5mf1 | /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:12mf3 /16 6:12mf3 6:12mf3 /8 6:10mf1 /16 6:10mf1 6:10mf1 | /8 6:5mf1 /16 6:5mf1 6:5mf1 /8 6:5mf1 /16 6:5mf1 6:5mf1 /8 6:8mf4 /16 6:8mf4 6:8mf4 /8 6:5mf1 /16 6:5mf1 6:5mf1 | /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:12mf3 /16 6:12mf3 6:12mf3 /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:8mf4 /16 6:8mf4 6:8mf4",
+                "tab": "/8 6:5mf1 /16 6:5mf1 6:5mf1 /8 6:5mf1 /16 6:5mf1 6:5mf1 /8 6:8mf4 /16 6:8mf4 6:8mf4 /8 6:5mf1 /16 6:5mf1 6:5mf1 | /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:12mf3 /16 6:12mf3 6:12mf3 /8 6:10mf1 /16 6:10mf1 6:10mf1 | /8 6:5mf1 /16 6:5mf1 6:5mf1 /8 6:5mf1 /16 6:5mf1 6:5mf1 /8 6:8mf4 /16 6:8mf4 6:8mf4 /8 6:5mf1 /16 6:5mf1 6:5mf1 | /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:12mf3 /16 6:12mf3 6:12mf3 /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:10mf1 6:10mf1",
                 "position": {
                   "fret": 5,
                   "shifts": "allowed"
@@ -6196,9 +6196,9 @@
                   {"string":6,"fret":10,"midi":50,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":10,"midi":50,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":10,"midi":50,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1},
-                  {"string":6,"fret":8,"midi":48,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":8,"midi":48,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":8,"midi":48,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4}
+                  {"string":6,"fret":10,"midi":50,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":10,"midi":50,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":10,"midi":50,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -6222,13 +6222,13 @@
               },
               {
                 "id": "key=A,stringSet=A-string",
-                "label": "A on the A string",
+                "label": "D on the A string",
                 "params": {
                   "key": "A",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/8 5:5mf1 /16 5:5mf1 5:5mf1 /8 5:5mf1 /16 5:5mf1 5:5mf1 /8 5:8mf4 /16 5:8mf4 5:8mf4 /8 5:5mf1 /16 5:5mf1 5:5mf1 | /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:12mf3 /16 5:12mf3 5:12mf3 /8 5:10mf1 /16 5:10mf1 5:10mf1 | /8 5:5mf1 /16 5:5mf1 5:5mf1 /8 5:5mf1 /16 5:5mf1 5:5mf1 /8 5:8mf4 /16 5:8mf4 5:8mf4 /8 5:5mf1 /16 5:5mf1 5:5mf1 | /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:12mf3 /16 5:12mf3 5:12mf3 /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:8mf4 /16 5:8mf4 5:8mf4",
+                "tab": "/8 5:5mf1 /16 5:5mf1 5:5mf1 /8 5:5mf1 /16 5:5mf1 5:5mf1 /8 5:8mf4 /16 5:8mf4 5:8mf4 /8 5:5mf1 /16 5:5mf1 5:5mf1 | /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:12mf3 /16 5:12mf3 5:12mf3 /8 5:10mf1 /16 5:10mf1 5:10mf1 | /8 5:5mf1 /16 5:5mf1 5:5mf1 /8 5:5mf1 /16 5:5mf1 5:5mf1 /8 5:8mf4 /16 5:8mf4 5:8mf4 /8 5:5mf1 /16 5:5mf1 5:5mf1 | /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:12mf3 /16 5:12mf3 5:12mf3 /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:10mf1 5:10mf1",
                 "position": {
                   "fret": 5,
                   "shifts": "allowed"
@@ -6280,9 +6280,9 @@
                   {"string":5,"fret":10,"midi":55,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":10,"midi":55,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":10,"midi":55,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1},
-                  {"string":5,"fret":8,"midi":53,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":8,"midi":53,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":8,"midi":53,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4}
+                  {"string":5,"fret":10,"midi":55,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":10,"midi":55,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":10,"midi":55,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -6312,7 +6312,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:10mf4 /16 6:10mf4 6:10mf4 /8 6:7mf1 /16 6:7mf1 6:7mf1 | /8 6:12mf1 /16 6:12mf1 6:12mf1 /8 6:12mf1 /16 6:12mf1 6:12mf1 /8 6:14mf3 /16 6:14mf3 6:14mf3 /8 6:12mf1 /16 6:12mf1 6:12mf1 | /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:10mf4 /16 6:10mf4 6:10mf4 /8 6:7mf1 /16 6:7mf1 6:7mf1 | /8 6:12mf1 /16 6:12mf1 6:12mf1 /8 6:14mf3 /16 6:14mf3 6:14mf3 /8 6:12mf1 /16 6:12mf1 6:12mf1 /8 6:10mf4 /16 6:10mf4 6:10mf4",
+                "tab": "/8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:10mf4 /16 6:10mf4 6:10mf4 /8 6:7mf1 /16 6:7mf1 6:7mf1 | /8 6:12mf1 /16 6:12mf1 6:12mf1 /8 6:12mf1 /16 6:12mf1 6:12mf1 /8 6:14mf3 /16 6:14mf3 6:14mf3 /8 6:12mf1 /16 6:12mf1 6:12mf1 | /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:10mf4 /16 6:10mf4 6:10mf4 /8 6:7mf1 /16 6:7mf1 6:7mf1 | /8 6:12mf1 /16 6:12mf1 6:12mf1 /8 6:14mf3 /16 6:14mf3 6:14mf3 /8 6:12mf1 /16 6:12mf1 6:12mf1 /8 6:12mf1 /16 6:12mf1 6:12mf1",
                 "position": {
                   "fret": 7,
                   "shifts": "allowed"
@@ -6364,9 +6364,9 @@
                   {"string":6,"fret":12,"midi":52,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":12,"midi":52,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":12,"midi":52,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1},
-                  {"string":6,"fret":10,"midi":50,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":10,"midi":50,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":10,"midi":50,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4}
+                  {"string":6,"fret":12,"midi":52,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":12,"midi":52,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":12,"midi":52,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -6390,13 +6390,13 @@
               },
               {
                 "id": "key=B,stringSet=A-string",
-                "label": "B on the A string",
+                "label": "E on the A string",
                 "params": {
                   "key": "B",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:10mf4 /16 5:10mf4 5:10mf4 /8 5:7mf1 /16 5:7mf1 5:7mf1 | /8 5:12mf1 /16 5:12mf1 5:12mf1 /8 5:12mf1 /16 5:12mf1 5:12mf1 /8 5:14mf3 /16 5:14mf3 5:14mf3 /8 5:12mf1 /16 5:12mf1 5:12mf1 | /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:10mf4 /16 5:10mf4 5:10mf4 /8 5:7mf1 /16 5:7mf1 5:7mf1 | /8 5:12mf1 /16 5:12mf1 5:12mf1 /8 5:14mf3 /16 5:14mf3 5:14mf3 /8 5:12mf1 /16 5:12mf1 5:12mf1 /8 5:10mf4 /16 5:10mf4 5:10mf4",
+                "tab": "/8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:10mf4 /16 5:10mf4 5:10mf4 /8 5:7mf1 /16 5:7mf1 5:7mf1 | /8 5:12mf1 /16 5:12mf1 5:12mf1 /8 5:12mf1 /16 5:12mf1 5:12mf1 /8 5:14mf3 /16 5:14mf3 5:14mf3 /8 5:12mf1 /16 5:12mf1 5:12mf1 | /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:10mf4 /16 5:10mf4 5:10mf4 /8 5:7mf1 /16 5:7mf1 5:7mf1 | /8 5:12mf1 /16 5:12mf1 5:12mf1 /8 5:14mf3 /16 5:14mf3 5:14mf3 /8 5:12mf1 /16 5:12mf1 5:12mf1 /8 5:12mf1 /16 5:12mf1 5:12mf1",
                 "position": {
                   "fret": 7,
                   "shifts": "allowed"
@@ -6448,9 +6448,9 @@
                   {"string":5,"fret":12,"midi":57,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":12,"midi":57,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":12,"midi":57,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1},
-                  {"string":5,"fret":10,"midi":55,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":10,"midi":55,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":10,"midi":55,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4}
+                  {"string":5,"fret":12,"midi":57,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":12,"midi":57,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":12,"midi":57,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -6480,7 +6480,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:11mf4 /16 6:11mf4 6:11mf4 /8 6:8mf1 /16 6:8mf1 6:8mf1 | /8 6:13mf1 /16 6:13mf1 6:13mf1 /8 6:13mf1 /16 6:13mf1 6:13mf1 /8 6:15mf3 /16 6:15mf3 6:15mf3 /8 6:13mf1 /16 6:13mf1 6:13mf1 | /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:11mf4 /16 6:11mf4 6:11mf4 /8 6:8mf1 /16 6:8mf1 6:8mf1 | /8 6:13mf1 /16 6:13mf1 6:13mf1 /8 6:15mf3 /16 6:15mf3 6:15mf3 /8 6:13mf1 /16 6:13mf1 6:13mf1 /8 6:11mf4 /16 6:11mf4 6:11mf4",
+                "tab": "/8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:11mf4 /16 6:11mf4 6:11mf4 /8 6:8mf1 /16 6:8mf1 6:8mf1 | /8 6:13mf1 /16 6:13mf1 6:13mf1 /8 6:13mf1 /16 6:13mf1 6:13mf1 /8 6:15mf3 /16 6:15mf3 6:15mf3 /8 6:13mf1 /16 6:13mf1 6:13mf1 | /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:11mf4 /16 6:11mf4 6:11mf4 /8 6:8mf1 /16 6:8mf1 6:8mf1 | /8 6:13mf1 /16 6:13mf1 6:13mf1 /8 6:15mf3 /16 6:15mf3 6:15mf3 /8 6:13mf1 /16 6:13mf1 6:13mf1 /8 6:13mf1 /16 6:13mf1 6:13mf1",
                 "position": {
                   "fret": 8,
                   "shifts": "allowed"
@@ -6532,9 +6532,9 @@
                   {"string":6,"fret":13,"midi":53,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":13,"midi":53,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":13,"midi":53,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1},
-                  {"string":6,"fret":11,"midi":51,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":11,"midi":51,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":11,"midi":51,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4}
+                  {"string":6,"fret":13,"midi":53,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":13,"midi":53,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":13,"midi":53,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -6558,13 +6558,13 @@
               },
               {
                 "id": "key=C,stringSet=A-string",
-                "label": "C on the A string",
+                "label": "F on the A string",
                 "params": {
                   "key": "C",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:11mf4 /16 5:11mf4 5:11mf4 /8 5:8mf1 /16 5:8mf1 5:8mf1 | /8 5:13mf1 /16 5:13mf1 5:13mf1 /8 5:13mf1 /16 5:13mf1 5:13mf1 /8 5:15mf3 /16 5:15mf3 5:15mf3 /8 5:13mf1 /16 5:13mf1 5:13mf1 | /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:11mf4 /16 5:11mf4 5:11mf4 /8 5:8mf1 /16 5:8mf1 5:8mf1 | /8 5:13mf1 /16 5:13mf1 5:13mf1 /8 5:15mf3 /16 5:15mf3 5:15mf3 /8 5:13mf1 /16 5:13mf1 5:13mf1 /8 5:11mf4 /16 5:11mf4 5:11mf4",
+                "tab": "/8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:11mf4 /16 5:11mf4 5:11mf4 /8 5:8mf1 /16 5:8mf1 5:8mf1 | /8 5:13mf1 /16 5:13mf1 5:13mf1 /8 5:13mf1 /16 5:13mf1 5:13mf1 /8 5:15mf3 /16 5:15mf3 5:15mf3 /8 5:13mf1 /16 5:13mf1 5:13mf1 | /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:11mf4 /16 5:11mf4 5:11mf4 /8 5:8mf1 /16 5:8mf1 5:8mf1 | /8 5:13mf1 /16 5:13mf1 5:13mf1 /8 5:15mf3 /16 5:15mf3 5:15mf3 /8 5:13mf1 /16 5:13mf1 5:13mf1 /8 5:13mf1 /16 5:13mf1 5:13mf1",
                 "position": {
                   "fret": 8,
                   "shifts": "allowed"
@@ -6616,9 +6616,9 @@
                   {"string":5,"fret":13,"midi":58,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":13,"midi":58,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":13,"midi":58,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1},
-                  {"string":5,"fret":11,"midi":56,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":11,"midi":56,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":11,"midi":56,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4}
+                  {"string":5,"fret":13,"midi":58,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":13,"midi":58,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":13,"midi":58,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -6648,7 +6648,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:13mf4 /16 6:13mf4 6:13mf4 /8 6:10mf1 /16 6:10mf1 6:10mf1 | /8 6:15mf1 /16 6:15mf1 6:15mf1 /8 6:15mf1 /16 6:15mf1 6:15mf1 /8 6:17mf3 /16 6:17mf3 6:17mf3 /8 6:15mf1 /16 6:15mf1 6:15mf1 | /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:13mf4 /16 6:13mf4 6:13mf4 /8 6:10mf1 /16 6:10mf1 6:10mf1 | /8 6:15mf1 /16 6:15mf1 6:15mf1 /8 6:17mf3 /16 6:17mf3 6:17mf3 /8 6:15mf1 /16 6:15mf1 6:15mf1 /8 6:13mf4 /16 6:13mf4 6:13mf4",
+                "tab": "/8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:13mf4 /16 6:13mf4 6:13mf4 /8 6:10mf1 /16 6:10mf1 6:10mf1 | /8 6:15mf1 /16 6:15mf1 6:15mf1 /8 6:15mf1 /16 6:15mf1 6:15mf1 /8 6:17mf3 /16 6:17mf3 6:17mf3 /8 6:15mf1 /16 6:15mf1 6:15mf1 | /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:13mf4 /16 6:13mf4 6:13mf4 /8 6:10mf1 /16 6:10mf1 6:10mf1 | /8 6:15mf1 /16 6:15mf1 6:15mf1 /8 6:17mf3 /16 6:17mf3 6:17mf3 /8 6:15mf1 /16 6:15mf1 6:15mf1 /8 6:15mf1 /16 6:15mf1 6:15mf1",
                 "position": {
                   "fret": 10,
                   "shifts": "allowed"
@@ -6700,9 +6700,9 @@
                   {"string":6,"fret":15,"midi":55,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":15,"midi":55,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":15,"midi":55,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1},
-                  {"string":6,"fret":13,"midi":53,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":13,"midi":53,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":13,"midi":53,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4}
+                  {"string":6,"fret":15,"midi":55,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":15,"midi":55,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":15,"midi":55,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -6726,13 +6726,13 @@
               },
               {
                 "id": "key=D,stringSet=A-string",
-                "label": "D on the A string",
+                "label": "G on the A string",
                 "params": {
                   "key": "D",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:13mf4 /16 5:13mf4 5:13mf4 /8 5:10mf1 /16 5:10mf1 5:10mf1 | /8 5:15mf1 /16 5:15mf1 5:15mf1 /8 5:15mf1 /16 5:15mf1 5:15mf1 /8 5:17mf3 /16 5:17mf3 5:17mf3 /8 5:15mf1 /16 5:15mf1 5:15mf1 | /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:13mf4 /16 5:13mf4 5:13mf4 /8 5:10mf1 /16 5:10mf1 5:10mf1 | /8 5:15mf1 /16 5:15mf1 5:15mf1 /8 5:17mf3 /16 5:17mf3 5:17mf3 /8 5:15mf1 /16 5:15mf1 5:15mf1 /8 5:13mf4 /16 5:13mf4 5:13mf4",
+                "tab": "/8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:13mf4 /16 5:13mf4 5:13mf4 /8 5:10mf1 /16 5:10mf1 5:10mf1 | /8 5:15mf1 /16 5:15mf1 5:15mf1 /8 5:15mf1 /16 5:15mf1 5:15mf1 /8 5:17mf3 /16 5:17mf3 5:17mf3 /8 5:15mf1 /16 5:15mf1 5:15mf1 | /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:13mf4 /16 5:13mf4 5:13mf4 /8 5:10mf1 /16 5:10mf1 5:10mf1 | /8 5:15mf1 /16 5:15mf1 5:15mf1 /8 5:17mf3 /16 5:17mf3 5:17mf3 /8 5:15mf1 /16 5:15mf1 5:15mf1 /8 5:15mf1 /16 5:15mf1 5:15mf1",
                 "position": {
                   "fret": 10,
                   "shifts": "allowed"
@@ -6784,9 +6784,9 @@
                   {"string":5,"fret":15,"midi":60,"tick":13440,"dur":480,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":15,"midi":60,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":15,"midi":60,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1},
-                  {"string":5,"fret":13,"midi":58,"tick":14400,"dur":480,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":13,"midi":58,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":13,"midi":58,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4}
+                  {"string":5,"fret":15,"midi":60,"tick":14400,"dur":480,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":15,"midi":60,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":15,"midi":60,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -6880,9 +6880,9 @@
             {"string":6,"fret":7,"midi":47,"tick":13440,"dur":240,"tech":["palmMute"],"finger":1},
             {"string":6,"fret":7,"midi":47,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1},
             {"string":6,"fret":7,"midi":47,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-            {"string":6,"fret":5,"midi":45,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4},
-            {"string":6,"fret":5,"midi":45,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4},
-            {"string":6,"fret":5,"midi":45,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+            {"string":6,"fret":7,"midi":47,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1},
+            {"string":6,"fret":7,"midi":47,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1},
+            {"string":6,"fret":7,"midi":47,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
           ],
           "rests": [],
           "tempo": {
@@ -6928,14 +6928,14 @@
             "subdivision": 1
           },
           "estimatedMinutes": 3,
-          "tab": "/16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:5mf4 6:5mf4 /8 6:5mf4 /16 6:2mf1 6:2mf1 /8 6:2mf1 | /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:9mf3 6:9mf3 /8 6:9mf3 /16 6:7mf1 6:7mf1 /8 6:7mf1 | /16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:5mf4 6:5mf4 /8 6:5mf4 /16 6:2mf1 6:2mf1 /8 6:2mf1 | /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:9mf3 6:9mf3 /8 6:9mf3 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:5mf4 6:5mf4 /8 6:5mf4",
+          "tab": "/16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:5mf4 6:5mf4 /8 6:5mf4 /16 6:2mf1 6:2mf1 /8 6:2mf1 | /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:9mf3 6:9mf3 /8 6:9mf3 /16 6:7mf1 6:7mf1 /8 6:7mf1 | /16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:5mf4 6:5mf4 /8 6:5mf4 /16 6:2mf1 6:2mf1 /8 6:2mf1 | /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:9mf3 6:9mf3 /8 6:9mf3 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:7mf1",
           "subdivision": "sixteenths",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 166.67,
-            "handShifts": 12,
+            "handShifts": 11,
             "maxPlayableBpm": 175,
-            "difficulty": 4.84
+            "difficulty": 4.81
           },
           "harmony": {
             "kind": "scale",
@@ -6964,7 +6964,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:5mf4 6:5mf4 /8 6:5mf4 /16 6:2mf1 6:2mf1 /8 6:2mf1 | /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:9mf3 6:9mf3 /8 6:9mf3 /16 6:7mf1 6:7mf1 /8 6:7mf1 | /16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:5mf4 6:5mf4 /8 6:5mf4 /16 6:2mf1 6:2mf1 /8 6:2mf1 | /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:9mf3 6:9mf3 /8 6:9mf3 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:5mf4 6:5mf4 /8 6:5mf4",
+                "tab": "/16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:5mf4 6:5mf4 /8 6:5mf4 /16 6:2mf1 6:2mf1 /8 6:2mf1 | /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:9mf3 6:9mf3 /8 6:9mf3 /16 6:7mf1 6:7mf1 /8 6:7mf1 | /16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:2mf1 6:2mf1 /8 6:2mf1 /16 6:5mf4 6:5mf4 /8 6:5mf4 /16 6:2mf1 6:2mf1 /8 6:2mf1 | /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:9mf3 6:9mf3 /8 6:9mf3 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:7mf1",
                 "position": {
                   "fret": 2,
                   "shifts": "allowed"
@@ -7016,9 +7016,9 @@
                   {"string":6,"fret":7,"midi":47,"tick":13440,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":7,"midi":47,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":7,"midi":47,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":6,"fret":5,"midi":45,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":5,"midi":45,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":5,"midi":45,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":6,"fret":7,"midi":47,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":7,"midi":47,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":7,"midi":47,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -7028,9 +7028,9 @@
                 "computed": {
                   "noteCount": 48,
                   "minGapMsAtTop": 166.67,
-                  "handShifts": 12,
+                  "handShifts": 11,
                   "maxPlayableBpm": 175,
-                  "difficulty": 4.84
+                  "difficulty": 4.81
                 },
                 "harmony": {
                   "kind": "scale",
@@ -7042,13 +7042,13 @@
               },
               {
                 "id": "key=F#,stringSet=A-string",
-                "label": "F# on the A string",
+                "label": "B on the A string",
                 "params": {
                   "key": "F#",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/16 5:2mf1 5:2mf1 /8 5:2mf1 /16 5:2mf1 5:2mf1 /8 5:2mf1 /16 5:5mf4 5:5mf4 /8 5:5mf4 /16 5:2mf1 5:2mf1 /8 5:2mf1 | /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:9mf3 5:9mf3 /8 5:9mf3 /16 5:7mf1 5:7mf1 /8 5:7mf1 | /16 5:2mf1 5:2mf1 /8 5:2mf1 /16 5:2mf1 5:2mf1 /8 5:2mf1 /16 5:5mf4 5:5mf4 /8 5:5mf4 /16 5:2mf1 5:2mf1 /8 5:2mf1 | /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:9mf3 5:9mf3 /8 5:9mf3 /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:5mf4 5:5mf4 /8 5:5mf4",
+                "tab": "/16 5:2mf1 5:2mf1 /8 5:2mf1 /16 5:2mf1 5:2mf1 /8 5:2mf1 /16 5:5mf4 5:5mf4 /8 5:5mf4 /16 5:2mf1 5:2mf1 /8 5:2mf1 | /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:9mf3 5:9mf3 /8 5:9mf3 /16 5:7mf1 5:7mf1 /8 5:7mf1 | /16 5:2mf1 5:2mf1 /8 5:2mf1 /16 5:2mf1 5:2mf1 /8 5:2mf1 /16 5:5mf4 5:5mf4 /8 5:5mf4 /16 5:2mf1 5:2mf1 /8 5:2mf1 | /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:9mf3 5:9mf3 /8 5:9mf3 /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:7mf1",
                 "position": {
                   "fret": 2,
                   "shifts": "allowed"
@@ -7100,9 +7100,9 @@
                   {"string":5,"fret":7,"midi":52,"tick":13440,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":7,"midi":52,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":7,"midi":52,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":5,"fret":5,"midi":50,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":5,"midi":50,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":5,"midi":50,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":5,"fret":7,"midi":52,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":7,"midi":52,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":7,"midi":52,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -7112,9 +7112,9 @@
                 "computed": {
                   "noteCount": 48,
                   "minGapMsAtTop": 166.67,
-                  "handShifts": 12,
+                  "handShifts": 11,
                   "maxPlayableBpm": 175,
-                  "difficulty": 4.84
+                  "difficulty": 4.81
                 },
                 "harmony": {
                   "kind": "scale",
@@ -7132,7 +7132,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/16 6:3mf1 6:3mf1 /8 6:3mf1 /16 6:3mf1 6:3mf1 /8 6:3mf1 /16 6:6mf4 6:6mf4 /8 6:6mf4 /16 6:3mf1 6:3mf1 /8 6:3mf1 | /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:10mf3 6:10mf3 /8 6:10mf3 /16 6:8mf1 6:8mf1 /8 6:8mf1 | /16 6:3mf1 6:3mf1 /8 6:3mf1 /16 6:3mf1 6:3mf1 /8 6:3mf1 /16 6:6mf4 6:6mf4 /8 6:6mf4 /16 6:3mf1 6:3mf1 /8 6:3mf1 | /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:10mf3 6:10mf3 /8 6:10mf3 /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:6mf4 6:6mf4 /8 6:6mf4",
+                "tab": "/16 6:3mf1 6:3mf1 /8 6:3mf1 /16 6:3mf1 6:3mf1 /8 6:3mf1 /16 6:6mf4 6:6mf4 /8 6:6mf4 /16 6:3mf1 6:3mf1 /8 6:3mf1 | /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:10mf3 6:10mf3 /8 6:10mf3 /16 6:8mf1 6:8mf1 /8 6:8mf1 | /16 6:3mf1 6:3mf1 /8 6:3mf1 /16 6:3mf1 6:3mf1 /8 6:3mf1 /16 6:6mf4 6:6mf4 /8 6:6mf4 /16 6:3mf1 6:3mf1 /8 6:3mf1 | /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:10mf3 6:10mf3 /8 6:10mf3 /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:8mf1",
                 "position": {
                   "fret": 3,
                   "shifts": "allowed"
@@ -7184,9 +7184,9 @@
                   {"string":6,"fret":8,"midi":48,"tick":13440,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":8,"midi":48,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":8,"midi":48,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":6,"fret":6,"midi":46,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":6,"midi":46,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":6,"midi":46,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":6,"fret":8,"midi":48,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":8,"midi":48,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":8,"midi":48,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -7196,9 +7196,9 @@
                 "computed": {
                   "noteCount": 48,
                   "minGapMsAtTop": 166.67,
-                  "handShifts": 8,
+                  "handShifts": 7,
                   "maxPlayableBpm": 178,
-                  "difficulty": 4.73
+                  "difficulty": 4.7
                 },
                 "harmony": {
                   "kind": "scale",
@@ -7210,13 +7210,13 @@
               },
               {
                 "id": "key=G,stringSet=A-string",
-                "label": "G on the A string",
+                "label": "C on the A string",
                 "params": {
                   "key": "G",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/16 5:3mf1 5:3mf1 /8 5:3mf1 /16 5:3mf1 5:3mf1 /8 5:3mf1 /16 5:6mf4 5:6mf4 /8 5:6mf4 /16 5:3mf1 5:3mf1 /8 5:3mf1 | /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:10mf3 5:10mf3 /8 5:10mf3 /16 5:8mf1 5:8mf1 /8 5:8mf1 | /16 5:3mf1 5:3mf1 /8 5:3mf1 /16 5:3mf1 5:3mf1 /8 5:3mf1 /16 5:6mf4 5:6mf4 /8 5:6mf4 /16 5:3mf1 5:3mf1 /8 5:3mf1 | /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:10mf3 5:10mf3 /8 5:10mf3 /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:6mf4 5:6mf4 /8 5:6mf4",
+                "tab": "/16 5:3mf1 5:3mf1 /8 5:3mf1 /16 5:3mf1 5:3mf1 /8 5:3mf1 /16 5:6mf4 5:6mf4 /8 5:6mf4 /16 5:3mf1 5:3mf1 /8 5:3mf1 | /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:10mf3 5:10mf3 /8 5:10mf3 /16 5:8mf1 5:8mf1 /8 5:8mf1 | /16 5:3mf1 5:3mf1 /8 5:3mf1 /16 5:3mf1 5:3mf1 /8 5:3mf1 /16 5:6mf4 5:6mf4 /8 5:6mf4 /16 5:3mf1 5:3mf1 /8 5:3mf1 | /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:10mf3 5:10mf3 /8 5:10mf3 /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:8mf1",
                 "position": {
                   "fret": 3,
                   "shifts": "allowed"
@@ -7268,9 +7268,9 @@
                   {"string":5,"fret":8,"midi":53,"tick":13440,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":8,"midi":53,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":8,"midi":53,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":5,"fret":6,"midi":51,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":6,"midi":51,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":6,"midi":51,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":5,"fret":8,"midi":53,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":8,"midi":53,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":8,"midi":53,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -7280,9 +7280,9 @@
                 "computed": {
                   "noteCount": 48,
                   "minGapMsAtTop": 166.67,
-                  "handShifts": 8,
+                  "handShifts": 7,
                   "maxPlayableBpm": 178,
-                  "difficulty": 4.73
+                  "difficulty": 4.7
                 },
                 "harmony": {
                   "kind": "scale",
@@ -7300,7 +7300,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/16 6:5mf1 6:5mf1 /8 6:5mf1 /16 6:5mf1 6:5mf1 /8 6:5mf1 /16 6:8mf4 6:8mf4 /8 6:8mf4 /16 6:5mf1 6:5mf1 /8 6:5mf1 | /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:12mf3 6:12mf3 /8 6:12mf3 /16 6:10mf1 6:10mf1 /8 6:10mf1 | /16 6:5mf1 6:5mf1 /8 6:5mf1 /16 6:5mf1 6:5mf1 /8 6:5mf1 /16 6:8mf4 6:8mf4 /8 6:8mf4 /16 6:5mf1 6:5mf1 /8 6:5mf1 | /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:12mf3 6:12mf3 /8 6:12mf3 /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:8mf4 6:8mf4 /8 6:8mf4",
+                "tab": "/16 6:5mf1 6:5mf1 /8 6:5mf1 /16 6:5mf1 6:5mf1 /8 6:5mf1 /16 6:8mf4 6:8mf4 /8 6:8mf4 /16 6:5mf1 6:5mf1 /8 6:5mf1 | /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:12mf3 6:12mf3 /8 6:12mf3 /16 6:10mf1 6:10mf1 /8 6:10mf1 | /16 6:5mf1 6:5mf1 /8 6:5mf1 /16 6:5mf1 6:5mf1 /8 6:5mf1 /16 6:8mf4 6:8mf4 /8 6:8mf4 /16 6:5mf1 6:5mf1 /8 6:5mf1 | /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:12mf3 6:12mf3 /8 6:12mf3 /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:10mf1",
                 "position": {
                   "fret": 5,
                   "shifts": "allowed"
@@ -7352,9 +7352,9 @@
                   {"string":6,"fret":10,"midi":50,"tick":13440,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":10,"midi":50,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":10,"midi":50,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":6,"fret":8,"midi":48,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":8,"midi":48,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":8,"midi":48,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":6,"fret":10,"midi":50,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":10,"midi":50,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":10,"midi":50,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -7378,13 +7378,13 @@
               },
               {
                 "id": "key=A,stringSet=A-string",
-                "label": "A on the A string",
+                "label": "D on the A string",
                 "params": {
                   "key": "A",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/16 5:5mf1 5:5mf1 /8 5:5mf1 /16 5:5mf1 5:5mf1 /8 5:5mf1 /16 5:8mf4 5:8mf4 /8 5:8mf4 /16 5:5mf1 5:5mf1 /8 5:5mf1 | /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:12mf3 5:12mf3 /8 5:12mf3 /16 5:10mf1 5:10mf1 /8 5:10mf1 | /16 5:5mf1 5:5mf1 /8 5:5mf1 /16 5:5mf1 5:5mf1 /8 5:5mf1 /16 5:8mf4 5:8mf4 /8 5:8mf4 /16 5:5mf1 5:5mf1 /8 5:5mf1 | /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:12mf3 5:12mf3 /8 5:12mf3 /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:8mf4 5:8mf4 /8 5:8mf4",
+                "tab": "/16 5:5mf1 5:5mf1 /8 5:5mf1 /16 5:5mf1 5:5mf1 /8 5:5mf1 /16 5:8mf4 5:8mf4 /8 5:8mf4 /16 5:5mf1 5:5mf1 /8 5:5mf1 | /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:12mf3 5:12mf3 /8 5:12mf3 /16 5:10mf1 5:10mf1 /8 5:10mf1 | /16 5:5mf1 5:5mf1 /8 5:5mf1 /16 5:5mf1 5:5mf1 /8 5:5mf1 /16 5:8mf4 5:8mf4 /8 5:8mf4 /16 5:5mf1 5:5mf1 /8 5:5mf1 | /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:12mf3 5:12mf3 /8 5:12mf3 /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:10mf1",
                 "position": {
                   "fret": 5,
                   "shifts": "allowed"
@@ -7436,9 +7436,9 @@
                   {"string":5,"fret":10,"midi":55,"tick":13440,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":10,"midi":55,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":10,"midi":55,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":5,"fret":8,"midi":53,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":8,"midi":53,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":8,"midi":53,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":5,"fret":10,"midi":55,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":10,"midi":55,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":10,"midi":55,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -7468,7 +7468,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:10mf4 6:10mf4 /8 6:10mf4 /16 6:7mf1 6:7mf1 /8 6:7mf1 | /16 6:12mf1 6:12mf1 /8 6:12mf1 /16 6:12mf1 6:12mf1 /8 6:12mf1 /16 6:14mf3 6:14mf3 /8 6:14mf3 /16 6:12mf1 6:12mf1 /8 6:12mf1 | /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:10mf4 6:10mf4 /8 6:10mf4 /16 6:7mf1 6:7mf1 /8 6:7mf1 | /16 6:12mf1 6:12mf1 /8 6:12mf1 /16 6:14mf3 6:14mf3 /8 6:14mf3 /16 6:12mf1 6:12mf1 /8 6:12mf1 /16 6:10mf4 6:10mf4 /8 6:10mf4",
+                "tab": "/16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:10mf4 6:10mf4 /8 6:10mf4 /16 6:7mf1 6:7mf1 /8 6:7mf1 | /16 6:12mf1 6:12mf1 /8 6:12mf1 /16 6:12mf1 6:12mf1 /8 6:12mf1 /16 6:14mf3 6:14mf3 /8 6:14mf3 /16 6:12mf1 6:12mf1 /8 6:12mf1 | /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:7mf1 6:7mf1 /8 6:7mf1 /16 6:10mf4 6:10mf4 /8 6:10mf4 /16 6:7mf1 6:7mf1 /8 6:7mf1 | /16 6:12mf1 6:12mf1 /8 6:12mf1 /16 6:14mf3 6:14mf3 /8 6:14mf3 /16 6:12mf1 6:12mf1 /8 6:12mf1 /16 6:12mf1 6:12mf1 /8 6:12mf1",
                 "position": {
                   "fret": 7,
                   "shifts": "allowed"
@@ -7520,9 +7520,9 @@
                   {"string":6,"fret":12,"midi":52,"tick":13440,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":12,"midi":52,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":12,"midi":52,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":6,"fret":10,"midi":50,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":10,"midi":50,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":10,"midi":50,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":6,"fret":12,"midi":52,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":12,"midi":52,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":12,"midi":52,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -7546,13 +7546,13 @@
               },
               {
                 "id": "key=B,stringSet=A-string",
-                "label": "B on the A string",
+                "label": "E on the A string",
                 "params": {
                   "key": "B",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:10mf4 5:10mf4 /8 5:10mf4 /16 5:7mf1 5:7mf1 /8 5:7mf1 | /16 5:12mf1 5:12mf1 /8 5:12mf1 /16 5:12mf1 5:12mf1 /8 5:12mf1 /16 5:14mf3 5:14mf3 /8 5:14mf3 /16 5:12mf1 5:12mf1 /8 5:12mf1 | /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:10mf4 5:10mf4 /8 5:10mf4 /16 5:7mf1 5:7mf1 /8 5:7mf1 | /16 5:12mf1 5:12mf1 /8 5:12mf1 /16 5:14mf3 5:14mf3 /8 5:14mf3 /16 5:12mf1 5:12mf1 /8 5:12mf1 /16 5:10mf4 5:10mf4 /8 5:10mf4",
+                "tab": "/16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:10mf4 5:10mf4 /8 5:10mf4 /16 5:7mf1 5:7mf1 /8 5:7mf1 | /16 5:12mf1 5:12mf1 /8 5:12mf1 /16 5:12mf1 5:12mf1 /8 5:12mf1 /16 5:14mf3 5:14mf3 /8 5:14mf3 /16 5:12mf1 5:12mf1 /8 5:12mf1 | /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:7mf1 5:7mf1 /8 5:7mf1 /16 5:10mf4 5:10mf4 /8 5:10mf4 /16 5:7mf1 5:7mf1 /8 5:7mf1 | /16 5:12mf1 5:12mf1 /8 5:12mf1 /16 5:14mf3 5:14mf3 /8 5:14mf3 /16 5:12mf1 5:12mf1 /8 5:12mf1 /16 5:12mf1 5:12mf1 /8 5:12mf1",
                 "position": {
                   "fret": 7,
                   "shifts": "allowed"
@@ -7604,9 +7604,9 @@
                   {"string":5,"fret":12,"midi":57,"tick":13440,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":12,"midi":57,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":12,"midi":57,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":5,"fret":10,"midi":55,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":10,"midi":55,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":10,"midi":55,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":5,"fret":12,"midi":57,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":12,"midi":57,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":12,"midi":57,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -7636,7 +7636,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:11mf4 6:11mf4 /8 6:11mf4 /16 6:8mf1 6:8mf1 /8 6:8mf1 | /16 6:13mf1 6:13mf1 /8 6:13mf1 /16 6:13mf1 6:13mf1 /8 6:13mf1 /16 6:15mf3 6:15mf3 /8 6:15mf3 /16 6:13mf1 6:13mf1 /8 6:13mf1 | /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:11mf4 6:11mf4 /8 6:11mf4 /16 6:8mf1 6:8mf1 /8 6:8mf1 | /16 6:13mf1 6:13mf1 /8 6:13mf1 /16 6:15mf3 6:15mf3 /8 6:15mf3 /16 6:13mf1 6:13mf1 /8 6:13mf1 /16 6:11mf4 6:11mf4 /8 6:11mf4",
+                "tab": "/16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:11mf4 6:11mf4 /8 6:11mf4 /16 6:8mf1 6:8mf1 /8 6:8mf1 | /16 6:13mf1 6:13mf1 /8 6:13mf1 /16 6:13mf1 6:13mf1 /8 6:13mf1 /16 6:15mf3 6:15mf3 /8 6:15mf3 /16 6:13mf1 6:13mf1 /8 6:13mf1 | /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:8mf1 6:8mf1 /8 6:8mf1 /16 6:11mf4 6:11mf4 /8 6:11mf4 /16 6:8mf1 6:8mf1 /8 6:8mf1 | /16 6:13mf1 6:13mf1 /8 6:13mf1 /16 6:15mf3 6:15mf3 /8 6:15mf3 /16 6:13mf1 6:13mf1 /8 6:13mf1 /16 6:13mf1 6:13mf1 /8 6:13mf1",
                 "position": {
                   "fret": 8,
                   "shifts": "allowed"
@@ -7688,9 +7688,9 @@
                   {"string":6,"fret":13,"midi":53,"tick":13440,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":13,"midi":53,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":13,"midi":53,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":6,"fret":11,"midi":51,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":11,"midi":51,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":11,"midi":51,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":6,"fret":13,"midi":53,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":13,"midi":53,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":13,"midi":53,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -7714,13 +7714,13 @@
               },
               {
                 "id": "key=C,stringSet=A-string",
-                "label": "C on the A string",
+                "label": "F on the A string",
                 "params": {
                   "key": "C",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:11mf4 5:11mf4 /8 5:11mf4 /16 5:8mf1 5:8mf1 /8 5:8mf1 | /16 5:13mf1 5:13mf1 /8 5:13mf1 /16 5:13mf1 5:13mf1 /8 5:13mf1 /16 5:15mf3 5:15mf3 /8 5:15mf3 /16 5:13mf1 5:13mf1 /8 5:13mf1 | /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:11mf4 5:11mf4 /8 5:11mf4 /16 5:8mf1 5:8mf1 /8 5:8mf1 | /16 5:13mf1 5:13mf1 /8 5:13mf1 /16 5:15mf3 5:15mf3 /8 5:15mf3 /16 5:13mf1 5:13mf1 /8 5:13mf1 /16 5:11mf4 5:11mf4 /8 5:11mf4",
+                "tab": "/16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:11mf4 5:11mf4 /8 5:11mf4 /16 5:8mf1 5:8mf1 /8 5:8mf1 | /16 5:13mf1 5:13mf1 /8 5:13mf1 /16 5:13mf1 5:13mf1 /8 5:13mf1 /16 5:15mf3 5:15mf3 /8 5:15mf3 /16 5:13mf1 5:13mf1 /8 5:13mf1 | /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:8mf1 5:8mf1 /8 5:8mf1 /16 5:11mf4 5:11mf4 /8 5:11mf4 /16 5:8mf1 5:8mf1 /8 5:8mf1 | /16 5:13mf1 5:13mf1 /8 5:13mf1 /16 5:15mf3 5:15mf3 /8 5:15mf3 /16 5:13mf1 5:13mf1 /8 5:13mf1 /16 5:13mf1 5:13mf1 /8 5:13mf1",
                 "position": {
                   "fret": 8,
                   "shifts": "allowed"
@@ -7772,9 +7772,9 @@
                   {"string":5,"fret":13,"midi":58,"tick":13440,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":13,"midi":58,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":13,"midi":58,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":5,"fret":11,"midi":56,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":11,"midi":56,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":11,"midi":56,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":5,"fret":13,"midi":58,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":13,"midi":58,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":13,"midi":58,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -7804,7 +7804,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:13mf4 6:13mf4 /8 6:13mf4 /16 6:10mf1 6:10mf1 /8 6:10mf1 | /16 6:15mf1 6:15mf1 /8 6:15mf1 /16 6:15mf1 6:15mf1 /8 6:15mf1 /16 6:17mf3 6:17mf3 /8 6:17mf3 /16 6:15mf1 6:15mf1 /8 6:15mf1 | /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:13mf4 6:13mf4 /8 6:13mf4 /16 6:10mf1 6:10mf1 /8 6:10mf1 | /16 6:15mf1 6:15mf1 /8 6:15mf1 /16 6:17mf3 6:17mf3 /8 6:17mf3 /16 6:15mf1 6:15mf1 /8 6:15mf1 /16 6:13mf4 6:13mf4 /8 6:13mf4",
+                "tab": "/16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:13mf4 6:13mf4 /8 6:13mf4 /16 6:10mf1 6:10mf1 /8 6:10mf1 | /16 6:15mf1 6:15mf1 /8 6:15mf1 /16 6:15mf1 6:15mf1 /8 6:15mf1 /16 6:17mf3 6:17mf3 /8 6:17mf3 /16 6:15mf1 6:15mf1 /8 6:15mf1 | /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:10mf1 6:10mf1 /8 6:10mf1 /16 6:13mf4 6:13mf4 /8 6:13mf4 /16 6:10mf1 6:10mf1 /8 6:10mf1 | /16 6:15mf1 6:15mf1 /8 6:15mf1 /16 6:17mf3 6:17mf3 /8 6:17mf3 /16 6:15mf1 6:15mf1 /8 6:15mf1 /16 6:15mf1 6:15mf1 /8 6:15mf1",
                 "position": {
                   "fret": 10,
                   "shifts": "allowed"
@@ -7856,9 +7856,9 @@
                   {"string":6,"fret":15,"midi":55,"tick":13440,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":15,"midi":55,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":6,"fret":15,"midi":55,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":6,"fret":13,"midi":53,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":13,"midi":53,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":6,"fret":13,"midi":53,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":6,"fret":15,"midi":55,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":15,"midi":55,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":6,"fret":15,"midi":55,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -7882,13 +7882,13 @@
               },
               {
                 "id": "key=D,stringSet=A-string",
-                "label": "D on the A string",
+                "label": "G on the A string",
                 "params": {
                   "key": "D",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:13mf4 5:13mf4 /8 5:13mf4 /16 5:10mf1 5:10mf1 /8 5:10mf1 | /16 5:15mf1 5:15mf1 /8 5:15mf1 /16 5:15mf1 5:15mf1 /8 5:15mf1 /16 5:17mf3 5:17mf3 /8 5:17mf3 /16 5:15mf1 5:15mf1 /8 5:15mf1 | /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:13mf4 5:13mf4 /8 5:13mf4 /16 5:10mf1 5:10mf1 /8 5:10mf1 | /16 5:15mf1 5:15mf1 /8 5:15mf1 /16 5:17mf3 5:17mf3 /8 5:17mf3 /16 5:15mf1 5:15mf1 /8 5:15mf1 /16 5:13mf4 5:13mf4 /8 5:13mf4",
+                "tab": "/16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:13mf4 5:13mf4 /8 5:13mf4 /16 5:10mf1 5:10mf1 /8 5:10mf1 | /16 5:15mf1 5:15mf1 /8 5:15mf1 /16 5:15mf1 5:15mf1 /8 5:15mf1 /16 5:17mf3 5:17mf3 /8 5:17mf3 /16 5:15mf1 5:15mf1 /8 5:15mf1 | /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:10mf1 5:10mf1 /8 5:10mf1 /16 5:13mf4 5:13mf4 /8 5:13mf4 /16 5:10mf1 5:10mf1 /8 5:10mf1 | /16 5:15mf1 5:15mf1 /8 5:15mf1 /16 5:17mf3 5:17mf3 /8 5:17mf3 /16 5:15mf1 5:15mf1 /8 5:15mf1 /16 5:15mf1 5:15mf1 /8 5:15mf1",
                 "position": {
                   "fret": 10,
                   "shifts": "allowed"
@@ -7940,9 +7940,9 @@
                   {"string":5,"fret":15,"midi":60,"tick":13440,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":15,"midi":60,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1},
                   {"string":5,"fret":15,"midi":60,"tick":13920,"dur":480,"tech":["palmMute"],"finger":1},
-                  {"string":5,"fret":13,"midi":58,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":13,"midi":58,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4},
-                  {"string":5,"fret":13,"midi":58,"tick":14880,"dur":480,"tech":["palmMute"],"finger":4}
+                  {"string":5,"fret":15,"midi":60,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":15,"midi":60,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1},
+                  {"string":5,"fret":15,"midi":60,"tick":14880,"dur":480,"tech":["palmMute"],"finger":1}
                 ],
                 "rests": [],
                 "backing": {
@@ -8068,10 +8068,10 @@
             {"string":6,"fret":7,"midi":47,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
             {"string":6,"fret":7,"midi":47,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
             {"string":6,"fret":7,"midi":47,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
-            {"string":6,"fret":5,"midi":45,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-            {"string":6,"fret":5,"midi":45,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"},
-            {"string":6,"fret":5,"midi":45,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-            {"string":6,"fret":5,"midi":45,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"}
+            {"string":6,"fret":7,"midi":47,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+            {"string":6,"fret":7,"midi":47,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
+            {"string":6,"fret":7,"midi":47,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+            {"string":6,"fret":7,"midi":47,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -8121,7 +8121,7 @@
             "subdivision": 1
           },
           "estimatedMinutes": 3,
-          "tab": "/16 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:5mf4 6:5mf4 6:2mf1 6:2mf1 6:2mf1 6:2mf1 | /16 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:9mf3 6:9mf3 6:7mf1 6:7mf1 6:7mf1 6:7mf1 | /16 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:5mf4 6:5mf4 6:2mf1 6:2mf1 6:2mf1 6:2mf1 | /16 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:9mf3 6:9mf3 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:5mf4 6:5mf4 6:5mf4 6:5mf4",
+          "tab": "/16 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:5mf4 6:5mf4 6:2mf1 6:2mf1 6:2mf1 6:2mf1 | /16 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:9mf3 6:9mf3 6:7mf1 6:7mf1 6:7mf1 6:7mf1 | /16 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:5mf4 6:5mf4 6:2mf1 6:2mf1 6:2mf1 6:2mf1 | /16 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:9mf3 6:9mf3 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1",
           "subdivision": "sixteenths",
           "computed": {
             "noteCount": 64,
@@ -8157,7 +8157,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/16 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:5mf4 6:5mf4 6:2mf1 6:2mf1 6:2mf1 6:2mf1 | /16 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:9mf3 6:9mf3 6:7mf1 6:7mf1 6:7mf1 6:7mf1 | /16 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:5mf4 6:5mf4 6:2mf1 6:2mf1 6:2mf1 6:2mf1 | /16 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:9mf3 6:9mf3 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:5mf4 6:5mf4 6:5mf4 6:5mf4",
+                "tab": "/16 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:5mf4 6:5mf4 6:2mf1 6:2mf1 6:2mf1 6:2mf1 | /16 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:9mf3 6:9mf3 6:7mf1 6:7mf1 6:7mf1 6:7mf1 | /16 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:5mf4 6:5mf4 6:2mf1 6:2mf1 6:2mf1 6:2mf1 | /16 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:9mf3 6:9mf3 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1",
                 "position": {
                   "fret": 2,
                   "shifts": "allowed"
@@ -8224,10 +8224,10 @@
                   {"string":6,"fret":7,"midi":47,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":6,"fret":7,"midi":47,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":6,"fret":7,"midi":47,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
-                  {"string":6,"fret":5,"midi":45,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":6,"fret":5,"midi":45,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":6,"fret":5,"midi":45,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":6,"fret":5,"midi":45,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":6,"fret":7,"midi":47,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":6,"fret":7,"midi":47,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":6,"fret":7,"midi":47,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":6,"fret":7,"midi":47,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -8251,13 +8251,13 @@
               },
               {
                 "id": "key=F#,stringSet=A-string",
-                "label": "F# on the A string",
+                "label": "B on the A string",
                 "params": {
                   "key": "F#",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/16 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:5mf4 5:5mf4 5:5mf4 5:5mf4 5:2mf1 5:2mf1 5:2mf1 5:2mf1 | /16 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:9mf3 5:9mf3 5:9mf3 5:9mf3 5:7mf1 5:7mf1 5:7mf1 5:7mf1 | /16 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:5mf4 5:5mf4 5:5mf4 5:5mf4 5:2mf1 5:2mf1 5:2mf1 5:2mf1 | /16 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:9mf3 5:9mf3 5:9mf3 5:9mf3 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:5mf4 5:5mf4 5:5mf4 5:5mf4",
+                "tab": "/16 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:5mf4 5:5mf4 5:5mf4 5:5mf4 5:2mf1 5:2mf1 5:2mf1 5:2mf1 | /16 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:9mf3 5:9mf3 5:9mf3 5:9mf3 5:7mf1 5:7mf1 5:7mf1 5:7mf1 | /16 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:5mf4 5:5mf4 5:5mf4 5:5mf4 5:2mf1 5:2mf1 5:2mf1 5:2mf1 | /16 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:9mf3 5:9mf3 5:9mf3 5:9mf3 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1",
                 "position": {
                   "fret": 2,
                   "shifts": "allowed"
@@ -8324,10 +8324,10 @@
                   {"string":5,"fret":7,"midi":52,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":5,"fret":7,"midi":52,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":5,"fret":7,"midi":52,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
-                  {"string":5,"fret":5,"midi":50,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":5,"fret":5,"midi":50,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":5,"fret":5,"midi":50,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":5,"fret":5,"midi":50,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":5,"fret":7,"midi":52,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":5,"fret":7,"midi":52,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":5,"fret":7,"midi":52,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":5,"fret":7,"midi":52,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -8357,7 +8357,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/16 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:6mf4 6:6mf4 6:6mf4 6:6mf4 6:3mf1 6:3mf1 6:3mf1 6:3mf1 | /16 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:10mf3 6:10mf3 6:10mf3 6:10mf3 6:8mf1 6:8mf1 6:8mf1 6:8mf1 | /16 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:6mf4 6:6mf4 6:6mf4 6:6mf4 6:3mf1 6:3mf1 6:3mf1 6:3mf1 | /16 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:10mf3 6:10mf3 6:10mf3 6:10mf3 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:6mf4 6:6mf4 6:6mf4 6:6mf4",
+                "tab": "/16 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:6mf4 6:6mf4 6:6mf4 6:6mf4 6:3mf1 6:3mf1 6:3mf1 6:3mf1 | /16 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:10mf3 6:10mf3 6:10mf3 6:10mf3 6:8mf1 6:8mf1 6:8mf1 6:8mf1 | /16 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:6mf4 6:6mf4 6:6mf4 6:6mf4 6:3mf1 6:3mf1 6:3mf1 6:3mf1 | /16 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:10mf3 6:10mf3 6:10mf3 6:10mf3 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1",
                 "position": {
                   "fret": 3,
                   "shifts": "allowed"
@@ -8424,10 +8424,10 @@
                   {"string":6,"fret":8,"midi":48,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":6,"fret":8,"midi":48,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":6,"fret":8,"midi":48,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
-                  {"string":6,"fret":6,"midi":46,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":6,"fret":6,"midi":46,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":6,"fret":6,"midi":46,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":6,"fret":6,"midi":46,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":6,"fret":8,"midi":48,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":6,"fret":8,"midi":48,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":6,"fret":8,"midi":48,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":6,"fret":8,"midi":48,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -8451,13 +8451,13 @@
               },
               {
                 "id": "key=G,stringSet=A-string",
-                "label": "G on the A string",
+                "label": "C on the A string",
                 "params": {
                   "key": "G",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/16 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:6mf4 5:6mf4 5:6mf4 5:6mf4 5:3mf1 5:3mf1 5:3mf1 5:3mf1 | /16 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:10mf3 5:10mf3 5:10mf3 5:10mf3 5:8mf1 5:8mf1 5:8mf1 5:8mf1 | /16 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:6mf4 5:6mf4 5:6mf4 5:6mf4 5:3mf1 5:3mf1 5:3mf1 5:3mf1 | /16 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:10mf3 5:10mf3 5:10mf3 5:10mf3 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:6mf4 5:6mf4 5:6mf4 5:6mf4",
+                "tab": "/16 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:6mf4 5:6mf4 5:6mf4 5:6mf4 5:3mf1 5:3mf1 5:3mf1 5:3mf1 | /16 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:10mf3 5:10mf3 5:10mf3 5:10mf3 5:8mf1 5:8mf1 5:8mf1 5:8mf1 | /16 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:6mf4 5:6mf4 5:6mf4 5:6mf4 5:3mf1 5:3mf1 5:3mf1 5:3mf1 | /16 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:10mf3 5:10mf3 5:10mf3 5:10mf3 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1",
                 "position": {
                   "fret": 3,
                   "shifts": "allowed"
@@ -8524,10 +8524,10 @@
                   {"string":5,"fret":8,"midi":53,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":5,"fret":8,"midi":53,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":5,"fret":8,"midi":53,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
-                  {"string":5,"fret":6,"midi":51,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":5,"fret":6,"midi":51,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":5,"fret":6,"midi":51,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":5,"fret":6,"midi":51,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":5,"fret":8,"midi":53,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":5,"fret":8,"midi":53,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":5,"fret":8,"midi":53,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":5,"fret":8,"midi":53,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -8557,7 +8557,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/16 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:8mf4 6:8mf4 6:8mf4 6:8mf4 6:5mf1 6:5mf1 6:5mf1 6:5mf1 | /16 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:12mf3 6:12mf3 6:12mf3 6:12mf3 6:10mf1 6:10mf1 6:10mf1 6:10mf1 | /16 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:8mf4 6:8mf4 6:8mf4 6:8mf4 6:5mf1 6:5mf1 6:5mf1 6:5mf1 | /16 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:12mf3 6:12mf3 6:12mf3 6:12mf3 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:8mf4 6:8mf4 6:8mf4 6:8mf4",
+                "tab": "/16 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:8mf4 6:8mf4 6:8mf4 6:8mf4 6:5mf1 6:5mf1 6:5mf1 6:5mf1 | /16 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:12mf3 6:12mf3 6:12mf3 6:12mf3 6:10mf1 6:10mf1 6:10mf1 6:10mf1 | /16 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:8mf4 6:8mf4 6:8mf4 6:8mf4 6:5mf1 6:5mf1 6:5mf1 6:5mf1 | /16 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:12mf3 6:12mf3 6:12mf3 6:12mf3 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1",
                 "position": {
                   "fret": 5,
                   "shifts": "allowed"
@@ -8624,10 +8624,10 @@
                   {"string":6,"fret":10,"midi":50,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":6,"fret":10,"midi":50,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":6,"fret":10,"midi":50,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
-                  {"string":6,"fret":8,"midi":48,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":6,"fret":8,"midi":48,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":6,"fret":8,"midi":48,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":6,"fret":8,"midi":48,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":6,"fret":10,"midi":50,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":6,"fret":10,"midi":50,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":6,"fret":10,"midi":50,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":6,"fret":10,"midi":50,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -8651,13 +8651,13 @@
               },
               {
                 "id": "key=A,stringSet=A-string",
-                "label": "A on the A string",
+                "label": "D on the A string",
                 "params": {
                   "key": "A",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/16 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:8mf4 5:8mf4 5:8mf4 5:8mf4 5:5mf1 5:5mf1 5:5mf1 5:5mf1 | /16 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:12mf3 5:12mf3 5:12mf3 5:12mf3 5:10mf1 5:10mf1 5:10mf1 5:10mf1 | /16 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:8mf4 5:8mf4 5:8mf4 5:8mf4 5:5mf1 5:5mf1 5:5mf1 5:5mf1 | /16 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:12mf3 5:12mf3 5:12mf3 5:12mf3 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:8mf4 5:8mf4 5:8mf4 5:8mf4",
+                "tab": "/16 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:8mf4 5:8mf4 5:8mf4 5:8mf4 5:5mf1 5:5mf1 5:5mf1 5:5mf1 | /16 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:12mf3 5:12mf3 5:12mf3 5:12mf3 5:10mf1 5:10mf1 5:10mf1 5:10mf1 | /16 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:8mf4 5:8mf4 5:8mf4 5:8mf4 5:5mf1 5:5mf1 5:5mf1 5:5mf1 | /16 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:12mf3 5:12mf3 5:12mf3 5:12mf3 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1",
                 "position": {
                   "fret": 5,
                   "shifts": "allowed"
@@ -8724,10 +8724,10 @@
                   {"string":5,"fret":10,"midi":55,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":5,"fret":10,"midi":55,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":5,"fret":10,"midi":55,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
-                  {"string":5,"fret":8,"midi":53,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":5,"fret":8,"midi":53,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":5,"fret":8,"midi":53,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":5,"fret":8,"midi":53,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":5,"fret":10,"midi":55,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":5,"fret":10,"midi":55,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":5,"fret":10,"midi":55,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":5,"fret":10,"midi":55,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -8757,7 +8757,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/16 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:10mf4 6:10mf4 6:10mf4 6:10mf4 6:7mf1 6:7mf1 6:7mf1 6:7mf1 | /16 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:14mf3 6:14mf3 6:14mf3 6:14mf3 6:12mf1 6:12mf1 6:12mf1 6:12mf1 | /16 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:10mf4 6:10mf4 6:10mf4 6:10mf4 6:7mf1 6:7mf1 6:7mf1 6:7mf1 | /16 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:14mf3 6:14mf3 6:14mf3 6:14mf3 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:10mf4 6:10mf4 6:10mf4 6:10mf4",
+                "tab": "/16 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:10mf4 6:10mf4 6:10mf4 6:10mf4 6:7mf1 6:7mf1 6:7mf1 6:7mf1 | /16 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:14mf3 6:14mf3 6:14mf3 6:14mf3 6:12mf1 6:12mf1 6:12mf1 6:12mf1 | /16 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:10mf4 6:10mf4 6:10mf4 6:10mf4 6:7mf1 6:7mf1 6:7mf1 6:7mf1 | /16 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:14mf3 6:14mf3 6:14mf3 6:14mf3 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:12mf1",
                 "position": {
                   "fret": 7,
                   "shifts": "allowed"
@@ -8824,10 +8824,10 @@
                   {"string":6,"fret":12,"midi":52,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":6,"fret":12,"midi":52,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":6,"fret":12,"midi":52,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
-                  {"string":6,"fret":10,"midi":50,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":6,"fret":10,"midi":50,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":6,"fret":10,"midi":50,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":6,"fret":10,"midi":50,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":6,"fret":12,"midi":52,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":6,"fret":12,"midi":52,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":6,"fret":12,"midi":52,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":6,"fret":12,"midi":52,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -8851,13 +8851,13 @@
               },
               {
                 "id": "key=B,stringSet=A-string",
-                "label": "B on the A string",
+                "label": "E on the A string",
                 "params": {
                   "key": "B",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/16 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:10mf4 5:10mf4 5:10mf4 5:10mf4 5:7mf1 5:7mf1 5:7mf1 5:7mf1 | /16 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:14mf3 5:14mf3 5:14mf3 5:14mf3 5:12mf1 5:12mf1 5:12mf1 5:12mf1 | /16 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:10mf4 5:10mf4 5:10mf4 5:10mf4 5:7mf1 5:7mf1 5:7mf1 5:7mf1 | /16 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:14mf3 5:14mf3 5:14mf3 5:14mf3 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:10mf4 5:10mf4 5:10mf4 5:10mf4",
+                "tab": "/16 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:10mf4 5:10mf4 5:10mf4 5:10mf4 5:7mf1 5:7mf1 5:7mf1 5:7mf1 | /16 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:14mf3 5:14mf3 5:14mf3 5:14mf3 5:12mf1 5:12mf1 5:12mf1 5:12mf1 | /16 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:10mf4 5:10mf4 5:10mf4 5:10mf4 5:7mf1 5:7mf1 5:7mf1 5:7mf1 | /16 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:14mf3 5:14mf3 5:14mf3 5:14mf3 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:12mf1",
                 "position": {
                   "fret": 7,
                   "shifts": "allowed"
@@ -8924,10 +8924,10 @@
                   {"string":5,"fret":12,"midi":57,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":5,"fret":12,"midi":57,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":5,"fret":12,"midi":57,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
-                  {"string":5,"fret":10,"midi":55,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":5,"fret":10,"midi":55,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":5,"fret":10,"midi":55,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":5,"fret":10,"midi":55,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":5,"fret":12,"midi":57,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":5,"fret":12,"midi":57,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":5,"fret":12,"midi":57,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":5,"fret":12,"midi":57,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -8957,7 +8957,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/16 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:11mf4 6:11mf4 6:11mf4 6:11mf4 6:8mf1 6:8mf1 6:8mf1 6:8mf1 | /16 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:15mf3 6:15mf3 6:15mf3 6:15mf3 6:13mf1 6:13mf1 6:13mf1 6:13mf1 | /16 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:11mf4 6:11mf4 6:11mf4 6:11mf4 6:8mf1 6:8mf1 6:8mf1 6:8mf1 | /16 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:15mf3 6:15mf3 6:15mf3 6:15mf3 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:11mf4 6:11mf4 6:11mf4 6:11mf4",
+                "tab": "/16 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:11mf4 6:11mf4 6:11mf4 6:11mf4 6:8mf1 6:8mf1 6:8mf1 6:8mf1 | /16 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:15mf3 6:15mf3 6:15mf3 6:15mf3 6:13mf1 6:13mf1 6:13mf1 6:13mf1 | /16 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:11mf4 6:11mf4 6:11mf4 6:11mf4 6:8mf1 6:8mf1 6:8mf1 6:8mf1 | /16 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:15mf3 6:15mf3 6:15mf3 6:15mf3 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:13mf1",
                 "position": {
                   "fret": 8,
                   "shifts": "allowed"
@@ -9024,10 +9024,10 @@
                   {"string":6,"fret":13,"midi":53,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":6,"fret":13,"midi":53,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":6,"fret":13,"midi":53,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
-                  {"string":6,"fret":11,"midi":51,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":6,"fret":11,"midi":51,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":6,"fret":11,"midi":51,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":6,"fret":11,"midi":51,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":6,"fret":13,"midi":53,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":6,"fret":13,"midi":53,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":6,"fret":13,"midi":53,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":6,"fret":13,"midi":53,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -9051,13 +9051,13 @@
               },
               {
                 "id": "key=C,stringSet=A-string",
-                "label": "C on the A string",
+                "label": "F on the A string",
                 "params": {
                   "key": "C",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/16 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:11mf4 5:11mf4 5:11mf4 5:11mf4 5:8mf1 5:8mf1 5:8mf1 5:8mf1 | /16 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:15mf3 5:15mf3 5:15mf3 5:15mf3 5:13mf1 5:13mf1 5:13mf1 5:13mf1 | /16 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:11mf4 5:11mf4 5:11mf4 5:11mf4 5:8mf1 5:8mf1 5:8mf1 5:8mf1 | /16 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:15mf3 5:15mf3 5:15mf3 5:15mf3 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:11mf4 5:11mf4 5:11mf4 5:11mf4",
+                "tab": "/16 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:11mf4 5:11mf4 5:11mf4 5:11mf4 5:8mf1 5:8mf1 5:8mf1 5:8mf1 | /16 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:15mf3 5:15mf3 5:15mf3 5:15mf3 5:13mf1 5:13mf1 5:13mf1 5:13mf1 | /16 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:11mf4 5:11mf4 5:11mf4 5:11mf4 5:8mf1 5:8mf1 5:8mf1 5:8mf1 | /16 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:15mf3 5:15mf3 5:15mf3 5:15mf3 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:13mf1",
                 "position": {
                   "fret": 8,
                   "shifts": "allowed"
@@ -9124,10 +9124,10 @@
                   {"string":5,"fret":13,"midi":58,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":5,"fret":13,"midi":58,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":5,"fret":13,"midi":58,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
-                  {"string":5,"fret":11,"midi":56,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":5,"fret":11,"midi":56,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":5,"fret":11,"midi":56,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":5,"fret":11,"midi":56,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":5,"fret":13,"midi":58,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":5,"fret":13,"midi":58,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":5,"fret":13,"midi":58,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":5,"fret":13,"midi":58,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -9157,7 +9157,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/16 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:13mf4 6:13mf4 6:13mf4 6:13mf4 6:10mf1 6:10mf1 6:10mf1 6:10mf1 | /16 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:17mf3 6:17mf3 6:17mf3 6:17mf3 6:15mf1 6:15mf1 6:15mf1 6:15mf1 | /16 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:13mf4 6:13mf4 6:13mf4 6:13mf4 6:10mf1 6:10mf1 6:10mf1 6:10mf1 | /16 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:17mf3 6:17mf3 6:17mf3 6:17mf3 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:13mf4 6:13mf4 6:13mf4 6:13mf4",
+                "tab": "/16 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:13mf4 6:13mf4 6:13mf4 6:13mf4 6:10mf1 6:10mf1 6:10mf1 6:10mf1 | /16 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:17mf3 6:17mf3 6:17mf3 6:17mf3 6:15mf1 6:15mf1 6:15mf1 6:15mf1 | /16 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:13mf4 6:13mf4 6:13mf4 6:13mf4 6:10mf1 6:10mf1 6:10mf1 6:10mf1 | /16 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:17mf3 6:17mf3 6:17mf3 6:17mf3 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:15mf1",
                 "position": {
                   "fret": 10,
                   "shifts": "allowed"
@@ -9224,10 +9224,10 @@
                   {"string":6,"fret":15,"midi":55,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":6,"fret":15,"midi":55,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":6,"fret":15,"midi":55,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
-                  {"string":6,"fret":13,"midi":53,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":6,"fret":13,"midi":53,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":6,"fret":13,"midi":53,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":6,"fret":13,"midi":53,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":6,"fret":15,"midi":55,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":6,"fret":15,"midi":55,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":6,"fret":15,"midi":55,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":6,"fret":15,"midi":55,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -9251,13 +9251,13 @@
               },
               {
                 "id": "key=D,stringSet=A-string",
-                "label": "D on the A string",
+                "label": "G on the A string",
                 "params": {
                   "key": "D",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/16 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:13mf4 5:13mf4 5:13mf4 5:13mf4 5:10mf1 5:10mf1 5:10mf1 5:10mf1 | /16 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:17mf3 5:17mf3 5:17mf3 5:17mf3 5:15mf1 5:15mf1 5:15mf1 5:15mf1 | /16 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:13mf4 5:13mf4 5:13mf4 5:13mf4 5:10mf1 5:10mf1 5:10mf1 5:10mf1 | /16 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:17mf3 5:17mf3 5:17mf3 5:17mf3 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:13mf4 5:13mf4 5:13mf4 5:13mf4",
+                "tab": "/16 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:13mf4 5:13mf4 5:13mf4 5:13mf4 5:10mf1 5:10mf1 5:10mf1 5:10mf1 | /16 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:17mf3 5:17mf3 5:17mf3 5:17mf3 5:15mf1 5:15mf1 5:15mf1 5:15mf1 | /16 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:13mf4 5:13mf4 5:13mf4 5:13mf4 5:10mf1 5:10mf1 5:10mf1 5:10mf1 | /16 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:17mf3 5:17mf3 5:17mf3 5:17mf3 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:15mf1",
                 "position": {
                   "fret": 10,
                   "shifts": "allowed"
@@ -9324,10 +9324,10 @@
                   {"string":5,"fret":15,"midi":60,"tick":13680,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":5,"fret":15,"midi":60,"tick":13920,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":5,"fret":15,"midi":60,"tick":14160,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
-                  {"string":5,"fret":13,"midi":58,"tick":14400,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":5,"fret":13,"midi":58,"tick":14640,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":5,"fret":13,"midi":58,"tick":14880,"dur":240,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":5,"fret":13,"midi":58,"tick":15120,"dur":240,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":5,"fret":15,"midi":60,"tick":14400,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":5,"fret":15,"midi":60,"tick":14640,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":5,"fret":15,"midi":60,"tick":14880,"dur":240,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":5,"fret":15,"midi":60,"tick":15120,"dur":240,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -9421,9 +9421,9 @@
             {"string":6,"fret":7,"midi":47,"tick":13440,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
             {"string":6,"fret":7,"midi":47,"tick":13760,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
             {"string":6,"fret":7,"midi":47,"tick":14080,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
-            {"string":6,"fret":5,"midi":45,"tick":14400,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"},
-            {"string":6,"fret":5,"midi":45,"tick":14720,"dur":320,"tech":["palmMute"],"finger":4,"pick":"d"},
-            {"string":6,"fret":5,"midi":45,"tick":15040,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"}
+            {"string":6,"fret":7,"midi":47,"tick":14400,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
+            {"string":6,"fret":7,"midi":47,"tick":14720,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
+            {"string":6,"fret":7,"midi":47,"tick":15040,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -9471,7 +9471,7 @@
             "subdivision": 1
           },
           "estimatedMinutes": 3,
-          "tab": "/8t 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:5mf4 6:2mf1 6:2mf1 6:2mf1 | /8t 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:9mf3 6:7mf1 6:7mf1 6:7mf1 | /8t 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:5mf4 6:2mf1 6:2mf1 6:2mf1 | /8t 6:7mf1 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:9mf3 6:7mf1 6:7mf1 6:7mf1 6:5mf4 6:5mf4 6:5mf4",
+          "tab": "/8t 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:5mf4 6:2mf1 6:2mf1 6:2mf1 | /8t 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:9mf3 6:7mf1 6:7mf1 6:7mf1 | /8t 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:5mf4 6:2mf1 6:2mf1 6:2mf1 | /8t 6:7mf1 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:9mf3 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1",
           "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
@@ -9507,7 +9507,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/8t 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:5mf4 6:2mf1 6:2mf1 6:2mf1 | /8t 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:9mf3 6:7mf1 6:7mf1 6:7mf1 | /8t 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:5mf4 6:2mf1 6:2mf1 6:2mf1 | /8t 6:7mf1 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:9mf3 6:7mf1 6:7mf1 6:7mf1 6:5mf4 6:5mf4 6:5mf4",
+                "tab": "/8t 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:5mf4 6:2mf1 6:2mf1 6:2mf1 | /8t 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:9mf3 6:7mf1 6:7mf1 6:7mf1 | /8t 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:2mf1 6:5mf4 6:5mf4 6:5mf4 6:2mf1 6:2mf1 6:2mf1 | /8t 6:7mf1 6:7mf1 6:7mf1 6:9mf3 6:9mf3 6:9mf3 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1",
                 "position": {
                   "fret": 2,
                   "shifts": "allowed"
@@ -9559,9 +9559,9 @@
                   {"string":6,"fret":7,"midi":47,"tick":13440,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":6,"fret":7,"midi":47,"tick":13760,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":6,"fret":7,"midi":47,"tick":14080,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
-                  {"string":6,"fret":5,"midi":45,"tick":14400,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":6,"fret":5,"midi":45,"tick":14720,"dur":320,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":6,"fret":5,"midi":45,"tick":15040,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":6,"fret":7,"midi":47,"tick":14400,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":6,"fret":7,"midi":47,"tick":14720,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":6,"fret":7,"midi":47,"tick":15040,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -9585,13 +9585,13 @@
               },
               {
                 "id": "key=F#,stringSet=A-string",
-                "label": "F# on the A string",
+                "label": "B on the A string",
                 "params": {
                   "key": "F#",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/8t 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:5mf4 5:5mf4 5:5mf4 5:2mf1 5:2mf1 5:2mf1 | /8t 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:9mf3 5:9mf3 5:9mf3 5:7mf1 5:7mf1 5:7mf1 | /8t 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:5mf4 5:5mf4 5:5mf4 5:2mf1 5:2mf1 5:2mf1 | /8t 5:7mf1 5:7mf1 5:7mf1 5:9mf3 5:9mf3 5:9mf3 5:7mf1 5:7mf1 5:7mf1 5:5mf4 5:5mf4 5:5mf4",
+                "tab": "/8t 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:5mf4 5:5mf4 5:5mf4 5:2mf1 5:2mf1 5:2mf1 | /8t 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:9mf3 5:9mf3 5:9mf3 5:7mf1 5:7mf1 5:7mf1 | /8t 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:2mf1 5:5mf4 5:5mf4 5:5mf4 5:2mf1 5:2mf1 5:2mf1 | /8t 5:7mf1 5:7mf1 5:7mf1 5:9mf3 5:9mf3 5:9mf3 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1",
                 "position": {
                   "fret": 2,
                   "shifts": "allowed"
@@ -9643,9 +9643,9 @@
                   {"string":5,"fret":7,"midi":52,"tick":13440,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":5,"fret":7,"midi":52,"tick":13760,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":5,"fret":7,"midi":52,"tick":14080,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
-                  {"string":5,"fret":5,"midi":50,"tick":14400,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":5,"fret":5,"midi":50,"tick":14720,"dur":320,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":5,"fret":5,"midi":50,"tick":15040,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":5,"fret":7,"midi":52,"tick":14400,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":5,"fret":7,"midi":52,"tick":14720,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":5,"fret":7,"midi":52,"tick":15040,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -9675,7 +9675,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/8t 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:6mf4 6:6mf4 6:6mf4 6:3mf1 6:3mf1 6:3mf1 | /8t 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:10mf3 6:10mf3 6:10mf3 6:8mf1 6:8mf1 6:8mf1 | /8t 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:6mf4 6:6mf4 6:6mf4 6:3mf1 6:3mf1 6:3mf1 | /8t 6:8mf1 6:8mf1 6:8mf1 6:10mf3 6:10mf3 6:10mf3 6:8mf1 6:8mf1 6:8mf1 6:6mf4 6:6mf4 6:6mf4",
+                "tab": "/8t 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:6mf4 6:6mf4 6:6mf4 6:3mf1 6:3mf1 6:3mf1 | /8t 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:10mf3 6:10mf3 6:10mf3 6:8mf1 6:8mf1 6:8mf1 | /8t 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:3mf1 6:6mf4 6:6mf4 6:6mf4 6:3mf1 6:3mf1 6:3mf1 | /8t 6:8mf1 6:8mf1 6:8mf1 6:10mf3 6:10mf3 6:10mf3 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1",
                 "position": {
                   "fret": 3,
                   "shifts": "allowed"
@@ -9727,9 +9727,9 @@
                   {"string":6,"fret":8,"midi":48,"tick":13440,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":6,"fret":8,"midi":48,"tick":13760,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":6,"fret":8,"midi":48,"tick":14080,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
-                  {"string":6,"fret":6,"midi":46,"tick":14400,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":6,"fret":6,"midi":46,"tick":14720,"dur":320,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":6,"fret":6,"midi":46,"tick":15040,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":6,"fret":8,"midi":48,"tick":14400,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":6,"fret":8,"midi":48,"tick":14720,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":6,"fret":8,"midi":48,"tick":15040,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -9753,13 +9753,13 @@
               },
               {
                 "id": "key=G,stringSet=A-string",
-                "label": "G on the A string",
+                "label": "C on the A string",
                 "params": {
                   "key": "G",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/8t 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:6mf4 5:6mf4 5:6mf4 5:3mf1 5:3mf1 5:3mf1 | /8t 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:10mf3 5:10mf3 5:10mf3 5:8mf1 5:8mf1 5:8mf1 | /8t 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:6mf4 5:6mf4 5:6mf4 5:3mf1 5:3mf1 5:3mf1 | /8t 5:8mf1 5:8mf1 5:8mf1 5:10mf3 5:10mf3 5:10mf3 5:8mf1 5:8mf1 5:8mf1 5:6mf4 5:6mf4 5:6mf4",
+                "tab": "/8t 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:6mf4 5:6mf4 5:6mf4 5:3mf1 5:3mf1 5:3mf1 | /8t 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:10mf3 5:10mf3 5:10mf3 5:8mf1 5:8mf1 5:8mf1 | /8t 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:3mf1 5:6mf4 5:6mf4 5:6mf4 5:3mf1 5:3mf1 5:3mf1 | /8t 5:8mf1 5:8mf1 5:8mf1 5:10mf3 5:10mf3 5:10mf3 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1",
                 "position": {
                   "fret": 3,
                   "shifts": "allowed"
@@ -9811,9 +9811,9 @@
                   {"string":5,"fret":8,"midi":53,"tick":13440,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":5,"fret":8,"midi":53,"tick":13760,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":5,"fret":8,"midi":53,"tick":14080,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
-                  {"string":5,"fret":6,"midi":51,"tick":14400,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":5,"fret":6,"midi":51,"tick":14720,"dur":320,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":5,"fret":6,"midi":51,"tick":15040,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":5,"fret":8,"midi":53,"tick":14400,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":5,"fret":8,"midi":53,"tick":14720,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":5,"fret":8,"midi":53,"tick":15040,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -9843,7 +9843,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/8t 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:8mf4 6:8mf4 6:8mf4 6:5mf1 6:5mf1 6:5mf1 | /8t 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:12mf3 6:12mf3 6:12mf3 6:10mf1 6:10mf1 6:10mf1 | /8t 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:8mf4 6:8mf4 6:8mf4 6:5mf1 6:5mf1 6:5mf1 | /8t 6:10mf1 6:10mf1 6:10mf1 6:12mf3 6:12mf3 6:12mf3 6:10mf1 6:10mf1 6:10mf1 6:8mf4 6:8mf4 6:8mf4",
+                "tab": "/8t 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:8mf4 6:8mf4 6:8mf4 6:5mf1 6:5mf1 6:5mf1 | /8t 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:12mf3 6:12mf3 6:12mf3 6:10mf1 6:10mf1 6:10mf1 | /8t 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:5mf1 6:8mf4 6:8mf4 6:8mf4 6:5mf1 6:5mf1 6:5mf1 | /8t 6:10mf1 6:10mf1 6:10mf1 6:12mf3 6:12mf3 6:12mf3 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1",
                 "position": {
                   "fret": 5,
                   "shifts": "allowed"
@@ -9895,9 +9895,9 @@
                   {"string":6,"fret":10,"midi":50,"tick":13440,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":6,"fret":10,"midi":50,"tick":13760,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":6,"fret":10,"midi":50,"tick":14080,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
-                  {"string":6,"fret":8,"midi":48,"tick":14400,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":6,"fret":8,"midi":48,"tick":14720,"dur":320,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":6,"fret":8,"midi":48,"tick":15040,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":6,"fret":10,"midi":50,"tick":14400,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":6,"fret":10,"midi":50,"tick":14720,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":6,"fret":10,"midi":50,"tick":15040,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -9921,13 +9921,13 @@
               },
               {
                 "id": "key=A,stringSet=A-string",
-                "label": "A on the A string",
+                "label": "D on the A string",
                 "params": {
                   "key": "A",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/8t 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:8mf4 5:8mf4 5:8mf4 5:5mf1 5:5mf1 5:5mf1 | /8t 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:12mf3 5:12mf3 5:12mf3 5:10mf1 5:10mf1 5:10mf1 | /8t 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:8mf4 5:8mf4 5:8mf4 5:5mf1 5:5mf1 5:5mf1 | /8t 5:10mf1 5:10mf1 5:10mf1 5:12mf3 5:12mf3 5:12mf3 5:10mf1 5:10mf1 5:10mf1 5:8mf4 5:8mf4 5:8mf4",
+                "tab": "/8t 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:8mf4 5:8mf4 5:8mf4 5:5mf1 5:5mf1 5:5mf1 | /8t 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:12mf3 5:12mf3 5:12mf3 5:10mf1 5:10mf1 5:10mf1 | /8t 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:5mf1 5:8mf4 5:8mf4 5:8mf4 5:5mf1 5:5mf1 5:5mf1 | /8t 5:10mf1 5:10mf1 5:10mf1 5:12mf3 5:12mf3 5:12mf3 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1",
                 "position": {
                   "fret": 5,
                   "shifts": "allowed"
@@ -9979,9 +9979,9 @@
                   {"string":5,"fret":10,"midi":55,"tick":13440,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":5,"fret":10,"midi":55,"tick":13760,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":5,"fret":10,"midi":55,"tick":14080,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
-                  {"string":5,"fret":8,"midi":53,"tick":14400,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":5,"fret":8,"midi":53,"tick":14720,"dur":320,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":5,"fret":8,"midi":53,"tick":15040,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":5,"fret":10,"midi":55,"tick":14400,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":5,"fret":10,"midi":55,"tick":14720,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":5,"fret":10,"midi":55,"tick":15040,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -10011,7 +10011,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/8t 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:10mf4 6:10mf4 6:10mf4 6:7mf1 6:7mf1 6:7mf1 | /8t 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:14mf3 6:14mf3 6:14mf3 6:12mf1 6:12mf1 6:12mf1 | /8t 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:10mf4 6:10mf4 6:10mf4 6:7mf1 6:7mf1 6:7mf1 | /8t 6:12mf1 6:12mf1 6:12mf1 6:14mf3 6:14mf3 6:14mf3 6:12mf1 6:12mf1 6:12mf1 6:10mf4 6:10mf4 6:10mf4",
+                "tab": "/8t 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:10mf4 6:10mf4 6:10mf4 6:7mf1 6:7mf1 6:7mf1 | /8t 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:14mf3 6:14mf3 6:14mf3 6:12mf1 6:12mf1 6:12mf1 | /8t 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:7mf1 6:10mf4 6:10mf4 6:10mf4 6:7mf1 6:7mf1 6:7mf1 | /8t 6:12mf1 6:12mf1 6:12mf1 6:14mf3 6:14mf3 6:14mf3 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:12mf1 6:12mf1",
                 "position": {
                   "fret": 7,
                   "shifts": "allowed"
@@ -10063,9 +10063,9 @@
                   {"string":6,"fret":12,"midi":52,"tick":13440,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":6,"fret":12,"midi":52,"tick":13760,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":6,"fret":12,"midi":52,"tick":14080,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
-                  {"string":6,"fret":10,"midi":50,"tick":14400,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":6,"fret":10,"midi":50,"tick":14720,"dur":320,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":6,"fret":10,"midi":50,"tick":15040,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":6,"fret":12,"midi":52,"tick":14400,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":6,"fret":12,"midi":52,"tick":14720,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":6,"fret":12,"midi":52,"tick":15040,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -10089,13 +10089,13 @@
               },
               {
                 "id": "key=B,stringSet=A-string",
-                "label": "B on the A string",
+                "label": "E on the A string",
                 "params": {
                   "key": "B",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/8t 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:10mf4 5:10mf4 5:10mf4 5:7mf1 5:7mf1 5:7mf1 | /8t 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:14mf3 5:14mf3 5:14mf3 5:12mf1 5:12mf1 5:12mf1 | /8t 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:10mf4 5:10mf4 5:10mf4 5:7mf1 5:7mf1 5:7mf1 | /8t 5:12mf1 5:12mf1 5:12mf1 5:14mf3 5:14mf3 5:14mf3 5:12mf1 5:12mf1 5:12mf1 5:10mf4 5:10mf4 5:10mf4",
+                "tab": "/8t 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:10mf4 5:10mf4 5:10mf4 5:7mf1 5:7mf1 5:7mf1 | /8t 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:14mf3 5:14mf3 5:14mf3 5:12mf1 5:12mf1 5:12mf1 | /8t 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:7mf1 5:10mf4 5:10mf4 5:10mf4 5:7mf1 5:7mf1 5:7mf1 | /8t 5:12mf1 5:12mf1 5:12mf1 5:14mf3 5:14mf3 5:14mf3 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:12mf1 5:12mf1",
                 "position": {
                   "fret": 7,
                   "shifts": "allowed"
@@ -10147,9 +10147,9 @@
                   {"string":5,"fret":12,"midi":57,"tick":13440,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":5,"fret":12,"midi":57,"tick":13760,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":5,"fret":12,"midi":57,"tick":14080,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
-                  {"string":5,"fret":10,"midi":55,"tick":14400,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":5,"fret":10,"midi":55,"tick":14720,"dur":320,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":5,"fret":10,"midi":55,"tick":15040,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":5,"fret":12,"midi":57,"tick":14400,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":5,"fret":12,"midi":57,"tick":14720,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":5,"fret":12,"midi":57,"tick":15040,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -10179,7 +10179,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/8t 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:11mf4 6:11mf4 6:11mf4 6:8mf1 6:8mf1 6:8mf1 | /8t 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:15mf3 6:15mf3 6:15mf3 6:13mf1 6:13mf1 6:13mf1 | /8t 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:11mf4 6:11mf4 6:11mf4 6:8mf1 6:8mf1 6:8mf1 | /8t 6:13mf1 6:13mf1 6:13mf1 6:15mf3 6:15mf3 6:15mf3 6:13mf1 6:13mf1 6:13mf1 6:11mf4 6:11mf4 6:11mf4",
+                "tab": "/8t 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:11mf4 6:11mf4 6:11mf4 6:8mf1 6:8mf1 6:8mf1 | /8t 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:15mf3 6:15mf3 6:15mf3 6:13mf1 6:13mf1 6:13mf1 | /8t 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:8mf1 6:11mf4 6:11mf4 6:11mf4 6:8mf1 6:8mf1 6:8mf1 | /8t 6:13mf1 6:13mf1 6:13mf1 6:15mf3 6:15mf3 6:15mf3 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:13mf1 6:13mf1",
                 "position": {
                   "fret": 8,
                   "shifts": "allowed"
@@ -10231,9 +10231,9 @@
                   {"string":6,"fret":13,"midi":53,"tick":13440,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":6,"fret":13,"midi":53,"tick":13760,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":6,"fret":13,"midi":53,"tick":14080,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
-                  {"string":6,"fret":11,"midi":51,"tick":14400,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":6,"fret":11,"midi":51,"tick":14720,"dur":320,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":6,"fret":11,"midi":51,"tick":15040,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":6,"fret":13,"midi":53,"tick":14400,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":6,"fret":13,"midi":53,"tick":14720,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":6,"fret":13,"midi":53,"tick":15040,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -10257,13 +10257,13 @@
               },
               {
                 "id": "key=C,stringSet=A-string",
-                "label": "C on the A string",
+                "label": "F on the A string",
                 "params": {
                   "key": "C",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/8t 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:11mf4 5:11mf4 5:11mf4 5:8mf1 5:8mf1 5:8mf1 | /8t 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:15mf3 5:15mf3 5:15mf3 5:13mf1 5:13mf1 5:13mf1 | /8t 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:11mf4 5:11mf4 5:11mf4 5:8mf1 5:8mf1 5:8mf1 | /8t 5:13mf1 5:13mf1 5:13mf1 5:15mf3 5:15mf3 5:15mf3 5:13mf1 5:13mf1 5:13mf1 5:11mf4 5:11mf4 5:11mf4",
+                "tab": "/8t 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:11mf4 5:11mf4 5:11mf4 5:8mf1 5:8mf1 5:8mf1 | /8t 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:15mf3 5:15mf3 5:15mf3 5:13mf1 5:13mf1 5:13mf1 | /8t 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:8mf1 5:11mf4 5:11mf4 5:11mf4 5:8mf1 5:8mf1 5:8mf1 | /8t 5:13mf1 5:13mf1 5:13mf1 5:15mf3 5:15mf3 5:15mf3 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:13mf1 5:13mf1",
                 "position": {
                   "fret": 8,
                   "shifts": "allowed"
@@ -10315,9 +10315,9 @@
                   {"string":5,"fret":13,"midi":58,"tick":13440,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":5,"fret":13,"midi":58,"tick":13760,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":5,"fret":13,"midi":58,"tick":14080,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
-                  {"string":5,"fret":11,"midi":56,"tick":14400,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":5,"fret":11,"midi":56,"tick":14720,"dur":320,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":5,"fret":11,"midi":56,"tick":15040,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":5,"fret":13,"midi":58,"tick":14400,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":5,"fret":13,"midi":58,"tick":14720,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":5,"fret":13,"midi":58,"tick":15040,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -10347,7 +10347,7 @@
                   "stringSet": "low E string"
                 },
                 "pool": "all",
-                "tab": "/8t 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:13mf4 6:13mf4 6:13mf4 6:10mf1 6:10mf1 6:10mf1 | /8t 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:17mf3 6:17mf3 6:17mf3 6:15mf1 6:15mf1 6:15mf1 | /8t 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:13mf4 6:13mf4 6:13mf4 6:10mf1 6:10mf1 6:10mf1 | /8t 6:15mf1 6:15mf1 6:15mf1 6:17mf3 6:17mf3 6:17mf3 6:15mf1 6:15mf1 6:15mf1 6:13mf4 6:13mf4 6:13mf4",
+                "tab": "/8t 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:13mf4 6:13mf4 6:13mf4 6:10mf1 6:10mf1 6:10mf1 | /8t 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:17mf3 6:17mf3 6:17mf3 6:15mf1 6:15mf1 6:15mf1 | /8t 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:10mf1 6:13mf4 6:13mf4 6:13mf4 6:10mf1 6:10mf1 6:10mf1 | /8t 6:15mf1 6:15mf1 6:15mf1 6:17mf3 6:17mf3 6:17mf3 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:15mf1 6:15mf1",
                 "position": {
                   "fret": 10,
                   "shifts": "allowed"
@@ -10399,9 +10399,9 @@
                   {"string":6,"fret":15,"midi":55,"tick":13440,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":6,"fret":15,"midi":55,"tick":13760,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":6,"fret":15,"midi":55,"tick":14080,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
-                  {"string":6,"fret":13,"midi":53,"tick":14400,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":6,"fret":13,"midi":53,"tick":14720,"dur":320,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":6,"fret":13,"midi":53,"tick":15040,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":6,"fret":15,"midi":55,"tick":14400,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":6,"fret":15,"midi":55,"tick":14720,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":6,"fret":15,"midi":55,"tick":15040,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -10425,13 +10425,13 @@
               },
               {
                 "id": "key=D,stringSet=A-string",
-                "label": "D on the A string",
+                "label": "G on the A string",
                 "params": {
                   "key": "D",
                   "stringSet": "A string"
                 },
                 "pool": "all",
-                "tab": "/8t 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:13mf4 5:13mf4 5:13mf4 5:10mf1 5:10mf1 5:10mf1 | /8t 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:17mf3 5:17mf3 5:17mf3 5:15mf1 5:15mf1 5:15mf1 | /8t 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:13mf4 5:13mf4 5:13mf4 5:10mf1 5:10mf1 5:10mf1 | /8t 5:15mf1 5:15mf1 5:15mf1 5:17mf3 5:17mf3 5:17mf3 5:15mf1 5:15mf1 5:15mf1 5:13mf4 5:13mf4 5:13mf4",
+                "tab": "/8t 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:13mf4 5:13mf4 5:13mf4 5:10mf1 5:10mf1 5:10mf1 | /8t 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:17mf3 5:17mf3 5:17mf3 5:15mf1 5:15mf1 5:15mf1 | /8t 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:10mf1 5:13mf4 5:13mf4 5:13mf4 5:10mf1 5:10mf1 5:10mf1 | /8t 5:15mf1 5:15mf1 5:15mf1 5:17mf3 5:17mf3 5:17mf3 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:15mf1 5:15mf1",
                 "position": {
                   "fret": 10,
                   "shifts": "allowed"
@@ -10483,9 +10483,9 @@
                   {"string":5,"fret":15,"midi":60,"tick":13440,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
                   {"string":5,"fret":15,"midi":60,"tick":13760,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
                   {"string":5,"fret":15,"midi":60,"tick":14080,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
-                  {"string":5,"fret":13,"midi":58,"tick":14400,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"},
-                  {"string":5,"fret":13,"midi":58,"tick":14720,"dur":320,"tech":["palmMute"],"finger":4,"pick":"d"},
-                  {"string":5,"fret":13,"midi":58,"tick":15040,"dur":320,"tech":["palmMute"],"finger":4,"pick":"u"}
+                  {"string":5,"fret":15,"midi":60,"tick":14400,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"},
+                  {"string":5,"fret":15,"midi":60,"tick":14720,"dur":320,"tech":["palmMute"],"finger":1,"pick":"d"},
+                  {"string":5,"fret":15,"midi":60,"tick":15040,"dur":320,"tech":["palmMute"],"finger":1,"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {

@@ -11,7 +11,7 @@ import { definePath } from "../spec";
 import type { ExerciseSpec, VariantParams } from "../spec";
 import { STANDARD_TUNING } from "../format";
 import { pcOfName } from "../theory";
-import { handAt, ladder, oneStringClimb, shiftFrets, swing } from "../templates";
+import { handAt, ladder, oneStringClimb, swing } from "../templates";
 
 const E_PENT = { scale: ["E", "minorPentatonic"] as [string, string] };
 const A_PENT = { scale: ["A", "minorPentatonic"] as [string, string] };
@@ -22,21 +22,6 @@ const FREE = { pick: "free" } as const satisfies Partial<ExerciseSpec>;
 const REST_CHECK = "In the rests, was the guitar silent, with no string left ringing?";
 const COUNT_CHECK = "Could you count the beats out loud while you played it?";
 const FOOT_CHECK = "Did your foot keep tapping the beat through the off-beat notes?";
-
-/** Semitones from A minor, for the lines at the fifth fret. */
-const KEY_SHIFT: Readonly<Record<string, number>> = { A: 0, B: 2, C: 3, D: 5, G: -2 };
-
-function inKeys(tab: string, keys: readonly string[]) {
-  return {
-    values: { key: keys },
-    pooled: ["key"] as const,
-    label: (p: VariantParams) => `${p.key} minor`,
-    build: (p: VariantParams) => {
-      const moved = shiftFrets(tab, KEY_SHIFT[p.key]);
-      return { tab: moved, position: handAt(moved), harmony: { scale: [p.key, "minorPentatonic"] as [string, string] } };
-    },
-  };
-}
 
 /** The same open-string riff on another pair of strings: E minor pentatonic sits the same way on each pair below. */
 const PAIRS: Readonly<Record<string, [string, string]>> = {
@@ -190,7 +175,7 @@ export default definePath({
           purpose: "A half note, then two quarters, and a whole note to end. Holding a note for exactly two clicks is harder than playing two notes.",
           howTo: [
             "Count '1, 2' through each half note and play the quarters on 3 and 4. The last bar is one note held for all four clicks.",
-            "The fretted notes are at fret 3 on the low E string and fret 2 on the A string: third finger and second finger.",
+            "The fretted notes are at fret 3 on the low E string and fret 2 on the other strings: third finger for fret 3, second finger for fret 2.",
           ],
           coach: "I time when each note starts. How long you let it ring is for your ear and your count.",
           vary: HALVES.vary,
@@ -292,13 +277,12 @@ export default definePath({
         {
           id: "fifth-tune",
           title: "A tune at the fifth fret",
-          purpose: "The same rhythms on fretted notes: a short A minor melody of eighths and quarters that ends on a long note.",
+          purpose: "The same rhythms on fretted notes: a short melody in the A minor pentatonic box, eighths and quarters, ending on a long C.",
           howTo: [
             "First finger at fret 5, third finger at fret 7, little finger at fret 8 on the B string.",
-            "Count it first without the guitar: '1 and 2, 3 and 4'. Then play what you counted.",
+            "Count it first without the guitar: '1 and 2, 3 and 4', then '1 and 2 and 3' and hold. Then play what you counted.",
           ],
           coach: "After the take I'll say how even it was and whether the notes were the written ones.",
-          vary: inKeys(FIFTH_TUNE, ["A", "B", "C", "D"]),
           tab: FIFTH_TUNE,
           position: 5,
           harmony: A_PENT,
@@ -326,7 +310,7 @@ export default definePath({
         {
           id: "quarter-rests",
           title: "Play one, rest one",
-          purpose: "A note on a click, silence on the next. The last bar is one note and three beats of nothing, which is longer than it sounds.",
+          purpose: "A note on a click, silence on the next; bar 3 moves the rest to beat 3. The last bar is one note and three beats of nothing, which is longer than it sounds.",
           howTo: [
             "Play on the click, then stop the string exactly on the next click. Count the rests as loudly as the notes.",
             "In bar 4, play on beat 1 and count '2, 3, 4' in silence before the loop starts again.",
@@ -442,7 +426,7 @@ export default definePath({
           title: "A beat and a half",
           purpose: "A dotted quarter note and an eighth: long, short, long, short. The short note falls on the 'and' of 2 and of 4.",
           howTo: [
-            "Count '1 and 2 AND 3 and 4 AND', playing on 1, on the 'and' of 2, on 3 and on the 'and' of 4.",
+            "Count '1 and 2 AND 3 and 4 AND', playing on 1, on the 'and' of 2, on 3 and on the 'and' of 4. In bar 2 the note on 3 is held to the end of the bar.",
             "The long note is a downstroke and the short one an upstroke. Let the long note ring until the short one starts.",
           ],
           coach: "I'll say how even it was and check the notes after the take.",
@@ -481,7 +465,7 @@ export default definePath({
           title: "A syncopated riff",
           purpose: "Two bars in E minor pentatonic where beats 2 and 3 are silent and the notes around them fall on the 'and'.",
           howTo: [
-            "Count '1 and, (2) and, (3) and 4 and'. The hand swings in eighths throughout and plays only the written ones.",
+            "Count '1 and, (2) and, (3) and 4'. The hand swings in eighths throughout and plays only the written ones.",
             "Learn it at the first rung with the count out loud. It will feel wrong until it suddenly feels right.",
           ],
           coach: "After the take I'll say how even it was and whether the notes were the written ones.",
@@ -625,7 +609,7 @@ export default definePath({
           purpose: "A beat of two eighths, then a beat of three triplets, and again. The click stays where it is and the division changes under it.",
           howTo: [
             "Count '1 and, 2-trip-let, 3 and, 4-trip-let'. The first note of every beat is on the click whichever it is.",
-            "The triplet is not faster eighths squeezed in. Slow the hand a little less than you think.",
+            "The triplet is three even notes, not two eighths with a third squeezed in. Speed the hand up a little less than you think.",
           ],
           coach: "The first note after each change is where the time moves. I'll say how even it was.",
           ...FREE,
@@ -665,7 +649,6 @@ export default definePath({
             "Six notes in a row cross three strings. Keep the strokes strictly down-up through the crossings.",
           ],
           coach: "After the take I'll say how even it was and whether the notes were the written ones.",
-          vary: inKeys(TRIPLET_TUNE, ["A", "B", "C", "D"]),
           tab: TRIPLET_TUNE,
           position: 5,
           harmony: A_PENT,
@@ -759,7 +742,6 @@ export default definePath({
           ],
           coach: "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
           ...FREE,
-          vary: inKeys(FUNK_LINE, ["A", "B", "C", "D"]),
           tab: FUNK_LINE,
           position: 5,
           harmony: A_PENT,
@@ -781,7 +763,7 @@ export default definePath({
         "Say the counts in a row before you play: '1 and, 2-trip-let, 3 e and a, 4'.",
         "Coming down from sixteenths to triplets is the hard direction. Leave more room than feels right.",
       ],
-      payoff: "The rhythm pyramid up and down in one take, and a riff that changes gear three times in two bars.",
+      payoff: "The rhythm pyramid up and down in one take, and a riff that changes gear on every beat.",
       exercises: [
         {
           id: "gears",
@@ -824,7 +806,7 @@ export default definePath({
         {
           id: "three-over-two",
           title: "Three across two beats",
-          purpose: "Two quarter notes, then three notes spread evenly over the next two beats: the quarter-note triplet. Slow, wide and easy to get wrong.",
+          purpose: "Two quarter notes, then three notes spread evenly over the next two beats: the quarter-note triplet. Bar 2 turns it round, the triplet first. Slow, wide and easy to get wrong.",
           howTo: [
             "Count eighth-note triplets, '1-trip-let, 2-trip-let', and play every second syllable: '1, let, trip'.",
             "The three notes are equal. If the last one is short, you fell back onto the beat too soon.",
@@ -851,7 +833,6 @@ export default definePath({
           ],
           coach: "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
           ...FREE,
-          vary: inKeys(GEAR_RIFF, ["A", "B", "C", "D"]),
           tab: GEAR_RIFF,
           position: 5,
           harmony: A_PENT,
@@ -865,7 +846,7 @@ export default definePath({
     {
       id: "with-the-band",
       title: "With the band",
-      goal: "Hold a riff in eighths, one in sixteenths and a shuffle against a real rhythm section for four bars.",
+      goal: "Hold a riff in eighths, one in sixteenths and a shuffle against a real rhythm section, two to four bars at a time.",
       why: "A click tells you exactly where the beat is. A band tells you roughly, and gives you a feel to sit in. Locking a riff to a bass drum and a snare is the reason to practise rhythm at all, and it uses the ear differently from a click.",
       howTo: [
         "Listen to the bass drum and the snare, not to your own guitar. Your riff is one part of the groove.",
@@ -877,9 +858,9 @@ export default definePath({
         {
           id: "band-eighths",
           title: "An eighth-note riff with the band",
-          purpose: "Four bars in E minor over a rock groove, with rests on beats 2 and 3 where the snare speaks. The riff follows the chords: E, G, A and back to E.",
+          purpose: "Four bars in E minor over a rock groove, with rests on beats 2 and 3 of the first three bars, where the snare speaks. The riff follows the chords: E, G, A and back to E.",
           howTo: [
-            "Count '1 and, (2) and, (3) and 4 and'. The hand swings in eighths throughout.",
+            "Count '1 and, (2) and, (3) and 4 and' for three bars; bar 4 fills beat 3 and ends on a long note. The hand swings in eighths throughout.",
             "Each bar starts on the root of its chord: open low E, G at fret 3, the open A string, and E again.",
           ],
           coach: "Band on. I time your notes against it and check them after the take.",

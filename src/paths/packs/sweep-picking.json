@@ -38,10 +38,10 @@
         {
           "id": "triads.two-string-push",
           "title": "Two strings: the push and the pull",
-          "purpose": "The smallest sweep there is: two notes of the triad in one push of the pick, a beat to stop them, then the same two notes in one pull back. Everything a bigger sweep needs is here, the rest stroke and the mute, with nothing else to think about.",
+          "purpose": "The smallest sweep there is: two notes of the triad in one push of the pick, a silent triplet to stop them, then the same two notes in one pull back. Everything a bigger sweep needs is here, the rest stroke and the mute, with nothing else to think about.",
           "howTo": [
             "Triplets: two notes, then a silent third. Push down through both strings in one motion; the pick lands on the second string, rests there for a moment, then goes through it. Coming back, one pull up through both.",
-            "A minor at fret 12: middle finger on the B string at 13, index on the top string at 12. Let go of the first note as the second sounds, without lifting the finger off the string.",
+            "On the B and top strings in A minor: middle finger on the B string at 13, index on the top string at 12. Let go of the first note as the second sounds, without lifting the finger off the string.",
             "Use the silent third to stop both strings. If you can hear them in the gap, the mute is what to work on, not the speed."
           ],
           "coachLine": "Timing only: I time the notes and say if one went missing or rang on as an extra. Whether it was one push or two strokes is yours to keep honest.",
@@ -8568,7 +8568,7 @@
           "purpose": "Up, link, down, link, through four chords. It's the cleanest way to hear a chain: every chord change is a single small step.",
           "howTo": [
             "Half-note triplets, three notes a bar: one pass through each chord's three strings, up in one bar and down in the next.",
-            "At each bar line the last note of one chord steps to the first note of the next, on the same string or the one beside it. Sing the top notes if you can: they make a tune."
+            "At each bar line the last note of one chord moves to the first note of the next on the same string, usually by a fret or two; the jump back to the first chord can be bigger. Sing the top notes if you can: they make a tune."
           ],
           "coachLine": "Four links per round. I report evenness and notes heard at these tempos.",
           "grading": "graded",
@@ -11056,7 +11056,7 @@
           "purpose": "Two loops of each four-string shape, voice-led. The band-sized sound with short moves.",
           "howTo": [
             "Sixteenths, four to the click. Each chord is a four-string loop played twice, and each new shape starts as near as it can to the last one.",
-            "The shift back to the first shape, at the end of the fourth bar, is the fastest move here. Look at where it lands before you get there."
+            "The shift back to the first shape, at the end of the fourth bar, is often the biggest move here. Look at where it lands before you get there."
           ],
           "coachLine": "Graded at every rung here. Even so, a recording tells you things I can't.",
           "grading": "graded",
@@ -22406,7 +22406,7 @@
           "title": "Five-string chain with the band",
           "purpose": "One big loop per chord, over a triplet-feel band, with the V chord in the mix.",
           "howTo": [
-            "Triplets over the band: one five-string loop to a bar, and a new chord every bar.",
+            "Triplets over the band: one five-string loop to a bar, one chord a bar.",
             "Lock the first note of each bar to the kick drum and let the band carry you round. If a shape is late, drop it and catch the next bar line."
           ],
           "coachLine": "Graded on slower rungs, and on direct input only. The fast ones are for your ear.",

@@ -28,7 +28,7 @@
       "howTo": [
         "A whole step is two frets and a half step is one. From any note, the pattern two, two, one, two, two, two, one gives its major scale.",
         "Say the numbers 1 to 8 as you go up. The eighth note is the first one again, an octave higher.",
-        "In open position each fret has its own finger: first finger for fret 1, second for fret 2, third for fret 3."
+        "In C major's open position each fret has its own finger: first finger for fret 1, second for fret 2, third for fret 3. For G the hand sits one fret higher."
       ],
       "payoff": "A tune everybody knows, played from the scale you just learned.",
       "prerequisites": [],
@@ -1729,7 +1729,7 @@
         {
           "id": "movable-major.tune-in-a",
           "title": "A melody over A, D and E",
-          "purpose": "A four-bar tune inside the shape over a band. Each bar starts on a note of its chord: A, then D, then G# over E, then home.",
+          "purpose": "A four-bar tune inside the shape over a band. Each bar starts on a note of its chord: A, then D, then G# over E, then E on the way home to A.",
           "howTo": [
             "Quarters and eighths, 60 BPM up to a pass at 90.",
             "It stays on the low three strings of the shape. Sing along if you can; the tune is the point, the scale is where it lives."
@@ -1873,7 +1873,7 @@
           "purpose": "A natural minor on the low three strings, up and back. A different key comes round on each Take.",
           "howTo": [
             "Straight eighths, 50 BPM up to a pass at 80.",
-            "In A: low E string 5, 7 and 8; A string 5, 7 and 8; D string 5 and 7. Fingers 1, 3 and 4 on each string."
+            "In A: low E string 5, 7 and 8; A string 5, 7 and 8; D string 5 and 7. Fingers 1, 3 and 4 on the low two strings, 1 and 3 on the D string."
           ],
           "coachLine": "Right notes and even eighths after the take.",
           "grading": "graded",
@@ -2362,7 +2362,7 @@
         {
           "id": "relative-minor.minor-tune",
           "title": "A melody over Am, Dm and Em",
-          "purpose": "A four-bar tune in A minor over a band, starting each bar on a note of its chord: A, then D, then E, then home to A.",
+          "purpose": "A four-bar tune in A minor over a band, starting each bar on a note of its chord: A, then D, then E, and E again on the way home to A.",
           "howTo": [
             "Quarters and eighths, 60 BPM up to a pass at 90.",
             "All of it sits in the minor shape at fret 5 on the low three strings."
@@ -3650,7 +3650,7 @@
         "Three notes per string at the eighth fret: frets 8, 10 and 12 on the low two strings, 9, 10 and 12 on the next two.",
         "Keep the thumb behind the neck so the hand can open for the wider shape. Nothing here should hurt."
       ],
-      "payoff": "C major across two positions without a seam, and a three-notes-per-string run that covers four strings in two beats.",
+      "payoff": "C major across two positions without a seam, and a three-notes-per-string run that covers four strings in one bar.",
       "prerequisites": ["sequences"],
       "difficulty": 2.95,
       "exercises": [
@@ -3910,8 +3910,8 @@
           "title": "The formula, then the shape",
           "purpose": "A major scale along one string and then the same scale in the movable shape: the same eight notes found two ways.",
           "howTo": [
-            "Quarter notes along the string, 50 BPM up to a pass at 80.",
-            "On the G string from fret 2: 2, 4, 6, 7, 9, 11, 13, 14 and back. It is A major, the scale the shape at fret 4 plays."
+            "Quarter notes along the string, then eighths in the shape, 50 BPM up to a pass at 80.",
+            "On the G string from fret 2: 2, 4, 6, 7, 9, 11, 13, 14 and back. It is A major. Then the same scale in the shape at fret 4, from the low E string's fret 5."
           ],
           "coachLine": "Right notes and steady quarters after the take.",
           "grading": "graded",
@@ -3920,7 +3920,7 @@
             "numerator": 4,
             "denominator": 4
           },
-          "bars": 4,
+          "bars": 6,
           "loops": true,
           "position": {
             "fret": 2,
@@ -3944,7 +3944,21 @@
             {"string":3,"fret":7,"midi":62,"tick":10560,"dur":960,"tech":[],"finger":1},
             {"string":3,"fret":6,"midi":61,"tick":11520,"dur":960,"tech":[],"finger":1},
             {"string":3,"fret":4,"midi":59,"tick":12480,"dur":960,"tech":[],"finger":1},
-            {"string":3,"fret":2,"midi":57,"tick":13440,"dur":1920,"tech":[],"finger":1}
+            {"string":3,"fret":2,"midi":57,"tick":13440,"dur":1920,"tech":[],"finger":1},
+            {"string":6,"fret":5,"midi":45,"tick":15360,"dur":480,"tech":[]},
+            {"string":6,"fret":7,"midi":47,"tick":15840,"dur":480,"tech":[]},
+            {"string":5,"fret":4,"midi":49,"tick":16320,"dur":480,"tech":[]},
+            {"string":5,"fret":5,"midi":50,"tick":16800,"dur":480,"tech":[]},
+            {"string":5,"fret":7,"midi":52,"tick":17280,"dur":480,"tech":[]},
+            {"string":4,"fret":4,"midi":54,"tick":17760,"dur":480,"tech":[]},
+            {"string":4,"fret":6,"midi":56,"tick":18240,"dur":480,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":18720,"dur":480,"tech":[]},
+            {"string":4,"fret":6,"midi":56,"tick":19200,"dur":480,"tech":[]},
+            {"string":4,"fret":4,"midi":54,"tick":19680,"dur":480,"tech":[]},
+            {"string":5,"fret":7,"midi":52,"tick":20160,"dur":480,"tech":[]},
+            {"string":5,"fret":5,"midi":50,"tick":20640,"dur":480,"tech":[]},
+            {"string":5,"fret":4,"midi":49,"tick":21120,"dur":480,"tech":[]},
+            {"string":6,"fret":7,"midi":47,"tick":21600,"dur":1440,"tech":[]}
           ],
           "rests": [],
           "tempo": {
@@ -4001,14 +4015,13 @@
             "subdivision": 1
           },
           "estimatedMinutes": 5,
-          "tab": "/4 3:2f1 3:4f1 3:6f1 3:7f1 | 3:9f1 3:11f1 3:13f1 3:14f1 | 3:13f1 3:11f1 3:9f1 3:7f1 | 3:6f1 3:4f1 /2 3:2f1",
-          "subdivision": "quarters",
+          "tab": "/4 3:2f1 3:4f1 3:6f1 3:7f1 | 3:9f1 3:11f1 3:13f1 3:14f1 | 3:13f1 3:11f1 3:9f1 3:7f1 | 3:6f1 3:4f1 /2 3:2f1 | /8 6:5 6:7 5:4 5:5 5:7 4:4 4:6 4:7 4:6 4:4 5:7 5:5 5:4 6:7 hold",
           "computed": {
-            "noteCount": 15,
-            "minGapMsAtTop": 545.45,
-            "handShifts": 9,
+            "noteCount": 29,
+            "minGapMsAtTop": 272.73,
+            "handShifts": 11,
             "maxPlayableBpm": 400,
-            "difficulty": 1.48
+            "difficulty": 1.92
           },
           "harmony": {
             "kind": "scale",
@@ -4357,7 +4370,7 @@
           "purpose": "Four bars over Am and E7. The Am bars use the plain minor notes and come to rest; the E7 bars lean on G# and want to move.",
           "howTo": [
             "Eighths and half notes, 60 BPM up to a pass at 90.",
-            "Bars 1 and 3 are over Am; bars 2 and 4 are over E7 and start on G#, the D string's fret 6. All of it stays in the shape at fret 5."
+            "Bars 1 and 3 are over Am. Bar 2 starts on G#, the D string's fret 6; bar 4 starts on E and ends on G#. All of it stays in the shape at fret 5."
           ],
           "coachLine": "Band on. Right notes and time after the take.",
           "grading": "graded",
@@ -4972,7 +4985,7 @@
             {"string":4,"fret":4,"midi":54,"tick":12000,"dur":480,"tech":[]},
             {"string":4,"fret":5,"midi":55,"tick":12480,"dur":480,"tech":[]},
             {"string":4,"fret":7,"midi":57,"tick":12960,"dur":480,"tech":[]},
-            {"string":4,"fret":4,"midi":54,"tick":13440,"dur":1920,"tech":[]}
+            {"string":4,"fret":5,"midi":55,"tick":13440,"dur":1920,"tech":[]}
           ],
           "rests": [],
           "tempo": {
@@ -5029,7 +5042,7 @@
             "subdivision": 1
           },
           "estimatedMinutes": 5,
-          "tab": "/8 4:7 4:5 5:8 5:7 /2 5:5 | /8 4:7 4:5 4:4 5:7 /2 5:5 | /8 5:7 5:8 4:5 4:7 /2 4:5 | /8 5:7 4:4 4:5 4:7 /2 4:4",
+          "tab": "/8 4:7 4:5 5:8 5:7 /2 5:5 | /8 4:7 4:5 4:4 5:7 /2 5:5 | /8 5:7 5:8 4:5 4:7 /2 4:5 | /8 5:7 4:4 4:5 4:7 /2 4:5",
           "subdivision": "eighths",
           "computed": {
             "noteCount": 20,
@@ -5612,7 +5625,7 @@
         {
           "id": "mixolydian.mixolydian-lick",
           "title": "A Mixolydian phrase over A and G",
-          "purpose": "Four bars over a band going from A to G and back. The bars over G land on G; the bars over A lean on C#.",
+          "purpose": "Four bars over a band going from A to G and back. The bars over G start on G; bar 1, over A, leans on C#.",
           "howTo": [
             "Eighths, quarters and half notes, 60 BPM up to a pass at 90.",
             "Bar 1 starts on A and bar 3 on E. Bars 2 and 4 start on G, the D string's fret 5, and bar 2 ends on the low G at fret 3."
@@ -5743,20 +5756,20 @@
       "order": 9,
       "title": "Choosing the scale",
       "goal": "Play a written phrase in each mode over its chords, and then choose the scale yourself from the chords you hear.",
-      "why": "Knowing a scale is half of it. The other half is knowing which one the song is asking for, and the chords tell you: a minor chord and the major chord a fourth up is Dorian; a major chord and the major chord a step down is Mixolydian. In both cases the note that changes is the third of the second chord.",
+      "why": "Knowing a scale is half of it. The other half is knowing which one the song is asking for, and the chords tell you: a minor chord and the major chord a fourth up is Dorian; a major chord and the major chord a step down is Mixolydian. In Dorian the changed note is the third of the second chord, F# in D; in Mixolydian it is that chord's root, G.",
       "howTo": [
         "Listen for the second chord. Over Am, when D arrives, play F#. Over A, when G arrives, play G.",
-        "Keep the hand in one place, between frets 4 and 8. Both scales live there, two notes apart.",
+        "Keep the hand around frets 4 to 8. The two scales differ by one note there: C in A Dorian, C# in A Mixolydian.",
         "A short phrase that lands on the changed note says more than a long run through the whole scale."
       ],
-      "payoff": "Two eight-bar solos that sound like they belong to their chords, and one of your own.",
+      "payoff": "Two four-bar solos that sound like they belong to their chords, and one of your own.",
       "prerequisites": ["mixolydian"],
       "difficulty": 3.55,
       "exercises": [
         {
           "id": "choosing.dorian-etude",
           "title": "Four bars of Dorian",
-          "purpose": "A written phrase over Am and D, twice round: A Dorian from the low string up to the A on the D string, landing on F# each time the D chord arrives.",
+          "purpose": "A written phrase over Am, D, Am, Am: A Dorian from the low string up to the A on the D string, landing on F# when the D chord arrives.",
           "howTo": [
             "Eighths, quarters and half notes, 60 BPM up to a pass at 95.",
             "Bar 2 starts and ends on F#. Bar 3 walks down to the low A, and bar 4 climbs back to finish on A."
@@ -6038,11 +6051,11 @@
             {"string":4,"fret":4,"midi":54,"tick":2400,"dur":480,"tech":[]},
             {"string":5,"fret":7,"midi":52,"tick":2880,"dur":480,"tech":[]},
             {"string":5,"fret":5,"midi":50,"tick":3360,"dur":480,"tech":[]},
-            {"string":4,"fret":4,"midi":54,"tick":3840,"dur":1920,"tech":[]},
-            {"string":4,"fret":5,"midi":55,"tick":5760,"dur":480,"tech":[]},
-            {"string":4,"fret":7,"midi":57,"tick":6240,"dur":480,"tech":[]},
-            {"string":4,"fret":5,"midi":55,"tick":6720,"dur":480,"tech":[]},
-            {"string":4,"fret":4,"midi":54,"tick":7200,"dur":480,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":3840,"dur":1920,"tech":[]},
+            {"string":4,"fret":4,"midi":54,"tick":5760,"dur":480,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":6240,"dur":480,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":6720,"dur":480,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":7200,"dur":480,"tech":[]},
             {"string":4,"fret":7,"midi":57,"tick":7680,"dur":1920,"tech":[]},
             {"string":4,"fret":5,"midi":55,"tick":9600,"dur":480,"tech":[]},
             {"string":4,"fret":4,"midi":54,"tick":10080,"dur":480,"tech":[]},
@@ -6092,7 +6105,7 @@
             "chart": "A | G | A | A"
           },
           "estimatedMinutes": 5,
-          "tab": "/2 4:7 /8 4:5 4:4 5:7 5:5 | /2 4:4 /8 4:5 4:7 4:5 4:4 | /2 4:7 /8 4:5 4:4 5:7 5:4 | /2 5:4 /8 5:5 5:7 4:4 5:7",
+          "tab": "/2 4:7 /8 4:5 4:4 5:7 5:5 | /2 4:5 /8 4:4 4:5 4:7 4:5 | /2 4:7 /8 4:5 4:4 5:7 5:4 | /2 5:4 /8 5:5 5:7 4:4 5:7",
           "subdivision": "eighths",
           "computed": {
             "noteCount": 20,
@@ -6128,7 +6141,7 @@
         {
           "id": "warmup-beginner.scale-walk",
           "title": "A walk up one string",
-          "purpose": "Four notes of a major scale on one string, a step higher each bar. A different key and string each time.",
+          "purpose": "Three notes of a major scale on one string, up and back, a step higher each bar. A different key and string each time.",
           "howTo": [
             "Quarter notes, well under your clean tempo. Say 'whole' or 'half' for each step, and move the hand up a note at each bar line."
           ],

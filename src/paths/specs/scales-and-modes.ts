@@ -106,7 +106,7 @@ const HARMONIC_LICK = `/8 4:7 5:8 5:7 5:5 /2 5:7 | /8 4:6 4:7 5:7 4:6 /2 5:7 | /
 // --- Dorian -------------------------------------------------------------------
 
 const DORIAN_SHAPE = `/8 6:5 6:7 6:8 5:5 5:7 4:4 4:5 4:7 | 4:5 4:4 5:7 5:5 6:8 6:7 hold`;
-const MINOR_VS_DORIAN = `/8 4:7 4:5 5:8 5:7 /2 5:5 | /8 4:7 4:5 4:4 5:7 /2 5:5 | /8 5:7 5:8 4:5 4:7 /2 4:5 | /8 5:7 4:4 4:5 4:7 /2 4:4`;
+const MINOR_VS_DORIAN = `/8 4:7 4:5 5:8 5:7 /2 5:5 | /8 4:7 4:5 4:4 5:7 /2 5:5 | /8 5:7 5:8 4:5 4:7 /2 4:5 | /8 5:7 4:4 4:5 4:7 /2 4:5`;
 const DORIAN_LICK = `/8 4:7 4:5 4:4 5:7 /4 5:5 5:7 | /8 4:4 4:5 4:7 4:5 /2 4:4 | /8 4:7 4:5 5:7 5:5 /4 6:8 5:5 | /8 4:4 5:7 4:4 4:5 /2 4:7`;
 
 // --- Mixolydian ---------------------------------------------------------------
@@ -119,7 +119,7 @@ const MIXO_LICK = `/8 4:7 4:5 4:4 5:7 /4 5:4 5:7 | /8 4:5 4:4 5:7 5:5 /2 6:3 | /
 
 const ETUDE_DORIAN = `/8 4:7 4:5 4:4 5:7 /4 5:5 5:7 | /8 4:4 5:7 4:4 4:5 /2 4:4 | /8 5:7 5:5 6:8 6:7 /4 6:5 5:5 | /8 5:7 5:5 5:7 4:5 /2 4:7`;
 const ETUDE_MIXO = `/8 4:7 4:5 4:4 5:7 /4 5:4 5:7 | /8 4:5 4:4 5:7 5:5 /2 6:3 | /8 5:7 5:5 5:4 5:5 /4 5:7 4:4 | /8 4:7 4:5 4:4 5:7 /2 6:5`;
-const MODE_EXAMPLE = `/2 4:7 /8 4:5 4:4 5:7 5:5 | /2 4:4 /8 4:5 4:7 4:5 4:4 | /2 4:7 /8 4:5 4:4 5:7 5:4 | /2 5:4 /8 5:5 5:7 4:4 5:7`;
+const MODE_EXAMPLE = `/2 4:7 /8 4:5 4:4 5:7 5:5 | /2 4:5 /8 4:4 4:5 4:7 4:5 | /2 4:7 /8 4:5 4:4 5:7 5:4 | /2 5:4 /8 5:5 5:7 4:4 5:7`;
 
 export default definePath({
   id: "scales-and-modes",
@@ -145,7 +145,7 @@ export default definePath({
       howTo: [
         "A whole step is two frets and a half step is one. From any note, the pattern two, two, one, two, two, two, one gives its major scale.",
         "Say the numbers 1 to 8 as you go up. The eighth note is the first one again, an octave higher.",
-        "In open position each fret has its own finger: first finger for fret 1, second for fret 2, third for fret 3.",
+        "In C major's open position each fret has its own finger: first finger for fret 1, second for fret 2, third for fret 3. For G the hand sits one fret higher.",
       ],
       payoff: "A tune everybody knows, played from the scale you just learned.",
       exercises: [
@@ -302,7 +302,7 @@ export default definePath({
         {
           id: "tune-in-a",
           title: "A melody over A, D and E",
-          purpose: "A four-bar tune inside the shape over a band. Each bar starts on a note of its chord: A, then D, then G# over E, then home.",
+          purpose: "A four-bar tune inside the shape over a band. Each bar starts on a note of its chord: A, then D, then G# over E, then E on the way home to A.",
           howTo: [
             "Quarters and eighths, 60 BPM up to a pass at 90.",
             "It stays on the low three strings of the shape. Sing along if you can; the tune is the point, the scale is where it lives.",
@@ -338,7 +338,7 @@ export default definePath({
           purpose: "A natural minor on the low three strings, up and back. A different key comes round on each Take.",
           howTo: [
             "Straight eighths, 50 BPM up to a pass at 80.",
-            "In A: low E string 5, 7 and 8; A string 5, 7 and 8; D string 5 and 7. Fingers 1, 3 and 4 on each string.",
+            "In A: low E string 5, 7 and 8; A string 5, 7 and 8; D string 5 and 7. Fingers 1, 3 and 4 on the low two strings, 1 and 3 on the D string.",
           ],
           coach: "Right notes and even eighths after the take.",
           vary: inKeys(MINOR_ONE, FROM_A, "naturalMinor"),
@@ -371,7 +371,7 @@ export default definePath({
         {
           id: "minor-tune",
           title: "A melody over Am, Dm and Em",
-          purpose: "A four-bar tune in A minor over a band, starting each bar on a note of its chord: A, then D, then E, then home to A.",
+          purpose: "A four-bar tune in A minor over a band, starting each bar on a note of its chord: A, then D, then E, and E again on the way home to A.",
           howTo: [
             "Quarters and eighths, 60 BPM up to a pass at 90.",
             "All of it sits in the minor shape at fret 5 on the low three strings.",
@@ -488,7 +488,7 @@ export default definePath({
         "Three notes per string at the eighth fret: frets 8, 10 and 12 on the low two strings, 9, 10 and 12 on the next two.",
         "Keep the thumb behind the neck so the hand can open for the wider shape. Nothing here should hurt.",
       ],
-      payoff: "C major across two positions without a seam, and a three-notes-per-string run that covers four strings in two beats.",
+      payoff: "C major across two positions without a seam, and a three-notes-per-string run that covers four strings in one bar.",
       difficultyException:
         "The lines move at the same eighth-note rate as the sequences before them but repeat no note, so the metric reads lower. The demand is the shift and the wider three-per-string hand.",
       exercises: [
@@ -535,11 +535,11 @@ export default definePath({
           title: "The formula, then the shape",
           purpose: "A major scale along one string and then the same scale in the movable shape: the same eight notes found two ways.",
           howTo: [
-            "Quarter notes along the string, 50 BPM up to a pass at 80.",
-            "On the G string from fret 2: 2, 4, 6, 7, 9, 11, 13, 14 and back. It is A major, the scale the shape at fret 4 plays.",
+            "Quarter notes along the string, then eighths in the shape, 50 BPM up to a pass at 80.",
+            "On the G string from fret 2: 2, 4, 6, 7, 9, 11, 13, 14 and back. It is A major. Then the same scale in the shape at fret 4, from the low E string's fret 5.",
           ],
           coach: "Right notes and steady quarters after the take.",
-          tab: formula(3, 2),
+          tab: `${formula(3, 2)} | ${MAJOR_ONE}`,
           position: 2,
           shifts: true,
           harmony: { scale: ["A", "major"], cover: true },
@@ -588,7 +588,7 @@ export default definePath({
           purpose: "Four bars over Am and E7. The Am bars use the plain minor notes and come to rest; the E7 bars lean on G# and want to move.",
           howTo: [
             "Eighths and half notes, 60 BPM up to a pass at 90.",
-            "Bars 1 and 3 are over Am; bars 2 and 4 are over E7 and start on G#, the D string's fret 6. All of it stays in the shape at fret 5.",
+            "Bars 1 and 3 are over Am. Bar 2 starts on G#, the D string's fret 6; bar 4 starts on E and ends on G#. All of it stays in the shape at fret 5.",
           ],
           coach: "Band on. Right notes and time after the take.",
           tab: HARMONIC_LICK,
@@ -738,7 +738,7 @@ export default definePath({
         {
           id: "mixolydian-lick",
           title: "A Mixolydian phrase over A and G",
-          purpose: "Four bars over a band going from A to G and back. The bars over G land on G; the bars over A lean on C#.",
+          purpose: "Four bars over a band going from A to G and back. The bars over G start on G; bar 1, over A, leans on C#.",
           howTo: [
             "Eighths, quarters and half notes, 60 BPM up to a pass at 90.",
             "Bar 1 starts on A and bar 3 on E. Bars 2 and 4 start on G, the D string's fret 5, and bar 2 ends on the low G at fret 3.",
@@ -761,18 +761,18 @@ export default definePath({
       id: "choosing",
       title: "Choosing the scale",
       goal: "Play a written phrase in each mode over its chords, and then choose the scale yourself from the chords you hear.",
-      why: "Knowing a scale is half of it. The other half is knowing which one the song is asking for, and the chords tell you: a minor chord and the major chord a fourth up is Dorian; a major chord and the major chord a step down is Mixolydian. In both cases the note that changes is the third of the second chord.",
+      why: "Knowing a scale is half of it. The other half is knowing which one the song is asking for, and the chords tell you: a minor chord and the major chord a fourth up is Dorian; a major chord and the major chord a step down is Mixolydian. In Dorian the changed note is the third of the second chord, F# in D; in Mixolydian it is that chord's root, G.",
       howTo: [
         "Listen for the second chord. Over Am, when D arrives, play F#. Over A, when G arrives, play G.",
-        "Keep the hand in one place, between frets 4 and 8. Both scales live there, two notes apart.",
+        "Keep the hand around frets 4 to 8. The two scales differ by one note there: C in A Dorian, C# in A Mixolydian.",
         "A short phrase that lands on the changed note says more than a long run through the whole scale.",
       ],
-      payoff: "Two eight-bar solos that sound like they belong to their chords, and one of your own.",
+      payoff: "Two four-bar solos that sound like they belong to their chords, and one of your own.",
       exercises: [
         {
           id: "dorian-etude",
           title: "Four bars of Dorian",
-          purpose: "A written phrase over Am and D, twice round: A Dorian from the low string up to the A on the D string, landing on F# each time the D chord arrives.",
+          purpose: "A written phrase over Am, D, Am, Am: A Dorian from the low string up to the A on the D string, landing on F# when the D chord arrives.",
           howTo: [
             "Eighths, quarters and half notes, 60 BPM up to a pass at 95.",
             "Bar 2 starts and ends on F#. Bar 3 walks down to the low A, and bar 4 climbs back to finish on A.",
@@ -850,7 +850,7 @@ export default definePath({
         {
           id: "scale-walk",
           title: "A walk up one string",
-          purpose: "Four notes of a major scale on one string, a step higher each bar. A different key and string each time.",
+          purpose: "Three notes of a major scale on one string, up and back, a step higher each bar. A different key and string each time.",
           howTo: ["Quarter notes, well under your clean tempo. Say 'whole' or 'half' for each step, and move the hand up a note at each bar line."],
           coach: "This is a warm-up. It tells you how it went, and it decides nothing.",
           vary: {

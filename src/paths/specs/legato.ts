@@ -34,6 +34,10 @@ const NOISE_CHECK = "Between takes, stop and listen: are the strings you are not
 const SAFETY =
   "Stop at any pain in the hand, wrist or forearm. A tired hand is one thing and pain is another; pain ends the set.";
 
+/** Said on every Exercise whose variants move the figure: the words name the first version's frets. */
+const VARIANT_NOTE =
+  "The frets and note names here are for the first version. Other Takes move the same figure to another string or key.";
+
 /** Semitones from A minor. */
 const KEY_SHIFT: Readonly<Record<string, number>> = { A: 0, B: 2, C: 3, D: 5, E: 7, G: -2 };
 
@@ -221,6 +225,7 @@ export default definePath({
           howTo: [
             "Eighth notes. Bar 1: pick both notes of each pair. Bar 2: pick the first, hammer the second with the third finger.",
             "The hammered note lands on the 'and', exactly where the picked one did. If it comes early, the finger is falling instead of being placed.",
+            VARIANT_NOTE,
           ],
           coach: "I time the picked notes most firmly. A hammer-on I can't hear costs nothing, so its volume is yours to judge against bar 1.",
           vary: onStrings(["G 5-7", "D 5-7", "A 5-7", "top E 5-7", "B 6-8"], hammerPair),
@@ -259,6 +264,7 @@ export default definePath({
           howTo: [
             "Eighths. Pick the lower note on each string and hammer the upper: D string 5 to 7, G string 5 to 7, B string 5 to 8, and back.",
             "Third finger hammers the frets at 7, little finger the 8 on the B string. The phrase ends on a picked E on the A string.",
+            VARIANT_NOTE,
           ],
           coach: "After the take I'll say how even it was and whether the notes were the written ones.",
           vary: inKeys(HAMMER_TUNE, ["A", "C", "D", "E"], "minorPentatonic"),
@@ -292,6 +298,7 @@ export default definePath({
           howTo: [
             "Eighth notes. Both fingers down. Bar 1: pick both notes. Bar 2: pick the upper note and pull off to the lower.",
             "The pull is a small flick toward the floor, not a lift. Listen for the lower note starting with a click of its own.",
+            VARIANT_NOTE,
           ],
           coach: "The picked notes are what I time most firmly. A pull-off I can't hear costs nothing, so compare it with bar 1 by ear.",
           vary: onStrings(["G 5-7", "D 5-7", "A 5-7", "top E 5-7", "B 6-8"], pullPair),
@@ -349,6 +356,7 @@ export default definePath({
           howTo: [
             "Eighths. Top E string 8 to 5, B string 8 to 5, G string 7 to 5, D string 7 to 5, then from the B string down again to a picked E on the A string.",
             "First finger lies ready on fret 5 of the next string before you get there. The little finger pulls from the 8s, the third finger from the 7s.",
+            VARIANT_NOTE,
           ],
           coach: "After the take I'll say how even it was and whether the notes were the written ones.",
           vary: inKeys(PULL_TUNE, ["A", "C", "D", "E"], "minorPentatonic"),
@@ -382,8 +390,9 @@ export default definePath({
           howTo: [
             "Eighths. Bar 1: pick lower, upper, lower, upper, twice. Bar 2: pick the lower note on beats 1 and 3 only, then hammer, pull, hammer.",
             "The first finger never leaves its fret. Only the upper finger moves, and it stays close to the string.",
+            VARIANT_NOTE,
           ],
-          coach: "Two picked notes a bar are my anchor in bar 2. The four notes between them are for your ear: all the same size.",
+          coach: "Two picked notes a bar are my anchor in bar 2. The three notes after each one are for your ear: all the same size.",
           vary: onStrings(["G 5-7", "B 5-6", "top E 5-7", "D 5-7", "A 5-7"], slowTrill),
           tab: slowTrill(3, [5, 7]),
           position: 5,
@@ -402,6 +411,7 @@ export default definePath({
           howTo: [
             "Triplets, three to the click. Bar 1 picked. Bar 2: pick fret 5 on each beat, hammer 6 with the second finger and 8 with the little finger.",
             "Leave the second finger down when the little finger hammers. Lift both together just before the next pick.",
+            VARIANT_NOTE,
           ],
           coach: "The picked note on each beat is what I time most firmly, and I check the notes after the take.",
           vary: onStrings(["B 5-6-8", "top E 5-7-8", "G 4-5-7", "A 5-7-8"], (s, [a, b, c]) => twin("/8t", repeat(`${s}:${a} ${s}:${b}h ${s}:${c}h`, 4))),
@@ -422,6 +432,7 @@ export default definePath({
           howTo: [
             "Triplets. Bar 1 picked. Bar 2: pick fret 8 on each beat, pull off to 7, pull off to 5.",
             "Set fingers 1, 3 and 4 down together, like a small chord on one string, during the last note of the beat before.",
+            VARIANT_NOTE,
           ],
           coach: "The picked note on each beat is what I time most firmly, and I check the notes after the take.",
           vary: onStrings(["top E 5-7-8", "B 5-6-8", "G 4-5-7", "A 5-7-8"], (s, [a, b, c]) => twin("/8t", repeat(`${s}:${c} ${s}:${b}p ${s}:${a}p`, 4))),
@@ -442,6 +453,7 @@ export default definePath({
           howTo: [
             "Triplets, one pick a beat. Bar 1: B string 5, 6, 8 then top string 5, 7, 8, twice. Bar 2: top string 8, 7, 5, B string 8, 6, 5, then a held D on the G string.",
             "At the top of bar 1 you hammer onto fret 8, then pick it again to start bar 2. Keep the little finger down across the bar line.",
+            VARIANT_NOTE,
           ],
           coach: "After the take I'll say how even it was and whether the notes were the written ones.",
           vary: inKeys(TRIPLET_TUNE, ["A", "B", "C", "D", "E"]),
@@ -475,6 +487,7 @@ export default definePath({
           howTo: [
             "Sixteenths. Bar 1: alternate-pick frets 5, 7, 8, 7 four times. Bar 2: pick 5 on each beat, hammer 7, hammer 8, pull off to 7.",
             "Fingers 1, 3 and 4. The third finger stays down from its hammer-on until the next pick.",
+            VARIANT_NOTE,
           ],
           coach: "The picked note on each beat is my anchor. The three notes after it are for your ear to weigh against bar 1.",
           vary: onStrings(["top E 5-7-8", "B 5-6-8", "G 4-5-7", "A 5-7-8"], rollUp),
@@ -495,6 +508,7 @@ export default definePath({
           howTo: [
             "Sixteenths. Bar 1 picked. Bar 2: pick fret 8 on each beat, pull off to 7, pull off to 5, hammer 7.",
             "All three fingers go down before each pick. That is the hard part, and it happens during the hammer-on before it.",
+            VARIANT_NOTE,
           ],
           coach: "The picked note on each beat is my anchor. A pull-off I can't hear costs nothing, so listen for it yourself.",
           vary: onStrings(["top E 5-7-8", "B 5-6-8", "G 4-5-7", "A 5-7-8"], rollDown),
@@ -515,6 +529,7 @@ export default definePath({
           howTo: [
             "Sixteenths. Bar 1 picked. Bar 2: pick fret 5 on beats 1 and 3 only; everything else is hammer, hammer, pull, pull, hammer, hammer, pull.",
             "Hammer a little harder on the second time round. The last pull-off of each group is the note that goes missing.",
+            VARIANT_NOTE,
           ],
           coach: "With two picked notes a bar I have less to time, so the evenness you hear is the better judge here.",
           vary: onStrings(["top E 5-7-8", "B 5-6-8", "G 4-5-7", "A 5-7-8"], longRoll),
@@ -531,10 +546,10 @@ export default definePath({
         {
           id: "roll-melody",
           title: "A roll that climbs",
-          purpose: "The roll moved up the B string through A minor: three positions, two beats each, then back. The shape under the fingers changes with each move.",
+          purpose: "The roll moved up the B string through A minor: three positions, two beats each, then back. The shape widens after the first move and then stays the same.",
           howTo: [
             "Sixteenths, one pick a beat. Frets 5, 6, 8, then 6, 8, 10, then 8, 10, 12, then 6, 8, 10 again, each roll played twice.",
-            "The first two shapes use fingers 1, 2, 4 and the third uses 1, 2, 4 with a wider gap at the bottom. Move the hand during the last note of the beat.",
+            "All three shapes use fingers 1, 2, 4. The first has a one-fret gap at the bottom; the other two are two frets and two frets. Move the hand during the last note of the beat.",
           ],
           coach: "The shifts are where the time usually moves. I'll say how even it was and check the notes after the take.",
           tab: ROLL_MELODY,
@@ -564,10 +579,11 @@ export default definePath({
         {
           id: "box-up",
           title: "Up the box with hammer-ons",
-          purpose: "All six strings of A minor pentatonic, sixteenths: pick, hammer, next string. Twelve notes and a held one.",
+          purpose: "All six strings of A minor pentatonic, sixteenths: pick, hammer, next string. Twelve notes, the last one held.",
           howTo: [
             "Sixteenths. Bar 1: alternate-pick the box from the low E string to the top and hold the last note. Bar 2: pick only the first note on each string.",
             "Third finger hammers the frets at 7, little finger the frets at 8.",
+            VARIANT_NOTE,
           ],
           coach: "A pick on every string gives me plenty to time. I check the notes after the take.",
           vary: inKeys(`/16 ${picked(BOX_UP)} hold | ${BOX_UP} hold`, ["A", "C", "D", "E"], "minorPentatonic"),
@@ -589,6 +605,7 @@ export default definePath({
           howTo: [
             "Sixteenths. Bar 1 picked, bar 2 with a pull-off on every string.",
             "Both fingers are down on the new string before you pick it. The first finger rolls or hops ahead; it never arrives late.",
+            VARIANT_NOTE,
           ],
           coach: "A pick on every string gives me plenty to time. I check the notes after the take.",
           vary: inKeys(`/16 ${picked(BOX_DOWN)} hold | ${BOX_DOWN} hold`, ["A", "C", "D", "E"], "minorPentatonic"),
@@ -606,7 +623,7 @@ export default definePath({
         {
           id: "repeating-lick",
           title: "The repeating lick",
-          purpose: "Four notes round and round: a picked note on the B string, then the top string picked, picked and pulled off. Then the same lick a string lower.",
+          purpose: "Four notes round and round: a picked note on the B string, then the top string picked, picked and pulled off. Then the same lick a string lower. There is no picked bar here: the lick is its own check.",
           howTo: [
             "Sixteenths. Bar 1: B string 8, top string 5, top string 8, pull off to 5, four times. Bar 2: the same shape on the G and B strings: G string 7, B string 5, B string 8, pull off to 5.",
             "Three picks and one pull-off a beat: down, down, up works for most players, because the pick falls from the B string onto the top string. Find the strokes that repeat without thinking.",
@@ -629,6 +646,7 @@ export default definePath({
           howTo: [
             "Sixteenths, one pick a string. At the top you hammer onto fret 8 and then pick it again to start down.",
             "The descent starts in bar 1 and crosses the bar line. Count the beats; the crossing is where players lose their place.",
+            VARIANT_NOTE,
           ],
           coach: "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
           vary: inKeys(BOX_ROUND, ["A", "C", "D", "E"], "minorPentatonic"),
@@ -653,7 +671,7 @@ export default definePath({
         "On the low E and A strings use fingers 1, 3, 4 (frets 7, 9, 10). On the D and G strings use 1, 2, 4 (frets 7, 9, 11): the stretch goes between the second and little fingers.",
         "Let the thumb sit behind the neck, about under the second finger, so the hand can open. Don't force a stretch that hurts; move the hand a little with it.",
       ],
-      payoff: "Two octaves of a scale with a third of the picking, every beat on a new string.",
+      payoff: "An octave and a half of a scale with a third of the picking, every beat on a new string.",
       exercises: [
         {
           id: "three-up",
@@ -662,6 +680,7 @@ export default definePath({
           howTo: [
             "Triplets. Low E string 7, 9, 10; A string 7, 9, 10; D string 7, 9, 11; A string again. Bar 2 picks only the first note of each string.",
             "The D string's 11 is the little finger at full stretch. Hammer it from the second finger on 9, not from the first.",
+            VARIANT_NOTE,
           ],
           coach: "A picked note on every beat is what I time. I check the notes after the take.",
           vary: fromB(twin("/8t", THREE_UP)),
@@ -682,6 +701,7 @@ export default definePath({
           howTo: [
             "Triplets. D string 11, 9, 7; A string 10, 9, 7; low E string 10, 9, 7; A string again. Bar 2 picks only the first note of each string.",
             "Land all three fingers on the new string together. The first pull-off is the easy one; the second is quieter unless you mean it.",
+            VARIANT_NOTE,
           ],
           coach: "A picked note on every beat is what I time. A pull-off I can't hear costs nothing, so its volume is for your ear.",
           vary: fromB(twin("/8t", THREE_DOWN)),
@@ -702,6 +722,7 @@ export default definePath({
           howTo: [
             "Triplets. Bar 1 climbs the low E, A, D and G strings with hammer-ons. Bar 2 comes down with pull-offs and turns on the low E string with a last hammer-on to fret 10.",
             "At the top you hammer onto the G string's 11 and then pick it again. Keep the little finger down across the bar line.",
+            VARIANT_NOTE,
           ],
           coach: "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
           vary: fromB(THREE_ROUND),
@@ -735,6 +756,7 @@ export default definePath({
           howTo: [
             "Sextuplets. A string 5, 7, 8 then D string 5, 7, 9, four times. In bar 2 only the A string's fret 5 is picked.",
             "The first finger leaves the A string and hammers the D string's fret 5 in one move. Let the A string stop as it lifts.",
+            VARIANT_NOTE,
           ],
           coach: "A hammer-on from nowhere is graded like any hammer-on: one too quiet for me to catch costs nothing, so your ear decides whether it spoke.",
           vary: inKeys(NOWHERE_TWO, ["A", "B", "C", "D", "E"]),
@@ -751,10 +773,11 @@ export default definePath({
         {
           id: "nowhere-ascent",
           title: "Four strings, one pick",
-          purpose: "Twelve notes up four strings and a held E. Bar 1 picked; bar 2 picks the first note and hammers everything else, three strings from nowhere.",
+          purpose: "Twelve notes up four strings, the last one a held E. Bar 1 picked; bar 2 picks the first note and hammers everything else, three strings from nowhere.",
           howTo: [
             "Sextuplets. Low E, A, D and G strings, three notes each, and hold the last note to the bar line.",
             "Fingers 1, 3, 4 on the low two strings and 1, 2, 4 on the D and G. Each new string starts with the first finger from the air.",
+            VARIANT_NOTE,
           ],
           coach: "One picked note a bar is all I can time firmly in bar 2. The rest is yours to hear: twelve notes, all present.",
           vary: inKeys(nowhereAscent(), ["A", "B", "C", "D", "E"]),
@@ -775,6 +798,7 @@ export default definePath({
           howTo: [
             "Sextuplets. Pick the low E string's fret 5 and nothing else. At the top, pull off from 9 to 7, hammer back to 9, then pull off down the string.",
             "Coming down, the little finger hammers the first note of each string from the air (D string 9, A string 8, low E string 8), with the other fingers already in place behind it.",
+            VARIANT_NOTE,
           ],
           coach: "There is one picked note a bar here, so my timing has little to hold. Record a take and listen: that is the real check.",
           vary: inKeys(ONE_PICK_ROUND, ["A", "B", "C", "D", "E"]),
@@ -798,7 +822,7 @@ export default definePath({
       howTo: [
         "Three notes per string in sextuplets: two strings to each beat, a pick on each string.",
         "The hand moves up one fret for the B string (6, 8, 10) and one more for the top string (7, 8, 10). Move during the last note of the string before.",
-        "Each run is a picked bar first, then the legato bar. Hold the last note to the bar line and let the hand go soft.",
+        "The two six-string runs are a picked bar first, then the legato bar. Hold the last note to the bar line and let the hand go soft.",
       ],
       payoff: "Two and a half octaves in under two beats of picking, and a line that travels up the neck and home.",
       difficultyException:
@@ -811,6 +835,7 @@ export default definePath({
           howTo: [
             "Sextuplets. Low E 5, 7, 8; A 5, 7, 8; D 5, 7, 9; G 5, 7, 9; B 6, 8, 10; top E 7, 8, 10, and hold the last note.",
             "Every string's first note falls on a beat or halfway through one. Let the pick mark those and keep the hammer-ons between them even.",
+            VARIANT_NOTE,
           ],
           coach: "Six picked notes a bar give me a clear grid. I check the notes after the take.",
           vary: inKeys(sixUp(), ["A", "B", "C", "D"]),
@@ -832,7 +857,8 @@ export default definePath({
           purpose: "The same eighteen notes from the top, a pick on each string and two pull-offs.",
           howTo: [
             "Sextuplets. Top E 10, 8, 7; B 10, 8, 6; G 9, 7, 5; D 9, 7, 5; A 8, 7, 5; low E 8, 7, 5, and hold the last note.",
-            "The hand moves back a fret at the G string. Have all three fingers down on each new string before you pick it.",
+            "The hand moves back a fret at the B string and another at the G string. Have all three fingers down on each new string before you pick it.",
+            VARIANT_NOTE,
           ],
           coach: "Six picked notes a bar give me a clear grid. A pull-off I can't hear costs nothing, so its volume is yours to judge.",
           vary: inKeys(sixDown(), ["A", "B", "C", "D"]),
@@ -851,7 +877,7 @@ export default definePath({
         {
           id: "position-run",
           title: "A shape that travels",
-          purpose: "One two-string shape on the B and top strings, moved up the neck through three positions with hammer-ons and brought back with pull-offs.",
+          purpose: "Three notes on the B string and three on the top string, in three positions up the neck with hammer-ons, and back with pull-offs. The shape under the fingers changes at each position.",
           howTo: [
             "Sextuplets, a pick on each string. Bar 1: frets 5, 6, 8 and 5, 7, 8, then from fret 8, then from fret 10, and a held note. Bar 2 comes back down the same three positions.",
             "The shift happens between beats, on the picked note. Look at the fret you are going to, not at the one you are leaving.",
@@ -876,7 +902,7 @@ export default definePath({
       why: "Legato players are known for lines that seem to float over the beat. Most of that is odd groupings: five notes where you expect four, six rolled from a single pick. The fretting hand has to count for itself, because the pick is only there once a beat and the groups no longer match the fingers' habits.",
       howTo: [
         "A quintuplet is five even notes in one beat. Say a five-syllable word on each click, like 'hip-po-pot-a-mus', before you play.",
-        "The pick marks the beat and nothing else. Give that note a small accent, and keep the notes after it level.",
+        "On one string the pick marks the beat and nothing else; when a five spills onto a new string, that string gets a pick too. Give the note on the beat a small accent, and keep the notes after it level.",
         "If five turns into four and a pause, slow down a rung. The gap after the fourth note is the usual fault.",
       ],
       payoff: "A rolling five that sits squarely on the click, and a scale that falls in fives across three strings.",
@@ -907,6 +933,7 @@ export default definePath({
           howTo: [
             "Sextuplets, six to the click. Pick fret 5, hammer 7 and 8, pull off to 7 and 5, hammer 7. Then pick 5 again.",
             "Lean a little on the fourth note of each six. It is the halfway point of the beat, and it keeps the six from turning into two uneven threes.",
+            VARIANT_NOTE,
           ],
           coach: "One picked note a beat is what I time most firmly. The rest is yours to hear: six notes, all present.",
           vary: onStrings(["top E 5-7-8", "B 5-6-8", "G 4-5-7", "A 5-7-8"], sixRoll),
@@ -927,6 +954,7 @@ export default definePath({
           howTo: [
             "Quintuplets. Beat 1: top string 8, 7, 5, then B string 8 and 6. Beat 2 starts on the top string's 7, beat 3 on its 5, beat 4 on the B string's 8.",
             "Every string change is a picked note; everything else is a pull-off. Have the fingers down on the new string before the pick gets there.",
+            VARIANT_NOTE,
           ],
           coach: "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
           vary: inKeys(FIVES_DOWN, ["A", "B", "C", "D", "E"]),
@@ -946,14 +974,14 @@ export default definePath({
     {
       id: "long-lines",
       title: "Long lines",
-      goal: "Hold a legato line for four bars over a band, run the whole neck both ways in one take, and keep a roll going for a minute.",
+      goal: "Hold a legato line for four bars over a band, run all six strings both ways in one take, and keep a roll going for a minute.",
       why: "A lick is two beats; a solo is a minute. Legato tires the fretting hand in a way picking does not, and the first thing to go is volume: the hammer-ons get lazy long before the timing does. This Step is about noticing that and holding the sound.",
       howTo: [
         "Play these below the tempo you could manage for one bar. The test is the last bar, not the first.",
         "Listen for the volume of the hammer-ons dropping. When it does, stop, shake the hand out and start again a rung lower.",
         SAFETY,
       ],
-      payoff: "A four-bar legato line that sits on a band, and a run across the neck and back that you can play on demand.",
+      payoff: "A four-bar legato line that sits on a band, and a run across all six strings and back that you can play on demand.",
       exercises: [
         {
           id: "etude",
@@ -977,11 +1005,12 @@ export default definePath({
         },
         {
           id: "six-round",
-          title: "The whole neck, up and back",
+          title: "All six strings, up and back",
           purpose: "Six strings up with hammer-ons and six down with pull-offs in one line, a pick on each string, and a long A to finish.",
           howTo: [
             "Sextuplets. The climb fills three beats and the descent starts on beat 4, so the turn at the top comes just before the bar line.",
-            "At the top you hammer onto fret 10 and pick it again to come down. Keep the hand in its upper position until the G string.",
+            "At the top you hammer onto fret 10 and pick it again to come down. Coming down, the hand drops back a fret at the B string and again at the G string.",
+            VARIANT_NOTE,
           ],
           coach: "This is the Path's test piece. I'll say how even it was and check the notes after the take.",
           vary: inKeys(sixRound(), ["A", "B", "C", "D"]),
@@ -1002,6 +1031,7 @@ export default definePath({
           howTo: [
             "Sixteenths: pick, hammer, hammer, pull. Choose a rung about 20% below your clean tempo for the roll; it should feel slow for the first ten seconds.",
             "If the hand starts to burn, that is the set done. Rest and come back to it.",
+            VARIANT_NOTE,
           ],
           coach: "I check that the time holds to the end of the minute. Whether the volume held is for your ear.",
           vary: onStrings(["top E 5-7-8", "B 5-6-8", "G 4-5-7", "A 5-7-8"], (s, [a, b, c]) => `/16 ${repeat(`${s}:${a} ${s}:${b}h ${s}:${c}h ${s}:${b}p`, 4)}`),
@@ -1132,7 +1162,7 @@ export default definePath({
       reachLevel: "advanced",
       startHereIf: [
         "You can run a minor scale three notes per string with one pick a string, in triplets at 110 BPM.",
-        "Your rolls stay even at sixteenths, 80 BPM, for a whole bar on one pick.",
+        "Your rolls stay even at sixteenths, 80 BPM, with one pick a beat.",
         "You still pick the first note of every string, or your legato fades over a long line.",
       ],
       steps: ["from-nowhere", "six-string-runs", "odd-groups", "long-lines"],
@@ -1140,7 +1170,7 @@ export default definePath({
         {
           id: "nowhere-round",
           title: "Two strings around the chords",
-          purpose: "Six notes on two strings from one pick, moved through the i, iv and v chords of a minor key. A different key each time.",
+          purpose: "Six notes on two strings from one pick: the same shape moved to the i, iv and v chords of a minor key, so each bar is the minor scale of its own chord. A different key each time.",
           howTo: ["Start well under your clean tempo. One pick a beat; the upper string starts with a hammer-on from nowhere. The hand moves after the long note at the end of each bar."],
           coach: "This is a warm-up. It tells you how it went, and it decides nothing.",
           vary: {

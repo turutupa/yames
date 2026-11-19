@@ -1047,7 +1047,7 @@ export default definePath({
           purpose: "The new scale on its own, in the same part of the neck as box 1, so you can hear and feel what changed: three strings start a fret lower.",
           howTo: [
             "Straight eighths, two to a click, 60 BPM up to a pass at 80.",
-            "Low E string 5 and 7, A string 4 and 7, D string 4 and 7, G string 4 and 6, B string 5 and 7, top string 5 and 7, then back down. First finger takes the frets at 4, and reaches up one fret for the 5s on the low E, B and top strings.",
+            "Low E string 5 and 7, A string 4 and 7, D string 4 and 7, G string 4 and 6, B string 5 and 7, top string 5 and 7, then back down. First finger takes the frets at 4, the second finger the 5s on the low E, B and top strings, the third finger the 6, and the little finger the 7s.",
           ],
           coach: "Same bar as box 1: right notes and even eighths after the take.",
           tab: `/8 6:5 6:7 5:4 5:7 4:4 4:7 3:4 3:6 | 2:5 2:7 1:5 1:7 1:5 2:7 2:5 3:6 | 3:4 4:7 4:4 5:7 5:4 6:7 /4 6:5`,
@@ -1063,7 +1063,7 @@ export default definePath({
         {
           id: "sweet-then-sour",
           title: "Sweet over A7, sour over D7",
-          purpose: "Four bars: a major pentatonic phrase over two bars of A7, then nearly the same phrase with C natural over two bars of D7. The one note that moves is the lesson.",
+          purpose: "Four bars: a major pentatonic phrase over two bars of A7, then a minor pentatonic phrase in the same rhythm over two bars of D7. The C# that opens bar 2 becomes the C that opens bar 3: that note is the lesson.",
           howTo: [
             "Shuffle eighths, 70 BPM up to a pass at 90.",
             "Bars 1 and 2: E, F#, A, F#, E, then C#, E, C#, B, A. Bars 3 and 4: C, D, E, D, C, then D, C, A, G, A. The hand moves up one fret between bar 2 and bar 3, back into box 1.",
@@ -1083,7 +1083,7 @@ export default definePath({
         {
           id: "tenth-fret",
           title: "The tenth-fret box",
-          purpose: "A two-bar phrase high on the B and top strings, around the A at fret 10, that ends on F#, the sixth: the note that makes a blues phrase sound sweet without leaving the chord.",
+          purpose: "A two-bar phrase high on the B and top strings, around the A at fret 10, that ends on F#, the sixth: a sweet note that sits beside the chord without clashing.",
           howTo: [
             "Shuffle eighths, 70 BPM up to a pass at 90.",
             "First finger on fret 10, third finger on fret 12, on both strings. Bar 1: A, B, D, B, A. Bar 2: E, D, B, A, then the second finger takes F# on the G string, fret 11.",

@@ -25,6 +25,10 @@ const NOISE_CHECK = "Between takes, stop and listen: are the strings you are not
 const SAFETY =
   "Stop at any pain in either hand, wrist or forearm. A tired hand is one thing and pain is another; pain ends the set.";
 
+/** Said on every Exercise whose variants move the figure: the words name the first version's frets. */
+const VARIANT_NOTE =
+  "The frets and note names here are for the first version. Other Takes move the same figure to another string or key.";
+
 const STRING_OF: Readonly<Record<string, number>> = { "top E": 1, B: 2, G: 3 };
 
 /** One figure on other strings: `"top E: 12-5-8"` is the tap, then the two fretted notes. */
@@ -44,9 +48,10 @@ function onStrings(sets: readonly string[], build: (string: number, frets: numbe
 const THREE_SETS = ["top E: 12-5-8", "B: 12-5-8", "G: 12-5-7"] as const;
 
 /** tap, pull to the first finger, hammer the upper finger. */
-const cell = (s: number, [t, a, b]: number[]) => `${s}:${t}t ${s}:${a}p ${s}:${b}h`;
+// Fingers are printed: the first finger below, and the little finger three frets up (the third finger for two).
+const cell = (s: number, [t, a, b]: number[]) => `${s}:${t}t ${s}:${a}pf1 ${s}:${b}hf${b - a >= 3 ? 4 : 3}`;
 /** The same with a pull back to the first finger: four notes. */
-const four = (s: number, [t, a, b]: number[]) => `${cell(s, [t, a, b])} ${s}:${a}p`;
+const four = (s: number, [t, a, b]: number[]) => `${cell(s, [t, a, b])} ${s}:${a}pf1`;
 
 const tapPull = (s: number, [t, a]: number[]) => `/8 ${repeat(`${s}:${t}t ${s}:${a}p`, 4)}`;
 const triplets = (s: number, f: number[]) => `/8t ${repeat(cell(s, f), 4)}`;
@@ -132,7 +137,7 @@ export default definePath({
       howTo: [
         "Tap with the middle finger of the picking hand, with the pick still held between thumb and first finger. Rest the thumb or the heel of the hand on the edge of the neck to steady it.",
         "Tap straight down, just behind the fret, hard enough to sound the note. Then pull off toward the floor so the finger plucks the string as it leaves. The tab marks a tap T.",
-        "The fretting hand's first finger is already down on its note before you tap, and lies lightly across the higher strings to keep them quiet.",
+        "The fretting hand's first finger is already down on its note before you tap, and its tip touches the string beside it to keep that quiet. The heel of the tapping hand rests on the lower strings.",
       ],
       payoff: "The three-note tapped arpeggio everybody recognises, slow and even.",
       exercises: [
@@ -143,6 +148,7 @@ export default definePath({
           howTo: [
             "Eighth notes. The tap lands on the click and the pulled-off note on the 'and'.",
             "Keep the first finger pressed at fret 5 the whole time. Make the second note as loud as the first.",
+            VARIANT_NOTE,
           ],
           coach: "The taps carry the timing. A pull-off I can't hear costs nothing, so its volume is yours to judge.",
           vary: onStrings(["top E: 12-5", "B: 12-5", "G: 12-5"], tapPull),
@@ -162,6 +168,7 @@ export default definePath({
           howTo: [
             "Triplets, three to the click, with the tap on the click.",
             "First finger at fret 5, little finger hammers fret 8. As the little finger lands, the tapping finger is already on its way back down.",
+            VARIANT_NOTE,
           ],
           coach: "One tap a beat is what I time most firmly. The two notes after it are for your ear: all three the same size.",
           vary: onStrings(THREE_SETS, triplets),
@@ -181,6 +188,7 @@ export default definePath({
           howTo: [
             "Eighth notes: tap 12, pull off to 5, hammer 8, pull off to 5. The tap is on beats 1 and 3.",
             "The last pull-off is the quiet one. Flick the little finger off toward the floor, don't just lift it.",
+            VARIANT_NOTE,
           ],
           coach: "Two taps a bar are my anchor. The six notes between them are yours to keep even.",
           vary: onStrings(THREE_SETS, fourEighths),
@@ -227,12 +235,12 @@ export default definePath({
         {
           id: "tap-scale",
           title: "A scale in the taps",
-          purpose: "The tap walks up A minor from D at fret 10 to A at fret 17 and back, a note a beat, over the same two fretted notes.",
+          purpose: "The tap walks up A minor from D at fret 10 to A at fret 17 and back down to E at fret 12, a note a beat, over the same two fretted notes.",
           howTo: [
             "Triplets, two bars. Taps at 10, 12, 13, 15, then 17, 15, 13, 12.",
             "The steps are not all the same size: two frets, one, two, two. Know the scale on the string before you tap it.",
           ],
-          coach: "Eight different taps in two bars. I time each one; where it landed is for your ear.",
+          coach: "Eight taps in two bars. I time each one; where it landed is for your ear.",
           tab: TAP_SCALE,
           position: 5,
           harmony: { scale: ["A", "naturalMinor"] },
@@ -340,9 +348,9 @@ export default definePath({
       howTo: [
         "Count '1 e and a'. The tap is the '1', and the fretting hand plays the rest.",
         "For two taps a beat, the tapping hand keeps a steady eighth-note pulse: tap, lift, tap, lift.",
-        "Keep the first finger down throughout. It is the note every pull-off lands on.",
+        "Keep the first finger down throughout. It is the note the last pull-off of every beat lands on.",
       ],
-      payoff: "A sixteenth-note tapped loop that follows four chords.",
+      payoff: "A sixteenth-note tapped loop that follows the chords.",
       exercises: [
         {
           id: "four-note-loop",
@@ -351,6 +359,7 @@ export default definePath({
           howTo: [
             "Sixteenths, with the tap on every beat: 12, 5, 8, 5.",
             "If the 'a' of each beat goes missing, the last pull-off is too gentle. Flick it.",
+            VARIANT_NOTE,
           ],
           coach: "One tap a beat is what I time. The three notes after it are for your ear.",
           vary: onStrings(THREE_SETS, fourSixteenths),
@@ -368,8 +377,9 @@ export default definePath({
           title: "Two taps to a beat",
           purpose: "Tap, pull off to 5, tap again, pull off to 8. The tapped note rings out twice a beat, like a bell over the chord.",
           howTo: [
-            "Sixteenths: 12, 5, 12, 8. Both fretted notes stay down the whole time; the pull-off just lands on a different one.",
-            "After the first pull-off the little finger is already on fret 8, so the second pull-off stops there.",
+            "Sixteenths: 12, 5, 12, 8. The first finger stays down throughout; the little finger lifts while the first tap sounds, so that pull-off lands on 5.",
+            "While the second tap sounds, the little finger goes back down on fret 8, so the second pull-off stops there.",
+            VARIANT_NOTE,
           ],
           coach: "Two taps a beat give me a firm grid. I time them and count them.",
           vary: onStrings(THREE_SETS, doubleTap),
@@ -383,7 +393,7 @@ export default definePath({
         },
         {
           id: "sixteenth-changes",
-          title: "The loop through four chords",
+          title: "The loop through the chords",
           purpose: "The four-note loop over Am, F, G and back to Am, a bar each.",
           howTo: [
             "Sixteenths, four loops a bar. Am: 12 over 5 and 8. F: 13. G: 15 over 7 and 10. Then Am.",
@@ -490,6 +500,7 @@ export default definePath({
           howTo: [
             "Sextuplets. One tap a beat; the fretting hand plays the other five notes.",
             "Lean a little on the fourth note, the A at fret 5. It is the middle of the beat and keeps the six even.",
+            VARIANT_NOTE,
           ],
           coach: "One tap a beat is my anchor. On a recording, count the notes between the taps: there should be five.",
           vary: {
@@ -557,7 +568,7 @@ export default definePath({
         "The tapping finger stays within a centimetre of the string. Big motions are what make it late.",
         "Start two rungs under the tempo you could play for one bar. This is about holding it.",
       ],
-      payoff: "The sound of tapping at full speed, through four chords.",
+      payoff: "The sound of tapping at full speed, through Am, F and G.",
       exercises: [
         {
           id: "fast-cell",
@@ -566,6 +577,7 @@ export default definePath({
           howTo: [
             "Sextuplets. Feel the first tap of each beat a little stronger than the second.",
             "If the hand tightens, drop a rung. Speed comes from the motion getting smaller.",
+            VARIANT_NOTE,
           ],
           coach: "Two taps a beat give me a firm grid. Above the middle rungs, evenness is the number to trust.",
           vary: onStrings(THREE_SETS, sextuplets),
@@ -597,7 +609,7 @@ export default definePath({
         },
         {
           id: "fast-changes",
-          title: "Four chords in sextuplets",
+          title: "Am, F and G in sextuplets",
           purpose: "Am, F, G, Am, eight cells a bar. The same moves as before with a sixth of a beat to make them in.",
           howTo: [
             "Sextuplets, one chord a bar.",
@@ -666,10 +678,11 @@ export default definePath({
         {
           id: "roll-down",
           title: "The cell from the top down",
-          purpose: "Tap 12, pull off to 8, pull off to 5, hammer 8, in sixteenths. The same notes as the four-note loop, in the other order.",
+          purpose: "Tap 12, pull off to 8, pull off to 5, hammer 8, in sixteenths. The same three notes as the four-note loop, with the little finger's note played twice.",
           howTo: [
             "Sixteenths, a tap on every beat: 12, 8, 5, 8.",
             "Both fretting fingers are down when you tap. The first pull-off lands on the little finger.",
+            VARIANT_NOTE,
           ],
           coach: "One tap a beat is what I time. The three notes after it are for your ear.",
           vary: onStrings(THREE_SETS, rollDown),
@@ -686,14 +699,14 @@ export default definePath({
     {
       id: "over-the-band",
       title: "A tapped solo, and a full minute",
-      goal: "Play an eight-bar tapped line over a band, and keep the cell going for sixty seconds.",
-      why: "A tapping lick is two beats; a tapped solo section is eight bars with the chords moving under it. This Step joins the pieces: the progression, then a melody in the taps over the same chords. And a minute of the plain cell shows whether the motion is relaxed enough to last.",
+      goal: "Play two four-bar tapped lines over a band, the chords and then a melody over them, and keep the cell going for sixty seconds.",
+      why: "A tapping lick is two beats; a tapped solo section is bars long, with the chords moving under it. This Step joins the pieces: the progression, then a melody in the taps over the same chords. And a minute of the plain cell shows whether the motion is relaxed enough to last.",
       howTo: [
-        "Learn the first four bars, then the second four, then join them.",
+        "Learn the chords first, then the melody over the same chords.",
         "For the minute, choose a rung about 20% below your clean tempo. It should feel slow for the first ten seconds.",
         SAFETY,
       ],
-      payoff: "Eight bars of tapping over a band that sound like the middle of a solo.",
+      payoff: "Four bars of chords and four of melody in taps over a band: the two halves of a solo section.",
       difficultyException:
         "Triplets again, slower than the sextuplets before: eight bars with a chord change every bar, and a full minute, are the demand, and a note-rate metric does not count length.",
       exercises: [
@@ -725,7 +738,7 @@ export default definePath({
             "Triplets, one tapped note a beat. Am: taps at 12, 15, 17, 15. G: 15, 17, 19, 17 over frets 7 and 10. F: 13, 15, 17, 15. E: 12, 16, 19, 16 over frets 4 and 7.",
             "The first tap of every bar is a note of its chord. The others are the scale around it.",
           ],
-          coach: "Band on. Sixteen different taps in four bars; I time each one.",
+          coach: "Band on. Sixteen taps in four bars; I time each one.",
           tab: ETUDE_B,
           position: 5,
           shifts: true,
@@ -744,6 +757,7 @@ export default definePath({
           howTo: [
             "Triplets, one tap a beat. Breathe, and let both shoulders drop.",
             "If the tapping finger or the forearm starts to burn, that is the set done.",
+            VARIANT_NOTE,
           ],
           coach: "I check that the time holds to the end of the minute. Whether the volume held is for your ear.",
           vary: onStrings(THREE_SETS, triplets),
@@ -826,12 +840,12 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: speed, two taps and a band",
-      summary: "The cell in sextuplets, two tapped notes and string skips, then an eight-bar tapped line over a band and a full minute.",
+      summary: "The cell in sextuplets, two tapped notes and string skips, then four-bar tapped lines over a band and a full minute.",
       reachLevel: "intermediate",
       startHereIf: [
         "You can play the four-note loop in sixteenths at 85 BPM.",
         "You can play six notes from one tap at 60 BPM and hear all six.",
-        "You can tap a lick, and not yet eight bars of one over chords.",
+        "You can tap a lick, and not yet 4 bars of one over chords.",
       ],
       steps: ["sextuplet-taps", "two-taps-and-skips", "over-the-band"],
       warmups: [

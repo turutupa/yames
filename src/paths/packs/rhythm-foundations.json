@@ -303,7 +303,7 @@
           "purpose": "A half note, then two quarters, and a whole note to end. Holding a note for exactly two clicks is harder than playing two notes.",
           "howTo": [
             "Count '1, 2' through each half note and play the quarters on 3 and 4. The last bar is one note held for all four clicks.",
-            "The fretted notes are at fret 3 on the low E string and fret 2 on the A string: third finger and second finger."
+            "The fretted notes are at fret 3 on the low E string and fret 2 on the other strings: third finger for fret 3, second finger for fret 2."
           ],
           "coachLine": "I time when each note starts. How long you let it ring is for your ear and your count.",
           "grading": "graded",
@@ -1620,10 +1620,10 @@
         {
           "id": "eighths.fifth-tune",
           "title": "A tune at the fifth fret",
-          "purpose": "The same rhythms on fretted notes: a short A minor melody of eighths and quarters that ends on a long note.",
+          "purpose": "The same rhythms on fretted notes: a short melody in the A minor pentatonic box, eighths and quarters, ending on a long C.",
           "howTo": [
             "First finger at fret 5, third finger at fret 7, little finger at fret 8 on the B string.",
-            "Count it first without the guitar: '1 and 2, 3 and 4'. Then play what you counted."
+            "Count it first without the guitar: '1 and 2, 3 and 4', then '1 and 2 and 3' and hold. Then play what you counted."
           ],
           "coachLine": "After the take I'll say how even it was and whether the notes were the written ones.",
           "grading": "graded",
@@ -1724,197 +1724,6 @@
             "scale": "minorPentatonic",
             "spelled": ["A", "C", "D", "E", "G"],
             "cover": false
-          },
-          "variation": {
-            "dimensions": ["key"],
-            "pooled": ["key"],
-            "notPooled": [],
-            "variants": [
-              {
-                "id": "key=A",
-                "label": "A minor",
-                "params": {
-                  "key": "A"
-                },
-                "pool": "all",
-                "tab": "/8 3:5 3:7 /4 2:5 /8 2:8 2:5 /4 3:7 | /8 3:5 3:7 2:5 3:7 /2 3:5",
-                "position": {
-                  "fret": 5,
-                  "shifts": "none"
-                },
-                "crossing": "both",
-                "notes": [
-                  {"string":3,"fret":5,"midi":60,"tick":0,"dur":480,"tech":[],"pick":"d"},
-                  {"string":3,"fret":7,"midi":62,"tick":480,"dur":480,"tech":[],"pick":"u"},
-                  {"string":2,"fret":5,"midi":64,"tick":960,"dur":960,"tech":[],"pick":"d"},
-                  {"string":2,"fret":8,"midi":67,"tick":1920,"dur":480,"tech":[],"pick":"d"},
-                  {"string":2,"fret":5,"midi":64,"tick":2400,"dur":480,"tech":[],"pick":"u"},
-                  {"string":3,"fret":7,"midi":62,"tick":2880,"dur":960,"tech":[],"pick":"d"},
-                  {"string":3,"fret":5,"midi":60,"tick":3840,"dur":480,"tech":[],"pick":"d"},
-                  {"string":3,"fret":7,"midi":62,"tick":4320,"dur":480,"tech":[],"pick":"u"},
-                  {"string":2,"fret":5,"midi":64,"tick":4800,"dur":480,"tech":[],"pick":"d"},
-                  {"string":3,"fret":7,"midi":62,"tick":5280,"dur":480,"tech":[],"pick":"u"},
-                  {"string":3,"fret":5,"midi":60,"tick":5760,"dur":1920,"tech":[],"pick":"d"}
-                ],
-                "rests": [],
-                "backing": {
-                  "kind": "click",
-                  "subdivision": 1
-                },
-                "computed": {
-                  "noteCount": 11,
-                  "minGapMsAtTop": 250,
-                  "handShifts": 0,
-                  "maxPlayableBpm": 224,
-                  "difficulty": 2.1
-                },
-                "harmony": {
-                  "kind": "scale",
-                  "root": "A",
-                  "scale": "minorPentatonic",
-                  "spelled": ["A", "C", "D", "E", "G"],
-                  "cover": false
-                }
-              },
-              {
-                "id": "key=B",
-                "label": "B minor",
-                "params": {
-                  "key": "B"
-                },
-                "pool": "all",
-                "tab": "/8 3:7 3:9 /4 2:7 /8 2:10 2:7 /4 3:9 | /8 3:7 3:9 2:7 3:9 /2 3:7",
-                "position": {
-                  "fret": 7,
-                  "shifts": "none"
-                },
-                "crossing": "both",
-                "notes": [
-                  {"string":3,"fret":7,"midi":62,"tick":0,"dur":480,"tech":[],"pick":"d"},
-                  {"string":3,"fret":9,"midi":64,"tick":480,"dur":480,"tech":[],"pick":"u"},
-                  {"string":2,"fret":7,"midi":66,"tick":960,"dur":960,"tech":[],"pick":"d"},
-                  {"string":2,"fret":10,"midi":69,"tick":1920,"dur":480,"tech":[],"pick":"d"},
-                  {"string":2,"fret":7,"midi":66,"tick":2400,"dur":480,"tech":[],"pick":"u"},
-                  {"string":3,"fret":9,"midi":64,"tick":2880,"dur":960,"tech":[],"pick":"d"},
-                  {"string":3,"fret":7,"midi":62,"tick":3840,"dur":480,"tech":[],"pick":"d"},
-                  {"string":3,"fret":9,"midi":64,"tick":4320,"dur":480,"tech":[],"pick":"u"},
-                  {"string":2,"fret":7,"midi":66,"tick":4800,"dur":480,"tech":[],"pick":"d"},
-                  {"string":3,"fret":9,"midi":64,"tick":5280,"dur":480,"tech":[],"pick":"u"},
-                  {"string":3,"fret":7,"midi":62,"tick":5760,"dur":1920,"tech":[],"pick":"d"}
-                ],
-                "rests": [],
-                "backing": {
-                  "kind": "click",
-                  "subdivision": 1
-                },
-                "computed": {
-                  "noteCount": 11,
-                  "minGapMsAtTop": 250,
-                  "handShifts": 0,
-                  "maxPlayableBpm": 354,
-                  "difficulty": 2.1
-                },
-                "harmony": {
-                  "kind": "scale",
-                  "root": "B",
-                  "scale": "minorPentatonic",
-                  "spelled": ["B", "D", "E", "F#", "A"],
-                  "cover": false
-                }
-              },
-              {
-                "id": "key=C",
-                "label": "C minor",
-                "params": {
-                  "key": "C"
-                },
-                "pool": "all",
-                "tab": "/8 3:8 3:10 /4 2:8 /8 2:11 2:8 /4 3:10 | /8 3:8 3:10 2:8 3:10 /2 3:8",
-                "position": {
-                  "fret": 8,
-                  "shifts": "none"
-                },
-                "crossing": "both",
-                "notes": [
-                  {"string":3,"fret":8,"midi":63,"tick":0,"dur":480,"tech":[],"pick":"d"},
-                  {"string":3,"fret":10,"midi":65,"tick":480,"dur":480,"tech":[],"pick":"u"},
-                  {"string":2,"fret":8,"midi":67,"tick":960,"dur":960,"tech":[],"pick":"d"},
-                  {"string":2,"fret":11,"midi":70,"tick":1920,"dur":480,"tech":[],"pick":"d"},
-                  {"string":2,"fret":8,"midi":67,"tick":2400,"dur":480,"tech":[],"pick":"u"},
-                  {"string":3,"fret":10,"midi":65,"tick":2880,"dur":960,"tech":[],"pick":"d"},
-                  {"string":3,"fret":8,"midi":63,"tick":3840,"dur":480,"tech":[],"pick":"d"},
-                  {"string":3,"fret":10,"midi":65,"tick":4320,"dur":480,"tech":[],"pick":"u"},
-                  {"string":2,"fret":8,"midi":67,"tick":4800,"dur":480,"tech":[],"pick":"d"},
-                  {"string":3,"fret":10,"midi":65,"tick":5280,"dur":480,"tech":[],"pick":"u"},
-                  {"string":3,"fret":8,"midi":63,"tick":5760,"dur":1920,"tech":[],"pick":"d"}
-                ],
-                "rests": [],
-                "backing": {
-                  "kind": "click",
-                  "subdivision": 1
-                },
-                "computed": {
-                  "noteCount": 11,
-                  "minGapMsAtTop": 250,
-                  "handShifts": 0,
-                  "maxPlayableBpm": 400,
-                  "difficulty": 2.1
-                },
-                "harmony": {
-                  "kind": "scale",
-                  "root": "C",
-                  "scale": "minorPentatonic",
-                  "spelled": ["C", "Eb", "F", "G", "Bb"],
-                  "cover": false
-                }
-              },
-              {
-                "id": "key=D",
-                "label": "D minor",
-                "params": {
-                  "key": "D"
-                },
-                "pool": "all",
-                "tab": "/8 3:10 3:12 /4 2:10 /8 2:13 2:10 /4 3:12 | /8 3:10 3:12 2:10 3:12 /2 3:10",
-                "position": {
-                  "fret": 10,
-                  "shifts": "none"
-                },
-                "crossing": "both",
-                "notes": [
-                  {"string":3,"fret":10,"midi":65,"tick":0,"dur":480,"tech":[],"pick":"d"},
-                  {"string":3,"fret":12,"midi":67,"tick":480,"dur":480,"tech":[],"pick":"u"},
-                  {"string":2,"fret":10,"midi":69,"tick":960,"dur":960,"tech":[],"pick":"d"},
-                  {"string":2,"fret":13,"midi":72,"tick":1920,"dur":480,"tech":[],"pick":"d"},
-                  {"string":2,"fret":10,"midi":69,"tick":2400,"dur":480,"tech":[],"pick":"u"},
-                  {"string":3,"fret":12,"midi":67,"tick":2880,"dur":960,"tech":[],"pick":"d"},
-                  {"string":3,"fret":10,"midi":65,"tick":3840,"dur":480,"tech":[],"pick":"d"},
-                  {"string":3,"fret":12,"midi":67,"tick":4320,"dur":480,"tech":[],"pick":"u"},
-                  {"string":2,"fret":10,"midi":69,"tick":4800,"dur":480,"tech":[],"pick":"d"},
-                  {"string":3,"fret":12,"midi":67,"tick":5280,"dur":480,"tech":[],"pick":"u"},
-                  {"string":3,"fret":10,"midi":65,"tick":5760,"dur":1920,"tech":[],"pick":"d"}
-                ],
-                "rests": [],
-                "backing": {
-                  "kind": "click",
-                  "subdivision": 1
-                },
-                "computed": {
-                  "noteCount": 11,
-                  "minGapMsAtTop": 250,
-                  "handShifts": 0,
-                  "maxPlayableBpm": 400,
-                  "difficulty": 2.1
-                },
-                "harmony": {
-                  "kind": "scale",
-                  "root": "D",
-                  "scale": "minorPentatonic",
-                  "spelled": ["D", "F", "G", "A", "C"],
-                  "cover": false
-                }
-              }
-            ]
           }
         }
       ]
@@ -1937,7 +1746,7 @@
         {
           "id": "rests.quarter-rests",
           "title": "Play one, rest one",
-          "purpose": "A note on a click, silence on the next. The last bar is one note and three beats of nothing, which is longer than it sounds.",
+          "purpose": "A note on a click, silence on the next; bar 3 moves the rest to beat 3. The last bar is one note and three beats of nothing, which is longer than it sounds.",
           "howTo": [
             "Play on the click, then stop the string exactly on the next click. Count the rests as loudly as the notes.",
             "In bar 4, play on beat 1 and count '2, 3, 4' in silence before the loop starts again."
@@ -3286,7 +3095,7 @@
           "title": "A beat and a half",
           "purpose": "A dotted quarter note and an eighth: long, short, long, short. The short note falls on the 'and' of 2 and of 4.",
           "howTo": [
-            "Count '1 and 2 AND 3 and 4 AND', playing on 1, on the 'and' of 2, on 3 and on the 'and' of 4.",
+            "Count '1 and 2 AND 3 and 4 AND', playing on 1, on the 'and' of 2, on 3 and on the 'and' of 4. In bar 2 the note on 3 is held to the end of the bar.",
             "The long note is a downstroke and the short one an upstroke. Let the long note ring until the short one starts."
           ],
           "coachLine": "I'll say how even it was and check the notes after the take.",
@@ -3757,7 +3566,7 @@
           "title": "A syncopated riff",
           "purpose": "Two bars in E minor pentatonic where beats 2 and 3 are silent and the notes around them fall on the 'and'.",
           "howTo": [
-            "Count '1 and, (2) and, (3) and 4 and'. The hand swings in eighths throughout and plays only the written ones.",
+            "Count '1 and, (2) and, (3) and 4'. The hand swings in eighths throughout and plays only the written ones.",
             "Learn it at the first rung with the count out loud. It will feel wrong until it suddenly feels right."
           ],
           "coachLine": "After the take I'll say how even it was and whether the notes were the written ones.",
@@ -5384,7 +5193,7 @@
           "purpose": "A beat of two eighths, then a beat of three triplets, and again. The click stays where it is and the division changes under it.",
           "howTo": [
             "Count '1 and, 2-trip-let, 3 and, 4-trip-let'. The first note of every beat is on the click whichever it is.",
-            "The triplet is not faster eighths squeezed in. Slow the hand a little less than you think."
+            "The triplet is three even notes, not two eighths with a third squeezed in. Speed the hand up a little less than you think."
           ],
           "coachLine": "The first note after each change is where the time moves. I'll say how even it was.",
           "grading": "graded",
@@ -5852,217 +5661,6 @@
             "scale": "minorPentatonic",
             "spelled": ["A", "C", "D", "E", "G"],
             "cover": false
-          },
-          "variation": {
-            "dimensions": ["key"],
-            "pooled": ["key"],
-            "notPooled": [],
-            "variants": [
-              {
-                "id": "key=A",
-                "label": "A minor",
-                "params": {
-                  "key": "A"
-                },
-                "pool": "all",
-                "tab": "/8t 3:5 3:7 2:5 3:7 3:5 4:7 /4 3:5 r | /8t 2:5 2:8 2:5 3:7 3:5 4:7 /2 4:5",
-                "position": {
-                  "fret": 5,
-                  "shifts": "none"
-                },
-                "crossing": "inside",
-                "notes": [
-                  {"string":3,"fret":5,"midi":60,"tick":0,"dur":320,"tech":[],"pick":"d"},
-                  {"string":3,"fret":7,"midi":62,"tick":320,"dur":320,"tech":[],"pick":"u"},
-                  {"string":2,"fret":5,"midi":64,"tick":640,"dur":320,"tech":[],"pick":"d"},
-                  {"string":3,"fret":7,"midi":62,"tick":960,"dur":320,"tech":[],"pick":"u"},
-                  {"string":3,"fret":5,"midi":60,"tick":1280,"dur":320,"tech":[],"pick":"d"},
-                  {"string":4,"fret":7,"midi":57,"tick":1600,"dur":320,"tech":[],"pick":"u"},
-                  {"string":3,"fret":5,"midi":60,"tick":1920,"dur":960,"tech":[],"pick":"d"},
-                  {"string":2,"fret":5,"midi":64,"tick":3840,"dur":320,"tech":[],"pick":"d"},
-                  {"string":2,"fret":8,"midi":67,"tick":4160,"dur":320,"tech":[],"pick":"u"},
-                  {"string":2,"fret":5,"midi":64,"tick":4480,"dur":320,"tech":[],"pick":"d"},
-                  {"string":3,"fret":7,"midi":62,"tick":4800,"dur":320,"tech":[],"pick":"u"},
-                  {"string":3,"fret":5,"midi":60,"tick":5120,"dur":320,"tech":[],"pick":"d"},
-                  {"string":4,"fret":7,"midi":57,"tick":5440,"dur":320,"tech":[],"pick":"u"},
-                  {"string":4,"fret":5,"midi":55,"tick":5760,"dur":1920,"tech":[],"pick":"d"}
-                ],
-                "rests": [
-                  {"tick":2880,"dur":960}
-                ],
-                "backing": {
-                  "kind": "click",
-                  "subdivision": 1
-                },
-                "computed": {
-                  "noteCount": 14,
-                  "minGapMsAtTop": 166.67,
-                  "handShifts": 0,
-                  "maxPlayableBpm": 149,
-                  "difficulty": 2.8
-                },
-                "harmony": {
-                  "kind": "scale",
-                  "root": "A",
-                  "scale": "minorPentatonic",
-                  "spelled": ["A", "C", "D", "E", "G"],
-                  "cover": false
-                }
-              },
-              {
-                "id": "key=B",
-                "label": "B minor",
-                "params": {
-                  "key": "B"
-                },
-                "pool": "all",
-                "tab": "/8t 3:7 3:9 2:7 3:9 3:7 4:9 /4 3:7 r | /8t 2:7 2:10 2:7 3:9 3:7 4:9 /2 4:7",
-                "position": {
-                  "fret": 7,
-                  "shifts": "none"
-                },
-                "crossing": "inside",
-                "notes": [
-                  {"string":3,"fret":7,"midi":62,"tick":0,"dur":320,"tech":[],"pick":"d"},
-                  {"string":3,"fret":9,"midi":64,"tick":320,"dur":320,"tech":[],"pick":"u"},
-                  {"string":2,"fret":7,"midi":66,"tick":640,"dur":320,"tech":[],"pick":"d"},
-                  {"string":3,"fret":9,"midi":64,"tick":960,"dur":320,"tech":[],"pick":"u"},
-                  {"string":3,"fret":7,"midi":62,"tick":1280,"dur":320,"tech":[],"pick":"d"},
-                  {"string":4,"fret":9,"midi":59,"tick":1600,"dur":320,"tech":[],"pick":"u"},
-                  {"string":3,"fret":7,"midi":62,"tick":1920,"dur":960,"tech":[],"pick":"d"},
-                  {"string":2,"fret":7,"midi":66,"tick":3840,"dur":320,"tech":[],"pick":"d"},
-                  {"string":2,"fret":10,"midi":69,"tick":4160,"dur":320,"tech":[],"pick":"u"},
-                  {"string":2,"fret":7,"midi":66,"tick":4480,"dur":320,"tech":[],"pick":"d"},
-                  {"string":3,"fret":9,"midi":64,"tick":4800,"dur":320,"tech":[],"pick":"u"},
-                  {"string":3,"fret":7,"midi":62,"tick":5120,"dur":320,"tech":[],"pick":"d"},
-                  {"string":4,"fret":9,"midi":59,"tick":5440,"dur":320,"tech":[],"pick":"u"},
-                  {"string":4,"fret":7,"midi":57,"tick":5760,"dur":1920,"tech":[],"pick":"d"}
-                ],
-                "rests": [
-                  {"tick":2880,"dur":960}
-                ],
-                "backing": {
-                  "kind": "click",
-                  "subdivision": 1
-                },
-                "computed": {
-                  "noteCount": 14,
-                  "minGapMsAtTop": 166.67,
-                  "handShifts": 0,
-                  "maxPlayableBpm": 236,
-                  "difficulty": 2.8
-                },
-                "harmony": {
-                  "kind": "scale",
-                  "root": "B",
-                  "scale": "minorPentatonic",
-                  "spelled": ["B", "D", "E", "F#", "A"],
-                  "cover": false
-                }
-              },
-              {
-                "id": "key=C",
-                "label": "C minor",
-                "params": {
-                  "key": "C"
-                },
-                "pool": "all",
-                "tab": "/8t 3:8 3:10 2:8 3:10 3:8 4:10 /4 3:8 r | /8t 2:8 2:11 2:8 3:10 3:8 4:10 /2 4:8",
-                "position": {
-                  "fret": 8,
-                  "shifts": "none"
-                },
-                "crossing": "inside",
-                "notes": [
-                  {"string":3,"fret":8,"midi":63,"tick":0,"dur":320,"tech":[],"pick":"d"},
-                  {"string":3,"fret":10,"midi":65,"tick":320,"dur":320,"tech":[],"pick":"u"},
-                  {"string":2,"fret":8,"midi":67,"tick":640,"dur":320,"tech":[],"pick":"d"},
-                  {"string":3,"fret":10,"midi":65,"tick":960,"dur":320,"tech":[],"pick":"u"},
-                  {"string":3,"fret":8,"midi":63,"tick":1280,"dur":320,"tech":[],"pick":"d"},
-                  {"string":4,"fret":10,"midi":60,"tick":1600,"dur":320,"tech":[],"pick":"u"},
-                  {"string":3,"fret":8,"midi":63,"tick":1920,"dur":960,"tech":[],"pick":"d"},
-                  {"string":2,"fret":8,"midi":67,"tick":3840,"dur":320,"tech":[],"pick":"d"},
-                  {"string":2,"fret":11,"midi":70,"tick":4160,"dur":320,"tech":[],"pick":"u"},
-                  {"string":2,"fret":8,"midi":67,"tick":4480,"dur":320,"tech":[],"pick":"d"},
-                  {"string":3,"fret":10,"midi":65,"tick":4800,"dur":320,"tech":[],"pick":"u"},
-                  {"string":3,"fret":8,"midi":63,"tick":5120,"dur":320,"tech":[],"pick":"d"},
-                  {"string":4,"fret":10,"midi":60,"tick":5440,"dur":320,"tech":[],"pick":"u"},
-                  {"string":4,"fret":8,"midi":58,"tick":5760,"dur":1920,"tech":[],"pick":"d"}
-                ],
-                "rests": [
-                  {"tick":2880,"dur":960}
-                ],
-                "backing": {
-                  "kind": "click",
-                  "subdivision": 1
-                },
-                "computed": {
-                  "noteCount": 14,
-                  "minGapMsAtTop": 166.67,
-                  "handShifts": 0,
-                  "maxPlayableBpm": 400,
-                  "difficulty": 2.8
-                },
-                "harmony": {
-                  "kind": "scale",
-                  "root": "C",
-                  "scale": "minorPentatonic",
-                  "spelled": ["C", "Eb", "F", "G", "Bb"],
-                  "cover": false
-                }
-              },
-              {
-                "id": "key=D",
-                "label": "D minor",
-                "params": {
-                  "key": "D"
-                },
-                "pool": "all",
-                "tab": "/8t 3:10 3:12 2:10 3:12 3:10 4:12 /4 3:10 r | /8t 2:10 2:13 2:10 3:12 3:10 4:12 /2 4:10",
-                "position": {
-                  "fret": 10,
-                  "shifts": "none"
-                },
-                "crossing": "inside",
-                "notes": [
-                  {"string":3,"fret":10,"midi":65,"tick":0,"dur":320,"tech":[],"pick":"d"},
-                  {"string":3,"fret":12,"midi":67,"tick":320,"dur":320,"tech":[],"pick":"u"},
-                  {"string":2,"fret":10,"midi":69,"tick":640,"dur":320,"tech":[],"pick":"d"},
-                  {"string":3,"fret":12,"midi":67,"tick":960,"dur":320,"tech":[],"pick":"u"},
-                  {"string":3,"fret":10,"midi":65,"tick":1280,"dur":320,"tech":[],"pick":"d"},
-                  {"string":4,"fret":12,"midi":62,"tick":1600,"dur":320,"tech":[],"pick":"u"},
-                  {"string":3,"fret":10,"midi":65,"tick":1920,"dur":960,"tech":[],"pick":"d"},
-                  {"string":2,"fret":10,"midi":69,"tick":3840,"dur":320,"tech":[],"pick":"d"},
-                  {"string":2,"fret":13,"midi":72,"tick":4160,"dur":320,"tech":[],"pick":"u"},
-                  {"string":2,"fret":10,"midi":69,"tick":4480,"dur":320,"tech":[],"pick":"d"},
-                  {"string":3,"fret":12,"midi":67,"tick":4800,"dur":320,"tech":[],"pick":"u"},
-                  {"string":3,"fret":10,"midi":65,"tick":5120,"dur":320,"tech":[],"pick":"d"},
-                  {"string":4,"fret":12,"midi":62,"tick":5440,"dur":320,"tech":[],"pick":"u"},
-                  {"string":4,"fret":10,"midi":60,"tick":5760,"dur":1920,"tech":[],"pick":"d"}
-                ],
-                "rests": [
-                  {"tick":2880,"dur":960}
-                ],
-                "backing": {
-                  "kind": "click",
-                  "subdivision": 1
-                },
-                "computed": {
-                  "noteCount": 14,
-                  "minGapMsAtTop": 166.67,
-                  "handShifts": 0,
-                  "maxPlayableBpm": 400,
-                  "difficulty": 2.8
-                },
-                "harmony": {
-                  "kind": "scale",
-                  "root": "D",
-                  "scale": "minorPentatonic",
-                  "spelled": ["D", "F", "G", "A", "C"],
-                  "cover": false
-                }
-              }
-            ]
           }
         }
       ],
@@ -6986,274 +6584,7 @@
             "spelled": ["A", "C", "D", "E", "G"],
             "cover": false
           },
-          "selfCheck": ["In the rests, was the guitar silent, with no string left ringing?"],
-          "variation": {
-            "dimensions": ["key"],
-            "pooled": ["key"],
-            "notPooled": [],
-            "variants": [
-              {
-                "id": "key=A",
-                "label": "A minor",
-                "params": {
-                  "key": "A"
-                },
-                "pool": "all",
-                "tab": "/16 6:5 r r 6:5 r 6:8 6:5 r 5:5 r 5:7 r 4:5 4:7 r r | 6:5 r r 6:5 r 6:8 6:5 r 4:7 r 4:5 r /4 5:7",
-                "position": {
-                  "fret": 5,
-                  "shifts": "none"
-                },
-                "crossing": "none",
-                "notes": [
-                  {"string":6,"fret":5,"midi":45,"tick":0,"dur":240,"tech":[]},
-                  {"string":6,"fret":5,"midi":45,"tick":720,"dur":240,"tech":[]},
-                  {"string":6,"fret":8,"midi":48,"tick":1200,"dur":240,"tech":[]},
-                  {"string":6,"fret":5,"midi":45,"tick":1440,"dur":240,"tech":[]},
-                  {"string":5,"fret":5,"midi":50,"tick":1920,"dur":240,"tech":[]},
-                  {"string":5,"fret":7,"midi":52,"tick":2400,"dur":240,"tech":[]},
-                  {"string":4,"fret":5,"midi":55,"tick":2880,"dur":240,"tech":[]},
-                  {"string":4,"fret":7,"midi":57,"tick":3120,"dur":240,"tech":[]},
-                  {"string":6,"fret":5,"midi":45,"tick":3840,"dur":240,"tech":[]},
-                  {"string":6,"fret":5,"midi":45,"tick":4560,"dur":240,"tech":[]},
-                  {"string":6,"fret":8,"midi":48,"tick":5040,"dur":240,"tech":[]},
-                  {"string":6,"fret":5,"midi":45,"tick":5280,"dur":240,"tech":[]},
-                  {"string":4,"fret":7,"midi":57,"tick":5760,"dur":240,"tech":[]},
-                  {"string":4,"fret":5,"midi":55,"tick":6240,"dur":240,"tech":[]},
-                  {"string":5,"fret":7,"midi":52,"tick":6720,"dur":960,"tech":[]}
-                ],
-                "rests": [
-                  {"tick":240,"dur":240},
-                  {"tick":480,"dur":240},
-                  {"tick":960,"dur":240},
-                  {"tick":1680,"dur":240},
-                  {"tick":2160,"dur":240},
-                  {"tick":2640,"dur":240},
-                  {"tick":3360,"dur":240},
-                  {"tick":3600,"dur":240},
-                  {"tick":4080,"dur":240},
-                  {"tick":4320,"dur":240},
-                  {"tick":4800,"dur":240},
-                  {"tick":5520,"dur":240},
-                  {"tick":6000,"dur":240},
-                  {"tick":6480,"dur":240}
-                ],
-                "backing": {
-                  "kind": "click",
-                  "subdivision": 1
-                },
-                "computed": {
-                  "noteCount": 15,
-                  "minGapMsAtTop": 136.36,
-                  "handShifts": 0,
-                  "maxPlayableBpm": 178,
-                  "difficulty": 2.9
-                },
-                "harmony": {
-                  "kind": "scale",
-                  "root": "A",
-                  "scale": "minorPentatonic",
-                  "spelled": ["A", "C", "D", "E", "G"],
-                  "cover": false
-                }
-              },
-              {
-                "id": "key=B",
-                "label": "B minor",
-                "params": {
-                  "key": "B"
-                },
-                "pool": "all",
-                "tab": "/16 6:7 r r 6:7 r 6:10 6:7 r 5:7 r 5:9 r 4:7 4:9 r r | 6:7 r r 6:7 r 6:10 6:7 r 4:9 r 4:7 r /4 5:9",
-                "position": {
-                  "fret": 7,
-                  "shifts": "none"
-                },
-                "crossing": "none",
-                "notes": [
-                  {"string":6,"fret":7,"midi":47,"tick":0,"dur":240,"tech":[]},
-                  {"string":6,"fret":7,"midi":47,"tick":720,"dur":240,"tech":[]},
-                  {"string":6,"fret":10,"midi":50,"tick":1200,"dur":240,"tech":[]},
-                  {"string":6,"fret":7,"midi":47,"tick":1440,"dur":240,"tech":[]},
-                  {"string":5,"fret":7,"midi":52,"tick":1920,"dur":240,"tech":[]},
-                  {"string":5,"fret":9,"midi":54,"tick":2400,"dur":240,"tech":[]},
-                  {"string":4,"fret":7,"midi":57,"tick":2880,"dur":240,"tech":[]},
-                  {"string":4,"fret":9,"midi":59,"tick":3120,"dur":240,"tech":[]},
-                  {"string":6,"fret":7,"midi":47,"tick":3840,"dur":240,"tech":[]},
-                  {"string":6,"fret":7,"midi":47,"tick":4560,"dur":240,"tech":[]},
-                  {"string":6,"fret":10,"midi":50,"tick":5040,"dur":240,"tech":[]},
-                  {"string":6,"fret":7,"midi":47,"tick":5280,"dur":240,"tech":[]},
-                  {"string":4,"fret":9,"midi":59,"tick":5760,"dur":240,"tech":[]},
-                  {"string":4,"fret":7,"midi":57,"tick":6240,"dur":240,"tech":[]},
-                  {"string":5,"fret":9,"midi":54,"tick":6720,"dur":960,"tech":[]}
-                ],
-                "rests": [
-                  {"tick":240,"dur":240},
-                  {"tick":480,"dur":240},
-                  {"tick":960,"dur":240},
-                  {"tick":1680,"dur":240},
-                  {"tick":2160,"dur":240},
-                  {"tick":2640,"dur":240},
-                  {"tick":3360,"dur":240},
-                  {"tick":3600,"dur":240},
-                  {"tick":4080,"dur":240},
-                  {"tick":4320,"dur":240},
-                  {"tick":4800,"dur":240},
-                  {"tick":5520,"dur":240},
-                  {"tick":6000,"dur":240},
-                  {"tick":6480,"dur":240}
-                ],
-                "backing": {
-                  "kind": "click",
-                  "subdivision": 1
-                },
-                "computed": {
-                  "noteCount": 15,
-                  "minGapMsAtTop": 136.36,
-                  "handShifts": 0,
-                  "maxPlayableBpm": 400,
-                  "difficulty": 2.9
-                },
-                "harmony": {
-                  "kind": "scale",
-                  "root": "B",
-                  "scale": "minorPentatonic",
-                  "spelled": ["B", "D", "E", "F#", "A"],
-                  "cover": false
-                }
-              },
-              {
-                "id": "key=C",
-                "label": "C minor",
-                "params": {
-                  "key": "C"
-                },
-                "pool": "all",
-                "tab": "/16 6:8 r r 6:8 r 6:11 6:8 r 5:8 r 5:10 r 4:8 4:10 r r | 6:8 r r 6:8 r 6:11 6:8 r 4:10 r 4:8 r /4 5:10",
-                "position": {
-                  "fret": 8,
-                  "shifts": "none"
-                },
-                "crossing": "none",
-                "notes": [
-                  {"string":6,"fret":8,"midi":48,"tick":0,"dur":240,"tech":[]},
-                  {"string":6,"fret":8,"midi":48,"tick":720,"dur":240,"tech":[]},
-                  {"string":6,"fret":11,"midi":51,"tick":1200,"dur":240,"tech":[]},
-                  {"string":6,"fret":8,"midi":48,"tick":1440,"dur":240,"tech":[]},
-                  {"string":5,"fret":8,"midi":53,"tick":1920,"dur":240,"tech":[]},
-                  {"string":5,"fret":10,"midi":55,"tick":2400,"dur":240,"tech":[]},
-                  {"string":4,"fret":8,"midi":58,"tick":2880,"dur":240,"tech":[]},
-                  {"string":4,"fret":10,"midi":60,"tick":3120,"dur":240,"tech":[]},
-                  {"string":6,"fret":8,"midi":48,"tick":3840,"dur":240,"tech":[]},
-                  {"string":6,"fret":8,"midi":48,"tick":4560,"dur":240,"tech":[]},
-                  {"string":6,"fret":11,"midi":51,"tick":5040,"dur":240,"tech":[]},
-                  {"string":6,"fret":8,"midi":48,"tick":5280,"dur":240,"tech":[]},
-                  {"string":4,"fret":10,"midi":60,"tick":5760,"dur":240,"tech":[]},
-                  {"string":4,"fret":8,"midi":58,"tick":6240,"dur":240,"tech":[]},
-                  {"string":5,"fret":10,"midi":55,"tick":6720,"dur":960,"tech":[]}
-                ],
-                "rests": [
-                  {"tick":240,"dur":240},
-                  {"tick":480,"dur":240},
-                  {"tick":960,"dur":240},
-                  {"tick":1680,"dur":240},
-                  {"tick":2160,"dur":240},
-                  {"tick":2640,"dur":240},
-                  {"tick":3360,"dur":240},
-                  {"tick":3600,"dur":240},
-                  {"tick":4080,"dur":240},
-                  {"tick":4320,"dur":240},
-                  {"tick":4800,"dur":240},
-                  {"tick":5520,"dur":240},
-                  {"tick":6000,"dur":240},
-                  {"tick":6480,"dur":240}
-                ],
-                "backing": {
-                  "kind": "click",
-                  "subdivision": 1
-                },
-                "computed": {
-                  "noteCount": 15,
-                  "minGapMsAtTop": 136.36,
-                  "handShifts": 0,
-                  "maxPlayableBpm": 400,
-                  "difficulty": 2.9
-                },
-                "harmony": {
-                  "kind": "scale",
-                  "root": "C",
-                  "scale": "minorPentatonic",
-                  "spelled": ["C", "Eb", "F", "G", "Bb"],
-                  "cover": false
-                }
-              },
-              {
-                "id": "key=D",
-                "label": "D minor",
-                "params": {
-                  "key": "D"
-                },
-                "pool": "all",
-                "tab": "/16 6:10 r r 6:10 r 6:13 6:10 r 5:10 r 5:12 r 4:10 4:12 r r | 6:10 r r 6:10 r 6:13 6:10 r 4:12 r 4:10 r /4 5:12",
-                "position": {
-                  "fret": 10,
-                  "shifts": "none"
-                },
-                "crossing": "none",
-                "notes": [
-                  {"string":6,"fret":10,"midi":50,"tick":0,"dur":240,"tech":[]},
-                  {"string":6,"fret":10,"midi":50,"tick":720,"dur":240,"tech":[]},
-                  {"string":6,"fret":13,"midi":53,"tick":1200,"dur":240,"tech":[]},
-                  {"string":6,"fret":10,"midi":50,"tick":1440,"dur":240,"tech":[]},
-                  {"string":5,"fret":10,"midi":55,"tick":1920,"dur":240,"tech":[]},
-                  {"string":5,"fret":12,"midi":57,"tick":2400,"dur":240,"tech":[]},
-                  {"string":4,"fret":10,"midi":60,"tick":2880,"dur":240,"tech":[]},
-                  {"string":4,"fret":12,"midi":62,"tick":3120,"dur":240,"tech":[]},
-                  {"string":6,"fret":10,"midi":50,"tick":3840,"dur":240,"tech":[]},
-                  {"string":6,"fret":10,"midi":50,"tick":4560,"dur":240,"tech":[]},
-                  {"string":6,"fret":13,"midi":53,"tick":5040,"dur":240,"tech":[]},
-                  {"string":6,"fret":10,"midi":50,"tick":5280,"dur":240,"tech":[]},
-                  {"string":4,"fret":12,"midi":62,"tick":5760,"dur":240,"tech":[]},
-                  {"string":4,"fret":10,"midi":60,"tick":6240,"dur":240,"tech":[]},
-                  {"string":5,"fret":12,"midi":57,"tick":6720,"dur":960,"tech":[]}
-                ],
-                "rests": [
-                  {"tick":240,"dur":240},
-                  {"tick":480,"dur":240},
-                  {"tick":960,"dur":240},
-                  {"tick":1680,"dur":240},
-                  {"tick":2160,"dur":240},
-                  {"tick":2640,"dur":240},
-                  {"tick":3360,"dur":240},
-                  {"tick":3600,"dur":240},
-                  {"tick":4080,"dur":240},
-                  {"tick":4320,"dur":240},
-                  {"tick":4800,"dur":240},
-                  {"tick":5520,"dur":240},
-                  {"tick":6000,"dur":240},
-                  {"tick":6480,"dur":240}
-                ],
-                "backing": {
-                  "kind": "click",
-                  "subdivision": 1
-                },
-                "computed": {
-                  "noteCount": 15,
-                  "minGapMsAtTop": 136.36,
-                  "handShifts": 0,
-                  "maxPlayableBpm": 400,
-                  "difficulty": 2.9
-                },
-                "harmony": {
-                  "kind": "scale",
-                  "root": "D",
-                  "scale": "minorPentatonic",
-                  "spelled": ["D", "F", "G", "A", "C"],
-                  "cover": false
-                }
-              }
-            ]
-          }
+          "selfCheck": ["In the rests, was the guitar silent, with no string left ringing?"]
         }
       ],
       "difficultyException": "The rests bring the note count down. The demand is placing single sixteenths around silent beats, which a note-rate metric does not count."
@@ -7269,7 +6600,7 @@
         "Say the counts in a row before you play: '1 and, 2-trip-let, 3 e and a, 4'.",
         "Coming down from sixteenths to triplets is the hard direction. Leave more room than feels right."
       ],
-      "payoff": "The rhythm pyramid up and down in one take, and a riff that changes gear three times in two bars.",
+      "payoff": "The rhythm pyramid up and down in one take, and a riff that changes gear on every beat.",
       "prerequisites": ["sixteenth-syncopation"],
       "difficulty": 3.25,
       "exercises": [
@@ -7818,7 +7149,7 @@
         {
           "id": "gear-changes.three-over-two",
           "title": "Three across two beats",
-          "purpose": "Two quarter notes, then three notes spread evenly over the next two beats: the quarter-note triplet. Slow, wide and easy to get wrong.",
+          "purpose": "Two quarter notes, then three notes spread evenly over the next two beats: the quarter-note triplet. Bar 2 turns it round, the triplet first. Slow, wide and easy to get wrong.",
           "howTo": [
             "Count eighth-note triplets, '1-trip-let, 2-trip-let', and play every second syllable: '1, let, trip'.",
             "The three notes are equal. If the last one is short, you fell back onto the beat too soon."
@@ -8183,233 +7514,6 @@
             "scale": "minorPentatonic",
             "spelled": ["A", "C", "D", "E", "G"],
             "cover": false
-          },
-          "variation": {
-            "dimensions": ["key"],
-            "pooled": ["key"],
-            "notPooled": [],
-            "variants": [
-              {
-                "id": "key=A",
-                "label": "A minor",
-                "params": {
-                  "key": "A"
-                },
-                "pool": "all",
-                "tab": "/8 3:5 3:7 /16 2:5 2:8 2:5 3:7 /8t 3:5 3:7 3:5 /4 4:7 | /8t 4:5 4:7 3:5 /16 3:7 3:5 4:7 4:5 /8 5:7 4:5 /4 4:7",
-                "position": {
-                  "fret": 5,
-                  "shifts": "none"
-                },
-                "crossing": "none",
-                "notes": [
-                  {"string":3,"fret":5,"midi":60,"tick":0,"dur":480,"tech":[]},
-                  {"string":3,"fret":7,"midi":62,"tick":480,"dur":480,"tech":[]},
-                  {"string":2,"fret":5,"midi":64,"tick":960,"dur":240,"tech":[]},
-                  {"string":2,"fret":8,"midi":67,"tick":1200,"dur":240,"tech":[]},
-                  {"string":2,"fret":5,"midi":64,"tick":1440,"dur":240,"tech":[]},
-                  {"string":3,"fret":7,"midi":62,"tick":1680,"dur":240,"tech":[]},
-                  {"string":3,"fret":5,"midi":60,"tick":1920,"dur":320,"tech":[]},
-                  {"string":3,"fret":7,"midi":62,"tick":2240,"dur":320,"tech":[]},
-                  {"string":3,"fret":5,"midi":60,"tick":2560,"dur":320,"tech":[]},
-                  {"string":4,"fret":7,"midi":57,"tick":2880,"dur":960,"tech":[]},
-                  {"string":4,"fret":5,"midi":55,"tick":3840,"dur":320,"tech":[]},
-                  {"string":4,"fret":7,"midi":57,"tick":4160,"dur":320,"tech":[]},
-                  {"string":3,"fret":5,"midi":60,"tick":4480,"dur":320,"tech":[]},
-                  {"string":3,"fret":7,"midi":62,"tick":4800,"dur":240,"tech":[]},
-                  {"string":3,"fret":5,"midi":60,"tick":5040,"dur":240,"tech":[]},
-                  {"string":4,"fret":7,"midi":57,"tick":5280,"dur":240,"tech":[]},
-                  {"string":4,"fret":5,"midi":55,"tick":5520,"dur":240,"tech":[]},
-                  {"string":5,"fret":7,"midi":52,"tick":5760,"dur":480,"tech":[]},
-                  {"string":4,"fret":5,"midi":55,"tick":6240,"dur":480,"tech":[]},
-                  {"string":4,"fret":7,"midi":57,"tick":6720,"dur":960,"tech":[]}
-                ],
-                "rests": [],
-                "backing": {
-                  "kind": "click",
-                  "subdivision": 1
-                },
-                "computed": {
-                  "noteCount": 20,
-                  "minGapMsAtTop": 136.36,
-                  "handShifts": 0,
-                  "maxPlayableBpm": 178,
-                  "difficulty": 3.56
-                },
-                "harmony": {
-                  "kind": "scale",
-                  "root": "A",
-                  "scale": "minorPentatonic",
-                  "spelled": ["A", "C", "D", "E", "G"],
-                  "cover": false
-                }
-              },
-              {
-                "id": "key=B",
-                "label": "B minor",
-                "params": {
-                  "key": "B"
-                },
-                "pool": "all",
-                "tab": "/8 3:7 3:9 /16 2:7 2:10 2:7 3:9 /8t 3:7 3:9 3:7 /4 4:9 | /8t 4:7 4:9 3:7 /16 3:9 3:7 4:9 4:7 /8 5:9 4:7 /4 4:9",
-                "position": {
-                  "fret": 7,
-                  "shifts": "none"
-                },
-                "crossing": "none",
-                "notes": [
-                  {"string":3,"fret":7,"midi":62,"tick":0,"dur":480,"tech":[]},
-                  {"string":3,"fret":9,"midi":64,"tick":480,"dur":480,"tech":[]},
-                  {"string":2,"fret":7,"midi":66,"tick":960,"dur":240,"tech":[]},
-                  {"string":2,"fret":10,"midi":69,"tick":1200,"dur":240,"tech":[]},
-                  {"string":2,"fret":7,"midi":66,"tick":1440,"dur":240,"tech":[]},
-                  {"string":3,"fret":9,"midi":64,"tick":1680,"dur":240,"tech":[]},
-                  {"string":3,"fret":7,"midi":62,"tick":1920,"dur":320,"tech":[]},
-                  {"string":3,"fret":9,"midi":64,"tick":2240,"dur":320,"tech":[]},
-                  {"string":3,"fret":7,"midi":62,"tick":2560,"dur":320,"tech":[]},
-                  {"string":4,"fret":9,"midi":59,"tick":2880,"dur":960,"tech":[]},
-                  {"string":4,"fret":7,"midi":57,"tick":3840,"dur":320,"tech":[]},
-                  {"string":4,"fret":9,"midi":59,"tick":4160,"dur":320,"tech":[]},
-                  {"string":3,"fret":7,"midi":62,"tick":4480,"dur":320,"tech":[]},
-                  {"string":3,"fret":9,"midi":64,"tick":4800,"dur":240,"tech":[]},
-                  {"string":3,"fret":7,"midi":62,"tick":5040,"dur":240,"tech":[]},
-                  {"string":4,"fret":9,"midi":59,"tick":5280,"dur":240,"tech":[]},
-                  {"string":4,"fret":7,"midi":57,"tick":5520,"dur":240,"tech":[]},
-                  {"string":5,"fret":9,"midi":54,"tick":5760,"dur":480,"tech":[]},
-                  {"string":4,"fret":7,"midi":57,"tick":6240,"dur":480,"tech":[]},
-                  {"string":4,"fret":9,"midi":59,"tick":6720,"dur":960,"tech":[]}
-                ],
-                "rests": [],
-                "backing": {
-                  "kind": "click",
-                  "subdivision": 1
-                },
-                "computed": {
-                  "noteCount": 20,
-                  "minGapMsAtTop": 136.36,
-                  "handShifts": 0,
-                  "maxPlayableBpm": 400,
-                  "difficulty": 3.56
-                },
-                "harmony": {
-                  "kind": "scale",
-                  "root": "B",
-                  "scale": "minorPentatonic",
-                  "spelled": ["B", "D", "E", "F#", "A"],
-                  "cover": false
-                }
-              },
-              {
-                "id": "key=C",
-                "label": "C minor",
-                "params": {
-                  "key": "C"
-                },
-                "pool": "all",
-                "tab": "/8 3:8 3:10 /16 2:8 2:11 2:8 3:10 /8t 3:8 3:10 3:8 /4 4:10 | /8t 4:8 4:10 3:8 /16 3:10 3:8 4:10 4:8 /8 5:10 4:8 /4 4:10",
-                "position": {
-                  "fret": 8,
-                  "shifts": "none"
-                },
-                "crossing": "none",
-                "notes": [
-                  {"string":3,"fret":8,"midi":63,"tick":0,"dur":480,"tech":[]},
-                  {"string":3,"fret":10,"midi":65,"tick":480,"dur":480,"tech":[]},
-                  {"string":2,"fret":8,"midi":67,"tick":960,"dur":240,"tech":[]},
-                  {"string":2,"fret":11,"midi":70,"tick":1200,"dur":240,"tech":[]},
-                  {"string":2,"fret":8,"midi":67,"tick":1440,"dur":240,"tech":[]},
-                  {"string":3,"fret":10,"midi":65,"tick":1680,"dur":240,"tech":[]},
-                  {"string":3,"fret":8,"midi":63,"tick":1920,"dur":320,"tech":[]},
-                  {"string":3,"fret":10,"midi":65,"tick":2240,"dur":320,"tech":[]},
-                  {"string":3,"fret":8,"midi":63,"tick":2560,"dur":320,"tech":[]},
-                  {"string":4,"fret":10,"midi":60,"tick":2880,"dur":960,"tech":[]},
-                  {"string":4,"fret":8,"midi":58,"tick":3840,"dur":320,"tech":[]},
-                  {"string":4,"fret":10,"midi":60,"tick":4160,"dur":320,"tech":[]},
-                  {"string":3,"fret":8,"midi":63,"tick":4480,"dur":320,"tech":[]},
-                  {"string":3,"fret":10,"midi":65,"tick":4800,"dur":240,"tech":[]},
-                  {"string":3,"fret":8,"midi":63,"tick":5040,"dur":240,"tech":[]},
-                  {"string":4,"fret":10,"midi":60,"tick":5280,"dur":240,"tech":[]},
-                  {"string":4,"fret":8,"midi":58,"tick":5520,"dur":240,"tech":[]},
-                  {"string":5,"fret":10,"midi":55,"tick":5760,"dur":480,"tech":[]},
-                  {"string":4,"fret":8,"midi":58,"tick":6240,"dur":480,"tech":[]},
-                  {"string":4,"fret":10,"midi":60,"tick":6720,"dur":960,"tech":[]}
-                ],
-                "rests": [],
-                "backing": {
-                  "kind": "click",
-                  "subdivision": 1
-                },
-                "computed": {
-                  "noteCount": 20,
-                  "minGapMsAtTop": 136.36,
-                  "handShifts": 0,
-                  "maxPlayableBpm": 400,
-                  "difficulty": 3.56
-                },
-                "harmony": {
-                  "kind": "scale",
-                  "root": "C",
-                  "scale": "minorPentatonic",
-                  "spelled": ["C", "Eb", "F", "G", "Bb"],
-                  "cover": false
-                }
-              },
-              {
-                "id": "key=D",
-                "label": "D minor",
-                "params": {
-                  "key": "D"
-                },
-                "pool": "all",
-                "tab": "/8 3:10 3:12 /16 2:10 2:13 2:10 3:12 /8t 3:10 3:12 3:10 /4 4:12 | /8t 4:10 4:12 3:10 /16 3:12 3:10 4:12 4:10 /8 5:12 4:10 /4 4:12",
-                "position": {
-                  "fret": 10,
-                  "shifts": "none"
-                },
-                "crossing": "none",
-                "notes": [
-                  {"string":3,"fret":10,"midi":65,"tick":0,"dur":480,"tech":[]},
-                  {"string":3,"fret":12,"midi":67,"tick":480,"dur":480,"tech":[]},
-                  {"string":2,"fret":10,"midi":69,"tick":960,"dur":240,"tech":[]},
-                  {"string":2,"fret":13,"midi":72,"tick":1200,"dur":240,"tech":[]},
-                  {"string":2,"fret":10,"midi":69,"tick":1440,"dur":240,"tech":[]},
-                  {"string":3,"fret":12,"midi":67,"tick":1680,"dur":240,"tech":[]},
-                  {"string":3,"fret":10,"midi":65,"tick":1920,"dur":320,"tech":[]},
-                  {"string":3,"fret":12,"midi":67,"tick":2240,"dur":320,"tech":[]},
-                  {"string":3,"fret":10,"midi":65,"tick":2560,"dur":320,"tech":[]},
-                  {"string":4,"fret":12,"midi":62,"tick":2880,"dur":960,"tech":[]},
-                  {"string":4,"fret":10,"midi":60,"tick":3840,"dur":320,"tech":[]},
-                  {"string":4,"fret":12,"midi":62,"tick":4160,"dur":320,"tech":[]},
-                  {"string":3,"fret":10,"midi":65,"tick":4480,"dur":320,"tech":[]},
-                  {"string":3,"fret":12,"midi":67,"tick":4800,"dur":240,"tech":[]},
-                  {"string":3,"fret":10,"midi":65,"tick":5040,"dur":240,"tech":[]},
-                  {"string":4,"fret":12,"midi":62,"tick":5280,"dur":240,"tech":[]},
-                  {"string":4,"fret":10,"midi":60,"tick":5520,"dur":240,"tech":[]},
-                  {"string":5,"fret":12,"midi":57,"tick":5760,"dur":480,"tech":[]},
-                  {"string":4,"fret":10,"midi":60,"tick":6240,"dur":480,"tech":[]},
-                  {"string":4,"fret":12,"midi":62,"tick":6720,"dur":960,"tech":[]}
-                ],
-                "rests": [],
-                "backing": {
-                  "kind": "click",
-                  "subdivision": 1
-                },
-                "computed": {
-                  "noteCount": 20,
-                  "minGapMsAtTop": 136.36,
-                  "handShifts": 0,
-                  "maxPlayableBpm": 400,
-                  "difficulty": 3.56
-                },
-                "harmony": {
-                  "kind": "scale",
-                  "root": "D",
-                  "scale": "minorPentatonic",
-                  "spelled": ["D", "F", "G", "A", "C"],
-                  "cover": false
-                }
-              }
-            ]
           }
         }
       ]
@@ -8418,7 +7522,7 @@
       "id": "with-the-band",
       "order": 9,
       "title": "With the band",
-      "goal": "Hold a riff in eighths, one in sixteenths and a shuffle against a real rhythm section for four bars.",
+      "goal": "Hold a riff in eighths, one in sixteenths and a shuffle against a real rhythm section, two to four bars at a time.",
       "why": "A click tells you exactly where the beat is. A band tells you roughly, and gives you a feel to sit in. Locking a riff to a bass drum and a snare is the reason to practise rhythm at all, and it uses the ear differently from a click.",
       "howTo": [
         "Listen to the bass drum and the snare, not to your own guitar. Your riff is one part of the groove.",
@@ -8432,9 +7536,9 @@
         {
           "id": "with-the-band.band-eighths",
           "title": "An eighth-note riff with the band",
-          "purpose": "Four bars in E minor over a rock groove, with rests on beats 2 and 3 where the snare speaks. The riff follows the chords: E, G, A and back to E.",
+          "purpose": "Four bars in E minor over a rock groove, with rests on beats 2 and 3 of the first three bars, where the snare speaks. The riff follows the chords: E, G, A and back to E.",
           "howTo": [
-            "Count '1 and, (2) and, (3) and 4 and'. The hand swings in eighths throughout.",
+            "Count '1 and, (2) and, (3) and 4 and' for three bars; bar 4 fills beat 3 and ends on a long note. The hand swings in eighths throughout.",
             "Each bar starts on the root of its chord: open low E, G at fret 3, the open A string, and E again."
           ],
           "coachLine": "Band on. I time your notes against it and check them after the take.",
