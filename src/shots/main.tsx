@@ -23,6 +23,7 @@ import "../styles/session-narrative.css";
 import { installShotMock } from "./mockIpc";
 import { shotById, SHOTS, SHOT_THEMES } from "./scenarios";
 import { RUNNABLE_PATH_IDS } from "../session/packs";
+import { CHOSEN_VARIANT } from "../containers/session/hooks/useSessionRun";
 import { stageDebug } from "../stage3d/controller";
 
 declare global {
@@ -339,6 +340,7 @@ async function drive() {
         await until("the Step", () => !!byId("step-detail"));
         const play = wanted ? `[data-testid="play-${wanted}"]` : '[data-testid^="play-"]';
         await until("an Exercise to play", () => !!document.querySelector(play));
+        CHOSEN_VARIANT.seed = shot!.session.variant ?? null;
         document.querySelector<HTMLElement>(play)?.click();
       } else {
         // The plan can be drawn a beat before the Start button is (Today's
