@@ -40,6 +40,7 @@ export const START_PATH_ORDER = [
   "rhythm-foundations",
   "legato",
   "metal-rhythm",
+  "know-the-neck",
 ];
 
 /** The Paths a player can start, in the step's order (unknown runnable ones last). */

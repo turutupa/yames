@@ -7,12 +7,14 @@ import { buildPath } from "../generate";
 import type { Exercise } from "../format";
 import bluesPentatonics from "./blues-pentatonics";
 import classicRock from "./classic-rock";
+import knowTheNeck from "./know-the-neck";
 
 const UNBUILT = new Set(METRICS.filter((m) => m.status === "new-grader" && m.id !== "evennessHold").map((m) => m.id));
 
 describe.each([
   ["blues-pentatonics", bluesPentatonics, 30, 0.7],
   ["classic-rock", classicRock, 24, 0.75],
+  ["know-the-neck", knowTheNeck, 25, 0.9],
 ] as const)("%s", (_id, spec, minGraded, minShare) => {
   const doc = buildPath(spec);
   const exercises: Exercise[] = doc.steps.flatMap((s) => s.exercises);

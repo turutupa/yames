@@ -68,6 +68,7 @@ describe("Where do you start? — what it offers", () => {
       "rhythm-foundations",
       "legato",
       "metal-rhythm",
+      "know-the-neck",
     ]);
   });
 
