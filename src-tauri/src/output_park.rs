@@ -125,21 +125,20 @@ pub(crate) fn start_must_report_dead(alive: bool, output_dead: bool) -> bool {
 /// Every one is an atomic load: the take's and the speech's slot flags are
 /// mirrors kept under their locks by the command and speaking threads, so
 /// this never waits on either while the app is away and the loop runs it
-/// on every pass. `take_ended_generation` is the playback whose end the
-/// loop has already seen: a take that ran off its end keeps its slot until
-/// the screen stops it, and the screen may be asleep.
+/// on every pass. A take whose end has already been reported does not
+/// count: it keeps its slot until the screen stops it, and the screen may be
+/// asleep. That acknowledgement lives on the handoff, so it survives a
+/// reopen that replaces this loop.
 pub(crate) fn read_needs(
     app_in_background: bool,
     transport_playing: bool,
     take: &crate::take::TakeHandoff,
-    take_ended_generation: Option<u64>,
     speech: &crate::speech_out::SpeechHandoff,
 ) -> OutputNeeds {
     OutputNeeds {
         app_in_background,
         transport_playing,
-        take_playing_back: take.is_playing_back()
-            && take_ended_generation != Some(take.play_generation()),
+        take_playing_back: take.is_playing_unfinished(),
         take_recording: take.is_recording(),
         speech_in_flight: speech.in_flight(),
     }
@@ -269,11 +268,19 @@ pub(crate) fn route_plan(req: RouteRequest, needs_reopen: bool) -> RoutePlan {
     }
 }
 
-/// `reopen_output`'s rule: keep what was decoded for the old stream only
-/// when the stream about to open will run at the same rate. Not knowing
-/// either rate is not knowing they match.
+/// `reopen_output`'s rule: drop what was decoded for the old stream only
+/// when both rates are known and differ.
+///
+/// A probe that failed (twice — `reopen_output` asks again once) is not a
+/// rate that moved, and dropping the song for it was the price of a
+/// transient refusal (review of card #14, item 3). With no probe there is
+/// no format to hand the stream either, so its own setup probes, and a
+/// device that refuses that too does not open: nothing stale gets played.
 pub(crate) fn reopen_keeps_loaded(old_rate: Option<u32>, new_rate: Option<u32>) -> bool {
-    matches!((old_rate, new_rate), (Some(a), Some(b)) if a == b)
+    match (old_rate, new_rate) {
+        (Some(a), Some(b)) => a == b,
+        _ => true,
+    }
 }
 
 #[cfg(target_os = "android")]
@@ -414,7 +421,7 @@ mod tests {
         let (t, s) = (take.clone(), speech.clone());
         let (tx, rx) = std::sync::mpsc::channel();
         std::thread::spawn(move || {
-            let _ = tx.send(read_needs(true, false, &t, None, &s));
+            let _ = tx.send(read_needs(true, false, &t, &s));
         });
         let needs = rx
             .recv_timeout(Duration::from_secs(2))
@@ -423,13 +430,14 @@ mod tests {
         assert!(needs.take_playing_back && needs.take_recording && needs.speech_in_flight);
         assert!(!should_park(needs));
 
-        // A playback whose end the loop has seen no longer holds the stream.
-        let seen = Some(take.play_generation());
-        let needs = read_needs(true, false, &take, seen, &speech);
+        // A playback whose end has been reported no longer holds the stream.
+        take.note_ended(take.play_generation());
+        assert!(take.take_ended().is_some());
+        let needs = read_needs(true, false, &take, &speech);
         assert!(!needs.take_playing_back);
         take.set_record(None);
         speech.set_clip(None);
-        assert!(should_park(read_needs(true, false, &take, seen, &speech)));
+        assert!(should_park(read_needs(true, false, &take, &speech)));
     }
 
     /// Card #14, item 2: a refusal that clears is retried, not reopened.
@@ -525,8 +533,9 @@ mod tests {
     fn loaded_material_survives_a_reopen_only_at_the_same_rate() {
         assert!(reopen_keeps_loaded(Some(48_000), Some(48_000)));
         assert!(!reopen_keeps_loaded(Some(48_000), Some(44_100)));
-        assert!(!reopen_keeps_loaded(None, Some(48_000)));
-        assert!(!reopen_keeps_loaded(Some(48_000), None));
+        // Unknown is not "moved": a failed probe keeps the song.
+        assert!(reopen_keeps_loaded(None, Some(48_000)));
+        assert!(reopen_keeps_loaded(Some(48_000), None));
     }
 
     /// End to end over the pure parts: away and stopped, a reroute closes the

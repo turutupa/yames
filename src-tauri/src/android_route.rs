@@ -113,11 +113,7 @@ pub(crate) fn spawn(app: AppHandle) {
                                 }
                             }
                             Some(crate::output_park::Reopen::SameRoute) => {
-                                let probe = || {
-                                    crate::android_audio::probe_output_format()
-                                        .ok()
-                                        .map(|f| f.sample_rate)
-                                };
+                                let probe = || crate::android_audio::probe_output_format().ok();
                                 match engine.reopen_output(state, Some(app.clone()), probe) {
                                     Err(e) => eprintln!("[yames][android] reopening a dead output failed: {e}"),
                                     Ok(kept) => eprintln!(

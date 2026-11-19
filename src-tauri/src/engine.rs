@@ -4977,6 +4977,30 @@ impl CallbackProbe {
 #[derive(Clone)]
 struct EventSink(Option<AppHandle>);
 
+/// `take-playback-ended`'s payload: which playback ended, so a listener
+/// can tell an ending from the take it just started (review of card #14,
+/// item 2). The screens ignore it today; it costs nothing to carry.
+#[derive(Clone, serde::Serialize)]
+pub(crate) struct TakeEnded {
+    pub generation: u64,
+}
+
+/// What `reopen_output` probes and hands to the next spawn: Oboe's format
+/// on a phone. A bare rate elsewhere, where only the tests call it.
+#[cfg(target_os = "android")]
+pub(crate) type OutputFormatHint = crate::android_audio::OutputFormat;
+#[cfg(not(target_os = "android"))]
+pub(crate) type OutputFormatHint = u32;
+
+#[cfg(target_os = "android")]
+fn hint_rate(h: &OutputFormatHint) -> u32 {
+    h.sample_rate
+}
+#[cfg(not(target_os = "android"))]
+fn hint_rate(h: &OutputFormatHint) -> u32 {
+    *h
+}
+
 impl EventSink {
     fn emit<S: serde::Serialize + Clone>(
         &self,
@@ -5142,6 +5166,12 @@ pub struct MetronomeEngine {
     /// has already been replaced reopens nothing. See `output_park`.
     #[cfg(target_os = "android")]
     output_dead: Arc<AtomicBool>,
+    /// The format `reopen_output` probed and judged the loaded material by,
+    /// handed to the next spawn so its stream opens at exactly that rate
+    /// rather than probing again and perhaps answering differently (review
+    /// of card #14, item 4). Taken by `ensure_thread`; `None` everywhere
+    /// else, and the setup probes as it always has.
+    output_format_hint: Option<OutputFormatHint>,
     thread_handle: Option<thread::JoinHandle<()>>,
     beat_log: BeatLog,
     device_name: Option<String>,
@@ -5232,6 +5262,7 @@ impl MetronomeEngine {
             playing: Arc::new(AtomicBool::new(false)),
             #[cfg(target_os = "android")]
             output_dead: Arc::new(AtomicBool::new(false)),
+            output_format_hint: None,
             thread_handle: None,
             beat_log,
             device_name: None,
@@ -5441,6 +5472,7 @@ impl MetronomeEngine {
         self.device_name = name;
         // Fully tear down the old thread/stream
         self.shutdown();
+        self.settle_take_end(&EventSink(Some(app_handle.clone())));
         // Create fresh atomics so the old cpal callback (if still lingering
         // in CoreAudio) can never be reactivated by a shared flag. `playing`
         // carries the old state across *before* the spawn rather than being
@@ -5517,6 +5549,18 @@ impl MetronomeEngine {
         keep_playing
     }
 
+    /// After a shutdown: report a take's ending the old event loop had not
+    /// got to yet, here, before the new callback can pick the take up. The
+    /// report acknowledges it (`TakeHandoff::take_ended`), so the new
+    /// callback skips the finished take instead of playing it again and the
+    /// new loop does not announce it a second time (review of card #14,
+    /// item 1). The thread is joined, so nothing else is reading the flag.
+    fn settle_take_end(&self, sink: &EventSink) -> Option<u64> {
+        let generation = self.take.take_ended()?;
+        let _ = sink.emit("take-playback-ended", TakeEnded { generation });
+        Some(generation)
+    }
+
     /// Android: reopen the output where it was, after its stream died
     /// WITHOUT the route moving — a resume that would not start even after
     /// `output_park`'s retries, or `start` finding the stream dead (card #14,
@@ -5525,13 +5569,16 @@ impl MetronomeEngine {
     /// `set_device` is the route-change path and takes away everything
     /// decoded for the old device: the song (the screen must load it again),
     /// the jam's folder kit and the coach's line in flight. None of that is
-    /// stale when the rate has not moved, so here the new stream's rate is
-    /// asked first (`probe_rate`, after the old stream is closed — the same
-    /// probe the stream's own setup runs) and the loaded material is kept
-    /// when it matches. A line of speech kept in its slot is picked up from
-    /// the top by the new callback; it cannot have been heard, because a
-    /// stream is only parked with nothing in flight and a dead one sounds
-    /// nothing. When the rate DID move, this is `set_device`'s drop exactly.
+    /// stale when the rate has not moved, so here the new stream's format is
+    /// probed first (after the old stream is closed; once more after 50 ms
+    /// if the first probe fails) and the loaded material is kept unless the
+    /// probed rate differs from the old one. The probed format is handed to
+    /// the spawn, so the stream opens at exactly the rate the material was
+    /// judged by. A line of speech kept in its slot is picked up from the
+    /// top by the new callback; it cannot have been heard, because a stream
+    /// is only parked with nothing in flight and a dead one sounds nothing.
+    /// When the rate DID move, this is `set_device`'s drop exactly, and the
+    /// cached probe is forgotten with it.
     ///
     /// `Ok(true)` when everything loaded was kept.
     #[cfg_attr(not(target_os = "android"), allow(dead_code))]
@@ -5539,20 +5586,30 @@ impl MetronomeEngine {
         &mut self,
         state: SharedState,
         app_handle: Option<AppHandle>,
-        probe_rate: impl FnOnce() -> Option<u32>,
+        mut probe: impl FnMut() -> Option<OutputFormatHint>,
     ) -> Result<bool, String> {
+        let sink = EventSink(app_handle.clone());
         let was_playing = self.playing.load(Ordering::SeqCst);
         let old_rate = self.output_sample_rate();
         self.shutdown_inner(false);
-        let kept = crate::output_park::reopen_keeps_loaded(old_rate, probe_rate());
+        self.settle_take_end(&sink);
+        let probed = probe().or_else(|| {
+            thread::sleep(Duration::from_millis(50));
+            probe()
+        });
+        let kept =
+            crate::output_park::reopen_keeps_loaded(old_rate, probed.as_ref().map(hint_rate));
         let keep_playing = if kept {
             was_playing
         } else {
             // The line was resampled for the old rate: take it back, the way
             // `shutdown` does for a device change.
             self.speech.cut();
-            self.drop_decoded_for_new_rate(was_playing, &state, &EventSink(app_handle.clone()))
+            #[cfg(target_os = "android")]
+            forget_output_rate();
+            self.drop_decoded_for_new_rate(was_playing, &state, &sink)
         };
+        self.output_format_hint = probed;
         // Fresh flags for the fresh thread, as `set_device` does and for the
         // same reason: the old thread may still be unwinding.
         self.alive = Arc::new(AtomicBool::new(false));
@@ -5753,6 +5810,12 @@ impl MetronomeEngine {
         let playing = self.playing.clone();
         #[cfg(target_os = "android")]
         let output_dead = self.output_dead.clone();
+        #[cfg(target_os = "android")]
+        let format_hint = self.output_format_hint.take();
+        #[cfg(not(target_os = "android"))]
+        {
+            self.output_format_hint = None;
+        }
         let beat_log = self.beat_log.clone();
         let device_name = self.device_name.clone();
         let adaptive_score = self.adaptive_score.clone();
@@ -5970,7 +6033,10 @@ impl MetronomeEngine {
             #[cfg(target_os = "android")]
             let (android_format, sample_rate, channels) = {
                 let _ = &device_name;
-                match crate::android_audio::probe_output_format() {
+                // `reopen_output`'s probe when there was one: the stream then
+                // opens at the rate the loaded material was judged by
+                // (`open_output_stream` refuses any other).
+                match format_hint.map(Ok).unwrap_or_else(crate::android_audio::probe_output_format) {
                     Ok(f) => {
                         let (sr, ch) = (f.sample_rate, f.channels);
                         (f, sr, ch)
@@ -8257,14 +8323,11 @@ impl MetronomeEngine {
             // forever after.
             let mut dropped_said: u64 = 0;
             // Whether this loop has paused the output stream because the app
-            // is away with nothing needing it, and the playback generation
-            // whose end it has already seen (a take that ran off its end
-            // keeps its slot until the screen stops it, and the screen may be
-            // asleep). See `output_park`.
+            // is away with nothing needing it. (Which take's end has been
+            // seen lives on the take handoff, so a reopen that replaces this
+            // loop does not forget it.) See `output_park`.
             #[cfg(target_os = "android")]
             let mut output_parked = false;
-            #[cfg(target_os = "android")]
-            let mut take_ended_generation: Option<u64> = None;
             #[cfg(target_os = "android")]
             crate::output_park::register_event_loop();
 
@@ -8293,7 +8356,6 @@ impl MetronomeEngine {
                                 crate::output_park::app_in_background(),
                                 playing.load(Ordering::SeqCst),
                                 &take_event,
-                                take_ended_generation,
                                 &speech_event,
                             )
                         };
@@ -8377,12 +8439,10 @@ impl MetronomeEngine {
                 // playback in the slot now — so an old take running off its
                 // end while a new one is handed over neither tells the
                 // screen the new one ended nor lets the stream park under it.
-                if let Some(_ended_generation) = take_event.take_ended() {
-                    #[cfg(target_os = "android")]
-                    {
-                        take_ended_generation = Some(_ended_generation);
-                    }
-                    let _ = app_handle.emit("take-playback-ended", ());
+                // Reporting it is what acknowledges it (`take_ended`), on the
+                // handoff, where a reopen cannot forget it.
+                if let Some(generation) = take_event.take_ended() {
+                    let _ = app_handle.emit("take-playback-ended", TakeEnded { generation });
                 }
                 // And a take that ran into the twenty-minute cap. Raised by
                 // the WRITER thread rather than the callback, but read here
@@ -12725,6 +12785,50 @@ mod tests {
         assert!(engine.jam_form_bars().is_none(), "a kit decoded at 48k survived onto 44.1k");
         assert!(!engine.speech.in_flight());
         assert!(engine.speech.was_cut(), "the speaking thread was not told");
+        engine.shutdown();
+    }
+
+    /// Review of card #14, items 1 and 3, at the engine: a reopen settles a
+    /// take's unreported ending before the new callback exists, so the
+    /// finished take is not handed over again; and a probe that fails once
+    /// is asked again, and failing twice keeps the loaded material.
+    #[test]
+    fn a_reopen_settles_a_finished_take_and_survives_a_failed_probe() {
+        let sr = 48_000u32;
+        let mut engine =
+            MetronomeEngine::new_with_forced_setup_failure(crate::timing::create_beat_log());
+        let state = crate::state::create_shared_state();
+        engine.take.set_play(Some(crate::take::TakePlayback {
+            pcm: Arc::new(vec![0.0; 16]),
+            sample_rate: sr,
+        }));
+        let mut seen = 0u64;
+        engine.take.poll_play(&mut seen).unwrap().unwrap();
+        engine.take.note_ended(seen); // the old loop never got to it
+
+        engine.sample_rate.store(sr, Ordering::Release);
+        let (table, _player) = song_with_its_renderer(sr);
+        engine.set_song_table(Some(table));
+        let mut asked = 0;
+        let kept = engine
+            .reopen_output(state.clone(), None, || {
+                asked += 1;
+                if asked == 1 { None } else { Some(sr) }
+            })
+            .unwrap();
+        assert_eq!(asked, 2, "a failed probe was not asked again");
+        assert!(kept);
+        assert_eq!(engine.take.take_ended(), None, "the end was left for the new loop to announce again");
+        let mut fresh = 0u64;
+        assert!(
+            engine.take.poll_play(&mut fresh).unwrap().is_none(),
+            "the new callback would replay the finished take"
+        );
+
+        engine.sample_rate.store(sr, Ordering::Release);
+        let kept = engine.reopen_output(state, None, || None).unwrap();
+        assert!(kept, "two failed probes dropped the song");
+        assert!(engine.song_loaded());
         engine.shutdown();
     }
 

@@ -136,10 +136,10 @@ impl SpeechHandoff {
     /// Event thread: is a line in the slot? The speaking thread empties it
     /// when the line ends, is cut, or times out, so this is "speech in
     /// flight" for `output_park`.
-    #[cfg_attr(not(target_os = "android"), allow(dead_code))]
     ///
     /// One atomic load: asked on every pass of the event loop while the app
     /// is away, which must not block on the speaking thread.
+    #[cfg_attr(not(target_os = "android"), allow(dead_code))]
     pub(crate) fn in_flight(&self) -> bool {
         self.occupied.load(Ordering::Acquire)
     }

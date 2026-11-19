@@ -440,6 +440,17 @@ pub struct TakeHandoff {
     /// thread holds (card #14, item 4).
     playing_back: AtomicBool,
     recording: AtomicBool,
+    /// The generation whose ending the event thread has already reported
+    /// (`take-playback-ended` went out for it), or [`NO_END`]. Kept HERE and
+    /// not in the event loop, because a reopen replaces the event loop and
+    /// the callback with it: a fresh callback starts at generation 0, finds
+    /// the finished take still in its slot (the screen stops it, and the
+    /// screen may be asleep) and used to play it again from the top — and
+    /// the fresh loop, having forgotten, announced its end a second time
+    /// (review of card #14, item 1). Written by whoever reports the ending,
+    /// cleared by `set_play`; read by `poll_play`, which skips the pickup,
+    /// and by the park check, which lets the stream park under it.
+    acknowledged_end: AtomicU64,
     /// Raised by the WRITER thread when a take hits [`TAKE_MAX_SECS`], and
     /// lowered by the event thread, which turns it into `take-capped`. The
     /// same shape as `ended` and for the same reason at the far end: the
@@ -468,6 +479,7 @@ impl TakeHandoff {
             ended_generation: AtomicU64::new(NO_END),
             playing_back: AtomicBool::new(false),
             recording: AtomicBool::new(false),
+            acknowledged_end: AtomicU64::new(NO_END),
             capped: AtomicBool::new(false),
             retired: Mutex::new(Vec::with_capacity(TAKE_RETIRED_CAP)),
         }
@@ -499,33 +511,58 @@ impl TakeHandoff {
     /// Hand the callback a take to play, or `None` to stop it. Command
     /// thread only. Clears any stale "it ended" flag, so a playback started
     /// twice does not report the first one's ending against the second.
+    ///
+    /// The order is the point (review of card #14, item 2), all of it under
+    /// the slot's lock: the generation moves FIRST, so from that instant an
+    /// ending the callback reports for the old take is stale and
+    /// `take_ended` drops it; then the slot is written; then the endings are
+    /// cleared. Clearing first and bumping last, as this used to, left a
+    /// window in which the old take's ending landed after the clear and
+    /// still matched the generation, and was reported as the new take
+    /// started. `poll_play` reads the generation under the same lock, so
+    /// what it hands the callback is labelled with exactly the generation
+    /// that wrote it.
     pub fn set_play(&self, play: Option<TakePlayback>) {
         self.drain_retired();
-        self.ended_generation.store(NO_END, Ordering::Release);
         if let Ok(mut slot) = self.play.lock() {
-            self.playing_back.store(play.is_some(), Ordering::Release);
-            *slot = play;
-            drop(slot);
-            self.play_generation.fetch_add(1, Ordering::Release);
+            self.bump_play_generation();
+            self.write_play(&mut slot, play);
+            self.clear_play_endings();
         }
         #[cfg(target_os = "android")]
         crate::output_park::wake();
     }
 
+    /// `set_play`'s three steps, apart so a test can interleave the other
+    /// threads between them. Called with the slot's lock held.
+    fn bump_play_generation(&self) {
+        self.play_generation.fetch_add(1, Ordering::AcqRel);
+    }
+
+    fn write_play(&self, slot: &mut Option<TakePlayback>, play: Option<TakePlayback>) {
+        self.playing_back.store(play.is_some(), Ordering::Release);
+        *slot = play;
+    }
+
+    fn clear_play_endings(&self) {
+        self.ended_generation.store(NO_END, Ordering::Release);
+        self.acknowledged_end.store(NO_END, Ordering::Release);
+    }
+
     /// Event thread: is the callback being asked to copy the band into a
     /// take? A take's clock is the output callback, so a parked stream must
     /// not stop it (`output_park`).
-    #[cfg_attr(not(target_os = "android"), allow(dead_code))]
     ///
     /// One atomic load: the park check runs on every pass of the event loop
     /// while the app is away, and must not wait on the command thread.
+    #[cfg_attr(not(target_os = "android"), allow(dead_code))]
     pub(crate) fn is_recording(&self) -> bool {
         self.recording.load(Ordering::Acquire)
     }
 
-    /// Event thread: which playback is in the slot, so an ending can be
-    /// pinned to the playback it belongs to (`output_park`).
-    #[cfg_attr(not(target_os = "android"), allow(dead_code))]
+    /// Which playback is in the slot. Only the tests ask: the endings and
+    /// the park check compare against it inside the handoff.
+    #[cfg(test)]
     pub(crate) fn play_generation(&self) -> u64 {
         self.play_generation.load(Ordering::Acquire)
     }
@@ -558,6 +595,15 @@ impl TakeHandoff {
         self.playing_back.load(Ordering::Acquire)
     }
 
+    /// Park check: is a take in the slot that has NOT already been reported
+    /// as finished? A finished take keeps its slot until the screen stops
+    /// it and must not keep the stream awake meanwhile. Atomic loads only.
+    pub(crate) fn is_playing_unfinished(&self) -> bool {
+        self.is_playing_back()
+            && self.acknowledged_end.load(Ordering::Acquire)
+                != self.play_generation.load(Ordering::Acquire)
+    }
+
     /// Event thread: has the playback that is in the slot NOW ended since
     /// the last time anyone asked? `Some(its generation)` if so. Consumes
     /// the flag, so the event is emitted exactly once.
@@ -565,12 +611,21 @@ impl TakeHandoff {
     /// An ending reported for any other generation is stale — the old take
     /// ran off its end while a new one was being handed over — and is
     /// dropped here rather than pinned on the playback that replaced it.
+    ///
+    /// And an ending already reported is not reported again: a playback
+    /// replayed by a callback that took over in a reopen before the ending
+    /// was acknowledged runs off its end a second time, and that is not
+    /// news. Reporting is what acknowledges it.
     pub fn take_ended(&self) -> Option<u64> {
         let ended = self.ended_generation.swap(NO_END, Ordering::AcqRel);
-        if ended == NO_END {
+        if ended == NO_END
+            || ended != self.play_generation.load(Ordering::Acquire)
+            || ended == self.acknowledged_end.load(Ordering::Acquire)
+        {
             return None;
         }
-        (ended == self.play_generation.load(Ordering::Acquire)).then_some(ended)
+        self.acknowledged_end.store(ended, Ordering::Release);
+        Some(ended)
     }
 
     /// Audio thread: say the playback the callback picked up at
@@ -614,13 +669,27 @@ impl TakeHandoff {
     }
 
     /// Audio thread: the same for the take being played back.
+    ///
+    /// Two differences from `poll_record`, both only on a generation change
+    /// and both inside the `try_lock` it already takes. The generation is
+    /// read again under the lock, which is where `set_play` moves it, so the
+    /// value comes back labelled with exactly its own generation. And a take
+    /// whose ending has already been reported is handed over as `None`
+    /// rather than cloned: a callback that took over in a reopen must not
+    /// play a finished take again (review of card #14, item 1). One more
+    /// atomic load; no allocation, no free.
     pub(crate) fn poll_play(&self, seen: &mut u64) -> Option<Option<TakePlayback>> {
         let gen = self.play_generation.load(Ordering::Acquire);
         if gen == *seen {
             return None;
         }
         let slot = self.play.try_lock().ok()?;
-        let incoming = slot.clone();
+        let gen = self.play_generation.load(Ordering::Acquire);
+        let incoming = if self.acknowledged_end.load(Ordering::Acquire) == gen {
+            None
+        } else {
+            slot.clone()
+        };
         drop(slot);
         *seen = gen;
         Some(incoming)
@@ -3478,6 +3547,145 @@ mod tests {
             handoff.note_ended(handoff.play_generation());
             assert_eq!(handoff.take_ended(), Some(handoff.play_generation()));
         }
+    }
+
+    /// Review of card #14, item 2, step by step: `set_play`'s three steps
+    /// with the callback's and the event thread's moves between each. The
+    /// old take (generation `old`) runs off its end at every point of the
+    /// handover; none of those endings may be reported, and the callback,
+    /// trying to pick up mid-handover, gets nothing until the lock is free
+    /// and then exactly the new take under exactly its generation.
+    #[test]
+    fn a_handover_interleaved_with_the_old_takes_ending_reports_nothing() {
+        let handoff = TakeHandoff::new();
+        let mut seen = 0u64;
+        handoff.set_play(Some(a_playback(10)));
+        handoff.poll_play(&mut seen).unwrap().unwrap();
+        let old = seen;
+
+        let mut slot = handoff.play.lock().unwrap();
+        // Before anything moved, the callback cannot pick up (lock held).
+        assert!(handoff.poll_play(&mut seen).is_none() && seen == old);
+
+        handoff.bump_play_generation();
+        handoff.note_ended(old); // the old take's end lands now ...
+        assert_eq!(handoff.take_ended(), None, "reported after the generation moved");
+        handoff.note_ended(old);
+        let mut probe_seen = old;
+        assert!(handoff.poll_play(&mut probe_seen).is_none(), "picked up mid-handover");
+
+        handoff.write_play(&mut slot, Some(a_playback(20)));
+        assert_eq!(handoff.take_ended(), None, "reported after the slot was written");
+        handoff.note_ended(old); // ... or now, before the clear
+
+        handoff.clear_play_endings();
+        drop(slot);
+        handoff.note_ended(old); // ... or after the handover is complete
+        assert_eq!(handoff.take_ended(), None, "a stale ending got through");
+
+        let got = handoff.poll_play(&mut seen).unwrap().unwrap();
+        assert_eq!(got.pcm.len(), 20, "the callback did not get the new take");
+        assert_eq!(seen, handoff.play_generation(), "the new take is mislabelled");
+        handoff.note_ended(seen);
+        assert_eq!(handoff.take_ended(), Some(seen), "the new take's own end was lost");
+    }
+
+    /// The same window under real concurrency: a callback thread that keeps
+    /// picking up and reporting the end of whatever it holds, an event thread
+    /// draining endings, and a command thread handing over takes whose length
+    /// encodes their generation. Every ending the event thread accepts must
+    /// belong to a pickup labelled with the generation of what it carried.
+    #[test]
+    fn concurrent_handovers_never_report_a_mislabelled_ending() {
+        use std::sync::atomic::AtomicBool;
+        let handoff = Arc::new(TakeHandoff::new());
+        let stop = Arc::new(AtomicBool::new(false));
+        let mislabelled = Arc::new(AtomicU64::new(0));
+
+        let cb = {
+            let (h, stop, bad) = (handoff.clone(), stop.clone(), mislabelled.clone());
+            std::thread::spawn(move || {
+                let mut seen = 0u64;
+                while !stop.load(Ordering::Relaxed) {
+                    if let Some(Some(p)) = h.poll_play(&mut seen) {
+                        // length = generation + 1, written by the command thread
+                        if p.pcm.len() as u64 != seen + 1 {
+                            bad.fetch_add(1, Ordering::Relaxed);
+                        }
+                        h.note_ended(seen);
+                    }
+                }
+            })
+        };
+        let ev = {
+            let (h, stop) = (handoff.clone(), stop.clone());
+            std::thread::spawn(move || {
+                let mut reported = Vec::new();
+                while !stop.load(Ordering::Relaxed) {
+                    if let Some(g) = h.take_ended() {
+                        reported.push(g);
+                    }
+                }
+                reported
+            })
+        };
+        for _ in 0..5_000 {
+            let next = handoff.play_generation() + 1;
+            handoff.set_play(Some(a_playback(next as usize + 1)));
+        }
+        stop.store(true, Ordering::Relaxed);
+        cb.join().unwrap();
+        let reported = ev.join().unwrap();
+        assert_eq!(mislabelled.load(Ordering::Relaxed), 0, "a pickup carried another generation");
+        let mut sorted = reported.clone();
+        sorted.dedup();
+        assert_eq!(sorted, reported, "an ending was reported twice");
+    }
+
+    /// Review of card #14, item 1. A take ends and is reported; the output
+    /// is then reopened, which replaces the callback (its cached generation
+    /// starts at 0 again) and the event loop. The take is still in its slot
+    /// because the screen has not stopped it. The new callback must not play
+    /// it again, and nobody may report its end a second time.
+    #[test]
+    fn a_finished_take_is_not_replayed_or_reported_again_after_a_reopen() {
+        let handoff = TakeHandoff::new();
+        handoff.set_play(Some(a_playback(10)));
+        let mut seen = 0u64;
+        handoff.poll_play(&mut seen).unwrap().unwrap();
+        handoff.note_ended(seen);
+        let mut events = 0;
+        events += handoff.take_ended().is_some() as u32;
+        assert!(!handoff.is_playing_unfinished(), "a reported end keeps the stream awake");
+
+        // The reopen: a brand-new callback.
+        let mut fresh = 0u64;
+        let pickup = handoff.poll_play(&mut fresh).expect("the generation moved");
+        assert!(pickup.is_none(), "the finished take was handed to the new callback");
+        assert_eq!(fresh, handoff.play_generation());
+        events += handoff.take_ended().is_some() as u32;
+        assert_eq!(events, 1);
+
+        // If the new callback got there first (the ending not yet reported)
+        // and played it to the end again, that second end is not news.
+        handoff.set_play(Some(a_playback(10)));
+        let mut cb1 = 0u64;
+        handoff.poll_play(&mut cb1).unwrap().unwrap();
+        handoff.note_ended(cb1);
+        let mut cb2 = 0u64;
+        assert!(handoff.poll_play(&mut cb2).unwrap().is_some(), "not acknowledged yet");
+        let mut events = handoff.take_ended().is_some() as u32;
+        handoff.note_ended(cb2);
+        events += handoff.take_ended().is_some() as u32;
+        assert_eq!(events, 1, "the replayed take's end was announced twice");
+
+        // And the next take is news again.
+        handoff.set_play(Some(a_playback(10)));
+        assert!(handoff.is_playing_unfinished());
+        let mut cb = 0u64;
+        handoff.poll_play(&mut cb).unwrap().unwrap();
+        handoff.note_ended(cb);
+        assert_eq!(handoff.take_ended(), Some(cb));
     }
 
     #[test]
