@@ -649,6 +649,33 @@ export function TabStrip({
     return out;
   }, [follow, size.width, page, lastSegment, fl]);
 
+  // Each segment's notes, made once. `Segment` is memoised on them: a fresh
+  // array per render redrew every bar on screen at every beat of a Take
+  // (thirty `TechMarks` nine times a second, measured 2026-11-19).
+  const followNotes = useMemo(() => {
+    const cache = new Map<number, StripNote[]>();
+    return (s: number): StripNote[] => {
+      let list = cache.get(s);
+      if (!list) {
+        list = segmentNotes(model, s, fl.segTicks, takeBars);
+        cache.set(s, list);
+      }
+      return list;
+    };
+  }, [model, fl.segTicks, takeBars]);
+  const overviewNotes = useMemo(() => {
+    const all = occurrences(model, 0, 0);
+    const cache = new Map<number, StripNote[]>();
+    return (s: number): StripNote[] => {
+      let list = cache.get(s);
+      if (!list) {
+        list = all.filter((n) => n.at >= s * ov.segTicks && n.at < (s + 1) * ov.segTicks);
+        cache.set(s, list);
+      }
+      return list;
+    };
+  }, [model, ov.segTicks]);
+
   const markTick = marker === null || marker === undefined || marker < 0 ? null : marker % model.passTicks;
   const markOnset = useMemo(() => {
     if (markTick === null) return null;
@@ -705,7 +732,7 @@ export function TabStrip({
                   width={fl.segWidth}
                   ppt={fl.ppt}
                   geo={geo}
-                  notes={segmentNotes(model, s, fl.segTicks, takeBars)}
+                  notes={followNotes(s)}
                   rel={rel}
                   // The pattern starting over reads "bar 1 again", not a bar 1
                   // after bar 2 (acceptance 4, P2-11).
@@ -761,7 +788,7 @@ export function TabStrip({
                   width={fl.segWidth}
                   ppt={fl.ppt}
                   geo={geo}
-                  notes={segmentNotes(model, s, fl.segTicks, takeBars)}
+                  notes={followNotes(s)}
                   rel={rel}
                   label={
                     rel === "now" || rel === "next"
@@ -781,7 +808,6 @@ export function TabStrip({
     );
   } else if (size.width > 0) {
     const geo = ov.geo;
-    const all = occurrences(model, 0, 0);
     const rows: number[][] = [];
     for (let s = 0; s < ov.segments; s++) {
       const r = Math.floor(s / ov.perRow);
@@ -797,7 +823,7 @@ export function TabStrip({
               {row.map((s, i) => {
                 const where = segmentPlace(model, s, ov.segTicks);
                 const startsBar = (s * ov.segTicks) % model.barTicks === 0;
-                const segNotes = all.filter((n) => n.at >= s * ov.segTicks && n.at < (s + 1) * ov.segTicks);
+                const segNotes = overviewNotes(s);
                 const marked = markSeg === s;
                 return (
                   <Segment
