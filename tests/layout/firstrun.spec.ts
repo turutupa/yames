@@ -72,13 +72,14 @@ test("the input step says the guitar is heard, with Next open", async ({ page })
 });
 
 /**
- * The wizard keeps its own look whatever the theme (owner, 2026-11-17).
+ * The wizard wears the current theme, and W2's choice restyles it live
+ * (owner, 2026-11-18: "everything should follow the current set theme").
  *
- * With Ivory chosen on W2 the click-sound cards turned into beige blocks under
- * the wizard's light amber ink, while the card around them stayed dark: the
- * overlay re-pointed only some of the theme's tokens, and `--bg-card` came
- * through from the root. The wizard now sets every token itself; the theme
- * shows in W2's swatches and on the window behind.
+ * The bug the earlier version of these tests guarded still matters: with
+ * Ivory picked on W2 the sound cards once went beige under ink meant for a
+ * dark card, because half the wizard followed the theme and half did not.
+ * Now all of it follows, so after the switch every card has moved and its
+ * label still reads.
  */
 type Rgba = [number, number, number, number];
 
@@ -115,37 +116,36 @@ async function soundCards(page: import("@playwright/test").Page) {
   });
 }
 
-test("W2's sound cards stay dark and readable with Ivory picked", async ({ page }) => {
+test("W2 restyles the wizard itself when Ivory is picked, and its cards stay readable", async ({ page }) => {
   await openShot(page, "firstrun-sound-look", { width: 1400, height: 900 }, "obsidian");
   const before = await soundCards(page);
+  const panel = () => page.locator(".onboarding-card").evaluate((el) => getComputedStyle(el).backgroundColor);
+  const darkPanel = await panel();
   const ivory = page.locator(".onboarding-theme-card").nth(2);
   await ivory.hover();
   await ivory.click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "ivory");
   const after = await soundCards(page);
   expect(after.length).toBeGreaterThan(0);
+  expect(await panel(), "the wizard's card did not follow the theme").not.toEqual(darkPanel);
   for (const [i, card] of after.entries()) {
-    expect(card.bg, `sound card ${i} changed colour with the theme`).toEqual(before[i].bg);
+    expect(card.bg, `sound card ${i} did not follow the theme`).not.toEqual(before[i].bg);
     expect(contrast(card.ink, card.bg), `sound card ${i} label contrast`).toBeGreaterThanOrEqual(4.5);
     expect(contrast(card.icon, card.bg), `sound card ${i} icon contrast`).toBeGreaterThanOrEqual(3);
   }
 });
 
 for (const theme of ["ivory", "arctic", "sand", "lavender", "prism", "manuscript"]) {
-  test(`the wizard's cards ignore the ${theme} theme`, async ({ page }) => {
+  test(`the wizard's cards follow the ${theme} theme`, async ({ page }) => {
+    const cardBgs = () =>
+      page.evaluate(() =>
+        [...document.querySelectorAll<HTMLElement>(".onboarding-hf-card")].map((el) => getComputedStyle(el).backgroundColor),
+      );
     await openShot(page, "firstrun-hands-free", { width: 1400, height: 900 }, theme);
-    const bgs = await page.evaluate(() =>
-      [...document.querySelectorAll<HTMLElement>(".onboarding-hf-card")].map(
-        (el) => getComputedStyle(el).backgroundColor,
-      ),
-    );
+    const light = await cardBgs();
     await openShot(page, "firstrun-hands-free", { width: 1400, height: 900 }, "obsidian");
-    const dark = await page.evaluate(() =>
-      [...document.querySelectorAll<HTMLElement>(".onboarding-hf-card")].map(
-        (el) => getComputedStyle(el).backgroundColor,
-      ),
-    );
-    expect(bgs.length).toBeGreaterThan(0);
-    expect(bgs).toEqual(dark);
+    const dark = await cardBgs();
+    expect(light.length).toBeGreaterThan(0);
+    expect(light).not.toEqual(dark);
   });
 }
