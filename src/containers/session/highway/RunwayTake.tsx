@@ -7,7 +7,7 @@
  * default. Nothing here decides anything: it reads the same Take, lights and
  * engine position the neck view reads.
  */
-import { kindOfPath } from "../../../session/kind";
+import { categoryTagKey, kindOfPath } from "../../../session/kind";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { barLine } from "../../../session/coachWords";
@@ -162,9 +162,7 @@ export function RunwayTakeScreen({
   const start = startButton(session, listening, t);
   const kind = isEdgeStep(step)
     ? t("session.edge.kick")
-    : theory
-      ? t("session.kind.theory")
-      : t("session.kind.mechanics");
+    : t(categoryTagKey(session.paths, take.pathId));
 
   return (
     <div

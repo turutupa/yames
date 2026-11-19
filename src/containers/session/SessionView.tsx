@@ -36,6 +36,7 @@ import type { TakeOutcome } from "../../session/runner";
 import { PORTRAIT_PHONE_QUERY, useMediaQuery } from "../../hooks/useMediaQuery";
 import { AskStart, CoachLine, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart, timedHowKey } from "./parts";
 import { RunwayTakeScreen, isTheoryTake } from "./highway/RunwayTake";
+import { categoryTagKey } from "../../session/kind";
 import { Runway } from "./highway/Runway";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { exerciseNeck, useNeck3d, useNeckSlot } from "./hooks/useNeck";
@@ -495,9 +496,7 @@ function TakeScreen({
           <>
             {isEdgeStep(step)
               ? t("session.edge.kick")
-              : isTheoryTake(session)
-                ? t("session.kind.theory")
-                : t("session.kind.mechanics")}
+              : t(categoryTagKey(session.paths, session.take?.pathId))}
             {pathTitle && ` · ${t("session.run.pathStep", { path: pathTitle.title, step: stepNumber ?? 1 })}`}
           </>
         }

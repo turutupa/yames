@@ -1041,6 +1041,26 @@ export const SHOTS: Shot[] = [
     height: 900,
     settleMs: 900,
   },
+  // The same strums on the Runway and the neck (card #78): the bracket and the
+  // V over each chord's column of chips, and NOW's way in the neck's foot.
+  {
+    id: "session-runway-first-chords",
+    suffix: "session-runway-first-chords",
+    window: "main",
+    session: { seed: "returning", stop: "playing", practiceView: "runway", path: "first-chords", exercise: "down-up.down-down-up" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "session-neck-first-chords-playing",
+    suffix: "session-neck-first-chords-playing",
+    window: "main",
+    session: { seed: "returning", stop: "playing", practiceView: "neck", path: "first-chords", exercise: "down-up.down-down-up" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
   {
     id: "session-neck-funk",
     suffix: "session-neck-funk",

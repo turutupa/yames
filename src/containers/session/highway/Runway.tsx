@@ -26,6 +26,7 @@ import type { TakePlan } from "../../../session/take";
 import { TAKE_COUNT_IN_BARS } from "../../../session/take";
 import type { TimingMark } from "../../songs/review/marks";
 import { kindOfMark } from "../hooks/useNeck";
+import { StrumGlyph } from "../tabstrip/TabStrip";
 import {
   STRING_NAMES,
   dotOffset,
@@ -106,6 +107,24 @@ const Strip = memo(function Strip({
           <i className="runway-dot" />
         </span>
       ))}
+      {/* Which way each strum goes, over its column of chips: the Tab's marks
+          (card #78), on strums alone. */}
+      {model.onsets.map((o) =>
+        o.strum ? (
+          <span
+            key={`s${o.id}`}
+            className="runway-strum"
+            data-strum={o.strum}
+            data-onset={o.id}
+            style={{
+              left: left(o.tick),
+              ["--chip-mid" as string]: collapsed ? "50%" : `${mid(Math.min(...o.places.map((p) => p.string))) * 100}%`,
+            }}
+          >
+            <StrumGlyph strum={o.strum} />
+          </span>
+        ) : null,
+      )}
     </>
   );
 });
@@ -115,6 +134,10 @@ export function Runway({ take, beat, playing, lights, collapsed = false, onNext 
   const model = useMemo(() => runwayModel(take, TAKE_COUNT_IN_BARS), [take]);
   const lanes = useMemo(() => usedStrings(model), [model]);
   const bands = useMemo(() => laneBands(lanes), [lanes]);
+  const strumKinds = useMemo(
+    () => [...new Set(model.onsets.flatMap((o) => (o.strum ? [o.strum] : [])))].sort(),
+    [model],
+  );
   const laneRef = useRef<HTMLDivElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
@@ -318,6 +341,12 @@ export function Runway({ take, beat, playing, lights, collapsed = false, onNext 
         </div>
         <i className="runway-hit" style={{ left: scale.hitX }} aria-hidden="true" />
         <span className="runway-legend" aria-hidden="true">
+          {strumKinds.map((strum) => (
+            <span key={strum} className="runway-strumkey" data-strum={strum}>
+              <StrumGlyph strum={strum} />
+              {t(strum === "d" ? "session.tabstrip.strumDown" : "session.tabstrip.strumUp")}
+            </span>
+          ))}
           <span>◂ {t("session.run.early")}</span>
           <span>{t("session.run.late")} ▸</span>
         </span>

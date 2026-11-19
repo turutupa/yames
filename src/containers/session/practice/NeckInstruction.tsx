@@ -54,6 +54,7 @@ import {
   windowView,
 } from "./practiceModel";
 import { usePracticeCursor } from "./usePracticeCursor";
+import { StrumGlyph } from "../tabstrip/TabStrip";
 import { WatchControls } from "./WatchControls";
 import type { WatchControl } from "./useWatch";
 
@@ -121,6 +122,7 @@ export function NeckInstruction({
   const nextTag = useRef<HTMLSpanElement>(null);
   const dots = useRef<HTMLDivElement>(null);
   const foot = useRef<HTMLDivElement>(null);
+  const strumNow = useRef<HTMLSpanElement>(null);
 
   const notes = take.exercise.notes;
   const shape = useMemo(() => neckNotesOf(notes, "aim"), [notes]);
@@ -134,6 +136,11 @@ export function NeckInstruction({
   const byOnset = useMemo(
     () => onsetFingers(notes, position, model.onsets, model.barTicks[0] ?? 0, Math.max(1, take.exercise.bars) * model.barLength),
     [notes, position, model, take.exercise.bars],
+  );
+  // Which way NOW's strum goes, in the foot (card #78): a chord Exercise only.
+  const strumKinds = useMemo(
+    () => [...new Set(model.onsets.flatMap((o) => (o.strum ? [o.strum] : [])))].sort(),
+    [model],
   );
   const hasFingers = useMemo(() => [...fingers.values()].some((f) => f !== "0"), [fingers]);
   // Strummed chords that change (card #74): the shape and its fingers are the
@@ -417,6 +424,8 @@ export function NeckInstruction({
       neck.setNotes(nowNextNeck(sh, m.onsets, index, v, th, fg, bo), { fade: 0.12 });
       // The finger is on the dot itself now; the tag under NOW says nothing.
       if (nowTag.current) nowTag.current.textContent = "";
+      const strum = m.onsets[index]?.strum;
+      if (strumNow.current && strumNow.current.dataset.strum !== (strum ?? "")) strumNow.current.dataset.strum = strum ?? "";
       const due = m.onsets[index]?.tick;
       const ms = tick !== null && due !== undefined ? ((due - tick) / perQuarter) * (60_000 / Math.max(1, take.bpm)) : null;
       placeOverlay(index, ms);
@@ -440,6 +449,7 @@ export function NeckInstruction({
     drawn.current = sh;
     neck.setNotes(readyNeck(sh, model.onsets, fg, theory));
     if (nowTag.current) nowTag.current.textContent = t("session.practice.start");
+    if (strumNow.current) strumNow.current.dataset.strum = "";
     dots.current?.querySelectorAll("i").forEach((d) => d.removeAttribute("data-on"));
     // Once the camera is there (an instant cut or the end of a flight).
     placeOverlay(0, null);
@@ -609,6 +619,16 @@ export function NeckInstruction({
             <i key={i} />
           ))}
         </div>
+        {strumKinds.length > 0 && (
+          <span className="practice-strum" ref={strumNow} data-strum="" data-testid="practice-strum" aria-hidden="true">
+            {strumKinds.map((strum) => (
+              <span key={strum} data-k={strum}>
+                <StrumGlyph strum={strum} />
+                {t(strum === "d" ? "session.tabstrip.strumDown" : "session.tabstrip.strumUp")}
+              </span>
+            ))}
+          </span>
+        )}
         <div className="practice-foot-end">
         {watch && <WatchControls watch={watch} />}
         <span className="practice-legend" aria-hidden="true">

@@ -112,3 +112,30 @@ describe("where the hand starts, in words", () => {
     expect(handOf(run)).toBe(run.position);
   });
 });
+
+describe("the runway and the neck know each strum's way (card #78)", () => {
+  it("every onset of a down, down-up Take carries the Tab's mark, on every pass", async () => {
+    const { buildTake } = await import("../../../session/take");
+    const { runwayModel } = await import("../highway/runwayModel");
+    const doc = firstChords as unknown as PathDoc;
+    const e = exercise(firstChords, "down-up.down-down-up");
+    const take = buildTake(doc, e, 70, null);
+    const model = runwayModel(take);
+    const tab = strumDirections(e.notes);
+    const pass = barLengthTicks(e.meter) * e.bars;
+    expect(model.onsets.length).toBeGreaterThan(tab.size);
+    for (const o of model.onsets) {
+      const inPattern = Math.round((o.tick - (model.barTicks[0] ?? 0)) * (960 / take.score.ticksPerQuarter)) % pass;
+      expect(o.strum).toBe(tab.get(inPattern));
+    }
+    expect(model.onsets.slice(0, 3).map((o) => o.strum)).toEqual(["d", "d", "u"]);
+  });
+
+  it("a single-note run has no strum marks", async () => {
+    const { buildTake } = await import("../../../session/take");
+    const { runwayModel } = await import("../highway/runwayModel");
+    const doc = alternate as unknown as PathDoc;
+    const take = buildTake(doc, doc.steps[0].exercises[0], 80, null);
+    expect(runwayModel(take).onsets.some((o) => o.strum)).toBe(false);
+  });
+});

@@ -3728,6 +3728,47 @@
   z-index: 3;
   pointer-events: none;
 }
+/* A strum's direction over its chord's column of chips (card #78): the Tab
+   view's bracket and V, in the same quiet ink, sat just above the top chip
+   (never above the lane's own top). Rides the strip, so it moves with it. */
+.runway {
+  --chip: var(--note, 32px);
+  --strum-mark: max(9px, calc(var(--chip) * 0.34));
+}
+.runway[data-collapsed] {
+  --chip: 22px;
+}
+.runway-strum {
+  position: absolute;
+  top: max(calc(var(--strum-mark) + 2px), calc(var(--chip-mid, 50%) - var(--chip) / 2 - 3px));
+  width: var(--strum-mark);
+  height: var(--strum-mark);
+  transform: translate(-50%, -100%);
+  color: color-mix(in srgb, var(--l-ink) 82%, var(--l-quiet));
+  pointer-events: none;
+  z-index: 1;
+}
+.runway-strum svg,
+.runway-strumkey svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.runway-strumkey {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.runway-strumkey svg {
+  width: 10px;
+  height: 10px;
+}
 /* A Theory Exercise: one lane, the neck takes the room. */
 .runway[data-collapsed] .runway-note {
   width: 22px;
@@ -3937,6 +3978,36 @@
   border-color: var(--l-amber);
   box-shadow: 0 0 12px var(--l-amber);
 }
+/* NOW's strum, by the beat dots (card #78): the Tab's bracket or V and its
+   word, only while a strum is NOW. Both words share one cell and only one is
+   seen, so the row does not shift as the hand goes down and up. */
+.practice-strum {
+  display: inline-grid;
+  align-items: center;
+  font: 600 12px/1.3 var(--l-body);
+  color: color-mix(in srgb, var(--l-ink) 82%, var(--l-quiet));
+}
+.practice-strum > span {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  visibility: hidden;
+}
+.practice-strum[data-strum="d"] > [data-k="d"],
+.practice-strum[data-strum="u"] > [data-k="u"] {
+  visibility: visible;
+}
+.practice-strum svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 .practice-foot-end {
   position: absolute;
   right: 0;
@@ -4074,6 +4145,11 @@
   }
   .practice-foot-end {
     display: contents;
+  }
+  /* The mark alone: the row is full, and the glyph is the notation. */
+  .practice-strum > span {
+    font-size: 0;
+    gap: 0;
   }
   .practice-watch {
     order: -1;
