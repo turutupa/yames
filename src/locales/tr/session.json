@@ -247,6 +247,8 @@
       "waitingForSignal": "Dinliyorum. Kontrol için bir nota çal.",
       "listeningBack": "Geri dinleniyor",
       "band": "Grup",
+      "key": "Ton",
+      "keyInTurn": "Her seferinde yeni bir ton",
       "bandHint": "Grup notlanmaz. Mikrofonla çalıyorsan sesini kıs ya da kulaklık tak.",
       "bandMicHint": "Mikrofonla grubu senin notaların sanırım, o yüzden kapalı başlar. Kulaklık takınca sesini aç.",
       "skip": "Bunu atla",

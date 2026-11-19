@@ -1546,6 +1546,11 @@
       "read": true,
       "written": true
     },
+    "session.chosenKeys": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
     "keyBindingsVersion": {
       "store": "settings.json",
       "read": true,
@@ -1575,6 +1580,11 @@
       "store": "settings.json",
       "read": true,
       "written": false
+    },
+    "stage.slowStrikes": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
     }
   },
   "tools": [

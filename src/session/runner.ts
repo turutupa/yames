@@ -219,6 +219,11 @@ export type RunEvent =
   /** A timed step, ready or paused: play it at this tempo. */
   | { type: "setBpm"; bpm: number; now: number }
   /**
+   * The ready screen's key chooser (card #93): this Exercise in another of its
+   * variants, chosen by the player. Only on a ready screen, only an Exercise.
+   */
+  | { type: "setVariant"; seed: number }
+  /**
    * Before anything on this step has been played: back to the timed step
    * before it, ready to start again (the warm-up once more, without Exit).
    */
@@ -388,6 +393,13 @@ export function runReducer(state: RunState, event: RunEvent): RunState {
           return backOf(state, event.now);
         case "tick":
           return { ...state, now: event.now };
+        case "setVariant": {
+          const at = state.plan?.steps[state.stepIndex];
+          if (!state.plan || at?.kind !== "exercise" || at.variantSeed === event.seed) return state;
+          const steps = state.plan.steps.slice();
+          steps[state.stepIndex] = { ...at, variantSeed: event.seed };
+          return { ...state, plan: { ...state.plan, steps } };
+        }
         default:
           return state;
       }

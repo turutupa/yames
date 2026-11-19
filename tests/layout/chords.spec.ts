@@ -134,5 +134,47 @@ for (const { name, size, phone } of SIZES) {
         if (seg.label) expect(touches(seg.label, tab.key), "the key is on a bar's name").toBe(false);
       }
     });
+
+    test("the Runway marks each strum over its chords' chips, and the neck's foot says NOW's way (card #78)", async ({ page }) => {
+      test.slow();
+      await openShot(page, "session-runway-first-chords", size, "ember");
+      await settleAnimations(page);
+      await expect(page.locator(".runway-strum").first()).toBeAttached();
+      const runway = await page.evaluate(() => {
+        const box = (el: Element) => {
+          const r = el.getBoundingClientRect();
+          return { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
+        };
+        const lanes = box(document.querySelector(".runway-lanes")!);
+        const marks = [...document.querySelectorAll<HTMLElement>(".runway-strum")].map((m) => ({
+          dir: m.dataset.strum,
+          onset: m.dataset.onset,
+          ...box(m),
+          chips: [...document.querySelectorAll(`.runway-note[data-onset="${m.dataset.onset}"]`)].map(box),
+        }));
+        return { lanes, marks };
+      });
+      // Down, down-up, in order, on every strum and nowhere else.
+      expect(runway.marks.map((m) => m.dir).join("")).toMatch(/^(ddu)+/);
+      for (const m of runway.marks) {
+        expect(m.chips.length, "a mark with no chord under it").toBeGreaterThanOrEqual(3);
+        const top = Math.min(...m.chips.map((c) => c.top));
+        expect(m.bottom, "a strum mark sits on its chord's chips").toBeLessThanOrEqual(top + 0.5);
+        expect(m.top, "a strum mark is above the lanes").toBeGreaterThanOrEqual(runway.lanes.top - 0.5);
+        expect(m.bottom - m.top).toBeGreaterThanOrEqual(8);
+      }
+
+      await openShot(page, "session-neck-first-chords-playing", size, "ember");
+      await settleAnimations(page);
+      const foot = page.getByTestId("practice-strum");
+      await expect(foot).toHaveAttribute("data-strum", /^[du]$/, { timeout: 10_000 });
+      const fits = await page.evaluate(() => {
+        const r = document.querySelector('[data-testid="practice-strum"]')!.getBoundingClientRect();
+        const f = document.querySelector(".practice-neck-foot")!.getBoundingClientRect();
+        return { inside: r.top >= f.top - 1 && r.bottom <= f.bottom + 1 && r.right <= window.innerWidth, w: r.width };
+      });
+      expect(fits.inside, "NOW's strum is out of the neck's foot").toBe(true);
+      expect(fits.w).toBeGreaterThan(8);
+    });
   });
 }

@@ -248,6 +248,8 @@
       "waitingForSignal": "In ascolto. Suona una nota per provare.",
       "listeningBack": "Riascolto",
       "band": "Band",
+      "key": "Tonalità",
+      "keyInTurn": "Una tonalità nuova ogni volta",
       "bandHint": "La band non viene valutata. Col microfono, tienila bassa o usa le cuffie.",
       "bandMicHint": "Col microfono sentirei la band come note tue, quindi parte spenta. Con le cuffie, alzala.",
       "skip": "Salta questo",

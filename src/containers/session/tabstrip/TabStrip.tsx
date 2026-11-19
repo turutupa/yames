@@ -285,6 +285,19 @@ function StrumMark({ strum, x, geo }: { strum: Strum; x: number; geo: StaffGeome
 }
 
 /**
+ * The same two marks at a fixed size, for a key and for the views without a
+ * staff to hang them on (the Runway's chord columns, the neck's foot; card
+ * #78). Stroked in `currentColor`, so each place gives it its own ink.
+ */
+export function StrumGlyph({ strum, className }: { strum: Strum; className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 10 10" width="10" height="10" aria-hidden="true" data-strum={strum}>
+      <path d={strum === "d" ? "M1.5 9 V1.5 H8.5 V9" : "M1.5 1.5 L5 9 L8.5 1.5"} />
+    </svg>
+  );
+}
+
+/**
  * A note's technique marks, the standard tab way (card #40): "h", "p" and
  * "t" between the two numbers on their string, with a slur over a hammer or a
  * pull; "/" and "\\" for a slide; an arrow up after a bend, to the fret it bends
@@ -895,9 +908,7 @@ export function TabStrip({
         <div className="tabstrip-strumkey" data-testid="tabstrip-strumkey">
           {[...new Set(model.strums.values())].sort().map((strum) => (
             <span key={strum} data-strum={strum}>
-              <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
-                <path d={strum === "d" ? "M1.5 9 V1.5 H8.5 V9" : "M1.5 1.5 L5 9 L8.5 1.5"} />
-              </svg>
+              <StrumGlyph strum={strum} />
               {t(strum === "d" ? "session.tabstrip.strumDown" : "session.tabstrip.strumUp")}
             </span>
           ))}

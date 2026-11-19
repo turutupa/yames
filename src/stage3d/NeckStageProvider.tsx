@@ -18,7 +18,7 @@ import { NeckStageContext } from "./context";
 import { StageController, footReserve, stripHeight } from "./controller";
 import { FallbackNeck } from "./FallbackNeck";
 import { OverviewStrip } from "./OverviewStrip";
-import { getStagePrefs, setForceFlat, stagePrefsReady, subscribeStagePrefs, wantsFlat } from "./prefs";
+import { getStagePrefs, noteFastProbe, noteSlowProbe, stagePrefsReady, subscribeStagePrefs, wantsFlat } from "./prefs";
 import { webgl2Available } from "./webgl";
 import "./stage.css";
 
@@ -60,9 +60,12 @@ export function createStageController(): StageController {
     // guard back there, which is a WebKitGTK machine exactly: a renderer whose name says nothing.
     probe: !window.__YAMES_ALLOW_SOFTWARE_GL__ || new URLSearchParams(window.location.search).get("probe") === "1",
     onSlow: (v) => {
-      console.warn(`[stage] ${v.medianMs.toFixed(0)} ms a frame (a GPU takes under ${v.budgetMs.toFixed(0)}): the flat neck from now on`);
-      setForceFlat(true);
+      const { remembered } = noteSlowProbe();
+      console.warn(
+        `[stage] ${v.medianMs.toFixed(0)} ms a frame (a GPU takes under ${v.budgetMs.toFixed(0)}): the flat neck ${remembered ? "from now on" : "for this session"}`,
+      );
     },
+    onFast: () => noteFastProbe(),
   });
 }
 

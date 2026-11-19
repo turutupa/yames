@@ -247,6 +247,8 @@
       "waitingForSignal": "Listening. Play a note to check.",
       "listeningBack": "Listening back",
       "band": "Band",
+      "key": "Key",
+      "keyInTurn": "A new key each time",
       "bandHint": "The band is not graded. On a microphone, keep it low or use headphones.",
       "bandMicHint": "On a microphone I'd hear the band as your notes, so it starts off. With headphones on, turn it up.",
       "skip": "Skip this",
