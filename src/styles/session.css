@@ -596,15 +596,25 @@
   gap: 12px;
   min-width: 0;
 }
+/* Equal cells wherever the names fit them. A cell is never narrower than its
+   longest word (`break-word`, which leaves the word whole when the row can
+   give it room, where `anywhere` let a third of a phone cut "Wechselschlag"
+   as "Wechselschl / ag"); cells that cannot all have theirs go onto a
+   second row rather than out of the well. */
+.session-page .session-today .session-today-focus .session-seg[data-focus] {
+  display: flex;
+  flex-wrap: wrap;
+}
 .session-page .session-today .session-today-focus .session-seg[data-focus] button {
+  flex: 1 1 0;
   min-height: 44px;
-  min-width: 0;
+  min-width: min-content;
+  max-width: 100%;
   padding: 6px 8px;
   font: 650 14.5px/1.2 var(--l-body);
   letter-spacing: 0;
   white-space: normal;
-  overflow-wrap: anywhere;
-  hyphens: auto;
+  overflow-wrap: break-word;
 }
 .session-focus-select {
   position: relative;
