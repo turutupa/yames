@@ -17,6 +17,29 @@ function fakeDeps(): SchedulerDeps {
   };
 }
 
+/**
+ * The same display as Chromium serves it: an animation frame asked for when
+ * this vsync's has not been run yet runs AT ONCE, stamped with the vsync
+ * already gone (up to 16.67 ms stale); only one asked for after that waits
+ * for the next. A timer that fires just after a vsync meets exactly this.
+ */
+function chromiumDeps(): SchedulerDeps {
+  const vsync = 1000 / 60;
+  /** The last vsync an animation frame was run for, counted in vsyncs. */
+  let served = -Infinity;
+  return {
+    ...fakeDeps(),
+    raf: (cb) => {
+      const now = Date.now();
+      const current = Math.floor(now / vsync);
+      const index = current > served ? current : current + 1;
+      served = index;
+      const stamp = index * vsync;
+      return setTimeout(() => cb(stamp), Math.max(0, stamp - now)) as unknown as number;
+    },
+  };
+}
+
 describe("FrameScheduler: render on demand", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -89,6 +112,39 @@ describe("FrameScheduler: render on demand", () => {
     vi.advanceTimersByTime(1000);
     expect(frame.mock.calls.length).toBeGreaterThanOrEqual(27);
     expect(frame.mock.calls.length).toBeLessThanOrEqual(31);
+    s.dispose();
+  });
+
+  it("caps at 30 fps by when frames are drawn, not by their stamps (a late frame's stamp is a vsync stale)", () => {
+    // Each frame takes 3 ms, so the cap's timer fires just after the vsync
+    // it was aiming at and the frame runs at once under the old stamp. Spaced
+    // from that stamp, every other frame came a vsync early: 41 a second.
+    const drawn: number[] = [];
+    const s = new FrameScheduler(() => {
+      drawn.push(Date.now());
+      vi.setSystemTime(Date.now() + 3);
+      return true;
+    }, chromiumDeps());
+    s.setMaxFps(30);
+    s.invalidate();
+    vi.advanceTimersByTime(2000);
+    s.dispose();
+    expect(drawn.length).toBeGreaterThan(40);
+    for (let i = 1; i < drawn.length; i++) {
+      expect(drawn[i] - drawn[i - 1], `frames ${i - 1} and ${i}`).toBeGreaterThanOrEqual(1000 / 30 - 2);
+    }
+    const perSecond = ((drawn.length - 1) * 1000) / (drawn[drawn.length - 1] - drawn[0]);
+    expect(perSecond).toBeLessThanOrEqual(31);
+  });
+
+  it("still runs the calm loop on the display's beat in that browser", () => {
+    const frame = vi.fn(() => true);
+    const s = new FrameScheduler(frame, chromiumDeps());
+    s.invalidate();
+    vi.advanceTimersByTime(1000);
+    expect(frame.mock.calls.length).toBeGreaterThanOrEqual(55);
+    // The first runs at once, then one a vsync.
+    expect(frame.mock.calls.length).toBeLessThanOrEqual(62);
     s.dispose();
   });
 
