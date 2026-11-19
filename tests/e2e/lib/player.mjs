@@ -190,19 +190,48 @@ export class CaptureClock {
   }
 }
 
-class Capture {
+/**
+ * How much the capture asks for at a time, in frames.
+ *
+ * A pulse record stream's fragment is also the quantum it asks PipeWire for,
+ * and a graph runs at the smallest quantum any of its nodes asks for. At
+ * `--latency-msec=5` (240 frames) that was 128: the sink, the app's output
+ * node and this capture all had to answer every 2.7 ms, eight times as often
+ * as the app's own stream asks (1024). A node whose thread wakes a cycle late
+ * does not get that cycle back, and for a capture that is a quantum of audio
+ * gone for good ("client missed N wakeups" in pipewire-pulse's log, ERR in
+ * pw-top). Measured without the app (2026-11-18, card #45): pipewire-pulse
+ * held up for 4 ms ten times a second lost 108 ms of 12 s at 128 frames and
+ * nothing at 512; held up for 16 ms, 1222 ms and 501 ms. A late READER costs
+ * nothing at any size: parec and the pulse server queue what it has not
+ * taken (this process stopped for a second lost no sample).
+ *
+ * 512 is one quantum exactly, so a fragment leaves on every cycle and each
+ * arrives as late as the one before; and it is the quantum `Playback`'s
+ * 60 ms already puts the `guitar` graph on, so the calibration and the Take
+ * are heard through graphs running alike.
+ */
+const CAPTURE_FRAMES = 512;
+
+export class Capture {
   constructor(env, device) {
     this.child = spawn(
       "parec",
-      [`--device=${device}`, "--raw", "--format=s16le", `--rate=${RATE}`, "--channels=1", "--latency-msec=5"],
+      // `--latency` is in bytes: mono s16.
+      [`--device=${device}`, "--raw", "--format=s16le", `--rate=${RATE}`, "--channels=1", `--latency=${CAPTURE_FRAMES * 2}`],
       { env: env.env(), stdio: ["ignore", "pipe", "ignore"] },
     );
     this.samples = 0;
     this.clock = new CaptureClock();
     this.listeners = new Set();
+    /** The longest wait between two chunks: how long the audio was held up on its way here. */
+    this.maxGapMs = 0;
+    let last = null;
     let carry = null;
     this.child.stdout.on("data", (buf) => {
       const t = now();
+      if (last !== null) this.maxGapMs = Math.max(this.maxGapMs, t - last);
+      last = t;
       if (carry) {
         buf = Buffer.concat([carry, buf]);
         carry = null;
@@ -480,6 +509,11 @@ export class Player {
       endedBy,
       clicksMs: clicks.map((c) => Math.round(c - at0)),
       captureLostMs: Math.round(cap.lostMs),
+      // Lost with no gap to match was dropped in the graph (see
+      // `CAPTURE_FRAMES`). A gap of more than about 0.7 s is this process
+      // stalled: the pipe then hands the backlog over in pieces, and the
+      // clock takes the first piece for a loss that was not one.
+      captureMaxGapMs: Math.round(cap.maxGapMs),
     };
   }
 
@@ -594,6 +628,12 @@ export class Player {
       cap.stop();
       play.stop();
     }
-    return { ...first, clicksHeard: clicks.length, beatsHeardFromTheBand: nudged };
+    return {
+      ...first,
+      clicksHeard: clicks.length,
+      beatsHeardFromTheBand: nudged,
+      captureLostMs: Math.round(cap.lostMs),
+      captureMaxGapMs: Math.round(cap.maxGapMs),
+    };
   }
 }

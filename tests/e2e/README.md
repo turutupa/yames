@@ -104,6 +104,24 @@ it.
   after it are placed from the tempo, twice at most. `results.json`
   `info.players` holds, per Take, the clicks heard and when, why the player
   stopped, and `captureLostMs`.
+- **Where a capture loses audio, and what the suite records of it.** Not in
+  the reader: parec and the pulse server queue what has not been taken (this
+  process stopped for a second lost no sample). It is lost in the graph, when
+  the thread of the capture's node (in pipewire-pulse) or of the sink's timer
+  (in pipewire) wakes more than a cycle late: the cycles it slept through are
+  not made up. The capture's fragment is also the quantum it asks for, and at
+  the 5 ms it used to ask for the graph ran at 128 frames, a 2.7 ms deadline
+  for every node in it, the app's included. It now asks for 512 frames
+  (`CAPTURE_FRAMES` in `lib/player.mjs`), the quantum the `guitar` graph is
+  already on. Measured without the app (2026-11-18) by stopping
+  pipewire-pulse ten times a second: 4 ms at a time cost 108 ms of 12 s
+  before and 8 ms cost 480, and both cost nothing now; 16 ms cost 1222 and
+  costs 501. The calibrated loop is about 8 ms longer and as steady as it
+  was (0.3 ms between pulses). PipeWire and pipewire-pulse run at log level 3,
+  where a node that missed a cycle is named, and `results.json` keeps the
+  count: `graphTrouble` per Take in `info.players` and for the run in `info`
+  (`Env.graphTrouble` says how to read it), beside `captureMaxGapMs`, the
+  longest the player waited for a chunk.
 - **The UI** is driven through `tauri-driver` and `WebKitWebDriver` with a
   small W3C client over `fetch` (`lib/webdriver.mjs`); buttons are found by
   their text, as a player would. The store is read with `node:sqlite`.
