@@ -8,7 +8,7 @@
 > been through this yet.
 
 Regenerate with `npm run test:grading:measure` (a release build, then the four
-`#[ignore]`d measurement tests). These tables were measured on 2026-11-16 on
+`#[ignore]`d measurement tests). These tables were measured on 2026-11-16 (note identity re-measured on 2026-11-19) on
 `revamp` at the detector the revamp ships: 256-sample hops, the ring cursor, the
 noise floor that learns only from quiet hops, and the known-score refractory at
 0.5 of the score's smallest gap (`onset.rs` `KNOWN_SCORE_REFRACTORY_FACTOR`).
@@ -38,10 +38,18 @@ new behaviour.
   Session Take): up to 110 ms, every note is matched at 80 to 120 BPM and the
   evenness is unchanged; at 160 BPM one note of 128 is lost from 60 ms. The
   headline score starts to dip at 110 ms; the pass rule does not read it.
-- **Note identity** is right on damped, clean and high-gain tones to about
-  200 BPM, and mostly **unheard** on ringing and swept tones, where the next
-  note starts over the last one. Since 2026-11-16 a Session Take's pass rule
-  measures `noteIdentity` from these numbers, and only where they hold
+- **Note identity** is right on damped, clean and high-gain tones down to the
+  75 ms gap the pass rule stops at (sixteenths at 200 BPM): 0.99 to 1.00
+  through the production path, the one a Session Take takes
+  (`ScheduleRun::report_with_notes`). Until 2026-11-19 it was not: the pass
+  looked every note up at the detector's timestamp, which is aubio's
+  peak-picking delay (24.5 ms at 48 kHz) after the attack, and at sixteenths
+  above about 150 BPM it read each note from inside the next one (0.27 to 0.89
+  right at 160 to 200 BPM, table below). The old table here was measured
+  through the test's own `identify()` helper, which looks notes up where they
+  were played, and so could not show it. It is mostly **unheard** on ringing
+  and swept tones, where the next note starts over the last one. A Session
+  Take's pass rule measures `noteIdentity` only where these numbers hold
   (`score/pass.rs` `notes_status`): notes at least 75 ms apart, at least 12
   heard notes with a pitch, a pitch for at least 60% of the heard notes (which
   is what rules out the ringing and swept rows), and no more than a quarter of
@@ -276,67 +284,110 @@ correction on.
 
 ## Note identity, by signal and tempo
 
-96 notes per row. `ratio`: right over right plus wrong, of the notes heard.
+Measured 2026-11-19 through the production path: the detector's own onsets
+with a 30 ms system lag on top, the lag measured and corrected by the scorer,
+and `ScheduleRun::report_with_notes` running the pitch pass over the Take's
+audio with the Alternate Picking `noteIdentity` bar loaded
+(`measure_note_identity_limit_by_signal`). 96 sixteenths per row, played right
+(3 ms of player jitter). `right`, `wrong`, `octave` and `unpitched` are the
+pass rule's own counts (`NotesCheck`); `ratio` is right over right plus wrong
+plus octave; `status` is what `notes_status` makes of it, and only `Measured`
+reaches the verdict. Rows under 75 ms are `TooFast` whatever they read.
 
-| Signal | gap ms | sixteenths at | right | wrong | octave | unheard | ratio |
-|---|---|---|---|---|---|---|---|
-| damped | 187.5 | 80 | 95 | 0 | 0 | 1 | 1.00 |
-| damped | 150.0 | 100 | 95 | 0 | 0 | 1 | 1.00 |
-| damped | 125.0 | 120 | 95 | 0 | 0 | 1 | 1.00 |
-| damped | 107.1 | 140 | 95 | 0 | 0 | 1 | 1.00 |
-| damped | 93.8 | 160 | 95 | 0 | 0 | 1 | 1.00 |
-| damped | 83.3 | 180 | 95 | 0 | 0 | 1 | 1.00 |
-| damped | 75.0 | 200 | 94 | 1 | 0 | 1 | 0.99 |
-| damped | 68.2 | 220 | 85 | 10 | 0 | 1 | 0.89 |
-| damped | 62.5 | 240 | 59 | 29 | 0 | 8 | 0.67 |
-| damped | 57.7 | 260 | 17 | 20 | 0 | 59 | 0.46 |
-| clean | 187.5 | 80 | 96 | 0 | 0 | 0 | 1.00 |
-| clean | 150.0 | 100 | 96 | 0 | 0 | 0 | 1.00 |
-| clean | 125.0 | 120 | 96 | 0 | 0 | 0 | 1.00 |
-| clean | 107.1 | 140 | 96 | 0 | 0 | 0 | 1.00 |
-| clean | 93.8 | 160 | 96 | 0 | 0 | 0 | 1.00 |
-| clean | 83.3 | 180 | 96 | 0 | 0 | 0 | 1.00 |
-| clean | 75.0 | 200 | 96 | 0 | 0 | 0 | 1.00 |
-| clean | 68.2 | 220 | 90 | 6 | 0 | 0 | 0.94 |
-| clean | 62.5 | 240 | 74 | 20 | 0 | 2 | 0.79 |
-| clean | 57.7 | 260 | 48 | 23 | 0 | 25 | 0.68 |
-| ringing | 187.5 | 80 | 46 | 0 | 0 | 50 | 1.00 |
-| ringing | 150.0 | 100 | 29 | 0 | 0 | 67 | 1.00 |
-| ringing | 125.0 | 120 | 16 | 0 | 0 | 80 | 1.00 |
-| ringing | 107.1 | 140 | 9 | 0 | 0 | 87 | 1.00 |
-| ringing | 93.8 | 160 | 4 | 0 | 0 | 92 | 1.00 |
-| ringing | 83.3 | 180 | 2 | 0 | 0 | 94 | 1.00 |
-| ringing | 75.0 | 200 | 2 | 0 | 0 | 94 | 1.00 |
-| ringing | 68.2 | 220 | 1 | 0 | 0 | 95 | 1.00 |
-| ringing | 62.5 | 240 | 1 | 1 | 0 | 94 | 0.50 |
-| ringing | 57.7 | 260 | 1 | 1 | 0 | 94 | 0.50 |
-| high-gain | 187.5 | 80 | 96 | 0 | 0 | 0 | 1.00 |
-| high-gain | 150.0 | 100 | 96 | 0 | 0 | 0 | 1.00 |
-| high-gain | 125.0 | 120 | 96 | 0 | 0 | 0 | 1.00 |
-| high-gain | 107.1 | 140 | 96 | 0 | 0 | 0 | 1.00 |
-| high-gain | 93.8 | 160 | 96 | 0 | 0 | 0 | 1.00 |
-| high-gain | 83.3 | 180 | 96 | 0 | 0 | 0 | 1.00 |
-| high-gain | 75.0 | 200 | 96 | 0 | 0 | 0 | 1.00 |
-| high-gain | 68.2 | 220 | 96 | 0 | 0 | 0 | 1.00 |
-| high-gain | 62.5 | 240 | 92 | 4 | 0 | 0 | 0.96 |
-| high-gain | 57.7 | 260 | 75 | 19 | 0 | 2 | 0.80 |
-| high-gain-ringing | 187.5 | 80 | 34 | 0 | 0 | 62 | 1.00 |
-| high-gain-ringing | 150.0 | 100 | 20 | 0 | 0 | 76 | 1.00 |
-| high-gain-ringing | 125.0 | 120 | 11 | 0 | 1 | 84 | 0.92 |
-| high-gain-ringing | 107.1 | 140 | 2 | 0 | 0 | 94 | 1.00 |
-| high-gain-ringing | 93.8 | 160 | 1 | 0 | 0 | 95 | 1.00 |
-| high-gain-ringing | 83.3 | 180 | 1 | 0 | 0 | 95 | 1.00 |
-| high-gain-ringing | 75.0 | 200 | 1 | 0 | 0 | 95 | 1.00 |
-| high-gain-ringing | 68.2 | 220 | 1 | 0 | 0 | 95 | 1.00 |
-| high-gain-ringing | 62.5 | 240 | 1 | 1 | 0 | 94 | 0.50 |
-| high-gain-ringing | 57.7 | 260 | 1 | 1 | 0 | 94 | 0.50 |
-| swept | 187.5 | 80 | 44 | 0 | 1 | 51 | 0.98 |
-| swept | 150.0 | 100 | 21 | 0 | 1 | 74 | 0.95 |
-| swept | 125.0 | 120 | 8 | 0 | 3 | 85 | 0.73 |
-| swept | 107.1 | 140 | 3 | 0 | 1 | 92 | 0.75 |
-| swept | 93.8 | 160 | 2 | 0 | 1 | 93 | 0.67 |
-| swept | 83.3 | 180 | 1 | 0 | 0 | 95 | 1.00 |
-| swept | 75.0 | 200 | 1 | 0 | 0 | 95 | 1.00 |
-| swept | 68.2 | 220 | 1 | 0 | 0 | 95 | 1.00 |
-| swept | 62.5 | 240 | 1 | 1 | 0 | 94 | 0.50 |
-| swept | 57.7 | 260 | 0 | 0 | 0 | 96 | - |
+| Signal | gap ms | sixteenths at | right | wrong | octave | unpitched | ratio | status |
+|---|---|---|---|---|---|---|---|---|
+| damped | 187.5 | 80 | 95 | 0 | 0 | 1 | 1.00 | Measured |
+| damped | 150.0 | 100 | 95 | 0 | 0 | 1 | 1.00 | Measured |
+| damped | 125.0 | 120 | 95 | 0 | 0 | 1 | 1.00 | Measured |
+| damped | 107.1 | 140 | 95 | 0 | 0 | 1 | 1.00 | Measured |
+| damped | 93.8 | 160 | 95 | 0 | 0 | 1 | 1.00 | Measured |
+| damped | 83.3 | 180 | 95 | 0 | 0 | 1 | 1.00 | Measured |
+| damped | 75.0 | 200 | 94 | 1 | 0 | 1 | 0.99 | Measured |
+| damped | 68.2 | 220 | 89 | 6 | 0 | 1 | 0.94 | TooFast |
+| damped | 62.5 | 240 | 60 | 29 | 0 | 6 | 0.67 | TooFast |
+| damped | 57.7 | 260 | 23 | 22 | 0 | 49 | 0.51 | TooFast |
+| clean | 187.5 | 80 | 96 | 0 | 0 | 0 | 1.00 | Measured |
+| clean | 150.0 | 100 | 96 | 0 | 0 | 0 | 1.00 | Measured |
+| clean | 125.0 | 120 | 96 | 0 | 0 | 0 | 1.00 | Measured |
+| clean | 107.1 | 140 | 96 | 0 | 0 | 0 | 1.00 | Measured |
+| clean | 93.8 | 160 | 96 | 0 | 0 | 0 | 1.00 | Measured |
+| clean | 83.3 | 180 | 96 | 0 | 0 | 0 | 1.00 | Measured |
+| clean | 75.0 | 200 | 96 | 0 | 0 | 0 | 1.00 | Measured |
+| clean | 68.2 | 220 | 91 | 5 | 0 | 0 | 0.95 | TooFast |
+| clean | 62.5 | 240 | 78 | 16 | 0 | 2 | 0.83 | TooFast |
+| clean | 57.7 | 260 | 53 | 23 | 0 | 17 | 0.70 | TooFast |
+| ringing | 187.5 | 80 | 46 | 0 | 0 | 50 | 1.00 | NotesRing |
+| ringing | 150.0 | 100 | 29 | 0 | 0 | 67 | 1.00 | NotesRing |
+| ringing | 125.0 | 120 | 16 | 0 | 0 | 80 | 1.00 | NotesRing |
+| ringing | 107.1 | 140 | 9 | 0 | 0 | 87 | 1.00 | TooFew |
+| ringing | 93.8 | 160 | 4 | 0 | 0 | 92 | 1.00 | TooFew |
+| ringing | 83.3 | 180 | 2 | 0 | 0 | 94 | 1.00 | TooFew |
+| ringing | 75.0 | 200 | 2 | 0 | 0 | 94 | 1.00 | TooFew |
+| ringing | 68.2 | 220 | 1 | 0 | 0 | 95 | 1.00 | TooFast |
+| ringing | 62.5 | 240 | 1 | 1 | 0 | 94 | 0.50 | TooFast |
+| ringing | 57.7 | 260 | 1 | 1 | 0 | 91 | 0.50 | TooFast |
+| high-gain | 187.5 | 80 | 96 | 0 | 0 | 0 | 1.00 | Measured |
+| high-gain | 150.0 | 100 | 96 | 0 | 0 | 0 | 1.00 | Measured |
+| high-gain | 125.0 | 120 | 96 | 0 | 0 | 0 | 1.00 | Measured |
+| high-gain | 107.1 | 140 | 96 | 0 | 0 | 0 | 1.00 | Measured |
+| high-gain | 93.8 | 160 | 96 | 0 | 0 | 0 | 1.00 | Measured |
+| high-gain | 83.3 | 180 | 96 | 0 | 0 | 0 | 1.00 | Measured |
+| high-gain | 75.0 | 200 | 96 | 0 | 0 | 0 | 1.00 | Measured |
+| high-gain | 68.2 | 220 | 94 | 2 | 0 | 0 | 0.98 | TooFast |
+| high-gain | 62.5 | 240 | 85 | 11 | 0 | 0 | 0.89 | TooFast |
+| high-gain | 57.7 | 260 | 66 | 22 | 0 | 6 | 0.75 | TooFast |
+| high-gain-ringing | 187.5 | 80 | 34 | 0 | 0 | 62 | 1.00 | NotesRing |
+| high-gain-ringing | 150.0 | 100 | 20 | 0 | 0 | 76 | 1.00 | NotesRing |
+| high-gain-ringing | 125.0 | 120 | 11 | 0 | 1 | 84 | 0.92 | NotesRing |
+| high-gain-ringing | 107.1 | 140 | 2 | 0 | 0 | 94 | 1.00 | TooFew |
+| high-gain-ringing | 93.8 | 160 | 1 | 0 | 0 | 95 | 1.00 | TooFew |
+| high-gain-ringing | 83.3 | 180 | 1 | 0 | 0 | 95 | 1.00 | TooFew |
+| high-gain-ringing | 75.0 | 200 | 1 | 0 | 0 | 95 | 1.00 | TooFew |
+| high-gain-ringing | 68.2 | 220 | 1 | 0 | 0 | 93 | 1.00 | TooFast |
+| high-gain-ringing | 62.5 | 240 | 1 | 1 | 0 | 87 | 0.50 | TooFast |
+| high-gain-ringing | 57.7 | 260 | 1 | 1 | 0 | 79 | 0.50 | TooFast |
+| swept | 187.5 | 80 | 44 | 0 | 1 | 51 | 0.98 | NotesRing |
+| swept | 150.0 | 100 | 21 | 0 | 1 | 74 | 0.95 | NotesRing |
+| swept | 125.0 | 120 | 8 | 0 | 3 | 85 | 0.73 | TooFew |
+| swept | 107.1 | 140 | 3 | 0 | 1 | 92 | 0.75 | TooFew |
+| swept | 93.8 | 160 | 2 | 0 | 1 | 93 | 0.67 | TooFew |
+| swept | 83.3 | 180 | 1 | 0 | 0 | 95 | 1.00 | TooFew |
+| swept | 75.0 | 200 | 1 | 0 | 0 | 95 | 1.00 | TooFew |
+| swept | 68.2 | 220 | 1 | 0 | 0 | 95 | 1.00 | TooFast |
+| swept | 62.5 | 240 | 1 | 1 | 0 | 94 | 0.50 | TooFast |
+| swept | 57.7 | 260 | 0 | 0 | 0 | 91 | - | TooFast |
+
+### What the 2026-11-19 fix changed
+
+The pass used to read each note at its onset's timestamp. The timestamp is the
+end of the hop in which aubio's peak picker called the onset, 4.6 hops (24.5 ms
+at 48 kHz) after the attack, and the tracker then skips another 20 ms of
+attack, so each note was read from about 45 ms after it began. Timing never
+minded, because the scorer measures and removes a constant lag per Take; the
+pitch pass is the one consumer that puts an onset's time onto the input's
+samples. It now takes the detector's delay off every look-up and every cut
+(`OnsetCore::detection_delay_ns`, carried with the Take's audio). Same rows,
+before and after, everything else identical:
+
+| Signal | gap ms | sixteenths at | as shipped (read at the stamp) | read at the attack |
+|---|---|---|---|---|
+| damped | 107.1 | 140 | 1.00 | 1.00 |
+| damped | 93.8 | 160 | 0.83 | 1.00 |
+| damped | 83.3 | 180 | 0.53 | 1.00 |
+| damped | 75.0 | 200 | 0.27 | 0.99 |
+| clean | 107.1 | 140 | 1.00 | 1.00 |
+| clean | 93.8 | 160 | 0.83 | 1.00 |
+| clean | 83.3 | 180 | 0.52 | 1.00 |
+| clean | 75.0 | 200 | 0.31 | 1.00 |
+| high-gain | 107.1 | 140 | 1.00 | 1.00 |
+| high-gain | 93.8 | 160 | 0.89 | 1.00 |
+| high-gain | 83.3 | 180 | 0.55 | 1.00 |
+| high-gain | 75.0 | 200 | 0.36 | 1.00 |
+
+At 140 BPM and slower nothing moved. At 150 BPM (100 ms) the gate test
+`right_sixteenths_are_right_at_every_speed_the_pass_checks` read 0.95 clean,
+0.91 damped and 0.98 high-gain before, 1.00 on all three after. Wrong notes are still wrong: a quarter of
+the notes a semitone off at 180 BPM reads 0.75 and fails
+(`wrong_sixteenths_are_still_wrong_at_speed`). Timing rows are unchanged: the
+onsets' timestamps did not move.
+
