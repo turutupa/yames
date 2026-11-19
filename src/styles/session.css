@@ -5966,3 +5966,15 @@ button.session-input-chip:hover {
   min-height: 38px;
   font-size: 15px;
 }
+
+/* A how-to's further lines (a variant's key and frets among them): under the
+   first, whole, a step quieter (card #79). */
+.session-how-more {
+  margin-top: 4px;
+  color: var(--l-quiet);
+  font-size: 0.94em;
+}
+.session-runway-notes > .session-how-more {
+  flex-basis: 100%;
+  margin-top: 0;
+}

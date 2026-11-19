@@ -362,6 +362,14 @@ function takeKey(take: TakePlan, takeNumber: string): string {
   return `${takeNumber}|${take.pathId}|${take.exercise.id}|${take.bpm}|${take.bars}|${take.source.length}`;
 }
 
+/**
+ * Which variant an Exercise chosen from its Step page plays: none (the
+ * Exercise as written) in the app. The screenshot harness sets a seed so a
+ * key-moved Exercise can be photographed in a given key (card #79), as
+ * `RUNNABLE_PATH_IDS` is widened for a scene.
+ */
+export const CHOSEN_VARIANT: { seed: number | null } = { seed: null };
+
 export function useSessionRun(input: SessionRunInput) {
   const { view, setView, isPlaying, beat, listening } = input;
   const [run, dispatch] = useReducer(runReducer, IDLE);
@@ -1406,7 +1414,7 @@ export function useSessionRun(input: SessionRunInput) {
             title: exercise.title,
             bpm: last?.bpm ?? exercise.tempo.rungs[0]?.bpm ?? 60,
             minutes: 5,
-            variantSeed: null,
+            variantSeed: CHOSEN_VARIANT.seed,
             why: { code: "chosen", values: { step: pathStep.title } },
           },
         ],
