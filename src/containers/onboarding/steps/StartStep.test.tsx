@@ -64,6 +64,7 @@ describe("Where do you start? — what it offers", () => {
   it("offers the Paths in the Paths screen's order: Foundations, How harmony works, Technique, Styles", () => {
     expect(startablePaths(PATHS).map((p) => p.id)).toEqual([
       "rhythm-foundations",
+      "first-chords",
       "know-the-neck",
       "scales-and-modes",
       "triads",

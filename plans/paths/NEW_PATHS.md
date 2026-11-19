@@ -17,7 +17,7 @@ which Paths are worth writing now:
 | Rhythm on single notes (rests, ties, syncopation, sixteenth figures, triplets) | Yes | It is exactly what onset timing measures, and it is the missing true-beginner Path. |
 | Metal rhythm (palm-muted downstrokes, gallops, pedal riffs) | Yes | Single low notes and two-note power chords are one attack each; timing and notes heard grade them. Palm muting itself is taught in words and listed as not graded. |
 | String skipping | Yes, later | The difficulty metric already prices a skip. Narrow; a good fourth. |
-| Strumming, funk ghost strokes | Not yet | A strummed chord is several onsets smeared together, and the app does not separate a muted stroke from a loud neighbour (`muting` is on the not-graded list). |
+| Strumming, funk ghost strokes | Timing only, since 2026-11-19 | A strummed chord is several strings struck within a few tens of milliseconds. Written as notes on one tick it is ONE expected onset (`schedule.ts`), and the detector's refractory window (40 to 50 ms at least, wider at slow tempos) is meant to keep it one heard onset. So a strum can be timed and counted, as a power chord is; it cannot be checked for which strings rang or for pitch, and nobody has tried it on a real guitar. First Chords and Strumming is built on exactly that (below). Ghost strokes still cannot be told from loud ones. |
 | Fingerstyle / Travis | Not yet | Ringing notes make the note check give up, and thumb-and-finger pairs are one onset. Timing-only would work; it needs its own profile and a real-guitar test first. |
 | Arpeggios across the neck | Covered | Sweep Picking and Classic Rock already teach them. |
 
@@ -207,6 +207,7 @@ arpeggios work on the guitar, and use that in their playing, with structure.*
 
 ```
 START HERE
+  First Chords and Strumming   (open chords, changes, strumming: the other first Path)
   Rhythm Foundations ──┬─> Alternate Picking ──┬─> Sweep Picking
   (time, the click,    │        (I)            └─> Shred
    clean notes)        ├─> Legato ──(B)──┬────────> Tapping
@@ -230,6 +231,7 @@ do X, or start anyway". Arrows are data now (`prerequisites.paths`, below).
 | Track | Path | Builds on | Length | State |
 |---|---|---|---|---|
 | Foundations | Rhythm Foundations | nothing: the first Path for a beginner | 6 weeks | written |
+| Foundations | **First Chords and Strumming** | nothing: the first Path for a beginner who wants songs | 11 Steps, 42 Exercises, about 8 weeks | written 2026-11-19 |
 | Technique | Alternate Picking | Rhythm Foundations (Beginner) | 9 weeks | written |
 | Technique | Legato | Rhythm Foundations (Beginner) | 6 weeks | written |
 | Technique | Tapping | Legato (Beginner) | 5 weeks | written |
@@ -238,12 +240,12 @@ do X, or start anyway". Arrows are data now (`prerequisites.paths`, below).
 | Technique | Metal Rhythm | Rhythm Foundations (Beginner) | 6 weeks | written |
 | Technique | Funk Lines | Rhythm Foundations (Intermediate) | 5 weeks | written |
 | Style | Blues and Pentatonics | Rhythm Foundations (Beginner) | 14 weeks | written |
-| Style | Classic Rock | Rhythm Foundations (Beginner) | 7 weeks | written |
+| Style | Classic Rock | Rhythm Foundations (Beginner) | 13 Steps, 46 Exercises, about 9 weeks | written, extended once (2026-11-19) |
 | Harmony | Know the Neck | nothing: the first Path for the harmony route | 6 weeks | written |
 | Harmony | Scales and Modes | Know the Neck (Beginner) | 6 weeks | written |
-| Harmony | **Triads** | Know the Neck (Beginner), Scales and Modes (Beginner) | 13 Steps, 41 Exercises, about 8 weeks; meant to grow to about 12 | written, extended once |
-| Harmony | **Chords in a Key** | Triads (Intermediate) | 10 Steps, 30 Exercises, about 6 weeks; meant to grow to about 12 | written, extended once |
-| Harmony | **Arpeggios over Changes** | Triads (Advanced), Chords in a Key (Beginner) | 9 Steps, 27 Exercises, about 5 weeks; meant to grow to about 8 | written (first version) |
+| Harmony | **Triads** | Know the Neck (Beginner), Scales and Modes (Beginner) | 18 Steps, 60 Exercises, about 12 weeks | written, extended twice (2026-11-19) |
+| Harmony | **Chords in a Key** | Triads (Intermediate) | 17 Steps, 57 Exercises, about 11 weeks | written, extended twice (2026-11-19) |
+| Harmony | **Arpeggios over Changes** | Triads (Advanced), Chords in a Key (Beginner) | 13 Steps, 42 Exercises, about 8 weeks | written, extended once (2026-11-19) |
 
 Nothing is renamed, split or merged: every existing Path teaches one thing a
 teacher would teach as one thing, and its Exercise ids carry progress. Know the
@@ -317,10 +319,21 @@ cannot drift apart. Warm-ups stay behind the lessons on purpose: the Beginner
 one uses only shape one, the Intermediate one the three major shapes learned in
 Beginner, the Advanced one the minor shapes learned in Intermediate.
 
-Still to add to reach the intended length: the diminished triad; the A, D and
-G string set; every shape of F and G drilled the way C is; minor triads on the
-middle strings in other keys; a second song form. They belong in this Path, as
-consolidation Steps, in the way Blues was extended.
+**Grown to its intended length (2026-11-19, `src/paths/specs/triads-more.ts`).**
+Five more Steps, 19 Exercises, all new ids: F and G on the middle strings and
+D minor and E minor there (both in the Intermediate Level, with `middle-strings`
+moved down to open them, because Chords in a Key's Beginner Level already plays
+middle-string shapes and builds on Triads only through Intermediate); the A, D
+and G strings (C and A minor in three shapes, the four chords); C, F and G and
+the four chords in other keys down there, and one C chord on three sets of
+strings in one place (the barre chord seen as three triads); a second song,
+sixteen bars in G with the verse on the middle strings and the chorus climbing
+the top strings, in four keys. A second Advanced warm-up rolls the middle-string
+shapes. Levels are now 4 / 7 / 7 Steps.
+
+Left for later, if a teacher wants more: the low E, A and D strings (same
+fingerings as A, D and G, said in the text and not drilled); augmented triads;
+triads in 3/4 (the pipeline writes 4/4 only).
 
 ### Chords in a Key (`chords-in-a-key`, theory): the second Path of the route, written
 
@@ -337,10 +350,29 @@ It reuses the shape helpers of Triads, so the same rule fingers both Paths.
 Chord numbers are written as words in the copy ("one, four, five") because
 that is how they are said, with the Roman numerals named once.
 
-Still to add to reach the intended length: the same route in G and A as full
-Steps and not only as variants; seventh chords on every degree; the minor key
-in a second key; secondary chords that songs borrow (the major two, the flat
-seven); a second form (sixteen bars, AABA).
+**Grown to its intended length (2026-11-19, `src/paths/specs/chords-more.ts`).**
+Seven more Steps, 27 Exercises, all new ids. Intermediate: the key of A in
+full; one, five, six, four by number in G, A and keys that change, with one,
+six, four, five beside it; the minor key a second time in E minor, ending on
+eight bars that put the same four chords under two homes (G major, then E
+minor). Advanced: sixteen bars, AABA, with a bridge that starts on four; three
+chords from outside the key (the flat seven, the major two, the minor four),
+each found from a chord the player knows by moving one note; the seventh chords
+of the key as four-string shapes with the root on the A string and on the low
+E string (triad, then the same chord with one finger moved, for each of the
+four kinds; all seven in order: C, D, E, F on the A string and G, A, B, C on
+the low E string at the same four frets); two, five, one and one, six, two,
+five in those sevenths, in four keys, ending on a self-checked "play them as
+chords". That last Step is the hand-off to Arpeggios over Changes, whose
+Intermediate Level opens on the same four chords. Levels are now 3 / 7 / 7.
+
+Fingering decisions worth a teacher's eye: A-string-root shapes are fingered so
+a triad and its seventh share fingers (C `1 3 3 3` to Cmaj7 `1 3 2 4`, Dm
+`1 3 4 2` to Dm7 `1 3 1 2`, Bdim `1 2 4 3` to Bm7b5 `1 2 1 3`); the low-E-root
+minor seven is one first-finger barre, which works because the roll never
+sounds the A string and would need muting when strummed (the "your turn" says
+so). E minor to C at frets 3 to 5 is fingered 2-3-1 to 2-3-1 so one finger
+slides.
 
 ### Arpeggios over Changes (`arpeggios-over-changes`, theory): the third Path, written 2026-11-19
 
@@ -365,12 +397,61 @@ whoever writes it (the helpers in `triads.ts` are exported for this):
 | Intermediate: two octaves, and sevenths | Two-octave major and minor arpeggios in the E and A shapes. Add the seventh (maj7, m7, 7) on ii-V-I. Arpeggio up one chord, down the next. A written chorus of arpeggios over the twelve-bar form | Reuse the keys of Chords in a Key through `inKeys`. A "your turn" that connects two chords by the nearest note. |
 | Advanced: the first sweeps | Three-string triad shapes played with one pick stroke per direction, slowly, as the same notes the player already knows. Two-string and three-string shapes over I-V-vi-IV. Hand-off: the last Step's Exercises are the first Step of Sweep Picking at half its tempo, and its payoff sends the player there | Sweep Picking grades ringing sweeps with a looser note bar (see its `gradingLimits`); copy its grading for these three Exercises only. Do not teach speed here. |
 
+**Arpeggios over Changes, grown (2026-11-19, `src/paths/specs/arpeggios-more.ts`).**
+Four more Steps, 15 Exercises: the two-octave shapes on G, D minor and through
+one, four, five of G and of A minor; seventh arpeggios across six strings (A
+minor seven as the pentatonic box with D left out, C major seven, G seven) and
+a two, five, one that crosses the neck; two, five, one in a minor key (B
+half-diminished, E seven, A minor seven: the arpeggios, a written line, three
+more minor keys, a your-turn); and two more swept fingerings before the song
+(the one-finger barre that has to roll, and the root-lowest minor shape Sweep
+Picking starts from). Levels are now 3 / 5 / 5.
+
+### First Chords and Strumming (`first-chords`, mechanics, foundations): written 2026-11-19
+
+**Who for:** the true beginner who wants to play songs: no chords yet, or two
+that buzz. Builds on nothing. It was "not built" until the scorer was read
+closely: a strum written on one tick is one expected onset, so it can be timed
+and counted today. What cannot be heard is taught in words, checked another
+way, or left to the player and labelled so.
+
+| What a teacher wants to know | How this Path finds out |
+|---|---|
+| Does every string of the chord ring? | "Check every string": the chord held and picked one string at a time in slow quarter notes, graded on right notes. A dead or muted string is a missing note. One for each of the ten chords that needs it (E minor, A minor, C, G, D, A, D minor, the small F). |
+| Is the strum on the beat, and is the next chord there in time? | Strums graded on timing, strums heard and extras (`grade: "timing"`, evenness 0.75, heard 0.85 because upstrokes are quiet, extras 6). A late change is a late or missing strum. |
+| Did the hand keep its down-up swing through the strokes left out? | Not hearable. Taught in the text, asked in a self-check question. |
+| Louder on two and four? | `accents` profile, with a low bar (0.6): the readout is rough. |
+| Can they choose a pattern, play a real song? | Two "your turn" Exercises, self-checked. |
+
+| Level | Steps | What it unlocks |
+|---|---|---|
+| Beginner: three chords and a steady hand | E minor (strings, one strum a bar, four); A minor and the first change (one, two, then four strums a bar, with the band); C, one finger from A minor, and an eight-bar tune | Three chords that ring, changes that land on the beat, a first tune. |
+| Intermediate: five chords and the upstroke | G (held with fingers 2, 3 and 4, so E minor keeps one finger and C is the same two-finger move as E minor to A minor); D, and G, C, D two ways; eighth notes down and up; patterns as the swing with strokes left out, ending on down, down-up, up-down-up through G, D, E minor, C | The three chords of a thousand songs and the strum of a thousand more. |
+| Advanced: ten chords, and a whole song | A and E (A to D on a sliding third finger), an eight-bar A, D, E form; D minor, F major seven, then the small F, and A minor, F, C, G; accents, a stop, bass note and strum; a sixteen-bar song with a different strum for verse and chorus, and "a song you know" | Ten chords including the F that stops beginners, dynamics, a whole song. |
+
+Decisions a teacher should look at first: the 2-3-4 G fingering; E minor with
+fingers 2 and 3; upstrokes written as the top three strings only; the small F
+(four strings) instead of the full barre; the pass tempos (70, 80, then 85 to
+90). Warm-ups cannot be chord changes, because the validator wants a warm-up to
+move along the neck (`warmup.moves`) and open chords sit under one hand: they
+are a one-finger scale walk along one string (minor in quarters, major in
+eighths, six strings each) and, in the last Level, a two-string first-finger
+barre moved up the neck, which is strength work for F.
+
+Known wart: `difficulty.ts` counts notes per second, and a six-string strum is
+six notes, so strummed Exercises read 9 to 18 where a single-note line at the
+same rate reads 2. The Step order is a teacher's, and the exceptions say so.
+The honest fix is to count onsets, not notes, in the metric; it would move the
+numbers of every Path with double stops, so it was not done here.
+
+For the UI (not built here): strum direction is not drawn. `pickPlan` is
+`free`, so no stroke marks are printed; a down or up arrow over each strum
+would help a beginner more than anything else on the screen. And the first-run
+step does not know this Path (it comes last, through the unknown-runnable
+rule): a player who says they want to play songs should be offered it first.
+
 ### Other foundations a beginner needs, not built
 
-- **First chords and strumming** (open chords, changing between them, strumming
-  patterns). The obvious hole for a true beginner, and the one the grader is
-  worst at. It needs a real-guitar test of whether a strum can be timed as one
-  onset before it is designed. Until then it could only be self-checked.
 - **Ear training** as its own Path: not gradable today.
 - **Fingerstyle**: same limit as before (ringing notes).
 
@@ -519,6 +600,21 @@ untouched, so nobody's progress moves.
 Still to do for Blues, in the same spirit: box 5 and a line that enters box 4;
 the form in E in open position with its turnarounds; a jump or uptempo shuffle;
 slow blues in a second key; a three-chorus solo with a shape.
+
+### Classic Rock, extended (2026-11-19)
+
+Two Steps and 7 Exercises added (`src/paths/specs/classic-rock-more.ts`), none
+replacing anything: 11 Steps and 39 Exercises became 13 and 46.
+
+| Level | New Step | What it consolidates |
+|---|---|---|
+| Beginner | The same riffs in E | The root line five frets lower, where half its notes become open strings; the fourths and the pedal riff on the same frets one string lower. Two ways to move a riff: by frets, or by strings. |
+| Intermediate | The next box up | Box 2 of A minor pentatonic, which the two-string extension was the top of: the shape, a four-bar line through box 1 into box 2 and home, a lick that lives in box 2, a your-turn. |
+
+Still to do for Classic Rock, in the same spirit: the licks of `box-extension`
+and `repeating-licks` in E at the twelfth fret; double stops over a second
+progression; a chord-tone Step over I, IV, V (the Path only has I, flat VII,
+IV); a second, shorter solo in E that uses box 2 and the open-position riffs.
 
 ## Proof-reading (2026-11-18)
 

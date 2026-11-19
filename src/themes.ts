@@ -279,11 +279,11 @@ const velvet: Theme = {
     "--surface-hover": "rgba(171, 135, 248, 0.06)",
     "--surface-active": "rgba(171, 135, 248, 0.12)",
     "--shadow": "0 8px 32px rgba(0, 0, 0, 0.5)",
-    "--font-family": "'Comfortaa', 'Nunito', system-ui, sans-serif",
-    "--font-display": "'Comfortaa', 'Nunito', system-ui, sans-serif",
-    "--font-heading": "'Comfortaa', 'Nunito', system-ui, sans-serif",
-    // Comfortaa is the voice on titles and labels; a paragraph of it at 12 px
-    // is hard going, so prose is Outfit, the round geometric sans Ember reads in.
+    // Outfit throughout: a clean geometric sans. Comfortaa's rounded letters
+    // read as twee on titles (owner, 2026-11-19: "not so cursi").
+    "--font-family": "'Outfit', 'Nunito', 'Segoe UI', system-ui, sans-serif",
+    "--font-display": "'Outfit', 'Nunito', 'Segoe UI', system-ui, sans-serif",
+    "--font-heading": "'Outfit', 'Nunito', 'Segoe UI', system-ui, sans-serif",
     "--font-body": "'Outfit', 'Nunito', 'Segoe UI', system-ui, sans-serif",
     "--font-num": "'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif",
     "--font-weight": "600",
@@ -297,9 +297,6 @@ const velvet: Theme = {
     "--feedback-miss": "#9097a3",
     "--neck-miss": "#ff5d6c",
     "--neck-hit": "#4ade80",
-    // Comfortaa runs wide: a touch smaller, so a Path's title keeps to the
-    // one line it has in the other themes.
-    "--heading-scale": "0.93",
   },
 };
 

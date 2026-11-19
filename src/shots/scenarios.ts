@@ -107,7 +107,7 @@ export interface Shot {
      * Today's plan. The harness makes it runnable for the scene, so a Theory
      * Take can be photographed before any Theory Path ships as runnable.
      */
-    path?: "blues-pentatonics" | "sweep-picking" | "alternate-picking" | "legato" | "rhythm-foundations" | "metal-rhythm" | "know-the-neck" | "scales-and-modes" | "tapping" | "funk-lines" | "triads" | "chords-in-a-key" | "arpeggios-over-changes";
+    path?: "blues-pentatonics" | "sweep-picking" | "alternate-picking" | "legato" | "rhythm-foundations" | "metal-rhythm" | "know-the-neck" | "scales-and-modes" | "tapping" | "funk-lines" | "triads" | "chords-in-a-key" | "arpeggios-over-changes" | "first-chords";
     /** With `path`: play this Exercise rather than the first Step's first. */
     exercise?: string;
     /** With `stop: "path"`: open this Path rather than Alternate Picking. */
@@ -978,6 +978,15 @@ export const SHOTS: Shot[] = [
     suffix: "session-neck-arpeggios",
     window: "main",
     session: { seed: "returning", stop: "ready", practiceView: "neck", path: "arpeggios-over-changes", exercise: "nearest-note.joined" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  {
+    id: "session-neck-first-chords",
+    suffix: "session-neck-first-chords",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "first-chords", exercise: "c-major.three-chords" },
     width: 1400,
     height: 900,
     settleMs: 1800,

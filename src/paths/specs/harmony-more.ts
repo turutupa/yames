@@ -10,7 +10,7 @@
  */
 import type { StepSpec } from "../spec";
 import { ladder } from "../templates";
-import { ROCK, bars, mid, named, top } from "./triadShapes";
+import { ROCK, bars, fingered, mid, named, top } from "./triadShapes";
 
 // --- Triads -----------------------------------------------------------------
 
@@ -19,9 +19,9 @@ export const F_AND_G: StepSpec = {
   id: "f-and-g",
   title: "F and G in three places",
   goal: "Play the three shapes of F major and of G major on the top strings, and play C, F and G by moving shape three.",
-  why: "You learned the three shapes on one chord. They are not C shapes: they are major shapes, and every major chord has the same three, in the same order up the neck, starting from a different fret. Doing it again for F and for G is what turns three fingerings into something you know. These are also the two chords you will need next.",
+  why: "You learned the three shapes on one chord. They are not C shapes: they are major shapes, and every major chord has the same three, in the same repeating order up the neck. Each chord comes into that order at a different shape and fret. Doing it again for F and for G is what turns three fingerings into something you know. These are also the two chords you will need next.",
   howTo: [
-    "F is F, A, C. Shape three is nearest the nut: frets 5, 6, 5. Then shape one at 10, 10, 8, then shape two at 14, 13, 13.",
+    "F is F, A, C. Start on shape three at frets 5, 6, 5, then shape one at 10, 10, 8, then shape two at 14, 13, 13. Shape two also fits near the nut, at 2, 1, 1: the small F chord you may already know.",
     "G is G, B, D. Shape two comes first: 4, 3, 3. Then shape three at 7, 8, 7, then shape one at 12, 12, 10.",
     "Shape one always has the root lowest, shape two the third, shape three the fifth. Which shape comes first on the neck depends on the chord.",
   ],
@@ -68,7 +68,7 @@ export const F_AND_G: StepSpec = {
     {
       id: "shape-three-moves",
       title: "C, F and G with shape three",
-      purpose: "One fingering, shape three, on three chords: C at fret 12, F at fret 5, G at fret 7, and back to C. The first finger lies across two strings and the second sits a fret above it.",
+      purpose: "One fingering, shape three, on three chords: C at fret 12, F at fret 5, G at fret 7, and back to C. The first finger holds the G string and the top string at the same fret, and the second finger holds the B string one fret higher.",
       howTo: [
         "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord: C, F, G, C.",
         "C: G string 12, B string 13, top string 12. F: 5, 6, 5. G: 7, 8, 7. Keep the fingers in their shape as the hand slides.",
@@ -174,17 +174,20 @@ export const DIMINISHED: StepSpec = {
     "It shares two notes, B and D, with G major. Songs often use it in G's place just before C.",
   ],
   payoff: "All three kinds of triad a key contains, and the sound of a chord that wants to resolve.",
+  difficultyException:
+    "Back on the top strings with one chord to a bar, after a Step that changes key and crosses three sets of strings, so the metric reads it as easier. The demand is a new kind of chord and a wider shape.",
   exercises: [
     {
       id: "minor-to-diminished",
       title: "B minor to B diminished",
-      purpose: "A minor shape, then the same shape with its top note one fret lower, back and forth. One note makes minor into diminished, as one note made major into minor.",
+      purpose: "B minor, then the same shape with its top note one fret lower, back and forth. One note makes minor into diminished, as one note made major into minor.",
       howTo: [
         "Straight eighths, 50 BPM up to a pass at 80. One bar each: B minor, B diminished, and again.",
-        "B minor: G string 4, B string 3, top string 2. B diminished: G string 4, B string 3, top string 1. Only the top string moves, and the hand has to open a little to reach it.",
+        "B minor: G string 4, B string 3, top string 2, held with the fourth, third and second fingers so the first finger is free. B diminished: G string 4, B string 3, top string 1. Only the top note changes: the second finger lifts and the first finger takes fret 1.",
+        "The hand has to open a little to reach fret 1. Keep the third and fourth fingers down through all four bars.",
       ],
       coach: "Right notes and even eighths after the take. Listen to what the one fret does.",
-      tab: bars(top(4, 3, 2), top(4, 3, 1), top(4, 3, 2), top(4, 3, 1)),
+      tab: bars(fingered(top(4, 3, 2), [4, 3, 2]), top(4, 3, 1), fingered(top(4, 3, 2), [4, 3, 2]), top(4, 3, 1)),
       position: 2,
       shifts: true,
       chords: "Bm | Bdim | Bm | Bdim",
@@ -219,7 +222,7 @@ export const DIMINISHED: StepSpec = {
       purpose: "G, then B diminished in almost the same shape, then two bars of C. Hear the diminished chord lean into C.",
       howTo: [
         "Straight eighths, 60 BPM up to a pass at 90.",
-        "G: G string 4, B string 3, top string 3. B diminished: 4, 3, 1: only the top string moves. C: 5, 5, 3, for two bars.",
+        "G: G string 4, B string 3, top string 3. B diminished: 4, 3, 1. B and D stay where they are and the top note drops from G to F, but the fingers change: the fourth finger takes the G string, the third the B string and the first the top string. C: 5, 5, 3, for two bars.",
       ],
       coach: "Band on. Right notes and time after the take.",
       tab: bars(top(4, 3, 3), top(4, 3, 1), top(5, 5, 3), top(5, 5, 3)),
@@ -243,11 +246,11 @@ export const KEY_OF_G: StepSpec = {
   id: "key-of-g",
   title: "The key of G, in full",
   goal: "Play the seven chords of G major, its one, four and five in an eight-bar form, and its one, six, two, five.",
-  why: "So far a new key has been the key of C moved up the neck. G is worth learning in its own right: it is the key guitar songs are most often in, and its chords fall low on the neck where the shapes are different from C's. Going through everything again in one new key, the seven chords, the three majors, the turn through the minors, is what makes the numbers independent of any one place.",
+  why: "So far a new key has been the key of C moved up the neck. G is worth learning in its own right: it is one of the keys guitar songs are most often in, and it puts shapes you already know on new numbers: the G shape that was five in the key of C is one here. Going through everything again in one new key, the seven chords, the three majors, the turn through the minors, is what makes the numbers independent of any one place.",
   howTo: [
     "G major has one sharp: F sharp. Its seven chords are G, A minor, B minor, C, D, E minor and F sharp diminished.",
-    "One, four and five are G, C and D. Six, two and three are E minor, A minor and B minor.",
-    "Around fret 3: G is 4, 3, 3. C is 5, 5, 3. D is 2, 3, 2. E minor is 4, 5, 3. A minor is 5, 5, 5.",
+    "One, four and five are G, C and D. Two, three and six are A minor, B minor and E minor.",
+    "Low on the neck, on the G, B and top strings: G is 4, 3, 3. C is 5, 5, 3. D is 2, 3, 2. E minor is 4, 5, 3. A minor is 5, 5, 5.",
   ],
   payoff: "A second key you know as well as the first.",
   exercises: [
@@ -279,7 +282,7 @@ export const KEY_OF_G: StepSpec = {
       purpose: "The eight-bar form with G, C and D, low on the neck: one, one, four, four, five, four, one, one.",
       howTo: [
         "Straight eighths, 60 BPM up to a pass at 90.",
-        "G is 4, 3, 3. C is 5, 5, 3. D is 2, 3, 2. Follow the form: G, G, C, C, D, C, G, G.",
+        "On the G, B and top strings: G is 4, 3, 3. C is 5, 5, 3. D is 2, 3, 2. Follow the form: G, G, C, C, D, C, G, G.",
       ],
       coach: "Eight bars with the band. Right notes and time after the take.",
       tab: bars(top(4, 3, 3), top(4, 3, 3), top(5, 5, 3), top(5, 5, 3), top(2, 3, 2), top(5, 5, 3), top(4, 3, 3), top(4, 3, 3)),
@@ -296,7 +299,7 @@ export const KEY_OF_G: StepSpec = {
     {
       id: "one-six-two-five-g",
       title: "One, six, two, five in G",
-      purpose: "G, E minor, A minor, D around fret 3. Between G and E minor only one note moves.",
+      purpose: "G, E minor, A minor, D between frets 2 and 5. Between G and E minor only one note moves.",
       howTo: [
         "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
         "G is 4, 3, 3. E minor is 4, 5, 3. A minor is 5, 5, 5. D is 2, 3, 2.",
