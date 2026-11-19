@@ -3827,10 +3827,50 @@
   min-width: 0;
   max-width: 100%;
 }
+/* The band's slider and its hint: two rows of the column as they always were,
+   and one row in a short window, where the second row pushed Start under the
+   fold on every Exercise played over the band (card #93). */
+.session-band-row {
+  display: contents;
+}
+.session-col > .session-band-row,
+.session-band-row > * {
+  flex-shrink: 0;
+}
+@media (min-width: 481px) and (max-height: 760px) {
+  .session-band-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 14px;
+    min-width: 0;
+  }
+  .session-band-row > .session-band-hint {
+    flex: 1 1 260px;
+    min-width: 0;
+    font-size: 12.5px;
+  }
+  /* And the neck gives up a little of its floor for the band's row: a longer
+     language wraps the hint onto a second line. Its slot stays well above the
+     140 px that keeps the finger numbers 13 px and up. */
+  .session-body:has(.session-band-row) > .practice-neck {
+    min-height: 210px;
+  }
+}
 .session-band input[type="range"] {
   width: clamp(90px, 14vw, 160px);
   min-width: 0;
   accent-color: var(--l-amber);
+}
+/* A thumb's 44 px to drag along (card #93: 90x16 on a phone). The track and
+   its knob stay as slim as they were; only the hit box grows, and the
+   negative margin keeps the row its height. */
+@media (pointer: coarse) {
+  .session-band input[type="range"] {
+    width: clamp(140px, 42vw, 220px);
+    height: 44px;
+    margin-block: -14px;
+  }
 }
 /* A ring of the page's own accent when reached by keyboard (acceptance 4,
    P2-10): the engine's default is a thin dark line on a dark page. */

@@ -2014,6 +2014,10 @@ export const PHONE_LEARNING_SCENES = [
   "session-runway-playing",
   // Fingers on the dots, the start pill and Watch, on a phone (2026-11-18).
   "session-neck-sweep",
+  // Exercises played over the band, from their Step page: the band's slider
+  // is a thumb's 44 px to drag along (card #93).
+  "session-neck-triads",
+  "session-variant-e",
   "session-between",
   "session-result",
   "session-no-catch",
@@ -2046,10 +2050,9 @@ for (const id of PHONE_LEARNING_SCENES) {
 }
 
 // A key-moved Exercise's own how-to on a phone (card #79), measured by
-// `tests/layout/session-variant-text.spec.ts`. Not in the list above: a Triads
-// Take's band slider is under a thumb's size there, as on every Exercise
-// played over the band (a follow-up of its own).
-for (const id of ["session-variant-e", "session-variant-runway"]) {
+// `tests/layout/session-variant-text.spec.ts` (session-variant-e is in the list
+// above since the band's slider became thumb-sized, card #93).
+for (const id of ["session-variant-runway"]) {
   const desktop = SHOTS.find((s) => s.id === id);
   if (desktop) SHOTS.push({ ...desktop, id: `phone-${id}`, suffix: `phone-${id}`, width: 360, height: 800 });
 }

@@ -13,7 +13,17 @@ const SIZES = [
   { width: 1024, height: 700 },
   { width: 1280, height: 720 },
 ];
-const SCENES = ["session-ready", "session-input-failed", "session-input-off", "session-ungraded-ready", "session-ask-ready"];
+// The last two are Exercises played over the band, opened from their Step
+// page (card #93): the band's slider and its mic hint pushed Start to 714 in 700.
+const SCENES = [
+  "session-ready",
+  "session-input-failed",
+  "session-input-off",
+  "session-ungraded-ready",
+  "session-ask-ready",
+  "session-neck-triads",
+  "session-variant-bb",
+];
 
 /** Every visible thing in the footer, and Start, that ends below the window. */
 async function belowFold(page: Page): Promise<string[]> {

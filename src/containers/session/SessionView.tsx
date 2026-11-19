@@ -1266,8 +1266,9 @@ function UngradedResultScreen({ session }: { session: SessionRun }) {
 export function BandVolume({ session, hint }: { session: SessionRun; hint: boolean }) {
   const { t } = useTranslation();
   if (!session.hasBand) return null;
+  // One row in a short window (card #93): the slider and its hint side by side.
   return (
-    <>
+    <div className="session-band-row">
       <label className="session-band" data-testid="session-band">
         <span>{t("session.run.band")}</span>
         <input
@@ -1280,11 +1281,11 @@ export function BandVolume({ session, hint }: { session: SessionRun; hint: boole
         />
       </label>
       {hint && (
-        <div className="session-why">
+        <div className="session-why session-band-hint">
           {t(session.directInput ? "session.run.bandHint" : "session.run.bandMicHint")}
         </div>
       )}
-    </>
+    </div>
   );
 }
 
