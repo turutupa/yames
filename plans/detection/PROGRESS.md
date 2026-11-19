@@ -240,3 +240,46 @@ the post-Take thread. `click-jitter-probe --late-pass` (new) loops
 `timing::late_grade` (verifier + right notes + curves, exactly the
 `yames-take-notes` body, now one public function) on a demoted thread under
 the click. **Not run yet**: the box was at load 10-11 every time.
+
+## Opus interlude (2026-11-19, between ed8870d4 and the Fable agent's return)
+
+A stand-in agent picked up the uncommitted M4 work, finished and gated it,
+then did M5. Commits on `mvp-detect`:
+
+| Commit | What |
+|---|---|
+| `b18f7be0` | M4 part 1: `noteIdentity` from tracker + verifier (`merge_states`), late pass whenever the model is in the build, note details from the app, legato "reported, not graded" line, "Keep my last Takes for troubleshooting" (Settings, Support), M0 nits (truth-vs-look-up lib test, MIDI Takes not read, `npm run test:detect`), card #90 fixed |
+| `b618393b` | `git merge revamp` (clean) |
+| `d8b5f4eb` | M5: `score/curves.rs`, `grade.curves`, DSL `b2r` / `B2`, bends and vibrato lines, `timing::late_grade`, probe `--late-pass`, bench `bends` group |
+
+Bench numbers are in the M4 and M5 sections above; baselines
+`fast.json` 1,112 -> 1,593 gated metrics, `fast-no-model.json` likewise
+extended, earlier values unchanged except the M4 `takes|*` improvements.
+
+Gates run on the final tree: `test:rust` 1089/0, `test:rust:detect` 1083/0
+(before M5), `test:grading` 29/0, `test:dsp`, `test:highbpm`, `test:pitch`,
+`detect:check` 0 worse, Android `cargo check --lib --target
+aarch64-linux-android` with and without `detect-ort`, tsc, vitest (all but
+`TabStage.render.test.tsx`, worktree-only), `npm run build`.
+
+**Not done / where it stands:**
+
+1. **Click-jitter probe not run** for the added post-Take compute: load was
+   10 to 11 all session. Run when `/proc/loadavg` 1- and 5-min < 6:
+   `cargo run --release --manifest-path src-tauri/Cargo.toml --features
+   detect-ort --bin click-jitter-probe -- --no-llm --late-pass` (and with
+   `--jam-swap --jam-move --jam-take --late-pass`). Gate: the four numbers in
+   AGENTS.md.
+2. **Shipped builds have no model**: `release.yml` and `scripts/tauri.mjs`
+   do not pass `detect-ort`, so M4/M5 verdicts reach players only once the
+   owner accepts +20 MB and the Intel-Mac gap (M3 "Runtime").
+3. **Reviewer**: `timing.rs` (late pass trigger, `midi_seen`, `late_grade`),
+   `take_diagnostics.rs` (disk writes on the post-Take thread),
+   `coach::lower_current_thread_priority` made `pub` (re-exported in
+   `probe`), `score.rs` / `score/*`. No change to the engine, the cpal
+   callback, the queue, the settings store or SQLite.
+4. **Card #89** (Songs review pitch pass may read at the detector's stamp)
+   untouched.
+5. Next milestones: M6 (live detector robustness, the 36% / 51% onset_heard
+   on hammer-ons / pull-offs and phone_agc 48% bends read are its targets),
+   M7 (free-play engine), M8+ planning. No pack uses `b2r` / `B2` yet.
