@@ -237,6 +237,25 @@ export function FallbackNeck({
                 </text>
               );
             })}
+          {shown
+            .filter((n) => n.label && n.shift)
+            .map((n) => {
+              const look = noteLook(n.kind, P);
+              const r = R * kOf(n.fret) * (SCALE[n.kind] ?? 1);
+              // The shift mark, as on the 3D neck: a short bar under the number.
+              return (
+                <line
+                  key={`shift-${n.string}:${n.fret}`}
+                  className="neck-fallback-shift"
+                  x1={noteX(n.fret) - r * 0.32}
+                  x2={noteX(n.fret) + r * 0.32}
+                  y1={S(n.string) + r * 0.62}
+                  y2={S(n.string) + r * 0.62}
+                  stroke={look.ink}
+                  strokeWidth={r * 0.14}
+                />
+              );
+            })}
         </g>
       </svg>
     </div>

@@ -3559,6 +3559,19 @@
 .practice-legend [data-k="fingers"]::before {
   display: none;
 }
+/* The shift mark's key: a number with the short bar the neck draws under it (P2-4). */
+.practice-legend [data-k="shift"]::before {
+  content: "4";
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  font-weight: 700;
+  color: var(--l-ink);
+  text-decoration: underline 2px;
+  text-underline-offset: 2px;
+  margin-right: 4px;
+  vertical-align: 0;
+}
 @media (max-width: 700px) {
   /* One row on a phone: Watch, the beat, the key, in the flow rather than
      over each other. The word "beat" goes; the dots say it. Watch keeps a
@@ -3595,8 +3608,8 @@
   .practice-sound-word {
     display: none;
   }
-  /* A phone keeps the one key the dots need: what their numbers are. */
-  .practice-legend > :not([data-k="fingers"]) {
+  /* A phone keeps the keys the dots need: what their numbers and the shift bar are. */
+  .practice-legend > :not([data-k="fingers"]):not([data-k="shift"]) {
     display: none;
   }
 }
