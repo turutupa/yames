@@ -407,7 +407,7 @@ export const SIXTEEN_BARS: StepSpec = {
         VARIANT_NOTE,
       ],
       coach: "A key that changes from day to day. Right notes and time after the take.",
-      vary: inKeys(AABA, AABA_CHART, { D: 2, E: 4, Bb: -2 }),
+      vary: inKeys(AABA, AABA_CHART, { D: 2, E: 4, Bb: -2 }, ROCK, { parts: ["the A section", "the A section", "the bridge", "the A section"] }),
       tab: shiftFrets(AABA, 2),
       position: 5,
       shifts: true,

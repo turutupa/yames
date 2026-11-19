@@ -380,6 +380,7 @@ function buildExercise(
           label: vary.label ? vary.label(params) : Object.values(params).join(", "),
           params,
           pool: poolOf(params, notPooled.map(([d]) => d)),
+          ...(index > 0 ? ownText(spec, c.part.build) : {}),
           tab: c.part.tab,
           position: c.part.position,
           crossing: c.crossing,
@@ -399,6 +400,20 @@ function buildExercise(
     };
   }
   return exercise;
+}
+
+/**
+ * A variant's own words, from its build. Not asked for the first variant: its
+ * notes are the Exercise's, so the Exercise's text is its text, and there is one
+ * authority for it. Words that only repeat the Exercise's are not written
+ * either: absent already means "the Exercise's".
+ */
+function ownText(spec: ExerciseSpec, build: VariantBuild): Pick<ExerciseVariant, "purpose" | "howTo"> {
+  const own: Pick<ExerciseVariant, "purpose" | "howTo"> = {};
+  if (build.purpose !== undefined && build.purpose !== spec.purpose) own.purpose = build.purpose;
+  const howTo = typeof build.howTo === "function" ? build.howTo(spec.howTo) : build.howTo;
+  if (howTo !== undefined && JSON.stringify(howTo) !== JSON.stringify(spec.howTo)) own.howTo = [...howTo];
+  return own;
 }
 
 /** The pool a variant belongs to, from the values that change difficulty. */

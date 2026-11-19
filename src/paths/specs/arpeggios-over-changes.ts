@@ -14,6 +14,8 @@ import { handAt, ladder, moveChart, shiftFrets } from "../templates";
 import { ROCK, named, tokens, top } from "./triadShapes";
 import { MINOR_TWO_FIVE_ONE, MORE_SWEEPS, SEVENTHS_ACROSS, TWO_OCTAVES_MORE } from "./arpeggios-more";
 import type { Shape } from "./triadShapes";
+import { keyHowTo } from "./keyText";
+import type { KeyLineKind } from "./keyText";
 
 const YOUR_TURN = { grade: "selfChecked", example: true } as const;
 const NOT_CHECKED_YET =
@@ -106,21 +108,33 @@ const SWEPT = {
   selfCheck: [ROLL_CHECK],
 } as const satisfies Partial<ExerciseSpec>;
 
-/** A line in C moved along the neck to other keys; the chart and the band move with it. */
-function inKeys(tab: string, chart: string, shifts: Readonly<Record<string, number>>, jam: (key: string) => { groove: string; key: string } = ROCK) {
+/**
+ * A line in C moved along the neck to other keys; the chart and the band move with it.
+ * Every key after the first reads its own how-to (`keyText.ts`): `kind` says
+ * whether the line is single notes (the default here) or a shape a bar.
+ */
+function inKeys(
+  tab: string,
+  chart: string,
+  shifts: Readonly<Record<string, number>>,
+  jam: (key: string) => { groove: string; key: string } = ROCK,
+  kind: KeyLineKind = "line",
+) {
   return {
     values: { key: Object.keys(shifts) },
     pooled: ["key"] as const,
     label: (p: VariantParams) => `In ${p.key}`,
     build: (p: VariantParams) => {
       const moved = shiftFrets(tab, shifts[p.key]);
+      const chords = chartIn(chart, shifts[p.key], p.key);
       return {
         tab: moved,
         position: handAt(moved),
         shifts: true,
-        chords: chartIn(chart, shifts[p.key], p.key),
+        chords,
         jam: jam(p.key),
         harmony: { chordTones: true as const },
+        howTo: keyHowTo({ kind, key: p.key, tab: moved, chords, shift: shifts[p.key], home: "C" }),
       };
     },
   };
@@ -806,7 +820,7 @@ export default definePath({
             VARIANT_NOTE,
           ],
           coach: "A key that changes from day to day. Timed and counted; the pitch is for your ear.",
-          vary: inKeys(SWEEP_SONG, SONG_CHART, { D: 2, E: 4, Bb: -2 }, TWELVE_EIGHT),
+          vary: inKeys(SWEEP_SONG, SONG_CHART, { D: 2, E: 4, Bb: -2 }, TWELVE_EIGHT, "shapes"),
           tab: shiftFrets(SWEEP_SONG, 2),
           position: 5,
           shifts: true,

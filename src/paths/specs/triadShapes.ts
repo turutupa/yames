@@ -6,6 +6,8 @@
 import type { ExerciseSpec, VariantParams } from "../spec";
 import type { PassBar } from "../format";
 import { handAt, moveChart, shiftFrets } from "../templates";
+import { keyHowTo } from "./keyText";
+import type { KeyLineKind } from "./keyText";
 
 type Grading = Pick<ExerciseSpec, "grade" | "alsoGraded" | "pass">;
 
@@ -112,15 +114,21 @@ export function chartIn(chart: string, by: number, key: string): string {
 
 /**
  * A line moved along the neck to other keys; the chart and the band move with
- * it. `shifts` is frets from the written line for each key, `home` the key the
- * written line is in when it is not C (so the chart's shift can be told from
- * the tab's when a key sits better an octave away).
+ * it. `shifts` is frets from the written line for each key.
+ *
+ * Every key after the first reads its own how-to: the Exercise's tempo
+ * sentence, then lines made from that key's own frets and chords
+ * (`keyText.ts`). `words` says what the line is, so the right sentences are
+ * made: `kind` is `shapes` (a shape a bar, the default) or `line` (single
+ * notes), `home` is the key the written line is in when it is not C, and
+ * `parts` is what each four bars of a long form is called ("the verse").
  */
 export function inKeys(
   tab: string,
   chart: string,
   shifts: Readonly<Record<string, number>>,
   jam: (key: string) => { groove: string; key: string } = ROCK,
+  words: { kind?: KeyLineKind; home?: string; parts?: readonly string[] } = {},
 ) {
   return {
     values: { key: Object.keys(shifts) },
@@ -128,13 +136,15 @@ export function inKeys(
     label: (p: VariantParams) => `In ${p.key}`,
     build: (p: VariantParams) => {
       const moved = shiftFrets(tab, shifts[p.key]);
+      const chords = chartIn(chart, shifts[p.key], p.key);
       return {
         tab: moved,
         position: handAt(moved),
         shifts: true,
-        chords: chartIn(chart, shifts[p.key], p.key),
+        chords,
         jam: jam(p.key),
         harmony: { chordTones: true as const },
+        howTo: keyHowTo({ kind: words.kind ?? "shapes", key: p.key, tab: moved, chords, shift: shifts[p.key], home: words.home ?? "C", parts: words.parts }),
       };
     },
   };

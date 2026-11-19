@@ -13,7 +13,14 @@ import { definePath } from "../spec";
 import type { ExerciseSpec, VariantParams } from "../spec";
 import type { PassBar } from "../format";
 import { handAt, ladder, moveChart, pentatonic, shiftFrets } from "../templates";
-import { BOX_TWO_STEP, RIFFS_IN_E } from "./classic-rock-more";
+import {
+  BOX_AT_TWELVE,
+  BOX_TWO_STEP,
+  CHORD_TONES_ADE,
+  DOUBLE_STOPS_IN_E,
+  RIFFS_IN_E,
+  SOLO_IN_E,
+} from "./classic-rock-more";
 
 // ---------------------------------------------------------------------------
 // Grading. Every written line carries a timing bar. Tighter on the early
@@ -381,6 +388,7 @@ export default definePath({
         },
       ],
     },
+    BOX_AT_TWELVE,
     {
       id: "major-pentatonic",
       title: "Major pentatonic, and minor against major",
@@ -638,6 +646,7 @@ export default definePath({
         },
       ],
     },
+    DOUBLE_STOPS_IN_E,
     {
       id: "embellishment",
       title: "Chord embellishment",
@@ -821,6 +830,7 @@ export default definePath({
         },
       ],
     },
+    CHORD_TONES_ADE,
     {
       id: "melody",
       title: "Phrasing a slow melody",
@@ -1090,6 +1100,7 @@ export default definePath({
         },
       ],
     },
+    SOLO_IN_E,
     {
       id: "solo-etude",
       title: "A sixteen-bar solo",
@@ -1190,13 +1201,13 @@ export default definePath({
     {
       id: "beginner",
       title: "Beginner: riffs, the box and its major twin",
-      summary: "Riffs in time with a band, in A and then in E, the minor pentatonic box and its classic licks, and the major pentatonic.",
+      summary: "Riffs in time with a band, in A and then in E, the minor pentatonic box and its classic licks at fret 5 and again at fret 12, and the major pentatonic.",
       startHereIf: [
         "You can play power chords and single notes cleanly at 80 BPM eighths.",
         "You don't yet know a rock lick you could play over a band.",
         "You couldn't say which notes change between minor and major pentatonic.",
       ],
-      steps: ["riffs", "riffs-in-e", "box-extension", "major-pentatonic"],
+      steps: ["riffs", "riffs-in-e", "box-extension", "box-at-twelve", "major-pentatonic"],
       warmups: [
         {
           id: "riff-around",
@@ -1225,13 +1236,13 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: loops, double stops and the changes",
-      summary: "The second pentatonic box, repeating licks, rock and roll double stops, chord embellishment, and chord tones over A, G and D.",
+      summary: "The second pentatonic box, repeating licks, rock and roll double stops in A and in E, chord embellishment, and chord tones over A, G and D and then over A, D and E.",
       startHereIf: [
         "You can play box 1 of A minor pentatonic from memory at 90 BPM eighths.",
         "You can play a sixteenth-note lick in the box at 80 BPM.",
         "Your solos stay in one box and don't follow the chords.",
       ],
-      steps: ["box-two", "repeating-licks", "double-stops", "embellishment", "chord-tones"],
+      steps: ["box-two", "repeating-licks", "double-stops", "double-stops-in-e", "embellishment", "chord-tones", "chord-tones-ade"],
       warmups: [
         {
           id: "loop-around",
@@ -1260,13 +1271,13 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: melody, conversation and a whole solo",
-      summary: "A slow melody with bends and vibrato, call and response with the band, the fast licks a solo peaks on, and a sixteen-bar written solo.",
+      summary: "A slow melody with bends and vibrato, call and response with the band, the fast licks a solo peaks on, a twelve-bar written solo in E and a sixteen-bar one in A.",
       startHereIf: [
         "You can play chord tones over A, G and D at 100 BPM eighths.",
         "You can bend a whole step to pitch by ear and hold it.",
         "Your licks are fine, and your solos don't yet have a shape from start to end.",
       ],
-      steps: ["melody", "call-response", "climax", "solo-etude"],
+      steps: ["melody", "call-response", "climax", "solo-in-e", "solo-etude"],
       warmups: [
         {
           id: "run-around",

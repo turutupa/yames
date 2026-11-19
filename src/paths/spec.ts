@@ -65,6 +65,20 @@ export type HarmonySpec =
 /** What one combination of a variation's values plays. */
 export type VariantBuild = {
   tab: string;
+  /**
+   * This variant's own why and how-to, in place of the Exercise's, for a variant
+   * whose notes the Exercise's words do not describe (another key, another
+   * position). Leave out and the Exercise's text applies. The first variant
+   * is the Exercise's own notes and always reads the Exercise's text: what a
+   * build says here for it is not written. Text equal to the Exercise's is
+   * not written either.
+   *
+   * `howTo` is the variant's whole how-to. A build has no sight of the Exercise
+   * it is in, so a variant that keeps some of the Exercise's lines (its tempo
+   * sentence) and replaces the rest gives a function of the Exercise's how-to.
+   */
+  purpose?: string;
+  howTo?: string[] | ((exerciseHowTo: readonly string[]) => string[]);
   guide?: string;
   position?: number;
   shifts?: boolean;

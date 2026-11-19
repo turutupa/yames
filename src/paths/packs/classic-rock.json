@@ -23,7 +23,7 @@
   },
   "orderRationale": "Riffs come first because they are what a rock player plays most, and they put time in the hands before any theory. The minor pentatonic box and its extension come next, with the licks the style is built on; the major pentatonic follows at once, because hearing minor against major over the same chord is the theory that separates rock from blues. Repeating licks come after the box, since they are box notes played as loops. Double stops and chord embellishment move from one note to two and into the chord, then chord tones over A, G and D (I, flat VII, IV) show why the same box works over those changes. The slow melody needs control more than speed, so it comes late; call and response with a band uses everything before it, and the sixteen-bar etude puts it all in one solo.",
   "gradingLimits": "Graded Exercises are written lines. The app checks timing evenness, notes heard and extra notes on every one, and right notes after the take on single notes that are far enough apart and don't ring into each other; elsewhere right notes read 'not checked'. Double stops, the chord embellishments and riffs with open strings ringing are timed and counted, and not pitch-checked, because a single-note tracker can't tell two notes apart. A bent note would read as a wrong one, so bends are timed and never pitch-checked, and their pitch is a self-check. The right-note check has only been tried on computer-made guitar sound with no band in the mix, so direct input or headphones are the honest way to play anything with a band, and with a microphone and speakers it is untested. Choosing your own notes, landing on chord tones and phrasing are not measured today: those Exercises are 'your turn', self-checked and labelled 'not checked yet'. Nothing here grades feel or tone.",
-  "estimatedMinutes": 233,
+  "estimatedMinutes": 311,
   "steps": [
     {
       "id": "riffs",
@@ -1801,8 +1801,401 @@
       ]
     },
     {
-      "id": "major-pentatonic",
+      "id": "box-at-twelve",
       "order": 4,
+      "title": "The box at the twelfth fret: licks in E",
+      "goal": "Play the descending sixteenth run, the three-note repeat and the extension lick in E minor pentatonic, with box 1 at fret 12 and its extension at frets 15 and 17.",
+      "why": "These are three of the licks you already know, seven frets higher. Box 1 of A minor pentatonic at fret 5 is box 1 of E minor pentatonic at fret 12, and nothing in the fingering changes: the same fingers on the same strings in the same order. Two things do change. The frets up here are narrow, so the fingers land in less room than they are used to. And the band is in E minor, the key of the root line you play at the nut, so these licks and that riff belong to the same song. A lick you can play in two places is a lick you can use.",
+      "howTo": [
+        "Box 1 in E: first finger on fret 12, and the notes are E, G, A, B and D. Every fret is the one you played in A plus 7: 5 becomes 12, 7 becomes 14, 8 becomes 15.",
+        "The extension is frets 15 and 17 on the B and high E strings: D, E, G and A. In A it was frets 8 and 10.",
+        "The frets are closer together here. Keep the fingers curled and close to the strings, and start at the slowest rung while the hand learns the smaller spacing."
+      ],
+      "payoff": "Three licks you can play in A and in E, and a box you can find at fret 5 and at fret 12.",
+      "prerequisites": ["box-extension"],
+      "difficulty": 4.46,
+      "exercises": [
+        {
+          "id": "box-at-twelve.twelve-descent",
+          "title": "The sixteenth run at fret 12",
+          "purpose": "The run you already know from 'A descending sixteenth run', moved to E. These are the same notes that Exercise gives you when it comes round in E, so nothing here is new: it is repeated so the box at fret 12 starts with something your fingers know. Four-note groups down the top of the box: E, D, B, A, then D, B, A, G, then down a string.",
+          "howTo": [
+            "Straight sixteenths, four to a click, 60 BPM up to a pass at 80.",
+            "Bar 1: E at 12 on the high E, D at 15 and B at 12 on the B, A at 14 on the G, twice; then D, B, A, G twice. Bar 2: A, G on the G string, E, D on the D string, twice, then B on the A string and E on the D string to finish.",
+            "The same fingers as in A: first finger for every note at fret 12, whichever string it is on, third finger on fret 14, fourth on fret 15."
+          ],
+          "coachLine": "Right notes, notes heard and even sixteenths after the take.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 2,
+          "loops": true,
+          "position": {
+            "fret": 12,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":1,"fret":12,"midi":76,"tick":0,"dur":240,"tech":[]},
+            {"string":2,"fret":15,"midi":74,"tick":240,"dur":240,"tech":[]},
+            {"string":2,"fret":12,"midi":71,"tick":480,"dur":240,"tech":[]},
+            {"string":3,"fret":14,"midi":69,"tick":720,"dur":240,"tech":[]},
+            {"string":1,"fret":12,"midi":76,"tick":960,"dur":240,"tech":[]},
+            {"string":2,"fret":15,"midi":74,"tick":1200,"dur":240,"tech":[]},
+            {"string":2,"fret":12,"midi":71,"tick":1440,"dur":240,"tech":[]},
+            {"string":3,"fret":14,"midi":69,"tick":1680,"dur":240,"tech":[]},
+            {"string":2,"fret":15,"midi":74,"tick":1920,"dur":240,"tech":[]},
+            {"string":2,"fret":12,"midi":71,"tick":2160,"dur":240,"tech":[]},
+            {"string":3,"fret":14,"midi":69,"tick":2400,"dur":240,"tech":[]},
+            {"string":3,"fret":12,"midi":67,"tick":2640,"dur":240,"tech":[]},
+            {"string":2,"fret":15,"midi":74,"tick":2880,"dur":240,"tech":[]},
+            {"string":2,"fret":12,"midi":71,"tick":3120,"dur":240,"tech":[]},
+            {"string":3,"fret":14,"midi":69,"tick":3360,"dur":240,"tech":[]},
+            {"string":3,"fret":12,"midi":67,"tick":3600,"dur":240,"tech":[]},
+            {"string":3,"fret":14,"midi":69,"tick":3840,"dur":240,"tech":[]},
+            {"string":3,"fret":12,"midi":67,"tick":4080,"dur":240,"tech":[]},
+            {"string":4,"fret":14,"midi":64,"tick":4320,"dur":240,"tech":[]},
+            {"string":4,"fret":12,"midi":62,"tick":4560,"dur":240,"tech":[]},
+            {"string":3,"fret":14,"midi":69,"tick":4800,"dur":240,"tech":[]},
+            {"string":3,"fret":12,"midi":67,"tick":5040,"dur":240,"tech":[]},
+            {"string":4,"fret":14,"midi":64,"tick":5280,"dur":240,"tech":[]},
+            {"string":4,"fret":12,"midi":62,"tick":5520,"dur":240,"tech":[]},
+            {"string":5,"fret":14,"midi":59,"tick":5760,"dur":960,"tech":[]},
+            {"string":4,"fret":14,"midi":64,"tick":6720,"dur":960,"tech":[]}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":105,"grading":"graded"},
+              {"bpm":110,"grading":"graded"}
+            ],
+            "passAtBpm": 80
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["bandBleed", "fastPicking"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested.",
+              "At this speed a real rig's input delay can push notes out of their matching window, which reads as late or missed. Evenness is the number to trust here, and only once the delay is calibrated."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "rock8",
+            "feel": "straight",
+            "key": "E minor",
+            "chart": "E5 | E5"
+          },
+          "estimatedMinutes": 5,
+          "tab": "/16 1:12 2:15 2:12 3:14 1:12 2:15 2:12 3:14 2:15 2:12 3:14 3:12 2:15 2:12 3:14 3:12 | /16 3:14 3:12 4:14 4:12 3:14 3:12 4:14 4:12 /4 5:14 4:14",
+          "subdivision": "sixteenths",
+          "computed": {
+            "noteCount": 26,
+            "minGapMsAtTop": 136.36,
+            "handShifts": 0,
+            "maxPlayableBpm": 400,
+            "difficulty": 5.3
+          },
+          "chords": ["E5", "E5"],
+          "harmony": {
+            "kind": "scale",
+            "root": "E",
+            "scale": "minorPentatonic",
+            "spelled": ["E", "G", "A", "B", "D"],
+            "cover": false
+          }
+        },
+        {
+          "id": "box-at-twelve.twelve-triplets",
+          "title": "The three-note repeat at fret 12",
+          "purpose": "E, D and B as triplets, over and over: the three-note repeat you learned in A, now in E. Then G, E, D, and home to E.",
+          "howTo": [
+            "Eighth-note triplets, three to a click, 60 BPM up to a pass at 90.",
+            "E at 12 on the high E and B at 12 on the B under one first finger, rolled from one string to the other, and D at 15 on the B with your fourth. Four times. Bar 2: G at 15, E at 12 on the high E, D at 15 on the B, twice, then the E held."
+          ],
+          "coachLine": "Written triplets: right notes, notes heard and timing after the take.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 2,
+          "loops": true,
+          "position": {
+            "fret": 12,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":1,"fret":12,"midi":76,"tick":0,"dur":320,"tech":[]},
+            {"string":2,"fret":15,"midi":74,"tick":320,"dur":320,"tech":[]},
+            {"string":2,"fret":12,"midi":71,"tick":640,"dur":320,"tech":[]},
+            {"string":1,"fret":12,"midi":76,"tick":960,"dur":320,"tech":[]},
+            {"string":2,"fret":15,"midi":74,"tick":1280,"dur":320,"tech":[]},
+            {"string":2,"fret":12,"midi":71,"tick":1600,"dur":320,"tech":[]},
+            {"string":1,"fret":12,"midi":76,"tick":1920,"dur":320,"tech":[]},
+            {"string":2,"fret":15,"midi":74,"tick":2240,"dur":320,"tech":[]},
+            {"string":2,"fret":12,"midi":71,"tick":2560,"dur":320,"tech":[]},
+            {"string":1,"fret":12,"midi":76,"tick":2880,"dur":320,"tech":[]},
+            {"string":2,"fret":15,"midi":74,"tick":3200,"dur":320,"tech":[]},
+            {"string":2,"fret":12,"midi":71,"tick":3520,"dur":320,"tech":[]},
+            {"string":1,"fret":15,"midi":79,"tick":3840,"dur":320,"tech":[]},
+            {"string":1,"fret":12,"midi":76,"tick":4160,"dur":320,"tech":[]},
+            {"string":2,"fret":15,"midi":74,"tick":4480,"dur":320,"tech":[]},
+            {"string":1,"fret":15,"midi":79,"tick":4800,"dur":320,"tech":[]},
+            {"string":1,"fret":12,"midi":76,"tick":5120,"dur":320,"tech":[]},
+            {"string":2,"fret":15,"midi":74,"tick":5440,"dur":320,"tech":[]},
+            {"string":1,"fret":12,"midi":76,"tick":5760,"dur":1920,"tech":[]}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":75,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"}
+            ],
+            "passAtBpm": 90
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["bandBleed"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "rockTwelveEight",
+            "feel": "straight",
+            "key": "E minor",
+            "chart": "E5 | E5"
+          },
+          "estimatedMinutes": 5,
+          "tab": "/8t 1:12 2:15 2:12 1:12 2:15 2:12 1:12 2:15 2:12 1:12 2:15 2:12 | /8t 1:15 1:12 2:15 1:15 1:12 2:15 /2 1:12",
+          "subdivision": "eighthTriplets",
+          "computed": {
+            "noteCount": 19,
+            "minGapMsAtTop": 181.82,
+            "handShifts": 0,
+            "maxPlayableBpm": 400,
+            "difficulty": 4.46
+          },
+          "chords": ["E5", "E5"],
+          "harmony": {
+            "kind": "scale",
+            "root": "E",
+            "scale": "minorPentatonic",
+            "spelled": ["E", "G", "A", "B", "D"],
+            "cover": false
+          }
+        },
+        {
+          "id": "box-at-twelve.twelve-extension",
+          "title": "Up to the extension at frets 15 and 17",
+          "purpose": "The lick from 'Up to the extension and back', in E. It leaves the box upwards on the top two strings, frets 15 and 17, and comes back home to E.",
+          "howTo": [
+            "Straight eighths, 70 BPM up to a pass at 100.",
+            "Bar 1: A on the G string at fret 14, then D and E on the B string (frets 15 and 17), G and A on the high E (15 and 17), and back down G, E, D. Bar 2: A and G on the high E, E and D on the B, then A and G on the G string (14 and 12) back in the box, and E at fret 14 on the D string.",
+            "First finger on fret 14 for the extension: frets 14, 15 and 17 lie under the first, second and fourth fingers. Move back to fret 12 for the last three notes of bar 2."
+          ],
+          "coachLine": "Right notes, notes heard and time after the take.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 2,
+          "loops": true,
+          "position": {
+            "fret": 14,
+            "shifts": "allowed"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":3,"fret":14,"midi":69,"tick":0,"dur":480,"tech":[]},
+            {"string":2,"fret":15,"midi":74,"tick":480,"dur":480,"tech":[]},
+            {"string":2,"fret":17,"midi":76,"tick":960,"dur":480,"tech":[]},
+            {"string":1,"fret":15,"midi":79,"tick":1440,"dur":480,"tech":[]},
+            {"string":1,"fret":17,"midi":81,"tick":1920,"dur":480,"tech":[]},
+            {"string":1,"fret":15,"midi":79,"tick":2400,"dur":480,"tech":[]},
+            {"string":2,"fret":17,"midi":76,"tick":2880,"dur":480,"tech":[]},
+            {"string":2,"fret":15,"midi":74,"tick":3360,"dur":480,"tech":[]},
+            {"string":1,"fret":17,"midi":81,"tick":3840,"dur":480,"tech":[]},
+            {"string":1,"fret":15,"midi":79,"tick":4320,"dur":480,"tech":[]},
+            {"string":2,"fret":17,"midi":76,"tick":4800,"dur":480,"tech":[]},
+            {"string":2,"fret":15,"midi":74,"tick":5280,"dur":480,"tech":[]},
+            {"string":3,"fret":14,"midi":69,"tick":5760,"dur":480,"tech":[]},
+            {"string":3,"fret":12,"midi":67,"tick":6240,"dur":480,"tech":[]},
+            {"string":4,"fret":14,"midi":64,"tick":6720,"dur":960,"tech":[]}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":70,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"},
+              {"bpm":120,"grading":"graded"}
+            ],
+            "passAtBpm": 100
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["bandBleed"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "rock8",
+            "feel": "straight",
+            "key": "E minor",
+            "chart": "E5 | E5"
+          },
+          "estimatedMinutes": 5,
+          "tab": "/8 3:14 2:15 2:17 1:15 1:17 1:15 2:17 2:15 | /8 1:17 1:15 2:17 2:15 3:14 3:12 /4 4:14",
+          "subdivision": "eighths",
+          "computed": {
+            "noteCount": 15,
+            "minGapMsAtTop": 250,
+            "handShifts": 2,
+            "maxPlayableBpm": 268,
+            "difficulty": 3.83
+          },
+          "chords": ["E5", "E5"],
+          "harmony": {
+            "kind": "scale",
+            "root": "E",
+            "scale": "minorPentatonic",
+            "spelled": ["E", "G", "A", "B", "D"],
+            "cover": false
+          }
+        }
+      ],
+      "difficultyException": "The licks of the Step before in a new place, without its sextuplet run, so the note rate is a little lower. The narrow frets at 12 are the demand."
+    },
+    {
+      "id": "major-pentatonic",
+      "order": 5,
       "title": "Major pentatonic, and minor against major",
       "goal": "Play A major pentatonic in two places on the neck, and hear the difference between minor and major lines over the same chord.",
       "why": "Minor pentatonic is the tough sound of rock; major pentatonic is the sweet, country-tinged sound of Southern rock and a lot of sixties pop. Over a power chord, which has no third, both work, and the choice between them is the choice of mood. Hearing that choice is the theory.",
@@ -1812,7 +2205,7 @@
         "Over A major, use major. Over A5 you choose."
       ],
       "payoff": "You can play the same phrase in minor and in major over one chord, and hear the mood flip.",
-      "prerequisites": ["box-extension"],
+      "prerequisites": ["box-at-twelve"],
       "difficulty": 2.96,
       "exercises": [
         {
@@ -2417,7 +2810,7 @@
     },
     {
       "id": "box-two",
-      "order": 5,
+      "order": 6,
       "title": "The next box up",
       "goal": "Play box 2 of A minor pentatonic across all six strings, and a line that climbs through box 1 into box 2 and comes home.",
       "why": "The extension at frets 8 and 10 was two strings of something bigger. The same five notes carry on up the neck in a second shape, box 2, which starts where box 1 ends. Nothing about the scale changes: A, C, D, E, G. What changes is which notes fall under which fingers, and that is why a lick played in box 2 does not sound like one played in box 1. Solos that go somewhere are made by moving between the two.",
@@ -2911,7 +3304,7 @@
     },
     {
       "id": "repeating-licks",
-      "order": 6,
+      "order": 7,
       "title": "Repeating licks",
       "goal": "Play the looping pull-off licks and open-string repeats of classic hard rock, in time, for as long as the band keeps going.",
       "why": "A short lick repeated in time builds tension like nothing else: the crowd hears it coming round again and again. Hard rock players of the seventies built whole solo climaxes this way. The lick is easy; keeping it even, and getting out of it cleanly, is the work.",
@@ -3527,7 +3920,7 @@
     },
     {
       "id": "double-stops",
-      "order": 7,
+      "order": 8,
       "title": "Double stops and rock and roll",
       "goal": "Play two-note double stops on the top strings in the fifties rock and roll style, mixed with single-note runs.",
       "why": "Two notes at once are louder, brighter and more urgent than one: rock and roll guitar is built on them. The shapes are small, a fret or two on the top strings, and the trick is rhythm: the double stop is a drum hit as much as a melody.",
@@ -3937,8 +4330,673 @@
       ]
     },
     {
+      "id": "double-stops-in-e",
+      "order": 9,
+      "title": "Double stops over E, A and B",
+      "goal": "Play rock and roll double stops in E over the one, four and five chords: a two-bar figure for each chord, then a twelve-bar chorus made of them.",
+      "why": "The double stops you learned were in A, and most of them sat over one chord. A twelve-bar rock and roll chorus has three: the one, the four and the five, which in E are E, A and B. Each chord has a double stop that belongs to it, and at the twelfth fret the three sit within a few frets of each other. Play the figures in the order of a twelve-bar chorus and you have a whole guitar part that follows the band, not a lick.",
+      "howTo": [
+        "Over E: first finger across the B and high E strings at fret 12, the shape you played at fret 5 in A. The G string adds frets 12, 13 and 14 under it.",
+        "Over A: the G and B strings at fret 14, which are A and C#. Over B: the same shape two frets higher, at fret 16, which is B and D#.",
+        "Mute the lower strings with the heel of the picking hand and hit only the two strings you want. Keep every double stop short and punchy except the held ones."
+      ],
+      "payoff": "Twelve bars of double stops that follow E, A and B: a rock and roll chorus.",
+      "prerequisites": ["double-stops"],
+      "difficulty": 9.03,
+      "exercises": [
+        {
+          "id": "double-stops-in-e.stops-on-e",
+          "title": "Over E: the barre at fret 12",
+          "purpose": "Two bars over E7. Bar 1 drives the double stop at fret 12 on the B and high E strings and jumps once to fret 15; bar 2 walks the G string under the B string and holds.",
+          "howTo": [
+            "Straight eighths, 80 BPM up to a pass at 120, over a rock beat.",
+            "Bar 1: fret 12 on the B and high E strings six times, fret 15 on the same two strings once, and fret 12 again. Bar 2: keep the B string at 12 and move the G string 13, 14, 13, 12, then 13 held.",
+            "First finger flat across the strings at fret 12, and second and third fingers for frets 13 and 14 on the G string. Play the fret 15 double stop with your third finger flat across the top two strings, or with your little finger if that holds both strings cleaner, then come straight back to the first finger at fret 12."
+          ],
+          "coachLine": "Two notes at once are one attack: timed and counted, not checked for pitch.",
+          "grading": "graded",
+          "feedback": "livePerNote",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 2,
+          "loops": true,
+          "position": {
+            "fret": 12,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":2,"fret":12,"midi":71,"tick":0,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":0,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":480,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":480,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":960,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":960,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":1440,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":1440,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":1920,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":1920,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":2400,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":2400,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":15,"midi":74,"tick":2880,"dur":480,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":2880,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":12,"midi":71,"tick":3360,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":3360,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":13,"midi":68,"tick":3840,"dur":480,"tech":[],"finger":2},
+            {"string":2,"fret":12,"midi":71,"tick":3840,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":4320,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":12,"midi":71,"tick":4320,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":13,"midi":68,"tick":4800,"dur":480,"tech":[],"finger":2},
+            {"string":2,"fret":12,"midi":71,"tick":4800,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":12,"midi":67,"tick":5280,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":5280,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":13,"midi":68,"tick":5760,"dur":1920,"tech":[],"finger":2},
+            {"string":2,"fret":12,"midi":71,"tick":5760,"dur":1920,"tech":[],"finger":1}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"},
+              {"bpm":120,"grading":"graded"},
+              {"bpm":130,"grading":"graded"},
+              {"bpm":140,"grading":"graded"}
+            ],
+            "passAtBpm": 120
+          },
+          "passBars": [
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            }
+          ],
+          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel",
+            "notesWritten"
+          ],
+          "detection": {
+            "flags": ["bandBleed"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "rock8",
+            "feel": "straight",
+            "key": "E",
+            "chart": "E7 | E7"
+          },
+          "estimatedMinutes": 5,
+          "tab": "/8 2:12f1+1:12f1 2:12f1+1:12f1 2:12f1+1:12f1 2:12f1+1:12f1 2:12f1+1:12f1 2:12f1+1:12f1 2:15f3+1:15f3 2:12f1+1:12f1 | /8 3:13f2+2:12f1 3:14f3+2:12f1 3:13f2+2:12f1 3:12f1+2:12f1 /2 3:13f2+2:12f1",
+          "subdivision": "eighths",
+          "computed": {
+            "noteCount": 26,
+            "minGapMsAtTop": 214.29,
+            "handShifts": 0,
+            "maxPlayableBpm": 400,
+            "difficulty": 9.05
+          },
+          "chords": ["E7", "E7"],
+          "harmony": {
+            "kind": "scaleOverChords",
+            "root": "E",
+            "scale": "minorPentatonic",
+            "spelled": ["E", "G", "A", "B", "D"],
+            "cover": false,
+            "allowed": ["G#", "C#", "D#"]
+          }
+        },
+        {
+          "id": "double-stops-in-e.stops-on-a",
+          "title": "Over A: fret 14 on the G and B strings",
+          "purpose": "Two bars over A7. The double stop is A and C#, the root and third of the chord, and the same shape two frets lower leans into it.",
+          "howTo": [
+            "Straight eighths, 80 BPM up to a pass at 120.",
+            "The G and B strings at the same fret, all the way. Bar 1: fret 14 six times, fret 12 once, fret 14 again. Bar 2: 14, 12, 14, 12, then 14 held.",
+            "Third finger flat across both strings at 14, first finger flat across them at 12. The first finger is where the E barre was: the hand has not moved."
+          ],
+          "coachLine": "Two notes at once are one attack: timed and counted, not checked for pitch.",
+          "grading": "graded",
+          "feedback": "livePerNote",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 2,
+          "loops": true,
+          "position": {
+            "fret": 12,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":3,"fret":14,"midi":69,"tick":0,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":0,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":480,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":480,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":960,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":960,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":1440,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":1440,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":1920,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":1920,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":2400,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":2400,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":12,"midi":67,"tick":2880,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":2880,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":3360,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":3360,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":3840,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":3840,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":12,"midi":67,"tick":4320,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":4320,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":4800,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":4800,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":12,"midi":67,"tick":5280,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":5280,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":5760,"dur":1920,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":5760,"dur":1920,"tech":[],"finger":3}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"},
+              {"bpm":120,"grading":"graded"},
+              {"bpm":130,"grading":"graded"},
+              {"bpm":140,"grading":"graded"}
+            ],
+            "passAtBpm": 120
+          },
+          "passBars": [
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            }
+          ],
+          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel",
+            "notesWritten"
+          ],
+          "detection": {
+            "flags": ["bandBleed"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "rock8",
+            "feel": "straight",
+            "key": "E",
+            "chart": "A7 | A7"
+          },
+          "estimatedMinutes": 5,
+          "tab": "/8 3:14f3+2:14f3 3:14f3+2:14f3 3:14f3+2:14f3 3:14f3+2:14f3 3:14f3+2:14f3 3:14f3+2:14f3 3:12f1+2:12f1 3:14f3+2:14f3 | /8 3:14f3+2:14f3 3:12f1+2:12f1 3:14f3+2:14f3 3:12f1+2:12f1 /2 3:14f3+2:14f3",
+          "subdivision": "eighths",
+          "computed": {
+            "noteCount": 26,
+            "minGapMsAtTop": 214.29,
+            "handShifts": 0,
+            "maxPlayableBpm": 400,
+            "difficulty": 9
+          },
+          "chords": ["A7", "A7"],
+          "harmony": {
+            "kind": "scaleOverChords",
+            "root": "E",
+            "scale": "minorPentatonic",
+            "spelled": ["E", "G", "A", "B", "D"],
+            "cover": false,
+            "allowed": ["G#", "C#", "D#"]
+          }
+        },
+        {
+          "id": "double-stops-in-e.stops-on-b",
+          "title": "Over B: the same shape at fret 16",
+          "purpose": "Two bars over B7: the A figure moved up two frets. The double stop is B and D#, and the one that leans into it is the A double stop you just played.",
+          "howTo": [
+            "Straight eighths, 80 BPM up to a pass at 120.",
+            "The G and B strings at the same fret, all the way. Bar 1: fret 16 six times, fret 14 once, fret 16 again. Bar 2: 16, 14, 16, 14, then 16 held.",
+            "Move the whole hand up two frets: third finger flat at 16, first finger flat at 14."
+          ],
+          "coachLine": "Two notes at once are one attack: timed and counted, not checked for pitch.",
+          "grading": "graded",
+          "feedback": "livePerNote",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 2,
+          "loops": true,
+          "position": {
+            "fret": 14,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":3,"fret":16,"midi":71,"tick":0,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":16,"midi":75,"tick":0,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":16,"midi":71,"tick":480,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":16,"midi":75,"tick":480,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":16,"midi":71,"tick":960,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":16,"midi":75,"tick":960,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":16,"midi":71,"tick":1440,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":16,"midi":75,"tick":1440,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":16,"midi":71,"tick":1920,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":16,"midi":75,"tick":1920,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":16,"midi":71,"tick":2400,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":16,"midi":75,"tick":2400,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":2880,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":14,"midi":73,"tick":2880,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":16,"midi":71,"tick":3360,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":16,"midi":75,"tick":3360,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":16,"midi":71,"tick":3840,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":16,"midi":75,"tick":3840,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":4320,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":14,"midi":73,"tick":4320,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":16,"midi":71,"tick":4800,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":16,"midi":75,"tick":4800,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":5280,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":14,"midi":73,"tick":5280,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":16,"midi":71,"tick":5760,"dur":1920,"tech":[],"finger":3},
+            {"string":2,"fret":16,"midi":75,"tick":5760,"dur":1920,"tech":[],"finger":3}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"},
+              {"bpm":120,"grading":"graded"},
+              {"bpm":130,"grading":"graded"},
+              {"bpm":140,"grading":"graded"}
+            ],
+            "passAtBpm": 120
+          },
+          "passBars": [
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            }
+          ],
+          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel",
+            "notesWritten"
+          ],
+          "detection": {
+            "flags": ["bandBleed"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "rock8",
+            "feel": "straight",
+            "key": "E",
+            "chart": "B7 | B7"
+          },
+          "estimatedMinutes": 5,
+          "tab": "/8 3:16f3+2:16f3 3:16f3+2:16f3 3:16f3+2:16f3 3:16f3+2:16f3 3:16f3+2:16f3 3:16f3+2:16f3 3:14f1+2:14f1 3:16f3+2:16f3 | /8 3:16f3+2:16f3 3:14f1+2:14f1 3:16f3+2:16f3 3:14f1+2:14f1 /2 3:16f3+2:16f3",
+          "subdivision": "eighths",
+          "computed": {
+            "noteCount": 26,
+            "minGapMsAtTop": 214.29,
+            "handShifts": 0,
+            "maxPlayableBpm": 400,
+            "difficulty": 9
+          },
+          "chords": ["B7", "B7"],
+          "harmony": {
+            "kind": "scaleOverChords",
+            "root": "E",
+            "scale": "minorPentatonic",
+            "spelled": ["E", "G", "A", "B", "D"],
+            "cover": false,
+            "allowed": ["G#", "C#", "D#"]
+          }
+        },
+        {
+          "id": "double-stops-in-e.stops-chorus",
+          "title": "A twelve-bar chorus in E",
+          "purpose": "The three figures in the order of a twelve-bar chorus: four bars of E, two of A, two of E, one of B, one of A, and two of E to finish.",
+          "howTo": [
+            "Straight eighths, 80 BPM up to a pass at 110, over a rock beat.",
+            "Bars 1 to 4: the E figure twice. Bars 5 and 6: the A figure. Bars 7 and 8: the E figure. Bar 9 is the first bar of the B figure, and bar 10 is the first bar of the A figure. Bars 11 and 12: the E figure, ending on its held double stop, G# and B, the third and fifth of the chord.",
+            "The whole hand moves only for bar 9, up two frets, and comes back for bar 10. In every other bar it stays where the first finger sits at fret 12."
+          ],
+          "coachLine": "Twelve bars of double stops: timed and counted, not checked for pitch.",
+          "grading": "graded",
+          "feedback": "livePerNote",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 12,
+          "loops": true,
+          "position": {
+            "fret": 12,
+            "shifts": "allowed"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":2,"fret":12,"midi":71,"tick":0,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":0,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":480,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":480,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":960,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":960,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":1440,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":1440,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":1920,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":1920,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":2400,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":2400,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":15,"midi":74,"tick":2880,"dur":480,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":2880,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":12,"midi":71,"tick":3360,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":3360,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":13,"midi":68,"tick":3840,"dur":480,"tech":[],"finger":2},
+            {"string":2,"fret":12,"midi":71,"tick":3840,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":4320,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":12,"midi":71,"tick":4320,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":13,"midi":68,"tick":4800,"dur":480,"tech":[],"finger":2},
+            {"string":2,"fret":12,"midi":71,"tick":4800,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":12,"midi":67,"tick":5280,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":5280,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":13,"midi":68,"tick":5760,"dur":1920,"tech":[],"finger":2},
+            {"string":2,"fret":12,"midi":71,"tick":5760,"dur":1920,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":7680,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":7680,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":8160,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":8160,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":8640,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":8640,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":9120,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":9120,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":9600,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":9600,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":10080,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":10080,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":15,"midi":74,"tick":10560,"dur":480,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":10560,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":12,"midi":71,"tick":11040,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":11040,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":13,"midi":68,"tick":11520,"dur":480,"tech":[],"finger":2},
+            {"string":2,"fret":12,"midi":71,"tick":11520,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":12000,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":12,"midi":71,"tick":12000,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":13,"midi":68,"tick":12480,"dur":480,"tech":[],"finger":2},
+            {"string":2,"fret":12,"midi":71,"tick":12480,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":12,"midi":67,"tick":12960,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":12960,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":13,"midi":68,"tick":13440,"dur":1920,"tech":[],"finger":2},
+            {"string":2,"fret":12,"midi":71,"tick":13440,"dur":1920,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":15360,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":15360,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":15840,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":15840,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":16320,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":16320,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":16800,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":16800,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":17280,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":17280,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":17760,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":17760,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":12,"midi":67,"tick":18240,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":18240,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":18720,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":18720,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":19200,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":19200,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":12,"midi":67,"tick":19680,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":19680,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":20160,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":20160,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":12,"midi":67,"tick":20640,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":20640,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":21120,"dur":1920,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":21120,"dur":1920,"tech":[],"finger":3},
+            {"string":2,"fret":12,"midi":71,"tick":23040,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":23040,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":23520,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":23520,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":24000,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":24000,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":24480,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":24480,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":24960,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":24960,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":25440,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":25440,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":15,"midi":74,"tick":25920,"dur":480,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":25920,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":12,"midi":71,"tick":26400,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":26400,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":13,"midi":68,"tick":26880,"dur":480,"tech":[],"finger":2},
+            {"string":2,"fret":12,"midi":71,"tick":26880,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":27360,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":12,"midi":71,"tick":27360,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":13,"midi":68,"tick":27840,"dur":480,"tech":[],"finger":2},
+            {"string":2,"fret":12,"midi":71,"tick":27840,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":12,"midi":67,"tick":28320,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":28320,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":13,"midi":68,"tick":28800,"dur":1920,"tech":[],"finger":2},
+            {"string":2,"fret":12,"midi":71,"tick":28800,"dur":1920,"tech":[],"finger":1},
+            {"string":3,"fret":16,"midi":71,"tick":30720,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":16,"midi":75,"tick":30720,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":16,"midi":71,"tick":31200,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":16,"midi":75,"tick":31200,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":16,"midi":71,"tick":31680,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":16,"midi":75,"tick":31680,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":16,"midi":71,"tick":32160,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":16,"midi":75,"tick":32160,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":16,"midi":71,"tick":32640,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":16,"midi":75,"tick":32640,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":16,"midi":71,"tick":33120,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":16,"midi":75,"tick":33120,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":33600,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":14,"midi":73,"tick":33600,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":16,"midi":71,"tick":34080,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":16,"midi":75,"tick":34080,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":34560,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":34560,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":35040,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":35040,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":35520,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":35520,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":36000,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":36000,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":36480,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":36480,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":36960,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":36960,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":12,"midi":67,"tick":37440,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":37440,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":37920,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":14,"midi":73,"tick":37920,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":12,"midi":71,"tick":38400,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":38400,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":38880,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":38880,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":39360,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":39360,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":39840,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":39840,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":40320,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":40320,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":40800,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":40800,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":15,"midi":74,"tick":41280,"dur":480,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":41280,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":12,"midi":71,"tick":41760,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":41760,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":13,"midi":68,"tick":42240,"dur":480,"tech":[],"finger":2},
+            {"string":2,"fret":12,"midi":71,"tick":42240,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":42720,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":12,"midi":71,"tick":42720,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":13,"midi":68,"tick":43200,"dur":480,"tech":[],"finger":2},
+            {"string":2,"fret":12,"midi":71,"tick":43200,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":12,"midi":67,"tick":43680,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":43680,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":13,"midi":68,"tick":44160,"dur":1920,"tech":[],"finger":2},
+            {"string":2,"fret":12,"midi":71,"tick":44160,"dur":1920,"tech":[],"finger":1}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":105,"grading":"graded"},
+              {"bpm":110,"grading":"graded"},
+              {"bpm":120,"grading":"graded"},
+              {"bpm":130,"grading":"graded"}
+            ],
+            "passAtBpm": 110
+          },
+          "passBars": [
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            }
+          ],
+          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel",
+            "notesWritten"
+          ],
+          "detection": {
+            "flags": ["bandBleed"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "rock8",
+            "feel": "straight",
+            "key": "E",
+            "chart": "E7 | E7 | E7 | E7 | A7 | A7 | E7 | E7 | B7 | A7 | E7 | E7"
+          },
+          "estimatedMinutes": 6,
+          "tab": "/8 2:12f1+1:12f1 2:12f1+1:12f1 2:12f1+1:12f1 2:12f1+1:12f1 2:12f1+1:12f1 2:12f1+1:12f1 2:15f3+1:15f3 2:12f1+1:12f1 | /8 3:13f2+2:12f1 3:14f3+2:12f1 3:13f2+2:12f1 3:12f1+2:12f1 /2 3:13f2+2:12f1 | /8 2:12f1+1:12f1 2:12f1+1:12f1 2:12f1+1:12f1 2:12f1+1:12f1 2:12f1+1:12f1 2:12f1+1:12f1 2:15f3+1:15f3 2:12f1+1:12f1 | /8 3:13f2+2:12f1 3:14f3+2:12f1 3:13f2+2:12f1 3:12f1+2:12f1 /2 3:13f2+2:12f1 | /8 3:14f3+2:14f3 3:14f3+2:14f3 3:14f3+2:14f3 3:14f3+2:14f3 3:14f3+2:14f3 3:14f3+2:14f3 3:12f1+2:12f1 3:14f3+2:14f3 | /8 3:14f3+2:14f3 3:12f1+2:12f1 3:14f3+2:14f3 3:12f1+2:12f1 /2 3:14f3+2:14f3 | /8 2:12f1+1:12f1 2:12f1+1:12f1 2:12f1+1:12f1 2:12f1+1:12f1 2:12f1+1:12f1 2:12f1+1:12f1 2:15f3+1:15f3 2:12f1+1:12f1 | /8 3:13f2+2:12f1 3:14f3+2:12f1 3:13f2+2:12f1 3:12f1+2:12f1 /2 3:13f2+2:12f1 | /8 3:16f3+2:16f3 3:16f3+2:16f3 3:16f3+2:16f3 3:16f3+2:16f3 3:16f3+2:16f3 3:16f3+2:16f3 3:14f1+2:14f1 3:16f3+2:16f3 | /8 3:14f3+2:14f3 3:14f3+2:14f3 3:14f3+2:14f3 3:14f3+2:14f3 3:14f3+2:14f3 3:14f3+2:14f3 3:12f1+2:12f1 3:14f3+2:14f3 | /8 2:12f1+1:12f1 2:12f1+1:12f1 2:12f1+1:12f1 2:12f1+1:12f1 2:12f1+1:12f1 2:12f1+1:12f1 2:15f3+1:15f3 2:12f1+1:12f1 | /8 3:13f2+2:12f1 3:14f3+2:12f1 3:13f2+2:12f1 3:12f1+2:12f1 /2 3:13f2+2:12f1",
+          "subdivision": "eighths",
+          "computed": {
+            "noteCount": 162,
+            "minGapMsAtTop": 230.77,
+            "handShifts": 0,
+            "maxPlayableBpm": 400,
+            "difficulty": 9.47
+          },
+          "chords": ["E7", "E7", "E7", "E7", "A7", "A7", "E7", "E7", "B7", "A7", "E7", "E7"],
+          "harmony": {
+            "kind": "scaleOverChords",
+            "root": "E",
+            "scale": "minorPentatonic",
+            "spelled": ["E", "G", "A", "B", "D"],
+            "cover": false,
+            "allowed": ["G#", "C#", "D#"]
+          }
+        }
+      ]
+    },
+    {
       "id": "embellishment",
-      "order": 8,
+      "order": 10,
       "title": "Chord embellishment",
       "goal": "Decorate an E and an A chord with hammered thirds and fills between the chord tones, the sixties rhythm-guitar style that sits between rhythm and lead.",
       "why": "The most melodic rock rhythm guitar never just strums: it hammers onto the chord's third, slides a double stop into the chord, and fills between the beats. It turns a chord into a little tune, and it is a lesson in where the chord tones live.",
@@ -3948,7 +5006,7 @@
         "Let notes ring into each other, and keep the time steady underneath."
       ],
       "payoff": "An E and an A that sing, with a fill between them, instead of two strummed chords.",
-      "prerequisites": ["double-stops"],
+      "prerequisites": ["double-stops-in-e"],
       "difficulty": 4.61,
       "exercises": [
         {
@@ -4326,7 +5384,7 @@
     },
     {
       "id": "chord-tones",
-      "order": 9,
+      "order": 11,
       "title": "Chord tones over A, G and D",
       "goal": "Play the triads of A, G and D one note at a time, and licks that end on each chord's root, over the I, flat VII, IV progression of classic rock.",
       "why": "A, G, D is the most common chord change in classic rock: I, flat VII, IV. The box works over it, and this is why: A, G and D are the roots, and the box holds all three. Knowing the triad under each bar lets a solo follow the changes instead of drifting over them.",
@@ -5317,8 +6375,489 @@
       "difficultyException": "The rate eases so the ear can follow a chord change every bar, which is the new demand here."
     },
     {
+      "id": "chord-tones-ade",
+      "order": 12,
+      "title": "Chord tones over A, D and E",
+      "goal": "Play the triads of A, D and E one note at a time, licks that end on each chord's root, and the three thirds as one slow line, over a one, four, five progression.",
+      "why": "You followed A, G and D: one, flat seven, four. The twelve-bar chorus you played in double stops uses one, four and five: in E that was E, A and B, and in A those chords are A, D and E. Two of the triads are ones you know. The new one is E, and its third, G#, is in neither A mixolydian nor the minor box: it is the note one fret below A, and it is what makes the five chord pull back home. The scale that holds all three triads is A major. Following these chords is the skill you already have, with one new note to hear.",
+      "howTo": [
+        "A is A, C#, E. D is D, F#, A. E is E, G#, B. The thirds are C#, F# and G#.",
+        "A major, A B C# D E F# G#, holds every note of all three chords. Licks in this Step use it.",
+        "End each lick on the root of the chord in that bar, and listen for it meeting the bass."
+      ],
+      "payoff": "A four-bar line that follows A, D, E and A, with the right third under every chord.",
+      "prerequisites": ["chord-tones"],
+      "difficulty": 4.17,
+      "exercises": [
+        {
+          "id": "chord-tones-ade.ade-arpeggios",
+          "title": "The A, D and E triads",
+          "purpose": "Each chord's three notes, up and down the top four strings, one bar each, then home to A. The E triad is the D shape two frets higher.",
+          "howTo": [
+            "Straight eighths, 70 BPM up to a pass at 100.",
+            "Bar 1, A: frets 7, 6, 5, 5 from the D string up to the high E, back down to the D string, and C# on the G string again. Bar 2, D: F# at 4 and A at 7 on the D string, D at 7 on the G, F# at 7 on the B, A at 5 on the high E, and back down to A on the D string. Bar 3, E: the same shape two frets higher, G# at 6 and B at 9 on the D string, E at 9 on the G, G# at 9 on the B, B at 7 on the high E, and back down to B on the D string. Bar 4: C#, E, A, E, and A on the D string held.",
+            "D and E are one shape: lay the third finger flat across the D, G and B strings, at fret 7 for D and fret 9 for E, and use the first finger for the two notes outside it. The first of those is three frets below the barre and the other is two, so let the hand move up a fret as the barre goes down."
+          ],
+          "coachLine": "Every note here is a chord tone: right notes and time after the take.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 4,
+          "loops": true,
+          "position": {
+            "fret": 5,
+            "shifts": "allowed"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":4,"fret":7,"midi":57,"tick":0,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":6,"midi":61,"tick":480,"dur":480,"tech":[],"finger":2},
+            {"string":2,"fret":5,"midi":64,"tick":960,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":5,"midi":69,"tick":1440,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":5,"midi":64,"tick":1920,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":6,"midi":61,"tick":2400,"dur":480,"tech":[],"finger":2},
+            {"string":4,"fret":7,"midi":57,"tick":2880,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":6,"midi":61,"tick":3360,"dur":480,"tech":[],"finger":2},
+            {"string":4,"fret":4,"midi":54,"tick":3840,"dur":480,"tech":[],"finger":1},
+            {"string":4,"fret":7,"midi":57,"tick":4320,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":7,"midi":62,"tick":4800,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":7,"midi":66,"tick":5280,"dur":480,"tech":[],"finger":3},
+            {"string":1,"fret":5,"midi":69,"tick":5760,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":7,"midi":66,"tick":6240,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":7,"midi":62,"tick":6720,"dur":480,"tech":[],"finger":3},
+            {"string":4,"fret":7,"midi":57,"tick":7200,"dur":480,"tech":[],"finger":3},
+            {"string":4,"fret":6,"midi":56,"tick":7680,"dur":480,"tech":[],"finger":1},
+            {"string":4,"fret":9,"midi":59,"tick":8160,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":9,"midi":64,"tick":8640,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":9,"midi":68,"tick":9120,"dur":480,"tech":[],"finger":3},
+            {"string":1,"fret":7,"midi":71,"tick":9600,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":9,"midi":68,"tick":10080,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":9,"midi":64,"tick":10560,"dur":480,"tech":[],"finger":3},
+            {"string":4,"fret":9,"midi":59,"tick":11040,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":6,"midi":61,"tick":11520,"dur":480,"tech":[],"finger":2},
+            {"string":2,"fret":5,"midi":64,"tick":12000,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":5,"midi":69,"tick":12480,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":5,"midi":64,"tick":12960,"dur":480,"tech":[],"finger":1},
+            {"string":4,"fret":7,"midi":57,"tick":13440,"dur":1920,"tech":[],"finger":3}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":70,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"},
+              {"bpm":120,"grading":"graded"}
+            ],
+            "passAtBpm": 100
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.75,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["bandBleed"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "rock8",
+            "feel": "straight",
+            "key": "A",
+            "chart": "A | D | E | A"
+          },
+          "estimatedMinutes": 5,
+          "tab": "/8 4:7f3 3:6f2 2:5f1 1:5f1 2:5f1 3:6f2 4:7f3 3:6f2 | /8 4:4f1 4:7f3 3:7f3 2:7f3 1:5f1 2:7f3 3:7f3 4:7f3 | /8 4:6f1 4:9f3 3:9f3 2:9f3 1:7f1 2:9f3 3:9f3 4:9f3 | /8 3:6f2 2:5f1 1:5f1 2:5f1 /2 4:7f3",
+          "subdivision": "eighths",
+          "computed": {
+            "noteCount": 29,
+            "minGapMsAtTop": 250,
+            "handShifts": 3,
+            "maxPlayableBpm": 236,
+            "difficulty": 5.68
+          },
+          "chords": ["A", "D", "E", "A"],
+          "harmony": {
+            "kind": "chordTones",
+            "cover": false
+          }
+        },
+        {
+          "id": "chord-tones-ade.ade-roots",
+          "title": "A lick to each root, over A, D and E",
+          "purpose": "Four short licks, one a chord, each ending on that chord's root: A, D, E and A. All four sit under one hand at fret 4.",
+          "howTo": [
+            "Straight eighths, then a half note, 70 BPM up to a pass at 100.",
+            "A: E, C#, B, G#, then A on the D string at fret 7. D: A, F#, E, C#, then D on the G string at fret 7. E: G#, E, B, G#, then E on the A string at fret 7. A: C#, E, F#, G#, then A on the high E string at fret 5.",
+            "First finger on fret 4 and one finger to a fret: frets 4, 5, 6 and 7. The hand doesn't move.",
+            "In bars 1, 2 and 4 the last eighth note is one fret below the root it leads to, on the same string."
+          ],
+          "coachLine": "Written notes over the changes: right notes and time after the take.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 4,
+          "loops": true,
+          "position": {
+            "fret": 4,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":2,"fret":5,"midi":64,"tick":0,"dur":480,"tech":[]},
+            {"string":3,"fret":6,"midi":61,"tick":480,"dur":480,"tech":[]},
+            {"string":3,"fret":4,"midi":59,"tick":960,"dur":480,"tech":[]},
+            {"string":4,"fret":6,"midi":56,"tick":1440,"dur":480,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":1920,"dur":1920,"tech":[]},
+            {"string":1,"fret":5,"midi":69,"tick":3840,"dur":480,"tech":[]},
+            {"string":2,"fret":7,"midi":66,"tick":4320,"dur":480,"tech":[]},
+            {"string":2,"fret":5,"midi":64,"tick":4800,"dur":480,"tech":[]},
+            {"string":3,"fret":6,"midi":61,"tick":5280,"dur":480,"tech":[]},
+            {"string":3,"fret":7,"midi":62,"tick":5760,"dur":1920,"tech":[]},
+            {"string":1,"fret":4,"midi":68,"tick":7680,"dur":480,"tech":[]},
+            {"string":2,"fret":5,"midi":64,"tick":8160,"dur":480,"tech":[]},
+            {"string":3,"fret":4,"midi":59,"tick":8640,"dur":480,"tech":[]},
+            {"string":4,"fret":6,"midi":56,"tick":9120,"dur":480,"tech":[]},
+            {"string":5,"fret":7,"midi":52,"tick":9600,"dur":1920,"tech":[]},
+            {"string":3,"fret":6,"midi":61,"tick":11520,"dur":480,"tech":[]},
+            {"string":2,"fret":5,"midi":64,"tick":12000,"dur":480,"tech":[]},
+            {"string":2,"fret":7,"midi":66,"tick":12480,"dur":480,"tech":[]},
+            {"string":1,"fret":4,"midi":68,"tick":12960,"dur":480,"tech":[]},
+            {"string":1,"fret":5,"midi":69,"tick":13440,"dur":1920,"tech":[]}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":70,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"},
+              {"bpm":120,"grading":"graded"}
+            ],
+            "passAtBpm": 100
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.75,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["bandBleed"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "rock8",
+            "feel": "straight",
+            "key": "A",
+            "chart": "A | D | E | A"
+          },
+          "estimatedMinutes": 5,
+          "tab": "/8 2:5 3:6 3:4 4:6 /2 4:7 | /8 1:5 2:7 2:5 3:6 /2 3:7 | /8 1:4 2:5 3:4 4:6 /2 5:7 | /8 3:6 2:5 2:7 1:4 /2 1:5",
+          "subdivision": "eighths",
+          "computed": {
+            "noteCount": 20,
+            "minGapMsAtTop": 250,
+            "handShifts": 0,
+            "maxPlayableBpm": 278,
+            "difficulty": 4.19
+          },
+          "chords": ["A", "D", "E", "A"],
+          "harmony": {
+            "kind": "scaleOverChords",
+            "root": "A",
+            "scale": "major",
+            "spelled": ["A", "B", "C#", "D", "E", "F#", "G#"],
+            "cover": false,
+            "allowed": []
+          }
+        },
+        {
+          "id": "chord-tones-ade.ade-thirds",
+          "title": "The thirds: C#, F#, G#",
+          "purpose": "One note a bar, the third of each chord: C# over A, F# over D, G# over E, and C# again. When the band goes from D up to E, the third goes up two frets with it.",
+          "howTo": [
+            "Whole notes, one a bar, 60 BPM up to a pass at 80.",
+            "C# at 6 on the G string, F# at 7 on the B string, G# at 9 on the B string, C# again. Listen for each one making its chord major.",
+            "First finger on fret 6, second on fret 7, fourth on fret 9."
+          ],
+          "coachLine": "Four notes, each the third of its chord: right notes and time after the take.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 4,
+          "loops": true,
+          "position": {
+            "fret": 6,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":3,"fret":6,"midi":61,"tick":0,"dur":3840,"tech":[]},
+            {"string":2,"fret":7,"midi":66,"tick":3840,"dur":3840,"tech":[]},
+            {"string":2,"fret":9,"midi":68,"tick":7680,"dur":3840,"tech":[]},
+            {"string":3,"fret":6,"midi":61,"tick":11520,"dur":3840,"tech":[]}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":60,"grading":"graded"},
+              {"bpm":65,"grading":"graded"},
+              {"bpm":75,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":100,"grading":"graded"}
+            ],
+            "passAtBpm": 80
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.75,
+              "overBars": 4
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["bandBleed"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "rock8",
+            "feel": "straight",
+            "key": "A",
+            "chart": "A | D | E | A"
+          },
+          "estimatedMinutes": 3,
+          "tab": "/1 3:6 | 2:7 | 2:9 | 3:6",
+          "subdivision": "wholes",
+          "computed": {
+            "noteCount": 4,
+            "minGapMsAtTop": 2400,
+            "handShifts": 0,
+            "maxPlayableBpm": 400,
+            "difficulty": 1.9
+          },
+          "chords": ["A", "D", "E", "A"],
+          "harmony": {
+            "kind": "chordTones",
+            "cover": false
+          }
+        },
+        {
+          "id": "chord-tones-ade.ade-your-turn",
+          "title": "Your turn: land on each root, over A, D and E",
+          "purpose": "Over A, D, E, A, make up a lick in each bar that finishes on that chord's root, or on its third once you can hear it coming.",
+          "howTo": [
+            "Straight eighths, 70 to 100 BPM.",
+            "Use A major. Over E, try landing on G#, the third of the chord: it is the one note of A major that A mixolydian doesn't have. The written licks are an example of how it could go.",
+            "Your turn, and not checked yet: the app can't judge notes you choose, so you tick it off yourself."
+          ],
+          "coachLine": "Not checked yet. Record it and listen to the end of each bar.",
+          "grading": "selfChecked",
+          "feedback": "none",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 4,
+          "loops": true,
+          "position": {
+            "fret": 4,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "example",
+          "notes": [
+            {"string":2,"fret":5,"midi":64,"tick":0,"dur":480,"tech":[]},
+            {"string":3,"fret":6,"midi":61,"tick":480,"dur":480,"tech":[]},
+            {"string":3,"fret":4,"midi":59,"tick":960,"dur":480,"tech":[]},
+            {"string":4,"fret":6,"midi":56,"tick":1440,"dur":480,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":1920,"dur":1920,"tech":[]},
+            {"string":1,"fret":5,"midi":69,"tick":3840,"dur":480,"tech":[]},
+            {"string":2,"fret":7,"midi":66,"tick":4320,"dur":480,"tech":[]},
+            {"string":2,"fret":5,"midi":64,"tick":4800,"dur":480,"tech":[]},
+            {"string":3,"fret":6,"midi":61,"tick":5280,"dur":480,"tech":[]},
+            {"string":3,"fret":7,"midi":62,"tick":5760,"dur":1920,"tech":[]},
+            {"string":1,"fret":4,"midi":68,"tick":7680,"dur":480,"tech":[]},
+            {"string":2,"fret":5,"midi":64,"tick":8160,"dur":480,"tech":[]},
+            {"string":3,"fret":4,"midi":59,"tick":8640,"dur":480,"tech":[]},
+            {"string":4,"fret":6,"midi":56,"tick":9120,"dur":480,"tech":[]},
+            {"string":5,"fret":7,"midi":52,"tick":9600,"dur":1920,"tech":[]},
+            {"string":3,"fret":6,"midi":61,"tick":11520,"dur":480,"tech":[]},
+            {"string":2,"fret":5,"midi":64,"tick":12000,"dur":480,"tech":[]},
+            {"string":2,"fret":7,"midi":66,"tick":12480,"dur":480,"tech":[]},
+            {"string":1,"fret":4,"midi":68,"tick":12960,"dur":480,"tech":[]},
+            {"string":1,"fret":5,"midi":69,"tick":13440,"dur":1920,"tech":[]}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":70,"grading":"selfChecked"},
+              {"bpm":80,"grading":"selfChecked"},
+              {"bpm":90,"grading":"selfChecked"},
+              {"bpm":100,"grading":"selfChecked"}
+            ],
+            "passAtBpm": null
+          },
+          "passBars": [],
+          "graded": [],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel",
+            "noteChoice",
+            "notesWritten"
+          ],
+          "detection": {
+            "flags": ["bandBleed"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "rock8",
+            "feel": "straight",
+            "key": "A",
+            "chart": "A | D | E | A"
+          },
+          "estimatedMinutes": 4,
+          "tab": "/8 2:5 3:6 3:4 4:6 /2 4:7 | /8 1:5 2:7 2:5 3:6 /2 3:7 | /8 1:4 2:5 3:4 4:6 /2 5:7 | /8 3:6 2:5 2:7 1:4 /2 1:5",
+          "subdivision": "eighths",
+          "computed": {
+            "noteCount": 20,
+            "minGapMsAtTop": 300,
+            "handShifts": 0,
+            "maxPlayableBpm": 278,
+            "difficulty": 4.15
+          },
+          "chords": ["A", "D", "E", "A"],
+          "selfCheck": [
+            "Did each bar end on its chord's root or third?",
+            "Could you hear the E bar pulling back to A?"
+          ]
+        }
+      ]
+    },
+    {
       "id": "melody",
-      "order": 10,
+      "order": 13,
       "title": "Phrasing a slow melody",
       "goal": "Play a slow, long-note melody over a ballad, in the style of the great melodic soloists, with every note placed and held.",
       "why": "The most memorable rock solos are melodies you can sing, with few notes, each one held, bent and shaken. Playing slowly is harder than playing fast: every note is exposed, and the gaps are as loud as the notes. This Step is about choosing to play less.",
@@ -5328,7 +6867,7 @@
         "A bend is a vocal slide: it should arrive at its pitch and stay there. Your ear judges it; the app doesn't measure bends."
       ],
       "payoff": "Four bars that someone could hum after hearing them once.",
-      "prerequisites": ["chord-tones"],
+      "prerequisites": ["chord-tones-ade"],
       "difficulty": 2.27,
       "exercises": [
         {
@@ -5662,7 +7201,7 @@
     },
     {
       "id": "call-response",
-      "order": 11,
+      "order": 14,
       "title": "Call and response with the band",
       "goal": "Answer a riff or a lick with a written reply, in time with a rock groove.",
       "why": "Rock solos talk to the riff: the riff states something and the guitar answers it, or one lick asks and the next replies. Answering in time, with the right length and the right ending, is what makes a solo sound like part of the song and not something laid on top of it.",
@@ -6199,7 +7738,7 @@
     },
     {
       "id": "climax",
-      "order": 12,
+      "order": 15,
       "title": "Building to a peak",
       "goal": "Play the fast runs and repeating licks a rock solo peaks on, in sixteenths at tempo, and come out of them on a long note.",
       "why": "A solo needs somewhere to go. After the melody and the conversation comes the part where the notes get fast, and in classic rock that part is nearly always the same few moves: a run up the box, a lick that repeats, a tumble down in pull-offs. They work because they stop, on one long note.",
@@ -6928,8 +8467,690 @@
       ]
     },
     {
+      "id": "solo-in-e",
+      "order": 16,
+      "title": "A second solo: twelve bars in E",
+      "goal": "Play a twelve-bar written solo in E minor with the band, from the open strings to the seventeenth fret, then play twelve bars of your own.",
+      "why": "A solo goes somewhere, and this one goes a long way. It opens in box 1 at the twelfth fret, answers itself with the open-string riff at the nut, climbs back through box 1 into box 2, peaks on a repeating lick and stops on one held note. Every part of it is something you have played in another Step, or close to it. What is new is getting from one part to the next in time, while the band keeps going.",
+      "howTo": [
+        "Learn it in halves, then join them. Bars 1 to 6 are over E5 and A5. Bars 7 to 12 start back on E5, pass through B5 and A5, and end on E5.",
+        "Three places for the hand: first finger at fret 12 for box 1, the nut for the riff in bars 3 and 4, and box 2 from the middle of bar 7, where the first finger sits at fret 14 on the D and G strings and at fret 15 on the top two.",
+        "The two long moves are made on open strings. The riff starts with two open low E's and ends on one: travel while they sound."
+      ],
+      "payoff": "Twelve bars that start in the box at the twelfth fret, go down to the nut and finish at the seventeenth fret, played with a band.",
+      "prerequisites": ["climax"],
+      "difficulty": 4.14,
+      "exercises": [
+        {
+          "id": "solo-in-e.e-solo-a",
+          "title": "The solo, bars 1 to 6",
+          "purpose": "The first half: a phrase up and down box 1 at fret 12, the open-string riff as its answer, then sixteenths over A5 that come to rest on A.",
+          "howTo": [
+            "Straight eighths and sixteenths, 60 BPM up to a pass at 85.",
+            "Bar 1 climbs E, G, A, B, D, E in box 1. Bar 2 comes back down: E, D, B, A, G, E. Bars 3 and 4 are the root line from 'The same riffs in E' at the nut, with a new ending on the open low E. Bar 5 is back at fret 12: two four-note groups of the sixteenth run, then A, B, D. Bar 6: E, D, B, and A on the G string at fret 14, held.",
+            "Bar 3 starts with two open notes, so the hand can leave fret 14 and be at the nut in time for the G at fret 3. Go back up during the open E that ends bar 4.",
+            "At the nut: third finger on fret 3, second finger on fret 2, as in 'The root line in E'. Mute the open low E's with the side of the picking hand as you did there, all but the last one, which rings for a full beat."
+          ],
+          "coachLine": "Written notes: right notes, notes heard and time over the six bars, after the take.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 6,
+          "loops": true,
+          "position": {
+            "fret": 12,
+            "shifts": "allowed"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":4,"fret":14,"midi":64,"tick":0,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":12,"midi":67,"tick":480,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":960,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":12,"midi":71,"tick":1440,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":15,"midi":74,"tick":1920,"dur":960,"tech":[],"finger":4},
+            {"string":1,"fret":12,"midi":76,"tick":2880,"dur":960,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":3840,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":15,"midi":74,"tick":4320,"dur":480,"tech":[],"finger":4},
+            {"string":2,"fret":12,"midi":71,"tick":4800,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":5280,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":12,"midi":67,"tick":5760,"dur":960,"tech":[],"finger":1},
+            {"string":4,"fret":14,"midi":64,"tick":6720,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":0,"midi":40,"tick":7680,"dur":480,"tech":["palmMute"]},
+            {"string":6,"fret":0,"midi":40,"tick":8160,"dur":480,"tech":["palmMute"]},
+            {"string":6,"fret":3,"midi":43,"tick":8640,"dur":480,"tech":[],"finger":3},
+            {"string":6,"fret":0,"midi":40,"tick":9120,"dur":480,"tech":["palmMute"]},
+            {"string":5,"fret":0,"midi":45,"tick":9600,"dur":480,"tech":[]},
+            {"string":6,"fret":0,"midi":40,"tick":10080,"dur":480,"tech":["palmMute"]},
+            {"string":6,"fret":3,"midi":43,"tick":10560,"dur":480,"tech":[],"finger":3},
+            {"string":6,"fret":2,"midi":42,"tick":11040,"dur":480,"tech":[],"finger":2},
+            {"string":6,"fret":0,"midi":40,"tick":11520,"dur":480,"tech":["palmMute"]},
+            {"string":6,"fret":0,"midi":40,"tick":12000,"dur":480,"tech":["palmMute"]},
+            {"string":5,"fret":2,"midi":47,"tick":12480,"dur":480,"tech":[],"finger":2},
+            {"string":5,"fret":0,"midi":45,"tick":12960,"dur":480,"tech":[]},
+            {"string":6,"fret":3,"midi":43,"tick":13440,"dur":480,"tech":[],"finger":3},
+            {"string":6,"fret":2,"midi":42,"tick":13920,"dur":480,"tech":[],"finger":2},
+            {"string":6,"fret":0,"midi":40,"tick":14400,"dur":960,"tech":[]},
+            {"string":1,"fret":12,"midi":76,"tick":15360,"dur":240,"tech":[],"finger":1},
+            {"string":2,"fret":15,"midi":74,"tick":15600,"dur":240,"tech":[],"finger":4},
+            {"string":2,"fret":12,"midi":71,"tick":15840,"dur":240,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":16080,"dur":240,"tech":[],"finger":3},
+            {"string":2,"fret":15,"midi":74,"tick":16320,"dur":240,"tech":[],"finger":4},
+            {"string":2,"fret":12,"midi":71,"tick":16560,"dur":240,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":16800,"dur":240,"tech":[],"finger":3},
+            {"string":3,"fret":12,"midi":67,"tick":17040,"dur":240,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":17280,"dur":960,"tech":[],"finger":3},
+            {"string":2,"fret":12,"midi":71,"tick":18240,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":15,"midi":74,"tick":18720,"dur":480,"tech":[],"finger":4},
+            {"string":1,"fret":12,"midi":76,"tick":19200,"dur":960,"tech":[],"finger":1},
+            {"string":2,"fret":15,"midi":74,"tick":20160,"dur":480,"tech":[],"finger":4},
+            {"string":2,"fret":12,"midi":71,"tick":20640,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":21120,"dur":1920,"tech":["vibrato"],"finger":3}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":60,"grading":"graded"},
+              {"bpm":65,"grading":"graded"},
+              {"bpm":75,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":100,"grading":"graded"}
+            ],
+            "passAtBpm": 85
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 6
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 6
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.75,
+              "overBars": 6
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel",
+            "vibrato"
+          ],
+          "detection": {
+            "flags": ["bandBleed", "fastPicking"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested.",
+              "At this speed a real rig's input delay can push notes out of their matching window, which reads as late or missed. Evenness is the number to trust here, and only once the delay is calibrated."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "rock8",
+            "feel": "straight",
+            "key": "E minor",
+            "chart": "E5 | E5 | E5 | E5 | A5 | A5"
+          },
+          "estimatedMinutes": 6,
+          "tab": "/8 4:14f3 3:12f1 3:14f3 2:12f1 /4 2:15f4 1:12f1 | /8 1:12f1 2:15f4 2:12f1 3:14f3 /4 3:12f1 4:14f3 | /8 6:0m 6:0m 6:3f3 6:0m 5:0 6:0m 6:3f3 6:2f2 | /8 6:0m 6:0m 5:2f2 5:0 6:3f3 6:2f2 /4 6:0 | /16 1:12f1 2:15f4 2:12f1 3:14f3 2:15f4 2:12f1 3:14f3 3:12f1 /4 3:14f3 /8 2:12f1 2:15f4 | /4 1:12f1 /8 2:15f4 2:12f1 /2 3:14f3v",
+          "computed": {
+            "noteCount": 42,
+            "minGapMsAtTop": 150,
+            "handShifts": 6,
+            "maxPlayableBpm": 400,
+            "difficulty": 3.41
+          },
+          "chords": ["E5", "E5", "E5", "E5", "A5", "A5"],
+          "harmony": {
+            "kind": "scaleOverChords",
+            "root": "E",
+            "scale": "minorPentatonic",
+            "spelled": ["E", "G", "A", "B", "D"],
+            "cover": false,
+            "allowed": ["F#"]
+          }
+        },
+        {
+          "id": "solo-in-e.e-solo-b",
+          "title": "The solo, bars 7 to 12",
+          "purpose": "The second half: the opening again, and this time it keeps climbing into box 2; a dip down box 2 over B5; the repeating lick over A5 and E5; and an E at fret 17, on the B string, held to the end.",
+          "howTo": [
+            "Straight eighths and sixteenths, 60 BPM up to a pass at 85.",
+            "Bar 7: E, G, A as in bar 1, then B at fret 16 on the G string and on up box 2 to the top string: D, E, A, and back to G. Bar 8: E, G, A, and G held. Bar 9: B, A, G, E down box 2, then A and B as quarter notes. Bars 10 and 11: the four-note lick, E, G, A and a pull-off back to G, six times, then A and G as quarter notes. Bar 12: E on the B string at fret 17 for the whole bar.",
+            "In bar 7 the first finger plays G at fret 12 and then A at fret 14, where bar 1 used the third finger: that move of two frets puts the hand in box 2. From there on, whenever the line is on the D and G strings, the first finger is at fret 14.",
+            "On the top two strings the first finger sits at 15, with the third finger on the B string at 17 and the little finger on the top string at 17: the same three fingers as the repeating lick in 'Building to a peak', with the first finger two frets below the other two where there it was three."
+          ],
+          "coachLine": "The picked notes are checked for pitch and time. A pull-off counts only if it is heard.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 6,
+          "loops": true,
+          "position": {
+            "fret": 12,
+            "shifts": "allowed"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":4,"fret":14,"midi":64,"tick":0,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":12,"midi":67,"tick":480,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":960,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":16,"midi":71,"tick":1440,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":15,"midi":74,"tick":1920,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":17,"midi":76,"tick":2400,"dur":480,"tech":[],"finger":3},
+            {"string":1,"fret":17,"midi":81,"tick":2880,"dur":480,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":3360,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":17,"midi":76,"tick":3840,"dur":960,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":4800,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":5280,"dur":480,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":5760,"dur":1920,"tech":["vibrato"],"finger":1},
+            {"string":3,"fret":16,"midi":71,"tick":7680,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":8160,"dur":480,"tech":[],"finger":1},
+            {"string":4,"fret":17,"midi":67,"tick":8640,"dur":480,"tech":[],"finger":4},
+            {"string":4,"fret":14,"midi":64,"tick":9120,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":9600,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":16,"midi":71,"tick":10560,"dur":960,"tech":[],"finger":3},
+            {"string":2,"fret":17,"midi":76,"tick":11520,"dur":240,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":11760,"dur":240,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":12000,"dur":240,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":12240,"dur":240,"tech":["pull"]},
+            {"string":2,"fret":17,"midi":76,"tick":12480,"dur":240,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":12720,"dur":240,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":12960,"dur":240,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":13200,"dur":240,"tech":["pull"]},
+            {"string":2,"fret":17,"midi":76,"tick":13440,"dur":240,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":13680,"dur":240,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":13920,"dur":240,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":14160,"dur":240,"tech":["pull"]},
+            {"string":2,"fret":17,"midi":76,"tick":14400,"dur":240,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":14640,"dur":240,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":14880,"dur":240,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":15120,"dur":240,"tech":["pull"]},
+            {"string":2,"fret":17,"midi":76,"tick":15360,"dur":240,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":15600,"dur":240,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":15840,"dur":240,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":16080,"dur":240,"tech":["pull"]},
+            {"string":2,"fret":17,"midi":76,"tick":16320,"dur":240,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":16560,"dur":240,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":16800,"dur":240,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":17040,"dur":240,"tech":["pull"]},
+            {"string":1,"fret":17,"midi":81,"tick":17280,"dur":960,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":18240,"dur":960,"tech":[],"finger":1},
+            {"string":2,"fret":17,"midi":76,"tick":19200,"dur":3840,"tech":["vibrato"],"finger":3}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":60,"grading":"graded"},
+              {"bpm":65,"grading":"graded"},
+              {"bpm":75,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":100,"grading":"graded"}
+            ],
+            "passAtBpm": 85
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 6
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 6
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.75,
+              "overBars": 6
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel",
+            "vibrato"
+          ],
+          "detection": {
+            "flags": ["softLegato", "bandBleed", "fastPicking"],
+            "notes": [
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it.",
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested.",
+              "At this speed a real rig's input delay can push notes out of their matching window, which reads as late or missed. Evenness is the number to trust here, and only once the delay is calibrated."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "rock8",
+            "feel": "straight",
+            "key": "E minor",
+            "chart": "E5 | E5 | B5 | A5 | E5 | E5"
+          },
+          "estimatedMinutes": 6,
+          "tab": "/8 4:14f3 3:12f1 3:14f1 3:16f3 2:15f1 2:17f3 1:17f4 1:15f1 | /4 2:17f3 /8 1:15f1 1:17f4 /2 1:15f1v | /8 3:16f3 3:14f1 4:17f4 4:14f1 /4 3:14f1 3:16f3 | /16 2:17f3 1:15f1 1:17f4 1:15p 2:17f3 1:15f1 1:17f4 1:15p 2:17f3 1:15f1 1:17f4 1:15p 2:17f3 1:15f1 1:17f4 1:15p | /16 2:17f3 1:15f1 1:17f4 1:15p 2:17f3 1:15f1 1:17f4 1:15p /4 1:17f4 1:15f1 | /1 2:17f3v",
+          "subdivision": "sixteenths",
+          "computed": {
+            "noteCount": 45,
+            "minGapMsAtTop": 150,
+            "handShifts": 0,
+            "maxPlayableBpm": 268,
+            "difficulty": 4.56
+          },
+          "chords": ["E5", "E5", "B5", "A5", "E5", "E5"],
+          "harmony": {
+            "kind": "scaleOverChords",
+            "root": "E",
+            "scale": "minorPentatonic",
+            "spelled": ["E", "G", "A", "B", "D"],
+            "cover": false,
+            "allowed": ["F#"]
+          }
+        },
+        {
+          "id": "solo-in-e.e-solo",
+          "title": "The whole solo in E, with the band",
+          "purpose": "All twelve bars, start to finish, with the band: the twelfth fret, the nut, box 2, the peak and the held note.",
+          "howTo": [
+            "Straight eighths and sixteenths, 60 BPM up to a pass at 85.",
+            "Join the halves without a gap: bar 6 holds A on the G string at fret 14, and bar 7 starts on E at the same fret, one string lower. The held notes in bars 6, 8 and 12 carry vibrato. Bar 12 is one long note: breathe, and go round again."
+          ],
+          "coachLine": "All twelve bars are checked for right notes, notes heard and time after the take.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 12,
+          "loops": true,
+          "position": {
+            "fret": 12,
+            "shifts": "allowed"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":4,"fret":14,"midi":64,"tick":0,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":12,"midi":67,"tick":480,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":960,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":12,"midi":71,"tick":1440,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":15,"midi":74,"tick":1920,"dur":960,"tech":[],"finger":4},
+            {"string":1,"fret":12,"midi":76,"tick":2880,"dur":960,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":3840,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":15,"midi":74,"tick":4320,"dur":480,"tech":[],"finger":4},
+            {"string":2,"fret":12,"midi":71,"tick":4800,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":5280,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":12,"midi":67,"tick":5760,"dur":960,"tech":[],"finger":1},
+            {"string":4,"fret":14,"midi":64,"tick":6720,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":0,"midi":40,"tick":7680,"dur":480,"tech":["palmMute"]},
+            {"string":6,"fret":0,"midi":40,"tick":8160,"dur":480,"tech":["palmMute"]},
+            {"string":6,"fret":3,"midi":43,"tick":8640,"dur":480,"tech":[],"finger":3},
+            {"string":6,"fret":0,"midi":40,"tick":9120,"dur":480,"tech":["palmMute"]},
+            {"string":5,"fret":0,"midi":45,"tick":9600,"dur":480,"tech":[]},
+            {"string":6,"fret":0,"midi":40,"tick":10080,"dur":480,"tech":["palmMute"]},
+            {"string":6,"fret":3,"midi":43,"tick":10560,"dur":480,"tech":[],"finger":3},
+            {"string":6,"fret":2,"midi":42,"tick":11040,"dur":480,"tech":[],"finger":2},
+            {"string":6,"fret":0,"midi":40,"tick":11520,"dur":480,"tech":["palmMute"]},
+            {"string":6,"fret":0,"midi":40,"tick":12000,"dur":480,"tech":["palmMute"]},
+            {"string":5,"fret":2,"midi":47,"tick":12480,"dur":480,"tech":[],"finger":2},
+            {"string":5,"fret":0,"midi":45,"tick":12960,"dur":480,"tech":[]},
+            {"string":6,"fret":3,"midi":43,"tick":13440,"dur":480,"tech":[],"finger":3},
+            {"string":6,"fret":2,"midi":42,"tick":13920,"dur":480,"tech":[],"finger":2},
+            {"string":6,"fret":0,"midi":40,"tick":14400,"dur":960,"tech":[]},
+            {"string":1,"fret":12,"midi":76,"tick":15360,"dur":240,"tech":[],"finger":1},
+            {"string":2,"fret":15,"midi":74,"tick":15600,"dur":240,"tech":[],"finger":4},
+            {"string":2,"fret":12,"midi":71,"tick":15840,"dur":240,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":16080,"dur":240,"tech":[],"finger":3},
+            {"string":2,"fret":15,"midi":74,"tick":16320,"dur":240,"tech":[],"finger":4},
+            {"string":2,"fret":12,"midi":71,"tick":16560,"dur":240,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":16800,"dur":240,"tech":[],"finger":3},
+            {"string":3,"fret":12,"midi":67,"tick":17040,"dur":240,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":17280,"dur":960,"tech":[],"finger":3},
+            {"string":2,"fret":12,"midi":71,"tick":18240,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":15,"midi":74,"tick":18720,"dur":480,"tech":[],"finger":4},
+            {"string":1,"fret":12,"midi":76,"tick":19200,"dur":960,"tech":[],"finger":1},
+            {"string":2,"fret":15,"midi":74,"tick":20160,"dur":480,"tech":[],"finger":4},
+            {"string":2,"fret":12,"midi":71,"tick":20640,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":21120,"dur":1920,"tech":["vibrato"],"finger":3},
+            {"string":4,"fret":14,"midi":64,"tick":23040,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":12,"midi":67,"tick":23520,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":24000,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":16,"midi":71,"tick":24480,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":15,"midi":74,"tick":24960,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":17,"midi":76,"tick":25440,"dur":480,"tech":[],"finger":3},
+            {"string":1,"fret":17,"midi":81,"tick":25920,"dur":480,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":26400,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":17,"midi":76,"tick":26880,"dur":960,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":27840,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":28320,"dur":480,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":28800,"dur":1920,"tech":["vibrato"],"finger":1},
+            {"string":3,"fret":16,"midi":71,"tick":30720,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":31200,"dur":480,"tech":[],"finger":1},
+            {"string":4,"fret":17,"midi":67,"tick":31680,"dur":480,"tech":[],"finger":4},
+            {"string":4,"fret":14,"midi":64,"tick":32160,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":32640,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":16,"midi":71,"tick":33600,"dur":960,"tech":[],"finger":3},
+            {"string":2,"fret":17,"midi":76,"tick":34560,"dur":240,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":34800,"dur":240,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":35040,"dur":240,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":35280,"dur":240,"tech":["pull"]},
+            {"string":2,"fret":17,"midi":76,"tick":35520,"dur":240,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":35760,"dur":240,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":36000,"dur":240,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":36240,"dur":240,"tech":["pull"]},
+            {"string":2,"fret":17,"midi":76,"tick":36480,"dur":240,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":36720,"dur":240,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":36960,"dur":240,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":37200,"dur":240,"tech":["pull"]},
+            {"string":2,"fret":17,"midi":76,"tick":37440,"dur":240,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":37680,"dur":240,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":37920,"dur":240,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":38160,"dur":240,"tech":["pull"]},
+            {"string":2,"fret":17,"midi":76,"tick":38400,"dur":240,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":38640,"dur":240,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":38880,"dur":240,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":39120,"dur":240,"tech":["pull"]},
+            {"string":2,"fret":17,"midi":76,"tick":39360,"dur":240,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":39600,"dur":240,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":39840,"dur":240,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":40080,"dur":240,"tech":["pull"]},
+            {"string":1,"fret":17,"midi":81,"tick":40320,"dur":960,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":41280,"dur":960,"tech":[],"finger":1},
+            {"string":2,"fret":17,"midi":76,"tick":42240,"dur":3840,"tech":["vibrato"],"finger":3}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":60,"grading":"graded"},
+              {"bpm":65,"grading":"graded"},
+              {"bpm":75,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":100,"grading":"graded"}
+            ],
+            "passAtBpm": 85
+          },
+          "passBars": [
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 12
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 12
+            },
+            {
+              "metric": "extraNotes",
+              "max": 4,
+              "overBars": 4
+            },
+            {
+              "metric": "timingEvenness",
+              "min": 0.75,
+              "overBars": 12
+            }
+          ],
+          "graded": ["noteIdentity", "notesHeard", "extraNotes", "timingEvenness"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel",
+            "vibrato"
+          ],
+          "detection": {
+            "flags": ["softLegato", "bandBleed", "fastPicking"],
+            "notes": [
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it.",
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested.",
+              "At this speed a real rig's input delay can push notes out of their matching window, which reads as late or missed. Evenness is the number to trust here, and only once the delay is calibrated."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "rock8",
+            "feel": "straight",
+            "key": "E minor",
+            "chart": "E5 | E5 | E5 | E5 | A5 | A5 | E5 | E5 | B5 | A5 | E5 | E5"
+          },
+          "estimatedMinutes": 7,
+          "tab": "/8 4:14f3 3:12f1 3:14f3 2:12f1 /4 2:15f4 1:12f1 | /8 1:12f1 2:15f4 2:12f1 3:14f3 /4 3:12f1 4:14f3 | /8 6:0m 6:0m 6:3f3 6:0m 5:0 6:0m 6:3f3 6:2f2 | /8 6:0m 6:0m 5:2f2 5:0 6:3f3 6:2f2 /4 6:0 | /16 1:12f1 2:15f4 2:12f1 3:14f3 2:15f4 2:12f1 3:14f3 3:12f1 /4 3:14f3 /8 2:12f1 2:15f4 | /4 1:12f1 /8 2:15f4 2:12f1 /2 3:14f3v | /8 4:14f3 3:12f1 3:14f1 3:16f3 2:15f1 2:17f3 1:17f4 1:15f1 | /4 2:17f3 /8 1:15f1 1:17f4 /2 1:15f1v | /8 3:16f3 3:14f1 4:17f4 4:14f1 /4 3:14f1 3:16f3 | /16 2:17f3 1:15f1 1:17f4 1:15p 2:17f3 1:15f1 1:17f4 1:15p 2:17f3 1:15f1 1:17f4 1:15p 2:17f3 1:15f1 1:17f4 1:15p | /16 2:17f3 1:15f1 1:17f4 1:15p 2:17f3 1:15f1 1:17f4 1:15p /4 1:17f4 1:15f1 | /1 2:17f3v",
+          "computed": {
+            "noteCount": 87,
+            "minGapMsAtTop": 150,
+            "handShifts": 6,
+            "maxPlayableBpm": 268,
+            "difficulty": 4.17
+          },
+          "chords": ["E5", "E5", "E5", "E5", "A5", "A5", "E5", "E5", "B5", "A5", "E5", "E5"],
+          "harmony": {
+            "kind": "scaleOverChords",
+            "root": "E",
+            "scale": "minorPentatonic",
+            "spelled": ["E", "G", "A", "B", "D"],
+            "cover": false,
+            "allowed": ["F#"]
+          }
+        },
+        {
+          "id": "solo-in-e.your-e-solo",
+          "title": "Your turn: your own twelve bars in E",
+          "purpose": "The same twelve bars of chords, and a solo of your own. Use box 1 at fret 12, box 2 above it, the open strings, or all three.",
+          "howTo": [
+            "Straight time, 60 to 90 BPM, twelve bars that loop.",
+            "Give it a shape: say something, answer it somewhere else on the neck, build through bars 9 and 10, and end on one long note. The written solo is an example.",
+            "Your turn, and not checked yet: the app can't judge notes you choose, so you tick it off yourself."
+          ],
+          "coachLine": "Not checked yet. Record it, and listen for where it moves.",
+          "grading": "selfChecked",
+          "feedback": "none",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 12,
+          "loops": true,
+          "position": {
+            "fret": 12,
+            "shifts": "allowed"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "example",
+          "notes": [
+            {"string":4,"fret":14,"midi":64,"tick":0,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":12,"midi":67,"tick":480,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":960,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":12,"midi":71,"tick":1440,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":15,"midi":74,"tick":1920,"dur":960,"tech":[],"finger":4},
+            {"string":1,"fret":12,"midi":76,"tick":2880,"dur":960,"tech":[],"finger":1},
+            {"string":1,"fret":12,"midi":76,"tick":3840,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":15,"midi":74,"tick":4320,"dur":480,"tech":[],"finger":4},
+            {"string":2,"fret":12,"midi":71,"tick":4800,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":5280,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":12,"midi":67,"tick":5760,"dur":960,"tech":[],"finger":1},
+            {"string":4,"fret":14,"midi":64,"tick":6720,"dur":960,"tech":[],"finger":3},
+            {"string":6,"fret":0,"midi":40,"tick":7680,"dur":480,"tech":["palmMute"]},
+            {"string":6,"fret":0,"midi":40,"tick":8160,"dur":480,"tech":["palmMute"]},
+            {"string":6,"fret":3,"midi":43,"tick":8640,"dur":480,"tech":[],"finger":3},
+            {"string":6,"fret":0,"midi":40,"tick":9120,"dur":480,"tech":["palmMute"]},
+            {"string":5,"fret":0,"midi":45,"tick":9600,"dur":480,"tech":[]},
+            {"string":6,"fret":0,"midi":40,"tick":10080,"dur":480,"tech":["palmMute"]},
+            {"string":6,"fret":3,"midi":43,"tick":10560,"dur":480,"tech":[],"finger":3},
+            {"string":6,"fret":2,"midi":42,"tick":11040,"dur":480,"tech":[],"finger":2},
+            {"string":6,"fret":0,"midi":40,"tick":11520,"dur":480,"tech":["palmMute"]},
+            {"string":6,"fret":0,"midi":40,"tick":12000,"dur":480,"tech":["palmMute"]},
+            {"string":5,"fret":2,"midi":47,"tick":12480,"dur":480,"tech":[],"finger":2},
+            {"string":5,"fret":0,"midi":45,"tick":12960,"dur":480,"tech":[]},
+            {"string":6,"fret":3,"midi":43,"tick":13440,"dur":480,"tech":[],"finger":3},
+            {"string":6,"fret":2,"midi":42,"tick":13920,"dur":480,"tech":[],"finger":2},
+            {"string":6,"fret":0,"midi":40,"tick":14400,"dur":960,"tech":[]},
+            {"string":1,"fret":12,"midi":76,"tick":15360,"dur":240,"tech":[],"finger":1},
+            {"string":2,"fret":15,"midi":74,"tick":15600,"dur":240,"tech":[],"finger":4},
+            {"string":2,"fret":12,"midi":71,"tick":15840,"dur":240,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":16080,"dur":240,"tech":[],"finger":3},
+            {"string":2,"fret":15,"midi":74,"tick":16320,"dur":240,"tech":[],"finger":4},
+            {"string":2,"fret":12,"midi":71,"tick":16560,"dur":240,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":16800,"dur":240,"tech":[],"finger":3},
+            {"string":3,"fret":12,"midi":67,"tick":17040,"dur":240,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":17280,"dur":960,"tech":[],"finger":3},
+            {"string":2,"fret":12,"midi":71,"tick":18240,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":15,"midi":74,"tick":18720,"dur":480,"tech":[],"finger":4},
+            {"string":1,"fret":12,"midi":76,"tick":19200,"dur":960,"tech":[],"finger":1},
+            {"string":2,"fret":15,"midi":74,"tick":20160,"dur":480,"tech":[],"finger":4},
+            {"string":2,"fret":12,"midi":71,"tick":20640,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":21120,"dur":1920,"tech":["vibrato"],"finger":3},
+            {"string":4,"fret":14,"midi":64,"tick":23040,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":12,"midi":67,"tick":23520,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":24000,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":16,"midi":71,"tick":24480,"dur":480,"tech":[],"finger":3},
+            {"string":2,"fret":15,"midi":74,"tick":24960,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":17,"midi":76,"tick":25440,"dur":480,"tech":[],"finger":3},
+            {"string":1,"fret":17,"midi":81,"tick":25920,"dur":480,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":26400,"dur":480,"tech":[],"finger":1},
+            {"string":2,"fret":17,"midi":76,"tick":26880,"dur":960,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":27840,"dur":480,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":28320,"dur":480,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":28800,"dur":1920,"tech":["vibrato"],"finger":1},
+            {"string":3,"fret":16,"midi":71,"tick":30720,"dur":480,"tech":[],"finger":3},
+            {"string":3,"fret":14,"midi":69,"tick":31200,"dur":480,"tech":[],"finger":1},
+            {"string":4,"fret":17,"midi":67,"tick":31680,"dur":480,"tech":[],"finger":4},
+            {"string":4,"fret":14,"midi":64,"tick":32160,"dur":480,"tech":[],"finger":1},
+            {"string":3,"fret":14,"midi":69,"tick":32640,"dur":960,"tech":[],"finger":1},
+            {"string":3,"fret":16,"midi":71,"tick":33600,"dur":960,"tech":[],"finger":3},
+            {"string":2,"fret":17,"midi":76,"tick":34560,"dur":240,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":34800,"dur":240,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":35040,"dur":240,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":35280,"dur":240,"tech":["pull"]},
+            {"string":2,"fret":17,"midi":76,"tick":35520,"dur":240,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":35760,"dur":240,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":36000,"dur":240,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":36240,"dur":240,"tech":["pull"]},
+            {"string":2,"fret":17,"midi":76,"tick":36480,"dur":240,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":36720,"dur":240,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":36960,"dur":240,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":37200,"dur":240,"tech":["pull"]},
+            {"string":2,"fret":17,"midi":76,"tick":37440,"dur":240,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":37680,"dur":240,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":37920,"dur":240,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":38160,"dur":240,"tech":["pull"]},
+            {"string":2,"fret":17,"midi":76,"tick":38400,"dur":240,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":38640,"dur":240,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":38880,"dur":240,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":39120,"dur":240,"tech":["pull"]},
+            {"string":2,"fret":17,"midi":76,"tick":39360,"dur":240,"tech":[],"finger":3},
+            {"string":1,"fret":15,"midi":79,"tick":39600,"dur":240,"tech":[],"finger":1},
+            {"string":1,"fret":17,"midi":81,"tick":39840,"dur":240,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":40080,"dur":240,"tech":["pull"]},
+            {"string":1,"fret":17,"midi":81,"tick":40320,"dur":960,"tech":[],"finger":4},
+            {"string":1,"fret":15,"midi":79,"tick":41280,"dur":960,"tech":[],"finger":1},
+            {"string":2,"fret":17,"midi":76,"tick":42240,"dur":3840,"tech":["vibrato"],"finger":3}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":60,"grading":"selfChecked"},
+              {"bpm":70,"grading":"selfChecked"},
+              {"bpm":80,"grading":"selfChecked"},
+              {"bpm":90,"grading":"selfChecked"}
+            ],
+            "passAtBpm": null
+          },
+          "passBars": [],
+          "graded": [],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel",
+            "vibrato",
+            "noteChoice",
+            "notesWritten"
+          ],
+          "detection": {
+            "flags": ["softLegato", "bandBleed"],
+            "notes": [
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it.",
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "rock8",
+            "feel": "straight",
+            "key": "E minor",
+            "chart": "E5 | E5 | E5 | E5 | A5 | A5 | E5 | E5 | B5 | A5 | E5 | E5"
+          },
+          "estimatedMinutes": 6,
+          "tab": "/8 4:14f3 3:12f1 3:14f3 2:12f1 /4 2:15f4 1:12f1 | /8 1:12f1 2:15f4 2:12f1 3:14f3 /4 3:12f1 4:14f3 | /8 6:0m 6:0m 6:3f3 6:0m 5:0 6:0m 6:3f3 6:2f2 | /8 6:0m 6:0m 5:2f2 5:0 6:3f3 6:2f2 /4 6:0 | /16 1:12f1 2:15f4 2:12f1 3:14f3 2:15f4 2:12f1 3:14f3 3:12f1 /4 3:14f3 /8 2:12f1 2:15f4 | /4 1:12f1 /8 2:15f4 2:12f1 /2 3:14f3v | /8 4:14f3 3:12f1 3:14f1 3:16f3 2:15f1 2:17f3 1:17f4 1:15f1 | /4 2:17f3 /8 1:15f1 1:17f4 /2 1:15f1v | /8 3:16f3 3:14f1 4:17f4 4:14f1 /4 3:14f1 3:16f3 | /16 2:17f3 1:15f1 1:17f4 1:15p 2:17f3 1:15f1 1:17f4 1:15p 2:17f3 1:15f1 1:17f4 1:15p 2:17f3 1:15f1 1:17f4 1:15p | /16 2:17f3 1:15f1 1:17f4 1:15p 2:17f3 1:15f1 1:17f4 1:15p /4 1:17f4 1:15f1 | /1 2:17f3v",
+          "computed": {
+            "noteCount": 87,
+            "minGapMsAtTop": 166.67,
+            "handShifts": 6,
+            "maxPlayableBpm": 268,
+            "difficulty": 4.12
+          },
+          "chords": ["E5", "E5", "E5", "E5", "A5", "A5", "E5", "E5", "B5", "A5", "E5", "E5"],
+          "selfCheck": ["Did your solo use more than one place on the neck?", "Did it end on a note you held?"]
+        }
+      ],
+      "difficultyException": "The Step before is fast licks alone. This solo has long notes, a riff and twelve bars to hold together, so its note rate is lower; moving between three places on the neck in time is the demand."
+    },
+    {
       "id": "solo-etude",
-      "order": 13,
+      "order": 17,
       "title": "A sixteen-bar solo",
       "goal": "Play a sixteen-bar written solo with the band, from the first note to the last, then play one of your own.",
       "why": "Everything in this Path, in one solo: a riff-like opening, a sixteenth-note run, double stops, the three-note repeat, and a low ending on the V chord that sends the band back to the top. Learning a whole solo teaches shape: where it starts, where it builds, where it breathes.",
@@ -6939,7 +9160,7 @@
         "Count the rests in bars 3 and 16. The band fills them."
       ],
       "payoff": "A whole solo, played with a band, that you could play at a jam tomorrow.",
-      "prerequisites": ["climax"],
+      "prerequisites": ["solo-in-e"],
       "difficulty": 4.04,
       "exercises": [
         {
@@ -7687,7 +9908,7 @@
     {
       "id": "beginner",
       "title": "Beginner: riffs, the box and its major twin",
-      "summary": "Riffs in time with a band, in A and then in E, the minor pentatonic box and its classic licks, and the major pentatonic.",
+      "summary": "Riffs in time with a band, in A and then in E, the minor pentatonic box and its classic licks at fret 5 and again at fret 12, and the major pentatonic.",
       "entry": "open",
       "placement": {
         "startHereIf": [
@@ -7696,7 +9917,7 @@
           "You couldn't say which notes change between minor and major pentatonic."
         ]
       },
-      "stepIds": ["riffs", "riffs-in-e", "box-extension", "major-pentatonic"],
+      "stepIds": ["riffs", "riffs-in-e", "box-extension", "box-at-twelve", "major-pentatonic"],
       "warmups": [
         {
           "id": "warmup-beginner.riff-around",
@@ -8202,7 +10423,7 @@
     {
       "id": "intermediate",
       "title": "Intermediate: loops, double stops and the changes",
-      "summary": "The second pentatonic box, repeating licks, rock and roll double stops, chord embellishment, and chord tones over A, G and D.",
+      "summary": "The second pentatonic box, repeating licks, rock and roll double stops in A and in E, chord embellishment, and chord tones over A, G and D and then over A, D and E.",
       "entry": "open",
       "placement": {
         "startHereIf": [
@@ -8211,7 +10432,15 @@
           "Your solos stay in one box and don't follow the chords."
         ]
       },
-      "stepIds": ["box-two", "repeating-licks", "double-stops", "embellishment", "chord-tones"],
+      "stepIds": [
+        "box-two",
+        "repeating-licks",
+        "double-stops",
+        "double-stops-in-e",
+        "embellishment",
+        "chord-tones",
+        "chord-tones-ade"
+      ],
       "warmups": [
         {
           "id": "warmup-intermediate.loop-around",
@@ -8830,7 +11059,7 @@
     {
       "id": "advanced",
       "title": "Advanced: melody, conversation and a whole solo",
-      "summary": "A slow melody with bends and vibrato, call and response with the band, the fast licks a solo peaks on, and a sixteen-bar written solo.",
+      "summary": "A slow melody with bends and vibrato, call and response with the band, the fast licks a solo peaks on, a twelve-bar written solo in E and a sixteen-bar one in A.",
       "entry": "open",
       "placement": {
         "startHereIf": [
@@ -8839,7 +11068,7 @@
           "Your licks are fine, and your solos don't yet have a shape from start to end."
         ]
       },
-      "stepIds": ["melody", "call-response", "climax", "solo-etude"],
+      "stepIds": ["melody", "call-response", "climax", "solo-in-e", "solo-etude"],
       "warmups": [
         {
           "id": "warmup-advanced.run-around",

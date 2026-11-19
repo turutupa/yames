@@ -17,6 +17,7 @@ import { KEY_OF_G } from "./harmony-more";
 import { BORROWED, FOUR_CHORD_SONGS, KEY_OF_A, MINOR_KEY_E, SEVENTHS, SEVENTHS_IN_SONGS, SIXTEEN_BARS } from "./chords-more";
 import { chartIn as chartInKey } from "./triadShapes";
 import { ROCK, bars, mid, named, toTop, top } from "./triadShapes";
+import { keyHowTo } from "./keyText";
 
 const YOUR_TURN = { grade: "selfChecked", example: true } as const;
 const NOT_CHECKED_YET =
@@ -60,21 +61,28 @@ const VERSE_CHORUS_CHART = "Am | F | C | G | C | G | Am | F";
 const chartIn = (chart: string, by: number, key: string) =>
   ["E", "B"].includes(key) ? moveChart(chart, by).replace(/Abm/g, "G#m").replace(/Ebm/g, "D#m") : moveChart(chart, by);
 
-/** A line in C moved along the neck to other keys; the chart and the band move with it. */
-function inKeys(tab: string, chart: string, shifts: Readonly<Record<string, number>>) {
+/**
+ * A line in C moved along the neck to other keys; the chart and the band move with it.
+ * `parts` is what each four bars of a long form is called ("the verse"), for the words
+ * every key after the first gets (`keyText.ts`).
+ */
+function inKeys(tab: string, chart: string, shifts: Readonly<Record<string, number>>, parts?: readonly string[]) {
   return {
     values: { key: Object.keys(shifts) },
     pooled: ["key"] as const,
     label: (p: VariantParams) => `In ${p.key}`,
     build: (p: VariantParams) => {
       const moved = shiftFrets(tab, shifts[p.key]);
+      const chords = chartIn(chart, shifts[p.key], p.key);
       return {
         tab: moved,
         position: handAt(moved),
         shifts: true,
-        chords: chartIn(chart, shifts[p.key], p.key),
+        chords,
         jam: ROCK(p.key),
         harmony: { chordTones: true as const },
+        // Every key after the first reads its own frets and chords (`keyText.ts`).
+        howTo: keyHowTo({ kind: "shapes", key: p.key, tab: moved, chords, shift: shifts[p.key], home: "C", parts }),
       };
     },
   };
@@ -768,7 +776,7 @@ export default definePath({
             VARIANT_NOTE,
           ],
           coach: "A key that changes from day to day. Right notes and time after the take.",
-          vary: inKeys(VERSE_CHORUS, VERSE_CHORUS_CHART, { D: 2, E: 4, Bb: -2 }),
+          vary: inKeys(VERSE_CHORUS, VERSE_CHORUS_CHART, { D: 2, E: 4, Bb: -2 }, ["the verse", "the chorus"]),
           tab: shiftFrets(VERSE_CHORUS, 2),
           position: 5,
           shifts: true,

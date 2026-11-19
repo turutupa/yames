@@ -26,6 +26,7 @@ const VARIANT_NOTE =
 
 import { ROCK, bar, bars, ending, mid, named, roll, slow, toTop, top } from "./triadShapes";
 import type { Shape } from "./triadShapes";
+import { keyHowTo } from "./keyText";
 
 
 // The chords of C major on the top three strings, by which note is lowest.
@@ -76,13 +77,16 @@ function inKeys(tab: string, chart: string, shifts: Readonly<Record<string, numb
     label: (p: VariantParams) => `In ${p.key}`,
     build: (p: VariantParams) => {
       const moved = shiftFrets(tab, shifts[p.key]);
+      const chords = moveChart(chart, shifts[p.key]);
       return {
         tab: moved,
         position: handAt(moved),
         shifts: true,
-        chords: moveChart(chart, shifts[p.key]),
+        chords,
         jam: ROCK(p.key),
         harmony: { chordTones: true as const },
+        // Every key after the first reads its own frets and chords (`keyText.ts`).
+        howTo: keyHowTo({ kind: "shapes", key: p.key, tab: moved, chords, shift: shifts[p.key], home: "C" }),
       };
     },
   };
