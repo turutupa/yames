@@ -14,6 +14,7 @@ import funkLines from "./funk-lines";
 import triads from "./triads";
 import chordsInAKey from "./chords-in-a-key";
 import arpeggiosOverChanges from "./arpeggios-over-changes";
+import firstChords from "./first-chords";
 import type { PathSpec } from "../spec";
 
 export const SPECS: readonly PathSpec[] = [
@@ -32,5 +33,6 @@ export const SPECS: readonly PathSpec[] = [
   triads,
   chordsInAKey,
   arpeggiosOverChanges,
+  firstChords,
   // new paths go above this line
 ];

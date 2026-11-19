@@ -15,6 +15,7 @@ import { definePath } from "../spec";
 import type { VariantParams } from "../spec";
 import { handAt, ladder, moveChart, shiftFrets } from "../templates";
 import { DIMINISHED, F_AND_G, MORE_MINORS } from "./harmony-more";
+import { F_AND_G_MIDDLE, LOW_SET, MINORS_MIDDLE, SECOND_SONG, THREE_SETS } from "./triads-more";
 
 const YOUR_TURN = { grade: "selfChecked", example: true } as const;
 const NOT_CHECKED_YET =
@@ -95,9 +96,9 @@ const DOWN = [0, -7, -5, 0] as const;
 function onTheNeck(one: string, by: number): string {
   const frets = (tab: string) => [...tab.matchAll(/:(\d+)/g)].map((m) => Number(m[1]));
   for (const shift of [by, by - 12, by + 12]) {
+    if (!frets(one).every((f) => f + shift >= 1)) continue;
     const moved = shiftFrets(one, shift);
-    const all = frets(moved);
-    if (frets(one).every((f) => f + shift >= 1) && Math.max(...all) <= 15) return moved;
+    if (Math.max(...frets(moved)) <= 15) return moved;
   }
   return shiftFrets(one, by);
 }
@@ -135,7 +136,7 @@ export default definePath({
   labelSubdivisions: "mostly",
   paceLadders: true,
   orderRationale:
-    "The major scale counted as numbers comes first, because a triad is defined by them: notes one, three and five. Then the three shapes one triad has on the top three strings, one at a time, since the top strings are the easiest to hear and to hold. Moving one shape to make three chords comes before the nearest-shape idea: it is easier, and it shows that a shape is a chord type and a fret is a chord name. Minor arrives as one changed note, never as a new set of shapes to memorise. The four chords most songs use come next, in two parts of the neck and then in other keys, before a second set of strings: a second set before the first is secure doubles the load and teaches nothing new. Seeing the open and barre chords as these same three notes comes near the end, when the three notes are familiar enough to recognise. A whole song form is last.",
+    "The major scale counted as numbers comes first, because a triad is defined by them: notes one, three and five. Then the three shapes one triad has on the top three strings, one at a time, since the top strings are the easiest to hear and to hold. Moving one shape to make three chords comes before the nearest-shape idea: it is easier, and it shows that a shape is a chord type and a fret is a chord name. Minor arrives as one changed note, never as a new set of shapes to memorise. The four chords most songs use come next, in two parts of the neck and then in other keys, before a second set of strings: a second set before the first is secure doubles the load and teaches nothing new. Seeing the open and barre chords as these same three notes comes near the end, when the three notes are familiar enough to recognise. A whole song form is last, and then a longer one in a new key that uses two sets of strings as two colours. The middle strings close the Intermediate Level, with F, G and the minor chords drilled there as they were on the top strings, because Chords in a Key leans on them; the A, D and G strings wait for the Advanced Level, after the first two sets have been joined.",
   gradingLimits:
     "Every graded Exercise is played one note at a time: after the take, the app checks that you played the written notes, counts them and times them. It cannot tell which string a pitch came from, so a right note in the wrong place passes, and it cannot hear whether you held the shape down like a chord or lifted each finger. Strummed chords are not graded anywhere in this Path. The band Exercises have only been tried on computer-made guitar sound, so direct input or headphones are the honest way to play them. Choosing your own shapes is 'your turn', self-checked and labelled 'not checked yet'.",
   steps: [
@@ -642,7 +643,7 @@ export default definePath({
       ],
       payoff: "Every triad you know, in a second, warmer part of the guitar's range.",
       difficultyException:
-        "A new Level and a new set of strings, with the shapes played alone before the band comes back, so the rate sits under the Step before. The demand is six new shapes.",
+        "A new set of strings, with the shapes played alone before the band comes back, so the rate sits under the Step before. The demand is six new shapes.",
       exercises: [
         {
           id: "c-middle",
@@ -702,6 +703,8 @@ export default definePath({
         },
       ],
     },
+    F_AND_G_MIDDLE,
+    MINORS_MIDDLE,
     {
       id: "two-sets",
       title: "Two sets of strings, one chord",
@@ -713,6 +716,8 @@ export default definePath({
         "Roll up through four strings, back down, and play one more note on the G string to finish the bar.",
       ],
       payoff: "Four strings of any chord under one hand, and C major from fret 3 to fret 14.",
+      difficultyException:
+        "The first Level's last Step ends on band Exercises in keys that change; this one opens a Level with a new four-string shape played alone, so its median sits under it. The demand is a fourth string under shapes that had three.",
       exercises: [
         {
           id: "c-four-strings",
@@ -782,6 +787,8 @@ export default definePath({
         },
       ],
     },
+    LOW_SET,
+    THREE_SETS,
     DIMINISHED,
     {
       id: "chords-from-triads",
@@ -932,6 +939,7 @@ export default definePath({
         },
       ],
     },
+    SECOND_SONG,
   ],
   levels: [
     {
@@ -961,14 +969,14 @@ export default definePath({
     },
     {
       id: "intermediate",
-      title: "Intermediate: minor, and the nearest shape",
-      summary: "Minor as one lowered note, A minor, D minor and E minor in three places each, the four chords most songs use in two parts of the neck and in other keys, and choosing shapes so the top note makes a line.",
+      title: "Intermediate: minor, the nearest shape, and the middle strings",
+      summary: "Minor as one lowered note, A minor, D minor and E minor in three places each, the four chords most songs use in two parts of the neck and in other keys, choosing shapes so the top note makes a line, and then all six chords of the key again on the D, G and B strings.",
       startHereIf: [
         "You can play a C major triad in 3 places on the top strings at 80 BPM.",
         "You can play C, F and G with triads over a band.",
         "You change chord by moving the whole hand, and your parts sound jumpy.",
       ],
-      steps: ["minor", "more-minors", "four-chords", "top-note"],
+      steps: ["minor", "more-minors", "four-chords", "top-note", "middle-strings", "f-and-g-middle", "minors-middle"],
       warmups: [
         {
           id: "major-shapes",
@@ -986,14 +994,14 @@ export default definePath({
     },
     {
       id: "advanced",
-      title: "Advanced: more strings, and whole chords",
-      summary: "The same triads on the middle strings, two sets joined into four-string shapes, the diminished triad, the triads inside open and barre chords, seventh chords, and an eight-bar song.",
+      title: "Advanced: every set of strings, and whole chords",
+      summary: "Two sets of strings joined into four-string shapes, the same triads on the A, D and G strings, one chord on all three sets, the diminished triad, the triads inside open and barre chords, seventh chords, and two songs: eight bars, then sixteen.",
       startHereIf: [
         "You can play C, A minor, F and G with the nearest shapes on the top strings at 90 BPM.",
         "You can say the top note of each of the 3 shapes of a triad.",
-        "You only know triads on the top 3 strings, or you can't yet see them inside the chords you strum.",
+        "You know triads on the top strings and on the D, G and B strings, and can't yet see them inside the chords you strum.",
       ],
-      steps: ["middle-strings", "two-sets", "diminished", "chords-from-triads", "a-song"],
+      steps: ["two-sets", "low-set", "three-sets", "diminished", "chords-from-triads", "a-song", "second-song"],
       warmups: [
         {
           id: "minor-shapes",
@@ -1004,6 +1012,18 @@ export default definePath({
           vary: shapeWarmup({ "shape one": { shape: AM_ROOT, moves: DOWN }, "shape two": { shape: AM_FIRST, moves: UP }, "shape three": { shape: AM_SECOND, moves: DOWN } }, { A: 0, B: 2, C: 3 }, true),
           grade: "warmup",
           warmup: { start: 0.6, top: 0.8, reference: "minor.a-minor-three", fallback: 50 },
+          rungs: ladder(50, 100, 10),
+          minutes: 3,
+        },
+        {
+          id: "middle-shapes",
+          title: "One middle-string shape, three chords",
+          purpose: "One of the three major shapes on the D, G and B strings, rolled on the first, fourth and fifth chords of a key and home. A different shape and key each time.",
+          howTo: ["Straight eighths, well under your clean tempo. Keep the fingers in their shape and move the whole hand at the bar line."],
+          coach: "This is a warm-up. It tells you how it went, and it decides nothing.",
+          vary: shapeWarmup({ "shape one": { shape: C_MID_ROOT, moves: DOWN }, "shape two": { shape: C_MID_FIRST, moves: DOWN }, "shape three": { shape: C_MID_SECOND, moves: UP } }, { C: 0, D: 2, Bb: -2 }, false),
+          grade: "warmup",
+          warmup: { start: 0.6, top: 0.8, reference: "middle-strings.c-middle", fallback: 50 },
           rungs: ladder(50, 100, 10),
           minutes: 3,
         },

@@ -12,7 +12,7 @@ describe("the Paths screen's tracks (the curriculum map)", () => {
   it("by category: the one start, How harmony works, Technique, Styles; every Path in exactly one", () => {
     const tracks = pathTracks(PATHS);
     expect(tracks.map((t) => [t.id, t.paths.map((p) => p.id)])).toEqual([
-      ["foundations", ["rhythm-foundations"]],
+      ["foundations", ["rhythm-foundations", "first-chords"]],
       ["harmony", ["know-the-neck", "scales-and-modes", "triads", "chords-in-a-key", "arpeggios-over-changes"]],
       ["technique", ["alternate-picking", "legato", "tapping", "sweep-picking", "shred", "metal-rhythm", "funk-lines"]],
       ["style", ["blues-pentatonics", "classic-rock"]],

@@ -24,7 +24,7 @@ export const START_HERE_PATH_ID = "rhythm-foundations";
 
 /** Each group's Paths in the map's order; a Path not named here comes after them. */
 const TRACK_ORDER: Readonly<Record<TrackId, readonly string[]>> = {
-  foundations: [START_HERE_PATH_ID],
+  foundations: [START_HERE_PATH_ID, "first-chords"],
   technique: [
     "alternate-picking",
     "legato",

@@ -14,6 +14,8 @@ import { definePath } from "../spec";
 import type { VariantParams } from "../spec";
 import { handAt, ladder, moveChart, shiftFrets } from "../templates";
 import { KEY_OF_G } from "./harmony-more";
+import { BORROWED, FOUR_CHORD_SONGS, KEY_OF_A, MINOR_KEY_E, SEVENTHS, SEVENTHS_IN_SONGS, SIXTEEN_BARS } from "./chords-more";
+import { chartIn as chartInKey } from "./triadShapes";
 import { ROCK, bars, mid, named, toTop, top } from "./triadShapes";
 
 const YOUR_TURN = { grade: "selfChecked", example: true } as const;
@@ -94,7 +96,7 @@ export default definePath({
   labelSubdivisions: "mostly",
   paceLadders: true,
   orderRationale:
-    "All seven chords of the key first, built in order from the scale, because the pattern of major and minor is the thing to learn and it is the same in every key. Numbers come next and letters go into the background: a progression is a set of numbers, and a key is where you put them. The three major chords come before the three minor ones because most songs can be played with them alone. Named progressions follow, one at a time. One, four and five move to other keys as soon as they have numbers; the longer progressions move later, once the numbers are familiar, so that changing key is moving a known thing. The minor key is late because it is the same seven chords counted from a different one. Longer forms come last: twelve bars, then a verse and a chorus.",
+    "All seven chords of the key first, built in order from the scale, because the pattern of major and minor is the thing to learn and it is the same in every key. Numbers come next and letters go into the background: a progression is a set of numbers, and a key is where you put them. The three major chords come before the three minor ones because most songs can be played with them alone. Named progressions follow, one at a time. One, four and five move to other keys as soon as they have numbers; the longer progressions move later, once the numbers are familiar, so that changing key is moving a known thing. The minor key is late because it is the same seven chords counted from a different one. Longer forms follow: twelve bars, a verse and a chorus, then sixteen bars with a bridge. Each idea is given a second and a third key before the next arrives (G and A in full, E minor after A minor), because a number only becomes a number once it has stood for several different chords. Chords from outside the key wait until the key itself is secure, and the seventh chords come last: they are the same seven chords with one more note each, and they hand the player on to Arpeggios over Changes.",
   gradingLimits:
     "Every graded Exercise is played one note at a time: after the take, the app checks that you played the written notes, counts them and times them. It cannot tell which string a pitch came from, so a right note in the wrong place passes, and it cannot hear whether you held each shape down like a chord. Strummed chords are not graded anywhere in this Path. It cannot hear you say a chord's number either: that part is yours. The band Exercises have only been tried on computer-made guitar sound, so direct input or headphones are the honest way to play them. Choosing your own chords and shapes is 'your turn', self-checked and labelled 'not checked yet'.",
   steps: [
@@ -489,6 +491,8 @@ export default definePath({
       ],
     },
     KEY_OF_G,
+    KEY_OF_A,
+    FOUR_CHORD_SONGS,
     {
       id: "minor-key",
       title: "The minor key",
@@ -564,6 +568,7 @@ export default definePath({
         },
       ],
     },
+    MINOR_KEY_E,
     {
       id: "two-places",
       title: "The same progression in two places",
@@ -800,6 +805,10 @@ export default definePath({
         },
       ],
     },
+    SIXTEEN_BARS,
+    BORROWED,
+    SEVENTHS,
+    SEVENTHS_IN_SONGS,
   ],
   levels: [
     {
@@ -839,13 +848,13 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: progressions, keys, and the minor key",
-      summary: "Two, five, one and two more named progressions, the seven chords of D, progressions in keys that change, the key of G in full, and the main chords of a minor key.",
+      summary: "Two, five, one and two more named progressions, the seven chords of D, progressions in keys that change, the keys of G and A in full, one, five, six, four in five keys, and the main chords of a minor key in A minor and in E minor.",
       startHereIf: [
         "You can name the 7 chords of C major and say which are minor.",
         "You can play one, six, two, five in C with triads at 90 BPM.",
         "You can't yet move a progression to another key without working out every chord.",
       ],
-      steps: ["progressions", "other-keys", "key-of-g", "minor-key"],
+      steps: ["progressions", "other-keys", "key-of-g", "key-of-a", "four-chord-songs", "minor-key", "minor-key-e"],
       warmups: [
         {
           id: "one-six-two-five-warm",
@@ -872,14 +881,14 @@ export default definePath({
     },
     {
       id: "advanced",
-      title: "Advanced: forms, and songs of your own",
-      summary: "One progression in two parts of the neck, the twelve-bar form in more than one key, and a verse and a chorus built from four chords.",
+      title: "Advanced: forms, borrowed chords, and sevenths",
+      summary: "One progression in two parts of the neck, the twelve-bar form in more than one key, a verse and a chorus built from four chords, a sixteen-bar form with a bridge, three chords from outside the key, and the seventh chords of the key in the progressions you know.",
       startHereIf: [
         "You can play two, five, one and one, six, two, five in 3 keys.",
         "You know the main chords of a minor key.",
         "You lose your place in forms longer than 4 bars, or you only know each progression in 1 part of the neck.",
       ],
-      steps: ["two-places", "twelve-bar", "verse-and-chorus"],
+      steps: ["two-places", "twelve-bar", "verse-and-chorus", "sixteen-bars", "borrowed", "sevenths", "sevenths-in-songs"],
       warmups: [
         {
           id: "two-five-one-warm",
@@ -901,6 +910,27 @@ export default definePath({
           warmup: { start: 0.6, top: 0.8, reference: "progressions.two-five-one", fallback: 50 },
           rungs: ladder(50, 100, 10),
           minutes: 3,
+        },
+        {
+          id: "seven-chords-keys",
+          title: "The seven chords of a new key",
+          purpose: "A chord on every note of a major scale, root lowest, from home round to home: the first four on the top three strings, the last four one set of strings lower, in a key you did not play yesterday.",
+          howTo: ["Straight eighths, well under your clean tempo. Say the pattern as you go: major, minor, minor, major, major, minor, diminished, major."],
+          coach: "This is a warm-up. It tells you how it went, and it decides nothing.",
+          vary: {
+            values: { key: ["D", "Eb", "E", "Bb", "B", "Db"] },
+            pooled: ["key"],
+            label: (p) => `${p.key} major`,
+            build: (p) => {
+              const by = ({ D: 2, Eb: 3, E: 4, Bb: -2, B: -1, Db: 1 } as Record<string, number>)[p.key];
+              const tab = shiftFrets(ALL_SEVEN, by);
+              return { tab, position: handAt(tab), shifts: true, chords: chartInKey(SEVEN_CHART, by, p.key), harmony: { chordTones: true as const } };
+            },
+          },
+          grade: "warmup",
+          warmup: { start: 0.6, top: 0.8, reference: "seven-chords.all-seven", fallback: 50 },
+          rungs: ladder(50, 100, 10),
+          minutes: 4,
         },
       ],
     },
