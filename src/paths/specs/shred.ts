@@ -1626,7 +1626,7 @@ const ADVANCED: StepSpec[] = [
         ],
         coach: "This is the finale: sixteen bars, held to the end. Fast notes on a real rig are the hardest for me to place, so trust the evenness and your ear together.",
         tab: ETUDE,
-        position: 4,
+        position: 5,
         shifts: true,
         chords: "Am | F | C | G | Am | F | C | G",
         jam: { groove: "rock8", key: "A minor" },
@@ -1746,7 +1746,8 @@ function octavesTab(set: string): string {
     "D and B": { low: 4, high: 2, gap: 3, frets: [7, 9, 10, 12] },
   };
   const { low, high, gap, frets } = shapes[set];
-  const pair = (f: number) => repeat(`${low}:${f} ${high}:${f + gap}`, 2);
+  // The octave grip moves as one: index below, ring (two frets up) or little finger (three) above.
+  const pair = (f: number) => repeat(`${low}:${f}f1 ${high}:${f + gap}f${gap === 2 ? 3 : 4}`, 2);
   return `/16 ${frets.map(pair).join(" ")} | ${[...frets].reverse().map(pair).join(" ")}`;
 }
 

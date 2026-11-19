@@ -55,7 +55,7 @@
           "loops": true,
           "position": {
             "fret": 12,
-            "shifts": "allowed"
+            "shifts": "none"
           },
           "pickPlan": "sweep",
           "crossing": "none",
@@ -172,7 +172,7 @@
                 "tab": "/8t 3:14 2:13 1:12 1:12 2:13 3:14 3:14 2:13 1:12 1:12 2:13 3:14 | /8t 3:12 2:13 1:12 1:12 2:13 3:12 3:12 2:13 1:12 1:12 2:13 3:12",
                 "position": {
                   "fret": 12,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -1686,18 +1686,18 @@
           "crossing": "none",
           "notesRole": "target",
           "notes": [
-            {"string":3,"fret":14,"midi":69,"tick":0,"dur":320,"tech":[],"pick":"d"},
-            {"string":2,"fret":13,"midi":72,"tick":320,"dur":320,"tech":[],"pick":"d"},
-            {"string":1,"fret":12,"midi":76,"tick":640,"dur":320,"tech":[],"pick":"d"},
-            {"string":1,"fret":10,"midi":74,"tick":960,"dur":320,"tech":["pull"]},
-            {"string":2,"fret":12,"midi":71,"tick":1280,"dur":320,"tech":[],"pick":"u"},
-            {"string":3,"fret":12,"midi":67,"tick":1600,"dur":320,"tech":[],"pick":"u"},
-            {"string":3,"fret":14,"midi":69,"tick":1920,"dur":320,"tech":[],"pick":"d"},
-            {"string":2,"fret":13,"midi":72,"tick":2240,"dur":320,"tech":[],"pick":"d"},
-            {"string":1,"fret":12,"midi":76,"tick":2560,"dur":320,"tech":[],"pick":"d"},
-            {"string":1,"fret":10,"midi":74,"tick":2880,"dur":320,"tech":["pull"]},
-            {"string":2,"fret":12,"midi":71,"tick":3200,"dur":320,"tech":[],"pick":"u"},
-            {"string":3,"fret":12,"midi":67,"tick":3520,"dur":320,"tech":[],"pick":"u"}
+            {"string":3,"fret":14,"midi":69,"tick":0,"dur":320,"tech":[],"finger":4,"pick":"d"},
+            {"string":2,"fret":13,"midi":72,"tick":320,"dur":320,"tech":[],"finger":3,"pick":"d"},
+            {"string":1,"fret":12,"midi":76,"tick":640,"dur":320,"tech":[],"finger":2,"pick":"d"},
+            {"string":1,"fret":10,"midi":74,"tick":960,"dur":320,"tech":["pull"],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":1280,"dur":320,"tech":[],"finger":3,"pick":"u"},
+            {"string":3,"fret":12,"midi":67,"tick":1600,"dur":320,"tech":[],"finger":3,"pick":"u"},
+            {"string":3,"fret":14,"midi":69,"tick":1920,"dur":320,"tech":[],"finger":4,"pick":"d"},
+            {"string":2,"fret":13,"midi":72,"tick":2240,"dur":320,"tech":[],"finger":3,"pick":"d"},
+            {"string":1,"fret":12,"midi":76,"tick":2560,"dur":320,"tech":[],"finger":2,"pick":"d"},
+            {"string":1,"fret":10,"midi":74,"tick":2880,"dur":320,"tech":["pull"],"finger":1},
+            {"string":2,"fret":12,"midi":71,"tick":3200,"dur":320,"tech":[],"finger":3,"pick":"u"},
+            {"string":3,"fret":12,"midi":67,"tick":3520,"dur":320,"tech":[],"finger":3,"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -1753,7 +1753,7 @@
             "subdivision": 1
           },
           "estimatedMinutes": 6,
-          "tab": "/8t 3:14 2:13 1:12 1:10p 2:12 3:12 3:14 2:13 1:12 1:10p 2:12 3:12",
+          "tab": "/8t 3:14f4 2:13f3 1:12f2 1:10pf1 2:12f3 3:12f3 3:14f4 2:13f3 1:12f2 1:10pf1 2:12f3 3:12f3",
           "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 12,
@@ -3341,7 +3341,7 @@
       ],
       "payoff": "The sound you came for: a five-string arpeggio up the neck and back, with every note separate.",
       "prerequisites": ["four-strings"],
-      "difficulty": 7.69,
+      "difficulty": 7.8,
       "exercises": [
         {
           "id": "five-strings.am-five",
@@ -3458,9 +3458,9 @@
         {
           "id": "five-strings.c-five",
           "title": "C major from the A string",
-          "purpose": "Major: G hammered up to C, then E, G, C, E and a three-fret top reach. It is a wider shape at the bottom and easier at the top.",
+          "purpose": "Major: G slid up to C, then E, G, C, E and a three-fret top reach. It is a wider shape at the bottom and easier at the top.",
           "howTo": [
-            "The reach from fret 10 to 15 on the A string is your widest. Warm up before pushing on this one."
+            "The slide from fret 10 to 15 on the A string is your widest move: the little finger slides, and the hand lands with the index at fret 12. Warm up before pushing on this one."
           ],
           "coachLine": "The same bar as Am. Compare the takes.",
           "grading": "graded",
@@ -3472,8 +3472,8 @@
           "bars": 1,
           "loops": true,
           "position": {
-            "fret": 10,
-            "shifts": "none"
+            "fret": 7,
+            "shifts": "allowed"
           },
           "pickPlan": "sweep",
           "crossing": "none",
@@ -3498,10 +3498,10 @@
               {"bpm":60,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
               {"bpm":90,"grading":"graded"},
-              {"bpm":110,"grading":"graded"},
-              {"bpm":125,"grading":"graded"},
-              {"bpm":145,"grading":"selfChecked"},
-              {"bpm":160,"grading":"selfChecked"}
+              {"bpm":105,"grading":"graded"},
+              {"bpm":120,"grading":"graded"},
+              {"bpm":135,"grading":"selfChecked"},
+              {"bpm":150,"grading":"selfChecked"}
             ],
             "passAtBpm": 90
           },
@@ -3550,10 +3550,10 @@
           "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 12,
-            "minGapMsAtTop": 125,
-            "handShifts": 0,
-            "maxPlayableBpm": 183,
-            "difficulty": 7.57
+            "minGapMsAtTop": 133.33,
+            "handShifts": 2,
+            "maxPlayableBpm": 154,
+            "difficulty": 7.8
           },
           "harmony": {
             "kind": "arpeggio",
@@ -4375,7 +4375,8 @@
             "Record a take and listen back. Does each note stop as the next one starts, or do they ring together like a strummed chord?"
           ]
         }
-      ]
+      ],
+      "difficultyException": "Level with Five strings to the hundredth: that Step rates a shade higher only since the C shape's slide was counted as the shift it is (fingering audit, 2026-11-18)."
     },
     {
       "id": "moving-shapes",
@@ -4980,7 +4981,7 @@
           "loops": true,
           "position": {
             "fret": 12,
-            "shifts": "allowed"
+            "shifts": "none"
           },
           "pickPlan": "sweep",
           "crossing": "none",
@@ -5081,7 +5082,7 @@
                 "tab": "/2 2:13 1:12 | 1:13h 2:13",
                 "position": {
                   "fret": 12,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -5212,7 +5213,7 @@
                 "tab": "/2 2:13 1:12 | 1:13h 2:15",
                 "position": {
                   "fret": 12,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -5288,7 +5289,7 @@
                 "tab": "/2 2:10 1:10 | 1:12h 2:12",
                 "position": {
                   "fret": 10,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -5533,7 +5534,7 @@
                 "tab": "/2 2:5 1:5 | 1:7h 2:7",
                 "position": {
                   "fret": 5,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -5778,7 +5779,7 @@
                 "tab": "/2 2:15 1:15 | 1:17h 2:17",
                 "position": {
                   "fret": 15,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -6023,7 +6024,7 @@
                 "tab": "/2 2:8 1:8 | 1:10h 2:10",
                 "position": {
                   "fret": 8,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -6061,7 +6062,7 @@
                 "tab": "/2 2:16 1:15 | 1:16h 2:16",
                 "position": {
                   "fret": 15,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -6192,7 +6193,7 @@
                 "tab": "/2 2:16 1:15 | 1:16h 2:18",
                 "position": {
                   "fret": 15,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -6268,7 +6269,7 @@
                 "tab": "/2 2:13 1:13 | 1:15h 2:15",
                 "position": {
                   "fret": 13,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -6557,7 +6558,7 @@
                 "tab": "/2t 3:10 2:10 1:10 | /2t 1:12h 2:12 3:13",
                 "position": {
                   "fret": 10,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -6717,7 +6718,7 @@
                 "tab": "/2t 3:5 2:5 1:5 | /2t 1:7h 2:7 3:8",
                 "position": {
                   "fret": 5,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -6877,7 +6878,7 @@
                 "tab": "/2t 3:15 2:15 1:15 | /2t 1:17h 2:17 3:18",
                 "position": {
                   "fret": 15,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -7037,7 +7038,7 @@
                 "tab": "/2t 3:8 2:8 1:8 | /2t 1:10h 2:10 3:11",
                 "position": {
                   "fret": 8,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -7214,7 +7215,7 @@
                 "tab": "/2t 3:13 2:13 1:13 | /2t 1:15h 2:15 3:16",
                 "position": {
                   "fret": 13,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -7574,7 +7575,7 @@
                 "tab": "/4t 3:12 2:12 1:12 1:15h 1:12p 2:12 | /4t 3:12 2:13 1:12 1:15h 1:12p 2:13",
                 "position": {
                   "fret": 12,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -7758,7 +7759,7 @@
                 "tab": "/4t 3:10 2:10 1:10 1:13h 1:10p 2:10 | /4t 3:10 2:11 1:10 1:13h 1:10p 2:11",
                 "position": {
                   "fret": 10,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -7959,7 +7960,7 @@
                 "tab": "/4t 3:15 2:15 1:15 1:18h 1:15p 2:15 | /4t 3:15 2:16 1:15 1:18h 1:15p 2:16",
                 "position": {
                   "fret": 15,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -17813,7 +17814,7 @@
       ],
       "payoff": "A sweep from the lowest note on the guitar to near the highest, with every note separate.",
       "prerequisites": ["over-the-progression"],
-      "difficulty": 7.48,
+      "difficulty": 7.7,
       "exercises": [
         {
           "id": "six-strings.minor-six",
@@ -18210,8 +18211,8 @@
           "bars": 1,
           "loops": true,
           "position": {
-            "fret": 8,
-            "shifts": "none"
+            "fret": 10,
+            "shifts": "allowed"
           },
           "pickPlan": "sweep",
           "crossing": "none",
@@ -18289,9 +18290,9 @@
           "computed": {
             "noteCount": 12,
             "minGapMsAtTop": 133.33,
-            "handShifts": 0,
+            "handShifts": 2,
             "maxPlayableBpm": 202,
-            "difficulty": 7.48
+            "difficulty": 7.7
           },
           "harmony": {
             "kind": "arpeggio",
@@ -18317,8 +18318,8 @@
                 "pool": "all",
                 "tab": "/8t 6:13 5:12 4:10 3:10 2:10 1:8 1:13h 1:8p 2:10 3:10 4:10 5:12",
                 "position": {
-                  "fret": 8,
-                  "shifts": "none"
+                  "fret": 10,
+                  "shifts": "allowed"
                 },
                 "crossing": "none",
                 "notes": [
@@ -18343,9 +18344,9 @@
                 "computed": {
                   "noteCount": 12,
                   "minGapMsAtTop": 133.33,
-                  "handShifts": 0,
+                  "handShifts": 2,
                   "maxPlayableBpm": 202,
-                  "difficulty": 7.48
+                  "difficulty": 7.7
                 },
                 "harmony": {
                   "kind": "arpeggio",
@@ -18363,8 +18364,8 @@
                 "pool": "all",
                 "tab": "/8t 6:15 5:14 4:12 3:12 2:12 1:10 1:15h 1:10p 2:12 3:12 4:12 5:14",
                 "position": {
-                  "fret": 10,
-                  "shifts": "none"
+                  "fret": 12,
+                  "shifts": "allowed"
                 },
                 "crossing": "none",
                 "notes": [
@@ -18389,9 +18390,9 @@
                 "computed": {
                   "noteCount": 12,
                   "minGapMsAtTop": 133.33,
-                  "handShifts": 0,
-                  "maxPlayableBpm": 400,
-                  "difficulty": 7.48
+                  "handShifts": 2,
+                  "maxPlayableBpm": 277,
+                  "difficulty": 7.7
                 },
                 "harmony": {
                   "kind": "arpeggio",
@@ -18409,8 +18410,8 @@
                 "pool": "all",
                 "tab": "/8t 6:17 5:16 4:14 3:14 2:14 1:12 1:17h 1:12p 2:14 3:14 4:14 5:16",
                 "position": {
-                  "fret": 12,
-                  "shifts": "none"
+                  "fret": 14,
+                  "shifts": "allowed"
                 },
                 "crossing": "none",
                 "notes": [
@@ -18435,9 +18436,9 @@
                 "computed": {
                   "noteCount": 12,
                   "minGapMsAtTop": 133.33,
-                  "handShifts": 0,
-                  "maxPlayableBpm": 400,
-                  "difficulty": 7.48
+                  "handShifts": 2,
+                  "maxPlayableBpm": 286,
+                  "difficulty": 7.7
                 },
                 "harmony": {
                   "kind": "arpeggio",
@@ -18934,7 +18935,7 @@
                 "pool": "all",
                 "tab": "/4t 6:12 5:10 4:9 3:9 2:8 1:7 | /4t 1:5p 2:7 3:7 4:7 5:9 6:10 | /4t 6:8p 5:7 4:5 3:5 2:5 1:3 | /4t 1:2p 2:3 3:2 4:4 5:5 6:5",
                 "position": {
-                  "fret": 7,
+                  "fret": 8,
                   "shifts": "allowed"
                 },
                 "crossing": "none",
@@ -18973,7 +18974,7 @@
                   "noteCount": 24,
                   "minGapMsAtTop": 222.22,
                   "handShifts": 6,
-                  "maxPlayableBpm": 323,
+                  "maxPlayableBpm": 390,
                   "difficulty": 5.35
                 },
                 "chords": ["Em", "D", "C", "D"],
@@ -18992,7 +18993,7 @@
                 "pool": "all",
                 "tab": "/4t 6:12 5:10 4:9 3:9 2:8 1:7 | /4t 1:8h 2:8 3:9 4:10 5:10 6:12 | /4t 6:10p 5:10 4:9 3:7 2:8 1:7 | /4t 1:5p 2:7 3:7 4:7 5:9 6:10",
                 "position": {
-                  "fret": 7,
+                  "fret": 8,
                   "shifts": "allowed"
                 },
                 "crossing": "none",
@@ -19030,9 +19031,9 @@
                 "computed": {
                   "noteCount": 24,
                   "minGapMsAtTop": 222.22,
-                  "handShifts": 3,
-                  "maxPlayableBpm": 323,
-                  "difficulty": 5.24
+                  "handShifts": 4,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 5.28
                 },
                 "chords": ["Em", "C", "G", "D"],
                 "harmony": {
@@ -19050,7 +19051,7 @@
                 "pool": "all",
                 "tab": "/4t 6:12 5:10 4:9 3:9 2:8 1:7 | /4t 1:8h 2:10 3:9 4:10 5:12 6:12 | /4t 6:11p 5:9 4:9 3:8 2:7 1:7s | /4t 1:3 2:5 3:4 4:5 5:7 6:7",
                 "position": {
-                  "fret": 7,
+                  "fret": 8,
                   "shifts": "allowed"
                 },
                 "crossing": "none",
@@ -19088,9 +19089,9 @@
                 "computed": {
                   "noteCount": 24,
                   "minGapMsAtTop": 222.22,
-                  "handShifts": 4,
-                  "maxPlayableBpm": 323,
-                  "difficulty": 5.28
+                  "handShifts": 5,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 5.31
                 },
                 "chords": ["Em", "Am", "B", "Em"],
                 "harmony": {
@@ -20211,7 +20212,8 @@
             ]
           }
         }
-      ]
+      ],
+      "difficultyException": "Its shapes are the three-string triads already known; the demand is the jump between them, which the score counts as one shift. Six strings rates higher since the major six-string shape was fingered honestly: six frets wide, its hand moves inside the shape (fingering audit, 2026-11-18)."
     },
     {
       "id": "neoclassical",
@@ -23792,7 +23794,7 @@
                 "pool": "all",
                 "tab": "/4t 6:12 5:10 4:9 3:9 2:8 1:7 | /4t 1:5p 2:7 3:7 4:7 5:9 6:10 | /4t 6:8p 5:7 4:5 3:5 2:5 1:3 | /4t 1:2p 2:3 3:2 4:4 5:5 6:5",
                 "position": {
-                  "fret": 7,
+                  "fret": 8,
                   "shifts": "allowed"
                 },
                 "crossing": "none",
@@ -23834,7 +23836,7 @@
                   "noteCount": 24,
                   "minGapMsAtTop": 222.22,
                   "handShifts": 6,
-                  "maxPlayableBpm": 323,
+                  "maxPlayableBpm": 390,
                   "difficulty": 5.35
                 },
                 "chords": ["Em", "D", "C", "D"],
@@ -23853,7 +23855,7 @@
                 "pool": "all",
                 "tab": "/4t 6:12 5:10 4:9 3:9 2:8 1:7 | /4t 1:8h 2:8 3:9 4:10 5:10 6:12 | /4t 6:10p 5:10 4:9 3:7 2:8 1:7 | /4t 1:5p 2:7 3:7 4:7 5:9 6:10",
                 "position": {
-                  "fret": 7,
+                  "fret": 8,
                   "shifts": "allowed"
                 },
                 "crossing": "none",
@@ -23894,9 +23896,9 @@
                 "computed": {
                   "noteCount": 24,
                   "minGapMsAtTop": 222.22,
-                  "handShifts": 3,
-                  "maxPlayableBpm": 323,
-                  "difficulty": 5.24
+                  "handShifts": 4,
+                  "maxPlayableBpm": 400,
+                  "difficulty": 5.28
                 },
                 "chords": ["Em", "C", "G", "D"],
                 "harmony": {

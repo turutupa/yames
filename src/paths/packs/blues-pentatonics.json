@@ -1760,7 +1760,7 @@
           "loops": true,
           "position": {
             "fret": 5,
-            "shifts": "allowed"
+            "shifts": "none"
           },
           "pickPlan": "free",
           "crossing": "none",
@@ -1881,7 +1881,7 @@
                 "tab": "/8 6:5 6:8 5:5 5:6 5:7 4:5 4:7 3:5 3:7 3:8 2:5 2:8 1:5 1:8 1:5 2:8 2:5 3:8 3:7 3:5 4:7 4:5 5:7 5:6 5:5 6:8 hold",
                 "position": {
                   "fret": 5,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -1944,7 +1944,7 @@
                 "tab": "/8 6:8 6:11 5:8 5:9 5:10 4:8 4:10 3:8 3:10 3:11 2:8 2:11 1:8 1:11 1:8 2:11 2:8 3:11 3:10 3:8 4:10 4:8 5:10 5:9 5:8 6:11 hold",
                 "position": {
                   "fret": 8,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -2007,7 +2007,7 @@
                 "tab": "/8 6:10 6:13 5:10 5:11 5:12 4:10 4:12 3:10 3:12 3:13 2:10 2:13 1:10 1:13 1:10 2:13 2:10 3:13 3:12 3:10 4:12 4:10 5:12 5:11 5:10 6:13 hold",
                 "position": {
                   "fret": 10,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -2070,7 +2070,7 @@
                 "tab": "/8 6:0 6:3 5:0 5:1 5:2 4:0 4:2 3:0 3:2 3:3 2:0 2:3 1:0 1:3 1:0 2:3 2:0 3:3 3:2 3:0 4:2 4:0 5:2 5:1 5:0 6:3 hold",
                 "position": {
                   "fret": 1,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -2133,7 +2133,7 @@
                 "tab": "/8 6:3 6:6 5:3 5:4 5:5 4:3 4:5 3:3 3:5 3:6 2:3 2:6 1:3 1:6 1:3 2:6 2:3 3:6 3:5 3:3 4:5 4:3 5:5 5:4 5:3 6:6 hold",
                 "position": {
                   "fret": 3,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -2175,7 +2175,7 @@
                   "noteCount": 26,
                   "minGapMsAtTop": 272.73,
                   "handShifts": 0,
-                  "maxPlayableBpm": 233,
+                  "maxPlayableBpm": 225,
                   "difficulty": 2.5
                 },
                 "harmony": {
@@ -3651,7 +3651,7 @@
           "loops": true,
           "position": {
             "fret": 5,
-            "shifts": "allowed"
+            "shifts": "none"
           },
           "pickPlan": "free",
           "crossing": "none",
@@ -3748,7 +3748,7 @@
             "noteCount": 40,
             "minGapMsAtTop": 222.22,
             "handShifts": 0,
-            "maxPlayableBpm": 400,
+            "maxPlayableBpm": 238,
             "difficulty": 2.83
           },
           "chords": ["A7", "A7", "A7", "A7", "D7", "D7", "A7", "A7", "E7", "D7", "A7", "E7"],
@@ -3771,7 +3771,7 @@
                 "tab": "/2 4:7 /4t 3:5 /8t 3:7 /4t 3:5 /8t 3:7 | /2 2:5 r | 2:8 /4t 2:5 /8t 3:7 /4t 3:5 /8t 3:7 | /2 4:7 r | 3:7 /4t 3:5 /8t 4:7 /4t 3:5 /8t 3:7 | /2 3:5 r | 4:7 /4t 3:5 /8t 3:7 /4t 2:5 /8t 3:7 | /2 2:5 r | 2:5 /4t 3:7 /8t 3:5 /4t 3:7 /8t 2:5 | /2 3:7 /4t 3:5 /8t 3:7 /4t 3:5 /8t 4:7 | /2 4:7 /4t 3:5 /8t 4:7 /4t 4:5 /8t 3:5 | /2 2:5 r",
                 "position": {
                   "fret": 5,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -3834,7 +3834,7 @@
                   "noteCount": 40,
                   "minGapMsAtTop": 222.22,
                   "handShifts": 0,
-                  "maxPlayableBpm": 400,
+                  "maxPlayableBpm": 238,
                   "difficulty": 2.83
                 },
                 "chords": ["A7", "A7", "A7", "A7", "D7", "D7", "A7", "A7", "E7", "D7", "A7", "E7"]
@@ -3849,7 +3849,7 @@
                 "tab": "/2 4:10 /4t 3:8 /8t 3:10 /4t 3:8 /8t 3:10 | /2 2:8 r | 2:11 /4t 2:8 /8t 3:10 /4t 3:8 /8t 3:10 | /2 4:10 r | 3:10 /4t 3:8 /8t 4:10 /4t 3:8 /8t 3:10 | /2 3:8 r | 4:10 /4t 3:8 /8t 3:10 /4t 2:8 /8t 3:10 | /2 2:8 r | 2:8 /4t 3:10 /8t 3:8 /4t 3:10 /8t 2:8 | /2 3:10 /4t 3:8 /8t 3:10 /4t 3:8 /8t 4:10 | /2 4:10 /4t 3:8 /8t 4:10 /4t 4:8 /8t 3:8 | /2 2:8 r",
                 "position": {
                   "fret": 8,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -3927,7 +3927,7 @@
                 "tab": "/2 4:2 /4t 3:0 /8t 3:2 /4t 3:0 /8t 3:2 | /2 2:0 r | 2:3 /4t 2:0 /8t 3:2 /4t 3:0 /8t 3:2 | /2 4:2 r | 3:2 /4t 3:0 /8t 4:2 /4t 3:0 /8t 3:2 | /2 3:0 r | 4:2 /4t 3:0 /8t 3:2 /4t 2:0 /8t 3:2 | /2 2:0 r | 2:0 /4t 3:2 /8t 3:0 /4t 3:2 /8t 2:0 | /2 3:2 /4t 3:0 /8t 3:2 /4t 3:0 /8t 4:2 | /2 4:2 /4t 3:0 /8t 4:2 /4t 4:0 /8t 3:0 | /2 2:0 r",
                 "position": {
                   "fret": 2,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -4005,7 +4005,7 @@
                 "tab": "/2 4:5 /4t 3:3 /8t 3:5 /4t 3:3 /8t 3:5 | /2 2:3 r | 2:6 /4t 2:3 /8t 3:5 /4t 3:3 /8t 3:5 | /2 4:5 r | 3:5 /4t 3:3 /8t 4:5 /4t 3:3 /8t 3:5 | /2 3:3 r | 4:5 /4t 3:3 /8t 3:5 /4t 2:3 /8t 3:5 | /2 2:3 r | 2:3 /4t 3:5 /8t 3:3 /4t 3:5 /8t 2:3 | /2 3:5 /4t 3:3 /8t 3:5 /4t 3:3 /8t 4:5 | /2 4:5 /4t 3:3 /8t 4:5 /4t 4:3 /8t 3:3 | /2 2:3 r",
                 "position": {
                   "fret": 3,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -4068,7 +4068,7 @@
                   "noteCount": 40,
                   "minGapMsAtTop": 222.22,
                   "handShifts": 0,
-                  "maxPlayableBpm": 400,
+                  "maxPlayableBpm": 150,
                   "difficulty": 2.83
                 },
                 "chords": ["G7", "G7", "G7", "G7", "C7", "C7", "G7", "G7", "D7", "C7", "G7", "D7"]
@@ -4112,20 +4112,20 @@
           "loops": true,
           "position": {
             "fret": 7,
-            "shifts": "none"
+            "shifts": "allowed"
           },
           "pickPlan": "free",
           "crossing": "none",
           "notesRole": "target",
           "notes": [
-            {"string":3,"fret":9,"midi":64,"tick":0,"dur":1920,"tech":[]},
-            {"string":3,"fret":7,"midi":62,"tick":1920,"dur":1920,"tech":["bend"],"bend":2},
-            {"string":2,"fret":10,"midi":69,"tick":3840,"dur":1920,"tech":[]},
-            {"string":2,"fret":8,"midi":67,"tick":5760,"dur":1920,"tech":["bend"],"bend":2},
-            {"string":1,"fret":10,"midi":74,"tick":7680,"dur":1920,"tech":[]},
-            {"string":1,"fret":8,"midi":72,"tick":9600,"dur":1920,"tech":["bend"],"bend":2},
-            {"string":3,"fret":9,"midi":64,"tick":11520,"dur":1920,"tech":[]},
-            {"string":3,"fret":7,"midi":62,"tick":13440,"dur":1920,"tech":["bend"],"bend":2}
+            {"string":3,"fret":9,"midi":64,"tick":0,"dur":1920,"tech":[],"finger":3},
+            {"string":3,"fret":7,"midi":62,"tick":1920,"dur":1920,"tech":["bend"],"bend":2,"finger":3},
+            {"string":2,"fret":10,"midi":69,"tick":3840,"dur":1920,"tech":[],"finger":3},
+            {"string":2,"fret":8,"midi":67,"tick":5760,"dur":1920,"tech":["bend"],"bend":2,"finger":3},
+            {"string":1,"fret":10,"midi":74,"tick":7680,"dur":1920,"tech":[],"finger":3},
+            {"string":1,"fret":8,"midi":72,"tick":9600,"dur":1920,"tech":["bend"],"bend":2,"finger":3},
+            {"string":3,"fret":9,"midi":64,"tick":11520,"dur":1920,"tech":[],"finger":3},
+            {"string":3,"fret":7,"midi":62,"tick":13440,"dur":1920,"tech":["bend"],"bend":2,"finger":3}
           ],
           "rests": [],
           "tempo": {
@@ -4163,7 +4163,7 @@
             "subdivision": 1
           },
           "estimatedMinutes": 5,
-          "tab": "/2 3:9 3:7b2 | /2 2:10 2:8b2 | /2 1:10 1:8b2 | /2 3:9 3:7b2",
+          "tab": "/2 3:9f3 3:7b2f3 | /2 2:10f3 2:8b2f3 | /2 1:10f3 1:8b2f3 | /2 3:9f3 3:7b2f3",
           "subdivision": "halves",
           "computed": {
             "noteCount": 8,
@@ -4209,10 +4209,10 @@
           "crossing": "none",
           "notesRole": "target",
           "notes": [
-            {"string":1,"fret":9,"midi":73,"tick":0,"dur":1920,"tech":[]},
-            {"string":1,"fret":8,"midi":72,"tick":1920,"dur":1920,"tech":["bend"],"bend":1},
-            {"string":1,"fret":9,"midi":73,"tick":3840,"dur":1920,"tech":[]},
-            {"string":1,"fret":8,"midi":72,"tick":5760,"dur":1920,"tech":["bend","vibrato"],"bend":1}
+            {"string":1,"fret":9,"midi":73,"tick":0,"dur":1920,"tech":[],"finger":3},
+            {"string":1,"fret":8,"midi":72,"tick":1920,"dur":1920,"tech":["bend"],"bend":1,"finger":3},
+            {"string":1,"fret":9,"midi":73,"tick":3840,"dur":1920,"tech":[],"finger":3},
+            {"string":1,"fret":8,"midi":72,"tick":5760,"dur":1920,"tech":["bend","vibrato"],"bend":1,"finger":3}
           ],
           "rests": [],
           "tempo": {
@@ -4257,7 +4257,7 @@
             "chart": "A7 | A7"
           },
           "estimatedMinutes": 4,
-          "tab": "/2 1:9 1:8b1 | 1:9 1:8b1v",
+          "tab": "/2 1:9f3 1:8b1f3 | 1:9f3 1:8b1vf3",
           "subdivision": "halves",
           "computed": {
             "noteCount": 4,
@@ -4287,7 +4287,7 @@
           "bars": 2,
           "loops": true,
           "position": {
-            "fret": 7,
+            "fret": 5,
             "shifts": "none"
           },
           "pickPlan": "free",
@@ -6083,7 +6083,7 @@
                 "tab": "/2 3:1 2:3 | 3:1 2:3 | 3:1 2:3 | 3:1 2:3 | 3:0 2:2 | 3:0 2:2 | 3:1 2:3 | 3:1 2:3 | 4:1 3:2 | 3:0 2:2 | 3:1 2:3 | 4:1 3:2",
                 "position": {
                   "fret": 1,
-                  "shifts": "allowed"
+                  "shifts": "none"
                 },
                 "crossing": "none",
                 "notes": [
@@ -6649,7 +6649,7 @@
           "loops": true,
           "position": {
             "fret": 5,
-            "shifts": "allowed"
+            "shifts": "none"
           },
           "pickPlan": "free",
           "crossing": "none",
