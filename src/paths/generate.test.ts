@@ -3,11 +3,12 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { MINIMAL_SPEC } from "./fixtures/minimal";
+import { MINIMAL_SPEC, VARIANT_TEXT_SPEC } from "./fixtures/minimal";
 import { PATH_SCHEMA_VERSION, REVIEW_STATUSES, subdivisionOf } from "./format";
 import type { PathDoc } from "./format";
 import { buildPath, serializePath } from "./generate";
 import { packBytes, renderReviewPage, scheduleFixtures } from "./pipeline";
+import type { PathSpec } from "./spec";
 import { SPECS } from "./specs/index";
 import { errorsIn, runtimeNeeds, validatePath } from "./validate";
 
@@ -130,6 +131,83 @@ describe("subdivisions", () => {
       }
     }
     expect(named).toBeGreaterThan(100);
+  });
+});
+
+describe("a variant's own text", () => {
+  const plain = buildPath(MINIMAL_SPEC).levels![0].warmups[0];
+  const warm = buildPath(VARIANT_TEXT_SPEC).levels![0].warmups[0];
+  const variants = warm.variation!.variants;
+
+  it("is copied from the build onto every variant after the first", () => {
+    expect(variants.slice(1).map((v) => v.purpose)).toEqual(
+      ["2", "3", "5", "7", "9"].map((key) => `A purpose of its own for the line moved up ${key} frets.`),
+    );
+    expect(variants[1].howTo).toEqual(["Play it evenly.", "Start at fret 5."]);
+    expect(variants[5].howTo).toEqual(["Play it evenly.", "Start at fret 12."]);
+  });
+
+  it("is never written for the first variant: its text is the Exercise's", () => {
+    expect(variants[0]).not.toHaveProperty("purpose");
+    expect(variants[0]).not.toHaveProperty("howTo");
+    expect(warm.purpose).toBe(plain.purpose);
+    expect(warm.howTo).toEqual(plain.howTo);
+    expect(serializePath(buildPath(VARIANT_TEXT_SPEC))).not.toContain("moved up 0 frets");
+  });
+
+  it("is not written when it only repeats the Exercise's", () => {
+    const spec = VARIANT_TEXT_SPEC.levels![0].warmups[0];
+    const same: PathSpec = {
+      ...MINIMAL_SPEC,
+      levels: MINIMAL_SPEC.levels!.map((level) => ({
+        ...level,
+        warmups: [{ ...spec, vary: { ...spec.vary!, build: (p) => ({ ...spec.vary!.build(p), purpose: spec.purpose, howTo: [...spec.howTo] }) } }],
+      })),
+    };
+    expect(packBytes(same)).toBe(packBytes(MINIMAL_SPEC));
+  });
+
+  it("may be made from the Exercise's own how-to, to keep a line of it", () => {
+    const spec = VARIANT_TEXT_SPEC.levels![0].warmups[0];
+    const kept: PathSpec = {
+      ...MINIMAL_SPEC,
+      levels: MINIMAL_SPEC.levels!.map((level) => ({
+        ...level,
+        warmups: [
+          {
+            ...spec,
+            howTo: ["Straight eighths, well under your clean tempo.", "Start at fret 3."],
+            vary: {
+              ...spec.vary!,
+              build: (p) => ({ ...spec.vary!.build(p), purpose: undefined, howTo: (own) => [own[0], `Start at fret ${3 + Number(p.key)}.`] }),
+            },
+          },
+        ],
+      })),
+    };
+    const built = buildPath(kept).levels![0].warmups[0].variation!.variants;
+    expect(built[2].howTo).toEqual(["Straight eighths, well under your clean tempo.", "Start at fret 6."]);
+    expect(built[2]).not.toHaveProperty("purpose");
+    // The first variant's comes out as the Exercise's own lines, and is not written.
+    expect(built[0]).not.toHaveProperty("howTo");
+  });
+
+  it("changes nothing else, and sits with the variant's label in the pack", () => {
+    const strip = (doc: PathDoc) =>
+      JSON.stringify(doc, (key, value) => (key === "purpose" || key === "howTo" ? undefined : value));
+    expect(strip(buildPath(VARIANT_TEXT_SPEC))).toBe(strip(buildPath(MINIMAL_SPEC)));
+    expect(Object.keys(variants[1]).slice(0, 7)).toEqual(["id", "label", "params", "pool", "purpose", "howTo", "tab"]);
+    expect(packBytes(VARIANT_TEXT_SPEC)).toBe(packBytes(VARIANT_TEXT_SPEC));
+  });
+
+  it("validates, and shows on the review page beside that variant's tab", () => {
+    const doc = buildPath(VARIANT_TEXT_SPEC);
+    expect(validatePath(JSON.parse(serializePath(doc))).map((i) => `${i.rule} ${i.where}`)).toEqual([]);
+    const html = renderReviewPage(doc);
+    // `includes`, not `toContain`: a failure must not print the whole page.
+    expect(html.includes("This variant's own text")).toBe(true);
+    expect(html.includes("<li>Start at fret 12.</li>")).toBe(true);
+    expect(renderReviewPage(buildPath(MINIMAL_SPEC)).includes("own text")).toBe(false);
   });
 });
 

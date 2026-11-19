@@ -29,7 +29,7 @@ import {
   barLengthTicks,
   subdivisionOf,
 } from "./format";
-import type { Exercise, Harmony, PathDoc, PathLevel, PathNote, Step } from "./format";
+import type { Exercise, ExerciseVariant, Harmony, PathDoc, PathLevel, PathNote, Step } from "./format";
 import {
   crossingsIn,
   gradedGapLimit,
@@ -138,6 +138,8 @@ export const RULES = {
   "variation.base": "the Exercise's own notes are not its first variant",
   "variation.pool": "a variant in the wrong pool for its values",
   "variation.pooledDifficulty": "a pool whose variants differ too much in difficulty to share progress",
+  "variation.text": "a variant's own why or how-to that is empty, too thin, or not text",
+  "variation.firstText": "the first variant carries text of its own: its text is the Exercise's",
   "warmup.variants": "a warm-up with too few variants",
   "warmup.moves": "a warm-up variant that stays in one place",
   "warmup.short": "a warm-up that is too long",
@@ -737,6 +739,15 @@ function checkPathText(doc: PathDoc, report: Report) {
   }
   for (const ex of [...doc.steps.flatMap((s) => s.exercises), ...(doc.levels ?? []).flatMap((l) => l.warmups)]) {
     texts.push([`${ex.id}.purpose`, ex.purpose], [`${ex.id}.coachLine`, ex.coachLine]);
+    // A variant's own words are read by the player like the Exercise's.
+    for (const v of ex.variation?.variants ?? []) {
+      if (typeof v.purpose === "string") texts.push([`${ex.id}#${v.id}.purpose`, v.purpose]);
+      if (Array.isArray(v.howTo)) {
+        v.howTo.forEach((t, i) => {
+          if (typeof t === "string") texts.push([`${ex.id}#${v.id}.howTo ${i + 1}`, t]);
+        });
+      }
+    }
   }
   for (const level of doc.levels ?? []) {
     texts.push([`level ${level.id}.summary`, level.summary]);
@@ -923,6 +934,31 @@ function noteKey(notes: readonly PathNote[]): string {
   return notes.map((n) => `${n.tick}:${n.string}:${n.fret}`).join(" ");
 }
 
+/**
+ * A variant's own words, held to what the Exercise's are (`progress.why`,
+ * `progress.howTo`): a why that says something, a how-to with no empty line.
+ * The banned-claims lint reads them through the concrete Exercise
+ * (`checkHonesty`), and the TODO and jargon lints in `checkPathText`.
+ */
+function checkVariantText(ex: Exercise, v: ExerciseVariant, index: number, report: Report) {
+  const where = `${ex.id}#${v.id}`;
+  const purpose: unknown = v.purpose;
+  const howTo: unknown = v.howTo;
+  if (index === 0 && (purpose !== undefined || howTo !== undefined)) {
+    report("variation.firstText", where, "the first variant is the Exercise's own notes, so the Exercise's purpose and how-to are its text; a second copy could disagree with it");
+  }
+  if (purpose !== undefined && (typeof purpose !== "string" || purpose.trim().length < 20)) {
+    report("variation.text", `${where}.purpose`, "the variant's own purpose does not say what it is for; leave it out to use the Exercise's");
+  }
+  if (howTo !== undefined) {
+    if (!Array.isArray(howTo) || howTo.length === 0) {
+      report("variation.text", `${where}.howTo`, "the variant's own how-to has no lines; leave it out to use the Exercise's");
+    } else if (howTo.some((t) => typeof t !== "string" || !t.trim())) {
+      report("variation.text", `${where}.howTo`, "the variant's own how-to has an empty line");
+    }
+  }
+}
+
 function checkVariation(ex: Exercise, report: Report) {
   const variation = ex.variation!;
   if (variation.variants.length < 2) {
@@ -947,9 +983,10 @@ function checkVariation(ex: Exercise, report: Report) {
   const ids = new Set<string>();
   const keys = new Map<string, string>();
   const pools = new Map<string, number[]>();
-  for (const v of variation.variants) {
+  for (const [index, v] of variation.variants.entries()) {
     if (ids.has(v.id)) report("variation.shape", ex.id, `variant id "${v.id}" is used twice`);
     ids.add(v.id);
+    checkVariantText(ex, v, index, report);
     for (const d of dims) {
       if (v.params[d] === undefined) report("variation.shape", `${ex.id}#${v.id}`, `no value for "${d}"`);
     }
