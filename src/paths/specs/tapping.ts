@@ -125,6 +125,7 @@ export default definePath({
   prerequisites: { paths: [{ path: "legato", level: "beginner" }], skills: ["Hammer-ons and pull-offs", "Triplets with a click at 70 BPM"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
+  variantText: true,
   orderRationale:
     "One tap and one pull-off first, then the three-note cell every tapping lick is built on. Moving the tap comes before moving the fretting hand, because the tapping finger is the easier of the two to aim. Sixteenths and two strings follow, then a scale under the tap, which needs the legato strength the earlier Steps build. Sextuplets and two tapped notes come last, and the band after that.",
   gradingLimits:

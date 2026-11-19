@@ -542,6 +542,10 @@
                   "stringSet": "F on the top string"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Quarter notes, 50 BPM up to a pass at 80.",
+                  "On the top string from fret 1: 1, 3, 5, 6, 8, 10, 12, 13, and back. Say 'whole, whole, half' as you move."
+                ],
                 "tab": "/4 1:1f1 1:3f1 1:5f1 1:6f1 | 1:8f1 1:10f1 1:12f1 1:13f1 | 1:12f1 1:10f1 1:8f1 1:6f1 | 1:5f1 1:3f1 /2 1:1f1",
                 "position": {
                   "fret": 1,
@@ -889,6 +893,10 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, two to a click, 50 BPM up to a pass at 80.",
+                  "In B: low E string 7 and 9, A string 6, 7 and 9, D string 6, 8 and 9. Fingers 2 and 4, then 1, 2 and 4, then 1, 3 and 4."
+                ],
                 "tab": "/8 6:7 6:9 5:6 5:7 5:9 4:6 4:8 4:9 4:8 4:6 5:9 5:7 5:6 6:9 hold",
                 "position": {
                   "fret": 6,
@@ -938,6 +946,10 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, two to a click, 50 BPM up to a pass at 80.",
+                  "In C: low E string 8 and 10, A string 7, 8 and 10, D string 7, 9 and 10. Fingers 2 and 4, then 1, 2 and 4, then 1, 3 and 4."
+                ],
                 "tab": "/8 6:8 6:10 5:7 5:8 5:10 4:7 4:9 4:10 4:9 4:7 5:10 5:8 5:7 6:10 hold",
                 "position": {
                   "fret": 7,
@@ -987,6 +999,10 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, two to a click, 50 BPM up to a pass at 80.",
+                  "In D: low E string 10 and 12, A string 9, 10 and 12, D string 9, 11 and 12. Fingers 2 and 4, then 1, 2 and 4, then 1, 3 and 4."
+                ],
                 "tab": "/8 6:10 6:12 5:9 5:10 5:12 4:9 4:11 4:12 4:11 4:9 5:12 5:10 5:9 6:12 hold",
                 "position": {
                   "fret": 9,
@@ -1232,6 +1248,10 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, 50 BPM up to a pass at 80.",
+                  "After the D string in B: G string 6 and 8, B string 7 and 9, top string 6 and 7. The first finger takes fret 6 on four of the six strings; the hand stays where it is."
+                ],
                 "tab": "/8 6:7 6:9 5:6 5:7 5:9 4:6 4:8 4:9 3:6 3:8 2:7 2:9 1:6 1:7 1:6 2:9 2:7 3:8 3:6 4:9 4:8 4:6 5:9 5:7 5:6 6:9 hold",
                 "position": {
                   "fret": 6,
@@ -1295,6 +1315,10 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, 50 BPM up to a pass at 80.",
+                  "After the D string in C: G string 7 and 9, B string 8 and 10, top string 7 and 8. The first finger takes fret 7 on four of the six strings; the hand stays where it is."
+                ],
                 "tab": "/8 6:8 6:10 5:7 5:8 5:10 4:7 4:9 4:10 3:7 3:9 2:8 2:10 1:7 1:8 1:7 2:10 2:8 3:9 3:7 4:10 4:9 4:7 5:10 5:8 5:7 6:10 hold",
                 "position": {
                   "fret": 7,
@@ -1358,6 +1382,10 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, 50 BPM up to a pass at 80.",
+                  "After the D string in D: G string 9 and 11, B string 10 and 12, top string 9 and 10. The first finger takes fret 9 on four of the six strings; the hand stays where it is."
+                ],
                 "tab": "/8 6:10 6:12 5:9 5:10 5:12 4:9 4:11 4:12 3:9 3:11 2:10 2:12 1:9 1:10 1:9 2:12 2:10 3:11 3:9 4:12 4:11 4:9 5:12 5:10 5:9 6:12 hold",
                 "position": {
                   "fret": 9,
@@ -2045,6 +2073,11 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "purpose": "B natural minor on the low three strings, up and back. A different key comes round on each Take.",
+                "howTo": [
+                  "Straight eighths, 50 BPM up to a pass at 80.",
+                  "In B: low E string 7, 9 and 10; A string 7, 9 and 10; D string 7 and 9."
+                ],
                 "tab": "/8 6:7 6:9 6:10 5:7 5:9 5:10 4:7 4:9 4:7 5:10 5:9 5:7 6:10 6:9 hold",
                 "position": {
                   "fret": 7,
@@ -2094,6 +2127,11 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "C natural minor on the low three strings, up and back. A different key comes round on each Take.",
+                "howTo": [
+                  "Straight eighths, 50 BPM up to a pass at 80.",
+                  "In C: low E string 8, 10 and 11; A string 8, 10 and 11; D string 8 and 10."
+                ],
                 "tab": "/8 6:8 6:10 6:11 5:8 5:10 5:11 4:8 4:10 4:8 5:11 5:10 5:8 6:11 6:10 hold",
                 "position": {
                   "fret": 8,
@@ -2143,6 +2181,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "D natural minor on the low three strings, up and back. A different key comes round on each Take.",
+                "howTo": [
+                  "Straight eighths, 50 BPM up to a pass at 80.",
+                  "In D: low E string 10, 12 and 13; A string 10, 12 and 13; D string 10 and 12."
+                ],
                 "tab": "/8 6:10 6:12 6:13 5:10 5:12 5:13 4:10 4:12 4:10 5:13 5:12 5:10 6:13 6:12 hold",
                 "position": {
                   "fret": 10,
@@ -2192,6 +2235,11 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "purpose": "E natural minor on the low three strings, up and back. A different key comes round on each Take.",
+                "howTo": [
+                  "Straight eighths, 50 BPM up to a pass at 80.",
+                  "In E: low E string 12, 14 and 15; A string 12, 14 and 15; D string 12 and 14."
+                ],
                 "tab": "/8 6:12 6:14 6:15 5:12 5:14 5:15 4:12 4:14 4:12 5:15 5:14 5:12 6:15 6:14 hold",
                 "position": {
                   "fret": 12,
@@ -2690,6 +2738,11 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "purpose": "B, C#, D; C#, D, E; D, E, F#: B minor climbing in groups of three, one group to a beat.",
+                "howTo": [
+                  "Eighth-note triplets, three to a click, 50 BPM up to a pass at 85.",
+                  "The minor shape at fret 7, one octave. The first note of each group lands on the click, and each group starts where the last one's second note was."
+                ],
                 "tab": "/8t 6:7 6:9 6:10 6:9 6:10 5:7 6:10 5:7 5:9 5:7 5:9 5:10 5:9 5:10 4:7 5:10 4:7 4:9 hold",
                 "position": {
                   "fret": 7,
@@ -2745,6 +2798,11 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "C, D, Eb; D, Eb, F; Eb, F, G: C minor climbing in groups of three, one group to a beat.",
+                "howTo": [
+                  "Eighth-note triplets, three to a click, 50 BPM up to a pass at 85.",
+                  "The minor shape at fret 8, one octave. The first note of each group lands on the click, and each group starts where the last one's second note was."
+                ],
                 "tab": "/8t 6:8 6:10 6:11 6:10 6:11 5:8 6:11 5:8 5:10 5:8 5:10 5:11 5:10 5:11 4:8 5:11 4:8 4:10 hold",
                 "position": {
                   "fret": 8,
@@ -2800,6 +2858,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "D, E, F; E, F, G; F, G, A: D minor climbing in groups of three, one group to a beat.",
+                "howTo": [
+                  "Eighth-note triplets, three to a click, 50 BPM up to a pass at 85.",
+                  "The minor shape at fret 10, one octave. The first note of each group lands on the click, and each group starts where the last one's second note was."
+                ],
                 "tab": "/8t 6:10 6:12 6:13 6:12 6:13 5:10 6:13 5:10 5:12 5:10 5:12 5:13 5:12 5:13 4:10 5:13 4:10 4:12 hold",
                 "position": {
                   "fret": 10,
@@ -3039,6 +3102,7 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "purpose": "B, C#, D, E; C#, D, E, F#; and on up: groups of four in eighth notes, each group two beats long.",
                 "tab": "/8 6:7 6:9 6:10 5:7 6:9 6:10 5:7 5:9 6:10 5:7 5:9 5:10 5:7 5:9 5:10 4:7 5:9 5:10 4:7 4:9 hold",
                 "position": {
                   "fret": 7,
@@ -3096,6 +3160,7 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "C, D, Eb, F; D, Eb, F, G; and on up: groups of four in eighth notes, each group two beats long.",
                 "tab": "/8 6:8 6:10 6:11 5:8 6:10 6:11 5:8 5:10 6:11 5:8 5:10 5:11 5:8 5:10 5:11 4:8 5:10 5:11 4:8 4:10 hold",
                 "position": {
                   "fret": 8,
@@ -3153,6 +3218,7 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "D, E, F, G; E, F, G, A; and on up: groups of four in eighth notes, each group two beats long.",
                 "tab": "/8 6:10 6:12 6:13 5:10 6:12 6:13 5:10 5:12 6:13 5:10 5:12 5:13 5:10 5:12 5:13 4:10 5:12 5:13 4:10 4:12 hold",
                 "position": {
                   "fret": 10,
@@ -3378,6 +3444,7 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "purpose": "B to D, C# to E, D to F#, up the octave: every other note of the scale, which is how chords are built.",
                 "tab": "/8 6:7 6:10 6:9 5:7 6:10 5:9 5:7 5:10 | 5:9 4:7 5:10 4:9 /4 4:7 4:9",
                 "position": {
                   "fret": 7,
@@ -3427,6 +3494,7 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "C to Eb, D to F, Eb to G, up the octave: every other note of the scale, which is how chords are built.",
                 "tab": "/8 6:8 6:11 6:10 5:8 6:11 5:10 5:8 5:11 | 5:10 4:8 5:11 4:10 /4 4:8 4:10",
                 "position": {
                   "fret": 8,
@@ -3476,6 +3544,7 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "D to F, E to G, F to A, up the octave: every other note of the scale, which is how chords are built.",
                 "tab": "/8 6:10 6:13 6:12 5:10 6:13 5:12 5:10 5:13 | 5:12 4:10 5:13 4:12 /4 4:10 4:12",
                 "position": {
                   "fret": 10,
@@ -4227,6 +4296,11 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "purpose": "B harmonic minor, one octave up and back: the minor shape with A# at the D string's fret 8.",
+                "howTo": [
+                  "Straight eighths, 50 BPM up to a pass at 80.",
+                  "Low E string 7, 9, 10; A string 7, 9, 10; D string 8 and 9. The second finger takes fret 8 and the third takes fret 9."
+                ],
                 "tab": "/8 6:7 6:9 6:10 5:7 5:9 5:10 4:8 4:9 | 4:8 5:10 5:9 5:7 6:10 6:9 hold",
                 "position": {
                   "fret": 7,
@@ -4276,6 +4350,11 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "C harmonic minor, one octave up and back: the minor shape with B at the D string's fret 9.",
+                "howTo": [
+                  "Straight eighths, 50 BPM up to a pass at 80.",
+                  "Low E string 8, 10, 11; A string 8, 10, 11; D string 9 and 10. The second finger takes fret 9 and the third takes fret 10."
+                ],
                 "tab": "/8 6:8 6:10 6:11 5:8 5:10 5:11 4:9 4:10 | 4:9 5:11 5:10 5:8 6:11 6:10 hold",
                 "position": {
                   "fret": 8,
@@ -4325,6 +4404,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "D harmonic minor, one octave up and back: the minor shape with C# at the D string's fret 11.",
+                "howTo": [
+                  "Straight eighths, 50 BPM up to a pass at 80.",
+                  "Low E string 10, 12, 13; A string 10, 12, 13; D string 11 and 12. The second finger takes fret 11 and the third takes fret 12."
+                ],
                 "tab": "/8 6:10 6:12 6:13 5:10 5:12 5:13 4:11 4:12 | 4:11 5:13 5:12 5:10 6:13 6:12 hold",
                 "position": {
                   "fret": 10,
@@ -4804,6 +4888,11 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "purpose": "B Dorian, one octave up and back: B, C#, D, E, F#, G#, A, B, with G# at the D string's fret 6.",
+                "howTo": [
+                  "Straight eighths, 50 BPM up to a pass at 80.",
+                  "Low E string 7, 9, 10; A string 7 and 9; D string 6, 7 and 9. The first finger reaches back one fret for the G#."
+                ],
                 "tab": "/8 6:7 6:9 6:10 5:7 5:9 4:6 4:7 4:9 | 4:7 4:6 5:9 5:7 6:10 6:9 hold",
                 "position": {
                   "fret": 7,
@@ -4853,6 +4942,11 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "C Dorian, one octave up and back: C, D, Eb, F, G, A, Bb, C, with A at the D string's fret 7.",
+                "howTo": [
+                  "Straight eighths, 50 BPM up to a pass at 80.",
+                  "Low E string 8, 10, 11; A string 8 and 10; D string 7, 8 and 10. The first finger reaches back one fret for the A."
+                ],
                 "tab": "/8 6:8 6:10 6:11 5:8 5:10 4:7 4:8 4:10 | 4:8 4:7 5:10 5:8 6:11 6:10 hold",
                 "position": {
                   "fret": 8,
@@ -4902,6 +4996,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "D Dorian, one octave up and back: D, E, F, G, A, B, C, D, with B at the D string's fret 9.",
+                "howTo": [
+                  "Straight eighths, 50 BPM up to a pass at 80.",
+                  "Low E string 10, 12, 13; A string 10 and 12; D string 9, 10 and 12. The first finger reaches back one fret for the B."
+                ],
                 "tab": "/8 6:10 6:12 6:13 5:10 5:12 4:9 4:10 4:12 | 4:10 4:9 5:12 5:10 6:13 6:12 hold",
                 "position": {
                   "fret": 10,
@@ -5374,6 +5473,11 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "purpose": "B Mixolydian, one octave up and back: major, with A natural at the D string's fret 7.",
+                "howTo": [
+                  "Straight eighths, 50 BPM up to a pass at 85.",
+                  "Low E string 7 and 9; A string 6, 7 and 9; D string 6, 7 and 9. First finger on the frets at 6, second on 7, fourth on 9."
+                ],
                 "tab": "/8 6:7 6:9 5:6 5:7 5:9 4:6 4:7 4:9 | 4:7 4:6 5:9 5:7 5:6 6:9 hold",
                 "position": {
                   "fret": 6,
@@ -5472,6 +5576,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "D Mixolydian, one octave up and back: major, with C natural at the D string's fret 10.",
+                "howTo": [
+                  "Straight eighths, 50 BPM up to a pass at 85.",
+                  "Low E string 10 and 12; A string 9, 10 and 12; D string 9, 10 and 12. First finger on the frets at 9, second on 10, fourth on 12."
+                ],
                 "tab": "/8 6:10 6:12 5:9 5:10 5:12 4:9 4:10 4:12 | 4:10 4:9 5:12 5:10 5:9 6:12 hold",
                 "position": {
                   "fret": 9,

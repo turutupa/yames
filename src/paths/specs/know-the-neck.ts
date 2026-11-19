@@ -129,6 +129,7 @@ export default definePath({
   prerequisites: { skills: ["Clean single notes", "Quarter notes with a click at 70 BPM"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
+  variantText: true,
   orderRationale:
     "The two low strings first, because chords and scales are named from them. Octave shapes next: they turn two known strings into six. Thirds, roots and triads are the smallest pieces of harmony and each is one shape. Only then the five pentatonic boxes, which most players learn first and never connect; here they arrive as places on a neck the player can already name. Arpeggios through the changes and landing on chord tones come last because they use all of it at once.",
   gradingLimits:

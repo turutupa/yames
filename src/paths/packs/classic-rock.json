@@ -223,6 +223,12 @@
                   "key": "G"
                 },
                 "pool": "all",
+                "purpose": "A single-note riff on the two low strings that walks the roots a power chord would play: G, Bb, C and the A below Bb. The riff a band locks to.",
+                "howTo": [
+                  "Straight eighths, 80 BPM up to a pass at 110, over a rock beat.",
+                  "Bar 1: G at fret 3 on the low E twice (muted), Bb at 6, G, C at fret 3 on the A string, G, Bb, A at 5. Bar 2: G, G, D and C on the A string, then Bb and A as quarter notes.",
+                  "First finger on fret 3, third on 5, fourth on 6. The hand doesn't move."
+                ],
                 "tab": "/8 6:3m 6:3m 6:6 6:3m 5:3 6:3m 6:6 6:5 | /8 6:3m 6:3m 5:5 5:3 /4 6:6 6:5",
                 "position": {
                   "fret": 3,
@@ -276,6 +282,12 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "A single-note riff on the two low strings that walks the roots a power chord would play: C, Eb, F and the D below Eb. The riff a band locks to.",
+                "howTo": [
+                  "Straight eighths, 80 BPM up to a pass at 110, over a rock beat.",
+                  "Bar 1: C at fret 8 on the low E twice (muted), Eb at 11, C, F at fret 8 on the A string, C, Eb, D at 10. Bar 2: C, C, G and F on the A string, then Eb and D as quarter notes.",
+                  "First finger on fret 8, third on 10, fourth on 11. The hand doesn't move."
+                ],
                 "tab": "/8 6:8m 6:8m 6:11 6:8m 5:8 6:8m 6:11 6:10 | /8 6:8m 6:8m 5:10 5:8 /4 6:11 6:10",
                 "position": {
                   "fret": 8,
@@ -329,6 +341,12 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "A single-note riff on the two low strings that walks the roots a power chord would play: D, F, G and the E below F. The riff a band locks to.",
+                "howTo": [
+                  "Straight eighths, 80 BPM up to a pass at 110, over a rock beat.",
+                  "Bar 1: D at fret 10 on the low E twice (muted), F at 13, D, G at fret 10 on the A string, D, F, E at 12. Bar 2: D, D, A and G on the A string, then F and E as quarter notes.",
+                  "First finger on fret 10, third on 12, fourth on 13. The hand doesn't move."
+                ],
                 "tab": "/8 6:10m 6:10m 6:13 6:10m 5:10 6:10m 6:13 6:12 | /8 6:10m 6:10m 5:12 5:10 /4 6:13 6:12",
                 "position": {
                   "fret": 10,
@@ -1221,6 +1239,11 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "purpose": "Four-note groups down the top of the box: E, D, B, A, then D, B, A, G, then down a string. The fast, flowing descent of a lot of seventies solos.",
+                "howTo": [
+                  "Straight sixteenths, four to a click, 60 BPM up to a pass at 80.",
+                  "Bar 1: E at 12 on the high E, D at 15 and B at 12 on the B, A at 14 on the G, twice; then D, B, A, G twice. Bar 2: A, G on the G string, E, D on the D string, twice, then B on the A string and E to finish."
+                ],
                 "tab": "/16 1:12 2:15 2:12 3:14 1:12 2:15 2:12 3:14 2:15 2:12 3:14 3:12 2:15 2:12 3:14 3:12 | /16 3:14 3:12 4:14 4:12 3:14 3:12 4:14 4:12 /4 5:14 4:14",
                 "position": {
                   "fret": 12,
@@ -1286,6 +1309,11 @@
                   "key": "G"
                 },
                 "pool": "all",
+                "purpose": "Four-note groups down the top of the box: G, F, D, C, then F, D, C, Bb, then down a string. The fast, flowing descent of a lot of seventies solos.",
+                "howTo": [
+                  "Straight sixteenths, four to a click, 60 BPM up to a pass at 80.",
+                  "Bar 1: G at 3 on the high E, F at 6 and D at 3 on the B, C at 5 on the G, twice; then F, D, C, Bb twice. Bar 2: C, Bb on the G string, G, F on the D string, twice, then D on the A string and G to finish."
+                ],
                 "tab": "/16 1:3 2:6 2:3 3:5 1:3 2:6 2:3 3:5 2:6 2:3 3:5 3:3 2:6 2:3 3:5 3:3 | /16 3:5 3:3 4:5 4:3 3:5 3:3 4:5 4:3 /4 5:5 4:5",
                 "position": {
                   "fret": 3,
@@ -1351,6 +1379,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "Four-note groups down the top of the box: D, C, A, G, then C, A, G, F, then down a string. The fast, flowing descent of a lot of seventies solos.",
+                "howTo": [
+                  "Straight sixteenths, four to a click, 60 BPM up to a pass at 80.",
+                  "Bar 1: D at 10 on the high E, C at 13 and A at 10 on the B, G at 12 on the G, twice; then C, A, G, F twice. Bar 2: G, F on the G string, D, C on the D string, twice, then A on the A string and D to finish."
+                ],
                 "tab": "/16 1:10 2:13 2:10 3:12 1:10 2:13 2:10 3:12 2:13 2:10 3:12 3:10 2:13 2:10 3:12 3:10 | /16 3:12 3:10 4:12 4:10 3:12 3:10 4:12 4:10 /4 5:12 4:12",
                 "position": {
                   "fret": 10,
@@ -5603,6 +5636,11 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "Each chord's three notes, up and down the top four strings, one bar each, then home to C.",
+                "howTo": [
+                  "Straight eighths, 70 BPM up to a pass at 100.",
+                  "C: frets 10, 9, 8, 8 from the D string up and back. Bb: the same shape two frets lower, 8, 7, 6, 6. F: A at 7 and C at 10 on the D string, F at 10 on the G, A at 10 on the B, C at 8 on the high E, and back. Then C."
+                ],
                 "tab": "/8 4:10 3:9 2:8 1:8 2:8 3:9 4:10 3:9 | /8 4:8 3:7 2:6 1:6 2:6 3:7 4:8 3:7 | /8 4:7 4:10 3:10 2:10 1:8 2:10 3:10 4:10 | /8 3:9 2:8 1:8 2:8 /2 4:10",
                 "position": {
                   "fret": 8,
@@ -5668,6 +5706,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "Each chord's three notes, up and down the top four strings, one bar each, then home to D.",
+                "howTo": [
+                  "Straight eighths, 70 BPM up to a pass at 100.",
+                  "D: frets 12, 11, 10, 10 from the D string up and back. C: the same shape two frets lower, 10, 9, 8, 8. G: B at 9 and D at 12 on the D string, G at 12 on the G, B at 12 on the B, D at 10 on the high E, and back. Then D."
+                ],
                 "tab": "/8 4:12 3:11 2:10 1:10 2:10 3:11 4:12 3:11 | /8 4:10 3:9 2:8 1:8 2:8 3:9 4:10 3:9 | /8 4:9 4:12 3:12 2:12 1:10 2:12 3:12 4:12 | /8 3:11 2:10 1:10 2:10 /2 4:12",
                 "position": {
                   "fret": 10,
@@ -5733,6 +5776,11 @@
                   "key": "G"
                 },
                 "pool": "all",
+                "purpose": "Each chord's three notes, up and down the top four strings, one bar each, then home to G.",
+                "howTo": [
+                  "Straight eighths, 70 BPM up to a pass at 100.",
+                  "G: frets 5, 4, 3, 3 from the D string up and back. F: the same shape two frets lower, 3, 2, 1, 1. C: E at 2 and G at 5 on the D string, C at 5 on the G, E at 5 on the B, G at 3 on the high E, and back. Then G."
+                ],
                 "tab": "/8 4:5 3:4 2:3 1:3 2:3 3:4 4:5 3:4 | /8 4:3 3:2 2:1 1:1 2:1 3:2 4:3 3:2 | /8 4:2 4:5 3:5 2:5 1:3 2:5 3:5 4:5 | /8 3:4 2:3 1:3 2:3 /2 4:5",
                 "position": {
                   "fret": 3,
@@ -5990,6 +6038,11 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "Four short licks, one a chord, each ending on that chord's root: C, Bb, F and C. The line follows the bass without playing it.",
+                "howTo": [
+                  "Straight eighths, then a half note, 70 BPM up to a pass at 100.",
+                  "C: G, F, E, D, then C on the D string. Bb: F, D, C, D, then Bb at 8 on the D string. F: A, C, A, G, then F at 10 on the G. C: E, G, F, E, then C."
+                ],
                 "tab": "/8 2:8 3:10 3:9 3:7 /2 4:10 | /8 3:10 3:7 4:10 3:7 /2 4:8 | /8 2:10 1:8 2:10 2:8 /2 3:10 | /8 3:9 2:8 3:10 3:9 /2 4:10",
                 "position": {
                   "fret": 7,
@@ -6050,6 +6103,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "Four short licks, one a chord, each ending on that chord's root: D, C, G and D. The line follows the bass without playing it.",
+                "howTo": [
+                  "Straight eighths, then a half note, 70 BPM up to a pass at 100.",
+                  "D: A, G, F#, E, then D on the D string. C: G, E, D, E, then C at 10 on the D string. G: B, D, B, A, then G at 12 on the G. D: F#, A, G, F#, then D."
+                ],
                 "tab": "/8 2:10 3:12 3:11 3:9 /2 4:12 | /8 3:12 3:9 4:12 3:9 /2 4:10 | /8 2:12 1:10 2:12 2:10 /2 3:12 | /8 3:11 2:10 3:12 3:11 /2 4:12",
                 "position": {
                   "fret": 9,
@@ -6110,6 +6168,11 @@
                   "key": "G"
                 },
                 "pool": "all",
+                "purpose": "Four short licks, one a chord, each ending on that chord's root: G, F, C and G. The line follows the bass without playing it.",
+                "howTo": [
+                  "Straight eighths, then a half note, 70 BPM up to a pass at 100.",
+                  "G: D, C, B, A, then G on the D string. F: C, A, G, A, then F at 3 on the D string. C: E, G, E, D, then C at 5 on the G. G: B, D, C, B, then G."
+                ],
                 "tab": "/8 2:3 3:5 3:4 3:2 /2 4:5 | /8 3:5 3:2 4:5 3:2 /2 4:3 | /8 2:5 1:3 2:5 2:3 /2 3:5 | /8 3:4 2:3 3:5 3:4 /2 4:5",
                 "position": {
                   "fret": 2,
@@ -7945,6 +8008,11 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "Box 1 from the low C to the top Eb in sixteenths, a turn on the top two strings, and a held Eb. The rising run that opens a hundred solos.",
+                "howTo": [
+                  "Straight sixteenths, four to a click, 60 BPM up to a pass at 95.",
+                  "Two notes a string, strictly down-up. After the top Eb the last beat rocks between the top two strings (C, Bb, C, Eb) and bar 2 holds the Eb with vibrato, then rests."
+                ],
                 "tab": "/16 6:8 6:11 5:8 5:10 4:8 4:10 3:8 3:10 2:8 2:11 1:8 1:11 1:8 2:11 1:8 1:11 | /2 1:11v /2 r",
                 "position": {
                   "fret": 8,
@@ -8003,6 +8071,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "Box 1 from the low D to the top F in sixteenths, a turn on the top two strings, and a held F. The rising run that opens a hundred solos.",
+                "howTo": [
+                  "Straight sixteenths, four to a click, 60 BPM up to a pass at 95.",
+                  "Two notes a string, strictly down-up. After the top F the last beat rocks between the top two strings (D, C, D, F) and bar 2 holds the F with vibrato, then rests."
+                ],
                 "tab": "/16 6:10 6:13 5:10 5:12 4:10 4:12 3:10 3:12 2:10 2:13 1:10 1:13 1:10 2:13 1:10 1:13 | /2 1:13v /2 r",
                 "position": {
                   "fret": 10,
@@ -10117,6 +10190,7 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "purpose": "One bar of the root riff on B, E, F# and B, in a new key each time: a warm-up that is already rock.",
                 "tab": "/8 6:7m 6:7m 6:10 6:7m 5:7 6:7m 6:10 6:9 | /8 6:12m 6:12m 6:15 6:12m 5:12 6:12m 6:15 6:14 | /8 6:14m 6:14m 6:17 6:14m 5:14 6:14m 6:17 6:16 | /8 6:7m 6:7m 6:10 6:7m 5:7 6:7m 6:10 6:9",
                 "position": {
                   "fret": 7,
@@ -10178,6 +10252,7 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "One bar of the root riff on C, F, G and C, in a new key each time: a warm-up that is already rock.",
                 "tab": "/8 6:8m 6:8m 6:11 6:8m 5:8 6:8m 6:11 6:10 | /8 6:13m 6:13m 6:16 6:13m 5:13 6:13m 6:16 6:15 | /8 6:15m 6:15m 6:18 6:15m 5:15 6:15m 6:18 6:17 | /8 6:8m 6:8m 6:11 6:8m 5:8 6:8m 6:11 6:10",
                 "position": {
                   "fret": 8,
@@ -10239,6 +10314,7 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "One bar of the root riff on D, G, A and D, in a new key each time: a warm-up that is already rock.",
                 "tab": "/8 6:10m 6:10m 6:13 6:10m 5:10 6:10m 6:13 6:12 | /8 6:15m 6:15m 6:18 6:15m 5:15 6:15m 6:18 6:17 | /8 6:17m 6:17m 6:20 6:17m 5:17 6:17m 6:20 6:19 | /8 6:10m 6:10m 6:13 6:10m 5:10 6:10m 6:13 6:12",
                 "position": {
                   "fret": 10,
@@ -10300,6 +10376,7 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "purpose": "One bar of the root riff on E, A, B and E, in a new key each time: a warm-up that is already rock.",
                 "tab": "/8 6:12m 6:12m 6:15 6:12m 5:12 6:12m 6:15 6:14 | /8 6:17m 6:17m 6:20 6:17m 5:17 6:17m 6:20 6:19 | /8 6:19m 6:19m 6:22 6:19m 5:19 6:19m 6:22 6:21 | /8 6:12m 6:12m 6:15 6:12m 5:12 6:12m 6:15 6:14",
                 "position": {
                   "fret": 12,
@@ -10361,6 +10438,7 @@
                   "key": "G"
                 },
                 "pool": "all",
+                "purpose": "One bar of the root riff on G, C, D and G, in a new key each time: a warm-up that is already rock.",
                 "tab": "/8 6:3m 6:3m 6:6 6:3m 5:3 6:3m 6:6 6:5 | /8 6:8m 6:8m 6:11 6:8m 5:8 6:8m 6:11 6:10 | /8 6:10m 6:10m 6:13 6:10m 5:10 6:10m 6:13 6:12 | /8 6:3m 6:3m 6:6 6:3m 5:3 6:3m 6:6 6:5",
                 "position": {
                   "fret": 3,
@@ -10673,6 +10751,7 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "purpose": "The triplet pull-off loop, moved to follow B, E, F# and B, in a new key each time.",
                 "tab": "/8t 2:10 2:7p 3:9 2:10 2:7p 3:9 2:10 2:7p 3:9 2:10 2:7p 3:9 | /8t 2:15 2:12p 3:14 2:15 2:12p 3:14 2:15 2:12p 3:14 2:15 2:12p 3:14 | /8t 2:17 2:14p 3:16 2:17 2:14p 3:16 2:17 2:14p 3:16 2:17 2:14p 3:16 | /8t 2:10 2:7p 3:9 2:10 2:7p 3:9 2:10 2:7p 3:9 2:10 2:7p 3:9",
                 "position": {
                   "fret": 7,
@@ -10750,6 +10829,7 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "The triplet pull-off loop, moved to follow C, F, G and C, in a new key each time.",
                 "tab": "/8t 2:11 2:8p 3:10 2:11 2:8p 3:10 2:11 2:8p 3:10 2:11 2:8p 3:10 | /8t 2:16 2:13p 3:15 2:16 2:13p 3:15 2:16 2:13p 3:15 2:16 2:13p 3:15 | /8t 2:18 2:15p 3:17 2:18 2:15p 3:17 2:18 2:15p 3:17 2:18 2:15p 3:17 | /8t 2:11 2:8p 3:10 2:11 2:8p 3:10 2:11 2:8p 3:10 2:11 2:8p 3:10",
                 "position": {
                   "fret": 8,
@@ -10827,6 +10907,7 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "The triplet pull-off loop, moved to follow D, G, A and D, in a new key each time.",
                 "tab": "/8t 2:13 2:10p 3:12 2:13 2:10p 3:12 2:13 2:10p 3:12 2:13 2:10p 3:12 | /8t 2:18 2:15p 3:17 2:18 2:15p 3:17 2:18 2:15p 3:17 2:18 2:15p 3:17 | /8t 2:20 2:17p 3:19 2:20 2:17p 3:19 2:20 2:17p 3:19 2:20 2:17p 3:19 | /8t 2:13 2:10p 3:12 2:13 2:10p 3:12 2:13 2:10p 3:12 2:13 2:10p 3:12",
                 "position": {
                   "fret": 10,
@@ -10904,6 +10985,7 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "purpose": "The triplet pull-off loop, moved to follow E, A, B and E, in a new key each time.",
                 "tab": "/8t 2:15 2:12p 3:14 2:15 2:12p 3:14 2:15 2:12p 3:14 2:15 2:12p 3:14 | /8t 2:20 2:17p 3:19 2:20 2:17p 3:19 2:20 2:17p 3:19 2:20 2:17p 3:19 | /8t 2:22 2:19p 3:21 2:22 2:19p 3:21 2:22 2:19p 3:21 2:22 2:19p 3:21 | /8t 2:15 2:12p 3:14 2:15 2:12p 3:14 2:15 2:12p 3:14 2:15 2:12p 3:14",
                 "position": {
                   "fret": 12,
@@ -10981,6 +11063,7 @@
                   "key": "G"
                 },
                 "pool": "all",
+                "purpose": "The triplet pull-off loop, moved to follow G, C, D and G, in a new key each time.",
                 "tab": "/8t 2:6 2:3p 3:5 2:6 2:3p 3:5 2:6 2:3p 3:5 2:6 2:3p 3:5 | /8t 2:11 2:8p 3:10 2:11 2:8p 3:10 2:11 2:8p 3:10 2:11 2:8p 3:10 | /8t 2:13 2:10p 3:12 2:13 2:10p 3:12 2:13 2:10p 3:12 2:13 2:10p 3:12 | /8t 2:6 2:3p 3:5 2:6 2:3p 3:5 2:6 2:3p 3:5 2:6 2:3p 3:5",
                 "position": {
                   "fret": 3,
@@ -11273,6 +11356,7 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "purpose": "Two beats of the descending sixteenth run, moved to follow B, E, F# and B, in a new key each time.",
                 "tab": "/16 1:7 2:10 2:7 3:9 1:7 2:10 2:7 3:9 /2 2:7 | /16 1:12 2:15 2:12 3:14 1:12 2:15 2:12 3:14 /2 2:12 | /16 1:14 2:17 2:14 3:16 1:14 2:17 2:14 3:16 /2 2:14 | /16 1:7 2:10 2:7 3:9 1:7 2:10 2:7 3:9 /2 2:7",
                 "position": {
                   "fret": 7,
@@ -11338,6 +11422,7 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "Two beats of the descending sixteenth run, moved to follow C, F, G and C, in a new key each time.",
                 "tab": "/16 1:8 2:11 2:8 3:10 1:8 2:11 2:8 3:10 /2 2:8 | /16 1:13 2:16 2:13 3:15 1:13 2:16 2:13 3:15 /2 2:13 | /16 1:15 2:18 2:15 3:17 1:15 2:18 2:15 3:17 /2 2:15 | /16 1:8 2:11 2:8 3:10 1:8 2:11 2:8 3:10 /2 2:8",
                 "position": {
                   "fret": 8,
@@ -11403,6 +11488,7 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "Two beats of the descending sixteenth run, moved to follow D, G, A and D, in a new key each time.",
                 "tab": "/16 1:10 2:13 2:10 3:12 1:10 2:13 2:10 3:12 /2 2:10 | /16 1:15 2:18 2:15 3:17 1:15 2:18 2:15 3:17 /2 2:15 | /16 1:17 2:20 2:17 3:19 1:17 2:20 2:17 3:19 /2 2:17 | /16 1:10 2:13 2:10 3:12 1:10 2:13 2:10 3:12 /2 2:10",
                 "position": {
                   "fret": 10,
@@ -11468,6 +11554,7 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "purpose": "Two beats of the descending sixteenth run, moved to follow E, A, B and E, in a new key each time.",
                 "tab": "/16 1:12 2:15 2:12 3:14 1:12 2:15 2:12 3:14 /2 2:12 | /16 1:17 2:20 2:17 3:19 1:17 2:20 2:17 3:19 /2 2:17 | /16 1:19 2:22 2:19 3:21 1:19 2:22 2:19 3:21 /2 2:19 | /16 1:12 2:15 2:12 3:14 1:12 2:15 2:12 3:14 /2 2:12",
                 "position": {
                   "fret": 12,
@@ -11533,6 +11620,7 @@
                   "key": "G"
                 },
                 "pool": "all",
+                "purpose": "Two beats of the descending sixteenth run, moved to follow G, C, D and G, in a new key each time.",
                 "tab": "/16 1:3 2:6 2:3 3:5 1:3 2:6 2:3 3:5 /2 2:3 | /16 1:8 2:11 2:8 3:10 1:8 2:11 2:8 3:10 /2 2:8 | /16 1:10 2:13 2:10 3:12 1:10 2:13 2:10 3:12 /2 2:10 | /16 1:3 2:6 2:3 3:5 1:3 2:6 2:3 3:5 /2 2:3",
                 "position": {
                   "fret": 3,

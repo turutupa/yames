@@ -200,6 +200,10 @@
                   "stringSet": "B: 12-5"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Eighth notes. The tap lands on the click and the pulled-off note on the 'and'.",
+                  "Keep the first finger pressed at fret 5 the whole time. Make the second note as loud as the first."
+                ],
                 "tab": "/8 2:12t 2:5p 2:12t 2:5p 2:12t 2:5p 2:12t 2:5p",
                 "position": {
                   "fret": 5,
@@ -243,6 +247,10 @@
                   "stringSet": "G: 12-5"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Eighth notes. The tap lands on the click and the pulled-off note on the 'and'.",
+                  "Keep the first finger pressed at fret 5 the whole time. Make the second note as loud as the first."
+                ],
                 "tab": "/8 3:12t 3:5p 3:12t 3:5p 3:12t 3:5p 3:12t 3:5p",
                 "position": {
                   "fret": 5,
@@ -450,6 +458,11 @@
                   "stringSet": "B: 12-5-8"
                 },
                 "pool": "all",
+                "purpose": "The cell: tap fret 12, pull off to 5, hammer on at 8. B, E, G: an E minor chord, one note at a time, in triplets.",
+                "howTo": [
+                  "Triplets, three to the click, with the tap on the click.",
+                  "First finger at fret 5, little finger hammers fret 8. As the little finger lands, the tapping finger is already on its way back down."
+                ],
                 "tab": "/8t 2:12t 2:5pf1 2:8hf4 2:12t 2:5pf1 2:8hf4 2:12t 2:5pf1 2:8hf4 2:12t 2:5pf1 2:8hf4",
                 "position": {
                   "fret": 5,
@@ -497,6 +510,8 @@
                   "stringSet": "G: 12-5-7"
                 },
                 "pool": "all",
+                "purpose": "The cell: tap fret 12, pull off to 5, hammer on at 7.",
+                "howTo": ["Triplets, three to the click, with the tap on the click."],
                 "tab": "/8t 3:12t 3:5pf1 3:7hf3 3:12t 3:5pf1 3:7hf3 3:12t 3:5pf1 3:7hf3 3:12t 3:5pf1 3:7hf3",
                 "position": {
                   "fret": 5,
@@ -701,6 +716,10 @@
                   "stringSet": "B: 12-5-8"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Eighth notes: tap 12, pull off to 5, hammer 8, pull off to 5. The tap is on beats 1 and 3.",
+                  "The last pull-off is the quiet one. Flick the little finger off toward the floor, don't just lift it."
+                ],
                 "tab": "/8 2:12t 2:5pf1 2:8hf4 2:5pf1 2:12t 2:5pf1 2:8hf4 2:5pf1",
                 "position": {
                   "fret": 5,
@@ -744,6 +763,10 @@
                   "stringSet": "G: 12-5-7"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Eighth notes: tap 12, pull off to 5, hammer 7, pull off to 5. The tap is on beats 1 and 3.",
+                  "The last pull-off is the quiet one."
+                ],
                 "tab": "/8 3:12t 3:5pf1 3:7hf3 3:5pf1 3:12t 3:5pf1 3:7hf3 3:5pf1",
                 "position": {
                   "fret": 5,
@@ -1759,6 +1782,10 @@
                   "stringSet": "B: 12-5-8"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sixteenths, with the tap on every beat: 12, 5, 8, 5.",
+                  "If the 'a' of each beat goes missing, the last pull-off is too gentle. Flick it."
+                ],
                 "tab": "/16 2:12t 2:5pf1 2:8hf4 2:5pf1 2:12t 2:5pf1 2:8hf4 2:5pf1 2:12t 2:5pf1 2:8hf4 2:5pf1 2:12t 2:5pf1 2:8hf4 2:5pf1",
                 "position": {
                   "fret": 5,
@@ -1810,6 +1837,10 @@
                   "stringSet": "G: 12-5-7"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sixteenths, with the tap on every beat: 12, 5, 7, 5.",
+                  "If the 'a' of each beat goes missing, the last pull-off is too gentle. Flick it."
+                ],
                 "tab": "/16 3:12t 3:5pf1 3:7hf3 3:5pf1 3:12t 3:5pf1 3:7hf3 3:5pf1 3:12t 3:5pf1 3:7hf3 3:5pf1 3:12t 3:5pf1 3:7hf3 3:5pf1",
                 "position": {
                   "fret": 5,
@@ -2033,6 +2064,10 @@
                   "stringSet": "B: 12-5-8"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sixteenths: 12, 5, 12, 8. The first finger stays down throughout; the little finger lifts while the first tap sounds, so that pull-off lands on 5.",
+                  "While the second tap sounds, the little finger goes back down on fret 8, so the second pull-off stops there."
+                ],
                 "tab": "/16 2:12t 2:5p 2:12t 2:8p 2:12t 2:5p 2:12t 2:8p 2:12t 2:5p 2:12t 2:8p 2:12t 2:5p 2:12t 2:8p",
                 "position": {
                   "fret": 5,
@@ -2084,6 +2119,8 @@
                   "stringSet": "G: 12-5-7"
                 },
                 "pool": "all",
+                "purpose": "Tap, pull off to 5, tap again, pull off to 7. The tapped note rings out twice a beat, like a bell over the chord.",
+                "howTo": ["Sixteenths: 12, 5, 12, 7."],
                 "tab": "/16 3:12t 3:5p 3:12t 3:7p 3:12t 3:5p 3:12t 3:7p 3:12t 3:5p 3:12t 3:7p 3:12t 3:5p 3:12t 3:7p",
                 "position": {
                   "fret": 5,
@@ -2849,6 +2886,11 @@
                   "stringSet": "B: 12 over 5-6-8"
                 },
                 "pool": "all",
+                "purpose": "Tap 12, pull off to 8, 6 and 5, hammer 6 and 8. B, G, F, E, F, G: six to the beat.",
+                "howTo": [
+                  "Sextuplets. One tap a beat; the fretting hand plays the other five notes.",
+                  "Lean a little on the fourth note, the E at fret 5. It is the middle of the beat and keeps the six even."
+                ],
                 "tab": "/16t 2:12t 2:8p 2:6p 2:5p 2:6h 2:8h 2:12t 2:8p 2:6p 2:5p 2:6h 2:8h 2:12t 2:8p 2:6p 2:5p 2:6h 2:8h 2:12t 2:8p 2:6p 2:5p 2:6h 2:8h",
                 "position": {
                   "fret": 5,
@@ -3357,6 +3399,10 @@
                   "stringSet": "B: 12-5-8"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sextuplets. Feel the first tap of each beat a little stronger than the second.",
+                  "If the hand tightens, drop a rung. Speed comes from the motion getting smaller."
+                ],
                 "tab": "/16t 2:12t 2:5pf1 2:8hf4 2:12t 2:5pf1 2:8hf4 2:12t 2:5pf1 2:8hf4 2:12t 2:5pf1 2:8hf4 2:12t 2:5pf1 2:8hf4 2:12t 2:5pf1 2:8hf4 2:12t 2:5pf1 2:8hf4 2:12t 2:5pf1 2:8hf4",
                 "position": {
                   "fret": 5,
@@ -3416,6 +3462,7 @@
                   "stringSet": "G: 12-5-7"
                 },
                 "pool": "all",
+                "howTo": ["Sextuplets. Feel the first tap of each beat a little stronger than the second."],
                 "tab": "/16t 3:12t 3:5pf1 3:7hf3 3:12t 3:5pf1 3:7hf3 3:12t 3:5pf1 3:7hf3 3:12t 3:5pf1 3:7hf3 3:12t 3:5pf1 3:7hf3 3:12t 3:5pf1 3:7hf3 3:12t 3:5pf1 3:7hf3 3:12t 3:5pf1 3:7hf3",
                 "position": {
                   "fret": 5,
@@ -4219,6 +4266,10 @@
                   "stringSet": "B: 12-5-8"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sixteenths, a tap on every beat: 12, 8, 5, 8.",
+                  "Both fretting fingers are down when you tap. The first pull-off lands on the little finger."
+                ],
                 "tab": "/16 2:12t 2:8p 2:5p 2:8h 2:12t 2:8p 2:5p 2:8h 2:12t 2:8p 2:5p 2:8h 2:12t 2:8p 2:5p 2:8h",
                 "position": {
                   "fret": 5,
@@ -4270,6 +4321,11 @@
                   "stringSet": "G: 12-5-7"
                 },
                 "pool": "all",
+                "purpose": "Tap 12, pull off to 7, pull off to 5, hammer 7, in sixteenths.",
+                "howTo": [
+                  "Sixteenths, a tap on every beat: 12, 7, 5, 7.",
+                  "Both fretting fingers are down when you tap."
+                ],
                 "tab": "/16 3:12t 3:7p 3:5p 3:7h 3:12t 3:7p 3:5p 3:7h 3:12t 3:7p 3:5p 3:7h 3:12t 3:7p 3:5p 3:7h",
                 "position": {
                   "fret": 5,
@@ -4800,6 +4856,10 @@
                   "stringSet": "B: 12-5-8"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets, one tap a beat. Breathe, and let both shoulders drop.",
+                  "If the tapping finger or the forearm starts to burn, that is the set done."
+                ],
                 "tab": "/8t 2:12t 2:5pf1 2:8hf4 2:12t 2:5pf1 2:8hf4 2:12t 2:5pf1 2:8hf4 2:12t 2:5pf1 2:8hf4",
                 "position": {
                   "fret": 5,
@@ -4847,6 +4907,10 @@
                   "stringSet": "G: 12-5-7"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets, one tap a beat. Breathe, and let both shoulders drop.",
+                  "If the tapping finger or the forearm starts to burn, that is the set done."
+                ],
                 "tab": "/8t 3:12t 3:5pf1 3:7hf3 3:12t 3:5pf1 3:7hf3 3:12t 3:5pf1 3:7hf3 3:12t 3:5pf1 3:7hf3",
                 "position": {
                   "fret": 5,

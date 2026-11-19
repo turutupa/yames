@@ -133,6 +133,7 @@ export default definePath({
   prerequisites: { paths: [{ path: "know-the-neck", level: "beginner" }], skills: ["Clean single notes", "Eighth notes with a click at 70 BPM"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
+  variantText: true,
   orderRationale:
     "The major scale first as a sound and a formula on one string, then as one movable shape, because every other scale here is described as a change to it. The relative minor comes next: the same notes from a different home, which is the idea a mode rests on. Sequences turn a shape into something the fingers know in any order. Harmonic minor is one raised note, and it prepares the ear for the modes, which are also one changed note each. Dorian comes before Mixolydian because it sits on the minor shape players already have.",
   gradingLimits:

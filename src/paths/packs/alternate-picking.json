@@ -4215,6 +4215,9 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "howTo": [
+                  "D, C#, B on the top string, then A, G, F# on the B string, all in triplets. Start on a downstroke, and it stays down on each repeat."
+                ],
                 "tab": "/8t 1:10 1:9 1:7 2:10 2:8 2:7 1:10 1:9 1:7 2:10 2:8 2:7",
                 "position": {
                   "fret": 7,
@@ -4262,6 +4265,9 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Eb, D, C on the top string, then Bb, Ab, G on the B string, all in triplets. Start on a downstroke, and it stays down on each repeat."
+                ],
                 "tab": "/8t 1:11 1:10 1:8 2:11 2:9 2:8 1:11 1:10 1:8 2:11 2:9 2:8",
                 "position": {
                   "fret": 8,
@@ -4309,6 +4315,9 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "howTo": [
+                  "F, E, D on the top string, then C, Bb, A on the B string, all in triplets. Start on a downstroke, and it stays down on each repeat."
+                ],
                 "tab": "/8t 1:13 1:12 1:10 2:13 2:11 2:10 1:13 1:12 1:10 2:13 2:11 2:10",
                 "position": {
                   "fret": 10,
@@ -4356,6 +4365,9 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "howTo": [
+                  "G, F#, E on the top string, then D, C, B on the B string, all in triplets. Start on a downstroke, and it stays down on each repeat."
+                ],
                 "tab": "/8t 1:3 1:2 1:0 2:3 2:1 2:0 1:3 1:2 1:0 2:3 2:1 2:0",
                 "position": {
                   "fret": 1,
@@ -4403,6 +4415,9 @@
                   "key": "G"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Bb, A, G on the top string, then F, Eb, D on the B string, all in triplets. Start on a downstroke, and it stays down on each repeat."
+                ],
                 "tab": "/8t 1:6 1:5 1:3 2:6 2:4 2:3 1:6 1:5 1:3 2:6 2:4 2:3",
                 "position": {
                   "fret": 3,
@@ -4614,6 +4629,10 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets. In B minor: F#, G, A on the B string (frets 7, 8, 10), then B, C#, D on the top string (7, 9, 10), twice. Fingers 1, 2 and 4, then 1, 3 and 4.",
+                  "Start on a downstroke. The B string ends on a downstroke and the top string starts on an upstroke, so the pick travels around the outside of the pair at each change."
+                ],
                 "tab": "/8t 2:7 2:8 2:10 1:7 1:9 1:10 2:7 2:8 2:10 1:7 1:9 1:10",
                 "position": {
                   "fret": 7,
@@ -4661,6 +4680,10 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets. In C minor: G, Ab, Bb on the B string (frets 8, 9, 11), then C, D, Eb on the top string (8, 10, 11), twice. Fingers 1, 2 and 4, then 1, 3 and 4.",
+                  "Start on a downstroke. The B string ends on a downstroke and the top string starts on an upstroke, so the pick travels around the outside of the pair at each change."
+                ],
                 "tab": "/8t 2:8 2:9 2:11 1:8 1:10 1:11 2:8 2:9 2:11 1:8 1:10 1:11",
                 "position": {
                   "fret": 8,
@@ -4708,6 +4731,10 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets. In D minor: A, Bb, C on the B string (frets 10, 11, 13), then D, E, F on the top string (10, 12, 13), twice. Fingers 1, 2 and 4, then 1, 3 and 4.",
+                  "Start on a downstroke. The B string ends on a downstroke and the top string starts on an upstroke, so the pick travels around the outside of the pair at each change."
+                ],
                 "tab": "/8t 2:10 2:11 2:13 1:10 1:12 1:13 2:10 2:11 2:13 1:10 1:12 1:13",
                 "position": {
                   "fret": 10,
@@ -4755,6 +4782,10 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets.",
+                  "Start on a downstroke. The B string ends on a downstroke and the top string starts on an upstroke, so the pick travels around the outside of the pair at each change."
+                ],
                 "tab": "/8t 2:0 2:1 2:3 1:0 1:2 1:3 2:0 2:1 2:3 1:0 1:2 1:3",
                 "position": {
                   "fret": 1,
@@ -4802,6 +4833,10 @@
                   "key": "G"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets. In G minor: D, Eb, F on the B string (frets 3, 4, 6), then G, A, Bb on the top string (3, 5, 6), twice. Fingers 1, 2 and 4, then 1, 3 and 4.",
+                  "Start on a downstroke. The B string ends on a downstroke and the top string starts on an upstroke, so the pick travels around the outside of the pair at each change."
+                ],
                 "tab": "/8t 2:3 2:4 2:6 1:3 1:5 1:6 2:3 2:4 2:6 1:3 1:5 1:6",
                 "position": {
                   "fret": 3,
@@ -6842,6 +6877,10 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Each bar is one chord, up and down twice. Cm to Ab moves one note. Stay in eighth position.",
+                  "These are picked, not swept: every stroke alternates even though the notes run across strings."
+                ],
                 "tab": "/8t 4:10 3:8 2:8 1:8 2:8 3:8 4:10 3:8 2:8 1:8 2:8 3:8 | 4:10 3:8 2:9 1:8 2:9 3:8 4:10 3:8 2:9 1:8 2:9 3:8 | 4:8 3:8 2:8 1:11 2:8 3:8 4:8 3:8 2:8 1:11 2:8 3:8 | 4:8 3:10 2:11 1:10 2:11 3:10 4:8 3:10 2:11 1:10 2:11 3:10",
                 "position": {
                   "fret": 8,
@@ -6926,6 +6965,10 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Each bar is one chord, up and down twice. Dm to Bb moves one note. Stay in tenth position.",
+                  "These are picked, not swept: every stroke alternates even though the notes run across strings."
+                ],
                 "tab": "/8t 4:12 3:10 2:10 1:10 2:10 3:10 4:12 3:10 2:10 1:10 2:10 3:10 | 4:12 3:10 2:11 1:10 2:11 3:10 4:12 3:10 2:11 1:10 2:11 3:10 | 4:10 3:10 2:10 1:13 2:10 3:10 4:10 3:10 2:10 1:13 2:10 3:10 | 4:10 3:12 2:13 1:12 2:13 3:12 4:10 3:12 2:13 1:12 2:13 3:12",
                 "position": {
                   "fret": 10,
@@ -7010,6 +7053,10 @@
                   "key": "G"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Each bar is one chord, up and down twice. Gm to Eb moves one note. Stay in third position.",
+                  "These are picked, not swept: every stroke alternates even though the notes run across strings."
+                ],
                 "tab": "/8t 4:5 3:3 2:3 1:3 2:3 3:3 4:5 3:3 2:3 1:3 2:3 3:3 | 4:5 3:3 2:4 1:3 2:4 3:3 4:5 3:3 2:4 1:3 2:4 3:3 | 4:3 3:3 2:3 1:6 2:3 3:3 4:3 3:3 2:3 1:6 2:3 3:3 | 4:3 3:5 2:6 1:5 2:6 3:5 4:3 3:5 2:6 1:5 2:6 3:5",
                 "position": {
                   "fret": 3,
@@ -7985,6 +8032,7 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "purpose": "D, C#, B, A, G, F# on the top two strings as sextuplets, round and round. The six-note burst from the Speed bursts Step, now without the rest after it.",
                 "tab": "/16t 1:10 1:9 1:7 2:10 2:8 2:7 1:10 1:9 1:7 2:10 2:8 2:7 1:10 1:9 1:7 2:10 2:8 2:7 1:10 1:9 1:7 2:10 2:8 2:7",
                 "position": {
                   "fret": 7,
@@ -8044,6 +8092,7 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "Eb, D, C, Bb, Ab, G on the top two strings as sextuplets, round and round. The six-note burst from the Speed bursts Step, now without the rest after it.",
                 "tab": "/16t 1:11 1:10 1:8 2:11 2:9 2:8 1:11 1:10 1:8 2:11 2:9 2:8 1:11 1:10 1:8 2:11 2:9 2:8 1:11 1:10 1:8 2:11 2:9 2:8",
                 "position": {
                   "fret": 8,
@@ -8103,6 +8152,7 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "F, E, D, C, Bb, A on the top two strings as sextuplets, round and round. The six-note burst from the Speed bursts Step, now without the rest after it.",
                 "tab": "/16t 1:13 1:12 1:10 2:13 2:11 2:10 1:13 1:12 1:10 2:13 2:11 2:10 1:13 1:12 1:10 2:13 2:11 2:10 1:13 1:12 1:10 2:13 2:11 2:10",
                 "position": {
                   "fret": 10,
@@ -8162,6 +8212,10 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "purpose": "G, F#, E, D, C, B on the top two strings as sextuplets, round and round. The six-note burst from the Speed bursts Step, now without the rest after it.",
+                "howTo": [
+                  "Lean on the first note of each beat a little. Without it six fast notes turn into a blur with no beat in it."
+                ],
                 "tab": "/16t 1:3 1:2 1:0 2:3 2:1 2:0 1:3 1:2 1:0 2:3 2:1 2:0 1:3 1:2 1:0 2:3 2:1 2:0 1:3 1:2 1:0 2:3 2:1 2:0",
                 "position": {
                   "fret": 1,
@@ -12067,6 +12121,7 @@
                   "shapeOrder": "outside lick"
                 },
                 "pool": "all",
+                "howTo": ["Start well under your clean tempo."],
                 "tab": "/16 4:2 3:0 3:2 2:0 3:2 3:0 4:2 4:0 4:2 3:0 3:2 2:0 3:2 3:0 4:2 4:0 | 4:7 3:5 3:7 2:5 3:7 3:5 4:7 4:5 4:7 3:5 3:7 2:5 3:7 3:5 4:7 4:5 | 4:9 3:7 3:9 2:7 3:9 3:7 4:9 4:7 4:9 3:7 3:9 2:7 3:9 3:7 4:9 4:7 | 4:2 3:0 3:2 2:0 3:2 3:0 4:2 4:0 4:2 3:0 3:2 2:0 3:2 3:0 4:2 4:0",
                 "position": {
                   "fret": 2,

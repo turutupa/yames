@@ -223,6 +223,10 @@
                   "stringSet": "D 5-7"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Eighth notes. Bar 1: pick both notes of each pair. Bar 2: pick the first, hammer the second with the third finger.",
+                  "The hammered note lands on the 'and', exactly where the picked one did. If it comes early, the finger is falling instead of being placed."
+                ],
                 "tab": "/8 4:5 4:7 4:5 4:7 4:5 4:7 4:5 4:7 | 4:5 4:7h 4:5 4:7h 4:5 4:7h 4:5 4:7h",
                 "position": {
                   "fret": 5,
@@ -274,6 +278,10 @@
                   "stringSet": "A 5-7"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Eighth notes. Bar 1: pick both notes of each pair. Bar 2: pick the first, hammer the second with the third finger.",
+                  "The hammered note lands on the 'and', exactly where the picked one did. If it comes early, the finger is falling instead of being placed."
+                ],
                 "tab": "/8 5:5 5:7 5:5 5:7 5:5 5:7 5:5 5:7 | 5:5 5:7h 5:5 5:7h 5:5 5:7h 5:5 5:7h",
                 "position": {
                   "fret": 5,
@@ -325,6 +333,10 @@
                   "stringSet": "top E 5-7"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Eighth notes. Bar 1: pick both notes of each pair. Bar 2: pick the first, hammer the second with the third finger.",
+                  "The hammered note lands on the 'and', exactly where the picked one did. If it comes early, the finger is falling instead of being placed."
+                ],
                 "tab": "/8 1:5 1:7 1:5 1:7 1:5 1:7 1:5 1:7 | 1:5 1:7h 1:5 1:7h 1:5 1:7h 1:5 1:7h",
                 "position": {
                   "fret": 5,
@@ -376,6 +388,10 @@
                   "stringSet": "B 6-8"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Eighth notes. Bar 1: pick both notes of each pair. Bar 2: pick the first, hammer the second with the third finger.",
+                  "The hammered note lands on the 'and', exactly where the picked one did. If it comes early, the finger is falling instead of being placed."
+                ],
                 "tab": "/8 2:6 2:8 2:6 2:8 2:6 2:8 2:6 2:8 | 2:6 2:8h 2:6 2:8h 2:6 2:8h 2:6 2:8h",
                 "position": {
                   "fret": 6,
@@ -706,6 +722,11 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "The C minor pentatonic box, two notes a string, each pair one pick and one hammer-on. It already sounds like a blues-rock phrase.",
+                "howTo": [
+                  "Eighths. Pick the lower note on each string and hammer the upper: D string 8 to 10, G string 8 to 10, B string 8 to 11, and back.",
+                  "Third finger hammers the frets at 10, little finger the 11 on the B string. The phrase ends on a picked G on the A string."
+                ],
                 "tab": "/8 4:8 4:10h 3:8 3:10h 2:8 2:11h 3:8 3:10h | 2:8 2:11h 3:8 3:10h 4:8 4:10h /4 5:10",
                 "position": {
                   "fret": 8,
@@ -756,6 +777,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "The D minor pentatonic box, two notes a string, each pair one pick and one hammer-on. It already sounds like a blues-rock phrase.",
+                "howTo": [
+                  "Eighths. Pick the lower note on each string and hammer the upper: D string 10 to 12, G string 10 to 12, B string 10 to 13, and back.",
+                  "Third finger hammers the frets at 12, little finger the 13 on the B string. The phrase ends on a picked A on the A string."
+                ],
                 "tab": "/8 4:10 4:12h 3:10 3:12h 2:10 2:13h 3:10 3:12h | 2:10 2:13h 3:10 3:12h 4:10 4:12h /4 5:12",
                 "position": {
                   "fret": 10,
@@ -806,6 +832,11 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "purpose": "The E minor pentatonic box, two notes a string, each pair one pick and one hammer-on. It already sounds like a blues-rock phrase.",
+                "howTo": [
+                  "Eighths. Pick the lower note on each string and hammer the upper: D string 12 to 14, G string 12 to 14, B string 12 to 15, and back.",
+                  "Third finger hammers the frets at 14, little finger the 15 on the B string. The phrase ends on a picked B on the A string."
+                ],
                 "tab": "/8 4:12 4:14h 3:12 3:14h 2:12 2:15h 3:12 3:14h | 2:12 2:15h 3:12 3:14h 4:12 4:14h /4 5:14",
                 "position": {
                   "fret": 12,
@@ -1052,6 +1083,10 @@
                   "stringSet": "D 5-7"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Eighth notes. Both fingers down. Bar 1: pick both notes. Bar 2: pick the upper note and pull off to the lower.",
+                  "The pull is a small flick toward the floor, not a lift. Listen for the lower note starting with a click of its own."
+                ],
                 "tab": "/8 4:7 4:5 4:7 4:5 4:7 4:5 4:7 4:5 | 4:7 4:5p 4:7 4:5p 4:7 4:5p 4:7 4:5p",
                 "position": {
                   "fret": 5,
@@ -1103,6 +1138,10 @@
                   "stringSet": "A 5-7"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Eighth notes. Both fingers down. Bar 1: pick both notes. Bar 2: pick the upper note and pull off to the lower.",
+                  "The pull is a small flick toward the floor, not a lift. Listen for the lower note starting with a click of its own."
+                ],
                 "tab": "/8 5:7 5:5 5:7 5:5 5:7 5:5 5:7 5:5 | 5:7 5:5p 5:7 5:5p 5:7 5:5p 5:7 5:5p",
                 "position": {
                   "fret": 5,
@@ -1154,6 +1193,10 @@
                   "stringSet": "top E 5-7"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Eighth notes. Both fingers down. Bar 1: pick both notes. Bar 2: pick the upper note and pull off to the lower.",
+                  "The pull is a small flick toward the floor, not a lift. Listen for the lower note starting with a click of its own."
+                ],
                 "tab": "/8 1:7 1:5 1:7 1:5 1:7 1:5 1:7 1:5 | 1:7 1:5p 1:7 1:5p 1:7 1:5p 1:7 1:5p",
                 "position": {
                   "fret": 5,
@@ -1205,6 +1248,10 @@
                   "stringSet": "B 6-8"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Eighth notes. Both fingers down. Bar 1: pick both notes. Bar 2: pick the upper note and pull off to the lower.",
+                  "The pull is a small flick toward the floor, not a lift. Listen for the lower note starting with a click of its own."
+                ],
                 "tab": "/8 2:8 2:6 2:8 2:6 2:8 2:6 2:8 2:6 | 2:8 2:6p 2:8 2:6p 2:8 2:6p 2:8 2:6p",
                 "position": {
                   "fret": 6,
@@ -1651,6 +1698,11 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "Down the C minor pentatonic box, two notes a string, each pair one pick and one pull-off.",
+                "howTo": [
+                  "Eighths. Top E string 11 to 8, B string 11 to 8, G string 10 to 8, D string 10 to 8, then from the B string down again to a picked G on the A string.",
+                  "First finger lies ready on fret 8 of the next string before you get there. The little finger pulls from the 11s, the third finger from the 10s."
+                ],
                 "tab": "/8 1:11 1:8p 2:11 2:8p 3:10 3:8p 4:10 4:8p | 2:11 2:8p 3:10 3:8p 4:10 4:8p /4 5:10",
                 "position": {
                   "fret": 8,
@@ -1701,6 +1753,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "Down the D minor pentatonic box, two notes a string, each pair one pick and one pull-off.",
+                "howTo": [
+                  "Eighths. Top E string 13 to 10, B string 13 to 10, G string 12 to 10, D string 12 to 10, then from the B string down again to a picked A on the A string.",
+                  "First finger lies ready on fret 10 of the next string before you get there. The little finger pulls from the 13s, the third finger from the 12s."
+                ],
                 "tab": "/8 1:13 1:10p 2:13 2:10p 3:12 3:10p 4:12 4:10p | 2:13 2:10p 3:12 3:10p 4:12 4:10p /4 5:12",
                 "position": {
                   "fret": 10,
@@ -1751,6 +1808,11 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "purpose": "Down the E minor pentatonic box, two notes a string, each pair one pick and one pull-off.",
+                "howTo": [
+                  "Eighths. Top E string 15 to 12, B string 15 to 12, G string 14 to 12, D string 14 to 12, then from the B string down again to a picked B on the A string.",
+                  "First finger lies ready on fret 12 of the next string before you get there. The little finger pulls from the 15s, the third finger from the 14s."
+                ],
                 "tab": "/8 1:15 1:12p 2:15 2:12p 3:14 3:12p 4:14 4:12p | 2:15 2:12p 3:14 3:12p 4:14 4:12p /4 5:14",
                 "position": {
                   "fret": 12,
@@ -1997,6 +2059,9 @@
                   "stringSet": "B 5-6"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Eighths. Bar 1: pick lower, upper, lower, upper, twice. Bar 2: pick the lower note on beats 1 and 3 only, then hammer, pull, hammer."
+                ],
                 "tab": "/8 2:5 2:6 2:5 2:6 2:5 2:6 2:5 2:6 | 2:5 2:6h 2:5p 2:6h 2:5 2:6h 2:5p 2:6h",
                 "position": {
                   "fret": 5,
@@ -2048,6 +2113,10 @@
                   "stringSet": "top E 5-7"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Eighths. Bar 1: pick lower, upper, lower, upper, twice. Bar 2: pick the lower note on beats 1 and 3 only, then hammer, pull, hammer.",
+                  "The first finger never leaves its fret. Only the upper finger moves, and it stays close to the string."
+                ],
                 "tab": "/8 1:5 1:7 1:5 1:7 1:5 1:7 1:5 1:7 | 1:5 1:7h 1:5p 1:7h 1:5 1:7h 1:5p 1:7h",
                 "position": {
                   "fret": 5,
@@ -2099,6 +2168,10 @@
                   "stringSet": "D 5-7"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Eighths. Bar 1: pick lower, upper, lower, upper, twice. Bar 2: pick the lower note on beats 1 and 3 only, then hammer, pull, hammer.",
+                  "The first finger never leaves its fret. Only the upper finger moves, and it stays close to the string."
+                ],
                 "tab": "/8 4:5 4:7 4:5 4:7 4:5 4:7 4:5 4:7 | 4:5 4:7h 4:5p 4:7h 4:5 4:7h 4:5p 4:7h",
                 "position": {
                   "fret": 5,
@@ -2150,6 +2223,10 @@
                   "stringSet": "A 5-7"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Eighths. Bar 1: pick lower, upper, lower, upper, twice. Bar 2: pick the lower note on beats 1 and 3 only, then hammer, pull, hammer.",
+                  "The first finger never leaves its fret. Only the upper finger moves, and it stays close to the string."
+                ],
                 "tab": "/8 5:5 5:7 5:5 5:7 5:5 5:7 5:5 5:7 | 5:5 5:7h 5:5p 5:7h 5:5 5:7h 5:5p 5:7h",
                 "position": {
                   "fret": 5,
@@ -2393,6 +2470,8 @@
                   "stringSet": "top E 5-7-8"
                 },
                 "pool": "all",
+                "purpose": "A, B, C on the top string as a triplet: pick, hammer, hammer.",
+                "howTo": ["Triplets, three to the click. Bar 1 picked."],
                 "tab": "/8t 1:5 1:7 1:8 1:5 1:7 1:8 1:5 1:7 1:8 1:5 1:7 1:8 | 1:5 1:7h 1:8h 1:5 1:7h 1:8h 1:5 1:7h 1:8h 1:5 1:7h 1:8h",
                 "position": {
                   "fret": 5,
@@ -2452,6 +2531,11 @@
                   "stringSet": "G 4-5-7"
                 },
                 "pool": "all",
+                "purpose": "B, C, D on the G string as a triplet: pick, hammer, hammer. Three fingers in a row, the second hammer-on with the little finger.",
+                "howTo": [
+                  "Triplets, three to the click. Bar 1 picked. Bar 2: pick fret 4 on each beat, hammer 5 with the second finger and 7 with the little finger.",
+                  "Leave the second finger down when the little finger hammers. Lift both together just before the next pick."
+                ],
                 "tab": "/8t 3:4 3:5 3:7 3:4 3:5 3:7 3:4 3:5 3:7 3:4 3:5 3:7 | 3:4 3:5h 3:7h 3:4 3:5h 3:7h 3:4 3:5h 3:7h 3:4 3:5h 3:7h",
                 "position": {
                   "fret": 4,
@@ -2511,6 +2595,8 @@
                   "stringSet": "A 5-7-8"
                 },
                 "pool": "all",
+                "purpose": "D, E, F on the A string as a triplet: pick, hammer, hammer.",
+                "howTo": ["Triplets, three to the click. Bar 1 picked."],
                 "tab": "/8t 5:5 5:7 5:8 5:5 5:7 5:8 5:5 5:7 5:8 5:5 5:7 5:8 | 5:5 5:7h 5:8h 5:5 5:7h 5:8h 5:5 5:7h 5:8h 5:5 5:7h 5:8h",
                 "position": {
                   "fret": 5,
@@ -2762,6 +2848,10 @@
                   "stringSet": "B 5-6-8"
                 },
                 "pool": "all",
+                "purpose": "G, F, E on the B string as a triplet: pick, pull, pull.",
+                "howTo": [
+                  "Triplets. Bar 1 picked. Bar 2: pick fret 8 on each beat, pull off to 6, pull off to 5."
+                ],
                 "tab": "/8t 2:8 2:6 2:5 2:8 2:6 2:5 2:8 2:6 2:5 2:8 2:6 2:5 | 2:8 2:6p 2:5p 2:8 2:6p 2:5p 2:8 2:6p 2:5p 2:8 2:6p 2:5p",
                 "position": {
                   "fret": 5,
@@ -2821,6 +2911,10 @@
                   "stringSet": "G 4-5-7"
                 },
                 "pool": "all",
+                "purpose": "D, C, B on the G string as a triplet: pick, pull, pull.",
+                "howTo": [
+                  "Triplets. Bar 1 picked. Bar 2: pick fret 7 on each beat, pull off to 5, pull off to 4."
+                ],
                 "tab": "/8t 3:7 3:5 3:4 3:7 3:5 3:4 3:7 3:5 3:4 3:7 3:5 3:4 | 3:7 3:5p 3:4p 3:7 3:5p 3:4p 3:7 3:5p 3:4p 3:7 3:5p 3:4p",
                 "position": {
                   "fret": 4,
@@ -2880,6 +2974,11 @@
                   "stringSet": "A 5-7-8"
                 },
                 "pool": "all",
+                "purpose": "F, E, D on the A string as a triplet: pick, pull, pull. All three fingers have to be down before the pick moves.",
+                "howTo": [
+                  "Triplets. Bar 1 picked. Bar 2: pick fret 8 on each beat, pull off to 7, pull off to 5.",
+                  "Set fingers 1, 3 and 4 down together, like a small chord on one string, during the last note of the beat before."
+                ],
                 "tab": "/8t 5:8 5:7 5:5 5:8 5:7 5:5 5:8 5:7 5:5 5:8 5:7 5:5 | 5:8 5:7p 5:5p 5:8 5:7p 5:5p 5:8 5:7p 5:5p 5:8 5:7p 5:5p",
                 "position": {
                   "fret": 5,
@@ -3120,6 +3219,10 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets, one pick a beat. Bar 1: B string 7, 8, 10 then top string 7, 9, 10, twice. Bar 2: top string 10, 9, 7, B string 10, 8, 7, then a held E on the G string.",
+                  "At the top of bar 1 you hammer onto fret 10, then pick it again to start bar 2. Keep the little finger down across the bar line."
+                ],
                 "tab": "/8t 2:7 2:8h 2:10h 1:7 1:9h 1:10h 2:7 2:8h 2:10h 1:7 1:9h 1:10h | 1:10 1:9p 1:7p 2:10 2:8p 2:7p /2 3:9",
                 "position": {
                   "fret": 7,
@@ -3174,6 +3277,10 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets, one pick a beat. Bar 1: B string 8, 9, 11 then top string 8, 10, 11, twice. Bar 2: top string 11, 10, 8, B string 11, 9, 8, then a held F on the G string.",
+                  "At the top of bar 1 you hammer onto fret 11, then pick it again to start bar 2. Keep the little finger down across the bar line."
+                ],
                 "tab": "/8t 2:8 2:9h 2:11h 1:8 1:10h 1:11h 2:8 2:9h 2:11h 1:8 1:10h 1:11h | 1:11 1:10p 1:8p 2:11 2:9p 2:8p /2 3:10",
                 "position": {
                   "fret": 8,
@@ -3228,6 +3335,10 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets, one pick a beat. Bar 1: B string 10, 11, 13 then top string 10, 12, 13, twice. Bar 2: top string 13, 12, 10, B string 13, 11, 10, then a held G on the G string.",
+                  "At the top of bar 1 you hammer onto fret 13, then pick it again to start bar 2. Keep the little finger down across the bar line."
+                ],
                 "tab": "/8t 2:10 2:11h 2:13h 1:10 1:12h 1:13h 2:10 2:11h 2:13h 1:10 1:12h 1:13h | 1:13 1:12p 1:10p 2:13 2:11p 2:10p /2 3:12",
                 "position": {
                   "fret": 10,
@@ -3282,6 +3393,10 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets, one pick a beat. Bar 1: B string 12, 13, 15 then top string 12, 14, 15, twice. Bar 2: top string 15, 14, 12, B string 15, 13, 12, then a held A on the G string.",
+                  "At the top of bar 1 you hammer onto fret 15, then pick it again to start bar 2. Keep the little finger down across the bar line."
+                ],
                 "tab": "/8t 2:12 2:13h 2:15h 1:12 1:14h 1:15h 2:12 2:13h 2:15h 1:12 1:14h 1:15h | 1:15 1:14p 1:12p 2:15 2:13p 2:12p /2 3:14",
                 "position": {
                   "fret": 12,
@@ -3562,6 +3677,10 @@
                   "stringSet": "B 5-6-8"
                 },
                 "pool": "all",
+                "purpose": "E, F, G, F on the B string: pick, hammer, hammer, pull. One bar picked, one bar rolled.",
+                "howTo": [
+                  "Sixteenths. Bar 1: alternate-pick frets 5, 6, 8, 6 four times. Bar 2: pick 5 on each beat, hammer 6, hammer 8, pull off to 6."
+                ],
                 "tab": "/16 2:5 2:6 2:8 2:6 2:5 2:6 2:8 2:6 2:5 2:6 2:8 2:6 2:5 2:6 2:8 2:6 | 2:5 2:6h 2:8h 2:6p 2:5 2:6h 2:8h 2:6p 2:5 2:6h 2:8h 2:6p 2:5 2:6h 2:8h 2:6p",
                 "position": {
                   "fret": 5,
@@ -3629,6 +3748,10 @@
                   "stringSet": "G 4-5-7"
                 },
                 "pool": "all",
+                "purpose": "B, C, D, C on the G string: pick, hammer, hammer, pull. One bar picked, one bar rolled.",
+                "howTo": [
+                  "Sixteenths. Bar 1: alternate-pick frets 4, 5, 7, 5 four times. Bar 2: pick 4 on each beat, hammer 5, hammer 7, pull off to 5."
+                ],
                 "tab": "/16 3:4 3:5 3:7 3:5 3:4 3:5 3:7 3:5 3:4 3:5 3:7 3:5 3:4 3:5 3:7 3:5 | 3:4 3:5h 3:7h 3:5p 3:4 3:5h 3:7h 3:5p 3:4 3:5h 3:7h 3:5p 3:4 3:5h 3:7h 3:5p",
                 "position": {
                   "fret": 4,
@@ -3696,6 +3819,11 @@
                   "stringSet": "A 5-7-8"
                 },
                 "pool": "all",
+                "purpose": "D, E, F, E on the A string: pick, hammer, hammer, pull. One bar picked, one bar rolled.",
+                "howTo": [
+                  "Sixteenths. Bar 1: alternate-pick frets 5, 7, 8, 7 four times. Bar 2: pick 5 on each beat, hammer 7, hammer 8, pull off to 7.",
+                  "Fingers 1, 3 and 4. The third finger stays down from its hammer-on until the next pick."
+                ],
                 "tab": "/16 5:5 5:7 5:8 5:7 5:5 5:7 5:8 5:7 5:5 5:7 5:8 5:7 5:5 5:7 5:8 5:7 | 5:5 5:7h 5:8h 5:7p 5:5 5:7h 5:8h 5:7p 5:5 5:7h 5:8h 5:7p 5:5 5:7h 5:8h 5:7p",
                 "position": {
                   "fret": 5,
@@ -3972,6 +4100,10 @@
                   "stringSet": "B 5-6-8"
                 },
                 "pool": "all",
+                "purpose": "G, F, E, F: pick, pull, pull, hammer.",
+                "howTo": [
+                  "Sixteenths. Bar 1 picked. Bar 2: pick fret 8 on each beat, pull off to 6, pull off to 5, hammer 6."
+                ],
                 "tab": "/16 2:8 2:6 2:5 2:6 2:8 2:6 2:5 2:6 2:8 2:6 2:5 2:6 2:8 2:6 2:5 2:6 | 2:8 2:6p 2:5p 2:6h 2:8 2:6p 2:5p 2:6h 2:8 2:6p 2:5p 2:6h 2:8 2:6p 2:5p 2:6h",
                 "position": {
                   "fret": 5,
@@ -4039,6 +4171,10 @@
                   "stringSet": "G 4-5-7"
                 },
                 "pool": "all",
+                "purpose": "D, C, B, C: pick, pull, pull, hammer.",
+                "howTo": [
+                  "Sixteenths. Bar 1 picked. Bar 2: pick fret 7 on each beat, pull off to 5, pull off to 4, hammer 5."
+                ],
                 "tab": "/16 3:7 3:5 3:4 3:5 3:7 3:5 3:4 3:5 3:7 3:5 3:4 3:5 3:7 3:5 3:4 3:5 | 3:7 3:5p 3:4p 3:5h 3:7 3:5p 3:4p 3:5h 3:7 3:5p 3:4p 3:5h 3:7 3:5p 3:4p 3:5h",
                 "position": {
                   "fret": 4,
@@ -4106,6 +4242,11 @@
                   "stringSet": "A 5-7-8"
                 },
                 "pool": "all",
+                "purpose": "F, E, D, E: pick, pull, pull, hammer. The same three notes, started from the little finger.",
+                "howTo": [
+                  "Sixteenths. Bar 1 picked. Bar 2: pick fret 8 on each beat, pull off to 7, pull off to 5, hammer 7.",
+                  "All three fingers go down before each pick. That is the hard part, and it happens during the hammer-on before it."
+                ],
                 "tab": "/16 5:8 5:7 5:5 5:7 5:8 5:7 5:5 5:7 5:8 5:7 5:5 5:7 5:8 5:7 5:5 5:7 | 5:8 5:7p 5:5p 5:7h 5:8 5:7p 5:5p 5:7h 5:8 5:7p 5:5p 5:7h 5:8 5:7p 5:5p 5:7h",
                 "position": {
                   "fret": 5,
@@ -4382,6 +4523,10 @@
                   "stringSet": "B 5-6-8"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sixteenths. Bar 1 picked. Bar 2: pick fret 5 on beats 1 and 3 only; everything else is hammer, hammer, pull, pull, hammer, hammer, pull.",
+                  "Hammer a little harder on the second time round. The last pull-off of each group is the note that goes missing."
+                ],
                 "tab": "/16 2:5 2:6 2:8 2:6 2:5 2:6 2:8 2:6 2:5 2:6 2:8 2:6 2:5 2:6 2:8 2:6 | 2:5 2:6h 2:8h 2:6p 2:5p 2:6h 2:8h 2:6p 2:5 2:6h 2:8h 2:6p 2:5p 2:6h 2:8h 2:6p",
                 "position": {
                   "fret": 5,
@@ -4449,6 +4594,10 @@
                   "stringSet": "G 4-5-7"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sixteenths. Bar 1 picked. Bar 2: pick fret 4 on beats 1 and 3 only; everything else is hammer, hammer, pull, pull, hammer, hammer, pull.",
+                  "Hammer a little harder on the second time round. The last pull-off of each group is the note that goes missing."
+                ],
                 "tab": "/16 3:4 3:5 3:7 3:5 3:4 3:5 3:7 3:5 3:4 3:5 3:7 3:5 3:4 3:5 3:7 3:5 | 3:4 3:5h 3:7h 3:5p 3:4p 3:5h 3:7h 3:5p 3:4 3:5h 3:7h 3:5p 3:4p 3:5h 3:7h 3:5p",
                 "position": {
                   "fret": 4,
@@ -4516,6 +4665,10 @@
                   "stringSet": "A 5-7-8"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sixteenths. Bar 1 picked. Bar 2: pick fret 5 on beats 1 and 3 only; everything else is hammer, hammer, pull, pull, hammer, hammer, pull.",
+                  "Hammer a little harder on the second time round. The last pull-off of each group is the note that goes missing."
+                ],
                 "tab": "/16 5:5 5:7 5:8 5:7 5:5 5:7 5:8 5:7 5:5 5:7 5:8 5:7 5:5 5:7 5:8 5:7 | 5:5 5:7h 5:8h 5:7p 5:5p 5:7h 5:8h 5:7p 5:5 5:7h 5:8h 5:7p 5:5p 5:7h 5:8h 5:7p",
                 "position": {
                   "fret": 5,
@@ -4932,6 +5085,11 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "All six strings of C minor pentatonic, sixteenths: pick, hammer, next string. Twelve notes, the last one held.",
+                "howTo": [
+                  "Sixteenths. Bar 1: alternate-pick the box from the low E string to the top and hold the last note. Bar 2: pick only the first note on each string.",
+                  "Third finger hammers the frets at 10, little finger the frets at 11."
+                ],
                 "tab": "/16 6:8 6:11 5:8 5:10 4:8 4:10 3:8 3:10 2:8 2:11 1:8 1:11 hold | 6:8 6:11h 5:8 5:10h 4:8 4:10h 3:8 3:10h 2:8 2:11h 1:8 1:11h hold",
                 "position": {
                   "fret": 8,
@@ -4994,6 +5152,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "All six strings of D minor pentatonic, sixteenths: pick, hammer, next string. Twelve notes, the last one held.",
+                "howTo": [
+                  "Sixteenths. Bar 1: alternate-pick the box from the low E string to the top and hold the last note. Bar 2: pick only the first note on each string.",
+                  "Third finger hammers the frets at 12, little finger the frets at 13."
+                ],
                 "tab": "/16 6:10 6:13 5:10 5:12 4:10 4:12 3:10 3:12 2:10 2:13 1:10 1:13 hold | 6:10 6:13h 5:10 5:12h 4:10 4:12h 3:10 3:12h 2:10 2:13h 1:10 1:13h hold",
                 "position": {
                   "fret": 10,
@@ -5056,6 +5219,11 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "purpose": "All six strings of E minor pentatonic, sixteenths: pick, hammer, next string. Twelve notes, the last one held.",
+                "howTo": [
+                  "Sixteenths. Bar 1: alternate-pick the box from the low E string to the top and hold the last note. Bar 2: pick only the first note on each string.",
+                  "Third finger hammers the frets at 14, little finger the frets at 15."
+                ],
                 "tab": "/16 6:12 6:15 5:12 5:14 4:12 4:14 3:12 3:14 2:12 2:15 1:12 1:15 hold | 6:12 6:15h 5:12 5:14h 4:12 4:14h 3:12 3:14h 2:12 2:15h 1:12 1:15h hold",
                 "position": {
                   "fret": 12,
@@ -5317,6 +5485,10 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sixteenths. Bar 1 picked, bar 2 with a pull-off on every string.",
+                  "Both fingers are down on the new string before you pick it. The first finger rolls or hops ahead; it never arrives late."
+                ],
                 "tab": "/16 1:11 1:8 2:11 2:8 3:10 3:8 4:10 4:8 5:10 5:8 6:11 6:8 hold | 1:11 1:8p 2:11 2:8p 3:10 3:8p 4:10 4:8p 5:10 5:8p 6:11 6:8p hold",
                 "position": {
                   "fret": 8,
@@ -5379,6 +5551,10 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sixteenths. Bar 1 picked, bar 2 with a pull-off on every string.",
+                  "Both fingers are down on the new string before you pick it. The first finger rolls or hops ahead; it never arrives late."
+                ],
                 "tab": "/16 1:13 1:10 2:13 2:10 3:12 3:10 4:12 4:10 5:12 5:10 6:13 6:10 hold | 1:13 1:10p 2:13 2:10p 3:12 3:10p 4:12 4:10p 5:12 5:10p 6:13 6:10p hold",
                 "position": {
                   "fret": 10,
@@ -5441,6 +5617,10 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sixteenths. Bar 1 picked, bar 2 with a pull-off on every string.",
+                  "Both fingers are down on the new string before you pick it. The first finger rolls or hops ahead; it never arrives late."
+                ],
                 "tab": "/16 1:15 1:12 2:15 2:12 3:14 3:12 4:14 4:12 5:14 5:12 6:15 6:12 hold | 1:15 1:12p 2:15 2:12p 3:14 3:12p 4:14 4:12p 5:14 5:12p 6:15 6:12p hold",
                 "position": {
                   "fret": 12,
@@ -5830,6 +6010,11 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "No picked bar this time: up the box with hammer-ons, straight back down with pull-offs, and a long C to land on.",
+                "howTo": [
+                  "Sixteenths, one pick a string. At the top you hammer onto fret 11 and then pick it again to start down.",
+                  "The descent starts in bar 1 and crosses the bar line. Count the beats; the crossing is where players lose their place."
+                ],
                 "tab": "/16 6:8 6:11h 5:8 5:10h 4:8 4:10h 3:8 3:10h 2:8 2:11h 1:8 1:11h 1:11 1:8p 2:11 2:8p | 3:10 3:8p 4:10 4:8p 5:10 5:8p 6:11 6:8p /2 4:10",
                 "position": {
                   "fret": 8,
@@ -5890,6 +6075,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "No picked bar this time: up the box with hammer-ons, straight back down with pull-offs, and a long D to land on.",
+                "howTo": [
+                  "Sixteenths, one pick a string. At the top you hammer onto fret 13 and then pick it again to start down.",
+                  "The descent starts in bar 1 and crosses the bar line. Count the beats; the crossing is where players lose their place."
+                ],
                 "tab": "/16 6:10 6:13h 5:10 5:12h 4:10 4:12h 3:10 3:12h 2:10 2:13h 1:10 1:13h 1:13 1:10p 2:13 2:10p | 3:12 3:10p 4:12 4:10p 5:12 5:10p 6:13 6:10p /2 4:12",
                 "position": {
                   "fret": 10,
@@ -5950,6 +6140,11 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "purpose": "No picked bar this time: up the box with hammer-ons, straight back down with pull-offs, and a long E to land on.",
+                "howTo": [
+                  "Sixteenths, one pick a string. At the top you hammer onto fret 15 and then pick it again to start down.",
+                  "The descent starts in bar 1 and crosses the bar line. Count the beats; the crossing is where players lose their place."
+                ],
                 "tab": "/16 6:12 6:15h 5:12 5:14h 4:12 4:14h 3:12 3:14h 2:12 2:15h 1:12 1:15h 1:15 1:12p 2:15 2:12p | 3:14 3:12p 4:14 4:12p 5:14 5:12p 6:15 6:12p /2 4:14",
                 "position": {
                   "fret": 12,
@@ -6220,6 +6415,11 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "C minor from the low E string to the D string, then round again through the A string. One bar picked, one bar with a pick on each string and two hammer-ons.",
+                "howTo": [
+                  "Triplets. Low E string 8, 10, 11; A string 8, 10, 11; D string 8, 10, 12; A string again. Bar 2 picks only the first note of each string.",
+                  "The D string's 12 is the little finger at full stretch. Hammer it from the second finger on 10, not from the first."
+                ],
                 "tab": "/8t 6:8 6:10 6:11 5:8 5:10 5:11 4:8 4:10 4:12 5:8 5:10 5:11 | 6:8 6:10h 6:11h 5:8 5:10h 5:11h 4:8 4:10h 4:12h 5:8 5:10h 5:11h",
                 "position": {
                   "fret": 8,
@@ -6279,6 +6479,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "D minor from the low E string to the D string, then round again through the A string. One bar picked, one bar with a pick on each string and two hammer-ons.",
+                "howTo": [
+                  "Triplets. Low E string 10, 12, 13; A string 10, 12, 13; D string 10, 12, 14; A string again. Bar 2 picks only the first note of each string.",
+                  "The D string's 14 is the little finger at full stretch. Hammer it from the second finger on 12, not from the first."
+                ],
                 "tab": "/8t 6:10 6:12 6:13 5:10 5:12 5:13 4:10 4:12 4:14 5:10 5:12 5:13 | 6:10 6:12h 6:13h 5:10 5:12h 5:13h 4:10 4:12h 4:14h 5:10 5:12h 5:13h",
                 "position": {
                   "fret": 10,
@@ -6338,6 +6543,11 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "purpose": "E minor from the low E string to the D string, then round again through the A string. One bar picked, one bar with a pick on each string and two hammer-ons.",
+                "howTo": [
+                  "Triplets. Low E string 12, 14, 15; A string 12, 14, 15; D string 12, 14, 16; A string again. Bar 2 picks only the first note of each string.",
+                  "The D string's 16 is the little finger at full stretch. Hammer it from the second finger on 14, not from the first."
+                ],
                 "tab": "/8t 6:12 6:14 6:15 5:12 5:14 5:15 4:12 4:14 4:16 5:12 5:14 5:15 | 6:12 6:14h 6:15h 5:12 5:14h 5:15h 4:12 4:14h 4:16h 5:12 5:14h 5:15h",
                 "position": {
                   "fret": 12,
@@ -6590,6 +6800,10 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets. D string 12, 10, 8; A string 11, 10, 8; low E string 11, 10, 8; A string again. Bar 2 picks only the first note of each string.",
+                  "Land all three fingers on the new string together. The first pull-off is the easy one; the second is quieter unless you mean it."
+                ],
                 "tab": "/8t 4:12 4:10 4:8 5:11 5:10 5:8 6:11 6:10 6:8 5:11 5:10 5:8 | 4:12 4:10p 4:8p 5:11 5:10p 5:8p 6:11 6:10p 6:8p 5:11 5:10p 5:8p",
                 "position": {
                   "fret": 8,
@@ -6649,6 +6863,10 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets. D string 14, 12, 10; A string 13, 12, 10; low E string 13, 12, 10; A string again. Bar 2 picks only the first note of each string.",
+                  "Land all three fingers on the new string together. The first pull-off is the easy one; the second is quieter unless you mean it."
+                ],
                 "tab": "/8t 4:14 4:12 4:10 5:13 5:12 5:10 6:13 6:12 6:10 5:13 5:12 5:10 | 4:14 4:12p 4:10p 5:13 5:12p 5:10p 6:13 6:12p 6:10p 5:13 5:12p 5:10p",
                 "position": {
                   "fret": 10,
@@ -6708,6 +6926,10 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Triplets. D string 16, 14, 12; A string 15, 14, 12; low E string 15, 14, 12; A string again. Bar 2 picks only the first note of each string.",
+                  "Land all three fingers on the new string together. The first pull-off is the easy one; the second is quieter unless you mean it."
+                ],
                 "tab": "/8t 4:16 4:14 4:12 5:15 5:14 5:12 6:15 6:14 6:12 5:15 5:14 5:12 | 4:16 4:14p 4:12p 5:15 5:14p 5:12p 6:15 6:14p 6:12p 5:15 5:14p 5:12p",
                 "position": {
                   "fret": 12,
@@ -6959,6 +7181,11 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "C minor across four strings and back, one pick a string: the scale run that the Advanced Level speeds up.",
+                "howTo": [
+                  "Triplets. Bar 1 climbs the low E, A, D and G strings with hammer-ons. Bar 2 comes down with pull-offs and turns on the low E string with a last hammer-on to fret 11.",
+                  "At the top you hammer onto the G string's 12 and then pick it again. Keep the little finger down across the bar line."
+                ],
                 "tab": "/8t 6:8 6:10h 6:11h 5:8 5:10h 5:11h 4:8 4:10h 4:12h 3:8 3:10h 3:12h | 3:12 3:10p 3:8p 4:12 4:10p 4:8p 5:11 5:10p 5:8p 6:11 6:10p 6:11h",
                 "position": {
                   "fret": 8,
@@ -7018,6 +7245,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "D minor across four strings and back, one pick a string: the scale run that the Advanced Level speeds up.",
+                "howTo": [
+                  "Triplets. Bar 1 climbs the low E, A, D and G strings with hammer-ons. Bar 2 comes down with pull-offs and turns on the low E string with a last hammer-on to fret 13.",
+                  "At the top you hammer onto the G string's 14 and then pick it again. Keep the little finger down across the bar line."
+                ],
                 "tab": "/8t 6:10 6:12h 6:13h 5:10 5:12h 5:13h 4:10 4:12h 4:14h 3:10 3:12h 3:14h | 3:14 3:12p 3:10p 4:14 4:12p 4:10p 5:13 5:12p 5:10p 6:13 6:12p 6:13h",
                 "position": {
                   "fret": 10,
@@ -7077,6 +7309,11 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "purpose": "E minor across four strings and back, one pick a string: the scale run that the Advanced Level speeds up.",
+                "howTo": [
+                  "Triplets. Bar 1 climbs the low E, A, D and G strings with hammer-ons. Bar 2 comes down with pull-offs and turns on the low E string with a last hammer-on to fret 15.",
+                  "At the top you hammer onto the G string's 16 and then pick it again. Keep the little finger down across the bar line."
+                ],
                 "tab": "/8t 6:12 6:14h 6:15h 5:12 5:14h 5:15h 4:12 4:14h 4:16h 3:12 3:14h 3:16h | 3:16 3:14p 3:12p 4:16 4:14p 4:12p 5:15 5:14p 5:12p 6:15 6:14p 6:15h",
                 "position": {
                   "fret": 12,
@@ -7397,6 +7634,10 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sextuplets. A string 7, 9, 10 then D string 7, 9, 11, four times. In bar 2 only the A string's fret 7 is picked.",
+                  "The first finger leaves the A string and hammers the D string's fret 7 in one move. Let the A string stop as it lifts."
+                ],
                 "tab": "/16t 5:7 5:9 5:10 4:7 4:9 4:11 5:7 5:9 5:10 4:7 4:9 4:11 5:7 5:9 5:10 4:7 4:9 4:11 5:7 5:9 5:10 4:7 4:9 4:11 | 5:7 5:9h 5:10h 4:7h 4:9h 4:11h 5:7 5:9h 5:10h 4:7h 4:9h 4:11h 5:7 5:9h 5:10h 4:7h 4:9h 4:11h 5:7 5:9h 5:10h 4:7h 4:9h 4:11h",
                 "position": {
                   "fret": 7,
@@ -7480,6 +7721,10 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sextuplets. A string 8, 10, 11 then D string 8, 10, 12, four times. In bar 2 only the A string's fret 8 is picked.",
+                  "The first finger leaves the A string and hammers the D string's fret 8 in one move. Let the A string stop as it lifts."
+                ],
                 "tab": "/16t 5:8 5:10 5:11 4:8 4:10 4:12 5:8 5:10 5:11 4:8 4:10 4:12 5:8 5:10 5:11 4:8 4:10 4:12 5:8 5:10 5:11 4:8 4:10 4:12 | 5:8 5:10h 5:11h 4:8h 4:10h 4:12h 5:8 5:10h 5:11h 4:8h 4:10h 4:12h 5:8 5:10h 5:11h 4:8h 4:10h 4:12h 5:8 5:10h 5:11h 4:8h 4:10h 4:12h",
                 "position": {
                   "fret": 8,
@@ -7563,6 +7808,10 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sextuplets. A string 10, 12, 13 then D string 10, 12, 14, four times. In bar 2 only the A string's fret 10 is picked.",
+                  "The first finger leaves the A string and hammers the D string's fret 10 in one move. Let the A string stop as it lifts."
+                ],
                 "tab": "/16t 5:10 5:12 5:13 4:10 4:12 4:14 5:10 5:12 5:13 4:10 4:12 4:14 5:10 5:12 5:13 4:10 4:12 4:14 5:10 5:12 5:13 4:10 4:12 4:14 | 5:10 5:12h 5:13h 4:10h 4:12h 4:14h 5:10 5:12h 5:13h 4:10h 4:12h 4:14h 5:10 5:12h 5:13h 4:10h 4:12h 4:14h 5:10 5:12h 5:13h 4:10h 4:12h 4:14h",
                 "position": {
                   "fret": 10,
@@ -7646,6 +7895,10 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sextuplets. A string 12, 14, 15 then D string 12, 14, 16, four times. In bar 2 only the A string's fret 12 is picked.",
+                  "The first finger leaves the A string and hammers the D string's fret 12 in one move. Let the A string stop as it lifts."
+                ],
                 "tab": "/16t 5:12 5:14 5:15 4:12 4:14 4:16 5:12 5:14 5:15 4:12 4:14 4:16 5:12 5:14 5:15 4:12 4:14 4:16 5:12 5:14 5:15 4:12 4:14 4:16 | 5:12 5:14h 5:15h 4:12h 4:14h 4:16h 5:12 5:14h 5:15h 4:12h 4:14h 4:16h 5:12 5:14h 5:15h 4:12h 4:14h 4:16h 5:12 5:14h 5:15h 4:12h 4:14h 4:16h",
                 "position": {
                   "fret": 12,
@@ -7928,6 +8181,10 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "purpose": "Twelve notes up four strings, the last one a held F#. Bar 1 picked; bar 2 picks the first note and hammers everything else, three strings from nowhere.",
+                "howTo": [
+                  "Sextuplets. Low E, A, D and G strings, three notes each, and hold the last note to the bar line."
+                ],
                 "tab": "/16t 6:7 6:9 6:10 5:7 5:9 5:10 4:7 4:9 4:11 3:7 3:9 3:11 hold | 6:7 6:9h 6:10h 5:7h 5:9h 5:10h 4:7h 4:9h 4:11h 3:7h 3:9h 3:11h hold",
                 "position": {
                   "fret": 7,
@@ -7990,6 +8247,10 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "Twelve notes up four strings, the last one a held G. Bar 1 picked; bar 2 picks the first note and hammers everything else, three strings from nowhere.",
+                "howTo": [
+                  "Sextuplets. Low E, A, D and G strings, three notes each, and hold the last note to the bar line."
+                ],
                 "tab": "/16t 6:8 6:10 6:11 5:8 5:10 5:11 4:8 4:10 4:12 3:8 3:10 3:12 hold | 6:8 6:10h 6:11h 5:8h 5:10h 5:11h 4:8h 4:10h 4:12h 3:8h 3:10h 3:12h hold",
                 "position": {
                   "fret": 8,
@@ -8052,6 +8313,10 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "Twelve notes up four strings, the last one a held A. Bar 1 picked; bar 2 picks the first note and hammers everything else, three strings from nowhere.",
+                "howTo": [
+                  "Sextuplets. Low E, A, D and G strings, three notes each, and hold the last note to the bar line."
+                ],
                 "tab": "/16t 6:10 6:12 6:13 5:10 5:12 5:13 4:10 4:12 4:14 3:10 3:12 3:14 hold | 6:10 6:12h 6:13h 5:10h 5:12h 5:13h 4:10h 4:12h 4:14h 3:10h 3:12h 3:14h hold",
                 "position": {
                   "fret": 10,
@@ -8114,6 +8379,10 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "purpose": "Twelve notes up four strings, the last one a held B. Bar 1 picked; bar 2 picks the first note and hammers everything else, three strings from nowhere.",
+                "howTo": [
+                  "Sextuplets. Low E, A, D and G strings, three notes each, and hold the last note to the bar line."
+                ],
                 "tab": "/16t 6:12 6:14 6:15 5:12 5:14 5:15 4:12 4:14 4:16 3:12 3:14 3:16 hold | 6:12 6:14h 6:15h 5:12h 5:14h 5:15h 4:12h 4:14h 4:16h 3:12h 3:14h 3:16h hold",
                 "position": {
                   "fret": 12,
@@ -8369,6 +8638,10 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sextuplets. Pick the low E string's fret 7 and nothing else. At the top, pull off from 11 to 9, hammer back to 11, then pull off down the string.",
+                  "Coming down, the little finger hammers the first note of each string from the air (D string 11, A string 10, low E string 10), with the other fingers already in place behind it."
+                ],
                 "tab": "/16t 6:7 6:9h 6:10h 5:7h 5:9h 5:10h 4:7h 4:9h 4:11h 3:7h 3:9h 3:11h 3:9p 3:11h 3:9p 3:7p 4:11h 4:9p 4:7p 5:10h 5:9p 5:7p 6:10h 6:9p",
                 "position": {
                   "fret": 7,
@@ -8428,6 +8701,10 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sextuplets. Pick the low E string's fret 8 and nothing else. At the top, pull off from 12 to 10, hammer back to 12, then pull off down the string.",
+                  "Coming down, the little finger hammers the first note of each string from the air (D string 12, A string 11, low E string 11), with the other fingers already in place behind it."
+                ],
                 "tab": "/16t 6:8 6:10h 6:11h 5:8h 5:10h 5:11h 4:8h 4:10h 4:12h 3:8h 3:10h 3:12h 3:10p 3:12h 3:10p 3:8p 4:12h 4:10p 4:8p 5:11h 5:10p 5:8p 6:11h 6:10p",
                 "position": {
                   "fret": 8,
@@ -8487,6 +8764,10 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sextuplets. Pick the low E string's fret 10 and nothing else. At the top, pull off from 14 to 12, hammer back to 14, then pull off down the string.",
+                  "Coming down, the little finger hammers the first note of each string from the air (D string 14, A string 13, low E string 13), with the other fingers already in place behind it."
+                ],
                 "tab": "/16t 6:10 6:12h 6:13h 5:10h 5:12h 5:13h 4:10h 4:12h 4:14h 3:10h 3:12h 3:14h 3:12p 3:14h 3:12p 3:10p 4:14h 4:12p 4:10p 5:13h 5:12p 5:10p 6:13h 6:12p",
                 "position": {
                   "fret": 10,
@@ -8546,6 +8827,10 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sextuplets. Pick the low E string's fret 12 and nothing else. At the top, pull off from 16 to 14, hammer back to 16, then pull off down the string.",
+                  "Coming down, the little finger hammers the first note of each string from the air (D string 16, A string 15, low E string 15), with the other fingers already in place behind it."
+                ],
                 "tab": "/16t 6:12 6:14h 6:15h 5:12h 5:14h 5:15h 4:12h 4:14h 4:16h 3:12h 3:14h 3:16h 3:14p 3:16h 3:14p 3:12p 4:16h 4:14p 4:12p 5:15h 5:14p 5:12p 6:15h 6:14p",
                 "position": {
                   "fret": 12,
@@ -8845,6 +9130,11 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "purpose": "Eighteen notes from the low B to the top E. Bar 1 picked; bar 2 with a pick on each string and two hammer-ons.",
+                "howTo": [
+                  "Sextuplets. Low E 7, 9, 10; A 7, 9, 10; D 7, 9, 11; G 7, 9, 11; B 8, 10, 12; top E 9, 10, 12, and hold the last note.",
+                  "Every string's first note falls on a beat or halfway through one. Let the pick mark those and keep the hammer-ons between them even."
+                ],
                 "tab": "/16t 6:7 6:9 6:10 5:7 5:9 5:10 4:7 4:9 4:11 3:7 3:9 3:11 2:8 2:10 2:12 1:9 1:10 1:12 hold | 6:7 6:9h 6:10h 5:7 5:9h 5:10h 4:7 4:9h 4:11h 3:7 3:9h 3:11h 2:8 2:10h 2:12h 1:9 1:10h 1:12h hold",
                 "position": {
                   "fret": 7,
@@ -8919,6 +9209,11 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "Eighteen notes from the low C to the top F. Bar 1 picked; bar 2 with a pick on each string and two hammer-ons.",
+                "howTo": [
+                  "Sextuplets. Low E 8, 10, 11; An 8, 10, 11; D 8, 10, 12; G 8, 10, 12; B 9, 11, 13; top E 10, 11, 13, and hold the last note.",
+                  "Every string's first note falls on a beat or halfway through one. Let the pick mark those and keep the hammer-ons between them even."
+                ],
                 "tab": "/16t 6:8 6:10 6:11 5:8 5:10 5:11 4:8 4:10 4:12 3:8 3:10 3:12 2:9 2:11 2:13 1:10 1:11 1:13 hold | 6:8 6:10h 6:11h 5:8 5:10h 5:11h 4:8 4:10h 4:12h 3:8 3:10h 3:12h 2:9 2:11h 2:13h 1:10 1:11h 1:13h hold",
                 "position": {
                   "fret": 8,
@@ -8993,6 +9288,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "Eighteen notes from the low D to the top G. Bar 1 picked; bar 2 with a pick on each string and two hammer-ons.",
+                "howTo": [
+                  "Sextuplets. Low E 10, 12, 13; A 10, 12, 13; D 10, 12, 14; G 10, 12, 14; B 11, 13, 15; top E 12, 13, 15, and hold the last note.",
+                  "Every string's first note falls on a beat or halfway through one. Let the pick mark those and keep the hammer-ons between them even."
+                ],
                 "tab": "/16t 6:10 6:12 6:13 5:10 5:12 5:13 4:10 4:12 4:14 3:10 3:12 3:14 2:11 2:13 2:15 1:12 1:13 1:15 hold | 6:10 6:12h 6:13h 5:10 5:12h 5:13h 4:10 4:12h 4:14h 3:10 3:12h 3:14h 2:11 2:13h 2:15h 1:12 1:13h 1:15h hold",
                 "position": {
                   "fret": 10,
@@ -9290,6 +9590,10 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sextuplets. Top E 12, 10, 9; B 12, 10, 8; G 11, 9, 7; D 11, 9, 7; A 10, 9, 7; low E 10, 9, 7, and hold the last note.",
+                  "The hand moves back a fret at the B string and another at the G string. Have all three fingers down on each new string before you pick it."
+                ],
                 "tab": "/16t 1:12f4 1:10f2 1:9f1 2:12 2:10 2:8 3:11 3:9 3:7 4:11 4:9 4:7 5:10 5:9 5:7 6:10 6:9 6:7 hold | 1:12f4 1:10pf2 1:9pf1 2:12 2:10p 2:8p 3:11 3:9p 3:7p 4:11 4:9p 4:7p 5:10 5:9p 5:7p 6:10 6:9p 6:7p hold",
                 "position": {
                   "fret": 8,
@@ -9364,6 +9668,10 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sextuplets. Top E 13, 11, 10; B 13, 11, 9; G 12, 10, 8; D 12, 10, 8; A 11, 10, 8; low E 11, 10, 8, and hold the last note.",
+                  "The hand moves back a fret at the B string and another at the G string."
+                ],
                 "tab": "/16t 1:13f4 1:11f2 1:10f1 2:13 2:11 2:9 3:12 3:10 3:8 4:12 4:10 4:8 5:11 5:10 5:8 6:11 6:10 6:8 hold | 1:13f4 1:11pf2 1:10pf1 2:13 2:11p 2:9p 3:12 3:10p 3:8p 4:12 4:10p 4:8p 5:11 5:10p 5:8p 6:11 6:10p 6:8p hold",
                 "position": {
                   "fret": 8,
@@ -9438,6 +9746,10 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sextuplets. Top E 15, 13, 12; B 15, 13, 11; G 14, 12, 10; D 14, 12, 10; A 13, 12, 10; low E 13, 12, 10, and hold the last note.",
+                  "The hand moves back a fret at the B string and another at the G string."
+                ],
                 "tab": "/16t 1:15f4 1:13f2 1:12f1 2:15 2:13 2:11 3:14 3:12 3:10 4:14 4:12 4:10 5:13 5:12 5:10 6:13 6:12 6:10 hold | 1:15f4 1:13pf2 1:12pf1 2:15 2:13p 2:11p 3:14 3:12p 3:10p 4:14 4:12p 4:10p 5:13 5:12p 5:10p 6:13 6:12p 6:10p hold",
                 "position": {
                   "fret": 10,
@@ -10122,6 +10434,10 @@
                   "stringSet": "A 5-7-8"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sextuplets, six to the click. Pick fret 5, hammer 7 and 8, pull off to 7 and 5, hammer 7. Then pick 5 again.",
+                  "Lean a little on the fourth note of each six. It is the halfway point of the beat, and it keeps the six from turning into two uneven threes."
+                ],
                 "tab": "/16t 5:5 5:7h 5:8h 5:7p 5:5p 5:7h 5:5 5:7h 5:8h 5:7p 5:5p 5:7h 5:5 5:7h 5:8h 5:7p 5:5p 5:7h 5:5 5:7h 5:8h 5:7p 5:5p 5:7h",
                 "position": {
                   "fret": 5,
@@ -10365,6 +10681,11 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "purpose": "Five notes down B minor from D, then five from C#, from B and from A: each beat starts one note lower and spills onto the next string. A pick on every new string.",
+                "howTo": [
+                  "Quintuplets. Beat 1: top string 10, 9, 7, then B string 10 and 8. Beat 2 starts on the top string's 9, beat 3 on its 7, beat 4 on the B string's 10.",
+                  "Every string change is a picked note; everything else is a pull-off. Have the fingers down on the new string before the pick gets there."
+                ],
                 "tab": "/16q 1:10 1:9p 1:7p 2:10 2:8p 1:9 1:7p 2:10 2:8p 2:7p 1:7 2:10 2:8p 2:7p 3:9 2:10 2:8p 2:7p 3:9 3:7p",
                 "position": {
                   "fret": 7,
@@ -10420,6 +10741,11 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "Five notes down C minor from Eb, then five from D, from C and from Bb: each beat starts one note lower and spills onto the next string. A pick on every new string.",
+                "howTo": [
+                  "Quintuplets. Beat 1: top string 11, 10, 8, then B string 11 and 9. Beat 2 starts on the top string's 10, beat 3 on its 8, beat 4 on the B string's 11.",
+                  "Every string change is a picked note; everything else is a pull-off. Have the fingers down on the new string before the pick gets there."
+                ],
                 "tab": "/16q 1:11 1:10p 1:8p 2:11 2:9p 1:10 1:8p 2:11 2:9p 2:8p 1:8 2:11 2:9p 2:8p 3:10 2:11 2:9p 2:8p 3:10 3:8p",
                 "position": {
                   "fret": 8,
@@ -10475,6 +10801,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "Five notes down D minor from F, then five from E, from D and from C: each beat starts one note lower and spills onto the next string. A pick on every new string.",
+                "howTo": [
+                  "Quintuplets. Beat 1: top string 13, 12, 10, then B string 13 and 11. Beat 2 starts on the top string's 12, beat 3 on its 10, beat 4 on the B string's 13.",
+                  "Every string change is a picked note; everything else is a pull-off. Have the fingers down on the new string before the pick gets there."
+                ],
                 "tab": "/16q 1:13 1:12p 1:10p 2:13 2:11p 1:12 1:10p 2:13 2:11p 2:10p 1:10 2:13 2:11p 2:10p 3:12 2:13 2:11p 2:10p 3:12 3:10p",
                 "position": {
                   "fret": 10,
@@ -10530,6 +10861,11 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "purpose": "Five notes down E minor from G, then five from F#, from E and from D: each beat starts one note lower and spills onto the next string. A pick on every new string.",
+                "howTo": [
+                  "Quintuplets. Beat 1: top string 15, 14, 12, then B string 15 and 13. Beat 2 starts on the top string's 14, beat 3 on its 12, beat 4 on the B string's 15.",
+                  "Every string change is a picked note; everything else is a pull-off. Have the fingers down on the new string before the pick gets there."
+                ],
                 "tab": "/16q 1:15 1:14p 1:12p 2:15 2:13p 1:14 1:12p 2:15 2:13p 2:12p 1:12 2:15 2:13p 2:12p 3:14 2:15 2:13p 2:12p 3:14 3:12p",
                 "position": {
                   "fret": 12,
@@ -10991,6 +11327,11 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "purpose": "Six strings up with hammer-ons and six down with pull-offs in one line, a pick on each string, and a long B to finish.",
+                "howTo": [
+                  "Sextuplets. The climb fills three beats and the descent starts on beat 4, so the turn at the top comes just before the bar line.",
+                  "At the top you hammer onto fret 12 and pick it again to come down. Coming down, the hand drops back a fret at the B string and again at the G string."
+                ],
                 "tab": "/16t 6:7 6:9h 6:10h 5:7 5:9h 5:10h 4:7 4:9h 4:11h 3:7 3:9h 3:11h 2:8 2:10h 2:12h 1:9 1:10h 1:12h 1:12 1:10p 1:9p 2:12 2:10p 2:8p | 3:11 3:9p 3:7p 4:11 4:9p 4:7p 5:10 5:9p 5:7p 6:10 6:9p 6:7p /2 4:9",
                 "position": {
                   "fret": 7,
@@ -11063,6 +11404,11 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "Six strings up with hammer-ons and six down with pull-offs in one line, a pick on each string, and a long C to finish.",
+                "howTo": [
+                  "Sextuplets. The climb fills three beats and the descent starts on beat 4, so the turn at the top comes just before the bar line.",
+                  "At the top you hammer onto fret 13 and pick it again to come down. Coming down, the hand drops back a fret at the B string and again at the G string."
+                ],
                 "tab": "/16t 6:8 6:10h 6:11h 5:8 5:10h 5:11h 4:8 4:10h 4:12h 3:8 3:10h 3:12h 2:9 2:11h 2:13h 1:10 1:11h 1:13h 1:13 1:11p 1:10p 2:13 2:11p 2:9p | 3:12 3:10p 3:8p 4:12 4:10p 4:8p 5:11 5:10p 5:8p 6:11 6:10p 6:8p /2 4:10",
                 "position": {
                   "fret": 8,
@@ -11135,6 +11481,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "Six strings up with hammer-ons and six down with pull-offs in one line, a pick on each string, and a long D to finish.",
+                "howTo": [
+                  "Sextuplets. The climb fills three beats and the descent starts on beat 4, so the turn at the top comes just before the bar line.",
+                  "At the top you hammer onto fret 15 and pick it again to come down. Coming down, the hand drops back a fret at the B string and again at the G string."
+                ],
                 "tab": "/16t 6:10 6:12h 6:13h 5:10 5:12h 5:13h 4:10 4:12h 4:14h 3:10 3:12h 3:14h 2:11 2:13h 2:15h 1:12 1:13h 1:15h 1:15 1:13p 1:12p 2:15 2:13p 2:11p | 3:14 3:12p 3:10p 4:14 4:12p 4:10p 5:13 5:12p 5:10p 6:13 6:12p 6:10p /2 4:12",
                 "position": {
                   "fret": 10,
@@ -11382,6 +11733,10 @@
                   "stringSet": "B 5-6-8"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sixteenths: pick, hammer, hammer, pull. Choose a rung about 20% below your clean tempo for the roll; it should feel slow for the first ten seconds.",
+                  "If the hand starts to burn, that is the set done. Rest and come back to it."
+                ],
                 "tab": "/16 2:5 2:6h 2:8h 2:6p 2:5 2:6h 2:8h 2:6p 2:5 2:6h 2:8h 2:6p 2:5 2:6h 2:8h 2:6p",
                 "position": {
                   "fret": 5,
@@ -11433,6 +11788,10 @@
                   "stringSet": "G 4-5-7"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sixteenths: pick, hammer, hammer, pull. Choose a rung about 20% below your clean tempo for the roll; it should feel slow for the first ten seconds.",
+                  "If the hand starts to burn, that is the set done. Rest and come back to it."
+                ],
                 "tab": "/16 3:4 3:5h 3:7h 3:5p 3:4 3:5h 3:7h 3:5p 3:4 3:5h 3:7h 3:5p 3:4 3:5h 3:7h 3:5p",
                 "position": {
                   "fret": 4,
@@ -11484,6 +11843,10 @@
                   "stringSet": "A 5-7-8"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Sixteenths: pick, hammer, hammer, pull. Choose a rung about 20% below your clean tempo for the roll; it should feel slow for the first ten seconds.",
+                  "If the hand starts to burn, that is the set done. Rest and come back to it."
+                ],
                 "tab": "/16 5:5 5:7h 5:8h 5:7p 5:5 5:7h 5:8h 5:7p 5:5 5:7h 5:8h 5:7p 5:5 5:7h 5:8h 5:7p",
                 "position": {
                   "fret": 5,
@@ -11826,6 +12189,7 @@
                   "stringSet": "4"
                 },
                 "pool": "all",
+                "howTo": ["Start well under your clean tempo."],
                 "tab": "/8 4:7f1 4:9hf3 4:9f1 4:10hf2 4:10f1 4:12hf3 4:12f1 4:14hf3 | /8 4:9f1 4:10hf2 4:10f1 4:12hf3 4:12f1 4:14hf3 4:14f1 4:15hf2 | /8 4:10f1 4:12hf3 4:12f1 4:14hf3 4:14f1 4:15hf2 4:15f1 4:17hf3 | /8 4:12f1 4:14hf3 4:14f1 4:15hf2 4:15f1 4:17hf3 4:17f1 4:19hf3",
                 "position": {
                   "fret": 7,
@@ -11962,6 +12326,7 @@
                   "stringSet": "3"
                 },
                 "pool": "all",
+                "howTo": ["Start well under your clean tempo."],
                 "tab": "/8 3:5f1 3:7hf3 3:7f1 3:8hf2 3:8f1 3:10hf3 3:10f1 3:12hf3 | /8 3:7f1 3:8hf2 3:8f1 3:10hf3 3:10f1 3:12hf3 3:12f1 3:13hf2 | /8 3:8f1 3:10hf3 3:10f1 3:12hf3 3:12f1 3:13hf2 3:13f1 3:15hf3 | /8 3:10f1 3:12hf3 3:12f1 3:13hf2 3:13f1 3:15hf3 3:15f1 3:17hf3",
                 "position": {
                   "fret": 5,
@@ -12098,6 +12463,7 @@
                   "stringSet": "2"
                 },
                 "pool": "all",
+                "howTo": ["Start well under your clean tempo."],
                 "tab": "/8 2:3f1 2:5hf3 2:5f1 2:6hf2 2:6f1 2:8hf3 2:8f1 2:10hf3 | /8 2:5f1 2:6hf2 2:6f1 2:8hf3 2:8f1 2:10hf3 2:10f1 2:11hf2 | /8 2:6f1 2:8hf3 2:8f1 2:10hf3 2:10f1 2:11hf2 2:11f1 2:13hf3 | /8 2:8f1 2:10hf3 2:10f1 2:11hf2 2:11f1 2:13hf3 2:13f1 2:15hf3",
                 "position": {
                   "fret": 3,
@@ -12166,6 +12532,7 @@
                   "stringSet": "3"
                 },
                 "pool": "all",
+                "howTo": ["Start well under your clean tempo."],
                 "tab": "/8 3:7f1 3:9hf3 3:9f1 3:10hf2 3:10f1 3:12hf3 3:12f1 3:14hf3 | /8 3:9f1 3:10hf2 3:10f1 3:12hf3 3:12f1 3:14hf3 3:14f1 3:15hf2 | /8 3:10f1 3:12hf3 3:12f1 3:14hf3 3:14f1 3:15hf2 3:15f1 3:17hf3 | /8 3:12f1 3:14hf3 3:14f1 3:15hf2 3:15f1 3:17hf3 3:17f1 3:19hf3",
                 "position": {
                   "fret": 7,
@@ -12302,6 +12669,7 @@
                   "stringSet": "2"
                 },
                 "pool": "all",
+                "howTo": ["Start well under your clean tempo."],
                 "tab": "/8 2:5f1 2:7hf3 2:7f1 2:8hf2 2:8f1 2:10hf3 2:10f1 2:12hf3 | /8 2:7f1 2:8hf2 2:8f1 2:10hf3 2:10f1 2:12hf3 2:12f1 2:13hf2 | /8 2:8f1 2:10hf3 2:10f1 2:12hf3 2:12f1 2:13hf2 2:13f1 2:15hf3 | /8 2:10f1 2:12hf3 2:12f1 2:13hf2 2:13f1 2:15hf3 2:15f1 2:17hf3",
                 "position": {
                   "fret": 5,
@@ -12370,6 +12738,7 @@
                   "stringSet": "3"
                 },
                 "pool": "all",
+                "howTo": ["Start well under your clean tempo."],
                 "tab": "/8 3:9f1 3:11hf3 3:11f1 3:12hf2 3:12f1 3:14hf3 3:14f1 3:16hf3 | /8 3:11f1 3:12hf2 3:12f1 3:14hf3 3:14f1 3:16hf3 3:16f1 3:17hf2 | /8 3:12f1 3:14hf3 3:14f1 3:16hf3 3:16f1 3:17hf2 3:17f1 3:19hf3 | /8 3:14f1 3:16hf3 3:16f1 3:17hf2 3:17f1 3:19hf3 3:19f1 3:21hf3",
                 "position": {
                   "fret": 9,
@@ -12506,6 +12875,7 @@
                   "stringSet": "2"
                 },
                 "pool": "all",
+                "howTo": ["Start well under your clean tempo."],
                 "tab": "/8 2:8f1 2:10hf3 2:10f1 2:11hf2 2:11f1 2:13hf3 2:13f1 2:15hf3 | /8 2:10f1 2:11hf2 2:11f1 2:13hf3 2:13f1 2:15hf3 2:15f1 2:16hf2 | /8 2:11f1 2:13hf3 2:13f1 2:15hf3 2:15f1 2:16hf2 2:16f1 2:18hf3 | /8 2:13f1 2:15hf3 2:15f1 2:16hf2 2:16f1 2:18hf3 2:18f1 2:20hf3",
                 "position": {
                   "fret": 8,
@@ -12642,6 +13012,7 @@
                   "stringSet": "4"
                 },
                 "pool": "all",
+                "howTo": ["Start well under your clean tempo."],
                 "tab": "/8 4:5f1 4:7hf3 4:7f1 4:8hf2 4:8f1 4:10hf3 4:10f1 4:12hf3 | /8 4:7f1 4:8hf2 4:8f1 4:10hf3 4:10f1 4:12hf3 4:12f1 4:13hf2 | /8 4:8f1 4:10hf3 4:10f1 4:12hf3 4:12f1 4:13hf2 4:13f1 4:15hf3 | /8 4:10f1 4:12hf3 4:12f1 4:13hf2 4:13f1 4:15hf3 4:15f1 4:17hf3",
                 "position": {
                   "fret": 5,

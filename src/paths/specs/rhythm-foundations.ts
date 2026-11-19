@@ -134,6 +134,7 @@ export default definePath({
   prerequisites: { skills: ["One clean note at a time", "Holding a pick"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
+  variantText: true,
   orderRationale:
     "The beat first, then two notes to a beat, then silence, because a rest is harder to place than a note. Off-beats come before sixteenths: they use the same eighth-note count, and a player who can't feel the 'and' will not feel the 'e' or the 'a'. Triplets follow sixteenths so the two ways of dividing a beat can be compared. The Advanced Level mixes them, and the band comes last because a band hides a loose rhythm that a click exposes.",
   gradingLimits:

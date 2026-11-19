@@ -463,6 +463,9 @@
                   "stringSet": "A and D"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Count '1, 2' through each half note and play the quarters on 3 and 4. The last bar is one note held for all four clicks."
+                ],
                 "tab": "/2 5:0 /4 5:2 5:0 | /2 4:0 /4 4:2 4:0 | /2 5:0 /4 5:2 4:0 | /1 4:2",
                 "position": {
                   "fret": 1,
@@ -508,6 +511,9 @@
                   "stringSet": "D and G"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Count '1, 2' through each half note and play the quarters on 3 and 4. The last bar is one note held for all four clicks."
+                ],
                 "tab": "/2 4:0 /4 4:2 4:0 | /2 3:0 /4 3:2 3:0 | /2 4:0 /4 4:2 3:0 | /1 3:2",
                 "position": {
                   "fret": 1,

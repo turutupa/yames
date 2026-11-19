@@ -2144,6 +2144,10 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, two to a click, 50 BPM up to a pass at 80.",
+                  "In D: frets 7 and 7, 9 and 8, 11 and 10, 12 and 12, 14 and 14. Same fret is major; one fret back on the B string is minor."
+                ],
                 "tab": "/8 3:7f2 2:7f3 3:9f2 2:8f1 3:11f2 2:10f1 3:12f2 2:12f3 | 3:14f2 2:14f3 3:12f2 2:12f3 3:11f2 2:10f1 3:9f2 2:8f1 | /2 3:7f2 2:7f3",
                 "position": {
                   "fret": 7,
@@ -2197,6 +2201,10 @@
                   "key": "E"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, two to a click, 50 BPM up to a pass at 80.",
+                  "In E: frets 9 and 9, 11 and 10, 13 and 12, 14 and 14, 16 and 16. Same fret is major; one fret back on the B string is minor."
+                ],
                 "tab": "/8 3:9f2 2:9f3 3:11f2 2:10f1 3:13f2 2:12f1 3:14f2 2:14f3 | 3:16f2 2:16f3 3:14f2 2:14f3 3:13f2 2:12f1 3:11f2 2:10f1 | /2 3:9f2 2:9f3",
                 "position": {
                   "fret": 9,
@@ -2250,6 +2258,10 @@
                   "key": "F"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, two to a click, 50 BPM up to a pass at 80.",
+                  "In F: frets 10 and 10, 12 and 11, 14 and 13, 15 and 15, 17 and 17. Same fret is major; one fret back on the B string is minor."
+                ],
                 "tab": "/8 3:10f2 2:10f3 3:12f2 2:11f1 3:14f2 2:13f1 3:15f2 2:15f3 | 3:17f2 2:17f3 3:15f2 2:15f3 3:14f2 2:13f1 3:12f2 2:11f1 | /2 3:10f2 2:10f3",
                 "position": {
                   "fret": 10,
@@ -2303,6 +2315,10 @@
                   "key": "A"
                 },
                 "pool": "all",
+                "howTo": [
+                  "Straight eighths, two to a click, 50 BPM up to a pass at 80.",
+                  "In A: frets 2 and 2, 4 and 3, 6 and 5, 7 and 7, 9 and 9. Same fret is major; one fret back on the B string is minor."
+                ],
                 "tab": "/8 3:2f2 2:2f3 3:4f2 2:3f1 3:6f2 2:5f1 3:7f2 2:7f3 | 3:9f2 2:9f3 3:7f2 2:7f3 3:6f2 2:5f1 3:4f2 2:3f1 | /2 3:2f2 2:2f3",
                 "position": {
                   "fret": 2,
@@ -4725,6 +4741,11 @@
                   "key": "B"
                 },
                 "pool": "all",
+                "purpose": "Four chords as four small arpeggios on the top four strings at the seventh fret, over a band. Between Bm and G one note moves.",
+                "howTo": [
+                  "Straight eighths, 60 BPM up to a pass at 90.",
+                  "Each bar goes up its four notes and back. Bm: 9, 7, 7, 7. G: 9, 7, 8, 7. D: 7, 7, 7, 10. A: 7, 9, 10, 9, from the D string to the top string."
+                ],
                 "tab": "/8 4:9 3:7 2:7 1:7 2:7 3:7 4:9 3:7 | 4:9 3:7 2:8 1:7 2:8 3:7 4:9 3:7 | 4:7 3:7 2:7 1:10 2:7 3:7 4:7 3:7 | 4:7 3:9 2:10 1:9 2:10 3:9 4:7 3:9",
                 "position": {
                   "fret": 7,
@@ -4793,6 +4814,11 @@
                   "key": "C"
                 },
                 "pool": "all",
+                "purpose": "Four chords as four small arpeggios on the top four strings at the eighth fret, over a band. Between Cm and Ab one note moves.",
+                "howTo": [
+                  "Straight eighths, 60 BPM up to a pass at 90.",
+                  "Each bar goes up its four notes and back. Cm: 10, 8, 8, 8. Ab: 10, 8, 9, 8. Eb: 8, 8, 8, 11. Bb: 8, 10, 11, 10, from the D string to the top string."
+                ],
                 "tab": "/8 4:10 3:8 2:8 1:8 2:8 3:8 4:10 3:8 | 4:10 3:8 2:9 1:8 2:9 3:8 4:10 3:8 | 4:8 3:8 2:8 1:11 2:8 3:8 4:8 3:8 | 4:8 3:10 2:11 1:10 2:11 3:10 4:8 3:10",
                 "position": {
                   "fret": 8,
@@ -4861,6 +4887,11 @@
                   "key": "D"
                 },
                 "pool": "all",
+                "purpose": "Four chords as four small arpeggios on the top four strings at the tenth fret, over a band. Between Dm and Bb one note moves.",
+                "howTo": [
+                  "Straight eighths, 60 BPM up to a pass at 90.",
+                  "Each bar goes up its four notes and back. Dm: 12, 10, 10, 10. Bb: 12, 10, 11, 10. F: 10, 10, 10, 13. C: 10, 12, 13, 12, from the D string to the top string."
+                ],
                 "tab": "/8 4:12 3:10 2:10 1:10 2:10 3:10 4:12 3:10 | 4:12 3:10 2:11 1:10 2:11 3:10 4:12 3:10 | 4:10 3:10 2:10 1:13 2:10 3:10 4:10 3:10 | 4:10 3:12 2:13 1:12 2:13 3:12 4:10 3:12",
                 "position": {
                   "fret": 10,
@@ -6821,6 +6852,7 @@
                   "position": "boxes 1 and 2"
                 },
                 "pool": "all",
+                "purpose": "G minor pentatonic box going up and the box above it coming down. A different key and pair of boxes each time.",
                 "tab": "/8 6:3 6:6 5:3 5:5 4:3 4:5 3:3 3:5 2:3 2:6 1:3 1:6 hold | /8 1:8 1:6 2:8 2:6 3:7 3:5 4:8 4:5 5:8 5:5 6:8 6:6 hold",
                 "position": {
                   "fret": 3,
@@ -7010,6 +7042,7 @@
                   "position": "boxes 1 and 2"
                 },
                 "pool": "all",
+                "purpose": "C minor pentatonic box going up and the box above it coming down. A different key and pair of boxes each time.",
                 "tab": "/8 6:8 6:11 5:8 5:10 4:8 4:10 3:8 3:10 2:8 2:11 1:8 1:11 hold | /8 1:13 1:11 2:13 2:11 3:12 3:10 4:13 4:10 5:13 5:10 6:13 6:11 hold",
                 "position": {
                   "fret": 8,

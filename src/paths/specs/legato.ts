@@ -202,6 +202,7 @@ export default definePath({
   prerequisites: { paths: [{ path: "rhythm-foundations", level: "beginner" }], skills: ["Clean single notes with all four fingers", "Eighth notes with a click at 80 BPM"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
+  variantText: true,
   orderRationale:
     "One hammer-on, then one pull-off, then the two joined, all with a picked note on every beat to lean on. Then three fingers on one string, then across strings in the pentatonic box, where every string is one pick and one legato note, then three notes per string. Hammer-ons from nowhere come last because they need the strength the earlier Steps build. Every figure is played picked first, so the ear knows the rhythm before the fretting hand has to make it alone.",
   gradingLimits:
