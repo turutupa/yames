@@ -2,6 +2,7 @@
  * Spec in, pack out. Pure and deterministic: no clock, no randomness, keys in
  * one fixed order, so the same spec gives the same bytes on every machine.
  */
+import { firstBase, handMoves } from "./fingering";
 import { GRADING_PROFILES } from "./profiles";
 import type { GradingProfile } from "./profiles";
 import { PATH_SCHEMA_VERSION, STANDARD_TUNING, SUBDIVISION_TICKS, VARIATION_DIMENSIONS, barLengthTicks, subdivisionOf } from "./format";
@@ -131,6 +132,8 @@ type Compiled = {
   backing: Backing;
   crossing: Crossing;
   tab: string;
+  /** The spec allowed shifts; `position.shifts` says whether the hand needs them. */
+  shiftsAsked: boolean;
 };
 
 function compile(spec: ExerciseSpec, build: VariantBuild, where: string): Omit<Compiled, "crossing" | "landings" | "backing" | "harmony"> {
@@ -151,9 +154,13 @@ function compile(spec: ExerciseSpec, build: VariantBuild, where: string): Omit<C
     build,
     notes: parsed.notes,
     rests: parsed.rests,
-    position: { fret, shifts: shifts ? "allowed" : "none" },
+    // "Allowed" only when the hand does move, and from where its index really starts: the Hand line says both out loud.
+    position: shifts && handMoves(parsed.notes, fret)
+      ? { fret: firstBase(parsed.notes, { fret, shifts: "allowed" }) ?? fret, shifts: "allowed" }
+      : { fret, shifts: "none" },
     bars: Math.max(1, Math.ceil(parsed.totalTicks / barTicks)),
     tab: build.tab.trim().replace(/\s+/g, " "),
+    shiftsAsked: !!shifts,
   };
   if (chords) compiled.chords = chords;
   if (guideText) compiled.guide = parseTab(guideText, STANDARD_TUNING, barTicks).notes;
@@ -246,6 +253,11 @@ function buildExercise(
   const top = rungs[rungs.length - 1]?.bpm ?? 60;
 
   const concrete = parts.map((part) => {
+    // A hand the fingering keeps still, but a smaller hand at this level cannot: it may move.
+    if (part.shiftsAsked && part.position.shifts === "none") {
+      const still = { notes: part.notes, position: part.position, loops, meter: METER, bars: part.bars };
+      if (checkReachAt(still, reachLevel, top).failure) part.position = { ...part.position, shifts: "allowed" };
+    }
     const shape = { notes: part.notes, position: part.position, loops, meter: METER, bars: part.bars };
     const reach = checkReachAt(shape, reachLevel, top);
     const handShifts = reach.failure ? 0 : reach.shifts;

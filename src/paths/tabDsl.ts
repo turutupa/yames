@@ -11,7 +11,8 @@
  *   `h` hammer-on, `p` pull-off (on the note arrived at), `s` slides out to the
  *   next note, `b2` bends two semitones, `v` vibrato, `>` accent, `m` palm
  *   mute, `l` let ring, `t` tapped with the picking hand (a loud attack with
- *   no stroke), `d` or `u` a printed stroke.
+ *   no stroke), `d` or `u` a printed stroke, `f1`..`f4` the fretting finger
+ *   (index to little finger) where the rules in `fingering.ts` would not choose it.
  * - `a+b` sounds two notes together, a double stop: `3:7b2+2:5` is a unison
  *   bend. Both take the current value; the score hears one attack.
  * - `r` is a rest of the current value.
@@ -74,6 +75,7 @@ function parseNote(part: string, token: string, tuning: readonly number[], tick:
   let pick: PickMark | undefined;
   let accent = false;
   let bend: number | undefined;
+  let finger: PathNote["finger"];
   const suffix = match[3];
   for (let i = 0; i < suffix.length; i += 1) {
     const c = suffix[i];
@@ -86,6 +88,13 @@ function parseNote(part: string, token: string, tuning: readonly number[], tick:
     else if (c === "t") tech.push("tap");
     else if (c === ">") accent = true;
     else if (c === "d" || c === "u") pick = c;
+    else if (c === "f") {
+      const f = Number(suffix[i + 1]);
+      if (f !== 1 && f !== 2 && f !== 3 && f !== 4) throw new Error(`bad finger: ${token}`);
+      if (fret === 0) throw new Error(`an open string takes no finger: ${token}`);
+      finger = f;
+      i += 1;
+    }
     else if (c === "b") {
       tech.push("bend");
       bend = Number(suffix[i + 1]);
@@ -104,6 +113,7 @@ function parseNote(part: string, token: string, tuning: readonly number[], tick:
   if (pick) note.pick = pick;
   if (accent) note.accent = true;
   if (bend !== undefined) note.bend = bend;
+  if (finger !== undefined) note.finger = finger;
   return note;
 }
 

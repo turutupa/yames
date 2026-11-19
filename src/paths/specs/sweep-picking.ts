@@ -527,13 +527,16 @@ const OLD_STEPS: StepSpec[] = [
         sweepExercise({
           id: "c-five",
           title: "C major from the A string",
-          purpose: "Major: G hammered up to C, then E, G, C, E and a three-fret top reach. It is a wider shape at the bottom and easier at the top.",
-          howTo: ["The reach from fret 10 to 15 on the A string is your widest. Warm up before pushing on this one."],
+          purpose: "Major: G slid up to C, then E, G, C, E and a three-fret top reach. It is a wider shape at the bottom and easier at the top.",
+          howTo: ["The slide from fret 10 to 15 on the A string is your widest move: the little finger slides, and the hand lands with the index at fret 12. Warm up before pushing on this one."],
           coach: "The same bar as Am. Compare the takes.",
           tab: `/8t ${c5}`,
-          position: 10,
+          // The little finger starts the slide at 10, so the index starts at 7 and the hand moves to 12.
+          position: 7,
+          shifts: true,
           harmony: { arpeggio: "C", cover: true },
-          rungs: ladder(60, 160, 10),
+          // The loop jumps the hand back five frets to the slide: past 150 there is no time for it (reach.ts).
+          rungs: ladder(60, 150, 10),
           passAt: 90,
           selfCheck: [ROLL_CHECK, NOISE_CHECK],
           minutes: 7,
@@ -581,6 +584,8 @@ const OLD_STEPS: StepSpec[] = [
         "While you tap, the fretting hand keeps holding the note you pull off to. The tap is a loud attack and it counts as a note that must be heard.",
       ],
       payoff: "Two five-string shapes per chord, and a tapped A minor sweep that reaches up to fret 20.",
+      difficultyException:
+        "Level with Five strings to the hundredth: that Step rates a shade higher only since the C shape's slide was counted as the shift it is (fingering audit, 2026-11-18).",
       exercises: [
         sweepExercise({
           id: "am-e-shape",
@@ -782,7 +787,8 @@ const OLD_STEPS: StepSpec[] = [
           purpose: "Two triads in one gesture: Am up the strings, G back down. Together they give a modern, open sound, and you only have to know one small shape each.",
           howTo: ["Three up, pull off to fret 10, two more upstrokes down the strings. Loop it. It works over A minor or over a G chord, and hearing that is worth a minute."],
           coach: "Short and repeatable: this is a good one for the top of the ladder, which you'll judge by ear.",
-          tab: `/8t ${repeat("3:14 2:13 1:12 1:10p 2:12 3:12", 2)}`,
+          // Little, ring, middle, then the pull to the index at 10: the G comes back down on the ring finger.
+          tab: `/8t ${repeat("3:14f4 2:13f3 1:12f2 1:10pf1 2:12f3 3:12f3", 2)}`,
           position: 10,
           harmony: { scale: ["A", "naturalMinor"] },
           rungs: ladder(60, 150, 10),
@@ -1323,7 +1329,8 @@ const NEW_STEPS: StepSpec[] = [
           build: (p) => {
             const near: Record<string, number> = { F: 13, G: 15, A: 17 };
             const tab = `/8t ${sweepLoop({ chord: p.key, strings: [6, 5, 4, 3, 2, 1], near: near[p.key] })}`;
-            return { tab, position: handAt(tab), harmony: { arpeggio: p.key, cover: true } };
+            // Six frets wide: the index starts on the D, G and B strings' fret and moves down for the top string.
+            return { tab, position: handAt(tab) + 2, shifts: true, harmony: { arpeggio: p.key, cover: true } };
           },
         },
         rungs: ladder(60, 150, 10),
@@ -1363,6 +1370,8 @@ const NEW_STEPS: StepSpec[] = [
       "Fast rungs are self-checked. Record yourself and slow the recording down: nothing is more honest than that.",
     ],
     payoff: "A line that jumps the neck, and a burst of sweep at a speed you couldn't have played a month ago.",
+    difficultyException:
+      "Its shapes are the three-string triads already known; the demand is the jump between them, which the score counts as one shift. Six strings rates higher since the major six-string shape was fingered honestly: six frets wide, its hand moves inside the shape (fingering audit, 2026-11-18).",
     exercises: [
       sweepExercise({
         id: "octave-jump",
