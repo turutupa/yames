@@ -285,6 +285,50 @@ test.describe("the learning side on a phone", () => {
     });
   }
 
+  // Progress on a phone (2026-11-18): the Path's own number sat mid-card, out
+  // of the column the Exercises' numbers keep at the right edge; and in a wide
+  // face at 360 px "SESSIONS" ran out of its stat tile over the next one.
+  for (const theme of ["ember", "neon"]) {
+    for (const size of WIDTHS) {
+      test(`phone-progress in ${theme}: one column of numbers, every tile holds its words, at ${size.width}px`, async ({ page }) => {
+        test.slow();
+        await openShot(page, "phone-progress", size, theme);
+        await settleAnimations(page);
+        const m = await page.evaluate(() => {
+          const right = (el: Element) => Math.round(el.getBoundingClientRect().right);
+          const card = document.querySelector(".session-prog-path")!;
+          const tiles = [...document.querySelectorAll(".session-stat-tile")].map((tile) => {
+            const box = tile.getBoundingClientRect();
+            const words = [...tile.querySelectorAll(".session-num, .session-stat-label")].map((el) => {
+              const range = document.createRange();
+              range.selectNodeContents(el);
+              const r = range.getBoundingClientRect();
+              return { text: (el.textContent ?? "").trim(), left: r.left, right: r.right };
+            });
+            return { left: box.left, right: box.right, words };
+          });
+          return {
+            head: right(card.querySelector(".session-prog-head .session-progress-value")!),
+            rows: [...card.querySelectorAll(".session-skill .session-progress-value")].map(right),
+            tiles,
+          };
+        });
+        expect(m.rows.length, "no Exercise rows on the card").toBeGreaterThan(0);
+        for (const row of m.rows) {
+          expect(Math.abs(row - m.head), `the Path's number ends at ${m.head}, a row's at ${row}`).toBeLessThanOrEqual(1);
+        }
+        expect(m.tiles.length).toBe(3);
+        for (const tile of m.tiles) {
+          for (const w of tile.words) {
+            expect(w.right, `"${w.text}" runs out of its tile`).toBeLessThanOrEqual(tile.right);
+            expect(w.left, `"${w.text}" starts before its tile`).toBeGreaterThanOrEqual(tile.left);
+          }
+        }
+        await noSidewaysScroll(page, `phone-progress in ${theme} at ${size.width}px`);
+      });
+    }
+  }
+
   // Owner, 2026-11-18: Start is on the first screen of every ready view, with
   // nothing to scroll to find it. The warm-up had no sticky footer at all and
   // the runway Take's stuck nothing (its row had no group to stick), so on a

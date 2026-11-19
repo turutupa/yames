@@ -197,6 +197,35 @@ test.describe("on a phone", () => {
         await shot(page, `phone-${scene}-390-${theme}`);
       });
     }
+    // A Path's name is never cut inside a word ("Wechselschl / ag" in the
+    // middle segment, German, 390 px): a segment is at least as wide as its
+    // longest word, and one that cannot be takes the next row.
+    for (const lng of ["de", "ru"]) {
+      for (const size of [PHONE, { width: 360, height: 800 }]) {
+        test(`phone-today-focus-two in ${lng} at ${size.width} in ${theme}: no name is cut mid-word`, async ({ page }) => {
+          await openShot(page, "phone-today-focus-two", size, theme, { lng });
+          await landed(page);
+          const cut = await page.evaluate(() =>
+            [...document.querySelectorAll<HTMLElement>('[data-testid="today-focus"] .session-seg button')].flatMap((b) => {
+              // The narrowest the label can be without breaking a word.
+              const probe = b.cloneNode(true) as HTMLElement;
+              probe.style.cssText =
+                "position:absolute;visibility:hidden;flex:none;width:min-content;min-width:0;max-width:none;" +
+                // Whatever the stylesheet lets a word do, here it stays whole.
+                "overflow-wrap:normal;word-break:normal;hyphens:manual";
+              b.parentElement!.appendChild(probe);
+              const needs = probe.getBoundingClientRect().width;
+              probe.remove();
+              const has = b.getBoundingClientRect().width;
+              return has + 1 < needs ? [`"${b.textContent}" has ${Math.round(has)}px, its longest word needs ${Math.round(needs)}px`] : [];
+            }),
+          );
+          expect(cut).toEqual([]);
+          await pickerFits(page, `phone-today-focus-two ${lng} ${theme} ${size.width}`);
+          await noSidewaysScroll(page, `phone-today-focus-two ${lng} ${theme} ${size.width}`);
+        });
+      }
+    }
     test(`phone-paths-mix at 390 in ${theme}`, async ({ page }) => {
       await openShot(page, "phone-paths-mix", PHONE, theme);
       await mixSwitchesFit(page, `phone-paths-mix ${theme}`, 44);
