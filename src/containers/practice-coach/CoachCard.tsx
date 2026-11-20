@@ -7,6 +7,7 @@ import { FeedMessageItem, type ChipAction } from "./CoachFeedMessage";
 import { CoachHistoryList } from "./CoachHistoryList";
 import { CoachSessionDetail } from "./CoachSessionDetail";
 import { SystemStatusChip } from "../../components/SystemStatusChip";
+import { CoachModelSelector } from "../main-window/CoachModelSelector";
 
 /**
  * Apply the JS-side legacy scoring formula to every loaded session.
@@ -212,6 +213,7 @@ export default function CoachCard({ open, active, messages, onToggle, onStartSes
     <div
       className={`coach-card coach-card-open${closing ? " coach-card-closing" : ""}`}
       data-tour="coach"
+      data-coach-model-bounds=""
     >
       <div className="coach-card-inner">
         <div className="coach-card-header">
@@ -382,6 +384,12 @@ export default function CoachCard({ open, active, messages, onToggle, onStartSes
             ) : null}
           </>
         )}
+
+        {/* The model selector, at the panel's foot on both tabs (ms1). It
+            takes nothing from this card: the Ask dock mounts it the same way. */}
+        <div className="coach-card-foot">
+          <CoachModelSelector />
+        </div>
       </div>
     </div>
   );

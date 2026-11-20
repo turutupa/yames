@@ -29,6 +29,57 @@
     "noteSpacingTrend": "Note spacing trend",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
   },
+  "coachModel": {
+    "label": "Coach model",
+    "button": "Coach model: {{choice}}, {{state}}",
+    "entry": "{{tier}} · {{model}} · {{size}}",
+    "offHint": "No language model loaded. The coach still works from its own rules.",
+    "memory": "Takes at least {{used}} of this computer's {{total}} of memory",
+    "memoryUnknown": "Takes at least {{used}} of memory",
+    "short": {
+      "off": "off",
+      "ready": "ready",
+      "loading": "loading",
+      "waiting": "waiting to load",
+      "failed": "couldn't load",
+      "notDownloaded": "not downloaded",
+      "notOnThisDevice": "not on this device",
+      "downloading": "downloading {{percent}}",
+      "downloadingNoPercent": "downloading"
+    },
+    "state": {
+      "ready": "Loaded and ready",
+      "loading": "Loading…",
+      "waiting": "Loads when the app is idle, never during a Take",
+      "onDisk": "Downloaded, not loaded",
+      "failed": "Couldn't load. Choose it to try again",
+      "failedWhy": "Couldn't load ({{reason}}). Choose it to try again",
+      "notDownloaded": "Not downloaded",
+      "update": "An older version. Download the new one",
+      "otherOnDisk": "Not downloaded. One model fits on this computer for now: switch in Settings → Coach"
+    },
+    "why": {
+      "phone": "Not on this device",
+      "noLlm": "Not on this device: this build can't run a model",
+      "ram": "Not on this device: it needs more memory"
+    },
+    "download": {
+      "start": "Download",
+      "pause": "Pause",
+      "resume": "Resume",
+      "retry": "Try again",
+      "anyway": "Download anyway",
+      "notNow": "Not now",
+      "running": "Downloading… {{percent}}",
+      "runningNoPercent": "Downloading…",
+      "voices": "Getting the coach's voices…",
+      "paused": "Paused at {{percent}}. Resume carries on from there.",
+      "pausedNoPercent": "Paused. Resume carries on where it stopped.",
+      "failed": "The download stopped: {{reason}}",
+      "failedNoReason": "The download stopped.",
+      "meteredWarn": "You seem to be on mobile data. {{size}} is a lot to download over it."
+    }
+  },
   "coachDetail": {
     "exercises": "Exercises",
     "notPlayed": "Not played",

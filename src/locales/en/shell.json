@@ -89,38 +89,7 @@
     "expand": "Expand sidebar",
     "collapseWithShortcut": "Collapse sidebar ({{shortcut}})",
     "expandWithShortcut": "Expand sidebar ({{shortcut}})",
-    "beta": "Beta",
-    "model": {
-      "label": "Coach model",
-      "button": "Coach model: {{choice}}, {{state}}",
-      "entry": "{{tier}} · {{model}} · {{size}}",
-      "offHint": "No language model loaded. The coach still works from its own rules.",
-      "memory": "Uses at least {{used}} of this computer's {{total}} of memory",
-      "memoryUnknown": "Uses at least {{used}} of memory",
-      "short": {
-        "off": "off",
-        "ready": "ready",
-        "loading": "loading",
-        "waiting": "waiting to load",
-        "failed": "couldn't load",
-        "notDownloaded": "not downloaded",
-        "notOnThisDevice": "not on this device"
-      },
-      "state": {
-        "ready": "Loaded and ready",
-        "loading": "Loading…",
-        "waiting": "Loads when the app is idle, never during a Take",
-        "onDisk": "Downloaded, not loaded",
-        "failed": "Couldn't load. Choose it to try again",
-        "notDownloaded": "Not downloaded. Get it in Settings",
-        "update": "An older model. Update it in Settings"
-      },
-      "why": {
-        "phone": "Not on this device",
-        "noLlm": "Not on this device: this build can't run a model",
-        "ram": "Not on this device: it needs more memory"
-      }
-    }
+    "beta": "Beta"
   },
   "tabs": {
     "library": "Library"

@@ -25,16 +25,21 @@
  *     tier and the weights it tried; it is tried again only on Retry, on a
  *     new pick, or when different weights land on disk.
  *   - **Off unloads, never deletes.** The weights stay in `models/brain/`.
+ *   - **Downloads are the player's press.** The selector's Download button
+ *     runs the same download Settings runs, through the port
+ *     `useCoachDownload` registers here; nothing in this module starts one,
+ *     and a download never changes the choice from the selector.
  *   - **One brain on disk.** Both tiers download to the same
- *     `models/brain/model.bin` (`models.rs`), so the tier that is not on disk
- *     reads "not downloaded" and the selector sends the player to Settings,
- *     where a download is their own press. Nothing here downloads.
+ *     `models/brain/model.bin` (`models.rs`), so while one tier is on disk
+ *     the other's row offers no Download: it would replace the first
+ *     without a word. Settings → Coach still switches (it asks first);
+ *     two side by side is leg ms2.
  *
  * Module-level state rather than a hook: residency is a property of the
  * process, not of a React tree, and two mounted components must not each
  * own their own idea of it. `useCoachModel` reads it.
  */
-import { getCoachCapabilities, loadCoachModel, unloadCoachModel } from "../ipc.desktop";
+import { getCoachCapabilities, isCoachLoaded, loadCoachModel, unloadCoachModel } from "../ipc.desktop";
 import type { ModelStatus } from "../ipc.desktop";
 import type { BrainTier, ModelTier } from "../types";
 import { IS_MOBILE } from "../platform";
@@ -55,8 +60,25 @@ export type CoachModelState =
  */
 export type CoachModelRowState = Exclude<CoachModelState, "off"> | "onDisk";
 
-/** Why a row reads "not on this device" or "not downloaded". */
-export type CoachModelWhy = "phone" | "noLlm" | "ram" | "update";
+/**
+ * Why a row reads "not on this device" or "not downloaded". `otherOnDisk`:
+ * the other tier holds the one place on disk (see the header).
+ */
+export type CoachModelWhy = "phone" | "noLlm" | "ram" | "update" | "otherOnDisk";
+
+/**
+ * The model download, as the selector shows it. `paused` is Rust's cancel,
+ * which keeps the bytes fetched so far; the next start resumes from them.
+ * `stage` is "voices" once the weights are down and the voice files follow.
+ * `fraction` is null until Rust has reported any.
+ */
+export type CoachModelDownload = {
+  tier: ModelTier;
+  phase: "running" | "paused" | "failed";
+  stage: "brain" | "voices";
+  fraction: number | null;
+  error: string | null;
+};
 
 export type CoachModelRow = {
   tier: ModelTier;
@@ -66,6 +88,10 @@ export type CoachModelRow = {
   why: CoachModelWhy | null;
   /** On disk when it is there; otherwise what the download weighs. */
   sizeBytes: number;
+  /** This tier's download, running, paused or failed; else null. */
+  download: CoachModelDownload | null;
+  /** Whether its row may offer Download (or Resume) now. */
+  canDownload: boolean;
 };
 
 /**
@@ -90,6 +116,8 @@ export type CoachModelSnapshot = {
   systemMemoryMb: number | null;
   /** The resident model's name from its GGUF metadata. */
   modelName: string | null;
+  /** The model download, whichever tier it is for, or null. */
+  download: CoachModelDownload | null;
 };
 
 /**
@@ -122,6 +150,11 @@ let residentTier: ModelTier | null = null;
 let residentStamp: string | null = null;
 let modelName: string | null = null;
 let failure: { tier: ModelTier; stamp: string; reason: string | null } | null = null;
+/** An unload on its way: nothing new loads until Rust has answered it. */
+let unloading = false;
+let download: CoachModelDownload | null = null;
+type DownloadPort = { start: (tier: ModelTier) => void; pause: () => void };
+let downloadPort: DownloadPort | null = null;
 
 const listeners = new Set<() => void>();
 let snapshot: CoachModelSnapshot = buildSnapshot();
@@ -186,9 +219,9 @@ export async function openCoachStartupGate(): Promise<void> {
   if (gateOpen || IS_MOBILE) return;
   gateOpen = true;
   try {
-    const caps = await getCoachCapabilities();
+    const [caps, loaded] = await Promise.all([getCoachCapabilities(), isCoachLoaded()]);
     llmCompiled = caps.llmCompiled;
-    if (caps.modelResident && !resident && !inFlight) {
+    if (loaded && !resident && !inFlight) {
       resident = true;
       residentTier = diskTier();
       residentStamp = diskStamp();
@@ -204,6 +237,39 @@ export async function openCoachStartupGate(): Promise<void> {
 export function retryCoachModel(): void {
   failure = null;
   reconcile();
+}
+
+// ── Downloads (the player's press only) ──────────────────────────────
+
+/** Where the download stands (`useCoachDownload`, which runs it). */
+export function setCoachModelDownload(next: CoachModelDownload | null): void {
+  download = next;
+  emit();
+}
+
+/** `useCoachDownload` hands over its start and pause; returns the undo. */
+export function registerCoachDownloadPort(port: DownloadPort): () => void {
+  downloadPort = port;
+  return () => {
+    if (downloadPort === port) downloadPort = null;
+  };
+}
+
+/**
+ * The selector's Download (or Resume) press. Refused, returning false, when
+ * the row may not offer one: a download already running, the other tier on
+ * disk, a machine or build that cannot run the model.
+ */
+export function startCoachModelDownload(tier: ModelTier): boolean {
+  const row = snapshot.rows.find((r) => r.tier === tier);
+  if (!downloadPort || !row?.canDownload) return false;
+  downloadPort.start(tier);
+  return true;
+}
+
+/** Pause: Rust stops curl and keeps the bytes; Resume picks them up. */
+export function pauseCoachModelDownload(): void {
+  if (download?.phase === "running") downloadPort?.pause();
 }
 
 // ── The machine ──────────────────────────────────────────────────────
@@ -227,20 +293,38 @@ function recommended(tier: ModelTier): boolean {
   return tier === "full" ? disk.studioRecommended : disk.standardRecommended;
 }
 
+/**
+ * The other tier holds the one place on disk, with weights that load: a
+ * download of this one would replace them without a word. Legacy weights
+ * (an update is recommended) load nothing, so they block nothing.
+ */
+function otherOnDisk(tier: ModelTier): boolean {
+  return !!disk?.brainReady && diskTier() !== tier && !disk.brainUpdateRecommended;
+}
+
 function rowFor(tier: ModelTier, name: string, downloadBytes: number): CoachModelRow {
   const onDisk = diskTier() === tier;
   const sizeBytes = onDisk && disk ? disk.brainSizeBytes || downloadBytes : downloadBytes;
+  const own = download?.tier === tier ? download : null;
   const row = (state: CoachModelRowState, why: CoachModelWhy | null = null): CoachModelRow => ({
     tier,
     name,
     state,
     why,
     sizeBytes,
+    download: own,
+    // Rust runs one download at a time; a paused or failed one of this
+    // tier is resumed by the same press.
+    canDownload:
+      state === "notDownloaded" &&
+      why !== "otherOnDisk" &&
+      disk !== null &&
+      (download === null || (own !== null && own.phase !== "running")),
   });
   if (IS_MOBILE) return row("notOnThisDevice", "phone");
   if (llmCompiled === false) return row("notOnThisDevice", "noLlm");
   if (!recommended(tier)) return row("notOnThisDevice", "ram");
-  if (!onDisk) return row("notDownloaded");
+  if (!onDisk) return row("notDownloaded", otherOnDisk(tier) ? "otherOnDisk" : null);
   if (disk?.brainUpdateRecommended) return row("notDownloaded", "update");
   if (resident && residentTier === tier && inFlightTier === null) return row("ready");
   if (inFlightTier === tier) return row("loading");
@@ -266,6 +350,7 @@ function buildSnapshot(): CoachModelSnapshot {
     residentBytes: residentRow ? residentRow.sizeBytes : null,
     systemMemoryMb,
     modelName: resident ? modelName : null,
+    download,
   };
 }
 
@@ -291,7 +376,7 @@ function loadable(tier: ModelTier): boolean {
  * during a load or a download landing mid-load is settled by the same code.
  */
 function reconcile(): void {
-  if (IS_MOBILE || inFlight) {
+  if (IS_MOBILE || inFlight || unloading) {
     emit();
     return;
   }
@@ -302,7 +387,9 @@ function reconcile(): void {
   if (resident) {
     const current = want !== null && residentTier === want && residentStamp === stamp;
     if (!current) {
-      if (want === null || !loadable(want)) {
+      // Until the disk has been read, only Off unloads: an unknown is not
+      // a reason to drop a model that is answering.
+      if (want === null || (disk !== null && !loadable(want))) {
         void unload();
         return;
       }
@@ -364,6 +451,7 @@ async function unload(): Promise<void> {
   residentTier = null;
   residentStamp = null;
   modelName = null;
+  unloading = true;
   emit();
   try {
     await unloadCoachModel();
@@ -371,6 +459,9 @@ async function unload(): Promise<void> {
     // Nothing to unload, or the backend is already gone. Either way the
     // frontend's view is "not resident", which is what matters here.
   }
+  unloading = false;
+  // A pick made while Rust was unloading is settled now, in order.
+  reconcile();
 }
 
 /** Test seam — drops all module state without touching the backend. */
@@ -388,6 +479,9 @@ export function __resetCoachLoaderForTests(): void {
   residentStamp = null;
   modelName = null;
   failure = null;
+  unloading = false;
+  download = null;
+  downloadPort = null;
   listeners.clear();
   snapshot = buildSnapshot();
 }

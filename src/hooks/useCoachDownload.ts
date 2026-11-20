@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { storeLoad, storeSave } from "../ipc";
 import { cancelModelDownload, getModelStatus, getSystemMemoryMb, onDownloadComplete, onDownloadProgress, startModelDownload, ttsListVoices, ttsSetVoice, ttsSetVolume, ttsVoiceDiagnostics } from "../ipc.desktop";
 import type { DownloadProgress, ModelStatus, VoiceDiagnostic } from "../ipc.desktop";
 import type { BrainTier, CoachMode, ModelTier, VoiceMode, Verbosity } from "../types";
 import type { CoachStance } from "../coach/learningMode";
 import { needsBrainUpdate, standardAvailable, studioAvailable } from "../coach/brainTiers";
-import { setCoachModelChoice, setCoachModelDisk } from "./coachLoader";
+import { registerCoachDownloadPort, setCoachModelChoice, setCoachModelDisk, setCoachModelDownload } from "./coachLoader";
 import { useCoachModel } from "./useCoachModel";
 
 // Legacy persisted values may still carry "chime" from an earlier
@@ -169,7 +169,30 @@ export function useCoachDownload() {
     ttsSetVolume(clamped).catch(() => {});
   }, []);
 
-  const handleStartDownload = useCallback(async (tier: ModelTier) => {
+  // ── The model selector's view of the download (ms1) ─────────────────
+  // Whether the tier that finishes becomes the choice. Settings' tier
+  // buttons and the wizard mean "use this one", so it does; the selector's
+  // Download button means "fetch it", so the model is then there to pick
+  // and nothing loads uninvited.
+  const selectOnFinishRef = useRef(true);
+  // The tier whose download is running, readable from the event handlers.
+  const runningTierRef = useRef<ModelTier | null>(null);
+  // Where the weights' download had got to, for a paused row.
+  const brainFractionRef = useRef<number | null>(null);
+  /**
+   * A stopped download. Rust's cancel kills curl and keeps the `.part` file
+   * (`models.rs` `curl_download`), and the next start resumes from it with
+   * `-C -`: so a cancel is a pause, and the selector calls it one.
+   */
+  const [pausedDownload, setPausedDownload] = useState<{ tier: ModelTier; fraction: number | null } | null>(null);
+  const [failedDownload, setFailedDownload] = useState<{ tier: ModelTier; error: string } | null>(null);
+
+  const handleStartDownload = useCallback(async (tier: ModelTier, opts?: { select?: boolean }) => {
+    selectOnFinishRef.current = opts?.select ?? true;
+    runningTierRef.current = tier;
+    brainFractionRef.current = null;
+    setPausedDownload(null);
+    setFailedDownload(null);
     setModelDownloading(true);
     setDownloadingTier(tier);
     setPendingDownloadTier(null);
@@ -187,6 +210,8 @@ export function useCoachDownload() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setDownloadError(msg);
+      setFailedDownload({ tier, error: msg });
+      runningTierRef.current = null;
       setModelDownloading(false);
       setDownloadProgress(null);
       setDownloadingTier(null);
@@ -196,23 +221,34 @@ export function useCoachDownload() {
   // Subscribe to backend progress / completion events.
   useEffect(() => {
     const unsubProgress = onDownloadProgress((progress) => {
+      if (progress.component === "brain") brainFractionRef.current = progress.fraction;
       setDownloadProgress(progress);
       if (progress.done) {
         getModelStatus().then(setModelStatus);
       }
     });
     const unsubComplete = onDownloadComplete((result) => {
+      const ranTier = runningTierRef.current;
+      runningTierRef.current = null;
+      if (ranTier && result.cancelled) {
+        setPausedDownload({ tier: ranTier, fraction: brainFractionRef.current });
+      } else if (ranTier && !result.success) {
+        setFailedDownload({ tier: ranTier, error: result.error ?? "" });
+      }
       if (result.success && result.tier) {
         // Full brain+voices install path — tier present, persist + flip
         // the active brain tier.
         //
-        // The tier downloaded becomes the choice, and the loader takes it
+        // From Settings or the wizard, the tier downloaded becomes the
+        // choice (from the selector it is only there to pick), and the loader takes it
         // from there (`hooks/coachLoader.ts`): it loads when no Take is
         // running, and because `load_coach_model` fingerprints the file
         // (path + size + mtime), new weights for a resident model are
         // swapped in on Rust's side rather than left answering forever.
-        setCoachBrainTier(result.tier as ModelTier);
-        storeSave("coachBrainTier", result.tier);
+        if (selectOnFinishRef.current) {
+          setCoachBrainTier(result.tier as ModelTier);
+          storeSave("coachBrainTier", result.tier);
+        }
         setDownloadSuccess(true);
         getModelStatus().then(setModelStatus);
         ttsListVoices().then(setAvailableVoices);
@@ -243,6 +279,36 @@ export function useCoachDownload() {
   const cancelDownload = useCallback(() => {
     cancelModelDownload();
   }, []);
+
+  // The selector reads the download from the loader's snapshot, and starts
+  // or pauses it through this port: it is the same download Settings runs,
+  // never a second one. Nothing here starts a download by itself.
+  useEffect(
+    () =>
+      registerCoachDownloadPort({
+        start: (tier) => void handleStartDownload(tier, { select: false }),
+        pause: cancelDownload,
+      }),
+    [handleStartDownload, cancelDownload],
+  );
+  useEffect(() => {
+    if (downloadingTier) {
+      const voices = !!downloadProgress && downloadProgress.component !== "brain";
+      setCoachModelDownload({
+        tier: downloadingTier,
+        phase: "running",
+        stage: voices ? "voices" : "brain",
+        fraction: downloadProgress && downloadProgress.fraction > 0 ? downloadProgress.fraction : null,
+        error: null,
+      });
+    } else if (pausedDownload) {
+      setCoachModelDownload({ ...pausedDownload, phase: "paused", stage: "brain", error: null });
+    } else if (failedDownload) {
+      setCoachModelDownload({ tier: failedDownload.tier, phase: "failed", stage: "brain", fraction: null, error: failedDownload.error });
+    } else {
+      setCoachModelDownload(null);
+    }
+  }, [downloadingTier, downloadProgress, pausedDownload, failedDownload]);
 
   return {
     // model state

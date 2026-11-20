@@ -89,38 +89,7 @@
     "expand": "Développer la barre latérale",
     "collapseWithShortcut": "Réduire la barre latérale ({{shortcut}})",
     "expandWithShortcut": "Développer la barre latérale ({{shortcut}})",
-    "beta": "Bêta",
-    "model": {
-      "label": "Modèle du coach",
-      "button": "Modèle du coach : {{choice}}, {{state}}",
-      "entry": "{{tier}} · {{model}} · {{size}}",
-      "offHint": "Aucun modèle de langage chargé. Le coach continue de travailler avec ses propres règles.",
-      "memory": "Utilise au moins {{used}} des {{total}} de mémoire de cet ordinateur",
-      "memoryUnknown": "Utilise au moins {{used}} de mémoire",
-      "short": {
-        "off": "désactivé",
-        "ready": "prêt",
-        "loading": "chargement",
-        "waiting": "en attente de chargement",
-        "failed": "échec du chargement",
-        "notDownloaded": "non téléchargé",
-        "notOnThisDevice": "indisponible sur cet appareil"
-      },
-      "state": {
-        "ready": "Chargé et prêt",
-        "loading": "Chargement…",
-        "waiting": "Se charge quand l'app est au repos, jamais pendant une prise",
-        "onDisk": "Téléchargé, non chargé",
-        "failed": "Échec du chargement. Choisis-le pour réessayer",
-        "notDownloaded": "Non téléchargé. Récupère-le dans les Réglages",
-        "update": "Un ancien modèle. Mets-le à jour dans les Réglages"
-      },
-      "why": {
-        "phone": "Indisponible sur cet appareil",
-        "noLlm": "Indisponible sur cet appareil : cette version ne peut pas exécuter de modèle",
-        "ram": "Indisponible sur cet appareil : il faut plus de mémoire"
-      }
-    }
+    "beta": "Bêta"
   },
   "tabs": {
     "library": "Bibliothèque"

@@ -5,7 +5,9 @@ import { IS_MOBILE } from "../platform";
 import {
   getCoachModelSnapshot,
   openCoachStartupGate,
+  pauseCoachModelDownload,
   retryCoachModel,
+  startCoachModelDownload,
   setCoachModelChoice,
   setCoachTakeRunning,
   subscribeCoachModel,
@@ -32,7 +34,7 @@ export function chooseCoachModel(tier: BrainTier): void {
   void storeSave("coachBrainTier", tier);
 }
 
-export { retryCoachModel };
+export { pauseCoachModelDownload, retryCoachModel, startCoachModelDownload };
 
 /** How long the startup gate waits for an idle moment, at most. */
 export const COACH_GATE_IDLE_TIMEOUT_MS = 5_000;

@@ -1396,20 +1396,6 @@ export function MainWindow() {
       );
     }
   }, [voicePrompt, setView]);
-  // The model selector's "not downloaded" row: Settings → Coach, where the
-  // download is the player's own press (ms1).
-  const openCoachSettings = useCallback(() => {
-    setView("settings");
-    for (const delay of [80, 260, 520]) {
-      setTimeout(
-        () =>
-          document
-            .getElementById("settings-coach")
-            ?.scrollIntoView({ block: "start", behavior: "auto" }),
-        delay,
-      );
-    }
-  }, [setView]);
   // The model's one owner, driven from here: its startup gate after first
   // paint, and the click's state, so no load starts during a Take.
   useCoachModelDriver(state.isPlaying);
@@ -2140,7 +2126,6 @@ export function MainWindow() {
     onDeleteSong: songsSession.deleteSong,
     onRenameSong: songsSession.renameSong,
     onToggleCoach: session.toggleCard,
-    onOpenCoachSettings: openCoachSettings,
     onZen: () => setIsFullscreen(true),
   });
 

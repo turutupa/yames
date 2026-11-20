@@ -89,38 +89,7 @@
     "expand": "Espandi barra laterale",
     "collapseWithShortcut": "Comprimi barra laterale ({{shortcut}})",
     "expandWithShortcut": "Espandi barra laterale ({{shortcut}})",
-    "beta": "Beta",
-    "model": {
-      "label": "Modello del coach",
-      "button": "Modello del coach: {{choice}}, {{state}}",
-      "entry": "{{tier}} · {{model}} · {{size}}",
-      "offHint": "Nessun modello linguistico caricato. Il coach continua a lavorare con le sue regole.",
-      "memory": "Usa almeno {{used}} dei {{total}} di memoria di questo computer",
-      "memoryUnknown": "Usa almeno {{used}} di memoria",
-      "short": {
-        "off": "disattivato",
-        "ready": "pronto",
-        "loading": "in caricamento",
-        "waiting": "in attesa di caricamento",
-        "failed": "caricamento non riuscito",
-        "notDownloaded": "non scaricato",
-        "notOnThisDevice": "non disponibile su questo dispositivo"
-      },
-      "state": {
-        "ready": "Caricato e pronto",
-        "loading": "Caricamento…",
-        "waiting": "Si carica quando l'app è inattiva, mai durante una Take",
-        "onDisk": "Scaricato, non caricato",
-        "failed": "Caricamento non riuscito. Sceglilo per riprovare",
-        "notDownloaded": "Non scaricato. Scaricalo nelle Impostazioni",
-        "update": "Un modello precedente. Aggiornalo nelle Impostazioni"
-      },
-      "why": {
-        "phone": "Non disponibile su questo dispositivo",
-        "noLlm": "Non disponibile su questo dispositivo: questa versione non può eseguire un modello",
-        "ram": "Non disponibile su questo dispositivo: serve più memoria"
-      }
-    }
+    "beta": "Beta"
   },
   "tabs": {
     "library": "Libreria"

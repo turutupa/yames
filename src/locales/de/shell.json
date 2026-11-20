@@ -89,38 +89,7 @@
     "expand": "Seitenleiste ausklappen",
     "collapseWithShortcut": "Seitenleiste einklappen ({{shortcut}})",
     "expandWithShortcut": "Seitenleiste ausklappen ({{shortcut}})",
-    "beta": "Beta",
-    "model": {
-      "label": "Coach-Modell",
-      "button": "Coach-Modell: {{choice}}, {{state}}",
-      "entry": "{{tier}} · {{model}} · {{size}}",
-      "offHint": "Kein Sprachmodell geladen. Der Coach arbeitet weiter mit seinen eigenen Regeln.",
-      "memory": "Braucht mindestens {{used}} von {{total}} Arbeitsspeicher dieses Computers",
-      "memoryUnknown": "Braucht mindestens {{used}} Arbeitsspeicher",
-      "short": {
-        "off": "aus",
-        "ready": "bereit",
-        "loading": "lädt",
-        "waiting": "wartet aufs Laden",
-        "failed": "konnte nicht geladen werden",
-        "notDownloaded": "nicht heruntergeladen",
-        "notOnThisDevice": "nicht auf diesem Gerät"
-      },
-      "state": {
-        "ready": "Geladen und bereit",
-        "loading": "Lädt…",
-        "waiting": "Lädt, wenn die App ruhig ist, nie während eines Takes",
-        "onDisk": "Heruntergeladen, nicht geladen",
-        "failed": "Konnte nicht geladen werden. Wähle es, um es erneut zu versuchen",
-        "notDownloaded": "Nicht heruntergeladen. Hol es dir in den Einstellungen",
-        "update": "Ein älteres Modell. Aktualisiere es in den Einstellungen"
-      },
-      "why": {
-        "phone": "Nicht auf diesem Gerät",
-        "noLlm": "Nicht auf diesem Gerät: dieser Build kann kein Modell ausführen",
-        "ram": "Nicht auf diesem Gerät: es braucht mehr Arbeitsspeicher"
-      }
-    }
+    "beta": "Beta"
   },
   "tabs": {
     "library": "Bibliothek"

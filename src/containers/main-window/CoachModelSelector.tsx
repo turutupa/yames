@@ -1,22 +1,32 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
-import type { KeyboardEvent as ReactKeyboardEvent } from "react";
-import { createPortal } from "react-dom";
+import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { brainTierLabelKey } from "../../coach/brainTiers";
-import { chooseCoachModel, retryCoachModel, useCoachModel } from "../../hooks/useCoachModel";
-import type { CoachModelRow, CoachModelSnapshot, CoachModelState } from "../../hooks/coachLoader";
-import type { BrainTier } from "../../types";
+import {
+  chooseCoachModel,
+  pauseCoachModelDownload,
+  retryCoachModel,
+  startCoachModelDownload,
+  useCoachModel,
+} from "../../hooks/useCoachModel";
+import type { CoachModelRow, CoachModelSnapshot } from "../../hooks/coachLoader";
+import type { BrainTier, ModelTier } from "../../types";
+import "../../styles/coach-model.css";
 
 /**
- * The model selector (owner, 2026-11-20): at the right end of the rail's Ask
- * row, a small button naming the choice and its state, opening a listbox of
- * Off and the two local models, each with its own truth. The Ask row keeps
- * opening the panel; this is its own control beside it.
+ * The model selector (owner, 2026-11-20): at the foot of the right-hand
+ * coach panel, a small button naming the choice and its state, opening a
+ * menu of Off and the two local models, each with its own truth. A model
+ * that is not downloaded shows its size and a Download button in its row.
  *
- * It never downloads: a model that is not on disk leads to Settings → Coach,
- * where the download is the player's own press. Where the rail is a strip of
- * icons the selector is not drawn (CSS); Settings carries the same choice.
+ * Self-contained: it takes no prop from the panel it sits in, so the Ask
+ * dock (leg c2a1) mounts the same component at its own foot. The menu opens
+ * upward and stays inside the nearest `[data-coach-model-bounds]` ancestor
+ * (the panel), or the window when there is none.
+ *
+ * Nothing here downloads, loads or unloads by itself: every one of those
+ * is a press, and goes through `hooks/coachLoader.ts`.
  */
 
 /** Sizes as people read them: decimal gigabytes, one place. */
@@ -30,72 +40,83 @@ function memoryGb(mb: number, lng: string): string {
   return `${new Intl.NumberFormat(lng, { maximumFractionDigits: 0 }).format(mb / 1024)} GB`;
 }
 
-/** One line saying what a row's state is. */
-export function rowStateText(row: CoachModelRow, t: TFunction): string {
+function percent(fraction: number, lng: string): string {
+  return new Intl.NumberFormat(lng, { style: "percent", maximumFractionDigits: 0 }).format(
+    Math.min(1, Math.max(0, fraction)),
+  );
+}
+
+/** Whether the system says this connection is metered. Unknown is no. */
+function onMeteredConnection(): boolean {
+  const c = (navigator as Navigator & { connection?: { type?: string; saveData?: boolean } }).connection;
+  return !!c && (c.type === "cellular" || c.saveData === true);
+}
+
+/** One line saying what a row's state is (its download aside). */
+export function rowStateText(row: CoachModelRow, t: TFunction, failure: string | null): string {
   switch (row.state) {
     case "notOnThisDevice":
-      return t(`rail.model.why.${row.why ?? "phone"}`);
+      return t(`coachModel.why.${row.why ?? "phone"}`);
     case "notDownloaded":
-      return t(row.why === "update" ? "rail.model.state.update" : "rail.model.state.notDownloaded");
+      if (row.why === "update") return t("coachModel.state.update");
+      if (row.why === "otherOnDisk") return t("coachModel.state.otherOnDisk");
+      return t("coachModel.state.notDownloaded");
+    case "failed":
+      return failure ? t("coachModel.state.failedWhy", { reason: failure }) : t("coachModel.state.failed");
     default:
-      return t(`rail.model.state.${row.state}`);
+      return t(`coachModel.state.${row.state}`);
   }
 }
 
-/** The short word for the button's own state. */
-function stateWord(state: CoachModelState, t: TFunction): string {
-  return t(`rail.model.short.${state}`);
+/** What the button says about the choice. */
+function buttonState(snap: CoachModelSnapshot, t: TFunction, lng: string): string {
+  const d = snap.download;
+  if (d?.phase === "running") {
+    return d.fraction !== null
+      ? t("coachModel.short.downloading", { percent: percent(d.fraction, lng) })
+      : t("coachModel.short.downloadingNoPercent");
+  }
+  return t(`coachModel.short.${snap.state}`);
 }
 
-type Option =
-  | { kind: "off"; tier: "off" }
-  | { kind: "local"; tier: BrainTier; row: CoachModelRow };
-
-function optionsOf(snap: CoachModelSnapshot): Option[] {
-  return [
-    { kind: "off", tier: "off" },
-    ...snap.rows.map((row) => ({ kind: "local" as const, tier: row.tier, row })),
-    // Cloud: `snap.cloud` is a typed place, always null, and draws nothing.
-  ];
+function selectable(row: CoachModelRow): boolean {
+  return row.state !== "notDownloaded" && row.state !== "notOnThisDevice";
 }
 
-function optionDisabled(o: Option): boolean {
-  return o.kind === "local" && o.row.state === "notOnThisDevice";
-}
-
-export function CoachModelSelector({ onOpenSettings }: { onOpenSettings: () => void }) {
+export function CoachModelSelector() {
   const { t, i18n } = useTranslation();
+  const lng = i18n.language;
   const snap = useCoachModel();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
+  // A Download pressed on a metered connection: the row asks first.
+  const [confirmTier, setConfirmTier] = useState<ModelTier | null>(null);
+  const [maxHeight, setMaxHeight] = useState<number | null>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const listRef = useRef<HTMLUListElement>(null);
-  const [place, setPlace] = useState<{ left: number; bottom: number; width: number; maxHeight: number } | null>(null);
-  const listId = useId();
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuId = useId();
 
-  const options = optionsOf(snap);
-  const chosenIndex = Math.max(0, options.findIndex((o) => o.tier === snap.choice));
   const choiceName = t(brainTierLabelKey(snap.choice));
+  const stateText = buttonState(snap, t, lng);
+  const buttonLabel = t("coachModel.button", { choice: choiceName, state: stateText });
+
+  const items = () => Array.from(menuRef.current?.querySelectorAll<HTMLElement>("[data-mi]") ?? []);
 
   const close = useCallback((refocus: boolean) => {
     setOpen(false);
+    setConfirmTier(null);
     if (refocus) buttonRef.current?.focus();
   }, []);
 
-  // Opens upward from the button, inside the window at every width the rail
-  // has: anchored to the button's top, kept off both window edges.
+  // Upward, inside the panel: as tall as the room above the button allows.
   const measure = useCallback(() => {
-    const b = buttonRef.current?.getBoundingClientRect();
-    if (!b) return;
-    const margin = 8;
-    const width = Math.min(320, window.innerWidth - margin * 2);
-    const left = Math.min(Math.max(margin, b.right - width), window.innerWidth - width - margin);
-    setPlace({
-      left,
-      bottom: window.innerHeight - b.top + 6,
-      width,
-      maxHeight: Math.max(120, b.top - margin * 2),
-    });
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    const top = wrap.getBoundingClientRect().top;
+    const bounds = wrap.closest("[data-coach-model-bounds]")?.getBoundingClientRect();
+    const ceiling = Math.max(bounds?.top ?? 0, 0);
+    setMaxHeight(Math.max(96, top - ceiling - 14));
   }, []);
 
   useLayoutEffect(() => {
@@ -105,180 +126,361 @@ export function CoachModelSelector({ onOpenSettings }: { onOpenSettings: () => v
     return () => window.removeEventListener("resize", measure);
   }, [open, measure]);
 
-  // Focus follows the active option while the list is open.
+  // Focus follows the active item while the menu is open.
   useEffect(() => {
     if (!open) return;
-    const el = listRef.current?.querySelectorAll<HTMLElement>("[role=option]")[active];
-    el?.focus();
-  }, [open, active, place]);
+    const list = items();
+    const i = Math.min(active, list.length - 1);
+    list[i]?.focus();
+  });
 
   // A press anywhere else closes it, without taking focus anywhere.
   useEffect(() => {
     if (!open) return;
     const onDown = (e: PointerEvent) => {
-      const target = e.target as Node;
-      if (listRef.current?.contains(target) || buttonRef.current?.contains(target)) return;
+      if (wrapRef.current?.contains(e.target as Node)) return;
       close(false);
     };
     document.addEventListener("pointerdown", onDown, true);
     return () => document.removeEventListener("pointerdown", onDown, true);
   }, [open, close]);
 
-  const activate = (o: Option) => {
-    if (optionDisabled(o)) return;
-    if (o.kind === "local" && o.row.state === "notDownloaded") {
-      close(false);
-      onOpenSettings();
-      return;
-    }
-    if (o.kind === "local" && o.row.state === "failed") {
+  const openMenu = () => {
+    const at = snap.choice === "off" ? 0 : 1 + snap.rows.findIndex((r) => r.tier === snap.choice);
+    setActive(Math.max(0, at));
+    setOpen(true);
+  };
+
+  const pick = (tier: BrainTier) => {
+    if (tier !== snap.choice) chooseCoachModel(tier);
+    close(true);
+  };
+
+  const pickRow = (row: CoachModelRow) => {
+    if (!selectable(row)) return;
+    if (row.state === "failed" && row.tier === snap.choice) {
       retryCoachModel();
       close(true);
       return;
     }
-    if (o.tier !== snap.choice) chooseCoachModel(o.tier);
-    close(true);
+    pick(row.tier);
   };
 
-  const onListKey = (e: ReactKeyboardEvent<HTMLUListElement>) => {
-    const last = options.length - 1;
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setActive((i) => (i >= last ? 0 : i + 1));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActive((i) => (i <= 0 ? last : i - 1));
-    } else if (e.key === "Home") {
-      e.preventDefault();
-      setActive(0);
-    } else if (e.key === "End") {
-      e.preventDefault();
-      setActive(last);
-    } else if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      activate(options[active]);
-    } else if (e.key === "Escape") {
+  const download = (tier: ModelTier, confirmed: boolean) => {
+    if (!confirmed && onMeteredConnection()) {
+      setConfirmTier(tier);
+      return;
+    }
+    setConfirmTier(null);
+    startCoachModelDownload(tier);
+  };
+
+  const onMenuKey = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    const count = items().length;
+    const last = count - 1;
+    const handled = () => {
       e.preventDefault();
       e.stopPropagation();
+    };
+    if (e.key === "ArrowDown") {
+      handled();
+      setActive((i) => (i >= last ? 0 : i + 1));
+    } else if (e.key === "ArrowUp") {
+      handled();
+      setActive((i) => (i <= 0 ? last : i - 1));
+    } else if (e.key === "Home") {
+      handled();
+      setActive(0);
+    } else if (e.key === "End") {
+      handled();
+      setActive(last);
+    } else if (e.key === "Enter" || e.key === " ") {
+      handled();
+      items()[active]?.click();
+    } else if (e.key === "Escape") {
+      handled();
       close(true);
     } else if (e.key === "Tab") {
       close(false);
     }
   };
 
-  const openList = (at: number) => {
-    setActive(at);
-    setOpen(true);
-  };
-
   const onButtonKey = (e: ReactKeyboardEvent<HTMLButtonElement>) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
       e.preventDefault();
-      openList(chosenIndex);
+      e.stopPropagation();
+      openMenu();
+    } else if (e.key === "Enter" || e.key === " ") {
+      // The button's own click; kept from the app's hotkeys (Space plays).
+      e.stopPropagation();
     }
+  };
+
+  // Every focusable item, in order, takes its index from this counter.
+  let n = 0;
+  const item = (props: {
+    role: "menuitem" | "menuitemradio";
+    checked?: boolean;
+    disabled?: boolean;
+    label?: string;
+    className: string;
+    onPress: () => void;
+    children: ReactNode;
+    tier?: string;
+  }) => {
+    const i = n++;
+    return (
+      <div
+        data-mi=""
+        data-tier={props.tier}
+        role={props.role}
+        aria-checked={props.role === "menuitemradio" ? !!props.checked : undefined}
+        aria-disabled={props.disabled || undefined}
+        aria-label={props.label}
+        tabIndex={i === active ? 0 : -1}
+        className={props.className}
+        onClick={() => {
+          setActive(i);
+          if (!props.disabled) props.onPress();
+        }}
+        onMouseMove={() => {
+          if (active !== i) setActive(i);
+        }}
+      >
+        {props.children}
+      </div>
+    );
+  };
+
+  const rowView = (row: CoachModelRow) => {
+    const entry = t("coachModel.entry", {
+      tier: t(brainTierLabelKey(row.tier)),
+      model: row.name,
+      size: gb(row.sizeBytes, lng),
+    });
+    const selected = row.tier === snap.choice;
+    const d = row.download;
+    const running = d?.phase === "running";
+    // A paused or failed download belongs to a row still without its model.
+    const showDownload = running || (!!d && row.state === "notDownloaded");
+    const text = (
+      <span className="coach-model-text">
+        <span className="coach-model-title">{entry}</span>
+        <span className="coach-model-detail">
+          <span className="coach-model-mark" data-state={row.state} aria-hidden="true" />
+          {rowStateText(row, t, selected ? snap.failure : null)}
+        </span>
+      </span>
+    );
+
+    if (selectable(row) || row.state === "notOnThisDevice") {
+      return (
+        <div className="coach-model-row" key={row.tier} data-state={row.state}>
+          {item({
+            role: "menuitemradio",
+            checked: selected,
+            disabled: row.state === "notOnThisDevice",
+            className: "coach-model-option",
+            onPress: () => pickRow(row),
+            tier: row.tier,
+            children: (
+              <>
+                <span className="coach-model-check" aria-hidden="true">{selected ? "✓" : ""}</span>
+                {text}
+              </>
+            ),
+          })}
+          {showDownload && running && downloadLine(row)}
+        </div>
+      );
+    }
+
+    // Not downloaded: the row is text, and its actions are the items.
+    const actions: ReactNode[] = [];
+    if (confirmTier === row.tier && !running) {
+      actions.push(
+        item({
+          role: "menuitem",
+          className: "coach-model-action btn-tonal",
+          label: `${t("coachModel.download.anyway")}: ${entry}`,
+          onPress: () => download(row.tier, true),
+          children: t("coachModel.download.anyway"),
+        }),
+        item({
+          role: "menuitem",
+          className: "coach-model-action coach-model-action-quiet",
+          onPress: () => setConfirmTier(null),
+          children: t("coachModel.download.notNow"),
+        }),
+      );
+    } else if (running) {
+      actions.push(
+        item({
+          role: "menuitem",
+          className: "coach-model-action coach-model-action-quiet",
+          label: `${t("coachModel.download.pause")}: ${entry}`,
+          onPress: () => pauseCoachModelDownload(),
+          children: t("coachModel.download.pause"),
+        }),
+      );
+    } else if (row.canDownload) {
+      const word =
+        d?.phase === "paused"
+          ? t("coachModel.download.resume")
+          : d?.phase === "failed"
+            ? t("coachModel.download.retry")
+            : t("coachModel.download.start");
+      actions.push(
+        item({
+          role: "menuitem",
+          className: "coach-model-action btn-tonal",
+          label: `${word}: ${entry}`,
+          onPress: () => download(row.tier, false),
+          children: word,
+        }),
+      );
+    }
+
+    return (
+      <div className="coach-model-row" key={row.tier} data-state={row.state}>
+        <div className="coach-model-option coach-model-option-static">
+          <span className="coach-model-check" aria-hidden="true" />
+          {actions.length === 0
+            ? item({
+                // Nothing to press: still reachable, and says why.
+                role: "menuitem",
+                disabled: true,
+                className: "coach-model-static-item",
+                tier: row.tier,
+                onPress: () => {},
+                children: text,
+              })
+            : <span className="coach-model-text-wrap" data-tier={row.tier}>{text}</span>}
+          {actions.length > 0 && <span className="coach-model-actions">{actions}</span>}
+        </div>
+        {confirmTier === row.tier && !running && (
+          <p className="coach-model-note" role="note">
+            {t("coachModel.download.meteredWarn", { size: gb(row.sizeBytes, lng) })}
+          </p>
+        )}
+        {showDownload && downloadLine(row)}
+      </div>
+    );
+  };
+
+  /** Progress, the voices step after the weights, a pause, a failure. */
+  const downloadLine = (row: CoachModelRow) => {
+    const d = row.download;
+    if (!d) return null;
+    let words: string;
+    if (d.phase === "running") {
+      words =
+        d.stage === "voices"
+          ? t("coachModel.download.voices")
+          : d.fraction !== null
+            ? t("coachModel.download.running", { percent: percent(d.fraction, lng) })
+            : t("coachModel.download.runningNoPercent");
+    } else if (d.phase === "paused") {
+      words =
+        d.fraction !== null
+          ? t("coachModel.download.paused", { percent: percent(d.fraction, lng) })
+          : t("coachModel.download.pausedNoPercent");
+    } else {
+      words = d.error
+        ? t("coachModel.download.failed", { reason: d.error })
+        : t("coachModel.download.failedNoReason");
+    }
+    const indeterminate = d.phase === "running" && (d.fraction === null || d.stage === "voices");
+    return (
+      <div className="coach-model-progress" data-phase={d.phase}>
+        {d.phase !== "failed" && (
+          <span
+            className="coach-model-bar"
+            role="progressbar"
+            aria-label={words}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={indeterminate || d.fraction === null ? undefined : Math.round(d.fraction * 100)}
+            data-indeterminate={indeterminate || undefined}
+          >
+            <span
+              className="coach-model-bar-fill"
+              style={indeterminate ? undefined : { width: `${Math.round((d.fraction ?? 0) * 100)}%` }}
+            />
+          </span>
+        )}
+        <span className="coach-model-progress-words" aria-live="polite">{words}</span>
+      </div>
+    );
   };
 
   const memoryLine =
     snap.residentBytes !== null
       ? snap.systemMemoryMb
-        ? t("rail.model.memory", {
-            used: gb(snap.residentBytes, i18n.language),
-            total: memoryGb(snap.systemMemoryMb, i18n.language),
+        ? t("coachModel.memory", {
+            used: gb(snap.residentBytes, lng),
+            total: memoryGb(snap.systemMemoryMb, lng),
           })
-        : t("rail.model.memoryUnknown", { used: gb(snap.residentBytes, i18n.language) })
+        : t("coachModel.memoryUnknown", { used: gb(snap.residentBytes, lng) })
       : null;
 
+  const running = snap.download?.phase === "running";
+
   return (
-    <>
+    <div className="coach-model" ref={wrapRef}>
       <button
         ref={buttonRef}
         type="button"
-        className="rail-model"
+        className="coach-model-button"
         data-state={snap.state}
-        aria-haspopup="listbox"
+        aria-haspopup="menu"
         aria-expanded={open}
-        aria-controls={open ? listId : undefined}
-        aria-label={t("rail.model.button", { choice: choiceName, state: stateWord(snap.state, t) })}
-        title={t("rail.model.button", { choice: choiceName, state: stateWord(snap.state, t) })}
-        onClick={() => (open ? close(false) : openList(chosenIndex))}
+        aria-controls={open ? menuId : undefined}
+        aria-label={buttonLabel}
+        title={buttonLabel}
+        onClick={() => (open ? close(false) : openMenu())}
         onKeyDown={onButtonKey}
       >
-        <span className="rail-model-name">{choiceName}</span>
-        <span className="rail-model-mark" data-state={snap.state} aria-hidden="true" />
+        <span className="coach-model-mark" data-state={running ? "downloading" : snap.state} aria-hidden="true" />
+        <span className="coach-model-button-name">{choiceName}</span>
+        <span className="coach-model-button-state" aria-hidden="true">{stateText}</span>
       </button>
-      {open &&
-        createPortal(
-          <div
-            className="rail-model-menu"
-            style={
-              place
-                ? { left: place.left, bottom: place.bottom, width: place.width, maxHeight: place.maxHeight }
-                : { visibility: "hidden" }
-            }
-          >
-            <div className="rail-model-head" id={`${listId}-label`}>
-              {t("rail.model.label")}
-            </div>
-            <ul
-              ref={listRef}
-              id={listId}
-              role="listbox"
-              aria-labelledby={`${listId}-label`}
-              className="rail-model-list"
-              onKeyDown={onListKey}
-            >
-              {options.map((o, i) => {
-                const selected = o.tier === snap.choice;
-                const disabled = optionDisabled(o);
-                const title =
-                  o.kind === "off"
-                    ? t("common.off")
-                    : t("rail.model.entry", {
-                        tier: t(brainTierLabelKey(o.tier)),
-                        model: o.row.name,
-                        size: gb(o.row.sizeBytes, i18n.language),
-                      });
-                const detail =
-                  o.kind === "off"
-                    ? t("rail.model.offHint")
-                    : o.row.state === "failed" && snap.failure && selected
-                      ? `${rowStateText(o.row, t)} (${snap.failure})`
-                      : rowStateText(o.row, t);
-                return (
-                  <li
-                    key={o.tier}
-                    role="option"
-                    tabIndex={i === active ? 0 : -1}
-                    aria-selected={selected}
-                    aria-disabled={disabled || undefined}
-                    data-tier={o.tier}
-                    data-state={o.kind === "off" ? "off" : o.row.state}
-                    className="rail-model-option"
-                    onClick={() => activate(o)}
-                    onMouseMove={() => {
-                      if (active !== i) setActive(i);
-                    }}
-                  >
-                    <span className="rail-model-check" aria-hidden="true">
-                      {selected ? "✓" : ""}
-                    </span>
-                    <span className="rail-model-text">
-                      <span className="rail-model-title">{title}</span>
-                      <span className="rail-model-detail">
-                        {o.kind === "local" && (
-                          <span className="rail-model-mark" data-state={o.row.state} aria-hidden="true" />
-                        )}
-                        {detail}
-                      </span>
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-            {memoryLine && <div className="rail-model-foot">{memoryLine}</div>}
-          </div>,
-          document.body,
-        )}
-    </>
+      {open && (
+        <div
+          ref={menuRef}
+          id={menuId}
+          className="coach-model-menu"
+          role="menu"
+          aria-labelledby={`${menuId}-label`}
+          style={maxHeight !== null ? { maxHeight } : { visibility: "hidden" }}
+          onKeyDown={onMenuKey}
+        >
+          <div className="coach-model-head" id={`${menuId}-label`}>
+            {t("coachModel.label")}
+          </div>
+          <div className="coach-model-row" data-state="off">
+            {item({
+              role: "menuitemradio",
+              checked: snap.choice === "off",
+              className: "coach-model-option",
+              onPress: () => pick("off"),
+              tier: "off",
+              children: (
+                <>
+                  <span className="coach-model-check" aria-hidden="true">{snap.choice === "off" ? "✓" : ""}</span>
+                  <span className="coach-model-text">
+                    <span className="coach-model-title">{t("common.off")}</span>
+                    <span className="coach-model-detail">{t("coachModel.offHint")}</span>
+                  </span>
+                </>
+              ),
+            })}
+          </div>
+          {snap.rows.map(rowView)}
+          {/* Cloud: `snap.cloud` is a typed place, always null, and draws nothing. */}
+          {memoryLine && <div className="coach-model-foot">{memoryLine}</div>}
+        </div>
+      )}
+    </div>
   );
 }
