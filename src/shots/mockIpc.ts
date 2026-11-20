@@ -671,11 +671,11 @@ function songLibraryRecords(which: "three" | "longTitle"): SongRecord[] {
  * Bars are four beats: every Exercise a scene plays is in 4/4.
  */
 function mockTakeGrade(
-  recipe: "pass" | "below" | "nearMiss" | "noCatch",
+  recipe: "pass" | "below" | "nearMiss" | "noCatch" | "passSlip",
   onsets: ScoreSchedule["onsets"],
   passBars: readonly ScorerPassBar[] = [],
 ): ScorerTakeGrade {
-  const even = recipe === "pass" ? 0.87 : recipe === "nearMiss" ? 0.83 : 0.74;
+  const even = recipe === "pass" || recipe === "passSlip" ? 0.87 : recipe === "nearMiss" ? 0.83 : 0.74;
   const caught = recipe !== "noCatch";
   const lastBeat = onsets.reduce((most, o) => Math.max(most, o.beat), 0);
   const barCount = Math.floor(lastBeat / 4) + 1;
@@ -696,7 +696,9 @@ function mockTakeGrade(
           ? bar < 4
             ? 0.86 + (bar % 2) * 0.02
             : 0.68 + (bar % 3) * 0.04
-          : Math.min(1, even + ((bar % 3) - 1) * 0.02),
+          : recipe === "passSlip" && bar % 4 === 0 && bar > 0
+            ? 0.7
+            : Math.min(1, even + ((bar % 3) - 1) * 0.02),
       evennessSigmaMs: caught ? 6 : null,
     };
   });
@@ -723,7 +725,7 @@ function mockTakeGrade(
 
 /** What `score/pass.rs` would say of a recipe's Take, for the bars it was loaded with. */
 function mockPass(
-  recipe: "pass" | "below" | "nearMiss" | "noCatch",
+  recipe: "pass" | "below" | "nearMiss" | "noCatch" | "passSlip",
   even: number,
   finishedBars: number,
   passBars: readonly ScorerPassBar[],
@@ -2075,7 +2077,8 @@ export function installShotMock(shot: Shot, theme: string): void {
         componentScores: {
           // What each recipe is about. The scorer is not the subject here: what
           // the app does with its report is.
-          intervalConsistency: recipe === "pass" ? 0.87 : recipe === "nearMiss" ? 0.83 : recipe === "below" ? 0.74 : 0.5,
+          intervalConsistency:
+            recipe === "pass" || recipe === "passSlip" ? 0.87 : recipe === "nearMiss" ? 0.83 : recipe === "below" ? 0.74 : 0.5,
           gridAlignment: 0.8,
           hitCompleteness: 1,
           onsetEfficiency: 1,

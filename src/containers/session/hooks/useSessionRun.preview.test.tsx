@@ -91,3 +91,42 @@ describe("useSessionRun — the tour's preview", () => {
     await waitFor(() => expect(h.startSession).toHaveBeenCalled());
   });
 });
+
+describe("useSessionRun and Ask (review of leg c2a1)", () => {
+  it("a Session's teardown leaves Ask as it is: the recap offers it, and Ask's own rules close it", async () => {
+    setInvokeResponse("list_path_states", [{ pathId: "alternate-picking", startedAt: 1, updatedAt: 1 }]);
+    setInvokeResponse("list_path_takes", []);
+    setInvokeResponse("list_exercise_ceilings", []);
+    let view: MainView = "today";
+    // Ask opened during the Session (on a result, say): the old card's rule
+    // closed "the card it opened" here, which closed Ask on the way to the recap.
+    let cardOpen = false;
+    const toggleCard = vi.fn();
+    const hook = renderHook(() =>
+      useSessionRun({
+        view,
+        setView: (v: MainView) => {
+          view = v;
+        },
+        isPlaying: false,
+        beat: null,
+        state: DEFAULT_TEST_STATE,
+        coach: { active: false, cardOpen, startSession: async () => {}, endSession: async () => {}, toggleCard },
+        listening: false,
+        startInput: async () => ({ device: "mic", fellBack: false }),
+        jams: [],
+        preload: true,
+      }),
+    );
+    await waitFor(() => expect(hook.result.current.plan.steps.length).toBeGreaterThan(0));
+    act(() => hook.result.current.actions.previewToday());
+    view = "session";
+    hook.rerender();
+    cardOpen = true;
+    hook.rerender();
+    view = "progress";
+    hook.rerender();
+    await waitFor(() => expect(hook.result.current.run.phase).toBe("idle"));
+    expect(toggleCard).not.toHaveBeenCalled();
+  });
+});

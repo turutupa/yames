@@ -1,0 +1,54 @@
+{
+  "ask": {
+    "title": "Hỏi",
+    "button": "Hỏi",
+    "close": "Đóng Hỏi",
+    "lookingAt": "Đang xem:",
+    "nowLooking": "Bây giờ đang xem: {{place}}",
+    "later": "Hỏi sẽ mở sau lượt này",
+    "placeholder": "Hỏi về màn hình này, các lượt của bạn hoặc các lộ trình của bạn",
+    "send": "Gửi",
+    "writing": "Đang viết câu trả lời…",
+    "sections": {
+      "ask": "Hỏi",
+      "tools": "Huấn luyện viên công cụ"
+    },
+    "screen": {
+      "today": "Hôm nay",
+      "paths": "Lộ trình",
+      "path": "Một lộ trình",
+      "step": "Một bước",
+      "session": "Buổi tập của bạn",
+      "progress": "Tiến bộ",
+      "jam": "Jam",
+      "songs": "Bài hát",
+      "beat": "Máy đếm nhịp",
+      "drill": "Luyện tempo",
+      "setlist": "Setlist",
+      "tools": "Công cụ"
+    },
+    "looking": {
+      "readyFor": "sẵn sàng cho lượt {{n}}",
+      "take": "Lượt {{n}}",
+      "recap": "phần nhìn lại"
+    },
+    "empty": {
+      "title": "Bạn muốn biết điều gì?",
+      "model": "Hỏi về màn hình này, các lượt của bạn hoặc các lộ trình của bạn. Mô hình trên máy tính này trả lời bằng lời của chính nó, như lời khuyên chung.",
+      "loading": "Mô hình bạn chọn đang được chuẩn bị. Khi xong, bạn có thể hỏi về màn hình này, các lượt của bạn hoặc các lộ trình của bạn.",
+      "noModel": "Câu hỏi gõ vào cần một mô hình trên máy tính này, và hiện chưa bật mô hình nào. Chọn một mô hình bên dưới để hỏi về màn hình này, các lượt của bạn hoặc các lộ trình của bạn.",
+      "phone": "Câu hỏi gõ vào cần một mô hình, và điện thoại chưa chạy được mô hình."
+    },
+    "reply": {
+      "noModel": "Chưa bật mô hình nào, nên chưa thể trả lời câu hỏi gõ vào. Hãy chọn một mô hình ở cuối bảng này.",
+      "gettingReady": "Mô hình vẫn đang được chuẩn bị. Hãy hỏi lại sau một lát.",
+      "phone": "Điện thoại chưa chạy được mô hình, nên ở đây chưa thể trả lời câu hỏi gõ vào.",
+      "nothing": "Lần này không có câu trả lời nào trả về."
+    },
+    "footer": {
+      "model": "Do mô hình trên máy tính này trả lời. Những gì bạn gõ không rời khỏi máy.",
+      "local": "Những gì bạn gõ ở đây không rời khỏi máy tính này.",
+      "phone": "Những gì bạn gõ ở đây không rời khỏi điện thoại này."
+    }
+  }
+}

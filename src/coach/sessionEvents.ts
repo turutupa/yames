@@ -66,7 +66,9 @@ export function sessionEventFor(
   }
 
   if (after.phase === "ready" || after.phase === "timedReady") {
-    const fresh = before.phase !== after.phase || before.stepIndex !== after.stepIndex;
+    // Back from a loop is the same ready screen, not a new one (c1c).
+    const fresh =
+      (before.phase !== after.phase && before.phase !== "looping") || before.stepIndex !== after.stepIndex;
     const step = currentStep(after);
     if (fresh && step) {
       return {

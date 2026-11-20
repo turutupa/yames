@@ -99,7 +99,12 @@ function selectable(row: CoachModelRow): boolean {
   return row.state !== "notDownloaded" && row.state !== "notOnThisDevice";
 }
 
-export function CoachModelSelector() {
+/**
+ * `placement`: "up" (the default) at a panel's foot; "down" in the phone
+ * sheet's head (leg c2a1), where the foot is under the keyboard. Down, the
+ * menu takes the room under the button inside the same bounds.
+ */
+export function CoachModelSelector({ placement = "up" }: { placement?: "up" | "down" } = {}) {
   const { t, i18n } = useTranslation();
   const lng = i18n.language;
   const snap = useCoachModel();
@@ -133,6 +138,11 @@ export function CoachModelSelector() {
     if (!wrap) return;
     const top = wrap.getBoundingClientRect().top;
     const panel = wrap.closest("[data-coach-model-bounds]");
+    if (placement === "down") {
+      const floor = Math.min(panel?.getBoundingClientRect().bottom ?? window.innerHeight, window.innerHeight);
+      setMaxHeight(Math.max(96, floor - wrap.getBoundingClientRect().bottom - 14));
+      return;
+    }
     // The panel may name a ceiling (its head, where its own controls are):
     // the menu stops under it rather than covering them.
     const ceilingEl = panel?.querySelector("[data-coach-model-ceiling]");
@@ -141,7 +151,7 @@ export function CoachModelSelector() {
       0,
     );
     setMaxHeight(Math.max(96, top - ceiling - 14));
-  }, []);
+  }, [placement]);
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -509,7 +519,7 @@ export function CoachModelSelector() {
   const running = snap.download?.phase === "running";
 
   return (
-    <div className="coach-model" ref={wrapRef}>
+    <div className="coach-model" ref={wrapRef} data-placement={placement}>
       <button
         ref={buttonRef}
         type="button"

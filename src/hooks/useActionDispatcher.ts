@@ -130,7 +130,10 @@ interface ActionDispatcherArgs {
   setIsFullscreen: (v: boolean) => void;
   setIsOsFullscreen: (v: boolean) => void;
   setSidebarOpen: (updater: boolean | ((prev: boolean) => boolean)) => void;
+  /** Open or close Ask, the coach panel (`toggle-coach`). */
   toggleCard: () => void;
+  /** `?`: open Ask with the caret in its box (`ask-coach`). */
+  askCoach?: () => void;
   forceWebviewFocus: () => Promise<void>;
 }
 
@@ -165,6 +168,7 @@ export function useActionDispatcher({
   setIsOsFullscreen,
   setSidebarOpen,
   toggleCard,
+  askCoach,
   forceWebviewFocus,
 }: ActionDispatcherArgs) {
   const handleBpmChange = useCallback((value: number) => {
@@ -192,7 +196,8 @@ export function useActionDispatcher({
         actionId === "settings" ||
         actionId === "toggle-widget" ||
         actionId === "toggle-sidebar" ||
-        actionId === "toggle-coach"
+        actionId === "toggle-coach" ||
+        actionId === "ask-coach"
       ) {
         switch (actionId) {
           // In rail order: Metronome, Setlist, Drill, Jam, Songs.
@@ -238,18 +243,13 @@ export function useActionDispatcher({
               setSidebarOpen((o) => !o);
             break;
           case "toggle-coach":
-            // The coach listens on a jam exactly as it does on the metronome,
-            // so the key that opens it has to work there too.
-            if (
-              view === "beat" ||
-              view === "drill" ||
-              view === "jam" ||
-              view === "today" ||
-              view === "paths" ||
-              view === "progress" ||
-              view === "tools"
-            )
-              toggleCard();
+            // Ask is one panel on every screen but Settings since leg c2a1:
+            // the Setlist and Songs (which had no coach) and a Session, where
+            // it is the drawer and a Take defers it to the result.
+            if (view !== "settings") toggleCard();
+            break;
+          case "ask-coach":
+            if (view !== "settings") askCoach?.();
             break;
         }
         return;
@@ -624,6 +624,7 @@ export function useActionDispatcher({
       setIsOsFullscreen,
       setSidebarOpen,
       toggleCard,
+      askCoach,
       prevTab,
       handleBpmChange,
       forceWebviewFocus,

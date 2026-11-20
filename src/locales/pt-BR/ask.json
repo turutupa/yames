@@ -1,0 +1,54 @@
+{
+  "ask": {
+    "title": "Perguntar",
+    "button": "Perguntar",
+    "close": "Fechar Perguntar",
+    "lookingAt": "Olhando para:",
+    "nowLooking": "Agora olhando para: {{place}}",
+    "later": "Perguntar abre depois desta tomada",
+    "placeholder": "Pergunte sobre esta tela, suas tomadas ou suas trilhas",
+    "send": "Enviar",
+    "writing": "Escrevendo uma resposta…",
+    "sections": {
+      "ask": "Perguntar",
+      "tools": "Coach das ferramentas"
+    },
+    "screen": {
+      "today": "Hoje",
+      "paths": "Trilhas",
+      "path": "Uma trilha",
+      "step": "Uma etapa",
+      "session": "Sua sessão",
+      "progress": "Progresso",
+      "jam": "Jam",
+      "songs": "Músicas",
+      "beat": "Metrônomo",
+      "drill": "Treino",
+      "setlist": "Setlist",
+      "tools": "Ferramentas"
+    },
+    "looking": {
+      "readyFor": "pronto para a tomada {{n}}",
+      "take": "tomada {{n}}",
+      "recap": "o resumo"
+    },
+    "empty": {
+      "title": "O que você quer saber?",
+      "model": "Pergunte sobre esta tela, suas tomadas ou suas trilhas. O modelo neste computador responde com as próprias palavras, como conselho geral.",
+      "loading": "O modelo que você escolheu está se preparando. Quando estiver pronto, você poderá perguntar sobre esta tela, suas tomadas ou suas trilhas.",
+      "noModel": "Perguntas digitadas precisam de um modelo neste computador, e nenhum está ligado. Escolha um abaixo para perguntar sobre esta tela, suas tomadas ou suas trilhas.",
+      "phone": "Perguntas digitadas precisam de um modelo, e os celulares ainda não executam um."
+    },
+    "reply": {
+      "noModel": "Nenhum modelo está ligado, então as perguntas digitadas ainda não podem ser respondidas. Escolha um no rodapé deste painel.",
+      "gettingReady": "O modelo ainda está se preparando. Pergunte de novo em instantes.",
+      "phone": "Os celulares ainda não executam um modelo, então as perguntas digitadas não podem ser respondidas aqui.",
+      "nothing": "Nenhuma resposta voltou desta vez."
+    },
+    "footer": {
+      "model": "Respondido pelo modelo neste computador. Nada do que você digita sai dele.",
+      "local": "Nada do que você digita aqui sai deste computador.",
+      "phone": "Nada do que você digita aqui sai deste celular."
+    }
+  }
+}

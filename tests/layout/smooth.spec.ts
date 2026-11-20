@@ -117,6 +117,26 @@ for (const scene of ["coach-take-order", "coach-take-order-runway"]) {
   });
 }
 
+/*
+ * The loop (coach leg c1c; DESIGN 4.2, "Loop a bar"): a per-beat screen like
+ * a Take, held to the same rules, and the coach's note (which it does not
+ * show) never commits under it.
+ */
+test("coach-loop: a loop running holds a Take's rules, and the coach's note never commits", async ({ page }) => {
+  test.slow();
+  await installPerf(page, { countRenders: true });
+  await openShot(page, "coach-loop", WIDE);
+  await expect(page.locator('[data-testid="session-loop-screen"]')).toHaveAttribute("data-phase", "looping", { timeout: 30_000 });
+  const s = await bestWindow(page);
+  expect(s.longTasks, `long tasks in the best of three windows (longest ${s.longTaskMaxMs} ms)`).toBe(0);
+  expect(s.commits, "the loop is running: React commits as the engine reports").toBeGreaterThan(0);
+  expect(s.commits / (s.ms / 1000), `${s.commits} commits in ${s.ms} ms`).toBeLessThan(24);
+  const strip = s.renders.OverviewStrip ?? 0;
+  expect(strip, `OverviewStrip rendered ${strip} times in ${s.commits} commits`).toBeLessThanOrEqual(Math.ceil(s.commits * 0.75));
+  expect(s.renders.CoachNote ?? 0, `CoachNote rendered in ${s.commits} commits`).toBe(0);
+  expect(s.renders.CoachLine ?? 0, `CoachLine rendered in ${s.commits} commits`).toBe(0);
+});
+
 test("the lane keeps the display's beat: a frame for every frame, or exactly every other", async ({ page }) => {
   test.slow();
   await installPerf(page);
@@ -133,6 +153,46 @@ test("the lane keeps the display's beat: a frame for every frame, or exactly eve
   // Held to 30 on a 60 Hz page: every other frame, never more.
   expect(low.runwayFrames / low.frames, `${low.runwayFrames} lane frames in ${low.frames} page frames at 30`).toBeLessThan(0.62);
   expect(low.runwayFrames, "the lane still moves at 30").toBeGreaterThan(10);
+});
+
+test("Ask commits nothing during a running Take: the Ask key there is one static label", async ({ page }) => {
+  test.slow();
+  /*
+   * DESIGN 3.4 (leg c2a1): nothing of Ask exists while a Take runs. The key
+   * pressed then shows "Ask opens after this Take" in the bar, once, and the
+   * panel itself is not mounted, so it cannot render with the shell at each
+   * report from the engine.
+   */
+  await installPerf(page, { countRenders: true });
+  await openShot(page, "session-playing", WIDE);
+  await takeRunning(page);
+  await page.keyboard.press("Shift+Slash");
+  await expect(page.locator('[data-testid="session-coach-ask-later"]')).toBeVisible();
+  const s = await bestWindow(page);
+  expect(s.commits, "the Take is running").toBeGreaterThan(0);
+  expect(s.renders.AskPanel ?? 0, "the Ask panel rendered during the Take").toBe(0);
+  expect(await page.locator(".ask-panel").count(), "the Ask panel is mounted during the Take").toBe(0);
+  expect(await page.locator('[data-testid="session-coach-ask"]').count(), "an Ask button in the bar during the Take").toBe(0);
+  expect(s.longTasks, `long tasks in the best of three windows (longest ${s.longTaskMaxMs} ms)`).toBe(0);
+});
+
+test("the open Ask panel on a tool screen does not re-render with the beat", async ({ page }) => {
+  test.slow();
+  /*
+   * Review of leg c2a1: the tools' coach inside Ask was a new element at
+   * every render of the shell, which re-renders at every report from the
+   * engine, so the panel's `memo` did nothing. The drill is climbing, the
+   * click playing, Ask open over it with the tools' coach as its second
+   * section: the shell commits, the panel does not.
+   */
+  await installPerf(page, { countRenders: true });
+  await openShot(page, "drill", WIDE);
+  await page.locator(".rail-footer .rail-action").first().click();
+  await expect(page.locator(".ask-panel")).toBeVisible();
+  await expect(page.locator('[data-testid="ask-section-tools"]')).toBeVisible();
+  const s = await samplePerf(page, WINDOW_MS);
+  expect(s.commits, "the click is playing: the shell commits as the engine reports").toBeGreaterThan(0);
+  expect(s.renders.AskPanel ?? 0, `AskPanel rendered in ${s.commits} commits`).toBe(0);
 });
 
 test("the level meter pulses without reading the layout", async ({ page }) => {

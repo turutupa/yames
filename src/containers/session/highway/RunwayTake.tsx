@@ -22,7 +22,7 @@ import type { SessionRun } from "../hooks/useSessionRun";
 import { fingeredNotes, kindOfMark, useNeckSlot, useNeckTake, zoomOf } from "../hooks/useNeck";
 import type { TimingMark } from "../../songs/review/marks";
 import { lineText } from "../lineText";
-import { AskStart, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart } from "../parts";
+import { AskStart, LoopButton, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart } from "../parts";
 import { TakeOrder } from "../../coach/CoachLine";
 import { ReadyNote, takeOrderText } from "../SessionCoach";
 import { Runway } from "./Runway";
@@ -280,7 +280,7 @@ export function RunwayTakeScreen({
             ))}
           {/* The bar is what is graded: not said to a player who chose to just play. */}
           {!running && bar && run.ungraded !== "gradingOff" && run.ungraded !== "chosen" && (
-            <span className="session-why">{lineText(t, bar)}</span>
+            <span className="session-why session-runway-passmark">{lineText(t, bar)}</span>
           )}
           {!running && (
             <ReadyInput
@@ -302,7 +302,9 @@ export function RunwayTakeScreen({
             is on the first screen under the runway's notes too (owner,
             2026-11-18). A plain run of the row on a desktop. */}
         <div className="session-go" data-testid="session-go">
+          {!running && session.loop?.front && <LoopButton session={session} />}
           {!running && <TempoNudges run={run} exercise={exercise} session={session} />}
+          {!running && session.loop && !session.loop.front && <LoopButton session={session} />}
           {!running && start.ask ? (
             <AskStart session={session} label={start.label} canStart={canStart} />
           ) : (

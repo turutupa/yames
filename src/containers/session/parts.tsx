@@ -11,6 +11,8 @@ import type { PlanStep } from "../../session/planner";
 import { useFitPair } from "./hooks/useFitOneLine";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { stepTitle } from "./TodayView";
+import { lineText } from "./lineText";
+import { loopButtonLine } from "../../coach/loopLine";
 
 // The coach's line (with its lamp) lived here; it is `containers/coach/CoachLine`
 // now, without the lamp (DESIGN 2: the number carries the grade).
@@ -45,6 +47,8 @@ export function bigLabel(action: BigAction, t: T): string {
       // The same words wherever going again is offered (UX audit SES-4).
       return t(action.up ? "session.run.goAgainUp" : "session.run.goAgain", { bpm: action.bpm });
     case "next":
+      // P2: on, because the same place came back three times (DESIGN 4.2).
+      if (action.leaveIt) return t("session.result.moveOn");
       return t("session.run.next", {
         title: stepTitle(action.step, t),
       });
@@ -52,9 +56,31 @@ export function bigLabel(action: BigAction, t: T): string {
       return t("session.run.finish");
     case "close":
       return t("session.run.done");
+    case "endLoop":
+      return t("session.loop.stop");
     case "none":
       return "";
   }
+}
+
+/**
+ * "Loop the first bar" (DESIGN 4.2): a tonal button with a verb, beside the
+ * tempo controls, never inside the note. Only where the Session offers it.
+ */
+export function LoopButton({ session }: { session: SessionRun }) {
+  const { t } = useTranslation();
+  const offer = session.loop;
+  if (!offer) return null;
+  return (
+    <button
+      className="session-secondary"
+      onClick={session.actions.startLoop}
+      data-testid="session-loop"
+      data-front={offer.front ? "" : undefined}
+    >
+      {lineText(t, loopButtonLine(offer.loop))}
+    </button>
+  );
 }
 
 export function TempoNudges({

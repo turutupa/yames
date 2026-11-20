@@ -7,7 +7,6 @@ import { FeedMessageItem, type ChipAction } from "./CoachFeedMessage";
 import { CoachHistoryList } from "./CoachHistoryList";
 import { CoachSessionDetail } from "./CoachSessionDetail";
 import { SystemStatusChip } from "../../components/SystemStatusChip";
-import { CoachModelSelector } from "../main-window/CoachModelSelector";
 
 /**
  * Apply the JS-side legacy scoring formula to every loaded session.
@@ -22,33 +21,29 @@ function rescoreHistory(sessions: SavedSession[]): SavedSession[] {
 import "../../styles/coach-card.css";
 import "../../styles/evaluation-panel.css";
 
+/**
+ * The tools' coach: Start and End, the Feed and History.
+ *
+ * Since leg c2a1 it is a section of Ask (`containers/coach/AskPanel.tsx`),
+ * not a panel of its own: the panel, its open state, its close button and
+ * the model selector at its foot are Ask's; the question box moved into Ask
+ * with the conversation, and `?` became a hotkey action (`ask-coach`). Leg
+ * c2a2 removes this component with Start, End, the Feed and History.
+ */
 interface CoachCardProps {
-  open: boolean;
   active: boolean;
   messages: FeedMessage[];
-  onToggle: () => void;
   onStartSession: () => void;
   onEndSession: () => void;
-  onSendChat?: (message: string) => void;
   /** Phase 5 — chip tap / affordance handler. When the user taps a
    *  chip on a mini-report the card dispatches the resulting
    *  `ChipAction` here. The session hook owns the routing (append
-   *  feed, set BPM, focus chat). */
+   *  feed, set BPM, ask in Ask). */
   onChipAction?: (action: ChipAction) => void;
-  /** Phase 5 — focus-input registration. The session hook calls this
-   *  on mount to install a focus callback the chip "open-chat"
-   *  affordance can invoke. The card calls `register(null)` on
-   *  unmount. */
-  onRegisterChatFocus?: (focus: (() => void) | null) => void;
   listening?: boolean;
   hasSignal?: boolean;
   spectrum?: AudioSpectrum | null;
-  /** Plan OQ8 — `?` while playing pauses the metronome AND opens the
-   *  card. Without these props, the shortcut just opens the card. The
-   *  MainWindow wires both: `isPlaying` from the metronome state and
-   *  `onPause` from `togglePlayback`. */
   isPlaying?: boolean;
-  onPause?: () => void;
   /** Path B — rhythm-inference lock state. When the matcher decides the
    *  user is playing a specific divisor (e.g. 4 → 16ths), this carries
    *  the locked divisor. Used to render the subtle "Tracking 16ths"
@@ -69,74 +64,10 @@ interface CoachCardProps {
 type CardTab = "feed" | "history";
 type HistoryView = "list" | "detail";
 
-export default function CoachCard({ open, active, messages, onToggle, onStartSession, onEndSession, onSendChat, onChipAction, onRegisterChatFocus, listening, hasSignal, spectrum, isPlaying, onPause, inferredGrid, playMode, coachLoading, ttsActive }: CoachCardProps) {
+export default function CoachCard({ active, messages, onStartSession, onEndSession, onChipAction, listening, hasSignal, spectrum, isPlaying, inferredGrid, playMode, coachLoading, ttsActive }: CoachCardProps) {
   const { t } = useTranslation();
   const feedRef = useRef<HTMLDivElement>(null);
-  const chatInputRef = useRef<HTMLInputElement>(null);
-  const [chatInput, setChatInput] = useState("");
-
-  // Phase 5 — register a focus callback the session hook can invoke
-  // when an "open-chat" chip fires. The callback is intentionally a
-  // re-creatable arrow so we don't need useCallback (the registration
-  // effect deps only fire when `onRegisterChatFocus` changes).
-  useEffect(() => {
-    if (!onRegisterChatFocus) return;
-    onRegisterChatFocus(() => chatInputRef.current?.focus());
-    return () => onRegisterChatFocus(null);
-  }, [onRegisterChatFocus]);
   const [tab, setTab] = useState<CardTab>("feed");
-  const [closing, setClosing] = useState(false);
-  const [showCard, setShowCard] = useState(open);
-
-  // Handle open/close with exit animation
-  useEffect(() => {
-    if (open) {
-      setClosing(false);
-      setShowCard(true);
-    } else if (showCard) {
-      setClosing(true);
-      const timer = setTimeout(() => {
-        setClosing(false);
-        setShowCard(false);
-      }, 150);
-      return () => clearTimeout(timer);
-    }
-  }, [open]);
-
-  // Phase 5 — global `?` shortcut: open the card if collapsed, focus
-  // the chat input. The shortcut is the mid-session "ask coach"
-  // discovery affordance: chips after a mini-report are the primary
-  // surface, but pressing `?` while you're playing gets you to the
-  // chat input without breaking flow. Plan OQ8 — when the metronome
-  // is currently playing we ALSO pause it so the user gets a clean
-  // "pause then ask" flow (rather than trying to type questions while
-  // the click track is still hammering). We ignore the key while
-  // focus is inside an input/textarea (or `contentEditable`) so we
-  // don't intercept the literal "?" character the user is typing
-  // somewhere else.
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key !== "?") return;
-      const target = e.target as HTMLElement | null;
-      const tag = target?.tagName?.toLowerCase();
-      if (tag === "input" || tag === "textarea" || target?.isContentEditable) {
-        return;
-      }
-      // Don't fight other keybindings that use modifiers.
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-      e.preventDefault();
-      // OQ8 — pause first, then open. Pausing before opening keeps the
-      // shortcut semantically consistent with the chat experience: the
-      // metronome stops, the card slides in, the input gets focus.
-      if (isPlaying) onPause?.();
-      if (!open) onToggle();
-      // Defer focus until after the open animation has started so the
-      // input is mounted and visible.
-      window.setTimeout(() => chatInputRef.current?.focus(), 0);
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [open, onToggle, isPlaying, onPause]);
 
   // History state
   const [history, setHistory] = useState<SavedSession[]>([]);
@@ -158,10 +89,10 @@ export default function CoachCard({ open, active, messages, onToggle, onStartSes
 
   // Load history when switching to history tab
   useEffect(() => {
-    if (tab === "history" && open) {
+    if (tab === "history") {
       getSessionHistory().then((h) => setHistory(rescoreHistory(h)));
     }
-  }, [tab, open]);
+  }, [tab]);
 
   const handleSelectSession = useCallback((session: SavedSession) => {
     setSelectedSession(session);
@@ -191,32 +122,10 @@ export default function CoachCard({ open, active, messages, onToggle, onStartSes
     setShowClearConfirm(false);
   }, []);
 
-  if (!showCard) {
-    return (
-      <button
-        className={`coach-card-pill ${active ? "coach-active" : ""}`}
-        data-tour="coach"
-        onClick={onToggle}
-        title={t("settings.coach.title")}
-      >
-        {listening && <span className={`coach-status-dot ${hasSignal ? "signal" : "listening"}`} />}
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2z" />
-          <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2z" />
-        </svg>
-        <span className="coach-card-pill-label">{t("settings.coach.title")}</span>
-      </button>
-    );
-  }
-
   return (
-    <div
-      className={`coach-card coach-card-open${closing ? " coach-card-closing" : ""}`}
-      data-tour="coach"
-      data-coach-model-bounds=""
-    >
+    <div className="coach-card coach-card-embedded">
       <div className="coach-card-inner">
-        <div className="coach-card-header" data-coach-model-ceiling="">
+        <div className="coach-card-header">
           {tab === "history" && historyView === "detail" ? (
             <button className="coach-card-header-btn" onClick={handleBack}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -267,11 +176,6 @@ export default function CoachCard({ open, active, messages, onToggle, onStartSes
                 </svg>
               </button>
             )}
-            <button className="coach-card-header-btn" onClick={onToggle} title={t("coachCard.collapse")}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
-            </button>
           </div>
         </div>
 
@@ -325,36 +229,6 @@ export default function CoachCard({ open, active, messages, onToggle, onStartSes
               ttsActive={ttsActive}
               inferredDivisor={inferredGrid?.locked ? inferredGrid.divisor : undefined}
             />
-
-            {/* Chat input */}
-            <div className="coach-card-chat">
-              <input
-                ref={chatInputRef}
-                className="coach-card-chat-input"
-                type="text"
-                placeholder={t("coachCard.askPlaceholder")}
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyDown={(e) => {
-                  e.stopPropagation();
-                  if (e.key === "Enter" && chatInput.trim()) {
-                    onSendChat?.(chatInput.trim());
-                    setChatInput("");
-                  }
-                }}
-              />
-              <button
-                className="coach-card-chat-send"
-                disabled={!chatInput.trim()}
-                onClick={() => { onSendChat?.(chatInput.trim()); setChatInput(""); }}
-                title={t("coachCard.send")}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="22" y1="2" x2="11" y2="13" />
-                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                </svg>
-              </button>
-            </div>
           </>
         ) : (
           <>
@@ -384,12 +258,6 @@ export default function CoachCard({ open, active, messages, onToggle, onStartSes
             ) : null}
           </>
         )}
-
-        {/* The model selector, at the panel's foot on both tabs (ms1). It
-            takes nothing from this card: the Ask dock mounts it the same way. */}
-        <div className="coach-card-foot">
-          <CoachModelSelector />
-        </div>
       </div>
     </div>
   );

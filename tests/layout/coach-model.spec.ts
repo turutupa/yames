@@ -2,12 +2,14 @@ import { test, expect, type Page } from "@playwright/test";
 import { openShot, settleAnimations, notHitTestable, noSidewaysScroll } from "./fits";
 
 /**
- * The coach model selector at the foot of the right-hand coach panel (ms1).
+ * The coach model selector at the foot of the right-hand coach panel (ms1),
+ * which is Ask since leg c2a1.
  *
  * The menu opens upward and stays inside the panel and the window at both
  * of the panel's widths (380 above 720px of window, 320 under it), with a
  * not-downloaded row and with a download in progress; nothing in it is cut,
- * and the panel's Start button and chat stay usable once it closes.
+ * it stays under the panel's head (its close button), and the text box and
+ * Send stay usable once it closes.
  * ms2 adds: bytes and Cancel in the row and the window's strip, both tiers on
  * disk, low storage, a pause kept from before a restart, the checksum stage.
  * Pictures go to the folder `YAMES_COACH_MODEL_SHOTS` names, when it is set.
@@ -47,8 +49,8 @@ async function boxes(page: Page) {
     return {
       vw: innerWidth,
       vh: innerHeight,
-      card: b(".coach-card.coach-card-open"),
-      head: b(".coach-card-header"),
+      card: b(".ask-panel"),
+      head: b(".ask-head"),
       menu: b(".coach-model-menu"),
       cut,
     };
@@ -70,10 +72,10 @@ async function checkMenu(page: Page, where: string) {
   expect(Math.round(m.card!.width)).toBeGreaterThan(0);
   inside(m.menu!, m.card!, `${where}: the menu in the panel`);
   inside(m.menu!, { left: 0, right: m.vw, top: 0, bottom: m.vh, width: m.vw }, `${where}: the menu in the window`);
-  // Under the panel's head: Start stays where it can be pressed.
+  // Under the panel's head: its close button stays where it can be pressed.
   expect(m.menu!.top, `${where}: the menu covers the panel's head`).toBeGreaterThanOrEqual(m.head!.bottom - 0.5);
   expect(m.cut, `${where}: cut or sticking out`).toEqual([]);
-  expect(await notHitTestable(page, ".coach-card-start-btn"), `${where}: Start`).toEqual([]);
+  expect(await notHitTestable(page, ".ask-close"), `${where}: Close`).toEqual([]);
 }
 
 for (const theme of THEMES) {
@@ -83,9 +85,9 @@ for (const theme of THEMES) {
       await openShot(page, "coach-model", { width: size.width, height: size.height }, theme);
       await page.mouse.click(5, 300);
       await page.keyboard.press("c");
-      await expect(page.locator(".coach-card.coach-card-open")).toBeVisible();
+      await expect(page.locator(".ask-panel")).toBeVisible();
       await settleAnimations(page);
-      const card = (await page.locator(".coach-card.coach-card-open").boundingBox())!;
+      const card = (await page.locator(".ask-panel").boundingBox())!;
       expect(Math.round(card.width)).toBe(size.panel);
       await noSidewaysScroll(page, `coach panel at ${size.panel}`);
 
@@ -110,7 +112,7 @@ for (const theme of THEMES) {
       await expect(page.locator(".coach-model-button")).toContainText("42%");
       // The window's download strip is over the bottom edge now: the button clears it.
       expect(
-        await notHitTestable(page, ".coach-card-start-btn, .coach-card-chat-input, .coach-card-chat-send, .coach-model-button"),
+        await notHitTestable(page, ".ask-close, .ask-input, .ask-send, .coach-model-button"),
       ).toEqual([]);
       const button = (await page.locator(".coach-model-button").boundingBox())!;
       expect(button.x + button.width, "the selector's button in the panel").toBeLessThanOrEqual(card.x + card.width + 0.5);

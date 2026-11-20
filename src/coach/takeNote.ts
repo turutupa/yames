@@ -34,7 +34,7 @@ import { barStrip, decidingCheck, notCaughtHint, takeLine } from "../session/coa
 import type { BarCheck, TakeVerdict } from "../session/grade";
 import { rungAbove } from "../session/ladder";
 import { factsOf, heardItOf, isUngradedTake } from "../session/progress";
-import type { TakeOutcome } from "../session/runner";
+import type { TakeOutcome, TakeSpot } from "../session/runner";
 import type { TakeMeasures } from "../session/takeMeasures";
 import type { Finding, FindingKind, NoteVerdict, ScoreSchedule, SongScore } from "../songs/types";
 import {
@@ -734,6 +734,18 @@ export function takeNote(
     strip,
     tuningSuspected: tuningSuspected(context.noteVerdicts),
   };
+}
+
+/**
+ * What the Session's rules read from a note (`TakeOutcome.spot`): the bars it
+ * named, the repeat row and P1's condition. Null when there is nothing in it
+ * for them: no place (or one in the Take's time, not the tune's) and no repeat.
+ */
+export function spotOf(note: TakeNote): TakeSpot | null {
+  if (note.kind !== "result") return null;
+  const bars = note.place && note.place.shape !== "fromRound" ? [...note.place.patternBars] : [];
+  if (bars.length === 0 && note.repeat === 1 && !note.onceMoreHere) return null;
+  return { patternBars: bars, repeat: note.repeat, onceMoreHere: note.onceMoreHere };
 }
 
 /**

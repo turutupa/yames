@@ -17,7 +17,14 @@ function strings(node: unknown, prefix: string): Array<[string, string]> {
   return Object.entries(node as Record<string, unknown>).flatMap(([k, v]) => strings(v, `${prefix}.${k}`));
 }
 
-const NOTE = strings((en as { session: { note: unknown } }).session.note, "session.note");
+const SESSION = (en as { session: { note: unknown; loop: unknown; eyes: unknown; result: { upTo: string } } }).session;
+// The note, the loop step's words and the Take for the eyes (c1c): the coach says those too.
+const NOTE = [
+  ...strings(SESSION.note, "session.note"),
+  ...strings(SESSION.loop, "session.loop"),
+  ...strings(SESSION.eyes, "session.eyes"),
+  ...strings(SESSION.result.upTo, "session.result.upTo"),
+];
 
 describe("the coach's note, in English", () => {
   it("has strings to check", () => {
