@@ -43,6 +43,7 @@ import { getCoachCapabilities, isCoachLoaded, loadCoachModel, unloadCoachModel }
 import type { ModelStatus } from "../ipc.desktop";
 import type { BrainTier, ModelTier } from "../types";
 import { IS_MOBILE } from "../platform";
+import { coachSessionBusy, setCoachSessionBusy, subscribeCoachSessionBusy } from "./coachLoadGate";
 
 /** What the selector says about the player's choice. */
 export type CoachModelState =
@@ -64,7 +65,7 @@ export type CoachModelRowState = Exclude<CoachModelState, "off"> | "onDisk";
  * Why a row reads "not on this device" or "not downloaded". `otherOnDisk`:
  * the other tier holds the one place on disk (see the header).
  */
-export type CoachModelWhy = "phone" | "noLlm" | "ram" | "update" | "otherOnDisk";
+export type CoachModelWhy = "phone" | "noLlm" | "update" | "otherOnDisk";
 
 /**
  * The model download, as the selector shows it. `paused` is Rust's cancel,
@@ -92,6 +93,12 @@ export type CoachModelRow = {
   download: CoachModelDownload | null;
   /** Whether its row may offer Download (or Resume) now. */
   canDownload: boolean;
+  /**
+   * Rust's RAM recommendation says no. Only a warning: the model stays
+   * selectable, loadable and downloadable (a saved choice on a small machine
+   * loaded before the selector, and still does). It decides no default here.
+   */
+  lowMemory: boolean;
 };
 
 /**
@@ -155,9 +162,31 @@ let unloading = false;
 let download: CoachModelDownload | null = null;
 type DownloadPort = { start: (tier: ModelTier) => void; pause: () => void };
 let downloadPort: DownloadPort | null = null;
+/**
+ * Whether the saved choice has been read (or the player has picked). Until
+ * then "off" is only the default, and nothing is unloaded for it.
+ */
+let choiceKnown = false;
+/** The startup probe threw: what the build can do is unknown until it is asked again. */
+let probeFailed = false;
+let probing = false;
+/**
+ * A failed load whose follow-up question failed too: Rust may still hold
+ * the previous model. Asked again (`isCoachLoaded`) before anything is decided.
+ */
+let residentUnknown = false;
+let asking = false;
+let inputWhileAsking = false;
+
+/** The click sounding, or a Path Session in progress: no load starts. */
+function holding(): boolean {
+  return takeRunning || coachSessionBusy();
+}
 
 const listeners = new Set<() => void>();
 let snapshot: CoachModelSnapshot = buildSnapshot();
+// A Session ending (back to idle or at its recap) may let a held load start.
+subscribeCoachSessionBusy(() => reconcile());
 
 // ── Reading ──────────────────────────────────────────────────────────
 
@@ -190,9 +219,27 @@ export function subscribeCoachModel(listener: () => void): () => void {
  * failure: picking is a press, and a press may try again.
  */
 export function setCoachModelChoice(next: BrainTier): void {
-  if (next === choice) return;
+  const wasKnown = choiceKnown;
+  choiceKnown = true;
+  if (next === choice && wasKnown) return;
   choice = next;
   failure = null;
+  // A pick is a press: a startup probe that failed is asked again.
+  if (probeFailed) void probe();
+  reconcile();
+}
+
+/**
+ * The saved choice, read at startup (`useCoachDownload`); `undefined` when
+ * nothing was saved or it could not be read. Either way the choice is now
+ * known, and only from here may a reconcile unload anything.
+ */
+export function restoreCoachModelChoice(saved: BrainTier | undefined): void {
+  choiceKnown = true;
+  if ((saved === "off" || saved === "standard" || saved === "full") && saved !== choice) {
+    choice = saved;
+    failure = null;
+  }
   reconcile();
 }
 
@@ -207,6 +254,8 @@ export function setCoachModelDisk(status: ModelStatus | null, memoryMb: number |
 export function setCoachTakeRunning(running: boolean): void {
   if (running === takeRunning) return;
   takeRunning = running;
+  // The click stopping is a moment to ask again after a failed probe.
+  if (!running && probeFailed) void probe();
   reconcile();
 }
 
@@ -218,9 +267,21 @@ export function setCoachTakeRunning(running: boolean): void {
 export async function openCoachStartupGate(): Promise<void> {
   if (gateOpen || IS_MOBILE) return;
   gateOpen = true;
+  await probe();
+}
+
+/**
+ * The startup probe. A throw leaves the build's abilities unknown and the
+ * chosen row "failed" with Retry; Retry, a pick or the click stopping asks
+ * again. Never in a loop: only those presses and moments call it.
+ */
+async function probe(): Promise<void> {
+  if (probing) return;
+  probing = true;
   try {
     const [caps, loaded] = await Promise.all([getCoachCapabilities(), isCoachLoaded()]);
     llmCompiled = caps.llmCompiled;
+    probeFailed = false;
     if (loaded && !resident && !inFlight) {
       resident = true;
       residentTier = diskTier();
@@ -228,14 +289,19 @@ export async function openCoachStartupGate(): Promise<void> {
       modelName = caps.modelName;
     }
   } catch {
-    // Unknown stays unknown: nothing is claimed and nothing loads.
+    probeFailed = true;
   }
+  probing = false;
   reconcile();
 }
 
 /** Retry after a failure: the player's press. Still waits for a Take. */
 export function retryCoachModel(): void {
   failure = null;
+  if (probeFailed) {
+    void probe();
+    return;
+  }
   reconcile();
 }
 
@@ -294,12 +360,13 @@ function recommended(tier: ModelTier): boolean {
 }
 
 /**
- * The other tier holds the one place on disk, with weights that load: a
- * download of this one would replace them without a word. Legacy weights
- * (an update is recommended) load nothing, so they block nothing.
+ * Some other brain holds the one place on disk: a download of this tier
+ * would replace it without a word, legacy weights included (they are the
+ * player's, and the selector could not get them back). Updating legacy
+ * weights of the same tier stays Settings' "Update brain".
  */
 function otherOnDisk(tier: ModelTier): boolean {
-  return !!disk?.brainReady && diskTier() !== tier && !disk.brainUpdateRecommended;
+  return !!disk?.brainReady && diskTier() !== tier;
 }
 
 function rowFor(tier: ModelTier, name: string, downloadBytes: number): CoachModelRow {
@@ -315,20 +382,24 @@ function rowFor(tier: ModelTier, name: string, downloadBytes: number): CoachMode
     download: own,
     // Rust runs one download at a time; a paused or failed one of this
     // tier is resumed by the same press.
+    // Only into an empty place on disk: never over a brain that is there.
     canDownload:
       state === "notDownloaded" &&
-      why !== "otherOnDisk" &&
+      why === null &&
       disk !== null &&
       (download === null || (own !== null && own.phase !== "running")),
+    lowMemory: !recommended(tier),
   });
   if (IS_MOBILE) return row("notOnThisDevice", "phone");
   if (llmCompiled === false) return row("notOnThisDevice", "noLlm");
-  if (!recommended(tier)) return row("notOnThisDevice", "ram");
   if (!onDisk) return row("notDownloaded", otherOnDisk(tier) ? "otherOnDisk" : null);
   if (disk?.brainUpdateRecommended) return row("notDownloaded", "update");
   if (resident && residentTier === tier && inFlightTier === null) return row("ready");
   if (inFlightTier === tier) return row("loading");
   if (failure?.tier === tier && failure.stamp === diskStamp()) return row("failed");
+  // The startup probe failed: this build's abilities are unknown, so the
+  // chosen model cannot be waiting for anything. It says so, with Retry.
+  if (probeFailed && llmCompiled === null && choice === tier) return row("failed");
   return row(choice === tier ? "waiting" : "onDisk");
 }
 
@@ -364,7 +435,6 @@ function loadable(tier: ModelTier): boolean {
   return (
     !IS_MOBILE &&
     llmCompiled === true &&
-    recommended(tier) &&
     diskTier() === tier &&
     !disk?.brainUpdateRecommended
   );
@@ -376,7 +446,14 @@ function loadable(tier: ModelTier): boolean {
  * during a load or a download landing mid-load is settled by the same code.
  */
 function reconcile(): void {
-  if (IS_MOBILE || inFlight || unloading) {
+  if (asking) {
+    // An input while Rust is being asked is settled when the answer comes,
+    // even if the answer is another throw.
+    inputWhileAsking = true;
+    emit();
+    return;
+  }
+  if (IS_MOBILE || inFlight || unloading || probing) {
     emit();
     return;
   }
@@ -384,18 +461,29 @@ function reconcile(): void {
   const stamp = diskStamp();
   const failedHere = want !== null && failure?.tier === want && failure.stamp === stamp;
 
+  if (residentUnknown) {
+    // Rust may or may not hold a model. Off unloads either way (harmless if
+    // nothing is there); anything else asks first.
+    if (want === null && choiceKnown) {
+      void unload();
+      return;
+    }
+    void askResident();
+    return;
+  }
+
   if (resident) {
     const current = want !== null && residentTier === want && residentStamp === stamp;
-    if (!current) {
-      // Until the disk has been read, only Off unloads: an unknown is not
-      // a reason to drop a model that is answering.
+    // Until the saved choice is read, "off" is only the default: nothing is
+    // unloaded for it. Until the disk is read, only Off unloads.
+    if (!current && choiceKnown) {
       if (want === null || (disk !== null && !loadable(want))) {
         void unload();
         return;
       }
       // Another model, or new weights for this one: Rust swaps them on its
-      // own thread. Not while a Take runs, and not twice after a failure.
-      if (gateOpen && !takeRunning && !failedHere) {
+      // own thread. Not while a Take or a Session runs, and not twice after a failure.
+      if (gateOpen && !holding() && !failedHere) {
         void load(want, stamp);
         return;
       }
@@ -404,7 +492,7 @@ function reconcile(): void {
     return;
   }
 
-  if (want !== null && gateOpen && !takeRunning && !failedHere && loadable(want)) {
+  if (want !== null && gateOpen && !holding() && !failedHere && loadable(want)) {
     void load(want, stamp);
     return;
   }
@@ -417,14 +505,14 @@ async function load(tier: ModelTier, stamp: string): Promise<void> {
   emit();
   const ok = await inFlight;
   let reason: string | null = null;
-  let stillResident = ok;
+  let stillResident: boolean | null = ok ? true : null;
   try {
     const caps = await getCoachCapabilities();
     stillResident = caps.modelResident;
     modelName = caps.modelName;
     reason = caps.loadError;
   } catch {
-    // Keep what the load itself said.
+    // Keep what the load itself said; after a failure that is nothing.
   }
   inFlight = null;
   inFlightTier = null;
@@ -435,18 +523,60 @@ async function load(tier: ModelTier, stamp: string): Promise<void> {
     failure = null;
   } else {
     // A refusal may leave the previous model in place, or none at all; Rust
-    // knows which.
-    resident = stillResident;
-    if (!resident) {
-      residentTier = null;
-      residentStamp = null;
+    // knows which. If it could not be asked, nobody knows: the next
+    // reconcile asks again before it decides anything.
+    if (stillResident === null) {
+      residentUnknown = true;
+    } else {
+      resident = stillResident;
+      if (!resident) {
+        residentTier = null;
+        residentStamp = null;
+      }
     }
     failure = { tier, stamp, reason };
   }
   reconcile();
 }
 
+/**
+ * Residency was lost track of (a failed load, then a failed question):
+ * ask Rust. If that throws too, it stays unknown until the next input,
+ * never in a loop.
+ */
+async function askResident(): Promise<void> {
+  asking = true;
+  inputWhileAsking = false;
+  emit();
+  let answer: boolean | null = null;
+  try {
+    answer = await isCoachLoaded();
+  } catch {
+    // Still unknown.
+  }
+  asking = false;
+  if (answer === null) {
+    // No loop: only an input that arrived meanwhile is settled now (Off
+    // unloads regardless; anything else asks once more).
+    if (inputWhileAsking) {
+      inputWhileAsking = false;
+      reconcile();
+    } else {
+      emit();
+    }
+    return;
+  }
+  residentUnknown = false;
+  resident = answer;
+  // Which weights it holds is not known: not "current" for any choice, so
+  // the next decision reloads (a no-op in Rust for the same file) or unloads.
+  residentTier = null;
+  residentStamp = null;
+  reconcile();
+}
+
 async function unload(): Promise<void> {
+  residentUnknown = false;
   resident = false;
   residentTier = null;
   residentStamp = null;
@@ -482,6 +612,13 @@ export function __resetCoachLoaderForTests(): void {
   unloading = false;
   download = null;
   downloadPort = null;
+  choiceKnown = false;
+  probeFailed = false;
+  probing = false;
+  residentUnknown = false;
+  asking = false;
+  inputWhileAsking = false;
+  setCoachSessionBusy(false);
   listeners.clear();
   snapshot = buildSnapshot();
 }

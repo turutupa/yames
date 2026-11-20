@@ -55,13 +55,14 @@
       "failed": "Caricamento non riuscito. Sceglilo per riprovare",
       "failedWhy": "Caricamento non riuscito ({{reason}}). Sceglilo per riprovare",
       "notDownloaded": "Non scaricato",
-      "update": "Una versione precedente. Scarica quella nuova",
-      "otherOnDisk": "Non scaricato. Per ora su questo computer ci sta un solo modello: cambia in Impostazioni → Coach"
+      "update": "Una versione precedente. Aggiornala in Impostazioni → Coach",
+      "otherOnDisk": "Non scaricato. Un secondo modello su questo computer richiede un aggiornamento successivo; per ora, cambia in Impostazioni → Coach",
+      "downloading": "Download in corso",
+      "lowMemory": "Questo computer ha meno memoria di quella che vuole questo modello; potrebbe essere lento o non caricarsi"
     },
     "why": {
       "phone": "Non su questo dispositivo",
-      "noLlm": "Non su questo dispositivo: questa versione non può eseguire un modello",
-      "ram": "Non su questo dispositivo: serve più memoria"
+      "noLlm": "Non su questo dispositivo: questa versione non può eseguire un modello"
     },
     "download": {
       "start": "Scarica",

@@ -55,13 +55,14 @@
       "failed": "No se pudo cargar. Elígelo para reintentarlo",
       "failedWhy": "No se pudo cargar ({{reason}}). Elígelo para reintentarlo",
       "notDownloaded": "Sin descargar",
-      "update": "Una versión anterior. Descarga la nueva",
-      "otherOnDisk": "Sin descargar. Por ahora en este equipo cabe un modelo: cambia en Ajustes → Coach"
+      "update": "Una versión anterior. Actualízala en Ajustes → Coach",
+      "otherOnDisk": "Sin descargar. Un segundo modelo en este equipo necesita una actualización posterior; por ahora, cambia en Ajustes → Coach",
+      "downloading": "Descargando",
+      "lowMemory": "Este equipo tiene menos memoria de la que quiere este modelo; puede ir lento o no cargar"
     },
     "why": {
       "phone": "No disponible en este dispositivo",
-      "noLlm": "No disponible en este dispositivo: esta versión no puede ejecutar un modelo",
-      "ram": "No disponible en este dispositivo: necesita más memoria"
+      "noLlm": "No disponible en este dispositivo: esta versión no puede ejecutar un modelo"
     },
     "download": {
       "start": "Descargar",

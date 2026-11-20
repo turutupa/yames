@@ -5,7 +5,7 @@ import type { DownloadProgress, ModelStatus, VoiceDiagnostic } from "../ipc.desk
 import type { BrainTier, CoachMode, ModelTier, VoiceMode, Verbosity } from "../types";
 import type { CoachStance } from "../coach/learningMode";
 import { needsBrainUpdate, standardAvailable, studioAvailable } from "../coach/brainTiers";
-import { registerCoachDownloadPort, setCoachModelChoice, setCoachModelDisk, setCoachModelDownload } from "./coachLoader";
+import { registerCoachDownloadPort, restoreCoachModelChoice, setCoachModelChoice, setCoachModelDisk, setCoachModelDownload } from "./coachLoader";
 import { useCoachModel } from "./useCoachModel";
 
 // Legacy persisted values may still carry "chime" from an earlier
@@ -116,11 +116,11 @@ export function useCoachDownload() {
     // Asked once on mount — physical RAM does not change while the app
     // runs, and a failure just leaves the Studio tier ungated.
     getSystemMemoryMb().then(setSystemMemoryMb).catch(() => {});
-    storeLoad<BrainTier>("coachBrainTier").then((v) => {
-      // The saved choice. The loader does nothing with it before its
-      // startup gate opens, after the first paint.
-      if (v === "off" || v === "standard" || v === "full") setCoachModelChoice(v);
-    });
+    // The saved choice. The loader loads nothing before its startup gate
+    // opens, after the first paint, and unloads nothing before this lands.
+    storeLoad<BrainTier>("coachBrainTier")
+      .then((v) => restoreCoachModelChoice(v))
+      .catch(() => restoreCoachModelChoice(undefined));
     storeLoad<PersistedVoiceMode>("coachVoiceMode").then((v) => {
       if (!v) return;
       if (v === "chime") {

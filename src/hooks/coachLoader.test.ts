@@ -13,6 +13,7 @@ import {
   openCoachStartupGate,
   pauseCoachModelDownload,
   registerCoachDownloadPort,
+  restoreCoachModelChoice,
   retryCoachModel,
   setCoachModelChoice,
   setCoachModelDisk,
@@ -20,6 +21,7 @@ import {
   setCoachTakeRunning,
   startCoachModelDownload,
 } from "./coachLoader";
+import { setCoachSessionBusy } from "./coachLoadGate";
 import type { ModelStatus } from "../ipc.desktop";
 import type { ModelTier } from "../types";
 import { mockInvoke, setInvokeResponse } from "../test/mocks";
@@ -73,7 +75,7 @@ function heldLoad() {
 }
 
 const flush = async () => {
-  for (let i = 0; i < 10; i++) await Promise.resolve();
+  for (let i = 0; i < 4; i++) await new Promise((r) => setTimeout(r, 0));
 };
 
 const state = () => getCoachModelSnapshot().state;
@@ -256,14 +258,29 @@ describe("the choice and the model's life", () => {
 });
 
 describe("what each row says", () => {
-  it("not on this device: too little memory, or no model support in this build", async () => {
-    setCoachModelDisk(disk({ studioRecommended: false }), 8_192);
+  it("too little memory is a warning, never a lock: the saved choice still loads (review 1)", async () => {
+    // Before the selector a saved tier loaded whatever the RAM; it still must.
+    setCoachModelDisk(disk({ standardRecommended: false, studioRecommended: false }), 4_096);
+    setCoachModelChoice("standard");
     await openCoachStartupGate();
     await flush();
-    expect(row("full").state).toBe("notOnThisDevice");
-    expect(row("full").why).toBe("ram");
+    expect(row("standard").lowMemory).toBe(true);
+    expect(row("standard").state).toBe("ready");
+    expect(calls("load_coach_model")).toBe(1);
+    // The other tier stays offered as what it is, not "not on this device".
+    expect(row("full").state).toBe("notDownloaded");
+    expect(row("full").lowMemory).toBe(true);
+  });
 
-    __resetCoachLoaderForTests();
+  it("too little memory still lets a model download into an empty disk (review 1)", async () => {
+    setCoachModelDisk(disk({ brainReady: false, brainTier: null, studioRecommended: false }), 8_192);
+    await openCoachStartupGate();
+    await flush();
+    expect(row("full").canDownload).toBe(true);
+    expect(row("full").lowMemory).toBe(true);
+  });
+
+  it("not on this device: only a build with no model support", async () => {
     setInvokeResponse("get_coach_capabilities", caps({ llmCompiled: false }));
     setCoachModelDisk(disk(), 32_768);
     setCoachModelChoice("standard");
@@ -291,13 +308,29 @@ describe("what each row says", () => {
     expect(row("full").canDownload).toBe(false);
   });
 
-  it("legacy weights block nothing: both rows may download", async () => {
+  it("legacy weights on disk are not overwritten from the selector (review 2)", async () => {
     setCoachModelDisk(disk({ brainFamily: null, brainUpdateRecommended: true }), 32_768);
     await openCoachStartupGate();
     await flush();
+    // The same tier: the update is Settings' "Update brain", not a row button.
     expect(row("standard").why).toBe("update");
-    expect(row("standard").canDownload).toBe(true);
-    expect(row("full").canDownload).toBe(true);
+    expect(row("standard").canDownload).toBe(false);
+    // The other tier would replace them: no Download.
+    expect(row("full").why).toBe("otherOnDisk");
+    expect(row("full").canDownload).toBe(false);
+    const started: ModelTier[] = [];
+    registerCoachDownloadPort({ start: (t) => started.push(t), pause: () => {} });
+    expect(startCoachModelDownload("full")).toBe(false);
+    expect(startCoachModelDownload("standard")).toBe(false);
+    expect(started).toEqual([]);
+  });
+
+  it("a brain file whose tier is unreadable blocks both rows (review 2)", async () => {
+    setCoachModelDisk(disk({ brainTier: null }), 32_768);
+    await openCoachStartupGate();
+    await flush();
+    expect(row("standard").canDownload).toBe(false);
+    expect(row("full").canDownload).toBe(false);
   });
 
   it("reports what the resident model takes beside the machine's memory", async () => {
@@ -391,5 +424,140 @@ describe("downloads in the selector", () => {
     await flush();
     expect(startCoachModelDownload("full")).toBe(false);
     expect(p.started).toEqual([]);
+  });
+});
+
+describe("the reviewer's cases", () => {
+  it("a failed startup probe reads as failed, and Retry asks again (review 3)", async () => {
+    setInvokeResponse("get_coach_capabilities", () => Promise.reject(new Error("ipc down")));
+    setCoachModelDisk(disk(), 32_768);
+    setCoachModelChoice("standard");
+    await openCoachStartupGate();
+    await flush();
+    expect(state()).toBe("failed");
+    expect(calls("load_coach_model")).toBe(0);
+
+    setInvokeResponse("get_coach_capabilities", caps());
+    retryCoachModel();
+    await flush();
+    expect(state()).toBe("ready");
+    expect(calls("load_coach_model")).toBe(1);
+  });
+
+  it("a failed probe is asked again when the click stops, never in a loop (review 3)", async () => {
+    let probes = 0;
+    setInvokeResponse("get_coach_capabilities", () => {
+      probes++;
+      return Promise.reject(new Error("ipc down"));
+    });
+    setCoachModelDisk(disk(), 32_768);
+    setCoachModelChoice("standard");
+    await openCoachStartupGate();
+    await flush();
+    expect(probes).toBe(1);
+    await flush();
+    expect(probes).toBe(1);
+
+    setInvokeResponse("get_coach_capabilities", caps());
+    setCoachTakeRunning(true);
+    setCoachTakeRunning(false);
+    await flush();
+    expect(state()).toBe("ready");
+  });
+
+  it("nothing is unloaded before the saved choice is read (review 4)", async () => {
+    // Rust already holds a model (a reloaded webview); the probes come back
+    // before the store does.
+    setInvokeResponse("is_coach_loaded", () => true);
+    setCoachModelDisk(disk(), 32_768);
+    await openCoachStartupGate();
+    await flush();
+    expect(coachResident()).toBe(true);
+    expect(calls("unload_coach_model")).toBe(0);
+
+    restoreCoachModelChoice("standard");
+    await flush();
+    expect(calls("unload_coach_model")).toBe(0);
+    expect(coachResident()).toBe(true);
+  });
+
+  it("a saved Off read late still unloads, once it is known (review 4)", async () => {
+    setInvokeResponse("is_coach_loaded", () => true);
+    setCoachModelDisk(disk(), 32_768);
+    await openCoachStartupGate();
+    await flush();
+    restoreCoachModelChoice("off");
+    await flush();
+    expect(calls("unload_coach_model")).toBe(1);
+  });
+
+  it("a failed load and a failed question: residency is asked again before Off decides (review 5)", async () => {
+    setCoachModelDisk(disk(), 32_768);
+    setCoachModelChoice("standard");
+    await openCoachStartupGate();
+    await flush();
+    expect(state()).toBe("ready");
+
+    // New weights land; their load fails and so does the question after it.
+    setInvokeResponse("load_coach_model", () => false);
+    setInvokeResponse("get_coach_capabilities", () => Promise.reject(new Error("ipc down")));
+    setInvokeResponse("is_coach_loaded", () => Promise.reject(new Error("ipc down")));
+    setCoachModelDisk(disk({ brainSizeBytes: 2_500_000_000 }), 32_768);
+    await flush();
+    expect(calls("load_coach_model")).toBe(2);
+
+    // Rust still holds the old model. Off must reach it.
+    setInvokeResponse("is_coach_loaded", () => true);
+    setCoachModelChoice("off");
+    await flush();
+    expect(calls("unload_coach_model")).toBe(1);
+    expect(coachResident()).toBe(false);
+  });
+
+  it("after a double failure, the next input asks Rust whether a model is there (review 5)", async () => {
+    setCoachModelDisk(disk(), 32_768);
+    setCoachModelChoice("standard");
+    setInvokeResponse("load_coach_model", () => false);
+    setInvokeResponse("get_coach_capabilities", caps());
+    await openCoachStartupGate();
+    await flush();
+    setInvokeResponse("get_coach_capabilities", () => Promise.reject(new Error("ipc down")));
+    setInvokeResponse("is_coach_loaded", () => true);
+    retryCoachModel();
+    await flush();
+    // The retry failed and the question after it threw: Rust was asked
+    // directly, and says a model is resident.
+    expect(coachResident()).toBe(true);
+  });
+
+  it("no load starts while a Path Session is in progress, between Takes included (review 6)", async () => {
+    setCoachModelDisk(disk(), 32_768);
+    setCoachModelChoice("standard");
+    setCoachSessionBusy(true);
+    await openCoachStartupGate();
+    await flush();
+    expect(calls("load_coach_model")).toBe(0);
+    expect(state()).toBe("waiting");
+    // The click is stopped between Takes: still no load.
+    setCoachTakeRunning(true);
+    setCoachTakeRunning(false);
+    await flush();
+    expect(calls("load_coach_model")).toBe(0);
+
+    setCoachSessionBusy(false);
+    await flush();
+    expect(calls("load_coach_model")).toBe(1);
+  });
+
+  it("a load already in flight runs on when a Session starts (review 6)", async () => {
+    setCoachModelDisk(disk(), 32_768);
+    setCoachModelChoice("standard");
+    const finish = heldLoad();
+    await openCoachStartupGate();
+    await flush();
+    setCoachSessionBusy(true);
+    finish(true);
+    await flush();
+    expect(state()).toBe("ready");
   });
 });

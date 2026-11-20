@@ -55,13 +55,14 @@
       "failed": "Nie udało się wczytać. Wybierz go, aby spróbować ponownie",
       "failedWhy": "Nie udało się wczytać ({{reason}}). Wybierz go, aby spróbować ponownie",
       "notDownloaded": "Niepobrany",
-      "update": "Starsza wersja. Pobierz nową",
-      "otherOnDisk": "Niepobrany. Na tym komputerze na razie mieści się jeden model: przełącz w Ustawienia → Trener"
+      "update": "Starsza wersja. Zaktualizuj w Ustawienia → Trener",
+      "otherOnDisk": "Niepobrany. Drugi model na tym komputerze wymaga późniejszej aktualizacji; na razie przełącz w Ustawienia → Trener",
+      "downloading": "Pobieranie",
+      "lowMemory": "Ten komputer ma mniej pamięci, niż potrzebuje ten model; może działać wolno albo się nie wczytać"
     },
     "why": {
       "phone": "Niedostępny na tym urządzeniu",
-      "noLlm": "Niedostępny na tym urządzeniu: ta wersja nie potrafi uruchomić modelu",
-      "ram": "Niedostępny na tym urządzeniu: potrzebuje więcej pamięci"
+      "noLlm": "Niedostępny na tym urządzeniu: ta wersja nie potrafi uruchomić modelu"
     },
     "download": {
       "start": "Pobierz",

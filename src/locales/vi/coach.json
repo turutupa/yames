@@ -55,13 +55,14 @@
       "failed": "Không tải được. Chọn lại để thử lần nữa",
       "failedWhy": "Không tải được ({{reason}}). Chọn lại để thử lần nữa",
       "notDownloaded": "Chưa tải về",
-      "update": "Phiên bản cũ. Hãy tải bản mới",
-      "otherOnDisk": "Chưa tải về. Hiện máy tính này chỉ chứa được một mô hình: chuyển trong Cài đặt → Huấn luyện viên"
+      "update": "Phiên bản cũ. Hãy cập nhật trong Cài đặt → Huấn luyện viên",
+      "otherOnDisk": "Chưa tải về. Mô hình thứ hai trên máy tính này cần một bản cập nhật sau; hiện giờ hãy chuyển trong Cài đặt → Huấn luyện viên",
+      "downloading": "Đang tải về",
+      "lowMemory": "Máy tính này có ít bộ nhớ hơn mức mô hình này cần; có thể chạy chậm hoặc không tải được"
     },
     "why": {
       "phone": "Không có trên thiết bị này",
-      "noLlm": "Không có trên thiết bị này: bản dựng này không chạy được mô hình",
-      "ram": "Không có trên thiết bị này: cần thêm bộ nhớ"
+      "noLlm": "Không có trên thiết bị này: bản dựng này không chạy được mô hình"
     },
     "download": {
       "start": "Tải về",

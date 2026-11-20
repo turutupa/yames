@@ -55,13 +55,14 @@
       "failed": "Laden mislukt. Kies het om het opnieuw te proberen",
       "failedWhy": "Laden mislukt ({{reason}}). Kies het om het opnieuw te proberen",
       "notDownloaded": "Niet gedownload",
-      "update": "Een oudere versie. Download de nieuwe",
-      "otherOnDisk": "Niet gedownload. Op deze computer past voorlopig één model: wissel in Instellingen → Coach"
+      "update": "Een oudere versie. Werk hem bij in Instellingen → Coach",
+      "otherOnDisk": "Niet gedownload. Een tweede model op deze computer heeft een latere update nodig; wissel voorlopig in Instellingen → Coach",
+      "downloading": "Downloaden",
+      "lowMemory": "Deze computer heeft minder geheugen dan dit model wil; het kan traag zijn of niet laden"
     },
     "why": {
       "phone": "Niet op dit apparaat",
-      "noLlm": "Niet op dit apparaat: deze versie kan geen model draaien",
-      "ram": "Niet op dit apparaat: het heeft meer geheugen nodig"
+      "noLlm": "Niet op dit apparaat: deze versie kan geen model draaien"
     },
     "download": {
       "start": "Downloaden",

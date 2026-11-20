@@ -126,7 +126,7 @@ describe("CoachModelSelector", () => {
     const button = await setup(STANDARD_ON_DISK);
     fireEvent.click(button);
     expect(screen.queryByRole("menuitem", { name: /^Download: Studio/ })).toBeNull();
-    expect(screen.getByRole("menu").textContent).toContain("One model fits on this computer for now");
+    expect(screen.getByRole("menu").textContent).toContain("A second model on this computer needs a later update");
   });
 
   it("arrow keys move, Enter picks, Esc closes and gives focus back", async () => {
@@ -154,13 +154,41 @@ describe("CoachModelSelector", () => {
     expect(document.activeElement).toBe(button);
   });
 
-  it("a model this machine cannot run is listed, disabled, and says why", async () => {
-    const button = await setup({ ...NOTHING_ON_DISK, studioRecommended: false });
+  it("a build with no model support lists the models disabled, and says why", async () => {
+    setInvokeResponse("get_coach_capabilities", () => ({ llmCompiled: false, modelResident: false, modelName: null, loadError: null }));
+    setCoachModelDisk(STANDARD_ON_DISK, 32_768);
+    setCoachModelChoice("off");
+    await act(async () => {
+      await openCoachStartupGate();
+    });
+    render(<CoachModelSelector />);
+    const button = screen.getByRole("button", { name: /Coach model:/ });
     fireEvent.click(button);
-    const studio = screen.getByRole("menuitemradio", { name: /Studio/ });
-    expect(studio.getAttribute("aria-disabled")).toBe("true");
-    expect(studio.textContent).toContain("it needs more memory");
-    fireEvent.click(studio);
+    const standard = screen.getByRole("menuitemradio", { name: /Standard/ });
+    expect(standard.getAttribute("aria-disabled")).toBe("true");
+    expect(standard.textContent).toContain("this build can't run a model");
+    fireEvent.click(standard);
     expect(button.getAttribute("aria-label")).toBe("Coach model: Off, off");
+  });
+
+  it("too little memory is a warning in the row; the model can still be picked (review 1)", async () => {
+    const button = await setup({ ...STANDARD_ON_DISK, standardRecommended: false });
+    fireEvent.click(button);
+    const standard = screen.getByRole("menuitemradio", { name: /Standard/ });
+    expect(standard.getAttribute("aria-disabled")).toBeNull();
+    expect(standard.textContent).toContain("less memory than this model wants");
+    fireEvent.click(standard);
+    expect(button.getAttribute("aria-label")).toMatch(/^Coach model: Standard, /);
+  });
+
+  it("a row that is downloading says so, not \"Not downloaded\"", async () => {
+    const button = await setup(NOTHING_ON_DISK);
+    act(() => {
+      setCoachModelDownload({ tier: "standard", phase: "running", stage: "brain", fraction: 0.42, error: null });
+    });
+    fireEvent.click(button);
+    const row = document.querySelector('.coach-model-row[data-state="notDownloaded"]')!;
+    expect(row.textContent).toContain("Downloading");
+    expect(row.textContent).not.toContain("Not downloaded");
   });
 });

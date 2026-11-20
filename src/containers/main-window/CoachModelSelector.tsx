@@ -55,6 +55,8 @@ function onMeteredConnection(): boolean {
 
 /** One line saying what a row's state is (its download aside). */
 export function rowStateText(row: CoachModelRow, t: TFunction, failure: string | null): string {
+  // While it downloads, that is its state; the progress line has the number.
+  if (row.download?.phase === "running") return t("coachModel.state.downloading");
   switch (row.state) {
     case "notOnThisDevice":
       return t(`coachModel.why.${row.why ?? "phone"}`);
@@ -277,6 +279,9 @@ export function CoachModelSelector() {
           <span className="coach-model-mark" data-state={row.state} aria-hidden="true" />
           {rowStateText(row, t, selected ? snap.failure : null)}
         </span>
+        {row.lowMemory && row.state !== "notOnThisDevice" && (
+          <span className="coach-model-warn">{t("coachModel.state.lowMemory")}</span>
+        )}
       </span>
     );
 

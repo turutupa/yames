@@ -55,13 +55,14 @@
       "failed": "Konnte nicht laden. Wähl es aus, um es noch einmal zu versuchen",
       "failedWhy": "Konnte nicht laden ({{reason}}). Wähl es aus, um es noch einmal zu versuchen",
       "notDownloaded": "Nicht heruntergeladen",
-      "update": "Eine ältere Version. Lade die neue herunter",
-      "otherOnDisk": "Nicht heruntergeladen. Auf diesen Computer passt vorerst ein Modell: wechsle in Einstellungen → Coach"
+      "update": "Eine ältere Version. Aktualisiere sie in Einstellungen → Coach",
+      "otherOnDisk": "Nicht heruntergeladen. Ein zweites Modell auf diesem Computer braucht ein späteres Update; wechsle vorerst in Einstellungen → Coach",
+      "downloading": "Lädt herunter",
+      "lowMemory": "Dieser Computer hat weniger Arbeitsspeicher, als dieses Modell möchte; es kann langsam sein oder nicht laden"
     },
     "why": {
       "phone": "Nicht auf diesem Gerät",
-      "noLlm": "Nicht auf diesem Gerät: Diese Version kann kein Modell ausführen",
-      "ram": "Nicht auf diesem Gerät: Es braucht mehr Arbeitsspeicher"
+      "noLlm": "Nicht auf diesem Gerät: Diese Version kann kein Modell ausführen"
     },
     "download": {
       "start": "Herunterladen",

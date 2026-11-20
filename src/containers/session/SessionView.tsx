@@ -9,6 +9,7 @@ import { heardRecap, heardSince } from "../../jam/heard";
 import type { HeardKeyName } from "../../jam/heard";
 import { useEffect, useRef, useState } from "react";
 import { useFitOneLine, useFitScale } from "./hooks/useFitOneLine";
+import { setCoachSessionBusy } from "../../hooks/coachLoadGate";
 import { useTranslation } from "react-i18next";
 import {
   barLine,
@@ -1954,6 +1955,13 @@ export function SessionView({
 }) {
   const { t } = useTranslation();
   const { run, actions } = session;
+  // The coach model's loader starts no load while a Session is in progress,
+  // between Takes included: a load begun there runs into the next one (ms1).
+  const sessionBusy = run.phase !== "idle" && run.phase !== "recap";
+  useEffect(() => {
+    setCoachSessionBusy(sessionBusy);
+    return () => setCoachSessionBusy(false);
+  }, [sessionBusy]);
   // A listen demo through the speakers is not a signal from the player (card #28).
   const hasSignal = heardSignal && !session.listen?.active;
   const testInput = onTestInput ?? onCheckSound;

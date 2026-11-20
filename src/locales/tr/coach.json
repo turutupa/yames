@@ -55,13 +55,14 @@
       "failed": "Yüklenemedi. Tekrar denemek için seç",
       "failedWhy": "Yüklenemedi ({{reason}}). Tekrar denemek için seç",
       "notDownloaded": "İndirilmedi",
-      "update": "Eski bir sürüm. Yenisini indir",
-      "otherOnDisk": "İndirilmedi. Şimdilik bu bilgisayara tek model sığıyor: Ayarlar → Pratik Koçu'ndan değiştir"
+      "update": "Eski bir sürüm. Ayarlar → Pratik Koçu'ndan güncelle",
+      "otherOnDisk": "İndirilmedi. Bu bilgisayarda ikinci bir model için sonraki bir güncelleme gerekiyor; şimdilik Ayarlar → Pratik Koçu'ndan değiştir",
+      "downloading": "İndiriliyor",
+      "lowMemory": "Bu bilgisayarda bu modelin istediğinden az bellek var; yavaş çalışabilir veya yüklenemeyebilir"
     },
     "why": {
       "phone": "Bu cihazda yok",
-      "noLlm": "Bu cihazda yok: bu sürüm model çalıştıramıyor",
-      "ram": "Bu cihazda yok: daha fazla bellek gerekiyor"
+      "noLlm": "Bu cihazda yok: bu sürüm model çalıştıramıyor"
     },
     "download": {
       "start": "İndir",

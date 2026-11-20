@@ -190,6 +190,11 @@
   color: var(--text-muted);
   overflow-wrap: anywhere;
 }
+.coach-model-warn {
+  font-size: 11px;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
 .coach-model-actions {
   display: flex;
   flex-wrap: wrap;

@@ -55,13 +55,14 @@
       "failed": "Échec du chargement. Choisis-le pour réessayer",
       "failedWhy": "Échec du chargement ({{reason}}). Choisis-le pour réessayer",
       "notDownloaded": "Non téléchargé",
-      "update": "Une version plus ancienne. Télécharge la nouvelle",
-      "otherOnDisk": "Non téléchargé. Pour l'instant, un seul modèle tient sur cet ordinateur : change dans Paramètres → Coach"
+      "update": "Une version plus ancienne. Mets-la à jour dans Paramètres → Coach",
+      "otherOnDisk": "Non téléchargé. Un second modèle sur cet ordinateur demande une mise à jour ultérieure ; pour l'instant, change dans Paramètres → Coach",
+      "downloading": "Téléchargement",
+      "lowMemory": "Cet ordinateur a moins de mémoire que ce modèle n'en demande ; il peut être lent ou ne pas se charger"
     },
     "why": {
       "phone": "Indisponible sur cet appareil",
-      "noLlm": "Indisponible sur cet appareil : cette version ne peut pas exécuter de modèle",
-      "ram": "Indisponible sur cet appareil : il faut plus de mémoire"
+      "noLlm": "Indisponible sur cet appareil : cette version ne peut pas exécuter de modèle"
     },
     "download": {
       "start": "Télécharger",
