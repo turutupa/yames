@@ -3635,6 +3635,29 @@ pub async fn coach_generate(
         .map_err(|e| format!("coach_generate join failed: {e}"))?
 }
 
+/// One Ask turn (DESIGN 9.4): the caller's static prefix, context,
+/// question, optional GBNF grammar and deadline in; `answered`,
+/// `truncated`, `deadEnd`, `cancelled`, `timedOut` or `noModel` out. A
+/// malformed grammar is an `Err` starting `grammar:`.
+/// Blocking like `coach_generate`, for the same reason.
+#[tauri::command]
+pub async fn coach_ask(
+    engine: State<'_, SharedCoachEngine>,
+    request: crate::coach::AskRequest,
+) -> Result<crate::coach::AskOutcome, String> {
+    let engine_arc: SharedCoachEngine = engine.inner().clone();
+    tokio::task::spawn_blocking(move || crate::coach::ask(&engine_arc, &request))
+        .await
+        .map_err(|e| format!("coach_ask join failed: {e}"))?
+}
+
+/// Stop the Ask generation with this id, queued or running. True when one
+/// was found. Never waits on the worker: it only raises a flag.
+#[tauri::command]
+pub fn cancel_generation(generation_id: u64) -> bool {
+    crate::coach::cancel_generation(generation_id)
+}
+
 /// Total physical RAM in MB, for the Studio-tier gate (ROADMAP §3: Studio
 /// is only offered at ≥ 16 GB). Returns 0 when the platform query fails,
 /// which the frontend treats as "unknown — don't block the user".

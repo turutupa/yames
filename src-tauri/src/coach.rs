@@ -220,6 +220,10 @@ pub enum GenKind {
     Chat,
     /// One-line narration of an adaptive-drill step the engine already made.
     Drill,
+    /// A question in the Ask panel (DESIGN 9.4). Never reaches the model
+    /// through `generate`: it has its own request shape, prompt, budget,
+    /// grammar and cancel, and goes through [`ask`]. `generate` refuses it.
+    Ask,
 }
 
 impl GenKind {
@@ -235,6 +239,10 @@ impl GenKind {
     pub fn max_tokens(self) -> usize {
         if self.is_rephrase() {
             REPHRASE_MAX_TOKENS
+        } else if self == GenKind::Ask {
+            // The larger of the Ask kind's two budgets; the request's
+            // `AskMode` picks the real one.
+            ASK_PROSE_MAX_TOKENS
         } else {
             CHAT_MAX_TOKENS
         }
@@ -283,6 +291,19 @@ Rules:
 - Use natural, conversational language like a supportive instructor
 - When commenting on timing: "early" means ahead of the beat, "late" means behind
 - Reference specific beats or patterns when the data supports it"#;
+
+/// The prompt every kind but Ask is sent as (see `llm::build_prompt` for
+/// why it is hand-built ChatML). Outside the `llm` module so a test on a
+/// build without the feature can hold it byte for byte.
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub(crate) fn chat_prompt(context: &str) -> String {
+    format!(
+        "<|im_start|>system\n{system}\n\n/no_think<|im_end|>\n\
+         <|im_start|>user\n{context}<|im_end|>\n\
+         <|im_start|>assistant\n<think>\n\n</think>\n\n",
+        system = SYSTEM_PROMPT,
+    )
+}
 
 /// Reason a load refused before any weights were touched. Surfaced in
 /// `CoachCapabilities.loadError` so Settings can say *why* rather than
@@ -592,6 +613,9 @@ pub fn tips_use_model() -> bool {
 /// budget, a decode error, or a dead worker.
 #[cfg_attr(not(feature = "coach-llm"), allow(unused_variables))]
 pub fn generate(handle: &CoachHandle, kind: GenKind, context: &str) -> Result<String, String> {
+    if kind == GenKind::Ask {
+        return Err(ASK_NOT_THROUGH_GENERATE.to_string());
+    }
     #[cfg(feature = "coach-llm")]
     {
         if should_use_model(kind) {
@@ -623,6 +647,927 @@ pub fn generate(handle: &CoachHandle, kind: GenKind, context: &str) -> Result<St
 
     // Template-based fallback
     generate_template(kind, context)
+}
+
+// ---------------------------------------------------------------------------
+// The Ask kind (DESIGN 9.4, 5.5; leg c3a)
+// ---------------------------------------------------------------------------
+
+/// Why `generate` / the template engine refuse `GenKind::Ask`.
+pub const ASK_NOT_THROUGH_GENERATE: &str =
+    "the ask kind goes through coach_ask, not coach_generate";
+
+/// Every error that comes from the caller's grammar starts with this, so
+/// the frontend can tell "your grammar is wrong" (a bug to fix) from "the
+/// model could not answer" (a turn to answer by rule).
+pub const ASK_GRAMMAR_ERROR: &str = "grammar";
+
+/// Output budgets, DESIGN 5.5: a choice is one small JSON object, prose is
+/// at most three sentences of general advice.
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub const ASK_CHOICE_MAX_TOKENS: usize = 48;
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub const ASK_PROSE_MAX_TOKENS: usize = 96;
+/// The context the caller may send with a question (DESIGN 5.5: the 1.5 KB
+/// of ROADMAP 3.4). Checked in tokens on the worker, where the tokenizer is.
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub const ASK_CONTEXT_MAX_TOKENS: usize = 450;
+/// A grammar longer than this is refused before llama.cpp sees it. The one
+/// the registry generates is a few kilobytes.
+pub const ASK_GRAMMAR_MAX_BYTES: usize = 32 * 1024;
+/// llama.cpp's own ceiling on `{m,n}` (`MAX_REPETITION_THRESHOLD`).
+const GRAMMAR_MAX_REPEAT: u64 = 2000;
+/// The most grammar elements a string may expand to, estimated from above
+/// by `measure_grammar`. llama.cpp's parser writes `S{m,n}` out as `m`
+/// copies of `S` plus `n - m` rules of `S` and three more elements each,
+/// so 32 KB of text can ask for tens of millions of elements (8 bytes each,
+/// more at the parser's peak). It parses the string again on every
+/// `reset()`, outside any `catch`, so a `bad_alloc` there would cross the
+/// FFI. 100,000 is about 800 KB of elements: the registry's whole answer
+/// grammar (`coach-answer.gbnf`, 6.8 KB with a 240-character sentence
+/// rule) measures under 10,000, and a choice grammar a few hundred.
+pub const ASK_GRAMMAR_MAX_ELEMENTS: u64 = 100_000;
+/// Rules a grammar may define, counting each parenthesised group (llama.cpp
+/// makes a rule of each). A tool grammar has one per argument shape and a
+/// few dozen groups; the answer grammar has about 65.
+const GRAMMAR_MAX_RULES: usize = 512;
+/// Alternatives in one rule or group. The widest closed list in the answer
+/// grammar has 31 (chord qualities); an intent list is one per tool.
+const GRAMMAR_MAX_ALTERNATIVES: usize = 128;
+/// Groups inside groups. Tool grammars nest two or three deep.
+const GRAMMAR_MAX_DEPTH: usize = 16;
+/// The longest chain of rule references (a cycle is cut where it closes).
+/// The answer grammar's is about 8.
+const GRAMMAR_MAX_REF_DEPTH: usize = 64;
+/// The most parse stacks `StackEstimate` may find at one position. Each
+/// stack is checked against every candidate token in a grammar `apply`
+/// (about 150,000 for Qwen3), which is one uninterruptible sampling step,
+/// and llama.cpp builds them at grammar init and on every `reset()`
+/// outside any `catch`. The answer grammar's estimate is in the tens (its
+/// widest closed list has 31 entries); `r1? r1? r1? r1?` chained twelve
+/// rules deep is about 4^12.
+pub const ASK_GRAMMAR_MAX_STACKS: u64 = 1_024;
+
+/// The Ask kind's own system lines. They come first in the system turn, in
+/// front of the caller's static prefix (its system text and its tool /
+/// intent list), and are part of what the prefix cache keeps.
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub const ASK_SYSTEM_PROMPT: &str = r#"You answer one question inside Yames, a guitar practice app. One reply, no follow-up questions.
+
+Rules:
+- Use only what the app gives you below; never invent a number, a tempo, a bar, a note or a result
+- Never state a fact about the player: the app shows those itself
+- Keep to guitar, practice and Yames
+- When a format is required, reply in exactly that format and nothing else"#;
+
+/// The two shapes of an Ask answer, each with its own budget.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum AskMode {
+    /// One small object under the caller's grammar: an intent id and its
+    /// arguments, from a closed list (engine 4a).
+    Choice,
+    /// General advice in the model's own words (engine 4b).
+    Prose,
+}
+
+impl AskMode {
+    #[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+    pub fn max_tokens(self) -> usize {
+        match self {
+            AskMode::Choice => ASK_CHOICE_MAX_TOKENS,
+            AskMode::Prose => ASK_PROSE_MAX_TOKENS,
+        }
+    }
+}
+
+/// One Ask turn. Rust does not know the tools: they live in TypeScript,
+/// which sends the static prefix that lists them and, for a choice, the
+/// grammar generated from the same registry.
+#[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AskRequest {
+    /// Chosen by the caller, unique for the life of the process, so the
+    /// caller can cancel before this call has even returned.
+    pub generation_id: u64,
+    pub mode: AskMode,
+    /// The static head: system text and the tool / intent list. Identical
+    /// from turn to turn, which is what lets the worker keep it decoded.
+    pub prefix: String,
+    /// What the app knows that bears on this question (at most
+    /// `ASK_CONTEXT_MAX_TOKENS`).
+    pub context: String,
+    pub question: String,
+    /// GBNF with a `root` rule. Optional for either mode; a choice without
+    /// one is free text the caller will have to validate.
+    #[serde(default)]
+    pub grammar: Option<String>,
+    /// The turn's wall-clock budget, from the moment `ask` is called:
+    /// queue, prompt and answer together. `ASK_DEFAULT_DEADLINE_MS` when
+    /// absent, at most `ASK_MAX_DEADLINE_MS`. Checked between prompt
+    /// chunks and per output token, as a cancel is.
+    #[serde(default)]
+    pub deadline_ms: Option<u32>,
+}
+
+/// DESIGN 5.5: a turn fits 8 s or the rule-made answer stands.
+pub const ASK_DEFAULT_DEADLINE_MS: u32 = 8_000;
+/// A caller may ask for longer (the probe does, to measure on a loaded
+/// machine), never for longer than this.
+pub const ASK_MAX_DEADLINE_MS: u32 = 60_000;
+
+impl AskRequest {
+    pub fn deadline(&self) -> std::time::Duration {
+        std::time::Duration::from_millis(
+            self.deadline_ms.unwrap_or(ASK_DEFAULT_DEADLINE_MS).min(ASK_MAX_DEADLINE_MS) as u64,
+        )
+    }
+}
+
+/// Why an answer stopped before the model ended it.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub enum TruncatedBy {
+    /// The mode's token budget ran out.
+    Budget,
+    /// `ASK_MAX_WHITESPACE_RUN` whitespace-only tokens in a row under a
+    /// grammar.
+    Whitespace,
+}
+
+/// How a generation ended on the worker, before `ask_outcome` shapes it.
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub(crate) enum AskEnd {
+    /// End-of-generation, allowed by the grammar if there is one.
+    Finished,
+    Truncated(TruncatedBy),
+    /// Nothing could be sampled though the grammar compiled and stayed
+    /// healthy: the model could not continue under it.
+    DeadEnd(String),
+}
+
+/// What a turn came to. A failure that is the caller's to fix (a malformed
+/// grammar, a context over budget) is an `Err` instead.
+#[derive(Clone, Debug, PartialEq, serde::Serialize)]
+#[serde(tag = "status", rename_all = "camelCase")]
+pub enum AskOutcome {
+    /// The model ended the answer itself, inside the budget. Under a
+    /// grammar, `text` is a complete sentence of the grammar's language.
+    #[serde(rename_all = "camelCase")]
+    #[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+    Answered {
+        text: String,
+        /// The static prefix was already decoded and only the context and
+        /// the question were.
+        prefix_cached: bool,
+        /// From the job starting on the worker to the first output token's
+        /// logits being ready: the prompt's cost.
+        prompt_ms: u32,
+        total_ms: u32,
+    },
+    /// The answer was cut off: `text` is at most a prefix of the grammar's
+    /// language, never a complete answer to act on. Its own status so no
+    /// caller can parse half a tool call by forgetting a flag.
+    #[serde(rename_all = "camelCase")]
+    #[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+    Truncated {
+        text: String,
+        by: TruncatedBy,
+        prefix_cached: bool,
+        prompt_ms: u32,
+        total_ms: u32,
+    },
+    /// The grammar is valid, but the model reached a point where nothing it
+    /// could give was allowed. Not the caller's bug: the rule-made answer
+    /// stands.
+    #[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+    DeadEnd { why: String },
+    /// `cancel_generation` reached it, queued or running.
+    Cancelled,
+    /// The turn's deadline passed, queued or running. Distinct from a
+    /// player's cancel.
+    #[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+    TimedOut,
+    /// No model is resident (or this build has none): the rule-made answer
+    /// stands, which is not an error.
+    NoModel,
+}
+
+/// Shape a finished generation for the caller.
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub(crate) fn ask_outcome(
+    end: AskEnd,
+    text: String,
+    prefix_cached: bool,
+    prompt_ms: u32,
+    total_ms: u32,
+) -> AskOutcome {
+    match end {
+        AskEnd::Finished => AskOutcome::Answered { text, prefix_cached, prompt_ms, total_ms },
+        AskEnd::Truncated(by) => {
+            AskOutcome::Truncated { text, by, prefix_cached, prompt_ms, total_ms }
+        }
+        AskEnd::DeadEnd(why) => AskOutcome::DeadEnd { why },
+    }
+}
+
+/// What stops a running turn: the player's cancel, then the deadline.
+/// Checked before a queued job starts, between prompt chunks and per
+/// output token.
+#[derive(Clone)]
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub(crate) struct AskStop {
+    pub cancel: std::sync::Arc<std::sync::atomic::AtomicBool>,
+    pub deadline: std::time::Instant,
+}
+
+/// Why `AskStop` stopped a turn.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub(crate) enum Halt {
+    Cancelled,
+    Expired,
+}
+
+impl AskStop {
+    /// The player's cancel wins over a deadline that passed at the same time.
+    #[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+    pub fn check(&self) -> Option<Halt> {
+        if self.cancel.load(std::sync::atomic::Ordering::Acquire) {
+            Some(Halt::Cancelled)
+        } else if std::time::Instant::now() >= self.deadline {
+            Some(Halt::Expired)
+        } else {
+            None
+        }
+    }
+}
+
+/// The cancel board: one flag per generation id that is queued or running.
+///
+/// Lives outside the worker so a cancel never waits behind the job it is
+/// cancelling. A cancel that arrives before its `ask` registered (the two
+/// commands race on the tokio pool) is remembered, a few at a time, and the
+/// job then starts cancelled.
+pub(crate) mod cancel {
+    use std::collections::{HashMap, VecDeque};
+    use std::sync::atomic::{AtomicBool, Ordering};
+    use std::sync::{Arc, Mutex, MutexGuard, OnceLock};
+
+    /// Early cancels remembered. Ids are unique per process, so an old one
+    /// falling off the end costs nothing but that one early cancel.
+    const EARLY_KEPT: usize = 32;
+
+    #[derive(Default)]
+    struct Board {
+        live: HashMap<u64, Arc<AtomicBool>>,
+        early: VecDeque<u64>,
+    }
+
+    fn board() -> MutexGuard<'static, Board> {
+        static BOARD: OnceLock<Mutex<Board>> = OnceLock::new();
+        BOARD
+            .get_or_init(|| Mutex::new(Board::default()))
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+    }
+
+    /// A registered generation. Dropping it takes the id off the board.
+    pub struct Ticket {
+        id: u64,
+        flag: Arc<AtomicBool>,
+    }
+
+    impl Ticket {
+        #[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+        pub fn flag(&self) -> &Arc<AtomicBool> {
+            &self.flag
+        }
+
+        pub fn is_cancelled(&self) -> bool {
+            self.flag.load(Ordering::Acquire)
+        }
+    }
+
+    impl Drop for Ticket {
+        fn drop(&mut self) {
+            let mut b = board();
+            // Only our own entry: a later registration of the same id
+            // cannot exist while this one is live (`register` refuses it).
+            if b.live.get(&self.id).is_some_and(|f| Arc::ptr_eq(f, &self.flag)) {
+                b.live.remove(&self.id);
+            }
+        }
+    }
+
+    pub fn register(id: u64) -> Result<Ticket, String> {
+        let mut b = board();
+        if b.live.contains_key(&id) {
+            return Err(format!("generation {id} is already running"));
+        }
+        let early = match b.early.iter().position(|&e| e == id) {
+            Some(pos) => {
+                b.early.remove(pos);
+                true
+            }
+            None => false,
+        };
+        let flag = Arc::new(AtomicBool::new(early));
+        b.live.insert(id, flag.clone());
+        Ok(Ticket { id, flag })
+    }
+
+    /// True when a queued or running generation was flagged.
+    pub fn cancel(id: u64) -> bool {
+        let mut b = board();
+        if let Some(flag) = b.live.get(&id) {
+            flag.store(true, Ordering::Release);
+            return true;
+        }
+        if !b.early.contains(&id) {
+            if b.early.len() >= EARLY_KEPT {
+                b.early.pop_front();
+            }
+            b.early.push_back(id);
+        }
+        false
+    }
+}
+
+/// Stop the generation with this id, queued or running. Returns whether
+/// one was found; either way the id, if it runs later, starts cancelled.
+pub fn cancel_generation(generation_id: u64) -> bool {
+    cancel::cancel(generation_id)
+}
+
+/// Checks on a GBNF string that llama.cpp does not make, or makes in a way
+/// that costs the process: a `{m,n}` with `n < m` underflows its repeat
+/// count and loops allocating rules until memory runs out (llama-grammar.cpp
+/// `handle_repetitions`, `n_opt = max_times - min_times`); a grammar that
+/// expands past `ASK_GRAMMAR_MAX_ELEMENTS` can exhaust memory in the parser
+/// (see the constant). It also refuses more than `GRAMMAR_MAX_RULES` rules
+/// and groups, `GRAMMAR_MAX_ALTERNATIVES` in one of them, groups nested
+/// past `GRAMMAR_MAX_DEPTH`, rule references chained past
+/// `GRAMMAR_MAX_REF_DEPTH`, and a grammar whose `StackEstimate` (the
+/// stacks one parse expands to at one position) passes
+/// `ASK_GRAMMAR_MAX_STACKS`. That bounds the stacks llama.cpp builds at
+/// init and on `reset()` for one parse; it does not bound the stacks an
+/// ambiguous grammar keeps for several parses at once (see
+/// `StackEstimate`). Everything else malformed is left to llama.cpp's
+/// parser, which returns an error for it.
+pub fn precheck_grammar(grammar: &str) -> Result<(), String> {
+    measure_grammar(grammar).map(|_| ())
+}
+
+/// What an item of a sequence is, for the parse-stack estimate.
+#[derive(Clone, Debug)]
+enum GrammarKind {
+    /// A literal character, a class, `.` or a token: one stack position.
+    Term,
+    /// `""`: nothing.
+    Empty,
+    Ref(String),
+    Group(Vec<Vec<GrammarItem>>),
+}
+
+#[derive(Clone, Debug)]
+struct GrammarItem {
+    kind: GrammarKind,
+    /// `?`, `*` or `{0,n}`: the item may be skipped.
+    optional: bool,
+    /// How many copies llama.cpp writes out (`{m,n}`: n, `*` / `+`: 2).
+    copies: u64,
+}
+
+/// One sequence being measured: a rule's body or a group's.
+struct GrammarFrame {
+    /// The alternatives already closed by a `|`.
+    closed: u64,
+    /// The sequence being read.
+    seq: u64,
+    /// The last item's size, which a repetition after it multiplies.
+    last: u64,
+    alternatives: usize,
+    /// The same sequences as items, for the parse-stack estimate.
+    closed_items: Vec<Vec<GrammarItem>>,
+    items: Vec<GrammarItem>,
+}
+
+impl GrammarFrame {
+    fn new() -> Self {
+        GrammarFrame {
+            closed: 0,
+            seq: 0,
+            last: 0,
+            alternatives: 1,
+            closed_items: Vec::new(),
+            items: Vec::new(),
+        }
+    }
+
+    fn total(&self) -> u64 {
+        self.closed.saturating_add(self.seq)
+    }
+
+    fn item(&mut self, size: u64, kind: GrammarKind) {
+        self.seq = self.seq.saturating_add(size);
+        self.last = size;
+        self.items.push(GrammarItem { kind, optional: false, copies: 1 });
+    }
+
+    /// `S` repeated: llama.cpp writes out `copies` of it, each with up to
+    /// three elements of rule bookkeeping (`handle_repetitions`).
+    fn repeat(&mut self, copies: u64, optional: bool) {
+        let grown = self.last.saturating_add(3).saturating_mul(copies.max(1));
+        self.seq = self.seq.saturating_sub(self.last).saturating_add(grown);
+        self.last = grown;
+        if let Some(last) = self.items.last_mut() {
+            last.optional |= optional;
+            last.copies = last.copies.saturating_mul(copies.max(1));
+        }
+    }
+
+    /// `|`: the sequence read so far is one alternative.
+    fn next_alternative(&mut self) {
+        self.closed = self.total();
+        self.seq = 0;
+        self.last = 0;
+        self.alternatives += 1;
+        self.closed_items.push(std::mem::take(&mut self.items));
+    }
+
+    /// Every alternative, the one being read included.
+    fn into_alternatives(mut self) -> Vec<Vec<GrammarItem>> {
+        self.closed_items.push(self.items);
+        self.closed_items
+    }
+}
+
+/// An upper estimate of the parse stacks llama.cpp holds at once.
+///
+/// `llama_grammar_advance_stack` expands a position into one stack per
+/// distinct way the next character can be reached: through every
+/// alternative of a referenced rule, and past every item that can be
+/// skipped. So the stacks at one position are the "starts" of the rest of
+/// its sequence: the starts of each item up to and including the first one
+/// that cannot be skipped, plus one for running off the end into the
+/// parent. A skippable item repeated `n` times counts its starts `n`
+/// times. Starts follow references to named rules (memoised; a rule met
+/// again while it is being costed counts once). The estimate is the
+/// largest such count over every position of every sequence.
+///
+/// What it does not cover: running off the end of a rule adds the
+/// parent's continuation, so one parse can hold up to the reference
+/// depth times the estimate (the depth is capped too); and an ambiguous
+/// grammar keeps several parses alive at once, which this does not
+/// multiply in. The turn's deadline is what bounds that, between steps.
+struct StackEstimate<'a> {
+    rules: &'a std::collections::HashMap<String, Vec<Vec<GrammarItem>>>,
+    nullable: std::collections::HashSet<String>,
+    /// Per rule: its starts and the longest reference chain below it.
+    memo: std::collections::HashMap<String, (u64, usize)>,
+    busy: std::collections::HashSet<String>,
+    max_stacks: u64,
+}
+
+impl<'a> StackEstimate<'a> {
+    fn new(rules: &'a std::collections::HashMap<String, Vec<Vec<GrammarItem>>>) -> Self {
+        // Which rules can match nothing: a fixpoint, at most one round per rule.
+        let mut nullable = std::collections::HashSet::new();
+        loop {
+            let found: Vec<String> = rules
+                .iter()
+                .filter(|(name, alts)| {
+                    !nullable.contains(*name) && alts.iter().any(|s| Self::seq_nullable(s, &nullable))
+                })
+                .map(|(name, _)| name.clone())
+                .collect();
+            if found.is_empty() {
+                break;
+            }
+            nullable.extend(found);
+        }
+        StackEstimate {
+            rules,
+            nullable,
+            memo: std::collections::HashMap::new(),
+            busy: std::collections::HashSet::new(),
+            max_stacks: 0,
+        }
+    }
+
+    fn kind_nullable(kind: &GrammarKind, nullable: &std::collections::HashSet<String>) -> bool {
+        match kind {
+            GrammarKind::Term => false,
+            GrammarKind::Empty => true,
+            GrammarKind::Ref(name) => nullable.contains(name),
+            GrammarKind::Group(alts) => alts.iter().any(|s| Self::seq_nullable(s, nullable)),
+        }
+    }
+
+    fn seq_nullable(seq: &[GrammarItem], nullable: &std::collections::HashSet<String>) -> bool {
+        seq.iter().all(|it| it.optional || Self::kind_nullable(&it.kind, nullable))
+    }
+
+    /// The starts of a whole rule, and the reference chain below it.
+    fn rule(&mut self, name: &str) -> Result<(u64, usize), String> {
+        if let Some(&known) = self.memo.get(name) {
+            return Ok(known);
+        }
+        let Some(alts) = self.rules.get(name) else {
+            // Undefined: llama.cpp refuses it.
+            return Ok((1, 0));
+        };
+        if !self.busy.insert(name.to_string()) {
+            return Ok((1, 0));
+        }
+        let (starts, depth) = self.alternatives(alts)?;
+        self.busy.remove(name);
+        let depth = depth + 1;
+        if depth > GRAMMAR_MAX_REF_DEPTH {
+            return Err(format!("rule references chain deeper than {GRAMMAR_MAX_REF_DEPTH}"));
+        }
+        self.memo.insert(name.to_string(), (starts, depth));
+        Ok((starts, depth))
+    }
+
+    fn alternatives(&mut self, alts: &[Vec<GrammarItem>]) -> Result<(u64, usize), String> {
+        let mut starts = 0u64;
+        let mut depth = 0usize;
+        for seq in alts {
+            let (s, d) = self.sequence(seq)?;
+            starts = starts.saturating_add(s);
+            depth = depth.max(d);
+        }
+        Ok((starts, depth))
+    }
+
+    /// The starts of `seq` from its first item, recording the largest
+    /// count at any of its positions.
+    fn sequence(&mut self, seq: &[GrammarItem]) -> Result<(u64, usize), String> {
+        let mut rest = 1u64; // running off the end into the parent
+        let mut depth = 0usize;
+        for item in seq.iter().rev() {
+            let (own, d) = match &item.kind {
+                GrammarKind::Term => (1, 0),
+                GrammarKind::Empty => (0, 0),
+                GrammarKind::Ref(name) => self.rule(name)?,
+                GrammarKind::Group(alts) => self.alternatives(alts)?,
+            };
+            depth = depth.max(d);
+            let inner_nullable = Self::kind_nullable(&item.kind, &self.nullable);
+            let own = if inner_nullable { own.saturating_mul(item.copies) } else { own };
+            rest = if item.optional || inner_nullable { own.saturating_add(rest) } else { own };
+            self.max_stacks = self.max_stacks.max(rest);
+            if self.max_stacks > ASK_GRAMMAR_MAX_STACKS {
+                return Err(format!(
+                    "grammar can hold more than {ASK_GRAMMAR_MAX_STACKS} parse stacks at once"
+                ));
+            }
+        }
+        Ok((rest, depth))
+    }
+}
+
+/// `precheck_grammar`, returning an upper estimate of the elements the
+/// grammar expands to in llama.cpp's parser. Literals and character classes
+/// count a byte as an element (an escape or a range is fewer), a rule name
+/// or a token one; a group's size is counted wherever it is repeated, so
+/// nested repetitions multiply through (llama.cpp makes a group a rule of
+/// its own and references it, so the true size is usually smaller).
+pub(crate) fn measure_grammar(grammar: &str) -> Result<u64, String> {
+    grammar_measures(grammar).map(|(size, _)| size)
+}
+
+/// `measure_grammar`'s checks, returning the size and the
+/// `StackEstimate`.
+fn grammar_measures(grammar: &str) -> Result<(u64, u64), String> {
+    if grammar.trim().is_empty() {
+        return Err("empty grammar".into());
+    }
+    if grammar.len() > ASK_GRAMMAR_MAX_BYTES {
+        return Err(format!(
+            "grammar is {} bytes; the limit is {ASK_GRAMMAR_MAX_BYTES}",
+            grammar.len()
+        ));
+    }
+    if grammar.contains('\0') {
+        return Err("grammar contains a NUL byte".into());
+    }
+    let has_root = grammar.lines().any(|line| {
+        line.trim_start()
+            .strip_prefix("root")
+            .is_some_and(|rest| rest.trim_start().starts_with("::="))
+    });
+    if !has_root {
+        return Err("grammar has no `root ::=` rule".into());
+    }
+
+    #[derive(PartialEq)]
+    enum At {
+        Code,
+        Literal,
+        Class,
+        Comment,
+    }
+    let bytes = grammar.as_bytes();
+    let mut at = At::Code;
+    let mut i = 0;
+    // Elements in the rules already closed, the frames open now (the rule
+    // being read, then its groups), the rules and groups seen, and the
+    // length of the literal or class being read.
+    let mut done: u64 = 0;
+    let mut frames = vec![GrammarFrame::new()];
+    let mut rules = 0usize;
+    let mut run: u64 = 0;
+    // The rules read so far as items, and the name of the one being read
+    // (none before the first `::=`).
+    let mut named: std::collections::HashMap<String, Vec<Vec<GrammarItem>>> =
+        std::collections::HashMap::new();
+    let mut rule_name: Option<String> = None;
+    let too_many = |rules: usize| -> Result<(), String> {
+        if rules > GRAMMAR_MAX_RULES {
+            return Err(format!("grammar has more than {GRAMMAR_MAX_RULES} rules and groups"));
+        }
+        Ok(())
+    };
+    let too_wide = |f: &GrammarFrame| -> Result<(), String> {
+        if f.alternatives > GRAMMAR_MAX_ALTERNATIVES {
+            return Err(format!(
+                "a rule or group has {} alternatives; the limit is {GRAMMAR_MAX_ALTERNATIVES}",
+                f.alternatives
+            ));
+        }
+        Ok(())
+    };
+    // Close the innermost group into the item it is in its parent.
+    let close_group = |frames: &mut Vec<GrammarFrame>| -> Result<(), String> {
+        let group = frames.pop().expect("a group frame");
+        too_wide(&group)?;
+        let size = group.total().saturating_add(1);
+        let alts = group.into_alternatives();
+        frames
+            .last_mut()
+            .expect("the rule's frame")
+            .item(size, GrammarKind::Group(alts));
+        Ok(())
+    };
+    let check_size = |done: u64, frames: &[GrammarFrame]| -> Result<(), String> {
+        let size = frames.iter().fold(done, |sum, f| sum.saturating_add(f.total()));
+        if size > ASK_GRAMMAR_MAX_ELEMENTS {
+            return Err(format!(
+                "grammar expands to more than {ASK_GRAMMAR_MAX_ELEMENTS} elements"
+            ));
+        }
+        Ok(())
+    };
+    while i < bytes.len() {
+        let c = bytes[i];
+        match at {
+            At::Literal | At::Class => {
+                if c == b'\\' {
+                    run += 1;
+                    i += 2;
+                    continue;
+                }
+                if (at == At::Literal && c == b'"') || (at == At::Class && c == b']') {
+                    let kind = if run == 0 && at == At::Literal {
+                        GrammarKind::Empty
+                    } else {
+                        GrammarKind::Term
+                    };
+                    at = At::Code;
+                    frames.last_mut().expect("a frame").item(run, kind);
+                    check_size(done, &frames)?;
+                } else {
+                    run += 1;
+                }
+            }
+            At::Comment => {
+                if c == b'\n' || c == b'\r' {
+                    at = At::Code;
+                }
+            }
+            At::Code => match c {
+                b'"' => {
+                    at = At::Literal;
+                    run = 0;
+                }
+                b'[' => {
+                    at = At::Class;
+                    run = 0;
+                }
+                b'#' => at = At::Comment,
+                b'(' => {
+                    // llama.cpp makes a rule of every group: counted here,
+                    // not only when the next named rule starts.
+                    rules += 1;
+                    too_many(rules)?;
+                    if frames.len() > GRAMMAR_MAX_DEPTH {
+                        return Err(format!("groups nest deeper than {GRAMMAR_MAX_DEPTH}"));
+                    }
+                    frames.push(GrammarFrame::new());
+                }
+                b')' => {
+                    // A stray `)` is llama.cpp's to refuse.
+                    if frames.len() > 1 {
+                        close_group(&mut frames)?;
+                        check_size(done, &frames)?;
+                    }
+                }
+                b'|' => {
+                    let f = frames.last_mut().expect("a frame");
+                    f.next_alternative();
+                    too_wide(f)?;
+                }
+                b'.' => frames.last_mut().expect("a frame").item(1, GrammarKind::Term),
+                b'*' | b'+' | b'?' => {
+                    frames
+                        .last_mut()
+                        .expect("a frame")
+                        .repeat(if c == b'?' { 1 } else { 2 }, c != b'+');
+                    check_size(done, &frames)?;
+                }
+                c if c.is_ascii_alphanumeric() || c == b'_' || c == b'-' => {
+                    let start = i;
+                    while i < bytes.len()
+                        && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'_' || bytes[i] == b'-')
+                    {
+                        i += 1;
+                    }
+                    let mut k = i;
+                    while k < bytes.len() && (bytes[k] == b' ' || bytes[k] == b'\t') {
+                        k += 1;
+                    }
+                    if bytes[k..].starts_with(b"::=") {
+                        // A new rule: the one before it is finished.
+                        while frames.len() > 1 {
+                            close_group(&mut frames)?;
+                        }
+                        let rule = frames.pop().expect("the rule's frame");
+                        too_wide(&rule)?;
+                        done = done.saturating_add(rule.total());
+                        if let Some(name) = rule_name.take() {
+                            named.entry(name).or_default().extend(rule.into_alternatives());
+                        }
+                        rule_name = Some(grammar[start..i].to_string());
+                        frames.push(GrammarFrame::new());
+                        rules += 1;
+                        too_many(rules)?;
+                        i = k + 3;
+                    } else {
+                        debug_assert!(i > start);
+                        frames
+                            .last_mut()
+                            .expect("a frame")
+                            .item(1, GrammarKind::Ref(grammar[start..i].to_string()));
+                    }
+                    continue;
+                }
+                b'{' => {
+                    let close = grammar[i..]
+                        .find('}')
+                        .map(|k| i + k)
+                        .ok_or_else(|| "a `{` is never closed".to_string())?;
+                    let inner = &grammar[i + 1..close];
+                    let (lo, hi) = match inner.split_once(',') {
+                        Some((lo, hi)) => (lo.trim(), Some(hi.trim())),
+                        None => (inner.trim(), None),
+                    };
+                    let number = |s: &str| -> Result<u64, String> {
+                        if s.is_empty() || !s.bytes().all(|b| b.is_ascii_digit()) {
+                            return Err(format!("`{{{inner}}}` is not a repetition"));
+                        }
+                        s.parse::<u64>()
+                            .ok()
+                            .filter(|&n| n <= GRAMMAR_MAX_REPEAT)
+                            .ok_or_else(|| format!("`{{{inner}}}` repeats too often"))
+                    };
+                    let min = number(lo)?;
+                    // `{m}` is m copies, `{m,}` m and one more rule, `{m,n}` n.
+                    let copies = match hi {
+                        None => min,
+                        Some(h) if h.is_empty() => min + 1,
+                        Some(h) => {
+                            let max = number(h)?;
+                            if max < min {
+                                return Err(format!(
+                                    "`{{{inner}}}`: the maximum is below the minimum"
+                                ));
+                            }
+                            max
+                        }
+                    };
+                    frames.last_mut().expect("a frame").repeat(copies, min == 0);
+                    check_size(done, &frames)?;
+                    i = close;
+                }
+                _ => {}
+            },
+        }
+        i += 1;
+    }
+    // An unclosed literal or group is llama.cpp's to refuse; its size
+    // still counts.
+    if at == At::Literal || at == At::Class {
+        frames.last_mut().expect("a frame").item(run, GrammarKind::Term);
+    }
+    while frames.len() > 1 {
+        close_group(&mut frames)?;
+    }
+    too_wide(&frames[0])?;
+    too_many(rules)?;
+    check_size(done, &frames)?;
+    let rule = frames.pop().expect("the rule's frame");
+    let size = done.saturating_add(rule.total());
+    if let Some(name) = rule_name.take() {
+        named.entry(name).or_default().extend(rule.into_alternatives());
+    }
+
+    let mut stacks = StackEstimate::new(&named);
+    let mut names: Vec<&String> = named.keys().collect();
+    names.sort();
+    for name in names {
+        stacks.rule(name)?;
+    }
+    Ok((size, stacks.max_stacks))
+}
+
+/// The system turn up to the user's content, ChatML as `chat_prompt`
+/// builds it. Static from turn to turn: this is what the worker keeps.
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub(crate) fn ask_prompt_head(prefix: &str) -> String {
+    let prefix = prefix.trim();
+    let mut head = String::with_capacity(ASK_SYSTEM_PROMPT.len() + prefix.len() + 64);
+    head.push_str("<|im_start|>system\n");
+    head.push_str(ASK_SYSTEM_PROMPT);
+    if !prefix.is_empty() {
+        head.push_str("\n\n");
+        head.push_str(prefix);
+    }
+    head.push_str("\n\n/no_think<|im_end|>\n<|im_start|>user\n");
+    head
+}
+
+/// The turn's own part: context, question, and the non-thinking assistant
+/// turn `chat_prompt` uses.
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub(crate) fn ask_prompt_tail(context: &str, question: &str) -> String {
+    let context = context.trim();
+    let mut tail = String::with_capacity(context.len() + question.len() + 96);
+    if !context.is_empty() {
+        tail.push_str(context);
+        tail.push_str("\n\n");
+    }
+    tail.push_str("Question: ");
+    tail.push_str(question.trim());
+    tail.push_str("<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n");
+    tail
+}
+
+/// Answer one Ask turn with the resident model.
+///
+/// One model call a turn, no tool loop (DESIGN 5.5). The grammar is checked
+/// before anything else, so a malformed one is an `Err` even with no model.
+/// Takes the engine mutex only to clone the worker handle, like `generate`.
+pub fn ask(handle: &CoachHandle, req: &AskRequest) -> Result<AskOutcome, String> {
+    if let Some(grammar) = req.grammar.as_deref() {
+        precheck_grammar(grammar).map_err(|e| format!("{ASK_GRAMMAR_ERROR}: {e}"))?;
+    }
+    if req.question.trim().is_empty() {
+        return Err("an ask needs a question".into());
+    }
+    let deadline = std::time::Instant::now() + req.deadline();
+    let ticket = cancel::register(req.generation_id)?;
+    if ticket.is_cancelled() {
+        return Ok(AskOutcome::Cancelled);
+    }
+
+    #[cfg(feature = "coach-llm")]
+    {
+        let worker = { handle.lock()?.llm.clone() };
+        let Some(worker) = worker else {
+            return Ok(AskOutcome::NoModel);
+        };
+        let stop = AskStop { cancel: ticket.flag().clone(), deadline };
+        match worker.ask(req, &stop) {
+            Ok(a) => Ok(ask_outcome(a.end, a.text, a.prefix_cached, a.prompt_ms, a.total_ms)),
+            Err(llm::AskError::Cancelled) => Ok(AskOutcome::Cancelled),
+            Err(llm::AskError::Expired) => Ok(AskOutcome::TimedOut),
+            Err(llm::AskError::WorkerGone) => {
+                handle.status().clear_residency("inference thread is gone");
+                Ok(AskOutcome::NoModel)
+            }
+            Err(llm::AskError::Failed(e)) => Err(e),
+        }
+    }
+    #[cfg(not(feature = "coach-llm"))]
+    {
+        let _ = (handle, ticket, deadline);
+        Ok(AskOutcome::NoModel)
+    }
 }
 
 /// Per-call generation cap (ROADMAP §0.3 / T04).
@@ -790,6 +1735,9 @@ fn generate_template(kind: GenKind, context: &str) -> Result<String, String> {
             return Err("no drill narration without a model".to_string());
         }
         GenKind::Report => {}
+        // The Ask panel's rule-made answer lives in TypeScript, beside the
+        // tools; there is nothing here to fall back to.
+        GenKind::Ask => return Err(ASK_NOT_THROUGH_GENERATE.to_string()),
     }
 
     // Mini-report
@@ -1176,8 +2124,10 @@ pub fn lower_current_thread_priority() {}
 
 #[cfg(feature = "coach-llm")]
 mod llm {
+    use std::collections::HashMap;
     use std::path::{Path, PathBuf};
-    use std::sync::mpsc::{channel, sync_channel, Receiver, Sender, SyncSender};
+    use std::sync::mpsc::{channel, sync_channel, Receiver, RecvTimeoutError, Sender, SyncSender};
+    use std::time::{Duration, Instant};
 
     use llama_cpp_2::context::params::LlamaContextParams;
     use llama_cpp_2::context::LlamaContext;
@@ -1186,6 +2136,8 @@ mod llm {
     use llama_cpp_2::model::params::LlamaModelParams;
     use llama_cpp_2::model::LlamaModel;
     use llama_cpp_2::sampling::LlamaSampler;
+    use llama_cpp_2::token::data::LlamaTokenData;
+    use llama_cpp_2::token::data_array::LlamaTokenDataArray;
     use llama_cpp_2::token::LlamaToken;
 
     /// ROADMAP §0.3: `n_ctx` 4096. Qwen3 trains at 32k but the coach's
@@ -1334,12 +2286,7 @@ mod llm {
     /// Qwen3 has no such tokens, so they tokenised as literal text and
     /// showed up in the model's output as template artifacts.
     fn build_prompt(context: &str) -> String {
-        format!(
-            "<|im_start|>system\n{system}\n\n/no_think<|im_end|>\n\
-             <|im_start|>user\n{context}<|im_end|>\n\
-             <|im_start|>assistant\n<think>\n\n</think>\n\n",
-            system = super::SYSTEM_PROMPT,
-        )
+        super::chat_prompt(context)
     }
 
     // -----------------------------------------------------------------
@@ -1371,6 +2318,70 @@ mod llm {
         Failed(String),
     }
 
+    /// Why an Ask job produced no answer. `Cancelled` is its own result,
+    /// never an error: the player pressed Stop, or the turn timed out.
+    #[derive(Debug)]
+    pub enum AskError {
+        Cancelled,
+        /// The turn's deadline passed (`AskRequest::deadline_ms`).
+        Expired,
+        WorkerGone,
+        Failed(String),
+    }
+
+    impl From<super::Halt> for AskError {
+        fn from(h: super::Halt) -> Self {
+            match h {
+                super::Halt::Cancelled => AskError::Cancelled,
+                super::Halt::Expired => AskError::Expired,
+            }
+        }
+    }
+
+    /// One Ask job's result, before `super::ask` shapes it for the caller.
+    #[derive(Debug)]
+    pub struct AskGenerated {
+        pub text: String,
+        /// Kept for a tokens/second figure, as `Generated::tokens`.
+        #[allow(dead_code)]
+        pub tokens: usize,
+        pub end: super::AskEnd,
+        pub prefix_cached: bool,
+        pub prompt_ms: u32,
+        pub total_ms: u32,
+    }
+
+    /// What the worker needs for an Ask job, built on the caller's thread.
+    struct AskJob {
+        /// `super::ask_prompt_head`: the part the prefix cache keeps.
+        head: String,
+        /// `super::ask_prompt_tail`: decoded every turn.
+        tail: String,
+        /// The context alone, to hold it to its budget in tokens.
+        context: String,
+        mode: super::AskMode,
+        grammar: Option<String>,
+    }
+
+    /// The prompt is decoded this many tokens at a time so a cancel lands
+    /// between chunks rather than after the whole prompt (DESIGN 9.4).
+    pub(super) const ASK_DECODE_CHUNK: usize = 256;
+
+    /// How often a caller waiting on a queued or running Ask looks at its
+    /// cancel flag. The worker checks the same flag per chunk and per token;
+    /// this is what lets a cancel return at once even while another kind's
+    /// generation still holds the worker.
+    const ASK_CANCEL_POLL: Duration = Duration::from_millis(20);
+
+    /// Under a grammar, this many whitespace-only tokens in a row end the
+    /// answer: the grammar's `ws` should be bounded, and when the caller's
+    /// is not, this is the bound (DESIGN 9.4, "whitespace bounded").
+    pub(super) const ASK_MAX_WHITESPACE_RUN: usize = 6;
+
+    /// The sequence that holds the Ask kind's static prefix between turns.
+    /// Sequence 0 is the one every generation decodes into.
+    const ASK_PREFIX_SEQ: i32 = 1;
+
     impl std::fmt::Display for GenError {
         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
             match self {
@@ -1385,6 +2396,14 @@ mod llm {
             context: String,
             max_tokens: usize,
             reply: SyncSender<Result<Generated, String>>,
+        },
+        /// One Ask turn. `stop` is the caller's flag on the cancel board and
+        /// the turn's deadline, read before the job starts, between prompt
+        /// chunks and per token.
+        Ask {
+            job: AskJob,
+            stop: super::AskStop,
+            reply: SyncSender<Result<AskGenerated, AskError>>,
         },
         /// Swap in different weights *on the worker's own thread*.
         ///
@@ -1497,6 +2516,42 @@ mod llm {
                 .recv()
                 .map_err(|_| GenError::WorkerGone)?
                 .map_err(GenError::Failed)
+        }
+
+        /// One Ask turn. Waits for the answer, but looks at `stop` every
+        /// `ASK_CANCEL_POLL` while it does, so a cancelled or expired turn
+        /// returns at once even when the job is still queued behind another
+        /// kind's generation; the worker then skips it when it gets there.
+        pub fn ask(
+            &self,
+            req: &super::AskRequest,
+            stop: &super::AskStop,
+        ) -> Result<AskGenerated, AskError> {
+            let (reply_tx, reply_rx) = sync_channel::<Result<AskGenerated, AskError>>(1);
+            let jobs = self.jobs.as_ref().ok_or(AskError::WorkerGone)?;
+            jobs.send(Job::Ask {
+                job: AskJob {
+                    head: super::ask_prompt_head(&req.prefix),
+                    tail: super::ask_prompt_tail(&req.context, &req.question),
+                    context: req.context.clone(),
+                    mode: req.mode,
+                    grammar: req.grammar.clone(),
+                },
+                stop: stop.clone(),
+                reply: reply_tx,
+            })
+            .map_err(|_| AskError::WorkerGone)?;
+            loop {
+                match reply_rx.recv_timeout(ASK_CANCEL_POLL) {
+                    Ok(result) => return result,
+                    Err(RecvTimeoutError::Timeout) => {
+                        if let Some(halt) = stop.check() {
+                            return Err(halt.into());
+                        }
+                    }
+                    Err(RecvTimeoutError::Disconnected) => return Err(AskError::WorkerGone),
+                }
+            }
         }
 
         /// Load different weights on this worker's thread and swap them in
@@ -1629,9 +2684,18 @@ mod llm {
             // is raised to the full context so a long prompt decodes in a
             // single pass (the default is 2048, below our `n_ctx`).
             let n_threads = inference_threads();
+            // Two sequences in ONE unified cache of `CONTEXT_SIZE` cells:
+            // sequence 0 is where every generation runs, as before; sequence
+            // 1 holds the Ask kind's static prefix between turns
+            // (`AskPrefix`). Unified, each sequence may still use the whole
+            // window (`n_ctx_seq == n_ctx`), the KV buffer is the same size
+            // as with one sequence, and copying the prefix into sequence 0
+            // is a bookkeeping operation on shared cells, not a data copy.
             let ctx_params = LlamaContextParams::default()
                 .with_n_ctx(std::num::NonZero::new(CONTEXT_SIZE))
                 .with_n_batch(CONTEXT_SIZE)
+                .with_n_seq_max(2)
+                .with_kv_unified(true)
                 .with_n_threads(n_threads)
                 .with_n_threads_batch(n_threads);
             let mut ctx = match model.new_context(&backend, ctx_params) {
@@ -1650,6 +2714,11 @@ mod llm {
             // that context's cache: rebuilding the context on a model swap
             // drops both together.
             let mut resident: Vec<LlamaToken> = Vec::new();
+            // The Ask kind's cached prefix and compiled grammars. Both
+            // belong to this context and this model: rebuilt with them on a
+            // swap, gone with the thread on an unload.
+            let mut ask_prefix = AskPrefix::default();
+            let mut grammars = GrammarCache::default();
 
             if let Some(ready) = ready.take() {
                 if ready.send(Ok(model_display_name(&model))).is_err() {
@@ -1669,8 +2738,30 @@ mod llm {
                         max_tokens,
                         reply,
                     } => {
-                        let out =
-                            infer(&model, &mut ctx, &mut batch, &mut resident, &context, max_tokens);
+                        let out = infer(
+                            &model,
+                            &mut ctx,
+                            &mut batch,
+                            &mut resident,
+                            &mut ask_prefix,
+                            &context,
+                            max_tokens,
+                        );
+                        let _ = reply.send(out);
+                    }
+                    Job::Ask { job, stop, reply } => {
+                        let out = infer_ask(
+                            &model,
+                            &mut ctx,
+                            &mut batch,
+                            &mut resident,
+                            &mut ask_prefix,
+                            &mut grammars,
+                            &job,
+                            &stop,
+                        );
+                        // The caller may have stopped waiting (cancelled
+                        // while queued); a send to nobody is fine.
                         let _ = reply.send(out);
                     }
                     Job::Reload { path, reply } => match load_with_fallback(&backend, &path) {
@@ -1694,6 +2785,11 @@ mod llm {
                 // `ctx` borrows `model`, so it has to die before the
                 // binding is replaced.
                 Some(new_model) => {
+                    // The grammars hold the old model's vocabulary by raw
+                    // pointer, which the borrow checker cannot see: they go
+                    // first, explicitly, with the context.
+                    drop(grammars);
+                    drop(ask_prefix);
                     drop(ctx);
                     model = new_model;
                 }
@@ -1725,6 +2821,7 @@ mod llm {
         ctx: &mut LlamaContext<'_>,
         batch: &mut LlamaBatch,
         resident: &mut Vec<LlamaToken>,
+        ask_prefix: &mut AskPrefix,
         context: &str,
         max_tokens: usize,
     ) -> Result<Generated, String> {
@@ -1740,6 +2837,10 @@ mod llm {
         if tokens.is_empty() {
             return Err("Tokenizer produced an empty prompt".into());
         }
+        // The Ask kind's prefix sits in sequence 1 of the same cache. If it
+        // and this generation might not both fit, the prefix goes (the next
+        // Ask decodes it again); this generation never loses room to it.
+        ask_prefix.make_room(ctx, tokens.len() + max_tokens);
 
         // T04b: reuse the KV cells the previous call already evaluated.
         //
@@ -1877,6 +2978,451 @@ mod llm {
             text: cleaned,
             tokens: output_tokens.len(),
             hit_eog,
+        })
+    }
+
+    // -----------------------------------------------------------------
+    // The Ask kind
+    // -----------------------------------------------------------------
+
+    /// The Ask kind's static prefix, decoded once into `ASK_PREFIX_SEQ`
+    /// and kept there between turns.
+    ///
+    /// The `resident` longest-common-prefix reuse in `infer` already skips
+    /// a shared head between two consecutive calls, but it lives in
+    /// sequence 0, so one greeting or report between two questions costs
+    /// the next question the whole prefix again (some 900 tokens of tool
+    /// list, seconds on a CPU). A sequence of its own survives that. The
+    /// key is the tokens, not the string, for the reason `infer` gives.
+    #[derive(Default)]
+    pub(super) struct AskPrefix {
+        tokens: Option<Vec<LlamaToken>>,
+    }
+
+    impl AskPrefix {
+        fn len(&self) -> usize {
+            self.tokens.as_ref().map_or(0, Vec::len)
+        }
+
+        fn holds(&self, head: &[LlamaToken]) -> bool {
+            self.tokens.as_deref() == Some(head)
+        }
+
+        /// Drop the cached prefix, cells and all.
+        fn forget(&mut self, ctx: &mut LlamaContext<'_>) {
+            if self.tokens.take().is_some() {
+                // A whole-sequence removal cannot fail (llama.cpp only
+                // refuses partial ones); the `Result` is the id conversion.
+                let _ = ctx.clear_kv_cache_seq(Some(ASK_PREFIX_SEQ as u32), None, None);
+            }
+        }
+
+        /// Make sure `need` more cells fit beside the cached prefix.
+        fn make_room(&mut self, ctx: &mut LlamaContext<'_>, need: usize) {
+            if self.len() > 0 && self.len() + need >= CONTEXT_SIZE as usize {
+                self.forget(ctx);
+            }
+        }
+    }
+
+    /// Compiled grammars, one per distinct string, at most
+    /// `GRAMMAR_CACHE_MAX`. A sampler is taken out for a generation and put
+    /// back only if it ended healthy: one whose `accept` threw has an empty
+    /// stack inside llama.cpp, and the next `apply` on it would abort.
+    ///
+    /// "Compiled once": `LlamaSampler::grammar` parses and checks the GBNF
+    /// (and reports a bad one) once per string. Reuse goes through
+    /// `LlamaSampler::reset`, the only way back to the start state the
+    /// crate offers at 0.1.146 (it has no `clone`); llama.cpp's reset
+    /// re-reads the rules from the string it kept, which for the grammars
+    /// the registry writes costs well under a millisecond.
+    #[derive(Default)]
+    pub(super) struct GrammarCache {
+        /// Each sampler with its grammar's `measure_grammar` size.
+        compiled: HashMap<String, (LlamaSampler, u64)>,
+    }
+
+    const GRAMMAR_CACHE_MAX: usize = 8;
+    /// The cache's total, in `measure_grammar` elements: four grammars at
+    /// the per-grammar cap, about 3 MB of parsed rules held at the most.
+    /// Every grammar in it is parsed again on its next `reset()`, so this
+    /// also bounds what a reuse can allocate.
+    pub(super) const GRAMMAR_CACHE_MAX_ELEMENTS: u64 = 4 * super::ASK_GRAMMAR_MAX_ELEMENTS;
+
+    impl GrammarCache {
+        /// The sampler for `source` and its size: the cached one reset to
+        /// the start, or a new one compiled.
+        pub(super) fn take(
+            &mut self,
+            model: &LlamaModel,
+            source: &str,
+        ) -> Result<(LlamaSampler, u64), String> {
+            if let Some((mut sampler, size)) = self.compiled.remove(source) {
+                sampler.reset();
+                return Ok((sampler, size));
+            }
+            let size = super::measure_grammar(source)?;
+            let sampler = LlamaSampler::grammar(model, source, "root").map_err(|e| match e {
+                llama_cpp_2::GrammarError::RootNotFound => "no `root` rule".to_string(),
+                llama_cpp_2::GrammarError::NullGrammar => {
+                    "llama.cpp could not parse it (see the log for where)".to_string()
+                }
+                other => other.to_string(),
+            })?;
+            Ok((sampler, size))
+        }
+
+        /// Keep a healthy sampler for the next turn. Past
+        /// `GRAMMAR_CACHE_MAX` grammars, or `GRAMMAR_CACHE_MAX_ELEMENTS` in
+        /// all, the others are dropped first.
+        pub(super) fn put_back(&mut self, source: String, sampler: LlamaSampler, size: u64) {
+            self.compiled.remove(&source);
+            if self.compiled.len() >= GRAMMAR_CACHE_MAX
+                || self.total().saturating_add(size) > GRAMMAR_CACHE_MAX_ELEMENTS
+            {
+                self.compiled.clear();
+            }
+            self.compiled.insert(source, (sampler, size));
+        }
+
+        /// The sizes of the grammars held, in `measure_grammar` elements.
+        pub(super) fn total(&self) -> u64 {
+            self.compiled.values().map(|(_, size)| size).sum()
+        }
+
+        #[cfg(test)]
+        pub(super) fn len(&self) -> usize {
+            self.compiled.len()
+        }
+    }
+
+    /// One sampling step's verdict.
+    #[derive(Debug, PartialEq)]
+    pub(super) enum Step {
+        Token(LlamaToken),
+        /// End of generation, allowed here (by the grammar, if any).
+        End,
+        /// Nothing can be sampled. `poisoned` when the grammar's state
+        /// inside llama.cpp is no longer safe to use.
+        DeadEnd { why: String, poisoned: bool },
+    }
+
+    fn candidates(logits: &[f32]) -> LlamaTokenDataArray {
+        LlamaTokenDataArray::from_iter(
+            logits
+                .iter()
+                .enumerate()
+                .map(|(i, &l)| LlamaTokenData::new(LlamaToken::new(i as i32), l, 0.0)),
+            false,
+        )
+    }
+
+    /// Whether the grammar, in its current state, lets `token` come next.
+    fn grammar_allows(grammar: &LlamaSampler, token: LlamaToken) -> bool {
+        let mut one = LlamaTokenDataArray::new(vec![LlamaTokenData::new(token, 1.0, 0.0)], false);
+        one.apply_sampler(grammar);
+        one.data.first().is_some_and(|d| d.logit().is_finite())
+    }
+
+    /// Pick the next token from `logits`, under `grammar` if there is one,
+    /// without ever letting llama.cpp throw or abort across the FFI.
+    ///
+    /// Two places in llama.cpp's grammar code end the process rather than
+    /// return an error: `llama_grammar_accept_impl` calls `GGML_ABORT` when
+    /// it is handed an end-of-generation token the grammar does not allow
+    /// yet, and `llama_grammar_reject_candidates` asserts on an empty stack,
+    /// which is the state an `accept` leaves behind when it throws. And
+    /// `llama_sampler_sample` (what `LlamaSampler::sample` calls) runs
+    /// `accept` with no `try` around it, so a rejected token there is a C++
+    /// exception unwinding into Rust: an abort. So, with a grammar:
+    ///
+    ///   1. never `sample` with the grammar in the chain: apply it to a
+    ///      candidate array (`apply` neither throws nor aborts while the
+    ///      stack is non-empty), then let `chain` pick;
+    ///   2. every pick is re-checked against the grammar, and a pick it
+    ///      does not allow is a dead end, not an `accept`;
+    ///   3. an end-of-generation pick ends the answer and is never handed
+    ///      to `accept` at all (that is the abort above);
+    ///   4. everything else goes through `try_accept`, the crate's wrapper
+    ///      that catches the exception; a caught one poisons the grammar.
+    ///
+    /// When the grammar is complete it rejects every token but
+    /// end-of-generation, so 1 and 3 end the answer; if the model gives
+    /// end-of-generation no weight at all, 1 finds nothing allowed and it is
+    /// a dead end. Either way the process lives: the fuzz test holds this.
+    ///
+    /// The fast path is llama.cpp's own (`common_sampler_sample`): pick
+    /// without the grammar, and only if the grammar refuses that pick,
+    /// apply it to the whole vocabulary and pick again. Most tokens of a
+    /// choice are forced and the model agrees with the grammar, so most
+    /// steps cost one candidate's check rather than 150,000.
+    pub(super) fn sample_step(
+        model: &LlamaModel,
+        logits: &[f32],
+        chain: &mut LlamaSampler,
+        grammar: Option<&mut LlamaSampler>,
+    ) -> Step {
+        let mut free = candidates(logits);
+        free.apply_sampler(chain);
+        let Some(first) = free.selected_token() else {
+            return Step::DeadEnd {
+                why: "the sampler picked nothing".into(),
+                poisoned: false,
+            };
+        };
+        let Some(grammar) = grammar else {
+            return if model.is_eog_token(first) {
+                Step::End
+            } else {
+                Step::Token(first)
+            };
+        };
+
+        let token = if grammar_allows(grammar, first) {
+            first
+        } else {
+            let mut held = candidates(logits);
+            held.apply_sampler(grammar);
+            if !held.data.iter().any(|d| d.logit().is_finite()) {
+                return Step::DeadEnd {
+                    why: "the grammar allows no token the model can give".into(),
+                    poisoned: false,
+                };
+            }
+            held.apply_sampler(chain);
+            match held.selected_token() {
+                Some(t) if grammar_allows(grammar, t) => t,
+                _ => {
+                    return Step::DeadEnd {
+                        why: "the sampler picked a token the grammar refuses".into(),
+                        poisoned: false,
+                    }
+                }
+            }
+        };
+
+        if model.is_eog_token(token) {
+            return Step::End;
+        }
+        match grammar.try_accept(token) {
+            Ok(()) => Step::Token(token),
+            Err(e) => Step::DeadEnd {
+                why: format!("the grammar refused an allowed token ({e})"),
+                poisoned: true,
+            },
+        }
+    }
+
+    /// Decode `tokens` into `seq` from position `start`, `ASK_DECODE_CHUNK`
+    /// at a time, looking at `stop` before each chunk. Logits only for
+    /// the last token, and only when `logits_last`.
+    fn decode_chunks(
+        ctx: &mut LlamaContext<'_>,
+        batch: &mut LlamaBatch,
+        tokens: &[LlamaToken],
+        start: usize,
+        seq: i32,
+        logits_last: bool,
+        stop: &super::AskStop,
+    ) -> Result<(), AskError> {
+        for (c, chunk) in tokens.chunks(ASK_DECODE_CHUNK).enumerate() {
+            if let Some(halt) = stop.check() {
+                return Err(halt.into());
+            }
+            batch.clear();
+            for (j, &token) in chunk.iter().enumerate() {
+                let i = c * ASK_DECODE_CHUNK + j;
+                let last = logits_last && i + 1 == tokens.len();
+                batch
+                    .add(token, (start + i) as i32, &[seq], last)
+                    .map_err(|e| AskError::Failed(format!("Batch add failed: {e}")))?;
+            }
+            ctx.decode(batch)
+                .map_err(|e| AskError::Failed(format!("Decode failed: {e}")))?;
+        }
+        Ok(())
+    }
+
+    fn millis(since: Instant) -> u32 {
+        since.elapsed().as_millis().min(u32::MAX as u128) as u32
+    }
+
+    /// One Ask turn against the resident context.
+    #[allow(clippy::too_many_arguments)]
+    fn infer_ask(
+        model: &LlamaModel,
+        ctx: &mut LlamaContext<'_>,
+        batch: &mut LlamaBatch,
+        resident: &mut Vec<LlamaToken>,
+        prefix: &mut AskPrefix,
+        grammars: &mut GrammarCache,
+        job: &AskJob,
+        stop: &super::AskStop,
+    ) -> Result<AskGenerated, AskError> {
+        let started = Instant::now();
+        // Cancelled or expired while it was queued: nothing touched.
+        if let Some(halt) = stop.check() {
+            return Err(halt.into());
+        }
+        let failed = |what: &str, e: &dyn std::fmt::Display| AskError::Failed(format!("{what}: {e}"));
+
+        let head = model
+            .str_to_token(&job.head, llama_cpp_2::model::AddBos::Always)
+            .map_err(|e| failed("Tokenization failed", &e))?;
+        let tail = model
+            .str_to_token(&job.tail, llama_cpp_2::model::AddBos::Never)
+            .map_err(|e| failed("Tokenization failed", &e))?;
+        let context_tokens = model
+            .str_to_token(&job.context, llama_cpp_2::model::AddBos::Never)
+            .map_err(|e| failed("Tokenization failed", &e))?
+            .len();
+        if context_tokens > super::ASK_CONTEXT_MAX_TOKENS {
+            return Err(AskError::Failed(format!(
+                "the context is {context_tokens} tokens; an ask allows {}",
+                super::ASK_CONTEXT_MAX_TOKENS
+            )));
+        }
+        let max_tokens = job.mode.max_tokens();
+        if tail.is_empty() || head.len() + tail.len() + max_tokens >= CONTEXT_SIZE as usize {
+            return Err(AskError::Failed("Prompt too long for context window".into()));
+        }
+
+        // The grammar before any decoding, so a bad one costs nothing.
+        let (mut grammar, grammar_size) = match job.grammar.as_deref() {
+            Some(source) => {
+                let (g, size) = grammars.take(model, source).map_err(|e| {
+                    AskError::Failed(format!("{}: {e}", super::ASK_GRAMMAR_ERROR))
+                })?;
+                (Some(g), size)
+            }
+            None => (None, 0),
+        };
+
+        // Sequence 0 is rebuilt for this turn whatever happens, so its
+        // cells are freed first: a long report left there must not crowd
+        // out the prefix's decode below. `resident` stays empty until the
+        // whole prompt is in, so a cancel or a failure below leaves the next
+        // `infer` re-deciding from nothing rather than trusting cells that
+        // were never filled.
+        resident.clear();
+        ctx.clear_kv_cache_seq(Some(0), None, None)
+            .map_err(|e| failed("KV cache reset failed", &e))?;
+
+        // The static prefix: decoded into its own sequence unless it is
+        // already there. `YAMES_LLM_NO_PREFIX_CACHE=1` turns this off too,
+        // so the saving can be measured A/B on one binary.
+        let prefix_cached = !prefix_cache_disabled() && prefix.holds(&head);
+        if !prefix_cached {
+            prefix.forget(ctx);
+            if let Err(e) = decode_chunks(ctx, batch, &head, 0, ASK_PREFIX_SEQ, false, stop) {
+                // Half a prefix in sequence 1 is no prefix at all.
+                let _ = ctx.clear_kv_cache_seq(Some(ASK_PREFIX_SEQ as u32), None, None);
+                return Err(e);
+            }
+            prefix.tokens = Some(head.clone());
+        }
+
+        // Sequence 0 becomes the prefix plus this turn.
+        if let Err(e) = ctx.copy_kv_cache_seq(ASK_PREFIX_SEQ, 0, None, None) {
+            prefix.forget(ctx);
+            return Err(failed("KV cache copy failed", &e));
+        }
+        decode_chunks(ctx, batch, &tail, head.len(), 0, true, stop)?;
+        resident.extend_from_slice(&head);
+        resident.extend_from_slice(&tail);
+        let prompt_ms = millis(started);
+
+        // A choice wants the model's best pick under the grammar, every
+        // time; prose keeps the coach's usual temperature (ROADMAP 0.3).
+        let mut chain = match job.mode {
+            super::AskMode::Choice => LlamaSampler::greedy(),
+            super::AskMode::Prose => LlamaSampler::chain_simple([
+                LlamaSampler::temp(0.7),
+                LlamaSampler::top_p(0.9, 1),
+                LlamaSampler::dist(42),
+            ]),
+        };
+
+        let mut decoder = encoding_rs::UTF_8.new_decoder();
+        let mut text = String::new();
+        let mut produced = 0usize;
+        // Until the model ends it, an answer that stops is a truncated one.
+        let mut end = super::AskEnd::Truncated(super::TruncatedBy::Budget);
+        let mut whitespace_run = 0usize;
+        let mut poisoned: Option<String> = None;
+        let position = head.len() + tail.len();
+
+        for _ in 0..max_tokens {
+            // Per token: the player's cancel and the turn's deadline. One
+            // `sample_step` between two checks is not interruptible (see
+            // `measure_grammar` for what bounds it).
+            if let Some(halt) = stop.check() {
+                // The grammar is mid-answer; `take` resets it next time.
+                if let (Some(source), Some(g)) = (job.grammar.clone(), grammar.take()) {
+                    grammars.put_back(source, g, grammar_size);
+                }
+                return Err(halt.into());
+            }
+            let logits = ctx.get_logits_ith(batch.n_tokens() - 1);
+            let token = match sample_step(model, logits, &mut chain, grammar.as_mut()) {
+                Step::Token(t) => t,
+                Step::End => {
+                    end = super::AskEnd::Finished;
+                    break;
+                }
+                // The grammar's state in llama.cpp is broken: llama.cpp
+                // allowed a token and then refused it. Reported as the
+                // grammar's error, since only a grammar construct can
+                // bring that about.
+                Step::DeadEnd { why, poisoned: true } => {
+                    poisoned = Some(why);
+                    break;
+                }
+                // A valid grammar the model cannot continue under: an
+                // outcome, not the caller's bug.
+                Step::DeadEnd { why, poisoned: false } => {
+                    end = super::AskEnd::DeadEnd(why);
+                    break;
+                }
+            };
+            produced += 1;
+            let piece = model
+                .token_to_piece(token, &mut decoder, false, None)
+                .map_err(|e| failed("Token decode failed", &e))?;
+            if grammar.is_some() && !piece.is_empty() && piece.trim().is_empty() {
+                whitespace_run += 1;
+            } else {
+                whitespace_run = 0;
+            }
+            text.push_str(&piece);
+            if whitespace_run >= ASK_MAX_WHITESPACE_RUN {
+                end = super::AskEnd::Truncated(super::TruncatedBy::Whitespace);
+                break;
+            }
+
+            batch.clear();
+            batch
+                .add(token, (position + produced - 1) as i32, &[0], true)
+                .map_err(|e| failed("Batch add failed", &e))?;
+            ctx.decode(batch).map_err(|e| failed("Decode failed", &e))?;
+        }
+
+        if let (Some(source), Some(g)) = (job.grammar.clone(), grammar.take()) {
+            if poisoned.is_none() {
+                grammars.put_back(source, g, grammar_size);
+            }
+        }
+        if let Some(why) = poisoned {
+            return Err(AskError::Failed(format!("{}: {why}", super::ASK_GRAMMAR_ERROR)));
+        }
+
+        Ok(AskGenerated {
+            text: super::strip_think(&text),
+            tokens: produced,
+            end,
+            prefix_cached,
+            prompt_ms,
+            total_ms: millis(started),
         })
     }
 
@@ -2032,6 +3578,456 @@ mod tests {
         // The drill kind has no template to fall back to — the JS side
         // owns that line and emits it when this call fails.
         assert!(generate(&handle, GenKind::Drill, "tempo went UP").is_err());
+    }
+}
+
+// ---------------------------------------------------------------------------
+// The Ask kind, without a model (every build)
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod ask_tests {
+    use super::*;
+
+    /// The registry's generated grammar (`scripts/coach-blocks.mjs`): the
+    /// shape every Ask grammar will have.
+    const COACH_ANSWER_GBNF: &str = include_str!("../../src/coach/blocks/coach-answer.gbnf");
+
+    /// Leg c3a: the six existing kinds go to the model exactly as before.
+    /// Pinned byte for byte, system text included: a change here changes
+    /// what every shipped coach line is generated from, and must be made
+    /// on purpose, not as a side effect of the Ask kind.
+    #[test]
+    fn the_existing_kinds_prompt_is_byte_identical() {
+        let expected = "<|im_start|>system\n\
+You are a practice coach for a metronome app. You help musicians improve their timing and rhythm.\n\
+\n\
+Rules:\n\
+- Keep responses concise (1-3 sentences max)\n\
+- Only discuss timing, rhythm, practice, and the session data you're given\n\
+- Be encouraging but honest about areas to improve\n\
+- Never make up data \u{2014} only reference metrics provided to you\n\
+- Use natural, conversational language like a supportive instructor\n\
+- When commenting on timing: \"early\" means ahead of the beat, \"late\" means behind\n\
+- Reference specific beats or patterns when the data supports it\n\
+\n\
+/no_think<|im_end|>\n\
+<|im_start|>user\n\
+Accuracy: 82\nUser asks: hello?<|im_end|>\n\
+<|im_start|>assistant\n\
+<think>\n\n</think>\n\n";
+        assert_eq!(chat_prompt("Accuracy: 82\nUser asks: hello?"), expected);
+        // And the context goes in verbatim: no trimming, no escaping.
+        assert!(chat_prompt("  x\n").contains("<|im_start|>user\n  x\n<|im_end|>"));
+    }
+
+    #[test]
+    fn the_existing_kinds_keep_their_budgets() {
+        for kind in [GenKind::Tip, GenKind::Greeting, GenKind::Drill] {
+            assert_eq!(kind.max_tokens(), 64, "{kind:?}");
+            assert!(kind.is_rephrase());
+        }
+        for kind in [GenKind::Report, GenKind::Summary, GenKind::Chat] {
+            assert_eq!(kind.max_tokens(), 256, "{kind:?}");
+            assert!(!kind.is_rephrase());
+        }
+        assert!(!GenKind::Ask.is_rephrase());
+        assert_eq!(AskMode::Choice.max_tokens(), 48);
+        assert_eq!(AskMode::Prose.max_tokens(), 96);
+    }
+
+    #[test]
+    fn generate_refuses_the_ask_kind() {
+        let handle = create_shared_engine();
+        assert_eq!(
+            generate(&handle, GenKind::Ask, "User asks: hi").unwrap_err(),
+            ASK_NOT_THROUGH_GENERATE
+        );
+        // `coach_generate` deserialises it like any other kind.
+        let kind: GenKind = serde_json::from_str("\"ask\"").unwrap();
+        assert_eq!(kind, GenKind::Ask);
+    }
+
+    #[test]
+    fn the_ask_prompt_puts_its_own_rules_before_the_callers_prefix() {
+        let head = ask_prompt_head("  TOOLS: open_step  ");
+        assert!(head.starts_with("<|im_start|>system\nYou answer one question inside Yames"));
+        assert!(head.contains("nothing else\n\nTOOLS: open_step\n\n/no_think<|im_end|>\n"));
+        assert!(head.ends_with("<|im_start|>user\n"));
+        // The head is all that varies with the prefix: it is the cache key.
+        assert_eq!(ask_prompt_head("p"), ask_prompt_head("p"));
+
+        let tail = ask_prompt_tail("Step 7 open\n", " why? ");
+        assert_eq!(
+            tail,
+            "Step 7 open\n\nQuestion: why?<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
+        );
+        assert!(ask_prompt_tail("", "why?").starts_with("Question: why?"));
+    }
+
+    #[test]
+    fn a_request_and_its_outcomes_have_the_wire_shape_the_frontend_uses() {
+        let req: AskRequest = serde_json::from_str(
+            r#"{"generationId":7,"mode":"choice","prefix":"p","context":"c","question":"q","grammar":"root ::= \"x\""}"#,
+        )
+        .unwrap();
+        assert_eq!(req.generation_id, 7);
+        assert_eq!(req.mode, AskMode::Choice);
+        assert_eq!(req.grammar.as_deref(), Some("root ::= \"x\""));
+        let no_grammar: AskRequest = serde_json::from_str(
+            r#"{"generationId":8,"mode":"prose","prefix":"","context":"","question":"q"}"#,
+        )
+        .unwrap();
+        assert_eq!(no_grammar.grammar, None);
+        assert_eq!(no_grammar.deadline_ms, None);
+        assert_eq!(no_grammar.deadline(), std::time::Duration::from_millis(8_000));
+        let timed: AskRequest = serde_json::from_str(
+            r#"{"generationId":9,"mode":"prose","prefix":"","context":"","question":"q","deadlineMs":2500}"#,
+        )
+        .unwrap();
+        assert_eq!(timed.deadline(), std::time::Duration::from_millis(2_500));
+        let greedy = AskRequest { deadline_ms: Some(u32::MAX), ..timed };
+        assert_eq!(greedy.deadline(), std::time::Duration::from_millis(ASK_MAX_DEADLINE_MS as u64));
+
+        let answered = AskOutcome::Answered {
+            text: "{}".into(),
+            prefix_cached: false,
+            prompt_ms: 3,
+            total_ms: 9,
+        };
+        assert_eq!(
+            serde_json::to_value(&answered).unwrap(),
+            serde_json::json!({"status":"answered","text":"{}","prefixCached":false,"promptMs":3,"totalMs":9})
+        );
+        let truncated = AskOutcome::Truncated {
+            text: "{\"to".into(),
+            by: TruncatedBy::Budget,
+            prefix_cached: true,
+            prompt_ms: 3,
+            total_ms: 9,
+        };
+        assert_eq!(
+            serde_json::to_value(&truncated).unwrap(),
+            serde_json::json!({"status":"truncated","text":"{\"to","by":"budget","prefixCached":true,"promptMs":3,"totalMs":9})
+        );
+        assert_eq!(
+            serde_json::to_value(AskOutcome::DeadEnd { why: "w".into() }).unwrap(),
+            serde_json::json!({"status":"deadEnd","why":"w"})
+        );
+        assert_eq!(
+            serde_json::to_value(AskOutcome::Cancelled).unwrap(),
+            serde_json::json!({"status":"cancelled"})
+        );
+        assert_eq!(
+            serde_json::to_value(AskOutcome::TimedOut).unwrap(),
+            serde_json::json!({"status":"timedOut"})
+        );
+        assert_eq!(
+            serde_json::to_value(AskOutcome::NoModel).unwrap(),
+            serde_json::json!({"status":"noModel"})
+        );
+    }
+
+    /// Findings 4 and 5 of the c3a review: only an answer the model ended
+    /// is `answered`; a cut-off one is `truncated` (budget or whitespace
+    /// guard) and a valid grammar's dead end is `deadEnd`, never a
+    /// `grammar:` error.
+    #[test]
+    fn how_a_generation_ended_decides_its_outcome() {
+        let shaped = |end| ask_outcome(end, "{\"tool\":".into(), true, 1, 2);
+        assert_eq!(
+            shaped(AskEnd::Finished),
+            AskOutcome::Answered { text: "{\"tool\":".into(), prefix_cached: true, prompt_ms: 1, total_ms: 2 }
+        );
+        for by in [TruncatedBy::Budget, TruncatedBy::Whitespace] {
+            assert_eq!(
+                shaped(AskEnd::Truncated(by)),
+                AskOutcome::Truncated {
+                    text: "{\"tool\":".into(),
+                    by,
+                    prefix_cached: true,
+                    prompt_ms: 1,
+                    total_ms: 2
+                }
+            );
+        }
+        assert_eq!(
+            shaped(AskEnd::DeadEnd("the grammar allows no token".into())),
+            AskOutcome::DeadEnd { why: "the grammar allows no token".into() }
+        );
+    }
+
+    /// Finding 2: a turn stops on the player's cancel or on its deadline,
+    /// and says which; the cancel wins when both hold.
+    #[test]
+    fn an_ask_stops_on_a_cancel_or_its_deadline() {
+        use std::sync::atomic::{AtomicBool, Ordering};
+        use std::time::{Duration, Instant};
+        let flag = std::sync::Arc::new(AtomicBool::new(false));
+        let live = AskStop { cancel: flag.clone(), deadline: Instant::now() + Duration::from_secs(60) };
+        assert_eq!(live.check(), None);
+        let past = AskStop { cancel: flag.clone(), deadline: Instant::now() };
+        assert_eq!(past.check(), Some(Halt::Expired));
+        flag.store(true, Ordering::Release);
+        assert_eq!(live.check(), Some(Halt::Cancelled));
+        assert_eq!(past.check(), Some(Halt::Cancelled));
+    }
+
+    fn request(id: u64, grammar: Option<&str>) -> AskRequest {
+        AskRequest {
+            generation_id: id,
+            mode: AskMode::Choice,
+            prefix: "Tools: open_step".into(),
+            context: "Screen: Today".into(),
+            question: "where was I?".into(),
+            grammar: grammar.map(str::to_string),
+            deadline_ms: None,
+        }
+    }
+
+    #[test]
+    fn with_no_model_an_ask_says_so_and_is_not_an_error() {
+        let handle = create_shared_engine();
+        assert_eq!(ask(&handle, &request(9_001, None)), Ok(AskOutcome::NoModel));
+        assert_eq!(
+            ask(&handle, &request(9_002, Some(COACH_ANSWER_GBNF))),
+            Ok(AskOutcome::NoModel)
+        );
+    }
+
+    #[test]
+    fn a_malformed_grammar_is_an_error_even_with_no_model() {
+        let handle = create_shared_engine();
+        let err = ask(&handle, &request(9_010, Some("root ::= \"a\"{5,2}"))).unwrap_err();
+        assert!(err.starts_with("grammar: "), "{err}");
+        let err = ask(&handle, &request(9_011, Some("answer ::= \"a\""))).unwrap_err();
+        assert!(err.starts_with("grammar: "), "{err}");
+        let mut empty = request(9_012, None);
+        empty.question = "  ".into();
+        assert!(ask(&handle, &empty).is_err());
+    }
+
+    #[test]
+    fn the_cancel_board() {
+        // Live: flagged, and the ticket sees it.
+        let ticket = cancel::register(9_100).unwrap();
+        assert!(!ticket.is_cancelled());
+        assert!(cancel_generation(9_100));
+        assert!(ticket.is_cancelled());
+        // One id, one generation at a time.
+        assert!(cancel::register(9_100).is_err());
+        drop(ticket);
+        // Gone from the board once its call returned...
+        let again = cancel::register(9_100).unwrap();
+        assert!(!again.is_cancelled());
+        drop(again);
+
+        // ...and a cancel that beats its own ask is remembered.
+        assert!(!cancel_generation(9_101));
+        let early = cancel::register(9_101).unwrap();
+        assert!(early.is_cancelled());
+        drop(early);
+        // Only once: the next generation with that id starts clean.
+        assert!(!cancel::register(9_101).unwrap().is_cancelled());
+
+        // `ask` itself: cancelled before it starts, it says so.
+        let handle = create_shared_engine();
+        cancel_generation(9_200);
+        assert_eq!(ask(&handle, &request(9_200, None)), Ok(AskOutcome::Cancelled));
+
+        // The early list is bounded. (Last in this test, and no other test
+        // leaves an early cancel waiting, so the flood evicts nobody's.)
+        for id in 20_000..20_100 {
+            cancel_generation(id);
+        }
+        assert!(!cancel::register(20_000).unwrap().is_cancelled());
+        assert!(cancel::register(20_099).unwrap().is_cancelled());
+    }
+
+    #[test]
+    fn precheck_accepts_the_registry_grammar() {
+        assert_eq!(precheck_grammar(COACH_ANSWER_GBNF), Ok(()));
+        assert_eq!(precheck_grammar("root ::= \"a\"{2,5} [x]{0,3} \"b\"{4} \"c\"{1,}"), Ok(()));
+        // Braces where they are text, not repetitions.
+        assert_eq!(precheck_grammar("root ::= \"{5,2}\" [{}] # {9,1}\n"), Ok(()));
+        assert_eq!(precheck_grammar("root ::= \"\\\"{5,2}\""), Ok(()));
+    }
+
+    #[test]
+    fn precheck_refuses_what_would_hang_or_cannot_be_a_grammar() {
+        for bad in [
+            "",
+            "   ",
+            "answer ::= \"a\"",
+            "root ::= \"a\"{5,2}",
+            "root ::= x\nx ::= [a-z]{3,1}",
+            "root ::= \"a\"{2001}",
+            "root ::= \"a\"{99999999999999999999999}",
+            "root ::= \"a\"{",
+            "root ::= \"a\"{x}",
+            "root ::= \"a\"{,3}",
+            "root ::= \"a\0\"",
+        ] {
+            assert!(precheck_grammar(bad).is_err(), "accepted {bad:?}");
+        }
+        let huge = format!("root ::= \"{}\"", "a".repeat(ASK_GRAMMAR_MAX_BYTES));
+        assert!(precheck_grammar(&huge).is_err());
+    }
+
+    /// Finding 1 of the c3a review: a grammar inside every textual limit
+    /// that llama.cpp would expand to tens of millions of elements.
+    #[test]
+    fn precheck_bounds_what_a_grammar_expands_to() {
+        // The reviewer's: just under 32 KB of literal, 1,999 times.
+        let literal = "a".repeat(ASK_GRAMMAR_MAX_BYTES - 32);
+        let reviewer = format!("root ::= \"{literal}\"{{1999}}");
+        assert!(reviewer.len() <= ASK_GRAMMAR_MAX_BYTES);
+        let err = precheck_grammar(&reviewer).unwrap_err();
+        assert!(err.contains("expands"), "{err}");
+        // Each repetition small, nested ones multiplied through.
+        let nested = "root ::= ((\"ab\"{100}){100}){100}";
+        assert!(precheck_grammar(nested).unwrap_err().contains("expands"));
+        let nested_class = "root ::= (([a-z]{50} \"-\")* ){1000}";
+        assert!(precheck_grammar(nested_class).is_err());
+        // Across rules too: each one small, the total not.
+        let mut many = String::from("root ::= r0\n");
+        for i in 0..200 {
+            many.push_str(&format!("r{i} ::= \"{}\"{{1000}}\n", "x".repeat(10)));
+        }
+        assert!(precheck_grammar(&many).unwrap_err().contains("expands"));
+
+        // What tool grammars look like passes, with room to spare.
+        let answer = measure_grammar(COACH_ANSWER_GBNF).unwrap();
+        assert!(answer < ASK_GRAMMAR_MAX_ELEMENTS / 10, "the answer grammar measures {answer}");
+        let modest = measure_grammar("root ::= ([a-z]{1,10} \",\"?){1,10}").unwrap();
+        assert!(modest < 1_000, "{modest}");
+        // The estimate is from above: a literal and its repetition.
+        assert!(measure_grammar("root ::= \"abcd\"{10}").unwrap() >= 40);
+    }
+
+    /// Finding 2: the bounds on rules, alternatives and nesting that keep
+    /// one sampling step's work to what a tool grammar needs.
+    #[test]
+    fn precheck_bounds_rules_alternatives_and_depth() {
+        let wide = format!(
+            "root ::= {}",
+            (0..=GRAMMAR_MAX_ALTERNATIVES).map(|i| format!("\"w{i}\"")).collect::<Vec<_>>().join(" | ")
+        );
+        assert!(precheck_grammar(&wide).unwrap_err().contains("alternatives"));
+        let wide_group = format!(
+            "root ::= \"x\" ({})",
+            (0..=GRAMMAR_MAX_ALTERNATIVES).map(|i| format!("\"w{i}\"")).collect::<Vec<_>>().join(" | ")
+        );
+        assert!(precheck_grammar(&wide_group).unwrap_err().contains("alternatives"));
+        let just_wide = format!(
+            "root ::= {}",
+            (0..GRAMMAR_MAX_ALTERNATIVES).map(|i| format!("\"w{i}\"")).collect::<Vec<_>>().join(" | ")
+        );
+        assert_eq!(precheck_grammar(&just_wide), Ok(()));
+
+        let deep = format!(
+            "root ::= {}\"x\"{}",
+            "(".repeat(GRAMMAR_MAX_DEPTH + 1),
+            ")".repeat(GRAMMAR_MAX_DEPTH + 1)
+        );
+        assert!(precheck_grammar(&deep).unwrap_err().contains("nest"));
+        let shallow = format!(
+            "root ::= {}\"x\"{}",
+            "(".repeat(GRAMMAR_MAX_DEPTH - 1),
+            ")".repeat(GRAMMAR_MAX_DEPTH - 1)
+        );
+        assert_eq!(precheck_grammar(&shallow), Ok(()));
+
+        let mut rules = String::from("root ::= r0\n");
+        for i in 0..GRAMMAR_MAX_RULES {
+            rules.push_str(&format!("r{i} ::= \"x\"\n"));
+        }
+        assert!(precheck_grammar(&rules).unwrap_err().contains("rules"));
+    }
+
+    /// The re-read's first point: groups in one rule count as rules when
+    /// they open, not only when the next named rule starts, and at the end.
+    #[test]
+    fn groups_count_as_rules_inside_one_rule() {
+        let groups = format!("root ::= {}", "(\"a\")".repeat(6_000));
+        assert!(groups.len() <= ASK_GRAMMAR_MAX_BYTES);
+        assert!(precheck_grammar(&groups).unwrap_err().contains("rules"), "accepted");
+        // At the limit, it passes.
+        let fits = format!("root ::= {}", "(\"a\")".repeat(GRAMMAR_MAX_RULES - 1));
+        assert_eq!(precheck_grammar(&fits), Ok(()));
+    }
+
+    /// The re-read's second point: optional references chained through
+    /// named rules expand to 4^12 parse stacks at grammar init, with no
+    /// parenthesis anywhere.
+    #[test]
+    fn precheck_bounds_the_parse_stacks() {
+        let mut chain = String::new();
+        for r in 0..12 {
+            let next = if r == 0 { "r1".to_string() } else { format!("r{}", r + 1) };
+            let name = if r == 0 { "root".to_string() } else { format!("r{r}") };
+            chain.push_str(&format!("{name} ::= {next}? {next}? {next}? {next}?\n"));
+        }
+        chain.push_str("r12 ::= \"x\"\n");
+        assert!(chain.len() < 600, "{}", chain.len());
+        let err = precheck_grammar(&chain).unwrap_err();
+        assert!(err.contains("parse stacks"), "{err}");
+
+        // The answer grammar passes with room.
+        let (_, answer) = grammar_measures(COACH_ANSWER_GBNF).unwrap();
+        eprintln!("[precheck] coach-answer.gbnf: {answer} parse stacks at most");
+        assert!(answer <= ASK_GRAMMAR_MAX_STACKS / 8, "the answer grammar estimates {answer}");
+
+        // Deep but nothing skippable: one stack at each step.
+        let mut deep = String::from("root ::= r1 \"x\"\n");
+        for r in 1..40 {
+            deep.push_str(&format!("r{r} ::= r{} \"y\"\n", r + 1));
+        }
+        deep.push_str("r40 ::= \"z\"\n");
+        let (_, stacks) = grammar_measures(&deep).unwrap();
+        assert!(stacks <= 2, "{stacks}");
+
+        // A reference chain past the cap is refused, nullable or not.
+        let mut deeper = String::from("root ::= r1\n");
+        for r in 1..=GRAMMAR_MAX_REF_DEPTH {
+            deeper.push_str(&format!("r{r} ::= r{} \"y\"\n", r + 1));
+        }
+        deeper.push_str(&format!("r{} ::= \"z\"\n", GRAMMAR_MAX_REF_DEPTH + 1));
+        assert!(precheck_grammar(&deeper).unwrap_err().contains("chain"));
+
+        // Recursion is costed once, not followed forever.
+        assert_eq!(precheck_grammar("root ::= \"(\" root? \")\" | \"x\""), Ok(()));
+    }
+
+    /// Pure-Rust half of the fuzz: whatever bytes arrive, the precheck
+    /// returns, it never panics. The llama.cpp half is in `llm_tests`.
+    #[test]
+    fn precheck_never_panics_on_mutated_grammars() {
+        let mut rng = 0x9E37_79B9_7F4A_7C15_u64;
+        let mut next = move || {
+            rng ^= rng << 13;
+            rng ^= rng >> 7;
+            rng ^= rng << 17;
+            rng
+        };
+        let seed = COACH_ANSWER_GBNF.as_bytes();
+        const ALPHABET: &[u8] = b"{}[]()\"\\#|*+?,0123456789:=root \n\t-^.";
+        for _ in 0..5_000 {
+            let mut bytes = seed.to_vec();
+            for _ in 0..(1 + next() % 8) {
+                let at = (next() as usize) % bytes.len().max(1);
+                match next() % 3 {
+                    0 => bytes[at] = ALPHABET[(next() as usize) % ALPHABET.len()],
+                    1 => bytes.insert(at, ALPHABET[(next() as usize) % ALPHABET.len()]),
+                    _ => {
+                        let end = (at + (next() as usize) % 40).min(bytes.len());
+                        bytes.drain(at..end);
+                    }
+                }
+            }
+            let text = String::from_utf8_lossy(&bytes);
+            let _ = precheck_grammar(&text);
+        }
     }
 }
 
@@ -2339,6 +4335,578 @@ mod llm_tests {
                 tokens / runs,
             );
         }
+    }
+
+    // -----------------------------------------------------------------
+    // The Ask kind: the grammar fuzz (a vocabulary is enough) and the
+    // worker with a real model.
+    // -----------------------------------------------------------------
+
+    use super::llm::{sample_step, GrammarCache, Step};
+    use super::{ask, cancel_generation, AskMode, AskOutcome, AskRequest};
+    use llama_cpp_2::llama_backend::LlamaBackend;
+    use llama_cpp_2::model::params::LlamaModelParams;
+    use llama_cpp_2::model::LlamaModel;
+    use llama_cpp_2::sampling::LlamaSampler;
+    use llama_cpp_2::token::LlamaToken;
+
+    const COACH_ANSWER_GBNF: &str = include_str!("../../src/coach/blocks/coach-answer.gbnf");
+
+    /// A choice grammar the shape c3b will generate: one object, an id
+    /// from a closed list, whitespace bounded.
+    const CHOICE_GBNF: &str = r#"root ::= "{" ws "\"tool\":" ws tool ws "}"
+tool ::= "\"open_step\"" | "\"show_card\"" | "\"none\""
+ws ::= " "?
+"#;
+
+    /// The model's vocabulary and nothing else: what the grammar code
+    /// needs. `YAMES_TEST_VOCAB_GGUF` (a `ggml-vocab-*.gguf` from
+    /// llama.cpp's `models/`) or, failing that, `YAMES_TEST_GGUF`. Model
+    /// first in the tuple: it must drop before the backend.
+    fn vocab() -> Option<(LlamaModel, LlamaBackend)> {
+        let raw = std::env::var("YAMES_TEST_VOCAB_GGUF")
+            .or_else(|_| std::env::var("YAMES_TEST_GGUF"))
+            .ok()?;
+        let backend = LlamaBackend::init().expect("backend");
+        let params = LlamaModelParams::default().with_vocab_only(true);
+        let model = LlamaModel::load_from_file(&backend, &raw, &params).expect("vocab load");
+        Some((model, backend))
+    }
+
+    const VOCAB_VARS: &str = "YAMES_TEST_VOCAB_GGUF or YAMES_TEST_GGUF";
+
+    /// A test that needs a model and has none passes without testing
+    /// anything, so it says so on a line of its own. Written to the stderr
+    /// handle rather than through `eprintln!`, which the test harness
+    /// captures and hides for a passing test: this line shows in every run.
+    /// The command that runs them with the model is in
+    /// `plans/coach/progress/c3a.md`.
+    fn skipped(test: &str, needs: &str) {
+        use std::io::Write;
+        let _ = writeln!(std::io::stderr(), "SKIPPED: no model: {test} (set {needs})");
+    }
+
+    struct Rng(u64);
+    impl Rng {
+        fn next(&mut self) -> u64 {
+            self.0 ^= self.0 << 13;
+            self.0 ^= self.0 >> 7;
+            self.0 ^= self.0 << 17;
+            self.0
+        }
+        fn logit(&mut self) -> f32 {
+            (self.next() % 2_000) as f32 / 100.0 - 10.0
+        }
+    }
+
+    fn mutate(seed: &str, rng: &mut Rng) -> String {
+        const ALPHABET: &[u8] = b"{}[]()\"\\#|*+?,0123456789:=root \n\t-^.";
+        let mut bytes = seed.as_bytes().to_vec();
+        for _ in 0..(1 + rng.next() % 6) {
+            let at = (rng.next() as usize) % bytes.len().max(1);
+            match rng.next() % 3 {
+                0 => bytes[at] = ALPHABET[(rng.next() as usize) % ALPHABET.len()],
+                1 => bytes.insert(at, ALPHABET[(rng.next() as usize) % ALPHABET.len()]),
+                _ => {
+                    let end = (at + (rng.next() as usize) % 24).min(bytes.len());
+                    bytes.drain(at..end);
+                }
+            }
+        }
+        String::from_utf8_lossy(&bytes).into_owned()
+    }
+
+    /// Drive `sample_step` under `grammar` with logits from `logits_for`
+    /// until it ends, for at most `steps`. Returns the text and how it
+    /// ended. This is the worker's loop minus the model.
+    fn drive(
+        model: &LlamaModel,
+        grammar: &mut LlamaSampler,
+        chain: &mut LlamaSampler,
+        steps: usize,
+        mut logits_for: impl FnMut(usize) -> Vec<f32>,
+    ) -> (String, Option<Step>) {
+        let mut decoder = encoding_rs::UTF_8.new_decoder();
+        let mut text = String::new();
+        for i in 0..steps {
+            let logits = logits_for(i);
+            match sample_step(model, &logits, chain, Some(&mut *grammar)) {
+                Step::Token(t) => {
+                    text.push_str(&model.token_to_piece(t, &mut decoder, false, None).unwrap_or_default());
+                }
+                end => return (text, Some(end)),
+            }
+        }
+        (text, None)
+    }
+
+    /// DESIGN 9.4 / 11: "a fuzz test that a completed grammar cannot abort
+    /// the process", and a malformed grammar is an error returned, never a
+    /// panic or an abort. If this test fails the way it is guarding
+    /// against, the test binary dies; any other ending is a pass.
+    #[test]
+    fn grammar_fuzz_malformed_is_an_error_and_nothing_aborts() {
+        let _guard = BACKEND_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let Some((model, _backend)) = vocab() else {
+            skipped("grammar_fuzz_malformed_is_an_error_and_nothing_aborts", VOCAB_VARS);
+            return;
+        };
+        let mut cache = GrammarCache::default();
+        let n_vocab = model.n_vocab() as usize;
+
+        // Malformed in ways the precheck lets through and llama.cpp's
+        // parser must refuse.
+        for bad in [
+            "root ::= \"a",
+            "root ::= [a-",
+            "root ::= undefined",
+            "root ::= root \"a\"",
+            "root ::= x\nx ::= x? \"a\"",
+            "root ::= ((\"a\")",
+            "root ::= \"\\x0\"",
+            "root",
+        ] {
+            assert!(cache.take(&model, bad).is_err(), "compiled {bad:?}");
+        }
+
+        // Shapes llama.cpp accepts that look as if they could loop: a
+        // nullable item under a star, an empty alternative, everything
+        // optional. Sampled under, with noise, until they end.
+        let mut rng = Rng(0x2545_F491_4F6C_DD1D);
+        let mut chain = LlamaSampler::greedy();
+        for odd in [
+            "root ::= (\"a\"?)* \"b\"",
+            "root ::= (\"a\"*)* \"b\"",
+            "root ::= \"a\" |",
+            "root ::= x*\nx ::= y?\ny ::= \" \"?",
+            "root ::= [ \\t\\n]* \"}\"",
+        ] {
+            if let Ok((mut grammar, _)) = cache.take(&model, odd) {
+                let _ = drive(&model, &mut grammar, &mut chain, 64, |_| {
+                    (0..n_vocab).map(|_| rng.logit()).collect()
+                });
+            }
+        }
+
+        // Mutations: each one either compiles or is an error; whatever
+        // compiles is then sampled under for a few steps of noise.
+        let mut rng = Rng(0x2545_F491_4F6C_DD1D);
+        let mut compiled = 0usize;
+        let mut chain = LlamaSampler::greedy();
+        for i in 0..1_500 {
+            let seed = if i % 10 == 0 { COACH_ANSWER_GBNF } else { CHOICE_GBNF };
+            let text = mutate(seed, &mut rng);
+            let Ok((mut grammar, _)) = cache.take(&model, &text) else {
+                continue;
+            };
+            compiled += 1;
+            let _ = drive(&model, &mut grammar, &mut chain, 12, |_| {
+                (0..n_vocab).map(|_| rng.logit()).collect()
+            });
+        }
+        eprintln!("[fuzz] 1500 mutated grammars, {compiled} compiled and were sampled under");
+        assert!(compiled > 0, "no mutation compiled; the fuzz sampled nothing");
+    }
+
+    #[test]
+    fn a_completed_grammar_cannot_abort_the_process() {
+        let _guard = BACKEND_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let Some((model, _backend)) = vocab() else {
+            skipped("a_completed_grammar_cannot_abort_the_process", VOCAB_VARS);
+            return;
+        };
+        let n_vocab = model.n_vocab() as usize;
+        let eog: Vec<usize> =
+            (0..n_vocab).filter(|&i| model.is_eog_token(LlamaToken::new(i as i32))).collect();
+        assert!(!eog.is_empty(), "this vocabulary has no end-of-generation token");
+        let mut cache = GrammarCache::default();
+        let mut rng = Rng(0xDEAD_BEEF_CAFE_F00D);
+        let answers = ["{\"tool\":\"open_step\"}", "{\"tool\":\"show_card\"}", "{\"tool\":\"none\"}"];
+        let accepted = |text: &str| {
+            let squeezed: String = text.chars().filter(|c| *c != ' ').collect();
+            answers.contains(&squeezed.as_str())
+        };
+
+        for round in 0..200 {
+            let (mut grammar, _) = cache.take(&model, CHOICE_GBNF).expect("the choice grammar compiles");
+            let mut chain = if round % 2 == 0 {
+                LlamaSampler::greedy()
+            } else {
+                LlamaSampler::chain_simple([
+                    LlamaSampler::temp(0.7),
+                    LlamaSampler::top_p(0.9, 1),
+                    LlamaSampler::dist(round as u32),
+                ])
+            };
+            // Noise until the grammar completes: the only way out is
+            // end-of-generation, which `sample_step` never hands to
+            // `accept` (that is llama.cpp's GGML_ABORT).
+            let (text, end) = drive(&model, &mut grammar, &mut chain, 400, |_| {
+                (0..n_vocab).map(|_| rng.logit()).collect()
+            });
+            assert_eq!(end, Some(Step::End), "round {round}: {text:?}");
+            assert!(accepted(&text), "round {round}: the grammar let through {text:?}");
+
+            // Now push past the end: the model wants a word, and
+            // end-of-generation has no weight at all. A dead end, not an
+            // abort, and not a token.
+            let favourite = (rng.next() as usize) % n_vocab;
+            let hostile = |_| {
+                let mut l: Vec<f32> = (0..n_vocab).map(|_| rng.logit()).collect();
+                for &e in &eog {
+                    l[e] = f32::NEG_INFINITY;
+                }
+                if !eog.contains(&favourite) {
+                    l[favourite] = 100.0;
+                }
+                l
+            };
+            let (more, end) = drive(&model, &mut grammar, &mut chain, 5, hostile);
+            assert!(more.is_empty(), "round {round}: sampled {more:?} past a completed grammar");
+            assert!(
+                matches!(end, Some(Step::DeadEnd { poisoned: false, .. })),
+                "round {round}: {end:?}"
+            );
+
+            // And `accept` itself, past the end, is a caught error.
+            let word = (0..n_vocab).find(|&i| !eog.contains(&i)).unwrap();
+            assert!(grammar.try_accept(LlamaToken::new(word as i32)).is_err());
+            // A poisoned sampler is never put back; a reset one starts over.
+            drop(grammar);
+        }
+        let (mut again, size) = cache.take(&model, CHOICE_GBNF).unwrap();
+        let mut chain = LlamaSampler::greedy();
+        let (text, end) = drive(&model, &mut again, &mut chain, 400, |_| {
+            (0..n_vocab).map(|_| rng.logit()).collect()
+        });
+        assert_eq!(end, Some(Step::End));
+        assert!(accepted(&text), "{text:?}");
+        cache.put_back(CHOICE_GBNF.to_string(), again, size);
+        assert_eq!(cache.len(), 1);
+        // Reused, it starts from the beginning again.
+        let (mut reused, _) = cache.take(&model, CHOICE_GBNF).unwrap();
+        let (text, end) = drive(&model, &mut reused, &mut chain, 400, |_| {
+            (0..n_vocab).map(|_| rng.logit()).collect()
+        });
+        assert_eq!(end, Some(Step::End));
+        assert!(accepted(&text), "{text:?}");
+    }
+
+    /// Finding 1 of the c3a review: what the cache keeps is bounded in
+    /// total, not only in count, since every grammar in it is parsed again
+    /// on its next reuse; and a grammar past the size cap never compiles.
+    #[test]
+    fn the_grammar_cache_holds_a_bounded_total() {
+        let _guard = BACKEND_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let Some((model, _backend)) = vocab() else {
+            skipped("the_grammar_cache_holds_a_bounded_total", VOCAB_VARS);
+            return;
+        };
+        let reviewer = format!("root ::= \"{}\"{{1999}}", "a".repeat(super::ASK_GRAMMAR_MAX_BYTES - 32));
+        let mut cache = GrammarCache::default();
+        assert!(cache.take(&model, &reviewer).unwrap_err().contains("expands"));
+
+        // Seven rules of 1,999 repetitions each (llama.cpp refuses 2,000):
+        // about 84,000 elements, under the per-grammar cap, so five of them
+        // overflow the total.
+        let big = |n: usize| {
+            let mut g = format!("root ::= \"g{n}\" r0 r1 r2 r3 r4 r5 r6\n");
+            for r in 0..7 {
+                g.push_str(&format!("r{r} ::= [a-z]{{1999}}\n"));
+            }
+            g
+        };
+        for n in 0..6 {
+            let source = big(n);
+            let (sampler, size) = cache.take(&model, &source).expect("a big grammar under the cap compiles");
+            assert!(size > super::ASK_GRAMMAR_MAX_ELEMENTS / 2, "{size}");
+            cache.put_back(source, sampler, size);
+            assert!(
+                cache.total() <= super::llm::GRAMMAR_CACHE_MAX_ELEMENTS,
+                "after {n}: {} held",
+                cache.total()
+            );
+        }
+        assert!(cache.len() < 5, "{} big grammars held", cache.len());
+        // And small ones still share it.
+        let (sampler, size) = cache.take(&model, CHOICE_GBNF).unwrap();
+        cache.put_back(CHOICE_GBNF.to_string(), sampler, size);
+        assert!(cache.len() >= 2);
+    }
+
+    /// A static prefix the size DESIGN 5.5 budgets (system text and an
+    /// intent list, about 900 tokens).
+    fn tool_list() -> String {
+        let mut s = String::from(
+            "Choose the one tool that answers the player's question. Reply with one JSON object.\n\nTools:\n",
+        );
+        for i in 0..60 {
+            s.push_str(&format!(
+                "- tool_{i}: opens screen number {i} of the practice app and shows the player where it is, with a way back\n"
+            ));
+        }
+        s
+    }
+
+    fn ask_req(id: u64, mode: AskMode, prefix: &str, question: &str, grammar: Option<&str>) -> AskRequest {
+        AskRequest {
+            generation_id: id,
+            mode,
+            prefix: prefix.to_string(),
+            context: "Screen: Today. The player has one Path open: Alternate Picking, Step 7.".into(),
+            question: question.to_string(),
+            grammar: grammar.map(str::to_string),
+            // Generous: a busy test machine must not turn these into
+            // timeouts. The deadline has its own test.
+            deadline_ms: Some(super::ASK_MAX_DEADLINE_MS),
+        }
+    }
+
+    /// The text of an answer, complete (`true`) or truncated (`false`),
+    /// with whether the prefix was cached and the two timings.
+    fn answered(out: &Result<AskOutcome, String>) -> (&str, bool, bool, u32, u32) {
+        match out {
+            Ok(AskOutcome::Answered { text, prefix_cached, prompt_ms, total_ms }) => {
+                (text.as_str(), true, *prefix_cached, *prompt_ms, *total_ms)
+            }
+            Ok(AskOutcome::Truncated { text, prefix_cached, prompt_ms, total_ms, .. }) => {
+                (text.as_str(), false, *prefix_cached, *prompt_ms, *total_ms)
+            }
+            other => panic!("not an answer: {other:?}"),
+        }
+    }
+
+    fn loaded() -> Option<std::sync::Arc<super::CoachHandle>> {
+        let raw = std::env::var("YAMES_TEST_GGUF").ok()?;
+        let handle = create_shared_engine();
+        let family = Some(crate::models::CURRENT_BRAIN_FAMILY);
+        assert_eq!(load_model(&handle, std::path::Path::new(&raw), family, "test"), Ok(true));
+        Some(handle)
+    }
+
+    /// The choice under its grammar, the prefix kept across turns and
+    /// across another kind's generation, and the saving measured.
+    #[test]
+    fn ask_choice_under_a_grammar_with_the_prefix_cached() {
+        let _guard = BACKEND_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let Some(handle) = loaded() else {
+            skipped("ask_choice_under_a_grammar_with_the_prefix_cached", "YAMES_TEST_GGUF");
+            return;
+        };
+        let prefix = tool_list();
+        let questions = [
+            "where was I?",
+            "show me my last card",
+            "what should I practise now?",
+            "open the step I was on",
+            "nothing, thanks",
+            "take me back",
+        ];
+
+        let first = ask(&handle, &ask_req(50_000, AskMode::Choice, &prefix, questions[0], Some(CHOICE_GBNF)));
+        let (text, finished, cached, uncached_ms, _) = answered(&first);
+        assert!(!cached, "the first turn cannot have a cached prefix");
+        let squeezed: String = text.chars().filter(|c| *c != ' ').collect();
+        assert!(
+            ["{\"tool\":\"open_step\"}", "{\"tool\":\"show_card\"}", "{\"tool\":\"none\"}"]
+                .contains(&squeezed.as_str()),
+            "the grammar let through {text:?}"
+        );
+        assert!(finished, "a complete choice ends itself: {text:?}");
+
+        let mut cached_ms = Vec::new();
+        for (i, q) in questions.iter().enumerate().skip(1) {
+            let out = ask(&handle, &ask_req(50_000 + i as u64, AskMode::Choice, &prefix, q, Some(CHOICE_GBNF)));
+            let (text, _, cached, prompt_ms, total_ms) = answered(&out);
+            assert!(cached, "turn {i} decoded the prefix again");
+            eprintln!("[ask] turn {i}: prompt {prompt_ms} ms, total {total_ms} ms, {text:?}");
+            cached_ms.push(prompt_ms);
+            if i == 2 {
+                // Another kind between two questions: sequence 0 is
+                // rewritten, sequence 1 keeps the prefix.
+                let chat = super::generate(&handle, GenKind::Chat, "User asks: hello?").unwrap();
+                assert!(!chat.trim().is_empty());
+            }
+        }
+        cached_ms.sort_unstable();
+        let median = cached_ms[cached_ms.len() / 2];
+        // The first turn above paid for cold weights too. The fair
+        // comparison is a warm worker meeting a prefix of the same size it
+        // has not seen: three of those.
+        let mut warm_uncached = Vec::new();
+        for v in 0..3u64 {
+            let other = format!("(variant {v}) {prefix}");
+            let out = ask(&handle, &ask_req(50_200 + v, AskMode::Choice, &other, questions[1], Some(CHOICE_GBNF)));
+            let (_, _, cached, prompt_ms, _) = answered(&out);
+            assert!(!cached, "a prefix never seen was taken as cached");
+            warm_uncached.push(prompt_ms);
+        }
+        warm_uncached.sort_unstable();
+        let warm = warm_uncached[1];
+        eprintln!(
+            "[ask] prefix cache: time to first token {median} ms cached (median of {}), \
+             {warm} ms uncached on a warm worker (median of 3), {uncached_ms} ms on the cold first turn; \
+             backend={}",
+            cached_ms.len(),
+            super::llm::BACKEND
+        );
+        assert!(median < warm, "the cached prefix saved nothing");
+
+        // A different prefix is a different cache entry.
+        let other = ask(&handle, &ask_req(50_100, AskMode::Choice, "Tools: none at all.", "hi", Some(CHOICE_GBNF)));
+        assert!(!answered(&other).2, "a new prefix was taken for the old one");
+        unload_model(&handle).unwrap();
+    }
+
+    #[test]
+    fn ask_prose_bad_grammars_and_budgets() {
+        let _guard = BACKEND_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let Some(handle) = loaded() else {
+            skipped("ask_prose_bad_grammars_and_budgets", "YAMES_TEST_GGUF");
+            return;
+        };
+        let out = ask(&handle, &ask_req(51_000, AskMode::Prose, "Answer in plain words.", "how do I relax my picking hand?", None));
+        let (text, _, _, _, total_ms) = answered(&out);
+        assert!(!text.trim().is_empty());
+        assert!(!text.contains("<think>"), "{text:?}");
+        eprintln!("[ask] prose in {total_ms} ms: {text:?}");
+
+        // Through the precheck, refused by llama.cpp: an error, and the
+        // worker carries on.
+        let err = ask(&handle, &ask_req(51_001, AskMode::Choice, "p", "q", Some("root ::= \"a"))).unwrap_err();
+        assert!(err.starts_with("grammar: "), "{err}");
+        let err = ask(&handle, &ask_req(51_002, AskMode::Choice, "p", "q", Some("root ::= root \"a\""))).unwrap_err();
+        assert!(err.starts_with("grammar: "), "{err}");
+
+        // The context is held to its budget.
+        let mut long = ask_req(51_003, AskMode::Choice, "p", "q", Some(CHOICE_GBNF));
+        long.context = "the player practised alternate picking at ninety ".repeat(60);
+        let err = ask(&handle, &long).unwrap_err();
+        assert!(err.contains("context"), "{err}");
+
+        // An unbounded `ws` is bounded by the worker, and an answer it cut
+        // off says so (finding 5): never `answered`.
+        let loose = "root ::= \"{\" ws \"}\"\nws ::= [ \\t\\n]*\n";
+        let out = ask(&handle, &ask_req(51_004, AskMode::Choice, "Reply with {} padded with as many spaces as you like.", "go", Some(loose)));
+        let (text, complete, _, _, _) = answered(&out);
+        assert!(text.starts_with('{'), "{text:?}");
+        if complete {
+            assert!(text.trim_end().ends_with('}'), "answered but incomplete: {text:?}");
+        } else {
+            assert!(
+                matches!(out, Ok(AskOutcome::Truncated { by: super::TruncatedBy::Whitespace, .. })),
+                "{out:?}"
+            );
+        }
+
+        // Out of budget is `truncated` too. A long answer asked for, three
+        // tries: at least one of them must run past 96 tokens.
+        let mut cut = 0;
+        for (i, q) in [
+            "write a long essay, at least five hundred words, on how to practise alternate picking",
+            "list forty different exercises for the picking hand, each with a paragraph",
+            "explain everything about metronome practice in great detail, step by step",
+        ]
+        .iter()
+        .enumerate()
+        {
+            let out = ask(&handle, &ask_req(51_010 + i as u64, AskMode::Prose, "Answer at length.", q, None));
+            match out {
+                Ok(AskOutcome::Truncated { ref text, by: super::TruncatedBy::Budget, .. }) => {
+                    assert!(!text.trim().is_empty());
+                    cut += 1;
+                }
+                Ok(AskOutcome::Answered { .. }) => {}
+                other => panic!("{other:?}"),
+            }
+        }
+        assert!(cut > 0, "no long answer ran out of budget; the truncated status was not seen");
+
+        let still = ask(&handle, &ask_req(51_005, AskMode::Choice, "p", "q", Some(CHOICE_GBNF)));
+        answered(&still);
+        unload_model(&handle).unwrap();
+    }
+
+    /// Cancel: while queued behind another kind, while running, and the
+    /// worker answering normally straight after.
+    #[test]
+    fn ask_cancel_queued_and_running() {
+        let _guard = BACKEND_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let Some(handle) = loaded() else {
+            skipped("ask_cancel_queued_and_running", "YAMES_TEST_GGUF");
+            return;
+        };
+        let prefix = tool_list();
+
+        // Running: a prose answer, cancelled as soon as it has started.
+        let mut cancelled_running = 0;
+        for round in 0..5u64 {
+            let id = 52_000 + round;
+            let h = handle.clone();
+            let p = prefix.clone();
+            let running = std::thread::spawn(move || {
+                ask(&h, &ask_req(id, AskMode::Prose, &p, "tell me everything about practice", None))
+            });
+            std::thread::sleep(std::time::Duration::from_millis(20 + round * 40));
+            let flagged = cancel_generation(id);
+            let started = std::time::Instant::now();
+            let out = running.join().unwrap();
+            eprintln!("[ask] cancel round {round}: flagged={flagged} out={:?} returned {:?} after the cancel", out.as_ref().map(|o| matches!(o, AskOutcome::Cancelled)), started.elapsed());
+            match out {
+                Ok(AskOutcome::Cancelled) => {
+                    assert!(flagged);
+                    assert!(started.elapsed() < std::time::Duration::from_millis(1_500));
+                    cancelled_running += 1;
+                }
+                // Finished in the instant between the flag and the end.
+                Ok(AskOutcome::Answered { .. } | AskOutcome::Truncated { .. }) => {}
+                other => panic!("round {round}: {other:?}"),
+            }
+        }
+        assert!(cancelled_running > 0, "every answer finished before its cancel; nothing was tested");
+
+        // Queued: a long chat holds the worker; the ask behind it is
+        // cancelled and returns without waiting for the chat.
+        let h = handle.clone();
+        let chat = std::thread::spawn(move || {
+            super::generate(&h, GenKind::Chat, "User asks: tell me a long story about timing?")
+        });
+        std::thread::sleep(std::time::Duration::from_millis(50));
+        let h = handle.clone();
+        let p = prefix.clone();
+        let queued = std::thread::spawn(move || {
+            ask(&h, &ask_req(52_100, AskMode::Choice, &p, "where was I?", Some(CHOICE_GBNF)))
+        });
+        std::thread::sleep(std::time::Duration::from_millis(30));
+        let started = std::time::Instant::now();
+        cancel_generation(52_100);
+        assert_eq!(queued.join().unwrap(), Ok(AskOutcome::Cancelled));
+        let waited = started.elapsed();
+        eprintln!("[ask] a queued cancel returned after {waited:?}");
+        assert!(waited < std::time::Duration::from_millis(500), "{waited:?}");
+        assert!(chat.join().unwrap().is_ok());
+
+        // And the next turn is an ordinary one.
+        let after = ask(&handle, &ask_req(52_200, AskMode::Choice, &prefix, "where was I?", Some(CHOICE_GBNF)));
+        answered(&after);
+
+        // The deadline (finding 2): already past, the turn never starts;
+        // 50 ms into a prefix that has to be decoded, it stops between two
+        // chunks and says `timedOut`, not `cancelled`.
+        let mut late = ask_req(52_300, AskMode::Choice, &prefix, "where was I?", Some(CHOICE_GBNF));
+        late.deadline_ms = Some(0);
+        assert_eq!(ask(&handle, &late), Ok(AskOutcome::TimedOut));
+        let mut short = ask_req(52_301, AskMode::Prose, &format!("(timed) {prefix}"), "tell me everything", None);
+        short.deadline_ms = Some(50);
+        let started = std::time::Instant::now();
+        assert_eq!(ask(&handle, &short), Ok(AskOutcome::TimedOut));
+        let waited = started.elapsed();
+        eprintln!("[ask] a 50 ms deadline returned after {waited:?}");
+        assert!(waited < std::time::Duration::from_millis(1_000), "{waited:?}");
+        // The half-decoded prefix was dropped, and the worker answers.
+        let next = ask(&handle, &ask_req(52_302, AskMode::Choice, &prefix, "where was I?", Some(CHOICE_GBNF)));
+        answered(&next);
+        unload_model(&handle).unwrap();
     }
 }
 

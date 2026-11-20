@@ -2362,6 +2362,109 @@ export async function coachGenerate(
   }
 }
 
+/**
+ * The Ask kind (DESIGN 9.4): one model call a turn, with the static prefix
+ * (system text and the tool list), the context (at most 450 tokens), the
+ * question and, for a choice, the GBNF grammar the registry generates. Rust
+ * keeps the prefix decoded between turns. A malformed grammar rejects with
+ * a message starting "grammar:"; no model is `noModel`, not an error.
+ *
+ * Only `answered` is an answer to act on. `truncated` is text the budget
+ * or the whitespace guard cut off (under a grammar, at most the start of a
+ * sentence of it: never parse it as a tool call); `deadEnd` is a valid
+ * grammar the model could not continue under; `timedOut` is the turn's
+ * deadline, distinct from the player's `cancelled`. In all of those the
+ * rule-made answer stands.
+ */
+export type CoachAskMode = "choice" | "prose";
+
+export interface CoachAskRequest {
+  /** From `newGenerationId()`: what `cancelGeneration` takes. */
+  generationId: number;
+  mode: CoachAskMode;
+  prefix: string;
+  context: string;
+  question: string;
+  grammar?: string | null;
+  /** The turn's budget in Rust, queue and generation together.
+   *  `COACH_ASK_TIMEOUT_MS` when absent. */
+  deadlineMs?: number;
+}
+
+interface CoachAskTimings {
+  prefixCached: boolean;
+  promptMs: number;
+  totalMs: number;
+}
+
+export type CoachAskOutcome =
+  | ({
+      /** The model ended the answer itself, inside the budget. */
+      status: "answered";
+      text: string;
+    } & CoachAskTimings)
+  | ({
+      /** Cut off: not a complete answer. */
+      status: "truncated";
+      text: string;
+      by: "budget" | "whitespace";
+    } & CoachAskTimings)
+  | { status: "deadEnd"; why: string }
+  | { status: "cancelled" }
+  | { status: "timedOut" }
+  | { status: "noModel" };
+
+/** DESIGN 5.5: a turn fits 8 s or the rule-made answer stands. Rust holds
+ *  the turn to it (`deadlineMs`); the wrapper's own timer is a backstop
+ *  `COACH_ASK_BACKSTOP_MS` later, for a Rust side that never answers. */
+export const COACH_ASK_TIMEOUT_MS = 8_000;
+export const COACH_ASK_BACKSTOP_MS = 1_000;
+/** Rust's own cap on a turn (`ASK_MAX_DEADLINE_MS`). A larger `deadlineMs`
+ *  is clamped to it here, before it is sent and before the backstop is
+ *  set: past 2^31 - 1 ms `setTimeout` fires at once. */
+export const COACH_ASK_MAX_DEADLINE_MS = 60_000;
+
+// Unique for the life of the Rust process, across webview reloads too: a
+// cancel Rust holds for an id it has not seen yet must not meet a new turn.
+let nextGenerationId = Date.now() * 1_000;
+
+export function newGenerationId(): number {
+  nextGenerationId += 1;
+  return nextGenerationId;
+}
+
+/** Stop an Ask turn, queued or running. True when Rust found it. */
+export async function cancelGeneration(generationId: number): Promise<boolean> {
+  return invoke<boolean>("cancel_generation", { generationId });
+}
+
+/** One Ask turn. Rust ends it at its deadline with `timedOut`; if Rust has
+ *  not answered a backstop later, the turn is cancelled there and this
+ *  rejects with `Error("coach_ask_timeout")`. */
+export async function coachAsk(request: CoachAskRequest): Promise<CoachAskOutcome> {
+  const asked = request.deadlineMs ?? COACH_ASK_TIMEOUT_MS;
+  const deadlineMs = Number.isFinite(asked)
+    ? Math.min(Math.max(0, Math.floor(asked)), COACH_ASK_MAX_DEADLINE_MS)
+    : COACH_ASK_MAX_DEADLINE_MS;
+  const call = invoke<CoachAskOutcome>("coach_ask", {
+    request: { ...request, grammar: request.grammar ?? null, deadlineMs },
+  });
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      call,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => {
+          void cancelGeneration(request.generationId).catch(() => false);
+          reject(new Error("coach_ask_timeout"));
+        }, deadlineMs + COACH_ASK_BACKSTOP_MS);
+      }),
+    ]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
+
 export async function isCoachLoaded(): Promise<boolean> {
   return invoke<boolean>("is_coach_loaded");
 }
