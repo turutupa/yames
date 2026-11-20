@@ -61,8 +61,9 @@ between evicts it. Hence the Ask prefix lives in a sequence of its own (below).
   (`ASK_NOT_THROUGH_GENERATE`); the six old kinds are untouched: their prompt is now built by
   `coach::chat_prompt` (moved out of `llm::build_prompt`, same format string) and **pinned byte for byte**
   by `ask_tests::the_existing_kinds_prompt_is_byte_identical`, budgets by `the_existing_kinds_keep_their_budgets`.
-- `AskRequest { generationId, mode: "choice" | "prose", prefix, context, question, grammar? }`,
-  `AskOutcome` `answered { text, finished, prefixCached, promptMs, totalMs } | cancelled | noModel`.
+- `AskRequest { generationId, mode: "choice" | "prose", prefix, context, question, grammar?, deadlineMs? }`,
+  `AskOutcome` `answered { text, prefixCached, promptMs, totalMs } | truncated { text, by, ... } |
+  deadEnd { why } | cancelled | timedOut | noModel` (as changed by c3ab, "Review fixes" below).
   Budgets: choice 48 tokens (greedy under the grammar), prose 96 (temp 0.7 / top-p 0.9, as the other
   kinds). Context checked at 450 tokens on the worker (error otherwise). One call a turn, no tool loop.
   Its own system lines (`ASK_SYSTEM_PROMPT`) come first, then the caller's prefix; ChatML as the others,
@@ -147,11 +148,96 @@ it on the owner's machine are still worth doing.
 
 - Send `grammar` with a `root` rule and a **bounded** `ws` (`ws ::= " "?` or `[ \t\n]{0,2}`):
   `coach-answer.gbnf`'s `ws ::= [ \t\n]*` works but leans on the worker's six-token guard.
-- A rejection starting `grammar:` is a bug in the grammar or the model hitting a dead end under it;
-  `noModel` and `cancelled` are not errors. `finished: false` means budget or whitespace guard: validate.
+- A rejection starting `grammar:` is a bug in the grammar (malformed, over the size or shape bounds
+  below, or one llama.cpp poisoned itself on). Only `answered` is an answer to act on: `truncated`
+  (`by: "budget" | "whitespace"`), `deadEnd`, `cancelled`, `timedOut` and `noModel` all mean the
+  rule-made answer stands. (Changed by c3ab: `answered.finished` is gone.)
 - Keep the prefix byte-identical turn to turn (no timestamps, no counters) or the cache never hits; put
   everything that changes in `context` (450 tokens) or `question`.
-- Ids: `newGenerationId()`, one per turn; `coachAsk` cancels on its own 8 s timeout.
+- Ids: `newGenerationId()`, one per turn. Rust ends a turn at `deadlineMs` (8 s unless sent);
+  `coachAsk`'s own timer is a backstop 1 s after it that cancels in Rust and rejects `coach_ask_timeout`.
+- **Note from the c3a review (finding 6), for c3b to measure:** with `kv_unified` the Ask prefix's cells
+  (about 900) sit in the range every other kind's decode attends over. Tips have a 3 s budget on a GPU.
+  Measure a tip's time with and without a cached Ask prefix resident (same model, same backend, a few
+  runs each); if it costs, drop the prefix before a tip (`AskPrefix::forget`, which clears sequence 1).
+  Nothing was measured for this in c3a or c3ab.
+
+## Review fixes (leg c3ab, 2026-11-20)
+
+The reviewer's verdict on the Rust diff (`a850d3ed..70bdd641`) was MERGE AFTER FIXES. What changed:
+
+1. **A grammar's expanded size is bounded.** `measure_grammar` (behind `precheck_grammar`) estimates
+   from above the elements llama.cpp's parser writes out: a literal or class counts a byte as an
+   element, `S{m,n}` counts `(|S| + 3) * n` (the copies plus the rule bookkeeping), `*`/`+` two copies,
+   and a group's size is multiplied wherever it is repeated, so nested repetitions multiply through.
+   Cap `ASK_GRAMMAR_MAX_ELEMENTS = 100,000` (about 800 KB of elements; `coach-answer.gbnf` measures
+   under 10,000, a choice grammar a few hundred). The reviewer's `root ::= "<32 KB>"{1999}` is refused
+   before llama.cpp sees it. The cache holds at most 8 grammars and `4 * 100,000` elements in all
+   (`GRAMMAR_CACHE_MAX_ELEMENTS`), so the re-parse every `reset()` does on reuse is bounded too.
+   Tests: `precheck_bounds_what_a_grammar_expands_to` (the reviewer's example, nested repeats, many
+   rules), `the_grammar_cache_holds_a_bounded_total` (vocab; also that the reviewer's grammar never
+   compiles through the cache).
+2. **Sampling work per step is bounded where it can be, and a turn has a deadline.** The precheck also
+   refuses more than 512 rules and groups, 128 alternatives in one rule or group, and groups nested
+   deeper than 16 (the answer grammar: about 65 rules, 31 alternatives at most, depth 2). `AskRequest`
+   takes `deadlineMs` (default 8,000, at most 60,000), measured from the moment `coach::ask` is called;
+   it is checked with the cancel flag before a queued job starts, between 256-token prompt chunks, per
+   output token, and by the waiting caller every 20 ms. On expiry the outcome is `timedOut`, distinct
+   from a player's `cancelled`. Tests: `precheck_bounds_rules_alternatives_and_depth`,
+   `an_ask_stops_on_a_cancel_or_its_deadline`, and in `ask_cancel_queued_and_running` (model) a deadline
+   already past and a 50 ms deadline inside an uncached prefix's decode, both `timedOut`, the second
+   returning within 1 s, then an ordinary turn.
+3. **`--llm-load` measures what it says.** The LLM thread waits for the measured window to open (main
+   stamps its start) instead of a fixed delay from `start_llm`; every load's start and end are kept, and
+   the report counts loads that **started** inside the window and loads that **began and finished**
+   inside it (the window ends where the stream is shut down), the average over the latter. Test:
+   `loads_are_counted_against_the_measured_window` (in the probe binary: `node scripts/rust-test.mjs
+   --bin click-jitter-probe`).
+4. **A runtime dead end is its own outcome.** A non-poisoned `DeadEnd` (a valid grammar the model
+   cannot continue under, or a sampler that picked nothing) is `{status: "deadEnd", why}`, not a
+   `grammar:` error. A poisoned one (llama.cpp allowed a token, then refused it) stays a `grammar:`
+   error: only a grammar construct brings it about. Test: `how_a_generation_ended_decides_its_outcome`.
+5. **A truncated answer cannot pass for an answer.** `Answered` lost `finished`; an answer the budget
+   or the six-whitespace guard cut off is `{status: "truncated", text, by: "budget" | "whitespace", ...}`
+   in Rust, in `ipc.ts` (`CoachAskOutcome`) and in the typed mock (`src/test/mocks.ts`). Tests:
+   `how_a_generation_ended_decides_its_outcome`, the wire-shape test, `ipc.coachGenerate.test.ts`, and
+   with the model `ask_prose_bad_grammars_and_budgets` (the loose-`ws` grammar is `answered` and
+   complete or `truncated` by whitespace; of three long prose asks at least one is `truncated` by
+   budget).
+6. Finding 6 is the note in "For c3b" above (nothing measured).
+7. **Model-gated tests say when they skipped.** The fuzz, the completed-grammar test, the cache test
+   and the three `ask_*` tests write `SKIPPED: no model: <test> (set <var>)` straight to stderr, past
+   the harness's capture, so the line shows in a green run too. A green CI without the variables is not
+   evidence for them. The command that runs them with the model on this DGX (through the wrapper):
+
+       cd /home/dgx-delgado/yames-coach-c3a
+       YAMES_TEST_GGUF=/home/dgx-delgado/scratch/yames-c3a-models/Qwen3-0.6B-Q8_0.gguf \
+       YAMES_TEST_VOCAB_GGUF=/home/dgx-delgado/src/llama.cpp/models/ggml-vocab-qwen2.gguf \
+         node scripts/rust-test.mjs --features coach-llm --lib coach::llm_tests
+
+   (`/tmp/coach-c3a/test-llm.sh` is that, with any filter as its argument.)
+
+**What remains uninterruptible.** The cancel flag and the deadline are read between steps, never
+inside one, so a turn can overrun its deadline by the longest single step:
+
+- one `ctx.decode` of a 256-token prompt chunk (on this DGX's CPU build with the 0.6B model, a few
+  hundred ms on a quiet machine; seconds under load);
+- one `sample_step`: a grammar `apply` over the whole vocabulary (about 150,000 tokens) against every
+  live parse stack. The precheck bounds the grammar's size, rules, alternatives and nesting, but an
+  ambiguous grammar inside those bounds can still hold many stacks at once; there is no bound on the
+  number of stacks llama.cpp keeps, and no way to interrupt `apply` from Rust;
+- `LlamaSampler::grammar` (first compile) and `reset()` (re-parse on reuse), both bounded by the size cap;
+- a model load (the selector's, not this path's).
+
+The caller returns at the deadline in any case (it polls every 20 ms); what overruns is the worker,
+and the next job waits behind it.
+
+## Owed after c3ab
+
+- The five quiet-machine probe runs (load average under 6): `bash /tmp/coach-c3a/probe-set.sh`, which
+  skips any run whose start sees load >= 6.
+- Finding 6's tip-latency measurement (c3b).
+- The same runs with the shipping Standard model and the Vulkan build on the owner's machine.
 
 ## Design vs code
 
