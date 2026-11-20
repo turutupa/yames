@@ -281,7 +281,7 @@ export const RHYTHM_FOUNDATIONS_CUES: CueBook = {
   "off-beats.the-and": [
     g("Play each 'and' as the foot comes up.", 1),
     c("heard", UP_CATCH),
-    c("extras", "Miss the string on each beat after the first.", 0),
+    c("extras", "Miss the string on '2', '3' and '4'.", 0),
     c("notes", NOTES_SAY),
     c("late", AND_LATE, 1),
     c("early", AND_EARLY, 1),

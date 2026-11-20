@@ -4009,7 +4009,7 @@
           "cues": [
             {"when":"even","say":"Play each 'and' as the foot comes up.","more":1,"general":true},
             {"when":"heard","say":"Catch the string on every upstroke."},
-            {"when":"extras","say":"Miss the string on each beat after the first.","more":0},
+            {"when":"extras","say":"Miss the string on '2', '3' and '4'.","more":0},
             {"when":"notes","say":"Read one note ahead in the tab as you play."},
             {"when":"late","say":"Play each 'and' as soon as the foot lifts.","more":1},
             {"when":"early","say":"Wait for the foot to lift before each 'and'.","more":1},
