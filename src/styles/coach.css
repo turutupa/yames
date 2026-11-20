@@ -375,7 +375,7 @@
   }
   .coach-note[data-kind="ready"] > .coach-note-head {
     flex: 1 1 22em;
-    font-size: 16px;
+    font-size: 15px;
     line-height: 1.25;
   }
   .coach-note[data-kind="ready"] {
@@ -387,8 +387,13 @@
   .coach-note[data-kind="ready"] > .coach-chips {
     display: none;
   }
+  /* Centred on the tempo, not on its baseline: there the pass mark's second
+     line hung under the number and took 22 px from the neck, which at 620 x 780
+     put NOW's ring over the dot on the next string (fix1). */
   .practice-meta-note {
     font-size: 14px;
+    line-height: 1.3;
+    align-self: center;
   }
   .coach-note [data-extra],
   .coach-note[data-kind="ready"] > .coach-block-source {

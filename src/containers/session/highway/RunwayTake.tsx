@@ -280,7 +280,7 @@ export function RunwayTakeScreen({
             ))}
           {/* The bar is what is graded: not said to a player who chose to just play. */}
           {!running && bar && run.ungraded !== "gradingOff" && run.ungraded !== "chosen" && (
-            <span className="session-why">{lineText(t, bar)}</span>
+            <span className="session-why session-runway-passmark">{lineText(t, bar)}</span>
           )}
           {!running && (
             <ReadyInput
