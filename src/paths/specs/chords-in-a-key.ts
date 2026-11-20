@@ -10,8 +10,9 @@
  *
  * Graded the way Triads is: every chord is played one note at a time.
  */
-import { definePath } from "../spec";
+import { definePath, withCues } from "../spec";
 import type { VariantParams } from "../spec";
+import { CHORDS_IN_A_KEY_CUES } from "./chords-in-a-key-cues";
 import { handAt, ladder, moveChart, shiftFrets } from "../templates";
 import { KEY_OF_G } from "./harmony-more";
 import { BORROWED, FOUR_CHORD_SONGS, KEY_OF_A, MINOR_KEY_E, SEVENTHS, SEVENTHS_IN_SONGS, SIXTEEN_BARS } from "./chords-more";
@@ -89,7 +90,7 @@ function inKeys(tab: string, chart: string, shifts: Readonly<Record<string, numb
   };
 }
 
-export default definePath({
+export default withCues(definePath({
   id: "chords-in-a-key",
   title: "Chords in a Key",
   kind: "theory",
@@ -950,4 +951,4 @@ export default definePath({
       ],
     },
   ],
-});
+}), CHORDS_IN_A_KEY_CUES);
