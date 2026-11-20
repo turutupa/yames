@@ -734,7 +734,7 @@
       "fact": {
         "heard": "{{heard}} of {{expected}} notes heard",
         "noExtras": "no extras",
-        "extras_one": "{{count}} extra note",
+        "extras": "{{count}} extra note",
         "extras_other": "{{count}} extra notes",
         "rightNotes": "{{value}}% right notes (of {{base}} I could pitch)",
         "notesUnchecked": {
@@ -754,7 +754,7 @@
         "dash": "couldn't tell:"
       },
       "strip": {
-        "held_one": "{{count}} bar in a row held",
+        "held": "{{count}} bar in a row held",
         "held_other": "{{count}} bars in a row held",
         "roundEvery": "the tune comes round every {{count}}",
         "plain": "as played"
@@ -785,9 +785,9 @@
         "held": "{{title}} stays at a clean {{bpm}} BPM.",
         "played": "{{title}}: played at {{bpm}} BPM.",
         "backNext": "It comes back next Session.",
-        "backReview_one": "It comes back for review in {{count}} day.",
+        "backReview": "It comes back for review in {{count}} day.",
         "backReview_other": "It comes back for review in {{count}} days.",
-        "backParked_one": "It rests for {{count}} day and comes back fresh.",
+        "backParked": "It rests for {{count}} day and comes back fresh.",
         "backParked_other": "It rests for {{count}} days and comes back fresh."
       }
     }
