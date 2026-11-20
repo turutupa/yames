@@ -12,7 +12,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import type { CoachScreen } from "../context";
 import { fakeHost, toolCtx } from "./fakeHost";
-import { HOST_MEMBERS, SETTINGS_SECTIONS, WIRED_IN_T1A1, notWiredHost } from "./host";
+import { HOST_MEMBERS, SAFE_SETTING_KEYS, SETTINGS_SECTIONS, WIRED_IN_T1A1, notWiredHost } from "./host";
 import { COACH_TOOLS, toolCatalogue } from "./registry";
 import { checkCall, runCoachTool, runCoachUndo } from "./run";
 import { TEST_PATHS, runIn } from "./testPaths";
@@ -46,6 +46,11 @@ const SAMPLE_ARGS: Readonly<Record<string, ToolArgs>> = {
   set_minutes: { minutes: 20 },
   set_focus: { path: "alternate picking" },
   follow_path: { path: "ligado" },
+  load_jam: { jam: "slow blues" },
+  load_preset: { preset: "warm up" },
+  click_subdivision: { subdivision: 2 },
+  set_setting: { key: "theme", value: "velvet" },
+  set_goal: { text: "Play the solo at 120" },
 };
 
 describe("the list", () => {
@@ -153,6 +158,16 @@ describe("the never-list", () => {
       for (const never of NEVER) expect(never.test(member), `host member ${member} matches ${String(never)}`).toBe(false);
     }
     for (const fn of NEVER_FUNCTIONS) expect(HOST_MEMBERS as readonly string[]).not.toContain(fn);
+  });
+
+  it("set_setting reaches the short safe list and nothing else: no model, no input, no device, no grading", () => {
+    const tool = COACH_TOOLS.find((t) => t.name === "set_setting")!;
+    const key = tool.args.find((a) => a.name === "key")!;
+    expect(key.type.kind === "enum" && [...key.type.values].sort()).toEqual([...SAFE_SETTING_KEYS].sort());
+    expect([...SAFE_SETTING_KEYS].sort()).toEqual(["bandVolume", "coachSuggestions", "coachVoice", "countIn", "language", "practiceView", "theme"]);
+    for (const value of SAFE_SETTING_KEYS) {
+      for (const never of [...NEVER, /model|brain|tier|llm/i]) expect(never.test(value), `${value} matches ${String(never)}`).toBe(false);
+    }
   });
 
   it("no tool's name is a never-action", () => {
