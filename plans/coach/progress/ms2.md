@@ -156,6 +156,38 @@ full layout suite 1326 passed, 0 failed, 268 skipped (`pw-layout.log`).
 Owed: the Windows build (`npm run test:rust` on the RTX: `GetDiskFreeSpaceExW`, the rename-over-a-
 mapped-file path that item 5 is for, curl.exe with `--`); no `coach-llm` build was run here.
 
+### Re-read fixes (`877fcd58`)
+
+- **A stopped download renames nothing.** The vouched-for path read no cancel flag, and with a
+  full-size part curl is skipped too: a Cancel pressed while a new download waited for the previous
+  one could still rename the part over `model.bin`. The flag is now read at the top of `fetch_brain`
+  (right after the wait), at the top of `finish_brain_part`, after the check and just before the
+  rename; a stop returns `Cancelled` and a Cancel's discard runs (`after_brain_stop`). Tests:
+  `a_stop_during_the_wait_renames_nothing`; `a_failed_rename_leaves_the_old_marker_with_the_old_weights`
+  now expects a stopped retry to rename nothing (and proves the hash skip with swapped bytes under
+  the same length and modification time).
+- **A status poll between the two renames.** Both renames take the ADOPTION lock (nothing else held;
+  the order residency → coach engine → ADOPTION → RESIDENT_BRAIN is kept). Test:
+  `a_status_poll_cannot_come_between_the_two_renames`.
+- **Cancel and Resume crossing.** Chosen: tie the discard to the download number at the press rather
+  than refuse the Resume, because the Resume is the player's later press and should win. The discard
+  is dropped if any download started since (`discard_if_current`, under the lock downloads are
+  numbered under, so no start slips between the check and the unlink). Test:
+  `a_discard_never_removes_a_newer_transfers_part`.
+
+Gates: `npm run test:rust` 1201 passed (`rust2.log`), tsc, the touched vitest files, layout
+`coach-model.spec.ts` + `settings.spec.ts` (`tsc2.log`, `vt-focus2.log`, `pw-named2.log`).
+
+### Known limits, not fixed here
+
+Neither can occur on an install that never ran an unmerged build of this branch:
+- The "older copy" label is a guess in one case: the tier's folder holds a legacy-family file and an
+  older build later wrote a current file to the old place. The folder's (legacy) copy is used and the
+  current one is called "older". Nothing is lost (each has a Remove), but the words are wrong.
+- A tier folder holding the other tier's file, written by a pre-fix build of this branch (before
+  `35aa5fd0`), has no re-file path: downloads into it are refused (`refuse_foreign_weights`), and only
+  that tier's Remove clears it.
+
 ## Open points
 
 - The Windows free-space call and the Windows build were not compiled; worth one `npm run test:rust` on
