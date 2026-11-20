@@ -8,6 +8,7 @@ import json
 import os
 import pathlib
 import shutil
+import subprocess
 import tempfile
 import unittest
 import zipfile
@@ -263,6 +264,55 @@ class IngestTest(unittest.TestCase):
         self.assertIn("N=2", script)
         self.assertIn("run-as", script)
         self.assertIn("tar -chf -", script)
+
+
+@unittest.skipIf(ingest.ffmpeg_bin() is None, "no ffmpeg (~/tools/ffmpeg/ffmpeg, $YAMES_FFMPEG or PATH)")
+class PhoneM4aTest(unittest.TestCase):
+    """The phone's recorder default: AAC in an m4a, decoded through ffmpeg. Lossy, so the same 2 ms bar as the WAV."""
+
+    def setUp(self):
+        self.tmp = pathlib.Path(tempfile.mkdtemp(prefix="corpus-m4a-"))
+        self.env = {k: os.environ.get(k) for k in ("YAMES_CAPTURE_RAW", "YAMES_CORPUS_PREVIEW", "YAMES_CORPUS_CASES", "YAMES_FFMPEG")}
+        os.environ["YAMES_CAPTURE_RAW"] = str(self.tmp / "raw")
+        os.environ["YAMES_CORPUS_PREVIEW"] = str(self.tmp / "preview")
+        os.environ["YAMES_CORPUS_CASES"] = str(self.tmp / "cases")
+        self.d = make_session(self.tmp / "capture")
+        wav = self.d / "phone-recording.wav"
+        self.m4a = self.d / "phone.m4a"
+        r = subprocess.run([ingest.ffmpeg_bin(), "-nostdin", "-loglevel", "error", "-i", str(wav), "-c:a", "aac", "-b:a", "128k", str(self.m4a)])
+        self.assertEqual(r.returncode, 0)
+        wav.unlink()
+
+    def tearDown(self):
+        for k, v in self.env.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def summary(self) -> dict:
+        return json.loads((self.tmp / "preview" / self.d.name / "summary.json").read_text())
+
+    def test_m4a_aligns(self):
+        self.assertLess(self.m4a.stat().st_size, 1_000_000)
+        self.assertEqual(ingest.main([str(self.d), "--no-replay", "--no-cases", "--store-root", str(self.tmp / "store")]), 0)
+        (rec,) = self.summary()["seconds"]
+        self.assertEqual((rec["file"], rec["decoded"], rec["method"]), ("phone.m4a", "ffmpeg", "chirps"))
+        self.assertEqual(rec["aligned"], len(TAKES), rec.get("dropped"))
+        for k, (start, *_rest) in enumerate(TAKES):
+            stem = f"take-{1795600000000 + k * 10000:013d}-{k + 1:04d}"
+            self.assertLess(abs(rec["takes"][stem]["fileStartS"] - phone_time(BASE_NS + int(start * 1e9))) * 1000, 2.0, (stem, rec["takes"][stem]))
+        items = jsonl(self.tmp / "store" / f"corpus-{self.d.name}" / "items.jsonl")
+        self.assertEqual({it["chain"]["name"] for it in items}, {"app", "phone"})
+
+    def test_m4a_without_ffmpeg_is_skipped_with_a_reason(self):
+        os.environ["YAMES_FFMPEG"] = ""
+        self.assertIsNone(ingest.ffmpeg_bin())
+        self.assertEqual(ingest.main([str(self.d), "--no-replay", "--no-cases", "--store-root", str(self.tmp / "store")]), 0)
+        (rec,) = self.summary()["seconds"]
+        self.assertIn("needs ffmpeg", rec["skipped"])
+        self.assertIn("WAV", rec["skipped"])
 
 
 if __name__ == "__main__":

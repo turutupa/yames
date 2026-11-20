@@ -18,9 +18,11 @@ Take's grade felt wrong.
      unplugged electric or an acoustic.
    - **Phone app** (Android build): the phone's mic as Yames' input.
 3. **A second recorder (optional, worth it).** A phone on the desk, about a
-   metre away, with a recorder app set to **WAV** (m4a cannot be read on the
-   DGX yet). **Start it before step 4**, stop it after step 6. A second
-   laptop's recorder works the same way.
+   metre away, with its recorder app as it comes: m4a (the usual default),
+   WAV, mp3 or opus all work (the DGX converts m4a/aac/mp3/opus with ffmpeg
+   from `~/tools/ffmpeg/`). WAV is still the safest if the app offers it.
+   **Start it before step 4**, stop it after step 6. A second laptop's
+   recorder works the same way.
 
 ## During (30 min)
 
@@ -44,9 +46,9 @@ Take's grade felt wrong.
 
 7. **On the RTX, nothing to send.** On the DGX, ask for (or run)
    `npm run corpus:ingest -- rtx` (it pulls the newest session over `ssh rtx`).
-   - **The phone's recording**: copy the WAV into the session folder first:
-     Settings > Recording session > **Open folder**, drop the file in, name it
-     with what it is (`phone.wav`, `laptop.wav`).
+   - **The phone's recording**: copy the file (m4a or WAV, as recorded) into
+     the session folder first: Settings > Recording session > **Open folder**,
+     drop the file in, name it with what it is (`phone.m4a`, `laptop.wav`).
    - **A session recorded on the Android app**: Settings > Recording session >
      **Share session**, send the zip to the PC (it ends up in
      `Downloads\yames-capture-<session>.zip`, which `rtx` also picks up), or

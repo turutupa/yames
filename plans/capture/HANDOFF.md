@@ -29,4 +29,7 @@ State 2026-11-20 ~04:45 PT, branch `mvp-capture` (from revamp 45ebdc2d), not pus
 - Android: `share_file` Kotlin not compiled here; adb `run-as` works only on a debuggable build.
 - rtx pull ran once for real (silent, no sessions there yet).
 - Songs passes are not captured; MIDI-input Takes with pitches are not (no notes pass).
-- Phone m4a unsupported (no ffmpeg on the DGX): TESTING.md asks for WAV.
+- Phone m4a: supported since the test-round leg (2026-11-20): `read_recording` decodes
+  m4a/aac/mp3/opus through ffmpeg (`$YAMES_FFMPEG`, else `~/tools/ffmpeg/ffmpeg`, a static
+  7.0.2 arm64 build from johnvansickle.com, md5 checked, else PATH); without one mp3/opus try
+  libsndfile and m4a is skipped with the reason in the report. Tests 10/10 (2 new, m4a AAC 128k).

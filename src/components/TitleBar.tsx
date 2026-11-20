@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { IS_MAC, IS_WINDOWS, IS_LINUX } from "../hotkeys";
 import { APP_NAME } from "../brand";
+import { IS_MOBILE } from "../platform";
 import { AppMark } from "./AppMark";
 import { WindowControls } from "./WindowControls";
 
@@ -39,7 +40,12 @@ export const TitleBar = memo(function TitleBar() {
     <div className="app-titlebar" {...(!IS_MAC && { "data-tauri-drag-region": "" })}>
       <AppMark />
       <span className="app-wordmark">{APP_NAME}</span>
-      {(IS_WINDOWS || IS_LINUX) && <WindowControls />}
+      {/* `!IS_MOBILE` first, though the strip is never rendered on a phone:
+          `memo()` is a call the bundler must keep, so without the build-time
+          constant here WindowControls (and with it the whole window API,
+          `set_always_on_top` included) stays in the Android bundle, and
+          IS_LINUX is true on Android (card #120). */}
+      {!IS_MOBILE && (IS_WINDOWS || IS_LINUX) && <WindowControls />}
     </div>
   );
 });
