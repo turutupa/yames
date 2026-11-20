@@ -265,6 +265,92 @@ describe("round 2: rules closed after the proof-read", () => {
   });
 });
 
+describe("round 3: three holes closed, on made-up lines", () => {
+  const note = (string: number, fret: number, tick: number) => ({ string, fret, midi: [64, 59, 55, 50, 45, 40][string - 1] + fret, tick, dur: 480, tech: [] });
+  const side = (places: Array<[number, number]>, fret = 5): TextSide => ({ notes: places.map(([s, f], i) => note(s, f, i * 480)), position: { fret, shifts: "none" } });
+  const minor = (root: string, spelled: string[]) => ({ kind: "scale" as const, root, scale: "naturalMinor", spelled, cover: false });
+  const aMinor = minor("A", ["A", "B", "C", "D", "E", "F", "G"]);
+  const dMinor = minor("D", ["D", "E", "F", "G", "A", "Bb", "C"]);
+  const eMinor = minor("E", ["E", "F#", "G", "A", "B", "C", "D"]);
+  const even = "Play it evenly and let every note ring.";
+
+  it("1. a capital 'A' after a colon is a note or a key, never the article", () => {
+    // A, C, D, C with the roots on the low E and A strings; a string higher it is D, F, G, F.
+    const ex: ExerciseText = {
+      ...side([[6, 5], [6, 8], [5, 5], [6, 8]]),
+      purpose: "Three roots, one after another.",
+      howTo: ["The roots: A while the first bar lasts, then C and D.", "One scale: A minor played from its root.", even],
+      harmony: aMinor,
+    };
+    const variant: TextSide = { ...side([[5, 5], [5, 8], [4, 5], [5, 8]]), harmony: dMinor };
+    expect(variantText(ex, variant)).toEqual({
+      howTo: ["The roots: D while the first bar lasts, then F and G.", "One scale: D minor played from its root.", even],
+    });
+    // Where a sentence starts it may still be the article.
+    const article: ExerciseText = { ...ex, purpose: "A while on three roots, one after another.", howTo: ["Frets 5 and 8 on the low E string.", even] };
+    expect(variantText(article, variant)).toEqual({ howTo: ["Frets 5 and 8 on the A string.", even] });
+  });
+
+  it("2. 'the low E' with no 'string' is the string and the note: written only where both readings agree", () => {
+    const ex: ExerciseText = {
+      ...side([[6, 0], [6, 3], [6, 0], [6, 5]], 1),
+      purpose: "A riff that keeps coming back to its lowest note.",
+      howTo: ["The riff rests on the low E and comes back to it after every fretted note.", "Fret 3 on the low E, then fret 5.", even],
+    };
+    // The same riff on the A string: the string is the A, and the note it rests on is the open A.
+    expect(variantText(ex, side([[5, 0], [5, 3], [5, 0], [5, 5]], 1))).toEqual({
+      howTo: ["The riff rests on the A and comes back to it after every fretted note.", "Fret 3 on the A, then fret 5.", even],
+    });
+    // Three frets up on the same string: the string is still the low E, the note is a G. The sentence that
+    // could be read as the note is not written; the one that puts a fret on the string is.
+    const up = describeVariant(ex, side([[6, 3], [6, 6], [6, 3], [6, 8]], 3));
+    expect(up.text).toEqual({ howTo: ["Fret 6 on the low E, then fret 8.", even] });
+    expect(up.refusals.map((r) => r.reason)).toEqual(["'low E' that could be the string or the note, and they moved differently"]);
+    // An Exercise that plays no E on that string has only one reading.
+    const box: ExerciseText = { ...side([[6, 5], [6, 8], [5, 5], [5, 7]]), purpose: "Four notes of a box, low to high.", howTo: ["Pick every note on the low E and on the A string.", even] };
+    const moved = describeVariant(box, side([[5, 5], [5, 8], [4, 5], [4, 7]]));
+    expect(moved.refusals).toEqual([]);
+    expect(moved.text).toEqual({ howTo: ["Pick every note on the A and on the D string.", even] });
+  });
+
+  it("3. what another Exercise did is not this variant's notes: the sentence is not written", () => {
+    // A, B, C, B on the top string; on the B string the same frets are E, F sharp, G, F sharp.
+    const ex: ExerciseText = {
+      ...side([[1, 5], [1, 7], [1, 8], [1, 7]]),
+      purpose: "Three notes on one string, round and round.",
+      howTo: [
+        "Frets 5, 7 and 8 on the top string. The last Exercise ended on A, and this one starts there.",
+        "In Step 2 the three notes were A, B and C.",
+        "The turn from the last Exercise: A, B and C, then B again.",
+        "Step 1's figure on the top string, frets 5, 7 and 8.",
+        even,
+      ],
+      harmony: aMinor,
+    };
+    const d = describeVariant(ex, { ...side([[2, 5], [2, 7], [2, 8], [2, 7]]), harmony: eMinor });
+    expect(d.text).toEqual({
+      howTo: ["Frets 5, 7 and 8 on the B string.", "The turn from the last Exercise: E, F# and G, then F# again.", "Step 1's figure on the B string, frets 5, 7 and 8.", even],
+    });
+    expect(d.howToFrom).toEqual([0, 2, 3, 4]);
+    expect(d.refusals.map((r) => r.reason)).toEqual(["a sentence about another Exercise", "a sentence about another Exercise"]);
+  });
+
+  it("the Paths' own sentences that name another Exercise's material as this one's are still written", () => {
+    expect(said("shred", "speed-bursts.one-beat", "stringSet=2")!.howTo![0]).toContain("the fret-12 figure from its top, 15, 13, 12, 13 on the B string");
+    // "ring finger ... 17 on the top E": a fret is put on it, so it is the string, though the shape has an E there.
+    for (const spec of SPECS.filter((s) => s.variantText)) {
+      for (const ex of exercisesOf(doc(spec.id))) {
+        for (const v of (ex.variation?.variants ?? []).slice(1)) {
+          const { exercise, variant } = sides(ex, v);
+          for (const r of describeVariant(exercise, variant).refusals) {
+            expect(r.reason, `${ex.id}#${v.id}: ${r.sentence}`).not.toMatch(/another Exercise|could be the string or the note/);
+          }
+        }
+      }
+    }
+  });
+});
+
 describe("the rules, on small made-up lines", () => {
   const note = (string: number, fret: number, tick: number, extra: Partial<ExerciseText["notes"][number]> = {}) => {
     const open = [64, 59, 55, 50, 45, 40][string - 1];
