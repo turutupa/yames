@@ -44,7 +44,7 @@
 import type { Exercise } from "../paths/format";
 import type { TakeGrade } from "./grade";
 import { hasRungAbove, hasRungBelow, rungAbove, rungBelow } from "./ladder";
-import type { PlanStep, SessionPlan } from "./planner";
+import type { LoopStep, PlanStep, SessionPlan } from "./planner";
 import type { TakeMeasures } from "./takeMeasures";
 
 export type RunPhase =
@@ -62,6 +62,11 @@ export type RunPhase =
   | "timedReady"
   /** A metronome, a jam or a drill is running against the clock. */
   | "timed"
+  /**
+   * A bar or two of the Exercise on repeat, slow and ungraded, until the
+   * player stops it (`RunState.loop`). Back to `ready` after.
+   */
+  | "looping"
   /** The Session is over, and says what moved. */
   | "recap";
 
@@ -85,7 +90,33 @@ export type TakeOutcome = {
    * grade is `ungraded` and it moved nothing (owner, 2026-11-18).
    */
   ungraded?: UngradedWhy;
+  /**
+   * What the coach's note measured about where this Take slipped, kept for
+   * the rules that read it (P1, P2 and the loop's button). Absent when the
+   * note named no place and found no repeat.
+   */
+  spot?: TakeSpot;
 };
+
+/**
+ * Where a Take slipped, and how often it has before (`takeNote`'s `place`,
+ * `repeat` and `onceMoreHere`). Facts only: `bigAction` decides with them.
+ */
+export type TakeSpot = {
+  /** Pattern bars the note named, from 1, the compared one first. Empty: no bar to name. */
+  patternBars: number[];
+  /** First, second or third time at the same spot and tempo; 3 also for three Takes falling. */
+  repeat: 1 | 2 | 3;
+  /** A pass that still holds the pattern bar that slipped in the Take before. */
+  onceMoreHere: boolean;
+};
+
+/**
+ * What a loop heard, when it was graded and something was measured: rounds
+ * played whole, the rounds with no note missed, and how many of those came
+ * last in a row.
+ */
+export type LoopHeard = { rounds: number; landed: number; lastRun: number };
 
 /**
  * Why a Take is played without grading. `gradingOff`: the player's choice in
@@ -149,6 +180,13 @@ export type RunState = {
    * long it takes, so time never turns "Go again" into "Next".
    */
   untimed: boolean;
+  /** The loop running now (`looping`), on the Exercise at `stepIndex`. */
+  loop: LoopStep | null;
+  /**
+   * The last loop on this Exercise, once it stopped, and what it heard: the
+   * ready screen's one line about it. Gone when the next Take starts.
+   */
+  afterLoop: { loop: LoopStep; heard: LoopHeard | null } | null;
 };
 
 /** A warm-up's or a jam's tempo, one press of - or +: not graded, so any tempo is fine. */
@@ -162,9 +200,12 @@ export function timedBpm(bpm: number, delta: number): number {
   return Math.max(TIMED_BPM_MIN, Math.min(TIMED_BPM_MAX, next));
 }
 
-/** A timed step whose tempo the player may set: a warm-up, or a jam with one. Not a ramp, which moves it. */
+/**
+ * A timed step whose tempo the player may set: a warm-up, a jam with one, or
+ * a loop. Not a ramp, which moves it.
+ */
 export function timedTempoAdjustable(step: PlanStep | null): boolean {
-  return !!step && (step.kind === "metronome" || (step.kind === "jam" && !!step.bpm));
+  return !!step && (step.kind === "metronome" || step.kind === "loop" || (step.kind === "jam" && !!step.bpm));
 }
 
 /** A timed step whose tempo may move while it plays: a warm-up's click. */
@@ -227,7 +268,14 @@ export type RunEvent =
    * Before anything on this step has been played: back to the timed step
    * before it, ready to start again (the warm-up once more, without Exit).
    */
-  | { type: "back"; now: number };
+  | { type: "back"; now: number }
+  /**
+   * From a ready screen or a result: a bar or two of this Exercise on repeat
+   * (`loopOffer`). Back to this Exercise's ready screen when it stops.
+   */
+  | { type: "loop"; loop: LoopStep; now: number }
+  /** The loop was stopped, with what it heard when it was graded and heard something. */
+  | { type: "loopStopped"; heard: LoopHeard | null; now: number };
 
 export const IDLE: RunState = {
   phase: "idle",
@@ -248,6 +296,8 @@ export const IDLE: RunState = {
   done: [],
   ungraded: null,
   untimed: false,
+  loop: null,
+  afterLoop: null,
 };
 
 export function currentStep(state: RunState): PlanStep | null {
@@ -262,7 +312,17 @@ export function nextStep(state: RunState): PlanStep | null {
 function enter(state: RunState, index: number, now: number): RunState {
   const step = state.plan?.steps[index];
   if (!step) return { ...state, phase: "recap", stepIndex: index, now };
-  const base = { ...state, stepIndex: index, stepStartedAt: now, takes: 0, now, paused: false, ended: false };
+  const base = {
+    ...state,
+    stepIndex: index,
+    stepStartedAt: now,
+    takes: 0,
+    now,
+    paused: false,
+    ended: false,
+    loop: null,
+    afterLoop: null,
+  };
   if (step.kind === "exercise") return { ...base, phase: "ready", bpm: step.bpm };
   return {
     ...base,
@@ -310,7 +370,9 @@ export function canJump(state: RunState): boolean {
     state.phase === "ready" ||
     state.phase === "result" ||
     state.phase === "timedReady" ||
-    state.phase === "timed"
+    state.phase === "timed" ||
+    // A loop has nothing in it to lose: it stops and the block opens.
+    state.phase === "looping"
   );
 }
 
@@ -380,7 +442,9 @@ export function runReducer(state: RunState, event: RunEvent): RunState {
     case "ready":
       switch (event.type) {
         case "takeStarted":
-          return { ...state, phase: "playing", now: event.now };
+          return { ...state, phase: "playing", afterLoop: null, now: event.now };
+        case "loop":
+          return startLoop(state, event.loop, event.now);
         case "slower":
           return { ...state, bpm: rungBelow(event.exercise, state.bpm), now: event.now };
         case "faster":
@@ -464,6 +528,31 @@ export function runReducer(state: RunState, event: RunEvent): RunState {
           steps.splice(state.stepIndex + 1, 0, { ...event.step, minutes: event.step.minutes + carried });
           return enter({ ...state, ...leaving(state), plan: { ...plan, steps } }, state.stepIndex + 1, event.now);
         }
+        case "loop":
+          return startLoop(state, event.loop, event.now);
+        case "tick":
+          return { ...state, now: event.now };
+        default:
+          return state;
+      }
+
+    case "looping":
+      switch (event.type) {
+        case "loopStopped": {
+          // Back to this Exercise's ready screen, at the Take's own tempo:
+          // the loop moved nothing, and counts as no Take.
+          const loop = state.loop;
+          return {
+            ...state,
+            phase: "ready",
+            loop: null,
+            afterLoop: loop ? { loop, heard: event.heard } : null,
+            now: event.now,
+          };
+        }
+        case "setBpm":
+          // The loop's own tempo, never the Take's.
+          return state.loop ? { ...state, loop: { ...state.loop, bpm: timedBpm(event.bpm, 0) }, now: event.now } : state;
         case "tick":
           return { ...state, now: event.now };
         default:
@@ -538,6 +627,80 @@ function onward(state: RunState, now: number, insert?: PlanStep): RunState {
   const steps = [...plan.steps];
   steps.splice(state.stepIndex + 1, 0, insert);
   return enter({ ...marked, plan: { ...plan, steps } }, state.stepIndex + 1, now);
+}
+
+/** Into a loop of the Exercise on screen: only that Exercise's own. */
+function startLoop(state: RunState, loop: LoopStep, now: number): RunState {
+  const step = currentStep(state);
+  if (step?.kind !== "exercise" || loop.exerciseId !== step.exerciseId || loop.pathId !== step.pathId) return state;
+  if (loop.fromBar < 1 || loop.toBar < loop.fromBar || loop.bpm <= 0) return state;
+  return { ...state, phase: "looping", loop, afterLoop: null, now };
+}
+
+/** A loop runs this many rungs under the Take's tempo (DESIGN 4.2). */
+export const LOOP_RUNGS_DOWN = 2;
+/** At most this many bars of the pattern: "the pattern bar (or two)". */
+export const LOOP_MAX_BARS = 2;
+
+/**
+ * The bars a loop plays, from the bars the note named: the compared bar, with
+ * the neighbour that slipped beside it when there was one.
+ */
+export function loopBars(patternBars: readonly number[], tuneBars: number): { fromBar: number; toBar: number } | null {
+  const first = patternBars[0];
+  if (first === undefined || first < 1) return null;
+  const named = new Set(patternBars);
+  const last = Math.max(1, tuneBars);
+  if (LOOP_MAX_BARS > 1 && named.has(first + 1) && first + 1 <= last) return { fromBar: first, toBar: first + 1 };
+  if (LOOP_MAX_BARS > 1 && named.has(first - 1)) return { fromBar: first - 1, toBar: first };
+  return { fromBar: Math.min(first, last), toBar: Math.min(first, last) };
+}
+
+/**
+ * "Loop the first bar", when the Session offers it: on a ready screen or a
+ * result of an Exercise whose last Take here named a place (or, ungraded,
+ * when the player answered "Not yet" twice). `front`: the second time at the
+ * same spot and tempo, the button leads the tonal row (DESIGN 4.2's table).
+ */
+export function loopOffer(
+  state: RunState,
+  exercise: Exercise | null,
+  options: { notYetTwice?: boolean } = {},
+): { loop: LoopStep; front: boolean } | null {
+  if (state.phase !== "ready" && state.phase !== "result") return null;
+  const step = currentStep(state);
+  if (step?.kind !== "exercise" || !exercise) return null;
+  const mine = stepOutcomes(state);
+  const last = mine[mine.length - 1];
+  if (!last) return null;
+  let bars: { fromBar: number; toBar: number } | null = null;
+  let front = false;
+  if (last.ungraded === undefined && last.spot && last.spot.patternBars.length > 0) {
+    bars = loopBars(last.spot.patternBars, exercise.bars);
+    front = last.spot.repeat >= 2;
+  } else if (last.ungraded !== undefined && options.notYetTwice) {
+    // Nothing was heard, so no bar was named: the tune's first.
+    bars = { fromBar: 1, toBar: 1 };
+    front = true;
+  }
+  if (!bars) return null;
+  let bpm = state.bpm;
+  for (let i = 0; i < LOOP_RUNGS_DOWN; i += 1) bpm = rungBelow(exercise, bpm);
+  return {
+    loop: {
+      kind: "loop",
+      id: `${step.id}#loop`,
+      title: step.title,
+      pathId: step.pathId,
+      exerciseId: step.exerciseId,
+      variantSeed: step.variantSeed,
+      ...bars,
+      bpm,
+      minutes: 0,
+      why: step.why,
+    },
+    front,
+  };
 }
 
 /** What a block of the Session bar shows: the one on screen, played out, skipped, or still to come. */
@@ -630,11 +793,21 @@ export type BigAction =
   /** Start a timed step's clock, and whatever it plays. */
   | { kind: "startTimed"; step: PlanStep }
   | { kind: "endTake" }
-  /** Go again; `up` when it is a rung faster than the Take just played. */
-  | { kind: "again"; bpm: number; up?: boolean }
-  | { kind: "next"; step: PlanStep; insert?: boolean }
-  | { kind: "finish" }
-  | { kind: "close" };
+  /**
+   * Go again; `up` when it is a rung faster than the Take just played.
+   * `onceMore` (P1): a pass that still held the bar that slipped before, so
+   * the same tempo once more, with the rung above (`up`) one tap away.
+   */
+  | { kind: "again"; bpm: number; up?: boolean; onceMore?: { up: number } }
+  /**
+   * `leaveIt` (P2): the same place three times at one tempo, or three Takes
+   * falling there. On, rather than again; every other choice stays.
+   */
+  | { kind: "next"; step: PlanStep; insert?: boolean; leaveIt?: boolean }
+  | { kind: "finish"; leaveIt?: boolean }
+  | { kind: "close" }
+  /** A loop is running: stop it, back to the ready screen. */
+  | { kind: "endLoop" };
 
 /** Slips on one rung that end Find my edge. One is a hold, not a verdict. */
 export const EDGE_SLIPS = 2;
@@ -763,6 +936,8 @@ export function bigAction(state: RunState, exercise: Exercise | null): BigAction
     }
     case "timed":
       return onward();
+    case "looping":
+      return { kind: "endLoop" };
     case "recap":
       return { kind: "close" };
     case "result":
@@ -782,17 +957,37 @@ export function bigAction(state: RunState, exercise: Exercise | null): BigAction
     case "notCaught":
       return { kind: "again", bpm: state.bpm };
     case "belowBar":
+      // P2, leave it (owner, 2026-11-20): the same place a third time at this
+      // tempo, or a third Take falling, and the Session moves on. Going again
+      // stays one tap away.
+      if (last.spot?.repeat === 3) return leaveIt(onward());
+      return timeLeft ? { kind: "again", bpm: state.bpm } : onward();
     case "tooShort":
       return timeLeft ? { kind: "again", bpm: state.bpm } : onward();
     case "ungraded":
       return onward();
     case "passed": {
       if (last.grade.passesExercise || !timeLeft || !exercise) return onward();
-      return hasRungAbove(exercise, state.bpm)
-        ? { kind: "again", bpm: rungAbove(exercise, state.bpm), up: true }
-        : onward();
+      if (!hasRungAbove(exercise, state.bpm)) return onward();
+      const up = rungAbove(exercise, state.bpm);
+      // P1, once more here (owner, 2026-11-20): a pass that still held the
+      // bar that slipped the Take before stays at this tempo once. Once: a
+      // pass here already, and the next one goes up as it always did.
+      if (onceMoreHere(state, last)) return { kind: "again", bpm: state.bpm, onceMore: { up } };
+      return { kind: "again", bpm: up, up: true };
     }
   }
+}
+
+function leaveIt(action: BigAction): BigAction {
+  return action.kind === "next" || action.kind === "finish" ? { ...action, leaveIt: true } : action;
+}
+
+/** P1's condition: this pass held the spot that slipped before, and no pass at this tempo came before it here. */
+function onceMoreHere(state: RunState, last: TakeOutcome): boolean {
+  if (!last.spot?.onceMoreHere) return false;
+  const mine = stepOutcomes(state);
+  return !mine.slice(0, -1).some((o) => o.bpm === last.bpm && o.grade.verdict === "passed");
 }
 
 /** Whether "slower" and "faster" mean anything right now. */
@@ -832,6 +1027,7 @@ export function eventForBigAction(action: BigAction, now: number): RunEvent | nu
     // Starting and stopping a Take are the engine's to do; its edge is the event.
     case "playTake":
     case "endTake":
+    case "endLoop":
     case "none":
       return null;
   }
