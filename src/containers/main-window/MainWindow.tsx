@@ -80,6 +80,7 @@ import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { DrillView } from "../drill/DrillView";
 import { JamView } from "../jam/JamView";
 import { SongsView } from "../songs/SongsView";
+import { useScheduleLeavesWithSong } from "../songs/useScheduleLeavesWithSong";
 import { useSongsDue } from "../songs/review/useSongsDue";
 import { useOpenedSong } from "../songs/useOpenedSong";
 import { FullscreenView } from "../zen/FullscreenView";
@@ -562,6 +563,9 @@ export function MainWindow() {
     // would come back with its playhead moved.
     beat: view === "session" ? null : currentBeat,
   });
+  // Its schedule leaves the engine when the app leaves Songs or the song
+  // closes; not when Settings opens over it (the mode stays).
+  useScheduleLeavesWithSong(mode === "songs" && !!songsSession.score);
 
   /**
    * Today's Session, and everything that runs it (`src/session/`).

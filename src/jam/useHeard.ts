@@ -58,12 +58,12 @@ export function useHeard({
     let timer: ReturnType<typeof setTimeout> | null = null;
     // The worker this effect started last, for its own stop.
     let id: number | null = null;
-    const start = () => {
+    const start = (first: boolean) => {
       timer = null;
       inTurn(async () => {
         // asked for, then the jam stopped before its turn came
         if (gone) return;
-        id = await harmonyStart(chartRef.current, bpmRef.current);
+        id = await harmonyStart(chartRef.current, bpmRef.current, first);
         // `gone` by now: the cleanup's stop is behind this in the queue and
         // finds the id
         if (gone) return;
@@ -79,11 +79,11 @@ export function useHeard({
         running.current = false;
         if (retries < RETRIES && !timer) {
           retries += 1;
-          timer = setTimeout(start, RETRY_MS);
+          timer = setTimeout(() => start(false), RETRY_MS);
         }
       }
     });
-    start();
+    start(true);
     return () => {
       gone = true;
       if (timer) clearTimeout(timer);

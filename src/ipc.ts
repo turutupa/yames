@@ -990,9 +990,12 @@ export type HeardChart = {
  * Start reading the key and chords from the input that is listening. The
  * worker's id, for `harmonyStop`; null when the input is not listening or the
  * build has no note model: nothing was started.
+ *
+ * `clearStale`: free play is beginning (not a retry after the worker ended
+ * by itself), so a schedule some screen left loaded is cleared.
  */
-export async function harmonyStart(chart: HeardChart | null, bpm: number): Promise<number | null> {
-  return invoke<number | null>("harmony_start", { chart, bpm });
+export async function harmonyStart(chart: HeardChart | null, bpm: number, clearStale: boolean): Promise<number | null> {
+  return invoke<number | null>("harmony_start", { chart, bpm, clearStale });
 }
 
 /** Bar `bar` of the jam's form starts now. */

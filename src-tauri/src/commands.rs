@@ -2129,6 +2129,12 @@ pub fn clear_score_schedule(timing_analyzer: State<SharedTimingAnalyzer>) -> Res
 /// is not checked here: every caller asks only while it is on and a jam
 /// plays (`useHeard`'s `active`).
 ///
+/// `clear_stale`: the page is beginning free play (not asking again after a
+/// worker ended by itself), so a schedule still loaded is one some screen
+/// forgot, and is cleared: under a jam's click it would pass for a Take and
+/// keep the reading paused. Not on a retry, which may come late, after the
+/// page has moved on and the next Take's schedule is loaded.
+///
 /// `chart` is the jam's key and chords in concert pitch, when it has them:
 /// the engine then takes them as given and estimates only what is missing.
 /// The reading arrives as `harmony-reading` events (`harmony::worker::Live`,
@@ -2141,6 +2147,7 @@ pub fn clear_score_schedule(timing_analyzer: State<SharedTimingAnalyzer>) -> Res
 pub async fn harmony_start(
     chart: Option<crate::harmony::Chart>,
     bpm: f64,
+    clear_stale: bool,
     audio_input: State<'_, SharedAudioInput>,
     timing_analyzer: State<'_, SharedTimingAnalyzer>,
     harmony: State<'_, crate::harmony::worker::SharedHarmony>,
@@ -2159,10 +2166,7 @@ pub async fn harmony_start(
     if !listening || !crate::detect::model::enabled() {
         return Ok(None);
     }
-    // The page asks for this only where no Take is being played: a schedule
-    // still loaded is one some screen forgot, and under a jam's click it
-    // would pass for a Take and keep the reading paused.
-    if timing_analyzer.lock().unwrap_or_else(|e| e.into_inner()).forget_stale_schedule() {
+    if clear_stale && timing_analyzer.lock().unwrap_or_else(|e| e.into_inner()).forget_stale_schedule() {
         eprintln!("[yames] free play started with a schedule still loaded: cleared");
     }
     // (The worker loads the note model itself, before its first look at the

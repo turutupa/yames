@@ -172,7 +172,8 @@ pub struct Hooks {
     pub paused: Box<dyn Fn() -> bool + Send>,
     /// Have the model loaded, however long that takes. Called once, on the
     /// worker's thread, before it first looks at the ring: a load inside the
-    /// first window would look like a model too slow for the music.
+    /// first window would look like a model too slow for the music. (`stop`
+    /// waits for it, as it waits for a window; `Drop` does not.)
     pub warm: Box<dyn FnMut() + Send>,
 }
 
@@ -547,11 +548,14 @@ fn run(alive: &AtomicBool, shared: &Mutex<Shared>, ring: &Mutex<RingBuffer>, rat
             // A mark's place in the input: the samples read up to this poll,
             // less how long before the poll the mark was made. Counted in
             // samples, so it does not drift from the engine's time over a
-            // long jam (the input's own latency is still not in it).
+            // long jam (the input's own latency is still not in it). A mark
+            // from before the first look at the ring (the page sends one as
+            // soon as the worker exists, and the model may take seconds to
+            // load) falls before zero, and is kept there: the bar line was
+            // then, not when the listening began.
             let read_s = (written - l.origin) as f64 / rate as f64;
             for (ns, bar, beat) in s.marks.drain(..) {
-                let t = read_s - (at_ns as f64 - ns as f64) / 1e9;
-                l.engine.mark_bar(t.max(0.0), bar, beat);
+                l.engine.mark_bar(read_s - (at_ns as f64 - ns as f64) / 1e9, bar, beat);
             }
         }
         // One window at a time, asking before each: a verifier that wants

@@ -3,20 +3,24 @@
  * in the same tick. The stop must reach the backend first and name the worker
  * it means; and a tempo change must reach a worker that has no chart.
  */
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import type { HeardChart } from "../ipc";
 
 const calls: string[] = [];
+/** `clearStale` of each start. */
+const cleared: boolean[] = [];
 let nextId = 1;
 /** Resolvers of the starts in flight, oldest first. */
 let starts: ((id: number | null) => void)[] = [];
 let holdStarts = false;
+let reading: (live: unknown) => void = () => {};
 
 vi.mock("../ipc", () => ({
-  harmonyStart: vi.fn(() => {
+  harmonyStart: vi.fn((_chart: unknown, _bpm: number, clearStale: boolean) => {
     const id = nextId++;
     calls.push(`start:${id}`);
+    cleared.push(clearStale);
     if (!holdStarts) return Promise.resolve(id);
     return new Promise<number | null>((resolve) => starts.push(() => resolve(id)));
   }),
@@ -29,7 +33,10 @@ vi.mock("../ipc", () => ({
     calls.push(`tempo:${bpm}`);
     return Promise.resolve();
   }),
-  onHarmonyReading: vi.fn(() => Promise.resolve(() => {})),
+  onHarmonyReading: vi.fn((cb: (live: unknown) => void) => {
+    reading = cb;
+    return Promise.resolve(() => {});
+  }),
 }));
 
 const { useHeard } = await import("./useHeard");
@@ -46,6 +53,7 @@ async function settle() {
 beforeEach(async () => {
   await settle();
   calls.length = 0;
+  cleared.length = 0;
   starts = [];
   holdStarts = false;
 });
@@ -92,4 +100,24 @@ describe("useHeard", () => {
     view.unmount();
     await settle();
   });
+
+  it("clears a schedule left loaded when free play begins, and not when it asks again", async () => {
+    vi.useFakeTimers();
+    const view = renderHook((p: Props) => useHeard(p), { initialProps: { active: true, chart: null, bpm: 100, formBar: 0 } });
+    await settle();
+    expect(cleared).toEqual([true]);
+    // the worker ended by itself: asked for again a little later
+    act(() => reading(null));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2000);
+    });
+    await settle();
+    expect(cleared).toEqual([true, false]);
+    view.unmount();
+    await settle();
+  });
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });

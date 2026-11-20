@@ -635,10 +635,15 @@ impl TimingAnalyzer {
     /// like a Take to `harmony::worker::TakeWatch`, and the reading would
     /// stay paused for the whole jam.
     pub fn forget_stale_schedule(&self) -> bool {
-        if self.schedule.lock().unwrap_or_else(|e| e.into_inner()).is_none() {
+        // looked at and emptied under one lock: a schedule loaded a moment
+        // later is not the one that was found
+        if self.schedule.lock().unwrap_or_else(|e| e.into_inner()).take().is_none() {
             return false;
         }
-        self.clear_score_schedule();
+        self.notes.forget();
+        self.notes.tap.disarm();
+        self.schedule_version
+            .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
         true
     }
 
@@ -6472,10 +6477,6 @@ mod notes_pass_tests {
         assert!(!notes.midi_seen.load(Ordering::Acquire));
     }
 
-    /// B2, end to end through the analyzer: a Take closed twice, the second
-    /// close landing after the first had started the pitch pass, still gets
-    /// its right notes. `close_open_segment` used to empty the slot, which
-    /// threw away the pass the first close had started.
     /// Review M7, B1: a schedule a screen left loaded, then a jam with the
     /// reading on. Free play starting clears it, once, and touches nothing
     /// when there is none (the version the analyzer's thread watches).
@@ -6493,6 +6494,10 @@ mod notes_pass_tests {
         assert!(!ta.forget_stale_schedule());
     }
 
+    /// B2, end to end through the analyzer: a Take closed twice, the second
+    /// close landing after the first had started the pitch pass, still gets
+    /// its right notes. `close_open_segment` used to empty the slot, which
+    /// threw away the pass the first close had started.
     #[test]
     fn a_second_close_does_not_throw_away_the_first_closes_pitch_pass() {
         let ta = TimingAnalyzer::new(Arc::new(Mutex::new(VecDeque::new())));
