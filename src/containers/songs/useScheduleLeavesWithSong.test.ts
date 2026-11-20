@@ -18,7 +18,7 @@ beforeEach(() => {
 
 describe("useScheduleLeavesWithSong", () => {
   it("clears the schedule when Songs unmounts with a song open", () => {
-    const view = renderHook(({ open }) => useScheduleLeavesWithSong(open), { initialProps: { open: true } });
+    const view = renderHook(({ open }) => useScheduleLeavesWithSong(open, false), { initialProps: { open: true } });
     // another render with the song still open (another song, a new range)
     view.rerender({ open: true });
     expect(ipc.clearScoreSchedule).not.toHaveBeenCalled();
@@ -27,15 +27,22 @@ describe("useScheduleLeavesWithSong", () => {
   });
 
   it("clears it when the song is closed, and not again on unmount", () => {
-    const view = renderHook(({ open }) => useScheduleLeavesWithSong(open), { initialProps: { open: true } });
+    const view = renderHook(({ open }) => useScheduleLeavesWithSong(open, false), { initialProps: { open: true } });
     view.rerender({ open: false });
     expect(ipc.clearScoreSchedule).toHaveBeenCalledTimes(1);
     view.unmount();
     expect(ipc.clearScoreSchedule).toHaveBeenCalledTimes(1);
   });
 
+  it("leaves the schedule under a pass that is still playing", () => {
+    const view = renderHook(({ playing }) => useScheduleLeavesWithSong(true, playing), { initialProps: { playing: false } });
+    view.rerender({ playing: true });
+    view.unmount();
+    expect(ipc.clearScoreSchedule).not.toHaveBeenCalled();
+  });
+
   it("does nothing when no song was ever open", () => {
-    renderHook(() => useScheduleLeavesWithSong(false)).unmount();
+    renderHook(() => useScheduleLeavesWithSong(false, false)).unmount();
     expect(ipc.clearScoreSchedule).not.toHaveBeenCalled();
   });
 });

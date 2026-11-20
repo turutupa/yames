@@ -512,7 +512,7 @@ export function SongsView({ session, currentBeat, isPlaying, themeId, listening 
     // is exactly when the engine needs telling.
   }, [score, isPlaying, session.pushSchedule]); // eslint-disable-line react-hooks/exhaustive-deps
   // And it goes when the song does: a schedule left loaded belongs to no one.
-  useScheduleLeavesWithSong(!!score);
+  useScheduleLeavesWithSong(!!score, isPlaying);
 
   const onFiles = useCallback(
     (files: FileList | null) => {

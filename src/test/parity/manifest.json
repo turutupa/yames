@@ -159,6 +159,7 @@
     "set_listen_demo",
     "set_take_diagnostics",
     "harmony_mark_bar",
+    "harmony_set_tempo",
     "harmony_start",
     "harmony_stop"
   ],
@@ -320,6 +321,7 @@
     "set_listen_demo",
     "set_take_diagnostics",
     "harmony_mark_bar",
+    "harmony_set_tempo",
     "harmony_start",
     "harmony_stop"
   ],
@@ -535,6 +537,7 @@
     "setListenDemo",
     "setTakeDiagnostics",
     "harmonyMarkBar",
+    "harmonySetTempo",
     "harmonyStart",
     "harmonyStop",
     "onHarmonyReading"

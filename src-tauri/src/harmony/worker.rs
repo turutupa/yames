@@ -11,16 +11,23 @@
 //! **It gives way to a Take.** The app's one note model is shared with the
 //! Take's late grade (`model::with_shared`), and a mutex is not a queue with
 //! priorities, so the worker asks first ([`paused`]): while a Take is running
-//! (its schedule has started and the click is still marking its beats:
-//! [`TakeWatch`]; a schedule that is only loaded is not a Take), or the
-//! post-Take pass is running or waiting for the model ([`verifier_hold`]), it
-//! runs no window and does not touch the ring. The verifier can therefore
-//! wait for at most the one window that was already running when it asked,
-//! once the model is loaded: the model is loaded on first use, under the same
-//! lock, and that takes seconds, so `harmony_start` asks for it to be warmed
-//! and so does loading an Exercise. When the pause ends the worker starts
-//! again from nothing (a new stream, a new engine): what it heard before a
-//! Take is not evidence about what is played after it.
+//! (a schedule is loaded and the click is marking beats under it, count-in
+//! included: [`TakeWatch`]; a schedule that is loaded with no click playing
+//! is not a Take), or the post-Take pass is running or waiting for the model
+//! ([`verifier_hold`]), it runs no window and does not touch the ring. The
+//! verifier can therefore wait for at most the one window that was already
+//! running when it asked, once the model is loaded: the model is loaded on
+//! first use, under the same lock, and that takes seconds, so the worker
+//! loads it before it first looks at the ring (`Hooks::warm`) and loading an
+//! Exercise asks for it too. When the pause ends the worker starts again
+//! from nothing (a new stream, a new engine): what it heard before a Take is
+//! not evidence about what is played after it.
+//!
+//! The watch cannot tell a Take from a schedule some screen forgot to clear
+//! with a jam's click over it. So free play starting is itself the word that
+//! no Take is loaded: `harmony_start` clears a schedule it finds
+//! (`TimingAnalyzer::forget_stale_schedule`), and Songs clears its own when
+//! the song or the screen goes.
 //!
 //! **It gives up rather than fall behind.** A device whose model is slower
 //! than the music (a poll finds [`BACKLOG_S`] seconds or more written since
@@ -106,10 +113,10 @@ pub fn paused() -> bool {
 }
 
 /// The timing analyzer's account of whether a Take is running, kept on its
-/// thread. A Take is a schedule whose run has started (its first downbeat
-/// fell) while the click still marks its quarter notes. A schedule that is
-/// loaded and not played is not one: Songs loads a schedule whenever a song
-/// is open, and that must not keep the reading off.
+/// thread. A Take is a schedule that is loaded while the click marks quarter
+/// notes under it (the count-in is part of it). A schedule that is loaded
+/// with no click is not one: Songs loads a schedule whenever a song is open,
+/// and that alone must not keep the reading off.
 #[derive(Default)]
 pub struct TakeWatch {
     last_quarter: Option<Instant>,
@@ -117,7 +124,14 @@ pub struct TakeWatch {
 }
 
 impl TakeWatch {
-    /// The click marked a quarter note of the loaded schedule.
+    /// A watch for an analyzer that is starting. Says "no Take" first: an
+    /// analyzer that panicked mid-Take never said so.
+    pub fn new() -> Self {
+        set_take_running(false);
+        Self::default()
+    }
+
+    /// The click marked a quarter note while a schedule was loaded.
     pub fn quarter(&mut self, now: Instant) {
         self.last_quarter = Some(now);
     }
@@ -127,14 +141,14 @@ impl TakeWatch {
         self.last_quarter = None;
     }
 
-    /// `started`: a schedule is loaded and its run has started.
-    pub fn running(&self, started: bool, now: Instant) -> bool {
-        started && self.last_quarter.is_some_and(|q| now.saturating_duration_since(q) < TAKE_BEAT_GAP)
+    /// `loaded`: a schedule is loaded.
+    pub fn running(&self, loaded: bool, now: Instant) -> bool {
+        loaded && self.last_quarter.is_some_and(|q| now.saturating_duration_since(q) < TAKE_BEAT_GAP)
     }
 
     /// Tell the worker ([`set_take_running`]) when the answer changed.
-    pub fn tell(&mut self, started: bool, now: Instant) {
-        let running = self.running(started, now);
+    pub fn tell(&mut self, loaded: bool, now: Instant) {
+        let running = self.running(loaded, now);
         if running != self.said {
             self.said = running;
             set_take_running(running);
@@ -156,6 +170,10 @@ pub struct Hooks {
     /// Run the next window. `None`: there is no model.
     pub step: Box<dyn FnMut(&mut Stream, &mut Engine) -> Option<Result<bool, String>> + Send>,
     pub paused: Box<dyn Fn() -> bool + Send>,
+    /// Have the model loaded, however long that takes. Called once, on the
+    /// worker's thread, before it first looks at the ring: a load inside the
+    /// first window would look like a model too slow for the music.
+    pub warm: Box<dyn FnMut() + Send>,
 }
 
 impl Hooks {
@@ -163,6 +181,7 @@ impl Hooks {
         Self {
             step: Box::new(|stream, engine| crate::detect::model::with_shared(|m| m.map(|m| stream.step(m.as_mut(), engine)))),
             paused: Box::new(paused),
+            warm: Box::new(|| crate::detect::model::with_shared(|_| ())),
         }
     }
 }
@@ -481,6 +500,11 @@ fn run(alive: &AtomicBool, shared: &Mutex<Shared>, ring: &Mutex<RingBuffer>, rat
         }
     };
     publish(&l, &mut last);
+    // Not while a Take has the model or wants it: loading an Exercise warms
+    // the model for the Take, and the first window after the pause finds it.
+    if !(hooks.paused)() {
+        (hooks.warm)();
+    }
     while alive.load(Ordering::SeqCst) {
         thread::sleep(POLL);
         if (hooks.paused)() {
@@ -621,6 +645,7 @@ mod tests {
         Hooks {
             step: Box::new(move |stream, engine| Some(stream.step(&mut *model.lock().unwrap(), engine))),
             paused: Box::new(move || gate.held()),
+            warm: Box::new(|| {}),
         }
     }
 
@@ -735,7 +760,7 @@ mod tests {
         let ring = ring();
         let ended = Arc::new(AtomicU32::new(0));
         let ended_t = ended.clone();
-        let hooks = Hooks { step: Box::new(|_, _| None), paused: Box::new(|| false) };
+        let hooks = Hooks { step: Box::new(|_, _| None), paused: Box::new(|| false), warm: Box::new(|| {}) };
         let worker = Worker::start_with(ring.clone(), RATE, None, 0.5, hooks, move |l| {
             if l.is_none() {
                 ended_t.fetch_add(1, Ordering::SeqCst);
@@ -873,17 +898,38 @@ mod tests {
         assert!(slot.lock().unwrap().is_none());
     }
 
+    /// A model that takes longer to load than the backlog allows is not a
+    /// model slower than the music: it is loaded before the first look at
+    /// the ring.
+    #[test]
+    fn a_slow_first_load_of_the_model_is_not_being_lapped() {
+        let (ring, windows) = (ring(), Arc::new(AtomicU32::new(0)));
+        let model = Arc::new(Mutex::new(Triad { windows: windows.clone(), slow: Duration::ZERO }));
+        let mut h = hooks(model, Arc::default());
+        h.warm = Box::new(|| thread::sleep(Duration::from_millis(3600)));
+        let worker = Worker::start_with(ring.clone(), RATE, None, 0.5, h, |_| {}).unwrap();
+        let stop = Arc::new(AtomicBool::new(false));
+        let cb = callback(ring, stop.clone());
+        wait_until("a window after the load", Duration::from_secs(30), || windows.load(Ordering::SeqCst) >= 2);
+        assert!(worker.is_alive(), "it gave up over the model's load");
+        stop.store(true, Ordering::SeqCst);
+        cb.join().unwrap();
+        worker.stop();
+    }
+
     /// B1: Songs loads a schedule whenever a song is open. Loaded is not
-    /// running: only a started run with the click on its beats is a Take.
+    /// running: a Take is a schedule with the click on its beats. (A stale
+    /// schedule under a jam's click is `forget_stale_schedule`'s, in
+    /// `timing.rs`.)
     #[test]
     fn a_schedule_that_is_only_loaded_is_not_a_take_and_a_take_ends_with_its_click() {
         let t0 = Instant::now();
         let mut w = TakeWatch::default();
-        assert!(!w.running(false, t0), "loaded, never played");
-        // a count-in: beats, but the run has not started
+        assert!(!w.running(true, t0), "loaded, never played");
+        // the click, and no schedule: a jam
         w.quarter(t0);
         assert!(!w.running(false, t0));
-        // the first downbeat
+        // the count-in's first beat
         assert!(w.running(true, t0 + Duration::from_millis(5)));
         w.quarter(t0 + Duration::from_secs(1));
         assert!(w.running(true, t0 + Duration::from_secs(4)));

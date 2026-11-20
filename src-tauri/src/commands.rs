@@ -2142,6 +2142,7 @@ pub async fn harmony_start(
     chart: Option<crate::harmony::Chart>,
     bpm: f64,
     audio_input: State<'_, SharedAudioInput>,
+    timing_analyzer: State<'_, SharedTimingAnalyzer>,
     harmony: State<'_, crate::harmony::worker::SharedHarmony>,
     app_handle: AppHandle,
 ) -> Result<Option<u64>, String> {
@@ -2158,9 +2159,14 @@ pub async fn harmony_start(
     if !listening || !crate::detect::model::enabled() {
         return Ok(None);
     }
-    // Loaded on its own thread by the time the first window is ready, not
-    // inside that window with the model's lock held.
-    crate::detect::model::warm_in_background();
+    // The page asks for this only where no Take is being played: a schedule
+    // still loaded is one some screen forgot, and under a jam's click it
+    // would pass for a Take and keep the reading paused.
+    if timing_analyzer.lock().unwrap_or_else(|e| e.into_inner()).forget_stale_schedule() {
+        eprintln!("[yames] free play started with a schedule still loaded: cleared");
+    }
+    // (The worker loads the note model itself, before its first look at the
+    // ring: `Hooks::warm`.)
     let worker = crate::harmony::worker::Worker::start(ring, rate, chart, beat_seconds(bpm), move |live| {
         let _ = app_handle.emit("harmony-reading", live);
     })?;

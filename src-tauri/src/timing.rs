@@ -626,6 +626,22 @@ impl TimingAnalyzer {
             .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
     }
 
+    /// Free play is starting (the key and chord reading of a jam): the page
+    /// that asks for it only does so where no Take is being played, so a
+    /// schedule still loaded here was left by a screen that did not clear
+    /// it. Cleared, and `true`; with none loaded nothing is touched.
+    ///
+    /// Without this a forgotten schedule under a jam's click looks exactly
+    /// like a Take to `harmony::worker::TakeWatch`, and the reading would
+    /// stay paused for the whole jam.
+    pub fn forget_stale_schedule(&self) -> bool {
+        if self.schedule.lock().unwrap_or_else(|e| e.into_inner()).is_none() {
+            return false;
+        }
+        self.clear_score_schedule();
+        true
+    }
+
     /// Back to free play. Whatever the current attempt had accumulated
     /// is dropped — the caller has already been given it on the last
     /// segment-ended event.
@@ -1038,7 +1054,7 @@ impl TimingAnalyzer {
         // Whether a Take is running, for the free-play worker, which keeps
         // off the note model and the input ring while one is. A schedule
         // that is loaded and not played is not a Take (`harmony/worker.rs`).
-        let mut take_watch = crate::harmony::worker::TakeWatch::default();
+        let mut take_watch = crate::harmony::worker::TakeWatch::new();
         // The pitch pass this run's Take already has, from its first close.
         // A Take is closed twice as a rule (the Session's own stop and the
         // coach's mini-report each ask), and the second close finds the tap
@@ -1200,7 +1216,7 @@ impl TimingAnalyzer {
 
             // Here, above the early `continue` of a pass with no beats: a Take
             // whose click stopped must stop counting as one.
-            take_watch.tell(schedule_run.as_ref().is_some_and(|r| r.has_started()), std::time::Instant::now());
+            take_watch.tell(schedule_run.is_some(), std::time::Instant::now());
 
             // D4 — Signal A poll. If the JS layer called
             // `notify_settings_change`, close the open segment with
@@ -6460,6 +6476,23 @@ mod notes_pass_tests {
     /// close landing after the first had started the pitch pass, still gets
     /// its right notes. `close_open_segment` used to empty the slot, which
     /// threw away the pass the first close had started.
+    /// Review M7, B1: a schedule a screen left loaded, then a jam with the
+    /// reading on. Free play starting clears it, once, and touches nothing
+    /// when there is none (the version the analyzer's thread watches).
+    #[test]
+    fn free_play_starting_clears_a_schedule_that_was_left_loaded() {
+        let ta = TimingAnalyzer::new(Arc::new(Mutex::new(VecDeque::new())));
+        let version = |ta: &TimingAnalyzer| ta.schedule_version.load(std::sync::atomic::Ordering::SeqCst);
+        let v0 = version(&ta);
+        assert!(!ta.forget_stale_schedule());
+        assert_eq!(version(&ta), v0, "nothing loaded: nothing touched");
+        ta.load_score_schedule(ScoreSchedule { onsets: Vec::new(), length_beats: 4.0, loops: false });
+        assert!(ta.forget_stale_schedule());
+        assert!(ta.schedule.lock().unwrap().is_none());
+        assert!(version(&ta) > v0 + 1, "the analyzer's thread is told");
+        assert!(!ta.forget_stale_schedule());
+    }
+
     #[test]
     fn a_second_close_does_not_throw_away_the_first_closes_pitch_pass() {
         let ta = TimingAnalyzer::new(Arc::new(Mutex::new(VecDeque::new())));
