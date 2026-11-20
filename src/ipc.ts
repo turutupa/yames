@@ -2362,6 +2362,77 @@ export async function coachGenerate(
   }
 }
 
+/**
+ * The Ask kind (DESIGN 9.4): one model call a turn, with the static prefix
+ * (system text and the tool list), the context (at most 450 tokens), the
+ * question and, for a choice, the GBNF grammar the registry generates. Rust
+ * keeps the prefix decoded between turns. A malformed grammar rejects with
+ * a message starting "grammar:"; no model is `noModel`, not an error.
+ */
+export type CoachAskMode = "choice" | "prose";
+
+export interface CoachAskRequest {
+  /** From `newGenerationId()`: what `cancelGeneration` takes. */
+  generationId: number;
+  mode: CoachAskMode;
+  prefix: string;
+  context: string;
+  question: string;
+  grammar?: string | null;
+}
+
+export type CoachAskOutcome =
+  | {
+      status: "answered";
+      text: string;
+      /** The model ended the answer itself, inside the budget. */
+      finished: boolean;
+      prefixCached: boolean;
+      promptMs: number;
+      totalMs: number;
+    }
+  | { status: "cancelled" }
+  | { status: "noModel" };
+
+/** DESIGN 5.5: a turn fits 8 s or the rule-made answer stands. */
+export const COACH_ASK_TIMEOUT_MS = 8_000;
+
+// Unique for the life of the Rust process, across webview reloads too: a
+// cancel Rust holds for an id it has not seen yet must not meet a new turn.
+let nextGenerationId = Date.now() * 1_000;
+
+export function newGenerationId(): number {
+  nextGenerationId += 1;
+  return nextGenerationId;
+}
+
+/** Stop an Ask turn, queued or running. True when Rust found it. */
+export async function cancelGeneration(generationId: number): Promise<boolean> {
+  return invoke<boolean>("cancel_generation", { generationId });
+}
+
+/** One Ask turn. On timeout the turn is cancelled in Rust and this rejects
+ *  with `Error("coach_ask_timeout")`. */
+export async function coachAsk(request: CoachAskRequest): Promise<CoachAskOutcome> {
+  const call = invoke<CoachAskOutcome>("coach_ask", {
+    request: { ...request, grammar: request.grammar ?? null },
+  });
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      call,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => {
+          void cancelGeneration(request.generationId).catch(() => false);
+          reject(new Error("coach_ask_timeout"));
+        }, COACH_ASK_TIMEOUT_MS);
+      }),
+    ]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
+
 export async function isCoachLoaded(): Promise<boolean> {
   return invoke<boolean>("is_coach_loaded");
 }

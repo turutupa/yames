@@ -174,7 +174,9 @@
     "capture_outbox_chunk",
     "capture_outbox_clear",
     "capture_outbox_prepare",
-    "capture_sessions"
+    "capture_sessions",
+    "cancel_generation",
+    "coach_ask"
   ],
   "ipcCommands": [
     "analyze_attempt",
@@ -349,7 +351,9 @@
     "capture_outbox_chunk",
     "capture_outbox_clear",
     "capture_outbox_prepare",
-    "capture_sessions"
+    "capture_sessions",
+    "cancel_generation",
+    "coach_ask"
   ],
   "commandsInvokedOutsideIpc": [
     "app_ready",
@@ -579,7 +583,10 @@
     "captureOutboxChunk",
     "captureOutboxClear",
     "captureOutboxPrepare",
-    "captureSessions"
+    "captureSessions",
+    "cancelGeneration",
+    "coachAsk",
+    "newGenerationId"
   ],
   "ipcWrappersWithoutCaller": [
     "clearSessionLogs",

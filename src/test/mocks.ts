@@ -187,6 +187,8 @@ const DEFAULT_INVOKE_MAP: Record<string, InvokeFn> = {
   load_coach_model: () => false,
   unload_coach_model: () => undefined,
   coach_generate: () => "",
+  coach_ask: () => ({ status: "noModel" }),
+  cancel_generation: () => false,
   is_coach_loaded: () => false,
   get_coach_capabilities: () => ({
     llmCompiled: false,
