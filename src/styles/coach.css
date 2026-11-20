@@ -349,13 +349,6 @@
 
 /* --- small screens and short windows ------------------------------------- */
 
-/* A short phone: "Hear it first" is the Watch button under the picture, so
-   the note does not spend a row on it. */
-@media (max-width: 480px) and (max-height: 760px) {
-  .coach-note[data-kind="ready"] .coach-chip[data-kind="play"] {
-    display: none;
-  }
-}
 
 .main-window.is-mobile .coach-note {
   padding: 12px 14px 12px 13px;
@@ -388,6 +381,14 @@
   .coach-note[data-kind="ready"] {
     padding-top: 5px;
     padding-bottom: 5px;
+  }
+  /* Its chips are the Watch button and the How fold already on this screen,
+     a few pixels away: in a window this short the note does not repeat them. */
+  .coach-note[data-kind="ready"] > .coach-chips {
+    display: none;
+  }
+  .practice-meta-note {
+    font-size: 14px;
   }
   .coach-note [data-extra],
   .coach-note[data-kind="ready"] > .coach-block-source {
