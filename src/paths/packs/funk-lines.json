@@ -6,7 +6,7 @@
   "category": "technique",
   "goal": "Play sixteenth-note funk rhythm as single-note lines, two-note stabs and octaves, locked to a band, with the picking hand never stopping.",
   "level": "early-intermediate",
-  "assumes": "You can play sixteenth notes with a click at 70 BPM and stop a note cleanly (the Intermediate Level of Rhythm Foundations covers both). A clean tone is the right one here. The minutes listed are one pass through the material; a groove is something you come back to for weeks.",
+  "assumes": "You can play sixteenth notes with a click at 70 BPM and stop a note cleanly (Rhythm Foundations covers both: stopping a note in 'Silence in time', sixteenths in its Intermediate Level). A clean tone is the right one here. The minutes listed are one pass through the material; a groove is something you come back to for weeks.",
   "prerequisites": {
     "paths": [
       {
@@ -265,7 +265,7 @@
         {
           "id": "the-engine.backbeat",
           "title": "Accent two and four",
-          "purpose": "Only two accents a bar, on beats 2 and 4, where the snare drum is. Everything else stays quiet and even.",
+          "purpose": "Only two accents a bar, on beats 2 and 4, the backbeat, where the snare drum is. Everything else stays quiet and even.",
           "howTo": [
             "Count the bar and lean on the first note of beat 2 and of beat 4.",
             "Fourteen quiet notes and two loud ones. The quiet ones are the hard part."
@@ -384,7 +384,8 @@
       "howTo": [
         "The hand swings in sixteenths the whole time. On a rest it misses the string, or plays a muted scratch: relax the fretting finger so the string is dead, and let the pick brush it.",
         "Stop each note by relaxing the fretting finger without lifting it off the string. Short notes make the rhythm clear.",
-        "The last beat of each bar moves down two frets, from A to G, so you can hear where the bar ends."
+        "The last beat of each bar moves down two frets, from A to G, so you can hear where the bar ends.",
+        "If you come from Rhythm Foundations: 'One, and-a' is its gallop, from 'Four to a beat'. The other two figures are in its Advanced Step 'Sixteenths with holes in them'. What is new here is the funk way of playing them: short notes, and a hand that swings through every hole."
       ],
       "payoff": "Three one-bar grooves on two notes that are already funk.",
       "prerequisites": ["the-engine"],
@@ -1253,9 +1254,13 @@
       "goal": "Play two-bar single-note funk lines in A minor pentatonic over a band, with short notes and real silence between them.",
       "why": "A funk line is a handful of short notes placed around the drums. Most of the bar is silence, or scratches, and the notes that are there have to sit exactly in the gaps the kick and the snare leave. With a band behind you the test is simple: does it make you want to move.",
       "howTo": [
-        "Learn each line at the first rung with the count out loud, one beat at a time.",
+        "Learn each line at the first rung with the count out loud, one beat at a time. Some beats are one of the figures you know, with the notes moving. The others are one note, or two.",
         "Everything is in the pentatonic box at the fifth fret, on the low three strings: first finger on the frets at 5, third finger on the 7s, little finger on the low E string's 8.",
-        "Play every note short. Listen to the hi-hat: it plays the same sixteenths your hand is swinging."
+        "The band is a drummer and a bassist in place of the click.",
+        "Play every note short. Listen to the hi-hat: it plays the same sixteenths your hand is swinging.",
+        "If you get lost, stop, find beat 1 of the next bar and come back in there.",
+        "The root is the note a chord is named after.",
+        "The chord is Am7 for the whole Step, so its root is A. You don't play the chord: every line starts or ends on that A."
       ],
       "payoff": "A four-bar single-note groove over a funk band.",
       "prerequisites": ["holes-mixed"],
@@ -2325,7 +2330,7 @@
       "goal": "Hit two strings at once, short, on the backbeat, on the off-beats and on single sixteenths.",
       "why": "Funk players rarely strum a whole chord. They take the top two or three notes of it and stab them, short and bright. Two notes at once need a stroke that crosses two strings and stops, and a fretting hand that kills both together.",
       "howTo": [
-        "The stab is C and E: the G and B strings at fret 5, under the first finger laid flat. Those two notes belong to Am7 and to D9, which is why the shape works over both.",
+        "The stab is C and E: the G and B strings at fret 5, under the first finger laid flat. A chord is a set of notes. C and E are in Am7 and in D9, the two chords of the next Step, which is why one shape works over both.",
         "Strike both strings with one small stroke and stop them at once by relaxing the finger.",
         "The low A on beat 1 is the first finger's tip on the low E string at fret 5: the same finger, moved across."
       ],
@@ -2339,7 +2344,7 @@
           "purpose": "The low A on beats 1 and 3, a short stab on beats 2 and 4. The simplest funk part there is.",
           "howTo": [
             "Quarter notes on 1 and 3; the stab is an eighth note on 2 and on 4, with silence after it.",
-            "Make the stab half as long as the bass note."
+            "Make the stab half as long as the bass note. It sits where you put the accents in 'Accent two and four'."
           ],
           "coachLine": "A stab is one attack to me: I time it and count it, and I don't check its pitch.",
           "grading": "graded",
@@ -2774,7 +2779,7 @@
         {
           "id": "line-and-stab.am-to-d",
           "title": "Am7 to D9",
-          "purpose": "A bar of each chord in eighth notes: the root, then stabs. For D9 the root is D on the A string and the stab is D and F# at fret 7.",
+          "purpose": "A bar of each chord in eighth notes: the root, which is the note the chord is named after, then stabs. For D9 the root is D on the A string and the stab is D and F# at fret 7.",
           "howTo": [
             "Both bars have the same rhythm: the root on 1, stabs on the 'and' of 1, the 'and' of 2 and the 'and' of 4.",
             "The hand does not move. Use the long rest in the middle of each bar to get the third and little fingers ready over fret 7, or the first finger back over fret 5."
@@ -4337,7 +4342,7 @@
           "title": "Starting on the 'e'",
           "purpose": "A low A on beat 1, then pairs of notes on the 'e' and the 'a', answered by pairs on the next beat and its 'and': upstrokes and downstrokes in turn.",
           "howTo": [
-            "Learn it one beat at a time with the count out loud.",
+            "Count '1 e (and) a, 2 (e) and (a), (3) e (and) a, 4 (e) and (a)'. Beat 3 is the only beat that starts with silence.",
             "Upstroke notes are usually quieter. Make them match the downstroke that starts the bar."
           ],
           "coachLine": "Four of these notes are on the 'e' and the 'a'. I'll say how even they were.",
@@ -4454,7 +4459,7 @@
           "title": "A two-bar phrase",
           "purpose": "A longer line in the pentatonic box whose rhythm keeps changing from beat to beat, ending on a held low A.",
           "howTo": [
-            "Take it at the first rung until you can sing the rhythm.",
+            "Count bar 1 '1 (e) and a, (2) e and (a), 3 (e and) a, (4) e (and) a' and bar 2 '1 (e and) a, 2 (e) and (a), 3 e (and) a, 4'. Take it at the first rung until you can sing it.",
             "The held A at the end is the only long note. Everything before it is short."
           ],
           "coachLine": "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
@@ -4971,11 +4976,12 @@
       "order": 12,
       "title": "The Dorian sixth, and hammer-ons",
       "goal": "Use F#, the note that turns a minor pentatonic line into a funk line, and hammer into notes inside a sixteenth-note rhythm.",
-      "why": "Funk in a minor key nearly always means Dorian. The note that matters is its major sixth, F# in the key of A, added to the minor pentatonic. It is the third of the D9 chord the tune keeps going to, so playing it when that chord arrives makes the line and the harmony agree. A hammer-on into a note is the other small thing that makes a line sound spoken.",
+      "why": "Funk in a minor key nearly always adds one note to the minor pentatonic: in the key of A it is F#. You have played it already, in the D9 bar of the vamp, and its twin G#, the note that does the same job in B minor, in the E9 bar. F# is one of the notes of D9, so playing it when that chord arrives makes the line and the harmony agree. The pentatonic with this note added is most of a scale called Dorian, where F# is the sixth note. The Scales and Modes Path teaches that scale whole. A hammer-on into a note is the other small thing that makes a line sound spoken.",
       "howTo": [
         "F# is the D string at fret 4, one fret below the G. The first finger reaches back for it.",
-        "A hammer-on here is two sixteenths from one stroke: pick the lower note, hammer the upper. The hand still swings, and misses the string for the hammered note.",
-        "Aim F# at the bars where the chord is D9."
+        "Aim F# at the bars where the chord is D9.",
+        "A hammer-on is a note the fretting hand sounds alone: pick the lower note, then bring a finger down hard and fast on the higher fret of the same string.",
+        "Here the third finger comes down two frets higher, and the two notes are two even sixteenths from one stroke. The hand still swings, and misses the string for the hammered note. Legato teaches the hammer-on if it is new."
       ],
       "payoff": "A four-bar line over Am7 and D9 that could not be played with the pentatonic alone.",
       "prerequisites": ["displaced-shapes"],
@@ -5420,7 +5426,7 @@
           "title": "Four bars of everything",
           "purpose": "A bar of line and stabs on Am7, a bar on D9, a bar of A in octaves, and a bar that starts in D octaves and walks up in single notes: D, E, F#, G.",
           "howTo": [
-            "Each bar is one you have played: the vamp, then the octave figure. Bar 4 is half octaves, half single notes.",
+            "Bars 1 and 2 are the vamp from 'Line and stab'. The Am7 stab is the first finger flat on the G and B strings at fret 5. The D9 stab is the third and little fingers at fret 7, and the first finger reaches back to fret 4 for the F#. Bar 3 is the octave figure from 'Octaves'. Bar 4 is half octaves, half single notes.",
             "The changes of register are the hard part. Look at the string you are going to."
           ],
           "coachLine": "Band on. I time every attack against it. Pitch is not checked when stabs and octaves are in the line.",
