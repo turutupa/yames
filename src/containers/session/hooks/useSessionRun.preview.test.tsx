@@ -10,6 +10,7 @@ import type { MainView } from "../../main-window/MainHeader";
 import { useSessionRun } from "./useSessionRun";
 import { startButton } from "../parts";
 import i18n from "../../../i18n";
+import { load } from "@tauri-apps/plugin-store";
 
 function mount() {
   setInvokeResponse("list_path_states", [{ pathId: "alternate-picking", startedAt: 1, updatedAt: 1 }]);
@@ -128,5 +129,22 @@ describe("useSessionRun and Ask (review of leg c2a1)", () => {
     hook.rerender();
     await waitFor(() => expect(hook.result.current.run.phase).toBe("idle"));
     expect(toggleCard).not.toHaveBeenCalled();
+  });
+});
+
+describe("useSessionRun — the band's stored choice (the coach's undo, t1a2 review 1)", () => {
+  it("setBandVolume(null) gives the choice back to the app: no number stored, the default again", async () => {
+    const h = mount();
+    await waitFor(() => expect(h.result.current.plan.steps.length).toBeGreaterThan(0));
+    expect(h.result.current.bandChoice).toBeNull();
+    // The store as the test setup mocks it (`src/test/mocks.ts`): one object, its `set` a spy.
+    const store = (await load("settings.json")) as unknown as { set: ReturnType<typeof vi.fn> };
+    store.set.mockClear();
+    act(() => h.result.current.setBandVolume(0.5));
+    expect(h.result.current.bandChoice).toBe(0.5);
+    act(() => h.result.current.setBandVolume(null));
+    expect(h.result.current.bandChoice).toBeNull();
+    const written = () => store.set.mock.calls.filter(([key]) => key === "session.bandVolume").map(([, value]) => value);
+    await waitFor(() => expect(written()).toEqual([0.5, null]));
   });
 });

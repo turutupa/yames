@@ -604,9 +604,9 @@ export function useSessionRun(input: SessionRunInput) {
     void storeSave(MINUTES_KEY, next).catch(() => {});
   }, []);
 
-  /** The band's level, per player, kept. */
-  const setBandVolume = useCallback((next: number) => {
-    const level = readBandVolume(next) ?? 0;
+  /** The band's level, per player, kept. `null` gives the choice back to the app (the coach's undo). */
+  const setBandVolume = useCallback((next: number | null) => {
+    const level = next === null ? null : (readBandVolume(next) ?? 0);
     setBandChoice(level);
     void storeSave(BAND_VOLUME_KEY, level).catch(() => {});
   }, []);
@@ -2404,6 +2404,8 @@ export function useSessionRun(input: SessionRunInput) {
     viewHintSeen,
     dismissViewHint,
     bandVolume,
+    /** The player's stored band level, or null: none chosen, the app decides (`bandVolumeFor`). */
+    bandChoice,
     setBandVolume,
     /**
      * The keys the Exercise on the stage can be played in, and which is on
