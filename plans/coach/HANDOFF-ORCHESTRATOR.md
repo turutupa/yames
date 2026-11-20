@@ -80,7 +80,11 @@ Cancel, checksum, low storage; reviewed twice), c4c (the `cues` field, Alternate
 marked "for a polish leg" in `PROGRESS.md` (the drawer covering the note at 1024 px; "Up to N" beside
 "Faster"; the strip's label against its cells).
 
-In flight on 2026-11-20 (check `git worktree list` and `git branch --no-merged coach`):
+**Session 2:** c2a2 (+ c2a2b) merged, reviewed twice, **delivery 1d** made (no Start button). The c2a2
+row in the table below is history. In flight since: see `git worktree list`; the legs' prompts follow
+`RULES-FOR-PROMPTS.md` and the leg files named in "Session 2" above.
+
+In flight on 2026-11-20 at the end of session 1 (check `git worktree list` and `git branch --no-merged coach`):
 
 | Leg | Worktree / branch | State | Next |
 |---|---|---|---|
