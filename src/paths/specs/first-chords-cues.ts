@@ -35,6 +35,8 @@ const ONCE_A_BEAT = "Strum once on each beat, no more.";
 const ONLY_ONE = "Strum only on '1'; let '2, 3, 4' ring.";
 const ONLY_ONE_THREE = "Strum only on '1' and '3'.";
 const SWEEP = "Brush all the strings in one quick stroke.";
+const BRUSH_DOWN = "Make each downstroke one quick brush.";
+const ONLY_DDU = "Strum only on '1', '2 and', '3', '4 and'.";
 const CLICK_LATE = "Strum right with each click.";
 const CLICK_EARLY = "Wait for the click before each strum.";
 const BAND_EARLY = "Wait for the band's beat before each strum.";
@@ -132,7 +134,7 @@ export const FIRST_CHORDS_CUES: CueBook = {
     g("Move on '4' so the new chord lands on '1'.", 1),
     c("heard", ALL_STRINGS),
     c("extras", ONLY_ONE),
-    c("late", CHANGE_LATE, 1),
+    c("late", "Have the new chord down before '1'.", 1),
     c("early", CHANGE_EARLY),
     c("openString", ARCH),
     c("stringChange", AM_FROM_A, 2),
@@ -178,11 +180,11 @@ export const FIRST_CHORDS_CUES: CueBook = {
     c("late", CHANGE_LATE),
     c("early", BAND_EARLY),
     c("openString", ARCH),
-    c("stringChange", "Keep the third finger low as it crosses."),
+    c("stringChange", "Lift the third finger only a little to cross."),
     c("lastBars", AM_REPEAT),
   ],
   "c-major.three-chords": [
-    g("Move only the fingers the next chord needs.", 1),
+    g("Move the fingers together, not one by one.", 1),
     c("heard", ALL_STRINGS),
     c("extras", ONCE_A_BEAT),
     c("late", CHANGE_LATE),
@@ -302,12 +304,12 @@ export const FIRST_CHORDS_CUES: CueBook = {
   "down-up.down-down-up": [
     g("Count '1, 2 and, 3, 4 and' as you strum.", 0),
     c("heard", UP_CATCH),
-    c("extras", UP_PAST_13, 1),
+    c("extras", ONLY_DDU, 0),
     c("late", DOWN_LATE),
     c("early", DOWN_EARLY),
     c("afterHeld", LONG_SWING, 1),
     c("openString", ARCH),
-    c("stringChange", SWEEP),
+    c("stringChange", BRUSH_DOWN),
     c("lastBars", EM_REPEAT),
   ],
   "down-up.eighths-change": [
@@ -317,7 +319,7 @@ export const FIRST_CHORDS_CUES: CueBook = {
     c("late", LET_GO, 1),
     c("early", CHANGE_EARLY),
     c("openString", OPEN_UP, 1),
-    c("stringChange", SWEEP),
+    c("stringChange", BRUSH_DOWN),
     c("lastBars", G_REPEAT),
   ],
 
@@ -330,7 +332,7 @@ export const FIRST_CHORDS_CUES: CueBook = {
     c("early", DOWN_EARLY),
     c("afterHeld", LONG_ONE),
     c("openString", ARCH),
-    c("stringChange", SWEEP),
+    c("stringChange", BRUSH_DOWN),
     c("lastBars", SWING_LAST),
   ],
   "patterns.pattern-g-em": [
@@ -341,7 +343,7 @@ export const FIRST_CHORDS_CUES: CueBook = {
     c("early", DOWN_EARLY),
     c("afterHeld", LONG_ONE),
     c("openString", ARCH),
-    c("stringChange", SWEEP),
+    c("stringChange", BRUSH_DOWN),
     c("lastBars", G_REPEAT),
   ],
   "patterns.pattern-song": [
@@ -371,7 +373,7 @@ export const FIRST_CHORDS_CUES: CueBook = {
   "strums-between-beats.only-ands": [
     g("Tap the foot on the beat, strum on the 'and'.", 2),
     c("heard", UP_CATCH, 1),
-    c("extras", "Swing down past the strings on every beat.", 1),
+    c("extras", "Swing down past the strings on silent beats.", 1),
     c("late", "Strum each 'and' as soon as the foot lifts."),
     c("early", "Wait for the foot to lift before each 'and'."),
     c("openString", ARCH),
@@ -461,7 +463,7 @@ export const FIRST_CHORDS_CUES: CueBook = {
   "sevenths-blues.d7-strings": [
     g("Put the first finger on the B string, fret one.", 2),
     c("heard", PRESS),
-    c("notes", "Press the B string at fret one."),
+    c("notes", "Press the G and top strings at fret two."),
     c("extras", ONE_PICK),
     c("late", PICK_LATE),
     c("early", PICK_EARLY),
@@ -492,7 +494,7 @@ export const FIRST_CHORDS_CUES: CueBook = {
   "sevenths-blues.blues-down-down-up": [
     g("Keep both short strums the same length.", 3),
     c("heard", UP_CATCH),
-    c("extras", UP_PAST_13),
+    c("extras", ONLY_DDU),
     c("late", LET_GO, 2),
     c("early", CHANGE_EARLY),
     c("afterHeld", LONG_SWING),
@@ -595,7 +597,7 @@ export const FIRST_CHORDS_CUES: CueBook = {
     c("heard", UP_CATCH, 1),
     c("extras", "Play four strokes to each click, no more."),
     c("late", BEAT_LATE),
-    c("early", "Spread the four strokes evenly to the click.", 2),
+    c("early", BEAT_EARLY),
     c("openString", ARCH),
     c("stringChange", UP_SHORT),
     c("lastBars", "Count '1 e and a' right to the end."),

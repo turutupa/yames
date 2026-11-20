@@ -635,7 +635,7 @@
             {"when":"even","say":"Move on '4' so the new chord lands on '1'.","more":1,"general":true},
             {"when":"heard","say":"Strum through every string of the chord."},
             {"when":"extras","say":"Strum only on '1'; let '2, 3, 4' ring."},
-            {"when":"late","say":"Start the change on '4', land on '1'.","more":1},
+            {"when":"late","say":"Have the new chord down before '1'.","more":1},
             {"when":"early","say":"Wait for '1' before the new chord's strum."},
             {"when":"openString","say":"Arch the fingers so the open strings ring."},
             {"when":"stringChange","say":"Strum A minor from the A string.","more":2},
@@ -1241,7 +1241,7 @@
             {"when":"late","say":"Start the change on '4', land on '1'."},
             {"when":"early","say":"Wait for the band's beat before each strum."},
             {"when":"openString","say":"Arch the fingers so the open strings ring."},
-            {"when":"stringChange","say":"Keep the third finger low as it crosses."},
+            {"when":"stringChange","say":"Lift the third finger only a little to cross."},
             {"when":"lastBars","say":"Change back to A minor as the tune repeats."}
           ],
           "grading": "graded",
@@ -1423,7 +1423,7 @@
           ],
           "coachLine": "Band on. Each strum is timed and counted. Whether every string rang is for your ear.",
           "cues": [
-            {"when":"even","say":"Move only the fingers the next chord needs.","more":1,"general":true},
+            {"when":"even","say":"Move the fingers together, not one by one.","more":1,"general":true},
             {"when":"heard","say":"Strum through every string of the chord."},
             {"when":"extras","say":"Strum once on each beat, no more."},
             {"when":"late","say":"Start the change on '4', land on '1'."},
@@ -3545,12 +3545,12 @@
           "cues": [
             {"when":"even","say":"Count '1, 2 and, 3, 4 and' as you strum.","more":0,"general":true},
             {"when":"heard","say":"Catch the top three strings on each upstroke."},
-            {"when":"extras","say":"Swing up past the strings after '1' and '3'.","more":1},
+            {"when":"extras","say":"Strum only on '1', '2 and', '3', '4 and'.","more":0},
             {"when":"late","say":"Put each downstroke right on the click."},
             {"when":"early","say":"Wait for the click before each downstroke."},
             {"when":"afterHeld","say":"Swing up past the strings after the long strum.","more":1},
             {"when":"openString","say":"Arch the fingers so the open strings ring."},
-            {"when":"stringChange","say":"Brush all the strings in one quick stroke."},
+            {"when":"stringChange","say":"Make each downstroke one quick brush."},
             {"when":"lastBars","say":"Change back to E minor as the tune repeats."}
           ],
           "grading": "graded",
@@ -3765,7 +3765,7 @@
             {"when":"late","say":"Let go on the last upstroke, land on '1'.","more":1},
             {"when":"early","say":"Wait for '1' before the new chord's strum."},
             {"when":"openString","say":"Let the last upstroke catch open strings.","more":1},
-            {"when":"stringChange","say":"Brush all the strings in one quick stroke."},
+            {"when":"stringChange","say":"Make each downstroke one quick brush."},
             {"when":"lastBars","say":"Change back to G as the tune repeats."}
           ],
           "grading": "graded",
@@ -4023,7 +4023,7 @@
             {"when":"early","say":"Wait for the click before each downstroke."},
             {"when":"afterHeld","say":"Keep swinging through the long strum on '1'."},
             {"when":"openString","say":"Arch the fingers so the open strings ring."},
-            {"when":"stringChange","say":"Brush all the strings in one quick stroke."},
+            {"when":"stringChange","say":"Make each downstroke one quick brush."},
             {"when":"lastBars","say":"Keep the down-up swing to the last stroke."}
           ],
           "grading": "graded",
@@ -4240,7 +4240,7 @@
             {"when":"early","say":"Wait for the click before each downstroke."},
             {"when":"afterHeld","say":"Keep swinging through the long strum on '1'."},
             {"when":"openString","say":"Arch the fingers so the open strings ring."},
-            {"when":"stringChange","say":"Brush all the strings in one quick stroke."},
+            {"when":"stringChange","say":"Make each downstroke one quick brush."},
             {"when":"lastBars","say":"Change back to G as the tune repeats."}
           ],
           "grading": "graded",
@@ -5054,7 +5054,7 @@
           "cues": [
             {"when":"even","say":"Tap the foot on the beat, strum on the 'and'.","more":2,"general":true},
             {"when":"heard","say":"Catch the top three strings on each upstroke.","more":1},
-            {"when":"extras","say":"Swing down past the strings on every beat.","more":1},
+            {"when":"extras","say":"Swing down past the strings on silent beats.","more":1},
             {"when":"late","say":"Strum each 'and' as soon as the foot lifts."},
             {"when":"early","say":"Wait for the foot to lift before each 'and'."},
             {"when":"openString","say":"Arch the fingers so the open strings ring."},
@@ -6623,7 +6623,7 @@
           "cues": [
             {"when":"even","say":"Put the first finger on the B string, fret one.","more":2,"general":true},
             {"when":"heard","say":"Press each fingertip just behind its fret."},
-            {"when":"notes","say":"Press the B string at fret one."},
+            {"when":"notes","say":"Press the G and top strings at fret two."},
             {"when":"extras","say":"Pick one string on each click, no more."},
             {"when":"late","say":"Pick each string right with the click."},
             {"when":"early","say":"Wait for the click before each string."},
@@ -7275,7 +7275,7 @@
           "cues": [
             {"when":"even","say":"Keep both short strums the same length.","more":3,"general":true},
             {"when":"heard","say":"Catch the top three strings on each upstroke."},
-            {"when":"extras","say":"Swing up past the strings after '1' and '3'."},
+            {"when":"extras","say":"Strum only on '1', '2 and', '3', '4 and'."},
             {"when":"late","say":"Let go on the last upstroke, land on '1'.","more":2},
             {"when":"early","say":"Wait for '1' before the new chord's strum."},
             {"when":"afterHeld","say":"Swing up past the strings after the long strum."},
@@ -9138,7 +9138,7 @@
             {"when":"heard","say":"Catch the top three strings on each upstroke.","more":1},
             {"when":"extras","say":"Play four strokes to each click, no more."},
             {"when":"late","say":"Put each beat's first stroke on the click."},
-            {"when":"early","say":"Spread the four strokes evenly to the click.","more":2},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
             {"when":"openString","say":"Arch the fingers so the open strings ring."},
             {"when":"stringChange","say":"Keep the upstrokes short: top three strings."},
             {"when":"lastBars","say":"Count '1 e and a' right to the end."}
