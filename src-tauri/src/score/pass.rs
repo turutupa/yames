@@ -276,6 +276,9 @@ pub fn notes_status(bars: &[BarSample], gap_ms: f64, ran: bool) -> NotesCheck {
 }
 
 /// [`notes_status`], knowing who gave the verdicts (`None`: nobody ran).
+/// `Verifier` only where the verifier decided at least half of what is counted
+/// (`verify::late_source`): a merged count that is mostly the tracker's is
+/// still held to the tracker's give-up rules.
 pub fn notes_status_from(bars: &[BarSample], gap_ms: f64, source: Option<NotesSource>) -> NotesCheck {
     let ran = source.is_some();
     let tracker = source != Some(NotesSource::Verifier);

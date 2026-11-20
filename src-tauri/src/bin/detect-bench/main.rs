@@ -435,7 +435,15 @@ fn cost(mut args: Args) -> Result<ExitCode, String> {
     let a = yames_lib::detect::analyse(m.as_mut(), &samples, rate)?;
     let (cpu, wall) = (thread_cpu_s().zip(c0).map(|(a, b)| a - b), w0.elapsed().as_secs_f64());
     let per_min = |s: f64| s * 60.0 / a.seconds;
+    // The other half of the post-Take pass: the shipped pitch track, which the
+    // right-notes pass and the curves share (`score::notes::LateScratch`).
+    let t0 = std::time::Instant::now();
+    let _ = std::hint::black_box(yames_lib::pitch::track(&samples, rate, &yames_lib::pitch::PitchConfig::guitar()));
+    let track_wall = t0.elapsed().as_secs_f64();
     println!("{}", json!({
+        "pitchTrackWallSeconds": track_wall,
+        "trackerGradeAtSeconds": track_wall,
+        "fullGradeAtSeconds": track_wall + wall,
         "runtime": m.runtime(),
         "audioSeconds": a.seconds,
         "wallSeconds": wall,

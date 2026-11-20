@@ -27,8 +27,43 @@ use std::collections::HashMap;
 
 use super::{pass_length, ExpectedOnset, OnsetState, ScheduleReport, ScheduleRun};
 use crate::pitch::{
-    identify_take_notes, MatchedOnset, NoteState, OnsetState as PitchState, PitchConfig, ScoreNote,
+    match_notes, notes_from, MatchConfig, MatchedOnset, NoteState, OnsetState as PitchState, PitchConfig,
+    PitchTrack, ScoreNote,
 };
+
+/// What one late pass over one Take has already worked out, so that its
+/// stages share it: the pitch track (the costly part: the right-notes pass
+/// and the curves read the same one) and the tracker's verdicts (the grade
+/// published first and the one merged with the verifier use the same ones).
+/// One per Take and per run: never reuse it for other audio.
+#[derive(Default)]
+pub struct LateScratch {
+    guitar: Option<PitchTrack>,
+    bass: Option<PitchTrack>,
+    tracker: Option<Vec<Option<NoteState>>>,
+}
+
+impl LateScratch {
+    /// The shipped pitch track of `audio` for a part whose lowest written
+    /// note is `lowest` (MIDI): made once per range. A guitar's range buys
+    /// the time resolution a fast part needs; below E2 is a bass
+    /// (`PitchConfig::for_tuning`).
+    pub(super) fn track(&mut self, audio: &TakeAudio<'_>, lowest: i32) -> &PitchTrack {
+        let slot = if lowest < 40 { &mut self.bass } else { &mut self.guitar };
+        slot.get_or_insert_with(|| {
+            let cfg = PitchConfig::for_tuning(&[lowest.min(40)]);
+            crate::pitch::track(audio.samples, audio.rate, &cfg)
+        })
+    }
+
+    /// [`identify`], made once.
+    pub(super) fn tracker(&mut self, run: &ScheduleRun, report: &ScheduleReport, audio: &TakeAudio<'_>) -> Vec<Option<NoteState>> {
+        if self.tracker.is_none() {
+            self.tracker = Some(identify_in(run, report, audio, self));
+        }
+        self.tracker.clone().unwrap_or_default()
+    }
+}
 
 /// A Take's input audio, mono, on the beat map's clock.
 #[derive(Debug, Clone, Copy)]
@@ -130,6 +165,12 @@ pub(super) fn cuts(run: &ScheduleRun, audio: &TakeAudio<'_>) -> Vec<f64> {
 /// soft note, a chord, a note outside the audio. All `None` when there is no
 /// audio or nothing to check against.
 pub(super) fn identify(run: &ScheduleRun, report: &ScheduleReport, audio: &TakeAudio<'_>) -> Vec<Option<NoteState>> {
+    identify_in(run, report, audio, &mut LateScratch::default())
+}
+
+/// [`identify`], over the pitch track `scratch` holds (made here when it
+/// holds none yet).
+pub(super) fn identify_in(run: &ScheduleRun, report: &ScheduleReport, audio: &TakeAudio<'_>, scratch: &mut LateScratch) -> Vec<Option<NoteState>> {
     let mut out = vec![None; report.results.len()];
     let span = audio.span_ms();
     if span <= END_MARGIN_MS || run.pitches.is_empty() {
@@ -165,12 +206,14 @@ pub(super) fn identify(run: &ScheduleRun, report: &ScheduleReport, audio: &TakeA
     let wanted: std::collections::HashSet<u32> =
         matched.iter().flat_map(|m| m.note_ids.iter().copied()).collect();
     let notes: Vec<ScoreNote> = run.pitches.iter().filter(|n| wanted.contains(&n.id)).copied().collect();
-    // A guitar's range buys the time resolution a fast part needs; below E2 is
-    // a bass (`PitchConfig::for_tuning`).
     let lowest = notes.iter().map(|n| n.midi.round() as i32).min().unwrap_or(40);
-    let cfg = PitchConfig::for_tuning(&[lowest.min(40)]);
+    // `pitch::identify_take_notes`, with the track shared: track the buffer,
+    // cut it at every onset, say what each written note was.
+    let mut onsets_ms: Vec<f64> = matched.iter().filter_map(|m| m.heard_at_ms).collect();
+    onsets_ms.extend_from_slice(&cuts);
+    let events = notes_from(scratch.track(audio, lowest), &onsets_ms);
 
-    for v in identify_take_notes(audio.samples, audio.rate, &notes, &matched, &cuts, &cfg) {
+    for v in match_notes(&events, &notes, &matched, &MatchConfig::default()) {
         let k = v.onset_id as usize;
         if k < out.len() && single[k] && v.state != NoteState::NotAssessed {
             out[k] = Some(v.state);

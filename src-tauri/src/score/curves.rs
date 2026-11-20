@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 use super::notes::TakeAudio;
 use super::verify::NoteDetail;
 use super::{pass_length, ExpectedOnset, OnsetState, ScheduleReport, ScheduleRun};
-use crate::pitch::{PitchConfig, PitchTrack};
+use crate::pitch::PitchTrack;
 
 /// A bend is on pitch when it holds within this of its target, in cents.
 /// M5's acceptance asks for 25.
@@ -335,6 +335,13 @@ impl ScheduleRun {
     /// Every bent or vibrato single note of `report` the matcher heard, read
     /// from `audio`'s pitch track. `None` when there is none to read.
     pub fn curves(&self, report: &ScheduleReport, audio: &TakeAudio<'_>) -> Option<CurveReport> {
+        self.curves_in(report, audio, &mut super::notes::LateScratch::default())
+    }
+
+    /// [`Self::curves`], reading the pitch track `scratch` holds: the one the
+    /// right-notes pass made of the same Take, when it ran over the same
+    /// range, so a Take is tracked once.
+    pub fn curves_in(&self, report: &ScheduleReport, audio: &TakeAudio<'_>, scratch: &mut super::notes::LateScratch) -> Option<CurveReport> {
         if !self.wants_curves() || audio.samples.is_empty() || audio.rate == 0 {
             return None;
         }
@@ -371,14 +378,13 @@ impl ScheduleRun {
             return None;
         }
         let lowest = self.pitches.iter().map(|n| n.midi.round() as i32).min().unwrap_or(40);
-        let cfg = PitchConfig::for_tuning(&[lowest.min(40)]);
-        let track = crate::pitch::track(audio.samples, audio.rate, &cfg);
+        let track = scratch.track(audio, lowest);
         let mut out = CurveReport::default();
         for (result, id, midi, d, from, to) in wanted {
             if to <= from {
                 continue;
             }
-            let mut note = read_note(&track, midi, d.bend.max(0.0), d.shape(), d.has("vibrato"), from, to);
+            let mut note = read_note(track, midi, d.bend.max(0.0), d.shape(), d.has("vibrato"), from, to);
             note.result = result as u32;
             note.note_id = id;
             if let Some(v) = note.bend {
@@ -408,7 +414,7 @@ impl ScheduleRun {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pitch::PitchFrame;
+    use crate::pitch::{PitchConfig, PitchFrame};
 
     /// A track drawn by hand: one frame every 11.6 ms, the pitch `f(ms)`.
     fn drawn(ms: f64, f: impl Fn(f64) -> f64) -> PitchTrack {

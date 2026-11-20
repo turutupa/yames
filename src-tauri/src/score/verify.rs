@@ -18,7 +18,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use super::notes::TakeAudio;
+use super::notes::{LateScratch, TakeAudio};
 use super::{pass_length, ExpectedOnset, OnsetState, ScheduleReport, ScheduleRun};
 use crate::detect::model::NoteModel;
 use crate::detect::verifier::{verify, Expected, Heard, How};
@@ -356,19 +356,39 @@ impl ScheduleRun {
         audio: &TakeAudio<'_>,
         verified: Option<&VerifierReport>,
     ) -> Option<ScheduleReport> {
+        self.report_late_in(weights, audio, verified, &mut LateScratch::default())
+    }
+
+    /// [`Self::report_late`], sharing `scratch` with an earlier call for the
+    /// same Take: the post-Take thread makes the grade twice, first without
+    /// the verifier (published at once, so a long Take is not left waiting
+    /// on the model) and then with it, and the pitch track and the tracker's
+    /// verdicts are worked out once for both. The curves read the same track.
+    pub fn report_late_in(
+        &self,
+        weights: &crate::instrument::ScoreWeights,
+        audio: &TakeAudio<'_>,
+        verified: Option<&VerifierReport>,
+        scratch: &mut LateScratch,
+    ) -> Option<ScheduleReport> {
         let ran = verified.filter(|v| v.status == VerifierStatus::Ran);
-        let mut report = match (self.wants_notes(), ran) {
-            (true, Some(v)) => {
-                let timed = self.report(weights)?;
-                let merged = self.late_states(&timed, audio, v);
-                self.report_with_states(weights, &merged, super::NotesSource::Verifier)
+        let mut report = if self.wants_notes() {
+            let timed = self.report(weights)?;
+            let tracker = scratch.tracker(self, &timed, audio);
+            match ran {
+                Some(v) => {
+                    let verifier = note_states(&timed, v);
+                    let merged = merge_states(&tracker, &verifier);
+                    self.report_with_states(weights, &merged, late_source(&merged, &verifier))
+                }
+                None => self.report_with_states(weights, &tracker, super::NotesSource::PitchPass),
             }
-            (true, None) => self.report_with_notes(weights, audio)?,
-            (false, _) => self.report(weights)?,
+        } else {
+            self.report(weights)?
         };
         report.grade.verifier = verified.cloned();
         // Bends and vibrato, read as curves: information only (M5).
-        report.grade.curves = self.curves(&report, audio);
+        report.grade.curves = self.curves_in(&report, audio, scratch);
         Some(report)
     }
 
@@ -377,6 +397,30 @@ impl ScheduleRun {
     pub fn late_states(&self, timed: &ScheduleReport, audio: &TakeAudio<'_>, verified: &VerifierReport) -> Vec<Option<crate::pitch::NoteState>> {
         let tracker = super::notes::identify(self, timed, audio);
         merge_states(&tracker, &note_states(timed, verified))
+    }
+}
+
+/// Who the merged right-notes count is said to be from. The verifier, and so
+/// the tracker's give-up rules (too fast, notes ring, octave unsure) set
+/// aside, only when it said right or wrong of at least half the notes
+/// counted. Where it mostly could not tell, or had nothing to say (chords,
+/// notes outside the audio), the count is the tracker's and is held to the
+/// tracker's rules.
+pub fn late_source(
+    merged: &[Option<crate::pitch::NoteState>],
+    verifier: &[Option<crate::pitch::NoteState>],
+) -> super::NotesSource {
+    use crate::pitch::NoteState::{Right, Wrong};
+    let counted = merged.iter().filter(|m| m.is_some()).count();
+    let decided = merged
+        .iter()
+        .zip(verifier)
+        .filter(|(m, v)| m.is_some() && matches!(v, Some(Right) | Some(Wrong)))
+        .count();
+    if counted > 0 && decided * 2 >= counted {
+        super::NotesSource::Verifier
+    } else {
+        super::NotesSource::PitchPass
     }
 }
 
@@ -467,5 +511,28 @@ mod merge_tests {
         assert_eq!(one(Some(Right), Some(Unheard)), Some(Right));
         assert_eq!(one(Some(Wrong), Some(Unheard)), Some(Unheard), "the verifier could not tell: not a wrong note");
         assert_eq!(one(None, Some(Unheard)), Some(Unheard));
+    }
+}
+
+#[cfg(test)]
+mod late_source_tests {
+    use super::{late_source, merge_states};
+    use crate::pitch::NoteState::{Right, Unheard, Wrong};
+    use crate::score::NotesSource;
+
+    /// Review of M4, item 5: the count is the verifier's, and the tracker's
+    /// give-up rules set aside, only where the verifier decided at least half
+    /// of what is counted.
+    #[test]
+    fn the_count_is_the_verifiers_only_where_it_decided_half_of_it() {
+        let tracker = vec![Some(Right), Some(Right), Some(Wrong), Some(Right), None];
+        // it said right or wrong of two of the four counted: its count
+        let half = vec![Some(Right), Some(Wrong), Some(Unheard), None, None];
+        assert_eq!(late_source(&merge_states(&tracker, &half), &half), NotesSource::Verifier);
+        // one of four (the rest it could not tell, or had no say): the tracker's
+        let less = vec![Some(Right), Some(Unheard), Some(Unheard), None, None];
+        assert_eq!(late_source(&merge_states(&tracker, &less), &less), NotesSource::PitchPass);
+        // nothing counted at all
+        assert_eq!(late_source(&[None, None], &[None, None]), NotesSource::PitchPass);
     }
 }

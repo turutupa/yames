@@ -2063,8 +2063,10 @@ pub fn set_take_diagnostics(
 /// The grade of the Take just closed, with right notes checked, once the pitch
 /// pass over its audio has finished. Call it after the timing grade said
 /// `notesPending`. Waits at most `timeoutMs` (capped at 8 s, the end of the
-/// "mid-session report" tier in AGENTS.md); `None` when it has not finished by
-/// then, or nothing was started, and the timing grade stands.
+/// "mid-session report" tier in AGENTS.md). When the pass has not finished by
+/// then, the grade from the pitch tracker alone if that much is done (the
+/// note model's look at a long Take can outlast the wait), else `None`, as
+/// when nothing was started, and the timing grade stands.
 ///
 /// The grade carries `notesSerial`: the caller checks it against the one on the
 /// timing grade it is answering.
@@ -2080,21 +2082,11 @@ pub async fn get_take_grade_with_notes(
     let deadline = std::time::Instant::now()
         + std::time::Duration::from_millis(timeout_ms.unwrap_or(4_000).min(8_000));
     // The wait is on the blocking pool, not on one of the runtime's async
-    // threads, which other commands share.
-    tauri::async_runtime::spawn_blocking(move || loop {
-        {
-            let s = slot.lock().map_err(|e| format!("Lock failed: {e}"))?;
-            if !s.pending {
-                return Ok(s.grade.clone());
-            }
-        }
-        if std::time::Instant::now() >= deadline {
-            return Ok(None);
-        }
-        std::thread::sleep(std::time::Duration::from_millis(10));
-    })
+    // threads, which other commands share. When it runs out with the pass
+    // still going, the grade from the pitch tracker alone is the answer.
+    tauri::async_runtime::spawn_blocking(move || crate::timing::wait_for_late_grade(&slot, deadline))
     .await
-    .map_err(|e| format!("the wait for right notes failed: {e}"))?
+    .map_err(|e| format!("the wait for right notes failed: {e}"))
 }
 
 /// Roadmap 2.4 — back to free play. Whatever the current attempt had
