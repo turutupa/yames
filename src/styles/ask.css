@@ -102,7 +102,7 @@
     --today-hero: 270px;
     grid-template-columns:
       minmax(0, 1fr) minmax(250px, var(--today-hero)) 28px
-      minmax(0, var(--today-plan)) minmax(0, 1fr);
+      minmax(0, var(--today-plan, 640px)) minmax(0, 1fr);
   }
 }
 @media (min-width: 981px) and (max-width: 1359px) {

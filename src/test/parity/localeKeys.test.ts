@@ -84,6 +84,12 @@ const DELIBERATELY_REMOVED: readonly string[] = [
   "session.today.toolsOffer",
   "session.today.toolsOfferOpen",
   "session.today.toolsOfferAlways",
+  // Ask is the coach panel (leg c2a1, DESIGN 7): its close button, its text
+  // box and its Send are Ask's own (`ask.close`, `ask.placeholder`,
+  // `ask.send`); the old card's collapse, chat placeholder and send went.
+  "coachCard.collapse",
+  "coachCard.askPlaceholder",
+  "coachCard.send",
 ];
 
 function englishKeys(): string[] {
