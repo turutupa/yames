@@ -35,9 +35,9 @@ ms1's first run had put the selector in the left rail: the relaunch moves it to 
 | pm pass mark + i18n brief | merged | `coach-pm` | 2026-11-20 | `progress/pm.md`, `plans/COACH_I18N_BRIEF.md`. Open: the passed chip reads "Passed · Pass mark 85%" (says pass twice): c1b1 or a polish pass rewords it. pt-BR "meta" wants a native read. |
 | c1b1 line and note | merged | `coach-c1b1` | 2026-11-20 | `progress/c1b1.md`. Checked against mocks 03, 06, 07: accepted. tsc, vitest 384 files / 11,718, build green on `coach`. Left one layout regression (`neck.spec` 620×780, ring gap −0.66 px): leg fix1. |
 | fix1 layout regressions | running | `coach-fix1` | – | `neck.spec` 620×780 (from c1b1); `short-window.spec` aurora 1024×700 (passes at 05644eec, fails from delivery 1a on: most likely pm's longer sentence); the "Passed · Pass mark 85%" chip; then the full layout suite. |
-| c3a worker (Rust) | running | `coach-c3a` | – | reviewer required |
-| c2a1 Ask shell | running | `coach-c2a1` | – | reviewer required (doors) |
-| ms2 selector downloads | briefed, waits for a slot | – | – | reviewer required (Rust, model store) |
+| c3a worker (Rust) | built, with the reviewer | `coach-c3a` | – | `progress/c3a.md` (on its branch). The grammar shipped: never in the sampler chain, every pick checked, end-of-generation never fed to accept, a precheck for the one input that hangs llama.cpp's parser. Prefix cache: a turn decodes about 40 tokens instead of about 940. Hard gates 0 in all five probe runs; p99 not readable (load 16 to 46). **Owed: the five probe runs on a quiet machine** (`bash /tmp/coach-c3a/probe-set.sh`) and the same with Qwen3 4B on Vulkan on the owner's machine. Model used: Qwen3-0.6B-Q8_0 (639 MB, `~/scratch/yames-c3a-models/`). |
+| c2a1 Ask shell | built; review fixes running (c2a1b) | `coach-c2a1` | – | `progress/c2a1.md` (on its branch). Reviewer: `useSession` clean; six findings in the shell (focus stolen after a Take, the dispatcher rebuilt per beat, the tour's coach stop, a per-beat re-render of the open panel on tool screens, the recap closing Ask, an answer landing during a Take). `messages` (the tools' feed) stays in `useSession`; Ask's conversation is `askStore`. |
+| ms2 selector downloads | running | `coach-ms2` | – | reviewer required (Rust, model store) |
 
 **Delivery 1a (2026-11-20):** c0 + c1a + pm + ms1 on `coach`: tsc clean, vitest 382 files / 11,508
 tests, build clean, layout `coach-model`, `rail`, `coach-blocks`, `settings` 43 passed (logs
@@ -63,5 +63,8 @@ See PLAN.md, "Things the orchestrator decided". Additions go here with the date 
 - 2026-11-20. **A leg that changes any text on a screen runs the full layout suite**, not only that
   screen's specs: pm's longer sentence broke a short-window scene in one theme that none of its named
   specs covered, and delivery 1a went out with it (fixed in fix1). Added to the shared brief.
+- 2026-11-20. **`run.sh` sets `TMPDIR=/tmp/coach-tmp`.** `/tmp` is shared with the other account, which
+  runs the same Rust suite: `take_video`'s fifteen tests write fixed names under `temp_dir()` and failed
+  here with PermissionDenied on that account's folders (c3a's run). Not a code defect.
 - 2026-11-20. `tuningSuspected` stays always false for now: the Session does not keep the pitch
   verdicts the note would need. Nothing is said about tuning in any case (owner decision 9).
