@@ -22,6 +22,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getCoachCapabilities } from "../../../ipc.desktop";
 import type { BrainTier, ModelTier } from "../../../types";
+import { tierOnDisk, tiersOnDisk } from "../../../coach/brainDisk";
 import { useWizardEnv } from "../WizardContext";
 import {
   memoryGb,
@@ -63,11 +64,9 @@ export function CoachStep(_props: WizardStepProps) {
     };
   }, []);
 
-  const installedTier: ModelTier | null =
-    coach.modelStatus?.brainReady &&
-    (coach.modelStatus.brainTier === "standard" || coach.modelStatus.brainTier === "full")
-      ? coach.modelStatus.brainTier
-      : null;
+  // Both tiers may be on disk side by side (leg ms2): the first one there is
+  // the one to recommend keeping.
+  const installedTier: ModelTier | null = tiersOnDisk(coach.modelStatus)[0] ?? null;
 
   // The tier gates come from Rust with the model status; reading them from
   // the same place Settings does means the two cannot disagree about what
@@ -158,11 +157,8 @@ export function CoachStep(_props: WizardStepProps) {
     // tier let a pre-Qwen3 install of the same tier short-circuit the
     // wizard, so a legacy brain survived onboarding and then answered every
     // prompt with visible ChatML artifacts.
-    const complete =
-      modelStatus?.brainReady &&
-      modelStatus.brainTier === staged &&
-      !modelStatus.brainUpdateRecommended &&
-      modelStatus.voiceReady;
+    const here = tierOnDisk(modelStatus, staged);
+    const complete = !!here && !here.updateRecommended && !!modelStatus?.voiceReady;
     if (complete || downloading) return;
     startDownload(staged);
   }, [
@@ -181,12 +177,8 @@ export function CoachStep(_props: WizardStepProps) {
   }, [staged, commit, setNextEnabled, setStepCommit]);
 
   const pending = staged !== undefined && staged !== "off" && !downloading;
-  const alreadyHere =
-    staged !== undefined &&
-    staged !== "off" &&
-    modelStatus?.brainReady &&
-    modelStatus.brainTier === staged &&
-    !modelStatus.brainUpdateRecommended;
+  const stagedHere = staged !== undefined && staged !== "off" ? tierOnDisk(modelStatus, staged) : null;
+  const alreadyHere = !!stagedHere && !stagedHere.updateRecommended;
 
   return (
     <div className="onboarding-step">

@@ -31,8 +31,12 @@ type PersistedVoiceMode = VoiceMode | "chime";
  * install. Only the user-facing string moved.
  *
  * Never Qwen2.5-3B: non-commercial Qwen Research License (ROADMAP §3).
+ *
+ * `models.rs` `BRAIN_ARTIFACTS` pins each of these beside its size and
+ * SHA-256; `brainArtifacts.test.ts` holds the two lists equal, because a URL
+ * Rust does not know downloads unchecked.
  */
-const MODEL_URLS: Record<ModelTier, string> = {
+export const MODEL_URLS: Record<ModelTier, string> = {
   standard:
     "https://huggingface.co/Qwen/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q4_K_M.gguf",
   full: "https://huggingface.co/Qwen/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q4_K_M.gguf",
@@ -179,20 +183,38 @@ export function useCoachDownload() {
   const runningTierRef = useRef<ModelTier | null>(null);
   // Where the weights' download had got to, for a paused row.
   const brainFractionRef = useRef<number | null>(null);
+  const brainBytesRef = useRef<{ downloaded: number; total: number } | null>(null);
   /**
-   * A stopped download. Rust's cancel kills curl and keeps the `.part` file
-   * (`models.rs` `curl_download`), and the next start resumes from it with
-   * `-C -`: so a cancel is a pause, and the selector calls it one.
+   * A paused download. Rust's plain cancel kills curl and keeps the `.part`
+   * file, and the next start resumes from it with `-C -` (after a restart
+   * too: `ModelStatus.tiers[].partialBytes` brings it back to the row).
    */
-  const [pausedDownload, setPausedDownload] = useState<{ tier: ModelTier; fraction: number | null } | null>(null);
-  const [failedDownload, setFailedDownload] = useState<{ tier: ModelTier; error: string } | null>(null);
+  const [pausedDownload, setPausedDownload] = useState<{
+    tier: ModelTier;
+    fraction: number | null;
+    downloadedBytes: number | null;
+    totalBytes: number | null;
+  } | null>(null);
+  const [failedDownload, setFailedDownload] = useState<{
+    tier: ModelTier;
+    error: string;
+    code: "space" | "checksum" | null;
+  } | null>(null);
+  /** A download the player cancelled: stopped, and its bytes removed. */
+  const [cancelledTier, setCancelledTier] = useState<ModelTier | null>(null);
+
+  const refreshStatus = useCallback(() => {
+    getModelStatus().then(setModelStatus).catch(() => {});
+  }, []);
 
   const handleStartDownload = useCallback(async (tier: ModelTier, opts?: { select?: boolean }) => {
     selectOnFinishRef.current = opts?.select ?? true;
     runningTierRef.current = tier;
     brainFractionRef.current = null;
+    brainBytesRef.current = null;
     setPausedDownload(null);
     setFailedDownload(null);
+    setCancelledTier(null);
     setModelDownloading(true);
     setDownloadingTier(tier);
     setPendingDownloadTier(null);
@@ -210,7 +232,7 @@ export function useCoachDownload() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setDownloadError(msg);
-      setFailedDownload({ tier, error: msg });
+      setFailedDownload({ tier, error: msg, code: null });
       runningTierRef.current = null;
       setModelDownloading(false);
       setDownloadProgress(null);
@@ -221,7 +243,12 @@ export function useCoachDownload() {
   // Subscribe to backend progress / completion events.
   useEffect(() => {
     const unsubProgress = onDownloadProgress((progress) => {
-      if (progress.component === "brain") brainFractionRef.current = progress.fraction;
+      if (progress.component === "brain" && progress.stage !== "checking") {
+        brainFractionRef.current = progress.fraction;
+        if (progress.totalBytes > 0) {
+          brainBytesRef.current = { downloaded: progress.downloadedBytes, total: progress.totalBytes };
+        }
+      }
       setDownloadProgress(progress);
       if (progress.done) {
         getModelStatus().then(setModelStatus);
@@ -230,11 +257,21 @@ export function useCoachDownload() {
     const unsubComplete = onDownloadComplete((result) => {
       const ranTier = runningTierRef.current;
       runningTierRef.current = null;
-      if (ranTier && result.cancelled) {
-        setPausedDownload({ tier: ranTier, fraction: brainFractionRef.current });
+      if (ranTier && result.cancelled && result.discarded) {
+        setCancelledTier(ranTier);
+      } else if (ranTier && result.cancelled) {
+        const bytes = brainBytesRef.current;
+        setPausedDownload({
+          tier: ranTier,
+          fraction: brainFractionRef.current,
+          downloadedBytes: bytes?.downloaded ?? null,
+          totalBytes: bytes?.total ?? null,
+        });
       } else if (ranTier && !result.success) {
-        setFailedDownload({ tier: ranTier, error: result.error ?? "" });
+        setFailedDownload({ tier: ranTier, error: result.error ?? "", code: result.code ?? null });
       }
+      // What a stop left on disk (a kept part, a removed one) is Rust's to say.
+      if (!result.success) refreshStatus();
       if (result.success && result.tier) {
         // Full brain+voices install path — tier present, persist + flip
         // the active brain tier.
@@ -274,41 +311,81 @@ export function useCoachDownload() {
       unsubProgress.then((u) => u());
       unsubComplete.then((u) => u());
     };
-  }, []);
+  }, [refreshStatus]);
 
+  /** Pause: Rust stops the transfer and keeps the bytes for the next start. */
   const cancelDownload = useCallback(() => {
     cancelModelDownload();
   }, []);
 
-  // The selector reads the download from the loader's snapshot, and starts
-  // or pauses it through this port: it is the same download Settings runs,
-  // never a second one. Nothing here starts a download by itself.
+  /**
+   * Cancel: stop `tier`'s download and remove its bytes. A running one is
+   * removed by Rust's download thread once curl has stopped (the complete
+   * event then says `discarded`); a paused one is removed at once.
+   */
+  const discardDownload = useCallback(
+    (tier: ModelTier) => {
+      const opts = { discard: true, tier, url: MODEL_URLS[tier] };
+      if (runningTierRef.current === tier) {
+        void cancelModelDownload(opts).catch(() => {});
+        return;
+      }
+      setPausedDownload((p) => (p?.tier === tier ? null : p));
+      setFailedDownload((f) => (f?.tier === tier ? null : f));
+      cancelModelDownload(opts)
+        .then(() => setCancelledTier(tier))
+        .catch((err) => {
+          setFailedDownload({ tier, error: err instanceof Error ? err.message : String(err), code: null });
+        })
+        .finally(refreshStatus);
+    },
+    [refreshStatus],
+  );
+
+  // The selector reads the download from the loader's snapshot, and starts,
+  // pauses or cancels it through this port: it is the same download Settings
+  // runs, never a second one. Nothing here starts a download by itself.
   useEffect(
     () =>
       registerCoachDownloadPort({
         start: (tier) => void handleStartDownload(tier, { select: false }),
         pause: cancelDownload,
+        cancel: discardDownload,
       }),
-    [handleStartDownload, cancelDownload],
+    [handleStartDownload, cancelDownload, discardDownload],
   );
   useEffect(() => {
     if (downloadingTier) {
-      const voices = !!downloadProgress && downloadProgress.component !== "brain";
+      const p = downloadProgress;
+      const voices = !!p && p.component !== "brain";
+      const checking = !!p && p.component === "brain" && p.stage === "checking";
       setCoachModelDownload({
         tier: downloadingTier,
         phase: "running",
-        stage: voices ? "voices" : "brain",
-        fraction: downloadProgress && downloadProgress.fraction > 0 ? downloadProgress.fraction : null,
+        stage: voices ? "voices" : checking ? "checking" : "brain",
+        fraction: p && p.fraction > 0 ? p.fraction : null,
+        downloadedBytes: p && !voices && p.totalBytes > 0 ? p.downloadedBytes : null,
+        totalBytes: p && !voices && p.totalBytes > 0 ? p.totalBytes : null,
         error: null,
+        code: null,
       });
     } else if (pausedDownload) {
-      setCoachModelDownload({ ...pausedDownload, phase: "paused", stage: "brain", error: null });
+      setCoachModelDownload({ ...pausedDownload, phase: "paused", stage: "brain", error: null, code: null });
     } else if (failedDownload) {
-      setCoachModelDownload({ tier: failedDownload.tier, phase: "failed", stage: "brain", fraction: null, error: failedDownload.error });
+      setCoachModelDownload({
+        tier: failedDownload.tier,
+        phase: "failed",
+        stage: "brain",
+        fraction: null,
+        error: failedDownload.error,
+        code: failedDownload.code,
+      });
+    } else if (cancelledTier) {
+      setCoachModelDownload({ tier: cancelledTier, phase: "cancelled", stage: "brain", fraction: null, error: null, code: null });
     } else {
       setCoachModelDownload(null);
     }
-  }, [downloadingTier, downloadProgress, pausedDownload, failedDownload]);
+  }, [downloadingTier, downloadProgress, pausedDownload, failedDownload, cancelledTier]);
 
   return {
     // model state
@@ -349,7 +426,11 @@ export function useCoachDownload() {
     setTtsVolume,
     // actions
     handleStartDownload,
+    /** Pause: keeps the bytes. */
     cancelDownload,
+    /** Cancel: stops the tier's download and removes its bytes. */
+    discardDownload,
+    refreshStatus,
   };
 }
 

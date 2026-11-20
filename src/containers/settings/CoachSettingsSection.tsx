@@ -12,6 +12,8 @@ import type { CoachCapabilities, ModelStatus, VoiceDiagnostic } from "../../ipc.
 import { storeSave } from "../../ipc";
 import { deleteModels, getCoachCapabilities, getModelStatus, onTtsSpeechEnded, ttsSetVoice, ttsSpeak, ttsStop } from "../../ipc.desktop";
 import { brainTierLabelKey } from "../../coach/brainTiers";
+import { MODEL_TIERS, tierOnDisk, tiersOnDisk } from "../../coach/brainDisk";
+import { COACH_MODEL_TIERS } from "../../hooks/coachLoader";
 import type { CoachStance } from "../../coach/learningMode";
 import { formatBytes } from "./formatBytes";
 import { coachStatusLabel, coachTierLabel, withLoaderState } from "./coachStatus";
@@ -110,6 +112,8 @@ export function CoachSettingsSection({
   // (the OS refuses to unlink a mapped file, which is why the backend
   // now unloads the worker first).
   const [removeError, setRemoveError] = useState<string | null>(null);
+  // The one tier being removed by its own Remove, if any.
+  const [removingTier, setRemovingTier] = useState<ModelTier | null>(null);
   // Which voice (if any) is currently mid-preview. Drives the inline
   // equalizer-style bars rendered inside that voice's toggle button so
   // the user gets visible feedback during the 200-1500 ms synthesis
@@ -327,7 +331,7 @@ export function CoachSettingsSection({
                screen it was looking at. */
             disabled={modelDownloading || !standardAvailable}
             onClick={() => {
-              if (modelStatus?.brainReady && modelStatus.brainTier === "standard") {
+              if (modelStatus && tierOnDisk(modelStatus, "standard")) {
                 setCoachBrainTier("standard");
                 storeSave("coachBrainTier", "standard");
                 if (!modelStatus.voiceReady) onStartDownload("standard");
@@ -353,7 +357,7 @@ export function CoachSettingsSection({
             }
             disabled={modelDownloading || !studioAvailable}
             onClick={() => {
-              if (modelStatus?.brainReady && modelStatus.brainTier === "full") {
+              if (modelStatus && tierOnDisk(modelStatus, "full")) {
                 setCoachBrainTier("full");
                 storeSave("coachBrainTier", "full");
                 if (!modelStatus.voiceReady) onStartDownload("full");
@@ -399,8 +403,10 @@ export function CoachSettingsSection({
             className="toggle-btn"
             disabled={modelDownloading}
             onClick={() => {
+              // The tier whose weights are the older family; it is updated
+              // in its own folder, and the other tier is not touched.
               const tier: ModelTier =
-                modelStatus?.brainTier === "full" && studioAvailable ? "full" : "standard";
+                MODEL_TIERS.find((x) => tierOnDisk(modelStatus, x)?.updateRecommended) ?? "standard";
               onStartDownload(tier);
             }}
           >
@@ -742,7 +748,11 @@ export function CoachSettingsSection({
               disabled={modelDownloading}
               onClick={() =>
                 onStartDownload(
-                  (modelStatus.brainTier as ModelTier) ?? "standard",
+                  // The voices come after any brain; the chosen one's when
+                  // it is on disk (Rust skips weights already there).
+                  (coachBrainTier !== "off" && tierOnDisk(modelStatus, coachBrainTier)
+                    ? coachBrainTier
+                    : tiersOnDisk(modelStatus)[0]) ?? "standard",
                 )
               }
             >
@@ -777,15 +787,64 @@ export function CoachSettingsSection({
           uninstalled by `deleteModels()` in one shot. */}
       {modelStatus?.brainReady && (
         <div className="coach-download-section coach-manage-section">
+          {/* Each model on disk, with its own Remove (leg ms2): the two
+              tiers live side by side, and removing one never touches the
+              other or the voices. The player's press, and nothing else,
+              ever deletes a model. */}
+          {tiersOnDisk(modelStatus).length > 0 && (
+            <ul className="coach-tier-list" data-testid="coach-tier-list">
+              {tiersOnDisk(modelStatus).map((tier) => {
+                const onDisk = tierOnDisk(modelStatus, tier)!;
+                const name = t("coachModel.entry", {
+                  tier: t(brainTierLabelKey(tier)),
+                  model: COACH_MODEL_TIERS.find((x) => x.tier === tier)?.name ?? "",
+                  size: formatBytes(onDisk.sizeBytes),
+                });
+                return (
+                  <li key={tier} className="coach-tier-item" data-tier={tier}>
+                    <span className="setting-hint coach-tier-name">{name}</span>
+                    <button
+                      className="coach-download-btn coach-tier-remove"
+                      disabled={removing || removingTier !== null || (modelDownloading && model.download?.tier === tier)}
+                      aria-label={t("settings.coach.removeTierLabel", { name })}
+                      onClick={async () => {
+                        setRemovingTier(tier);
+                        setRemoveError(null);
+                        try {
+                          await deleteModels(tier);
+                          setModelStatus(await getModelStatus());
+                          // The choice goes to Off only when it was this
+                          // model; the other one stays chosen and loaded.
+                          if (coachBrainTier === tier) {
+                            setCoachBrainTier("off");
+                            storeSave("coachBrainTier", "off");
+                          }
+                        } catch (err) {
+                          setRemoveError(err instanceof Error ? err.message : String(err));
+                          getModelStatus().then(setModelStatus).catch(() => {});
+                        } finally {
+                          setRemovingTier(null);
+                        }
+                      }}
+                    >
+                      {removingTier === tier ? t("settings.coach.removing") : t("settings.coach.removeTier")}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
           <p className="setting-hint" style={{ marginBottom: 8 }}>
             {t("settings.coach.installed", {
-              tier: t(brainTierLabelKey(modelStatus.brainTier)),
+              tier: tiersOnDisk(modelStatus)
+                .map((x) => t(brainTierLabelKey(x)))
+                .join(" + ") || t(brainTierLabelKey(modelStatus.brainTier)),
               size: formatBytes(modelStatus.brainSizeBytes + modelStatus.voiceSizeBytes),
             })}
           </p>
           <button
             className="coach-download-btn"
-            disabled={removing || modelDownloading}
+            disabled={removing || removingTier !== null || modelDownloading}
             onClick={async () => {
               setRemoving(true);
               setRemoveError(null);

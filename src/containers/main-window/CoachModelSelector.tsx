@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { brainTierLabelKey } from "../../coach/brainTiers";
 import {
+  cancelCoachModelDownload,
   chooseCoachModel,
   pauseCoachModelDownload,
   retryCoachModel,
@@ -36,6 +37,16 @@ function gb(bytes: number, lng: string): string {
   return `${n.format(bytes / 1e9)} GB`;
 }
 
+/**
+ * The bytes done so far, in the same unit as the whole and never rounded up
+ * to it: "2.4 of 2.5 GB" until the last byte, not "2.5 of 2.5 GB".
+ */
+function gbOf(done: number, total: number, lng: string): string {
+  const n = new Intl.NumberFormat(lng, { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+  const tenths = done >= total ? total / 1e8 : Math.min(Math.floor(done / 1e8), Math.floor(total / 1e8));
+  return n.format(Math.round(tenths) / 10);
+}
+
 /** The machine's memory, in the round number its owner knows it by. */
 function memoryGb(mb: number, lng: string): string {
   return `${new Intl.NumberFormat(lng, { maximumFractionDigits: 0 }).format(mb / 1024)} GB`;
@@ -47,22 +58,34 @@ function percent(fraction: number, lng: string): string {
   );
 }
 
-/** Whether the system says this connection is metered. Unknown is no. */
-function onMeteredConnection(): boolean {
+/**
+ * Whether the system says this connection is metered. Unknown is no.
+ *
+ * Only the webview can say, and only some can: Chromium's
+ * `navigator.connection` (WebView2 on Windows, Android's WebView) reports
+ * `saveData`, and `type` where the OS gives it (Android); WebKit (macOS,
+ * Linux) has no such API at all. Where it cannot say, nothing is shown.
+ */
+export function onMeteredConnection(): boolean {
   const c = (navigator as Navigator & { connection?: { type?: string; saveData?: boolean } }).connection;
   return !!c && (c.type === "cellular" || c.saveData === true);
 }
 
 /** One line saying what a row's state is (its download aside). */
-export function rowStateText(row: CoachModelRow, t: TFunction, failure: string | null): string {
+export function rowStateText(row: CoachModelRow, t: TFunction, failure: string | null, lng = "en"): string {
   // While it downloads, that is its state; the progress line has the number.
-  if (row.download?.phase === "running") return t("coachModel.state.downloading");
+  if (row.download?.phase === "running") {
+    return row.download.stage === "checking" ? t("coachModel.state.checking") : t("coachModel.state.downloading");
+  }
   switch (row.state) {
     case "notOnThisDevice":
       return t(`coachModel.why.${row.why ?? "phone"}`);
     case "notDownloaded":
       if (row.why === "update") return t("coachModel.state.update");
-      if (row.why === "otherOnDisk") return t("coachModel.state.otherOnDisk");
+      if (row.why === "unplaced") return t("coachModel.state.unplaced");
+      if (row.space?.state === "short") {
+        return t("coachModel.state.noRoom", { need: gb(row.space.needBytes, lng), free: gb(row.space.freeBytes, lng) });
+      }
       return t("coachModel.state.notDownloaded");
     case "failed":
       return failure ? t("coachModel.state.failedWhy", { reason: failure }) : t("coachModel.state.failed");
@@ -74,6 +97,7 @@ export function rowStateText(row: CoachModelRow, t: TFunction, failure: string |
 /** What the button says about the choice. */
 function buttonState(snap: CoachModelSnapshot, t: TFunction, lng: string): string {
   const d = snap.download;
+  if (d?.phase === "running" && d.stage === "checking") return t("coachModel.short.checking");
   if (d?.phase === "running") {
     return d.fraction !== null
       ? t("coachModel.short.downloading", { percent: percent(d.fraction, lng) })
@@ -92,8 +116,10 @@ export function CoachModelSelector() {
   const snap = useCoachModel();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
-  // A Download pressed on a metered connection: the row asks first.
-  const [confirmTier, setConfirmTier] = useState<ModelTier | null>(null);
+  // A Download pressed on a metered connection, or with little room to
+  // spare: the row asks first, and says which.
+  const [confirm, setConfirm] = useState<{ tier: ModelTier; metered: boolean; tight: boolean } | null>(null);
+  const confirmTier = confirm?.tier ?? null;
   const [maxHeight, setMaxHeight] = useState<number | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -108,7 +134,7 @@ export function CoachModelSelector() {
 
   const close = useCallback((refocus: boolean) => {
     setOpen(false);
-    setConfirmTier(null);
+    setConfirm(null);
     if (refocus) buttonRef.current?.focus();
   }, []);
 
@@ -175,13 +201,15 @@ export function CoachModelSelector() {
     pick(row.tier);
   };
 
-  const download = (tier: ModelTier, confirmed: boolean) => {
-    if (!confirmed && onMeteredConnection()) {
-      setConfirmTier(tier);
+  const download = (row: CoachModelRow, confirmed: boolean) => {
+    const metered = onMeteredConnection();
+    const tight = row.space?.state === "tight";
+    if (!confirmed && (metered || tight)) {
+      setConfirm({ tier: row.tier, metered, tight });
       return;
     }
-    setConfirmTier(null);
-    startCoachModelDownload(tier);
+    setConfirm(null);
+    startCoachModelDownload(row.tier);
   };
 
   const onMenuKey = (e: ReactKeyboardEvent<HTMLDivElement>) => {
@@ -277,7 +305,7 @@ export function CoachModelSelector() {
         <span className="coach-model-title">{entry}</span>
         <span className="coach-model-detail">
           <span className="coach-model-mark" data-state={row.state} aria-hidden="true" />
-          {rowStateText(row, t, selected ? snap.failure : null)}
+          {rowStateText(row, t, selected ? snap.failure : null, lng)}
         </span>
         {row.lowMemory && row.state !== "notOnThisDevice" && (
           <span className="coach-model-warn">{t("coachModel.state.lowMemory")}</span>
@@ -309,19 +337,32 @@ export function CoachModelSelector() {
 
     // Not downloaded: the row is text, and its actions are the items.
     const actions: ReactNode[] = [];
+    // Cancel stops the download and removes its bytes: offered beside Pause
+    // while it runs, and beside Resume once paused.
+    const cancelItem = () =>
+      item({
+        role: "menuitem",
+        className: "coach-model-action coach-model-action-quiet",
+        label: `${t("coachModel.download.cancel")}: ${entry}`,
+        onPress: () => {
+          setConfirm(null);
+          cancelCoachModelDownload(row.tier);
+        },
+        children: t("coachModel.download.cancel"),
+      });
     if (confirmTier === row.tier && !running) {
       actions.push(
         item({
           role: "menuitem",
           className: "coach-model-action btn-tonal",
           label: `${t("coachModel.download.anyway")}: ${entry}`,
-          onPress: () => download(row.tier, true),
+          onPress: () => download(row, true),
           children: t("coachModel.download.anyway"),
         }),
         item({
           role: "menuitem",
           className: "coach-model-action coach-model-action-quiet",
-          onPress: () => setConfirmTier(null),
+          onPress: () => setConfirm(null),
           children: t("coachModel.download.notNow"),
         }),
       );
@@ -335,22 +376,28 @@ export function CoachModelSelector() {
           children: t("coachModel.download.pause"),
         }),
       );
-    } else if (row.canDownload) {
-      const word =
-        d?.phase === "paused"
-          ? t("coachModel.download.resume")
-          : d?.phase === "failed"
-            ? t("coachModel.download.retry")
-            : t("coachModel.download.start");
-      actions.push(
-        item({
-          role: "menuitem",
-          className: "coach-model-action btn-tonal",
-          label: `${word}: ${entry}`,
-          onPress: () => download(row.tier, false),
-          children: word,
-        }),
-      );
+      // The voices step comes after the weights are adopted: nothing of the
+      // model is left to cancel there.
+      if (d?.stage !== "voices") actions.push(cancelItem());
+    } else {
+      if (row.canDownload) {
+        const word =
+          d?.phase === "paused"
+            ? t("coachModel.download.resume")
+            : d?.phase === "failed"
+              ? t("coachModel.download.retry")
+              : t("coachModel.download.start");
+        actions.push(
+          item({
+            role: "menuitem",
+            className: "coach-model-action btn-tonal",
+            label: `${word}: ${entry}`,
+            onPress: () => download(row, false),
+            children: word,
+          }),
+        );
+      }
+      if (d?.phase === "paused") actions.push(cancelItem());
     }
 
     return (
@@ -370,9 +417,19 @@ export function CoachModelSelector() {
             : <span className="coach-model-text-wrap" data-tier={row.tier}>{text}</span>}
           {actions.length > 0 && <span className="coach-model-actions">{actions}</span>}
         </div>
-        {confirmTier === row.tier && !running && (
+        {confirm?.tier === row.tier && !running && (
           <p className="coach-model-note" role="note">
-            {t("coachModel.download.meteredWarn", { size: gb(row.sizeBytes, lng) })}
+            {[
+              confirm.metered ? t("coachModel.download.meteredWarn", { size: gb(row.sizeBytes, lng) }) : null,
+              confirm.tight && row.space
+                ? t("coachModel.download.spaceWarn", {
+                    need: gb(row.space.needBytes, lng),
+                    free: gb(row.space.freeBytes, lng),
+                  })
+                : null,
+            ]
+              .filter(Boolean)
+              .join(" ")}
           </p>
         )}
         {showDownload && downloadLine(row)}
@@ -384,19 +441,38 @@ export function CoachModelSelector() {
   const downloadLine = (row: CoachModelRow) => {
     const d = row.download;
     if (!d) return null;
+    // "1.2 of 2.5 GB" where Rust has said how many bytes; else a percentage.
+    const bytes =
+      d.downloadedBytes != null && d.totalBytes
+        ? { done: gbOf(d.downloadedBytes, d.totalBytes, lng), total: gb(d.totalBytes, lng) }
+        : null;
     let words: string;
     if (d.phase === "running") {
       words =
         d.stage === "voices"
           ? t("coachModel.download.voices")
-          : d.fraction !== null
-            ? t("coachModel.download.running", { percent: percent(d.fraction, lng) })
-            : t("coachModel.download.runningNoPercent");
+          : d.stage === "checking"
+            ? t("coachModel.download.checking", { percent: percent(d.fraction ?? 0, lng) })
+            : bytes
+              ? t("coachModel.download.runningBytes", bytes)
+              : d.fraction !== null
+                ? t("coachModel.download.running", { percent: percent(d.fraction, lng) })
+                : t("coachModel.download.runningNoPercent");
     } else if (d.phase === "paused") {
-      words =
-        d.fraction !== null
+      words = bytes
+        ? t("coachModel.download.pausedBytes", bytes)
+        : d.fraction !== null
           ? t("coachModel.download.paused", { percent: percent(d.fraction, lng) })
           : t("coachModel.download.pausedNoPercent");
+    } else if (d.phase === "cancelled") {
+      words = t("coachModel.download.cancelled");
+    } else if (d.code === "checksum") {
+      words = t("coachModel.download.checksumFailed");
+    } else if (d.code === "space" && row.space) {
+      words = t("coachModel.download.noRoom", {
+        need: gb(row.space.needBytes, lng),
+        free: gb(row.space.freeBytes, lng),
+      });
     } else {
       words = d.error
         ? t("coachModel.download.failed", { reason: d.error })
@@ -404,8 +480,8 @@ export function CoachModelSelector() {
     }
     const indeterminate = d.phase === "running" && (d.fraction === null || d.stage === "voices");
     return (
-      <div className="coach-model-progress" data-phase={d.phase}>
-        {d.phase !== "failed" && (
+      <div className="coach-model-progress" data-phase={d.phase} data-stage={d.stage}>
+        {d.phase !== "failed" && d.phase !== "cancelled" && (
           <span
             className="coach-model-bar"
             role="progressbar"

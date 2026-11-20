@@ -2191,6 +2191,30 @@ export type ModelStatus = {
   studioRecommended: boolean;
   standardRecommended: boolean;
   brainUpdateRecommended: boolean;
+  /**
+   * Each local tier on its own (leg ms2): both can be on disk side by side,
+   * in `models/brain/<tier>/`. One entry per tier. Absent from an older
+   * backend, where the single-brain fields above are the whole truth
+   * (`coach/brainDisk.ts` reads either).
+   */
+  tiers?: TierStatus[];
+  /** Bytes free on the models' volume; null when the platform cannot say. */
+  freeBytes?: number | null;
+};
+
+/** One tier's brain on disk (`ModelStatus.tiers`). */
+export type TierStatus = {
+  tier: string;
+  onDisk: boolean;
+  sizeBytes: number;
+  family: string | null;
+  updateRecommended: boolean;
+  /** A paused download of this tier, kept to resume from; 0 when none. */
+  partialBytes: number;
+  /** What the pinned file weighs. */
+  downloadBytes: number | null;
+  /** A SHA-256 is pinned for it and checked before it is adopted. */
+  checksumPinned: boolean;
 };
 
 export type DownloadProgress = {
@@ -2199,6 +2223,26 @@ export type DownloadProgress = {
   totalBytes: number;
   fraction: number;
   done: boolean;
+  /**
+   * "transfer" while bytes arrive, "checking" while the brain's checksum is
+   * computed (the bytes then count what has been hashed).
+   */
+  stage?: "transfer" | "checking";
+};
+
+/** The `model-download-complete` payload. */
+export type DownloadComplete = {
+  success: boolean;
+  tier?: string;
+  /** Paused or cancelled by the player. */
+  cancelled?: boolean;
+  /** Cancelled, and the partial file was removed. */
+  discarded?: boolean;
+  /** "space": not enough room; "checksum": the file did not match its pinned hash. */
+  code?: "space" | "checksum";
+  needBytes?: number;
+  freeBytes?: number;
+  error?: string;
 };
 
 export async function getModelStatus(): Promise<ModelStatus> {
@@ -2274,8 +2318,13 @@ export async function downloadModelFile(
   await writeModelChunk(component, filename, Array.from(full));
 }
 
-export async function deleteModels(): Promise<void> {
-  return invoke("delete_models");
+/**
+ * "Remove models": everything, voices included. With a `tier`, that tier's
+ * brain only (Settings → Coach, per tier); the other tier and the voices
+ * stay, and Rust unloads the model only when it may be the one deleted.
+ */
+export async function deleteModels(tier?: string): Promise<void> {
+  return tier ? invoke("delete_models", { tier }) : invoke("delete_models");
 }
 
 // ---------------------------------------------------------------------------
@@ -2288,8 +2337,9 @@ export async function deleteModels(): Promise<void> {
  * not restarted. Prefer `ensureCoachLoaded()` from `hooks/coachLoader`,
  * which also dedupes the in-flight promise on this side.
  */
-export async function loadCoachModel(): Promise<boolean> {
-  return invoke<boolean>("load_coach_model");
+export async function loadCoachModel(tier?: string): Promise<boolean> {
+  // The tier's own file: both tiers may be on disk side by side.
+  return tier ? invoke<boolean>("load_coach_model", { tier }) : invoke<boolean>("load_coach_model");
 }
 
 /**
@@ -2543,16 +2593,21 @@ export function onDownloadProgress(callback: (progress: DownloadProgress) => voi
   return listen<DownloadProgress>("model-download-progress", (e) => callback(e.payload));
 }
 
-export function onDownloadComplete(callback: (result: { success: boolean; tier?: string; cancelled?: boolean; error?: string }) => void) {
-  return listen<{ success: boolean; tier?: string; cancelled?: boolean; error?: string }>("model-download-complete", (e) => callback(e.payload));
+export function onDownloadComplete(callback: (result: DownloadComplete) => void) {
+  return listen<DownloadComplete>("model-download-complete", (e) => callback(e.payload));
 }
 
 export async function startModelDownload(url: string, component: string, filename: string, tier: string): Promise<void> {
   return invoke("start_model_download", { url, component, filename, tier });
 }
 
-export async function cancelModelDownload(): Promise<void> {
-  return invoke("cancel_model_download");
+/**
+ * Stop the model download. Plain, it is a pause: Rust keeps the bytes and
+ * the next start resumes. With `discard`, a cancel: the partial file of
+ * `tier` / `url` is removed too (a paused one included).
+ */
+export async function cancelModelDownload(opts?: { discard: boolean; tier: string; url: string }): Promise<void> {
+  return opts ? invoke("cancel_model_download", opts) : invoke("cancel_model_download");
 }
 
 export function onPlaybackFinished(callback: () => void) {

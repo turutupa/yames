@@ -124,6 +124,8 @@
       "downloadVoices": "Download voices",
       "installed": "{{tier}} coach installed ({{size}})",
       "removing": "Removing…",
+      "removeTier": "Remove",
+      "removeTierLabel": "Remove {{name}}",
       "removeModels": "Remove models",
       "stance": "Coaching Style",
       "stanceHint": "How hard the coach is on you while you play in the tools",
