@@ -89,6 +89,54 @@ def read_mono(path) -> tuple[np.ndarray, int]:
     return x.mean(axis=1), int(sr)
 
 
+# A phone's recorder writes m4a (AAC) by default; libsndfile cannot read that,
+# and its mp3/opus support depends on the build. These go through ffmpeg to a
+# temporary WAV first (the DGX has no system ffmpeg: a static aarch64 build
+# lives in ~/tools/ffmpeg/, johnvansickle.com, md5 checked). Without ffmpeg
+# mp3/opus still get a try with libsndfile; m4a/aac are skipped with a message.
+FFMPEG_EXT = {".m4a", ".aac", ".mp3", ".opus", ".mp4", ".caf", ".wma", ".webm"}
+
+
+def ffmpeg_bin() -> str | None:
+    """$YAMES_FFMPEG, else ~/tools/ffmpeg/ffmpeg, else ffmpeg on PATH; None when there is none."""
+    env = os.environ.get("YAMES_FFMPEG")
+    if env is not None:  # set but empty = "pretend there is none" (tests)
+        return env if env and os.access(env, os.X_OK) else None
+    local = HOME / "tools/ffmpeg/ffmpeg"
+    if os.access(local, os.X_OK):
+        return str(local)
+    return shutil.which("ffmpeg")
+
+
+def decode_to_wav(path: pathlib.Path, out_wav: pathlib.Path, ffmpeg: str) -> None:
+    """The first audio stream of `path` as 32-bit float WAV at its own rate and channels."""
+    r = subprocess.run([ffmpeg, "-nostdin", "-hide_banner", "-loglevel", "error", "-y", "-i", str(path),
+                        "-vn", "-map", "0:a:0", "-c:a", "pcm_f32le", "-f", "wav", str(out_wav)],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, timeout=600)
+    if r.returncode != 0 or not out_wav.exists():
+        raise RuntimeError(f"ffmpeg could not decode {path.name}: {(r.stderr or '').strip()[-300:]}")
+
+
+def read_recording(path: pathlib.Path) -> tuple[np.ndarray, int, str]:
+    """A second recording, mono -> (samples, rate, how it was read). m4a/aac/mp3/opus via ffmpeg."""
+    if path.suffix.lower() not in FFMPEG_EXT:
+        x, sr = read_mono(path)
+        return x, sr, "soundfile"
+    ff = ffmpeg_bin()
+    if ff is None:
+        try:  # libsndfile >= 1.1 reads mp3 and ogg-opus; never m4a/aac
+            x, sr = read_mono(path)
+            return x, sr, "soundfile"
+        except Exception:
+            raise RuntimeError(f"{path.suffix} needs ffmpeg to be read, and there is none (looked at $YAMES_FFMPEG, "
+                               f"~/tools/ffmpeg/ffmpeg and PATH). Put a static build there, or export the recording as WAV and drop that in instead")
+    with tempfile.TemporaryDirectory(prefix="corpus-decode-") as td:
+        wav = pathlib.Path(td) / (path.stem + ".wav")
+        decode_to_wav(path, wav, ff)
+        x, sr = read_mono(wav)
+    return x, sr, "ffmpeg"
+
+
 def resample(x: np.ndarray, sr: int, to_rate: int = store.RATE) -> np.ndarray:
     if sr == to_rate:
         return np.asarray(x, dtype=np.float32)
@@ -395,10 +443,13 @@ def align_file(session: Session, path: pathlib.Path, floor: float) -> dict:
     """One second recording -> its clock model and every Take's alignment (and trimmed audio)."""
     rec = {"file": str(path.relative_to(session.dir)), "chain": chain_of(path), "takes": {}, "dropped": []}
     try:
-        x, sr = read_mono(path)
+        x, sr, how = read_recording(path)
     except Exception as e:
-        rec["skipped"] = f"cannot read {path.suffix or 'this format'} ({type(e).__name__}); export it as WAV (or FLAC) and drop that in instead"
+        why = str(e) if isinstance(e, RuntimeError) else f"cannot read {path.suffix or 'this format'} ({type(e).__name__}); export it as WAV (or FLAC) and drop that in instead"
+        rec["skipped"] = why
+        log(f"  {path.name}: skipped: {why}")
         return rec
+    rec["decoded"] = how
     y = resample(x, sr)
     del x
     rec.update({"rate": sr, "seconds": round(len(y) / store.RATE, 3)})
