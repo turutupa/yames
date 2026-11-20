@@ -400,7 +400,7 @@ async function drive() {
                 ? "session-ungraded"
                 : stop === "noCatch"
                   ? "session-no-catch"
-                  : stop === "between" || stop === "readyAgain" || stop === "loop" || stop === "afterLoop"
+                  : stop === "between" || stop === "readyAgain" || stop === "playingAgain" || stop === "loop" || stop === "afterLoop"
                     ? "session-between"
                     : "session-result";
             await until("the verdict", () => !!byId(outcome), 30000);
@@ -417,6 +417,11 @@ async function drive() {
               const nudge = slower && !slower.disabled ? slower : (byId("session-faster") as HTMLButtonElement | null);
               nudge?.click();
               await until("the next Take to be ready", ready, 20000);
+            }
+            if (stop === "playingAgain") {
+              // Go again: straight into the next Take, whose order the last verdict chose.
+              big()?.click();
+              await until("the next Take to run", () => !!byId("session-live"), 20000);
             }
             if (stop === "loop" || stop === "afterLoop") {
               await until("the loop's button", () => !!byId("session-loop"));

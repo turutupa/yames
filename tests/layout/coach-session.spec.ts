@@ -31,6 +31,7 @@ const NOTE_SCENES = [
   { scene: "session-ungraded-ready", kind: "ready" },
   { scene: "coach-ungraded-ready", kind: "ready" },
   { scene: "coach-ungraded-result", kind: "ungraded" },
+  { scene: "coach-next", kind: "result" },
 ] as const;
 
 type NoteFacts = {
@@ -226,6 +227,31 @@ test("the order during a Take: 24 px, in ink, fixed (neck and runway)", async ({
   await checkOrder(page, "runway at 1440", 24);
 });
 
+test("one thing to try: the result's cue, from the Path, is the next Take's order word for word (neck and runway)", async ({ page }) => {
+  test.slow();
+  await openShot(page, "coach-next", WIDE);
+  const next = page.locator('[data-testid="coach-next"]');
+  await expect(next, "the result's cue").toBeVisible({ timeout: 20_000 });
+  await expect(next.locator(".coach-block-source"), "its source").toContainText("From the Path");
+  // The finding stays the headline; the cue sits under it and is not it.
+  const head = (await page.locator('[data-testid="coach-note"] .coach-note-head').textContent()) ?? "";
+  const cue = ((await next.locator("b").textContent()) ?? "").trim();
+  expect(cue.length).toBeGreaterThan(0);
+  expect([...cue].length).toBeLessThanOrEqual(48);
+  expect(head).not.toContain(cue);
+  // On a short window the cue stays; the note and Go again fit.
+  await page.setViewportSize(SHORT);
+  await expect(next).toBeVisible();
+  const big = await page.locator('[data-testid="session-big"]').boundingBox();
+  expect(big!.y + big!.height, "Go again on screen at 1024x700").toBeLessThanOrEqual(700 + 0.5);
+  for (const scene of ["coach-next-order", "coach-next-order-runway"]) {
+    await openShot(page, scene, WIDE);
+    await expect(page.locator('[data-testid="session-take"]')).toHaveAttribute("data-phase", "playing", { timeout: 30_000 });
+    await checkOrder(page, `${scene} at 1440`, 24);
+    await expect(page.locator('[data-testid="coach-order"]'), `${scene}: the same sentence`).toHaveText(cue);
+  }
+});
+
 test("a cue too long for the order shows nothing during the Take rather than half a sentence", async ({ page }) => {
   // The returning player's Exercise: its cue runs past 48 characters.
   await openShot(page, "session-playing", WIDE);
@@ -270,6 +296,8 @@ test.describe("pictures for the review", () => {
     "coach-ungraded-result",
     "session-no-catch",
     "session-recap",
+    "coach-next",
+    "coach-next-order",
   ];
   for (const theme of ["ember", "neon", "manuscript"]) {
     for (const scene of SCENES) {
@@ -290,7 +318,7 @@ test.describe("phone pictures for the review", () => {
   test.skip(!SHOTS_DIR, "COACH_SHOTS is not set");
   test.use({ baseURL: MOBILE_URL, viewport: PHONE, isMobile: true, hasTouch: true });
   for (const theme of ["ember", "manuscript"]) {
-    for (const scene of ["coach-ready-again", "coach-take-order", "session-between", "session-result", "coach-ungraded-ready", "coach-ungraded-result"]) {
+    for (const scene of ["coach-ready-again", "coach-take-order", "session-between", "session-result", "coach-ungraded-ready", "coach-ungraded-result", "coach-next", "coach-next-order"]) {
       test(`${scene} on a phone in ${theme}`, async ({ page }) => {
         test.slow();
         await openShot(page, `phone-${scene}`, PHONE, theme);

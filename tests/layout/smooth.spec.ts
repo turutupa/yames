@@ -102,7 +102,8 @@ for (const build of ["desktop", "phone"] as const) {
  * the commits the engine's reports cause must not reach it; nor may the
  * coach's note, which has no business on a running screen at all.
  */
-for (const scene of ["coach-take-order", "coach-take-order-runway"]) {
+// c4c: and when the order is the cue the last Take chose ("coach-next-order"), the same.
+for (const scene of ["coach-take-order", "coach-take-order-runway", "coach-next-order", "coach-next-order-runway"]) {
   test(`${scene}: the coach's line and note never commit during a running Take`, async ({ page }) => {
     test.slow();
     await installPerf(page, { countRenders: true });

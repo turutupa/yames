@@ -91,6 +91,8 @@ export interface Shot {
       | "noCatch"
       /** One Take played, then the same again: the ready screen of a later Take, with the coach's note on the last one. */
       | "readyAgain"
+      /** The Takes played, then Go again: the next Take running, with the order the last one chose (c4c). */
+      | "playingAgain"
       /** After the Takes, "Loop the first bar" pressed: the loop running (c1c). */
       | "loop"
       /** The loop stopped again: back on the ready screen of the same Exercise. */
@@ -1653,6 +1655,43 @@ export const SHOTS: Shot[] = [
     height: 900,
     settleMs: 900,
   },
+  // c4c: one thing to try. A Take below the pass mark on an Exercise with cues:
+  // the result says "Next time: {cue}" under the finding, from the Path...
+  {
+    id: "coach-next",
+    suffix: "coach-next",
+    window: "main",
+    session: { seed: "returning", take: "below", stop: "between", path: "alternate-picking", exercise: "other-strings.b-string-tune" },
+    width: 1440,
+    height: 900,
+    settleMs: 600,
+  },
+  // ...and Go again runs the next Take with that same sentence as its order.
+  {
+    id: "coach-next-order",
+    suffix: "coach-next-order",
+    window: "main",
+    session: { seed: "returning", take: "below", stop: "playingAgain", path: "alternate-picking", exercise: "other-strings.b-string-tune" },
+    width: 1440,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "coach-next-order-runway",
+    suffix: "coach-next-order-runway",
+    window: "main",
+    session: {
+      seed: "returning",
+      take: "below",
+      stop: "playingAgain",
+      practiceView: "runway",
+      path: "alternate-picking",
+      exercise: "other-strings.b-string-tune",
+    },
+    width: 1440,
+    height: 900,
+    settleMs: 900,
+  },
   // Grading not decided yet: the ready screen asks (owner, 2026-11-18).
   {
     id: "session-ask-ready",
@@ -2207,6 +2246,8 @@ export const PHONE_LEARNING_SCENES = [
   "coach-take-order",
   "coach-ungraded-ready",
   "coach-ungraded-result",
+  "coach-next",
+  "coach-next-order",
   "coach-loop-front",
   "coach-leave-it",
   "coach-once-more",
