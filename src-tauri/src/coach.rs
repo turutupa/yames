@@ -2999,6 +2999,258 @@ mod tests {
 }
 
 // ---------------------------------------------------------------------------
+// The Ask kind, without a model (every build)
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod ask_tests {
+    use super::*;
+
+    /// The registry's generated grammar (`scripts/coach-blocks.mjs`): the
+    /// shape every Ask grammar will have.
+    const COACH_ANSWER_GBNF: &str = include_str!("../../src/coach/blocks/coach-answer.gbnf");
+
+    /// Leg c3a: the six existing kinds go to the model exactly as before.
+    /// Pinned byte for byte, system text included: a change here changes
+    /// what every shipped coach line is generated from, and must be made
+    /// on purpose, not as a side effect of the Ask kind.
+    #[test]
+    fn the_existing_kinds_prompt_is_byte_identical() {
+        let expected = "<|im_start|>system\n\
+You are a practice coach for a metronome app. You help musicians improve their timing and rhythm.\n\
+\n\
+Rules:\n\
+- Keep responses concise (1-3 sentences max)\n\
+- Only discuss timing, rhythm, practice, and the session data you're given\n\
+- Be encouraging but honest about areas to improve\n\
+- Never make up data \u{2014} only reference metrics provided to you\n\
+- Use natural, conversational language like a supportive instructor\n\
+- When commenting on timing: \"early\" means ahead of the beat, \"late\" means behind\n\
+- Reference specific beats or patterns when the data supports it\n\
+\n\
+/no_think<|im_end|>\n\
+<|im_start|>user\n\
+Accuracy: 82\nUser asks: hello?<|im_end|>\n\
+<|im_start|>assistant\n\
+<think>\n\n</think>\n\n";
+        assert_eq!(chat_prompt("Accuracy: 82\nUser asks: hello?"), expected);
+        // And the context goes in verbatim: no trimming, no escaping.
+        assert!(chat_prompt("  x\n").contains("<|im_start|>user\n  x\n<|im_end|>"));
+    }
+
+    #[test]
+    fn the_existing_kinds_keep_their_budgets() {
+        for kind in [GenKind::Tip, GenKind::Greeting, GenKind::Drill] {
+            assert_eq!(kind.max_tokens(), 64, "{kind:?}");
+            assert!(kind.is_rephrase());
+        }
+        for kind in [GenKind::Report, GenKind::Summary, GenKind::Chat] {
+            assert_eq!(kind.max_tokens(), 256, "{kind:?}");
+            assert!(!kind.is_rephrase());
+        }
+        assert!(!GenKind::Ask.is_rephrase());
+        assert_eq!(AskMode::Choice.max_tokens(), 48);
+        assert_eq!(AskMode::Prose.max_tokens(), 96);
+    }
+
+    #[test]
+    fn generate_refuses_the_ask_kind() {
+        let handle = create_shared_engine();
+        assert_eq!(
+            generate(&handle, GenKind::Ask, "User asks: hi").unwrap_err(),
+            ASK_NOT_THROUGH_GENERATE
+        );
+        // `coach_generate` deserialises it like any other kind.
+        let kind: GenKind = serde_json::from_str("\"ask\"").unwrap();
+        assert_eq!(kind, GenKind::Ask);
+    }
+
+    #[test]
+    fn the_ask_prompt_puts_its_own_rules_before_the_callers_prefix() {
+        let head = ask_prompt_head("  TOOLS: open_step  ");
+        assert!(head.starts_with("<|im_start|>system\nYou answer one question inside Yames"));
+        assert!(head.contains("nothing else\n\nTOOLS: open_step\n\n/no_think<|im_end|>\n"));
+        assert!(head.ends_with("<|im_start|>user\n"));
+        // The head is all that varies with the prefix: it is the cache key.
+        assert_eq!(ask_prompt_head("p"), ask_prompt_head("p"));
+
+        let tail = ask_prompt_tail("Step 7 open\n", " why? ");
+        assert_eq!(
+            tail,
+            "Step 7 open\n\nQuestion: why?<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
+        );
+        assert!(ask_prompt_tail("", "why?").starts_with("Question: why?"));
+    }
+
+    #[test]
+    fn a_request_and_its_outcomes_have_the_wire_shape_the_frontend_uses() {
+        let req: AskRequest = serde_json::from_str(
+            r#"{"generationId":7,"mode":"choice","prefix":"p","context":"c","question":"q","grammar":"root ::= \"x\""}"#,
+        )
+        .unwrap();
+        assert_eq!(req.generation_id, 7);
+        assert_eq!(req.mode, AskMode::Choice);
+        assert_eq!(req.grammar.as_deref(), Some("root ::= \"x\""));
+        let no_grammar: AskRequest = serde_json::from_str(
+            r#"{"generationId":8,"mode":"prose","prefix":"","context":"","question":"q"}"#,
+        )
+        .unwrap();
+        assert_eq!(no_grammar.grammar, None);
+
+        let answered = AskOutcome::Answered {
+            text: "{}".into(),
+            finished: true,
+            prefix_cached: false,
+            prompt_ms: 3,
+            total_ms: 9,
+        };
+        assert_eq!(
+            serde_json::to_value(&answered).unwrap(),
+            serde_json::json!({"status":"answered","text":"{}","finished":true,"prefixCached":false,"promptMs":3,"totalMs":9})
+        );
+        assert_eq!(
+            serde_json::to_value(AskOutcome::Cancelled).unwrap(),
+            serde_json::json!({"status":"cancelled"})
+        );
+        assert_eq!(
+            serde_json::to_value(AskOutcome::NoModel).unwrap(),
+            serde_json::json!({"status":"noModel"})
+        );
+    }
+
+    fn request(id: u64, grammar: Option<&str>) -> AskRequest {
+        AskRequest {
+            generation_id: id,
+            mode: AskMode::Choice,
+            prefix: "Tools: open_step".into(),
+            context: "Screen: Today".into(),
+            question: "where was I?".into(),
+            grammar: grammar.map(str::to_string),
+        }
+    }
+
+    #[test]
+    fn with_no_model_an_ask_says_so_and_is_not_an_error() {
+        let handle = create_shared_engine();
+        assert_eq!(ask(&handle, &request(9_001, None)), Ok(AskOutcome::NoModel));
+        assert_eq!(
+            ask(&handle, &request(9_002, Some(COACH_ANSWER_GBNF))),
+            Ok(AskOutcome::NoModel)
+        );
+    }
+
+    #[test]
+    fn a_malformed_grammar_is_an_error_even_with_no_model() {
+        let handle = create_shared_engine();
+        let err = ask(&handle, &request(9_010, Some("root ::= \"a\"{5,2}"))).unwrap_err();
+        assert!(err.starts_with("grammar: "), "{err}");
+        let err = ask(&handle, &request(9_011, Some("answer ::= \"a\""))).unwrap_err();
+        assert!(err.starts_with("grammar: "), "{err}");
+        let mut empty = request(9_012, None);
+        empty.question = "  ".into();
+        assert!(ask(&handle, &empty).is_err());
+    }
+
+    #[test]
+    fn the_cancel_board() {
+        // Live: flagged, and the ticket sees it.
+        let ticket = cancel::register(9_100).unwrap();
+        assert!(!ticket.is_cancelled());
+        assert!(cancel_generation(9_100));
+        assert!(ticket.is_cancelled());
+        // One id, one generation at a time.
+        assert!(cancel::register(9_100).is_err());
+        drop(ticket);
+        // Gone from the board once its call returned...
+        let again = cancel::register(9_100).unwrap();
+        assert!(!again.is_cancelled());
+        drop(again);
+
+        // ...and a cancel that beats its own ask is remembered.
+        assert!(!cancel_generation(9_101));
+        let early = cancel::register(9_101).unwrap();
+        assert!(early.is_cancelled());
+        drop(early);
+        // Only once: the next generation with that id starts clean.
+        assert!(!cancel::register(9_101).unwrap().is_cancelled());
+
+        // `ask` itself: cancelled before it starts, it says so.
+        let handle = create_shared_engine();
+        cancel_generation(9_200);
+        assert_eq!(ask(&handle, &request(9_200, None)), Ok(AskOutcome::Cancelled));
+
+        // The early list is bounded. (Last in this test, and no other test
+        // leaves an early cancel waiting, so the flood evicts nobody's.)
+        for id in 20_000..20_100 {
+            cancel_generation(id);
+        }
+        assert!(!cancel::register(20_000).unwrap().is_cancelled());
+        assert!(cancel::register(20_099).unwrap().is_cancelled());
+    }
+
+    #[test]
+    fn precheck_accepts_the_registry_grammar() {
+        assert_eq!(precheck_grammar(COACH_ANSWER_GBNF), Ok(()));
+        assert_eq!(precheck_grammar("root ::= \"a\"{2,5} [x]{0,3} \"b\"{4} \"c\"{1,}"), Ok(()));
+        // Braces where they are text, not repetitions.
+        assert_eq!(precheck_grammar("root ::= \"{5,2}\" [{}] # {9,1}\n"), Ok(()));
+        assert_eq!(precheck_grammar("root ::= \"\\\"{5,2}\""), Ok(()));
+    }
+
+    #[test]
+    fn precheck_refuses_what_would_hang_or_cannot_be_a_grammar() {
+        for bad in [
+            "",
+            "   ",
+            "answer ::= \"a\"",
+            "root ::= \"a\"{5,2}",
+            "root ::= x\nx ::= [a-z]{3,1}",
+            "root ::= \"a\"{2001}",
+            "root ::= \"a\"{99999999999999999999999}",
+            "root ::= \"a\"{",
+            "root ::= \"a\"{x}",
+            "root ::= \"a\"{,3}",
+            "root ::= \"a\0\"",
+        ] {
+            assert!(precheck_grammar(bad).is_err(), "accepted {bad:?}");
+        }
+        let huge = format!("root ::= \"{}\"", "a".repeat(ASK_GRAMMAR_MAX_BYTES));
+        assert!(precheck_grammar(&huge).is_err());
+    }
+
+    /// Pure-Rust half of the fuzz: whatever bytes arrive, the precheck
+    /// returns, it never panics. The llama.cpp half is in `llm_tests`.
+    #[test]
+    fn precheck_never_panics_on_mutated_grammars() {
+        let mut rng = 0x9E37_79B9_7F4A_7C15_u64;
+        let mut next = move || {
+            rng ^= rng << 13;
+            rng ^= rng >> 7;
+            rng ^= rng << 17;
+            rng
+        };
+        let seed = COACH_ANSWER_GBNF.as_bytes();
+        const ALPHABET: &[u8] = b"{}[]()\"\\#|*+?,0123456789:=root \n\t-^.";
+        for _ in 0..5_000 {
+            let mut bytes = seed.to_vec();
+            for _ in 0..(1 + next() % 8) {
+                let at = (next() as usize) % bytes.len().max(1);
+                match next() % 3 {
+                    0 => bytes[at] = ALPHABET[(next() as usize) % ALPHABET.len()],
+                    1 => bytes.insert(at, ALPHABET[(next() as usize) % ALPHABET.len()]),
+                    _ => {
+                        let end = (at + (next() as usize) % 40).min(bytes.len());
+                        bytes.drain(at..end);
+                    }
+                }
+            }
+            let text = String::from_utf8_lossy(&bytes);
+            let _ = precheck_grammar(&text);
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
 // LLM smoke test (coach-llm builds only)
 // ---------------------------------------------------------------------------
 
@@ -3302,6 +3554,451 @@ mod llm_tests {
                 tokens / runs,
             );
         }
+    }
+
+    // -----------------------------------------------------------------
+    // The Ask kind: the grammar fuzz (a vocabulary is enough) and the
+    // worker with a real model.
+    // -----------------------------------------------------------------
+
+    use super::llm::{sample_step, GrammarCache, Step};
+    use super::{ask, cancel_generation, AskMode, AskOutcome, AskRequest};
+    use llama_cpp_2::llama_backend::LlamaBackend;
+    use llama_cpp_2::model::params::LlamaModelParams;
+    use llama_cpp_2::model::LlamaModel;
+    use llama_cpp_2::sampling::LlamaSampler;
+    use llama_cpp_2::token::LlamaToken;
+
+    const COACH_ANSWER_GBNF: &str = include_str!("../../src/coach/blocks/coach-answer.gbnf");
+
+    /// A choice grammar the shape c3b will generate: one object, an id
+    /// from a closed list, whitespace bounded.
+    const CHOICE_GBNF: &str = r#"root ::= "{" ws "\"tool\":" ws tool ws "}"
+tool ::= "\"open_step\"" | "\"show_card\"" | "\"none\""
+ws ::= " "?
+"#;
+
+    /// The model's vocabulary and nothing else: what the grammar code
+    /// needs. `YAMES_TEST_VOCAB_GGUF` (a `ggml-vocab-*.gguf` from
+    /// llama.cpp's `models/`) or, failing that, `YAMES_TEST_GGUF`. Model
+    /// first in the tuple: it must drop before the backend.
+    fn vocab() -> Option<(LlamaModel, LlamaBackend)> {
+        let raw = std::env::var("YAMES_TEST_VOCAB_GGUF")
+            .or_else(|_| std::env::var("YAMES_TEST_GGUF"))
+            .ok()?;
+        let backend = LlamaBackend::init().expect("backend");
+        let params = LlamaModelParams::default().with_vocab_only(true);
+        let model = LlamaModel::load_from_file(&backend, &raw, &params).expect("vocab load");
+        Some((model, backend))
+    }
+
+    struct Rng(u64);
+    impl Rng {
+        fn next(&mut self) -> u64 {
+            self.0 ^= self.0 << 13;
+            self.0 ^= self.0 >> 7;
+            self.0 ^= self.0 << 17;
+            self.0
+        }
+        fn logit(&mut self) -> f32 {
+            (self.next() % 2_000) as f32 / 100.0 - 10.0
+        }
+    }
+
+    fn mutate(seed: &str, rng: &mut Rng) -> String {
+        const ALPHABET: &[u8] = b"{}[]()\"\\#|*+?,0123456789:=root \n\t-^.";
+        let mut bytes = seed.as_bytes().to_vec();
+        for _ in 0..(1 + rng.next() % 6) {
+            let at = (rng.next() as usize) % bytes.len().max(1);
+            match rng.next() % 3 {
+                0 => bytes[at] = ALPHABET[(rng.next() as usize) % ALPHABET.len()],
+                1 => bytes.insert(at, ALPHABET[(rng.next() as usize) % ALPHABET.len()]),
+                _ => {
+                    let end = (at + (rng.next() as usize) % 24).min(bytes.len());
+                    bytes.drain(at..end);
+                }
+            }
+        }
+        String::from_utf8_lossy(&bytes).into_owned()
+    }
+
+    /// Drive `sample_step` under `grammar` with logits from `logits_for`
+    /// until it ends, for at most `steps`. Returns the text and how it
+    /// ended. This is the worker's loop minus the model.
+    fn drive(
+        model: &LlamaModel,
+        grammar: &mut LlamaSampler,
+        chain: &mut LlamaSampler,
+        steps: usize,
+        mut logits_for: impl FnMut(usize) -> Vec<f32>,
+    ) -> (String, Option<Step>) {
+        let mut decoder = encoding_rs::UTF_8.new_decoder();
+        let mut text = String::new();
+        for i in 0..steps {
+            let logits = logits_for(i);
+            match sample_step(model, &logits, chain, Some(&mut *grammar)) {
+                Step::Token(t) => {
+                    text.push_str(&model.token_to_piece(t, &mut decoder, false, None).unwrap_or_default());
+                }
+                end => return (text, Some(end)),
+            }
+        }
+        (text, None)
+    }
+
+    /// DESIGN 9.4 / 11: "a fuzz test that a completed grammar cannot abort
+    /// the process", and a malformed grammar is an error returned, never a
+    /// panic or an abort. If this test fails the way it is guarding
+    /// against, the test binary dies; any other ending is a pass.
+    #[test]
+    fn grammar_fuzz_malformed_is_an_error_and_nothing_aborts() {
+        let _guard = BACKEND_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let Some((model, _backend)) = vocab() else {
+            eprintln!("YAMES_TEST_VOCAB_GGUF / YAMES_TEST_GGUF unset — skipping the grammar fuzz");
+            return;
+        };
+        let mut cache = GrammarCache::default();
+        let n_vocab = model.n_vocab() as usize;
+
+        // Malformed in ways the precheck lets through and llama.cpp's
+        // parser must refuse.
+        for bad in [
+            "root ::= \"a",
+            "root ::= [a-",
+            "root ::= undefined",
+            "root ::= root \"a\"",
+            "root ::= x\nx ::= x? \"a\"",
+            "root ::= ((\"a\")",
+            "root ::= \"\\x0\"",
+            "root",
+        ] {
+            assert!(cache.take(&model, bad).is_err(), "compiled {bad:?}");
+        }
+
+        // Shapes llama.cpp accepts that look as if they could loop: a
+        // nullable item under a star, an empty alternative, everything
+        // optional. Sampled under, with noise, until they end.
+        let mut rng = Rng(0x2545_F491_4F6C_DD1D);
+        let mut chain = LlamaSampler::greedy();
+        for odd in [
+            "root ::= (\"a\"?)* \"b\"",
+            "root ::= (\"a\"*)* \"b\"",
+            "root ::= \"a\" |",
+            "root ::= x*\nx ::= y?\ny ::= \" \"?",
+            "root ::= [ \\t\\n]* \"}\"",
+        ] {
+            if let Ok(mut grammar) = cache.take(&model, odd) {
+                let _ = drive(&model, &mut grammar, &mut chain, 64, |_| {
+                    (0..n_vocab).map(|_| rng.logit()).collect()
+                });
+            }
+        }
+
+        // Mutations: each one either compiles or is an error; whatever
+        // compiles is then sampled under for a few steps of noise.
+        let mut rng = Rng(0x2545_F491_4F6C_DD1D);
+        let mut compiled = 0usize;
+        let mut chain = LlamaSampler::greedy();
+        for i in 0..1_500 {
+            let seed = if i % 10 == 0 { COACH_ANSWER_GBNF } else { CHOICE_GBNF };
+            let text = mutate(seed, &mut rng);
+            let Ok(mut grammar) = cache.take(&model, &text) else {
+                continue;
+            };
+            compiled += 1;
+            let _ = drive(&model, &mut grammar, &mut chain, 12, |_| {
+                (0..n_vocab).map(|_| rng.logit()).collect()
+            });
+        }
+        eprintln!("[fuzz] 1500 mutated grammars, {compiled} compiled and were sampled under");
+        assert!(compiled > 0, "no mutation compiled; the fuzz sampled nothing");
+    }
+
+    #[test]
+    fn a_completed_grammar_cannot_abort_the_process() {
+        let _guard = BACKEND_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let Some((model, _backend)) = vocab() else {
+            eprintln!("YAMES_TEST_VOCAB_GGUF / YAMES_TEST_GGUF unset — skipping the completed-grammar fuzz");
+            return;
+        };
+        let n_vocab = model.n_vocab() as usize;
+        let eog: Vec<usize> =
+            (0..n_vocab).filter(|&i| model.is_eog_token(LlamaToken::new(i as i32))).collect();
+        assert!(!eog.is_empty(), "this vocabulary has no end-of-generation token");
+        let mut cache = GrammarCache::default();
+        let mut rng = Rng(0xDEAD_BEEF_CAFE_F00D);
+        let answers = ["{\"tool\":\"open_step\"}", "{\"tool\":\"show_card\"}", "{\"tool\":\"none\"}"];
+        let accepted = |text: &str| {
+            let squeezed: String = text.chars().filter(|c| *c != ' ').collect();
+            answers.contains(&squeezed.as_str())
+        };
+
+        for round in 0..200 {
+            let mut grammar = cache.take(&model, CHOICE_GBNF).expect("the choice grammar compiles");
+            let mut chain = if round % 2 == 0 {
+                LlamaSampler::greedy()
+            } else {
+                LlamaSampler::chain_simple([
+                    LlamaSampler::temp(0.7),
+                    LlamaSampler::top_p(0.9, 1),
+                    LlamaSampler::dist(round as u32),
+                ])
+            };
+            // Noise until the grammar completes: the only way out is
+            // end-of-generation, which `sample_step` never hands to
+            // `accept` (that is llama.cpp's GGML_ABORT).
+            let (text, end) = drive(&model, &mut grammar, &mut chain, 400, |_| {
+                (0..n_vocab).map(|_| rng.logit()).collect()
+            });
+            assert_eq!(end, Some(Step::End), "round {round}: {text:?}");
+            assert!(accepted(&text), "round {round}: the grammar let through {text:?}");
+
+            // Now push past the end: the model wants a word, and
+            // end-of-generation has no weight at all. A dead end, not an
+            // abort, and not a token.
+            let favourite = (rng.next() as usize) % n_vocab;
+            let hostile = |_| {
+                let mut l: Vec<f32> = (0..n_vocab).map(|_| rng.logit()).collect();
+                for &e in &eog {
+                    l[e] = f32::NEG_INFINITY;
+                }
+                if !eog.contains(&favourite) {
+                    l[favourite] = 100.0;
+                }
+                l
+            };
+            let (more, end) = drive(&model, &mut grammar, &mut chain, 5, hostile);
+            assert!(more.is_empty(), "round {round}: sampled {more:?} past a completed grammar");
+            assert!(
+                matches!(end, Some(Step::DeadEnd { poisoned: false, .. })),
+                "round {round}: {end:?}"
+            );
+
+            // And `accept` itself, past the end, is a caught error.
+            let word = (0..n_vocab).find(|&i| !eog.contains(&i)).unwrap();
+            assert!(grammar.try_accept(LlamaToken::new(word as i32)).is_err());
+            // A poisoned sampler is never put back; a reset one starts over.
+            drop(grammar);
+        }
+        let mut again = cache.take(&model, CHOICE_GBNF).unwrap();
+        let mut chain = LlamaSampler::greedy();
+        let (text, end) = drive(&model, &mut again, &mut chain, 400, |_| {
+            (0..n_vocab).map(|_| rng.logit()).collect()
+        });
+        assert_eq!(end, Some(Step::End));
+        assert!(accepted(&text), "{text:?}");
+        cache.put_back(CHOICE_GBNF.to_string(), again);
+        assert_eq!(cache.len(), 1);
+        // Reused, it starts from the beginning again.
+        let mut reused = cache.take(&model, CHOICE_GBNF).unwrap();
+        let (text, end) = drive(&model, &mut reused, &mut chain, 400, |_| {
+            (0..n_vocab).map(|_| rng.logit()).collect()
+        });
+        assert_eq!(end, Some(Step::End));
+        assert!(accepted(&text), "{text:?}");
+    }
+
+    /// A static prefix the size DESIGN 5.5 budgets (system text and an
+    /// intent list, about 900 tokens).
+    fn tool_list() -> String {
+        let mut s = String::from(
+            "Choose the one tool that answers the player's question. Reply with one JSON object.\n\nTools:\n",
+        );
+        for i in 0..60 {
+            s.push_str(&format!(
+                "- tool_{i}: opens screen number {i} of the practice app and shows the player where it is, with a way back\n"
+            ));
+        }
+        s
+    }
+
+    fn ask_req(id: u64, mode: AskMode, prefix: &str, question: &str, grammar: Option<&str>) -> AskRequest {
+        AskRequest {
+            generation_id: id,
+            mode,
+            prefix: prefix.to_string(),
+            context: "Screen: Today. The player has one Path open: Alternate Picking, Step 7.".into(),
+            question: question.to_string(),
+            grammar: grammar.map(str::to_string),
+        }
+    }
+
+    fn answered(out: &Result<AskOutcome, String>) -> (&str, bool, bool, u32, u32) {
+        match out {
+            Ok(AskOutcome::Answered { text, finished, prefix_cached, prompt_ms, total_ms }) => {
+                (text.as_str(), *finished, *prefix_cached, *prompt_ms, *total_ms)
+            }
+            other => panic!("not an answer: {other:?}"),
+        }
+    }
+
+    fn loaded() -> Option<std::sync::Arc<super::CoachHandle>> {
+        let raw = std::env::var("YAMES_TEST_GGUF").ok()?;
+        let handle = create_shared_engine();
+        let family = Some(crate::models::CURRENT_BRAIN_FAMILY);
+        assert_eq!(load_model(&handle, std::path::Path::new(&raw), family, "test"), Ok(true));
+        Some(handle)
+    }
+
+    /// The choice under its grammar, the prefix kept across turns and
+    /// across another kind's generation, and the saving measured.
+    #[test]
+    fn ask_choice_under_a_grammar_with_the_prefix_cached() {
+        let _guard = BACKEND_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let Some(handle) = loaded() else {
+            eprintln!("YAMES_TEST_GGUF unset — skipping the ask test");
+            return;
+        };
+        let prefix = tool_list();
+        let questions = [
+            "where was I?",
+            "show me my last card",
+            "what should I practise now?",
+            "open the step I was on",
+            "nothing, thanks",
+            "take me back",
+        ];
+
+        let first = ask(&handle, &ask_req(50_000, AskMode::Choice, &prefix, questions[0], Some(CHOICE_GBNF)));
+        let (text, finished, cached, uncached_ms, _) = answered(&first);
+        assert!(!cached, "the first turn cannot have a cached prefix");
+        let squeezed: String = text.chars().filter(|c| *c != ' ').collect();
+        assert!(
+            ["{\"tool\":\"open_step\"}", "{\"tool\":\"show_card\"}", "{\"tool\":\"none\"}"]
+                .contains(&squeezed.as_str()),
+            "the grammar let through {text:?}"
+        );
+        assert!(finished, "a complete choice ends itself: {text:?}");
+
+        let mut cached_ms = Vec::new();
+        for (i, q) in questions.iter().enumerate().skip(1) {
+            let out = ask(&handle, &ask_req(50_000 + i as u64, AskMode::Choice, &prefix, q, Some(CHOICE_GBNF)));
+            let (text, _, cached, prompt_ms, total_ms) = answered(&out);
+            assert!(cached, "turn {i} decoded the prefix again");
+            eprintln!("[ask] turn {i}: prompt {prompt_ms} ms, total {total_ms} ms, {text:?}");
+            cached_ms.push(prompt_ms);
+            if i == 2 {
+                // Another kind between two questions: sequence 0 is
+                // rewritten, sequence 1 keeps the prefix.
+                let chat = super::generate(&handle, GenKind::Chat, "User asks: hello?").unwrap();
+                assert!(!chat.trim().is_empty());
+            }
+        }
+        cached_ms.sort_unstable();
+        let median = cached_ms[cached_ms.len() / 2];
+        eprintln!(
+            "[ask] prefix cache: time to first token {uncached_ms} ms uncached, {median} ms cached (median of {}), backend={}",
+            cached_ms.len(),
+            super::llm::BACKEND
+        );
+        assert!(median < uncached_ms, "the cached prefix saved nothing");
+
+        // A different prefix is a different cache entry.
+        let other = ask(&handle, &ask_req(50_100, AskMode::Choice, "Tools: none at all.", "hi", Some(CHOICE_GBNF)));
+        assert!(!answered(&other).2, "a new prefix was taken for the old one");
+        unload_model(&handle).unwrap();
+    }
+
+    #[test]
+    fn ask_prose_bad_grammars_and_budgets() {
+        let _guard = BACKEND_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let Some(handle) = loaded() else {
+            eprintln!("YAMES_TEST_GGUF unset — skipping the ask prose test");
+            return;
+        };
+        let out = ask(&handle, &ask_req(51_000, AskMode::Prose, "Answer in plain words.", "how do I relax my picking hand?", None));
+        let (text, _, _, _, total_ms) = answered(&out);
+        assert!(!text.trim().is_empty());
+        assert!(!text.contains("<think>"), "{text:?}");
+        eprintln!("[ask] prose in {total_ms} ms: {text:?}");
+
+        // Through the precheck, refused by llama.cpp: an error, and the
+        // worker carries on.
+        let err = ask(&handle, &ask_req(51_001, AskMode::Choice, "p", "q", Some("root ::= \"a"))).unwrap_err();
+        assert!(err.starts_with("grammar: "), "{err}");
+        let err = ask(&handle, &ask_req(51_002, AskMode::Choice, "p", "q", Some("root ::= root \"a\""))).unwrap_err();
+        assert!(err.starts_with("grammar: "), "{err}");
+
+        // The context is held to its budget.
+        let mut long = ask_req(51_003, AskMode::Choice, "p", "q", Some(CHOICE_GBNF));
+        long.context = "the player practised alternate picking at ninety ".repeat(60);
+        let err = ask(&handle, &long).unwrap_err();
+        assert!(err.contains("context"), "{err}");
+
+        // An unbounded `ws` is bounded by the worker.
+        let loose = "root ::= \"{\" ws \"}\"\nws ::= [ \\t\\n]*\n";
+        let out = ask(&handle, &ask_req(51_004, AskMode::Choice, "Reply with {} padded with as many spaces as you like.", "go", Some(loose)));
+        let (text, _, _, _, _) = answered(&out);
+        assert!(text.starts_with('{'), "{text:?}");
+
+        let still = ask(&handle, &ask_req(51_005, AskMode::Choice, "p", "q", Some(CHOICE_GBNF)));
+        answered(&still);
+        unload_model(&handle).unwrap();
+    }
+
+    /// Cancel: while queued behind another kind, while running, and the
+    /// worker answering normally straight after.
+    #[test]
+    fn ask_cancel_queued_and_running() {
+        let _guard = BACKEND_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let Some(handle) = loaded() else {
+            eprintln!("YAMES_TEST_GGUF unset — skipping the ask cancel test");
+            return;
+        };
+        let prefix = tool_list();
+
+        // Running: a prose answer, cancelled as soon as it has started.
+        let mut cancelled_running = 0;
+        for round in 0..5u64 {
+            let id = 52_000 + round;
+            let h = handle.clone();
+            let p = prefix.clone();
+            let running = std::thread::spawn(move || {
+                ask(&h, &ask_req(id, AskMode::Prose, &p, "tell me everything about practice", None))
+            });
+            std::thread::sleep(std::time::Duration::from_millis(20 + round * 40));
+            let flagged = cancel_generation(id);
+            let started = std::time::Instant::now();
+            let out = running.join().unwrap();
+            eprintln!("[ask] cancel round {round}: flagged={flagged} out={:?} returned {:?} after the cancel", out.as_ref().map(|o| matches!(o, AskOutcome::Cancelled)), started.elapsed());
+            match out {
+                Ok(AskOutcome::Cancelled) => {
+                    assert!(flagged);
+                    assert!(started.elapsed() < std::time::Duration::from_millis(1_500));
+                    cancelled_running += 1;
+                }
+                // Finished in the instant between the flag and the end.
+                Ok(AskOutcome::Answered { .. }) => {}
+                other => panic!("round {round}: {other:?}"),
+            }
+        }
+        assert!(cancelled_running > 0, "every answer finished before its cancel; nothing was tested");
+
+        // Queued: a long chat holds the worker; the ask behind it is
+        // cancelled and returns without waiting for the chat.
+        let h = handle.clone();
+        let chat = std::thread::spawn(move || {
+            super::generate(&h, GenKind::Chat, "User asks: tell me a long story about timing?")
+        });
+        std::thread::sleep(std::time::Duration::from_millis(50));
+        let h = handle.clone();
+        let p = prefix.clone();
+        let queued = std::thread::spawn(move || {
+            ask(&h, &ask_req(52_100, AskMode::Choice, &p, "where was I?", Some(CHOICE_GBNF)))
+        });
+        std::thread::sleep(std::time::Duration::from_millis(30));
+        let started = std::time::Instant::now();
+        cancel_generation(52_100);
+        assert_eq!(queued.join().unwrap(), Ok(AskOutcome::Cancelled));
+        let waited = started.elapsed();
+        eprintln!("[ask] a queued cancel returned after {waited:?}");
+        assert!(waited < std::time::Duration::from_millis(500), "{waited:?}");
+        assert!(chat.join().unwrap().is_ok());
+
+        // And the next turn is an ordinary one.
+        let after = ask(&handle, &ask_req(52_200, AskMode::Choice, &prefix, "where was I?", Some(CHOICE_GBNF)));
+        answered(&after);
+        unload_model(&handle).unwrap();
     }
 }
 
