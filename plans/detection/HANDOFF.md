@@ -36,16 +36,38 @@ strummed microphone: 78.6% on the subset, 77.6% on all 360 (bar 78%). The
 click-jitter probe with the worker ran in nine configurations: hard gates 0
 in all. What is left, in order:
 
-1. **Reviewer** on `git diff df4a4633..HEAD -- src-tauri/src` (owed before
-   merge, item 5 below).
+1. ~~Reviewer~~: done (`REVIEW-M7.md`), its blocker and should-fix items
+   fixed and read a second time (`PROGRESS.md`, "M7 review fixes"). Left
+   from the two reviews:
+   - N4: the probe's `--harmony --late-pass` does not exercise the pause
+     (its late pass calls `late_grade` without `verifier_hold`), and its
+     feeder's `block` can grow if it falls a second behind.
+   - D2: the soft onset's amplitude from the attack hop (M6 review A6) is
+     still open and has no card.
+   - D4: a listen demo shorter than one wake of the onset thread (5 ms) is
+     never forgotten; noted beside `set_demo_gate`, not changed.
+   - A worker that ended by itself, or with the input, takes its Summary
+     with it: the recap misses that stretch.
+   - Bar marks still leave out the input's own latency.
+   - A stop pressed in Songs and the mode left within about 600 ms: the
+     clear can land before the attempt's grade is fetched. Songs' own
+     re-push on stop already bumps the schedule version at that moment
+     (`SongsView.tsx`, the `pushSchedule` effect), which is worth a look of
+     its own.
+   - `stop` of a worker waits for the model's first load; a chart change
+     during that load delays the next start by as long.
+   - The last fix commit (`5c356e50`) was not read by the second reviewer.
+   - `tests/layout/jam.spec.ts:684` (the groove editor: "the setup drawer
+     stayed open") fails when `jam`, `session` and `songs` run together
+     with the default workers, on `141c3fc2` as well; it passes run alone.
 2. The debounce (`worker::Shown`) on the bench: beats shown and right when
    shown, solo and strummed.
 3. Product questions in `PROGRESS.md` "M7 part 2", "Not done" (the chart
    repeats the NOW block; the Session's jam step has no chart), and the NOW
    block's squeeze at 1100 px, which the line makes one line taller.
 4. Funk and jazz chord roots (61%, 63%): rootless voicings.
-5. Songs' exit path leaving a schedule loaded (keeps the reading paused);
-   whether a phone shows the Coach section the setting sits in.
+5. Whether a phone shows the Coach section the setting sits in. (Songs'
+   exit path leaving a schedule loaded is fixed.)
 
 ## Owed before this branch merges
 
@@ -64,7 +86,8 @@ in all. What is left, in order:
    and `f97370f6`, `229462ed` (`detect/model.rs`: retiring a panicking model,
    where the model is warmed). Written by a helper, gated, not reviewed.
 4. **A player's ear on real devices**: every M6 number is synthetic.
-5. **Independent review of M7's Rust**: `git diff df4a4633..HEAD -- src-tauri/src`.
+5. ~~Independent review of M7's Rust~~: done and fixed, see "M7" above.
+   What it read: `git diff df4a4633..141c3fc2 -- src-tauri/src`.
    `harmony/` is new and off every real-time thread; what touches the rest:
    `harmony/worker.rs` (the pause before every window, the lapped rule, the
    ring's lock held for one copy), `commands.rs` (`harmony_start`,

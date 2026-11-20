@@ -733,6 +733,90 @@ Still open from the list above: the reviewer on the Rust diff, the debounce
 on the bench, the two product questions, funk and jazz roots, Songs' exit
 path, the setting on a phone.
 
+## M7 review fixes (2026-11-19 night; card #107)
+
+`REVIEW-M7.md` (the independent review of `df4a4633..141c3fc2`) asked for one
+blocker and four should-fix items before merge. Three commits: `0ccf85fa`,
+`3c7f6ea6`, `5c356e50`. What changed, by finding:
+
+- **B1, the pause that stuck.** The worker's pause no longer follows "a
+  schedule is loaded". The analyzer's thread keeps a `TakeWatch`
+  (`harmony/worker.rs`): a Take is a loaded schedule with the click marking
+  quarter notes under it (count-in included), and it stops being one 4 s
+  after the last quarter, when the schedule changes, or when the analyzer
+  ends. Songs' schedule now leaves the engine when the app leaves Songs or
+  the song closes (`useScheduleLeavesWithSong`, called from `MainWindow`
+  with `mode === "songs" && score`: Settings over Songs clears nothing).
+  And free play beginning is itself the word that no Take is loaded:
+  `harmony_start(clear_stale: true)` clears a schedule it finds
+  (`TimingAnalyzer::forget_stale_schedule`); a retry sends `false`.
+- **S1, the backlog past one ring.** `RingBuffer` counts samples written in
+  a `u64` (one add in `write`, nothing else on the callback). The worker
+  keeps that count as its cursor: 3 s or more since the last poll ends it,
+  however often the ring wrapped. The worker loads the model on its own
+  thread before its first look at the ring (`Hooks::warm`), so a slow first
+  load is not taken for a slow model.
+- **S2, the input restarted.** `start_evaluation` ends the worker and sends
+  the `null`, as `stop_evaluation` does. The worker also ends by itself when
+  the ring's count goes backwards or its length changes.
+- **S3, readings after stop.** Every `on_reading` and the clearing of
+  `alive` pass through one lock (`voice`): after `stop`, `Drop` or
+  `worker::end` returns, nothing more is said.
+- **S4, start against stop.** `harmony_start` returns the worker's id and
+  `harmony_stop(id)` stops only that worker (`worker::take_if`). `useHeard`
+  runs its starts, stops and tempo changes in one queue, in the order asked.
+- **Nits.** N1: `harmony_set_tempo` (a new command, in the frozen surface on
+  purpose), sent on a tempo change. N2: a bar mark's time is the sample
+  count at the poll less how long before the poll it was made, so it no
+  longer drifts; not clamped at zero. N3, N6: the doc comments say what is
+  true. N5: a poisoned ring is said. D1: `onset_flux` steps its history
+  after the non-finite check. D3: `forget_recent_attacks` resets both.
+  D4: a note beside `set_demo_gate`. N4, D2: not done (`HANDOFF.md`).
+
+Regression tests: `worker.rs` `lapped_by_more_than_the_whole_ring_it_still_gives_up`,
+`the_ring_counts_what_was_written_past_its_own_length` (S1),
+`an_input_restarted_under_it_ends_it` (S2),
+`ended_by_the_input_it_says_nothing_more` (S2, S3),
+`a_stop_meant_for_an_earlier_worker_leaves_the_new_one_running` (S4),
+`a_schedule_that_is_only_loaded_is_not_a_take_and_a_take_ends_with_its_click`
+(B1), `a_slow_first_load_of_the_model_is_not_being_lapped`,
+`a_tempo_change_reaches_a_worker_that_has_no_chart`; `timing.rs`
+`free_play_starting_clears_a_schedule_that_was_left_loaded` (B1);
+`src/jam/useHeard.test.ts` (S4, N1, the retry),
+`src/containers/songs/useScheduleLeavesWithSong.test.ts` (B1). Not covered
+by a test: that `start_evaluation` and `harmony_start` make the calls (they
+need a Tauri app); the helpers they call are.
+
+**Second review** (one fresh read-only reader, given the first review and
+the diff): "merge after fixes", no blocker, twice. Its first pass found the
+stale schedule under a jam's click still pausing the worker, the model's
+load still able to lap it, a flag left set by an analyzer that panicked,
+and the worker running through the count-in: all fixed in `3c7f6ea6`. Its
+second pass found the Songs clear skipped on the usual way out, the first
+bar mark clamped to zero, and a retry able to clear a later Take's
+schedule: fixed in `5c356e50`. That last commit has not been read by it.
+
+Gates on `5c356e50`: tsc, `npm run build`; vitest 10,886 passed (the one
+failing file is `TabStage.render.test.tsx`, worktree-only as before);
+`test:rust` 1144/0; `test:rust:detect` 1146/0; `detect:check` 1,704 gated
+metrics, 0 worse, 0 better. Click-jitter probe `--no-llm --harmony`, seven
+runs on the final Rust: hard gates 0 in all (missed beats, callback heap,
+dropped beats); the worker read 60.9 s, 120 beats, key settled, still
+listening; 0 to 2 of about 11,600 input buffers turned away. p99 with the
+worker 0.87, 1.32, 1.06, 1.09, 1.08, 0.99 and 1.23 ms; the plain baseline
+(`--no-llm` alone) run between the last ones read 0.59 and 1.22 ms at load
+3 to 4. So the advisory 1 ms bar was missed five times with the worker and
+once of twice without it: the same 0.6 to 1.3 ms band the earlier leg saw,
+on a box where another agent was training all night. Not a clean pass; not
+evidence against the worker.
+
+Layout (`npx playwright test --trace off`): `songs` 106 of 106, `session`
+92 of 92, `jam` 46 of 47. The one is `jam.spec.ts:684` (the groove editor,
+"the setup drawer stayed open"): it fails in a parallel run on `141c3fc2`
+too and passes run alone on both trees. With all three files at once and
+the box at load 35 to 45, `songs.spec.ts:383` and `session.spec.ts:220`,
+`:291` also failed once each and passed alone.
+
 ## Runtime merge and its review nits (2026-11-19 evening)
 
 `mvp-detect-runtime` (`3a983dd1`: the verifier runs on tract, pure Rust, from
