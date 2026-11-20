@@ -52,7 +52,7 @@ pub struct TruthNote {
     /// Vibrato actually played, cents either way.
     #[serde(default)]
     pub vibrato_cents: f64,
-    /// "omitted" | "wrong" | "weak" | "dead" | "flat" | "noVibrato"
+    /// "omitted" | "wrong" | "weak" | "dead" | "flat" | "noVibrato" | "silent"
     #[serde(default)]
     pub fault: Option<String>,
 }
@@ -229,7 +229,7 @@ const SELECT: &[Pick] = &[
 
 fn styles(category: &str) -> &'static [&'static str] {
     match category {
-        "picked" => &["good", "sloppy", "omit", "wrong"],
+        "picked" => &["good", "sloppy", "omit", "wrong", "silent", "noises"],
         "picked_fast" => &["good", "omit", "wrong"],
         "legato" => &["good", "weak", "omit", "wrong"],
         "legato_fast" => &["good", "weak"],
@@ -491,6 +491,12 @@ fn build_take(ex: &Exercise, bpm: f64, style: &str, seed: u64, category: &str, m
             legato_strength = 0.10;
             fault = Some("weak");
         }
+        // Nobody plays: the room alone, through the chain. What the detector
+        // fires on here is the room's noise or the automatic gain's pumping.
+        if style == "silent" {
+            present = false;
+            fault = Some("silent");
+        }
         if style == "omit" && !chord {
             single_count += 1;
             if single_count % 6 == 3 {
@@ -574,6 +580,39 @@ fn build_take(ex: &Exercise, bpm: f64, style: &str, seed: u64, category: &str, m
             fault: fault.map(|s| s.to_string()),
         });
         prev_on_string.insert(n.string, nid);
+    }
+
+    // Stray sounds a hand makes between notes: a brushed, damped string at a
+    // sixteenth of a pick's strength (-24 dB), halfway between two written
+    // notes, in every third gap. Played, not written: an onset on one of them
+    // is spurious.
+    if style == "noises" {
+        let attacks: Vec<(f64, u8)> = notes.iter().map(|n| (n.t, n.string)).collect();
+        for (k, w) in attacks.windows(2).enumerate() {
+            if k % 3 != 1 || w[1].0 - w[0].0 < 0.16 {
+                continue;
+            }
+            let string = if w[0].1 >= 4 { w[0].1 - 2 } else { w[0].1 + 2 };
+            notes.push(Note {
+                t: 0.5 * (w[0].0 + w[1].0),
+                dur: 0.05,
+                string,
+                midi: 52.0 + 5.0 * (6 - string) as f64,
+                tech: vec!["dead".into()],
+                vel: 0.06,
+                legato_strength: 0.45,
+                bend: 0.0,
+                bend_ms: 0.0,
+                release: false,
+                prebend: false,
+                slide_from: None,
+                slide_ms: 0.0,
+                vibrato_cents: 0.0,
+                ring: false,
+                present: true,
+            });
+        }
+        notes.sort_by(|a, b| a.t.total_cmp(&b.t));
     }
 
     let onsets: Vec<ExpectedOnset> = ticks

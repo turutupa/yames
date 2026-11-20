@@ -75,6 +75,11 @@ pub struct TakeRow {
     pub due: u32,
     pub heard: u32,
     pub extra: u32,
+    /// What the live detector emitted, and how many of those sit on no played
+    /// note: more than 50 ms from every true attack, or a second onset on an
+    /// attack another onset already has (`spurious`).
+    pub onsets: u32,
+    pub spurious: u32,
     pub evenness: Option<f32>,
     pub verifier_status: VerifierStatus,
     pub verifier_lag_ms: f64,
@@ -150,6 +155,7 @@ pub fn rows(meta: &TakeMeta, out: &Outcome) -> (Vec<Row>, TakeRow) {
         });
     }
     let grade = report.map(|r| &r.grade);
+    let (onsets, spurious) = spurious_onsets(meta, out);
     let take = TakeRow {
         take: meta.name.clone(),
         category: meta.category.clone(),
@@ -163,12 +169,41 @@ pub fn rows(meta: &TakeMeta, out: &Outcome) -> (Vec<Row>, TakeRow) {
         due: grade.map(|g| g.due).unwrap_or(0),
         heard: grade.map(|g| g.heard).unwrap_or(0),
         extra: grade.map(|g| g.extra).unwrap_or(0),
+        onsets,
+        spurious,
         evenness: grade.and_then(|g| g.evenness),
         verifier_status: out.verifier.status,
         verifier_lag_ms: out.verifier.lag_ms,
         cost: out.cost,
     };
     (rows, take)
+}
+
+/// The detector's raw output against the truth, before the matcher has a say:
+/// every onset is put back on its attack (the detector's own delay off) and
+/// given to the nearest true attack within 50 ms that no onset has yet. What
+/// is left over is spurious: noise, a reverb tail, a second firing on one note.
+fn spurious_onsets(meta: &TakeMeta, out: &Outcome) -> (u32, u32) {
+    const NEAR_S: f64 = 0.050;
+    let mut attacks: Vec<f64> = meta.truth.iter().filter_map(|n| n.t_played).collect();
+    attacks.sort_by(|a, b| a.total_cmp(b));
+    attacks.dedup_by(|a, b| (*a - *b).abs() < 0.012);
+    let mut taken = vec![false; attacks.len()];
+    let mut spurious = 0u32;
+    for o in &out.detected.onsets {
+        let t = (o.time_ms - out.detected.delay_ms) / 1000.0;
+        let best = attacks
+            .iter()
+            .enumerate()
+            .filter(|(i, a)| !taken[*i] && (**a - t).abs() <= NEAR_S)
+            .min_by(|a, b| (a.1 - t).abs().total_cmp(&(b.1 - t).abs()))
+            .map(|(i, _)| i);
+        match best {
+            Some(i) => taken[i] = true,
+            None => spurious += 1,
+        }
+    }
+    (out.detected.onsets.len() as u32, spurious)
 }
 
 fn json_name<T: Serialize>(v: &T) -> String {
@@ -366,6 +401,9 @@ pub fn metrics(rows: &[Row], takes: &[TakeRow], has_verifier: bool) -> BTreeMap<
                         }
                     }
                 }
+                (_, Some("silent")) => {
+                    put("silent", "all", "onset_heard", r.onset == "hit", Better::Lower);
+                }
                 (_, Some("wrong")) => {
                     for kind in [r.kind, "all"] {
                         if r.kind != "chord_tone" {
@@ -407,6 +445,27 @@ pub fn metrics(rows: &[Row], takes: &[TakeRow], has_verifier: bool) -> BTreeMap<
         }
     }
     let mut out = BTreeMap::new();
+    // Spurious onsets a minute, every Take whose truth is known (all of them).
+    // The Takes nobody plays on are counted apart: the room's own.
+    let mut spur: BTreeMap<(&str, &str), (f64, f64, u32)> = BTreeMap::new();
+    for t in takes {
+        let metric = match t.style.as_str() {
+            "silent" => "silent_spurious_per_min",
+            "noises" => "noises_spurious_per_min",
+            _ => "spurious_per_min",
+        };
+        for chain in [t.chain.as_str(), "all"] {
+            let e = spur.entry((chain, metric)).or_default();
+            e.0 += t.spurious as f64;
+            e.1 += t.seconds / 60.0;
+            e.2 += 1;
+        }
+    }
+    for ((chain, metric), (k, minutes, n)) in spur {
+        if minutes > 0.0 {
+            out.insert(format!("takes|{chain}|all|{metric}"), Metric { value: k / minutes, n, better: Better::Lower });
+        }
+    }
     for (key, (s, better)) in acc.shares {
         out.insert(key, Metric { value: if s.n == 0 { 0.0 } else { s.k as f64 / s.n as f64 }, n: s.n, better: better.unwrap_or(Better::Info) });
     }
@@ -443,6 +502,8 @@ pub struct Baseline {
 pub fn tolerance(key: &str, n: u32) -> f64 {
     if key.ends_with("_ms") {
         1.0
+    } else if key.ends_with("_per_min") {
+        0.5
     } else if key.ends_with("_cents") {
         3.0
     } else {
@@ -485,6 +546,8 @@ pub fn check(now: &BTreeMap<String, Metric>, base: &Baseline) -> CheckOutcome {
 pub fn fmt_value(key: &str, v: f64) -> String {
     if key.ends_with("_ms") {
         format!("{v:.1} ms")
+    } else if key.ends_with("_per_min") {
+        format!("{v:.2}/min")
     } else if key.ends_with("_cents") {
         format!("{v:.1} cents")
     } else {
@@ -501,6 +564,7 @@ const KIND_ORDER: [&str; 13] = [
 fn cell(m: Option<&Metric>, key: &str) -> String {
     match m {
         Some(m) if key.ends_with("_ms") || key.ends_with("_cents") => format!("{:.1}", m.value),
+        Some(m) if key.ends_with("_per_min") => format!("{:.2}", m.value),
         Some(m) => format!("{:.0}%", m.value * 100.0),
         None => "-".into(),
     }
@@ -597,6 +661,10 @@ pub fn markdown(about: &serde_json::Value, metrics: &BTreeMap<String, Metric>, t
     table(&mut s, "Weak legato heard by the live detector", "Information.", metrics, "weak", "onset_heard", k, chains);
     s.push_str("## Takes\n\n");
     table(&mut s, "Correctly played Takes that pass their Exercise's bars", "Higher is better. A correct Take that fails is the app wronging the player.", metrics, "takes", "good_passed", &["all"], chains);
+    table(&mut s, "Spurious onsets from the live detector, per minute", "Onsets on no played note: over 50 ms from every true attack, or a second one on the same attack. Before the matcher, which drops most of them. Lower is better.", metrics, "takes", "spurious_per_min", &["all"], chains);
+    table(&mut s, "Onsets from the live detector with nobody playing, per minute", "The room alone through each chain (style `silent`): noise, and the automatic gain pumping it. Lower is better.", metrics, "takes", "silent_spurious_per_min", &["all"], chains);
+    table(&mut s, "Onsets on no written note in a Take with stray hand noises, per minute", "A correct Take with a brushed, damped string at -24 dB halfway between notes, in every third gap (style `noises`; 34 of them a minute at 100 BPM). Lower is better.", metrics, "takes", "noises_spurious_per_min", &["all"], chains);
+    table(&mut s, "A note counted as heard with nobody playing", "Lower is better.", metrics, "silent", "onset_heard", &["all"], chains);
     table(&mut s, "Correctly played Takes answered with \"I didn't catch enough\"", "", metrics, "takes", "good_not_caught", &["all"], chains);
     table(&mut s, "Takes with scripted mistakes that pass", "Information: one note in five or six is wrong or missing in these.", metrics, "takes", "faulty_passed", &["all"], chains);
 

@@ -5,6 +5,7 @@ use std::time::Duration;
 
 use crate::audio_input::{RingBuffer, SharedAudioInput};
 use crate::instrument::InstrumentProfile;
+use crate::onset_flux::FluxDetector;
 
 // aubio onset detector — replaces the hand-rolled Goertzel FFT + spectral
 // flux pipeline. Aliased to avoid shadowing our own `Onset` event struct.
@@ -532,6 +533,16 @@ const MAX_BACKLOG_SECS: f64 = 0.25;
 /// it calls back with onsets.
 pub struct OnsetCore {
     detector: AubioOnset,
+    /// The second detector (`onset_flux.rs`): what aubio does not hear.
+    flux: FluxDetector,
+    /// An attack only the second detector heard, held until its own
+    /// timestamp has passed so aubio can still claim it.
+    soft_pending: Option<SoftPending>,
+    /// When aubio's last onset got through the level gate.
+    last_primary_ns: Option<u64>,
+    /// Hops analysed since the detector was started or the click came back.
+    hops_since_start: u32,
+    warmup_hops: u32,
     hop_size: usize,
     sample_rate: u32,
     floor: NoiseFloor,
@@ -581,7 +592,6 @@ impl OnsetCore {
         // explicitly at −70 dBFS (aubio's default). Our own adaptive RMS
         // noise floor is layered on top as a second guard.
         detector.set_silence(-70.0);
-
         let hops_per_sec = sample_rate as f32 / hop_size as f32;
         let max_backlog = (sample_rate as f64 * MAX_BACKLOG_SECS) as usize;
         let debug_enabled = std::env::var("YAMES_ONSET_DEBUG").is_ok();
@@ -590,6 +600,11 @@ impl OnsetCore {
         }
         Self {
             detector,
+            flux: FluxDetector::new(sample_rate, hop_size),
+            soft_pending: None,
+            last_primary_ns: None,
+            hops_since_start: 0,
+            warmup_hops: (ONSET_FFT_SIZE / hop_size.max(1)) as u32 + 2,
             hop_size,
             sample_rate,
             floor: NoiseFloor::new(hops_per_sec),
@@ -641,6 +656,10 @@ impl OnsetCore {
         }
         self.gate.reset();
         self.detector.reset();
+        self.flux.reset();
+        self.soft_pending = None;
+        self.last_primary_ns = None;
+        self.hops_since_start = 0;
         self.cursor = None;
         self.fresh.clear();
     }
@@ -708,7 +727,12 @@ impl OnsetCore {
         self.hop_energy_pos = (self.hop_energy_pos + 1) % slots;
         let rms = (self.hop_energies.iter().sum::<f32>() / (slots * hop.len()) as f32).sqrt();
 
-        let fired = onset_value > 0.0;
+        // The first windows after a start are half full of nothing, and the
+        // step from nothing to the room is an onset to aubio: one phantom at
+        // the top of every Take on a microphone (3.9 a minute on the bench).
+        self.hops_since_start = self.hops_since_start.saturating_add(1);
+        let warming_up = self.hops_since_start <= self.warmup_hops;
+        let fired = onset_value > 0.0 && !warming_up;
         self.floor.observe(rms, fired, now_ns);
         let noise_floor = self.floor.level(now_ns);
 
@@ -740,10 +764,75 @@ impl OnsetCore {
             }
         }
 
+        // The second detector reads every hop, whatever aubio said of it.
+        let soft = self.flux.process(hop, now_ns);
+        let hop_ns = (hop.len() as f64 * 1e9 / self.sample_rate as f64) as u64;
+
         // aubio signals an onset when do_result returns > 0.
         // We layer our own RMS noise-floor gate on top so brief
         // silence artefacts in the phase-vocoder don't fire.
-        if fired && rms > noise_floor {
+        // The level gate refuses an attack whose level does not swing: a
+        // compressed high-gain signal, an input whose automatic gain holds
+        // everything at one loudness. The second detector vouches for it when
+        // the spectrum itself rose, which no level has a say in.
+        let vouched = fired && rms <= noise_floor && self.flux.rise_now() >= VOUCHED_RISE;
+        if fired && (rms > noise_floor || vouched) {
+            // The same attack heard by both is aubio's.
+            if self.soft_pending.is_some_and(|s| now_ns.abs_diff(s.ts_ns) <= SAME_ATTACK_NS) {
+                self.soft_pending = None;
+            }
+            self.last_primary_ns = Some(now_ns);
+            let conf_desc = self.detector.get_thresholded_descriptor().clamp(0.0, 1.0);
+            self.admit(now_ns, rms, noise_floor, conf_desc, sub_interval_ms, refractory_factor, on_onset);
+        }
+
+        if let Some(f) = soft {
+            // Put on aubio's clock, the one every calibration is against: the
+            // attack (the peak, less how long the peak trails it) plus the
+            // delay aubio would have called it with.
+            let peak_ns = now_ns as i64 + (f.hops_from_now as f64 * hop_ns as f64) as i64;
+            let ts_ns = (peak_ns - self.flux.peak_after_attack_ns() as i64 + self.detection_delay_ns() as i64).max(0) as u64;
+            let claimed = self.last_primary_ns.is_some_and(|p| p.abs_diff(ts_ns) <= SAME_ATTACK_NS);
+            if !claimed && self.soft_pending.is_none() {
+                self.soft_pending = Some(SoftPending { ts_ns, salience: f.salience });
+            }
+        }
+        if let Some(s) = self.soft_pending {
+            if now_ns >= s.ts_ns + hop_ns {
+                self.soft_pending = None;
+                let conf = (s.salience * 0.5).clamp(0.0, 1.0);
+                self.admit(s.ts_ns, rms, noise_floor, conf, sub_interval_ms, refractory_factor, on_onset);
+            }
+        }
+
+        // Flush any pending cluster whose window has closed (even if
+        // no new onset arrived this hop).
+        if let Some(ref p) = self.pending {
+            if now_ns.saturating_sub(p.first_ts_ns) > self.cluster_window_ns {
+                let merged = self.pending.take().unwrap().flush();
+                on_onset(merged);
+            }
+        }
+    }
+
+    /// An onset either detector called: the refractory gate, then the chord
+    /// cluster, then out.
+    #[allow(clippy::too_many_arguments)]
+    fn admit<F: FnMut(Onset)>(
+        &mut self,
+        now_ns: u64,
+        rms: f32,
+        noise_floor: f32,
+        conf_desc: f32,
+        sub_interval_ms: f32,
+        refractory_factor: f32,
+        on_onset: &mut F,
+    ) {
+        let refractory_floor_ms = self.refractory_floor_ms;
+        let adaptive_refractory_ms =
+            (sub_interval_ms * refractory_factor).max(refractory_floor_ms as f32);
+        let onset_value = 1.0f32;
+        {
             let since_last_ms = self.gate.since_last_ms(now_ns);
 
             // Refractory period check (skips spurious double-counts).
@@ -796,7 +885,6 @@ impl OnsetCore {
                     1.0
                 };
                 let conf_amp = ((amp_ratio - 1.0) / 4.0).clamp(0.0, 1.0);
-                let conf_desc = self.detector.get_thresholded_descriptor().clamp(0.0, 1.0);
                 let confidence = (conf_amp * 0.45 + conf_desc * 0.55).clamp(0.0, 1.0);
 
                 let onset = Onset {
@@ -848,15 +936,6 @@ impl OnsetCore {
                     "[onset] blocked-by-refractory since_last={}ms < refrac={:.0}ms (rms={:.4})",
                     since_last_ms, adaptive_refractory_ms, rms,
                 );
-            }
-        }
-
-        // Flush any pending cluster whose window has closed (even if
-        // no new onset arrived this hop).
-        if let Some(ref p) = self.pending {
-            if now_ns.saturating_sub(p.first_ts_ns) > self.cluster_window_ns {
-                let merged = self.pending.take().unwrap().flush();
-                on_onset(merged);
             }
         }
     }
@@ -1010,6 +1089,21 @@ impl NoiseFloor {
         window.sort_unstable_by(|a, b| a.total_cmp(b));
         Some(window[count / 2])
     }
+}
+
+/// aubio's onset and the second detector's are the same attack when they are
+/// this close.
+const SAME_ATTACK_NS: u64 = 16_000_000;
+
+/// How far the second detector's summed rise must stand above its last
+/// 100 ms for it to vouch for an aubio onset the level gate refused. Its own
+/// onsets need 1.0 and more; 3.0 is a plain attack.
+const VOUCHED_RISE: f32 = 3.0;
+
+#[derive(Debug, Clone, Copy)]
+struct SoftPending {
+    ts_ns: u64,
+    salience: f32,
 }
 
 /// Internal helper used during chord/strum merging. Holds the in-flight

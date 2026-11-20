@@ -64,7 +64,7 @@ equal to reverb). They are stress conditions, not measurements of a device.
 
 Playing styles: `good`, `sloppy` (25 ms scatter), `weak` (legato at a tenth of
 a pick), `omit` (every sixth note left out), `wrong` (every fifth a semitone
-or two off), `dead_string` (a chord's middle string damped), `flat` (every
+or two off), `silent` (nobody plays: the room alone through the chain), `noises` (a correct Take plus a brushed, damped string at -24 dB halfway between notes in every third gap), `dead_string` (a chord's middle string damped), `flat` (every
 other bend 50 cents short), `ringing`, `no_vibrato`.
 
 Metric names are `group|chain|kind|metric`; `all` pools a dimension.
@@ -86,6 +86,9 @@ Metric names are `group|chain|kind|metric`; `all` pools a dimension.
 | `wrong` | `final_right`, `final_caught` | a wrong pitch counted right / wrong by the late grade | right: lower, caught: higher |
 | `dead` | `verifier_yes` | a damped chord string judged sounding | lower |
 | `weak` | `onset_heard`, `verifier_yes` | very weak legato | info |
+| `takes` | `spurious_per_min` | onsets the live detector emits on no played note (over 50 ms from every true attack, or a second on one attack), per minute, before the matcher (M6) | lower (tolerance 0.5) |
+| `takes` | `silent_spurious_per_min`, `noises_spurious_per_min` | the same on the `silent` Take (nobody plays) and the `noises` Take (stray hand noises at -24 dB) | lower |
+| `silent` | `onset_heard` | a note counted as heard with nobody playing | lower |
 | `takes` | `good_passed` | correct Takes that pass their Exercise's own bars | higher |
 | `takes` | `good_not_caught`, `faulty_passed` | "I didn't catch enough" on a correct Take; a Take with scripted mistakes passing | info |
 | `bends` | `read` | bent notes heard and given a verdict by `score::curves` | info |
