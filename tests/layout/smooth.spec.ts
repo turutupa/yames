@@ -114,6 +114,27 @@ test("the lane keeps the display's beat: a frame for every frame, or exactly eve
   expect(low.runwayFrames, "the lane still moves at 30").toBeGreaterThan(10);
 });
 
+test("Ask commits nothing during a running Take: the Ask key there is one static label", async ({ page }) => {
+  test.slow();
+  /*
+   * DESIGN 3.4 (leg c2a1): nothing of Ask exists while a Take runs. The key
+   * pressed then shows "Ask opens after this Take" in the bar, once, and the
+   * panel itself is not mounted, so it cannot render with the shell at each
+   * report from the engine.
+   */
+  await installPerf(page, { countRenders: true });
+  await openShot(page, "session-playing", WIDE);
+  await takeRunning(page);
+  await page.keyboard.press("Shift+Slash");
+  await expect(page.locator('[data-testid="session-ask-later"]')).toBeVisible();
+  const s = await bestWindow(page);
+  expect(s.commits, "the Take is running").toBeGreaterThan(0);
+  expect(s.renders.AskPanel ?? 0, "the Ask panel rendered during the Take").toBe(0);
+  expect(await page.locator(".ask-panel").count(), "the Ask panel is mounted during the Take").toBe(0);
+  expect(await page.locator('[data-testid="session-ask"]').count(), "an Ask button in the bar during the Take").toBe(0);
+  expect(s.longTasks, `long tasks in the best of three windows (longest ${s.longTaskMaxMs} ms)`).toBe(0);
+});
+
 test("the level meter pulses without reading the layout", async ({ page }) => {
   test.slow();
   /*

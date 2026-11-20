@@ -223,10 +223,18 @@
   border-radius: 8px;
   background: transparent;
   color: var(--text-secondary);
-  font: 600 13px/1.2 inherit;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
   overflow-wrap: anywhere;
 }
-.ask-section[aria-selected="true"] {
+/* Light themes give every bare button a fill; the unchosen segment has none. */
+.ask-panel .ask-sections .ask-section:not([aria-selected="true"]) {
+  background: transparent;
+  box-shadow: none;
+}
+.ask-panel .ask-sections .ask-section[aria-selected="true"] {
   background: var(--btn-sel);
   box-shadow: var(--btn-sel-ring);
   color: var(--btn-tint-ink);
@@ -350,7 +358,9 @@
   resize: none;
   background: transparent;
   color: var(--text-primary);
-  font: 15px/1.35 inherit;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.35;
   field-sizing: content;
 }
 .ask-input::placeholder {
@@ -401,7 +411,11 @@
   display: flex;
   flex-direction: column;
 }
-.ask-tools > .coach-card-embedded {
+/* `.coach-card.coach-card-embedded`: coach-card.css hides any card that is not
+   "open" (its old closed state); this one is never a panel of its own. */
+.ask-tools > .coach-card.coach-card-embedded {
+  display: flex;
+  flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
   width: auto;
@@ -413,6 +427,9 @@
 }
 .ask-tools > .coach-card-embedded .coach-card-inner {
   opacity: 1;
+  min-width: 0;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 /* ── The Session bar's Ask pill, and the label during a Take ─────────── */
@@ -451,6 +468,16 @@
 /* ── The phone: the header's Ask button and the sheet ──────────────── */
 .main-header .header-ask {
   gap: 6px;
+  flex: none;
+}
+/* Labelled, on every width (DESIGN 3.2): the other chips shed their words
+   first; this one is the only way into Ask on a phone. */
+.main-header .header-ask .context-chip-label {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
 }
 .main-header .header-ask .ask-glyph {
   color: var(--accent-2);
@@ -468,6 +495,9 @@
   padding: 0;
 }
 .ask-panel.ask-sheet {
+  /* Under the sheet's own close button, which floats over its corner. */
+  position: static;
+  z-index: auto;
   flex: 1 1 auto;
   width: auto;
   min-width: 0;
@@ -510,15 +540,16 @@
 }
 /* A phone on its side: the 360 px drawer at the right. */
 @media (orientation: landscape) and (max-height: 540px) {
+  /* The layer is a column that stacks the sheet at its foot; on its side the
+     sheet takes the right of it instead, the whole height. */
   .sheet.sheet--ask {
-    left: auto;
-    right: 0;
-    top: 0;
-    bottom: 0;
+    align-self: flex-end;
     width: 360px;
     max-width: 100%;
     height: 100%;
     max-height: 100%;
+    border-top: 0;
+    border-left: 1px solid var(--border);
     border-radius: 16px 0 0 16px;
   }
 }
