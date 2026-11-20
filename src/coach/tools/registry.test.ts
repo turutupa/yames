@@ -41,6 +41,11 @@ const SAMPLE_ARGS: Readonly<Record<string, ToolArgs>> = {
   test_out: { path: "alternate picking", step: 1 },
   loop_bars: { from: 1, to: 2 },
   make_exercise: { shape: "scale run", root: "A" },
+  swap_part: { at: 2, choice: "harder" },
+  restore_part: { at: 2, title: "Inside picking" },
+  set_minutes: { minutes: 20 },
+  set_focus: { path: "alternate picking" },
+  follow_path: { path: "ligado" },
 };
 
 describe("the list", () => {
