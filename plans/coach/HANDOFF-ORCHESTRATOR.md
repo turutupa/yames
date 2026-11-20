@@ -46,7 +46,8 @@ Merged on `coach`, in order: c0 (bus, context, source line), c1a (takeNote, roun
 (pass mark, `plans/COACH_I18N_BRIEF.md`), ms1 (model selector, resident model, silent quiet session;
 reviewed), c1b1 (the Session's coach line and note), fix1 (two layout regressions, "Needs 85%"), c2a1
 with c2a1b (Ask's shell: dock, drawer, sheet; reviewed, six fixes), c1c (the loop step, P1, P2, "for
-your eyes"). Deliveries: 1a and 1b (see `STATUS.md`); c2a1 and c1c are on `coach` but not yet in a
+your eyes"), c3a with c3ab (the Rust worker's Ask kind: grammar, cancel, deadline, cached prefix, two
+probe modes; reviewed twice; nothing calls it yet). Deliveries: 1a and 1b (see `STATUS.md`); c2a1 and c1c are on `coach` but not yet in a
 delivery line: they go out with c2a2 as 1c. A polish leg is owed at the end of milestone 1: the items
 marked "for a polish leg" in `PROGRESS.md` (the drawer covering the note at 1024 px; "Up to N" beside
 "Faster"; the strip's label against its cells).
@@ -55,8 +56,8 @@ In flight on 2026-11-20 (check `git worktree list` and `git branch --no-merged c
 
 | Leg | Worktree / branch | State | Next |
 |---|---|---|---|
-| ms2 → **ms2b** | `~/yames-coach-ms2`, `coach-ms2` | Reviewed (MERGE AFTER FIXES: seven items, the first a way to misfile and later overwrite an old model); the fix agent is running and also merges `coach` into the branch | Short re-read of its Rust diff since `45abc598` by a reviewer; gates; merge. Tell STATUS that `npm run test:rust` on Windows is owed. |
-| c3a → **c3ab** | `~/yames-coach-c3a`, `coach-c3a` | The reviewer's fixes are running | Short re-read of its diff since `70bdd641` by a reviewer; merge (it and ms2 both touch `commands.rs`: the second to merge resolves). |
+| ms2 → **ms2b** | `~/yames-coach-ms2`, `coach-ms2` | Reviewed twice. The seven first-review items are fixed and confirmed; the re-read found one defect the fix introduced (a cancelled download can still be renamed over `model.bin` on the check-skip path) and two small races: the ms2b agent was resumed for those (it is near 300k tokens: if it does not finish, a fresh agent takes the three items from the re-read, which are in this session's message to it and summarised in `PROGRESS.md`) | Its report; a last look by a reviewer at the diff since `35aa5fd0` (a few hunks); merge `coach` into it again (c3a touched `commands.rs`), gates including `test:rust`, merge. Tell STATUS that `npm run test:rust` on Windows is owed. |
+| **c4c** | `~/yames-coach-c4c`, `coach-c4c` | Running: the `cues` pack field, `cueFor`, the cue on the ready note / Take / result, Alternate Picking's cues, `plans/coach/CUES_GUIDE.md` | Read a sample of the cues yourself as a teacher would; screenshots; merge. Then brief the content legs for the other fifteen Paths (one per four Paths, each with a separate proof-reader) from the guide. |
 | **c2a2** | `~/yames-coach-c2a2`, `coach-c2a2` | Running: Listen on the tools' transport, the tool line and note, Tool runs on Progress, `CoachCard` deleted | Screenshots against DESIGN 7; **reviewer on the `useSession.ts` diff**; merge; then delivery 1c/1d. |
 
 Briefed and not started (files in `plans/tasks/coach/`): `c1b2-today-speech-keys.md`,
