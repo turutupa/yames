@@ -216,6 +216,12 @@ fn with_slot<R>(
         }
     });
     let had_model = model.is_some();
+    // The catch is around all of `f`, not the one inference call inside it:
+    // `f` is the caller's (the verifier's rule runs in it too) and this file
+    // cannot see where in it the panic came from. Retiring the model on any
+    // of them is the safe side: a panic that came from the rule would come
+    // again on every Take with the model still in, and a retired model costs
+    // only the second look, never the tracker's grade.
     match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(model.as_mut()))) {
         Ok(r) => r,
         Err(panic) => {

@@ -366,6 +366,10 @@ pub struct OnsetDetector {
     /// Where a Session Take's audio is kept for the pitch pass, when the
     /// timing analyzer handed one over. Copies, and decides nothing.
     take_tap: Option<crate::take_audio::SharedTakeAudioTap>,
+    /// The timing analyzer's listen-demo gate (`TimingAnalyzer::demo_gate`):
+    /// onsets stamped before it are dropped downstream. Read here only to
+    /// know when a demo ended.
+    demo_gate: Option<Arc<std::sync::atomic::AtomicU64>>,
 }
 
 impl OnsetDetector {
@@ -374,7 +378,14 @@ impl OnsetDetector {
             alive: Arc::new(AtomicBool::new(false)),
             thread_handle: None,
             take_tap: None,
+            demo_gate: None,
         }
+    }
+
+    /// Tell the detector about the listen-demo gate, so that it forgets the
+    /// demo's loudness when the demo ends. Call before `start`.
+    pub fn set_demo_gate(&mut self, gate: Arc<std::sync::atomic::AtomicU64>) {
+        self.demo_gate = Some(gate);
     }
 
     /// Keep an armed Take's audio as it is read (`take_audio`). Call before
@@ -411,13 +422,14 @@ impl OnsetDetector {
         self.alive.store(true, Ordering::SeqCst);
         let alive = self.alive.clone();
         let take_tap = self.take_tap.clone();
+        let demo_gate = self.demo_gate.clone();
 
         self.thread_handle = Some(thread::spawn(move || {
             // ROADMAP §0.5 — the analyzer runs per audio hop and must not be
             // preempted by background compute (LLM inference).
             let _rt = audio_thread_priority::promote_current_thread_to_real_time(0, 48_000)
                 .map_err(|e| eprintln!("[yames] analyzer stayed at normal priority: {e}"));
-            Self::detect_loop(alive, audio_input, profile, tempo_ctx, take_tap, on_onset);
+            Self::detect_loop(alive, audio_input, profile, tempo_ctx, take_tap, demo_gate, on_onset);
         }));
     }
 
@@ -446,6 +458,7 @@ impl OnsetDetector {
         profile: InstrumentProfile,
         tempo_ctx: SharedTempoContext,
         take_tap: Option<crate::take_audio::SharedTakeAudioTap>,
+        demo_gate: Option<Arc<std::sync::atomic::AtomicU64>>,
         on_onset: F,
     ) where
         F: Fn(Onset) + Send + 'static,
@@ -460,6 +473,7 @@ impl OnsetDetector {
             tap.set_detection_delay_ns(core.detection_delay_ns());
         }
         let mut emit = |onset: Onset| on_onset(onset);
+        let mut in_demo = false;
 
         while alive.load(Ordering::SeqCst) {
             // Sleep a bit between processing (don't spin-wait)
@@ -490,7 +504,18 @@ impl OnsetDetector {
                     tap.pull(&r, crate::clock::now_ns());
                 }
             }
-            core.process(crate::clock::now_ns(), &tempo_ctx, &mut emit);
+            let now_ns = crate::clock::now_ns();
+            core.process(now_ns, &tempo_ctx, &mut emit);
+            // A listen demo just ended (one atomic load a wake): what the
+            // detectors learnt about "recent notes" was the demo, not the
+            // player. Forgotten after the hops above, which were the demo's.
+            if let Some(gate) = demo_gate.as_ref() {
+                let demo = now_ns < gate.load(Ordering::Relaxed);
+                if in_demo && !demo {
+                    core.forget_recent_notes();
+                }
+                in_demo = demo;
+            }
         }
 
         core.finish(&mut emit);
@@ -567,6 +592,8 @@ pub struct OnsetCore {
     /// here, not every hop: `std::env::var` is a syscall.
     debug_enabled: bool,
     hops_since_log: u32,
+    /// aubio's answer for the hop being analysed, for the debug log only.
+    last_onset_value: f32,
 }
 
 impl OnsetCore {
@@ -619,6 +646,7 @@ impl OnsetCore {
             refractory_floor_ms: profile.refractory_floor_ms,
             debug_enabled,
             hops_since_log: 0,
+            last_onset_value: 0.0,
         }
     }
 
@@ -662,6 +690,15 @@ impl OnsetCore {
         self.hops_since_start = 0;
         self.cursor = None;
         self.fresh.clear();
+    }
+
+    /// What was just heard was not the player (a listen demo through the
+    /// speakers): forget how loud "recent notes" were, in both detectors, so
+    /// the player's first soft notes are not small beside the demo's. The
+    /// room's own level, the refractory clock and the audio are kept.
+    pub fn forget_recent_notes(&mut self) {
+        self.flux.forget_recent_attacks();
+        self.floor.forget_notes();
     }
 
     /// Copy what the input callback has written since the last pull. Holds
@@ -718,6 +755,7 @@ impl OnsetCore {
             Ok(v) => v,
             Err(_) => return,
         };
+        self.last_onset_value = onset_value;
 
         // RMS for amplitude and noise-floor gating, over the amplitude
         // window rather than one hop.
@@ -778,7 +816,7 @@ impl OnsetCore {
         let vouched = fired && rms <= noise_floor && self.flux.rise_now() >= VOUCHED_RISE;
         if fired && (rms > noise_floor || vouched) {
             // The same attack heard by both is aubio's.
-            if self.soft_pending.is_some_and(|s| now_ns.abs_diff(s.ts_ns) <= SAME_ATTACK_NS) {
+            if self.soft_pending.is_some_and(|s| now_ns.abs_diff(s.ts_ns) <= same_attack_ns(hop_ns)) {
                 self.soft_pending = None;
             }
             self.last_primary_ns = Some(now_ns);
@@ -792,7 +830,7 @@ impl OnsetCore {
             // delay aubio would have called it with.
             let peak_ns = now_ns as i64 + (f.hops_from_now as f64 * hop_ns as f64) as i64;
             let ts_ns = (peak_ns - self.flux.peak_after_attack_ns() as i64 + self.detection_delay_ns() as i64).max(0) as u64;
-            let claimed = self.last_primary_ns.is_some_and(|p| p.abs_diff(ts_ns) <= SAME_ATTACK_NS);
+            let claimed = self.last_primary_ns.is_some_and(|p| p.abs_diff(ts_ns) <= same_attack_ns(hop_ns));
             if !claimed && self.soft_pending.is_none() {
                 self.soft_pending = Some(SoftPending { ts_ns, salience: f.salience });
             }
@@ -831,7 +869,7 @@ impl OnsetCore {
         let refractory_floor_ms = self.refractory_floor_ms;
         let adaptive_refractory_ms =
             (sub_interval_ms * refractory_factor).max(refractory_floor_ms as f32);
-        let onset_value = 1.0f32;
+        let onset_value = self.last_onset_value;
         {
             let since_last_ms = self.gate.since_last_ms(now_ns);
 
@@ -1058,6 +1096,11 @@ impl NoiseFloor {
     }
 
     /// A note got through. Its level is what the cap reads.
+    /// Forget the recent notes' level; the room's is kept.
+    pub fn forget_notes(&mut self) {
+        self.recent_note_count = 0;
+    }
+
     pub fn note_heard(&mut self, rms: f32, now_ns: u64) {
         self.recent_notes[self.recent_note_count % RECENT_NOTES] = rms;
         self.recent_note_count += 1;
@@ -1092,8 +1135,14 @@ impl NoiseFloor {
 }
 
 /// aubio's onset and the second detector's are the same attack when they are
-/// this close.
+/// this close: 16 ms, or a hop and a half where a hop is longer than that
+/// would allow for (16 ms at 16 kHz, a Bluetooth headset: both detectors
+/// stamp to the hop, so two calls of one attack can sit a whole hop apart).
 const SAME_ATTACK_NS: u64 = 16_000_000;
+
+fn same_attack_ns(hop_ns: u64) -> u64 {
+    SAME_ATTACK_NS.max(hop_ns + hop_ns / 2)
+}
 
 /// How far the second detector's summed rise must stand above its last
 /// 100 ms for it to vouch for an aubio onset the level gate refused. Its own
@@ -1391,6 +1440,146 @@ mod tests {
         assert!(approx_eq(ctx.played_interval_ms().unwrap(), 1.0, 1e-3));
         ctx.set_played_interval_ms(Some(1_000_000.0));
         assert!(approx_eq(ctx.played_interval_ms().unwrap(), 4_000.0, 1e-3));
+    }
+
+    // ----- OnsetCore: the two detectors together (review of M6, A2/A3/A5) -----
+
+    const CORE_RATE: u32 = 48_000;
+    const CORE_BASE_NS: u64 = 5_000_000_000;
+
+    /// A plucked-ish note: fast attack, slow decay, four partials.
+    fn pluck(x: &mut [f32], rate: u32, at_s: f32, hz: f32, level: f32) {
+        let i0 = (at_s * rate as f32) as usize;
+        for i in i0..x.len() {
+            let t = (i - i0) as f32 / rate as f32;
+            let env = level * (1.0 - (-t / 0.002).exp()) * (-t / 0.35).exp();
+            for (h, a) in [(1.0, 1.0), (2.0, 0.5), (3.0, 0.33), (4.0, 0.2)] {
+                x[i] += env * a * (2.0 * std::f32::consts::PI * hz * h * t).sin();
+            }
+        }
+    }
+
+    fn room(seconds: f32, rate: u32, noise: f32) -> Vec<f32> {
+        let mut state = 0x1234_5678_9ABCu64;
+        (0..(seconds * rate as f32) as usize)
+            .map(|_| {
+                state ^= state << 13;
+                state ^= state >> 7;
+                state ^= state << 17;
+                noise * ((state >> 40) as f32 / (1u64 << 23) as f32 - 1.0)
+            })
+            .collect()
+    }
+
+    /// Onset times in seconds of the audio, the detector's delay taken off.
+    fn core_onsets(x: &[f32], rate: u32) -> Vec<f32> {
+        let profile = crate::instrument::Instrument::ElectricGuitar.profile();
+        let mut core = OnsetCore::with_hop(&profile, rate, ONSET_HOP_SIZE);
+        let delay_ns = core.detection_delay_ns();
+        let ctx = TempoContext::new(120, 2);
+        let mut found = Vec::new();
+        let mut sink = |o: Onset| found.push((o.ts_ns - CORE_BASE_NS - delay_ns) as f32 / 1e9);
+        for (k, hop) in x.chunks_exact(ONSET_HOP_SIZE).enumerate() {
+            core.fresh.extend_from_slice(hop);
+            let end_ns = CORE_BASE_NS + ((k + 1) as f64 * ONSET_HOP_SIZE as f64 * 1e9 / rate as f64) as u64;
+            core.process(end_ns, &ctx, &mut sink);
+        }
+        core.finish(&mut sink);
+        found
+    }
+
+    #[test]
+    fn an_attack_both_detectors_hear_is_one_onset_at_every_sample_rate() {
+        for rate in [16_000, 44_100, 48_000, 96_000] {
+            let mut x = room(3.0, rate, 0.0005);
+            for (k, hz) in [196.0, 220.0, 247.0, 262.0].into_iter().enumerate() {
+                pluck(&mut x, rate, 1.0 + 0.4 * k as f32, hz, 0.3);
+            }
+            let found = core_onsets(&x, rate);
+            assert_eq!(found.len(), 4, "at {rate} Hz: {found:?}");
+            // aubio's stamp, which is within a hop or two of the attack
+            let slack = 0.012 + 2.0 * ONSET_HOP_SIZE as f32 / rate as f32;
+            for (k, f) in found.iter().enumerate() {
+                let at = 1.0 + 0.4 * k as f32;
+                assert!((f - at).abs() < slack, "at {rate} Hz the attack at {at} was put at {f}");
+            }
+        }
+    }
+
+    #[test]
+    fn two_calls_of_one_attack_are_the_same_attack_where_a_hop_is_long() {
+        let hop_ns = |rate: u64| ONSET_HOP_SIZE as u64 * 1_000_000_000 / rate;
+        assert_eq!(same_attack_ns(hop_ns(48_000)), 16_000_000);
+        assert_eq!(same_attack_ns(hop_ns(96_000)), 16_000_000);
+        assert_eq!(same_attack_ns(hop_ns(16_000)), 24_000_000);
+    }
+
+    /// The soft detector's onset, then aubio's a hop later for the same
+    /// attack (aubio's stamp no longer within the same-attack window of a
+    /// pending that was already emitted): the refractory gate is what keeps
+    /// it one onset.
+    #[test]
+    fn an_aubio_onset_a_hop_after_an_emitted_soft_one_is_blocked() {
+        let profile = crate::instrument::Instrument::ElectricGuitar.profile();
+        let mut core = OnsetCore::with_hop(&profile, CORE_RATE, ONSET_HOP_SIZE);
+        let hop_ns = ONSET_HOP_SIZE as u64 * 1_000_000_000 / CORE_RATE as u64;
+        let mut found = Vec::new();
+        let mut sink = |o: Onset| found.push(o.ts_ns);
+        let t = CORE_BASE_NS;
+        core.admit(t, 0.2, 0.01, 0.5, 250.0, REFRACTORY_SUBDIVISION_FACTOR, &mut sink);
+        core.admit(t + hop_ns, 0.2, 0.01, 0.9, 250.0, REFRACTORY_SUBDIVISION_FACTOR, &mut sink);
+        core.finish(&mut sink);
+        assert_eq!(found, vec![t]);
+        assert_eq!(
+            core.gate.admit_with_factor(t + 2 * hop_ns, 0.2, 250.0, profile.refractory_floor_ms, REFRACTORY_SUBDIVISION_FACTOR),
+            GateDecision::Blocked
+        );
+    }
+
+    /// The step from nothing to the room at a start is not an onset, and a
+    /// note 60 ms in is. A note inside the first window (about 27 ms: the
+    /// warm-up, `warmup_hops`) may be dropped, which is intended: it is under
+    /// the click's own count-in, and the phantom it replaces was one false
+    /// onset at the top of every Take on a microphone.
+    #[test]
+    fn the_warm_up_drops_the_phantom_and_keeps_a_note_sixty_ms_in() {
+        // a room loud enough that its arrival is a step for aubio
+        assert!(core_onsets(&room(2.0, CORE_RATE, 0.02), CORE_RATE).is_empty());
+        let mut x = room(2.0, CORE_RATE, 0.02);
+        pluck(&mut x, CORE_RATE, 0.06, 196.0, 0.4);
+        let found = core_onsets(&x, CORE_RATE);
+        assert_eq!(found.len(), 1, "{found:?}");
+        assert!((found[0] - 0.06).abs() < 0.02, "{found:?}");
+        let core = OnsetCore::with_hop(&crate::instrument::Instrument::ElectricGuitar.profile(), CORE_RATE, ONSET_HOP_SIZE);
+        let warm_ms = core.warmup_hops as f32 * ONSET_HOP_SIZE as f32 * 1000.0 / CORE_RATE as f32;
+        assert!(warm_ms > 20.0 && warm_ms < 40.0, "the warm-up is {warm_ms} ms");
+    }
+
+    /// A5: after a loud demo, the player's soft legato is not "small beside
+    /// recent attacks" once the demo's loudness is forgotten.
+    #[test]
+    fn forgetting_recent_notes_empties_both_memories_and_keeps_the_room() {
+        let profile = crate::instrument::Instrument::ElectricGuitar.profile();
+        let mut core = OnsetCore::with_hop(&profile, CORE_RATE, ONSET_HOP_SIZE);
+        let ctx = TempoContext::new(120, 2);
+        let mut x = room(3.0, CORE_RATE, 0.0005);
+        for k in 0..4 {
+            pluck(&mut x, CORE_RATE, 1.0 + 0.4 * k as f32, 196.0, 0.5);
+        }
+        let mut n = 0;
+        let mut sink = |_: Onset| n += 1;
+        let mut now = CORE_BASE_NS;
+        for (k, hop) in x.chunks_exact(ONSET_HOP_SIZE).enumerate() {
+            core.fresh.extend_from_slice(hop);
+            now = CORE_BASE_NS + ((k + 1) as f64 * ONSET_HOP_SIZE as f64 * 1e9 / CORE_RATE as f64) as u64;
+            core.process(now, &ctx, &mut sink);
+        }
+        assert!(core.floor.recent_note_level(now).is_some());
+        let room_level = core.floor.background;
+        core.forget_recent_notes();
+        assert!(core.floor.recent_note_level(now).is_none());
+        assert_eq!(core.floor.background, room_level);
+        assert_eq!(n, 4);
     }
 
     fn mk_onset(ts_ns: u64, amp: f32, centroid: f32, conf: f32) -> Onset {

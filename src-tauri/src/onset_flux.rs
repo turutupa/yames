@@ -42,9 +42,13 @@ const MAX_BANDS: usize = 32;
 const PEAK_AFTER_ATTACK_WINDOWS: f64 = 0.73;
 /// The summed rise is kept this long: the threshold reads the part before a
 /// peak.
-const HISTORY: usize = 32;
+const HISTORY: usize = 64;
 /// How far back the threshold looks, seconds.
 const THRESHOLD_LOOKBACK_SECS: f32 = 0.10;
+/// Two peaks closer than this are one attack. At 44.1 and 48 kHz two peaks
+/// are two hops apart at the least, which is already more; at 96 kHz a hop
+/// is 2.7 ms and the first attack out of silence peaks twice inside 6 ms.
+const MIN_GAP_SECS: f32 = 0.010;
 /// How many of the player's last attacks the salience test remembers, and
 /// for how long after the last of them.
 const RECENT: usize = 8;
@@ -82,9 +86,11 @@ pub struct FluxTuning {
     /// Before any attack has been heard, the whole input must rise by this
     /// factor across the peak.
     pub first_note_rise: f32,
-    /// The rise is measured against the larger of the frames this many hops
-    /// back and one more.
-    pub lag_hops: usize,
+    /// The rise is measured against the larger of the frame this far back
+    /// and the hop before it, seconds. In seconds and not hops, like the
+    /// window: at 96 kHz a hop is 2.7 ms and at 16 kHz (a Bluetooth headset
+    /// on Android) it is 16 ms. Two hops at 44.1 and 48 kHz.
+    pub lag_secs: f32,
     /// Half-life of the "loudest recent input", seconds.
     pub peak_half_life_secs: f32,
 }
@@ -98,7 +104,7 @@ impl Default for FluxTuning {
             threshold_offset: 1.0,
             min_salience: 0.25,
             first_note_rise: 1.6,
-            lag_hops: 2,
+            lag_secs: 0.0107,
             peak_half_life_secs: 5.0,
         }
     }
@@ -132,6 +138,11 @@ pub struct FluxDetector {
     flux: [f32; HISTORY],
     flux_pos: usize,
     lookback: usize,
+    /// `tuning.lag_secs` in hops, at least one.
+    lag: usize,
+    /// Two peaks closer than this many hops are one attack ([`MIN_GAP_SECS`]).
+    min_gap: u64,
+    last_onset_frame: Option<u64>,
     frames_seen: u64,
     /// The first frames after a reset read a window half full of nothing.
     warmup_frames: u64,
@@ -172,7 +183,7 @@ impl FluxDetector {
             lo = hi;
         }
         let window = (0..n_fft).map(|i| 0.5 - 0.5 * (2.0 * std::f32::consts::PI * i as f32 / n_fft as f32).cos()).collect();
-        let lag = tuning.lag_hops.max(1);
+        let lag = ((tuning.lag_secs * hops_per_sec).round() as usize).clamp(1, 8);
         Self {
             tuning,
             fft: Fft::new(n_fft),
@@ -195,6 +206,9 @@ impl FluxDetector {
             flux: [0.0; HISTORY],
             flux_pos: 0,
             lookback: ((THRESHOLD_LOOKBACK_SECS * hops_per_sec).round() as usize).clamp(6, HISTORY - 3),
+            lag,
+            min_gap: (MIN_GAP_SECS * hops_per_sec).ceil() as u64,
+            last_onset_frame: None,
             frames_seen: 0,
             warmup_frames: (n_fft / hop_size.max(1)) as u64 + lag as u64 + 2,
             recent: [0.0; RECENT],
@@ -216,6 +230,7 @@ impl FluxDetector {
         self.peak = 0.0;
         self.flux = [0.0; HISTORY];
         self.frames_seen = 0;
+        self.last_onset_frame = None;
         self.recent_count = 0;
     }
 
@@ -247,11 +262,18 @@ impl FluxDetector {
             now[b] = (p.sqrt() * norm) as f32;
         }
         let level = (total.sqrt() * norm) as f32;
+        // A NaN or an infinity from the device would sit in `peak` for good
+        // (`max` keeps an infinity) and every band would be under the floor
+        // from then on. The hop is skipped; the bad samples leave the frame
+        // within a window.
+        if !level.is_finite() {
+            return None;
+        }
         self.peak = (self.peak * self.peak_decay).max(level);
         let under_peak = self.peak * self.tuning.floor_under_peak;
 
         // The summed rise against the larger of two earlier frames.
-        let lag = self.tuning.lag_hops.max(1);
+        let lag = self.lag;
         let a = &self.mags[(self.mag_pos + slots - lag) % slots];
         let b2 = &self.mags[(self.mag_pos + slots - lag - 1) % slots];
         let mut rise = 0.0f32;
@@ -313,6 +335,10 @@ impl FluxDetector {
         if salience < self.tuning.min_salience {
             return None;
         }
+        if self.last_onset_frame.is_some_and(|f| self.frames_seen - f < self.min_gap) {
+            return None;
+        }
+        self.last_onset_frame = Some(self.frames_seen);
         self.recent[self.recent_count % RECENT] = contrast;
         self.recent_count += 1;
         self.last_recent_ns = now_ns;
@@ -321,6 +347,14 @@ impl FluxDetector {
         let denom = prev - 2.0 * here + next;
         let frac = if denom < 0.0 { (0.5 * (prev - next) / denom).clamp(-0.5, 0.5) } else { 0.0 };
         Some(FluxOnset { hops_from_now: -1.0 + frac, salience })
+    }
+
+    /// Forget how loud the recent attacks were, and nothing else. For when
+    /// what was just heard was not the player: a listen demo through the
+    /// speakers must not be the measure the player's own soft notes are
+    /// small beside for the next 30 s.
+    pub fn forget_recent_attacks(&mut self) {
+        self.recent_count = 0;
     }
 
     /// How far the summed rise of the last three hops stands above the 100 ms
@@ -374,13 +408,17 @@ mod tests {
 
     /// Plucked-ish notes at the given times (seconds, Hz, level) over noise.
     fn signal(seconds: f32, noise: f32, notes: &[(f32, f32, f32)]) -> Vec<f32> {
+        signal_at(RATE, seconds, noise, notes)
+    }
+
+    fn signal_at(rate: u32, seconds: f32, noise: f32, notes: &[(f32, f32, f32)]) -> Vec<f32> {
         let mut rng = Rng(0x1234_5678_9ABC);
-        let n = (seconds * RATE as f32) as usize;
+        let n = (seconds * rate as f32) as usize;
         let mut x: Vec<f32> = (0..n).map(|_| noise * rng.bipolar()).collect();
         for &(t0, hz, level) in notes {
-            let i0 = (t0 * RATE as f32) as usize;
+            let i0 = (t0 * rate as f32) as usize;
             for i in i0..n {
-                let t = (i - i0) as f32 / RATE as f32;
+                let t = (i - i0) as f32 / rate as f32;
                 let env = level * (1.0 - (-t / 0.002).exp()) * (-t / 0.35).exp();
                 for (h, a) in [(1.0, 1.0), (2.0, 0.5), (3.0, 0.33), (4.0, 0.2)] {
                     x[i] += env * a * (2.0 * std::f32::consts::PI * hz * h * t).sin();
@@ -392,8 +430,12 @@ mod tests {
 
     /// Attack times the detector calls, seconds.
     fn attacks(x: &[f32]) -> Vec<f32> {
-        let mut d = FluxDetector::new(RATE, HOP);
-        let hop_s = HOP as f32 / RATE as f32;
+        attacks_at(RATE, x)
+    }
+
+    fn attacks_at(rate: u32, x: &[f32]) -> Vec<f32> {
+        let mut d = FluxDetector::new(rate, HOP);
+        let hop_s = HOP as f32 / rate as f32;
         let lag_s = d.peak_after_attack_ns() as f32 / 1e9;
         let mut out = Vec::new();
         for (k, hop) in x.chunks_exact(HOP).enumerate() {
@@ -428,6 +470,37 @@ mod tests {
     #[test]
     fn notes_are_heard_once_each_and_on_time() {
         each_heard_once(&attacks(&signal(4.0, 0.0005, &NOTES)));
+    }
+
+    /// The lag and the lookback are lengths of time: the same notes are heard
+    /// once each where a hop is 2.7 ms and where it is 16 ms.
+    #[test]
+    fn notes_are_heard_once_each_at_other_sample_rates() {
+        for rate in [16_000, 44_100, 96_000] {
+            let found = attacks_at(rate, &signal_at(rate, 4.0, 0.0005, &NOTES));
+            assert_eq!(found.len(), NOTES.len(), "at {rate} Hz: onsets at {found:?}");
+            // a hop of slack on top of the 48 kHz tolerance: at 16 kHz a hop is 16 ms
+            let slack = 0.012 + HOP as f32 / rate as f32;
+            for (f, n) in found.iter().zip(NOTES) {
+                assert!((f - n.0).abs() < slack, "at {rate} Hz an attack at {} was put at {f}", n.0);
+            }
+        }
+    }
+
+    #[test]
+    fn the_lag_is_a_length_of_time() {
+        for (rate, lag, lookback) in [(16_000, 1, 6), (44_100, 2, 17), (48_000, 2, 19), (96_000, 4, 38)] {
+            let d = FluxDetector::new(rate, HOP);
+            assert_eq!((d.lag, d.lookback), (lag, lookback), "at {rate} Hz");
+        }
+    }
+
+    #[test]
+    fn a_sample_that_is_not_a_number_does_not_deafen_the_detector() {
+        let mut x = signal(4.0, 0.0005, &NOTES);
+        x[(0.5 * RATE as f32) as usize] = f32::NAN;
+        x[(0.6 * RATE as f32) as usize] = f32::INFINITY;
+        each_heard_once(&attacks(&x));
     }
 
     #[test]

@@ -159,6 +159,9 @@ jobs:
           export CC_aarch64_linux_android="$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang"
           export CXX_aarch64_linux_android="$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang++"
           export AR_aarch64_linux_android="$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar"
+          # Both: the crate must build without the note model (the default
+          # features) and with it.
+          cargo check --manifest-path src-tauri/Cargo.toml --lib --target aarch64-linux-android
           cargo check --manifest-path src-tauri/Cargo.toml --lib --features detect-tract --target aarch64-linux-android
 
       - name: Setup Node
