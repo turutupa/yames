@@ -149,8 +149,10 @@ Sol / Si / "primeira" beside chord letters, as the pack does), ru, pl and pt-BR 
 
 - `npm run paths -- check` (every pack): 16 Paths ok, 0 errors (`/tmp/coach-cues1/fc-merge.log`).
 - `npx tsc --noEmit`: clean (`/tmp/coach-cues1/tsc2.log`).
-- `npm run test`: GATE_VITEST2 (`/tmp/coach-cues1/vitest2.log`).
-- `npm run build`: GATE_BUILD2 (`/tmp/coach-cues1/build2.log`).
+- `npm run test`: 392 of 393 files, 17,580 of 17,580 tests passed (`/tmp/coach-cues1/vitest2.log`); the one
+  file is the known worktree-only `TabStage.render.test.tsx`.
+- `npm run build`: ok (`/tmp/coach-cues1/build2.log`, on `401ba5a6`). The de/pl fix after vitest changed
+  two overlay strings only; `paths check first-chords` after it: 0 errors (`/tmp/coach-cues1/fix2.log`).
 
 ## Twelve cues to read
 
