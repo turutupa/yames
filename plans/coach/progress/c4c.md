@@ -102,8 +102,24 @@ Answered, not changed:
 
 436 cues: general 59, heard 58, late 58, early 58, extras 52, lastBars 39, notes 37, stringChange 31,
 openString 15, afterHeld 15, shift 14. All 59 Exercises (56 in Steps, 3 warm-ups) now show an order during
-every Take (before: 2 of the Path's 59 had a coach line of 48 characters or less... see c1b1's list: 57 too
-long). No variant needed cues of its own after the rewording (0 refusals).
+every Take (before: 57 of them had a coach line too long to be the order, `c1b1-long-cues.txt`). No variant
+needed cues of its own after the rewording (0 refusals). Translated in all fourteen languages (927 of
+927 strings each); the longest cue is 48 characters in de, fr, it, es, nl, pl, pt-BR, ru, tr.
+
+## Gates (logs in `/tmp/coach-c4c/`)
+
+- `tsc` clean (`tsc.log`); `npm run build` ok (`build.log`); vitest 390 of 391 files, 13,649 tests passed;
+  the one file is the known worktree-only `TabStage.render.test.tsx` (`vitest.log`; re-run of the touched
+  areas after the translations: 46 files, 7,385 tests, `vt-final.log`).
+- `npm run paths -- check`: every pack ok, alternate-picking 0 errors (`paths-check-all.log`).
+- `npm run test:paths:rust`: 11 passed (`rust.log`).
+- Full layout suite: 1,314 passed, 278 skipped, 1 failed: `songs-seek.spec.ts` (timing). Re-run: a
+  different songs-seek case fails each time under a load average of 45 to 50 (`pw-rerun.log`,
+  `pw-songs.log`); coach-session, short-window and neck with the German and Russian cues merged: passed.
+- `smooth.spec.ts`: 15 passed. The neck's Go-again scene (`coach-next-order`) is not in it: under the
+  render counter the second Take is over before the scene returns (the runway's is, and passes).
+- Pictures: `/tmp/coach-c4c/shots/` (coach-next, coach-next-order, coach-ready-again; Ember and
+  Manuscript; 1440, 1024x700, phone).
 
 ## For the content legs (the other fifteen Paths)
 
