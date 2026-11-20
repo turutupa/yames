@@ -283,7 +283,7 @@ fn run(mut args: Args) -> Result<ExitCode, String> {
 
     let baseline_path = baseline_arg.unwrap_or_else(|| repo_root().join("plans/detection/baselines").join(format!("{mode_name}{}.json", if has_model { "" } else { "-no-model" })));
     if update {
-        let base = eval::Baseline { about: about.clone(), metrics: metrics.clone() };
+        let base = eval::Baseline { about: about.clone(), metrics: metrics.clone(), verifier_times: eval::verifier_times(&rows) };
         if let Some(parent) = baseline_path.parent() {
             std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
         }
@@ -294,6 +294,14 @@ fn run(mut args: Args) -> Result<ExitCode, String> {
             let better = serde_json::to_string(&m.better).map_err(|e| e.to_string())?;
             body.push_str(&format!("{}: {{\"value\": {:.4}, \"n\": {}, \"better\": {}}}{}\n", serde_json::to_string(k).map_err(|e| e.to_string())?, m.value, m.n, better, if i + 1 < n { "," } else { "" }));
         }
+        // the confirmed notes' verifier times, one Take a line, for the
+        // paired timing check (`eval::paired_scatter`)
+        body.push_str("},\n\"verifierTimes\": {\n");
+        let n = base.verifier_times.len();
+        for (i, (take, times)) in base.verifier_times.iter().enumerate() {
+            let times = serde_json::to_string(times).map_err(|e| e.to_string())?;
+            body.push_str(&format!("{}: {times}{}\n", serde_json::to_string(take).map_err(|e| e.to_string())?, if i + 1 < n { "," } else { "" }));
+        }
         body.push_str("}\n}\n");
         std::fs::write(&baseline_path, body).map_err(|e| format!("{}: {e}", baseline_path.display()))?;
         eprintln!("baseline written: {}", baseline_path.display());
@@ -301,24 +309,30 @@ fn run(mut args: Args) -> Result<ExitCode, String> {
     if check {
         let raw = std::fs::read_to_string(&baseline_path).map_err(|e| format!("{}: {e} (run with --update-baseline to make one)", baseline_path.display()))?;
         let base: eval::Baseline = serde_json::from_str(&raw).map_err(|e| format!("{}: {e}", baseline_path.display()))?;
-        let outcome = eval::check(&metrics, &base);
+        // timing over the notes both models confirm, when the baseline kept them
+        let paired = (!base.verifier_times.is_empty()).then(|| eval::paired_scatter(&rows, &base.verifier_times));
+        let outcome = eval::check(&metrics, &base, paired.as_ref());
         for line in &outcome.improvements {
             println!("better   {line}");
         }
         for key in &outcome.missing {
             println!("missing  {key}: in the baseline, not measured by this run");
         }
+        for key in &outcome.unpaired {
+            println!("unpaired {key}: no confirmed note shared with the baseline, timing not compared");
+        }
         for line in &outcome.regressions {
             println!("WORSE    {line}");
         }
         let gated = base.metrics.values().filter(|m| m.better != eval::Better::Info).count();
         println!(
-            "{} gated metrics against {}: {} worse, {} better, {} missing",
+            "{} gated metrics against {}: {} worse, {} better, {} missing, {} timing cells unpaired",
             gated,
             baseline_path.display(),
             outcome.regressions.len(),
             outcome.improvements.len(),
-            outcome.missing.len()
+            outcome.missing.len(),
+            outcome.unpaired.len()
         );
         if !outcome.regressions.is_empty() || !outcome.missing.is_empty() {
             return Ok(ExitCode::from(1));

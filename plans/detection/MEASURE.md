@@ -112,6 +112,24 @@ for them: read the two rows in `results/fast.md` after any change to the
 right-notes path, treat any rise over the baseline as a failure of the change
 whatever the exit code says, and never raise them with `--update-baseline`.
 
+**Paired timing** (`verifier_scatter_ms`, `eval.rs::paired_scatter`). The
+verifier's timing spread is measured only over the notes it confirms, so two
+models confirm different notes, and over its own notes the spread punishes
+the model that confirms more: one confirmed slide has no spread, four do. The
+check therefore compares this cell over the notes **both** the baseline's
+model and this run confirm. The baseline keeps each confirmed note's
+verifier start against the truth (`verifierTimes`, by Take and note id);
+each Take's lag is removed per side over the shared notes (four or more, as
+in the unpaired metric), and the two spreads are compared with the same 1 ms
+tolerance. A cell whose notes the two share none of is not compared (confirming is
+gated by its own cells) and is listed as `unpaired`, with a count in the
+summary line; a compared cell's line says "over the notes both confirm"
+with the shared n. A Take whose note ids repeat is left out of the pairing. The unpaired number is still what `results.md`
+and the baseline's `metrics` show. A baseline without `verifierTimes`
+(`fast-no-model.json`, which has no verifier) is compared unpaired.
+`onset_scatter_ms` is the live detector, the same for every note model, and
+stays unpaired.
+
 `takes|*|faulty_passed` is noisy per chain: n = 23 Takes a chain in the fast
 bench (and `good_passed` n = 15), so one Take is 4 to 7 points and a chain's
 number moves by that for no reason at all. Read the pooled row
@@ -130,7 +148,8 @@ verdicts happen to do. It reads about 1 ms today.
 `plans/detection/baselines/fast.json` (with the note model) and
 `fast-no-model.json` (`--no-model`, for a machine that cannot fetch ONNX
 Runtime). One metric a line, so `git diff` on a baseline is the list of what
-moved.
+moved. After the metrics, `verifierTimes` holds one Take a line: the
+confirmed notes' verifier times for the paired timing check (above).
 
 ```sh
 npm run detect:check                                  # the gate
