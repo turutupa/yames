@@ -58,6 +58,25 @@ const STRUM_RISE: f32 = 0.6;
 /// 0.25 to 0.5 s after the attack is under [`CHOKED_ACT`] was choked at once.
 const CHOKED_MIN_DUR: f64 = 0.6;
 const CHOKED_ACT: f32 = 0.04;
+/// Rang on, not played (card #119): with no attack at all where a note is
+/// written, its pitch plainly sounding before ([`RINGING_SHARE`] of the
+/// "sounding" threshold, and of its own level over the note), and its own
+/// "just started" under this, nothing started there: it only rang on from
+/// the stroke before. That is a note left out, said as such, not "couldn't
+/// tell". A chord tone also needs its chord unstruck by the strum rule (no
+/// string of it plainly starting, [`STRUM_RISE`]): on a microphone a left-out
+/// chord's strings show "just started" up to 0.3 to 0.45 from noise alone.
+/// It needs the stroke it rings from: the last written note of the same
+/// pitch, unbent, started [`RANG_ON_AFTER`] or more before (a quick repeat on
+/// one string, funk sixteenths, can be re-picked under its own ring with
+/// little to show), is not still written to sound (a unison on another
+/// string, an overlapping voice: that one may be all that is heard), and no
+/// note one to four semitones away is written in between (a trill, or a
+/// hammer-on and a pull-off back: legato returns to a pitch with no attack),
+/// nor its octave (a model can read an octave's sound in this pitch's column).
+/// Anything short of that stays unsure; a bent note never takes this path.
+const RANG_ON_RISE: f32 = 0.10;
+const RANG_ON_AFTER: f64 = 0.25;
 /// Evidence over this share of a threshold, but short of it, is "couldn't
 /// tell" rather than "no".
 const UNSURE_SHARE: f32 = 0.5;
@@ -321,6 +340,24 @@ pub fn verify(ev: &Evidence, expected: &[Expected], lag: Option<f64>) -> Verifie
         *r = r.max(rise_in(e).2);
     }
 
+    // the stroke a pitch can have rung on from: the last written note of the
+    // same pitch before this one (by time, not id: a looped Take repeats ids),
+    // well before, unbent, written to have ended, with no legato neighbour
+    // written in between (nor its octave: the column can read an octave's sound)
+    let rings_from_stroke_before = |e: &Expected| {
+        let earlier = || expected.iter().filter(|o| o.t < e.t - 1e-3);
+        let same = || earlier().filter(|o| (o.midi - e.midi).abs() < 0.5);
+        let Some(last) = same().max_by(|a, b| a.t.total_cmp(&b.t)) else { return false };
+        last.bend <= 0.0
+            && last.t <= e.t - RANG_ON_AFTER + 1e-6
+            && same().all(|o| o.t + o.dur <= e.t + 0.03)
+            && !earlier().any(|o| {
+                // a legato neighbour, or the octave a model can hear this pitch in
+                let apart = (o.midi - e.midi).abs().round();
+                o.t > last.t + 1e-3 && ((1.0..=4.0).contains(&apart) || apart == 12.0)
+            })
+    };
+
     let fr = |t: f64| (t / dt).round() as i64;
     let mut verdicts = Vec::with_capacity(expected.len());
     for e in expected {
@@ -471,10 +508,18 @@ pub fn verify(ev: &Evidence, expected: &[Expected], lag: Option<f64>) -> Verifie
             } else {
                 how = How::None;
                 t_est = None;
-                heard = if act >= UNSURE_SHARE * ACT_THRESHOLD {
-                    // the pitch is there, or half there, and nothing says it
-                    // STARTED here: a note still ringing, a repeat with no
-                    // attack, a weak capture
+                // no attack, no trace of a start, and the pitch was as loud
+                // before: the string rang on from the stroke before (#119)
+                let rang_on = e.bend <= 0.0
+                    && pre >= RINGING_SHARE * act
+                    && pre >= RINGING_SHARE * ACT_THRESHOLD
+                    && rise_peak < RANG_ON_RISE
+                    && (!e.chord || strum_unclear(0.0))
+                    && rings_from_stroke_before(e);
+                heard = if act >= UNSURE_SHARE * ACT_THRESHOLD && !rang_on {
+                    // the pitch is there, or half there, and nothing says
+                    // whether it STARTED here: a repeat with no attack but
+                    // a trace of a start, a weak capture
                     Heard::Unsure
                 } else {
                     Heard::No
@@ -576,7 +621,45 @@ mod tests {
         let v = verify(&ev, &exp, Some(0.0));
         assert_eq!(v.verdicts[1].heard, Heard::No);
         assert_eq!(v.verdicts[2].heard, Heard::Yes);
-        assert_eq!(v.verdicts[3].heard, Heard::Unsure, "a pitch already sounding cannot be said to have started");
+        // card #119: no attack and no trace of a start: it only rang on
+        assert_eq!(v.verdicts[3].heard, Heard::No, "rang on, not played: {:?}", v.verdicts[3]);
+        // a trace of a start (a soft re-pick the attack envelope missed) is
+        // not enough to credit it, nor to call it missed
+        let mut ev = evidence(3.0, &[(0.5, 0.7, 60, true), (1.0, 1.6, 64, true)]);
+        let k = (1.25 / ev.dt).round() as usize;
+        ev.rise[k * NP + Evidence::col(64.0)] = 0.2;
+        assert_eq!(verify(&ev, &exp, Some(0.0)).verdicts[3].heard, Heard::Unsure);
+        // rung on from a stroke too close before (a quick repeat on one
+        // string can be re-picked under its own ring with little to show)
+        let ev = evidence(3.0, &[(0.5, 0.7, 60, true), (1.1, 1.6, 64, true)]);
+        let quick = [want(0, 0.5, 60), Expected { dur: 0.15, ..want(2, 1.1, 64) }, want(3, 1.25, 64)];
+        let v = verify(&ev, &quick, Some(0.0));
+        assert_eq!(v.verdicts[2].heard, Heard::Unsure, "{:?}", v.verdicts[2]);
+        // the pitch is still written to sound from another note (a unison on
+        // another string): that may be all that is heard
+        let ev = evidence(3.0, &[(0.5, 0.7, 60, true), (1.0, 1.6, 64, true)]);
+        let held = [want(0, 0.5, 60), Expected { dur: 0.6, ..want(2, 1.0, 64) }, want(3, 1.25, 64)];
+        let v = verify(&ev, &held, Some(0.0));
+        assert_eq!(v.verdicts[2].heard, Heard::Unsure, "{:?}", v.verdicts[2]);
+        // a pull-off back to it after a hammer-on in between: legato, unsure
+        let ev = evidence(3.0, &[(0.5, 0.7, 60, true), (1.0, 1.6, 64, true), (1.12, 1.24, 66, false)]);
+        let trill = [want(0, 0.5, 60), Expected { dur: 0.12, ..want(2, 1.0, 64) }, Expected { dur: 0.12, ..want(4, 1.12, 66) }, want(3, 1.25, 64)];
+        let v = verify(&ev, &trill, Some(0.0));
+        assert_eq!(v.verdicts[3].heard, Heard::Unsure, "{:?}", v.verdicts[3]);
+        // its octave written in between: the column may be reading that
+        let ev = evidence(3.0, &[(0.5, 0.7, 60, true), (1.0, 1.6, 64, true), (1.12, 1.24, 52, true)]);
+        let octave = [want(0, 0.5, 60), Expected { dur: 0.12, ..want(2, 1.0, 64) }, Expected { dur: 0.12, ..want(4, 1.12, 52) }, want(3, 1.25, 64)];
+        let v = verify(&ev, &octave, Some(0.0));
+        assert_eq!(v.verdicts[3].heard, Heard::Unsure, "{:?}", v.verdicts[3]);
+        // barely there before (a weak capture): unsure, not left out
+        let mut ev = evidence(3.0, &[(0.5, 0.7, 60, true), (1.0, 1.6, 64, true)]);
+        for k in 0..ev.frames {
+            let v = &mut ev.act[k * NP + Evidence::col(64.0)];
+            if *v > 0.5 {
+                *v = 0.22;
+            }
+        }
+        assert_eq!(verify(&ev, &exp, Some(0.0)).verdicts[3].heard, Heard::Unsure);
     }
 
     /// Card #116: sounding is not starting. A pitch still ringing from the

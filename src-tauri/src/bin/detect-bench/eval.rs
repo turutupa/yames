@@ -281,6 +281,63 @@ fn scatter(v: &mut [f64]) -> f64 {
     1.4826 * median(&mut d)
 }
 
+/// The notes [`metrics`] counts in `verifier_scatter_ms`, each with its
+/// verifier start against the truth (ms, the Take's lag NOT removed), by
+/// Take and note id. A baseline keeps them so the check can compare timing
+/// over the notes BOTH models confirm ([`paired_scatter`]).
+pub fn verifier_times(rows: &[Row]) -> BTreeMap<String, BTreeMap<u32, f64>> {
+    let mut out: BTreeMap<String, BTreeMap<u32, f64>> = BTreeMap::new();
+    let mut repeated = std::collections::BTreeSet::new();
+    for r in rows.iter().filter(|r| r.style == "good" && r.fault.is_none() && r.kind != "chord_tone") {
+        if let (Some(t), Some(truth)) = (r.verifier_t, r.t_played) {
+            // a tenth of a millisecond: the file stays small, the spread does not move
+            if out.entry(r.take.clone()).or_default().insert(r.note_id, ((t - truth) * 10_000.0).round() / 10.0).is_some() {
+                repeated.insert(r.take.clone());
+            }
+        }
+    }
+    // a Take whose ids repeat (a recording that loops) cannot be paired by id
+    for take in repeated {
+        eprintln!("note: {take} repeats note ids; its verifier timing is compared unpaired only");
+        out.remove(&take);
+    }
+    out
+}
+
+/// `verifier_scatter_ms` for the baseline and for this run, each measured over
+/// only the notes both confirm (MEASURE.md, "Paired timing"). Over each
+/// model's own confirmed notes the spread punishes a model for confirming
+/// more: one confirmed slide has no spread, four do. Each Take's lag is
+/// removed per side over the shared notes (four or more, as in [`metrics`]).
+pub fn paired_scatter(rows: &[Row], base: &BTreeMap<String, BTreeMap<u32, f64>>) -> (BTreeMap<String, Metric>, BTreeMap<String, Metric>) {
+    let now = verifier_times(rows);
+    let (mut b_err, mut n_err): (BTreeMap<String, Vec<f64>>, BTreeMap<String, Vec<f64>>) = Default::default();
+    let mut by_take: BTreeMap<&str, Vec<&Row>> = BTreeMap::new();
+    for r in rows {
+        by_take.entry(&r.take).or_default().push(r);
+    }
+    for (take, rs) in by_take {
+        let (Some(bt), Some(nt)) = (base.get(take), now.get(take)) else { continue };
+        let shared: Vec<(&Row, f64, f64)> = rs.iter().filter_map(|r| Some((*r, *bt.get(&r.note_id)?, *nt.get(&r.note_id)?))).collect();
+        if shared.len() < 4 {
+            continue;
+        }
+        let b_lag = median(&mut shared.iter().map(|s| s.1).collect::<Vec<_>>());
+        let n_lag = median(&mut shared.iter().map(|s| s.2).collect::<Vec<_>>());
+        for (r, b, n) in shared {
+            for chain in [r.chain.as_str(), "all"] {
+                let key = format!("good|{chain}|{}|verifier_scatter_ms", r.kind);
+                b_err.entry(key.clone()).or_default().push(b - b_lag);
+                n_err.entry(key).or_default().push(n - n_lag);
+            }
+        }
+    }
+    let to_metrics = |m: BTreeMap<String, Vec<f64>>| -> BTreeMap<String, Metric> {
+        m.into_iter().map(|(k, mut v)| (k, Metric { n: v.len() as u32, value: scatter(&mut v), better: Better::Lower })).collect()
+    };
+    (to_metrics(b_err), to_metrics(n_err))
+}
+
 /// Metric names are `group|chain|kind|metric`; `all` pools a dimension.
 pub fn metrics(rows: &[Row], takes: &[TakeRow], has_verifier: bool) -> BTreeMap<String, Metric> {
     let mut acc = Acc::default();
@@ -494,6 +551,10 @@ pub struct Baseline {
     /// What produced it, for a reader: mode, chains, runtime.
     pub about: serde_json::Value,
     pub metrics: BTreeMap<String, Metric>,
+    /// [`verifier_times`] of the run that made it; empty in an older
+    /// baseline, whose timing cells are then compared unpaired.
+    #[serde(default)]
+    pub verifier_times: BTreeMap<String, BTreeMap<u32, f64>>,
 }
 
 /// How far a metric may move the wrong way before the check fails. Shares:
@@ -515,10 +576,15 @@ pub struct CheckOutcome {
     pub regressions: Vec<String>,
     pub improvements: Vec<String>,
     pub missing: Vec<String>,
+    /// Paired timing cells the two runs share no notes in: not compared.
+    pub unpaired: Vec<String>,
 }
 
-pub fn check(now: &BTreeMap<String, Metric>, base: &Baseline) -> CheckOutcome {
-    let mut out = CheckOutcome { regressions: vec![], improvements: vec![], missing: vec![] };
+/// `paired` is [`paired_scatter`]'s (baseline, now): a timing cell measured
+/// in both runs is compared there, over the notes both confirm, and passes
+/// when they share none (confirming is gated by its own cells).
+pub fn check(now: &BTreeMap<String, Metric>, base: &Baseline, paired: Option<&(BTreeMap<String, Metric>, BTreeMap<String, Metric>)>) -> CheckOutcome {
+    let mut out = CheckOutcome { regressions: vec![], improvements: vec![], missing: vec![], unpaired: vec![] };
     for (key, b) in &base.metrics {
         if b.better == Better::Info {
             continue;
@@ -527,13 +593,23 @@ pub fn check(now: &BTreeMap<String, Metric>, base: &Baseline) -> CheckOutcome {
             out.missing.push(key.clone());
             continue;
         };
+        let (b, m, over) = match paired {
+            Some((pb, pn)) if key.ends_with("|verifier_scatter_ms") => match (pb.get(key), pn.get(key)) {
+                (Some(pb), Some(pn)) => (pb, pn, ", over the notes both confirm"),
+                _ => {
+                    out.unpaired.push(key.clone());
+                    continue;
+                }
+            },
+            _ => (b, m, ""),
+        };
         let tol = tolerance(key, b.n.min(m.n));
         let worse = match b.better {
             Better::Higher => b.value - m.value,
             Better::Lower => m.value - b.value,
             Better::Info => 0.0,
         };
-        let line = format!("{key}: {} -> {} (n={}, tolerance {})", fmt_value(key, b.value), fmt_value(key, m.value), m.n, fmt_value(key, tol));
+        let line = format!("{key}: {} -> {} (n={}{over}, tolerance {})", fmt_value(key, b.value), fmt_value(key, m.value), m.n, fmt_value(key, tol));
         if worse > tol + 1e-9 {
             out.regressions.push(line);
         } else if worse < -tol - 1e-9 {

@@ -817,6 +817,49 @@ too and passes run alone on both trees. With all three files at once and
 the box at load 35 to 45, `songs.spec.ts:383` and `session.spec.ts:220`,
 `:291` also failed once each and passed alone.
 
+## Rang on, not played; paired slide timing; the octave ghosts (2026-11-20; cards #119, #130)
+
+**Verifier rule (card #119), ported from `mvp-ml` 9284a763.** On the soft
+path (no attack where the note is written), a note whose pitch was plainly
+sounding before, with no trace of a start (rise under 0.10; a chord tone's
+chord unstruck), is **No** (left out), not "couldn't tell", when the stroke
+it rings from is the last written note of that pitch, unbent, 0.25 s or
+more before, written to have ended, with no note 1 to 4 semitones away
+(legato) **or an octave away** (review: the column can read an octave's
+sound) written in between. It sits beside revamp's own onset rule (#116,
+063f4dd9) in the same branch; both rules' tests kept, one more for the
+octave guard. Basic Pitch: `detect:check` 0 worse; the baseline re-made,
+only `omitted` cells moved (left-out caught 85.0 to 85.7%, chords 33 to 38,
+sweeps 43 to 51); GuitarSet unchanged (`mvp-ml` leg 4).
+
+**Paired slide timing.** `verifier_scatter_ms` is now compared over the
+notes both the baseline's model and the run confirm (`MEASURE.md`, "Paired
+timing"; the baseline gains `verifierTimes`). Basic Pitch against itself:
+0 worse, metrics identical to four decimals.
+
+**Octave ghosts (card #130): no decode-side fix.** The 16 false "inside"
+notes n1b-clean adds on `harmony|di|strummed` are octave-up copies of a
+strummed string. With the decoder's only evidence (the note and onset
+posteriors), they cannot be told from real octaves in the bench's own
+voicing (root and its octave, fifth and its octave): the best simple rule
+(onset under 0.7 of the octave below's, note under 0.6 of its level, at
+most one frame after it) removes 5 of 21 DI ghosts and 1 real octave, and
+11 real ones elsewhere on strummed chains; a depth-4 tree on
+the same features, fitted to the answer, finds 31 of 152 across chains.
+Onset timing does not separate them either (both start 0 to 1 frame after
+the octave below). `harmony/notes.rs` is unchanged; this needs the model
+(octave-ghost negatives in the bench synth's timbre family) or spectral
+evidence the decoder does not have.
+
+**n1b-clean through the production path** (`YAMES_NOTE_MODEL`, local
+loader from `mvp-ml`, not on revamp): **2 worse / 71 better** (was 5):
+`good|laptop_reverb|slide_to|verifier_scatter_ms` 1.2 to 7.4 ms paired (n=4:
+both confirm all four; n1b-clean puts 2 of them one frame, 11.6 ms,
+later: a real difference, at n=4), and the octave-ghost cell 98.9 to
+96.5%. Left-out caught 85.7 to 91.9% (chords 38 to 45, sweeps 51 to 83);
+a left-out note counted heard 0.0 to 0.1% (1 of 707, within tolerance); a
+wrong pitch counted right 0 and 0. Not 0 worse: no promotion.
+
 ## The stop's hold (2026-11-20; card #107)
 
 HANDOFF's open race: a Songs stop waits up to 600 ms for its last segment,
