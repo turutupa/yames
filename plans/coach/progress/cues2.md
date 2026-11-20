@@ -27,6 +27,34 @@ Cues: `src/paths/specs/blues-pentatonics-cues.ts`, attached with `withCues` in `
   -> "Arrive on the new note as each bar starts."; "Keep pressing through the slide to the new fret." (warm-up,
   E: a layout of frets) -> "Keep pressing all the way through the slide." All 100 Exercises: 763 cues, 312
   distinct sentences, 0 refusals, check 0 errors (`gc6.log`).
-- [ ] Proof-read
+- [x] Proof-read (below): two sonnet readers (Levels 1-2 and warm-ups; Level 3), 30 objections, all taken.
+  763 cues, 317 distinct sentences, 0 refusals, check 0 errors (`gc7.log`).
 - [ ] Translations
 - [ ] Gates
+
+## The proof-read (two separate sonnet readers: cues, tabs, purposes, how-tos, the guide's rules only)
+
+30 objections (`/tmp/coach-cues2/proof-blues-pentatonics/objections-a.md`, `objections-b.md`), all taken
+(was -> now):
+three-as, riffs-in-c general "Start each bar on its A/C" and late "each bar's first A/C" (bar 4 starts on E/G)
+-> "Start each riff on its A/C without looking." / "Put each bar's first note right on the beat." ·
+chorus-in-keys general named the low E string on a moving-key Exercise -> "Find the key's root before you
+start." · landing-chorus general "Hold each third its full two beats." (bar 11's C# is short) -> "Land each
+phrase on its third and let it ring." · the-turn general "Hold each chord's own note" (the last G# is a
+quarter) -> "Land on ..." · nine `lastBars` cues that repeated the `afterHeld` hold (first-lick, lick-in-e,
+blue-third, passing, bend-and-release, the five arpeggio licks) -> "Keep the long-short swing / the shuffle /
+the eighths even right to the last ...", and for the arpeggio licks "Walk down G, E, D, C, then settle on C#."
+and its moves (c7: "... to the third.") · two-on-two-off: three cues counted the silent bars -> afterHeld
+"Count '1, 2, 3, 4' twice, then play.", lastBars "Let the last note go and stay off the strings." ·
+four-answers afterHeld repeated late/early -> "Hum the call while it plays, then answer." · two-boxes-keys
+shift "Let the slide carry the hand." (only bar 1 slides) -> "Move to each new place in one calm motion." ·
+"Move the hand while the held note rings." (shift, eight Exercises: a held fretted note cannot be left while
+it rings) -> "Arrive at the new fret right on its beat." · chorus-peak afterHeld "the bend's two beats" (only
+bars 5 and 7 bend) -> the stock held-note count · e-chorus-climb extras "Rest one beat after each bend" (the
+second bend has no rest) -> "Leave the beat after the first bend silent." · chorus-low, e-chorus-low,
+play-less extras "Play nothing in the empty bars." (repeated the general) -> "Rest both hands in the empty
+bars." · a7-sixths, sixths-twelve stringChange "Keep the pick close as you cross strings." (the sixths never
+cross) -> "Keep both fingers on their strings as you move." / "Let the third finger take the top string on D7."
+
+Answered, not changed: none. A tab point outside the cues, for the Path's owner: quick-chorus bar 2 reads
+D, C, A, A, F# (`4:7` twice); the reader thinks a G (`4:5`) was meant. Not mine to change.

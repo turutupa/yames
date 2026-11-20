@@ -40,7 +40,7 @@ const CROSS_CLOSE = "Keep the pick close as you cross strings.";
 const CROSS_ON_BEAT = "Land each new string right on its beat.";
 const CROSS_STILL = "Hold the hand still as the pick changes strings.";
 const AFTER_HELD = "Count the held note's two beats, then go on.";
-const SHIFT_HELD = "Move the hand while the held note rings.";
+const SHIFT_HELD = "Arrive at the new fret right on its beat.";
 const LAST_HOLD = "Hold the last note for two beats, then stop.";
 const LAST_A = "Hold the last A for its full two beats.";
 const LAST_E = "Hold the last E for two beats, then stop.";
@@ -82,7 +82,7 @@ const SLIDE_UP = "Let the slide carry the hand up.";
 const HIGH_A = "Hold the high A for its full two beats.";
 // The choruses.
 const EMPTY_LISTEN = "Listen to the band in the empty bars.";
-const EMPTY_SILENT = "Play nothing in the empty bars.";
+const EMPTY_SILENT = "Rest both hands in the empty bars.";
 const BEND_REST = "Rest one beat after each bend, silent.";
 const LAST_EMPTY = "Leave the last bar empty for the band.";
 const LAST_B = "Hold the last B for two beats, then stop.";
@@ -119,11 +119,11 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("lastBars", "Hold the low A its full two beats."),
   ],
   "box-one.three-as": [
-    g("Start each bar on its A without looking.", 2),
+    g("Start each riff on its A without looking.", 2),
     c("notes", "Find the low, middle and high A first."),
     c("heard", HEARD),
     c("extras", EXTRAS),
-    c("late", "Put each bar's first A right on the beat."),
+    c("late", "Put each bar's first note right on the beat."),
     c("early", SHUF_EARLY),
     c("afterHeld", "Count the held A's two beats, then the low A."),
     c("stringChange", CROSS_STILL),
@@ -138,7 +138,7 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("early", SHUF_EARLY),
     c("afterHeld", "Count the last A's two beats, then start again."),
     c("stringChange", CROSS_CLOSE),
-    c("lastBars", LAST_A),
+    c("lastBars", "Keep the long-short swing right to the last A."),
   ],
   "box-one.first-chorus": [
     g("Count the twelve bars as they go by.", 0),
@@ -165,11 +165,11 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("lastBars", "Hold the low G its full two beats."),
   ],
   "box-keys.riffs-in-c": [
-    g("Start each bar on its C without looking.", 1),
+    g("Start each riff on its C without looking.", 1),
     c("notes", "Keep one finger per fret from fret eight.", 2),
     c("heard", HEARD),
     c("extras", EXTRAS),
-    c("late", "Put each bar's first C right on the beat."),
+    c("late", "Put each bar's first note right on the beat."),
     c("early", SHUF_EARLY),
     c("afterHeld", "Count the held C's two beats, then the low C."),
     c("stringChange", CROSS_STILL),
@@ -184,10 +184,10 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("early", SHUF_EARLY),
     c("afterHeld", "Count the last E's two beats, then start again."),
     c("stringChange", CROSS_CLOSE),
-    c("lastBars", "Hold the last E for its full two beats."),
+    c("lastBars", "Keep the shuffle going right to the last E."),
   ],
   "box-keys.chorus-in-keys": [
-    g("Find the key's root on the low E string first.", 0),
+    g("Find the key's root before you start.", 0),
     c("notes", "Keep one finger per fret for the whole chorus."),
     c("heard", HEARD),
     c("extras", EXTRAS),
@@ -264,7 +264,7 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("afterHeld", "Count the C#'s two beats, then the low A."),
     c("shift", "Move up a fret after the C# on the G string.", 1),
     c("stringChange", CROSS_CLOSE),
-    c("lastBars", "Hold the C# for its full two beats."),
+    c("lastBars", "Walk down G, E, D, C, then settle on C#."),
   ],
   "landing.d7-arpeggio": [
     g("Step down from G to F# and hold it.", 2),
@@ -276,7 +276,7 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("afterHeld", "Count the F#'s two beats, then the D."),
     c("shift", SHIFT_UP_FRET, 1),
     c("stringChange", CROSS_CLOSE),
-    c("lastBars", "Hold the F# for its full two beats."),
+    c("lastBars", "Walk down A, C, A, G, then settle on F#."),
   ],
   "landing.e7-arpeggio": [
     g("Step down from A to G# and hold it.", 2),
@@ -288,7 +288,7 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("afterHeld", "Count the G#'s two beats, then the root."),
     c("shift", SHIFT_UP_FRET, 1),
     c("stringChange", CROSS_CLOSE),
-    c("lastBars", "Hold the G# for its full two beats."),
+    c("lastBars", "Walk down B, D, B, A, then settle on G#."),
   ],
   "landing.land-any-tone": [g("Choose each landing note before you reach it.", 1)],
 
@@ -310,7 +310,7 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("extras", CALL_QUIET),
     c("late", "Start each answer right on '1'."),
     c("early", "Wait for '1' before each answer."),
-    c("afterHeld", "Count both bars of the call, then answer."),
+    c("afterHeld", "Hum the call while it plays, then answer."),
     c("stringChange", CROSS_CLOSE),
     c("lastBars", "Hold the high C two beats, then stop."),
   ],
@@ -321,9 +321,9 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("extras", "Play nothing at all in the two silent bars."),
     c("late", SHUF_LATE),
     c("early", "Wait for '1' before each phrase starts."),
-    c("afterHeld", "Count both silent bars, then come in."),
+    c("afterHeld", "Count '1, 2, 3, 4' twice, then play."),
     c("stringChange", CROSS_CLOSE),
-    c("lastBars", "Keep counting through the last two silent bars."),
+    c("lastBars", "Let the last note go and stay off the strings."),
   ],
   "call-response.free-trade": [g("Answer once with few notes, once with many.", 1)],
 
@@ -338,7 +338,7 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("afterHeld", "Count the B's two beats, then the low G."),
     c("shift", "Move up a fret after the B on the G string."),
     c("stringChange", CROSS_CLOSE),
-    c("lastBars", "Hold the B for its full two beats."),
+    c("lastBars", "Walk down F, D, C, B flat, then settle on B."),
   ],
   "landing-review.c7-third": [
     g("Move from E flat up to E and hold it.", 2),
@@ -350,10 +350,10 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("afterHeld", "Count the third's two beats, then the low C."),
     c("shift", "Move up a fret after fret nine on the G string."),
     c("stringChange", CROSS_CLOSE),
-    c("lastBars", LAST_NOTE),
+    c("lastBars", "Walk down B flat, G, F, E flat, to the third."),
   ],
   "landing-review.landing-chorus": [
-    g("Hold each third its full two beats.", 1),
+    g("Land each phrase on its third and let it ring.", 1),
     c("notes", "Reach back to fret four with the first finger.", 2),
     c("heard", HEARD),
     c("extras", EXTRAS),
@@ -407,7 +407,7 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("early", EIGHTH_EARLY),
     c("afterHeld", "Count the held G's two beats, then start again."),
     c("stringChange", CROSS_CLOSE),
-    c("lastBars", "Hold the last G for its full two beats."),
+    c("lastBars", "Keep the eighths even down to the last G."),
   ],
   "blues-scale.blue-third": [
     g("Hammer from C onto C#, one fret up.", 1),
@@ -418,7 +418,7 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("early", SHUF_EARLY),
     c("afterHeld", "Count the last E's two beats, then start again."),
     c("stringChange", CROSS_CLOSE),
-    c("lastBars", "Hold the last E for its full two beats."),
+    c("lastBars", "Keep the shuffle going right to the last E."),
   ],
   "blues-scale.one-blue-note": [g("Pass through one blue note per phrase.", 1)],
 
@@ -525,7 +525,7 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("early", SHUF_EARLY),
     c("afterHeld", "Count the long A's two beats, then bend."),
     c("stringChange", CROSS_CLOSE),
-    c("lastBars", "Hold the long A for its full two beats."),
+    c("lastBars", "Keep the shuffle going right to the long A."),
   ],
   "bends.bends-over-changes": [
     g("Hear each bend's target before you pick it.", 1),
@@ -597,7 +597,7 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("lastBars", "Hold the last F for its full two beats."),
   ],
   "minor-blues.the-turn": [
-    g("Hold each chord's own note: G#, F, A, G#.", 1),
+    g("Land on each chord's own note: G#, F, A, G#.", 1),
     c("notes", "Reach fret six on the D string for the G#.", 1),
     c("heard", HEARD),
     c("extras", EXTRAS),
@@ -860,7 +860,7 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("extras", BEND_REST, 3),
     c("late", SHUF_LATE),
     c("early", SHUF_EARLY),
-    c("afterHeld", "Count the bend's two beats, then rest one."),
+    c("afterHeld", AFTER_HELD),
     c("shift", SHIFT_HELD),
     c("stringChange", CROSS_CLOSE),
     c("lastBars", LAST_EMPTY),
@@ -894,7 +894,7 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
   "three-choruses-in-e.e-chorus-climb": [
     g("Bend the A at fret fourteen up to B.", 5),
     c("heard", SLIDE_PRESS),
-    c("extras", BEND_REST, 5),
+    c("extras", "Leave the beat after the first bend silent.", 5),
     c("late", SHUF_LATE),
     c("early", SHUF_EARLY),
     c("afterHeld", AFTER_HELD),
@@ -950,7 +950,7 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("early", SIXTH_EARLY),
     c("afterHeld", SIXTH_HELD),
     c("shift", SIXTH_SLIDE),
-    c("stringChange", CROSS_CLOSE),
+    c("stringChange", "Keep both fingers on their strings as you move."),
     c("lastBars", SIXTH_LAST),
   ],
   "sixths.sixths-twelve": [
@@ -959,7 +959,7 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("extras", SIXTH_QUIET, 2),
     c("late", SIXTH_LATE),
     c("early", SIXTH_EARLY),
-    c("stringChange", CROSS_CLOSE),
+    c("stringChange", "Let the third finger take the top string on D7.", 1),
     c("lastBars", SIXTH_LAST),
   ],
   "sixths.lick-to-sixth": [
@@ -1076,7 +1076,7 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("late", SHUF_LATE),
     c("early", SHUF_EARLY),
     c("afterHeld", AFTER_LONG),
-    c("shift", "Let the slide carry the hand.", 0),
+    c("shift", "Move to each new place in one calm motion.", 0),
     c("stringChange", "Keep the pick close to the strings."),
     c("lastBars", LAST_NOTE),
   ],
