@@ -8175,6 +8175,17 @@
             "The hole is in the middle of the beat. Don't close it up: the 'a' comes late, just before the next beat."
           ],
           "coachLine": "I time each note against where it is written, so a closed-up gap shows as early notes.",
+          "cues": [
+            {"when":"even","say":"Count '1 e (and) a' and leave the gap open.","more":1,"general":true},
+            {"when":"heard","say":"Pick every written note, right to the end."},
+            {"when":"extras","say":"Miss the string on each 'and'.","more":0},
+            {"when":"notes","say":"Read one note ahead in the tab as you play."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Play the 'a' late, just before the next beat.","more":1},
+            {"when":"afterHeld","say":"Count the long note's beat, then come in."},
+            {"when":"openString","say":"Lift the finger off in time for open notes."},
+            {"when":"stringChange","say":"Move the pick across during the note before."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -8443,6 +8454,17 @@
             "Let the foot hit the floor in the hole. The first note comes straight after it."
           ],
           "coachLine": "The first note after each silent beat is the one I'd look at. Early means the rest was cut short.",
+          "cues": [
+            {"when":"even","say":"Let the foot land, then play right after it.","more":1,"general":true},
+            {"when":"heard","say":"Pick every written note, right to the end."},
+            {"when":"extras","say":"Swing past the string on '2' and '4'.","more":0},
+            {"when":"notes","say":"Read one note ahead in the tab as you play."},
+            {"when":"late","say":"Come in straight after the foot lands.","more":1},
+            {"when":"early","say":"Wait for the click before each group."},
+            {"when":"afterHeld","say":"Let the long note fill its whole beat."},
+            {"when":"openString","say":"Lift the finger off in time for open notes."},
+            {"when":"stringChange","say":"Move the pick across during the note before."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -8700,6 +8722,17 @@
             "The notes land on 1, the 'a' of 1, the 'and' of 2, and the 'e' of 3. The quarter note is on beat 4."
           ],
           "coachLine": "Only the first and last notes of the bar are on a beat. I'll say how even the ones between were.",
+          "cues": [
+            {"when":"even","say":"Count the sixteenths in threes as you play.","more":0,"general":true},
+            {"when":"heard","say":"Pick every written note, right to the end."},
+            {"when":"extras","say":"Play five notes in each bar, no more."},
+            {"when":"notes","say":"Read one note ahead in the tab as you play."},
+            {"when":"late","say":"Land the long note right on '4'.","more":1},
+            {"when":"early","say":"Give each note three sixteenths, no less."},
+            {"when":"openString","say":"Lift the finger off in time for open notes."},
+            {"when":"stringChange","say":"Move the pick across during the note before."},
+            {"when":"lastBars","say":"Keep counting in threes to the last note."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -8950,6 +8983,17 @@
             "Play every note short. Relax the fretting finger straight after each one so it stops."
           ],
           "coachLine": "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
+          "cues": [
+            {"when":"even","say":"Learn it a beat at a time with the count.","more":0,"general":true},
+            {"when":"heard","say":"Press each finger right behind the fret."},
+            {"when":"extras","say":"Play only the written notes; leave the gaps."},
+            {"when":"notes","say":"Keep the first finger at fret five.","more":0},
+            {"when":"late","say":"Put each note on its sixteenth, no later."},
+            {"when":"early","say":"Wait for each note's sixteenth; don't rush."},
+            {"when":"afterHeld","say":"Count through the gap, then come in."},
+            {"when":"stringChange","say":"Have the next finger ready as you cross."},
+            {"when":"lastBars","say":"Hold the last note for its whole beat."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -9098,6 +9142,17 @@
             "Strict down-up from the first note. The quarter note on beat 4 is your check: it lands on the click or it doesn't."
           ],
           "coachLine": "The quarter note on beat 4 tells me whether the three beats before it kept time. I'll say how even it was.",
+          "cues": [
+            {"when":"even","say":"Count '1 and, 2-trip-let, 3 e and a, 4'.","more":0,"general":true},
+            {"when":"heard","say":"Pick every written note, right to the end."},
+            {"when":"extras","say":"Play two, three, then four notes, no more."},
+            {"when":"notes","say":"Read one note ahead in the tab as you play."},
+            {"when":"late","say":"Land the note on '4' right on the click.","more":1},
+            {"when":"early","say":"Give each beat its full length."},
+            {"when":"afterHeld","say":"Count the long note's beat, then come in."},
+            {"when":"openString","say":"Lift the finger off in time for open notes."},
+            {"when":"stringChange","say":"Move the pick across during the note before."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -9349,6 +9404,18 @@
             "The two beats of sixteenths meet at the bar line. Keep them the same speed on both sides of it."
           ],
           "coachLine": "I'll say how even each beat was. The step down from four notes to three is where it usually drags.",
+          "cues": [
+            {"when":"even","say":"Add one note a beat, then take one away.","more":0,"general":true},
+            {"when":"heard","say":"Pick every written note, right to the end."},
+            {"when":"extras","say":"Play one, two, three, then four notes a beat.","more":0},
+            {"when":"notes","say":"Read one note ahead in the tab as you play."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"afterHeld","say":"Count the long note's beat, then come in."},
+            {"when":"openString","say":"Lift the finger off in time for open notes."},
+            {"when":"stringChange","say":"Move the pick across during the note before."},
+            {"when":"lastBars","say":"Step down evenly: four, three, two, one.","more":0}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -9640,6 +9707,17 @@
             "The three notes are equal. If the last one is short, you fell back onto the beat too soon."
           ],
           "coachLine": "I time the three notes against the triplet they are written on. I'll say how even they were.",
+          "cues": [
+            {"when":"even","say":"Count triplets and play every second syllable.","more":0,"general":true},
+            {"when":"heard","say":"Pick every written note, right to the end."},
+            {"when":"extras","say":"Play just three notes over two beats."},
+            {"when":"notes","say":"Read one note ahead in the tab as you play."},
+            {"when":"late","say":"Make the three wide notes all the same length.","more":1},
+            {"when":"early","say":"Give the third note its full length.","more":1},
+            {"when":"openString","say":"Lift the finger off in time for open notes."},
+            {"when":"stringChange","say":"Move the pick across during the note before."},
+            {"when":"lastBars","say":"Keep the foot tapping to the last note."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -9891,6 +9969,17 @@
             "Play it as a phrase, with the long notes as the places it is going to."
           ],
           "coachLine": "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
+          "cues": [
+            {"when":"even","say":"Aim the phrase at the long notes.","more":1,"general":true},
+            {"when":"heard","say":"Press each finger right behind the fret."},
+            {"when":"extras","say":"Keep the stroke small: just the strings in use."},
+            {"when":"notes","say":"Use one finger per fret: five, seven, eight."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"afterHeld","say":"Count the long note's beat, then come in."},
+            {"when":"stringChange","say":"Keep the pick close as you cross."},
+            {"when":"lastBars","say":"Count '3 and, 4' and land the last note.","more":0}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -10030,6 +10119,17 @@
             "Make the upstroke reach both strings. If only the A string sounds on the 'and', the stroke is too short."
           ],
           "coachLine": "A chord counts as one stroke: timed and counted, and which notes were in it is not checked. The join between the bars is where the time usually slips.",
+          "cues": [
+            {"when":"even","say":"Make the upstroke reach both strings.","more":2,"general":true},
+            {"when":"heard","say":"Strike both strings with every stroke.","more":1},
+            {"when":"extras","say":"Keep the stroke small: just the two strings."},
+            {"when":"late","say":"Put each chord's downstroke on the click."},
+            {"when":"early","say":"Wait for the click before each chord."},
+            {"when":"afterHeld","say":"Start the eighths right on the click.","more":0},
+            {"when":"openString","say":"Keep the first finger down on every chord.","more":1},
+            {"when":"stringChange","say":"Brush both strings in one stroke, not two."},
+            {"when":"lastBars","say":"Hold the last chord through '4'."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -10314,6 +10414,17 @@
             "Keep the strokes small in bar 2: the pick only has to clear two strings. The click does not change between the bars."
           ],
           "coachLine": "A chord counts as one stroke: timed and counted, and which notes were in it is not checked. The first beat of bar 2 is where the time usually slips.",
+          "cues": [
+            {"when":"even","say":"Keep the strokes small in the fast bar.","more":2,"general":true},
+            {"when":"heard","say":"Strike both strings with every stroke."},
+            {"when":"extras","say":"Keep the stroke small: just the two strings.","more":2},
+            {"when":"late","say":"Put the first chord of each bar on the click."},
+            {"when":"early","say":"Wait for the click on the first fast chord.","more":2},
+            {"when":"afterHeld","say":"Count the long note's beat, then come in."},
+            {"when":"openString","say":"Keep the first finger down on every chord."},
+            {"when":"stringChange","say":"Brush both strings in one stroke, not two."},
+            {"when":"lastBars","say":"Count '1, and a' through the fast bar.","more":1}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -10639,6 +10750,17 @@
             "The chords on the 'and' are upstrokes. Tap the foot on the silent beats."
           ],
           "coachLine": "Chords are timed and counted; which notes they were is not checked. A sound in a rest counts as an extra note; strings left humming are for your ear.",
+          "cues": [
+            {"when":"even","say":"Tap the foot on the silent beats.","more":2,"general":true},
+            {"when":"heard","say":"Strike both strings with every stroke."},
+            {"when":"extras","say":"Swing past the strings on the silent beats.","more":1},
+            {"when":"late","say":"Play each 'and' as soon as the foot lifts."},
+            {"when":"early","say":"Wait for the foot to lift before each 'and'."},
+            {"when":"afterHeld","say":"Count the long note's beat, then come in."},
+            {"when":"openString","say":"Keep the first finger down on every chord."},
+            {"when":"stringChange","say":"Brush both strings in one stroke, not two."},
+            {"when":"lastBars","say":"Hold the last chord for all of '4'.","more":0}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -10941,6 +11063,17 @@
             "Hop the first finger across just before beat 1, not earlier: the chord before it should last its full length."
           ],
           "coachLine": "This is the Step's test piece. The first chord of each bar, straight after the change, is the one that arrives late. Chords are timed and counted; which notes they were is not checked.",
+          "cues": [
+            {"when":"even","say":"Hop the finger across just before the '1'.","more":2,"general":true},
+            {"when":"heard","say":"Strike both strings with every stroke."},
+            {"when":"extras","say":"Keep the stroke small: just the two strings."},
+            {"when":"late","say":"Land each bar's first chord on the click."},
+            {"when":"early","say":"Let the long chord last its full length.","more":2},
+            {"when":"afterHeld","say":"Count the long chord out, then hop.","more":2},
+            {"when":"openString","say":"Keep the first finger down on every chord."},
+            {"when":"stringChange","say":"Keep the hop small: one string across."},
+            {"when":"lastBars","say":"Hold the last chord through '4'.","more":0}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -11256,6 +11389,18 @@
             "The root is the note a chord is named after. Each bar starts on the root of its chord: open low E, G at fret 3, the open A string, and E again."
           ],
           "coachLine": "Band on. I time your notes against it and check them after the take.",
+          "cues": [
+            {"when":"even","say":"Leave '2' and '3' to the drums.","more":0,"general":true},
+            {"when":"heard","say":"Pick every written note, right to the end."},
+            {"when":"extras","say":"Swing past the strings on the silent beats."},
+            {"when":"notes","say":"Start each bar on its chord's root note.","more":1},
+            {"when":"late","say":"Land each bar's first note with the band."},
+            {"when":"early","say":"Wait for the band at the start of each beat."},
+            {"when":"afterHeld","say":"Count the long note's beat, then come in."},
+            {"when":"openString","say":"Lift the finger off in time for open notes."},
+            {"when":"stringChange","say":"Move the pick across during the note before."},
+            {"when":"lastBars","say":"Fill beat three, then hold the last note.","more":0}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -11393,6 +11538,18 @@
             "Keep every note short and let the band fill the gaps."
           ],
           "coachLine": "Band on. I'll say how even it was against the band and check the notes after the take.",
+          "cues": [
+            {"when":"even","say":"Keep every note short; let the band fill in.","more":1,"general":true},
+            {"when":"heard","say":"Pick every written note, right to the end."},
+            {"when":"extras","say":"Touch the string only on the written notes."},
+            {"when":"notes","say":"Read one note ahead in the tab as you play."},
+            {"when":"late","say":"Land each bar's first note with the band."},
+            {"when":"early","say":"Wait for the band at the start of each beat."},
+            {"when":"afterHeld","say":"Count the long note's beat, then come in."},
+            {"when":"openString","say":"Lift the finger off in time for open notes."},
+            {"when":"stringChange","say":"Move the pick across during the note before."},
+            {"when":"lastBars","say":"Keep the swing going right to the last note."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -11522,6 +11679,17 @@
             "Listen to the hi-hat or the ride: it plays the same long-short you do."
           ],
           "coachLine": "Band on. I time your notes against the shuffle, so straight eighths will read as early.",
+          "cues": [
+            {"when":"even","say":"Swing your long-short with the hi-hat.","more":1,"general":true},
+            {"when":"heard","say":"Pick both notes of every pair, long and short."},
+            {"when":"extras","say":"Play each note twice, then move on."},
+            {"when":"notes","say":"First finger on fret two, third on fret four."},
+            {"when":"late","say":"Put each long note right on the click."},
+            {"when":"early","say":"Play the short note late, just before the beat."},
+            {"when":"openString","say":"Lift both fingers off for the open notes."},
+            {"when":"stringChange","say":"Move across as each open note ends."},
+            {"when":"lastBars","say":"Hold the last note for its whole beat."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -16131,6 +16299,15 @@
             "Start well under your clean tempo. Count '1, 2 and, 3-trip-let, 4 e and a' and move the hand up a note at each bar line."
           ],
           "coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
+          "cues": [
+            {"when":"even","say":"Count '1, 2 and, 3-trip-let, 4 e and a'.","more":0,"general":true},
+            {"when":"heard","say":"Pick every written note, right to the end."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"afterHeld","say":"Count the long note's beat, then come in."},
+            {"when":"shift","say":"Arrive on the new note as each bar starts.","more":0},
+            {"when":"lastBars","say":"Keep the sixteenths even to the last note."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -17410,6 +17587,15 @@
             "Start well under your clean tempo. Count '1 e (and) a' on each beat: down, up, miss, up. Move the hand up a note at each bar line."
           ],
           "coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
+          "cues": [
+            {"when":"even","say":"Count '1 e (and) a': down, up, miss, up.","more":0,"general":true},
+            {"when":"heard","say":"Pick every written note, right to the end."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Play the 'a' late, just before the next beat."},
+            {"when":"afterHeld","say":"Count the long note's beat, then come in."},
+            {"when":"shift","say":"Arrive on the new note as each bar starts.","more":0},
+            {"when":"lastBars","say":"Land the last quarter note on '4'."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {

@@ -7,7 +7,8 @@ Branch `coach-cues1`, worktree `/home/dgx-delgado/yames-coach-cues1`, logs `/tmp
 - [x] Step 1: read; 52 Exercises (46 in Steps, 6 warm-ups), dump `/tmp/coach-cues1/rhythm-foundations-dump.txt`.
 - [x] Level 1 (beginner: on-the-beat, eighths, rests, other-strings, two warm-ups): 17 Exercises, 158 cues, check 0 errors.
 - [x] Level 2 (intermediate: off-beats, the-push, sixteenths, triplets, two warm-ups): 18 Exercises, 154 cues, 0 errors.
-- [ ] Level 3 (advanced)
+- [x] Level 3 (advanced: sixteenth-syncopation, gear-changes, two-strings-at-once, with-the-band, two warm-ups):
+  17 Exercises, 152 cues, 0 refusals, check 0 errors. All 52 Exercises: 464 cues, 220 distinct sentences.
 - [ ] Proof-read
 - [ ] Translations
 - [ ] Gates
