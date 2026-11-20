@@ -52,6 +52,13 @@ export function useSegmentCoach(params: {
    * when the segment ended.
    */
   jamModeRef: MutableRefObject<boolean>;
+  /**
+   * A quiet session (a Path Session's history writer): its mini-report is
+   * the local metrics line, and `coach_generate` is not called at all, so
+   * no model runs for it (DESIGN 9.4, "a quiet session generates nothing").
+   * Optional so the hook's own tests need not pass it.
+   */
+  quietRef?: MutableRefObject<boolean>;
   // State setters
   setMessages: Dispatch<SetStateAction<FeedMessage[]>>;
   setPlayMode: Dispatch<SetStateAction<"structured" | "noodling" | undefined>>;
@@ -72,6 +79,7 @@ export function useSegmentCoach(params: {
     playBpmRef,
     beatsInSegmentRef,
     jamModeRef,
+    quietRef,
     setMessages,
     setPlayMode,
   } = params;
@@ -385,7 +393,7 @@ export function useSegmentCoach(params: {
           // avg ±8.1ms"), so gating here would silently downgrade every
           // template-mode user from prose to numbers.
           let comment = formatMiniReport(report);
-          try {
+          if (!quietRef?.current) try {
             const context = formatMiniReportContext(
               segmentBpm,
               timeSignature,

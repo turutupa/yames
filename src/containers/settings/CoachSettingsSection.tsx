@@ -14,7 +14,8 @@ import { deleteModels, getCoachCapabilities, getModelStatus, onTtsSpeechEnded, t
 import { brainTierLabelKey } from "../../coach/brainTiers";
 import type { CoachStance } from "../../coach/learningMode";
 import { formatBytes } from "./formatBytes";
-import { coachStatusLabel, coachTierLabel } from "./coachStatus";
+import { coachStatusLabel, coachTierLabel, withLoaderState } from "./coachStatus";
+import { useCoachModel } from "../../hooks/useCoachModel";
 
 // Short per-voice sample line played when the user clicks a voice
 // button. Each line is distinct on purpose so the user can hear timbre
@@ -139,9 +140,10 @@ export function CoachSettingsSection({
   // `modelStatus` only knows whether the weights are on disk; this
   // knows whether the build can run them and whether one is actually
   // resident. Refetched whenever the on-disk state or the selected
-  // tier changes, and when a download finishes — `load_coach_model` is
-  // driven from `useSession`, so residency flips without this
-  // component re-rendering on its own.
+  // tier changes, when a download finishes, and when the model selector's
+  // loader (`hooks/coachLoader.ts`) moves: it loads and unloads on its own
+  // timetable, so residency flips without this component's own inputs.
+  const model = useCoachModel();
   const [coachCaps, setCoachCaps] = useState<CoachCapabilities | null>(null);
   useEffect(() => {
     let cancelled = false;
@@ -161,6 +163,7 @@ export function CoachSettingsSection({
     modelStatus?.brainTier,
     modelDownloading,
     coachBrainTier,
+    model.state,
   ]);
   // While a load is in flight the status line says "warming up"; nothing
   // in the dependency list above changes when it finishes, so poll until
@@ -173,11 +176,14 @@ export function CoachSettingsSection({
     }, 1000);
     return () => clearInterval(id);
   }, [coachCaps?.loading]);
-  const coachStatus = coachStatusLabel(
-    coachCaps,
-    // Prefer the capabilities snapshot: it and the residency flag were
-    // read in the same call, so the two can never disagree.
-    coachCaps?.brainDownloaded ?? !!modelStatus?.brainReady,
+  const coachStatus = withLoaderState(
+    coachStatusLabel(
+      coachCaps,
+      // Prefer the capabilities snapshot: it and the residency flag were
+      // read in the same call, so the two can never disagree.
+      coachCaps?.brainDownloaded ?? !!modelStatus?.brainReady,
+    ),
+    model.state,
   );
   // Which tiers actually reach the model on this machine (T04b). Null
   // unless a model is resident, so it never appears above the line that

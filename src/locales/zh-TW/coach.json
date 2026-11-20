@@ -29,6 +29,58 @@
     "noteSpacingTrend": "音符間距趨勢",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
   },
+  "coachModel": {
+    "label": "教練模型",
+    "button": "教練模型：{{choice}}，{{state}}",
+    "entry": "{{tier}} · {{model}} · {{size}}",
+    "offHint": "未載入語言模型。教練仍依自己的規則運作。",
+    "memory": "至少佔用這台電腦 {{total}} 記憶體中的 {{used}}",
+    "memoryUnknown": "至少佔用 {{used}} 記憶體",
+    "short": {
+      "off": "關閉",
+      "ready": "就緒",
+      "loading": "載入中",
+      "waiting": "等待載入",
+      "failed": "載入失敗",
+      "notDownloaded": "未下載",
+      "notOnThisDevice": "此裝置不支援",
+      "downloading": "下載中 {{percent}}",
+      "downloadingNoPercent": "下載中"
+    },
+    "state": {
+      "ready": "已載入，就緒",
+      "loading": "正在載入…",
+      "waiting": "應用程式閒置時載入，錄音期間絕不載入",
+      "onDisk": "已下載，未載入",
+      "failed": "載入失敗。選擇它以重試",
+      "failedWhy": "載入失敗（{{reason}}）。選擇它以重試",
+      "notDownloaded": "未下載",
+      "update": "舊版本。請在設定 → 練習教練中更新",
+      "otherOnDisk": "未下載。這台電腦上的第二個模型需要後續更新；目前請在設定 → 練習教練中切換",
+      "downloading": "下載中",
+      "lowMemory": "這台電腦的記憶體少於此模型所需；可能執行緩慢或無法載入"
+    },
+    "why": {
+      "phone": "此裝置不支援",
+      "noLlm": "此裝置不支援：此版本無法執行模型"
+    },
+    "download": {
+      "start": "下載",
+      "pause": "暫停",
+      "resume": "繼續",
+      "retry": "重試",
+      "anyway": "仍要下載",
+      "notNow": "暫不",
+      "running": "正在下載… {{percent}}",
+      "runningNoPercent": "正在下載…",
+      "voices": "正在取得教練的語音…",
+      "paused": "已暫停於 {{percent}}。點選「繼續」會從此處接著下載。",
+      "pausedNoPercent": "已暫停。點選「繼續」會從停下的地方接著下載。",
+      "failed": "下載已中斷：{{reason}}",
+      "failedNoReason": "下載已中斷。",
+      "meteredWarn": "你似乎正在使用行動數據。透過它下載 {{size}} 的內容流量很大。"
+    }
+  },
   "coachDetail": {
     "exercises": "練習段落",
     "notPlayed": "未演奏",

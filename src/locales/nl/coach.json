@@ -29,6 +29,58 @@
     "noteSpacingTrend": "Nootafstand-trend",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
   },
+  "coachModel": {
+    "label": "Coachmodel",
+    "button": "Coachmodel: {{choice}}, {{state}}",
+    "entry": "{{tier}} · {{model}} · {{size}}",
+    "offHint": "Geen taalmodel geladen. De coach werkt nog steeds met zijn eigen regels.",
+    "memory": "Gebruikt minstens {{used}} van de {{total}} geheugen van deze computer",
+    "memoryUnknown": "Gebruikt minstens {{used}} geheugen",
+    "short": {
+      "off": "uit",
+      "ready": "klaar",
+      "loading": "laden",
+      "waiting": "wacht om te laden",
+      "failed": "laden mislukt",
+      "notDownloaded": "niet gedownload",
+      "notOnThisDevice": "niet op dit apparaat",
+      "downloading": "downloaden {{percent}}",
+      "downloadingNoPercent": "downloaden"
+    },
+    "state": {
+      "ready": "Geladen en klaar",
+      "loading": "Laden…",
+      "waiting": "Laadt als de app niets doet, nooit tijdens een Take",
+      "onDisk": "Gedownload, niet geladen",
+      "failed": "Laden mislukt. Kies het om het opnieuw te proberen",
+      "failedWhy": "Laden mislukt ({{reason}}). Kies het om het opnieuw te proberen",
+      "notDownloaded": "Niet gedownload",
+      "update": "Een oudere versie. Werk hem bij in Instellingen → Coach",
+      "otherOnDisk": "Niet gedownload. Een tweede model op deze computer heeft een latere update nodig; wissel voorlopig in Instellingen → Coach",
+      "downloading": "Downloaden",
+      "lowMemory": "Deze computer heeft minder geheugen dan dit model wil; het kan traag zijn of niet laden"
+    },
+    "why": {
+      "phone": "Niet op dit apparaat",
+      "noLlm": "Niet op dit apparaat: deze versie kan geen model draaien"
+    },
+    "download": {
+      "start": "Downloaden",
+      "pause": "Pauzeren",
+      "resume": "Hervatten",
+      "retry": "Opnieuw proberen",
+      "anyway": "Toch downloaden",
+      "notNow": "Nu niet",
+      "running": "Downloaden… {{percent}}",
+      "runningNoPercent": "Downloaden…",
+      "voices": "De stemmen van de coach ophalen…",
+      "paused": "Gepauzeerd bij {{percent}}. Hervatten gaat vanaf daar verder.",
+      "pausedNoPercent": "Gepauzeerd. Hervatten gaat verder waar het stopte.",
+      "failed": "De download is gestopt: {{reason}}",
+      "failedNoReason": "De download is gestopt.",
+      "meteredWarn": "Je lijkt mobiele data te gebruiken. {{size}} is veel om daarover te downloaden."
+    }
+  },
   "coachDetail": {
     "exercises": "Oefeningen",
     "notPlayed": "Niet gespeeld",

@@ -1,20 +1,25 @@
 /**
- * useSession — when the brain is loaded and unloaded.
+ * useSession and the coach model, since the model selector (ms1).
  *
- * The policy: the model is resident only while somebody is practising.
- * Before T04c this hook loaded it from its mount effect *and* from
- * `startSession` while the first call was still in flight, and the Rust
- * side dropped the resident worker before spawning its replacement — so
- * the second call tore down a working brain, and a failure at that point
- * left none at all. It also meant every launch paid several seconds and
- * ~4 GB for a model the user might never ask a question of.
+ * Sessions no longer own the model: `hooks/coachLoader.ts` loads the
+ * player's choice once after startup and keeps it until they pick Off or
+ * another model. So a session start loads nothing, a session end unloads
+ * nothing and arms no idle unload, and a quiet session (a Path Session's
+ * history writer) asks the model for nothing even when one is resident.
  */
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { useSession } from "./useSession";
-import { COACH_IDLE_UNLOAD_MS, __resetCoachLoaderForTests } from "./coachLoader";
-import { mockInvoke, setInvokeResponse } from "../test/mocks";
-import type { BrainTier } from "../types";
+import {
+  __resetCoachLoaderForTests,
+  coachResident,
+  openCoachStartupGate,
+  setCoachModelChoice,
+  setCoachModelDisk,
+} from "./coachLoader";
+import { mockInvoke, mockListen, setInvokeResponse } from "../test/mocks";
+import type { ModelStatus } from "../ipc.desktop";
+import type { AdaptiveEvalRequest } from "../ipc";
 
 type Evaluation = Parameters<typeof useSession>[0]["evaluation"];
 
@@ -28,23 +33,80 @@ const evaluation = {
 const calls = (command: string) =>
   mockInvoke.mock.calls.filter(([cmd]) => cmd === command).length;
 
-function renderSession(brainTier: BrainTier) {
+const generated = (kind: string) =>
+  mockInvoke.mock.calls.filter(
+    ([cmd, args]) => cmd === "coach_generate" && (args as { kind?: string } | undefined)?.kind === kind,
+  ).length;
+
+const STANDARD_ON_DISK: ModelStatus = {
+  brainReady: true,
+  brainTier: "standard",
+  brainFamily: "qwen3",
+  brainSizeBytes: 2_497_280_256,
+  voiceReady: true,
+  voiceSizeBytes: 0,
+  studioRecommended: true,
+  standardRecommended: true,
+  brainUpdateRecommended: false,
+} as ModelStatus;
+
+function renderSession() {
   return renderHook(() =>
     useSession({
       evaluation,
       isPlaying: false,
       bpm: 120,
       timeSignature: 4,
-      brainTier,
       setBpm: vi.fn(),
     }),
   );
 }
 
-describe("useSession — brain residency", () => {
+/** A Standard model resident, as the loader leaves it after startup. */
+async function residentStandard() {
+  setInvokeResponse("get_coach_capabilities", () => ({
+    llmCompiled: true,
+    modelResident: true,
+    loading: false,
+    backend: "vulkan",
+    modelName: "Qwen3 4B",
+    loadError: null,
+    brainDownloaded: true,
+    studioRecommended: true,
+    standardRecommended: true,
+    brainUpdateRecommended: false,
+    tipsUseModel: true,
+    rephraseP50Ms: 400,
+  }));
+  setInvokeResponse("load_coach_model", () => true);
+  setCoachModelDisk(STANDARD_ON_DISK, 32_768);
+  setCoachModelChoice("standard");
+  await openCoachStartupGate();
+  await waitFor(() => expect(coachResident()).toBe(true));
+}
+
+/** The latest `adaptive-eval` listener useSession registered. */
+function adaptiveEval(): (e: { payload: AdaptiveEvalRequest }) => void {
+  const subs = mockListen.mock.calls.filter(([event]) => event === "adaptive-eval");
+  return subs[subs.length - 1][1] as (e: { payload: AdaptiveEvalRequest }) => void;
+}
+
+const STEP_UP: AdaptiveEvalRequest = {
+  currentBpm: 100,
+  newBpm: 104,
+  startBpm: 90,
+  targetBpm: 120,
+  accuracyPct: 92,
+  aggressiveness: "normal",
+  currentStep: 2,
+  decision: "up",
+};
+
+describe("useSession — the model is not the session's", () => {
   beforeEach(() => {
     __resetCoachLoaderForTests();
     setInvokeResponse("load_coach_model", () => true);
+    setInvokeResponse("coach_generate", () => "Nice and steady, keep it there.");
     vi.useFakeTimers({ shouldAdvanceTime: true });
   });
   afterEach(() => {
@@ -52,61 +114,70 @@ describe("useSession — brain residency", () => {
     vi.useRealTimers();
   });
 
-  it("loads nothing at mount", async () => {
-    const { result } = renderSession("standard");
-    // Let every mount effect settle — including the residency query.
-    await waitFor(() => expect(calls("is_coach_loaded")).toBeGreaterThan(0));
-    expect(calls("load_coach_model")).toBe(0);
-    expect(result.current.active).toBe(false);
-  });
-
-  it("loads once when a session starts", async () => {
-    const { result } = renderSession("standard");
-    await act(async () => {
-      await result.current.startSession();
-    });
-    await waitFor(() => expect(calls("load_coach_model")).toBe(1));
-
-    // A second session must not reload weights that are already resident:
-    // that is the call that used to destroy the working worker.
-    await act(async () => {
-      await result.current.endSession();
-    });
-    await act(async () => {
-      await result.current.startSession();
-    });
-    expect(calls("load_coach_model")).toBe(1);
-  });
-
-  it("loads nothing when the user has the brain switched off", async () => {
-    const { result } = renderSession("off");
+  it("loads nothing at mount, at a session's start or at its end", async () => {
+    const { result } = renderSession();
     await act(async () => {
       await result.current.startSession();
     });
     await waitFor(() => expect(result.current.active).toBe(true));
-    expect(calls("load_coach_model")).toBe(0);
-  });
-
-  it("drops the worker after the idle window and reloads for the next session", async () => {
-    const { result } = renderSession("standard");
-    await act(async () => {
-      await result.current.startSession();
-    });
-    await waitFor(() => expect(calls("load_coach_model")).toBe(1));
-
     await act(async () => {
       await result.current.endSession();
     });
+    expect(calls("load_coach_model")).toBe(0);
     expect(calls("unload_coach_model")).toBe(0);
+  });
 
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(COACH_IDLE_UNLOAD_MS);
-    });
-    expect(calls("unload_coach_model")).toBe(1);
-
+  it("leaves a resident model loaded after a session ends, however long the app idles", async () => {
+    await residentStandard();
+    const loadsBefore = calls("load_coach_model");
+    const { result } = renderSession();
     await act(async () => {
       await result.current.startSession();
     });
-    await waitFor(() => expect(calls("load_coach_model")).toBe(2));
+    await act(async () => {
+      await result.current.endSession();
+    });
+    // The old ten-minute idle unload is gone: an hour later it is still there.
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(60 * 60 * 1000);
+    });
+    expect(calls("unload_coach_model")).toBe(0);
+    expect(calls("load_coach_model")).toBe(loadsBefore);
+    expect(coachResident()).toBe(true);
+  });
+
+  it("the player's own session asks a resident model to phrase a drill step", async () => {
+    await residentStandard();
+    const { result } = renderSession();
+    await act(async () => {
+      await result.current.startSession();
+    });
+    await act(async () => {
+      adaptiveEval()({ payload: STEP_UP });
+    });
+    await waitFor(() => expect(generated("drill")).toBe(1));
+  });
+
+  it("a quiet session asks the model for nothing, though one is resident", async () => {
+    await residentStandard();
+    const { result } = renderSession();
+    await act(async () => {
+      await result.current.startSession({ quiet: true });
+    });
+    await act(async () => {
+      adaptiveEval()({ payload: STEP_UP });
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2_000);
+    });
+    await act(async () => {
+      await result.current.endSession();
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2_000);
+    });
+    expect(calls("coach_generate")).toBe(0);
+    expect(calls("load_coach_model")).toBe(1);
+    expect(calls("unload_coach_model")).toBe(0);
   });
 });
