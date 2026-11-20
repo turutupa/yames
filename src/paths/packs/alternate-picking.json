@@ -277,9 +277,9 @@
         {
           "id": "even-eighths.a-minor-one-string",
           "title": "A minor up one string",
-          "purpose": "Your first melody, played by moving the whole hand along the G string, so shifts stop being an event.",
+          "purpose": "A melody played by moving the whole hand along the G string, so shifts stop being an event.",
           "howTo": [
-            "Play the A natural minor scale along the G string with the first two fingers only, sliding the hand between notes. Lift just enough to move.",
+            "Play the notes of A minor along the G string: frets 2, 4, 5, 7, 9, 10, 12 and 14, then back down. Use the first two fingers only and slide the hand between notes. Lift just enough to move.",
             "Sing the notes if you can. A wrong note here is obvious to the ear."
           ],
           "coachLine": "After the take I can say whether the notes were the written ones, and how even they were.",
@@ -299,22 +299,22 @@
           "crossing": "none",
           "notesRole": "target",
           "notes": [
-            {"string":3,"fret":2,"midi":57,"tick":0,"dur":480,"tech":[],"pick":"d"},
-            {"string":3,"fret":4,"midi":59,"tick":480,"dur":480,"tech":[],"pick":"u"},
-            {"string":3,"fret":5,"midi":60,"tick":960,"dur":480,"tech":[],"pick":"d"},
-            {"string":3,"fret":7,"midi":62,"tick":1440,"dur":480,"tech":[],"pick":"u"},
-            {"string":3,"fret":9,"midi":64,"tick":1920,"dur":480,"tech":[],"pick":"d"},
-            {"string":3,"fret":10,"midi":65,"tick":2400,"dur":480,"tech":[],"pick":"u"},
-            {"string":3,"fret":12,"midi":67,"tick":2880,"dur":480,"tech":[],"pick":"d"},
-            {"string":3,"fret":14,"midi":69,"tick":3360,"dur":480,"tech":[],"pick":"u"},
-            {"string":3,"fret":12,"midi":67,"tick":3840,"dur":480,"tech":[],"pick":"d"},
-            {"string":3,"fret":10,"midi":65,"tick":4320,"dur":480,"tech":[],"pick":"u"},
-            {"string":3,"fret":9,"midi":64,"tick":4800,"dur":480,"tech":[],"pick":"d"},
-            {"string":3,"fret":7,"midi":62,"tick":5280,"dur":480,"tech":[],"pick":"u"},
-            {"string":3,"fret":5,"midi":60,"tick":5760,"dur":480,"tech":[],"pick":"d"},
-            {"string":3,"fret":4,"midi":59,"tick":6240,"dur":480,"tech":[],"pick":"u"},
-            {"string":3,"fret":2,"midi":57,"tick":6720,"dur":480,"tech":[],"pick":"d"},
-            {"string":3,"fret":4,"midi":59,"tick":7200,"dur":480,"tech":[],"pick":"u"}
+            {"string":3,"fret":2,"midi":57,"tick":0,"dur":480,"tech":[],"finger":1,"pick":"d"},
+            {"string":3,"fret":4,"midi":59,"tick":480,"dur":480,"tech":[],"finger":2,"pick":"u"},
+            {"string":3,"fret":5,"midi":60,"tick":960,"dur":480,"tech":[],"finger":1,"pick":"d"},
+            {"string":3,"fret":7,"midi":62,"tick":1440,"dur":480,"tech":[],"finger":2,"pick":"u"},
+            {"string":3,"fret":9,"midi":64,"tick":1920,"dur":480,"tech":[],"finger":1,"pick":"d"},
+            {"string":3,"fret":10,"midi":65,"tick":2400,"dur":480,"tech":[],"finger":2,"pick":"u"},
+            {"string":3,"fret":12,"midi":67,"tick":2880,"dur":480,"tech":[],"finger":1,"pick":"d"},
+            {"string":3,"fret":14,"midi":69,"tick":3360,"dur":480,"tech":[],"finger":2,"pick":"u"},
+            {"string":3,"fret":12,"midi":67,"tick":3840,"dur":480,"tech":[],"finger":1,"pick":"d"},
+            {"string":3,"fret":10,"midi":65,"tick":4320,"dur":480,"tech":[],"finger":2,"pick":"u"},
+            {"string":3,"fret":9,"midi":64,"tick":4800,"dur":480,"tech":[],"finger":1,"pick":"d"},
+            {"string":3,"fret":7,"midi":62,"tick":5280,"dur":480,"tech":[],"finger":2,"pick":"u"},
+            {"string":3,"fret":5,"midi":60,"tick":5760,"dur":480,"tech":[],"finger":1,"pick":"d"},
+            {"string":3,"fret":4,"midi":59,"tick":6240,"dur":480,"tech":[],"finger":2,"pick":"u"},
+            {"string":3,"fret":2,"midi":57,"tick":6720,"dur":480,"tech":[],"finger":1,"pick":"d"},
+            {"string":3,"fret":4,"midi":59,"tick":7200,"dur":480,"tech":[],"finger":2,"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -371,7 +371,7 @@
             "subdivision": 1
           },
           "estimatedMinutes": 5,
-          "tab": "/8 3:2 3:4 3:5 3:7 3:9 3:10 3:12 3:14 | 3:12 3:10 3:9 3:7 3:5 3:4 3:2 3:4",
+          "tab": "/8 3:2f1 3:4f2 3:5f1 3:7f2 3:9f1 3:10f2 3:12f1 3:14f2 | 3:12f1 3:10f2 3:9f1 3:7f2 3:5f1 3:4f2 3:2f1 3:4f2",
           "subdivision": "eighths",
           "computed": {
             "noteCount": 16,
@@ -1043,7 +1043,7 @@
       ],
       "payoff": "A run of sixteenths you can hold for a full loop, and a melody that sounds busy without feeling frantic.",
       "prerequisites": ["other-strings"],
-      "difficulty": 6.12,
+      "difficulty": 5.78,
       "exercises": [
         {
           "id": "even-sixteenths.gear-change",
@@ -1174,7 +1174,7 @@
           "title": "Four fingers at sixteenths",
           "purpose": "The hands have to agree at a rate where they can no longer be managed one note at a time.",
           "howTo": [
-            "The same walk as before, at sixteenths. If the fingers run ahead of the pick, the notes come out as flams; make the fingers lazier."
+            "The same four-finger walk as in the first Step, at sixteenths. If the fingers land ahead of the pick, each note sounds twice: a soft tap from the finger, then the picked note. Make the fingers lazier."
           ],
           "coachLine": "Evenness is the number to watch on this one.",
           "grading": "graded",
@@ -1216,12 +1216,12 @@
               {"bpm":55,"grading":"graded"},
               {"bpm":65,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
-              {"bpm":80,"grading":"graded"},
-              {"bpm":90,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
               {"bpm":100,"grading":"graded"},
               {"bpm":110,"grading":"graded"}
             ],
-            "passAtBpm": 90
+            "passAtBpm": 85
           },
           "passBars": [
             {
@@ -1270,7 +1270,7 @@
             "minGapMsAtTop": 136.36,
             "handShifts": 0,
             "maxPlayableBpm": 178,
-            "difficulty": 6
+            "difficulty": 5.67
           },
           "variation": {
             "dimensions": ["position", "stringSet"],
@@ -1324,7 +1324,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 178,
-                  "difficulty": 6
+                  "difficulty": 5.67
                 }
               },
               {
@@ -1369,7 +1369,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 178,
-                  "difficulty": 6
+                  "difficulty": 5.67
                 }
               },
               {
@@ -1414,7 +1414,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 178,
-                  "difficulty": 6
+                  "difficulty": 5.67
                 }
               },
               {
@@ -1459,7 +1459,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 178,
-                  "difficulty": 6
+                  "difficulty": 5.67
                 }
               },
               {
@@ -1504,7 +1504,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
-                  "difficulty": 6
+                  "difficulty": 5.67
                 }
               },
               {
@@ -1549,7 +1549,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
-                  "difficulty": 6
+                  "difficulty": 5.67
                 }
               },
               {
@@ -1594,7 +1594,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
-                  "difficulty": 6
+                  "difficulty": 5.67
                 }
               },
               {
@@ -1639,7 +1639,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
-                  "difficulty": 6
+                  "difficulty": 5.67
                 }
               },
               {
@@ -1684,7 +1684,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
-                  "difficulty": 6
+                  "difficulty": 5.67
                 }
               },
               {
@@ -1729,7 +1729,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
-                  "difficulty": 6
+                  "difficulty": 5.67
                 }
               },
               {
@@ -1774,7 +1774,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
-                  "difficulty": 6
+                  "difficulty": 5.67
                 }
               },
               {
@@ -1819,7 +1819,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
-                  "difficulty": 6
+                  "difficulty": 5.67
                 }
               },
               {
@@ -1864,7 +1864,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 112,
-                  "difficulty": 6
+                  "difficulty": 5.67
                 }
               },
               {
@@ -1909,7 +1909,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 112,
-                  "difficulty": 6
+                  "difficulty": 5.67
                 }
               },
               {
@@ -1954,7 +1954,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 112,
-                  "difficulty": 6
+                  "difficulty": 5.67
                 }
               },
               {
@@ -1999,7 +1999,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 112,
-                  "difficulty": 6
+                  "difficulty": 5.67
                 }
               }
             ]
@@ -2069,12 +2069,12 @@
               {"bpm":55,"grading":"graded"},
               {"bpm":65,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
-              {"bpm":80,"grading":"graded"},
-              {"bpm":90,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
               {"bpm":100,"grading":"graded"},
               {"bpm":110,"grading":"graded"}
             ],
-            "passAtBpm": 90
+            "passAtBpm": 85
           },
           "passBars": [
             {
@@ -2127,7 +2127,7 @@
             "minGapMsAtTop": 136.36,
             "handShifts": 4,
             "maxPlayableBpm": 116,
-            "difficulty": 6.23
+            "difficulty": 5.88
           },
           "harmony": {
             "kind": "scale",
@@ -2142,7 +2142,8 @@
           "title": "Sixteenth melody on the B string",
           "purpose": "A real line in A minor on one string: if this one sings, your sixteenths are musical rather than merely fast.",
           "howTo": [
-            "Stay on the B string and shift by small moves. Let the first note of each beat be a touch stronger so you can hear where you are."
+            "Stay on the B string. Beat 1 uses frets 6, 8 and 10 with the first, second and little fingers: a wider reach than one finger per fret, so open the hand from the first finger. Beat 2 starts with the first finger one fret lower, at fret 5, and it slides back up to fret 6 for the next note. For beat 3 move the whole hand up two frets, so the same fingers take frets 8, 10 and 12, and come back down for beat 4.",
+            "Let the first note of each beat be a touch stronger so you can hear where you are."
           ],
           "coachLine": "When this is even and on the written notes, the next Step is ready for you.",
           "grading": "graded",
@@ -2161,22 +2162,22 @@
           "crossing": "none",
           "notesRole": "target",
           "notes": [
-            {"string":2,"fret":10,"midi":69,"tick":0,"dur":240,"tech":[],"pick":"d"},
-            {"string":2,"fret":8,"midi":67,"tick":240,"dur":240,"tech":[],"pick":"u"},
-            {"string":2,"fret":6,"midi":65,"tick":480,"dur":240,"tech":[],"pick":"d"},
-            {"string":2,"fret":8,"midi":67,"tick":720,"dur":240,"tech":[],"pick":"u"},
-            {"string":2,"fret":5,"midi":64,"tick":960,"dur":240,"tech":[],"pick":"d"},
-            {"string":2,"fret":6,"midi":65,"tick":1200,"dur":240,"tech":[],"pick":"u"},
-            {"string":2,"fret":8,"midi":67,"tick":1440,"dur":240,"tech":[],"pick":"d"},
-            {"string":2,"fret":10,"midi":69,"tick":1680,"dur":240,"tech":[],"pick":"u"},
-            {"string":2,"fret":12,"midi":71,"tick":1920,"dur":240,"tech":[],"pick":"d"},
-            {"string":2,"fret":10,"midi":69,"tick":2160,"dur":240,"tech":[],"pick":"u"},
-            {"string":2,"fret":8,"midi":67,"tick":2400,"dur":240,"tech":[],"pick":"d"},
-            {"string":2,"fret":10,"midi":69,"tick":2640,"dur":240,"tech":[],"pick":"u"},
-            {"string":2,"fret":6,"midi":65,"tick":2880,"dur":240,"tech":[],"pick":"d"},
-            {"string":2,"fret":8,"midi":67,"tick":3120,"dur":240,"tech":[],"pick":"u"},
-            {"string":2,"fret":10,"midi":69,"tick":3360,"dur":240,"tech":[],"pick":"d"},
-            {"string":2,"fret":8,"midi":67,"tick":3600,"dur":240,"tech":[],"pick":"u"}
+            {"string":2,"fret":10,"midi":69,"tick":0,"dur":240,"tech":[],"finger":4,"pick":"d"},
+            {"string":2,"fret":8,"midi":67,"tick":240,"dur":240,"tech":[],"finger":2,"pick":"u"},
+            {"string":2,"fret":6,"midi":65,"tick":480,"dur":240,"tech":[],"finger":1,"pick":"d"},
+            {"string":2,"fret":8,"midi":67,"tick":720,"dur":240,"tech":[],"finger":2,"pick":"u"},
+            {"string":2,"fret":5,"midi":64,"tick":960,"dur":240,"tech":[],"finger":1,"pick":"d"},
+            {"string":2,"fret":6,"midi":65,"tick":1200,"dur":240,"tech":[],"finger":1,"pick":"u"},
+            {"string":2,"fret":8,"midi":67,"tick":1440,"dur":240,"tech":[],"finger":2,"pick":"d"},
+            {"string":2,"fret":10,"midi":69,"tick":1680,"dur":240,"tech":[],"finger":4,"pick":"u"},
+            {"string":2,"fret":12,"midi":71,"tick":1920,"dur":240,"tech":[],"finger":4,"pick":"d"},
+            {"string":2,"fret":10,"midi":69,"tick":2160,"dur":240,"tech":[],"finger":2,"pick":"u"},
+            {"string":2,"fret":8,"midi":67,"tick":2400,"dur":240,"tech":[],"finger":1,"pick":"d"},
+            {"string":2,"fret":10,"midi":69,"tick":2640,"dur":240,"tech":[],"finger":2,"pick":"u"},
+            {"string":2,"fret":6,"midi":65,"tick":2880,"dur":240,"tech":[],"finger":1,"pick":"d"},
+            {"string":2,"fret":8,"midi":67,"tick":3120,"dur":240,"tech":[],"finger":2,"pick":"u"},
+            {"string":2,"fret":10,"midi":69,"tick":3360,"dur":240,"tech":[],"finger":4,"pick":"d"},
+            {"string":2,"fret":8,"midi":67,"tick":3600,"dur":240,"tech":[],"finger":2,"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -2235,7 +2236,7 @@
             "subdivision": 2
           },
           "estimatedMinutes": 6,
-          "tab": "/16 2:10 2:8 2:6 2:8 2:5 2:6 2:8 2:10 2:12 2:10 2:8 2:10 2:6 2:8 2:10 2:8",
+          "tab": "/16 2:10f4 2:8f2 2:6f1 2:8f2 2:5f1 2:6f1 2:8f2 2:10f4 2:12f4 2:10f2 2:8f1 2:10f2 2:6f1 2:8f2 2:10f4 2:8f2",
           "subdivision": "sixteenths",
           "computed": {
             "noteCount": 16,
@@ -4695,9 +4696,12 @@
       "goal": "Play the A minor pentatonic box in the sequences you actually hear in rock and blues solos.",
       "why": "Two notes per string means a crossing every other note, and the same kind of crossing each time. That is exactly what makes pentatonic runs harder to pick than they look, and it is why they come right after crossings. You get a sound you already recognise as your reward.",
       "howTo": [
+        "Box 1 of A minor pentatonic sits at fret 5, two notes on every string. The first finger plays fret 5 on all six strings. The other note is fret 8 with the little finger on the low E, B and top strings, and fret 7 with the third finger on the A, D and G strings.",
+        "Blues and Pentatonics teaches the box slowly over a band in its first Step.",
         "Starting on a downstroke on the first note of a string, every change going up is inside. Coming down from a downstroke on the first note of a string, every change is outside. Where the stroke falls decides it, so you can choose.",
         "Roll a fingertip across when two notes share a fret on neighbouring strings, rather than lifting and placing it.",
-        "Use a click on the quarter note and let the triplets feel round."
+        "Count '1-trip-let, 2-trip-let'. Three even notes a click, with the first one on it.",
+        "Three of the Exercises here are in triplets. Keep the strokes strictly down-up, so beats 2 and 4 start on an upstroke. That is correct. Do not add a stroke to fix it. Rhythm Foundations drills triplets on their own in its Intermediate Level, in the Step 'Three to a beat'."
       ],
       "payoff": "The run from a hundred solos you have heard, at a tempo where it is clean, and the same lick working in three keys.",
       "prerequisites": ["crossing"],
@@ -4705,10 +4709,11 @@
       "exercises": [
         {
           "id": "pentatonic-patterns.box-up-down",
-          "title": "Box 1, up and down",
+          "title": "The box, up and down",
           "purpose": "The whole box in plain triplets, so the map and the crossings settle together.",
           "howTo": [
-            "Six strings up and back. The turn on the top string lands the next downstroke on the box's lower fret, so the descent is inside crossings too: the whole loop is one kind, and you get a long look at it."
+            "Six strings up and back. The turn on the top string lands the next downstroke on the box's lower fret, so the descent is inside crossings too: the whole loop is one kind, and you get a long look at it.",
+            "Each Take plays one of the five boxes: the same five notes, further up the neck from box 1 to box 5. Read the frets from the tab."
           ],
           "coachLine": "I'll say whether the notes were the box and how even they were.",
           "grading": "graded",
@@ -5228,7 +5233,7 @@
           "title": "Descending threes",
           "purpose": "The classic pentatonic run: groups of three coming down the box, each group starting one note lower.",
           "howTo": [
-            "Triplets, so every group starts on a beat. Three is odd, so each group starts on the opposite stroke from the last one, which is the whole point: the crossings keep changing."
+            "Triplets, so every group starts on a beat. Three is odd, so each group starts on the opposite stroke from the last one, which is the whole point: the crossings keep changing. Accent the first note of each group a little, as in the Step 'Accents where you want them'. Every second accent is an upstroke."
           ],
           "coachLine": "A long run like this usually slips in the same place. Listening back will show you where.",
           "grading": "graded",
@@ -5581,10 +5586,11 @@
             "rungs": [
               {"bpm":50,"grading":"graded"},
               {"bpm":55,"grading":"graded"},
-              {"bpm":60,"grading":"graded"},
               {"bpm":65,"grading":"graded"},
               {"bpm":70,"grading":"graded"},
-              {"bpm":75,"grading":"graded"}
+              {"bpm":75,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":90,"grading":"graded"}
             ],
             "passAtBpm": 70
           },
@@ -5634,10 +5640,10 @@
           "subdivision": "sixteenths",
           "computed": {
             "noteCount": 64,
-            "minGapMsAtTop": 200,
-            "handShifts": 3,
+            "minGapMsAtTop": 166.67,
+            "handShifts": 4,
             "maxPlayableBpm": 91,
-            "difficulty": 5.67
+            "difficulty": 5.69
           },
           "chords": ["Am", "Am", "Dm", "Em"]
         }
@@ -6611,7 +6617,7 @@
           "title": "Two and a half octaves",
           "purpose": "The whole shape up and down in triplets, a small hand shift included where the top strings move up a fret.",
           "howTo": [
-            "The hand moves up one fret when you reach the B string. Do it during the string change, not after it."
+            "The hand moves up one fret when you reach the B string and one more at the top string, and back on the way down. Move during the string change, not after it."
           ],
           "coachLine": "Long lines are where time drifts. Evenness across the whole take is the number.",
           "grading": "graded",
@@ -6793,13 +6799,13 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":80,"grading":"graded"},
-              {"bpm":95,"grading":"graded"},
-              {"bpm":105,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"},
               {"bpm":120,"grading":"graded"},
-              {"bpm":135,"grading":"graded"},
-              {"bpm":155,"grading":"graded"},
-              {"bpm":170,"grading":"graded"}
+              {"bpm":130,"grading":"graded"},
+              {"bpm":140,"grading":"graded"},
+              {"bpm":150,"grading":"graded"}
             ],
             "passAtBpm": 120
           },
@@ -6847,7 +6853,7 @@
           "subdivision": "sixteenths",
           "computed": {
             "noteCount": 10,
-            "minGapMsAtTop": 88.24,
+            "minGapMsAtTop": 100,
             "handShifts": 0,
             "maxPlayableBpm": 178,
             "difficulty": 5
@@ -6896,7 +6902,7 @@
                 },
                 "computed": {
                   "noteCount": 10,
-                  "minGapMsAtTop": 88.24,
+                  "minGapMsAtTop": 100,
                   "handShifts": 0,
                   "maxPlayableBpm": 178,
                   "difficulty": 5
@@ -6935,7 +6941,7 @@
                 },
                 "computed": {
                   "noteCount": 10,
-                  "minGapMsAtTop": 88.24,
+                  "minGapMsAtTop": 100,
                   "handShifts": 0,
                   "maxPlayableBpm": 178,
                   "difficulty": 5
@@ -6974,7 +6980,7 @@
                 },
                 "computed": {
                   "noteCount": 10,
-                  "minGapMsAtTop": 88.24,
+                  "minGapMsAtTop": 100,
                   "handShifts": 0,
                   "maxPlayableBpm": 178,
                   "difficulty": 5
@@ -7013,7 +7019,7 @@
                 },
                 "computed": {
                   "noteCount": 10,
-                  "minGapMsAtTop": 88.24,
+                  "minGapMsAtTop": 100,
                   "handShifts": 0,
                   "maxPlayableBpm": 178,
                   "difficulty": 5
@@ -7052,7 +7058,7 @@
                 },
                 "computed": {
                   "noteCount": 10,
-                  "minGapMsAtTop": 88.24,
+                  "minGapMsAtTop": 100,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
                   "difficulty": 5
@@ -7091,7 +7097,7 @@
                 },
                 "computed": {
                   "noteCount": 10,
-                  "minGapMsAtTop": 88.24,
+                  "minGapMsAtTop": 100,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
                   "difficulty": 5
@@ -7130,7 +7136,7 @@
                 },
                 "computed": {
                   "noteCount": 10,
-                  "minGapMsAtTop": 88.24,
+                  "minGapMsAtTop": 100,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
                   "difficulty": 5
@@ -7169,7 +7175,7 @@
                 },
                 "computed": {
                   "noteCount": 10,
-                  "minGapMsAtTop": 88.24,
+                  "minGapMsAtTop": 100,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
                   "difficulty": 5
@@ -7208,7 +7214,7 @@
                 },
                 "computed": {
                   "noteCount": 10,
-                  "minGapMsAtTop": 88.24,
+                  "minGapMsAtTop": 100,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
                   "difficulty": 5
@@ -7247,7 +7253,7 @@
                 },
                 "computed": {
                   "noteCount": 10,
-                  "minGapMsAtTop": 88.24,
+                  "minGapMsAtTop": 100,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
                   "difficulty": 5
@@ -7286,7 +7292,7 @@
                 },
                 "computed": {
                   "noteCount": 10,
-                  "minGapMsAtTop": 88.24,
+                  "minGapMsAtTop": 100,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
                   "difficulty": 5
@@ -7325,7 +7331,7 @@
                 },
                 "computed": {
                   "noteCount": 10,
-                  "minGapMsAtTop": 88.24,
+                  "minGapMsAtTop": 100,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
                   "difficulty": 5
@@ -7364,7 +7370,7 @@
                 },
                 "computed": {
                   "noteCount": 10,
-                  "minGapMsAtTop": 88.24,
+                  "minGapMsAtTop": 100,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
                   "difficulty": 5
@@ -7403,7 +7409,7 @@
                 },
                 "computed": {
                   "noteCount": 10,
-                  "minGapMsAtTop": 88.24,
+                  "minGapMsAtTop": 100,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
                   "difficulty": 5
@@ -7442,7 +7448,7 @@
                 },
                 "computed": {
                   "noteCount": 10,
-                  "minGapMsAtTop": 88.24,
+                  "minGapMsAtTop": 100,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
                   "difficulty": 5
@@ -7481,7 +7487,7 @@
                 },
                 "computed": {
                   "noteCount": 10,
-                  "minGapMsAtTop": 88.24,
+                  "minGapMsAtTop": 100,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
                   "difficulty": 5
@@ -7726,8 +7732,9 @@
         {
           "id": "speed-bursts.six-note-burst",
           "title": "The six-note burst, into a landing",
-          "purpose": "Your descending lick at sextuplet speed, then a walk down to A: this is how a fast run actually gets used in a solo.",
+          "purpose": "The descending six-note lick from the Step 'Three notes per string', all six notes in one beat, then a walk down to A: this is how a fast run actually gets used in a solo.",
           "howTo": [
+            "Sextuplets are six even notes to one click.",
             "One beat of sextuplets from the top string, then D, C and A as quarter notes. Land exactly on beat 2."
           ],
           "coachLine": "Fast notes on a real rig are the hardest to time, so trust the landing and your own ear as much as the numbers.",
@@ -9453,8 +9460,8 @@
           "title": "The six-note lick, six to a click",
           "purpose": "C, B, A, G, F, E on the top two strings as sextuplets, round and round. The six-note burst from the Speed bursts Step, now without the rest after it.",
           "howTo": [
-            "Six notes to the click, starting on a downstroke; the pattern is even, so every repeat starts down too.",
-            "Lean on the first note of each beat a little. Without it six fast notes turn into a blur with no beat in it."
+            "Six notes to the click, starting on a downstroke; the count is even, so every repeat starts down too.",
+            "Accent the first note of each beat a little. Without it six fast notes turn into a blur with no beat in it."
           ],
           "coachLine": "Fast notes are the hardest for me to place, so read the evenness as provisional and trust a recording as well.",
           "grading": "graded",
@@ -9824,9 +9831,6 @@
                 },
                 "pool": "all",
                 "purpose": "G, F#, E, D, C, B on the top two strings as sextuplets, round and round. The six-note burst from the Speed bursts Step, now without the rest after it.",
-                "howTo": [
-                  "Lean on the first note of each beat a little. Without it six fast notes turn into a blur with no beat in it."
-                ],
                 "tab": "/16t 1:3 1:2 1:0 2:3 2:1 2:0 1:3 1:2 1:0 2:3 2:1 2:0 1:3 1:2 1:0 2:3 2:1 2:0 1:3 1:2 1:0 2:3 2:1 2:0",
                 "position": {
                   "fret": 1,
@@ -11113,7 +11117,7 @@
       "goal": "Play an eight-bar line over Am, F, C, G with a real band behind you, and stay even when the click is no longer the only thing in your ears.",
       "why": "A click forgives nothing and a band hides everything, which is why this is a separate skill. The drums give you a pulse with a feel to it, the bass tells you where the changes are, and your line has to fit between them. This is the reason you did all of the rest.",
       "howTo": [
-        "Every written line lands on a tone of the chord on each bar line. Play it dry first and hear that happen.",
+        "Every written line lands on a note of the chord on each bar line. Play it on your own first, with no band, and listen for those notes.",
         "Listen to the snare, not to your own fingers. If you get lost, catch the next bar line and carry on.",
         "Use direct input or headphones for a graded take: the band reaching a microphone is something the app has not been tested against."
       ],
@@ -14121,7 +14125,7 @@
       "placement": {
         "startHereIf": [
           "You can run A minor three notes per string, across three strings, even at sixteenths 80 BPM.",
-          "You can name which crossing is your weaker one.",
+          "You can name which crossing is your weaker one, outside or inside. The Step 'Crossing two strings' explains both.",
           "Clean is fine at a moderate tempo and you've hit a speed wall, or you've never held a long line over a band."
         ]
       },

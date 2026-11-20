@@ -82,6 +82,13 @@ function onStrings(tab: string, strings: readonly string[], lowest: string) {
   };
 }
 
+/** Shared lines, word for word the same in every Path that uses them, so each is translated once. */
+const TRIPLET_COUNT = "Count '1-trip-let, 2-trip-let'. Three even notes a click, with the first one on it.";
+const SEXTUPLETS_ARE = "Sextuplets are six even notes to one click.";
+const BOX_ONE =
+  "Box 1 of A minor pentatonic sits at fret 5, two notes on every string. The first finger plays fret 5 on all six strings. The other note is fret 8 with the little finger on the low E, B and top strings, and fret 7 with the third finger on the A, D and G strings.";
+const BOX_ONE_POINTER = "Blues and Pentatonics teaches the box slowly over a band in its first Step.";
+
 const SAFETY =
   "Stop at any pain in the hand, wrist or forearm. A tired forearm is one thing and pain is another; pain ends the set.";
 
@@ -153,13 +160,14 @@ export default definePath({
         {
           id: "a-minor-one-string",
           title: "A minor up one string",
-          purpose: "Your first melody, played by moving the whole hand along the G string, so shifts stop being an event.",
+          purpose: "A melody played by moving the whole hand along the G string, so shifts stop being an event.",
           howTo: [
-            "Play the A natural minor scale along the G string with the first two fingers only, sliding the hand between notes. Lift just enough to move.",
+            "Play the notes of A minor along the G string: frets 2, 4, 5, 7, 9, 10, 12 and 14, then back down. Use the first two fingers only and slide the hand between notes. Lift just enough to move.",
             "Sing the notes if you can. A wrong note here is obvious to the ear.",
           ],
           coach: "After the take I can say whether the notes were the written ones, and how even they were.",
-          tab: `/8 3:2 3:4 3:5 3:7 3:9 3:10 3:12 3:14 | 3:12 3:10 3:9 3:7 3:5 3:4 3:2 3:4`,
+          // Fingers printed: the how-to asks for the first two fingers only, a shift after every pair.
+          tab: `/8 3:2f1 3:4f2 3:5f1 3:7f2 3:9f1 3:10f2 3:12f1 3:14f2 | 3:12f1 3:10f2 3:9f1 3:7f2 3:5f1 3:4f2 3:2f1 3:4f2`,
           position: 2,
           shifts: true,
           harmony: { scale: ["A", "naturalMinor"], cover: true },
@@ -222,13 +230,13 @@ export default definePath({
           id: "four-fingers-16",
           title: "Four fingers at sixteenths",
           purpose: "The hands have to agree at a rate where they can no longer be managed one note at a time.",
-          howTo: ["The same walk as before, at sixteenths. If the fingers run ahead of the pick, the notes come out as flams; make the fingers lazier."],
+          howTo: ["The same four-finger walk as in the first Step, at sixteenths. If the fingers land ahead of the pick, each note sounds twice: a soft tap from the finger, then the picked note. Make the fingers lazier."],
           coach: "Evenness is the number to watch on this one.",
           vary: onStrings(`/16 ${repeat("5:5 5:6 5:7 5:8 5:7 5:6 5:5 5:6", 2)}`, ["5", "4", "3", "6"], "fret 3"),
           tab: `/16 ${repeat("5:5 5:6 5:7 5:8 5:7 5:6 5:5 5:6", 2)}`,
           position: 5,
           rungs: ladder(55, 110, 5),
-          passAt: 90,
+          passAt: 85,
           grade: "timing",
           minutes: 6,
         },
@@ -246,7 +254,7 @@ export default definePath({
           shifts: true,
           harmony: { scale: ["A", "naturalMinor"] },
           rungs: ladder(55, 110, 5),
-          passAt: 90,
+          passAt: 85,
           grade: "timingNotes",
           minutes: 6,
         },
@@ -254,9 +262,13 @@ export default definePath({
           id: "b-string-melody",
           title: "Sixteenth melody on the B string",
           purpose: "A real line in A minor on one string: if this one sings, your sixteenths are musical rather than merely fast.",
-          howTo: ["Stay on the B string and shift by small moves. Let the first note of each beat be a touch stronger so you can hear where you are."],
+          howTo: [
+            "Stay on the B string. Beat 1 uses frets 6, 8 and 10 with the first, second and little fingers: a wider reach than one finger per fret, so open the hand from the first finger. Beat 2 starts with the first finger one fret lower, at fret 5, and it slides back up to fret 6 for the next note. For beat 3 move the whole hand up two frets, so the same fingers take frets 8, 10 and 12, and come back down for beat 4.",
+            "Let the first note of each beat be a touch stronger so you can hear where you are.",
+          ],
           coach: "When this is even and on the written notes, the next Step is ready for you.",
-          tab: `/16 2:10 2:8 2:6 2:8 2:5 2:6 2:8 2:10 2:12 2:10 2:8 2:10 2:6 2:8 2:10 2:8`,
+          // Fingers printed: one hand shape (first, second and little fingers, two frets apart) moved along the string.
+          tab: `/16 2:10f4 2:8f2 2:6f1 2:8f2 2:5f1 2:6f1 2:8f2 2:10f4 2:12f4 2:10f2 2:8f1 2:10f2 2:6f1 2:8f2 2:10f4 2:8f2`,
           position: 7,
           shifts: true,
           click: 2,
@@ -440,9 +452,12 @@ export default definePath({
       goal: "Play the A minor pentatonic box in the sequences you actually hear in rock and blues solos.",
       why: "Two notes per string means a crossing every other note, and the same kind of crossing each time. That is exactly what makes pentatonic runs harder to pick than they look, and it is why they come right after crossings. You get a sound you already recognise as your reward.",
       howTo: [
+        BOX_ONE,
+        BOX_ONE_POINTER,
         "Starting on a downstroke on the first note of a string, every change going up is inside. Coming down from a downstroke on the first note of a string, every change is outside. Where the stroke falls decides it, so you can choose.",
         "Roll a fingertip across when two notes share a fret on neighbouring strings, rather than lifting and placing it.",
-        "Use a click on the quarter note and let the triplets feel round.",
+        TRIPLET_COUNT,
+        "Three of the Exercises here are in triplets. Keep the strokes strictly down-up, so beats 2 and 4 start on an upstroke. That is correct. Do not add a stroke to fix it. Rhythm Foundations drills triplets on their own in its Intermediate Level, in the Step 'Three to a beat'.",
       ],
       payoff: "The run from a hundred solos you have heard, at a tempo where it is clean, and the same lick working in three keys.",
       difficultyException:
@@ -450,9 +465,12 @@ export default definePath({
       exercises: [
         {
           id: "box-up-down",
-          title: "Box 1, up and down",
+          title: "The box, up and down",
           purpose: "The whole box in plain triplets, so the map and the crossings settle together.",
-          howTo: ["Six strings up and back. The turn on the top string lands the next downstroke on the box's lower fret, so the descent is inside crossings too: the whole loop is one kind, and you get a long look at it."],
+          howTo: [
+            "Six strings up and back. The turn on the top string lands the next downstroke on the box's lower fret, so the descent is inside crossings too: the whole loop is one kind, and you get a long look at it.",
+            "Each Take plays one of the five boxes: the same five notes, further up the neck from box 1 to box 5. Read the frets from the tab.",
+          ],
           coach: "I'll say whether the notes were the box and how even they were.",
           vary: {
             values: { position: ["box 1", "box 2", "box 3", "box 4", "box 5"] },
@@ -491,7 +509,7 @@ export default definePath({
           id: "threes-down",
           title: "Descending threes",
           purpose: "The classic pentatonic run: groups of three coming down the box, each group starting one note lower.",
-          howTo: ["Triplets, so every group starts on a beat. Three is odd, so each group starts on the opposite stroke from the last one, which is the whole point: the crossings keep changing."],
+          howTo: ["Triplets, so every group starts on a beat. Three is odd, so each group starts on the opposite stroke from the last one, which is the whole point: the crossings keep changing. Accent the first note of each group a little, as in the Step 'Accents where you want them'. Every second accent is an upstroke."],
           coach: "A long run like this usually slips in the same place. Listening back will show you where.",
           tab: `/8t ${pentatonic({ root: "A", box: 1, sequence: "threesDown" })} hold`,
           position: 5,
@@ -528,7 +546,8 @@ export default definePath({
           shifts: true,
           crossing: "outside",
           chords: "Am | Am | Dm | Em",
-          rungs: ladder(50, 75, 5),
+          // Top rung 90: the validator times the shift to fret 12 at about 91 BPM at the fastest.
+          rungs: ladder(50, 90, 5),
           passAt: 70,
           grade: "timingNotes",
           minutes: 6,
@@ -602,7 +621,7 @@ export default definePath({
           id: "six-strings",
           title: "Two and a half octaves",
           purpose: "The whole shape up and down in triplets, a small hand shift included where the top strings move up a fret.",
-          howTo: ["The hand moves up one fret when you reach the B string. Do it during the string change, not after it."],
+          howTo: ["The hand moves up one fret when you reach the B string and one more at the top string, and back on the way down. Move during the string change, not after it."],
           coach: "Long lines are where time drifts. Evenness across the whole take is the number.",
           tab: `/8t ${threeNps({ root: "A", scale: "naturalMinor", string: 6, fret: 5, strings: 6, sequence: "updown" })} hold`,
           position: 5,
@@ -642,7 +661,7 @@ export default definePath({
           vary: onStrings(`/16 5:5 5:6 5:7 5:8 /4 5:7 /16 5:5 5:6 5:7 5:8 /4 5:7`, ["5", "4", "3", "6"], "fret 12"),
           tab: `/16 5:5 5:6 5:7 5:8 /4 5:7 /16 5:5 5:6 5:7 5:8 /4 5:7`,
           position: 5,
-          rungs: ladder(80, 170, 10),
+          rungs: ladder(90, 150, 10),
           passAt: 120,
           grade: "timing",
           pass: [
@@ -690,8 +709,8 @@ export default definePath({
         {
           id: "six-note-burst",
           title: "The six-note burst, into a landing",
-          purpose: "Your descending lick at sextuplet speed, then a walk down to A: this is how a fast run actually gets used in a solo.",
-          howTo: ["One beat of sextuplets from the top string, then D, C and A as quarter notes. Land exactly on beat 2."],
+          purpose: "The descending six-note lick from the Step 'Three notes per string', all six notes in one beat, then a walk down to A: this is how a fast run actually gets used in a solo.",
+          howTo: [SEXTUPLETS_ARE, "One beat of sextuplets from the top string, then D, C and A as quarter notes. Land exactly on beat 2."],
           coach: "Fast notes on a real rig are the hardest to time, so trust the landing and your own ear as much as the numbers.",
           tab: `/16t 1:8 1:7 1:5 2:8 2:6 2:5 /4 3:7 3:5 4:7`,
           position: 5,
@@ -851,8 +870,8 @@ export default definePath({
           title: "The six-note lick, six to a click",
           purpose: "C, B, A, G, F, E on the top two strings as sextuplets, round and round. The six-note burst from the Speed bursts Step, now without the rest after it.",
           howTo: [
-            "Six notes to the click, starting on a downstroke; the pattern is even, so every repeat starts down too.",
-            "Lean on the first note of each beat a little. Without it six fast notes turn into a blur with no beat in it.",
+            "Six notes to the click, starting on a downstroke; the count is even, so every repeat starts down too.",
+            "Accent the first note of each beat a little. Without it six fast notes turn into a blur with no beat in it.",
           ],
           coach: "Fast notes are the hardest for me to place, so read the evenness as provisional and trust a recording as well.",
           vary: inKeys(`/16t ${repeat("1:8 1:7 1:5 2:8 2:6 2:5", 4)}`, ["A", "B", "C", "D", "E"]),
@@ -964,7 +983,7 @@ export default definePath({
       goal: "Play an eight-bar line over Am, F, C, G with a real band behind you, and stay even when the click is no longer the only thing in your ears.",
       why: "A click forgives nothing and a band hides everything, which is why this is a separate skill. The drums give you a pulse with a feel to it, the bass tells you where the changes are, and your line has to fit between them. This is the reason you did all of the rest.",
       howTo: [
-        "Every written line lands on a tone of the chord on each bar line. Play it dry first and hear that happen.",
+        "Every written line lands on a note of the chord on each bar line. Play it on your own first, with no band, and listen for those notes.",
         "Listen to the snare, not to your own fingers. If you get lost, catch the next bar line and carry on.",
         "Use direct input or headphones for a graded take: the band reaching a microphone is something the app has not been tested against.",
       ],
@@ -1131,7 +1150,7 @@ export default definePath({
       summary: "Bursts above your clean tempo, string skips and long lines, the figures you know taken up to tempo, a full minute without letting up, then a composed run over a band.",
       startHereIf: [
         "You can run A minor three notes per string, across three strings, even at sixteenths 80 BPM.",
-        "You can name which crossing is your weaker one.",
+        "You can name which crossing is your weaker one, outside or inside. The Step 'Crossing two strings' explains both.",
         "Clean is fine at a moderate tempo and you've hit a speed wall, or you've never held a long line over a band.",
       ],
       steps: ["speed-bursts", "cross-string-runs", "up-to-tempo", "stamina-minute", "over-the-band"],
