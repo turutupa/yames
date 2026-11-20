@@ -1280,6 +1280,59 @@ export function sentencesOf(text: string): string[] {
 
 type TextResult = { text: string | null; firstRefused: boolean };
 
+const ON_STRING = /^On the ((?:low |top |high )?[A-G]) string,? (.+)\.$/;
+
+/**
+ * Sentences next to each other that say the same thing of different strings become one: "On the A string
+ * the fretted note is at fret 2. On the D string it is at fret 2." reads "On the A and D strings the fretted
+ * note is at fret 2." The later sentence may name the subject again or say "it"; anything else that differs
+ * keeps the sentences apart.
+ */
+export function mergeSameFacts(sentences: readonly string[]): string[] {
+  const out: string[] = [];
+  let run: { strings: string[]; fact: string; sentence: string } | null = null;
+  const flush = () => {
+    if (!run) return;
+    const [first, ...rest] = run.strings;
+    out.push(
+      rest.length === 0
+        ? run.sentence
+        : `On the ${[first, ...rest.slice(0, -1)].join(", ")} and ${rest[rest.length - 1]} strings ${run.fact}.`,
+    );
+    run = null;
+  };
+  for (const sentence of sentences) {
+    const m = ON_STRING.exec(sentence);
+    if (!m) {
+      flush();
+      out.push(sentence);
+      continue;
+    }
+    const [, name, fact] = m;
+    const sameFact = (said: string, before: string): boolean => {
+      if (said === before) return true;
+      // "it is at fret 2" after "the fretted note is at fret 2": the subject, said again as "it".
+      const pronoun = /^it (.+)$/.exec(said);
+      if (!pronoun) return false;
+      const subject = before.slice(0, before.length - pronoun[1].length).trim();
+      return before.endsWith(" " + pronoun[1]) && /^the [a-z ]+$/.test(subject);
+    };
+    if (run && !run.strings.includes(name) && sameFact(fact, run.fact)) {
+      run.strings.push(name);
+      continue;
+    }
+    flush();
+    // A sentence that begins a run keeps its own words until a second string joins it.
+    if (/^it /.test(fact)) {
+      out.push(sentence);
+      continue;
+    }
+    run = { strings: [name], fact, sentence };
+  }
+  flush();
+  return out;
+}
+
 function rewriteText(text: string, where: string, ctx: Ctx, refusals: Refusal[]): TextResult {
   const kept: string[] = [];
   let counting = false;
@@ -1289,12 +1342,12 @@ function rewriteText(text: string, where: string, ctx: Ctx, refusals: Refusal[])
     if (!result.ok) {
       refusals.push({ where, sentence: sentences[i], reason: result.reason });
       for (const later of sentences.slice(i + 1)) refusals.push({ where, sentence: later, reason: "after a sentence that was not written" });
-      return { text: kept.length ? kept.join(" ") : null, firstRefused: i === 0 };
+      return { text: kept.length ? mergeSameFacts(kept).join(" ") : null, firstRefused: i === 0 };
     }
     counting = counting || !!result.counting;
     kept.push(result.text);
   }
-  return { text: kept.join(" "), firstRefused: false };
+  return { text: mergeSameFacts(kept).join(" "), firstRefused: false };
 }
 
 export function describeVariant(exercise: ExerciseText, variant: TextSide): VariantDescription {
