@@ -249,6 +249,8 @@ export function CoachModelSelector() {
     checked?: boolean;
     disabled?: boolean;
     label?: string;
+    /** What the press does, for a pointer that rests on it. */
+    hint?: string;
     className: string;
     onPress: () => void;
     children: ReactNode;
@@ -263,6 +265,7 @@ export function CoachModelSelector() {
         aria-checked={props.role === "menuitemradio" ? !!props.checked : undefined}
         aria-disabled={props.disabled || undefined}
         aria-label={props.label}
+        title={props.hint}
         tabIndex={i === active ? 0 : -1}
         className={props.className}
         onClick={() => {
@@ -333,6 +336,7 @@ export function CoachModelSelector() {
         role: "menuitem",
         className: "coach-model-action coach-model-action-quiet",
         label: `${t("coachModel.download.cancel")}: ${entry}`,
+        hint: t("coachModel.download.cancelHint"),
         onPress: () => {
           setConfirm(null);
           cancelCoachModelDownload(row.tier);
@@ -361,6 +365,7 @@ export function CoachModelSelector() {
           role: "menuitem",
           className: "coach-model-action coach-model-action-quiet",
           label: `${t("coachModel.download.pause")}: ${entry}`,
+          hint: t("coachModel.download.pauseHint"),
           onPress: () => pauseCoachModelDownload(),
           children: t("coachModel.download.pause"),
         }),

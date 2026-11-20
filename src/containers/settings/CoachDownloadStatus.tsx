@@ -200,7 +200,7 @@ export function DownloadProgressBar({
           <button
             className="global-download-bar-cancel"
             onClick={onCancel}
-            title={t("coachModel.download.cancelHint")}
+            title={t("coachDownload.cancelHint")}
             data-testid="download-bar-cancel"
           >
             {t("coachModel.download.cancel")}
