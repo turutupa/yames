@@ -37,7 +37,8 @@ export type ShotTheme = (typeof SHOT_THEMES)[number];
 
 /** What the mocked scorer reports for one Session Take. */
 /** `nearMiss`: 83% against a bar of 85, the result the fairness question is for. */
-export type TakeRecipe = "pass" | "below" | "nearMiss" | "noCatch";
+/** `passSlip`: a pass in which the tune's first bar still slipped (bars 1 and 5), for P1's scene. */
+export type TakeRecipe = "pass" | "below" | "nearMiss" | "noCatch" | "passSlip";
 
 export interface Shot {
   /** `?shot=` value, and the folder under docs/img/. */
@@ -72,6 +73,12 @@ export interface Shot {
     unsubscribed?: string[];
     /** On a result, answer "Was this grade fair?" before the photograph. */
     fair?: "yes" | "no";
+    /**
+     * After the first Take's verdict, press the big button ("Go again") this
+     * many more times, each Take to its verdict (`take` as a list gives each
+     * its recipe): the second and third time at the same place (c1c).
+     */
+    again?: number;
     minutes?: 5 | 10 | 15 | 20;
     /** One recipe for every Take, or one per Take in order, the last repeating. */
     take?: TakeRecipe | TakeRecipe[];
@@ -84,6 +91,10 @@ export interface Shot {
       | "noCatch"
       /** One Take played, then the same again: the ready screen of a later Take, with the coach's note on the last one. */
       | "readyAgain"
+      /** After the Takes, "Loop the first bar" pressed: the loop running (c1c). */
+      | "loop"
+      /** The loop stopped again: back on the ready screen of the same Exercise. */
+      | "afterLoop"
       /** A timed step (the warm-up), up and waiting for its Start. */
       | "timedReady"
       /** A timed step after its Start: the clock and the click running. */
@@ -1542,6 +1553,55 @@ export const SHOTS: Shot[] = [
     // The neck glides from the result's frame back to the ready one.
     settleMs: 2500,
   },
+  // c1c: the second time at the same place, "Loop the first bar" leads the tonal row.
+  {
+    id: "coach-loop-front",
+    suffix: "coach-loop-front",
+    window: "main",
+    session: { seed: "returning", minutes: 20, take: "below", again: 1, stop: "between" },
+    width: 1440,
+    height: 900,
+    settleMs: 600,
+  },
+  // c1c: P2, the third time at the same place: the solid button is Move on.
+  {
+    id: "coach-leave-it",
+    suffix: "coach-leave-it",
+    window: "main",
+    session: { seed: "returning", minutes: 20, take: "below", again: 2, stop: "between" },
+    width: 1440,
+    height: 900,
+    settleMs: 600,
+  },
+  // c1c: P1, a pass that still held the bar that slipped: once more here, "Up to N" one tap away.
+  {
+    id: "coach-once-more",
+    suffix: "coach-once-more",
+    window: "main",
+    session: { seed: "returning", minutes: 20, take: ["below", "passSlip"], again: 1, stop: "result" },
+    width: 1440,
+    height: 900,
+    settleMs: 600,
+  },
+  // c1c: the loop running, and the ready screen after it.
+  {
+    id: "coach-loop",
+    suffix: "coach-loop",
+    window: "main",
+    session: { seed: "returning", minutes: 20, take: "below", stop: "loop" },
+    width: 1440,
+    height: 900,
+    settleMs: 1500,
+  },
+  {
+    id: "coach-after-loop",
+    suffix: "coach-after-loop",
+    window: "main",
+    session: { seed: "returning", minutes: 20, take: "below", stop: "afterLoop" },
+    width: 1440,
+    height: 900,
+    settleMs: 2500,
+  },
   // The one order during a Take: an Exercise whose cue fits it (48 characters).
   {
     id: "coach-take-order",
@@ -2147,6 +2207,11 @@ export const PHONE_LEARNING_SCENES = [
   "coach-take-order",
   "coach-ungraded-ready",
   "coach-ungraded-result",
+  "coach-loop-front",
+  "coach-leave-it",
+  "coach-once-more",
+  "coach-loop",
+  "coach-after-loop",
   "progress-ungraded",
   "paths",
   "path-alternate",

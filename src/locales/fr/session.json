@@ -269,6 +269,7 @@
       "cleanFirst": "Tempo propre : {{bpm}} BPM.",
       "cleanMoved": "Tempo propre : de {{from}} à {{bpm}} BPM.",
       "moveOn": "Passer à la suite",
+      "upTo": "Monter à {{bpm}} BPM",
       "fairAsk": "Cette note était-elle juste ?",
       "fairYes": "Oui",
       "fairNo": "Non",
@@ -744,7 +745,8 @@
         "closer": "De {{from}} % à {{to}} % à ce tempo."
       },
       "repeat": {
-        "leaveIt": "Trois fois au même endroit. Laisse-le pour aujourd'hui ; ça va souvent mieux demain."
+        "leaveIt": "Trois fois au même endroit. Laisse-le pour aujourd'hui ; ça va souvent mieux demain.",
+        "onceMore": "Encore une fois à {{bpm}} avant {{up}}, car cette mesure a glissé à la dernière prise."
       },
       "fact": {
         "heard": "{{heard}} notes entendues sur {{expected}}",
@@ -807,6 +809,36 @@
         "backParked_many": "{{title}} se repose {{count}} jours, puis revient à neuf.",
         "backParked_other": "{{title}} se repose {{count}} jours, puis revient à neuf."
       }
+    },
+    "loop": {
+      "kick": "Boucle · non noté",
+      "title": {
+        "bar": "La mesure {{bar}} de la mélodie, en boucle",
+        "bars": "Les mesures {{from}} et {{to}} de la mélodie, en boucle"
+      },
+      "button": {
+        "first": "Boucler la 1re mesure",
+        "bar": "Boucler la mesure {{bar}}",
+        "bars": "Boucler les mesures {{from}} et {{to}}"
+      },
+      "stop": "Arrêter la boucle",
+      "how": "Encore et encore jusqu'à ce que tu arrêtes. Rien ici n'est noté ni gardé ; les points montrent en avance et en retard.",
+      "howUngraded": "Encore et encore jusqu'à ce que tu arrêtes. Rien ici n'est noté ni gardé.",
+      "after": {
+        "lastBar": "Dans la boucle, la mesure {{bar}} de la mélodie est passée sur les {{count}} derniers passages.",
+        "lastBars": "Dans la boucle, les mesures {{from}} et {{to}} de la mélodie sont passées sur les {{count}} derniers passages.",
+        "ofBar": "Dans la boucle, la mesure {{bar}} de la mélodie est passée sur {{landed}} passages sur {{count}}.",
+        "ofBars": "Dans la boucle, les mesures {{from}} et {{to}} de la mélodie sont passées sur {{landed}} passages sur {{count}}."
+      }
+    },
+    "eyes": {
+      "offer": "Celle-ci est pour tes yeux",
+      "watch": "Cette fois, regarde ton médiator.",
+      "result": "Celle-ci était pour tes yeux",
+      "body": "Ni notée ni écoutée. Tu as vu ce que faisait le médiator.",
+      "question": "Un temps a-t-il commencé par un coup montant ?",
+      "yes": "Oui",
+      "no": "Non"
     }
   }
 }

@@ -270,6 +270,7 @@
       "cleanFirst": "Czyste tempo: {{bpm}} BPM.",
       "cleanMoved": "Czyste tempo: z {{from}} na {{bpm}} BPM.",
       "moveOn": "Idź dalej",
+      "upTo": "W górę do {{bpm}} BPM",
       "fairAsk": "Czy ta ocena była uczciwa?",
       "fairYes": "Tak",
       "fairNo": "Nie",
@@ -757,7 +758,8 @@
         "closer": "Wzrost z {{from}}% do {{to}}% w tym tempie."
       },
       "repeat": {
-        "leaveIt": "To samo miejsce trzy razy. Zostaw je na dziś; zwykle jutro idzie lepiej."
+        "leaveIt": "To samo miejsce trzy razy. Zostaw je na dziś; zwykle jutro idzie lepiej.",
+        "onceMore": "Jeszcze raz w {{bpm}} przed {{up}}, bo ten takt rozjechał się w ostatnim podejściu."
       },
       "fact": {
         "heard": "usłyszano {{heard}} z {{expected}} nut",
@@ -824,6 +826,36 @@
         "backParked_many": "{{title}} robi przerwę na {{count}} dni i wraca od nowa.",
         "backParked_other": "{{title}} robi przerwę na {{count}} dnia i wraca od nowa."
       }
+    },
+    "loop": {
+      "kick": "Pętla · bez oceny",
+      "title": {
+        "bar": "Takt {{bar}} melodii w pętli",
+        "bars": "Takty {{from}} i {{to}} melodii w pętli"
+      },
+      "button": {
+        "first": "Zapętl pierwszy takt",
+        "bar": "Zapętl takt {{bar}}",
+        "bars": "Zapętl takty {{from}} i {{to}}"
+      },
+      "stop": "Zatrzymaj pętlę",
+      "how": "Kółko za kółkiem, aż to zatrzymasz. Nic tu nie jest oceniane ani zapisywane; kropki pokazują za wcześnie i za późno.",
+      "howUngraded": "Kółko za kółkiem, aż to zatrzymasz. Nic tu nie jest oceniane ani zapisywane.",
+      "after": {
+        "lastBar": "W pętli takt {{bar}} melodii udał się w ostatnich {{count}} razach.",
+        "lastBars": "W pętli takty {{from}} i {{to}} melodii udały się w ostatnich {{count}} razach.",
+        "ofBar": "W pętli takt {{bar}} melodii udał się w {{landed}} z {{count}} razy.",
+        "ofBars": "W pętli takty {{from}} i {{to}} melodii udały się w {{landed}} z {{count}} razy."
+      }
+    },
+    "eyes": {
+      "offer": "Ten raz jest dla twoich oczu",
+      "watch": "Tym razem patrz na kostkę.",
+      "result": "To podejście było dla twoich oczu",
+      "body": "Bez oceny i bez słuchania. Sam widzisz, co robiła kostka.",
+      "question": "Czy któreś uderzenie zaczęło się ruchem w górę?",
+      "yes": "Tak",
+      "no": "Nie"
     }
   }
 }
