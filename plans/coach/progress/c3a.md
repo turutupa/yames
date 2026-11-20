@@ -217,16 +217,43 @@ The reviewer's verdict on the Rust diff (`a850d3ed..70bdd641`) was MERGE AFTER F
 
    (`/tmp/coach-c3a/test-llm.sh` is that, with any filter as its argument.)
 
+**After the reviewer's re-read** (fixes 1, 3, 4, 5 and the deadline confirmed; three points, commit
+`1b04a140`):
+
+- **Groups count as rules when they open.** The 512 cap was only checked when the next named rule
+  started, so `root ::= ("a")("a")…` 6,000 times in one rule passed; now each `(` is checked, and the
+  count again at the end. Test: `groups_count_as_rules_inside_one_rule`.
+- **A parse-stack estimate.** The precheck now builds the grammar's items and runs `StackEstimate`:
+  at every position of every sequence, the starts of the rest of it (each item's starts up to and
+  including the first that cannot be skipped, plus one for running into the parent; a skippable item
+  repeated n times counts n times), following named references (memoised, a cycle costed once).
+  Refused over `ASK_GRAMMAR_MAX_STACKS = 1,024`; reference chains over `GRAMMAR_MAX_REF_DEPTH = 64`
+  refused too. `coach-answer.gbnf` estimates 32. The reviewer's chain (`root ::= r1? r1? r1? r1?`, … ,
+  `r12 ::= "x"`, about 4^12) is refused; a 40-deep chain with nothing skippable passes. What it does
+  not bound: one parse can add its parents' continuations (at most the reference depth times the
+  estimate), and an ambiguous grammar keeps several parses alive at once, which the estimate does not
+  multiply in; the precheck's doc comment says exactly this. Test: `precheck_bounds_the_parse_stacks`.
+- **The wrapper clamps the deadline.** `coachAsk` clamps `deadlineMs` to 60 s
+  (`COACH_ASK_MAX_DEADLINE_MS`, Rust's cap) before sending it and before setting the backstop: past
+  2^31 - 1 ms `setTimeout` fires at once. Test: "clamps a deadline past Rust's cap" in
+  `ipc.coachGenerate.test.ts`.
+
+Gates after these: `npm run test:rust` 1177 passed, 0 failed (`/tmp/coach-c3ab/rust2.log`); the
+`coach-llm` lib suite with the model 1188 passed, 0 failed, no `SKIPPED` (`/tmp/coach-c3ab/rust-llm2.log`);
+tsc pass (`tsc2.log`); the ipc and parity vitest files 239 passed (`vitest-ipc.log`); build pass
+(`build2.log`).
+
 **What remains uninterruptible.** The cancel flag and the deadline are read between steps, never
 inside one, so a turn can overrun its deadline by the longest single step:
 
 - one `ctx.decode` of a 256-token prompt chunk (on this DGX's CPU build with the 0.6B model, a few
   hundred ms on a quiet machine; seconds under load);
 - one `sample_step`: a grammar `apply` over the whole vocabulary (about 150,000 tokens) against every
-  live parse stack. The precheck bounds the grammar's size, rules, alternatives and nesting, but an
-  ambiguous grammar inside those bounds can still hold many stacks at once; there is no bound on the
-  number of stacks llama.cpp keeps, and no way to interrupt `apply` from Rust;
-- `LlamaSampler::grammar` (first compile) and `reset()` (re-parse on reuse), both bounded by the size cap;
+  live parse stack. The precheck bounds the grammar's size, rules, alternatives, nesting, reference
+  depth and one parse's stack estimate, but an ambiguous grammar inside those bounds can still hold
+  several parses' stacks at once, and there is no way to interrupt `apply` from Rust;
+- `LlamaSampler::grammar` (first compile) and `reset()` (re-parse and stack init on reuse), bounded by
+  the size cap and the stack estimate;
 - a model load (the selector's, not this path's).
 
 The caller returns at the deadline in any case (it polls every 20 ms); what overruns is the worker,
