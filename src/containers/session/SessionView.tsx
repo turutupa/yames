@@ -39,6 +39,7 @@ import { AskStart, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart,
 import { TakeOrder } from "../coach/CoachLine";
 import { ReadyNote, RecapLine, ResultNote, SessionAsk, UngradedNote, takeOrderText } from "./SessionCoach";
 import { askCoach } from "../coach/askStore";
+import { IS_MOBILE } from "../../platform";
 import { RunwayTakeScreen, isTheoryTake } from "./highway/RunwayTake";
 import { categoryTagKey } from "../../session/kind";
 import { KeyChooser } from "./practice/KeyChooser";
@@ -1927,9 +1928,12 @@ export function SessionView({
       ((run.phase === "timedReady" || run.phase === "timed") &&
         (step?.kind === "metronome" || (step?.kind === "jam" && !!step.exerciseId))));
 
-  // The coach's words open Ask where the Session offers it, never during a Take.
+  // The coach's words open Ask where the Session offers it, never during a
+  // Take. Not on a phone: a one-line sentence and a bar cell are under a
+  // thumb's 44 px (phone-learning.spec), and the phone's Ask has no model to
+  // say anything about them; its bar's Ask pill is the way in there.
   const takeRuns = run.phase === "playing" || run.phase === "listening";
-  const notesAsk = onAsk && !takeRuns ? askCoach : undefined;
+  const notesAsk = onAsk && !takeRuns && !IS_MOBILE ? askCoach : undefined;
 
   return (
     <SessionAsk.Provider value={notesAsk}>
