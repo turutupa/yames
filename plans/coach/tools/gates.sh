@@ -32,6 +32,15 @@ gate() {
 gate tsc npx tsc --noEmit
 gate vitest npm run test
 grep -E "Test Files|Tests " "$LOGS/vitest.log" | tail -n 2
+# Under a high load average vitest's worker RPC times out ("Timeout calling
+# onTaskUpdate") and the run exits 1 with every test passing. Say which it was.
+if grep -q 'Timeout calling "onTaskUpdate"' "$LOGS/vitest.log"; then
+  if grep -E "Test Files|Tests " "$LOGS/vitest.log" | grep -q "failed"; then
+    echo "NOTE vitest: a worker RPC timeout AND failing tests"
+  else
+    echo "NOTE vitest: exit 1 is the worker RPC timeout under load; no test failed"
+  fi
+fi
 gate build npm run build
 if [ "$#" -gt 0 ]; then
   gate layout npx playwright test --trace off "$@"
