@@ -31,6 +31,8 @@ export type HotkeyAction =
   | "toggle-widget"
   | "toggle-sidebar"
   | "toggle-coach"
+  /** `?`: open Ask with the caret in its box (leg c2a1; was a listener in the coach card). */
+  | "ask-coach"
   | "tab-1"
   | "tab-2"
   | "tab-3"
@@ -694,6 +696,21 @@ export const HOTKEYS: HotkeyEntry[] = [
     action: "Toggle Coach",
     key: "C",
     desc: "Open or close the practice coach panel",
+    group: "navigation",
+  },
+  /**
+   * `?` opens Ask with the caret in its text box (DESIGN 3.3, 5.1). It was a
+   * window listener inside the old coach card, which nobody could rebind and
+   * which a Session never saw. On a tool with the click running it stops the
+   * click first, as the listener did (plan OQ8); during a Take it opens
+   * nothing and Ask opens on the result. Shift is part of the key on every
+   * layout that has a `?`, so the binding says so.
+   */
+  {
+    id: "ask-coach",
+    action: "Ask the coach",
+    key: "⇧?",
+    desc: "Open Ask with the cursor in its text box",
     group: "navigation",
   },
   /**

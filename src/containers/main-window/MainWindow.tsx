@@ -56,6 +56,9 @@ import {
   MIC_PERMISSION_TIMEOUT_MS,
 } from "../../ipc";
 import CoachCard from "../practice-coach/CoachCard";
+import { AskPanel } from "../coach/AskPanel";
+import { askShownOn, useAskHost } from "../coach/useAskHost";
+import { askCoach, closeAsk, toggleAsk, useAskState } from "../coach/askStore";
 import "../../styles/main-window.css";
 import "../../styles/transitions.css";
 import "../../styles/evaluation.css";
@@ -571,6 +574,9 @@ export function MainWindow() {
   // closes; not when Settings opens over it (the mode stays).
   useScheduleLeavesWithSong(mode === "songs" && !!songsSession.score);
 
+  /** Ask, the coach panel: open or not, and the Ask key held over a Take (leg c2a1). */
+  const askState = useAskState();
+
   /**
    * Today's Session, and everything that runs it (`src/session/`).
    *
@@ -584,7 +590,9 @@ export function MainWindow() {
     isPlaying: state.isPlaying,
     beat: currentBeat,
     state,
-    coach: session,
+    // The panel's open state is Ask's since leg c2a1 (`askStore`), not the
+    // coach session's: a Session still closes one it opened.
+    coach: { ...session, cardOpen: askState.open, toggleCard: toggleAsk },
     listening: evaluation.enabled,
     // A Session turns the input on by itself, and says why when it cannot
     // (owner, beta 6: Start take did nothing with the input off).
@@ -605,6 +613,17 @@ export function MainWindow() {
     lineup: jamSession.lineup,
     // "Where do you start?" lists the Paths, over whichever screen the wizard opened on.
     preload: onboarding.isOpen,
+  });
+
+  // Ask (leg c2a1): the panel, the coach's context for it, and the drawer's
+  // rules in a Session. The conversation lives for the app run.
+  const ask = useAskHost({
+    view,
+    session: sessionRun,
+    listening: evaluation.enabled,
+    isPlaying: state.isPlaying,
+    jam: jamSession.jam,
+    song: songsSession.song,
   });
 
   // "Hear what I play" (detection M7): the key and the chord heard while a
@@ -1796,7 +1815,13 @@ export function MainWindow() {
     setIsFullscreen,
     setIsOsFullscreen,
     setSidebarOpen,
-    toggleCard: session.toggleCard,
+    toggleCard: ask.panel.toggle,
+    // `?` (plan OQ8, as the old card's listener did): on a tool the click
+    // stops first, then Ask opens with the caret in its box.
+    askCoach: () => {
+      if (state.isPlaying && view !== "session") void togglePlayback();
+      askCoach();
+    },
     forceWebviewFocus,
   });
 
@@ -1830,6 +1855,13 @@ export function MainWindow() {
         if (isFullscreen) {
           e.preventDefault();
           setIsFullscreen(false);
+          return;
+        }
+        // Ask open over the screen: Escape puts it away before it means
+        // anything to the screen (in a Session, Exit).
+        if (askState.open && view !== "settings") {
+          e.preventDefault();
+          closeAsk();
           return;
         }
         if (view === "settings") {
@@ -1872,7 +1904,7 @@ export function MainWindow() {
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [view, keyBindings, isFullscreen, bindingFor, setView, dispatchAction, inputTestMode, onboarding.isOpen, tour?.isOpen]);
+  }, [view, keyBindings, isFullscreen, bindingFor, setView, dispatchAction, inputTestMode, onboarding.isOpen, tour?.isOpen, askState.open]);
 
   // MIDI controller support. The dispatcher is silenced while the input
   // tester is open by reading `inputTestModeRef` (the ref pattern keeps
@@ -2125,7 +2157,8 @@ export function MainWindow() {
     },
     onDeleteSong: songsSession.deleteSong,
     onRenameSong: songsSession.renameSong,
-    onToggleCoach: session.toggleCard,
+    // The rail's "Ask the coach" row: Ask, with the caret in its box.
+    onToggleCoach: () => ask.panel.toggle({ focus: true }),
     onZen: () => setIsFullscreen(true),
   });
 
@@ -2267,7 +2300,12 @@ export function MainWindow() {
       )}
 
       <LearningNeck view={view}>
-      <div className="main-body" data-session={inSession ? "" : undefined}>
+      <div
+        className="main-body"
+        data-session={inSession ? "" : undefined}
+        // A phone's Ask is a sheet over everything: nothing moves for it.
+        data-ask={!IS_MOBILE && askState.open && askShownOn(view) ? "" : undefined}
+      >
         {/* A phone gets a bottom tab bar instead (below): 252px of rail on a
             360px screen is two thirds of the app. See MobileTabBar.tsx. */}
         {!IS_MOBILE && (
@@ -2288,7 +2326,7 @@ export function MainWindow() {
           songFiles={songsSession.songFiles}
           activeSongId={songsSession.song?.id ?? null}
           dueSongs={songsDue}
-          coachOpen={session.cardOpen}
+          coachOpen={askState.open}
           coachActive={session.active}
           coachListening={evaluation.enabled}
           keyBindings={keyBindings}
@@ -2425,6 +2463,8 @@ export function MainWindow() {
                 !!coach.modelStatus?.voiceReady
           }
           onOpenHelp={help?.openMenu}
+          // The phone's way into Ask: a labelled 44 px button (DESIGN 3.2).
+          onAsk={IS_MOBILE ? () => ask.panel.toggle() : undefined}
         />
         )}
 
@@ -2715,6 +2755,8 @@ export function MainWindow() {
               midi.bindings.some((b) => b.action === "session-pedal")
             }
             onCheckSound={openAudioSettings}
+            onAsk={() => ask.panel.show({ focus: true })}
+            askLater={askState.deferred}
           />
           </>
         ) : view === "songs" ? (
@@ -2941,33 +2983,41 @@ export function MainWindow() {
           />
         )}
       </div>
-      {!IS_MOBILE &&
-        (view === "beat" ||
-        view === "drill" ||
-        view === "setlist" ||
-        view === "jam" ||
-        view === "today" ||
-        view === "paths" ||
-        view === "progress" ||
-        view === "tools") && (
-      <CoachCard
-        open={session.cardOpen}
-        active={session.active}
-        messages={session.messages}
-        onToggle={session.toggleCard}
-        onStartSession={session.startSession}
-        onEndSession={session.endSession}
-        onSendChat={session.sendChat}
-        onChipAction={session.handleChipAction}
-        onRegisterChatFocus={session.registerChatFocus}
-        listening={evaluation.enabled}
-        hasSignal={evaluation.hasSignal}
-        spectrum={evaluation.spectrum}
-        isPlaying={state.isPlaying}
-        onPause={() => state.isPlaying && togglePlayback()}
-        inferredGrid={evaluation.inferredGrid}
-        playMode={session.playMode}
-      />
+      {/* Ask: the one coach panel, a dock or a drawer by the window's width
+          and the screen (ask.css), a sheet on a phone. Not mounted while it
+          is closed, so nothing of it runs during a Take. Until c2a2 the tools'
+          coach (Start, End, Feed, History) is its second section, on the
+          screens the old coach card was on. */}
+      {askState.open && askShownOn(view) && (
+        <AskPanel
+          lookingAt={ask.lookingAt}
+          onClose={ask.panel.close}
+          toolsCoach={
+            !IS_MOBILE &&
+            (view === "beat" ||
+              view === "drill" ||
+              view === "setlist" ||
+              view === "jam" ||
+              view === "today" ||
+              view === "paths" ||
+              view === "progress" ||
+              view === "tools") ? (
+              <CoachCard
+                active={session.active}
+                messages={session.messages}
+                onStartSession={session.startSession}
+                onEndSession={session.endSession}
+                onChipAction={session.handleChipAction}
+                listening={evaluation.enabled}
+                hasSignal={evaluation.hasSignal}
+                spectrum={evaluation.spectrum}
+                isPlaying={state.isPlaying}
+                inferredGrid={evaluation.inferredGrid}
+                playMode={session.playMode}
+              />
+            ) : undefined
+          }
+        />
       )}
       </div>{/* main-body */}
       </LearningNeck>
