@@ -124,8 +124,10 @@ coach-llm-vulkan = ["coach-llm", "llama-cpp-2/vulkan"]
 # `YAMES_CALLBACK_PROBE=1`, with or without this.
 callback-probe-alloc = []
 # The note verifier's model runtime. `detect-tract` is the one builds people
-# play on carry: `scripts/tauri.mjs`, `release.yml`, `beta.yml` and
-# `android.yml` pass it explicitly (Tauri's CLI has no
+# play on carry: `release.yml` and `beta.yml` pass it explicitly for the
+# desktop builds, and `scripts/tauri.mjs` (the `npm run tauri` wrapper) adds
+# it to every `dev` / `build`, which is how `android.yml` and the Android
+# beta get it; `android.yml`'s own `cargo check` names it (Tauri's CLI has no
 # `--no-default-features`, and `npm run test:rust` must stay the no-model
 # gate, so it is not in `default`). `detect-ort` (ONNX Runtime; its build
 # downloads pyke's prebuilt library) is for the bench and the parity check

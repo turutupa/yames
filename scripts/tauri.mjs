@@ -47,7 +47,8 @@ const FEATURE = process.platform === "darwin" ? "coach-llm-metal" : "coach-llm-v
 
 // The note verifier's runtime (`plans/detection/RUNTIME.md`): pure Rust, so
 // every build people play on carries it, phones included. Not behind
-// YAMES_DEV_NO_LLM: it costs no toolchain and about 3 MB.
+// YAMES_DEV_NO_LLM: it costs no toolchain. About +13 MB of binary
+// (RUNTIME.md, "Size").
 const DETECT_FEATURE = "detect-tract";
 
 const subcommand = argv.find((a) => !a.startsWith("-"));
