@@ -37,7 +37,7 @@ import type { TakeOutcome } from "../../session/runner";
 import { PORTRAIT_PHONE_QUERY, useMediaQuery } from "../../hooks/useMediaQuery";
 import { AskStart, LoopButton, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart, timedHowKey } from "./parts";
 import { TakeOrder } from "../coach/CoachLine";
-import { ReadyNote, RecapLine, ResultNote, SessionAsk, UngradedNote, takeOrderText } from "./SessionCoach";
+import { ReadyNote, RecapLine, ResultNote, SessionAsk, UngradedNote, takeOrderText, useNextCue } from "./SessionCoach";
 import { askCoach } from "../coach/askStore";
 import { IS_MOBILE } from "../../platform";
 import { RunwayTakeScreen, isTheoryTake } from "./highway/RunwayTake";
@@ -578,6 +578,8 @@ function TakeScreen({
     view: session.practiceView,
   });
   const howRef = useRef<HTMLDetailsElement>(null);
+  // The cue for this Take: the ready note's headline and the running order, one sentence.
+  const cue = useNextCue(session);
   if (!exercise || !take || !step) return null;
 
   const pathTitle = session.paths.find((p) => p.id === take.pathId);
@@ -606,12 +608,16 @@ function TakeScreen({
   ]);
   const hasHow = !!how || words.howTo.length > 1;
   // The one order of a running Take: fixed before the count-in (DESIGN 3.4).
-  const order = run.ungraded === "eyes" ? t("session.eyes.watch") : takeOrderText(exercise);
-  const openHow = () => {
+  const order = run.ungraded === "eyes" ? t("session.eyes.watch") : takeOrderText(exercise, cue);
+  // "What should I try?": the How, open, at the line the cue points to when it names one.
+  const openHow = (more?: number) => {
     const fold = howRef.current;
     if (!fold) return;
     fold.open = true;
-    fold.scrollIntoView({ block: "nearest" });
+    const lines = fold.querySelectorAll<HTMLElement>("[data-how-line]");
+    lines.forEach((line) => line.toggleAttribute("data-pointed", more !== undefined && line.dataset.howLine === String(more)));
+    const pointed = more === undefined ? null : fold.querySelector<HTMLElement>(`[data-how-line="${more}"]`);
+    (pointed ?? fold).scrollIntoView({ block: "nearest" });
   };
 
   return (
@@ -738,11 +744,15 @@ function TakeScreen({
               (acceptance P1-4). */}
           {!running && hasHow && (
             <HowLines detailsRef={howRef}>
-              {how && <div className="session-why session-how-text" data-testid="session-how-text">{how}</div>}
+              {how && (
+                <div className="session-why session-how-text" data-testid="session-how-text" data-how-line="0">
+                  {how}
+                </div>
+              )}
               {/* The how-to's further lines (a variant's key and frets among
                   them), whole and quieter: the numbers in them are the point. */}
               {words.howTo.slice(1).map((line, i) => (
-                <div key={i} className="session-why session-how-more" data-testid="session-how-more">
+                <div key={i} className="session-why session-how-more" data-testid="session-how-more" data-how-line={i + 1}>
                   {line}
                 </div>
               ))}

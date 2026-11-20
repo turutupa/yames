@@ -696,6 +696,7 @@
     },
     "note": {
       "passedAt": "在 {{bpm}} 通过。",
+      "nextTime": "下次：",
       "finding": {
         "ceiling": "{{holds}} BPM 能稳住，{{breaks}} 开始乱。"
       },

@@ -34,7 +34,10 @@ export function CoachNote({
   testId,
   kind,
   onAsk,
+  cue,
 }: {
+  /** The trigger of the Path's cue the headline is, when it is one (for tests and styles). */
+  cue?: string;
   /** The one thing: an order before a Take, the finding after it. */
   headline: ReactNode;
   /** Where the headline's words come from, said under it. */
@@ -49,7 +52,7 @@ export function CoachNote({
   onAsk?: AskHandler;
 }) {
   return (
-    <section className="coach-note" data-testid={testId} data-kind={kind} aria-live={live ? "polite" : undefined}>
+    <section className="coach-note" data-testid={testId} data-kind={kind} data-cue={cue} aria-live={live ? "polite" : undefined}>
       <p className="coach-note-head">
         <CoachGlyph />
         <span>
@@ -74,6 +77,22 @@ export function NoteLine({ children, extra, testId }: { children: ReactNode; ext
     <p className="coach-note-line" data-extra={extra ? "" : undefined} data-testid={testId}>
       {children}
     </p>
+  );
+}
+
+/**
+ * One thing to try, under a finding (DESIGN 4.2): "Next time: {cue}", with
+ * where the words come from on its own line. The finding above says where
+ * and which way; this is the Path author's suggestion, and says so.
+ */
+export function NoteCue({ label, say, source, testId }: { label: string; say: string; source: BlockSource; testId?: string }) {
+  return (
+    <div className="coach-note-cue" data-testid={testId}>
+      <p className="coach-note-line">
+        <span className="coach-note-cue-label">{label}</span> <b>{say}</b>
+      </p>
+      <SourceLine source={source} />
+    </div>
   );
 }
 

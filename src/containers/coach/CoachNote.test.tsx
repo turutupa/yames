@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import "../../i18n";
 import { TAKE_ORDER_MAX, TakeOrder, shortCue } from "./CoachLine";
-import { CoachNote, FactLine, NoteBars } from "./CoachNote";
+import { CoachNote, FactLine, NoteBars, NoteCue } from "./CoachNote";
 import type { FactItem, NoteStrip } from "../../coach/takeNote";
 import { UngradedNote } from "../session/SessionCoach";
 import type { SessionRun } from "../session/hooks/useSessionRun";
@@ -46,6 +46,19 @@ describe("the note", () => {
     expect(note).toHaveAttribute("aria-live", "polite");
     expect(note).toHaveTextContent("Bar 1 of the tune slipped.");
     expect(note).toHaveTextContent("From the Path · Step 2");
+  });
+
+  it("says the next thing to try under a finding as the Path's, with its source", () => {
+    render(
+      <CoachNote headline="The tune's first bar slipped on two rounds of three." live testId="n">
+        <NoteCue label="Next time:" say="Count the held E, then come in." source={{ kind: "path", step: 2 }} testId="next" />
+      </CoachNote>,
+    );
+    const next = screen.getByTestId("next");
+    expect(next).toHaveTextContent("Next time: Count the held E, then come in.");
+    expect(next).toHaveTextContent("From the Path · Step 2");
+    // The finding is the headline; the cue is not.
+    expect(screen.getByTestId("n").querySelector(".coach-note-head")).not.toHaveTextContent("Count the held E");
   });
 
   it("marks a fact it could not tell with a dash, never a cross", () => {
