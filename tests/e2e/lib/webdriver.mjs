@@ -11,6 +11,18 @@ export class Driver {
   }
 
   async call(method, path, body) {
+    const t0 = Date.now();
+    try {
+      return await this.call0(method, path, body);
+    } finally {
+      const ms = Date.now() - t0;
+      if (process.env.YAMES_E2E_STALLS && ms > 400 && !/execute\/async/.test(path)) {
+        console.log(`[stall] ${new Date().toISOString().slice(11, 23)} ${ms} ms ${method} ${path.replace(/\/session\/[^/]+/, "")} ${(body?.script ?? "").replace(/\s+/g, " ").slice(0, 60)}`);
+      }
+    }
+  }
+
+  async call0(method, path, body) {
     const res = await fetch(`${this.base}${path}`, {
       method,
       headers: { "content-type": "application/json" },

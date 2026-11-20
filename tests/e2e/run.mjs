@@ -62,9 +62,14 @@ if (flag("--help")) {
   --app-env K=V       an extra variable for the app (repeatable), e.g.
                       WEBKIT_DMABUF_RENDERER_FORCE_SHM=1 for WebGL on the
                       NVIDIA X server (see README)
+  --stalls            log every WebDriver call that took over 400 ms ([stall]) and, per launch, the
+                      page's main-thread gaps over 250 ms ([heartbeat]); see README, "When the page dies"
   --keep              leave the profile and logs behind`);
   process.exit(0);
 }
+if (flag("--stalls")) process.env.YAMES_E2E_STALLS = "1";
+/** The page's memory guard: twice the most a launch's web process was seen to hold (0.65 GB, 2026-11-19). */
+const WEB_RSS_LIMIT_MB = 1536;
 const scenarios = new Set(opt("--scenarios", "placement,session,relaunch,two-paths,four-fingers,warmup,input-off,gpu-info").split(","));
 const targetDir = process.env.CARGO_TARGET_DIR || join(repo, "src-tauri", "target");
 const app = resolve(opt("--app", join(targetDir, "release", "yames")));
@@ -217,12 +222,55 @@ async function launchApp() {
   }
   // "What's new" is offered on every new version; it is not what this tests.
   await d.clickText(/^Got it$/, { timeoutMs: 3000 }).catch(() => {});
+  if (process.env.YAMES_E2E_STALLS) {
+    // The page's main thread, heard every 20 ms; a gap over 250 ms is kept with its time (UTC).
+    await d.exec(`if (!window.__hb) { window.__hb = { last: performance.now(), gaps: [] };
+      setInterval(() => { const n = performance.now(), g = n - window.__hb.last;
+        if (g > 250) window.__hb.gaps.push([new Date().toISOString().slice(11, 23), Math.round(g)]);
+        window.__hb.last = n; }, 20); }`).catch(() => {});
+  }
   return d;
 }
+
+/** This run's WebKit web processes (their environment names our profile), with their RSS. */
+function webProcesses() {
+  const found = [];
+  for (const pid of readdirSync("/proc").filter((n) => /^\d+$/.test(n))) {
+    try {
+      if (!readFileSync(`/proc/${pid}/comm`, "utf8").startsWith("WebKitWebProces")) continue;
+      if (!readFileSync(`/proc/${pid}/environ`, "latin1").includes(env.dirs.root)) continue;
+      const rss = Number(/VmRSS:\s+(\d+)/.exec(readFileSync(`/proc/${pid}/status`, "utf8"))?.[1] ?? 0);
+      found.push({ pid: Number(pid), rssMB: Math.round(rss / 1024) });
+    } catch {
+      /* gone, or not ours to read */
+    }
+  }
+  return found;
+}
+
+/** What the host's memory looked like: a box short of it stalls WebKit's GL (see README, "When the page dies"). */
+function hostMemory() {
+  const m = readFileSync("/proc/meminfo", "utf8");
+  const kb = (k) => Number(new RegExp(`^${k}:\\s+(\\d+)`, "m").exec(m)?.[1] ?? 0);
+  let psi = null;
+  try {
+    psi = readFileSync("/proc/pressure/memory", "utf8").trim().split("\n").join("; ");
+  } catch {
+    /* no PSI on this kernel */
+  }
+  const gib = (k) => Math.round((kb(k) / 1048576) * 10) / 10;
+  return { availableGiB: gib("MemAvailable"), totalGiB: gib("MemTotal"), swapFreeGiB: gib("SwapFree"), swapTotalGiB: gib("SwapTotal"), psi };
+}
+const memLine = (m) => `${m.availableGiB} of ${m.totalGiB} GiB available, swap ${m.swapFreeGiB} of ${m.swapTotalGiB} GiB free`;
 
 /** Quit as a player does (the window's Close), so the probe report is written. */
 async function quitApp(d, label) {
   const path = probeOut(launch);
+  if (process.env.YAMES_E2E_STALLS) {
+    const gaps = await d.exec("return window.__hb ? window.__hb.gaps : null").catch((e) => e.message.slice(0, 80));
+    console.log(`[heartbeat] ${label}: ${JSON.stringify(gaps)}`);
+  }
+  (info.webRssMB ??= {})[label] = webProcesses().map((p) => p.rssMB);
   try {
     await d.clickText(/^Close$/, { timeoutMs: 5000 });
   } catch (e) {
@@ -1427,6 +1475,15 @@ try {
         "numbers describe the machine, not the app. Re-run on a quieter machine before believing a failure.",
     );
   }
+  info.memoryAtStart = hostMemory();
+  const mem = info.memoryAtStart;
+  if (mem.availableGiB < 8 || (mem.swapTotalGiB > 0 && mem.swapFreeGiB < mem.swapTotalGiB * 0.1)) {
+    console.warn(
+      `WARNING: memory is short (${memLine(mem)}). WebKit's WebGL on this box has blocked the page for tens of ` +
+        "seconds while the host reclaimed memory, and WebKit then ends the session as a page crash or hang. " +
+        "Re-run when memory is free before believing such a failure.",
+    );
+  }
   info.appEnv = appEnv;
   if (scenarios.has("gpu-info")) await scenarioGpuInfo();
   if (scenarios.has("placement")) await scenarioPlacement();
@@ -1442,8 +1499,22 @@ try {
   if (scenarios.has("neck")) await scenarioNeck();
   if (scenarios.has("baseline")) await scenarioBaseline();
   info.loadAtEnd = readFileSync("/proc/loadavg", "utf8").trim();
+  // A leak in the page (a GL context never released, a growing cache) shows here first: a launch's web
+  // processes were 0.4-0.65 GB on 2026-11-19, flat across launches.
+  const rss = Object.entries(info.webRssMB ?? {});
+  if (rss.length) {
+    const worst = Math.max(...rss.flatMap(([, v]) => v));
+    check("the page's memory stays bounded (every launch's web process under 1.5 GB at its Close)", worst < WEB_RSS_LIMIT_MB,
+      rss.map(([k, v]) => `${k} ${v.join("+")} MB`).join(", "));
+  }
 } catch (e) {
-  check("the run finished", false, e.message.split("\n").slice(0, 6).join(" | "));
+  info.memoryAtFailure = hostMemory();
+  const dead = /page crash or hang|Could not parse script result/.test(e.message);
+  check("the run finished", false, e.message.split("\n").slice(0, 6).join(" | ") + (dead
+    ? ` || the web process stopped answering and WebKit ended the session (it does that to an automated page that ` +
+      `is unresponsive); memory now: ${memLine(info.memoryAtFailure)}; web processes left: ${webProcesses().length}. ` +
+      `See README, "When the page dies", before reading it as the app's bug.`
+    : ""));
   exitCode = 1;
 } finally {
   // The logs go with the profile; what they said about the audio stays.

@@ -12,6 +12,7 @@ npm run test:e2e                         # build, then placement, session, relau
 npm run test:e2e -- --no-build           # use the binary already built
 npm run test:e2e:probe                   # the click with the neck vs the headless probe
 node tests/e2e/run.mjs --help
+npm run test:e2e -- --no-build --stalls    # also log the page's stalls ("When the page dies")
 ```
 
 Exit 0 when every check passes, 1 when one fails, 2 for a setup error.
@@ -158,6 +159,38 @@ build. `--gpu` also needs `xserver-xorg-video-nvidia-*` and passwordless sudo.
    matter: even under Xvfb, WebKit's WebGL goes through NVIDIA's EGL and
    `nvidia-smi` lists the web process; only the compositing is in software.
    A tester on a VM or without GPU drivers would get the neck on llvmpipe.)
+
+## When the page dies
+
+`invalid session id: session deleted because of page crash or hang` (or
+`Could not parse script result` from an exec) means WebKitWebDriver lost the
+page: WebKit ends an automated page whose web process stops answering, and
+kills that process. It is not a SIGSEGV (apport logs none), and the app's own
+process lives on (its window still closes, its probe report is written).
+
+On the DGX it has had one cause so far (card #102, 2026-11-19): **WebKit's
+WebGL blocking the page while the host is short of memory.** Beta 9's run
+lost the page after the `ungraded` scenario; at 22:04 the same night, right
+after the box came out of a swap-full spell (another account's llama-servers
+held about 107 GB), even the suite's own `getContext('webgl2')` in `gpu-info`
+never returned, in two runs out of two, and WebKit killed the web process at
+about 28 s. Minutes later, at the same GPU load (96%, the same llama-servers),
+WebGL came up at once in eight runs out of eight and the full suite passed
+75/75 three times. On a healthy box the page's main thread never stops
+for more than about 0.4 s in the whole suite (`--stalls`), and a launch's web
+processes hold 0.4 to 0.65 GB, flat from launch to launch.
+
+So, before reading it as the app's bug:
+
+- `results.json` `info.memoryAtStart` and `info.memoryAtFailure` (available
+  memory, swap, PSI). The run warns at the start when under 8 GiB is available
+  or swap is over 90% used.
+- Re-run with `--stalls`: every WebDriver call over 400 ms is logged as
+  `[stall]`, and each launch's main-thread gaps over 250 ms as `[heartbeat]`
+  (UTC times). A page that stalls only at one step on a healthy box is the app.
+- `info.webRssMB`, per launch at its Close; the check "the page's memory
+  stays bounded" fails over 1.5 GB (a GL context never released or a growing
+  cache would show there first).
 
 ## Measuring the click with the neck
 
