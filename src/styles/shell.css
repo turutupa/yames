@@ -2526,6 +2526,61 @@ body[data-sheet-maximized] .rail {
   }
 }
 
+/* Listen on a narrow bar (leg c2a2, measured by tests/layout/tool-coach.spec.ts).
+ *
+ * Listen is a control where the sentence it replaced was a slot that shrank to
+ * nothing, so the row lost its give: at 1024 a Listen that is listening ran
+ * 17–55px off the window, at 800 the whole switch was past the edge (as the
+ * "Input off" readout already was there, unmeasured). It sheds, in this order:
+ *
+ *   - the keyboard hint, below 1200, on the bars that carry Listen (it is in
+ *     Settings, as on the drill's bar);
+ *   - its word, below 1024, kept for a screen reader (the switch's name) and
+ *     in the title; the track, the mic and the lamp stay, so the state is
+ *     still the knob's place and whether sound arrives is still the lamp;
+ *   - the bar-and-elapsed readouts, below 900 rather than 780, on the bars
+ *     that carry Listen (idle they are transparent anyway; they are readouts,
+ *     Listen is a control).
+ *
+ * The track and the lamp are never shed: the setlist's rule under 820 and the
+ * rule under 560 hide every span of the input pill, which on Listen took the
+ * track with them and left a mic whose state was its colour alone. */
+@media (max-width: 1199px) {
+  .transport:has(.transport-listen) .transport-key {
+    display: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .transport .transport-listen {
+    gap: 7px;
+    padding: 0 10px;
+  }
+
+  .transport .transport-listen > span:not([class]) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 899px) {
+  .transport:has(.transport-listen) .transport-readouts {
+    display: none;
+  }
+}
+
+.transport .transport-listen span.transport-switch-track {
+  display: block;
+}
+
+.transport .transport-listen span.transport-signal {
+  display: inline-block;
+}
+
 /* The context bar sheds in a fixed order, and the order comes out of the
    arithmetic rather than out of a principle stated in advance.
  *

@@ -26,6 +26,15 @@ import type { SongRecord } from "../songs/library";
 import { scriptFindings, scriptPass } from "../containers/songs/review/reviewFixtures";
 import type { ScoreSchedule, SongTransport } from "../songs/types";
 import type { ExerciseCeilingRow, PathStateRow, PathTakeRow, ScorerPassBar, ScorerPassResult, ScorerTakeGrade } from "../ipc";
+import {
+  COACH_REPORT_SENTENCE,
+  coachFeedOption,
+  coachReportOption,
+  lowConfidenceFeedback,
+  reportableRun,
+  toolRunsHistory,
+  toolRunsOption,
+} from "./toolCoachFixtures";
 
 /**
  * The library in the sidebar.
@@ -1096,6 +1105,12 @@ export function installShotMock(shot: Shot, theme: string): void {
   /** The first run's mocked input level, while the stream is open. */
   let firstRunMeter: ReturnType<typeof setInterval> | undefined;
   let beatCount = 0;
+  /** The tools' coach options on the query string (`toolCoachFixtures.ts`). */
+  const coachFeed = coachFeedOption();
+  const coachReport = coachReportOption();
+  const toolRuns = toolRunsOption();
+  /** The input is on: between `start_evaluation` and `stop_evaluation`. */
+  let evaluating = false;
 
   /**
    * The jam the "engine" is carrying, if any.
@@ -1360,6 +1375,8 @@ export function installShotMock(shot: Shot, theme: string): void {
       beatsPerMeasure: total,
       ...song,
     });
+    // `?coachFeed=lowConf`: what the analyzer would say of each beat heard.
+    if (coachFeed === "lowConf" && evaluating) emit("beat-feedback", lowConfidenceFeedback(Math.floor(beatCount)));
     if (!song.songCountIn && songTransport) {
       const tpq = songTransport.ticksPerQuarter;
       const start = songTransport.bars[songTransport.range.startBar]?.startTick ?? 0;
@@ -1501,7 +1518,15 @@ export function installShotMock(shot: Shot, theme: string): void {
     list_audio_output_devices: () => ["Default"],
     list_midi_devices: () => [],
     get_midi_bindings: () => [],
-    get_session_history: () => [],
+    get_session_history: () => toolRunsHistory(toolRuns),
+    // `?coachReport=1`: a run worth a note, and the coach's sentence on it.
+    ...(coachReport
+      ? {
+          get_session_report: () => reportableRun(),
+          get_final_session_report: () => reportableRun(),
+          coach_generate: () => COACH_REPORT_SENTENCE,
+        }
+      : {}),
     query_history: () => [],
     /*
      * The song library, as the practice store answers it.
@@ -1944,6 +1969,10 @@ export function installShotMock(shot: Shot, theme: string): void {
     }
     if (cmd === "plugin:window|scale_factor") return window.devicePixelRatio || 1;
     if (cmd.startsWith("plugin:")) return null;
+
+    // Whether the input is on, for `?coachFeed` (the answers are below).
+    if (cmd === "start_evaluation" && !shot.session?.input) evaluating = true;
+    if (cmd === "stop_evaluation") evaluating = false;
 
     // The input, made to misbehave (owner, beta 6): it never answers, it is
     // refused, or the device asked for is not there under that name.
