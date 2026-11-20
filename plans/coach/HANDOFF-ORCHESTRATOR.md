@@ -44,22 +44,22 @@ Read this, then `PLAN.md` (the order), `PROGRESS.md` (the index and the decision
 
 Merged on `coach`, in order: c0 (bus, context, source line), c1a (takeNote, rounds, lean, heardIt), pm
 (pass mark, `plans/COACH_I18N_BRIEF.md`), ms1 (model selector, resident model, silent quiet session;
-reviewed), c1b1 (the Session's coach line and note), fix1 (two layout regressions, "Needs 85%").
-Deliveries: 1a and 1b (see `STATUS.md`).
+reviewed), c1b1 (the Session's coach line and note), fix1 (two layout regressions, "Needs 85%"), c2a1
+with c2a1b (Ask's shell: dock, drawer, sheet; reviewed, six fixes). Deliveries: 1a and 1b (see
+`STATUS.md`); c2a1 is on `coach` but not yet in a delivery line: it goes out with c2a2 as 1c.
 
 In flight on 2026-11-20 (check `git worktree list` and `git branch --no-merged coach`):
 
 | Leg | Worktree / branch | State | Next |
 |---|---|---|---|
-| c2a1 → **c2a1b** | `~/yames-coach-c2a1`, `coach-c2a1` | Ask shell built; the reviewer's six fixes, the merge of `coach` and the `onAsk` wiring are running | Check its report and screenshots, merge (one known conflict, in `localeKeys.test.ts`, is the fix agent's to resolve), full gates. Then c2a2 can start. |
-| **ms2** | `~/yames-coach-ms2`, `coach-ms2` | Running: both tiers on disk, cancel, checksum, storage / metered warnings | **Reviewer on the Rust diff** (model files on disk: the migration must never lose a player's model), then merge. |
+| **ms2** | `~/yames-coach-ms2`, `coach-ms2` | Built and reported; **the reviewer is reading its Rust diff** (`/tmp/coach-orch/ms2-review.diff`) | Act on the review (a fresh "ms2b" agent on the same worktree if fixes are needed: the ms2 agent ended at 400k tokens), merge `coach` into it (c2a1 moved the selector), gates, merge. Tell STATUS that `npm run test:rust` on Windows is owed. |
 | **c1c** | `~/yames-coach-c1c`, `coach-c1c` | Running: the loop step, P1, P2, "for your eyes" | Check, merge. Its probe p99 will be owed if the machine is busy. |
-| c3a → **c3ab** | `~/yames-coach-c3a`, `coach-c3a` | Built and reviewed (MERGE AFTER FIXES); fix brief written (`c3ab-worker-review-fixes.md`), **not started** | Start it when a slot frees; short re-read of its diff since `70bdd641` by a reviewer; merge. |
+| c3a → **c3ab** | `~/yames-coach-c3a`, `coach-c3a` | The reviewer's fixes are running | Short re-read of its diff since `70bdd641` by a reviewer; merge (it and ms2 both touch `commands.rs`: the second to merge resolves). |
+| **c2a2** | `~/yames-coach-c2a2`, `coach-c2a2` | Running: Listen on the tools' transport, the tool line and note, Tool runs on Progress, `CoachCard` deleted | Screenshots against DESIGN 7; **reviewer on the `useSession.ts` diff**; merge; then delivery 1c/1d. |
 
 Briefed and not started (files in `plans/tasks/coach/`): `c1b2-today-speech-keys.md`,
-`c2a2-listen-and-no-start.md` (needs c2a1 merged; **the owner's top priority with the selector: it
-removes the old Start button**), `c4c-cues-field.md` (moved up: see below), `t1a-tool-registry.md`
-(needs c2a1 merged). Not yet briefed: t1b, c2b, c2c, the `cues` content legs (after c4c writes
+`c4c-cues-field.md` (moved up: see below), `t1a-tool-registry.md` (c2a1 is merged, so it can start).
+Start them as slots free, c4c and c1b2 first. Not yet briefed: t1b, c2b, c2c, the `cues` content legs (after c4c writes
 `plans/coach/CUES_GUIDE.md`; one leg per four Paths, each with a separate proof-reader), c4a, c4b, t2a
 to t2c, rem, c3b, c3c, c5a, c5b, c5c, c6. `PLAN.md` has each one's scope, design sections and flags.
 
