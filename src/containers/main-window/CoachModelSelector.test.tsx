@@ -33,7 +33,30 @@ const STANDARD_ON_DISK = {
   brainSizeBytes: 2_497_280_256,
 } as ModelStatus;
 
+/** What an ms2 backend reports: each tier on its own, and the free space. */
+function tiered(onDisk: ModelTier[], partial: Partial<Record<ModelTier, number>> = {}, freeBytes = 100e9): ModelStatus {
+  const sizes: Record<ModelTier, number> = { standard: 2_497_280_256, full: 5_027_783_488 };
+  return {
+    ...NOTHING_ON_DISK,
+    brainReady: onDisk.length > 0,
+    brainTier: onDisk[0] ?? null,
+    brainFamily: onDisk.length ? "qwen3" : null,
+    tiers: (["standard", "full"] as const).map((tier) => ({
+      tier,
+      onDisk: onDisk.includes(tier),
+      sizeBytes: onDisk.includes(tier) ? sizes[tier] : 0,
+      family: onDisk.includes(tier) ? "qwen3" : null,
+      updateRecommended: false,
+      partialBytes: partial[tier] ?? 0,
+      downloadBytes: sizes[tier],
+      checksumPinned: true,
+    })),
+    freeBytes,
+  };
+}
+
 let started: ModelTier[] = [];
+let cancelled: ModelTier[] = [];
 let paused = 0;
 
 async function setup(disk: ModelStatus, choice: "off" | "standard" | "full" = "off") {
@@ -44,6 +67,7 @@ async function setup(disk: ModelStatus, choice: "off" | "standard" | "full" = "o
     pause: () => {
       paused++;
     },
+    cancel: (tier) => cancelled.push(tier),
   });
   setCoachModelDisk(disk, 32_768);
   setCoachModelChoice(choice);
@@ -59,6 +83,7 @@ const items = () => Array.from(document.querySelectorAll<HTMLElement>("[data-mi]
 beforeEach(() => {
   __resetCoachLoaderForTests();
   started = [];
+  cancelled = [];
   paused = 0;
 });
 afterEach(() => {
@@ -122,11 +147,81 @@ describe("CoachModelSelector", () => {
     expect(started).toEqual(["standard"]);
   });
 
-  it("offers no Download for the other tier while one model holds the disk", async () => {
+  it("with one model on disk the other still offers its own Download: both can be there (ms2)", async () => {
     const button = await setup(STANDARD_ON_DISK);
     fireEvent.click(button);
+    expect(screen.queryByRole("menuitem", { name: /^Download: Standard/ })).toBeNull();
+    fireEvent.click(screen.getByRole("menuitem", { name: /^Download: Studio/ }));
+    expect(started).toEqual(["full"]);
+  });
+
+  it("with both on disk both are picked from the menu (ms2)", async () => {
+    const button = await setup(tiered(["standard", "full"]));
+    fireEvent.click(button);
+    expect(screen.queryByRole("menuitem", { name: /^Download/ })).toBeNull();
+    fireEvent.click(screen.getByRole("menuitemradio", { name: /Studio/ }));
+    expect(button.getAttribute("aria-label")).toMatch(/^Coach model: Studio, /);
+    fireEvent.click(button);
+    fireEvent.click(screen.getByRole("menuitemradio", { name: /Standard/ }));
+    expect(button.getAttribute("aria-label")).toMatch(/^Coach model: Standard, /);
+  });
+
+  it("progress in bytes, Cancel beside Pause, then the check (ms2)", async () => {
+    const button = await setup(tiered([]));
+    act(() => {
+      setCoachModelDownload({
+        tier: "full", phase: "running", stage: "brain", fraction: 0.24,
+        downloadedBytes: 1_234_000_000, totalBytes: 5_027_783_488, error: null,
+      });
+    });
+    fireEvent.click(button);
+    expect(screen.getByRole("menu").textContent).toContain("1.2 of 5.0 GB");
+    fireEvent.click(screen.getByRole("menuitem", { name: /^Cancel: Studio/ }));
+    expect(cancelled).toEqual(["full"]);
+    act(() => {
+      setCoachModelDownload({ tier: "full", phase: "running", stage: "checking", fraction: 0.5, error: null });
+    });
+    expect(button.getAttribute("aria-label")).toBe("Coach model: Off, checking the download");
+    expect(screen.getByRole("menu").textContent).toContain("published checksum");
+  });
+
+  it("a paused download offers Resume and Cancel; a cancelled one says what was removed (ms2)", async () => {
+    const button = await setup(tiered([], { full: 1_200_000_000 }));
+    fireEvent.click(button);
+    expect(screen.getByRole("menu").textContent).toContain("Paused at 1.2 of 5.0 GB");
+    fireEvent.click(screen.getByRole("menuitem", { name: /^Cancel: Studio/ }));
+    expect(cancelled).toEqual(["full"]);
+    act(() => {
+      setCoachModelDisk(tiered([]), 32_768);
+      setCoachModelDownload({ tier: "full", phase: "cancelled", stage: "brain", fraction: null, error: null });
+    });
+    expect(screen.getByRole("menu").textContent).toContain("What had downloaded was removed");
+    expect(screen.queryByRole("menuitem", { name: /^Cancel: Studio/ })).toBeNull();
+    fireEvent.click(screen.getByRole("menuitem", { name: /^Download: Studio/ }));
+    expect(started).toEqual(["full"]);
+  });
+
+  it("a download that does not fit is not offered and says by how much; a tight one asks first (ms2)", async () => {
+    const button = await setup(tiered([], {}, 3_100_000_000));
+    fireEvent.click(button);
     expect(screen.queryByRole("menuitem", { name: /^Download: Studio/ })).toBeNull();
-    expect(screen.getByRole("menu").textContent).toContain("A second model on this computer needs a later update");
+    expect(screen.getByRole("menu").textContent).toContain("Needs 5.3 GB, 3.1 GB free");
+    fireEvent.click(screen.getByRole("menuitem", { name: /^Download: Standard/ }));
+    expect(started).toEqual([]);
+    expect(screen.getByRole("menu").textContent).toContain("Only 3.1 GB is free");
+    fireEvent.click(screen.getByRole("menuitem", { name: /^Download anyway: Standard/ }));
+    expect(started).toEqual(["standard"]);
+  });
+
+  it("a checksum mismatch says the file was removed and offers Try again (ms2)", async () => {
+    const button = await setup(tiered([]));
+    act(() => {
+      setCoachModelDownload({ tier: "standard", phase: "failed", stage: "brain", fraction: null, error: "x", code: "checksum" });
+    });
+    fireEvent.click(button);
+    expect(screen.getByRole("menu").textContent).toContain("didn't match its published checksum");
+    fireEvent.click(screen.getByRole("menuitem", { name: /^Try again: Standard/ }));
+    expect(started).toEqual(["standard"]);
   });
 
   it("arrow keys move, Enter picks, Esc closes and gives focus back", async () => {
