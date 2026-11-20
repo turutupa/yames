@@ -941,6 +941,67 @@ export async function setTakeDiagnostics(enabled: boolean): Promise<string | nul
   return invoke<string | null>("set_take_diagnostics", { enabled });
 }
 
+/**
+ * Recording session mode (card #109, `src-tauri/src/capture.rs`): with a
+ * session on, every Take's raw input audio and what it was are kept under the
+ * app's data folder (`capture/<date-time>/`), for `npm run corpus:ingest` on
+ * the DGX. Off by default; nothing is sent anywhere.
+ */
+export type CaptureStatus = {
+  active: boolean;
+  session: string | null;
+  dir: string | null;
+  takes: number;
+  bytes: number;
+  warnBytes: number;
+  capBytes: number;
+  warn: boolean;
+  stopped: boolean;
+};
+
+/** Start a session (plays the start sync chirp). `meta` goes into session.json. */
+export async function captureStart(meta: unknown, capGb: number | null): Promise<{ status: CaptureStatus; chirp: unknown }> {
+  return invoke("capture_start", { meta, capGb });
+}
+
+/** End the session (plays the end sync chirp). Resolves to its folder. */
+export async function captureEnd(): Promise<string | null> {
+  return invoke<string | null>("capture_end");
+}
+
+export async function captureStatus(): Promise<CaptureStatus> {
+  return invoke<CaptureStatus>("capture_status");
+}
+
+/** What the next Take is (Path, Step, Exercise, variant, mode); `null` between Takes. */
+export async function captureSetContext(context: Record<string, unknown> | null): Promise<void> {
+  return invoke("capture_set_context", { context });
+}
+
+/** "That one felt off": flags the current or last Take. */
+export async function captureMark(): Promise<unknown> {
+  return invoke("capture_mark");
+}
+
+/** A jam or free play starts / ends: kept in segments, ungraded. */
+export async function captureFreeBegin(context: Record<string, unknown>): Promise<void> {
+  return invoke("capture_free_begin", { context });
+}
+
+export async function captureFreeEnd(heard: unknown): Promise<void> {
+  return invoke("capture_free_end", { heard: heard ?? null });
+}
+
+/** Show the session's folder (the one on, else the last). */
+export async function captureReveal(): Promise<string> {
+  return invoke<string>("capture_reveal");
+}
+
+/** Zip the session (the one on, else the last). Resolves to the zip's path. */
+export async function captureZip(): Promise<string> {
+  return invoke<string>("capture_zip");
+}
+
 /** The written pitch of one note a schedule names (`pitch.rs` `ScoreNote`). */
 export type ScorerNotePitch = { id: number; midi: number };
 

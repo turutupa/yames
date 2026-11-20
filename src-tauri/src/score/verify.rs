@@ -228,6 +228,16 @@ impl ScheduleRun {
         })
     }
 
+    /// The onsets the live matcher was given, in milliseconds from the start
+    /// of the audio at `audio_start_ms` (detector stamps: the detection delay
+    /// after each attack). For `crate::capture` only.
+    pub fn capture_onsets(&self, audio_start_ms: f64) -> serde_json::Value {
+        self.played
+            .iter()
+            .map(|o| serde_json::json!({"ms": ((o.time_ms - audio_start_ms) * 100.0).round() / 100.0, "amp": o.amplitude, "conf": o.confidence}))
+            .collect()
+    }
+
     /// Every written note of `report` placed in `audio`, in the order of
     /// `report.results`, with the result's index and the kind of each.
     pub fn expected_notes(&self, report: &ScheduleReport, audio: &TakeAudio<'_>) -> Vec<(Expected, u32, NoteKind)> {

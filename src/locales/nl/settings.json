@@ -464,6 +464,25 @@
       "title": "Mijn laatste takes bewaren voor probleemoplossing",
       "hint": "Als een take verkeerd wordt beoordeeld, kunnen de audio en wat Yames verwachtte opnieuw worden afgespeeld om te zien waarom. Bewaart de onbewerkte microfoonopname van je laatste 20 takes op dit apparaat (tot ongeveer 460 MB); er wordt niets verzonden. Standaard uit.",
       "folder": "Map: {{folder}}"
+    },
+    "recordingSession": {
+      "title": "Opnamesessie (testgegevens)",
+      "hint": "Om Yames te testen: zolang hij aan staat, neemt hij de onbewerkte microfoon- of instrumentingang van elke Take, jam en vrij spel op, met wat elke Take verwachtte en hoe hij beoordeeld werd, in een map op dit apparaat. Er wordt niets verstuurd; de map stuur je zelf. Bij het starten en stoppen klinkt een korte piep, zodat een tegelijk gemaakte telefoonopname kan worden uitgelijnd. Druk op M (of tik op \"Voelde fout\") als een Take verkeerd beoordeeld leek. Gaat uit als Yames sluit.",
+      "status": "Opname: {{takes}} Takes, {{size}}. Map: {{folder}}",
+      "stopped": "Gestopt bij de groottegrens: er worden geen Takes meer bewaard.",
+      "warn": "Meer dan {{size}}: controleer je vrije ruimte.",
+      "cap": "Stop met opnemen bij (GB)",
+      "capHint": "Vanaf deze grootte bewaart de sessie geen Takes meer. Een Take op 48 kHz is ongeveer 6 MB per 30 s.",
+      "open": "Map openen",
+      "zip": "Sessie zippen",
+      "share": "Sessie delen",
+      "zipped": "Gezipt: {{path}}",
+      "noSession": "Nog geen opnamesessie.",
+      "failed": "De opnamesessie kon niet starten.",
+      "pill": "REC · {{takes}} Takes · {{size}}",
+      "pillStopped": "REC gestopt: groottegrens",
+      "mark": "Voelde fout (M)",
+      "marked": "Gemarkeerd"
     }
   },
   "keybindings": {

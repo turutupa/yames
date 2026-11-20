@@ -158,3 +158,45 @@ test.describe("the settings column", () => {
     });
   }
 });
+
+/**
+ * Recording session (card #109): its switch, its cap field and its two
+ * buttons sit inside the Support panel at every width, and the switch never
+ * overlaps the long hint beside it.
+ */
+test.describe("the recording session row", () => {
+  for (const size of [
+    { width: 520, height: 900 },
+    { width: 1024, height: 900 },
+    { width: 1400, height: 900 },
+  ]) {
+    test(`fits its panel at ${size.width}px`, async ({ page }) => {
+      await openShot(page, "settings-update", size);
+      const row = page.getByTestId("settings-recording-session");
+      await row.scrollIntoViewIfNeeded();
+      const m = await row.evaluate((el) => {
+        const panel = el.closest("section.settings-section")!.getBoundingClientRect();
+        const r = (q: string) => {
+          const e = el.querySelector(q);
+          return e ? e.getBoundingClientRect() : null;
+        };
+        return {
+          panel: { left: panel.left, right: panel.right },
+          parts: [".setting-switch", ".recording-session-cap", '[data-testid="recording-session-zip"]', '[data-testid="recording-session-open"]']
+            .map((q) => ({ q, b: r(q) }))
+            .filter((x) => x.b !== null)
+            .map((x) => ({ q: x.q, left: x.b!.left, right: x.b!.right, width: x.b!.width })),
+          label: r(".setting-label"),
+          toggle: r(".setting-switch"),
+        };
+      });
+      expect(m.parts.length).toBe(4);
+      for (const p of m.parts) {
+        expect(p.width, `${p.q} has no size`).toBeGreaterThan(10);
+        expect(p.left, `${p.q} starts outside its panel`).toBeGreaterThanOrEqual(m.panel.left - 0.5);
+        expect(p.right, `${p.q} ends outside its panel`).toBeLessThanOrEqual(m.panel.right + 0.5);
+      }
+      expect(m.label!.right, "the switch overlaps the hint").toBeLessThanOrEqual(m.toggle!.left + 0.5);
+    });
+  }
+});

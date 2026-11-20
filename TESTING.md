@@ -196,6 +196,10 @@ affected.
   Android sends you to **Install unknown apps** for Yames. Allow it, come back,
   and press **Update** again.
 
+**A recording session** (test data for the detection work): Settings >
+Support > Recording session keeps every Take of a practice session for
+analysis. How to run one and what to send back: `plans/capture/TESTING.md`.
+
 **To make a test build** (maintainers): run the `Beta (test builds)` workflow
 from any branch. Pick the platforms (default `windows,android`; `linux` and
 `macos` are optional, and macOS fails until Apple signing is sorted) and write

@@ -22,6 +22,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -53,6 +54,12 @@ class ToggleArgs {
 @InvokeArg
 class OpenUrlArgs {
     var url: String = ""
+}
+
+@InvokeArg
+class ShareFileArgs {
+    var path: String = ""
+    var mime: String = "application/zip"
 }
 
 @InvokeArg
@@ -407,6 +414,34 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
             invoke.resolve()
         } catch (e: Exception) {
             invoke.reject("no app on this phone can open that link", e)
+        }
+    }
+
+    /**
+     * Hand a file of the app's own cache to another app (`ACTION_SEND`): the
+     * recording session's zip (card #109). Only the cache: the FileProvider's
+     * `cache-path` covers it, and nothing else of the app's is handed out.
+     */
+    @Command
+    fun shareFile(invoke: Invoke) {
+        val args = invoke.parseArgs(ShareFileArgs::class.java)
+        val file = java.io.File(args.path)
+        val cache = activity.cacheDir.canonicalFile
+        if (!file.canonicalFile.path.startsWith(cache.path + java.io.File.separator) || !file.isFile) {
+            invoke.reject("only a file in the app's cache can be shared")
+            return
+        }
+        try {
+            val uri = FileProvider.getUriForFile(activity, "${activity.packageName}.fileprovider", file)
+            val send =
+                Intent(Intent.ACTION_SEND)
+                    .setType(args.mime)
+                    .putExtra(Intent.EXTRA_STREAM, uri)
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            activity.startActivity(Intent.createChooser(send, file.name).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            invoke.resolve()
+        } catch (e: Exception) {
+            invoke.reject("could not share the file", e)
         }
     }
 

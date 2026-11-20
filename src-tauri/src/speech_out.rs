@@ -61,6 +61,15 @@ pub struct SpeechHandoff {
     /// read with one load by the event loop's park check, which must never
     /// wait on the speaking thread's lock (card #14, item 4).
     occupied: AtomicBool,
+    /// `clock::now_ns` at which the newest clip's first sample leaves the
+    /// DAC, by the convention the clicks are stamped with (callback entry
+    /// plus output latency). Stored by the audio thread with one relaxed
+    /// store when it picks a clip up; read by the recording session's sync
+    /// chirp (`capture::play_chirp`). 0 before any clip.
+    started_ns: AtomicU64,
+    /// The slot generation of the clip `started_ns` is for, stored after it,
+    /// so a reader can tell its own clip's start from a later one's.
+    started_gen: AtomicU64,
     retired: Mutex<Vec<Retired>>,
 }
 
@@ -101,6 +110,8 @@ impl SpeechHandoff {
             done: AtomicBool::new(false),
             cut: AtomicBool::new(false),
             occupied: AtomicBool::new(false),
+            started_ns: AtomicU64::new(0),
+            started_gen: AtomicU64::new(0),
             retired: Mutex::new(Vec::with_capacity(SPEECH_RETIRED_CAP)),
         }
     }
@@ -139,7 +150,6 @@ impl SpeechHandoff {
     ///
     /// One atomic load: asked on every pass of the event loop while the app
     /// is away, which must not block on the speaking thread.
-    #[cfg_attr(not(target_os = "android"), allow(dead_code))]
     pub(crate) fn in_flight(&self) -> bool {
         self.occupied.load(Ordering::Acquire)
     }
@@ -154,6 +164,63 @@ impl SpeechHandoff {
     /// Consumes the flag.
     pub fn finished(&self) -> bool {
         self.done.swap(false, Ordering::AcqRel)
+    }
+
+    /// Audio thread: the clip of slot generation `gen` (the one just picked
+    /// up) starts sounding at `ns`. Two stores: no lock, no allocation.
+    pub(crate) fn note_started(&self, ns: u64, gen: u64) {
+        self.started_ns.store(ns, Ordering::Relaxed);
+        self.started_gen.store(gen, Ordering::Release);
+    }
+
+    /// When the clip handed over as generation `gen` ([`Self::set_clip_gen`])
+    /// started sounding, once the audio thread has picked it up; `None` until
+    /// then, or when a later clip replaced it before it was.
+    pub fn started_ns_of(&self, gen: u64) -> Option<u64> {
+        if self.started_gen.load(Ordering::Acquire) != gen {
+            return None;
+        }
+        let ns = self.started_ns.load(Ordering::Relaxed);
+        // read again: a later clip may have been stamped in between
+        (self.started_gen.load(Ordering::Acquire) == gen).then_some(ns)
+    }
+
+    /// The slot's generation now: moves on every hand-over.
+    pub fn generation(&self) -> u64 {
+        self.generation.load(Ordering::Acquire)
+    }
+
+    /// [`Self::set_clip`], answering the generation the clip was handed over
+    /// as (`None` if the slot's lock was poisoned and nothing changed).
+    pub fn set_clip_gen(&self, clip: Option<SpeechClip>) -> Option<u64> {
+        self.drain_retired();
+        self.done.store(false, Ordering::Release);
+        let gen = {
+            let mut slot = self.clip.lock().ok()?;
+            self.occupied.store(clip.is_some(), Ordering::Release);
+            *slot = clip;
+            // bumped under the lock here, so no other hand-over can come
+            // between the write and the number this answers
+            self.generation.fetch_add(1, Ordering::AcqRel) + 1
+        };
+        #[cfg(target_os = "android")]
+        crate::output_park::wake();
+        Some(gen)
+    }
+
+    /// Empty the slot only if it still holds the clip of generation `gen`: a
+    /// line handed over since is left alone.
+    pub fn clear_if_generation(&self, gen: u64) {
+        if let Ok(mut slot) = self.clip.lock() {
+            if self.generation.load(Ordering::Acquire) != gen {
+                return;
+            }
+            self.occupied.store(false, Ordering::Release);
+            *slot = None;
+            drop(slot);
+            self.generation.fetch_add(1, Ordering::Release);
+        }
+        self.drain_retired();
     }
 
     /// Audio thread: say a line ran off its end.

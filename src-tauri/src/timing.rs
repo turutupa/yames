@@ -611,6 +611,7 @@ impl TimingAnalyzer {
         let wanted = pass_bars.iter().any(|b| b.metric == "noteIdentity")
             || crate::detect::model::enabled()
             || self.notes.diagnostics.enabled()
+            || crate::capture::global().enabled()
             || details.iter().any(|d| d.bend > 0.0 || d.tech.iter().any(|t| t == "vibrato"));
         if !pitches.is_empty() && wanted {
             self.notes.tap.arm(input_rate);
@@ -618,6 +619,10 @@ impl TimingAnalyzer {
             // loaded by the time the first one closes. Its own thread, below
             // normal priority; this is a command's thread, not a real-time one.
             crate::detect::model::warm_in_background();
+        } else if crate::capture::global().enabled() {
+            // A rhythm Take, kept by the recording session all the same
+            // (`start_capture_only`): no pitch pass, no model.
+            self.notes.tap.arm(input_rate);
         } else {
             self.notes.tap.disarm();
         }
@@ -3004,6 +3009,9 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass,
     let run = run.clone();
     let slot = notes.slot.clone();
     let diagnostics = notes.diagnostics.clone();
+    // What the recording session says this Take is, read as it closes: the
+    // next Take's context may be set before this thread writes.
+    let capture_context = crate::capture::global().context_snapshot();
     let instrument_id = instrument_id.to_string();
     let spawned = thread::Builder::new()
         .name("yames-take-notes".into())
@@ -3033,9 +3041,9 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass,
                     slot.provisional = Some(g);
                     model_fits_budget(closed.elapsed().as_millis() as u64, LATE_BUDGET_MS)
                 })
-                .map(|r| r.grade)
             }));
-            let mut grade = graded.ok().flatten();
+            let late = graded.ok().flatten();
+            let mut grade = late.as_ref().map(|r| r.grade.clone());
             if let Some(g) = grade.as_mut() {
                 g.notes_serial = Some(serial);
             }
@@ -3056,6 +3064,14 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass,
                     diagnostics.write(&audio.samples, audio.rate, run.diagnostic_job(start_ms, &instrument_id));
                 }));
             }
+            // The recording session (`capture`): every Take, with what it
+            // was and both grades, after the grade is published.
+            if let Some(context) = capture_context {
+                let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    let job = capture_job(&run, &weights, start_ms, &instrument_id, &audio, context, late.as_ref());
+                    crate::capture::global().write_take(&audio.samples, audio.rate, audio.first_ns, job);
+                }));
+            }
             // The Take's audio is freed here, on this thread.
             drop(audio);
         });
@@ -3064,6 +3080,69 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass,
         return None;
     }
     Some(serial)
+}
+
+/// The recording session's copy of a Take with no pitch pass (no written
+/// pitches): its audio and sidecar, on a thread of its own below normal
+/// priority. Touches nothing the grade reads.
+fn start_capture_only(run: &ScheduleRun, weights: &ScoreWeights, notes: &NotesPass, instrument_id: &str) {
+    let Some(context) = crate::capture::global().context_snapshot() else { return };
+    let Some(audio) = notes.tap.capture() else { return };
+    let start_ms = now_wall_ms() as f64 + (audio.first_ns as f64 - crate::clock::now_ns() as f64) / 1e6;
+    let (run, weights, instrument_id) = (run.clone(), *weights, instrument_id.to_string());
+    let _ = thread::Builder::new().name("yames-take-capture".into()).spawn(move || {
+        crate::coach::lower_current_thread_priority();
+        let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            let job = capture_job(&run, &weights, start_ms, &instrument_id, &audio, context, None);
+            crate::capture::global().write_take(&audio.samples, audio.rate, audio.first_ns, job);
+        }));
+        drop(audio);
+    });
+}
+
+/// A Session Take's sidecar for the recording session (`capture`,
+/// `plans/capture/FORMAT.md`): what `detect-bench replay` reads, the context
+/// the frontend gave, where the count-in and beat 0 are in samples, the live
+/// detections and grade, and the late grade with the verifier's account.
+fn capture_job(
+    run: &ScheduleRun,
+    weights: &ScoreWeights,
+    start_ms: f64,
+    instrument_id: &str,
+    audio: &crate::take_audio::CapturedAudio,
+    context: serde_json::Value,
+    late: Option<&crate::score::ScheduleReport>,
+) -> serde_json::Value {
+    let mut job = run.diagnostic_job(start_ms, instrument_id);
+    let rate = audio.rate.max(1) as f64;
+    let first_beat_ms = job["firstBeatMs"].as_f64().unwrap_or(0.0);
+    let bpm = job["bpm"].as_f64().filter(|b| *b > 0.0);
+    let per_bar = job["beatsPerBar"].as_f64().unwrap_or(4.0);
+    let count_in_bars = context.get("countInBars").and_then(|v| v.as_f64()).unwrap_or(0.0);
+    let count_in_beats = count_in_bars * per_bar;
+    let first_beat_sample = (first_beat_ms * rate / 1000.0).round() as i64;
+    let count_in_start = bpm.map(|b| first_beat_sample - (count_in_beats * 60.0 / b * rate).round() as i64);
+    let ungraded = context.get("mode").and_then(|m| m.as_str()) == Some("ungraded");
+    let live = run.report(weights);
+    job["capture"] = serde_json::json!({
+        "kind": context.get("kind").and_then(|k| k.as_str()).unwrap_or("take"),
+        "mode": if ungraded { "ungraded" } else { "graded" },
+        "context": context,
+        "firstBeatSample": first_beat_sample,
+        "countInStartSample": count_in_start,
+        "countInBeats": count_in_beats,
+        "detectionDelayMs": audio.detection_delay_ns as f64 / 1e6,
+    });
+    job["live"] = serde_json::json!({
+        "grade": live.as_ref().map(|r| &r.grade),
+        "results": live.as_ref().map(|r| &r.results),
+        "onsets": run.capture_onsets(start_ms),
+    });
+    job["late"] = match late {
+        Some(r) => serde_json::json!({"grade": &r.grade, "results": &r.results}),
+        None => serde_json::Value::Null,
+    };
+    job
 }
 
 /// The whole of the post-Take pass, as the `yames-take-notes` thread runs it:
@@ -3120,7 +3199,14 @@ fn close_take_notes(
     started: &mut Option<u64>,
     instrument_id: &str,
 ) -> Option<u64> {
-    if !run.wants_notes() && !run.wants_verifier() && !run.wants_curves() && !(notes.diagnostics.enabled() && run.has_pitches()) {
+    // A Take with no written pitches gets no pitch pass; the recording
+    // session keeps it anyway, and its grade is the timing grade as ever.
+    if crate::capture::global().enabled() && !run.has_pitches() {
+        start_capture_only(run, &weights, notes, instrument_id);
+        return None;
+    }
+    let kept = notes.diagnostics.enabled() || crate::capture::global().enabled();
+    if !run.wants_notes() && !run.wants_verifier() && !run.wants_curves() && !(kept && run.has_pitches()) {
         return None;
     }
     if notes.midi_seen.load(std::sync::atomic::Ordering::Acquire) {

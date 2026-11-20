@@ -464,6 +464,25 @@
       "title": "Meine letzten Takes zur Fehlersuche behalten",
       "hint": "Wird ein Take falsch bewertet, lassen sich sein Audio und das, was Yames erwartet hat, erneut abspielen, um den Grund zu finden. Behält die unbearbeitete Mikrofonaufnahme deiner letzten 20 Takes auf diesem Gerät (bis zu etwa 460 MB); nichts wird gesendet. Standardmäßig aus.",
       "folder": "Ordner: {{folder}}"
+    },
+    "recordingSession": {
+      "title": "Aufnahmesitzung (Testdaten)",
+      "hint": "Zum Testen von Yames: Solange sie läuft, nimmt sie den unbearbeiteten Mikrofon- oder Instrumenteingang jedes Takes, Jams und freien Spiels auf, mit dem, was jeder Take erwartete, und seiner Bewertung, in einen Ordner auf diesem Gerät. Nichts wird gesendet; den Ordner schickst du selbst. Beim Start und beim Ende ertönt ein kurzer Ton, damit sich eine gleichzeitige Handyaufnahme ausrichten lässt. Drück M (oder tippe auf „Fühlte sich falsch an“), wenn ein Take falsch bewertet wirkte. Sie schaltet sich aus, wenn Yames schließt.",
+      "status": "Aufnahme: {{takes}} Takes, {{size}}. Ordner: {{folder}}",
+      "stopped": "An der Größengrenze gestoppt: Es werden keine Takes mehr behalten.",
+      "warn": "Über {{size}}: Prüfe den freien Speicher.",
+      "cap": "Aufnahme stoppen bei (GB)",
+      "capHint": "Ab dieser Größe behält die Sitzung keine Takes mehr. Ein Take bei 48 kHz sind etwa 6 MB pro 30 s.",
+      "open": "Ordner öffnen",
+      "zip": "Sitzung zippen",
+      "share": "Sitzung teilen",
+      "zipped": "Gezippt: {{path}}",
+      "noSession": "Noch keine Aufnahmesitzung.",
+      "failed": "Die Aufnahmesitzung konnte nicht starten.",
+      "pill": "REC · {{takes}} Takes · {{size}}",
+      "pillStopped": "REC gestoppt: Größengrenze",
+      "mark": "Falsch bewertet (M)",
+      "marked": "Markiert"
     }
   },
   "keybindings": {

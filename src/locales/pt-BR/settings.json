@@ -464,6 +464,25 @@
       "title": "Guardar minhas últimas tomadas para diagnóstico",
       "hint": "Quando uma tomada é avaliada errado, o áudio e o que o Yames esperava podem ser reproduzidos para entender o porquê. Guarda a gravação bruta do microfone das suas 20 últimas tomadas neste dispositivo (até cerca de 460 MB); nada é enviado. Desativado por padrão.",
       "folder": "Pasta: {{folder}}"
+    },
+    "recordingSession": {
+      "title": "Sessão de gravação (dados de teste)",
+      "hint": "Para testar o Yames: enquanto está ligada, grava a entrada bruta do microfone ou do instrumento de cada Take, jam e prática livre, com o que cada Take esperava e como foi avaliado, numa pasta deste aparelho. Nada é enviado; você mesmo envia a pasta. Um bipe curto toca ao começar e ao parar, para alinhar uma gravação feita ao mesmo tempo no celular. Aperte M (ou toque em \"Pareceu errado\") quando um Take parecer mal avaliado. Desliga sozinha quando o Yames fecha.",
+      "status": "Gravando: {{takes}} Takes, {{size}}. Pasta: {{folder}}",
+      "stopped": "Parou no limite de tamanho: nenhum outro Take é guardado.",
+      "warn": "Mais de {{size}}: verifique o espaço livre.",
+      "cap": "Parar de gravar em (GB)",
+      "capHint": "A sessão para de guardar Takes neste tamanho. Um Take a 48 kHz ocupa uns 6 MB por 30 s.",
+      "open": "Abrir pasta",
+      "zip": "Compactar sessão",
+      "share": "Compartilhar sessão",
+      "zipped": "Compactada: {{path}}",
+      "noSession": "Ainda não há sessão de gravação.",
+      "failed": "Não foi possível iniciar a sessão de gravação.",
+      "pill": "REC · {{takes}} Takes · {{size}}",
+      "pillStopped": "REC parada: limite de tamanho",
+      "mark": "Pareceu errado (M)",
+      "marked": "Marcado"
     }
   },
   "keybindings": {

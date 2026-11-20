@@ -145,6 +145,25 @@ impl TakeAudioTap {
         drop(old);
     }
 
+    /// Whether a capture is armed: one atomic load. The detector reads it
+    /// before taking the ring's lock for a tap that runs whether or not the
+    /// transport does (`capture::Capture::free_tap`).
+    pub fn is_armed(&self) -> bool {
+        self.armed.load(Ordering::Acquire)
+    }
+
+    /// The rate the tap is armed at (or the last the detector reported).
+    /// Takes the state's lock: not for the detector's thread.
+    pub fn rate(&self) -> u32 {
+        self.state.lock().map(|s| s.rate).unwrap_or(0)
+    }
+
+    /// How many seconds one capture holds at `rate`: [`MAX_TAKE_SECS`], or
+    /// less at a rate where [`MAX_SAMPLES`] comes first.
+    pub fn max_secs(rate: u32) -> f64 {
+        MAX_TAKE_SECS.min(MAX_SAMPLES as f64 / rate.max(1) as f64)
+    }
+
     /// The detector's thread, with the ring's lock held: copy what is new.
     pub fn pull(&self, ring: &RingBuffer, now_ns: u64) {
         if !self.armed.load(Ordering::Acquire) {

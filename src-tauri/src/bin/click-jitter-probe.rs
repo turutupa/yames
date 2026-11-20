@@ -285,6 +285,7 @@ struct Args {
     /// `--harmony`: run the free-play worker (`harmony::worker`) on an input
     /// ring fed with strummed chords in real time.
     harmony: bool,
+    capture: bool,
     /// Whether the tempo / resolution came from the command line, so `--jam`
     /// can supply its own 240 BPM sixteenths without overruling a run that
     /// asked for something else.
@@ -315,6 +316,7 @@ impl Default for Args {
             jam_kit: None,
             late_pass: false,
             harmony: false,
+            capture: false,
             jam_voice: None,
             bpm_set: false,
             subdivision_set: false,
@@ -423,6 +425,10 @@ fn parse_args() -> Result<Args, String> {
             }
             "--harmony" => {
                 a.harmony = true;
+                consumed = 1;
+            }
+            "--capture" => {
+                a.capture = true;
                 consumed = 1;
             }
             "-h" | "--help" => return Err("help".into()),
@@ -1278,6 +1284,11 @@ fn main() -> ExitCode {
         }
     }
 
+    // `--capture`: a recording session (card #109) underneath: a 30 s Take
+    // written to disk every 1.5 s and the sync chirp through the speech slot
+    // every few seconds, the callback stamping each one's start.
+    let capture = args.capture.then(|| start_capture(stop.clone(), engine.speech_slots(), engine.output_latency_handle()));
+
     // `--jam-kit`: the musician's own drums, decoded HERE rather than
     // above, because a folder is resampled to the output rate and the
     // output rate is not a thing anyone knows until the device has opened.
@@ -1850,6 +1861,7 @@ fn main() -> ExitCode {
         let n = passes.load(Ordering::Relaxed);
         (n, if n > 0 { ms.load(Ordering::Relaxed) as f64 / n as f64 } else { 0.0 })
     });
+    let capture_summary = capture.map(|h| h.join().unwrap_or((0, 0, 0)));
     let harmony_summary = harmony.map(|(feeder, worker)| {
         let alive = worker.is_alive();
         let (writes, turned_away) = feeder.join().unwrap_or((0, 0));
@@ -1968,9 +1980,15 @@ fn main() -> ExitCode {
     if args.harmony {
         mode.push_str(" + --harmony");
     }
+    if args.capture {
+        mode.push_str(" + --capture");
+    }
 
     println!("\n=== click-jitter-probe ===");
     println!("mode              {mode}");
+    if let Some((takes, played, asked)) = &capture_summary {
+        println!("capture           {takes} Takes written, {played} of {asked} chirps played and stamped");
+    }
     if let Some((n, ms)) = &late_summary {
         println!("late passes       {n} over a 30 s Take, {ms:.0} ms each (verifier {})", if yames_lib::detect::model::enabled() { "on" } else { "off: no model in this build" });
     }
@@ -2224,4 +2242,44 @@ fn start_late_pass(stop: Arc<AtomicBool>) -> (std::thread::JoinHandle<()>, Arc<A
         })
         .expect("spawn the late pass");
     (handle, passes, total_ms)
+}
+
+/// `--capture`: a recording session's disk writes and sync chirps under the
+/// click. Returns (Takes written, chirps stamped, chirps asked for).
+fn start_capture(
+    stop: Arc<AtomicBool>,
+    slots: yames_lib::probe::SpeechSlots,
+    latency: Arc<AtomicU64>,
+) -> std::thread::JoinHandle<(u64, u64, u64)> {
+    std::thread::Builder::new()
+        .name("probe-capture".into())
+        .spawn(move || {
+            yames_lib::probe::lower_current_thread_priority();
+            let root = std::env::temp_dir().join(format!("yames-probe-capture-{}", std::process::id()));
+            let c = yames_lib::capture::global();
+            if let Err(e) = c.start(&root, serde_json::json!({"probe": true}), Some(1 << 40)) {
+                eprintln!("[probe] capture did not start: {e}");
+                return (0, 0, 0);
+            }
+            let samples: Vec<f32> = (0..48_000 * 30).map(|i| ((i as f32) * 0.01).sin() * 0.1).collect();
+            let (mut takes, mut played, mut asked, mut n) = (0u64, 0u64, 0u64, 0u64);
+            while !stop.load(Ordering::Relaxed) {
+                if c.write_take(&samples, 48_000, yames_lib::probe::now_ns(), serde_json::json!({"capture": {"kind": "take"}})).is_some() {
+                    takes += 1;
+                }
+                if n % 3 == 0 {
+                    asked += 1;
+                    let r = yames_lib::capture::play_chirp(&slots, &latency, "start");
+                    if r["played"] == true {
+                        played += 1;
+                    }
+                }
+                n += 1;
+                std::thread::sleep(Duration::from_millis(1500));
+            }
+            c.end();
+            let _ = std::fs::remove_dir_all(&root);
+            (takes, played, asked)
+        })
+        .expect("spawn the capture")
 }

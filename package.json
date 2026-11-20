@@ -51,6 +51,7 @@
     "test:grading:measure": "node scripts/rust-test.mjs --release --test audio_fixtures -- --ignored --nocapture --test-threads=1",
     "test:pitch": "node scripts/rust-test.mjs --test pitch_fixtures",
     "test:highbpm:bake": "UPDATE_FIXTURES=1 node scripts/rust-test.mjs --test highbpm_fixtures",
+    "corpus:ingest": "$HOME/projects/.venvs/ml/bin/python -m tools.corpus.ingest",
     "detect:bench": "cargo run --release --manifest-path src-tauri/Cargo.toml --features detect-tract --bin detect-bench --",
     "detect:check": "cargo run --release --manifest-path src-tauri/Cargo.toml --features detect-tract --bin detect-bench -- run --fast --check",
     "detect:parity": "cargo run --release --manifest-path src-tauri/Cargo.toml --features detect-tract,detect-ort --bin detect-bench -- parity --fast",

@@ -5569,6 +5569,12 @@ impl MetronomeEngine {
     /// How far ahead of the speakers the callback is working, in
     /// microseconds, or 0 before a stream has run. Half of the round trip a
     /// take has to pull the mic back by; the other half is the input side.
+    /// The output latency as the callback publishes it, for a reader that
+    /// holds no engine lock (the recording session's chirp).
+    pub fn output_latency_handle(&self) -> Arc<AtomicU64> {
+        self.output_latency_us.clone()
+    }
+
     pub fn output_latency_us(&self) -> u64 {
         self.output_latency_us.load(Ordering::Acquire)
     }
@@ -6931,6 +6937,16 @@ impl MetronomeEngine {
                     if let Some(incoming) = speech_cb.poll(&mut cached.speech_generation) {
                         if let Some(old) = cached.speech.take() {
                             speech_retire.retire(&speech_cb, old.pcm);
+                        }
+                        // A clip starts at frame 0 of this buffer: note
+                        // when that frame is heard, the way a click's
+                        // stamp is made (one clock read and two atomic
+                        // stores, only on the buffer a clip arrives in).
+                        if incoming.is_some() {
+                            speech_cb.note_started(
+                                crate::clock::now_ns() + output_latency_us * 1000,
+                                cached.speech_generation,
+                            );
                         }
                         cached.speech = incoming;
                         cached.speech_pos = 0;
