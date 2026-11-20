@@ -393,7 +393,7 @@ impl NoteEvent {
 /// are all absent), and a module that needs one transform of one power-of-two
 /// size does not justify being the reason a dependency and its half-dozen
 /// transitive crates enter a GPL-3 audio app's licence audit.
-struct Fft {
+pub(crate) struct Fft {
     n: usize,
     /// Bit-reversal permutation, precomputed.
     rev: Vec<u32>,
@@ -403,7 +403,7 @@ struct Fft {
 }
 
 impl Fft {
-    fn new(n: usize) -> Self {
+    pub(crate) fn new(n: usize) -> Self {
         assert!(n.is_power_of_two() && n >= 2, "an FFT length is a power of two");
         let bits = n.trailing_zeros();
         let rev = (0..n)
@@ -426,7 +426,7 @@ impl Fft {
 
     /// In place, over the whole of `re` and `im`, which must both be `n`
     /// long. The inverse conjugates the twiddles and scales by `1/n`.
-    fn run(&self, re: &mut [f64], im: &mut [f64], inverse: bool) {
+    pub(crate) fn run(&self, re: &mut [f64], im: &mut [f64], inverse: bool) {
         let n = self.n;
         debug_assert_eq!(re.len(), n);
         debug_assert_eq!(im.len(), n);

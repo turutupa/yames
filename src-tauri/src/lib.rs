@@ -51,6 +51,7 @@ mod midi;
 mod models;
 pub mod detect;
 pub mod onset;
+pub mod onset_flux;
 /// The score a player is playing against, and — roadmap 2.4 — what came
 /// back from a pass at it. `pub` for the same reason the three below are.
 pub mod score;

@@ -39,7 +39,8 @@ usage:
                    [--check] [--update-baseline] [--baseline <file>]
   detect-bench replay <audio> [--job <sidecar.json>] [--out <dir>] [--no-model]
   detect-bench render <out-dir> [--fast | --full] [--chains a,b,..] [--only <substr>]
-  detect-bench cost [--seconds N]
+  detect-bench cost [--seconds N] [--runtime tract|ort]
+  detect-bench parity [--fast | --full] [--chains a,b,..] [--only <substr>] [--a tract] [--b ort]
 ";
 
 struct Args(Vec<String>);
@@ -187,7 +188,7 @@ fn run(mut args: Args) -> Result<ExitCode, String> {
     }
     let has_model = model::compiled() && !no_model;
     if !has_model {
-        eprintln!("note: running WITHOUT the note model (build with `--features detect-ort`, or drop `--no-model`); verifier metrics are left out");
+        eprintln!("note: running WITHOUT the note model (build with `--features detect-tract`, or drop `--no-model`); verifier metrics are left out");
     }
     let out_dir = out_dir.unwrap_or_else(|| repo_root().join(".detect-bench").join(&mode_name));
     std::fs::create_dir_all(&out_dir).map_err(|e| format!("{}: {e}", out_dir.display()))?;
@@ -249,7 +250,7 @@ fn run(mut args: Args) -> Result<ExitCode, String> {
         "takes": takes.len(),
         "notes": rows.len(),
         "chains": chains,
-        "noteModel": if has_model { "basic-pitch icassp-2022 on onnxruntime (ort)" } else { "none" },
+        "noteModel": if has_model { "basic-pitch icassp-2022" } else { "none" },
     });
     let doc = json!({ "about": about, "metrics": metrics, "takes": takes });
     let write = |name: &str, body: String| -> Result<(), String> {
@@ -429,7 +430,29 @@ fn cost(mut args: Args) -> Result<ExitCode, String> {
         samples.extend_from_slice(&one);
     }
     samples.truncate((seconds * rate as f64) as usize);
-    let mut m = model::load()?;
+    // Loading (reading the archive, optimising the graph): what the first
+    // verifier run of a session pays unless the model was warmed
+    // (`model::warm_in_background`). The second load is the same work with
+    // the code and the allocator warm.
+    let runtime = args.value("--runtime");
+    let load = |name: &Option<String>| match name {
+        Some(name) => model::load_runtime(name),
+        None => model::load(),
+    };
+    let (lc, lw) = (thread_cpu_s(), std::time::Instant::now());
+    let mut m = load(&runtime)?;
+    let (load_cpu, load_wall) = (thread_cpu_s().zip(lc).map(|(a, b)| a - b), lw.elapsed().as_secs_f64());
+    let lw = std::time::Instant::now();
+    drop(load(&runtime)?);
+    let reload_wall = lw.elapsed().as_secs_f64();
+    // The first window through a fresh model against a later one.
+    let silence = vec![0.0f32; model::WINDOW_SAMPLES];
+    let lw = std::time::Instant::now();
+    m.infer(&silence)?;
+    let first_window = lw.elapsed().as_secs_f64();
+    let lw = std::time::Instant::now();
+    m.infer(&silence)?;
+    let later_window = lw.elapsed().as_secs_f64();
     let _ = yames_lib::detect::analyse(m.as_mut(), &samples[..rate as usize * 2], rate)?; // warm
     let (c0, w0) = (thread_cpu_s(), std::time::Instant::now());
     let a = yames_lib::detect::analyse(m.as_mut(), &samples, rate)?;
@@ -440,10 +463,32 @@ fn cost(mut args: Args) -> Result<ExitCode, String> {
     let t0 = std::time::Instant::now();
     let _ = std::hint::black_box(yames_lib::pitch::track(&samples, rate, &yames_lib::pitch::PitchConfig::guitar()));
     let track_wall = t0.elapsed().as_secs_f64();
+    // the same pass with a model that answers zeros at once: what is left
+    // of the cost is resampling and the envelope, so the difference is the
+    // model alone
+    struct Zeros;
+    impl model::NoteModel for Zeros {
+        fn infer(&mut self, _: &[f32]) -> Result<model::WindowOut, String> {
+            let n = model::WINDOW_FRAMES * model::PITCHES;
+            Ok(model::WindowOut { note: vec![0.0; n], onset: vec![0.0; n] })
+        }
+        fn runtime(&self) -> &'static str {
+            "zeros"
+        }
+    }
+    let c1 = thread_cpu_s();
+    let _ = yames_lib::detect::analyse(&mut Zeros, &samples, rate)?;
+    let overhead = thread_cpu_s().zip(c1).map(|(a, b)| a - b);
+    let model_cpu = cpu.zip(overhead).map(|(a, b)| a - b);
     println!("{}", json!({
         "pitchTrackWallSeconds": track_wall,
         "trackerGradeAtSeconds": track_wall,
         "fullGradeAtSeconds": track_wall + wall,
+        "modelLoadWallSeconds": load_wall,
+        "modelLoadCpuSeconds": load_cpu,
+        "modelReloadWallSeconds": reload_wall,
+        "firstWindowWallSeconds": first_window,
+        "laterWindowWallSeconds": later_window,
         "runtime": m.runtime(),
         "audioSeconds": a.seconds,
         "wallSeconds": wall,
@@ -451,8 +496,121 @@ fn cost(mut args: Args) -> Result<ExitCode, String> {
         "wallSecondsPerMinuteOfAudio": per_min(wall),
         "cpuSecondsPerMinuteOfAudio": cpu.map(per_min),
         "timesRealTime": a.seconds / wall,
+        "modelOnlyCpuSecondsPerMinuteOfAudio": model_cpu.map(per_min),
         "note": "resample + model + envelope, one intra-op thread; CPU time is this thread's own, so it holds on a busy machine",
     }));
+    Ok(ExitCode::SUCCESS)
+}
+
+/// The largest posterior difference `parity` lets through. The two runtimes
+/// measured 1.8e-4 apart at most (`plans/detection/RUNTIME.md`).
+const PARITY_MAX_ABS_DIFF: f32 = 1e-3;
+
+/// Two runtimes over the same audio: the largest difference between their
+/// posteriors, how many values land on different sides of the verifier's
+/// thresholds, and how many notes the verifier or the late grade calls
+/// differently (`plans/detection/RUNTIME.md`). Exits 1 when a posterior
+/// differs by more than [`PARITY_MAX_ABS_DIFF`], when either runtime gave a
+/// value that is not a finite number, or when any verdict differs. A
+/// posterior that merely crosses a threshold is reported, not failed on:
+/// what the player sees is the verdict.
+fn parity(mut args: Args) -> Result<ExitCode, String> {
+    let a_name = args.value("--a").unwrap_or_else(|| "tract".into());
+    let b_name = args.value("--b").unwrap_or_else(|| "ort".into());
+    let (cases, mode_name, _) = collect_cases(&mut args)?;
+    let mut a = model::load_runtime(&a_name)?;
+    let mut b = model::load_runtime(&b_name)?;
+    let (mut max_note, mut max_onset, mut sum, mut values, mut non_finite) = (0.0f32, 0.0f32, 0.0f64, 0usize, 0usize);
+    let mut flips = [0usize; 3];
+    const CUTS: [f32; 3] = [0.3, 0.5, 0.7];
+    let (mut ta, mut tb, mut seconds) = (0.0f64, 0.0f64, 0.0f64);
+    let (mut notes, mut verdict_flips, mut grade_flips) = (0usize, 0usize, 0usize);
+    let mut flipped_in: Vec<String> = Vec::new();
+    let started = std::time::Instant::now();
+    for (i, case) in cases.iter().enumerate() {
+        let (samples, rate) = audio_of(case)?;
+        let job = job_of(&case.meta);
+        let oa = run_take(&samples, rate, &job, Some(&mut a), &Options { keep_track: false });
+        let ob = run_take(&samples, rate, &job, Some(&mut b), &Options { keep_track: false });
+        ta += oa.cost.model_ms / 1000.0;
+        tb += ob.cost.model_ms / 1000.0;
+        let (Some(pa), Some(pb)) = (oa.analysis.as_ref(), ob.analysis.as_ref()) else {
+            return Err(format!("{}: a runtime gave no posteriors", case.meta.name));
+        };
+        seconds += pa.seconds;
+        for (xs, ys, max) in [(&pa.posteriors.note, &pb.posteriors.note, &mut max_note), (&pa.posteriors.onset, &pb.posteriors.onset, &mut max_onset)] {
+            if xs.len() != ys.len() {
+                return Err(format!("{}: {} vs {} values", case.meta.name, xs.len(), ys.len()));
+            }
+            for (x, y) in xs.iter().zip(ys.iter()) {
+                values += 1;
+                // counted apart: `f32::max` drops a NaN, so it would never
+                // show in the maximum
+                if !x.is_finite() || !y.is_finite() {
+                    non_finite += 1;
+                    continue;
+                }
+                let d = (x - y).abs();
+                *max = max.max(d);
+                sum += d as f64;
+                for (k, c) in CUTS.iter().enumerate() {
+                    if (*x >= *c) != (*y >= *c) {
+                        flips[k] += 1;
+                    }
+                }
+            }
+        }
+        // The verdicts: what the verifier says of each note (and the pitch
+        // it heard instead), and the right-notes state the late grade counts.
+        let said = |o: &harness::Outcome| -> Vec<_> { o.verifier.notes.iter().map(|n| (n.result, n.heard, n.heard_midi)).collect() };
+        let (va, vb) = (said(&oa), said(&ob));
+        notes += va.len().max(vb.len());
+        let v = if oa.verifier.status != ob.verifier.status || va.len() != vb.len() {
+            va.len().max(vb.len()).max(1)
+        } else {
+            va.iter().zip(&vb).filter(|(x, y)| x != y).count()
+        };
+        let g = if oa.final_states.len() != ob.final_states.len() {
+            oa.final_states.len().max(ob.final_states.len()).max(1)
+        } else {
+            oa.final_states.iter().zip(&ob.final_states).filter(|(x, y)| x != y).count()
+        };
+        if v + g > 0 && flipped_in.len() < 20 {
+            flipped_in.push(case.meta.name.clone());
+        }
+        verdict_flips += v;
+        grade_flips += g;
+        if (i + 1) % 100 == 0 {
+            eprintln!("{}/{} Takes after {:.0} s", i + 1, cases.len(), started.elapsed().as_secs_f64());
+        }
+    }
+    let ok = non_finite == 0 && max_note <= PARITY_MAX_ABS_DIFF && max_onset <= PARITY_MAX_ABS_DIFF && verdict_flips == 0 && grade_flips == 0;
+    println!("{}", serde_json::to_string_pretty(&json!({
+        "mode": mode_name,
+        "takes": cases.len(),
+        "audioSeconds": seconds,
+        "a": a.runtime(),
+        "b": b.runtime(),
+        "values": values,
+        "nonFiniteValues": non_finite,
+        "maxAbsDiffNote": max_note,
+        "maxAbsDiffOnset": max_onset,
+        "maxAbsDiffAllowed": PARITY_MAX_ABS_DIFF,
+        "meanAbsDiff": sum / values.max(1) as f64,
+        "thresholdFlips": { "0.3": flips[0], "0.5": flips[1], "0.7": flips[2] },
+        "verifiedNotes": notes,
+        "verifierVerdictFlips": verdict_flips,
+        "lateGradeNoteFlips": grade_flips,
+        "takesWithAFlip": flipped_in,
+        "parity": if ok { "ok" } else { "FAILED" },
+        "wallSecondsPerMinuteA": ta * 60.0 / seconds,
+        "wallSecondsPerMinuteB": tb * 60.0 / seconds,
+        "note": "each Take through the whole bench path on both runtimes: posteriors (resample + model, the verifier's input), the verifier's verdicts and the late grade's note states; wall time includes resampling and the envelope",
+    })).map_err(|e| e.to_string())?);
+    if !ok {
+        eprintln!("parity FAILED: {non_finite} non-finite value(s), max abs diff {} (allowed {PARITY_MAX_ABS_DIFF}), {verdict_flips} verifier verdict(s) and {grade_flips} late-grade note state(s) differ", max_note.max(max_onset));
+        return Ok(ExitCode::from(1));
+    }
     Ok(ExitCode::SUCCESS)
 }
 
@@ -469,6 +627,7 @@ fn main() -> ExitCode {
         "replay" => replay_cmd(args),
         "render" => render(args),
         "cost" => cost(args),
+        "parity" => parity(args),
         _ => Err(USAGE.to_string()),
     };
     match result {

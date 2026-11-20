@@ -441,6 +441,19 @@ pub struct NotesSlot {
 /// already spent this much on the tracker does not start the model.
 pub const LATE_BUDGET_MS: u64 = 5_000;
 
+/// The note model's stage of the late grade costs about this many times the
+/// pitch tracker's stage on the same audio (`plans/detection/RUNTIME.md`:
+/// the tracker's grade is about a third of the whole pass).
+const MODEL_STAGE_OVER_TRACKER: u64 = 2;
+
+/// Whether to start the model's stage, `tracker_ms` after the Take closed
+/// with the tracker's grade just made: only when the model can be expected
+/// to land inside the budget. Starting it with less left spends a core on a
+/// grade the result screen has stopped waiting for.
+fn model_fits_budget(tracker_ms: u64, budget_ms: u64) -> bool {
+    tracker_ms.saturating_mul(1 + MODEL_STAGE_OVER_TRACKER) < budget_ms
+}
+
 /// Wait until `deadline` for the late grade in `slot`: the grade once the pass
 /// is done (`None` when it made none, or none was started); when the wait
 /// runs out first, the grade from the pitch tracker alone if that much is in.
@@ -601,6 +614,10 @@ impl TimingAnalyzer {
             || details.iter().any(|d| d.bend > 0.0 || d.tech.iter().any(|t| t == "vibrato"));
         if !pitches.is_empty() && wanted {
             self.notes.tap.arm(input_rate);
+            // The verifier will run on this Exercise's Takes: have its model
+            // loaded by the time the first one closes. Its own thread, below
+            // normal priority; this is a command's thread, not a real-time one.
+            crate::detect::model::warm_in_background();
         } else {
             self.notes.tap.disarm();
         }
@@ -2977,7 +2994,7 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass,
                         return false;
                     }
                     slot.provisional = Some(g);
-                    closed.elapsed() < Duration::from_millis(LATE_BUDGET_MS)
+                    model_fits_budget(closed.elapsed().as_millis() as u64, LATE_BUDGET_MS)
                 })
                 .map(|r| r.grade)
             }));
@@ -3041,10 +3058,17 @@ pub fn late_grade_staged(
         return Some(tracked);
     }
     let timed = run.report(weights)?;
-    let verified = crate::detect::model::with_shared(|model| match model {
-        Some(m) => run.verify(&timed, take, m.as_mut()),
-        None => crate::score::verify::VerifierReport::status(crate::score::verify::VerifierStatus::NoModel),
-    });
+    use crate::score::verify::{VerifierReport, VerifierStatus};
+    // Its own catch: a panic in the model or the runtime costs the verifier's
+    // verdicts, never the tracker's grade. That grade is already published
+    // (`first`); what follows it is the same grade marked `failed`.
+    let verified = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        crate::detect::model::with_shared(|model| match model {
+            Some(m) => run.verify(&timed, take, m.as_mut()),
+            None => VerifierReport::status(VerifierStatus::NoModel),
+        })
+    }))
+    .unwrap_or_else(|_| VerifierReport::status(VerifierStatus::Failed));
     run.report_late_in(weights, take, Some(&verified), &mut scratch)
 }
 
@@ -3765,6 +3789,15 @@ pub type SharedTimingAnalyzer = Arc<Mutex<TimingAnalyzer>>;
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn the_model_is_not_started_when_it_cannot_land_inside_the_budget() {
+        // tracker in 1 s: the model is expected 2 s later, inside 5 s
+        assert!(super::model_fits_budget(1_000, super::LATE_BUDGET_MS));
+        // tracker in 2 s: the model would land at 6 s
+        assert!(!super::model_fits_budget(2_000, super::LATE_BUDGET_MS));
+        assert!(!super::model_fits_budget(u64::MAX, super::LATE_BUDGET_MS));
+    }
+
     use super::*;
     use crate::instrument::{Instrument, ScoreWeights};
 

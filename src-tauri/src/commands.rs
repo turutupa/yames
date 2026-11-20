@@ -1600,6 +1600,7 @@ pub async fn start_evaluation(
     // `ta` is still held from above: locking the analyzer again here would
     // deadlock.
     od.set_take_tap(ta.take_audio_tap());
+    od.set_demo_gate(ta.demo_gate());
     // Listen first (card #28): while the app plays a demo of the Exercise, a
     // microphone hearing it is not the player. Read without the analyzer's
     // lock, so the page's onset dots stay quiet too.

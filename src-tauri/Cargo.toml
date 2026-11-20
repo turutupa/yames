@@ -96,6 +96,17 @@ base64 = "0.22"
 # Linux, Android arm64/x86_64 are all in its table); `tls-rustls` keeps that
 # download off the system's OpenSSL. MIT OR Apache-2.0; ONNX Runtime is MIT.
 ort = { version = "=2.0.0-rc.15", optional = true, default-features = false, features = ["std", "download-binaries", "tls-rustls"] }
+# tract, the note verifier's SHIPPED runtime (`src/detect/model.rs`,
+# `plans/detection/RUNTIME.md`): pure Rust, no native library and nothing
+# fetched at build time, so it builds for every target Yames ships, Intel
+# macOS included, where ONNX Runtime has no prebuilt. Only the NNEF reader:
+# the model is converted once from the ONNX file
+# (`tools/basic-pitch-nnef`, outputs identical), which keeps tract's ONNX
+# front end and its protobuf parser out of the app (about 5 MB). Single
+# threaded (no `multithread-mm`). Pinned: the archive uses tract's own
+# `tract_core` extension, and the tool pins the same version. MIT OR
+# Apache-2.0.
+tract-nnef = { version = "=0.23.10", optional = true, default-features = false }
 
 [features]
 default = []
@@ -112,10 +123,18 @@ coach-llm-vulkan = ["coach-llm", "llama-cpp-2/vulkan"]
 # never for a build anyone plays on. The probe itself is armed at run time by
 # `YAMES_CALLBACK_PROBE=1`, with or without this.
 callback-probe-alloc = []
-# The note verifier's model runtime (ONNX Runtime through `ort`). Off by
-# default; `scripts/tauri.mjs` and the release workflow turn it on for builds
-# people play on, and `npm run detect:bench` for the bench. Without it the
-# verifier reports `noModel` and grading is exactly what it was.
+# The note verifier's model runtime. `detect-tract` is the one builds people
+# play on carry: `release.yml` and `beta.yml` pass it explicitly for the
+# desktop builds, and `scripts/tauri.mjs` (the `npm run tauri` wrapper) adds
+# it to every `dev` / `build`, which is how `android.yml` and the Android
+# beta get it; `android.yml`'s own `cargo check` names it (Tauri's CLI has no
+# `--no-default-features`, and `npm run test:rust` must stay the no-model
+# gate, so it is not in `default`). `detect-ort` (ONNX Runtime; its build
+# downloads pyke's prebuilt library) is for the bench and the parity check
+# only. With both, tract is used unless `YAMES_DETECT_RUNTIME=ort`. With
+# neither the verifier reports `noModel` and grading is exactly what it was;
+# `YAMES_VERIFIER=0` turns it off at run time.
+detect-tract = ["dep:tract-nnef"]
 detect-ort = ["dep:ort"]
 
 # ---------------------------------------------------------------------------

@@ -286,6 +286,248 @@ callback, not against a slow machine. The click-jitter probe (`--late-pass`)
 is still not run (load): the pass does the same work as before, less one
 pitch track, in a different order.
 
+## M6. Live detector: noise, reverb, automatic gain, legato (done on the bench; probe owed)
+
+**What was wrong, measured before anything was changed** (each a bench run
+with one thing switched, no note model; `onset_heard`, 7 chains pooled):
+
+| Experiment | picked | 16ths | hammer | pull | chord | what it says |
+|---|---|---|---|---|---|---|
+| as shipped | 87% | 72% | 36% | 51% | 79% | |
+| level gate off | 95% | 86% | 39% | 56% | 93% | the RMS gate is the whole loss on `di_gain` (picked 78 -> 100, chords 50 -> 100) and most of it on `phone_agc` (16ths 0 -> 99) |
+| gate off, aubio threshold 0.15 -> 0.06 | 99% | 94% | 51% | 71% | 100% | the rest of `phone_mic` is aubio's own peak picker (16ths 11 -> 61); but a brushed string at -24 dB is now heard on DI (0 -> 11.8/min) |
+| gate off, aubio `specflux` | 99% | 100% | 64% | 86% | 100% | hears everything, including every note-off: 14.5 spurious/min on clean DI, 47/min on the stray-noise Take |
+
+So no setting of aubio wins: the complex-domain function is exact and deaf,
+the flux one hears and cannot tell a note from its ending. aubio's threshold
+and method are unchanged.
+
+**What was built.** aubio stays the first detector, with its timestamps.
+Beside it, on the same hops, a second one (`src-tauri/src/onset_flux.rs`,
+`FluxDetector`):
+
+- the spectrum (1024 points at 44.1/48 kHz, 2048 at 96 kHz: the window is in
+  seconds) folded into quarter-octave bands, 80 Hz to 8 kHz;
+- per band, the log of the rise against the larger of the frames two and
+  three hops back, above a floor that is the larger of twice the band's own
+  background (a minimum that doubles in two seconds) and 5% of the loudest
+  the input has been lately (5 s half-life). Every term is a ratio: gain,
+  automatic or not, moves nothing (`the_gain_of_the_input_changes_nothing`);
+- a peak of the summed rise is an attack when it clears the median of its
+  last 100 ms by 3 mean deviations + 1.0, and is at least a quarter of the
+  median of the player's last 8 attacks (a stray sound is small beside the
+  playing). Before 3 attacks have been heard there is nothing to be small
+  beside, so the input as a whole must rise 1.6x across the peak: a room's
+  noise moves band by band, not as a whole;
+- the peak is placed between hops by a parabola and put on aubio's clock
+  (attack + aubio's delay), so no calibration, lag or deadline moves.
+
+In `OnsetCore::analyse_hop`: aubio's onset wins when both hear an attack
+(within 16 ms); an attack only the second detector heard waits one hop past
+its own timestamp and then goes through the same refractory gate and chord
+cluster (`admit`). The level gate stays, but an aubio onset it refuses is let
+through when the second detector saw the spectrum rise (`VOUCHED_RISE`): that
+is the `di_gain` and automatic-gain fix. aubio's phantom onset on the first
+window of a start (zeros to room) is dropped (`warmup_hops`): it was one
+spurious onset at the top of every microphone Take.
+
+Sweeps behind the constants (pooled picked / 16ths / hammer / pull heard,
+spurious a minute on `laptop_noisy`): salience 0.25 -> 0.35 loses hammer
+83 -> 66 for 7.4 -> 5.0; floor 3% -> 5% of the peak and half-life 2 -> 5 s
+gave 4.9 at hammer 82; threshold 3 -> 5 deviations loses 16ths 98 -> 88.
+
+**New in the bench** (so the cost side is measured too):
+`takes|chain|all|spurious_per_min` (detector onsets on no played note: over
+50 ms from every true attack, or a second on one attack; before the matcher),
+style `silent` (nobody plays: `silent|...|onset_heard`,
+`silent_spurious_per_min`) and style `noises` (a correct Take with a brushed
+damped string at -24 dB between notes: `noises_spurious_per_min`). All gated,
+lower is better.
+
+**Numbers** (`npm run detect:bench -- run --fast --no-model`, 343 Takes;
+"before" is the same bench on the old detector):
+
+**Notes played as written that the live detector and matcher hear, `good|chain|kind|onset_heard`** (before -> after)
+
+| kind | all | di | di_gain | laptop_mic | laptop_noisy | laptop_reverb | phone_mic | phone_agc |
+|---|---|---|---|---|---|---|---|---|
+| picked | 87% -> **100%** | 100% | 78% -> **100%** | 99% -> **100%** | 98% -> **99%** | 100% | 70% -> **100%** | 65% -> **100%** |
+| picked_16ths_160_220 | 72% -> **99%** | 100% | 99% | 100% | 93% -> **99%** | 100% | 10% -> **94%** | 0% -> **99%** |
+| palm_mute | 96% -> **100%** | 100% | 100% | 100% | 100% | 100% | 90% -> **100%** | 82% -> **100%** |
+| hammer | 36% -> **83%** | 100% | 75% -> **88%** | 62% -> **100%** | 0% -> **54%** | 17% -> **79%** | 0% -> **79%** | 0% -> **83%** |
+| pull | 51% -> **86%** | 100% | 79% -> **92%** | 75% -> **100%** | 0% -> **67%** | 67% -> **92%** | 4% -> **71%** | 29% -> **83%** |
+| tap | 72% -> **100%** | 100% | 100% | 100% | 44% -> **100%** | 100% | 31% -> **100%** | 31% -> **100%** |
+| slide_to | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| bend | 92% -> **100%** | 100% | 100% | 100% | 100% | 100% | 100% | 44% -> **100%** |
+| bend_release | 86% -> **100%** | 100% | 100% | 100% | 100% | 100% | 100% | 0% -> **100%** |
+| harmonic | 81% -> **100%** | 100% | 100% | 100% | 81% -> **100%** | 100% | 81% -> **100%** | 6% -> **100%** |
+| sweep | 96% -> **100%** | 100% | 100% | 100% | 100% | 100% | 78% -> **100%** | 94% -> **100%** |
+| chord_tone | 79% -> **100%** | 100% | 50% -> **100%** | 100% | 100% | 100% | 100% | 0% -> **100%** |
+
+**Timing scatter of heard notes, ms, `onset_scatter_ms`** (before -> after)
+
+| kind | all | di | di_gain | laptop_mic | laptop_noisy | laptop_reverb | phone_mic | phone_agc |
+|---|---|---|---|---|---|---|---|---|
+| picked | 2.7 -> **2.6** | 2.6 | 2.8 | 2.7 | 2.7 | 2.7 | 2.3 -> **2.1** | 2.6 |
+| picked_16ths_160_220 | 2.4 -> **2.3** | 2.4 | 2.7 | 2.2 | 2.4 -> **2.3** | 2.5 | 1.7 | - -> **2.4** |
+| palm_mute | 2.0 | 1.9 | 2.1 | 1.6 | 1.9 | 2.0 | 2.5 -> **1.9** | 2.7 -> **2.6** |
+| hammer | 1.9 | 1.8 | 2.0 -> **2.1** | 2.1 -> **2.3** | - -> **2.3** | 0.7 -> **2.2** | - -> **1.7** | - -> **1.6** |
+| pull | 1.2 | 1.1 | 1.3 -> **1.0** | 1.3 -> **0.9** | - -> **1.3** | 1.1 -> **1.0** | 0.0 -> **1.4** | 1.4 -> **1.1** |
+| tap | 1.4 | 1.7 | 1.8 | 1.8 | 0.9 -> **1.4** | 1.8 | 0.8 -> **1.4** | 1.7 |
+| sweep | 2.2 | 2.1 | 2.5 | 2.4 | 2.2 | 2.3 | 1.8 -> **1.9** | 2.2 -> **2.3** |
+
+**Weak legato (a tenth of a pick) heard, `weak|...|onset_heard` (information)** (before -> after)
+
+| kind | all | di | di_gain | laptop_mic | laptop_noisy | laptop_reverb | phone_mic | phone_agc |
+|---|---|---|---|---|---|---|---|---|
+| hammer | 0% -> **9%** | 0% -> **12%** | 0% -> **50%** | 0% | 0% | 0% | 0% | 0% |
+| pull | 39% -> **67%** | 67% | 67% -> **92%** | 67% | 0% -> **58%** | 67% | 0% -> **58%** | 4% -> **62%** |
+| tap | 59% -> **100%** | 100% | 100% | 100% | 6% -> **100%** | 100% | 6% -> **100%** | 0% -> **100%** |
+
+**Left-out notes counted as heard, `omitted|...|onset_heard`** (before -> after)
+
+| kind | all | di | di_gain | laptop_mic | laptop_noisy | laptop_reverb | phone_mic | phone_agc |
+|---|---|---|---|---|---|---|---|---|
+| all | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% -> **1%** |
+| tap | 0% -> **3%** | 0% | 0% | 0% | 0% | 0% | 0% | 0% -> **20%** |
+
+**Correct Takes that pass their own bars (no note model), `takes|chain|all|good_passed`** (before -> after)
+
+| kind | all | di | di_gain | laptop_mic | laptop_noisy | laptop_reverb | phone_mic | phone_agc |
+|---|---|---|---|---|---|---|---|---|
+| all | 54% -> **77%** | 80% -> **87%** | 53% -> **80%** | 87% -> **93%** | 53% | 80% -> **93%** | 13% -> **80%** | 13% -> **53%** |
+
+**Spurious onsets a minute, all played Takes, `takes|chain|all|spurious_per_min`** (before -> after)
+
+| kind | all | di | di_gain | laptop_mic | laptop_noisy | laptop_reverb | phone_mic | phone_agc |
+|---|---|---|---|---|---|---|---|---|
+| all | 2.51 -> **0.30** | 0.00 | 0.00 | 2.68 -> **0.00** | 3.81 -> **1.05** | 3.49 -> **0.00** | 3.81 -> **0.00** | 3.81 -> **1.05** |
+
+**Onsets a minute with nobody playing, `takes|chain|all|silent_spurious_per_min`** (before -> after)
+
+| kind | all | di | di_gain | laptop_mic | laptop_noisy | laptop_reverb | phone_mic | phone_agc |
+|---|---|---|---|---|---|---|---|---|
+| all | 1.69 -> **0.00** | 0.00 | 0.00 | 0.00 | 3.95 -> **0.00** | 0.00 | 3.95 -> **0.00** | 3.95 -> **0.00** |
+
+**Onsets a minute on stray hand noises at -24 dB, `takes|chain|all|noises_spurious_per_min`** (before -> after)
+
+| kind | all | di | di_gain | laptop_mic | laptop_noisy | laptop_reverb | phone_mic | phone_agc |
+|---|---|---|---|---|---|---|---|---|
+| all | 1.69 -> **0.00** | 0.00 | 0.00 | 0.00 | 3.95 -> **0.00** | 0.00 | 3.95 -> **0.00** | 3.95 -> **0.00** |
+
+
+Left-out taps on `phone_agc`: 1 of 5 now counted heard (the automatic gain
+pumping the room up when a note stops); every other left-out row stays 0%.
+Spurious onsets fell on every chain although the detector hears far more,
+because 3.8/min of the old figure was the phantom at the start.
+
+With the note model (`detect:check` before the baseline moved): 1,562 gated,
+116 better, 9 "worse", every one an effect of hearing notes that had no
+verdict before:
+
+| Metric | Was | Is | Why |
+|---|---|---|---|
+| `good|phone_agc|bend|pitch_wrong`, `bend_release` | 44%, 0% | 100%, 88% | the tracker alone calls a bend wrong (M5, known); these bends were not heard at all before. `final_wrong`, what is graded, is 0% |
+| `good|all|bend|pitch_wrong`, `bend_release`, `tap` | 89%, 62%, 43% | 97%, 75%, 46% | the same, pooled |
+| `good|di_gain|pull|pitch_wrong` | 8% | 21% | 3 more pull-offs heard on high gain, read wrong by the tracker; `final_wrong` 0% |
+| `good|phone_agc|picked_16ths_160_220|pitch_wrong` | 0% | 5% | 0 of 288 were heard before, 285 now |
+| `good|laptop_reverb|hammer|onset_scatter_ms` | 0.7 (n=4) | 2.2 (n=19) | the old number was four notes |
+| `good|phone_mic|pull|onset_scatter_ms` | 0.0 (n=1) | 1.4 (n=17) | the old number was one note |
+
+Baselines updated in the same commit: `fast.json` 1,562 -> 1,608 gated
+metrics (the new spurious / silent / noises rows), `fast-no-model.json`
+likewise. Hard gates unchanged: `wrong|all|all|final_right` 0.0%,
+`pitch_right` 0.1%, `omitted|all|all|onset_heard` 0.1% (1 of 707),
+`good|*|final_wrong` 0%. Correct Takes passing with the model: 80% pooled
+(`phone_mic` 13% -> 80%, `phone_agc` 13% -> 53%, `laptop_noisy` 53%).
+
+**Against the report's M6 bar** (synthetic chains, not the corpus, which does
+not exist yet: card #85):
+
+| Bar | Result |
+|---|---|
+| picked heard >= 98% DI, >= 95% laptop and phone | 100 / 100 / 99-100 / 100; fast sixteenths 94% on `phone_mic` (was 10%) |
+| scatter under 5 ms on every capture | 1.0 to 3.4 ms, every kind and chain |
+| no deafness under automatic gain and noise | `phone_agc` picked 65 -> 100, 16ths 0 -> 99; `laptop_noisy` 98 -> 99 |
+| extras per Take not increased | **not quite**: the matcher's extras go from 0 to 13 over 343 Takes (3 on correctly played Takes; all on `laptop_noisy` and `phone_agc`, chords ringing in noise and taps under automatic gain), while the detector's raw spurious onsets fall 2.51 -> 0.30 a minute |
+
+**Cost.** `cost_per_hop` (ignored test in `onset_flux.rs`, release, this
+machine under load 9): the second detector 7.5 us a hop; the whole core
+(ring, aubio, gates, second detector) 22.1 us, so about 14.5 us before: 0.41%
+of a 5.33 ms hop, was 0.27%. No allocation after construction (fixed arrays,
+one FFT plan built in `new`), no lock, no system call. The cpal output
+callback, the engine and the queue are untouched.
+
+**Not done / known limits:**
+
+1. **Click-jitter probe: run and passed** (2026-11-19 evening, load 1.8 to
+   2.5 one-minute, 3.5 to 5.8 five-minute; `--features detect-ort` build of
+   `eb484bea`). All hard gates 0 (missed beats, callback allocations and
+   frees, dropped beats) in every run:
+
+   | Run | p99 jitter |
+   |---|---|
+   | `--no-llm` | 0.90 ms |
+   | `--no-llm --jam-swap --jam-move --jam-take` | 0.95 ms |
+   | `--no-llm --song-loop --song-take` | 0.98 ms |
+   | `--no-llm --late-pass` (104 late passes of 592 ms, verifier on; owed since M4/M5) | 0.55 ms |
+   | `--no-llm --jam-swap --jam-move --jam-take --late-pass` (107 passes) | 0.56 ms |
+
+   What this does and does not show: the probe runs the engine headless and
+   **does not start the onset thread** (it has no input device), so it shows
+   the output callback is as it was, which is expected since M6 touches
+   nothing on that side. The onset thread's added load is the `cost_per_hop`
+   figure above (7.5 us in every 5.33 ms). The run that has the detector
+   live beside the click is `npm run test:e2e:probe`; it was not run in this
+   leg.
+2. Slid-to notes: still 0% (no attack; the verifier hears 69%).
+3. Hammer-ons in noise stop at 54 to 83%: what is left sits at the salience
+   of the spurious peaks (0.27 to 0.4 of a pick). The next lever is the
+   research's pitch-change detector (a live pitch estimate), not a threshold.
+4. The first attack out of silence is stamped up to two hops early by the
+   second detector (nothing to measure its rise against yet); on a clean
+   input aubio hears that note and its stamp is used.
+5. Section 3.3's other items are not in this leg: aubio's 50 ms minimum
+   inter-onset interval, hop and aubio window in milliseconds (the second
+   detector's window is), band onsets discounted live.
+6. The chains are stationary noise and a simple gain model. Real rooms
+   (speech, a TV, a fan starting) are card #85's recordings and card #86.
+
+## Runtime merge and its review nits (2026-11-19 evening)
+
+`mvp-detect-runtime` (`3a983dd1`: the verifier runs on tract, pure Rust, from
+an NNEF model, in every shipped build; `ort` kept for `npm run
+detect:parity`) is merged as `08e9c1ac`. `late_grade` keeps both sides: the
+tracker's grade is published first (`13c3cf6a`) and the model call sits
+inside the runtime branch's `catch_unwind`, so a panic leaves the tracker's
+grade in place (`timing::late_grade_staged`). Details: `RUNTIME.md`.
+
+| Commit | Review nit |
+|---|---|
+| `f97370f6` | 2: a model that panics while running is retired like one that failed to load; 3: outputs checked by exact name and shape |
+| `229462ed` | 4: the model is loaded when an Exercise with pitches is loaded, off the Take's pass and off every real-time thread; `detect-bench cost` times the load (37 to 42 ms on a desktop big core, 65 to 73 ms on a phone mid core: `RUNTIME.md`, "Loading") |
+| `eab273a5` | 6: `detect:parity` exits 1 on a posterior difference over 1e-3, a non-finite value or a verdict flip |
+| `d978cfd6` | 5, 7: stale comments; `android.yml` type-checks with `detect-tract` |
+
+Gates on the merged tree (`detect:bench`, `detect:check` and
+`test:rust:detect` now build with `detect-tract`): `test:rust` 1101/0,
+`test:rust:detect` 1103/0, `test:grading` 29/0, `test:pitch` 8/0, `test:dsp`,
+`test:highbpm`, `detect:check` 1,608 gated, 0 worse, 0 better, 0 missing
+against the M6 baselines (so tract moved no gated number), `detect:parity`
+exit 0, Android `cargo check` plain, `detect-tract` and `detect-ort`, tsc,
+vitest 364 of 365 files (`TabStage.render.test.tsx`, worktree-only), `npm
+run build`.
+
+Click-jitter probe on the tract build (load 2.9 to 3.3 one-minute, 4.9 to
+5.8 five-minute), hard gates 0 in both: `--no-llm --late-pass` p99 0.51 ms
+(86 late passes of 719 ms), `--no-llm --jam-swap --jam-move --jam-take
+--late-pass` p99 0.90 ms (87 passes of 724 ms; 592 ms on `ort`).
+
+A helper did the merge and the four fixes and was cut off by an API error
+before its gates; the gates and the probe above were run on its tree
+afterwards. Its merge resolution of `timing.rs` has had no second reader:
+it is on the reviewer's list in `HANDOFF.md`.
+
 ## Opus interlude (2026-11-19, between ed8870d4 and the Fable agent's return)
 
 A stand-in agent picked up the uncommitted M4 work, finished and gated it,
@@ -329,3 +571,42 @@ aarch64-linux-android` with and without `detect-ort`, tsc, vitest (all but
 5. Next milestones: M6 (live detector robustness, the 36% / 51% onset_heard
    on hammer-ons / pull-offs and phone_agc 48% bends read are its targets),
    M7 (free-play engine), M8+ planning. No pack uses `b2r` / `B2` yet.
+
+## Runtime: tract on every platform (2026-11-19, branch `mvp-detect-runtime`)
+
+The owner asked for the best solution for all players: the verifier on
+every platform, small and dependable. Measured and decided in
+`RUNTIME.md`; in short:
+
+- **tract** (`tract-nnef` 0.23.10, pure Rust) is now the verifier's runtime
+  in every build people play on, feature `detect-tract`: `release.yml`,
+  `beta.yml` (desktop), `scripts/tauri.mjs` (desktop dev/build and Android
+  /iOS dev/build, so `android.yml` and the Android beta carry it). Intel
+  macOS included, where ort cannot build at all. `detect-ort` stays for
+  `npm run detect:parity`.
+- Model: `nmp.nnef.tar`, converted from `nmp.onnx` by
+  `tools/basic-pitch-nnef` (`npm run detect:nnef`; checked: max abs diff 0
+  against the ONNX on tract).
+- Parity with ort over the fast bench: verdicts identical on 15,855 of
+  15,855 notes, all 2,113 metrics identical, posteriors within 1.8e-4;
+  `detect:check` 0 worse on tract (and on `--no-model`).
+- Speed, one thread, model only: 1.36 s per minute of audio on a Cortex-X925,
+  2.71 s on a Cortex-A725 (phone-class core); ort 1.03 / 2.24. A 30 s Take on
+  a mid phone is about 1.5 s, inside the 3-8 s tier.
+- Size: +13.3 MB stripped (Android `.so` and Linux binary), against ort's
+  +21.2 / +25.1 MB.
+- Robustness (review items 3 and 9): a panic in the model call is caught in
+  `timing::late_grade` on its own (`verifier.status = failed`, tracker grade
+  kept); a panic in `load()` is caught and remembered as "no model";
+  `Cargo.toml`'s feature comment says what ships. `YAMES_VERIFIER=0` is still
+  the switch.
+- `package.json`: `detect:bench`, `detect:check`, `test:rust:detect` now on
+  `detect-tract`.
+
+Gates: `test:rust` 1089/0, `test:rust:detect` 1091/0 (tract), the model
+tests with both features (the plucked A on tract and on ort), `detect:check` 0 worse, Android `cargo check --lib` with and
+without `detect-tract`, the Android release `.so` and `detect-bench` linked
+for `aarch64-linux-android`. Not proven here: the Windows and macOS app
+builds (no SDKs on this box; tract's crates `cargo check` for both macOS
+targets, Windows needs MSVC's `ml64`/`lib.exe`). The next beta run is that
+proof.

@@ -505,7 +505,7 @@ click-jitter-probe — ROADMAP §4 audio-safety gate
                      table, and swapped and retired with it. Combines
                      with all three above.
   --late-pass        loop the post-Take pass (timing::late_grade: the note
-                     verifier with --features detect-ort, the right-notes
+                     verifier with --features detect-tract, the right-notes
                      pass, the bend curves) over a 30 s Take on a thread
                      demoted like yames-take-notes, for the whole run.
                      Combines with everything

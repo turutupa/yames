@@ -64,7 +64,7 @@ equal to reverb). They are stress conditions, not measurements of a device.
 
 Playing styles: `good`, `sloppy` (25 ms scatter), `weak` (legato at a tenth of
 a pick), `omit` (every sixth note left out), `wrong` (every fifth a semitone
-or two off), `dead_string` (a chord's middle string damped), `flat` (every
+or two off), `silent` (nobody plays: the room alone through the chain), `noises` (a correct Take plus a brushed, damped string at -24 dB halfway between notes in every third gap), `dead_string` (a chord's middle string damped), `flat` (every
 other bend 50 cents short), `ringing`, `no_vibrato`.
 
 Metric names are `group|chain|kind|metric`; `all` pools a dimension.
@@ -86,6 +86,9 @@ Metric names are `group|chain|kind|metric`; `all` pools a dimension.
 | `wrong` | `final_right`, `final_caught` | a wrong pitch counted right / wrong by the late grade | right: lower, caught: higher |
 | `dead` | `verifier_yes` | a damped chord string judged sounding | lower |
 | `weak` | `onset_heard`, `verifier_yes` | very weak legato | info |
+| `takes` | `spurious_per_min` | onsets the live detector emits on no played note (over 50 ms from every true attack, or a second on one attack), per minute, before the matcher (M6) | lower (tolerance 0.5) |
+| `takes` | `silent_spurious_per_min`, `noises_spurious_per_min` | the same on the `silent` Take (nobody plays) and the `noises` Take (stray hand noises at -24 dB) | lower |
+| `silent` | `onset_heard` | a note counted as heard with nobody playing | lower |
 | `takes` | `good_passed` | correct Takes that pass their Exercise's own bars | higher |
 | `takes` | `good_not_caught`, `faulty_passed` | "I didn't catch enough" on a correct Take; a Take with scripted mistakes passing | info |
 | `bends` | `read` | bent notes heard and given a verdict by `score::curves` | info |
@@ -145,13 +148,14 @@ failure, but it is a reason to update: the check prints `better` lines.
 |---|---|---|
 | **All of the below but the probe** | `npm run test:detect` | `test:rust`, `test:rust:detect`, `test:grading`, `test:pitch`, `test:dsp`, `test:highbpm`, `detect:check`, in that order. Run it for any change to detection or grading |
 | Unit tests | `npm run test:rust` | everything in the lib, without the model (includes `score::notes::tests`, the truth-vs-look-up check with the detector's delay in it) |
-| The same with the model | `npm run test:rust:detect` | the whole lib with `detect-ort`, including the real model on a plucked A |
+| The same with the model | `npm run test:rust:detect` | the whole lib with `detect-tract` (the shipped runtime), including the real model on a plucked A |
+| Runtime parity | `npm run detect:parity` | tract against ONNX Runtime over the fast bench's posteriors (`RUNTIME.md`); after any change to `detect/model.rs`, the NNEF archive or the tract version |
 | Fixture-level grading | `npm run test:grading` | `tests/audio_fixtures.rs`: the scorer on synthetic plucks, **including the M0 production-path tests**; not part of `test:rust` |
 | Detector goldens | `npm run test:dsp`, `npm run test:highbpm` | onset detector and Songs scoring, byte for byte |
 | Pitch tracker | `npm run test:pitch` | `pitch.rs` fixtures |
 | The bench | `npm run detect:check` | this page |
 | Audio safety | `npm run yames:jitter-probe -- --no-llm` (+ `--jam-swap --jam-move --jam-take`, `--song-loop --song-take`) | nothing may add jitter to the click |
-| Android | `cargo check --lib --target aarch64-linux-android [--features detect-ort]` | that it still builds for a phone |
+| Android | `cargo check --lib --target aarch64-linux-android [--features detect-tract]` | that it still builds for a phone (a `cargo build --release --lib` proves it links) |
 
 ## Reproducing a player's report: "this Take graded wrong"
 
@@ -191,11 +195,9 @@ failure, but it is a reason to update: the check prints `better` lines.
    `npm run detect:bench -- run --dir <folder>`, fix, re-run. If the case is
    one the synth can produce, add it to `cases.rs` so the fast check carries it.
 
-A kept Take is written whatever the build, but the verifier's verdicts in
-the app need a build with the note model (`--features detect-ort`). Shipped
-builds do not have it yet (`release.yml` passes only the coach feature):
-turning it on is the owner's call (about +20 MB, and no prebuilt ONNX Runtime
-for Intel macOS; `PROGRESS.md` M3). `YAMES_VERIFIER=0` turns the verifier off
+A kept Take is written whatever the build. The verifier's verdicts need a
+build with the note model: every shipped build has it since the runtime
+moved to tract (`--features detect-tract`, `RUNTIME.md`). `YAMES_VERIFIER=0` turns the verifier off
 in a build that has it. A Take with MIDI notes in it gets no pass over its
 audio at all (`NotesPass::midi_seen`): a MIDI note's time is its attack, a
 heard onset's is the detector's delay later, and the pass takes one delay out
