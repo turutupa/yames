@@ -37,7 +37,17 @@ import type { TakeOutcome } from "../../session/runner";
 import { PORTRAIT_PHONE_QUERY, useMediaQuery } from "../../hooks/useMediaQuery";
 import { AskStart, LoopButton, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart, timedHowKey } from "./parts";
 import { TakeOrder } from "../coach/CoachLine";
-import { ReadyNote, RecapLine, ResultNote, SessionAsk, UngradedNote, takeOrderText, useNextCue } from "./SessionCoach";
+import {
+  CoachAnswerLine,
+  ReadyNote,
+  RecapLine,
+  ResultNote,
+  SessionAsk,
+  UngradedNote,
+  takeOrderText,
+  useNextCue,
+  useNoCatchVoice,
+} from "./SessionCoach";
 import { askCoach } from "../coach/askStore";
 import { IS_MOBILE } from "../../platform";
 import { RunwayTakeScreen, isTheoryTake } from "./highway/RunwayTake";
@@ -1269,6 +1279,8 @@ function NoCatchScreen({
   const outcome = run.outcomes[run.outcomes.length - 1];
   // The neck quiet: nothing on it was heard well enough to colour.
   const slot = useExerciseSlot(session, "dim");
+  // The title is the finding here: what the voice says and the explain key repeats.
+  useNoCatchVoice(outcome, t("session.noCatch.title"));
   if (!outcome) return null;
   const { measures } = outcome;
   return (
@@ -1287,6 +1299,7 @@ function NoCatchScreen({
         <div className="session-why session-rise" style={rise(3)}>
           {t("session.noCatch.noGuess")} {lineText(t, notCaughtHint(measures))}
         </div>
+        <CoachAnswerLine />
       </div>
       <div className="session-slot" ref={slot} aria-hidden="true" data-exercise="" />
       <div className="session-center">

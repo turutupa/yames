@@ -96,6 +96,11 @@ export type HotkeyAction =
   | "session-restart"
   /** L in a Session: watch the pattern's order on the neck before a Take (2026-11-18). */
   | "session-watch"
+  // The coach, hands-free (ROADMAP 3.5, DESIGN 5.1; leg c1b2b). Unbound by
+  // default; a key or a MIDI button. One line in the coach's slot, no panel.
+  | "ask-explain-last"
+  | "ask-what-next"
+  | "accept-suggestion"
   | "settings";
 
 export interface HotkeyEntry {
@@ -114,6 +119,13 @@ export interface HotkeyEntry {
    * Settings list says it ("not in Songs").
    */
   notIn?: readonly string[];
+  /**
+   * The only views where this action answers, for one whose id carries no
+   * mode prefix (the coach's keys keep ROADMAP 3.5's ids and answer only in a
+   * Session). Read like a mode's prefix: `activeIn`, `actionForCombo`,
+   * `scopeNote`.
+   */
+  onlyIn?: readonly string[];
 }
 
 /**
@@ -142,10 +154,18 @@ export function modeOf(actionId: string): "jam" | "songs" | "session" | null {
 }
 
 /** Does this action answer a key on this view? */
-export function activeIn(entry: Pick<HotkeyEntry, "id" | "notIn">, view: string): boolean {
+export function activeIn(entry: Pick<HotkeyEntry, "id" | "notIn" | "onlyIn">, view: string): boolean {
   const mode = modeOf(entry.id);
   if (mode) return mode === view;
+  if (entry.onlyIn) return entry.onlyIn.includes(view);
   return !(entry.notIn ?? []).includes(view);
+}
+
+/** The views an action answers on only, by its prefix or its `onlyIn`; null for an app-wide one. */
+function onlyViewsOf(actionId: string): readonly string[] | null {
+  const mode = modeOf(actionId);
+  if (mode) return [mode];
+  return HOTKEYS.find((h) => h.id === actionId)?.onlyIn ?? null;
 }
 
 /**
@@ -184,11 +204,11 @@ export function scopeNote(
   if (!key) return null;
   const others = Object.entries(bindings).filter(([id, k]) => id !== actionId && k === key).map(([id]) => id);
   if (others.length === 0) return null;
-  const mode = modeOf(actionId);
-  if (mode) return { kind: "in", views: [mode] };
+  const only = onlyViewsOf(actionId);
+  if (only) return { kind: "in", views: [...only] };
   const entry = HOTKEYS.find((h) => h.id === actionId);
   const views = [
-    ...new Set([...(entry?.notIn ?? []), ...others.map(modeOf).filter((m): m is "jam" | "songs" | "session" => !!m)]),
+    ...new Set([...(entry?.notIn ?? []), ...others.flatMap((id) => onlyViewsOf(id) ?? [])]),
   ];
   return views.length ? { kind: "notIn", views } : null;
 }
@@ -486,10 +506,16 @@ export function actionForCombo(
     // fallback below must not hand it out.
     .filter((action) => action !== "session-exit" || view === "session")
     // An app-wide action that stands aside on this view (`notIn`).
-    .filter((action) => !(HOTKEYS.find((h) => h.id === action)?.notIn ?? []).includes(view));
-  const modeOnly = (action: string) => MODE_ACTION_PREFIXES.some((p) => action.startsWith(p));
+    .filter((action) => !(HOTKEYS.find((h) => h.id === action)?.notIn ?? []).includes(view))
+    // One that answers on some views only, off them (`onlyIn`).
+    .filter((action) => {
+      const only = HOTKEYS.find((h) => h.id === action)?.onlyIn;
+      return !only || only.includes(view);
+    });
+  const modeOnly = (action: string) =>
+    MODE_ACTION_PREFIXES.some((p) => action.startsWith(p)) || !!HOTKEYS.find((h) => h.id === action)?.onlyIn;
   return (
-    bound.find((action) => action.startsWith(`${view}-`)) ??
+    bound.find((action) => action.startsWith(`${view}-`) || !!HOTKEYS.find((h) => h.id === action)?.onlyIn) ??
     bound.find((action) => !modeOnly(action)) ??
     bound[0]
   );
@@ -1038,6 +1064,34 @@ export const HOTKEYS: HotkeyEntry[] = [
     key: "L",
     desc: "Before a Take, on the neck: light the notes in order at the tempo, or stop. No sound, nothing graded",
     group: "session",
+  },
+  // The coach, hands-free (ROADMAP 3.5; DESIGN 5.1, last row). Unbound: a
+  // player picks a key or a MIDI button. They answer on a Session's ready
+  // screen and its result, as one line in the coach's slot (spoken with Voice
+  // on), and do nothing while a Take runs.
+  {
+    id: "ask-explain-last",
+    action: "Explain the last Take",
+    key: "",
+    desc: "In a Session: the coach says what it found in your last Take, in one line",
+    group: "session",
+    onlyIn: ["session"],
+  },
+  {
+    id: "ask-what-next",
+    action: "What's next",
+    key: "",
+    desc: "In a Session: the coach says what the big button will do, and why",
+    group: "session",
+    onlyIn: ["session"],
+  },
+  {
+    id: "accept-suggestion",
+    action: "Take the suggestion",
+    key: "",
+    desc: "In a Session: press the coach's suggestion on screen, when there is exactly one",
+    group: "session",
+    onlyIn: ["session"],
   },
 ];
 

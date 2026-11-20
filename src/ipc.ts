@@ -4,6 +4,7 @@ import { listen } from "@tauri-apps/api/event";
 import { IS_MOBILE } from "./platform";
 import { openUrlNative, requestMicrophone } from "./mobile/native";
 import { load } from "@tauri-apps/plugin-store";
+import { soundStarting } from "./soundGate";
 import type { AppState, BeatEvent, ComponentScores, InstrumentId, SegmentEndReason, SpeedRamp, Subdivision } from "./types";
 
 // Shared store instance (lazy singleton)
@@ -65,10 +66,13 @@ export async function setSubdivision(subdivision: Subdivision): Promise<void> {
 }
 
 export async function togglePlayback(): Promise<void> {
+  // The coach's voice stops before anything sounds (src/soundGate.ts).
+  soundStarting();
   return invoke("toggle_playback");
 }
 
 export async function setPlaying(playing: boolean): Promise<void> {
+  if (playing) soundStarting();
   return invoke("set_playing", { playing });
 }
 

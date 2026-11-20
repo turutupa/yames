@@ -7,7 +7,9 @@
  * or a tempo: the Session's own buttons (`bigAction`) do that, and no sentence
  * here argues with them.
  */
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { noteFinding, useCoachAnswer } from "../../coach/coachSlot";
+import { sayAtBoundary, type VoiceBoundary } from "../../coach/voice";
 import type { AskHandler } from "../coach/askStore";
 import { useTranslation } from "react-i18next";
 import { takeNote } from "../../coach/takeNote";
@@ -51,6 +53,38 @@ type T = ReturnType<typeof useTranslation>["t"];
 export const SessionAsk = createContext<AskHandler | undefined>(undefined);
 
 const DAY_MS = 86_400_000;
+
+/**
+ * The headline a note drew at a boundary, handed to the coach's voice
+ * (`coach/voice.ts`), which says it once if Voice is on and nothing sounds.
+ * The same string the note shows: there is no second wording.
+ */
+function useBoundaryVoice(kind: VoiceBoundary, text: string | null): void {
+  useEffect(() => {
+    if (text) sayAtBoundary(kind, text);
+  }, [kind, text]);
+}
+
+/**
+ * What a coach key put in the coach's slot (`ask-explain-last`,
+ * `ask-what-next`): one line in the note, until the screen changes.
+ */
+export function CoachAnswerLine() {
+  const answer = useCoachAnswer();
+  if (!answer) return null;
+  return <NoteLine testId="coach-answer">{answer}</NoteLine>;
+}
+
+/**
+ * A Take not caught has no note: its screen's title is the finding. Kept for
+ * `ask-explain-last` and said at the boundary like a note's headline.
+ */
+export function useNoCatchVoice(outcome: TakeOutcome | undefined, title: string): void {
+  useEffect(() => {
+    if (outcome) noteFinding(outcome, title, null);
+  }, [outcome, title]);
+  useBoundaryVoice("result", outcome ? title : null);
+}
 
 /** A pitch class as a player says it ("B", "F#"): the note a direction line names. */
 function pitchName(midi: number): string {
@@ -207,8 +241,15 @@ export function ResultNote({ session, outcome, howTo }: { session: SessionRun; o
   const note = useTakeNote(session, outcome);
   const [howOpen, setHowOpen] = useState(false);
   const played = whereOf(session).exercise;
-  if (!note || note.kind === "notCaught" || note.kind === "ungraded") return null;
-  const history = historyText(t, note, session.big);
+  const said = note && note.kind !== "notCaught" && note.kind !== "ungraded" ? note : null;
+  const headline = said ? findingText(t, said, outcome.bpm) : null;
+  const history = said ? historyText(t, said, session.big) : null;
+  // The finding, as drawn: what `ask-explain-last` repeats and the voice says.
+  useEffect(() => {
+    if (headline) noteFinding(outcome, headline, history);
+  }, [outcome, headline, history]);
+  useBoundaryVoice("result", headline);
+  if (!note || !headline || note.kind === "notCaught" || note.kind === "ungraded") return null;
   // One thing to try next time (DESIGN 4.2): only a cue this Take's finding
   // chose, and only when the next Take is this Exercise again. "Go again"
   // skips the ready screen, so this is where it is read. A pass that moves
@@ -230,7 +271,8 @@ export function ResultNote({ session, outcome, howTo }: { session: SessionRun; o
       ]
     : [];
   return (
-    <CoachNote headline={findingText(t, note, outcome.bpm)} live kind="result" testId="coach-note" onAsk={onAsk}>
+    <CoachNote headline={headline} live kind="result" testId="coach-note" onAsk={onAsk}>
+      <CoachAnswerLine />
       {note.findingLine && <NoteLine>{noteText(t, note.findingLine)}</NoteLine>}
       {history && <NoteLine testId="coach-history">{history}</NoteLine>}
       {next && (
@@ -277,6 +319,13 @@ export function UngradedNote({ session, outcome }: { session: SessionRun; outcom
   const { t } = useTranslation();
   const onAsk = useContext(SessionAsk);
   const { exercise } = whereOf(session);
+  // The question the Take listened for is what this result says, aloud too.
+  const asked = !outcome.takeId
+    ? null
+    : outcome.ungraded === "eyes"
+      ? t("session.eyes.question")
+      : selfCheckOf(exercise, session.exercise);
+  useBoundaryVoice("result", asked);
   // The Take for the eyes (DESIGN 4.2, "Watch your pick"): its one question,
   // answered by the player, kept with the Take.
   if (outcome.ungraded === "eyes") {
@@ -287,6 +336,7 @@ export function UngradedNote({ session, outcome }: { session: SessionRun; outcom
     const question = t("session.eyes.question");
     return (
       <CoachNote headline={question} kind="ungraded" testId="coach-note">
+        <CoachAnswerLine />
         <NoteAnswer
           question={t("session.note.ungraded.yourAnswer")}
           answer={said === "yes" ? "yes" : said === "no" ? "notYet" : undefined}
@@ -303,6 +353,7 @@ export function UngradedNote({ session, outcome }: { session: SessionRun; outcom
   const answer = row ? (heardItOf(row) ?? undefined) : undefined;
   return (
     <CoachNote headline={question} kind="ungraded" testId="coach-note" onAsk={onAsk}>
+      <CoachAnswerLine />
       <NoteAnswer
         question={t("session.note.ungraded.yourAnswer")}
         answer={answer}
@@ -313,7 +364,7 @@ export function UngradedNote({ session, outcome }: { session: SessionRun; outcom
 }
 
 /** "Last Take: 79% even." The number the verdict turned on, as the result showed it. */
-function lastTakeLead(t: T, outcome: TakeOutcome): string | null {
+export function lastTakeLead(t: T, outcome: TakeOutcome): string | null {
   const { grade } = outcome;
   if (grade.verdict === "notCaught") return t("session.note.ready.lastNotCaught");
   if (grade.verdict === "passed") return t("session.note.ready.lastPassed", { bpm: outcome.bpm });
@@ -356,7 +407,17 @@ export function ReadyNote({
   const lastNote = useTakeNote(session, last);
   // One thing to do: the cue the last Take chose, or the general one (DESIGN 4.1).
   const pick = useNextCue(session);
-  if (!exercise) return null;
+  // The order: the headline in each case below, and what the voice says.
+  const question = run.ungraded && run.ungraded !== "eyes" ? selfCheckOf(played, exercise) : null;
+  const headline = !exercise
+    ? null
+    : run.ungraded === "eyes"
+      ? t("session.eyes.watch")
+      : question
+        ? t("session.note.ungraded.listenFor", { question })
+        : (pick?.cue.say ?? exercise.coachLine);
+  useBoundaryVoice("ready", headline);
+  if (!exercise || headline === null) return null;
   const source = { kind: "path" as const, ...(stepNumber === undefined ? {} : { step: stepNumber }) };
   const chips: NoteChip[] = [];
   if (watch?.canWatch && watch.hasSound && watch.soundOn && !watch.showing) {
@@ -366,11 +427,14 @@ export function ReadyNote({
 
   // The Take for the eyes: what to watch, and nothing else.
   if (run.ungraded === "eyes") {
-    return <CoachNote headline={t("session.eyes.watch")} source={source} kind="ready" testId="coach-note" />;
+    return (
+      <CoachNote headline={headline} source={source} kind="ready" testId="coach-note">
+        <CoachAnswerLine />
+      </CoachNote>
+    );
   }
   // Ungraded, by choice or because nothing is listening: no claim about the playing.
   if (run.ungraded) {
-    const question = selfCheckOf(played, exercise);
     const saidOnce = run.outcomes.some((o) => o.ungraded !== undefined);
     const lastRow = last?.takeId ? session.progress.takes.find((row) => row.id === last.takeId) : undefined;
     const lastUngraded = !!last && last.ungraded !== undefined && !!last.takeId;
@@ -378,12 +442,13 @@ export function ReadyNote({
     const untried = lastNote?.ungraded?.tryLine ?? null;
     return (
       <CoachNote
-        headline={question ? t("session.note.ungraded.listenFor", { question }) : (pick?.cue.say ?? exercise.coachLine)}
+        headline={headline}
         source={source}
         kind="ready"
         testId="coach-note"
         onAsk={onAsk}
       >
+        <CoachAnswerLine />
         {!saidOnce && run.ungraded !== "inputOff" && (
           <NoteLine extra testId="coach-not-listening">
             {t("session.note.ungraded.notListening")}
@@ -423,13 +488,14 @@ export function ReadyNote({
   if (afterLoop) quiet.unshift({ text: noteText(t, afterLoop), id: "coach-after-loop" });
   return (
     <CoachNote
-      headline={pick?.cue.say ?? exercise.coachLine}
+      headline={headline}
       source={source}
       kind="ready"
       testId="coach-note"
       onAsk={onAsk}
       cue={pick ? pick.trigger : undefined}
     >
+      <CoachAnswerLine />
       {quiet.map((line) => (
         <NoteLine key={line.id} extra testId={line.id}>
           {line.text}
