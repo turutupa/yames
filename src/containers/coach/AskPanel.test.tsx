@@ -7,7 +7,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, renderHook, screen, waitFor } from "@testing-library/react";
 import { AskPanel } from "./AskPanel";
 import { answerAsk, useAskSessionRules } from "./useCoachPanel";
-import { __resetAskStoreForTests, getAskState, openAsk, registerAskSender, showToolsCoach } from "./askStore";
+import {
+  __resetAskStoreForTests,
+  closeAsk,
+  getAskState,
+  openAsk,
+  registerAskSender,
+  showToolsCoach,
+  subscribeAsk,
+} from "./askStore";
 import { __resetCoachLoaderForTests } from "../../hooks/coachLoader";
 import { mockInvoke, setInvokeResponse } from "../../test/mocks";
 import i18n from "../../i18n";
@@ -107,6 +115,28 @@ describe("the panel", () => {
     act(() => openAsk({ focus: true }));
     expect(document.activeElement).toBe(screen.getByTestId("ask-input"));
   });
+
+  it("a focus request is consumed once: the next open that did not ask (the deferred one after a Take) leaves the caret alone", () => {
+    const opener = document.createElement("button");
+    document.body.appendChild(opener);
+    openAsk({ focus: true });
+    const first = render(<AskPanel lookingAt={null} onClose={() => {}} />);
+    expect(document.activeElement).toBe(screen.getByTestId("ask-input"));
+    act(() => closeAsk({ restoreFocus: false }));
+    first.unmount();
+    opener.focus();
+    // The panel remounts on every open, as MainWindow mounts it.
+    act(() => openAsk());
+    render(<AskPanel lookingAt={null} onClose={() => {}} />);
+    expect(document.activeElement).toBe(opener);
+    opener.remove();
+  });
+
+  it("shows the sentence it was opened about", () => {
+    openAsk({ about: "Bar 5 slipped" });
+    render(<AskPanel lookingAt={null} onClose={() => {}} />);
+    expect(screen.getByTestId("ask-about")).toHaveTextContent("Bar 5 slipped");
+  });
 });
 
 describe("answering", () => {
@@ -205,5 +235,26 @@ describe("the drawer in a Session", () => {
     const { rerender } = rules({ ...base, open: true });
     rerender({ ...base, open: true, sounding: true });
     expect(getAskState().open).toBe(false);
+  });
+
+  it("an answer in flight when a Take starts commits nothing during the Take, and lands after it", async () => {
+    snapshot.state = "ready";
+    let reply!: (text: string) => void;
+    setInvokeResponse("coach_generate", () => new Promise<string>((resolve) => (reply = resolve)));
+    const { rerender } = rules({ ...base });
+    const answered = answerAsk("why 90?", t, () => "ctx");
+    await waitFor(() => expect(reply).toBeTypeOf("function"));
+    rerender({ ...base, takeRunning: true });
+    const changes = vi.fn();
+    const off = subscribeAsk(changes);
+    await act(async () => {
+      reply("Same tempo until it holds.");
+      await answered;
+    });
+    expect(changes).not.toHaveBeenCalled();
+    expect(getAskState().turns.at(-1)).toMatchObject({ kind: "coach", pending: true });
+    rerender({ ...base, takeRunning: false });
+    expect(getAskState().turns.at(-1)).toMatchObject({ kind: "coach", text: "Same tempo until it holds." });
+    off();
   });
 });

@@ -156,6 +156,25 @@ test("Ask commits nothing during a running Take: the Ask key there is one static
   expect(s.longTasks, `long tasks in the best of three windows (longest ${s.longTaskMaxMs} ms)`).toBe(0);
 });
 
+test("the open Ask panel on a tool screen does not re-render with the beat", async ({ page }) => {
+  test.slow();
+  /*
+   * Review of leg c2a1: the tools' coach inside Ask was a new element at
+   * every render of the shell, which re-renders at every report from the
+   * engine, so the panel's `memo` did nothing. The drill is climbing, the
+   * click playing, Ask open over it with the tools' coach as its second
+   * section: the shell commits, the panel does not.
+   */
+  await installPerf(page, { countRenders: true });
+  await openShot(page, "drill", WIDE);
+  await page.locator(".rail-footer .rail-action").first().click();
+  await expect(page.locator(".ask-panel")).toBeVisible();
+  await expect(page.locator('[data-testid="ask-section-tools"]')).toBeVisible();
+  const s = await samplePerf(page, WINDOW_MS);
+  expect(s.commits, "the click is playing: the shell commits as the engine reports").toBeGreaterThan(0);
+  expect(s.renders.AskPanel ?? 0, `AskPanel rendered in ${s.commits} commits`).toBe(0);
+});
+
 test("the level meter pulses without reading the layout", async ({ page }) => {
   test.slow();
   /*

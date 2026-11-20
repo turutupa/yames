@@ -80,6 +80,37 @@ describe("the note", () => {
     const missed = [...document.querySelectorAll('.coach-bar[data-state="missed"]')];
     expect(missed.map((m) => m.textContent)).toEqual(["×1", "×5"]);
   });
+
+  it("given onAsk, its sentence and each bar open Ask about themselves (DESIGN 5.1)", () => {
+    const onAsk = vi.fn();
+    const strip: NoteStrip = {
+      cells: [1, 2, 3].map((n) => ({ n, state: (n === 2 ? "missed" : "met") as "missed" | "met", round: 1, patternBar: n, spot: n === 2 })),
+      patternBars: 3,
+      rounds: 1,
+      held: null,
+      label: { key: "session.note.strip.roundEvery", values: { count: 3 } },
+    };
+    render(
+      <CoachNote headline="Bar 2 of the tune slipped." onAsk={onAsk} testId="n">
+        <NoteBars strip={strip} label="every 3" onAsk={onAsk} />
+      </CoachNote>,
+    );
+    const say = screen.getByTestId("coach-note-ask");
+    fireEvent.click(say);
+    expect(onAsk).toHaveBeenLastCalledWith({ about: "Bar 2 of the tune slipped.", from: say });
+    const bar = screen.getByTestId("coach-bar-ask-2");
+    fireEvent.click(bar);
+    expect(onAsk).toHaveBeenLastCalledWith({ about: bar.getAttribute("aria-label"), from: bar });
+    expect(bar.getAttribute("aria-label")).toMatch(/2/);
+    // No question is put for the player: no "?" chip, nothing asked.
+    expect(onAsk.mock.calls.every(([r]) => !("question" in r))).toBe(true);
+  });
+
+  it("without onAsk, its words are just words", () => {
+    render(<CoachNote headline="Keep it even." testId="n" />);
+    expect(screen.queryByTestId("coach-note-ask")).toBeNull();
+    expect(screen.getByTestId("n").querySelector("button")).toBeNull();
+  });
 });
 
 describe("an ungraded Take's question", () => {

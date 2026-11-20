@@ -36,6 +36,12 @@ export type AskRequest = {
   from?: Element | null;
   /** Put the caret in the text box (a keyboard or a question opened it). */
   focus?: boolean;
+  /**
+   * What the question is about: the coach's sentence that was tapped, or a
+   * bar of the strip ("Bar 5 slipped"). Shown in the panel and given to the
+   * model with the next question; cleared by any open without one.
+   */
+  about?: string;
 };
 
 /** The function a coach line, note or chip is given as its `onAsk`. */
@@ -47,8 +53,15 @@ export type AskState = {
   turns: readonly AskTurn[];
   /** The Ask key was pressed during a Take: the panel opens on the result. */
   deferred: boolean;
-  /** Bumped when the text box should take focus. */
-  focusSeq: number;
+  /**
+   * An open asked for the caret in the text box, and the panel has not taken
+   * it yet. Consumed once (`consumeAskFocus`): an open that did not ask for
+   * focus (the deferred open after a Take, `C`) never takes it, so Space and
+   * Enter keep driving the Session.
+   */
+  focusPending: boolean;
+  /** What the player opened Ask about (`AskRequest.about`), or null. */
+  about: string | null;
   /** The screen the last turn or divider was written on, for the next divider. */
   screenKey: string | null;
 };
@@ -58,7 +71,8 @@ const INITIAL: AskState = {
   section: "ask",
   turns: [],
   deferred: false,
-  focusSeq: 0,
+  focusPending: false,
+  about: null,
   screenKey: null,
 };
 
@@ -113,7 +127,8 @@ export function openAsk(request: AskRequest = {}): void {
     open: true,
     section: "ask",
     deferred: false,
-    focusSeq: request.focus ? state.focusSeq + 1 : state.focusSeq,
+    focusPending: request.focus === true,
+    about: request.about?.trim() || null,
   });
   if (request.question?.trim()) sender?.(request.question.trim());
 }
@@ -124,7 +139,7 @@ export const askCoach: AskHandler = (request) => openAsk({ focus: true, ...reque
 /** Close Ask; focus goes back to what opened it, when it is still there. */
 export function closeAsk(options: { restoreFocus?: boolean } = {}): void {
   if (!state.open && !state.deferred) return;
-  set({ open: false, deferred: false });
+  set({ open: false, deferred: false, focusPending: false, about: null });
   const target = returnFocus;
   returnFocus = null;
   if (options.restoreFocus !== false && target instanceof HTMLElement && target.isConnected) {
@@ -141,6 +156,11 @@ export function toggleAsk(request: AskRequest = {}): void {
 export function showToolsCoach(): void {
   if (!state.open) returnFocus = activeElement();
   set({ open: true, section: "tools", deferred: false });
+}
+
+/** The panel took (or could not take) the focus it was asked for. */
+export function consumeAskFocus(): void {
+  if (state.focusPending) set({ focusPending: false });
 }
 
 export function setAskSection(section: AskSection): void {
@@ -182,7 +202,34 @@ export function appendAskTurn(turn: AskTurn, screenKey?: string | null): void {
 }
 
 export function updateAskTurn(id: string, next: AskTurn): void {
+  if (!state.turns.some((t) => t.id === id)) return;
   set({ turns: state.turns.map((t) => (t.id === id ? next : t)) });
+}
+
+/** Answers that came back while a Take ran, applied when it ends. */
+let held: Array<{ id: string; next: AskTurn }> = [];
+
+/**
+ * An answer arriving: applied now, or, while a Take runs, held until it ends.
+ * Nothing of Ask commits during a Take (a store change re-renders the window).
+ * A held answer whose turn is gone by then (the conversation was cleared) is
+ * dropped. The generation itself still runs to its end: cancelling it is the
+ * next model leg's (`cancel_generation`, leg c3a).
+ */
+export function settleAskTurn(id: string, next: AskTurn): void {
+  if (takeRunning()) {
+    held.push({ id, next });
+    return;
+  }
+  updateAskTurn(id, next);
+}
+
+/** The Take is over: apply what was held during it. */
+export function releaseHeldAsk(): void {
+  if (held.length === 0 || takeRunning()) return;
+  const pending = held;
+  held = [];
+  for (const { id, next } of pending) updateAskTurn(id, next);
 }
 
 /**
@@ -208,6 +255,7 @@ export function __resetAskStoreForTests(): void {
   returnFocus = null;
   sender = null;
   takeRunning = () => false;
+  held = [];
   nextId = 0;
   for (const l of [...listeners]) l();
 }

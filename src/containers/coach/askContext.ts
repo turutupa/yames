@@ -45,7 +45,14 @@ const TURNS_IN_PROMPT = 6;
  * (`useSession.sendChat` before this leg), so the model's behaviour and the
  * Rust side's `chat` kind are unchanged.
  */
-export function askPrompt(contextText: string, turns: readonly AskTurn[], question: string): string {
+export function askPrompt(
+  contextText: string,
+  turns: readonly AskTurn[],
+  question: string,
+  /** The coach's sentence or the bar Ask was opened about (`AskRequest.about`). */
+  about?: string | null,
+): string {
+  if (about) contextText = `${contextText}\nThe player is asking about this: "${about}"`;
   const recent = turns.filter((x) => x.kind === "user" || (x.kind === "coach" && !x.pending)).slice(-TURNS_IN_PROMPT);
   const conversation =
     recent.length > 0

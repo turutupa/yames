@@ -13,6 +13,10 @@ import {
   toggleAsk,
   appendAskTurn,
   askTurnId,
+  consumeAskFocus,
+  releaseHeldAsk,
+  settleAskTurn,
+  subscribeAsk,
 } from "./askStore";
 
 describe("Ask's store", () => {
@@ -40,8 +44,63 @@ describe("Ask's store", () => {
     registerAskSender((q) => asked.push(q));
     askCoach({ question: "  Why 90 again?  " });
     expect(getAskState().open).toBe(true);
-    expect(getAskState().focusSeq).toBe(1);
+    expect(getAskState().focusPending).toBe(true);
     expect(asked).toEqual(["Why 90 again?"]);
+  });
+
+  it("a focus request is consumed once: a later open that did not ask for it does not take it", () => {
+    askCoach();
+    expect(getAskState().focusPending).toBe(true);
+    consumeAskFocus();
+    expect(getAskState().focusPending).toBe(false);
+    closeAsk();
+    // The deferred open after a Take, or `C`: no focus asked.
+    openAsk();
+    expect(getAskState().focusPending).toBe(false);
+    closeAsk();
+    // Asked but never taken (closed first): not carried into the next open.
+    askCoach();
+    closeAsk();
+    openAsk();
+    expect(getAskState().focusPending).toBe(false);
+  });
+
+  it("opens about a sentence, and any open without one forgets it", () => {
+    askCoach({ about: " Bar 5 slipped. " });
+    expect(getAskState().about).toBe("Bar 5 slipped.");
+    openAsk();
+    expect(getAskState().about).toBeNull();
+    askCoach({ about: "Keep it even." });
+    closeAsk();
+    expect(getAskState().about).toBeNull();
+  });
+
+  it("an answer that arrives during a Take is held, and lands when the Take ends", () => {
+    let running = false;
+    setAskTakeGate(() => running);
+    const id = askTurnId();
+    appendAskTurn({ id, kind: "coach", text: "", pending: true });
+    const seen: number[] = [];
+    const off = subscribeAsk(() => seen.push(1));
+    running = true;
+    settleAskTurn(id, { id, kind: "coach", text: "Same tempo." });
+    expect(seen).toEqual([]);
+    expect(getAskState().turns[0]).toMatchObject({ pending: true });
+    releaseHeldAsk();
+    expect(seen).toEqual([]);
+    running = false;
+    releaseHeldAsk();
+    expect(getAskState().turns[0]).toMatchObject({ kind: "coach", text: "Same tempo." });
+    off();
+  });
+
+  it("a held answer whose conversation was cleared is dropped", () => {
+    let running = true;
+    setAskTakeGate(() => running);
+    settleAskTurn("ask-gone", { id: "ask-gone", kind: "coach", text: "late" });
+    running = false;
+    releaseHeldAsk();
+    expect(getAskState().turns).toEqual([]);
   });
 
   it("during a Take nothing opens: it is deferred, the question dropped, and opens after", () => {

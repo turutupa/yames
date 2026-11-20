@@ -252,6 +252,16 @@
   font-weight: 600;
   color: var(--text-primary);
 }
+/* The coach's sentence (or the bar) Ask was opened about: quoted, quiet. */
+.ask-about {
+  margin: 0;
+  padding-left: 9px;
+  border-left: 2px solid var(--border);
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
 
 /* ── The thread ──────────────────────────────────────────────────────── */
 .ask-thread {

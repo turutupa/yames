@@ -7,7 +7,7 @@ import { useCoachModel } from "../../hooks/useCoachModel";
 import { IS_MOBILE } from "../../platform";
 import { CoachModelSelector } from "../main-window/CoachModelSelector";
 import { CoachGlyph } from "./CoachGlyph";
-import { noteAskScreen, sendAsk, setAskSection, useAskState, type AskTurn } from "./askStore";
+import { consumeAskFocus, noteAskScreen, sendAsk, setAskSection, useAskState, type AskTurn } from "./askStore";
 import "../../styles/ask.css";
 
 /** "Looking at: …", and the key that decides when the thread gets a divider. */
@@ -42,7 +42,7 @@ type AskPanelProps = {
  */
 export const AskPanel = memo(function AskPanel({ lookingAt, toolsCoach, onClose }: AskPanelProps) {
   const { t } = useTranslation();
-  const { section, turns, focusSeq } = useAskState();
+  const { section, turns, focusPending, about } = useAskState();
   const titleId = useId();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [typing, setTyping] = useState(false);
@@ -57,11 +57,14 @@ export const AskPanel = memo(function AskPanel({ lookingAt, toolsCoach, onClose 
   }, [lookingKey, lookingText, t]);
 
   // A key or a question opened it: the caret goes in the box (never on a
-  // phone, where that would raise the keyboard over the answer).
+  // phone, where that would raise the keyboard over the answer). The request
+  // is consumed here, once: the panel remounts on every open, and a request
+  // that outlived its open stole the caret from every later one (review of c2a1).
   useEffect(() => {
-    if (focusSeq === 0 || IS_MOBILE) return;
-    inputRef.current?.focus({ preventScroll: true });
-  }, [focusSeq]);
+    if (!focusPending) return;
+    if (!IS_MOBILE) inputRef.current?.focus({ preventScroll: true });
+    consumeAskFocus();
+  }, [focusPending]);
 
   const head = (
     <div className="ask-head" data-coach-model-ceiling="">
@@ -105,6 +108,11 @@ export const AskPanel = memo(function AskPanel({ lookingAt, toolsCoach, onClose 
       {!showTools && lookingText && (
         <p className="ask-context" data-testid="ask-context">
           <span className="ask-context-label">{t("ask.lookingAt")}</span> <b>{lookingText}</b>
+        </p>
+      )}
+      {!showTools && about && (
+        <p className="ask-about" data-testid="ask-about">
+          <q>{about}</q>
         </p>
       )}
     </div>

@@ -37,7 +37,8 @@ import type { TakeOutcome } from "../../session/runner";
 import { PORTRAIT_PHONE_QUERY, useMediaQuery } from "../../hooks/useMediaQuery";
 import { AskStart, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart, timedHowKey } from "./parts";
 import { TakeOrder } from "../coach/CoachLine";
-import { ReadyNote, RecapLine, ResultNote, UngradedNote, takeOrderText } from "./SessionCoach";
+import { ReadyNote, RecapLine, ResultNote, SessionAsk, UngradedNote, takeOrderText } from "./SessionCoach";
+import { askCoach } from "../coach/askStore";
 import { RunwayTakeScreen, isTheoryTake } from "./highway/RunwayTake";
 import { categoryTagKey } from "../../session/kind";
 import { KeyChooser } from "./practice/KeyChooser";
@@ -1926,8 +1927,13 @@ export function SessionView({
       ((run.phase === "timedReady" || run.phase === "timed") &&
         (step?.kind === "metronome" || (step?.kind === "jam" && !!step.exerciseId))));
 
+  // The coach's words open Ask where the Session offers it, never during a Take.
+  const takeRuns = run.phase === "playing" || run.phase === "listening";
+  const notesAsk = onAsk && !takeRuns ? askCoach : undefined;
+
   return (
-    // The recap draws no neck either (UX audit SES-10): the page's own backdrop.
+    <SessionAsk.Provider value={notesAsk}>
+    {/* The recap draws no neck either (UX audit SES-10): the page's own backdrop. */}
     <div
       className="session-page session-run"
       data-testid="session"
@@ -2012,6 +2018,7 @@ export function SessionView({
       )}
       {run.phase === "recap" && <RecapScreen session={session} />}
     </div>
+    </SessionAsk.Provider>
   );
 }
 

@@ -511,6 +511,9 @@ export const Rail = memo(forwardRef<PresetSidebarHandle, RailProps>(function Rai
           // would take the status with it.
           aria-label={`${t("session.nav.askCoach")} — ${coachStatus}`}
           onClick={onToggleCoach}
+          // The tools tour's "coach" stop points here: Ask is opened from this
+          // row, and the panel itself is not on screen when the stop shows.
+          data-tour="coach"
         >
           <span className="rail-action-icon rail-action-coach">
             <svg

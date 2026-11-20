@@ -129,6 +129,34 @@
   color: var(--coach-ink);
 }
 
+/* The sentence that opens Ask about itself (DESIGN 5.1): still the words, set
+   as they were; a dotted underline on hover and a ring on focus say it can be
+   pressed. */
+.coach-say {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
+  overflow-wrap: inherit;
+  cursor: pointer;
+}
+.coach-say:hover {
+  text-decoration: underline dotted;
+  text-decoration-color: var(--coach-faint);
+  text-underline-offset: 0.2em;
+}
+.coach-say:focus-visible {
+  outline: 2px solid var(--coach-ink);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 /* The Exercise's own How, opened in place from "What should I try?". */
 .coach-note-how {
   display: flex;
@@ -294,6 +322,21 @@
 .coach-bar-x {
   margin-right: 2px;
   font-weight: 600;
+}
+/* Ask about this bar: over the whole cell, so the cell keeps its size. */
+.coach-bar-ask {
+  position: absolute;
+  inset: -1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  cursor: pointer;
+}
+.coach-bar-ask:focus-visible {
+  outline: 2px solid var(--coach-ink);
+  outline-offset: 1px;
 }
 .coach-bar[data-held]::after {
   content: "";

@@ -123,7 +123,7 @@ export default function CoachCard({ active, messages, onStartSession, onEndSessi
   }, []);
 
   return (
-    <div className="coach-card coach-card-embedded" data-tour="coach">
+    <div className="coach-card coach-card-embedded">
       <div className="coach-card-inner">
         <div className="coach-card-header">
           {tab === "history" && historyView === "detail" ? (

@@ -58,7 +58,7 @@ import {
 import CoachCard from "../practice-coach/CoachCard";
 import { AskPanel } from "../coach/AskPanel";
 import { askShownOn, useAskHost } from "../coach/useAskHost";
-import { askCoach, closeAsk, toggleAsk, useAskState } from "../coach/askStore";
+import { askCoach, closeAsk, getAskState, useAskState } from "../coach/askStore";
 import "../../styles/main-window.css";
 import "../../styles/transitions.css";
 import "../../styles/evaluation.css";
@@ -590,9 +590,9 @@ export function MainWindow() {
     isPlaying: state.isPlaying,
     beat: currentBeat,
     state,
-    // The panel's open state is Ask's since leg c2a1 (`askStore`), not the
-    // coach session's: a Session still closes one it opened.
-    coach: { ...session, cardOpen: askState.open, toggleCard: toggleAsk },
+    // The panel's open state is Ask's since leg c2a1 (`askStore`), and a
+    // Session's teardown leaves it alone (Ask's own rules close it).
+    coach: session,
     listening: evaluation.enabled,
     // A Session turns the input on by itself, and says why when it cannot
     // (owner, beta 6: Start take did nothing with the input off).
@@ -625,6 +625,57 @@ export function MainWindow() {
     jam: jamSession.jam,
     song: songsSession.song,
   });
+  // Until c2a2 the tools' coach (Start, End, Feed, History) is Ask's second
+  // section, on the screens the old coach card was on. Built once per change
+  // of what it shows, never per beat: a new element each render made the
+  // panel's `memo` worthless and re-rendered the open panel at every beat.
+  // The level meter in its title is drawn only while a tools session listens,
+  // so the spectrum is passed only then (the status dot's `hasSignal` is a
+  // boolean and changes only when the signal comes or goes).
+  const toolsCoachHere =
+    !IS_MOBILE &&
+    (view === "beat" ||
+      view === "drill" ||
+      view === "setlist" ||
+      view === "jam" ||
+      view === "today" ||
+      view === "paths" ||
+      view === "progress" ||
+      view === "tools");
+  const toolsSpectrum = toolsCoachHere && session.active && evaluation.enabled ? evaluation.spectrum : null;
+  const toolsHasSignal = evaluation.hasSignal;
+  const toolsCoach = useMemo(
+    () =>
+      toolsCoachHere ? (
+        <CoachCard
+          active={session.active}
+          messages={session.messages}
+          onStartSession={session.startSession}
+          onEndSession={session.endSession}
+          onChipAction={session.handleChipAction}
+          listening={evaluation.enabled}
+          hasSignal={toolsHasSignal}
+          spectrum={toolsSpectrum}
+          isPlaying={state.isPlaying}
+          inferredGrid={evaluation.inferredGrid}
+          playMode={session.playMode}
+        />
+      ) : undefined,
+    [
+      toolsCoachHere,
+      session.active,
+      session.messages,
+      session.startSession,
+      session.endSession,
+      session.handleChipAction,
+      evaluation.enabled,
+      toolsHasSignal,
+      toolsSpectrum,
+      state.isPlaying,
+      evaluation.inferredGrid,
+      session.playMode,
+    ],
+  );
 
   // "Hear what I play" (detection M7): the key and the chord heard while a
   // jam plays and the input listens. Off, nothing below invokes anything.
@@ -923,12 +974,17 @@ export function MainWindow() {
    * is. Stopped, it is the start of the current portion — a player who has
    * not pressed play yet is at the top of what they chose.
    */
+  // The beat, read when a key is pressed rather than named in the memo below:
+  // with `currentBeat` in its deps the dispatcher, and the window's keydown
+  // listener behind it, were rebuilt on every beat (review of leg c2a1).
+  const songsBeat = useRef(currentBeat);
+  songsBeat.current = currentBeat;
   const songsActions = useMemo(
     () => {
       const score = songsSession.score;
       const barNow = () => {
         if (!score) return null;
-        return songPosition(score, songsSession.range, currentBeat, {
+        return songPosition(score, songsSession.range, songsBeat.current, {
           playing: state.isPlaying,
         }).bar;
       };
@@ -988,7 +1044,6 @@ export function MainWindow() {
       songsSession.setSelection,
       songsSession.setLoop,
       songsSession.clearSelection,
-      currentBeat,
       state.isPlaying,
     ],
   );
@@ -1791,6 +1846,19 @@ export function MainWindow() {
     ],
   );
 
+  // `?` (plan OQ8, as the old card's listener did): on a tool the click stops
+  // first, then Ask opens with the caret in its box. Stable, reading the
+  // latest values from a ref: it is one of the dispatcher's deps, and an
+  // inline function rebuilt `dispatchAction` (and re-registered the window's
+  // keydown listener) on every beat.
+  const askKeyLatest = useRef({ isPlaying: state.isPlaying, view, togglePlayback });
+  askKeyLatest.current = { isPlaying: state.isPlaying, view, togglePlayback };
+  const askCoachKey = useCallback(() => {
+    const { isPlaying, view: on, togglePlayback: toggle } = askKeyLatest.current;
+    if (isPlaying && on !== "session") void toggle();
+    askCoach();
+  }, []);
+
   // Shared action dispatcher — called by keyboard handler and gamepad hook
   // Nothing on a phone dispatches an action: no keyboard, no pedal, no
   // gamepad. The dispatcher also drives the window APIs, which is the other
@@ -1816,12 +1884,7 @@ export function MainWindow() {
     setIsOsFullscreen,
     setSidebarOpen,
     toggleCard: ask.panel.toggle,
-    // `?` (plan OQ8, as the old card's listener did): on a tool the click
-    // stops first, then Ask opens with the caret in its box.
-    askCoach: () => {
-      if (state.isPlaying && view !== "session") void togglePlayback();
-      askCoach();
-    },
+    askCoach: askCoachKey,
     forceWebviewFocus,
   });
 
@@ -1859,7 +1922,10 @@ export function MainWindow() {
         }
         // Ask open over the screen: Escape puts it away before it means
         // anything to the screen (in a Session, Exit).
-        if (askState.open && view !== "settings") {
+        // Read from the store, not the render: opening Ask must not
+        // re-register this listener (its order is what Settings' Escape
+        // handling relies on).
+        if (getAskState().open && view !== "settings") {
           e.preventDefault();
           closeAsk();
           return;
@@ -1904,7 +1970,7 @@ export function MainWindow() {
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [view, keyBindings, isFullscreen, bindingFor, setView, dispatchAction, inputTestMode, onboarding.isOpen, tour?.isOpen, askState.open]);
+  }, [view, keyBindings, isFullscreen, bindingFor, setView, dispatchAction, inputTestMode, onboarding.isOpen, tour?.isOpen]);
 
   // MIDI controller support. The dispatcher is silenced while the input
   // tester is open by reading `inputTestModeRef` (the ref pattern keeps
@@ -2986,38 +3052,9 @@ export function MainWindow() {
       {/* Ask: the one coach panel, a dock or a drawer by the window's width
           and the screen (ask.css), a sheet on a phone. Not mounted while it
           is closed, so nothing of it runs during a Take. Until c2a2 the tools'
-          coach (Start, End, Feed, History) is its second section, on the
-          screens the old coach card was on. */}
+          coach is its second section (`toolsCoach`, memoised above). */}
       {askState.open && askShownOn(view) && (
-        <AskPanel
-          lookingAt={ask.lookingAt}
-          onClose={ask.panel.close}
-          toolsCoach={
-            !IS_MOBILE &&
-            (view === "beat" ||
-              view === "drill" ||
-              view === "setlist" ||
-              view === "jam" ||
-              view === "today" ||
-              view === "paths" ||
-              view === "progress" ||
-              view === "tools") ? (
-              <CoachCard
-                active={session.active}
-                messages={session.messages}
-                onStartSession={session.startSession}
-                onEndSession={session.endSession}
-                onChipAction={session.handleChipAction}
-                listening={evaluation.enabled}
-                hasSignal={evaluation.hasSignal}
-                spectrum={evaluation.spectrum}
-                isPlaying={state.isPlaying}
-                inferredGrid={evaluation.inferredGrid}
-                playMode={session.playMode}
-              />
-            ) : undefined
-          }
-        />
+        <AskPanel lookingAt={ask.lookingAt} onClose={ask.panel.close} toolsCoach={toolsCoach} />
       )}
       </div>{/* main-body */}
       </LearningNeck>

@@ -23,10 +23,11 @@ import {
   openAsk,
   openDeferredAsk,
   registerAskSender,
+  releaseHeldAsk,
   setAskSection,
   setAskTakeGate,
+  settleAskTurn,
   toggleAsk,
-  updateAskTurn,
   useAskState,
   type AskRequest,
   type AskSection,
@@ -44,7 +45,7 @@ import {
 export async function answerAsk(question: string, t: TFunction, contextText: () => string): Promise<void> {
   const q = question.trim();
   if (!q) return;
-  const before = getAskState().turns;
+  const { turns: before, about } = getAskState();
   appendAskTurn({ id: askTurnId(), kind: "user", text: q });
   if (IS_MOBILE) {
     appendAskTurn({ id: askTurnId(), kind: "app", text: t("ask.reply.phone") });
@@ -60,11 +61,15 @@ export async function answerAsk(question: string, t: TFunction, contextText: () 
   appendAskTurn({ id, kind: "coach", text: "", pending: true });
   let answer = "";
   try {
-    answer = (await coachGenerate("chat", askPrompt(contextText(), before, q)))?.trim() ?? "";
+    answer = (await coachGenerate("chat", askPrompt(contextText(), before, q, about)))?.trim() ?? "";
   } catch {
     answer = "";
   }
-  updateAskTurn(
+  // A question asked at a result can come back during the next Take: the
+  // store holds it until the Take is over. (The generation is not cancelled
+  // when a Take starts; `cancel_generation` arrives with leg c3a, which
+  // should cancel it there.)
+  settleAskTurn(
     id,
     answer ? { id, kind: "coach", text: answer } : { id, kind: "app", text: t("ask.reply.nothing") },
   );
@@ -139,6 +144,11 @@ export function useAskSessionRules({
   useEffect(() => {
     if (inSession && takeRunning && open) closeAsk({ restoreFocus: false });
   }, [inSession, takeRunning, open]);
+
+  // The Take is over: an answer held during it lands now.
+  useEffect(() => {
+    if (!(inSession && takeRunning)) releaseHeldAsk();
+  }, [inSession, takeRunning]);
 
   // The Take is over: a deferred open happens now. Off the Session it is forgotten.
   useEffect(() => {
