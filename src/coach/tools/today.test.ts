@@ -204,8 +204,12 @@ describe("swap_part", () => {
     const proposal = proposalOf(runCoachTool(call("swap_part", { at: 2, choice: "harder" }), h, toolCtx()));
     h.confirmSwap(1, { id: "row-1", title: "Tirones" } as PlanStep);
     expect(confirmCoachTool(proposal, h, toolCtx())).toMatchObject({ line: { key: "coachTools.why.refused.proposal" } });
-    expect(runCoachUndo({ tool: "restore_part", args: { at: 2, title: "Inside picking" } }, h, toolCtx())).toMatchObject({ ok: false });
     expect(h.rows()[1]).toBe("Tirones");
+    const swapped = today();
+    const out = done(confirmCoachTool(proposalOf(runCoachTool(call("swap_part", { at: 2, choice: "harder" }), swapped, toolCtx())), swapped, toolCtx()));
+    swapped.confirmSwap(1, { id: "row-1", title: "Tirones" } as PlanStep);
+    expect(runCoachUndo(out.undo, swapped, toolCtx())).toMatchObject({ ok: false });
+    expect(swapped.rows()[1]).toBe("Tirones");
   });
 
   it("the swap's undo is the app's own: a player cannot call it", () => {
@@ -245,6 +249,16 @@ describe("follow_path", () => {
     const capped = host(progress(), { followPath: () => "cap" });
     const proposal = proposalOf(runCoachTool(call("follow_path", { path: "ligado" }), capped, toolCtx()));
     expect(confirmCoachTool(proposal, capped, toolCtx())).toMatchObject({ why: "refused", line: { key: "coachTools.why.refused.cap" } });
+  });
+
+  it("a Path followed between the proposal and the press is left where it is (review 4)", () => {
+    let prog = nothing;
+    const h = host(nothing, { progress: () => prog });
+    const proposal = proposalOf(runCoachTool(call("follow_path", { path: "alternate picking", level: "intermediate" }), h, toolCtx()));
+    // The player starts it from its page, or plays it, and moves on.
+    prog = progress({ states: [state({ pathId: "alternate-picking" })] });
+    expect(confirmCoachTool(proposal, h, toolCtx())).toMatchObject({ why: "refused", line: { key: "coachTools.why.refused.proposal" } });
+    expect(h.changes()).toEqual([]);
   });
 
   it("several Paths are choices; a Session refuses", () => {

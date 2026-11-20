@@ -313,6 +313,9 @@ const followPath = defineConfirmTool<FollowPath>({
     if (host.sessionActive()) return sessionOpen();
     const path = host.paths().find((p) => p.id === pathId);
     if (!path) return gone("the Path is not there any more");
+    // Followed since the proposal (from its page, or by playing it): starting it again
+    // would move the player's place back to the Level's entry (review finding 4).
+    if (isSubscribed(host.progress(), pathId)) return gone("the Path is followed already");
     const out = host.followPath(pathId, levelId);
     if (out === "notWiredYet") return notWiredYet("follow_path");
     if (out === "cap") return refuse("refused", "coachTools.why.refused.cap", { cap: SUBSCRIPTION_CAP, path: path.title });
