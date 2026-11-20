@@ -46,7 +46,7 @@ export const KEY_OF_A: StepSpec = {
   id: "key-of-a",
   title: "The key of A, in full",
   goal: "Play the seven chords of A major, its one, four and five in an eight-bar form, and its one, six, two, five.",
-  why: "G moved the whole key to a new place. A does it once more, and this time you can start to notice what never changes: the pattern of major and minor, which chords are one, four and five, and how their shapes sit next to each other. A is also a key the guitar likes. Its one, four and five are A, D and E, three of the first chords most players learn, and here they are as small shapes in the middle of the neck.",
+  why: "A is G moved two frets up the neck: every shape here is one you played in the key of G, two frets higher. So the work in this Step is the naming. At the start of each Exercise, say the chord for each number in A, then look at the frets. A is also a key the guitar likes. Its one, four and five are A, D and E, three of the first chords most players learn, and here they are as small shapes in the middle of the neck.",
   howTo: [
     "A major has three sharps: C sharp, F sharp and G sharp. Its seven chords are A, B minor, C sharp minor, D, E, F sharp minor and G sharp diminished.",
     "One, four and five are A, D and E. Two, three and six are B minor, C sharp minor and F sharp minor.",
@@ -131,11 +131,11 @@ export const FOUR_CHORD_SONGS: StepSpec = {
   id: "four-chord-songs",
   title: "One, five, six, four",
   goal: "Play one, five, six, four in G and in A, the same four chords in the order one, six, four, five, and one, five, six, four in keys that change.",
-  why: "If one progression had to stand for the popular music of the last sixty years, it would be one, five, six, four. In C it is C, G, A minor, F: the eight-bar song in Triads. Start the same loop on its third chord and it is six, four, one, five, which you have played too. Put the chords in the order one, six, four, five and you have the sound of the nineteen-fifties. The same four chords every time. Knowing them by number, in the keys guitarists use most, means you can play along with a few hundred songs after hearing four bars.",
+  why: "If one progression had to stand for the popular music of the last sixty years, it would be one, five, six, four. In C it is C, G, A minor, F. Start the same loop on its third chord and it is six, four, one, five, which you have already played. Put the chords in the order one, six, four, five and you have the sound of the nineteen-fifties. The same four chords every time. Knowing them by number, in the keys guitarists use most, means you can play along with a few hundred songs after hearing four bars.",
   howTo: [
     "In G, one, five, six, four is G, D, E minor, C. In A it is A, E, F sharp minor, D.",
     "In G, low on the neck, on the G, B and top strings: G is 4, 3, 3. D is 2, 3, 2. E minor is 4, 5, 3. C is 5, 5, 3.",
-    "When you hear a song, listen for the bass note. If it goes home, up to the fifth, up one more step and down to the fourth, it is this.",
+    "Try it away from the app, on songs you know. Find the chord that sounds like home, then follow the bass. If it goes home, to five, up one more step to six and down to four, it is this progression. Say the numbers as the chords change.",
   ],
   payoff: "The most-used progression in popular music, by number, in five keys.",
   exercises: [
@@ -235,7 +235,7 @@ const C_AFTER_EM = fingered(C_MID, [3, 2, 1]);
 export const MINOR_KEY_E: StepSpec = {
   id: "minor-key-e",
   title: "The minor key again: E minor",
-  goal: "Play the main chords of E minor, walk down from home to a major fifth chord, and hear G major and E minor as two homes for one set of chords.",
+  goal: "Play the main chords of E minor, walk down from home to a five chord made major, and hear G major and E minor as two homes for one set of chords.",
   why: "A minor was the relative minor of C. Every major key has one, on its sixth note, and E minor is G's: the same seven chords as the key of G, with E minor as home. Going through the minor key a second time, with chords you already know from the other side, is what turns it from a list into a pattern. One, four and five are minor. Six and seven are the two major chords just below home. And five is often made major so that it pulls harder.",
   howTo: [
     "In the key of E minor, one is E minor, four is A minor, and five is B minor or B major. Six and seven are C and D.",
@@ -456,9 +456,9 @@ export const BORROWED: StepSpec = {
   id: "borrowed",
   title: "Chords from outside the key",
   goal: "Play the three chords songs most often take from outside the key, the flat seven, the major two and the minor four, and hear the one note each of them changes.",
-  why: "The seven chords of a key are the ones a song can use without surprising anyone. Songs surprise people on purpose. Three outside chords turn up again and again, and each is made by changing a single note of the scale. Lower the seventh note and a major chord appears a whole step below home: in C, B flat. Raise the fourth note and the two chord turns major: D instead of D minor. Lower the sixth note and the four chord turns minor: F minor instead of F. You do not need the theory to use them. You need to know where they sit beside the chords you have.",
+  why: "The seven chords of a key are the ones a song can use without surprising anyone. You have met one chord from outside already: the major five of a minor key. Songs in a major key borrow too. Three outside chords turn up again and again, and each is made by changing a single note of the scale. Lower the seventh note and a major chord appears two frets, a whole step, below home: in C, B flat. Raise the fourth note and the two chord turns major: D instead of D minor. Lower the sixth note and the four chord turns minor: F minor instead of F. You do not need the theory to use them. You need to know where they sit beside the chords you have.",
   howTo: [
-    "The flat seven is the one chord moved two frets down, same shape. C is 5, 5, 3, so B flat is 3, 3, 1.",
+    "The flat seven (bVII) is the one chord moved two frets down, same shape. C is 5, 5, 3, so B flat is 3, 3, 1.",
     "The major two: D minor is 7, 6, 5 and D major is 7, 7, 5. The new note is F sharp, one fret under G, which is why it leans toward the five chord.",
     "The minor four: F is 5, 6, 5 and F minor is 5, 6, 4. The new note is A flat, one fret above G, and it falls to the G of a C chord.",
   ],
@@ -494,7 +494,7 @@ export const BORROWED: StepSpec = {
       howTo: [
         "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
         "C is 5, 5, 3. D major is 7, 7, 5: the C shape two frets up. G is 7, 8, 7. C is 9, 8, 8.",
-        "The F sharp in the D chord, B string fret 7, moves up one fret to G in the next bar. That half step is why this D wants to go to G.",
+        "The F sharp in the D chord, B string fret 7, moves up one fret to G in the next bar. That one fret, a half step, is why this D wants to go to G.",
       ],
       coach: "Band on. Right notes and time after the take.",
       tab: bars(C_LOW, D_MID, G_MID, C_MID),
@@ -668,10 +668,11 @@ export const SEVENTHS: StepSpec = {
       title: "All seven, with their sevenths",
       purpose: "Eight bars: a seventh chord on every note of the scale. The first four have their root on the A string, the last four on the low E string, at the same four frets.",
       howTo: [
-        "Straight eighths, 60 BPM up to a pass at 85. One bar on each chord.",
+        "Straight eighths, 50 BPM up to a pass at 80. One bar on each chord.",
         "Bars 1 to 4, root on the A string at frets 3, 5, 7 and 8: C major seven is 3, 5, 4, 5. D minor seven is 5, 7, 5, 6. E minor seven is 7, 9, 7, 8. F major seven is 8, 10, 9, 10.",
         "Bars 5 to 8, root on the low E string at frets 3, 5, 7 and 8, with the A string left out: G seven is 3, 3, 4, 3. A minor seven is 5, 5, 5, 5. B half-diminished is 7, 7, 7, 6. C major seven is 8, 9, 9, 8.",
         "The roots spell the scale: C, D, E, F on the A string, then G, A, B, C on the low E string.",
+        "Bars 5 to 8 are four new shapes. Play those four bars alone a few times before the Take: in each one the pick goes from the low E string straight to the D string.",
       ],
       coach: "Eight bars with the band. Right notes and time after the take.",
       tab: rolls(aMajor7(3), aMinor7(5), aMinor7(7), aMajor7(8), eSeven(3), eMinor7(5), eHalfDiminished(7), eMajor7(8)),
@@ -680,8 +681,8 @@ export const SEVENTHS: StepSpec = {
       chords: "Cmaj7 | Dm7 | Em7 | Fmaj7 | G7 | Am7 | Bm7b5 | Cmaj7",
       jam: ROCK("C"),
       harmony: { chordTones: true },
-      rungs: ladder(60, 110, 5),
-      passAt: 85,
+      rungs: ladder(50, 110, 10),
+      passAt: 80,
       ...named(0.75, 8),
       minutes: 7,
     },
@@ -693,7 +694,7 @@ export const SEVENTHS_IN_SONGS: StepSpec = {
   id: "sevenths-in-songs",
   title: "Sevenths in the progressions you know",
   goal: "Play two, five, one and one, six, two, five in seventh chords, move them to other keys, and then play them as whole chords in your own rhythm.",
-  why: "Nothing about a progression changes when its chords gain a seventh: two, five, one is still two, five, one. What changes is the colour, and how smoothly one chord hands over to the next, because with four notes there is nearly always one that stays. These chords, in these shapes, are the first thing a player learns when they start on jazz or bossa nova. They are also the doorway to the next Path, Arpeggios over Changes, which plays the same chords one note at a time as a melody.",
+  why: "Nothing about a progression changes when its chords gain a seventh: two, five, one is still two, five, one. What changes is the colour, and how smoothly one chord hands over to the next, because with four notes there is nearly always one that stays. These chords, in these shapes, are the first thing a player learns when they start on jazz or bossa nova. They are also the doorway to the next Path, Arpeggios over Changes. There you stop rolling one shape in each bar and play each chord's notes as a line that moves through the changes like a melody.",
   howTo: [
     "Two, five, one: D minor seven with its root on the A string at fret 5, G seven with its root on the low E string at fret 3, C major seven with its root on the A string at fret 3. The roots go D, G, C.",
     "One, six, two, five: C major seven, A minor seven with its root on the low E string at fret 5, D minor seven, G seven.",
