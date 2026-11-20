@@ -10,7 +10,12 @@
 //!   2. With an attack, each written pitch is HEARD if it is sounding over the
 //!      middle of the note, or if its own onset fired and no neighbouring
 //!      semitone's fired harder. If a neighbour did, the note was WRONG and
-//!      the pitch that started is reported.
+//!      the pitch that started is reported. Sounding is not starting: a
+//!      pitch already sounding as strongly just before (a string left ringing)
+//!      needs its own start here, and a chord tone needs the chord to have
+//!      been struck (a real attack, or one of its strings plainly starting)
+//!      and, written to ring, still to sound a quarter second on.
+//!      Short of that it is UNSURE, never HEARD (card #116).
 //!   3. Without an attack (hammer-ons, pull-offs, slides) the written pitch is
 //!      HEARD if it sounds after and did not before.
 //!   4. Anything in between is UNSURE: "couldn't tell". It is never a miss and
@@ -39,6 +44,20 @@ pub const ATTACK_THRESHOLD: f32 = 0.12;
 /// [`RIVAL_RATIO`] of it, means the neighbour was played instead.
 const RIVAL_ONSET: f32 = 0.5;
 const RIVAL_RATIO: f32 = 0.85;
+/// A pitch whose "sounding" just before the attack is this share of its
+/// "sounding" over the note was already ringing: it counts as started only
+/// with its own "just started" at [`RESTRIKE_RISE`] or more.
+const RINGING_SHARE: f32 = 0.7;
+const RESTRIKE_RISE: f32 = 0.25;
+/// A chord was struck if its attack is this strong against the Take's typical
+/// pick, or one of its written pitches shows "just started" at
+/// [`STRUM_RISE`]. A noise bump under a ringing chord is neither.
+const STRUM_ATTACK: f32 = 0.2;
+const STRUM_RISE: f32 = 0.6;
+/// A chord tone written to last this long (seconds) whose "sounding" over
+/// 0.25 to 0.5 s after the attack is under [`CHOKED_ACT`] was choked at once.
+const CHOKED_MIN_DUR: f64 = 0.6;
+const CHOKED_ACT: f32 = 0.04;
 /// Evidence over this share of a threshold, but short of it, is "couldn't
 /// tell" rather than "no".
 const UNSURE_SHARE: f32 = 0.5;
@@ -274,11 +293,38 @@ pub fn verify(ev: &Evidence, expected: &[Expected], lag: Option<f64>) -> Verifie
         }
     }
 
+    // "Just started" at a note's own pitch, peak inside its attack window:
+    // (first frame, last frame, peak, the peak's offset from the first).
+    let rise_in = |e: &Expected| -> (i64, i64, f32, i64) {
+        let w = (0.4 * gap_of(e.t)).clamp(0.025, 0.10);
+        let c = Evidence::col(e.midi);
+        let i0 = (((e.t + lag - w) / dt).floor() as i64).max(0);
+        let i1 = (((e.t + lag + w) / dt).ceil() as i64).min(frames - 1);
+        let (mut peak, mut rk) = (0.0f32, 0i64);
+        if i1 > i0 {
+            peak = f32::MIN;
+            for k in i0..=i1 {
+                let v = ev.rise[k as usize * NP + c];
+                if v > peak {
+                    peak = v;
+                    rk = k - i0;
+                }
+            }
+        }
+        (i0, i1, peak, rk)
+    };
+    // the clearest start of any written pitch of each chord: one string that
+    // plainly started says the chord was struck, however soft the strum
+    let mut chord_rise: std::collections::HashMap<i64, f32> = std::collections::HashMap::new();
+    for e in expected.iter().filter(|e| e.chord) {
+        let r = chord_rise.entry(key(e.t)).or_insert(0.0);
+        *r = r.max(rise_in(e).2);
+    }
+
     let fr = |t: f64| (t / dt).round() as i64;
     let mut verdicts = Vec::with_capacity(expected.len());
     for e in expected {
         let gap = gap_of(e.t);
-        let w = (0.4 * gap).clamp(0.025, 0.10);
         let g = gap.min(e.dur.max(0.05));
         let (mut a0, mut a1) = ((0.30 * g).clamp(0.015, 0.04), (0.85 * g).clamp(0.045, 0.15));
         if e.chord {
@@ -298,19 +344,10 @@ pub fn verify(ev: &Evidence, expected: &[Expected], lag: Option<f64>) -> Verifie
         };
         let before = |t0: f64| -> f32 { ev.mean_act(fr(t0 - a1), fr(t0 - a0), c) };
 
-        let i0 = (((e.t + lag - w) / dt).floor() as i64).max(0);
-        let i1 = (((e.t + lag + w) / dt).ceil() as i64).min(frames - 1);
-        let (mut rise_peak, mut rk) = (0.0f32, 0i64);
-        if i1 > i0 {
-            rise_peak = f32::MIN;
-            for k in i0..=i1 {
-                let v = ev.rise[k as usize * NP + c];
-                if v > rise_peak {
-                    rise_peak = v;
-                    rk = k - i0;
-                }
-            }
-        }
+        let (i0, i1, rise_peak, rk) = rise_in(e);
+        // a chord with no attack worth the name and no string of it plainly
+        // starting: the strum is not there, whatever is still ringing
+        let strum_unclear = |attack: f32| e.chord && attack < STRUM_ATTACK && chord_rise.get(&key(e.t)).copied().unwrap_or(0.0) < STRUM_RISE;
         let t_rise = ((i0 + rk).clamp(0, (frames - 1).max(0))) as f64 * dt;
 
         let mut alt_midi = None;
@@ -355,10 +392,28 @@ pub fn verify(ev: &Evidence, expected: &[Expected], lag: Option<f64>) -> Verifie
                     yes = true; // the written pitch started here
                 }
             }
-            if yes {
+            // Sounding is not starting. A pitch already sounding about as
+            // strongly before the attack (a string left ringing from the
+            // stroke before) counts only if its own start shows here; and a
+            // chord tone only if the chord was struck. Short of that it is
+            // "couldn't tell": never a miss, never credit (card #116).
+            let ringing = pre >= RINGING_SHARE * act && rise_peak < RESTRIKE_RISE;
+            // A chord tone written to ring that is gone a quarter second in
+            // started and stopped at once: a dead or choked string.
+            let choked = e.chord
+                && e.bend <= 0.0
+                && e.dur >= CHOKED_MIN_DUR
+                && fr(t_a + 0.5) <= frames // the audio goes on that long
+                && ev.mean_act(fr(t_a + 0.25), fr(t_a + 0.5), c) < CHOKED_ACT;
+            let doubt = yes && (ringing || strum_unclear(st) || choked);
+            if yes && !doubt {
                 heard = Heard::Yes;
                 how = How::Pick;
                 t_est = Some(t_a);
+            } else if doubt {
+                heard = Heard::Unsure;
+                how = How::None;
+                t_est = None;
             } else {
                 how = How::None;
                 t_est = None;
@@ -404,7 +459,12 @@ pub fn verify(ev: &Evidence, expected: &[Expected], lag: Option<f64>) -> Verifie
             // one way to know; a pitch that was absent and is now present (a
             // slide arriving, a gentle hammer-on) is the other.
             let yes = act >= ACT_THRESHOLD && pre < 0.5 * act && (rise_peak >= RISE_THRESHOLD || pre < 0.5 * ACT_THRESHOLD);
-            if yes {
+            if yes && strum_unclear(0.0) {
+                // a chord tone with no attack and no string plainly starting
+                how = How::None;
+                t_est = None;
+                heard = Heard::Unsure;
+            } else if yes {
                 heard = Heard::Yes;
                 how = How::Soft;
                 t_est = Some(t_rise);
@@ -517,6 +577,112 @@ mod tests {
         assert_eq!(v.verdicts[1].heard, Heard::No);
         assert_eq!(v.verdicts[2].heard, Heard::Yes);
         assert_eq!(v.verdicts[3].heard, Heard::Unsure, "a pitch already sounding cannot be said to have started");
+    }
+
+    /// Card #116: sounding is not starting. A pitch still ringing from the
+    /// stroke before is not credited for an attack that started something
+    /// else; picked again, with its own start, it is.
+    #[test]
+    fn a_ringing_pitch_needs_its_own_start() {
+        // 60 rings on from 0.5 s while 64 is picked at 1.0, where 60 is written
+        let ev = evidence(3.0, &[(0.5, 1.6, 60, true), (1.0, 1.25, 64, true), (1.5, 1.75, 67, true)]);
+        let exp = [want(0, 0.5, 60), want(1, 1.0, 60), want(2, 1.5, 67)];
+        let v = verify(&ev, &exp, Some(0.0));
+        assert_eq!(v.verdicts[1].heard, Heard::Unsure, "ringing, not started: {:?}", v.verdicts[1]);
+        // the same, but 60 is picked again at 1.0
+        let ev = evidence(3.0, &[(0.5, 1.6, 60, true), (1.0, 1.6, 60, true), (1.5, 1.75, 67, true)]);
+        let v = verify(&ev, &exp, Some(0.0));
+        assert_eq!(v.verdicts[1].heard, Heard::Yes);
+        assert_eq!(v.verdicts[1].how, How::Pick);
+    }
+
+    /// Card #116: a chord left out while the one before rings on, under a
+    /// noise bump that passes for an attack, is not heard; strummed again, it is.
+    #[test]
+    fn a_chord_left_out_while_the_last_rings_is_not_heard() {
+        let chord = [52, 55, 59];
+        let mut notes = vec![];
+        for m in chord {
+            notes.push((0.5, 2.2, m, true)); // struck at 0.5 s, rings to 2.2 s
+            notes.push((1.5, 2.2, m, true)); // struck again at 1.5 s
+        }
+        let mut ev = evidence(3.0, &notes);
+        ev.flux[(1.0 / ev.flux_dt).round() as usize] = 0.45; // a bump at 1.0 s
+        let exp: Vec<Expected> = [0.5, 1.0, 1.5]
+            .iter()
+            .enumerate()
+            .flat_map(|(k, &t)| chord.iter().enumerate().map(move |(j, &m)| Expected { note_id: (3 * k + j) as u32, t, midi: m as f64, dur: 0.5, chord: true, bend: 0.0 }))
+            .collect();
+        let v = verify(&ev, &exp, Some(0.0));
+        let heard: Vec<Heard> = v.verdicts.iter().map(|x| x.heard).collect();
+        assert!(v.verdicts[3].attack > 0.0, "the bump passes for an attack");
+        assert_eq!(heard[0..3], [Heard::Yes; 3]);
+        assert_eq!(heard[3..6], [Heard::Unsure; 3], "left out, still ringing: {:?}", &v.verdicts[3..6]);
+        assert_eq!(heard[6..9], [Heard::Yes; 3]);
+    }
+
+    /// Card #116: a chord tone written to ring that is gone at once (a dead
+    /// string in the strum: it sounds over the attack, then stops) is
+    /// "couldn't tell", not heard.
+    #[test]
+    fn a_choked_chord_tone_is_unsure() {
+        let ev = evidence(3.0, &[(0.5, 1.8, 52, true), (0.5, 0.72, 55, true), (0.5, 1.8, 59, true), (2.0, 2.5, 64, true)]);
+        let exp: Vec<Expected> = [52, 55, 59]
+            .iter()
+            .enumerate()
+            .map(|(j, &m)| Expected { note_id: j as u32, t: 0.5, midi: m as f64, dur: 1.2, chord: true, bend: 0.0 })
+            .chain([want(3, 2.0, 64)])
+            .collect();
+        let v = verify(&ev, &exp, Some(0.0));
+        let heard: Vec<Heard> = v.verdicts.iter().map(|x| x.heard).collect();
+        assert_eq!(heard, [Heard::Yes, Heard::Unsure, Heard::Yes, Heard::Yes]);
+        // written short, it is simply heard
+        let short: Vec<Expected> = exp.iter().map(|e| Expected { dur: if e.chord { 0.25 } else { e.dur }, ..e.clone() }).collect();
+        assert_eq!(verify(&ev, &short, Some(0.0)).verdicts[1].heard, Heard::Yes);
+        // a long chord right at the end of the audio is not taken for choked
+        let ev = evidence(0.74, &[(0.5, 0.74, 52, true), (0.5, 0.74, 55, true), (0.5, 0.74, 59, true)]);
+        let v = verify(&ev, &exp[0..3], Some(0.0));
+        assert!(v.verdicts.iter().all(|x| x.heard == Heard::Yes), "{:?}", v.verdicts);
+    }
+
+    /// Card #116: a chord whose pitches appear under a bump too weak to be a
+    /// strum, or under no attack at all, with no string plainly starting, is
+    /// "couldn't tell"; one string plainly starting says it was struck.
+    #[test]
+    fn a_chord_with_no_clear_strum_is_unsure() {
+        let chord = [52, 55, 59];
+        for (bump, one_clear, want_heard) in [(0.45, false, Heard::Unsure), (0.0, false, Heard::Unsure), (0.45, true, Heard::Yes)] {
+            let mut notes = vec![];
+            for (t, ms) in [(0.5, [40, 43, 47]), (1.0, [41, 44, 48]), (2.5, [42, 45, 49])] {
+                for m in ms {
+                    notes.push((t, t + 0.45, m, true));
+                }
+            }
+            for m in chord {
+                notes.push((2.0, 2.45, m, false)); // fresh pitches, not ringing before
+            }
+            let mut ev = evidence(3.5, &notes);
+            ev.flux[(2.0 / ev.flux_dt).round() as usize] = bump as f32;
+            // no string's own start is clear: cap "just started" around 2.0 s
+            let dt = Posteriors::frame_seconds();
+            for (j, m) in chord.iter().enumerate() {
+                let cap = if one_clear && j == 0 { 0.7 } else { 0.4 };
+                for k in (1.8 / dt) as usize..(2.2 / dt) as usize {
+                    let r = &mut ev.rise[k * NP + (m - P_LO) as usize];
+                    *r = r.min(cap);
+                }
+            }
+            let mut exp = vec![];
+            for (k, (t, ms)) in [(0.5, [40, 43, 47]), (1.0, [41, 44, 48]), (2.0, chord), (2.5, [42, 45, 49])].iter().enumerate() {
+                for (j, m) in ms.iter().enumerate() {
+                    exp.push(Expected { note_id: (3 * k + j) as u32, t: *t, midi: *m as f64, dur: 0.45, chord: true, bend: 0.0 });
+                }
+            }
+            let v = verify(&ev, &exp, Some(0.0));
+            let at2: Vec<Heard> = v.verdicts[6..9].iter().map(|x| x.heard).collect();
+            assert_eq!(at2, [want_heard; 3], "bump {bump}, one clear {one_clear}: {:?}", &v.verdicts[6..9]);
+            assert!(v.verdicts[0..6].iter().chain(&v.verdicts[9..12]).all(|x| x.heard == Heard::Yes));
+        }
     }
 
     #[test]
