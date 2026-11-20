@@ -220,6 +220,10 @@ pub enum GenKind {
     Chat,
     /// One-line narration of an adaptive-drill step the engine already made.
     Drill,
+    /// A question in the Ask panel (DESIGN 9.4). Never reaches the model
+    /// through `generate`: it has its own request shape, prompt, budget,
+    /// grammar and cancel, and goes through [`ask`]. `generate` refuses it.
+    Ask,
 }
 
 impl GenKind {
@@ -235,6 +239,10 @@ impl GenKind {
     pub fn max_tokens(self) -> usize {
         if self.is_rephrase() {
             REPHRASE_MAX_TOKENS
+        } else if self == GenKind::Ask {
+            // The larger of the Ask kind's two budgets; the request's
+            // `AskMode` picks the real one.
+            ASK_PROSE_MAX_TOKENS
         } else {
             CHAT_MAX_TOKENS
         }
@@ -283,6 +291,19 @@ Rules:
 - Use natural, conversational language like a supportive instructor
 - When commenting on timing: "early" means ahead of the beat, "late" means behind
 - Reference specific beats or patterns when the data supports it"#;
+
+/// The prompt every kind but Ask is sent as (see `llm::build_prompt` for
+/// why it is hand-built ChatML). Outside the `llm` module so a test on a
+/// build without the feature can hold it byte for byte.
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub(crate) fn chat_prompt(context: &str) -> String {
+    format!(
+        "<|im_start|>system\n{system}\n\n/no_think<|im_end|>\n\
+         <|im_start|>user\n{context}<|im_end|>\n\
+         <|im_start|>assistant\n<think>\n\n</think>\n\n",
+        system = SYSTEM_PROMPT,
+    )
+}
 
 /// Reason a load refused before any weights were touched. Surfaced in
 /// `CoachCapabilities.loadError` so Settings can say *why* rather than
@@ -592,6 +613,9 @@ pub fn tips_use_model() -> bool {
 /// budget, a decode error, or a dead worker.
 #[cfg_attr(not(feature = "coach-llm"), allow(unused_variables))]
 pub fn generate(handle: &CoachHandle, kind: GenKind, context: &str) -> Result<String, String> {
+    if kind == GenKind::Ask {
+        return Err(ASK_NOT_THROUGH_GENERATE.to_string());
+    }
     #[cfg(feature = "coach-llm")]
     {
         if should_use_model(kind) {
@@ -623,6 +647,386 @@ pub fn generate(handle: &CoachHandle, kind: GenKind, context: &str) -> Result<St
 
     // Template-based fallback
     generate_template(kind, context)
+}
+
+// ---------------------------------------------------------------------------
+// The Ask kind (DESIGN 9.4, 5.5; leg c3a)
+// ---------------------------------------------------------------------------
+
+/// Why `generate` / the template engine refuse `GenKind::Ask`.
+pub const ASK_NOT_THROUGH_GENERATE: &str =
+    "the ask kind goes through coach_ask, not coach_generate";
+
+/// Every error that comes from the caller's grammar starts with this, so
+/// the frontend can tell "your grammar is wrong" (a bug to fix) from "the
+/// model could not answer" (a turn to answer by rule).
+pub const ASK_GRAMMAR_ERROR: &str = "grammar";
+
+/// Output budgets, DESIGN 5.5: a choice is one small JSON object, prose is
+/// at most three sentences of general advice.
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub const ASK_CHOICE_MAX_TOKENS: usize = 48;
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub const ASK_PROSE_MAX_TOKENS: usize = 96;
+/// The context the caller may send with a question (DESIGN 5.5: the 1.5 KB
+/// of ROADMAP 3.4). Checked in tokens on the worker, where the tokenizer is.
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub const ASK_CONTEXT_MAX_TOKENS: usize = 450;
+/// A grammar longer than this is refused before llama.cpp sees it. The one
+/// the registry generates is a few kilobytes.
+pub const ASK_GRAMMAR_MAX_BYTES: usize = 32 * 1024;
+/// llama.cpp's own ceiling on `{m,n}` (`MAX_REPETITION_THRESHOLD`).
+const GRAMMAR_MAX_REPEAT: u64 = 2000;
+
+/// The Ask kind's own system lines. They come first in the system turn, in
+/// front of the caller's static prefix (its system text and its tool /
+/// intent list), and are part of what the prefix cache keeps.
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub const ASK_SYSTEM_PROMPT: &str = r#"You answer one question inside Yames, a guitar practice app. One reply, no follow-up questions.
+
+Rules:
+- Use only what the app gives you below; never invent a number, a tempo, a bar, a note or a result
+- Never state a fact about the player: the app shows those itself
+- Keep to guitar, practice and Yames
+- When a format is required, reply in exactly that format and nothing else"#;
+
+/// The two shapes of an Ask answer, each with its own budget.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum AskMode {
+    /// One small object under the caller's grammar: an intent id and its
+    /// arguments, from a closed list (engine 4a).
+    Choice,
+    /// General advice in the model's own words (engine 4b).
+    Prose,
+}
+
+impl AskMode {
+    #[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+    pub fn max_tokens(self) -> usize {
+        match self {
+            AskMode::Choice => ASK_CHOICE_MAX_TOKENS,
+            AskMode::Prose => ASK_PROSE_MAX_TOKENS,
+        }
+    }
+}
+
+/// One Ask turn. Rust does not know the tools: they live in TypeScript,
+/// which sends the static prefix that lists them and, for a choice, the
+/// grammar generated from the same registry.
+#[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AskRequest {
+    /// Chosen by the caller, unique for the life of the process, so the
+    /// caller can cancel before this call has even returned.
+    pub generation_id: u64,
+    pub mode: AskMode,
+    /// The static head: system text and the tool / intent list. Identical
+    /// from turn to turn, which is what lets the worker keep it decoded.
+    pub prefix: String,
+    /// What the app knows that bears on this question (at most
+    /// `ASK_CONTEXT_MAX_TOKENS`).
+    pub context: String,
+    pub question: String,
+    /// GBNF with a `root` rule. Optional for either mode; a choice without
+    /// one is free text the caller will have to validate.
+    #[serde(default)]
+    pub grammar: Option<String>,
+}
+
+/// What a turn came to. A failure that is the caller's to fix (a malformed
+/// grammar, a context over budget) is an `Err` instead.
+#[derive(Clone, Debug, PartialEq, serde::Serialize)]
+#[serde(tag = "status", rename_all = "camelCase")]
+pub enum AskOutcome {
+    #[serde(rename_all = "camelCase")]
+    #[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+    Answered {
+        text: String,
+        /// The model ended the answer itself (end-of-generation), rather
+        /// than running out of budget or into the whitespace guard.
+        finished: bool,
+        /// The static prefix was already decoded and only the context and
+        /// the question were.
+        prefix_cached: bool,
+        /// From the job starting on the worker to the first output token's
+        /// logits being ready: the prompt's cost.
+        prompt_ms: u32,
+        total_ms: u32,
+    },
+    /// `cancel_generation` reached it, queued or running.
+    Cancelled,
+    /// No model is resident (or this build has none): the rule-made answer
+    /// stands, which is not an error.
+    NoModel,
+}
+
+/// The cancel board: one flag per generation id that is queued or running.
+///
+/// Lives outside the worker so a cancel never waits behind the job it is
+/// cancelling. A cancel that arrives before its `ask` registered (the two
+/// commands race on the tokio pool) is remembered, a few at a time, and the
+/// job then starts cancelled.
+pub(crate) mod cancel {
+    use std::collections::{HashMap, VecDeque};
+    use std::sync::atomic::{AtomicBool, Ordering};
+    use std::sync::{Arc, Mutex, MutexGuard, OnceLock};
+
+    /// Early cancels remembered. Ids are unique per process, so an old one
+    /// falling off the end costs nothing but that one early cancel.
+    const EARLY_KEPT: usize = 32;
+
+    #[derive(Default)]
+    struct Board {
+        live: HashMap<u64, Arc<AtomicBool>>,
+        early: VecDeque<u64>,
+    }
+
+    fn board() -> MutexGuard<'static, Board> {
+        static BOARD: OnceLock<Mutex<Board>> = OnceLock::new();
+        BOARD
+            .get_or_init(|| Mutex::new(Board::default()))
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+    }
+
+    /// A registered generation. Dropping it takes the id off the board.
+    pub struct Ticket {
+        id: u64,
+        flag: Arc<AtomicBool>,
+    }
+
+    impl Ticket {
+        #[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+        pub fn flag(&self) -> &Arc<AtomicBool> {
+            &self.flag
+        }
+
+        pub fn is_cancelled(&self) -> bool {
+            self.flag.load(Ordering::Acquire)
+        }
+    }
+
+    impl Drop for Ticket {
+        fn drop(&mut self) {
+            let mut b = board();
+            // Only our own entry: a later registration of the same id
+            // cannot exist while this one is live (`register` refuses it).
+            if b.live.get(&self.id).is_some_and(|f| Arc::ptr_eq(f, &self.flag)) {
+                b.live.remove(&self.id);
+            }
+        }
+    }
+
+    pub fn register(id: u64) -> Result<Ticket, String> {
+        let mut b = board();
+        if b.live.contains_key(&id) {
+            return Err(format!("generation {id} is already running"));
+        }
+        let early = match b.early.iter().position(|&e| e == id) {
+            Some(pos) => {
+                b.early.remove(pos);
+                true
+            }
+            None => false,
+        };
+        let flag = Arc::new(AtomicBool::new(early));
+        b.live.insert(id, flag.clone());
+        Ok(Ticket { id, flag })
+    }
+
+    /// True when a queued or running generation was flagged.
+    pub fn cancel(id: u64) -> bool {
+        let mut b = board();
+        if let Some(flag) = b.live.get(&id) {
+            flag.store(true, Ordering::Release);
+            return true;
+        }
+        if !b.early.contains(&id) {
+            if b.early.len() >= EARLY_KEPT {
+                b.early.pop_front();
+            }
+            b.early.push_back(id);
+        }
+        false
+    }
+}
+
+/// Stop the generation with this id, queued or running. Returns whether
+/// one was found; either way the id, if it runs later, starts cancelled.
+pub fn cancel_generation(generation_id: u64) -> bool {
+    cancel::cancel(generation_id)
+}
+
+/// Checks on a GBNF string that llama.cpp does not make, or makes in a way
+/// that costs the process: a `{m,n}` with `n < m` underflows its repeat
+/// count and loops allocating rules until memory runs out (llama-grammar.cpp
+/// `handle_repetitions`, `n_opt = max_times - min_times`). Everything else
+/// malformed is left to llama.cpp's parser, which returns an error for it.
+pub fn precheck_grammar(grammar: &str) -> Result<(), String> {
+    if grammar.trim().is_empty() {
+        return Err("empty grammar".into());
+    }
+    if grammar.len() > ASK_GRAMMAR_MAX_BYTES {
+        return Err(format!(
+            "grammar is {} bytes; the limit is {ASK_GRAMMAR_MAX_BYTES}",
+            grammar.len()
+        ));
+    }
+    if grammar.contains('\0') {
+        return Err("grammar contains a NUL byte".into());
+    }
+    let has_root = grammar.lines().any(|line| {
+        line.trim_start()
+            .strip_prefix("root")
+            .is_some_and(|rest| rest.trim_start().starts_with("::="))
+    });
+    if !has_root {
+        return Err("grammar has no `root ::=` rule".into());
+    }
+
+    #[derive(PartialEq)]
+    enum At {
+        Code,
+        Literal,
+        Class,
+        Comment,
+    }
+    let bytes = grammar.as_bytes();
+    let mut at = At::Code;
+    let mut i = 0;
+    while i < bytes.len() {
+        let c = bytes[i];
+        match at {
+            At::Literal | At::Class => {
+                if c == b'\\' {
+                    i += 2;
+                    continue;
+                }
+                if (at == At::Literal && c == b'"') || (at == At::Class && c == b']') {
+                    at = At::Code;
+                }
+            }
+            At::Comment => {
+                if c == b'\n' || c == b'\r' {
+                    at = At::Code;
+                }
+            }
+            At::Code => match c {
+                b'"' => at = At::Literal,
+                b'[' => at = At::Class,
+                b'#' => at = At::Comment,
+                b'{' => {
+                    let close = grammar[i..]
+                        .find('}')
+                        .map(|k| i + k)
+                        .ok_or_else(|| "a `{` is never closed".to_string())?;
+                    let inner = &grammar[i + 1..close];
+                    let (lo, hi) = match inner.split_once(',') {
+                        Some((lo, hi)) => (lo.trim(), Some(hi.trim())),
+                        None => (inner.trim(), None),
+                    };
+                    let number = |s: &str| -> Result<u64, String> {
+                        if s.is_empty() || !s.bytes().all(|b| b.is_ascii_digit()) {
+                            return Err(format!("`{{{inner}}}` is not a repetition"));
+                        }
+                        s.parse::<u64>()
+                            .ok()
+                            .filter(|&n| n <= GRAMMAR_MAX_REPEAT)
+                            .ok_or_else(|| format!("`{{{inner}}}` repeats too often"))
+                    };
+                    let min = number(lo)?;
+                    if let Some(hi) = hi.filter(|h| !h.is_empty()) {
+                        if number(hi)? < min {
+                            return Err(format!("`{{{inner}}}`: the maximum is below the minimum"));
+                        }
+                    }
+                    i = close;
+                }
+                _ => {}
+            },
+        }
+        i += 1;
+    }
+    Ok(())
+}
+
+/// The system turn up to the user's content, ChatML as `chat_prompt`
+/// builds it. Static from turn to turn: this is what the worker keeps.
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub(crate) fn ask_prompt_head(prefix: &str) -> String {
+    let prefix = prefix.trim();
+    let mut head = String::with_capacity(ASK_SYSTEM_PROMPT.len() + prefix.len() + 64);
+    head.push_str("<|im_start|>system\n");
+    head.push_str(ASK_SYSTEM_PROMPT);
+    if !prefix.is_empty() {
+        head.push_str("\n\n");
+        head.push_str(prefix);
+    }
+    head.push_str("\n\n/no_think<|im_end|>\n<|im_start|>user\n");
+    head
+}
+
+/// The turn's own part: context, question, and the non-thinking assistant
+/// turn `chat_prompt` uses.
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub(crate) fn ask_prompt_tail(context: &str, question: &str) -> String {
+    let context = context.trim();
+    let mut tail = String::with_capacity(context.len() + question.len() + 96);
+    if !context.is_empty() {
+        tail.push_str(context);
+        tail.push_str("\n\n");
+    }
+    tail.push_str("Question: ");
+    tail.push_str(question.trim());
+    tail.push_str("<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n");
+    tail
+}
+
+/// Answer one Ask turn with the resident model.
+///
+/// One model call a turn, no tool loop (DESIGN 5.5). The grammar is checked
+/// before anything else, so a malformed one is an `Err` even with no model.
+/// Takes the engine mutex only to clone the worker handle, like `generate`.
+pub fn ask(handle: &CoachHandle, req: &AskRequest) -> Result<AskOutcome, String> {
+    if let Some(grammar) = req.grammar.as_deref() {
+        precheck_grammar(grammar).map_err(|e| format!("{ASK_GRAMMAR_ERROR}: {e}"))?;
+    }
+    if req.question.trim().is_empty() {
+        return Err("an ask needs a question".into());
+    }
+    let ticket = cancel::register(req.generation_id)?;
+    if ticket.is_cancelled() {
+        return Ok(AskOutcome::Cancelled);
+    }
+
+    #[cfg(feature = "coach-llm")]
+    {
+        let worker = { handle.lock()?.llm.clone() };
+        let Some(worker) = worker else {
+            return Ok(AskOutcome::NoModel);
+        };
+        match worker.ask(req, ticket.flag()) {
+            Ok(a) => Ok(AskOutcome::Answered {
+                text: a.text,
+                finished: a.hit_eog,
+                prefix_cached: a.prefix_cached,
+                prompt_ms: a.prompt_ms,
+                total_ms: a.total_ms,
+            }),
+            Err(llm::AskError::Cancelled) => Ok(AskOutcome::Cancelled),
+            Err(llm::AskError::WorkerGone) => {
+                handle.status().clear_residency("inference thread is gone");
+                Ok(AskOutcome::NoModel)
+            }
+            Err(llm::AskError::Failed(e)) => Err(e),
+        }
+    }
+    #[cfg(not(feature = "coach-llm"))]
+    {
+        let _ = (handle, ticket);
+        Ok(AskOutcome::NoModel)
+    }
 }
 
 /// Per-call generation cap (ROADMAP §0.3 / T04).
@@ -790,6 +1194,9 @@ fn generate_template(kind: GenKind, context: &str) -> Result<String, String> {
             return Err("no drill narration without a model".to_string());
         }
         GenKind::Report => {}
+        // The Ask panel's rule-made answer lives in TypeScript, beside the
+        // tools; there is nothing here to fall back to.
+        GenKind::Ask => return Err(ASK_NOT_THROUGH_GENERATE.to_string()),
     }
 
     // Mini-report
@@ -1176,8 +1583,12 @@ pub fn lower_current_thread_priority() {}
 
 #[cfg(feature = "coach-llm")]
 mod llm {
+    use std::collections::HashMap;
     use std::path::{Path, PathBuf};
-    use std::sync::mpsc::{channel, sync_channel, Receiver, Sender, SyncSender};
+    use std::sync::atomic::{AtomicBool, Ordering};
+    use std::sync::mpsc::{channel, sync_channel, Receiver, RecvTimeoutError, Sender, SyncSender};
+    use std::sync::Arc;
+    use std::time::{Duration, Instant};
 
     use llama_cpp_2::context::params::LlamaContextParams;
     use llama_cpp_2::context::LlamaContext;
@@ -1186,6 +1597,8 @@ mod llm {
     use llama_cpp_2::model::params::LlamaModelParams;
     use llama_cpp_2::model::LlamaModel;
     use llama_cpp_2::sampling::LlamaSampler;
+    use llama_cpp_2::token::data::LlamaTokenData;
+    use llama_cpp_2::token::data_array::LlamaTokenDataArray;
     use llama_cpp_2::token::LlamaToken;
 
     /// ROADMAP §0.3: `n_ctx` 4096. Qwen3 trains at 32k but the coach's
@@ -1334,12 +1747,7 @@ mod llm {
     /// Qwen3 has no such tokens, so they tokenised as literal text and
     /// showed up in the model's output as template artifacts.
     fn build_prompt(context: &str) -> String {
-        format!(
-            "<|im_start|>system\n{system}\n\n/no_think<|im_end|>\n\
-             <|im_start|>user\n{context}<|im_end|>\n\
-             <|im_start|>assistant\n<think>\n\n</think>\n\n",
-            system = super::SYSTEM_PROMPT,
-        )
+        super::chat_prompt(context)
     }
 
     // -----------------------------------------------------------------
@@ -1371,6 +1779,58 @@ mod llm {
         Failed(String),
     }
 
+    /// Why an Ask job produced no answer. `Cancelled` is its own result,
+    /// never an error: the player pressed Stop, or the turn timed out.
+    #[derive(Debug)]
+    pub enum AskError {
+        Cancelled,
+        WorkerGone,
+        Failed(String),
+    }
+
+    /// One Ask job's result, before `super::ask` shapes it for the caller.
+    #[derive(Debug)]
+    pub struct AskGenerated {
+        pub text: String,
+        #[cfg_attr(not(test), allow(dead_code))]
+        pub tokens: usize,
+        pub hit_eog: bool,
+        pub prefix_cached: bool,
+        pub prompt_ms: u32,
+        pub total_ms: u32,
+    }
+
+    /// What the worker needs for an Ask job, built on the caller's thread.
+    struct AskJob {
+        /// `super::ask_prompt_head`: the part the prefix cache keeps.
+        head: String,
+        /// `super::ask_prompt_tail`: decoded every turn.
+        tail: String,
+        /// The context alone, to hold it to its budget in tokens.
+        context: String,
+        mode: super::AskMode,
+        grammar: Option<String>,
+    }
+
+    /// The prompt is decoded this many tokens at a time so a cancel lands
+    /// between chunks rather than after the whole prompt (DESIGN 9.4).
+    pub(super) const ASK_DECODE_CHUNK: usize = 256;
+
+    /// How often a caller waiting on a queued or running Ask looks at its
+    /// cancel flag. The worker checks the same flag per chunk and per token;
+    /// this is what lets a cancel return at once even while another kind's
+    /// generation still holds the worker.
+    const ASK_CANCEL_POLL: Duration = Duration::from_millis(20);
+
+    /// Under a grammar, this many whitespace-only tokens in a row end the
+    /// answer: the grammar's `ws` should be bounded, and when the caller's
+    /// is not, this is the bound (DESIGN 9.4, "whitespace bounded").
+    pub(super) const ASK_MAX_WHITESPACE_RUN: usize = 6;
+
+    /// The sequence that holds the Ask kind's static prefix between turns.
+    /// Sequence 0 is the one every generation decodes into.
+    const ASK_PREFIX_SEQ: i32 = 1;
+
     impl std::fmt::Display for GenError {
         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
             match self {
@@ -1385,6 +1845,13 @@ mod llm {
             context: String,
             max_tokens: usize,
             reply: SyncSender<Result<Generated, String>>,
+        },
+        /// One Ask turn. `cancel` is the caller's flag on the cancel board,
+        /// read before the job starts, between prompt chunks and per token.
+        Ask {
+            job: AskJob,
+            cancel: Arc<AtomicBool>,
+            reply: SyncSender<Result<AskGenerated, AskError>>,
         },
         /// Swap in different weights *on the worker's own thread*.
         ///
@@ -1497,6 +1964,42 @@ mod llm {
                 .recv()
                 .map_err(|_| GenError::WorkerGone)?
                 .map_err(GenError::Failed)
+        }
+
+        /// One Ask turn. Waits for the answer, but looks at `cancel` every
+        /// `ASK_CANCEL_POLL` while it does, so a cancelled turn returns at
+        /// once even when the job is still queued behind another kind's
+        /// generation; the worker then skips it when it gets there.
+        pub fn ask(
+            &self,
+            req: &super::AskRequest,
+            cancel: &Arc<AtomicBool>,
+        ) -> Result<AskGenerated, AskError> {
+            let (reply_tx, reply_rx) = sync_channel::<Result<AskGenerated, AskError>>(1);
+            let jobs = self.jobs.as_ref().ok_or(AskError::WorkerGone)?;
+            jobs.send(Job::Ask {
+                job: AskJob {
+                    head: super::ask_prompt_head(&req.prefix),
+                    tail: super::ask_prompt_tail(&req.context, &req.question),
+                    context: req.context.clone(),
+                    mode: req.mode,
+                    grammar: req.grammar.clone(),
+                },
+                cancel: cancel.clone(),
+                reply: reply_tx,
+            })
+            .map_err(|_| AskError::WorkerGone)?;
+            loop {
+                match reply_rx.recv_timeout(ASK_CANCEL_POLL) {
+                    Ok(result) => return result,
+                    Err(RecvTimeoutError::Timeout) => {
+                        if cancel.load(Ordering::Acquire) {
+                            return Err(AskError::Cancelled);
+                        }
+                    }
+                    Err(RecvTimeoutError::Disconnected) => return Err(AskError::WorkerGone),
+                }
+            }
         }
 
         /// Load different weights on this worker's thread and swap them in
@@ -1629,9 +2132,18 @@ mod llm {
             // is raised to the full context so a long prompt decodes in a
             // single pass (the default is 2048, below our `n_ctx`).
             let n_threads = inference_threads();
+            // Two sequences in ONE unified cache of `CONTEXT_SIZE` cells:
+            // sequence 0 is where every generation runs, as before; sequence
+            // 1 holds the Ask kind's static prefix between turns
+            // (`AskPrefix`). Unified, each sequence may still use the whole
+            // window (`n_ctx_seq == n_ctx`), the KV buffer is the same size
+            // as with one sequence, and copying the prefix into sequence 0
+            // is a bookkeeping operation on shared cells, not a data copy.
             let ctx_params = LlamaContextParams::default()
                 .with_n_ctx(std::num::NonZero::new(CONTEXT_SIZE))
                 .with_n_batch(CONTEXT_SIZE)
+                .with_n_seq_max(2)
+                .with_kv_unified(true)
                 .with_n_threads(n_threads)
                 .with_n_threads_batch(n_threads);
             let mut ctx = match model.new_context(&backend, ctx_params) {
@@ -1650,6 +2162,11 @@ mod llm {
             // that context's cache: rebuilding the context on a model swap
             // drops both together.
             let mut resident: Vec<LlamaToken> = Vec::new();
+            // The Ask kind's cached prefix and compiled grammars. Both
+            // belong to this context and this model: rebuilt with them on a
+            // swap, gone with the thread on an unload.
+            let mut ask_prefix = AskPrefix::default();
+            let mut grammars = GrammarCache::default();
 
             if let Some(ready) = ready.take() {
                 if ready.send(Ok(model_display_name(&model))).is_err() {
@@ -1669,8 +2186,30 @@ mod llm {
                         max_tokens,
                         reply,
                     } => {
-                        let out =
-                            infer(&model, &mut ctx, &mut batch, &mut resident, &context, max_tokens);
+                        let out = infer(
+                            &model,
+                            &mut ctx,
+                            &mut batch,
+                            &mut resident,
+                            &mut ask_prefix,
+                            &context,
+                            max_tokens,
+                        );
+                        let _ = reply.send(out);
+                    }
+                    Job::Ask { job, cancel, reply } => {
+                        let out = infer_ask(
+                            &model,
+                            &mut ctx,
+                            &mut batch,
+                            &mut resident,
+                            &mut ask_prefix,
+                            &mut grammars,
+                            &job,
+                            &cancel,
+                        );
+                        // The caller may have stopped waiting (cancelled
+                        // while queued); a send to nobody is fine.
                         let _ = reply.send(out);
                     }
                     Job::Reload { path, reply } => match load_with_fallback(&backend, &path) {
@@ -1694,6 +2233,11 @@ mod llm {
                 // `ctx` borrows `model`, so it has to die before the
                 // binding is replaced.
                 Some(new_model) => {
+                    // The grammars hold the old model's vocabulary by raw
+                    // pointer, which the borrow checker cannot see: they go
+                    // first, explicitly, with the context.
+                    drop(grammars);
+                    drop(ask_prefix);
                     drop(ctx);
                     model = new_model;
                 }
@@ -1725,6 +2269,7 @@ mod llm {
         ctx: &mut LlamaContext<'_>,
         batch: &mut LlamaBatch,
         resident: &mut Vec<LlamaToken>,
+        ask_prefix: &mut AskPrefix,
         context: &str,
         max_tokens: usize,
     ) -> Result<Generated, String> {
@@ -1740,6 +2285,10 @@ mod llm {
         if tokens.is_empty() {
             return Err("Tokenizer produced an empty prompt".into());
         }
+        // The Ask kind's prefix sits in sequence 1 of the same cache. If it
+        // and this generation might not both fit, the prefix goes (the next
+        // Ask decodes it again); this generation never loses room to it.
+        ask_prefix.make_room(ctx, tokens.len() + max_tokens);
 
         // T04b: reuse the KV cells the previous call already evaluated.
         //
@@ -1877,6 +2426,420 @@ mod llm {
             text: cleaned,
             tokens: output_tokens.len(),
             hit_eog,
+        })
+    }
+
+    // -----------------------------------------------------------------
+    // The Ask kind
+    // -----------------------------------------------------------------
+
+    /// The Ask kind's static prefix, decoded once into `ASK_PREFIX_SEQ`
+    /// and kept there between turns.
+    ///
+    /// The `resident` longest-common-prefix reuse in `infer` already skips
+    /// a shared head between two consecutive calls, but it lives in
+    /// sequence 0, so one greeting or report between two questions costs
+    /// the next question the whole prefix again (some 900 tokens of tool
+    /// list, seconds on a CPU). A sequence of its own survives that. The
+    /// key is the tokens, not the string, for the reason `infer` gives.
+    #[derive(Default)]
+    pub(super) struct AskPrefix {
+        tokens: Option<Vec<LlamaToken>>,
+    }
+
+    impl AskPrefix {
+        fn len(&self) -> usize {
+            self.tokens.as_ref().map_or(0, Vec::len)
+        }
+
+        fn holds(&self, head: &[LlamaToken]) -> bool {
+            self.tokens.as_deref() == Some(head)
+        }
+
+        /// Drop the cached prefix, cells and all.
+        fn forget(&mut self, ctx: &mut LlamaContext<'_>) {
+            if self.tokens.take().is_some() {
+                // A whole-sequence removal cannot fail (llama.cpp only
+                // refuses partial ones); the `Result` is the id conversion.
+                let _ = ctx.clear_kv_cache_seq(Some(ASK_PREFIX_SEQ as u32), None, None);
+            }
+        }
+
+        /// Make sure `need` more cells fit beside the cached prefix.
+        fn make_room(&mut self, ctx: &mut LlamaContext<'_>, need: usize) {
+            if self.len() > 0 && self.len() + need >= CONTEXT_SIZE as usize {
+                self.forget(ctx);
+            }
+        }
+    }
+
+    /// Compiled grammars, one per distinct string, at most
+    /// `GRAMMAR_CACHE_MAX`. A sampler is taken out for a generation and put
+    /// back only if it ended healthy: one whose `accept` threw has an empty
+    /// stack inside llama.cpp, and the next `apply` on it would abort.
+    ///
+    /// "Compiled once": `LlamaSampler::grammar` parses and checks the GBNF
+    /// (and reports a bad one) once per string. Reuse goes through
+    /// `LlamaSampler::reset`, the only way back to the start state the
+    /// crate offers at 0.1.146 (it has no `clone`); llama.cpp's reset
+    /// re-reads the rules from the string it kept, which for the grammars
+    /// the registry writes costs well under a millisecond.
+    #[derive(Default)]
+    pub(super) struct GrammarCache {
+        compiled: HashMap<String, LlamaSampler>,
+    }
+
+    const GRAMMAR_CACHE_MAX: usize = 8;
+
+    impl GrammarCache {
+        pub(super) fn take(
+            &mut self,
+            model: &LlamaModel,
+            source: &str,
+        ) -> Result<LlamaSampler, String> {
+            if let Some(mut sampler) = self.compiled.remove(source) {
+                sampler.reset();
+                return Ok(sampler);
+            }
+            super::precheck_grammar(source)?;
+            LlamaSampler::grammar(model, source, "root").map_err(|e| match e {
+                llama_cpp_2::GrammarError::RootNotFound => "no `root` rule".to_string(),
+                llama_cpp_2::GrammarError::NullGrammar => {
+                    "llama.cpp could not parse it (see the log for where)".to_string()
+                }
+                other => other.to_string(),
+            })
+        }
+
+        pub(super) fn put_back(&mut self, source: String, sampler: LlamaSampler) {
+            if self.compiled.len() >= GRAMMAR_CACHE_MAX && !self.compiled.contains_key(&source) {
+                self.compiled.clear();
+            }
+            self.compiled.insert(source, sampler);
+        }
+
+        #[cfg(test)]
+        pub(super) fn len(&self) -> usize {
+            self.compiled.len()
+        }
+    }
+
+    /// One sampling step's verdict.
+    #[derive(Debug, PartialEq)]
+    pub(super) enum Step {
+        Token(LlamaToken),
+        /// End of generation, allowed here (by the grammar, if any).
+        End,
+        /// Nothing can be sampled. `poisoned` when the grammar's state
+        /// inside llama.cpp is no longer safe to use.
+        DeadEnd { why: String, poisoned: bool },
+    }
+
+    fn candidates(logits: &[f32]) -> LlamaTokenDataArray {
+        LlamaTokenDataArray::from_iter(
+            logits
+                .iter()
+                .enumerate()
+                .map(|(i, &l)| LlamaTokenData::new(LlamaToken::new(i as i32), l, 0.0)),
+            false,
+        )
+    }
+
+    /// Whether the grammar, in its current state, lets `token` come next.
+    fn grammar_allows(grammar: &LlamaSampler, token: LlamaToken) -> bool {
+        let mut one = LlamaTokenDataArray::new(vec![LlamaTokenData::new(token, 1.0, 0.0)], false);
+        one.apply_sampler(grammar);
+        one.data.first().is_some_and(|d| d.logit().is_finite())
+    }
+
+    /// Pick the next token from `logits`, under `grammar` if there is one,
+    /// without ever letting llama.cpp throw or abort across the FFI.
+    ///
+    /// Two places in llama.cpp's grammar code end the process rather than
+    /// return an error: `llama_grammar_accept_impl` calls `GGML_ABORT` when
+    /// it is handed an end-of-generation token the grammar does not allow
+    /// yet, and `llama_grammar_reject_candidates` asserts on an empty stack,
+    /// which is the state an `accept` leaves behind when it throws. And
+    /// `llama_sampler_sample` (what `LlamaSampler::sample` calls) runs
+    /// `accept` with no `try` around it, so a rejected token there is a C++
+    /// exception unwinding into Rust: an abort. So, with a grammar:
+    ///
+    ///   1. never `sample` with the grammar in the chain: apply it to a
+    ///      candidate array (`apply` neither throws nor aborts while the
+    ///      stack is non-empty), then let `chain` pick;
+    ///   2. every pick is re-checked against the grammar, and a pick it
+    ///      does not allow is a dead end, not an `accept`;
+    ///   3. an end-of-generation pick ends the answer and is never handed
+    ///      to `accept` at all (that is the abort above);
+    ///   4. everything else goes through `try_accept`, the crate's wrapper
+    ///      that catches the exception; a caught one poisons the grammar.
+    ///
+    /// When the grammar is complete it rejects every token but
+    /// end-of-generation, so 1 and 3 end the answer; if the model gives
+    /// end-of-generation no weight at all, 1 finds nothing allowed and it is
+    /// a dead end. Either way the process lives: the fuzz test holds this.
+    ///
+    /// The fast path is llama.cpp's own (`common_sampler_sample`): pick
+    /// without the grammar, and only if the grammar refuses that pick,
+    /// apply it to the whole vocabulary and pick again. Most tokens of a
+    /// choice are forced and the model agrees with the grammar, so most
+    /// steps cost one candidate's check rather than 150,000.
+    pub(super) fn sample_step(
+        model: &LlamaModel,
+        logits: &[f32],
+        chain: &mut LlamaSampler,
+        grammar: Option<&mut LlamaSampler>,
+    ) -> Step {
+        let mut free = candidates(logits);
+        free.apply_sampler(chain);
+        let Some(first) = free.selected_token() else {
+            return Step::DeadEnd {
+                why: "the sampler picked nothing".into(),
+                poisoned: false,
+            };
+        };
+        let Some(grammar) = grammar else {
+            return if model.is_eog_token(first) {
+                Step::End
+            } else {
+                Step::Token(first)
+            };
+        };
+
+        let token = if grammar_allows(grammar, first) {
+            first
+        } else {
+            let mut held = candidates(logits);
+            held.apply_sampler(grammar);
+            if !held.data.iter().any(|d| d.logit().is_finite()) {
+                return Step::DeadEnd {
+                    why: "the grammar allows no token the model can give".into(),
+                    poisoned: false,
+                };
+            }
+            held.apply_sampler(chain);
+            match held.selected_token() {
+                Some(t) if grammar_allows(grammar, t) => t,
+                _ => {
+                    return Step::DeadEnd {
+                        why: "the sampler picked a token the grammar refuses".into(),
+                        poisoned: false,
+                    }
+                }
+            }
+        };
+
+        if model.is_eog_token(token) {
+            return Step::End;
+        }
+        match grammar.try_accept(token) {
+            Ok(()) => Step::Token(token),
+            Err(e) => Step::DeadEnd {
+                why: format!("the grammar refused an allowed token ({e})"),
+                poisoned: true,
+            },
+        }
+    }
+
+    /// Decode `tokens` into `seq` from position `start`, `ASK_DECODE_CHUNK`
+    /// at a time, looking at `cancel` before each chunk. Logits only for
+    /// the last token, and only when `logits_last`.
+    fn decode_chunks(
+        ctx: &mut LlamaContext<'_>,
+        batch: &mut LlamaBatch,
+        tokens: &[LlamaToken],
+        start: usize,
+        seq: i32,
+        logits_last: bool,
+        cancel: &AtomicBool,
+    ) -> Result<(), AskError> {
+        for (c, chunk) in tokens.chunks(ASK_DECODE_CHUNK).enumerate() {
+            if cancel.load(Ordering::Acquire) {
+                return Err(AskError::Cancelled);
+            }
+            batch.clear();
+            for (j, &token) in chunk.iter().enumerate() {
+                let i = c * ASK_DECODE_CHUNK + j;
+                let last = logits_last && i + 1 == tokens.len();
+                batch
+                    .add(token, (start + i) as i32, &[seq], last)
+                    .map_err(|e| AskError::Failed(format!("Batch add failed: {e}")))?;
+            }
+            ctx.decode(batch)
+                .map_err(|e| AskError::Failed(format!("Decode failed: {e}")))?;
+        }
+        Ok(())
+    }
+
+    fn millis(since: Instant) -> u32 {
+        since.elapsed().as_millis().min(u32::MAX as u128) as u32
+    }
+
+    /// One Ask turn against the resident context.
+    #[allow(clippy::too_many_arguments)]
+    fn infer_ask(
+        model: &LlamaModel,
+        ctx: &mut LlamaContext<'_>,
+        batch: &mut LlamaBatch,
+        resident: &mut Vec<LlamaToken>,
+        prefix: &mut AskPrefix,
+        grammars: &mut GrammarCache,
+        job: &AskJob,
+        cancel: &AtomicBool,
+    ) -> Result<AskGenerated, AskError> {
+        let started = Instant::now();
+        // Cancelled while it was queued: nothing touched.
+        if cancel.load(Ordering::Acquire) {
+            return Err(AskError::Cancelled);
+        }
+        let failed = |what: &str, e: &dyn std::fmt::Display| AskError::Failed(format!("{what}: {e}"));
+
+        let head = model
+            .str_to_token(&job.head, llama_cpp_2::model::AddBos::Always)
+            .map_err(|e| failed("Tokenization failed", &e))?;
+        let tail = model
+            .str_to_token(&job.tail, llama_cpp_2::model::AddBos::Never)
+            .map_err(|e| failed("Tokenization failed", &e))?;
+        let context_tokens = model
+            .str_to_token(&job.context, llama_cpp_2::model::AddBos::Never)
+            .map_err(|e| failed("Tokenization failed", &e))?
+            .len();
+        if context_tokens > super::ASK_CONTEXT_MAX_TOKENS {
+            return Err(AskError::Failed(format!(
+                "the context is {context_tokens} tokens; an ask allows {}",
+                super::ASK_CONTEXT_MAX_TOKENS
+            )));
+        }
+        let max_tokens = job.mode.max_tokens();
+        if tail.is_empty() || head.len() + tail.len() + max_tokens >= CONTEXT_SIZE as usize {
+            return Err(AskError::Failed("Prompt too long for context window".into()));
+        }
+
+        // The grammar before any decoding, so a bad one costs nothing.
+        let mut grammar = match job.grammar.as_deref() {
+            Some(source) => Some(grammars.take(model, source).map_err(|e| {
+                AskError::Failed(format!("{}: {e}", super::ASK_GRAMMAR_ERROR))
+            })?),
+            None => None,
+        };
+
+        // The static prefix: decoded into its own sequence unless it is
+        // already there. `YAMES_LLM_NO_PREFIX_CACHE=1` turns this off too,
+        // so the saving can be measured A/B on one binary.
+        let prefix_cached = !prefix_cache_disabled() && prefix.holds(&head);
+        if !prefix_cached {
+            prefix.forget(ctx);
+            if let Err(e) = decode_chunks(ctx, batch, &head, 0, ASK_PREFIX_SEQ, false, cancel) {
+                // Half a prefix in sequence 1 is no prefix at all.
+                let _ = ctx.clear_kv_cache_seq(Some(ASK_PREFIX_SEQ as u32), None, None);
+                return Err(e);
+            }
+            prefix.tokens = Some(head.clone());
+        }
+
+        // Sequence 0 becomes the prefix plus this turn. `resident` stays
+        // empty until the whole prompt is in, so a cancel or a failure
+        // below leaves the next `infer` re-deciding from nothing rather
+        // than trusting cells that were never filled.
+        resident.clear();
+        let reset = ctx
+            .clear_kv_cache_seq(Some(0), None, None)
+            .map_err(|e| failed("KV cache reset failed", &e))
+            .and_then(|_| {
+                ctx.copy_kv_cache_seq(ASK_PREFIX_SEQ, 0, None, None)
+                    .map_err(|e| failed("KV cache copy failed", &e))
+            });
+        if let Err(e) = reset {
+            prefix.forget(ctx);
+            return Err(e);
+        }
+        decode_chunks(ctx, batch, &tail, head.len(), 0, true, cancel)?;
+        resident.extend_from_slice(&head);
+        resident.extend_from_slice(&tail);
+        let prompt_ms = millis(started);
+
+        // A choice wants the model's best pick under the grammar, every
+        // time; prose keeps the coach's usual temperature (ROADMAP 0.3).
+        let mut chain = match job.mode {
+            super::AskMode::Choice => LlamaSampler::greedy(),
+            super::AskMode::Prose => LlamaSampler::chain_simple([
+                LlamaSampler::temp(0.7),
+                LlamaSampler::top_p(0.9, 1),
+                LlamaSampler::dist(42),
+            ]),
+        };
+
+        let mut decoder = encoding_rs::UTF_8.new_decoder();
+        let mut text = String::new();
+        let mut produced = 0usize;
+        let mut hit_eog = false;
+        let mut whitespace_run = 0usize;
+        let mut poisoned = false;
+        let mut dead_end: Option<String> = None;
+        let position = head.len() + tail.len();
+
+        for _ in 0..max_tokens {
+            if cancel.load(Ordering::Acquire) {
+                // The grammar is mid-answer; `take` resets it next time.
+                if let (Some(source), Some(g)) = (job.grammar.clone(), grammar.take()) {
+                    grammars.put_back(source, g);
+                }
+                return Err(AskError::Cancelled);
+            }
+            let logits = ctx.get_logits_ith(batch.n_tokens() - 1);
+            let token = match sample_step(model, logits, &mut chain, grammar.as_mut()) {
+                Step::Token(t) => t,
+                Step::End => {
+                    hit_eog = true;
+                    break;
+                }
+                Step::DeadEnd { why, poisoned: p } => {
+                    poisoned = p;
+                    dead_end = Some(why);
+                    break;
+                }
+            };
+            produced += 1;
+            let piece = model
+                .token_to_piece(token, &mut decoder, false, None)
+                .map_err(|e| failed("Token decode failed", &e))?;
+            if grammar.is_some() && !piece.is_empty() && piece.trim().is_empty() {
+                whitespace_run += 1;
+            } else {
+                whitespace_run = 0;
+            }
+            text.push_str(&piece);
+            if whitespace_run >= ASK_MAX_WHITESPACE_RUN {
+                break;
+            }
+
+            batch.clear();
+            batch
+                .add(token, (position + produced - 1) as i32, &[0], true)
+                .map_err(|e| failed("Batch add failed", &e))?;
+            ctx.decode(batch).map_err(|e| failed("Decode failed", &e))?;
+        }
+
+        if let (Some(source), Some(g)) = (job.grammar.clone(), grammar.take()) {
+            if !poisoned {
+                grammars.put_back(source, g);
+            }
+        }
+        if let Some(why) = dead_end {
+            return Err(AskError::Failed(if job.grammar.is_some() {
+                format!("{}: {why}", super::ASK_GRAMMAR_ERROR)
+            } else {
+                why
+            }));
+        }
+
+        Ok(AskGenerated {
+            text: super::strip_think(&text),
+            tokens: produced,
+            hit_eog,
+            prefix_cached,
+            prompt_ms,
+            total_ms: millis(started),
         })
     }
 
