@@ -250,7 +250,7 @@ fn run(mut args: Args) -> Result<ExitCode, String> {
         "takes": takes.len(),
         "notes": rows.len(),
         "chains": chains,
-        "noteModel": if has_model { "basic-pitch icassp-2022" } else { "none" },
+        "noteModel": if !has_model { "none".to_string() } else if let Some(p) = yames_lib::detect::candidate::asked() { format!("candidate {p}") } else { "basic-pitch icassp-2022".to_string() },
     });
     let doc = json!({ "about": about, "metrics": metrics, "takes": takes });
     let write = |name: &str, body: String| -> Result<(), String> {

@@ -136,6 +136,12 @@ pub fn runtimes() -> Vec<&'static str> {
 /// build, `tract` unless `YAMES_DETECT_RUNTIME=ort` (bench and parity only;
 /// shipped builds have tract alone, `plans/detection/RUNTIME.md`).
 pub fn load() -> Result<Box<dyn NoteModel>, String> {
+    // A candidate note model from a file (`plans/ml/PLAN.md`): for the bench
+    // and for trying a trained model in a dev build. Unset in every shipped
+    // build, where the model is the one compiled in.
+    if let Some(path) = super::candidate::asked() {
+        return super::candidate::load(&path);
+    }
     let asked = std::env::var("YAMES_DETECT_RUNTIME").ok().filter(|v| !v.is_empty());
     match asked {
         Some(name) => load_runtime(&name),
@@ -251,7 +257,7 @@ pub fn enabled() -> bool {
 /// network as [`MODEL_BYTES`] with the input fixed to one window and only
 /// the note and onset heads kept (`tools/basic-pitch-nnef`).
 #[cfg(feature = "detect-tract")]
-mod tract_backend {
+pub(super) mod tract_backend {
     use super::{NoteModel, WindowOut, NNEF_BYTES, PITCHES, WINDOW_FRAMES, WINDOW_SAMPLES};
     use tract_nnef::prelude::*;
 
@@ -266,8 +272,15 @@ mod tract_backend {
 
     impl TractModel {
         pub fn new() -> Result<Self, String> {
+            Self::from_nnef(NNEF_BYTES)
+        }
+
+        /// A model from any NNEF archive that keeps Basic Pitch's contract:
+        /// one window in, (note, onset) out under the same names
+        /// (`detect/candidate.rs`).
+        pub fn from_nnef(archive: &[u8]) -> Result<Self, String> {
             let e = |e: TractError| format!("{e:?}");
-            let model = tract_nnef::nnef().model_for_read(&mut std::io::Cursor::new(NNEF_BYTES)).map_err(e)?;
+            let model = tract_nnef::nnef().model_for_read(&mut std::io::Cursor::new(archive)).map_err(e)?;
             // The archive's outputs are (note, onset), in that order
             // (`tools/basic-pitch-nnef`); refuse one that says otherwise:
             // exactly these two names, each one window of frames by pitches.

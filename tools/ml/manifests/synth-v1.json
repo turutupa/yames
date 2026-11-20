@@ -1,0 +1,14 @@
+{
+ "name": "synth-v1",
+ "source": "synth",
+ "licence": "own",
+ "seed": 20261119,
+ "variants": 4,
+ "drills": 1500,
+ "renderer": "tools/ml/factory/synth.py (extended Karplus-Strong), chains.py",
+ "packs": "src/paths/packs/*.json",
+ "rate": 22050,
+ "takes": 4696,
+ "items": 14088,
+ "hours": 73.248
+}

@@ -55,6 +55,14 @@ def jobs_of(seed: int, variants: int, n_drills: int):
 
 
 def run(job: dict):
+    """One job; a job that cannot be rendered is reported and skipped."""
+    try:
+        return _run(job)
+    except Exception as e:  # noqa: BLE001
+        return {"failed": repr(e), "job": job}, None, None
+
+
+def _run(job: dict):
     global _EX
     if _EX is None:
         _EX = takes.load_pack_exercises()
@@ -95,6 +103,9 @@ def main():
     t0 = time.time()
     with mp.Pool(a.jobs) as pool:
         for i, (meta, labels, out) in enumerate(pool.imap(run, jobs, chunksize=4)):
+            if labels is None:
+                print("FAILED", json.dumps(meta), flush=True)
+                continue
             tid = w.take(meta, labels)
             for p, y in out:
                 w.item(tid, y, {"split": meta["split"], "chain": p})

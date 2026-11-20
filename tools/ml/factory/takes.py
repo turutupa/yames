@@ -224,7 +224,8 @@ def technique_class(tech, legato: bool, slid: bool) -> int:
 def build_take(ex: dict, bpm: float, style: str, seed: int, timbre: gs.Timbre):
     """-> (synth notes, labels, seconds). Labels are of what SOUNDS."""
     rng = np.random.default_rng(seed)
-    bt = round(ex["meter"]["numerator"] * 960 * 4 / ex["meter"]["denominator"])
+    meter = ex.get("meter") or {"numerator": 4, "denominator": 4}
+    bt = round(meter["numerator"] * 960 * 4 / meter["denominator"])
     q = 60.0 / bpm
     bar_s = bt / 960 * q
     bars = max(2, int(min(MAX_TAKE_S - LEAD_S - 1.0, 16 * bar_s) // bar_s))
@@ -293,7 +294,7 @@ def build_take(ex: dict, bpm: float, style: str, seed: int, timbre: gs.Timbre):
 
 
 def _decay_s(note: gs.Note, timbre: gs.Timbre) -> float:
-    """Seconds until the string is 40 dB down (the synth's own loop loss): a
+    """Seconds until the string is 26 dB down (the synth's own loop loss): a
     label must not outlive the sound, or the model learns to hear silence."""
     tech = set(note.tech)
     sustain = 0.9985 if note.midi < 52 else 0.998 if note.midi < 64 else 0.9972
@@ -301,7 +302,7 @@ def _decay_s(note: gs.Note, timbre: gs.Timbre) -> float:
         sustain = 0.972
     if "harmonic" in tech:
         sustain = 0.9992
-    return max(0.05, math.log(0.01) / (gs.midi_hz(note.midi) * math.log(sustain ** timbre.sustain)))
+    return max(0.05, math.log(0.05) / (gs.midi_hz(note.midi) * math.log(sustain ** timbre.sustain)))
 
 
 def labels_of(notes: List[gs.Note], seconds: float, timbre: gs.Timbre) -> List[dict]:

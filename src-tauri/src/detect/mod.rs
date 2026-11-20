@@ -6,6 +6,7 @@
 //! on the analyzer's loop. The callers are the post-Take thread, the free-play
 //! worker and offline tools. See each file's header for its tier.
 
+pub mod candidate;
 pub mod fft;
 pub mod flux;
 pub mod model;

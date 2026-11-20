@@ -1,0 +1,34 @@
+{
+ "name": "guitarset-v1",
+ "source": "guitarset",
+ "licence": "CC BY 4.0",
+ "citation": "Q. Xi, R. M. Bittner, J. Pauwels, X. Ye, J. P. Bello: GuitarSet: A Dataset for Guitar Transcription. ISMIR 2018.",
+ "url": "https://zenodo.org/records/3371780",
+ "seed": 20261119,
+ "splits": {
+  "train": {
+   "takes": 280,
+   "items": 840,
+   "hours": 7.048,
+   "notes": 49339
+  },
+  "val": {
+   "takes": 20,
+   "items": 60,
+   "hours": 0.569,
+   "notes": 4422
+  },
+  "heldout": {
+   "takes": 60,
+   "items": 120,
+   "hours": 1.016,
+   "notes": 8715
+  }
+ },
+ "dropped": [],
+ "adapter": "tools/ml/factory/real.py",
+ "rate": 22050,
+ "takes": 360,
+ "items": 1020,
+ "hours": 8.633
+}

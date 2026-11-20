@@ -1,0 +1,34 @@
+{
+ "name": "techs-v1",
+ "source": "guitar-techs",
+ "licence": "CC BY 4.0",
+ "citation": "H. Pedroza, W. Abreu, R. Corey, I. Roman: Guitar-TECHS: An Electric Guitar Dataset Covering Techniques, Musical Excerpts, Chords and Scales Using a Diverse Array of Hardware. ICASSP 2025.",
+ "url": "https://zenodo.org/records/14963133",
+ "seed": 20261119,
+ "splits": {
+  "train": {
+   "takes": 86,
+   "items": 172,
+   "hours": 8.994,
+   "notes": 15938
+  },
+  "val": {
+   "takes": 6,
+   "items": 12,
+   "hours": 0.784,
+   "notes": 1046
+  },
+  "heldout": {
+   "takes": 12,
+   "items": 24,
+   "hours": 0.268,
+   "notes": 1948
+  }
+ },
+ "dropped": [],
+ "adapter": "tools/ml/factory/real.py",
+ "rate": 22050,
+ "takes": 104,
+ "items": 208,
+ "hours": 10.047
+}
