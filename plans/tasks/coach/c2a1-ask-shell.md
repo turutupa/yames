@@ -45,9 +45,12 @@ tools exactly as today**, so nothing is lost between the two merges.
 5. **What the panel holds after this leg** (the fact cards and tools are the next milestone; be honest
    meanwhile):
    - the head: "Ask", the context line "Looking at: …" from `buildCoachContext` (one quiet line; a
-     divider in the thread when the screen changes mid-conversation), close; and **the model selector's
-     second home** (the same control and state as the rail's; this is where it lives when the rail is
-     icons only);
+     divider in the thread when the screen changes mid-conversation), close;
+   - **the model selector at the panel's foot** (owner, 2026-11-20: the bottom of the right-hand coach
+     panel is its home): the `CoachModelSelector` leg ms1 built and mounted at the foot of the old
+     card, moved to the foot of the dock and the drawer, under the text box, above or beside the
+     one-line footer. Its menu opens upward and stays inside the panel. On a phone it sits in the
+     sheet's head (the foot is under the keyboard);
    - the thread and the text box: the existing conversation (`sendChat`) as it works today when a model
      is ready. When the selector is Off or no model is ready, the box is still there and the empty state
      says in one sentence what this panel can do now; do not fake an answer. Model output keeps the

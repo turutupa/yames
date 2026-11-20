@@ -38,6 +38,14 @@ verify with grep before you rely on one, and write any real difference into your
   paint), stays loaded across the app, and is unloaded only when the player picks Off or another model.
   Off still gives the whole rule-made coach. This overrides DESIGN 9.4's "load when Ask first needs it"
   and its ten-minute idle unload.
+  **Where it sits:** at the bottom of the right-hand coach panel (where the old coach card and its Start
+  button sat; in the new design the foot of the Ask dock / drawer). Not the left rail. On a phone: the
+  Ask sheet's head, and Settings → Coach. Entries are named by model and size ("Standard · Qwen3 4B").
+  **A model that is not downloaded** shows its size and a Download button in the selector itself
+  (progress, pause / resume, checksum check, cancel; a warning on mobile data or low storage), reusing
+  the existing download path (`src/ipc.ts`, `commands.rs` `download_model`); when it finishes it can be
+  selected and loads as usual. Deleting a downloaded model lives in Settings → Coach. The player starts
+  every download with a press; the coach itself never downloads (downloading stays a never-tool).
 
 ## Rules (binding)
 

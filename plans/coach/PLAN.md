@@ -21,7 +21,8 @@ old Start button). Four deliveries.
 | Leg | What | Design | Needs | Flags |
 |---|---|---|---|---|
 | **c0** | Plumbing: `src/coach/bus.ts`, the lazy `CoachContext`, app-side `ResolvedBlock.source`, publish lines in `useSessionRun.ts`. No visible change. | 9.1, 9.2, 9.3 (first two rows), C0 | – | – |
-| **ms1** | The model selector and the resident model. `Off / Standard / Studio` (Cloud later) at the foot of the rail, on the Ask row's right end; the choice persists; one loader owns load and unload app-wide (after first paint, idle, never while a Take runs); no session loads, unloads or arms an idle unload any more; a quiet Path Session generates nothing; honest state (loading, ready, failed, not downloaded, not on this device) and memory. | Brief item 10; 9.4 row 1; 5.5 | – | R (session call order; any Rust), i18n |
+| **ms1** | The model selector and the resident model. `Off / Standard / Studio` (Cloud later) **at the foot of the right-hand coach panel** (where the old card's Start button sat; the foot of the Ask dock once c2a1 lands); the choice persists; one loader owns load and unload app-wide (after first paint, idle, never while a Take runs); no session loads, unloads or arms an idle unload any more; a quiet Path Session generates nothing; honest state (loading, ready, failed, not downloaded, not on this device) and memory; **a model that is not downloaded shows its size and a Download button in the selector**, on the existing download path. | Brief item 10; owner updates 2 and 3; 9.4 row 1; 5.5 | – | R (session call order; any Rust), i18n |
+| **ms2** | What ms1 could not finish of the selector's download: both tiers on disk side by side (if the store holds one brain today), pause / resume, the checksum check, the mobile-data and low-storage warnings. Settings → Coach keeps manage and delete. | Owner updates 2 and 3 | ms1 | R (model store, Rust), i18n |
 | **c1a** | The note's brain, pure TypeScript: `takeNote()`, `rounds.ts`, `TakeFacts.lean` and `.heardIt`, export. A table test with one fixture Take per finding. | 4.2, 4.4, 9.3 | – | – |
 | **d1** | *Delivery 1a*: selector in the rail; sessions silent. | | c0, ms1, c1a | |
 | **pm** | "Pass mark" replaces "the bar" for the threshold in the app's English, translations following; writes `plans/COACH_I18N_BRIEF.md` (glossary, tone, the fifteen locales). | 2 (last row), 10 | c0 merged (quiet tree) | i18n |
@@ -29,11 +30,11 @@ old Start button). Four deliveries.
 | **c1b2** | Today's line (absorbs "Where you left off"), greetings by mood; boundary speech (Voice on only); hotkey and MIDI actions `ask-explain-last`, `ask-what-next`, `accept-suggestion`; phone scenes. | 6.1, 5.1, 8 (Voice, Today); mocks 01, 12 | c1b1 | i18n |
 | **d2** | *Delivery 1b*: the coach speaks in every Path Step and on Today. | | | |
 | **c1c** | The loop step ("Loop the first bar"), P1 (once more here) and P2 (Move on after the third same miss); "This one is for your eyes". | 4.2, 9.3 | c1b1 | probe (`--song-loop --song-take`), i18n |
-| **c2a1** | Ask's shell: `AskPanel` in three shapes (dock, drawer, sheet), `useCoachPanel` (panel state out of `useSession`), Session and Songs mounts, the phone's Ask button in the header, the `?` hotkey as a real action, the selector's second home in the panel head. The old chat thread moves in as it is. | 3.2, 3.3, 5.1, 7; mocks 02, 08, 11, 15 | c0, ms1 | R (doors parity), i18n |
+| **c2a1** | Ask's shell: `AskPanel` in three shapes (dock, drawer, sheet), `useCoachPanel` (panel state out of `useSession`), Session and Songs mounts, the phone's Ask button in the header, the `?` hotkey as a real action, the model selector at the panel's foot (the sheet's head on a phone). The old chat thread moves in as it is. | 3.2, 3.3, 5.1, 7; mocks 02, 08, 11, 15 | c0, ms1 | R (doors parity), i18n |
 | **c2a2** | The old Start and End buttons go. **Listen** on the tools' transport, the tool's coach line and note, History to Progress → Tool runs, `CoachCard` and `coach-card.css` deleted, `DELIBERATELY_REMOVED` keys, the mobile-bundle rule amended and recorded. | 7 (all tables), 8 (Tools, Progress) | c2a1, c1b1 | R (doors parity), i18n |
 | **d3** | *Delivery 1c/1d*: loop and the two Session rules; Ask shell; no Start button anywhere; the tools keep their coach. | | | |
 
-Parallelism: wave 1 = c0 ‖ ms1 ‖ c1a. Wave 2 = pm, then c1b1 ‖ c2a1. Wave 3 = c1b2 ‖ c1c ‖ c2a2.
+Parallelism: wave 1 = c0 ‖ ms1 ‖ c1a. Wave 2 = pm ‖ ms2, then c1b1 ‖ c2a1. Wave 3 = c1b2 ‖ c1c ‖ c2a2.
 `useSessionRun.ts`, `useSession.ts`, `MainWindow.tsx` and the locale files are the shared files: each leg
 file names which hunks it owns, and the second branch to merge rebases.
 
@@ -66,7 +67,6 @@ file names which hunks it owns, and the second branch to merge rebases.
 | **c3a** | The worker: `GenKind::Ask` with its own prompt, a grammar sampler (verify the crate's API first; a fuzz test that a completed grammar cannot abort), chunked prompt decode, cancel by generation id, prompt caching; probe modes `--llm-load` and `--llm-cancel`. The existing kinds' prompts stay byte-identical (a test). Can start any time after ms1. | 9.4 | ms1 | R, probe |
 | **c3b** | The model chooses tools: grammar generated from the registry, `ask/model.ts`, the speed gate (`asksUseModel`, 8 s a turn), token budgets, **the hand-written tool test set (about 300 items, at least 20 per language)** and the harness (`scripts/coach-eval.mjs`, `coach-eval.rs`); stock Standard and Studio measured four ways. Gates: right tool ≥ 90%, wrong action < 2% before a model-read navigation goes at once, per language. | 5.5, 13; TOOLS 3.5 | c3a, t1b, c2b | – |
 | **c3c** | Prose: labelled general advice, English first; no digit, no note name (structural). | 5.4 | c3b | i18n |
-| **ms2** | Both local tiers on disk side by side, so the selector switches without a download (only if ms1 finds the store holds one brain at a time). | Brief item 10 | ms1 | R (model store) |
 | **d6** | *Delivery 4*, with the eval numbers in STATUS. | | | |
 
 ## Milestone 5: the rest of the app
@@ -88,13 +88,18 @@ file names which hunks it owns, and the second branch to merge rebases.
 
 ## Things the orchestrator decided, to revisit only if building proves one wrong
 
-1. "The bottom rail" in the owner's note is read as the foot of the rail (`rail-footer`), where the Ask
-   row's status already sits at the right end. Under 620 px the rail is icons only, so the selector's
-   second home is the Ask panel's head (c2a1) and Settings → Coach.
+1. **Corrected by the owner (2026-11-20).** The selector sits at the **bottom of the right-hand coach
+   panel**: where the old coach card and its Start button sat, and in the new design the foot of the Ask
+   dock / drawer. Not the left rail. On a phone: the Ask sheet's head, and Settings → Coach. (My first
+   reading, the foot of the left rail, was wrong.)
 2. The selector's local entries are named by what they are (the tier's model and size, e.g. "Standard ·
-   Qwen3 4B · 2.5 GB"), not "Local 1 / Local 2".
-3. Off means unloaded, never deleted. Picking a model that is not downloaded does not download it: the
-   row says so and leads to Settings → Coach, where the download is the player's own press.
+   Qwen3 4B · 2.5 GB"), not "Local 1 / Local 2". Confirmed by the owner.
+3. **Corrected by the owner (2026-11-20).** Off means unloaded, never deleted. A model that is not
+   downloaded shows its size and a **Download button in the selector itself** (progress, pause / resume,
+   checksum check, cancel; a warning on mobile data or low storage), on the existing download path;
+   when it finishes it can be selected and loads as usual. Settings → Coach keeps manage and delete. The
+   player starts every download with a press; the coach itself never downloads (it stays a never-tool).
+   (My first reading, a detour to Settings, was wrong.)
 4. A load that is in flight when a Take starts runs on (it cannot be interrupted); the loader never
    *starts* one while a Take runs. The probe run that proves a load under the click is in c3a.
 5. Progress notes are one file per leg (`plans/coach/progress/<leg>.md`); `PROGRESS.md` is the index.
