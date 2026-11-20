@@ -493,6 +493,75 @@ callback, the engine and the queue are untouched.
 6. The chains are stationary noise and a simple gain model. Real rooms
    (speech, a TV, a fan starting) are card #85's recordings and card #86.
 
+## M7. Free-play engine (Rust engine and bench done; app surfaces NOT done)
+
+Leg of 2026-11-19 night. Card #106.
+
+**First, the review of M6 and the staged late grade** (`df4a4633`): A1 the
+second detector's lag is 10.7 ms in hops and its history holds 100 ms at
+96 kHz, two peaks inside 10 ms are one attack, the same-attack window is
+max(16 ms, 1.5 hops), tests at 16/44.1/96 kHz; A2/A3 `OnsetCore` tests; A4 a
+non-finite level skips the hop; A5 `OnsetDetector::set_demo_gate` and
+`OnsetCore::forget_recent_notes` when a listen demo ends; A7 the debug log;
+B1 `timing::model_fits_budget`; B2 a comment; B3 `android.yml`. A6 (a soft
+onset's amplitude from the attack hop) is not done: it moves
+`Onset::amplitude`. `detect:check`: 1,608 gated metrics, 0 worse, 0 better.
+
+**Built** (`src-tauri/src/harmony/`, nothing on a real-time thread):
+
+- `mod.rs`: `Engine`. Notes in (`onset`, `sustain`), `tick`, a `Reading`
+  out: key with a state (`Listening`, `Unsure`, `Settled`, `Chart`), scale
+  (nine types), the relative pair flagged when the notes do not separate
+  them, chord per beat (24 triads, sticky path, bass bonus, a seventh named
+  when it sounds; "couldn't tell" unless the beat held a chord or goes on
+  with the last one), per-note `ChordTone` / `ScaleTone` / `Approach` /
+  `Outside` / `Unknown`. A `Chart` (key, chords per bar, bar marks) replaces
+  estimation.
+- `notes.rs`: `NoteDecoder`, notes from the model's posteriors, causal.
+- `stream.rs`: `Stream`, the model on a window every 47 frames (0.55 s);
+  the engine is about one second behind the input.
+- `worker.rs`: `Worker`, the thread (`yames-harmony`, lowered priority,
+  polls the input ring every 100 ms, shares the app's one model). **Written
+  and compiled, not wired to a command and never run in the app.**
+- Bench: `bin/detect-bench/harmony.rs`; metrics and commands in `MEASURE.md`,
+  "Free play". Baseline `fast.json` gained 187 `harmony|...` metrics (the
+  1,608 older gated ones did not move); `fast-no-model.json` is unchanged.
+
+**Measured.** Synthetic (`run --fast`, pooled over the seven chains):
+strummed chord root 96% of beats, key 0.95 at 15 s and 1.00 at 30 s, settled
+in 12.8 s, 14 of 14 right. GuitarSet, 52 excerpts (every seventh file;
+`results/harmony-guitarset-subset.md`):
+
+| playing | chain | chord root right, all beats | beats given a chord | root right when given | key score at 15 s | key score at 30 s | key settled | settled key right | seconds to settle | "inside" right | "outside" right | "outside" right, with the chart |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| solo | gs_annotation | 2% (1511) | 8% (1511) | 28% (128) | 0.53 | 0.67 | 88% (26) | 83% (23) | 16.5 | 99% (1061) | 92% (86) | - |
+| solo | gs_mic | 4% (1489) | 15% (1489) | 28% (230) | 0.64 | 0.64 | 85% (26) | 82% (22) | 13.5 | 83% (1468) | 50% (147) | 48% (192) |
+| strummed | gs_annotation | 71% (1479) | 84% (1479) | 85% (1236) | 0.82 | 0.88 | 96% (26) | 84% (25) | 12.5 | 99% (3746) | 85% (155) | - |
+| strummed | gs_mic | 70% (1457) | 84% (1457) | 84% (1218) | 0.82 | 0.83 | 96% (26) | 92% (25) | 14.4 | 76% (3632) | 51% (146) | - |
+
+Against the M7 acceptance (strummed GuitarSet, microphone):
+
+- key 0.82 at 15 s (bar 0.75) and 0.83 at 30 s (bar 0.80): **met** on the subset.
+- chord root 70% of all beats (bar 78%): **not met**. It is 84% of the beats
+  it answers and it answers 84%. The research's 79% used a Viterbi path with
+  backtrace (it reads the future) and answered every beat. Next: a decision
+  one beat late (fixed-lag) and counting a held chord through quiet beats.
+- an unsure state whenever the margin is small: in the engine; no page shows it yet.
+- zero jitter-gate regressions: **not run**; the worker is not wired.
+
+Also seen: "inside" calls are right 73 to 83% of the time on the microphone
+against 99% from annotated notes. The difference is notes the decoder makes
+up (harmonics, doubled attacks). "Outside" calls from the microphone are
+right about half the time: too weak to show a player as fact. A solo gets a
+chord on 15% of beats and it is right 28% of those: the gate that says
+"this beat is a line" still lets some through.
+
+**Not done in this leg** (budget): the Tauri commands (`harmony_start`,
+`harmony_mark_bar`, `harmony_stop`, event `harmony-reading`), the setting
+(default off) and its parity-manifest entry, the Jam readout, the coach
+line in 15 locales, the click-jitter probe with the worker running, the
+full 360-excerpt GuitarSet run. `HANDOFF.md` has the design for each.
+
 ## Runtime merge and its review nits (2026-11-19 evening)
 
 `mvp-detect-runtime` (`3a983dd1`: the verifier runs on tract, pure Rust, from

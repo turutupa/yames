@@ -14,6 +14,7 @@
 
 mod cases;
 mod eval;
+mod harmony;
 mod harness;
 mod replay;
 mod synth;
@@ -41,6 +42,7 @@ usage:
   detect-bench render <out-dir> [--fast | --full] [--chains a,b,..] [--only <substr>]
   detect-bench cost [--seconds N] [--runtime tract|ort]
   detect-bench parity [--fast | --full] [--chains a,b,..] [--only <substr>] [--a tract] [--b ort]
+  detect-bench harmony --guitarset <dir> [--limit N] [--jobs N] [--out <dir>]
 ";
 
 struct Args(Vec<String>);
@@ -179,14 +181,19 @@ fn run(mut args: Args) -> Result<ExitCode, String> {
     let jobs: usize = args.value("--jobs").and_then(|v| v.parse().ok()).unwrap_or_else(|| (std::thread::available_parallelism().map(|n| n.get()).unwrap_or(4) / 2).clamp(1, 8));
     let out_dir = args.value("--out").map(PathBuf::from);
     let baseline_arg = args.value("--baseline").map(PathBuf::from);
+    let only = args.0.iter().position(|a| a == "--only").and_then(|i| args.0.get(i + 1).cloned());
     let (cases, mode_name, chains) = collect_cases(&mut args)?;
     if let Some(extra) = args.0.first() {
         return Err(format!("unknown argument `{extra}`\n{USAGE}"));
     }
-    if cases.is_empty() {
+    let has_model = model::compiled() && !no_model;
+    // The free-play engine's cases (M7): synthetic runs only, and they need
+    // the note model, so a `--no-model` run and its baseline have none.
+    let harmony_chains: Vec<String> = if mode_name == "recordings" || !has_model { Vec::new() } else if chains.is_empty() { synth::CHAINS.iter().map(|c| c.to_string()).collect() } else { chains.clone() };
+    let want_harmony = !harmony_chains.is_empty() && only.as_deref().is_none_or(|o| "harmony".contains(o) || o.contains("harmony"));
+    if cases.is_empty() && !want_harmony {
         return Err("no Takes to run".into());
     }
-    let has_model = model::compiled() && !no_model;
     if !has_model {
         eprintln!("note: running WITHOUT the note model (build with `--features detect-tract`, or drop `--no-model`); verifier metrics are left out");
     }
@@ -243,7 +250,12 @@ fn run(mut args: Args) -> Result<ExitCode, String> {
     results.sort_by_key(|r| r.0);
     let rows: Vec<eval::Row> = results.iter().flat_map(|r| r.1.iter().cloned()).collect();
     let takes: Vec<eval::TakeRow> = results.iter().map(|r| r.2.clone()).collect();
-    let metrics = eval::metrics(&rows, &takes, has_model);
+    let mut metrics = eval::metrics(&rows, &takes, has_model);
+    if want_harmony {
+        let only_harmony = only.as_deref().filter(|o| o.contains("harmony_"));
+        metrics.extend(harmony::run_synthetic(&harmony_chains, mode_name == "fast", jobs, only_harmony)?);
+        eprintln!("free-play cases done after {:.0} s", started.elapsed().as_secs_f64());
+    }
 
     let about = json!({
         "mode": mode_name,
@@ -258,7 +270,7 @@ fn run(mut args: Args) -> Result<ExitCode, String> {
         std::fs::write(&p, body).map_err(|e| format!("{}: {e}", p.display()))
     };
     write("results.json", serde_json::to_string_pretty(&doc).map_err(|e| e.to_string())?)?;
-    write("results.md", eval::markdown(&about, &metrics, &takes, &chains, has_model))?;
+    write("results.md", eval::markdown(&about, &metrics, &takes, &chains, has_model) + &harmony::markdown(&metrics))?;
     if want_notes {
         let mut body = String::new();
         for r in &rows {
@@ -315,6 +327,24 @@ fn run(mut args: Args) -> Result<ExitCode, String> {
             println!("(improvements are not failures; re-run with --update-baseline to keep them)");
         }
     }
+    Ok(ExitCode::SUCCESS)
+}
+
+/// The free-play engine on GuitarSet (`MEASURE.md`, "Free play").
+fn harmony_cmd(mut args: Args) -> Result<ExitCode, String> {
+    let root = args.value("--guitarset").map(PathBuf::from).ok_or_else(|| USAGE.to_string())?;
+    let jobs: usize = args.value("--jobs").and_then(|v| v.parse().ok()).unwrap_or(4);
+    let limit = args.value("--limit").and_then(|v| v.parse().ok());
+    let out_dir = args.value("--out").map(PathBuf::from).unwrap_or_else(|| repo_root().join(".detect-bench").join("harmony-guitarset"));
+    if !model::compiled() {
+        return Err("the free-play engine reads notes from the note model: build with `--features detect-tract`".into());
+    }
+    std::fs::create_dir_all(&out_dir).map_err(|e| format!("{}: {e}", out_dir.display()))?;
+    let metrics = harmony::run_guitarset(&root, jobs, limit)?;
+    let md = format!("# Free play on GuitarSet\n\n`gs_mic` is the microphone recording through the note model; `gs_annotation` is the annotated notes through the same engine (a perfect capture layer).\n\n{}", harmony::markdown(&metrics));
+    std::fs::write(out_dir.join("results.md"), &md).map_err(|e| e.to_string())?;
+    std::fs::write(out_dir.join("results.json"), serde_json::to_string_pretty(&json!({ "metrics": metrics })).map_err(|e| e.to_string())?).map_err(|e| e.to_string())?;
+    print!("{md}");
     Ok(ExitCode::SUCCESS)
 }
 
@@ -628,6 +658,7 @@ fn main() -> ExitCode {
         "render" => render(args),
         "cost" => cost(args),
         "parity" => parity(args),
+        "harmony" => harmony_cmd(args),
         _ => Err(USAGE.to_string()),
     };
     match result {

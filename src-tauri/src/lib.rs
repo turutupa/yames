@@ -50,6 +50,8 @@ mod kit;
 mod midi;
 mod models;
 pub mod detect;
+// Free play: key, chord and inside/outside from the notes heard (M7).
+pub mod harmony;
 pub mod onset;
 pub mod onset_flux;
 /// The score a player is playing against, and — roadmap 2.4 — what came

@@ -210,6 +210,42 @@ sends anything anywhere unless the player turns on "Keep my last Takes", and
 that only writes local files. Debug builds have the older `session_audio.rs`
 dump; release builds do not.
 
+## Free play: key, chord, inside/outside (M7)
+
+The free-play engine (`src-tauri/src/harmony/`) is measured through the path
+the app runs: audio, the note model on rolling windows (`stream.rs`, a window
+every 0.55 s), the note decoder (`notes.rs`), the engine (`mod.rs`). No chart
+is given, except where a metric says `chart_`.
+
+- `run --fast` adds 21 synthetic recordings (per chain: two strummed
+  progressions and one solo, 16 bars each; `run --full`: three of each) and
+  about 25 s. They need the note model, so a `--no-model` run has none.
+  `--only harmony` runs them alone; `--only harmony_C_I-vi-IV-V_solo` one.
+- `npm run detect:bench -- harmony --guitarset ~/projects/.datasets/guitarset [--limit N]`
+  runs GuitarSet's microphone recordings (`gs_mic`) and its annotated notes
+  through the same engine (`gs_annotation`, a perfect capture layer) against
+  its own key and chart. All 360 excerpts: about 10 minutes with `--jobs 6`.
+
+Metrics are `harmony|chain|strummed or solo|metric`:
+
+| Metric | Meaning | Gate |
+|---|---|---|
+| `chord_root` | beats (of the chart's tempo) whose chord root is right; a beat with no answer counts as wrong | higher (strummed) |
+| `chord_answered` | beats given a chord at all; the rest read "couldn't tell" | info |
+| `chord_root_when_answered` | root right among the beats answered | higher (strummed) |
+| `key_15s`, `key_30s` | the leading key on the standard weighted score (1.0 exact, 0.5 a fifth away, 0.3 relative, 0.2 parallel), whatever its state | higher |
+| `key_settled` | recordings where a key settled (the state the app shows a key in) | info |
+| `key_settled_right` | settled keys that are the true key, or its relative shown as a pair | higher |
+| `key_settle_s` | mean seconds until it settled | info |
+| `inside_precision` | notes called inside the key that were played and are inside it | higher |
+| `outside_precision` | notes called outside that were played and are outside (small n) | info |
+| `notes_not_judged` | notes with no verdict: no key yet | info |
+| `chart_outside_precision`, `chart_class_agrees` | solos with the chart as the prior: "outside" calls that are right; decoded notes whose class matches the same rule over the written notes | higher |
+
+A wrong "played" in the precision metrics is a note the decoder made up (a
+harmonic, a doubled attack): the player sees it as a note they did not play,
+so it counts against the engine.
+
 ## Public datasets (the heavy, local half)
 
 `tools/detect-bench/` holds the adapters. They download into
