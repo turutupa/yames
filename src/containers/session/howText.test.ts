@@ -4,8 +4,8 @@ import { howText } from "./SessionView";
 describe("the ready screen's one how paragraph (acceptance P1-4)", () => {
   it("drops the sentence naming the fret the hand line gives", () => {
     expect(
-      howText("First finger on fret 5, one finger per fret. Walk up and back on the A string.", { fret: 5 }, ["The bar: 85%."]),
-    ).toBe("Walk up and back on the A string. The bar: 85%.");
+      howText("First finger on fret 5, one finger per fret. Walk up and back on the A string.", { fret: 5 }, ["The pass mark: 85%."]),
+    ).toBe("Walk up and back on the A string. The pass mark: 85%.");
   });
 
   it("keeps a sentence whose numbers only contain the fret's digits", () => {

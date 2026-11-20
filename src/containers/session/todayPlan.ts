@@ -10,7 +10,7 @@
  * The reason line is short because the row already says the rest: the target
  * BPM sits in the right-hand column and the Path's name on the meta line, so a
  * reason no longer repeats either. A reason that carries a measured value
- * ("Evenness was 78% at 80 BPM. The bar is 85%.") keeps its full sentence.
+ * ("Evenness was 78% at 80 BPM. The pass mark is 85%.") keeps its full sentence.
  */
 import type { PathDoc } from "../../paths/format";
 import type { Line } from "../../session/coachWords";

@@ -305,9 +305,9 @@
         },
         "progress": {
           "title": "Clean tempo",
-          "body": "Progress counts clean tempo: the fastest you met the bar, not just the fastest you played. That is the number to grow.",
+          "body": "Progress counts clean tempo: the fastest you met the pass mark, not just the fastest you played. That is the number to grow.",
           "bodyOff": "Progress keeps your minutes, your streak and the tempos you played. With grading on it adds your clean tempo.",
-          "bodyAsk": "Progress counts clean tempo: the fastest you met the bar, not just the fastest you played. That is the number to grow."
+          "bodyAsk": "Progress counts clean tempo: the fastest you met the pass mark, not just the fastest you played. That is the number to grow."
         }
       }
     },
