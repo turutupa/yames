@@ -1,0 +1,54 @@
+{
+  "ask": {
+    "title": "Vraag",
+    "button": "Vraag",
+    "close": "Vraag sluiten",
+    "lookingAt": "In beeld:",
+    "nowLooking": "Nu in beeld: {{place}}",
+    "later": "Vraag opent na deze take",
+    "placeholder": "Vraag iets over dit scherm, je takes of je leerpaden",
+    "send": "Verstuur",
+    "writing": "Antwoord wordt geschreven…",
+    "sections": {
+      "ask": "Vraag",
+      "tools": "Toolscoach"
+    },
+    "screen": {
+      "today": "Vandaag",
+      "paths": "Leerpaden",
+      "path": "Een leerpad",
+      "step": "Een stap",
+      "session": "Je sessie",
+      "progress": "Voortgang",
+      "jam": "Jam",
+      "songs": "Nummers",
+      "beat": "Metronoom",
+      "drill": "Tempotraining",
+      "setlist": "Setlist",
+      "tools": "Tools"
+    },
+    "looking": {
+      "readyFor": "klaar voor take {{n}}",
+      "take": "take {{n}}",
+      "recap": "de terugblik"
+    },
+    "empty": {
+      "title": "Wat wil je weten?",
+      "model": "Vraag iets over dit scherm, je takes of je leerpaden. Het model op deze computer antwoordt in eigen woorden, als algemeen advies.",
+      "loading": "Het model dat je koos, maakt zich klaar. Zodra het klaar is, kun je iets vragen over dit scherm, je takes of je leerpaden.",
+      "noModel": "Getypte vragen hebben een model op deze computer nodig, en er staat er geen aan. Kies hieronder een model om iets te vragen over dit scherm, je takes of je leerpaden.",
+      "phone": "Getypte vragen hebben een model nodig, en telefoons draaien er nog geen."
+    },
+    "reply": {
+      "noModel": "Er staat geen model aan, dus getypte vragen kunnen nog niet worden beantwoord. Kies er een onderaan dit paneel.",
+      "gettingReady": "Het model maakt zich nog klaar. Vraag het zo nog eens.",
+      "phone": "Telefoons draaien nog geen model, dus getypte vragen kunnen hier niet worden beantwoord.",
+      "nothing": "Er kwam dit keer geen antwoord terug."
+    },
+    "footer": {
+      "model": "Beantwoord door het model op deze computer. Wat je typt, verlaat hem niet.",
+      "local": "Wat je hier typt, verlaat deze computer niet.",
+      "phone": "Wat je hier typt, verlaat deze telefoon niet."
+    }
+  }
+}

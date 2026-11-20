@@ -1,0 +1,54 @@
+{
+  "ask": {
+    "title": "Fragen",
+    "button": "Fragen",
+    "close": "Fragen schließen",
+    "lookingAt": "Im Blick:",
+    "nowLooking": "Jetzt im Blick: {{place}}",
+    "later": "Fragen öffnet sich nach diesem Take",
+    "placeholder": "Frag zu diesem Bildschirm, deinen Takes oder deinen Pfaden",
+    "send": "Senden",
+    "writing": "Antwort wird geschrieben…",
+    "sections": {
+      "ask": "Fragen",
+      "tools": "Tools-Coach"
+    },
+    "screen": {
+      "today": "Heute",
+      "paths": "Pfade",
+      "path": "Ein Pfad",
+      "step": "Ein Schritt",
+      "session": "Deine Session",
+      "progress": "Fortschritt",
+      "jam": "Jam",
+      "songs": "Songs",
+      "beat": "Metronom",
+      "drill": "Tempo-Training",
+      "setlist": "Setlist",
+      "tools": "Werkzeuge"
+    },
+    "looking": {
+      "readyFor": "bereit für Take {{n}}",
+      "take": "Take {{n}}",
+      "recap": "der Rückblick"
+    },
+    "empty": {
+      "title": "Was willst du wissen?",
+      "model": "Frag zu diesem Bildschirm, deinen Takes oder deinen Pfaden. Das Modell auf diesem Computer antwortet mit eigenen Worten, als allgemeiner Rat.",
+      "loading": "Das gewählte Modell wird gerade vorbereitet. Sobald es bereit ist, kannst du zu diesem Bildschirm, deinen Takes oder deinen Pfaden fragen.",
+      "noModel": "Getippte Fragen brauchen ein Modell auf diesem Computer, und es ist keins eingeschaltet. Wähle unten eins, um zu diesem Bildschirm, deinen Takes oder deinen Pfaden zu fragen.",
+      "phone": "Getippte Fragen brauchen ein Modell, und Handys führen noch keins aus."
+    },
+    "reply": {
+      "noModel": "Es ist kein Modell eingeschaltet, deshalb können getippte Fragen noch nicht beantwortet werden. Wähle unten in diesem Bereich eins.",
+      "gettingReady": "Das Modell wird noch vorbereitet. Frag gleich noch einmal.",
+      "phone": "Handys führen noch kein Modell aus, deshalb können getippte Fragen hier nicht beantwortet werden.",
+      "nothing": "Diesmal kam keine Antwort zurück."
+    },
+    "footer": {
+      "model": "Beantwortet vom Modell auf diesem Computer. Nichts, was du tippst, verlässt ihn.",
+      "local": "Nichts, was du hier tippst, verlässt diesen Computer.",
+      "phone": "Nichts, was du hier tippst, verlässt dieses Handy."
+    }
+  }
+}
