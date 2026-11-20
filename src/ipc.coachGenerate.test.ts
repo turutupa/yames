@@ -10,6 +10,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   COACH_ASK_BACKSTOP_MS,
+  COACH_ASK_MAX_DEADLINE_MS,
   COACH_ASK_TIMEOUT_MS,
   COACH_GENERATE_TIMEOUT_MS,
   cancelGeneration,
@@ -159,6 +160,25 @@ describe("coachAsk", () => {
       why: "nothing allowed",
     });
     expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("clamps a deadline past Rust's cap, so the backstop cannot fire at once", async () => {
+    setInvokeResponse("coach_ask", () => new Promise(() => {}));
+    setInvokeResponse("cancel_generation", () => true);
+    // Past 2^31 - 1 ms, an unclamped setTimeout would fire immediately.
+    const call = coachAsk({ ...request(13), deadlineMs: 2 ** 31 });
+    const settled = vi.fn();
+    call.catch(settled);
+    expect(mockInvoke).toHaveBeenCalledWith("coach_ask", {
+      request: { ...request(13), deadlineMs: COACH_ASK_MAX_DEADLINE_MS },
+    });
+
+    await vi.advanceTimersByTimeAsync(COACH_ASK_MAX_DEADLINE_MS + COACH_ASK_BACKSTOP_MS - 1);
+    expect(settled).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(2);
+    expect(settled).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "coach_ask_timeout" }),
+    );
   });
 
   it("sends a missing grammar as null, and passes noModel through", async () => {

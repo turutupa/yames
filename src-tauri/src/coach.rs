@@ -696,6 +696,17 @@ const GRAMMAR_MAX_RULES: usize = 512;
 const GRAMMAR_MAX_ALTERNATIVES: usize = 128;
 /// Groups inside groups. Tool grammars nest two or three deep.
 const GRAMMAR_MAX_DEPTH: usize = 16;
+/// The longest chain of rule references (a cycle is cut where it closes).
+/// The answer grammar's is about 8.
+const GRAMMAR_MAX_REF_DEPTH: usize = 64;
+/// The most parse stacks `StackEstimate` may find at one position. Each
+/// stack is checked against every candidate token in a grammar `apply`
+/// (about 150,000 for Qwen3), which is one uninterruptible sampling step,
+/// and llama.cpp builds them at grammar init and on every `reset()`
+/// outside any `catch`. The answer grammar's estimate is in the tens (its
+/// widest closed list has 31 entries); `r1? r1? r1? r1?` chained twelve
+/// rules deep is about 4^12.
+pub const ASK_GRAMMAR_MAX_STACKS: u64 = 1_024;
 
 /// The Ask kind's own system lines. They come first in the system turn, in
 /// front of the caller's static prefix (its system text and its tool /
@@ -996,12 +1007,38 @@ pub fn cancel_generation(generation_id: u64) -> bool {
 /// count and loops allocating rules until memory runs out (llama-grammar.cpp
 /// `handle_repetitions`, `n_opt = max_times - min_times`); a grammar that
 /// expands past `ASK_GRAMMAR_MAX_ELEMENTS` can exhaust memory in the parser
-/// (see the constant); and the rule, alternative and nesting bounds keep
-/// the number of live parse stacks, which is what one sampling step costs,
-/// to what a tool grammar needs. Everything else malformed is left to
-/// llama.cpp's parser, which returns an error for it.
+/// (see the constant). It also refuses more than `GRAMMAR_MAX_RULES` rules
+/// and groups, `GRAMMAR_MAX_ALTERNATIVES` in one of them, groups nested
+/// past `GRAMMAR_MAX_DEPTH`, rule references chained past
+/// `GRAMMAR_MAX_REF_DEPTH`, and a grammar whose `StackEstimate` (the
+/// stacks one parse expands to at one position) passes
+/// `ASK_GRAMMAR_MAX_STACKS`. That bounds the stacks llama.cpp builds at
+/// init and on `reset()` for one parse; it does not bound the stacks an
+/// ambiguous grammar keeps for several parses at once (see
+/// `StackEstimate`). Everything else malformed is left to llama.cpp's
+/// parser, which returns an error for it.
 pub fn precheck_grammar(grammar: &str) -> Result<(), String> {
     measure_grammar(grammar).map(|_| ())
+}
+
+/// What an item of a sequence is, for the parse-stack estimate.
+#[derive(Clone, Debug)]
+enum GrammarKind {
+    /// A literal character, a class, `.` or a token: one stack position.
+    Term,
+    /// `""`: nothing.
+    Empty,
+    Ref(String),
+    Group(Vec<Vec<GrammarItem>>),
+}
+
+#[derive(Clone, Debug)]
+struct GrammarItem {
+    kind: GrammarKind,
+    /// `?`, `*` or `{0,n}`: the item may be skipped.
+    optional: bool,
+    /// How many copies llama.cpp writes out (`{m,n}`: n, `*` / `+`: 2).
+    copies: u64,
 }
 
 /// One sequence being measured: a rule's body or a group's.
@@ -1013,28 +1050,184 @@ struct GrammarFrame {
     /// The last item's size, which a repetition after it multiplies.
     last: u64,
     alternatives: usize,
+    /// The same sequences as items, for the parse-stack estimate.
+    closed_items: Vec<Vec<GrammarItem>>,
+    items: Vec<GrammarItem>,
 }
 
 impl GrammarFrame {
     fn new() -> Self {
-        GrammarFrame { closed: 0, seq: 0, last: 0, alternatives: 1 }
+        GrammarFrame {
+            closed: 0,
+            seq: 0,
+            last: 0,
+            alternatives: 1,
+            closed_items: Vec::new(),
+            items: Vec::new(),
+        }
     }
 
     fn total(&self) -> u64 {
         self.closed.saturating_add(self.seq)
     }
 
-    fn item(&mut self, size: u64) {
+    fn item(&mut self, size: u64, kind: GrammarKind) {
         self.seq = self.seq.saturating_add(size);
         self.last = size;
+        self.items.push(GrammarItem { kind, optional: false, copies: 1 });
     }
 
     /// `S` repeated: llama.cpp writes out `copies` of it, each with up to
     /// three elements of rule bookkeeping (`handle_repetitions`).
-    fn repeat(&mut self, copies: u64) {
+    fn repeat(&mut self, copies: u64, optional: bool) {
         let grown = self.last.saturating_add(3).saturating_mul(copies.max(1));
         self.seq = self.seq.saturating_sub(self.last).saturating_add(grown);
         self.last = grown;
+        if let Some(last) = self.items.last_mut() {
+            last.optional |= optional;
+            last.copies = last.copies.saturating_mul(copies.max(1));
+        }
+    }
+
+    /// `|`: the sequence read so far is one alternative.
+    fn next_alternative(&mut self) {
+        self.closed = self.total();
+        self.seq = 0;
+        self.last = 0;
+        self.alternatives += 1;
+        self.closed_items.push(std::mem::take(&mut self.items));
+    }
+
+    /// Every alternative, the one being read included.
+    fn into_alternatives(mut self) -> Vec<Vec<GrammarItem>> {
+        self.closed_items.push(self.items);
+        self.closed_items
+    }
+}
+
+/// An upper estimate of the parse stacks llama.cpp holds at once.
+///
+/// `llama_grammar_advance_stack` expands a position into one stack per
+/// distinct way the next character can be reached: through every
+/// alternative of a referenced rule, and past every item that can be
+/// skipped. So the stacks at one position are the "starts" of the rest of
+/// its sequence: the starts of each item up to and including the first one
+/// that cannot be skipped, plus one for running off the end into the
+/// parent. A skippable item repeated `n` times counts its starts `n`
+/// times. Starts follow references to named rules (memoised; a rule met
+/// again while it is being costed counts once). The estimate is the
+/// largest such count over every position of every sequence.
+///
+/// What it does not cover: running off the end of a rule adds the
+/// parent's continuation, so one parse can hold up to the reference
+/// depth times the estimate (the depth is capped too); and an ambiguous
+/// grammar keeps several parses alive at once, which this does not
+/// multiply in. The turn's deadline is what bounds that, between steps.
+struct StackEstimate<'a> {
+    rules: &'a std::collections::HashMap<String, Vec<Vec<GrammarItem>>>,
+    nullable: std::collections::HashSet<String>,
+    /// Per rule: its starts and the longest reference chain below it.
+    memo: std::collections::HashMap<String, (u64, usize)>,
+    busy: std::collections::HashSet<String>,
+    max_stacks: u64,
+}
+
+impl<'a> StackEstimate<'a> {
+    fn new(rules: &'a std::collections::HashMap<String, Vec<Vec<GrammarItem>>>) -> Self {
+        // Which rules can match nothing: a fixpoint, at most one round per rule.
+        let mut nullable = std::collections::HashSet::new();
+        loop {
+            let found: Vec<String> = rules
+                .iter()
+                .filter(|(name, alts)| {
+                    !nullable.contains(*name) && alts.iter().any(|s| Self::seq_nullable(s, &nullable))
+                })
+                .map(|(name, _)| name.clone())
+                .collect();
+            if found.is_empty() {
+                break;
+            }
+            nullable.extend(found);
+        }
+        StackEstimate {
+            rules,
+            nullable,
+            memo: std::collections::HashMap::new(),
+            busy: std::collections::HashSet::new(),
+            max_stacks: 0,
+        }
+    }
+
+    fn kind_nullable(kind: &GrammarKind, nullable: &std::collections::HashSet<String>) -> bool {
+        match kind {
+            GrammarKind::Term => false,
+            GrammarKind::Empty => true,
+            GrammarKind::Ref(name) => nullable.contains(name),
+            GrammarKind::Group(alts) => alts.iter().any(|s| Self::seq_nullable(s, nullable)),
+        }
+    }
+
+    fn seq_nullable(seq: &[GrammarItem], nullable: &std::collections::HashSet<String>) -> bool {
+        seq.iter().all(|it| it.optional || Self::kind_nullable(&it.kind, nullable))
+    }
+
+    /// The starts of a whole rule, and the reference chain below it.
+    fn rule(&mut self, name: &str) -> Result<(u64, usize), String> {
+        if let Some(&known) = self.memo.get(name) {
+            return Ok(known);
+        }
+        let Some(alts) = self.rules.get(name) else {
+            // Undefined: llama.cpp refuses it.
+            return Ok((1, 0));
+        };
+        if !self.busy.insert(name.to_string()) {
+            return Ok((1, 0));
+        }
+        let (starts, depth) = self.alternatives(alts)?;
+        self.busy.remove(name);
+        let depth = depth + 1;
+        if depth > GRAMMAR_MAX_REF_DEPTH {
+            return Err(format!("rule references chain deeper than {GRAMMAR_MAX_REF_DEPTH}"));
+        }
+        self.memo.insert(name.to_string(), (starts, depth));
+        Ok((starts, depth))
+    }
+
+    fn alternatives(&mut self, alts: &[Vec<GrammarItem>]) -> Result<(u64, usize), String> {
+        let mut starts = 0u64;
+        let mut depth = 0usize;
+        for seq in alts {
+            let (s, d) = self.sequence(seq)?;
+            starts = starts.saturating_add(s);
+            depth = depth.max(d);
+        }
+        Ok((starts, depth))
+    }
+
+    /// The starts of `seq` from its first item, recording the largest
+    /// count at any of its positions.
+    fn sequence(&mut self, seq: &[GrammarItem]) -> Result<(u64, usize), String> {
+        let mut rest = 1u64; // running off the end into the parent
+        let mut depth = 0usize;
+        for item in seq.iter().rev() {
+            let (own, d) = match &item.kind {
+                GrammarKind::Term => (1, 0),
+                GrammarKind::Empty => (0, 0),
+                GrammarKind::Ref(name) => self.rule(name)?,
+                GrammarKind::Group(alts) => self.alternatives(alts)?,
+            };
+            depth = depth.max(d);
+            let inner_nullable = Self::kind_nullable(&item.kind, &self.nullable);
+            let own = if inner_nullable { own.saturating_mul(item.copies) } else { own };
+            rest = if item.optional || inner_nullable { own.saturating_add(rest) } else { own };
+            self.max_stacks = self.max_stacks.max(rest);
+            if self.max_stacks > ASK_GRAMMAR_MAX_STACKS {
+                return Err(format!(
+                    "grammar can hold more than {ASK_GRAMMAR_MAX_STACKS} parse stacks at once"
+                ));
+            }
+        }
+        Ok((rest, depth))
     }
 }
 
@@ -1045,6 +1238,12 @@ impl GrammarFrame {
 /// nested repetitions multiply through (llama.cpp makes a group a rule of
 /// its own and references it, so the true size is usually smaller).
 pub(crate) fn measure_grammar(grammar: &str) -> Result<u64, String> {
+    grammar_measures(grammar).map(|(size, _)| size)
+}
+
+/// `measure_grammar`'s checks, returning the size and the
+/// `StackEstimate`.
+fn grammar_measures(grammar: &str) -> Result<(u64, u64), String> {
     if grammar.trim().is_empty() {
         return Err("empty grammar".into());
     }
@@ -1083,6 +1282,17 @@ pub(crate) fn measure_grammar(grammar: &str) -> Result<u64, String> {
     let mut frames = vec![GrammarFrame::new()];
     let mut rules = 0usize;
     let mut run: u64 = 0;
+    // The rules read so far as items, and the name of the one being read
+    // (none before the first `::=`).
+    let mut named: std::collections::HashMap<String, Vec<Vec<GrammarItem>>> =
+        std::collections::HashMap::new();
+    let mut rule_name: Option<String> = None;
+    let too_many = |rules: usize| -> Result<(), String> {
+        if rules > GRAMMAR_MAX_RULES {
+            return Err(format!("grammar has more than {GRAMMAR_MAX_RULES} rules and groups"));
+        }
+        Ok(())
+    };
     let too_wide = |f: &GrammarFrame| -> Result<(), String> {
         if f.alternatives > GRAMMAR_MAX_ALTERNATIVES {
             return Err(format!(
@@ -1096,10 +1306,12 @@ pub(crate) fn measure_grammar(grammar: &str) -> Result<u64, String> {
     let close_group = |frames: &mut Vec<GrammarFrame>| -> Result<(), String> {
         let group = frames.pop().expect("a group frame");
         too_wide(&group)?;
+        let size = group.total().saturating_add(1);
+        let alts = group.into_alternatives();
         frames
             .last_mut()
             .expect("the rule's frame")
-            .item(group.total().saturating_add(1));
+            .item(size, GrammarKind::Group(alts));
         Ok(())
     };
     let check_size = |done: u64, frames: &[GrammarFrame]| -> Result<(), String> {
@@ -1121,8 +1333,13 @@ pub(crate) fn measure_grammar(grammar: &str) -> Result<u64, String> {
                     continue;
                 }
                 if (at == At::Literal && c == b'"') || (at == At::Class && c == b']') {
+                    let kind = if run == 0 && at == At::Literal {
+                        GrammarKind::Empty
+                    } else {
+                        GrammarKind::Term
+                    };
                     at = At::Code;
-                    frames.last_mut().expect("a frame").item(run);
+                    frames.last_mut().expect("a frame").item(run, kind);
                     check_size(done, &frames)?;
                 } else {
                     run += 1;
@@ -1144,7 +1361,10 @@ pub(crate) fn measure_grammar(grammar: &str) -> Result<u64, String> {
                 }
                 b'#' => at = At::Comment,
                 b'(' => {
+                    // llama.cpp makes a rule of every group: counted here,
+                    // not only when the next named rule starts.
                     rules += 1;
+                    too_many(rules)?;
                     if frames.len() > GRAMMAR_MAX_DEPTH {
                         return Err(format!("groups nest deeper than {GRAMMAR_MAX_DEPTH}"));
                     }
@@ -1159,15 +1379,15 @@ pub(crate) fn measure_grammar(grammar: &str) -> Result<u64, String> {
                 }
                 b'|' => {
                     let f = frames.last_mut().expect("a frame");
-                    f.closed = f.total();
-                    f.seq = 0;
-                    f.last = 0;
-                    f.alternatives += 1;
+                    f.next_alternative();
                     too_wide(f)?;
                 }
-                b'.' => frames.last_mut().expect("a frame").item(1),
+                b'.' => frames.last_mut().expect("a frame").item(1, GrammarKind::Term),
                 b'*' | b'+' | b'?' => {
-                    frames.last_mut().expect("a frame").repeat(if c == b'?' { 1 } else { 2 });
+                    frames
+                        .last_mut()
+                        .expect("a frame")
+                        .repeat(if c == b'?' { 1 } else { 2 }, c != b'+');
                     check_size(done, &frames)?;
                 }
                 c if c.is_ascii_alphanumeric() || c == b'_' || c == b'-' => {
@@ -1189,17 +1409,20 @@ pub(crate) fn measure_grammar(grammar: &str) -> Result<u64, String> {
                         let rule = frames.pop().expect("the rule's frame");
                         too_wide(&rule)?;
                         done = done.saturating_add(rule.total());
+                        if let Some(name) = rule_name.take() {
+                            named.entry(name).or_default().extend(rule.into_alternatives());
+                        }
+                        rule_name = Some(grammar[start..i].to_string());
                         frames.push(GrammarFrame::new());
                         rules += 1;
-                        if rules > GRAMMAR_MAX_RULES {
-                            return Err(format!(
-                                "grammar has more than {GRAMMAR_MAX_RULES} rules and groups"
-                            ));
-                        }
+                        too_many(rules)?;
                         i = k + 3;
                     } else {
                         debug_assert!(i > start);
-                        frames.last_mut().expect("a frame").item(1);
+                        frames
+                            .last_mut()
+                            .expect("a frame")
+                            .item(1, GrammarKind::Ref(grammar[start..i].to_string()));
                     }
                     continue;
                 }
@@ -1237,7 +1460,7 @@ pub(crate) fn measure_grammar(grammar: &str) -> Result<u64, String> {
                             max
                         }
                     };
-                    frames.last_mut().expect("a frame").repeat(copies);
+                    frames.last_mut().expect("a frame").repeat(copies, min == 0);
                     check_size(done, &frames)?;
                     i = close;
                 }
@@ -1249,14 +1472,27 @@ pub(crate) fn measure_grammar(grammar: &str) -> Result<u64, String> {
     // An unclosed literal or group is llama.cpp's to refuse; its size
     // still counts.
     if at == At::Literal || at == At::Class {
-        frames.last_mut().expect("a frame").item(run);
+        frames.last_mut().expect("a frame").item(run, GrammarKind::Term);
     }
     while frames.len() > 1 {
         close_group(&mut frames)?;
     }
     too_wide(&frames[0])?;
+    too_many(rules)?;
     check_size(done, &frames)?;
-    Ok(done.saturating_add(frames[0].total()))
+    let rule = frames.pop().expect("the rule's frame");
+    let size = done.saturating_add(rule.total());
+    if let Some(name) = rule_name.take() {
+        named.entry(name).or_default().extend(rule.into_alternatives());
+    }
+
+    let mut stacks = StackEstimate::new(&named);
+    let mut names: Vec<&String> = named.keys().collect();
+    names.sort();
+    for name in names {
+        stacks.rule(name)?;
+    }
+    Ok((size, stacks.max_stacks))
 }
 
 /// The system turn up to the user's content, ChatML as `chat_prompt`
@@ -3707,6 +3943,60 @@ Accuracy: 82\nUser asks: hello?<|im_end|>\n\
             rules.push_str(&format!("r{i} ::= \"x\"\n"));
         }
         assert!(precheck_grammar(&rules).unwrap_err().contains("rules"));
+    }
+
+    /// The re-read's first point: groups in one rule count as rules when
+    /// they open, not only when the next named rule starts, and at the end.
+    #[test]
+    fn groups_count_as_rules_inside_one_rule() {
+        let groups = format!("root ::= {}", "(\"a\")".repeat(6_000));
+        assert!(groups.len() <= ASK_GRAMMAR_MAX_BYTES);
+        assert!(precheck_grammar(&groups).unwrap_err().contains("rules"), "accepted");
+        // At the limit, it passes.
+        let fits = format!("root ::= {}", "(\"a\")".repeat(GRAMMAR_MAX_RULES - 1));
+        assert_eq!(precheck_grammar(&fits), Ok(()));
+    }
+
+    /// The re-read's second point: optional references chained through
+    /// named rules expand to 4^12 parse stacks at grammar init, with no
+    /// parenthesis anywhere.
+    #[test]
+    fn precheck_bounds_the_parse_stacks() {
+        let mut chain = String::new();
+        for r in 0..12 {
+            let next = if r == 0 { "r1".to_string() } else { format!("r{}", r + 1) };
+            let name = if r == 0 { "root".to_string() } else { format!("r{r}") };
+            chain.push_str(&format!("{name} ::= {next}? {next}? {next}? {next}?\n"));
+        }
+        chain.push_str("r12 ::= \"x\"\n");
+        assert!(chain.len() < 600, "{}", chain.len());
+        let err = precheck_grammar(&chain).unwrap_err();
+        assert!(err.contains("parse stacks"), "{err}");
+
+        // The answer grammar passes with room.
+        let (_, answer) = grammar_measures(COACH_ANSWER_GBNF).unwrap();
+        eprintln!("[precheck] coach-answer.gbnf: {answer} parse stacks at most");
+        assert!(answer <= ASK_GRAMMAR_MAX_STACKS / 8, "the answer grammar estimates {answer}");
+
+        // Deep but nothing skippable: one stack at each step.
+        let mut deep = String::from("root ::= r1 \"x\"\n");
+        for r in 1..40 {
+            deep.push_str(&format!("r{r} ::= r{} \"y\"\n", r + 1));
+        }
+        deep.push_str("r40 ::= \"z\"\n");
+        let (_, stacks) = grammar_measures(&deep).unwrap();
+        assert!(stacks <= 2, "{stacks}");
+
+        // A reference chain past the cap is refused, nullable or not.
+        let mut deeper = String::from("root ::= r1\n");
+        for r in 1..=GRAMMAR_MAX_REF_DEPTH {
+            deeper.push_str(&format!("r{r} ::= r{} \"y\"\n", r + 1));
+        }
+        deeper.push_str(&format!("r{} ::= \"z\"\n", GRAMMAR_MAX_REF_DEPTH + 1));
+        assert!(precheck_grammar(&deeper).unwrap_err().contains("chain"));
+
+        // Recursion is costed once, not followed forever.
+        assert_eq!(precheck_grammar("root ::= \"(\" root? \")\" | \"x\""), Ok(()));
     }
 
     /// Pure-Rust half of the fuzz: whatever bytes arrive, the precheck

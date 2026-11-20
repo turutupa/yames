@@ -2419,6 +2419,10 @@ export type CoachAskOutcome =
  *  `COACH_ASK_BACKSTOP_MS` later, for a Rust side that never answers. */
 export const COACH_ASK_TIMEOUT_MS = 8_000;
 export const COACH_ASK_BACKSTOP_MS = 1_000;
+/** Rust's own cap on a turn (`ASK_MAX_DEADLINE_MS`). A larger `deadlineMs`
+ *  is clamped to it here, before it is sent and before the backstop is
+ *  set: past 2^31 - 1 ms `setTimeout` fires at once. */
+export const COACH_ASK_MAX_DEADLINE_MS = 60_000;
 
 // Unique for the life of the Rust process, across webview reloads too: a
 // cancel Rust holds for an id it has not seen yet must not meet a new turn.
@@ -2438,7 +2442,10 @@ export async function cancelGeneration(generationId: number): Promise<boolean> {
  *  not answered a backstop later, the turn is cancelled there and this
  *  rejects with `Error("coach_ask_timeout")`. */
 export async function coachAsk(request: CoachAskRequest): Promise<CoachAskOutcome> {
-  const deadlineMs = request.deadlineMs ?? COACH_ASK_TIMEOUT_MS;
+  const asked = request.deadlineMs ?? COACH_ASK_TIMEOUT_MS;
+  const deadlineMs = Number.isFinite(asked)
+    ? Math.min(Math.max(0, Math.floor(asked)), COACH_ASK_MAX_DEADLINE_MS)
+    : COACH_ASK_MAX_DEADLINE_MS;
   const call = invoke<CoachAskOutcome>("coach_ask", {
     request: { ...request, grammar: request.grammar ?? null, deadlineMs },
   });
