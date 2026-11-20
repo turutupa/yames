@@ -21,22 +21,11 @@ section 6. Board: Personal board card #100 (M6), #85 (the owner's recordings),
 
 ## Owed before this branch merges
 
-1. **Click-jitter probe**, on a quiet machine (`/proc/loadavg` 1- and 5-min
-   under 6; it was 9 to 60 all day). M6 added 7.5 us a hop to the onset
-   thread and nothing to the output callback, so no change is expected, but
-   the gate is the gate:
-   ```sh
-   npm run yames:jitter-probe -- --no-llm
-   npm run yames:jitter-probe -- --no-llm --jam-swap --jam-move --jam-take
-   npm run yames:jitter-probe -- --no-llm --song-loop --song-take
-   # M4/M5's post-Take compute, owed since the Opus interlude:
-   cargo run --release --manifest-path src-tauri/Cargo.toml --features detect-ort \
-     --bin click-jitter-probe -- --no-llm --late-pass
-   cargo run --release --manifest-path src-tauri/Cargo.toml --features detect-ort \
-     --bin click-jitter-probe -- --no-llm --jam-swap --jam-move --jam-take --late-pass
-   ```
-   Gate: the four numbers in `AGENTS.md` (missed beats, callback
-   allocations/frees and dropped notifications all 0; p99 under 1 ms).
+1. ~~Click-jitter probe~~: run and passed on `eb484bea`, all five
+   configurations including `--late-pass` (`PROGRESS.md`, M6, "Not done" 1).
+   Re-run after the `mvp-detect-runtime` merge changes the verifier backend.
+   The probe does not start the onset thread: `npm run test:e2e:probe` is the
+   run with the detector live beside the click, and it has not been run on M6.
 2. **Independent review of M6** (the onset thread): the Rust diff is
    `git diff cda60ed4..HEAD -- src-tauri/src/onset.rs src-tauri/src/onset_flux.rs src-tauri/src/pitch.rs src-tauri/src/lib.rs`.
    What to look at: no allocation per hop in `FluxDetector::process` /

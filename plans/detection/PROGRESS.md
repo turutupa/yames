@@ -460,8 +460,26 @@ callback, the engine and the queue are untouched.
 
 **Not done / known limits:**
 
-1. **Click-jitter probe not run** (see the end of this file for the state at
-   the end of the leg).
+1. **Click-jitter probe: run and passed** (2026-11-19 evening, load 1.8 to
+   2.5 one-minute, 3.5 to 5.8 five-minute; `--features detect-ort` build of
+   `eb484bea`). All hard gates 0 (missed beats, callback allocations and
+   frees, dropped beats) in every run:
+
+   | Run | p99 jitter |
+   |---|---|
+   | `--no-llm` | 0.90 ms |
+   | `--no-llm --jam-swap --jam-move --jam-take` | 0.95 ms |
+   | `--no-llm --song-loop --song-take` | 0.98 ms |
+   | `--no-llm --late-pass` (104 late passes of 592 ms, verifier on; owed since M4/M5) | 0.55 ms |
+   | `--no-llm --jam-swap --jam-move --jam-take --late-pass` (107 passes) | 0.56 ms |
+
+   What this does and does not show: the probe runs the engine headless and
+   **does not start the onset thread** (it has no input device), so it shows
+   the output callback is as it was, which is expected since M6 touches
+   nothing on that side. The onset thread's added load is the `cost_per_hop`
+   figure above (7.5 us in every 5.33 ms). The run that has the detector
+   live beside the click is `npm run test:e2e:probe`; it was not run in this
+   leg.
 2. Slid-to notes: still 0% (no attack; the verifier hears 69%).
 3. Hammer-ons in noise stop at 54 to 83%: what is left sits at the salience
    of the spurious peaks (0.27 to 0.4 of a pick). The next lever is the
