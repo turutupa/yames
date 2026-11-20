@@ -78,6 +78,20 @@ const YOUR_TURN = { grade: "selfChecked", example: true } as const;
 const NOT_CHECKED_YET =
   "Your turn, and not checked yet: the app can't judge notes you choose, so you tick it off yourself.";
 
+// Shared with other Paths word for word (coherence audit, S5, S6 and S8 to S12), so each is translated once and copied.
+const BAND_IS = "The band is a drummer and a bassist in place of the click.";
+const IF_LOST = "If you get lost, stop, find beat 1 of the next bar and come back in there.";
+const COUNT_SIXTEENTHS = "Count '1 e and a, 2 e and a'. The hand goes down on the number and the 'and', up on the 'e' and the 'a'.";
+const SEXTUPLETS_ARE = "Sextuplets are six even notes to one click.";
+const BOX_ONE_IS =
+  "Box 1 of A minor pentatonic sits at fret 5, two notes on every string. The first finger plays fret 5 on all six strings. The other note is fret 8 with the little finger on the low E, B and top strings, and fret 7 with the third finger on the A, D and G strings.";
+const BOX_ONE_POINTER = "Blues and Pentatonics teaches the box slowly over a band in its first Step.";
+const HAMMER_ON_IS =
+  "A hammer-on is a note the fretting hand sounds alone: pick the lower note, then bring a finger down hard and fast on the higher fret of the same string.";
+const VIBRATO_IS = "Vibrato is a bend kept very small: push the string a little and let it back, over and over, at an even speed.";
+const BEND_POINTER = "Blues and Pentatonics teaches the bend in its Step 'Bends that land'.";
+const ROOT_IS = "The root is the note a chord is named after.";
+
 const ROCK = (key: string) => ({ groove: "rock8", key });
 const HARD = (key: string) => ({ groove: "hardRock", key });
 const BALLAD = { groove: "ballad", key: "E minor" };
@@ -208,13 +222,19 @@ export default definePath({
   goal: "Play riffs, licks and a written solo in the classic rock style over a band, and know why each note fits the chord under it.",
   level: "early-intermediate",
   assumes:
-    "You can play power chords and single notes cleanly, and eighth notes with a click at 80 BPM. Knowing the A minor pentatonic box helps and isn't required: Step 3 goes through it. Most of the Path is in A, so that theory is the only new thing; licks a player repeats for weeks move to other keys and positions.",
-  prerequisites: { paths: [{ path: "rhythm-foundations", level: "beginner" }], skills: ["Power chords", "Clean single notes", "Eighth notes with a click at 80 BPM"] },
+    "You can play single notes cleanly, and eighth notes with a click at 80 BPM. Sixteenth notes and triplets come from the Intermediate Level of Rhythm Foundations. Box 1 of A minor pentatonic comes from the Beginner Level of Blues and Pentatonics. The Advanced Level here also bends strings, which Blues and Pentatonics teaches in its Intermediate Level, in the Step 'Bends that land'. Most of the Path is in A, so that the theory is the only new thing; licks a player repeats for weeks move to other keys and positions.",
+  prerequisites: {
+    paths: [
+      { path: "rhythm-foundations", level: "intermediate" },
+      { path: "blues-pentatonics", level: "beginner" },
+    ],
+    skills: ["Clean single notes", "Eighth notes with a click at 80 BPM", "Sixteenth notes and triplets with a click", "Box 1 of A minor pentatonic"],
+  },
   labelSubdivisions: "mostly",
   paceLadders: true,
   variantText: true,
   orderRationale:
-    "Riffs come first because they are what a rock player plays most, and they put time in the hands before any theory. The minor pentatonic box and its extension come next, with the licks the style is built on, and then the same box at fret 12 in E, ending with the sextuplet run and its turn back up; the major pentatonic follows, because hearing minor against major over the same chord is the theory that separates rock from blues. Repeating licks come after the box, since they are box notes played as loops. Double stops and chord embellishment, on E and then on open A and D, move from one note to two and into the chord, then chord tones over A, G and D (I, flat VII, IV) show why the same box works over those changes. The slow melody needs control more than speed, so it comes late; call and response with a band uses everything before it, and the sixteen-bar etude puts it all in one solo.",
+    "Riffs come first because they are what a rock player plays most, and they put time in the hands before any theory. The minor pentatonic box and its extension come next, with the licks the style is built on, and then the same box at fret 12 in E; the major pentatonic follows, because hearing minor against major over the same chord is the theory that separates rock from blues. Repeating licks come after the box, since they are box notes played as loops. Double stops and chord embellishment, on E and then on open A and D, move from one note to two and into the chord, then chord tones over A, G and D show why the same box works over those changes. The slow melody needs control more than speed, so it comes late; call and response with a band uses everything before it. The sextuplet run at fret 12 and its turn back up wait until then, next to the licks of the peak, because those two Steps are the fastest playing in the Path. The sixteen-bar etude puts the box to work in one solo.",
   gradingLimits:
     "Graded Exercises are written lines. The app checks timing evenness, notes heard and extra notes on every one, and right notes after the take on single notes that are far enough apart and don't ring into each other; elsewhere right notes read 'not checked'. Double stops, the chord embellishments and riffs with open strings ringing are timed and counted, and not pitch-checked, because a single-note tracker can't tell two notes apart. A bent note would read as a wrong one, so bends are timed and never pitch-checked, and their pitch is a self-check. The right-note check has only been tried on computer-made guitar sound with no band in the mix, so direct input or headphones are the honest way to play anything with a band, and with a microphone and speakers it is untested. Choosing your own notes, landing on chord tones and phrasing are not measured today: those Exercises are 'your turn', self-checked and labelled 'not checked yet'. Nothing here grades feel or tone.",
   steps: [
@@ -224,6 +244,9 @@ export default definePath({
       goal: "Play three kinds of rock riff in time with a band: a single-note root line, parallel fourths, and an open-string pedal.",
       why: "Riffs are most of what a rock guitarist plays, and they are where time lives. A riff played a little ahead or behind is what makes a band sound tight or loose. These three shapes, a root line, two-note fourths and a pedal under a moving line, are the building blocks of a thousand rock songs.",
       howTo: [
+        ROOT_IS,
+        BAND_IS,
+        IF_LOST,
         "Palm-mute the low notes marked with an m: rest the side of your picking hand on the strings just in front of the bridge, so they thud rather than ring.",
         "Downstrokes on every eighth sound heavier; alternate if the tempo gets away from you. Either way, lock to the drummer's hi-hat.",
         "Fourths are two strings at once with one finger flattened across them, or two fingers side by side on the same fret.",
@@ -301,7 +324,9 @@ export default definePath({
       goal: "Play the licks rock is built on in box 1 of A minor pentatonic, and reach up to the extension at frets 8 and 10.",
       why: "Nearly every classic rock solo starts in this box. The licks here are its common phrases: a descending sixteenth run, a three-note repeat on the top strings, a six-note sequence that runs down the box, and the extension, the two frets above the box on the top strings where so many solos find their high notes.",
       howTo: [
-        "Box 1 in A: first finger on fret 5, the notes A, C, D, E, G. The extension is frets 8 and 10 on the B and high E strings: G, A, C and D.",
+        BOX_ONE_IS,
+        BOX_ONE_POINTER,
+        "The notes of the box are A, C, D, E and G. The extension is frets 8 and 10 on the B string and on the top string, the high E: G, A, C and D. Fret 8 is the top of the box on those strings, and fret 10 is new.",
         "Play everything at the slowest rung until the notes are automatic, then let the tempo come.",
         "Keep the picking small. Speed in these licks comes from a quiet hand.",
       ],
@@ -313,6 +338,7 @@ export default definePath({
           purpose: "Four-note groups down the top of the box: A, G, E, D, then G, E, D, C, then down a string. The fast, flowing descent of a lot of seventies solos.",
           howTo: [
             "Straight sixteenths, four to a click, 60 BPM up to a pass at 80.",
+            COUNT_SIXTEENTHS,
             "Bar 1: A at 5 on the high E, G at 8 and E at 5 on the B, D at 7 on the G, twice; then G, E, D, C twice. Bar 2: D, C on the G string, A, G on the D string, twice, then E on the A string and A to finish.",
           ],
           coach: "Right notes, notes heard and even sixteenths after the take.",
@@ -351,7 +377,8 @@ export default definePath({
           title: "Sixes down the box",
           purpose: "Six notes down the box, then start one note lower and play six more. A sequence that sounds faster than it is, the way hard rock players of the eighties loved to run it.",
           howTo: [
-            "Sixteenth-note sextuplets, six to a click, 50 BPM up to a pass at 60.",
+            "Sixteenth-note sextuplets, six to a click, 30 BPM up to a pass at 45.",
+            SEXTUPLETS_ARE,
             "Group 1 starts at C, fret 8 on the high E: C, A, G, E, D, C. Group 2 starts one box note lower, on A. Four groups in bar 1, two in bar 2, then the low A held.",
             "Say 'one-two-three-four-five-six' on every beat; the first note of each group falls on the click.",
           ],
@@ -362,8 +389,8 @@ export default definePath({
           chords: "A5 | A5",
           jam: ROCK("A minor"),
           harmony: { scale: ["A", "minorPentatonic"] },
-          rungs: ladder(50, 90, 5),
-          passAt: 60,
+          rungs: ladder(30, 60, 5),
+          passAt: 45,
           ...lick("straight"),
           minutes: 5,
         },
@@ -391,15 +418,14 @@ export default definePath({
       ],
     },
     BOX_AT_TWELVE,
-    SIXES_AT_TWELVE,
     {
       id: "major-pentatonic",
       title: "Major pentatonic, and minor against major",
       goal: "Play A major pentatonic in two places on the neck, and hear the difference between minor and major lines over the same chord.",
-      why: "Minor pentatonic is the tough sound of rock; major pentatonic is the sweet, country-tinged sound of Southern rock and a lot of sixties pop. Over a power chord, which has no third, both work, and the choice between them is the choice of mood. Hearing that choice is the theory.",
+      why: "Minor pentatonic is the tough sound of rock; major pentatonic is the sweet, country-tinged sound of Southern rock and a lot of sixties pop. A power chord such as A5 is two notes, A and E, with nothing in it that says major or minor. Over it both work, and the choice between them is the choice of mood. Hearing that choice is the theory.",
       howTo: [
         "A major pentatonic is A, B, C#, E, F#. Its box is the minor box moved down three frets: first finger on fret 2, or on fret 14 an octave up.",
-        "The two notes that change are C to C# and G to F#. Everything else in the phrase can stay where it was.",
+        "Three notes change: C becomes C#, G becomes F#, and D gives way to B. A and E stay. Next to the minor box the major notes lie under a first finger at fret 4, where the last two Exercises play them.",
         "Over A major, use major. Over A5 you choose.",
       ],
       payoff: "You can play the same phrase in minor and in major over one chord, and hear the mood flip.",
@@ -458,7 +484,7 @@ export default definePath({
           purpose: "Two bars in the minor box, then the same rhythm and shape with the major notes over the same A5. E, G, A, C becomes E, F#, A, B, and the C on the way home becomes C#.",
           howTo: [
             "Straight eighths and quarters, 70 BPM up to a pass at 90.",
-            "Bars 1 and 2, minor, first finger on fret 5: E, G, A, C, A, G, E, then E, D, C, D and A. Bars 3 and 4, major, first finger on fret 4: E, F#, A, B, A, F#, E, then E, D, C#, B and A.",
+            "Bars 1 and 2, minor, first finger on fret 5: E, G, A, C, A, G, E, then E, D, C, D and A. Bars 3 and 4, major, first finger on fret 4: E, F#, A, B, A, F#, E, then E, D, C#, B and A. The D in bar 4 is kept from the minor phrase as a passing note on the way down to C#.",
             "Listen to bar 4 against bar 2. One fret changes the mood.",
           ],
           coach: "Written notes in both boxes, checked after the take with their timing.",
@@ -516,7 +542,7 @@ export default definePath({
           title: "The triplet pull-off loop",
           purpose: "Pick, pull off, pick, in triplets: C, A, G on the top strings, round and round, then out to E. Then the same loop a string pair lower.",
           howTo: [
-            "Eighth-note triplets, three to a click, 80 BPM up to a pass at 110.",
+            "Eighth-note triplets, three to a click, 60 BPM up to a pass at 100.",
             "On the top pair: pick C at fret 8 on the high E with your fourth finger, pull off to A at fret 5 under your first, pick G at fret 8 on the B with your third. The lower pairs are the same move: fret 8 to 5 on the B and 7 on the G, or 7 to 5 on the G and 7 on the D.",
           ],
           coach: "The picked notes are checked for pitch and time. A pulled-off note that is too quiet for me doesn't count against you.",
@@ -531,8 +557,8 @@ export default definePath({
           chords: "A5 | A5",
           jam: { groove: "rockTwelveEight", key: "A minor" },
           harmony: { scale: ["A", "minorPentatonic"] },
-          rungs: ladder(80, 140, 10),
-          passAt: 110,
+          rungs: ladder(60, 120, 10),
+          passAt: 100,
           ...lick("straight"),
           minutes: 5,
         },
@@ -560,7 +586,7 @@ export default definePath({
           title: "An open-string repeat on the top strings",
           purpose: "Fretted notes on the B string against the open high E, as sixteenths: the restless, high-voltage sound of Australian hard rock, in E minor. Original notes.",
           howTo: [
-            "Straight sixteenths, four to a click, 60 BPM up to a pass at 90.",
+            "Straight sixteenths, four to a click, 60 BPM up to a pass at 80.",
             "Every other note is the open high E. Bar 1, the fretted notes on the B string: G, F#, G, F# (frets 8 and 7), then E, F#, E, F# (frets 5 and 7). Bar 2 climbs G, A, B (frets 8, 10, 12), comes back down, and ends on E at fret 5.",
             "Pick evenly; the open string should be as loud as the fretted one.",
           ],
@@ -571,8 +597,8 @@ export default definePath({
           chords: "E5 | E5",
           jam: HARD("E minor"),
           harmony: { scale: ["E", "naturalMinor"] },
-          rungs: ladder(60, 110, 10),
-          passAt: 90,
+          rungs: ladder(60, 100, 10),
+          passAt: 80,
           ...lick("straight"),
           minutes: 5,
         },
@@ -658,8 +684,9 @@ export default definePath({
       goal: "Decorate an E and an A chord with hammered thirds and fills between the chord tones, the sixties rhythm-guitar style that sits between rhythm and lead.",
       why: "The most melodic rock rhythm guitar never just strums: it hammers onto the chord's third, slides a double stop into the chord, and fills between the beats. It turns a chord into a little tune, and it is a lesson in where the chord tones live.",
       howTo: [
-        "Hold the shape of the chord and lift single fingers to decorate it. Your hand stays in the chord.",
-        "The hammer-on goes to the third: G to G# over E, C to C# over A. That half step is the sound.",
+        "For the open E move, hold the open E chord: second finger on the A string at fret 2, third finger on the D string at fret 2, first finger on the G string at fret 1. Lift single fingers to decorate it. Your hand stays in the chord. First Chords and Strumming teaches the open chords.",
+        HAMMER_ON_IS,
+        "In the first and third Exercises the hammer-on goes to the chord's third, the note that makes the chord major: G to G# over E, C to C# over A. That half step, one fret, is the sound.",
         "Let notes ring into each other, and keep the time steady underneath.",
       ],
       payoff: "An E and an A that sing, with a fill between them, instead of two strummed chords.",
@@ -712,7 +739,7 @@ export default definePath({
           purpose: "The open E move, then the same move on an A chord at fret 5: C hammered to C# on the G string. Two chords, one idea.",
           howTo: [
             "Straight eighths, 60 BPM up to a pass at 80.",
-            "Bar 1 is the open E move from the first Exercise. Bar 2 moves it to A, the E shape barred at fret 5 with the first finger: A at 5 on the low E, A at 7 on the D string, C at 5 on the G hammered to C# at 6, E at 5 on the B, C#, A, C#. Bar 3 is the E move again. Bar 4: low E, E on the D string, G#, open B, and the open high E held.",
+            "Bar 1 is the open E move from the first Exercise. Bar 2 moves it to A, the E shape barred at fret 5: the first finger lies flat across all six strings and the third finger takes the D string at fret 7. The notes are A at 5 on the low E, A at 7 on the D string, C at 5 on the G hammered to C# at 6 with the second finger, E at 5 on the B, C#, A, C#. Bar 3 is the E move again. Bar 4: low E, E on the D string, G#, open B, and the open high E held.",
           ],
           coach: "Ringing notes again: timing and notes heard, not pitch.",
           // The E bars in the open E chord's own fingers. The A bar is the E shape barred at
@@ -737,11 +764,11 @@ export default definePath({
     {
       id: "chord-tones",
       title: "Chord tones over A, G and D",
-      goal: "Play the triads of A, G and D one note at a time, and licks that end on each chord's root, over the I, flat VII, IV progression of classic rock.",
-      why: "A, G, D is the most common chord change in classic rock: I, flat VII, IV. The box works over it, and this is why: A, G and D are the roots, and the box holds all three. Knowing the triad under each bar lets a solo follow the changes instead of drifting over them.",
+      goal: "Play the triads of A, G and D one note at a time, and licks that end on each chord's root, over the chord change A, G, D.",
+      why: "A, G, D is a chord change classic rock uses all the time: the one chord, the chord a whole step below it, and the four chord (one, flat seven, four). The box works over it, and this is why: A, G and D are the roots, and the box holds all three. Knowing the triad under each bar lets a solo follow the changes instead of drifting over them.",
       howTo: [
         "A is A, C#, E. G is G, B, D. D is D, F#, A. The notes that change are the thirds: C#, B and F#.",
-        "A mixolydian, A B C# D E F# G, holds every note of all three chords. Licks in this Step use it.",
+        "A mixolydian, A B C# D E F# G, holds every note of all three chords. It is the A major pentatonic you know with D and G added. Licks in this Step use it. Scales and Modes teaches the scale whole.",
         "Aim for the root at the end of each lick, and hear it match the bass.",
       ],
       payoff: "A four-bar line that follows A, G, D and A, and sounds like it knows where the band is.",
@@ -840,8 +867,10 @@ export default definePath({
       why: "The most memorable rock solos are melodies you can sing, with few notes, each one held, bent and shaken. Playing slowly is harder than playing fast: every note is exposed, and the gaps are as loud as the notes. This Step is about choosing to play less.",
       howTo: [
         "Hold every long note for its full value. Count it.",
+        VIBRATO_IS,
         "Add vibrato only once the note has sounded steady for a moment, and keep it even: the same width and speed on every note.",
         "A bend is a vocal slide: it should arrive at its pitch and stay there. Your ear judges it; the app doesn't measure bends.",
+        BEND_POINTER,
       ],
       payoff: "Four bars that someone could hum after hearing them once.",
       difficultyException:
@@ -975,7 +1004,7 @@ export default definePath({
         {
           id: "answer-the-riff",
           title: "Answer the riff",
-          purpose: "The app plays the root riff from Step 1; you answer it high on the neck with a written lick. Low and heavy, then high and singing.",
+          purpose: "The app plays the root riff from 'Riffs in eighths'; you answer it high on the neck with a written lick. Low and heavy, then high and singing.",
           howTo: [
             "Sixteenths, eighths and a half note, 60 BPM up to a pass at 85. Bars 1 and 2 are the riff.",
             "Bar 3: A, G, E, D on the top strings twice as sixteenths, then E held. Bar 4: D, C, A, G, and A held.",
@@ -1010,13 +1039,14 @@ export default definePath({
         },
       ],
     },
+    SIXES_AT_TWELVE,
     {
       id: "climax",
       title: "Building to a peak",
       goal: "Play the fast runs and repeating licks a rock solo peaks on, in sixteenths at tempo, and come out of them on a long note.",
       why: "A solo needs somewhere to go. After the melody and the conversation comes the part where the notes get fast, and in classic rock that part is nearly always the same few moves: a run up the box, a lick that repeats, a tumble down in pull-offs. They work because they stop, on one long note.",
       howTo: [
-        "Every figure here is box 1 of the minor pentatonic, at the fifth fret in A. Nothing is new for the fretting hand except the speed.",
+        "Every figure here is box 1 of the minor pentatonic, at the fifth fret in A. Nothing is new for the fretting hand except the speed. The pull-offs are the ones from 'Repeating licks': a small flick down off the string.",
         "Pick lightly. Fast pentatonic lines choke when the pick digs in; let the amp do the work.",
         "The long note at the end is half the lick. Arrive on it in time and give it vibrato.",
       ],
@@ -1107,7 +1137,7 @@ export default definePath({
       id: "solo-etude",
       title: "A sixteen-bar solo",
       goal: "Play a sixteen-bar written solo with the band, from the first note to the last, then play one of your own.",
-      why: "Everything in this Path, in one solo: a riff-like opening, a sixteenth-note run, double stops, the three-note repeat, and a low ending on the V chord that sends the band back to the top. Learning a whole solo teaches shape: where it starts, where it builds, where it breathes.",
+      why: "The box at work in one solo: a riff-like opening, a sixteenth-note run, double stops, the three-note repeat, and a low ending on the five chord that sends the band back to the top. Learning a whole solo teaches shape: where it starts, where it builds, where it breathes.",
       howTo: [
         "Learn it in halves, then join them. Bars 1 to 8 are over A5, G5 and D5; bars 9 to 16 climb through F5 and G5 to the peak, and come down over E5.",
         "Keep your hand in box 1 the whole way: first finger on fret 5.",
@@ -1123,7 +1153,7 @@ export default definePath({
           purpose: "The first half: a rising opening, a double stop, a riff-like answer over G5 and D5, then sixteenths and the way home.",
           howTo: [
             "Straight eighths and sixteenths, 60 BPM up to a pass at 85.",
-            "Bar 1 climbs A, C, D, E, G, A. Bar 2 holds the E and A double stop, then G, E, D, C. Bars 3 and 4 answer low. Bars 5 and 6 are the sixteenth runs from Step 3. Bars 7 and 8 come home to the high A.",
+            "Bar 1 climbs A, C, D, E, G, A. Bar 2 holds the E and A double stop, then G, E, D, C. Bars 3 and 4 answer low. Bars 5 and 6 are the sixteenth runs from 'The box and its extension'. Bars 7 and 8 come home to the high A.",
           ],
           coach: "Written notes: right notes, notes heard and time over any eight bars in a row, after the take.",
           tab: etude(0, 8),
@@ -1203,13 +1233,13 @@ export default definePath({
     {
       id: "beginner",
       title: "Beginner: riffs, the box and its major twin",
-      summary: "Riffs in time with a band, in A and then in E, the minor pentatonic box and its classic licks at fret 5 and again at fret 12, the sextuplet run down the box and back up, and the major pentatonic.",
+      summary: "Riffs in time with a band, in A and then in E, the minor pentatonic box and its classic licks at fret 5 and again at fret 12, and the major pentatonic.",
       startHereIf: [
-        "You can play power chords and single notes cleanly at 80 BPM eighths.",
+        "You can play single notes cleanly at 80 BPM eighths.",
         "You don't yet know a rock lick you could play over a band.",
         "You couldn't say which notes change between minor and major pentatonic.",
       ],
-      steps: ["riffs", "riffs-in-e", "box-extension", "box-at-twelve", "sixes-at-twelve", "major-pentatonic"],
+      steps: ["riffs", "riffs-in-e", "box-extension", "box-at-twelve", "major-pentatonic"],
       warmups: [
         {
           id: "riff-around",
@@ -1273,13 +1303,13 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: melody, conversation and a whole solo",
-      summary: "A slow melody with bends and vibrato, call and response with the band, the fast licks a solo peaks on, a twelve-bar written solo in E and a sixteen-bar one in A.",
+      summary: "A slow melody with bends and vibrato, call and response with the band, the sextuplet run at the twelfth fret and its turn back up, the fast licks a solo peaks on, a twelve-bar written solo in E and a sixteen-bar one in A.",
       startHereIf: [
         "You can play chord tones over A, G and D at 100 BPM eighths.",
         "You can bend a whole step to pitch by ear and hold it.",
         "Your licks are fine, and your solos don't yet have a shape from start to end.",
       ],
-      steps: ["melody", "call-response", "climax", "solo-in-e", "solo-etude"],
+      steps: ["melody", "call-response", "sixes-at-twelve", "climax", "solo-in-e", "solo-etude"],
       warmups: [
         {
           id: "run-around",

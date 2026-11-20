@@ -118,12 +118,12 @@ function turnWords(key: string): KeyText {
   };
 }
 
-/** Beginner, after the box licks at the twelfth fret: the fourth lick, the sextuplet one. */
+/** Advanced, after call and response (moved there from Beginner by the coherence audit, CR-F2): the fourth box lick, the sextuplet one. */
 export const SIXES_AT_TWELVE: StepSpec = {
   id: "sixes-at-twelve",
   title: "Sixes at the twelfth fret",
   goal: "Play the six-note sequence down box 1 of E minor pentatonic at fret 12 in sextuplets, turn it round at the bottom and climb back up, and end a four-bar phrase in E minor with it.",
-  why: "The last Step moved three of the four box licks up to E and left one behind: the sixes, the fastest of them. This Step brings it up. The sequence is the one you know, six notes down the box and then six more from one note lower, on the same strings with the same fingers, seven frets higher. Then two things are made of it. Turned round at the low E, the same sequence climbs. And placed after two bars of slow notes, it does the job a fast lick does in a solo: it answers.",
+  why: "The Step 'The box at the twelfth fret: licks in E' moved three of the four box licks up to E and left one behind: the sixes, the fastest of them. This Step brings it up. The sequence is the one you know, six notes down the box and then six more from one note lower, on the same strings with the same fingers, seven frets higher. Then two things are made of it. Turned round at the low E, the same sequence climbs. And placed after two bars of slow notes, it does the job a fast lick does in a solo: it answers.",
   howTo: [
     "Box 1 in E, first finger on fret 12. The low E, B and high E strings are frets 12 and 15; the A, D and G strings are frets 12 and 14. First finger for every fret 12, third finger for fret 14, fourth finger for fret 15.",
     "A group is six notes in a row down the box, and it ends on the note it started on, an octave lower. The next group starts one note lower than the last one started. Six groups take the line from G at fret 15 on the high E string down to the low E string.",
