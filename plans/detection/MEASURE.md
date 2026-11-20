@@ -246,6 +246,16 @@ A wrong "played" in the precision metrics is a note the decoder made up (a
 harmonic, a doubled attack): the player sees it as a note they did not play,
 so it counts against the engine.
 
+**The worker beside the click.** `click-jitter-probe --harmony` starts the
+app's worker (`harmony::worker::Worker::start`: the shared model, its own
+demoted thread) on a ring a feeder thread fills in real time with strummed
+chords, and prints `harmony worker  read N s of input ... still listening at
+the end`. Build the probe with `--features detect-tract` or there is no
+model and the line says the worker ended by itself. Run it alone, with
+`--jam-swap --jam-move --jam-take`, and with `--late-pass` (in the probe the
+late pass does not take `verifier_hold`, so the two fight for the model: a
+harder case than the app's).
+
 ## Public datasets (the heavy, local half)
 
 `tools/detect-bench/` holds the adapters. They download into

@@ -493,7 +493,7 @@ callback, the engine and the queue are untouched.
 6. The chains are stationary noise and a simple gain model. Real rooms
    (speech, a TV, a fan starting) are card #85's recordings and card #86.
 
-## M7. Free-play engine (Rust engine and bench done; app surfaces NOT done)
+## M7. Free-play engine (engine, bench and app surfaces done; the probe with the worker is in "M7 part 2", leg 3)
 
 Leg of 2026-11-19 night. Card #106.
 
@@ -547,7 +547,7 @@ Against the M7 acceptance (strummed GuitarSet, microphone):
   backtrace (it reads the future) and answered every beat. Next: a decision
   one beat late (fixed-lag) and counting a held chord through quiet beats.
 - an unsure state whenever the margin is small: in the engine; no page shows it yet.
-- zero jitter-gate regressions: **not run**; the worker is not wired.
+- zero jitter-gate regressions: not run in that leg; run in leg 3 ("M7 part 2"): hard gates 0.
 
 Also seen: "inside" calls are right 73 to 83% of the time on the microphone
 against 99% from annotated notes. The difference is notes the decoder makes
@@ -561,6 +561,177 @@ chord on 15% of beats and it is right 28% of those: the gate that says
 (default off) and its parity-manifest entry, the Jam readout, the coach
 line in 15 locales, the click-jitter probe with the worker running, the
 full 360-excerpt GuitarSet run. `HANDOFF.md` has the design for each.
+
+## M7 part 2. The engine in the app, and the chord root (2026-11-19 late; card #107)
+
+**Chord root, second pass** (helper, `2893adb3`, `84c2f0a4`; `harmony/mod.rs`
+only). A beat's chord is decided one beat late (`CHORD_LAG_BEATS = 1`, a
+fixed-lag backtrace on the chord path), a seventh counts for its chord, a
+chord needs three voices at one moment and 1.2 on average (was 1.6 on
+average alone), one quiet beat keeps the chord. The live chord is therefore
+the last beat but one: 0.5 to 1 s at 120 BPM on top of the capture's second.
+Chart mode is unchanged. GuitarSet, before -> after (subset is the 52
+excerpts it was tuned on; the full 360 were run once and not tuned on;
+tables in `results/harmony-guitarset-subset.md` and `-full.md`):
+
+| playing, chain | set | chord root, all beats | beats given a chord | right when given | key 15 s | key 30 s | "inside" right | "outside" right |
+|---|---|---|---|---|---|---|---|---|
+| strummed, mic | subset | 70% -> **78.6%** (1145/1457) | 84% -> 92% | 84% -> 86% | 0.82 = | 0.83 = | 76% = | 51% -> 49% |
+| strummed, mic | full | 69% -> **77.6%** (7945/10236) | 83% -> 92% | 83% -> 84% | 0.75 = | 0.79 = | 75% = | 50% -> 48% |
+| strummed, annotation | full | 71% -> 79% | 85% -> 91% | 83% -> 87% | 0.76 = | 0.78 = | 99% = | 89% -> 93% |
+| solo, mic | subset | 4% = | 15% -> 13% | 28% -> 30% | 0.64 = | 0.64 = | 83% = | 50% -> 51% |
+| solo, mic | full | 5% = | 16% -> 15% | 29% -> 32% | 0.65 = | 0.64 = | 79% = | 46% = |
+
+Against the bar (78% of all beats): **met on the subset, 0.4 point short on
+the full set.** By style on the full set: singer-songwriter 94%, rock 92%,
+bossa nova 77%, jazz 63%, funk 61% (voicings without the root in the bass,
+offbeat stabs ringing into the next beat, excerpts played off the instructed
+chart). The key bar at 30 s (0.80) is met on the subset (0.83) and not on
+the full set (0.79); the first leg only ran the subset. Not tuned further:
+tuning on the full set would spend the test set.
+
+Baseline `fast.json`: only `harmony|...` lines moved (73 metrics, 30 gated;
+no other metric moved). Strummed `chord_root` pooled 96.1 -> 98.1% (every
+chain up 0.8 to 3.9 points: the late decision names the first beat of a new
+chord right), `chord_root_when_answered` up 0.8 to 5.4 points,
+`inside_precision` -0.2 to +0.6 point (one drop, laptop_reverb strummed
+92.59 -> 92.43, inside tolerance: a note's verdict now waits for its beat's
+chord). Key metrics unchanged. **Worse, information only:** a synthetic solo
+is now given a chord on 29.2% of beats (was 22.5%); at the old 1.6 average
+it is 20.1% but GuitarSet strummed drops to 76.9%. Real solos (GuitarSet)
+went down, so 1.2 stayed; the page does not show those single beats (below).
+
+**I-vi-IV-V that did not settle**: the test's strum had the root in three
+of five voices, so F major fit as well as C major and the lead changed hands
+every two bars, never holding 6 s. Counting a pitch class once per beat
+settles it but measured worse on GuitarSet (key at 30 s 0.83 -> 0.81), so
+the engine is unchanged; the test strums a guitar shape and asserts
+`Settled` again.
+
+**The worker, made safe to run** (`harmony/worker.rs`; it had never run):
+
+- It gives way to a Take. `paused()` is true while a Take's schedule is
+  loaded in the timing analyzer (`set_take_loaded`, from
+  `load_exercise_with_details` / `clear_score_schedule`) or the post-Take
+  pass holds `verifier_hold()` (taken on `yames-take-notes` before it asks
+  for the model). Paused, the worker runs no window and does not lock the
+  ring; it asks before every window, so the verifier waits for one window at
+  most (the one already running). After a pause it starts from nothing.
+- It gives up when lapped: a poll that finds 3 s of input waiting ends the
+  worker (`harmony-reading` null) instead of reading stale audio.
+- The ring's lock is held for one copy into a buffer sized up front.
+- `Shown`: the chord a page may show is the beat's chord once two beats
+  running named it, kept through one stray beat, dropped after two beats
+  without one. `Live.shownChord` is that; `Reading.chord` stays the raw
+  beat. **Not measured on the bench** (the bench scores raw beats): owed.
+- `Summary` on stop: the reading plus the chords shown most (at most four,
+  each at least a tenth of the chord beats).
+- Tests (10, fake models, a thread feeding the ring every 5 ms): reads and
+  reports, the input's `try_lock` is turned away on under 2% of buffers; no
+  window while paused and a fresh start after; a verifier that asks while
+  five windows are queued sees at most one more window; no model, and
+  lapped, each end it with one null; the debounce; the summary; the gate.
+
+**Commands** (`commands.rs`, `lib.rs`): `harmony_start(chart, bpm) -> bool`
+(false when the input is not listening or the build has no model; in turn
+with input start/stop), `harmony_mark_bar(bar, bpm)`, `harmony_stop() ->
+Option<Summary>` (the join is on a blocking thread), event `harmony-reading`
+(`Live` or null). `stop_evaluation` ends the worker and emits null; the page
+asks again up to three times (a device change restarts the input).
+
+**The app** (off by default):
+
+- Setting `jamHear`, "Hear what I play" (Settings, Coach, under Spoken
+  cues); parity manifest gained the setting, three commands, four `ipc.ts`
+  exports and one event, nothing removed.
+- `src/jam/heard.ts`, `useHeard.ts`: the hook lives in `MainWindow` and runs
+  only while the setting is on, the transport plays, the input listens and
+  the mode is Jam (with the jam's chart: key and one chord per bar, concert
+  pitch) or a Session's plain jam step (no chart; a finisher is a Take).
+- Jam readout (`NowBlock.tsx`, `HeardLine`): "Heard: A minor · Dm",
+  "Chart: ..." when the key is the chart's, "Couldn't tell yet",
+  "Listening…"; both keys when the relative pair is not separated; a chord
+  without a key while the key is open. **No inside/outside anywhere** (the
+  orchestrator's call: 48 to 51% right for "outside").
+- Recap line (`session.recap.heard`, `heardKey`, 15 locales): only a key the
+  engine estimated and that settled, after 20 s of playing, with the chords
+  shown most. A chart's key is not reported back.
+
+**Gates** (leg 3, on the final tree, one at a time): `tsc --noEmit`; vitest
+366 of 367 files, 10,879 tests (`TabStage.render.test.tsx`, worktree-only);
+`npm run build`; `test:rust` 1,135 passed; `test:rust:detect` 1,137 passed
+(the worker's nine tests in both); `detect:check` 1,704 gated metrics, 0
+worse, 0 better, 0 missing; `test:layout` `jam.spec` + `session.spec` 139
+passed, `settings.spec` passed (145 with the first two before the new
+scenes); the click-jitter probe below.
+
+**Not done:**
+
+- ~~Click-jitter probe with the worker~~: run in leg 3, below.
+- ~~The readout in a real browser~~: scenes `jam-heard` and
+  `jam-heard-unsure` (leg 3, below).
+- With a chart the readout repeats what the NOW block already says, and the
+  model runs for it. Product question for the orchestrator: chart jams could
+  send the key only (chords then estimated), or not listen at all.
+- The Session's jam step is heard without a chart even when its jam has one.
+- A schedule left loaded by a screen keeps the reading paused until cleared
+  (quiet is the safe side); Songs' exit path was not audited for it.
+- The setting sits in the Coach section; whether a phone shows that section
+  was not checked.
+- Reviewer: the Rust diff is `git diff 3f596af6..HEAD -- src-tauri/src`
+  (worker.rs, commands.rs, lib.rs, timing.rs three lines, the probe).
+
+**Leg 3 (2026-11-19 night): what leg 2 left, the probe, the scene.** Leg 2
+was killed by a container restart; its tree was saved as a WIP commit and is
+now the gated commits of this section (the WIP commit is gone). Read against
+its notes, the code was complete: nothing in `src-tauri/src` or `src/` was
+changed in leg 3 except the shot harness. What was missing was every gate
+(above), the probe, and the scene.
+
+*Click-jitter probe with the worker* (`--features detect-tract` release
+build, load 2.7 to 4.4 one-minute and 2.9 to 3.6 five-minute, 60 s each, in
+this order). Hard gates (missed beats, callback allocations and frees,
+dropped beats) 0 in all nine runs; the worker read the whole run, settled a
+key and was "still listening at the end" in every `--harmony` run; its lock
+turned away 0 or 1 of about 12,000 input buffers.
+
+| Run | p99 jitter ms | max ms |
+|---|---|---|
+| `--no-llm --harmony` | 1.10 | 1.42 |
+| `--no-llm` | 1.19 | 1.57 |
+| `--no-llm --harmony` | 0.78 | 1.23 |
+| `--no-llm` | 0.71 | 0.99 |
+| `--no-llm --harmony` | 0.65 | 1.21 |
+| `--no-llm --harmony --jam-swap --jam-move --jam-take` | 0.99 | 1.46 |
+| `--no-llm --harmony --late-pass` (82 passes of 760 ms) | 0.58 | 1.28 |
+| `--no-llm --harmony --jam-swap --jam-move --jam-take --late-pass` (83 passes) | 0.59 | 1.03 |
+| `--no-llm --jam-swap --jam-move --jam-take` | 0.77 | 1.16 |
+
+The advisory p99 bar (1 ms) was missed twice, once with the worker and once
+by the plain baseline right after it (1.10 and 1.19): the machine, not the
+worker. With and without the worker the p99 sits in the same 0.6 to 1.2 ms
+band. As with M6, the probe has no input device: it shows the output
+callback beside the worker, not the input callback's `try_lock` against a
+real driver (the feeder thread stands in for it).
+
+*The readout in a browser.* `src/shots/scenarios.ts` has `jam-heard` and
+`jam-heard-unsure` (`jam.heard`: the store's `jamHear`, a listening input,
+`harmony_start` answered and one `harmony-reading` sent by `mockIpc.ts`).
+`tests/layout/jam.spec.ts`, "the key and chord heard" (5 tests): one line
+in its column at 760, 1100 and 1400 px, on screen, its words over no word or
+control of the tempo cluster, "couldn't tell" for a reading with neither,
+absent with the setting off, and no "inside" or "outside" in the block.
+**Seen while writing it:** at 1100 px the NOW block is squeezed to 104 px
+(before this branch too) and the 172 px column beside the chord reaches
+under the tempo; the line makes that column one line taller, so its box now
+also reaches the "Tempo" label. No words touch in English with "A7 in 2
+bars"; a long next-chord line or a long locale at that width was not tried.
+The mocked reading is a heard key in a jam that has a chart; the app would
+say "Chart: ..." there (same length).
+
+Still open from the list above: the reviewer on the Rust diff, the debounce
+on the bench, the two product questions, funk and jazz roots, Songs' exit
+path, the setting on a phone.
 
 ## Runtime merge and its review nits (2026-11-19 evening)
 
