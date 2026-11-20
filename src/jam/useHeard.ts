@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { harmonyMarkBar, harmonySetTempo, harmonyStart, harmonyStop, onHarmonyReading } from "../ipc";
+import { scheduleHeld } from "../songs/scheduleHold";
 import type { HeardChart, HeardLive } from "../ipc";
 import { rememberHeard } from "./heard";
 
@@ -63,7 +64,10 @@ export function useHeard({
       inTurn(async () => {
         // asked for, then the jam stopped before its turn came
         if (gone) return;
-        id = await harmonyStart(chartRef.current, bpmRef.current, first);
+        // A stale schedule is cleared only when no stop is still being graded
+        // against it: that stop clears it itself once its grade is read
+        // (`src/songs/scheduleHold.ts`), and the pause lifts with the clear.
+        id = await harmonyStart(chartRef.current, bpmRef.current, first && !scheduleHeld());
         // `gone` by now: the cleanup's stop is behind this in the queue and
         // finds the id
         if (gone) return;

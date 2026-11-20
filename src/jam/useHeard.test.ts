@@ -116,6 +116,17 @@ describe("useHeard", () => {
     view.unmount();
     await settle();
   });
+
+  it("clears nothing while a stop is still being graded against the schedule", async () => {
+    const { holdSchedule } = await import("../songs/scheduleHold");
+    const release = holdSchedule();
+    const view = renderHook((p: Props) => useHeard(p), { initialProps: { active: true, chart: null, bpm: 100, formBar: 0 } });
+    await settle();
+    release();
+    expect(cleared, "free play cleared the schedule a Songs stop was being graded against").toEqual([false]);
+    view.unmount();
+    await settle();
+  });
 });
 
 afterEach(() => {

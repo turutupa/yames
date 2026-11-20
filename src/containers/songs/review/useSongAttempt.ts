@@ -55,6 +55,7 @@ import { buildSchedule } from "../../../songs/schedule";
 import type { BarRange } from "../../../songs/schedule";
 import type { Finding, ScoreSchedule, SongScore } from "../../../songs/types";
 import { withRightNotes } from "../../../session/takeMeasures";
+import { holdSchedule } from "../../../songs/scheduleHold";
 
 /**
  * How long to wait for the forced segment close to come back.
@@ -153,6 +154,13 @@ export function useSongAttempt(input: SongAttemptInput): SongAttemptState {
   const wasPlaying = useRef(false);
   /** Bumped by every stop, so a slow verdict for an old pass is dropped. */
   const generation = useRef(0);
+  /**
+   * The stops still being graded. The segment listener outlives an unmount
+   * until they are done: Settings over Songs, or leaving it, unmounts this
+   * within the 600 ms a stop waits for its last segment, and a listener gone
+   * by then loses the segment and with it the attempt.
+   */
+  const pending = useRef(new Set<Promise<unknown>>());
 
   // Everything the falling edge needs, without making the effect depend on it
   // — a review that restarted because the tempo chip moved would be a review
@@ -173,8 +181,11 @@ export function useSongAttempt(input: SongAttemptInput): SongAttemptState {
       stop = fn;
     });
     return () => {
-      void unlisten.then((fn) => fn());
-      stop?.();
+      // After the stops in flight, not before (`pending` above).
+      void Promise.all([...pending.current]).then(() => {
+        void unlisten.then((fn) => fn());
+        stop?.();
+      });
     };
   }, []);
 
@@ -224,10 +235,15 @@ export function useSongAttempt(input: SongAttemptInput): SongAttemptState {
     // below always ran to its deadline and then concluded "nothing" — half a
     // second of a status line for an answer that could not come. The schedule
     // still has to be cleared; nothing else does.
+    // The schedule is held from here until this stop's own clear: nothing
+    // else may clear it or load the next one before the grade is read
+    // (`src/songs/scheduleHold.ts`). Taken before anything is awaited.
+    const release = holdSchedule();
     if (!latest.current.listening && !runRef.current) {
       generation.current += 1;
       void clearScoreSchedule()
         .catch(() => undefined)
+        .finally(release)
         .then(() => {
           setLastGrade(null);
           setSettled((n) => n + 1);
@@ -237,7 +253,10 @@ export function useSongAttempt(input: SongAttemptInput): SongAttemptState {
 
     const mine = ++generation.current;
     setWorking(true);
-    void finishAttempt(pass, runRef, waiterRef).then((result) => {
+    const finishing = finishAttempt(pass, runRef, waiterRef, release);
+    pending.current.add(finishing);
+    void finishing.finally(() => pending.current.delete(finishing));
+    void finishing.then((result) => {
       if (generation.current !== mine) return;
       setWorking(false);
       setLastGrade(result.kind === "review" ? (result.review.segment.takeGrade ?? null) : result.grade);
@@ -278,6 +297,20 @@ async function finishAttempt(
   pass: Pass,
   runRef: { current: PracticeSegmentEndedPayload | null },
   waiterRef: { current: (() => void) | null },
+  release: () => void = () => {},
+): Promise<FinishResult> {
+  try {
+    return await gradeAndKeep(pass, runRef, waiterRef, release);
+  } finally {
+    release();
+  }
+}
+
+async function gradeAndKeep(
+  pass: Pass,
+  runRef: { current: PracticeSegmentEndedPayload | null },
+  waiterRef: { current: (() => void) | null },
+  release: () => void,
 ): Promise<FinishResult> {
   // The last segment has to be closed before it is reported at all. Wait for
   // the event it produces rather than for a fixed delay; the deadline is only
@@ -297,7 +330,10 @@ async function finishAttempt(
   const grade = await withRightNotes(timed);
   const payload = segment && grade !== timed ? { ...segment, takeGrade: grade ?? undefined } : segment;
   // An attempt is play-to-stop: the run is cleared here and nowhere else.
+  // Then the schedule is free: the leaving clear may run, the next push may
+  // load (`scheduleHold.ts`). Saving and the findings need neither.
   await clearScoreSchedule().catch(() => undefined);
+  release();
 
   const run = payload ? resultsFromSegment(payload) : null;
   if (!run) return { kind: "nothing", grade };

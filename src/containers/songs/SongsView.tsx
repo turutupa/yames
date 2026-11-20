@@ -51,6 +51,7 @@ import { TrackPicker, tuningLabel } from "./TrackPicker";
 import { TrackMenu } from "./TrackMenu";
 import { SongNotesMark, SongNotesToast, useSongNotesSeen } from "./SongNotes";
 import { useHeaderSlot } from "../main-window/headerSlot";
+import { useSongSchedulePush } from "./useSongSchedulePush";
 /*
  * The review's hooks, from their own modules rather than through
  * `./review`.
@@ -503,13 +504,12 @@ export function SongsView({ session, currentBeat, isPlaying, themeId, listening 
   });
 
   // The engine gets the schedule when what it describes changes — not on every
-  // render, and never while a pass is running underneath it.
-  useEffect(() => {
-    if (!score || isPlaying) return;
-    void session.pushSchedule();
-    // `pushSchedule` is rebuilt whenever the range or the loop changes, which
-    // is exactly when the engine needs telling.
-  }, [score, isPlaying, session.pushSchedule]); // eslint-disable-line react-hooks/exhaustive-deps
+  // render, never while a pass is running underneath it, and never while a
+  // stop is still being graded against the last one (`useSongSchedulePush`).
+  // `pushSchedule` is rebuilt whenever the range or the loop changes, which
+  // is exactly when the engine needs telling. After `useSongAttempt`: its
+  // stop takes the hold this reads, in the same commit.
+  useSongSchedulePush(!!score, isPlaying, session.pushSchedule);
 
   const onFiles = useCallback(
     (files: FileList | null) => {
