@@ -41,7 +41,7 @@ import { paceLadder } from "./pace";
 import type { ExerciseSpec, HarmonySpec, PathSpec, VariantBuild, VariantParams, VarySpec } from "./spec";
 import { markAlternate, markEconomy, markSweep, parseTab } from "./tabDsl";
 import { canSpellScale, chordRootName, guideTones, spellChord, spellScale } from "./theory";
-import { variantText } from "./variantText";
+import { FIRST_VERSION_LINE, variantText } from "./variantText";
 import type { ScaleId } from "../jam/scales";
 
 const METER = { numerator: 4, denominator: 4 };
@@ -400,6 +400,11 @@ function buildExercise(
         return variant;
       }),
     };
+    // "The frets and note names here are for the first version": true until every other variant has a
+    // how-to of its own, which the Take screen shows. From then on the line tells the player nothing.
+    if (exercise.variation.variants.slice(1).every((v) => v.howTo !== undefined)) {
+      exercise.howTo = exercise.howTo.filter((line) => !FIRST_VERSION_LINE.test(line));
+    }
   }
   return exercise;
 }

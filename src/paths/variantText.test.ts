@@ -58,7 +58,12 @@ describe("variants read by hand", () => {
   });
 
   it("Tapping: the cell on the B string keeps its frets and fingers, and is an E minor chord", () => {
-    expect(said("tapping", "first-taps.tap-pull-hammer", "stringSet=B:-12-5-8")).toEqual({
+    // Read from the pack: the generator rewrites the spec's how-to, which still ends with the "first
+    // version" line; the pack's Exercise has lost it, so `said` would find these two lines unchanged.
+    const cell = exercisesOf(doc("tapping")).find((e) => e.id === "first-taps.tap-pull-hammer")!;
+    const onB = cell.variation!.variants.find((v) => v.id === "stringSet=B:-12-5-8")!;
+    expect(onB.howTo).toEqual(cell.howTo);
+    expect({ purpose: onB.purpose, howTo: onB.howTo }).toEqual({
       purpose: "The cell: tap fret 12, pull off to 5, hammer on at 8. B, E, G: an E minor chord, one note at a time, in triplets.",
       howTo: [
         "Triplets, three to the click, with the tap on the click.",
@@ -613,6 +618,30 @@ describe.each(flagged.map((s) => [s.id, s] as const))("%s: what its variants are
       if (first) expect(first.purpose === undefined && first.howTo === undefined, ex.id).toBe(true);
     }
     expect(validatePath(pack).filter((i) => i.rule.startsWith("variation.text") || i.rule === "variation.firstText")).toEqual([]);
+  });
+});
+
+describe("the 'first version' line", () => {
+  const line = /for the first version/i;
+  const all = SPECS.flatMap((spec) => exercisesOf(doc(spec.id)).map((ex) => ({ spec, ex })));
+
+  it("is gone from every Exercise whose other variants all have a how-to of their own", () => {
+    let dropped = 0;
+    for (const { spec, ex } of all) {
+      const others = (ex.variation?.variants ?? []).slice(1);
+      if (others.length === 0 || !others.every((v) => v.howTo !== undefined)) continue;
+      expect(ex.howTo.some((h) => line.test(h)), `${spec.id}/${ex.id}`).toBe(false);
+      for (const v of others) expect(v.howTo!.some((h) => line.test(h)), `${spec.id}/${ex.id}#${v.id}`).toBe(false);
+      dropped += 1;
+    }
+    expect(dropped).toBeGreaterThan(90);
+  });
+
+  it("stays where a variant still reads the Exercise's how-to", () => {
+    // Legato's six-note roll: two of its three other variants have no how-to of their own.
+    const roll = exercisesOf(doc("legato")).find((e) => e.id === "odd-groups.six-roll")!;
+    expect(roll.variation!.variants.slice(1).some((v) => v.howTo === undefined)).toBe(true);
+    expect(line.test(roll.howTo[roll.howTo.length - 1])).toBe(true);
   });
 });
 

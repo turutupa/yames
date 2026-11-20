@@ -529,7 +529,8 @@ describe.each([
 
   it("keeps the tempo sentence, names its own key, and never says 'first version' or measures from another key", () => {
     for (const ex of moved) {
-      expect(ex.howTo[ex.howTo.length - 1], ex.id).toMatch(/for the first version/);
+      // Every moved line has its own how-to, so the Exercise no longer says its words are the first version's.
+      expect(ex.howTo.join(" "), ex.id).not.toMatch(/for the first version/);
       for (const v of ex.variation!.variants.slice(1)) {
         const [tempo, own] = v.howTo!;
         const where = `${ex.id}#${v.id}`;
