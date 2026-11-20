@@ -34,6 +34,18 @@ const YOUR_TURN = { grade: "selfChecked", example: true } as const;
 const NOT_CHECKED_YET =
   "Your turn, and not checked yet: the app can't judge notes you choose, so you tick it off yourself.";
 
+// Shared with other Paths word for word (coherence audit, S1 to S4 and S9), so each is translated once and copied.
+const WORDS_STRINGS_FRETS_FINGERS =
+  "The words this Path uses. The strings, from thickest to thinnest: low E, A, D, G, B and the top string. Fret 1 is the first space next to the nut, at the head end of the neck. Fingers are numbered from the index finger: first, second, third, and the little finger is the fourth.";
+const WORDS_CLICK_AND_NOTES =
+  "A click is the tick of the metronome. Each tick is a beat, four beats make a bar, and BPM is how many beats go by in a minute. A whole note lasts a whole bar, a half note two beats, a quarter note one beat. The pass tempo is the speed at which an Exercise counts as done.";
+const WORDS_TAKES_AND_RUNGS =
+  "One play through an Exercise is a Take. Each Exercise has a ladder of tempos called rungs: between Takes, Slower and Faster move one rung along it, and the pass tempo is the rung at which the Exercise counts as done. Some Exercises change key or string from Take to Take.";
+const WORDS_TAB =
+  "On the tab each line is a string: the top line is the top string and the bottom line is the low E string. Each number is the fret to press. 0 is an open string, one played with no finger on it.";
+const BOX_ONE_REMINDER =
+  "Box 1 of A minor pentatonic sits at fret 5, two notes on every string. The first finger plays fret 5 on all six strings. The other note is fret 8 with the little finger on the low E, B and top strings, and fret 7 with the third finger on the A, D and G strings.";
+
 const SAY_CHECK = "Did you say each note's name out loud as you played it?";
 const EYES_CHECK = "Could you play it once without looking at the neck?";
 
@@ -133,7 +145,7 @@ export default definePath({
   paceLadders: true,
   variantText: true,
   orderRationale:
-    "The two low strings first, because chords and scales are named from them. Octave shapes next: they turn two known strings into six. Thirds, roots and triads are the smallest pieces of harmony and each is one shape. Only then the five pentatonic boxes, which most players learn first and never connect; here they arrive as places on a neck the player can already name. Arpeggios through the changes and landing on chord tones come last because they use all of it at once.",
+    "The two low strings first, because chords and scales are named from them. Octave shapes next: they turn two known strings into six. The Intermediate Level opens on the top three strings in G major and F major, so that scale, key and key note are shown before a scale is played in thirds. Thirds, roots and triads are the smallest pieces of harmony and each is one shape. Only then the five pentatonic boxes, which most players learn first and never connect; here they arrive as places on a neck the player can already name. Arpeggios through the changes and landing on chord tones come last because they use all of it at once.",
   gradingLimits:
     "The app checks that the notes you played were the written ones, after the take, and times them loosely. It cannot hear you say a note's name, and it cannot tell which string you played a pitch on: the same C on two strings sounds alike to it. So the saying and the place are yours to keep honest. The 'your turn' Exercises are not checked at all. None of this has been tried on a real guitar yet.",
   steps: [
@@ -141,8 +153,12 @@ export default definePath({
       id: "low-strings",
       title: "The low E and A strings",
       goal: "Name and play every natural note on the low E and A strings up to the twelfth fret.",
-      why: "Barre chords, power chords and most scale shapes are named from the note under the first finger on one of these two strings. Know these two strings and you can name any chord you already play. The notes follow the alphabet from A to G, with a whole step between each pair except B to C and E to F, which are next-door frets.",
+      why: "Barre chords, power chords and most scale shapes are named from the note under the first finger on one of these two strings. Know these two strings and you can name any chord you already play. The notes follow the alphabet from A to G, and these seven plain letters are called the natural notes. Each is two frets above the one before, which is called a whole step. The exceptions are B to C and E to F: they are next-door frets, a half step.",
       howTo: [
+        WORDS_STRINGS_FRETS_FINGERS,
+        WORDS_CLICK_AND_NOTES,
+        WORDS_TAKES_AND_RUNGS,
+        "A key is the set of notes a piece of music uses. It is named after the note the music comes to rest on.",
         "Say each note's name out loud as you play it. Saying it is the practice; playing it is only the check.",
         "Walk up the string with the first finger alone. Two frets between most notes, one fret between B and C and between E and F.",
         "The twelfth fret is the same note as the open string, an octave higher. The dots on the neck at 3, 5, 7, 9 and 12 are your landmarks.",
@@ -155,6 +171,7 @@ export default definePath({
           purpose: "E, A, D, G, B, E, from the lowest string to the highest and back. Their names are the starting point for everything else.",
           howTo: [
             "Quarter notes, one to a click, 50 BPM up to a pass at 80.",
+            WORDS_TAB,
             "Low to high and back down, saying each name. A common way to remember them: Eddie Ate Dynamite, Good Bye Eddie.",
           ],
           coach: "Right notes and steady quarters after the take. The names are yours to say.",
@@ -446,6 +463,7 @@ export default definePath({
       ],
     },
     IN_BETWEEN,
+    TOP_STRINGS_KEYS,
     {
       id: "thirds",
       title: "Thirds",
@@ -525,14 +543,13 @@ export default definePath({
         },
       ],
     },
-    TOP_STRINGS_KEYS,
     {
       id: "roots",
       title: "Roots, fourths and fifths",
-      goal: "Find the roots of a I-IV-V and of a minor progression on the low strings, by shape, and play them under a band.",
-      why: "Most songs move between a handful of chords, and their roots sit in a pattern on the two low strings: the fourth is the same fret one string higher, the fifth two frets above that. Seeing that pattern is how players follow a song they have never heard.",
+      goal: "Find the roots of one, four and five, and of a minor four-chord song, on the low strings, by shape, and play them under a band.",
+      why: "Most songs move between a handful of chords. Count the notes of a key from its key note: in G that is G, A, B, C, D, E, F sharp. The chords on notes one, four and five, here G, C and D, are called the one chord, the four chord and the five chord, and a great many songs use only those three. Their roots sit in one small shape on the two low strings. Seeing that shape is how players follow a song they have never heard. Chords in a Key is the Path that explains these chords. Here you only find their roots.",
       howTo: [
-        "From a root on the low E string: the IV chord's root is the same fret on the A string, and the V chord's root is two frets higher on the A string.",
+        "From a root on the low E string, the four chord's root is at the same fret on the A string, and the five chord's root is two frets higher on the A string.",
         "The fifth of any note is also the top of its power chord: one string higher, two frets up.",
         "Say the chord names as you change. In A the three are A, D and E.",
       ],
@@ -608,7 +625,7 @@ export default definePath({
       id: "triads",
       title: "Triads on the top strings",
       goal: "Play a major and a minor triad in three places on the top three strings, and move between three chords with the nearest shapes.",
-      why: "A triad is a root, a third and a fifth: the whole chord in three notes. On the top three strings there are three shapes for each one, depending on which note is on top, and together they cover the neck. They are the bridge between knowing notes and playing harmony.",
+      why: "A triad is the three notes a chord is made of: its root, the note a third above it, and the note a third above that, which is called the fifth because it is the fifth note of the scale counted from the root. The C triad is C, E and G. On the top three strings there are three shapes for each triad, depending on which note is on top, and together they cover the neck. This Step is a first look. Triads is the Path that builds them from the scale and moves them through the chords of a song.",
       howTo: [
         "Each shape holds the same three notes in a different order. Say which note is on the top string: the fifth, the root, or the third.",
         "Hold the shape like a small chord and pick the strings one at a time.",
@@ -637,7 +654,7 @@ export default definePath({
         {
           id: "am-three-places",
           title: "A minor in three places",
-          purpose: "The A minor triad's three shapes on the top strings. Compare each with the C shapes: one note is different.",
+          purpose: "The A minor triad's three shapes on the top strings. Compare each with the C shapes: C and E stay, and G moves up two frets to A. They are two chords that share two notes. Triads is the Path that explains what makes a chord minor.",
           howTo: [
             "Straight eighths, 50 BPM up to a pass at 80.",
             "All three strings at fret 5. Then G string 9, B string 10, top string 8. Then 14, 13, 12. The letters are A, C and E.",
@@ -658,7 +675,7 @@ export default definePath({
           purpose: "Three chords from shapes that sit next to each other at the bottom of the neck, over a band. The hand barely moves; the harmony changes completely.",
           howTo: [
             "Straight eighths, 60 BPM up to a pass at 90.",
-            "C: G string 5, B string 5, top string 3. F: 5, 6, 5. G: 4, 3, 3. Each bar rolls its shape up and back twice.",
+            "C: G string 5, B string 5, top string 3. F: 5, 6, 5. G: 4, 3, 3. Each of the first three bars rolls its shape up and back twice. The last bar rolls C once and holds its lowest note.",
           ],
           coach: "Band on. Right notes and time after the take.",
           tab: NEAR_TRIADS,
@@ -678,8 +695,9 @@ export default definePath({
       id: "five-boxes",
       title: "The five boxes, joined up",
       goal: "Play all five boxes of A minor pentatonic and move between them along two strings.",
-      why: "The pentatonic scale is five notes, and up the neck they make five overlapping shapes. Most players know the first and get stuck in it. The boxes are not five scales: they are one scale, and each box shares a wall with the next. Walking that wall on two strings is how the neck opens up.",
+      why: "The minor pentatonic scale has five notes. In A they are A, C, D, E and G. Up the neck those five notes make five overlapping shapes, called boxes. Box 1, at fret 5, is the one most players learn first, and Blues and Pentatonics teaches it and makes music with it in its first Step. If box 1 is new to you, learn it there first. This Step is a map of where all five are and how they join. The boxes are not five scales: they are one scale, and each box shares a wall with the next. Walking that wall on two strings is how the neck opens up.",
       howTo: [
+        BOX_ONE_REMINDER,
         "Each box starts on the next note of the scale on the low E string: A at fret 5, C at 8, D at 10, E at 12, G at 15 (or 3).",
         "The top notes of one box are the bottom notes of the next. Look for the frets they share.",
         "Find the A's in each box before you play it. They are your way home.",
@@ -895,7 +913,7 @@ export default definePath({
           purpose: "Free playing in A minor over Am, F, C, G, with one rule: on beat 1 of every bar you are on a note of that chord.",
           howTo: [
             "Straight eighths or longer, 60 to 90 BPM.",
-            "Start with only the thirds from the first Exercise, held long. Then add a few notes between them. The written line is an example.",
+            "Start with only the thirds from the first Exercise, held long. Then add a few notes of box 1 of A minor pentatonic between them: it sits at frets 5 to 8. The written line is an example.",
             NOT_CHECKED_YET,
           ],
           coach: "Not checked yet. Record it and listen to beat 1 of each bar.",
@@ -920,7 +938,7 @@ export default definePath({
     {
       id: "beginner",
       title: "Beginner: the notes by name",
-      summary: "The natural notes on every string, the octave shapes that connect them, the roots of the open chords, and the sharps and flats in between.",
+      summary: "The natural notes on every string, the octave shapes that connect them, the roots of the open chords, and the sharps and flats in between. After this Level, two Paths start from these names: Scales and Modes, and Triads.",
       reachLevel: "early-intermediate",
       startHereIf: [
         "You can play quarter notes with a click at 70 BPM.",
@@ -955,20 +973,21 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: the shapes of harmony",
-      summary: "Thirds on two strings, the top three strings in G major and F major, roots and fifths on the low strings, the roots of a song's chords in G and in D, and triads on the top three.",
+      summary: "The top three strings in G major and F major, thirds on two strings, roots and fifths on the low strings, the roots of a song's chords in G and in D, and triads on the top three.",
       reachLevel: "early-intermediate",
       startHereIf: [
         "You can name any natural note on the low E and A strings within 2 seconds.",
         "You can find a note's octave by shape.",
         "You play chords without knowing which note is the third.",
+        "You can play eighth notes, two to a click, at 60 BPM. Rhythm Foundations teaches them in its Beginner Level.",
       ],
-      steps: ["thirds", "top-strings-keys", "roots", "roots-other-keys", "triads"],
+      steps: ["top-strings-keys", "thirds", "roots", "roots-other-keys", "triads"],
       warmups: [
         {
           id: "thirds-around",
           title: "Thirds in a new key",
           purpose: "The major scale in broken thirds on the G and B strings, five pairs up and back. A different key each time.",
-          howTo: ["Straight eighths, well under your clean tempo. Lower note, then upper; say major or minor for each pair."],
+          howTo: ["Straight eighths, well under your clean tempo. Lower note, then upper. Each pair is a third: major where both strings are at the same fret, minor where the B string is one fret lower. Say which each pair is."],
           coach: "This is a warm-up. It tells you how it went, and it decides nothing.",
           vary: {
             values: { key: ["C", "D", "E", "F", "A", "Bb"] },
@@ -993,7 +1012,7 @@ export default definePath({
       reachLevel: "intermediate",
       startHereIf: [
         "You can play a C major triad in 3 places on the top three strings.",
-        "You can find the roots of a I-IV-V in any key on the low strings.",
+        "You can find the roots of one, four and five in any key on the low strings.",
         "You know box 1 of the pentatonic scale and get lost above it, or your solos ignore the chords.",
       ],
       steps: ["five-boxes", "boxes-second-key", "arpeggios", "the-changes", "changes-in-g"],

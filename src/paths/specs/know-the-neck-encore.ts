@@ -348,7 +348,7 @@ export const CHANGES_IN_G: StepSpec = {
     "The chords spelled: G is G, B, D. E minor is E, G, B. C is C, E, G. D is D, F sharp, A.",
     "On beat 1 of each bar, say the chord's name and which of its notes you are on: root, third or fifth.",
   ],
-  payoff: "You can land on a note of G, E minor, C or D, say what it is in the chord, and play a line of your own over the four.",
+  payoff: "You can land on a note of G, E minor, C or D, say what it is in the chord, and play a line of your own over the four. Scales and Modes gives you whole scales to put between the landings. Two more Paths, Triads and Arpeggios over Changes, take the chord notes over the whole neck.",
   exercises: [
     {
       id: "g-three-lines",
@@ -422,7 +422,7 @@ export const CHANGES_IN_G: StepSpec = {
       purpose: "Free playing in G over G, E minor, C and D, with one rule: on beat 1 of every bar you are on a note of that chord, and you know which one.",
       howTo: [
         "Straight eighths or longer, 60 to 90 BPM.",
-        "Start with one of the three one-string lines from the first Exercise, held long. Then add a few notes of the G major scale between the landings. The written line is an example: it lands on the third of each chord.",
+        "Start with one of the three one-string lines from the first Exercise, held long. Then add a few notes of box 2 of E minor pentatonic between the landings: it sits at these same frets, 2 to 5, and all five of its notes are in G major. The written line is an example: it lands on the third of each chord, and in bar 3 it also plays C, the root of that chord.",
         NOT_CHECKED_YET,
       ],
       coach: "Not checked yet. Record it and listen to beat 1 of each bar.",
