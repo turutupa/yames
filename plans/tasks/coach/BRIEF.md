@@ -70,6 +70,16 @@ verify with grep before you rely on one, and write any real difference into your
   must carry every key (`i18n.locales.test.ts`), so new strings land translated in the same leg.
   Report a gate honestly: if one fails for a reason that is not yours, show that it also fails on
   `coach` untouched, and say so.
+  **Known, in every worktree:** vitest cannot load `src/containers/songs/TabStage.render.test.tsx`
+  (`Denied ID …/node_modules/@coderline/alphatab/dist/font/Bravura.woff2?url`): Vite refuses a file
+  reached through the `node_modules` symlink. It passes in the main checkout, where the orchestrator
+  re-runs the suite after each merge. Name it in your report and do not chase it; any other failing
+  file is yours to explain.
+- **Commit early and often.** A gated commit or a `WIP(coach-<leg>):` commit at each step: an agent can
+  be stopped without warning, and uncommitted work is the only work that is lost. Do not end your turn
+  while a helper agent you spawned is still running.
+- **The briefs in the main checkout are the current ones** (`/home/dgx-delgado/yames-coach-build/plans/`):
+  the orchestrator edits them there, and the copy in your worktree is as old as your branch.
 - **Rust that touches the audio callback, the engine, the queue between them, or the settings / SQLite
   stores** is reviewed by an independent read-only reviewer before it merges. You do not arrange that:
   finish, and put a "Rust diff for review" paragraph in your report. The orchestrator runs the reviewer.

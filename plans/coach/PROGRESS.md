@@ -29,9 +29,15 @@ ms1's first run had put the selector in the left rail: the relaunch moves it to 
 
 | Leg | State | Branch | Merged at | Notes |
 |---|---|---|---|---|
-| c0 plumbing | running (wave 1) | `coach-c0` | – | |
-| ms1 model selector | running (wave 1) | `coach-ms1` | – | reviewer required |
-| c1a take note | running (wave 1) | `coach-c1a` | – | |
+| c0 plumbing | merged | `coach-c0` | 2026-11-20 | `progress/c0.md`. Session events go through one wrapped dispatch (the reducer is pure), not a line per dispatch site: accepted. Events are published before React commits: subscribers read the payload. |
+| c1a take note | merged | `coach-c1a` | 2026-11-20 | `progress/c1a.md`. `takeNote` returns data and proposes `session.note.*` keys; c1b1 writes them. `lean` is `(number \| null)[]`. `tuningSuspected` is kept and never said. |
+| ms1 model selector | running (relaunched) | `coach-ms1` | – | reviewer required |
+| pm pass mark + i18n brief | running | `coach-pm` | – | |
+| c1b1 line and note | running | `coach-c1b1` | – | |
+
+After c0 + c1a on `coach`: tsc clean, vitest 381 files / 11,475 tests, build clean (logs `/tmp/coach-orch/`).
+In a worktree one vitest file (`TabStage.render.test.tsx`) cannot load through the `node_modules`
+symlink; it passes in the main checkout.
 
 ## Decisions recorded while building
 

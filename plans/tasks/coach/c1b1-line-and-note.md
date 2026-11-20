@@ -56,6 +56,24 @@ with its evidence after it.
    honesty lint (`BANNED_CLAIMS`, `src/paths/honesty.ts`) over every new coach key, and fails on
    "the bar" used for the threshold and on any "tuning" sentence (owner decision 9).
 
+## What the legs before you left (read their progress files; the short version)
+
+- `takeNote(outcome, review, earlier, exercise, context?)` returns typed parts and **proposes the keys
+  under `session.note.*`; none of them exist in the locales yet. You write them.** Pass the optional
+  `context` (`variantSeed`, `session`, `noteVerdicts`) from the Session, or "once a Session" and the
+  repeat count fall back to the Take number.
+- `answerHeardIt(takeId, answer)` exists in `useSessionRun` and nothing calls it yet: the ungraded
+  Yes / Not yet does.
+- The bus: `useCoachEvent("takeResult")` gives the last result with its whole review; events are
+  published at dispatch time, before React has committed the new run state, so read the event's own
+  payload, not the hook's state, inside a subscriber. `stepReady`, `takeStarted`, `sessionRecap` likewise.
+- `ResolvedBlock.source` and the `SourceLine` look ("From the Path · Step 2", `coachBlocks.source.*`)
+  exist in `src/coach/blocks`: the note's source line uses the same words and marks, not a second set.
+- Leg pm ("pass mark" in the app's English, and `plans/COACH_I18N_BRIEF.md`) runs beside you and changes
+  existing strings in `session.json`. Before you translate, merge `coach` into your branch
+  (`git -C <worktree> merge coach`) so you have its rename and the brief; your new English never says
+  "the bar" for the threshold either way.
+
 ## What is not in this leg, and what to do about it
 
 - **Ask does not exist yet** (leg c2a1, running beside you). A "?" chip or a tap on the line that would
