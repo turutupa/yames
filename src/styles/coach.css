@@ -365,16 +365,22 @@
 /* Under 760 px of height the note is its headline, its source and its chips,
    so Start stays on screen (the last Take and the reasons step aside). */
 @media (min-width: 481px) and (max-height: 760px) {
-  .coach-note [data-extra] {
+  .coach-note [data-extra],
+  .coach-note[data-kind="ready"] > .coach-block-source {
     display: none;
   }
   .coach-note {
     gap: 6px;
-    padding-top: 11px;
-    padding-bottom: 11px;
+    padding-top: 8px;
+    padding-bottom: 8px;
   }
   .coach-note-head {
     font-size: 17px;
+  }
+  .coach-note .coach-chip {
+    min-height: 30px;
+    padding-top: 4px;
+    padding-bottom: 4px;
   }
   /* With the input's trouble on the ready screen, it is what to read. */
   .session-mechlow:has(.session-input-failed) .coach-note[data-kind="ready"] {

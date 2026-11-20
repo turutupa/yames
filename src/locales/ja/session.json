@@ -279,19 +279,10 @@
       "decidedPass": "合格",
       "lastTime": "前回",
       "decidedMiss": "足りなかったところ",
-      "notesNotChecked": "正しい音：今回は確認できず",
       "barsTitle": "小節ごと",
-      "barsHeld": "{{count}} 小節続けてキープ",
-      "barsHeld_other": "{{count}} 小節続けてキープ",
-      "barsMet": "{{of}} 小節中 {{count}} 小節キープ",
       "barHeld": "{{n}} 小節目：キープ",
       "barSlipped": "{{n}} 小節目：崩れた",
-      "barThin": "{{n}} 小節目：判定するには音が少なすぎ",
-      "legatoAll": "ハンマリング・プリング・タッピング：{{due}}音中{{sounded}}音が鳴りました。参考のみで採点しません。",
-      "legatoSome": "ハンマリング・プリング・タッピング：{{due}}音中{{sounded}}音が鳴り、{{silent}}音は鳴りませんでした。参考のみで採点しません。",
-      "bendsAll": "チョーキング：{{due}}回中{{onPitch}}回が目標の音程に届きました。参考のみで採点しません。",
-      "bendsSomeFlat": "チョーキング：{{due}}回中{{onPitch}}回が目標の音程に届き、{{flat}}回は届きませんでした。参考のみで採点しません。",
-      "vibratoHeard": "ビブラート：{{due}}音中{{present}}音で聞こえました。参考のみで採点しません。"
+      "barThin": "{{n}} 小節目：判定するには音が少なすぎ"
     },
     "edge": {
       "kick": "限界に挑戦",
@@ -701,6 +692,104 @@
       "harmony": "ハーモニー",
       "technique": "テクニック",
       "style": "スタイル"
+    },
+    "note": {
+      "passedAt": "{{bpm}} で合格。",
+      "finding": {
+        "ceiling": "{{holds}} BPM まではキープし、{{breaks}} で崩れます。"
+      },
+      "place": {
+        "slipped": {
+          "bar": "曲の {{bar}} 小節目が {{of}} 回中 {{count}} 回で崩れました。",
+          "bars": "曲の {{from}}〜{{to}} 小節目が {{of}} 回中 {{count}} 回で崩れました。",
+          "loop": "パターンが {{of}} 回中 {{count}} 回で崩れました。",
+          "fromRound": "{{of}} 回中 {{round}} 回目まではキープし、そこから崩れました。",
+          "all": "曲全体が {{of}} 回中 {{count}} 回で崩れました。"
+        },
+        "caught": {
+          "bar": "曲の {{bar}} 小節目が {{of}} 回中 {{count}} 回で引っかかりました。",
+          "bars": "曲の {{from}}〜{{to}} 小節目が {{of}} 回中 {{count}} 回で引っかかりました。",
+          "loop": "パターンが {{of}} 回中 {{count}} 回で引っかかりました。",
+          "all": "曲全体が {{of}} 回中 {{count}} 回で引っかかりました。"
+        },
+        "lastTake": "前回のテイクでは {{count}} 回でした。",
+        "lastTakeHeld": "前回のテイクではキープできていました。"
+      },
+      "direction": {
+        "early": "そこの音は走っていました。",
+        "late": "そこの音は遅れていました。",
+        "earlyOpen": "そこの開放弦の {{note}} は走っていました。",
+        "lateOpen": "そこの開放弦の {{note}} は遅れていました。",
+        "earlyNote": "{{fret}} フレットの {{note}} は走っていました。",
+        "lateNote": "{{fret}} フレットの {{note}} は遅れていました。"
+      },
+      "history": {
+        "newClean": "新しいクリーンテンポ：{{bpm}} BPM。",
+        "tooEasy": "2 セッション続けて、最初のテイクに余裕を持って合格しました。",
+        "goingDown": "{{bpm}} での 3 テイク連続で下がっています。",
+        "stuck": "{{bpm}} での 3 テイクは、すべて 2 ポイント以内です。",
+        "closer": "このテンポで {{from}}% から {{to}}% に上がりました。"
+      },
+      "repeat": {
+        "leaveIt": "同じ場所で 3 回目です。今日はここまでにしましょう。たいてい明日のほうが良くなります。"
+      },
+      "fact": {
+        "heard": "{{expected}} 音中 {{heard}} 音を聞き取り",
+        "noExtras": "余分な音なし",
+        "extras": "余分な音 {{count}} 個",
+        "extras_other": "余分な音 {{count}} 個",
+        "rightNotes": "正しい音 {{value}}%（音程を判定できた {{base}} 音中）",
+        "notesUnchecked": {
+          "notRun": "正しい音：今回は未確認",
+          "tooFast": "正しい音：速すぎて音程を判定できず",
+          "tooFew": "正しい音：判定できる音が少なすぎ",
+          "notesRing": "正しい音：音が重なり合って判定できず",
+          "octaveUnsure": "正しい音：オクターブを判定できず"
+        },
+        "legato": "ハンマリング・プリング：{{due}} 音中 {{sounded}} 音が鳴った（参考のみ、採点なし）",
+        "bends": "チョーキング：{{due}} 回中 {{onPitch}} 回が目標の音程に届いた（参考のみ、採点なし）",
+        "vibrato": "ビブラート：{{due}} 音中 {{present}} 音（参考のみ、採点なし）"
+      },
+      "mark": {
+        "check": "達成：",
+        "cross": "未達成：",
+        "dash": "判定できず："
+      },
+      "strip": {
+        "held": "{{count}} 小節続けてキープ",
+        "held_other": "{{count}} 小節続けてキープ",
+        "roundEvery": "曲は {{count}} 小節で一巡",
+        "plain": "演奏どおり"
+      },
+      "ready": {
+        "lastValue": "前回のテイク：{{metric}} {{value}}%。",
+        "lastCount": "前回のテイク：{{metric}} {{value}}。",
+        "lastPassed": "前回のテイク：{{bpm}} で合格。",
+        "lastNotCaught": "前回のテイク：十分に聞き取れませんでした。"
+      },
+      "chip": {
+        "hear": "先に聴く",
+        "try": "何を試せばいいですか？"
+      },
+      "ungraded": {
+        "listenFor": "今回は 1 点だけ聴いてください：{{question}}",
+        "notListening": "今回は聴いていないので、判断はあなたです。",
+        "didThey": "最後に：{{question}}",
+        "yourAnswer": "あなたの答え：",
+        "yes": "はい",
+        "notYet": "まだ",
+        "tryFaster": "2 回続けてはい。{{bpm}} で試しますか？"
+      },
+      "recap": {
+        "passed": "{{bpm}} BPM で合格。",
+        "held": "クリーンテンポは今も {{bpm}} BPM。",
+        "played": "最後は {{bpm}} BPM で演奏。",
+        "backNext": "{{title}} は次のセッションに戻ってきます。",
+        "backReview": "{{title}} は {{count}} 日後に復習で戻ってきます。",
+        "backReview_other": "{{title}} は {{count}} 日後に復習で戻ってきます。",
+        "backParked": "{{title}} は {{count}} 日休んで、新鮮な状態で戻ってきます。",
+        "backParked_other": "{{title}} は {{count}} 日休んで、新鮮な状態で戻ってきます。"
+      }
     }
   }
 }

@@ -279,19 +279,10 @@
       "decidedPass": "通过",
       "lastTime": "上次",
       "decidedMiss": "卡在这里",
-      "notesNotChecked": "音准：这次没有检查",
       "barsTitle": "逐小节",
-      "barsHeld": "连续 {{count}} 小节稳住",
-      "barsHeld_other": "连续 {{count}} 小节稳住",
-      "barsMet": "{{of}} 小节里稳住 {{count}} 小节",
       "barHeld": "第 {{n}} 小节：稳住",
       "barSlipped": "第 {{n}} 小节：乱了",
-      "barThin": "第 {{n}} 小节：音太少，无法判断",
-      "legatoAll": "击弦、勾弦和点弦：{{due}} 个音中响了 {{sounded}} 个。仅供参考，不计分。",
-      "legatoSome": "击弦、勾弦和点弦：{{due}} 个音中响了 {{sounded}} 个，{{silent}} 个没响。仅供参考，不计分。",
-      "bendsAll": "推弦：{{due}} 次中有 {{onPitch}} 次推到了目标音高。仅供参考，不计分。",
-      "bendsSomeFlat": "推弦：{{due}} 次中有 {{onPitch}} 次推到了目标音高，{{flat}} 次没推够。仅供参考，不计分。",
-      "vibratoHeard": "揉弦：{{due}} 个音中有 {{present}} 个听到了揉弦。仅供参考，不计分。"
+      "barThin": "第 {{n}} 小节：音太少，无法判断"
     },
     "edge": {
       "kick": "挑战极限",
@@ -701,6 +692,104 @@
       "harmony": "和声",
       "technique": "技术",
       "style": "风格"
+    },
+    "note": {
+      "passedAt": "在 {{bpm}} 通过。",
+      "finding": {
+        "ceiling": "{{holds}} BPM 能稳住，{{breaks}} 开始乱。"
+      },
+      "place": {
+        "slipped": {
+          "bar": "曲子第 {{bar}} 小节在 {{of}} 轮中有 {{count}} 轮乱了。",
+          "bars": "曲子第 {{from}} 到 {{to}} 小节在 {{of}} 轮中有 {{count}} 轮乱了。",
+          "loop": "这段循环在 {{of}} 轮中有 {{count}} 轮乱了。",
+          "fromRound": "稳到第 {{round}} 轮（共 {{of}} 轮），之后就乱了。",
+          "all": "整段曲子在 {{of}} 轮中有 {{count}} 轮乱了。"
+        },
+        "caught": {
+          "bar": "曲子第 {{bar}} 小节在 {{of}} 轮中有 {{count}} 轮绊住了你。",
+          "bars": "曲子第 {{from}} 到 {{to}} 小节在 {{of}} 轮中有 {{count}} 轮绊住了你。",
+          "loop": "这段循环在 {{of}} 轮中有 {{count}} 轮绊住了你。",
+          "all": "整段曲子在 {{of}} 轮中有 {{count}} 轮绊住了你。"
+        },
+        "lastTake": "上一遍是 {{count}} 轮。",
+        "lastTakeHeld": "上一遍稳住了。"
+      },
+      "direction": {
+        "early": "那里的音偏早。",
+        "late": "那里的音偏晚。",
+        "earlyOpen": "那里的空弦 {{note}} 偏早。",
+        "lateOpen": "那里的空弦 {{note}} 偏晚。",
+        "earlyNote": "第 {{fret}} 品的 {{note}} 偏早。",
+        "lateNote": "第 {{fret}} 品的 {{note}} 偏晚。"
+      },
+      "history": {
+        "newClean": "新的干净速度：{{bpm}} BPM。",
+        "tooEasy": "连续两次练习，第一遍都轻松通过，还有余量。",
+        "goingDown": "{{bpm}} 下连续三遍的分数在下降。",
+        "stuck": "{{bpm}} 下三遍，分数都在两分以内。",
+        "closer": "这个速度下从 {{from}}% 升到了 {{to}}%。"
+      },
+      "repeat": {
+        "leaveIt": "同一个地方第三次了。今天先放下，明天通常会更好。"
+      },
+      "fact": {
+        "heard": "{{expected}} 个音中听到 {{heard}} 个",
+        "noExtras": "没有多余的音",
+        "extras": "{{count}} 个多余的音",
+        "extras_other": "{{count}} 个多余的音",
+        "rightNotes": "正确的音 {{value}}%（我能判断音高的 {{base}} 个音中）",
+        "notesUnchecked": {
+          "notRun": "正确的音：这次没有检查",
+          "tooFast": "正确的音：太快，我判断不了音高",
+          "tooFew": "正确的音：音太少，我判断不了音高",
+          "notesRing": "正确的音：音连在一起，我判断不了",
+          "octaveUnsure": "正确的音：我判断不了八度"
+        },
+        "legato": "击弦和勾弦 {{due}} 个中响了 {{sounded}} 个（仅供参考，不计分）",
+        "bends": "推弦 {{due}} 次中有 {{onPitch}} 次推到了目标音高（仅供参考，不计分）",
+        "vibrato": "{{due}} 个音中 {{present}} 个有揉弦（仅供参考，不计分）"
+      },
+      "mark": {
+        "check": "达到：",
+        "cross": "未达到：",
+        "dash": "判断不了："
+      },
+      "strip": {
+        "held": "连续 {{count}} 小节稳住",
+        "held_other": "连续 {{count}} 小节稳住",
+        "roundEvery": "曲子每 {{count}} 小节一轮",
+        "plain": "按实际演奏"
+      },
+      "ready": {
+        "lastValue": "上一遍：{{metric}} {{value}}%。",
+        "lastCount": "上一遍：{{metric}} {{value}}。",
+        "lastPassed": "上一遍：在 {{bpm}} 通过。",
+        "lastNotCaught": "上一遍：我听到的不够。"
+      },
+      "chip": {
+        "hear": "先听一下",
+        "try": "我该试什么？"
+      },
+      "ungraded": {
+        "listenFor": "这一遍请只听一件事：{{question}}",
+        "notListening": "这次我没在听，所以由你来判断。",
+        "didThey": "最后一个：{{question}}",
+        "yourAnswer": "你的回答：",
+        "yes": "是",
+        "notYet": "还没有",
+        "tryFaster": "连续两次是。试试 {{bpm}}？"
+      },
+      "recap": {
+        "passed": "在 {{bpm}} BPM 通过。",
+        "held": "干净速度仍是 {{bpm}} BPM。",
+        "played": "最近一次弹在 {{bpm}} BPM。",
+        "backNext": "{{title}} 下次练习会回来。",
+        "backReview": "{{title}} 将在 {{count}} 天后回来复习。",
+        "backReview_other": "{{title}} 将在 {{count}} 天后回来复习。",
+        "backParked": "{{title}} 先歇 {{count}} 天，再重新回来。",
+        "backParked_other": "{{title}} 先歇 {{count}} 天，再重新回来。"
+      }
     }
   }
 }
