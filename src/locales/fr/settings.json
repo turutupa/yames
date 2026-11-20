@@ -124,6 +124,8 @@
       "downloadVoices": "Télécharger les voix",
       "installed": "Coach {{tier}} installé ({{size}})",
       "removing": "Suppression…",
+      "removeTier": "Supprimer",
+      "removeTierLabel": "Supprimer {{name}}",
       "removeModels": "Supprimer les modèles",
       "stance": "Style de coaching",
       "stanceHint": "À quel point le coach est exigeant quand tu joues dans les outils",

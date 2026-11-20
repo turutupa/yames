@@ -124,6 +124,8 @@
       "downloadVoices": "Tải giọng nói",
       "installed": "Huấn luyện viên {{tier}} đã cài ({{size}})",
       "removing": "Đang gỡ…",
+      "removeTier": "Gỡ",
+      "removeTierLabel": "Gỡ {{name}}",
       "removeModels": "Gỡ mô hình",
       "stance": "Lối huấn luyện",
       "stanceHint": "Huấn luyện viên khắt khe đến đâu khi bạn chơi trong các công cụ",

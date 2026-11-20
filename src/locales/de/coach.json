@@ -45,7 +45,8 @@
       "notDownloaded": "nicht heruntergeladen",
       "notOnThisDevice": "nicht auf diesem Gerät",
       "downloading": "lädt herunter {{percent}}",
-      "downloadingNoPercent": "lädt herunter"
+      "downloadingNoPercent": "lädt herunter",
+      "checking": "prüft den Download"
     },
     "state": {
       "ready": "Geladen und bereit",
@@ -56,8 +57,10 @@
       "failedWhy": "Konnte nicht laden ({{reason}}). Wähl es aus, um es noch einmal zu versuchen",
       "notDownloaded": "Nicht heruntergeladen",
       "update": "Eine ältere Version. Aktualisiere sie in Einstellungen → Coach",
-      "otherOnDisk": "Nicht heruntergeladen. Ein zweites Modell auf diesem Computer braucht ein späteres Update; wechsle vorerst in Einstellungen → Coach",
+      "unplaced": "Nicht heruntergeladen. Ein Modell auf diesem Computer ließ sich nicht zuordnen; verwalte es in Einstellungen → Coach",
+      "noRoom": "Nicht heruntergeladen. Braucht {{need}}, {{free}} frei",
       "downloading": "Lädt herunter",
+      "checking": "Prüft den Download",
       "lowMemory": "Dieser Computer hat weniger Arbeitsspeicher, als dieses Modell möchte; es kann langsam sein oder nicht laden"
     },
     "why": {
@@ -67,18 +70,29 @@
     "download": {
       "start": "Herunterladen",
       "pause": "Pausieren",
+      "pauseHint": "Vorerst anhalten und das Heruntergeladene behalten; Fortsetzen geht dort weiter",
+      "cancel": "Abbrechen",
+      "cancelHint": "Anhalten und das bisher Heruntergeladene entfernen",
       "resume": "Fortsetzen",
       "retry": "Nochmal versuchen",
       "anyway": "Trotzdem herunterladen",
       "notNow": "Jetzt nicht",
       "running": "Lädt herunter… {{percent}}",
       "runningNoPercent": "Lädt herunter…",
+      "runningBytes": "Lädt herunter… {{done}} von {{total}}",
+      "bytes": "{{done}} von {{total}}",
+      "checking": "Prüft den Download anhand seiner veröffentlichten Prüfsumme… {{percent}}",
       "voices": "Die Stimmen des Coachs werden geholt…",
       "paused": "Bei {{percent}} pausiert. Mit Fortsetzen geht es dort weiter.",
+      "pausedBytes": "Bei {{done}} von {{total}} pausiert. Mit Fortsetzen geht es dort weiter.",
       "pausedNoPercent": "Pausiert. Mit Fortsetzen geht es dort weiter, wo es aufgehört hat.",
+      "cancelled": "Abgebrochen. Das Heruntergeladene wurde entfernt.",
       "failed": "Der Download wurde abgebrochen: {{reason}}",
       "failedNoReason": "Der Download wurde abgebrochen.",
-      "meteredWarn": "Du scheinst mobile Daten zu nutzen. {{size}} sind dafür viel zum Herunterladen."
+      "checksumFailed": "Die heruntergeladene Datei passte nicht zu ihrer veröffentlichten Prüfsumme und wurde entfernt. Nichts, was du schon hattest, wurde geändert.",
+      "noRoom": "Nicht genug Platz: Es braucht {{need}}, frei sind {{free}}. Schaffe etwas Platz und versuche es dann noch einmal.",
+      "meteredWarn": "Du scheinst mobile Daten zu nutzen. {{size}} sind dafür viel zum Herunterladen.",
+      "spaceWarn": "Nur {{free}} sind frei und dafür braucht es {{need}}. Es passt, mit wenig Reserve."
     }
   },
   "coachDetail": {

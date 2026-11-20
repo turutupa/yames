@@ -45,7 +45,8 @@
       "notDownloaded": "chưa tải về",
       "notOnThisDevice": "không có trên thiết bị này",
       "downloading": "đang tải về {{percent}}",
-      "downloadingNoPercent": "đang tải về"
+      "downloadingNoPercent": "đang tải về",
+      "checking": "đang kiểm tra bản tải về"
     },
     "state": {
       "ready": "Đã tải và sẵn sàng",
@@ -56,8 +57,10 @@
       "failedWhy": "Không tải được ({{reason}}). Chọn lại để thử lần nữa",
       "notDownloaded": "Chưa tải về",
       "update": "Phiên bản cũ. Hãy cập nhật trong Cài đặt → Huấn luyện viên",
-      "otherOnDisk": "Chưa tải về. Mô hình thứ hai trên máy tính này cần một bản cập nhật sau; hiện giờ hãy chuyển trong Cài đặt → Huấn luyện viên",
+      "unplaced": "Chưa tải về. Không nhận ra được một mô hình trên máy tính này; hãy quản lý nó trong Cài đặt → Huấn luyện viên",
+      "noRoom": "Chưa tải về. Cần {{need}}, còn trống {{free}}",
       "downloading": "Đang tải về",
+      "checking": "Đang kiểm tra bản tải về",
       "lowMemory": "Máy tính này có ít bộ nhớ hơn mức mô hình này cần; có thể chạy chậm hoặc không tải được"
     },
     "why": {
@@ -67,18 +70,29 @@
     "download": {
       "start": "Tải về",
       "pause": "Tạm dừng",
+      "pauseHint": "Dừng lúc này và giữ phần đã tải; Tiếp tục sẽ chạy tiếp từ đó",
+      "cancel": "Hủy",
+      "cancelHint": "Dừng và xóa phần đã tải cho đến giờ",
       "resume": "Tiếp tục",
       "retry": "Thử lại",
       "anyway": "Vẫn tải về",
       "notNow": "Để sau",
       "running": "Đang tải về… {{percent}}",
       "runningNoPercent": "Đang tải về…",
+      "runningBytes": "Đang tải về… {{done}} trên {{total}}",
+      "bytes": "{{done}} trên {{total}}",
+      "checking": "Đang đối chiếu bản tải về với mã kiểm tra đã công bố… {{percent}}",
       "voices": "Đang lấy giọng nói của huấn luyện viên…",
       "paused": "Đã tạm dừng ở {{percent}}. Nhấn Tiếp tục để chạy tiếp từ đó.",
+      "pausedBytes": "Đã tạm dừng ở {{done}} trên {{total}}. Nhấn Tiếp tục để chạy tiếp từ đó.",
       "pausedNoPercent": "Đã tạm dừng. Nhấn Tiếp tục để chạy tiếp từ chỗ đã dừng.",
+      "cancelled": "Đã hủy. Phần đã tải đã được xóa.",
       "failed": "Việc tải về đã dừng: {{reason}}",
       "failedNoReason": "Việc tải về đã dừng.",
-      "meteredWarn": "Có vẻ bạn đang dùng dữ liệu di động. {{size}} là khá nhiều để tải qua mạng này."
+      "checksumFailed": "Tệp đã tải không khớp với mã kiểm tra đã công bố nên đã bị xóa. Những gì bạn đã có không bị thay đổi.",
+      "noRoom": "Không đủ chỗ: cần {{need}}, còn trống {{free}}. Hãy giải phóng bớt dung lượng rồi thử lại.",
+      "meteredWarn": "Có vẻ bạn đang dùng dữ liệu di động. {{size}} là khá nhiều để tải qua mạng này.",
+      "spaceWarn": "Chỉ còn trống {{free}} mà cần {{need}}. Vừa đủ, còn dư rất ít."
     }
   },
   "coachDetail": {

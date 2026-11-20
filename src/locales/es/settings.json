@@ -124,6 +124,8 @@
       "downloadVoices": "Descargar voces",
       "installed": "Entrenador {{tier}} instalado ({{size}})",
       "removing": "Eliminando…",
+      "removeTier": "Eliminar",
+      "removeTierLabel": "Eliminar {{name}}",
       "removeModels": "Eliminar modelos",
       "stance": "Estilo de entrenamiento",
       "stanceHint": "Lo exigente que es el coach contigo mientras tocas en las herramientas",

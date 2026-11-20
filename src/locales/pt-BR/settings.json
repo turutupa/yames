@@ -124,6 +124,8 @@
       "downloadVoices": "Baixar vozes",
       "installed": "Coach {{tier}} instalado ({{size}})",
       "removing": "Removendo…",
+      "removeTier": "Remover",
+      "removeTierLabel": "Remover {{name}}",
       "removeModels": "Remover modelos",
       "stance": "Estilo de treino",
       "stanceHint": "O quanto o coach é exigente enquanto você toca nas ferramentas",

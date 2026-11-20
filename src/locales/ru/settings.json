@@ -124,6 +124,8 @@
       "downloadVoices": "Скачать голоса",
       "installed": "Установлен тренер «{{tier}}» ({{size}})",
       "removing": "Удаляю…",
+      "removeTier": "Удалить",
+      "removeTierLabel": "Удалить {{name}}",
       "removeModels": "Удалить модели",
       "stance": "Манера тренера",
       "stanceHint": "Насколько строг тренер, пока ты играешь в инструментах",

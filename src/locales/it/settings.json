@@ -124,6 +124,8 @@
       "downloadVoices": "Scarica le voci",
       "installed": "Coach {{tier}} installato ({{size}})",
       "removing": "Rimozione in corso…",
+      "removeTier": "Rimuovi",
+      "removeTierLabel": "Rimuovi {{name}}",
       "removeModels": "Rimuovi modelli",
       "stance": "Stile di coaching",
       "stanceHint": "Quanto è severo il coach mentre suoni negli strumenti",

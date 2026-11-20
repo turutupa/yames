@@ -124,6 +124,8 @@
       "downloadVoices": "Sesleri indir",
       "installed": "{{tier}} koç kurulu ({{size}})",
       "removing": "Kaldırılıyor…",
+      "removeTier": "Kaldır",
+      "removeTierLabel": "{{name}} modelini kaldır",
       "removeModels": "Modelleri kaldır",
       "stance": "Koçluk tarzı",
       "stanceHint": "Araçlarda çalarken koçun sana ne kadar sert davrandığı",

@@ -124,6 +124,8 @@
       "downloadVoices": "下载语音",
       "installed": "已安装{{tier}}教练（{{size}}）",
       "removing": "移除中…",
+      "removeTier": "移除",
+      "removeTierLabel": "移除{{name}}",
       "removeModels": "移除模型",
       "stance": "教练风格",
       "stanceHint": "在工具中演奏时教练的严格程度",

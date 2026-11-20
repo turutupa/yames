@@ -45,7 +45,8 @@
       "notDownloaded": "indirilmedi",
       "notOnThisDevice": "bu cihazda yok",
       "downloading": "indiriliyor {{percent}}",
-      "downloadingNoPercent": "indiriliyor"
+      "downloadingNoPercent": "indiriliyor",
+      "checking": "indirme denetleniyor"
     },
     "state": {
       "ready": "Yüklendi ve hazır",
@@ -56,8 +57,10 @@
       "failedWhy": "Yüklenemedi ({{reason}}). Tekrar denemek için seç",
       "notDownloaded": "İndirilmedi",
       "update": "Eski bir sürüm. Ayarlar → Pratik Koçu'ndan güncelle",
-      "otherOnDisk": "İndirilmedi. Bu bilgisayarda ikinci bir model için sonraki bir güncelleme gerekiyor; şimdilik Ayarlar → Pratik Koçu'ndan değiştir",
+      "unplaced": "İndirilmedi. Bu bilgisayardaki bir model tanımlanamadı; Ayarlar → Pratik Koçu'ndan yönet",
+      "noRoom": "İndirilmedi. {{need}} gerekiyor, {{free}} boş",
       "downloading": "İndiriliyor",
+      "checking": "İndirme denetleniyor",
       "lowMemory": "Bu bilgisayarda bu modelin istediğinden az bellek var; yavaş çalışabilir veya yüklenemeyebilir"
     },
     "why": {
@@ -67,18 +70,29 @@
     "download": {
       "start": "İndir",
       "pause": "Duraklat",
+      "pauseHint": "Şimdilik durdur ve inen kısmı sakla; Devam et, oradan sürdürür",
+      "cancel": "İptal",
+      "cancelHint": "Durdur ve şimdiye kadar inen kısmı sil",
       "resume": "Devam et",
       "retry": "Yeniden dene",
       "anyway": "Yine de indir",
       "notNow": "Şimdi değil",
       "running": "İndiriliyor… {{percent}}",
       "runningNoPercent": "İndiriliyor…",
+      "runningBytes": "İndiriliyor… {{done}} / {{total}}",
+      "bytes": "{{done}} / {{total}}",
+      "checking": "İndirilen dosya yayımlanan sağlama toplamıyla denetleniyor… {{percent}}",
       "voices": "Koçun sesleri alınıyor…",
       "paused": "{{percent}} noktasında duraklatıldı. Devam et, oradan sürdürür.",
+      "pausedBytes": "{{done}} / {{total}} noktasında duraklatıldı. Devam et, oradan sürdürür.",
       "pausedNoPercent": "Duraklatıldı. Devam et, kaldığı yerden sürdürür.",
+      "cancelled": "İptal edildi. İnen kısım silindi.",
       "failed": "İndirme durdu: {{reason}}",
       "failedNoReason": "İndirme durdu.",
-      "meteredWarn": "Mobil veri kullanıyor gibisin. {{size}}, bununla indirmek için fazla."
+      "checksumFailed": "İndirilen dosya yayımlanan sağlama toplamıyla eşleşmedi, bu yüzden silindi. Zaten sahip olduğun hiçbir şey değişmedi.",
+      "noRoom": "Yeterli yer yok: {{need}} gerekiyor, {{free}} boş. Biraz yer aç, sonra tekrar dene.",
+      "meteredWarn": "Mobil veri kullanıyor gibisin. {{size}}, bununla indirmek için fazla.",
+      "spaceWarn": "Yalnızca {{free}} boş, bunun için {{need}} gerekiyor. Sığıyor, ama pek fazlası kalmıyor."
     }
   },
   "coachDetail": {

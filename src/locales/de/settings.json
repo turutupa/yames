@@ -124,6 +124,8 @@
       "downloadVoices": "Stimmen herunterladen",
       "installed": "{{tier}}-Coach installiert ({{size}})",
       "removing": "Wird entfernt…",
+      "removeTier": "Entfernen",
+      "removeTierLabel": "{{name}} entfernen",
       "removeModels": "Modelle entfernen",
       "stance": "Coaching-Stil",
       "stanceHint": "Wie streng der Coach in den Werkzeugen mit dir ist, während du spielst",
