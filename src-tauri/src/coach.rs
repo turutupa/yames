@@ -3886,12 +3886,27 @@ ws ::= " "?
         }
         cached_ms.sort_unstable();
         let median = cached_ms[cached_ms.len() / 2];
+        // The first turn above paid for cold weights too. The fair
+        // comparison is a warm worker meeting a prefix of the same size it
+        // has not seen: three of those.
+        let mut warm_uncached = Vec::new();
+        for v in 0..3u64 {
+            let other = format!("(variant {v}) {prefix}");
+            let out = ask(&handle, &ask_req(50_200 + v, AskMode::Choice, &other, questions[1], Some(CHOICE_GBNF)));
+            let (_, _, cached, prompt_ms, _) = answered(&out);
+            assert!(!cached, "a prefix never seen was taken as cached");
+            warm_uncached.push(prompt_ms);
+        }
+        warm_uncached.sort_unstable();
+        let warm = warm_uncached[1];
         eprintln!(
-            "[ask] prefix cache: time to first token {uncached_ms} ms uncached, {median} ms cached (median of {}), backend={}",
+            "[ask] prefix cache: time to first token {median} ms cached (median of {}), \
+             {warm} ms uncached on a warm worker (median of 3), {uncached_ms} ms on the cold first turn; \
+             backend={}",
             cached_ms.len(),
             super::llm::BACKEND
         );
-        assert!(median < uncached_ms, "the cached prefix saved nothing");
+        assert!(median < warm, "the cached prefix saved nothing");
 
         // A different prefix is a different cache entry.
         let other = ask(&handle, &ask_req(50_100, AskMode::Choice, "Tools: none at all.", "hi", Some(CHOICE_GBNF)));
