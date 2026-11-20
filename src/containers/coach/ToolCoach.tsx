@@ -87,7 +87,9 @@ type ToolCoachProps = {
   onOpenRuns?: () => void;
 };
 
-export const ToolCoach = memo(function ToolCoach({
+// `@__PURE__`: the phone build drops the only use (an `IS_MOBILE` branch), and
+// an unannotated top-level `memo()` call would keep the component in its bundle.
+export const ToolCoach = /* @__PURE__ */ memo(function ToolCoach({
   messages,
   listenOn,
   isPlaying,
