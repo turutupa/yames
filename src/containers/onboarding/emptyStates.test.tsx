@@ -10,7 +10,7 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PresetSidebar } from "../../components/presets/PresetSidebar";
-import { CoachHistoryList } from "../practice-coach/CoachHistoryList";
+import { ToolRunList } from "../coach/toolRuns/ToolRunList";
 import { DrillView } from "../drill/DrillView";
 import { DEFAULT_TEST_STATE, setInvokeResponse } from "../../test/mocks";
 import type { AppState } from "../../types";
@@ -63,15 +63,11 @@ describe("presets empty state", () => {
   });
 });
 
-describe("session history empty state", () => {
-  it("says where sessions come from", () => {
-    const { container } = render(
-      <CoachHistoryList sessions={[]} onSelect={vi.fn()} onDelete={vi.fn()} />,
-    );
-    expect(container.firstChild).toMatchSnapshot();
-    expect(
-      screen.getByText(/press End or stop the metronome.*Sessions from Today are in Progress/i),
-    ).toBeInTheDocument();
+describe("Tool runs' empty state (the old History's, on Progress since c2a2)", () => {
+  it("says where runs come from: Listen in a tool", () => {
+    render(<ToolRunList sessions={[]} onSelect={vi.fn()} onDelete={vi.fn()} />);
+    expect(screen.getByTestId("tool-runs-empty")).toBeInTheDocument();
+    expect(screen.getByText(/Turn on Listen in the Metronome, Drill, Setlist or Jam/i)).toBeInTheDocument();
   });
 });
 
