@@ -166,6 +166,7 @@ const VIEW_HINT_KEY = "session.viewHintSeen";
 /** How loud the band is under a jam-backed Take, 0..1.5 (0 is the click alone). */
 const BAND_VOLUME_KEY = "session.bandVolume";
 /** Settings → Practice → "Grade my playing", now a choice of three (`session/grading.ts`). */
+import { setTakeContext } from "../../../settings/recordingSession";
 export { GRADING_KEY } from "../../../session/grading";
 const TICK_MS = 1000;
 /** Minutes per Exercise in Test out: one Take at the pass tempo, and a breath. */
@@ -757,6 +758,19 @@ export function useSessionRun(input: SessionRunInput) {
   }, [run.phase, dismissViewHint]);
   const takeNumber = `${run.stepIndex}|${run.takes}`;
   const prepared = take !== null && preparedTake === takeKey(take, takeNumber);
+  // What the recording session is told the Take is (card #109): read when it
+  // is loaded, from this render.
+  const captureStepRef = useRef<{ stepId?: string; stepKind?: string; variantSeed: number | null; ungraded: boolean; takeNumber: string }>({
+    variantSeed: null,
+    ungraded: false,
+    takeNumber,
+  });
+  captureStepRef.current = {
+    ...(step ? { stepId: step.id, stepKind: step.kind } : {}),
+    variantSeed: seedOf(step),
+    ungraded: grading === "off" || ungradedOnce.current,
+    takeNumber,
+  };
 
   const onExercise = step?.kind === "exercise";
   // A graded Take on a microphone starts with the band off (see `bandVolumeFor`).
@@ -869,6 +883,19 @@ export function useSessionRun(input: SessionRunInput) {
         // Not under a stop still being graded (a Songs pass, or this
         // Session's last Take): its clear, coming after, would wipe this one.
         await whenScheduleFree();
+        const where = captureStepRef.current;
+        setTakeContext({
+          kind: "take",
+          mode: where.ungraded ? "ungraded" : "graded",
+          pathId: take.pathId,
+          exerciseId: take.exercise.id,
+          ...(where.stepId ? { stepId: where.stepId, stepKind: where.stepKind } : {}),
+          variantSeed: where.variantSeed,
+          takeNumber: where.takeNumber,
+          bpm: take.bpm,
+          bars: take.bars,
+          countInBars: TAKE_COUNT_IN_BARS,
+        });
         await loadScoreSchedule(take.schedule, take.exercise.passBars, take.pitches, take.details);
         if (prepareId.current === mine) setPreparedTake(takeKey(take, takeNumber));
       } catch (err) {

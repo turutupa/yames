@@ -17,6 +17,8 @@ use tauri::{AppHandle, Emitter, Manager, State};
 /// platform and the *bodies* are what changes.
 #[cfg(mobile)]
 mod mobile;
+mod capture;
+pub use capture::*;
 #[cfg(mobile)]
 pub use mobile::*;
 

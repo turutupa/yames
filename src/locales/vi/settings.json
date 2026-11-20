@@ -464,6 +464,25 @@
       "title": "Giữ các lượt chơi gần nhất để khắc phục sự cố",
       "hint": "Khi một lượt chơi bị chấm sai, âm thanh của nó và những gì Yames mong đợi có thể được phát lại để tìm nguyên nhân. Giữ bản ghi âm thô từ micrô của 20 lượt chơi gần nhất trên thiết bị này (tối đa khoảng 460 MB); không gửi gì đi đâu. Mặc định tắt.",
       "folder": "Thư mục: {{folder}}"
+    },
+    "recordingSession": {
+      "title": "Phiên ghi âm (dữ liệu thử)",
+      "hint": "Để thử Yames: khi bật, ghi âm đầu vào thô của micro hoặc nhạc cụ trong mọi Lượt chơi, jam và chơi tự do, kèm điều mỗi Lượt mong đợi và cách nó được chấm, vào một thư mục trên thiết bị này. Không gửi gì đi đâu; bạn tự gửi thư mục. Một tiếng bíp ngắn vang lên lúc bắt đầu và lúc dừng để căn khớp bản ghi bằng điện thoại thu cùng lúc. Nhấn M (hoặc chạm \"Thấy sai\") khi một Lượt có vẻ bị chấm sai. Tự tắt khi Yames đóng.",
+      "status": "Đang ghi: {{takes}} Lượt, {{size}}. Thư mục: {{folder}}",
+      "stopped": "Đã dừng ở giới hạn dung lượng: không lưu thêm Lượt nào.",
+      "warn": "Hơn {{size}}: hãy kiểm tra dung lượng trống.",
+      "cap": "Dừng ghi ở (GB)",
+      "capHint": "Phiên ngừng lưu Lượt khi đạt dung lượng này. Một Lượt ở 48 kHz khoảng 6 MB cho 30 giây.",
+      "open": "Mở thư mục",
+      "zip": "Nén phiên",
+      "share": "Chia sẻ phiên",
+      "zipped": "Đã nén: {{path}}",
+      "noSession": "Chưa có phiên ghi âm nào.",
+      "failed": "Không thể bắt đầu phiên ghi âm.",
+      "pill": "REC · {{takes}} Lượt · {{size}}",
+      "pillStopped": "REC đã dừng: giới hạn dung lượng",
+      "mark": "Thấy sai (M)",
+      "marked": "Đã đánh dấu"
     }
   },
   "keybindings": {

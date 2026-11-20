@@ -464,6 +464,25 @@
       "title": "Conserva le mie ultime take per la diagnosi",
       "hint": "Se una take viene valutata male, il suo audio e ciò che Yames si aspettava possono essere riprodotti per capire il perché. Conserva la registrazione grezza del microfono delle tue ultime 20 take su questo dispositivo (fino a circa 460 MB); non viene inviato nulla. Disattivato per impostazione predefinita.",
       "folder": "Cartella: {{folder}}"
+    },
+    "recordingSession": {
+      "title": "Sessione di registrazione (dati di test)",
+      "hint": "Per testare Yames: finché è attiva registra l'ingresso grezzo del microfono o dello strumento di ogni Take, jam e suonata libera, con ciò che ogni Take si aspettava e il suo voto, in una cartella di questo dispositivo. Non viene inviato nulla; la cartella la mandi tu. Un breve segnale suona all'inizio e alla fine, per allineare una registrazione fatta insieme con un telefono. Premi M (o tocca \"Non mi torna\") quando un Take ti sembra valutato male. Si spegne alla chiusura di Yames.",
+      "status": "Registrazione: {{takes}} Take, {{size}}. Cartella: {{folder}}",
+      "stopped": "Fermata al limite di dimensione: nessun altro Take viene tenuto.",
+      "warn": "Oltre {{size}}: controlla lo spazio libero.",
+      "cap": "Ferma la registrazione a (GB)",
+      "capHint": "A questa dimensione la sessione smette di tenere Take. Un Take a 48 kHz occupa circa 6 MB ogni 30 s.",
+      "open": "Apri cartella",
+      "zip": "Comprimi sessione",
+      "share": "Condividi sessione",
+      "zipped": "Compressa: {{path}}",
+      "noSession": "Ancora nessuna sessione di registrazione.",
+      "failed": "Impossibile avviare la sessione di registrazione.",
+      "pill": "REC · {{takes}} Take · {{size}}",
+      "pillStopped": "REC fermata: limite di dimensione",
+      "mark": "Non mi torna (M)",
+      "marked": "Segnato"
     }
   },
   "keybindings": {

@@ -57,6 +57,11 @@ export function keepAwake(active: boolean): Promise<void> {
   return invoke(`plugin:${PLUGIN}|keep_awake`, { payload: { active } });
 }
 
+/** `Intent.ACTION_SEND` of a file in the app's cache (the recording session's zip). */
+export function shareFileNative(path: string, mime = "application/zip"): Promise<void> {
+  return invoke(`plugin:${PLUGIN}|share_file`, { payload: { path, mime } });
+}
+
 /** `Intent.ACTION_VIEW`. http and https only. */
 export function openUrlNative(url: string): Promise<void> {
   return invoke(`plugin:${PLUGIN}|open_url`, { payload: { url } });

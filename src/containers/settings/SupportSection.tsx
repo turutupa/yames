@@ -6,6 +6,7 @@ import { ShareIcon } from "../main-window/ShareMenuPopover";
 import { ExportPracticeButton } from "../session/ExportPracticeButton";
 import { keepTakesStored, setKeepTakes } from "../../settings/takeDiagnostics";
 import { SwitchFace } from "./SwitchFace";
+import { RecordingSessionRow } from "./RecordingSessionRow";
 
 type ShareOption = (typeof SHARE_OPTIONS)[number];
 
@@ -160,6 +161,7 @@ export function SupportSection({
           save and choose to attach, never sent from here. */}
       <ExportPracticeButton appVersion={appVersion} className="toggle-btn" layout="row" />
       <KeepTakesRow />
+      <RecordingSessionRow />
 
       <h3 className="settings-subhead">{t("settings.support.supportTitle")}</h3>
       <p className="settings-section-intro">{t("settings.support.blurb")}</p>

@@ -476,6 +476,11 @@ impl OnsetDetector {
             tap.set_rate(sample_rate);
             tap.set_detection_delay_ns(core.detection_delay_ns());
         }
+        // A jam or free play kept by the recording session (`capture`): its
+        // own tap, filled whether or not the transport runs while it is armed.
+        let free_tap = crate::capture::global().free_tap();
+        free_tap.set_rate(sample_rate);
+        free_tap.set_detection_delay_ns(core.detection_delay_ns());
         let mut emit = |onset: Onset| on_onset(onset);
         let mut in_demo = false;
 
@@ -494,6 +499,14 @@ impl OnsetDetector {
                 if let Some(tap) = take_tap.as_ref() {
                     tap.idle();
                 }
+                // One atomic load unless a free play is being kept; then the
+                // ring's lock, as the playing branch below takes it.
+                if free_tap.is_armed() {
+                    let ai = audio_input.lock().unwrap();
+                    let ring = ai.ring();
+                    let r = ring.lock().unwrap();
+                    free_tap.pull(&r, crate::clock::now_ns());
+                }
                 continue;
             }
 
@@ -507,6 +520,7 @@ impl OnsetDetector {
                 if let Some(tap) = take_tap.as_ref() {
                     tap.pull(&r, crate::clock::now_ns());
                 }
+                free_tap.pull(&r, crate::clock::now_ns());
             }
             let now_ns = crate::clock::now_ns();
             core.process(now_ns, &tempo_ctx, &mut emit);

@@ -194,6 +194,8 @@ import {
   isTypingTarget,
 } from "../../hotkeys";
 import type { HotkeyAction } from "../../hotkeys";
+import { RecordingPill } from "./RecordingPill";
+import { useFreeCapture } from "./hooks/useFreeCapture";
 import "../../styles/audio-input-test.css";
 // Last: the five tools in the app's design language, over every tool's own
 // stylesheet (UX audit TOOL-1). Every rule is scoped to a tool's view.
@@ -616,6 +618,23 @@ export function MainWindow() {
     chart: heardChartNow,
     bpm: state.bpm,
     formBar: currentBeat?.formBar ?? 0,
+  });
+  // Recording session (card #109): a jam or the Session's free play is kept
+  // while it plays and the input listens. A finisher too, ungraded.
+  const freeKind = mode === "jam" ? "jam" : mode === "session" && sessionStep?.kind === "jam" ? (sessionStep.exerciseId ? "jam" : "freeplay") : null;
+  useFreeCapture({
+    active: freeKind !== null && state.isPlaying && evaluation.enabled,
+    context: {
+      kind: freeKind ?? "freeplay",
+      mode: "ungraded",
+      bpm: state.bpm,
+      jamId: heardJam?.id ?? null,
+      jamName: heardJam?.name ?? null,
+      ...(mode === "session" && sessionStep
+        ? { stepId: sessionStep.id, stepKind: sessionStep.kind, ...("exerciseId" in sessionStep && sessionStep.exerciseId ? { exerciseId: sessionStep.exerciseId } : {}), ...("pathId" in sessionStep && sessionStep.pathId ? { pathId: sessionStep.pathId } : {}) }
+        : {}),
+    },
+    heard: heardLive,
   });
   const heardShown = useMemo(
     () => (jamHear && heardJam ? heardLine(heardLive, displayTransposition(heardJam.transposition ?? "concert")) : null),
@@ -3211,6 +3230,7 @@ export function MainWindow() {
       onClose={whatsNew.dismiss}
       animate={!reducedMotion}
     />
+    <RecordingPill />
     </>
   );
 }

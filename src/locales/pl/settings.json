@@ -464,6 +464,25 @@
       "title": "Zachowaj moje ostatnie podejścia do diagnostyki",
       "hint": "Gdy podejście zostanie źle ocenione, jego dźwięk i to, czego oczekiwał Yames, można odtworzyć, żeby sprawdzić dlaczego. Zachowuje surowe nagranie z mikrofonu z 20 ostatnich podejść na tym urządzeniu (do około 460 MB); nic nie jest wysyłane. Domyślnie wyłączone.",
       "folder": "Folder: {{folder}}"
+    },
+    "recordingSession": {
+      "title": "Sesja nagrywania (dane testowe)",
+      "hint": "Do testowania Yames: gdy jest włączona, nagrywa surowe wejście mikrofonu lub instrumentu z każdego Podejścia, jamu i swobodnej gry, razem z tym, czego Podejście oczekiwało i jak zostało ocenione, do folderu na tym urządzeniu. Nic nie jest wysyłane; folder wysyłasz sam. Na początku i na końcu słychać krótki sygnał, aby dało się zgrać nagranie z telefonu robione równocześnie. Naciśnij M (lub stuknij „Coś nie tak”), gdy Podejście wydaje się źle ocenione. Wyłącza się po zamknięciu Yames.",
+      "status": "Nagrywanie: {{takes}} Podejść, {{size}}. Folder: {{folder}}",
+      "stopped": "Zatrzymano na limicie rozmiaru: kolejne Podejścia nie są zapisywane.",
+      "warn": "Ponad {{size}}: sprawdź wolne miejsce.",
+      "cap": "Przestań nagrywać przy (GB)",
+      "capHint": "Po osiągnięciu tego rozmiaru sesja przestaje zapisywać Podejścia. Podejście przy 48 kHz to ok. 6 MB na 30 s.",
+      "open": "Otwórz folder",
+      "zip": "Spakuj sesję",
+      "share": "Udostępnij sesję",
+      "zipped": "Spakowano: {{path}}",
+      "noSession": "Brak sesji nagrywania.",
+      "failed": "Nie udało się uruchomić sesji nagrywania.",
+      "pill": "REC · {{takes}} Podejść · {{size}}",
+      "pillStopped": "REC zatrzymane: limit rozmiaru",
+      "mark": "Coś nie tak (M)",
+      "marked": "Oznaczono"
     }
   },
   "keybindings": {

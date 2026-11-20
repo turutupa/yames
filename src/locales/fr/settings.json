@@ -464,6 +464,25 @@
       "title": "Garder mes dernières prises pour le dépannage",
       "hint": "Si une prise est mal notée, son audio et ce que Yames attendait peuvent être rejoués pour comprendre pourquoi. Garde l'enregistrement brut du micro de vos 20 dernières prises sur cet appareil (jusqu'à environ 460 Mo) ; rien n'est envoyé. Désactivé par défaut.",
       "folder": "Dossier : {{folder}}"
+    },
+    "recordingSession": {
+      "title": "Session d'enregistrement (données de test)",
+      "hint": "Pour tester Yames : tant qu'elle est active, enregistre l'entrée brute du micro ou de l'instrument de chaque Prise, jam et jeu libre, avec ce que chaque Prise attendait et sa note, dans un dossier de cet appareil. Rien n'est envoyé ; c'est vous qui envoyez le dossier. Un court bip retentit au début et à la fin, pour caler un enregistrement fait en même temps sur un téléphone. Appuyez sur M (ou touchez « Pas juste ») quand une Prise vous semble mal notée. Elle se désactive à la fermeture de Yames.",
+      "status": "Enregistrement : {{takes}} Prises, {{size}}. Dossier : {{folder}}",
+      "stopped": "Arrêtée à la taille limite : plus aucune Prise n'est gardée.",
+      "warn": "Plus de {{size}} : vérifiez l'espace libre.",
+      "cap": "Arrêter l'enregistrement à (Go)",
+      "capHint": "La session cesse de garder des Prises à cette taille. Une Prise à 48 kHz pèse environ 6 Mo pour 30 s.",
+      "open": "Ouvrir le dossier",
+      "zip": "Zipper la session",
+      "share": "Partager la session",
+      "zipped": "Zippée : {{path}}",
+      "noSession": "Aucune session d'enregistrement pour l'instant.",
+      "failed": "La session d'enregistrement n'a pas pu démarrer.",
+      "pill": "REC · {{takes}} Prises · {{size}}",
+      "pillStopped": "REC arrêté : taille limite",
+      "mark": "Pas juste (M)",
+      "marked": "Marquée"
     }
   },
   "keybindings": {

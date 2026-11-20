@@ -464,6 +464,25 @@
       "title": "Guardar mis últimas tomas para diagnosticar",
       "hint": "Si una toma se califica mal, su audio y lo que Yames esperaba pueden reproducirse para ver por qué. Guarda la grabación sin procesar del micrófono de tus 20 últimas tomas en este equipo (hasta unos 460 MB); no se envía nada. Desactivado por defecto.",
       "folder": "Carpeta: {{folder}}"
+    },
+    "recordingSession": {
+      "title": "Sesión de grabación (datos de prueba)",
+      "hint": "Para probar Yames: mientras está activa, graba la entrada en bruto del micrófono o del instrumento de cada Toma, jam y práctica libre, con lo que esperaba cada Toma y cómo se calificó, en una carpeta de este dispositivo. No se envía nada; la carpeta la envías tú. Suena un breve pitido al empezar y al terminar, para poder alinear una grabación del móvil hecha a la vez. Pulsa M (o toca \"Me sonó mal\") si una Toma parece mal calificada. Se apaga sola al cerrar Yames.",
+      "status": "Grabando: {{takes}} Tomas, {{size}}. Carpeta: {{folder}}",
+      "stopped": "Detenida en el límite de tamaño: no se guardan más Tomas.",
+      "warn": "Más de {{size}}: revisa el espacio libre.",
+      "cap": "Dejar de grabar a los (GB)",
+      "capHint": "La sesión deja de guardar Tomas a este tamaño. Una Toma a 48 kHz ocupa unos 6 MB por 30 s.",
+      "open": "Abrir carpeta",
+      "zip": "Comprimir sesión",
+      "share": "Compartir sesión",
+      "zipped": "Comprimida: {{path}}",
+      "noSession": "Aún no hay sesión de grabación.",
+      "failed": "No se pudo iniciar la sesión de grabación.",
+      "pill": "REC · {{takes}} Tomas · {{size}}",
+      "pillStopped": "REC detenida: límite de tamaño",
+      "mark": "Me sonó mal (M)",
+      "marked": "Marcada"
     }
   },
   "keybindings": {

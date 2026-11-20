@@ -464,6 +464,25 @@
       "title": "Sorun giderme için son çekimlerimi sakla",
       "hint": "Bir çekim yanlış puanlanırsa, sesi ve Yames'in beklediği şey nedenini bulmak için yeniden oynatılabilir. Son 20 çekiminin ham mikrofon kaydını bu cihazda saklar (yaklaşık 460 MB'a kadar); hiçbir şey gönderilmez. Varsayılan olarak kapalı.",
       "folder": "Klasör: {{folder}}"
+    },
+    "recordingSession": {
+      "title": "Kayıt oturumu (test verisi)",
+      "hint": "Yames'i test etmek için: açıkken her Çekimin, jamin ve serbest çalmanın ham mikrofon veya enstrüman girişini, her Çekimin ne beklediği ve nasıl notlandığıyla birlikte bu cihazdaki bir klasöre kaydeder. Hiçbir şey gönderilmez; klasörü siz gönderirsiniz. Başlarken ve biterken kısa bir sinyal çalar; böylece aynı anda telefonla yapılan bir kayıt hizalanabilir. Bir Çekim yanlış notlanmış gibi gelirse M'ye basın (veya \"Yanlış geldi\"ye dokunun). Yames kapanınca kendiliğinden kapanır.",
+      "status": "Kaydediliyor: {{takes}} Çekim, {{size}}. Klasör: {{folder}}",
+      "stopped": "Boyut sınırında durdu: artık Çekim saklanmıyor.",
+      "warn": "{{size}} üzerinde: boş alanınızı kontrol edin.",
+      "cap": "Kaydı şu boyutta durdur (GB)",
+      "capHint": "Oturum bu boyutta Çekim saklamayı bırakır. 48 kHz'de bir Çekim 30 sn için yaklaşık 6 MB'tır.",
+      "open": "Klasörü aç",
+      "zip": "Oturumu sıkıştır",
+      "share": "Oturumu paylaş",
+      "zipped": "Sıkıştırıldı: {{path}}",
+      "noSession": "Henüz kayıt oturumu yok.",
+      "failed": "Kayıt oturumu başlatılamadı.",
+      "pill": "REC · {{takes}} Çekim · {{size}}",
+      "pillStopped": "REC durdu: boyut sınırı",
+      "mark": "Yanlış geldi (M)",
+      "marked": "İşaretlendi"
     }
   },
   "keybindings": {

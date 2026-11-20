@@ -92,6 +92,14 @@ pub struct OpenUrl {
     pub url: String,
 }
 
+/// A file of the app's own cache to hand to another app (`ACTION_SEND`):
+/// the recording session's zip (card #109).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ShareFile {
+    pub path: String,
+    pub mime: String,
+}
+
 /// One channel carries every event the Android side raises, tagged.
 ///
 /// The alternative is `addPluginListener`, and it does not work for a plugin
@@ -176,6 +184,11 @@ async fn keep_awake<R: Runtime>(app: AppHandle<R>, payload: Toggle) -> Result<()
 #[tauri::command]
 async fn open_url<R: Runtime>(app: AppHandle<R>, payload: OpenUrl) -> Result<(), String> {
     call(&app, "openUrl", payload)
+}
+
+#[tauri::command]
+async fn share_file<R: Runtime>(app: AppHandle<R>, payload: ShareFile) -> Result<(), String> {
+    call(&app, "shareFile", payload)
 }
 
 #[tauri::command]
@@ -319,6 +332,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             request_microphone,
             keep_awake,
             open_url,
+            share_file,
             set_back_intercept,
             set_event_channel,
             set_light_system_bars,

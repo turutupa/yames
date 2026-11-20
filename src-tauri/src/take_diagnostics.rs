@@ -49,12 +49,9 @@ impl TakeDiagnostics {
         self.enabled.load(Ordering::Acquire)
     }
 
-    /// Write one Take: `take-<unix ms>-<count>.wav` and `.job.json`, which is
-    /// `job` with the audio's file name put in. Each is written under a
-    /// `.tmp` name and renamed when whole, the audio first, so a sidecar that
-    /// is there always names a finished recording; the count keeps two Takes
-    /// that close together apart. Failures are logged and swallowed:
-    /// troubleshooting must never cost a grade.
+    /// Write one Take ([`write_pair`]) and prune to the last [`KEEP`].
+    /// Failures are logged and swallowed: troubleshooting must never cost a
+    /// grade.
     pub fn write(&self, samples: &[f32], rate: u32, mut job: serde_json::Value) {
         if !self.enabled() || samples.is_empty() || rate == 0 {
             return;
@@ -62,32 +59,44 @@ impl TakeDiagnostics {
         let Some(dir) = self.dir.lock().unwrap_or_else(|e| e.into_inner()).clone() else {
             return;
         };
-        let ms = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis()).unwrap_or(0);
-        // Names sort by time: 13 digits of milliseconds until the year 2286,
-        // and a `take-<seconds>.wav` from before this sorts ahead of them.
-        let stem = format!("take-{ms:013}-{:04}", WRITTEN.fetch_add(1, Ordering::Relaxed) % 10_000);
-        let result = (|| -> Result<(), String> {
-            std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
-            let wav = dir.join(format!("{stem}.wav"));
-            let wav_partial = dir.join(format!("{stem}.wav.{PARTIAL}"));
-            let spec = hound::WavSpec { channels: 1, sample_rate: rate, bits_per_sample: 32, sample_format: hound::SampleFormat::Float };
-            let mut w = hound::WavWriter::create(&wav_partial, spec).map_err(|e| e.to_string())?;
-            for s in samples {
-                w.write_sample(*s).map_err(|e| e.to_string())?;
-            }
-            w.finalize().map_err(|e| e.to_string())?;
-            job["audio"] = serde_json::Value::String(format!("{stem}.wav"));
-            let job_partial = dir.join(format!("{stem}.job.json.{PARTIAL}"));
-            std::fs::write(&job_partial, serde_json::to_vec(&job).map_err(|e| e.to_string())?).map_err(|e| e.to_string())?;
-            std::fs::rename(&wav_partial, &wav).map_err(|e| e.to_string())?;
-            std::fs::rename(&job_partial, dir.join(format!("{stem}.job.json"))).map_err(|e| e.to_string())?;
-            prune(&dir);
-            Ok(())
-        })();
+        let result = write_pair(&dir, &next_stem(), samples, rate, &mut job).map(|_| prune(&dir));
         if let Err(e) = result {
             eprintln!("[yames] could not keep the Take for troubleshooting: {e}");
         }
     }
+}
+
+/// A new Take's file stem, `take-<unix ms>-<count>`. Names sort by time: 13
+/// digits of milliseconds until the year 2286, and a `take-<seconds>.wav` from
+/// before this sorts ahead of them; the count keeps two Takes written in the
+/// same millisecond apart.
+pub(crate) fn next_stem() -> String {
+    let ms = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis()).unwrap_or(0);
+    format!("take-{ms:013}-{:04}", WRITTEN.fetch_add(1, Ordering::Relaxed) % 10_000)
+}
+
+/// Write `<stem>.wav` (mono 32-bit float) and `<stem>.job.json` (`job`, with
+/// the audio's file name put in) into `dir`. Each under a `.tmp` name, renamed
+/// when whole, the audio first, so a sidecar that is there always names a
+/// finished recording. The bytes written. Blocks on the disk: never call it
+/// from an audio thread, the detector's thread or the analyzer's loop.
+pub(crate) fn write_pair(dir: &std::path::Path, stem: &str, samples: &[f32], rate: u32, job: &mut serde_json::Value) -> Result<u64, String> {
+    std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
+    let wav = dir.join(format!("{stem}.wav"));
+    let wav_partial = dir.join(format!("{stem}.wav.{PARTIAL}"));
+    let spec = hound::WavSpec { channels: 1, sample_rate: rate, bits_per_sample: 32, sample_format: hound::SampleFormat::Float };
+    let mut w = hound::WavWriter::create(&wav_partial, spec).map_err(|e| e.to_string())?;
+    for s in samples {
+        w.write_sample(*s).map_err(|e| e.to_string())?;
+    }
+    w.finalize().map_err(|e| e.to_string())?;
+    job["audio"] = serde_json::Value::String(format!("{stem}.wav"));
+    let body = serde_json::to_vec(job).map_err(|e| e.to_string())?;
+    let job_partial = dir.join(format!("{stem}.job.json.{PARTIAL}"));
+    std::fs::write(&job_partial, &body).map_err(|e| e.to_string())?;
+    std::fs::rename(&wav_partial, &wav).map_err(|e| e.to_string())?;
+    std::fs::rename(&job_partial, dir.join(format!("{stem}.job.json"))).map_err(|e| e.to_string())?;
+    Ok(44 + samples.len() as u64 * 4 + body.len() as u64)
 }
 
 /// Keep the newest [`KEEP`] Takes of `dir`; names sort by time. Partial files

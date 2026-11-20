@@ -46,6 +46,9 @@ tauri-plugin-dialog = "2"
 # does not implement, and a file the user chose must be REFUSED with a
 # message, never crash the command. Apache-2.0.
 hound = "3"
+# Recording session mode's "Zip session" (`capture.rs`): stored entries only,
+# already in the lock through the updater.
+zip = { version = "4", default-features = false }
 # The General MIDI synthesiser behind Songs (W28). Pure Rust, MIT, and no
 # dependencies at all beyond std — so it adds one package to Cargo.lock and
 # nothing to the build toolchain, which matters on a crate that already needs

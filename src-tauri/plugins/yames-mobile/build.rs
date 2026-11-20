@@ -6,6 +6,7 @@ const COMMANDS: &[&str] = &[
     "request_microphone",
     "keep_awake",
     "open_url",
+    "share_file",
     "set_back_intercept",
     "set_event_channel",
     "set_light_system_bars",

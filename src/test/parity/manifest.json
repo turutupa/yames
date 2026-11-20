@@ -161,7 +161,16 @@
     "harmony_mark_bar",
     "harmony_set_tempo",
     "harmony_start",
-    "harmony_stop"
+    "harmony_stop",
+    "capture_end",
+    "capture_free_begin",
+    "capture_free_end",
+    "capture_mark",
+    "capture_reveal",
+    "capture_set_context",
+    "capture_start",
+    "capture_status",
+    "capture_zip"
   ],
   "ipcCommands": [
     "analyze_attempt",
@@ -323,7 +332,16 @@
     "harmony_mark_bar",
     "harmony_set_tempo",
     "harmony_start",
-    "harmony_stop"
+    "harmony_stop",
+    "capture_end",
+    "capture_free_begin",
+    "capture_free_end",
+    "capture_mark",
+    "capture_reveal",
+    "capture_set_context",
+    "capture_start",
+    "capture_status",
+    "capture_zip"
   ],
   "commandsInvokedOutsideIpc": [
     "app_ready",
@@ -540,7 +558,16 @@
     "harmonySetTempo",
     "harmonyStart",
     "harmonyStop",
-    "onHarmonyReading"
+    "onHarmonyReading",
+    "captureEnd",
+    "captureFreeBegin",
+    "captureFreeEnd",
+    "captureMark",
+    "captureReveal",
+    "captureSetContext",
+    "captureStart",
+    "captureStatus",
+    "captureZip"
   ],
   "ipcWrappersWithoutCaller": [
     "clearSessionLogs",
