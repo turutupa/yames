@@ -37,14 +37,63 @@
       "minutes": "{{minutes}} min",
       "start": "Zaczynamy",
       "howLong": "Ile masz czasu? Minuty:",
-      "leftOff": "Gdzie skończyłeś",
-      "leftOffValue": {
-        "even": "{{value}}% równo przy {{bpm}} BPM. Dziś zaczynamy wolniej.",
-        "heard": "{{value}}% nut usłyszanych przy {{bpm}} BPM. Dziś zaczynamy wolniej.",
-        "accents": "{{value}}% akcentów trafionych przy {{bpm}} BPM. Dziś zaczynamy wolniej.",
-        "notes": "{{value}}% właściwych nut przy {{bpm}} BPM. Dziś zaczynamy wolniej."
+      "line": {
+        "first": "Pierwsza sesja pokaże, od czego zaczynasz. Nie musisz się przygotowywać.",
+        "slipped": {
+          "today": {
+            "bar": "{{exercise}}: wcześniej dziś takt {{bar}} melodii rozjechał się w {{count}} z {{of}} razy.",
+            "bars": "{{exercise}}: wcześniej dziś takty {{from}} do {{to}} melodii rozjechały się w {{count}} z {{of}} razy.",
+            "all": "{{exercise}}: wcześniej dziś cała melodia rozjechała się w {{count}} z {{of}} razy."
+          },
+          "yesterday": {
+            "bar": "{{exercise}}: wczoraj takt {{bar}} melodii rozjechał się w {{count}} z {{of}} razy.",
+            "bars": "{{exercise}}: wczoraj takty {{from}} do {{to}} melodii rozjechały się w {{count}} z {{of}} razy.",
+            "all": "{{exercise}}: wczoraj cała melodia rozjechała się w {{count}} z {{of}} razy."
+          },
+          "lastSession": {
+            "bar": "{{exercise}}: w ostatniej sesji takt {{bar}} melodii rozjechał się w {{count}} z {{of}} razy.",
+            "bars": "{{exercise}}: w ostatniej sesji takty {{from}} do {{to}} melodii rozjechały się w {{count}} z {{of}} razy.",
+            "all": "{{exercise}}: w ostatniej sesji cała melodia rozjechała się w {{count}} z {{of}} razy."
+          }
+        },
+        "startsThere": "Dziś zaczynamy od niego.",
+        "earned": {
+          "today": "{{exercise}}: wcześniej dziś twoje czyste tempo wzrosło do {{bpm}} BPM.",
+          "yesterday": "{{exercise}}: wczoraj twoje czyste tempo wzrosło do {{bpm}} BPM.",
+          "lastSession": "{{exercise}}: w ostatniej sesji twoje czyste tempo wzrosło do {{bpm}} BPM."
+        },
+        "earnedThen": {
+          "review": "Dziś czeka je krótka powtórka.",
+          "climb": "Dziś pójdzie szybciej.",
+          "keep": "Dziś jedno przejście, żeby je utrzymać."
+        },
+        "back": {
+          "even": "Ostatnia sesja, {{exercise}}: {{value}}% równo przy {{bpm}} BPM.",
+          "heard": "Ostatnia sesja, {{exercise}}: {{value}}% nut usłyszanych przy {{bpm}} BPM.",
+          "accents": "Ostatnia sesja, {{exercise}}: {{value}}% akcentów trafionych przy {{bpm}} BPM.",
+          "notes": "Ostatnia sesja, {{exercise}}: {{value}}% właściwych nut przy {{bpm}} BPM.",
+          "plain": "Ostatnia sesja skończyła się tak: {{exercise}} przy {{bpm}} BPM."
+        },
+        "backRungs": "Dziś zaczynamy o {{count}} szczebel niżej, niż zaczęlibyśmy.",
+        "backRungs_few": "Dziś zaczynamy o {{count}} szczeble niżej, niż zaczęlibyśmy.",
+        "backRungs_many": "Dziś zaczynamy o {{count}} szczebli niżej, niż zaczęlibyśmy.",
+        "backRungs_other": "Dziś zaczynamy o {{count}} szczebla niżej, niż zaczęlibyśmy.",
+        "ungraded": {
+          "today": "{{count}} minuta podejść wcześniej dziś, ostatnie: {{exercise}} przy {{bpm}} BPM.",
+          "today_few": "{{count}} minuty podejść wcześniej dziś, ostatnie: {{exercise}} przy {{bpm}} BPM.",
+          "today_many": "{{count}} minut podejść wcześniej dziś, ostatnie: {{exercise}} przy {{bpm}} BPM.",
+          "today_other": "{{count}} minuty podejść wcześniej dziś, ostatnie: {{exercise}} przy {{bpm}} BPM.",
+          "yesterday": "{{count}} minuta podejść wczoraj, ostatnie: {{exercise}} przy {{bpm}} BPM.",
+          "yesterday_few": "{{count}} minuty podejść wczoraj, ostatnie: {{exercise}} przy {{bpm}} BPM.",
+          "yesterday_many": "{{count}} minut podejść wczoraj, ostatnie: {{exercise}} przy {{bpm}} BPM.",
+          "yesterday_other": "{{count}} minuty podejść wczoraj, ostatnie: {{exercise}} przy {{bpm}} BPM.",
+          "lastSession": "{{count}} minuta podejść w ostatniej sesji, ostatnie: {{exercise}} przy {{bpm}} BPM.",
+          "lastSession_few": "{{count}} minuty podejść w ostatniej sesji, ostatnie: {{exercise}} przy {{bpm}} BPM.",
+          "lastSession_many": "{{count}} minut podejść w ostatniej sesji, ostatnie: {{exercise}} przy {{bpm}} BPM.",
+          "lastSession_other": "{{count}} minuty podejść w ostatniej sesji, ostatnie: {{exercise}} przy {{bpm}} BPM."
+        },
+        "samePlace": "Dziś zaczynamy w tym samym miejscu."
       },
-      "leftOffPlain": "{{bpm}} BPM. Dziś zaczynamy wolniej.",
       "whatsIn": "Co w niej jest i dlaczego",
       "min": "MIN",
       "nothing": "Na razie nie ma nic do zagrania.",

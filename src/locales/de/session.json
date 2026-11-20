@@ -37,14 +37,55 @@
       "minutes": "{{minutes}} Min.",
       "start": "Los geht's",
       "howLong": "Wie viel Zeit hast du? Minuten:",
-      "leftOff": "Wo du aufgehört hast",
-      "leftOffValue": {
-        "even": "{{value}} % gleichmäßig bei {{bpm}} BPM. Heute geht es langsamer los.",
-        "heard": "{{value}} % der Töne gehört bei {{bpm}} BPM. Heute geht es langsamer los.",
-        "accents": "{{value}} % der Akzente getroffen bei {{bpm}} BPM. Heute geht es langsamer los.",
-        "notes": "{{value}} % richtige Töne bei {{bpm}} BPM. Heute geht es langsamer los."
+      "line": {
+        "first": "Deine erste Session findet heraus, wo du anfängst. Du musst nichts vorbereiten.",
+        "slipped": {
+          "today": {
+            "bar": "{{exercise}}: Takt {{bar}} der Melodie ist heute in {{count}} von {{of}} Durchgängen verrutscht.",
+            "bars": "{{exercise}}: Takt {{from}} bis {{to}} der Melodie ist heute in {{count}} von {{of}} Durchgängen verrutscht.",
+            "all": "{{exercise}}: Die ganze Melodie ist heute in {{count}} von {{of}} Durchgängen verrutscht."
+          },
+          "yesterday": {
+            "bar": "{{exercise}}: Takt {{bar}} der Melodie ist gestern in {{count}} von {{of}} Durchgängen verrutscht.",
+            "bars": "{{exercise}}: Takt {{from}} bis {{to}} der Melodie ist gestern in {{count}} von {{of}} Durchgängen verrutscht.",
+            "all": "{{exercise}}: Die ganze Melodie ist gestern in {{count}} von {{of}} Durchgängen verrutscht."
+          },
+          "lastSession": {
+            "bar": "{{exercise}}: Takt {{bar}} der Melodie ist in deiner letzten Session in {{count}} von {{of}} Durchgängen verrutscht.",
+            "bars": "{{exercise}}: Takt {{from}} bis {{to}} der Melodie ist in deiner letzten Session in {{count}} von {{of}} Durchgängen verrutscht.",
+            "all": "{{exercise}}: Die ganze Melodie ist in deiner letzten Session in {{count}} von {{of}} Durchgängen verrutscht."
+          }
+        },
+        "startsThere": "Heute geht es dort los.",
+        "earned": {
+          "today": "{{exercise}}: Dein sauberes Tempo ist heute auf {{bpm}} BPM gestiegen.",
+          "yesterday": "{{exercise}}: Dein sauberes Tempo ist gestern auf {{bpm}} BPM gestiegen.",
+          "lastSession": "{{exercise}}: Dein sauberes Tempo ist in deiner letzten Session auf {{bpm}} BPM gestiegen."
+        },
+        "earnedThen": {
+          "review": "Heute gibt es dazu eine kurze Wiederholung.",
+          "climb": "Heute geht es damit schneller.",
+          "keep": "Heute gibt es dazu einen Durchlauf, damit es bleibt."
+        },
+        "back": {
+          "even": "Letzte Session, {{exercise}}: {{value}} % gleichmäßig bei {{bpm}} BPM.",
+          "heard": "Letzte Session, {{exercise}}: {{value}} % der Töne gehört bei {{bpm}} BPM.",
+          "accents": "Letzte Session, {{exercise}}: {{value}} % der Akzente getroffen bei {{bpm}} BPM.",
+          "notes": "Letzte Session, {{exercise}}: {{value}} % richtige Töne bei {{bpm}} BPM.",
+          "plain": "Die letzte Session endete bei {{exercise}} mit {{bpm}} BPM."
+        },
+        "backRungs": "Heute startest du eine Stufe tiefer als sonst.",
+        "backRungs_other": "Heute startest du {{count}} Stufen tiefer als sonst.",
+        "ungraded": {
+          "today": "{{count}} Minute Takes heute, der letzte: {{exercise}} bei {{bpm}} BPM.",
+          "today_other": "{{count}} Minuten Takes heute, der letzte: {{exercise}} bei {{bpm}} BPM.",
+          "yesterday": "{{count}} Minute Takes gestern, der letzte: {{exercise}} bei {{bpm}} BPM.",
+          "yesterday_other": "{{count}} Minuten Takes gestern, der letzte: {{exercise}} bei {{bpm}} BPM.",
+          "lastSession": "{{count}} Minute Takes in deiner letzten Session, der letzte: {{exercise}} bei {{bpm}} BPM.",
+          "lastSession_other": "{{count}} Minuten Takes in deiner letzten Session, der letzte: {{exercise}} bei {{bpm}} BPM."
+        },
+        "samePlace": "Heute an derselben Stelle."
       },
-      "leftOffPlain": "{{bpm}} BPM. Heute geht es langsamer los.",
       "whatsIn": "Was drin ist, und warum",
       "min": "MIN",
       "nothing": "Noch gibt es nichts zu spielen.",
