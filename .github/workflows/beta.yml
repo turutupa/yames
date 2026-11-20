@@ -36,7 +36,9 @@ name: Beta (test builds)
 # Z) * 10000 + N (scripts/beta-feed.mjs, build.gradle.kts).
 #
 # Frugal on purpose: no LLM smoke job, no notes job, no AAB. Same features
-# as release.yml (coach-llm-vulkan on Windows/Linux, -metal on macOS).
+# as release.yml (coach-llm-vulkan on Windows/Linux, -metal on macOS, plus
+# detect-tract, the note verifier, everywhere; Android gets detect-tract from
+# scripts/tauri.mjs).
 on:
   # `gh workflow run` only finds workflows that exist on the default branch.
   # Until this file is on main, a push to `beta-build` starts a run with the
@@ -101,11 +103,11 @@ jobs:
             process.exit(1);
           }
           const rows = [];
-          if (asked.includes("windows")) rows.push({ label: "windows", os: "windows-latest", target: "", args: "--bundles nsis", features: "coach-llm-vulkan" });
-          if (asked.includes("linux")) rows.push({ label: "linux", os: "ubuntu-22.04", target: "", args: "--bundles appimage", features: "coach-llm-vulkan" });
+          if (asked.includes("windows")) rows.push({ label: "windows", os: "windows-latest", target: "", args: "--bundles nsis", features: "coach-llm-vulkan,detect-tract" });
+          if (asked.includes("linux")) rows.push({ label: "linux", os: "ubuntu-22.04", target: "", args: "--bundles appimage", features: "coach-llm-vulkan,detect-tract" });
           if (asked.includes("macos")) {
-            rows.push({ label: "macos-aarch64", os: "macos-latest", target: "aarch64-apple-darwin", args: "--target aarch64-apple-darwin --bundles app,dmg", features: "coach-llm-metal" });
-            rows.push({ label: "macos-x86_64", os: "macos-latest", target: "x86_64-apple-darwin", args: "--target x86_64-apple-darwin --bundles app,dmg", features: "coach-llm-metal" });
+            rows.push({ label: "macos-aarch64", os: "macos-latest", target: "aarch64-apple-darwin", args: "--target aarch64-apple-darwin --bundles app,dmg", features: "coach-llm-metal,detect-tract" });
+            rows.push({ label: "macos-x86_64", os: "macos-latest", target: "x86_64-apple-darwin", args: "--target x86_64-apple-darwin --bundles app,dmg", features: "coach-llm-metal,detect-tract" });
           }
           console.log(`desktop=${JSON.stringify({ include: rows })}`);
           console.log(`has_desktop=${rows.length > 0}`);

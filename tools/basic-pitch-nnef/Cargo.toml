@@ -1,0 +1,21 @@
+# Converts Basic Pitch's ONNX file into the NNEF archive the app's `tract`
+# backend loads (`src-tauri/models/basic-pitch/nmp.nnef.tar`), and checks the
+# two against each other. A tool, not part of the app: the app links only
+# `tract-nnef`, which is about 5 MB smaller than `tract-onnx` with its
+# protobuf parser and ONNX op set (`plans/detection/RUNTIME.md`).
+#
+#   cargo run --release --manifest-path tools/basic-pitch-nnef/Cargo.toml
+#
+# The tract version MUST equal the app's (`src-tauri/Cargo.toml`): the
+# archive uses tract's own `tract_core` NNEF extension.
+[package]
+name = "basic-pitch-nnef"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+tract-onnx = { version = "=0.23.10", default-features = false }
+tract-nnef = "=0.23.10"
