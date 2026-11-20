@@ -16,6 +16,10 @@ Read this, then `PLAN.md` (the order), `PROGRESS.md` (the index and the decision
 - **Never end your turn while an agent is running.** Print mode stops background agents when the turn
   ends. Wait with `~/.local/bin/wait-until --timeout 580 --any file /tmp/yames-dgx-yield file
   <worktree>/plans/coach/progress/<leg>.md` in a loop; reports arrive as messages.
+- **Size the legs smaller than this session did.** c1b1, c2a1, c2a2 and c4c each ran to 440k to 540k
+  tokens, far past the 300k cap in their own brief, and c2a2 stopped without reporting. Split a leg that
+  builds a screen, its strings, its layout scenes and its translations into two (build; then scenes,
+  translations and gates), and tell each agent to hand off at 300k rather than push on.
 - An agent past about 300k tokens is not resumed: a fresh "b" agent takes its fixes on the same
   worktree and branch (ms1 was resumed once at 280k and it was the limit; c2a1 and c3a got fresh
   agents: c2a1b, c3ab).
@@ -57,7 +61,7 @@ In flight on 2026-11-20 (check `git worktree list` and `git branch --no-merged c
 
 | Leg | Worktree / branch | State | Next |
 |---|---|---|---|
-| **c2a2** | `~/yames-coach-c2a2`, `coach-c2a2` | Running: Listen on the tools' transport, the tool line and note, Tool runs on Progress, `CoachCard` deleted | Screenshots against DESIGN 7; **reviewer on the `useSession.ts` diff**; merge; then delivery 1c/1d. |
+| **c2a2** (**the one open leg; start here**) | `~/yames-coach-c2a2`, `coach-c2a2` (worktree kept, `node_modules` linked) | **Stopped without a final report** at about 13:01 on 2026-11-20, past 500k tokens: do not resume that agent. Committed on the branch (5 commits on top of `5600c7c9`): Listen on the tools' transport, the tool's coach line and note, History → Progress → Tool runs, the old card, its feed and Start deleted, strings in fifteen locales, the mobile cut recorded, `plans/coach/progress/c2a2.md` (13 KB: read it first). **Uncommitted in the worktree** (its layout helper's work, unverified): `src/shots/mockIpc.ts`, `src/styles/shell.css`, `src/styles/tool-runs.css`, `tests/layout/ask.spec.ts`, `tests/layout/smooth.spec.ts`, new `src/shots/toolCoachFixtures.ts` and `tests/layout/tool-coach.spec.ts`. Its last logs: `/tmp/coach-c2a2/` (`pw-toolcoach.log`, `pw-others.log`, `pw-tsc.log`). The branch is behind `coach` by c1c, c3a, ms2 and c4c. | Launch a fresh **c2a2b** agent on the same worktree (the shape of the c2a1b prompt: inspect and commit the uncommitted files as `WIP(coach-c2a2): the stopped run's layout scenes, unverified`; `git merge coach` and resolve; finish whatever `c2a2.md` and `c2a2-listen-and-no-start.md` show undone, the COA table included; all gates and the full layout suite; screenshots in three themes; the report). Then: look at the screenshots against DESIGN 7; a **reviewer on the `useSession.ts` diff** (`git diff 5600c7c9..coach-c2a2 -- src/hooks/useSession.ts src/containers/practice-coach/ src/test/parity/`); merge; gates; **delivery 1d** (no Start button anywhere; the tools keep their coach through Listen). |
 
 Briefed and not started (files in `plans/tasks/coach/`): `c1b2-today-speech-keys.md` and
 `t1a-tool-registry.md` (both can start now). Not yet briefed: the `cues` content legs for the other
