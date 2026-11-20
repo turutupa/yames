@@ -10,8 +10,9 @@
  * chord tones and bending to pitch are a small "your turn" minority, self-checked
  * and marked "not checked yet", because the graders for them do not exist.
  */
-import { definePath } from "../spec";
+import { definePath, withCues } from "../spec";
 import type { ExerciseSpec, VariantParams } from "../spec";
+import { BLUES_PENTATONICS_CUES } from "./blues-pentatonics-cues";
 import type { PassBar } from "../format";
 import { handAt, ladder, moveChart, pentatonic, shiftFrets, swing } from "../templates";
 import { BOX_KEYS, LANDING_REVIEW, MINOR_BLUES, QUICK_CHANGE, SIXTHS, STRAIGHT_FEEL, UP_THE_NECK } from "./blues-more";
@@ -184,7 +185,7 @@ const HAMMER_IS =
 const VIBRATO_IS = "Vibrato is a bend kept very small: push the string a little and let it back, over and over, at an even speed.";
 const ROOT_IS = "The root is the note a chord is named after.";
 
-export default definePath({
+export default withCues(definePath({
   id: "blues-pentatonics",
   title: "Blues and Pentatonics",
   kind: "theory",
@@ -1474,4 +1475,4 @@ export default definePath({
       ],
     },
   ],
-});
+}), BLUES_PENTATONICS_CUES);
