@@ -225,6 +225,42 @@ supplies; without it the binary dies at load with
 `test:highbpm` need nothing special — `src-tauri/build.rs` covers the
 integration-test harnesses.
 
+## Local test builds (no GitHub Actions)
+
+Two scripts build what the beta builds, on our own machines:
+
+- **`scripts/build-windows-arm64.ps1`**: a native `aarch64-pc-windows-msvc`
+  NSIS installer for Windows on ARM (the beta only ships x86_64, which an
+  ARM PC runs emulated). Same features as the beta (`coach-llm-vulkan,
+  detect-tract`). It differs from the x86_64 build in four ways, all
+  forced by the platform: **clang-cl** is the C/C++ compiler (llama.cpp's
+  CPU backend refuses MSVC on ARM; ring and tract's arm64 assembly want
+  clang too), with `/EHsc` passed by hand; ggml's **OpenMP is off**
+  (`CMAKE_DISABLE_FIND_PACKAGE_OpenMP`: clang-cl's OpenMP needs
+  `libomp.dll` shipped beside the exe; ggml uses its own thread pool
+  instead, which only matters for CPU inference); the updater artifact is
+  not signed (`createUpdaterArtifacts: false`); and the version is
+  `<next minor>-local.<stamp>`. OpenSSL stays out as in CI. Needs LLVM
+  (clang-cl and libclang; clang 23 works with aubio's bindgen 0.58 here),
+  VS Build Tools with the ARM64 tools, and LunarG's **ARM64** Vulkan SDK.
+  Only `Include\`, `Lib\vulkan-1.lib` and `Bin\glslc.exe` are needed:
+  `7zz x` the 7z archives embedded in the SDK installer gets them without
+  an admin install. A warm rebuild takes about 4 minutes on the 20-core N1X.
+  Run it hidden (the header shows how) and keep `-Priority BelowNormal`
+  while someone is using the PC.
+- **`scripts/build-android-local.sh`**: the arm64 APK, signed with the
+  TEST key (`~/secrets/yames-android-test.txt`; it refuses any alias other
+  than `yames-test`), built as the beta: `YAMES_CHANNEL=beta`, version
+  `X.Y.0-beta.<last beta.yml run + 1>` (`BETA_N` to override), so it
+  installs over the current beta. On the DGX (aarch64 Linux, where Google
+  ships no host tools) it builds an NDK shim around the host's clang-18
+  (`~/android-ndk-local`, linked into `$ANDROID_HOME/ndk/`, which is the
+  only place the Tauri CLI looks), and runs the SDK's x86_64 `aapt2` under
+  qemu-user with an x86_64 glibc at `$ANDROID_HOME/x86_64-root`. Needs a
+  JDK 17 with `javac` (`~/tools/jdk-17*`), `platforms;android-36` and
+  `build-tools;35.0.0`. It copies the APK to the RTX by scp unless
+  `RTX_DEST=` is empty.
+
 ## Audio-safety gate — the click-jitter probe
 
 ROADMAP §1 principle 1 says nothing may add jitter to the metronome, and
