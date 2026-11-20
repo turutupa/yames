@@ -28,6 +28,7 @@ export { CURRICULUM_RULES, checkCurriculum, curriculumOrder } from "./curriculum
 export type { CurriculumIssue } from "./curriculum";
 export type { Issue, PathDoc };
 export { checkOverlay, englishStrings, mergeTranslations, readOverlay, serializeOverlay, stringsToTranslate };
+export { CUE_MAX_CHARS } from "./format";
 
 export function allSpecs(): readonly PathSpec[] {
   return SPECS;

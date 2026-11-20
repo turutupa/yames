@@ -6,6 +6,7 @@
  */
 import type {
   Crossing,
+  Cue,
   FeedbackTiming,
   LevelId,
   LandingAccept,
@@ -116,6 +117,13 @@ export type ExerciseSpec = {
   purpose: string;
   howTo: string[];
   coach: string;
+  /**
+   * One thing to try, by what a Take measured (`format.ts` `Cue`): orders of at
+   * most 48 characters, `more` an index into `howTo` above. A cue that names a
+   * fret, a string or a note is said again for each variant, or left out of a
+   * variant it cannot be said truthfully for. See `plans/coach/CUES_GUIDE.md`.
+   */
+  cues?: Cue[];
   /** The tab, written or from a template. See `tabDsl.ts`. Optional with `vary`. */
   tab?: string;
   vary?: VarySpec;

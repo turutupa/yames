@@ -134,6 +134,43 @@ describe("checkOverlay", () => {
   });
 });
 
+describe("cues", () => {
+  const cued: PathDoc = JSON.parse(JSON.stringify(ALT));
+  const ex = cued.steps[0].exercises[0];
+  ex.cues = [
+    { when: "even", say: "Count every eighth out loud.", general: true },
+    { when: "late", say: "Put the open B right on the click.", more: 0 },
+  ];
+
+  it("are keyed by position, `exercise.<id>.cue.<n>`, right after the coach line, and only `say` is text", () => {
+    const keys = Object.keys(extractStrings(cued));
+    const at = keys.indexOf(`exercise.${ex.id}.coachLine`);
+    expect(keys.slice(at + 1, at + 3)).toEqual([`exercise.${ex.id}.cue.0`, `exercise.${ex.id}.cue.1`]);
+    const o: StringsOverlay = {
+      version: 1,
+      path: cued.id,
+      lng: "de",
+      strings: { [`exercise.${ex.id}.cue.1`]: "Die leere B-Saite genau auf den Klick." },
+      from: { [`exercise.${ex.id}.cue.1`]: sourceHash("Put the open B right on the click.") },
+    };
+    const local = localizePack(cued, o).steps[0].exercises[0];
+    expect(local.cues).toEqual([ex.cues![0], { when: "late", say: "Die leere B-Saite genau auf den Klick.", more: 0 }]);
+  });
+
+  it("over 48 characters in a language is an error for `check`, counted in characters, not bytes", () => {
+    const en = extractStrings(cued);
+    const key = `exercise.${ex.id}.cue.0`;
+    const long = "Zähle jede Achtel laut mit und bleib dabei ganz ruhig.";
+    const fits = "每个八分音符都大声数出来，一直数到最后一个音为止，不要停下来。";
+    const o: StringsOverlay = { version: 1, path: cued.id, lng: "de", strings: { [key]: long }, from: { [key]: sourceHash(en[key]) } };
+    expect(checkOverlay(en, o).long).toEqual([key]);
+    expect(checkOverlay(en, { ...o, strings: { [key]: fits } }).long).toEqual([]);
+    // A coach line is not a cue: its length is not this check's business.
+    const line = `exercise.${ex.id}.coachLine`;
+    expect(checkOverlay(en, { ...o, strings: { [line]: long + long }, from: { [line]: sourceHash(en[line]) } }).long).toEqual([]);
+  });
+});
+
 describe("todo and merge", () => {
   it("merges stamped, fills repeated English once, refuses unknown keys", () => {
     const en = { a: "Same", b: "Same", c: "Other" };

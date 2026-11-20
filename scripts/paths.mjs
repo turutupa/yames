@@ -191,7 +191,8 @@ function checkStrings(pipeline, id, { verbose = false } = {}) {
       const r = pipeline.checkOverlay(english.strings, overlay);
       for (const key of r.stale) console.log(`ERROR strings: i18n/${lng}/${doc.id}.json has "${key}", which the English does not`);
       for (const key of r.placeholders) console.log(`ERROR strings: i18n/${lng}/${doc.id}.json "${key}" changes a placeholder or markup`);
-      errors += r.stale.length + r.placeholders.length;
+      for (const key of r.long) console.log(`ERROR strings: i18n/${lng}/${doc.id}.json "${key}" is a cue longer than ${pipeline.CUE_MAX_CHARS} characters`);
+      errors += r.stale.length + r.placeholders.length + r.long.length;
       if (verbose) for (const key of r.numbers) console.log(`warn  strings: i18n/${lng}/${doc.id}.json "${key}" has different numbers from the English`);
       const notes = [];
       if (r.missing.length) notes.push(`${r.missing.length} missing`);
@@ -262,6 +263,7 @@ function stringsMerge(pipeline, lng, file) {
     const r = pipeline.checkOverlay(english, merged.overlay);
     console.log(`wrote src/paths/packs/i18n/${lng}/${pathId}.json: ${r.translated} of ${Object.keys(english).length}`);
     for (const key of r.placeholders) console.log(`ERROR ${lng}/${pathId} "${key}" changes a placeholder or markup`);
+    for (const key of r.long) console.log(`ERROR ${lng}/${pathId} "${key}" is a cue longer than ${pipeline.CUE_MAX_CHARS} characters: ${merged.overlay.strings[key]}`);
     for (const key of r.numbers) console.log(`warn  ${lng}/${pathId} "${key}" has different numbers: ${english[key]}\n      ${merged.overlay.strings[key]}`);
   }
   if (refused > 0) fail(`${refused} refused.`);
