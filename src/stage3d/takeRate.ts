@@ -38,17 +38,16 @@
  * Whether the 3D neck is drawn at the display's rate during a Take, or held
  * to 30 as it has been since it was built.
  *
- * Off, on purpose, on 2026-11-19. Everything it needs is here and tested, but
- * the one thing that may turn it on is the click's gate with the neck at the
- * display's rate (`AGENTS.md`, "Frame rate during a Take"): no missed beat,
- * jitter inside the gate, on a quiet machine. That day the machine was never
- * quiet (load 8 to 96 from other work), so the runs that were made say
- * nothing either way and are recorded as such in `plans/HANDOFF-smooth.md`.
- * When the gate has passed, this becomes `true` and nothing else changes.
- * To try it on one machine before then, put `"stage.takeFps": "display"` in
- * its settings store.
+ * On since 2026-11-20, when the click's gate passed with the neck at the
+ * display's rate (`AGENTS.md`, "Frame rate during a Take"): on a quiet
+ * machine (load under 2), two pairs of e2e probe runs on the GB10's X server,
+ * the neck's frames 17 ms apart at 60 against 34 ms at 30, p99 jitter 0.82 and
+ * 0.98 ms at 60 against 0.84 and 1.04 ms at 30, and zero missed beats,
+ * callback allocations or dropped notifications in all of them. Runs:
+ * `~/projects/.preview/smooth/beta9-1120-0231/`. `takeCeiling` and the
+ * frame-time fallback still hold a machine that cannot keep up at 30.
  */
-export const NECK_FOLLOWS_DISPLAY = false;
+export const NECK_FOLLOWS_DISPLAY = true;
 
 /** A Take on a machine that should not be asked for more. */
 export const TAKE_FPS_LOW = 30;

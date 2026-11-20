@@ -351,11 +351,11 @@ the three read one governor, `src/stage3d/takeRate.ts`:
 - **The lane and the cursor follow the display**, up to 120 frames a second
   (`TAKE_FPS_MAX`; a 144 or 165 Hz display is drawn in full, a 240 Hz one
   every other frame, so the spacing is always even).
-- **The neck is still held to 30 (`TAKE_FPS_LOW`) during a Take**, behind one
-  switch: `NECK_FOLLOWS_DISPLAY` in `takeRate.ts`. On, it follows the display
-  as the lane does, and everything below applies to it. **It is off because
-  the gate that may turn it on has not been passed**, not because a
-  measurement said no: see the numbers under this list.
+- **The neck follows the display too** since 2026-11-20 (`NECK_FOLLOWS_DISPLAY`
+  in `takeRate.ts`, on since the gate below passed on a quiet machine: p99
+  0.82 and 0.98 ms at 60 against 0.84 and 1.04 ms at 30, zero missed beats,
+  allocations or dropped notifications; runs in
+  `~/projects/.preview/smooth/beta9-1120-0231/`). Everything below applies to it.
   `"stage.takeFps": "display"` in a machine's settings store turns it on for
   that machine alone (`?takefps=display` in the shot harness).
 - **Everything starts at 30 where the machine says it should**

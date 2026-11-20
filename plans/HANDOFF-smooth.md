@@ -225,3 +225,15 @@ transitions, the meter and now the Take's rate.
 - `~/projects/.smooth-base` (the "before" worktree at 642b03a1) has been removed.
 - `~/projects/.target-smooth`: the e2e build (2.7 GB). Delete it once
   the probe has been run from it.
+
+## 2026-11-20: the gate passed, the neck follows the display
+
+On a quiet machine (load 0.4 to 1.7), `/tmp/probe-ab-revamp.sh` ran the e2e
+probe at 30, 60, 30, 60 and auto on revamp 063f4dd9 (output:
+`~/projects/.preview/smooth/beta9-1120-0231/`). On the GB10's X server the
+neck's frames were 17 ms apart at 60 and 34 ms at 30; p99 jitter 0.82 / 0.98
+ms at 60 against 0.84 / 1.04 ms at 30; zero missed beats, callback
+allocations or dropped notifications in every run (the headless probe alone
+reads 1.25 to 1.35 ms p99 on this box, so its 1 ms advisory bar is the box's
+floor, not the app). `NECK_FOLLOWS_DISPLAY` is now `true`; `takeCeiling` and
+the frame-time fallback are unchanged. Owner feel test: card #95.
