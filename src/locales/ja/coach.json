@@ -14,17 +14,17 @@
     }
   },
   "coachCard": {
-    "end": "終了",
-    "start": "開始",
     "clearAll": "すべて消去",
-    "feed": "フィード",
-    "history": "履歴",
-    "emptyTitle": "クリックに合わせて弾いている間、コーチが聴いています。",
-    "emptyHint": "このパネル上部の「開始」を押して弾き始めてください。演奏中にタイミングについてコメントし、「終了」を押すとまとめます。",
     "today": "今日",
     "yesterday": "昨日",
     "noteSpacingTrend": "音符間隔の推移",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
+  },
+  "toolCoach": {
+    "runScore": "スコア {{score}}、{{bpm}} BPM",
+    "runScoreNoBpm": "スコア {{score}}",
+    "sessionScore": "セッションスコア {{score}} · {{word}}",
+    "openRuns": "「上達」でツールの記録を開く"
   },
   "coachModel": {
     "label": "コーチのモデル",
@@ -99,8 +99,6 @@
     "beatPlacement": "ビートの位置"
   },
   "coachReport": {
-    "segment": "セグメント",
-    "thinkingAria": "コーチが話す準備をしています",
     "qualifier": {
       "excellent": "素晴らしい",
       "good": "いいね",

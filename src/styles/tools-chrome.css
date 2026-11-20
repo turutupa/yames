@@ -507,7 +507,7 @@
   color: var(--btn-disabled-ink);
 }
 
-.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .transport-note {
+.main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"]) .transport-listen {
   border-color: var(--tk-line-strong);
   border-radius: 10px;
   font-family: var(--tk-body);

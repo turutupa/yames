@@ -59,7 +59,7 @@
     },
     "history": {
       "title": "Chưa có gì ở đây.",
-      "hint": "Mỗi lần bạn nhấn Kết thúc hoặc dừng máy đếm nhịp, nó sẽ hiện ở đây. Các buổi tập từ Hôm nay nằm trong Tiến bộ."
+      "hint": "Bật Nghe trong Máy đếm nhịp, Luyện tempo, Setlist hoặc Jam rồi chơi. Khi bạn tắt, lần chạy đó được giữ lại ở đây."
     },
     "drill": {
       "linear": "Tuyến tính: nhịp độ tăng dần từ BPM đầu đến mục tiêu, từng bậc một.",
@@ -74,8 +74,8 @@
     "startsAt": "Bắt đầu từ",
     "listening": "Đang nghe",
     "inputOff": "Tắt đầu vào",
-    "coachOnPlay": "Huấn luyện viên nghe khi bạn bấm phát",
-    "coachQuiet": "Huấn luyện viên im lặng giữa mỗi bước",
+    "listen": "Nghe",
+    "listenHint": "Bật để huấn luyện viên nghe bạn chơi ở đây. Nó dùng đầu vào âm thanh của bạn cho đến khi bạn tắt hoặc rời khỏi các công cụ.",
     "countIn": "Đếm vào",
     "backToStart": "Về đầu bài",
     "setUpInput": "Thiết lập đầu vào"

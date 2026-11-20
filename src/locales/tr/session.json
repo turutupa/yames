@@ -488,6 +488,9 @@
     },
     "progress": {
       "title": "İlerleme",
+      "toolRuns": "Araç çalışmaları",
+      "toolRunsIntro": "Koçun dinlediği her bölüm, araçlarda ve seanslarda, en yeniden başlayarak.",
+      "toolRunsDeleteFailed": "Bu silinemedi, bu yüzden hiçbir şey kaldırılmadı. Birazdan tekrar dene.",
       "intro": "Buradaki her şey senin çalışından ölçüldü: duyulan notalar, zamanlama düzgünlüğü, temiz tempo.",
       "cleanMeans": "Herhangi art arda sekiz ölçü boyunca çıtayı geçtiğin en hızlı tempo.",
       "sparkLabel": "Denemeler boyunca düzgünlük, {{title}}",

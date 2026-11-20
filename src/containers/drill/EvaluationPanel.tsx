@@ -11,7 +11,7 @@ import "../../styles/evaluation-panel.css";
 
 /**
  * Apply the JS-side legacy scoring formula to every loaded session.
- * Mirrors `CoachCard.rescoreHistory` — see that file for the rationale
+ * Mirrors `rescoreHistory` in `containers/coach/ToolRuns.tsx` — see that file for the rationale
  * (sessions saved with the pre-fix segment-aware Rust score get
  * re-derived on read so the history view is internally consistent).
  */

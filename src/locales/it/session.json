@@ -500,6 +500,9 @@
     },
     "progress": {
       "title": "Progressi",
+      "toolRuns": "Esecuzioni degli strumenti",
+      "toolRunsIntro": "Ogni tratto che il coach ha ascoltato, negli strumenti e nelle sessioni, dal più recente.",
+      "toolRunsDeleteFailed": "Non è stato possibile eliminarlo, quindi non è stato rimosso nulla. Riprova tra un momento.",
       "intro": "Tutto qui è stato misurato da come suoni: note sentite, regolarità del tempo, tempo pulito.",
       "cleanMeans": "Il tempo più veloce a cui hai superato l'asticella, per otto battute di fila qualsiasi.",
       "sparkLabel": "Regolarità nelle varie take, {{title}}",

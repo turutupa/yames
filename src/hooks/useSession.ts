@@ -9,7 +9,7 @@ import {
   coachResident,
   subscribeCoachModel,
 } from "./coachLoader";
-import { loadHistoryWithBudget, renderGreeting } from "../coach/greeting";
+import { loadHistoryWithBudget } from "../coach/historyBudget";
 import { safeRephrase } from "../coach/rephraseGuard";
 import {
   appendCoachUtterance,
@@ -67,7 +67,7 @@ import { coachDebug } from "../utils/debug";
 import { meterKey } from "../utils/meter";
 import { useRealtimeTips } from "../containers/practice-coach/hooks/useRealtimeTips";
 import { useSegmentCoach } from "../containers/practice-coach/hooks/useSegmentCoach";
-import { askCoach, showToolsCoach } from "../containers/coach/askStore";
+import { appendAskTurn, askCoach, askTurnId } from "../containers/coach/askStore";
 
 // ── Realtime-tip evaluation window ──────────────────────────────────
 // The gatekeeper consumes the last N BeatFeedback entries when deciding
@@ -1280,8 +1280,8 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     startedAtRef.current = now;
     setStartedAt(now);
     if (!quiet) {
-      showToolsCoach();
-
+      // Listen turned on (DESIGN 7) opens no panel: the line and the note
+      // under the stage read this feed.
       // Clear the feed synchronously BEFORE awaiting history. Without this,
       // any messages from a prior session stay visible for up to 500ms
       // while `loadHistoryWithBudget` races, producing a "stale state" flash
@@ -1297,14 +1297,11 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     // No model load here: the selector's loader keeps the chosen model
     // resident across the app (`hooks/coachLoader.ts`).
 
-    // ── C2: Context-Aware Greetings ────────────────────────────
-    // Race session-history loading against a 500ms budget. If history
-    // arrives in time we pick from the 4-tier hierarchy; if not, we
-    // ship the tier-4 ("cold") greeting and DO NOT replace it once
-    // history finally arrives (avoids "greeting flicker" bug).
-    const greetingId = crypto.randomUUID();
-    // Two reads, one budget. The greeting is about the last thing the player
-    // did, whatever they did it on, so it keeps the thirty-session slice.
+    // Race session-history loading against a 500ms budget. No greeting any
+    // more (DESIGN 7: Today's line replaced it, leg c2a2); the history is
+    // still read for the chips, the tips and the narrative below.
+    // Two reads, one budget. The chips' "last session" is about the last thing
+    // the player did, whatever they did it on, so it keeps the thirty-session slice.
     // Everything in `presetAwareness` is about THIS preset, and the slice was
     // starving it: thirty sessions across every preset in the app routinely
     // hold one or two of any given one, and its gates need three at the
@@ -1348,14 +1345,6 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
       return bpmCeiling ?? undefined;
     })();
 
-    const greeting = renderGreeting({
-      presetId,
-      presetName,
-      bpm: playBpmRef.current,
-      history,
-      now,
-    });
-
     // ── C1: Seed session narrative ────────────────────────────
     // Compact 2KB running log of the session arc. Prefer a real
     // prior-session summary when history is available; falls back to
@@ -1371,98 +1360,12 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
       now,
     });
 
-    if (!quiet) setMessages([{
-      id: greetingId,
-      type: "session-start",
-      timestamp: now,
-      content: greeting.text,
-      // Spinner-until-audio: hide the text until the matching
-      // `tts-speech-started` event fires (or until `speakAndReveal`
-      // safety-net force-reveals). Without this the user reads the
-      // greeting seconds before they hear it — see the comment on
-      // `speakAndReveal`.
-      pending: true,
-    }]);
-
-    // Defer TTS until we know whether the LLM is going to rephrase the
-    // greeting — otherwise we'd speak the template, then speak the
-    // rephrased version a moment later, and the user hears the
-    // greeting twice. When no LLM is loaded, speak the template right
-    // away since it's all we'll get; the spinner reveals in lockstep
-    // with the audio.
-    if (!quiet && !coachLoadedRef.current) {
-      speakAndReveal(greetingId, greeting.text);
-    }
-
-    // Record the greeting as the first coach utterance in the narrative.
-    if (!quiet && narrativeRef.current) {
-      narrativeRef.current = appendCoachUtterance(
-        narrativeRef.current,
-        greeting.text,
-        now,
-      );
-    }
-
     // Awaited, inside the lifecycle queue: an end asked for now runs after
     // the input is on, so its stop cannot overtake this start (B1).
     if (options?.listen !== false) {
       await evaluation.setListening(true).catch((e: unknown) => {
         console.error("[startSession] the input would not start:", e);
       });
-    }
-
-    // LLM paraphrase path — the coach LLM (when available) gets the
-    // already-filled template + structured context and is asked to
-    // rephrase for variety while preserving every number. The plan
-    // calls this "LLM as paraphraser, never deciding what to say."
-    // If the model is unavailable or times out, the template greeting
-    // above ships as-is and is spoken via the fallback branches below.
-    if (!quiet && coachLoadedRef.current) {
-      const token = createSessionToken(sessionIdRef, activeRef);
-      const tierGreeting = greeting; // capture for the closure
-      (async () => {
-        try {
-          // Tier-1 paraphrase keeps the rich structured context so the
-          // LLM has the same numbers to anchor on. Lower tiers feed a
-          // minimal hint.
-          let context: string;
-          if (tierGreeting.tier === "preset-with-history") {
-            context = `Rephrase this practice-coach greeting for a player of ${instrumentLabel} starting a session. Preserve every number and the preset name exactly. Keep it to 1-2 sentences, warm but specific.\n\nOriginal: "${tierGreeting.text}"\n\nStructured facts (do NOT add new ones):\n${JSON.stringify(tierGreeting.context, null, 2)}`;
-          } else {
-            context = `Rephrase this practice-coach greeting for a player of ${instrumentLabel}. Preserve every number; keep it warm and short (1-2 sentences).\n\nOriginal: "${tierGreeting.text}"`;
-          }
-          // The model may reword the greeting, never add to it: a rephrase
-          // that brings a number or a unit of its own is dropped for the
-          // template (it once invented "this week's 120 BPM reps").
-          const rephrased = safeRephrase(tierGreeting.text, await coachGenerate("greeting", context));
-          if (token.isStaleOrInactive()) return;
-          if (rephrased === tierGreeting.text) {
-            // LLM returned nothing useful — fall back to speaking the
-            // template greeting we've already shown in the feed. The
-            // message stays `pending: true` until the audio starts.
-            speakAndRevealRef.current(greetingId, tierGreeting.text);
-            return;
-          }
-          setMessages((prev) => prev.map((m) =>
-            m.id === greetingId ? { ...m, content: rephrased } : m
-          ));
-          speakAndRevealRef.current(greetingId, rephrased);
-          // Replace the template coach utterance with the LLM rephrase
-          // so downstream LLM calls see the actual greeting the user heard.
-          if (narrativeRef.current) {
-            narrativeRef.current = appendCoachUtterance(
-              narrativeRef.current,
-              rephrased,
-            );
-          }
-        } catch {
-          // LLM errored — fall back to the template greeting, but only
-          // if the session is still live (same sid AND still active).
-          if (!token.isStaleOrInactive()) {
-            speakAndRevealRef.current(greetingId, tierGreeting.text);
-          }
-        }
-      })();
     }
   }, [evaluation, presetId, presetName, maybeSpeak, instrumentLabel, speakAndReveal]);
 
@@ -1784,22 +1687,46 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     lifecycle.current = next.catch(() => {});
     return next;
   }, []);
-  const startSession = useCallback(
-    (options?: StartSessionOptions) => inTurn(() => startNowRef.current(options)),
+  /**
+   * The last start or end asked for and not yet finished. `isActive()` answers
+   * as of the calls made: a session whose end is queued is ending, not
+   * someone's to ride (Listen's end on leaving the tools, then Today's Start
+   * inside the start's window, used to make the Session take the ending
+   * session as the player's and run with the input off). Once the queue has
+   * drained, `activeRef` is the answer again.
+   */
+  const queuedRef = useRef<{ op: "start" | "end" } | null>(null);
+  const queue = useCallback(
+    (op: "start" | "end", work: () => Promise<void>): Promise<void> => {
+      const mark = { op };
+      queuedRef.current = mark;
+      const p = inTurn(work);
+      const settle = () => {
+        if (queuedRef.current === mark) queuedRef.current = null;
+      };
+      p.then(settle, settle);
+      return p;
+    },
     [inTurn],
   );
-  const isActive = useCallback(() => activeRef.current, []);
-  const endSession = useCallback(() => inTurn(() => endNowRef.current()), [inTurn]);
+  const startSession = useCallback(
+    (options?: StartSessionOptions) => queue("start", () => startNowRef.current(options)),
+    [queue],
+  );
+  const isActive = useCallback(
+    () => (queuedRef.current ? queuedRef.current.op === "start" : activeRef.current),
+    [],
+  );
+  const endSession = useCallback(() => queue("end", () => endNowRef.current()), [queue]);
 
   /**
    * Phase 5 — route a chip tap (or its follow-up affordance) into the feed.
    *
    * Three actions are supported:
-   *   - `answer`: appends a user-chat bubble (the chip label, so the
-   *     transcript reads naturally) and a coach-chat bubble (the
-   *     pre-resolved answer text). For LLM chips (`answer === null`)
-   *     the chip's label is asked in Ask (`askCoach`), where the
-   *     conversation lives since leg c2a1.
+   *   - `answer`: opens Ask with the chip's label and its pre-resolved
+   *     answer in the thread (leg c2a2: the feed is gone). For LLM chips
+   *     (`answer === null`) the chip's label is asked in Ask (`askCoach`),
+   *     where the conversation lives since leg c2a1.
    *   - `set-bpm`: applies a delta to the current BPM via the optional
    *     `setBpm` callback (no-op when not wired). The delta is clamped
    *     to the metronome's safe range to mirror chip rendering.
@@ -1816,14 +1743,6 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
       case "answer": {
         const chip = action.chip;
         if (!chip) return;
-        // User-chat bubble first so the transcript reads naturally.
-        const userMsg: FeedMessage = {
-          id: crypto.randomUUID(),
-          type: "user-chat",
-          timestamp: Date.now(),
-          content: chip.label,
-        };
-        setMessages((prev) => [...prev, userMsg]);
         if (narrativeRef.current) {
           narrativeRef.current = appendUserAction(
             narrativeRef.current,
@@ -1832,24 +1751,19 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
         }
         if (chip.answer != null) {
           // Canned / template-fill — answer was resolved at chip
-          // selection time. Land it immediately, but spin until voice
-          // arrives so the text doesn't beat the audio.
-          const coachMsgId = crypto.randomUUID();
-          const coachMsg: FeedMessage = {
-            id: coachMsgId,
-            type: "coach-chat",
-            timestamp: Date.now(),
-            content: chip.answer,
-            pending: voiceMode === "voice",
-          };
-          setMessages((prev) => [...prev, coachMsg]);
+          // selection time. The note's chips open Ask (DESIGN 7, leg
+          // c2a2): the question and its answer land in Ask's thread, the
+          // answer as the app's own words, and are spoken as before.
+          askCoach();
+          appendAskTurn({ id: askTurnId(), kind: "user", text: chip.label });
+          appendAskTurn({ id: askTurnId(), kind: "app", text: chip.answer });
           if (narrativeRef.current) {
             narrativeRef.current = appendCoachUtterance(
               narrativeRef.current,
               chip.answer,
             );
           }
-          speakAndRevealRef.current(coachMsgId, chip.answer, "normal");
+          maybeSpeak(chip.answer, "normal");
         } else {
           // LLM pathway — the chip label is asked in Ask, where the
           // model can handle it as a question.

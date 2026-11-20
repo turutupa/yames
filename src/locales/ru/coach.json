@@ -14,17 +14,17 @@
     }
   },
   "coachCard": {
-    "end": "Завершить",
-    "start": "Старт",
     "clearAll": "Очистить всё",
-    "feed": "Лента",
-    "history": "История",
-    "emptyTitle": "Тренер слушает, пока ты играешь под клик.",
-    "emptyHint": "Нажми «Старт» вверху этой панели и играй. Он комментирует твой тайминг по ходу и подводит итог, когда нажмёшь «Завершить».",
     "today": "Сегодня",
     "yesterday": "Вчера",
     "noteSpacingTrend": "Тренд промежутков",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
+  },
+  "toolCoach": {
+    "runScore": "Оценка {{score}} на {{bpm}} BPM",
+    "runScoreNoBpm": "Оценка {{score}}",
+    "sessionScore": "Оценка сессии {{score}} · {{word}}",
+    "openRuns": "Открыть «Запуски инструментов» в «Прогрессе»"
   },
   "coachModel": {
     "label": "Модель тренера",
@@ -99,8 +99,6 @@
     "beatPlacement": "Попадание в долю"
   },
   "coachReport": {
-    "segment": "Отрезок",
-    "thinkingAria": "Тренер готовится заговорить",
     "qualifier": {
       "excellent": "Отлично",
       "good": "Хорошо",

@@ -14,17 +14,17 @@
     }
   },
   "coachCard": {
-    "end": "結束",
-    "start": "開始",
     "clearAll": "清空",
-    "feed": "動態",
-    "history": "歷史",
-    "emptyTitle": "你跟著節拍器演奏時，教練會在一旁聆聽。",
-    "emptyHint": "點擊此面板頂部的「開始」，然後演奏。教練會邊聽邊點評你的節奏，並在你點擊「結束」時做總結。",
     "today": "今天",
     "yesterday": "昨天",
     "noteSpacingTrend": "音符間距趨勢",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
+  },
+  "toolCoach": {
+    "runScore": "得分 {{score}}，{{bpm}} BPM",
+    "runScoreNoBpm": "得分 {{score}}",
+    "sessionScore": "這次練習得分 {{score}} · {{word}}",
+    "openRuns": "在「進度」中開啟工具紀錄"
   },
   "coachModel": {
     "label": "教練模型",
@@ -99,8 +99,6 @@
     "beatPlacement": "落拍位置"
   },
   "coachReport": {
-    "segment": "段落",
-    "thinkingAria": "教練正在準備發言",
     "qualifier": {
       "excellent": "優秀",
       "good": "不錯",

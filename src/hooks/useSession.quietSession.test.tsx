@@ -135,15 +135,16 @@ describe("whose feed it is", () => {
     expect(result.current.messages.some((m) => m.type === "session-start")).toBe(false);
   });
 
-  it("the player's own session still greets and still ends with its report", async () => {
+  it("the player's own session (Listen) opens no panel, greets nobody and still ends with its report", async () => {
     setInvokeResponse("get_final_session_report", () => REPORT);
     const { result } = renderSession();
     await act(async () => {
       await result.current.startSession();
     });
-    // The panel opens on the tools' coach (Ask's "Tools coach" section).
-    expect(getAskState()).toMatchObject({ open: true, section: "tools" });
-    expect(result.current.messages.some((m) => m.type === "session-start")).toBe(true);
+    // Listen turned on (DESIGN 7, leg c2a2): no panel, no feed, no greeting;
+    // the line and the note under the stage read the messages.
+    expect(getAskState().open).toBe(false);
+    expect(result.current.messages.some((m) => m.type === "session-start")).toBe(false);
     await act(async () => {
       await result.current.endSession();
     });

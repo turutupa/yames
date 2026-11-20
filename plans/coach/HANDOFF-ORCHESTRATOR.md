@@ -44,6 +44,29 @@ Read this, then `PLAN.md` (the order), `PROGRESS.md` (the index and the decision
   that two-line script if `/tmp` was cleared: `cd` there, `exec npx playwright test --trace off "$@"`).
 - Never: GitHub (no push, issues, PRs, boards), `npm install`, `npm run tauri dev`, `rm`, `sudo`.
 
+## Session 2 (started 2026-11-20 13:45 PT): what changed in how the build runs
+
+- **The rules pasted into every prompt** are `plans/tasks/coach/RULES-FOR-PROMPTS.md` (250k tokens a
+  leg, a commit at every milestone, the daytime limits). Paste the block, with the leg's name filled in.
+- **`run.sh` applies the owner's daytime limits by itself** (weekdays 7 AM to 8 PM Pacific): `nice`,
+  4 cargo jobs, 2 Playwright workers, 4 vitest workers, and a lock (`/tmp/coach-heavy.lock`) so only one
+  heavy command runs at a time across all agents. Agents start heavy commands in the background and
+  wait. The full layout suite runs only after 8 PM: legs run named specs and the orchestrator runs the
+  full suite on `coach` in the evening.
+- **Legs are split**: t1a → `t1a1-tool-runner.md`, `t1a2-confirm-tools.md`; c1b2 →
+  `c1b2a-today-line.md`, `c1b2b-voice-and-keys.md`. The cue legs share `cues-content.md`: one Path a
+  leg (a second only if the agent is under 110k tokens), in worktrees `~/yames-coach-cues<N>`. The
+  queue of Paths, in order: rhythm-foundations, first-chords, blues-pentatonics, chords-in-a-key,
+  know-the-neck, scales-and-modes, classic-rock, legato, triads, funk-lines, metal-rhythm,
+  arpeggios-over-changes, sweep-picking, tapping, shred. Cue legs never conflict with each other (a
+  Path's own cue file, spec line, pack and overlays).
+- **The Windows run is blocked from here.** The bundle and the script were copied
+  (`C:\Users\delgado\src\yames-coach.bundle`, `yames-coach-test.ps1`; the local copies are in
+  `~/scratch/yt-coach/`), but the session's permission mode refused the `ssh rtx ... powershell.exe`
+  call that runs it. Not retried another way (the owner's rule). The owner can run it with one line
+  (in `STATUS.md`); it fetches `coach` into `refs/remotes/dgx/coach`, tests in a separate worktree
+  `C:\yt-coach\wt`, and leaves the owner's working tree alone.
+
 ## State (update this section at every merge)
 
 Merged on `coach`, in order: c0 (bus, context, source line), c1a (takeNote, rounds, lean, heardIt), pm
@@ -57,7 +80,11 @@ Cancel, checksum, low storage; reviewed twice), c4c (the `cues` field, Alternate
 marked "for a polish leg" in `PROGRESS.md` (the drawer covering the note at 1024 px; "Up to N" beside
 "Faster"; the strip's label against its cells).
 
-In flight on 2026-11-20 (check `git worktree list` and `git branch --no-merged coach`):
+**Session 2:** c2a2 (+ c2a2b) merged, reviewed twice, **delivery 1d** made (no Start button). The c2a2
+row in the table below is history. In flight since: see `git worktree list`; the legs' prompts follow
+`RULES-FOR-PROMPTS.md` and the leg files named in "Session 2" above.
+
+In flight on 2026-11-20 at the end of session 1 (check `git worktree list` and `git branch --no-merged coach`):
 
 | Leg | Worktree / branch | State | Next |
 |---|---|---|---|

@@ -585,7 +585,8 @@ export type SessionLog = {
  * the segment went"), the chip-prompt is an input affordance FOR the
  * user ("here's what you can ask next"). They used to share a single
  * card and the chips looked like part of the coach's commentary —
- * see CoachFeedMessage.tsx for the rendering split.
+ * the tool note (`ToolCoach.tsx`) and a run's report on Tool runs
+ * (`toolRuns/RunReport.tsx`) keep them apart.
  */
 export type FeedMessageType = "session-start" | "mini-report" | "session-end" | "system" | "coach-tip" | "user-chat" | "coach-chat" | "chip-prompt";
 

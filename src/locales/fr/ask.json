@@ -9,10 +9,6 @@
     "placeholder": "Demande à propos de cet écran, de tes prises ou de tes parcours",
     "send": "Envoyer",
     "writing": "Rédaction d'une réponse…",
-    "sections": {
-      "ask": "Demander",
-      "tools": "Coach des outils"
-    },
     "screen": {
       "today": "Aujourd'hui",
       "paths": "Parcours",

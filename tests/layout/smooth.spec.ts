@@ -31,6 +31,18 @@ const WIDE = { width: 1400, height: 900 };
 const PHONE = { width: 390, height: 844 };
 const WINDOW_MS = 2500;
 
+/**
+ * Renders of a component by its name, however the dev build spelled it.
+ * `export const X = memo(function X …)` is served with the inner function
+ * renamed `X2` (the module already has an `X`), so a count read under `X`
+ * alone stays 0 whatever the component does.
+ */
+function rendersOf(s: PerfSample, name: string): number {
+  return Object.entries(s.renders)
+    .filter(([n]) => n === name || new RegExp(`^${name}\\d+$`).test(n))
+    .reduce((sum, [, v]) => sum + v, 0);
+}
+
 /** Up to three windows of a running scene; the one with the fewest long tasks. */
 async function bestWindow(page: Page): Promise<PerfSample> {
   let best: PerfSample | null = null;
@@ -184,17 +196,71 @@ test("the open Ask panel on a tool screen does not re-render with the beat", asy
    * Review of leg c2a1: the tools' coach inside Ask was a new element at
    * every render of the shell, which re-renders at every report from the
    * engine, so the panel's `memo` did nothing. The drill is climbing, the
-   * click playing, Ask open over it with the tools' coach as its second
-   * section: the shell commits, the panel does not.
+   * click playing, Ask open over it: the shell commits, the panel does not.
+   * (Since c2a2 the tools' coach is not in Ask at all; this still holds the
+   * panel's own `memo`.)
    */
   await installPerf(page, { countRenders: true });
   await openShot(page, "drill", WIDE);
   await page.locator(".rail-footer .rail-action").first().click();
   await expect(page.locator(".ask-panel")).toBeVisible();
-  await expect(page.locator('[data-testid="ask-section-tools"]')).toBeVisible();
   const s = await samplePerf(page, WINDOW_MS);
   expect(s.commits, "the click is playing: the shell commits as the engine reports").toBeGreaterThan(0);
-  expect(s.renders.AskPanel ?? 0, `AskPanel rendered in ${s.commits} commits`).toBe(0);
+  expect(rendersOf(s, "AskPanel"), `AskPanel rendered in ${s.commits} commits`).toBe(0);
+});
+
+test("the tools' coach under the stage does not re-render with the beat while Listen is on", async ({ page }) => {
+  test.slow();
+  /*
+   * Leg c2a2: `ToolCoach` sits under every tool's stage, inside the shell
+   * that re-renders at each report from the engine. It is `memo` and none of
+   * its props change at a beat, so with the click playing and Listen on the
+   * shell commits and it does not. Listen first, then the click, the way a
+   * player does it (the metronome: its tempo stays put, so no settings change
+   * opens a new run under the sample).
+   */
+  await installPerf(page, { countRenders: true });
+  await openShot(page, "metronome", WIDE);
+  const listen = page.locator('[data-testid="transport-listen"]');
+  await listen.click();
+  await expect(listen).toHaveAttribute("aria-checked", "true");
+  await expect(page.locator('[data-testid="tool-coach"]')).toBeVisible();
+  await page.locator(".transport-play").click();
+  await expect(page.locator(".transport-play.playing")).toBeVisible();
+  // The run's own start (`runStartedAt`) and the status chip's "playing" are
+  // one render each, as the click starts; let them land before sampling.
+  await page.waitForTimeout(1200);
+  /*
+   * Asked of ToolCoach's own fiber, not of `perf.ts`'s commit walk: that walk
+   * does not reach the shell's main content (it counts the Transport 0 times
+   * in a window where its bar count visibly changes), so a 0 from it here
+   * would prove nothing. A function component that renders gets a new hook
+   * list; one that `memo` bails out of keeps the one it had. So: the hook
+   * lists on the fiber pair before the window, and after it.
+   */
+  await page.evaluate(() => {
+    type F = { type: unknown; return: F | null; alternate: F | null; memoizedState: unknown };
+    const el = document.querySelector('[data-testid="tool-coach"]')!;
+    const key = Object.keys(el).find((k) => k.startsWith("__reactFiber$"))!;
+    let f: F | null = (el as unknown as Record<string, F>)[key];
+    while (f && !(typeof f.type === "function" && /^ToolCoach\d*$/.test((f.type as { name: string }).name))) f = f.return;
+    const w = window as unknown as { __TC__: { fiber: F; seen: unknown[] } };
+    w.__TC__ = { fiber: f!, seen: [f!.memoizedState, f!.alternate?.memoizedState] };
+  });
+  const rendered = () =>
+    page.evaluate(() => {
+      const { fiber, seen } = (window as unknown as { __TC__: { fiber: { memoizedState: unknown; alternate: { memoizedState: unknown } | null }; seen: unknown[] } }).__TC__;
+      return [fiber.memoizedState, fiber.alternate?.memoizedState].some((s) => s !== undefined && !seen.includes(s));
+    });
+  expect(await page.evaluate(() => !!(window as unknown as { __TC__?: { fiber: unknown } }).__TC__?.fiber), "found ToolCoach's fiber").toBe(true);
+  const s = await samplePerf(page, WINDOW_MS);
+  expect(s.commits, "the click is playing: the shell commits as the engine reports").toBeGreaterThan(0);
+  expect(await rendered(), `ToolCoach rendered during ${s.commits} commits of the shell`).toBe(false);
+  expect(rendersOf(s, "ToolCoach"), `ToolCoach counted in ${s.commits} commits`).toBe(0);
+  // And the check can fail: turning Listen off is a change ToolCoach renders for.
+  await page.locator('[data-testid="transport-listen"]').click();
+  await expect(page.locator('[data-testid="transport-listen"]')).toHaveAttribute("aria-checked", "false");
+  await expect.poll(rendered, { message: "ToolCoach renders when Listen goes off" }).toBe(true);
 });
 
 test("the level meter pulses without reading the layout", async ({ page }) => {

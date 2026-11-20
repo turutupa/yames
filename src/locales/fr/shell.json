@@ -59,7 +59,7 @@
     },
     "history": {
       "title": "Rien ici pour l’instant.",
-      "hint": "Chaque fois que vous appuyez sur Terminer ou arrêtez le métronome, cela apparaît ici. Vos séances du jour sont dans Progrès."
+      "hint": "Activez Écouter dans le Métronome, la Rampe, la Setlist ou le Jam et jouez. Quand vous le coupez, le passage est gardé ici."
     },
     "drill": {
       "linear": "Linéaire : le tempo monte du BPM de départ vers la cible, palier par palier.",
@@ -74,8 +74,8 @@
     "startsAt": "Départ à",
     "listening": "À l'écoute",
     "inputOff": "Entrée coupée",
-    "coachOnPlay": "Le coach écoute dès que vous lancez la lecture",
-    "coachQuiet": "Le coach se tait pendant une étape",
+    "listen": "Écouter",
+    "listenHint": "Activez pour que le coach écoute votre jeu ici. Il utilise votre entrée audio jusqu'à ce que vous la coupiez ou quittiez les outils.",
     "countIn": "Décompte",
     "backToStart": "Revenir au début",
     "setUpInput": "Configurer l'entrée"

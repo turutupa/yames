@@ -207,40 +207,6 @@
   }
 }
 
-/* Ask | Tools coach: the segmented control's look (global.css, "B · Tonal"). */
-.ask-sections {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
-  gap: 4px;
-  padding: 3px;
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--text-primary) 5%, transparent);
-}
-.ask-section {
-  min-height: 34px;
-  padding: 4px 10px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text-secondary);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.2;
-  overflow-wrap: anywhere;
-}
-/* Light themes give every bare button a fill; the unchosen segment has none. */
-.ask-panel .ask-sections .ask-section:not([aria-selected="true"]) {
-  background: transparent;
-  box-shadow: none;
-}
-.ask-panel .ask-sections .ask-section[aria-selected="true"] {
-  background: var(--btn-sel);
-  box-shadow: var(--btn-sel-ring);
-  color: var(--btn-tint-ink);
-}
-
 /* "Looking at: …": one quiet line, not a box. */
 .ask-context {
   margin: 0;
@@ -413,34 +379,6 @@
   line-height: 1.4;
   color: var(--text-tertiary, var(--text-secondary));
   overflow-wrap: anywhere;
-}
-
-/* ── The tools' coach, in its section until c2a2 ───────────────────── */
-.ask-tools {
-  flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-/* `.coach-card.coach-card-embedded`: coach-card.css hides any card that is not
-   "open" (its old closed state); this one is never a panel of its own. */
-.ask-tools > .coach-card.coach-card-embedded {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 0;
-  width: auto;
-  min-width: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-.ask-tools > .coach-card-embedded .coach-card-inner {
-  opacity: 1;
-  min-width: 0;
-  flex: 1 1 auto;
-  min-height: 0;
 }
 
 /* ── The Session bar's Ask pill, and the label during a Take ─────────── */

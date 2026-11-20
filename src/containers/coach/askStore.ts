@@ -7,17 +7,14 @@
  * changing and the panel's shape changing (dock, drawer, sheet). Anything in
  * the app may open Ask (the rail, the phone's header, the Session bar, a key,
  * a "?" chip on a coach note) without a prop being threaded down to it:
- * `askCoach` below is that one function. And `useSession` (the tools' coach)
- * opens the panel when the player presses its Start, which it used to do
- * with a `cardOpen` state of its own.
+ * `askCoach` below is that one function. Since leg c2a2 Ask is only Ask: the
+ * tools' coach (Listen, its line and its note) opens no panel, and its old
+ * History is on Progress → Tool runs.
  *
  * Nothing here talks to the model. The host (`useCoachPanel`) registers the
  * function that answers a question; this file only keeps the turns.
  */
 import { useSyncExternalStore } from "react";
-
-/** "ask": the conversation. "tools": the tools' coach (Start, Feed, History) until c2a2. */
-export type AskSection = "ask" | "tools";
 
 export type AskTurn =
   | { id: string; kind: "user"; text: string }
@@ -49,7 +46,6 @@ export type AskHandler = (request?: AskRequest) => void;
 
 export type AskState = {
   open: boolean;
-  section: AskSection;
   turns: readonly AskTurn[];
   /** The Ask key was pressed during a Take: the panel opens on the result. */
   deferred: boolean;
@@ -68,7 +64,6 @@ export type AskState = {
 
 const INITIAL: AskState = {
   open: false,
-  section: "ask",
   turns: [],
   deferred: false,
   focusPending: false,
@@ -125,7 +120,6 @@ export function openAsk(request: AskRequest = {}): void {
   }
   set({
     open: true,
-    section: "ask",
     deferred: false,
     focusPending: request.focus === true,
     about: request.about?.trim() || null,
@@ -152,19 +146,9 @@ export function toggleAsk(request: AskRequest = {}): void {
   else openAsk(request);
 }
 
-/** The tools' coach was started by the player's own press: show its section. */
-export function showToolsCoach(): void {
-  if (!state.open) returnFocus = activeElement();
-  set({ open: true, section: "tools", deferred: false });
-}
-
 /** The panel took (or could not take) the focus it was asked for. */
 export function consumeAskFocus(): void {
   if (state.focusPending) set({ focusPending: false });
-}
-
-export function setAskSection(section: AskSection): void {
-  if (state.section !== section) set({ section });
 }
 
 /** The host says whether a Take is running; the store asks before opening. */

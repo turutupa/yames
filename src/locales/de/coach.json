@@ -14,17 +14,17 @@
     }
   },
   "coachCard": {
-    "end": "Beenden",
-    "start": "Start",
     "clearAll": "Alles löschen",
-    "feed": "Feed",
-    "history": "Verlauf",
-    "emptyTitle": "Dein Coach hört zu, während du zum Klick spielst.",
-    "emptyHint": "Drück oben in diesem Bereich auf Start und spiel los. Er kommentiert dein Timing unterwegs und fasst zusammen, wenn du auf Beenden drückst.",
     "today": "Heute",
     "yesterday": "Gestern",
     "noteSpacingTrend": "Notenabstands-Trend",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
+  },
+  "toolCoach": {
+    "runScore": "Score {{score}} bei {{bpm}} BPM",
+    "runScoreNoBpm": "Score {{score}}",
+    "sessionScore": "Session-Score {{score}} · {{word}}",
+    "openRuns": "Tool-Läufe unter Fortschritt öffnen"
   },
   "coachModel": {
     "label": "Coach-Modell",
@@ -99,8 +99,6 @@
     "beatPlacement": "Beat-Platzierung"
   },
   "coachReport": {
-    "segment": "Abschnitt",
-    "thinkingAria": "Der Coach bereitet sich vor, zu sprechen",
     "qualifier": {
       "excellent": "Ausgezeichnet",
       "good": "Gut",

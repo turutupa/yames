@@ -487,3 +487,130 @@
     display: none;
   }
 }
+
+/* --- the tools' coach, under the stage (DESIGN 7) ------------------------- */
+
+/* Between the stage and the transport, in the stage's width. Absent while
+   Listen is off and nothing is left to say, so the tools look as they always
+   did; while it is on, one row (the line, or nothing yet, and the status). */
+.tool-coach {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(820px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 4px 0 12px;
+}
+.tool-coach-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 28px;
+}
+.tool-coach-line {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+.tool-coach-line .coach-line {
+  flex: 1 1 260px;
+  font-size: 15px;
+}
+.tool-coach-spacer {
+  flex: 1;
+}
+.tool-coach-act {
+  flex: none;
+  min-height: 32px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.tool-coach-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tool-coach .coach-note {
+  max-width: none;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  box-shadow: none;
+}
+.tool-coach .coach-note-head {
+  font-size: 16px;
+}
+.tool-coach-parts .coach-fact {
+  white-space: normal;
+}
+.tool-coach-strip {
+  display: block;
+  width: 100%;
+  height: 24px;
+  color: var(--coach-quiet);
+}
+.tool-coach-strip rect {
+  fill: currentColor;
+  opacity: 0.75;
+}
+.tool-coach-strip rect[data-wide] {
+  opacity: 0.4;
+}
+.tool-coach-strip-mid {
+  stroke: var(--coach-hair);
+  stroke-width: 0.5;
+  vector-effect: non-scaling-stroke;
+}
+@media (pointer: coarse) {
+  .tool-coach-act {
+    min-height: 44px;
+  }
+}
+
+/* The coach's state while Listen is on (COA-12): "Listening…", "Tracking
+   16ths", "Noodling". Quiet words with a dot; the dot breathes only while it
+   waits, never while the click runs. */
+.system-status-chip {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+.system-status-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.system-status-chip-dot.pulse {
+  animation: chip-dot-pulse 1.6s ease-in-out infinite;
+}
+@keyframes chip-dot-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .system-status-chip-dot.pulse {
+    animation: none;
+  }
+}
+.system-status-chip.playing,
+.system-status-chip.thinking,
+.system-status-chip.speaking {
+  color: var(--accent);
+}
+.system-status-chip-label {
+  font-weight: 500;
+}

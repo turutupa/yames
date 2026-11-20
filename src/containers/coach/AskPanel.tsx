@@ -1,5 +1,5 @@
 import { memo, useEffect, useId, useRef, useState } from "react";
-import type { FormEvent, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
+import type { FormEvent, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { CoachBlocks } from "../../coach/blocks/CoachBlocks";
 import { Sheet } from "../../components/Sheet";
@@ -7,7 +7,7 @@ import { useCoachModel } from "../../hooks/useCoachModel";
 import { IS_MOBILE } from "../../platform";
 import { CoachModelSelector } from "../main-window/CoachModelSelector";
 import { CoachGlyph } from "./CoachGlyph";
-import { consumeAskFocus, noteAskScreen, sendAsk, setAskSection, useAskState, type AskTurn } from "./askStore";
+import { consumeAskFocus, noteAskScreen, sendAsk, useAskState, type AskTurn } from "./askStore";
 import "../../styles/ask.css";
 
 /** "Looking at: …", and the key that decides when the thread gets a divider. */
@@ -16,11 +16,6 @@ export type AskLookingAt = { text: string; key: string };
 type AskPanelProps = {
   /** Where the player is, built by the host from the coach's context. */
   lookingAt: AskLookingAt | null;
-  /**
-   * The tools' coach (Start, End, Feed, History), shown as a second section
-   * until leg c2a2 gives the tools their own Listen. Absent: no sections.
-   */
-  toolsCoach?: ReactNode;
   onClose: () => void;
 };
 
@@ -40,13 +35,12 @@ type AskPanelProps = {
  * re-rendering at every beat does not render it (it is not mounted at all
  * while a Take runs).
  */
-export const AskPanel = memo(function AskPanel({ lookingAt, toolsCoach, onClose }: AskPanelProps) {
+export const AskPanel = memo(function AskPanel({ lookingAt, onClose }: AskPanelProps) {
   const { t } = useTranslation();
-  const { section, turns, focusPending, about } = useAskState();
+  const { turns, focusPending, about } = useAskState();
   const titleId = useId();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [typing, setTyping] = useState(false);
-  const showTools = !IS_MOBILE && !!toolsCoach && section === "tools";
 
   // A divider in the thread when the screen changed mid-conversation.
   const lookingText = lookingAt?.text ?? null;
@@ -88,29 +82,12 @@ export const AskPanel = memo(function AskPanel({ lookingAt, toolsCoach, onClose 
           <CoachModelSelector placement="down" />
         </div>
       )}
-      {!IS_MOBILE && toolsCoach && (
-        <div className="ask-sections" role="tablist" aria-label={t("ask.title")}>
-          {(["ask", "tools"] as const).map((s) => (
-            <button
-              key={s}
-              type="button"
-              role="tab"
-              className="ask-section"
-              aria-selected={(s === "tools") === showTools}
-              onClick={() => setAskSection(s)}
-              data-testid={`ask-section-${s}`}
-            >
-              {t(`ask.sections.${s}`)}
-            </button>
-          ))}
-        </div>
-      )}
-      {!showTools && lookingText && (
+      {lookingText && (
         <p className="ask-context" data-testid="ask-context">
           <span className="ask-context-label">{t("ask.lookingAt")}</span> <b>{lookingText}</b>
         </p>
       )}
-      {!showTools && about && (
+      {about && (
         <p className="ask-about" data-testid="ask-about">
           <q>{about}</q>
         </p>
@@ -118,13 +95,7 @@ export const AskPanel = memo(function AskPanel({ lookingAt, toolsCoach, onClose 
     </div>
   );
 
-  const body = showTools ? (
-    <div className="ask-tools" role="tabpanel" data-testid="ask-tools">
-      {toolsCoach}
-    </div>
-  ) : (
-    <AskConversation turns={turns} inputRef={inputRef} onTyping={setTyping} />
-  );
+  const body = <AskConversation turns={turns} inputRef={inputRef} onTyping={setTyping} />;
 
   if (IS_MOBILE) {
     return (
@@ -167,7 +138,7 @@ export const AskPanel = memo(function AskPanel({ lookingAt, toolsCoach, onClose 
       {body}
       <div className="ask-foot">
         <CoachModelSelector />
-        {!showTools && <AskFooter />}
+        <AskFooter />
       </div>
     </aside>
   );

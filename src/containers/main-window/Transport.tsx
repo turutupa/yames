@@ -15,6 +15,16 @@ interface TransportProps {
   /** Audio input is on and the coach is listening to it. */
   listening: boolean;
   hasSignal: boolean;
+  /**
+   * Listen (DESIGN 7): the tools' coach, on or off, by the player's press.
+   *
+   * Where the sentence "Coach listens when you press play" sat, because that
+   * sentence was never how the code worked: Play never turned the input on,
+   * the coach panel's Start did. With the panel's Start gone this switch is
+   * the only thing in the tools that does, and it is never on by itself.
+   * Absent where the screen has no tools' coach (Songs).
+   */
+  listen?: { on: boolean; onToggle: () => void };
   playShortcut?: string;
   /**
    * Count the first bar in before anything starts. EVERY mode (2026-09-19).
@@ -114,26 +124,6 @@ function clock(totalSeconds: number): string {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
 
-function CoachIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 12a8 8 0 1 0-3.1 6.3L21 19z" />
-      <line x1="9" y1="10" x2="9" y2="14" />
-      <line x1="12.5" y1="8.5" x2="12.5" y2="15.5" />
-      <line x1="16" y1="11" x2="16" y2="13" />
-    </svg>
-  );
-}
-
 function MicIcon() {
   return (
     <svg
@@ -178,6 +168,7 @@ export function Transport({
   elapsedSeconds,
   listening,
   hasSignal,
+  listen,
   playShortcut,
   startBpm,
   countIn,
@@ -439,50 +430,55 @@ export function Transport({
 
       <div className="transport-spacer" />
 
-      {/* The right end of the bar, in three states.
+      {/* The right end of the bar.
        *
-       * Once the coach is actually listening it is a live readout — the label
-       * plus a signal lamp, which is the one place in the app that shows
-       * whether sound is arriving. The context bar's input chip does not.
+       * In the tools it is Listen (DESIGN 7): a switch, off until the player
+       * turns it on, that starts the tools' coach and the input with it. Its
+       * state is said in words ("Listen", "Listening") and in the knob's
+       * place, not in colour alone; while it listens the lamp beside the word
+       * is the one place in the app that shows whether sound is arriving.
        *
-       * Before that there is nothing live to report, so the mockup's sentence
-       * takes the slot and explains what the coach is about to do. It is an
-       * explanation, not a control; nothing here ever turned the input on.
+       * Where there is no tools' coach (Songs) it is the readout it always
+       * was: "Listening" with the lamp, or "Input off".
        *
-       * Except that below 920px the context bar sheds its input chip — on the
-       * explicit grounds that the transport reports the same state — so the
-       * compact readout has to come back at that width instead. The sentence
-       * has no room there anyway. */}
-      {/* All three of these states are the coach and the microphone it
-          listens on. A phone has neither, so the right end of the bar is
-          simply empty there rather than explaining an absent feature. */}
+       * All of these are the coach and the microphone it listens on. A phone
+       * has neither in the tools, so the right end of the bar is simply empty
+       * there rather than explaining an absent feature. */}
       {!IS_MOBILE &&
-        (listening ? (
+        (listen ? (
+          <button
+            type="button"
+            role="switch"
+            aria-checked={listen.on}
+            className={`transport-input transport-listen ${listen.on ? "on" : ""} ${listen.on && listening ? "listening" : ""}`}
+            onClick={listen.onToggle}
+            title={t("transport.listenHint")}
+            data-testid="transport-listen"
+          >
+            <span className="transport-switch-track" aria-hidden="true" />
+            <MicIcon />
+            <span>
+              {!listen.on
+                ? t("transport.listen")
+                : listening
+                  ? t("transport.listening")
+                  : t("transport.inputOff")}
+            </span>
+            {listen.on && listening && (
+              <span className={`transport-signal ${hasSignal ? "on" : ""}`} aria-hidden="true" />
+            )}
+          </button>
+        ) : listening ? (
           <div className="transport-input listening">
             <MicIcon />
             <span>{t("transport.listening")}</span>
             <span className={`transport-signal ${hasSignal ? "on" : ""}`} aria-hidden="true" />
           </div>
         ) : (
-          <>
-            {/* The sentence shows whole or not at all: its slot takes the
-                bar's free width, and a sentence wider than that drops to a
-                second line the slot does not show, rather than running off
-                the window's edge (acceptance pass 3 P2-4: Metronome and Songs
-                at 1024 with the sidebar open, in any language). */}
-            <div className="transport-note-slot">
-              <div className="transport-note">
-                <CoachIcon />
-                <span>
-                  {view === "drill" ? t("transport.coachQuiet") : t("transport.coachOnPlay")}
-                </span>
-              </div>
-            </div>
-            <div className="transport-input transport-input-narrow">
-              <MicIcon />
-              <span>{t("transport.inputOff")}</span>
-            </div>
-          </>
+          <div className="transport-input">
+            <MicIcon />
+            <span>{t("transport.inputOff")}</span>
+          </div>
         ))}
     </div>
   );

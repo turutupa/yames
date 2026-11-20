@@ -38,17 +38,3 @@ exports[`presets empty state > offers one action and names the panel shortcut 1`
   </p>
 </div>
 `;
-
-exports[`session history empty state > says where sessions come from 1`] = `
-<div
-  class="coach-card-empty"
->
-  <p
-    class="coach-card-empty-text"
-  >
-    Nothing here yet.
-    <br />
-    Each time you press End or stop the metronome, it shows up here. Your Sessions from Today are in Progress.
-  </p>
-</div>
-`;

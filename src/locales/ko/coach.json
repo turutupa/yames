@@ -14,17 +14,17 @@
     }
   },
   "coachCard": {
-    "end": "종료",
-    "start": "시작",
     "clearAll": "모두 지우기",
-    "feed": "피드",
-    "history": "기록",
-    "emptyTitle": "클릭에 맞춰 연주하는 동안 코치가 듣고 있습니다.",
-    "emptyHint": "이 패널 위쪽의 시작을 누르고 연주하세요. 연주하는 동안 타이밍에 대해 말해 주고, 종료를 누르면 정리해 줍니다.",
     "today": "오늘",
     "yesterday": "어제",
     "noteSpacingTrend": "음표 간격 추세",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
+  },
+  "toolCoach": {
+    "runScore": "점수 {{score}}, {{bpm}} BPM",
+    "runScoreNoBpm": "점수 {{score}}",
+    "sessionScore": "세션 점수 {{score}} · {{word}}",
+    "openRuns": "진도에서 도구 기록 열기"
   },
   "coachModel": {
     "label": "코치 모델",
@@ -99,8 +99,6 @@
     "beatPlacement": "박 위치"
   },
   "coachReport": {
-    "segment": "구간",
-    "thinkingAria": "코치가 말할 준비를 하고 있습니다",
     "qualifier": {
       "excellent": "훌륭함",
       "good": "좋음",
