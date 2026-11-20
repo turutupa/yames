@@ -1,0 +1,100 @@
+# Handoff for the next coach-build orchestrator
+
+Kept current by the orchestrator as it works, so a session that ends without warning loses nothing.
+Read this, then `PLAN.md` (the order), `PROGRESS.md` (the index and the decisions made while building),
+`STATUS.md` (what was delivered), `plans/tasks/coach/BRIEF.md` (the rules every leg gets) and
+`~/yames-coach-design-out/OWNER-UPDATES.md` (binding, newest last: re-read it before each leg).
+
+## How this build runs
+
+- You orchestrate; you do not write app code. Coding legs: `Agent` with `model: "opus"`,
+  `effort: "medium"`, `run_in_background: true`, one worktree and branch per leg
+  (`git worktree add ~/yames-coach-<leg> -b coach-<leg> coach`, then
+  `ln -s ~/yames-coach-build/node_modules ~/yames-coach-<leg>/node_modules`). Reviewers: fresh opus
+  agents, read-only, given a diff file under `/tmp/coach-orch/`. Translators: sonnet helpers the leg
+  spawns itself.
+- **Never end your turn while an agent is running.** Print mode stops background agents when the turn
+  ends. Wait with `~/.local/bin/wait-until --timeout 580 --any file /tmp/yames-dgx-yield file
+  <worktree>/plans/coach/progress/<leg>.md` in a loop; reports arrive as messages.
+- An agent past about 300k tokens is not resumed: a fresh "b" agent takes its fixes on the same
+  worktree and branch (ms1 was resumed once at 280k and it was the limit; c2a1 and c3a got fresh
+  agents: c2a1b, c3ab).
+- The prompt for a leg: copy the shape of the prompts already used (the leg file path, the reading
+  order, the binding rules pasted in full, which other legs are running and which files they own, the
+  design judgement you will check, what the final report must contain). The rules must be in the
+  prompt itself, not only in BRIEF.md.
+- After a leg reports: look at its screenshots against the mocks yourself (Read the PNGs); send any
+  Rust diff, and any `useSession.ts` / store diff, to a reviewer; merge with
+  `git merge --no-ff coach-<leg>` (identity and trailer as in BRIEF); run
+  `bash plans/coach/tools/gates.sh [layout specs]` on the main checkout; unlink `node_modules`, then
+  `git worktree remove`; update `PROGRESS.md`; at a delivery add a `STATUS.md` line, commit, then
+  `git bundle create /tmp/yames-coach-out.bundle coach` and `chmod 644` it.
+- Machine: at most 3 coding agents (2 on weekday daytime unless `/tmp/yames-dgx-full` exists; it did on
+  2026-11-20). `/tmp/yames-dgx-yield` means everyone commits WIP and stops. The load average was 50 to
+  80 all day on 2026-11-20: vitest then sometimes reports "Timeout calling onTaskUpdate" with every
+  test passing (re-run to confirm), timing-based layout tests flake (re-run alone), and no jitter-probe
+  p99 is believable.
+- `/home/dgx-delgado/yames-coach-base` is a scratch worktree (detached) for "did this fail before?"
+  comparisons: `git -C ~/yames-coach-base checkout -q --detach <sha>`, then
+  `bash plans/coach/tools/run.sh bash /tmp/coach-orch/base-layout.sh <spec> -g "<title>"` (recreate
+  that two-line script if `/tmp` was cleared: `cd` there, `exec npx playwright test --trace off "$@"`).
+- Never: GitHub (no push, issues, PRs, boards), `npm install`, `npm run tauri dev`, `rm`, `sudo`.
+
+## State (update this section at every merge)
+
+Merged on `coach`, in order: c0 (bus, context, source line), c1a (takeNote, rounds, lean, heardIt), pm
+(pass mark, `plans/COACH_I18N_BRIEF.md`), ms1 (model selector, resident model, silent quiet session;
+reviewed), c1b1 (the Session's coach line and note), fix1 (two layout regressions, "Needs 85%").
+Deliveries: 1a and 1b (see `STATUS.md`).
+
+In flight on 2026-11-20 (check `git worktree list` and `git branch --no-merged coach`):
+
+| Leg | Worktree / branch | State | Next |
+|---|---|---|---|
+| c2a1 → **c2a1b** | `~/yames-coach-c2a1`, `coach-c2a1` | Ask shell built; the reviewer's six fixes, the merge of `coach` and the `onAsk` wiring are running | Check its report and screenshots, merge (one known conflict, in `localeKeys.test.ts`, is the fix agent's to resolve), full gates. Then c2a2 can start. |
+| **ms2** | `~/yames-coach-ms2`, `coach-ms2` | Running: both tiers on disk, cancel, checksum, storage / metered warnings | **Reviewer on the Rust diff** (model files on disk: the migration must never lose a player's model), then merge. |
+| **c1c** | `~/yames-coach-c1c`, `coach-c1c` | Running: the loop step, P1, P2, "for your eyes" | Check, merge. Its probe p99 will be owed if the machine is busy. |
+| c3a → **c3ab** | `~/yames-coach-c3a`, `coach-c3a` | Built and reviewed (MERGE AFTER FIXES); fix brief written (`c3ab-worker-review-fixes.md`), **not started** | Start it when a slot frees; short re-read of its diff since `70bdd641` by a reviewer; merge. |
+
+Briefed and not started (files in `plans/tasks/coach/`): `c1b2-today-speech-keys.md`,
+`c2a2-listen-and-no-start.md` (needs c2a1 merged; **the owner's top priority with the selector: it
+removes the old Start button**), `c4c-cues-field.md` (moved up: see below), `t1a-tool-registry.md`
+(needs c2a1 merged). Not yet briefed: t1b, c2b, c2c, the `cues` content legs (after c4c writes
+`plans/coach/CUES_GUIDE.md`; one leg per four Paths, each with a separate proof-reader), c4a, c4b, t2a
+to t2c, rem, c3b, c3c, c5a, c5b, c5c, c6. `PLAN.md` has each one's scope, design sections and flags.
+
+Suggested order from here: c2a1b merge → c2a2 ‖ c1b2 ‖ c4c (then delivery 1c/1d: no Start button,
+loop, Today's line) → t1a → t1b ‖ c2b ‖ cues content → c2c (delivery 2) → the rest of `PLAN.md`.
+
+## Owed, and easy to forget
+
+- **Quiet-machine probe runs** (load average under 6): c3a's five (`bash /tmp/coach-c3a/probe-set.sh`;
+  the commands are also in `progress/c3a.md` on its branch), c1c's `--song-loop --song-take`. And the
+  LLM runs with Qwen3 4B on Vulkan on the owner's machine: say so in STATUS when delivering c3a.
+- The main orchestrator (the other account) re-runs gates on each bundle: tell it in STATUS what is
+  owed rather than letting it find out.
+- Translations wanting a native read are listed in each leg's progress file (pt-BR "meta"; "caught
+  you" in fr / it / es / nl / ja / zh; ru short state words; "Ask" as a feature name in de / ru).
+- `neck.spec` at 620×780 has a thin margin now (−0.35 against a −0.5 tolerance; the base was −0.17):
+  any leg that adds height to the Session's ready screen must run it.
+- DESIGN 3.6 "tapping a source line opens what it cites" is not built and no leg owns it yet: give it
+  to c2b (the fact cards).
+- The window's old bottom download strip calls a pause "Cancel": ms2 was asked to make the words true.
+- c3b must: send a grammar with a bounded `ws`; treat a truncated answer as no answer; measure a tip's
+  time with and without the cached Ask prefix; cancel an Ask generation when a Take starts (c2a1b only
+  holds the answer back until the Take ends).
+
+## Decisions made while building (the full list with reasons is in `PROGRESS.md`)
+
+- The selector: at the foot of the right-hand panel (the owner corrected an earlier reading), named by
+  model and size, Download in the row; Off never deletes; memory is a warning and never a lock; no
+  download ever replaces a brain on disk; no load starts during a Path Session or while the click
+  plays; a load in flight runs on.
+- Session events reach the coach through one wrapped dispatch (the reducer is pure). Subscribers read
+  the event's payload: events are published before React commits.
+- `takeNote` returns data; sentences live in the locales under `session.note.*`.
+- The cue legs moved up: 825 of 1,010 Exercises have no cue short enough for the Take's order. The cue
+  is also shown under the finding on the result, because "Go again" skips the ready screen.
+- A leg that changes any text on a screen runs the full layout suite.
+- `run.sh` sets `TMPDIR=/tmp/coach-tmp` (the other account's `/tmp/yames-take-video-*` folders made
+  fifteen Rust tests fail with PermissionDenied).
