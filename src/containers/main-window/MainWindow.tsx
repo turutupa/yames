@@ -55,11 +55,11 @@ import {
   openFeedback,
   MIC_PERMISSION_TIMEOUT_MS,
 } from "../../ipc";
-import CoachCard from "../practice-coach/CoachCard";
 import { AskPanel } from "../coach/AskPanel";
 import { askShownOn, useAskHost } from "../coach/useAskHost";
 import { askCoach, closeAsk, getAskState, useAskState } from "../coach/askStore";
 import { ToolCoach } from "../coach/ToolCoach";
+import { revealToolRuns } from "../coach/ToolRuns";
 import { LISTEN_VIEWS, useToolListen } from "./hooks/useToolListen";
 import "../../styles/main-window.css";
 import "../../styles/transitions.css";
@@ -635,61 +635,11 @@ export function MainWindow() {
     [listen.on, listen.toggle],
   );
   const openToolRuns = useCallback(() => {
+    revealToolRuns();
     setView("progress");
   }, [setView]);
+  // Changes when the matcher locks or unlocks, never at a beat.
   const inferredDivisor = evaluation.inferredGrid?.locked ? evaluation.inferredGrid.divisor : undefined;
-
-  // Until c2a2 the tools' coach (Start, End, Feed, History) is Ask's second
-  // section, on the screens the old coach card was on. Built once per change
-  // of what it shows, never per beat: a new element each render made the
-  // panel's `memo` worthless and re-rendered the open panel at every beat.
-  // The level meter in its title is drawn only while a tools session listens,
-  // so the spectrum is passed only then (the status dot's `hasSignal` is a
-  // boolean and changes only when the signal comes or goes).
-  const toolsCoachHere =
-    !IS_MOBILE &&
-    (view === "beat" ||
-      view === "drill" ||
-      view === "setlist" ||
-      view === "jam" ||
-      view === "today" ||
-      view === "paths" ||
-      view === "progress" ||
-      view === "tools");
-  const toolsSpectrum = toolsCoachHere && session.active && evaluation.enabled ? evaluation.spectrum : null;
-  const toolsHasSignal = evaluation.hasSignal;
-  const toolsCoach = useMemo(
-    () =>
-      toolsCoachHere ? (
-        <CoachCard
-          active={session.active}
-          messages={session.messages}
-          onStartSession={session.startSession}
-          onEndSession={session.endSession}
-          onChipAction={session.handleChipAction}
-          listening={evaluation.enabled}
-          hasSignal={toolsHasSignal}
-          spectrum={toolsSpectrum}
-          isPlaying={state.isPlaying}
-          inferredGrid={evaluation.inferredGrid}
-          playMode={session.playMode}
-        />
-      ) : undefined,
-    [
-      toolsCoachHere,
-      session.active,
-      session.messages,
-      session.startSession,
-      session.endSession,
-      session.handleChipAction,
-      evaluation.enabled,
-      toolsHasSignal,
-      toolsSpectrum,
-      state.isPlaying,
-      evaluation.inferredGrid,
-      session.playMode,
-    ],
-  );
 
   // "Hear what I play" (detection M7): the key and the chord heard while a
   // jam plays and the input listens. Off, nothing below invokes anything.
@@ -3083,10 +3033,10 @@ export function MainWindow() {
       </div>
       {/* Ask: the one coach panel, a dock or a drawer by the window's width
           and the screen (ask.css), a sheet on a phone. Not mounted while it
-          is closed, so nothing of it runs during a Take. Until c2a2 the tools'
-          coach is its second section (`toolsCoach`, memoised above). */}
+          is closed, so nothing of it runs during a Take. Only Ask: the tools'
+          coach is Listen, the line and the note under the stage (leg c2a2). */}
       {askState.open && askShownOn(view) && (
-        <AskPanel lookingAt={ask.lookingAt} onClose={ask.panel.close} toolsCoach={toolsCoach} />
+        <AskPanel lookingAt={ask.lookingAt} onClose={ask.panel.close} />
       )}
       </div>{/* main-body */}
       </LearningNeck>

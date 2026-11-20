@@ -20,6 +20,8 @@ import { CLEAN_TEMPO_MIN_BARS } from "../../session/grade";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { useNeck3d } from "./hooks/useNeck";
 import { rise } from "./TodayView";
+import { IS_MOBILE } from "../../platform";
+import { ToolRuns } from "../coach/ToolRuns";
 import "../../styles/session.css";
 
 type Point = { at: number; bpm: number };
@@ -333,6 +335,9 @@ export function ProgressView({ session, onStart }: { session: SessionRun; onStar
           </div>
         </>
       )}
+      {/* The tools' coach's runs (the old coach card's History, DESIGN 7).
+          Not on a phone: the phone's tools have no coach, as before. */}
+      {!IS_MOBILE && <ToolRuns />}
     </div>
   );
 }

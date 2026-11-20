@@ -9,7 +9,6 @@ import {
   openDeferredAsk,
   registerAskSender,
   setAskTakeGate,
-  showToolsCoach,
   toggleAsk,
   appendAskTurn,
   askTurnId,
@@ -23,20 +22,16 @@ describe("Ask's store", () => {
   beforeEach(() => __resetAskStoreForTests());
   afterEach(() => __resetAskStoreForTests());
 
-  it("opens and closes, on the Ask section, and toggles", () => {
+  it("opens and closes, and toggles; it is only Ask (no Tools coach section since c2a2)", () => {
     openAsk();
-    expect(getAskState()).toMatchObject({ open: true, section: "ask" });
+    expect(getAskState().open).toBe(true);
+    expect(getAskState()).not.toHaveProperty("section");
     closeAsk();
     expect(getAskState().open).toBe(false);
     toggleAsk();
     expect(getAskState().open).toBe(true);
     toggleAsk();
     expect(getAskState().open).toBe(false);
-  });
-
-  it("the tools' Start opens it on the Tools coach section", () => {
-    showToolsCoach();
-    expect(getAskState()).toMatchObject({ open: true, section: "tools" });
   });
 
   it("askCoach (a line's or a chip's onAsk) asks the focus and the question", () => {

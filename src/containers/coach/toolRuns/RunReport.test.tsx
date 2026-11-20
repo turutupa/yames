@@ -15,12 +15,19 @@
  * exactly what is in front of them and a diff in it is worth a second
  * look. The assertions below the snapshot are the rules the snapshot
  * cannot state on its own.
+ *
+ * Since leg c2a2 the report lives on Progress → Tool runs (`RunSummary`,
+ * `SegmentTimeline`), and a stretch's numbers in the tool's coach note under
+ * the stage (`ToolCoach`): the old feed card that held both is gone, and these
+ * rules moved with what it showed.
  */
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import "../../../i18n";
 
-import { FeedMessageItem } from "./CoachFeedMessage";
-import type { FeedMessage, SessionReport, SessionSegment } from "../../types";
+import { RunSummary, SegmentTimeline } from "./RunReport";
+import { ToolCoach } from "../ToolCoach";
+import type { FeedMessage, SessionReport, SessionSegment } from "../../../types";
 
 /**
  * A session with segment data, so the DSP-derived components
@@ -88,27 +95,31 @@ const segments: SessionSegment[] = [
   },
 ];
 
-function sessionEnd(overrides: Partial<FeedMessage> = {}): FeedMessage {
-  return {
-    id: "end-1",
-    type: "session-end",
-    timestamp: 1_205_000,
-    content: "That was a solid half hour.",
-    report,
-    segments,
-    ...overrides,
-  };
+/** A run as Tool runs shows it: its summary, then its timeline. */
+function Run() {
+  return (
+    <>
+      <RunSummary report={report} />
+      <SegmentTimeline segments={segments} sessionStart={segments[0].startTime!} />
+    </>
+  );
 }
 
 function miniReport(): FeedMessage {
   return {
     id: "mini-1",
     type: "mini-report",
-    timestamp: 1_090_000,
+    // After the note mounts, so it is this run's.
+    timestamp: Date.now() + 1000,
     content: "You held the tempo through the whole passage.",
     report,
     meta: { bpm: 130, timeSignature: 4 },
   };
+}
+
+/** The tool's note after a stretch, as it shows under the stage. */
+function Note({ message }: { message: FeedMessage }) {
+  return <ToolCoach messages={[message]} listenOn isPlaying={false} inputOn onChipAction={vi.fn()} />;
 }
 
 /** Visible text of the rendered report, whitespace collapsed. */
@@ -118,23 +129,10 @@ function reportText(container: HTMLElement): string {
     .trim();
 }
 
-/**
- * Same, minus the wall-clock stamp in the corner of the card — that one
- * is the only thing on screen that depends on when the test ran. Removed
- * by class rather than by pattern: the timeline's own `1:30–3:25` offsets
- * look identical to a clock time and a regex eats a digit of the score
- * badge in front of them.
- */
-function stableReportText(container: HTMLElement): string {
-  const clone = container.cloneNode(true) as HTMLElement;
-  for (const stamp of clone.querySelectorAll(".coach-feed-msg-time")) stamp.remove();
-  return reportText(clone);
-}
-
-describe("EndReportSummary", () => {
+describe("RunSummary", () => {
   it("reads the same way it did when a musician last checked it", () => {
-    const { container } = render(<FeedMessageItem message={sessionEnd()} />);
-    expect(stableReportText(container)).toMatchSnapshot();
+    const { container } = render(<Run />);
+    expect(reportText(container)).toMatchSnapshot();
   });
 
   it("shows no bare 0-to-1 component value", () => {
@@ -142,14 +140,14 @@ describe("EndReportSummary", () => {
     // as `0.42` / `0.71` in the stat grid AND as "42 %" / "71 %" in the
     // bars below — the same measurement twice, once unreadable. A number
     // shaped `0.xx` anywhere in this card means the grid cells are back.
-    const { container } = render(<FeedMessageItem message={sessionEnd()} />);
+    const { container } = render(<Run />);
     expect(reportText(container)).not.toMatch(/\b0\.\d\d\b/);
   });
 
   it("gives every timing figure its unit", () => {
     // Problem 6. Average error, consistency and tempo stability are all
     // milliseconds and all meaningless without saying so.
-    render(<FeedMessageItem message={sessionEnd()} />);
+    render(<Run />);
     for (const label of ["Avg timing error", "Consistency", "Tempo stability"]) {
       const cell = screen.getByText(label).parentElement!;
       expect(cell.textContent, `${label} carries no unit`).toMatch(/ms\b/);
@@ -161,7 +159,7 @@ describe("EndReportSummary", () => {
     // only thing on the card that answers the second question.
     // "Good" also names a hit-quality bucket in the breakdown below, so
     // look for the qualifier where it belongs: next to the ring's label.
-    render(<FeedMessageItem message={sessionEnd()} />);
+    render(<Run />);
     const label = screen.getByText("Session Score");
     expect(label.nextElementSibling?.textContent).toBe("Good");
   });
@@ -170,7 +168,7 @@ describe("EndReportSummary", () => {
     // Problem 2. IC and GA by their initials meant nothing. They now have
     // a musician's name, a sublabel, and a tooltip — and exactly one
     // rendering each.
-    render(<FeedMessageItem message={sessionEnd()} />);
+    render(<Run />);
     const spacing = screen.getByText("Note spacing");
     expect(spacing.getAttribute("title")).toBeTruthy();
     expect(screen.getByText("Even gaps between your notes")).toBeInTheDocument();
@@ -185,7 +183,7 @@ describe("SegmentTimeline", () => {
     // Problem 3. The timeline used to read "12:04–12:06 · Semi-structured
     // · 130 BPM · 70 % · on beat" — and the 70 % was the only number on
     // the row with no name.
-    render(<FeedMessageItem message={sessionEnd()} />);
+    render(<Run />);
     const labelled = screen.getAllByText(/Beats hit: \d+%/);
     expect(labelled.length).toBe(segments.length);
   });
@@ -193,7 +191,7 @@ describe("SegmentTimeline", () => {
   it("defines the playing-style and pocket words it uses", () => {
     // Problem 4. "Semi-structured" and "on beat" are categories with
     // thresholds behind them; the thresholds live in the tooltip.
-    render(<FeedMessageItem message={sessionEnd()} />);
+    render(<Run />);
     for (const word of ["Semi-structured", "Grid exercise", "rushing", "dragging", "on beat"]) {
       for (const node of screen.queryAllByText(word)) {
         expect(node.getAttribute("title"), `"${word}" is undefined`).toBeTruthy();
@@ -202,11 +200,11 @@ describe("SegmentTimeline", () => {
   });
 });
 
-describe("mini-report components", () => {
+describe("a stretch's numbers, in the tool's note", () => {
   it("names the three component scores and explains each one", () => {
     // The same complaint as problem 2, one card earlier: `Cov · Eff ·
     // Grid` was the densest jargon in the coach.
-    render(<FeedMessageItem message={miniReport()} />);
+    render(<Note message={miniReport()} />);
     for (const label of ["Beats covered", "Notes on a beat", "Locked to the click"]) {
       const node = screen.getByText(new RegExp(`^${label} \\d+%$`));
       expect(node.getAttribute("title"), `"${label}" is undefined`).toBeTruthy();
@@ -214,31 +212,28 @@ describe("mini-report components", () => {
   });
 
   it("rounds the component scores to whole percentages", () => {
-    const { container } = render(<FeedMessageItem message={miniReport()} />);
-    const row = container.querySelector(".coach-mini-report-components")!;
+    const { container } = render(<Note message={miniReport()} />);
+    const row = container.querySelector("[data-testid=tool-coach-parts]")!;
     expect(row.textContent).not.toMatch(/\d\.\d/);
   });
 });
 
-describe("a card says each thing once", () => {
-  it("an end card without a report shows its line once, not as a title and a body", () => {
+describe("a note or a line says each thing once", () => {
+  it("an end note without a report shows its line once, not as a title and a body", () => {
     const message: FeedMessage = {
       id: "end",
       type: "session-end",
-      timestamp: 0,
+      timestamp: Date.now() + 1000,
       content: "Session complete.",
     };
-    const { container } = render(<FeedMessageItem message={message} />);
+    const { container } = render(<Note message={message} />);
     const text = container.textContent ?? "";
     expect(text.split("Session complete.").length - 1).toBe(1);
   });
 
-  it.each(["session-start", "system", "coach-tip", "coach-chat", "user-chat"] as const)(
-    "a %s card shows its line once",
-    (type) => {
-      const message: FeedMessage = { id: type, type, timestamp: 0, content: "One line from the coach." };
-      const { container } = render(<FeedMessageItem message={message} />);
-      expect((container.textContent ?? "").split("One line from the coach.").length - 1).toBe(1);
-    },
-  );
+  it.each(["system", "coach-tip"] as const)("a %s line shows its words once", (type) => {
+    const message: FeedMessage = { id: type, type, timestamp: Date.now() + 1000, content: "One line from the coach." };
+    const { container } = render(<Note message={message} />);
+    expect((container.textContent ?? "").split("One line from the coach.").length - 1).toBe(1);
+  });
 });

@@ -46,7 +46,7 @@ describe("i18n loader", () => {
     expect(t("nav.metronome")).toBeTruthy();
     expect(t("metronome.tap")).toBeTruthy();
     expect(t("drill.mode")).toBeTruthy();
-    expect(t("coachCard.feed")).toBeTruthy();
+    expect(t("coachCard.clearAll")).toBeTruthy();
     expect(t("zen.fullscreen")).toBeTruthy();
     expect(t("settings.coach.title")).toBeTruthy();
     expect(t("onboarding.welcome.title")).toBeTruthy();

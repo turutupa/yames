@@ -24,13 +24,11 @@ import {
   openDeferredAsk,
   registerAskSender,
   releaseHeldAsk,
-  setAskSection,
   setAskTakeGate,
   settleAskTurn,
   toggleAsk,
   useAskState,
   type AskRequest,
-  type AskSection,
 } from "./askStore";
 
 /**
@@ -77,12 +75,10 @@ export async function answerAsk(question: string, t: TFunction, contextText: () 
 
 export type CoachPanel = {
   open: boolean;
-  section: AskSection;
   deferred: boolean;
   toggle: (request?: AskRequest) => void;
   show: (request?: AskRequest) => void;
   close: () => void;
-  setSection: (section: AskSection) => void;
 };
 
 /**
@@ -91,7 +87,7 @@ export type CoachPanel = {
  */
 export function useCoachPanel({ contextText }: { contextText: () => string }): CoachPanel {
   const { t } = useTranslation();
-  const { open, section, deferred } = useAskState();
+  const { open, deferred } = useAskState();
   const latest = useRef(contextText);
   latest.current = contextText;
   useEffect(
@@ -99,7 +95,7 @@ export function useCoachPanel({ contextText }: { contextText: () => string }): C
     [t],
   );
   const close = useCallback(() => closeAsk(), []);
-  return { open, section, deferred, toggle: toggleAsk, show: openAsk, close, setSection: setAskSection };
+  return { open, deferred, toggle: toggleAsk, show: openAsk, close };
 }
 
 /**

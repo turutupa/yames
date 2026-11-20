@@ -14,13 +14,7 @@
     }
   },
   "coachCard": {
-    "end": "End",
-    "start": "Start",
     "clearAll": "Clear all",
-    "feed": "Feed",
-    "history": "History",
-    "emptyTitle": "Your coach listens while you play to the click.",
-    "emptyHint": "Press Start at the top of this panel, then play. It comments on your timing as you go and sums it up when you press End.",
     "today": "Today",
     "yesterday": "Yesterday",
     "noteSpacingTrend": "Note spacing trend",
@@ -91,8 +85,6 @@
     "beatPlacement": "Beat placement"
   },
   "coachReport": {
-    "segment": "Segment",
-    "thinkingAria": "Coach is preparing to speak",
     "qualifier": {
       "excellent": "Excellent",
       "good": "Good",

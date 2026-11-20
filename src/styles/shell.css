@@ -2191,28 +2191,6 @@ body[data-sheet-maximized] .rail {
    leaves the stage 168px, which is not a metronome. Two breakpoints fix it,
    both chosen from the arithmetic rather than from a round number. */
 
-/* Under 1160px there is not room for rail + dock + a usable stage
-   (252 + 380 + 528). The coach stops displacing the stage and floats over
-   it instead: the tempo readout keeps its place, which is the same promise
-   docking made when there was room for both. */
-@media (max-width: 1159px) {
-  .coach-card.coach-card-open {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 30;
-    box-shadow: -18px 0 48px -20px rgba(0, 0, 0, 0.55);
-  }
-}
-
-@media (max-width: 719px) {
-  .coach-card.coach-card-open {
-    width: 320px;
-    min-width: 320px;
-  }
-}
-
 /* Under 620px the rail itself is the problem: 252 of 480 is more than half
    the window. It becomes a strip of icons, and opening the library floats it
    back out to full width over the stage rather than squeezing it. */
@@ -2676,18 +2654,6 @@ body[data-sheet-maximized] .rail {
 /* …the preset sidebar's clearance is still double-counted, though. */
 .rail-library .preset-sidebar-header {
   padding-top: 10px;
-}
-
-/* Nothing overlays the dock any more, so it keeps its own top. */
-.coach-card.coach-card-open {
-  margin: 0;
-}
-
-/* The pill is the closed state of the coach card and renders instead of it,
-   not inside it — so hiding `.coach-card:not(.coach-card-open)` never matched
-   anything. The rail's coach row replaces it, status dot and all. */
-.coach-card-pill {
-  display: none;
 }
 
 /* ── The sidebar, collapsed on purpose ───────────────────────────────────

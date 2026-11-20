@@ -36,7 +36,7 @@ import { useTranslation } from "react-i18next";
 import { megabytes, takeLength, TAKES_SIZE_NOTICE_BYTES } from "../../jam/takes";
 import { useMenuPlacement } from "../jam/useMenuPlacement";
 import type { JamTake } from "../../jam/types";
-import { formatDate } from "../practice-coach/coachCardHelpers";
+import { formatDate } from "../../utils/dates";
 // W25 — a take looks like a take: a frame of it, and what it was a go at.
 import { mediaSrc } from "../../takes/src";
 import { printedBarNumber } from "../../songs/position";

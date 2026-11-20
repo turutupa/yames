@@ -233,20 +233,11 @@ export type SessionRunInput = {
     /** `active` as of the calls made, not the last render (`useSession`). */
     isActive?: () => boolean;
     /**
-     * Unused since the review of leg c2a1: the old card never showed in a
-     * Session, and closing "the card it opened" at teardown closed Ask, the
-     * drawer the result and the recap offer. Ask's own rules
-     * (`useAskSessionRules`) close it. Kept optional until c2a2 removes the card.
-     */
-    cardOpen?: boolean;
-    /**
      * `quiet`: a Session's coach session is for the history, not the coach's feed.
      * `listen: false`: a Session played without grading, which never asks for the input.
      */
     startSession: (options?: { quiet?: boolean; listen?: boolean }) => Promise<void>;
     endSession: () => Promise<void>;
-    /** Unused, as `cardOpen`. */
-    toggleCard?: () => void;
   };
   listening: boolean;
   /**
