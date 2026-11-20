@@ -85,6 +85,7 @@ import {
   nextStepAfterPass,
   takesOf,
   withHeardIt,
+  withUpstroke,
 } from "../../../session/progress";
 import {
   CHOSEN_KEYS_KEY,
@@ -106,6 +107,7 @@ import {
   eventForBigAction,
   hasPrevious,
   jumpNeedsAsking,
+  eyesOffer,
   leaveNeedsAsking,
   loopOffer,
   runReducer,
@@ -116,6 +118,7 @@ import {
 } from "../../../session/runner";
 import type { BigAction, LoopHeard, RunState, TakeOutcome, UngradedWhy } from "../../../session/runner";
 import { spotOf, takeNote } from "../../../coach/takeNote";
+import { pickDirectionMatters } from "../../../session/caveats";
 import { loopHeardOf } from "../../../coach/loopLine";
 import type { LoopRound } from "../../../coach/loopLine";
 import { classifyInputError } from "../../../session/inputStart";
@@ -1828,6 +1831,27 @@ export function useSessionRun(input: SessionRunInput) {
     dispatch({ type: "loop", loop: loop.loop, now: Date.now() });
   }, [loop, listen]);
 
+  /** "This one is for your eyes": offered on this result (`eyesOffer`). */
+  const pickMatters = !!take && take.exercise.grading === "graded" && pickDirectionMatters(take.exercise);
+  const eyes = useMemo(() => eyesOffer(run, pickMatters), [run, pickMatters]);
+  /** One ungraded Take to watch the pick, straight into the count-in; graded again after it. */
+  const eyesTake = useCallback(() => {
+    if (!eyesOffer(runRef.current, pickMatters)) return;
+    ungradedOnce.current = true;
+    dispatch({ type: "setUngraded", why: "eyes" });
+    autoStart.current = true;
+    dispatch({ type: "again", now: Date.now() });
+  }, [pickMatters]);
+  /** The answer to "Did any beat start on an upstroke?", kept on the row like `answerHeardIt`. */
+  const answerUpstroke = useCallback((takeId: string, upstroke: "yes" | "no") => {
+    const row = takesRef.current.find((t) => t.id === takeId);
+    if (!row || factsOf(row).upstroke === upstroke) return;
+    const next = withUpstroke(row, upstroke);
+    takesRef.current = takesRef.current.map((t) => (t.id === takeId ? next : t));
+    setProgress((p) => ({ ...p, takes: p.takes.map((t) => (t.id === takeId ? withUpstroke(t, upstroke) : t)) }));
+    void savePathTake(next, null).catch(() => {});
+  }, []);
+
   const endLoop = useCallback(() => {
     if (runRef.current.phase !== "looping") return;
     const heard: LoopHeard | null = loopGraded.current ? loopHeardOf(loopRounds.current, loopOnsets.current) : null;
@@ -1901,7 +1925,8 @@ export function useSessionRun(input: SessionRunInput) {
   useEffect(() => {
     if (run.phase !== "result" || !ungradedOnce.current) return;
     ungradedOnce.current = false;
-    if (run.ungraded === "inputOff") dispatch({ type: "setUngraded", why: null });
+    // An input that would not come on, or the one Take for the eyes: graded again after it.
+    if (run.ungraded === "inputOff" || run.ungraded === "eyes") dispatch({ type: "setUngraded", why: null });
   }, [run.phase, run.ungraded]);
 
   // On from anywhere (Settings, the wizard, a late answer): nothing failed any more.
@@ -2395,6 +2420,8 @@ export function useSessionRun(input: SessionRunInput) {
     loop,
     /** The loop running now, built to play: the neck and the tab draw it. */
     loopPlan,
+    /** "This one is for your eyes" is offered on this result. */
+    eyes,
     working: run.phase === "listening",
     /** Watch with Sound: one pass heard before it is played (card #28). */
     listen,
@@ -2456,6 +2483,8 @@ export function useSessionRun(input: SessionRunInput) {
       startLoop,
       endLoop,
       upTo,
+      eyesTake,
+      answerUpstroke,
       cycleView,
       jump,
       previous,

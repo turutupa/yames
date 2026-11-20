@@ -13,6 +13,7 @@ import {
   canJump,
   currentStep,
   eventForBigAction,
+  eyesOffer,
   leaveNeedsAsking,
   loopBars,
   loopOffer,
@@ -250,6 +251,38 @@ describe("the loop step", () => {
   it("is a step whose tempo the player sets", () => {
     const offer = loopOffer(take(atFocus(), "belowBar", SLIPPED), EX) as { loop: LoopStep };
     expect(timedTempoAdjustable(offer.loop)).toBe(true);
+  });
+});
+
+describe("this one is for your eyes", () => {
+  it("every fifth Take, on an Exercise where the pick matters, graded", () => {
+    let state = atFocus();
+    const offered: number[] = [];
+    for (let i = 1; i <= 10; i += 1) {
+      state = take(state, "belowBar");
+      if (eyesOffer(state, true)) offered.push(state.takes);
+      state = run(state, { type: "again", now: NOW });
+    }
+    // Offered after the 4th and the 9th: the 5th and the 10th are for the eyes.
+    expect(offered).toEqual([4, 9]);
+  });
+
+  it("never where the pick does not matter, ungraded, or on a ready screen", () => {
+    let state = atFocus();
+    for (let i = 0; i < 4; i += 1) state = run(take(state, "belowBar"), { type: "again", now: NOW });
+    expect(eyesOffer(state, true)).toBe(false);
+    const fourth = take(state, "belowBar");
+    expect(eyesOffer(fourth, false)).toBe(false);
+    expect(eyesOffer({ ...fourth, ungraded: "gradingOff" }, true)).toBe(false);
+  });
+
+  it("the Take itself is ungraded and moves nothing: the big action after it is the plain one", () => {
+    let state = atFocus();
+    for (let i = 0; i < 4; i += 1) state = run(take(state, "belowBar"), { type: "again", now: NOW });
+    const eyes = run(state, { type: "setUngraded", why: "eyes" });
+    const after = take(eyes, "ungraded", undefined, true);
+    expect(after.bpm).toBe(state.bpm);
+    expect(loopOffer(after, EX)).toBeNull();
   });
 });
 

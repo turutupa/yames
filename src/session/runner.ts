@@ -124,7 +124,28 @@ export type LoopHeard = { rounds: number; landed: number; lastRun: number };
  * "Just play". `inputOff`: graded, but the input would not come on and they
  * played this one anyway.
  */
-export type UngradedWhy = "inputOff" | "gradingOff" | "chosen";
+export type UngradedWhy = "inputOff" | "gradingOff" | "chosen" | "eyes";
+
+/**
+ * "This one is for your eyes" (DESIGN 4.2, "Watch your pick"): on an
+ * Exercise where pick direction matters, which the app cannot hear, every
+ * fifth Take is offered as one ungraded Take to watch the pick, with one
+ * question after it. The honest line was said once already; this is not it.
+ */
+export const EYES_EVERY = 5;
+
+/**
+ * Whether the result on screen offers that Take: graded, on an Exercise whose
+ * picking matters, and the next Take on it would be the fifth, tenth, ...
+ */
+export function eyesOffer(state: RunState, pickMatters: boolean): boolean {
+  if (state.phase !== "result" || state.ungraded || !pickMatters) return false;
+  const step = currentStep(state);
+  if (step?.kind !== "exercise" || step.role === "test" || step.role === "placement") return false;
+  const last = state.outcomes[state.outcomes.length - 1];
+  if (!last || last.stepId !== step.id || last.ungraded !== undefined) return false;
+  return (state.takes + 1) % EYES_EVERY === 0;
+}
 
 export type RunState = {
   phase: RunPhase;

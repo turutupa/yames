@@ -578,7 +578,7 @@ function TakeScreen({
   ]);
   const hasHow = !!how || words.howTo.length > 1;
   // The one order of a running Take: fixed before the count-in (DESIGN 3.4).
-  const order = takeOrderText(exercise);
+  const order = run.ungraded === "eyes" ? t("session.eyes.watch") : takeOrderText(exercise);
   const openHow = () => {
     const fold = howRef.current;
     if (!fold) return;
@@ -1174,6 +1174,12 @@ function ResultScreen({ session, pedalMapped }: { session: SessionRun; pedalMapp
             {session.loop?.front && <LoopButton session={session} />}
             <TempoNudges run={run} exercise={exercise} session={session} />
             {session.loop && !session.loop.front && <LoopButton session={session} />}
+            {/* Every fifth Take where the pick matters: one ungraded Take to watch it. */}
+            {session.eyes && (
+              <button className="session-secondary" onClick={actions.eyesTake} data-testid="session-eyes">
+                {t("session.eyes.offer")}
+              </button>
+            )}
             {big.kind !== "again" && (
               <button className="session-secondary" onClick={actions.again} data-testid="session-again">
                 {t("session.run.goAgain", { bpm: run.bpm })}
@@ -1296,10 +1302,22 @@ function UngradedResultScreen({ session }: { session: SessionRun }) {
         {/* By choice it is simply practice, said as such: no word of the
             input, and nothing about what grading would have done. */}
         <h1 className="session-h1 session-rise" style={rise(1)}>
-          {t(outcome.ungraded === "inputOff" ? "session.ungraded.result" : "session.ungraded.resultOff")}
+          {t(
+            outcome.ungraded === "inputOff"
+              ? "session.ungraded.result"
+              : outcome.ungraded === "eyes"
+                ? "session.eyes.result"
+                : "session.ungraded.resultOff",
+          )}
         </h1>
         <div className="session-why session-rise" style={rise(2)}>
-          {t(outcome.ungraded === "inputOff" ? "session.ungraded.body" : "session.ungraded.bodyOff")}
+          {t(
+            outcome.ungraded === "inputOff"
+              ? "session.ungraded.body"
+              : outcome.ungraded === "eyes"
+                ? "session.eyes.body"
+                : "session.ungraded.bodyOff",
+          )}
         </div>
         {/* What the player listened for, and their answer (DESIGN 4.4). */}
         <UngradedNote session={session} outcome={outcome} />

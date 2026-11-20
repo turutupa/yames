@@ -813,6 +813,15 @@
         "ofBar": "In the loop, bar {{bar}} of the tune landed on {{landed}} of {{count}} rounds.",
         "ofBars": "In the loop, bars {{from}} and {{to}} of the tune landed on {{landed}} of {{count}} rounds."
       }
+    },
+    "eyes": {
+      "offer": "This one is for your eyes",
+      "watch": "This time, watch your pick.",
+      "result": "That one was for your eyes",
+      "body": "Not graded and not listened to. You saw what the pick did.",
+      "question": "Did any beat start on an upstroke?",
+      "yes": "Yes",
+      "no": "No"
     }
   }
 }

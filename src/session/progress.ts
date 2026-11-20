@@ -38,7 +38,7 @@ export type TakeFacts = {
    * player chose to play anyway, or Settings has grading off. Practice, so it
    * counts toward minutes and the streak; never an attempt at the bar.
    */
-  ungraded?: "inputOff" | "gradingOff" | "chosen";
+  ungraded?: "inputOff" | "gradingOff" | "chosen" | "eyes";
   /**
    * Where the Take sat in time, per bar of the pattern (DESIGN 9.3): the signed
    * mean deviation of each pattern bar's heard notes, in ms, relative to the
@@ -52,7 +52,24 @@ export type TakeFacts = {
    * Moves no tempo. Absent: not asked or not answered.
    */
   heardIt?: "yes" | "notYet";
+  /**
+   * "This one is for your eyes" (DESIGN 4.2, "Watch your pick"): the player's
+   * own answer to "Did any beat start on an upstroke?" after a Take played
+   * ungraded to watch the pick. Kept like `heardIt`; moves nothing.
+   */
+  upstroke?: "yes" | "no";
 };
+
+/** A row's answer to "Did any beat start on an upstroke?", when it has one. */
+export function upstrokeOf(take: PathTakeRow): "yes" | "no" | null {
+  const answer = factsOf(take).upstroke;
+  return answer === "yes" || answer === "no" ? answer : null;
+}
+
+/** The same row with that answer kept on it. */
+export function withUpstroke(take: PathTakeRow, upstroke: "yes" | "no"): PathTakeRow {
+  return { ...take, facts: { ...factsOf(take), upstroke } };
+}
 
 /** A row's `lean`, when it holds one a reader can trust. */
 export function leanOf(take: PathTakeRow): Array<number | null> | null {

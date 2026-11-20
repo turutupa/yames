@@ -17,7 +17,7 @@ import type { Line } from "../../session/coachWords";
 import { displayValue, metricKey, reasonLine } from "../../session/coachWords";
 import { readyHonestLineKey } from "../../session/caveats";
 import type { PlanStep } from "../../session/planner";
-import { cleanTempoOf, heardItOf, takesOf } from "../../session/progress";
+import { cleanTempoOf, heardItOf, takesOf, upstrokeOf } from "../../session/progress";
 import { parkedUntil, reviewStateOf } from "../../session/rotation";
 import { currentStep } from "../../session/runner";
 import type { BigAction, TakeOutcome } from "../../session/runner";
@@ -200,6 +200,25 @@ function selfCheckOf(played: Exercise | null | undefined, exercise: Exercise | n
 export function UngradedNote({ session, outcome }: { session: SessionRun; outcome: TakeOutcome }) {
   const { t } = useTranslation();
   const { exercise } = whereOf(session);
+  // The Take for the eyes (DESIGN 4.2, "Watch your pick"): its one question,
+  // answered by the player, kept with the Take.
+  if (outcome.ungraded === "eyes") {
+    const id = outcome.takeId;
+    if (!id) return null;
+    const row = session.progress.takes.find((take) => take.id === id);
+    const said = row ? upstrokeOf(row) : null;
+    const question = t("session.eyes.question");
+    return (
+      <CoachNote headline={question} kind="ungraded" testId="coach-note">
+        <NoteAnswer
+          question={t("session.note.ungraded.yourAnswer")}
+          answer={said === "yes" ? "yes" : said === "no" ? "notYet" : undefined}
+          labels={{ yes: t("session.eyes.yes"), notYet: t("session.eyes.no") }}
+          onAnswer={(value) => session.actions.answerUpstroke(id, value === "yes" ? "yes" : "no")}
+        />
+      </CoachNote>
+    );
+  }
   const question = selfCheckOf(exercise, session.exercise);
   const id = outcome.takeId;
   if (!question || !id) return null;
@@ -265,6 +284,10 @@ export function ReadyNote({
   }
   if (onTry) chips.push({ kind: "ask", label: t("session.note.chip.try"), onClick: onTry, testId: "coach-try" });
 
+  // The Take for the eyes: what to watch, and nothing else.
+  if (run.ungraded === "eyes") {
+    return <CoachNote headline={t("session.eyes.watch")} source={source} kind="ready" testId="coach-note" />;
+  }
   // Ungraded, by choice or because nothing is listening: no claim about the playing.
   if (run.ungraded) {
     const question = selfCheckOf(played, exercise);

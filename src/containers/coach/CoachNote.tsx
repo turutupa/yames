@@ -203,10 +203,13 @@ export function NoteAnswer({
   question,
   answer,
   onAnswer,
+  labels,
 }: {
   question: string;
   answer: "yes" | "notYet" | undefined;
   onAnswer: (answer: "yes" | "notYet") => void;
+  /** Other words for the two answers ("Yes" / "No"); the default is "Yes" / "Not yet". */
+  labels?: { yes: string; notYet: string };
 }) {
   const { t } = useTranslation();
   return (
@@ -221,7 +224,7 @@ export function NoteAnswer({
           onClick={() => onAnswer(value)}
           data-testid={`coach-heard-${value}`}
         >
-          {t(value === "yes" ? "session.note.ungraded.yes" : "session.note.ungraded.notYet")}
+          {labels ? labels[value] : t(value === "yes" ? "session.note.ungraded.yes" : "session.note.ungraded.notYet")}
         </button>
       ))}
     </div>
