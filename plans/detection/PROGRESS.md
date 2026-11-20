@@ -493,6 +493,41 @@ callback, the engine and the queue are untouched.
 6. The chains are stationary noise and a simple gain model. Real rooms
    (speech, a TV, a fan starting) are card #85's recordings and card #86.
 
+## Runtime merge and its review nits (2026-11-19 evening)
+
+`mvp-detect-runtime` (`3a983dd1`: the verifier runs on tract, pure Rust, from
+an NNEF model, in every shipped build; `ort` kept for `npm run
+detect:parity`) is merged as `08e9c1ac`. `late_grade` keeps both sides: the
+tracker's grade is published first (`13c3cf6a`) and the model call sits
+inside the runtime branch's `catch_unwind`, so a panic leaves the tracker's
+grade in place (`timing::late_grade_staged`). Details: `RUNTIME.md`.
+
+| Commit | Review nit |
+|---|---|
+| `f97370f6` | 2: a model that panics while running is retired like one that failed to load; 3: outputs checked by exact name and shape |
+| `229462ed` | 4: the model is loaded when an Exercise with pitches is loaded, off the Take's pass and off every real-time thread; `detect-bench cost` times the load (37 to 42 ms on a desktop big core, 65 to 73 ms on a phone mid core: `RUNTIME.md`, "Loading") |
+| `eab273a5` | 6: `detect:parity` exits 1 on a posterior difference over 1e-3, a non-finite value or a verdict flip |
+| `d978cfd6` | 5, 7: stale comments; `android.yml` type-checks with `detect-tract` |
+
+Gates on the merged tree (`detect:bench`, `detect:check` and
+`test:rust:detect` now build with `detect-tract`): `test:rust` 1101/0,
+`test:rust:detect` 1103/0, `test:grading` 29/0, `test:pitch` 8/0, `test:dsp`,
+`test:highbpm`, `detect:check` 1,608 gated, 0 worse, 0 better, 0 missing
+against the M6 baselines (so tract moved no gated number), `detect:parity`
+exit 0, Android `cargo check` plain, `detect-tract` and `detect-ort`, tsc,
+vitest 364 of 365 files (`TabStage.render.test.tsx`, worktree-only), `npm
+run build`.
+
+Click-jitter probe on the tract build (load 2.9 to 3.3 one-minute, 4.9 to
+5.8 five-minute), hard gates 0 in both: `--no-llm --late-pass` p99 0.51 ms
+(86 late passes of 719 ms), `--no-llm --jam-swap --jam-move --jam-take
+--late-pass` p99 0.90 ms (87 passes of 724 ms; 592 ms on `ort`).
+
+A helper did the merge and the four fixes and was cut off by an API error
+before its gates; the gates and the probe above were run on its tree
+afterwards. Its merge resolution of `timing.rs` has had no second reader:
+it is on the reviewer's list in `HANDOFF.md`.
+
 ## Opus interlude (2026-11-19, between ed8870d4 and the Fable agent's return)
 
 A stand-in agent picked up the uncommitted M4 work, finished and gated it,

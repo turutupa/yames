@@ -33,12 +33,19 @@ Why, by the numbers below:
 Kill switch unchanged: `YAMES_VERIFIER=0`. A model that fails or panics while
 loading is remembered as "no model" (not retried every Take) and grading is
 the tracker's; a panic inside the verifier is caught at the model call in
-`timing::late_grade` and reported as `verifier.status = failed`, with the
-tracker's grade kept.
+`timing::late_grade_staged` and reported as `verifier.status = failed`, with
+the tracker's grade kept (it was published before the model was asked), and
+the model that panicked is retired the same way: later Takes get "no model",
+not the same panic.
 
 ## Parity (tract vs ort, same audio)
 
-`npm run detect:parity` (`detect-bench parity --fast`): both runtimes over
+`npm run detect:parity` (`detect-bench parity --fast`) exits 1 when a
+posterior differs by more than 1e-3, when either runtime gives a value that
+is not finite, or when any verifier verdict or late-grade note state
+differs (it runs each Take through the bench's whole path on both runtimes;
+a posterior merely crossing a threshold is reported, not failed on). The
+table below is the first measurement: both runtimes over
 the posteriors of every fast-bench Take (329 Takes, 5,179 s of audio,
 78.5 M values), then the bench run on each (`--notes`) and the two
 `notes.jsonl` / `results.json` compared.
@@ -88,6 +95,31 @@ phone anyway.
 Not tried, on purpose: more threads (`multithread-mm`). The pass runs beside
 a metronome (AGENTS.md, the audio-safety gate) and one thread is the rule
 for ort too.
+
+## Loading (review nit 4, measured after the merge into `mvp-detect`)
+
+`TractModel::new()` reads the NNEF archive and optimises the graph. It used
+to happen inside the first Take's verifier pass, under the model's lock.
+`detect-bench cost` now times it (`modelLoadWallSeconds`, a second load, and
+the first window through a fresh model against a later one). Release,
+`taskset` to one core, three runs each, load average 1.5 to 2.5:
+
+| | Load (first) | Load again | First window | A later window |
+|---|---|---|---|---|
+| X925 (desktop big core) | 37 to 42 ms | 34 ms | 32 to 34 ms | 30 to 31 ms |
+| A725 (phone mid core) | 65 to 73 ms | 63 to 71 ms | 72 to 75 ms | 71 to 73 ms |
+
+So the load is about one window of inference (a 30 s Take is 37 windows),
+there is no lazy first-run cost worth the name, and a budget phone's A55
+would pay perhaps 0.2 s. Small, and now paid ahead of the Take anyway:
+`model::warm_in_background()` loads the shared model on a thread of its own
+(`yames-note-model-warm`, below normal priority, once per process), started
+from `TimingAnalyzer::load_exercise_with_details` when an Exercise with
+written pitches is loaded and the verifier is on. That is the Tauri command's
+thread: never the cpal callback, the onset thread or the analyzer's loop. If
+a Take closes before the warm thread is done, the post-Take thread waits on
+the model's lock for the rest of the load; the tracker's grade is published
+before that either way.
 
 ## Size
 
@@ -144,16 +176,18 @@ Sizes: `cargo build --release --lib --target aarch64-linux-android
 ## Code (summary for the reviewer)
 
 - `src/detect/model.rs`: `tract_backend::TractModel` (NNEF from
-  `NNEF_BYTES`, outputs checked to be (note, onset) by name, optimised plan
-  run per window); `compiled()` is either feature; `runtimes()`,
+  `NNEF_BYTES`, outputs checked to be (note, onset) by exact name and by
+  shape 1 x 172 x 88, optimised plan run per window); `compiled()` is either feature; `runtimes()`,
   `load_runtime(name)`; `load()` picks tract, or `YAMES_DETECT_RUNTIME`;
-  `with_shared` catches a panic in `load()` and caches "no model". The
+  `with_shared` catches a panic in `load()` and caches "no model", and does
+  the same for a panic while the model runs (then lets it go on to the
+  caller); `warm_in_background()` ("Loading" above). The
   plucked-A test runs every runtime in the build; a size test for the
   archive.
-- `src/timing.rs` `late_grade`: only the model call is wrapped in its own
-  `catch_unwind` (-> `VerifierStatus::Failed`), so the tracker's grade
-  survives. Nothing else in the late pass moved (the M6 agent is reordering
-  it on `mvp-detect`).
+- `src/timing.rs` `late_grade_staged` (after the merge with `mvp-detect`,
+  which publishes the tracker's grade first): only the model call is
+  wrapped in its own `catch_unwind` (-> `VerifierStatus::Failed`), so the
+  tracker's grade survives, marked `failed`.
 - `detect-bench`: `parity` subcommand, `cost --runtime` and a model-only
   figure, `noteModel` no longer names ort.
 - `Cargo.toml`: `tract-nnef` optional, `detect-tract` feature, comments
