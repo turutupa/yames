@@ -7,8 +7,10 @@
 //! `yames-take-notes`, below normal priority) and offline tools.
 //!
 //! **The runtime sits behind [`NoteModel`]**, so nothing outside this file
-//! names it. `detect-ort` builds ONNX Runtime through the `ort` crate. A build
-//! without it has no model: [`load`] says so and every caller degrades to
+//! names it. `detect-tract` (the shipped default) runs it on tract, pure
+//! Rust; `detect-ort` on ONNX Runtime through the `ort` crate, kept for the
+//! bench and parity (`plans/detection/RUNTIME.md`). A build with neither has
+//! no model: [`load`] says so and every caller degrades to
 //! "not run" (`VerifierStatus::NoModel`), which is what a plain
 //! `cargo test` and the default desktop build get.
 //!
@@ -39,6 +41,12 @@ const KEPT_FRAMES: usize = 141;
 /// The ONNX file, compiled in: 225 KiB, so no platform has a file to bundle.
 /// `models/basic-pitch/README.md` has its source, licence and hash.
 pub static MODEL_BYTES: &[u8] = include_bytes!("../../models/basic-pitch/nmp.onnx");
+
+/// The same network as tract's NNEF archive, made from [`MODEL_BYTES`] by
+/// `tools/basic-pitch-nnef` (input fixed to one window, the two heads the
+/// verifier reads). 257 KiB. Only builds with `detect-tract` carry it.
+#[cfg(feature = "detect-tract")]
+pub static NNEF_BYTES: &[u8] = include_bytes!("../../models/basic-pitch/nmp.nnef.tar");
 
 /// One window's answer: `WINDOW_FRAMES x PITCHES`, row-major, 0..1.
 pub struct WindowOut {
@@ -107,26 +115,55 @@ pub fn posteriors(model: &mut dyn NoteModel, audio: &[f32]) -> Result<Posteriors
 
 /// Whether this build can run the model at all.
 pub const fn compiled() -> bool {
-    cfg!(feature = "detect-ort")
+    cfg!(any(feature = "detect-tract", feature = "detect-ort"))
 }
 
-/// The model on the runtime this build has. One or two threads at most: it
-/// runs beside a metronome (AGENTS.md, the audio-safety gate).
-#[cfg(feature = "detect-ort")]
-pub fn load() -> Result<Box<dyn NoteModel>, String> {
-    ort_backend::OrtModel::new().map(|m| Box::new(m) as Box<dyn NoteModel>)
+/// The runtimes this build has, the default first.
+pub fn runtimes() -> Vec<&'static str> {
+    let mut v = Vec::new();
+    if cfg!(feature = "detect-tract") {
+        v.push("tract");
+    }
+    if cfg!(feature = "detect-ort") {
+        v.push("ort");
+    }
+    v
 }
 
-#[cfg(not(feature = "detect-ort"))]
+/// The model on the runtime this build has. One thread: it runs beside a
+/// metronome (AGENTS.md, the audio-safety gate). With both runtimes in the
+/// build, `tract` unless `YAMES_DETECT_RUNTIME=ort` (bench and parity only;
+/// shipped builds have tract alone, `plans/detection/RUNTIME.md`).
 pub fn load() -> Result<Box<dyn NoteModel>, String> {
-    Err("this build has no note model (feature `detect-ort` is off)".into())
+    let asked = std::env::var("YAMES_DETECT_RUNTIME").ok().filter(|v| !v.is_empty());
+    match asked {
+        Some(name) => load_runtime(&name),
+        None => match runtimes().first() {
+            Some(name) => load_runtime(name),
+            None => Err("this build has no note model (features `detect-tract` and `detect-ort` are off)".into()),
+        },
+    }
+}
+
+/// The model on one named runtime (`"tract"` or `"ort"`), if this build has it.
+pub fn load_runtime(name: &str) -> Result<Box<dyn NoteModel>, String> {
+    match name {
+        #[cfg(feature = "detect-tract")]
+        "tract" => tract_backend::TractModel::new().map(|m| Box::new(m) as Box<dyn NoteModel>),
+        #[cfg(feature = "detect-ort")]
+        "ort" => ort_backend::OrtModel::new().map(|m| Box::new(m) as Box<dyn NoteModel>),
+        other => Err(format!("this build has no `{other}` note-model runtime (it has: {:?})", runtimes())),
+    }
 }
 
 /// The app's one loaded model, made on first use and kept. `f` gets `None`
 /// when this build has no model, when the player's environment turned the
-/// verifier off (`YAMES_VERIFIER=0`), or when loading failed (said once on
-/// stderr). Inference holds the lock, so callers queue: the post-Take pass is
-/// the only one, and it is one Take at a time.
+/// verifier off (`YAMES_VERIFIER=0`), or when loading failed or panicked
+/// (said once on stderr, and remembered: a model that would not load is not
+/// tried again on every Take). Inference holds the lock, so callers queue:
+/// the post-Take pass is the only one, and it is one Take at a time. A panic
+/// inside `f` is the caller's to catch (`timing::late_grade` does); the lock
+/// recovers from the poisoning it leaves.
 pub fn with_shared<R>(f: impl FnOnce(Option<&mut Box<dyn NoteModel>>) -> R) -> R {
     static SHARED: std::sync::Mutex<Option<Option<Box<dyn NoteModel>>>> = std::sync::Mutex::new(None);
     let mut slot = SHARED.lock().unwrap_or_else(|e| e.into_inner());
@@ -134,10 +171,14 @@ pub fn with_shared<R>(f: impl FnOnce(Option<&mut Box<dyn NoteModel>>) -> R) -> R
         if !enabled() {
             return None;
         }
-        match load() {
-            Ok(m) => Some(m),
-            Err(e) => {
+        match std::panic::catch_unwind(load) {
+            Ok(Ok(m)) => Some(m),
+            Ok(Err(e)) => {
                 eprintln!("[yames] the note model did not load, so notes are not verified: {e}");
+                None
+            }
+            Err(_) => {
+                eprintln!("[yames] the note model panicked while loading, so notes are not verified");
                 None
             }
         }
@@ -149,6 +190,58 @@ pub fn with_shared<R>(f: impl FnOnce(Option<&mut Box<dyn NoteModel>>) -> R) -> R
 /// not turned off with `YAMES_VERIFIER=0` (a troubleshooting switch).
 pub fn enabled() -> bool {
     compiled() && std::env::var("YAMES_VERIFIER").map(|v| v != "0").unwrap_or(true)
+}
+
+/// Pure-Rust inference (`tract`, Sonos, MIT OR Apache-2.0): no native
+/// library, nothing downloaded at build time, the same code on every target
+/// Yames ships (Intel Macs included). It reads [`NNEF_BYTES`], the same
+/// network as [`MODEL_BYTES`] with the input fixed to one window and only
+/// the note and onset heads kept (`tools/basic-pitch-nnef`).
+#[cfg(feature = "detect-tract")]
+mod tract_backend {
+    use super::{NoteModel, WindowOut, NNEF_BYTES, PITCHES, WINDOW_FRAMES, WINDOW_SAMPLES};
+    use tract_nnef::prelude::*;
+
+    pub struct TractModel {
+        plan: std::sync::Arc<TypedRunnableModel>,
+    }
+
+    impl TractModel {
+        pub fn new() -> Result<Self, String> {
+            let e = |e: TractError| format!("{e:?}");
+            let model = tract_nnef::nnef().model_for_read(&mut std::io::Cursor::new(NNEF_BYTES)).map_err(e)?;
+            // The archive's outputs are (note, onset), in that order
+            // (`tools/basic-pitch-nnef`); refuse one that says otherwise.
+            let names: Vec<String> = model.output_outlets().map_err(e)?.iter().map(|o| model.node(o.node).name.clone()).collect();
+            if names.len() != 2 || !names[0].starts_with("StatefulPartitionedCall_1") || !names[1].starts_with("StatefulPartitionedCall_2") {
+                return Err(format!("the NNEF note model has outputs {names:?}, not (note, onset)"));
+            }
+            let plan = model.into_optimized().map_err(e)?.into_runnable().map_err(e)?;
+            Ok(Self { plan })
+        }
+    }
+
+    impl NoteModel for TractModel {
+        fn infer(&mut self, window: &[f32]) -> Result<WindowOut, String> {
+            let e = |e: TractError| format!("{e:?}");
+            let input = Tensor::from_shape(&[1, WINDOW_SAMPLES, 1], window).map_err(e)?;
+            let out = self.plan.run(tvec!(input.into())).map_err(e)?;
+            let take = |i: usize| -> Result<Vec<f32>, String> {
+                let t = out.get(i).ok_or("the note model gave fewer outputs than asked")?;
+                let plain = t.try_as_plain_ram().map_err(e)?;
+                let v = plain.as_slice::<f32>().map_err(e)?;
+                if v.len() != WINDOW_FRAMES * PITCHES {
+                    return Err(format!("output {i} has {} values, not {}", v.len(), WINDOW_FRAMES * PITCHES));
+                }
+                Ok(v.to_vec())
+            };
+            Ok(WindowOut { note: take(0)?, onset: take(1)? })
+        }
+
+        fn runtime(&self) -> &'static str {
+            "tract"
+        }
+    }
 }
 
 #[cfg(feature = "detect-ort")]
@@ -252,7 +345,13 @@ mod tests {
         assert_eq!(MODEL_BYTES.len(), 230_444);
     }
 
-    #[cfg(feature = "detect-ort")]
+    #[cfg(feature = "detect-tract")]
+    #[test]
+    fn the_nnef_archive_is_the_one_the_readme_names() {
+        assert_eq!(NNEF_BYTES.len(), 263_168);
+    }
+
+    #[cfg(any(feature = "detect-tract", feature = "detect-ort"))]
     #[test]
     fn the_real_model_hears_a_plucked_a() {
         // A decaying harmonic tone at A3 (MIDI 57) from 0.5 s.
@@ -267,15 +366,17 @@ mod tests {
             }
             audio[i] = (0.3 * v * (-2.0 * t).exp()) as f32;
         }
-        let mut model = load().expect("the model loads");
-        let p = posteriors(model.as_mut(), &audio).unwrap();
-        let col = (57 - MIDI_LOW) as usize;
-        let at = |t: f64| (t / Posteriors::frame_seconds()).round() as usize;
-        let sounding = p.note[at(0.8) * PITCHES + col];
-        let before = p.note[at(0.3) * PITCHES + col];
-        assert!(sounding > 0.5, "A3 sounding reads {sounding}");
-        assert!(before < 0.2, "A3 before it starts reads {before}");
-        let onset_peak = (at(0.4)..at(0.6)).map(|k| p.onset[k * PITCHES + col]).fold(0.0f32, f32::max);
-        assert!(onset_peak > 0.4, "A3's onset reads {onset_peak}");
+        for name in runtimes() {
+            let mut model = load_runtime(name).expect("the model loads");
+            let p = posteriors(model.as_mut(), &audio).unwrap();
+            let col = (57 - MIDI_LOW) as usize;
+            let at = |t: f64| (t / Posteriors::frame_seconds()).round() as usize;
+            let sounding = p.note[at(0.8) * PITCHES + col];
+            let before = p.note[at(0.3) * PITCHES + col];
+            assert!(sounding > 0.5, "{name}: A3 sounding reads {sounding}");
+            assert!(before < 0.2, "{name}: A3 before it starts reads {before}");
+            let onset_peak = (at(0.4)..at(0.6)).map(|k| p.onset[k * PITCHES + col]).fold(0.0f32, f32::max);
+            assert!(onset_peak > 0.4, "{name}: A3's onset reads {onset_peak}");
+        }
     }
 }

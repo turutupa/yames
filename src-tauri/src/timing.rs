@@ -3041,10 +3041,17 @@ pub fn late_grade_staged(
         return Some(tracked);
     }
     let timed = run.report(weights)?;
-    let verified = crate::detect::model::with_shared(|model| match model {
-        Some(m) => run.verify(&timed, take, m.as_mut()),
-        None => crate::score::verify::VerifierReport::status(crate::score::verify::VerifierStatus::NoModel),
-    });
+    use crate::score::verify::{VerifierReport, VerifierStatus};
+    // Its own catch: a panic in the model or the runtime costs the verifier's
+    // verdicts, never the tracker's grade. That grade is already published
+    // (`first`); what follows it is the same grade marked `failed`.
+    let verified = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        crate::detect::model::with_shared(|model| match model {
+            Some(m) => run.verify(&timed, take, m.as_mut()),
+            None => VerifierReport::status(VerifierStatus::NoModel),
+        })
+    }))
+    .unwrap_or_else(|_| VerifierReport::status(VerifierStatus::Failed));
     run.report_late_in(weights, take, Some(&verified), &mut scratch)
 }
 

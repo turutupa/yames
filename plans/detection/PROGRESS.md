@@ -536,3 +536,42 @@ aarch64-linux-android` with and without `detect-ort`, tsc, vitest (all but
 5. Next milestones: M6 (live detector robustness, the 36% / 51% onset_heard
    on hammer-ons / pull-offs and phone_agc 48% bends read are its targets),
    M7 (free-play engine), M8+ planning. No pack uses `b2r` / `B2` yet.
+
+## Runtime: tract on every platform (2026-11-19, branch `mvp-detect-runtime`)
+
+The owner asked for the best solution for all players: the verifier on
+every platform, small and dependable. Measured and decided in
+`RUNTIME.md`; in short:
+
+- **tract** (`tract-nnef` 0.23.10, pure Rust) is now the verifier's runtime
+  in every build people play on, feature `detect-tract`: `release.yml`,
+  `beta.yml` (desktop), `scripts/tauri.mjs` (desktop dev/build and Android
+  /iOS dev/build, so `android.yml` and the Android beta carry it). Intel
+  macOS included, where ort cannot build at all. `detect-ort` stays for
+  `npm run detect:parity`.
+- Model: `nmp.nnef.tar`, converted from `nmp.onnx` by
+  `tools/basic-pitch-nnef` (`npm run detect:nnef`; checked: max abs diff 0
+  against the ONNX on tract).
+- Parity with ort over the fast bench: verdicts identical on 15,855 of
+  15,855 notes, all 2,113 metrics identical, posteriors within 1.8e-4;
+  `detect:check` 0 worse on tract (and on `--no-model`).
+- Speed, one thread, model only: 1.36 s per minute of audio on a Cortex-X925,
+  2.71 s on a Cortex-A725 (phone-class core); ort 1.03 / 2.24. A 30 s Take on
+  a mid phone is about 1.5 s, inside the 3-8 s tier.
+- Size: +13.3 MB stripped (Android `.so` and Linux binary), against ort's
+  +21.2 / +25.1 MB.
+- Robustness (review items 3 and 9): a panic in the model call is caught in
+  `timing::late_grade` on its own (`verifier.status = failed`, tracker grade
+  kept); a panic in `load()` is caught and remembered as "no model";
+  `Cargo.toml`'s feature comment says what ships. `YAMES_VERIFIER=0` is still
+  the switch.
+- `package.json`: `detect:bench`, `detect:check`, `test:rust:detect` now on
+  `detect-tract`.
+
+Gates: `test:rust` 1089/0, `test:rust:detect` 1091/0 (tract), the model
+tests with both features (the plucked A on tract and on ort), `detect:check` 0 worse, Android `cargo check --lib` with and
+without `detect-tract`, the Android release `.so` and `detect-bench` linked
+for `aarch64-linux-android`. Not proven here: the Windows and macOS app
+builds (no SDKs on this box; tract's crates `cargo check` for both macOS
+targets, Windows needs MSVC's `ml64`/`lib.exe`). The next beta run is that
+proof.

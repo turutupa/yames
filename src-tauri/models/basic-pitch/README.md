@@ -21,3 +21,21 @@ It is compiled into the binary with `include_bytes!` (`src/detect/model.rs`),
 so there is no model file to bundle, sign or lose on any platform. Yames uses
 it only to CONFIRM or DECLINE notes the Exercise already wrote
 (`src/detect/verifier.rs`); it never transcribes on its own.
+
+## `nmp.nnef.tar`: the same network, for tract
+
+What the shipped builds run (`detect-tract`, `plans/detection/RUNTIME.md`).
+Made from `nmp.onnx` by `tools/basic-pitch-nnef` (`npm run detect:nnef`),
+which then reads it back and checks it against the ONNX file on tract (max
+abs difference 0 when it was made). Inside tract: the input fixed to
+`[1, 43844, 1]`, only the note and onset outputs kept (in that order; the
+contour head is never read), typed and decluttered. Same weights, nothing
+retrained or re-quantised. Uses tract's `tract_core` NNEF extension, so the
+tool and the app pin the same tract version (0.23.10); after a tract
+upgrade, re-run the tool and `npm run detect:parity`.
+
+- Size: 263,168 bytes (uncompressed tar).
+- SHA-256: `f23f7f7ed0083ecea103904da61356d62bdc1d883b067b55a28f1ef00f2b438e`
+  (the bytes change from run to run, tar mtimes and tract's numbering of some
+  intermediate names; the graph does not).
+- Licence: as `nmp.onnx` (Apache-2.0, `NOTICE`).

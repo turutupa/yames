@@ -39,7 +39,8 @@ usage:
                    [--check] [--update-baseline] [--baseline <file>]
   detect-bench replay <audio> [--job <sidecar.json>] [--out <dir>] [--no-model]
   detect-bench render <out-dir> [--fast | --full] [--chains a,b,..] [--only <substr>]
-  detect-bench cost [--seconds N]
+  detect-bench cost [--seconds N] [--runtime tract|ort]
+  detect-bench parity [--fast | --full] [--chains a,b,..] [--only <substr>] [--a tract] [--b ort]
 ";
 
 struct Args(Vec<String>);
@@ -187,7 +188,7 @@ fn run(mut args: Args) -> Result<ExitCode, String> {
     }
     let has_model = model::compiled() && !no_model;
     if !has_model {
-        eprintln!("note: running WITHOUT the note model (build with `--features detect-ort`, or drop `--no-model`); verifier metrics are left out");
+        eprintln!("note: running WITHOUT the note model (build with `--features detect-tract`, or drop `--no-model`); verifier metrics are left out");
     }
     let out_dir = out_dir.unwrap_or_else(|| repo_root().join(".detect-bench").join(&mode_name));
     std::fs::create_dir_all(&out_dir).map_err(|e| format!("{}: {e}", out_dir.display()))?;
@@ -249,7 +250,7 @@ fn run(mut args: Args) -> Result<ExitCode, String> {
         "takes": takes.len(),
         "notes": rows.len(),
         "chains": chains,
-        "noteModel": if has_model { "basic-pitch icassp-2022 on onnxruntime (ort)" } else { "none" },
+        "noteModel": if has_model { "basic-pitch icassp-2022" } else { "none" },
     });
     let doc = json!({ "about": about, "metrics": metrics, "takes": takes });
     let write = |name: &str, body: String| -> Result<(), String> {
@@ -429,7 +430,10 @@ fn cost(mut args: Args) -> Result<ExitCode, String> {
         samples.extend_from_slice(&one);
     }
     samples.truncate((seconds * rate as f64) as usize);
-    let mut m = model::load()?;
+    let mut m = match args.value("--runtime") {
+        Some(name) => model::load_runtime(&name)?,
+        None => model::load()?,
+    };
     let _ = yames_lib::detect::analyse(m.as_mut(), &samples[..rate as usize * 2], rate)?; // warm
     let (c0, w0) = (thread_cpu_s(), std::time::Instant::now());
     let a = yames_lib::detect::analyse(m.as_mut(), &samples, rate)?;
@@ -440,6 +444,23 @@ fn cost(mut args: Args) -> Result<ExitCode, String> {
     let t0 = std::time::Instant::now();
     let _ = std::hint::black_box(yames_lib::pitch::track(&samples, rate, &yames_lib::pitch::PitchConfig::guitar()));
     let track_wall = t0.elapsed().as_secs_f64();
+    // the same pass with a model that answers zeros at once: what is left
+    // of the cost is resampling and the envelope, so the difference is the
+    // model alone
+    struct Zeros;
+    impl model::NoteModel for Zeros {
+        fn infer(&mut self, _: &[f32]) -> Result<model::WindowOut, String> {
+            let n = model::WINDOW_FRAMES * model::PITCHES;
+            Ok(model::WindowOut { note: vec![0.0; n], onset: vec![0.0; n] })
+        }
+        fn runtime(&self) -> &'static str {
+            "zeros"
+        }
+    }
+    let c1 = thread_cpu_s();
+    let _ = yames_lib::detect::analyse(&mut Zeros, &samples, rate)?;
+    let overhead = thread_cpu_s().zip(c1).map(|(a, b)| a - b);
+    let model_cpu = cpu.zip(overhead).map(|(a, b)| a - b);
     println!("{}", json!({
         "pitchTrackWallSeconds": track_wall,
         "trackerGradeAtSeconds": track_wall,
@@ -451,8 +472,70 @@ fn cost(mut args: Args) -> Result<ExitCode, String> {
         "wallSecondsPerMinuteOfAudio": per_min(wall),
         "cpuSecondsPerMinuteOfAudio": cpu.map(per_min),
         "timesRealTime": a.seconds / wall,
+        "modelOnlyCpuSecondsPerMinuteOfAudio": model_cpu.map(per_min),
         "note": "resample + model + envelope, one intra-op thread; CPU time is this thread's own, so it holds on a busy machine",
     }));
+    Ok(ExitCode::SUCCESS)
+}
+
+/// Two runtimes over the same audio: the largest difference between their
+/// posteriors, and how many values land on different sides of the
+/// verifier's thresholds (`plans/detection/RUNTIME.md`).
+fn parity(mut args: Args) -> Result<ExitCode, String> {
+    let a_name = args.value("--a").unwrap_or_else(|| "tract".into());
+    let b_name = args.value("--b").unwrap_or_else(|| "ort".into());
+    let (cases, mode_name, _) = collect_cases(&mut args)?;
+    let mut a = model::load_runtime(&a_name)?;
+    let mut b = model::load_runtime(&b_name)?;
+    let (mut max_note, mut max_onset, mut sum, mut values) = (0.0f32, 0.0f32, 0.0f64, 0usize);
+    let mut flips = [0usize; 3];
+    const CUTS: [f32; 3] = [0.3, 0.5, 0.7];
+    let (mut ta, mut tb, mut seconds) = (0.0f64, 0.0f64, 0.0f64);
+    let started = std::time::Instant::now();
+    for (i, case) in cases.iter().enumerate() {
+        let (samples, rate) = audio_of(case)?;
+        let w = std::time::Instant::now();
+        let pa = yames_lib::detect::analyse(a.as_mut(), &samples, rate)?;
+        ta += w.elapsed().as_secs_f64();
+        let w = std::time::Instant::now();
+        let pb = yames_lib::detect::analyse(b.as_mut(), &samples, rate)?;
+        tb += w.elapsed().as_secs_f64();
+        seconds += pa.seconds;
+        for (xs, ys, max) in [(&pa.posteriors.note, &pb.posteriors.note, &mut max_note), (&pa.posteriors.onset, &pb.posteriors.onset, &mut max_onset)] {
+            if xs.len() != ys.len() {
+                return Err(format!("{}: {} vs {} values", case.meta.name, xs.len(), ys.len()));
+            }
+            for (x, y) in xs.iter().zip(ys.iter()) {
+                let d = (x - y).abs();
+                *max = max.max(d);
+                sum += d as f64;
+                values += 1;
+                for (k, c) in CUTS.iter().enumerate() {
+                    if (*x >= *c) != (*y >= *c) {
+                        flips[k] += 1;
+                    }
+                }
+            }
+        }
+        if (i + 1) % 100 == 0 {
+            eprintln!("{}/{} Takes after {:.0} s", i + 1, cases.len(), started.elapsed().as_secs_f64());
+        }
+    }
+    println!("{}", serde_json::to_string_pretty(&json!({
+        "mode": mode_name,
+        "takes": cases.len(),
+        "audioSeconds": seconds,
+        "a": a.runtime(),
+        "b": b.runtime(),
+        "values": values,
+        "maxAbsDiffNote": max_note,
+        "maxAbsDiffOnset": max_onset,
+        "meanAbsDiff": sum / values.max(1) as f64,
+        "thresholdFlips": { "0.3": flips[0], "0.5": flips[1], "0.7": flips[2] },
+        "wallSecondsPerMinuteA": ta * 60.0 / seconds,
+        "wallSecondsPerMinuteB": tb * 60.0 / seconds,
+        "note": "posteriors of the two runtimes on each Take's audio (resample + model, the verifier's input); wall time includes resampling and the envelope",
+    })).map_err(|e| e.to_string())?);
     Ok(ExitCode::SUCCESS)
 }
 
@@ -469,6 +552,7 @@ fn main() -> ExitCode {
         "replay" => replay_cmd(args),
         "render" => render(args),
         "cost" => cost(args),
+        "parity" => parity(args),
         _ => Err(USAGE.to_string()),
     };
     match result {
