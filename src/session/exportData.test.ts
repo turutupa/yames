@@ -12,6 +12,13 @@ describe("the practice-data export", () => {
       take("even-eighths.open-string", {
         facts: { role: "benchmark", reason: "benchmark", benchmark: { day: 1, exerciseId: "even-eighths.open-string", bpm: 60 } },
       }),
+      take("even-eighths.open-string", {
+        facts: { session: NOW, verdict: "belowBar", lean: [14, -3, null, -5] },
+      }),
+      take("even-eighths.open-string", {
+        caught: false,
+        facts: { session: NOW, verdict: "ungraded", ungraded: "chosen", heardIt: "notYet" },
+      }),
     ],
     unsubscribed: [],
   });
@@ -25,7 +32,7 @@ describe("the practice-data export", () => {
 
   it("holds the Takes, ceilings and where each Path stands", () => {
     expect(data.kind).toBe("yames-practice-data");
-    expect(data.takes).toHaveLength(2);
+    expect(data.takes).toHaveLength(4);
     expect(data.paths[0]).toMatchObject({ pathId: ALT.id, title: ALT.title, subscribed: true });
   });
 
@@ -36,6 +43,13 @@ describe("the practice-data export", () => {
     expect(data.fairness).toEqual([expect.objectContaining({ fair: "no", verdict: "passed" })]);
     expect(data.plannerReasons.map((r) => r.reason).sort()).toEqual(["benchmark", "climb"]);
     expect(data.todayPlan?.steps.length).toBeGreaterThan(0);
+  });
+
+  it("pulls out the answers to \"Did they?\" and each Take's lean per pattern bar", () => {
+    expect(data.heardIt).toEqual([expect.objectContaining({ heardIt: "notYet", ungraded: "chosen" })]);
+    expect(data.leans).toEqual([expect.objectContaining({ lean: [14, -3, null, -5] })]);
+    // A bar with no heard note stays null through JSON, never a made-up zero.
+    expect(JSON.parse(JSON.stringify(data)).leans[0].lean).toEqual([14, -3, null, -5]);
   });
 
   it("is JSON, and names itself by the day", () => {

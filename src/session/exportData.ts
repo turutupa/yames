@@ -55,6 +55,14 @@ export function buildPracticeExport(input: {
     fairness: facts
       .filter((f) => f.fair)
       .map((f) => ({ takeId: f.id, fair: f.fair, verdict: f.verdict ?? null })),
+    // The answers to "Did they?" after an ungraded Take (DESIGN 4.4).
+    heardIt: facts
+      .filter((f) => f.heardIt)
+      .map((f) => ({ takeId: f.id, heardIt: f.heardIt, ungraded: f.ungraded ?? null })),
+    // Where each Take sat in time, per bar of the pattern, relative to its own median.
+    leans: facts
+      .filter((f) => Array.isArray(f.lean) && f.lean.length > 0)
+      .map((f) => ({ takeId: f.id, lean: f.lean })),
     plannerReasons: facts
       .filter((f) => f.reason)
       .map((f) => ({ takeId: f.id, role: f.role ?? null, reason: f.reason })),
