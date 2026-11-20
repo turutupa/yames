@@ -2,16 +2,20 @@
  * Today: the front door. The Session is already built, every line says why it is
  * there, and one press starts it. Choosing minutes rebuilds it.
  */
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { PLAN_MINUTES } from "../../session/planner";
 import type { PlanStep } from "../../session/planner";
-import { leftOffLine, reasonLine } from "../../session/coachWords";
-import { factsOf } from "../../session/progress";
+import { reasonLine } from "../../session/coachWords";
 import { FIRST_PATH_ID } from "../../session/packs";
 import type { PathDoc } from "../../paths/format";
+import { TAKES_TO_READ } from "./hooks/useSessionRun";
 import type { SessionRun } from "./hooks/useSessionRun";
+import { todayLine, todayLineText } from "../../coach/todayLine";
+import { CoachLine } from "../coach/CoachLine";
+import { askCoach } from "../coach/askStore";
+import { IS_MOBILE } from "../../platform";
 import { lineText } from "./lineText";
 import { bpmLine, pathTitleOf, planSources, roleKey, roleOf, rowKind, shortContext, shortReason, ticksOf } from "./todayPlan";
 import { InstrumentNote } from "./InstrumentNote";
@@ -276,10 +280,32 @@ export function TodayView({
   const neck3d = useNeck3d();
   const [endRef, endInView] = useEndInView();
 
+  // The coach's one sentence above the plan (DESIGN 6.1): from stored rows
+  // only, and absent when it would only repeat the rows.
+  const grading = session.grading ?? "ask";
+  const line = useMemo(
+    () =>
+      todayLine({ plan, progress, paths: session.paths, now: Date.now(), grading, takesRead: TAKES_TO_READ }),
+    [plan, progress, session.paths, grading],
+  );
+  const said = line ? todayLineText(t, line) : null;
+  // The whole line opens Ask about it, on a computer. A phone's Ask is the
+  // header's labelled button: a sentence is no thumb target (DESIGN 3.6).
+  const coachLine = said ? (
+    <div className="session-today-line session-rise" style={rise(IS_MOBILE ? 2 : 4)} data-kind={line?.kind}>
+      <CoachLine testId="today-line" onAsk={IS_MOBILE ? undefined : askCoach}>
+        {said}
+      </CoachLine>
+    </div>
+  ) : null;
+
   const weekday = new Intl.DateTimeFormat(i18n.language, { weekday: "long" }).format(new Date());
   const lead =
     plan.mood === "first"
-      ? t("session.today.leadFirstOutcome")
+      ? // The line says what a first Session finds; the kicker does not say it twice.
+        line?.kind === "first"
+        ? t("session.today.leadFirst")
+        : t("session.today.leadFirstOutcome")
       : plan.mood === "back"
         ? t("session.today.leadBack", { days: plan.daysAway ?? 0 })
         : weekday;
@@ -288,8 +314,6 @@ export function TodayView({
   // is choosing a Path rather than a Start that cannot start.
   // Only once the Paths have loaded: before then nothing is subscribed either.
   const noPaths = session.paths.length > 0 && myPaths.length === 0;
-  const last = progress.takes[0];
-  const leftOff = last ? leftOffLine(factsOf(last), last.bpm) : null;
   const steps = plan.steps;
   const planned = steps.reduce((sum, s) => sum + s.minutes, 0);
   // What Today plans from: the daily mix, or one Path chosen for today. Tests
@@ -358,6 +382,8 @@ export function TodayView({
               </ul>
             )}
           </div>
+          {/* Mock 12: on a phone the line sits under the title, above the minutes. */}
+          {IS_MOBILE && coachLine}
           {noPaths ? (
             <button
               className="session-big session-rise"
@@ -406,14 +432,7 @@ export function TodayView({
         </div>
 
         <div className="session-today-plan">
-          {plan.mood === "back" && last && (
-            <div className="session-glass session-card session-rise" data-testid="today-left-off">
-              <div className="session-kick">{t("session.today.leftOff")}</div>
-              <div className="session-why">
-                <b>{leftOff && lineText(t, leftOff)}</b>
-              </div>
-            </div>
-          )}
+          {!IS_MOBILE && coachLine}
           {steps.length > 0 && (
             <div className="session-plan-head session-rise" style={rise(4)}>
               <div className="session-kick">{t("session.today.whatsIn")}</div>

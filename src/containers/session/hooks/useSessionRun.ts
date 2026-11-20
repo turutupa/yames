@@ -164,7 +164,7 @@ import type { StoredFocus, TodayFocus } from "../../../session/focus";
 import type { SwapChoice, SwapMemory, SwapOptions } from "../../../session/swap";
 
 /** How many Takes are read back for planning. More than any plan looks at. */
-const TAKES_TO_READ = 500;
+export const TAKES_TO_READ = 500;
 const MINUTES_KEY = "session.minutes";
 /** Paths the player unsubscribed from; their rows and Takes stay (`PlayerProgress.unsubscribed`). */
 const UNSUBSCRIBED_KEY = "session.unsubscribed";

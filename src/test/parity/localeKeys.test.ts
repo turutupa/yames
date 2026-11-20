@@ -26,6 +26,15 @@ const SNAPSHOT = path.resolve(process.cwd(), "src/test/parity/locale-keys.en.jso
  * in the commit. A key listed here must really be gone, so this cannot go stale.
  */
 const DELIBERATELY_REMOVED: readonly string[] = [
+  // Today's line (c1b2a, DESIGN 6.1) absorbs "Where you left off": its last
+  // number moved into the line's "back" sentence, and "Today starts slower"
+  // (said whatever the plan did) went.
+  "session.today.leftOff",
+  "session.today.leftOffValue.even",
+  "session.today.leftOffValue.heard",
+  "session.today.leftOffValue.accents",
+  "session.today.leftOffValue.notes",
+  "session.today.leftOffPlain",
   // Grading is a choice, not a switch (owner, 2026-11-18). Played ungraded
   // on purpose, the ready screen says nothing about the input ("Not graded:
   // grading is off in Settings." is gone), and the bar's chip is the quiet

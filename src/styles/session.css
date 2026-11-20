@@ -856,6 +856,32 @@
   justify-content: flex-start;
   min-width: 0;
 }
+/* Today's line (DESIGN 6.1, mock 01): the coach's glyph and one sentence that
+   wraps and is never cut. No card, no fill; the coach's colour on the glyph
+   only (coach.css). The whole sentence opens Ask on a computer, with a quiet
+   chevron after it; absent, it takes no room at all. */
+.session-today-line {
+  margin: 0 0 10px;
+  min-width: 0;
+}
+.session-today-line .coach-line {
+  font-size: 18px;
+  line-height: 1.4;
+}
+.session-today-line .coach-say {
+  text-align: start;
+}
+.session-today-line .coach-say::after {
+  content: "\203A";
+  margin-inline-start: 0.4em;
+  color: var(--coach-faint);
+}
+.main-window.is-mobile .session-today-line {
+  margin: 4px 0 12px;
+}
+.main-window.is-mobile .session-today-line .coach-line {
+  font-size: 16px;
+}
 /* The eyebrow breaks only between its parts, and evenly: never "START" alone
    on a line of its own (acceptance P1-11). */
 .session-today-head > .session-kick {

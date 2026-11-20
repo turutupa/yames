@@ -37,14 +37,55 @@
       "minutes": "{{minutes}} min",
       "start": "Start",
       "howLong": "How long have you got? Minutes:",
-      "leftOff": "Where you left off",
-      "leftOffValue": {
-        "even": "{{value}}% even at {{bpm}} BPM. Today starts slower.",
-        "heard": "{{value}}% of the notes heard at {{bpm}} BPM. Today starts slower.",
-        "accents": "{{value}}% of the accents landed at {{bpm}} BPM. Today starts slower.",
-        "notes": "{{value}}% right notes at {{bpm}} BPM. Today starts slower."
+      "line": {
+        "first": "Your first Session finds where you start. Nothing to prepare.",
+        "slipped": {
+          "today": {
+            "bar": "{{exercise}}: bar {{bar}} of the tune slipped on {{count}} of {{of}} rounds earlier today.",
+            "bars": "{{exercise}}: bars {{from}} to {{to}} of the tune slipped on {{count}} of {{of}} rounds earlier today.",
+            "all": "{{exercise}}: the whole tune slipped on {{count}} of {{of}} rounds earlier today."
+          },
+          "yesterday": {
+            "bar": "{{exercise}}: bar {{bar}} of the tune slipped on {{count}} of {{of}} rounds yesterday.",
+            "bars": "{{exercise}}: bars {{from}} to {{to}} of the tune slipped on {{count}} of {{of}} rounds yesterday.",
+            "all": "{{exercise}}: the whole tune slipped on {{count}} of {{of}} rounds yesterday."
+          },
+          "lastSession": {
+            "bar": "{{exercise}}: bar {{bar}} of the tune slipped on {{count}} of {{of}} rounds in your last Session.",
+            "bars": "{{exercise}}: bars {{from}} to {{to}} of the tune slipped on {{count}} of {{of}} rounds in your last Session.",
+            "all": "{{exercise}}: the whole tune slipped on {{count}} of {{of}} rounds in your last Session."
+          }
+        },
+        "startsThere": "Today starts there.",
+        "earned": {
+          "today": "{{exercise}}: your clean tempo went up to {{bpm}} BPM earlier today.",
+          "yesterday": "{{exercise}}: your clean tempo went up to {{bpm}} BPM yesterday.",
+          "lastSession": "{{exercise}}: your clean tempo went up to {{bpm}} BPM in your last Session."
+        },
+        "earnedThen": {
+          "review": "Today it gets a short review.",
+          "climb": "Today it goes faster.",
+          "keep": "Today it gets one run to keep it."
+        },
+        "back": {
+          "even": "Last Session, {{exercise}}: {{value}}% even at {{bpm}} BPM.",
+          "heard": "Last Session, {{exercise}}: {{value}}% of the notes heard at {{bpm}} BPM.",
+          "accents": "Last Session, {{exercise}}: {{value}}% of the accents landed at {{bpm}} BPM.",
+          "notes": "Last Session, {{exercise}}: {{value}}% right notes at {{bpm}} BPM.",
+          "plain": "Last Session ended on {{exercise}} at {{bpm}} BPM."
+        },
+        "backRungs": "Today starts a rung lower than it would have.",
+        "backRungs_other": "Today starts {{count}} rungs lower than it would have.",
+        "ungraded": {
+          "today": "{{count}} minute of Takes earlier today, the last one {{exercise}} at {{bpm}} BPM.",
+          "today_other": "{{count}} minutes of Takes earlier today, the last one {{exercise}} at {{bpm}} BPM.",
+          "yesterday": "{{count}} minute of Takes yesterday, the last one {{exercise}} at {{bpm}} BPM.",
+          "yesterday_other": "{{count}} minutes of Takes yesterday, the last one {{exercise}} at {{bpm}} BPM.",
+          "lastSession": "{{count}} minute of Takes in your last Session, the last one {{exercise}} at {{bpm}} BPM.",
+          "lastSession_other": "{{count}} minutes of Takes in your last Session, the last one {{exercise}} at {{bpm}} BPM."
+        },
+        "samePlace": "Same place today."
       },
-      "leftOffPlain": "{{bpm}} BPM. Today starts slower.",
       "whatsIn": "What's in it, and why",
       "min": "MIN",
       "nothing": "There's nothing to play yet.",
