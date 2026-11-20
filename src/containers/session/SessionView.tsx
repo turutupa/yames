@@ -41,7 +41,7 @@ import { RunwayTakeScreen, isTheoryTake } from "./highway/RunwayTake";
 import { categoryTagKey } from "../../session/kind";
 import { KeyChooser } from "./practice/KeyChooser";
 import { Runway } from "./highway/Runway";
-import type { SessionRun } from "./hooks/useSessionRun";
+import { seedOf, type SessionRun } from "./hooks/useSessionRun";
 import { exerciseNeck, useNeck3d, useNeckSlot } from "./hooks/useNeck";
 import { PracticeViewSwitch } from "./practice/PracticeViewSwitch";
 import { NeckInstruction } from "./practice/NeckInstruction";
@@ -1974,7 +1974,12 @@ export function SessionView({
 
   return (
     // The recap draws no neck either (UX audit SES-10): the page's own backdrop.
-    <div className="session-page session-run" data-testid="session" data-neck3d={tabShown || run.phase === "recap" ? undefined : neck3d}>
+    <div
+      className="session-page session-run"
+      data-testid="session"
+      data-neck3d={tabShown || run.phase === "recap" ? undefined : neck3d}
+      data-variant-seed={seedOf(step) ?? undefined}
+    >
       {run.phase !== "recap" && (
         <SessionBar
           session={session}

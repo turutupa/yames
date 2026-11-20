@@ -17,6 +17,7 @@ import {
   exerciseByTitle,
   exerciseOnScreen,
   loadPath,
+  withVariant,
   placementExercise,
   placementLadder,
   takeBars,
@@ -30,6 +31,12 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const PASSED = /PASS BAR MET|PASSED · /i;
 /** The Paths the suite plays: the one a new player starts on, and a second. */
 const PATHS = [loadPath(FIRST_PATH), loadPath(SECOND_PATH)];
+/**
+ * What Today can put on screen in a full run: the profile is shared by the
+ * scenarios, and `blues-band` subscribes the player to Blues and Pentatonics,
+ * so a later Today takes its turn with it (the restart scenario after it).
+ */
+const ON_SCREEN_PATHS = [...PATHS, loadPath("blues-pentatonics")];
 
 // ---------------------------------------------------------------------------
 // Arguments
@@ -436,8 +443,8 @@ async function exerciseHere(d) {
       const k = document.querySelector('[data-testid="session-result"] .session-kick');
       return k ? (k.textContent.replace(/\u00a0/g, ' ').split(' · ')[1] ?? null) : null;`)
     .catch(() => null);
-  const pathTitle = PATHS.map((p) => p.title).find((t) => new RegExp(`${t}, step`, "i").test(page));
-  return { page, hit: exerciseOnScreen({ heading, page, pathTitle }, PATHS) };
+  const pathTitle = ON_SCREEN_PATHS.map((p) => p.title).find((t) => new RegExp(`${t}, step`, "i").test(page));
+  return { page, hit: exerciseOnScreen({ heading, page, pathTitle }, ON_SCREEN_PATHS) };
 }
 
 /** The Takes saved since `t0`, oldest first. */
@@ -1146,12 +1153,19 @@ async function goodTakeHeard(d, label, { again = false } = {}) {
     await shot(d, `deaf-${label}`);
     return;
   }
-  const exercise = (await exerciseHere(d)).hit?.exercise ?? null;
+  const written = (await exerciseHere(d)).hit?.exercise ?? null;
+  // A varied Exercise plays the variant Today picked (its second visit is on
+  // other strings), so the player renders those notes, not the written ones.
+  const seed = await d.exec(`const s = document.querySelector('[data-testid="session"]')?.dataset.variantSeed;
+    return s === undefined ? null : Number(s);`).catch(() => null);
+  const exercise = written && (await withVariant(written, seed));
   if (!exercise) {
     check(`${label}: a shipped Exercise on the Take screen`, false, (await d.text()).slice(0, 300));
     return;
   }
-  const r = await playTake(d, exercise, "good", label, { again });
+  // An Exercise with a backing plays over the band: the player keeps time
+  // from the count-in and the band's hits, not from clicks it cannot hear.
+  const r = await playTake(d, exercise, "good", label, { again, band: exercise.backing?.kind === "jam" });
   const row = takesOf(exercise.id).at(-1);
   check(`${label}: the Take was heard and passes`, PASSED.test(r.text) && row?.passed === 1,
     `${exercise.title} at ${r.bpm}${noInput ? `, input on after ${waitedS} s` : ""}; ` +

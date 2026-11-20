@@ -321,8 +321,12 @@ export function followingExercise(
   return at >= 0 ? all[at + 1] ?? null : null;
 }
 
-/** The variant a step plays: an Exercise's, or a warm-up's. */
-function seedOf(step: PlanStep | null): number | null {
+/**
+ * The variant a step plays: an Exercise's, or a warm-up's. The Session screen
+ * also carries it as `data-variant-seed`, so the e2e player renders the notes
+ * this Take plays rather than the Exercise as written.
+ */
+export function seedOf(step: PlanStep | null): number | null {
   if (step?.kind === "exercise") return step.variantSeed;
   if (step?.kind === "metronome") return step.variantSeed ?? null;
   return null;
