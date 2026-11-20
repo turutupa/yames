@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { storeLoad, storeSave } from "../ipc";
 import { cancelModelDownload, getModelStatus, getSystemMemoryMb, onDownloadComplete, onDownloadProgress, startModelDownload, ttsListVoices, ttsSetVoice, ttsSetVolume, ttsVoiceDiagnostics } from "../ipc.desktop";
 import type { DownloadProgress, ModelStatus, VoiceDiagnostic } from "../ipc.desktop";
 import type { BrainTier, CoachMode, ModelTier, VoiceMode, Verbosity } from "../types";
 import type { CoachStance } from "../coach/learningMode";
 import { needsBrainUpdate, standardAvailable, studioAvailable } from "../coach/brainTiers";
-import { unloadCoach } from "./coachLoader";
+import { registerCoachDownloadPort, restoreCoachModelChoice, setCoachModelChoice, setCoachModelDisk, setCoachModelDownload } from "./coachLoader";
+import { useCoachModel } from "./useCoachModel";
 
 // Legacy persisted values may still carry "chime" from an earlier
 // release; we collapse it to "silent" on load and rewrite the store so
@@ -66,20 +67,20 @@ export function useCoachDownload() {
   // answers; `studioAvailable` treats both null and 0 as "unknown, allow".
   const [systemMemoryMb, setSystemMemoryMb] = useState<number | null>(null);
 
-  const [coachBrainTier, setCoachBrainTierState] = useState<BrainTier>("off");
   /**
-   * Setter wrapper: switching the brain off must also free the RAM.
-   * Nothing else did — the tier flag only gated *future* prompts, so a
-   * user who turned the coach off after a session kept paying 4 GB for a
-   * model that would never be asked anything again. Loading is the
-   * mirror image and deliberately does NOT happen here: weights become
-   * resident when a session starts, not when a toggle is pressed
-   * (`hooks/coachLoader.ts`).
+   * The model selector's choice. One state, held by the loader
+   * (`hooks/coachLoader.ts`): Settings' tier buttons, the wizard and the
+   * rail's selector all write it, and the loader loads, keeps or unloads the
+   * model to match. Off unloads; it never deletes.
    */
+  const coachBrainTier = useCoachModel().choice;
   const setCoachBrainTier = useCallback((tier: BrainTier) => {
-    setCoachBrainTierState(tier);
-    if (tier === "off") void unloadCoach();
+    setCoachModelChoice(tier);
   }, []);
+  // The loader learns what is on disk and how big the machine is from here.
+  useEffect(() => {
+    setCoachModelDisk(modelStatus, systemMemoryMb);
+  }, [modelStatus, systemMemoryMb]);
   const [coachVoiceMode, setCoachVoiceMode] = useState<VoiceMode>("silent");
   const [coachVoiceName, setCoachVoiceName] = useState("lessac");
   // C5 verbosity. "default" honours the gatekeeper's tier verbatim.
@@ -115,11 +116,11 @@ export function useCoachDownload() {
     // Asked once on mount — physical RAM does not change while the app
     // runs, and a failure just leaves the Studio tier ungated.
     getSystemMemoryMb().then(setSystemMemoryMb).catch(() => {});
-    storeLoad<BrainTier>("coachBrainTier").then((v) => {
-      // Raw setter: restoring a persisted "off" at startup is not the
-      // user switching the brain off, and nothing is resident yet.
-      if (v) setCoachBrainTierState(v);
-    });
+    // The saved choice. The loader loads nothing before its startup gate
+    // opens, after the first paint, and unloads nothing before this lands.
+    storeLoad<BrainTier>("coachBrainTier")
+      .then((v) => restoreCoachModelChoice(v))
+      .catch(() => restoreCoachModelChoice(undefined));
     storeLoad<PersistedVoiceMode>("coachVoiceMode").then((v) => {
       if (!v) return;
       if (v === "chime") {
@@ -168,7 +169,30 @@ export function useCoachDownload() {
     ttsSetVolume(clamped).catch(() => {});
   }, []);
 
-  const handleStartDownload = useCallback(async (tier: ModelTier) => {
+  // ── The model selector's view of the download (ms1) ─────────────────
+  // Whether the tier that finishes becomes the choice. Settings' tier
+  // buttons and the wizard mean "use this one", so it does; the selector's
+  // Download button means "fetch it", so the model is then there to pick
+  // and nothing loads uninvited.
+  const selectOnFinishRef = useRef(true);
+  // The tier whose download is running, readable from the event handlers.
+  const runningTierRef = useRef<ModelTier | null>(null);
+  // Where the weights' download had got to, for a paused row.
+  const brainFractionRef = useRef<number | null>(null);
+  /**
+   * A stopped download. Rust's cancel kills curl and keeps the `.part` file
+   * (`models.rs` `curl_download`), and the next start resumes from it with
+   * `-C -`: so a cancel is a pause, and the selector calls it one.
+   */
+  const [pausedDownload, setPausedDownload] = useState<{ tier: ModelTier; fraction: number | null } | null>(null);
+  const [failedDownload, setFailedDownload] = useState<{ tier: ModelTier; error: string } | null>(null);
+
+  const handleStartDownload = useCallback(async (tier: ModelTier, opts?: { select?: boolean }) => {
+    selectOnFinishRef.current = opts?.select ?? true;
+    runningTierRef.current = tier;
+    brainFractionRef.current = null;
+    setPausedDownload(null);
+    setFailedDownload(null);
     setModelDownloading(true);
     setDownloadingTier(tier);
     setPendingDownloadTier(null);
@@ -186,6 +210,8 @@ export function useCoachDownload() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setDownloadError(msg);
+      setFailedDownload({ tier, error: msg });
+      runningTierRef.current = null;
       setModelDownloading(false);
       setDownloadProgress(null);
       setDownloadingTier(null);
@@ -195,25 +221,34 @@ export function useCoachDownload() {
   // Subscribe to backend progress / completion events.
   useEffect(() => {
     const unsubProgress = onDownloadProgress((progress) => {
+      if (progress.component === "brain") brainFractionRef.current = progress.fraction;
       setDownloadProgress(progress);
       if (progress.done) {
         getModelStatus().then(setModelStatus);
       }
     });
     const unsubComplete = onDownloadComplete((result) => {
+      const ranTier = runningTierRef.current;
+      runningTierRef.current = null;
+      if (ranTier && result.cancelled) {
+        setPausedDownload({ tier: ranTier, fraction: brainFractionRef.current });
+      } else if (ranTier && !result.success) {
+        setFailedDownload({ tier: ranTier, error: result.error ?? "" });
+      }
       if (result.success && result.tier) {
         // Full brain+voices install path — tier present, persist + flip
         // the active brain tier.
         //
-        // Deliberately NOT loading the model here. Downloading weights is
-        // not the same act as wanting them in RAM: Settings shows "ready
-        // — loads when you start a session" and the next `startSession`
-        // picks them up. Because `load_coach_model` fingerprints the file
-        // (path + size + mtime), an "Update brain" that lands while a
-        // session is running is picked up by the session after it — the
-        // old weights are never left answering forever.
-        setCoachBrainTier(result.tier as ModelTier);
-        storeSave("coachBrainTier", result.tier);
+        // From Settings or the wizard, the tier downloaded becomes the
+        // choice (from the selector it is only there to pick), and the loader takes it
+        // from there (`hooks/coachLoader.ts`): it loads when no Take is
+        // running, and because `load_coach_model` fingerprints the file
+        // (path + size + mtime), new weights for a resident model are
+        // swapped in on Rust's side rather than left answering forever.
+        if (selectOnFinishRef.current) {
+          setCoachBrainTier(result.tier as ModelTier);
+          storeSave("coachBrainTier", result.tier);
+        }
         setDownloadSuccess(true);
         getModelStatus().then(setModelStatus);
         ttsListVoices().then(setAvailableVoices);
@@ -244,6 +279,36 @@ export function useCoachDownload() {
   const cancelDownload = useCallback(() => {
     cancelModelDownload();
   }, []);
+
+  // The selector reads the download from the loader's snapshot, and starts
+  // or pauses it through this port: it is the same download Settings runs,
+  // never a second one. Nothing here starts a download by itself.
+  useEffect(
+    () =>
+      registerCoachDownloadPort({
+        start: (tier) => void handleStartDownload(tier, { select: false }),
+        pause: cancelDownload,
+      }),
+    [handleStartDownload, cancelDownload],
+  );
+  useEffect(() => {
+    if (downloadingTier) {
+      const voices = !!downloadProgress && downloadProgress.component !== "brain";
+      setCoachModelDownload({
+        tier: downloadingTier,
+        phase: "running",
+        stage: voices ? "voices" : "brain",
+        fraction: downloadProgress && downloadProgress.fraction > 0 ? downloadProgress.fraction : null,
+        error: null,
+      });
+    } else if (pausedDownload) {
+      setCoachModelDownload({ ...pausedDownload, phase: "paused", stage: "brain", error: null });
+    } else if (failedDownload) {
+      setCoachModelDownload({ tier: failedDownload.tier, phase: "failed", stage: "brain", fraction: null, error: failedDownload.error });
+    } else {
+      setCoachModelDownload(null);
+    }
+  }, [downloadingTier, downloadProgress, pausedDownload, failedDownload]);
 
   return {
     // model state

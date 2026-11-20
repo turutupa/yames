@@ -25,6 +25,8 @@ import path from "node:path";
 const LOCALES_DIR = path.resolve(process.cwd(), "src/locales");
 
 const NAMESPACES = [
+  // Ask, the coach panel (leg c2a1); fact cards and chips join it later (c2b).
+  "ask",
   "coach",
   // The coach's blocks (COACH_UX D3) get their own file rather than joining
   // `coach`: the renderer is one component with one vocabulary, and a whole

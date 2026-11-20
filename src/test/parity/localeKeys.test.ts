@@ -84,6 +84,25 @@ const DELIBERATELY_REMOVED: readonly string[] = [
   "session.today.toolsOffer",
   "session.today.toolsOfferOpen",
   "session.today.toolsOfferAlways",
+  // Ask is the coach panel (leg c2a1, DESIGN 7): its close button, its text
+  // box and its Send are Ask's own (`ask.close`, `ask.placeholder`,
+  // `ask.send`); the old card's collapse, chat placeholder and send went.
+  "coachCard.collapse",
+  "coachCard.askPlaceholder",
+  "coachCard.send",
+  // The coach's note (DESIGN 4.2, leg c1b1, 2026-11-20): the result's list of
+  // other checks and its own bar strip are one note now, with the strip inside
+  // it and one fact line under it (`session.note.fact.*`, `session.note.strip.*`).
+  // The "Bar by bar" title and each cell's spoken label stay.
+  "session.result.notesNotChecked",
+  "session.result.barsHeld",
+  "session.result.barsHeld_other",
+  "session.result.barsMet",
+  "session.result.legatoAll",
+  "session.result.legatoSome",
+  "session.result.bendsAll",
+  "session.result.bendsSomeFlat",
+  "session.result.vibratoHeard",
 ];
 
 function englishKeys(): string[] {

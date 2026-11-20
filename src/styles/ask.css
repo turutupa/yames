@@ -1,0 +1,577 @@
+/* ── Ask: the one coach panel (leg c2a1; DESIGN 3.2, 3.3, 3.6) ────────────────
+ *
+ * One width: 380 px, 320 under 720 px of window. Three shapes, decided here
+ * from the window's width and the screen under it, never by the component:
+ *
+ * - DOCK, 1160 px and wider: a column of the window that pushes the content
+ *   (UI_DECISIONS U1.6); and over Today from 981 px, where floating covered
+ *   the whole plan.
+ * - DRAWER, 1159 px and narrower on the other screens, and in a Session at
+ *   any width: over the right of the content. In a Session it covers the
+ *   picture and never the controls: the bar, the text and the action row
+ *   move in by the panel's width (`--ask-w`), the neck is covered, not
+ *   resized, and nothing is blurred over the canvas.
+ * - SHEET, on a phone (`.sheet--ask`): the app's bottom sheet, 92% high; in
+ *   landscape, the 360 px drawer.
+ *
+ * Theme tokens only. The coach's colour is on the glyph and nowhere else;
+ * nothing in the panel is a solid button (the page keeps its one).
+ */
+
+.main-body {
+  --ask-w: 380px;
+}
+@media (max-width: 719px) {
+  .main-body {
+    --ask-w: 320px;
+  }
+}
+
+.ask-panel {
+  /* The panel's own surface, on a solid one: a theme whose panel token is
+     translucent must still hide the neck under the drawer. */
+  --ask-surface: var(--bg-panel);
+  --ask-line: color-mix(in srgb, var(--text-primary) 13%, transparent);
+  --ask-shade: rgba(0, 0, 0, 0.55);
+  position: relative;
+  z-index: 30;
+  flex: none;
+  width: var(--ask-w);
+  min-width: var(--ask-w);
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  background: linear-gradient(var(--ask-surface), var(--ask-surface)), var(--bg-solid, var(--bg-primary));
+  border-left: 1px solid var(--border);
+  color: var(--text-primary);
+  animation: ask-in 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+:root[data-theme-group="light"] .ask-panel {
+  --ask-shade: color-mix(in srgb, var(--text-primary) 40%, transparent);
+}
+@keyframes ask-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ask-panel {
+    animation: none;
+  }
+}
+
+/* The drawer: under 1160 px, over everything but Today (below). */
+@media (max-width: 1159px) {
+  .main-body > .ask-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    box-shadow: -18px 0 48px -20px var(--ask-shade);
+  }
+}
+/* …and over Today from 981 px it docks: Today takes the rest, one column. */
+@media (min-width: 981px) and (max-width: 1159px) {
+  .main-body:has(.session-today-page) > .ask-panel {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    box-shadow: none;
+  }
+}
+/* In a Session, at any desktop width: the drawer over the right of the picture. */
+.main-body[data-session] > .ask-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  box-shadow: -18px 0 48px -20px var(--ask-shade);
+}
+
+/* ── Today with the dock open (as the old coach card had it, session.css) ── */
+@media (min-width: 1360px) and (max-width: 1700px) {
+  .main-body:has(> .ask-panel) .session-today {
+    --today-hero: 270px;
+    grid-template-columns:
+      minmax(0, 1fr) minmax(250px, var(--today-hero)) 28px
+      minmax(0, var(--today-plan, 640px)) minmax(0, 1fr);
+  }
+}
+@media (min-width: 981px) and (max-width: 1359px) {
+  .main-body:has(> .ask-panel) .session-today-page {
+    flex: none;
+    min-height: 100%;
+  }
+  .main-body:has(> .ask-panel) .session-today {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: min(100%, 560px);
+    margin: 0 auto;
+    align-content: normal;
+  }
+  .main-body:has(> .ask-panel) .session-today-hero {
+    position: static;
+    align-self: stretch;
+  }
+  .main-body:has(> .ask-panel) .session-today > .session-today-plan,
+  .main-body:has(> .ask-panel) .session-today-plan .session-plan-list {
+    flex-shrink: 0;
+    overflow-y: visible;
+  }
+}
+
+/* ── A Session with the drawer open: the controls move in ──────────────── */
+/* Exit, the clock, the input state and the solid button stay in view
+   (DESIGN 3.3: the session bar and the action row). The picture's own slot is
+   left alone, so the neck is covered rather than re-framed; and so is the text
+   above and below it (the head, the coach's note): narrowed, it wrapped onto
+   another line and took that line from the picture (the pass mark in the head
+   and the note's sentence, since leg c1b1), which re-framed the neck. */
+.main-body[data-session][data-ask] .session-run :is(
+  .session-bar,
+  .session-actions
+) {
+  margin-right: calc(var(--ask-w) - 12px);
+}
+.main-body[data-session][data-ask] .session-run .session-bar {
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+/* A result: its text column stays whole. Beside the picture it already is
+   when the column ends left of the drawer; one column (980 px and under) it
+   moves in like the rest. */
+@media (max-width: 1279px) {
+  .main-body[data-session][data-ask] .session-run .session-between > .session-col:first-child {
+    margin-right: max(0px, calc(var(--ask-w) - 50vw + 24px));
+  }
+}
+@media (max-width: 980px) {
+  .main-body[data-session][data-ask] .session-run .session-between > .session-col:first-child {
+    margin-right: calc(var(--ask-w) - 12px);
+  }
+}
+.main-body[data-session][data-ask] .session-run .session-recap-coach-ask {
+  display: none;
+}
+
+/* ── The head ────────────────────────────────────────────────────────── */
+.ask-head {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px 8px;
+}
+.ask-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 32px;
+}
+.ask-glyph {
+  flex: none;
+  color: var(--accent-2);
+}
+.ask-title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font: 600 20px/1.2 var(--font-display, inherit);
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+.ask-close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+}
+@media (hover: hover) {
+  .ask-close:hover {
+    background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+    color: var(--text-primary);
+  }
+}
+
+/* Ask | Tools coach: the segmented control's look (global.css, "B · Tonal"). */
+.ask-sections {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+}
+.ask-section {
+  min-height: 34px;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+/* Light themes give every bare button a fill; the unchosen segment has none. */
+.ask-panel .ask-sections .ask-section:not([aria-selected="true"]) {
+  background: transparent;
+  box-shadow: none;
+}
+.ask-panel .ask-sections .ask-section[aria-selected="true"] {
+  background: var(--btn-sel);
+  box-shadow: var(--btn-sel-ring);
+  color: var(--btn-tint-ink);
+}
+
+/* "Looking at: …": one quiet line, not a box. */
+.ask-context {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+.ask-context b {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+/* The coach's sentence (or the bar) Ask was opened about: quoted, quiet. */
+.ask-about {
+  margin: 0;
+  padding-left: 9px;
+  border-left: 2px solid var(--border);
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+/* ── The thread ──────────────────────────────────────────────────────── */
+.ask-thread {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 16px 12px;
+}
+/* The conversation sits at the bottom of the thread, as a chat does. */
+.ask-thread > :first-child {
+  margin-top: auto;
+}
+.ask-empty {
+  margin-top: 0;
+  margin-bottom: auto;
+}
+.ask-thread > .ask-empty:first-child {
+  margin-top: 0;
+}
+.ask-empty-title {
+  margin: 4px 0 6px;
+  font: 600 17px/1.3 var(--font-display, inherit);
+  color: var(--text-primary);
+}
+.ask-empty-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+.ask-turn {
+  font-size: 15px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.ask-turn-user {
+  align-self: flex-end;
+  max-width: 85%;
+  padding: 8px 14px;
+  border-radius: 14px;
+  background: var(--btn-tint);
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+.ask-turn-app,
+.ask-turn-pending {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+.ask-turn-pending {
+  font-style: italic;
+}
+.ask-turn-coach.coach-blocks {
+  margin: 0;
+}
+.ask-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-tertiary, var(--text-secondary));
+}
+.ask-divider::before,
+.ask-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--ask-line);
+}
+.ask-divider > span {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+/* ── The text box ────────────────────────────────────────────────────── */
+.ask-compose {
+  flex: none;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  margin: 0 12px;
+  padding: 6px 6px 6px 14px;
+  border: 1px solid var(--ask-line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+}
+.ask-compose:focus-within {
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+}
+.ask-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 36px;
+  max-height: 120px;
+  padding: 8px 0;
+  border: 0;
+  outline: none;
+  resize: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.35;
+  field-sizing: content;
+}
+.ask-input::placeholder {
+  color: var(--text-tertiary, var(--text-secondary));
+}
+/* Tonal, never solid: the page's button is the one solid thing on screen. */
+.ask-send {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
+}
+@media (hover: hover) {
+  .ask-send:hover:not(:disabled) {
+    background: var(--btn-tint-hover);
+  }
+}
+.ask-send:disabled {
+  background: var(--btn-disabled-bg);
+  color: var(--btn-disabled-ink);
+}
+
+/* ── The foot: the model selector, then one line ────────────────────── */
+.ask-foot {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 16px 12px;
+}
+.ask-footer {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-tertiary, var(--text-secondary));
+  overflow-wrap: anywhere;
+}
+
+/* ── The tools' coach, in its section until c2a2 ───────────────────── */
+.ask-tools {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+/* `.coach-card.coach-card-embedded`: coach-card.css hides any card that is not
+   "open" (its old closed state); this one is never a panel of its own. */
+.ask-tools > .coach-card.coach-card-embedded {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: auto;
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.ask-tools > .coach-card-embedded .coach-card-inner {
+  opacity: 1;
+  min-width: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* ── The Session bar's Ask pill, and the label during a Take ─────────── */
+.session-page .session-coach-ask {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  min-height: 30px;
+  padding: 3px 12px 3px 9px;
+  border: 1px solid var(--l-line2, var(--border));
+  border-radius: 999px;
+  background: transparent;
+  color: var(--l-ink, var(--text-primary));
+  font: 600 13px/1 var(--l-body, inherit);
+  white-space: nowrap;
+}
+.session-page .session-coach-ask .ask-glyph {
+  color: var(--accent-2);
+}
+@media (hover: hover) {
+  .session-page .session-coach-ask:hover {
+    background: color-mix(in srgb, var(--l-wash, var(--text-primary)) 8%, transparent);
+  }
+}
+/* On a phone, a thumb tall like Exit and Skip beside it (phone-learning.css). */
+.main-window.is-mobile .session-page .session-coach-ask {
+  min-height: 44px;
+  min-width: 44px;
+  padding-left: 10px;
+  padding-right: 12px;
+}
+.main-window.is-mobile .session-page .session-bar[data-tight] .session-coach-ask {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+.session-page .session-coach-ask-later {
+  flex: none;
+  font-size: 13px;
+  color: var(--l-quiet, var(--text-secondary));
+}
+.session-page .session-recap-coach-ask {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ── The phone: the header's Ask button and the sheet ──────────────── */
+.main-header .header-ask {
+  gap: 6px;
+  flex: none;
+}
+/* Labelled, on every width (DESIGN 3.2): the other chips shed their words
+   first; this one is the only way into Ask on a phone. */
+.main-header .header-ask .context-chip-label {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
+}
+.main-header .header-ask .ask-glyph {
+  color: var(--accent-2);
+}
+.sheet.sheet--ask {
+  height: 92%;
+  max-height: 92%;
+}
+.sheet--ask .sheet-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  padding: 0;
+}
+.ask-panel.ask-sheet {
+  /* Under the sheet's own close button, which floats over its corner. */
+  position: static;
+  z-index: auto;
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  animation: none;
+}
+.ask-sheet .ask-head {
+  /* Room for the sheet's own close button over the corner. */
+  padding-right: 56px;
+}
+.ask-head-model {
+  display: flex;
+}
+.ask-sheet .ask-thread {
+  padding-bottom: 8px;
+}
+.ask-sheet .ask-compose {
+  margin-bottom: 6px;
+}
+.ask-sheet .ask-footer {
+  padding: 2px 16px calc(10px + var(--safe-bottom, 0px));
+}
+.ask-sheet .ask-send,
+.ask-sheet .ask-input {
+  min-height: 44px;
+}
+.ask-sheet .ask-send {
+  width: 44px;
+}
+/* The keyboard is up: the context line and the footer make room. */
+.ask-sheet[data-typing] .ask-context,
+.ask-sheet[data-typing] .ask-footer {
+  display: none;
+}
+/* The selector's menu, from the sheet's head: downward, inside the sheet. */
+.coach-model[data-placement="down"] .coach-model-menu {
+  top: calc(100% + 6px);
+  bottom: auto;
+}
+/* A phone on its side: the 360 px drawer at the right. */
+@media (orientation: landscape) and (max-height: 540px) {
+  /* The layer is a column that stacks the sheet at its foot; on its side the
+     sheet takes the right of it instead, the whole height. */
+  .sheet.sheet--ask {
+    align-self: flex-end;
+    width: 360px;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border-top: 0;
+    border-left: 1px solid var(--border);
+    border-radius: 16px 0 0 16px;
+  }
+}

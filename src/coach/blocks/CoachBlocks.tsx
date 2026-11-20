@@ -280,7 +280,7 @@ function sourceWords(t: Translate, source: BlockSource): string {
  * 3.6). An icon and words, quiet, never a colour that means anything: the
  * caller decided the source, this only says it.
  */
-function SourceLine({ source }: { source: BlockSource }) {
+export function SourceLine({ source }: { source: BlockSource }) {
   const { t } = useTranslation();
   return (
     <p className="coach-block-source" data-source={source.kind}>

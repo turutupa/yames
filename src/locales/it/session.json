@@ -280,20 +280,10 @@
       "decidedPass": "Superato",
       "lastTime": "l'ultima volta",
       "decidedMiss": "Cosa l'ha frenato",
-      "notesNotChecked": "Note giuste: non controllate stavolta",
       "barsTitle": "Battuta per battuta",
-      "barsHeld": "{{count}} battuta di fila tenuta",
-      "barsHeld_many": "{{count}} battute di fila tenute",
-      "barsHeld_other": "{{count}} battute di fila tenute",
-      "barsMet": "{{count}} battute su {{of}} tenute",
       "barHeld": "Battuta {{n}}: tenuta",
       "barSlipped": "Battuta {{n}}: scivolata",
-      "barThin": "Battuta {{n}}: troppe poche note per giudicare",
-      "legatoAll": "Hammer-on, pull-off e tapping: {{sounded}} su {{due}} hanno suonato. Solo segnalato, non valutato.",
-      "legatoSome": "Hammer-on, pull-off e tapping: {{sounded}} su {{due}} hanno suonato, {{silent}} no. Solo segnalato, non valutato.",
-      "bendsAll": "Bending: {{onPitch}} su {{due}} hanno raggiunto la nota. Solo segnalato, non valutato.",
-      "bendsSomeFlat": "Bending: {{onPitch}} su {{due}} hanno raggiunto la nota, {{flat}} sono rimasti corti. Solo segnalato, non valutato.",
-      "vibratoHeard": "Vibrato: sentito su {{present}} note su {{due}}. Solo segnalato, non valutato."
+      "barThin": "Battuta {{n}}: troppe poche note per giudicare"
     },
     "edge": {
       "kick": "Trova il mio limite",
@@ -715,6 +705,108 @@
       "harmony": "Armonia",
       "technique": "Tecnica",
       "style": "Stili"
+    },
+    "note": {
+      "passedAt": "Superato a {{bpm}}.",
+      "finding": {
+        "ceiling": "Tiene a {{holds}} BPM e scivola a {{breaks}}."
+      },
+      "place": {
+        "slipped": {
+          "bar": "La battuta {{bar}} della melodia è scivolata in {{count}} giri su {{of}}.",
+          "bars": "Le battute da {{from}} a {{to}} della melodia sono scivolate in {{count}} giri su {{of}}.",
+          "loop": "Il pattern è scivolato in {{count}} giri su {{of}}.",
+          "fromRound": "Ha tenuto fino al giro {{round}} su {{of}}, poi si è sfaldato.",
+          "all": "Tutta la melodia è scivolata in {{count}} giri su {{of}}."
+        },
+        "caught": {
+          "bar": "La battuta {{bar}} della melodia ti ha fatto inciampare in {{count}} giri su {{of}}.",
+          "bars": "Le battute da {{from}} a {{to}} della melodia ti hanno fatto inciampare in {{count}} giri su {{of}}.",
+          "loop": "Il pattern ti ha fatto inciampare in {{count}} giri su {{of}}.",
+          "all": "Tutta la melodia ti ha fatto inciampare in {{count}} giri su {{of}}."
+        },
+        "lastTake": "Nell'ultima take erano {{count}}.",
+        "lastTakeHeld": "Nell'ultima take ha tenuto."
+      },
+      "direction": {
+        "early": "Le note lì sono arrivate in anticipo.",
+        "late": "Le note lì sono arrivate in ritardo.",
+        "earlyOpen": "I {{note}} a vuoto lì sono arrivati in anticipo.",
+        "lateOpen": "I {{note}} a vuoto lì sono arrivati in ritardo.",
+        "earlyNote": "I {{note}} al tasto {{fret}} lì sono arrivati in anticipo.",
+        "lateNote": "I {{note}} al tasto {{fret}} lì sono arrivati in ritardo."
+      },
+      "history": {
+        "newClean": "Nuovo tempo pulito: {{bpm}} BPM.",
+        "tooEasy": "Superato con margine alla prima take, per due sessioni di fila.",
+        "goingDown": "Tre take di fila a {{bpm}} sono andate peggio.",
+        "stuck": "Tre take a {{bpm}}, tutte entro due punti.",
+        "closer": "Dal {{from}}% al {{to}}% a questo tempo."
+      },
+      "repeat": {
+        "leaveIt": "Tre volte nello stesso punto. Lascialo per oggi; di solito domani va meglio."
+      },
+      "fact": {
+        "heard": "{{heard}} note su {{expected}} sentite",
+        "noExtras": "nessuna nota in più",
+        "extras": "{{count}} nota in più",
+        "extras_many": "{{count}} note in più",
+        "extras_other": "{{count}} note in più",
+        "rightNotes": "{{value}}% note giuste (su {{base}} di cui ho potuto sentire l'altezza)",
+        "notesUnchecked": {
+          "notRun": "note giuste: non controllate stavolta",
+          "tooFast": "note giuste: troppo veloci perché ne senta l'altezza",
+          "tooFew": "note giuste: troppo poche perché ne senta l'altezza",
+          "notesRing": "note giuste: risuonavano l'una sull'altra, non ho saputo dirlo",
+          "octaveUnsure": "note giuste: non ho saputo dire l'ottava"
+        },
+        "legato": "{{sounded}} hammer-on e pull-off su {{due}} hanno suonato (solo segnalato, non valutato)",
+        "bends": "{{onPitch}} bending su {{due}} hanno raggiunto la nota (solo segnalato, non valutato)",
+        "vibrato": "vibrato su {{present}} note su {{due}} (solo segnalato, non valutato)"
+      },
+      "mark": {
+        "check": "raggiunto:",
+        "cross": "non raggiunto:",
+        "dash": "non ho saputo dire:"
+      },
+      "strip": {
+        "held": "{{count}} battuta di fila tenuta",
+        "held_many": "{{count}} battute di fila tenute",
+        "held_other": "{{count}} battute di fila tenute",
+        "roundEvery": "la melodia ricomincia ogni {{count}} battute",
+        "plain": "come suonato"
+      },
+      "ready": {
+        "lastValue": "Ultima take: {{value}}% {{metric}}.",
+        "lastCount": "Ultima take: {{value}} {{metric}}.",
+        "lastPassed": "Ultima take: superata a {{bpm}}.",
+        "lastNotCaught": "Ultima take: non ho sentito abbastanza."
+      },
+      "chip": {
+        "hear": "Ascoltala prima",
+        "try": "Cosa dovrei provare?"
+      },
+      "ungraded": {
+        "listenFor": "Stavolta ascolta una cosa sola: {{question}}",
+        "notListening": "Stavolta non ascolto, quindi giudichi tu.",
+        "didThey": "Ultima domanda: {{question}}",
+        "yourAnswer": "La tua risposta:",
+        "yes": "Sì",
+        "notYet": "Non ancora",
+        "tryFaster": "Due sì. Provi {{bpm}}?"
+      },
+      "recap": {
+        "passed": "Superato a {{bpm}} BPM.",
+        "held": "Tempo pulito ancora {{bpm}} BPM.",
+        "played": "Suonato per ultimo a {{bpm}} BPM.",
+        "backNext": "{{title}} torna alla prossima sessione.",
+        "backReview": "{{title}} torna per il ripasso tra {{count}} giorno.",
+        "backReview_many": "{{title}} torna per il ripasso tra {{count}} giorni.",
+        "backReview_other": "{{title}} torna per il ripasso tra {{count}} giorni.",
+        "backParked": "{{title}} riposa per {{count}} giorno e torna come nuovo.",
+        "backParked_many": "{{title}} riposa per {{count}} giorni e torna come nuovo.",
+        "backParked_other": "{{title}} riposa per {{count}} giorni e torna come nuovo."
+      }
     }
   }
 }

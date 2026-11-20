@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { openShot, MOBILE_URL, IN_ENGLISH } from "./fits";
-import { LEARN_STOPS, targetOf } from "../../src/containers/onboarding/tour/stops";
+import { LEARN_STOPS, TOOLS_STOPS, targetOf } from "../../src/containers/onboarding/tour/stops";
 import { SHOT_THEMES } from "../../src/shots/scenarios";
 
 /**
@@ -144,6 +144,41 @@ test.describe("Show me around, every stop", () => {
       test.slow();
       await openShot(page, "tour-learn", size);
       await walk(page, `${size.width}x${size.height}`);
+    });
+  }
+});
+
+/**
+ * The tools tour's "coach" stop (review of leg c2a1): the old card it pointed
+ * at is gone, and Ask's panel is closed when the stop shows, so it points at
+ * the rail's Ask row. Walked with Next to it, then measured as above.
+ */
+test.describe("Tour the tools, the coach stop", () => {
+  for (const size of DESKTOP) {
+    test(`spotlights the rail's Ask row at ${size.width}x${size.height}`, async ({ page }) => {
+      test.slow();
+      await openShot(page, "tour-tools", size);
+      const index = TOOLS_STOPS.findIndex((s) => s.id === "coach");
+      for (let i = 0; i < index; i++) {
+        await stopSettled(page, i);
+        await page.locator(".tour-btn-primary").click();
+      }
+      await stopSettled(page, index);
+      const at = `coach at ${size.width}x${size.height}`;
+      await expect(async () => {
+        const m = await measureStop(page, targetOf(TOOLS_STOPS[index]));
+        const screen = { x: 0, y: 0, ...m.viewport };
+        expect(m.placement, `${at}: the bubble points at nothing`).not.toBe("center");
+        expect(m.targets.length, `${at}: one visible target`).toBe(1);
+        const row = await page.evaluate(() => {
+          const el = document.querySelector('[data-tour="coach"]');
+          return !!el && el.classList.contains("rail-action") && !!el.closest(".rail");
+        });
+        expect(row, `${at}: the target is the rail's Ask row`).toBe(true);
+        expect(inside(m.targets[0], screen, 0.5), `${at}: the row is off screen`).toBe(true);
+        expect(m.rings.some((ring) => inside(m.targets[0], ring, 1.5)), `${at}: the row sits outside the spotlight`).toBe(true);
+        expect(inside(m.card, screen, 0.5), `${at}: the bubble leaves the window`).toBe(true);
+      }).toPass({ timeout: 8_000, intervals: [150, 350, 350, 700] });
     });
   }
 });

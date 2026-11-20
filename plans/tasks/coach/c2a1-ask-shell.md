@@ -50,7 +50,10 @@ tools exactly as today**, so nothing is lost between the two merges.
      panel is its home): the `CoachModelSelector` leg ms1 built and mounted at the foot of the old
      card, moved to the foot of the dock and the drawer, under the text box, above or beside the
      one-line footer. Its menu opens upward and stays inside the panel. On a phone it sits in the
-     sheet's head (the foot is under the keyboard);
+     sheet's head (the foot is under the keyboard). From ms1's notes: mount `<CoachModelSelector />`
+     with `data-coach-model-bounds` on the panel and `data-coach-model-ceiling` on its head (the menu
+     measures against them); `tests/layout/coach-model.spec.ts` is its layout gate and must keep
+     passing in the new home;
    - the thread and the text box: the existing conversation (`sendChat`) as it works today when a model
      is ready. When the selector is Off or no model is ready, the box is still there and the empty state
      says in one sentence what this panel can do now; do not fake an answer. Model output keeps the

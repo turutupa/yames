@@ -1064,6 +1064,13 @@
       "globalKey": null,
       "globalAllowed": false,
       "group": "session"
+    },
+    {
+      "id": "ask-coach",
+      "key": "⇧?",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "navigation"
     }
   ],
   "settingsKeys": {

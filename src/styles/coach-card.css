@@ -637,6 +637,32 @@
   line-height: 1.5;
 }
 
+/* The foot: the model selector (ms1). Under the chat on the feed, under the
+   list on History; the menu opens upward from here, inside the card. */
+.coach-card-foot {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 12px 10px;
+  margin-top: auto;
+}
+.coach-card-foot > .coach-model {
+  flex: 1;
+}
+/* The window's 22px download / download-failed strip lies over the bottom
+   edge, and with it the selector a download is started from: lift the foot
+   clear of it while it is there. */
+:root:has(.global-download-bar) .coach-card-foot {
+  padding-bottom: 32px;
+}
+/* At 320 the card is narrower than the 380 its inside was pinned to, and
+   the right-hand 60px (the chat's Send, the selector's menu) were cut off. */
+@media (max-width: 719px) {
+  .coach-card-inner {
+    min-width: 0;
+  }
+}
+
 /* Chat input */
 .coach-card-chat {
   flex-shrink: 0;

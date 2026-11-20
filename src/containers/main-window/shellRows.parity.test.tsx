@@ -159,8 +159,8 @@ describe("Settings, over a tool", () => {
   });
 });
 
-describe("the coach card, from the shell", () => {
-  const cardOpen = () => document.querySelector(".coach-card-inner") !== null;
+describe("the coach panel (Ask, since leg c2a1), from the shell", () => {
+  const cardOpen = () => document.querySelector("[data-ask-panel]") !== null;
 
   it("SHL-12, COA-01: the rail's coach button opens and closes it", async () => {
     await openShell();

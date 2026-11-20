@@ -273,25 +273,16 @@
       "fairNo": "No",
       "fairThanksYes": "Thanks: kept as fair. Tap No to change it.",
       "fairThanksNo": "Thanks: kept as not fair. Tap Yes to change it.",
-      "barChip": "Pass mark {{bar}}%",
-      "barChipCount": "Pass mark: {{bar}} or fewer",
+      "barChip": "Needs {{bar}}%",
+      "barChipCount": "Needs {{bar}} or fewer",
       "barMissed": "Pass mark not met",
       "decidedPass": "Passed",
       "lastTime": "last time",
       "decidedMiss": "What held it back",
-      "notesNotChecked": "Right notes: not checked this time",
       "barsTitle": "Bar by bar",
-      "barsHeld": "{{count}} bar in a row held",
-      "barsHeld_other": "{{count}} bars in a row held",
-      "barsMet": "{{count}} of {{of}} bars held",
       "barHeld": "Bar {{n}}: held",
       "barSlipped": "Bar {{n}}: slipped",
-      "barThin": "Bar {{n}}: too few notes to judge",
-      "legatoAll": "Hammer-ons, pull-offs and taps: {{sounded}} of {{due}} sounded. Reported, not graded.",
-      "legatoSome": "Hammer-ons, pull-offs and taps: {{sounded}} of {{due}} sounded, {{silent}} didn't. Reported, not graded.",
-      "bendsAll": "Bends: {{onPitch}} of {{due}} reached the pitch. Reported, not graded.",
-      "bendsSomeFlat": "Bends: {{onPitch}} of {{due}} reached the pitch, {{flat}} fell short. Reported, not graded.",
-      "vibratoHeard": "Vibrato: heard on {{present}} of {{due}} notes. Reported, not graded."
+      "barThin": "Bar {{n}}: too few notes to judge"
     },
     "edge": {
       "kick": "Find my edge",
@@ -701,6 +692,104 @@
       "harmony": "Harmony",
       "technique": "Technique",
       "style": "Styles"
+    },
+    "note": {
+      "passedAt": "Passed at {{bpm}}.",
+      "finding": {
+        "ceiling": "It holds at {{holds}} BPM and slips at {{breaks}}."
+      },
+      "place": {
+        "slipped": {
+          "bar": "Bar {{bar}} of the tune slipped on {{count}} of {{of}} rounds.",
+          "bars": "Bars {{from}} to {{to}} of the tune slipped on {{count}} of {{of}} rounds.",
+          "loop": "The pattern slipped on {{count}} of {{of}} rounds.",
+          "fromRound": "It held until round {{round}} of {{of}}, then came apart.",
+          "all": "The whole tune slipped on {{count}} of {{of}} rounds."
+        },
+        "caught": {
+          "bar": "Bar {{bar}} of the tune caught you on {{count}} of {{of}} rounds.",
+          "bars": "Bars {{from}} to {{to}} of the tune caught you on {{count}} of {{of}} rounds.",
+          "loop": "The pattern caught you on {{count}} of {{of}} rounds.",
+          "all": "The whole tune caught you on {{count}} of {{of}} rounds."
+        },
+        "lastTake": "Last Take it was {{count}}.",
+        "lastTakeHeld": "Last Take it held."
+      },
+      "direction": {
+        "early": "The notes there landed early.",
+        "late": "The notes there landed late.",
+        "earlyOpen": "The open {{note}}s there landed early.",
+        "lateOpen": "The open {{note}}s there landed late.",
+        "earlyNote": "The {{note}}s at fret {{fret}} there landed early.",
+        "lateNote": "The {{note}}s at fret {{fret}} there landed late."
+      },
+      "history": {
+        "newClean": "New clean tempo: {{bpm}} BPM.",
+        "tooEasy": "Passed with room to spare on your first Take, two Sessions running.",
+        "goingDown": "Three Takes in a row at {{bpm}} have gone down.",
+        "stuck": "Three Takes at {{bpm}}, all within two points.",
+        "closer": "Up from {{from}}% to {{to}}% at this tempo."
+      },
+      "repeat": {
+        "leaveIt": "Same place three times. Leave it for today; it is usually better tomorrow."
+      },
+      "fact": {
+        "heard": "{{heard}} of {{expected}} notes heard",
+        "noExtras": "no extras",
+        "extras": "{{count}} extra note",
+        "extras_other": "{{count}} extra notes",
+        "rightNotes": "{{value}}% right notes (of {{base}} I could pitch)",
+        "notesUnchecked": {
+          "notRun": "right notes: not checked this time",
+          "tooFast": "right notes: too fast for me to pitch",
+          "tooFew": "right notes: too few for me to pitch",
+          "notesRing": "right notes: they rang into each other, so I couldn't tell",
+          "octaveUnsure": "right notes: I couldn't tell the octave"
+        },
+        "legato": "{{sounded}} of {{due}} hammer-ons and pull-offs sounded (reported, not graded)",
+        "bends": "{{onPitch}} of {{due}} bends reached the pitch (reported, not graded)",
+        "vibrato": "vibrato on {{present}} of {{due}} notes (reported, not graded)"
+      },
+      "mark": {
+        "check": "met:",
+        "cross": "not met:",
+        "dash": "couldn't tell:"
+      },
+      "strip": {
+        "held": "{{count}} bar in a row held",
+        "held_other": "{{count}} bars in a row held",
+        "roundEvery": "the tune comes round every {{count}}",
+        "plain": "as played"
+      },
+      "ready": {
+        "lastValue": "Last Take: {{value}}% {{metric}}.",
+        "lastCount": "Last Take: {{value}} {{metric}}.",
+        "lastPassed": "Last Take: passed at {{bpm}}.",
+        "lastNotCaught": "Last Take: I didn't catch enough."
+      },
+      "chip": {
+        "hear": "Hear it first",
+        "try": "What should I try?"
+      },
+      "ungraded": {
+        "listenFor": "This time, listen for one thing: {{question}}",
+        "notListening": "I'm not listening this time, so you're the judge.",
+        "didThey": "Last one: {{question}}",
+        "yourAnswer": "Your answer:",
+        "yes": "Yes",
+        "notYet": "Not yet",
+        "tryFaster": "Twice yes. Try {{bpm}}?"
+      },
+      "recap": {
+        "passed": "Passed at {{bpm}} BPM.",
+        "held": "Clean tempo still {{bpm}} BPM.",
+        "played": "Last played at {{bpm}} BPM.",
+        "backNext": "{{title}} comes back next Session.",
+        "backReview": "{{title}} comes back for review in {{count}} day.",
+        "backReview_other": "{{title}} comes back for review in {{count}} days.",
+        "backParked": "{{title}} rests for {{count}} day and comes back fresh.",
+        "backParked_other": "{{title}} rests for {{count}} days and comes back fresh."
+      }
     }
   }
 }

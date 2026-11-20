@@ -1,51 +1,37 @@
 /**
  * CoachCard feature preservation tests.
  *
- * Locks in:
- * - Collapsed state renders a "Practice Coach" pill button
- * - Clicking the pill calls onToggle
- * - Open + inactive shows a "Start" button
- * - Open + active shows an "End" button
+ * Since leg c2a1 the card is the "Tools coach" section of Ask: the panel
+ * around it (open, close, the pill, the model selector, the question box)
+ * and the `?` key are Ask's (`containers/coach/AskPanel.test.tsx`,
+ * `useActionDispatcher.parity.test.tsx`). What the tools still get here,
+ * until c2a2, is locked in:
+ * - Inactive shows a "Start" button
+ * - Active shows an "End" button
  * - Start button calls onStartSession
  * - End button calls onEndSession
  * - "History" tab swaps content
+ * - No question box: the conversation is Ask's
  */
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import CoachCard from "./CoachCard";
 
 const baseProps = {
-  open: true,
   active: false,
   messages: [],
-  onToggle: vi.fn(),
   onStartSession: vi.fn(),
   onEndSession: vi.fn(),
 };
 
 describe("CoachCard", () => {
-  it("renders the collapsed pill when open=false", () => {
-    render(<CoachCard {...baseProps} open={false} />);
-    expect(
-      screen.getByRole("button", { name: /practice coach/i }),
-    ).toBeInTheDocument();
-  });
-
-  it("collapsed pill click calls onToggle", () => {
-    const onToggle = vi.fn();
-    render(<CoachCard {...baseProps} open={false} onToggle={onToggle} />);
-    const pill = screen.getByRole("button", { name: /practice coach/i });
-    fireEvent.click(pill);
-    expect(onToggle).toHaveBeenCalled();
-  });
-
-  it("open + inactive shows a Start button", () => {
+  it("inactive shows a Start button", () => {
     render(<CoachCard {...baseProps} active={false} />);
     expect(screen.getByRole("button", { name: /^start$/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /^end$/i })).not.toBeInTheDocument();
   });
 
-  it("open + active shows an End button", () => {
+  it("active shows an End button", () => {
     render(<CoachCard {...baseProps} active={true} />);
     expect(screen.getByRole("button", { name: /^end$/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /^start$/i })).not.toBeInTheDocument();
@@ -75,28 +61,11 @@ describe("CoachCard", () => {
     expect(historyTab?.className).toMatch(/active/);
   });
 
-  it("? shortcut opens the card when collapsed (OQ8)", () => {
-    const onToggle = vi.fn();
-    render(<CoachCard {...baseProps} open={false} onToggle={onToggle} />);
+  it("has no question box and no key of its own: both are Ask's", () => {
+    const { container } = render(<CoachCard {...baseProps} />);
+    expect(container.querySelector("input, textarea")).toBeNull();
+    // `?` used to be a window listener in here; nothing happens now.
     fireEvent.keyDown(window, { key: "?" });
-    expect(onToggle).toHaveBeenCalled();
-  });
-
-  it("? shortcut pauses the metronome when playing (OQ8)", () => {
-    const onPause = vi.fn();
-    render(
-      <CoachCard {...baseProps} open={true} isPlaying={true} onPause={onPause} />,
-    );
-    fireEvent.keyDown(window, { key: "?" });
-    expect(onPause).toHaveBeenCalled();
-  });
-
-  it("? shortcut does NOT pause when metronome is already paused", () => {
-    const onPause = vi.fn();
-    render(
-      <CoachCard {...baseProps} open={true} isPlaying={false} onPause={onPause} />,
-    );
-    fireEvent.keyDown(window, { key: "?" });
-    expect(onPause).not.toHaveBeenCalled();
+    expect(container.querySelector(".coach-card-embedded")).not.toBeNull();
   });
 });

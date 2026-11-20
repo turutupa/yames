@@ -1,5 +1,6 @@
 import { backendLabel } from "../../coach/brainTiers";
 import type { CoachCapabilities } from "../../ipc.desktop";
+import type { CoachModelState } from "../../hooks/coachLoader";
 
 /**
  * Maps coach capabilities + on-disk model presence to the i18n key (and
@@ -74,6 +75,27 @@ export function coachStatusLabel(
   }
 
   return { key: "settings.coach.statusNoModel", tone: "info" };
+}
+
+/**
+ * The resting "on disk, not loaded" line, told apart by the model selector's
+ * state (ms1). It used to say the model "loads when you start practising";
+ * since the selector a session loads nothing: a chosen model loads in the
+ * background once the app is idle, Off keeps it on disk unloaded, and a
+ * failed load says so. Every other line is left as `coachStatusLabel` made it.
+ */
+export function withLoaderState(
+  label: CoachStatusLabel | null,
+  state: CoachModelState,
+): CoachStatusLabel | null {
+  if (!label || label.key !== "settings.coach.statusReadyNotLoaded") return label;
+  // Caps are refetched when the loader moves; until they land, its word wins.
+  if (state === "loading") return { key: "settings.coach.statusWarmingUp", tone: "info" };
+  if (state === "ready") return label;
+  if (state === "failed") return { key: "settings.coach.statusLoadFailed", tone: "warn" };
+  if (state === "waiting") return { key: "settings.coach.statusWaitingToLoad", tone: "info" };
+  // Off, or a choice this machine cannot load: on disk, and not loaded.
+  return { key: "settings.coach.statusOnDiskOff", tone: "info" };
 }
 
 /**
