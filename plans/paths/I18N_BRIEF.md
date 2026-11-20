@@ -445,3 +445,13 @@ English is in your translation: print the keys where the digits differ and fix t
 language's pack already writes that kind of number another way). When every file of your group is
 written and verified, create the empty file /tmp/yp5/i18n/<lng>.<group>.DONE, then reply with ONE line:
 the language, strings per path, and any key you were unsure about (at most 60 words).
+
+Round 19, afterwards (2026-11-19): what the lead had to repair, so the next round's brief can say it first.
+- pt-BR: the counting syllable 'and' is '&' ('1 e & a'), never 'e': 'e' is the second sixteenth. The
+  Alternate Picking pack wrote both as 'e' until this round.
+- A band here is drums and bass. No sentence, in any language, says the band plays a chord: "the chords
+  are", "the band follows the chord", "the bass stays on E".
+- The todo holds one key for each distinct English sentence; `strings merge` copies the translation to
+  every other key with the same English (variants). A translator who sees a variant key "still in the old
+  wording" in the pack is looking at the state before the merge.
+- fr: "heavy band" is "groupe lourd" (Sweep Picking).
