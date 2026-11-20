@@ -1,0 +1,15 @@
+[Unit]
+Description=Yames test-session inbox (card #123; tailnet via tailscale serve :8646)
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/projects/yames-inbox
+Environment=PATH=%h/.nvm/versions/node/v20.15.1/bin:%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/usr/bin/python3 %h/projects/yames-inbox/tools/inbox/server.py serve --host 127.0.0.1 --port 5646 --repo %h/projects/yames-inbox
+Restart=on-failure
+RestartSec=10
+Nice=5
+
+[Install]
+WantedBy=default.target

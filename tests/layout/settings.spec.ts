@@ -200,3 +200,51 @@ test.describe("the recording session row", () => {
     });
   }
 });
+
+/**
+ * Send my test sessions to my computer (card #123, test builds; the shot
+ * harness shows it too): the switch beside its hint, and once on, the
+ * address, the code and Pair inside the Support panel at every width, the
+ * fields wide enough to type in.
+ */
+test.describe("the test inbox row", () => {
+  for (const size of [
+    { width: 520, height: 900 },
+    { width: 1024, height: 900 },
+    { width: 1400, height: 900 },
+  ]) {
+    test(`fits its panel at ${size.width}px`, async ({ page }) => {
+      await openShot(page, "settings-update", size);
+      const row = page.getByTestId("settings-test-inbox");
+      await row.scrollIntoViewIfNeeded();
+      await page.getByTestId("test-inbox-switch").click();
+      await expect(page.getByTestId("test-inbox-address")).toBeVisible();
+      const m = await row.evaluate((el) => {
+        const panel = el.closest("section.settings-section")!.getBoundingClientRect();
+        const r = (q: string) => {
+          const e = el.querySelector(q);
+          return e ? e.getBoundingClientRect() : null;
+        };
+        return {
+          panel: { left: panel.left, right: panel.right },
+          parts: [".setting-switch", '[data-testid="test-inbox-address"]', '[data-testid="test-inbox-code"]', '[data-testid="test-inbox-pair"]']
+            .map((q) => ({ q, b: r(q) }))
+            .filter((x) => x.b !== null)
+            .map((x) => ({ q: x.q, left: x.b!.left, right: x.b!.right, width: x.b!.width })),
+          label: r(".setting-label"),
+          toggle: r(".setting-switch"),
+        };
+      });
+      expect(m.parts.length).toBe(4);
+      for (const p of m.parts) {
+        expect(p.width, `${p.q} has no size`).toBeGreaterThan(10);
+        expect(p.left, `${p.q} starts outside its panel`).toBeGreaterThanOrEqual(m.panel.left - 0.5);
+        expect(p.right, `${p.q} ends outside its panel`).toBeLessThanOrEqual(m.panel.right + 0.5);
+      }
+      for (const q of ['[data-testid="test-inbox-address"]', '[data-testid="test-inbox-code"]']) {
+        expect(m.parts.find((p) => p.q === q)!.width, `${q} is too narrow to type in`).toBeGreaterThanOrEqual(120);
+      }
+      expect(m.label!.right, "the switch overlaps the hint").toBeLessThanOrEqual(m.toggle!.left + 0.5);
+    });
+  }
+});

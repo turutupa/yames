@@ -61,6 +61,41 @@ Take's grade felt wrong.
    next to them, how well the phone recording lined up, and the regression
    cases made from them.
 
+## Sessions that send themselves (test builds, card #123)
+
+Once per device, then nothing to copy ever again. The inbox runs on the DGX
+(`https://dgx-delgado.taildf6572.ts.net:8646`, tailnet only).
+
+1. **Tailscale on the phone** (and on the RTX if it is not there yet): install
+   the Tailscale app from the Play Store, log in with the same account as the
+   DGX, and leave it connected. Check: the phone's browser opens
+   `https://dgx-delgado.taildf6572.ts.net:8646/v1/ping` and answers
+   `{"error": "unauthorized"}` (that is right: it needs the token).
+2. **A pairing code**: on the DGX, `npm run inbox:pair` (or ask for one). It
+   prints a code (`ABCDE-12345`, one use, 24 h) and a link with the code in it.
+3. **In Yames** (a beta build): Settings > Support > **Send my test sessions
+   to my computer**: on. Paste the link into the inbox field (it fills the
+   code too), or type the address and the code. **Pair**. The row then says
+   "Sending to dgx-delgado…".
+4. From then on, every recording session that ends is zipped and uploaded in
+   the background, and the line under the switch says **uploaded**,
+   **waiting** (the DGX could not be reached: it tries again when Yames
+   opens, when the network is back, and every ten minutes) or **failed**
+   (pair again for a refused device; Send now tries again). A session closed
+   by quitting Yames is sent the next time it opens.
+5. On the DGX each arrival is ingested by itself: the report is at
+   `~/projects/.preview/corpus/<session>/report.html`, the zip in
+   `~/projects/.datasets/yames-corpus/inbox/`.
+
+**Without Tailscale on the phone**: with the switch on, the Android app also
+keeps each session's zip in `Documents/Yames/capture` (Android 11 or later).
+Plug the phone into the RTX with USB debugging on and `npm run corpus:ingest
+-- rtx` pulls them by adb, on a normal (non-debuggable) build too.
+
+**Privacy**: the raw microphone audio of the session goes only to the address
+you paired with; with the switch off (the default) nothing goes anywhere.
+Forget in the same row removes the pairing.
+
 ## What it records, plainly
 
 The raw input of every Take (whatever the mic hears, voices included), into

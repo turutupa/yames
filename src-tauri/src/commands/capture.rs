@@ -134,3 +134,65 @@ pub async fn capture_zip(app: AppHandle) -> Result<String, String> {
         .await
         .map_err(|e| e.to_string())?
 }
+
+// --- "Send my test sessions to my computer" (card #123, test builds only) ----
+// The files only: the upload is the webview's (`src/capture/inbox.ts`). Every
+// id is checked in `crate::capture_outbox` before it touches a path.
+
+fn outbox_dir(app: &AppHandle) -> Result<std::path::PathBuf, String> {
+    Ok(app.path().app_cache_dir().map_err(|e| e.to_string())?.join("capture-outbox"))
+}
+
+fn active_id() -> Option<String> {
+    crate::capture::global().status().session
+}
+
+/// The recording sessions on this device, oldest first.
+#[tauri::command]
+pub async fn capture_sessions(app: AppHandle) -> Result<Vec<crate::capture_outbox::SessionEntry>, String> {
+    let root = capture_root(&app)?;
+    tokio::task::spawn_blocking(move || crate::capture_outbox::list_sessions(&root, active_id().as_deref()))
+        .await
+        .map_err(|e| e.to_string())
+}
+
+/// Zip session `id` into the outbox (once) and, with `shared` on Android, copy
+/// it to `Documents/Yames/capture`. `{ id, size, shared, sharedError }`.
+#[tauri::command]
+pub async fn capture_outbox_prepare(app: AppHandle, id: String, shared: Option<bool>) -> Result<Value, String> {
+    let root = capture_root(&app)?;
+    let outbox = outbox_dir(&app)?;
+    tokio::task::spawn_blocking(move || {
+        let (zip, size) = crate::capture_outbox::prepare(&root, &outbox, &id, active_id().as_deref())?;
+        let (mut copy, mut copy_err) = (Value::Null, Value::Null);
+        if shared.unwrap_or(false) && cfg!(target_os = "android") {
+            match crate::capture_outbox::copy_to_shared(&zip, std::path::Path::new(crate::capture_outbox::ANDROID_SHARED_DIR), &id) {
+                Ok(p) => copy = Value::String(p.display().to_string()),
+                Err(e) => copy_err = Value::String(e),
+            }
+        }
+        Ok(serde_json::json!({"id": id, "size": size, "shared": copy, "sharedError": copy_err}))
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+/// Up to `len` bytes of the outbox zip of `id` from `offset`, as raw bytes
+/// (an `ArrayBuffer` in the webview, no JSON or base64 on the way).
+#[tauri::command]
+pub async fn capture_outbox_chunk(app: AppHandle, id: String, offset: u64, len: u64) -> Result<tauri::ipc::Response, String> {
+    let outbox = outbox_dir(&app)?;
+    let bytes = tokio::task::spawn_blocking(move || crate::capture_outbox::read_chunk(&outbox, &id, offset, len))
+        .await
+        .map_err(|e| e.to_string())??;
+    Ok(tauri::ipc::Response::new(bytes))
+}
+
+/// The computer has session `id`: drop the outbox's zip of it.
+#[tauri::command]
+pub async fn capture_outbox_clear(app: AppHandle, id: String) -> Result<(), String> {
+    let outbox = outbox_dir(&app)?;
+    tokio::task::spawn_blocking(move || crate::capture_outbox::clear(&outbox, &id))
+        .await
+        .map_err(|e| e.to_string())?
+}

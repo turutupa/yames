@@ -264,6 +264,44 @@ class IngestTest(unittest.TestCase):
         self.assertIn("N=2", script)
         self.assertIn("run-as", script)
         self.assertIn("tar -chf -", script)
+        self.assertIn(ingest.ANDROID_SHARED, script)
+
+    def test_a_zip_cannot_name_its_way_out_of_the_raw_root(self):
+        # session.json's "session" becomes the folder name: a path in it falls back to the folder's own
+        zp = self.tmp / "evil.zip"
+        with zipfile.ZipFile(zp, "w") as z:
+            z.writestr("20261120-010203/session.json", json.dumps({"session": "../../outside"}))
+        found = ingest.resolve_input(str(zp), None, False)
+        self.assertEqual([p.name for p in found], ["20261120-010203"])
+        self.assertFalse((self.tmp / "outside").exists())
+        self.assertEqual(found[0].parent, ingest.raw_root())
+        zp = self.tmp / "evil2.zip"
+        with zipfile.ZipFile(zp, "w") as z:
+            z.writestr("../x/session.json", "{}")
+        with self.assertRaises(ValueError):
+            ingest.resolve_input(str(zp), None, False)
+
+    def test_a_nested_session_or_a_namesake_never_replaces_another(self):
+        victim = ingest.raw_root() / "VICTIM"
+        victim.mkdir(parents=True, exist_ok=True)
+        (victim / "session.json").write_text(json.dumps({"session": "VICTIM", "startedWallMs": 1}))
+        zp = self.tmp / "nested.zip"
+        with zipfile.ZipFile(zp, "w") as z:
+            z.writestr("20261120-040000/session.json", json.dumps({"session": "20261120-040000"}))
+            z.writestr("20261120-040000/A/session.json", json.dumps({"session": "VICTIM"}))
+        with self.assertRaises(ValueError):
+            ingest.resolve_input(str(zp), None, False)
+        self.assertEqual(json.loads((victim / "session.json").read_text())["startedWallMs"], 1)
+        # the same name from another device lands beside it; the same recording again replaces itself
+        def zipped(started, platform, name):
+            p = self.tmp / name
+            with zipfile.ZipFile(p, "w") as z:
+                z.writestr("20261120-050000/session.json", json.dumps({"session": "20261120-050000", "startedWallMs": started, "app": {"platform": platform}}))
+            return p
+        a = ingest.resolve_input(str(zipped(10, "windows", "a.zip")), None, False)
+        b = ingest.resolve_input(str(zipped(10, "android", "b.zip")), None, False)
+        a2 = ingest.resolve_input(str(zipped(10, "windows", "a2.zip")), None, False)
+        self.assertEqual([a[0].name, b[0].name, a2[0].name], ["20261120-050000", "20261120-050000-b", "20261120-050000"])
 
 
 @unittest.skipIf(ingest.ffmpeg_bin() is None, "no ffmpeg (~/tools/ffmpeg/ffmpeg, $YAMES_FFMPEG or PATH)")

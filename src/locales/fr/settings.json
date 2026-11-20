@@ -483,6 +483,39 @@
       "pillStopped": "REC arrêté : taille limite",
       "mark": "Pas juste (M)",
       "marked": "Marquée"
+    },
+    "testInbox": {
+      "title": "Envoyer mes sessions de test à mon ordinateur",
+      "hint": "Versions de test uniquement. À la fin d'une session d'enregistrement, Yames la compresse et l'envoie à l'ordinateur que vous associez ici. Elle contient l'enregistrement brut du micro de chaque Prise, voix comprises, et ne va qu'à l'adresse que vous indiquez ; rien n'est envoyé nulle part tant que c'est désactivé. Sur Android, une copie reste aussi dans Documents/Yames/capture.",
+      "address": "Boîte de réception de votre ordinateur (adresse ou lien d'association)",
+      "code": "Code d'association",
+      "pair": "Associer",
+      "pairing": "Association…",
+      "paired": "Envoi vers {{host}}",
+      "forget": "Oublier",
+      "sendNow": "Envoyer maintenant",
+      "pairFailed": "Association impossible : {{why}}",
+      "status": {
+        "none": "Aucune session envoyée pour l'instant.",
+        "uploaded": "Dernière session {{id}} : envoyée.",
+        "waiting": "Dernière session {{id}} : en attente ({{why}}).",
+        "failed": "Dernière session {{id}} : échec ({{why}}).",
+        "sending": "Envoi de {{id}} : {{pct}} %"
+      },
+      "reasons": {
+        "offline": "l'ordinateur est injoignable ; nouvel essai à l'ouverture de Yames",
+        "notPaired": "pas encore associé",
+        "token": "l'ordinateur n'a pas accepté cet appareil, associez-le à nouveau",
+        "tooBig": "trop volumineux pour la boîte de réception",
+        "refused": "l'ordinateur a refusé le fichier",
+        "server": "l'ordinateur a rencontré un problème",
+        "full": "le disque de l'ordinateur est plein",
+        "tooMany": "trop d'essais, attendez dix minutes",
+        "zip": "la session n'a pas pu être compressée",
+        "badAddress": "ce n'est pas une adresse https",
+        "badCode": "le code est faux, déjà utilisé ou expiré",
+        "noCode": "saisissez le code d'association"
+      }
     }
   },
   "keybindings": {

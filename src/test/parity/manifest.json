@@ -170,7 +170,11 @@
     "capture_set_context",
     "capture_start",
     "capture_status",
-    "capture_zip"
+    "capture_zip",
+    "capture_outbox_chunk",
+    "capture_outbox_clear",
+    "capture_outbox_prepare",
+    "capture_sessions"
   ],
   "ipcCommands": [
     "analyze_attempt",
@@ -341,7 +345,11 @@
     "capture_set_context",
     "capture_start",
     "capture_status",
-    "capture_zip"
+    "capture_zip",
+    "capture_outbox_chunk",
+    "capture_outbox_clear",
+    "capture_outbox_prepare",
+    "capture_sessions"
   ],
   "commandsInvokedOutsideIpc": [
     "app_ready",
@@ -567,7 +575,11 @@
     "captureSetContext",
     "captureStart",
     "captureStatus",
-    "captureZip"
+    "captureZip",
+    "captureOutboxChunk",
+    "captureOutboxClear",
+    "captureOutboxPrepare",
+    "captureSessions"
   ],
   "ipcWrappersWithoutCaller": [
     "clearSessionLogs",

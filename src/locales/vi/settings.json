@@ -483,6 +483,39 @@
       "pillStopped": "REC đã dừng: giới hạn dung lượng",
       "mark": "Thấy sai (M)",
       "marked": "Đã đánh dấu"
+    },
+    "testInbox": {
+      "title": "Gửi các phiên thử nghiệm của tôi về máy tính của tôi",
+      "hint": "Chỉ có trong bản thử nghiệm. Khi một phiên ghi âm kết thúc, Yames nén nó và tải lên máy tính bạn ghép nối ở đây. Nó chứa bản ghi micro thô của mọi Lượt chơi, kể cả giọng nói, và chỉ được gửi tới địa chỉ bạn đặt; khi tắt, không có gì được gửi đi đâu cả. Trên Android, một bản sao cũng được giữ trong Documents/Yames/capture.",
+      "address": "Hộp thư của máy tính (địa chỉ hoặc liên kết ghép nối)",
+      "code": "Mã ghép nối",
+      "pair": "Ghép nối",
+      "pairing": "Đang ghép nối…",
+      "paired": "Đang gửi tới {{host}}",
+      "forget": "Quên",
+      "sendNow": "Gửi ngay",
+      "pairFailed": "Không ghép nối được: {{why}}",
+      "status": {
+        "none": "Chưa gửi phiên nào.",
+        "uploaded": "Phiên gần nhất {{id}}: đã tải lên.",
+        "waiting": "Phiên gần nhất {{id}}: đang chờ ({{why}}).",
+        "failed": "Phiên gần nhất {{id}}: thất bại ({{why}}).",
+        "sending": "Đang gửi {{id}}: {{pct}}%"
+      },
+      "reasons": {
+        "offline": "không kết nối được máy tính; sẽ thử lại khi mở Yames",
+        "notPaired": "chưa ghép nối",
+        "token": "máy tính không chấp nhận thiết bị này, hãy ghép nối lại",
+        "tooBig": "quá lớn cho hộp thư",
+        "refused": "máy tính đã từ chối tệp",
+        "server": "máy tính gặp sự cố",
+        "full": "ổ đĩa của máy tính đã đầy",
+        "tooMany": "thử quá nhiều lần, hãy chờ mười phút",
+        "zip": "không nén được phiên",
+        "badAddress": "đó không phải địa chỉ https",
+        "badCode": "mã sai, đã dùng hoặc đã hết hạn",
+        "noCode": "hãy nhập mã ghép nối"
+      }
     }
   },
   "keybindings": {

@@ -120,7 +120,8 @@ export function settingsSnapshot(store: Storage | null = storage()): Record<stri
   if (!store) return out;
   for (let i = 0; i < store.length; i++) {
     const k = store.key(i);
-    if (!k || !k.startsWith("yames.")) continue;
+    // never a credential (the test inbox's token is not under `yames.` either)
+    if (!k || !k.startsWith("yames.") || /token|secret|password/i.test(k)) continue;
     const v = store.getItem(k) ?? "";
     out[k] = v.length > 2000 ? `${v.slice(0, 2000)}…` : v;
   }

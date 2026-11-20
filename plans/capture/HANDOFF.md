@@ -33,3 +33,26 @@ State 2026-11-20 ~04:45 PT, branch `mvp-capture` (from revamp 45ebdc2d), not pus
   m4a/aac/mp3/opus through ffmpeg (`$YAMES_FFMPEG`, else `~/tools/ffmpeg/ffmpeg`, a static
   7.0.2 arm64 build from johnvansickle.com, md5 checked, else PATH); without one mp3/opus try
   libsndfile and m4a is skipped with the reason in the report. Tests 10/10 (2 new, m4a AAC 128k).
+
+# Sessions send themselves (card #123), branch `inbox`, not pushed
+
+State 2026-11-20 ~06:30 PT.
+- App (test builds only, `inboxOffered()`): `src/settings/testInbox.ts` (pairing, resumable
+  4 MB chunk upload by webview `fetch`, states uploaded/waiting/failed, retry on open/online/10 min),
+  `containers/settings/TestInboxRow.tsx` under Recording session, 15 locales.
+  Rust `src-tauri/src/capture_outbox.rs` + `capture_sessions`, `capture_outbox_{prepare,chunk,clear}`
+  (blocking pool; ids checked; chunk read only from the outbox). Android: zip copied to
+  `/storage/emulated/0/Documents/Yames/capture` (best effort, Android 11+).
+  The token is stored under `yamesInbox.token` (not `yames.*`), and `settingsSnapshot` drops any
+  key naming a token/secret/password, so it never reaches session.json.
+- DGX: `tools/inbox/server.py` (`npm run inbox:serve|inbox:pair|inbox:test`), systemd --user
+  `yames-inbox.service` (copy in tools/inbox/), 127.0.0.1:5646 -> tailnet :8646.
+  Inbox `~/projects/.datasets/yames-corpus/inbox/`, ingest logs `~/projects/.preview/corpus/inbox-logs/`.
+  After merge: repoint the unit's WorkingDirectory/ExecStart/--repo to ~/projects/yames-revamp.
+- `corpus:ingest rtx` also pulls `yames-capture-*.zip` from the phone's shared storage over adb.
+- Review (opus, read-only): 4 medium + 6 low confirmed; all fixed with tests except the global
+  pairing lockout (kept: tailnet only, 31^10 codes). Uploads are keyed `<session>__<device>`
+  (X-Yames-Device, random per install); ingest puts a same-named session from another device at
+  `<name>-b`. Server tests 27/0, ingest 10/0.
+- Not verified: the real upload from WebView2 / Android WebView (CORS preflight, PNA), the Android
+  shared-storage write on the owner's phone. QR pairing not built (paste link instead).

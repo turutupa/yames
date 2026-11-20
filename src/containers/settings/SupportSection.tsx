@@ -7,6 +7,8 @@ import { ExportPracticeButton } from "../session/ExportPracticeButton";
 import { keepTakesStored, setKeepTakes } from "../../settings/takeDiagnostics";
 import { SwitchFace } from "./SwitchFace";
 import { RecordingSessionRow } from "./RecordingSessionRow";
+import { TestInboxRow } from "./TestInboxRow";
+import { inboxOffered } from "../../settings/testInbox";
 
 type ShareOption = (typeof SHARE_OPTIONS)[number];
 
@@ -162,6 +164,8 @@ export function SupportSection({
       <ExportPracticeButton appVersion={appVersion} className="toggle-btn" layout="row" />
       <KeepTakesRow />
       <RecordingSessionRow />
+      {/* test builds only: where a finished session goes (card #123) */}
+      {inboxOffered() && <TestInboxRow />}
 
       <h3 className="settings-subhead">{t("settings.support.supportTitle")}</h3>
       <p className="settings-section-intro">{t("settings.support.blurb")}</p>

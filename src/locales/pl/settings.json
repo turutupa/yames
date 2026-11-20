@@ -483,6 +483,39 @@
       "pillStopped": "REC zatrzymane: limit rozmiaru",
       "mark": "Coś nie tak (M)",
       "marked": "Oznaczono"
+    },
+    "testInbox": {
+      "title": "Wysyłaj moje sesje testowe na mój komputer",
+      "hint": "Tylko w wersjach testowych. Po zakończeniu sesji nagrywania Yames pakuje ją do zip i wysyła na komputer sparowany tutaj. Zawiera surowe nagranie z mikrofonu każdego Ujęcia, łącznie z głosami, i trafia tylko pod adres, który ustawisz; gdy to jest wyłączone, nic nie jest wysyłane. Na Androidzie kopia zostaje też w Documents/Yames/capture.",
+      "address": "Skrzynka twojego komputera (adres lub link parowania)",
+      "code": "Kod parowania",
+      "pair": "Sparuj",
+      "pairing": "Parowanie…",
+      "paired": "Wysyłanie do {{host}}",
+      "forget": "Zapomnij",
+      "sendNow": "Wyślij teraz",
+      "pairFailed": "Nie udało się sparować: {{why}}",
+      "status": {
+        "none": "Nie wysłano jeszcze żadnej sesji.",
+        "uploaded": "Ostatnia sesja {{id}}: wysłana.",
+        "waiting": "Ostatnia sesja {{id}}: czeka ({{why}}).",
+        "failed": "Ostatnia sesja {{id}}: błąd ({{why}}).",
+        "sending": "Wysyłanie {{id}}: {{pct}}%"
+      },
+      "reasons": {
+        "offline": "nie udało się połączyć z komputerem; ponowna próba po otwarciu Yames",
+        "notPaired": "jeszcze nie sparowano",
+        "token": "komputer nie przyjął tego urządzenia, sparuj ponownie",
+        "tooBig": "za duże dla skrzynki",
+        "refused": "komputer odrzucił plik",
+        "server": "komputer miał problem",
+        "full": "dysk komputera jest pełny",
+        "tooMany": "za dużo prób, odczekaj dziesięć minut",
+        "zip": "nie udało się spakować sesji",
+        "badAddress": "to nie jest adres https",
+        "badCode": "kod jest błędny, zużyty lub wygasł",
+        "noCode": "wpisz kod parowania"
+      }
     }
   },
   "keybindings": {
