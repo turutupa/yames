@@ -260,6 +260,13 @@ export const WIRED_IN_T1A1: readonly (keyof CoachToolHost)[] = [
   "jams",
 ];
 
+/**
+ * The members the real host still leaves as stubs after t1a2: the Notebook's
+ * goal (leg c4a) and a loop of bars named from outside (the Session's loop
+ * plays the bar that slipped; no door takes bars).
+ */
+export const STILL_NOT_WIRED: readonly (keyof CoachToolHost)[] = ["goal", "setGoal", "loopBars"];
+
 const NOT_WIRED = "notWiredYet" as const;
 
 /**

@@ -628,17 +628,6 @@ export function MainWindow() {
     jam: jamSession.jam,
     song: songsSession.song,
   });
-  // The coach's tools (leg t1a1): one host, built once and read through a
-  // ref, so the per-beat render rebuilds nothing (`useCoachToolHost`).
-  useCoachToolHost({
-    view,
-    setView,
-    pathsPlace,
-    session: sessionRun,
-    instrument,
-    jams: jamSession.jams,
-    loadJam: jamSession.loadJam,
-  });
   // Listen (DESIGN 7): the tools' coach, on by the player's press only, ended
   // when they turn it off, leave the tools or leave it idle ten minutes.
   const listen = useToolListen({
@@ -1773,6 +1762,39 @@ export function MainWindow() {
     setlistSession.closeSetlist();
     closeJamRef.current();
   }, [setView, setlistSession.closeSetlist]);
+
+  // The coach's tools (legs t1a1, t1a2): one host, built once and read
+  // through a ref, so the per-beat render rebuilds nothing
+  // (`useCoachToolHost`). Here, below the unsaved-work gate and the preset
+  // loader it goes through.
+  useCoachToolHost({
+    view,
+    setView,
+    pathsPlace,
+    session: sessionRun,
+    instrument,
+    jams: jamSession.jams,
+    loadJam: (jam) =>
+      guarded(() => {
+        jamSession.loadJam(jam);
+        setView("jam");
+      }),
+    isPlaying: state.isPlaying,
+    tempo: state.bpm,
+    setTempo: handleBpmChange,
+    subdivision: state.subdivision,
+    setSubdivision: (subdivision) => void setSubdivision(subdivision).catch(() => {}),
+    loadPreset: (preset) => guarded(() => void handleLoadPreset(preset)),
+    settings: {
+      theme: state.theme,
+      setTheme: (theme) => void setTheme(theme).catch(() => {}),
+      countIn: countInOn,
+      toggleCountIn,
+      coachVoice: coach.coachVoiceMode,
+      setCoachVoice: coach.setCoachVoiceMode,
+      voiceAvailable: coach.coachBrainTier !== "off" && coach.availableVoices.length > 0,
+    },
+  });
 
 
   // Close dropdown on outside click
