@@ -17,6 +17,7 @@ import {
   threeNps,
 } from "../templates";
 import type { VariantParams } from "../spec";
+import { MIXED_RHYTHMS, ONE_STRING_TUNES, OTHER_STRINGS } from "./alternate-picking-more";
 
 const A_MINOR_LICK = "4:7 3:5 3:7 2:5 3:7 3:5 4:7 4:5";
 
@@ -98,7 +99,7 @@ export default definePath({
   paceLadders: true,
   variantText: true,
   orderRationale:
-    "Time first, then speed of the same motion, then control of it (accents), then one problem at a time across strings. It departs from the starting order in one place: pentatonic patterns move up to Step 5, before three notes per string, and bursts follow them. Two notes per string gives the same crossing over and over, so it is the natural first application, while three per string changes crossing type on every string. Bursts come after both so they can use real shapes rather than chromatic fingers. Outside picking is taught before inside because most players find it easier, and both are named so a teacher can overrule that. Up to tempo (added 2026-11-18) sits after the cross-string runs: the Advanced Level otherwise passed no faster than the Intermediate one, and its figures are ones the player already knows, so speed is the only new thing.",
+    "Time first, then speed of the same motion, then control of it (accents), then one problem at a time across strings. The Beginner Level gives each idea a second Step before strings are crossed: on other strings, in mixed rhythms and in whole tunes. It departs from the starting order in one place: pentatonic patterns come before three notes per string, and bursts follow them. Two notes per string gives the same crossing over and over, so it is the natural first application, while three per string changes crossing type on every string. Bursts come after both so they can use real shapes rather than chromatic fingers. Outside picking is taught before inside because most players find it easier, and both are named so a teacher can overrule that. Up to tempo (added 2026-11-18) sits after the cross-string runs: the Advanced Level otherwise passed no faster than the Intermediate one, and its figures are ones the player already knows, so speed is the only new thing.",
   gradingLimits:
     "Everything here is graded on timing and notes for single picked notes, which is what the app is built for, and none of it has been tried on a real guitar yet. The faster the line, the less sure the grade. Your setup adds a small delay between playing a note and the app hearing it; up to sixteenths at 100 BPM that makes no difference, and above that, read the evenness score as provisional. Heavy distortion and compression blur where each note starts, so a clean or light-crunch tone is the honest setting for a graded take. Nothing faster than sixteenths at 200 BPM is graded, and no Exercise here goes that far.",
   steps: [
@@ -186,6 +187,7 @@ export default definePath({
         },
       ],
     },
+    OTHER_STRINGS,
     {
       id: "even-sixteenths",
       title: "Even sixteenths on one string",
@@ -266,6 +268,7 @@ export default definePath({
         },
       ],
     },
+    MIXED_RHYTHMS,
     {
       id: "accents",
       title: "Accents where you want them",
@@ -277,8 +280,6 @@ export default definePath({
         "Use a clean or light-crunch tone. Compression and high gain flatten the difference, for your ear and for the app.",
       ],
       payoff: "The same run of notes that used to sound like a typewriter now has a groove in it.",
-      difficultyException:
-        "The tempo drops on purpose: an accent is a control problem, and the note-rate metric only counts speed.",
       exercises: [
         {
           id: "on-the-beat",
@@ -338,6 +339,7 @@ export default definePath({
         },
       ],
     },
+    ONE_STRING_TUNES,
     {
       id: "crossing",
       title: "Crossing two strings",
@@ -971,7 +973,7 @@ export default definePath({
         {
           id: "etude-eighths",
           title: "The eight-bar line, eighths",
-          purpose: "A composed line at a rate you can certainly play, so the band is the only new thing.",
+          purpose: "A composed line at a rate you can certainly play, so the chord changes under it are the only new thing.",
           howTo: [
             "Eighth notes for eight bars: Am, F, C, G, twice round, on the top four strings in fifth position, with the first finger dropping back to fret 4 for the B in bars 4 and 8.",
             "Every bar starts on a note of its chord, so hear the bar lines land. Bar 8 climbs up the B string, and the line starts again from the A on the D string.",
@@ -1050,13 +1052,13 @@ export default definePath({
     {
       id: "beginner",
       title: "Beginner: one string, even",
-      summary: "Eighths, sixteenths and accents on a single string, so that time and control come before crossing strings.",
+      summary: "Eighths, sixteenths and accents, one string at a time: every string in turn, both note lengths in one bar, and at the end whole tunes of eight bars, one of them with a band, so that time and control come before crossing strings.",
       startHereIf: [
         "You can fret single notes cleanly and you hold a pick.",
         "You can play eighth notes with a click at 80 BPM, but sixteenths come out uneven.",
         "An accent on an upstroke feels foreign, or you've never tried one.",
       ],
-      steps: ["even-eighths", "even-sixteenths", "accents"],
+      steps: ["even-eighths", "other-strings", "even-sixteenths", "mixed-rhythms", "accents", "one-string-tunes"],
       warmups: [
         {
           id: "one-string-climb",
@@ -1130,7 +1132,7 @@ export default definePath({
       startHereIf: [
         "You can run A minor three notes per string, across three strings, even at sixteenths 80 BPM.",
         "You can name which crossing is your weaker one.",
-        "Clean is fine at a moderate tempo and you've hit a speed wall, or you've never played with a band.",
+        "Clean is fine at a moderate tempo and you've hit a speed wall, or you've never held a long line over a band.",
       ],
       steps: ["speed-bursts", "cross-string-runs", "up-to-tempo", "stamina-minute", "over-the-band"],
       warmups: [

@@ -384,7 +384,8 @@ const sameShape = (a: Said, b: Said) => a.chord === b.chord && a.strings.join() 
 function readForm(sentence: string): string[] {
   const plain = /^The (\w+) bars are (.+)\.$/.exec(sentence);
   if (plain) {
-    const names = plain[2].split(/, | and /);
+    // "E, A, B, A, then E, B, A, E": a form said in two lines of four.
+    const names = plain[2].split(/, then | and |, /);
     expect(names.length, sentence).toBe(NUMBER_WORDS.indexOf(plain[1]));
     return names;
   }
@@ -505,7 +506,7 @@ function checkStarts(lines: readonly string[], bars: readonly PackBar[], where: 
 }
 
 describe.each([
-  ["triads", triads, 7],
+  ["triads", triads, 8],
   ["chords-in-a-key", chordsInAKey, 8],
   ["arpeggios-over-changes", arpeggiosOverChanges, 5],
 ] as const)("%s: every line moved to other keys", (_id, spec, count) => {

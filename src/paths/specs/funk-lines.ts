@@ -13,6 +13,7 @@ import type { ExerciseSpec } from "../spec";
 import type { PassBar } from "../format";
 import { ladder, repeat } from "../templates";
 import { DISPLACED_SHAPES, LONG_FORM, SECOND_PAIR } from "./funk-lines-more";
+import { HOLES_MIXED, LINES_SECOND_KEY } from "./funk-lines-encore";
 
 const even = (min: number, overBars = 4): PassBar => ({ metric: "timingEvenness", min, overBars });
 const heard = (min: number, overBars = 4): PassBar => ({ metric: "notesHeard", min, overBars });
@@ -286,6 +287,7 @@ export default definePath({
         },
       ],
     },
+    HOLES_MIXED,
     {
       id: "first-lines",
       title: "Lines with the band",
@@ -365,6 +367,7 @@ export default definePath({
         },
       ],
     },
+    LINES_SECOND_KEY,
     {
       id: "stabs",
       title: "Two-note stabs",
@@ -812,14 +815,14 @@ export default definePath({
     {
       id: "beginner",
       title: "Beginner: the hand that never stops",
-      summary: "Even sixteenths with accents, the three one-hole figures, and two-bar lines over a band.",
+      summary: "Even sixteenths with accents, the one-hole figures alone and then mixed in one bar, a two-bar rhythm on one note, and lines over a band in A minor and in D minor, the last one built from the figures.",
       reachLevel: "early-intermediate",
       startHereIf: [
         "You can play sixteenth notes with a click at 70 BPM.",
         "Your picking hand stops when the rhythm has a rest in it.",
-        "You know the pentatonic box at the fifth fret, or can learn six notes of it.",
+        "You know the pentatonic box at the fifth fret, or can learn its notes on four strings.",
       ],
-      steps: ["the-engine", "holes", "first-lines"],
+      steps: ["the-engine", "holes", "holes-mixed", "first-lines", "lines-second-key"],
       warmups: [
         {
           id: "swing-up",

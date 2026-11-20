@@ -27,11 +27,11 @@ const stepIdsOf = (plan: SessionPlan) =>
   plan.steps.flatMap((s: PlanStep) => (s.kind === "exercise" && s.pathId === ALT.id ? [s.stepId] : []));
 
 describe("the Levels the pack offers", () => {
-  it("are Beginner from Step 1, Intermediate from Step 4, Advanced from Step 7", () => {
+  it("are Beginner from Step 1, Intermediate from Step 7, Advanced from Step 10", () => {
     expect(ALT.levels!.map((l) => [l.id, levelStartIndex(ALT, l) + 1])).toEqual([
       ["beginner", 1],
-      ["intermediate", 4],
-      ["advanced", 7],
+      ["intermediate", 7],
+      ["advanced", 10],
     ]);
     expect(levelOfStep(ALT, "accents")?.id).toBe("beginner");
     expect(levelOfStep(ALT, "crossing")?.id).toBe("intermediate");
@@ -73,7 +73,7 @@ describe("the Steps below the Level", () => {
 
   it("are skipped at Intermediate, and only those", () => {
     const skipped = ALT.steps.filter((s) => isStepSkipped(at("intermediate"), ALT, s)).map((s) => s.id);
-    expect(skipped).toEqual(["even-eighths", "even-sixteenths", "accents"]);
+    expect(skipped).toEqual(["even-eighths", "other-strings", "even-sixteenths", "mixed-rhythms", "accents", "one-string-tunes"]);
   });
 
   it("are all back at Beginner, and with no Level chosen", () => {

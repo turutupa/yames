@@ -19,6 +19,7 @@ import {
   sweepDown,
   sweepUp,
 } from "../templates";
+import { ADVANCED_ETUDE, SIX_STRING_CHANGES } from "./sweep-picking-more";
 
 const ROLL_CHECK =
   "Record a take and listen back. Does each note stop as the next one starts, or do they ring together like a strummed chord?";
@@ -1431,8 +1432,7 @@ const NEW_STEPS: StepSpec[] = [
       "Fast rungs are self-checked. Record yourself and slow the recording down: nothing is more honest than that.",
     ],
     payoff: "A line that jumps the neck, and a burst of sweep at a speed you couldn't have played a month ago.",
-    difficultyException:
-      "Its shapes are the three-string triads already known; the demand is the jump between them, which the score counts as one shift. Six strings rates higher since the major six-string shape was fingered honestly: six frets wide, its hand moves inside the shape (fingering audit, 2026-11-18).",
+    // No difficultyException since 2026-11-19: `six-string-changes` now comes before this Step and rates lower, so the validator no longer wants one here.
     exercises: [
       sweepExercise({
         id: "octave-jump",
@@ -1648,8 +1648,7 @@ const NEW_STEPS: StepSpec[] = [
       "Grading covers the slower rungs only. Above them you're on your own, with your ears and a recording.",
     ],
     payoff: "You play a long, linked, minor-key arpeggio line over a band.",
-    difficultyException:
-      "One pass a bar and big shapes: the tempo may be high, but the note rate is low. Playing them over a loud band is the new demand.",
+    // No difficultyException since 2026-11-19: `advanced-etude` now comes before this Step and rates lower, so the validator no longer wants one here.
     exercises: [
       sweepExercise({
         id: "band-big-chain",
@@ -1722,7 +1721,7 @@ const NEW_STEPS: StepSpec[] = [
   },
 ];
 
-const ALL_STEPS: readonly StepSpec[] = [...OLD_STEPS, ...NEW_STEPS];
+const ALL_STEPS: readonly StepSpec[] = [...OLD_STEPS, ...NEW_STEPS, SIX_STRING_CHANGES, ADVANCED_ETUDE];
 const LEVEL_STEPS = {
   beginner: ["triads", "turnaround", "phrases", "qualities", "first-solo"],
   intermediate: [
@@ -1736,7 +1735,7 @@ const LEVEL_STEPS = {
     "minor-progressions",
     "over-the-progression",
   ],
-  advanced: ["six-strings", "fast-shifts", "neoclassical", "over-a-heavy-band"],
+  advanced: ["six-strings", "six-string-changes", "fast-shifts", "neoclassical", "advanced-etude", "over-a-heavy-band"],
 };
 const stepNamed = (id: string): StepSpec => {
   const found = ALL_STEPS.find((s) => s.id === id);
@@ -1843,7 +1842,7 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: the whole neck, at speed",
-      summary: "Six strings, wide shifts and neoclassical sequences. Grading runs out early here: most of what makes this hard can only be judged by ear and on a recording.",
+      summary: "Six strings, alone and then through chord changes, wide shifts and neoclassical sequences, and an eight-bar etude that puts them together before the heavy band. Grading runs out early here: most of what makes this hard can only be judged by ear and on a recording.",
       reachLevel: "advanced",
       startHereIf: [
         "You can chain four five-string shapes through a minor progression without stopping, at 90 BPM triplets.",

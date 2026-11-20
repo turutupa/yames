@@ -98,7 +98,7 @@ describe("what scoring is told", () => {
 
   it("accents arrive as accents", () => {
     const doc = loadPack("alternate-picking");
-    const ex = doc.steps[2].exercises[0];
+    const ex = doc.steps.find((s) => s.id === "accents")!.exercises[0];
     const schedule = buildSchedule(exerciseScore(doc.id, ex, 80));
     expect(schedule.onsets.filter((o) => o.accent).length).toBe(4);
   });

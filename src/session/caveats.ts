@@ -58,6 +58,12 @@ const COACH_SAYS_PICK = new Set([
   "two-part-riff.pedal-part",
   "two-part-riff.gallop-part",
   "two-part-riff.two-parts-joined",
+  "other-strings.d-string-tune",
+  "pedal-from-a.a-pedal-both",
+  "pedal-from-a.pedal-a-to-e",
+  "verse-and-chorus.verse-riff",
+  "verse-and-chorus.verse-into-chorus",
+  "verse-and-chorus.song-form",
 ]);
 
 export function coachSaysPick(exercise: Pick<Exercise, "id">): boolean {
