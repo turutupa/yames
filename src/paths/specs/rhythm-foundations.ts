@@ -7,12 +7,13 @@
  * purpose (open strings, E minor pentatonic in open position, a few frets at the
  * fifth), so the rhythm is the only hard thing.
  */
-import { definePath } from "../spec";
+import { definePath, withCues } from "../spec";
 import type { ExerciseSpec, VariantParams } from "../spec";
 import { STANDARD_TUNING } from "../format";
 import { pcOfName } from "../theory";
 import { handAt, ladder, oneStringClimb, swing } from "../templates";
 import { OTHER_STRINGS, THE_PUSH, TWO_STRINGS_AT_ONCE } from "./rhythm-foundations-more";
+import { RHYTHM_FOUNDATIONS_CUES } from "./rhythm-foundations-cues";
 
 const E_PENT = { scale: ["E", "minorPentatonic"] as [string, string] };
 const A_PENT = { scale: ["A", "minorPentatonic"] as [string, string] };
@@ -123,7 +124,7 @@ function climbFigure(p: VariantParams, figure: string, size: 2 | 3) {
 
 const WARMUP_KEYS = { key: ["A", "C", "D", "E", "G"], stringSet: ["2", "3", "4"] } as const;
 
-export default definePath({
+export default withCues(definePath({
   id: "rhythm-foundations",
   title: "Rhythm Foundations",
   kind: "mechanics",
@@ -1064,4 +1065,4 @@ export default definePath({
       ],
     },
   ],
-});
+}), RHYTHM_FOUNDATIONS_CUES);
