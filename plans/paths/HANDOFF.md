@@ -630,8 +630,8 @@ not done. Scratch `/tmp/yp5/` is NOT deleted: the next leg needs it. No cargo wa
      it, ja, ko, nl, pl, pt-BR, ru, tr, vi, zh-CN, zh-TW.
    - Group b (alternate-picking, funk-lines, tapping, metal-rhythm, sweep-picking; about 450 strings):
      after step 2, for each language `npm run paths -- strings todo <lng> --out /tmp/yp5/i18n/todo.<lng>.all.json`
-     and keep only those five path ids in `todo.<lng>.b.json` (the ten-line python of this leg is in the
-     shell history of the handoff: load, filter by path id, `json.dump(..., ensure_ascii=False, indent=1)`).
+     and keep only those five path ids in `todo.<lng>.b.json` (script: `/tmp/yp5/i18n/mk_todo_b.py`;
+     it filters each `todo.<lng>.all.json` by path id).
    - Check each language with `python3 /tmp/yp5/i18n/verify.py <lng> <a|b>`, then
      `npm run paths -- strings merge <lng> /tmp/yp5/i18n/done.<lng>.<pathId>.json` per file.
    - If English changes after a todo was written, write a new todo for that path.
