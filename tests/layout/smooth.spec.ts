@@ -96,6 +96,27 @@ for (const build of ["desktop", "phone"] as const) {
   });
 }
 
+/*
+ * The coach's order during a Take (DESIGN 3.4): rendered once, as the Take
+ * starts, and never again while it runs. It reads no beat and no count, so
+ * the commits the engine's reports cause must not reach it; nor may the
+ * coach's note, which has no business on a running screen at all.
+ */
+for (const scene of ["coach-take-order", "coach-take-order-runway"]) {
+  test(`${scene}: the coach's line and note never commit during a running Take`, async ({ page }) => {
+    test.slow();
+    await installPerf(page, { countRenders: true });
+    await openShot(page, scene, WIDE);
+    await takeRunning(page);
+    await expect(page.locator('[data-testid="coach-order"]')).toBeVisible();
+    const s = await samplePerf(page, WINDOW_MS);
+    expect(s.commits, "the Take is running: React commits as the engine reports").toBeGreaterThan(0);
+    expect(s.renders.TakeOrder ?? 0, `TakeOrder rendered in ${s.commits} commits`).toBe(0);
+    expect(s.renders.CoachNote ?? 0, `CoachNote rendered in ${s.commits} commits`).toBe(0);
+    expect(s.renders.CoachLine ?? 0, `CoachLine rendered in ${s.commits} commits`).toBe(0);
+  });
+}
+
 test("the lane keeps the display's beat: a frame for every frame, or exactly every other", async ({ page }) => {
   test.slow();
   await installPerf(page);

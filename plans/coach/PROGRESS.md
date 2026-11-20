@@ -33,7 +33,8 @@ ms1's first run had put the selector in the left rail: the relaunch moves it to 
 | c1a take note | merged | `coach-c1a` | 2026-11-20 | `progress/c1a.md`. `takeNote` returns data and proposes `session.note.*` keys; c1b1 writes them. `lean` is `(number \| null)[]`. `tuningSuspected` is kept and never said. |
 | ms1 model selector | merged | `coach-ms1` | 2026-11-20 | `progress/ms1.md`. Reviewed (independent, read-only): call order in `useSession` sound; six loader findings fixed with tests before merge (memory is a warning and never a lock; no download over a brain on disk; retryable probe; no unload before the saved choice is read; residency re-asked after a double failure; no load starts during a Path Session). One brain on disk today: the second tier's Download waits for ms2. |
 | pm pass mark + i18n brief | merged | `coach-pm` | 2026-11-20 | `progress/pm.md`, `plans/COACH_I18N_BRIEF.md`. Open: the passed chip reads "Passed · Pass mark 85%" (says pass twice): c1b1 or a polish pass rewords it. pt-BR "meta" wants a native read. |
-| c1b1 line and note | running | `coach-c1b1` | – | |
+| c1b1 line and note | merged | `coach-c1b1` | 2026-11-20 | `progress/c1b1.md`. Checked against mocks 03, 06, 07: accepted. tsc, vitest 384 files / 11,718, build green on `coach`. Left one layout regression (`neck.spec` 620×780, ring gap −0.66 px): leg fix1. |
+| fix1 layout regressions | running | `coach-fix1` | – | `neck.spec` 620×780 (from c1b1); `short-window.spec` aurora 1024×700 (passes at 05644eec, fails from delivery 1a on: most likely pm's longer sentence); the "Passed · Pass mark 85%" chip; then the full layout suite. |
 | c3a worker (Rust) | running | `coach-c3a` | – | reviewer required |
 | c2a1 Ask shell | running | `coach-c2a1` | – | reviewer required (doors) |
 | ms2 selector downloads | briefed, waits for a slot | – | – | reviewer required (Rust, model store) |
@@ -50,3 +51,17 @@ symlink; it passes in the main checkout.
 ## Decisions recorded while building
 
 See PLAN.md, "Things the orchestrator decided". Additions go here with the date and the reason.
+
+- 2026-11-20. **The cue legs move up** (c4c and `cues` start beside milestone 2, not in milestone 3).
+  c1b1 measured it: 825 of 1,010 Exercises have a `coachLine` longer than 48 characters, so their Takes
+  show no order at all, and many of the 185 that fit are not orders. "Feedback as you go" during a Take
+  is mostly absent until the short cues are written. List: `progress/c1b1-long-cues.txt`.
+- 2026-11-20. **The ready note between Takes is rarely seen**: "Go again" starts the count-in straight
+  away (the design's mock 03 assumed a ready screen). The finding lives on the result, and so will the
+  "one thing to try" once cues exist: c4c puts the cue chosen by the finding under the finding on the
+  result, as well as on the ready note and as the Take's order. `bigAction` is not changed for this.
+- 2026-11-20. **A leg that changes any text on a screen runs the full layout suite**, not only that
+  screen's specs: pm's longer sentence broke a short-window scene in one theme that none of its named
+  specs covered, and delivery 1a went out with it (fixed in fix1). Added to the shared brief.
+- 2026-11-20. `tuningSuspected` stays always false for now: the Session does not keep the pitch
+  verdicts the note would need. Nothing is said about tuning in any case (owner decision 9).

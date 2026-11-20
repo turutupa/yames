@@ -279,19 +279,10 @@
       "decidedPass": "Gehaald",
       "lastTime": "vorige keer",
       "decidedMiss": "Waar het op stukliep",
-      "notesNotChecked": "Juiste noten: deze keer niet gecontroleerd",
       "barsTitle": "Maat voor maat",
-      "barsHeld": "{{count}} maat achter elkaar gehouden",
-      "barsHeld_other": "{{count}} maten achter elkaar gehouden",
-      "barsMet": "{{count}} van de {{of}} maten gehouden",
       "barHeld": "Maat {{n}}: gehouden",
       "barSlipped": "Maat {{n}}: gegleden",
-      "barThin": "Maat {{n}}: te weinig noten om te beoordelen",
-      "legatoAll": "Hammer-ons, pull-offs en taps: {{sounded}} van {{due}} klonken. Ter info, niet beoordeeld.",
-      "legatoSome": "Hammer-ons, pull-offs en taps: {{sounded}} van {{due}} klonken, {{silent}} niet. Ter info, niet beoordeeld.",
-      "bendsAll": "Bends: {{onPitch}} van {{due}} haalden de toon. Ter info, niet beoordeeld.",
-      "bendsSomeFlat": "Bends: {{onPitch}} van {{due}} haalden de toon, {{flat}} bleven te laag. Ter info, niet beoordeeld.",
-      "vibratoHeard": "Vibrato: gehoord op {{present}} van {{due}} noten. Ter info, niet beoordeeld."
+      "barThin": "Maat {{n}}: te weinig noten om te beoordelen"
     },
     "edge": {
       "kick": "Mijn grens vinden",
@@ -701,6 +692,104 @@
       "harmony": "Harmonie",
       "technique": "Techniek",
       "style": "Stijlen"
+    },
+    "note": {
+      "passedAt": "Gehaald op {{bpm}}.",
+      "finding": {
+        "ceiling": "Het houdt stand op {{holds}} BPM en glijdt op {{breaks}}."
+      },
+      "place": {
+        "slipped": {
+          "bar": "Maat {{bar}} van de melodie gleed in {{count}} van de {{of}} keer.",
+          "bars": "Maat {{from}} tot {{to}} van de melodie gleed in {{count}} van de {{of}} keer.",
+          "loop": "Het patroon gleed in {{count}} van de {{of}} keer.",
+          "fromRound": "Het hield stand tot keer {{round}} van {{of}}, daarna liep het uit elkaar.",
+          "all": "De hele melodie gleed in {{count}} van de {{of}} keer."
+        },
+        "caught": {
+          "bar": "Maat {{bar}} van de melodie liet je struikelen in {{count}} van de {{of}} keer.",
+          "bars": "Maat {{from}} tot {{to}} van de melodie liet je struikelen in {{count}} van de {{of}} keer.",
+          "loop": "Het patroon liet je struikelen in {{count}} van de {{of}} keer.",
+          "all": "De hele melodie liet je struikelen in {{count}} van de {{of}} keer."
+        },
+        "lastTake": "Bij de vorige take waren het er {{count}}.",
+        "lastTakeHeld": "Bij de vorige take hield het stand."
+      },
+      "direction": {
+        "early": "De noten daar kwamen vroeg.",
+        "late": "De noten daar kwamen laat.",
+        "earlyOpen": "De open {{note}}'s daar kwamen vroeg.",
+        "lateOpen": "De open {{note}}'s daar kwamen laat.",
+        "earlyNote": "De {{note}}'s op fret {{fret}} daar kwamen vroeg.",
+        "lateNote": "De {{note}}'s op fret {{fret}} daar kwamen laat."
+      },
+      "history": {
+        "newClean": "Nieuw schoon tempo: {{bpm}} BPM.",
+        "tooEasy": "Gehaald met ruimte over bij je eerste take, twee sessies achter elkaar.",
+        "goingDown": "Drie takes achter elkaar op {{bpm}} werden slechter.",
+        "stuck": "Drie takes op {{bpm}}, allemaal binnen twee punten.",
+        "closer": "Van {{from}}% naar {{to}}% op dit tempo."
+      },
+      "repeat": {
+        "leaveIt": "Drie keer dezelfde plek. Laat het voor vandaag; morgen gaat het meestal beter."
+      },
+      "fact": {
+        "heard": "{{heard}} van {{expected}} noten gehoord",
+        "noExtras": "geen extra noten",
+        "extras": "{{count}} extra noot",
+        "extras_other": "{{count}} extra noten",
+        "rightNotes": "{{value}}% juiste noten (van {{base}} waarvan ik de toonhoogte kon bepalen)",
+        "notesUnchecked": {
+          "notRun": "juiste noten: deze keer niet gecontroleerd",
+          "tooFast": "juiste noten: te snel om de toonhoogte te bepalen",
+          "tooFew": "juiste noten: te weinig om de toonhoogte te bepalen",
+          "notesRing": "juiste noten: ze klonken door elkaar, dat kon ik niet zeggen",
+          "octaveUnsure": "juiste noten: de octaaf kon ik niet zeggen"
+        },
+        "legato": "{{sounded}} van {{due}} hammer-ons en pull-offs klonken (ter info, niet beoordeeld)",
+        "bends": "{{onPitch}} van {{due}} bends haalden de toon (ter info, niet beoordeeld)",
+        "vibrato": "vibrato op {{present}} van {{due}} noten (ter info, niet beoordeeld)"
+      },
+      "mark": {
+        "check": "gehaald:",
+        "cross": "niet gehaald:",
+        "dash": "kon ik niet zeggen:"
+      },
+      "strip": {
+        "held": "{{count}} maat achter elkaar gehouden",
+        "held_other": "{{count}} maten achter elkaar gehouden",
+        "roundEvery": "de melodie komt elke {{count}} maten terug",
+        "plain": "zoals gespeeld"
+      },
+      "ready": {
+        "lastValue": "Vorige take: {{value}}% {{metric}}.",
+        "lastCount": "Vorige take: {{value}} {{metric}}.",
+        "lastPassed": "Vorige take: gehaald op {{bpm}}.",
+        "lastNotCaught": "Vorige take: ik hoorde niet genoeg."
+      },
+      "chip": {
+        "hear": "Eerst luisteren",
+        "try": "Wat kan ik proberen?"
+      },
+      "ungraded": {
+        "listenFor": "Luister deze keer naar één ding: {{question}}",
+        "notListening": "Ik luister deze keer niet, dus jij bent de jury.",
+        "didThey": "Laatste vraag: {{question}}",
+        "yourAnswer": "Jouw antwoord:",
+        "yes": "Ja",
+        "notYet": "Nog niet",
+        "tryFaster": "Twee keer ja. {{bpm}} proberen?"
+      },
+      "recap": {
+        "passed": "Gehaald op {{bpm}} BPM.",
+        "held": "Schoon tempo nog steeds {{bpm}} BPM.",
+        "played": "Laatst gespeeld op {{bpm}} BPM.",
+        "backNext": "{{title}} komt terug in de volgende sessie.",
+        "backReview": "{{title}} komt over {{count}} dag terug ter herhaling.",
+        "backReview_other": "{{title}} komt over {{count}} dagen terug ter herhaling.",
+        "backParked": "{{title}} rust {{count}} dag en komt dan fris terug.",
+        "backParked_other": "{{title}} rust {{count}} dagen en komt dan fris terug."
+      }
     }
   }
 }
