@@ -268,6 +268,7 @@
       "cleanFirst": "Clean tempo: {{bpm}} BPM.",
       "cleanMoved": "Clean tempo: {{from}} to {{bpm}} BPM.",
       "moveOn": "Move on",
+      "upTo": "Up to {{bpm}} BPM",
       "fairAsk": "Was this grade fair?",
       "fairYes": "Yes",
       "fairNo": "No",
@@ -731,7 +732,8 @@
         "closer": "Up from {{from}}% to {{to}}% at this tempo."
       },
       "repeat": {
-        "leaveIt": "Same place three times. Leave it for today; it is usually better tomorrow."
+        "leaveIt": "Same place three times. Leave it for today; it is usually better tomorrow.",
+        "onceMore": "Once more at {{bpm}} before {{up}}, since that bar slipped last Take."
       },
       "fact": {
         "heard": "{{heard}} of {{expected}} notes heard",
@@ -790,6 +792,36 @@
         "backParked": "{{title}} rests for {{count}} day and comes back fresh.",
         "backParked_other": "{{title}} rests for {{count}} days and comes back fresh."
       }
+    },
+    "loop": {
+      "kick": "Loop · not graded",
+      "title": {
+        "bar": "Bar {{bar}} of the tune, on repeat",
+        "bars": "Bars {{from}} and {{to}} of the tune, on repeat"
+      },
+      "button": {
+        "first": "Loop the first bar",
+        "bar": "Loop bar {{bar}}",
+        "bars": "Loop bars {{from}} and {{to}}"
+      },
+      "stop": "Stop the loop",
+      "how": "Round and round until you stop it. Nothing here is graded or kept; the dots show early and late.",
+      "howUngraded": "Round and round until you stop it. Nothing here is graded or kept.",
+      "after": {
+        "lastBar": "In the loop, bar {{bar}} of the tune landed on the last {{count}} rounds.",
+        "lastBars": "In the loop, bars {{from}} and {{to}} of the tune landed on the last {{count}} rounds.",
+        "ofBar": "In the loop, bar {{bar}} of the tune landed on {{landed}} of {{count}} rounds.",
+        "ofBars": "In the loop, bars {{from}} and {{to}} of the tune landed on {{landed}} of {{count}} rounds."
+      }
+    },
+    "eyes": {
+      "offer": "This one is for your eyes",
+      "watch": "This time, watch your pick.",
+      "result": "That one was for your eyes",
+      "body": "Not graded and not listened to. You saw what the pick did.",
+      "question": "Did any beat start on an upstroke?",
+      "yes": "Yes",
+      "no": "No"
     }
   }
 }

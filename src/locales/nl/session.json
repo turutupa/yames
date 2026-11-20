@@ -268,6 +268,7 @@
       "cleanFirst": "Schoon tempo: {{bpm}} BPM.",
       "cleanMoved": "Schoon tempo: van {{from}} naar {{bpm}} BPM.",
       "moveOn": "Verder",
+      "upTo": "Omhoog naar {{bpm}} BPM",
       "fairAsk": "Was dit oordeel eerlijk?",
       "fairYes": "Ja",
       "fairNo": "Nee",
@@ -731,7 +732,8 @@
         "closer": "Van {{from}}% naar {{to}}% op dit tempo."
       },
       "repeat": {
-        "leaveIt": "Drie keer dezelfde plek. Laat het voor vandaag; morgen gaat het meestal beter."
+        "leaveIt": "Drie keer dezelfde plek. Laat het voor vandaag; morgen gaat het meestal beter.",
+        "onceMore": "Nog één keer op {{bpm}} voor {{up}}, want die maat gleed bij de vorige take."
       },
       "fact": {
         "heard": "{{heard}} van {{expected}} noten gehoord",
@@ -790,6 +792,36 @@
         "backParked": "{{title}} rust {{count}} dag en komt dan fris terug.",
         "backParked_other": "{{title}} rust {{count}} dagen en komt dan fris terug."
       }
+    },
+    "loop": {
+      "kick": "Loop · niet beoordeeld",
+      "title": {
+        "bar": "Maat {{bar}} van de melodie, op repeat",
+        "bars": "Maat {{from}} en {{to}} van de melodie, op repeat"
+      },
+      "button": {
+        "first": "Herhaal de eerste maat",
+        "bar": "Herhaal maat {{bar}}",
+        "bars": "Herhaal maat {{from}} en {{to}}"
+      },
+      "stop": "Stop de loop",
+      "how": "Steeds opnieuw tot je stopt. Niets hier wordt beoordeeld of bewaard; de stippen tonen vroeg en laat.",
+      "howUngraded": "Steeds opnieuw tot je stopt. Niets hier wordt beoordeeld of bewaard.",
+      "after": {
+        "lastBar": "In de loop ging maat {{bar}} van de melodie goed in de laatste {{count}} keer.",
+        "lastBars": "In de loop gingen maat {{from}} en {{to}} van de melodie goed in de laatste {{count}} keer.",
+        "ofBar": "In de loop ging maat {{bar}} van de melodie goed in {{landed}} van de {{count}} keer.",
+        "ofBars": "In de loop gingen maat {{from}} en {{to}} van de melodie goed in {{landed}} van de {{count}} keer."
+      }
+    },
+    "eyes": {
+      "offer": "Deze is voor je ogen",
+      "watch": "Kijk deze keer naar je plectrum.",
+      "result": "Die was voor je ogen",
+      "body": "Niet beoordeeld en niet beluisterd. Je zag wat het plectrum deed.",
+      "question": "Begon er een tel met een opslag?",
+      "yes": "Ja",
+      "no": "Nee"
     }
   }
 }

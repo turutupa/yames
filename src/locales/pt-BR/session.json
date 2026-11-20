@@ -269,6 +269,7 @@
       "cleanFirst": "Andamento limpo: {{bpm}} BPM.",
       "cleanMoved": "Andamento limpo: de {{from}} para {{bpm}} BPM.",
       "moveOn": "Seguir em frente",
+      "upTo": "Subir para {{bpm}} BPM",
       "fairAsk": "Esta nota foi justa?",
       "fairYes": "Sim",
       "fairNo": "Não",
@@ -744,7 +745,8 @@
         "closer": "Subiu de {{from}}% para {{to}}% neste andamento."
       },
       "repeat": {
-        "leaveIt": "Mesmo ponto três vezes. Deixe para hoje; costuma ficar melhor amanhã."
+        "leaveIt": "Mesmo ponto três vezes. Deixe para hoje; costuma ficar melhor amanhã.",
+        "onceMore": "Mais uma vez a {{bpm}} antes de {{up}}, pois esse compasso escapou na última tomada."
       },
       "fact": {
         "heard": "{{heard}} de {{expected}} notas ouvidas",
@@ -807,6 +809,36 @@
         "backParked_many": "{{title}} descansa por {{count}} dias e volta renovado.",
         "backParked_other": "{{title}} descansa por {{count}} dias e volta renovado."
       }
+    },
+    "loop": {
+      "kick": "Repetição · sem avaliação",
+      "title": {
+        "bar": "Compasso {{bar}} da melodia, em repetição",
+        "bars": "Compassos {{from}} e {{to}} da melodia, em repetição"
+      },
+      "button": {
+        "first": "Repetir o 1º compasso",
+        "bar": "Repetir compasso {{bar}}",
+        "bars": "Repetir compassos {{from}} e {{to}}"
+      },
+      "stop": "Parar a repetição",
+      "how": "Volta e volta até você parar. Nada aqui é avaliado nem guardado; os pontos mostram adiantado e atrasado.",
+      "howUngraded": "Volta e volta até você parar. Nada aqui é avaliado nem guardado.",
+      "after": {
+        "lastBar": "Na repetição, o compasso {{bar}} da melodia saiu limpo nas últimas {{count}} vezes.",
+        "lastBars": "Na repetição, os compassos {{from}} e {{to}} da melodia saíram limpos nas últimas {{count}} vezes.",
+        "ofBar": "Na repetição, o compasso {{bar}} da melodia saiu limpo em {{landed}} de {{count}} vezes.",
+        "ofBars": "Na repetição, os compassos {{from}} e {{to}} da melodia saíram limpos em {{landed}} de {{count}} vezes."
+      }
+    },
+    "eyes": {
+      "offer": "Esta é para os seus olhos",
+      "watch": "Desta vez, olhe a palheta.",
+      "result": "Essa foi para os seus olhos",
+      "body": "Sem avaliação e sem escuta. Você viu o que a palheta fez.",
+      "question": "Alguma batida começou com a palhetada para cima?",
+      "yes": "Sim",
+      "no": "Não"
     }
   }
 }

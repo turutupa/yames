@@ -83,6 +83,9 @@ export function roleOf(step: PlanStep): RoleWord {
       return "drill";
     case "metronome":
       return step.why.code === "yourTurn" ? "yourTurn" : "warmUp";
+    case "loop":
+      // Never a row of Today: a loop lives inside its Exercise's block.
+      return "nextUp";
   }
 }
 

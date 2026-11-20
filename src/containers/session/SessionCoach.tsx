@@ -18,10 +18,11 @@ import type { Line } from "../../session/coachWords";
 import { displayValue, metricKey, reasonLine } from "../../session/coachWords";
 import { readyHonestLineKey } from "../../session/caveats";
 import type { PlanStep } from "../../session/planner";
-import { cleanTempoOf, heardItOf, takesOf } from "../../session/progress";
+import { cleanTempoOf, heardItOf, takesOf, upstrokeOf } from "../../session/progress";
 import { parkedUntil, reviewStateOf } from "../../session/rotation";
 import { currentStep } from "../../session/runner";
-import type { TakeOutcome } from "../../session/runner";
+import type { BigAction, TakeOutcome } from "../../session/runner";
+import { loopLine } from "../../coach/loopLine";
 import { noteNameOf } from "../songs/review/marks";
 import { CoachLine, shortCue } from "../coach/CoachLine";
 import { CoachNote, FactLine, NoteAnswer, NoteBars, NoteChips, NoteLine } from "../coach/CoachNote";
@@ -139,9 +140,17 @@ function findingText(t: T, note: TakeNote, bpm: number): string {
   return parts.join(" ");
 }
 
-/** The one quiet line under a finding: the repeat, else what history knows. */
-function historyText(t: T, note: TakeNote): string | null {
-  if (note.repeatLine) return noteText(t, note.repeatLine);
+/**
+ * The one quiet line under a finding: what the big button does and why, when
+ * a rule chose it (P2's "leave it", P1's "once more"), else what history
+ * knows. Read off `bigAction`'s actual result, so no sentence here argues
+ * with the button.
+ */
+function historyText(t: T, note: TakeNote, big: BigAction): string | null {
+  if (note.repeatLine && (big.kind === "next" || big.kind === "finish") && big.leaveIt) {
+    return noteText(t, note.repeatLine);
+  }
+  if (big.kind === "again" && big.onceMore) return t("session.note.repeat.onceMore", { bpm: big.bpm, up: big.onceMore.up });
   // A new clean tempo is said by the result's own line above the note.
   const line = note.historyLines.find((l) => l.key !== "session.note.history.newClean");
   return line ? noteText(t, line) : null;
@@ -161,7 +170,7 @@ export function ResultNote({ session, outcome, howTo }: { session: SessionRun; o
   const note = useTakeNote(session, outcome);
   const [howOpen, setHowOpen] = useState(false);
   if (!note || note.kind === "notCaught" || note.kind === "ungraded") return null;
-  const history = historyText(t, note);
+  const history = historyText(t, note, session.big);
   const chips: NoteChip[] = howTo.length
     ? [
         {
@@ -208,6 +217,25 @@ export function UngradedNote({ session, outcome }: { session: SessionRun; outcom
   const { t } = useTranslation();
   const onAsk = useContext(SessionAsk);
   const { exercise } = whereOf(session);
+  // The Take for the eyes (DESIGN 4.2, "Watch your pick"): its one question,
+  // answered by the player, kept with the Take.
+  if (outcome.ungraded === "eyes") {
+    const id = outcome.takeId;
+    if (!id) return null;
+    const row = session.progress.takes.find((take) => take.id === id);
+    const said = row ? upstrokeOf(row) : null;
+    const question = t("session.eyes.question");
+    return (
+      <CoachNote headline={question} kind="ungraded" testId="coach-note">
+        <NoteAnswer
+          question={t("session.note.ungraded.yourAnswer")}
+          answer={said === "yes" ? "yes" : said === "no" ? "notYet" : undefined}
+          labels={{ yes: t("session.eyes.yes"), notYet: t("session.eyes.no") }}
+          onAnswer={(value) => session.actions.answerUpstroke(id, value === "yes" ? "yes" : "no")}
+        />
+      </CoachNote>
+    );
+  }
   const question = selfCheckOf(exercise, session.exercise);
   const id = outcome.takeId;
   if (!question || !id) return null;
@@ -274,6 +302,10 @@ export function ReadyNote({
   }
   if (onTry) chips.push({ kind: "ask", label: t("session.note.chip.try"), onClick: onTry, testId: "coach-try" });
 
+  // The Take for the eyes: what to watch, and nothing else.
+  if (run.ungraded === "eyes") {
+    return <CoachNote headline={t("session.eyes.watch")} source={source} kind="ready" testId="coach-note" />;
+  }
   // Ungraded, by choice or because nothing is listening: no claim about the playing.
   if (run.ungraded) {
     const question = selfCheckOf(played, exercise);
@@ -324,6 +356,9 @@ export function ReadyNote({
       : [];
     if (lead) quiet.push({ text: [lead, ...tail].join(" "), id: "coach-last" });
   }
+  // Back from a loop: one line about it, when something was measured (DESIGN 4.2).
+  const afterLoop = run.afterLoop ? loopLine(run.afterLoop.heard, run.afterLoop.loop, !run.ungraded) : null;
+  if (afterLoop) quiet.unshift({ text: noteText(t, afterLoop), id: "coach-after-loop" });
   return (
     <CoachNote headline={exercise.coachLine} source={source} kind="ready" testId="coach-note" onAsk={onAsk}>
       {quiet.map((line) => (

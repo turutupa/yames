@@ -124,6 +124,67 @@ export function buildTake(
 }
 
 /**
+ * Bars `fromBar` to `toBar` of the pattern (from 1, inclusive), cut out on
+ * their bar lines: the notes of a loop. A note never crosses a bar line
+ * (`exerciseAlphaTex`), so the cut loses nothing.
+ */
+export function patternBars(exercise: Exercise, fromBar: number, toBar: number): Exercise {
+  const own = Math.max(1, exercise.bars);
+  const from = Math.max(1, Math.min(own, fromBar));
+  const to = Math.max(from, Math.min(own, toBar));
+  const barTicks = barLengthTicks(exercise.meter);
+  const start = (from - 1) * barTicks;
+  const end = to * barTicks;
+  return {
+    ...exercise,
+    bars: to - from + 1,
+    loops: true,
+    notes: exercise.notes
+      .filter((note) => note.tick >= start && note.tick < end)
+      .map((note) => ({ ...note, tick: note.tick - start })),
+    rests: exercise.rests
+      .filter((rest) => rest.tick >= start && rest.tick < end)
+      .map((rest) => ({ ...rest, tick: rest.tick - start })),
+  };
+}
+
+/**
+ * A loop (DESIGN 4.2, "Loop a bar"): a bar or two of the pattern on repeat,
+ * built as the Songs screen loops a passage, `buildSchedule(score, range, {
+ * loops: true })`. The same shape as a Take, so the neck and the tab draw it,
+ * and nothing in it is graded: there are no pass marks to send.
+ */
+export type LoopPlan = TakePlan & { fromBar: number; toBar: number };
+
+export function buildLoop(
+  path: PathDoc,
+  base: Exercise,
+  bpm: number,
+  variantSeed: number | null | undefined,
+  fromBar: number,
+  toBar: number,
+): LoopPlan {
+  const exercise = withVariant(base, variantSeed);
+  const cut = patternBars(exercise, fromBar, toBar);
+  const score = exerciseScore(path.id, cut, bpm);
+  const range = wholeSong(score);
+  return {
+    pathId: path.id,
+    exercise: cut,
+    bpm,
+    bars: cut.bars,
+    score,
+    source: new TextEncoder().encode(exerciseAlphaTex(cut, bpm)),
+    schedule: buildSchedule(score, range, { loops: true }),
+    range,
+    pitches: score.notes.map((n) => ({ id: n.id, midi: n.midi })),
+    details: noteDetails(cut, score),
+    fromBar: Math.max(1, Math.min(Math.max(1, exercise.bars), fromBar)),
+    toBar: Math.max(1, Math.min(Math.max(1, exercise.bars), toBar)),
+  };
+}
+
+/**
  * `exerciseScore` numbers its notes in tick order, then string order; the
  * bend amount lives only on the Exercise's own notes, so they are walked in
  * the same order to find it.
