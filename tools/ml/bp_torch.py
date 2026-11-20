@@ -40,8 +40,9 @@ def _patch_pad():
                 continue
             size = x.shape[ax]
             if self.mode == "reflect":
-                idx = list(range(b, 0, -1)) + list(range(size)) + list(range(size - 2, size - 2 - e, -1))
-                x = x.index_select(ax, torch.tensor(idx, device=x.device))
+                # no Python lists of sample indices: they cost more than the whole network
+                parts = ([x.narrow(ax, 1, b).flip(ax)] if b else []) + [x] + ([x.narrow(ax, size - 1 - e, e).flip(ax)] if e else [])
+                x = torch.cat(parts, dim=ax)
             elif self.mode == "constant":
                 shape_b = list(x.shape); shape_b[ax] = b
                 shape_e = list(x.shape); shape_e[ax] = e

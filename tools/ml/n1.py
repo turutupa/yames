@@ -73,9 +73,18 @@ class Front(nn.Module):
 
     @torch.no_grad()
     def forward(self, audio):
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            return self.net(audio.unsqueeze(-1))
+        # Traced once per batch size: the converted graph reads shapes back
+        # from the GPU at every Reshape, and on a shared GPU each read waits
+        # for a time slice (0.45 s a batch against 0.16 s traced).
+        key = (audio.shape[0], str(audio.device))
+        if not hasattr(self, "_traced"):
+            self._traced = {}
+        x = audio.unsqueeze(-1)
+        if key not in self._traced:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                self._traced[key] = torch.jit.trace(self.net, x, check_trace=False)
+        return self._traced[key](x)
 
 
 class Head(nn.Module):
@@ -83,6 +92,7 @@ class Head(nn.Module):
         super().__init__()
         _, w, _ = _graph()
         self.arch, self.width = arch, width
+        self.note_bias, self.onset_bias = 0.0, 0.0
 
         def conv(shape, **kw):
             c = nn.Conv2d(shape[1], shape[0], shape[2:], **kw)
@@ -123,7 +133,9 @@ class Head(nn.Module):
             d = self.r4(r)
             note = note + d[:, :1]
             onset = onset + d[:, 1:]
-        return note, onset
+        # calibration, set at export: the verifier's thresholds were tuned on
+        # Basic Pitch, a head trained with a weighted loss answers higher
+        return note + self.note_bias, onset + self.onset_bias
 
     def forward(self, h):
         n, o = self.logits(h)
@@ -179,10 +191,11 @@ def export(head: Head, path: pathlib.Path, note: str = ""):
         onnx.save(merged, str(path))
 
 
-def load_head(ckpt: pathlib.Path) -> Head:
+def load_head(ckpt: pathlib.Path, note_bias: float = 0.0, onset_bias: float = 0.0) -> Head:
     s = torch.load(str(ckpt), map_location="cpu", weights_only=False)
     h = Head(s["arch"], s.get("width", 24))
     h.load_state_dict(s["head"])
+    h.note_bias, h.onset_bias = note_bias, onset_bias
     return h
 
 
@@ -190,9 +203,10 @@ if __name__ == "__main__":
     import sys
     import onnxruntime as ort
 
-    if len(sys.argv) >= 3:  # python -m tools.ml.n1 <ckpt.pt> <out.onnx>
-        h = load_head(pathlib.Path(sys.argv[1]))
-        export(h, pathlib.Path(sys.argv[2]), note=pathlib.Path(sys.argv[1]).name)
+    if len(sys.argv) >= 3:  # python -m tools.ml.n1 <ckpt.pt> <out.onnx> [note logit bias] [onset logit bias]
+        nb, ob = (float(sys.argv[3]) if len(sys.argv) > 3 else 0.0), (float(sys.argv[4]) if len(sys.argv) > 4 else 0.0)
+        h = load_head(pathlib.Path(sys.argv[1]), nb, ob)
+        export(h, pathlib.Path(sys.argv[2]), note=f"{pathlib.Path(sys.argv[1]).name}, note bias {nb}, onset bias {ob}")
         ref = ort.InferenceSession(sys.argv[2])
         x = (np.random.RandomState(0).randn(1, WINDOW) * 0.05).astype(np.float32)
         x[0] += 0.3 * np.sin(2 * np.pi * 220 * np.arange(WINDOW) / 22050)
