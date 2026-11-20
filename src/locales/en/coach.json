@@ -26,6 +26,12 @@
     "noteSpacingTrend": "Note spacing trend",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
   },
+  "toolCoach": {
+    "runScore": "Score {{score}} at {{bpm}} BPM",
+    "runScoreNoBpm": "Score {{score}}",
+    "sessionScore": "Session score {{score}} · {{word}}",
+    "openRuns": "Open Tool runs in Progress"
+  },
   "coachModel": {
     "label": "Coach model",
     "button": "Coach model: {{choice}}, {{state}}",

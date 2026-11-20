@@ -59,6 +59,8 @@ import CoachCard from "../practice-coach/CoachCard";
 import { AskPanel } from "../coach/AskPanel";
 import { askShownOn, useAskHost } from "../coach/useAskHost";
 import { askCoach, closeAsk, getAskState, useAskState } from "../coach/askStore";
+import { ToolCoach } from "../coach/ToolCoach";
+import { LISTEN_VIEWS, useToolListen } from "./hooks/useToolListen";
 import "../../styles/main-window.css";
 import "../../styles/transitions.css";
 import "../../styles/evaluation.css";
@@ -625,6 +627,18 @@ export function MainWindow() {
     jam: jamSession.jam,
     song: songsSession.song,
   });
+  // Listen (DESIGN 7): the tools' coach, on by the player's press only, ended
+  // when they turn it off, leave the tools or leave it idle ten minutes.
+  const listen = useToolListen({ view, isPlaying: state.isPlaying, coach: session });
+  const listenSwitch = useMemo(
+    () => ({ on: listen.on, onToggle: listen.toggle }),
+    [listen.on, listen.toggle],
+  );
+  const openToolRuns = useCallback(() => {
+    setView("progress");
+  }, [setView]);
+  const inferredDivisor = evaluation.inferredGrid?.locked ? evaluation.inferredGrid.divisor : undefined;
+
   // Until c2a2 the tools' coach (Start, End, Feed, History) is Ask's second
   // section, on the screens the old coach card was on. Built once per change
   // of what it shows, never per beat: a new element each render made the
@@ -2986,6 +3000,23 @@ export function MainWindow() {
             containerRef={contentRef}
           />
         )}
+        {/* The tools' coach, under the stage (DESIGN 7): the line and the note
+            while Listen is on. Keyed by the tool, so what it said under one
+            does not follow the player to the next. Not on a phone. */}
+        {!IS_MOBILE && LISTEN_VIEWS.has(view) && (
+          <ToolCoach
+            key={view}
+            messages={session.messages}
+            listenOn={listen.on}
+            isPlaying={state.isPlaying}
+            inputOn={evaluation.enabled}
+            playMode={session.playMode}
+            inferredDivisor={inferredDivisor}
+            onChipAction={session.handleChipAction}
+            onAsk={askCoach}
+            onOpenRuns={openToolRuns}
+          />
+        )}
         {/* Nothing to transport on an empty setlist tab. */}
         {(view === "beat" ||
           view === "drill" ||
@@ -3001,6 +3032,7 @@ export function MainWindow() {
             elapsedSeconds={elapsedSeconds}
             listening={evaluation.enabled}
             hasSignal={evaluation.hasSignal}
+            listen={LISTEN_VIEWS.has(view) ? listenSwitch : undefined}
             playShortcut={platformKey(keyBindings["play"] || "")}
             startBpm={state.speedRamp.startBpm}
             countIn={countInOn}

@@ -103,6 +103,12 @@ const DELIBERATELY_REMOVED: readonly string[] = [
   "session.result.bendsAll",
   "session.result.bendsSomeFlat",
   "session.result.vibratoHeard",
+  // No Start button (DESIGN 7, leg c2a2, 2026-11-20). "Coach listens when you
+  // press play" was never how the code worked (Play never turned the input
+  // on); the slot is the Listen switch now (`transport.listen`), in every
+  // tool, the drill's "stays quiet mid-step" with it.
+  "transport.coachOnPlay",
+  "transport.coachQuiet",
 ];
 
 function englishKeys(): string[] {
