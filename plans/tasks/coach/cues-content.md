@@ -72,6 +72,32 @@ count-in: an order they can carry out, about the hands or the count, true of the
    read**: for four Exercises of different Levels, the Exercise's title and one-line purpose, its
    general cue and two of its trigger cues. Commit.
 
+## What the first four Paths taught (read before writing)
+
+- **`check` passing is not enough.** It reports 0 errors while a cue is silently dropped from some
+  variants (a key change that is not a plain transposition loses a cue that says "pair", "cross",
+  "root", "new fret", or names a string or fret). After each Level run `refusals-entry.ts` (below): it
+  lists what `cueTexts` drops and why. Reword until it lists nothing.
+- The checker reads a bare "B", "G", "D" or "E strings" as a chord name or a string it cannot tell
+  apart: write "the B string", name one string and one fret, and name a chord as a chord.
+- The proof-readers' commonest objections: a place cue that missed its place in the tab; a cue true
+  of most bars and false for one; two cues of one Exercise saying the same thing (`extras` repeating
+  the general cue, `lastBars` repeating `afterHeld`); a strum cue wrong for the strings the stroke
+  really catches; an order nobody can carry out ("move the hand while the held note rings").
+- **The helper scripts exist**: `plans/coach/tools/cues/` (copies of the last leg's working files:
+  `dump.mjs`, `dump-entry.ts`, `dump-out.mjs` list a Path's Exercises with pack ids, tabs, purposes and
+  possible triggers; `proof-entry.ts` builds the proof-reader's input; `todo-entry.ts` the translators'
+  input, each distinct cue once; `refusals-entry.ts`; `merge.sh`, `gencheck.sh`, `paths.sh`;
+  `check_i18n.py` checks a translated file; `translate-brief.md` is a brief that worked). They have
+  the old leg's worktree, log folder and Path name inside: copy them to your log folder and change
+  those with the Edit tool before running anything.
+- **Time and size.** One agent stopped while waiting on translators; two ran past 300k tokens (97 and
+  58 + 52 Exercises). Start the translation helpers the moment the proof-read fixes are committed
+  (three or four at once, each with its own input and output file and the self-check) and write the
+  progress file while they run. Past about 170k tokens with translations not yet merged, stop writing
+  new Levels: finish what you have through proof-read, translation and gates and say which Levels are
+  left. `check` accepts a partly cued Path, so a Path may land in two legs.
+
 ## Size
 
 One Path is one leg. If your prompt names a second Path: start it only when the first is committed and
