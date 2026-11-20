@@ -115,3 +115,6 @@ tab-clips/
 .detect-bench/
 *.replay.json
 *.replay.html
+
+# Python caches (tools/ml)
+__pycache__/
