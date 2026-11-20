@@ -5976,6 +5976,13 @@ button.session-input-chip:hover {
   .session-runway-notes:has(.session-input-failed) > .session-runway-later {
     display: none;
   }
+  /* The runway's pass mark too, as the neck's bar does: in German or Russian,
+     or since "the bar" became "the pass mark" in English, it wraps, and its
+     second line put the input's ways out under the fold (fix1). Nothing is
+     graded without an input; the line is back the moment there is one. */
+  .session-runway-notes:has(.session-input-failed) > .session-runway-passmark {
+    display: none;
+  }
   .session-page .practice-tab:not([data-compact]) {
     min-height: 140px;
     margin-top: 8px;
