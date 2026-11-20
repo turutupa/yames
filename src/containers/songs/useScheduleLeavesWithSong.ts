@@ -20,6 +20,10 @@ import { scheduleHeld } from "../../songs/scheduleHold";
  * so while it holds, this clear is skipped. A stop and a leave within the
  * 600 ms a stop waits for its last segment used to clear first and lose the
  * grade.
+ *
+ * One case is left: the song closing in the very commit the transport stops
+ * (deleting the song being played). React runs this cleanup before the stop's
+ * effect takes the hold, so that clear lands first; the song is gone with it.
  */
 export function useScheduleLeavesWithSong(open: boolean): void {
   useEffect(() => {

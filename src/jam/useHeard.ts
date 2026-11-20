@@ -66,7 +66,8 @@ export function useHeard({
         if (gone) return;
         // A stale schedule is cleared only when no stop is still being graded
         // against it: that stop clears it itself once its grade is read
-        // (`src/songs/scheduleHold.ts`), and the pause lifts with the clear.
+        // (`src/songs/scheduleHold.ts`), and the pause lifts with the clear:
+        // up to about 5.6 s behind a Session Take whose right notes are checked.
         id = await harmonyStart(chartRef.current, bpmRef.current, first && !scheduleHeld());
         // `gone` by now: the cleanup's stop is behind this in the queue and
         // finds the id

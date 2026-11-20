@@ -58,3 +58,21 @@ export function __resetScheduleHoldForTests(): void {
   holds = 0;
   listeners.clear();
 }
+
+/**
+ * Resolves once no stop holds the schedule: at once when none does. For a
+ * caller that loads or clears a schedule of its own (a Session's Take, its
+ * teardown, a seek). `capMs` only guards against a hold that never went.
+ */
+export function whenScheduleFree(capMs = 10_000): Promise<void> {
+  if (!scheduleHeld()) return Promise.resolve();
+  return new Promise<void>((resolve) => {
+    const done = () => {
+      clearTimeout(timer);
+      off();
+      resolve();
+    };
+    const timer = setTimeout(done, capMs);
+    const off = onScheduleFree(done);
+  });
+}

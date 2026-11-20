@@ -817,6 +817,44 @@ too and passes run alone on both trees. With all three files at once and
 the box at load 35 to 45, `songs.spec.ts:383` and `session.spec.ts:220`,
 `:291` also failed once each and passed alone.
 
+## The stop's hold (2026-11-20; card #107)
+
+HANDOFF's open race: a Songs stop waits up to 600 ms for its last segment,
+then reads the grade off the loaded schedule, and the clear on leaving Songs
+(`5c356e50`) could land first. Worse, and older (`b39e494d`): Songs' push on
+every stop loaded a fresh run before the close graded the old one, and the
+stop's own clear, coming after, left the next pass with nothing loaded.
+
+Fix (`69b13866` and the commit after it): `src/songs/scheduleHold.ts`.
+`useSongAttempt` takes a hold at the stop, before anything is awaited, and
+lets go after its own `clearScoreSchedule` (and in a `finally`). While held:
+`useScheduleLeavesWithSong` skips its clear (the stop clears); the Songs
+push (`useSongSchedulePush`, out of `SongsView`) waits and is made on
+release, mid-pass too for a retry; `seekToTick` and `backToStart` skip their
+push (the release push covers it); `useHeard` sends `clear_stale: false`;
+a Session's Take load and its two clears wait (`whenScheduleFree`). The
+segment listener outlives an unmount until the stops in flight are done, so
+Settings over Songs right after a stop keeps the attempt.
+
+Tests: `src/containers/songs/review/useSongAttempt.schedule.test.tsx`
+(leave 300 ms after a silent stop: close, grade, clear, in that order; the
+stop's push after the clear; a retry; Settings and back; the song closed in
+the wait; nothing held clears at once), `src/songs/scheduleHold.test.ts`,
+`useHeard.test.ts` (no clear while held). The 600 ms and the Settings cases
+fail with the fix taken out.
+
+Third reviewer (opus, read-only, given `git diff 3c7f6ea6..HEAD` and
+`REVIEW-M7.md`): "merge after fixes", no bug confirmed, Rust of `5c356e50`
+correct. Fixed: seek and Home pushes ignoring the hold (1), Session loads
+and clears ignoring it (2), two comments (5, 7). Left (`HANDOFF.md`): the
+retry's mid-pass push alignment (3), a pass ending under Settings (4), a
+retry dropping the old stop's late segment (6).
+
+Gates: tsc; vitest 10,895 passed (`TabStage.render.test.tsx`, worktree-only,
+as before); `test:rust` 1144/0; layout `songs` 106 of 106 run alone (one run
+at load 13 failed `:383`, the known flake; it passed alone twice and the
+whole file passed after).
+
 ## Runtime merge and its review nits (2026-11-19 evening)
 
 `mvp-detect-runtime` (`3a983dd1`: the verifier runs on tract, pure Rust, from

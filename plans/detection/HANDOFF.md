@@ -49,14 +49,21 @@ in all. What is left, in order:
    - A worker that ended by itself, or with the input, takes its Summary
      with it: the recap misses that stretch.
    - Bar marks still leave out the input's own latency.
-   - A stop pressed in Songs and the mode left within about 600 ms: the
-     clear can land before the attempt's grade is fetched. Songs' own
-     re-push on stop already bumps the schedule version at that moment
-     (`SongsView.tsx`, the `pushSchedule` effect), which is worth a look of
-     its own.
+   - ~~A stop pressed in Songs and the mode left within about 600 ms~~:
+     fixed in `69b13866` and the commit after it (`PROGRESS.md`, "The stop's
+     hold"). A stop holds the schedule (`src/songs/scheduleHold.ts`) until
+     its own clear; the leaving clear skips, the Songs push, a seek's push,
+     a Session's load and its clears wait. Still open from its review: a
+     retry within the grading window gets its schedule mid-pass (on release,
+     as a seek does), so its first bar may be graded from the next downbeat
+     (review finding 3: check on the bench, retry 300 ms after a silent stop
+     with the count-in off); a pass that ends while Settings is open over
+     Songs is never graded (older than M7); a retry's start drops the old
+     stop's late segment from the review (one `runRef` per hook, older).
    - `stop` of a worker waits for the model's first load; a chart change
      during that load delays the next start by as long.
-   - The last fix commit (`5c356e50`) was not read by the second reviewer.
+   - ~~The last fix commit (`5c356e50`) was not read~~: read with the hold
+     fix by a third reviewer, "merge after fixes", no bug confirmed.
    - `tests/layout/jam.spec.ts:684` (the groove editor: "the setup drawer
      stayed open") fails when `jam`, `session` and `songs` run together
      with the default workers, on `141c3fc2` as well; it passes run alone.
