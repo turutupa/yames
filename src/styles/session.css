@@ -874,7 +874,7 @@
 .session-today-line .coach-say::after {
   content: "\203A";
   margin-inline-start: 0.4em;
-  color: var(--coach-faint);
+  color: var(--l-faint, var(--text-tertiary));
 }
 .session-step-line {
   margin-top: 12px;
