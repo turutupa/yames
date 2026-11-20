@@ -34,6 +34,11 @@ old Start button). Four deliveries.
 | **c2a2** | The old Start and End buttons go. **Listen** on the tools' transport, the tool's coach line and note, History to Progress → Tool runs, `CoachCard` and `coach-card.css` deleted, `DELIBERATELY_REMOVED` keys, the mobile-bundle rule amended and recorded. | 7 (all tables), 8 (Tools, Progress) | c2a1, c1b1 | R (doors parity), i18n |
 | **d3** | *Delivery 1c/1d*: loop and the two Session rules; Ask shell; no Start button anywhere; the tools keep their coach. | | | |
 
+**Moved up (2026-11-20):** c4c (the `cues` pack field) and the `cues` content legs from milestone 3 run
+beside milestone 2: 825 of 1,010 Exercises have no cue short enough to be the Take's order, so the
+Take's line is mostly empty until they are written. c4c also shows the cue under the finding on the
+result, because "Go again" skips the ready screen.
+
 Parallelism: wave 1 = c0 ‖ ms1 ‖ c1a. Wave 2 = pm ‖ ms2, then c1b1 ‖ c2a1. Wave 3 = c1b2 ‖ c1c ‖ c2a2.
 `useSessionRun.ts`, `useSession.ts`, `MainWindow.tsx` and the locale files are the shared files: each leg
 file names which hunks it owns, and the second branch to merge rebases.

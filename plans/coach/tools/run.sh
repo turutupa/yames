@@ -28,6 +28,11 @@ export PATH="$HOME/.cargo/bin:$PATH"
 export CFLAGS='-std=gnu11 -Wno-implicit-function-declaration'
 export CARGO_TARGET_DIR="$HOME/.target-coach"
 export CARGO_BUILD_JOBS=8
+# A temp directory of this account's own. /tmp is shared with another account
+# that runs the same Rust suite, and tests that write fixed names under
+# temp_dir() (take_video's fifteen) fail with PermissionDenied on its folders.
+export TMPDIR="${TMPDIR:-/tmp/coach-tmp}"
+mkdir -p "$TMPDIR"
 
 while [ "$(free -g | awk '/Mem/{print $7}')" -lt 16 ]; do
   if [ -e /tmp/yames-dgx-yield ]; then

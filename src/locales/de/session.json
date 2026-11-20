@@ -279,19 +279,10 @@
       "decidedPass": "Bestanden",
       "lastTime": "letztes Mal",
       "decidedMiss": "Daran lag es",
-      "notesNotChecked": "Richtige Töne: diesmal nicht geprüft",
       "barsTitle": "Takt für Takt",
-      "barsHeld": "{{count}} Takt am Stück gehalten",
-      "barsHeld_other": "{{count}} Takte am Stück gehalten",
-      "barsMet": "{{count}} von {{of}} Takten gehalten",
       "barHeld": "Takt {{n}}: gehalten",
       "barSlipped": "Takt {{n}}: verrutscht",
-      "barThin": "Takt {{n}}: zu wenige Töne zum Beurteilen",
-      "legatoAll": "Hammer-ons, Pull-offs und Taps: {{sounded}} von {{due}} klangen. Nur zur Info, nicht bewertet.",
-      "legatoSome": "Hammer-ons, Pull-offs und Taps: {{sounded}} von {{due}} klangen, {{silent}} nicht. Nur zur Info, nicht bewertet.",
-      "bendsAll": "Bendings: {{onPitch}} von {{due}} erreichten den Ton. Nur zur Info, nicht bewertet.",
-      "bendsSomeFlat": "Bendings: {{onPitch}} von {{due}} erreichten den Ton, {{flat}} blieben zu tief. Nur zur Info, nicht bewertet.",
-      "vibratoHeard": "Vibrato: auf {{present}} von {{due}} Tönen gehört. Nur zur Info, nicht bewertet."
+      "barThin": "Takt {{n}}: zu wenige Töne zum Beurteilen"
     },
     "edge": {
       "kick": "Mein Limit finden",
@@ -701,6 +692,104 @@
       "harmony": "Harmonie",
       "technique": "Technik",
       "style": "Stile"
+    },
+    "note": {
+      "passedAt": "Bestanden bei {{bpm}}.",
+      "finding": {
+        "ceiling": "Bei {{holds}} BPM hält es, bei {{breaks}} rutscht es."
+      },
+      "place": {
+        "slipped": {
+          "bar": "Takt {{bar}} der Melodie ist in {{count}} von {{of}} Durchgängen verrutscht.",
+          "bars": "Takt {{from}} bis {{to}} der Melodie ist in {{count}} von {{of}} Durchgängen verrutscht.",
+          "loop": "Das Muster ist in {{count}} von {{of}} Durchgängen verrutscht.",
+          "fromRound": "Es hielt bis Durchgang {{round}} von {{of}}, dann fiel es auseinander.",
+          "all": "Die ganze Melodie ist in {{count}} von {{of}} Durchgängen verrutscht."
+        },
+        "caught": {
+          "bar": "Takt {{bar}} der Melodie hat dich in {{count}} von {{of}} Durchgängen erwischt.",
+          "bars": "Takt {{from}} bis {{to}} der Melodie hat dich in {{count}} von {{of}} Durchgängen erwischt.",
+          "loop": "Das Muster hat dich in {{count}} von {{of}} Durchgängen erwischt.",
+          "all": "Die ganze Melodie hat dich in {{count}} von {{of}} Durchgängen erwischt."
+        },
+        "lastTake": "Beim letzten Take waren es {{count}}.",
+        "lastTakeHeld": "Beim letzten Take hat es gehalten."
+      },
+      "direction": {
+        "early": "Die Töne dort kamen früh.",
+        "late": "Die Töne dort kamen spät.",
+        "earlyOpen": "Die leeren {{note}}-Töne dort kamen früh.",
+        "lateOpen": "Die leeren {{note}}-Töne dort kamen spät.",
+        "earlyNote": "Die {{note}}-Töne im {{fret}}. Bund kamen dort früh.",
+        "lateNote": "Die {{note}}-Töne im {{fret}}. Bund kamen dort spät."
+      },
+      "history": {
+        "newClean": "Neues sauberes Tempo: {{bpm}} BPM.",
+        "tooEasy": "Beim ersten Take mit Luft nach oben bestanden, zwei Sessions in Folge.",
+        "goingDown": "Drei Takes in Folge bei {{bpm}} sind schlechter geworden.",
+        "stuck": "Drei Takes bei {{bpm}}, alle innerhalb von zwei Punkten.",
+        "closer": "Von {{from}} % auf {{to}} % bei diesem Tempo."
+      },
+      "repeat": {
+        "leaveIt": "Dreimal dieselbe Stelle. Lass sie für heute; morgen klappt sie meist besser."
+      },
+      "fact": {
+        "heard": "{{heard}} von {{expected}} Tönen gehört",
+        "noExtras": "keine zusätzlichen Töne",
+        "extras": "{{count}} zusätzlicher Ton",
+        "extras_other": "{{count}} zusätzliche Töne",
+        "rightNotes": "{{value}} % richtige Töne (von {{base}}, die ich bestimmen konnte)",
+        "notesUnchecked": {
+          "notRun": "richtige Töne: diesmal nicht geprüft",
+          "tooFast": "richtige Töne: zu schnell, als dass ich sie bestimmen konnte",
+          "tooFew": "richtige Töne: zu wenige, als dass ich sie bestimmen konnte",
+          "notesRing": "richtige Töne: sie klangen ineinander, das konnte ich nicht sagen",
+          "octaveUnsure": "richtige Töne: die Oktave konnte ich nicht sagen"
+        },
+        "legato": "{{sounded}} von {{due}} Hammer-ons und Pull-offs klangen (nur zur Info, nicht bewertet)",
+        "bends": "{{onPitch}} von {{due}} Bendings erreichten den Ton (nur zur Info, nicht bewertet)",
+        "vibrato": "Vibrato bei {{present}} von {{due}} Tönen (nur zur Info, nicht bewertet)"
+      },
+      "mark": {
+        "check": "erfüllt:",
+        "cross": "nicht erfüllt:",
+        "dash": "konnte ich nicht sagen:"
+      },
+      "strip": {
+        "held": "{{count}} Takt am Stück gehalten",
+        "held_other": "{{count}} Takte am Stück gehalten",
+        "roundEvery": "die Melodie kommt alle {{count}} Takte wieder",
+        "plain": "wie gespielt"
+      },
+      "ready": {
+        "lastValue": "Letzter Take: {{value}} % {{metric}}.",
+        "lastCount": "Letzter Take: {{value}} {{metric}}.",
+        "lastPassed": "Letzter Take: bestanden bei {{bpm}}.",
+        "lastNotCaught": "Letzter Take: Ich habe nicht genug mitbekommen."
+      },
+      "chip": {
+        "hear": "Erst anhören",
+        "try": "Was soll ich versuchen?"
+      },
+      "ungraded": {
+        "listenFor": "Hör diesmal auf eine Sache: {{question}}",
+        "notListening": "Ich höre diesmal nicht zu, also entscheidest du.",
+        "didThey": "Beim letzten Take: {{question}}",
+        "yourAnswer": "Deine Antwort:",
+        "yes": "Ja",
+        "notYet": "Noch nicht",
+        "tryFaster": "Zweimal Ja. {{bpm}} versuchen?"
+      },
+      "recap": {
+        "passed": "Bestanden bei {{bpm}} BPM.",
+        "held": "Sauberes Tempo weiter {{bpm}} BPM.",
+        "played": "Zuletzt gespielt bei {{bpm}} BPM.",
+        "backNext": "{{title}} kommt in der nächsten Session wieder.",
+        "backReview": "{{title}} kommt in {{count}} Tag zur Wiederholung wieder.",
+        "backReview_other": "{{title}} kommt in {{count}} Tagen zur Wiederholung wieder.",
+        "backParked": "{{title}} pausiert {{count}} Tag und kommt dann frisch wieder.",
+        "backParked_other": "{{title}} pausiert {{count}} Tage und kommt dann frisch wieder."
+      }
     }
   }
 }

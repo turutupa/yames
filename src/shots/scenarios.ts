@@ -82,6 +82,8 @@ export interface Shot {
       | "between"
       | "result"
       | "noCatch"
+      /** One Take played, then the same again: the ready screen of a later Take, with the coach's note on the last one. */
+      | "readyAgain"
       /** A timed step (the warm-up), up and waiting for its Start. */
       | "timedReady"
       /** A timed step after its Start: the clock and the click running. */
@@ -1528,6 +1530,69 @@ export const SHOTS: Shot[] = [
     height: 900,
     settleMs: 300,
   },
+  // The coach in a Session (coach leg c1b1, DESIGN 4.1 to 4.4; mocks 03 to 07).
+  // A later Take's ready screen: one thing to do, then the last Take in a line.
+  {
+    id: "coach-ready-again",
+    suffix: "coach-ready-again",
+    window: "main",
+    session: { seed: "returning", minutes: 5, take: "below", stop: "readyAgain" },
+    width: 1440,
+    height: 900,
+    // The neck glides from the result's frame back to the ready one.
+    settleMs: 2500,
+  },
+  // The one order during a Take: an Exercise whose cue fits it (48 characters).
+  {
+    id: "coach-take-order",
+    suffix: "coach-take-order",
+    window: "main",
+    session: {
+      seed: "returning",
+      stop: "playing",
+      practiceView: "neck",
+      path: "alternate-picking",
+      exercise: "even-sixteenths.four-fingers-16",
+    },
+    width: 1440,
+    height: 900,
+    settleMs: 900,
+  },
+  // Ungraded, an Exercise whose author wrote a question to listen for (DESIGN
+  // 4.4, mock 04): asked before the Take, and "Yes / Not yet" after it.
+  {
+    id: "coach-ungraded-ready",
+    suffix: "coach-ungraded-ready",
+    window: "main",
+    session: { seed: "returning", stop: "ready", grading: "off", path: "alternate-picking", exercise: "speed-bursts.one-beat" },
+    width: 1440,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "coach-ungraded-result",
+    suffix: "coach-ungraded-result",
+    window: "main",
+    session: { seed: "returning", stop: "result", grading: "off", path: "alternate-picking", exercise: "speed-bursts.one-beat" },
+    width: 1440,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "coach-take-order-runway",
+    suffix: "coach-take-order-runway",
+    window: "main",
+    session: {
+      seed: "returning",
+      stop: "playing",
+      practiceView: "runway",
+      path: "alternate-picking",
+      exercise: "even-sixteenths.four-fingers-16",
+    },
+    width: 1440,
+    height: 900,
+    settleMs: 900,
+  },
   // Grading not decided yet: the ready screen asks (owner, 2026-11-18).
   {
     id: "session-ask-ready",
@@ -2078,6 +2143,10 @@ export const PHONE_LEARNING_SCENES = [
   "session-ask-ready",
   "session-ask-ready-runway",
   "session-ready-signal",
+  "coach-ready-again",
+  "coach-take-order",
+  "coach-ungraded-ready",
+  "coach-ungraded-result",
   "progress-ungraded",
   "paths",
   "path-alternate",

@@ -279,19 +279,10 @@
       "decidedPass": "Đạt",
       "lastTime": "lần trước",
       "decidedMiss": "Điều kéo lại",
-      "notesNotChecked": "Đúng nốt: lần này chưa kiểm tra",
       "barsTitle": "Từng ô nhịp",
-      "barsHeld": "Giữ được {{count}} ô nhịp liền",
-      "barsHeld_other": "Giữ được {{count}} ô nhịp liền",
-      "barsMet": "Giữ được {{count}} trên {{of}} ô nhịp",
       "barHeld": "Ô nhịp {{n}}: giữ được",
       "barSlipped": "Ô nhịp {{n}}: bị lệch",
-      "barThin": "Ô nhịp {{n}}: quá ít nốt để đánh giá",
-      "legatoAll": "Hammer-on, pull-off và tap: {{sounded}}/{{due}} nốt đã kêu. Chỉ thông báo, không chấm điểm.",
-      "legatoSome": "Hammer-on, pull-off và tap: {{sounded}}/{{due}} nốt đã kêu, {{silent}} nốt không kêu. Chỉ thông báo, không chấm điểm.",
-      "bendsAll": "Bend: {{onPitch}}/{{due}} lần lên tới cao độ. Chỉ thông báo, không chấm điểm.",
-      "bendsSomeFlat": "Bend: {{onPitch}}/{{due}} lần lên tới cao độ, {{flat}} lần bị thiếu. Chỉ thông báo, không chấm điểm.",
-      "vibratoHeard": "Vibrato: nghe thấy ở {{present}}/{{due}} nốt. Chỉ thông báo, không chấm điểm."
+      "barThin": "Ô nhịp {{n}}: quá ít nốt để đánh giá"
     },
     "edge": {
       "kick": "Tìm giới hạn",
@@ -701,6 +692,104 @@
       "harmony": "Hòa âm",
       "technique": "Kỹ thuật",
       "style": "Phong cách"
+    },
+    "note": {
+      "passedAt": "Đạt ở {{bpm}}.",
+      "finding": {
+        "ceiling": "Giữ được ở {{holds}} BPM và bị lệch ở {{breaks}}."
+      },
+      "place": {
+        "slipped": {
+          "bar": "Ô nhịp {{bar}} của giai điệu bị lệch ở {{count}}/{{of}} vòng.",
+          "bars": "Ô nhịp {{from}} đến {{to}} của giai điệu bị lệch ở {{count}}/{{of}} vòng.",
+          "loop": "Mẫu nhịp bị lệch ở {{count}}/{{of}} vòng.",
+          "fromRound": "Giữ được đến vòng {{round}}/{{of}}, rồi vỡ ra.",
+          "all": "Cả giai điệu bị lệch ở {{count}}/{{of}} vòng."
+        },
+        "caught": {
+          "bar": "Ô nhịp {{bar}} của giai điệu làm bạn vấp ở {{count}}/{{of}} vòng.",
+          "bars": "Ô nhịp {{from}} đến {{to}} của giai điệu làm bạn vấp ở {{count}}/{{of}} vòng.",
+          "loop": "Mẫu nhịp làm bạn vấp ở {{count}}/{{of}} vòng.",
+          "all": "Cả giai điệu làm bạn vấp ở {{count}}/{{of}} vòng."
+        },
+        "lastTake": "Lượt trước: {{count}}.",
+        "lastTakeHeld": "Lượt trước thì giữ được."
+      },
+      "direction": {
+        "early": "Các nốt ở đó rơi sớm.",
+        "late": "Các nốt ở đó rơi trễ.",
+        "earlyOpen": "Các nốt {{note}} dây buông ở đó rơi sớm.",
+        "lateOpen": "Các nốt {{note}} dây buông ở đó rơi trễ.",
+        "earlyNote": "Các nốt {{note}} ở phím {{fret}} rơi sớm.",
+        "lateNote": "Các nốt {{note}} ở phím {{fret}} rơi trễ."
+      },
+      "history": {
+        "newClean": "Tempo sạch mới: {{bpm}} BPM.",
+        "tooEasy": "Đạt dư dả ngay lượt đầu, hai buổi tập liền.",
+        "goingDown": "Ba lượt liên tiếp ở {{bpm}} đều đi xuống.",
+        "stuck": "Ba lượt ở {{bpm}}, đều chênh nhau trong hai điểm.",
+        "closer": "Tăng từ {{from}}% lên {{to}}% ở tempo này."
+      },
+      "repeat": {
+        "leaveIt": "Cùng một chỗ ba lần. Để hôm nay nghỉ; thường ngày mai sẽ khá hơn."
+      },
+      "fact": {
+        "heard": "nghe thấy {{heard}}/{{expected}} nốt",
+        "noExtras": "không có nốt thừa",
+        "extras": "{{count}} nốt thừa",
+        "extras_other": "{{count}} nốt thừa",
+        "rightNotes": "{{value}}% nốt đúng (trong {{base}} nốt tôi nhận ra được cao độ)",
+        "notesUnchecked": {
+          "notRun": "đúng nốt: lần này chưa kiểm tra",
+          "tooFast": "đúng nốt: nhanh quá nên tôi không nhận ra cao độ",
+          "tooFew": "đúng nốt: quá ít nốt để tôi nhận ra cao độ",
+          "notesRing": "đúng nốt: các nốt ngân chồng lên nhau nên tôi không nói được",
+          "octaveUnsure": "đúng nốt: tôi không nói được quãng tám"
+        },
+        "legato": "{{sounded}}/{{due}} hammer-on và pull-off đã kêu (chỉ thông báo, không chấm điểm)",
+        "bends": "{{onPitch}}/{{due}} lần bend lên tới cao độ (chỉ thông báo, không chấm điểm)",
+        "vibrato": "vibrato ở {{present}}/{{due}} nốt (chỉ thông báo, không chấm điểm)"
+      },
+      "mark": {
+        "check": "đã đạt:",
+        "cross": "chưa đạt:",
+        "dash": "không nói được:"
+      },
+      "strip": {
+        "held": "{{count}} ô nhịp liền được giữ",
+        "held_other": "{{count}} ô nhịp liền được giữ",
+        "roundEvery": "giai điệu quay lại sau mỗi {{count}} ô nhịp",
+        "plain": "như đã chơi"
+      },
+      "ready": {
+        "lastValue": "Lượt trước: {{value}}% {{metric}}.",
+        "lastCount": "Lượt trước: {{value}} {{metric}}.",
+        "lastPassed": "Lượt trước: đạt ở {{bpm}}.",
+        "lastNotCaught": "Lượt trước: tôi không nghe đủ."
+      },
+      "chip": {
+        "hear": "Nghe thử trước",
+        "try": "Tôi nên thử gì?"
+      },
+      "ungraded": {
+        "listenFor": "Lần này, hãy nghe một điều: {{question}}",
+        "notListening": "Lần này tôi không nghe, nên bạn là người đánh giá.",
+        "didThey": "Câu cuối: {{question}}",
+        "yourAnswer": "Câu trả lời của bạn:",
+        "yes": "Có",
+        "notYet": "Chưa",
+        "tryFaster": "Hai lần có. Thử {{bpm}} nhé?"
+      },
+      "recap": {
+        "passed": "Đạt ở {{bpm}} BPM.",
+        "held": "Tempo sạch vẫn là {{bpm}} BPM.",
+        "played": "Lần chơi gần nhất ở {{bpm}} BPM.",
+        "backNext": "{{title}} quay lại ở buổi tập sau.",
+        "backReview": "{{title}} quay lại để ôn sau {{count}} ngày.",
+        "backReview_other": "{{title}} quay lại để ôn sau {{count}} ngày.",
+        "backParked": "{{title}} nghỉ {{count}} ngày rồi quay lại như mới.",
+        "backParked_other": "{{title}} nghỉ {{count}} ngày rồi quay lại như mới."
+      }
     }
   }
 }
