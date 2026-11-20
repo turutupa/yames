@@ -469,7 +469,7 @@
                 "pool": "all",
                 "howTo": [
                   "Count '1, 2' through each half note and play the quarters on 3 and 4. The last bar is one note held for all four clicks.",
-                  "On the A string the fretted note is at fret 2. On the D string it is at fret 2."
+                  "On the A and D strings the fretted note is at fret 2."
                 ],
                 "tab": "/2 5:0 /4 5:2 5:0 | /2 4:0 /4 4:2 4:0 | /2 5:0 /4 5:2 4:0 | /1 4:2",
                 "position": {
@@ -518,7 +518,7 @@
                 "pool": "all",
                 "howTo": [
                   "Count '1, 2' through each half note and play the quarters on 3 and 4. The last bar is one note held for all four clicks.",
-                  "On the D string the fretted note is at fret 2. On the G string it is at fret 2."
+                  "On the D and G strings the fretted note is at fret 2."
                 ],
                 "tab": "/2 4:0 /4 4:2 4:0 | /2 3:0 /4 3:2 3:0 | /2 4:0 /4 4:2 3:0 | /1 3:2",
                 "position": {

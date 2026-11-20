@@ -218,16 +218,24 @@ test.describe("the Session bar", () => {
     { name: "1024", width: 1024, height: 700 },
   ]) {
     test(`fits on one line, and every block takes a click, at ${size.name}`, async ({ page }) => {
+      // Opening a Session is the slowest scene the harness builds, and this one
+      // is built at 1440 and then narrowed: room for both on a loaded machine.
+      test.slow();
       await openShot(page, "session-warmup-ready", size);
-      await noSidewaysScroll(page, `session-warmup-ready at ${size.width}px`);
-      await fitsOnOneLine(page, '[data-testid="session-bar"]', `the Session bar at ${size.width}px`);
-      expect(await notHitTestable(page, ".session-pip")).toEqual([]);
-      expect(await notHitTestable(page, '[data-testid="session-previous"]')).toEqual([]);
-      expect(await notHitTestable(page, '[data-testid="session-input-chip"]')).toEqual([]);
-      // Taller than the 5 px it draws: a pointer finds it.
-      for (const box of await page.locator(".session-pip").evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height))) {
-        expect(box).toBeGreaterThanOrEqual(20);
-      }
+      // The screen rises in, and at 1024 it has just been narrowed: the bar is
+      // measured once it has come to rest, and fails with its last reading if
+      // it never does.
+      await expect(async () => {
+        await noSidewaysScroll(page, `session-warmup-ready at ${size.width}px`);
+        await fitsOnOneLine(page, '[data-testid="session-bar"]', `the Session bar at ${size.width}px`);
+        expect(await notHitTestable(page, ".session-pip")).toEqual([]);
+        expect(await notHitTestable(page, '[data-testid="session-previous"]')).toEqual([]);
+        expect(await notHitTestable(page, '[data-testid="session-input-chip"]')).toEqual([]);
+        // Taller than the 5 px it draws: a pointer finds it.
+        for (const box of await page.locator(".session-pip").evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height))) {
+          expect(box).toBeGreaterThanOrEqual(20);
+        }
+      }).toPass({ timeout: 15_000 });
       // On the first block, Previous says why it does nothing.
       await expect(page.locator('[data-testid="session-previous"]')).toHaveAttribute("aria-disabled", "true");
     });

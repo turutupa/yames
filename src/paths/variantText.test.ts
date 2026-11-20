@@ -11,7 +11,7 @@ import { buildPath, serializePath } from "./generate";
 import type { PathSpec } from "./spec";
 import { SPECS } from "./specs/index";
 import { validatePath } from "./validate";
-import { describeVariant, sentencesOf, variantText } from "./variantText";
+import { describeVariant, mergeSameFacts, sentencesOf, variantText } from "./variantText";
 import type { ExerciseText, TextSide, VariantText } from "./variantText";
 
 const built = new Map<string, PathDoc>();
@@ -131,17 +131,18 @@ describe("variants read by hand", () => {
     });
   });
 
-  // Rhythm Foundations: on the A and D strings both fretted notes are at fret 2. The Step's line is
-  // one sentence a string (coherence audit, 2026-11-20), so each variant names its own two strings;
-  // the finger sentence ("Third finger for fret 3") is not written, and no line says "fret 3".
+  // Rhythm Foundations: on the A and D strings both fretted notes are at fret 2, played by the second
+  // finger. "fret 3 ... and fret 2" would become "fret 2 ... and fret 2": the same fact is said once, of
+  // both strings, and the finger sentence ("Third finger for fret 3") is not written.
   it.each([
-    ["stringSet=A-and-D", "On the A string the fretted note is at fret 2. On the D string it is at fret 2."],
-    ["stringSet=D-and-G", "On the D string the fretted note is at fret 2. On the G string it is at fret 2."],
-  ])("Rhythm Foundations: %s names fret 2 on each string, and no third finger", (variantId, frets) => {
+    ["stringSet=A-and-D", "On the A and D strings the fretted note is at fret 2."],
+    ["stringSet=D-and-G", "On the D and G strings the fretted note is at fret 2."],
+  ])("Rhythm Foundations: %s never says 'fret 2 ... and fret 2'", (variantId, frets) => {
     const own = said("rhythm-foundations", "on-the-beat.halves", variantId);
     expect(own).toEqual({
       howTo: ["Count '1, 2' through each half note and play the quarters on 3 and 4. The last bar is one note held for all four clicks.", frets],
     });
+    expect(JSON.stringify(own).match(/fret 2/g)).toHaveLength(1);
     expect(JSON.stringify(own)).not.toMatch(/fret 3|finger/);
   });
 
@@ -520,6 +521,19 @@ describe("the rules, on small made-up lines", () => {
     expect(variantText(ex, side([[2, 5], [2, 6], [2, 8], [2, 6]]))).toBeNull();
   });
 
+  it("the same fact of two strings is said once, of both", () => {
+    expect(mergeSameFacts(["On the A string the fretted note is at fret 2.", "On the D string it is at fret 2."])).toEqual(["On the A and D strings the fretted note is at fret 2."]);
+    expect(mergeSameFacts(["On the A string the note is at fret 2.", "On the D string the note is at fret 2.", "On the G string it is at fret 2.", "Let it ring."])).toEqual([
+      "On the A, D and G strings the note is at fret 2.",
+      "Let it ring.",
+    ]);
+    // Different facts, or a string named twice, stay as they are.
+    const apart = ["On the low E string the fretted note is at fret 3.", "On the A string it is at fret 2."];
+    expect(mergeSameFacts(apart)).toEqual(apart);
+    const twice = ["On the A string the note is at fret 2.", "On the A string it is at fret 2."];
+    expect(mergeSameFacts(twice)).toEqual(twice);
+  });
+
   it("splits sentences without breaking a count", () => {
     expect(sentencesOf("Count '1 and 2 and'. Then stop. Bar 2: go on.")).toEqual(["Count '1 and 2 and'.", "Then stop.", "Bar 2: go on."]);
   });
@@ -566,6 +580,28 @@ describe.each(flagged.map((s) => [s.id, s] as const))("%s: what its variants are
       expect(text, where).not.toMatch(/first version/i);
       expect(text, where).not.toContain("!");
       for (const line of v.howTo ?? []) expect(line.trim().length, where).toBeGreaterThan(0);
+    }
+  });
+
+  it("never says the same fact of two strings in two sentences", () => {
+    for (const { v, where } of withText) {
+      for (const line of [v.purpose ?? "", ...(v.howTo ?? [])]) {
+        const sentences = sentencesOf(line);
+        for (let i = 1; i < sentences.length; i += 1) {
+          const a = /^On the (?:low |top |high )?[A-G] string,? (?:the [a-z ]+ )?(is .+)$/.exec(sentences[i - 1]);
+          const b = /^On the (?:low |top |high )?[A-G] string,? (?:it |the [a-z ]+ )?(is .+)$/.exec(sentences[i]);
+          expect(a && b && a[1] === b[1], `${where}: "${sentences[i - 1]} ${sentences[i]}"`).toBeFalsy();
+        }
+      }
+    }
+  });
+
+  it("every string in 'the A and D strings' is a string that variant plays", () => {
+    for (const { v, text, where } of withText) {
+      const strings = new Set(v.notes.map((n) => n.string));
+      for (const m of text.matchAll(/\bthe ((?:(?:low |top |high )?[A-G], )*(?:low |top |high )?[A-G] and (?:low |top |high )?[A-G]) strings\b/g)) {
+        for (const name of m[1].split(/, | and /)) expect(strings.has(STRING_OF[name]), `${where}: "${m[0]}"`).toBe(true);
+      }
     }
   });
 

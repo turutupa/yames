@@ -832,3 +832,15 @@ the fingerings the appliers printed on purpose (AP `a-minor-one-string` 1-2 pair
 - `paceLadder` step size (Part 3, "for a dev"): its own card, not content.
 - `plans/paths/REVIEW_NOTES.md:283` still names the cut `one-pass-each` (a review note, left as history).
 - Slots `yames-mvp-paths7-s1..s3` and `/tmp/yp7` are scratch; delete when this branch is merged.
+
+## Small fixes (2026-11-20 morning PST): cards #118 and #115
+
+- #118 (`391e5cd5`): `mergeSameFacts` in `src/paths/variantText.ts` joins neighbouring "On the X string ..."
+  sentences that say the same thing (the later may say "it"): RF `halves` variants now read "On the A and D
+  strings the fretted note is at fret 2." Leg 6's relaxed test is strict again ("fret 2" once, no finger, no
+  fret 3), plus a pack-wide rule (no repeated fact of two strings) and string-list truth check. Only RF changed;
+  the 2 keys re-translated by hand in all 14 languages from each one's `step.other-strings` plural wording.
+  `paths check` 0/0.
+- #115 (`633a0f36`): four layout tests wait for their real end state (drawer gone, sheet settled after the
+  ResizeObserver, band agreeing with alphaTab's re-engraving, Session scene given 45 s in the harness). All
+  timing, none a layout bug. 5/5 parallel and 5/5 serial under 40 busy loops (load 40-60).
