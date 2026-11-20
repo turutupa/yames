@@ -15,6 +15,7 @@ import type { VariantParams } from "../spec";
 import { handAt, ladder, moveChart, shiftFrets } from "../templates";
 import { KEY_OF_G } from "./harmony-more";
 import { BORROWED, FOUR_CHORD_SONGS, KEY_OF_A, MINOR_KEY_E, SEVENTHS, SEVENTHS_IN_SONGS, SIXTEEN_BARS } from "./chords-more";
+import { COMING_HOME, NUMBERS_IN_F, ONE_FOUR_FIVE_AGAIN } from "./chords-encore";
 import { chartIn as chartInKey } from "./triadShapes";
 import { ROCK, bars, mid, named, toTop, top } from "./triadShapes";
 import { keyHowTo } from "./keyText";
@@ -104,7 +105,7 @@ export default definePath({
   labelSubdivisions: "mostly",
   paceLadders: true,
   orderRationale:
-    "All seven chords of the key first, built in order from the scale, because the pattern of major and minor is the thing to learn and it is the same in every key. Numbers come next and letters go into the background: a progression is a set of numbers, and a key is where you put them. The three major chords come before the three minor ones because most songs can be played with them alone. Named progressions follow, one at a time. One, four and five move to other keys as soon as they have numbers; the longer progressions move later, once the numbers are familiar, so that changing key is moving a known thing. The minor key is late because it is the same seven chords counted from a different one. Longer forms follow: twelve bars, a verse and a chorus, then sixteen bars with a bridge. Each idea is given a second and a third key before the next arrives (G and A in full, E minor after A minor), because a number only becomes a number once it has stood for several different chords. Chords from outside the key wait until the key itself is secure, and the seventh chords come last: they are the same seven chords with one more note each, and they hand the player on to Arpeggios over Changes.",
+    "All seven chords of the key first, built in order from the scale, because the pattern of major and minor is the thing to learn and it is the same in every key. Numbers come next and letters go into the background: a progression is a set of numbers, and a key is where you put them. The three major chords come before the three minor ones because most songs can be played with them alone. The Beginner Level takes its time in C, with one, four and five in new orders and lines that stop on five against lines that come home to one, and ends by finding the same numbers chord by chord in F. Named progressions follow, one at a time. One, four and five move to other keys as soon as they have numbers; the longer progressions move later, once the numbers are familiar, so that changing key is moving a known thing. The minor key is late because it is the same seven chords counted from a different one. Longer forms follow: twelve bars, a verse and a chorus, then sixteen bars with a bridge. Each idea is given a second and a third key before the next arrives (G and A in full, E minor after A minor), because a number only becomes a number once it has stood for several different chords. Chords from outside the key wait until the key itself is secure, and the seventh chords come last: they are the same seven chords with one more note each, and they hand the player on to Arpeggios over Changes.",
   gradingLimits:
     "Every graded Exercise is played one note at a time: after the take, the app checks that you played the written notes, counts them and times them. It cannot tell which string a pitch came from, so a right note in the wrong place passes, and it cannot hear whether you held each shape down like a chord. Strummed chords are not graded anywhere in this Path. It cannot hear you say a chord's number either: that part is yours. The band Exercises have only been tried on computer-made guitar sound, so direct input or headphones are the honest way to play them. Choosing your own chords and shapes is 'your turn', self-checked and labelled 'not checked yet'.",
   steps: [
@@ -267,6 +268,7 @@ export default definePath({
         },
       ],
     },
+    ONE_FOUR_FIVE_AGAIN,
     {
       id: "the-minors",
       title: "Two, three and six",
@@ -278,6 +280,8 @@ export default definePath({
         "G to E minor: D moves up to E, on the B string, fret 3 to fret 5.",
       ],
       payoff: "Six chords that feel like three pairs, and one of the most used four-chord turns in older songs: one, six, two, five.",
+      difficultyException:
+        "Four-bar lines after a Step that ends on two eight-bar forms with a new chord in every bar, so the metric reads a few hundredths lower. The new demand is three more chords to know by number, each heard as the partner of a major chord.",
       exercises: [
         {
           id: "pairs",
@@ -342,6 +346,8 @@ export default definePath({
         },
       ],
     },
+    COMING_HOME,
+    NUMBERS_IN_F,
     {
       id: "progressions",
       title: "Three progressions worth knowing by name",
@@ -822,13 +828,13 @@ export default definePath({
     {
       id: "beginner",
       title: "Beginner: seven chords from one scale",
-      summary: "A triad on every note of the scale, the pattern of major and minor, chords called by number, one, four and five in C and in a second key, and the three minor chords as partners of the major ones.",
+      summary: "A triad on every note of the scale, the pattern of major and minor, chords called by number, one, four and five in C and moved to another key, the three minor chords as partners of the major ones, lines that stop on five against lines that come home to one, and one, four, five and six in the key of F.",
       startHereIf: [
         "You can change between C, A minor, F and G with triads at 80 BPM.",
         "You know some chords and could not say which of them belong to 1 key.",
         "You don't yet know what 'one, four, five' means.",
       ],
-      steps: ["seven-chords", "numbers", "the-minors"],
+      steps: ["seven-chords", "numbers", "one-four-five-again", "the-minors", "coming-home", "numbers-in-f"],
       warmups: [
         {
           id: "first-four-keys",

@@ -507,7 +507,7 @@ function checkStarts(lines: readonly string[], bars: readonly PackBar[], where: 
 describe.each([
   ["triads", triads, 7],
   ["chords-in-a-key", chordsInAKey, 8],
-  ["arpeggios-over-changes", arpeggiosOverChanges, 4],
+  ["arpeggios-over-changes", arpeggiosOverChanges, 5],
 ] as const)("%s: every line moved to other keys", (_id, spec, count) => {
   const doc: PathDoc = buildPath(spec);
   const moved: Exercise[] = doc.steps

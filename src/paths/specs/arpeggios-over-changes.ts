@@ -13,6 +13,7 @@ import type { ExerciseSpec, VariantParams } from "../spec";
 import { handAt, ladder, moveChart, shiftFrets } from "../templates";
 import { ROCK, named, tokens, top } from "./triadShapes";
 import { MINOR_TWO_FIVE_ONE, MORE_SWEEPS, SEVENTHS_ACROSS, TWO_OCTAVES_MORE } from "./arpeggios-more";
+import { FOUR_CHORDS_IN_G, NEAREST_NOTE_AGAIN, SEVENTHS_IN_G } from "./arpeggios-encore";
 import type { Shape } from "./triadShapes";
 import { keyHowTo } from "./keyText";
 import type { KeyLineKind } from "./keyText";
@@ -159,7 +160,7 @@ export default definePath({
   labelSubdivisions: "mostly",
   paceLadders: true,
   orderRationale:
-    "One chord as a line first, from its root, on one note a string, because that is the smallest change from a triad shape: the same fingers, played in order and let go. Then the same shape on each chord of a progression, starting every bar on the root, since the root is the easiest place to know you are right. Starting from the nearest note comes next and is the real skill: it is what makes arpeggios sound like a melody and not an exercise. Sevenths arrive only then, as one changed note on top of a shape already known. Two octaves follow, then a whole form. Sweeping is last and short on purpose: by then the notes are familiar, so the only new thing is the picking hand, and the Path that teaches it properly is Sweep Picking.",
+    "One chord as a line first, from its root, on one note a string, because that is the smallest change from a triad shape: the same fingers, played in order and let go. Then the same shape on each chord of a progression, starting every bar on the root, since the root is the easiest place to know you are right. Starting from the nearest note comes next and is the real skill: it is what makes arpeggios sound like a melody and not an exercise. Sevenths arrive only then, as one changed note on top of a shape already known. The four chords, the nearest-note line and the sevenths are each played a second time in the key of G before the next idea arrives, so that what stays is the shape and the question, not one set of frets. Two octaves follow, then a whole form. Sweeping is last and short on purpose: by then the notes are familiar, so the only new thing is the picking hand, and the Path that teaches it properly is Sweep Picking.",
   gradingLimits:
     "After the take the app checks the single-note lines for right notes, counts them and times them. The note check only works when notes are separate: lift each finger as the next lands, or it reads 'not checked'. The app cannot tell which string a pitch came from. The sweeps in the last Level are timed and counted and never pitch-checked, because swept strings ring together and a correct take could read as wrong; whether each note was clean is for your ear, and the Exercise asks you. The band Exercises have only been tried on computer-made guitar sound, so direct input or headphones are the honest way to play them. Choosing your own notes is 'your turn', self-checked and labelled 'not checked yet'.",
   steps: [
@@ -306,6 +307,7 @@ export default definePath({
         },
       ],
     },
+    FOUR_CHORDS_IN_G,
     {
       id: "nearest-note",
       title: "Start from the nearest note",
@@ -387,6 +389,7 @@ export default definePath({
         },
       ],
     },
+    NEAREST_NOTE_AGAIN,
     {
       id: "sevenths",
       title: "Add the seventh",
@@ -463,6 +466,7 @@ export default definePath({
         },
       ],
     },
+    SEVENTHS_IN_G,
     {
       id: "two-octaves",
       title: "Two octaves",
@@ -863,13 +867,13 @@ export default definePath({
     {
       id: "beginner",
       title: "Beginner: one chord, one octave",
-      summary: "A chord played as a line from its root, an arpeggio for each of four chords, and moving to the nearest note when the chord changes.",
+      summary: "A chord played as a line from its root, an arpeggio for each of four chords, and moving to the nearest note when the chord changes. The four chords and the nearest-note line come twice: in the key of C, then in G.",
       startHereIf: [
         "You can play C, A minor, F and G as triads with the band at 80 BPM.",
         "You roll chord shapes and have never played a chord's notes as a line.",
         "You can find a chord's root on 1 string.",
       ],
-      steps: ["one-octave", "four-chords", "nearest-note"],
+      steps: ["one-octave", "four-chords", "four-chords-in-g", "nearest-note", "nearest-note-again"],
       warmups: [
         {
           id: "arpeggios-one-four-five",
@@ -897,13 +901,13 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: sevenths, two octaves, a whole form",
-      summary: "Seventh chords as one changed note, a two, five, one line, arpeggios across six strings on six chords, seventh arpeggios across the neck, and twelve bars of chord notes.",
+      summary: "Seventh chords as one changed note, in C and then in G, a two, five, one line that moves to other keys, arpeggios across six strings on six chords, seventh arpeggios across the neck, and twelve bars of chord notes.",
       startHereIf: [
         "You can play one-octave arpeggios through 4 chords at 80 BPM.",
         "You can move from one chord to the next without jumping back to the root.",
         "You have not yet played a seventh chord as an arpeggio.",
       ],
-      steps: ["sevenths", "two-octaves", "two-octaves-more", "sevenths-across", "a-whole-form"],
+      steps: ["sevenths", "sevenths-in-g", "two-octaves", "two-octaves-more", "sevenths-across", "a-whole-form"],
       warmups: [
         {
           id: "sevenths-round",

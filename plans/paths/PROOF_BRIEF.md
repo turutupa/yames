@@ -4,7 +4,7 @@ You are a guitar teacher proof-reading lesson text against the actual notes of g
 READ-ONLY: do not edit any file in the repository, do not run git, npm or any build. Write scratch
 files only under your own scratch directory (given in your task).
 
-Repo: /home/dgx-personal/projects/yames-mvp-paths3 (a guitar practice app). Lesson "packs" are JSON
+Repo: /home/dgx-personal/projects/yames-mvp-paths4 (a guitar practice app). Lesson "packs" are JSON
 files in src/paths/packs/<pathId>.json.
 
 ## Pack format
@@ -40,6 +40,9 @@ check it against the printed notes and against music theory:
   spellings of seventh chords, statements like "X is in both chords"
 - for a varied Exercise: the chord names the purpose gives for every other key vs that variant's `chords`,
   and the frets given for the first version vs the Exercise's own notes
+- a variant's OWN text (`variation.variants[i].purpose` and `.howTo`, where present): every sentence
+  against THAT variant's notes and chords, as strictly as the Exercise's own; where a variant has none,
+  it reads the Exercise's text, so say when that would be false for it
 - the Step-level text (goal, why, howTo, payoff) against what its Exercises actually contain
 - cross-references ("the song at the end of Triads", "which you have played", "the next Step") — check
   them where the referenced thing is in a pack you can read (src/paths/packs/*.json)

@@ -15,6 +15,7 @@ import type { PassBar } from "../format";
 import { pcOfName, scalePcs } from "../theory";
 import { handAt, ladder, moveChart, oneStringClimb, pentatonic, repeat, shiftFrets } from "../templates";
 import { CHORD_ROOTS, IN_BETWEEN, TOP_STRINGS_KEYS } from "./know-the-neck-more";
+import { BOXES_SECOND_KEY, CHANGES_IN_G, ROOTS_OTHER_KEYS } from "./know-the-neck-encore";
 
 type Grading = Pick<ExerciseSpec, "grade" | "alsoGraded" | "pass">;
 
@@ -602,6 +603,7 @@ export default definePath({
         },
       ],
     },
+    ROOTS_OTHER_KEYS,
     {
       id: "triads",
       title: "Triads on the top strings",
@@ -751,6 +753,7 @@ export default definePath({
         },
       ],
     },
+    BOXES_SECOND_KEY,
     {
       id: "arpeggios",
       title: "Arpeggios up the neck",
@@ -911,6 +914,7 @@ export default definePath({
         },
       ],
     },
+    CHANGES_IN_G,
   ],
   levels: [
     {
@@ -951,14 +955,14 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: the shapes of harmony",
-      summary: "Thirds on two strings, the top three strings in G major and F major, roots and fifths on the low strings, and triads on the top three.",
+      summary: "Thirds on two strings, the top three strings in G major and F major, roots and fifths on the low strings, the roots of a band's chords in G and in D, and triads on the top three.",
       reachLevel: "early-intermediate",
       startHereIf: [
         "You can name any natural note on the low E and A strings within 2 seconds.",
         "You can find a note's octave by shape.",
         "You play chords without knowing which note is the third.",
       ],
-      steps: ["thirds", "top-strings-keys", "roots", "triads"],
+      steps: ["thirds", "top-strings-keys", "roots", "roots-other-keys", "triads"],
       warmups: [
         {
           id: "thirds-around",
@@ -985,14 +989,14 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: the whole neck, and the changes",
-      summary: "The five pentatonic boxes joined along two strings, arpeggios from the low strings to the top, and landing on chord tones over a band.",
+      summary: "The five pentatonic boxes joined along two strings, in A minor and in E minor, arpeggios from the low strings to the top, and landing on chord tones over a band in two keys.",
       reachLevel: "intermediate",
       startHereIf: [
         "You can play a C major triad in 3 places on the top three strings.",
         "You can find the roots of a I-IV-V in any key on the low strings.",
         "You know box 1 of the pentatonic scale and get lost above it, or your solos ignore the chords.",
       ],
-      steps: ["five-boxes", "arpeggios", "the-changes"],
+      steps: ["five-boxes", "boxes-second-key", "arpeggios", "the-changes", "changes-in-g"],
       warmups: [
         {
           id: "two-boxes-up",
