@@ -198,6 +198,42 @@ describe("useCoachDownload — brain tier", () => {
     expect(getCoachModelSnapshot().download).toMatchObject({ tier: "full", phase: "cancelled" });
   });
 
+  it("a stopped download's late events do not touch the download that replaced it (ms2b)", async () => {
+    setInvokeResponse("get_model_status", () => NOTHING_ON_DISK);
+    let next = 0;
+    setInvokeResponse("start_model_download", () => ++next);
+    const { result } = renderHook(() => useCoachDownload());
+    await waitFor(() => expect(result.current.modelStatus).not.toBeNull());
+    await act(async () => {
+      await result.current.handleStartDownload("full", { select: false });
+    });
+    await act(async () => {
+      fire("model-download-progress", {
+        component: "brain", downloadedBytes: 1_000_000_000, totalBytes: 5_027_783_488, fraction: 0.2, done: false, generation: 1,
+      });
+    });
+    // Pause, then Resume at once: the first thread's "cancelled" arrives
+    // after the second download started.
+    await act(async () => {
+      await result.current.handleStartDownload("full", { select: false });
+    });
+    await act(async () => {
+      fire("model-download-complete", { success: false, cancelled: true, generation: 1 });
+      fire("model-download-progress", {
+        component: "brain", downloadedBytes: 0, totalBytes: 0, fraction: 0.9, done: false, generation: 1,
+      });
+    });
+    expect(result.current.downloadingTier).toBe("full");
+    expect(getCoachModelSnapshot().download).toMatchObject({ tier: "full", phase: "running" });
+    expect(getCoachModelSnapshot().download?.fraction).not.toBe(0.9);
+
+    // The current download's own events still land.
+    await act(async () => {
+      fire("model-download-complete", { success: false, cancelled: true, generation: 2 });
+    });
+    expect(getCoachModelSnapshot().download).toMatchObject({ tier: "full", phase: "paused" });
+  });
+
   it("a paused download kept from before is cancelled at once, by tier and URL (ms2)", async () => {
     const tiers = (partial: number) => [
       { tier: "standard", onDisk: false, sizeBytes: 0, family: null, updateRecommended: false, partialBytes: partial, downloadBytes: 2_497_280_256, checksumPinned: true },

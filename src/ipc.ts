@@ -2215,6 +2215,13 @@ export type TierStatus = {
   downloadBytes: number | null;
   /** A SHA-256 is pinned for it and checked before it is adopted. */
   checksumPinned: boolean;
+  /**
+   * Bytes of this tier left in the old single place and not in use: an older
+   * copy of the model that the tier's own copy shadows, and a paused
+   * download that could not be moved. Settings shows it with its own Remove.
+   * Absent from an older backend.
+   */
+  olderCopyBytes?: number;
 };
 
 export type DownloadProgress = {
@@ -2228,11 +2235,19 @@ export type DownloadProgress = {
    * computed (the bytes then count what has been hashed).
    */
   stage?: "transfer" | "checking";
+  /** The download it belongs to (`startModelDownload`'s answer). */
+  generation?: number;
 };
 
 /** The `model-download-complete` payload. */
 export type DownloadComplete = {
   success: boolean;
+  /**
+   * The download it belongs to. Downloads are numbered in the order they
+   * start; an event from an earlier one than the download the UI started
+   * is stale (a stopped thread's late word) and is ignored.
+   */
+  generation?: number;
   tier?: string;
   /** Paused or cancelled by the player. */
   cancelled?: boolean;
@@ -2323,8 +2338,14 @@ export async function downloadModelFile(
  * brain only (Settings → Coach, per tier); the other tier and the voices
  * stay, and Rust unloads the model only when it may be the one deleted.
  */
-export async function deleteModels(tier?: string): Promise<void> {
-  return tier ? invoke("delete_models", { tier }) : invoke("delete_models");
+/**
+ * Remove models: all of them (no tier), one tier's, or, with `olderCopy`,
+ * only the older copy of that tier left in the old place (the copy in use
+ * stays).
+ */
+export async function deleteModels(tier?: string, opts?: { olderCopy?: boolean }): Promise<void> {
+  if (!tier) return invoke("delete_models");
+  return opts?.olderCopy ? invoke("delete_models", { tier, olderCopy: true }) : invoke("delete_models", { tier });
 }
 
 // ---------------------------------------------------------------------------
@@ -2597,8 +2618,13 @@ export function onDownloadComplete(callback: (result: DownloadComplete) => void)
   return listen<DownloadComplete>("model-download-complete", (e) => callback(e.payload));
 }
 
-export async function startModelDownload(url: string, component: string, filename: string, tier: string): Promise<void> {
-  return invoke("start_model_download", { url, component, filename, tier });
+/**
+ * Start (or resume) a brain download. Rust takes only the pinned URL of the
+ * tier asked for, and answers with the download's number, which every one
+ * of its events carries (`generation`).
+ */
+export async function startModelDownload(url: string, component: string, filename: string, tier: string): Promise<number | undefined> {
+  return invoke<number | undefined>("start_model_download", { url, component, filename, tier });
 }
 
 /**

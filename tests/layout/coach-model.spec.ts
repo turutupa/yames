@@ -140,10 +140,40 @@ async function openMenu(page: Page, scene: string, size: (typeof SIZES)[number],
   await openShot(page, scene, { width: size.width, height: size.height }, theme);
   await page.mouse.click(5, 300);
   await page.keyboard.press("c");
-  await expect(page.locator(".coach-card.coach-card-open")).toBeVisible();
+  await expect(page.locator(".ask-panel")).toBeVisible();
   await settleAnimations(page);
   await page.locator(".coach-model-button").click();
   await expect(page.locator(".coach-model-menu")).toBeVisible();
+}
+
+// ms2b: an older copy of a model on disk, in Settings → Coach, with its own
+// Remove inside the section at every width; the Remove takes only that line.
+for (const width of [520, 1024, 1400]) {
+  test(`an older copy of a model in Settings, at ${width}px`, async ({ page }) => {
+    test.slow();
+    await openShot(page, "coach-model-olderCopy", { width, height: 900 });
+    const older = page.locator("[data-older-copy]");
+    await older.scrollIntoViewIfNeeded();
+    await expect(older).toContainText("An older copy of this model is also on disk · 5.0 GB");
+    const m = await older.evaluate((el) => {
+      const panel = el.closest("section.settings-section")!.getBoundingClientRect();
+      const b = el.querySelector("button")!.getBoundingClientRect();
+      const label = el.querySelector(".coach-tier-name")!.getBoundingClientRect();
+      return { panel: { l: panel.left, r: panel.right }, b: { l: b.left, r: b.right, w: b.width, t: b.top, bt: b.bottom }, label: { r: label.right, t: label.top, bt: label.bottom } };
+    });
+    expect(m.b.w, "the Remove has a size").toBeGreaterThan(10);
+    expect(m.b.l, "the Remove starts inside the section").toBeGreaterThanOrEqual(m.panel.l - 0.5);
+    expect(m.b.r, "the Remove ends inside the section").toBeLessThanOrEqual(m.panel.r + 0.5);
+    const sideBySide = m.label.r <= m.b.l + 0.5;
+    const stacked = m.label.bt <= m.b.t + 0.5 || m.b.bt <= m.label.t + 0.5;
+    expect(sideBySide || stacked, "the line and its Remove overlap").toBe(true);
+    expect(await notHitTestable(page, "[data-older-copy] button")).toEqual([]);
+    if (SHOTS_DIR) await page.screenshot({ path: `${SHOTS_DIR}/settings-older-copy-${width}.png` });
+
+    await older.locator("button").click();
+    await expect(page.locator("[data-older-copy]")).toHaveCount(0);
+    await expect(page.locator(".coach-tier-item")).toHaveCount(2);
+  });
 }
 
 // ms2: both tiers on disk, room on disk, a pause kept from before, the check.

@@ -126,6 +126,8 @@
       "removing": "Wird entfernt…",
       "removeTier": "Entfernen",
       "removeTierLabel": "{{name}} entfernen",
+      "olderCopy": "Eine ältere Kopie dieses Modells liegt ebenfalls auf der Festplatte · {{size}}",
+      "removeOlderCopyLabel": "Die ältere Kopie von {{name}} entfernen",
       "removeModels": "Modelle entfernen",
       "stance": "Coaching-Stil",
       "stanceHint": "Wie streng der Coach in den Werkzeugen mit dir ist, während du spielst",

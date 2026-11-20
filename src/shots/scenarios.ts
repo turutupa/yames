@@ -390,8 +390,10 @@ export interface Shot {
    * `lowStorage` (3.1 GB free: Studio does not fit, Standard only just),
    * `paused` (1.2 GB of Studio kept from before; Cancel removes it), and
    * `checking` (a press answers with the checksum stage at 60%).
+   * ms2b: `olderCopy`, both on disk and an older copy of Studio (5.0 GB) left
+   * in the old place, which Settings → Coach lists with its own Remove.
    */
-  coachModel?: "notDownloaded" | "bothOnDisk" | "lowStorage" | "paused" | "checking";
+  coachModel?: "notDownloaded" | "bothOnDisk" | "lowStorage" | "paused" | "checking" | "olderCopy";
   /**
    * The first-run wizard, over a store with no player in it (MVP, 2026-11-16).
    *
@@ -548,6 +550,18 @@ export const SHOTS: Shot[] = [
     height: 900,
     settleMs: 400,
   })),
+  {
+    // ms2b: Settings → Coach with an older copy of a model on disk.
+    id: "coach-model-olderCopy",
+    suffix: "coach-model-olderCopy",
+    window: "main",
+    tab: "beat",
+    coachModel: "olderCopy",
+    settings: {},
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
   {
     id: "drill",
     suffix: "drill",

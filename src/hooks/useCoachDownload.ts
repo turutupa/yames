@@ -207,7 +207,22 @@ export function useCoachDownload() {
     getModelStatus().then(setModelStatus).catch(() => {});
   }, []);
 
+  /**
+   * Rust numbers downloads in the order they start, and every event carries
+   * its download's number (`generation`). An event from a download older
+   * than the one this hook started last is a stopped thread's late word
+   * (Pause then a quick Resume, Cancel then Download) and must not clear the
+   * newer download's state. `latestGenRef` is the highest number seen or
+   * returned; `floorGenRef` the oldest still listened to. Events without a
+   * number (an older backend) are taken as before.
+   */
+  const latestGenRef = useRef(0);
+  const floorGenRef = useRef(0);
+
   const handleStartDownload = useCallback(async (tier: ModelTier, opts?: { select?: boolean }) => {
+    // Anything numbered before this start is stale from here on, even before
+    // Rust answers with this download's own number.
+    floorGenRef.current = latestGenRef.current + 1;
     selectOnFinishRef.current = opts?.select ?? true;
     runningTierRef.current = tier;
     brainFractionRef.current = null;
@@ -228,7 +243,11 @@ export function useCoachDownload() {
       done: false,
     });
     try {
-      await startModelDownload(MODEL_URLS[tier], "brain", "model.bin", tier);
+      const generation = await startModelDownload(MODEL_URLS[tier], "brain", "model.bin", tier);
+      if (typeof generation === "number") {
+        latestGenRef.current = Math.max(latestGenRef.current, generation);
+        floorGenRef.current = generation;
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setDownloadError(msg);
@@ -242,7 +261,15 @@ export function useCoachDownload() {
 
   // Subscribe to backend progress / completion events.
   useEffect(() => {
+    /** False for a stale download's event; notes the number otherwise. */
+    const current = (generation: number | undefined) => {
+      if (typeof generation !== "number") return true;
+      if (generation < floorGenRef.current) return false;
+      latestGenRef.current = Math.max(latestGenRef.current, generation);
+      return true;
+    };
     const unsubProgress = onDownloadProgress((progress) => {
+      if (!current(progress.generation)) return;
       if (progress.component === "brain" && progress.stage !== "checking") {
         brainFractionRef.current = progress.fraction;
         if (progress.totalBytes > 0) {
@@ -255,6 +282,7 @@ export function useCoachDownload() {
       }
     });
     const unsubComplete = onDownloadComplete((result) => {
+      if (!current(result.generation)) return;
       const ranTier = runningTierRef.current;
       runningTierRef.current = null;
       if (ranTier && result.cancelled && result.discarded) {

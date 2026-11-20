@@ -126,6 +126,8 @@
       "removing": "Usuwanie…",
       "removeTier": "Usuń",
       "removeTierLabel": "Usuń {{name}}",
+      "olderCopy": "Na dysku jest też starsza kopia tego modelu · {{size}}",
+      "removeOlderCopyLabel": "Usuń starszą kopię {{name}}",
       "removeModels": "Usuń modele",
       "stance": "Styl prowadzenia",
       "stanceHint": "Jak surowy jest trener, gdy grasz w narzędziach",

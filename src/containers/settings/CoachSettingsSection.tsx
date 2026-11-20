@@ -112,8 +112,9 @@ export function CoachSettingsSection({
   // (the OS refuses to unlink a mapped file, which is why the backend
   // now unloads the worker first).
   const [removeError, setRemoveError] = useState<string | null>(null);
-  // The one tier being removed by its own Remove, if any.
-  const [removingTier, setRemovingTier] = useState<ModelTier | null>(null);
+  // The one tier being removed by its own Remove, if any; `<tier>-older` for
+  // the older copy of a tier.
+  const [removingTier, setRemovingTier] = useState<ModelTier | `${ModelTier}-older` | null>(null);
   // Which voice (if any) is currently mid-preview. Drives the inline
   // equalizer-style bars rendered inside that voice's toggle button so
   // the user gets visible feedback during the 200-1500 ms synthesis
@@ -801,7 +802,38 @@ export function CoachSettingsSection({
                   // The selector's units, so the two say the same size.
                   size: gbText(onDisk.sizeBytes, i18n.language),
                 });
-                return (
+                // An older copy of this model left in the old single place
+                // (an older build wrote there again): reported with its own
+                // Remove, and removed by nothing else (ms2b).
+                const olderBytes = onDisk.olderCopyBytes ?? 0;
+                const olderRow = olderBytes > 0 && (
+                  <li key={`${tier}-older`} className="coach-tier-item coach-tier-older" data-tier={tier} data-older-copy="">
+                    <span className="setting-hint coach-tier-name">
+                      {t("settings.coach.olderCopy", { size: gbText(olderBytes, i18n.language) })}
+                    </span>
+                    <button
+                      className="coach-download-btn coach-tier-remove"
+                      disabled={removing || removingTier !== null}
+                      aria-label={t("settings.coach.removeOlderCopyLabel", { name })}
+                      onClick={async () => {
+                        setRemovingTier(`${tier}-older`);
+                        setRemoveError(null);
+                        try {
+                          await deleteModels(tier, { olderCopy: true });
+                          setModelStatus(await getModelStatus());
+                        } catch (err) {
+                          setRemoveError(err instanceof Error ? err.message : String(err));
+                          getModelStatus().then(setModelStatus).catch(() => {});
+                        } finally {
+                          setRemovingTier(null);
+                        }
+                      }}
+                    >
+                      {removingTier === `${tier}-older` ? t("settings.coach.removing") : t("settings.coach.removeTier")}
+                    </button>
+                  </li>
+                );
+                return [
                   <li key={tier} className="coach-tier-item" data-tier={tier}>
                     <span className="setting-hint coach-tier-name">{name}</span>
                     <button
@@ -830,8 +862,9 @@ export function CoachSettingsSection({
                     >
                       {removingTier === tier ? t("settings.coach.removing") : t("settings.coach.removeTier")}
                     </button>
-                  </li>
-                );
+                  </li>,
+                  olderRow,
+                ];
               })}
             </ul>
           )}

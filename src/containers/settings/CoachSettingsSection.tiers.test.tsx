@@ -104,4 +104,23 @@ describe("Settings → Coach, each model on disk on its own (ms2)", () => {
     const deletes = mockInvoke.mock.calls.filter(([c]) => c === "delete_models");
     expect(deletes[0][1]).toEqual({ tier: "standard" });
   });
+
+  it("an older copy of a model is shown with its size and its own Remove, which removes only it (ms2b)", async () => {
+    const disk = status(["standard", "full"]);
+    disk.tiers![1].olderCopyBytes = 5_027_783_488;
+    setInvokeResponse("get_model_status", () => status(["standard", "full"]));
+    const { setCoachBrainTier, setModelStatus } = renderSection("full", disk);
+    const list = screen.getByTestId("coach-tier-list");
+    expect(list.textContent).toContain("An older copy of this model is also on disk · 5.0 GB");
+    expect(list.querySelectorAll("[data-older-copy]")).toHaveLength(1);
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /^Remove the older copy of Studio/ }));
+    });
+    await waitFor(() => expect(setModelStatus).toHaveBeenCalled());
+    const deletes = mockInvoke.mock.calls.filter(([c]) => c === "delete_models");
+    expect(deletes).toHaveLength(1);
+    expect(deletes[0][1]).toEqual({ tier: "full", olderCopy: true });
+    // The model in use stays, and so does the choice.
+    expect(setCoachBrainTier).not.toHaveBeenCalled();
+  });
 });

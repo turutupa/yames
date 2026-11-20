@@ -126,6 +126,8 @@
       "removing": "Rimozione in corso…",
       "removeTier": "Rimuovi",
       "removeTierLabel": "Rimuovi {{name}}",
+      "olderCopy": "Sul disco c'è anche una copia più vecchia di questo modello · {{size}}",
+      "removeOlderCopyLabel": "Rimuovi la copia più vecchia di {{name}}",
       "removeModels": "Rimuovi modelli",
       "stance": "Stile di coaching",
       "stanceHint": "Quanto è severo il coach mentre suoni negli strumenti",

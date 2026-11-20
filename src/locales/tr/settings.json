@@ -126,6 +126,8 @@
       "removing": "Kaldırılıyor…",
       "removeTier": "Kaldır",
       "removeTierLabel": "{{name}} modelini kaldır",
+      "olderCopy": "Bu modelin daha eski bir kopyası da diskte duruyor · {{size}}",
+      "removeOlderCopyLabel": "{{name}} modelinin eski kopyasını kaldır",
       "removeModels": "Modelleri kaldır",
       "stance": "Koçluk tarzı",
       "stanceHint": "Araçlarda çalarken koçun sana ne kadar sert davrandığı",

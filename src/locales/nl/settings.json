@@ -126,6 +126,8 @@
       "removing": "Verwijderen…",
       "removeTier": "Verwijderen",
       "removeTierLabel": "{{name}} verwijderen",
+      "olderCopy": "Er staat ook een oudere kopie van dit model op de schijf · {{size}}",
+      "removeOlderCopyLabel": "De oudere kopie van {{name}} verwijderen",
       "removeModels": "Modellen verwijderen",
       "stance": "Manier van coachen",
       "stanceHint": "Hoe streng de coach is terwijl je in de tools speelt",

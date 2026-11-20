@@ -296,6 +296,8 @@ const SHOT_TAKE_JAM = "shot-song";
 
 /** The coach model scenes' download: whether one runs, and whether a cancel removed its bytes. */
 const coachDl = { running: false, discarded: false };
+/** The `olderCopy` scene: whether its Remove was pressed. */
+const coachOlderCopyRemoved = { value: false };
 
 /**
  * `get_model_status` as an ms2 backend answers it for the coach model scenes:
@@ -303,7 +305,7 @@ const coachDl = { running: false, discarded: false };
  */
 function coachModelStatus(world: NonNullable<Shot["coachModel"]>, discarded: boolean) {
   const sizes = { standard: 2_497_280_256, full: 5_027_783_488 } as const;
-  const both = world === "bothOnDisk";
+  const both = world === "bothOnDisk" || world === "olderCopy";
   const tiers = (["standard", "full"] as const).map((tier) => ({
     tier,
     onDisk: both,
@@ -313,6 +315,7 @@ function coachModelStatus(world: NonNullable<Shot["coachModel"]>, discarded: boo
     partialBytes: world === "paused" && tier === "full" && !discarded ? 1_200_000_000 : 0,
     downloadBytes: sizes[tier],
     checksumPinned: true,
+    olderCopyBytes: world === "olderCopy" && tier === "full" && !coachOlderCopyRemoved.value ? sizes.full : 0,
   }));
   return {
     brainReady: both,
@@ -1496,6 +1499,11 @@ export function installShotMock(shot: Shot, theme: string): void {
                 }),
               50,
             );
+            return null;
+          },
+          // ms2b: the older copy's own Remove.
+          delete_models: (a) => {
+            if (a?.olderCopy === true) coachOlderCopyRemoved.value = true;
             return null;
           },
           // Rust's cancel: a pause keeps the bytes; with `discard` it removes
