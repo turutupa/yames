@@ -104,6 +104,7 @@ fn measure(model: &mut dyn NoteModel, samples: &[f32], rate: u32, truth: &Truth,
     let (mut beats, mut verdicts) = (Vec::new(), Vec::new());
     if from_annotation {
         feed_notes(&mut engine, &truth.notes, truth.seconds);
+        engine.finish();
         beats = engine.take_beats();
         verdicts = engine.take_verdicts();
     } else {
@@ -111,17 +112,42 @@ fn measure(model: &mut dyn NoteModel, samples: &[f32], rate: u32, truth: &Truth,
             beats.extend(e.take_beats());
             verdicts.extend(e.take_verdicts());
         })?;
+        engine.finish();
+        beats.extend(engine.take_beats());
+        verdicts.extend(engine.take_verdicts());
     }
+    // `HARMONY_DEBUG_BEATS=1`: a line per recording (wrong roots by interval
+    // above the true one; `near`: wrong, and the chord of a neighbouring
+    // beat). `HARMONY_DEBUG_SEQ=<part of a name>`: truth/answer per beat.
+    let mut wrong_by = [0u32; 12];
+    let mut near = 0u32;
     for b in &beats {
-        let Some((root, _)) = truth.chord_at(0.5 * (b.t0 + b.t1)) else { continue };
+        let mid = 0.5 * (b.t0 + b.t1);
+        let Some((root, _)) = truth.chord_at(mid) else { continue };
         cell.beats += 1;
         if let Some(c) = &b.chord {
             cell.answered += 1;
             if c.root == root {
                 cell.answered_right += 1;
                 cell.root_right += 1;
+            } else {
+                wrong_by[((c.root + 12 - root) % 12) as usize] += 1;
+                let len = b.t1 - b.t0;
+                near += u32::from([mid - len, mid + len].iter().any(|t| truth.chord_at(*t).is_some_and(|x| x.0 == c.root)));
             }
         }
+    }
+    if std::env::var("HARMONY_DEBUG_SEQ").is_ok_and(|v| truth.name.contains(&v)) {
+        const N: [&str; 12] = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
+        let line: Vec<String> = beats.iter().map(|b| {
+            let t = truth.chord_at(0.5 * (b.t0 + b.t1)).map_or("-".to_string(), |c| format!("{}{}", N[c.0 as usize], if c.1 { "m" } else { "" }));
+            let e = b.chord.as_ref().map_or("?".to_string(), |c| format!("{}{}", N[c.root as usize], if c.quality.is_some_and(|q| q.is_minor()) { "m" } else { "" }));
+            format!("{t}/{e}")
+        }).collect();
+        eprintln!("SEQ {} {} {}", truth.name, if from_annotation { "ann" } else { "mic" }, line.join(" "));
+    }
+    if std::env::var("HARMONY_DEBUG_BEATS").is_ok() {
+        eprintln!("BEATS {} {} {} beats {} answered {} right {} near {} wrong_by {:?}", truth.name, truth.style, if from_annotation { "ann" } else { "mic" }, cell.beats, cell.answered, cell.root_right, near, wrong_by);
     }
     if truth.seconds >= 15.0 {
         cell.key15.push(key_score(leading_at(&beats, 15.0), truth.key));
@@ -465,6 +491,9 @@ pub fn run_guitarset(root: &Path, jobs: usize, limit: Option<usize>) -> Result<B
         let step = (files.len() / n.max(1)).max(1);
         files = files.into_iter().step_by(step).collect();
     }
+    // `HARMONY_ANNOTATION_ONLY=1`: only the annotated notes (seconds, no
+    // audio): for working on the engine's rules.
+    let annotation_only = std::env::var("HARMONY_ANNOTATION_ONLY").is_ok();
     let next = AtomicUsize::new(0);
     let results: Mutex<Vec<(String, String, Cell)>> = Mutex::new(Vec::new());
     let failure: Mutex<Option<String>> = Mutex::new(None);
@@ -484,15 +513,20 @@ pub fn run_guitarset(root: &Path, jobs: usize, limit: Option<usize>) -> Result<B
                     let style = if stem.ends_with("solo") { "solo" } else { "strummed" };
                     let one = (|| {
                         let truth = load_jams(&files[i], style)?;
+                        let ann = measure(model.as_mut(), &[], 44_100, &truth, true)?;
+                        if annotation_only {
+                            return Ok((None, ann));
+                        }
                         let (audio, rate) = decode_mono_file(&root.join("audio_mono-mic").join(format!("{stem}_mic.wav")))?;
                         let mic = measure(model.as_mut(), &audio, rate, &truth, false)?;
-                        let ann = measure(model.as_mut(), &[], rate, &truth, true)?;
-                        Ok::<_, String>((mic, ann))
+                        Ok::<_, String>((Some(mic), ann))
                     })();
                     match one {
                         Ok((mic, ann)) => {
                             let mut r = results.lock().unwrap();
-                            r.push(("gs_mic".into(), style.into(), mic));
+                            if let Some(mic) = mic {
+                                r.push(("gs_mic".into(), style.into(), mic));
+                            }
                             r.push(("gs_annotation".into(), style.into(), ann));
                             if r.len() % 80 == 0 {
                                 eprintln!("{}/{} excerpts", r.len() / 2, files.len());

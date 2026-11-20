@@ -50,8 +50,21 @@ const RELATIVE_MARGIN: f32 = 0.06;
 const CHORD_STAY: f32 = 0.6;
 /// The bonus when the lowest note of the beat is the root.
 const CHORD_BASS_BONUS: f32 = 0.25;
-/// A beat is a chord and not a line when this many voices sound on average.
-const CHORD_MIN_POLYPHONY: f32 = 1.6;
+/// A seventh over the triad counts this much for the chord (and is not held
+/// against it): Am7 is A C E G, not C major with an A; Cmaj7 is not E minor.
+const CHORD_SEVENTH_GAIN: f32 = 0.25;
+/// A beat is a chord and not a line when this many voices sound on average
+/// ...
+const CHORD_MIN_POLYPHONY: f32 = 1.2;
+/// ... and this many sound at one moment: a strum, not two notes of a line
+/// ringing into each other.
+const CHORD_MIN_VOICES: u32 = 3;
+/// The chord of a beat is decided this many beats after it closed: the
+/// beat after it is read first (fixed-lag smoothing on the chord path). See
+/// [`Reading::chord`] for what that does to the readout.
+pub const CHORD_LAG_BEATS: usize = 1;
+/// A chord is counted through this many beats in which nothing sounded.
+const CHORD_HOLD_BEATS: u32 = 1;
 /// And at least this share of what sounded is the triad's.
 const CHORD_MIN_COVER: f32 = 0.5;
 /// A beat that goes on with the chord of the beats before it needs only
@@ -298,7 +311,12 @@ pub struct Reading {
     /// `None` while listening; present and not to be shown as fact while
     /// `Unsure`.
     pub key: Option<KeyReading>,
-    /// The chord of the last whole beat; `None` is "couldn't tell".
+    /// The newest chord decided; `None` is "couldn't tell". Without a chart
+    /// a beat's chord is decided when the beat after it has closed
+    /// ([`CHORD_LAG_BEATS`]), so this is the chord of the last beat but one:
+    /// between one and two beats behind the notes the engine has been
+    /// handed (0.5 to 1 s at 120 BPM), on top of the capture layer's own
+    /// second. With a chart it is the chord of the last whole beat.
     pub chord: Option<ChordReading>,
     pub notes: Tally,
     /// Seconds since the engine started at which the key first settled.
@@ -333,6 +351,23 @@ struct Mark {
     beat_s: f64,
 }
 
+/// A closed beat whose chord is not decided yet.
+#[derive(Debug, Clone, Copy)]
+struct Frame {
+    t0: f64,
+    t1: f64,
+    chroma: [f32; 12],
+    total: f32,
+    silent: bool,
+    /// The most voices that sounded at once.
+    voices: u32,
+    /// `back[k]`: the chord of the beat before on the best path that has
+    /// chord `k` in this beat.
+    back: [u8; 24],
+    leading: Option<Key>,
+    key_state: KeyState,
+}
+
 #[derive(Debug, Clone, Copy)]
 struct Pending {
     t: f64,
@@ -360,6 +395,8 @@ pub struct Engine {
     path: [f32; 24],
     chords: VecDeque<(f64, f64, Option<ChordReading>)>,
     silent_beats: u32,
+    frames: VecDeque<Frame>,
+    quiet_run: u32,
     tally: Tally,
     beats_out: VecDeque<BeatOut>,
     verdicts: VecDeque<NoteVerdict>,
@@ -389,6 +426,8 @@ impl Engine {
             path: [0.0; 24],
             chords: VecDeque::new(),
             silent_beats: 0,
+            frames: VecDeque::with_capacity(8),
+            quiet_run: 0,
             tally: Tally::default(),
             beats_out: VecDeque::new(),
             verdicts: VecDeque::new(),
@@ -520,10 +559,17 @@ impl Engine {
         let mut chroma = [0.0f32; 12];
         let mut bass: Option<i32> = None;
         let mut weight = [0.0f32; 12];
+        let mut voices = 0u32;
         for s in &self.segs {
             let ov = s.t1.min(b1) - s.t0.max(b0);
             if ov <= 0.0 {
                 continue;
+            }
+            // how many sound a moment after this one starts (a strum's
+            // strings start within a few tens of ms of each other)
+            let at = s.t0.max(b0) + 0.04;
+            if at < b1 {
+                voices = voices.max(self.segs.iter().filter(|o| o.t0 <= at && o.t1 > at).count() as u32);
             }
             let pc = s.midi.rem_euclid(12) as usize;
             chroma[pc] += ov as f32;
@@ -550,17 +596,37 @@ impl Engine {
         self.update_key_at(b1);
 
         // chord
-        let chord = if self.chart.bars.is_empty() { self.estimate_chord(&chroma, bass, len) } else { self.chart_chord_at(0.5 * (b0 + b1)) };
+        if self.chart.bars.is_empty() {
+            let frame = self.advance_path(b0, b1, &chroma, bass, voices);
+            self.frames.push_back(frame);
+            while self.frames.len() > CHORD_LAG_BEATS {
+                self.decide_front();
+            }
+        } else {
+            let chord = self.chart_chord_at(0.5 * (b0 + b1));
+            self.emit_beat(b0, b1, chord, self.leader, self.key_state);
+        }
+    }
+
+    /// Decide the beats still held back ([`CHORD_LAG_BEATS`]) with what is
+    /// known now: the input ended. Nothing else needs it; a live reading
+    /// simply stays one beat behind.
+    pub fn finish(&mut self) {
+        while !self.frames.is_empty() {
+            self.decide_front();
+        }
+    }
+
+    fn emit_beat(&mut self, b0: f64, b1: f64, chord: Option<ChordReading>, leading: Option<Key>, key_state: KeyState) {
         self.chords.push_back((b0, b1, chord.clone()));
         while self.chords.len() > 16 {
             self.chords.pop_front();
         }
-        self.beats_out.push_back(BeatOut { t0: b0, t1: b1, chord, leading: self.leader, key_state: self.key_state });
+        self.beats_out.push_back(BeatOut { t0: b0, t1: b1, chord, leading, key_state });
         while self.beats_out.len() > KEEP {
             self.beats_out.pop_front();
         }
-
-        self.classify(b1, len);
+        self.classify(b1, b1 - b0);
     }
 
     fn update_key(&mut self) {
@@ -629,46 +695,81 @@ impl Engine {
         }
     }
 
-    fn estimate_chord(&mut self, chroma: &[f32; 12], bass: Option<i32>, len: f64) -> Option<ChordReading> {
+    /// One step of the chord path over the beat that just closed.
+    fn advance_path(&mut self, b0: f64, b1: f64, chroma: &[f32; 12], bass: Option<i32>, voices: u32) -> Frame {
+        let len = (b1 - b0) as f32;
         let total: f32 = chroma.iter().sum();
-        if total < 0.15 * len as f32 {
+        let mut frame = Frame { t0: b0, t1: b1, chroma: *chroma, total, silent: false, voices, back: std::array::from_fn(|k| k as u8), leading: self.leader, key_state: self.key_state };
+        if total < 0.15 * len {
             // Nothing sounded: the path is kept for two beats (a rest in a
             // strummed bar), then forgotten.
+            frame.silent = true;
             self.silent_beats += 1;
             if self.silent_beats > 2 {
                 self.path = [0.0; 24];
             }
-            return None;
+            return frame;
         }
         self.silent_beats = 0;
         let bass_pc = bass.map(|b| b.rem_euclid(12) as usize);
-        let best_prev = self.path.iter().copied().fold(f32::MIN, f32::max);
-        let mut emit = [0.0f32; 24];
-        for (k, e) in emit.iter_mut().enumerate() {
+        let top_prev = (0..24).max_by(|a, b| self.path[*a].total_cmp(&self.path[*b])).unwrap_or(0);
+        let best_prev = self.path[top_prev];
+        for k in 0..24 {
             let (root, minor) = (k / 2, k % 2 == 1);
             let third = if minor { 3 } else { 4 };
-            let inside = (chroma[root] + chroma[(root + third) % 12] + chroma[(root + 7) % 12]) / total;
-            *e = inside - 0.5 * (1.0 - inside) + if bass_pc == Some(root) { CHORD_BASS_BONUS } else { 0.0 };
+            let triad = (chroma[root] + chroma[(root + third) % 12] + chroma[(root + 7) % 12]) / total;
+            let seventh = if minor { chroma[(root + 10) % 12] } else { chroma[(root + 10) % 12].max(chroma[(root + 11) % 12]) } / total;
+            let emit = triad + CHORD_SEVENTH_GAIN * seventh - 0.5 * (1.0 - triad - seventh) + if bass_pc == Some(root) { CHORD_BASS_BONUS } else { 0.0 };
+            if self.path[k] < best_prev - CHORD_STAY {
+                frame.back[k] = top_prev as u8;
+                self.path[k] = best_prev - CHORD_STAY;
+            }
+            self.path[k] += emit;
         }
-        for k in 0..24 {
-            self.path[k] = self.path[k].max(best_prev - CHORD_STAY) + emit[k];
-        }
-        let top = (0..24).max_by(|a, b| self.path[*a].total_cmp(&self.path[*b])).unwrap_or(0);
-        let peak = self.path[top];
+        let peak = self.path.iter().copied().fold(f32::MIN, f32::max);
         self.path.iter_mut().for_each(|v| *v -= peak);
+        frame
+    }
 
-        let (root, minor) = (top / 2, top % 2 == 1);
+    /// Name the chord of the oldest undecided beat: its place on the path
+    /// that is best now, the beats after it included (a Viterbi backtrace
+    /// over the window, [`CHORD_LAG_BEATS`] deep).
+    fn decide_front(&mut self) {
+        let Some(frame) = self.frames.front().copied() else { return };
+        let mut state = (0..24).max_by(|a, b| self.path[*a].total_cmp(&self.path[*b])).unwrap_or(0);
+        for f in self.frames.iter().skip(1).rev() {
+            state = f.back[state] as usize;
+        }
+        let chord = self.gate(&frame, state);
+        self.frames.pop_front();
+        self.emit_beat(frame.t0, frame.t1, chord, frame.leading, frame.key_state);
+    }
+
+    /// The path's chord for `frame`, or "couldn't tell": it is named when
+    /// the beat held a chord, when it goes on with the chord of the beats
+    /// around it (a bass note or a fill inside a strummed bar), or for one
+    /// quiet beat after a chord.
+    fn gate(&mut self, frame: &Frame, state: usize) -> Option<ChordReading> {
+        if frame.silent {
+            self.quiet_run += 1;
+            return if self.quiet_run <= CHORD_HOLD_BEATS { self.chords.back().and_then(|c| c.2.clone()) } else { None };
+        }
+        let (root, minor) = (state / 2, state % 2 == 1);
         let third = if minor { 3 } else { 4 };
-        let cover = (chroma[root] + chroma[(root + third) % 12] + chroma[(root + 7) % 12]) / total;
-        let polyphony = total / len as f32;
-        let chordal = polyphony >= CHORD_MIN_POLYPHONY && cover >= CHORD_MIN_COVER;
-        // the chord named in one of the last four beats, still on top
-        let goes_on = cover >= CHORD_CONTINUE_COVER
-            && self.chords.iter().rev().take(4).any(|c| c.2.as_ref().is_some_and(|c| !c.from_chart && c.root as usize == root && c.quality.is_some_and(|q| q.is_minor() == minor)));
-        if !chordal && !goes_on {
+        let cover_of = |f: &Frame| (f.chroma[root] + f.chroma[(root + third) % 12] + f.chroma[(root + 7) % 12]) / f.total.max(1e-9);
+        let chordal = |f: &Frame| !f.silent && f.voices >= CHORD_MIN_VOICES && f.total / (f.t1 - f.t0) as f32 >= CHORD_MIN_POLYPHONY && cover_of(f) >= CHORD_MIN_COVER;
+        // the chord named in one of the last four beats, or held by a beat
+        // after this one
+        let before = self.chords.iter().rev().take(4).any(|c| c.2.as_ref().is_some_and(|c| !c.from_chart && c.root as usize == root && c.quality.is_some_and(|q| q.is_minor() == minor)));
+        let after = self.frames.iter().skip(1).any(chordal);
+        let goes_on = cover_of(frame) >= CHORD_CONTINUE_COVER && (before || after);
+        if !chordal(frame) && !goes_on {
+            // a line is not a rest: nothing is held through it
+            self.quiet_run = self.quiet_run.max(CHORD_HOLD_BEATS);
             return None;
         }
-        let share = |d: usize| chroma[(root + d) % 12] / total;
+        self.quiet_run = 0;
+        let share = |d: usize| frame.chroma[(root + d) % 12] / frame.total;
         let quality = match (minor, share(10) >= SEVENTH_SHARE, share(11) >= SEVENTH_SHARE) {
             (true, true, _) => Quality::Min7,
             (true, false, _) => Quality::Min,
@@ -800,9 +901,10 @@ mod tests {
 
     const C: i32 = 60;
 
+    /// A guitar's five-string shape: root, fifth, root, third, fifth.
     fn strum(out: &mut Vec<(f64, f64, i32)>, t: f64, dur: f64, root: i32, minor: bool) {
         let third = if minor { 3 } else { 4 };
-        for m in [root - 12, root, root + third, root + 7, root + 12] {
+        for m in [root - 12, root - 5, root, root + third, root + 7] {
             out.push((t, dur, m));
         }
     }
@@ -830,20 +932,100 @@ mod tests {
         let mut e = Engine::new(None);
         feed_notes(&mut e, &notes, 32.0);
         let r = e.reading();
-        // Even triads of I vi IV V fit F major nearly as well as C: the key
-        // leads, and whether it settles is the margin's business (real
-        // strumming does, on GuitarSet: `MEASURE.md`).
-        assert_ne!(r.key_state, KeyState::Listening);
+        assert_eq!(r.key_state, KeyState::Settled);
         assert_eq!(r.key.unwrap().key, c_major());
-        if let Some(settled) = r.settled_at_s {
-            assert!(settled >= KEY_HOLD_S, "settled at {settled}");
-        }
+        let settled = r.settled_at_s.expect("settled");
+        assert!((KEY_HOLD_S..=20.0).contains(&settled), "settled at {settled}");
         let beats = e.take_beats();
         let roots = [0u8, 9, 5, 7];
         let right = beats.iter().filter(|b| b.chord.as_ref().is_some_and(|c| c.root == roots[(b.t0 / 2.0) as usize % 4])).count();
         assert!(right as f64 >= 0.9 * beats.len() as f64, "{right} of {} beats", beats.len());
         let minor = beats.iter().filter(|b| (b.t0 / 2.0) as usize % 4 == 1).all(|b| b.chord.as_ref().is_some_and(|c| c.quality == Some(Quality::Min)));
         assert!(minor, "the vi chord is minor");
+    }
+
+    /// Why this file's strum is a guitar shape and not root, root, third,
+    /// fifth, root: the key histogram counts every voice, so with the root
+    /// in three of five voices I vi IV V weighs C 5, A 4, G 4, F 3, E 2, and
+    /// F major (F A C) fits as well as C major (C E G). The lead then goes
+    /// to F after each IV bar and back to C after each I bar, every 4 s, and
+    /// no key leads for `KEY_HOLD_S`: nothing settles, which is the honest
+    /// answer for those notes. Counting a pitch class once a beat settles
+    /// this on C, and was measured worse on real recordings (GuitarSet
+    /// microphone, strummed: key score at 30 s 0.83 to 0.81, settled 96% to
+    /// 92%), so every voice still counts.
+    #[test]
+    fn a_root_in_three_octaves_leans_to_the_subdominant_and_does_not_settle_wrong() {
+        let mut notes = Vec::new();
+        for bar in 0..16 {
+            let (root, minor) = [(C, false), (C + 9, true), (C + 5, false), (C + 7, false)][bar % 4];
+            for beat in 0..4 {
+                for m in [root - 12, root, root + if minor { 3 } else { 4 }, root + 7, root + 12] {
+                    notes.push((bar as f64 * 2.0 + beat as f64 * 0.5, 0.45, m));
+                }
+            }
+        }
+        let mut e = Engine::new(None);
+        feed_notes(&mut e, &notes, 32.0);
+        let r = e.reading();
+        assert_ne!(r.key_state, KeyState::Listening);
+        let leads = r.key.unwrap().key;
+        assert!(leads == c_major() || leads == Key { tonic: 5, mode: Mode::Major }, "{leads:?}");
+        assert!(r.key_state != KeyState::Settled || leads == c_major());
+    }
+
+    #[test]
+    fn a_beats_chord_is_decided_one_beat_late_and_finish_decides_the_rest() {
+        let mut e = Engine::new(None);
+        feed_notes(&mut e, &progression(4), 8.0);
+        // 16 beats closed, the last one waits for the beat after it
+        let beats = e.take_beats();
+        assert_eq!(beats.len(), 16 - CHORD_LAG_BEATS);
+        // the first beat of each new chord is that chord: the beat after it
+        // was read before it was named
+        for bar in 1..4 {
+            let first = beats.iter().find(|b| (b.t0 - bar as f64 * 2.0).abs() < 1e-6).unwrap();
+            assert_eq!(first.chord.as_ref().map(|c| c.root), Some([0u8, 9, 5, 7][bar]), "bar {bar}");
+        }
+        assert_eq!(e.reading().chord.map(|c| c.root), Some(7));
+        e.finish();
+        assert_eq!(e.take_beats().len(), CHORD_LAG_BEATS);
+    }
+
+    #[test]
+    fn a_chord_is_held_through_one_quiet_beat_and_no_further() {
+        let mut notes = Vec::new();
+        for beat in [0, 1, 2, 3, 5, 6, 7] {
+            strum(&mut notes, beat as f64 * 0.5, 0.45, C, false);
+        }
+        let mut e = Engine::new(None);
+        feed_notes(&mut e, &notes, 8.0);
+        e.finish();
+        let named: Vec<bool> = e.take_beats().iter().map(|b| b.chord.as_ref().is_some_and(|c| c.root == 0)).collect();
+        assert_eq!(named[..8], [true; 8], "the rest on beat 4 is still C");
+        assert_eq!(named[8..], [true, false, false, false, false, false, false, false], "one quiet beat, then nothing");
+    }
+
+    #[test]
+    fn two_notes_ringing_into_each_other_are_a_line_and_a_minor_seventh_is_its_roots_chord() {
+        // a line in overlapping thirds: two voices on average, never three at once
+        let line: Vec<_> = (0..32).map(|i| (i as f64 * 0.25, 0.5, 60 + [0, 4, 7, 4][i % 4])).collect();
+        let mut e = Engine::new(None);
+        feed_notes(&mut e, &line, 8.0);
+        e.finish();
+        assert!(e.take_beats().iter().all(|b| b.chord.is_none()));
+        // Am7 with the fifth in the bass: A C E G is A minor seventh, not C
+        let mut notes = Vec::new();
+        for beat in 0..8 {
+            for m in [52, 57, 60, 67] {
+                notes.push((beat as f64 * 0.5, 0.45, m));
+            }
+        }
+        let mut e = Engine::new(None);
+        feed_notes(&mut e, &notes, 4.0);
+        e.finish();
+        let beats = e.take_beats();
+        assert!(beats.iter().all(|b| b.chord.as_ref().is_some_and(|c| c.root == 9 && c.quality == Some(Quality::Min7))), "{:?}", beats.iter().map(|b| b.chord.as_ref().map(|c| c.root)).collect::<Vec<_>>());
     }
 
     #[test]
@@ -908,6 +1090,7 @@ mod tests {
         e.mark_bar(0.3, 0, 0.4);
         e.mark_bar(1.9, 1, 0.4);
         e.tick(3.0);
+        e.finish();
         let starts: Vec<f64> = e.take_beats().iter().map(|b| (b.t0 * 100.0).round() / 100.0).collect();
         assert_eq!(starts, vec![0.0, 0.3, 0.7, 1.1, 1.5, 1.9, 2.3]);
     }
