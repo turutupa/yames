@@ -3625,8 +3625,12 @@ pub async fn cancel_model_download(
     let discard = discard.unwrap_or(false);
     // Named, only that tier's download is stopped; unnamed (an older
     // caller, the window's strip) whichever runs.
+    let asked_at: u64;
     let running = {
         let mut guard = dl_state.0.lock().unwrap();
+        // The newest download when Cancel was pressed: a discard below is
+        // dropped if a later one (a Resume) has started by the time it runs.
+        asked_at = models::current_generation();
         let ours = guard.as_ref().is_some_and(|c| tier.is_none() || c.tier == tier);
         if ours { guard.take() } else { None }.inspect(|control| {
             if discard {
@@ -3647,7 +3651,9 @@ pub async fn cancel_model_download(
                 if !models::wait_for_transfers_of(&tier, &url, std::time::Duration::from_secs(30)) {
                     return Err("the download is still stopping; try again in a moment".to_string());
                 }
-                models::discard_partial(&app_handle, &tier, &url)
+                // Only this Cancel's part: if a Resume started meanwhile the
+                // part is that transfer's now, and the discard is dropped.
+                models::discard_partial(&app_handle, &tier, &url, asked_at).map(|_| ())
             })
             .await
             .map_err(|e| format!("cancel_model_download join failed: {e}"))?;

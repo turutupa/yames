@@ -1074,11 +1074,11 @@ fn delete_brain_tier_in(brain_root: &Path, tier: &str) -> Result<(), String> {
 /// Stop keeping a paused download: remove the `.part` of `url` for `tier`
 /// (in the tier's directory, and in the old single place if one is left
 /// there). Never touches `model.bin`.
-pub fn discard_partial(app: &AppHandle, tier: &str, url: &str) -> Result<(), String> {
+pub fn discard_partial(app: &AppHandle, tier: &str, url: &str, asked_at: u64) -> Result<bool, String> {
     if !is_brain_tier(tier) {
         return Err(format!("unknown brain tier {tier:?}"));
     }
-    discard_partial_in(&models_dir(app)?.join("brain"), tier, url)
+    discard_if_current(&models_dir(app)?.join("brain"), tier, url, asked_at)
 }
 
 fn discard_partial_in(brain_root: &Path, tier: &str, url: &str) -> Result<(), String> {
@@ -1149,19 +1149,21 @@ impl DownloadControl {
     /// thread that will run (`start_download`, `start_voice_repair`): until
     /// that thread ends, the next download waits for it.
     pub fn new(tier: Option<String>, url: Option<String>) -> Self {
-        let generation = DOWNLOAD_GENERATION.fetch_add(1, Ordering::SeqCst) + 1;
         let life = Arc::new(TransferLife {
             tier: tier.clone(),
             url: url.clone(),
             ended: std::sync::Mutex::new(false),
             changed: std::sync::Condvar::new(),
         });
-        let previous = {
+        // Numbered under the same lock `discard_if_current` holds, so a
+        // discard and a new start never interleave.
+        let (generation, previous) = {
             let mut live = LIVE_TRANSFERS.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+            let generation = DOWNLOAD_GENERATION.fetch_add(1, Ordering::SeqCst) + 1;
             live.retain(|t| !t.has_ended());
             let previous = live.clone();
             live.push(life.clone());
-            previous
+            (generation, previous)
         };
         DownloadControl {
             cancel: Arc::new(AtomicBool::new(false)),
@@ -1260,6 +1262,27 @@ pub fn wait_for_transfers_of(tier: &str, url: &str, timeout: std::time::Duration
         .cloned()
         .collect();
     wait_for_previous(&matching, timeout)
+}
+
+/// The newest download's number, for a discard to be tied to
+/// (`discard_if_current`).
+pub fn current_generation() -> u64 {
+    DOWNLOAD_GENERATION.load(Ordering::SeqCst)
+}
+
+/// Discard a paused download's part, unless a download has started since
+/// the Cancel was pressed (`asked_at`, `current_generation()` then). That
+/// newer download is the player's later press (a Resume), and the part may
+/// already be its own: the discard is dropped rather than remove bytes
+/// under a running curl. Holds the lock `DownloadControl::new` numbers
+/// under, so no start can slip between the check and the removal. True when
+/// the part was discarded.
+pub fn discard_if_current(brain_root: &Path, tier: &str, url: &str, asked_at: u64) -> Result<bool, String> {
+    let _live = LIVE_TRANSFERS.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+    if DOWNLOAD_GENERATION.load(Ordering::SeqCst) != asked_at {
+        return Ok(false);
+    }
+    discard_partial_in(brain_root, tier, url).map(|()| true)
 }
 
 /// The app, as a download thread emits through it: every
@@ -1387,6 +1410,16 @@ fn brain_failure_event(e: &BrainFetchError, discarded: bool) -> serde_json::Valu
     }
 }
 
+/// What a brain download leaves behind when it stopped: on a Cancel (the
+/// discard flag set with the stop) its part is removed, now that curl has
+/// been killed and waited for (or never ran) and the part is closed on
+/// every platform; on a Pause it is kept. True when the part was removed.
+fn after_brain_stop(brain_root: &Path, tier: &str, url: &str, e: &BrainFetchError, discard: &AtomicBool) -> bool {
+    *e == BrainFetchError::Cancelled
+        && discard.load(Ordering::Relaxed)
+        && discard_partial_in(brain_root, tier, url).is_ok()
+}
+
 /// The first thing a download thread does: wait for every earlier transfer
 /// to have exited. False (and the event sent) when one did not exit in
 /// time.
@@ -1449,12 +1482,7 @@ pub fn start_download(
         // updates) and the tier switch that used to silently no-op.
         if component == "brain" {
             if let Err(e) = fetch_brain(&app, &models_dir, &url, &tier, &cancel) {
-                let mut discarded = false;
-                if e == BrainFetchError::Cancelled && control.discard.load(Ordering::Relaxed) {
-                    // curl has been killed and waited for: the part is
-                    // closed and may be removed on every platform.
-                    discarded = discard_partial_in(&models_dir.join("brain"), &tier, &url).is_ok();
-                }
+                let discarded = after_brain_stop(&models_dir.join("brain"), &tier, &url, &e, &control.discard);
                 let _ = app.emit("model-download-complete", brain_failure_event(&e, discarded));
                 return;
             }
@@ -1923,6 +1951,12 @@ fn fetch_brain(
     if !is_brain_tier(tier) {
         return Err(BrainFetchError::Failed(format!("unknown brain tier {tier:?}")));
     }
+    // Stopped while it waited for the previous transfer
+    // (`begin_after_previous`): nothing is touched, and a Cancel's discard
+    // runs as for any stop.
+    if cancel.load(Ordering::Relaxed) {
+        return Err(BrainFetchError::Cancelled);
+    }
     let brain_root = models_dir.join("brain");
     // A `Conflict` (an older copy of this tier in the old place) is no
     // reason to stop: the download goes to the tier's own folder, and the
@@ -2007,6 +2041,14 @@ fn finish_brain_part(
     cancel: &AtomicBool,
     on_hash: &mut dyn FnMut(u64, u64),
 ) -> Result<(), BrainFetchError> {
+    // A stopped download renames nothing. The flag is read here, after the
+    // check (hashed or vouched for) and once more just before the rename:
+    // with a full-size part curl is skipped, and with a vouched-for part no
+    // hash runs, so nothing else on this path would read it.
+    let stopped = || cancel.load(Ordering::Relaxed);
+    if stopped() {
+        return Err(BrainFetchError::Cancelled);
+    }
     let bytes = file_len(part);
     match artifact {
         Some(a) if bytes < a.bytes => {
@@ -2060,6 +2102,9 @@ fn finish_brain_part(
         }
         verified = Some(expected);
     }
+    if stopped() {
+        return Err(BrainFetchError::Cancelled);
+    }
     // The order is what keeps the marker and the weights describing each
     // other at every point:
     //   1. the new marker goes beside the PART (`<part>.verified.json`),
@@ -2075,6 +2120,14 @@ fn finish_brain_part(
     write_synced(&sidecar, marker.to_string().as_bytes()).map_err(BrainFetchError::Failed)?;
     write_synced(&dir.join("tier"), tier.as_bytes())
         .map_err(|e| BrainFetchError::Failed(format!("Failed to write tier: {e}")))?;
+    // The two renames under the adoption lock: a status poll's
+    // `settle_verified_marker` (which runs under it) can then never move the
+    // record between them. Nothing else is held here, so the lock order
+    // (residency, coach engine, ADOPTION, RESIDENT_BRAIN) is kept.
+    let _adoption = ADOPTION.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+    if stopped() {
+        return Err(BrainFetchError::Cancelled);
+    }
     std::fs::rename(part, dir.join("model.bin"))
         .map_err(|e| BrainFetchError::Failed(format!("Failed to rename file: {e}")))?;
     sync_dir(dir);
@@ -3539,10 +3592,25 @@ mod brain_store_tests {
 
         std::fs::remove_dir_all(dir.join("model.bin")).unwrap();
         put(&dir.join("model.bin"), b"old");
-        let flag = AtomicBool::new(true);
-        finish_brain_part(&dir, &part, STD_URL, "standard", Some(&abc_artifact()), 2, &flag, &mut |_, _| {})
+        // A stopped retry renames nothing, vouched-for part or not.
+        let stop = AtomicBool::new(true);
+        assert_eq!(
+            finish_brain_part(&dir, &part, STD_URL, "standard", Some(&abc_artifact()), 2, &stop, &mut |_, _| {}),
+            Err(BrainFetchError::Cancelled)
+        );
+        assert_eq!(read(&dir.join("model.bin")), b"old");
+        assert_eq!(read(&part), b"abc");
+
+        // The retry adopts it on its earlier check, without reading it: the
+        // bytes are swapped under the same length and modification time, and
+        // a hash would have refused them.
+        let when = std::fs::metadata(&part).unwrap().modified().unwrap();
+        put(&part, b"xyz");
+        std::fs::OpenOptions::new().write(true).open(&part).unwrap().set_modified(when).unwrap();
+        let go = AtomicBool::new(false);
+        finish_brain_part(&dir, &part, STD_URL, "standard", Some(&abc_artifact()), 2, &go, &mut |_, _| {})
             .expect("adopted on its earlier check");
-        assert_eq!(read(&dir.join("model.bin")), b"abc");
+        assert_eq!(read(&dir.join("model.bin")), b"xyz", "not hashed again");
         assert_eq!(read_brain_marker(&dir).unwrap()["sha256"], ABC_SHA256);
         assert!(!verified_marker_path(&part).exists());
 
@@ -3722,8 +3790,114 @@ mod brain_store_tests {
 
     /// 3. One transfer at a time, and a stopped download's events are not
     /// sent once a newer one exists.
+    /// The download numbers are one counter for the process: the tests that
+    /// make downloads take turns.
+    static GENERATIONS: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
+    fn generations() -> std::sync::MutexGuard<'static, ()> {
+        GENERATIONS.lock().unwrap_or_else(std::sync::PoisonError::into_inner)
+    }
+
+    /// Review 1. Download pressed while another transfer is still stopping,
+    /// then Cancel (or Pause) during the wait: the part was whole and
+    /// vouched for, so neither curl nor a hash would read the flag; nothing
+    /// is renamed, the old `model.bin` is untouched, and the part is gone on
+    /// a Cancel and kept on a Pause.
+    #[test]
+    fn a_stop_during_the_wait_renames_nothing() {
+        let _turn = generations();
+        for discard in [true, false] {
+            let r = root("stop-in-wait");
+            let dir = r.join("standard");
+            put(&dir.join("model.bin"), b"old");
+            let part = part_path_for(&dir.join("model.bin"), STD_URL);
+            put(&part, b"abc");
+            let stamp = modified_stamp(&part);
+            let rec = brain_marker_json(STD_URL, "standard", 3, Some(ABC_SHA256), stamp.as_deref());
+            put(&verified_marker_path(&part), rec.to_string().as_bytes());
+
+            let stopping = DownloadControl::new(Some("full".into()), Some(BRAIN_ARTIFACTS[1].url.into()));
+            let control = DownloadControl::new(Some("standard".into()), Some(STD_URL.into()));
+            let (cancel, discard_flag, previous) = (control.cancel.clone(), control.discard.clone(), control.previous.clone());
+            let brain = r.to_path_buf();
+            let artifact = abc_artifact();
+            let worker = std::thread::spawn(move || {
+                assert!(wait_for_previous(&previous, std::time::Duration::from_secs(10)));
+                let dir = brain.join("standard");
+                let part = part_path_for(&dir.join("model.bin"), STD_URL);
+                let e = finish_brain_part(&dir, &part, STD_URL, "standard", Some(&artifact), 2, &cancel, &mut |_, _| {})
+                    .unwrap_err();
+                (after_brain_stop(&brain, "standard", STD_URL, &e, &discard_flag), e)
+            });
+            // The player stops it while it waits; then the old transfer exits.
+            control.discard.store(discard, Ordering::Relaxed);
+            control.cancel.store(true, Ordering::Relaxed);
+            drop(TransferEnd(stopping.life.clone()));
+            let (discarded, e) = worker.join().unwrap();
+            drop(TransferEnd(control.life.clone()));
+
+            assert_eq!(e, BrainFetchError::Cancelled);
+            assert_eq!(read(&dir.join("model.bin")), b"old", "nothing renamed over it");
+            assert_eq!(discarded, discard);
+            assert_eq!(part.exists(), !discard, "gone on a Cancel, kept on a Pause");
+        }
+    }
+
+    /// Review 2. The two renames run under the adoption lock, so a status
+    /// poll's `settle_verified_marker` cannot move the record between them.
+    #[test]
+    fn a_status_poll_cannot_come_between_the_two_renames() {
+        let r = root("poll-race");
+        let dir = r.join("standard");
+        put(&dir.join("model.bin"), b"old");
+        let part = part_path_for(&dir.join("model.bin"), STD_URL);
+        put(&part, b"abc");
+        let held = ADOPTION.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        let d = dir.clone();
+        let p = part.clone();
+        let worker = std::thread::spawn(move || {
+            finish_brain_part(&d, &p, STD_URL, "standard", Some(&abc_artifact()), 2, &AtomicBool::new(false), &mut |_, _| {})
+        });
+        // The finish has its record written and is waiting for the lock.
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+        while !verified_marker_path(&part).is_file() && std::time::Instant::now() < deadline {
+            std::thread::sleep(std::time::Duration::from_millis(5));
+        }
+        std::thread::sleep(std::time::Duration::from_millis(50));
+        assert_eq!(read(&dir.join("model.bin")), b"old", "no rename without the lock");
+        // A poll now (it would hold this same lock) finds nothing to settle.
+        settle_verified_marker(&dir, "standard");
+        assert!(verified_marker_path(&part).is_file());
+        drop(held);
+        assert_eq!(worker.join().unwrap(), Ok(()));
+        assert_eq!(read(&dir.join("model.bin")), b"abc");
+        assert_eq!(read_brain_marker(&dir).unwrap()["sha256"], ABC_SHA256);
+    }
+
+    /// Review 3. A Cancel of a paused download removes only its own part: a
+    /// Resume started while it waited owns the part now, and the discard is
+    /// dropped.
+    #[test]
+    fn a_discard_never_removes_a_newer_transfers_part() {
+        let _turn = generations();
+        let brain = root("discard-vs-resume");
+        let part = part_path_for(&brain.join("standard/model.bin"), STD_URL);
+        put(&part, b"half");
+
+        let asked_at = current_generation();
+        let resume = DownloadControl::new(Some("standard".into()), Some(STD_URL.into()));
+        assert_eq!(discard_if_current(&brain, "standard", STD_URL, asked_at), Ok(false));
+        assert_eq!(read(&part), b"half", "the Resume's part is left alone");
+        drop(TransferEnd(resume.life.clone()));
+
+        let asked_at = current_generation();
+        assert_eq!(discard_if_current(&brain, "standard", STD_URL, asked_at), Ok(true));
+        assert!(!part.exists());
+    }
+
     #[test]
     fn a_new_download_waits_for_the_old_one_and_the_old_ones_events_stop() {
+        let _turn = generations();
         let a = DownloadControl::new(Some("standard".into()), Some(STD_URL.into()));
         let b = DownloadControl::new(Some("standard".into()), Some(STD_URL.into()));
         assert!(b.generation > a.generation);
