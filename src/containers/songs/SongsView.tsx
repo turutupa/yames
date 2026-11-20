@@ -51,6 +51,7 @@ import { TrackPicker, tuningLabel } from "./TrackPicker";
 import { TrackMenu } from "./TrackMenu";
 import { SongNotesMark, SongNotesToast, useSongNotesSeen } from "./SongNotes";
 import { useHeaderSlot } from "../main-window/headerSlot";
+import { useScheduleLeavesWithSong } from "./useScheduleLeavesWithSong";
 /*
  * The review's hooks, from their own modules rather than through
  * `./review`.
@@ -510,6 +511,8 @@ export function SongsView({ session, currentBeat, isPlaying, themeId, listening 
     // `pushSchedule` is rebuilt whenever the range or the loop changes, which
     // is exactly when the engine needs telling.
   }, [score, isPlaying, session.pushSchedule]); // eslint-disable-line react-hooks/exhaustive-deps
+  // And it goes when the song does: a schedule left loaded belongs to no one.
+  useScheduleLeavesWithSong(!!score);
 
   const onFiles = useCallback(
     (files: FileList | null) => {

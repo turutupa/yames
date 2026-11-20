@@ -384,6 +384,10 @@ impl OnsetDetector {
 
     /// Tell the detector about the listen-demo gate, so that it forgets the
     /// demo's loudness when the demo ends. Call before `start`.
+    ///
+    /// The gate's falling edge is seen when the onset thread wakes, and the
+    /// gate is read with relaxed ordering: a demo shorter than one wake
+    /// (5 ms) is never seen and so never forgotten. No demo is that short.
     pub fn set_demo_gate(&mut self, gate: Arc<std::sync::atomic::AtomicU64>) {
         self.demo_gate = Some(gate);
     }

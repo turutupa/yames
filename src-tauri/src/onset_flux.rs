@@ -249,7 +249,6 @@ impl FluxDetector {
 
         // Band magnitudes, and the broadband one.
         let slots = self.mags.len();
-        self.mag_pos = (self.mag_pos + 1) % slots;
         let norm = 2.0 / n as f64;
         let mut total = 0.0f64;
         let mut now = [0.0f32; MAX_BANDS];
@@ -266,9 +265,13 @@ impl FluxDetector {
         // (`max` keeps an infinity) and every band would be under the floor
         // from then on. The hop is skipped; the bad samples leave the frame
         // within a window.
+        // Skipped before the history moves on: a slot that was stepped to
+        // and never written would hold the frame of a whole history ago, and
+        // serve as a rise's reference later.
         if !level.is_finite() {
             return None;
         }
+        self.mag_pos = (self.mag_pos + 1) % slots;
         self.peak = (self.peak * self.peak_decay).max(level);
         let under_peak = self.peak * self.tuning.floor_under_peak;
 
@@ -355,6 +358,7 @@ impl FluxDetector {
     /// small beside for the next 30 s.
     pub fn forget_recent_attacks(&mut self) {
         self.recent_count = 0;
+        self.last_recent_ns = 0;
     }
 
     /// How far the summed rise of the last three hops stands above the 100 ms

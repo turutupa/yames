@@ -2153,7 +2153,7 @@ export function installShotMock(shot: Shot, theme: string): void {
      * the chord two beats agreed on; or, for "unsure", neither.
      */
     if (cmd === "harmony_start") {
-      if (!shot.jam?.heard) return false;
+      if (!shot.jam?.heard) return null;
       const sure = shot.jam.heard === "heard";
       const chord = { root: 2, quality: "dom7", label: null, fromChart: false };
       setTimeout(
@@ -2168,9 +2168,9 @@ export function installShotMock(shot: Shot, theme: string): void {
           }),
         50,
       );
-      return true;
+      return 1;
     }
-    if (cmd === "harmony_mark_bar" || cmd === "harmony_stop") return null;
+    if (cmd === "harmony_mark_bar" || cmd === "harmony_set_tempo" || cmd === "harmony_stop") return null;
 
     if (cmd === "set_jam_position") {
       const command = (a?.command ?? {}) as {

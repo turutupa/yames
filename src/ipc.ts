@@ -987,11 +987,12 @@ export type HeardChart = {
 };
 
 /**
- * Start reading the key and chords from the input that is listening. False
- * when it is not, or the build has no note model: nothing was started.
+ * Start reading the key and chords from the input that is listening. The
+ * worker's id, for `harmonyStop`; null when the input is not listening or the
+ * build has no note model: nothing was started.
  */
-export async function harmonyStart(chart: HeardChart | null, bpm: number): Promise<boolean> {
-  return invoke<boolean>("harmony_start", { chart, bpm });
+export async function harmonyStart(chart: HeardChart | null, bpm: number): Promise<number | null> {
+  return invoke<number | null>("harmony_start", { chart, bpm });
 }
 
 /** Bar `bar` of the jam's form starts now. */
@@ -999,9 +1000,17 @@ export async function harmonyMarkBar(bar: number, bpm: number): Promise<void> {
   return invoke("harmony_mark_bar", { bar, bpm });
 }
 
-/** Stop reading. What was heard, or null when nothing was running. */
-export async function harmonyStop(): Promise<HeardSummary | null> {
-  return invoke<HeardSummary | null>("harmony_stop");
+/** The jam's tempo changed. With no chart there are no bar marks to carry it. */
+export async function harmonySetTempo(bpm: number): Promise<void> {
+  return invoke("harmony_set_tempo", { bpm });
+}
+
+/**
+ * Stop worker `id`. What it heard, or null when it is no longer the one
+ * running (it was replaced, or ended with the input).
+ */
+export async function harmonyStop(id: number): Promise<HeardSummary | null> {
+  return invoke<HeardSummary | null>("harmony_stop", { id });
 }
 
 /** A new reading, or null: the worker ended, or the input was stopped. */

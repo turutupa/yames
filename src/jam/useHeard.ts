@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { harmonyMarkBar, harmonyStart, harmonyStop, onHarmonyReading } from "../ipc";
+import { harmonyMarkBar, harmonySetTempo, harmonyStart, harmonyStop, onHarmonyReading } from "../ipc";
 import type { HeardChart, HeardLive } from "../ipc";
 import { rememberHeard } from "./heard";
 
@@ -8,11 +8,26 @@ const RETRY_MS = 1500;
 const RETRIES = 3;
 
 /**
+ * Starts and stops, one at a time and in the order they were asked for: a
+ * chart change stops one worker and starts the next in the same tick, and the
+ * two commands would otherwise race in the backend. Each stop names the
+ * worker it means (`harmonyStop(id)`), so even out of turn it cannot stop
+ * another's.
+ */
+let turn: Promise<unknown> = Promise.resolve();
+function inTurn<T>(job: () => Promise<T>): Promise<T> {
+  const next = turn.then(job, job);
+  turn = next.catch(() => {});
+  return next;
+}
+
+/**
  * Runs the free-play engine while `active`: the setting is on, a jam is
  * playing and the input is listening. Off, nothing is invoked at all.
  *
- * The worker ends when the input stops (a device change restarts the input);
- * the page is told with a null reading and asks again, a few times.
+ * The worker ends when the input stops or restarts (a device change restarts
+ * the input); the page is told with a null reading and asks again, a few
+ * times.
  */
 export function useHeard({
   active,
@@ -41,16 +56,21 @@ export function useHeard({
     let gone = false;
     let retries = 0;
     let timer: ReturnType<typeof setTimeout> | null = null;
+    // The worker this effect started last, for its own stop.
+    let id: number | null = null;
     const start = () => {
       timer = null;
-      harmonyStart(chartRef.current, bpmRef.current)
-        .then((started) => {
-          if (gone) return;
-          running.current = started;
-          // a form of one bar never changes bar: say where it is now
-          if (started && chartRef.current) harmonyMarkBar(formBarRef.current, bpmRef.current).catch(() => {});
-        })
-        .catch(() => {});
+      inTurn(async () => {
+        // asked for, then the jam stopped before its turn came
+        if (gone) return;
+        id = await harmonyStart(chartRef.current, bpmRef.current);
+        // `gone` by now: the cleanup's stop is behind this in the queue and
+        // finds the id
+        if (gone) return;
+        running.current = id !== null;
+        // a form of one bar never changes bar: say where it is now
+        if (id !== null && chartRef.current) harmonyMarkBar(formBarRef.current, bpmRef.current).catch(() => {});
+      }).catch(() => {});
     };
     const unlisten = onHarmonyReading((next) => {
       if (gone) return;
@@ -70,7 +90,7 @@ export function useHeard({
       running.current = false;
       setLive(null);
       void unlisten.then((off) => off()).catch(() => {});
-      harmonyStop()
+      inTurn(async () => (id === null ? null : harmonyStop(id)))
         .then(rememberHeard)
         .catch(() => {});
     };
@@ -81,6 +101,18 @@ export function useHeard({
     if (!active || !chartRef.current || !running.current) return;
     harmonyMarkBar(formBar, bpmRef.current).catch(() => {});
   }, [active, formBar]);
+
+  // The tempo: a jam with no chart sends no bar lines to carry it. In turn,
+  // so it reaches the worker a start in flight is about to make.
+  const toldBpm = useRef(bpm);
+  useEffect(() => {
+    if (!active || toldBpm.current === bpm) {
+      toldBpm.current = bpm;
+      return;
+    }
+    toldBpm.current = bpm;
+    inTurn(() => harmonySetTempo(bpm)).catch(() => {});
+  }, [active, bpm]);
 
   return active ? live : null;
 }

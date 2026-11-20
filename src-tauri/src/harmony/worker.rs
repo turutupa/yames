@@ -10,22 +10,34 @@
 //!
 //! **It gives way to a Take.** The app's one note model is shared with the
 //! Take's late grade (`model::with_shared`), and a mutex is not a queue with
-//! priorities, so the worker asks first ([`paused`]): while a Take's schedule
-//! is loaded in the timing analyzer, or the post-Take pass is running or
-//! waiting for the model ([`verifier_hold`]), it runs no window and does not
-//! touch the ring. The verifier can therefore wait for at most the one window
-//! that was already running when it asked. When the pause ends the worker
-//! starts again from nothing (a new stream, a new engine): what it heard
-//! before a Take is not evidence about what is played after it.
+//! priorities, so the worker asks first ([`paused`]): while a Take is running
+//! (its schedule has started and the click is still marking its beats:
+//! [`TakeWatch`]; a schedule that is only loaded is not a Take), or the
+//! post-Take pass is running or waiting for the model ([`verifier_hold`]), it
+//! runs no window and does not touch the ring. The verifier can therefore
+//! wait for at most the one window that was already running when it asked,
+//! once the model is loaded: the model is loaded on first use, under the same
+//! lock, and that takes seconds, so `harmony_start` asks for it to be warmed
+//! and so does loading an Exercise. When the pause ends the worker starts
+//! again from nothing (a new stream, a new engine): what it heard before a
+//! Take is not evidence about what is played after it.
 //!
 //! **It gives up rather than fall behind.** A device whose model is slower
-//! than the music (a poll finds [`BACKLOG_S`] seconds waiting) ends the worker
-//! and says so once: `on_reading(None)`, and the page shows nothing.
+//! than the music (a poll finds [`BACKLOG_S`] seconds or more written since
+//! the last one, by the ring's own count of samples, which does not wrap)
+//! ends the worker and says so once: `on_reading(None)`, and the page shows
+//! nothing. So does an input that was restarted under it (another ring, or
+//! the same one counting from zero again).
+//!
+//! **It says nothing once it is told to stop.** `stop`, `Drop` and the last
+//! word of a worker that ended by itself all pass through one lock
+//! (`voice`), so after either of the first two returns `on_reading` is never
+//! called again, even by a window that was already running.
 
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use super::stream::Stream;
 use super::{BeatOut, Chart, ChordReading, Engine, Quality, Reading};
@@ -70,7 +82,11 @@ impl Drop for Hold<'_> {
 }
 
 static VERIFIER: Gate = Gate::new();
-static TAKE_LOADED: AtomicBool = AtomicBool::new(false);
+static TAKE_RUNNING: AtomicBool = AtomicBool::new(false);
+static NEXT_ID: AtomicU64 = AtomicU64::new(1);
+/// How long after the click's last quarter note a started Take still counts
+/// as running. Longer than a beat at the slowest tempo the engine plays.
+const TAKE_BEAT_GAP: Duration = Duration::from_secs(4);
 
 /// Held by the post-Take pass from before it asks for the note model until
 /// it is done with it (`timing::start_notes_pass`).
@@ -78,17 +94,60 @@ pub fn verifier_hold() -> Hold<'static> {
     VERIFIER.hold()
 }
 
-/// The timing analyzer says a Take's schedule was loaded, or cleared.
-pub fn set_take_loaded(loaded: bool) {
-    TAKE_LOADED.store(loaded, Ordering::SeqCst);
+/// The timing analyzer says a Take is running, or no longer is ([`TakeWatch`]).
+pub fn set_take_running(running: bool) {
+    TAKE_RUNNING.store(running, Ordering::SeqCst);
 }
 
 /// Whether the app's worker must keep off the model and the ring right now:
-/// the post-Take pass has or wants the model, or a Take's schedule is loaded.
-/// (A screen that left its schedule loaded keeps the reading off until
-/// another clears it: quiet is the safe side of that mistake.)
+/// the post-Take pass has or wants the model, or a Take is running.
 pub fn paused() -> bool {
-    VERIFIER.held() || TAKE_LOADED.load(Ordering::SeqCst)
+    VERIFIER.held() || TAKE_RUNNING.load(Ordering::SeqCst)
+}
+
+/// The timing analyzer's account of whether a Take is running, kept on its
+/// thread. A Take is a schedule whose run has started (its first downbeat
+/// fell) while the click still marks its quarter notes. A schedule that is
+/// loaded and not played is not one: Songs loads a schedule whenever a song
+/// is open, and that must not keep the reading off.
+#[derive(Default)]
+pub struct TakeWatch {
+    last_quarter: Option<Instant>,
+    said: bool,
+}
+
+impl TakeWatch {
+    /// The click marked a quarter note of the loaded schedule.
+    pub fn quarter(&mut self, now: Instant) {
+        self.last_quarter = Some(now);
+    }
+
+    /// Another schedule was loaded, or none: its beats are not this one's.
+    pub fn forget(&mut self) {
+        self.last_quarter = None;
+    }
+
+    /// `started`: a schedule is loaded and its run has started.
+    pub fn running(&self, started: bool, now: Instant) -> bool {
+        started && self.last_quarter.is_some_and(|q| now.saturating_duration_since(q) < TAKE_BEAT_GAP)
+    }
+
+    /// Tell the worker ([`set_take_running`]) when the answer changed.
+    pub fn tell(&mut self, started: bool, now: Instant) {
+        let running = self.running(started, now);
+        if running != self.said {
+            self.said = running;
+            set_take_running(running);
+        }
+    }
+
+    /// The analyzer is ending: no Take runs without it.
+    pub fn end(&mut self) {
+        self.forget();
+        if std::mem::take(&mut self.said) {
+            set_take_running(false);
+        }
+    }
 }
 
 /// What the worker is given to run a window with, and to ask whether it may.
@@ -216,17 +275,43 @@ impl Heard {
 struct Shared {
     /// Bar lines not yet given to the engine: `clock::now_ns`, bar, beat seconds.
     marks: Vec<(u64, u32, f64)>,
+    /// A tempo the engine has not been told yet (a jam with no chart has no
+    /// bar marks to carry it).
+    beat_s: Option<f64>,
     summary: Option<Summary>,
 }
 
 pub struct Worker {
+    id: u64,
     alive: Arc<AtomicBool>,
+    /// Held around every `on_reading`, and while `alive` is cleared by the
+    /// owner: once [`Worker::silence`] returns, nothing more is said.
+    voice: Arc<Mutex<()>>,
     shared: Arc<Mutex<Shared>>,
     handle: Option<JoinHandle<()>>,
 }
 
 /// The app's one worker, or none.
 pub type SharedHarmony = Mutex<Option<Worker>>;
+
+/// End the app's worker, whichever it is, without waiting for it: it says
+/// nothing from here on. Whether there was one (the page is then owed a
+/// `null` reading).
+pub fn end(slot: &SharedHarmony) -> bool {
+    let worker = slot.lock().unwrap_or_else(|e| e.into_inner()).take();
+    worker.is_some()
+}
+
+/// Take the app's worker out of its slot if it is worker `id`. A stop that
+/// was asked of an earlier worker must not end the one that replaced it.
+pub fn take_if(slot: &SharedHarmony, id: u64) -> Option<Worker> {
+    let mut slot = slot.lock().unwrap_or_else(|e| e.into_inner());
+    if slot.as_ref().is_some_and(|w| w.id == id) {
+        slot.take()
+    } else {
+        None
+    }
+}
 
 impl Worker {
     /// Start listening on `ring` (at `rate`) with the app's model and the
@@ -239,24 +324,53 @@ impl Worker {
 
     pub fn start_with(ring: Arc<Mutex<RingBuffer>>, rate: u32, chart: Option<Chart>, beat_s: f64, mut hooks: Hooks, on_reading: impl Fn(Option<&Live>) + Send + 'static) -> Result<Self, String> {
         let alive = Arc::new(AtomicBool::new(true));
+        let voice = Arc::new(Mutex::new(()));
         let shared = Arc::new(Mutex::new(Shared::default()));
-        let (alive_t, shared_t) = (alive.clone(), shared.clone());
+        let (alive_t, voice_t, shared_t) = (alive.clone(), voice.clone(), shared.clone());
         let handle = thread::Builder::new()
             .name("yames-harmony".into())
             .spawn(move || {
                 crate::coach::lower_current_thread_priority();
                 // A panic in the model retires it (`with_shared`) and ends
                 // this thread; the jam goes on without a reading.
+                let say = |live: &Live| {
+                    let _voice = voice_t.lock().unwrap_or_else(|e| e.into_inner());
+                    if alive_t.load(Ordering::SeqCst) {
+                        on_reading(Some(live));
+                    }
+                };
                 let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                    run(&alive_t, &shared_t, &ring, rate, chart, beat_s, &mut hooks, &on_reading);
+                    run(&alive_t, &shared_t, &ring, rate, chart, beat_s, &mut hooks, &say);
                 }));
                 // stopped by its owner, or ended by itself: then say so
+                let _voice = voice_t.lock().unwrap_or_else(|e| e.into_inner());
                 if alive_t.swap(false, Ordering::SeqCst) {
                     on_reading(None);
                 }
             })
             .map_err(|e| format!("could not start the harmony worker: {e}"))?;
-        Ok(Self { alive, shared, handle: Some(handle) })
+        Ok(Self { id: NEXT_ID.fetch_add(1, Ordering::SeqCst), alive, voice, shared, handle: Some(handle) })
+    }
+
+    /// Which worker this is: never zero, never the same twice in one run of
+    /// the app.
+    pub fn id(&self) -> u64 {
+        self.id
+    }
+
+    /// The tempo changed. With a chart the bar marks carry it too; without
+    /// one this is the only way the engine's beat follows.
+    pub fn set_beat(&self, beat_s: f64) {
+        if let Ok(mut s) = self.shared.lock() {
+            s.beat_s = Some(beat_s);
+        }
+    }
+
+    /// From when this returns, `on_reading` is not called again: not by a
+    /// window that is running, not by the thread's last word.
+    fn silence(&self) {
+        let _voice = self.voice.lock().unwrap_or_else(|e| e.into_inner());
+        self.alive.store(false, Ordering::SeqCst);
     }
 
     /// Bar `bar` of the form starts now.
@@ -276,7 +390,7 @@ impl Worker {
     /// Stop, and hand back what it heard. Waits for the window that is
     /// running, if one is: never call it from a real-time thread.
     pub fn stop(mut self) -> Option<Summary> {
-        self.alive.store(false, Ordering::SeqCst);
+        self.silence();
         if let Some(h) = self.handle.take() {
             let _ = h.join();
         }
@@ -286,7 +400,7 @@ impl Worker {
 
 impl Drop for Worker {
     fn drop(&mut self) {
-        self.alive.store(false, Ordering::SeqCst);
+        self.silence();
     }
 }
 
@@ -295,15 +409,18 @@ struct Listening {
     engine: Engine,
     stream: Stream,
     heard: Heard,
-    cursor: Option<usize>,
-    t0_ns: u64,
+    /// The ring's count of samples (`RingBuffer::written`) at the last poll,
+    /// and at the first: the engine's second zero.
+    cursor: Option<u64>,
+    origin: u64,
+    capacity: usize,
 }
 
 impl Listening {
     fn new(rate: u32, chart: Option<Chart>, beat_s: f64) -> Self {
         let mut engine = Engine::new(chart);
         engine.set_beat_seconds(beat_s);
-        Self { engine, stream: Stream::new(rate), heard: Heard::default(), cursor: None, t0_ns: 0 }
+        Self { engine, stream: Stream::new(rate), heard: Heard::default(), cursor: None, origin: 0, capacity: 0 }
     }
 
     fn live(&self) -> Live {
@@ -311,12 +428,42 @@ impl Listening {
     }
 }
 
+/// What one look at the ring found.
+enum Poll {
+    /// Read, into `fresh`. The ring's count of samples and the clock, taken
+    /// together under the lock: where a bar mark's time falls in the input.
+    Read { written: u64, at_ns: u64 },
+    Lapped,
+    Restarted,
+}
+
+fn poll(ring: &RingBuffer, l: &mut Listening, fresh: &mut Vec<f32>, backlog: usize) -> Poll {
+    let (written, at_ns) = (ring.written(), crate::clock::now_ns());
+    match l.cursor {
+        None => {
+            l.origin = written;
+            l.capacity = ring.capacity();
+        }
+        Some(cursor) => {
+            // a device change puts another ring in this one's place, at the
+            // new device's rate: its count starts again
+            let Some(new) = written.checked_sub(cursor).filter(|_| ring.capacity() == l.capacity) else { return Poll::Restarted };
+            if new >= backlog as u64 {
+                return Poll::Lapped;
+            }
+            ring.read_newest_into(new as usize, fresh);
+        }
+    }
+    l.cursor = Some(written);
+    Poll::Read { written, at_ns }
+}
+
 #[allow(clippy::too_many_arguments)]
-fn run(alive: &AtomicBool, shared: &Mutex<Shared>, ring: &Mutex<RingBuffer>, rate: u32, chart: Option<Chart>, beat_s: f64, hooks: &mut Hooks, on_reading: &dyn Fn(Option<&Live>)) {
+fn run(alive: &AtomicBool, shared: &Mutex<Shared>, ring: &Mutex<RingBuffer>, rate: u32, chart: Option<Chart>, mut beat_s: f64, hooks: &mut Hooks, say: &dyn Fn(&Live)) {
     let backlog = rate as usize * BACKLOG_S;
     let mut l = Listening::new(rate, chart.clone(), beat_s);
-    // big enough for the most `read_since` hands over: no growing it while
-    // the ring is locked
+    // big enough for the most a poll hands over: no growing it while the
+    // ring is locked
     let mut fresh: Vec<f32> = Vec::with_capacity(backlog);
     let mut last: Option<Live> = None;
     let mut was_paused = false;
@@ -329,7 +476,7 @@ fn run(alive: &AtomicBool, shared: &Mutex<Shared>, ring: &Mutex<RingBuffer>, rat
         // changes a page shows
         let shows = |v: &Live| (v.reading.key_state, v.reading.key, v.shown_chord.clone());
         if last.as_ref().map(shows) != Some(shows(&live)) {
-            on_reading(Some(&live));
+            say(&live);
             *last = Some(live);
         }
     };
@@ -340,6 +487,10 @@ fn run(alive: &AtomicBool, shared: &Mutex<Shared>, ring: &Mutex<RingBuffer>, rat
             was_paused = true;
             continue;
         }
+        if let Some(b) = shared.lock().ok().and_then(|mut s| s.beat_s.take()) {
+            beat_s = b;
+            l.engine.set_beat_seconds(b);
+        }
         if was_paused {
             was_paused = false;
             l = Listening::new(rate, chart.clone(), beat_s);
@@ -348,23 +499,35 @@ fn run(alive: &AtomicBool, shared: &Mutex<Shared>, ring: &Mutex<RingBuffer>, rat
             }
             publish(&l, &mut last);
         }
-        {
-            let Ok(r) = ring.lock() else { return };
-            let c = l.cursor.get_or_insert_with(|| {
-                l.t0_ns = crate::clock::now_ns();
-                r.write_pos()
-            });
-            r.read_since(c, &mut fresh, backlog);
-        }
-        if fresh.len() >= backlog {
-            eprintln!("[yames] the free-play reading stopped: the note model is slower than the music on this device");
-            return;
-        }
+        let found = match ring.lock() {
+            Ok(r) => poll(&r, &mut l, &mut fresh, backlog),
+            Err(_) => {
+                eprintln!("[yames] the free-play reading stopped: the input's buffer was left poisoned by a panic");
+                return;
+            }
+        };
+        let (written, at_ns) = match found {
+            Poll::Read { written, at_ns } => (written, at_ns),
+            Poll::Lapped => {
+                eprintln!("[yames] the free-play reading stopped: the note model is slower than the music on this device");
+                return;
+            }
+            Poll::Restarted => {
+                eprintln!("[yames] the free-play reading stopped: the input was restarted");
+                return;
+            }
+        };
         l.stream.push(&fresh);
         fresh.clear();
         if let Ok(mut s) = shared.lock() {
+            // A mark's place in the input: the samples read up to this poll,
+            // less how long before the poll the mark was made. Counted in
+            // samples, so it does not drift from the engine's time over a
+            // long jam (the input's own latency is still not in it).
+            let read_s = (written - l.origin) as f64 / rate as f64;
             for (ns, bar, beat) in s.marks.drain(..) {
-                l.engine.mark_bar(ns.saturating_sub(l.t0_ns) as f64 / 1e9, bar, beat);
+                let t = read_s - (at_ns as f64 - ns as f64) / 1e9;
+                l.engine.mark_bar(t.max(0.0), bar, beat);
             }
         }
         // One window at a time, asking before each: a verifier that wants
@@ -391,7 +554,6 @@ mod tests {
     use super::*;
     use crate::detect::model::{NoteModel, WindowOut, FRAME_HOP, PITCHES, WINDOW_FRAMES, WINDOW_SAMPLES};
     use std::sync::atomic::AtomicU32;
-    use std::time::Instant;
 
     const RATE: u32 = 22_050;
 
@@ -600,6 +762,155 @@ mod tests {
         wait_until("the worker to end", Duration::from_secs(20), || !worker.is_alive());
         assert!(ended.load(Ordering::SeqCst));
         worker.stop();
+    }
+
+    /// S1: a gap of more than the whole ring. By the write position alone
+    /// 4.5 s in a 4 s ring looks like half a second.
+    #[test]
+    fn lapped_by_more_than_the_whole_ring_it_still_gives_up() {
+        let (ring, windows) = (ring(), Arc::new(AtomicU32::new(0)));
+        let model = Arc::new(Mutex::new(Triad { windows, slow: Duration::ZERO }));
+        let ended = Arc::new(AtomicBool::new(false));
+        let ended_t = ended.clone();
+        let worker = Worker::start_with(ring.clone(), RATE, None, 0.5, hooks(model, Arc::default()), move |l| ended_t.store(l.is_none(), Ordering::SeqCst)).unwrap();
+        thread::sleep(Duration::from_millis(400));
+        assert!(worker.is_alive());
+        // four and a half seconds between two polls, into a ring of four
+        ring.lock().unwrap().write(&strums(0, RATE as usize * 9 / 2));
+        wait_until("the worker to end", Duration::from_secs(20), || !worker.is_alive());
+        assert!(ended.load(Ordering::SeqCst));
+        worker.stop();
+    }
+
+    #[test]
+    fn the_ring_counts_what_was_written_past_its_own_length() {
+        let mut r = RingBuffer::new(8);
+        let mut l = Listening::new(RATE, None, 0.5);
+        let mut fresh = Vec::with_capacity(8);
+        assert!(matches!(poll(&r, &mut l, &mut fresh, 6), Poll::Read { written: 0, .. }));
+        r.write(&[1.0, 2.0, 3.0]);
+        assert!(matches!(poll(&r, &mut l, &mut fresh, 6), Poll::Read { written: 3, .. }));
+        assert_eq!(fresh, vec![1.0, 2.0, 3.0]);
+        // 9 more: the write position is one past where it was
+        r.write(&[0.0; 9]);
+        assert!(matches!(poll(&r, &mut l, &mut fresh, 6), Poll::Lapped));
+        // across the ring's end, oldest first
+        let mut l = Listening::new(RATE, None, 0.5);
+        poll(&r, &mut l, &mut fresh, 6);
+        fresh.clear();
+        r.write(&[4.0, 5.0, 6.0, 7.0, 8.0]);
+        assert!(matches!(poll(&r, &mut l, &mut fresh, 6), Poll::Read { written: 17, .. }));
+        assert_eq!(fresh, vec![4.0, 5.0, 6.0, 7.0, 8.0]);
+    }
+
+    /// S2: a device change puts a new ring in the old one's place (the same
+    /// `Arc`), at the new device's rate. The worker's rate is the old one.
+    #[test]
+    fn an_input_restarted_under_it_ends_it() {
+        for capacity in [RATE as usize * 4, 48_000 * 4] {
+            let (ring, windows) = (ring(), Arc::new(AtomicU32::new(0)));
+            let model = Arc::new(Mutex::new(Triad { windows, slow: Duration::ZERO }));
+            let ended = Arc::new(AtomicBool::new(false));
+            let ended_t = ended.clone();
+            let worker = Worker::start_with(ring.clone(), RATE, None, 0.5, hooks(model, Arc::default()), move |l| ended_t.store(l.is_none(), Ordering::SeqCst)).unwrap();
+            thread::sleep(Duration::from_millis(300));
+            ring.lock().unwrap().write(&strums(0, RATE as usize));
+            thread::sleep(Duration::from_millis(300));
+            *ring.lock().unwrap() = RingBuffer::new(capacity);
+            wait_until("the worker to end", Duration::from_secs(20), || !worker.is_alive());
+            assert!(ended.load(Ordering::SeqCst));
+            worker.stop();
+        }
+    }
+
+    /// S2, S3: what `start_evaluation` and `stop_evaluation` do to the
+    /// worker. A window that is running when it is ended finishes, and says
+    /// nothing: no reading after the page was told there is none.
+    #[test]
+    fn ended_by_the_input_it_says_nothing_more() {
+        let (ring, windows) = (ring(), Arc::new(AtomicU32::new(0)));
+        let model = Arc::new(Mutex::new(Triad { windows: windows.clone(), slow: Duration::from_millis(250) }));
+        let said = Arc::new(AtomicU32::new(0));
+        let said_t = said.clone();
+        let worker = Worker::start_with(ring.clone(), RATE, None, 0.5, hooks(model.clone(), Arc::default()), move |_| {
+            said_t.fetch_add(1, Ordering::SeqCst);
+        })
+        .unwrap();
+        let slot: SharedHarmony = Mutex::new(Some(worker));
+        thread::sleep(Duration::from_millis(400));
+        ring.lock().unwrap().write(&strums(0, RATE as usize * 28 / 10));
+        // inside a window: the model is held while it runs
+        wait_until("a window to be running", Duration::from_secs(20), || windows.load(Ordering::SeqCst) >= 1 && model.try_lock().is_err());
+        assert!(end(&slot), "there was a worker");
+        let then = said.load(Ordering::SeqCst);
+        assert!(slot.lock().unwrap().is_none());
+        assert!(!end(&slot), "and now there is none");
+        // the window ends, its reading (a key, a chord) has nowhere to go,
+        // and neither has the thread's last word
+        thread::sleep(Duration::from_millis(1200));
+        assert_eq!(said.load(Ordering::SeqCst), then, "a reading after the stop");
+    }
+
+    /// S4: a chart change stops one worker and starts the next, and the two
+    /// commands can arrive in either order.
+    #[test]
+    fn a_stop_meant_for_an_earlier_worker_leaves_the_new_one_running() {
+        let start = || {
+            let model = Arc::new(Mutex::new(Triad { windows: Arc::default(), slow: Duration::ZERO }));
+            Worker::start_with(ring(), RATE, None, 0.5, hooks(model, Arc::default()), |_| {}).unwrap()
+        };
+        let (old, new) = (start(), start());
+        let (old_id, new_id) = (old.id(), new.id());
+        assert!(old_id != 0 && new_id != 0 && old_id != new_id);
+        // start ran first: the old worker was replaced
+        let slot: SharedHarmony = Mutex::new(Some(old));
+        *slot.lock().unwrap() = Some(new);
+        assert!(take_if(&slot, old_id).is_none(), "the late stop took the new worker");
+        assert!(slot.lock().unwrap().as_ref().is_some_and(Worker::is_alive));
+        // and its own stop still finds it
+        let taken = take_if(&slot, new_id).expect("the new worker");
+        assert!(taken.stop().is_some());
+        assert!(slot.lock().unwrap().is_none());
+    }
+
+    /// B1: Songs loads a schedule whenever a song is open. Loaded is not
+    /// running: only a started run with the click on its beats is a Take.
+    #[test]
+    fn a_schedule_that_is_only_loaded_is_not_a_take_and_a_take_ends_with_its_click() {
+        let t0 = Instant::now();
+        let mut w = TakeWatch::default();
+        assert!(!w.running(false, t0), "loaded, never played");
+        // a count-in: beats, but the run has not started
+        w.quarter(t0);
+        assert!(!w.running(false, t0));
+        // the first downbeat
+        assert!(w.running(true, t0 + Duration::from_millis(5)));
+        w.quarter(t0 + Duration::from_secs(1));
+        assert!(w.running(true, t0 + Duration::from_secs(4)));
+        // the click stopped and nothing cleared the schedule
+        assert!(!w.running(true, t0 + Duration::from_secs(1) + TAKE_BEAT_GAP));
+        // another schedule: the last one's beats are not its own
+        w.quarter(t0 + Duration::from_secs(9));
+        w.forget();
+        assert!(!w.running(true, t0 + Duration::from_secs(9)));
+    }
+
+    /// N1: a jam with no chart has no bar marks; the tempo must still reach
+    /// the engine.
+    #[test]
+    fn a_tempo_change_reaches_a_worker_that_has_no_chart() {
+        let (ring, windows) = (ring(), Arc::new(AtomicU32::new(0)));
+        let model = Arc::new(Mutex::new(Triad { windows: windows.clone(), slow: Duration::ZERO }));
+        let worker = Worker::start_with(ring.clone(), RATE, None, 0.5, hooks(model, Arc::default()), |_| {}).unwrap();
+        worker.set_beat(0.25);
+        let stop = Arc::new(AtomicBool::new(false));
+        let cb = callback(ring, stop.clone());
+        wait_until("six windows", Duration::from_secs(30), || windows.load(Ordering::SeqCst) >= 6);
+        stop.store(true, Ordering::SeqCst);
+        cb.join().unwrap();
+        let summary = worker.stop().expect("a summary");
+        // quarter-second beats: about four a second heard, not two
+        assert!(summary.beats as f64 > summary.reading.heard_s * 3.0, "{summary:?}");
     }
 
     fn chord(root: u8) -> ChordReading {

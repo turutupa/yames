@@ -622,8 +622,6 @@ impl TimingAnalyzer {
             self.notes.tap.disarm();
         }
         *self.schedule.lock().unwrap() = Some((schedule, pass_bars, pitches, details));
-        // a Take is coming: the free-play worker keeps off the model and the ring
-        crate::harmony::worker::set_take_loaded(true);
         self.schedule_version
             .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
     }
@@ -635,7 +633,6 @@ impl TimingAnalyzer {
         self.notes.forget();
         self.notes.tap.disarm();
         *self.schedule.lock().unwrap() = None;
-        crate::harmony::worker::set_take_loaded(false);
         self.schedule_version
             .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
     }
@@ -1038,6 +1035,10 @@ impl TimingAnalyzer {
         // does not mention it.
         let mut schedule_run: Option<ScheduleRun> = None;
         let mut seen_schedule_version = u64::MAX;
+        // Whether a Take is running, for the free-play worker, which keeps
+        // off the note model and the input ring while one is. A schedule
+        // that is loaded and not played is not a Take (`harmony/worker.rs`).
+        let mut take_watch = crate::harmony::worker::TakeWatch::default();
         // The pitch pass this run's Take already has, from its first close.
         // A Take is closed twice as a rule (the Session's own stop and the
         // coach's mini-report each ask), and the second close finds the tap
@@ -1178,6 +1179,7 @@ impl TimingAnalyzer {
                 if version != seen_schedule_version {
                     seen_schedule_version = version;
                     take_notes_serial = None;
+                    take_watch.forget();
                     schedule_run = schedule_slot
                         .lock()
                         .unwrap()
@@ -1195,6 +1197,10 @@ impl TimingAnalyzer {
                         });
                 }
             }
+
+            // Here, above the early `continue` of a pass with no beats: a Take
+            // whose click stopped must stop counting as one.
+            take_watch.tell(schedule_run.as_ref().is_some_and(|r| r.has_started()), std::time::Instant::now());
 
             // D4 — Signal A poll. If the JS layer called
             // `notify_settings_change`, close the open segment with
@@ -1559,6 +1565,9 @@ impl TimingAnalyzer {
             // beat happened.
             if let Some(run) = schedule_run.as_mut() {
                 let counting_in = !run.has_started();
+                if beats.iter().any(|b| b.subdivision_index == 0) {
+                    take_watch.quarter(std::time::Instant::now());
+                }
                 for beat in beats.iter().filter(|b| b.subdivision_index == 0) {
                     run.note_quarter_in_bar(
                         beat.is_downbeat,
@@ -2450,6 +2459,7 @@ impl TimingAnalyzer {
         }
 
         // ─── Session-end segment close ───────────────────────────────
+        take_watch.end();
         // Fires when ta.stop() sets `alive = false`, the while loop
         // drains its final flush iteration, and this thread exits.
         // Mirrors Signal-B scoring but skips the silence-threshold
