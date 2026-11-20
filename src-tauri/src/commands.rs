@@ -3636,8 +3636,9 @@ pub async fn coach_generate(
 }
 
 /// One Ask turn (DESIGN 9.4): the caller's static prefix, context,
-/// question and optional GBNF grammar in; an answer, `cancelled` or
-/// `noModel` out. A malformed grammar is an `Err` starting `grammar:`.
+/// question, optional GBNF grammar and deadline in; `answered`,
+/// `truncated`, `deadEnd`, `cancelled`, `timedOut` or `noModel` out. A
+/// malformed grammar is an `Err` starting `grammar:`.
 /// Blocking like `coach_generate`, for the same reason.
 #[tauri::command]
 pub async fn coach_ask(

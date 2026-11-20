@@ -173,7 +173,7 @@ pub mod probe {
     #[cfg(feature = "coach-llm")]
     pub use crate::coach::{
         ask, cancel_generation, create_shared_engine, generate, load_model, unload_model,
-        AskMode, AskOutcome, AskRequest, GenKind,
+        AskMode, AskOutcome, AskRequest, GenKind, ASK_MAX_DEADLINE_MS,
     };
     #[cfg(feature = "coach-llm")]
     pub use crate::models::CURRENT_BRAIN_FAMILY;

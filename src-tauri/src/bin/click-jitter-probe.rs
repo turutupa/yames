@@ -712,13 +712,54 @@ struct LlmRun {
     handle: Option<std::thread::JoinHandle<()>>,
     generations: Arc<AtomicU64>,
     failures: Arc<AtomicU64>,
-    /// `--llm-load`: loads completed under the click, and their total ms.
-    loads: Arc<AtomicU64>,
-    load_ms_total: Arc<AtomicU64>,
+    /// `--llm-load`: every load's start and end (`probe::now_ns`), so the
+    /// report can count only the loads that fell inside the measured
+    /// window, which the LLM thread cannot know the end of.
+    load_spans: Arc<std::sync::Mutex<Vec<(u64, u64)>>>,
     /// `--llm-cancel`: turns that came back cancelled.
     cancels: Arc<AtomicU64>,
     backend: String,
     load_secs: f64,
+}
+
+/// `--llm-load`'s count, against the measured window.
+#[derive(Debug, Default, PartialEq)]
+struct LoadCount {
+    /// Loads whose start fell inside the window.
+    started_inside: u64,
+    /// Loads that began and finished inside it: the ones the click was
+    /// measured under from end to end.
+    finished_inside: u64,
+    /// Total time of the `finished_inside` loads.
+    finished_ns: u64,
+}
+
+impl LoadCount {
+    fn mean_secs(&self) -> f64 {
+        if self.finished_inside == 0 {
+            0.0
+        } else {
+            self.finished_ns as f64 / self.finished_inside as f64 / 1e9
+        }
+    }
+}
+
+/// Count the loads in `spans` (start, end) against the window
+/// `[start_ns, end_ns)`. A load still running when the stream stopped
+/// started inside but did not finish inside: half of it was not measured.
+fn loads_in_window(spans: &[(u64, u64)], start_ns: u64, end_ns: u64) -> LoadCount {
+    let mut count = LoadCount::default();
+    for &(began, ended) in spans {
+        if began < start_ns || began >= end_ns {
+            continue;
+        }
+        count.started_inside += 1;
+        if ended <= end_ns {
+            count.finished_inside += 1;
+            count.finished_ns += ended.saturating_sub(began);
+        }
+    }
+    count
 }
 
 /// What the LLM thread does while the click runs.
@@ -763,6 +804,10 @@ fn probe_ask(id: u64, prose: bool, prefix_variant: u64) -> yames_lib::probe::Ask
              ws ::= \" \"?\n"
                 .to_string()
         }),
+        // The longest a caller may ask for: the probe measures the click
+        // under the work, and a loaded machine must not turn the work into
+        // timeouts.
+        deadline_ms: Some(yames_lib::probe::ASK_MAX_DEADLINE_MS),
     }
 }
 
@@ -771,7 +816,7 @@ fn start_llm(
     path: &str,
     stop: Arc<AtomicBool>,
     mode: LlmMode,
-    start_after: std::time::Duration,
+    window_open_ns: Arc<AtomicU64>,
 ) -> Result<LlmRun, String> {
     use std::time::Instant;
     use yames_lib::probe::{
@@ -796,16 +841,18 @@ fn start_llm(
 
     let generations = Arc::new(AtomicU64::new(0));
     let failures = Arc::new(AtomicU64::new(0));
-    let loads = Arc::new(AtomicU64::new(0));
-    let load_ms_total = Arc::new(AtomicU64::new(0));
+    let load_spans = Arc::new(std::sync::Mutex::new(Vec::new()));
     let cancels = Arc::new(AtomicU64::new(0));
     let gens = generations.clone();
     let fails = failures.clone();
     let engine = create_shared_engine();
 
     if mode == LlmMode::Load {
-        // The whole point: nothing loaded before the click starts.
-        let (n_loads, ms_total) = (loads.clone(), load_ms_total.clone());
+        // The whole point: nothing loaded before the measured window opens.
+        // The countdown is the window itself (`window_open_ns` stays 0 until
+        // `main` stamps its start), not a guess at how long the device
+        // setup takes.
+        let spans = load_spans.clone();
         let handle = std::thread::Builder::new()
             .name("probe-llm".into())
             .spawn(move || {
@@ -815,14 +862,16 @@ fn start_llm(
                         std::thread::sleep(std::time::Duration::from_millis(20));
                     }
                 };
-                nap(start_after);
+                while window_open_ns.load(Ordering::Acquire) == 0 && !stop.load(Ordering::Relaxed) {
+                    std::thread::sleep(std::time::Duration::from_millis(5));
+                }
                 let mut id = 1_000_000u64;
                 while !stop.load(Ordering::Relaxed) {
-                    let started = Instant::now();
+                    let began = yames_lib::probe::now_ns();
                     match load_model(&engine, &p, Some(CURRENT_BRAIN_FAMILY), "probe model") {
                         Ok(true) => {
-                            n_loads.fetch_add(1, Ordering::Relaxed);
-                            ms_total.fetch_add(started.elapsed().as_millis() as u64, Ordering::Relaxed);
+                            let ended = yames_lib::probe::now_ns();
+                            spans.lock().unwrap_or_else(|e| e.into_inner()).push((began, ended));
                         }
                         other => {
                             fails.fetch_add(1, Ordering::Relaxed);
@@ -833,7 +882,7 @@ fn start_llm(
                     }
                     id += 1;
                     match ask(&engine, &probe_ask(id, false, 0)) {
-                        Ok(AskOutcome::Answered { .. }) => {
+                        Ok(AskOutcome::Answered { .. } | AskOutcome::Truncated { .. }) => {
                             gens.fetch_add(1, Ordering::Relaxed);
                         }
                         other => {
@@ -851,8 +900,7 @@ fn start_llm(
             handle: Some(handle),
             generations,
             failures,
-            loads,
-            load_ms_total,
+            load_spans,
             cancels,
             backend: backend.to_string(),
             load_secs: 0.0,
@@ -908,7 +956,7 @@ fn start_llm(
                         Ok(Ok(AskOutcome::Cancelled)) => {
                             n_cancels.fetch_add(1, Ordering::Relaxed);
                         }
-                        Ok(Ok(AskOutcome::Answered { .. })) => {
+                        Ok(Ok(AskOutcome::Answered { .. } | AskOutcome::Truncated { .. })) => {
                             gens.fetch_add(1, Ordering::Relaxed);
                         }
                         other => {
@@ -923,8 +971,7 @@ fn start_llm(
             handle: Some(handle),
             generations,
             failures,
-            loads,
-            load_ms_total,
+            load_spans,
             cancels,
             backend: backend.to_string(),
             load_secs,
@@ -963,8 +1010,7 @@ fn start_llm(
         handle: Some(handle),
         generations,
         failures,
-        loads,
-        load_ms_total,
+        load_spans,
         cancels,
         backend: backend.to_string(),
         load_secs,
@@ -976,7 +1022,7 @@ fn start_llm(
     _path: &str,
     _stop: Arc<AtomicBool>,
     _mode: LlmMode,
-    _start_after: std::time::Duration,
+    _window_open_ns: Arc<AtomicU64>,
 ) -> Result<LlmRun, String> {
     Err("this binary was built without the coach-llm feature — rebuild with \
          `--features coach-llm` (or coach-llm-vulkan / coach-llm-metal), \
@@ -1401,6 +1447,8 @@ fn main() -> ExitCode {
 
     // ---- LLM first, so the model is warm before the window opens ----
     let stop = Arc::new(AtomicBool::new(false));
+    // 0 until the measured window opens, then its start (`probe::now_ns`).
+    let window_open_ns = Arc::new(AtomicU64::new(0));
     let mut llm: Option<LlmRun> = None;
     if let Some(ref path) = args.gguf {
         let mode = if args.llm_load {
@@ -1410,10 +1458,10 @@ fn main() -> ExitCode {
         } else {
             LlmMode::Generate
         };
-        // `--llm-load` starts loading once the stream is past its start-up,
-        // so every load it reports happened inside the measured window.
-        let start_after = std::time::Duration::from_millis(args.warmup_ms + 500);
-        match start_llm(path, stop.clone(), mode, start_after) {
+        // `--llm-load` starts loading when the measured window opens (main
+        // stamps `window_open_ns` there), and the report counts only the
+        // loads that began and finished inside the window.
+        match start_llm(path, stop.clone(), mode, window_open_ns.clone()) {
             Ok(run) => llm = Some(run),
             Err(e) => {
                 eprintln!("error: {e}");
@@ -2018,6 +2066,7 @@ fn main() -> ExitCode {
 
     std::thread::sleep(Duration::from_millis(args.warmup_ms));
     let window_start_ns = yames_lib::probe::now_ns();
+    window_open_ns.store(window_start_ns.max(1), Ordering::Release);
     std::thread::sleep(Duration::from_secs(args.seconds));
 
     // The take stops BEFORE the engine, so the writer's last drain is of a
@@ -2041,6 +2090,9 @@ fn main() -> ExitCode {
         None => None,
     };
 
+    // The measured window is every callback from `window_start_ns` until
+    // the stream stops here.
+    let window_end_ns = yames_lib::probe::now_ns();
     engine.shutdown();
     stop.store(true, Ordering::Relaxed);
     let swaps_done = match swapper {
@@ -2099,13 +2151,13 @@ fn main() -> ExitCode {
         if let Some(h) = run.handle.take() {
             let _ = h.join();
         }
+        let spans = run.load_spans.lock().unwrap_or_else(|e| e.into_inner()).clone();
         (
             run.backend,
             run.load_secs,
             run.generations.load(Ordering::Relaxed),
             run.failures.load(Ordering::Relaxed),
-            run.loads.load(Ordering::Relaxed),
-            run.load_ms_total.load(Ordering::Relaxed),
+            loads_in_window(&spans, window_start_ns, window_end_ns),
             run.cancels.load(Ordering::Relaxed),
         )
     });
@@ -2244,11 +2296,14 @@ fn main() -> ExitCode {
             None => println!("harmony worker    said nothing"),
         }
     }
-    if let Some((_, load_secs, gens, fails, loads, load_ms, cancels)) = &llm_summary {
+    if let Some((_, load_secs, gens, fails, loads, cancels)) = &llm_summary {
         if args.llm_load {
             println!(
-                "model loads       {loads} under the click, {:.2} s each on average",
-                if *loads > 0 { *load_ms as f64 / *loads as f64 / 1000.0 } else { 0.0 }
+                "model loads       {} started inside the window, {} began and finished inside it \
+                 ({:.2} s each on average)",
+                loads.started_inside,
+                loads.finished_inside,
+                loads.mean_secs()
             );
         } else {
             println!("model load        {load_secs:.1} s");
@@ -2531,4 +2586,29 @@ fn start_capture(
             (takes, played, asked)
         })
         .expect("spawn the capture")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{loads_in_window, LoadCount};
+
+    /// `--llm-load` counts a load only against the window it was measured
+    /// in: one before it (a slow device setup) is not counted, one still
+    /// running at the end started inside but did not finish inside.
+    #[test]
+    fn loads_are_counted_against_the_measured_window() {
+        let spans = [
+            (50, 150),    // began before the window: not counted at all
+            (100, 400),   // inside
+            (400, 700),   // inside
+            (700, 1_200), // began inside, still loading when the stream stopped
+            (1_000, 1_000), // began exactly at the end: outside
+        ];
+        assert_eq!(
+            loads_in_window(&spans, 100, 1_000),
+            LoadCount { started_inside: 3, finished_inside: 2, finished_ns: 600 }
+        );
+        assert_eq!(loads_in_window(&spans, 100, 1_000).mean_secs(), 300e-9);
+        assert_eq!(loads_in_window(&[], 100, 1_000).mean_secs(), 0.0);
+    }
 }
