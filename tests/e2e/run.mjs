@@ -426,8 +426,15 @@ async function startSession(d, minutes) {
 /** Which Exercise the Session is on, read off its screen. */
 async function exerciseHere(d) {
   const page = await d.text();
+  // The Take screen's heading, or on a result ("Go again") the kicker's
+  // second part: "Take 1 · <Exercise> · 80 BPM · 10 bars". Read from the DOM:
+  // WebKitGTK's innerText of a result just reopened from Settings left the
+  // kicker out (fix-hotkey, 2026-11-20).
   const heading = await d
-    .exec(`return document.querySelector('[data-testid="session-take"] h2')?.textContent ?? null`)
+    .exec(`const h = document.querySelector('[data-testid="session-take"] h2');
+      if (h) return h.textContent;
+      const k = document.querySelector('[data-testid="session-result"] .session-kick');
+      return k ? (k.textContent.replace(/\u00a0/g, ' ').split(' · ')[1] ?? null) : null;`)
     .catch(() => null);
   const pathTitle = PATHS.map((p) => p.title).find((t) => new RegExp(`${t}, step`, "i").test(page));
   return { page, hit: exerciseOnScreen({ heading, page, pathTitle }, PATHS) };
@@ -1179,13 +1186,31 @@ async function scenarioRestart() {
     await d.clickIn(/Four fingers, one string/, /^Play this$/);
     await goodTakeHeard(d, "restart: Exit, then Play this");
 
-    // 3. Leave by a tab hotkey (Metronome) mid-Session, come back by Today's.
+    // 3. A tab hotkey mid-Session does not leave it; after Exit, a tab hotkey
+    // out (Metronome) and Today's back still start a Session that is heard.
+    // Since 86c390cc (UX audit NAV-2, 2026-11-17) walking away ends a Session,
+    // so a stray tab key is dropped there: Exit, Escape and the recap are the
+    // doors (`useActionDispatcher`). The keys are the defaults since 6bbd9084:
+    // Ctrl+1-4 Today, Paths, Progress, Tools; Ctrl+5-9 the tools, Metronome
+    // first. Ctrl+0 is nothing (it is the webview's "actual size").
+    // Where the player is comes from the DOM, not `d.text()`: WebKitGTK's
+    // innerText on the Session's result read as just "Exit" (fix-hotkey,
+    // 2026-11-20), though the screen was whole.
     const key = (k, code) => d.exec(`document.dispatchEvent(new KeyboardEvent('keydown',
       { key: arguments[0], code: arguments[1], ctrlKey: true, bubbles: true, cancelable: true }))`, [k, code]);
-    await key("1", "Digit1");
+    const viewIs = () => d.exec(`return document.querySelector('.main-content')?.dataset.view ?? ''`);
+    await key("5", "Digit5");
     await sleep(1500);
-    check("restart: the Metronome hotkey leaves the Session", !/Start take|End take/.test(await d.text()));
-    await key("0", "Digit0");
+    check("restart: the Metronome hotkey does not leave a running Session", (await viewIs()) === "session", await viewIs());
+    // Exit from a Step's Take goes back to that Step on Paths (86c390cc:
+    // "Paths keeps your place"), not to Today.
+    await d.leaveSession();
+    await d.waitFor(`return document.querySelector('.main-content')?.dataset.view === 'paths'`, 15000);
+    check("restart: Exit from a Step's Take goes back to Paths", (await viewIs()) === "paths", await viewIs());
+    await key("5", "Digit5");
+    await sleep(1500);
+    check("restart: the Metronome hotkey opens the Metronome off the Session", (await viewIs()) === "beat", await viewIs());
+    await key("1", "Digit1");
     await backToToday();
     await d.clickText(/^Start(\n|$)/);
     await goodTakeHeard(d, "restart: a tab hotkey out and back");
@@ -1205,8 +1230,8 @@ async function scenarioRestart() {
     await sleep(800);
     await d.clickText(/^Metronome$/).catch(() => {});
     await sleep(1500);
-    check("restart: Tools opens from Today", !/Start take|End take/.test(await d.text()));
-    await key("0", "Digit0");
+    check("restart: Tools opens from Today", ["tools", "beat"].includes(await viewIs()), await viewIs());
+    await key("1", "Digit1");
     await backToToday();
     await d.clickText(/^Start(\n|$)/);
     await goodTakeHeard(d, "restart: Tools out and back");
