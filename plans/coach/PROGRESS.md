@@ -31,9 +31,17 @@ ms1's first run had put the selector in the left rail: the relaunch moves it to 
 |---|---|---|---|---|
 | c0 plumbing | merged | `coach-c0` | 2026-11-20 | `progress/c0.md`. Session events go through one wrapped dispatch (the reducer is pure), not a line per dispatch site: accepted. Events are published before React commits: subscribers read the payload. |
 | c1a take note | merged | `coach-c1a` | 2026-11-20 | `progress/c1a.md`. `takeNote` returns data and proposes `session.note.*` keys; c1b1 writes them. `lean` is `(number \| null)[]`. `tuningSuspected` is kept and never said. |
-| ms1 model selector | running (relaunched) | `coach-ms1` | – | reviewer required |
-| pm pass mark + i18n brief | running | `coach-pm` | – | |
+| ms1 model selector | merged | `coach-ms1` | 2026-11-20 | `progress/ms1.md`. Reviewed (independent, read-only): call order in `useSession` sound; six loader findings fixed with tests before merge (memory is a warning and never a lock; no download over a brain on disk; retryable probe; no unload before the saved choice is read; residency re-asked after a double failure; no load starts during a Path Session). One brain on disk today: the second tier's Download waits for ms2. |
+| pm pass mark + i18n brief | merged | `coach-pm` | 2026-11-20 | `progress/pm.md`, `plans/COACH_I18N_BRIEF.md`. Open: the passed chip reads "Passed · Pass mark 85%" (says pass twice): c1b1 or a polish pass rewords it. pt-BR "meta" wants a native read. |
 | c1b1 line and note | running | `coach-c1b1` | – | |
+| c3a worker (Rust) | running | `coach-c3a` | – | reviewer required |
+| c2a1 Ask shell | running | `coach-c2a1` | – | reviewer required (doors) |
+| ms2 selector downloads | briefed, waits for a slot | – | – | reviewer required (Rust, model store) |
+
+**Delivery 1a (2026-11-20):** c0 + c1a + pm + ms1 on `coach`: tsc clean, vitest 382 files / 11,508
+tests, build clean, layout `coach-model`, `rail`, `coach-blocks`, `settings` 43 passed (logs
+`/tmp/coach-orch/`; one vitest run under a load average of 70 reported a worker RPC timeout with every
+test passing, and was clean on the re-run). `plans/coach/tools/gates.sh` is the post-merge gate command.
 
 After c0 + c1a on `coach`: tsc clean, vitest 381 files / 11,475 tests, build clean (logs `/tmp/coach-orch/`).
 In a worktree one vitest file (`TabStage.render.test.tsx`) cannot load through the `node_modules`
