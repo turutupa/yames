@@ -12,6 +12,7 @@ import type { Preset } from "../../types";
 import { toolCtx } from "../../coach/tools/fakeHost";
 import { TEST_PATHS } from "../../coach/tools/testPaths";
 import type { Jam } from "../../jam/types";
+import { bandVolumeFor } from "../../session/takeBand";
 import type { MainView } from "../main-window/MainHeader";
 import type { PathsAt, PathsPlace } from "../main-window/hooks/usePathsPlace";
 import type { SessionRun } from "../session/hooks/useSessionRun";
@@ -21,7 +22,7 @@ import { useCoachToolHost, type CoachToolHostInput } from "./useCoachToolHost";
 const sessionCalls: Array<[string, unknown[]]> = [];
 const recordAs = (name: string) => (...args: unknown[]) => {
   sessionCalls.push([name, args]);
-  return null;
+  return "done" as const;
 };
 
 function input(over: Partial<CoachToolHostInput> = {}): CoachToolHostInput & { moves: PathsAt[]; views: MainView[] } {
@@ -46,6 +47,7 @@ function input(over: Partial<CoachToolHostInput> = {}): CoachToolHostInput & { m
       progress: { states: [], takes: [], ceilings: [] },
       practiceView: "neck",
       bandVolume: 1,
+      bandChoice: 1,
       previewPlan: (change: { minutes?: number }) => ({ minutes: change.minutes ?? 15, steps: [] }),
       setMinutes: recordAs("setMinutes"),
       setTodayFocus: recordAs("setTodayFocus"),
@@ -166,6 +168,75 @@ describe("useCoachToolHost", () => {
       const { result } = renderHook(() => useCoachToolHost(input(over)));
       expect(result.current.sounding(), JSON.stringify(over)).toBe(sounding);
     }
+  });
+
+  it("knows Settings is an overlay: it names the mode under it, and says what a target would stop (review 7)", () => {
+    const cases: Array<[Partial<CoachToolHostInput>, MainView | undefined, string | null]> = [
+      [{ isPlaying: true, view: "settings", mode: "jam" }, undefined, "band"],
+      [{ isPlaying: true, view: "settings", mode: "jam" }, "jam", null],
+      [{ isPlaying: true, view: "settings", mode: "jam" }, "today", "band"],
+      [{ isPlaying: true, view: "beat", mode: "beat" }, "settings", null],
+      [{ isPlaying: true, view: "beat", mode: "beat" }, "drill", "click"],
+      [{ isPlaying: true, view: "settings", mode: "session" }, "today", null],
+      [{ isPlaying: false, view: "beat", mode: "beat" }, "today", null],
+    ];
+    for (const [over, target, sounding] of cases) {
+      const { result } = renderHook(() => useCoachToolHost(input(over)));
+      expect(result.current.sounding(target), `${JSON.stringify(over)} → ${target}`).toBe(sounding);
+    }
+  });
+
+  it("band volume never chosen: set then undo gives the choice back, and a graded mic Take starts silent again (review 1)", () => {
+    // The Session's own band choice and its store, as `useSessionRun` keeps them.
+    let choice: number | null = null;
+    const stored = new Map<string, unknown>();
+    const session = {
+      ...input().session,
+      get bandChoice() {
+        return choice;
+      },
+      // On Today, outside an Exercise: the level heard here is the default, not 0.
+      get bandVolume() {
+        return bandVolumeFor(choice, false, false);
+      },
+      setBandVolume: (next: number | null) => {
+        choice = next;
+        stored.set("session.bandVolume", next);
+      },
+    } as unknown as SessionRun;
+    const props = input({ session });
+    const { result } = renderHook(() => useCoachToolHost(props));
+    const host = result.current;
+    expect(host.safeSetting("bandVolume")).toBe("auto");
+    const proposal = runCoachTool({ tool: "set_setting", args: { key: "bandVolume", value: "50" } }, host, toolCtx());
+    if (!proposal.ok || !("proposal" in proposal)) throw new Error(JSON.stringify(proposal));
+    expect(proposal.proposal.line.values).toEqual({ key: "bandVolume", from: "auto", to: 50 });
+    const done = confirmCoachTool(proposal.proposal, host, toolCtx());
+    if (!done.ok) throw new Error(JSON.stringify(done));
+    expect(choice).toBe(0.5);
+    expect(runCoachUndo(done.undo, host, toolCtx()).ok).toBe(true);
+    expect(choice).toBeNull();
+    expect(typeof stored.get("session.bandVolume")).not.toBe("number");
+    // A graded Take on a microphone: the band is off again, as before the tool ran.
+    expect(bandVolumeFor(choice, false, true)).toBe(0);
+  });
+
+  it("a load the unsaved-work question holds says \"asked\"; the presets carry their screen (review 9)", async () => {
+    const { result } = renderHook(() =>
+      useCoachToolHost(
+        input({
+          loadJam: () => "asked",
+          loadPreset: () => "asked",
+          listPresets: () => Promise.resolve([{ id: "p1", name: "Warm up 80", view: "drill" } as Preset]),
+        }),
+      ),
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(result.current.loadJam("j1")).toBe("asked");
+    expect(result.current.presets()).toEqual([{ id: "p1", name: "Warm up 80", view: "drill" }]);
+    expect(result.current.loadPreset("p1")).toBe("asked");
   });
 
   it("goes through the window's and the Session's own doors, only on the press", () => {

@@ -124,7 +124,11 @@ export type ToolDone = {
   ok: true;
   /** What the app did, from what it actually did. */
   receipt: Line;
-  /** The call that puts the app back where it was. Every `go` that changed something has one. */
+  /**
+   * The call that puts the app back where it was. Every `go` that changed
+   * something has one. Hand back this very object to `runCoachUndo`: the
+   * runner remembers the undos it handed out and runs each once.
+   */
   undo?: ToolCall;
   /** What a `read` tool shows, resolved against the app's own data. */
   blocks?: readonly ResolvedBlock[];
@@ -135,10 +139,11 @@ export type ToolResult = ToolDone | Refusal;
 /**
  * What a `confirm` tool would do, shown before it does it.
  *
- * Plain data the UI draws (`line`), plus what the tool resolved (`resolved`),
- * which only the runner hands back to the tool's `commit`. A proposal is
- * minted by `runCoachTool` and accepted once by `confirmCoachTool`; one built
- * by hand, or confirmed twice, does nothing.
+ * Plain data the UI draws (`line`). What the tool resolved stays inside the
+ * runner, which alone hands it back to the tool's `commit`: nothing a caller
+ * does to this object can change what the press does. A proposal is minted
+ * by `runCoachTool` and accepted once by `confirmCoachTool`; one built by
+ * hand, or confirmed twice, does nothing.
  */
 export type Proposal = {
   readonly tool: string;
@@ -146,8 +151,6 @@ export type Proposal = {
   readonly args: ToolArgs;
   /** Exactly what will happen, as a line ("Start today at part 3: …"). */
   readonly line: Line;
-  /** What the tool resolved, for its `commit`. Not for the UI. */
-  readonly resolved: unknown;
   /** Today's plan as it would be (`set_minutes`, `set_focus`): drawn under the proposal. */
   readonly plan?: SessionPlan;
   /**

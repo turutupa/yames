@@ -14,10 +14,16 @@
  * `notWiredHost()`, answering "notWiredYet": `goal` / `setGoal` (the
  * Notebook, leg c4a), `loopBars` (no bars door on the loop), and the
  * `coachSuggestions` setting (c4a's stored key).
+ *
+ * Review fixes (t1a2b): band volume is read and written as the STORED choice
+ * (`bandChoice`, `"auto"` for none, put back as `null`); `sounding(target)`
+ * knows Settings is an overlay and reads the mode under it; a load reports
+ * `"asked"` when the unsaved-work question opened instead.
  */
 import { useEffect, useRef } from "react";
 import type { Jam } from "../../jam/types";
 import {
+  BAND_VOLUME_AUTO,
   notWiredHost,
   setCoachToolHost,
   SETTINGS_SECTIONS,
@@ -54,6 +60,11 @@ export type CoachToolSettingsInput = {
 
 export type CoachToolHostInput = {
   view: MainView;
+  /**
+   * `useTabRouting`'s mode: the view, except under Settings, where it is the
+   * mode Settings covers (what plays under it). Left out: the view.
+   */
+  mode?: MainView;
   /** `useTabRouting`'s, the rail's. */
   setView: (view: MainView) => void;
   pathsPlace: PathsPlace;
@@ -61,8 +72,11 @@ export type CoachToolHostInput = {
   /** The instrument id the player chose (`"bass"`, `"electric-guitar"`, …). */
   instrument: string;
   jams: readonly Jam[];
-  /** `useJamSession().loadJam` behind the window's unsaved-work gate (`guarded`). */
-  loadJam: (jam: Jam) => void;
+  /**
+   * `useJamSession().loadJam` behind the window's unsaved-work gate
+   * (`guarded`): `"asked"` when the gate's question opened instead.
+   */
+  loadJam: (jam: Jam) => "done" | "asked";
   /** The engine plays (the click, a jam's band, a song). */
   isPlaying: boolean;
   /** The tool screens' tempo, and `handleBpmChange` (clamped; on the jam tab it edits the jam). */
@@ -71,8 +85,12 @@ export type CoachToolHostInput = {
   subdivision: Subdivision;
   /** The `set_subdivision` IPC. */
   setSubdivision: (subdivision: Subdivision) => void;
-  /** `handleLoadPreset` behind the unsaved-work gate. */
-  loadPreset: (preset: Preset) => void;
+  /**
+   * `handleLoadPreset` behind the unsaved-work gate, the preset re-read from
+   * the store first (one deleted since is not applied): `"asked"` when the
+   * gate's question opened instead.
+   */
+  loadPreset: (preset: Preset) => "done" | "asked";
   settings: CoachToolSettingsInput;
   /** The saved presets (the `list_presets` IPC). A test passes its own. */
   listPresets?: () => Promise<Preset[]>;
@@ -86,6 +104,9 @@ export type CoachToolHostInput = {
 const SCROLL_NUDGES_MS = [80, 260, 520];
 
 const PRACTICE_VIEWS: readonly PracticeView[] = ["neck", "runway", "tab"];
+
+/** The screens `handleLoadPreset` opens (an older store may hold neither). */
+const isPresetView = (view: unknown): view is "beat" | "drill" => view === "beat" || view === "drill";
 const ON_OFF: readonly SafeSettingOption[] = [
   { value: false, names: ["off"] },
   { value: true, names: ["on"] },
@@ -128,7 +149,8 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
       case "practiceView":
         return session().practiceView;
       case "bandVolume":
-        return session().bandVolume;
+        // The stored choice, not `bandVolume` (derived for the screen on show).
+        return session().bandChoice ?? BAND_VOLUME_AUTO;
       case "countIn":
         return settings.countIn;
       case "coachVoice":
@@ -141,11 +163,15 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
 
   return {
     ...notWiredHost(),
-    sounding: () => {
+    sounding: (target) => {
       const { isPlaying, view } = latest.current;
+      // The mode playing: under Settings, the one it covers (`useTabRouting`).
+      const mode = latest.current.mode ?? view;
       // A Session's own sound is not this: the Session refuses the tools that leave it.
-      if (!isPlaying || view === "session") return null;
-      return view === "jam" ? "band" : view === "songs" ? "song" : "click";
+      if (!isPlaying || mode === "session") return null;
+      // Settings is an overlay, and the mode playing is where the sound already is: neither stops it.
+      if (target !== undefined && (target === "settings" || target === mode)) return null;
+      return mode === "jam" ? "band" : mode === "songs" ? "song" : "click";
     },
     previewPlan: (change) => session().previewPlan(change),
     startToday: (at) => {
@@ -208,18 +234,16 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
     loadJam: (jamId) => {
       const jam = latest.current.jams.find((j) => j.id === jamId);
       if (!jam) throw new Error(`no jam ${jamId}`);
-      latest.current.loadJam(jam);
-      return "done";
+      return latest.current.loadJam(jam) === "asked" ? "asked" : "done";
     },
     presets: () => {
       refreshPresets();
-      return presets ? presets.map((p) => ({ id: p.id, name: p.name })) : "notWiredYet";
+      return presets ? presets.map((p) => ({ id: p.id, name: p.name, ...(isPresetView(p.view) ? { view: p.view } : {}) })) : "notWiredYet";
     },
     loadPreset: (presetId) => {
       const preset = presets?.find((p) => p.id === presetId);
       if (!preset) throw new Error(`no preset ${presetId}`);
-      latest.current.loadPreset(preset);
-      return "done";
+      return latest.current.loadPreset(preset) === "asked" ? "asked" : "done";
     },
     clickSubdivision: () => latest.current.subdivision,
     setClickSubdivision: (subdivision) => {
@@ -236,7 +260,8 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
         case "practiceView":
           return PRACTICE_VIEWS.map((view) => ({ value: view, names: [view] }));
         case "bandVolume":
-          return [];
+          // A level is a percentage (`settings.ts` reads it); the one word is "the app chooses".
+          return [{ value: BAND_VOLUME_AUTO, names: [BAND_VOLUME_AUTO] }];
         case "countIn":
           return ON_OFF;
         case "coachVoice":
@@ -260,7 +285,7 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
           session().setPracticeView(value as PracticeView);
           return "done";
         case "bandVolume":
-          session().setBandVolume(Number(value));
+          session().setBandVolume(value === BAND_VOLUME_AUTO ? null : Number(value));
           return "done";
         case "countIn":
           if (Boolean(value) !== settings.countIn) settings.toggleCountIn();

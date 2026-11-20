@@ -61,11 +61,45 @@ describe("load_jam and load_preset", () => {
     expect(h.changes()).toEqual([]);
   });
 
-  it("a jam shown from elsewhere says what stops; from the jam screen nothing does", () => {
+  it("a jam says what stops: the click from elsewhere, the band playing on the jam tab, nothing when quiet (review 9)", () => {
     const away = fakeHost({ view: "beat", sounding: "click" }, { jams: () => JAMS });
     expect(proposalOf(runCoachTool(call("load_jam", { jam: "funk" }), away, toolCtx({ screen: "beat" }))).line.values).toEqual({ jam: "Funk vamp", stops: "click" });
     const here = fakeHost({ view: "jam", sounding: "band" }, { jams: () => JAMS });
-    expect(proposalOf(runCoachTool(call("load_jam", { jam: "funk" }), here, toolCtx({ screen: "jam" }))).line.values).toEqual({ jam: "Funk vamp" });
+    expect(proposalOf(runCoachTool(call("load_jam", { jam: "funk" }), here, toolCtx({ screen: "jam" }))).line.values).toEqual({ jam: "Funk vamp", stops: "band" });
+    const quiet = fakeHost({ view: "jam" }, { jams: () => JAMS });
+    expect(proposalOf(runCoachTool(call("load_jam", { jam: "funk" }), quiet, toolCtx({ screen: "jam" }))).line.values).toEqual({ jam: "Funk vamp" });
+  });
+
+  it("a preset says what stops: a band always, the click only when the preset opens another screen (review 9)", () => {
+    const presets = () => [
+      { id: "p1", name: "Warm up 80", view: "beat" as const },
+      { id: "p2", name: "Ladder", view: "drill" as const },
+    ];
+    const stops = (start: Parameters<typeof fakeHost>[0], preset: string) =>
+      proposalOf(runCoachTool(call("load_preset", { preset }), fakeHost(start, { presets }), toolCtx({ screen: start.view === "jam" ? "jam" : "beat" }))).line.values.stops;
+    expect(stops({ view: "jam", sounding: "band" }, "warm up")).toBe("band");
+    expect(stops({ view: "beat", sounding: "click" }, "warm up")).toBeUndefined();
+    expect(stops({ view: "beat", sounding: "click" }, "ladder")).toBe("click");
+    expect(stops({ view: "beat" }, "ladder")).toBeUndefined();
+  });
+
+  it.each([
+    ["load_jam", { jam: "funk" }, { jam: "Funk vamp" }],
+    ["load_preset", { preset: "warm up" }, { preset: "Warm up 80" }],
+  ])("%s: when the app's unsaved-work question opens instead, the receipt says so, never \"Loaded\" (review 9)", (tool, args, values) => {
+    const h = host({ loadJam: () => "asked", loadPreset: () => "asked" });
+    const out = done(confirmCoachTool(proposalOf(runCoachTool(call(tool, args), h, toolCtx())), h, toolCtx()));
+    expect(out.receipt).toEqual({ key: "coachTools.receipt.loadAsked", values });
+    expect(out.undo).toBeUndefined();
+  });
+
+  it("a preset deleted between the proposal and the press is not loaded (review 9)", () => {
+    let presets = [{ id: "p1", name: "Warm up 80" }];
+    const h = host({ presets: () => presets });
+    const proposal = proposalOf(runCoachTool(call("load_preset", { preset: "warm up" }), h, toolCtx()));
+    presets = [];
+    expect(confirmCoachTool(proposal, h, toolCtx())).toMatchObject({ why: "refused", line: { key: "coachTools.why.refused.proposal" } });
+    expect(h.changes()).toEqual([]);
   });
 
   it("not in a Session, and not before the presets can be read", () => {
@@ -129,6 +163,8 @@ describe("set_setting", () => {
     ],
     // No voice installed: only Off.
     coachVoice: [{ value: false, names: ["off"] }],
+    // A level is a percentage; the one word is "the app chooses".
+    bandVolume: [{ value: "auto", names: ["auto"] }],
   };
 
   function host(start: Partial<Record<SafeSettingKey, SafeSettingValue>>, view: "today" | "beat" = "today") {
@@ -197,6 +233,50 @@ describe("set_setting", () => {
     expect(confirmCoachTool(proposal, h, toolCtx())).toMatchObject({ line: { key: "coachTools.why.refused.proposal" } });
     expect(h.values.theme).toBe("velvet");
     expect(runCoachTool(call("set_setting", { key: "coachSuggestions", value: "on" }), host({}), toolCtx())).toMatchObject({ why: "notWiredYet" });
+  });
+
+  it("band volume never chosen: the proposal says so, and the undo gives the choice back to the app (review 1)", () => {
+    const h = host({ bandVolume: "auto" });
+    const proposal = proposalOf(runCoachTool(call("set_setting", { key: "bandVolume", value: "50" }), h, toolCtx()));
+    expect(proposal.line.values).toEqual({ key: "bandVolume", from: "auto", to: 50 });
+    const out = done(confirmCoachTool(proposal, h, toolCtx()));
+    expect(h.values.bandVolume).toBe(0.5);
+    expect(out.undo).toEqual({ tool: "set_setting", args: { key: "bandVolume", value: "auto" } });
+    expect(runCoachUndo(out.undo, h, toolCtx()).ok).toBe(true);
+    expect(h.values.bandVolume).toBe("auto");
+  });
+
+  it("a count-in proposed on one screen and pressed on another is refused, touching nothing (review 2)", () => {
+    const h = host({ countIn: false }, "beat");
+    h.setView("jam");
+    const proposal = proposalOf(runCoachTool(call("set_setting", { key: "countIn", value: "on" }), h, toolCtx({ screen: "jam" })));
+    // Today's own reading is "off" too: only the screen tells the two switches apart.
+    h.setView("today");
+    expect(confirmCoachTool(proposal, h, toolCtx())).toMatchObject({ why: "refused", line: { key: "coachTools.why.refused.proposal" } });
+    expect(h.changes().filter((c) => c.member === "setSafeSetting")).toEqual([]);
+    expect(h.values.countIn).toBe(false);
+  });
+
+  it("a value the control stopped offering before the press is refused (review 3)", () => {
+    let voiceOptions: SafeSettingOption[] = [
+      { value: false, names: ["off"] },
+      { value: true, names: ["on"] },
+    ];
+    const values: Partial<Record<SafeSettingKey, SafeSettingValue>> = { coachVoice: false };
+    const h = fakeHost({}, {
+      safeSetting: (key) => values[key] ?? "notWiredYet",
+      safeSettingOptions: (key) => (key === "coachVoice" ? voiceOptions : "notWiredYet"),
+      setSafeSetting: (key, value) => {
+        values[key] = value;
+        return "done";
+      },
+    });
+    const proposal = proposalOf(runCoachTool(call("set_setting", { key: "coachVoice", value: "on" }), h, toolCtx()));
+    // The brain tier turned off, or the voice removed, in Settings.
+    voiceOptions = voiceOptions.slice(0, 1);
+    expect(confirmCoachTool(proposal, h, toolCtx())).toMatchObject({ why: "refused", line: { key: "coachTools.why.refused.proposal" } });
+    expect(h.changes()).toEqual([]);
+    expect(values.coachVoice).toBe(false);
   });
 
   it("is allowed in a Session between Takes (the practice view, the band's volume)", () => {

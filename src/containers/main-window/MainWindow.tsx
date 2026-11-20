@@ -53,6 +53,7 @@ import {
   storeSave,
   togglePlayback,
   openFeedback,
+  listPresets,
   MIC_PERMISSION_TIMEOUT_MS,
 } from "../../ipc";
 import { AskPanel } from "../coach/AskPanel";
@@ -1769,22 +1770,41 @@ export function MainWindow() {
   // loader it goes through.
   useCoachToolHost({
     view,
+    mode,
     setView,
     pathsPlace,
     session: sessionRun,
     instrument,
     jams: jamSession.jams,
-    loadJam: (jam) =>
+    // The gate runs the action now, or opens its question and runs it on the answer: say which.
+    loadJam: (jam) => {
+      let ran = false;
       guarded(() => {
+        ran = true;
         jamSession.loadJam(jam);
         setView("jam");
-      }),
+      });
+      return ran ? "done" : "asked";
+    },
     isPlaying: state.isPlaying,
     tempo: state.bpm,
     setTempo: handleBpmChange,
     subdivision: state.subdivision,
     setSubdivision: (subdivision) => void setSubdivision(subdivision).catch(() => {}),
-    loadPreset: (preset) => guarded(() => void handleLoadPreset(preset)),
+    loadPreset: (preset) => {
+      let ran = false;
+      guarded(() => {
+        ran = true;
+        // Re-read at the press: a preset deleted since the coach proposed it is not applied.
+        void listPresets()
+          .then((list) => {
+            const fresh = list.find((p) => p.id === preset.id);
+            if (fresh) void handleLoadPreset(fresh);
+          })
+          .catch(() => {});
+      });
+      return ran ? "done" : "asked";
+    },
     settings: {
       theme: state.theme,
       setTheme: (theme) => void setTheme(theme).catch(() => {}),

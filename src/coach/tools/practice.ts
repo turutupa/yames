@@ -202,7 +202,8 @@ const playExercise = defineConfirmTool<PlayExercise>({
 
 type SetTempo =
   | { mode: "nudge"; direction: "slower" | "faster"; from: number; to: number }
-  | { mode: "set"; from: number; to: number };
+  /** `view`: the screen whose tempo it is (on the jam tab it is the jam's): pressed on another, refused. */
+  | { mode: "set"; from: number; to: number; view: string };
 
 const setTempo = defineConfirmTool<SetTempo>({
   name: "set_tempo",
@@ -212,6 +213,12 @@ const setTempo = defineConfirmTool<SetTempo>({
   args: [
     { name: "bpm", type: { kind: "integer", min: 1, max: 999 }, optional: true, note: "The tempo asked for. Snapped to what the screen allows." },
     { name: "direction", type: { kind: "enum", values: ["slower", "faster"] }, optional: true, note: "One step slower or faster." },
+    {
+      name: "at",
+      type: { kind: "integer", min: 1, max: 999 },
+      optional: true,
+      note: "Only if the tempo is this now (an undo's guard: it puts back what the tool changed, nothing since).",
+    },
   ],
   when: (ctx) => !takeRunning(ctx) && (inSession(ctx) ? betweenTakes(ctx) : TEMPO_SCREENS.has(ctx.screen)),
   propose(args, host, ctx) {
@@ -220,14 +227,20 @@ const setTempo = defineConfirmTool<SetTempo>({
     if ((bpm === undefined) === (direction === undefined)) {
       return refuse("refused", "coachTools.why.refused.shape", {}, { detail: "set_tempo needs `bpm` or `direction`, not both" });
     }
-    if (inSession(ctx) || host.sessionActive()) return proposeRung(bpm, direction, host, ctx);
+    const guard = argNumber(args, "at");
+    if (inSession(ctx) || host.sessionActive()) {
+      // The undo of a nudge: absolute, and only from the rung the nudge left (review finding 5).
+      if (guard !== undefined && ctx.run?.bpm !== guard) return gone("the tempo moved since");
+      return proposeRung(bpm, direction, host, ctx);
+    }
     if (!TEMPO_SCREENS.has(host.view())) return refuse("notNow", "coachTools.why.notNow.here", { tool: "set_tempo" });
     const now = host.tempo();
     if (now === "notWiredYet") return notWiredYet("set_tempo");
+    if (guard !== undefined && now !== guard) return gone("the tempo moved since");
     const wanted = bpm ?? now + (direction === "slower" ? -TOOL_BPM_STEP : TOOL_BPM_STEP);
     const to = Math.max(TOOL_BPM_MIN, Math.min(TOOL_BPM_MAX, Math.round(wanted)));
     if (to === now) return refuse("notNow", "coachTools.why.notNow.alreadyAt", { bpm: now });
-    return { ok: true, line: line("coachTools.propose.setTempo", { from: now, to }), resolved: { mode: "set", from: now, to } };
+    return { ok: true, line: line("coachTools.propose.setTempo", { from: now, to }), resolved: { mode: "set", from: now, to, view: host.view() } };
   },
   commit(resolved, host, ctx): ToolResult {
     if (resolved.mode === "nudge") {
@@ -239,16 +252,19 @@ const setTempo = defineConfirmTool<SetTempo>({
       return {
         ok: true,
         receipt: line("coachTools.receipt.setTempo", { from: resolved.from, to: resolved.to }),
-        undo: { tool: "set_tempo", args: { direction: resolved.direction === "slower" ? "faster" : "slower" } },
+        // Absolute (back to `from`) and guarded (only from `to`): a Faster pressed since is not undone twice.
+        undo: { tool: "set_tempo", args: { bpm: resolved.from, at: resolved.to } },
       };
     }
     if (host.sessionActive()) return sessionOpen();
+    // Another screen's tempo is another thing (the jam tab's is the saved jam's).
+    if (host.view() !== resolved.view) return gone("the screen changed");
     if (host.tempo() !== resolved.from) return gone("the tempo moved");
     if (host.setTempo(resolved.to) === "notWiredYet") return notWiredYet("set_tempo");
     return {
       ok: true,
       receipt: line("coachTools.receipt.setTempo", { from: resolved.from, to: resolved.to }),
-      undo: { tool: "set_tempo", args: { bpm: resolved.from } },
+      undo: { tool: "set_tempo", args: { bpm: resolved.from, at: resolved.to } },
     };
   },
 });

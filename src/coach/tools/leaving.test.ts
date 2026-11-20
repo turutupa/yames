@@ -17,7 +17,6 @@ describe("a navigating go tool while something sounds", () => {
     ["go_to", { screen: "paths" }, "coachTools.propose.goTo", { screen: "paths" }],
     ["open_path", { path: "ligado" }, "coachTools.propose.openPath", { path: "Ligado" }],
     ["open_step", { path: "alternate picking", step: 2 }, "coachTools.propose.openStep", { path: "Alternate Picking", step: 2 }],
-    ["open_settings", { section: "appearance" }, "coachTools.propose.openSettings", { section: "appearance" }],
   ])("%s is a proposal that says what stops, and goes only on the press", (tool, args, key, values) => {
     const host = fakeHost({ view: "jam", paths: TEST_PATHS, sounding: "band" });
     const out = runCoachTool({ tool, args }, host, jamCtx);
@@ -62,17 +61,60 @@ describe("a navigating go tool while something sounds", () => {
     expect(runCoachTool({ tool: "show_chord", args: { chord: "Am7" } }, host, jamCtx)).toMatchObject({ ok: true });
   });
 
-  it("an Undo that would leave while something sounds waits, and moves nothing", () => {
-    const host = fakeHost({ view: "beat", sounding: "click" });
-    expect(runCoachUndo({ tool: "return_to", args: { screen: "today" } }, host, toolCtx({ screen: "beat" }))).toMatchObject({
+  it("an Undo that would leave while something sounds waits, moves nothing, and stays good for later", () => {
+    const host = fakeHost({ view: "today" });
+    const out = runCoachTool({ tool: "go_to", args: { screen: "beat" } }, host, toolCtx());
+    if (!out.ok || "proposal" in out || !out.undo) throw new Error(JSON.stringify(out));
+    host.play("click");
+    expect(runCoachUndo(out.undo, host, toolCtx({ screen: "beat" }))).toMatchObject({
       ok: false,
       why: "notNow",
       line: { key: "coachTools.why.notNow.sounding", values: { stops: "click" } },
     });
     expect(host.where().view).toBe("beat");
+    host.play(null);
+    expect(runCoachUndo(out.undo, host, toolCtx({ screen: "beat" })).ok).toBe(true);
+    expect(host.where().view).toBe("today");
+  });
+});
+
+describe("Settings is an overlay: opening it stops nothing (review 7 and 8)", () => {
+  it("open_settings with the click playing runs at once, and its Undo goes back without stopping anything", () => {
+    const host = fakeHost({ view: "beat", sounding: "click" });
+    const out = runCoachTool({ tool: "open_settings", args: { section: "appearance" } }, host, toolCtx({ screen: "beat" }));
+    expect(out).toMatchObject({ ok: true, receipt: { key: "coachTools.receipt.openSettings" }, undo: { tool: "return_to", args: { screen: "beat" } } });
+    expect(host.where().view).toBe("settings");
+    expect(host.sounding()).toBe("click");
+    if (!out.ok || "proposal" in out) return;
+    expect(runCoachUndo(out.undo, host, toolCtx({ screen: "beat" }))).toMatchObject({ ok: true });
+    expect(host.where().view).toBe("beat");
+    expect(host.sounding()).toBe("click");
   });
 
-  it("a proposal to leave is good once, and re-checked against a Take", () => {
+  it("go_to settings with a band playing runs at once too", () => {
+    const host = fakeHost({ view: "jam", sounding: "band" });
+    expect(runCoachTool({ tool: "go_to", args: { screen: "settings" } }, host, jamCtx)).toMatchObject({ ok: true, receipt: { key: "coachTools.receipt.goTo" } });
+    expect(host.where().view).toBe("settings");
+  });
+
+  it("from Settings over a playing jam: back to the jam is at once; elsewhere is a proposal naming the band", () => {
+    const host = fakeHost({ view: "settings", mode: "jam", sounding: "band" });
+    const away = runCoachTool({ tool: "go_to", args: { screen: "paths" } }, host, toolCtx());
+    expect(away.ok && "proposal" in away && away.proposal.line.values.stops).toBe("band");
+    expect(runCoachTool({ tool: "go_to", args: { screen: "jam" } }, host, toolCtx())).toMatchObject({ ok: true, receipt: { key: "coachTools.receipt.goTo" } });
+    expect(host.sounding()).toBe("band");
+  });
+
+  it("open_settings from Settings while the click plays scrolls to the section", () => {
+    const host = fakeHost({ view: "settings", mode: "beat", sounding: "click" });
+    const out = runCoachTool({ tool: "open_settings", args: { section: "coach" } }, host, toolCtx({ screen: "beat" }));
+    expect(out).toMatchObject({ ok: true, receipt: { key: "coachTools.receipt.openSettings" } });
+    expect(host.calls.filter((c) => c.member === "openSettingsSection")).toEqual([{ member: "openSettingsSection", args: ["coach"] }]);
+  });
+});
+
+describe("a proposal to leave", () => {
+  it("is good once, and re-checked against a Take", () => {
     const host = fakeHost({ view: "beat", sounding: "click" });
     const out = runCoachTool({ tool: "go_to", args: { screen: "paths" } }, host, toolCtx({ screen: "beat" }));
     if (!out.ok || !("proposal" in out)) throw new Error("no proposal");

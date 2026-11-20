@@ -213,7 +213,7 @@ describe("set_tempo, on a tool screen", () => {
     expect(h.bpm()).toBe(from);
     const out = done(confirmCoachTool(proposal, h, beat));
     expect(h.bpm()).toBe(to);
-    expect(out.undo).toEqual({ tool: "set_tempo", args: { bpm: from } });
+    expect(out.undo).toEqual({ tool: "set_tempo", args: { bpm: from, at: to } });
     expect(runCoachUndo(out.undo, h, beat).ok).toBe(true);
     expect(h.bpm()).toBe(from);
   });
@@ -234,6 +234,23 @@ describe("set_tempo, on a tool screen", () => {
     expect(confirmCoachTool(proposal, h, beat)).toMatchObject({ line: { key: "coachTools.why.refused.proposal" } });
     expect(h.bpm()).toBe(110);
   });
+
+  it("proposed on the Metronome, pressed on the jam tab at the same tempo: refused, the jam untouched (review 2)", () => {
+    const h = tools(100, "beat");
+    const proposal = proposalOf(runCoachTool(call("set_tempo", { bpm: 120 }), h, beat));
+    h.setView("jam");
+    expect(confirmCoachTool(proposal, h, toolCtx({ screen: "jam" }))).toMatchObject({ why: "refused", line: { key: "coachTools.why.refused.proposal" } });
+    expect(h.changes().filter((c) => c.member === "setTempo")).toEqual([]);
+    expect(h.bpm()).toBe(100);
+  });
+
+  it("the undo puts back only what the tool changed: moved by hand since, it is refused (review 5)", () => {
+    const h = tools(100);
+    const out = done(confirmCoachTool(proposalOf(runCoachTool(call("set_tempo", { bpm: 120 }), h, beat)), h, beat));
+    h.setTempo(130);
+    expect(runCoachUndo(out.undo, h, beat)).toMatchObject({ ok: false, line: { key: "coachTools.why.refused.proposal" } });
+    expect(h.bpm()).toBe(130);
+  });
 });
 
 describe("set_tempo, in a Session", () => {
@@ -251,11 +268,26 @@ describe("set_tempo, in a Session", () => {
     expect(h.changes()).toEqual([]);
     const out = done(confirmCoachTool(proposal, h, at(60, outside)));
     expect(out.receipt).toEqual({ key: "coachTools.receipt.setTempo", values: { from: 60, to: 72 } });
-    expect(out.undo).toEqual({ tool: "set_tempo", args: { direction: "slower" } });
+    expect(out.undo).toEqual({ tool: "set_tempo", args: { bpm: 60, at: 72 } });
     const back = fakeHost({ view: "session", session: true }, { nudges: () => ({ slower: true, faster: false }), nudgeTempo: () => "done" });
     expect(runCoachUndo(out.undo, back, at(72, outside)).ok).toBe(true);
     expect(h.changes()).toEqual([{ member: "nudgeTempo", args: ["faster"] }]);
     expect(back.changes()).toEqual([{ member: "nudgeTempo", args: ["slower"] }]);
+  });
+
+  it("a nudge's undo is absolute and single-use: refused once the player moved the rung, and refused when pressed twice (review 5)", () => {
+    const h = host(true, true);
+    // 70 → 60 by the tool, then the player's own Faster takes it back to 70.
+    const out = done(confirmCoachTool(proposalOf(runCoachTool(call("set_tempo", { direction: "slower" }), h, at(70, steady))), h, at(70, steady)));
+    expect(runCoachUndo(out.undo, h, at(70, steady))).toMatchObject({ ok: false, line: { key: "coachTools.why.refused.proposal" } });
+    expect(runCoachUndo(out.undo, h, at(80, steady))).toMatchObject({ ok: false });
+    expect(h.changes()).toEqual([{ member: "nudgeTempo", args: ["slower"] }]);
+    // Still at 60: the undo runs once, and the second press does nothing.
+    const again = done(confirmCoachTool(proposalOf(runCoachTool(call("set_tempo", { direction: "slower" }), h, at(70, steady))), h, at(70, steady)));
+    expect(runCoachUndo(again.undo, h, at(60, steady)).ok).toBe(true);
+    // The same press again, as if the tempo were still at 60: only the single use stops it.
+    expect(runCoachUndo(again.undo, h, at(60, steady))).toMatchObject({ ok: false, why: "refused", detail: "not a live undo" });
+    expect(h.changes().map((c) => c.args[0])).toEqual(["slower", "slower", "faster"]);
   });
 
   it.each([

@@ -11,7 +11,12 @@
  * "on" with no voice installed is not one of them.
  *
  * Every change says "{key}: {from} → {to}" before the press and returns the
- * call that puts the old value back.
+ * call that puts the old value back. Band volume's "from" is the STORED
+ * choice, `"auto"` when the player never made one (`BAND_VOLUME_AUTO`: the
+ * app chooses, off under a graded Take on a microphone), and its undo gives
+ * that back rather than pinning the level heard on the screen it was asked
+ * from. At the press the screen (for the count-in), the value and the
+ * control's offer are all checked again.
  */
 
 import { SAFE_SETTING_KEYS, type CoachToolHost, type SafeSettingKey, type SafeSettingOption, type SafeSettingValue } from "./host";
@@ -44,18 +49,38 @@ export function settingWords(key: SafeSettingKey, value: SafeSettingValue): stri
   return value;
 }
 
-type Resolved = { key: SafeSettingKey; from: SafeSettingValue; to: SafeSettingValue };
+/**
+ * `view`: the screen the proposal was made on, for a setting that belongs to
+ * the screen (the count-in is the transport's on show); the press is refused
+ * on another (review finding 2).
+ */
+type Resolved = { key: SafeSettingKey; from: SafeSettingValue; to: SafeSettingValue; view: string | null };
+
+/** The settings whose value is the screen's, not the player's everywhere. */
+const SCREEN_SETTINGS: ReadonlySet<SafeSettingKey> = new Set(["countIn"]);
+
+/**
+ * `value` is one the setting's control offers now (review finding 3): checked
+ * when proposed and again at the press, since Voice "on" goes away with the
+ * voice. Band volume: a level 0 to 1.5, or "the app chooses".
+ */
+function offered(key: SafeSettingKey, value: SafeSettingValue, options: readonly SafeSettingOption[]): boolean {
+  if (key === "bandVolume" && typeof value === "number") return value >= 0 && value <= BAND_PERCENT_MAX / 100;
+  return options.some((o) => o.value === value);
+}
 
 /** The value the player's words name, among what the setting may be now. */
 function resolveValue(key: SafeSettingKey, words: string, host: CoachToolHost): { value: SafeSettingValue } | Refusal {
+  const options = host.safeSettingOptions(key);
+  if (options === "notWiredYet") return notWiredYet("set_setting");
   if (key === "bandVolume") {
+    const named = options.find((o) => o.names.some((name) => normalizeWords(name) === normalizeWords(words)));
+    if (named) return { value: named.value };
     const match = /^(\d{1,3})\s*%?$/.exec(words.trim());
     if (!match) return refuse("notFound", "coachTools.why.notFound.settingValue", { key, query: words });
     const percent = Math.min(BAND_PERCENT_MAX, Math.round(Number(match[1]) / BAND_PERCENT_STEP) * BAND_PERCENT_STEP);
     return { value: percent / 100 };
   }
-  const options = host.safeSettingOptions(key);
-  if (options === "notWiredYet") return notWiredYet("set_setting");
   const exact = options.filter((o) => o.names.some((name) => normalizeWords(name) === normalizeWords(words)));
   const partial = exact.length > 0 ? exact : options.filter((o) => o.names.some((name) => titleMatch(words, name) > 0));
   if (partial.length === 1) return { value: partial[0].value };
@@ -93,11 +118,16 @@ const setSetting = defineConfirmTool<Resolved>({
     return {
       ok: true,
       line: line("coachTools.propose.setSetting", { key, from: settingWords(key, from), to: settingWords(key, to) }),
-      resolved: { key, from, to },
+      resolved: { key, from, to, view: SCREEN_SETTINGS.has(key) ? host.view() : null },
     };
   },
-  commit({ key, from, to }, host) {
+  commit({ key, from, to, view }, host) {
+    // The screen the proposal was made on: on another, the switch is another one.
+    if (view !== null && host.view() !== view) return gone("the screen changed");
     if (host.safeSetting(key) !== from) return gone("the setting changed");
+    const options = host.safeSettingOptions(key);
+    if (options === "notWiredYet") return notWiredYet("set_setting");
+    if (!offered(key, to, options)) return gone("the control no longer offers that value");
     if (host.setSafeSetting(key, to) === "notWiredYet") return notWiredYet("set_setting");
     return {
       ok: true,

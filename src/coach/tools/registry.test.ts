@@ -212,8 +212,11 @@ describe("nothing runs while a Take runs", () => {
     for (const tool of COACH_TOOLS) {
       const host = fakeHost({ view: "session", session: true, paths: TEST_PATHS });
       const call = { tool: tool.name, args: SAMPLE_ARGS[tool.name] };
+      // An app tool is reached only through an undo the runner handed out (none here): refused before the Take is asked.
       const out = tool.audience === "app" ? runCoachUndo(call, host, ctx) : runCoachTool(call, host, ctx);
-      expect(out, tool.name).toMatchObject({ ok: false, why: "notNow", line: { key: "coachTools.why.notNow.take" } });
+      expect(out, tool.name).toMatchObject(
+        tool.audience === "app" ? { ok: false, why: "refused" } : { ok: false, why: "notNow", line: { key: "coachTools.why.notNow.take" } },
+      );
       expect(host.calls, tool.name).toEqual([]);
     }
   });

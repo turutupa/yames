@@ -52,6 +52,16 @@ export type NotWired = "notWiredYet";
 export type HostOutcome = "done" | NotWired;
 
 /**
+ * A load through the window's unsaved-work gate: `"asked"` when the app's
+ * own question opened instead (an edited jam, setlist or preset), and the
+ * load waits on the player's answer, which may be Cancel.
+ */
+export type LoadOutcome = HostOutcome | "asked";
+
+/** A saved preset as the tools see it: its name, and the screen it opens on. */
+export type PresetRef = NamedRef & { view?: MainView };
+
+/**
  * The Settings sections a tool may open, each to its element id
  * (`id="settings-…"` in `src/containers/settings/`; `registry.test.ts` checks
  * every one is there). Opening a section is how a never-action is still
@@ -94,6 +104,14 @@ export type SafeSettingKey = (typeof SAFE_SETTING_KEYS)[number];
 export type SafeSettingValue = string | number | boolean;
 
 /**
+ * Band volume's stored value when the player never chose one: the app
+ * decides (`bandVolumeFor`: off under a graded Take on a microphone). The host
+ * reads and writes the STORED choice, never the level derived for the screen
+ * on show, so an undo can give the choice back (finding 1 of the t1a2 review).
+ */
+export const BAND_VOLUME_AUTO = "auto";
+
+/**
  * One value a safe setting may take now, and the words that name it (its id,
  * and for a language its own name). Only what the app's own control would
  * offer: Voice "on" is not an option with no voice installed.
@@ -123,10 +141,13 @@ export type CoachToolHost = {
   /** Open Settings at a section. */
   openSettingsSection: (section: SettingsSection) => void;
   /**
-   * What is playing outside a Session, or null. Leaving a tool stops it, so
-   * while it is not null a navigating `go` tool waits for a press (t1a2).
+   * What is playing outside a Session, or null (named by the MODE playing:
+   * under Settings, the mode Settings covers). With a `target`: what showing
+   * that view would stop, as `useTabRouting.setView` does it. Settings is an
+   * overlay and stops nothing, nor does going back to the mode that plays.
+   * While it is not null a navigating `go` tool waits for a press (t1a2).
    */
-  sounding: () => Sounding | null;
+  sounding: (target?: MainView) => Sounding | null;
 
   // -- Declared for t1a2 (the `confirm` tools) -----------------------------
 
@@ -167,12 +188,12 @@ export type CoachToolHost = {
   followPath: (pathId: string, level: string | null) => "done" | "cap" | NotWired;
   /** The jams, by the names the player gave them. */
   jams: () => readonly NamedRef[];
-  /** `CoachActionHost.loadJam`. */
-  loadJam: (jamId: string) => HostOutcome;
-  /** The saved presets, by name. */
-  presets: () => readonly NamedRef[] | NotWired;
-  /** `CoachActionHost.loadPreset`. */
-  loadPreset: (presetId: string) => HostOutcome;
+  /** `CoachActionHost.loadJam`, behind the unsaved-work gate. */
+  loadJam: (jamId: string) => LoadOutcome;
+  /** The saved presets, by name, with the screen each opens on (re-read at every call). */
+  presets: () => readonly PresetRef[] | NotWired;
+  /** `CoachActionHost.loadPreset`, behind the unsaved-work gate. */
+  loadPreset: (presetId: string) => LoadOutcome;
   /** The click's subdivision now. */
   clickSubdivision: () => Subdivision | NotWired;
   /** `CoachActionHost.setClickSubdivision`. */
