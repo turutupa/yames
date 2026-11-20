@@ -246,7 +246,7 @@ export const KEY_OF_G: StepSpec = {
   id: "key-of-g",
   title: "The key of G, in full",
   goal: "Play the seven chords of G major, its one, four and five in an eight-bar form, and its one, six, two, five.",
-  why: "So far a new key has been the key of C moved up the neck. G is worth learning in its own right: it is one of the keys guitar songs are most often in, and it puts shapes you already know on new numbers: the G shape that was five in the key of C is one here. Going through everything again in one new key, the seven chords, the three majors, the turn through the minors, is what makes the numbers independent of any one place.",
+  why: "So far, apart from one Step in F, a new key has been the key of C moved along the neck. G is worth learning in its own right: it is one of the keys guitar songs are most often in, and it puts shapes you already know on new numbers: the G shape that was five in the key of C is one here. Going through everything again in one new key, the seven chords, the three majors, the turn through the minors, is what makes the numbers independent of any one place.",
   howTo: [
     "G major has one sharp: F sharp. Its seven chords are G, A minor, B minor, C, D, E minor and F sharp diminished.",
     "One, four and five are G, C and D. Two, three and six are A minor, B minor and E minor.",

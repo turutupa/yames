@@ -4,7 +4,8 @@ You are a guitar teacher and curriculum author working on Yames, a learning-path
 coach. You add Steps to ONE existing Path. Other authors are doing the same for OTHER Paths, at the
 same time, in the same worktree. Stay inside your own files.
 
-Worktree: /home/dgx-personal/projects/yames-mvp-paths3 (branch mvp-paths3). All paths below are in it.
+Worktree: /home/dgx-personal/projects/yames-mvp-paths4 (branch mvp-paths4). All paths below are in it.
+Your shell starts somewhere else: `cd` there in every command, or use absolute paths.
 
 ## Read first (in this order, only what is named)
 1. plans/paths/HANDOFF.md: sections 3 ("How to work here": "Adding Steps to an existing Path") and
@@ -16,8 +17,9 @@ Worktree: /home/dgx-personal/projects/yames-mvp-paths3 (branch mvp-paths3). All 
 4. plans/paths/NEW_PATHS.md: only the section your task names.
 
 ## Hard rules
-- Environment: `export PATH="$HOME/.nvm/versions/node/v20.15.1/bin:$PATH"`. `node_modules` is a
-  symlink: never `npm install`, never delete it. No `tauri dev`. `sleep` is blocked. No cargo.
+- Environment: the system `node` is the one to use (the nvm path older notes name is not on this
+  machine). `node_modules` is a symlink: never `npm install`, never delete it. No `tauri dev`. `sleep`
+  is blocked. No cargo. Keep command output short (`| tail -n 20`, `| grep ...`).
 - NO git commands that change anything: no add, commit, stash, checkout, restore, reset, merge.
   (`git diff` and `git status` to look are fine.) The lead commits.
 - Do NOT run: `vitest -u` (fingering pins), `strings merge`, any translation, `npm run paths -- gen`
@@ -50,8 +52,26 @@ Worktree: /home/dgx-personal/projects/yames-mvp-paths3 (branch mvp-paths3). All 
 - Fingering must be idiomatic and playable; print explicit `fN` where the engine's choice would be
   odd (read the notes' `finger` values in the pack after `gen`).
 
+## Variants and their words
+- An Exercise that varies (`vary`) plays other frets, strings or keys on other Takes, and the Take
+  screen shows each variant its own why and how-to. Variant 0 reads the Exercise's own text.
+- In the three harmony Paths (Triads, Chords in a Key, Arpeggios over Changes) a line moved to other
+  keys with `inKeys(...)` gets its later keys' how-to from `keyText.ts`, made from that key's own
+  notes: use `inKeys` exactly as the Path's other key-moved Exercises do and give the Exercise the
+  Path's `VARIANT_NOTE` as its last how-to line (the generator drops that line once every variant has
+  a how-to of its own, and keeps it where one does not).
+- In Paths with `variantText: true` the Exercise's own sentences are rewritten for each variant by
+  `variantText.ts`, and a sentence it cannot rewrite truthfully is dropped with everything after it
+  in that line. So in a varied Exercise: one fact per sentence, frets as "fret 5" or "frets 5, 7 and
+  8", strings as "the A string", notes by letter, and the specifics early in the line. Write
+  naturally otherwise: "Three roots: A while ...", "the low E", and a sentence that points at the
+  last Exercise are all fine now.
+- After `gen`, read EVERY variant's text in the pack (`variation.variants[i].purpose/howTo`) against
+  that variant's own notes, exactly as you read the Exercise's. A variant with no text of its own
+  reads the Exercise's: if that would be false for it, say so in your report with the Exercise id.
+
 ## Text must match notes: check it yourself before you report
-Write a small script under /tmp/yp3/<your scratch dir>/ that loads src/paths/packs/<pathId>.json and
+Write a small script under /tmp/yp4/<your scratch dir>/ that loads src/paths/packs/<pathId>.json and
 prints, for each of YOUR Exercises, every bar's notes as string:fret, note name (from midi), finger,
 duration and tech, plus `tempo.rungs[0].bpm`, `passAtBpm`, backing and chords. Then read every
 sentence you wrote against it: frets, strings, note names, bar counts, "twice", which notes are open,

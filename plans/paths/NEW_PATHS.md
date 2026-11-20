@@ -241,11 +241,11 @@ do X, or start anyway". Arrows are data now (`prerequisites.paths`, below).
 | Technique | Funk Lines | Rhythm Foundations (Intermediate) | 5 weeks | written |
 | Style | Blues and Pentatonics | Rhythm Foundations (Beginner) | 23 Steps, 92 Exercises, about 18 weeks | written, extended twice |
 | Style | Classic Rock | Rhythm Foundations (Beginner) | 17 Steps, 61 Exercises, about 12 weeks | written, extended twice (2026-11-19) |
-| Harmony | Know the Neck | nothing: the first Path for the harmony route | 6 weeks | written |
+| Harmony | Know the Neck | nothing: the first Path for the harmony route | 15 Steps, 54 Exercises, about 11 weeks | written, extended twice (2026-11-19) |
 | Harmony | Scales and Modes | Know the Neck (Beginner) | 6 weeks | written |
 | Harmony | **Triads** | Know the Neck (Beginner), Scales and Modes (Beginner) | 18 Steps, 60 Exercises, about 12 weeks | written, extended twice (2026-11-19) |
-| Harmony | **Chords in a Key** | Triads (Intermediate) | 17 Steps, 57 Exercises, about 11 weeks | written, extended twice (2026-11-19) |
-| Harmony | **Arpeggios over Changes** | Triads (Advanced), Chords in a Key (Beginner) | 13 Steps, 42 Exercises, about 8 weeks | written, extended once (2026-11-19) |
+| Harmony | **Chords in a Key** | Triads (Intermediate) | 20 Steps, 69 Exercises, about 14 weeks | written, extended three times (2026-11-19) |
+| Harmony | **Arpeggios over Changes** | Triads (Advanced), Chords in a Key (Beginner) | 16 Steps, 54 Exercises, about 11 weeks | written, extended twice (2026-11-19) |
 
 Nothing is renamed, split or merged: every existing Path teaches one thing a
 teacher would teach as one thing, and its Exercise ids carry progress. Know the
@@ -628,6 +628,26 @@ against the pack's notes and corrected before translation.
 | Classic Rock | `box-at-twelve` (B): the box licks in E at fret 12. `double-stops-in-e` (I): double stops over E, A, B and a twelve-bar chorus. `chord-tones-ade` (I): chord tones over one, four, five. `solo-in-e` (A): a twelve-bar solo in E before the sixteen-bar one | 17 Steps, 61 Exercises |
 | Blues and Pentatonics | `open-e-blues`: the form in E at the nut with its turnarounds. `fast-shuffle`: known lines at a jump tempo. `box-five`: the last box, joined to boxes 1 and 4. `three-choruses`: a solo with a shape. `slow-blues-in-c`: the slow feel in a second key | 23 Steps, 92 Exercises |
 | First Chords and Strumming | `strums-between-beats` (I): a rest, off-beat upstrokes, a pattern that leaves room for the change. `sevenths-blues` (A): A7, D7, E7 and a twelve-bar blues in A. `sixteenth-strums` (A): four strokes to a beat at slow tempos | 14 Steps, 55 Exercises, thirteen chords |
+
+### The third pass: the harmony route takes its time (2026-11-19, night)
+
+Three Paths of the owner's route had a Level where each idea was met once. Nine consolidation Steps,
+36 Exercises, nothing new for the hand, written and proof-read the same way as the second pass
+(`src/paths/specs/*-encore.ts`):
+
+| Path | New Steps (Level) | Now |
+|---|---|---|
+| Know the Neck | `roots-other-keys` (I): the roots of one, four, five and of one, six, four, five in G and in D. `boxes-second-key` (A): the five boxes in E minor, box 1 at the nut (and once at fret 12). `changes-in-g` (A): landing on chord tones over G, E minor, C and D | 15 Steps, 54 Exercises, Levels 5 / 5 / 5 |
+| Chords in a Key | All Beginner. `one-four-five-again`: the three major chords of C in new orders and an eight-bar form, on both string sets. `coming-home`: lines that stop on five against lines that come home to one, with an ear "your turn". `numbers-in-f`: the same numbers found chord by chord in F (not G: `key-of-g` already writes G out) | 20 Steps, 69 Exercises, Levels 6 / 7 / 7 |
+| Arpeggios over Changes | `four-chords-in-g` (B) and `nearest-note-again` (B): the one-octave arpeggios, the four-chord line and the nearest-note line a second time, in G and in a new order. `sevenths-in-g` (I): the four sevenths and two, five, one in G, and the line in keys that change | 16 Steps, 54 Exercises, Levels 5 / 6 / 5 |
+
+Decisions a teacher should look at: E minor's one-octave arpeggio starts at fret 14 on the D string
+(fret 2 would need open strings), so G to E minor is a nine-fret move, and the text says so; the G two,
+five, one is the C line a fourth lower re-strung into frets 2 to 7; B flat in F keeps the rule's
+fingering (7, 6, 6 with fingers 2, 1, 1: the G shape three frets up); the ear Exercise `your-turn-home`
+uses a click and not the band, so the band does not play the one for the player; the D bar of
+`changes-in-g.g-arpeggios` is fingered 3, 1, 2, 1 (a one-fret slide down from C) after the proof-reader
+found the engine's 4, 1, 3, 2 crossed fingers.
 
 **Per-variant text.** A variant may now carry its own `purpose` and `howTo`
 (`plans/PATHS_PIPELINE.md`). The key-moved Exercises of Triads, Chords in a

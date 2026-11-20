@@ -1,5 +1,8 @@
 # Paths content: handoff (2026-11-19, evening PST, after the second pass)
 
+**Newest state: the last section, "Relay leg 1 on `mvp-paths4`". Read that first; sections 0 to 7 are
+the background it builds on, and where they disagree the last section wins.**
+
 For the agent (Opus 5.5) that continues the curriculum work. Read this, then
 `plans/paths/NEW_PATHS.md` (the design doc: "The curriculum map", "First Chords
 and Strumming" and "How long each Path is" matter most), then
@@ -478,3 +481,95 @@ Not done, exactly where:
   `yames-mvp-paths3-w2`, `-vt`, `-metric` (all superseded by `f4f37e10`),
   and `CARGO_TARGET_DIR=/home/dgx-personal/projects/.target-paths3` (delete
   when done).
+
+## Relay leg 1 on `mvp-paths4` (2026-11-19, evening PST)
+
+Worktree `/home/dgx-personal/projects/yames-mvp-paths4`, branch `mvp-paths4`, started at `revamp`
+`09a0d67a` (which has all of `mvp-paths3` and the Take screen's variant text, so the "merge revamp" item
+of the Opus interlude is done). Never push; the orchestrator merges. Board: notes on #76.
+
+Commits of this leg, oldest first (hashes in `git log --oneline 09a0d67a..`):
+
+1. `fix(paths): the describer's three known holes closed`. `variantText.ts`: a capital "A" after a colon
+   is never the article; "the low E" with no "string" is written only where reading it as the string and
+   as the note agree, or where the words can only mean the string (frets after it, a fret put on it, a
+   list ending in "strings"); a sentence that tells what another Exercise, Step or Take did (named, and
+   either the sentence opens with it or it has a past-tense verb) is not written. Tests: "round 3" in
+   `variantText.test.ts`. No pack changed.
+2. `feat(paths): the "first version" line goes ...`. The GENERATOR drops the line
+   (`FIRST_VERSION_LINE`, `generate.ts`) from an Exercise whose other variants all have a how-to of
+   their own: 97 Exercises in eleven Paths. Specs still write `VARIANT_NOTE`; keep writing it on new
+   varied Exercises, the rule follows the variants. It stays on Legato `odd-groups.six-roll` and Know the
+   Neck `octaves.every-a`. The 97 keys were pruned from the 14 overlays by script (the pipeline has no
+   prune command: `check` only reports stale keys; the script is ten lines of python over
+   `i18n/<lng>/*.json`, deleting keys of `strings` and `from` that `i18n/en` no longer has, written
+   back with `json.dumps(indent=2, ensure_ascii=False)` plus a newline, which round-trips byte for byte).
+3. `fix(paths): a ninth chord is a chord symbol ...`. The one real workaround the audit found: Funk Lines
+   `second-pair.bm-vamp` said "the ninth chord" because the describer did not know "E9" (it read E and a
+   9). `TOKEN` now knows 9, m9 and maj9; the vamp names Bm7 and E9 and its three other keys say theirs.
+   Blues `d-minor-chorus` bar 12 says "A held over the last A7 (A string, fret 12)". A read-only audit
+   of the 53 varied Exercises in the nine newest files found nothing else worth changing
+   (`rhythm-foundations-more`'s "the open low E string" is the Path's way of naming open notes).
+4. `feat(paths): the harmony route takes its time ...`. Nine consolidation Steps, 36 Exercises, in
+   `know-the-neck-encore.ts`, `chords-encore.ts`, `arpeggios-encore.ts`; the table and the decisions a
+   teacher should look at are in `NEW_PATHS.md`, "The third pass". Know the Neck 42 to 54, Chords in a
+   Key 57 to 69, Arpeggios over Changes 42 to 54. Translations round 18 (313 strings a locale, 14
+   locales, notes at the end of `I18N_BRIEF.md`).
+
+How it was done (same routine as the second pass, briefs updated for this worktree): three authors in
+parallel, one Path each, from `AUTHOR_BRIEF.md` (now has a section on variants and their words) plus a
+task of twenty lines; three read-only proof-readers from `PROOF_BRIEF.md` (now reads variant text too);
+three fixers; fourteen sonnet translators. Proof results: Arpeggios 1 error (a false theory sentence)
+and 11 suggestions, Chords 3 errors (B flat called a new shape; it is the G shape three frets up) and
+10, Know the Neck 0 and 12 (one fingering: a crossed little finger); all applied except a second
+fingering for D minor to B flat and a restyle of old Steps. **The text the fixers changed was checked by
+their own scripts, not by a second independent reader**: a final read-only proof of the nine Steps is
+the first thing the next leg could do cheaply.
+
+Gates at the last commit: `check` 16 Paths 0/0, curriculum 0, strings complete; tsc; vitest (the result
+line is in the commit message); build; `cargo test --test path_exercises` 11 passed; layout
+`paths-prereq planner phone-learning chords session-variant-text` passed. Fingering pins: 42 lines
+added, none changed.
+
+Things that changed about the environment:
+- **The nvm Node path does not exist on this machine** (`~/.nvm/versions/node/v20.15.1`): the system
+  `node` (v26) is what every gate above ran on. Drop the `export PATH=...nvm...` line.
+- **Daytime rule from the owner**: until 8 PM PT (and from 7 AM PT on weekdays) heavy commands run under
+  `nice -n 19 ionice -c3` with capped parallelism (`vitest --maxWorkers=6`, layout `--workers=1`,
+  `CARGO_BUILD_JOBS=6`), and at most two helper agents at a time.
+- Full vitest beside a cargo build times out two tests in `generate.test.ts`; they pass alone. Do not
+  run them side by side.
+- A helper launched in the foreground returns its report to you; several in one message run together.
+
+Left, in the order a teacher would take it:
+1. A final read-only proof of the nine new Steps (above), and of round 18's "home" wording by a native
+   reader where translators were unsure: de (`Zuhause`), fr (`la maison`), ko (`집`), pt-BR (`casa` is
+   also "fret" in that pack), nl. ja `know-the-neck` writes some fret numbers in kanji, as that pack
+   already did.
+2. **Scales and Modes** is the one Path of the harmony route this leg did not touch (12 Steps, 42
+   Exercises, Advanced 13): the modes each met once in A and once in a second key; "what a key is" could
+   use the same patience Chords in a Key's Beginner Level now has (a second and third key by hand, the
+   one, four, five roots found in each).
+3. **Advanced Levels still thin**: Sweep Picking (4 Steps, 14 Exercises), Metal Rhythm (5, 15), Tapping
+   Intermediate (3, 9), Funk Lines Beginner (3, 9), Alternate Picking Beginner (3, 12). Triads (60) is
+   now the shortest long Path of the route next to its neighbours; its Beginner Level is 4 Steps, 13.
+4. Old items still open from section 4: Classic Rock's sixes lick in E; a minor blues in a second key.
+5. The describer: `rhythm-foundations` has 134 variants and `sweep-picking` 238 with no text of their own; the top
+   refusal reasons are "the notes do not line up" (108), "an interval, and the move is not a uniform
+   transposition" (104) and "a box or shape ..." (79). Nothing there is a hole (nothing false is
+   written); it is coverage.
+6. Waiting on the owner, untouched: the real-guitar test of First Chords (#66).
+
+UI notes for the dev agent (not content, not touched here):
+- Classic Rock `fourth-and-back` / `a-and-d-part`: "Hand: open A chord shape" over D bars
+  (`HandLine.tsx` needs a wording for two open shapes).
+- Metal `gallop-changes.two-beat-changes` changes chord mid-bar; the chord strip shows one symbol a bar.
+- The Path page shows an Exercise's base text, which names the first variant's frets and no longer says
+  so on the 97 Exercises above. If the Path page ever lists a varied Exercise's how-to in full, it should
+  say which version it is showing (the variant label), or show the variant the next Take will play.
+- Chords in a Key `coming-home.your-turn-home` is a self-checked ear Exercise on a click; if the UI ever
+  gets a "listen, then answer" pattern, this is its first customer.
+
+Scratch: `/tmp/yp4/` (tasks, proofs, reports, the i18n round) and
+`CARGO_TARGET_DIR=/home/dgx-personal/projects/.target-paths4` are deleted at the end of the leg; the
+briefs that matter are in `plans/paths/`.

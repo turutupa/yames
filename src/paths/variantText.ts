@@ -70,8 +70,12 @@ export type VariantDescription = {
   refusals: Refusal[];
 };
 
-/** The line every varied Exercise of some Paths ends with. Never part of a variant's own how-to. */
-const DISCLAIMER = /for the first version/i;
+/**
+ * The line every varied Exercise of some Paths ends with. Never part of a variant's own how-to, and the
+ * generator drops it from an Exercise whose other variants all have a how-to of their own.
+ */
+export const FIRST_VERSION_LINE = /for the first version/i;
+const DISCLAIMER = FIRST_VERSION_LINE;
 
 // ---------------------------------------------------------------------------
 // The move: what happened to every aligned note
@@ -316,7 +320,8 @@ type Tok = {
   used?: boolean;
 };
 
-const TOKEN = /[A-G](?:#|b)?(?:maj7|m7b5|m7|dim7|dim|aug|sus2|sus4|m|7|5)?(?![A-Za-z0-9#])|[A-Za-z]+(?:['’][a-z]+)*|\d+|\S/g;
+// A chord symbol's suffix. "E9" is a chord (a ninth), never a string and a fret: those are "E 9" or "E string 9".
+const TOKEN = /[A-G](?:#|b)?(?:maj7|maj9|m7b5|m7|m9|dim7|dim|aug|sus2|sus4|m|7|9|5)?(?![A-Za-z0-9#])|[A-Za-z]+(?:['’][a-z]+)*|\d+|\S/g;
 
 function tokenize(sentence: string): Tok[] {
   const toks: Tok[] = [];
@@ -327,7 +332,7 @@ function tokenize(sentence: string): Tok[] {
     const start = match.index;
     const before = start > 0 ? sentence[start - 1] : " ";
     let kind: Tok["kind"] = /^\d/.test(text) ? "num" : /^[A-Za-z]/.test(text) ? "word" : "punct";
-    if (kind === "word" && /^[A-G](?:#|b)?(?:maj7|m7b5|m7|dim7|dim|aug|sus2|sus4|m|7|5)?$/.test(text) && !/[A-Za-z0-9]/.test(before)) kind = "note";
+    if (kind === "word" && /^[A-G](?:#|b)?(?:maj7|maj9|m7b5|m7|m9|dim7|dim|aug|sus2|sus4|m|7|9|5)?$/.test(text) && !/[A-Za-z0-9]/.test(before)) kind = "note";
     toks.push({ text, low: text.toLowerCase(), start, end: start + text.length, kind, quoted: false });
   }
   // Quoted spans: an opening quote after a space, a bracket or the start; a closing one before a space, punctuation or the end.
@@ -366,6 +371,12 @@ const COUNTED = new Set([
 const FINGER_NAMES = new Set(["first", "second", "third", "fourth", "little", "ring", "middle", "index", "pinky"]);
 const STRING_FULL: Record<number, string> = { 1: "top string", 2: "B string", 3: "G string", 4: "D string", 5: "A string", 6: "low E string" };
 const STRING_LETTER: Record<string, number[]> = { E: [1, 6], B: [2], G: [3], D: [4], A: [5] };
+/** The pitch class of each open string. */
+const OPEN_PC: Record<number, number> = { 1: 4, 2: 11, 3: 7, 4: 2, 5: 9, 6: 4 };
+/** What another Exercise did, said in the past: "the last Exercise ended on A", "in Step 2 the root was at fret 5". */
+const PAST = new Set(["was", "were", "had", "did", "ended", "started", "began", "played", "used", "went", "came", "stopped", "landed", "sat", "climbed", "walked", "stayed", "moved", "took"]);
+const WHICH_EXERCISE = new Set(["last", "previous", "earlier", "first", "second", "third", "next", "other", "another"]);
+const ELSEWHERE = new Set(["exercise", "exercises", "step", "steps", "take", "takes"]);
 
 const DIRECTION = new Set([
   "up", "down", "higher", "lower", "upper", "climb", "climbs", "climbing", "climbed", "rise", "rises", "rising", "fall", "falls", "falling",
@@ -522,6 +533,32 @@ function rewriteSentence(sentence: string, ctx: Ctx, countCarried: boolean): Wri
       classes.set(to, "string");
     };
     const isStringWord = (i: number) => is(i, "string", "string's");
+    /**
+     * "low E" from token `from` to `to` can only be the string: frets follow it ("low E 5, 7, 8", "the low
+     * E's fret 5", "the low E (5, 7, 8)"), a fret is put on it ("5 on the low E", "A at fret 5 on the low E"),
+     * or it is one of a list that ends in "strings" ("the low E, A and D strings").
+     */
+    const plainlyString = (from: number, to: number): boolean => {
+      let after = to + 1;
+      if (is(after, "'", "’") && is(after + 1, "s")) return true;
+      if (is(after, "(")) after += 1;
+      if (at(after)?.kind === "num" && !at(after)!.quoted) return true;
+      // "12 on the A and top E": back over the strings it is listed with, to the fret put on them.
+      let before = from - 1;
+      for (;;) {
+        if (is(before, "the")) before -= 1;
+        if (!is(before, "and", "or", ",")) break;
+        const letter = bareLetter(before - 1);
+        if (!letter || !STRING_LETTER[letter]) break;
+        before -= 2;
+      }
+      if (is(before, "on") && at(before - 1)?.kind === "num") return true;
+      for (let j = to + 1; j < toks.length; j += 1) {
+        if (is(j, "strings")) return true;
+        if (!(is(j, ",", "and", "or", "the", "top") || (bareLetter(j) && STRING_LETTER[bareLetter(j)!]))) break;
+      }
+      return false;
+    };
 
     for (let i = 0; i < toks.length; i += 1) {
       const t = toks[i];
@@ -530,7 +567,21 @@ function rewriteSentence(sentence: string, ctx: Ctx, countCarried: boolean): Wri
       if ((t.low === "low" || t.low === "high" || t.low === "top") && bareLetter(i + 1) === "E") {
         const s = t.low === "low" ? 6 : 1;
         if (isStringWord(i + 2)) claimString(i, i + 2, s, true, toks[i + 2].low === "string's");
-        else claimString(i, i + 1, s, false);
+        else {
+          // "the low E" with no "string" is also what a reader calls the note, where the Exercise plays
+          // an E on that string ("the riff rests on the low E"). Unless the words around it make it the
+          // string, both readings must come out as the same words: the E's must go to the open note of
+          // the string the words will name (the low E stays, or an open-E figure moves to the open A).
+          const eNotes = ex.notes.some((n) => n.string === s && pcOf(n.midi) === 4);
+          if (eNotes && !plainlyString(i, i + 1)) {
+            const to = move.strings.get(s);
+            const pc = move.pcs.get(4);
+            if (to === null || to === undefined || pc === null || pc === undefined || pc !== OPEN_PC[to]) {
+              refuse("'low E' that could be the string or the note, and they moved differently");
+            }
+          }
+          claimString(i, i + 1, s, false);
+        }
         continue;
       }
       if (t.low === "top" && isStringWord(i + 1)) {
@@ -693,7 +744,10 @@ function rewriteSentence(sentence: string, ctx: Ctx, countCarried: boolean): Wri
       [["seven"], "major", null],
     ];
     const CHORD_NOUNS = ["chord", "chords", "triad", "triads", "arpeggio", "arpeggios", "shape", "shapes"];
-    const sentenceStart = (i: number) => i === 0 || (i === 1 && toks[0].kind === "punct") || is(i - 1, ":");
+    // Where "A" may be the article: only where the sentence starts. After a colon the article is a
+    // lower-case "a" ("one thing: a new string"), so a capital there is a note, a string or a key
+    // ("Three roots: A while the band is on Dm7, ...").
+    const sentenceStart = (i: number) => i === 0 || (i === 1 && toks[0].kind === "punct");
 
     for (let i = 0; i < toks.length; i += 1) {
       const t = toks[i];
@@ -1026,6 +1080,25 @@ function rewriteSentence(sentence: string, ctx: Ctx, countCarried: boolean): Wri
     }
 
     // ----- words that claim what the maps cannot carry ---------------------
+    /** Another Exercise, Step or Take is named ("the last Exercise", "the Exercise before", "Step 2"), and is what the sentence tells of. */
+    const aboutAnother = (): boolean => {
+      let subject = false;
+      let found = false;
+      for (let i = 0; i < toks.length; i += 1) {
+        if (toks[i].quoted || !ELSEWHERE.has(word(i))) continue;
+        const named =
+          WHICH_EXERCISE.has(word(i - 1)) || is(i + 1, "before", "after", "above") || (word(i) === "step" && at(i + 1)?.kind === "num" && !toks[i + 1].quoted);
+        // "Step 1's figure" is a name for something this Exercise plays.
+        if (!named || is(i + (at(i + 1)?.kind === "num" ? 2 : 1), "'", "’")) continue;
+        found = true;
+        // The sentence opens with it: "The Exercise before climbs ...", "In Step 2 the root ...", "Step 2 has ...".
+        let first = 0;
+        if (is(first, "in", "from")) first += 1;
+        if (is(first, "the")) first += 1;
+        if (i === first || (i === first + 1 && WHICH_EXERCISE.has(word(first)))) subject = true;
+      }
+      return found && (subject || toks.some((t) => !t.quoted && t.kind === "word" && PAST.has(t.low)));
+    };
     let meta = false;
     for (let i = 0; i < toks.length; i += 1) {
       const t = toks[i];
@@ -1121,6 +1194,10 @@ function rewriteSentence(sentence: string, ctx: Ctx, countCarried: boolean): Wri
       }
     }
     if (meta && specific) refuse("a sentence about the other variants");
+    // What another Exercise did is not this variant's notes: its letters and frets do not move with this
+    // Exercise's, and nothing here says where they went. "The turn from the last Exercise: C# held over A7"
+    // names this Exercise's own notes and is written; "the last Exercise ended on A" is not.
+    if (specific && aboutAnother()) refuse("a sentence about another Exercise");
     // "fret 3 for G, fret 8 for C": a table of keys, one of them this variant's.
     const keyLetters = new Set<string>();
     for (const i of keyish) if (["in", "for"].includes(word(i - 1))) keyLetters.add(toks[i].text);

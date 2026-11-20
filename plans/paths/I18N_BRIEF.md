@@ -337,3 +337,43 @@ Scratch only under /tmp/yp2/i18n/round16/work_<lng>/ . Do the three small harmon
 classic-rock, first-chords, blues-pentatonics. Verify each file as before (exact keys, no "!" or "！",
 nothing empty), then reply with one line: the language, strings per path, and any key you were
 unsure about (at most 60 words).
+
+Round 18 notes (folder /tmp/yp4/i18n/): FIVE path ids in the todo, about 313 strings, all in packs that
+are ALREADY translated in your language. The worktree is /home/dgx-personal/projects/yames-mvp-paths4:
+your language's packs are src/paths/packs/i18n/<lng>/<pathId>.json there, the English beside them in
+i18n/en/. Use THOSE as your reference for terminology (the reference path the top of this brief names no
+longer exists). Everything in "Rules" at the top of this brief applies; the OUTPUT sections of earlier
+rounds do not.
+- "know-the-neck" (111): three new Steps (roots-other-keys, boxes-second-key, changes-in-g) and two Level
+  summaries. Reuse the pack's words exactly: root, box (the five pentatonic boxes), octave, arpeggio,
+  "land on" a chord tone, third, fifth, "Your turn", "not checked yet". Keys like
+  `exercise.<id>.variant.position=box-2.howTo.0` are what a player reads when the same Exercise is played
+  in another box: translate them as carefully as the Exercise's own lines.
+- "chords-in-a-key" (95): three new Steps (one-four-five-again, coming-home, numbers-in-f), a Level
+  summary and two changed sentences. Chord numbers are WORDS in the English ("one, four, five", "six")
+  and stay words in your language, exactly as the pack already writes them; "home" (the one chord, where
+  a progression comes to rest) must be ONE word or phrase throughout: look for how the pack already says
+  "home" in `step.the-minors.*` and `step.minor-key.*`.
+- "arpeggios-over-changes" (98): three new Steps (four-chords-in-g, nearest-note-again, sevenths-in-g),
+  two Level summaries. Reuse the pack's words: arpeggio, root, third, fifth, seventh, "the nearest
+  note", "two, five, one", "major seven / minor seven / seven" as the pack names chords in prose. Keys
+  like `...variant.key=Eb.howTo.1` are short and formulaic ("In E flat: F minor seven starts on the D
+  string at fret 15, ..."): find how the pack already translates the same pattern and use it.
+- "funk-lines" (8) and "blues-pentatonics" (1): a chord named by its symbol where it was described
+  before ("E9", "the Bm7 bar"). Start from the existing translation of the same key and change only that.
+- Digits stay digits (frets, fingers, bars, BPM: "fret 5", "fingers 3, 2, 1, 1" keep 5 and 3, 2, 1, 1 as
+  digits; never "third finger" for "finger 3" unless the English itself says "third finger"), and a number
+  the English spells as a word stays a word. Chord symbols (Bm7, E9, Gmaj7) are never translated.
+For every key that already exists in your language's pack (its English changed): start from the existing
+translation and change only what the English changed. Copy verbatim where the English is identical to an
+already translated string (build the identical-English map by script first: it saves half the work).
+
+INPUT:  /tmp/yp4/i18n/todo.<lng>.json   shape { "<pathId>": { "<key>": "<English>" } }
+OUTPUT: ONE FILE PER PATH ID, each shaped { "<pathId>": { "<key>": "<translation>" } } with exactly the
+todo's keys for that path:   /tmp/yp4/i18n/done.<lng>.<pathId>.json     (five files)
+Scratch only under /tmp/yp4/i18n/work_<lng>/ . Do not edit any file in the repository; no git, no npm.
+The machine is shared with its owner's work: run only small python scripts, nothing heavy.
+Verify each file with python (exact keys, no "!" or "！", nothing empty, and every run of digits in the
+English is in your translation: print the keys where the digits differ and fix them unless your
+language's pack already writes that kind of number another way), then reply with ONE line: the language,
+strings per path, and any key you were unsure about (at most 60 words).
