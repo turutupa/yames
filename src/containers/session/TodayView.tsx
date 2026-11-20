@@ -92,8 +92,10 @@ function useEndInView(): [(el: HTMLElement | null) => void, boolean] {
     observer.current?.disconnect();
     observer.current = null;
     if (!el || typeof IntersectionObserver === "undefined") return;
-    observer.current = new IntersectionObserver(([entry]) => setInView(entry.intersectionRatio > 0.9), {
-      threshold: [0, 0.9, 1],
+    // In view only when (all but a hair of) the row is: a list cut by a few
+    // pixels scrolls too, and says so (the line above the plan made that case).
+    observer.current = new IntersectionObserver(([entry]) => setInView(entry.intersectionRatio > 0.98), {
+      threshold: [0, 0.9, 0.98, 1],
     });
     observer.current.observe(el);
   }, []);
