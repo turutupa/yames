@@ -649,6 +649,12 @@
 .coach-card-foot > .coach-model {
   flex: 1;
 }
+/* The window's 22px download / download-failed strip lies over the bottom
+   edge, and with it the selector a download is started from: lift the foot
+   clear of it while it is there. */
+:root:has(.global-download-bar) .coach-card-foot {
+  padding-bottom: 32px;
+}
 /* At 320 the card is narrower than the 380 its inside was pinned to, and
    the right-hand 60px (the chat's Send, the selector's menu) were cut off. */
 @media (max-width: 719px) {

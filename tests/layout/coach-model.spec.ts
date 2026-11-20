@@ -104,7 +104,10 @@ for (const theme of THEMES) {
       await page.keyboard.press("Escape");
       await expect(page.locator(".coach-model-menu")).toHaveCount(0);
       await expect(page.locator(".coach-model-button")).toContainText("42%");
-      expect(await notHitTestable(page, ".coach-card-start-btn, .coach-card-chat-input, .coach-card-chat-send")).toEqual([]);
+      // The window's download strip is over the bottom edge now: the button clears it.
+      expect(
+        await notHitTestable(page, ".coach-card-start-btn, .coach-card-chat-input, .coach-card-chat-send, .coach-model-button"),
+      ).toEqual([]);
       const button = (await page.locator(".coach-model-button").boundingBox())!;
       expect(button.x + button.width, "the selector's button in the panel").toBeLessThanOrEqual(card.x + card.width + 0.5);
       expect(button.y + button.height, "the selector's button in the window").toBeLessThanOrEqual(size.height + 0.5);

@@ -450,7 +450,10 @@ export function CoachModelSelector() {
       >
         <span className="coach-model-mark" data-state={running ? "downloading" : snap.state} aria-hidden="true" />
         <span className="coach-model-button-name">{choiceName}</span>
-        <span className="coach-model-button-state" aria-hidden="true">{stateText}</span>
+        {/* "Off off" says one thing twice: the word only when it adds one. */}
+        {(snap.state !== "off" || running) && (
+          <span className="coach-model-button-state" aria-hidden="true">{stateText}</span>
+        )}
       </button>
       {open && (
         <div
