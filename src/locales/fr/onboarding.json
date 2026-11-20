@@ -305,9 +305,9 @@
         },
         "progress": {
           "title": "Tempo propre",
-          "body": "Progrès compte le tempo propre : le plus rapide auquel tu as atteint la barre, pas seulement le plus rapide que tu as joué. C'est ce chiffre qu'il faut faire monter.",
+          "body": "Progrès compte le tempo propre : le plus rapide auquel tu as atteint le seuil, pas seulement le plus rapide que tu as joué. C'est ce chiffre qu'il faut faire monter.",
           "bodyOff": "Progrès garde tes minutes, ta série et les tempos joués. Avec l'évaluation, il ajoute ton tempo propre.",
-          "bodyAsk": "Progrès compte le tempo propre : le plus rapide auquel tu as atteint la barre, pas seulement le plus rapide que tu as joué. C'est ce chiffre qu'il faut faire monter."
+          "bodyAsk": "Progrès compte le tempo propre : le plus rapide auquel tu as atteint le seuil, pas seulement le plus rapide que tu as joué. C'est ce chiffre qu'il faut faire monter."
         }
       }
     },

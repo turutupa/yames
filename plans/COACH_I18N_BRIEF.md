@@ -99,8 +99,7 @@ If English hedges ("I couldn't tell"), the translation hedges the same way and s
   the locale file already writes it (de and fr put a space before %, tr writes %{{bar}}).
 - **The order shown during a Take is at most 48 characters in every language** (count the placeholder as
   its longest value, e.g. "{{bpm}}" as 3). Shorten the wording, never the meaning; if it cannot fit, say
-  so in the return line instead of truncating.
-- A chip label (result chips, the Take's kicker) stays as short as English's +50% at most.
+  so in the return line instead of truncating. A chip label stays within English's length +50%.
 
 ## How a helper returns its work
 

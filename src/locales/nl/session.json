@@ -163,7 +163,7 @@
       "belowBar": {
         "even": "Omdat de gelijkmatigheid {{value}}% was op {{bpm}} BPM. De lat ligt op {{bar}}%.",
         "heard": "Omdat ik {{value}}% van de noten hoorde op {{bpm}} BPM. De lat ligt op {{bar}}%.",
-        "extras": "Door extra noten op {{bpm}} BPM. De lat ligt op {{bar}} over vier maten.",
+        "extras": "Door extra noten op {{bpm}} BPM. De lat ligt op hoogstens {{bar}} in vier maten.",
         "accents": "Omdat {{value}}% van de accenten raak was op {{bpm}} BPM. De lat ligt op {{bar}}%.",
         "plain": "Omdat de laatste take op {{bpm}} BPM de lat niet haalde.",
         "notes": "Omdat {{value}}% van de noten waarvan ik de toonhoogte kon horen de geschreven waren op {{bpm}} BPM. De lat ligt op {{bar}}%."

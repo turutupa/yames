@@ -164,7 +164,7 @@
       "belowBar": {
         "even": "Porque a regularidade foi de {{value}}% a {{bpm}} BPM. A meta é {{bar}}%.",
         "heard": "Porque eu ouvi {{value}}% das notas a {{bpm}} BPM. A meta é {{bar}}%.",
-        "extras": "Por causa de notas a mais a {{bpm}} BPM. A meta é {{bar}} a cada quatro compassos.",
+        "extras": "Por causa de notas a mais a {{bpm}} BPM. A meta é no máximo {{bar}} a cada quatro compassos.",
         "accents": "Porque {{value}}% dos acentos caíram no lugar a {{bpm}} BPM. A meta é {{bar}}%.",
         "plain": "Porque a última tomada a {{bpm}} BPM não bateu a meta.",
         "notes": "Porque {{value}}% das notas que consegui identificar eram as escritas a {{bpm}} BPM. A meta é {{bar}}%."

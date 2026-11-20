@@ -164,7 +164,7 @@
       "belowBar": {
         "even": "Parce que la régularité était de {{value}} % à {{bpm}} BPM. Le seuil est à {{bar}} %.",
         "heard": "Parce que j'ai entendu {{value}} % des notes à {{bpm}} BPM. Le seuil est à {{bar}} %.",
-        "extras": "À cause de notes en trop à {{bpm}} BPM. Le seuil est de {{bar}} sur quatre mesures.",
+        "extras": "À cause de notes en trop à {{bpm}} BPM. Le seuil est de {{bar}} au plus sur quatre mesures.",
         "accents": "Parce que {{value}} % des accents sont bien tombés à {{bpm}} BPM. Le seuil est à {{bar}} %.",
         "plain": "Parce que la dernière prise à {{bpm}} BPM n'a pas atteint le seuil.",
         "notes": "Parce que {{value}} % des notes dont j'ai pu reconnaître la hauteur étaient celles écrites à {{bpm}} BPM. Le seuil est à {{bar}} %."

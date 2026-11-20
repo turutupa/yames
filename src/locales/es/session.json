@@ -164,7 +164,7 @@
       "belowBar": {
         "even": "Porque la regularidad fue del {{value}}% a {{bpm}} BPM. El listón está en el {{bar}}%.",
         "heard": "Porque oí el {{value}}% de las notas a {{bpm}} BPM. El listón está en el {{bar}}%.",
-        "extras": "Por las notas de más a {{bpm}} BPM. El listón está en {{bar}} cada cuatro compases.",
+        "extras": "Por las notas de más a {{bpm}} BPM. El listón está en {{bar}} como máximo en cuatro compases.",
         "accents": "Porque el {{value}}% de los acentos cayó en su sitio a {{bpm}} BPM. El listón está en el {{bar}}%.",
         "plain": "Porque la última toma a {{bpm}} BPM no llegó al listón.",
         "notes": "Porque el {{value}}% de las notas que pude identificar eran las escritas a {{bpm}} BPM. El listón está en el {{bar}}%."

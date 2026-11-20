@@ -163,7 +163,7 @@
       "belowBar": {
         "even": "Weil die Gleichmäßigkeit bei {{bpm}} BPM {{value}} % war. Die Messlatte liegt bei {{bar}} %.",
         "heard": "Weil ich bei {{bpm}} BPM {{value}} % der Töne gehört habe. Die Messlatte liegt bei {{bar}} %.",
-        "extras": "Wegen zusätzlicher Töne bei {{bpm}} BPM. Die Messlatte liegt bei {{bar}} über vier Takte.",
+        "extras": "Wegen zusätzlicher Töne bei {{bpm}} BPM. Die Messlatte liegt bei höchstens {{bar}} in vier Takten.",
         "accents": "Weil bei {{bpm}} BPM {{value}} % der Akzente saßen. Die Messlatte liegt bei {{bar}} %.",
         "plain": "Weil der letzte Take bei {{bpm}} BPM die Messlatte nicht erreicht hat.",
         "notes": "Weil bei {{bpm}} BPM {{value}} % der Töne, deren Höhe ich erkennen konnte, die notierten waren. Die Messlatte liegt bei {{bar}} %."

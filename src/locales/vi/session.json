@@ -163,7 +163,7 @@
       "belowBar": {
         "even": "Vì độ đều là {{value}}% ở {{bpm}} BPM. Mức đạt là {{bar}}%.",
         "heard": "Vì tôi nghe được {{value}}% số nốt ở {{bpm}} BPM. Mức đạt là {{bar}}%.",
-        "extras": "Vì có nốt thừa ở {{bpm}} BPM. Mức đạt là {{bar}} trong bốn ô nhịp.",
+        "extras": "Vì có nốt thừa ở {{bpm}} BPM. Mức đạt là tối đa {{bar}} trong bốn ô nhịp.",
         "accents": "Vì {{value}}% số nhấn rơi đúng ở {{bpm}} BPM. Mức đạt là {{bar}}%.",
         "plain": "Vì lượt gần nhất ở {{bpm}} BPM chưa đạt mức.",
         "notes": "Vì ở {{bpm}} BPM, {{value}}% số nốt tôi nhận ra cao độ là đúng nốt đã viết. Mức đạt là {{bar}}%."

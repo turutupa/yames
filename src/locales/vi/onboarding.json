@@ -305,9 +305,9 @@
         },
         "progress": {
           "title": "Tempo sạch",
-          "body": "Tiến bộ tính tempo sạch: tempo nhanh nhất bạn đạt chuẩn, không chỉ tempo nhanh nhất bạn đã chơi. Đó là con số cần tăng.",
+          "body": "Tiến bộ tính tempo sạch: tempo nhanh nhất bạn đạt mức, không chỉ tempo nhanh nhất bạn đã chơi. Đó là con số cần tăng.",
           "bodyOff": "Tiến bộ giữ số phút, chuỗi ngày và các tempo bạn đã chơi. Khi bật chấm điểm, có thêm tempo sạch của bạn.",
-          "bodyAsk": "Tiến bộ tính tempo sạch: tempo nhanh nhất bạn đạt chuẩn, không chỉ tempo nhanh nhất bạn đã chơi. Đó là con số cần tăng."
+          "bodyAsk": "Tiến bộ tính tempo sạch: tempo nhanh nhất bạn đạt mức, không chỉ tempo nhanh nhất bạn đã chơi. Đó là con số cần tăng."
         }
       }
     },

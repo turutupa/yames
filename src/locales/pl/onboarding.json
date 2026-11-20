@@ -305,9 +305,9 @@
         },
         "progress": {
           "title": "Czyste tempo",
-          "body": "Postępy liczą czyste tempo: najszybsze, przy którym spełniłeś wymaganie, a nie tylko najszybsze, jakie zagrałeś. To tę liczbę warto podnosić.",
+          "body": "Postępy liczą czyste tempo: najszybsze, przy którym przeskoczyłeś poprzeczkę, a nie tylko najszybsze, jakie zagrałeś. To tę liczbę warto podnosić.",
           "bodyOff": "Postępy pokazują twoje minuty, serię i zagrane tempa. Z włączoną oceną dochodzi czyste tempo.",
-          "bodyAsk": "Postępy liczą czyste tempo: najszybsze, przy którym spełniłeś wymaganie, a nie tylko najszybsze, jakie zagrałeś. To tę liczbę warto podnosić."
+          "bodyAsk": "Postępy liczą czyste tempo: najszybsze, przy którym przeskoczyłeś poprzeczkę, a nie tylko najszybsze, jakie zagrałeś. To tę liczbę warto podnosić."
         }
       }
     },
