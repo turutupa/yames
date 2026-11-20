@@ -727,7 +727,7 @@ gates one French word was merged (item 5): `check` and `npx vitest run src/paths
 3382 tests) were run again and are green.
 
 ### Open, for the next leg or a teacher
-- **Older Steps still say the band plays chords** (a few dozen sentences by a loose grep, about 18 in
+- **Older Steps still say the band plays chords** (card #110; a few dozen sentences by a loose grep, about 18 in
   Blues and Pentatonics: "The band plays A7 for four bars"; `what-a-key-is.one-four-five` in Scales and
   Modes; `gallop-changes.band-changes` in Metal Rhythm: "The band changes chord on beat 1 of every
   bar"). Not touched: each is a translated string in 14 languages. One round: fix the English ("the
@@ -739,3 +739,4 @@ gates one French word was merged (item 5): `check` and `npx vitest run src/paths
   Scales and Modes and 새끼손가락 elsewhere for the little finger; zh-TW "第六個音" for "the sixth".
 - Everything under leg 2's "Decisions a teacher should look at" and "UI notes for the dev agent" stands.
 - Nobody has played any of this (#65).
+- Board: #76 and #65 carry notes of this leg; #110 is the follow-up above.
