@@ -799,7 +799,7 @@ export default definePath({
           title: "Your turn: write eight bars",
           purpose: "Eight bars of your own from the six major and minor chords of the key: choose an order for the verse and another for the chorus.",
           howTo: [
-            "Straight eighths or any rhythm you like, 60 to 90 BPM. The band plays the written chords; play yours over the click alone if they differ.",
+            "Straight eighths or any rhythm you like, 60 to 90 BPM. The band follows the written chords; play yours over the click alone if they differ.",
             "Write the numbers down first, then find the shapes. Put five in the eighth bar if you want it to come round again.",
             NOT_CHECKED_YET,
           ],

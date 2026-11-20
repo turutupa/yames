@@ -955,7 +955,7 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: the shapes of harmony",
-      summary: "Thirds on two strings, the top three strings in G major and F major, roots and fifths on the low strings, the roots of a band's chords in G and in D, and triads on the top three.",
+      summary: "Thirds on two strings, the top three strings in G major and F major, roots and fifths on the low strings, the roots of a song's chords in G and in D, and triads on the top three.",
       reachLevel: "early-intermediate",
       startHereIf: [
         "You can name any natural note on the low E and A strings within 2 seconds.",

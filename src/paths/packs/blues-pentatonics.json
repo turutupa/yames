@@ -422,9 +422,9 @@
         {
           "id": "box-one.first-chorus",
           "title": "Your first twelve bars",
-          "purpose": "A whole chorus of the blues in box 1, built the way real players build one: the lick, then the A riff, said again over D7, then a new line over E7 and D7 that comes home. Twelve bars of playing, with the band changing chords under you.",
+          "purpose": "A whole chorus of the blues in box 1, built the way real players build one: the lick, then the A riff, said again over D7, then a new line over E7 and D7 that comes home. Twelve bars of playing, with the chords changing under you.",
           "howTo": [
-            "Shuffle eighths, 50 BPM up to a pass at 80. The band plays A7 for four bars, D7 for two, A7 for two, then E7, D7, A7 and E7.",
+            "Shuffle eighths, 50 BPM up to a pass at 80. The chords are A7 for four bars, D7 for two, A7 for two, then E7, D7, A7 and E7.",
             "Bars 1 and 2 are your first lick, and bars 3 and 4 the low and middle A riffs. Bars 5 to 8 are the same four bars again: the lick sounds different over D7 because the chord has moved, not the notes.",
             "Bar 9 starts on E for the E7, bar 10 on D for the D7, bar 11 lands on the middle A, and bar 12 holds E over the E7, which pulls you back to the top.",
             "Shake the last E with a little vibrato if you like. Vibrato isn't graded: the app checks that E was the note and on time, and the shake is yours."
@@ -1005,7 +1005,7 @@
         {
           "id": "box-keys.chorus-in-keys",
           "title": "Twelve bars in a new key",
-          "purpose": "Your first chorus from Step 1, all twelve bars, in G, C or D. The band changes chords in the new key and the same line follows them.",
+          "purpose": "Your first chorus from Step 1, all twelve bars, in G, C or D. The chords are in the new key and the same line follows them.",
           "howTo": [
             "Shuffle eighths, 50 BPM up to a pass at 80. Look at which key came up, put your first finger on its root on the low E string, and play the chorus you know from there: fret 3 for G, fret 8 for C, fret 10 for D.",
             "The form has not changed: four bars on the first chord, two on the second, two back home, then one bar each of the third chord, the second, home, and the third again."
@@ -3261,7 +3261,7 @@
       "order": 6,
       "title": "Landing on the third, in new keys",
       "goal": "Play the arpeggio and its lick to the third in G and C, then a twelve-bar chorus whose phrases stop on each chord's third.",
-      "why": "You have met the two ideas that matter most at this Level: the box moves with the key, and a phrase sounds right when it stops on a note of the chord. This Step puts them together before anything new arrives. The third is the note that says whether a chord is major, so a phrase that stops on it tells the listener which chord the band is on, with no band needed.",
+      "why": "You have met the two ideas that matter most at this Level: the box moves with the key, and a phrase sounds right when it stops on a note of the chord. This Step puts them together before anything new arrives. The third is the note that says whether a chord is major, so a phrase that stops on it tells the listener which chord is under it, with no band needed.",
       "howTo": [
         "The third of the home chord sits one fret above the minor pentatonic's own third: in A, C# is one fret above C. In every key it is the same move, one fret up on the same string.",
         "The thirds in A: C# over A7 (G string, fret 6), F# over D7 (D string, fret 4), G# over E7 (D string, fret 6). The F# is a fret below the box, so the first finger reaches back for it. So is the B over E7 (G string, fret 4).",
@@ -4899,7 +4899,7 @@
           "purpose": "As simple as it gets: a whole note on the root of each bar's chord, all the way through the form.",
           "howTo": [
             "Whole notes, one a bar, 70 BPM up to a pass at 90.",
-            "A at fret 5 on the low E, D at 5 and E at 7 on the A string. Hear each move before you play it. Don't count: listen for the band's change."
+            "A at fret 5 on the low E, D at 5 and E at 7 on the A string. Hear each move before you play it. Don't count: listen for the chord change."
           ],
           "coachLine": "Twelve notes, each the right root, each on the bar. If you got lost, the band will tell you first.",
           "grading": "graded",
@@ -5851,7 +5851,7 @@
           "howTo": [
             "Shuffle eighths, twelve bars, 70 BPM up to a pass at 85.",
             "Bars 1, 3 and 5 are the same phrase: A, C, A, G, E, D from the top string. Bar 4 resolves to C#, E and A. Bar 8 drops to the low A on the E string. Bars 9 to 11 answer, and bar 12 rests on E for the turnaround.",
-            "Rest where it rests. The phrase over D7 in bar 5 is the same notes as bar 1: hear the band change under it."
+            "Rest where it rests. The phrase over D7 in bar 5 is the same notes as bar 1: hear the chord change under it."
           ],
           "coachLine": "The whole form, written. I check notes and time over all twelve bars after the take.",
           "grading": "graded",
@@ -6460,7 +6460,7 @@
         "Before you play, listen to the band once through and point at bar 2 when the chord moves.",
         "Everything you play here uses notes and shapes you already know: the roots and the boogie line from the last Step, and the thirds from the Beginner Level. What changes is when."
       ],
-      "payoff": "When a band goes to the IV chord in bar 2, you are already there.",
+      "payoff": "When a song goes to the IV chord in bar 2, you are already there.",
       "prerequisites": ["twelve-bar"],
       "difficulty": 3.18,
       "exercises": [
@@ -7472,7 +7472,7 @@
             "allowed": ["C#"]
           },
           "selfCheck": [
-            "On a recording, does each bend sit in tune with the band's chord?",
+            "On a recording, does each bend sit in tune with the chord?",
             "Did you reach the top of each bend before beat 2?"
           ]
         }
@@ -7632,7 +7632,7 @@
             "Over E7: the open low E twice, G and G# on the same string (frets 3 and 4), B on the A string (fret 2), the open D string, B again, and G#. Over A7 it is the same shape one string higher: the open A twice, C and C# (frets 3 and 4), E on the D string (fret 2), the open G string, E, and C#. Third finger on fret 3, fourth on fret 4, second on fret 2.",
             "The low B has no open string, so the B7 riff stays inside the open B7 chord shape: B twice on the A string (fret 2), the open D string and then D# (fret 1), A on the G string (fret 2), the open B string, A again, and D#. First finger on fret 1, second finger on the A string and third finger on the G string, both at fret 2."
           ],
-          "coachLine": "Four bars and three chords, with the band changing under you. Notes and the shuffle after the take.",
+          "coachLine": "Four bars and three chords, with the chord changing under you. Notes and the shuffle after the take.",
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -7768,7 +7768,7 @@
             "Shuffle eighths, then quarter notes, 50 BPM up to a pass at 80. Four bars: the first turnaround, then the second.",
             "Bars 1 and 2: D, C#, C and B step down the B string (frets 3, 2, 1 and open), and the open high E answers each one. Then B on the A string (fret 2), a beat of rest, D# on the D string (fret 1), and B again.",
             "Bars 3 and 4: on the low strings, each note twice: the open E, G# (fret 4), the open A, and B flat (A string, fret 1). Then the same ending: B, a rest, D# and B.",
-            "Let the high E ring through bar 1. That ringing string is the sound of the first turnaround. The band plays E7 and B7 in turn, so each turnaround is heard doing its job."
+            "Let the high E ring through bar 1. That ringing string is the sound of the first turnaround. The chords are E7 and B7 in turn, so each turnaround is heard doing its job."
           ],
           "coachLine": "Timed and counted. The open E rings over the line on purpose, so right notes are not checked here: the pitch is for your ear.",
           "grading": "graded",
@@ -8761,7 +8761,7 @@
           "purpose": "The same line over A7 and over D7, then an answer over E7 and D7. A blues chorus, written out, with six or seven notes to a phrase.",
           "howTo": [
             "Shuffle eighths and quarters, twelve bars, 70 BPM up to a pass at 85.",
-            "Bars 1 and 5 start the same, and the band changes under you. That change is the magic. Bars 9 and 10 are the reply. Rest everywhere it says."
+            "Bars 1 and 5 start the same, and the chord changes under you. That change is the magic. Bars 9 and 10 are the reply. Rest everywhere it says."
           ],
           "coachLine": "A lot of silence in this one. I check the notes and their time; a note in a rest shows up as an extra one.",
           "grading": "graded",
@@ -9531,7 +9531,7 @@
         {
           "id": "minor-blues.your-minor-chorus",
           "title": "Your turn: F over the Dm7",
-          "purpose": "Free playing over Am7 and Dm7 with one rule: E while the band is on Am7, F while it is on Dm7.",
+          "purpose": "Free playing over Am7 and Dm7 with one rule: E while the chord is Am7, F while it is Dm7.",
           "howTo": [
             "Shuffle, 50 to 70 BPM, two bars of Am7 and two of Dm7, four bars that loop.",
             "Play as little as you like. An E held over the Am7 and an F held over the Dm7 is a complete answer. The written line is an example.",
@@ -10357,7 +10357,7 @@
         {
           "id": "minor-blues-in-d.your-d-minor-turn",
           "title": "Your turn: a note for each chord",
-          "purpose": "Free playing over Dm7, Gm7, Dm7 and A7 with one rule for each chord: A while the band is on Dm7, B flat while it is on Gm7, C# while it is on A7.",
+          "purpose": "Free playing over Dm7, Gm7, Dm7 and A7 with one rule for each chord: A while the chord is Dm7, B flat while it is Gm7, C# while it is A7.",
           "howTo": [
             "Shuffle, 50 to 70 BPM, four bars that loop: Dm7, Gm7, Dm7, A7.",
             "Play as little as you like. One long note in each bar, the one that bar's chord asks for, is a complete answer. The written line is an example.",
@@ -10451,7 +10451,7 @@
           "chords": ["Dm7", "Gm7", "Dm7", "A7"],
           "selfCheck": [
             "Did you play B flat over the Gm7 and C# over the A7, at least once each?",
-            "Did you go back to A when the band went back to Dm7?"
+            "Did you go back to A when the chord went back to Dm7?"
           ]
         }
       ]
@@ -12305,7 +12305,7 @@
         {
           "id": "major-and-minor.your-mix",
           "title": "Your turn: change the third with the chord",
-          "purpose": "Free playing over A7 and D7 with one rule: C# while the band is on A7, C natural while it is on D7.",
+          "purpose": "Free playing over A7 and D7 with one rule: C# while the chord is A7, C natural while the chord is D7.",
           "howTo": [
             "Shuffle, 70 to 90 BPM, two bars of A7 and two of D7.",
             "Play as little as you like. One C# held over the A7 and one C held over the D7 is a complete answer. The written line is an example.",
@@ -13398,7 +13398,7 @@
           "purpose": "Land on a guide tone on beat 1, then fill with the box. It's the sound of a player who is really hearing the changes.",
           "howTo": [
             "A half note, then shuffle eighths, 60 BPM up to a pass at 80.",
-            "C# over A7, C over D7, G over A7, G# over E7, each followed by four notes of box 1. Note how the C# and G# stand out against the band's chord, because that's what they're for."
+            "C# over A7, C over D7, G over A7, G# over E7, each followed by four notes of box 1. Note how the C# and G# stand out against the chord, because that's what they're for."
           ],
           "coachLine": "Written notes on this one, checked with their timing after the take.",
           "grading": "graded",
@@ -13807,7 +13807,7 @@
         {
           "id": "three-choruses.chorus-answers",
           "title": "Chorus 2: up a box, call and answer",
-          "purpose": "Twelve bars that slide into box 2 in bar 1 and stay there. A busy call ends on C. A slower answer ends on A, or on D when the band is on D7.",
+          "purpose": "Twelve bars that slide into box 2 in bar 1 and stay there. A busy call ends on C. A slower answer ends on A, or on D when the chord is D7.",
           "howTo": [
             "Shuffle eighths, quarter notes and half notes, 60 BPM up to a pass at 80.",
             "Bar 1 is the door: A on the D string, C, then D slid to E on the G string (frets 7 to 9), and G held on the B string (fret 8). Bar 2 answers: E and G as quarter notes, and A held (B string, fret 10).",

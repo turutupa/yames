@@ -8333,7 +8333,7 @@
         {
           "id": "chord-tones-ade.ade-thirds",
           "title": "The thirds: C#, F#, G#",
-          "purpose": "One note a bar, the third of each chord: C# over A, F# over D, G# over E, and C# again. When the band goes from D up to E, the third goes up two frets with it.",
+          "purpose": "One note a bar, the third of each chord: C# over A, F# over D, G# over E, and C# again. When the chord goes from D up to E, the third goes up two frets with it.",
           "howTo": [
             "Whole notes, one a bar, 60 BPM up to a pass at 80.",
             "C# at 6 on the G string, F# at 7 on the B string, G# at 9 on the B string, C# again. Listen for each one making its chord major.",

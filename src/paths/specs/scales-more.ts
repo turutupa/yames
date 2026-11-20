@@ -41,7 +41,7 @@ const oneStringOver = (tab: string) => tab.replace(/(\d):(\d+)/g, (_all, string,
 const C_BY_NAME = `/4 6:8 6:10 5:7 5:8 | 5:10 4:7 4:9 4:10 | 4:9 4:7 5:10 5:8 | 5:7 6:10 /2 6:8`;
 // One hand at fret 9: G major from the A string, then D major from the low E string.
 const G_THEN_D = `/8 5:10 5:12 4:9 4:10 4:12 3:9 3:11 3:12 | 3:11 3:9 4:12 4:10 4:9 5:12 /4 5:10 | /8 6:10 6:12 5:9 5:10 5:12 4:9 4:11 4:12 | 4:11 4:9 5:12 5:10 5:9 6:12 /4 6:10`;
-// Notes one, one, two, three; then four, five and one: the roots of the band's three chords.
+// Notes one, one, two, three; then four, five and one: the roots of the three chords.
 const ROOTS_IN_C = `/4 6:8 6:8 6:10 5:7 | /4 5:8 5:8 /2 5:8 | /4 5:10 5:10 /2 5:10 | /4 6:8 6:8 /2 6:8`;
 const ROOTS: Readonly<Record<string, { tab: string; at: number; by: number }>> = {
   C: { tab: ROOTS_IN_C, at: 7, by: 0 },
@@ -109,12 +109,12 @@ export const WHAT_A_KEY_IS: StepSpec = {
     {
       id: "one-four-five",
       title: "One, four and five under the band",
-      purpose: "The first, fourth and fifth notes of the scale, played as single notes while a band plays the three chords built on them. A different key comes round on each Take.",
+      purpose: "The first, fourth and fifth notes of the scale, played as single notes over a band, one for each of the three chords built on them. A different key comes round on each Take.",
       howTo: [
         "Quarter notes and half notes, 60 BPM up to a pass at 90.",
         "In C, bar 1 counts up from home: C, C, D, E, the low E string's fret 8 twice, fret 10, then the A string's fret 7. They are notes one, one, two and three.",
         "Bar 2 is note four, F, the A string's fret 8. Bar 3 is note five, G, the A string's fret 10. Bar 4 is C again.",
-        "Each time the band changes chord, the note you are on is the note that chord is named after.",
+        "Each time the chord changes, the note you are on is the note that chord is named after.",
       ],
       coach: "Band on. Right notes and time after the take.",
       vary: {
@@ -142,7 +142,7 @@ export const WHAT_A_KEY_IS: StepSpec = {
     {
       id: "tune-two-keys",
       title: "One tune, two keys",
-      purpose: "A four-bar tune in C, then the same tune in D: every note two frets higher, with the same fingers. The band moves with you, from C, F and G to D, G and A.",
+      purpose: "A four-bar tune in C, then the same tune in D: every note two frets higher, with the same fingers. The chords move with you, from C, F and G to D, G and A.",
       howTo: [
         "Quarters, eighths and half notes, 60 BPM up to a pass at 90.",
         "Bars 1 to 4 are in C, with the first finger at fret 7. The tune starts on E, the A string's fret 7, and ends on a long C, the low E string's fret 8.",

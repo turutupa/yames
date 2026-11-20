@@ -663,7 +663,7 @@ export default definePath({
       id: "the-sixth",
       title: "The Dorian sixth, and hammer-ons",
       goal: "Use F#, the note that turns a minor pentatonic line into a funk line, and hammer into notes inside a sixteenth-note rhythm.",
-      why: "Funk in a minor key nearly always means Dorian. The note that matters is its major sixth, F# in the key of A, added to the minor pentatonic. It is the third of the D9 chord the band keeps going to, so playing it when that chord arrives makes the line and the harmony agree. A hammer-on into a note is the other small thing that makes a line sound spoken.",
+      why: "Funk in a minor key nearly always means Dorian. The note that matters is its major sixth, F# in the key of A, added to the minor pentatonic. It is the third of the D9 chord the tune keeps going to, so playing it when that chord arrives makes the line and the harmony agree. A hammer-on into a note is the other small thing that makes a line sound spoken.",
       howTo: [
         "F# is the D string at fret 4, one fret below the G. The first finger reaches back for it.",
         "A hammer-on here is two sixteenths from one stroke: pick the lower note, hammer the upper. The hand still swings, and misses the string for the hammered note.",

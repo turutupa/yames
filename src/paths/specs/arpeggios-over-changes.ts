@@ -382,7 +382,7 @@ export default definePath({
           rungs: ladder(60, 90, 10),
           ...YOUR_TURN,
           selfCheck: [
-            "Was every note one of the three notes of the chord the band was on?",
+            "Was every note one of the three notes of the chord in that bar?",
             "Did you get through every change without a jump?",
           ],
           minutes: 4,

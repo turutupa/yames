@@ -52,7 +52,7 @@ export const ROOTS_OTHER_KEYS: StepSpec = {
   id: "roots-other-keys",
   title: "Roots in G and in D",
   goal: "Find the roots of one, four, five and of one, six, four, five in G and in D on the low E and A strings, by shape, and play them under a band.",
-  why: "The shape from the last Step starts from a root on the low E string. A root on the A string turns it over: the five is at the same fret on the low E string, and the four is two frets below that. With both ways round, the roots of a song in G or in D are three or four places within a few frets of each other, and you can name each one as the band reaches it.",
+  why: "The shape from the last Step starts from a root on the low E string. A root on the A string turns it over: the five is at the same fret on the low E string, and the four is two frets below that. With both ways round, the roots of a song in G or in D are three or four places within a few frets of each other, and you can name each one as its chord arrives.",
   howTo: [
     "From a root on the low E string, the four chord's root is at the same fret on the A string, and the five chord's root is two frets higher on the A string. In G: the low E string at fret 3, then the A string at 3 and at 5.",
     "From a root on the A string, the five chord's root is at the same fret on the low E string, and the four chord's root is two frets lower on the low E string. In D: the A string at fret 5, then the low E string at 5 and at 3.",

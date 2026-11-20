@@ -740,3 +740,29 @@ gates one French word was merged (item 5): `check` and `npx vitest run src/paths
 - Everything under leg 2's "Decisions a teacher should look at" and "UI notes for the dev agent" stands.
 - Nobody has played any of this (#65).
 - Board: #76 and #65 carry notes of this leg; #110 is the follow-up above.
+
+## Relay leg 4 on `mvp-paths6` (2026-11-19, night PST): the band plays no chords, older Steps too (card #110)
+
+From revamp 5178e406. Scope frozen: wording only, no new content.
+1. Grep of every spec for the band as the one playing, being on, or changing a chord ("the band plays
+   A7", "while the band is on Dm7", "the band's chord", "the band changes chord", "the chord the band
+   was on"). Kept on purpose: "over/with a band", "the chart and the band move with it" (a key change),
+   "change chord with the band", "the band follows ...", Metal's leg-3 `verse-and-chorus` line, comments.
+2. 37 player-facing strings changed in 9 Paths (17 Blues and Pentatonics, 11 Scales and Modes, 2 Know
+   the Neck, 2 Arpeggios over Changes, 1 each Metal Rhythm, Classic Rock, Funk, Triads, Chords in a
+   Key), plus two code comments. Patterns: "The chords are A7 for four bars ...", "C# while the chord
+   is A7, C natural while the chord is D7", "the chord changes", "of the chord in that bar?", "The band
+   follows the written chords", "a song's chords", "the D9 chord the tune keeps going to". No "bass"
+   anywhere. Variants kept their how-to lines (en key count unchanged).
+3. Independent sonnet proof-read of the 37: 0 errors, 5 suggestions, all applied ("When a song goes to
+   the IV chord", "with the chord changing under you", "one for each of the three chords built on
+   them", "with the chords Am, D, G and G").
+4. Translation: 33 distinct strings a language (variants copied by `strings merge`), 14 languages, four
+   sonnet helpers (3 to 4 languages each), each from the old translation of the same key; verified by
+   script (exact keys, no "!", nothing empty, digits) and merged. Scratch: `/tmp/yp6/i18n/` (prompt
+   `PROMPT.txt`, `ctx.<lng>.json` = new English + old English + old translation, `verify.py`).
+5. No notes or fingers changed: pins and caveats untouched; `schedules.jsonl` unchanged.
+6. Gates: `paths check` 16 Paths 0/0, curriculum 0, strings complete in 14 languages; tsc clean; vitest
+   365 files passed, 1 failed (TabStage, worktree-only), 11325 tests; build OK; `cargo test --test
+   path_exercises` 11 passed (357 s, `.target-w1`); layout paths-prereq planner phone-learning chords
+   session-variant-text: 247 passed. Nothing open from #110.

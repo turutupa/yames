@@ -1612,7 +1612,7 @@
           },
           "chords": ["C", "Am", "F", "G"],
           "selfCheck": [
-            "Was every note one of the three notes of the chord the band was on?",
+            "Was every note one of the three notes of the chord in that bar?",
             "Did you get through every change without a jump?"
           ]
         }
@@ -2086,7 +2086,7 @@
           },
           "chords": ["G", "Em", "C", "D"],
           "selfCheck": [
-            "Was every note one of the three notes of the chord the band was on?",
+            "Was every note one of the three notes of the chord in that bar?",
             "Did you get through every change without a jump?"
           ]
         }

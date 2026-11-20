@@ -2155,12 +2155,12 @@
         {
           "id": "what-a-key-is.one-four-five",
           "title": "One, four and five under the band",
-          "purpose": "The first, fourth and fifth notes of the scale, played as single notes while a band plays the three chords built on them. A different key comes round on each Take.",
+          "purpose": "The first, fourth and fifth notes of the scale, played as single notes over a band, one for each of the three chords built on them. A different key comes round on each Take.",
           "howTo": [
             "Quarter notes and half notes, 60 BPM up to a pass at 90.",
             "In C, bar 1 counts up from home: C, C, D, E, the low E string's fret 8 twice, fret 10, then the A string's fret 7. They are notes one, one, two and three.",
             "Bar 2 is note four, F, the A string's fret 8. Bar 3 is note five, G, the A string's fret 10. Bar 4 is C again.",
-            "Each time the band changes chord, the note you are on is the note that chord is named after."
+            "Each time the chord changes, the note you are on is the note that chord is named after."
           ],
           "coachLine": "Band on. Right notes and time after the take.",
           "grading": "graded",
@@ -2340,7 +2340,7 @@
                   "Quarter notes and half notes, 60 BPM up to a pass at 90.",
                   "In G, bar 1 counts up from home: G, G, A, B, the A string's fret 10 twice, fret 12, then the D string's fret 9. They are notes one, one, two and three.",
                   "Bar 2 is note four, C, the D string's fret 10. Bar 3 is note five, D, the D string's fret 12. Bar 4 is G again.",
-                  "Each time the band changes chord, the note you are on is the note that chord is named after."
+                  "Each time the chord changes, the note you are on is the note that chord is named after."
                 ],
                 "tab": "/4 5:10 5:10 5:12 4:9 | /4 4:10 4:10 /2 4:10 | /4 4:12 4:12 /2 4:12 | /4 5:10 5:10 /2 5:10",
                 "position": {
@@ -2399,7 +2399,7 @@
                   "Quarter notes and half notes, 60 BPM up to a pass at 90.",
                   "In D, bar 1 counts up from home: D, D, E, F#, the low E string's fret 10 twice, fret 12, then the A string's fret 9. They are notes one, one, two and three.",
                   "Bar 2 is note four, G, the A string's fret 10. Bar 3 is note five, A, the A string's fret 12. Bar 4 is D again.",
-                  "Each time the band changes chord, the note you are on is the note that chord is named after."
+                  "Each time the chord changes, the note you are on is the note that chord is named after."
                 ],
                 "tab": "/4 6:10 6:10 6:12 5:9 | /4 5:10 5:10 /2 5:10 | /4 5:12 5:12 /2 5:12 | /4 6:10 6:10 /2 6:10",
                 "position": {
@@ -2458,7 +2458,7 @@
                   "Quarter notes and half notes, 60 BPM up to a pass at 90.",
                   "In A, bar 1 counts up from home: A, A, B, C#, the low E string's fret 5 twice, fret 7, then the A string's fret 4. They are notes one, one, two and three.",
                   "Bar 2 is note four, D, the A string's fret 5. Bar 3 is note five, E, the A string's fret 7. Bar 4 is A again.",
-                  "Each time the band changes chord, the note you are on is the note that chord is named after."
+                  "Each time the chord changes, the note you are on is the note that chord is named after."
                 ],
                 "tab": "/4 6:5 6:5 6:7 5:4 | /4 5:5 5:5 /2 5:5 | /4 5:7 5:7 /2 5:7 | /4 6:5 6:5 /2 6:5",
                 "position": {
@@ -2512,7 +2512,7 @@
         {
           "id": "what-a-key-is.tune-two-keys",
           "title": "One tune, two keys",
-          "purpose": "A four-bar tune in C, then the same tune in D: every note two frets higher, with the same fingers. The band moves with you, from C, F and G to D, G and A.",
+          "purpose": "A four-bar tune in C, then the same tune in D: every note two frets higher, with the same fingers. The chords move with you, from C, F and G to D, G and A.",
           "howTo": [
             "Quarters, eighths and half notes, 60 BPM up to a pass at 90.",
             "Bars 1 to 4 are in C, with the first finger at fret 7. The tune starts on E, the A string's fret 7, and ends on a long C, the low E string's fret 8.",
@@ -2912,7 +2912,7 @@
           "howTo": [
             "Quarter notes and half notes, 60 BPM up to a pass at 90.",
             "In A, bar 1 counts up from home: A, B, C#, D, the low E string's frets 5 and 7, then the A string's frets 4 and 5. They are notes one, two, three and four.",
-            "Bar 2 is note five, E, the A string's fret 7: the band changes to E as you reach it. Bar 3 steps back down to note four, D, the A string's fret 5. Bar 4 is A again.",
+            "Bar 2 is note five, E, the A string's fret 7: the chord changes to E as you reach it. Bar 3 steps back down to note four, D, the A string's fret 5. Bar 4 is A again.",
             "The chords are A, E, D and A. Each time the chord changes, the note you are on is the note that chord is named after."
           ],
           "coachLine": "Band on. Right notes and time after the take.",
@@ -3093,7 +3093,7 @@
                 "howTo": [
                   "Quarter notes and half notes, 60 BPM up to a pass at 90.",
                   "In F, bar 1 counts up from home: F, G, A, B flat, the A string's frets 8 and 10, then the D string's frets 7 and 8. They are notes one, two, three and four.",
-                  "Bar 2 is note five, C, the D string's fret 10: the band changes to C as you reach it. Bar 3 steps back down to note four, B flat, the D string's fret 8. Bar 4 is F again.",
+                  "Bar 2 is note five, C, the D string's fret 10: the chord changes to C as you reach it. Bar 3 steps back down to note four, B flat, the D string's fret 8. Bar 4 is F again.",
                   "The chords are F, C, B flat and F. Each time the chord changes, the note you are on is the note that chord is named after."
                 ],
                 "tab": "/4 5:8f2 5:10f4 4:7f1 4:8f2 | /4 4:10f4 4:10f4 /2 4:10f4 | /4 4:8f2 4:8f2 /2 4:8f2 | /4 5:8f2 5:8f2 /2 5:8f2",
@@ -11542,7 +11542,7 @@
         "The three homes are at fret 5 on three neighbouring strings: A on the low E string, D on the A string, G on the D string.",
         "Dorian's home is the second note of its major scale and Mixolydian's is the fifth. A is note two of G major and D is note five.",
         "No fret changes between the three scales. What changes is where you start and stop.",
-        "Over the band, each chord's first bar starts on its root. The band moves the home: Am, then D, then G."
+        "Over the band, each chord's first bar starts on its root. The chords move the home: Am, then D, then G."
       ],
       "payoff": "One set of seven notes played from three homes, and a line over the second, fifth and first chords of G that follows them.",
       "prerequisites": ["modes-second-key"],
@@ -11820,7 +11820,7 @@
         {
           "id": "same-notes-new-home.two-five-one-line",
           "title": "One line, three homes: Am, D and G",
-          "purpose": "Four bars over a band on Am, D, G and G: the second, fifth and first chords of G major. Bars 1, 2 and 3 play the same figure, five notes up the scale and back to the third, each from the root of its chord.",
+          "purpose": "Four bars over a band, with the chords Am, D, G and G: the second, fifth and first chords of G major. Bars 1, 2 and 3 play the same figure, five notes up the scale and back to the third, each from the root of its chord.",
           "howTo": [
             "Eighths, quarters and half notes, 60 BPM up to a pass at 90.",
             "Bar 1 starts on A, the low E string's fret 5. Bar 2 starts on D, the A string's fret 5. Bars 3 and 4 start on G, the D string's fret 5.",
@@ -11949,7 +11949,7 @@
           }
         }
       ],
-      "difficultyException": "This Step looks at notes the player already has from three starting points, at the pace of the shape Exercises, and its band changes chord twice in four bars where the phrases of the Step before change three times. The demand is hearing the home move."
+      "difficultyException": "This Step looks at notes the player already has from three starting points, at the pace of the shape Exercises, and its chords change twice in four bars where the phrases of the Step before change three times. The demand is hearing the home move."
     },
     {
       "id": "choosing",
@@ -12326,7 +12326,7 @@
       "id": "choosing-again",
       "order": 19,
       "title": "One note follows the chord",
-      "goal": "Play a phrase that changes its sixth from F to F# when the band goes to F and then to D, another that changes its seventh from G# to G when the band goes to E and then to G, and then choose the notes yourself over Am and D and over D and C.",
+      "goal": "Play a phrase that changes its sixth from F to F# when the chord goes to F and then to D, another that changes its seventh from G# to G when the chord goes to E and then to G, and then choose the notes yourself over Am and D and over D and C.",
       "why": "In the Step before, each phrase stayed in one mode, because its chords all fitted one scale. A song does not always keep to chords like that. Over Am, F, Am and D the F chord has F in it and the D chord has F#, so no one scale fits all four bars: A natural minor fits the first three and A Dorian fits the last. You do not need a new shape for that, and the hand moves one fret at most. You change one note, the sixth, in the bar whose chord has it. Over A, E, A and G the same thing happens to the seventh: the E chord has G# in it, which is A major, and the G chord is built on G, which is A Mixolydian. Harmonic minor did this in the Intermediate Level, where the raised seventh belonged to one chord. Here the note that follows the chord is the note that names the mode.",
       "howTo": [
         "Read the chart before you play and find the chord that has the changed note in it. F has F and D has F#. E has G# and G has G.",

@@ -524,7 +524,7 @@
     "exercise.chord-tones-ade.ade-roots.coachLine": "Written notes over the changes: right notes and time after the take.",
     "exercise.chord-tones-ade.ade-roots.detection.0": "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested.",
     "exercise.chord-tones-ade.ade-thirds.title": "The thirds: C#, F#, G#",
-    "exercise.chord-tones-ade.ade-thirds.purpose": "One note a bar, the third of each chord: C# over A, F# over D, G# over E, and C# again. When the band goes from D up to E, the third goes up two frets with it.",
+    "exercise.chord-tones-ade.ade-thirds.purpose": "One note a bar, the third of each chord: C# over A, F# over D, G# over E, and C# again. When the chord goes from D up to E, the third goes up two frets with it.",
     "exercise.chord-tones-ade.ade-thirds.howTo.0": "Whole notes, one a bar, 60 BPM up to a pass at 80.",
     "exercise.chord-tones-ade.ade-thirds.howTo.1": "C# at 6 on the G string, F# at 7 on the B string, G# at 9 on the B string, C# again. Listen for each one making its chord major.",
     "exercise.chord-tones-ade.ade-thirds.howTo.2": "First finger on fret 6, second on fret 7, fourth on fret 9.",

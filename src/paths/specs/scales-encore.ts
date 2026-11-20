@@ -40,7 +40,7 @@ const C_THEN_F = inPosition(
   `/8 6:8 6:10 5:7 5:8 5:10 4:7 4:9 4:10 | 4:9 4:7 5:10 5:8 5:7 6:10 /4 6:8 | /8 5:8 5:10 4:7 4:8 4:10 3:7 3:9 3:10 | 3:9 3:7 4:10 4:8 4:7 5:10 /4 5:8`,
   7,
 );
-// Notes one, two, three, four; then five, four and one: the roots of the band's chords.
+// Notes one, two, three, four; then five, four and one: the roots of the chords.
 const ROOTS_IN_A = inPosition(`/4 6:5 6:7 5:4 5:5 | /4 5:7 5:7 /2 5:7 | /4 5:5 5:5 /2 5:5 | /4 6:5 6:5 /2 6:5`, 4);
 const ROOTS_IN_F = inPosition(`/4 5:8 5:10 4:7 4:8 | /4 4:10 4:10 /2 4:10 | /4 4:8 4:8 /2 4:8 | /4 5:8 5:8 /2 5:8`, 7);
 const ONE_FIVE_FOUR_TEMPO = "Quarter notes and half notes, 60 BPM up to a pass at 90.";
@@ -110,7 +110,7 @@ export const KEYS_BY_HAND: StepSpec = {
       howTo: [
         ONE_FIVE_FOUR_TEMPO,
         "In A, bar 1 counts up from home: A, B, C#, D, the low E string's frets 5 and 7, then the A string's frets 4 and 5. They are notes one, two, three and four.",
-        "Bar 2 is note five, E, the A string's fret 7: the band changes to E as you reach it. Bar 3 steps back down to note four, D, the A string's fret 5. Bar 4 is A again.",
+        "Bar 2 is note five, E, the A string's fret 7: the chord changes to E as you reach it. Bar 3 steps back down to note four, D, the A string's fret 5. Bar 4 is A again.",
         "The chords are A, E, D and A. Each time the chord changes, the note you are on is the note that chord is named after.",
       ],
       coach: "Band on. Right notes and time after the take.",
@@ -132,7 +132,7 @@ export const KEYS_BY_HAND: StepSpec = {
                 howTo: [
                   ONE_FIVE_FOUR_TEMPO,
                   "In F, bar 1 counts up from home: F, G, A, B flat, the A string's frets 8 and 10, then the D string's frets 7 and 8. They are notes one, two, three and four.",
-                  "Bar 2 is note five, C, the D string's fret 10: the band changes to C as you reach it. Bar 3 steps back down to note four, B flat, the D string's fret 8. Bar 4 is F again.",
+                  "Bar 2 is note five, C, the D string's fret 10: the chord changes to C as you reach it. Bar 3 steps back down to note four, B flat, the D string's fret 8. Bar 4 is F again.",
                   "The chords are F, C, B flat and F. Each time the chord changes, the note you are on is the note that chord is named after.",
                 ],
               },

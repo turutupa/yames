@@ -173,11 +173,11 @@ export const SAME_NOTES_NEW_HOME: StepSpec = {
     "The three homes are at fret 5 on three neighbouring strings: A on the low E string, D on the A string, G on the D string.",
     "Dorian's home is the second note of its major scale and Mixolydian's is the fifth. A is note two of G major and D is note five.",
     "No fret changes between the three scales. What changes is where you start and stop.",
-    "Over the band, each chord's first bar starts on its root. The band moves the home: Am, then D, then G.",
+    "Over the band, each chord's first bar starts on its root. The chords move the home: Am, then D, then G.",
   ],
   payoff: "One set of seven notes played from three homes, and a line over the second, fifth and first chords of G that follows them.",
   difficultyException:
-    "This Step looks at notes the player already has from three starting points, at the pace of the shape Exercises, and its band changes chord twice in four bars where the phrases of the Step before change three times. The demand is hearing the home move.",
+    "This Step looks at notes the player already has from three starting points, at the pace of the shape Exercises, and its chords change twice in four bars where the phrases of the Step before change three times. The demand is hearing the home move.",
   exercises: [
     {
       id: "three-homes",
@@ -226,7 +226,7 @@ export const SAME_NOTES_NEW_HOME: StepSpec = {
     {
       id: "two-five-one-line",
       title: "One line, three homes: Am, D and G",
-      purpose: "Four bars over a band on Am, D, G and G: the second, fifth and first chords of G major. Bars 1, 2 and 3 play the same figure, five notes up the scale and back to the third, each from the root of its chord.",
+      purpose: "Four bars over a band, with the chords Am, D, G and G: the second, fifth and first chords of G major. Bars 1, 2 and 3 play the same figure, five notes up the scale and back to the third, each from the root of its chord.",
       howTo: [
         "Eighths, quarters and half notes, 60 BPM up to a pass at 90.",
         "Bar 1 starts on A, the low E string's fret 5. Bar 2 starts on D, the A string's fret 5. Bars 3 and 4 start on G, the D string's fret 5.",
@@ -272,7 +272,7 @@ const D_MIXO_EXAMPLE = inPosition(
 export const CHOOSING_AGAIN: StepSpec = {
   id: "choosing-again",
   title: "One note follows the chord",
-  goal: "Play a phrase that changes its sixth from F to F# when the band goes to F and then to D, another that changes its seventh from G# to G when the band goes to E and then to G, and then choose the notes yourself over Am and D and over D and C.",
+  goal: "Play a phrase that changes its sixth from F to F# when the chord goes to F and then to D, another that changes its seventh from G# to G when the chord goes to E and then to G, and then choose the notes yourself over Am and D and over D and C.",
   why: "In the Step before, each phrase stayed in one mode, because its chords all fitted one scale. A song does not always keep to chords like that. Over Am, F, Am and D the F chord has F in it and the D chord has F#, so no one scale fits all four bars: A natural minor fits the first three and A Dorian fits the last. You do not need a new shape for that, and the hand moves one fret at most. You change one note, the sixth, in the bar whose chord has it. Over A, E, A and G the same thing happens to the seventh: the E chord has G# in it, which is A major, and the G chord is built on G, which is A Mixolydian. Harmonic minor did this in the Intermediate Level, where the raised seventh belonged to one chord. Here the note that follows the chord is the note that names the mode.",
   howTo: [
     "Read the chart before you play and find the chord that has the changed note in it. F has F and D has F#. E has G# and G has G.",
