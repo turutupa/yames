@@ -483,6 +483,39 @@
       "pillStopped": "REC detenida: límite de tamaño",
       "mark": "Me sonó mal (M)",
       "marked": "Marcada"
+    },
+    "testInbox": {
+      "title": "Enviar mis sesiones de prueba a mi ordenador",
+      "hint": "Solo en versiones de prueba. Al terminar una sesión de grabación, Yames la comprime y la sube al ordenador que emparejes aquí. Contiene la grabación del micrófono sin procesar de cada Toma, voces incluidas, y solo va a la dirección que indiques; con esto apagado no se envía nada a ningún sitio. En Android también queda una copia en Documents/Yames/capture.",
+      "address": "Buzón de tu ordenador (dirección o enlace de emparejamiento)",
+      "code": "Código de emparejamiento",
+      "pair": "Emparejar",
+      "pairing": "Emparejando…",
+      "paired": "Enviando a {{host}}",
+      "forget": "Olvidar",
+      "sendNow": "Enviar ahora",
+      "pairFailed": "No se pudo emparejar: {{why}}",
+      "status": {
+        "none": "Aún no se ha enviado ninguna sesión.",
+        "uploaded": "Última sesión {{id}}: subida.",
+        "waiting": "Última sesión {{id}}: en espera ({{why}}).",
+        "failed": "Última sesión {{id}}: falló ({{why}}).",
+        "sending": "Enviando {{id}}: {{pct}} %"
+      },
+      "reasons": {
+        "offline": "no se pudo contactar con el ordenador; lo vuelve a intentar al abrir Yames",
+        "notPaired": "aún sin emparejar",
+        "token": "el ordenador no aceptó este dispositivo, vuelve a emparejar",
+        "tooBig": "demasiado grande para el buzón",
+        "refused": "el ordenador rechazó el archivo",
+        "server": "el ordenador tuvo un problema",
+        "full": "el disco del ordenador está lleno",
+        "tooMany": "demasiados intentos, espera diez minutos",
+        "zip": "no se pudo comprimir la sesión",
+        "badAddress": "no es una dirección https",
+        "badCode": "el código es incorrecto, ya se usó o caducó",
+        "noCode": "introduce el código de emparejamiento"
+      }
     }
   },
   "keybindings": {

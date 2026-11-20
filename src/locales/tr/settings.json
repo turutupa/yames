@@ -483,6 +483,39 @@
       "pillStopped": "REC durdu: boyut sınırı",
       "mark": "Yanlış geldi (M)",
       "marked": "İşaretlendi"
+    },
+    "testInbox": {
+      "title": "Test oturumlarımı bilgisayarıma gönder",
+      "hint": "Yalnızca test sürümlerinde. Bir kayıt oturumu bittiğinde Yames onu zip'ler ve burada eşlediğin bilgisayara yükler. Her Çekimin işlenmemiş mikrofon kaydını, sesler dahil, içerir ve yalnızca belirlediğin adrese gider; bu kapalıyken hiçbir yere bir şey gönderilmez. Android'de bir kopya da Documents/Yames/capture içinde kalır.",
+      "address": "Bilgisayarının gelen kutusu (adres veya eşleme bağlantısı)",
+      "code": "Eşleme kodu",
+      "pair": "Eşle",
+      "pairing": "Eşleniyor…",
+      "paired": "{{host}} adresine gönderiliyor",
+      "forget": "Unut",
+      "sendNow": "Şimdi gönder",
+      "pairFailed": "Eşlenemedi: {{why}}",
+      "status": {
+        "none": "Henüz oturum gönderilmedi.",
+        "uploaded": "Son oturum {{id}}: yüklendi.",
+        "waiting": "Son oturum {{id}}: bekliyor ({{why}}).",
+        "failed": "Son oturum {{id}}: başarısız ({{why}}).",
+        "sending": "{{id}} gönderiliyor: %{{pct}}"
+      },
+      "reasons": {
+        "offline": "bilgisayara ulaşılamadı; Yames açılınca yeniden dener",
+        "notPaired": "henüz eşlenmedi",
+        "token": "bilgisayar bu cihazı kabul etmedi, yeniden eşle",
+        "tooBig": "gelen kutusu için fazla büyük",
+        "refused": "bilgisayar dosyayı reddetti",
+        "server": "bilgisayarda bir sorun oldu",
+        "full": "bilgisayarın diski dolu",
+        "tooMany": "çok fazla deneme, on dakika bekle",
+        "zip": "oturum zip'lenemedi",
+        "badAddress": "bu bir https adresi değil",
+        "badCode": "kod yanlış, kullanılmış ya da süresi dolmuş",
+        "noCode": "eşleme kodunu gir"
+      }
     }
   },
   "keybindings": {

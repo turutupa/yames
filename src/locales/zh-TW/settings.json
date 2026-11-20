@@ -483,6 +483,39 @@
       "pillStopped": "REC 已停止：容量上限",
       "mark": "感覺不對 (M)",
       "marked": "已標記"
+    },
+    "testInbox": {
+      "title": "把我的測試工作階段傳送到我的電腦",
+      "hint": "僅限測試版。錄音工作階段結束後，Yames 會將其壓縮成 zip 並上傳到你在此配對的電腦。其中包含每個片段的原始麥克風錄音（包括人聲），只會傳送到你設定的位址；關閉時不會傳送任何內容到任何地方。在 Android 上，Documents/Yames/capture 中也會保留一份副本。",
+      "address": "電腦的收件匣（位址或配對連結）",
+      "code": "配對碼",
+      "pair": "配對",
+      "pairing": "配對中…",
+      "paired": "正在傳送到 {{host}}",
+      "forget": "忘記",
+      "sendNow": "立即傳送",
+      "pairFailed": "無法配對：{{why}}",
+      "status": {
+        "none": "尚未傳送任何工作階段。",
+        "uploaded": "最近的工作階段 {{id}}：已上傳。",
+        "waiting": "最近的工作階段 {{id}}：等待中（{{why}}）。",
+        "failed": "最近的工作階段 {{id}}：失敗（{{why}}）。",
+        "sending": "正在傳送 {{id}}：{{pct}}%"
+      },
+      "reasons": {
+        "offline": "無法連線到電腦；Yames 開啟時會重試",
+        "notPaired": "尚未配對",
+        "token": "電腦不接受此裝置，請重新配對",
+        "tooBig": "對收件匣來說太大",
+        "refused": "電腦拒絕了該檔案",
+        "server": "電腦發生問題",
+        "full": "電腦磁碟已滿",
+        "tooMany": "嘗試次數過多，請等待十分鐘",
+        "zip": "無法壓縮工作階段",
+        "badAddress": "這不是 https 位址",
+        "badCode": "配對碼錯誤、已使用或已過期",
+        "noCode": "請輸入配對碼"
+      }
     }
   },
   "keybindings": {

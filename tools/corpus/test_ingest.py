@@ -263,6 +263,22 @@ class IngestTest(unittest.TestCase):
         self.assertIn("N=2", script)
         self.assertIn("run-as", script)
         self.assertIn("tar -chf -", script)
+        self.assertIn(ingest.ANDROID_SHARED, script)
+
+    def test_a_zip_cannot_name_its_way_out_of_the_raw_root(self):
+        # session.json's "session" becomes the folder name: a path in it falls back to the folder's own
+        zp = self.tmp / "evil.zip"
+        with zipfile.ZipFile(zp, "w") as z:
+            z.writestr("20261120-010203/session.json", json.dumps({"session": "../../outside"}))
+        found = ingest.resolve_input(str(zp), None, False)
+        self.assertEqual([p.name for p in found], ["20261120-010203"])
+        self.assertFalse((self.tmp / "outside").exists())
+        self.assertEqual(found[0].parent, ingest.raw_root())
+        zp = self.tmp / "evil2.zip"
+        with zipfile.ZipFile(zp, "w") as z:
+            z.writestr("../x/session.json", "{}")
+        with self.assertRaises(ValueError):
+            ingest.resolve_input(str(zp), None, False)
 
 
 if __name__ == "__main__":

@@ -483,6 +483,39 @@
       "pillStopped": "REC stopped: size limit",
       "mark": "Felt off (M)",
       "marked": "Marked"
+    },
+    "testInbox": {
+      "title": "Send my test sessions to my computer",
+      "hint": "Test builds only. When a recording session ends, Yames zips it and uploads it to the computer you pair with here. It holds the raw microphone recording of every Take, voices included, and it goes only to the address you set; nothing is sent anywhere while this is off. On Android a copy also stays in Documents/Yames/capture.",
+      "address": "Your computer's inbox (address or pairing link)",
+      "code": "Pairing code",
+      "pair": "Pair",
+      "pairing": "Pairing…",
+      "paired": "Sending to {{host}}",
+      "forget": "Forget",
+      "sendNow": "Send now",
+      "pairFailed": "Could not pair: {{why}}",
+      "status": {
+        "none": "No session sent yet.",
+        "uploaded": "Last session {{id}}: uploaded.",
+        "waiting": "Last session {{id}}: waiting ({{why}}).",
+        "failed": "Last session {{id}}: failed ({{why}}).",
+        "sending": "Sending {{id}}: {{pct}}%"
+      },
+      "reasons": {
+        "offline": "the computer could not be reached; it tries again when Yames opens",
+        "notPaired": "not paired yet",
+        "token": "the computer did not accept this device, pair again",
+        "tooBig": "too big for the inbox",
+        "refused": "the computer refused the file",
+        "server": "the computer had a problem",
+        "full": "the computer's disk is full",
+        "tooMany": "too many tries, wait ten minutes",
+        "zip": "the session could not be zipped",
+        "badAddress": "that is not an https address",
+        "badCode": "the code is wrong, used or expired",
+        "noCode": "enter the pairing code"
+      }
     }
   },
   "keybindings": {

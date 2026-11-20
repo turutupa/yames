@@ -59,6 +59,8 @@ RTX_CAPTURE = "/mnt/c/Users/delgado/AppData/Roaming/com.yames.metronome/capture"
 RTX_DOWNLOADS = "/mnt/c/Users/delgado/Downloads"
 RTX_ADB = "/mnt/c/Users/delgado/tools/platform-tools/adb.exe"
 ANDROID_PKG = "com.yames.metronome"
+# where a test build copies each session zip, for `adb pull` on a non-debuggable build (card #123)
+ANDROID_SHARED = "/sdcard/Documents/Yames/capture"
 SESSION_RE = re.compile(r"^\d{8}-\d{6}")
 
 
@@ -870,13 +872,34 @@ def sessions_in(p: pathlib.Path) -> list[pathlib.Path]:
     return out
 
 
+# what a zip may unpack to (a 30 min session is about 1 GB; the inbox caps uploads at 16 GB)
+MAX_UNPACKED = 64 * 1024**3
+SAFE_NAME_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
+
+
+def safe_name(name, fallback: str) -> str:
+    """A session's folder name: what session.json says when it is a plain name, else the folder's own."""
+    name = str(name or "")
+    if SAFE_NAME_RE.match(name):
+        return name
+    if SAFE_NAME_RE.match(fallback):
+        return fallback
+    raise ValueError(f"not a session name we can use as a folder: {name!r} / {fallback!r}")
+
+
 def safe_extract_zip(zp: pathlib.Path, dest: pathlib.Path) -> list[pathlib.Path]:
     dest.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(zp) as z:
+        total = 0
         for m in z.infolist():
             target = (dest / m.filename).resolve()
             if not str(target).startswith(str(dest.resolve()) + os.sep) and target != dest.resolve():
                 raise ValueError(f"{zp}: unsafe path {m.filename}")
+            if "\\" in m.filename or (m.external_attr >> 16) & 0o170000 == 0o120000:
+                raise ValueError(f"{zp}: unsafe member {m.filename}")
+            total += m.file_size
+            if total > MAX_UNPACKED:
+                raise ValueError(f"{zp}: unpacks past {MAX_UNPACKED} bytes")
         z.extractall(dest)
     return sessions_in(dest)
 
@@ -888,7 +911,7 @@ def import_zip(zp: pathlib.Path) -> list[pathlib.Path]:
         found = safe_extract_zip(zp, tmp)
         out = []
         for s in found:
-            name = json.loads((s / "session.json").read_text()).get("session") or s.name
+            name = safe_name(json.loads((s / "session.json").read_text()).get("session"), s.name)
             dest = raw_root() / name
             if dest.exists():
                 shutil.rmtree(dest)
@@ -909,6 +932,7 @@ CAP='{RTX_CAPTURE}'
 DL='{RTX_DOWNLOADS}'
 ADB='{RTX_ADB}'
 PKG='{ANDROID_PKG}'
+SHARED='{ANDROID_SHARED}'
 T=$(mktemp -d)
 trap 'rm -rf "$T"' EXIT
 mkdir -p "$T/out/pc" "$T/out/android" "$T/out/zips"
@@ -928,8 +952,13 @@ if [ -x "$ADB" ] || [ -f "$ADB" ]; then
     if tar tf "$T/android.tar" >/dev/null 2>&1 && [ -s "$T/android.tar" ]; then
       tar xf "$T/android.tar" -C "$T/out/android" && say "android $DEV: $(ls -1 "$T/out/android" | tr '\\n' ' ')"
     else
-      say "android $DEV: run-as could not read the app's files ($(head -c 300 "$T/android.err" "$T/android.tar" 2>/dev/null | tr -d '\\r' | tr '\\n' ' ')). A release build is not debuggable: use the app's Share/Zip export (it lands in Downloads as yames-capture-<session>.zip)."
+      say "android $DEV: run-as could not read the app's files (a release build is not debuggable); trying shared storage"
     fi
+    # 2b. any build: the zips a test build leaves in shared storage (Documents/Yames/capture), newest N
+    for z in $("$ADB" -s "$DEV" shell "ls -1t $SHARED/yames-capture-*.zip 2>/dev/null" </dev/null | tr -d '\\r' | grep -E '/yames-capture-[A-Za-z0-9_-]+\\.zip$' | head -n "$N"); do
+      b=$(basename "$z")
+      "$ADB" -s "$DEV" exec-out cat "$z" </dev/null > "$T/out/zips/android-$b" && say "android $DEV shared: $b"
+    done
   else
     say "android: no device connected"
   fi
@@ -971,8 +1000,8 @@ def pull_rtx(latest: int, dry_run: bool) -> list[pathlib.Path]:
         out = []
         for sub in ("pc", "android"):
             for s in sessions_in(stage / sub) if (stage / sub).exists() else []:
-                name = json.loads((s / "session.json").read_text()).get("session") or s.name
-                dest = root / (name if sub == "pc" else f"{name}")
+                name = safe_name(json.loads((s / "session.json").read_text()).get("session"), s.name)
+                dest = root / name
                 if dest.exists():
                     shutil.rmtree(dest)
                 shutil.move(str(s), str(dest))

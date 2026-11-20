@@ -483,6 +483,39 @@
       "pillStopped": "REC 已停止：容量上限",
       "mark": "感觉不对 (M)",
       "marked": "已标记"
+    },
+    "testInbox": {
+      "title": "把我的测试会话发送到我的电脑",
+      "hint": "仅限测试版。录音会话结束后，Yames 会将其打包成 zip 并上传到你在此配对的电脑。其中包含每个片段的原始麦克风录音（包括人声），只会发送到你设置的地址；关闭时不会向任何地方发送任何内容。在 Android 上，Documents/Yames/capture 中也会保留一份副本。",
+      "address": "电脑的收件箱（地址或配对链接）",
+      "code": "配对码",
+      "pair": "配对",
+      "pairing": "正在配对…",
+      "paired": "正在发送到 {{host}}",
+      "forget": "忘记",
+      "sendNow": "立即发送",
+      "pairFailed": "无法配对：{{why}}",
+      "status": {
+        "none": "尚未发送任何会话。",
+        "uploaded": "最近的会话 {{id}}：已上传。",
+        "waiting": "最近的会话 {{id}}：等待中（{{why}}）。",
+        "failed": "最近的会话 {{id}}：失败（{{why}}）。",
+        "sending": "正在发送 {{id}}：{{pct}}%"
+      },
+      "reasons": {
+        "offline": "无法连接到电脑；Yames 打开时会重试",
+        "notPaired": "尚未配对",
+        "token": "电脑不接受此设备，请重新配对",
+        "tooBig": "对收件箱来说太大",
+        "refused": "电脑拒绝了该文件",
+        "server": "电脑出了问题",
+        "full": "电脑磁盘已满",
+        "tooMany": "尝试次数过多，请等待十分钟",
+        "zip": "无法打包会话",
+        "badAddress": "这不是 https 地址",
+        "badCode": "配对码错误、已使用或已过期",
+        "noCode": "请输入配对码"
+      }
     }
   },
   "keybindings": {

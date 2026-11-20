@@ -483,6 +483,39 @@
       "pillStopped": "REC gestoppt: Größengrenze",
       "mark": "Falsch bewertet (M)",
       "marked": "Markiert"
+    },
+    "testInbox": {
+      "title": "Meine Testsitzungen an meinen Computer senden",
+      "hint": "Nur in Testversionen. Wenn eine Aufnahmesitzung endet, packt Yames sie als ZIP und lädt sie auf den Computer hoch, den du hier koppelst. Sie enthält die unbearbeitete Mikrofonaufnahme jedes Takes, Stimmen eingeschlossen, und geht nur an die Adresse, die du einträgst; solange dies aus ist, wird nichts gesendet. Unter Android bleibt außerdem eine Kopie in Documents/Yames/capture.",
+      "address": "Posteingang deines Computers (Adresse oder Kopplungslink)",
+      "code": "Kopplungscode",
+      "pair": "Koppeln",
+      "pairing": "Wird gekoppelt…",
+      "paired": "Sendet an {{host}}",
+      "forget": "Vergessen",
+      "sendNow": "Jetzt senden",
+      "pairFailed": "Kopplung fehlgeschlagen: {{why}}",
+      "status": {
+        "none": "Noch keine Sitzung gesendet.",
+        "uploaded": "Letzte Sitzung {{id}}: hochgeladen.",
+        "waiting": "Letzte Sitzung {{id}}: wartet ({{why}}).",
+        "failed": "Letzte Sitzung {{id}}: fehlgeschlagen ({{why}}).",
+        "sending": "Sende {{id}}: {{pct}} %"
+      },
+      "reasons": {
+        "offline": "der Computer war nicht erreichbar; neuer Versuch beim nächsten Start von Yames",
+        "notPaired": "noch nicht gekoppelt",
+        "token": "der Computer hat dieses Gerät nicht angenommen, bitte neu koppeln",
+        "tooBig": "zu groß für den Posteingang",
+        "refused": "der Computer hat die Datei abgelehnt",
+        "server": "der Computer hatte ein Problem",
+        "full": "die Festplatte des Computers ist voll",
+        "tooMany": "zu viele Versuche, warte zehn Minuten",
+        "zip": "die Sitzung konnte nicht gepackt werden",
+        "badAddress": "das ist keine https-Adresse",
+        "badCode": "der Code ist falsch, verbraucht oder abgelaufen",
+        "noCode": "gib den Kopplungscode ein"
+      }
     }
   },
   "keybindings": {

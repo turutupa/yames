@@ -483,6 +483,39 @@
       "pillStopped": "REC gestopt: groottegrens",
       "mark": "Voelde fout (M)",
       "marked": "Gemarkeerd"
+    },
+    "testInbox": {
+      "title": "Mijn testsessies naar mijn computer sturen",
+      "hint": "Alleen in testversies. Als een opnamesessie eindigt, pakt Yames die in als zip en uploadt hem naar de computer die je hier koppelt. Hij bevat de onbewerkte microfoonopname van elke Take, stemmen inbegrepen, en gaat alleen naar het adres dat je instelt; zolang dit uit staat, wordt niets verstuurd. Op Android blijft ook een kopie in Documents/Yames/capture.",
+      "address": "Inbox van je computer (adres of koppellink)",
+      "code": "Koppelcode",
+      "pair": "Koppelen",
+      "pairing": "Koppelen…",
+      "paired": "Verstuurt naar {{host}}",
+      "forget": "Vergeten",
+      "sendNow": "Nu versturen",
+      "pairFailed": "Koppelen mislukt: {{why}}",
+      "status": {
+        "none": "Nog geen sessie verstuurd.",
+        "uploaded": "Laatste sessie {{id}}: geüpload.",
+        "waiting": "Laatste sessie {{id}}: wacht ({{why}}).",
+        "failed": "Laatste sessie {{id}}: mislukt ({{why}}).",
+        "sending": "{{id}} versturen: {{pct}}%"
+      },
+      "reasons": {
+        "offline": "de computer was niet bereikbaar; opnieuw bij het openen van Yames",
+        "notPaired": "nog niet gekoppeld",
+        "token": "de computer accepteerde dit apparaat niet, koppel opnieuw",
+        "tooBig": "te groot voor de inbox",
+        "refused": "de computer weigerde het bestand",
+        "server": "de computer had een probleem",
+        "full": "de schijf van de computer is vol",
+        "tooMany": "te veel pogingen, wacht tien minuten",
+        "zip": "de sessie kon niet worden ingepakt",
+        "badAddress": "dat is geen https-adres",
+        "badCode": "de code is fout, gebruikt of verlopen",
+        "noCode": "vul de koppelcode in"
+      }
     }
   },
   "keybindings": {

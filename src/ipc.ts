@@ -1002,6 +1002,40 @@ export async function captureZip(): Promise<string> {
   return invoke<string>("capture_zip");
 }
 
+/**
+ * "Send my test sessions to my computer" (card #123, test builds only,
+ * `src-tauri/src/capture_outbox.rs`, `src/capture/inbox.ts`): the files side.
+ * The upload is `fetch` from the webview.
+ */
+export type CaptureSessionEntry = {
+  id: string;
+  startedWallMs: number | null;
+  endedWallMs: number | null;
+  active: boolean;
+};
+
+/** The recording sessions on this device, oldest first. */
+export async function captureSessions(): Promise<CaptureSessionEntry[]> {
+  return invoke<CaptureSessionEntry[]>("capture_sessions");
+}
+
+export type CaptureOutboxZip = { id: string; size: number; shared: string | null; sharedError: string | null };
+
+/** Zip session `id` for sending (once); `shared` also copies it to Documents/Yames/capture on Android. */
+export async function captureOutboxPrepare(id: string, shared: boolean): Promise<CaptureOutboxZip> {
+  return invoke<CaptureOutboxZip>("capture_outbox_prepare", { id, shared });
+}
+
+/** Up to `len` bytes of that zip from `offset`, raw. */
+export async function captureOutboxChunk(id: string, offset: number, len: number): Promise<ArrayBuffer> {
+  return invoke<ArrayBuffer>("capture_outbox_chunk", { id, offset, len });
+}
+
+/** The computer has it: drop the zip kept for sending. */
+export async function captureOutboxClear(id: string): Promise<void> {
+  return invoke("capture_outbox_clear", { id });
+}
+
 /** The written pitch of one note a schedule names (`pitch.rs` `ScoreNote`). */
 export type ScorerNotePitch = { id: number; midi: number };
 

@@ -483,6 +483,39 @@
       "pillStopped": "REC parada: limite de tamanho",
       "mark": "Pareceu errado (M)",
       "marked": "Marcado"
+    },
+    "testInbox": {
+      "title": "Enviar minhas sessões de teste para o meu computador",
+      "hint": "Só em versões de teste. Quando uma sessão de gravação termina, o Yames a compacta e envia para o computador que você parear aqui. Ela contém a gravação bruta do microfone de cada Take, vozes incluídas, e vai só para o endereço que você definir; com isto desligado nada é enviado. No Android uma cópia também fica em Documents/Yames/capture.",
+      "address": "Caixa de entrada do seu computador (endereço ou link de pareamento)",
+      "code": "Código de pareamento",
+      "pair": "Parear",
+      "pairing": "Pareando…",
+      "paired": "Enviando para {{host}}",
+      "forget": "Esquecer",
+      "sendNow": "Enviar agora",
+      "pairFailed": "Não foi possível parear: {{why}}",
+      "status": {
+        "none": "Nenhuma sessão enviada ainda.",
+        "uploaded": "Última sessão {{id}}: enviada.",
+        "waiting": "Última sessão {{id}}: aguardando ({{why}}).",
+        "failed": "Última sessão {{id}}: falhou ({{why}}).",
+        "sending": "Enviando {{id}}: {{pct}}%"
+      },
+      "reasons": {
+        "offline": "não foi possível alcançar o computador; tenta de novo quando o Yames abrir",
+        "notPaired": "ainda não pareado",
+        "token": "o computador não aceitou este dispositivo, pareie de novo",
+        "tooBig": "grande demais para a caixa de entrada",
+        "refused": "o computador recusou o arquivo",
+        "server": "o computador teve um problema",
+        "full": "o disco do computador está cheio",
+        "tooMany": "tentativas demais, espere dez minutos",
+        "zip": "não foi possível compactar a sessão",
+        "badAddress": "isso não é um endereço https",
+        "badCode": "o código está errado, já foi usado ou expirou",
+        "noCode": "digite o código de pareamento"
+      }
     }
   },
   "keybindings": {

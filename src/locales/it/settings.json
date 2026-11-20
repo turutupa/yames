@@ -483,6 +483,39 @@
       "pillStopped": "REC fermata: limite di dimensione",
       "mark": "Non mi torna (M)",
       "marked": "Segnato"
+    },
+    "testInbox": {
+      "title": "Invia le mie sessioni di test al mio computer",
+      "hint": "Solo nelle versioni di test. Quando una sessione di registrazione finisce, Yames la comprime e la carica sul computer che abbini qui. Contiene la registrazione grezza del microfono di ogni Take, voci comprese, e va solo all'indirizzo che imposti; quando è disattivato non viene inviato nulla. Su Android ne resta anche una copia in Documents/Yames/capture.",
+      "address": "Casella del tuo computer (indirizzo o link di abbinamento)",
+      "code": "Codice di abbinamento",
+      "pair": "Abbina",
+      "pairing": "Abbinamento…",
+      "paired": "Invio a {{host}}",
+      "forget": "Dimentica",
+      "sendNow": "Invia ora",
+      "pairFailed": "Abbinamento non riuscito: {{why}}",
+      "status": {
+        "none": "Nessuna sessione inviata finora.",
+        "uploaded": "Ultima sessione {{id}}: caricata.",
+        "waiting": "Ultima sessione {{id}}: in attesa ({{why}}).",
+        "failed": "Ultima sessione {{id}}: non riuscita ({{why}}).",
+        "sending": "Invio di {{id}}: {{pct}}%"
+      },
+      "reasons": {
+        "offline": "il computer non è raggiungibile; riprova all'apertura di Yames",
+        "notPaired": "non ancora abbinato",
+        "token": "il computer non ha accettato questo dispositivo, abbinalo di nuovo",
+        "tooBig": "troppo grande per la casella",
+        "refused": "il computer ha rifiutato il file",
+        "server": "il computer ha avuto un problema",
+        "full": "il disco del computer è pieno",
+        "tooMany": "troppi tentativi, attendi dieci minuti",
+        "zip": "impossibile comprimere la sessione",
+        "badAddress": "non è un indirizzo https",
+        "badCode": "il codice è errato, già usato o scaduto",
+        "noCode": "inserisci il codice di abbinamento"
+      }
     }
   },
   "keybindings": {

@@ -2817,6 +2817,53 @@
   margin: 0 0 10px;
 }
 
+/* Send my test sessions to my computer (card #123, test builds): the pairing
+   fields wrap under each other on a narrow panel. */
+.test-inbox-status {
+  overflow-wrap: anywhere;
+}
+
+.test-inbox-failed {
+  color: var(--danger, #d9534f);
+}
+
+.test-inbox-pair {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 4px 0 10px;
+}
+
+.test-inbox-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 14em;
+  min-width: 0;
+}
+
+.test-inbox-code-field {
+  flex: 0 1 10em;
+}
+
+.test-inbox-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.test-inbox-host {
+  margin-right: auto;
+  align-self: center;
+  overflow-wrap: anywhere;
+}
+
 /* The pill a session shows while it records, with the "felt off" tap target. */
 .recording-pill {
   position: fixed;

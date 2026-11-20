@@ -15,6 +15,7 @@ import { useKeybindings } from "../../hooks/useKeybindings";
 import { useCoachDownload } from "../../hooks/useCoachDownload";
 import { useActionDispatcher } from "../../hooks/useActionDispatcher";
 import { IS_BETA, IS_MOBILE, SAYS_WHEN_NEWER } from "../../platform";
+import { startTestInbox } from "../../settings/testInbox";
 import { NO_ANDROID_BETA, useAndroidBetaUpdate } from "../../beta/useAndroidBetaUpdate";
 import { NO_BETA_PROMPT, useBetaPrompt } from "../../beta/useBetaPrompt";
 import { BetaUpdateNotice } from "../../beta/BetaUpdateNotice";
@@ -1159,6 +1160,9 @@ export function MainWindow() {
     IS_BETA && IS_MOBILE
       ? useAndroidBetaUpdate({ appVersion, isPlaying: state.isPlaying })
       : NO_ANDROID_BETA;
+  // Test builds: send finished recording sessions to the tester's computer
+  // when they turned that on (card #123, `src/settings/testInbox.ts`).
+  useEffect(() => (IS_BETA ? startTestInbox() : undefined), []);
   const betaBusy = IS_MOBILE
     ? androidBeta.status === "downloading" || androidBeta.status === "installing"
     : updateStatus === "downloading";
