@@ -8,7 +8,18 @@
  * tokens cannot be produced in three seconds.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { COACH_GENERATE_TIMEOUT_MS, coachGenerate } from "./ipc.desktop";
+import {
+  COACH_ASK_BACKSTOP_MS,
+  COACH_ASK_MAX_DEADLINE_MS,
+  COACH_ASK_TIMEOUT_MS,
+  COACH_GENERATE_TIMEOUT_MS,
+  cancelGeneration,
+  coachAsk,
+  coachGenerate,
+  newGenerationId,
+  type CoachAskOutcome,
+  type CoachAskRequest,
+} from "./ipc.desktop";
 import { mockInvoke, setInvokeResponse } from "./test/mocks";
 
 beforeEach(() => {
@@ -87,5 +98,131 @@ describe("coachGenerate", () => {
     // A 15 s timer left armed would keep the fake clock (and, in the app,
     // the event loop) busy long after the answer arrived.
     expect(vi.getTimerCount()).toBe(0);
+  });
+});
+
+describe("coachAsk", () => {
+  const request = (generationId: number): CoachAskRequest => ({
+    generationId,
+    mode: "choice",
+    prefix: "Tools: open_step",
+    context: "Screen: Today",
+    question: "where was I?",
+    grammar: 'root ::= "{}"',
+  });
+
+  it("sends the whole turn to its own command, with the 8 s deadline", async () => {
+    setInvokeResponse("coach_ask", () => ({
+      status: "answered",
+      text: "{}",
+      prefixCached: true,
+      promptMs: 40,
+      totalMs: 90,
+    }));
+    await expect(coachAsk(request(7))).resolves.toMatchObject({
+      status: "answered",
+      prefixCached: true,
+    });
+    expect(mockInvoke).toHaveBeenCalledWith("coach_ask", {
+      request: { ...request(7), deadlineMs: COACH_ASK_TIMEOUT_MS },
+    });
+  });
+
+  it("passes a cut-off answer through as truncated, never as answered", async () => {
+    setInvokeResponse("coach_ask", () => ({
+      status: "truncated",
+      text: '{"tool":"open_',
+      by: "budget",
+      prefixCached: true,
+      promptMs: 40,
+      totalMs: 900,
+    }));
+    const out: CoachAskOutcome = await coachAsk(request(10));
+    expect(out.status).toBe("truncated");
+    // The type keeps a caller from reading a truncated text as an answer:
+    // only the "answered" branch is one.
+    const answer = out.status === "answered" ? out.text : null;
+    expect(answer).toBeNull();
+    if (out.status === "truncated") expect(out.by).toBe("budget");
+  });
+
+  it("passes timedOut and deadEnd through, and sends the caller's deadline", async () => {
+    setInvokeResponse("coach_ask", () => ({ status: "timedOut" }));
+    await expect(coachAsk({ ...request(11), deadlineMs: 2_000 })).resolves.toEqual({
+      status: "timedOut",
+    });
+    expect(mockInvoke).toHaveBeenCalledWith("coach_ask", {
+      request: { ...request(11), deadlineMs: 2_000 },
+    });
+    setInvokeResponse("coach_ask", () => ({ status: "deadEnd", why: "nothing allowed" }));
+    await expect(coachAsk(request(12))).resolves.toEqual({
+      status: "deadEnd",
+      why: "nothing allowed",
+    });
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("clamps a deadline past Rust's cap, so the backstop cannot fire at once", async () => {
+    setInvokeResponse("coach_ask", () => new Promise(() => {}));
+    setInvokeResponse("cancel_generation", () => true);
+    // Past 2^31 - 1 ms, an unclamped setTimeout would fire immediately.
+    const call = coachAsk({ ...request(13), deadlineMs: 2 ** 31 });
+    const settled = vi.fn();
+    call.catch(settled);
+    expect(mockInvoke).toHaveBeenCalledWith("coach_ask", {
+      request: { ...request(13), deadlineMs: COACH_ASK_MAX_DEADLINE_MS },
+    });
+
+    await vi.advanceTimersByTimeAsync(COACH_ASK_MAX_DEADLINE_MS + COACH_ASK_BACKSTOP_MS - 1);
+    expect(settled).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(2);
+    expect(settled).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "coach_ask_timeout" }),
+    );
+  });
+
+  it("sends a missing grammar as null, and passes noModel through", async () => {
+    setInvokeResponse("coach_ask", () => ({ status: "noModel" }));
+    const prose: CoachAskRequest = {
+      generationId: 8,
+      mode: "prose",
+      prefix: "p",
+      context: "",
+      question: "how do I relax?",
+    };
+    await expect(coachAsk(prose)).resolves.toEqual({ status: "noModel" });
+    expect(mockInvoke).toHaveBeenCalledWith("coach_ask", {
+      request: { ...prose, grammar: null, deadlineMs: COACH_ASK_TIMEOUT_MS },
+    });
+  });
+
+  it("cancels the turn in Rust when Rust has not answered a backstop past 8 s", async () => {
+    setInvokeResponse("coach_ask", () => new Promise(() => {}));
+    setInvokeResponse("cancel_generation", () => true);
+    const call = coachAsk(request(9));
+    const settled = vi.fn();
+    call.catch(settled);
+
+    // Rust's own deadline is 8 s; the wrapper waits for its answer a
+    // little longer before giving up on it.
+    await vi.advanceTimersByTimeAsync(COACH_ASK_TIMEOUT_MS + COACH_ASK_BACKSTOP_MS - 1);
+    expect(settled).not.toHaveBeenCalled();
+    expect(mockInvoke).not.toHaveBeenCalledWith("cancel_generation", expect.anything());
+
+    await vi.advanceTimersByTimeAsync(2);
+    expect(settled).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "coach_ask_timeout" }),
+    );
+    expect(mockInvoke).toHaveBeenCalledWith("cancel_generation", { generationId: 9 });
+  });
+
+  it("cancels by id, and hands out ids that never repeat", async () => {
+    setInvokeResponse("cancel_generation", () => true);
+    await expect(cancelGeneration(42)).resolves.toBe(true);
+    expect(mockInvoke).toHaveBeenCalledWith("cancel_generation", { generationId: 42 });
+    const a = newGenerationId();
+    const b = newGenerationId();
+    expect(b).toBeGreaterThan(a);
+    expect(Number.isSafeInteger(b)).toBe(true);
   });
 });

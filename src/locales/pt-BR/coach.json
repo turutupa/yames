@@ -42,7 +42,8 @@
       "notDownloaded": "não baixado",
       "notOnThisDevice": "indisponível neste dispositivo",
       "downloading": "baixando {{percent}}",
-      "downloadingNoPercent": "baixando"
+      "downloadingNoPercent": "baixando",
+      "checking": "verificando o download"
     },
     "state": {
       "ready": "Carregado e pronto",
@@ -53,8 +54,10 @@
       "failedWhy": "Não carregou ({{reason}}). Escolha-o para tentar de novo",
       "notDownloaded": "Não baixado",
       "update": "Uma versão antiga. Atualize em Configurações → Coach",
-      "otherOnDisk": "Não baixado. Um segundo modelo neste computador depende de uma atualização futura; por enquanto, troque em Configurações → Coach",
+      "unplaced": "Não baixado. Um modelo neste computador não pôde ser identificado; gerencie-o em Configurações → Coach",
+      "noRoom": "Não baixado. Precisa de {{need}}, {{free}} livres",
       "downloading": "Baixando",
+      "checking": "Verificando o download",
       "lowMemory": "Este computador tem menos memória do que este modelo precisa; pode ficar lento ou não carregar"
     },
     "why": {
@@ -64,18 +67,29 @@
     "download": {
       "start": "Baixar",
       "pause": "Pausar",
+      "pauseHint": "Parar por enquanto e manter o que foi baixado; Retomar continua dali",
+      "cancel": "Cancelar",
+      "cancelHint": "Parar e remover o que foi baixado até agora",
       "resume": "Retomar",
       "retry": "Tentar de novo",
       "anyway": "Baixar mesmo assim",
       "notNow": "Agora não",
       "running": "Baixando… {{percent}}",
       "runningNoPercent": "Baixando…",
+      "runningBytes": "Baixando… {{done}} de {{total}}",
+      "bytes": "{{done}} de {{total}}",
+      "checking": "Verificando o download com o checksum publicado… {{percent}}",
       "voices": "Buscando as vozes do coach…",
       "paused": "Pausado em {{percent}}. Retomar continua de onde parou.",
+      "pausedBytes": "Pausado em {{done}} de {{total}}. Retomar continua de onde parou.",
       "pausedNoPercent": "Pausado. Retomar continua de onde parou.",
+      "cancelled": "Cancelado. O que havia sido baixado foi removido.",
       "failed": "O download parou: {{reason}}",
       "failedNoReason": "O download parou.",
-      "meteredWarn": "Parece que você está no plano de dados do celular. {{size}} é muito para baixar assim."
+      "checksumFailed": "O arquivo baixado não correspondia ao checksum publicado, então foi removido. Nada do que você já tinha foi alterado.",
+      "noRoom": "Espaço insuficiente: precisa de {{need}} e {{free}} estão livres. Libere espaço e tente de novo.",
+      "meteredWarn": "Parece que você está no plano de dados do celular. {{size}} é muito para baixar assim.",
+      "spaceWarn": "Só {{free}} estão livres e isso precisa de {{need}}. Cabe, com pouca folga."
     }
   },
   "coachDetail": {

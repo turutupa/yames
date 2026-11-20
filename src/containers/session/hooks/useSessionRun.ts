@@ -85,6 +85,7 @@ import {
   nextStepAfterPass,
   takesOf,
   withHeardIt,
+  withUpstroke,
 } from "../../../session/progress";
 import {
   CHOSEN_KEYS_KEY,
@@ -106,14 +107,20 @@ import {
   eventForBigAction,
   hasPrevious,
   jumpNeedsAsking,
+  eyesOffer,
   leaveNeedsAsking,
+  loopOffer,
   runReducer,
   timedBpm,
   timedTempoAdjustable,
   timedTempoLive,
   tempoNudges,
 } from "../../../session/runner";
-import type { BigAction, RunState, TakeOutcome, UngradedWhy } from "../../../session/runner";
+import type { BigAction, LoopHeard, RunState, TakeOutcome, UngradedWhy } from "../../../session/runner";
+import { spotOf, takeNote } from "../../../coach/takeNote";
+import { pickDirectionMatters } from "../../../session/caveats";
+import { loopHeardOf } from "../../../coach/loopLine";
+import type { LoopRound } from "../../../coach/loopLine";
 import { classifyInputError } from "../../../session/inputStart";
 import {
   GRADING_KEY,
@@ -123,7 +130,7 @@ import {
 } from "../../../session/grading";
 import type { GradingChoice } from "../../../session/grading";
 import type { InputFailure } from "../../../session/inputStart";
-import { TAKE_COUNT_IN_BARS, buildTake } from "../../../session/take";
+import { TAKE_COUNT_IN_BARS, buildLoop, buildTake } from "../../../session/take";
 import { GUITAR_BAND, bandVolumeFor, buildTakeBand, readBandVolume, takeMix } from "../../../session/takeBand";
 import type { SongBacking } from "../../../songs/types";
 import { DEFAULT_PRACTICE_VIEW, isPracticeView, nextPracticeView } from "../highway/runwayModel";
@@ -817,6 +824,25 @@ export function useSessionRun(input: SessionRunInput) {
     });
   }, [bandVolume, enqueue]);
 
+  // --- the loop (DESIGN 4.2, "Loop a bar") ---------------------------------
+  // A bar or two of this Exercise on repeat, slow and ungraded. Its sound is
+  // the engine's until it has really stopped after the loop: until then a
+  // Take's edge, its attempt and its lights are not this.
+  const loopNow = run.loop;
+  const loopPlan = useMemo(
+    () =>
+      loopNow && current
+        ? buildLoop(current.path, current.exercise, loopNow.bpm, loopNow.variantSeed, loopNow.fromBar, loopNow.toBar)
+        : null,
+    [loopNow, current],
+  );
+  const [loopEngaged, setLoopEngaged] = useState(false);
+  useEffect(() => {
+    if (run.phase === "looping") setLoopEngaged(true);
+    else if (!isPlaying) setLoopEngaged(false);
+  }, [run.phase, isPlaying]);
+  const loopSound = run.phase === "looping" || loopEngaged;
+
   const attempt = useSongAttempt({
     score: onExercise && take ? take.score : null,
     scoreId: null,
@@ -824,15 +850,16 @@ export function useSessionRun(input: SessionRunInput) {
     loop: false,
     tempoPercent: 100,
     bpm: take?.bpm ?? 120,
-    // Only a Take's own edge. A warm-up's click stopping is not a pass, nor a demo.
-    isPlaying: isPlaying && onExercise && !demoOn,
+    // Only a Take's own edge. A warm-up's click stopping is not a pass, nor a
+    // demo, nor a loop.
+    isPlaying: isPlaying && onExercise && !demoOn && !loopSound,
     listening,
   });
 
   const lights = useLiveNoteLights({
     schedule: onExercise ? (take?.schedule ?? null) : null,
     beatInRange: beat && !beat.songCountIn ? beat.songTick / 960 : 0,
-    isPlaying: isPlaying && onExercise && !demoOn,
+    isPlaying: isPlaying && onExercise && !demoOn && !loopSound,
     bpm: take?.bpm,
   });
 
@@ -858,6 +885,97 @@ export function useSessionRun(input: SessionRunInput) {
 
   /** The timed step whose sound is on: which step, and which of its runs (Start, Resume, Restart). */
   const lastEntered = useRef<{ index: number; kind: PlanStep["kind"]; runs: number } | null>(null);
+
+  /**
+   * The loop's rounds as the scorer's live verdicts count them, for the one
+   * line after it. Only when it is graded and the input is on: with grading
+   * off nothing is listened to and nothing is said.
+   */
+  const loopRounds = useRef(new Map<number, LoopRound>());
+  const loopOnsets = useRef(0);
+  const loopGraded = useRef(false);
+
+  /**
+   * A loop onto the engine: the bars on repeat as Songs loops a passage
+   * (`buildTransport` with `loops`), the band under it, and the scorer's
+   * schedule without pass marks when it is graded, for the early / late strip.
+   * Again from the top when its tempo moves.
+   */
+  useEffect(() => {
+    if (run.phase !== "looping" || !loopPlan) return;
+    const plan = loopPlan;
+    const graded = !runRef.current.ungraded && latest.current.listening;
+    loopGraded.current = graded;
+    loopRounds.current = new Map();
+    loopOnsets.current = plan.schedule.onsets.length;
+    setLive(NO_LIVE);
+    // The Take's song leaves the engine: it is loaded again after the loop.
+    prepareId.current += 1;
+    setPreparedTake(null);
+    void enqueue(async () => {
+      await setPlaying(false).catch(() => {});
+      await whenScheduleFree();
+      await clearScoreSchedule().catch(() => {});
+      if (runRef.current.phase !== "looping") return;
+      try {
+        const importer = await import("../../../songs/import");
+        const transport = importer.buildTransport(plan.score, plan.range, {
+          loops: true,
+          tempoPercent: 100,
+          countInBars: TAKE_COUNT_IN_BARS,
+          startTick: 0,
+        });
+        const band = buildTakeBand(plan.exercise, plan.bars, plan.bpm, latest.current.lineup ?? GUITAR_BAND);
+        finisherLoaded.current = false;
+        await loadSong(transport, band);
+        loadedBand.current = band;
+        await setSongMix(
+          band
+            ? takeMix(band, bandVolumeRef.current, DEFAULT_MIX_SETTING.mix.click)
+            : engineMix(DEFAULT_MIX_SETTING, 0),
+        );
+        // No pass marks: nothing in a loop is graded (Songs loads it so).
+        if (graded) await loadScoreSchedule(plan.schedule);
+        if (runRef.current.phase !== "looping") return;
+        await setPlaying(true);
+      } catch (err) {
+        console.warn("[yames] the loop would not load", err);
+        setEngineTrouble(typeof err === "string" ? err : "load");
+      }
+    });
+  }, [run.phase, loopPlan, enqueue]);
+
+  /** Leaving a loop, however it is left: its sound stops and its schedule goes. */
+  const wasLooping = useRef(false);
+  useEffect(() => {
+    const was = wasLooping.current;
+    wasLooping.current = run.phase === "looping";
+    if (!was || run.phase === "looping") return;
+    void enqueue(async () => {
+      await setPlaying(false).catch(() => {});
+      await whenScheduleFree();
+      await clearScoreSchedule().catch(() => {});
+      loadedBand.current = null;
+    });
+  }, [run.phase, enqueue]);
+
+  /** The loop's live verdicts: the strip, and the rounds for the line after it. */
+  useEffect(() => {
+    if (run.phase !== "looping") return;
+    const off = onScoreOnset((onset) => {
+      const round = loopRounds.current.get(onset.pass) ?? { seen: 0, missed: 0 };
+      loopRounds.current.set(onset.pass, {
+        seen: round.seen + 1,
+        missed: round.missed + (onset.state === "miss" ? 1 : 0),
+      });
+      const deviation = onset.deviationMs;
+      if (onset.state !== "hit" || deviation === null) return;
+      setLive((now) => ({ ...now, deviations: [...now.deviations, deviation].slice(-STRIP_NOTES) }));
+    });
+    return () => {
+      void off.then((fn) => fn()).catch(() => {});
+    };
+  }, [run.phase]);
 
   /** Get a Take onto the engine: the song, the mix, then the schedule. Again once a demo lets go. */
   useEffect(() => {
@@ -1208,7 +1326,7 @@ export function useSessionRun(input: SessionRunInput) {
       facts: { ...facts, view: practiceViewRef.current },
     };
 
-    const outcome: TakeOutcome = {
+    const plain: TakeOutcome = {
       stepId: stepNow.id,
       exerciseId: exercise.id,
       title: exercise.title,
@@ -1220,6 +1338,21 @@ export function useSessionRun(input: SessionRunInput) {
       cleanBefore,
       takeId: row.id,
     };
+    // Where it slipped and how often it has (the note's own facts), kept on
+    // the outcome for the rules that read them: P1, P2 and the loop's button
+    // (DESIGN 4.2). The note on screen reads the same; the button decides.
+    let spot: ReturnType<typeof spotOf> = null;
+    try {
+      spot = spotOf(
+        takeNote(plain, attempt.review, earlier, takeRef.current?.exercise ?? exercise, {
+          variantSeed: stepNow.variantSeed,
+          session: state.startedAt,
+        }),
+      );
+    } catch (err) {
+      console.warn("[yames] the coach could not read where the Take slipped", err);
+    }
+    const outcome: TakeOutcome = spot ? { ...plain, spot } : plain;
     dispatch({ type: "takeResult", outcome, now }, attempt.review);
 
     // What the Session goes on to read: kept in memory at once, in the store as
@@ -1671,6 +1804,60 @@ export function useSessionRun(input: SessionRunInput) {
   const big: BigAction = useMemo(() => bigAction(run, exercise), [run, exercise]);
 
   /**
+   * "Not yet" twice on this Exercise's ungraded Takes (DESIGN 4.4): the loop
+   * comes to the front. The player's own answers, read off the stored rows.
+   */
+  const notYetTwice = useMemo(() => {
+    const here = currentStep(run);
+    if (!here || !run.ungraded) return false;
+    const mine = run.outcomes.filter((o) => o.stepId === here.id).slice(-2);
+    return (
+      mine.length === 2 &&
+      mine.every((o) => {
+        if (o.ungraded === undefined || !o.takeId) return false;
+        const row = progress.takes.find((t) => t.id === o.takeId);
+        return !!row && factsOf(row).heardIt === "notYet";
+      })
+    );
+  }, [run, progress.takes]);
+  /** "Loop the first bar", when the Session offers it (`loopOffer`). */
+  const loop = useMemo(() => loopOffer(run, exercise, { notYetTwice }), [run, exercise, notYetTwice]);
+
+  const startLoop = useCallback(() => {
+    if (!loop) return;
+    if (listen.active) listen.stop({ tail: false });
+    autoStart.current = false;
+    dispatch({ type: "loop", loop: loop.loop, now: Date.now() });
+  }, [loop, listen]);
+
+  /** "This one is for your eyes": offered on this result (`eyesOffer`). */
+  const pickMatters = !!take && take.exercise.grading === "graded" && pickDirectionMatters(take.exercise);
+  const eyes = useMemo(() => eyesOffer(run, pickMatters), [run, pickMatters]);
+  /** One ungraded Take to watch the pick, straight into the count-in; graded again after it. */
+  const eyesTake = useCallback(() => {
+    if (!eyesOffer(runRef.current, pickMatters)) return;
+    ungradedOnce.current = true;
+    dispatch({ type: "setUngraded", why: "eyes" });
+    autoStart.current = true;
+    dispatch({ type: "again", now: Date.now() });
+  }, [pickMatters]);
+  /** The answer to "Did any beat start on an upstroke?", kept on the row like `answerHeardIt`. */
+  const answerUpstroke = useCallback((takeId: string, upstroke: "yes" | "no") => {
+    const row = takesRef.current.find((t) => t.id === takeId);
+    if (!row || factsOf(row).upstroke === upstroke) return;
+    const next = withUpstroke(row, upstroke);
+    takesRef.current = takesRef.current.map((t) => (t.id === takeId ? next : t));
+    setProgress((p) => ({ ...p, takes: p.takes.map((t) => (t.id === takeId ? withUpstroke(t, upstroke) : t)) }));
+    void savePathTake(next, null).catch(() => {});
+  }, []);
+
+  const endLoop = useCallback(() => {
+    if (runRef.current.phase !== "looping") return;
+    const heard: LoopHeard | null = loopGraded.current ? loopHeardOf(loopRounds.current, loopOnsets.current) : null;
+    dispatch({ type: "loopStopped", heard, now: Date.now() });
+  }, []);
+
+  /**
    * Where placement put the player, once its climb is over (UX audit TODAY-3):
    * the result says "You start at Step 2" rather than moving on in silence.
    */
@@ -1737,7 +1924,8 @@ export function useSessionRun(input: SessionRunInput) {
   useEffect(() => {
     if (run.phase !== "result" || !ungradedOnce.current) return;
     ungradedOnce.current = false;
-    if (run.ungraded === "inputOff") dispatch({ type: "setUngraded", why: null });
+    // An input that would not come on, or the one Take for the eyes: graded again after it.
+    if (run.ungraded === "inputOff" || run.ungraded === "eyes") dispatch({ type: "setUngraded", why: null });
   }, [run.phase, run.ungraded]);
 
   // On from anywhere (Settings, the wizard, a late answer): nothing failed any more.
@@ -1830,12 +2018,13 @@ export function useSessionRun(input: SessionRunInput) {
       return;
     }
     if (big.kind === "endTake") return endTake();
+    if (big.kind === "endLoop") return endLoop();
     const event = eventForBigAction(big, Date.now());
     if (!event) return;
     if (event.type === "again") autoStart.current = true;
     dispatch(event);
     if (event.type === "close") setView(origin.current);
-  }, [big, listening, playTake, endTake, setView, startInputNow, listen, decide]);
+  }, [big, listening, playTake, endTake, endLoop, setView, startInputNow, listen, decide]);
 
   /**
    * "Just play this one": graded, but the input will not come on, so this Take
@@ -1916,6 +2105,11 @@ export function useSessionRun(input: SessionRunInput) {
    */
   const nudgeTimed = useCallback((sign: 1 | -1) => {
     const state = runRef.current;
+    // A loop's own tempo, a step at a time: the Take's stays where it was.
+    if (state.phase === "looping" && state.loop) {
+      dispatch({ type: "setBpm", bpm: timedBpm(state.loop.bpm, sign * TIMED_BPM_STEP), now: Date.now() });
+      return true;
+    }
     const timedNow =
       state.phase === "timedReady" ||
       (state.phase === "timed" && (state.paused || state.ended || timedTempoLive(currentStep(state))));
@@ -1980,6 +2174,16 @@ export function useSessionRun(input: SessionRunInput) {
     autoStart.current = true;
     dispatch({ type: "again", now: Date.now() });
   }, []);
+
+  /**
+   * P1's "Up to N BPM": the rung the pass would have gone to, one tap away
+   * while the big button holds the tempo once more. Straight into the count-in.
+   */
+  const upTo = useCallback(() => {
+    if (big.kind !== "again" || !big.onceMore) return;
+    autoStart.current = true;
+    dispatch({ type: "again", bpm: big.onceMore.up, now: Date.now() });
+  }, [big]);
 
   /**
    * The recap's ways on (UX audit SES-10). "5 more minutes" plans five more
@@ -2211,6 +2415,12 @@ export function useSessionRun(input: SessionRunInput) {
     live,
     lights,
     big,
+    /** "Loop the first bar", when it is offered here, and whether it leads the tonal row. */
+    loop,
+    /** The loop running now, built to play: the neck and the tab draw it. */
+    loopPlan,
+    /** "This one is for your eyes" is offered on this result. */
+    eyes,
     working: run.phase === "listening",
     /** Watch with Sound: one pass heard before it is played (card #28). */
     listen,
@@ -2269,6 +2479,11 @@ export function useSessionRun(input: SessionRunInput) {
       testOut,
       answerFair,
       answerHeardIt,
+      startLoop,
+      endLoop,
+      upTo,
+      eyesTake,
+      answerUpstroke,
       cycleView,
       jump,
       previous,

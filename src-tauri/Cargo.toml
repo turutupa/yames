@@ -90,6 +90,11 @@ rusqlite = { version = "0.37", features = ["bundled"] }
 # under tauri itself, so this adds NO package to Cargo.lock and NOTHING to
 # the installer. MIT OR Apache-2.0.
 base64 = "0.22"
+# SHA-256, for the coach model's checksum check (`models.rs` `sha256_file`):
+# a downloaded brain is hashed against the pinned published hash before it
+# is adopted. Already in the graph under wry (and tauri-codegen), so this
+# adds NO package to Cargo.lock. MIT OR Apache-2.0.
+sha2 = "0.10"
 # ONNX Runtime, for the note verifier (`src/detect/model.rs`): Basic Pitch run
 # over a Take's audio after it closes, never on an audio thread. Optional and
 # behind `detect-ort`, so a plain `cargo build` or `cargo test` neither
@@ -227,8 +232,10 @@ tauri-plugin-yames-mobile = { path = "plugins/yames-mobile" }
 # path) and the total-RAM query behind the Studio tier gate (§3: Studio is
 # only offered at >= 16 GB). Both crates are already in the dependency
 # graph transitively, so declaring them adds no new downloads.
+# `Win32_Storage_FileSystem` is `GetDiskFreeSpaceExW`, the free-space figure
+# behind the coach model download's low-storage check (`models.rs`).
 [target.'cfg(windows)'.dependencies]
-windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_System_Threading", "Win32_System_SystemInformation"] }
+windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_System_Threading", "Win32_System_SystemInformation", "Win32_Storage_FileSystem"] }
 # W21 — the camera's permission prompt on Windows.
 #
 # WebView2 asks for a camera the way a browser does: its own bar, per origin,

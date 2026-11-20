@@ -29,7 +29,10 @@ import {
   barLengthTicks,
   subdivisionOf,
 } from "./format";
-import type { Exercise, ExerciseVariant, Harmony, PathDoc, PathLevel, PathNote, Step } from "./format";
+import { CUE_TRIGGERS } from "./format";
+import type { Cue, CueTrigger, Exercise, ExerciseVariant, Harmony, PathDoc, PathLevel, PathNote, Step } from "./format";
+import { cueWordIssues, possibleTriggers } from "./cues";
+import { cueTexts } from "./variantText";
 import {
   crossingsIn,
   gradedGapLimit,
@@ -152,6 +155,17 @@ export const RULES = {
   "chain.harmony": "a chain whose bars aren't checked against their chords",
   "chain.continuous": "a chain that stops at a bar line",
   "chain.joint": "a link that jumps instead of connecting",
+  "cue.shape": "a cue that is not well formed",
+  "cue.length": "a cue longer than the Take's order can be (48 characters)",
+  "cue.order": "a cue that is not an order: a question, a description, a grade or praise",
+  "cue.honesty": "a cue that claims something the app cannot hear",
+  "cue.passMark": "a cue that calls the threshold \"the bar\"",
+  "cue.tuning": "a cue about tuning, which the app cannot check",
+  "cue.more": "a cue's how-to line that the played variant does not have",
+  "cue.trigger": "a cue for something no Take of the Exercise can measure",
+  "cue.general": "more than one general cue",
+  "cue.specific": "a cue that names a fret, string or note the notes do not have",
+  "cue.firstVariant": "the first variant carries cues of its own: its cues are the Exercise's",
 } as const;
 
 export type RuleId = keyof typeof RULES;
@@ -739,6 +753,9 @@ function checkPathText(doc: PathDoc, report: Report) {
   }
   for (const ex of [...doc.steps.flatMap((s) => s.exercises), ...(doc.levels ?? []).flatMap((l) => l.warmups)]) {
     texts.push([`${ex.id}.purpose`, ex.purpose], [`${ex.id}.coachLine`, ex.coachLine]);
+    (Array.isArray(ex.cues) ? ex.cues : []).forEach((c, i) => {
+      if (typeof c?.say === "string") texts.push([`${ex.id}.cue ${i + 1}`, c.say]);
+    });
     // A variant's own words are read by the player like the Exercise's.
     for (const v of ex.variation?.variants ?? []) {
       if (typeof v.purpose === "string") texts.push([`${ex.id}#${v.id}.purpose`, v.purpose]);
@@ -1086,6 +1103,79 @@ function checkChain(ex: Exercise, report: Report) {
 }
 
 /** Check a pack. Pass anything: the first thing it does is read the shape. */
+/**
+ * Cues (`format.ts` `Cue`): well formed; words a machine can hold to the
+ * rules (`cues.ts` `cueWordIssues`); `more` a line of the how-to the played
+ * variant shows; a trigger some variant can produce; at most one general cue;
+ * nothing named that the notes do not have. Words are read once per text
+ * (the Exercise's cues, and a variant's own), the rest per variant.
+ */
+function checkCues(ex: Exercise, concrete: readonly Exercise[], report: Report) {
+  const variants = ex.variation?.variants ?? [];
+  if (variants[0]?.cues !== undefined) {
+    report("cue.firstVariant", `${ex.id}#${variants[0].id}`, "the first variant is the Exercise's own notes, so the Exercise's cues are its cues");
+  }
+  const possible = new Set<CueTrigger>();
+  for (const one of concrete) for (const t of possibleTriggers(one)) possible.add(t);
+  const lists: Array<{ where: string; cues: unknown; one: Exercise }> = [{ where: ex.id, cues: ex.cues, one: concrete[0] ?? ex }];
+  variants.forEach((v, i) => {
+    if (i > 0 && v.cues !== undefined) lists.push({ where: `${ex.id}#${v.id}`, cues: v.cues, one: concrete[i] });
+  });
+  for (const { where, cues, one } of lists) {
+    if (cues === undefined) continue;
+    if (!Array.isArray(cues)) {
+      report("cue.shape", `${where}.cues`, "cues are a list");
+      continue;
+    }
+    let generals = 0;
+    cues.forEach((raw: unknown, i) => {
+      const at = `${where}.cue ${i + 1}`;
+      if (!isObject(raw) || typeof raw.say !== "string" || !CUE_TRIGGERS.includes(raw.when as CueTrigger)) {
+        report("cue.shape", at, `a cue is { when: one of ${CUE_TRIGGERS.join(", ")}, say: text, more?, general? }`);
+        return;
+      }
+      if (raw.more !== undefined && !(Number.isInteger(raw.more) && (raw.more as number) >= 0)) {
+        report("cue.shape", at, "more is the index of a how-to line");
+        return;
+      }
+      if (raw.general !== undefined && raw.general !== true) {
+        report("cue.shape", at, "general is true or left out");
+        return;
+      }
+      const cue = raw as Cue;
+      if (cue.general) generals += 1;
+      for (const issue of cueWordIssues(cue.say)) report(issue.rule, at, `${issue.message}: "${cue.say}"`);
+      if (!cue.general && !possible.has(cue.when)) {
+        report("cue.trigger", at, `"${cue.when}" cannot happen here: no Take of this Exercise measures it or has it in a bar`);
+      }
+      if (cue.more !== undefined && cue.more >= one.howTo.length) {
+        report("cue.more", at, `more is ${cue.more}, and the how-to has ${one.howTo.length} lines`);
+      }
+    });
+    if (generals > 1) report("cue.general", `${where}.cues`, `${generals} cues are marked general; the one said with nothing measured is one`);
+  }
+  // Per variant, as played: `more` in its how-to, and nothing named that its notes do not have.
+  concrete.forEach((one, i) => {
+    if (i === 0 || !Array.isArray(one.cues)) return;
+    const own = variants[i]?.cues !== undefined;
+    one.cues.forEach((cue, n) => {
+      if (!isObject(cue)) return;
+      if (!own && cue.more !== undefined && cue.more >= one.howTo.length) {
+        report("cue.more", `${one.id}.cue ${n + 1}`, `more is ${cue.more}, and this variant's how-to has ${one.howTo.length} lines`);
+      }
+    });
+  });
+  concrete.forEach((one) => {
+    if (!Array.isArray(one.cues)) return;
+    const said = cueTexts(one, one, one.cues.map((c) => (typeof c?.say === "string" ? c.say : "")));
+    said.forEach((s, n) => {
+      if (!s.ok && one.cues![n]?.say) {
+        report("cue.specific", `${one.id}.cue ${n + 1}`, `names something these notes do not have (${s.reason}): "${one.cues![n].say}"`);
+      }
+    });
+  });
+}
+
 export function validatePath(doc: unknown): Issue[] {
   const issues: Issue[] = [];
   const report: Report = (rule, where, message, severity = "error") => {
@@ -1110,6 +1200,7 @@ export function validatePath(doc: unknown): Issue[] {
       checkOne(doc, level, one, report, issues);
       if (ex.chain) checkChain(one, report);
     }
+    if (ex.cues !== undefined || ex.variation?.variants.some((v) => v.cues !== undefined)) checkCues(ex, concrete, report);
   };
   for (const step of doc.steps) {
     for (const ex of step.exercises) {

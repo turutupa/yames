@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import type { DownloadProgress, ModelStatus } from "../../ipc.desktop";
 import { brainTierLabelKey } from "../../coach/brainTiers";
+import { gbDoneText, gbText, tierOnDisk } from "../../coach/brainDisk";
+import { useCoachModel } from "../../hooks/useCoachModel";
 import { formatBytes } from "./formatBytes";
 
 /**
@@ -36,7 +38,7 @@ export function CoachDownloadConfirmDialog({
   onUseInstalled: (tier: "standard" | "full") => void;
   onStartDownload: (tier: "standard" | "full") => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // Escape closes this dialog and nothing else. MainWindow's unified hotkey
   // dispatcher listens on `document` in the bubble phase and maps Escape in
@@ -60,6 +62,8 @@ export function CoachDownloadConfirmDialog({
   // `full` on the wire, "Studio" on screen — the mapping lives in
   // `brainTiers.ts` so every display site agrees.
   const tierLabel = (tier: "standard" | "full") => t(brainTierLabelKey(tier));
+  // Room on disk, the same reading the selector's rows make.
+  const model = useCoachModel();
   return (
     <div className="download-confirm-overlay" onClick={onCancel}>
       <div
@@ -72,7 +76,12 @@ export function CoachDownloadConfirmDialog({
         <h3 className="download-confirm-title">{t("coachDownload.title")}</h3>
         <div className="download-confirm-models">
           {(["standard", "full"] as const).map((tier) => {
-            const isInstalled = modelStatus?.brainReady && modelStatus.brainTier === tier;
+            // Each tier on its own: both may be on disk side by side.
+            const isInstalled = tierOnDisk(modelStatus, tier) !== null;
+            const space = model.rows.find((r) => r.tier === tier)?.space ?? null;
+            const spaceWords = space
+              ? { need: gbText(space.needBytes, i18n.language), free: gbText(space.freeBytes, i18n.language) }
+              : undefined;
             return (
               <div
                 key={tier}
@@ -91,9 +100,20 @@ export function CoachDownloadConfirmDialog({
                     ? t("coachDownload.stdDesc")
                     : t("coachDownload.studioDesc")}
                 </p>
+                {!isInstalled && space?.state === "tight" && (
+                  <p className="download-confirm-model-detail" role="note">
+                    {t("coachModel.download.spaceWarn", spaceWords)}
+                  </p>
+                )}
                 {tier === "full" && !studioAvailable ? (
                   <button className="download-confirm-go" disabled>
                     {t("coachDownload.studioNeedsRam")}
+                  </button>
+                ) : !isInstalled && space?.state === "short" ? (
+                  // The same rule as the selector's row: a download that
+                  // does not fit is not offered.
+                  <button className="download-confirm-go" disabled>
+                    {t("coachModel.state.noRoom", spaceWords)}
                   </button>
                 ) : isInstalled ? (
                   <button
@@ -119,25 +139,43 @@ export function CoachDownloadConfirmDialog({
   );
 }
 
-/** Sticky bottom bar showing live model download progress with a cancel button. */
+/**
+ * Sticky bottom bar showing live model download progress, with the same two
+ * actions and the same words as the model selector's row: Pause (Rust keeps
+ * the bytes; the selector's Resume carries on) and Cancel (stops and removes
+ * them). It used to call its pause "Cancel".
+ */
 export function DownloadProgressBar({
   downloadProgress,
   downloadingTier,
+  onPause,
   onCancel,
 }: {
   downloadProgress: DownloadProgress | null;
   downloadingTier: "standard" | "full" | null;
-  onCancel: () => void;
+  onPause: () => void;
+  /** Absent when there is nothing of the model left to cancel (the voices step). */
+  onCancel?: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const pct = downloadProgress ? Math.round(downloadProgress.fraction * 100) : 0;
   const tierLabel = downloadingTier === null ? "" : t(brainTierLabelKey(downloadingTier));
   const modelName = downloadProgress?.component ?? "model";
+  // "1.2 of 2.5 GB", the selector's own words and units.
+  const p = downloadProgress;
   const bytesInfo =
-    downloadProgress && downloadProgress.downloadedBytes > 0
-      ? ` · ${formatBytes(downloadProgress.downloadedBytes)}${downloadProgress.totalBytes > 0 ? ` / ${formatBytes(downloadProgress.totalBytes)}` : ""}`
-      : "";
-  const label = t("coachDownload.progress", { tier: tierLabel, model: modelName, bytes: bytesInfo, pct });
+    p && p.downloadedBytes > 0 && p.totalBytes > 0
+      ? ` · ${t("coachModel.download.bytes", {
+          done: gbDoneText(p.downloadedBytes, p.totalBytes, i18n.language),
+          total: gbText(p.totalBytes, i18n.language),
+        })}`
+      : p && p.downloadedBytes > 0
+        ? ` · ${formatBytes(p.downloadedBytes)}`
+        : "";
+  const label =
+    downloadProgress?.stage === "checking"
+      ? `${tierLabel} — ${t("coachModel.download.checking", { percent: `${pct}%` })}`
+      : t("coachDownload.progress", { tier: tierLabel, model: modelName, bytes: bytesInfo, pct });
 
   return (
     <div className="global-download-bar">
@@ -149,9 +187,26 @@ export function DownloadProgressBar({
       >
         {label}
       </span>
-      <button className="global-download-bar-cancel" onClick={onCancel} title={t("coachDownload.cancelHint")}>
-        {t("coachDownload.cancel")}
-      </button>
+      <span className="global-download-bar-actions">
+        <button
+          className="global-download-bar-cancel"
+          onClick={onPause}
+          title={t("coachModel.download.pauseHint")}
+          data-testid="download-bar-pause"
+        >
+          {t("coachModel.download.pause")}
+        </button>
+        {onCancel && (
+          <button
+            className="global-download-bar-cancel"
+            onClick={onCancel}
+            title={t("coachDownload.cancelHint")}
+            data-testid="download-bar-cancel"
+          >
+            {t("coachModel.download.cancel")}
+          </button>
+        )}
+      </span>
     </div>
   );
 }

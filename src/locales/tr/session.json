@@ -268,6 +268,7 @@
       "cleanFirst": "Temiz tempo: {{bpm}} BPM.",
       "cleanMoved": "Temiz tempo: {{from}} → {{bpm}} BPM.",
       "moveOn": "Devam et",
+      "upTo": "Yukarı: {{bpm}} BPM",
       "fairAsk": "Bu not adil miydi?",
       "fairYes": "Evet",
       "fairNo": "Hayır",
@@ -697,6 +698,7 @@
     },
     "note": {
       "passedAt": "Geçti: {{bpm}}.",
+      "nextTime": "Bir dahaki sefere:",
       "finding": {
         "ceiling": "{{holds}} BPM'de tutuyor, {{breaks}} BPM'de kayıyor."
       },
@@ -733,7 +735,8 @@
         "closer": "Bu tempoda %{{from}} seviyesinden %{{to}} seviyesine çıktı."
       },
       "repeat": {
-        "leaveIt": "Aynı yer üç kez. Bugünlük bırak; genelde yarın daha iyi olur."
+        "leaveIt": "Aynı yer üç kez. Bugünlük bırak; genelde yarın daha iyi olur.",
+        "onceMore": "{{up}} öncesinde {{bpm}} tempoda bir kez daha, çünkü o ölçü geçen denemede kaydı."
       },
       "fact": {
         "heard": "{{expected}} notanın {{heard}} tanesi duyuldu",
@@ -792,6 +795,36 @@
         "backParked": "{{title}} {{count}} gün dinleniyor, sonra yeniden geliyor.",
         "backParked_other": "{{title}} {{count}} gün dinleniyor, sonra yeniden geliyor."
       }
+    },
+    "loop": {
+      "kick": "Döngü · değerlendirilmedi",
+      "title": {
+        "bar": "Melodinin {{bar}}. ölçüsü, döngüde",
+        "bars": "Melodinin {{from}}. ve {{to}}. ölçüleri, döngüde"
+      },
+      "button": {
+        "first": "İlk ölçüyü döngüye al",
+        "bar": "{{bar}}. ölçüyü döngüye al",
+        "bars": "{{from}}. ve {{to}}. ölçüyü döngüye al"
+      },
+      "stop": "Döngüyü durdur",
+      "how": "Sen durdurana kadar daire çizer. Burada hiçbir şey değerlendirilmez ya da saklanmaz; noktalar erken ve geç olduğunu gösterir.",
+      "howUngraded": "Sen durdurana kadar daire çizer. Burada hiçbir şey değerlendirilmez ya da saklanmaz.",
+      "after": {
+        "lastBar": "Döngüde melodinin {{bar}}. ölçüsü son {{count}} geçişte temiz çıktı.",
+        "lastBars": "Döngüde melodinin {{from}}. ve {{to}}. ölçüleri son {{count}} geçişte temiz çıktı.",
+        "ofBar": "Döngüde melodinin {{bar}}. ölçüsü {{count}} geçişin {{landed}} tanesinde temiz çıktı.",
+        "ofBars": "Döngüde melodinin {{from}}. ve {{to}}. ölçüleri {{count}} geçişin {{landed}} tanesinde temiz çıktı."
+      }
+    },
+    "eyes": {
+      "offer": "Bu sefer gözlerin için",
+      "watch": "Bu sefer penana bak.",
+      "result": "Bu deneme gözlerin içindi",
+      "body": "Değerlendirilmedi, dinlenmedi. Penanın ne yaptığını gördün.",
+      "question": "Herhangi bir vuruş yukarı vuruşla mı başladı?",
+      "yes": "Evet",
+      "no": "Hayır"
     }
   }
 }

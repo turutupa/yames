@@ -42,7 +42,8 @@
       "notDownloaded": "non scaricato",
       "notOnThisDevice": "non su questo dispositivo",
       "downloading": "download {{percent}}",
-      "downloadingNoPercent": "download"
+      "downloadingNoPercent": "download",
+      "checking": "verifica del download"
     },
     "state": {
       "ready": "Caricato e pronto",
@@ -53,8 +54,10 @@
       "failedWhy": "Caricamento non riuscito ({{reason}}). Sceglilo per riprovare",
       "notDownloaded": "Non scaricato",
       "update": "Una versione precedente. Aggiornala in Impostazioni → Coach",
-      "otherOnDisk": "Non scaricato. Un secondo modello su questo computer richiede un aggiornamento successivo; per ora, cambia in Impostazioni → Coach",
+      "unplaced": "Non scaricato. Un modello su questo computer non è stato riconosciuto; gestiscilo in Impostazioni → Coach",
+      "noRoom": "Non scaricato. Servono {{need}}, {{free}} liberi",
       "downloading": "Download in corso",
+      "checking": "Verifica del download",
       "lowMemory": "Questo computer ha meno memoria di quella che vuole questo modello; potrebbe essere lento o non caricarsi"
     },
     "why": {
@@ -64,18 +67,29 @@
     "download": {
       "start": "Scarica",
       "pause": "Pausa",
+      "pauseHint": "Ferma per ora e tieni ciò che è stato scaricato; Riprendi continua da lì",
+      "cancel": "Annulla",
+      "cancelHint": "Ferma e rimuovi ciò che è stato scaricato finora",
       "resume": "Riprendi",
       "retry": "Riprova",
       "anyway": "Scarica comunque",
       "notNow": "Non ora",
       "running": "Download in corso… {{percent}}",
       "runningNoPercent": "Download in corso…",
+      "runningBytes": "Download in corso… {{done}} di {{total}}",
+      "bytes": "{{done}} di {{total}}",
+      "checking": "Verifica del download con il suo checksum pubblicato… {{percent}}",
       "voices": "Recupero delle voci del coach…",
       "paused": "In pausa al {{percent}}. Riprendi continua da lì.",
+      "pausedBytes": "In pausa a {{done}} di {{total}}. Riprendi continua da lì.",
       "pausedNoPercent": "In pausa. Riprendi continua da dove si era fermato.",
+      "cancelled": "Annullato. Ciò che era stato scaricato è stato rimosso.",
       "failed": "Il download si è interrotto: {{reason}}",
       "failedNoReason": "Il download si è interrotto.",
-      "meteredWarn": "Sembra che tu stia usando i dati mobili. {{size}} sono tanti da scaricare così."
+      "checksumFailed": "Il file scaricato non corrispondeva al suo checksum pubblicato, quindi è stato rimosso. Nulla di ciò che avevi già è stato modificato.",
+      "noRoom": "Spazio insufficiente: servono {{need}} e ne sono liberi {{free}}. Libera un po' di spazio, poi riprova.",
+      "meteredWarn": "Sembra che tu stia usando i dati mobili. {{size}} sono tanti da scaricare così.",
+      "spaceWarn": "Sono liberi solo {{free}} e ne servono {{need}}. Ci sta, con poco margine."
     }
   },
   "coachDetail": {

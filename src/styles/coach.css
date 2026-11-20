@@ -129,6 +129,25 @@
   color: var(--coach-ink);
 }
 
+/* "Next time: {cue}" under a finding, and its source: the Path's suggestion,
+   set as the note's ink so it reads as the thing to do, never as a verdict. */
+.coach-note-cue {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.coach-note-cue b {
+  font-weight: 600;
+}
+/* The how-to line a cue points at, when "What should I try?" opens the How. */
+.coach-note-how [data-pointed],
+.session-how [data-pointed],
+[data-how-line][data-pointed] {
+  color: var(--coach-ink, var(--l-ink, var(--text-primary)));
+  box-shadow: inset 2px 0 0 currentColor;
+  padding-left: 8px;
+}
+
 /* The sentence that opens Ask about itself (DESIGN 5.1): still the words, set
    as they were; a dotted underline on hover and a ring on focus say it can be
    pressed. */
@@ -441,6 +460,13 @@
   .coach-note [data-extra],
   .coach-note[data-kind="ready"] > .coach-block-source {
     display: none;
+  }
+  /* The cue stays (it is what to do next) and its source sits beside it. */
+  .coach-note-cue {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 10px;
   }
   .coach-note {
     gap: 6px;

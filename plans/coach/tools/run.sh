@@ -46,7 +46,36 @@ if [ ! -e /tmp/yames-dgx-full ]; then
   dow="$(TZ=America/Los_Angeles date +%u)"
   hour="$(TZ=America/Los_Angeles date +%-H)"
   if [ "$dow" -le 5 ] && [ "$hour" -ge 7 ] && [ "$hour" -lt 20 ]; then
-    exec nice -n 19 ionice -c3 "$@"
+    # The owner works on this machine in these hours (OWNER-UPDATES,
+    # 2026-11-20 11:45): four cargo jobs, two Playwright workers, four vitest
+    # workers, and never two heavy commands at once across all agents. The
+    # lock below is that last rule: a second command waits here for the first
+    # to end, so run heavy commands in the background and wait for the log.
+    export CARGO_BUILD_JOBS=4
+    joined=" $* "
+    case "$joined" in
+      *" playwright test "*)
+        case "$joined" in
+          *" --workers"*) ;;
+          *) set -- "$@" --workers=2 ;;
+        esac
+        ;;
+      *" vitest "*)
+        case "$joined" in
+          *" --maxWorkers"*) ;;
+          *) set -- "$@" --maxWorkers=4 ;;
+        esac
+        ;;
+      " npm run test "*)
+        case "$joined" in
+          *" --maxWorkers"*) ;;
+          *" -- "*) set -- "$@" --maxWorkers=4 ;;
+          *) set -- "$@" -- --maxWorkers=4 ;;
+        esac
+        ;;
+    esac
+    echo "run.sh: daytime limits (nice, one heavy command at a time): $*" >&2
+    exec flock /tmp/coach-heavy.lock nice -n 19 ionice -c3 "$@"
   fi
 fi
 

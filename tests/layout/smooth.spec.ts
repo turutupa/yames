@@ -114,7 +114,9 @@ for (const build of ["desktop", "phone"] as const) {
  * the commits the engine's reports cause must not reach it; nor may the
  * coach's note, which has no business on a running screen at all.
  */
-for (const scene of ["coach-take-order", "coach-take-order-runway"]) {
+// c4c: and when the order is the cue the last Take chose, the same. Only the runway's scene: under the
+// render counter the neck's second Take is over before the scene returns (see progress/c4c.md).
+for (const scene of ["coach-take-order", "coach-take-order-runway", "coach-next-order-runway"]) {
   test(`${scene}: the coach's line and note never commit during a running Take`, async ({ page }) => {
     test.slow();
     await installPerf(page, { countRenders: true });
@@ -128,6 +130,26 @@ for (const scene of ["coach-take-order", "coach-take-order-runway"]) {
     expect(s.renders.CoachLine ?? 0, `CoachLine rendered in ${s.commits} commits`).toBe(0);
   });
 }
+
+/*
+ * The loop (coach leg c1c; DESIGN 4.2, "Loop a bar"): a per-beat screen like
+ * a Take, held to the same rules, and the coach's note (which it does not
+ * show) never commits under it.
+ */
+test("coach-loop: a loop running holds a Take's rules, and the coach's note never commits", async ({ page }) => {
+  test.slow();
+  await installPerf(page, { countRenders: true });
+  await openShot(page, "coach-loop", WIDE);
+  await expect(page.locator('[data-testid="session-loop-screen"]')).toHaveAttribute("data-phase", "looping", { timeout: 30_000 });
+  const s = await bestWindow(page);
+  expect(s.longTasks, `long tasks in the best of three windows (longest ${s.longTaskMaxMs} ms)`).toBe(0);
+  expect(s.commits, "the loop is running: React commits as the engine reports").toBeGreaterThan(0);
+  expect(s.commits / (s.ms / 1000), `${s.commits} commits in ${s.ms} ms`).toBeLessThan(24);
+  const strip = s.renders.OverviewStrip ?? 0;
+  expect(strip, `OverviewStrip rendered ${strip} times in ${s.commits} commits`).toBeLessThanOrEqual(Math.ceil(s.commits * 0.75));
+  expect(s.renders.CoachNote ?? 0, `CoachNote rendered in ${s.commits} commits`).toBe(0);
+  expect(s.renders.CoachLine ?? 0, `CoachLine rendered in ${s.commits} commits`).toBe(0);
+});
 
 test("the lane keeps the display's beat: a frame for every frame, or exactly every other", async ({ page }) => {
   test.slow();

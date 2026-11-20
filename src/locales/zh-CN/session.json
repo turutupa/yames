@@ -268,6 +268,7 @@
       "cleanFirst": "干净速度：{{bpm}} BPM。",
       "cleanMoved": "干净速度：从 {{from}} 到 {{bpm}} BPM。",
       "moveOn": "继续",
+      "upTo": "升到 {{bpm}} BPM",
       "fairAsk": "这个评分公平吗？",
       "fairYes": "是",
       "fairNo": "否",
@@ -697,6 +698,7 @@
     },
     "note": {
       "passedAt": "在 {{bpm}} 通过。",
+      "nextTime": "下次：",
       "finding": {
         "ceiling": "{{holds}} BPM 能稳住，{{breaks}} 开始乱。"
       },
@@ -733,7 +735,8 @@
         "closer": "这个速度下从 {{from}}% 升到了 {{to}}%。"
       },
       "repeat": {
-        "leaveIt": "同一个地方第三次了。今天先放下，明天通常会更好。"
+        "leaveIt": "同一个地方第三次了。今天先放下，明天通常会更好。",
+        "onceMore": "上一遍那一小节乱了，所以升到 {{up}} 之前，先用 {{bpm}} 再来一遍。"
       },
       "fact": {
         "heard": "{{expected}} 个音中听到 {{heard}} 个",
@@ -792,6 +795,36 @@
         "backParked": "{{title}} 先歇 {{count}} 天，再重新回来。",
         "backParked_other": "{{title}} 先歇 {{count}} 天，再重新回来。"
       }
+    },
+    "loop": {
+      "kick": "循环 · 不评分",
+      "title": {
+        "bar": "曲子第 {{bar}} 小节，反复循环",
+        "bars": "曲子第 {{from}}、{{to}} 小节，反复循环"
+      },
+      "button": {
+        "first": "循环第一小节",
+        "bar": "循环第 {{bar}} 小节",
+        "bars": "循环第 {{from}}、{{to}} 小节"
+      },
+      "stop": "停止循环",
+      "how": "一直循环，直到你停下。这里不评分，也不保存；圆点显示偏早和偏晚。",
+      "howUngraded": "一直循环，直到你停下。这里不评分，也不保存。",
+      "after": {
+        "lastBar": "循环中，曲子第 {{bar}} 小节最近 {{count}} 轮都到位了。",
+        "lastBars": "循环中，曲子第 {{from}}、{{to}} 小节最近 {{count}} 轮都到位了。",
+        "ofBar": "循环中，曲子第 {{bar}} 小节在 {{count}} 轮中有 {{landed}} 轮到位。",
+        "ofBars": "循环中，曲子第 {{from}}、{{to}} 小节在 {{count}} 轮中有 {{landed}} 轮到位。"
+      }
+    },
+    "eyes": {
+      "offer": "这一遍用眼睛看",
+      "watch": "这次，看着你的拨片。",
+      "result": "刚才这一遍是用眼睛看的",
+      "body": "没有评分，我也没有听。你已经看到拨片做了什么。",
+      "question": "有没有哪一拍是上拨开始的？",
+      "yes": "有",
+      "no": "没有"
     }
   }
 }

@@ -20,7 +20,8 @@
  * variant labels and author-facing notes (`orderRationale`,
  * `difficultyException`, `feedbackNote`, review history) stay as they are.
  */
-import type { Exercise, Level, PathDoc, Step, Variation } from "./format";
+import { CUE_MAX_CHARS } from "./format";
+import type { Cue, Exercise, Level, PathDoc, Step, Variation } from "./format";
 
 /** Bump if the key scheme changes in a way old overlays cannot follow. */
 export const STRINGS_VERSION = 1;
@@ -62,6 +63,14 @@ function list(lookup: Lookup, key: string, items: readonly string[] | undefined)
   return items?.map((text, i) => lookup(`${key}.${i}`, text));
 }
 
+/** Cues by position: `<key>.cue.<n>` is the `say` of the n-th; the rest of a cue is data. */
+function cueText(lookup: Lookup, key: string, cues: readonly Cue[]): Cue[] {
+  return cues.map((cue, i) => ({ ...cue, say: lookup(`${key}.cue.${i}`, cue.say) }));
+}
+
+/** The keys that hold a cue: the Take's order, held to `CUE_MAX_CHARS` in every language. */
+export const CUE_KEY = /\.cue\.\d+$/;
+
 function exerciseText(ex: Exercise, lookup: Lookup): Exercise {
   const k = `exercise.${ex.id}`;
   const out: Exercise = {
@@ -70,6 +79,7 @@ function exerciseText(ex: Exercise, lookup: Lookup): Exercise {
     purpose: lookup(`${k}.purpose`, ex.purpose),
     howTo: list(lookup, `${k}.howTo`, ex.howTo) ?? [],
     coachLine: lookup(`${k}.coachLine`, ex.coachLine),
+    ...(ex.cues ? { cues: cueText(lookup, k, ex.cues) } : {}),
     detection: { ...ex.detection, notes: list(lookup, `${k}.detection`, ex.detection.notes) ?? [] },
   };
   if (ex.selfCheck) out.selfCheck = list(lookup, `${k}.selfCheck`, ex.selfCheck);
@@ -87,15 +97,17 @@ function exerciseText(ex: Exercise, lookup: Lookup): Exercise {
  * the whole variation when none has any.
  */
 function variationText(variation: Variation, exerciseKey: string, lookup: Lookup): Variation {
-  if (!variation.variants.some((v) => v.purpose !== undefined || v.howTo !== undefined)) return variation;
+  const worded = (v: Variation["variants"][number]) => v.purpose !== undefined || v.howTo !== undefined || v.cues !== undefined;
+  if (!variation.variants.some(worded)) return variation;
   return {
     ...variation,
     variants: variation.variants.map((variant) => {
-      if (variant.purpose === undefined && variant.howTo === undefined) return variant;
+      if (!worded(variant)) return variant;
       const k = `${exerciseKey}.variant.${variant.id}`;
       const out = { ...variant };
       if (variant.purpose !== undefined) out.purpose = lookup(`${k}.purpose`, variant.purpose);
       if (variant.howTo !== undefined) out.howTo = list(lookup, `${k}.howTo`, variant.howTo);
+      if (variant.cues !== undefined) out.cues = cueText(lookup, k, variant.cues);
       return out;
     }),
   };
@@ -211,13 +223,18 @@ export type OverlayReport = {
   placeholders: string[];
   /** Numbers that differ from the English. A warning: tempos, frets, bars. */
   numbers: string[];
+  /** A cue longer than `CUE_MAX_CHARS` in this language: too long to be the Take's order. An error. */
+  long: string[];
   /** Translated and current. */
   translated: number;
 };
 
+/** Characters as a reader counts them: code points, so a CJK cue is not counted twice. */
+export const charCount = (text: string): number => [...text].length;
+
 /** What `paths -- check` says about one overlay against its English. */
 export function checkOverlay(english: PackStrings, overlay: StringsOverlay): OverlayReport {
-  const report: OverlayReport = { stale: [], missing: [], outdated: [], placeholders: [], numbers: [], translated: 0 };
+  const report: OverlayReport = { stale: [], missing: [], outdated: [], placeholders: [], numbers: [], long: [], translated: 0 };
   for (const key of Object.keys(overlay.strings)) {
     if (!(key in english)) report.stale.push(key);
   }
@@ -230,6 +247,8 @@ export function checkOverlay(english: PackStrings, overlay: StringsOverlay): Ove
       report.missing.push(key);
       continue;
     }
+    // Checked whether current or not: an outdated translation is still in the file.
+    if (CUE_KEY.test(key) && charCount(text) > CUE_MAX_CHARS) report.long.push(key);
     if (overlay.from[key] !== sourceHash(source)) {
       report.outdated.push(key);
       continue;
