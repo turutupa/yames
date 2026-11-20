@@ -888,6 +888,13 @@
       "question": "Qualche colpo è partito in risalita?",
       "yes": "Sì",
       "no": "No"
+    },
+    "keys": {
+      "noTakeYet": "Ancora nessuna take, quindi non ho niente su cui basarmi.",
+      "ungradedLast": "La tua ultima take non è stata valutata, quindi non ci ho misurato niente.",
+      "lastBelow": "Ultima take: sotto l'asticella a {{bpm}} BPM.",
+      "whatNext": "{{action}}. {{why}}",
+      "whatNextAlone": "{{action}}."
     }
   }
 }

@@ -867,6 +867,13 @@
       "question": "업스트로크로 시작한 박이 있었나요?",
       "yes": "네",
       "no": "아니요"
+    },
+    "keys": {
+      "noTakeYet": "아직 테이크가 없어서 말씀드릴 게 없어요.",
+      "ungradedLast": "지난 테이크는 채점하지 않아서 아무것도 측정하지 못했어요.",
+      "lastBelow": "지난 테이크: {{bpm}} BPM에서 통과 기준에 못 미쳤어요.",
+      "whatNext": "{{action}}. {{why}}",
+      "whatNextAlone": "{{action}}."
     }
   }
 }

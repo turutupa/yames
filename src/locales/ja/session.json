@@ -867,6 +867,13 @@
       "question": "アップストロークで始まった拍はありましたか？",
       "yes": "はい",
       "no": "いいえ"
+    },
+    "keys": {
+      "noTakeYet": "まだテイクがないので、お伝えできることがありません。",
+      "ungradedLast": "直前のテイクは採点なしだったので、何も測っていません。",
+      "lastBelow": "直前のテイク：{{bpm}} BPM で合格ラインに届きませんでした。",
+      "whatNext": "{{action}}。{{why}}",
+      "whatNextAlone": "{{action}}。"
     }
   }
 }

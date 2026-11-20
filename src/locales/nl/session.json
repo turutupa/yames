@@ -867,6 +867,13 @@
       "question": "Begon er een tel met een opslag?",
       "yes": "Ja",
       "no": "Nee"
+    },
+    "keys": {
+      "noTakeYet": "Nog geen take, dus ik heb niets om op af te gaan.",
+      "ungradedLast": "Je laatste take is niet beoordeeld, dus ik heb er niets in gemeten.",
+      "lastBelow": "Laatste take: onder de lat bij {{bpm}} BPM.",
+      "whatNext": "{{action}}. {{why}}",
+      "whatNextAlone": "{{action}}."
     }
   }
 }

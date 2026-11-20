@@ -888,6 +888,13 @@
       "question": "Alguma batida começou com a palhetada para cima?",
       "yes": "Sim",
       "no": "Não"
+    },
+    "keys": {
+      "noTakeYet": "Ainda não houve nenhuma tomada, então não tenho em que me basear.",
+      "ungradedLast": "Sua última tomada não teve avaliação, então não medi nada nela.",
+      "lastBelow": "Última tomada: abaixo da meta em {{bpm}} BPM.",
+      "whatNext": "{{action}}. {{why}}",
+      "whatNextAlone": "{{action}}."
     }
   }
 }

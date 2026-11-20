@@ -48,6 +48,35 @@ describe("the scope a shared key's row says", () => {
     expect(scopeNote("bpm-up", DEFAULTS)).toEqual({ kind: "notIn", views: ["session"] });
   });
 
+  it("the coach's keys: unbound by default, a Session's only, and say so when a key is shared", () => {
+    const coach = ["ask-explain-last", "ask-what-next", "accept-suggestion"];
+    for (const id of coach) {
+      expect(DEFAULTS[id], id).toBe("");
+      const hk = HOTKEYS.find((h) => h.id === id)!;
+      expect(hk.group).toBe("session");
+      for (const view of HOTKEY_VIEWS) expect(activeIn(hk, view), `${id} on ${view}`).toBe(view === "session");
+    }
+    // Bound to Q by a player: the Session's Q, nothing anywhere else.
+    const bound = { ...DEFAULTS, "ask-what-next": "Q" };
+    expect(actionForCombo(bound, "Q", "session")).toBe("ask-what-next");
+    expect(actionForCombo(bound, "Q", "beat")).toBeUndefined();
+    expect(actionForCombo(bound, "Q", "today")).toBeUndefined();
+    // On a key the Session already uses elsewhere, a Session's key wins there and the row says "in a Session".
+    const shared = { ...DEFAULTS, "accept-suggestion": "G" };
+    expect(actionForCombo(shared, "G", "session")).toBe("accept-suggestion");
+    expect(actionForCombo(shared, "G", "jam")).toBe("jam-next-groove");
+    expect(scopeNote("accept-suggestion", shared)).toEqual({ kind: "in", views: ["session"] });
+    expect(scopeNote("jam-next-groove", shared)).toEqual({ kind: "in", views: ["jam"] });
+    // An app-wide key shared with one of them stands aside in a Session only.
+    const onPlay = { ...DEFAULTS, "ask-explain-last": DEFAULTS.play };
+    expect(scopeNote("play", onPlay)).toEqual({ kind: "notIn", views: ["session"] });
+    expect(sameViewClashes(onPlay)).toContainEqual({
+      view: "session",
+      key: DEFAULTS.play,
+      actions: ["play", "ask-explain-last"],
+    });
+  });
+
   it("says nothing for a key that is the action's alone", () => {
     expect(scopeNote("toggle-coach", DEFAULTS)).toBeNull();
     expect(scopeNote("play", DEFAULTS)).toBeNull();

@@ -271,7 +271,10 @@
         "session-pause": "Pauze / verder",
         "session-restart": "Take opnieuw starten",
         "session-prev": "Terug naar het vorige blok",
-        "session-watch": "Volgorde bekijken"
+        "session-watch": "Volgorde bekijken",
+        "ask-explain-last": "De laatste take uitleggen",
+        "ask-what-next": "Wat nu",
+        "accept-suggestion": "De suggestie nemen"
       },
       "descs": {
         "play": "Start of stop de metronoom",
@@ -331,7 +334,10 @@
         "session-pause": "Tijdens een warming-up of een getimed blok: pauzeren, of doorgaan",
         "session-restart": "Tijdens een warming-up of een getimed blok: vanaf het begin. Na een take: dezelfde take nog eens",
         "session-prev": "In een sessie: terug naar het blok hiervoor",
-        "session-watch": "Voor een take, op de hals: de noten op volgorde in het tempo laten oplichten, of stoppen. Zonder geluid, zonder beoordeling"
+        "session-watch": "Voor een take, op de hals: de noten op volgorde in het tempo laten oplichten, of stoppen. Zonder geluid, zonder beoordeling",
+        "ask-explain-last": "In een sessie: de coach zegt in één regel wat hij in je laatste take vond",
+        "ask-what-next": "In een sessie: de coach zegt wat de grote knop gaat doen, en waarom",
+        "accept-suggestion": "In een sessie: de suggestie van de coach op het scherm indrukken, als er precies één is"
       },
       "scope": {
         "in": {

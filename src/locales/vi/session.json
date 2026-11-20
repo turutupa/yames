@@ -867,6 +867,13 @@
       "question": "Có phách nào bắt đầu bằng nhát gảy lên không?",
       "yes": "Có",
       "no": "Không"
+    },
+    "keys": {
+      "noTakeYet": "Chưa có lượt nào, nên tôi không có gì để dựa vào.",
+      "ungradedLast": "Lượt cuối của bạn không chấm điểm, nên tôi không đo gì trong đó.",
+      "lastBelow": "Lượt cuối: dưới mức đạt ở {{bpm}} BPM.",
+      "whatNext": "{{action}}. {{why}}",
+      "whatNextAlone": "{{action}}."
     }
   }
 }

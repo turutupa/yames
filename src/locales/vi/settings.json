@@ -271,7 +271,10 @@
         "session-pause": "Tạm dừng / tiếp tục",
         "session-restart": "Thu lại từ đầu",
         "session-prev": "Về khối trước",
-        "session-watch": "Xem thứ tự"
+        "session-watch": "Xem thứ tự",
+        "ask-explain-last": "Giải thích lượt vừa rồi",
+        "ask-what-next": "Tiếp theo là gì",
+        "accept-suggestion": "Nhận gợi ý"
       },
       "descs": {
         "play": "Bắt đầu hoặc dừng máy đếm nhịp",
@@ -331,7 +334,10 @@
         "session-pause": "Khi khởi động hoặc trong khối tính giờ: tạm dừng, hoặc tiếp tục",
         "session-restart": "Khi khởi động hoặc trong khối tính giờ: từ đầu. Sau một lượt: lượt đó thêm lần nữa",
         "session-prev": "Trong buổi tập: quay về khối trước khối này",
-        "session-watch": "Trước một lượt, trên cần đàn: sáng các nốt theo thứ tự đúng tempo, hoặc dừng. Không tiếng, không chấm điểm"
+        "session-watch": "Trước một lượt, trên cần đàn: sáng các nốt theo thứ tự đúng tempo, hoặc dừng. Không tiếng, không chấm điểm",
+        "ask-explain-last": "Trong buổi tập: huấn luyện viên nói trong một dòng điều nó thấy ở lượt vừa rồi",
+        "ask-what-next": "Trong buổi tập: huấn luyện viên nói nút lớn sẽ làm gì và vì sao",
+        "accept-suggestion": "Trong buổi tập: bấm gợi ý của huấn luyện viên trên màn hình, khi chỉ có đúng một"
       },
       "scope": {
         "in": {

@@ -271,7 +271,10 @@
         "session-pause": "Pausar / seguir",
         "session-restart": "Reiniciar la toma",
         "session-prev": "Volver al bloque anterior",
-        "session-watch": "Ver el orden"
+        "session-watch": "Ver el orden",
+        "ask-explain-last": "Explicar la última toma",
+        "ask-what-next": "Qué sigue",
+        "accept-suggestion": "Aceptar la sugerencia"
       },
       "descs": {
         "play": "Inicia o detiene el metrónomo",
@@ -331,7 +334,10 @@
         "session-pause": "En un calentamiento o un bloque cronometrado: pausarlo o seguir",
         "session-restart": "En un calentamiento o un bloque cronometrado: desde el principio. Tras una toma: la misma toma otra vez",
         "session-prev": "En una sesión: volver al bloque anterior",
-        "session-watch": "Antes de una toma, en el mástil: ilumina las notas en orden al tempo, o para. Sin sonido, sin nota"
+        "session-watch": "Antes de una toma, en el mástil: ilumina las notas en orden al tempo, o para. Sin sonido, sin nota",
+        "ask-explain-last": "En una sesión: el coach dice en una línea lo que encontró en tu última toma",
+        "ask-what-next": "En una sesión: el coach dice lo que hará el botón grande, y por qué",
+        "accept-suggestion": "En una sesión: pulsar la sugerencia del coach en pantalla, cuando hay una sola"
       },
       "scope": {
         "in": {

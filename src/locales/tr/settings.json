@@ -271,7 +271,10 @@
         "session-pause": "Duraklat / devam",
         "session-restart": "Kaydı baştan başlat",
         "session-prev": "Önceki bloğa dön",
-        "session-watch": "Sırayı izle"
+        "session-watch": "Sırayı izle",
+        "ask-explain-last": "Son denemeyi açıkla",
+        "ask-what-next": "Sırada ne var",
+        "accept-suggestion": "Öneriyi kabul et"
       },
       "descs": {
         "play": "Metronomu başlat veya durdur",
@@ -331,7 +334,10 @@
         "session-pause": "Isınmada ya da süreli blokta: duraklat ya da devam et",
         "session-restart": "Isınmada ya da süreli blokta: baştan. Bir kayıttan sonra: aynı kayıt yeniden",
         "session-prev": "Oturumda: bundan önceki bloğa dön",
-        "session-watch": "Bir Take'ten önce, sapta: notaları tempoda sırayla yakar ya da durdurur. Ses yok, puan yok"
+        "session-watch": "Bir Take'ten önce, sapta: notaları tempoda sırayla yakar ya da durdurur. Ses yok, puan yok",
+        "ask-explain-last": "Oturumda: koç, son denemende ne bulduğunu tek satırda söyler",
+        "ask-what-next": "Oturumda: koç, büyük düğmenin ne yapacağını ve nedenini söyler",
+        "accept-suggestion": "Oturumda: ekrandaki koç önerisine basar, tam olarak bir tane varsa"
       },
       "scope": {
         "in": {

@@ -124,7 +124,9 @@ describe("a Session, heard by the coach", () => {
     expect(ended).toMatchObject({ type: "timedEnded", stepIndex: 0, at: 61_000 });
     expect(ready).toMatchObject({ type: "stepReady", stepIndex: 1, timed: false, bpm: 80, takes: 0 });
     expect(started).toMatchObject({ type: "takeStarted", stepIndex: 1, takeNumber: 1, at: 64_000 });
-    expect(again).toMatchObject({ type: "stepReady", stepIndex: 1, takes: 1 });
+    expect(again).toMatchObject({ type: "stepReady", stepIndex: 1, takes: 1, straight: true });
+    // The first ready screen of a step is not straight into a count-in.
+    expect("straight" in ready).toBe(false);
 
     const recap = heard[8];
     expect(recap.type === "sessionRecap" && recap.outcomes.map((o) => o.takeNumber)).toEqual([1, 2]);

@@ -1041,6 +1041,15 @@ export function installFallbackCamera(): void {
   (media as { __shotFallback?: true }).__shotFallback = true;
 }
 
+/** What the harness's speech engine was asked to do (`tts_speak`, `tts_stop`). */
+type SpeechEntry = { op: "speak" | "stop" | "play" | "halt"; text: string; at: number };
+/** The lines still "playing", ended by a stop. */
+const speechEnds: Array<() => void> = [];
+function speechLog(): SpeechEntry[] {
+  const w = window as unknown as { __yamesSpeech?: SpeechEntry[] };
+  return (w.__yamesSpeech ??= []);
+}
+
 export function installShotMock(shot: Shot, theme: string): void {
   const w = window as unknown as Record<string, unknown>;
   if (w.__TAURI_INTERNALS__) return;
@@ -1075,6 +1084,12 @@ export function installShotMock(shot: Shot, theme: string): void {
   // Every other scene opens on its own tool, the way a player who chose "open on
   // my last tool" does. Only a scene about the learning side uses the front door.
   if (!shot.session && !shot.firstRun) store.set("openOn", "lastTool");
+  // `?voice=1`: the coach's Voice on (Settings > Coach), for the speech scenes.
+  if (new URLSearchParams(window.location.search).get("voice") === "1") store.set("coachVoiceMode", "voice");
+  // `?coachKeys=1`: the coach's three keys bound, as a player would bind them (J, U, Y are free everywhere).
+  if (new URLSearchParams(window.location.search).get("coachKeys") === "1") {
+    store.set("keyBindings", { "ask-explain-last": "J", "ask-what-next": "U", "accept-suggestion": "Y" });
+  }
   // The first run: nobody has used this app. No instrument, no onboarding
   // stamp, no presets (a saved preset alone counts as an existing player).
   if (shot.firstRun) {
@@ -1554,6 +1569,22 @@ export function installShotMock(shot: Shot, theme: string): void {
     get_system_memory_mb: () => 32768,
     tts_list_voices: () => [],
     tts_voice_diagnostics: () => [],
+    // The coach's voice (leg c1b2b), heard by `?voice=1`: every line asked for
+    // and every stop, in order, on `window.__yamesSpeech` for the layout suite.
+    // A line "plays" for three seconds, or until a stop, as the real engine's does.
+    tts_speak: (a: Record<string, unknown> | undefined) => {
+      speechLog().push({ op: "speak", text: String(a?.text ?? ""), at: performance.now() });
+      return new Promise<null>((resolve) => {
+        const done = () => resolve(null);
+        speechEnds.push(done);
+        setTimeout(done, 3_000);
+      });
+    },
+    tts_stop: () => {
+      speechLog().push({ op: "stop", text: "", at: performance.now() });
+      speechEnds.splice(0).forEach((end) => end());
+      return null;
+    },
     // A bool, not an object — see `get_evaluation_state` in commands.rs. An
     // object here is truthy, and the app drew a live green "Listening" chip
     // over a microphone that was not on.
@@ -2159,6 +2190,8 @@ export function installShotMock(shot: Shot, theme: string): void {
       return null;
     }
     if (cmd === "set_playing" && shot.session) {
+      // In the speech log too, so a spec can see what was said around the sound.
+      speechLog().push({ op: a?.playing === true ? "play" : "halt", text: "", at: performance.now() });
       setPlaying(a?.playing === true);
       return null;
     }

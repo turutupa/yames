@@ -271,7 +271,10 @@
         "session-pause": "Pauza / wznów",
         "session-restart": "Zacznij nagranie od nowa",
         "session-prev": "Wróć do poprzedniego bloku",
-        "session-watch": "Pokaż kolejność"
+        "session-watch": "Pokaż kolejność",
+        "ask-explain-last": "Wyjaśnij ostatnie podejście",
+        "ask-what-next": "Co dalej",
+        "accept-suggestion": "Przyjmij sugestię"
       },
       "descs": {
         "play": "Uruchom lub zatrzymaj metronom",
@@ -331,7 +334,10 @@
         "session-pause": "W rozgrzewce lub bloku na czas: pauza albo dalej",
         "session-restart": "W rozgrzewce lub bloku na czas: od początku. Po podejściu: to samo podejście jeszcze raz",
         "session-prev": "W sesji: wróć do bloku przed tym",
-        "session-watch": "Przed nagraniem, na gryfie: podświetla dźwięki po kolei w tempie albo zatrzymuje. Bez dźwięku, bez oceny"
+        "session-watch": "Przed nagraniem, na gryfie: podświetla dźwięki po kolei w tempie albo zatrzymuje. Bez dźwięku, bez oceny",
+        "ask-explain-last": "W sesji: trener mówi jednym zdaniem, co znalazł w ostatnim podejściu",
+        "ask-what-next": "W sesji: trener mówi, co zrobi duży przycisk i dlaczego",
+        "accept-suggestion": "W sesji: naciśnij sugestię trenera widoczną na ekranie, gdy jest dokładnie jedna"
       },
       "scope": {
         "in": {
