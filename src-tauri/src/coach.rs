@@ -2723,6 +2723,16 @@ mod llm {
             None => None,
         };
 
+        // Sequence 0 is rebuilt for this turn whatever happens, so its
+        // cells are freed first: a long report left there must not crowd
+        // out the prefix's decode below. `resident` stays empty until the
+        // whole prompt is in, so a cancel or a failure below leaves the next
+        // `infer` re-deciding from nothing rather than trusting cells that
+        // were never filled.
+        resident.clear();
+        ctx.clear_kv_cache_seq(Some(0), None, None)
+            .map_err(|e| failed("KV cache reset failed", &e))?;
+
         // The static prefix: decoded into its own sequence unless it is
         // already there. `YAMES_LLM_NO_PREFIX_CACHE=1` turns this off too,
         // so the saving can be measured A/B on one binary.
@@ -2737,21 +2747,10 @@ mod llm {
             prefix.tokens = Some(head.clone());
         }
 
-        // Sequence 0 becomes the prefix plus this turn. `resident` stays
-        // empty until the whole prompt is in, so a cancel or a failure
-        // below leaves the next `infer` re-deciding from nothing rather
-        // than trusting cells that were never filled.
-        resident.clear();
-        let reset = ctx
-            .clear_kv_cache_seq(Some(0), None, None)
-            .map_err(|e| failed("KV cache reset failed", &e))
-            .and_then(|_| {
-                ctx.copy_kv_cache_seq(ASK_PREFIX_SEQ, 0, None, None)
-                    .map_err(|e| failed("KV cache copy failed", &e))
-            });
-        if let Err(e) = reset {
+        // Sequence 0 becomes the prefix plus this turn.
+        if let Err(e) = ctx.copy_kv_cache_seq(ASK_PREFIX_SEQ, 0, None, None) {
             prefix.forget(ctx);
-            return Err(e);
+            return Err(failed("KV cache copy failed", &e));
         }
         decode_chunks(ctx, batch, &tail, head.len(), 0, true, cancel)?;
         resident.extend_from_slice(&head);
