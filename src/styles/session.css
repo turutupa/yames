@@ -876,6 +876,10 @@
   margin-inline-start: 0.4em;
   color: var(--coach-faint);
 }
+.session-step-line {
+  margin-top: 12px;
+  max-width: 64ch;
+}
 .main-window.is-mobile .session-today-line {
   margin: 4px 0 12px;
 }

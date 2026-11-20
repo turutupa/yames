@@ -77,12 +77,12 @@
         "backRungs": "Today starts a rung lower than it would have.",
         "backRungs_other": "Today starts {{count}} rungs lower than it would have.",
         "ungraded": {
-          "today": "{{count}} minute of Takes earlier today, the last one {{exercise}} at {{bpm}} BPM.",
-          "today_other": "{{count}} minutes of Takes earlier today, the last one {{exercise}} at {{bpm}} BPM.",
-          "yesterday": "{{count}} minute of Takes yesterday, the last one {{exercise}} at {{bpm}} BPM.",
-          "yesterday_other": "{{count}} minutes of Takes yesterday, the last one {{exercise}} at {{bpm}} BPM.",
-          "lastSession": "{{count}} minute of Takes in your last Session, the last one {{exercise}} at {{bpm}} BPM.",
-          "lastSession_other": "{{count}} minutes of Takes in your last Session, the last one {{exercise}} at {{bpm}} BPM."
+          "today": "{{count}} minute of Takes earlier today, ending with {{exercise}} at {{bpm}} BPM.",
+          "today_other": "{{count}} minutes of Takes earlier today, ending with {{exercise}} at {{bpm}} BPM.",
+          "yesterday": "{{count}} minute of Takes yesterday, ending with {{exercise}} at {{bpm}} BPM.",
+          "yesterday_other": "{{count}} minutes of Takes yesterday, ending with {{exercise}} at {{bpm}} BPM.",
+          "lastSession": "{{count}} minute of Takes in your last Session, ending with {{exercise}} at {{bpm}} BPM.",
+          "lastSession_other": "{{count}} minutes of Takes in your last Session, ending with {{exercise}} at {{bpm}} BPM."
         },
         "samePlace": "Same place today."
       },
