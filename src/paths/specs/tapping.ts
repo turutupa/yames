@@ -11,6 +11,7 @@ import type { ExerciseSpec, VariantParams } from "../spec";
 import type { PassBar } from "../format";
 import { ladder, repeat, shiftFrets } from "../templates";
 import { CELL_IN_E_MINOR, SECOND_SOLO, TWO_TAPS_THROUGH_CHORDS } from "./tapping-more";
+import { SCALE_TAP_AGAIN, SIXTEENTHS_IN_E_MINOR, STRINGS_THROUGH_CHORDS } from "./tapping-encore";
 
 const even = (min: number, overBars = 4): PassBar => ({ metric: "timingEvenness", min, overBars });
 const heard = (min: number, overBars = 4): PassBar => ({ metric: "notesHeard", min, overBars });
@@ -416,6 +417,7 @@ export default definePath({
         },
       ],
     },
+    SIXTEENTHS_IN_E_MINOR,
     {
       id: "two-strings",
       title: "Across the strings",
@@ -485,6 +487,7 @@ export default definePath({
         },
       ],
     },
+    STRINGS_THROUGH_CHORDS,
     {
       id: "scale-under-the-tap",
       title: "A scale under the tap",
@@ -562,6 +565,7 @@ export default definePath({
         },
       ],
     },
+    SCALE_TAP_AGAIN,
     {
       id: "sextuplet-taps",
       title: "Sextuplets",
@@ -815,14 +819,14 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: sixteenths, strings and scales",
-      summary: "Four-note loops and two taps a beat, the cell across three strings, and a scale shape under the tap.",
+      summary: "Four-note loops and two taps a beat, on one chord, through three chords in A minor and through Em, C, D and B; the cell across three strings, then on two strings through four chords; and a scale shape under the tap, in A minor and in E minor.",
       reachLevel: "intermediate",
       startHereIf: [
         "You can play tap, pull, hammer in triplets at 85 BPM with all three notes the same size.",
         "You can move the cell through four chords, such as Am, G, F and E or Em, C, D and B, without stopping.",
         "Your tapping only works on one string, or only in triplets.",
       ],
-      steps: ["sixteenths", "two-strings", "scale-under-the-tap"],
+      steps: ["sixteenths", "sixteenths-in-e-minor", "two-strings", "strings-through-chords", "scale-under-the-tap", "scale-tap-again"],
       warmups: [
         {
           id: "loop-around",

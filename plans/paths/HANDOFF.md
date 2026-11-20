@@ -573,3 +573,170 @@ UI notes for the dev agent (not content, not touched here):
 Scratch: `/tmp/yp4/` (tasks, proofs, reports, the i18n round) and
 `CARGO_TARGET_DIR=/home/dgx-personal/projects/.target-paths4` are deleted at the end of the leg; the
 briefs that matter are in `plans/paths/`.
+
+## Relay leg 2 on `mvp-paths5` (2026-11-19, night PST): stopped at the context cap, half done (finished by leg 3, below)
+
+Worktree `/home/dgx-personal/projects/yames-mvp-paths5`, branch `mvp-paths5`, from `revamp` `6411f3b8`.
+The last commit of this leg is a **WIP commit, not gated**: English content is written, proof-read and
+fixed for everything except Sweep Picking's fix round; translations, fingering pins and the gates are
+not done. Scratch `/tmp/yp5/` is NOT deleted: the next leg needs it. No cargo was run (no target dir).
+
+### What was done
+1. **Second proof of leg 1's nine Steps** (`/tmp/yp5/proof9/*.md`): 0 definite errors in 36 Exercises.
+   Five wording fixes applied (Know the Neck: `g-three-lines` title "One note, three jobs",
+   `g-arpeggios` howTo[3], `e-minor-box-one-twice` nut fingers; Arpeggios `sevenths-in-g.two-five-one`
+   howTo[3] and [4]: a flat third finger would have stopped the G at fret 3). Not applied, for a teacher:
+   an open-E-minor-grip fingering for `e-minor-three-octaves`; the E flat variant of `two-five-one-keys`
+   starts at fret 15 (hard on an acoustic); the E minor boxes carry no `finger` values, like the A minor
+   ones (the `pentatonic()` template prints none).
+2. **Scales and Modes 42 -> 69 Exercises, 12 -> 19 Steps** (Levels 6 / 6 / 7), `scales-encore.ts`
+   (`keys-by-hand`, `minor-second-key`, `chords-from-the-scale`, `harmonic-minor-again`) and
+   `modes-encore.ts` (`box-plus-two`, `same-notes-new-home`, `choosing-again`). Proofs: 2 + 4 errors,
+   all fixed; `orderRationale` extended; old `harmonic-minor.harmonic-shape` coach line no longer names G#
+   (false on its other keys) and `two-homes` coach line ends in a question mark.
+3. **Thin Levels**, each author -> read-only proof -> fix by the author:
+   Alternate Picking Beginner +3 Steps, 11 Exercises (`alternate-picking-more.ts`; 45 -> 56; 3 errors: the
+   Take band is drums and bass, no chords). Triads Beginner +2, 8 (`triads-encore.ts`; 60 -> 68; 0
+   errors). Funk Lines Beginner +2, 8 (`funk-lines-encore.ts`; 38 -> 46; 3 errors). Tapping Intermediate
+   +3, 11 (`tapping-encore.ts`; 38 -> 49; 1 error). Metal Rhythm Advanced +2, 8
+   (`metal-rhythm-encore.ts`; 41 -> 49; 1 error). Sweep Picking Advanced +2, 7
+   (`sweep-picking-more.ts`; 65 -> 72; 0 errors, 18 suggestions, **fix round running**).
+4. **Recheck 1** (`/tmp/yp5/proof/recheck1.md`): the sentences fixers wrote in their own words (Scales,
+   Alternate Picking, Triads, Funk), read by an independent agent: 0 errors in 53, 3 suggestions applied.
+5. Tests tied to Alternate Picking's Step positions fixed (`toScore.test.ts`, `audit.test.ts`,
+   `levels.test.ts`), `keyText.test.ts` (triads count 8; a form may say ", then"), `caveats.ts` (new coach
+   lines that say strokes are the player's; rerun `python3 /tmp/yp5/caveats.py write` after Sweep's fix).
+6. Briefs retargeted to this worktree; `I18N_BRIEF.md` has "Round 19 notes" (two groups per language).
+
+### Helpers still running when this leg stopped (wait on these files)
+- Sweep fixer: `/tmp/yp5/fix/sweep.DONE` (its notes: `/tmp/yp5/fix/sweep.FIXED.md`). It edits
+  `sweep-picking-more.ts` / `sweep-picking.ts` and regenerates `sweep-picking.json`: the WIP commit may
+  hold a half-edited Sweep. When DONE exists: `npm run paths -- gen sweep-picking`, `strings`, `check`.
+- Translators, group a (harmony packs: scales-and-modes, triads, know-the-neck, arpeggios-over-changes;
+  332 strings a language): `/tmp/yp5/i18n/de.a.DONE`, `es.a.DONE`, `fr.a.DONE`; output
+  `/tmp/yp5/i18n/done.<lng>.<pathId>.json`.
+
+### Remaining, in order
+1. Wait for `/tmp/yp5/fix/sweep.DONE`; read `sweep.FIXED.md`; `gen`/`strings`/`check sweep-picking`.
+2. **Recheck 2**: launch a read-only agent on `/tmp/yp5/proof/recheck2.TASK.md` (Tapping, Metal, Sweep
+   fix-round sentences; done-file `/tmp/yp5/proof/recheck2.DONE`, report `recheck2.md`). Apply what it
+   finds, `gen` + `strings` the Path. Then the English of the five technique packs is frozen.
+3. `python3 /tmp/yp5/caveats.py write`; `npx vitest run src/paths/fingering.test.ts -u` and READ the pin
+   diff (seven Paths gain lines; none should change except Sweep/Know the Neck lines whose fingers were
+   edited on purpose).
+4. **Translations, round 19** (brief: last section of `plans/paths/I18N_BRIEF.md`; prompt template with
+   LNG/GRP placeholders: `/tmp/yp5/i18n/PROMPT.txt`; sonnet agents; at most 4 helpers at once tonight).
+   - Group a: `todo.<lng>.a.json` exist for all 14 languages. Still to launch (`/tmp/yp5/i18n/queue`):
+     it, ja, ko, nl, pl, pt-BR, ru, tr, vi, zh-CN, zh-TW.
+   - Group b (alternate-picking, funk-lines, tapping, metal-rhythm, sweep-picking; about 450 strings):
+     after step 2, for each language `npm run paths -- strings todo <lng> --out /tmp/yp5/i18n/todo.<lng>.all.json`
+     and keep only those five path ids in `todo.<lng>.b.json` (script: `/tmp/yp5/i18n/mk_todo_b.py`;
+     it filters each `todo.<lng>.all.json` by path id).
+   - Check each language with `python3 /tmp/yp5/i18n/verify.py <lng> <a|b>`, then
+     `npm run paths -- strings merge <lng> /tmp/yp5/i18n/done.<lng>.<pathId>.json` per file.
+   - If English changes after a todo was written, write a new todo for that path.
+5. Gates (the task's list): `npm run paths -- check` (0/0, curriculum 0, strings complete), `cargo test
+   --test path_exercises` (`CARGO_TARGET_DIR=/home/dgx-personal/projects/.target-paths5`, delete after),
+   `npx tsc --noEmit` (clean at the WIP commit), `npx vitest run` (the early run of this leg failed only on
+   pins, the tests fixed in item 5 above and TabStage), `npm run build`, `npm run test:layout --
+   paths-prereq planner phone-learning chords session-variant-text --workers=2` (lists and Level summaries
+   changed in seven Paths).
+6. Commit (`feat(paths): ...`; split by Path file sets if wanted: `schedules.jsonl` is one line per
+   path/exercise, so an intermediate file can be made by filtering lines), update this section and
+   `NEW_PATHS.md` ("How long each Path is" table and a "fourth pass" table), note #76, delete `/tmp/yp5`.
+
+### Decisions a teacher should look at
+- Scales and Modes: `chords-from-the-scale` is the one new idea (the seven chords taken out of the scale,
+  the bridge to Chords in a Key); `box-plus-two` has no natural-minor phrase over a band (kept to four
+  Exercises so its median stays under `modes-second-key`); A major pentatonic is shown inside the
+  Mixolydian shape, not as "the box three frets lower".
+- Triads `three-chords-tunes.twelve-bars` is a tune of its own (C C G G / F F C C / F G C C), not the
+  blues; the text says so. Its key variants say the form in two lines through a small wrapper in
+  `triads-encore.ts` (`eightInKeys`), not by changing `keyText.ts`.
+- Alternate Picking's new Steps 2 and 3 print no pick strokes (`pick: "free"`: down, down-up fails
+  `pick.alternate`); the text says so. Tunes use an open string plus three frets higher up, because
+  frets 0, 2, 3, 5 fail the reach check.
+- Funk `lines-second-key`: the D minor lines are the A minor lines one string over with a new rhythm (the
+  text now says it). Scratches on rests can count as extra notes: the new Steps say to keep rests empty.
+- Tapping `strings-through-chords` uses Am, F (top string) and C, Em (B string): the same frets one
+  string over spell a chord a fifth away.
+- Metal `verse-and-chorus`: the chorus starts on E5, the verse's chord; nothing in the chords marks it.
+- Sweep (pending its fix round): D minor variant of `four-chords-six` swapped for B minor (fret 18);
+  etude pass bars over 8 bars; second diminished position fingered 3 2 1 4.
+
+### UI notes for the dev agent (not touched)
+- Everything in leg 1's list still stands.
+- A Take band for a guitarist is drums and bass (`takeBand.ts`): text can no longer say "the band plays
+  the chords". If keys are ever added to the Take band, several sentences could say more.
+- `overBars` shorter than the Exercise lets the best stretch pass (Triads twelve bars, Sweep etude were
+  set to the full length): a long form's pass could say which bars it timed.
+- Variant coach lines: a variant carries its own purpose and how-to but reads the Exercise's `coachLine`,
+  so a coach line must not name a note that changes with the key.
+- Still open from leg 1: a native read of "home" in de, fr, ko, pt-BR, nl (Chords in a Key round 18).
+
+## Relay leg 3 on `mvp-paths5` (2026-11-19, late night PST): the fourth pass is DONE and gated
+
+Leg 2's "Remaining" list is finished. The fourth pass (Scales and Modes 42 -> 69 Exercises, six thin
+Levels given Steps: 21 Steps, 80 Exercises in seven Paths) is written, proof-read, rechecked, translated
+in all 14 languages and gated. `/tmp/yp5` is deleted. Nothing is half-done.
+
+### What this leg did
+1. **Sweep's fix round** (leg 2's helper finished): 18 report items applied; the second diminished
+   position stays 4 3 1 4 (the fixer's reasons: the same finger twice across the shift either way, and
+   `neoclassical` teaches the shape as 4 3 1 4), and howTo[3] of `part-one` says so.
+2. **Recheck 2** (independent, read-only: 63 sentences in Tapping, Metal and Sweep): 2 definite errors,
+   3 suggestions, all applied with the proof-reader's words. Metal `verse-and-chorus` howTo[4] now says
+   "the bass stays on E ... Nothing in the bass tells you the chorus has come"; its `why` says "one fret
+   lower than in the earlier single-note riffs near the nut, first finger on fret 2 instead of fret 3";
+   Metal's `orderRationale` names `stop-start`; Sweep `part-two` howTo[2] ("B major has a D# in it ...
+   that half step is the pull home") and Sweep's `orderRationale` ("before the heavy band").
+3. **The band plays no chords in the new text.** Leg 2 fixed this in Alternate Picking and Funk; this
+   leg found it still in Scales and Modes, Tapping and one Funk line and changed 17 sentences in the specs
+   (`scales-encore.ts`, `modes-encore.ts`, `tapping-more.ts`, `tapping-encore.ts`,
+   `funk-lines-encore.ts`): "The band plays A, E, D and A" -> "The chords are A, E, D and A"; "while a
+   band plays the chords built on them" -> "over a band, through the chords built on them"; "the band
+   plays F in the F chord and F# in the D chord" -> "the F chord has F in it and the D chord has F#";
+   Tapping "The band plays the chord you are tapping" -> "The band follows the chord you are tapping"
+   (also in the older `cell-in-e-minor.em-with-the-band`, so the Path says it one way). These rewrites
+   change the subject of a sentence, not a fact about the notes, and were NOT read again by an
+   independent agent.
+   **Pitfall found:** the variant-text describer refuses a sentence with the word "bass" in it
+   (`variantText.ts`, `STRING_KIND`: it reads "bass" as a kind of string), so a string-set variant
+   silently loses the whole how-to line and `check` then reports the translated key as stale. "The bass
+   plays the root ..." cost two Tapping variants their line until it was reworded.
+4. Caveats: nothing missing. Pins: 95 lines added in seven Paths, none changed or removed (read:
+   Sweep's diminished loops are 4 3 1 4 in both positions, `big-meets-small` bars 2 and 4 carry
+   4 3 1 2 1 4 and 1 2 1 4 in all three keys).
+5. **Translations, round 19**: 787 strings a language, 14 languages, two sonnet translators a language
+   (owner decision: translators are sonnet, never the lead's model), each verified by script (exact
+   keys, no "!", nothing empty) and merged. After the merge a scan of all 787 keys in every language:
+   no English digit missing except zh-TW "diminished 7" as 減七 (2 keys), no string left in English.
+   Spot fixes by the lead: pt-BR Alternate Picking wrote the counting syllable 'and' as 'e', the same
+   letter as the sixteenth 'e' ("down on 1 and 'e', up on 'e' and 'a'"); 18 keys, two of them older
+   (`even-eighths`, `even-sixteenths`), now write '&' as the pt-BR Funk pack does. fr Sweep
+   `level.advanced.summary` "groupe costaud" -> "groupe lourd" (the pack's word).
+
+### Gates at the final commit
+`npm run paths -- check`: 16 Paths 0 errors 0 warnings, curriculum 0 errors, strings complete in 14
+languages. `npx tsc --noEmit` clean. `npx vitest run`: 365 files passed, 1 failed (TabStage, the
+worktree-only one), 11325 tests passed. `npm run build` OK. `cargo test --test path_exercises`: 11
+passed (322 s; run on the final fixture: `schedules.jsonl` is byte-identical at the commit, checked by
+hash; `CARGO_TARGET_DIR=/home/dgx-personal/projects/.target-w1`, shared, not deleted). Layout
+`paths-prereq planner phone-learning chords session-variant-text --workers=2`: 247 passed. After the
+gates one French word was merged (item 5): `check` and `npx vitest run src/paths src/session` (42 files,
+3382 tests) were run again and are green.
+
+### Open, for the next leg or a teacher
+- **Older Steps still say the band plays chords** (card #110; a few dozen sentences by a loose grep, about 18 in
+  Blues and Pentatonics: "The band plays A7 for four bars"; `what-a-key-is.one-four-five` in Scales and
+  Modes; `gallop-changes.band-changes` in Metal Rhythm: "The band changes chord on beat 1 of every
+  bar"). Not touched: each is a translated string in 14 languages. One round: fix the English ("the
+  chords are", "the chord changes", "the bass"; never the word "bass" in a sentence a string-set
+  variant reads), then one small translation round.
+- Native reads worth having: it Triads "forma" is both "shape" and "form"; it Funk counts 'and' and 'e'
+  both as 'e' (the pack's older convention; the new Step says "the first 'e'" and "the second 'e'");
+  de Alternate Picking counts „1 e und e“; nl "thuis" and pt-BR "casa" for "home"; ko uses 소지 in
+  Scales and Modes and 새끼손가락 elsewhere for the little finger; zh-TW "第六個音" for "the sixth".
+- Everything under leg 2's "Decisions a teacher should look at" and "UI notes for the dev agent" stands.
+- Nobody has played any of this (#65).
+- Board: #76 and #65 carry notes of this leg; #110 is the follow-up above.

@@ -4,7 +4,7 @@ You are a guitar teacher proof-reading lesson text against the actual notes of g
 READ-ONLY: do not edit any file in the repository, do not run git, npm or any build. Write scratch
 files only under your own scratch directory (given in your task).
 
-Repo: /home/dgx-personal/projects/yames-mvp-paths4 (a guitar practice app). Lesson "packs" are JSON
+Repo: /home/dgx-personal/projects/yames-mvp-paths5 (a guitar practice app). Lesson "packs" are JSON
 files in src/paths/packs/<pathId>.json.
 
 ## Pack format

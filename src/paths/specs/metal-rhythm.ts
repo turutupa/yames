@@ -13,6 +13,7 @@ import type { ExerciseSpec, VariantParams } from "../spec";
 import type { PassBar } from "../format";
 import { ladder, repeat } from "../templates";
 import { A_STRING_CHUG, GALLOP_CHANGES, TWO_PART_RIFF } from "./metal-rhythm-more";
+import { PEDAL_FROM_A, VERSE_AND_CHORUS } from "./metal-rhythm-encore";
 
 const even = (min: number, overBars = 4): PassBar => ({ metric: "timingEvenness", min, overBars });
 const heard = (min: number, overBars = 4): PassBar => ({ metric: "notesHeard", min, overBars });
@@ -142,7 +143,7 @@ export default definePath({
   paceLadders: true,
   variantText: true,
   orderRationale:
-    "The palm mute and the downstroke first, because every later riff is made of them. Power chords next, then the two together, which is already a riff, and then the same chug and chords from the A string, so later riffs can use both low strings. The gallop and its reverse are the same three notes with one stroke left out, so they come before continuous sixteenths, where no stroke is left out and the hand has to alternate. Chord changes under the gallop close that Level, once the picking hand no longer needs watching. Triplets and bursts, pedal riffs that leave the low string, a riff that joins a pedal part to a gallop part, and the long takes come last because they need the stamina the earlier Steps build.",
+    "The palm mute and the downstroke first, because every later riff is made of them. Power chords next, then the two together, which is already a riff, and then the same chug and chords from the A string, so later riffs can use both low strings. The gallop and its reverse are the same three notes with one stroke left out, so they come before continuous sixteenths, where no stroke is left out and the hand has to alternate. Chord changes under the gallop close that Level, once the picking hand no longer needs watching. Triplets and bursts, pedal riffs that leave the low string, pedal riffs from the A string, chugs with silent sixteenths in them, a riff that joins a pedal part to a gallop part, and the long takes come last because they need the stamina the earlier Steps build. The Path ends on a verse and a chorus played over the band as a sixteen-bar form.",
   gradingLimits:
     "The app times each attack and counts the ones it heard. A two-note power chord is one attack: it is timed and counted, and its pitch is not checked. Palm muting and the direction of each stroke are taught here and cannot be heard apart, so they are yours to keep honest. Heavy distortion and compression blur where a note starts; for a graded take, turn the gain down to a crunch, or use the dry signal if your interface has one. Sixteenths above 150 BPM are close to the fastest the app will grade. None of this has been tried on a real guitar yet.",
   steps: [
@@ -718,6 +719,7 @@ export default definePath({
         },
       ],
     },
+    PEDAL_FROM_A,
     {
       id: "stop-start",
       title: "Chugs with holes in them",
@@ -873,6 +875,7 @@ export default definePath({
         },
       ],
     },
+    VERSE_AND_CHORUS,
   ],
   levels: [
     {
@@ -960,7 +963,7 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: speed and stamina",
-      summary: "Triplet chugs, sextuplet bursts and tremolo picking, pedal-tone riffs across strings, stop-start riffs with silent sixteenths, an eight-bar riff in two parts, then a riff over a band and a full minute.",
+      summary: "Triplet chugs, sextuplet bursts and tremolo picking, pedal-tone riffs across strings, first over the open low E string and then over the open A string, stop-start riffs with silent sixteenths, an eight-bar riff in two parts, a riff over a band and a full minute, then a verse and a chorus as a sixteen-bar form with the band.",
       reachLevel: "intermediate",
       startHereIf: [
         "You can play the gallop and the reverse gallop evenly at 100 BPM.",
@@ -968,7 +971,7 @@ export default definePath({
         "You can keep a gallop even through a power chord change every bar at 100 BPM.",
         "Your riffs fall apart when they leave the low string, or your picking arm tires before a song is over.",
       ],
-      steps: ["triplets-and-bursts", "pedal-riffs", "stop-start", "two-part-riff", "riffs-at-length"],
+      steps: ["triplets-and-bursts", "pedal-riffs", "pedal-from-a", "stop-start", "two-part-riff", "riffs-at-length", "verse-and-chorus"],
       warmups: [
         {
           id: "root-sixteenths",

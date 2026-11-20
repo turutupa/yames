@@ -551,20 +551,28 @@ four Sessions to pass, a fifteen-to-twenty-minute Session holds three or four
 of them, six Sessions a week. That comes to about a week for every five
 Exercises. A teacher should correct it once real players have been through.
 
-| Path | Kind of thing | Steps (B / I / A) | Exercises | Intended length |
+| Path | Kind of thing | Steps (B / I / A) | Exercises (B / I / A) | Intended length |
 |---|---|---|---|---|
-| Blues and Pentatonics | A style | 6 / 6 / 6 | 74 | Long: about 14 weeks. Extended on purpose (below). |
-| Sweep Picking | A deep technique | 5 / 9 / 4 | 65 | Long: about 12 weeks. The middle Level is the technique. |
-| Shred | Several techniques joined | 3 / 7 / 5 | 54 | About 10 weeks. |
-| Alternate Picking | A core technique | 3 / 3 / 5 | 45 | About 9 weeks. |
-| Classic Rock | A style | 3 / 4 / 4 | 39 | About 7 weeks. A candidate to grow the way Blues did. |
-| Rhythm Foundations | Fundamentals | 3 / 3 / 3 | 34 | About 6 weeks. |
-| Legato | A technique | 3 / 3 / 4 | 34 | About 6 weeks. |
-| Metal Rhythm | A technique in a style | 3 / 3 / 4 | 30 | About 6 weeks. |
-| Know the Neck | Knowledge | 3 / 3 / 3 | 30 | About 6 weeks; should grow (triads on every string set, below). |
-| Scales and Modes | Knowledge | 3 / 3 / 3 | 30 | About 6 weeks. |
-| Funk Lines | A narrow technique | 3 / 3 / 3 | 27 | Short: about 5 weeks. |
-| Tapping | A narrow technique | 3 / 3 / 3 | 27 | Short: about 5 weeks. |
+| Blues and Pentatonics | A style | 6 / 9 / 10 | 100 (25 / 36 / 39) | Long: about 20 weeks. Extended on purpose (below). |
+| Sweep Picking | A deep technique | 5 / 9 / 6 | 72 (17 / 34 / 21) | Long: about 14 weeks. The middle Level is the technique. |
+| Classic Rock | A style | 6 / 8 / 5 | 69 (21 / 29 / 19) | About 14 weeks. |
+| Chords in a Key | Knowledge (the route) | 6 / 7 / 7 | 69 (21 / 23 / 25) | About 14 weeks. |
+| Scales and Modes | Knowledge | 6 / 6 / 7 | 69 (23 / 22 / 24) | About 14 weeks. |
+| Triads | Knowledge (the route) | 6 / 7 / 7 | 68 (21 / 24 / 23) | About 14 weeks. |
+| Alternate Picking | A core technique | 6 / 3 / 5 | 56 (23 / 14 / 19) | About 11 weeks. |
+| First Chords and Strumming | Foundations | 3 / 5 / 6 | 55 (11 / 19 / 25) | About 11 weeks. |
+| Shred | Several techniques joined | 3 / 7 / 5 | 54 (11 / 26 / 17) | About 11 weeks. |
+| Know the Neck | Knowledge | 5 / 5 / 5 | 54 (20 / 17 / 17) | About 11 weeks. |
+| Arpeggios over Changes | Knowledge (the route) | 5 / 6 / 5 | 54 (17 / 21 / 16) | About 11 weeks. |
+| Metal Rhythm | A technique in a style | 4 / 4 / 7 | 49 (13 / 13 / 23) | About 10 weeks. |
+| Tapping | A narrow technique | 4 / 6 / 5 | 49 (13 / 20 / 16) | About 10 weeks. |
+| Funk Lines | A narrow technique | 5 / 4 / 5 | 46 (17 / 13 / 16) | About 9 weeks. |
+| Rhythm Foundations | Fundamentals | 4 / 4 / 4 | 46 (15 / 16 / 15) | About 9 weeks. |
+| Legato | A technique | 3 / 4 / 6 | 46 (11 / 15 / 20) | About 9 weeks. |
+
+The table is as of the fourth pass (2026-11-19, late night; counts read from the packs, weeks by the model
+above). The owner's note of 2026-11-18 had twelve Paths between 27 and 74 Exercises; no Path is under 46
+now and no Level is under 11 Exercises.
 
 **What the pipeline assumes about length: nothing that blocks a long Path.**
 Checked in `validate.ts`, `difficulty.ts`, `pace.ts` and the planner:
@@ -655,6 +663,32 @@ Key and Arpeggios over Changes use it: 38 variants whose how-to is generated
 from their own notes by `src/paths/specs/keyText.ts`. The Take screen needs a
 UI change to show it (it reads the base Exercise); the review pages show it.
 Every other varied Exercise still has one text for all its variants.
+
+### The fourth pass: Scales and Modes deepened, six thin Levels given Steps (2026-11-19, late night)
+
+Seven Paths, 21 new Steps, 80 Exercises, nothing new for the hand except where a row says so. Each
+Step was written by an authoring agent, read by a read-only proof-reader against the pack's notes, fixed
+by its author, and the sentences a fixer wrote in its own words were read once more by an independent
+agent (rechecks 1 and 2) before translation (round 19, all 14 languages).
+
+| Path | New Steps (Level) | Now |
+|---|---|---|
+| Scales and Modes | `keys-by-hand` (B): A major and F major by name, and notes one, five, four under a band. `minor-second-key` (B): the relative minor of G and of F, a tune in E minor. `chords-from-the-scale` (I): the seven chords of a key taken out of its scale (the one new idea, the bridge to Chords in a Key). `harmonic-minor-again` (I): E harmonic minor, D# over B7. `box-plus-two` (A): the pentatonic box plus two notes is a mode. `same-notes-new-home` (A): A Dorian, D Mixolydian and G major as one scale with three homes. `choosing-again` (A): one note follows the chord | 19 Steps, 69 Exercises (was 12 and 42) |
+| Alternate Picking | Beginner: `other-strings` (the even eighths on the D, A and B strings), `mixed-rhythms` (an eighth and two sixteenths on one beat), `one-string-tunes` (two eight-bar tunes in E minor, one with a band) | 14 Steps, 56 Exercises |
+| Triads | Beginner: `one-three-five-again` (one, three, five counted in F and in G), `three-chords-tunes` (C, F and G as whole tunes: eight bars, twelve bars, other keys) | 20 Steps, 68 Exercises |
+| Funk Lines | Beginner: `holes-mixed` (the hole figures in one bar, and a new one, 'One, a'), `lines-second-key` (lines in D minor, and one in A minor made of the figures) | 14 Steps, 46 Exercises |
+| Tapping | Intermediate: `sixteenths-in-e-minor` (the four-note loop through Em, C, D and B), `strings-through-chords` (string and chord change in one line), `scale-tap-again` (the scale under the tap in E minor) | 15 Steps, 49 Exercises |
+| Metal Rhythm | Advanced: `pedal-from-a` (pedal riffs against the open A string), `verse-and-chorus` (a verse and a chorus riff, then sixteen bars with a band; the Path ends here) | 15 Steps, 49 Exercises |
+| Sweep Picking | Advanced: `six-string-changes` (whole six-string shapes through chord changes), `advanced-etude` (a composed eight-bar piece in E minor, in two halves and then with a band) | 20 Steps, 72 Exercises |
+
+**The band is drums and bass.** A guitarist's Take band has no chord instrument (`takeBand.ts`,
+`GUITAR_BAND`). None of this pass's text says the band plays a chord: it says "the chords are ...", "the
+chord is ...", "the band follows the chord you are tapping" or "the bass stays on E". Older Steps still
+say it (a few dozen sentences by a loose count, about 18 of them in Blues and Pentatonics: "The band plays
+A7 for four bars"; also `what-a-key-is.one-four-five` in Scales and Modes and `gallop-changes.band-changes`
+in Metal Rhythm); they were not touched in this pass and are listed as a follow-up in `HANDOFF.md`.
+
+Decisions a teacher should look at are in `HANDOFF.md`, "Relay leg 2", and "Relay leg 3".
 
 ## Proof-reading (2026-11-18)
 

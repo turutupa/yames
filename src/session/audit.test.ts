@@ -180,7 +180,7 @@ describe("TODAY-2: Skip this, and N from a Step", () => {
   it("the next Exercise after one on a Step is the next on that Step, then the next Step's first", () => {
     expect(followingExercise([ALT], ALT.id, "even-eighths.open-string")?.exercise.id).toBe("even-eighths.four-fingers");
     const lastOfStep1 = ALT.steps[0].exercises.filter((e) => e.grading === "graded").at(-1)!.id;
-    expect(followingExercise([ALT], ALT.id, lastOfStep1)?.step.id).toBe("even-sixteenths");
+    expect(followingExercise([ALT], ALT.id, lastOfStep1)?.step.id).toBe(ALT.steps[1].id);
     const lastOfPath = ALT.steps.at(-1)!.exercises.filter((e) => e.grading === "graded").at(-1)!.id;
     expect(followingExercise([ALT], ALT.id, lastOfPath)).toBeNull();
   });

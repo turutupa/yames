@@ -23,7 +23,7 @@
   },
   "orderRationale": "The constant sixteenth-note swing of the picking hand first, with accents, because every funk part is that swing with some strokes left out. Then leaving strokes out, one figure at a time, then whole lines over a band. Stabs come after lines because two strings are harder to hit short than one, and the vamp then moves to a second pair of chords while it is fresh. Octaves follow: the same idea across three strings with one of them muted. Displaced patterns come next, on single notes and then on stabs and octaves, then the Dorian sixth, and then long grooves: four bars, a minute, and last an eight-bar form with a change of part.",
   "gradingLimits": "The app times the notes it hears against where they are written, counts them, and checks single notes for pitch after the take. Two-note stabs and octaves are one attack each: timed and counted, never pitch-checked. The muted scratch strokes that funk players put between the notes are written as rests here. If the app hears one it counts as an extra note, so the bar on extras is loose, and how good your scratches sound is for your ear. Whether your notes were short enough is not measured either. None of this has been tried on a real guitar yet.",
-  "estimatedMinutes": 226,
+  "estimatedMinutes": 273,
   "steps": [
     {
       "id": "the-engine",
@@ -743,8 +743,512 @@
       "difficultyException": "Fewer notes a bar than the Step before, on purpose: the demand is keeping the swing through a missing stroke, which a note-rate metric does not count."
     },
     {
-      "id": "first-lines",
+      "id": "holes-mixed",
       "order": 3,
+      "title": "The figures mixed",
+      "goal": "Play the three one-hole figures in one bar, the mixed bar with the note changing inside each beat, a figure with two strokes left out, and a two-bar rhythm on one note, with the hand's swing unbroken.",
+      "why": "The Step before kept to one figure for a whole bar. A part changes figure from beat to beat, and the picking hand must not notice: it swings down, up, down, up, and the only thing that changes is which stroke misses the string. Each figure was learned by itself. Here they meet in one bar, then the fretting hand starts to move under the swing, and at the end the figures make a rhythm two bars long.",
+      "howTo": [
+        "The hand swings in sixteenths the whole time: down on the beat and the 'and', up on the 'e' and the 'a'. On a rest the hand passes over the string without touching it. A muted scratch is the sound players put there, but the app may count it as an extra note, so keep the rests empty while you are going for a pass.",
+        "The figures keep the names they had in the Step before. 'One, and-a' leaves out the 'e'. 'One-e, a' leaves out the 'and'. 'E-and-a' leaves out the beat itself.",
+        "Every note is on the D string: A at fret 7 under the third finger, G at fret 5 under the first. Stop each short note by relaxing the fretting finger."
+      ],
+      "payoff": "A two-bar rhythm on one note that already sounds like a guitar part.",
+      "prerequisites": ["holes"],
+      "difficulty": 3.63,
+      "exercises": [
+        {
+          "id": "holes-mixed.three-in-a-bar",
+          "title": "Three figures in a bar",
+          "purpose": "One bar with a different figure on each of its first three beats: 'One, and-a', then 'One-e, a', then 'E-and-a'. Beat 4 is 'One, and-a' again, on G.",
+          "howTo": [
+            "Count '1, and a, 2 e (and) a, (3) e and a, 4, and a'. The hand misses the string on the 'e' of beat 1, on the 'and' of beat 2, on beat 3 itself and on the 'e' of beat 4.",
+            "Beats 1, 2 and 3 are A at fret 7 of the D string. Beat 4 is G at fret 5, as in the Step before, so you can hear where the bar ends.",
+            "Beat 3 is the one that trips you up. The upstroke on the 'a' of beat 2 sounds, and the downstroke straight after it, on beat 3, plays the air."
+          ],
+          "coachLine": "Twelve notes a bar, each timed against where it is written. The two pitches are checked after the take.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 1,
+          "loops": true,
+          "position": {
+            "fret": 5,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":4,"fret":7,"midi":57,"tick":0,"dur":480,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":480,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":720,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":960,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":1200,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":1680,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":2160,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":2400,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":2640,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":2880,"dur":480,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":3360,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":3600,"dur":240,"tech":[]}
+          ],
+          "rests": [
+            {"tick":1440,"dur":240},
+            {"tick":1920,"dur":240}
+          ],
+          "tempo": {
+            "rungs": [
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":75,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":110,"grading":"graded"},
+              {"bpm":120,"grading":"graded"}
+            ],
+            "passAtBpm": 85
+          },
+          "passBars": [
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 6,
+              "overBars": 4
+            },
+            {
+              "metric": "noteIdentity",
+              "min": 0.85,
+              "overBars": 4
+            }
+          ],
+          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo", "noteIdentity"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["fastPicking"],
+            "notes": [
+              "At this speed a real rig's input delay can push notes out of their matching window, which reads as late or missed. Evenness is the number to trust here, and only once the delay is calibrated."
+            ]
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 5,
+          "tab": "/16 /8 4:7 /16 4:7 4:7 4:7 4:7 r 4:7 r 4:7 4:7 4:7 /8 4:5 /16 4:5 4:5",
+          "subdivision": "sixteenths",
+          "computed": {
+            "noteCount": 12,
+            "minGapMsAtTop": 125,
+            "handShifts": 0,
+            "maxPlayableBpm": 400,
+            "difficulty": 4.25
+          },
+          "harmony": {
+            "kind": "scale",
+            "root": "A",
+            "scale": "minorPentatonic",
+            "spelled": ["A", "C", "D", "E", "G"],
+            "cover": false
+          },
+          "selfCheck": ["Did the picking hand keep swinging in sixteenths through the rests?"]
+        },
+        {
+          "id": "holes-mixed.two-notes",
+          "title": "The mixed bar with the note moving",
+          "purpose": "The rhythm of 'Three figures in a bar' with the fretting hand moving: the 'a' of every beat is G, and every other note is A.",
+          "howTo": [
+            "The count is the same: '1, and a, 2 e (and) a, (3) e and a, 4, and a'. Every 'a' is an upstroke, and here every one of them is G at fret 5.",
+            "The first finger can stay touching the D string at fret 5 for the whole bar, and presses only for each G. The third finger presses at fret 7 for each A and comes off the string for each G. To stop a note before a hole, relax both fingers: a first finger left pressed turns the end of an A into a G.",
+            "The picking hand must not follow the fretting hand. If the swing hesitates where the note changes, go down a rung."
+          ],
+          "coachLine": "Twelve notes a bar: eight A and four G. Each one is timed against where it is written, and the pitches are checked after the take.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 1,
+          "loops": true,
+          "position": {
+            "fret": 5,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":4,"fret":7,"midi":57,"tick":0,"dur":480,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":480,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":720,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":960,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":1200,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":1680,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":2160,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":2400,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":2640,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":2880,"dur":480,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":3360,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":3600,"dur":240,"tech":[]}
+          ],
+          "rests": [
+            {"tick":1440,"dur":240},
+            {"tick":1920,"dur":240}
+          ],
+          "tempo": {
+            "rungs": [
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":75,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":110,"grading":"graded"},
+              {"bpm":120,"grading":"graded"}
+            ],
+            "passAtBpm": 85
+          },
+          "passBars": [
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 6,
+              "overBars": 4
+            },
+            {
+              "metric": "noteIdentity",
+              "min": 0.85,
+              "overBars": 4
+            }
+          ],
+          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo", "noteIdentity"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["fastPicking"],
+            "notes": [
+              "At this speed a real rig's input delay can push notes out of their matching window, which reads as late or missed. Evenness is the number to trust here, and only once the delay is calibrated."
+            ]
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 5,
+          "tab": "/16 /8 4:7 /16 4:7 4:5 4:7 4:7 r 4:5 r 4:7 4:7 4:5 /8 4:7 /16 4:7 4:5",
+          "subdivision": "sixteenths",
+          "computed": {
+            "noteCount": 12,
+            "minGapMsAtTop": 125,
+            "handShifts": 0,
+            "maxPlayableBpm": 400,
+            "difficulty": 4.25
+          },
+          "harmony": {
+            "kind": "scale",
+            "root": "A",
+            "scale": "minorPentatonic",
+            "spelled": ["A", "C", "D", "E", "G"],
+            "cover": false
+          },
+          "selfCheck": ["Did the picking hand keep swinging in sixteenths through the rests?"]
+        },
+        {
+          "id": "holes-mixed.one-a",
+          "title": "One, a",
+          "purpose": "Two strokes left out of every beat, the 'e' and the 'and'. Only the beat and the 'a' sound.",
+          "howTo": [
+            "Count '1 (e and) a'. Down, miss, miss, up: the hand passes over the string twice between the two notes.",
+            "The 'a' and the beat after it are neighbours: an upstroke and a downstroke one sixteenth apart, then a gap. Keep the gap its full length.",
+            "Three beats on A at fret 7, the last beat on G at fret 5."
+          ],
+          "coachLine": "Eight notes a bar. A gap cut short shows as an early 'a': each note is timed against where it is written.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 1,
+          "loops": true,
+          "position": {
+            "fret": 5,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":4,"fret":7,"midi":57,"tick":0,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":720,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":960,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":1680,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":1920,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":2640,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":2880,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":3600,"dur":240,"tech":[]}
+          ],
+          "rests": [
+            {"tick":240,"dur":240},
+            {"tick":480,"dur":240},
+            {"tick":1200,"dur":240},
+            {"tick":1440,"dur":240},
+            {"tick":2160,"dur":240},
+            {"tick":2400,"dur":240},
+            {"tick":3120,"dur":240},
+            {"tick":3360,"dur":240}
+          ],
+          "tempo": {
+            "rungs": [
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":75,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":110,"grading":"graded"},
+              {"bpm":120,"grading":"graded"}
+            ],
+            "passAtBpm": 85
+          },
+          "passBars": [
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 6,
+              "overBars": 4
+            },
+            {
+              "metric": "noteIdentity",
+              "min": 0.85,
+              "overBars": 4
+            }
+          ],
+          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo", "noteIdentity"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["fastPicking"],
+            "notes": [
+              "At this speed a real rig's input delay can push notes out of their matching window, which reads as late or missed. Evenness is the number to trust here, and only once the delay is calibrated."
+            ]
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 5,
+          "tab": "/16 4:7 r r 4:7 4:7 r r 4:7 4:7 r r 4:7 4:5 r r 4:5",
+          "computed": {
+            "noteCount": 8,
+            "minGapMsAtTop": 125,
+            "handShifts": 0,
+            "maxPlayableBpm": 400,
+            "difficulty": 2.83
+          },
+          "harmony": {
+            "kind": "scale",
+            "root": "A",
+            "scale": "minorPentatonic",
+            "spelled": ["A", "C", "D", "E", "G"],
+            "cover": false
+          },
+          "selfCheck": ["Did the picking hand keep swinging in sixteenths through the rests?"]
+        },
+        {
+          "id": "holes-mixed.one-note-part",
+          "title": "A part on one note",
+          "purpose": "Two bars on the A at fret 7 of the D string, made of all four figures, a silent beat and one single note: a rhythm with a shape of its own, on a single note.",
+          "howTo": [
+            "Bar 1: 'One, and-a' on beat 1, 'One-e, a' on beat 2, 'One, a' on beat 3, and beat 4 is silent.",
+            "Bar 2: 'One, and-a' on beat 1, 'E-and-a' on beat 2, 'One, a' on beat 3, and one short note on beat 4.",
+            "Count it out loud at the first rung: '1, and a, 2 e (and) a, 3 (e and) a, (4)', then '1, and a, (2) e and a, 3 (e and) a, 4'.",
+            "The hand swings through the silent beat as it does through the notes: four strokes that miss the string."
+          ],
+          "coachLine": "Seventeen notes in the two bars, all on one pitch. Each one is timed against where it is written.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 2,
+          "loops": true,
+          "position": {
+            "fret": 5,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":4,"fret":7,"midi":57,"tick":0,"dur":480,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":480,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":720,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":960,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":1200,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":1680,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":1920,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":2640,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":3840,"dur":480,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":4320,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":4560,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":5040,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":5280,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":5520,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":5760,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":6480,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":6720,"dur":240,"tech":[]}
+          ],
+          "rests": [
+            {"tick":1440,"dur":240},
+            {"tick":2160,"dur":240},
+            {"tick":2400,"dur":240},
+            {"tick":2880,"dur":240},
+            {"tick":3120,"dur":240},
+            {"tick":3360,"dur":240},
+            {"tick":3600,"dur":240},
+            {"tick":4800,"dur":240},
+            {"tick":6000,"dur":240},
+            {"tick":6240,"dur":240},
+            {"tick":6960,"dur":240},
+            {"tick":7200,"dur":240},
+            {"tick":7440,"dur":240}
+          ],
+          "tempo": {
+            "rungs": [
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":75,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":110,"grading":"graded"},
+              {"bpm":120,"grading":"graded"}
+            ],
+            "passAtBpm": 85
+          },
+          "passBars": [
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 6,
+              "overBars": 4
+            },
+            {
+              "metric": "noteIdentity",
+              "min": 0.85,
+              "overBars": 4
+            }
+          ],
+          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo", "noteIdentity"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["fastPicking"],
+            "notes": [
+              "At this speed a real rig's input delay can push notes out of their matching window, which reads as late or missed. Evenness is the number to trust here, and only once the delay is calibrated."
+            ]
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 6,
+          "tab": "/16 /8 4:7 /16 4:7 4:7 4:7 4:7 r 4:7 4:7 r r 4:7 r r r r | /16 /8 4:7 /16 4:7 4:7 r 4:7 4:7 4:7 4:7 r r 4:7 4:7 r r r",
+          "subdivision": "sixteenths",
+          "computed": {
+            "noteCount": 17,
+            "minGapMsAtTop": 125,
+            "handShifts": 0,
+            "maxPlayableBpm": 400,
+            "difficulty": 3.01
+          },
+          "harmony": {
+            "kind": "scale",
+            "root": "A",
+            "scale": "minorPentatonic",
+            "spelled": ["A", "C", "D", "E", "G"],
+            "cover": false
+          },
+          "selfCheck": ["Did the picking hand keep swinging in sixteenths through the rests?"]
+        }
+      ],
+      "difficultyException": "Two of these Exercises leave more strokes out of the bar than the one-hole figures before them, so the note count falls. The demand is changing figure from beat to beat and moving the fretting hand under an unbroken swing, which a note-rate metric does not count."
+    },
+    {
+      "id": "first-lines",
+      "order": 4,
       "title": "Lines with the band",
       "goal": "Play two-bar single-note funk lines in A minor pentatonic over a band, with short notes and real silence between them.",
       "why": "A funk line is a handful of short notes placed around the drums. Most of the bar is silence, or scratches, and the notes that are there have to sit exactly in the gaps the kick and the snare leave. With a band behind you the test is simple: does it make you want to move.",
@@ -754,7 +1258,7 @@
         "Play every note short. Listen to the hi-hat: it plays the same sixteenths your hand is swinging."
       ],
       "payoff": "A four-bar single-note groove over a funk band.",
-      "prerequisites": ["holes"],
+      "prerequisites": ["holes-mixed"],
       "difficulty": 2.82,
       "exercises": [
         {
@@ -1190,8 +1694,633 @@
       "difficultyException": "A funk line is mostly silence, so its note count is lower than the one-hole figures before it. Placing single notes around the drums is the demand, and a note-rate metric does not count it."
     },
     {
+      "id": "lines-second-key",
+      "order": 5,
+      "title": "Lines in a second key",
+      "goal": "Play a two-bar line from the top and one from the bottom in D minor pentatonic over a band, join them, and play a four-bar line in A minor that is made of the hole figures.",
+      "why": "The box at the fifth fret is a shape, and a shape can sit on other strings. Move it one string over, from the low E, A and D strings to the A, D and G strings, and the same fingers on the same frets play D minor pentatonic where they played A minor. The two lines keep the order of notes they had in A minor, one string over, each with one note fewer in bar 1, and the rhythm is new: the fretting hand makes moves it knows on new strings while the picking hand puts them in new places. The last line comes back to A minor and puts a figure of this Level on beats 1 and 3 of every bar, because a line is those figures with the notes moving.",
+      "howTo": [
+        "D minor pentatonic here is on the A, D and G strings: first finger on the frets at 5, third finger on the 7s, little finger on the A string's fret 8. The hand stays at the fifth fret.",
+        "The low D is the A string at fret 5. The high D is the G string at fret 7.",
+        "Play every note short except the held one that ends a line, and leave the rests empty. The picking hand swings in sixteenths from the first note to the last.",
+        "The chord is Dm7 under the three D minor lines and Am7 under the last line."
+      ],
+      "payoff": "A four-bar line over the band in a second key, and a line in A minor where beats 1 and 3 of every bar are figures you can name.",
+      "prerequisites": ["first-lines"],
+      "difficulty": 2.59,
+      "exercises": [
+        {
+          "id": "lines-second-key.d-line-top",
+          "title": "From the top, in D minor",
+          "purpose": "Two bars that start on the high D, the G string's fret 7, and work down to the low D on the A string.",
+          "howTo": [
+            "Both bars start 'One-e, a' on the G string: D on the beat and on the 'e', then C at fret 5 on the 'a'. One more D follows on the 'and' of beat 2.",
+            "Bar 1 goes on with 'One, a' on beat 3, A then G on the D string at frets 7 and 5, and a single A on the 'e' of beat 4.",
+            "Bar 2 plays 'One-e, a' again on beat 3: A, G, then F at fret 8 of the A string under the little finger. It ends on a held low D."
+          ],
+          "coachLine": "Band on. Notes are timed against it and checked after the take. Direct input or headphones make that fair.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 2,
+          "loops": true,
+          "position": {
+            "fret": 5,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":3,"fret":7,"midi":62,"tick":0,"dur":240,"tech":[]},
+            {"string":3,"fret":7,"midi":62,"tick":240,"dur":240,"tech":[]},
+            {"string":3,"fret":5,"midi":60,"tick":720,"dur":240,"tech":[]},
+            {"string":3,"fret":7,"midi":62,"tick":1440,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":1920,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":2640,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":3120,"dur":240,"tech":[]},
+            {"string":3,"fret":7,"midi":62,"tick":3840,"dur":240,"tech":[]},
+            {"string":3,"fret":7,"midi":62,"tick":4080,"dur":240,"tech":[]},
+            {"string":3,"fret":5,"midi":60,"tick":4560,"dur":240,"tech":[]},
+            {"string":3,"fret":7,"midi":62,"tick":5280,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":5760,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":6000,"dur":240,"tech":[]},
+            {"string":5,"fret":8,"midi":53,"tick":6480,"dur":240,"tech":[]},
+            {"string":5,"fret":5,"midi":50,"tick":6720,"dur":960,"tech":[]}
+          ],
+          "rests": [
+            {"tick":480,"dur":240},
+            {"tick":960,"dur":240},
+            {"tick":1200,"dur":240},
+            {"tick":1680,"dur":240},
+            {"tick":2160,"dur":240},
+            {"tick":2400,"dur":240},
+            {"tick":2880,"dur":240},
+            {"tick":3360,"dur":240},
+            {"tick":3600,"dur":240},
+            {"tick":4320,"dur":240},
+            {"tick":4800,"dur":240},
+            {"tick":5040,"dur":240},
+            {"tick":5520,"dur":240},
+            {"tick":6240,"dur":240}
+          ],
+          "tempo": {
+            "rungs": [
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"}
+            ],
+            "passAtBpm": 80
+          },
+          "passBars": [
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 6,
+              "overBars": 4
+            },
+            {
+              "metric": "noteIdentity",
+              "min": 0.85,
+              "overBars": 4
+            }
+          ],
+          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo", "noteIdentity"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["bandBleed", "fastPicking"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested.",
+              "At this speed a real rig's input delay can push notes out of their matching window, which reads as late or missed. Evenness is the number to trust here, and only once the delay is calibrated."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "funk",
+            "feel": "straight",
+            "key": "D minor",
+            "chart": "Dm7 | Dm7"
+          },
+          "estimatedMinutes": 6,
+          "tab": "/16 3:7 3:7 r 3:5 r r 3:7 r 4:7 r r 4:5 r 4:7 r r | /16 3:7 3:7 r 3:5 r r 3:7 r 4:7 4:5 r 5:8 /4 5:5",
+          "computed": {
+            "noteCount": 15,
+            "minGapMsAtTop": 136.36,
+            "handShifts": 0,
+            "maxPlayableBpm": 178,
+            "difficulty": 2.77
+          },
+          "chords": ["Dm7", "Dm7"],
+          "harmony": {
+            "kind": "scale",
+            "root": "D",
+            "scale": "minorPentatonic",
+            "spelled": ["D", "F", "G", "A", "C"],
+            "cover": false
+          },
+          "selfCheck": ["Were the notes short, with silence between them?"]
+        },
+        {
+          "id": "lines-second-key.d-line-bottom",
+          "title": "From the bottom, in D minor",
+          "purpose": "The answer: two bars that start on the low D and climb to the high D, where the first line began.",
+          "howTo": [
+            "Both bars start 'One, a' on the A string: the low D on beat 1, F at fret 8 on the 'a', then the low D again on beat 2.",
+            "Beat 3 starts with silence in both bars. Bar 1 plays G and A on the 'e' and the 'and', then C on the 'and' of beat 4.",
+            "Bar 2 plays 'E-and-a' on beat 3, G, A and C, and lands on a held high D on beat 4.",
+            "G and A are the D string at frets 5 and 7. C is the G string at fret 5."
+          ],
+          "coachLine": "Band on. Notes are timed against it and checked after the take.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 2,
+          "loops": true,
+          "position": {
+            "fret": 5,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":5,"fret":5,"midi":50,"tick":0,"dur":240,"tech":[]},
+            {"string":5,"fret":8,"midi":53,"tick":720,"dur":240,"tech":[]},
+            {"string":5,"fret":5,"midi":50,"tick":960,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":2160,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":2400,"dur":240,"tech":[]},
+            {"string":3,"fret":5,"midi":60,"tick":3360,"dur":240,"tech":[]},
+            {"string":5,"fret":5,"midi":50,"tick":3840,"dur":240,"tech":[]},
+            {"string":5,"fret":8,"midi":53,"tick":4560,"dur":240,"tech":[]},
+            {"string":5,"fret":5,"midi":50,"tick":4800,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":6000,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":6240,"dur":240,"tech":[]},
+            {"string":3,"fret":5,"midi":60,"tick":6480,"dur":240,"tech":[]},
+            {"string":3,"fret":7,"midi":62,"tick":6720,"dur":960,"tech":[]}
+          ],
+          "rests": [
+            {"tick":240,"dur":240},
+            {"tick":480,"dur":240},
+            {"tick":1200,"dur":240},
+            {"tick":1440,"dur":240},
+            {"tick":1680,"dur":240},
+            {"tick":1920,"dur":240},
+            {"tick":2640,"dur":240},
+            {"tick":2880,"dur":240},
+            {"tick":3120,"dur":240},
+            {"tick":3600,"dur":240},
+            {"tick":4080,"dur":240},
+            {"tick":4320,"dur":240},
+            {"tick":5040,"dur":240},
+            {"tick":5280,"dur":240},
+            {"tick":5520,"dur":240},
+            {"tick":5760,"dur":240}
+          ],
+          "tempo": {
+            "rungs": [
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"}
+            ],
+            "passAtBpm": 80
+          },
+          "passBars": [
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 6,
+              "overBars": 4
+            },
+            {
+              "metric": "noteIdentity",
+              "min": 0.85,
+              "overBars": 4
+            }
+          ],
+          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo", "noteIdentity"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["bandBleed", "fastPicking"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested.",
+              "At this speed a real rig's input delay can push notes out of their matching window, which reads as late or missed. Evenness is the number to trust here, and only once the delay is calibrated."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "funk",
+            "feel": "straight",
+            "key": "D minor",
+            "chart": "Dm7 | Dm7"
+          },
+          "estimatedMinutes": 6,
+          "tab": "/16 5:5 r r 5:8 5:5 r r r r 4:5 4:7 r r r 3:5 r | /16 5:5 r r 5:8 5:5 r r r r 4:5 4:7 3:5 /4 3:7",
+          "computed": {
+            "noteCount": 13,
+            "minGapMsAtTop": 136.36,
+            "handShifts": 0,
+            "maxPlayableBpm": 178,
+            "difficulty": 2.53
+          },
+          "chords": ["Dm7", "Dm7"],
+          "harmony": {
+            "kind": "scale",
+            "root": "D",
+            "scale": "minorPentatonic",
+            "spelled": ["D", "F", "G", "A", "C"],
+            "cover": false
+          },
+          "selfCheck": ["Were the notes short, with silence between them?"]
+        },
+        {
+          "id": "lines-second-key.d-both-lines",
+          "title": "Question and answer in D minor",
+          "purpose": "The two D minor lines joined: four bars, down from the high D and back up to it.",
+          "howTo": [
+            "Bars 1 and 2 are the line from the top; bars 3 and 4 are the line from the bottom.",
+            "The held low D at the end of bar 2 is your breath. Bar 3 starts on the same note.",
+            "Bar 4 ends on the high D, the note bar 1 started on."
+          ],
+          "coachLine": "This is the test piece for the new key. Notes are timed against the band and checked after the take.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 4,
+          "loops": false,
+          "position": {
+            "fret": 5,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":3,"fret":7,"midi":62,"tick":0,"dur":240,"tech":[]},
+            {"string":3,"fret":7,"midi":62,"tick":240,"dur":240,"tech":[]},
+            {"string":3,"fret":5,"midi":60,"tick":720,"dur":240,"tech":[]},
+            {"string":3,"fret":7,"midi":62,"tick":1440,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":1920,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":2640,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":3120,"dur":240,"tech":[]},
+            {"string":3,"fret":7,"midi":62,"tick":3840,"dur":240,"tech":[]},
+            {"string":3,"fret":7,"midi":62,"tick":4080,"dur":240,"tech":[]},
+            {"string":3,"fret":5,"midi":60,"tick":4560,"dur":240,"tech":[]},
+            {"string":3,"fret":7,"midi":62,"tick":5280,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":5760,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":6000,"dur":240,"tech":[]},
+            {"string":5,"fret":8,"midi":53,"tick":6480,"dur":240,"tech":[]},
+            {"string":5,"fret":5,"midi":50,"tick":6720,"dur":960,"tech":[]},
+            {"string":5,"fret":5,"midi":50,"tick":7680,"dur":240,"tech":[]},
+            {"string":5,"fret":8,"midi":53,"tick":8400,"dur":240,"tech":[]},
+            {"string":5,"fret":5,"midi":50,"tick":8640,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":9840,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":10080,"dur":240,"tech":[]},
+            {"string":3,"fret":5,"midi":60,"tick":11040,"dur":240,"tech":[]},
+            {"string":5,"fret":5,"midi":50,"tick":11520,"dur":240,"tech":[]},
+            {"string":5,"fret":8,"midi":53,"tick":12240,"dur":240,"tech":[]},
+            {"string":5,"fret":5,"midi":50,"tick":12480,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":13680,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":13920,"dur":240,"tech":[]},
+            {"string":3,"fret":5,"midi":60,"tick":14160,"dur":240,"tech":[]},
+            {"string":3,"fret":7,"midi":62,"tick":14400,"dur":960,"tech":[]}
+          ],
+          "rests": [
+            {"tick":480,"dur":240},
+            {"tick":960,"dur":240},
+            {"tick":1200,"dur":240},
+            {"tick":1680,"dur":240},
+            {"tick":2160,"dur":240},
+            {"tick":2400,"dur":240},
+            {"tick":2880,"dur":240},
+            {"tick":3360,"dur":240},
+            {"tick":3600,"dur":240},
+            {"tick":4320,"dur":240},
+            {"tick":4800,"dur":240},
+            {"tick":5040,"dur":240},
+            {"tick":5520,"dur":240},
+            {"tick":6240,"dur":240},
+            {"tick":7920,"dur":240},
+            {"tick":8160,"dur":240},
+            {"tick":8880,"dur":240},
+            {"tick":9120,"dur":240},
+            {"tick":9360,"dur":240},
+            {"tick":9600,"dur":240},
+            {"tick":10320,"dur":240},
+            {"tick":10560,"dur":240},
+            {"tick":10800,"dur":240},
+            {"tick":11280,"dur":240},
+            {"tick":11760,"dur":240},
+            {"tick":12000,"dur":240},
+            {"tick":12720,"dur":240},
+            {"tick":12960,"dur":240},
+            {"tick":13200,"dur":240},
+            {"tick":13440,"dur":240}
+          ],
+          "tempo": {
+            "rungs": [
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"}
+            ],
+            "passAtBpm": 80
+          },
+          "passBars": [
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 6,
+              "overBars": 4
+            },
+            {
+              "metric": "noteIdentity",
+              "min": 0.85,
+              "overBars": 4
+            }
+          ],
+          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo", "noteIdentity"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["bandBleed", "fastPicking"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested.",
+              "At this speed a real rig's input delay can push notes out of their matching window, which reads as late or missed. Evenness is the number to trust here, and only once the delay is calibrated."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "funk",
+            "feel": "straight",
+            "key": "D minor",
+            "chart": "Dm7 | Dm7 | Dm7 | Dm7"
+          },
+          "estimatedMinutes": 7,
+          "tab": "/16 3:7 3:7 r 3:5 r r 3:7 r 4:7 r r 4:5 r 4:7 r r | /16 3:7 3:7 r 3:5 r r 3:7 r 4:7 4:5 r 5:8 /4 5:5 | /16 5:5 r r 5:8 5:5 r r r r 4:5 4:7 r r r 3:5 r | /16 5:5 r r 5:8 5:5 r r r r 4:5 4:7 3:5 /4 3:7",
+          "computed": {
+            "noteCount": 28,
+            "minGapMsAtTop": 136.36,
+            "handShifts": 0,
+            "maxPlayableBpm": 178,
+            "difficulty": 2.65
+          },
+          "chords": ["Dm7", "Dm7", "Dm7", "Dm7"],
+          "harmony": {
+            "kind": "scale",
+            "root": "D",
+            "scale": "minorPentatonic",
+            "spelled": ["D", "F", "G", "A", "C"],
+            "cover": false
+          }
+        },
+        {
+          "id": "lines-second-key.figures-line",
+          "title": "A line made of figures",
+          "purpose": "Four bars back in A minor, in the box on the low three strings. Every bar has a named figure on beat 1 and another on beat 3, and beat 2 is always silent.",
+          "howTo": [
+            "Bars 1 and 3: 'One, and-a' on beat 1, A, A and G on the D string at frets 7, 7 and 5. Then 'One-e, a' on beat 3, E, E and D on the A string at frets 7, 7 and 5. Beat 4 is silent.",
+            "Bar 2: 'E-and-a' on beat 1, G, A and G on the D string. Then 'One, a' on beat 3, E and D on the A string, and one short low A on beat 4, the low E string at fret 5.",
+            "Bar 4: 'E-and-a' on beat 1 climbs C, D, E: the low E string at fret 8, then the A string at frets 5 and 7. 'One, a' on beat 3 is G on the D string, then E on the A string, and the bar ends on a held low A.",
+            "The notes are short here, so 'One, and-a' is three short notes with a hole after the first. The hand swings through every silent beat."
+          ],
+          "coachLine": "Band on, in A minor again. Notes are timed against it and checked after the take.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 4,
+          "loops": true,
+          "position": {
+            "fret": 5,
+            "shifts": "none"
+          },
+          "pickPlan": "free",
+          "crossing": "none",
+          "notesRole": "target",
+          "notes": [
+            {"string":4,"fret":7,"midi":57,"tick":0,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":480,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":720,"dur":240,"tech":[]},
+            {"string":5,"fret":7,"midi":52,"tick":1920,"dur":240,"tech":[]},
+            {"string":5,"fret":7,"midi":52,"tick":2160,"dur":240,"tech":[]},
+            {"string":5,"fret":5,"midi":50,"tick":2640,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":4080,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":4320,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":4560,"dur":240,"tech":[]},
+            {"string":5,"fret":7,"midi":52,"tick":5760,"dur":240,"tech":[]},
+            {"string":5,"fret":5,"midi":50,"tick":6480,"dur":240,"tech":[]},
+            {"string":6,"fret":5,"midi":45,"tick":6720,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":7680,"dur":240,"tech":[]},
+            {"string":4,"fret":7,"midi":57,"tick":8160,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":8400,"dur":240,"tech":[]},
+            {"string":5,"fret":7,"midi":52,"tick":9600,"dur":240,"tech":[]},
+            {"string":5,"fret":7,"midi":52,"tick":9840,"dur":240,"tech":[]},
+            {"string":5,"fret":5,"midi":50,"tick":10320,"dur":240,"tech":[]},
+            {"string":6,"fret":8,"midi":48,"tick":11760,"dur":240,"tech":[]},
+            {"string":5,"fret":5,"midi":50,"tick":12000,"dur":240,"tech":[]},
+            {"string":5,"fret":7,"midi":52,"tick":12240,"dur":240,"tech":[]},
+            {"string":4,"fret":5,"midi":55,"tick":13440,"dur":240,"tech":[]},
+            {"string":5,"fret":7,"midi":52,"tick":14160,"dur":240,"tech":[]},
+            {"string":6,"fret":5,"midi":45,"tick":14400,"dur":960,"tech":[]}
+          ],
+          "rests": [
+            {"tick":240,"dur":240},
+            {"tick":960,"dur":240},
+            {"tick":1200,"dur":240},
+            {"tick":1440,"dur":240},
+            {"tick":1680,"dur":240},
+            {"tick":2400,"dur":240},
+            {"tick":2880,"dur":240},
+            {"tick":3120,"dur":240},
+            {"tick":3360,"dur":240},
+            {"tick":3600,"dur":240},
+            {"tick":3840,"dur":240},
+            {"tick":4800,"dur":240},
+            {"tick":5040,"dur":240},
+            {"tick":5280,"dur":240},
+            {"tick":5520,"dur":240},
+            {"tick":6000,"dur":240},
+            {"tick":6240,"dur":240},
+            {"tick":6960,"dur":240},
+            {"tick":7200,"dur":240},
+            {"tick":7440,"dur":240},
+            {"tick":7920,"dur":240},
+            {"tick":8640,"dur":240},
+            {"tick":8880,"dur":240},
+            {"tick":9120,"dur":240},
+            {"tick":9360,"dur":240},
+            {"tick":10080,"dur":240},
+            {"tick":10560,"dur":240},
+            {"tick":10800,"dur":240},
+            {"tick":11040,"dur":240},
+            {"tick":11280,"dur":240},
+            {"tick":11520,"dur":240},
+            {"tick":12480,"dur":240},
+            {"tick":12720,"dur":240},
+            {"tick":12960,"dur":240},
+            {"tick":13200,"dur":240},
+            {"tick":13680,"dur":240},
+            {"tick":13920,"dur":240}
+          ],
+          "tempo": {
+            "rungs": [
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
+              {"bpm":100,"grading":"graded"},
+              {"bpm":110,"grading":"graded"}
+            ],
+            "passAtBpm": 80
+          },
+          "passBars": [
+            {
+              "metric": "timingEvenness",
+              "min": 0.8,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.9,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 6,
+              "overBars": 4
+            },
+            {
+              "metric": "noteIdentity",
+              "min": 0.85,
+              "overBars": 4
+            }
+          ],
+          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo", "noteIdentity"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": ["bandBleed", "fastPicking"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested.",
+              "At this speed a real rig's input delay can push notes out of their matching window, which reads as late or missed. Evenness is the number to trust here, and only once the delay is calibrated."
+            ]
+          },
+          "backing": {
+            "kind": "jam",
+            "grooveId": "funk",
+            "feel": "straight",
+            "key": "A minor",
+            "chart": "Am7 | Am7 | Am7 | Am7"
+          },
+          "estimatedMinutes": 7,
+          "tab": "/16 4:7 r 4:7 4:5 r r r r 5:7 5:7 r 5:5 r r r r | /16 r 4:5 4:7 4:5 r r r r 5:7 r r 5:5 6:5 r r r | /16 4:7 r 4:7 4:5 r r r r 5:7 5:7 r 5:5 r r r r | /16 r 6:8 5:5 5:7 r r r r 4:5 r r 5:7 /4 6:5",
+          "computed": {
+            "noteCount": 24,
+            "minGapMsAtTop": 136.36,
+            "handShifts": 0,
+            "maxPlayableBpm": 178,
+            "difficulty": 2.38
+          },
+          "chords": ["Am7", "Am7", "Am7", "Am7"],
+          "harmony": {
+            "kind": "scale",
+            "root": "A",
+            "scale": "minorPentatonic",
+            "spelled": ["A", "C", "D", "E", "G"],
+            "cover": false
+          },
+          "selfCheck": ["Were the notes short, with silence between them?"]
+        }
+      ],
+      "difficultyException": "These lines leave a little more of the bar silent than the two before them, and the last one leaves whole beats empty, so the note count is lower. The demand is finding the box on new strings and placing named figures around a band, which a note-rate metric does not count."
+    },
+    {
       "id": "stabs",
-      "order": 4,
+      "order": 6,
       "title": "Two-note stabs",
       "goal": "Hit two strings at once, short, on the backbeat, on the off-beats and on single sixteenths.",
       "why": "Funk players rarely strum a whole chord. They take the top two or three notes of it and stab them, short and bright. Two notes at once need a stroke that crosses two strings and stops, and a fretting hand that kills both together.",
@@ -1201,7 +2330,7 @@
         "The low A on beat 1 is the first finger's tip on the low E string at fret 5: the same finger, moved across."
       ],
       "payoff": "A bass note and stabs that sound like a rhythm section by themselves.",
-      "prerequisites": ["first-lines"],
+      "prerequisites": ["lines-second-key"],
       "difficulty": 2.05,
       "exercises": [
         {
@@ -1520,7 +2649,7 @@
     },
     {
       "id": "line-and-stab",
-      "order": 5,
+      "order": 7,
       "title": "Line and stab",
       "goal": "Play a bass-register line and answer it with stabs inside one bar, and move the part from Am7 to D9.",
       "why": "The classic funk guitar part is two players in one: a low line that talks to the bass, and stabs that talk to the snare. Putting them in one bar means the picking hand jumps from the low strings to the high ones between sixteenths, without the swing changing.",
@@ -1884,7 +3013,7 @@
     },
     {
       "id": "second-pair",
-      "order": 6,
+      "order": 8,
       "title": "The same shapes on Bm7 and E9",
       "goal": "Play stabs, and a line with stabs, over Bm7 and E9: the two stab shapes of the vamp, two frets higher. Then hold the two-bar vamp with the band, in B minor and in other keys.",
       "why": "The stab and the line are shapes, and shapes move. Two frets up the neck, Am7 and D9 become Bm7 and E9: the first finger's flat stab, the stab two frets above it for the second chord, and the same box of low notes, with one note a fret below it for the second chord. The line here is a new one, so the hand has to find its notes in the new place and cannot lean on what it memorised at fret 5.",
@@ -2683,7 +3812,7 @@
     },
     {
       "id": "octaves",
-      "order": 7,
+      "order": 9,
       "title": "Octaves",
       "goal": "Play a note and its octave together as one short attack, and move octave shapes in a sixteenth-note rhythm.",
       "why": "An octave is the fattest single-note sound a guitar has, and disco and funk are full of it. The shape is two fingers with a string between them, and that middle string has to be dead: the first finger leans on it, so the pick can strike straight through all three.",
@@ -3073,7 +4202,7 @@
     },
     {
       "id": "displaced",
-      "order": 8,
+      "order": 10,
       "title": "Across the beat",
       "goal": "Play figures that are three sixteenths long, and lines whose notes fall on the 'e' and the 'a', without losing the pulse.",
       "why": "A three-sixteenth figure in a bar of four slides against the beat: it starts on the beat, then just before the next one, then halfway through one, then just after one. That rub is the sound of a lot of funk and Afrobeat guitar. The hand keeps its swing, the foot keeps the beat, and the figure moves between them.",
@@ -3453,7 +4582,7 @@
     },
     {
       "id": "displaced-shapes",
-      "order": 9,
+      "order": 11,
       "title": "Stabs and octaves across the beat",
       "goal": "Play the three-sixteenth figure as stabs, play octaves on the 'e' and the 'a', and join a line that moves across the beat to stabs in one two-bar phrase.",
       "why": "Moving a figure against the beat was learned on single notes. A stab crosses two strings and an octave crosses three, so the stroke is bigger, and an upstroke through two or three strings is the one that comes out thin or late. The fretting hand has nothing new here: the Am7 stab and the A octave, both with the first finger at fret 5. All of the attention can go to where the stroke lands.",
@@ -3839,7 +4968,7 @@
     },
     {
       "id": "the-sixth",
-      "order": 10,
+      "order": 12,
       "title": "The Dorian sixth, and hammer-ons",
       "goal": "Use F#, the note that turns a minor pentatonic line into a funk line, and hammer into notes inside a sixteenth-note rhythm.",
       "why": "Funk in a minor key nearly always means Dorian. The note that matters is its major sixth, F# in the key of A, added to the minor pentatonic. It is the third of the D9 chord the band keeps going to, so playing it when that chord arrives makes the line and the harmony agree. A hammer-on into a note is the other small thing that makes a line sound spoken.",
@@ -4273,7 +5402,7 @@
     },
     {
       "id": "the-pocket",
-      "order": 11,
+      "order": 13,
       "title": "The pocket",
       "goal": "Hold a four-bar groove of lines, stabs and octaves over a band, and keep a one-bar line in the pocket for a full minute.",
       "why": "A funk guitarist plays the same bar for five minutes and it has to feel better at the end than at the start. That is what 'the pocket' means: nothing rushes, nothing drags, every note is the same length it was last time. Long takes are the only way to practise it.",
@@ -4689,7 +5818,7 @@
     },
     {
       "id": "long-form",
-      "order": 12,
+      "order": 14,
       "title": "Eight bars and a change",
       "goal": "Hold an eight-bar groove over a band, in B minor and in other keys, four bars of line and stabs and four bars of octaves, and keep its first bar in the pocket for a full minute.",
       "why": "Songs are built from parts that last four or eight bars, and the guitar changes part when the song does. The change is where a groove comes apart: the last bar of one part rushes because the mind is already on the next. Eight bars with one change in the middle, in the key you moved the vamp to, is that problem at its smallest.",
@@ -6223,16 +7352,16 @@
     {
       "id": "beginner",
       "title": "Beginner: the hand that never stops",
-      "summary": "Even sixteenths with accents, the three one-hole figures, and two-bar lines over a band.",
+      "summary": "Even sixteenths with accents, the one-hole figures alone and then mixed in one bar, a two-bar rhythm on one note, and lines over a band in A minor and in D minor, the last one built from the figures.",
       "entry": "open",
       "placement": {
         "startHereIf": [
           "You can play sixteenth notes with a click at 70 BPM.",
           "Your picking hand stops when the rhythm has a rest in it.",
-          "You know the pentatonic box at the fifth fret, or can learn six notes of it."
+          "You know the pentatonic box at the fifth fret, or can learn its notes on four strings."
         ]
       },
-      "stepIds": ["the-engine", "holes", "first-lines"],
+      "stepIds": ["the-engine", "holes", "holes-mixed", "first-lines", "lines-second-key"],
       "warmups": [
         {
           "id": "warmup-beginner.swing-up",

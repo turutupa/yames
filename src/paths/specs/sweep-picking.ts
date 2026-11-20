@@ -19,6 +19,7 @@ import {
   sweepDown,
   sweepUp,
 } from "../templates";
+import { ADVANCED_ETUDE, SIX_STRING_CHANGES } from "./sweep-picking-more";
 
 const ROLL_CHECK =
   "Record a take and listen back. Does each note stop as the next one starts, or do they ring together like a strummed chord?";
@@ -1431,8 +1432,7 @@ const NEW_STEPS: StepSpec[] = [
       "Fast rungs are self-checked. Record yourself and slow the recording down: nothing is more honest than that.",
     ],
     payoff: "A line that jumps the neck, and a burst of sweep at a speed you couldn't have played a month ago.",
-    difficultyException:
-      "Its shapes are the three-string triads already known; the demand is the jump between them, which the score counts as one shift. Six strings rates higher since the major six-string shape was fingered honestly: six frets wide, its hand moves inside the shape (fingering audit, 2026-11-18).",
+    // No difficultyException since 2026-11-19: `six-string-changes` now comes before this Step and rates lower, so the validator no longer wants one here.
     exercises: [
       sweepExercise({
         id: "octave-jump",
@@ -1648,8 +1648,7 @@ const NEW_STEPS: StepSpec[] = [
       "Grading covers the slower rungs only. Above them you're on your own, with your ears and a recording.",
     ],
     payoff: "You play a long, linked, minor-key arpeggio line over a band.",
-    difficultyException:
-      "One pass a bar and big shapes: the tempo may be high, but the note rate is low. Playing them over a loud band is the new demand.",
+    // No difficultyException since 2026-11-19: `advanced-etude` now comes before this Step and rates lower, so the validator no longer wants one here.
     exercises: [
       sweepExercise({
         id: "band-big-chain",
@@ -1722,7 +1721,7 @@ const NEW_STEPS: StepSpec[] = [
   },
 ];
 
-const ALL_STEPS: readonly StepSpec[] = [...OLD_STEPS, ...NEW_STEPS];
+const ALL_STEPS: readonly StepSpec[] = [...OLD_STEPS, ...NEW_STEPS, SIX_STRING_CHANGES, ADVANCED_ETUDE];
 const LEVEL_STEPS = {
   beginner: ["triads", "turnaround", "phrases", "qualities", "first-solo"],
   intermediate: [
@@ -1736,7 +1735,7 @@ const LEVEL_STEPS = {
     "minor-progressions",
     "over-the-progression",
   ],
-  advanced: ["six-strings", "fast-shifts", "neoclassical", "over-a-heavy-band"],
+  advanced: ["six-strings", "six-string-changes", "fast-shifts", "neoclassical", "advanced-etude", "over-a-heavy-band"],
 };
 const stepNamed = (id: string): StepSpec => {
   const found = ALL_STEPS.find((s) => s.id === id);
@@ -1764,7 +1763,7 @@ export default definePath({
   paceLadders: true,
   variantText: true,
   orderRationale:
-    "Three Levels, each open from the start, rebuilt on 2026-11-17 after the owner played the old Step 1 (two notes, mostly rests, at 50 BPM) and called it a beginner exercise nobody should have to sit through. Beginner now starts on a real sweep: a three-string A minor triad up and down in triplets, with one beat of rest only where it teaches the muting reset. It is the standard first drill in most sweep courses (one push per click, the top note repeated where the pick turns), and it already sounds like an arpeggio. Major and minor come together in the first Step because they differ by one note and hearing that note is the point. Then the turn at the top with a hammer and a pull, which is what removes the repeated note; then the three inversions and diminished; and the Level ends with a four-bar solo over a band. Intermediate skips everything under four strings: four-string shapes, then the five-string A-shape, then the E-shape with a hammer or a tap at the top, then inversions and position shifts with those shapes, and only then linking, which the owner asked for as the backbone, on three strings first because a long shape makes a bad link worse. It ends on an eight-bar etude over a band. Advanced adds six strings, wide shifts and neoclassical sequences. The comparison was against common practice (Gambale's economy and sweep method, Becker- and Malmsteen-style arpeggio studies, Troy Grady's work on pick paths): triads before long shapes, the turnaround as its own skill, the tap as an extension of the five-string shape. Chains change chord once a bar because Jam's grid is one chord to a bar. The progressions are common vocabulary and every line is written for this Path: nothing is transcribed from a song or copied from a course.",
+    "Three Levels, each open from the start, rebuilt on 2026-11-17 after the owner played the old Step 1 (two notes, mostly rests, at 50 BPM) and called it a beginner exercise nobody should have to sit through. Beginner now starts on a real sweep: a three-string A minor triad up and down in triplets, with one beat of rest only where it teaches the muting reset. It is the standard first drill in most sweep courses (one push per click, the top note repeated where the pick turns), and it already sounds like an arpeggio. Major and minor come together in the first Step because they differ by one note and hearing that note is the point. Then the turn at the top with a hammer and a pull, which is what removes the repeated note; then the three inversions and diminished; and the Level ends with a four-bar solo over a band. Intermediate skips everything under four strings: four-string shapes, then the five-string A-shape, then the E-shape with a hammer or a tap at the top, then inversions and position shifts with those shapes, and only then linking, which the owner asked for as the backbone, on three strings first because a long shape makes a bad link worse. It ends on an eight-bar etude over a band. Advanced adds six strings, first shape by shape and then as whole shapes through chord changes, wide shifts and neoclassical sequences, and a composed eight-bar etude before the heavy band. The comparison was against common practice (Gambale's economy and sweep method, Becker- and Malmsteen-style arpeggio studies, Troy Grady's work on pick paths): triads before long shapes, the turnaround as its own skill, the tap as an extension of the five-string shape. Chains change chord once a bar because Jam's grid is one chord to a bar. The progressions are common vocabulary and every line is written for this Path: nothing is transcribed from a song or copied from a course.",
   gradingLimits:
     "Grading stops being trustworthy at about 150 ms between notes: sixteenths at 100 BPM, eighth triplets at 133, sextuplets at 66. Rungs faster than that are self-checked, whatever they look like, and the card says where grading stops. That line is a cautious policy, not a measurement. What a sweep is graded on is timing: how even the notes are, whether each one arrived, and whether extra notes crept in. Right notes are not graded anywhere on this Path: swept notes ring into each other, and a pitch read on ringing strings can fail a take that was played right, so nothing here promises them. The tests behind these numbers used synthetic tones, and no real guitar has been through them yet. The note after a slide counts as missed if it isn't heard, so bars on sliding shapes are lower; a tap counts as a note that must be heard, and a hammer or pull that isn't heard costs nothing. In practice: Beginner is graded at every rung. In Intermediate the sixteenth-note shapes stop at 100 BPM, triplet shapes at 130, and the sextuplet pickup at 65. In Advanced most of what makes the playing hard can't be graded. Sound never tells us the two things that matter most here, muting and pick path, and the Exercises say so.",
   steps: [...LEVEL_STEPS.beginner, ...LEVEL_STEPS.intermediate, ...LEVEL_STEPS.advanced].map(stepNamed),
@@ -1843,7 +1842,7 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: the whole neck, at speed",
-      summary: "Six strings, wide shifts and neoclassical sequences. Grading runs out early here: most of what makes this hard can only be judged by ear and on a recording.",
+      summary: "Six strings, alone and then through chord changes, wide shifts and neoclassical sequences, and an eight-bar etude that puts them together before the heavy band. Grading runs out early here: most of what makes this hard can only be judged by ear and on a recording.",
       reachLevel: "advanced",
       startHereIf: [
         "You can chain four five-string shapes through a minor progression without stopping, at 90 BPM triplets.",

@@ -13,6 +13,8 @@ import type { PassBar } from "../format";
 import type { FretCell, Sequence } from "../templates";
 import { handAt, ladder, moveChart, oneStringClimb, sequenced, shiftFrets } from "../templates";
 import { MODES_SECOND_KEY, SECOND_SHAPE, WHAT_A_KEY_IS } from "./scales-more";
+import { CHORDS_FROM_THE_SCALE, HARMONIC_MINOR_AGAIN, KEYS_BY_HAND, MINOR_SECOND_KEY } from "./scales-encore";
+import { BOX_PLUS_TWO, CHOOSING_AGAIN, SAME_NOTES_NEW_HOME } from "./modes-encore";
 
 type Grading = Pick<ExerciseSpec, "grade" | "alsoGraded" | "pass">;
 
@@ -136,7 +138,7 @@ export default definePath({
   paceLadders: true,
   variantText: true,
   orderRationale:
-    "The major scale first as a sound and a formula on one string, then as one movable shape, because every other scale here is described as a change to it. A key is named as soon as the shape has been moved, because moving it is changing key. The relative minor comes next: the same notes from a different home, which is the idea a mode rests on. Sequences turn a shape into something the fingers know in any order. The second major shape waits until C major has been carried across two positions, because it is the lower of those two given a name. Harmonic minor is one raised note, and it prepares the ear for the modes, which are also one changed note each. Dorian comes before Mixolydian because it sits on the minor shape players already have. Each mode is then played from a second string and over new chords before the player is asked to choose between them.",
+    "The major scale first as a sound and a formula on one string, then as one movable shape, because every other scale here is described as a change to it. A key is named as soon as the shape has been moved, because moving it is changing key. The relative minor comes next: the same notes from a different home, which is the idea a mode rests on. Keys are met again in A and F before the relative minor, and the relative minor again in E minor and D minor before the Level ends. Sequences turn a shape into something the fingers know in any order. The second major shape waits until C major has been carried across two positions, because it is the lower of those two given a name. The seven chords of a key are taken out of the scale just before harmonic minor, because its raised note is first heard as a change to one of those chords. Harmonic minor is one raised note, and it prepares the ear for the modes, which are also one changed note each. Dorian comes before Mixolydian because it sits on the minor shape players already have. Each mode is then played from a second string and over new chords before the player is asked to choose between them. Once both modes are known, the pentatonic notes are shown with two added to make each one, and the same seven notes are played from three homes after the second key. The Level ends by choosing a second time, with the changing note written out before the player chooses alone.",
   gradingLimits:
     "The app checks that the notes you played were the written ones, after the take, and times them. It can tell a wrong note from a right one, which is what matters in a scale. It cannot tell whether you heard the changed note as a colour or just played the fret, and it cannot judge the 'your turn' Exercises at all. Naming notes and scale degrees out loud is taught and not heard. None of this has been tried on a real guitar yet.",
   steps: [
@@ -324,6 +326,7 @@ export default definePath({
       ],
     },
     WHAT_A_KEY_IS,
+    KEYS_BY_HAND,
     {
       id: "relative-minor",
       title: "The relative minor",
@@ -362,7 +365,7 @@ export default definePath({
             "Straight eighths, 50 BPM up to a pass at 80.",
             "Bars 1 and 2 are C major at the second fret; bars 3 and 4 are A minor at the fifth. The hand moves up three frets between them, during the long C.",
           ],
-          coach: "Right notes and even eighths after the take. Which half sounded finished to you, and on which note.",
+          coach: "Right notes and even eighths after the take. Which half sounded finished to you, and on which note?",
           tab: TWO_HOMES,
           position: 2,
           shifts: true,
@@ -393,6 +396,7 @@ export default definePath({
         },
       ],
     },
+    MINOR_SECOND_KEY,
     {
       id: "sequences",
       title: "Sequences",
@@ -555,6 +559,7 @@ export default definePath({
       ],
     },
     SECOND_SHAPE,
+    CHORDS_FROM_THE_SCALE,
     {
       id: "harmonic-minor",
       title: "Harmonic minor",
@@ -577,7 +582,7 @@ export default definePath({
             "Straight eighths, 50 BPM up to a pass at 80.",
             "Low E string 5, 7, 8; A string 5, 7, 8; D string 6 and 7. The second finger takes fret 6 and the third takes fret 7.",
           ],
-          coach: "Right notes and even eighths after the take. G# is the note I am listening for.",
+          coach: "Right notes and even eighths after the take. The raised seventh is the note to listen for.",
           vary: inKeys(HARMONIC_SHAPE, FROM_A, "harmonicMinor", ["A", "B", "C", "D"]),
           tab: HARMONIC_SHAPE,
           position: 5,
@@ -624,6 +629,7 @@ export default definePath({
         },
       ],
     },
+    HARMONIC_MINOR_AGAIN,
     {
       id: "dorian",
       title: "Dorian",
@@ -635,6 +641,8 @@ export default definePath({
         "Over the D chord, land on F#. That is the note that proves the scale.",
       ],
       payoff: "A phrase over Am and D that could not have been played with the minor scale.",
+      difficultyException:
+        "A new scale starts here with one shape and a side-by-side comparison, at an easier pace than the eight bars over three chords that end the Step before. The demand is hearing the one changed note.",
       exercises: [
         {
           id: "dorian-shape",
@@ -762,7 +770,9 @@ export default definePath({
         },
       ],
     },
+    BOX_PLUS_TWO,
     MODES_SECOND_KEY,
+    SAME_NOTES_NEW_HOME,
     {
       id: "choosing",
       title: "Choosing the scale",
@@ -839,19 +849,20 @@ export default definePath({
         },
       ],
     },
+    CHOOSING_AGAIN,
   ],
   levels: [
     {
       id: "beginner",
       title: "Beginner: the major scale and its minor",
-      summary: "The major scale in open position and on one string, one movable shape for every key, what a key is, and the relative minor.",
+      summary: "The major scale in open position and on one string, one movable shape for every key, what a key is, five keys by name with their sharps and one flat, and the relative minor in three keys.",
       reachLevel: "early-intermediate",
       startHereIf: [
         "You can play quarter and eighth notes with a click at 70 BPM.",
         "You know some chords or the pentatonic box, and no full scale from memory.",
         "You couldn't say which notes are in G major.",
       ],
-      steps: ["major-scale", "movable-major", "what-a-key-is", "relative-minor"],
+      steps: ["major-scale", "movable-major", "what-a-key-is", "keys-by-hand", "relative-minor", "minor-second-key"],
       warmups: [
         {
           id: "scale-walk",
@@ -879,14 +890,14 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: patterns, positions and one raised note",
-      summary: "Sequences through the minor shape, C major across two positions and three notes per string, a second major shape joined to the first, and harmonic minor over Am and E7.",
+      summary: "Sequences through the minor shape, C major across two positions and three notes per string, a second major shape joined to the first, the seven chords a scale makes, and harmonic minor over Am and E7 and over Em and B7.",
       reachLevel: "intermediate",
       startHereIf: [
         "You can play a major and a natural minor scale shape from memory at eighths, 80 BPM.",
         "You can move the major shape to 3 other keys without working it out.",
         "Your scales only go straight up and down, or only live in one position.",
       ],
-      steps: ["sequences", "more-neck", "second-shape", "harmonic-minor"],
+      steps: ["sequences", "more-neck", "second-shape", "chords-from-the-scale", "harmonic-minor", "harmonic-minor-again"],
       warmups: [
         {
           id: "shape-of-the-day",
@@ -918,14 +929,14 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: the modes over a band",
-      summary: "Dorian and Mixolydian, each as one changed note heard against the scale you know, in A and then in a second key, then phrases that follow the chords.",
+      summary: "Dorian and Mixolydian, each as one changed note heard against the scale you know and as five pentatonic notes with two added, in A and then in a second key; the same seven notes from three homes; then phrases that follow the chords, one note changing as they change, and your own playing over two chords.",
       reachLevel: "intermediate",
       startHereIf: [
         "You can play A natural minor in threes at triplets, 80 BPM.",
         "You know the major and minor shapes in at least 3 keys.",
         "You've heard the words Dorian and Mixolydian and couldn't say which note makes each one.",
       ],
-      steps: ["dorian", "mixolydian", "modes-second-key", "choosing"],
+      steps: ["dorian", "mixolydian", "box-plus-two", "modes-second-key", "same-notes-new-home", "choosing", "choosing-again"],
       warmups: [
         {
           id: "mode-of-the-day",

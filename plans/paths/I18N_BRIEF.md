@@ -377,3 +377,81 @@ Verify each file with python (exact keys, no "!" or "！", nothing empty, and ev
 English is in your translation: print the keys where the digits differ and fix them unless your
 language's pack already writes that kind of number another way), then reply with ONE line: the language,
 strings per path, and any key you were unsure about (at most 60 words).
+
+Round 19 notes (folder /tmp/yp5/i18n/): NINE path ids, about 950 strings a language, all in packs that
+are ALREADY translated in your language. The work is split in TWO groups per language, one translator
+each: group "a" (the harmony Paths: scales-and-modes, triads, know-the-neck, arpeggios-over-changes) and
+group "b" (the technique Paths: alternate-picking, funk-lines, tapping, metal-rhythm, sweep-picking).
+The worktree is /home/dgx-personal/projects/yames-mvp-paths5: your language's packs are
+src/paths/packs/i18n/<lng>/<pathId>.json there, the English beside them in i18n/en/. Use THOSE as your
+reference for terminology. Everything in "Rules" at the top of this brief applies; the OUTPUT sections of
+earlier rounds do not.
+- New Steps reuse the words of the Steps around them. Before you translate a path, read your language's
+  existing strings of the neighbouring Steps (named below) and reuse their terms and sentence patterns
+  exactly: the tempo sentence ("Straight eighths, 50 BPM up to a pass at 85."), "Your turn", "not
+  checked yet", "Right notes and even eighths after the take.", the names of fingers and strings.
+- scales-and-modes (group a, the biggest): seven new Steps. Beginner `keys-by-hand`, `minor-second-key`
+  (neighbours: `what-a-key-is`, `relative-minor`); Intermediate `chords-from-the-scale`,
+  `harmonic-minor-again` (neighbours: `sequences`, `harmonic-minor`); Advanced `box-plus-two`,
+  `same-notes-new-home`, `choosing-again` (neighbours: `dorian`, `mixolydian`, `modes-second-key`,
+  `choosing`). Terms to keep as the pack has them: key, sharp, flat, whole step, half step, the major
+  shape, relative minor, "home" (the note or chord a scale rests on: ONE word throughout, the one
+  `relative-minor.two-homes` uses), root, third, fifth, seventh, "raised seventh", harmonic minor,
+  natural minor, Dorian, Mixolydian, pentatonic, "the box", diminished. Chord numbers are WORDS in the
+  English ("one, four, five", "two, five, one") and stay words.
+- triads (a): two new Beginner Steps, `one-three-five-again` and `three-chords-tunes` (neighbours:
+  `one-three-five`, `three-shapes`, `three-chords`). "Shape one / two / three", "one, three and five",
+  "under one hand", "form" (the order of chords of a whole tune) as the pack already says them. Keys like
+  `...variant.key=E.howTo.2` are what a player reads when the Exercise is played in another key.
+- know-the-neck (a) and arpeggios-over-changes (a): a handful of changed sentences. Start from the
+  existing translation of the same key and change only what the English changed.
+- alternate-picking (b): three new Beginner Steps, `other-strings`, `mixed-rhythms`, `one-string-tunes`
+  (neighbours: `even-eighths`, `even-sixteenths`, `accents`). Downstroke, upstroke, "the 'and'", counting
+  syllables in quotes ('1 e and a') exactly as the pack's `even-sixteenths` Step writes them. New coach
+  lines here are NOT first person (the old ones of this Path are: do not copy that into the new ones).
+- funk-lines (b): two new Beginner Steps, `holes-mixed`, `lines-second-key` (neighbours: `holes`,
+  `first-lines`). The figure names in quotes ('One, and-a', 'One-e, a', 'E-and-a', and the new 'One, a')
+  are names a player says: translate them exactly as the pack translated the titles of `holes`' three
+  Exercises, and build 'One, a' the same way. A count such as '1 e (and) a' keeps its brackets: the
+  bracketed syllable is a stroke that misses the string. "Scratch" = a muted stroke.
+- tapping (b): three new Intermediate Steps, `sixteenths-in-e-minor`, `strings-through-chords`,
+  `scale-tap-again` (neighbours: `sixteenths`, `two-strings`, `scale-under-the-tap`, `cell-in-e-minor`).
+  Tap, pull-off, hammer-on, "the cell", "the loop", "double tap" as the pack has them.
+- metal-rhythm (b): two new Advanced Steps, `pedal-from-a`, `verse-and-chorus` (neighbours:
+  `pedal-riffs`, `a-string-chug`, `two-part-riff`, `riffs-at-length`). Chug, gallop, power chord, pedal
+  tone, palm mute, verse, chorus as the pack has them; chord symbols (E5, C5) are never translated.
+- sweep-picking (b): two new Advanced Steps, `six-string-changes`, `advanced-etude` (neighbours:
+  `six-strings`, `neoclassical`, `over-the-progression`). Sweep, "the link", "pass" (one sweep across
+  the strings), etude, hammer, pull, roll as the pack has them. The old coach lines of this Path are first
+  person; new ones are not.
+- Keys like `exercise.<id>.variant.<param>=<value>.howTo.0` are what a player reads when the same
+  Exercise is played in another key or position: translate them as carefully as the Exercise's own.
+- Digits stay digits (frets, fingers, bars, BPM: "fret 5", "fingers 3, 2, 1, 1" keep 5 and 3, 2, 1, 1 as
+  digits; never "third finger" for "finger 3" unless the English itself says "third finger"), and a
+  number the English spells as a word stays a word. Note letters and chord symbols (F#, B flat as your
+  pack writes flats, Bm7, E5) are never changed. No exclamation marks.
+For every key that already exists in your language's pack (its English changed): start from the existing
+translation and change only what the English changed. Copy verbatim where the English is identical to an
+already translated string (build the identical-English map by script first: it saves a good part of the
+work).
+
+INPUT:  /tmp/yp5/i18n/todo.<lng>.<group>.json   shape { "<pathId>": { "<key>": "<English>" } }
+OUTPUT: ONE FILE PER PATH ID, each shaped { "<pathId>": { "<key>": "<translation>" } } with exactly the
+todo's keys for that path:   /tmp/yp5/i18n/done.<lng>.<pathId>.json
+Scratch only under /tmp/yp5/i18n/work_<lng>_<group>/ . Do not edit any file in the repository; no git,
+no npm. Run only small python scripts, nothing heavy. Do the small paths first, the biggest last.
+Verify each file with python (exact keys, no "!" or "！", nothing empty, and every run of digits in the
+English is in your translation: print the keys where the digits differ and fix them unless your
+language's pack already writes that kind of number another way). When every file of your group is
+written and verified, create the empty file /tmp/yp5/i18n/<lng>.<group>.DONE, then reply with ONE line:
+the language, strings per path, and any key you were unsure about (at most 60 words).
+
+Round 19, afterwards (2026-11-19): what the lead had to repair, so the next round's brief can say it first.
+- pt-BR: the counting syllable 'and' is '&' ('1 e & a'), never 'e': 'e' is the second sixteenth. The
+  Alternate Picking pack wrote both as 'e' until this round.
+- A band here is drums and bass. No sentence, in any language, says the band plays a chord: "the chords
+  are", "the band follows the chord", "the bass stays on E".
+- The todo holds one key for each distinct English sentence; `strings merge` copies the translation to
+  every other key with the same English (variants). A translator who sees a variant key "still in the old
+  wording" in the pack is looking at the state before the merge.
+- fr: "heavy band" is "groupe lourd" (Sweep Picking).

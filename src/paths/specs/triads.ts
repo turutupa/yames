@@ -16,6 +16,7 @@ import type { VariantParams } from "../spec";
 import { handAt, ladder, moveChart, shiftFrets } from "../templates";
 import { DIMINISHED, F_AND_G, MORE_MINORS } from "./harmony-more";
 import { F_AND_G_MIDDLE, LOW_SET, MINORS_MIDDLE, SECOND_SONG, THREE_SETS } from "./triads-more";
+import { ONE_THREE_FIVE_AGAIN, THREE_CHORDS_TUNES } from "./triads-encore";
 
 const YOUR_TURN = { grade: "selfChecked", example: true } as const;
 const NOT_CHECKED_YET =
@@ -140,7 +141,7 @@ export default definePath({
   labelSubdivisions: "mostly",
   paceLadders: true,
   orderRationale:
-    "The major scale counted as numbers comes first, because a triad is defined by them: notes one, three and five. Then the three shapes one triad has on the top three strings, one at a time, since the top strings are the easiest to hear and to hold. Moving one shape to make three chords comes before the nearest-shape idea: it is easier, and it shows that a shape is a chord type and a fret is a chord name. Minor arrives as one changed note, never as a new set of shapes to memorise. The four chords most songs use come next, in two parts of the neck and then in other keys, before a second set of strings: a second set before the first is secure doubles the load and teaches nothing new. Seeing the open and barre chords as these same three notes comes near the end, when the three notes are familiar enough to recognise. A whole song form is last, and then a longer one in a new key that uses two sets of strings as two colours. The middle strings close the Intermediate Level, with F, G and the minor chords drilled there as they were on the top strings, because Chords in a Key leans on them; the A, D and G strings wait for the Advanced Level, after the first two sets have been joined.",
+    "The major scale counted as numbers comes first, because a triad is defined by them: notes one, three and five. Then the three shapes one triad has on the top three strings, one at a time, since the top strings are the easiest to hear and to hold. The count is done again in F and in G before those two chords get their shapes, so their letters are worked out and not handed over, and the Beginner Level ends on whole tunes of eight and twelve bars. Moving one shape to make three chords comes before the nearest-shape idea: it is easier, and it shows that a shape is a chord type and a fret is a chord name. Minor arrives as one changed note, never as a new set of shapes to memorise. The four chords most songs use come next, in two parts of the neck and then in other keys, before a second set of strings: a second set before the first is secure doubles the load and teaches nothing new. Seeing the open and barre chords as these same three notes comes near the end, when the three notes are familiar enough to recognise. A whole song form is last, and then a longer one in a new key that uses two sets of strings as two colours. The middle strings close the Intermediate Level, with F, G and the minor chords drilled there as they were on the top strings, because Chords in a Key leans on them; the A, D and G strings wait for the Advanced Level, after the first two sets have been joined.",
   gradingLimits:
     "Every graded Exercise is played one note at a time: after the take, the app checks that you played the written notes, counts them and times them. It cannot tell which string a pitch came from, so a right note in the wrong place passes, and it cannot hear whether you held the shape down like a chord or lifted each finger. Strummed chords are not graded anywhere in this Path. The band Exercises have only been tried on computer-made guitar sound, so direct input or headphones are the honest way to play them. Choosing your own shapes is 'your turn', self-checked and labelled 'not checked yet'.",
   steps: [
@@ -286,6 +287,7 @@ export default definePath({
         },
       ],
     },
+    ONE_THREE_FIVE_AGAIN,
     F_AND_G,
     {
       id: "three-chords",
@@ -383,6 +385,7 @@ export default definePath({
         },
       ],
     },
+    THREE_CHORDS_TUNES,
     {
       id: "minor",
       title: "One note makes it minor",
@@ -949,13 +952,13 @@ export default definePath({
     {
       id: "beginner",
       title: "Beginner: what a triad is",
-      summary: "The major scale counted as numbers, one, three and five as a chord, the three shapes of C on the top strings, the same three for F and G, and C, F and G two ways.",
+      summary: "The major scale counted as numbers, one, three and five as a chord, the three shapes of C on the top strings, the count again in F and in G, the same three shapes for F and G, C, F and G two ways, and then the three chords in new orders through eight and twelve bars.",
       startHereIf: [
         "You can play eighth notes with a click at 60 BPM.",
         "You play chords from shapes and could not say which 3 notes are in a C chord.",
         "You know the C major scale, or are willing to learn it on 1 string.",
       ],
-      steps: ["one-three-five", "three-shapes", "f-and-g", "three-chords"],
+      steps: ["one-three-five", "three-shapes", "one-three-five-again", "f-and-g", "three-chords", "three-chords-tunes"],
       warmups: [
         {
           id: "shape-one-keys",
