@@ -49,6 +49,14 @@
       "any": "Jouw take",
       "soon": "Een take terugluisteren komt binnenkort."
     },
+    "source": {
+      "measured": "Gemeten",
+      "measuredTake": "Gemeten · Take {{take}}",
+      "path": "Uit het leerpad",
+      "pathStep": "Uit het leerpad · Stap {{step}}",
+      "app": "Berekend door de app",
+      "general": "Algemeen advies · niet uit jouw spel"
+    },
     "compare": {
       "title": "Twee rondes van {{title}}, naast elkaar",
       "any": "Twee rondes, naast elkaar",

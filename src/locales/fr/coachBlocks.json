@@ -49,6 +49,14 @@
       "any": "Ta prise",
       "soon": "Réécouter une prise arrive bientôt."
     },
+    "source": {
+      "measured": "Mesuré",
+      "measuredTake": "Mesuré · Prise {{take}}",
+      "path": "Tiré du parcours",
+      "pathStep": "Tiré du parcours · Étape {{step}}",
+      "app": "Calculé par l'app",
+      "general": "Conseil général · pas tiré de ton jeu"
+    },
     "compare": {
       "title": "Deux essais sur {{title}}, côte à côte",
       "any": "Deux essais, côte à côte",

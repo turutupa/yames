@@ -49,6 +49,14 @@
       "any": "Tu toma",
       "soon": "Escuchar una toma llega pronto."
     },
+    "source": {
+      "measured": "Medido",
+      "measuredTake": "Medido · Toma {{take}}",
+      "path": "De la ruta",
+      "pathStep": "De la ruta · Paso {{step}}",
+      "app": "Calculado por la app",
+      "general": "Consejo general · no sale de cómo tocas"
+    },
     "compare": {
       "title": "Dos pasadas de {{title}}, una al lado de la otra",
       "any": "Dos pasadas, una al lado de la otra",

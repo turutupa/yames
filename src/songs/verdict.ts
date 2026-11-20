@@ -31,9 +31,17 @@
  * until somebody translates them, which is the rule the whole wave runs on.
  */
 import { pickTemplate, type ShuffleState } from "../coach/templates";
-import type { CoachAction, CoachBlock } from "../coach/blocks";
+import type { BlockSource, CoachAction, CoachBlock } from "../coach/blocks";
 import { printedBarNumber } from "./position";
 import type { Evidence, Finding, FindingKind, Fix, SongScore } from "./types";
+
+/**
+ * Where a verdict's words come from: the pass the player just played, as
+ * `findings.rs` measured it (DESIGN 3.6, 9.3). Handed to `resolveCoachAnswer`
+ * with the blocks, which carry no source of their own: the model's catalogue
+ * has no such field, and a sentence cannot vouch for itself.
+ */
+export const VERDICT_SOURCE: BlockSource = { kind: "measured" };
 
 /** What a template is handed. Everything is already a word or a number. */
 export type SentenceValues = Record<string, string | number>;

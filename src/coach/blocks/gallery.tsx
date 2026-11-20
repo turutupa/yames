@@ -21,7 +21,7 @@
 import type { CSSProperties } from "react";
 import { THEMES } from "../../themes";
 import { CoachBlocks } from "./CoachBlocks";
-import { resolveCoachAnswer, type CoachBlockContext } from "./resolve";
+import { resolveCoachAnswer, type BlockSource, type CoachBlockContext } from "./resolve";
 import type { CoachAction } from "./types";
 import "../../styles/global.css";
 
@@ -63,12 +63,14 @@ export const GALLERY_CONTEXT: CoachBlockContext = {
 // The answers
 // ---------------------------------------------------------------------------
 
-type Scene = { name: string; note: string; answer: unknown };
+/** `source`: where the caller says the answer came from (DESIGN 3.6); its line goes under the text. */
+type Scene = { name: string; note: string; answer: unknown; source?: BlockSource };
 
 export const GALLERY_SCENES: Scene[] = [
   {
     name: "The verdict",
     note: "text · tabExcerpt · action — what A4 and A5 ask for, and what the review screen is built from.",
+    source: { kind: "measured", take: 2 },
     answer: {
       blocks: [
         {
@@ -139,6 +141,19 @@ export const GALLERY_SCENES: Scene[] = [
     },
   },
   {
+    name: "General advice",
+    note: "A model's prose, labelled by the app under the words it covers: not from the player's playing.",
+    source: { kind: "general" },
+    answer: {
+      blocks: [
+        {
+          type: "text",
+          text: "A light touch on the body is common and fine. Planting the hand hard tends to lock the wrist, so check yours in a mirror.",
+        },
+      ],
+    },
+  },
+  {
     name: "What gets dropped",
     note: "Six references that mean nothing. One sentence survives; the rest render as nothing, never as a guess.",
     answer: {
@@ -160,7 +175,7 @@ export const GALLERY_SCENES: Scene[] = [
 // ---------------------------------------------------------------------------
 
 function SceneBlock({ scene, onAction }: { scene: Scene; onAction: (a: CoachAction) => void }) {
-  const { blocks, dropped } = resolveCoachAnswer(scene.answer, GALLERY_CONTEXT);
+  const { blocks, dropped } = resolveCoachAnswer(scene.answer, GALLERY_CONTEXT, { source: scene.source });
   return (
     <section className="gallery-scene">
       <h3 className="gallery-scene-name">{scene.name}</h3>

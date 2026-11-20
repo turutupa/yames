@@ -167,6 +167,7 @@ const VIEW_HINT_KEY = "session.viewHintSeen";
 const BAND_VOLUME_KEY = "session.bandVolume";
 /** Settings → Practice → "Grade my playing", now a choice of three (`session/grading.ts`). */
 import { setTakeContext } from "../../../settings/recordingSession";
+import { useCoachPublishingDispatch } from "../../../coach/sessionEvents";
 export { GRADING_KEY } from "../../../session/grading";
 const TICK_MS = 1000;
 /** Minutes per Exercise in Test out: one Take at the pass tempo, and a breath. */
@@ -385,7 +386,9 @@ export const CHOSEN_VARIANT: { seed: number | null } = { seed: null };
 
 export function useSessionRun(input: SessionRunInput) {
   const { view, setView, isPlaying, beat, listening } = input;
-  const [run, dispatch] = useReducer(runReducer, IDLE);
+  const [run, dispatchRun] = useReducer(runReducer, IDLE);
+  // Each transition is also told to the coach (stepReady, takeStarted, takeResult, timedEnded, sessionRecap).
+  const dispatch = useCoachPublishingDispatch(dispatchRun);
   const [paths, setPaths] = useState<PathDoc[]>([]);
   const { i18n } = useTranslation();
   const packLanguage = i18n.resolvedLanguage ?? i18n.language ?? "en";
@@ -1215,7 +1218,7 @@ export function useSessionRun(input: SessionRunInput) {
       cleanBefore,
       takeId: row.id,
     };
-    dispatch({ type: "takeResult", outcome, now });
+    dispatch({ type: "takeResult", outcome, now }, attempt.review);
 
     // What the Session goes on to read: kept in memory at once, in the store as
     // it will be. A save that fails loses this one row, and is not the player's

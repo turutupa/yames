@@ -15,6 +15,7 @@ import { resolveCoachAnswer } from "../coach/blocks";
 import { createShuffleState } from "../coach/templates";
 import {
   FINDING_KINDS,
+  VERDICT_SOURCE,
   actionFor,
   barsPhrase,
   beatFractionKey,
@@ -283,6 +284,21 @@ describe("the blocks the coach answers with", () => {
       expect(answer.blocks.length).toBe(blocks.length);
     });
   }
+
+  it("is said as measured: the source line under its sentence says so (DESIGN 9.3)", () => {
+    const blocks = blocksFor(
+      t,
+      finding("rushing"),
+      score(),
+      { scoreId: "song-1", attemptId: "att-1" },
+      createShuffleState(),
+    );
+    expect(VERDICT_SOURCE).toEqual({ kind: "measured" });
+    const answer = resolveCoachAnswer({ blocks }, context, { source: VERDICT_SOURCE });
+    expect(answer.blocks.find((b) => b.type === "text")?.source).toEqual({ kind: "measured" });
+    // The model's catalogue has no source field: the blocks themselves carry none.
+    expect(blocks.some((b) => "source" in b)).toBe(false);
+  });
 
   it("says one thing, points at it, and offers one button", () => {
     const blocks = blocksFor(

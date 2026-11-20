@@ -49,6 +49,14 @@
       "any": "Kaydın",
       "soon": "Bir kaydı geri dinlemek yakında geliyor."
     },
+    "source": {
+      "measured": "Ölçüldü",
+      "measuredTake": "Ölçüldü · Deneme {{take}}",
+      "path": "Yoldan",
+      "pathStep": "Yoldan · Adım {{step}}",
+      "app": "Uygulama hesapladı",
+      "general": "Genel tavsiye · senin çalışından değil"
+    },
     "compare": {
       "title": "{{title}} parçasından iki tur, yan yana",
       "any": "İki tur, yan yana",

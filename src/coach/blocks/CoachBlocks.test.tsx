@@ -222,6 +222,36 @@ describe("the button", () => {
   });
 });
 
+describe("the source line (DESIGN 3.6)", () => {
+  const SENTENCE = { blocks: [{ type: "text", text: "The last four bars ran ahead." }] };
+
+  it.each([
+    [{ kind: "measured", take: 2 } as const, "Measured · Take 2"],
+    [{ kind: "measured" } as const, "Measured"],
+    [{ kind: "path", step: 2 } as const, "From the Path · Step 2"],
+    [{ kind: "path" } as const, "From the Path"],
+    [{ kind: "app" } as const, "Worked out by the app"],
+    [{ kind: "general" } as const, "General advice · not from your playing"],
+  ])("says %o as its own line under the text", (source, words) => {
+    const { blocks } = resolveCoachAnswer(SENTENCE, GALLERY_CONTEXT, { source });
+    render(<CoachBlocks blocks={blocks} />);
+    const block = screen.getByTestId("coach-blocks").querySelector('[data-block="text"]')!;
+    const line = block.querySelector(".coach-block-source")!;
+    expect(line).not.toBeNull();
+    expect(line.getAttribute("data-source")).toBe(source.kind);
+    expect(line.textContent).toBe(words);
+    // After the sentence, never before it, and with an icon nobody reads aloud.
+    expect(block.lastElementChild).toBe(line);
+    expect(line.querySelector("svg")?.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  it("draws no source line when the caller gave none", () => {
+    const { blocks } = resolveCoachAnswer(SENTENCE, GALLERY_CONTEXT);
+    render(<CoachBlocks blocks={blocks} />);
+    expect(document.querySelector(".coach-block-source")).toBeNull();
+  });
+});
+
 describe("an answer that resolved to nothing", () => {
   it("draws nothing — not a frame, not an apology", () => {
     const { blocks, dropped } = draw({
