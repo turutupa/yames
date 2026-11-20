@@ -377,6 +377,13 @@ pub fn verify(ev: &Evidence, expected: &[Expected], lag: Option<f64>) -> Verifie
                 if let Some(p) = rival_pitch {
                     alt_midi = Some(p);
                     heard = Heard::Wrong;
+                } else if best.0 >= ACT_THRESHOLD && best.1.abs_diff(c) == 12 {
+                    // The written pitch's octave: the model's own commonest
+                    // slip (a strong second harmonic, a string's octave
+                    // ringing in sympathy), so not evidence of a wrong note.
+                    // "Couldn't tell" (owner decision 4), with what was read.
+                    alt_midi = Some(P_LO + best.1 as i32);
+                    heard = Heard::Unsure;
                 } else if best.0 >= ACT_THRESHOLD && best.1 != c {
                     alt_midi = Some(P_LO + best.1 as i32);
                     heard = Heard::Wrong;
@@ -474,6 +481,20 @@ mod tests {
         assert_eq!(heard, [Heard::Yes, Heard::Yes, Heard::Wrong, Heard::Yes]);
         assert_eq!(v.verdicts[2].alt_midi, Some(65));
         assert!(v.verdicts.iter().filter(|x| x.heard == Heard::Yes).all(|x| x.how == How::Pick));
+    }
+
+    /// Review of M4, item 4: the model reading a note an octave out (its
+    /// commonest slip) is "couldn't tell", not a wrong note; any other pitch
+    /// still is one.
+    #[test]
+    fn the_written_pitch_an_octave_out_is_unsure_not_wrong() {
+        for (played, verdict) in [(76, Heard::Unsure), (52, Heard::Unsure), (71, Heard::Wrong)] {
+            let ev = evidence(3.0, &[(0.5, 0.75, 60, true), (0.75, 1.0, 62, true), (1.0, 1.25, played, true), (1.25, 1.5, 65, true)]);
+            let exp = [want(0, 0.5, 60), want(1, 0.75, 62), want(2, 1.0, 64), want(3, 1.25, 65)];
+            let v = verify(&ev, &exp, Some(0.0));
+            assert_eq!(v.verdicts[2].heard, verdict, "64 written, {played} read");
+            assert_eq!(v.verdicts[2].alt_midi, Some(played));
+        }
     }
 
     #[test]
