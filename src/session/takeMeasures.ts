@@ -152,16 +152,21 @@ function noteIdentityOf(pass: ScorerPassResult | undefined): number | null {
  * How long a Take's result waits for right notes. The pitch pass takes well
  * under a second for a Take in a release build; this is the end of the
  * "mid-session report" tier (`AGENTS.md`, 3 to 8 s) less the time the timing
- * grade already took, and past it the timing grade stands.
+ * grade already took. Past it the engine hands over the grade from the pitch
+ * tracker alone when the note model is still on a long Take (`timing.rs`
+ * `LATE_BUDGET_MS`, the same number: change both), and the timing grade
+ * stands only when not even that is in.
  */
 export const NOTES_WAIT_MS = 5000;
 
 /**
  * The grade a Take's result should read: the timing grade as it came, or, when
  * it said the pitch pass was still running, the grade with right notes in it.
- * The timing numbers are the same in both; only `pass` gains `noteIdentity`.
- * A build without the command, a pass that is not done in time, or one that
- * failed all leave the timing grade, `noteIdentity` not assessed.
+ * The timing numbers are the same in both; `pass` gains `noteIdentity`, and
+ * what is reported and not graded (`verifier`, `curves`) comes with it, on an
+ * Exercise with no pass bars too. A build without the command, a pass with
+ * nothing to hand over in time, or one that failed all leave the timing
+ * grade, `noteIdentity` not assessed.
  */
 export async function withRightNotes(
   grade: ScorerTakeGrade | null,
@@ -171,10 +176,12 @@ export async function withRightNotes(
   const withNotes = await fetch(NOTES_WAIT_MS).catch(() => null);
   // Only the pass this Take started: a grade for another Take is no answer.
   const same = withNotes?.notesSerial !== undefined && withNotes.notesSerial === grade.notesSerial;
-  if (!withNotes?.pass || !same) return { ...grade, notesPending: false };
+  if (!withNotes || !same) return { ...grade, notesPending: false };
+  // An Exercise with no pass bars has no `pass` on either grade, and its late
+  // grade still carries what was reported: the legato line and the curves.
   return {
     ...grade,
-    pass: withNotes.pass,
+    ...(withNotes.pass ? { pass: withNotes.pass } : {}),
     ...(withNotes.verifier ? { verifier: withNotes.verifier } : {}),
     ...(withNotes.curves ? { curves: withNotes.curves } : {}),
     notesPending: false,

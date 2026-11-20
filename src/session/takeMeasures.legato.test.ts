@@ -40,6 +40,27 @@ describe("withRightNotes", () => {
     expect(got?.verifier).toBe(verifier);
     expect(got?.notesPending).toBe(false);
   });
+  it("keeps the curves and the verifier of a late grade with no pass bars", async () => {
+    // an Exercise with bends and no pass bars: neither grade has a `pass`
+    const timed = { notesPending: true, notesSerial: 7, due: 12 } as unknown as ScorerTakeGrade;
+    const curves = { bends: { due: 3, onPitch: 2, flat: 1, sharp: 0, unsure: 0 }, vibrato: { due: 0, present: 0, absent: 0, unsure: 0 }, notes: [], ms: 1 };
+    const verifier = report([{ kind: "hammer", due: 2, sounded: 2, notSounded: 0, wrong: 0, unsure: 0 }]);
+    const late = { notesSerial: 7, curves, verifier } as unknown as ScorerTakeGrade;
+    const got = await withRightNotes(timed, async () => late);
+    expect(got?.curves).toBe(curves);
+    expect(got?.verifier).toBe(verifier);
+    expect(got?.pass).toBeUndefined();
+    expect(got?.due).toBe(12);
+    expect(got?.notesPending).toBe(false);
+  });
+  it("still takes nothing from another Take's late grade", async () => {
+    const timed = { notesPending: true, notesSerial: 7 } as unknown as ScorerTakeGrade;
+    const late = { notesSerial: 6, curves: { notes: [] }, pass: { verdict: "passed" } } as unknown as ScorerTakeGrade;
+    const got = await withRightNotes(timed, async () => late);
+    expect(got?.curves).toBeUndefined();
+    expect(got?.pass).toBeUndefined();
+    expect(got?.notesPending).toBe(false);
+  });
 });
 
 describe("curvesOf", () => {
