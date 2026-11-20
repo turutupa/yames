@@ -1039,6 +1039,8 @@ export function installShotMock(shot: Shot, theme: string): void {
   if (!shot.firstRun) store.set("session.grading", shot.session?.grading ?? "on");
   // A Windows interface that came back on another port with another name.
   if (shot.session?.input === "missing") store.set("evaluationDevice", "Scarlett 2i2 USB");
+  // Settings, Coach, "Hear what I play" (detection M7): off unless the scene says.
+  if (shot.jam?.heard) store.set("jamHear", true);
   // Played Alternate Picking, then unsubscribed from it: no Path at all.
   if (shot.session?.seed === "none") store.set("session.unsubscribed", ["alternate-picking"]);
   if (shot.session?.unsubscribed) store.set("session.unsubscribed", shot.session.unsubscribed);
@@ -1427,7 +1429,7 @@ export function installShotMock(shot: Shot, theme: string): void {
     // …except on a scene that shows a verdict: a pass can only have been heard
     // with the input on, and since 2026-09-21 a stop with it off (rightly) says
     // nothing at all, so a review scene with the input off never builds.
-    get_evaluation_state: () => Boolean(shot.songs?.review),
+    get_evaluation_state: () => Boolean(shot.songs?.review || shot.jam?.heard),
     // The first run's input step needs something to pick: a laptop mic and
     // an interface, or nothing at all for the "no input found" scene.
     list_audio_input_devices: () =>
@@ -2144,6 +2146,31 @@ export function installShotMock(shot: Shot, theme: string): void {
       }
       return null;
     }
+
+    /*
+     * The free-play reading (detection M7): the worker's answer to a jam in A
+     * blues, as `harmony::worker::Live` serialises it. A key that settled and
+     * the chord two beats agreed on; or, for "unsure", neither.
+     */
+    if (cmd === "harmony_start") {
+      if (!shot.jam?.heard) return false;
+      const sure = shot.jam.heard === "heard";
+      const chord = { root: 2, quality: "dom7", label: null, fromChart: false };
+      setTimeout(
+        () =>
+          emit("harmony-reading", {
+            keyState: sure ? "settled" : "unsure",
+            key: sure ? { key: { tonic: 9, mode: "minor" }, scale: "minorPentatonic", confidence: 0.7, relativeToo: false } : null,
+            chord: sure ? chord : null,
+            shownChord: sure ? chord : null,
+            settledAtS: sure ? 13 : null,
+            heardS: 24,
+          }),
+        50,
+      );
+      return true;
+    }
+    if (cmd === "harmony_mark_bar" || cmd === "harmony_stop") return null;
 
     if (cmd === "set_jam_position") {
       const command = (a?.command ?? {}) as {
