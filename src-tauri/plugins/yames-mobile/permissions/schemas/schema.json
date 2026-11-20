@@ -415,10 +415,22 @@
           "markdownDescription": "Denies the set_light_system_bars command without any pre-configured scope."
         },
         {
-          "description": "Everything the phone build of Yames needs from its own native half: keeping\nthe click playing with the screen off, keeping the screen awake, answering the\nsystem Back gesture, opening a link in the browser, and asking for the\nmicrophone the Session grades from, and matching the status and navigation\nbar icons to the app's theme, and, in a test build only, updating itself to\nthe newest beta APK (the native side refuses on any build whose manifest does\nnot declare REQUEST_INSTALL_PACKAGES, which only the beta build's does). All of\nthe commands, and\nno scope — there is nothing here to narrow, and the frontend calls all of them.\n\n#### This default permission set includes:\n\n- `allow-set-background-audio`\n- `allow-request-microphone`\n- `allow-keep-awake`\n- `allow-open-url`\n- `allow-set-back-intercept`\n- `allow-set-event-channel`\n- `allow-set-light-system-bars`\n- `allow-beta-update-probe`\n- `allow-beta-update-download`\n- `allow-beta-update-install`",
+          "description": "Enables the share_file command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-share-file",
+          "markdownDescription": "Enables the share_file command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the share_file command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-share-file",
+          "markdownDescription": "Denies the share_file command without any pre-configured scope."
+        },
+        {
+          "description": "Everything the phone build of Yames needs from its own native half: keeping\nthe click playing with the screen off, keeping the screen awake, answering the\nsystem Back gesture, opening a link in the browser, sharing a recording session's zip, and asking for the\nmicrophone the Session grades from, and matching the status and navigation\nbar icons to the app's theme, and, in a test build only, updating itself to\nthe newest beta APK (the native side refuses on any build whose manifest does\nnot declare REQUEST_INSTALL_PACKAGES, which only the beta build's does). All of\nthe commands, and\nno scope — there is nothing here to narrow, and the frontend calls all of them.\n\n#### This default permission set includes:\n\n- `allow-set-background-audio`\n- `allow-request-microphone`\n- `allow-keep-awake`\n- `allow-open-url`\n- `allow-share-file`\n- `allow-set-back-intercept`\n- `allow-set-event-channel`\n- `allow-set-light-system-bars`\n- `allow-beta-update-probe`\n- `allow-beta-update-download`\n- `allow-beta-update-install`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Everything the phone build of Yames needs from its own native half: keeping\nthe click playing with the screen off, keeping the screen awake, answering the\nsystem Back gesture, opening a link in the browser, and asking for the\nmicrophone the Session grades from, and matching the status and navigation\nbar icons to the app's theme, and, in a test build only, updating itself to\nthe newest beta APK (the native side refuses on any build whose manifest does\nnot declare REQUEST_INSTALL_PACKAGES, which only the beta build's does). All of\nthe commands, and\nno scope — there is nothing here to narrow, and the frontend calls all of them.\n\n#### This default permission set includes:\n\n- `allow-set-background-audio`\n- `allow-request-microphone`\n- `allow-keep-awake`\n- `allow-open-url`\n- `allow-set-back-intercept`\n- `allow-set-event-channel`\n- `allow-set-light-system-bars`\n- `allow-beta-update-probe`\n- `allow-beta-update-download`\n- `allow-beta-update-install`"
+          "markdownDescription": "Everything the phone build of Yames needs from its own native half: keeping\nthe click playing with the screen off, keeping the screen awake, answering the\nsystem Back gesture, opening a link in the browser, sharing a recording session's zip, and asking for the\nmicrophone the Session grades from, and matching the status and navigation\nbar icons to the app's theme, and, in a test build only, updating itself to\nthe newest beta APK (the native side refuses on any build whose manifest does\nnot declare REQUEST_INSTALL_PACKAGES, which only the beta build's does). All of\nthe commands, and\nno scope — there is nothing here to narrow, and the frontend calls all of them.\n\n#### This default permission set includes:\n\n- `allow-set-background-audio`\n- `allow-request-microphone`\n- `allow-keep-awake`\n- `allow-open-url`\n- `allow-share-file`\n- `allow-set-back-intercept`\n- `allow-set-event-channel`\n- `allow-set-light-system-bars`\n- `allow-beta-update-probe`\n- `allow-beta-update-download`\n- `allow-beta-update-install`"
         }
       ]
     }
