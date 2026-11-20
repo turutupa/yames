@@ -683,6 +683,28 @@ export function useSessionRun(input: SessionRunInput) {
     () => applySwaps(basePlan, todaySwaps, swapContext),
     [basePlan, todaySwaps, swapContext],
   );
+  /**
+   * Today's plan as it would be with other minutes or another focus, built the
+   * way `plan` is and changing nothing (the coach's `set_minutes` / `set_focus`
+   * proposal draws it before the player presses). A new focus takes its
+   * swaps with it, as `setTodayFocus` does.
+   */
+  const previewPlan = useCallback(
+    (change: { minutes?: PlanMinutes; focus?: TodayFocus }): SessionPlan => {
+      const next = change.focus === undefined ? today : todayPathsOf(myPaths, offMix, readFocus(change.focus));
+      const base = planSession({
+        minutes: change.minutes ?? minutes,
+        now: planClock,
+        paths: next.paths,
+        progress,
+        avoid: avoidSet(swapMemory),
+        ungraded: grading === "off",
+        ...(next.focusedPath ? { focused: true } : {}),
+      });
+      return applySwaps(base, swapsIn(swapMemory, next.focus), swapContext);
+    },
+    [today, myPaths, offMix, minutes, planClock, progress, swapMemory, grading, swapContext],
+  );
 
   /** What Today's row `index` can be swapped for (owner, 2026-11-18). */
   const swapOptionsAt = useCallback(
@@ -2372,6 +2394,7 @@ export function useSessionRun(input: SessionRunInput) {
   return {
     run,
     plan,
+    previewPlan,
     minutes,
     setMinutes,
     practiceView: preview ? ("neck" as PracticeView) : practiceView,

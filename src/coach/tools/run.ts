@@ -26,15 +26,18 @@ import { runCoachAction, type CoachActionOutcome } from "../blocks/actions";
 import type { CoachAction } from "../blocks/types";
 import type { CoachContext } from "../context";
 import { chordNamePattern } from "../blocks/schema";
-import type { CoachToolHost, HostOutcome } from "./host";
+import type { CoachToolHost, HostOutcome, Sounding } from "./host";
 import { COACH_TOOLS } from "./registry";
 import {
+  line,
   refuse,
   takeRunning,
+  type ActTool,
   type ArgType,
   type ArgValue,
   type CoachTool,
   type Proposal,
+  type Proposed,
   type Refusal,
   type RunOutcome,
   type ToolArgs,
@@ -137,22 +140,59 @@ function guarded<T extends RunOutcome>(name: string, run: () => T): T | Refusal 
 /** The proposals this runner minted and nobody has confirmed yet. */
 const issued = new WeakSet<Proposal>();
 
+function mint(tool: CoachTool, args: ToolArgs, proposed: Omit<Proposal, "tool" | "args">): Proposed {
+  const proposal: Proposal = Object.freeze({
+    tool: tool.name,
+    args: Object.freeze({ ...args }),
+    line: proposed.line,
+    resolved: proposed.resolved,
+    ...(proposed.plan ? { plan: proposed.plan } : {}),
+    ...(proposed.noUndo ? { noUndo: true as const } : {}),
+  });
+  issued.add(proposal);
+  return { ok: true, proposal };
+}
+
+/**
+ * The host as a `go` tool sees it for a dry run: every read as it is, and the
+ * three doors a `go` tool moves the app through shut. What the tool returns
+ * is then exactly what it would do, and nothing has moved.
+ */
+function dryHost(host: CoachToolHost): CoachToolHost {
+  return { ...host, setView: () => {}, movePaths: () => {}, openSettingsSection: () => {} };
+}
+
+/**
+ * A `go` tool that leaves the screen while something sounds is not "at once"
+ * (the owner's rule: nothing sounds or stops sounding). It is run dry, and
+ * what it would do comes back as a proposal (the receipt's key under
+ * `coachTools.propose.`, with what stops). A refusal, or a run that would not
+ * move anything, comes back as it is.
+ */
+function proposeLeaving(tool: ActTool, args: ToolArgs, host: CoachToolHost, ctx: CoachContext, stops: Sounding): RunOutcome {
+  const dry = tool.run(args, dryHost(host), ctx);
+  if (!dry.ok || !dry.undo) return dry;
+  const key = dry.receipt.key.replace(/^coachTools\.receipt\./, "coachTools.propose.");
+  return mint(tool, args, { line: line(key, { ...dry.receipt.values, stops }), resolved: args });
+}
+
 function run(checked: CheckedCall, host: CoachToolHost, ctx: CoachContext): RunOutcome {
   const { tool, args } = checked;
   const wrong = checkContext(tool, ctx);
   if (wrong) return wrong;
-  if (tool.kind !== "confirm") return guarded(tool.name, () => tool.run(args, host, ctx));
+  if (tool.kind !== "confirm") {
+    return guarded(tool.name, () => {
+      const stops = tool.kind === "go" && tool.leaves ? host.sounding() : null;
+      return stops ? proposeLeaving(tool, args, host, ctx, stops) : tool.run(args, host, ctx);
+    });
+  }
   return guarded(tool.name, (): RunOutcome => {
     const proposed = tool.propose(args, host, ctx);
     if (!proposed.ok) return proposed;
-    const proposal: Proposal = Object.freeze({
-      tool: tool.name,
-      args: Object.freeze({ ...args }),
-      line: proposed.line,
-      resolved: proposed.resolved,
-    });
-    issued.add(proposal);
-    return { ok: true, proposal };
+    // A Session about to open says what it stops.
+    const stops = tool.leaves ? host.sounding() : null;
+    const said = stops ? line(proposed.line.key, { ...proposed.line.values, stops }) : proposed.line;
+    return mint(tool, args, { ...proposed, line: said });
   });
 }
 
@@ -185,9 +225,13 @@ export function confirmCoachTool(
   if (!issued.has(proposal)) return refuse("refused", "coachTools.why.refused.proposal", {}, { detail: "not a live proposal" });
   issued.delete(proposal);
   const tool = registry.find((t) => t.name === proposal.tool);
-  if (!tool || tool.kind !== "confirm") return refuse("refused", "coachTools.why.refused.proposal", {}, { detail: "no such confirm tool" });
+  if (!tool || !(tool.kind === "confirm" || (tool.kind === "go" && tool.leaves))) {
+    return refuse("refused", "coachTools.why.refused.proposal", {}, { detail: "no such confirm tool" });
+  }
   const wrong = checkContext(tool, ctx);
   if (wrong) return wrong;
+  // A `go` tool's proposal holds its checked arguments: run it for real now.
+  if (tool.kind !== "confirm") return guarded(tool.name, () => tool.run(proposal.resolved as ToolArgs, host, ctx));
   return guarded(tool.name, () => tool.commit(proposal.resolved, host, ctx));
 }
 
@@ -209,6 +253,10 @@ export function runCoachUndo(
 ): ToolResult {
   const checked = checkCall(undo, registry, "app");
   if (!checked.ok) return checked;
+  // Undo is not a press on "this stops the click": going back waits until it has stopped.
+  const { tool } = checked.call;
+  const stops = tool.kind === "go" && tool.leaves && !takeRunning(ctx) ? host.sounding() : null;
+  if (stops) return refuse("notNow", "coachTools.why.notNow.sounding", { stops });
   const outcome = run(checked.call, host, ctx);
   if (!("proposal" in outcome)) return outcome;
   return confirmCoachTool(outcome.proposal, host, ctx, registry);

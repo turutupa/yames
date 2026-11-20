@@ -93,6 +93,16 @@ export type SafeSettingKey = (typeof SAFE_SETTING_KEYS)[number];
 
 export type SafeSettingValue = string | number | boolean;
 
+/**
+ * One value a safe setting may take now, and the words that name it (its id,
+ * and for a language its own name). Only what the app's own control would
+ * offer: Voice "on" is not an option with no voice installed.
+ */
+export type SafeSettingOption = { value: SafeSettingValue; names: readonly string[] };
+
+/** What is sounding: the click (Metronome, Drill), a jam's band, or a song. */
+export type Sounding = "click" | "band" | "song";
+
 export type CoachToolHost = {
   // -- Wired in t1a1: where the player is, and going somewhere -------------
 
@@ -112,6 +122,11 @@ export type CoachToolHost = {
   movePaths: (at: PathsAt) => void;
   /** Open Settings at a section. */
   openSettingsSection: (section: SettingsSection) => void;
+  /**
+   * What is playing outside a Session, or null. Leaving a tool stops it, so
+   * while it is not null a navigating `go` tool waits for a press (t1a2).
+   */
+  sounding: () => Sounding | null;
 
   // -- Declared for t1a2 (the `confirm` tools) -----------------------------
 
@@ -132,6 +147,8 @@ export type CoachToolHost = {
   setTempo: (bpm: number) => HostOutcome;
   /** `actions.slower` / `faster`. */
   nudgeTempo: (direction: "slower" | "faster") => HostOutcome;
+  /** Which of those mean anything now (`tempoNudges`: a Test out is locked, the ladder has ends). */
+  nudges: () => { slower: boolean; faster: boolean } | NotWired;
   /** `actions.findEdge`. */
   findEdge: (pathId: string, exerciseId: string) => HostOutcome;
   /** `actions.testOut`. */
@@ -162,6 +179,8 @@ export type CoachToolHost = {
   setClickSubdivision: (subdivision: Subdivision) => HostOutcome;
   /** A safe setting's value now (for the undo). */
   safeSetting: (key: SafeSettingKey) => SafeSettingValue | NotWired;
+  /** The values a safe setting may take now (band volume, a number, has none). */
+  safeSettingOptions: (key: SafeSettingKey) => readonly SafeSettingOption[] | NotWired;
   /** Change a safe setting through its existing setter. */
   setSafeSetting: (key: SafeSettingKey, value: SafeSettingValue) => HostOutcome;
   /** The Notebook's goal (DESIGN 9.5), when there is a Notebook. */
@@ -185,6 +204,7 @@ export const HOST_MEMBERS = [
   "setView",
   "movePaths",
   "openSettingsSection",
+  "sounding",
   "plan",
   "minutes",
   "todayFocus",
@@ -195,6 +215,7 @@ export const HOST_MEMBERS = [
   "tempo",
   "setTempo",
   "nudgeTempo",
+  "nudges",
   "findEdge",
   "testOut",
   "swapOptions",
@@ -210,6 +231,7 @@ export const HOST_MEMBERS = [
   "clickSubdivision",
   "setClickSubdivision",
   "safeSetting",
+  "safeSettingOptions",
   "setSafeSetting",
   "goal",
   "setGoal",
@@ -256,6 +278,7 @@ export function notWiredHost(): CoachToolHost {
     setView: () => {},
     movePaths: () => {},
     openSettingsSection: () => {},
+    sounding: () => null,
     plan: () => null,
     minutes: () => 15,
     todayFocus: () => "mix",
@@ -266,6 +289,7 @@ export function notWiredHost(): CoachToolHost {
     tempo: nothing,
     setTempo: nothing,
     nudgeTempo: nothing,
+    nudges: nothing,
     findEdge: nothing,
     testOut: nothing,
     swapOptions: nothing,
@@ -281,6 +305,7 @@ export function notWiredHost(): CoachToolHost {
     clickSubdivision: nothing,
     setClickSubdivision: nothing,
     safeSetting: nothing,
+    safeSettingOptions: nothing,
     setSafeSetting: nothing,
     goal: nothing,
     setGoal: nothing,

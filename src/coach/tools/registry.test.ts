@@ -34,6 +34,13 @@ const SAMPLE_ARGS: Readonly<Record<string, ToolArgs>> = {
   show_chord: { chord: "Am7" },
   show_bars: { from: 1 },
   explain_screen: {},
+  start_today: { at: 2 },
+  play_exercise: { exercise: "outside picking", bpm: 70 },
+  set_tempo: { bpm: 80 },
+  find_edge: { exercise: "outside picking" },
+  test_out: { path: "alternate picking", step: 1 },
+  loop_bars: { from: 1, to: 2 },
+  make_exercise: { shape: "scale run", root: "A" },
 };
 
 describe("the list", () => {

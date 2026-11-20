@@ -40,6 +40,7 @@
 import type { CoachContext } from "../context";
 import type { ResolvedBlock } from "../blocks/resolve";
 import type { CoachToolHost } from "./host";
+import type { SessionPlan } from "../../session/planner";
 
 // ---------------------------------------------------------------------------
 // Arguments
@@ -147,15 +148,27 @@ export type Proposal = {
   readonly line: Line;
   /** What the tool resolved, for its `commit`. Not for the UI. */
   readonly resolved: unknown;
+  /** Today's plan as it would be (`set_minutes`, `set_focus`): drawn under the proposal. */
+  readonly plan?: SessionPlan;
+  /**
+   * Confirmed, this cannot be undone from the receipt (`follow_path`: leaving
+   * a Path is the player's, never a tool). The UI says so before the press.
+   */
+  readonly noUndo?: true;
 };
 
 export type Proposed = { ok: true; proposal: Proposal };
 
-/** What `runCoachTool` returns: a result, or (for a `confirm` tool) a proposal. */
+/**
+ * What `runCoachTool` returns: a result, or a proposal (a `confirm` tool, or
+ * a `go` tool that would stop something sounding).
+ */
 export type RunOutcome = ToolResult | Proposed;
 
 /** What a `confirm` tool's `propose` returns. */
-export type ProposeResult<R = unknown> = { ok: true; line: Line; resolved: R } | Refusal;
+export type ProposeResult<R = unknown> =
+  | { ok: true; line: Line; resolved: R; plan?: SessionPlan; noUndo?: true }
+  | Refusal;
 
 // ---------------------------------------------------------------------------
 // Tools
@@ -176,6 +189,13 @@ export type ToolSpec = {
   args: ArgSpec;
   /** What it does, in one line. */
   note: string;
+  /**
+   * It changes the screen (or opens a Session), and the app stops a playing
+   * click, band or song when it does. A `go` tool marked so is not "at once"
+   * while something sounds: the runner returns a proposal that says what
+   * stops. A `confirm` tool's proposal names what stops.
+   */
+  leaves?: true;
 };
 
 type ToolFunctions = {

@@ -11,7 +11,7 @@ import type { MainView } from "../../containers/main-window/MainHeader";
 import type { PathsAt } from "../../containers/main-window/hooks/usePathsPlace";
 import type { PathDoc } from "../../paths/format";
 import type { CoachContext } from "../context";
-import { HOST_MEMBERS, notWiredHost, type CoachToolHost } from "./host";
+import { HOST_MEMBERS, notWiredHost, type CoachToolHost, type Sounding } from "./host";
 
 export type HostCall = { member: keyof CoachToolHost; args: unknown[] };
 
@@ -42,15 +42,19 @@ const READS = new Set<keyof CoachToolHost>([
   "presets",
   "clickSubdivision",
   "safeSetting",
+  "safeSettingOptions",
   "goal",
+  "sounding",
+  "nudges",
 ]);
 
 export function fakeHost(
-  start: { view?: MainView; at?: PathsAt; paths?: readonly PathDoc[]; session?: boolean } = {},
+  start: { view?: MainView; at?: PathsAt; paths?: readonly PathDoc[]; session?: boolean; sounding?: Sounding | null } = {},
   overrides: Partial<CoachToolHost> = {},
 ): FakeHost {
   let view: MainView = start.view ?? "today";
   let at: PathsAt = start.at ?? { pathId: null, stepId: null };
+  let sounding: Sounding | null = start.sounding ?? null;
   const calls: HostCall[] = [];
   const base: CoachToolHost = {
     ...notWiredHost(),
@@ -58,14 +62,18 @@ export function fakeHost(
     pathsAt: () => at,
     paths: () => start.paths ?? [],
     sessionActive: () => start.session ?? false,
+    // Leaving a tool stops what plays, as the app's own view switch does.
+    sounding: () => sounding,
     setView: (next) => {
       view = next;
+      sounding = null;
     },
     movePaths: (next) => {
       at = next;
     },
     openSettingsSection: () => {
       view = "settings";
+      sounding = null;
     },
     ...overrides,
   };
