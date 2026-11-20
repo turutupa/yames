@@ -20,11 +20,12 @@
  *   graded. Choosing a pattern, and playing along with a song, are "your
  *   turn": self-checked.
  */
-import { definePath } from "../spec";
+import { definePath, withCues } from "../spec";
 import type { ExerciseSpec, VariantParams } from "../spec";
 import type { PassBar } from "../format";
 import { ladder } from "../templates";
 import { SEVENTHS_BLUES, SIXTEENTH_STRUMS, STRUMS_BETWEEN_BEATS } from "./first-chords-more";
+import { FIRST_CHORDS_CUES } from "./first-chords-cues";
 
 const even = (min: number, overBars = 4): PassBar => ({ metric: "timingEvenness", min, overBars });
 const heard = (min: number, overBars = 4): PassBar => ({ metric: "notesHeard", min, overBars });
@@ -157,7 +158,7 @@ const BARRE_PAIRS: Readonly<Record<string, { strings: [number, number]; frets: r
   "low E and A": { strings: [6, 5], frets: [3, 5, 7, 8, 10, 12] },
 };
 
-export default definePath({
+export default withCues(definePath({
   id: "first-chords",
   title: "First Chords and Strumming",
   kind: "mechanics",
@@ -1293,4 +1294,4 @@ export default definePath({
       ],
     },
   ],
-});
+}), FIRST_CHORDS_CUES);
