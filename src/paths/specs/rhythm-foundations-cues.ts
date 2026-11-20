@@ -46,7 +46,28 @@ const FRET_BEHIND = "Press each finger right behind the fret.";
 const FINGERS_578 = "Use one finger per fret: five, seven, eight.";
 const NEXT_FINGER_CROSS = "Have the next finger ready as you cross.";
 const LAST_TWO_BEATS = "Hold the last note for both beats.";
-const SHIFT_BAR = "Move the hand up as each new bar starts.";
+const SHIFT_BAR = "Arrive on the new note as each bar starts.";
+const AND_LATE = "Play each 'and' as soon as the foot lifts.";
+const AND_EARLY = "Wait for the foot to lift before each 'and'.";
+const UP_CATCH = "Catch the string on every upstroke.";
+const FOOT_LAST = "Keep the foot tapping to the last 'and'.";
+const SILENT_SWING = "Swing past the strings on the silent beats.";
+const COUNT_THREES = "Keep counting in threes to the last note.";
+const PUSH_AFTER_EARLY = "Wait for the click on the note after a push.";
+const PUSH_COUNT = "Keep counting through each pushed note.";
+const SWING_ON = "Keep the swing going right to the last note.";
+const TOUCH_WRITTEN = "Touch the string only on the written notes.";
+const TRIPLETS = "Count '1-trip-let' and keep it even.";
+const PAIR_BOTH = "Pick both notes of every pair, long and short.";
+const TWICE = "Play each note twice, then move on.";
+const F24 = "First finger on fret two, third on fret four.";
+const SHORT_LATE = "Play the short note late, just before the beat.";
+const OPEN_BOTH = "Lift both fingers off for the open notes.";
+const OPEN_CROSS = "Move across as each open note ends.";
+const LAST_BEAT = "Hold the last note for its whole beat.";
+const GALLOP_HEARD = "Pick the two short notes light but clear.";
+const A_LATE = "Play the 'a' late, just before the next beat.";
+const LAND_FOUR = "Land the last quarter note on '4'.";
 
 export const RHYTHM_FOUNDATIONS_CUES: CueBook = {
   // Level 1, Step 1: on the beat
@@ -247,5 +268,203 @@ export const RHYTHM_FOUNDATIONS_CUES: CueBook = {
     c("early", REST_EARLY),
     c("shift", "Move the hand up during the rest.", 0),
     c("lastBars", "Stop the string on '4' right to the end."),
+  ],
+
+  // Level 2, Step 5: off-beats
+  "off-beats.the-and": [
+    g("Play each note as the foot comes up.", 1),
+    c("heard", UP_CATCH),
+    c("extras", "Miss the string on each beat after the first.", 0),
+    c("notes", NOTES_SAY),
+    c("late", AND_LATE, 1),
+    c("early", AND_EARLY, 1),
+    c("openString", OPEN_LIFT),
+    c("stringChange", STRING_AHEAD),
+    c("lastBars", FOOT_LAST),
+  ],
+  "off-beats.dotted-quarter": [
+    g("Put each short note on its 'and'.", 0),
+    c("heard", "Catch the string on each short upstroke.", 1),
+    c("extras", RING_ONCE, 1),
+    c("notes", NOTES_SAY),
+    c("late", "Play each short note on its 'and', not later."),
+    c("early", "Hold the long note for a beat and a half."),
+    c("openString", OPEN_LIFT),
+    c("stringChange", STRING_AHEAD),
+    c("lastBars", "Hold the last note from '3' to the end.", 0),
+  ],
+  "off-beats.three-three-two": [
+    g("Count '1 2 3, 1 2 3, 1 2' and play each '1'.", 0),
+    c("heard", HEARD_ALL),
+    c("extras", "Play three notes in each bar, no more."),
+    c("notes", NOTES_SAY),
+    c("late", "Play the middle note on the 'and' of '2'.", 0),
+    c("early", "Wait for the click on '4' for the last note."),
+    c("openString", OPEN_LIFT),
+    c("stringChange", STRING_AHEAD),
+    c("lastBars", COUNT_THREES),
+  ],
+  "off-beats.sync-riff": [
+    g("Count '1 and, (2) and, (3) and 4' out loud.", 0),
+    c("heard", HEARD_ALL),
+    c("extras", SILENT_SWING, 0),
+    c("notes", NOTES_SAY),
+    c("late", AND_LATE),
+    c("early", AND_EARLY),
+    c("afterHeld", HELD_AFTER),
+    c("openString", OPEN_LIFT),
+    c("stringChange", STRING_AHEAD),
+    c("lastBars", "Hold the last note for the whole of '4'."),
+  ],
+
+  // Level 2, Step 6: the push
+  "the-push.push-in-the-bar": [
+    g("Let the pushed note ring through '3'.", 0),
+    c("heard", HEARD_ALL),
+    c("extras", "Miss the string on '3' while the note rings.", 0),
+    c("notes", NOTES_SAY),
+    c("late", "Play the push on the 'and', before '3'.", 0),
+    c("early", "Wait for the click on '4' after the push."),
+    c("openString", OPEN_LIFT),
+    c("stringChange", STRING_AHEAD),
+    c("lastBars", "Keep the finger down through the pushed note.", 2),
+  ],
+  "the-push.push-over-the-line": [
+    g("Let the pushed note ring through the next '1'.", 2),
+    c("heard", HEARD_ALL),
+    c("extras", "Let the foot tap the '1' alone.", 0),
+    c("late", "Play the push on the 'and' of '4'.", 0),
+    c("early", "Wait for the click on '2' after the push."),
+    c("openString", OPEN_LIFT),
+    c("stringChange", STRING_AHEAD),
+    c("lastBars", "Keep counting '2, 3, 4' after the push."),
+  ],
+  "the-push.two-pushes": [
+    g("Count '4 AND, (1), 2 AND, (3), 4' out loud.", 0),
+    c("heard", HEARD_ALL),
+    c("extras", "Let the foot tap '1' and '3' alone.", 3),
+    c("late", "Play both pushes as upstrokes, on the 'and'.", 3),
+    c("early", PUSH_AFTER_EARLY),
+    c("afterHeld", PUSH_COUNT),
+    c("openString", OPEN_LIFT),
+    c("stringChange", STRING_AHEAD),
+    c("lastBars", "Hold the push through '3', then play '4'.", 2),
+  ],
+  "the-push.push-riff": [
+    g("Keep the hand swinging in eighths throughout.", 4),
+    c("heard", HEARD_ALL),
+    c("extras", "Let each pushed note ring; don't pick it again.", 3),
+    c("late", "Play each push on its 'and', not on the beat."),
+    c("early", PUSH_AFTER_EARLY),
+    c("afterHeld", PUSH_COUNT),
+    c("openString", OPEN_LIFT),
+    c("stringChange", STRING_AHEAD),
+    c("lastBars", "Count '(1), 2 AND, (3), 4' in the last bar.", 0),
+  ],
+
+  // Level 2, Step 7: sixteenths
+  "sixteenths.four-and-one": [
+    g("Fit the four notes exactly into one click.", 1),
+    c("heard", "Pick all four fast notes, down-up-down-up.", 0),
+    c("extras", "Play four fast notes, then one long one."),
+    c("notes", NOTES_SAY),
+    c("late", "Put the first of each four on the click."),
+    c("early", "Spread the four notes to fill the whole beat.", 1),
+    c("afterHeld", LONG_BEAT),
+    c("openString", OPEN_LIFT),
+    c("stringChange", STRING_AHEAD),
+  ],
+  "sixteenths.long-short-short-16": [
+    g("Count '1, and a' on every beat.", 0),
+    c("heard", GALLOP_HEARD, 1),
+    c("extras", "Miss the string on the 'e' each beat.", 0),
+    c("notes", NOTES_SAY),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("openString", OPEN_LIFT),
+    c("stringChange", STRING_AHEAD),
+  ],
+  "sixteenths.short-short-long": [
+    g("Count '1 e and' on every beat.", 0),
+    c("heard", "Pick both short notes, then the long one."),
+    c("extras", "Miss the string on the 'a' each beat.", 0),
+    c("notes", NOTES_SAY),
+    c("late", "Put the first short note right on the click.", 1),
+    c("early", "Wait for the click before each short pair.", 1),
+    c("openString", OPEN_LIFT),
+    c("stringChange", STRING_AHEAD),
+  ],
+  "sixteenths.sixteenth-riff": [
+    g("Clap the rhythm once before you play it.", 0),
+    c("heard", HEARD_ALL),
+    c("extras", TOUCH_WRITTEN, 1),
+    c("notes", NOTES_SAY),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("afterHeld", LONG_BEAT),
+    c("openString", OPEN_LIFT),
+    c("stringChange", STRING_AHEAD),
+    c("lastBars", SWING_ON, 1),
+  ],
+
+  // Level 2, Step 8: triplets
+  "triplets.triplets": [
+    g(TRIPLETS, 0),
+    c("heard", HEARD_ALL),
+    c("extras", "Play three notes on each click, no more."),
+    c("notes", NOTES_SAY),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("openString", OPEN_LIFT),
+    c("stringChange", STRING_AHEAD),
+  ],
+  "triplets.two-and-three": [
+    g("Switch between two and three on the click.", 0),
+    c("heard", HEARD_ALL),
+    c("extras", "Play just three notes in each triplet."),
+    c("notes", NOTES_SAY),
+    c("late", BEAT_LATE, 0),
+    c("early", "Speed the hand up less for the triplets.", 1),
+    c("openString", OPEN_LIFT),
+    c("stringChange", STRING_AHEAD),
+  ],
+  "triplets.shuffle": [
+    g("Down on the long note, up on the short one.", 1),
+    c("heard", PAIR_BOTH),
+    c("extras", TWICE, 0),
+    c("notes", F24, 0),
+    c("late", LONG_LATE),
+    c("early", SHORT_LATE, 1),
+    c("openString", OPEN_BOTH),
+    c("stringChange", OPEN_CROSS),
+    c("lastBars", LAST_BEAT),
+  ],
+  "triplets.triplet-tune": [
+    g("Keep strictly down-up through the crossings.", 1),
+    c("heard", FRET_BEHIND),
+    c("extras", REST_QUIET),
+    c("notes", FINGERS_578),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("afterHeld", "Count the rest out loud before the triplets.", 0),
+    c("stringChange", "Keep the pick close as you cross."),
+    c("lastBars", LAST_TWO_BEATS),
+  ],
+  "warmup-intermediate.gallop-up": [
+    g("Count '1, and a, 2, and a' as you climb.", 0),
+    c("heard", GALLOP_HEARD),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("afterHeld", LONG_BEAT),
+    c("shift", SHIFT_BAR, 0),
+    c("lastBars", LAND_FOUR),
+  ],
+  "warmup-intermediate.off-beat-walk": [
+    g("Keep the foot on every click as you climb.", 0),
+    c("heard", UP_CATCH),
+    c("late", AND_LATE),
+    c("early", AND_EARLY),
+    c("shift", SHIFT_BAR, 0),
+    c("lastBars", FOOT_LAST),
   ],
 };
