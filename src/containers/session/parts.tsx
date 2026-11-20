@@ -11,6 +11,8 @@ import type { PlanStep } from "../../session/planner";
 import { useFitPair } from "./hooks/useFitOneLine";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { stepTitle } from "./TodayView";
+import { lineText } from "./lineText";
+import { loopButtonLine } from "../../coach/loopLine";
 
 // The coach's line (with its lamp) lived here; it is `containers/coach/CoachLine`
 // now, without the lamp (DESIGN 2: the number carries the grade).
@@ -59,6 +61,26 @@ export function bigLabel(action: BigAction, t: T): string {
     case "none":
       return "";
   }
+}
+
+/**
+ * "Loop the first bar" (DESIGN 4.2): a tonal button with a verb, beside the
+ * tempo controls, never inside the note. Only where the Session offers it.
+ */
+export function LoopButton({ session }: { session: SessionRun }) {
+  const { t } = useTranslation();
+  const offer = session.loop;
+  if (!offer) return null;
+  return (
+    <button
+      className="session-secondary"
+      onClick={session.actions.startLoop}
+      data-testid="session-loop"
+      data-front={offer.front ? "" : undefined}
+    >
+      {lineText(t, loopButtonLine(offer.loop))}
+    </button>
+  );
 }
 
 export function TempoNudges({

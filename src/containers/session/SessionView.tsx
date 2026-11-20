@@ -35,7 +35,7 @@ import {
 } from "../../session/runner";
 import type { TakeOutcome } from "../../session/runner";
 import { PORTRAIT_PHONE_QUERY, useMediaQuery } from "../../hooks/useMediaQuery";
-import { AskStart, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart, timedHowKey } from "./parts";
+import { AskStart, LoopButton, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart, timedHowKey } from "./parts";
 import { TakeOrder } from "../coach/CoachLine";
 import { ReadyNote, RecapLine, ResultNote, UngradedNote, takeOrderText } from "./SessionCoach";
 import { RunwayTakeScreen, isTheoryTake } from "./highway/RunwayTake";
@@ -58,6 +58,7 @@ import type { TimingMark } from "../songs/review/marks";
 import type { BeatPosition } from "../../songs/position";
 import type { NeckKind, NeckView } from "../../stage3d/api";
 import { lineText } from "./lineText";
+import { loopTitleLine } from "../../coach/loopLine";
 import { exerciseWords, plannedPurpose } from "../../session/exerciseWords";
 import { ContextLine, StepTag, rise, stepTitle } from "./TodayView";
 import { roleKey } from "./todayPlan";
@@ -403,6 +404,93 @@ function TimingStrip({ deviations }: { deviations: readonly number[] }) {
   );
 }
 
+/** P1's "Up to N BPM": the rung the pass would have gone to, one tap away. */
+function UpToButton({ session }: { session: SessionRun }) {
+  const { t } = useTranslation();
+  const { big } = session;
+  if (big.kind !== "again" || !big.onceMore) return null;
+  return (
+    <button className="session-secondary" onClick={session.actions.upTo} data-testid="session-up-to">
+      {t("session.result.upTo", { bpm: big.onceMore.up })}
+    </button>
+  );
+}
+
+/**
+ * A loop (DESIGN 4.2, "Loop a bar"): the bar or two on repeat, slow, with its
+ * own Slower and Faster, the early / late strip when it is graded, and one
+ * button to stop it. Nothing here is graded or kept.
+ */
+function LoopScreen({
+  session,
+  beat,
+  isPlaying,
+  viewKey,
+}: {
+  session: SessionRun;
+  beat: PracticeBeat | null;
+  isPlaying: boolean;
+  viewKey: string;
+}) {
+  const { t } = useTranslation();
+  const { run, loopPlan, live, big, actions } = session;
+  const loop = run.loop;
+  if (!loop || !loopPlan) return null;
+  const view = session.practiceView;
+  // The strip only when something is listening: with grading off nothing is
+  // said about the playing, not even a dot.
+  const graded = !run.ungraded;
+  const countingIn = isPlaying && !!beat?.songCountIn;
+  const picture =
+    view === "tab" ? (
+      <PracticeTab take={loopPlan} running beat={beat} playing={isPlaying} loopTicks={takeTicks(loopPlan)} />
+    ) : view === "runway" ? (
+      <Runway take={loopPlan} beat={beat} playing={isPlaying} lights={NO_LIGHTS} />
+    ) : (
+      <NeckInstruction
+        take={loopPlan}
+        running
+        beat={beat}
+        playing={isPlaying}
+        theory={isTheoryTake(session)}
+        className="session-practice-hero"
+      />
+    );
+  return (
+    <div className="session-body" data-testid="session-loop-screen" data-phase={run.phase} data-view={view}>
+      <PracticeHead
+        kick={t("session.loop.kick")}
+        title={lineText(t, loopTitleLine(loop))}
+        aside={<PracticeViewSwitch view={view} onChange={session.setPracticeView} locked={false} keyLabel={viewKey} />}
+        meta={
+          <>
+            <MetaTempo bpm={loop.bpm} onSlower={actions.slower} onFaster={actions.faster} slowerKey="↓" fasterKey="↑" />
+            {graded && (
+              <span className="session-row session-live practice-live" data-testid="session-loop-strip">
+                <TimingStrip deviations={live.deviations} />
+              </span>
+            )}
+          </>
+        }
+        status={countingIn ? t("session.run.countIn") : null}
+        statusTone="live"
+      />
+      {picture}
+      <div className="practice-foot">
+        <span className="practice-note" data-testid="session-loop-how">
+          {t(graded ? "session.loop.how" : "session.loop.howUngraded")}
+        </span>
+        <span className="practice-grow" />
+        <div className="practice-go" data-testid="practice-go">
+          <button className="session-big" data-size="mid" onClick={actions.go} data-testid="session-big">
+            {bigLabel(big, t)}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** One line for each thing the pedal does, so nobody has to remember. */
 function PedalCard() {
   const { t } = useTranslation();
@@ -669,6 +757,9 @@ function TakeScreen({
               compact
             />
           )}
+          {/* "Loop the first bar" with the tempo controls: first in the row
+              the second time at the same spot (DESIGN 4.2). */}
+          {!running && session.loop?.front && <LoopButton session={session} />}
           {!running && tabView && portraitPhone && watch.canWatch ? (
             <WatchFooterRow watch={watch}>
               <TempoNudges run={run} exercise={exercise} session={session} />
@@ -676,6 +767,7 @@ function TakeScreen({
           ) : (
             !running && <TempoNudges run={run} exercise={exercise} session={session} />
           )}
+          {!running && session.loop && !session.loop.front && <LoopButton session={session} />}
           {/* `aria-disabled`, not `disabled`, while the next Take loads: ↓ or
               ↑ reloads it, and a disabled button drops the keyboard's focus
               to the page (acceptance pass 2, P2-9). */}
@@ -1074,8 +1166,14 @@ function ResultScreen({ session, pedalMapped }: { session: SessionRun; pedalMapp
           <button ref={bigRef} className="session-big" data-size="mid" data-fit="" onClick={actions.go} data-testid="session-big">
             {bigText}
           </button>
-          <div className="session-nudges">
+          {/* The tonal row: every other way on, the one the big button is not
+              (DESIGN 4.2). P1 puts "Up to N" first; the loop leads the second
+              time at the same spot; after P2 going again is still here. */}
+          <div className="session-nudges" data-testid="session-tonal">
+            <UpToButton session={session} />
+            {session.loop?.front && <LoopButton session={session} />}
             <TempoNudges run={run} exercise={exercise} session={session} />
+            {session.loop && !session.loop.front && <LoopButton session={session} />}
             {big.kind !== "again" && (
               <button className="session-secondary" onClick={actions.again} data-testid="session-again">
                 {t("session.run.goAgain", { bpm: run.bpm })}
@@ -1212,6 +1310,8 @@ function UngradedResultScreen({ session }: { session: SessionRun }) {
           {bigText}
         </button>
         <div className="session-nudges">
+          {/* "Not yet" twice: the loop first (DESIGN 4.4). Nothing about the playing. */}
+          <LoopButton session={session} />
           {big.kind !== "again" && (
             <button className="session-secondary" onClick={actions.again} data-testid="session-again">
               {t("session.run.goAgain", { bpm: run.bpm })}
@@ -1949,6 +2049,9 @@ export function SessionView({
           onTestInput={testInput}
           onChooseInput={chooseInput}
         />
+      )}
+      {run.phase === "looping" && (
+        <LoopScreen session={session} beat={beat} isPlaying={isPlaying} viewKey={viewKey} />
       )}
       {run.phase === "listening" && <ListeningScreen session={session} />}
       {run.phase === "result" &&
