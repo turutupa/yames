@@ -40,6 +40,13 @@ Cuts: `soundStarting` (`voice.test` "a Start pressed during speech..."; `coach-v
 - **accept-suggestion's suggestions** are the coach's offers drawn as tonal buttons: "Up to N" (P1), the loop, "This one is for your eyes". Not the big button (its own key), not the tempo nudges. Exactly one, or nothing.
 - **ask-what-next's "why"**: the planner's reason (`step.why`) before a step's first Take; after one, that Take's lead ("Last Take: 79% even."), because after Slower the planner's reason no longer matches the tempo; on a result, the rule's own existing sentence (`session.why.climb`, `.belowBar.plain`, `.notCaught`, `session.note.repeat.onceMore`, P2's history line), or the next step's `step.why`.
 
+## Gates (logs in /tmp/coach-c1b2b/)
+
+- `tsc --noEmit`: pass (`tsc.log`). `npm run build`: pass (`build.log`).
+- vitest: 17,955 tests pass, 403 of 404 files; the one is the known worktree-only `TabStage.render.test.tsx` (Bravura through the linked node_modules) (`vitest.log`).
+- Layout by name: `settings`, `coach-session`, `smooth`, `coach-voice`: 63 passed, 52 skipped (env-gated variants) (`pw-gates.log`).
+- Owed: the full layout suite (gates ran before 8 PM Pacific).
+
 ## Open
 
 - The tools' coach (`useSession.ts`) pops its own reveal FIFO on any `tts-speech-started`; in a Session it is hushed, so the two never interleave there. Outside a Session our voice never speaks.
