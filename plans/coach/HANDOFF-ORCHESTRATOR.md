@@ -47,8 +47,9 @@ Merged on `coach`, in order: c0 (bus, context, source line), c1a (takeNote, roun
 reviewed), c1b1 (the Session's coach line and note), fix1 (two layout regressions, "Needs 85%"), c2a1
 with c2a1b (Ask's shell: dock, drawer, sheet; reviewed, six fixes), c1c (the loop step, P1, P2, "for
 your eyes"), c3a with c3ab (the Rust worker's Ask kind: grammar, cancel, deadline, cached prefix, two
-probe modes; reviewed twice; nothing calls it yet). Deliveries: 1a and 1b (see `STATUS.md`); c2a1 and c1c are on `coach` but not yet in a
-delivery line: they go out with c2a2 as 1c. A polish leg is owed at the end of milestone 1: the items
+probe modes; reviewed twice; nothing calls it yet), ms2 with ms2b (both models on disk, Pause / Resume /
+Cancel, checksum, low storage; reviewed twice), c4c (the `cues` field, Alternate Picking's cues,
+`CUES_GUIDE.md`). Deliveries: 1a, 1b, 1c (see `STATUS.md`); 1d is c2a2. A polish leg is owed at the end of milestone 1: the items
 marked "for a polish leg" in `PROGRESS.md` (the drawer covering the note at 1024 px; "Up to N" beside
 "Faster"; the strip's label against its cells).
 
@@ -56,18 +57,18 @@ In flight on 2026-11-20 (check `git worktree list` and `git branch --no-merged c
 
 | Leg | Worktree / branch | State | Next |
 |---|---|---|---|
-| ms2 → **ms2b** | `~/yames-coach-ms2`, `coach-ms2` | Reviewed twice. The seven first-review items are fixed and confirmed; the re-read found one defect the fix introduced (a cancelled download can still be renamed over `model.bin` on the check-skip path) and two small races: the ms2b agent was resumed for those (it is near 300k tokens: if it does not finish, a fresh agent takes the three items from the re-read, which are in this session's message to it and summarised in `PROGRESS.md`) | Its report; a last look by a reviewer at the diff since `35aa5fd0` (a few hunks); merge `coach` into it again (c3a touched `commands.rs`), gates including `test:rust`, merge. Tell STATUS that `npm run test:rust` on Windows is owed. |
-| **c4c** | `~/yames-coach-c4c`, `coach-c4c` | Running: the `cues` pack field, `cueFor`, the cue on the ready note / Take / result, Alternate Picking's cues, `plans/coach/CUES_GUIDE.md` | Read a sample of the cues yourself as a teacher would; screenshots; merge. Then brief the content legs for the other fifteen Paths (one per four Paths, each with a separate proof-reader) from the guide. |
 | **c2a2** | `~/yames-coach-c2a2`, `coach-c2a2` | Running: Listen on the tools' transport, the tool line and note, Tool runs on Progress, `CoachCard` deleted | Screenshots against DESIGN 7; **reviewer on the `useSession.ts` diff**; merge; then delivery 1c/1d. |
 
-Briefed and not started (files in `plans/tasks/coach/`): `c1b2-today-speech-keys.md`,
-`c4c-cues-field.md` (moved up: see below), `t1a-tool-registry.md` (c2a1 is merged, so it can start).
-Start them as slots free, c4c and c1b2 first. Not yet briefed: t1b, c2b, c2c, the `cues` content legs (after c4c writes
-`plans/coach/CUES_GUIDE.md`; one leg per four Paths, each with a separate proof-reader), c4a, c4b, t2a
-to t2c, rem, c3b, c3c, c5a, c5b, c5c, c6. `PLAN.md` has each one's scope, design sections and flags.
+Briefed and not started (files in `plans/tasks/coach/`): `c1b2-today-speech-keys.md` and
+`t1a-tool-registry.md` (both can start now). Not yet briefed: the `cues` content legs for the other
+fifteen Paths (write the brief from `plans/coach/CUES_GUIDE.md` and c4c's prompt: one leg per four
+Paths, a separate sonnet proof-reader before translating, the full layout suite at the end), a polish
+leg (the items marked "for a polish leg" in `PROGRESS.md`), t1b, c2b, c2c, c4a, c4b, t2a to t2c, rem,
+c3b, c3c, c5a, c5b, c5c, c6. `PLAN.md` has each one's scope, design sections and flags.
 
-Suggested order from here: c2a1b merge → c2a2 ‖ c1b2 ‖ c4c (then delivery 1c/1d: no Start button,
-loop, Today's line) → t1a → t1b ‖ c2b ‖ cues content → c2c (delivery 2) → the rest of `PLAN.md`.
+Suggested order from here: c2a2 (review, merge, delivery 1d: no Start button) → c1b2 ‖ t1a ‖ cues
+content (two legs at a time at most beside a code leg) → the polish leg → t1b ‖ c2b → c2c (delivery 2)
+→ the rest of `PLAN.md`.
 
 ## Owed, and easy to forget
 
