@@ -130,7 +130,7 @@ export default definePath({
   goal: "Know what a triad is, play major and minor triads in three places on the top strings and on the middle strings, and move between the chords of a song with the nearest shapes.",
   level: "beginner",
   assumes:
-    "You can fret and pick single notes and play eighth notes with a click at 60 BPM, and you can find C on the B string or will learn it in the first Exercise. No theory is assumed: this Path starts from counting the notes of one scale. The minutes listed are one pass through the material; these shapes are worth months.",
+    "You can fret and pick single notes and play eighth notes with a click at 60 BPM, and you can find C on the B string or will learn it in the first Exercise. No theory is assumed: this Path starts from counting the notes of one scale. If you have done Know the Neck and Scales and Modes you already know the note names and the major scale, and the two Steps that count scales will go quickly. The minutes listed are one pass through the material; these shapes are worth months.",
   prerequisites: {
     paths: [
       { path: "know-the-neck", level: "beginner" },
@@ -151,6 +151,8 @@ export default definePath({
       goal: "Count the C major scale along one string, pick out its first, third and fifth notes, and play those three under one hand.",
       why: "A chord is not a shape someone invented. Take a major scale, count its notes from one to seven, and play numbers one, three and five together: that is a major chord, and the three notes are called a triad. Every major chord you already play is three notes like these, some of them played more than once. Once you can count to five on one string, you can build a chord anywhere.",
       howTo: [
+        "The words this Path uses. The strings, from thickest to thinnest: low E, A, D, G, B and the top string. Fret 1 is the first space next to the nut, at the head end of the neck. Fingers are numbered from the index finger: first, second, third, and the little finger is the fourth.",
+        "A click is the tick of the metronome. Each tick is a beat, four beats make a bar, and BPM is how many beats go by in a minute. A whole note lasts a whole bar, a half note two beats, a quarter note one beat. The pass tempo is the speed at which an Exercise counts as done.",
         "The C major scale is C, D, E, F, G, A, B, and then C again. Count them: C is one, E is three, G is five.",
         "On one string, a scale is a row of frets. On the B string, C major is frets 1, 3, 5, 6, 8, 10, 12 and 13.",
         "One is called the root, and it gives the chord its name. Three is the third and five is the fifth. The C at fret 13 is one again, an octave up: the same note, higher.",
@@ -164,7 +166,7 @@ export default definePath({
           howTo: [
             "Quarter notes, 60 BPM up to a pass at 90.",
             "B string, first finger only: frets 1, 3, 5, 6, 8, 10, 12, 13, then back down to fret 1. Say the numbers as you go up: one, two, three, four, five, six, seven, and one again at fret 13.",
-            "Most notes are two frets apart. Two pairs are only one fret apart: three and four (frets 5 and 6), and seven and the top (frets 12 and 13).",
+            "Most notes are two frets apart, which is called a whole step. Two pairs are only one fret apart, a half step: three and four (frets 5 and 6), and seven and the top (frets 12 and 13).",
           ],
           coach: "Right notes and steady quarter notes after the take. The app can't hear you count, so that part is yours.",
           tab: SCALE_ON_B,
@@ -295,11 +297,13 @@ export default definePath({
       goal: "Play C, F and G by moving one shape, then by staying in one place and changing shape, over a band.",
       why: "A shape is a kind of chord, and the fret you put it on is the chord's name. Move the C shape up five frets and it is F; two more and it is G. That is the easy way to change chord. The better way is the opposite: stay where you are and change to the shape of the next chord that is already under your hand. Both are worth having, and the second is what makes a rhythm part sound smooth.",
       howTo: [
+        "A key is the seven notes of one major scale, with the note you count from as home. The key of C is the C major scale.",
         "Build a chord on notes one, four and five of the C scale and you get C, F and G: the first, fourth and fifth chords of the key of C, and the three chords of a great many songs. F is F, A, C and G is G, B, D.",
         "Moving one shape: C at fret 5, F at fret 10, G at fret 12, counted on the G string.",
         "Staying put around fret 8: C is 9, 8, 8. F is 10, 10, 8. G is 7, 8, 7. The top string hardly moves.",
+        "When a Take passes, play the same four bars once more with the three strings of each shape strummed together, two strums a bar. The app does not grade strums, so that part is yours to judge.",
       ],
-      payoff: "Three chords over a band, played two ways, and the same three in two more keys.",
+      payoff: "Three chords over a band, played two ways, and the same three in three more keys.",
       exercises: [
         {
           id: "move-the-shape",
@@ -471,7 +475,7 @@ export default definePath({
         "Around fret 8: C is 9, 8, 8. A minor is 9, 10, 8. F is 10, 10, 8. G is 7, 8, 7.",
         "Before each change, ask which notes stay. Between C and A minor two do; between A minor and F two do.",
       ],
-      payoff: "A whole chord progression under one hand, in two places and three keys.",
+      payoff: "A whole chord progression under one hand, in two places and four keys.",
       exercises: [
         {
           id: "low",
@@ -804,10 +808,11 @@ export default definePath({
       why: "An open C chord has five strings and only three different notes: C, E, G, C, E. A six-string barre chord has only three as well. Every big major or minor chord shape is a triad with some notes played twice, which is why the small shapes you have learned sound like the same chord. Going the other way, add the seventh note of the scale to a triad and you have a seventh chord: the next family of chords, built the same way.",
       howTo: [
         "Open C, low to high: C (A string, fret 3), E (D string, fret 2), G (open G string), C (B string, fret 1), E (open top string).",
-        "A G barre chord at fret 3, low to high: G, D, G, B, D, G. Its top three strings are the G triad you know: 4, 3, 3.",
+        "The open chords of First Chords and Strumming hold shapes you have played. The top three strings of open D, 2, 3, 2, are shape three of D. The D, G and B strings of open A minor, 2, 2, 1, are the A minor shape from 14, 14, 13, twelve frets lower. The top three strings of open C, 0, 1, 0, are shape three of C from fret 12, twelve frets lower. The small F is shape two of F.",
+        "If you play barre chords: a G barre chord at fret 3 is, low to high, G, D, G, B, D, G. Its top three strings are the G triad you know: 4, 3, 3.",
         "B is the seventh note of the C scale: add it to C, E and G and you have C major seven. Lower it one fret to B flat and you have C seven. On three strings you leave out G, the fifth, which the ear does not miss, and keep C and E with the new note on top.",
       ],
-      payoff: "You can look at a chord shape and name the three notes it is made of.",
+      payoff: "You can look at a chord shape and name the three notes it is made of, and you have heard what a seventh adds. Chords in a Key and Arpeggios over Changes take the sevenths further.",
       difficultyException:
         "Slow on purpose, with no band: the Exercises are for looking at chord shapes and naming their notes, which the metric does not count.",
       exercises: [
@@ -870,14 +875,14 @@ export default definePath({
     {
       id: "a-song",
       title: "A whole song in triads",
-      goal: "Play a four-bar chord progression twice, low then high, eight bars in all, in three keys, and then with shapes of your own choosing.",
+      goal: "Play a four-bar chord progression twice, low then high, eight bars in all, in four keys, and then with shapes of your own choosing.",
       why: "Everything so far has been four bars. A song is longer, and the skill it needs is staying with the form while the hand changes shape every bar. This is the progression of a great many songs, C, G, A minor, F, played low the first time and higher the second, the way a second guitar part lifts a second verse.",
       howTo: [
         "Bars 1 to 4 around fret 5: C is 5, 5, 3. G is 4, 3, 3. A minor is 5, 5, 5. F is 5, 6, 5.",
         "Bars 5 to 8 around fret 8: C is 9, 8, 8. G is 7, 8, 7. A minor is 9, 10, 8. F is 10, 10, 8.",
         "There are two big moves: from bar 4 to bar 5, and from bar 8 back to the start. Look at the fret you are going to during the last beat before each.",
       ],
-      payoff: "Eight bars of rhythm guitar made of small shapes, in any of three keys.",
+      payoff: "Eight bars of rhythm guitar made of small shapes, in any of four keys.",
       exercises: [
         {
           id: "eight-bars",
@@ -977,7 +982,7 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: minor, the nearest shape, and the middle strings",
-      summary: "Minor as one lowered note, A minor, D minor and E minor in three places each, the four chords most songs use in two parts of the neck and in other keys, choosing shapes so the top note makes a line, and then all six chords of the key again on the D, G and B strings.",
+      summary: "Minor as one lowered note, A minor, D minor and E minor in three places each, the four chords most songs use in two parts of the neck and in other keys, choosing shapes so the top note makes a line, and then all six chords of the key again on the D, G and B strings. After this Level you have everything Chords in a Key assumes.",
       startHereIf: [
         "You can play a C major triad in 3 places on the top strings at 80 BPM.",
         "You can play C, F and G with triads over a band.",
@@ -1002,7 +1007,7 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: every set of strings, and whole chords",
-      summary: "Two sets of strings joined into four-string shapes, the same triads on the A, D and G strings, one chord on all three sets, the diminished triad, the triads inside open and barre chords, seventh chords, and two songs: eight bars, then sixteen.",
+      summary: "Two sets of strings joined into four-string shapes, the same triads on the A, D and G strings, one chord on all three sets, the diminished triad, the triads inside open and barre chords, seventh chords, and two songs: eight bars, then sixteen. After it, Arpeggios over Changes plays these same chords as lines.",
       startHereIf: [
         "You can play C, A minor, F and G with the nearest shapes on the top strings at 90 BPM.",
         "You can say the top note of each of the 3 shapes of a triad.",

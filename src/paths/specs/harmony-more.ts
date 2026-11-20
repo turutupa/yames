@@ -72,6 +72,9 @@ export const F_AND_G: StepSpec = {
       howTo: [
         "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord: C, F, G, C.",
         "C: G string 12, B string 13, top string 12. F: 5, 6, 5. G: 7, 8, 7. Keep the fingers in their shape as the hand slides.",
+        "The band is a drummer and a bassist in place of the click.",
+        "If you get lost, stop, find beat 1 of the next bar and come back in there.",
+        "One fingering can be three chords because the shape makes a major chord wherever you put it, and the fret decides which one. The next Step works on that.",
       ],
       coach: "Band on. Right notes and time after the take.",
       tab: bars(top(12, 13, 12), top(5, 6, 5), top(7, 8, 7), top(12, 13, 12)),
@@ -93,7 +96,7 @@ export const MORE_MINORS: StepSpec = {
   id: "more-minors",
   title: "D minor and E minor in three places",
   goal: "Play the three shapes of D minor and of E minor on the top strings, and the three minor chords of the key in one place.",
-  why: "A minor showed you the three minor shapes. D minor and E minor are the other two minor chords in the key of C, and they use the same three shapes from other frets. With these you have all six of the key's major and minor chords in three places each, which is everything the next Path needs.",
+  why: "A minor showed you the three minor shapes. It also belongs to the key of C: start on A, the sixth note of the C scale, take every other note of that scale, and you get A, C and E. Do the same from D and you get D, F and A. From E you get E, G and B. So D minor and E minor are the other two minor chords in the key of C, and they use the same three shapes from other frets. With these you have all six of the key's major and minor chords in three places each.",
   howTo: [
     "D minor is D, F, A. Its shapes: 2, 3, 1 near the nut, then 7, 6, 5, then the first finger across fret 10.",
     "E minor is E, G, B: the same three shapes two frets higher. 4, 5, 3, then 9, 8, 7, then the first finger across fret 12.",
@@ -167,11 +170,11 @@ export const DIMINISHED: StepSpec = {
   id: "diminished",
   title: "The third kind: diminished",
   goal: "Turn a minor triad into a diminished one by lowering its fifth, play B diminished in three shapes, and use it to lead home to C.",
-  why: "There are three kinds of triad in a major key and you know two. The third is diminished: a minor triad whose fifth is lowered one fret as well. It sounds tense and unfinished on its own, and that is its use: it leans hard toward the chord a fret above its root. In the key of C the only one is B diminished, and it leads to C. You will meet it by name in the next Path.",
+  why: "There are three kinds of triad in a major key and you know two. The third is diminished: a minor triad whose fifth is lowered one fret as well. It sounds tense and unfinished on its own, and that is its use: it leans hard toward the chord a fret above its root. In the key of C the only one is B diminished, and it leads to C. In Chords in a Key it is the chord on the seventh note of the scale.",
   howTo: [
     "B minor would be B, D, F sharp. Lower the F sharp one fret to F and it is B diminished: B, D, F.",
     "Its three shapes on the top strings: 4, 3, 1, then 7, 6, 7, then 10, 12, 10.",
-    "It shares two notes, B and D, with G major. Songs often use it in G's place just before C.",
+    "It shares two notes, B and D, with G major, so it can stand in G's place just before C. Songs use it rarely: the point here is to hear it lean.",
   ],
   payoff: "All three kinds of triad a key contains, and the sound of a chord that wants to resolve.",
   difficultyException:
