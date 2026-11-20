@@ -1362,11 +1362,18 @@ pub async fn start_evaluation(
     state: State<'_, SharedState>,
     tempo_ctx: State<'_, SharedTempoContext>,
     cal_cache: State<'_, crate::calibration_cache::SharedCalibrationCache>,
+    harmony: State<'_, crate::harmony::worker::SharedHarmony>,
     app_handle: AppHandle,
 ) -> Result<(), String> {
     let mut slow = SlowInputCall::new("start_evaluation");
     let _turn = EVALUATION_TURN.lock().await;
     slow.got_turn();
+    // `ai.start` below puts a new ring in the old one's place, at the new
+    // device's rate. The free-play worker was started on the old one: it
+    // ends here, as in `stop_evaluation`, and the page asks again.
+    if crate::harmony::worker::end(&harmony) {
+        let _ = app_handle.emit("harmony-reading", None::<crate::harmony::worker::Live>);
+    }
     let coach_mode = match coach_mode.as_deref().unwrap_or("default") {
         "pro" => CoachMode::Pro,
         _ => CoachMode::Default,
@@ -1600,6 +1607,7 @@ pub async fn start_evaluation(
     // `ta` is still held from above: locking the analyzer again here would
     // deadlock.
     od.set_take_tap(ta.take_audio_tap());
+    od.set_demo_gate(ta.demo_gate());
     // Listen first (card #28): while the app plays a demo of the Exercise, a
     // microphone hearing it is not the player. Read without the analyzer's
     // lock, so the page's onset dots stay quiet too.
@@ -1636,7 +1644,7 @@ pub async fn start_evaluation(
             };
             let _ = app_for_midi.emit("onset-detected", &onset);
             if let Ok(ta) = ta_for_midi.lock() {
-                ta.log_onset(onset);
+                ta.log_midi_onset(onset);
             }
         });
     }
@@ -1652,11 +1660,18 @@ pub async fn stop_evaluation(
     midi: State<'_, SharedMidi>,
     session_acc: State<'_, SharedSessionAccumulator>,
     state: State<'_, SharedState>,
+    harmony: State<'_, crate::harmony::worker::SharedHarmony>,
     app_handle: AppHandle,
 ) -> Result<(), String> {
     let mut slow = SlowInputCall::new("stop_evaluation");
     let _turn = EVALUATION_TURN.lock().await;
     slow.got_turn();
+    // The free-play worker reads this input: it ends with it (not waited
+    // for), and the page is told, so a device change can start it again.
+    // It says nothing once ended, so this `null` is the last word.
+    if crate::harmony::worker::end(&harmony) {
+        let _ = app_handle.emit("harmony-reading", None::<crate::harmony::worker::Live>);
+    }
     // Idempotency guard — if the analyzer is already stopped (e.g. double-call
     // from a device change racing an explicit Stop), skip silently. The first
     // call already drained telemetry and persisted the log.
@@ -2017,6 +2032,7 @@ pub fn load_score_schedule(
     schedule: crate::score::ScoreSchedule,
     pass_bars: Option<Vec<crate::score::PassBar>>,
     notes: Option<Vec<crate::pitch::ScoreNote>>,
+    details: Option<Vec<crate::score::verify::NoteDetail>>,
     timing_analyzer: State<SharedTimingAnalyzer>,
     audio_input: State<SharedAudioInput>,
 ) -> Result<(), String> {
@@ -2026,20 +2042,46 @@ pub fn load_score_schedule(
     let ta = timing_analyzer
         .lock()
         .map_err(|e| format!("Lock failed: {e}"))?;
-    ta.load_exercise_with_notes(
+    ta.load_exercise_with_details(
         schedule,
         pass_bars.unwrap_or_default(),
         notes.unwrap_or_default(),
+        details.unwrap_or_default(),
         input_rate,
     );
     Ok(())
 }
 
+/// "Keep my last Takes for troubleshooting": with `enabled`, every graded
+/// Take's input audio and a sidecar describing what was expected are written
+/// under the app's data folder (`diagnostics/takes/`, the last 20), to be
+/// replayed with `detect-bench replay`. Off by default; nothing is sent
+/// anywhere. Returns the folder, for the setting to show.
+#[tauri::command]
+pub fn set_take_diagnostics(
+    enabled: bool,
+    app: tauri::AppHandle,
+    timing_analyzer: State<SharedTimingAnalyzer>,
+) -> Result<Option<String>, String> {
+    use tauri::Manager;
+    let dir = if enabled {
+        Some(app.path().app_data_dir().map_err(|e| e.to_string())?.join("diagnostics").join("takes"))
+    } else {
+        None
+    };
+    let shown = dir.as_ref().map(|d| d.display().to_string());
+    let ta = timing_analyzer.lock().map_err(|e| format!("Lock failed: {e}"))?;
+    ta.take_diagnostics().set(dir);
+    Ok(shown)
+}
+
 /// The grade of the Take just closed, with right notes checked, once the pitch
 /// pass over its audio has finished. Call it after the timing grade said
 /// `notesPending`. Waits at most `timeoutMs` (capped at 8 s, the end of the
-/// "mid-session report" tier in AGENTS.md); `None` when it has not finished by
-/// then, or nothing was started, and the timing grade stands.
+/// "mid-session report" tier in AGENTS.md). When the pass has not finished by
+/// then, the grade from the pitch tracker alone if that much is done (the
+/// note model's look at a long Take can outlast the wait), else `None`, as
+/// when nothing was started, and the timing grade stands.
 ///
 /// The grade carries `notesSerial`: the caller checks it against the one on the
 /// timing grade it is answering.
@@ -2055,21 +2097,11 @@ pub async fn get_take_grade_with_notes(
     let deadline = std::time::Instant::now()
         + std::time::Duration::from_millis(timeout_ms.unwrap_or(4_000).min(8_000));
     // The wait is on the blocking pool, not on one of the runtime's async
-    // threads, which other commands share.
-    tauri::async_runtime::spawn_blocking(move || loop {
-        {
-            let s = slot.lock().map_err(|e| format!("Lock failed: {e}"))?;
-            if !s.pending {
-                return Ok(s.grade.clone());
-            }
-        }
-        if std::time::Instant::now() >= deadline {
-            return Ok(None);
-        }
-        std::thread::sleep(std::time::Duration::from_millis(10));
-    })
+    // threads, which other commands share. When it runs out with the pass
+    // still going, the grade from the pitch tracker alone is the answer.
+    tauri::async_runtime::spawn_blocking(move || crate::timing::wait_for_late_grade(&slot, deadline))
     .await
-    .map_err(|e| format!("the wait for right notes failed: {e}"))?
+    .map_err(|e| format!("the wait for right notes failed: {e}"))
 }
 
 /// Roadmap 2.4 — back to free play. Whatever the current attempt had
@@ -2082,6 +2114,102 @@ pub fn clear_score_schedule(timing_analyzer: State<SharedTimingAnalyzer>) -> Res
         .map_err(|e| format!("Lock failed: {e}"))?;
     ta.clear_score_schedule();
     Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Free play: the key and the chord heard in a jam (`harmony/`, M7)
+// ---------------------------------------------------------------------------
+
+/// Start reading the key and chords of what the player plays, from the input
+/// that is already listening. The worker's id, for `harmony_stop`; `None` and
+/// nothing started when the input is not listening, or this build has no
+/// note model.
+///
+/// **The page is the gate.** "Hear what I play" (`jamHear`, off by default)
+/// is not checked here: every caller asks only while it is on and a jam
+/// plays (`useHeard`'s `active`).
+///
+/// `clear_stale`: the page is beginning free play (not asking again after a
+/// worker ended by itself), so a schedule still loaded is one some screen
+/// forgot, and is cleared: under a jam's click it would pass for a Take and
+/// keep the reading paused. Not on a retry, which may come late, after the
+/// page has moved on and the next Take's schedule is loaded.
+///
+/// `chart` is the jam's key and chords in concert pitch, when it has them:
+/// the engine then takes them as given and estimates only what is missing.
+/// The reading arrives as `harmony-reading` events (`harmony::worker::Live`,
+/// or `null` when the worker ended by itself or the input was restarted or
+/// stopped). A worker that was stopped or replaced sends nothing more.
+///
+/// Nothing here is on a real-time path: the worker is a thread below normal
+/// priority that gives way to a Take (`harmony/worker.rs`).
+#[tauri::command]
+pub async fn harmony_start(
+    chart: Option<crate::harmony::Chart>,
+    bpm: f64,
+    clear_stale: bool,
+    audio_input: State<'_, SharedAudioInput>,
+    timing_analyzer: State<'_, SharedTimingAnalyzer>,
+    harmony: State<'_, crate::harmony::worker::SharedHarmony>,
+    app_handle: AppHandle,
+) -> Result<Option<u64>, String> {
+    // In turn with the input's start and stop: the ring and its rate are read
+    // from an input that is not half-way through opening.
+    let _turn = EVALUATION_TURN.lock().await;
+    // One worker: an earlier one is silent from here and ends by itself (it
+    // is not waited for).
+    crate::harmony::worker::end(&harmony);
+    let (ring, rate, listening) = {
+        let ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
+        (ai.ring(), ai.sample_rate(), ai.is_active())
+    };
+    if !listening || !crate::detect::model::enabled() {
+        return Ok(None);
+    }
+    if clear_stale && timing_analyzer.lock().unwrap_or_else(|e| e.into_inner()).forget_stale_schedule() {
+        eprintln!("[yames] free play started with a schedule still loaded: cleared");
+    }
+    // (The worker loads the note model itself, before its first look at the
+    // ring: `Hooks::warm`.)
+    let worker = crate::harmony::worker::Worker::start(ring, rate, chart, beat_seconds(bpm), move |live| {
+        let _ = app_handle.emit("harmony-reading", live);
+    })?;
+    let id = worker.id();
+    *harmony.lock().unwrap_or_else(|e| e.into_inner()) = Some(worker);
+    Ok(Some(id))
+}
+
+fn beat_seconds(bpm: f64) -> f64 {
+    60.0 / if bpm.is_finite() { bpm.clamp(20.0, 400.0) } else { 120.0 }
+}
+
+/// Bar `bar` of the jam's form starts now, at `bpm`: with a chart, how the
+/// engine knows which of its chords is sounding.
+#[tauri::command]
+pub fn harmony_mark_bar(bar: u32, bpm: f64, harmony: State<crate::harmony::worker::SharedHarmony>) {
+    if let Some(worker) = harmony.lock().unwrap_or_else(|e| e.into_inner()).as_ref() {
+        worker.mark_bar(bar, beat_seconds(bpm));
+    }
+}
+
+/// The jam's tempo is now `bpm`. A jam with no chart sends no bar marks, so
+/// this is how the engine's beat follows a tempo change.
+#[tauri::command]
+pub fn harmony_set_tempo(bpm: f64, harmony: State<crate::harmony::worker::SharedHarmony>) {
+    if let Some(worker) = harmony.lock().unwrap_or_else(|e| e.into_inner()).as_ref() {
+        worker.set_beat(beat_seconds(bpm));
+    }
+}
+
+/// Stop worker `id` (what `harmony_start` returned), and say what it heard.
+/// `None` when it is no longer the app's worker: it was replaced, or ended
+/// with the input. A stop that arrives after the next start (a chart change
+/// sends both at once) therefore does not stop the new worker.
+#[tauri::command]
+pub async fn harmony_stop(id: u64, harmony: State<'_, crate::harmony::worker::SharedHarmony>) -> Result<Option<crate::harmony::worker::Summary>, String> {
+    let Some(worker) = crate::harmony::worker::take_if(&harmony, id) else { return Ok(None) };
+    // `stop` waits for the window that is running: not on a runtime thread
+    tauri::async_runtime::spawn_blocking(move || worker.stop()).await.map_err(|e| format!("the harmony worker did not stop: {e}"))
 }
 
 /// The bands the review colours a note by — the scorer's own, not the

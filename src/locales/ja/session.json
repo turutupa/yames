@@ -286,7 +286,12 @@
       "barsMet": "{{of}} 小節中 {{count}} 小節キープ",
       "barHeld": "{{n}} 小節目：キープ",
       "barSlipped": "{{n}} 小節目：崩れた",
-      "barThin": "{{n}} 小節目：判定するには音が少なすぎ"
+      "barThin": "{{n}} 小節目：判定するには音が少なすぎ",
+      "legatoAll": "ハンマリング・プリング・タッピング：{{due}}音中{{sounded}}音が鳴りました。参考のみで採点しません。",
+      "legatoSome": "ハンマリング・プリング・タッピング：{{due}}音中{{sounded}}音が鳴り、{{silent}}音は鳴りませんでした。参考のみで採点しません。",
+      "bendsAll": "チョーキング：{{due}}回中{{onPitch}}回が目標の音程に届きました。参考のみで採点しません。",
+      "bendsSomeFlat": "チョーキング：{{due}}回中{{onPitch}}回が目標の音程に届き、{{flat}}回は届きませんでした。参考のみで採点しません。",
+      "vibratoHeard": "ビブラート：{{due}}音中{{present}}音で聞こえました。参考のみで採点しません。"
     },
     "edge": {
       "kick": "限界に挑戦",
@@ -390,7 +395,9 @@
       "fairAsk": "今日の採点は妥当でしたか？",
       "backTo": "{{place}} に戻る",
       "more": "あと 5 分",
-      "keepGoing": "続ける：{{title}}"
+      "keepGoing": "続ける：{{title}}",
+      "heard": "フリープレイのキーは {{key}}、主なコードは {{chords}} でした。",
+      "heardKey": "フリープレイのキーは {{key}} でした。"
     },
     "paths": {
       "title": "コース",

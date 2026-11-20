@@ -744,6 +744,16 @@
       "nudgeBack": "Görüntü biraz önce",
       "nudgeOn": "Görüntü biraz sonra",
       "broken": "Bu kayıt çalmadı. Dosya taşınmış veya silinmiş olabilir."
+    },
+    "hear": {
+      "label": "Çaldığımı dinle",
+      "hint": "Bir jam çalarken ve giriş açıkken Yames duyduğu tonu ve akoru söyler. Bu bir tahmindir; emin olmadığında bunu söyler."
+    },
+    "heard": {
+      "heard": "Duyulan: {{what}}",
+      "chart": "Şema: {{what}}",
+      "unsure": "Henüz belli değil",
+      "listening": "Dinliyor…"
     }
   },
   "scale": {

@@ -286,7 +286,12 @@
       "barsMet": "{{of}}마디 중 {{count}}마디 유지",
       "barHeld": "{{n}}마디: 유지",
       "barSlipped": "{{n}}마디: 흔들림",
-      "barThin": "{{n}}마디: 판단하기엔 음이 너무 적음"
+      "barThin": "{{n}}마디: 판단하기엔 음이 너무 적음",
+      "legatoAll": "해머링, 풀링, 태핑: {{due}}개 중 {{sounded}}개가 소리 났습니다. 참고용이며 채점하지 않습니다.",
+      "legatoSome": "해머링, 풀링, 태핑: {{due}}개 중 {{sounded}}개가 소리 났고 {{silent}}개는 나지 않았습니다. 참고용이며 채점하지 않습니다.",
+      "bendsAll": "벤딩: {{due}}개 중 {{onPitch}}개가 목표 음에 닿았습니다. 참고용이며 채점하지 않습니다.",
+      "bendsSomeFlat": "벤딩: {{due}}개 중 {{onPitch}}개가 목표 음에 닿았고 {{flat}}개는 모자랐습니다. 참고용이며 채점하지 않습니다.",
+      "vibratoHeard": "비브라토: {{due}}개 음 중 {{present}}개에서 들렸습니다. 참고용이며 채점하지 않습니다."
     },
     "edge": {
       "kick": "한계 찾기",
@@ -390,7 +395,9 @@
       "fairAsk": "오늘 채점이 공정했나요?",
       "backTo": "{{place}}(으)로 돌아가기",
       "more": "5분 더",
-      "keepGoing": "계속하기: {{title}}"
+      "keepGoing": "계속하기: {{title}}",
+      "heard": "자유 연주에서 키는 {{key}}, 주로 {{chords}} 코드였습니다.",
+      "heardKey": "자유 연주에서 키는 {{key}}였습니다."
     },
     "paths": {
       "title": "코스",

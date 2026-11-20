@@ -380,7 +380,7 @@ pub struct TimingAnalyzer {
 
 /// What `load_exercise_schedule` was handed: the schedule, the Exercise's pass
 /// bars, and the written pitch of each note for the pitch pass.
-type LoadedSchedule = (ScoreSchedule, Vec<PassBar>, Vec<crate::pitch::ScoreNote>);
+type LoadedSchedule = (ScoreSchedule, Vec<PassBar>, Vec<crate::pitch::ScoreNote>, Vec<crate::score::verify::NoteDetail>);
 
 /// Right notes on a Session Take (`score::notes`), the second half of its
 /// grade.
@@ -396,6 +396,15 @@ type LoadedSchedule = (ScoreSchedule, Vec<PassBar>, Vec<crate::pitch::ScoreNote>
 pub struct NotesPass {
     pub tap: crate::take_audio::SharedTakeAudioTap,
     pub slot: Arc<Mutex<NotesSlot>>,
+    /// "Keep my last Takes for troubleshooting" (`crate::take_diagnostics`).
+    pub diagnostics: Arc<crate::take_diagnostics::TakeDiagnostics>,
+    /// A MIDI note arrived since the schedule was loaded. Its time is the
+    /// attack itself, where a heard onset's is the detector's delay after it,
+    /// and one Take's onsets carry one delay (`TakeAudio::detection_delay_ms`):
+    /// a Take with MIDI notes in it would have them read 25 ms early in the
+    /// input audio, which may not even be that instrument. So such a Take gets
+    /// no pass over its audio; right notes stay "not checked this time".
+    pub midi_seen: Arc<std::sync::atomic::AtomicBool>,
 }
 
 impl NotesPass {
@@ -406,6 +415,8 @@ impl NotesPass {
         slot.serial += 1;
         slot.pending = false;
         slot.grade = None;
+        slot.provisional = None;
+        self.midi_seen.store(false, std::sync::atomic::Ordering::Release);
     }
 }
 
@@ -417,6 +428,50 @@ pub struct NotesSlot {
     pub serial: u64,
     pub pending: bool,
     pub grade: Option<TakeGrade>,
+    /// While `pending`: the grade from the pitch tracker alone, in before the
+    /// note model has had its (longer) look. What a caller whose wait runs
+    /// out is given, so a long Take's right notes are never dropped for the
+    /// model's sake (`LATE_BUDGET_MS`). `None` once `grade` is in.
+    pub provisional: Option<TakeGrade>,
+}
+
+/// How long after a Take closes its result still waits for the late grade:
+/// `NOTES_WAIT_MS` in `src/session/takeMeasures.ts`, the same number. Past it
+/// nothing the note model could add would be shown, so a pass that has
+/// already spent this much on the tracker does not start the model.
+pub const LATE_BUDGET_MS: u64 = 5_000;
+
+/// The note model's stage of the late grade costs about this many times the
+/// pitch tracker's stage on the same audio (`plans/detection/RUNTIME.md`:
+/// the tracker's grade is about a third of the whole pass).
+const MODEL_STAGE_OVER_TRACKER: u64 = 2;
+
+/// Whether to start the model's stage, `tracker_ms` after the Take closed
+/// with the tracker's grade just made: only when the model can be expected
+/// to land inside the budget. Starting it with less left spends a core on a
+/// grade the result screen has stopped waiting for.
+fn model_fits_budget(tracker_ms: u64, budget_ms: u64) -> bool {
+    tracker_ms.saturating_mul(1 + MODEL_STAGE_OVER_TRACKER) < budget_ms
+}
+
+/// Wait until `deadline` for the late grade in `slot`: the grade once the pass
+/// is done (`None` when it made none, or none was started); when the wait
+/// runs out first, the grade from the pitch tracker alone if that much is in.
+/// Blocks: for a thread that may (`get_take_grade_with_notes` uses the
+/// blocking pool).
+pub fn wait_for_late_grade(slot: &Mutex<NotesSlot>, deadline: std::time::Instant) -> Option<TakeGrade> {
+    loop {
+        {
+            let s = slot.lock().unwrap_or_else(|e| e.into_inner());
+            if !s.pending {
+                return s.grade.clone();
+            }
+            if std::time::Instant::now() >= deadline {
+                return s.provisional.clone();
+            }
+        }
+        thread::sleep(Duration::from_millis(10));
+    }
 }
 
 /// How many live verdicts one sweep is expected to hand back.
@@ -478,6 +533,8 @@ impl TimingAnalyzer {
             notes: NotesPass {
                 tap: crate::take_audio::TakeAudioTap::new(),
                 slot: Arc::new(Mutex::new(NotesSlot::default())),
+                diagnostics: Arc::new(crate::take_diagnostics::TakeDiagnostics::default()),
+                midi_seen: Arc::new(std::sync::atomic::AtomicBool::new(false)),
             },
         }
     }
@@ -489,6 +546,11 @@ impl TimingAnalyzer {
     }
 
     /// Where the grade with right notes lands. See [`NotesPass`].
+    /// The switch behind "Keep my last Takes for troubleshooting".
+    pub fn take_diagnostics(&self) -> Arc<crate::take_diagnostics::TakeDiagnostics> {
+        self.notes.diagnostics.clone()
+    }
+
     pub fn notes_slot(&self) -> Arc<Mutex<NotesSlot>> {
         self.notes.slot.clone()
     }
@@ -529,15 +591,60 @@ impl TimingAnalyzer {
         pitches: Vec<crate::pitch::ScoreNote>,
         input_rate: Option<u32>,
     ) {
+        self.load_exercise_with_details(schedule, pass_bars, pitches, Vec::new(), input_rate);
+    }
+
+    /// [`Self::load_exercise_with_notes`], with what else is known of each
+    /// note (length, bend, technique) for the note verifier
+    /// (`score::verify`). With pitches loaded and a note model in the build,
+    /// the Take's audio is kept whether or not a bar names `noteIdentity`:
+    /// the verifier's account of the Take is information on every Exercise.
+    pub fn load_exercise_with_details(
+        &self,
+        schedule: ScoreSchedule,
+        pass_bars: Vec<PassBar>,
+        pitches: Vec<crate::pitch::ScoreNote>,
+        details: Vec<crate::score::verify::NoteDetail>,
+        input_rate: Option<u32>,
+    ) {
         self.notes.forget();
-        if !pitches.is_empty() && pass_bars.iter().any(|b| b.metric == "noteIdentity") {
+        let wanted = pass_bars.iter().any(|b| b.metric == "noteIdentity")
+            || crate::detect::model::enabled()
+            || self.notes.diagnostics.enabled()
+            || details.iter().any(|d| d.bend > 0.0 || d.tech.iter().any(|t| t == "vibrato"));
+        if !pitches.is_empty() && wanted {
             self.notes.tap.arm(input_rate);
+            // The verifier will run on this Exercise's Takes: have its model
+            // loaded by the time the first one closes. Its own thread, below
+            // normal priority; this is a command's thread, not a real-time one.
+            crate::detect::model::warm_in_background();
         } else {
             self.notes.tap.disarm();
         }
-        *self.schedule.lock().unwrap() = Some((schedule, pass_bars, pitches));
+        *self.schedule.lock().unwrap() = Some((schedule, pass_bars, pitches, details));
         self.schedule_version
             .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+    }
+
+    /// Free play is starting (the key and chord reading of a jam): the page
+    /// that asks for it only does so where no Take is being played, so a
+    /// schedule still loaded here was left by a screen that did not clear
+    /// it. Cleared, and `true`; with none loaded nothing is touched.
+    ///
+    /// Without this a forgotten schedule under a jam's click looks exactly
+    /// like a Take to `harmony::worker::TakeWatch`, and the reading would
+    /// stay paused for the whole jam.
+    pub fn forget_stale_schedule(&self) -> bool {
+        // looked at and emptied under one lock: a schedule loaded a moment
+        // later is not the one that was found
+        if self.schedule.lock().unwrap_or_else(|e| e.into_inner()).take().is_none() {
+            return false;
+        }
+        self.notes.forget();
+        self.notes.tap.disarm();
+        self.schedule_version
+            .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+        true
     }
 
     /// Back to free play. Whatever the current attempt had accumulated
@@ -581,6 +688,14 @@ impl TimingAnalyzer {
         while log.len() > 256 {
             log.pop_front();
         }
+    }
+
+    /// A MIDI NoteOn as an onset. It times like any other, but it marks the
+    /// Take as one whose audio is not read for right notes
+    /// (`NotesPass::midi_seen`).
+    pub fn log_midi_onset(&self, onset: Onset) {
+        self.notes.midi_seen.store(true, std::sync::atomic::Ordering::Release);
+        self.log_onset(onset);
     }
 
     /// An onset the input HEARD (the microphone or an interface): dropped
@@ -941,6 +1056,10 @@ impl TimingAnalyzer {
         // does not mention it.
         let mut schedule_run: Option<ScheduleRun> = None;
         let mut seen_schedule_version = u64::MAX;
+        // Whether a Take is running, for the free-play worker, which keeps
+        // off the note model and the input ring while one is. A schedule
+        // that is loaded and not played is not a Take (`harmony/worker.rs`).
+        let mut take_watch = crate::harmony::worker::TakeWatch::new();
         // The pitch pass this run's Take already has, from its first close.
         // A Take is closed twice as a rule (the Session's own stop and the
         // coach's mini-report each ask), and the second close finds the tap
@@ -1081,11 +1200,12 @@ impl TimingAnalyzer {
                 if version != seen_schedule_version {
                     seen_schedule_version = version;
                     take_notes_serial = None;
+                    take_watch.forget();
                     schedule_run = schedule_slot
                         .lock()
                         .unwrap()
                         .clone()
-                        .map(|(schedule, pass_bars, pitches)| {
+                        .map(|(schedule, pass_bars, pitches, details)| {
                             // A schedule loaded with pass bars is a Session
                             // Take; only those get the lag correction.
                             let session_take = !pass_bars.is_empty();
@@ -1094,9 +1214,14 @@ impl TimingAnalyzer {
                                 .with_lag_correction(session_take)
                                 .with_pass_bars(pass_bars)
                                 .with_note_pitches(pitches)
+                                .with_note_details(details)
                         });
                 }
             }
+
+            // Here, above the early `continue` of a pass with no beats: a Take
+            // whose click stopped must stop counting as one.
+            take_watch.tell(schedule_run.is_some(), std::time::Instant::now());
 
             // D4 — Signal A poll. If the JS layer called
             // `notify_settings_change`, close the open segment with
@@ -1160,7 +1285,7 @@ impl TimingAnalyzer {
                     };
                     // Right notes take a pitch pass, off this loop. The grade
                     // below and the segment's say it is coming.
-                    let serial = close_take_notes(run, weights, &notes, &mut take_notes_serial);
+                    let serial = close_take_notes(run, weights, &notes, &mut take_notes_serial, &instrument_id);
                     run.set_notes_pending(serial);
                     *take_grade.lock().unwrap() = run.report(&weights).map(|r| r.grade);
                 }
@@ -1460,12 +1585,22 @@ impl TimingAnalyzer {
             // are about whether a NOTE is scored, not about whether a
             // beat happened.
             if let Some(run) = schedule_run.as_mut() {
+                let counting_in = !run.has_started();
+                if beats.iter().any(|b| b.subdivision_index == 0) {
+                    take_watch.quarter(std::time::Instant::now());
+                }
                 for beat in beats.iter().filter(|b| b.subdivision_index == 0) {
                     run.note_quarter_in_bar(
                         beat.is_downbeat,
                         ts_ns_to_wall_ms(beat.ts_ns, beat_base_wall_ms, beat_base_ns) as f64,
                         beat.beats_per_bar as u32,
                     );
+                }
+                // The Take starts here, at its first downbeat. A MIDI note
+                // from before it (a keyboard tried out on the ready screen,
+                // or through the count-in) is not a note of this Take.
+                if counting_in && run.has_started() {
+                    notes.midi_seen.store(false, Ordering::Release);
                 }
 
                 // `plans/SONGS.md` A7 — and say what can be said about the
@@ -2345,6 +2480,7 @@ impl TimingAnalyzer {
         }
 
         // ─── Session-end segment close ───────────────────────────────
+        take_watch.end();
         // Fires when ta.stop() sets `alive = false`, the while loop
         // drains its final flush iteration, and this thread exits.
         // Mirrors Signal-B scoring but skips the silence-threshold
@@ -2851,7 +2987,7 @@ pub fn window_thresholds(window_ms: f64) -> WindowThresholds {
 /// and nothing started when no usable audio was kept. Called on the analyzer's
 /// thread; the pitch pass never runs on it, and its own thread runs below
 /// normal priority, like the coach's model worker.
-fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass) -> Option<u64> {
+fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass, instrument_id: &str) -> Option<u64> {
     let audio = notes.tap.capture()?;
     // `clock::now_ns` to the wall milliseconds the beat map is in, the way
     // every onset and beat is converted.
@@ -2862,14 +2998,21 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass)
         slot.serial += 1;
         slot.pending = true;
         slot.grade = None;
+        slot.provisional = None;
         slot.serial
     };
     let run = run.clone();
     let slot = notes.slot.clone();
+    let diagnostics = notes.diagnostics.clone();
+    let instrument_id = instrument_id.to_string();
     let spawned = thread::Builder::new()
         .name("yames-take-notes".into())
         .spawn(move || {
             crate::coach::lower_current_thread_priority();
+            // The model is this pass's first: the free-play worker runs no
+            // new window while this is held (`harmony/worker.rs`).
+            let _model_first = crate::harmony::worker::verifier_hold();
+            let closed = std::time::Instant::now();
             let graded = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                 let take = crate::score::notes::TakeAudio {
                     samples: &audio.samples,
@@ -2877,7 +3020,20 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass)
                     start_ms,
                     detection_delay_ms: audio.detection_delay_ns as f64 / 1e6,
                 };
-                run.report_with_notes(&weights, &take).map(|r| r.grade)
+                // The tracker's grade is published as soon as it is made; the
+                // model's second look replaces it when (and if) it lands.
+                late_grade_staged(&run, &weights, &take, |first| {
+                    let mut g = first.grade.clone();
+                    g.notes_serial = Some(serial);
+                    let mut slot = slot.lock().unwrap_or_else(|e| e.into_inner());
+                    if slot.serial != serial {
+                        // a new Take was loaded: nobody is waiting for this one
+                        return false;
+                    }
+                    slot.provisional = Some(g);
+                    model_fits_budget(closed.elapsed().as_millis() as u64, LATE_BUDGET_MS)
+                })
+                .map(|r| r.grade)
             }));
             let mut grade = graded.ok().flatten();
             if let Some(g) = grade.as_mut() {
@@ -2887,8 +3043,18 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass)
                 let mut slot = slot.lock().unwrap_or_else(|e| e.into_inner());
                 if slot.serial == serial {
                     slot.pending = false;
-                    slot.grade = grade;
+                    // A model that failed after the tracker's grade was made
+                    // leaves the tracker's.
+                    let provisional = slot.provisional.take();
+                    slot.grade = grade.or(provisional);
                 }
+            }
+            // Only once the grade is where the result reads it: writing a
+            // long Take to disk is not something the player waits for.
+            if diagnostics.enabled() {
+                let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    diagnostics.write(&audio.samples, audio.rate, run.diagnostic_job(start_ms, &instrument_id));
+                }));
             }
             // The Take's audio is freed here, on this thread.
             drop(audio);
@@ -2900,6 +3066,49 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass)
     Some(serial)
 }
 
+/// The whole of the post-Take pass, as the `yames-take-notes` thread runs it:
+/// the note model's second look (`score::verify`), then the grade with right
+/// notes from both witnesses in it, with bends and vibrato read as curves.
+/// With no model in the build this is `report_with_notes` plus the curves.
+/// Public for the click-jitter probe (`--late-pass`), which loops exactly this
+/// under the click.
+pub fn late_grade(run: &ScheduleRun, weights: &ScoreWeights, take: &crate::score::notes::TakeAudio<'_>) -> Option<crate::score::ScheduleReport> {
+    late_grade_staged(run, weights, take, |_| true)
+}
+
+/// [`late_grade`] in the two stages the app runs it in. With a note model to
+/// consult, the grade from the pitch tracker alone (right notes and curves,
+/// about a third of the whole pass) is made first and handed to `first`; the
+/// model's look and the merged grade follow only if `first` says to go on,
+/// and otherwise the tracker's grade is the answer. The pitch track and the
+/// tracker's verdicts are made once for both. Without a model there is one
+/// stage and `first` is not called.
+pub fn late_grade_staged(
+    run: &ScheduleRun,
+    weights: &ScoreWeights,
+    take: &crate::score::notes::TakeAudio<'_>,
+    first: impl FnOnce(&crate::score::ScheduleReport) -> bool,
+) -> Option<crate::score::ScheduleReport> {
+    let mut scratch = crate::score::notes::LateScratch::default();
+    let tracked = run.report_late_in(weights, take, None, &mut scratch)?;
+    if !run.wants_verifier() || !first(&tracked) {
+        return Some(tracked);
+    }
+    let timed = run.report(weights)?;
+    use crate::score::verify::{VerifierReport, VerifierStatus};
+    // Its own catch: a panic in the model or the runtime costs the verifier's
+    // verdicts, never the tracker's grade. That grade is already published
+    // (`first`); what follows it is the same grade marked `failed`.
+    let verified = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        crate::detect::model::with_shared(|model| match model {
+            Some(m) => run.verify(&timed, take, m.as_mut()),
+            None => VerifierReport::status(VerifierStatus::NoModel),
+        })
+    }))
+    .unwrap_or_else(|_| VerifierReport::status(VerifierStatus::Failed));
+    run.report_late_in(weights, take, Some(&verified), &mut scratch)
+}
+
 /// A close of a Take whose notes are checked: start the pitch pass over its
 /// audio, or, when an earlier close of the same run already did (the tap hands
 /// its audio over once), keep saying that one is coming. `started` is the
@@ -2909,11 +3118,15 @@ fn close_take_notes(
     weights: ScoreWeights,
     notes: &NotesPass,
     started: &mut Option<u64>,
+    instrument_id: &str,
 ) -> Option<u64> {
-    if !run.wants_notes() {
+    if !run.wants_notes() && !run.wants_verifier() && !run.wants_curves() && !(notes.diagnostics.enabled() && run.has_pitches()) {
         return None;
     }
-    if let Some(serial) = start_notes_pass(run, weights, notes) {
+    if notes.midi_seen.load(std::sync::atomic::Ordering::Acquire) {
+        return None;
+    }
+    if let Some(serial) = start_notes_pass(run, weights, notes, instrument_id) {
         *started = Some(serial);
         return Some(serial);
     }
@@ -3613,6 +3826,15 @@ pub type SharedTimingAnalyzer = Arc<Mutex<TimingAnalyzer>>;
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn the_model_is_not_started_when_it_cannot_land_inside_the_budget() {
+        // tracker in 1 s: the model is expected 2 s later, inside 5 s
+        assert!(super::model_fits_budget(1_000, super::LATE_BUDGET_MS));
+        // tracker in 2 s: the model would land at 6 s
+        assert!(!super::model_fits_budget(2_000, super::LATE_BUDGET_MS));
+        assert!(!super::model_fits_budget(u64::MAX, super::LATE_BUDGET_MS));
+    }
+
     use super::*;
     use crate::instrument::{Instrument, ScoreWeights};
 
@@ -6139,6 +6361,8 @@ mod notes_pass_tests {
         let notes = NotesPass {
             tap: crate::take_audio::TakeAudioTap::new(),
             slot: Arc::new(Mutex::new(NotesSlot::default())),
+            diagnostics: Arc::new(crate::take_diagnostics::TakeDiagnostics::default()),
+            midi_seen: Arc::new(std::sync::atomic::AtomicBool::new(false)),
         };
         notes.tap.arm(Some(RATE));
         let mut ring = RingBuffer::new(RATE as usize * 4);
@@ -6186,12 +6410,12 @@ mod notes_pass_tests {
         assert!(run.wants_notes());
         let weights = Instrument::ElectricGuitar.profile().score_weights;
         let mut started = None;
-        let serial = close_take_notes(&run, weights, &notes, &mut started).expect("a pass started");
+        let serial = close_take_notes(&run, weights, &notes, &mut started, "electric-guitar").expect("a pass started");
         // Once: a second close of the same Take starts nothing...
-        assert!(start_notes_pass(&run, weights, &notes).is_none());
+        assert!(start_notes_pass(&run, weights, &notes, "electric-guitar").is_none());
         // ...and says the first pass is still the one coming, rather than
         // that none ran (B2: the second close used to leave `notRun`).
-        assert_eq!(close_take_notes(&run, weights, &notes, &mut started), Some(serial));
+        assert_eq!(close_take_notes(&run, weights, &notes, &mut started, "electric-guitar"), Some(serial));
         // The timing grade says the notes are coming, and does not count them.
         run.set_notes_pending(Some(serial));
         let timed = run.report(&weights).unwrap().grade;
@@ -6220,10 +6444,54 @@ mod notes_pass_tests {
         assert!(pass.checks.iter().any(|c| c.metric == "noteIdentity" && c.held));
         assert!(!grade.notes_pending);
         assert_eq!(grade.notes_serial, Some(serial));
+        assert!(notes.slot.lock().unwrap().provisional.is_none(), "the tracker's grade is dropped once the full one is in");
         // A new Take's load forgets it: no answer for the next Take.
         notes.forget();
         assert!(notes.slot.lock().unwrap().grade.is_none());
-        assert_eq!(close_take_notes(&run, weights, &notes, &mut started), None);
+        assert_eq!(close_take_notes(&run, weights, &notes, &mut started, "electric-guitar"), None);
+    }
+
+    /// A Take with MIDI notes in it gets no pass over its audio: a MIDI note's
+    /// time is its attack, a heard onset's is the detector's delay later, and
+    /// the pass takes one delay out of all of them.
+    #[test]
+    fn a_take_with_midi_notes_in_it_is_not_read_from_the_audio() {
+        let analyzer = TimingAnalyzer::new(Arc::new(Mutex::new(VecDeque::new())));
+        let notes = analyzer.notes.clone();
+        assert!(!notes.midi_seen.load(Ordering::Acquire));
+        analyzer.log_midi_onset(Onset { ts_ns: 1, amplitude: 0.5, centroid: 0.0, confidence: 1.0 });
+        assert!(notes.midi_seen.load(Ordering::Acquire));
+        let schedule = ScoreSchedule {
+            onsets: vec![crate::score::ExpectedOnset { id: 0, beat: 0.0, note_ids: vec![0], soft: false, accent: false }],
+            length_beats: 4.0,
+            loops: false,
+        };
+        let bars = vec![PassBar { metric: "noteIdentity".into(), min: Some(0.9), max: None, over_bars: 1 }];
+        let run = ScheduleRun::new(schedule.clone()).with_pass_bars(bars.clone()).with_note_pitches(vec![crate::pitch::ScoreNote { id: 0, midi: 60.0 }]);
+        assert!(run.wants_notes());
+        let mut started = None;
+        let weights = Instrument::ElectricGuitar.profile().score_weights;
+        assert_eq!(close_take_notes(&run, weights, &notes, &mut started, "electric-guitar"), None);
+        // the next Take's load starts clean
+        analyzer.load_exercise_with_notes(schedule, bars, vec![crate::pitch::ScoreNote { id: 0, midi: 60.0 }], Some(48_000));
+        assert!(!notes.midi_seen.load(Ordering::Acquire));
+    }
+
+    /// Review M7, B1: a schedule a screen left loaded, then a jam with the
+    /// reading on. Free play starting clears it, once, and touches nothing
+    /// when there is none (the version the analyzer's thread watches).
+    #[test]
+    fn free_play_starting_clears_a_schedule_that_was_left_loaded() {
+        let ta = TimingAnalyzer::new(Arc::new(Mutex::new(VecDeque::new())));
+        let version = |ta: &TimingAnalyzer| ta.schedule_version.load(std::sync::atomic::Ordering::SeqCst);
+        let v0 = version(&ta);
+        assert!(!ta.forget_stale_schedule());
+        assert_eq!(version(&ta), v0, "nothing loaded: nothing touched");
+        ta.load_score_schedule(ScoreSchedule { onsets: Vec::new(), length_beats: 4.0, loops: false });
+        assert!(ta.forget_stale_schedule());
+        assert!(ta.schedule.lock().unwrap().is_none());
+        assert!(version(&ta) > v0 + 1, "the analyzer's thread is told");
+        assert!(!ta.forget_stale_schedule());
     }
 
     /// B2, end to end through the analyzer: a Take closed twice, the second
@@ -6249,6 +6517,41 @@ mod notes_pass_tests {
         ta.clear_score_schedule();
         let s = slot.lock().unwrap();
         assert!(s.serial > 7 && !s.pending && s.grade.is_none());
+    }
+
+    /// Review of M4, item 1: a wait that runs out while the note model is
+    /// still on a long Take is given the tracker's grade, not nothing; a pass
+    /// that finished is given its grade; a new Take's load forgets both.
+    #[test]
+    fn a_wait_that_runs_out_gets_the_trackers_grade() {
+        let ta = TimingAnalyzer::new(Arc::new(Mutex::new(VecDeque::new())));
+        let slot = ta.notes_slot();
+        let grade = |serial: u64| TakeGrade { notes_serial: Some(serial), ..Default::default() };
+        let soon = || std::time::Instant::now() + Duration::from_millis(30);
+        {
+            let mut s = slot.lock().unwrap();
+            s.serial = 3;
+            s.pending = true;
+        }
+        // nothing in yet: the timing grade stands
+        assert!(wait_for_late_grade(&slot, soon()).is_none());
+        slot.lock().unwrap().provisional = Some(grade(3));
+        assert_eq!(wait_for_late_grade(&slot, soon()).and_then(|g| g.notes_serial), Some(3));
+        // the full grade landing mid-wait ends the wait
+        let landing = slot.clone();
+        let t = thread::spawn(move || {
+            thread::sleep(Duration::from_millis(40));
+            let mut s = landing.lock().unwrap();
+            s.pending = false;
+            s.provisional = None;
+            s.grade = Some(TakeGrade { notes_serial: Some(3), due: 9, ..Default::default() });
+        });
+        let got = wait_for_late_grade(&slot, std::time::Instant::now() + Duration::from_secs(20)).unwrap();
+        t.join().unwrap();
+        assert_eq!(got.due, 9);
+        ta.clear_score_schedule();
+        let s = slot.lock().unwrap();
+        assert!(s.grade.is_none() && s.provisional.is_none());
     }
 }
 

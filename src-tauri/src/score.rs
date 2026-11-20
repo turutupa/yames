@@ -428,6 +428,32 @@ impl BeatMap {
     /// When beat `beat` falls, in ms. Linear between logged quarters;
     /// past the end, the last logged interval carries on, so a schedule
     /// that outruns its beat log degrades rather than truncates.
+    /// Where every logged quarter fell, ms.
+    pub(crate) fn quarters_ms(&self) -> &[f64] {
+        &self.beats_ms
+    }
+
+    /// The tempo of the logged quarters, or 120 when there are fewer than two.
+    pub(crate) fn median_bpm(&self) -> f64 {
+        if self.beats_ms.len() < 2 {
+            return 120.0;
+        }
+        let mut gaps: Vec<f64> = self.beats_ms.windows(2).map(|w| w[1] - w[0]).filter(|g| *g > 0.0).collect();
+        if gaps.is_empty() {
+            return 120.0;
+        }
+        gaps.sort_by(|a, b| a.total_cmp(b));
+        60_000.0 / gaps[gaps.len() / 2]
+    }
+
+    pub(crate) fn beats_per_bar_or(&self, fallback: u32) -> u32 {
+        if self.beats_per_bar > 0 {
+            self.beats_per_bar
+        } else {
+            fallback
+        }
+    }
+
     pub fn time_at_beat(&self, beat: f64) -> Option<f64> {
         if self.beats_ms.is_empty() || beat < 0.0 {
             return None;
@@ -988,6 +1014,16 @@ pub struct TakeGrade {
     /// made it. A caller checks the two match before taking one for the other.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub notes_serial: Option<u64>,
+    /// The note verifier's account of the Take, on the late grade only: which
+    /// written notes the note model confirmed, per technique. Information,
+    /// except where `pass.notes` says the right-notes count came from it
+    /// (`verify`). `None` when it did not run.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub verifier: Option<verify::VerifierReport>,
+    /// Bends and vibrato of the Take read as curves from the pitch track
+    /// (`curves`), on the late grade only. Information; no bar reads it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub curves: Option<curves::CurveReport>,
 }
 
 /// Under this share of the notes due, the Take says "I didn't catch enough"
@@ -1256,7 +1292,7 @@ pub fn match_attempt_calibrated(
     policy: CalibrationPolicy,
     pass_bars: &[PassBar],
 ) -> ScheduleReport {
-    match_attempt_graded(schedule, beats, played, weights, policy, pass_bars, None)
+    match_attempt_graded(schedule, beats, played, weights, policy, pass_bars, None, pass::NotesSource::PitchPass)
 }
 
 /// [`match_attempt_calibrated`], with the pitch pass's verdict on each result,
@@ -1270,6 +1306,7 @@ fn match_attempt_graded(
     policy: CalibrationPolicy,
     pass_bars: &[PassBar],
     notes: Option<&[Option<crate::pitch::NoteState>]>,
+    notes_source: pass::NotesSource,
 ) -> ScheduleReport {
     let (matching_ms, mut calibration) = resolve_calibration(schedule, beats, played, policy);
     // Everything below sees the notes as if there were no lag. `played` is on
@@ -1441,6 +1478,7 @@ fn match_attempt_graded(
             amplitudes: &amplitudes,
             pass_bars,
             notes,
+            notes_source,
         },
         grade_score,
         calibration,
@@ -1618,6 +1656,8 @@ struct GradeInputs<'a> {
     /// In step with `results`: what the pitch pass said of a hit's note.
     /// `None` when it did not run.
     notes: Option<&'a [Option<crate::pitch::NoteState>]>,
+    /// Who gave them: the pitch tracker alone, or the verifier with it.
+    notes_source: pass::NotesSource,
 }
 
 /// What `match_attempt` tells the player and the screen.
@@ -1632,6 +1672,7 @@ fn grade_take(input: GradeInputs<'_>, score: f32, calibration: TakeCalibration) 
         amplitudes,
         pass_bars,
         notes,
+        notes_source,
     } = input;
     let sub = smallest_gap_beats(&schedule.onsets).unwrap_or(1.0);
     let gap_ms = sub * median_interval_ms(beats);
@@ -1662,7 +1703,7 @@ fn grade_take(input: GradeInputs<'_>, score: f32, calibration: TakeCalibration) 
     );
     let graded = reason.is_none();
     let finished = finished_bars_of(beats, schedule).min(samples.len() as u32) as usize;
-    let pass = pass::evaluate(&samples[..finished], pass_bars, gap_ms, graded, notes.is_some());
+    let pass = pass::evaluate_from(&samples[..finished], pass_bars, gap_ms, graded, notes.map(|_| notes_source));
     TakeGrade {
         verdict: if graded {
             TakeVerdict::Graded
@@ -1690,6 +1731,8 @@ fn grade_take(input: GradeInputs<'_>, score: f32, calibration: TakeCalibration) 
         pass,
         notes_pending: false,
         notes_serial: None,
+        verifier: None,
+        curves: None,
     }
 }
 
@@ -2086,6 +2129,9 @@ pub struct ScheduleRun {
     /// The written pitch of every note the schedule names, when the Exercise
     /// has a `noteIdentity` bar for the pitch pass to check (`notes`).
     pitches: Vec<crate::pitch::ScoreNote>,
+    /// What else is known of each written note (length, bend, technique), for
+    /// the verifier (`verify`). Empty when the caller sent none.
+    details: Vec<verify::NoteDetail>,
     /// Said on the grade: the pitch pass with this serial is running and its
     /// grade will follow.
     notes_pending: Option<u64>,
@@ -2186,6 +2232,7 @@ impl ScheduleRun {
             pass_bars: Vec::new(),
             correct_lag: false,
             pitches: Vec::new(),
+            details: Vec::new(),
             notes_pending: None,
         }
     }
@@ -2201,6 +2248,11 @@ impl ScheduleRun {
     /// bars naming `noteIdentity` and the pitches to check them against.
     pub fn wants_notes(&self) -> bool {
         !self.pitches.is_empty() && self.pass_bars.iter().any(|b| b.metric == "noteIdentity")
+    }
+
+    /// Whether the written pitches were loaded with the schedule.
+    pub fn has_pitches(&self) -> bool {
+        !self.pitches.is_empty()
     }
 
     /// The grades this run reports from now on say the pitch pass with this
@@ -2225,7 +2277,42 @@ impl ScheduleRun {
             self.policy(),
             &self.pass_bars,
             Some(&states),
+            pass::NotesSource::PitchPass,
         ))
+    }
+
+    /// The grade with these verdicts as its right notes, whoever made them.
+    pub(crate) fn report_with_states(
+        &self,
+        weights: &ScoreWeights,
+        states: &[Option<crate::pitch::NoteState>],
+        source: pass::NotesSource,
+    ) -> ScheduleReport {
+        match_attempt_graded(&self.schedule, &self.beats, &self.played, weights, self.policy(), &self.pass_bars, Some(states), source)
+    }
+
+    /// What the pitch pass says of each result of `report`, in step with
+    /// `report.results` (`notes::identify`): the per-note half of
+    /// [`Self::report_with_notes`], for tools that show it note by note.
+    pub fn pitch_states(&self, report: &ScheduleReport, audio: &notes::TakeAudio<'_>) -> Vec<Option<crate::pitch::NoteState>> {
+        notes::identify(self, report, audio)
+    }
+
+    /// Where the pitch pass reads each result of `report` from, ms into
+    /// `audio`: the attack time of every hit inside it, `None` for the rest.
+    /// For tools: the bench holds these against the true attack times.
+    pub fn pitch_lookups_ms(&self, report: &ScheduleReport, audio: &notes::TakeAudio<'_>) -> Vec<Option<f64>> {
+        let mut out = vec![None; report.results.len()];
+        for look in notes::lookups(self, report, audio) {
+            out[look.result] = Some(look.attack_ms);
+        }
+        out
+    }
+
+    /// Where the pitch pass cuts its track into notes, ms into `audio`. For
+    /// tools, like [`Self::pitch_lookups_ms`].
+    pub fn pitch_cuts_ms(&self, audio: &notes::TakeAudio<'_>) -> Vec<f64> {
+        notes::cuts(self, audio)
     }
 
     fn policy(&self) -> CalibrationPolicy {
@@ -2616,9 +2703,11 @@ fn median(sorted: &[f64]) -> f64 {
     }
 }
 
+pub mod curves;
 pub mod notes;
 pub mod pass;
-pub use pass::{NotesCheck, NotesStatus, PassBar, PassResult, PassVerdict};
+pub mod verify;
+pub use pass::{NotesCheck, NotesSource, NotesStatus, PassBar, PassResult, PassVerdict};
 
 #[cfg(test)]
 mod tests;

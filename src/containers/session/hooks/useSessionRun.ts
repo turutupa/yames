@@ -46,6 +46,7 @@ import {
   storeLoad,
   storeSave,
 } from "../../../ipc";
+import { whenScheduleFree } from "../../../songs/scheduleHold";
 import type { PathStateRow, PathTakeRow } from "../../../ipc";
 import { compileJam } from "../../../jam";
 import type { Jam, JamBand } from "../../../jam";
@@ -865,7 +866,10 @@ export function useSessionRun(input: SessionRunInput) {
             ? takeMix(band, bandVolumeRef.current, DEFAULT_MIX_SETTING.mix.click)
             : engineMix(DEFAULT_MIX_SETTING, 0),
         );
-        await loadScoreSchedule(take.schedule, take.exercise.passBars, take.pitches);
+        // Not under a stop still being graded (a Songs pass, or this
+        // Session's last Take): its clear, coming after, would wipe this one.
+        await whenScheduleFree();
+        await loadScoreSchedule(take.schedule, take.exercise.passBars, take.pitches, take.details);
         if (prepareId.current === mine) setPreparedTake(takeKey(take, takeNumber));
       } catch (err) {
         if (prepareId.current !== mine) return;
@@ -888,6 +892,8 @@ export function useSessionRun(input: SessionRunInput) {
       await setPlaying(false).catch(() => {});
       // A Restart of a ramp: from its first rung again.
       if (step.kind === "drill") await stopSpeedRamp().catch(() => {});
+      // After any stop still being graded against it (`scheduleHold.ts`).
+      await whenScheduleFree();
       await clearScoreSchedule().catch(() => {});
       await clearSong().catch(() => {});
       loadedBand.current = null;
@@ -1264,6 +1270,8 @@ export function useSessionRun(input: SessionRunInput) {
     void enqueue(async () => {
       await setPlaying(false).catch(() => {});
       if (entered?.kind === "drill") await stopSpeedRamp().catch(() => {});
+      // After any stop still being graded against it (`scheduleHold.ts`).
+      await whenScheduleFree();
       await clearScoreSchedule().catch(() => {});
       await clearSong().catch(() => {});
       finisherLoaded.current = false;

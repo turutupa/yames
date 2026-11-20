@@ -746,6 +746,14 @@
   color: var(--text-faint);
 }
 
+/* What Yames hears you play: an estimate, so it is as quiet as the scales. */
+.jam-now-heard {
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
 /* A link, not a button: the neck is a thing you glance at between choruses,
    and it should not sit in the row of controls competing with them. */
 .jam-now-fretboard {

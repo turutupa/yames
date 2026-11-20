@@ -10,7 +10,9 @@
  * - `s:f` is string and fret, string 1 the highest. Suffixes, in any order:
  *   `h` hammer-on, `p` pull-off (on the note arrived at; an `h` whose note
  *   before it is on another string is a hammer-on from nowhere, `fromNowhere`), `s` slides out to the
- *   next note, `b2` bends two semitones, `v` vibrato, `>` accent, `m` palm
+ *   next note, `b2` bends two semitones (`b2r` bends and lets it back
+ *   down within the note, `B2` is a pre-bend: bent before the pick, struck at
+ *   the target and let down), `v` vibrato, `>` accent, `m` palm
  *   mute, `l` let ring, `t` tapped with the picking hand (a loud attack with
  *   no stroke), `d` or `u` a printed stroke, `f1`..`f4` the fretting finger
  *   (index to little finger) where the rules in `fingering.ts` would not choose it.
@@ -76,6 +78,7 @@ function parseNote(part: string, token: string, tuning: readonly number[], tick:
   let pick: PickMark | undefined;
   let accent = false;
   let bend: number | undefined;
+  let bendShape: PathNote["bendShape"];
   let finger: PathNote["finger"];
   const suffix = match[3];
   for (let i = 0; i < suffix.length; i += 1) {
@@ -96,11 +99,16 @@ function parseNote(part: string, token: string, tuning: readonly number[], tick:
       finger = f;
       i += 1;
     }
-    else if (c === "b") {
+    else if (c === "b" || c === "B") {
       tech.push("bend");
       bend = Number(suffix[i + 1]);
       i += 1;
       if (!Number.isFinite(bend)) throw new Error(`bad bend: ${token}`);
+      if (c === "B") bendShape = "prebend";
+      else if (suffix[i + 1] === "r") {
+        bendShape = "release";
+        i += 1;
+      }
     } else throw new Error(`bad suffix ${c} in ${token}`);
   }
   const note: PathNote = {
@@ -114,6 +122,7 @@ function parseNote(part: string, token: string, tuning: readonly number[], tick:
   if (pick) note.pick = pick;
   if (accent) note.accent = true;
   if (bend !== undefined) note.bend = bend;
+  if (bendShape) note.bendShape = bendShape;
   if (finger !== undefined) note.finger = finger;
   return note;
 }

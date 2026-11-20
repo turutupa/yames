@@ -272,6 +272,12 @@ export interface Shot {
   jam?: {
     row: number;
     bar?: number;
+    /**
+     * "Hear what I play" is on and the input listens (detection M7): the
+     * mock answers `harmony_start` and sends one reading, so the line under
+     * the chord is drawn. `"unsure"` sends a reading with no key and no chord.
+     */
+    heard?: "heard" | "unsure";
     /** Open the groove editor drawer before the capture. */
     editor?: boolean;
     /**
@@ -532,6 +538,28 @@ export const SHOTS: Shot[] = [
     // way a person presses it. Starting the click before the jam was on the
     // stage would count bars against no form at all.
     jam: { row: 0, bar: 5 },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-heard",
+    suffix: "jam-heard",
+    window: "main",
+    tab: "jam",
+    // The same jam with "Hear what I play" on: the key and the chord heard,
+    // one quiet line under the chord. Never a note inside or outside the key.
+    jam: { row: 0, bar: 5, heard: "heard" },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-heard-unsure",
+    suffix: "jam-heard-unsure",
+    window: "main",
+    tab: "jam",
+    jam: { row: 0, bar: 5, heard: "unsure" },
     width: 1400,
     height: 900,
     settleMs: 400,

@@ -744,6 +744,16 @@
       "nudgeBack": "Beeld iets eerder",
       "nudgeOn": "Beeld iets later",
       "broken": "Deze take speelde niet af. Misschien is het bestand verplaatst of verwijderd."
+    },
+    "hear": {
+      "label": "Horen wat ik speel",
+      "hint": "Terwijl een jam speelt en de ingang aan staat, noemt Yames de toonsoort en het akkoord dat het hoort. Het is een schatting, en Yames zegt het als het niet zeker is."
+    },
+    "heard": {
+      "heard": "Gehoord: {{what}}",
+      "chart": "Schema: {{what}}",
+      "unsure": "Nog niet te zeggen",
+      "listening": "Luistert…"
     }
   },
   "scale": {

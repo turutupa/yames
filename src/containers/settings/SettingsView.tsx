@@ -123,6 +123,9 @@ interface SettingsViewProps {
   /** Spoken cues on the Jam tab — a preference now (JAM_UX_DECISIONS A4). */
   jamCues: boolean;
   setJamCues: Dispatch<SetStateAction<boolean>>;
+  /** "Hear what I play" (detection M7), off by default. */
+  jamHear?: boolean;
+  setJamHear?: Dispatch<SetStateAction<boolean>>;
   onStartDownload: (tier: ModelTier) => void;
   onRequestDownload: (tier: ModelTier) => void;
 
@@ -221,6 +224,8 @@ export function SettingsView({
   setInstrument,
   jamCues,
   setJamCues,
+  jamHear = false,
+  setJamHear,
   onStartDownload,
   onRequestDownload,
   widgetMode,
@@ -339,6 +344,8 @@ export function SettingsView({
           voiceDiagnostics={voiceDiagnostics}
           jamCues={jamCues}
           setJamCues={setJamCues}
+          jamHear={jamHear}
+          setJamHear={setJamHear}
           onStartDownload={onStartDownload}
           onRequestDownload={onRequestDownload}
         />

@@ -1,9 +1,11 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { SHARE_OPTIONS, SHARE_URL } from "../../constants/metronome";
 import { openFeedback, openUrl } from "../../ipc";
 import { ShareIcon } from "../main-window/ShareMenuPopover";
 import { ExportPracticeButton } from "../session/ExportPracticeButton";
+import { keepTakesStored, setKeepTakes } from "../../settings/takeDiagnostics";
+import { SwitchFace } from "./SwitchFace";
 
 type ShareOption = (typeof SHARE_OPTIONS)[number];
 
@@ -70,6 +72,38 @@ function LinkCard({
 }
 
 /**
+ * "Keep my last Takes for troubleshooting": off by default, local files only
+ * (`src/settings/takeDiagnostics.ts`). What a tester attaches when a Take
+ * graded wrong, next to the practice data.
+ */
+function KeepTakesRow() {
+  const { t } = useTranslation();
+  const [on, setOn] = useState(keepTakesStored);
+  const [folder, setFolder] = useState<string | null>(null);
+  const toggle = () => {
+    const next = !on;
+    setOn(next);
+    void setKeepTakes(next)
+      .then((dir) => setFolder(next ? dir : null))
+      .catch(() => setFolder(null));
+  };
+  return (
+    <div className="setting-row" data-testid="settings-keep-takes">
+      <div className="setting-label">
+        <label>{t("settings.keepTakes.title")}</label>
+        <span className="setting-hint">
+          {t("settings.keepTakes.hint")}
+          {on && folder ? ` ${t("settings.keepTakes.folder", { folder })}` : ""}
+        </span>
+      </div>
+      <button className={`toggle-btn setting-switch ${on ? "active" : ""}`} aria-pressed={on} onClick={toggle}>
+        <SwitchFace label={on ? t("common.on") : t("common.off")} />
+      </button>
+    </div>
+  );
+}
+
+/**
  * Support (settings polish, 2026-11-18). The owner: "the Support and the
  * About could use some help". It was a stack of equal buttons and paragraphs,
  * so "Send feedback" (the one thing a tester comes here for) weighed the same
@@ -125,6 +159,7 @@ export function SupportSection({
       {/* The practice data a tester can attach to that issue: a file they
           save and choose to attach, never sent from here. */}
       <ExportPracticeButton appVersion={appVersion} className="toggle-btn" layout="row" />
+      <KeepTakesRow />
 
       <h3 className="settings-subhead">{t("settings.support.supportTitle")}</h3>
       <p className="settings-section-intro">{t("settings.support.blurb")}</p>

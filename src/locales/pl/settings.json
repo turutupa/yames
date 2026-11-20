@@ -459,6 +459,11 @@
         "ask": "Pytaj mnie",
         "askHint": "Sesja pyta przed pierwszym podejściem, dopóki nie wybierzesz."
       }
+    },
+    "keepTakes": {
+      "title": "Zachowaj moje ostatnie podejścia do diagnostyki",
+      "hint": "Gdy podejście zostanie źle ocenione, jego dźwięk i to, czego oczekiwał Yames, można odtworzyć, żeby sprawdzić dlaczego. Zachowuje surowe nagranie z mikrofonu z 20 ostatnich podejść na tym urządzeniu (do około 460 MB); nic nie jest wysyłane. Domyślnie wyłączone.",
+      "folder": "Folder: {{folder}}"
     }
   },
   "keybindings": {

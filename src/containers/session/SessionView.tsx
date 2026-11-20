@@ -5,6 +5,8 @@
  * press in every state, and it does what a pedal tap does: both come from
  * `bigAction`, so they cannot disagree.
  */
+import { heardRecap, heardSince } from "../../jam/heard";
+import type { HeardKeyName } from "../../jam/heard";
 import { useEffect, useRef, useState } from "react";
 import { useFitOneLine, useFitScale } from "./hooks/useFitOneLine";
 import { useTranslation } from "react-i18next";
@@ -820,7 +822,12 @@ function OtherChecks({ outcome }: { outcome: TakeOutcome }) {
   // Only the pitch check is ever left unmeasured by this build; it is said
   // plainly here, in one place (UX audit SES-2).
   const unchecked = outcome.grade.unmeasured.includes("noteIdentity");
-  if (others.length === 0 && !unchecked) return null;
+  // Hammer-ons, pull-offs and taps the note verifier heard: reported, not
+  // graded (owner decision 3), so it carries no ✓ or ✗.
+  const legato = outcome.measures.legato;
+  // Bends and vibrato read as curves: reported, not graded either (M5).
+  const { bends, vibrato } = outcome.measures;
+  if (others.length === 0 && !unchecked && !legato && !bends && !vibrato) return null;
   return (
     <ul className="session-checks" data-testid="session-checks">
       {others.map((c, i) => {
@@ -844,6 +851,36 @@ function OtherChecks({ outcome }: { outcome: TakeOutcome }) {
         <li data-unchecked="">
           <span className="session-check-mark" aria-hidden="true">–</span>
           <span>{t("session.result.notesNotChecked")}</span>
+        </li>
+      )}
+      {legato && (
+        <li data-reported="" data-testid="session-legato">
+          <span className="session-check-mark" aria-hidden="true">·</span>
+          <span>
+            {t(legato.notSounded > 0 ? "session.result.legatoSome" : "session.result.legatoAll", {
+              sounded: legato.sounded,
+              due: legato.due,
+              silent: legato.notSounded,
+            })}
+          </span>
+        </li>
+      )}
+      {bends && (
+        <li data-reported="" data-testid="session-bends">
+          <span className="session-check-mark" aria-hidden="true">·</span>
+          <span>
+            {t(bends.flat > 0 ? "session.result.bendsSomeFlat" : "session.result.bendsAll", {
+              onPitch: bends.onPitch,
+              due: bends.due,
+              flat: bends.flat,
+            })}
+          </span>
+        </li>
+      )}
+      {vibrato && (
+        <li data-reported="" data-testid="session-vibrato">
+          <span className="session-check-mark" aria-hidden="true">·</span>
+          <span>{t("session.result.vibratoHeard", { present: vibrato.present, due: vibrato.due })}</span>
         </li>
       )}
     </ul>
@@ -1755,6 +1792,15 @@ function RecapScreen({ session }: { session: SessionRun }) {
   });
   const origin = session.origin;
   const lastExercise = [...steps].reverse().find((s) => s.kind === "exercise");
+  // What was heard in this Session's free play ("Hear what I play", M7):
+  // only a key the engine estimated and that held. Read once, as the recap
+  // opens; nothing when the setting is off, because nothing was heard then.
+  const [heard] = useState(() => {
+    const said = heardRecap(heardSince(run.startedAt));
+    if (!said) return null;
+    const name = (k: HeardKeyName) => t(`jam.key.${k.mode}Named`, { root: k.root });
+    return { key: said.relative ? `${name(said.key)} / ${name(said.relative)}` : name(said.key), chords: said.chords };
+  });
 
   return (
     <div className="session-body session-recap" data-testid="session-recap">
@@ -1794,6 +1840,13 @@ function RecapScreen({ session }: { session: SessionRun }) {
           ))}
           {takes === 0 && <div className="session-why">{t("session.recap.noTakes")}</div>}
           {notGraded && <div className="session-why">{t("session.recap.notGraded")}</div>}
+          {heard && (
+            <div className="session-why" data-testid="session-recap-heard">
+              {heard.chords.length > 0
+                ? t("session.recap.heard", { key: heard.key, chords: heard.chords.join(", ") })
+                : t("session.recap.heardKey", { key: heard.key })}
+            </div>
+          )}
           {lastGraded && <FairTap session={session} outcome={lastGraded} askKey="session.recap.fairAsk" />}
         </div>
         <div className="session-col">

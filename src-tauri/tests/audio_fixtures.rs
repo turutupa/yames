@@ -933,6 +933,32 @@ fn path_take(path: &str, exercise: &str, bpm: f64, passes: usize) -> Take {
     take
 }
 
+/// [`exercise_take`] long enough to be `bars` bars of 4/4, whatever length the
+/// pack gives the Exercise today, and judged on its timing bars only.
+///
+/// These tests are about the pass rule on timing. They used to assume that
+/// `even-eighths.open-string` was two bars long with no `noteIdentity` bar;
+/// the content pass of 2026-11 made it a four-bar tune with one, and three of
+/// them failed for reasons that had nothing to do with the scorer (card #90).
+/// Right notes on a pack Exercise have their own tests further down, which go
+/// through `run_take_with_notes`.
+fn timing_take(exercise: &str, bpm: f64, bars: usize) -> Take {
+    let per_pass = exercise_take(exercise, bpm, 1).schedule.length_beats / 4.0;
+    assert!(per_pass >= 1.0, "{exercise} is {per_pass} bars long");
+    let passes = (bars as f64 / per_pass).ceil().max(1.0) as usize;
+    let mut take = exercise_take(exercise, bpm, passes);
+    // cut to exactly `bars`, so a count of finished bars means what it says
+    let beats = bars as f64 * 4.0;
+    take.schedule.onsets.retain(|o| o.beat < beats - 1e-9);
+    take.schedule.length_beats = beats;
+    if let Some(m) = take.midis.as_mut() {
+        m.truncate(take.schedule.onsets.len());
+    }
+    take.pass_bars.retain(|b| b.metric != "noteIdentity");
+    assert!(!take.pass_bars.is_empty(), "{exercise} has timing bars");
+    take
+}
+
 fn pass_of(run: &GradingRun) -> &PassResult {
     run.grade().pass.as_ref().expect("pass bars were loaded")
 }
@@ -942,7 +968,7 @@ fn pass_of(run: &GradingRun) -> &PassResult {
 #[test]
 fn a_tidy_take_passes_alternate_picking_and_counts_for_the_clean_tempo() {
     for tone in [Tone::Clean, Tone::HighGain] {
-        let mut take = exercise_take("even-eighths.open-string", 100.0, 8);
+        let mut take = timing_take("even-eighths.open-string", 100.0, 16);
         take.tone = tone;
         let run = run_take(&take);
         let pass = pass_of(&run);
@@ -966,10 +992,11 @@ fn each_alternate_picking_bar_fails_a_take_on_its_own() {
     // Uneven: 35 ms of spread on eighths at 100 BPM is evenness 0.68. (At
     // 25 ms, 0.82 over the Take, the best four bars of sixteen can still
     // clear 0.85: the bar asks for four good bars, not sixteen.)
-    let mut uneven = exercise_take("even-eighths.open-string", 100.0, 8);
+    let mut uneven = timing_take("even-eighths.open-string", 100.0, 16);
     uneven.jitter_ms = 35.0;
     // A note dropped in every bar: 7 of 8 heard.
-    let mut dropping = exercise_take("even-eighths.open-string", 100.0, 8);
+    let mut dropping = timing_take("even-eighths.open-string", 100.0, 16);
+    assert_eq!(dropping.schedule.onsets.len(), 128, "eight eighths a bar");
     dropping.drop = (0..128).step_by(8).map(|i| i + 3).collect();
     for (take, failing) in [
         (uneven, "timingEvenness"),
@@ -989,9 +1016,9 @@ fn each_alternate_picking_bar_fails_a_take_on_its_own() {
 /// could not hear.
 #[test]
 fn a_short_take_or_a_silent_one_is_not_a_fail() {
-    let short = run_take(&exercise_take("even-eighths.open-string", 100.0, 1));
+    let short = run_take(&timing_take("even-eighths.open-string", 100.0, 2));
     assert_eq!(pass_of(&short).verdict, PassVerdict::TooShort, "{:?}", pass_of(&short));
-    let mut silent = exercise_take("even-eighths.open-string", 100.0, 4);
+    let mut silent = timing_take("even-eighths.open-string", 100.0, 8);
     silent.drop = (0..64).collect();
     let silent = run_take(&silent);
     assert_eq!(pass_of(&silent).verdict, PassVerdict::DidntCatchEnough);

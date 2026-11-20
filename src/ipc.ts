@@ -824,16 +824,121 @@ export async function loadScoreSchedule(
   schedule: ScoreSchedule,
   passBars?: readonly ScorerPassBar[],
   notes?: readonly ScorerNotePitch[],
+  details?: readonly ScorerNoteDetail[],
 ): Promise<void> {
   // Songs loads a schedule with no bars to judge against; a Session sends its
   // Exercise's, and the scorer's grade then carries `pass` (score/pass.rs).
   // With the written pitches too, a `noteIdentity` bar is checked from the
   // Take's own audio after it (`score/notes.rs`).
   if (!passBars) return invoke("load_score_schedule", { schedule });
+  // `details` (length, bend, technique of each note) is for the note verifier
+  // (`score/verify.rs`), which confirms the written notes one by one after
+  // the Take; it is only worth sending with the pitches.
+  if (!notes || notes.length === 0) return invoke("load_score_schedule", { schedule, passBars });
   return invoke(
     "load_score_schedule",
-    notes && notes.length > 0 ? { schedule, passBars, notes } : { schedule, passBars },
+    details && details.length > 0 ? { schedule, passBars, notes, details } : { schedule, passBars, notes },
   );
+}
+
+/**
+ * What else the scorer may know of a written note (`score/verify.rs`
+ * `NoteDetail`). `string` is 1 for the high E; `tech` are `PathTechnique`
+ * names; `bend` is in semitones.
+ */
+export type ScorerNoteDetail = {
+  id: number;
+  durBeats: number;
+  bend?: number;
+  /** `release` or `prebend` (`score/curves.rs` `BendShape`); absent: up and held. */
+  bendShape?: "release" | "prebend";
+  string?: number;
+  tech?: string[];
+};
+
+/** How a written note is produced, as the verifier tallies it. */
+export type VerifierNoteKind =
+  | "chordTone"
+  | "hammer"
+  | "pull"
+  | "tap"
+  | "slideTo"
+  | "bend"
+  | "harmonic"
+  | "palmMute"
+  | "picked";
+
+/** One technique's line of the verifier's account (`score/verify.rs`). */
+export type VerifierKindTally = {
+  kind: VerifierNoteKind;
+  /** Notes of this kind the Take reached. */
+  due: number;
+  sounded: number;
+  notSounded: number;
+  wrong: number;
+  /** "Couldn't tell": never a miss, never part of a pass. */
+  unsure: number;
+};
+
+/**
+ * The note verifier's account of a Take, on the late grade only: which
+ * written notes the note model confirmed. Information, except that
+ * `pass.notes.source === "verifier"` says the right-notes count used it.
+ */
+export type VerifierReport = {
+  status: "ran" | "noModel" | "noAudio" | "failed";
+  kinds?: VerifierKindTally[];
+  notes?: {
+    result: number;
+    onsetId: number;
+    pass: number;
+    noteId: number;
+    kind: VerifierNoteKind;
+    heard: "yes" | "no" | "wrong" | "unsure";
+    how: "pick" | "soft" | "none";
+    heardMidi?: number;
+    deviationMs?: number;
+    strength: number;
+  }[];
+  lagMs: number;
+  modelMs: number;
+  ruleMs: number;
+  audioS: number;
+};
+
+/** Bends and vibrato of a Take read from the pitch track (`score/curves.rs` `CurveReport`). */
+export type CurveReport = {
+  bends: { due: number; onPitch: number; flat: number; sharp: number; unsure: number };
+  vibrato: { due: number; present: number; absent: number; unsure: number };
+  notes: {
+    result: number;
+    noteId: number;
+    bendWritten: number;
+    shape: "up" | "release" | "prebend";
+    vibratoWritten: boolean;
+    frames: number;
+    startCents?: number;
+    peakCents?: number;
+    holdCents?: number;
+    endCents?: number;
+    vibratoCents?: number;
+    vibratoHz?: number;
+    bend?: "onPitch" | "flat" | "sharp" | "unsure";
+    released?: boolean;
+    vibrato?: "present" | "absent" | "unsure";
+  }[];
+  ms: number;
+};
+
+/**
+ * "Keep my last Takes for troubleshooting": with it on, each graded Take's
+ * input audio and what was expected of it are written under the app's data
+ * folder (the last 20), for `detect-bench replay`
+ * (`plans/detection/MEASURE.md`). Off by default; nothing is sent anywhere.
+ * Resolves to the folder when on.
+ */
+export async function setTakeDiagnostics(enabled: boolean): Promise<string | null> {
+  return invoke<string | null>("set_take_diagnostics", { enabled });
 }
 
 /** The written pitch of one note a schedule names (`pitch.rs` `ScoreNote`). */
@@ -842,6 +947,78 @@ export type ScorerNotePitch = { id: number; midi: number };
 /** Back to free play. Safe to call when nothing is loaded. */
 export async function clearScoreSchedule(): Promise<void> {
   return invoke("clear_score_schedule");
+}
+
+// ── Free play: the key and the chord heard (detection M7) ─────────────────
+
+/** `harmony::Key`: pitch class of the tonic, concert pitch. */
+export type HeardKey = { tonic: number; mode: "major" | "minor" | "blues" };
+export type HeardKeyState = "listening" | "unsure" | "settled" | "chart";
+export type HeardQuality = "maj" | "min" | "dom7" | "maj7" | "min7";
+export type HeardChord = {
+  root: number;
+  /** Null for a chart's chord, whose `label` names it. */
+  quality: HeardQuality | null;
+  label: string | null;
+  fromChart: boolean;
+};
+/** `harmony::Reading`. `notes` (inside and outside counts) is for tools: not shown. */
+export type HeardReading = {
+  keyState: HeardKeyState;
+  key: { key: HeardKey; scale: string; confidence: number; relativeToo: boolean } | null;
+  chord: HeardChord | null;
+  settledAtS: number | null;
+  heardS: number;
+};
+/** `harmony::worker::Live`: a reading and the chord a page may show. */
+export type HeardLive = HeardReading & { shownChord: HeardChord | null };
+/** `harmony::worker::Summary`: what a stretch of free play came to. */
+export type HeardSummary = {
+  reading: HeardReading;
+  chords: { root: number; quality: HeardQuality | null; beats: number }[];
+  chordBeats: number;
+  beats: number;
+};
+/** `harmony::Chart`, in concert pitch. */
+export type HeardChart = {
+  key: HeardKey | null;
+  bars: { root: number; tones: number[]; label: string }[][];
+  beatsPerBar: number;
+};
+
+/**
+ * Start reading the key and chords from the input that is listening. The
+ * worker's id, for `harmonyStop`; null when the input is not listening or the
+ * build has no note model: nothing was started.
+ *
+ * `clearStale`: free play is beginning (not a retry after the worker ended
+ * by itself), so a schedule some screen left loaded is cleared.
+ */
+export async function harmonyStart(chart: HeardChart | null, bpm: number, clearStale: boolean): Promise<number | null> {
+  return invoke<number | null>("harmony_start", { chart, bpm, clearStale });
+}
+
+/** Bar `bar` of the jam's form starts now. */
+export async function harmonyMarkBar(bar: number, bpm: number): Promise<void> {
+  return invoke("harmony_mark_bar", { bar, bpm });
+}
+
+/** The jam's tempo changed. With no chart there are no bar marks to carry it. */
+export async function harmonySetTempo(bpm: number): Promise<void> {
+  return invoke("harmony_set_tempo", { bpm });
+}
+
+/**
+ * Stop worker `id`. What it heard, or null when it is no longer the one
+ * running (it was replaced, or ended with the input).
+ */
+export async function harmonyStop(id: number): Promise<HeardSummary | null> {
+  return invoke<HeardSummary | null>("harmony_stop", { id });
+}
+
+/** A new reading, or null: the worker ended, or the input was stopped. */
+export function onHarmonyReading(callback: (live: HeardLive | null) => void) {
+  return listen<HeardLive | null>("harmony-reading", (e) => callback(e.payload));
 }
 
 /**
@@ -1005,6 +1182,10 @@ export type ScorerTakeGrade = {
    * `notesPending`; the one that made it, on the grade with right notes.
    */
   notesSerial?: number;
+  /** The note verifier's account of the Take, on the late grade (`VerifierReport`). */
+  verifier?: VerifierReport;
+  /** Bends and vibrato read as curves (`score/curves.rs`), on the late grade. Information only. */
+  curves?: CurveReport;
 };
 
 /** Whether right notes could be measured on a Take (`score/pass.rs` `NotesStatus`). */
@@ -1018,6 +1199,11 @@ export type ScorerNotesStatus =
 
 /** The pitch pass over a Take's finished bars (`score/pass.rs` `NotesCheck`). */
 export type ScorerNotesCheck = {
+  /**
+   * Who gave the verdicts: absent for the pitch tracker alone, `"verifier"`
+   * when the note verifier's were merged in (`score/verify.rs`).
+   */
+  source?: "pitchPass" | "verifier";
   status: ScorerNotesStatus;
   right: number;
   wrong: number;

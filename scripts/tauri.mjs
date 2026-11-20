@@ -10,11 +10,13 @@
  * shipped binary is built `coach-llm-metal` / `coach-llm-vulkan` by
  * `release.yml`. Dev and production were exercising different code.
  *
- * So for `dev` and `build` this injects the same feature the release
- * workflow uses for the host platform, unless the caller already passed
- * `--features` / `-f`.
+ * So for `dev` and `build` this injects the same features the release
+ * workflow uses for the host platform (the coach's GPU backend and the note
+ * verifier's `detect-tract`), unless the caller already passed
+ * `--features` / `-f`. A phone build gets `detect-tract` alone.
  *
- * Escape hatch: `YAMES_DEV_NO_LLM=1` skips the injection. The LLM build
+ * Escape hatch: `YAMES_DEV_NO_LLM=1` skips the coach's feature (the
+ * verifier's stays). The LLM build
  * needs cmake, libclang and (off macOS) the Vulkan SDK, and costs a long
  * first compile — someone changing only CSS should not have to pay that.
  *
@@ -23,7 +25,7 @@
  *
  * Mobile (`tauri android …`, `tauri ios …`) is the other way round: there is
  * no coach in a phone build at all (MOBILE_IMPLEMENTATION_PLAN §1), so this
- * injects no feature and no LLM build environment. The cut is made by
+ * injects no coach feature and no LLM build environment (only `detect-tract`). The cut is made by
  * target-conditional dependencies in `src-tauri/Cargo.toml` plus
  * `#[cfg(desktop)]` in the source, not by a Cargo feature — the Tauri CLI has
  * no `--no-default-features` flag to turn one off with. What the mobile path
@@ -43,12 +45,24 @@ const argv = process.argv.slice(2);
 // at runtime when it finds no usable device, so one feature serves both.
 const FEATURE = process.platform === "darwin" ? "coach-llm-metal" : "coach-llm-vulkan";
 
+// The note verifier's runtime (`plans/detection/RUNTIME.md`): pure Rust, so
+// every build people play on carries it, phones included. Not behind
+// YAMES_DEV_NO_LLM: it costs no toolchain. About +13 MB of binary
+// (RUNTIME.md, "Size").
+const DETECT_FEATURE = "detect-tract";
+
 const subcommand = argv.find((a) => !a.startsWith("-"));
 const isMobile = subcommand === "android" || subcommand === "ios";
+const callerChoseFeatures = argv.some((a) => a === "-f" || a === "--features" || a.startsWith("--features="));
 const wantsFeatureInjection =
   (subcommand === "dev" || subcommand === "build") &&
   process.env.YAMES_DEV_NO_LLM !== "1" &&
-  !argv.some((a) => a === "-f" || a === "--features" || a.startsWith("--features="));
+  !callerChoseFeatures;
+// `tauri android build` / `tauri ios dev`: the action after the platform.
+const mobileAction = isMobile ? argv.slice(argv.indexOf(subcommand) + 1).find((a) => !a.startsWith("-")) : undefined;
+const wantsMobileFeature = (mobileAction === "dev" || mobileAction === "build") && !callerChoseFeatures;
+const wantsDetectOnly =
+  (subcommand === "dev" || subcommand === "build") && process.env.YAMES_DEV_NO_LLM === "1" && !callerChoseFeatures;
 
 const args = [...argv];
 const env = { ...process.env };
@@ -74,12 +88,22 @@ if (subcommand === "android" && !env.CARGO_PROFILE_RELEASE_STRIP) {
   console.log("[tauri] CARGO_PROFILE_RELEASE_STRIP=symbols for the Android release library");
 }
 
+if (wantsMobileFeature) {
+  args.splice(args.indexOf(mobileAction, args.indexOf(subcommand) + 1) + 1, 0, "--features", DETECT_FEATURE);
+  console.log(`[tauri] building with --features ${DETECT_FEATURE}`);
+}
+
+if (wantsDetectOnly) {
+  args.splice(args.indexOf(subcommand) + 1, 0, "--features", DETECT_FEATURE);
+  console.log(`[tauri] building with --features ${DETECT_FEATURE} (YAMES_DEV_NO_LLM=1: no coach)`);
+}
+
 if (wantsFeatureInjection) {
   // Insert straight after the subcommand: everything after a `--` is
   // forwarded to cargo by the CLI, so appending would land in the wrong
   // argument list.
-  args.splice(args.indexOf(subcommand) + 1, 0, "--features", FEATURE);
-  console.log(`[tauri] building with --features ${FEATURE} (YAMES_DEV_NO_LLM=1 to skip)`);
+  args.splice(args.indexOf(subcommand) + 1, 0, "--features", `${FEATURE},${DETECT_FEATURE}`);
+  console.log(`[tauri] building with --features ${FEATURE},${DETECT_FEATURE} (YAMES_DEV_NO_LLM=1 to skip the coach)`);
 
   if (process.platform === "win32") {
     // Both discovered the hard way in T01 and encoded in

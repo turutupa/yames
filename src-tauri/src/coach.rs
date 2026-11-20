@@ -1132,7 +1132,7 @@ fn extract_int(text: &str, prefix: &str) -> Option<u32> {
 // -----------------------------------------------------------------
 
 #[cfg(windows)]
-pub(crate) fn lower_current_thread_priority() {
+pub fn lower_current_thread_priority() {
     use windows_sys::Win32::System::Threading::{
         GetCurrentThread, SetThreadPriority, THREAD_PRIORITY_BELOW_NORMAL,
     };
@@ -1147,7 +1147,7 @@ pub(crate) fn lower_current_thread_priority() {
 }
 
 #[cfg(unix)]
-pub(crate) fn lower_current_thread_priority() {
+pub fn lower_current_thread_priority() {
     // On macOS `PRIO_DARWIN_THREAD` scopes `setpriority` to the calling
     // thread. On Linux `PRIO_PROCESS` with `who == 0` is already
     // per-thread (a documented Linux divergence from POSIX), which is
@@ -1172,7 +1172,7 @@ pub(crate) fn lower_current_thread_priority() {
 }
 
 #[cfg(not(any(windows, unix)))]
-pub(crate) fn lower_current_thread_priority() {}
+pub fn lower_current_thread_priority() {}
 
 #[cfg(feature = "coach-llm")]
 mod llm {

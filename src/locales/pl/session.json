@@ -290,7 +290,12 @@
       "barsMet": "Utrzymane takty: {{count}} z {{of}}",
       "barHeld": "Takt {{n}}: utrzymany",
       "barSlipped": "Takt {{n}}: rozjechał się",
-      "barThin": "Takt {{n}}: za mało nut, by ocenić"
+      "barThin": "Takt {{n}}: za mało nut, by ocenić",
+      "legatoAll": "Hammer-ony, pull-offy i tapping: zabrzmiało {{sounded}} z {{due}}. Tylko informacja, bez oceny.",
+      "legatoSome": "Hammer-ony, pull-offy i tapping: zabrzmiało {{sounded}} z {{due}}, {{silent}} nie. Tylko informacja, bez oceny.",
+      "bendsAll": "Podciągnięcia: {{onPitch}} z {{due}} sięgnęło dźwięku. Tylko informacja, bez oceny.",
+      "bendsSomeFlat": "Podciągnięcia: {{onPitch}} z {{due}} sięgnęło dźwięku, {{flat}} za nisko. Tylko informacja, bez oceny.",
+      "vibratoHeard": "Wibrato: słychać na {{present}} z {{due}} nut. Tylko informacja, bez oceny."
     },
     "edge": {
       "kick": "Znajdź mój limit",
@@ -404,7 +409,9 @@
       "fairAsk": "Czy dzisiejsze oceny były uczciwe?",
       "backTo": "Wróć: {{place}}",
       "more": "Jeszcze 5 minut",
-      "keepGoing": "Graj dalej: {{title}}"
+      "keepGoing": "Graj dalej: {{title}}",
+      "heard": "W swobodnej grze byłeś w {{key}}, najczęściej na {{chords}}.",
+      "heardKey": "W swobodnej grze byłeś w {{key}}."
     },
     "paths": {
       "title": "Ścieżki",

@@ -108,6 +108,11 @@ pub struct RingBuffer {
     buf: Vec<f32>,
     write_pos: usize,
     capacity: usize,
+    /// Samples written since this ring was made. Unlike `write_pos` it never
+    /// wraps, so a reader that keeps it can tell being a whole ring behind
+    /// from being a little behind, and a new ring (a device change makes
+    /// one) from the one it was reading: the count starts again at zero.
+    written: u64,
 }
 
 impl RingBuffer {
@@ -116,6 +121,30 @@ impl RingBuffer {
             buf: vec![0.0; capacity],
             write_pos: 0,
             capacity,
+            written: 0,
+        }
+    }
+
+    pub fn capacity(&self) -> usize {
+        self.capacity
+    }
+
+    /// See the field: samples written since this ring was made.
+    pub fn written(&self) -> u64 {
+        self.written
+    }
+
+    /// Append the newest `n` samples to `out`, oldest first (`n` is cut to
+    /// the ring's length). `out` is the caller's, with room already: nothing
+    /// here allocates with the lock held unless the caller let it.
+    pub fn read_newest_into(&self, n: usize, out: &mut Vec<f32>) {
+        let take = n.min(self.capacity);
+        let start = (self.write_pos + self.capacity - take) % self.capacity;
+        if start + take <= self.capacity {
+            out.extend_from_slice(&self.buf[start..start + take]);
+        } else {
+            out.extend_from_slice(&self.buf[start..]);
+            out.extend_from_slice(&self.buf[..start + take - self.capacity]);
         }
     }
 
@@ -124,6 +153,7 @@ impl RingBuffer {
             self.buf[self.write_pos] = s;
             self.write_pos = (self.write_pos + 1) % self.capacity;
         }
+        self.written += samples.len() as u64;
     }
 
     /// Read the last `n` samples in chronological order.

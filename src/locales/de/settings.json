@@ -459,6 +459,11 @@
         "ask": "Frag mich",
         "askHint": "Eine Session fragt vor ihrem ersten Take, bis du dich entscheidest."
       }
+    },
+    "keepTakes": {
+      "title": "Meine letzten Takes zur Fehlersuche behalten",
+      "hint": "Wird ein Take falsch bewertet, lassen sich sein Audio und das, was Yames erwartet hat, erneut abspielen, um den Grund zu finden. Behält die unbearbeitete Mikrofonaufnahme deiner letzten 20 Takes auf diesem Gerät (bis zu etwa 460 MB); nichts wird gesendet. Standardmäßig aus.",
+      "folder": "Ordner: {{folder}}"
     }
   },
   "keybindings": {

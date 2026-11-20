@@ -459,6 +459,11 @@
         "ask": "Demande-moi",
         "askHint": "Chaque séance demande avant sa première prise, jusqu'à ce que tu choisisses."
       }
+    },
+    "keepTakes": {
+      "title": "Garder mes dernières prises pour le dépannage",
+      "hint": "Si une prise est mal notée, son audio et ce que Yames attendait peuvent être rejoués pour comprendre pourquoi. Garde l'enregistrement brut du micro de vos 20 dernières prises sur cet appareil (jusqu'à environ 460 Mo) ; rien n'est envoyé. Désactivé par défaut.",
+      "folder": "Dossier : {{folder}}"
     }
   },
   "keybindings": {

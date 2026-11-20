@@ -744,6 +744,16 @@
       "nudgeBack": "Bild etwas früher",
       "nudgeOn": "Bild etwas später",
       "broken": "Dieser Take ließ sich nicht abspielen. Die Datei wurde vielleicht verschoben oder gelöscht."
+    },
+    "hear": {
+      "label": "Hören, was ich spiele",
+      "hint": "Während ein Jam läuft und der Eingang an ist, nennt Yames die Tonart und den Akkord, die es hört. Das ist eine Schätzung, und Yames sagt es, wenn es unsicher ist."
+    },
+    "heard": {
+      "heard": "Gehört: {{what}}",
+      "chart": "Chart: {{what}}",
+      "unsure": "Noch nicht erkennbar",
+      "listening": "Hört zu…"
     }
   },
   "scale": {

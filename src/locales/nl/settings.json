@@ -459,6 +459,11 @@
         "ask": "Vraag het me",
         "askHint": "Een sessie vraagt het voor de eerste take, tot je kiest."
       }
+    },
+    "keepTakes": {
+      "title": "Mijn laatste takes bewaren voor probleemoplossing",
+      "hint": "Als een take verkeerd wordt beoordeeld, kunnen de audio en wat Yames verwachtte opnieuw worden afgespeeld om te zien waarom. Bewaart de onbewerkte microfoonopname van je laatste 20 takes op dit apparaat (tot ongeveer 460 MB); er wordt niets verzonden. Standaard uit.",
+      "folder": "Map: {{folder}}"
     }
   },
   "keybindings": {

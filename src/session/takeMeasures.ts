@@ -12,6 +12,8 @@
  */
 import { getTakeGradeWithNotes } from "../ipc";
 import type {
+  VerifierReport,
+  CurveReport,
   NoCatchReason,
   PracticeSegmentEndedPayload,
   ScorerPassResult,
@@ -59,6 +61,21 @@ export type TakeMeasures = {
    * decides the verdict; `grade.ts` only falls back to its own reading without.
    */
   pass?: ScorerPassResult;
+  /**
+   * Hammer-ons, pull-offs and taps, as the note verifier heard them
+   * (`score/verify.rs`), when it ran. Reported, never graded (owner decision
+   * 3): `due` counts every one the Take reached, `sounded` the confirmed ones,
+   * `notSounded` the ones it called silent; the rest it could not tell, which
+   * is never a miss (decision 4).
+   */
+  legato?: { due: number; sounded: number; notSounded: number };
+  /**
+   * Bends and vibrato read as curves (`score/curves.rs`, M5), when the Take
+   * had any the scorer heard. Reported, never graded; "couldn't tell" is in
+   * `due` only.
+   */
+  bends?: { due: number; onPitch: number; flat: number; sharp: number };
+  vibrato?: { due: number; present: number; absent: number };
 };
 
 /**
@@ -100,6 +117,31 @@ function barsOf(grade: ScorerTakeGrade): number[] | null {
   return out;
 }
 
+const LEGATO_KINDS = new Set(["hammer", "pull", "tap"]);
+
+/** The verifier's legato line, when it ran and the Take had any. */
+export function legatoOf(verifier: VerifierReport | undefined): TakeMeasures["legato"] | undefined {
+  if (verifier?.status !== "ran" || !verifier.kinds) return undefined;
+  const rows = verifier.kinds.filter((k) => LEGATO_KINDS.has(k.kind));
+  const due = rows.reduce((n, k) => n + k.due, 0);
+  if (due === 0) return undefined;
+  return {
+    due,
+    sounded: rows.reduce((n, k) => n + k.sounded, 0),
+    notSounded: rows.reduce((n, k) => n + k.notSounded, 0),
+  };
+}
+
+/** The curve reading's bends and vibrato, when there were any to read. */
+export function curvesOf(curves: CurveReport | undefined): Pick<TakeMeasures, "bends" | "vibrato"> {
+  if (!curves) return {};
+  const { bends: b, vibrato: v } = curves;
+  return {
+    ...(b.due > 0 && b.due > b.unsure ? { bends: { due: b.due, onPitch: b.onPitch, flat: b.flat, sharp: b.sharp } } : {}),
+    ...(v.due > 0 && v.due > v.unsure ? { vibrato: { due: v.due, present: v.present, absent: v.absent } } : {}),
+  };
+}
+
 /** The scorer's right-notes value, when it measured one. */
 function noteIdentityOf(pass: ScorerPassResult | undefined): number | null {
   if (pass?.notes?.status !== "measured") return null;
@@ -110,16 +152,21 @@ function noteIdentityOf(pass: ScorerPassResult | undefined): number | null {
  * How long a Take's result waits for right notes. The pitch pass takes well
  * under a second for a Take in a release build; this is the end of the
  * "mid-session report" tier (`AGENTS.md`, 3 to 8 s) less the time the timing
- * grade already took, and past it the timing grade stands.
+ * grade already took. Past it the engine hands over the grade from the pitch
+ * tracker alone when the note model is still on a long Take (`timing.rs`
+ * `LATE_BUDGET_MS`, the same number: change both), and the timing grade
+ * stands only when not even that is in.
  */
 export const NOTES_WAIT_MS = 5000;
 
 /**
  * The grade a Take's result should read: the timing grade as it came, or, when
  * it said the pitch pass was still running, the grade with right notes in it.
- * The timing numbers are the same in both; only `pass` gains `noteIdentity`.
- * A build without the command, a pass that is not done in time, or one that
- * failed all leave the timing grade, `noteIdentity` not assessed.
+ * The timing numbers are the same in both; `pass` gains `noteIdentity`, and
+ * what is reported and not graded (`verifier`, `curves`) comes with it, on an
+ * Exercise with no pass bars too. A build without the command, a pass with
+ * nothing to hand over in time, or one that failed all leave the timing
+ * grade, `noteIdentity` not assessed.
  */
 export async function withRightNotes(
   grade: ScorerTakeGrade | null,
@@ -129,8 +176,16 @@ export async function withRightNotes(
   const withNotes = await fetch(NOTES_WAIT_MS).catch(() => null);
   // Only the pass this Take started: a grade for another Take is no answer.
   const same = withNotes?.notesSerial !== undefined && withNotes.notesSerial === grade.notesSerial;
-  if (!withNotes?.pass || !same) return { ...grade, notesPending: false };
-  return { ...grade, pass: withNotes.pass, notesPending: false };
+  if (!withNotes || !same) return { ...grade, notesPending: false };
+  // An Exercise with no pass bars has no `pass` on either grade, and its late
+  // grade still carries what was reported: the legato line and the curves.
+  return {
+    ...grade,
+    ...(withNotes.pass ? { pass: withNotes.pass } : {}),
+    ...(withNotes.verifier ? { verifier: withNotes.verifier } : {}),
+    ...(withNotes.curves ? { curves: withNotes.curves } : {}),
+    notesPending: false,
+  };
 }
 
 function fromGrade(
@@ -154,6 +209,8 @@ function fromGrade(
     caught,
     ...(grade.noCatchReason ? { noCatchReason: grade.noCatchReason } : {}),
     ...(grade.pass ? { pass: grade.pass } : {}),
+    ...(caught && legatoOf(grade.verifier) ? { legato: legatoOf(grade.verifier) } : {}),
+    ...(caught ? curvesOf(grade.curves) : {}),
   };
 }
 

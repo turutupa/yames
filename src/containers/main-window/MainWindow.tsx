@@ -80,6 +80,7 @@ import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { DrillView } from "../drill/DrillView";
 import { JamView } from "../jam/JamView";
 import { SongsView } from "../songs/SongsView";
+import { useScheduleLeavesWithSong } from "../songs/useScheduleLeavesWithSong";
 import { useSongsDue } from "../songs/review/useSongsDue";
 import { useOpenedSong } from "../songs/useOpenedSong";
 import { FullscreenView } from "../zen/FullscreenView";
@@ -106,7 +107,9 @@ import { coachDebug } from "../../utils/debug";
 import { presetBeatGroups, presetFreeMode } from "../../utils/meter";
 import { formBars } from "../../jam/forms";
 import { barInView, jamHarmony, nextChange } from "../../jam/display";
-import { chordName } from "../../jam/harmony";
+import { chordName, displayTransposition } from "../../jam/harmony";
+import { heardChart, heardLine } from "../../jam/heard";
+import { useHeard } from "../../jam/useHeard";
 import { useShareMenu } from "./useShareMenu";
 import { ShareMenuPopover } from "./ShareMenuPopover";
 import { useUiPreferences } from "./hooks/useUiPreferences";
@@ -489,6 +492,8 @@ export function MainWindow() {
     setAnimationStyle,
     jamCues,
     setJamCues,
+    jamHear,
+    setJamHear,
   } = useUiPreferences();
 
   // The jam the window has open (JAM_MODE). With none loaded every one of
@@ -558,6 +563,9 @@ export function MainWindow() {
     // would come back with its playhead moved.
     beat: view === "session" ? null : currentBeat,
   });
+  // Its schedule leaves the engine when the app leaves Songs or the song
+  // closes; not when Settings opens over it (the mode stays).
+  useScheduleLeavesWithSong(mode === "songs" && !!songsSession.score);
 
   /**
    * Today's Session, and everything that runs it (`src/session/`).
@@ -594,6 +602,25 @@ export function MainWindow() {
     // "Where do you start?" lists the Paths, over whichever screen the wizard opened on.
     preload: onboarding.isOpen,
   });
+
+  // "Hear what I play" (detection M7): the key and the chord heard while a
+  // jam plays and the input listens. Off, nothing below invokes anything.
+  // The Session's own jam step is heard too (for the recap's line), without
+  // a chart; a finisher is a Take, and a Take is never read this way.
+  const sessionStep = sessionRun.run.plan?.steps[sessionRun.run.stepIndex];
+  const heardJam = mode === "jam" ? jamSession.jam : null;
+  const heardInSession = mode === "session" && sessionStep?.kind === "jam" && !sessionStep.exerciseId;
+  const heardChartNow = useMemo(() => (heardJam ? heardChart(heardJam) : null), [heardJam]);
+  const heardLive = useHeard({
+    active: jamHear && state.isPlaying && evaluation.enabled && (!!heardJam || heardInSession),
+    chart: heardChartNow,
+    bpm: state.bpm,
+    formBar: currentBeat?.formBar ?? 0,
+  });
+  const heardShown = useMemo(
+    () => (jamHear && heardJam ? heardLine(heardLive, displayTransposition(heardJam.transposition ?? "concert")) : null),
+    [jamHear, heardJam, heardLive],
+  );
 
   // The tours (O6, card #50). "Show me around" walks Today, Paths, a Session
   // and Progress; "Tour the tools" the Metronome and the Drill. Either owns the
@@ -2549,6 +2576,7 @@ export function MainWindow() {
               lineup={jamSession.lineup}
               trainedBpm={jamSession.trainedBpm}
               listening={evaluation.enabled}
+              heard={heardShown}
               takes={jamTakes}
               onToggleTakes={jamTakes.requestTakes}
               camera={jamCamera}
@@ -2763,6 +2791,8 @@ export function MainWindow() {
             setInstrument={setInstrument}
             jamCues={jamCues}
             setJamCues={setJamCues}
+            jamHear={jamHear}
+            setJamHear={setJamHear}
             onStartDownload={coach.handleStartDownload}
             onRequestDownload={coach.setPendingDownloadTier}
             widgetMode={state.mode}

@@ -288,7 +288,12 @@
       "barsMet": "{{count}} de {{of}} compassos sustentados",
       "barHeld": "Compasso {{n}}: sustentado",
       "barSlipped": "Compasso {{n}}: escapou",
-      "barThin": "Compasso {{n}}: poucas notas para julgar"
+      "barThin": "Compasso {{n}}: poucas notas para julgar",
+      "legatoAll": "Hammer-ons, pull-offs e taps: {{sounded}} de {{due}} soaram. Informado, não avaliado.",
+      "legatoSome": "Hammer-ons, pull-offs e taps: {{sounded}} de {{due}} soaram, {{silent}} não. Informado, não avaliado.",
+      "bendsAll": "Bends: {{onPitch}} de {{due}} chegaram à nota. Informado, não avaliado.",
+      "bendsSomeFlat": "Bends: {{onPitch}} de {{due}} chegaram à nota, {{flat}} ficaram curtos. Informado, não avaliado.",
+      "vibratoHeard": "Vibrato: ouvido em {{present}} de {{due}} notas. Informado, não avaliado."
     },
     "edge": {
       "kick": "Achar meu limite",
@@ -397,7 +402,9 @@
       "fairAsk": "As notas de hoje pareceram justas?",
       "backTo": "Voltar para {{place}}",
       "more": "Mais 5 minutos",
-      "keepGoing": "Continuar: {{title}}"
+      "keepGoing": "Continuar: {{title}}",
+      "heard": "Tocando livre você esteve em {{key}}, principalmente em {{chords}}.",
+      "heardKey": "Tocando livre você esteve em {{key}}."
     },
     "paths": {
       "title": "Trilhas",

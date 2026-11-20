@@ -49,7 +49,11 @@ mod kit;
 #[cfg_attr(target_os = "android", path = "midi_android.rs")]
 mod midi;
 mod models;
+pub mod detect;
+// Free play: key, chord and inside/outside from the notes heard (M7).
+pub mod harmony;
 pub mod onset;
+pub mod onset_flux;
 /// The score a player is playing against, and — roadmap 2.4 — what came
 /// back from a pass at it. `pub` for the same reason the three below are.
 pub mod score;
@@ -86,6 +90,7 @@ mod camera_permission;
 mod loopback;
 mod take;
 pub mod take_audio;
+pub mod take_diagnostics;
 /// The camera's recording, beside the take it belongs to (W21,
 /// `plans/SONGS.md` A9/A10). Nothing in it goes near the audio threads.
 mod take_video;
@@ -101,6 +106,10 @@ mod voices;
 /// implementation details of the Tauri command surface — this facade
 /// re-exports the exact handful of symbols the audio-safety gate uses.
 pub mod probe {
+    /// `--late-pass`: the post-Take pass, on a thread demoted the way
+    /// `yames-take-notes` is.
+    pub use crate::coach::lower_current_thread_priority;
+    pub use crate::timing::late_grade;
     /// The other half of the audio-safety gate: the callback raises this for
     /// the span of its own body and the probe's `#[global_allocator]` counts
     /// every allocation and free made while it is up. See `alloc_probe`.
@@ -188,7 +197,7 @@ use commands::{
     analyze_attempt, analyze_take_pitch,
     get_waveform, is_coach_loaded, list_audio_input_devices, list_audio_output_devices,
     list_calibration_cache, list_midi_devices, list_presets, list_session_logs, load_coach_model,
-    clear_score_schedule, close_open_segment, get_take_grade, get_take_grade_with_notes, load_score_schedule, notify_settings_change, set_listen_demo,
+    clear_score_schedule, close_open_segment, get_take_grade, get_take_grade_with_notes, load_score_schedule, set_take_diagnostics, notify_settings_change, set_listen_demo,
     // W12 — the bands the review colours a note by, from the scorer's own rule.
     score_timing_bands,
     open_url, reveal_in_folder, reorder_presets, save_drill_run, save_preset, save_session,
@@ -199,7 +208,7 @@ use commands::{
     app_ready, set_volume, set_widget_always_on_top, set_widget_mode, show_floating, show_main,
     start_evaluation, start_model_download, start_playback, start_recording, start_speed_ramp,
     start_speed_ramp_from, start_voice_repair, stop_evaluation, stop_playback, stop_recording,
-    arm_count_in, inspect_kit_folder, pick_kit_folder, set_accent_mode, set_jam, set_jam_position, warm_jam, release_jam_sounds, refresh_audio_devices, set_app_in_background, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
+    arm_count_in, inspect_kit_folder, pick_kit_folder, set_accent_mode, set_jam, set_jam_position, warm_jam, harmony_start, harmony_mark_bar, harmony_set_tempo, harmony_stop, release_jam_sounds, refresh_audio_devices, set_app_in_background, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
     tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk, DownloadState,
     check_take_sound, delete_take, list_takes, play_take, start_take, stop_take, stop_take_playback,
     takes_dir_size,
@@ -553,6 +562,7 @@ pub fn run() {
             android_route::spawn(app.handle().clone());
             app.manage(create_shared_audio_input());
             app.manage(create_shared_onset_detector());
+            app.manage(harmony::worker::SharedHarmony::default());
             app.manage(Arc::new(Mutex::new(TimingAnalyzer::new(beat_log))));
             app.manage(create_shared_session_accumulator());
 
@@ -860,6 +870,10 @@ pub fn run() {
             set_jam,
             set_jam_position,
             warm_jam,
+            harmony_start,
+            harmony_mark_bar,
+            harmony_set_tempo,
+            harmony_stop,
             release_jam_sounds,
             refresh_audio_devices,
             set_app_in_background,
@@ -935,6 +949,7 @@ pub fn run() {
             get_take_grade_with_notes,
             // Roadmap 2.4 — the score the player is playing against.
             load_score_schedule,
+            set_take_diagnostics,
             clear_score_schedule,
             // W12 — the review's colours, from `timing::window_thresholds`.
             score_timing_bands,

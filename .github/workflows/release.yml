@@ -93,19 +93,19 @@ jobs:
           # llama.cpp falls back to the CPU at runtime, so one binary per
           # platform serves both GPU and GPU-less machines.
           - platform: macos-latest
-            args: '--target aarch64-apple-darwin -- --features coach-llm-metal'
+            args: '--target aarch64-apple-darwin -- --features coach-llm-metal,detect-tract'
             target: aarch64-apple-darwin
             label: macos-aarch64
           - platform: macos-latest
-            args: '--target x86_64-apple-darwin -- --features coach-llm-metal'
+            args: '--target x86_64-apple-darwin -- --features coach-llm-metal,detect-tract'
             target: x86_64-apple-darwin
             label: macos-x86_64
           - platform: ubuntu-22.04
-            args: '-- --features coach-llm-vulkan'
+            args: '-- --features coach-llm-vulkan,detect-tract'
             target: ''
             label: ubuntu-22.04
           - platform: windows-latest
-            args: '-- --features coach-llm-vulkan'
+            args: '-- --features coach-llm-vulkan,detect-tract'
             target: ''
             label: windows
 

@@ -288,7 +288,12 @@
       "barsMet": "{{count}} mesures sur {{of}} tenues",
       "barHeld": "Mesure {{n}} : tenue",
       "barSlipped": "Mesure {{n}} : a glissé",
-      "barThin": "Mesure {{n}} : trop peu de notes pour juger"
+      "barThin": "Mesure {{n}} : trop peu de notes pour juger",
+      "legatoAll": "Hammer-ons, pull-offs et taps : {{sounded}} sur {{due}} ont sonné. Signalé, pas noté.",
+      "legatoSome": "Hammer-ons, pull-offs et taps : {{sounded}} sur {{due}} ont sonné, {{silent}} non. Signalé, pas noté.",
+      "bendsAll": "Tirés : {{onPitch}} sur {{due}} ont atteint la note. Signalé, pas noté.",
+      "bendsSomeFlat": "Tirés : {{onPitch}} sur {{due}} ont atteint la note, {{flat}} sont restés courts. Signalé, pas noté.",
+      "vibratoHeard": "Vibrato : entendu sur {{present}} notes sur {{due}}. Signalé, pas noté."
     },
     "edge": {
       "kick": "Trouver ma limite",
@@ -397,7 +402,9 @@
       "fairAsk": "Les notes d'aujourd'hui te semblent-elles justes ?",
       "backTo": "Retour à {{place}}",
       "more": "5 minutes de plus",
-      "keepGoing": "Continuer : {{title}}"
+      "keepGoing": "Continuer : {{title}}",
+      "heard": "En jeu libre, vous étiez en {{key}}, surtout sur {{chords}}.",
+      "heardKey": "En jeu libre, vous étiez en {{key}}."
     },
     "paths": {
       "title": "Parcours",

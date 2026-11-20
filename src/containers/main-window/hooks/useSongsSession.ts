@@ -42,6 +42,7 @@ import type { PlayheadState } from "../../../songs/playhead";
 import type { BeatPosition } from "../../../songs/position";
 import { buildSchedule, clampRange, rangeTempo, wholeSong } from "../../../songs/schedule";
 import { loadScoreSchedule, markScoreOpened, seekSong } from "../../../ipc";
+import { scheduleHeld } from "../../../songs/scheduleHold";
 /**
  * The importer is loaded when a file arrives, not when the app starts.
  *
@@ -673,8 +674,10 @@ export function useSongsSession(
       // And the scorer starts again from here. An attempt that was seeked
       // scores what was actually played AFTER the seek: the onsets that were
       // jumped over never happened, and a note nobody was in a position to
-      // play must not be marked as one they missed.
-      void pushSchedule();
+      // play must not be marked as one they missed. Not while the last stop
+      // is still being graded: the push its hold makes on release covers it
+      // (`src/songs/scheduleHold.ts`).
+      if (!scheduleHeld()) void pushSchedule();
     },
     [score, isPlaying, pushSchedule, selection],
   );
@@ -707,7 +710,7 @@ export function useSongsSession(
     setPlayhead(playheadToStart());
     if (!isPlaying) return;
     void seekSong(rangeStartTick(score, portion)).catch(() => {});
-    void pushSchedule();
+    if (!scheduleHeld()) void pushSchedule();
   }, [score, portion, isPlaying, pushSchedule]);
 
   /**

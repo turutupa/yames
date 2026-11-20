@@ -84,6 +84,68 @@ test.describe("what you reach for mid-chorus", () => {
   }
 });
 
+/**
+ * "Hear what I play" (detection M7): one line under the chord with the key and
+ * the chord heard. It is an estimate, so it may say "couldn't tell"; what it
+ * may never say is whether a note was inside or outside the key (from a
+ * microphone about half of those calls are wrong).
+ */
+test.describe("the key and chord heard", () => {
+  for (const size of [
+    { name: "a phone-wide window", width: 760, height: 900 },
+    { name: "a laptop", width: 1100, height: 720 },
+    { name: "the pictures", width: 1400, height: 900 },
+  ]) {
+    test(`is one line beside the chord, over nothing, at ${size.name}`, async ({ page }) => {
+      await openShot(page, "jam-heard", size);
+      const line = page.getByTestId("jam-heard");
+      await expect(line).toHaveAttribute("data-state", "heard");
+      await expect(line).toHaveText(/A minor.*D7/);
+      await expect(line).not.toHaveText(/inside|outside/i);
+      await insideViewport(page, "[data-testid=jam-heard]", `the line heard at ${size.name}`, size);
+      // The line makes the column beside the chord one line taller. Under
+      // about 1200px that column's box already reaches past the NOW block,
+      // under the tempo, so the question is asked of the ink: the words in
+      // the column against every word and control of the cluster beside it.
+      const fits = await line.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        const side = el.closest(".jam-now-side")!;
+        const p = side.getBoundingClientRect();
+        const lines = new Set([...el.getClientRects()].map((c) => Math.round(c.top))).size;
+        const ink = (e: Element) => {
+          const range = document.createRange();
+          range.selectNodeContents(e);
+          return [...range.getClientRects()].filter((b) => b.width > 0 && b.height > 0);
+        };
+        const mine = [...side.children].flatMap(ink);
+        const hit = [...document.querySelectorAll(".jam-head-controls *")]
+          .filter((e) => e.matches("button, input, select") || [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent!.trim() !== ""))
+          .filter((e) => (e.matches("button, input, select") ? [e.getBoundingClientRect()] : ink(e)).some((b) => mine.some((m) => m.left < b.right && b.left < m.right && m.top < b.bottom && b.top < m.bottom)))
+          .map((e) => e.textContent!.trim().slice(0, 24) || String(e.className));
+        return { inColumn: r.left >= p.left - 1 && r.right <= p.right + 1 && r.top >= p.top - 1 && r.bottom <= p.bottom + 1, lines, hit };
+      });
+      expect(fits, `the line heard at ${size.name}`).toEqual({ inColumn: true, lines: 1, hit: [] });
+      await noSidewaysScroll(page, `the jam screen with the line heard at ${size.width}px`);
+    });
+  }
+
+  test("says it couldn't tell when there is no key and no chord", async ({ page }) => {
+    await openShot(page, "jam-heard-unsure", { width: 1400, height: 900 });
+    const line = page.getByTestId("jam-heard");
+    await expect(line).toHaveAttribute("data-state", "unsure");
+    await expect(line).not.toHaveText(/inside|outside/i);
+  });
+
+  test("is not there with the setting off, and no note is called inside or outside anywhere", async ({ page }) => {
+    await openShot(page, "jam", { width: 1400, height: 900 });
+    await expect(page.locator(".transport-play.playing")).toHaveCount(1);
+    await expect(page.getByTestId("jam-heard")).toHaveCount(0);
+    await openShot(page, "jam-heard", { width: 1400, height: 900 });
+    await expect(page.getByTestId("jam-heard")).toHaveCount(1);
+    expect(await page.locator(".jam-now").innerText()).not.toMatch(/inside|outside/i);
+  });
+});
+
 test.describe("the band rows", () => {
   for (const size of WIDTHS) {
     test(`hold their controls at ${size.name} (${size.width}px)`, async ({ page }) => {

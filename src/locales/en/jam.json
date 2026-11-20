@@ -744,6 +744,16 @@
       "nudgeBack": "Picture a touch earlier",
       "nudgeOn": "Picture a touch later",
       "broken": "That take would not play. The file may have been moved or deleted."
+    },
+    "hear": {
+      "label": "Hear what I play",
+      "hint": "While a jam plays and the input is on, Yames names the key and the chord it hears. It is an estimate, and it says so when it can't tell."
+    },
+    "heard": {
+      "heard": "Heard: {{what}}",
+      "chart": "Chart: {{what}}",
+      "unsure": "Couldn't tell yet",
+      "listening": "Listening…"
     }
   },
   "scale": {

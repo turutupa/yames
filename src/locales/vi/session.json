@@ -286,7 +286,12 @@
       "barsMet": "Giữ được {{count}} trên {{of}} ô nhịp",
       "barHeld": "Ô nhịp {{n}}: giữ được",
       "barSlipped": "Ô nhịp {{n}}: bị lệch",
-      "barThin": "Ô nhịp {{n}}: quá ít nốt để đánh giá"
+      "barThin": "Ô nhịp {{n}}: quá ít nốt để đánh giá",
+      "legatoAll": "Hammer-on, pull-off và tap: {{sounded}}/{{due}} nốt đã kêu. Chỉ thông báo, không chấm điểm.",
+      "legatoSome": "Hammer-on, pull-off và tap: {{sounded}}/{{due}} nốt đã kêu, {{silent}} nốt không kêu. Chỉ thông báo, không chấm điểm.",
+      "bendsAll": "Bend: {{onPitch}}/{{due}} lần lên tới cao độ. Chỉ thông báo, không chấm điểm.",
+      "bendsSomeFlat": "Bend: {{onPitch}}/{{due}} lần lên tới cao độ, {{flat}} lần bị thiếu. Chỉ thông báo, không chấm điểm.",
+      "vibratoHeard": "Vibrato: nghe thấy ở {{present}}/{{due}} nốt. Chỉ thông báo, không chấm điểm."
     },
     "edge": {
       "kick": "Tìm giới hạn",
@@ -390,7 +395,9 @@
       "fairAsk": "Điểm hôm nay có công bằng không?",
       "backTo": "Về {{place}}",
       "more": "Thêm 5 phút",
-      "keepGoing": "Tập tiếp: {{title}}"
+      "keepGoing": "Tập tiếp: {{title}}",
+      "heard": "Khi chơi tự do, bạn ở giọng {{key}}, chủ yếu trên {{chords}}.",
+      "heardKey": "Khi chơi tự do, bạn ở giọng {{key}}."
     },
     "paths": {
       "title": "Lộ trình",

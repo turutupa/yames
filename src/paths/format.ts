@@ -83,6 +83,12 @@ export type PathNote = {
   /** Semitones. Only with the `bend` technique. */
   bend?: number;
   /**
+   * How the bend moves, when it is not "up and held": `release` lets it back
+   * down within the note, `prebend` is bent before the pick and let down. The
+   * tab's `b2r` and `B2`. Read by the scorer's bend curves (`score/curves.rs`).
+   */
+  bendShape?: "release" | "prebend";
+  /**
    * The fretting finger, 1 index to 4 little finger, where the content says it
    * (the tab's `f1`..`f4`). Used in preference to the rules in `fingering.ts`
    * (the fingering audit, 2026-11-18). Absent: the rules decide.

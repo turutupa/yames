@@ -459,6 +459,11 @@
         "ask": "Pergunte",
         "askHint": "Cada sessão pergunta antes da primeira tomada, até você escolher."
       }
+    },
+    "keepTakes": {
+      "title": "Guardar minhas últimas tomadas para diagnóstico",
+      "hint": "Quando uma tomada é avaliada errado, o áudio e o que o Yames esperava podem ser reproduzidos para entender o porquê. Guarda a gravação bruta do microfone das suas 20 últimas tomadas neste dispositivo (até cerca de 460 MB); nada é enviado. Desativado por padrão.",
+      "folder": "Pasta: {{folder}}"
     }
   },
   "keybindings": {

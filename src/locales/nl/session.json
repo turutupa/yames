@@ -286,7 +286,12 @@
       "barsMet": "{{count}} van de {{of}} maten gehouden",
       "barHeld": "Maat {{n}}: gehouden",
       "barSlipped": "Maat {{n}}: gegleden",
-      "barThin": "Maat {{n}}: te weinig noten om te beoordelen"
+      "barThin": "Maat {{n}}: te weinig noten om te beoordelen",
+      "legatoAll": "Hammer-ons, pull-offs en taps: {{sounded}} van {{due}} klonken. Ter info, niet beoordeeld.",
+      "legatoSome": "Hammer-ons, pull-offs en taps: {{sounded}} van {{due}} klonken, {{silent}} niet. Ter info, niet beoordeeld.",
+      "bendsAll": "Bends: {{onPitch}} van {{due}} haalden de toon. Ter info, niet beoordeeld.",
+      "bendsSomeFlat": "Bends: {{onPitch}} van {{due}} haalden de toon, {{flat}} bleven te laag. Ter info, niet beoordeeld.",
+      "vibratoHeard": "Vibrato: gehoord op {{present}} van {{due}} noten. Ter info, niet beoordeeld."
     },
     "edge": {
       "kick": "Mijn grens vinden",
@@ -390,7 +395,9 @@
       "fairAsk": "Voelden de beoordelingen van vandaag eerlijk?",
       "backTo": "Terug naar {{place}}",
       "more": "Nog 5 minuten",
-      "keepGoing": "Ga door: {{title}}"
+      "keepGoing": "Ga door: {{title}}",
+      "heard": "In vrij spel zat je in {{key}}, vooral op {{chords}}.",
+      "heardKey": "In vrij spel zat je in {{key}}."
     },
     "paths": {
       "title": "Leerpaden",
