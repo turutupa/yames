@@ -766,3 +766,69 @@ From revamp 5178e406. Scope frozen: wording only, no new content.
    365 files passed, 1 failed (TabStage, worktree-only), 11325 tests; build OK; `cargo test --test
    path_exercises` 11 passed (357 s, `.target-w1`); layout paths-prereq planner phone-learning chords
    session-variant-text: 247 passed. Nothing open from #110.
+
+## Relay legs 5 and 6 on `mvp-paths7` (2026-11-20, night PST): the coherence audit is applied (card #112)
+
+Plan: `~/projects/.preview/paths-audit/COHERENCE_FIXES.md` (from REPORT.md, audit of `cf02401a`). Leg 5 (Fable)
+landed 11 Paths and stopped when its quota ran out; leg 6 (Opus) landed the other five, translated and gated.
+Every applier's notes, with its proof-read round, are in `~/projects/.preview/paths-audit/APPLIED_NOTES.md`
+(per finding: applied / differently / skipped and why; moves, cuts, links, tempo; tabs and fingerings for #65).
+
+### How it was done
+One Path at a time in a scratch slot (`yames-mvp-paths7-s1..s3`, branches `tmp/paths7-s*`, scratch only): an
+applier (brief `/tmp/yp7/APPLIER_BRIEF.md`) edited only that Path's specs, `gen` + `check` 0/0, then an
+independent sonnet proof-reader (read-only, `/tmp/yp7/PROOF_TASK.md`) checked every changed string and the
+whole Path's order/tempo/band sentences; the applier took its definite errors and the suggestions that mattered;
+the lead applied the spec patch here (`/tmp/yp7/land.sh`), regenerated, checked and committed. One commit a Path:
+FC 79d9815f, KN e2dc414e, RF c779e097, CR b80e2e7e, TR 6db8e8b2, BP 676453eb, MR bc2be653, CK b7edd692,
+AP 55b44b0a, SW 77d569c8, AC 4c4482ef, TP 4af62048, LG 57874d0c, SH 5820d7b2, FL 6bb51470, SM 9623447f.
+Plus `4bc104ce` (a moved Exercise keeps its id: `firstStep`), `cac47e76` (translations, pins), `7d0f76d2` (tests).
+
+### Part 3c, decided (the teacher questions)
+- Rhythm Foundations Beginner is NOT click-only: `other-strings.three-strings` gets the band (RF-F2), because the
+  next Paths assume a player who has heard a band once, and S5 explains it there.
+- `fast-shuffle` is cut (BP-F6): three Exercises that only repeated the shuffle faster; its one teaching line
+  (pick lighter on fast rungs) moved to `twelve-bar.walking`, whose ladder now goes to 110.
+- Shred is not a stand-alone Path: it is Alternate Picking taken up to tempo plus the other techniques (SH-F1);
+  it builds on Legato Intermediate, and its Advanced "start here if" names Sweep Picking and Tapping Beginner
+  (no Path-level link: the UI shows links per Path, not per Level).
+- Classic Rock comes after Blues Beginner (CR-F4): the box and the bend come from there; one "assumes" sentence
+  says so, and S9 stays as a short reminder.
+- S3/S4 were worded from the real screen words (Take, rung, pass tempo, Slower, Faster; the tab's top line is the
+  top string).
+- SM-F3 (leg 6): `more-neck` kept whole, nothing moved: the move would leave it under 3 Exercises (validator) and
+  the default was keep the Step. Optional merges (MR-F9, CK-F3 cut) not taken.
+
+### Numbers
+English since `8280d632`: 147 strings added, 424 changed, 52 removed (16 Paths). Structure: Steps moved in RF
+(an Exercise), TP, SW, MR, CR, BP (3), KN, SM (3 as a block), CK; Exercise `sweep-basics.turnaround` moved into
+Shred `five-string-sweeps` (id kept). Cuts: Blues Step `fast-shuffle` (`.jump-boogie`, `.jump-riffs`,
+`.jump-lick`), Shred `five-string-sweeps.one-pass-each`. Links: Legato + Alternate Picking (beginner); Sweep +
+Triads (intermediate); Shred Legato beginner -> intermediate; Classic Rock Rhythm Foundations beginner ->
+intermediate, + Blues (beginner), skill "Power chords" removed. Tempo data as Part 3 "Data", with the generated
+first rungs (paceLadders) quoted in text. Consolidation claims were checked against `data/variants.tsv` before
+acting (RF-F8, AP-F8, LG-F9 part dropped; others true).
+
+### Translations
+392 strings a language were new or changed after copies (119 a language copied from existing translations of the
+same English: S1-S12 glossary lines). One sonnet helper a language, from the old translation of each key, checked
+by `/tmp/yp7/i18n/verify.py` (keys, no "!", no em dash, digits, nothing left unchanged without reason) and merged.
+Lead fixes: the triplet count follows each language's Rhythm Foundations (pt-BR '1-&-a', fr '1-trio-let', ja
+'1-trip-let'); ru keeps "—" as its copula dash. Native reads worth having: "the turn" (Blues `minor-blues`), the
+"five chord" titles (Sweep `minor-progressions`), pl "pryma"/"prymina" for root.
+
+### Gates at 7d0f76d2
+`paths check` 16 Paths 0/0, curriculum 0, strings complete in 14 languages; tsc clean; vitest 365 files passed,
+1 failed (TabStage, worktree-only), the three content tests updated in 7d0f76d2; build OK; `cargo test --test
+path_exercises` 11 passed (254 s, `.target-paths`, on the final fixture); layout paths-prereq planner
+phone-learning chords session-variant-text: 247 passed. Pins re-pinned and read: besides moves, only the cuts and
+the fingerings the appliers printed on purpose (AP `a-minor-one-string` 1-2 pairs and `b-string-melody`; AC
+`the-line`, `your-changes`, `two-five-one`; FC `bass-strum` and `am-f-c-g` tabs). Caveats test green.
+
+### Open
+- Teacher review (#65): every tab, fingering and backing change above, listed per Path in APPLIED_NOTES.md
+  (e.g. Tapping `taps-and-skip-line` with a slow rock beat, Shred `outside-lick`/`picked-arpeggios` with the band,
+  AP's two-finger `a-minor-one-string`). Nobody has played any of it.
+- `paceLadder` step size (Part 3, "for a dev"): its own card, not content.
+- `plans/paths/REVIEW_NOTES.md:283` still names the cut `one-pass-each` (a review note, left as history).
+- Slots `yames-mvp-paths7-s1..s3` and `/tmp/yp7` are scratch; delete when this branch is merged.
