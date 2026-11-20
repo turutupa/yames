@@ -12,6 +12,7 @@ import type { Jam } from "../../jam/types";
 import type { LibrarySong } from "../../songs/songFiles";
 import type { MainView } from "./MainHeader";
 import { isLearnTab } from "./hooks/useTabRouting";
+import { CoachModelSelector } from "./CoachModelSelector";
 import type { AppTab, PlayTab } from "./hooks/useTabRouting";
 
 interface RailProps {
@@ -66,6 +67,8 @@ interface RailProps {
   coachActive: boolean;
   coachListening: boolean;
   onToggleCoach: () => void;
+  /** Settings → Coach, where a model the selector cannot load is downloaded. */
+  onOpenCoachSettings: () => void;
   onZen: () => void;
   /**
    * The player's own key bindings, as stored (`useKeybindings`), so a keycap
@@ -338,6 +341,7 @@ export const Rail = memo(forwardRef<PresetSidebarHandle, RailProps>(function Rai
     coachActive,
     coachListening,
     onToggleCoach,
+    onOpenCoachSettings,
     onZen,
     keyBindings,
   },
@@ -504,6 +508,7 @@ export const Rail = memo(forwardRef<PresetSidebarHandle, RailProps>(function Rai
         {/* No coach on a phone, so no row for one — not a disabled one,
             not a "coming soon" one. See the mobile plan §1. */}
         {!IS_MOBILE && (
+        <div className="rail-coach-row">
         <button
           className={`rail-action ${coachOpen ? "active" : ""}`}
           // The status is in the name, not only beside it: below 620px the
@@ -530,9 +535,14 @@ export const Rail = memo(forwardRef<PresetSidebarHandle, RailProps>(function Rai
             </svg>
           </span>
           <span className="rail-action-label">{t("session.nav.askCoach")}</span>
-          <span className="rail-action-status" aria-hidden="true">
-            {coachStatus}
-          </span>
+          {/* The session's state, while there is one. Idle, the row's right
+              end is the model selector's, and "Ready" beside a model's own
+              "Ready" would say two different things in one word. */}
+          {coachActive && (
+            <span className="rail-action-status" aria-hidden="true">
+              {coachStatus}
+            </span>
+          )}
           {coachActive && (
             <span
               className={`rail-action-dot ${coachListening ? "listening" : ""}`}
@@ -540,6 +550,8 @@ export const Rail = memo(forwardRef<PresetSidebarHandle, RailProps>(function Rai
             />
           )}
         </button>
+        <CoachModelSelector onOpenSettings={onOpenCoachSettings} />
+        </div>
         )}
 
         {/* Zen has three faces, each a tool's. The learning side has none. */}

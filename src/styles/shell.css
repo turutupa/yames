@@ -1703,6 +1703,200 @@ body[data-sheet-maximized] .rail {
   box-shadow: 0 0 8px var(--feedback-perfect);
 }
 
+/* ── The model selector (ms1) ───────────────────────────────────────────
+   The Ask row is two controls side by side: the row that opens the panel,
+   and at its right end a small outlined button naming the model and its
+   state. Not nested: a button inside a button is neither. The footer is a
+   size container so the selector leaves with the labels wherever the rail
+   is a strip of icons (under 620px, collapsed, the learning side under
+   900px); Settings → Coach carries the same choice there. */
+.rail-footer {
+  container: rail-footer / inline-size;
+}
+.rail-coach-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.rail-coach-row > .rail-action {
+  flex: 1;
+  min-width: 0;
+}
+.rail-model {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  max-width: 104px;
+  min-height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-tertiary);
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+@media (hover: hover) {
+  .rail-model:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
+}
+.rail-model[aria-expanded="true"] {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+.rail-model-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@container rail-footer (max-width: 160px) {
+  .rail-model {
+    display: none;
+  }
+}
+@media (pointer: coarse) {
+  .rail-model {
+    min-height: 44px;
+  }
+}
+
+/* The state's mark: a shape, never colour alone. Filled = loaded; ring =
+   on its way (turning while it loads, still under reduced motion); an
+   outlined square = chosen but failed; a dash = cannot load here. */
+.rail-model-mark {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  box-sizing: border-box;
+  opacity: 0.8;
+}
+.rail-model-mark[data-state="off"] {
+  display: none;
+}
+.rail-model-mark[data-state="ready"] {
+  background: currentColor;
+  border-color: currentColor;
+  color: var(--accent);
+  opacity: 1;
+}
+.rail-model-mark[data-state="loading"] {
+  border-right-color: transparent;
+  animation: rail-model-turn 0.9s linear infinite;
+}
+.rail-model-mark[data-state="failed"] {
+  border-radius: 1px;
+  color: var(--feedback-miss);
+  opacity: 1;
+}
+.rail-model-mark:is([data-state="notDownloaded"], [data-state="notOnThisDevice"]) {
+  height: 0;
+  border-width: 1px 0 0;
+  border-radius: 0;
+}
+@keyframes rail-model-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rail-model-mark[data-state="loading"] {
+    animation: none;
+  }
+}
+
+.rail-model-menu {
+  position: fixed;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  box-shadow: var(--shadow);
+  font-family: var(--ui-body);
+}
+.rail-model-head {
+  padding: 6px 8px 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.rail-model-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.rail-model-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 44px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  outline: none;
+}
+.rail-model-option:focus-visible,
+.rail-model-option:focus {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+.rail-model-option[aria-selected="true"] {
+  color: var(--text-primary);
+}
+.rail-model-option[aria-disabled="true"] {
+  cursor: default;
+  opacity: 0.6;
+}
+.rail-model-check {
+  width: 14px;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  line-height: 1.3;
+  color: var(--accent);
+}
+.rail-model-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.rail-model-title {
+  font-size: 0.86rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.rail-model-detail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  overflow-wrap: anywhere;
+}
+.rail-model-foot {
+  padding: 6px 8px 4px 30px;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+}
+
 /* =================== The docked transport =================== */
 /* The same bar on every screen. It used to float over the content and, on the
    Drill tab, covered the bottom rows of the step grid (UI_DECISIONS U1.2). */

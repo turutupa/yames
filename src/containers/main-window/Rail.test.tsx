@@ -41,6 +41,7 @@ function setup(overrides: Partial<React.ComponentProps<typeof Rail>> = {}) {
     coachActive: false,
     coachListening: false,
     onToggleCoach: vi.fn(),
+    onOpenCoachSettings: vi.fn(),
     onZen: vi.fn(),
     ...overrides,
   };
@@ -162,7 +163,9 @@ describe("Rail", () => {
     const name = () =>
       container.querySelector(".rail-action")?.getAttribute("aria-label") ?? "";
 
-    expect(status()).toBe("Ready");
+    // Idle, the row's right end is the model selector's (ms1): "Ready" is
+    // said in the name only, not drawn beside the model's own state.
+    expect(status()).toBeUndefined();
     expect(name()).toContain("Ready");
 
     rerender(<Rail {...props} coachActive />);
