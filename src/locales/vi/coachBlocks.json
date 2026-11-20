@@ -49,6 +49,14 @@
       "any": "Bản thu của bạn",
       "soon": "Nghe lại bản thu sắp có."
     },
+    "source": {
+      "measured": "Đã đo",
+      "measuredTake": "Đã đo · Lượt {{take}}",
+      "path": "Từ lộ trình",
+      "pathStep": "Từ lộ trình · Bước {{step}}",
+      "app": "Do ứng dụng tính ra",
+      "general": "Lời khuyên chung · không dựa trên cách bạn chơi"
+    },
     "compare": {
       "title": "Hai lượt {{title}}, đặt cạnh nhau",
       "any": "Hai lượt, đặt cạnh nhau",

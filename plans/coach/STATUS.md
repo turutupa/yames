@@ -1,0 +1,6 @@
+# Coach build: status (one line per delivery, newest last)
+
+Bundle: `/tmp/yames-coach-out.bundle` (branch `coach`). Plan: `plans/coach/PLAN.md`.
+
+- 2026-11-20 · plan written, wave 1 started (c0 plumbing, ms1 model selector, c1a take note) · no app change yet · nothing to see.
+- 2026-11-20 · **delivery 1a** (c0, c1a, pm, ms1) · sha: see `git log -1` of the bundle's `coach` (the commit that adds this line) · gates: tsc, vitest 11,508, build, layout coach-model / rail / coach-blocks / settings 43 passed; no Rust changed; ms1 read by an independent reviewer, findings fixed · **to see:** the model selector at the foot of the right-hand coach panel (Off / Standard · Qwen3 4B / Studio · Qwen3 8B, Download in the row, load state and memory); the chosen model loads once after startup and stays loaded, sessions no longer load it, a Path Session asks it for nothing; "pass mark" instead of "the bar" in English; "Measured" under the Songs verdict. Not yet: the second tier's download beside the first, cancel, checksum, storage warning (ms2); the old Start button is still there (c2a2).

@@ -11,6 +11,7 @@ import {
 import { useMidi } from "../../hooks/useMidi";
 import { useMetronome } from "../../hooks/useMetronome";
 import { useStableHandlers } from "../../hooks/useStableHandlers";
+import { useCoachModelDriver } from "../../hooks/useCoachModel";
 import { useKeybindings } from "../../hooks/useKeybindings";
 import { useCoachDownload } from "../../hooks/useCoachDownload";
 import { useActionDispatcher } from "../../hooks/useActionDispatcher";
@@ -356,7 +357,7 @@ export function MainWindow() {
     coachVerbosity: coach.coachVerbosity,
     coachMode: coach.coachMode,
     coachStance: coach.coachStance,
-    // "off" means no model: `startSession` skips the load entirely.
+    // No longer read: the model selector's loader owns the model (ms1).
     brainTier: coach.coachBrainTier,
     instrument,
     // Phase 5 — chip "set-bpm" affordances delegate to the canonical
@@ -1395,6 +1396,9 @@ export function MainWindow() {
       );
     }
   }, [voicePrompt, setView]);
+  // The model's one owner, driven from here: its startup gate after first
+  // paint, and the click's state, so no load starts during a Take.
+  useCoachModelDriver(state.isPlaying);
 
   /**
    * The wizard closed. Restore the preview click, make sure an instrument is

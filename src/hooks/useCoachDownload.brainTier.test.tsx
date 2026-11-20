@@ -1,51 +1,175 @@
 /**
- * useCoachDownload — switching the brain off frees its RAM.
+ * useCoachDownload — the brain tier is the model selector's choice (ms1).
  *
- * The tier flag used to gate only *future* prompts, so a user who turned
- * the coach off after a session kept paying ~4 GB for a model that would
- * never be asked anything again. Loading is deliberately NOT the mirror
- * image: weights become resident when a session starts, never when a
- * toggle is pressed.
+ * One state: Settings' tier buttons, the wizard and the selector write the
+ * loader's choice, and the loader loads or unloads to match. Off unloads
+ * and never deletes. The selector's Download runs this hook's download
+ * through the loader's port, and only on a press.
  */
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { useCoachDownload } from "./useCoachDownload";
-import { __resetCoachLoaderForTests, ensureCoachLoaded } from "./coachLoader";
-import { mockInvoke, setInvokeResponse } from "../test/mocks";
+import {
+  __resetCoachLoaderForTests,
+  coachResident,
+  getCoachModelSnapshot,
+  openCoachStartupGate,
+  startCoachModelDownload,
+} from "./coachLoader";
+import { mockInvoke, mockListen, setInvokeResponse } from "../test/mocks";
 
 const calls = (command: string) =>
   mockInvoke.mock.calls.filter(([cmd]) => cmd === command).length;
+
+const STANDARD_ON_DISK = {
+  brainReady: true,
+  brainTier: "standard",
+  brainFamily: "qwen3",
+  brainSizeBytes: 2_497_280_256,
+  voiceReady: true,
+  voiceSizeBytes: 60_000_000,
+  studioRecommended: true,
+  standardRecommended: true,
+  brainUpdateRecommended: false,
+};
+
+const NOTHING_ON_DISK = {
+  ...STANDARD_ON_DISK,
+  brainReady: false,
+  brainTier: null,
+  brainFamily: null,
+  brainSizeBytes: 0,
+  voiceReady: false,
+};
+
+function fire(event: string, payload: unknown) {
+  for (const [name, cb] of mockListen.mock.calls) {
+    if (name === event) (cb as (e: { payload: unknown }) => void)({ payload });
+  }
+}
 
 describe("useCoachDownload — brain tier", () => {
   beforeEach(() => {
     __resetCoachLoaderForTests();
     setInvokeResponse("load_coach_model", () => true);
+    setInvokeResponse("get_coach_capabilities", () => ({ llmCompiled: true, modelResident: false, modelName: null, loadError: null }));
   });
   afterEach(() => {
     __resetCoachLoaderForTests();
   });
 
-  it("unloads the model when the user switches the brain off", async () => {
-    await ensureCoachLoaded();
+  it("unloads the model when the player switches it off, and deletes nothing", async () => {
+    setInvokeResponse("get_model_status", () => STANDARD_ON_DISK);
     const { result } = renderHook(() => useCoachDownload());
     await waitFor(() => expect(result.current.modelStatus).not.toBeNull());
+    await act(async () => {
+      result.current.setCoachBrainTier("standard");
+      await openCoachStartupGate();
+    });
+    await waitFor(() => expect(coachResident()).toBe(true));
 
     await act(async () => {
       result.current.setCoachBrainTier("off");
     });
     await waitFor(() => expect(calls("unload_coach_model")).toBe(1));
+    expect(calls("delete_models")).toBe(0);
+    expect(result.current.coachBrainTier).toBe("off");
   });
 
-  it("does not load a model when the user switches a tier on", async () => {
+  it("does not load a model before the startup gate, whatever the toggle says", async () => {
+    setInvokeResponse("get_model_status", () => STANDARD_ON_DISK);
     const { result } = renderHook(() => useCoachDownload());
     await waitFor(() => expect(result.current.modelStatus).not.toBeNull());
 
     await act(async () => {
       result.current.setCoachBrainTier("standard");
     });
-    // Residency is a session's business, not a toggle's.
     expect(calls("load_coach_model")).toBe(0);
     expect(result.current.coachBrainTier).toBe("standard");
+    expect(getCoachModelSnapshot().state).toBe("waiting");
+  });
+
+  it("starts no download at mount, and none until the selector's press", async () => {
+    setInvokeResponse("get_model_status", () => NOTHING_ON_DISK);
+    const { result } = renderHook(() => useCoachDownload());
+    await waitFor(() => expect(result.current.modelStatus).not.toBeNull());
+    await act(async () => {
+      await openCoachStartupGate();
+    });
+    expect(calls("start_model_download")).toBe(0);
+
+    await act(async () => {
+      expect(startCoachModelDownload("standard")).toBe(true);
+    });
+    await waitFor(() => expect(calls("start_model_download")).toBe(1));
+    expect(getCoachModelSnapshot().download?.phase).toBe("running");
+    expect(getCoachModelSnapshot().download?.tier).toBe("standard");
+  });
+
+  it("the selector's download, once finished, is there to pick: the choice stays", async () => {
+    setInvokeResponse("get_model_status", () => NOTHING_ON_DISK);
+    const { result } = renderHook(() => useCoachDownload());
+    await waitFor(() => expect(result.current.modelStatus).not.toBeNull());
+    await act(async () => {
+      await openCoachStartupGate();
+      startCoachModelDownload("standard");
+    });
+    await act(async () => {
+      fire("model-download-progress", { component: "brain", downloadedBytes: 0, totalBytes: 0, fraction: 0.5, done: false });
+    });
+    expect(getCoachModelSnapshot().download?.fraction).toBe(0.5);
+
+    setInvokeResponse("get_model_status", () => STANDARD_ON_DISK);
+    await act(async () => {
+      fire("model-download-complete", { success: true, tier: "standard" });
+    });
+    await waitFor(() => expect(getCoachModelSnapshot().rows[0].state).toBe("onDisk"));
+    expect(getCoachModelSnapshot().download).toBeNull();
+    expect(result.current.coachBrainTier).toBe("off");
+    expect(calls("load_coach_model")).toBe(0);
+  });
+
+  it("a download from Settings' tier buttons still makes that tier the choice", async () => {
+    setInvokeResponse("get_model_status", () => NOTHING_ON_DISK);
+    const { result } = renderHook(() => useCoachDownload());
+    await waitFor(() => expect(result.current.modelStatus).not.toBeNull());
+    await act(async () => {
+      await result.current.handleStartDownload("standard");
+    });
+    setInvokeResponse("get_model_status", () => STANDARD_ON_DISK);
+    await act(async () => {
+      fire("model-download-complete", { success: true, tier: "standard" });
+    });
+    await waitFor(() => expect(result.current.coachBrainTier).toBe("standard"));
+  });
+
+  it("a cancelled download reads as paused where it stopped; a failed one keeps its reason", async () => {
+    setInvokeResponse("get_model_status", () => NOTHING_ON_DISK);
+    const { result } = renderHook(() => useCoachDownload());
+    await waitFor(() => expect(result.current.modelStatus).not.toBeNull());
+    await act(async () => {
+      await openCoachStartupGate();
+      startCoachModelDownload("full");
+    });
+    await act(async () => {
+      fire("model-download-progress", { component: "brain", downloadedBytes: 0, totalBytes: 0, fraction: 0.3, done: false });
+    });
+    await act(async () => {
+      fire("model-download-complete", { success: false, cancelled: true });
+    });
+    expect(getCoachModelSnapshot().download).toMatchObject({ tier: "full", phase: "paused", fraction: 0.3 });
+
+    await act(async () => {
+      startCoachModelDownload("full");
+    });
+    await act(async () => {
+      fire("model-download-complete", { success: false, error: "curl exited with status 6" });
+    });
+    expect(getCoachModelSnapshot().download).toMatchObject({
+      tier: "full",
+      phase: "failed",
+      error: "curl exited with status 6",
+    });
   });
 
   it("passes the backend's tier gates straight through", async () => {

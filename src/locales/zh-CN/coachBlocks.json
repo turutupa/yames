@@ -49,6 +49,14 @@
       "any": "你的录音",
       "soon": "回听录音即将推出。"
     },
+    "source": {
+      "measured": "实测",
+      "measuredTake": "实测 · 第 {{take}} 遍",
+      "path": "来自路线",
+      "pathStep": "来自路线 · 第 {{step}} 步",
+      "app": "由应用推算",
+      "general": "一般建议 · 并非来自你的演奏"
+    },
     "compare": {
       "title": "{{title}} 的两遍，并排放",
       "any": "两遍并排放",

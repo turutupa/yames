@@ -39,7 +39,38 @@ export type TakeFacts = {
    * counts toward minutes and the streak; never an attempt at the bar.
    */
   ungraded?: "inputOff" | "gradingOff" | "chosen";
+  /**
+   * Where the Take sat in time, per bar of the pattern (DESIGN 9.3): the signed
+   * mean deviation of each pattern bar's heard notes, in ms, relative to the
+   * Take's median (positive is late). Relative because the scorer's lag
+   * correction absorbs a lean the whole Take shares. `null` for a pattern bar
+   * with no heard note. Absent: nothing heard, or an older row.
+   */
+  lean?: Array<number | null>;
+  /**
+   * The player's answer after an ungraded Take to "Did they?" (DESIGN 4.4).
+   * Moves no tempo. Absent: not asked or not answered.
+   */
+  heardIt?: "yes" | "notYet";
 };
+
+/** A row's `lean`, when it holds one a reader can trust. */
+export function leanOf(take: PathTakeRow): Array<number | null> | null {
+  const lean = factsOf(take).lean;
+  if (!Array.isArray(lean) || lean.length === 0) return null;
+  return lean.every((v) => v === null || (typeof v === "number" && Number.isFinite(v))) ? lean : null;
+}
+
+/** A row's answer to "Did they?", when it has one. */
+export function heardItOf(take: PathTakeRow): "yes" | "notYet" | null {
+  const answer = factsOf(take).heardIt;
+  return answer === "yes" || answer === "notYet" ? answer : null;
+}
+
+/** The same row with the player's answer to "Did they?" kept on it. */
+export function withHeardIt(take: PathTakeRow, heardIt: "yes" | "notYet"): PathTakeRow {
+  return { ...take, facts: { ...factsOf(take), heardIt } };
+}
 
 export type PlayerProgress = {
   /** Paths this player has started. */

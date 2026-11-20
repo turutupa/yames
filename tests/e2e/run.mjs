@@ -27,8 +27,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, "..", "..");
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 /** A result that met its bar: the pass leads with its closest call (UX audit SES-3). */
-// A pass heads its result "Passed · Bar …" (acceptance pass 2; it was "Closest to the bar").
-const PASSED = /PASS BAR MET|PASSED · /i;
+// A pass heads its result "Passed · Pass mark …" (acceptance pass 2; it was "Closest to the bar").
+const PASSED = /PASS MARK MET|PASSED · /i;
 /** The Paths the suite plays: the one a new player starts on, and a second. */
 const PATHS = [loadPath(FIRST_PATH), loadPath(SECOND_PATH)];
 /**
@@ -603,8 +603,8 @@ async function scenarioSession() {
     const evenBar = exercise.passBars.find((b) => b.metric === "timingEvenness")?.min;
     // The result leads with what held it back, the bar beside it (UX audit SES-3).
     check("sloppy take: the result names the evenness bar",
-      new RegExp(`against a bar of ${Math.round((evenBar ?? 0) * 100)}%`, "i").test(sloppy.text) && /WHAT HELD IT BACK/i.test(sloppy.text),
-      firstLines(sloppy.text, /against a bar|WHAT HELD IT BACK/i));
+      new RegExp(`against a pass mark of ${Math.round((evenBar ?? 0) * 100)}%`, "i").test(sloppy.text) && /WHAT HELD IT BACK/i.test(sloppy.text),
+      firstLines(sloppy.text, /against a pass mark|WHAT HELD IT BACK/i));
     check("sloppy take: saved, caught, not passed, evenness under the bar",
       sloppyRow?.passed === 0 && sloppyRow?.caught === 1 && evenCheck && evenCheck.held === false,
       sloppyRow ? `evenness ${fmt(sloppyRow.facts.measures.evenness)}, heard ${sloppyRow.facts.measures.heard}/${sloppyRow.facts.measures.expected}` : "no row");

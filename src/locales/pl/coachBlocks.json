@@ -49,6 +49,14 @@
       "any": "Twoja taka",
       "soon": "Odsłuch taki będzie wkrótce."
     },
+    "source": {
+      "measured": "Zmierzone",
+      "measuredTake": "Zmierzone · Podejście {{take}}",
+      "path": "Ze ścieżki",
+      "pathStep": "Ze ścieżki · Krok {{step}}",
+      "app": "Wyliczone przez aplikację",
+      "general": "Ogólna rada · nie z twojej gry"
+    },
     "compare": {
       "title": "Dwa podejścia do {{title}}, obok siebie",
       "any": "Dwa podejścia, obok siebie",

@@ -49,6 +49,14 @@
       "any": "내 테이크",
       "soon": "테이크 다시 듣기는 곧 준비됩니다."
     },
+    "source": {
+      "measured": "측정됨",
+      "measuredTake": "측정됨 · 테이크 {{take}}",
+      "path": "코스에서",
+      "pathStep": "코스에서 · {{step}}단계",
+      "app": "앱이 계산함",
+      "general": "일반적인 조언 · 연주를 바탕으로 한 것이 아님"
+    },
     "compare": {
       "title": "{{title}}의 두 번을 나란히",
       "any": "두 번을 나란히",

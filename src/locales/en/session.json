@@ -161,23 +161,23 @@
       "newStep": "Next up: {{step}}. It starts at {{bpm}} BPM.",
       "nextInStep": "Next in {{step}}. It starts at {{bpm}} BPM.",
       "belowBar": {
-        "even": "Because evenness was {{value}}% at {{bpm}} BPM. The bar is {{bar}}%.",
-        "heard": "Because I heard {{value}}% of the notes at {{bpm}} BPM. The bar is {{bar}}%.",
-        "extras": "Because of extra notes at {{bpm}} BPM. The bar is {{bar}} over four bars.",
-        "accents": "Because {{value}}% of the accents landed at {{bpm}} BPM. The bar is {{bar}}%.",
-        "plain": "Because the last Take at {{bpm}} BPM didn't meet the bar.",
-        "notes": "Because {{value}}% of the notes I could pitch were the written ones at {{bpm}} BPM. The bar is {{bar}}%."
+        "even": "Because evenness was {{value}}% at {{bpm}} BPM. The pass mark is {{bar}}%.",
+        "heard": "Because I heard {{value}}% of the notes at {{bpm}} BPM. The pass mark is {{bar}}%.",
+        "extras": "Because of extra notes at {{bpm}} BPM. The pass mark is {{bar}} or fewer in four bars.",
+        "accents": "Because {{value}}% of the accents landed at {{bpm}} BPM. The pass mark is {{bar}}%.",
+        "plain": "Because the last Take at {{bpm}} BPM didn't meet the pass mark.",
+        "notes": "Because {{value}}% of the notes I could pitch were the written ones at {{bpm}} BPM. The pass mark is {{bar}}%."
       },
       "easing": {
-        "even": "Evenness was {{value}}% at {{bpm}} BPM and the bar is {{bar}}%, so this is {{next}} BPM.",
-        "heard": "I heard {{value}}% of the notes at {{bpm}} BPM and the bar is {{bar}}%, so this is {{next}} BPM.",
+        "even": "Evenness was {{value}}% at {{bpm}} BPM and the pass mark is {{bar}}%, so this is {{next}} BPM.",
+        "heard": "I heard {{value}}% of the notes at {{bpm}} BPM and the pass mark is {{bar}}%, so this is {{next}} BPM.",
         "extras": "There were extra notes at {{bpm}} BPM, so this is {{next}} BPM.",
-        "accents": "{{value}}% of the accents landed at {{bpm}} BPM and the bar is {{bar}}%, so this is {{next}} BPM.",
-        "plain": "The last Takes at {{bpm}} BPM didn't meet the bar, so this is {{next}} BPM.",
-        "notes": "{{value}}% of the notes I could pitch were the written ones at {{bpm}} BPM and the bar is {{bar}}%, so this is {{next}} BPM."
+        "accents": "{{value}}% of the accents landed at {{bpm}} BPM and the pass mark is {{bar}}%, so this is {{next}} BPM.",
+        "plain": "The last Takes at {{bpm}} BPM didn't meet the pass mark, so this is {{next}} BPM.",
+        "notes": "{{value}}% of the notes I could pitch were the written ones at {{bpm}} BPM and the pass mark is {{bar}}%, so this is {{next}} BPM."
       },
-      "climb": "Because you met the bar at {{bpm}} BPM. Next rung: {{next}}.",
-      "climbFast": "Because evenness was {{value}}% at {{bpm}} BPM, well over the bar. This skips to {{next}}.",
+      "climb": "Because you met the pass mark at {{bpm}} BPM. Next rung: {{next}}.",
+      "climbFast": "Because evenness was {{value}}% at {{bpm}} BPM, well over the pass mark. This skips to {{next}}.",
       "notCaught": "Last time I didn't catch enough at {{bpm}} BPM, so that didn't count. Same tempo.",
       "passedKeepGoing": "You've passed this at {{bpm}} BPM. This is to keep it.",
       "review": "You haven't played this for a while.",
@@ -187,9 +187,9 @@
       "warmUp": "Just you and the click at {{bpm}} BPM, before anything counts.",
       "warmUpClean": "A warm-up at {{bpm}} BPM, under your clean tempo of {{clean}}.",
       "jam": "Not graded. Ends the Session on some music.",
-      "edge": "From the tempo you reached, {{bpm}} BPM. It goes up a step after every Take that meets the bar.",
+      "edge": "From the tempo you reached, {{bpm}} BPM. It goes up a step after every Take that meets the pass mark.",
       "edgeCheck": "To check your clean tempo. Last time it was {{clean}} BPM.",
-      "edgeFirst": "To find your clean tempo. It starts at {{bpm}} BPM and goes up while you meet the bar.",
+      "edgeFirst": "To find your clean tempo. It starts at {{bpm}} BPM and goes up while you meet the pass mark.",
       "chosen": "Your pick, from {{step}}.",
       "focusTurn": "{{path}} leads today: its turn.",
       "focusTurnAway": "{{path}} leads today: you haven't played it for {{days}} days.",
@@ -215,7 +215,7 @@
       "playedUngraded": "Where you left it: {{bpm}} BPM."
     },
     "bar": {
-      "summary": "The bar: {{even}}% even and {{heard}}% of the notes heard, at {{bpm}} BPM."
+      "summary": "The pass mark: {{even}}% even and {{heard}}% of the notes heard, at {{bpm}} BPM."
     },
     "run": {
       "exit": "Exit",
@@ -264,7 +264,7 @@
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} bars",
-      "barMet": "Pass bar met",
+      "barMet": "Pass mark met",
       "cleanFirst": "Clean tempo: {{bpm}} BPM.",
       "cleanMoved": "Clean tempo: {{from}} to {{bpm}} BPM.",
       "moveOn": "Move on",
@@ -273,9 +273,9 @@
       "fairNo": "No",
       "fairThanksYes": "Thanks: kept as fair. Tap No to change it.",
       "fairThanksNo": "Thanks: kept as not fair. Tap Yes to change it.",
-      "barChip": "Bar {{bar}}%",
-      "barChipCount": "Bar: {{bar}} or fewer",
-      "barMissed": "Bar not met",
+      "barChip": "Pass mark {{bar}}%",
+      "barChipCount": "Pass mark: {{bar}} or fewer",
+      "barMissed": "Pass mark not met",
       "decidedPass": "Passed",
       "lastTime": "last time",
       "decidedMiss": "What held it back",
@@ -295,14 +295,14 @@
     },
     "edge": {
       "kick": "Find my edge",
-      "how": "It goes up a step after every Take that meets the bar, and holds when one doesn't. Two misses at one tempo end it.",
+      "how": "It goes up a step after every Take that meets the pass mark, and holds when one doesn't. Two misses at one tempo end it.",
       "climb": "The climb so far",
       "reached": "Your edge so far: {{bpm}} BPM",
       "done": "Your edge today: {{bpm}} BPM",
-      "slipped": "The bar wasn't met at {{bpm}} BPM.",
-      "none": "No Take met the bar this time, so your clean tempo stays as it was.",
+      "slipped": "The pass mark wasn't met at {{bpm}} BPM.",
+      "none": "No Take met the pass mark this time, so your clean tempo stays as it was.",
       "offerTitle": "Find my edge from here",
-      "offerBody": "Goes up from {{bpm}} BPM while you meet the bar, and keeps your clean tempo. Adds {{minutes}} minutes.",
+      "offerBody": "Goes up from {{bpm}} BPM while you meet the pass mark, and keeps your clean tempo. Adds {{minutes}} minutes.",
       "start": "Find my edge",
       "recap": "Edge",
       "rungLabel": "{{bpm}} BPM: {{met}} met, {{missed}} missed",
@@ -316,12 +316,12 @@
       "tooShort": "That was {{bars}} bars, too short to judge. It takes the whole Take.",
       "ungraded": "This one isn't graded. You're the judge.",
       "below": {
-        "even": "{{value}}% even against a bar of {{bar}}%. Every note was there; it's the spacing between them. Same notes, same tempo.",
+        "even": "{{value}}% even against a pass mark of {{bar}}%. Every note was there; it's the spacing between them. Same notes, same tempo.",
         "heard": "I heard {{heard}} of {{expected}} notes, and timing can't pass without them.",
         "extras": "{{extras}} notes I wasn't expecting. Keep the idle strings quiet if they're ringing.",
         "accents": "{{value}}% of the marked accents came out louder than the notes around them.",
         "notes": "{{value}}% of the notes I could pitch were the written ones. Same notes, same tempo, and watch the frets.",
-        "evenSome": "{{value}}% even against a bar of {{bar}}%, and {{missed}} notes didn't sound. Same notes, same tempo, every one of them."
+        "evenSome": "{{value}}% even against a pass mark of {{bar}}%, and {{missed}} notes didn't sound. Same notes, same tempo, every one of them."
       },
       "passedSome": "{{heard}} of {{expected}} notes landed, even across {{bars}} bars in a row at {{bpm}} BPM.",
       "passedTiming": "All {{heard}} notes on time, {{bars}} bars in a row. I couldn't check the pitches this time.",
@@ -497,7 +497,7 @@
     "progress": {
       "title": "Progress",
       "intro": "Everything here was measured from your playing: notes heard, timing evenness, clean tempo.",
-      "cleanMeans": "The fastest you met the bar, over any eight bars in a row.",
+      "cleanMeans": "The fastest you met the pass mark, over any eight bars in a row.",
       "sparkLabel": "Evenness across Takes, {{title}}",
       "statMinutes": "Minutes in Takes",
       "statSessions": "Sessions",

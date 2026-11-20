@@ -95,7 +95,7 @@ import { createShuffleState } from "../../../coach/templates";
 import { ReviewTab } from "./ReviewTab";
 import { passesIn } from "./marks";
 import type { SongAttemptReview } from "./useSongAttempt";
-import { blocksFor } from "../../../songs/verdict";
+import { VERDICT_SOURCE, blocksFor } from "../../../songs/verdict";
 import { beatAtMs, passLengthMs } from "../../../takes/offset";
 import { rangeTempoSteps } from "../../../songs/schedule";
 import type { BarRange } from "../../../songs/schedule";
@@ -468,6 +468,7 @@ export function SongReview({
         ),
       },
       context,
+      { source: VERDICT_SOURCE },
     );
     // `t` is stable per language and the bag is a ref; re-resolving on every
     // render would draw a different variant of the same sentence each time.
@@ -517,6 +518,7 @@ export function SongReview({
             ),
           },
           context,
+          { source: VERDICT_SOURCE },
         ),
       })),
     // eslint-disable-next-line react-hooks/exhaustive-deps

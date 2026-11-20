@@ -49,6 +49,14 @@
       "any": "Your take",
       "soon": "Listening back to a take is coming soon."
     },
+    "source": {
+      "measured": "Measured",
+      "measuredTake": "Measured · Take {{take}}",
+      "path": "From the Path",
+      "pathStep": "From the Path · Step {{step}}",
+      "app": "Worked out by the app",
+      "general": "General advice · not from your playing"
+    },
     "compare": {
       "title": "Two goes at {{title}}, side by side",
       "any": "Two goes, side by side",

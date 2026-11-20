@@ -182,7 +182,28 @@ export type ResolvedBars = {
   printedTo: number;
 };
 
-export type ResolvedBlock =
+/**
+ * Where what a block says comes from (DESIGN 3.6, the "Source" row): drawn as
+ * its own line under the text it covers, an icon and words.
+ *
+ * App-side only. The model's catalogue (`spec.ts`, v1) has no such field and
+ * never will: a model cannot vouch for its own sentence. The CALLER of
+ * `resolveCoachAnswer` says where the answer came from, because only the
+ * caller knows whether it was measured, read off the Path, worked out by a
+ * rule, or written by a model.
+ *
+ * - `measured`: from the player's own playing ("Measured · Take 2").
+ * - `path`: the Path's own words ("From the Path · Step 2").
+ * - `app`: a rule computed it from facts, not from this playing ("Worked out by the app").
+ * - `general`: a model's prose, about guitar in general ("General advice · not from your playing").
+ */
+export type BlockSource =
+  | { kind: "measured"; take?: number }
+  | { kind: "path"; step?: number }
+  | { kind: "app" }
+  | { kind: "general" };
+
+export type ResolvedBlock = (
   | { type: "text"; text: string }
   | ResolvedFretboard
   | ResolvedChordShape
@@ -198,9 +219,23 @@ export type ResolvedBlock =
       printedTo: number | null;
     }
   | { type: "compare"; older: AttemptRef; newer: AttemptRef; score: ScoreRef | null }
-  | { type: "action"; action: CoachAction; label: ActionLabel };
+  | { type: "action"; action: CoachAction; label: ActionLabel }
+) & {
+  /**
+   * Where the text came from. Set on `text` blocks only, from
+   * `ResolveOptions.source`: the line goes under the words it vouches for,
+   * not under a drawing or a button. Absent: no source line.
+   */
+  source?: BlockSource;
+};
 
 export type ResolvedAnswer = { blocks: ResolvedBlock[]; dropped: DroppedBlock[] };
+
+/** What the caller knows about the answer as a whole. */
+export type ResolveOptions = {
+  /** Where the answer came from. Given to every `text` block that resolves. */
+  source?: BlockSource;
+};
 
 // ---------------------------------------------------------------------------
 // The neck
@@ -560,7 +595,11 @@ function resolveBlock(
  * half-written object gets the same treatment as one that answers with a bad
  * bar number: an empty list of blocks and a line saying what happened.
  */
-export function resolveCoachAnswer(input: unknown, ctx: CoachBlockContext = {}): ResolvedAnswer {
+export function resolveCoachAnswer(
+  input: unknown,
+  ctx: CoachBlockContext = {},
+  options: ResolveOptions = {},
+): ResolvedAnswer {
   const blocks: ResolvedBlock[] = [];
   const dropped: DroppedBlock[] = [];
 
@@ -609,7 +648,11 @@ export function resolveCoachAnswer(input: unknown, ctx: CoachBlockContext = {}):
       dropped.push({ at, type: shape.block.type, reason: resolved.reason, detail: resolved.detail });
       return;
     }
-    blocks.push(resolved.block);
+    blocks.push(
+      options.source && resolved.block.type === "text"
+        ? { ...resolved.block, source: options.source }
+        : resolved.block,
+    );
   });
 
   return { blocks, dropped };

@@ -84,6 +84,7 @@ import {
   levelStartIndex,
   nextStepAfterPass,
   takesOf,
+  withHeardIt,
 } from "../../../session/progress";
 import {
   CHOSEN_KEYS_KEY,
@@ -94,6 +95,7 @@ import {
   stepPageSeed,
 } from "../../../session/variants";
 import type { PlayerProgress, TakeFacts } from "../../../session/progress";
+import { takeLean } from "../../../coach/rounds";
 import {
   IDLE,
   TIMED_BPM_STEP,
@@ -167,6 +169,7 @@ const VIEW_HINT_KEY = "session.viewHintSeen";
 const BAND_VOLUME_KEY = "session.bandVolume";
 /** Settings → Practice → "Grade my playing", now a choice of three (`session/grading.ts`). */
 import { setTakeContext } from "../../../settings/recordingSession";
+import { useCoachPublishingDispatch } from "../../../coach/sessionEvents";
 export { GRADING_KEY } from "../../../session/grading";
 const TICK_MS = 1000;
 /** Minutes per Exercise in Test out: one Take at the pass tempo, and a breath. */
@@ -385,7 +388,9 @@ export const CHOSEN_VARIANT: { seed: number | null } = { seed: null };
 
 export function useSessionRun(input: SessionRunInput) {
   const { view, setView, isPlaying, beat, listening } = input;
-  const [run, dispatch] = useReducer(runReducer, IDLE);
+  const [run, dispatchRun] = useReducer(runReducer, IDLE);
+  // Each transition is also told to the coach (stepReady, takeStarted, takeResult, timedEnded, sessionRecap).
+  const dispatch = useCoachPublishingDispatch(dispatchRun);
   const [paths, setPaths] = useState<PathDoc[]>([]);
   const { i18n } = useTranslation();
   const packLanguage = i18n.resolvedLanguage ?? i18n.language ?? "en";
@@ -1173,6 +1178,8 @@ export function useSessionRun(input: SessionRunInput) {
     const now = Date.now();
     const raised =
       grade.cleanBpm !== null && (cleanBefore === null || grade.cleanBpm > cleanBefore);
+    // Where it sat in time per bar of the pattern, for tomorrow's line (DESIGN 9.3).
+    const lean = takeLean(attempt.review, exercise.bars);
     const facts: TakeFacts = {
       measures,
       verdict: grade.verdict,
@@ -1183,6 +1190,7 @@ export function useSessionRun(input: SessionRunInput) {
       role: stepNow.role,
       reason: stepNow.why.code,
       newClean: raised,
+      ...(lean ? { lean } : {}),
       ...(stepNow.benchmark
         ? { benchmark: { day: stepNow.benchmark.day, exerciseId: exercise.id, bpm } }
         : {}),
@@ -1215,7 +1223,7 @@ export function useSessionRun(input: SessionRunInput) {
       cleanBefore,
       takeId: row.id,
     };
-    dispatch({ type: "takeResult", outcome, now });
+    dispatch({ type: "takeResult", outcome, now }, attempt.review);
 
     // What the Session goes on to read: kept in memory at once, in the store as
     // it will be. A save that fails loses this one row, and is not the player's
@@ -1644,6 +1652,19 @@ export function useSessionRun(input: SessionRunInput) {
     takesRef.current = takesRef.current.map((t) => (t.id === takeId ? next : t));
     setProgress((p) => ({ ...p, takes: p.takes.map((t) => (t.id === takeId ? { ...t, facts: { ...factsOf(t), fair } } : t)) }));
     // The same row again: `INSERT OR REPLACE`, and no clean tempo with it.
+    void savePathTake(next, null).catch(() => {});
+  }, []);
+
+  /**
+   * "Did they?" after an ungraded Take (DESIGN 4.4): kept in the Take's facts
+   * like `fair`, by saving the same row again. It moves no tempo.
+   */
+  const answerHeardIt = useCallback((takeId: string, heardIt: "yes" | "notYet") => {
+    const row = takesRef.current.find((t) => t.id === takeId);
+    if (!row || factsOf(row).heardIt === heardIt) return;
+    const next = withHeardIt(row, heardIt);
+    takesRef.current = takesRef.current.map((t) => (t.id === takeId ? next : t));
+    setProgress((p) => ({ ...p, takes: p.takes.map((t) => (t.id === takeId ? withHeardIt(t, heardIt) : t)) }));
     void savePathTake(next, null).catch(() => {});
   }, []);
 
@@ -2248,6 +2269,7 @@ export function useSessionRun(input: SessionRunInput) {
       unsubscribe,
       testOut,
       answerFair,
+      answerHeardIt,
       cycleView,
       jump,
       previous,

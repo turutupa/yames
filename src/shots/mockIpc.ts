@@ -1419,7 +1419,59 @@ export function installShotMock(shot: Shot, theme: string): void {
       return null;
     },
     app_ready: () => null,
-    get_model_status: () => ({ voiceReady: false, downloaded: [], active: null }),
+    get_model_status: () =>
+      shot.coachModel
+        ? {
+            brainReady: false,
+            brainTier: null,
+            brainFamily: null,
+            brainSizeBytes: 0,
+            voiceReady: false,
+            voiceSizeBytes: 0,
+            studioRecommended: true,
+            standardRecommended: true,
+            brainUpdateRecommended: false,
+          }
+        : { voiceReady: false, downloaded: [], active: null },
+    // The model selector's scene (ms1): a build that can run a model, and a
+    // download that answers a press the way Rust does: progress events, and
+    // a pause (Rust's cancel) as "cancelled".
+    ...(shot.coachModel
+      ? {
+          get_coach_capabilities: () => ({
+            llmCompiled: true,
+            modelResident: false,
+            loading: false,
+            backend: "vulkan",
+            modelName: null,
+            loadError: null,
+            brainDownloaded: false,
+            studioRecommended: true,
+            standardRecommended: true,
+            brainUpdateRecommended: false,
+            tipsUseModel: false,
+            rephraseP50Ms: null,
+          }),
+          start_model_download: () => {
+            setTimeout(
+              () =>
+                emit("model-download-progress", {
+                  component: "brain",
+                  downloadedBytes: 0,
+                  totalBytes: 0,
+                  fraction: 0.42,
+                  done: false,
+                }),
+              50,
+            );
+            return null;
+          },
+          cancel_model_download: () => {
+            setTimeout(() => emit("model-download-complete", { success: false, cancelled: true }), 50);
+            return null;
+          },
+        }
+      : {}),
     get_system_memory_mb: () => 32768,
     tts_list_voices: () => [],
     tts_voice_diagnostics: () => [],

@@ -29,6 +29,58 @@
     "noteSpacingTrend": "Nota aralığı eğilimi",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
   },
+  "coachModel": {
+    "label": "Koç modeli",
+    "button": "Koç modeli: {{choice}}, {{state}}",
+    "entry": "{{tier}} · {{model}} · {{size}}",
+    "offHint": "Yüklü dil modeli yok. Koç yine de kendi kurallarıyla çalışır.",
+    "memory": "Bu bilgisayarın {{total}} belleğinden en az {{used}} kullanır",
+    "memoryUnknown": "En az {{used}} bellek kullanır",
+    "short": {
+      "off": "kapalı",
+      "ready": "hazır",
+      "loading": "yükleniyor",
+      "waiting": "yüklenmeyi bekliyor",
+      "failed": "yüklenemedi",
+      "notDownloaded": "indirilmedi",
+      "notOnThisDevice": "bu cihazda yok",
+      "downloading": "indiriliyor {{percent}}",
+      "downloadingNoPercent": "indiriliyor"
+    },
+    "state": {
+      "ready": "Yüklendi ve hazır",
+      "loading": "Yükleniyor…",
+      "waiting": "Uygulama boştayken yüklenir, kayıt sırasında asla",
+      "onDisk": "İndirildi, yüklenmedi",
+      "failed": "Yüklenemedi. Tekrar denemek için seç",
+      "failedWhy": "Yüklenemedi ({{reason}}). Tekrar denemek için seç",
+      "notDownloaded": "İndirilmedi",
+      "update": "Eski bir sürüm. Ayarlar → Pratik Koçu'ndan güncelle",
+      "otherOnDisk": "İndirilmedi. Bu bilgisayarda ikinci bir model için sonraki bir güncelleme gerekiyor; şimdilik Ayarlar → Pratik Koçu'ndan değiştir",
+      "downloading": "İndiriliyor",
+      "lowMemory": "Bu bilgisayarda bu modelin istediğinden az bellek var; yavaş çalışabilir veya yüklenemeyebilir"
+    },
+    "why": {
+      "phone": "Bu cihazda yok",
+      "noLlm": "Bu cihazda yok: bu sürüm model çalıştıramıyor"
+    },
+    "download": {
+      "start": "İndir",
+      "pause": "Duraklat",
+      "resume": "Devam et",
+      "retry": "Yeniden dene",
+      "anyway": "Yine de indir",
+      "notNow": "Şimdi değil",
+      "running": "İndiriliyor… {{percent}}",
+      "runningNoPercent": "İndiriliyor…",
+      "voices": "Koçun sesleri alınıyor…",
+      "paused": "{{percent}} noktasında duraklatıldı. Devam et, oradan sürdürür.",
+      "pausedNoPercent": "Duraklatıldı. Devam et, kaldığı yerden sürdürür.",
+      "failed": "İndirme durdu: {{reason}}",
+      "failedNoReason": "İndirme durdu.",
+      "meteredWarn": "Mobil veri kullanıyor gibisin. {{size}}, bununla indirmek için fazla."
+    }
+  },
   "coachDetail": {
     "exercises": "Alıştırmalar",
     "notPlayed": "Çalınmadı",

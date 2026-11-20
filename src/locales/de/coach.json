@@ -29,6 +29,58 @@
     "noteSpacingTrend": "Notenabstands-Trend",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
   },
+  "coachModel": {
+    "label": "Coach-Modell",
+    "button": "Coach-Modell: {{choice}}, {{state}}",
+    "entry": "{{tier}} · {{model}} · {{size}}",
+    "offHint": "Kein Sprachmodell geladen. Der Coach arbeitet weiter mit seinen eigenen Regeln.",
+    "memory": "Belegt mindestens {{used}} von {{total}} Arbeitsspeicher dieses Computers",
+    "memoryUnknown": "Belegt mindestens {{used}} Arbeitsspeicher",
+    "short": {
+      "off": "aus",
+      "ready": "bereit",
+      "loading": "lädt",
+      "waiting": "wartet aufs Laden",
+      "failed": "konnte nicht laden",
+      "notDownloaded": "nicht heruntergeladen",
+      "notOnThisDevice": "nicht auf diesem Gerät",
+      "downloading": "lädt herunter {{percent}}",
+      "downloadingNoPercent": "lädt herunter"
+    },
+    "state": {
+      "ready": "Geladen und bereit",
+      "loading": "Lädt…",
+      "waiting": "Lädt, wenn die App ruhig ist, nie während eines Takes",
+      "onDisk": "Heruntergeladen, nicht geladen",
+      "failed": "Konnte nicht laden. Wähl es aus, um es noch einmal zu versuchen",
+      "failedWhy": "Konnte nicht laden ({{reason}}). Wähl es aus, um es noch einmal zu versuchen",
+      "notDownloaded": "Nicht heruntergeladen",
+      "update": "Eine ältere Version. Aktualisiere sie in Einstellungen → Coach",
+      "otherOnDisk": "Nicht heruntergeladen. Ein zweites Modell auf diesem Computer braucht ein späteres Update; wechsle vorerst in Einstellungen → Coach",
+      "downloading": "Lädt herunter",
+      "lowMemory": "Dieser Computer hat weniger Arbeitsspeicher, als dieses Modell möchte; es kann langsam sein oder nicht laden"
+    },
+    "why": {
+      "phone": "Nicht auf diesem Gerät",
+      "noLlm": "Nicht auf diesem Gerät: Diese Version kann kein Modell ausführen"
+    },
+    "download": {
+      "start": "Herunterladen",
+      "pause": "Pausieren",
+      "resume": "Fortsetzen",
+      "retry": "Nochmal versuchen",
+      "anyway": "Trotzdem herunterladen",
+      "notNow": "Jetzt nicht",
+      "running": "Lädt herunter… {{percent}}",
+      "runningNoPercent": "Lädt herunter…",
+      "voices": "Die Stimmen des Coachs werden geholt…",
+      "paused": "Bei {{percent}} pausiert. Mit Fortsetzen geht es dort weiter.",
+      "pausedNoPercent": "Pausiert. Mit Fortsetzen geht es dort weiter, wo es aufgehört hat.",
+      "failed": "Der Download wurde abgebrochen: {{reason}}",
+      "failedNoReason": "Der Download wurde abgebrochen.",
+      "meteredWarn": "Du scheinst mobile Daten zu nutzen. {{size}} sind dafür viel zum Herunterladen."
+    }
+  },
   "coachDetail": {
     "exercises": "Übungen",
     "notPlayed": "Nicht gespielt",

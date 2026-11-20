@@ -133,7 +133,7 @@ export type BarCell = {
  */
 export function barStrip(
   exercise: Pick<Exercise, "passBars">,
-  measures: TakeMeasures,
+  measures: Pick<TakeMeasures, "perBar" | "pass">,
 ): { cells: BarCell[]; held: { from: number; count: number } | null } | null {
   const bars = measures.perBar;
   if (!bars || bars.length === 0) return null;

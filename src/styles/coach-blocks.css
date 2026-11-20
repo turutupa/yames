@@ -75,6 +75,28 @@
   font-size: 11px;
 }
 
+/* Where the words above came from (DESIGN 3.6): its own line, an icon and
+   words, quiet. Never a colour that means good or bad; 12 px is the floor. */
+.coach-block-source {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  min-width: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.coach-block-source-mark {
+  flex: none;
+}
+
+.coach-block-source[data-source="general"] {
+  font-style: italic;
+}
+
 /* --- the neck and the grip, both borrowed whole ------------------------- */
 
 .coach-block-neck {
