@@ -74,14 +74,14 @@ const majorBar = (up: number) => `/16 ${shiftFrets(MAJOR_SIX, up)} r r r`;
 
 // E minor into G, its relative major, around fret 12.
 const PAIR = `${minorBar(7)} | ${majorBar(0)}`;
-// C minor, Ab, F minor, G: one, six, four, five in C minor.
+// C minor, Ab, F minor, G: one, six, four, five in C minor. A fret lower it is B minor, nothing above fret 15.
 const FOUR_CHORDS = `${minorBar(3)} | ${majorBar(1)} | ${minorBar(8)} | ${majorBar(0)}`;
 // A minor on six strings, F on five, A minor again, E major on three.
 const BIG_SMALL = [
   `/8t ${MINOR_SIX_TWELVE}`,
-  `/8t 5:8 4:7 3:5 2:6 1:5 1:8h 1:5p 2:6 3:5 4:7 r r`,
+  `/8t 5:8f4 4:7f3 3:5f1 2:6f2 1:5f1 1:8f4h 1:5f1p 2:6f2 3:5f1 4:7f3 r r`,
   `/8t ${MINOR_SIX_TWELVE}`,
-  `/8t 3:4 2:5 1:4 1:7h 1:4p 2:5 3:4 2:5 1:4 r r r`,
+  `/8t 3:4f1 2:5f2 1:4f1 1:7f4h 1:4f1p 2:5f2 3:4f1 2:5f2 1:4f1 r r r`,
 ].join(" | ");
 
 // ---------------------------------------------------------------------------
@@ -98,7 +98,10 @@ const ETUDE_ONE = [
   `/8t 5:15f4 4:14f3 3:12f1 2:13f2 1:12f1 1:15f4h 1:12f1p 2:13f2 3:12f1 4:14f3 r r`,
   // G on six strings.
   `/8t ${MAJOR_SIX_TWELVE}`,
-  // D# diminished 7 on three strings, then the same shape three frets higher.
+  // D# diminished 7 on three strings, then the same shape three frets higher. Fingered 4 3 1 4, as the
+  // rules finger it in `neoclassical`: the ring finger has just played the note before each loop (the A
+  // string at 14, then the B string at 13), and ring, middle, index would also put the middle finger on
+  // the last note of this bar and the first of bar 5.
   `/8t 3:14f4 2:13f3 1:11f1 1:14f4h 1:11f1p 2:13f3 3:17f4 2:16f3 1:14f1 1:17f4h 1:14f1p 2:16f3`,
 ].join(" | ");
 const ETUDE_TWO = [
@@ -113,29 +116,37 @@ const ETUDE_TWO = [
 ].join(" | ");
 const ETUDE_ONE_CHORDS = "Em | C | G | D#dim7";
 const ETUDE_TWO_CHORDS = "Em | Am | B | Em";
+// The joined piece is judged over all eight bars, so the join of the halves is always in the timed
+// stretch. The extra-notes ceiling is the profile's rate: 3 in four bars is 6 in eight.
+const EIGHT_BARS = [
+  { metric: "timingEvenness", min: 0.8, overBars: 8 },
+  { metric: "notesHeard", min: 0.85, overBars: 8 },
+  { metric: "extraNotes", max: 6, overBars: 8 },
+];
 const HELD_CHECK = "Did the held E in the last bar ring for its full two beats?";
 
 export const SIX_STRING_CHANGES: StepSpec = {
   id: "six-string-changes",
   title: "Six strings through the changes",
   goal: "Change chord with the six-string shapes: a minor shape into its major, four chords in a minor key, and a six-string shape joined to a five-string and a three-string one.",
-  why: "The last Step gave you two six-string shapes, each looped on one chord. Music changes chord, and a shape this wide is slow to leave: there are six strings to quiet and a new place to find before the next bar. This Step adds no new shape. It takes the minor and the major shape through changes, slowly, so the move between them gets the practice the shapes have already had.",
+  why: "The last Step gave you two six-string shapes, each looped on one chord, and single passes linked through a progression. Looping a whole shape on each chord of a progression is harder: a shape this wide is slow to leave, with six strings to quiet and a new place to find before the next bar. This Step adds no new shape. It takes the minor and the major shape through changes, slowly, so the move between them gets the practice the shapes have already had.",
   howTo: [
     "Each bar is one chord. In the sixteenth-note lines every bar ends with a rest: stop every string in it, then move the hand.",
     "The pass tempos are slow on purpose. These shapes are wide, and the change has to be clean before it is fast.",
+    "The minor shape: index and little finger on the low E, the ring finger rolling across the A and D strings, the index rolling across the G, B and top strings, and the little finger for the top hammer.",
     "The major shape is fingered the same both ways: little finger on the low E, ring finger on the A string, the index rolling across the D and G strings, the middle finger on the B string, and the index again two frets lower on the top string.",
     "Grading is timing only, as on the rest of the Path: how even the notes are, whether each one arrived, and whether extra notes rang. The fast rungs are not graded at all: there it is your ear and a recording.",
   ],
   payoff: "Six-string arpeggios that follow a chord progression, and a line where a big shape hands over to a small one without a stop.",
   difficultyException:
-    "The same two shapes as the Step before, at the same or slower pass tempos and with a rest in most bars, so the note rate is lower. The demand is the change between two wide shapes, which the rate does not count.",
+    "The two six-string shapes of the Step before, with a five-string and a three-string shape in the last Exercise, at the same or slower pass tempos and with a rest in most bars, so the note rate is lower. The demand is the change between shapes, which the rate does not count.",
   exercises: [
     sweepExercise({
       id: "minor-into-major",
-      title: "Minor, then its major",
-      purpose: "The minor shape and the major shape from the last Step, one bar each, as one line. E minor and G major share two of their three notes, G and B, so the two shapes sit around the same frets and only the change is new.",
+      title: "Minor, then its relative major",
+      purpose: "The minor shape and the major shape from the last Step, one bar each, as one line. G major is the relative major of E minor: the major chord three frets above it. They share two of their three notes, G and B, so the two shapes sit around the same frets and only the change is new.",
       howTo: [
-        "Sixteenths. Bar 1 is E minor, from fret 12 on the low E string: fourteen notes and a rest, with a hammer on the low E string and on the top string.",
+        "Sixteenths. Bar 1 is E minor, from fret 12 on the low E string: fourteen notes and two sixteenths of rest, with a hammer on the low E string and on the top string.",
         "Bar 2 is G major: thirteen notes and three sixteenths of rest. It starts at fret 15 on the low E string, the note the E minor bar stopped on, and it comes back to that note.",
         "In the G major bar the top string is played at fret 10 and hammered to fret 15. The index moves down two frets for it, and two frets back up for the G and D strings on the return.",
         "Use each rest to stop all six strings before the next bar starts.",
@@ -159,20 +170,20 @@ export const SIX_STRING_CHANGES: StepSpec = {
     sweepExercise({
       id: "four-chords-six",
       title: "Four chords on six strings",
-      purpose: "A four-chord progression in C minor with a whole six-string shape on each chord: C minor, Ab, F minor and G. The last chord is the major five chord, the one that pulls the line back to the first.",
+      purpose: "A four-chord progression in C minor with a whole six-string shape on each chord: C minor, Ab, F minor and G. The last chord is the major five chord, the V chord you met in the Step \"Minor keys and the V chord\": the one that pulls the line back to the first.",
       howTo: [
-        "Sixteenths, one chord a bar. The two minor bars are fourteen notes and a rest. The two major bars are thirteen notes and three sixteenths of rest.",
-        "C minor starts on the low E at fret 8. Ab starts on the low E at fret 16, with the little finger. That is the longest move in the line, so use the rest before it.",
+        "Sixteenths, one chord a bar. The two minor bars are fourteen notes and two sixteenths of rest. The two major bars are thirteen notes and three sixteenths of rest.",
+        "C minor starts on the low E at fret 8. Ab starts on the low E at fret 16, with the little finger. That is the longest move in the line and the rest before it is the short one, so leave the first chord early rather than land late.",
         "F minor starts on the low E at fret 13 and hammers to fret 16, the note the Ab bar ended on, so the hand is already there.",
         "For G the little finger moves down one fret, to fret 15 on the low E. After that last bar the hand drops back to fret 8.",
       ],
       coach: "Four wide shapes in a row is a lot of string to keep quiet. The notes are timed and counted; the ringing between bars is for your ear.",
       vary: {
-        values: { key: ["C", "D"] },
+        values: { key: ["C", "B"] },
         pooled: ["key"],
         label: (p) => `${p.key} minor`,
         build: (p) => {
-          const up = p.key === "C" ? 0 : 2;
+          const up = p.key === "C" ? 0 : -1;
           return { tab: shiftFrets(FOUR_CHORDS, up), position: 8 + up, shifts: true, chords: moveChart("Cm | Ab | Fm | G", up) };
         },
       },
@@ -188,11 +199,11 @@ export const SIX_STRING_CHANGES: StepSpec = {
       purpose: "The six-string A minor shape handing over to F major on five strings, and then to E major on three. The big shape and the small one meet with no rest between them.",
       howTo: [
         "Triplets. A minor is the six-string shape from fret 5 with no hammer on the low E: twelve notes, up to the hammer on the top string and back to the A string.",
-        "Bar 2 is F major on five strings. It starts on the A string at fret 8, one fret above the note the A minor bar ended on, and it ends with a two-note rest.",
+        "Bar 2 is F major on five strings. It starts on the A string at fret 8, one fret above the note the A minor bar ended on, and it ends with a two-note rest. The pick turns on the A string: up for the last note of the A minor bar, down for the first note of the F major bar.",
         "Bar 4 is E major on three strings, from fret 4 on the G string: one loop, then the three strings once more, and a beat of rest. It stops on G# at fret 4 on the top string, the note that pulls back to A.",
-        "The pick skips the D string going from A minor into E major.",
+        "The pick skips the D string going from A minor into E major, and the hand moves down one fret as it does.",
       ],
-      coach: "Triplets all the way through, so an uneven take points at one of the joins. Timing and notes heard are what is reported.",
+      coach: "Every note is a triplet. If a take comes back uneven, look first at the two joins with no rest, bar 1 into 2 and bar 3 into 4. Timing and notes heard are what is reported.",
       vary: {
         values: { key: ["A", "B", "D"] },
         pooled: ["key"],
@@ -233,9 +244,9 @@ export const ADVANCED_ETUDE: StepSpec = {
       howTo: [
         "Triplets. Bar 1 is the six-string E minor shape from fret 12 with no hammer on the low E: twelve notes.",
         "Bar 2 is C major on five strings, from fret 15 on the A string, one fret above the note bar 1 ended on. It ends with a two-note rest.",
-        "Bar 3 is the six-string G major shape, from the little finger at fret 15 on the low E.",
-        "Bar 4 is D# diminished 7 on three strings: one loop from fret 14 on the G string, then the same shape three frets higher, from fret 17. The pick skips the D string to get there from bar 3.",
-        "When it loops, the diminished bar pulls back to the E minor of bar 1.",
+        "Bar 3 is the six-string G major shape, from the little finger at fret 15 on the low E, up to the top-string hammer and back to the A string: twelve notes, no rest.",
+        "Bar 4 is D# diminished 7 on three strings: one loop from fret 14 on the G string, then the same shape three frets higher, from fret 17. Little finger on the G string, ring on the B string, index on the top string, and the little finger again for the hammer. The pick skips the D string to get there from bar 3, and the index drops from fret 12 to fret 11.",
+        "When it loops, the diminished bar pulls back to the E minor of bar 1. That jump back to the low E is not in the piece, so do not let it hold you at a rung.",
       ],
       coach: "Big shapes and small ones in one line. The notes are timed and counted; whether the changes sound like one line is for you and a recording.",
       tab: ETUDE_ONE,
@@ -253,12 +264,12 @@ export const ADVANCED_ETUDE: StepSpec = {
       title: "The etude, part two",
       purpose: "The last four bars of the etude, bars 5 to 8, as the answer: E minor high on the neck, A minor below it, B major pulling home, and one sweep up all six strings to a held E.",
       howTo: [
-        "Triplets. Bar 1 is E minor on three strings, two loops: fret 16 on the G string, 17 on the B string, 15 on the top string, and a hammer to fret 19.",
+        "Triplets. Bar 1 here, bar 5 of the piece, is E minor on three strings, two loops: fret 16 on the G string, 17 on the B string, 15 on the top string, and a hammer to fret 19.",
         "Bar 2 is A minor, two loops: fret 14 on the G string, 13 on the B string, 12 on the top string, and a hammer to fret 17. The index moves down three frets to get there.",
-        "Bar 3 is B major: one loop from fret 11 on the G string, then the upstroke carries on through the G string again, the D string at fret 13 and the A string at fret 14. A beat of rest follows.",
+        "Bar 3 is B major: one loop from fret 11 on the G string, then the upstroke carries on through the G string again, the D string at fret 13 and the A string at fret 14. A beat of rest follows. B major has a D# in it, at fret 11 on the top string, one fret below the E that the last bar holds: that half step is the pull home.",
         "Bar 4 is the six-string E minor shape with its hammer on the low E, swept once from fret 12 to the top string. The E there, at fret 12, is held for two beats with vibrato.",
       ],
-      coach: "The beat of silence in bar 3 is part of the piece: stop the strings in it. Timing and notes heard are reported, and the held E is yours to judge.",
+      coach: "The beat of silence in bar 3 here (bar 7 of the piece) is part of the music: stop the strings in it. Timing and notes heard are reported, and the held E is yours to judge.",
       tab: ETUDE_TWO,
       position: 15,
       shifts: true,
@@ -275,10 +286,10 @@ export const ADVANCED_ETUDE: StepSpec = {
       purpose: "All eight bars against a click. The only new thing is the join: the diminished shape in bar 4 ends at fret 16 on the B string, and bar 5 starts at fret 16 on the G string.",
       howTo: [
         "Triplets, eight bars: part one, then part two with no gap.",
-        "Play bars 4 and 5 alone a few times first. The hand moves up one fret between them: the index goes from fret 14 to fret 15 on the top string.",
+        "Play bars 4 and 5 alone a few times first. The hand moves up one fret between them: the index goes from fret 14 to fret 15 on the top string. The last note of bar 4 is D# at fret 16 on the B string, and E is one fret above it in bar 5: that half step is the pull.",
         "The piece ends on a held E on the top string and goes round to the low E of bar 1, both at fret 12.",
       ],
-      coach: "If a bar goes wrong, leave it and catch the next bar line. Timing and missed notes are what is reported, and a stop costs more than a smear.",
+      coach: "If a bar goes wrong, leave it and catch the next bar line. Timing and missed notes are what is reported.",
       tab: `${ETUDE_ONE} | ${ETUDE_TWO}`,
       position: 12,
       shifts: true,
@@ -286,6 +297,7 @@ export const ADVANCED_ETUDE: StepSpec = {
       harmony: { chordTones: true, cover: true },
       rungs: ladder(60, 130, 5),
       passAt: 85,
+      pass: EIGHT_BARS,
       selfCheck: [ROLL_CHECK, HELD_CHECK],
       minutes: 8,
     }),
@@ -298,7 +310,7 @@ export const ADVANCED_ETUDE: StepSpec = {
         "Lock the first note of each bar to the band. If a shape is late, drop it and catch the next bar line.",
         "Use direct input or headphones for a graded take. Whatever the numbers say, record a take with the band turned down and listen.",
       ],
-      coach: "Graded on timing, on direct input. Notes heard and extra notes are counted; whether it sounds like a solo is for you and a recording.",
+      coach: "Graded on timing, on direct input or headphones. Notes heard and extra notes are counted; whether it sounds like a solo is for you and a recording.",
       tab: `${ETUDE_ONE} | ${ETUDE_TWO}`,
       position: 12,
       shifts: true,
@@ -307,6 +319,7 @@ export const ADVANCED_ETUDE: StepSpec = {
       harmony: { chordTones: true, cover: true },
       rungs: ladder(60, 130, 5),
       passAt: 85,
+      pass: EIGHT_BARS,
       selfCheck: [ROLL_CHECK, HELD_CHECK],
       minutes: 8,
     }),

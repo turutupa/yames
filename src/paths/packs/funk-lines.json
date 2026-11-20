@@ -1703,7 +1703,7 @@
         "D minor pentatonic here is on the A, D and G strings: first finger on the frets at 5, third finger on the 7s, little finger on the A string's fret 8. The hand stays at the fifth fret.",
         "The low D is the A string at fret 5. The high D is the G string at fret 7.",
         "Play every note short except the held one that ends a line, and leave the rests empty. The picking hand swings in sixteenths from the first note to the last.",
-        "The band plays Dm7 under the three D minor lines and Am7 under the last line."
+        "The chord is Dm7 under the three D minor lines and Am7 under the last line."
       ],
       "payoff": "A four-bar line over the band in a second key, and a line in A minor where beats 1 and 3 of every bar are figures you can name.",
       "prerequisites": ["first-lines"],

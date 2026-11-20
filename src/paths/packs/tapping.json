@@ -1989,7 +1989,7 @@
           "purpose": "Em, C, D and B on the B string over a band with a triplet feel, one chord a bar.",
           "howTo": [
             "Triplets, four cells a bar. Em is tap 12 over frets 5 and 8, C is tap 13 over frets 5 and 8, D is tap 15 over frets 7 and 10, and B is tap 12 over frets 4 and 7.",
-            "The band plays the chord you are tapping. If a move is late, leave out a cell and come back in on the next beat."
+            "The band follows the chord you are tapping. If a move is late, leave out a cell and come back in on the next beat."
           ],
           "coachLine": "Band on. The taps carry the timing; direct input or headphones is the honest way to take this.",
           "grading": "graded",
@@ -2227,7 +2227,7 @@
                 "purpose": "Am, F, G and E on the top string over a band with a triplet feel, one chord a bar.",
                 "howTo": [
                   "Triplets, four cells a bar. Am is tap 12 over frets 5 and 8, F is tap 13 over frets 5 and 8, G is tap 15 over frets 7 and 10, and E is tap 12 over frets 4 and 7.",
-                  "The band plays the chord you are tapping. If a move is late, leave out a cell and come back in on the next beat."
+                  "The band follows the chord you are tapping. If a move is late, leave out a cell and come back in on the next beat."
                 ],
                 "tab": "/8t 1:12t 1:5pf1 1:8hf4 1:12t 1:5pf1 1:8hf4 1:12t 1:5pf1 1:8hf4 1:12t 1:5pf1 1:8hf4 | /8t 1:13t 1:5pf1 1:8hf4 1:13t 1:5pf1 1:8hf4 1:13t 1:5pf1 1:8hf4 1:13t 1:5pf1 1:8hf4 | /8t 1:15t 1:7pf1 1:10hf4 1:15t 1:7pf1 1:10hf4 1:15t 1:7pf1 1:10hf4 1:15t 1:7pf1 1:10hf4 | /8t 1:12t 1:4pf1 1:7hf4 1:12t 1:4pf1 1:7hf4 1:12t 1:4pf1 1:7hf4 1:12t 1:4pf1 1:7hf4",
                 "position": {
@@ -2316,7 +2316,7 @@
                 "purpose": "Cm, Ab, Bb and G on the G string over a band with a triplet feel, one chord a bar.",
                 "howTo": [
                   "Triplets, four cells a bar. Cm is tap 12 over frets 5 and 8, Ab is tap 13 over frets 5 and 8, Bb is tap 15 over frets 7 and 10, and G is tap 12 over frets 4 and 7.",
-                  "The band plays the chord you are tapping. If a move is late, leave out a cell and come back in on the next beat."
+                  "The band follows the chord you are tapping. If a move is late, leave out a cell and come back in on the next beat."
                 ],
                 "tab": "/8t 3:12t 3:5pf1 3:8hf4 3:12t 3:5pf1 3:8hf4 3:12t 3:5pf1 3:8hf4 3:12t 3:5pf1 3:8hf4 | /8t 3:13t 3:5pf1 3:8hf4 3:13t 3:5pf1 3:8hf4 3:13t 3:5pf1 3:8hf4 3:13t 3:5pf1 3:8hf4 | /8t 3:15t 3:7pf1 3:10hf4 3:15t 3:7pf1 3:10hf4 3:15t 3:7pf1 3:10hf4 3:15t 3:7pf1 3:10hf4 | /8t 3:12t 3:4pf1 3:7hf4 3:12t 3:4pf1 3:7hf4 3:12t 3:4pf1 3:7hf4 3:12t 3:4pf1 3:7hf4",
                 "position": {
@@ -3737,7 +3737,7 @@
           "purpose": "Em, C, D and B in the four-note loop on the B string, over a rock band, one chord a bar.",
           "howTo": [
             "Sixteenths, four loops a bar. Em is tap 12 over frets 5 and 8, C is tap 13 over frets 5 and 8, D is tap 15 over frets 7 and 10, and B is tap 12 over frets 4 and 7.",
-            "The band plays the chord you are tapping. If a move is late, leave out a loop and come back in on the next beat."
+            "The band follows the chord you are tapping. If a move is late, leave out a loop and come back in on the next beat."
           ],
           "coachLine": "Band on. The taps carry the timing, and where each one landed is for your ear. Direct input or headphones is the honest way to take this.",
           "grading": "graded",
@@ -4008,7 +4008,7 @@
                 "purpose": "Am, F, G and E in the four-note loop on the top string, over a rock band, one chord a bar.",
                 "howTo": [
                   "Sixteenths, four loops a bar. Am is tap 12 over frets 5 and 8, F is tap 13 over frets 5 and 8, G is tap 15 over frets 7 and 10, and E is tap 12 over frets 4 and 7.",
-                  "The band plays the chord you are tapping. If a move is late, leave out a loop and come back in on the next beat."
+                  "The band follows the chord you are tapping. If a move is late, leave out a loop and come back in on the next beat."
                 ],
                 "tab": "/16 1:12t 1:5pf1 1:8hf4 1:5pf1 1:12t 1:5pf1 1:8hf4 1:5pf1 1:12t 1:5pf1 1:8hf4 1:5pf1 1:12t 1:5pf1 1:8hf4 1:5pf1 | /16 1:13t 1:5pf1 1:8hf4 1:5pf1 1:13t 1:5pf1 1:8hf4 1:5pf1 1:13t 1:5pf1 1:8hf4 1:5pf1 1:13t 1:5pf1 1:8hf4 1:5pf1 | /16 1:15t 1:7pf1 1:10hf4 1:7pf1 1:15t 1:7pf1 1:10hf4 1:7pf1 1:15t 1:7pf1 1:10hf4 1:7pf1 1:15t 1:7pf1 1:10hf4 1:7pf1 | /16 1:12t 1:4pf1 1:7hf4 1:4pf1 1:12t 1:4pf1 1:7hf4 1:4pf1 1:12t 1:4pf1 1:7hf4 1:4pf1 1:12t 1:4pf1 1:7hf4 1:4pf1",
                 "position": {
@@ -4113,7 +4113,7 @@
                 "purpose": "Cm, Ab, Bb and G in the four-note loop on the G string, over a rock band, one chord a bar.",
                 "howTo": [
                   "Sixteenths, four loops a bar. Cm is tap 12 over frets 5 and 8, Ab is tap 13 over frets 5 and 8, Bb is tap 15 over frets 7 and 10, and G is tap 12 over frets 4 and 7.",
-                  "The band plays the chord you are tapping. If a move is late, leave out a loop and come back in on the next beat."
+                  "The band follows the chord you are tapping. If a move is late, leave out a loop and come back in on the next beat."
                 ],
                 "tab": "/16 3:12t 3:5pf1 3:8hf4 3:5pf1 3:12t 3:5pf1 3:8hf4 3:5pf1 3:12t 3:5pf1 3:8hf4 3:5pf1 3:12t 3:5pf1 3:8hf4 3:5pf1 | /16 3:13t 3:5pf1 3:8hf4 3:5pf1 3:13t 3:5pf1 3:8hf4 3:5pf1 3:13t 3:5pf1 3:8hf4 3:5pf1 3:13t 3:5pf1 3:8hf4 3:5pf1 | /16 3:15t 3:7pf1 3:10hf4 3:7pf1 3:15t 3:7pf1 3:10hf4 3:7pf1 3:15t 3:7pf1 3:10hf4 3:7pf1 3:15t 3:7pf1 3:10hf4 3:7pf1 | /16 3:12t 3:4pf1 3:7hf4 3:4pf1 3:12t 3:4pf1 3:7hf4 3:4pf1 3:12t 3:4pf1 3:7hf4 3:4pf1 3:12t 3:4pf1 3:7hf4 3:4pf1",
                 "position": {
@@ -4850,7 +4850,7 @@
           "purpose": "Am, F, C and Em over a band with a triplet feel, one chord a bar: two bars on the top string, then two on the B string.",
           "howTo": [
             "Triplets, four cells a bar. Am is tap 12 on the top string, F is tap 13 on the top string, C is tap 13 on the B string, and Em is tap 12 on the B string, all over the first finger at fret 5 and the little finger at fret 8.",
-            "The band plays the chord you are tapping. If a crossing is late, leave out a cell and come back in on the next beat."
+            "The band follows the chord you are tapping. If a crossing is late, leave out a cell and come back in on the next beat."
           ],
           "coachLine": "Band on. The taps carry the timing, and where each one landed is for your ear. Direct input or headphones is the honest way to take this.",
           "grading": "graded",
@@ -5088,7 +5088,7 @@
                 "purpose": "Bm, G, D and F#m over a band with a triplet feel, one chord a bar: two bars on the top string, then two on the B string.",
                 "howTo": [
                   "Triplets, four cells a bar. Bm is tap 14 on the top string, G is tap 15 on the top string, D is tap 15 on the B string, and F#m is tap 14 on the B string, all over the first finger at fret 7 and the little finger at fret 10.",
-                  "The band plays the chord you are tapping. If a crossing is late, leave out a cell and come back in on the next beat."
+                  "The band follows the chord you are tapping. If a crossing is late, leave out a cell and come back in on the next beat."
                 ],
                 "tab": "/8t 1:14t 1:7pf1 1:10hf4 1:14t 1:7pf1 1:10hf4 1:14t 1:7pf1 1:10hf4 1:14t 1:7pf1 1:10hf4 | /8t 1:15t 1:7pf1 1:10hf4 1:15t 1:7pf1 1:10hf4 1:15t 1:7pf1 1:10hf4 1:15t 1:7pf1 1:10hf4 | /8t 2:15t 2:7pf1 2:10hf4 2:15t 2:7pf1 2:10hf4 2:15t 2:7pf1 2:10hf4 2:15t 2:7pf1 2:10hf4 | /8t 2:14t 2:7pf1 2:10hf4 2:14t 2:7pf1 2:10hf4 2:14t 2:7pf1 2:10hf4 2:14t 2:7pf1 2:10hf4",
                 "position": {
@@ -5177,7 +5177,7 @@
                 "purpose": "Cm, Ab, Eb and Gm over a band with a triplet feel, one chord a bar: two bars on the top string, then two on the B string.",
                 "howTo": [
                   "Triplets, four cells a bar. Cm is tap 15 on the top string, Ab is tap 16 on the top string, Eb is tap 16 on the B string, and Gm is tap 15 on the B string, all over the first finger at fret 8 and the little finger at fret 11.",
-                  "The band plays the chord you are tapping. If a crossing is late, leave out a cell and come back in on the next beat."
+                  "The band follows the chord you are tapping. If a crossing is late, leave out a cell and come back in on the next beat."
                 ],
                 "tab": "/8t 1:15t 1:8pf1 1:11hf4 1:15t 1:8pf1 1:11hf4 1:15t 1:8pf1 1:11hf4 1:15t 1:8pf1 1:11hf4 | /8t 1:16t 1:8pf1 1:11hf4 1:16t 1:8pf1 1:11hf4 1:16t 1:8pf1 1:11hf4 1:16t 1:8pf1 1:11hf4 | /8t 2:16t 2:8pf1 2:11hf4 2:16t 2:8pf1 2:11hf4 2:16t 2:8pf1 2:11hf4 2:16t 2:8pf1 2:11hf4 | /8t 2:15t 2:8pf1 2:11hf4 2:15t 2:8pf1 2:11hf4 2:15t 2:8pf1 2:11hf4 2:15t 2:8pf1 2:11hf4",
                 "position": {

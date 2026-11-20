@@ -673,3 +673,20 @@ not done. Scratch `/tmp/yp5/` is NOT deleted: the next leg needs it. No cargo wa
 - Variant coach lines: a variant carries its own purpose and how-to but reads the Exercise's `coachLine`,
   so a coach line must not name a note that changes with the key.
 - Still open from leg 1: a native read of "home" in de, fr, ko, pt-BR, nl (Chords in a Key round 18).
+
+## Relay leg 3 on `mvp-paths5` (2026-11-19, late night PST): IN PROGRESS (this section is rewritten at the end)
+
+State while running, for whoever picks this up if the leg dies:
+- Done: Sweep fix round read and regenerated; recheck 2 (`/tmp/yp5/proof/recheck2.md`: 2 errors, 3
+  suggestions, all applied word for word); the new text no longer says the band plays chords (18 source
+  sentences in `scales-encore.ts`, `modes-encore.ts`, `tapping-more.ts`, `tapping-encore.ts`,
+  `funk-lines-encore.ts`, `metal-rhythm-encore.ts`); caveats (nothing missing); pins (95 lines added in
+  seven Paths, none changed). **English is frozen.**
+- Translations: group a merged for de, es, fr, it, ja, ko (marker files `/tmp/yp5/i18n/merged.<lng>.<grp>`).
+  Fresh todos written after the freeze: `todo.<lng>.a.json` (8 languages left) and `todo.<lng>.b.json`
+  (all 14; for the six merged languages it also holds 11 `scales-and-modes` keys whose English changed).
+  What is not launched yet: `/tmp/yp5/i18n/queue`. Translators are **sonnet** agents (owner decision),
+  prompt `/tmp/yp5/i18n/PROMPT.txt` (group b for the six merged languages gets one more paragraph about the
+  11 scales keys). Verify and merge one language and group: `/tmp/yp5/i18n/vm.sh <lng> <a|b>`.
+- Gates: tsc clean and vitest red only on pins and TabStage before the freeze; everything is to be run
+  again after the last merge.

@@ -203,7 +203,7 @@ export const SAME_NOTES_NEW_HOME: StepSpec = {
     {
       id: "three-home-chords",
       title: "A chord from each home",
-      purpose: "Root, third and fifth from A, from D and from G, all taken from the same seven notes, while a band plays the chords they spell: A minor, D and G.",
+      purpose: "Root, third and fifth from A, from D and from G, all taken from the same seven notes, over a band, through the chords they spell: A minor, D and G.",
       howTo: [
         "Quarter notes, one to a beat, 60 BPM up to a pass at 90; the last note is a half note.",
         "Bar 1: A, C, E, C. Bar 2: D, F#, A, F#. Bar 3: G, B, D, B. Bar 4 comes back down the G chord: D, B and a long G.",
@@ -273,7 +273,7 @@ export const CHOOSING_AGAIN: StepSpec = {
   id: "choosing-again",
   title: "One note follows the chord",
   goal: "Play a phrase that changes its sixth from F to F# when the band goes to F and then to D, another that changes its seventh from G# to G when the band goes to E and then to G, and then choose the notes yourself over Am and D and over D and C.",
-  why: "In the Step before, each phrase stayed in one mode, because its chords all fitted one scale. A song does not always keep to chords like that. Over Am, F, Am and D the band plays F in the F chord and F# in the D chord, so no one scale fits all four bars: A natural minor fits the first three and A Dorian fits the last. You do not need a new shape for that, and the hand moves one fret at most. You change one note, the sixth, in the bar whose chord has it. Over A, E, A and G the same thing happens to the seventh: the E chord has G# in it, which is A major, and the G chord is built on G, which is A Mixolydian. Harmonic minor did this in the Intermediate Level, where the raised seventh belonged to one chord. Here the note that follows the chord is the note that names the mode.",
+  why: "In the Step before, each phrase stayed in one mode, because its chords all fitted one scale. A song does not always keep to chords like that. Over Am, F, Am and D the F chord has F in it and the D chord has F#, so no one scale fits all four bars: A natural minor fits the first three and A Dorian fits the last. You do not need a new shape for that, and the hand moves one fret at most. You change one note, the sixth, in the bar whose chord has it. Over A, E, A and G the same thing happens to the seventh: the E chord has G# in it, which is A major, and the G chord is built on G, which is A Mixolydian. Harmonic minor did this in the Intermediate Level, where the raised seventh belonged to one chord. Here the note that follows the chord is the note that names the mode.",
   howTo: [
     "Read the chart before you play and find the chord that has the changed note in it. F has F and D has F#. E has G# and G has G.",
     "The sixth of A is F at the A string's fret 8, or F# at the D string's fret 4. The seventh of A is G# at the D string's fret 6, or G at fret 5.",

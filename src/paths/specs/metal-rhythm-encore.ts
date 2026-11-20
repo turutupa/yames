@@ -198,13 +198,13 @@ export const VERSE_AND_CHORUS: StepSpec = {
   id: "verse-and-chorus",
   title: "A verse and a chorus, with the band",
   goal: "Play a four-bar verse riff and a four-bar chorus riff, each alone, then verse, verse, chorus, chorus as sixteen bars with a band, keeping the tempo through every change of part.",
-  why: "A song is longer than a riff, and it changes feel as it goes. The verse riff here is tight: muted, low and busy, and it stays on one chord. The chorus opens up: power chords that ring, a new chord in every bar, and a rhythm with far fewer notes in it. No technique here is new: the gallop, eighth notes let out of the mute that answer it, and power chords. Only the verse's fingering is: the hand sits one fret lower than in the earlier single-note riffs, first finger on fret 2. The work is keeping your place in sixteen bars, and the change: on one bar line the palm comes off the strings and the strokes get bigger, and on another they go back to small and muted, at the same tempo.",
+  why: "A song is longer than a riff, and it changes feel as it goes. The verse riff here is tight: muted, low and busy, and it stays on one chord. The chorus opens up: power chords that ring, a new chord in every bar, and a rhythm with far fewer notes in it. No technique here is new: the gallop, eighth notes let out of the mute that answer it, and power chords. Only the verse's fingering is: the hand sits one fret lower than in the earlier single-note riffs near the nut, first finger on fret 2 instead of fret 3. The work is keeping your place in sixteen bars, and the change: on one bar line the palm comes off the strings and the strokes get bigger, and on another they go back to small and muted, at the same tempo.",
   howTo: [
     "Learn each part by itself first, with the click. The verse is the gallop on the muted open low E string with short answers on the A string. The chorus is four power chords, one to a bar: E, C, G and D.",
     "The verse is down, down-up, with the palm on the low E string. The chorus is all downstrokes, palm off the strings, each stroke carried through two strings.",
     "Into the chorus, lift the palm and let the first chord ring for its full two beats. The tempo has not changed, only how much you play: count through the long chord and do not rush it.",
     "Back into the verse, bring the palm down before the first note, so the gallop starts muted.",
-    "With the band, the chord stays E5 through the whole verse and the first bar of the chorus, then C5, G5 and D5, a bar each. Nothing in the chords tells you the chorus has come, so count the bars in fours.",
+    "With the band, the bass stays on E through the whole verse and the first bar of the chorus, then goes to C, G and D, a bar each. Nothing in the bass tells you the chorus has come, so count the bars in fours.",
   ],
   payoff: "Sixteen bars of rhythm guitar with a band: two verses, two choruses, and the change of feel on the bar line.",
   difficultyException:

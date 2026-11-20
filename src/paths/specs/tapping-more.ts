@@ -238,7 +238,7 @@ export const CELL_IN_E_MINOR: StepSpec = {
       purpose: "Em, C, D and B on the B string over a band with a triplet feel, one chord a bar.",
       howTo: [
         "Triplets, four cells a bar. Em is tap 12 over frets 5 and 8, C is tap 13 over frets 5 and 8, D is tap 15 over frets 7 and 10, and B is tap 12 over frets 4 and 7.",
-        "The band plays the chord you are tapping. If a move is late, leave out a cell and come back in on the next beat.",
+        "The band follows the chord you are tapping. If a move is late, leave out a cell and come back in on the next beat.",
         VARIANT_NOTE,
       ],
       coach: "Band on. The taps carry the timing; direct input or headphones is the honest way to take this.",
@@ -247,7 +247,7 @@ export const CELL_IN_E_MINOR: StepSpec = {
           purpose: "Cm, Ab, Bb and G on the G string over a band with a triplet feel, one chord a bar.",
           howTo: [
             "Triplets, four cells a bar. Cm is tap 12 over frets 5 and 8, Ab is tap 13 over frets 5 and 8, Bb is tap 15 over frets 7 and 10, and G is tap 12 over frets 4 and 7.",
-            "The band plays the chord you are tapping. If a move is late, leave out a cell and come back in on the next beat.",
+            "The band follows the chord you are tapping. If a move is late, leave out a cell and come back in on the next beat.",
           ],
         },
       }),

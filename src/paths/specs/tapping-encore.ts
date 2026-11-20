@@ -241,7 +241,7 @@ export const SIXTEENTHS_IN_E_MINOR: StepSpec = {
       purpose: "Em, C, D and B in the four-note loop on the B string, over a rock band, one chord a bar.",
       howTo: [
         "Sixteenths, four loops a bar. Em is tap 12 over frets 5 and 8, C is tap 13 over frets 5 and 8, D is tap 15 over frets 7 and 10, and B is tap 12 over frets 4 and 7.",
-        "The band plays the chord you are tapping. If a move is late, leave out a loop and come back in on the next beat.",
+        "The band follows the chord you are tapping. If a move is late, leave out a loop and come back in on the next beat.",
         VARIANT_NOTE,
       ],
       coach: "Band on. The taps carry the timing, and where each one landed is for your ear. Direct input or headphones is the honest way to take this.",
@@ -323,7 +323,7 @@ export const STRINGS_THROUGH_CHORDS: StepSpec = {
       purpose: "Am, F, C and Em over a band with a triplet feel, one chord a bar: two bars on the top string, then two on the B string.",
       howTo: [
         "Triplets, four cells a bar. Am is tap 12 on the top string, F is tap 13 on the top string, C is tap 13 on the B string, and Em is tap 12 on the B string, all over the first finger at fret 5 and the little finger at fret 8.",
-        "The band plays the chord you are tapping. If a crossing is late, leave out a cell and come back in on the next beat.",
+        "The band follows the chord you are tapping. If a crossing is late, leave out a cell and come back in on the next beat.",
         VARIANT_NOTE,
       ],
       coach: "Band on. The taps carry the timing, and where each one landed is for your ear. Direct input or headphones is the honest way to take this.",
