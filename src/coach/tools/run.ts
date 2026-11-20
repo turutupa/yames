@@ -168,13 +168,26 @@ function mint(
  * runs only one of these, once: a call made up by a caller, an app-only tool
  * named from outside, or an Undo pressed twice does nothing (review finding 5).
  */
-const undos = new WeakSet<ToolCall>();
+const undos = new WeakMap<ToolCall, string>();
 
-/** A result as it leaves the runner: its undo, if any, frozen and remembered. */
-function issue<T extends RunOutcome>(outcome: T): T {
+/**
+ * Where an undo was handed out: the view and, in a Session, the Exercise
+ * (its block and id). An undo is a plain call (`set_setting {countIn: off}`,
+ * `set_tempo {bpm, at}`) that names no screen, so a `confirm` undo pressed
+ * anywhere else would change that screen's count-in or tempo instead
+ * (review t1a2b, finding A). `runCoachUndo` compares this with where the app
+ * is at the press.
+ */
+function placeOf(host: CoachToolHost, ctx: CoachContext): string {
+  const exercise = host.sessionActive() ? `${String(ctx.run?.stepIndex ?? "")}:${ctx.exercise?.id ?? ""}` : "";
+  return `${host.view()}|${exercise}`;
+}
+
+/** A result as it leaves the runner: its undo, if any, frozen and remembered with where it was issued. */
+function issue<T extends RunOutcome>(outcome: T, host: CoachToolHost, ctx: CoachContext): T {
   if (!outcome.ok || !("receipt" in outcome) || !outcome.undo) return outcome;
   const undo: ToolCall = Object.freeze({ tool: outcome.undo.tool, args: Object.freeze({ ...outcome.undo.args }) });
-  undos.add(undo);
+  undos.set(undo, placeOf(host, ctx));
   return { ...outcome, undo } as T;
 }
 
@@ -229,7 +242,7 @@ function run(checked: CheckedCall, host: CoachToolHost, ctx: CoachContext): RunO
   const { tool, args } = checked;
   const wrong = checkContext(tool, ctx);
   if (wrong) return wrong;
-  if (tool.kind !== "confirm") return guarded(tool.name, () => issue(runGo(tool, args, host, ctx)));
+  if (tool.kind !== "confirm") return guarded(tool.name, () => issue(runGo(tool, args, host, ctx), host, ctx));
   return guarded(tool.name, (): RunOutcome => {
     const proposed = tool.propose(args, host, ctx);
     if (!proposed.ok) return proposed;
@@ -276,8 +289,8 @@ export function confirmCoachTool(
   const wrong = checkContext(tool, ctx);
   if (wrong) return wrong;
   // A `go` tool's proposal holds its checked arguments: run it for real now.
-  if (tool.kind !== "confirm") return guarded(tool.name, () => issue(tool.run(resolved as ToolArgs, host, ctx)));
-  return guarded(tool.name, () => issue(tool.commit(resolved, host, ctx)));
+  if (tool.kind !== "confirm") return guarded(tool.name, () => issue(tool.run(resolved as ToolArgs, host, ctx), host, ctx));
+  return guarded(tool.name, () => issue(tool.commit(resolved, host, ctx), host, ctx));
 }
 
 /** Drop a proposal the player turned down ("Not now"), so it can never be confirmed. */
@@ -290,8 +303,10 @@ export function dismissProposal(proposal: Proposal): void {
  * result, the very object, and once (a made-up call, or the same Undo
  * pressed twice, is refused and runs nothing). May reach the app's own tools
  * (`return_to`). An undo that is a `confirm` tool runs at once, because the
- * Undo press is the press. Refused as `notNow` (a Take, a click still
- * playing), it stays good for a later press.
+ * Undo press is the press. A `confirm` undo pressed anywhere but the view
+ * (and, in a Session, the Exercise) it was issued on is refused and spent.
+ * Refused as `notNow` (a Take, a click still playing), it stays good for a
+ * later press, on that same screen.
  */
 export function runCoachUndo(
   undo: unknown,
@@ -303,9 +318,24 @@ export function runCoachUndo(
     return refuse("refused", "coachTools.why.refused.proposal", {}, { detail: "not a live undo" });
   }
   const issuedUndo = undo as ToolCall;
+  const place = undos.get(issuedUndo) ?? "";
   undos.delete(issuedUndo);
+  // A `confirm` undo puts back a screen's own setting: anywhere else it would change
+  // another screen's, so it is refused and spent. A `go` undo moves the view by design.
+  const tool = registry.find((t) => t.name === issuedUndo.tool);
+  if (tool?.kind === "confirm") {
+    let here: string | null = null;
+    try {
+      here = placeOf(host, ctx);
+    } catch {
+      // A host that cannot say where it is cannot be where the undo was issued.
+    }
+    if (here !== place) {
+      return refuse("refused", "coachTools.why.refused.proposal", {}, { detail: "the undo was issued on another screen" });
+    }
+  }
   const outcome = runIssuedUndo(issuedUndo, host, ctx, registry);
-  if (!outcome.ok && outcome.why === "notNow") undos.add(issuedUndo);
+  if (!outcome.ok && outcome.why === "notNow") undos.set(issuedUndo, place);
   return outcome;
 }
 

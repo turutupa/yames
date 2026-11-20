@@ -257,6 +257,37 @@ describe("set_setting", () => {
     expect(h.values.countIn).toBe(false);
   });
 
+  it("the count-in's undo pressed on the jam tab is refused and spent; on the Metronome it puts it back (review t1a2b A)", () => {
+    const beat = toolCtx({ screen: "beat" });
+    const h = host({ countIn: false }, "beat");
+    const out = done(confirmCoachTool(proposalOf(runCoachTool(call("set_setting", { key: "countIn", value: "on" }), h, beat)), h, beat));
+    expect(h.values.countIn).toBe(true);
+    // The jam tab, whose loaded jam has a count-in: "on" there too, so only the screen tells them apart.
+    h.setView("jam");
+    expect(runCoachUndo(out.undo, h, toolCtx({ screen: "jam" }))).toMatchObject({ ok: false, why: "refused", line: { key: "coachTools.why.refused.proposal" } });
+    expect(h.changes().filter((c) => c.member === "setSafeSetting")).toEqual([{ member: "setSafeSetting", args: ["countIn", true] }]);
+    // Spent: back on the Metronome, the same Undo does nothing.
+    h.setView("beat");
+    expect(runCoachUndo(out.undo, h, beat)).toMatchObject({ ok: false, why: "refused", detail: "not a live undo" });
+    expect(h.values.countIn).toBe(true);
+    // A fresh one, pressed where it was issued, still works.
+    const again = done(confirmCoachTool(proposalOf(runCoachTool(call("set_setting", { key: "countIn", value: "off" }), h, beat)), h, beat));
+    expect(runCoachUndo(again.undo, h, beat).ok).toBe(true);
+    expect(h.values.countIn).toBe(true);
+  });
+
+  it("an undo kept after a notNow is good only on its own screen (review t1a2b A)", () => {
+    const beat = toolCtx({ screen: "beat" });
+    const h = host({ countIn: false }, "beat");
+    const out = done(confirmCoachTool(proposalOf(runCoachTool(call("set_setting", { key: "countIn", value: "on" }), h, beat)), h, beat));
+    expect(runCoachUndo(out.undo, h, toolCtx({ screen: "beat", run: runIn("playing") }))).toMatchObject({ why: "notNow" });
+    h.setView("jam");
+    expect(runCoachUndo(out.undo, h, toolCtx({ screen: "jam" }))).toMatchObject({ why: "refused", line: { key: "coachTools.why.refused.proposal" } });
+    h.setView("beat");
+    expect(runCoachUndo(out.undo, h, beat)).toMatchObject({ why: "refused", detail: "not a live undo" });
+    expect(h.values.countIn).toBe(true);
+  });
+
   it("a value the control stopped offering before the press is refused (review 3)", () => {
     let voiceOptions: SafeSettingOption[] = [
       { value: false, names: ["off"] },
