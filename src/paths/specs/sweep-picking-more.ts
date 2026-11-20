@@ -162,7 +162,7 @@ export const SIX_STRING_CHANGES: StepSpec = {
         },
       },
       harmony: { chordTones: true, cover: true },
-      rungs: ladder(60, 130, 5),
+      rungs: ladder(60, 120, 5),
       passAt: 80,
       selfCheck: [ROLL_CHECK, NOISE_CHECK],
       minutes: 7,
@@ -170,7 +170,7 @@ export const SIX_STRING_CHANGES: StepSpec = {
     sweepExercise({
       id: "four-chords-six",
       title: "Four chords on six strings",
-      purpose: "A four-chord progression in C minor with a whole six-string shape on each chord: C minor, Ab, F minor and G. The last chord is the major five chord, the V chord you met in the Step \"Minor keys and the V chord\": the one that pulls the line back to the first.",
+      purpose: "A four-chord progression in C minor with a whole six-string shape on each chord: C minor, Ab, F minor and G. The last chord is the major five chord you met in the Step \"Minor keys and the major five chord\": the one that pulls the line back to the first.",
       howTo: [
         "Sixteenths, one chord a bar. The two minor bars are fourteen notes and two sixteenths of rest. The two major bars are thirteen notes and three sixteenths of rest.",
         "C minor starts on the low E at fret 8. Ab starts on the low E at fret 16, with the little finger. That is the longest move in the line and the rest before it is the short one, so leave the first chord early rather than land late.",

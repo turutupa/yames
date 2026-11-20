@@ -27,6 +27,14 @@ const LINK_CHECK =
   "At each change, did the sweep keep going, with no gap and no extra pick stroke before the new shape?";
 const NOISE_CHECK = "Between takes, stop and listen: are the strings you are not playing silent?";
 
+// Shared strings of the coherence audit (COHERENCE_FIXES Part 1), word for word so their translations are copied.
+const S8_SEXTUPLETS = "Sextuplets are six even notes to one click.";
+const S11_VIBRATO = "Vibrato is a bend kept very small: push the string a little and let it back, over and over, at an even speed.";
+const BEND_POINTER = "Blues and Pentatonics teaches the bend in its Step 'Bends that land'.";
+/** The count for the three Exercises in quarter-note triplets. No digits: `variantText` drops a number it cannot place. */
+const QUARTER_TRIPLETS =
+  "Quarter-note triplets: three even notes to every two beats, six to a bar, with a note on the first and third beats and none on the second and fourth.";
+
 const am3 = sweepLoop({ chord: "Am", strings: [3, 2, 1], near: 14 });
 const am3Low = sweepLoop({ chord: "Am", strings: [3, 2, 1], near: 5 });
 const am3Mid = sweepLoop({ chord: "Am", strings: [3, 2, 1], near: 9 });
@@ -168,12 +176,13 @@ const OLD_STEPS: StepSpec[] = [
       id: "triads",
       title: "Three-string triads, up and down",
       goal: "Sweep a minor and a major triad on the top three strings, up and back down, in even triplets, with each note separate.",
-      why: "This is the sweep everyone recognises: three notes of a chord in one push, A, C, E going up and E, C, A coming back. Three strings is the size every bigger shape is made of, and it's short enough to keep clean from the first day. Triplets put one sweep on every click, so the rhythm tells you where each stroke starts. You learn major and minor together because they differ by one note, and hearing that note is what turns a shape into a chord you can use.",
+      why: "This is the sweep everyone recognises: three notes of a chord in one push, A, C, E going up and E, C, A coming back. Three strings is the size every bigger shape is made of, and it's short enough to keep clean from the first day. Triplets put one sweep on every click, so the rhythm tells you where each stroke starts. You learn a minor and a major triad together because their shapes differ by one note, and hearing that note is what turns a shape into a chord you can use.",
       howTo: [
         "One push per click. Going up the strings, the pick falls through the G, B and E strings in one downward motion and comes to rest on each string before it plays it. Coming back, the same in reverse: one upward pull through E, B and G. The last Exercise turns the pick at both ends with no repeated note, in sixteenths.",
         "The top note is played twice, once at the end of the push and once at the start of the pull. That repeated note is the only place the pick changes direction.",
         "Fretting hand: lift each finger's pressure as soon as the next note sounds, without leaving the string. Picking hand: the side of the palm rests lightly on the strings you have just left. Those two together are the mute.",
-        "The A minor shape at fret 12: little finger on the G string at 14, middle finger on the B string at 13, index on the top string at 12. For C major only the G string changes, to fret 12.",
+        "A triad is a chord of three notes: the root, which is the note the chord is named after, the third and the fifth. A minor is A (the root), C (the third) and E (the fifth). Its shape at fret 12: ring finger on the G string at 14, middle finger on the B string at 13, index on the top string at 12. Move the G string note to fret 12 and the notes are G, C and E. That is C major, a different chord that shares two notes with A minor.",
+        "The third is the note that makes a triad major or minor. C major is C, E and G. Lower the E by one fret and it is C minor: that pair is one of the Takes of the second Exercise. If this is new, the Triads Path teaches it slowly, through its Intermediate Level.",
       ],
       payoff: "A minor and C major arpeggios that sound like chords being spelled out, and a four-chord progression played as sweeps, in your first session.",
       exercises: [
@@ -269,8 +278,10 @@ const OLD_STEPS: StepSpec[] = [
           tab: `/16 ${repeat("3:14 2:13 1:12 2:13", 4)}`,
           position: 12,
           harmony: { arpeggio: "Am", cover: true },
-          rungs: ladder(60, 120, 5),
-          passAt: 85,
+          // Lowered 2026-11-20 (coherence audit SW-F9): a first-day sweeper could not start under 60. The top stays at 120,
+          // so the coach line about the rungs above the graded ones stays true.
+          rungs: ladder(45, 120, 5),
+          passAt: 75,
           selfCheck: [ROLL_CHECK, NOISE_CHECK],
           minutes: 6,
         }),
@@ -333,7 +344,7 @@ const OLD_STEPS: StepSpec[] = [
       id: "qualities",
       title: "Triads up the neck",
       goal: "Play the same minor and major triad in three places up the neck, with the shifts landing on time.",
-      why: "A shape you know in one place is a shape you can only use in one place. Every triad has three shapes on the top three strings, one per inversion, and between them they cover the neck, so whatever chord comes next, one of its shapes is under your hand. Learning them as loops that climb and come back is also your first real position-shift drill.",
+      why: "A shape you know in one place is a shape you can only use in one place. Every triad has three shapes on the top three strings, one for each of its three notes at the bottom, called inversions, and between them they cover the neck, so whatever chord comes next, one of its shapes is under your hand. Learning them as loops that climb and come back is also your first real position-shift drill.",
       howTo: [
         "Name the notes out loud as you practise, at least once. The spelled notes on each Exercise are there for that.",
         "Moving between inversions, shift during the last note of the bar, and arrive on the first finger of the new shape.",
@@ -530,9 +541,9 @@ const OLD_STEPS: StepSpec[] = [
       id: "five-strings",
       title: "Five strings: the root positions",
       goal: "Own the two common five-string shapes with the root on the A string, in minor and major.",
-      why: "Five strings is the big sweep, the sound people mean when they say the word. There are few shapes to learn: minor from the A string, major from the A string, and the two moved around. Everything else on the fretboard is one of those at a different fret, which is why you learn only these.",
+      why: "Five strings is the big sweep, the sound people mean when they say the word. This Step has the shapes with the root on the A string, called the A-shape from here on: one minor and one major. Moved to another fret, those two give you every minor and major chord. The third Exercise adds one more major shape, and the next Step adds a second family.",
       howTo: [
-        "Minor: root on the A string, a hammer to the third on that same string, then one note a string up to the top. Major: a chord tone below the root, hammer to the root, then one note a string.",
+        "Minor: root on the A string, a hammer to the third on that same string, then one note a string up to the top. Major: a chord tone below the root, a slide up to the root, then one note a string.",
         "Mute everything. With five strings moving there is more to keep silent than there are fingers: palm on the low strings, fretting fingers across the high ones.",
         "Keep this below your speed limit. A clean five-string sweep at a modest tempo sounds better than a fast smear.",
       ],
@@ -607,7 +618,7 @@ const OLD_STEPS: StepSpec[] = [
       id: "five-e-shape",
       title: "Five strings: the E-shape, and a tap at the top",
       goal: "Sweep the E-shape arpeggios that start on the fifth, and add a tapped note above the top of a five-string shape.",
-      why: "The A-shape puts the root on the A string. The E-shape is the barre chord you already know from the low E string, swept from the A string up, so it starts on the chord's fifth. Between the two shapes you have a minor and a major arpeggio in every part of the neck, often in the same place, which is what lets a progression stay under one hand. The tap is the other half of the classic sound: one more note above the shape, played by the picking hand, so the arpeggio reaches higher than the fretting hand can stretch.",
+      why: "The A-shape puts the root on the A string. The E-shape is the barre chord with its root on the low E string, swept from the A string up, so it starts on the chord's fifth. The first two Exercises give the fingering. Between the two shapes you have a minor and a major arpeggio in every part of the neck, often in the same place, which is what lets a progression stay under one hand. The tap is the other half of the classic sound: one more note above the shape, played by the picking hand, so the arpeggio reaches higher than the fretting hand can stretch.",
       howTo: [
         "E-shape: the first note is on the A string, then one note a string up to the top, and a hammer to the top note. There's no second note on the A string, so the bottom turn is a pick turn, and the rest after each loop gives you time for it and a moment to check the mute.",
         "Tap with the middle finger of the picking hand, holding the pick tucked against the palm. Tap firmly on the fret, then pull off slightly downward so the fretted note under it sounds.",
@@ -738,7 +749,7 @@ const OLD_STEPS: StepSpec[] = [
         sweepExercise({
           id: "am-f-c-g",
           title: "Am, F, C, G",
-          purpose: "The same progression as the last Step, on five strings, so you hear how much bigger the same chords sound.",
+          purpose: "The progression from the Step \"Four strings\", on five strings, so you hear how much bigger the same chords sound.",
           howTo: ["F and G have ten notes and a rest of two. Use the rest to move. Am and C have twelve notes, so those moves come in the last note of the bar."],
           coach: "Slower and clean beats fast and rough. This one is worth repeating at a rung that stays even.",
           tab: `/8t ${am5} | ${f5} r r | ${c5} | ${g5} r r`,
@@ -775,9 +786,11 @@ const OLD_STEPS: StepSpec[] = [
       goal: "Use a sweep as part of a line that goes somewhere, starting and ending in a scale or on a held note.",
       why: "Nobody wants to hear ten bars of arpeggio. What makes a sweep sound exciting is what comes either side of it: a line that arrives by sweep, then sings; a run that shoots up to a held bend. This Step turns the shapes into something you could actually play in a solo.",
       howTo: [
+        S11_VIBRATO,
         "The held note after a sweep matters more than the sweep. Give it time and a little vibrato.",
         "Change technique cleanly. When a sweep ends, you go straight back to normal picking, with no moment of confusion in the hand.",
         "Use these as starting points. Write your own ending as soon as you can play the written one.",
+        BEND_POINTER,
       ],
       payoff: "Four phrases you can actually use in a solo, each one ending in a note that sings.",
       difficultyException:
@@ -801,7 +814,10 @@ const OLD_STEPS: StepSpec[] = [
           id: "lick-to-bend",
           title: "Two strings, a run, and a bend",
           purpose: "A three-string sweep into a two-string lick with a hammer and two pulls, finishing in a whole-tone bend: the minor pentatonic box with sweeps in it.",
-          howTo: ["Sweep through G, B and E, then the lick. The last note is D on the G string, bent up to E and held with vibrato. Hear E on the B string first, so you know where the bend has to reach."],
+          howTo: [
+            "The sweep is the index finger laid across fret 5 on the G, B and top strings. Roll it: press only the string the pick is on, and let the finger tip over to the next string as the pick gets there, so each note stops as the next one sounds.",
+            "Sweep through G, B and E, then the lick. The last note is D on the G string, bent up to E and held with vibrato. Hear E on the B string first, so you know where the bend has to reach.",
+          ],
           coach: "I time the picked notes. How far the bend went is up to your ear: compare it with the E at fret 5 on the B string.",
           tab: `/8t 3:5 2:5 1:5 1:8h 1:5p 2:8 2:5p 3:7 3:5 3:7 3:5 4:7 | /2 3:7b2v /4 r r`,
           position: 5,
@@ -829,14 +845,19 @@ const OLD_STEPS: StepSpec[] = [
         sweepExercise({
           id: "pickup-sweep",
           title: "A fast sweep as a pickup",
-          purpose: "A long, held note, then one beat of fast sweep into the next bar. It is the sound of a sweep used sparingly, and it's where this Path's grading stops being trustworthy, even at these low tempos.",
-          howTo: ["Sextuplets in the fourth beat only. Aim for the next downbeat. If the sextuplet is not perfect, the landing will still save the phrase."],
-          coach: "Sextuplets are fast enough that I can only grade the slowest rungs, and even those are unproven. Trust your own ear above them.",
+          purpose: "A long, held note, then one beat of fast sweep into the next bar. It is the sound of a sweep used sparingly, and nothing here is scored: the landing is yours to judge.",
+          howTo: [
+            S8_SEXTUPLETS,
+            "Sextuplets in the fourth beat only. Aim for the next downbeat. If the sextuplet is not perfect, the landing will still save the phrase.",
+            "The sweep starts on the D string, one string lower than you have swept so far. Its note and the G string's note are both at fret 14, so lay the ring finger across the two and tip it from one string to the other. Four strings get a Step of their own in the next Level.",
+          ],
+          coach: "No score on this one: aim for the downbeat and listen to the landing.",
           tab: `/2 1:12v /4 r /16t 4:14 3:14 2:13 1:12 1:17h 1:12p | /2 2:13v /4 r /16t 4:14 3:14 2:13 1:12 2:13 3:14`,
           position: 12,
           harmony: { arpeggio: "Am", cover: true },
           rungs: ladder(40, 80, 5),
-          passAt: 60,
+          // Self-checked since 2026-11-20 (coherence audit SW-F3): four strings in sextuplets, three Steps early, was in the Beginner Test out.
+          grade: "selfChecked",
           selfCheck: [ROLL_CHECK, "Did the phrase land on the downbeat, whatever happened in the sextuplet?"],
           minutes: 6,
         }),
@@ -946,6 +967,22 @@ function linkedVariant(strings: readonly number[], near: number, rhythm: string,
 }
 
 /**
+ * A three-string pass written on the click: two quarter notes and a half note
+ * a bar, in place of the half-note triplets nobody had been taught to count
+ * (coherence audit SW-F2). Same notes, same order.
+ */
+function onTheClick(tab: string): string {
+  return tab
+    .split("|")
+    .map((bar) => {
+      const [rhythm, a, b, c, ...rest] = bar.trim().split(/\s+/);
+      if (rhythm !== "/4" || !c || rest.length) throw new Error(`not a three-note pass in quarters: ${bar}`);
+      return `/4 ${a} ${b} /2 ${c}`;
+    })
+    .join(" | ");
+}
+
+/**
  * The minor shape from the low E (A minor: 17, 15, 14, 14, 13, 12) is wider than
  * a hand, so it is written with its shift (fingering audit 2): little, middle,
  * then the index rolling across the D and G strings at 14, and the hand moves
@@ -1029,8 +1066,8 @@ const NEW_STEPS: StepSpec[] = [
         title: "Up one chord, down the next",
         purpose: "The whole gesture in two bars: one chord up the strings, the link at the top, the next chord back down, and a link at the bottom to go round again.",
         howTo: [
-          "Triplets that take a whole bar for three notes. The pick pushes up through three strings, waits, then pushes down through the next shape.",
-          "Every note on an outer string after the first is legato. If you hear a pick attack at a link, that's the thing to fix.",
+          "Two quarter notes and a half note in each bar: one note on each of the first three clicks, and the last one held through the fourth click. The pick goes through three strings, waits, then comes back through the next shape.",
+          "The first note of the second bar is not picked: it is a pull, a hammer or a slide from the last note of the first bar. If you hear a pick attack at that link, that's the thing to fix.",
         ],
         coach: "I report whether each note came in time. Whether a link was picked is up to your ear.",
         vary: {
@@ -1041,21 +1078,25 @@ const NEW_STEPS: StepSpec[] = [
             const [a, b] = p.progression.split(" to ");
             const shift = KEY_SHIFT[p.key];
             const chords = [moveChart(a, shift).trim(), moveChart(b, shift).trim()];
-            const tab = linkedSweep({ chords, strings: [3, 2, 1], near: a === "Am" ? NEAR_THREE[p.key] : nearFret(10, shift), rhythm: "/2t" });
+            const tab = onTheClick(linkedSweep({ chords, strings: [3, 2, 1], near: a === "Am" ? NEAR_THREE[p.key] : nearFret(10, shift), rhythm: "/4" }));
             return { tab, position: handAt(tab), shifts: true, chords: chords.join(" | ") };
           },
         },
         chain: { maxJointFrets: 5 },
         harmony: { chordTones: true },
-        rungs: ladder(60, 160, 10),
-        passAt: 120,
+        // Quarter notes at the note rate the half-note triplets had (pass 120 and top 160 then): proof-read round, 2026-11-20.
+        rungs: ladder(60, 120, 10),
+        passAt: 90,
         minutes: 6,
       }),
       sweepExercise({
         id: "round-the-loop",
         title: "The other link: round the bottom",
         purpose: "Loop one shape, and at the bottom of the loop carry on into the next shape. It's the link you will use most, because the shape has already gone up and come back.",
-        howTo: ["One loop to a bar, slowly. The upward push that finishes one shape carries straight on into the first note of the next: don't stop it, and don't restart it."],
+        howTo: [
+          QUARTER_TRIPLETS,
+          "One loop to a bar, slowly. The upward pull that finishes one shape carries straight on into the first note of the next: don't stop it, and don't restart it.",
+        ],
         coach: "Listen for a gap at the bar line. It's the one thing here that a recording shows at once.",
         vary: {
           values: { progression: ["Am F", "Am G", "Am E", "Am Dm"], key: MINOR_KEYS },
@@ -1093,7 +1134,7 @@ const NEW_STEPS: StepSpec[] = [
         title: "One pass per chord",
         purpose: "Up, link, down, link, through four chords. It's the cleanest way to hear a chain: every chord change is a single small step.",
         howTo: [
-          "Half-note triplets, three notes a bar: one pass through each chord's three strings, up in one bar and down in the next.",
+          "Two quarter notes and a half note in each bar: one pass through each chord's three strings, up in one bar and down in the next.",
           "At each bar line the last note of one chord moves to the first note of the next on the same string, usually by a fret or two; the jump back to the first chord can be bigger. Sing the top notes if you can: they make a tune.",
         ],
         coach: "Four links per round. I report evenness and notes heard at these tempos.",
@@ -1101,12 +1142,16 @@ const NEW_STEPS: StepSpec[] = [
           values: { progression: [...MINOR_LOOP, "i-VII-VI-V"], key: MINOR_KEYS },
           pooled: ["progression", "key"],
           label: labelKeyed,
-          build: (p) => ({ ...linkedVariant([3, 2, 1], 14, "/2t")(p), shifts: true }),
+          build: (p) => {
+            const built = linkedVariant([3, 2, 1], 14, "/4")(p);
+            return { ...built, tab: onTheClick(built.tab), shifts: true };
+          },
         },
         chain: { maxJointFrets: 5 },
         harmony: { chordTones: true },
-        rungs: ladder(60, 180, 10),
-        passAt: 140,
+        // Quarter notes at the note rate the half-note triplets had (pass 140 and top 180 then): proof-read round, 2026-11-20.
+        rungs: ladder(60, 135, 5),
+        passAt: 105,
         minutes: 6,
       }),
       sweepExercise({
@@ -1164,6 +1209,8 @@ const NEW_STEPS: StepSpec[] = [
       "Mixed lengths: keep the beat the same when the shape gets shorter. The short shape fills the bar with two loops.",
     ],
     payoff: "A long chain over a whole progression, big enough to sound like a solo.",
+    difficultyException:
+      "Since `minor-progressions` moved before this Step (2026-11-20) its median rate is a shade under that Step's three-string loops: 7.63 after 7.71. The demand here is the length of the sweep and the longer way back at each link, which the rate does not count.",
     exercises: [
       sweepExercise({
         id: "chain-four",
@@ -1244,10 +1291,11 @@ const NEW_STEPS: StepSpec[] = [
   },
   {
     id: "minor-progressions",
-    title: "Minor keys and the V chord",
-    goal: "Link through the harmonic-minor movement: the major V chord pulling back to i.",
-    why: "A natural-minor loop goes round forever and never needs to resolve. The major V chord is what changes that: its G# sits a half step under A and pulls back to it, and that pull is the dark, dramatic sound of metal and neoclassical playing. These progressions are shared vocabulary, and the thing to learn is the half-step move: it is the link you will come to love.",
+    title: "Minor keys and the major five chord",
+    goal: "Link through the harmonic-minor movement: the major five chord pulling back to the one chord.",
+    why: "A natural-minor loop goes round forever and never needs to resolve. The major five chord is what changes that: its G# sits a half step under A and pulls back to it, and that pull is the dark, dramatic sound of metal and neoclassical playing. These progressions are shared vocabulary, and the thing to learn is the half-step move: it is the link you will come to love.",
     howTo: [
+      "The chords of a key are numbered from its first note and written as Roman numerals, small for a minor chord and capital for a major one. In A minor the one chord is A minor (i), the four chord is D minor (iv), the five chord is E major (V) and the six chord is F major (VI). Chords in a Key teaches the numbers.",
       "E major in A minor contains G#, a note A minor doesn't have. Find it in the shape. It is where the sound comes from.",
       "Aim for the G# to A step at the resolution, and hear it before you play it.",
       "Bdim to E to Am is the minor two-five-one. It is the same pull with one more chord of warning.",
@@ -1256,7 +1304,7 @@ const NEW_STEPS: StepSpec[] = [
     exercises: [
       sweepExercise({
         id: "the-pull",
-        title: "i to V and back",
+        title: "The one chord to the five chord and back",
         purpose: "Only two chords, so all of your attention goes on the half step from G# to A, on three strings.",
         howTo: [
           "Triplets. One bar of the i chord and one of the V, twice round; each bar is its three-string loop played twice.",
@@ -1322,8 +1370,8 @@ const NEW_STEPS: StepSpec[] = [
       }),
       sweepExercise({
         id: "minor-two-five-one",
-        title: "ii°, V, i",
-        purpose: "The minor two-five-one, with the diminished ii giving a chord of warning before the V. It's a move you can drop in at the end of any minor progression.",
+        title: "The minor two-five-one",
+        purpose: "The minor two-five-one, with the diminished two chord giving a chord of warning before the five chord. It's a move you can drop in at the end of any minor progression.",
         howTo: ["Two loops a chord on three strings; the last bar's Dm leads you round again. B diminished is B, D and F: the B minor shape with its top note a fret lower."],
         coach: "If it sounds dark and resolved, that's on your ear. I'll report the timing.",
         vary: {
@@ -1373,7 +1421,7 @@ const NEW_STEPS: StepSpec[] = [
             return { tab, position: handAt(tab), harmony: { arpeggio: `${p.key}m`, cover: true } };
           },
         },
-        rungs: ladder(60, 130, 5),
+        rungs: ladder(60, 120, 5),
         passAt: 80,
         selfCheck: [ROLL_CHECK, NOISE_CHECK],
         minutes: 7,
@@ -1404,7 +1452,7 @@ const NEW_STEPS: StepSpec[] = [
         id: "six-string-links",
         title: "Six-string passes, linked",
         purpose: "One chord up all six strings, a link on the top string, the next chord back down. It's the widest link there is.",
-        howTo: ["Six notes a bar, starting up near fret 17. Every pass is the whole width of the neck."],
+        howTo: [QUARTER_TRIPLETS, "Six notes a bar, starting up near fret 17. Every pass is the whole width of the neck."],
         coach: "Slower note rate than it looks, so this is gradable for longer. It's a good place to check your muting by ear.",
         vary: {
           values: { progression: ["i-VII-VI-VII", "i-VI-III-VII", "i-iv-V-i"], key: ["A", "G", "E"] },
@@ -1425,7 +1473,7 @@ const NEW_STEPS: StepSpec[] = [
     id: "fast-shifts",
     title: "Wide shapes and fast shifts",
     goal: "Jump between shapes far apart on the neck, and play sweeps fast enough that grading no longer applies.",
-    why: "Everything until now has moved a fret or two. Sometimes a line needs an octave jump, and that's a throw of the whole arm that has to land exactly. This is also where speed comes in, so it's where the app can't help much: you'll be working by recording and by ear, as players always have.",
+    why: "Most moves until now have been a fret or two. Sometimes a line needs an octave jump, and that's a throw of the whole arm that has to land exactly. This is also where speed comes in, so it's where the app can't help much: you'll be working by recording and by ear, as players always have.",
     howTo: [
       "Look at the landing spot before you leave. The hand follows the eye.",
       "A shift is one fast movement and then stillness. Land early and let the note come to you.",
@@ -1462,9 +1510,9 @@ const NEW_STEPS: StepSpec[] = [
       sweepExercise({
         id: "inversion-runs",
         title: "Up the neck through the inversions",
-        purpose: "A sextuplet run on one chord, moving to the next shape every beat, climbing the neck. Each beat is a real shift at speed. Almost all of this ladder is above what can be graded.",
+        purpose: "A sextuplet run on one chord, moving to the next shape every beat, climbing the neck. Each beat is a real shift at speed. Nothing here is scored: it is for your ear and a recording.",
         howTo: ["Sextuplets: three up, three down, four shapes a bar. Start slowly with one beat of each, and only then join them up."],
-        coach: "Sextuplets are graded only to about 65 BPM. Above that, this one is yours to judge, on a recording.",
+        coach: "No score on this one. Judge it on a recording, slowed down.",
         vary: {
           values: { key: JUMP_KEYS },
           pooled: ["key"],
@@ -1480,16 +1528,17 @@ const NEW_STEPS: StepSpec[] = [
         },
         loops: false,
         rungs: ladder(40, 90, 5),
-        passAt: 60,
+        // Self-checked since 2026-11-20 (coherence audit, SW curve): three graded rungs with the pass on the top one.
+        grade: "selfChecked",
         selfCheck: [ROLL_CHECK, "On a slowed-down recording, can you still count six notes in every beat?"],
         minutes: 6,
       }),
       sweepExercise({
         id: "big-shape-jumps",
-        title: "Five strings, two positions",
-        purpose: "A five-string loop on one chord, then the same chord on four strings at twice the note rate. The change of rate and shape at the bar line is the point.",
+        title: "Five strings, then four",
+        purpose: "A five-string loop on one chord, then the same chord on four strings in sixteenths, two loops to the bar. The change of rate and shape at the bar line is the point.",
         howTo: ["Triplets, then sixteenths on the next bar. The rhythm changes as the shape changes, so the last note of the first shape has to let go early."],
-        coach: "If notes go missing at the jump, go back a rung. I can only report that they went missing, not why.",
+        coach: "If notes go missing at the change, go back a rung. I can only report that they went missing, not why.",
         vary: {
           values: { key: ["A", "G", "F"] },
           pooled: ["key"],
@@ -1515,7 +1564,7 @@ const NEW_STEPS: StepSpec[] = [
     id: "neoclassical",
     title: "Neoclassical sequences",
     goal: "Play the moves that give this style its sound: diminished shapes climbing in minor thirds, and triads walking up the harmonic minor scale.",
-    why: "Baroque-flavoured metal comes from a few harmonic ideas played very fast: the major V, the diminished seventh on its leading tone, and triads walked in sequence. You've met the first two. A sequence adds the sense of a long line unfolding, and a diminished chord that moves three frets at a time is the most fun you can have with one shape.",
+    why: "Baroque-flavoured metal comes from a few harmonic ideas played very fast: the major five chord, the diminished seventh on its leading tone, and triads walked in sequence. You've met the first, and a diminished triad in the minor two-five-one. The diminished seventh adds one note to that triad, a half step under the home note. A sequence adds the sense of a long line unfolding, and a diminished chord that moves three frets at a time is the most fun you can have with one shape.",
     howTo: [
       "A diminished seventh is the same four notes every three frets. So G#dim7, Bdim7, Ddim7 and Fdim7 are one sound in four places.",
       "In a sequence, hear each bar as the next step of one melody. The top notes usually tell the tale.",
@@ -1543,10 +1592,10 @@ const NEW_STEPS: StepSpec[] = [
       }),
       sweepExercise({
         id: "i-iv-dim-i",
-        title: "i, iv, vii°, i",
-        purpose: "Two loops of each shape through the classic cadence, with the diminished seventh in place of the V. It's the same pull with a sharper edge.",
+        title: "One, four, diminished seventh, one",
+        purpose: "Two loops of each shape through the classic cadence, with the diminished seventh in place of the five chord. It's the same pull with a sharper edge.",
         howTo: [
-          "Triplets, two three-string loops a bar: the i chord, the iv, the diminished seventh, and home.",
+          "Triplets, two three-string loops a bar: the one chord, the four chord, the diminished seventh, and home.",
           "In A minor, hear the G# in the third bar rise to the A at the start of the fourth. That half step is the whole cadence.",
         ],
         coach: "I report timing and notes heard. It sounds grand, I hope, but that part is for you to judge.",
@@ -1593,7 +1642,7 @@ const NEW_STEPS: StepSpec[] = [
       sweepExercise({
         id: "walking-triads",
         title: "Triads up the harmonic minor",
-        purpose: "The chords of the harmonic minor, walking up the neck a step at a time. It's a sequence: a long line that unfolds, and it finishes high on the V. It leaves out the third degree, whose augmented chord doesn't suit this style.",
+        purpose: "The chords of the harmonic minor, walking up the neck a step at a time. It's a sequence: a long line that unfolds, and it finishes high on the five chord. It leaves out the third degree, whose augmented chord doesn't suit this style.",
         howTo: ["One chord a bar, and each shape sits higher than the last. Note the two chords the harmonic minor changes: E major and G# diminished. This one runs once through and stops."],
         coach: "Eight bars is long. If you get lost, the chord names on the tab are the way back in.",
         vary: {
@@ -1653,7 +1702,7 @@ const NEW_STEPS: StepSpec[] = [
       sweepExercise({
         id: "band-big-chain",
         title: "Five-string chain with the band",
-        purpose: "One big loop per chord, over a triplet-feel band. Most of the progressions here have the major V chord in them; one stays inside the natural minor.",
+        purpose: "One big loop per chord, over a triplet-feel band. Most of the progressions here have the major five chord in them; one stays inside the natural minor.",
         howTo: [
           "Triplets over the band: one five-string loop to a bar, one chord a bar.",
           "Lock the first note of each bar to the kick drum and let the band carry you round. If a shape is late, drop it and catch the next bar line.",
@@ -1681,7 +1730,7 @@ const NEW_STEPS: StepSpec[] = [
         id: "band-six-links",
         title: "Six-string passes with the band",
         purpose: "Whole-neck passes, one to a chord, at a tempo where a heavy band really moves. Slow notes in a fast song.",
-        howTo: ["Six notes to a bar at a fast tempo. The band plays straight, so your triplets sit across it: that's what makes it feel wide."],
+        howTo: [QUARTER_TRIPLETS, "Six notes to a bar at a fast tempo. The band plays straight, so your triplets sit across it: that's what makes it feel wide."],
         coach: "On a loud band this is one to record and listen back to, however the numbers look.",
         vary: {
           values: { progression: ["i-VII-VI-VII", "i-VI-III-VII"], key: ["A", "G", "E"] },
@@ -1703,7 +1752,7 @@ const NEW_STEPS: StepSpec[] = [
       sweepExercise({
         id: "your-solo",
         title: "Your own solo",
-        purpose: "Sixteen bars built from whichever links you like, and nothing here grades them. The written line is one original example: replace it bar by bar.",
+        purpose: "Eight bars built from whichever links you like, and nothing here grades them. The written line is one original example: replace it bar by bar.",
         howTo: ["Record it, listen and keep what sounds like music. Change the rest."],
         coach: "No marks on this one. It's yours.",
         tab: `${sweepChain({ chords: ["Am", "F", "C", "G"], strings: [5, 4, 3, 2, 1], near: 12, doubleLow: true, rhythm: "/8t" })} | ${sweepChain({ chords: ["Am", "Dm", "E", "Am"], strings: [3, 2, 1], near: 14, perBar: 2, rhythm: "/8t" })}`,
@@ -1731,8 +1780,9 @@ const LEVEL_STEPS = {
     "moving-shapes",
     "the-link",
     "link-chains",
-    "long-chains",
+    // Moved before `long-chains` on 2026-11-20 (coherence audit SW-F7): the three-string linking runs on, and its four-string pass leads into the long chains.
     "minor-progressions",
+    "long-chains",
     "over-the-progression",
   ],
   advanced: ["six-strings", "six-string-changes", "fast-shifts", "neoclassical", "advanced-etude", "over-a-heavy-band"],
@@ -1757,15 +1807,15 @@ export default definePath({
   goal: "Sweep clean, separated arpeggios from three-string triads to six-string shapes, and link them through minor-key progressions so they sound like a solo.",
   level: "intermediate",
   assumes:
-    "You can alternate-pick single notes evenly at sixteenths around 80 BPM (Alternate Picking through its Intermediate Level covers this) and you can hammer on and pull off cleanly. You don't need any sweeping yet, and you can start at whichever Level suits you.",
-  prerequisites: { paths: [{ path: "alternate-picking", level: "intermediate" }, { path: "legato", level: "beginner" }], skills: ["Even alternate picking at sixteenths, 80 BPM", "Clean hammer-ons and pull-offs"] },
+    "You can alternate-pick single notes evenly at sixteenths around 80 BPM (Alternate Picking through its Intermediate Level covers this) and you can hammer on and pull off cleanly. It helps to know what a triad is and which note makes it major or minor (Triads through its Intermediate Level covers this, and Step 1 here says it briefly). You don't need any sweeping yet, and you can start at whichever Level suits you.",
+  prerequisites: { paths: [{ path: "alternate-picking", level: "intermediate" }, { path: "legato", level: "beginner" }, { path: "triads", level: "intermediate" }], skills: ["Even alternate picking at sixteenths, 80 BPM", "Clean hammer-ons and pull-offs"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
   variantText: true,
   orderRationale:
-    "Three Levels, each open from the start, rebuilt on 2026-11-17 after the owner played the old Step 1 (two notes, mostly rests, at 50 BPM) and called it a beginner exercise nobody should have to sit through. Beginner now starts on a real sweep: a three-string A minor triad up and down in triplets, with one beat of rest only where it teaches the muting reset. It is the standard first drill in most sweep courses (one push per click, the top note repeated where the pick turns), and it already sounds like an arpeggio. Major and minor come together in the first Step because they differ by one note and hearing that note is the point. Then the turn at the top with a hammer and a pull, which is what removes the repeated note; then the three inversions and diminished; and the Level ends with a four-bar solo over a band. Intermediate skips everything under four strings: four-string shapes, then the five-string A-shape, then the E-shape with a hammer or a tap at the top, then inversions and position shifts with those shapes, and only then linking, which the owner asked for as the backbone, on three strings first because a long shape makes a bad link worse. It ends on an eight-bar etude over a band. Advanced adds six strings, first shape by shape and then as whole shapes through chord changes, wide shifts and neoclassical sequences, and a composed eight-bar etude before the heavy band. The comparison was against common practice (Gambale's economy and sweep method, Becker- and Malmsteen-style arpeggio studies, Troy Grady's work on pick paths): triads before long shapes, the turnaround as its own skill, the tap as an extension of the five-string shape. Chains change chord once a bar because Jam's grid is one chord to a bar. The progressions are common vocabulary and every line is written for this Path: nothing is transcribed from a song or copied from a course.",
+    "Three Levels, each open from the start, rebuilt on 2026-11-17 after the owner played the old Step 1 (two notes, mostly rests, at 50 BPM) and called it a beginner exercise nobody should have to sit through. Beginner now starts on a real sweep: a three-string A minor triad up and down in triplets, with one beat of rest only where it teaches the muting reset. It is the standard first drill in most sweep courses (one push per click, the top note repeated where the pick turns), and it already sounds like an arpeggio. A minor and C major come together in the first Step because their shapes differ by one note, and the Step says they are two different chords; C major against C minor, the pair that does differ by its third, is one of its Takes. Then the turn at the top with a hammer and a pull, which is what removes the repeated note; then phrases, then the three inversions; and the Level ends with a four-bar solo over a band. Intermediate skips everything under four strings: four-string shapes, then the five-string A-shape, then the E-shape with a hammer or a tap at the top, then inversions and position shifts with those shapes, and only then linking, which the owner asked for as the backbone, on three strings first because a long shape makes a bad link worse: the link, chains of links, then the minor-key progressions with the major five chord, and only after those the four- and five-string chains. It ends on an eight-bar etude over a band. Advanced adds six strings, first shape by shape and then as whole shapes through chord changes, wide shifts and neoclassical sequences, and a composed eight-bar etude before the heavy band. The comparison was against common practice (Gambale's economy and sweep method, Becker- and Malmsteen-style arpeggio studies, Troy Grady's work on pick paths): triads before long shapes, the turnaround as its own skill, the tap as an extension of the five-string shape. Chains change chord once a bar because Jam's grid is one chord to a bar. The progressions are common vocabulary and every line is written for this Path: nothing is transcribed from a song or copied from a course.",
   gradingLimits:
-    "Grading stops being trustworthy at about 150 ms between notes: sixteenths at 100 BPM, eighth triplets at 133, sextuplets at 66. Rungs faster than that are self-checked, whatever they look like, and the card says where grading stops. That line is a cautious policy, not a measurement. What a sweep is graded on is timing: how even the notes are, whether each one arrived, and whether extra notes crept in. Right notes are not graded anywhere on this Path: swept notes ring into each other, and a pitch read on ringing strings can fail a take that was played right, so nothing here promises them. The tests behind these numbers used synthetic tones, and no real guitar has been through them yet. The note after a slide counts as missed if it isn't heard, so bars on sliding shapes are lower; a tap counts as a note that must be heard, and a hammer or pull that isn't heard costs nothing. In practice: Beginner is graded at every rung. In Intermediate the sixteenth-note shapes stop at 100 BPM, triplet shapes at 130, and the sextuplet pickup at 65. In Advanced most of what makes the playing hard can't be graded. Sound never tells us the two things that matter most here, muting and pick path, and the Exercises say so.",
+    "Grading stops being trustworthy at about 150 ms between notes: sixteenths at 100 BPM, eighth triplets at 133, sextuplets at 66. Rungs faster than that are self-checked, whatever they look like, and the card says where grading stops. That line is a cautious policy, not a measurement. What a sweep is graded on is timing: how even the notes are, whether each one arrived, and whether extra notes crept in. Right notes are not graded anywhere on this Path: swept notes ring into each other, and a pitch read on ringing strings can fail a take that was played right, so nothing here promises them. The tests behind these numbers used synthetic tones, and no real guitar has been through them yet. The note after a slide counts as missed if it isn't heard, so bars on sliding shapes are lower; a tap counts as a note that must be heard, and a hammer or pull that isn't heard costs nothing. In practice: Beginner is graded at nearly every rung, and its one sextuplet phrase is self-checked. In Intermediate the sixteenth-note shapes stop at 100 BPM and triplet shapes at 130. In Advanced most of what makes the playing hard can't be graded. Sound never tells us the two things that matter most here, muting and pick path, and the Exercises say so.",
   steps: [...LEVEL_STEPS.beginner, ...LEVEL_STEPS.intermediate, ...LEVEL_STEPS.advanced].map(stepNamed),
   levels: [
     {
