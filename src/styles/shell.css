@@ -2540,7 +2540,8 @@ body[data-sheet-maximized] .rail {
  *     still the knob's place and whether sound arrives is still the lamp;
  *   - the bar-and-elapsed readouts, below 900 rather than 780, on the bars
  *     that carry Listen (idle they are transparent anyway; they are readouts,
- *     Listen is a control).
+ *     Listen is a control); on a Jam's bar below 1200;
+ *   - Play's minimum width, in the 620–719 pinch.
  *
  * The track and the lamp are never shed: the setlist's rule under 820 and the
  * rule under 560 hide every span of the input pill, which on Listen took the
@@ -2570,6 +2571,28 @@ body[data-sheet-maximized] .rail {
 @media (max-width: 899px) {
   .transport:has(.transport-listen) .transport-readouts {
     display: none;
+  }
+}
+
+/* A Jam's bar carries a third readout (the chorus), and while the band plays
+ * the three of them pushed Listen 5–80px off a 1024 window. They give way
+ * below 1200, as the setlist's do below 1100 and for the same reason: the
+ * stage already says "chorus 1 · bar 5 of 12" over the form, so they are a
+ * second telling of it, and Listen is a control. */
+@media (max-width: 1199px) {
+  .transport[data-view="jam"]:has(.transport-listen) .transport-readouts {
+    display: none;
+  }
+}
+
+/* The pinch (620–719: the rail still 252 wide, the stage 366). Play, Count-in
+ * and Listen's track were 6–14px wider than the bar. Play's floor of 150 is
+ * the one thing in the row with room to spare: it relaxes to the width its
+ * word needs, so no control and no switch's label has to go. */
+@media (max-width: 719px) {
+  .transport:has(.transport-listen) .transport-play {
+    min-width: 112px;
+    padding: 0 18px;
   }
 }
 

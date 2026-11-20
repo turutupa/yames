@@ -17,6 +17,8 @@
  *   `?coachReport=1`      `get_session_report` and `get_final_session_report`
  *                         answer a reportable run, `coach_generate` a sentence.
  *   `?toolRuns=N`         `get_session_history` answers N saved runs.
+ *   `?inputFail=1`        `start_evaluation` is refused, as with no input
+ *                         device: Listen is on and says "Input off".
  */
 import type { BeatFeedback, SavedSession, SessionReport } from "../types";
 
@@ -28,6 +30,10 @@ export function coachFeedOption(): "lowConf" | null {
 
 export function coachReportOption(): boolean {
   return params().get("coachReport") === "1";
+}
+
+export function inputFailOption(): boolean {
+  return params().get("inputFail") === "1";
 }
 
 export function toolRunsOption(): number {

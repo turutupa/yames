@@ -30,6 +30,7 @@ import {
   COACH_REPORT_SENTENCE,
   coachFeedOption,
   coachReportOption,
+  inputFailOption,
   lowConfidenceFeedback,
   reportableRun,
   toolRunsHistory,
@@ -1149,6 +1150,7 @@ export function installShotMock(shot: Shot, theme: string): void {
   const coachFeed = coachFeedOption();
   const coachReport = coachReportOption();
   const toolRuns = toolRunsOption();
+  const inputFail = inputFailOption();
   /** The input is on: between `start_evaluation` and `stop_evaluation`. */
   let evaluating = false;
 
@@ -2021,6 +2023,8 @@ export function installShotMock(shot: Shot, theme: string): void {
     if (cmd === "plugin:window|scale_factor") return window.devicePixelRatio || 1;
     if (cmd.startsWith("plugin:")) return null;
 
+    // `?inputFail=1`: no input device, so Listen is on and says "Input off".
+    if (cmd === "start_evaluation" && inputFail) throw "No default input device found";
     // Whether the input is on, for `?coachFeed` (the answers are below).
     if (cmd === "start_evaluation" && !shot.session?.input) evaluating = true;
     if (cmd === "stop_evaluation") evaluating = false;

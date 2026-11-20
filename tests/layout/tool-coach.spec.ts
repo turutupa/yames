@@ -80,6 +80,9 @@ async function listenOnHolds(page: Page, size: Size, where: string) {
   await expect(listen, where).toHaveAttribute("aria-checked", "true");
   // The mock's input opens at once: the switch says it is listening.
   if (IN_ENGLISH) await expect(listen, where).toContainText("Listening");
+  // Its lamp (whether sound arrives) and its track (the state) both stay.
+  await expect(listen.locator(".transport-signal"), `${where}: Listening's lamp`).toBeVisible();
+  await expect(listen.locator(".transport-switch-track"), `${where}: Listen's track`).toBeVisible();
   await expect(page.locator(COACH), where).toBeVisible();
   await expect(page.locator(".tool-coach-row"), where).toBeVisible();
   await expect(page.locator(".system-status-chip"), where).toBeVisible();
@@ -132,6 +135,24 @@ for (const theme of THEMES) {
         await expect(page.locator(LISTEN)).toHaveAttribute("aria-checked", "false");
       });
     }
+
+    test("listen-input-off: Listen on, the input refused", async ({ page }) => {
+      await openShot(page, "metronome", MID, theme, { inputFail: "1" });
+      const listen = page.locator(LISTEN);
+      await listen.click();
+      // On, because the player asked; "Input off", because nothing came up.
+      await expect(listen).toHaveAttribute("aria-checked", "true");
+      if (IN_ENGLISH) await expect(listen).toContainText("Input off");
+      await expect(listen.locator(".transport-switch-track")).toBeVisible();
+      expect(await listen.locator(".transport-signal").count(), "no lamp without an input").toBe(0);
+      await settleAnimations(page);
+      await insideViewport(page, LISTEN, "input off 1024", MID);
+      await fitsOnOneLine(page, ".transport", "input off 1024");
+      await shot(page, `${theme}-listen-input-off`);
+      // And off again, by the same press.
+      await listen.click();
+      await expect(listen).toHaveAttribute("aria-checked", "false");
+    });
 
     for (const [scene, what] of [
       ["drill", "the Drill"],
@@ -217,7 +238,18 @@ for (const theme of THEMES) {
       const note = page.locator('[data-testid="tool-coach-note"]');
       await expect(note).toBeVisible({ timeout: 15_000 });
       await expect(note.locator('[data-testid="tool-coach-score"]')).toBeVisible();
-      if (IN_ENGLISH) await expect(note).toContainText("Even spacing through most of that run");
+      if (IN_ENGLISH) {
+        await expect(note).toContainText("Even spacing through most of that run");
+        // The source line, the score at its tempo, the three parts by name.
+        await expect(note).toContainText("Measured");
+        await expect(note.locator('[data-testid="tool-coach-score"]')).toContainText(/Score \d+ at \d+ BPM/);
+        for (const part of ["Beats covered", "Notes on a beat", "Locked to the click"]) {
+          await expect(note.locator('[data-testid="tool-coach-parts"]')).toContainText(part);
+        }
+      }
+      await expect(note.locator(".tool-coach-strip"), "the note's timing strip").toBeVisible();
+      // A note's actions are outline chips, never a solid button.
+      expect(await note.locator(".btn-fill, .btn-primary").count(), "a solid button in the note").toBe(0);
       const chips = note.locator('[data-testid^="tool-coach-chip-"]');
       expect(await chips.count(), "the note's question chips").toBeGreaterThan(0);
       await settleAnimations(page);
@@ -285,8 +317,34 @@ for (const theme of THEMES) {
         await shot(page, `${theme}-progress-tool-runs-detail-${size.width}`);
         await page.locator('[data-testid="tool-runs-back"]').click();
         await expect(rows).toHaveCount(4);
+
+        // Clear all asks first; cancelling it keeps every run.
+        await page.locator('[data-testid="tool-runs-clear"]').click();
+        const confirm = page.locator('[data-testid="tool-runs-confirm"]');
+        await expect(confirm).toBeVisible();
+        await confirm.scrollIntoViewIfNeeded();
+        await settleAnimations(page);
+        await insideViewport(page, '[data-testid="tool-runs-confirm"]', `${where} confirm`, size);
+        await shot(page, `${theme}-progress-tool-runs-confirm-${size.width}`);
+        await confirm.locator(".coach-confirm-cancel").click();
+        await expect(confirm).toHaveCount(0);
+        await expect(rows).toHaveCount(4);
       });
     }
+
+    test("progress-tool-runs-empty at 1024x700: no runs yet", async ({ page }) => {
+      await openShot(page, "progress", MID, theme);
+      const section = page.locator('[data-testid="tool-runs"]');
+      await section.scrollIntoViewIfNeeded();
+      const empty = page.locator('[data-testid="tool-runs-empty"]');
+      await expect(empty).toBeVisible();
+      expect(await page.locator('[data-testid="tool-run"]').count()).toBe(0);
+      expect(await page.locator('[data-testid="tool-runs-clear"]').count(), "Clear all with nothing to clear").toBe(0);
+      await settleAnimations(page);
+      expect(await cutText(page, '[data-testid="tool-runs"]'), "empty: text cut").toEqual([]);
+      await noSidewaysScroll(page, "Tool runs empty");
+      await shot(page, `${theme}-progress-tool-runs-empty`);
+    });
   });
 }
 
