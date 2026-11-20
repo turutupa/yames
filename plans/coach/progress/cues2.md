@@ -29,8 +29,57 @@ Cues: `src/paths/specs/blues-pentatonics-cues.ts`, attached with `withCues` in `
   distinct sentences, 0 refusals, check 0 errors (`gc6.log`).
 - [x] Proof-read (below): two sonnet readers (Levels 1-2 and warm-ups; Level 3), 30 objections, all taken.
   763 cues, 317 distinct sentences, 0 refusals, check 0 errors (`gc7.log`).
-- [ ] Translations
-- [ ] Gates
+- [x] Translations (`73ecbe4b`): five sonnet helpers (de fr es · it nl pl · pt-BR ru tr · vi ja ko · zh-CN
+  zh-TW), 317 sentences each, each file checked again by me with `/tmp/coach-cues2/check_i18n.py` (problems 0
+  in all fourteen). One fix after: nl nut-chorus general was a question ("Kwijt? ...") -> "Wacht op de grondtoon
+  van de bas als je zoekt." Merged (`/tmp/coach-cues2/merge.log`: every overlay 1802 of 1802, 0 errors; the
+  warnings are "different numbers" where a translation writes "fret five" as 5, and pre-existing ones).
+- [x] Gates (below)
+
+## Gates (on `73ecbe4b`)
+
+- `npm run paths -- check` (every pack): 16 Paths ok, 0 errors (`/tmp/coach-cues2/check-all.log`).
+- `npx tsc --noEmit`: clean (`/tmp/coach-cues2/tsc.log`).
+- `npm run test`: 401 of 402 files, 21,138 of 21,138 tests passed (`/tmp/coach-cues2/vitest.log`); the one file
+  is the known worktree-only `TabStage.render.test.tsx` (Vite refuses a file reached through the `node_modules`
+  link).
+- `npm run build`: ok (`/tmp/coach-cues2/build.log`).
+- No Rust file changed, so no `test:paths:rust`; no layout run (the orchestrator's).
+
+## The numbers
+
+763 cues on 100 Exercises (97 in 24 Steps, 3 warm-ups; 18 self-checked or practice-only with the general cue
+only), 317 distinct sentences, 0 refusals. By trigger: general 100, heard 82, late 82, early 82, stringChange
+81, lastBars 81, extras 79, notes 70, afterHeld 65, shift 35, openString 6. `openString` only where every Take
+has an open string (the E-at-the-nut Exercises); none on the key-varied Exercises and warm-ups where only the E
+key has one. The bend Exercises with no pitch check (bends-on-time, bends-over-changes, chorus-peak,
+e-chorus-climb, c-long-bends, the sixths, nut-turnarounds) have no `notes` cue: the app cannot produce it there,
+and their general cues teach the bend's target as plain teaching ("Bend fret eight until it sounds like fret
+nine.").
+
+Longest cue per language (characters; the limit is 48): en 48 · de 48 · es 48 · fr 48 · it 48 · nl 48 · pl 48 ·
+pt-BR 48 · ru 48 · tr 48 · vi 47 · ja 30 · ko 31 · zh-CN 26 · zh-TW 28.
+
+Want a native read: the helpers chose their own word where the overlay had none for "guide tone" (pt-BR
+"nota-guia", ru "направляющий тон", vi "nốt dẫn", ja "ガイドトーン", ko "가이드 톤"; tr and zh keep it as
+the overlay does), ja "ブルーノート" for blue note, ru "зов" for the call. it mixes "movimento" and "tempi"
+for beat, and writes "root" in a few cues; pl writes "palcem 1" in two; nl is elliptical in a few. zh-TW keeps
+"Turnaround", "riff", "Shuffle" in English as its overlay does.
+
+## Twelve cues to read
+
+- **"Find the three A's"** (Level 1, box-one). One riff from each A of box 1 in turn, low, middle, high, over
+  the shuffle. general "Start each riff on its A without looking." · late "Put each bar's first note right on
+  the beat." · afterHeld "Count the held A's two beats, then the low A."
+- **"The A7 arpeggio, and a lick to C#"** (Level 1, landing). A7 up from the low root, then a lick down the box
+  that moves C to C#. general "Move from C up to C# and hold it." · shift "Move up a fret after the C# on the G
+  string." · lastBars "Walk down G, E, D, C, then settle on C#."
+- **"Bends that land on the chord"** (Level 2, bends). A half-note bend on each change, onto a tone of that
+  chord, then a fill. general "Hear each bend's target before you pick it." · late "Pick each bend right on
+  '1'." · afterHeld "Count the bend's two beats, then the fill."
+- **"Chorus 3 in E: the climb, and the top"** (Level 3, three-choruses-in-e). From the nut up the top string to
+  the twelfth fret, two bends, ending high. general "Bend the A at fret fourteen up to B." · shift "Lead each
+  move up the neck with finger one." · extras "Leave the beat after the first bend silent."
 
 ## The proof-read (two separate sonnet readers: cues, tabs, purposes, how-tos, the guide's rules only)
 
