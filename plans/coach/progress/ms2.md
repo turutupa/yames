@@ -91,6 +91,71 @@ Logs: `rust.log` (full lib), `rust-models.log`, `check.log`,
 `tsc.log`, `vitest.log`, `vt-cov.log`, `build.log`, `build-mobile.log`, `mobile-bundle.log`,
 `pw-coach-model.log`, `pw-layout.log`. Screenshots `/tmp/coach-ms2/shots/`.
 
+## Review fixes (leg ms2b)
+
+The reviewer's MERGE AFTER FIXES, fixed after `45abc598`; `coach` merged in first (`acad0f7d`, one
+comment conflict in `coach-model.spec.ts`). Rust re-read: `git diff 45abc598..coach-ms2 -- src-tauri/`
+(all in `35aa5fd0`). Tests in `models::brain_store_tests`, each in its own temp dir.
+
+1. **Misfiled old brain.** `legacy_tier` asks the weights first (`weights_tier`): a marker whose `bytes`
+   match them, else a pinned file's exact size, else ≥ Studio floor → `full`; only then the `tier` file,
+   then a marker without `bytes`, then Standard. `refuse_foreign_weights` refuses (before the transfer
+   and again before the rename) to put a download over a `model.bin` that its marker or size says is
+   the other tier's; the file and the verified part stay. **Pre-T04 (no marker)**: the old files
+   (Qwen2.5-1.5B, Phi-3.5-mini) are under the Studio floor and not pinned, so size cannot tell them
+   apart and the `tier` file decides; a stale one can still misfile such a file, which is harmless: it
+   is legacy wherever it sits (Update, never loaded), and nothing of the other tier is renamed over it.
+   Tests: `a_marker_that_describes_the_weights_outranks_a_stale_tier_file`,
+   `stale_records_lose_to_the_size_of_the_weights`, `a_pre_t04_brain_follows_its_tier_file`,
+   `a_download_is_never_renamed_over_another_tiers_file`.
+2. **Same-tier conflict.** The folder's copy is used; `TierStatus.olderCopyBytes` reports the other
+   (and is counted in `brainSizeBytes`); Settings → Coach shows "An older copy of this model is also
+   on disk · 5.0 GB" with its own Remove (`delete_models(tier, olderCopy: true)`, removes only it, never
+   the only copy). The tier's Remove removes the copy in use (one file per press); the older copy is
+   then the tier's only copy and is adopted on the next call. Download of the tier no longer refuses.
+   Tests: `an_older_copy_is_reported_and_removed_only_by_its_own_press`,
+   `the_only_copy_is_never_an_older_copy`; vitest `CoachSettingsSection.tiers.test.tsx`; layout
+   `coach-model.spec.ts` "an older copy of a model in Settings" (520/1024/1400). Strings in 15 locales.
+3. **One transfer at a time.** Chosen: **wait**, not refuse. A new download's thread first waits for
+   every earlier download thread to exit (they were all told to stop; a stop is seen within about a
+   second), up to 90 s, then gives up with "the previous download is still stopping" rather than
+   overlap. Pause→Resume and Cancel→Download are two quick presses that should just work. A Cancel of
+   a paused download waits (30 s) for that tier's exiting curl before removing the part
+   (`cancel_model_download` is now async). Every download event carries `generation`; a superseded
+   thread's events are not sent at all, and `useCoachDownload` drops any event older than the download
+   it started (floor raised before the invoke, set to the answer after). Tests:
+   `a_new_download_waits_for_the_old_one_and_the_old_ones_events_stop`; vitest "a stopped download's
+   late events do not touch the download that replaced it".
+4. **Residency.** Loads, unloads and both per-tier removals hold `models::residency_lock`; a load is
+   recorded only on `Ok(true)` (`load_and_record`), so coach's "another load is in progress" `Ok(true)`
+   can never be recorded (coach.rs untouched). An adoption moves an old-place record to the tier's
+   folder; an old-place record whose file is gone reads as unknown (unload first). Test:
+   `residency_is_recorded_only_for_a_load_that_happened`.
+5. **Marker order.** The new marker is written beside the part (`<part>.verified.json`), the part is
+   renamed over `model.bin`, then the record over `model.json`. A failed rename leaves the old marker
+   with the old weights, and keeps part + record; the retry skips the hash when the part's length and
+   modification time (ns) are those the record was checked at (a changed part is hashed again). A stop
+   between the renames is finished by the next `adopt_legacy_brain`; an orphan record is dropped.
+   Tests: `a_failed_rename_leaves_the_old_marker_with_the_old_weights`,
+   `a_stop_between_the_two_renames_is_finished_by_the_next_call`.
+6. **Leftovers.** A paused download stranded in the old place is in `olderCopyBytes` and removed by
+   the tier's Remove (and by Cancel's discard, as before). Test roots are guards removed on drop
+   (sparse file included). Tests: `a_stranded_part_is_counted_and_cleared_by_the_tiers_remove`,
+   `a_test_root_is_removed_when_it_is_dropped`.
+7. **URLs.** `start_model_download` takes only `component == "brain"` and the tier's pinned URL
+   (`pinned_download`); everything else is refused. Searched: only `useCoachDownload`'s `MODEL_URLS`
+   calls it; voices and the speech engine take their URLs from Rust's own tables; no dev override or
+   test passes another URL, so no debug hook was added. curl gets `--` before the URL. Test:
+   `only_the_pinned_files_are_downloaded`. It now answers with the download's number.
+
+Gates (logs in `/tmp/coach-ms2b/`): `npm run test:rust` 1198 passed (`rust.log`; models 53,
+`rust-models.log`); `cargo check --lib` no warning in models.rs / commands.rs (`check.log`); tsc
+green; vitest 11877 passed, only the known TabStage load failure (`vitest.log`); build, build:mobile,
+check:mobile-bundle green; layout coach-model + settings + ask + firstrun 88 passed (`pw-named.log`);
+full layout suite 1326 passed, 0 failed, 268 skipped (`pw-layout.log`).
+Owed: the Windows build (`npm run test:rust` on the RTX: `GetDiskFreeSpaceExW`, the rename-over-a-
+mapped-file path that item 5 is for, curl.exe with `--`); no `coach-llm` build was run here.
+
 ## Open points
 
 - The Windows free-space call and the Windows build were not compiled; worth one `npm run test:rust` on
