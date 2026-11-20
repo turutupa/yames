@@ -40,6 +40,13 @@ const VARIANT_NOTE =
   "The frets and note names here are for the first version. Other Takes move the same figure to another string or key.";
 
 /** Semitones from A minor. */
+// Shared with other Paths word for word (coherence audit, S5, S7, S9), so each line is translated once and copied.
+const BAND_IS = "The band is a drummer and a bassist in place of the click.";
+const IF_LOST = "If you get lost, stop, find beat 1 of the next bar and come back in there.";
+const TRIPLET_COUNT = "Count '1-trip-let, 2-trip-let'. Three even notes a click, with the first one on it.";
+const BOX_ONE =
+  "Box 1 of A minor pentatonic sits at fret 5, two notes on every string. The first finger plays fret 5 on all six strings. The other note is fret 8 with the little finger on the low E, B and top strings, and fret 7 with the third finger on the A, D and G strings.";
+
 const KEY_SHIFT: Readonly<Record<string, number>> = { A: 0, B: 2, C: 3, D: 5, E: 7, G: -2 };
 
 /** A legato bar with its hammers and pulls taken off: the picked twin. */
@@ -199,8 +206,8 @@ export default definePath({
   goal: "Play a smooth A minor line with hammer-ons and pull-offs as loud and as even as picked notes, up and down all six strings.",
   level: "early-intermediate",
   assumes:
-    "You can fret single notes cleanly with all four fingers and play eighth notes with a click at 80 BPM. No speed is assumed. The minutes listed are one pass through the material; expect to come back to each Step for days or weeks.",
-  prerequisites: { paths: [{ path: "rhythm-foundations", level: "beginner" }], skills: ["Clean single notes with all four fingers", "Eighth notes with a click at 80 BPM"] },
+    "You can fret single notes cleanly with all four fingers and play eighth notes with a click at 80 BPM. Most Exercises open with a picked bar of the same notes, and from the Intermediate Level on that bar is in sixteenths, triplets or faster, so you need even picked notes at that speed: sixteenths at about 80 BPM. The Beginner Level of Alternate Picking covers that, and the first Step of its Intermediate Level, Crossing two strings, covers the picked bars that change string. No legato speed is assumed. The minutes listed are one pass through the material; expect to come back to each Step for days or weeks.",
+  prerequisites: { paths: [{ path: "rhythm-foundations", level: "beginner" }, { path: "alternate-picking", level: "beginner" }], skills: ["Clean single notes with all four fingers", "Eighth notes with a click at 80 BPM"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
   variantText: true,
@@ -381,7 +388,8 @@ export default definePath({
       why: "Real legato is hammer-ons and pull-offs joined: one stroke starts a string and the fretting hand keeps it going. The new problem is the third note. The string has lost some of its energy by then, so the finger has to put it back.",
       howTo: [
         "After a hammer-on, the same finger pulls off again. Hammer down, then flick off sideways: two different moves from one finger.",
-        "In triplets, count '1-and-a, 2-and-a'. The pick plays the 1, the 2, the 3 and the 4, and nothing else.",
+        TRIPLET_COUNT,
+        "In triplets, the pick plays the 1, the 2, the 3 and the 4, and nothing else.",
         "If the last note of a group is faint, slow down. A faster tempo hides it; it does not fix it.",
       ],
       payoff: "A slow trill that holds its volume, and a triplet line across two strings that sounds like one breath.",
@@ -475,7 +483,7 @@ export default definePath({
       id: "rolls",
       title: "Rolls on one string",
       goal: "Four sixteenths from one pick, round and round on three fingers, without the volume sagging.",
-      why: "A roll is the engine of every long legato line: up with two hammer-ons, back with a pull-off, and the pick only marks the beat. At sixteenths the fretting hand has to keep time by itself for three notes out of four, which is the real skill of this Path.",
+      why: "A roll is the slow trill with a third finger added, and it is the engine of every long legato line: up with two hammer-ons, back with a pull-off, and the pick only marks the beat. At sixteenths the fretting hand has to keep time by itself for three notes out of four, which is the real skill of this Path.",
       howTo: [
         "Sixteenths, counted '1 e and a'. The pick plays the 1 and the fretting hand plays the 'e', the 'and' and the 'a'.",
         "Keep the middle finger of the three down when the top one hammers, so the pull-off has a note to land on.",
@@ -552,7 +560,8 @@ export default definePath({
           purpose: "The roll moved up the B string through A minor: three positions, two beats each, then back. The shape widens after the first move and then stays the same.",
           howTo: [
             "Sixteenths, one pick a beat. Frets 5, 6, 8, then 6, 8, 10, then 8, 10, 12, then 6, 8, 10 again, each roll played twice.",
-            "All three shapes use fingers 1, 2, 4. The first has a one-fret gap at the bottom; the other two are two frets and two frets. Move the hand during the last note of the beat.",
+            "All three shapes use fingers 1, 2, 4. The first has a one-fret gap at the bottom; the other two are two frets and two frets. Move the hand during the last note of the beat. The two shapes with two-fret gaps are the reach that the Step Three notes per string works on.",
+            "Let the thumb sit behind the neck so the hand can open, and do not force a stretch that hurts.",
           ],
           coach: "The shifts are where the time usually moves. I'll say how even it was and check the notes after the take.",
           tab: ROLL_MELODY,
@@ -573,11 +582,15 @@ export default definePath({
       goal: "Run the pentatonic box with one pick and one legato note on every string, up with hammer-ons and down with pull-offs.",
       why: "Most rock and blues legato lives in the pentatonic box, two notes a string. The fretting hand now has to change string in time while the pick only touches each string once, so the two hands have to agree on every crossing.",
       howTo: [
+        BOX_ONE,
+        "Other Takes move the same box to another key's frets.",
         "Going up: pick the lower note of each string and hammer the upper. Going down: pick the upper note and pull off to the lower.",
         "Lay the first finger on the next string a moment before you need it. Coming down, it is the note every pull-off lands on.",
         "Each Exercise is a picked bar, then the same notes legato, unless it says otherwise.",
       ],
       payoff: "The box up and down as one smooth line, and the repeating lick that half of rock guitar is built on.",
+      difficultyException:
+        "The box runs pass at 80 BPM, below the rolls before them, because their first bar is picked across all six strings, so the note rate falls. It does not count that the fretting hand now changes string on every second note while the pick touches each string once.",
       exercises: [
         {
           id: "box-up",
@@ -595,7 +608,7 @@ export default definePath({
           position: 5,
           harmony: { scale: ["A", "minorPentatonic"], cover: true },
           rungs: ladder(50, 110, 5),
-          passAt: 90,
+          passAt: 80,
           grade: "timingNotes",
           pass: LEGATO,
           selfCheck: [VOLUME_CHECK],
@@ -607,7 +620,7 @@ export default definePath({
           purpose: "The same twelve notes coming down: pick the upper note of each string and pull off to the first finger.",
           howTo: [
             "Sixteenths. Bar 1 picked, bar 2 with a pull-off on every string.",
-            "Both fingers are down on the new string before you pick it. The first finger rolls or hops ahead; it never arrives late.",
+            "Both fingers are down on the new string before you pick it. The first finger moves ahead to the next string and never arrives late.",
             VARIANT_NOTE,
           ],
           coach: "A pick on every string gives me plenty to time. I check the notes after the take.",
@@ -617,7 +630,7 @@ export default definePath({
           position: 5,
           harmony: { scale: ["A", "minorPentatonic"], cover: true },
           rungs: ladder(50, 110, 5),
-          passAt: 90,
+          passAt: 80,
           grade: "timingNotes",
           pass: LEGATO,
           selfCheck: [VOLUME_CHECK],
@@ -802,6 +815,7 @@ export default definePath({
           howTo: [
             "Sextuplets. Pick the low E string's fret 5 and nothing else. At the top, pull off from 9 to 7, hammer back to 9, then pull off down the string.",
             "Coming down, the little finger hammers the first note of each string from the air (D string 9, A string 8, low E string 8), with the other fingers already in place behind it.",
+            "The way down is the hardest part of this Exercise. If it is not clean yet, go on to the Step From nowhere in the box, which starts the descent on two strings, and come back to this one later.",
             VARIANT_NOTE,
           ],
           coach: "There is one picked note a bar here, so my timing has little to hold. Record a take and listen: that is the real check.",
@@ -830,6 +844,8 @@ export default definePath({
         "The two six-string runs are a picked bar first, then the legato bar. Hold the last note to the bar line and let the hand go soft.",
       ],
       payoff: "Two and a half octaves in under two beats of picking, and a line that travels up the neck and home.",
+      difficultyException:
+        "The two six-string runs pass at 65 BPM because their first bar is picked across all six strings in sextuplets, so the note rate falls below the Step before. It does not count the two shifts inside each run or the length of a line across all six strings.",
       exercises: [
         {
           id: "six-up",
@@ -848,7 +864,7 @@ export default definePath({
           shifts: true,
           harmony: { scale: ["A", "naturalMinor"], cover: true },
           rungs: ladder(45, 100, 5),
-          passAt: 80,
+          passAt: 65,
           grade: "timingNotes",
           pass: LEGATO,
           selfCheck: [SAME_BAR_CHECK],
@@ -871,7 +887,7 @@ export default definePath({
           shifts: true,
           harmony: { scale: ["A", "naturalMinor"], cover: true },
           rungs: ladder(45, 100, 5),
-          passAt: 80,
+          passAt: 65,
           grade: "timingNotes",
           pass: LEGATO,
           selfCheck: [SAME_BAR_CHECK],
@@ -991,7 +1007,10 @@ export default definePath({
           title: "Four bars over the band",
           purpose: "A legato line over Am, F, C and G: one pick a beat, the rolls from earlier bent to fit each chord. Every bar starts on a note of its chord.",
           howTo: [
-            "Sixteenths, a pick on each beat and three legato notes after it. Play it dry first and hear each bar land on its chord.",
+            "Sixteenths, a pick on each beat and three legato notes after it. Play the line with the click first, then with the band.",
+            BAND_IS,
+            "The bassist moves to a new chord every bar. Hear each bar of the line land on its chord.",
+            IF_LOST,
             "It stays in fifth position on the top three strings, so the hand never moves. Only the string under the pick changes.",
           ],
           coach: "With the band on I time your picked notes against it and check the notes after the take. Direct input or headphones make that fair.",
@@ -1013,6 +1032,7 @@ export default definePath({
           howTo: [
             "Sextuplets. The climb fills three beats and the descent starts on beat 4, so the turn at the top comes just before the bar line.",
             "At the top you hammer onto fret 10 and pick it again to come down. Coming down, the hand drops back a fret at the B string and again at the G string.",
+            "When that is even, play the climb again and pick only its first note. Each new string then starts with a hammer-on from nowhere, as in the Step Hammer-ons from nowhere.",
             VARIANT_NOTE,
           ],
           coach: "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
