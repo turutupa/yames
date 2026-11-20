@@ -6,11 +6,12 @@
  */
 import { test, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { openShot, MOBILE_URL, noSidewaysScroll } from "./fits";
+import { openShot, MOBILE_URL, noSidewaysScroll, settleAnimations } from "./fits";
 
 const SHOTS_DIR = process.env.YAMES_SHOT_DIR ?? "/tmp/coach-c1b2a/shots";
 
 async function lineFits(page: Page) {
+  await settleAnimations(page);
   const line = page.locator(".session-today-line");
   await expect(line).toHaveCount(1);
   await expect(line).toBeVisible();

@@ -880,8 +880,11 @@
   margin-top: 12px;
   max-width: 64ch;
 }
+/* The phone's hero is `display: contents` and ordered: the line follows the
+   head (same order, later in the DOM), before the minutes. */
 .main-window.is-mobile .session-today-line {
-  margin: 4px 0 12px;
+  order: 1;
+  margin: 0;
 }
 .main-window.is-mobile .session-today-line .coach-line {
   font-size: 16px;
