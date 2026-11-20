@@ -386,7 +386,7 @@ test.describe("the chosen portion, on the tab", () => {
       // What the scene chose, and where the engraving put those bars. The
       // bounds come from alphaTab's own lookup — the same one the stage hit-
       // tests with — because nothing about the DOM says which box is bar 5.
-      const measured = await page.evaluate(() => {
+      const measure = () => page.evaluate(() => {
         const api = (
           window as unknown as {
             __SONGS_TAB_API__?: {
@@ -415,14 +415,10 @@ test.describe("the chosen portion, on the tab", () => {
         );
         return { bands, wanted, notWanted };
       });
-      expect(measured, `no tab bounds at ${size.name}`).not.toBeNull();
-      const { bands, wanted, notWanted } = measured!;
-      expect(bands.length, `nothing drawn behind the chosen bars at ${size.name}`).toBeGreaterThan(
-        0,
-      );
 
       /** Is the middle of this bar inside one of the bands? */
-      const covered = (box: { x: number; y: number; w: number; h: number } | null) => {
+      type Box = { x: number; y: number; w: number; h: number };
+      const covered = (bands: Box[], box: Box | null) => {
         if (!box) return false;
         const cx = box.x + box.w / 2;
         const cy = box.y + box.h / 2;
@@ -430,13 +426,23 @@ test.describe("the chosen portion, on the tab", () => {
           (b) => cx >= b.x - 2 && cx <= b.x + b.w + 2 && cy >= b.y - 2 && cy <= b.y + b.h + 2,
         );
       };
+      /** What is wrong with the band, or nothing. */
+      const wrong = (m: Awaited<ReturnType<typeof measure>>): string[] => {
+        if (!m) return [`no tab bounds at ${size.name}`];
+        if (m.bands.length === 0) return [`nothing drawn behind the chosen bars at ${size.name}`];
+        return [
+          ...m.wanted.flatMap((box, i) => (covered(m.bands, box) ? [] : [`bar ${i + 5} is chosen but has no band over it`])),
+          ...m.notWanted.flatMap((box, i) => (covered(m.bands, box) ? [`bar ${i + 1} is not chosen but has a band over it`] : [])),
+        ];
+      };
 
-      for (const [i, box] of wanted.entries()) {
-        expect(covered(box), `bar ${i + 5} is chosen but has no band over it`).toBe(true);
-      }
-      for (const [i, box] of notWanted.entries()) {
-        expect(covered(box), `bar ${i + 1} is not chosen but has a band over it`).toBe(false);
-      }
+      // The scene is built wide and then narrowed: alphaTab engraves the tab
+      // again for the new width, and the band is laid over the bars once that
+      // engraving is done. Read in between, the bounds are the new engraving's
+      // and the band is still the old one's (on a loaded machine, "bar 5 is
+      // chosen but has no band over it"). So this waits for the band to agree
+      // with the engraving, and fails with what is still wrong if it never does.
+      await expect.poll(async () => wrong(await measure()), { timeout: 15_000 }).toEqual([]);
     });
   }
 

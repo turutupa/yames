@@ -348,7 +348,12 @@ async function drive() {
         await until("Today's Start", () => !!byId("today-start") && !(byId("today-start") as HTMLButtonElement).disabled);
         byId("today-start")?.click();
       }
-      await until("the Session", () => !!byId("session"));
+      // The Session is the app's heaviest screen to open (its stage, the neck,
+      // the Take's song), and in the layout suite on a loaded machine it took
+      // longer than the 15 s every other wait here gets ("timed out waiting for
+      // the Session", session-warmup-ready at 1024, card #115). The wait is for
+      // the screen itself, so a longer bound costs nothing when it is quick.
+      await until("the Session", () => !!byId("session"), 45000);
       if (stop === "timed" || stop === "timedReady") {
         const timedPhase = () => byId("session-timed")?.dataset.phase;
         await until("the warm-up, ready", () => timedPhase() === "timedReady");

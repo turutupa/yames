@@ -691,8 +691,10 @@ test.describe("the groove editor", () => {
      */
     await openShot(page, "jam-editor", { width: 1500, height: 1000 });
 
-    // The drawer is not over it.
-    expect(await page.$(".jam-sheet"), "the setup drawer stayed open").toBeNull();
+    // The drawer is not over it. It closes on the way in, and on a busy
+    // machine it can still be on its way out when the scene says it is ready:
+    // what matters is that it goes, so this waits for it to be gone.
+    await expect(page.locator(".jam-sheet"), "the setup drawer stayed open").toHaveCount(0);
 
     const grid = (await (await page.waitForSelector(".jam-editor__grid")).boundingBox())!;
     const width = page.viewportSize()!.width;
@@ -886,15 +888,29 @@ test.describe("the jam on a phone", () => {
     await openShot(page, "jam-chords", { width: 360, height: 800 });
     await page.waitForSelector(".jam-chord-table-wrap");
 
-    const chart = await page.$$eval(".jam-chord-table-wrap", (wraps) =>
-      wraps.map((w) => ({
-        over: w.scrollWidth - w.clientWidth,
-        overflowX: getComputedStyle(w).overflowX,
-        right: Math.round(w.getBoundingClientRect().right),
-      })),
-    );
-    expect(chart.length, "no chart drawn").toBeGreaterThan(0);
+    // The scene is built at 1440px and then narrowed, and the sheet learns
+    // the window is narrow from a ResizeObserver (`JamSheet`: the push-aside
+    // class comes off). Under load that lands a few frames after the resize,
+    // and until it does the sheet is still laid out as the wide window's
+    // second column (it measured 427 against 360). So the chart is read once
+    // the sheet has settled inside the window, and a sheet that never does
+    // still fails here.
     const width = page.viewportSize()!.width;
+    const measure = () =>
+      page.$$eval(".jam-chord-table-wrap", (wraps) =>
+        wraps.map((w) => ({
+          over: w.scrollWidth - w.clientWidth,
+          overflowX: getComputedStyle(w).overflowX,
+          right: Math.round(w.getBoundingClientRect().right),
+        })),
+      );
+    await expect
+      .poll(async () => Math.max(...(await measure()).map((w) => w.right)), {
+        message: "the chart's own box runs off the screen",
+      })
+      .toBeLessThanOrEqual(width);
+    const chart = await measure();
+    expect(chart.length, "no chart drawn").toBeGreaterThan(0);
     for (const wrap of chart) {
       expect(wrap.right, "the chart's own box runs off the screen").toBeLessThanOrEqual(width);
       expect(wrap.overflowX, "the chart cannot be dragged").toMatch(/auto|scroll/);
