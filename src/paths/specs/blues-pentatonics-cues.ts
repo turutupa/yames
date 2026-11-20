@@ -70,6 +70,40 @@ const BEND_EARLY = "Wait for the beat before each bend.";
 // The riffs at the nut.
 const RIFF_HEARD = "Pick both root notes at each riff's start.";
 const NUT_END = "Count the rest, then D# and B.";
+// The boxes up and down, and the doors between them.
+const HOLD_CLIMB = "Count the last note out, then climb again.";
+const EVEN_DOWN = "Keep the eighths even all the way down.";
+const ONE_PER_FRET = "Put one finger per fret, seven to ten.";
+const AFTER_LONG = "Count each long note to its end, then go.";
+const SLIDE_PRESS = "Keep pressing all the way through the slide.";
+const SLIDE_ONE = "Pick the slide's first note only.";
+const SLIDE_SHIFT = "Let the slide carry the hand up and back.";
+const SLIDE_UP = "Let the slide carry the hand up.";
+const HIGH_A = "Hold the high A for its full two beats.";
+// The choruses.
+const EMPTY_LISTEN = "Listen to the band in the empty bars.";
+const EMPTY_SILENT = "Play nothing in the empty bars.";
+const BEND_REST = "Rest one beat after each bend, silent.";
+const LAST_EMPTY = "Leave the last bar empty for the band.";
+const LAST_B = "Hold the last B for two beats, then stop.";
+// Sixths: two notes picked as one.
+const SIXTH_HEARD = "Pick each sixth firmly, both strings at once.";
+const SIXTH_QUIET = "Keep the middle string quiet between the two.";
+const SIXTH_LATE = "Put each sixth right on its beat.";
+const SIXTH_EARLY = "Wait for the beat before each sixth.";
+const SIXTH_HELD = "Count the held sixth's two beats, then move.";
+const SIXTH_SLIDE = "Slide the second finger along the G string.";
+const SIXTH_LAST = "Hold the last sixth for its full two beats.";
+// One long note a bar.
+const LONG_HEARD = "Pick each note firmly and let it ring.";
+const LONG_LATE = "Play each note right as its bar starts.";
+const LONG_EARLY = "Wait for '1' before each new note.";
+const NEXT_READY = "Have the next note's finger ready early.";
+const LAST_GSHARP = "Hold the last G# through all four beats.";
+// The slow blues.
+const SLOW_LATE = "Start each phrase with the band, not after.";
+const SLOW_EARLY = "Wait for the band's pulse before each phrase.";
+const SLOW_LAST = "Give the last two notes two beats each.";
 
 export const BLUES_PENTATONICS_CUES: CueBook = {
   // Level 1 (beginner), Step 1: box 1
@@ -360,9 +394,9 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("extras", EXTRAS),
     c("late", EIGHTH_LATE),
     c("early", EIGHTH_EARLY),
-    c("afterHeld", "Count the held root out, then climb again."),
+    c("afterHeld", HOLD_CLIMB),
     c("stringChange", CROSS_CLOSE),
-    c("lastBars", "Keep the eighths even all the way down."),
+    c("lastBars", EVEN_DOWN),
   ],
   "blues-scale.passing": [
     g("Pass through the Eb; never stop on it.", 1),
@@ -659,5 +693,391 @@ export const BLUES_PENTATONICS_CUES: CueBook = {
     c("shift", "Arrive on the new note as each bar starts.", 0),
     c("stringChange", "Keep the pick close to the strings."),
     c("lastBars", WALK_LAST),
+  ],
+
+  // Level 3 (advanced), Step 15: two boxes
+  "two-boxes.box-two": [
+    g("Say the A's at fret seven and fret ten.", 1),
+    c("notes", ONE_PER_FRET),
+    c("heard", HEARD_EIGHTHS),
+    c("extras", EXTRAS),
+    c("late", EIGHTH_LATE),
+    c("early", EIGHTH_EARLY),
+    c("afterHeld", HOLD_CLIMB),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", EVEN_DOWN),
+  ],
+  "two-boxes.the-door": [
+    g("Slide from fret seven to nine on the G string.", 1),
+    c("notes", "Slide back from ten to eight on the B string.", 1),
+    c("heard", SLIDE_PRESS),
+    c("extras", SLIDE_ONE, 1),
+    c("late", EIGHTH_LATE),
+    c("early", EIGHTH_EARLY),
+    c("afterHeld", AFTER_LONG),
+    c("shift", SLIDE_SHIFT),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", LAST_A),
+  ],
+  "two-boxes.there-and-back": [
+    g("Take the slide on the G string slowly.", 1),
+    c("notes", "Reach fret ten on the B string at the top.", 1),
+    c("heard", SLIDE_PRESS),
+    c("extras", SLIDE_ONE),
+    c("late", SHUF_LATE),
+    c("early", SHUF_EARLY),
+    c("afterHeld", AFTER_HELD),
+    c("shift", SLIDE_SHIFT),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", LAST_A),
+  ],
+  "two-boxes.land-in-either": [g("Land on a chord tone as each bar starts.", 1)],
+
+  // Level 3, Step 16: up the neck
+  "up-the-neck.box-three": [
+    g("Say the A's at fret twelve and fret ten.", 1),
+    c("notes", "Start from D at fret ten on the low E string."),
+    c("heard", HEARD_EIGHTHS),
+    c("extras", EXTRAS),
+    c("late", EIGHTH_LATE),
+    c("early", EIGHTH_EARLY),
+    c("afterHeld", HOLD_CLIMB),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", EVEN_DOWN),
+  ],
+  "up-the-neck.box-four": [
+    g("Say the A's at fret twelve and fret fourteen.", 1),
+    c("notes", "Start from E at fret twelve, low E string.", 1),
+    c("heard", HEARD_EIGHTHS),
+    c("extras", EXTRAS),
+    c("late", EIGHTH_LATE),
+    c("early", EIGHTH_EARLY),
+    c("afterHeld", HOLD_CLIMB),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", EVEN_DOWN),
+  ],
+  "up-the-neck.second-door": [
+    g("Slide D to E on the top string, third finger.", 1),
+    c("notes", "Come home to the A at fret ten, B string.", 2),
+    c("heard", SLIDE_PRESS),
+    c("extras", SLIDE_ONE, 1),
+    c("late", EIGHTH_LATE),
+    c("early", EIGHTH_EARLY),
+    c("afterHeld", AFTER_LONG),
+    c("shift", SLIDE_SHIFT),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", LAST_A),
+  ],
+  "up-the-neck.fifth-to-twelfth": [
+    g("Let each slide carry you into the next box.", 1),
+    c("notes", "Hold the G at fret twelve on the G string.", 2),
+    c("heard", SLIDE_PRESS),
+    c("extras", SLIDE_ONE),
+    c("late", SHUF_LATE),
+    c("early", SHUF_EARLY),
+    c("afterHeld", AFTER_HELD),
+    c("shift", SLIDE_UP),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", HIGH_A),
+  ],
+
+  // Level 3, Step 17: box 5
+  "box-five.fifth-shape": [
+    g("Say each A out loud as you pass it.", 1),
+    c("notes", "Start from G at fret three, low E string."),
+    c("heard", HEARD_EIGHTHS),
+    c("extras", EXTRAS),
+    c("late", EIGHTH_LATE),
+    c("early", EIGHTH_EARLY),
+    c("afterHeld", HOLD_CLIMB),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", EVEN_DOWN),
+  ],
+  "box-five.low-door": [
+    g("Slide the first finger from fret two to five.", 1),
+    c("notes", "Come home to the A at fret seven, D string.", 2),
+    c("heard", SLIDE_PRESS),
+    c("extras", SLIDE_ONE, 1),
+    c("late", EIGHTH_LATE),
+    c("early", EIGHTH_EARLY),
+    c("afterHeld", AFTER_HELD),
+    c("shift", SLIDE_UP),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", LAST_A),
+  ],
+  "box-five.high-door": [
+    g("Slide the first finger from fret ten to twelve.", 1),
+    c("notes", "Finish on the A at fret fourteen, G string.", 2),
+    c("heard", SLIDE_PRESS),
+    c("extras", SLIDE_ONE, 1),
+    c("late", EIGHTH_LATE),
+    c("early", EIGHTH_EARLY),
+    c("afterHeld", AFTER_LONG),
+    c("shift", SLIDE_UP),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", LAST_A),
+  ],
+  "box-five.second-to-fifteenth": [
+    g("Make both slides with the first finger."),
+    c("notes", "Finish on the A at fret fourteen, G string.", 2),
+    c("heard", SLIDE_PRESS),
+    c("extras", SLIDE_ONE),
+    c("late", SHUF_LATE),
+    c("early", SHUF_EARLY),
+    c("afterHeld", AFTER_HELD),
+    c("shift", SLIDE_UP),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", HIGH_A),
+  ],
+
+  // Level 3, Step 18: three choruses in A
+  "three-choruses.chorus-low": [
+    g(EMPTY_LISTEN, 4),
+    c("notes", "End the second phrase on G, D string, fret five.", 1),
+    c("heard", HEARD),
+    c("extras", EMPTY_SILENT, 4),
+    c("late", SHUF_LATE),
+    c("early", SHUF_EARLY),
+    c("afterHeld", AFTER_REST),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", LAST_E),
+  ],
+  "three-choruses.chorus-answers": [
+    g("Slide into box two at the start and stay there.", 1),
+    c("notes", "End each call on C at fret eight, top string.", 2),
+    c("heard", HEARD),
+    c("extras", EXTRAS),
+    c("late", SHUF_LATE),
+    c("early", SHUF_EARLY),
+    c("afterHeld", AFTER_HELD),
+    c("shift", SHIFT_HELD),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", LAST_E),
+  ],
+  "three-choruses.chorus-peak": [
+    g("Bend G at fret fifteen until it sounds like A.", 3),
+    c("heard", HEARD),
+    c("extras", BEND_REST, 3),
+    c("late", SHUF_LATE),
+    c("early", SHUF_EARLY),
+    c("afterHeld", "Count the bend's two beats, then rest one."),
+    c("shift", SHIFT_HELD),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", LAST_EMPTY),
+  ],
+  "three-choruses.your-three-choruses": [g("Plan where the highest note comes first.", 2)],
+
+  // Level 3, Step 19: three choruses in E
+  "three-choruses-in-e.e-chorus-low": [
+    g(EMPTY_LISTEN, 6),
+    c("notes", "Hold B at fret two on the A string.", 1),
+    c("heard", HEARD),
+    c("extras", EMPTY_SILENT, 6),
+    c("late", SHUF_LATE),
+    c("early", SHUF_EARLY),
+    c("afterHeld", AFTER_REST),
+    c("openString", OPEN_ON_BEAT),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", LAST_B),
+  ],
+  "three-choruses-in-e.e-chorus-twelfth": [
+    g("Play the same phrase three times over E7.", 1),
+    c("notes", "First finger on twelve, fourth on fifteen.", 1),
+    c("heard", HEARD),
+    c("extras", EXTRAS),
+    c("late", SHUF_LATE),
+    c("early", SHUF_EARLY),
+    c("afterHeld", AFTER_LONG),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", LAST_B),
+  ],
+  "three-choruses-in-e.e-chorus-climb": [
+    g("Bend the A at fret fourteen up to B.", 5),
+    c("heard", SLIDE_PRESS),
+    c("extras", BEND_REST, 5),
+    c("late", SHUF_LATE),
+    c("early", SHUF_EARLY),
+    c("afterHeld", AFTER_HELD),
+    c("openString", OPEN_ON_BEAT),
+    c("shift", "Lead each move up the neck with finger one.", 4),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", LAST_EMPTY),
+  ],
+  "three-choruses-in-e.your-three-choruses-in-e": [g("Start at the nut with few notes.", 2)],
+
+  // Level 3, Step 20: major and minor
+  "major-and-minor.major-box": [
+    g("Start the A, D and G strings at fret four.", 1),
+    c("notes", "Use the little finger for every fret seven.", 1),
+    c("heard", HEARD_EIGHTHS),
+    c("extras", EXTRAS),
+    c("late", EIGHTH_LATE),
+    c("early", EIGHTH_EARLY),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", "Hold the last low A for a full beat."),
+  ],
+  "major-and-minor.sweet-then-sour": [
+    g("Change C# to C as the D7 arrives.", 1),
+    c("notes", "Play C# over A7, then C over D7.", 1),
+    c("heard", HEARD),
+    c("extras", EXTRAS),
+    c("late", SHUF_LATE),
+    c("early", SHUF_EARLY),
+    c("afterHeld", AFTER_HELD),
+    c("shift", "Move the hand up a fret for the D7 phrase.", 1),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", LAST_A),
+  ],
+  "major-and-minor.tenth-fret": [
+    g("Take the last F# with the second finger.", 1),
+    c("notes", "First finger on ten, third on twelve.", 1),
+    c("heard", HEARD),
+    c("extras", EXTRAS),
+    c("late", SHUF_LATE),
+    c("early", SHUF_EARLY),
+    c("afterHeld", AFTER_HELD),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", "Hold the F# for its full two beats."),
+  ],
+  "major-and-minor.your-mix": [g("Play C# over A7 and C over D7.", 1)],
+
+  // Level 3, Step 21: sixths
+  "sixths.a7-sixths": [
+    g("Pick both notes of each sixth as one.", 2),
+    c("heard", SIXTH_HEARD),
+    c("extras", SIXTH_QUIET),
+    c("late", SIXTH_LATE),
+    c("early", SIXTH_EARLY),
+    c("afterHeld", SIXTH_HELD),
+    c("shift", SIXTH_SLIDE),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", SIXTH_LAST),
+  ],
+  "sixths.sixths-twelve": [
+    g("Keep the second finger on the G string.", 1),
+    c("heard", SIXTH_HEARD),
+    c("extras", SIXTH_QUIET, 2),
+    c("late", SIXTH_LATE),
+    c("early", SIXTH_EARLY),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", SIXTH_LAST),
+  ],
+  "sixths.lick-to-sixth": [
+    g("Land the first sixth right on '3'.", 1),
+    c("heard", SIXTH_HEARD),
+    c("extras", SIXTH_QUIET),
+    c("late", SHUF_LATE),
+    c("early", SHUF_EARLY),
+    c("afterHeld", SIXTH_HELD),
+    c("shift", SIXTH_SLIDE),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", SIXTH_LAST),
+  ],
+
+  // Level 3, Step 22: guide tones
+  "guide-tones.sevenths-line": [
+    g("Hear the note fit as each chord changes.", 1),
+    c("notes", "Follow the chart: frets eight, seven, nine.", 1),
+    c("heard", LONG_HEARD),
+    c("extras", ROOT_EXTRAS),
+    c("late", LONG_LATE),
+    c("early", LONG_EARLY),
+    c("lastBars", LAST_GSHARP),
+  ],
+  "guide-tones.thirds-line": [
+    g("Hear the line move by half steps.", 1),
+    c("notes", "Play G# on the D string, fret six.", 1),
+    c("heard", LONG_HEARD),
+    c("extras", ROOT_EXTRAS),
+    c("late", LONG_LATE),
+    c("early", LONG_EARLY),
+    c("stringChange", NEXT_READY),
+    c("lastBars", LAST_GSHARP),
+  ],
+  "guide-tones.both-tones": [
+    g("Move the fingers as little as you can.", 1),
+    c("notes", "Name each note before you play it."),
+    c("heard", LONG_HEARD),
+    c("extras", "Play two notes a bar and let them ring."),
+    c("late", "Put each note right on its beat."),
+    c("early", "Wait for the beat before each note."),
+    c("shift", "Arrive on the new note as each bar starts."),
+    c("stringChange", NEXT_READY),
+    c("lastBars", LAST_NOTE),
+  ],
+  "guide-tones.with-fills": [
+    g("Land a guide tone on '1', then fill.", 1),
+    c("notes", "Land C#, C, G, then G# on each '1'.", 1),
+    c("heard", HEARD),
+    c("extras", EXTRAS),
+    c("late", SHUF_LATE),
+    c("early", SHUF_EARLY),
+    c("afterHeld", "Count the guide tone's two beats, then fill."),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", "Play the last fill right to its end."),
+  ],
+  "guide-tones.free-guide-tones": [g("Pick a guide tone for each change ahead.", 1)],
+
+  // Level 3, Step 23: slow blues
+  "slow-blues.written-chorus": [
+    g("Hold each long note for its full length.", 1),
+    c("notes", "Play the turnaround from fret nine down to six.", 2),
+    c("heard", HEARD),
+    c("extras", REST_EMPTY),
+    c("late", SLOW_LATE),
+    c("early", SLOW_EARLY),
+    c("afterHeld", AFTER_HELD),
+    c("shift", "Step down one fret a beat in the turnaround.", 2),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", SLOW_LAST),
+  ],
+  "slow-blues.play-less": [
+    g(EMPTY_LISTEN, 1),
+    c("notes", "End on G# at fret six, D string."),
+    c("heard", HEARD),
+    c("extras", EMPTY_SILENT, 1),
+    c("late", SLOW_LATE),
+    c("early", SLOW_EARLY),
+    c("afterHeld", AFTER_REST),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", "Hold the G# two beats, then stop."),
+  ],
+  "slow-blues.landings-chorus": [g("Land on a chord tone, then leave a gap.", 1)],
+  "slow-blues.free-chorus": [g("Close your eyes and play it for a friend.", 1)],
+
+  // Level 3, Step 24: slow blues in C
+  "slow-blues-in-c.c-chorus": [
+    g("Play the slow chorus three frets higher."),
+    c("notes", "Turn around from fret twelve down to nine.", 2),
+    c("heard", HEARD),
+    c("extras", REST_EMPTY),
+    c("late", SLOW_LATE),
+    c("early", SLOW_EARLY),
+    c("afterHeld", AFTER_HELD),
+    c("shift", "Step down one fret a beat in the turnaround.", 2),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", SLOW_LAST),
+  ],
+  "slow-blues-in-c.c-long-bends": [
+    g("Reach the top of each bend before beat two.", 4),
+    c("heard", HEARD),
+    c("extras", REST_EMPTY),
+    c("late", "Pick each bend right on '1'."),
+    c("early", "Wait for '1' before each bend."),
+    c("afterHeld", "Count the bend's two beats, then rest one."),
+    c("shift", SHIFT_HELD),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", LAST_B),
+  ],
+  "slow-blues-in-c.your-c-chorus": [g("Bend up to at least one landing note.", 1)],
+  "warmup-advanced.two-boxes-keys": [
+    g("Take the slide slowly, under your clean tempo.", 0),
+    c("heard", SLIDE_PRESS),
+    c("late", SHUF_LATE),
+    c("early", SHUF_EARLY),
+    c("afterHeld", AFTER_LONG),
+    c("shift", "Let the slide carry the hand.", 0),
+    c("stringChange", "Keep the pick close to the strings."),
+    c("lastBars", LAST_NOTE),
   ],
 };

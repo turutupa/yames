@@ -20,7 +20,13 @@ Cues: `src/paths/specs/blues-pentatonics-cues.ts`, attached with `withCues` in `
   frets in a row" (a distance) and "Let the hand move" (the hand's position) where the E variant is not a
   uniform transposition. Reworded (the shuffle's late/early everywhere -> "Put each beat's long note right on
   the beat." / "Wait for the beat before each long note."): 0 refusals.
-- [ ] Level 3
+- [x] Level 3 (advanced: two-boxes, up-the-neck, box-five, three-choruses, three-choruses-in-e,
+  major-and-minor, sixths, guide-tones, slow-blues, slow-blues-in-c, warm-up two-boxes-keys). Refusals:
+  `cue.specific` x2 "Keep the B string quiet between the two." (sixths: the B string is never played) -> "the
+  middle string"; `cueTexts` x2 "Move the hand while the held note rings." (both-tones, E: the hand's position)
+  -> "Arrive on the new note as each bar starts."; "Keep pressing through the slide to the new fret." (warm-up,
+  E: a layout of frets) -> "Keep pressing all the way through the slide." All 100 Exercises: 763 cues, 312
+  distinct sentences, 0 refusals, check 0 errors (`gc6.log`).
 - [ ] Proof-read
 - [ ] Translations
 - [ ] Gates
