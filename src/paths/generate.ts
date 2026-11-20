@@ -321,7 +321,7 @@ function buildExercise(
         : undefined;
   if (grid === null) throw new Error(`${where}: no nameable subdivision in its notes`);
   const exercise: Exercise = {
-    id: `${groupId}.${spec.id}`,
+    id: `${spec.firstStep ?? groupId}.${spec.id}`,
     title: spec.title,
     purpose: spec.purpose,
     howTo: spec.howTo,
