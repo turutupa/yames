@@ -269,6 +269,7 @@
       "cleanFirst": "Tempo pulito: {{bpm}} BPM.",
       "cleanMoved": "Tempo pulito: da {{from}} a {{bpm}} BPM.",
       "moveOn": "Vai avanti",
+      "upTo": "Sali a {{bpm}} BPM",
       "fairAsk": "Questo voto era giusto?",
       "fairYes": "Sì",
       "fairNo": "No",
@@ -708,6 +709,7 @@
     },
     "note": {
       "passedAt": "Superato a {{bpm}}.",
+      "nextTime": "La prossima volta:",
       "finding": {
         "ceiling": "Tiene a {{holds}} BPM e scivola a {{breaks}}."
       },
@@ -744,7 +746,8 @@
         "closer": "Dal {{from}}% al {{to}}% a questo tempo."
       },
       "repeat": {
-        "leaveIt": "Tre volte nello stesso punto. Lascialo per oggi; di solito domani va meglio."
+        "leaveIt": "Tre volte nello stesso punto. Lascialo per oggi; di solito domani va meglio.",
+        "onceMore": "Ancora una volta a {{bpm}} prima di {{up}}, perché quella battuta è scivolata nell'ultima take."
       },
       "fact": {
         "heard": "{{heard}} note su {{expected}} sentite",
@@ -807,6 +810,36 @@
         "backParked_many": "{{title}} riposa per {{count}} giorni e torna come nuovo.",
         "backParked_other": "{{title}} riposa per {{count}} giorni e torna come nuovo."
       }
+    },
+    "loop": {
+      "kick": "Loop · non valutato",
+      "title": {
+        "bar": "La battuta {{bar}} della melodia, in loop",
+        "bars": "Le battute {{from}} e {{to}} della melodia, in loop"
+      },
+      "button": {
+        "first": "Ripeti la prima battuta",
+        "bar": "Ripeti la battuta {{bar}}",
+        "bars": "Ripeti le battute {{from}} e {{to}}"
+      },
+      "stop": "Ferma il loop",
+      "how": "Giro dopo giro finché non lo fermi. Qui niente viene valutato o salvato; i puntini mostrano in anticipo e in ritardo.",
+      "howUngraded": "Giro dopo giro finché non lo fermi. Qui niente viene valutato o salvato.",
+      "after": {
+        "lastBar": "Nel loop, la battuta {{bar}} della melodia è andata bene negli ultimi {{count}} giri.",
+        "lastBars": "Nel loop, le battute {{from}} e {{to}} della melodia sono andate bene negli ultimi {{count}} giri.",
+        "ofBar": "Nel loop, la battuta {{bar}} della melodia è andata bene in {{landed}} giri su {{count}}.",
+        "ofBars": "Nel loop, le battute {{from}} e {{to}} della melodia sono andate bene in {{landed}} giri su {{count}}."
+      }
+    },
+    "eyes": {
+      "offer": "Questa è per i tuoi occhi",
+      "watch": "Stavolta guarda il plettro.",
+      "result": "Quella era per i tuoi occhi",
+      "body": "Non valutata e non ascoltata. Hai visto cosa faceva il plettro.",
+      "question": "Qualche colpo è partito in risalita?",
+      "yes": "Sì",
+      "no": "No"
     }
   }
 }

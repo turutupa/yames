@@ -17,13 +17,10 @@
     "end": "End",
     "start": "Start",
     "clearAll": "Clear all",
-    "collapse": "Collapse",
     "feed": "Feed",
     "history": "History",
     "emptyTitle": "Your coach listens while you play to the click.",
     "emptyHint": "Press Start at the top of this panel, then play. It comments on your timing as you go and sums it up when you press End.",
-    "askPlaceholder": "Ask the coach...",
-    "send": "Send",
     "today": "Today",
     "yesterday": "Yesterday",
     "noteSpacingTrend": "Note spacing trend",
@@ -45,7 +42,8 @@
       "notDownloaded": "not downloaded",
       "notOnThisDevice": "not on this device",
       "downloading": "downloading {{percent}}",
-      "downloadingNoPercent": "downloading"
+      "downloadingNoPercent": "downloading",
+      "checking": "checking the download"
     },
     "state": {
       "ready": "Loaded and ready",
@@ -56,8 +54,10 @@
       "failedWhy": "Couldn't load ({{reason}}). Choose it to try again",
       "notDownloaded": "Not downloaded",
       "update": "An older version. Update it in Settings → Coach",
-      "otherOnDisk": "Not downloaded. A second model on this computer needs a later update; for now, switch in Settings → Coach",
+      "unplaced": "Not downloaded. A model on this computer could not be identified; manage it in Settings → Coach",
+      "noRoom": "Not downloaded. Needs {{need}}, {{free}} free",
       "downloading": "Downloading",
+      "checking": "Checking the download",
       "lowMemory": "This computer has less memory than this model wants; it may be slow or fail to load"
     },
     "why": {
@@ -67,18 +67,29 @@
     "download": {
       "start": "Download",
       "pause": "Pause",
+      "pauseHint": "Stop for now and keep what has downloaded; Resume carries on from there",
+      "cancel": "Cancel",
+      "cancelHint": "Stop and remove what has downloaded so far",
       "resume": "Resume",
       "retry": "Try again",
       "anyway": "Download anyway",
       "notNow": "Not now",
       "running": "Downloading… {{percent}}",
       "runningNoPercent": "Downloading…",
+      "runningBytes": "Downloading… {{done}} of {{total}}",
+      "bytes": "{{done}} of {{total}}",
+      "checking": "Checking the download against its published checksum… {{percent}}",
       "voices": "Getting the coach's voices…",
       "paused": "Paused at {{percent}}. Resume carries on from there.",
+      "pausedBytes": "Paused at {{done}} of {{total}}. Resume carries on from there.",
       "pausedNoPercent": "Paused. Resume carries on where it stopped.",
+      "cancelled": "Cancelled. What had downloaded was removed.",
       "failed": "The download stopped: {{reason}}",
       "failedNoReason": "The download stopped.",
-      "meteredWarn": "You seem to be on mobile data. {{size}} is a lot to download over it."
+      "checksumFailed": "The downloaded file didn't match its published checksum, so it was removed. Nothing you already had was changed.",
+      "noRoom": "Not enough room: it needs {{need}} and {{free}} is free. Free some space, then try again.",
+      "meteredWarn": "You seem to be on mobile data. {{size}} is a lot to download over it.",
+      "spaceWarn": "Only {{free}} is free and this needs {{need}}. It fits, with little to spare."
     }
   },
   "coachDetail": {

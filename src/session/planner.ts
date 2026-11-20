@@ -232,7 +232,32 @@ export type PlanStep =
       targetBpm: number;
       minutes: number;
       why: Reason;
-    };
+    }
+  | LoopStep;
+
+/**
+ * "Loop the first bar" (DESIGN 4.2, 9.3): the pattern bar (or two) that
+ * slipped, slow, on repeat, until the player stops it. Not graded: it stores
+ * no Take, moves no tempo and passes nothing. It is never one of a plan's
+ * steps: the runner holds it beside the Exercise it came from (`RunState.loop`)
+ * and goes back to that Exercise's ready screen when it stops.
+ */
+export type LoopStep = {
+  kind: "loop";
+  /** The Exercise step's id with `#loop`: never a block of the Session bar. */
+  id: string;
+  title: string;
+  pathId: string;
+  exerciseId: string;
+  variantSeed: number | null;
+  /** Bars of the pattern, from 1 (`src/coach/rounds.ts`), inclusive. */
+  fromBar: number;
+  toBar: number;
+  bpm: number;
+  /** Nothing: a loop runs until it is stopped, on the Exercise's own minutes. */
+  minutes: number;
+  why: Reason;
+};
 
 export type SessionMood = "first" | "returning" | "back";
 

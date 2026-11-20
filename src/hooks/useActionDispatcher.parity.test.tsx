@@ -12,8 +12,9 @@
  * do on it. See TOOLS_PARITY.md section 3.1 item 6.
  *
  * Known gaps are pinned as they are, not as they should be: `toggle-sidebar` is
- * ignored on the Setlist, and `toggle-coach` on the Setlist and Songs (section 6.1
- * item 14). Keep them or change them, but on purpose.
+ * ignored on the Setlist. (`toggle-coach` was ignored on the Setlist and Songs,
+ * section 6.1 item 14, until Ask became one panel on every screen: leg c2a1.)
+ * Keep them or change them, but on purpose.
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import fs from "node:fs";
@@ -141,10 +142,11 @@ const ACTIONS: Record<HotkeyAction, Row | Partial<Record<Where, readonly string[
     where: ["beat", "drill", "drillRamping", "jam", "jamEmpty", "jamEditor", "songs", "songsEmpty"],
     does: ["setSidebarOpen"],
   },
-  "toggle-coach": {
-    where: ["beat", "drill", "drillRamping", "jam", "jamEmpty", "jamEditor", "today", "paths", "progress", "tools"],
-    does: ["toggleCard"],
-  },
+  // Ask is one panel everywhere but Settings since leg c2a1: the Setlist and
+  // Songs gained it (the gap of section 6.1 item 14, closed on purpose), and
+  // a Session has it as the drawer.
+  "toggle-coach": { where: without("settings"), does: ["toggleCard"] },
+  "ask-coach": { where: without("settings"), does: ["askCoach"] },
   // The saved meaning of these five is exactly this, whatever else the rail grows.
   "tab-1": { where: NOT_IN_SESSION, does: ["setView beat"] },
   "tab-2": { where: NOT_IN_SESSION, does: ["setView setlist"] },
@@ -249,6 +251,7 @@ async function observe(action: HotkeyAction, where: Where, state: AppState = STA
       setIsOsFullscreen: () => {},
       setSidebarOpen: spy("setSidebarOpen") as never,
       toggleCard: spy("toggleCard"),
+      askCoach: spy("askCoach"),
       sessionActions: named("session", [
         "startToday",
         "go",

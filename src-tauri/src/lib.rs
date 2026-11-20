@@ -171,7 +171,10 @@ pub mod probe {
     pub use crate::timing::create_beat_log;
 
     #[cfg(feature = "coach-llm")]
-    pub use crate::coach::{create_shared_engine, generate, load_model, GenKind};
+    pub use crate::coach::{
+        ask, cancel_generation, create_shared_engine, generate, load_model, unload_model,
+        AskMode, AskOutcome, AskRequest, GenKind, ASK_MAX_DEADLINE_MS,
+    };
     #[cfg(feature = "coach-llm")]
     pub use crate::models::CURRENT_BRAIN_FAMILY;
 }
@@ -181,8 +184,9 @@ use app_probe::callback_probe_report;
 use calibration_cache::create_shared_calibration_cache;
 use coach::create_shared_engine;
 use commands::{
-    cancel_model_download, clear_all_sessions, clear_calibration_cache_entry, clear_midi_binding,
-    clear_session, clear_session_logs, coach_generate, configure_speed_ramp, connect_midi_device,
+    cancel_generation, cancel_model_download, clear_all_sessions, clear_calibration_cache_entry,
+    clear_midi_binding, clear_session, clear_session_logs, coach_ask, coach_generate,
+    configure_speed_ramp, connect_midi_device,
     delete_models, delete_preset, delete_score, delete_session, discard_recording,
     disconnect_midi_device,
     export_session_logs, get_active_tab, get_calibration_cache_entry, get_calibration_offset,
@@ -1026,6 +1030,8 @@ pub fn run() {
             load_coach_model,
             unload_coach_model,
             coach_generate,
+            coach_ask,
+            cancel_generation,
             is_coach_loaded,
             get_coach_capabilities,
             tts_speak,

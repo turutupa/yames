@@ -269,6 +269,7 @@
       "cleanFirst": "Tempo limpio: {{bpm}} BPM.",
       "cleanMoved": "Tempo limpio: de {{from}} a {{bpm}} BPM.",
       "moveOn": "Seguir",
+      "upTo": "Subir a {{bpm}} BPM",
       "fairAsk": "¿Fue justa esta nota?",
       "fairYes": "Sí",
       "fairNo": "No",
@@ -708,6 +709,7 @@
     },
     "note": {
       "passedAt": "Superado a {{bpm}}.",
+      "nextTime": "La próxima vez:",
       "finding": {
         "ceiling": "Aguanta a {{holds}} BPM y se escapa a {{breaks}}."
       },
@@ -744,7 +746,8 @@
         "closer": "De {{from}}% a {{to}}% a este tempo."
       },
       "repeat": {
-        "leaveIt": "Tres veces en el mismo sitio. Déjalo por hoy; suele salir mejor mañana."
+        "leaveIt": "Tres veces en el mismo sitio. Déjalo por hoy; suele salir mejor mañana.",
+        "onceMore": "Una vez más a {{bpm}} antes de {{up}}, porque ese compás se escapó en la última toma."
       },
       "fact": {
         "heard": "{{heard}} de {{expected}} notas oídas",
@@ -807,6 +810,36 @@
         "backParked_many": "{{title}} descansa {{count}} días y vuelve como nuevo.",
         "backParked_other": "{{title}} descansa {{count}} días y vuelve como nuevo."
       }
+    },
+    "loop": {
+      "kick": "Bucle · sin evaluar",
+      "title": {
+        "bar": "El compás {{bar}} de la melodía, en bucle",
+        "bars": "Los compases {{from}} y {{to}} de la melodía, en bucle"
+      },
+      "button": {
+        "first": "Repetir primer compás",
+        "bar": "Repetir compás {{bar}}",
+        "bars": "Repetir compases {{from}} y {{to}}"
+      },
+      "stop": "Parar el bucle",
+      "how": "Vuelta tras vuelta hasta que lo pares. Aquí nada se evalúa ni se guarda; los puntos marcan pronto y tarde.",
+      "howUngraded": "Vuelta tras vuelta hasta que lo pares. Aquí nada se evalúa ni se guarda.",
+      "after": {
+        "lastBar": "En el bucle, el compás {{bar}} de la melodía salió limpio en las últimas {{count}} vueltas.",
+        "lastBars": "En el bucle, los compases {{from}} y {{to}} de la melodía salieron limpios en las últimas {{count}} vueltas.",
+        "ofBar": "En el bucle, el compás {{bar}} de la melodía salió limpio en {{landed}} de {{count}} vueltas.",
+        "ofBars": "En el bucle, los compases {{from}} y {{to}} de la melodía salieron limpios en {{landed}} de {{count}} vueltas."
+      }
+    },
+    "eyes": {
+      "offer": "Esta es para tus ojos",
+      "watch": "Esta vez, mira tu púa.",
+      "result": "Esa fue para tus ojos",
+      "body": "Sin evaluar y sin escuchar. Viste lo que hizo la púa.",
+      "question": "¿Algún pulso empezó con la púa hacia arriba?",
+      "yes": "Sí",
+      "no": "No"
     }
   }
 }

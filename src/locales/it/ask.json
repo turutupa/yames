@@ -1,0 +1,54 @@
+{
+  "ask": {
+    "title": "Chiedi",
+    "button": "Chiedi",
+    "close": "Chiudi Chiedi",
+    "lookingAt": "Sotto gli occhi:",
+    "nowLooking": "Ora sotto gli occhi: {{place}}",
+    "later": "Chiedi si apre dopo questo take",
+    "placeholder": "Chiedi di questa schermata, dei tuoi take o dei tuoi percorsi",
+    "send": "Invia",
+    "writing": "Scrittura di una risposta…",
+    "sections": {
+      "ask": "Chiedi",
+      "tools": "Coach degli strumenti"
+    },
+    "screen": {
+      "today": "Oggi",
+      "paths": "Percorsi",
+      "path": "Un percorso",
+      "step": "Una tappa",
+      "session": "La tua sessione",
+      "progress": "Progressi",
+      "jam": "Jam",
+      "songs": "Brani",
+      "beat": "Metronomo",
+      "drill": "Rampa",
+      "setlist": "Scaletta",
+      "tools": "Strumenti"
+    },
+    "looking": {
+      "readyFor": "pronto per il take {{n}}",
+      "take": "take {{n}}",
+      "recap": "il riepilogo"
+    },
+    "empty": {
+      "title": "Cosa vuoi sapere?",
+      "model": "Chiedi di questa schermata, dei tuoi take o dei tuoi percorsi. Il modello su questo computer risponde con parole sue, come consiglio generale.",
+      "loading": "Il modello che hai scelto si sta preparando. Quando è pronto, puoi chiedere di questa schermata, dei tuoi take o dei tuoi percorsi.",
+      "noModel": "Le domande scritte richiedono un modello su questo computer, e nessuno è attivo. Scegline uno qui sotto per chiedere di questa schermata, dei tuoi take o dei tuoi percorsi.",
+      "phone": "Le domande scritte richiedono un modello, e i telefoni non ne eseguono ancora uno."
+    },
+    "reply": {
+      "noModel": "Nessun modello è attivo, quindi le domande scritte non hanno ancora risposta. Scegline uno in fondo a questo pannello.",
+      "gettingReady": "Il modello si sta ancora preparando. Chiedi di nuovo tra un attimo.",
+      "phone": "I telefoni non eseguono ancora un modello, quindi qui le domande scritte non hanno risposta.",
+      "nothing": "Questa volta non è arrivata nessuna risposta."
+    },
+    "footer": {
+      "model": "Risposta del modello su questo computer. Niente di ciò che scrivi ne esce.",
+      "local": "Niente di ciò che scrivi qui lascia questo computer.",
+      "phone": "Niente di ciò che scrivi qui lascia questo telefono."
+    }
+  }
+}

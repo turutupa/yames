@@ -26,6 +26,7 @@ import { runwayModel } from "../highway/runwayModel";
 import type { RunwayModel } from "../highway/runwayModel";
 import type { ListenDemoControl } from "../hooks/useListenDemo";
 import { onToggleWatch } from "./watchBus";
+import { closeAsk } from "../../coach/askStore";
 
 export type WatchControl = {
   /** Something to watch: a ready screen with a pattern of more than one note. */
@@ -110,6 +111,10 @@ export function useWatch({
   const hearing = !running && !!listen?.playing;
   const showing = canWatch && (watching || hearing);
   const silent = useSilentWatch(model, take?.bpm ?? 0, perQuarter, canWatch && watching);
+  // Watch and Hear it move the picture: Ask's drawer gets out of its way (leg c2a1).
+  useEffect(() => {
+    if (showing) closeAsk({ restoreFocus: false });
+  }, [showing]);
 
   const latest = useRef({ running, listen, canWatch });
   latest.current = { running, listen, canWatch };

@@ -294,6 +294,44 @@ function songShelfTakes(): ShotSongTake[] {
 }
 const SHOT_TAKE_JAM = "shot-song";
 
+/** The coach model scenes' download: whether one runs, and whether a cancel removed its bytes. */
+const coachDl = { running: false, discarded: false };
+/** The `olderCopy` scene: whether its Remove was pressed. */
+const coachOlderCopyRemoved = { value: false };
+
+/**
+ * `get_model_status` as an ms2 backend answers it for the coach model scenes:
+ * each tier on its own, the free space, a paused download's kept bytes.
+ */
+function coachModelStatus(world: NonNullable<Shot["coachModel"]>, discarded: boolean) {
+  const sizes = { standard: 2_497_280_256, full: 5_027_783_488 } as const;
+  const both = world === "bothOnDisk" || world === "olderCopy";
+  const tiers = (["standard", "full"] as const).map((tier) => ({
+    tier,
+    onDisk: both,
+    sizeBytes: both ? sizes[tier] : 0,
+    family: both ? "qwen3" : null,
+    updateRecommended: false,
+    partialBytes: world === "paused" && tier === "full" && !discarded ? 1_200_000_000 : 0,
+    downloadBytes: sizes[tier],
+    checksumPinned: true,
+    olderCopyBytes: world === "olderCopy" && tier === "full" && !coachOlderCopyRemoved.value ? sizes.full : 0,
+  }));
+  return {
+    brainReady: both,
+    brainTier: both ? "standard" : null,
+    brainFamily: both ? "qwen3" : null,
+    brainSizeBytes: both ? sizes.standard + sizes.full : 0,
+    voiceReady: both,
+    voiceSizeBytes: 0,
+    studioRecommended: true,
+    standardRecommended: true,
+    brainUpdateRecommended: false,
+    tiers,
+    freeBytes: world === "lowStorage" ? 3_100_000_000 : 120_000_000_000,
+  };
+}
+
 function baseState(theme: string) {
   return {
     // 120 reads ALLEGRO on the tempo scale; 4/4 with eighths is the setting
@@ -636,11 +674,11 @@ function songLibraryRecords(which: "three" | "longTitle"): SongRecord[] {
  * Bars are four beats: every Exercise a scene plays is in 4/4.
  */
 function mockTakeGrade(
-  recipe: "pass" | "below" | "nearMiss" | "noCatch",
+  recipe: "pass" | "below" | "nearMiss" | "noCatch" | "passSlip",
   onsets: ScoreSchedule["onsets"],
   passBars: readonly ScorerPassBar[] = [],
 ): ScorerTakeGrade {
-  const even = recipe === "pass" ? 0.87 : recipe === "nearMiss" ? 0.83 : 0.74;
+  const even = recipe === "pass" || recipe === "passSlip" ? 0.87 : recipe === "nearMiss" ? 0.83 : 0.74;
   const caught = recipe !== "noCatch";
   const lastBeat = onsets.reduce((most, o) => Math.max(most, o.beat), 0);
   const barCount = Math.floor(lastBeat / 4) + 1;
@@ -661,7 +699,9 @@ function mockTakeGrade(
           ? bar < 4
             ? 0.86 + (bar % 2) * 0.02
             : 0.68 + (bar % 3) * 0.04
-          : Math.min(1, even + ((bar % 3) - 1) * 0.02),
+          : recipe === "passSlip" && bar % 4 === 0 && bar > 0
+            ? 0.7
+            : Math.min(1, even + ((bar % 3) - 1) * 0.02),
       evennessSigmaMs: caught ? 6 : null,
     };
   });
@@ -688,7 +728,7 @@ function mockTakeGrade(
 
 /** What `score/pass.rs` would say of a recipe's Take, for the bars it was loaded with. */
 function mockPass(
-  recipe: "pass" | "below" | "nearMiss" | "noCatch",
+  recipe: "pass" | "below" | "nearMiss" | "noCatch" | "passSlip",
   even: number,
   finishedBars: number,
   passBars: readonly ScorerPassBar[],
@@ -1421,17 +1461,7 @@ export function installShotMock(shot: Shot, theme: string): void {
     app_ready: () => null,
     get_model_status: () =>
       shot.coachModel
-        ? {
-            brainReady: false,
-            brainTier: null,
-            brainFamily: null,
-            brainSizeBytes: 0,
-            voiceReady: false,
-            voiceSizeBytes: 0,
-            studioRecommended: true,
-            standardRecommended: true,
-            brainUpdateRecommended: false,
-          }
+        ? coachModelStatus(shot.coachModel, coachDl.discarded)
         : { voiceReady: false, downloaded: [], active: null },
     // The model selector's scene (ms1): a build that can run a model, and a
     // download that answers a press the way Rust does: progress events, and
@@ -1452,22 +1482,43 @@ export function installShotMock(shot: Shot, theme: string): void {
             tipsUseModel: false,
             rephraseP50Ms: null,
           }),
-          start_model_download: () => {
+          start_model_download: (a) => {
+            coachDl.running = true;
+            const total = a?.tier === "full" ? 5_027_783_488 : 2_497_280_256;
+            const checking = shot.coachModel === "checking";
+            const fraction = checking ? 0.6 : 0.42;
             setTimeout(
               () =>
                 emit("model-download-progress", {
                   component: "brain",
-                  downloadedBytes: 0,
-                  totalBytes: 0,
-                  fraction: 0.42,
+                  downloadedBytes: Math.round(total * fraction),
+                  totalBytes: total,
+                  fraction,
                   done: false,
+                  stage: checking ? "checking" : "transfer",
                 }),
               50,
             );
             return null;
           },
-          cancel_model_download: () => {
-            setTimeout(() => emit("model-download-complete", { success: false, cancelled: true }), 50);
+          // ms2b: the older copy's own Remove.
+          delete_models: (a) => {
+            if (a?.olderCopy === true) coachOlderCopyRemoved.value = true;
+            return null;
+          },
+          // Rust's cancel: a pause keeps the bytes; with `discard` it removes
+          // them, through the download's thread when one runs, at once when
+          // it is paused.
+          cancel_model_download: (a) => {
+            const discard = a?.discard === true;
+            if (discard) coachDl.discarded = true;
+            if (coachDl.running) {
+              coachDl.running = false;
+              setTimeout(
+                () => emit("model-download-complete", { success: false, cancelled: true, discarded: discard }),
+                50,
+              );
+            }
             return null;
           },
         }
@@ -2034,7 +2085,8 @@ export function installShotMock(shot: Shot, theme: string): void {
         componentScores: {
           // What each recipe is about. The scorer is not the subject here: what
           // the app does with its report is.
-          intervalConsistency: recipe === "pass" ? 0.87 : recipe === "nearMiss" ? 0.83 : recipe === "below" ? 0.74 : 0.5,
+          intervalConsistency:
+            recipe === "pass" || recipe === "passSlip" ? 0.87 : recipe === "nearMiss" ? 0.83 : recipe === "below" ? 0.74 : 0.5,
           gridAlignment: 0.8,
           hitCompleteness: 1,
           onsetEfficiency: 1,

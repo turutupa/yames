@@ -59,6 +59,8 @@ export function exerciseWithVariant(ex: Exercise, variant: ExerciseVariant): Exe
   // one is not text (the validator refuses it): the Exercise's stays.
   if (typeof variant.purpose === "string" && variant.purpose.trim()) merged.purpose = variant.purpose;
   if (Array.isArray(variant.howTo) && variant.howTo.length > 0) merged.howTo = variant.howTo;
+  // Its cues replace the Exercise's whole, even when none could be said for these notes.
+  if (Array.isArray(variant.cues)) merged.cues = variant.cues;
   return merged;
 }
 

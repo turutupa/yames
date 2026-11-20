@@ -268,6 +268,7 @@
       "cleanFirst": "Tempo sạch: {{bpm}} BPM.",
       "cleanMoved": "Tempo sạch: từ {{from}} lên {{bpm}} BPM.",
       "moveOn": "Đi tiếp",
+      "upTo": "Lên {{bpm}} BPM",
       "fairAsk": "Điểm này có công bằng không?",
       "fairYes": "Có",
       "fairNo": "Không",
@@ -695,6 +696,7 @@
     },
     "note": {
       "passedAt": "Đạt ở {{bpm}}.",
+      "nextTime": "Lần sau:",
       "finding": {
         "ceiling": "Giữ được ở {{holds}} BPM và bị lệch ở {{breaks}}."
       },
@@ -731,7 +733,8 @@
         "closer": "Tăng từ {{from}}% lên {{to}}% ở tempo này."
       },
       "repeat": {
-        "leaveIt": "Cùng một chỗ ba lần. Để hôm nay nghỉ; thường ngày mai sẽ khá hơn."
+        "leaveIt": "Cùng một chỗ ba lần. Để hôm nay nghỉ; thường ngày mai sẽ khá hơn.",
+        "onceMore": "Chơi thêm một lần ở {{bpm}} trước khi lên {{up}}, vì ô nhịp đó bị lệch ở lượt trước."
       },
       "fact": {
         "heard": "nghe thấy {{heard}}/{{expected}} nốt",
@@ -790,6 +793,36 @@
         "backParked": "{{title}} nghỉ {{count}} ngày rồi quay lại như mới.",
         "backParked_other": "{{title}} nghỉ {{count}} ngày rồi quay lại như mới."
       }
+    },
+    "loop": {
+      "kick": "Lặp · không chấm điểm",
+      "title": {
+        "bar": "Ô nhịp {{bar}} của giai điệu, lặp lại",
+        "bars": "Ô nhịp {{from}} và {{to}} của giai điệu, lặp lại"
+      },
+      "button": {
+        "first": "Lặp ô nhịp đầu",
+        "bar": "Lặp ô nhịp {{bar}}",
+        "bars": "Lặp ô nhịp {{from}} và {{to}}"
+      },
+      "stop": "Dừng lặp",
+      "how": "Lặp đi lặp lại cho đến khi bạn dừng. Ở đây không gì được chấm điểm hay lưu; các chấm cho thấy sớm và trễ.",
+      "howUngraded": "Lặp đi lặp lại cho đến khi bạn dừng. Ở đây không gì được chấm điểm hay lưu.",
+      "after": {
+        "lastBar": "Trong phần lặp, ô nhịp {{bar}} của giai điệu chơi trọn ở {{count}} vòng cuối.",
+        "lastBars": "Trong phần lặp, ô nhịp {{from}} và {{to}} của giai điệu chơi trọn ở {{count}} vòng cuối.",
+        "ofBar": "Trong phần lặp, ô nhịp {{bar}} của giai điệu chơi trọn ở {{landed}}/{{count}} vòng.",
+        "ofBars": "Trong phần lặp, ô nhịp {{from}} và {{to}} của giai điệu chơi trọn ở {{landed}}/{{count}} vòng."
+      }
+    },
+    "eyes": {
+      "offer": "Lượt này để bạn nhìn",
+      "watch": "Lần này, hãy nhìn miếng gảy.",
+      "result": "Lượt đó để bạn nhìn",
+      "body": "Không chấm điểm và không nghe. Bạn đã thấy miếng gảy làm gì.",
+      "question": "Có phách nào bắt đầu bằng nhát gảy lên không?",
+      "yes": "Có",
+      "no": "Không"
     }
   }
 }

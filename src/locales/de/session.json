@@ -268,6 +268,7 @@
       "cleanFirst": "Sauberes Tempo: {{bpm}} BPM.",
       "cleanMoved": "Sauberes Tempo: von {{from}} auf {{bpm}} BPM.",
       "moveOn": "Weiter",
+      "upTo": "Hoch auf {{bpm}} BPM",
       "fairAsk": "War diese Bewertung fair?",
       "fairYes": "Ja",
       "fairNo": "Nein",
@@ -695,6 +696,7 @@
     },
     "note": {
       "passedAt": "Bestanden bei {{bpm}}.",
+      "nextTime": "Beim nächsten Mal:",
       "finding": {
         "ceiling": "Bei {{holds}} BPM hält es, bei {{breaks}} rutscht es."
       },
@@ -731,7 +733,8 @@
         "closer": "Von {{from}} % auf {{to}} % bei diesem Tempo."
       },
       "repeat": {
-        "leaveIt": "Dreimal dieselbe Stelle. Lass sie für heute; morgen klappt sie meist besser."
+        "leaveIt": "Dreimal dieselbe Stelle. Lass sie für heute; morgen klappt sie meist besser.",
+        "onceMore": "Noch einmal bei {{bpm}}, bevor es auf {{up}} geht, denn dieser Takt ist beim letzten Take verrutscht."
       },
       "fact": {
         "heard": "{{heard}} von {{expected}} Tönen gehört",
@@ -790,6 +793,36 @@
         "backParked": "{{title}} pausiert {{count}} Tag und kommt dann frisch wieder.",
         "backParked_other": "{{title}} pausiert {{count}} Tage und kommt dann frisch wieder."
       }
+    },
+    "loop": {
+      "kick": "Schleife · nicht bewertet",
+      "title": {
+        "bar": "Takt {{bar}} der Melodie, in Wiederholung",
+        "bars": "Takt {{from}} und {{to}} der Melodie, in Wiederholung"
+      },
+      "button": {
+        "first": "Ersten Takt wiederholen",
+        "bar": "Takt {{bar}} wiederholen",
+        "bars": "Takt {{from}} und {{to}} wiederholen"
+      },
+      "stop": "Schleife stoppen",
+      "how": "Immer wieder, bis du stoppst. Nichts hier wird bewertet oder gespeichert; die Punkte zeigen früh und spät.",
+      "howUngraded": "Immer wieder, bis du stoppst. Nichts hier wird bewertet oder gespeichert.",
+      "after": {
+        "lastBar": "In der Schleife saß Takt {{bar}} der Melodie in den letzten {{count}} Durchgängen.",
+        "lastBars": "In der Schleife saßen Takt {{from}} und {{to}} der Melodie in den letzten {{count}} Durchgängen.",
+        "ofBar": "In der Schleife saß Takt {{bar}} der Melodie in {{landed}} von {{count}} Durchgängen.",
+        "ofBars": "In der Schleife saßen Takt {{from}} und {{to}} der Melodie in {{landed}} von {{count}} Durchgängen."
+      }
+    },
+    "eyes": {
+      "offer": "Dieser ist für deine Augen",
+      "watch": "Diesmal: Beobachte dein Plektrum.",
+      "result": "Dieser war für deine Augen",
+      "body": "Nicht bewertet und nicht gehört. Du hast gesehen, was das Plektrum gemacht hat.",
+      "question": "Hat irgendein Schlag mit einem Aufschlag begonnen?",
+      "yes": "Ja",
+      "no": "Nein"
     }
   }
 }

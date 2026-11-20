@@ -12,6 +12,7 @@ import { JamGlyph } from "../../components/jam/JamGlyph";
 import { putHeaderSlot } from "./headerSlot";
 import { IS_MAC } from "../../hotkeys";
 import { IS_MOBILE } from "../../platform";
+import { CoachGlyph } from "../coach/CoachGlyph";
 
 /**
  * A volume, as one of the context bar's chips: label, then a bar you drag.
@@ -360,6 +361,11 @@ interface MainHeaderProps {
    * Optional so other mounts of the header keep working without it.
    */
   onOpenHelp?: () => void;
+  /**
+   * Ask, on a phone (leg c2a1, DESIGN 3.2): a labelled 44 px button that opens
+   * the Ask sheet. A desktop has the rail's row for it and passes nothing.
+   */
+  onAsk?: () => void;
 }
 
 /**
@@ -426,6 +432,7 @@ export function MainHeader({
   levelMeter = false,
   soundPicker = true,
   modeBar = false,
+  onAsk,
   onOpenHelp,
 }: MainHeaderProps) {
   const { t } = useTranslation();
@@ -635,6 +642,18 @@ export function MainHeader({
               </span>
             </div>
           )
+        )}
+
+        {onAsk && (
+          <button
+            type="button"
+            className="context-chip header-ask"
+            onClick={onAsk}
+            data-testid="header-ask"
+          >
+            <CoachGlyph size={16} />
+            <span className="context-chip-label">{t("ask.button")}</span>
+          </button>
         )}
 
         <div className="header-more-wrap" ref={moreWrapRef}>

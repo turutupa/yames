@@ -21,7 +21,8 @@ import type { ReactNode } from "react";
 import type { FactItem, Mark, NoteStrip } from "../../coach/takeNote";
 import { SourceLine } from "../../coach/blocks/CoachBlocks";
 import type { BlockSource } from "../../coach/blocks/resolve";
-import { CoachGlyph } from "./CoachLine";
+import { AskableText, CoachGlyph } from "./CoachLine";
+import type { AskHandler } from "./askStore";
 import "../../styles/coach-blocks.css";
 import "../../styles/coach.css";
 
@@ -32,7 +33,11 @@ export function CoachNote({
   live,
   testId,
   kind,
+  onAsk,
+  cue,
 }: {
+  /** The trigger of the Path's cue the headline is, when it is one (for tests and styles). */
+  cue?: string;
   /** The one thing: an order before a Take, the finding after it. */
   headline: ReactNode;
   /** Where the headline's words come from, said under it. */
@@ -43,12 +48,18 @@ export function CoachNote({
   testId?: string;
   /** What the note is about, for styles and tests: "ready", "result", "ungraded". */
   kind?: string;
+  /** Ask the coach about the headline (never during a Take: the Session passes none then). */
+  onAsk?: AskHandler;
 }) {
   return (
-    <section className="coach-note" data-testid={testId} data-kind={kind} aria-live={live ? "polite" : undefined}>
+    <section className="coach-note" data-testid={testId} data-kind={kind} data-cue={cue} aria-live={live ? "polite" : undefined}>
       <p className="coach-note-head">
         <CoachGlyph />
-        <span>{headline}</span>
+        <span>
+          <AskableText onAsk={onAsk} testId="coach-note-ask">
+            {headline}
+          </AskableText>
+        </span>
       </p>
       {source && <SourceLine source={source} />}
       {children}
@@ -66,6 +77,22 @@ export function NoteLine({ children, extra, testId }: { children: ReactNode; ext
     <p className="coach-note-line" data-extra={extra ? "" : undefined} data-testid={testId}>
       {children}
     </p>
+  );
+}
+
+/**
+ * One thing to try, under a finding (DESIGN 4.2): "Next time: {cue}", with
+ * where the words come from on its own line. The finding above says where
+ * and which way; this is the Path author's suggestion, and says so.
+ */
+export function NoteCue({ label, say, source, testId }: { label: string; say: string; source: BlockSource; testId?: string }) {
+  return (
+    <div className="coach-note-cue" data-testid={testId}>
+      <p className="coach-note-line">
+        <span className="coach-note-cue-label">{label}</span> <b>{say}</b>
+      </p>
+      <SourceLine source={source} />
+    </div>
   );
 }
 
@@ -104,7 +131,7 @@ export function FactLine({ facts, render }: { facts: readonly FactItem[]; render
  * tune is a group, set apart from the next; the stretch that counted for a
  * pass is underlined.
  */
-export function NoteBars({ strip, label }: { strip: NoteStrip; label: string }) {
+export function NoteBars({ strip, label, onAsk }: { strip: NoteStrip; label: string; onAsk?: AskHandler }) {
   const { t } = useTranslation();
   if (strip.cells.length < 2) return null;
   const held = strip.held;
@@ -126,28 +153,41 @@ export function NoteBars({ strip, label }: { strip: NoteStrip; label: string }) 
         {rounds.map((round) => (
           <li key={round[0].round} className="coach-bars-round" style={{ flexGrow: round.length }}>
             <ol>
-              {round.map((c) => (
-                <li
-                  key={c.n}
-                  className="coach-bar"
-                  data-state={c.state}
-                  data-held={inHeld(c.n) ? "" : undefined}
-                  data-spot={c.spot ? "" : undefined}
-                  aria-label={t(
-                    c.state === "met"
-                      ? "session.result.barHeld"
-                      : c.state === "missed"
-                        ? "session.result.barSlipped"
-                        : "session.result.barThin",
-                    { n: c.n },
-                  )}
-                >
-                  <span aria-hidden="true">
-                    {c.state === "missed" && <span className="coach-bar-x">×</span>}
-                    {c.n}
-                  </span>
-                </li>
-              ))}
+              {round.map((c) => {
+                const said = t(
+                  c.state === "met"
+                    ? "session.result.barHeld"
+                    : c.state === "missed"
+                      ? "session.result.barSlipped"
+                      : "session.result.barThin",
+                  { n: c.n },
+                );
+                return (
+                  <li
+                    key={c.n}
+                    className="coach-bar"
+                    data-state={c.state}
+                    data-held={inHeld(c.n) ? "" : undefined}
+                    data-spot={c.spot ? "" : undefined}
+                    aria-label={onAsk ? undefined : said}
+                  >
+                    <span aria-hidden="true">
+                      {c.state === "missed" && <span className="coach-bar-x">×</span>}
+                      {c.n}
+                    </span>
+                    {/* Ask about this bar: a button over the cell, which keeps its size. */}
+                    {onAsk && (
+                      <button
+                        type="button"
+                        className="coach-bar-ask"
+                        aria-label={said}
+                        onClick={(e) => onAsk({ about: said, from: e.currentTarget })}
+                        data-testid={`coach-bar-ask-${c.n}`}
+                      />
+                    )}
+                  </li>
+                );
+              })}
             </ol>
           </li>
         ))}
@@ -203,10 +243,13 @@ export function NoteAnswer({
   question,
   answer,
   onAnswer,
+  labels,
 }: {
   question: string;
   answer: "yes" | "notYet" | undefined;
   onAnswer: (answer: "yes" | "notYet") => void;
+  /** Other words for the two answers ("Yes" / "No"); the default is "Yes" / "Not yet". */
+  labels?: { yes: string; notYet: string };
 }) {
   const { t } = useTranslation();
   return (
@@ -221,7 +264,7 @@ export function NoteAnswer({
           onClick={() => onAnswer(value)}
           data-testid={`coach-heard-${value}`}
         >
-          {t(value === "yes" ? "session.note.ungraded.yes" : "session.note.ungraded.notYet")}
+          {labels ? labels[value] : t(value === "yes" ? "session.note.ungraded.yes" : "session.note.ungraded.notYet")}
         </button>
       ))}
     </div>

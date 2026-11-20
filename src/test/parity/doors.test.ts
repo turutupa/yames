@@ -53,7 +53,8 @@ describe("the doors", () => {
 
   // Wherever the shell ends up living. Two sessions would each save, two routers
   // would disagree about which mode is on, two dispatchers would act twice.
-  it.each(["useSession", "useTabRouting", "useActionDispatcher"])(
+  // `useCoachPanel` registers the one answerer Ask's store calls (leg c2a1).
+  it.each(["useSession", "useTabRouting", "useActionDispatcher", "useCoachPanel"])(
     "%s is mounted exactly once",
     (hook) => {
       const mounted = productionTs().flatMap((f) =>

@@ -458,7 +458,11 @@ function needsAn(text: string): boolean {
   return /^(eight|eleven|eighteen|eighth|eleventh|open)/.test(text);
 }
 
-function rewriteSentence(sentence: string, ctx: Ctx, countCarried: boolean): Written & { counting?: boolean } {
+function rewriteSentence(
+  sentence: string,
+  ctx: Ctx,
+  countCarried: boolean,
+): Written & { counting?: boolean; specific?: boolean } {
   const toks = tokenize(sentence);
   const edits: Edit[] = [];
   const { move, ex, v } = ctx;
@@ -1255,7 +1259,7 @@ function rewriteSentence(sentence: string, ctx: Ctx, countCarried: boolean): Wri
       }
     }
   }
-  return { ok: true, text: out, counting };
+  return { ok: true, text: out, counting, specific };
 }
 
 function sentenceSlice(sentence: string, from: Tok, to: Tok): string {
@@ -1350,16 +1354,9 @@ function rewriteText(text: string, where: string, ctx: Ctx, refusals: Refusal[])
   return { text: mergeSameFacts(kept).join(" "), firstRefused: false };
 }
 
-export function describeVariant(exercise: ExerciseText, variant: TextSide): VariantDescription {
-  const refusals: Refusal[] = [];
-  const none = (reason?: string): VariantDescription => {
-    if (reason) refusals.push({ where: "variant", sentence: "", reason });
-    return { text: null, howToFrom: [], refusals };
-  };
-  const move = moveOf(exercise, variant);
-  if (!move) return none("the notes do not line up with the Exercise's one to one");
+function ctxOf(exercise: ExerciseText, variant: TextSide, move: Move): Ctx {
   const pcShift = move.pcShift;
-  const ctx: Ctx = {
+  return {
     ex: exercise,
     v: variant,
     move,
@@ -1371,6 +1368,61 @@ export function describeVariant(exercise: ExerciseText, variant: TextSide): Vari
     sameDeclared: declarationsMoved(exercise, variant, 0),
     qualities: sameQualities(exercise, variant),
   };
+}
+
+/** One cue said for one variant: its words for those notes, or why it cannot be said there. */
+export type CueText = { ok: true; text: string } | { ok: false; reason: string };
+
+/**
+ * Cues (`Exercise.cues[].say`) said again for a variant's notes, by the same
+ * rules as the how-to: every fret, string, note and finger a cue names must
+ * be true of the Exercise's own notes and must move to one place in the
+ * variant's. A cue that names nothing specific ("Count every note out loud.")
+ * is the same for every variant, even one whose notes do not line up; one
+ * that names something is refused there. Each sentence of a cue must be
+ * written, or the whole cue is refused: half an order is not an order.
+ *
+ * Called with the Exercise as its own variant it says which cues name
+ * something the Exercise does not play (the validator's `cue.specific`).
+ */
+export function cueTexts(exercise: ExerciseText, variant: TextSide, says: readonly string[]): CueText[] {
+  const move = moveOf(exercise, variant);
+  const own = moveOf(exercise, exercise);
+  const ctx = move ? ctxOf(exercise, variant, move) : null;
+  const ownCtx = own ? ctxOf(exercise, exercise, own) : null;
+  return says.map((say): CueText => {
+    const sentences = sentencesOf(say);
+    if (sentences.length === 0) return { ok: false, reason: "no words" };
+    const out: string[] = [];
+    let counting = false;
+    for (const sentence of sentences) {
+      if (ctx) {
+        const written = rewriteSentence(sentence, ctx, counting);
+        if (!written.ok) return { ok: false, reason: written.reason };
+        counting = counting || !!written.counting;
+        out.push(written.text);
+        continue;
+      }
+      // Notes that do not line up: only a sentence that names nothing of them is still true.
+      const checked = ownCtx ? rewriteSentence(sentence, ownCtx, counting) : null;
+      if (!checked || !checked.ok) return { ok: false, reason: checked && !checked.ok ? checked.reason : "no notes" };
+      if (checked.specific) return { ok: false, reason: "the notes do not line up with the Exercise's one to one" };
+      counting = counting || !!checked.counting;
+      out.push(sentence);
+    }
+    return { ok: true, text: out.join(" ") };
+  });
+}
+
+export function describeVariant(exercise: ExerciseText, variant: TextSide): VariantDescription {
+  const refusals: Refusal[] = [];
+  const none = (reason?: string): VariantDescription => {
+    if (reason) refusals.push({ where: "variant", sentence: "", reason });
+    return { text: null, howToFrom: [], refusals };
+  };
+  const move = moveOf(exercise, variant);
+  if (!move) return none("the notes do not line up with the Exercise's one to one");
+  const ctx = ctxOf(exercise, variant, move);
 
   const purpose = rewriteText(exercise.purpose, "purpose", ctx, refusals);
   // A purpose that names the wrong frets must keep its disclaimer: no text at all.

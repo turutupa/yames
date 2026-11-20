@@ -334,6 +334,13 @@ export type ExerciseVariant = {
    * Exercise's applies. Never on the first variant.
    */
   howTo?: string[];
+  /**
+   * This variant's cues, whole, when the Exercise's do not fit its notes: a cue
+   * that names a fret, a string or a note said again for this variant, one that
+   * cannot be dropped, `more` pointing into this variant's own how-to. Absent:
+   * the Exercise's apply. Never on the first variant.
+   */
+  cues?: Cue[];
   tab: string;
   position: HandPosition;
   crossing: Crossing;
@@ -357,6 +364,48 @@ export type Variation = {
   /** Dimensions that do, and why. Each value starts its own pool. */
   notPooled: Array<{ dimension: VariationDimension; reason: string }>;
   variants: ExerciseVariant[];
+};
+
+/**
+ * What a Take measured that may choose a cue (DESIGN 4.2, "One thing to try").
+ * The first four are the check the verdict turned on (evenness, notes heard,
+ * extras, right notes); `late` and `early` the direction the slipped bars
+ * leaned; the rest say what the place that slipped has in it: a note after a
+ * held one, an open string, a change of string, a shift of the hand, the
+ * tune's last bars (or a long Take coming apart from a round on).
+ */
+export const CUE_TRIGGERS = [
+  "even",
+  "heard",
+  "extras",
+  "notes",
+  "late",
+  "early",
+  "afterHeld",
+  "openString",
+  "stringChange",
+  "shift",
+  "lastBars",
+] as const;
+export type CueTrigger = (typeof CUE_TRIGGERS)[number];
+
+/** The most a cue may be, in characters, in every language: it is the Take's one order (DESIGN 3.4). */
+export const CUE_MAX_CHARS = 48;
+
+/**
+ * One thing to try: an order a teacher gives across the room ("Count the held
+ * E, then come in."). Chosen by what the last Take measured (`when`), never by
+ * a guess about why; always shown as the Path's suggestion, with its source.
+ * Added 2026-11-20, optional, so every older pack stays valid.
+ */
+export type Cue = {
+  when: CueTrigger;
+  /** An order, one idea, at most `CUE_MAX_CHARS` characters. */
+  say: string;
+  /** An index into the played variant's `howTo`: the line "What should I try?" opens on. */
+  more?: number;
+  /** The Exercise's general cue: said when nothing was measured (first Take, ungraded, not caught). At most one. */
+  general?: true;
 };
 
 /** Set on a warm-up Exercise; such an Exercise lives in `Level.warmups`. */
@@ -387,6 +436,8 @@ export type Exercise = {
   howTo: string[];
   /** What the Coach may say about it. Never claims more than `graded`. */
   coachLine: string;
+  /** Short orders, each for what a Take measured; several per trigger: the second time gets the second. */
+  cues?: Cue[];
   grading: GradingMode;
   feedback: FeedbackTiming;
   /** Why this feedback timing, for the ones that need something built. */

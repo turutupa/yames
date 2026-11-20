@@ -206,6 +206,17 @@ struct Args {
     warmup_ms: u64,
     gguf: Option<String>,
     no_llm: bool,
+    /// `--llm-load`: the model is NOT loaded before the window; it is
+    /// loaded while the click runs, used for one Ask, unloaded, and loaded
+    /// again, for the whole run. A load cannot be interrupted, so one that
+    /// is still running when a Take starts runs on (DESIGN 9.4): this is
+    /// that, as often as it fits in the window.
+    llm_load: bool,
+    /// `--llm-cancel`: Ask turns started and cancelled at random points
+    /// (in the queue, in the prompt's chunks, in the answer) under the
+    /// click, the static prefix changed every few turns so its decode is
+    /// cancelled too.
+    llm_cancel: bool,
     p99_ms: f64,
     /// Output level, 0.0-1.0. The app's own default unless asked otherwise.
     ///
@@ -303,6 +314,8 @@ impl Default for Args {
             warmup_ms: 1500,
             gguf: None,
             no_llm: false,
+            llm_load: false,
+            llm_cancel: false,
             p99_ms: 1.0,
             volume: 0.8,
             json: false,
@@ -358,6 +371,14 @@ fn parse_args() -> Result<Args, String> {
             "--dump-csv" => a.dump_csv = Some(value(i)?.to_string()),
             "--no-llm" => {
                 a.no_llm = true;
+                consumed = 1;
+            }
+            "--llm-load" => {
+                a.llm_load = true;
+                consumed = 1;
+            }
+            "--llm-cancel" => {
+                a.llm_cancel = true;
                 consumed = 1;
             }
             "--json" => {
@@ -447,6 +468,16 @@ fn parse_args() -> Result<Args, String> {
     // the song and report the jam. Refuse rather than measure the wrong thing
     // quietly, which is the rule the `--jam --subdivision` check below is
     // also written under.
+    if (a.llm_load || a.llm_cancel) && a.gguf.is_none() {
+        return Err("--llm-load and --llm-cancel need --gguf <path>".into());
+    }
+    if a.llm_load && a.llm_cancel {
+        return Err(
+            "--llm-load and --llm-cancel are separate runs: a run with both would \
+             report two loads of work as one"
+                .into(),
+        );
+    }
     if a.song && a.jam {
         return Err(
             "--song and --jam are different engine modes; the song wins and the jam \
@@ -491,6 +522,11 @@ click-jitter-probe — ROADMAP §4 audio-safety gate
   --gguf <path>      loop coach::generate over this model (needs
                      --features coach-llm | coach-llm-vulkan | coach-llm-metal)
   --no-llm           baseline run
+  --llm-load         with --gguf: load the model WHILE the click runs (not
+                     before), one Ask, unload, and again, for the whole run
+  --llm-cancel       with --gguf: Ask turns started and cancelled at random
+                     points (queued, mid-prompt, mid-answer) for the whole
+                     run, the prefix changed every few turns
   --p99-ms <f>       jitter threshold, default 1.0
   --volume <f>       0.0-1.0, default 0.8. Amplitude only — the mixer does
                      the same work at any level — so the gate can be run
@@ -676,15 +712,116 @@ struct LlmRun {
     handle: Option<std::thread::JoinHandle<()>>,
     generations: Arc<AtomicU64>,
     failures: Arc<AtomicU64>,
+    /// `--llm-load`: every load's start and end (`probe::now_ns`), so the
+    /// report can count only the loads that fell inside the measured
+    /// window, which the LLM thread cannot know the end of.
+    load_spans: Arc<std::sync::Mutex<Vec<(u64, u64)>>>,
+    /// `--llm-cancel`: turns that came back cancelled.
+    cancels: Arc<AtomicU64>,
     backend: String,
     load_secs: f64,
 }
 
+/// `--llm-load`'s count, against the measured window.
+#[derive(Debug, Default, PartialEq)]
+struct LoadCount {
+    /// Loads whose start fell inside the window.
+    started_inside: u64,
+    /// Loads that began and finished inside it: the ones the click was
+    /// measured under from end to end.
+    finished_inside: u64,
+    /// Total time of the `finished_inside` loads.
+    finished_ns: u64,
+}
+
+impl LoadCount {
+    fn mean_secs(&self) -> f64 {
+        if self.finished_inside == 0 {
+            0.0
+        } else {
+            self.finished_ns as f64 / self.finished_inside as f64 / 1e9
+        }
+    }
+}
+
+/// Count the loads in `spans` (start, end) against the window
+/// `[start_ns, end_ns)`. A load still running when the stream stopped
+/// started inside but did not finish inside: half of it was not measured.
+fn loads_in_window(spans: &[(u64, u64)], start_ns: u64, end_ns: u64) -> LoadCount {
+    let mut count = LoadCount::default();
+    for &(began, ended) in spans {
+        if began < start_ns || began >= end_ns {
+            continue;
+        }
+        count.started_inside += 1;
+        if ended <= end_ns {
+            count.finished_inside += 1;
+            count.finished_ns += ended.saturating_sub(began);
+        }
+    }
+    count
+}
+
+/// What the LLM thread does while the click runs.
+#[derive(Clone, Copy, PartialEq)]
+enum LlmMode {
+    /// `--gguf`: `Chat` generations back to back (the heaviest kind).
+    Generate,
+    /// `--llm-load`: load, one Ask, unload, again.
+    Load,
+    /// `--llm-cancel`: Ask turns cancelled at random points.
+    Cancel,
+}
+
+/// The Ask turn the probe sends: a static prefix the size DESIGN 5.5
+/// budgets (about 900 tokens of system text and intent list), a context, a
+/// question, and the choice grammar the registry will generate.
 #[cfg(feature = "coach-llm")]
-fn start_llm(path: &str, stop: Arc<AtomicBool>) -> Result<LlmRun, String> {
+fn probe_ask(id: u64, prose: bool, prefix_variant: u64) -> yames_lib::probe::AskRequest {
+    use yames_lib::probe::{AskMode, AskRequest};
+    let mut prefix = format!(
+        "Choose the one tool that answers the player's question (list {prefix_variant}). \
+         Reply with one JSON object.\n\nTools:\n"
+    );
+    for i in 0..60 {
+        prefix.push_str(&format!(
+            "- tool_{i}: opens screen number {i} of the practice app and shows the player where it is, with a way back\n"
+        ));
+    }
+    AskRequest {
+        generation_id: id,
+        mode: if prose { AskMode::Prose } else { AskMode::Choice },
+        prefix,
+        context: "Screen: Today. The player has one Path open: Alternate Picking, Step 7.".into(),
+        question: if prose {
+            "how do I keep my picking hand relaxed at speed?".into()
+        } else {
+            "open the step I was on".into()
+        },
+        grammar: (!prose).then(|| {
+            "root ::= \"{\" ws \"\\\"tool\\\":\" ws tool ws \"}\"\n\
+             tool ::= \"\\\"open_step\\\"\" | \"\\\"show_card\\\"\" | \"\\\"none\\\"\"\n\
+             ws ::= \" \"?\n"
+                .to_string()
+        }),
+        // The longest a caller may ask for: the probe measures the click
+        // under the work, and a loaded machine must not turn the work into
+        // timeouts.
+        deadline_ms: Some(yames_lib::probe::ASK_MAX_DEADLINE_MS),
+    }
+}
+
+#[cfg(feature = "coach-llm")]
+fn start_llm(
+    path: &str,
+    stop: Arc<AtomicBool>,
+    mode: LlmMode,
+    window_open_ns: Arc<AtomicU64>,
+) -> Result<LlmRun, String> {
     use std::time::Instant;
     use yames_lib::probe::{
-        create_shared_engine, generate, load_model, GenKind, CURRENT_BRAIN_FAMILY,
+        ask, cancel_generation, create_shared_engine, generate, load_model, unload_model,
+        AskOutcome, GenKind, CURRENT_BRAIN_FAMILY,
     };
 
     let p = std::path::PathBuf::from(path);
@@ -702,11 +839,78 @@ fn start_llm(path: &str, stop: Arc<AtomicBool>) -> Result<LlmRun, String> {
     let gpu_layers = std::env::var("YAMES_LLM_GPU_LAYERS").unwrap_or_else(|_| "(unset)".into());
     eprintln!("[probe] loading {path} (backend={backend}, YAMES_LLM_GPU_LAYERS={gpu_layers})");
 
+    let generations = Arc::new(AtomicU64::new(0));
+    let failures = Arc::new(AtomicU64::new(0));
+    let load_spans = Arc::new(std::sync::Mutex::new(Vec::new()));
+    let cancels = Arc::new(AtomicU64::new(0));
+    let gens = generations.clone();
+    let fails = failures.clone();
+    let engine = create_shared_engine();
+
+    if mode == LlmMode::Load {
+        // The whole point: nothing loaded before the measured window opens.
+        // The countdown is the window itself (`window_open_ns` stays 0 until
+        // `main` stamps its start), not a guess at how long the device
+        // setup takes.
+        let spans = load_spans.clone();
+        let handle = std::thread::Builder::new()
+            .name("probe-llm".into())
+            .spawn(move || {
+                let nap = |d: std::time::Duration| {
+                    let until = Instant::now() + d;
+                    while Instant::now() < until && !stop.load(Ordering::Relaxed) {
+                        std::thread::sleep(std::time::Duration::from_millis(20));
+                    }
+                };
+                while window_open_ns.load(Ordering::Acquire) == 0 && !stop.load(Ordering::Relaxed) {
+                    std::thread::sleep(std::time::Duration::from_millis(5));
+                }
+                let mut id = 1_000_000u64;
+                while !stop.load(Ordering::Relaxed) {
+                    let began = yames_lib::probe::now_ns();
+                    match load_model(&engine, &p, Some(CURRENT_BRAIN_FAMILY), "probe model") {
+                        Ok(true) => {
+                            let ended = yames_lib::probe::now_ns();
+                            spans.lock().unwrap_or_else(|e| e.into_inner()).push((began, ended));
+                        }
+                        other => {
+                            fails.fetch_add(1, Ordering::Relaxed);
+                            eprintln!("[probe] load failed: {other:?}");
+                            nap(std::time::Duration::from_millis(500));
+                            continue;
+                        }
+                    }
+                    id += 1;
+                    match ask(&engine, &probe_ask(id, false, 0)) {
+                        Ok(AskOutcome::Answered { .. } | AskOutcome::Truncated { .. }) => {
+                            gens.fetch_add(1, Ordering::Relaxed);
+                        }
+                        other => {
+                            fails.fetch_add(1, Ordering::Relaxed);
+                            eprintln!("[probe] ask after a load: {other:?}");
+                        }
+                    }
+                    if let Err(e) = unload_model(&engine) {
+                        eprintln!("[probe] unload failed: {e}");
+                    }
+                }
+            })
+            .map_err(|e| format!("failed to spawn LLM thread: {e}"))?;
+        return Ok(LlmRun {
+            handle: Some(handle),
+            generations,
+            failures,
+            load_spans,
+            cancels,
+            backend: backend.to_string(),
+            load_secs: 0.0,
+        });
+    }
+
     // Load before the metronome starts: the gate is about *generation*
     // disturbing the click, and a 60 s window that begins mid-load would
     // measure a different thing every run.
     let started = Instant::now();
-    let engine = create_shared_engine();
     // The probe points at a bare GGUF with no `model.json` marker beside
     // it, so the family the loader gates on is asserted here rather than
     // read off disk.
@@ -716,10 +920,63 @@ fn start_llm(path: &str, stop: Arc<AtomicBool>) -> Result<LlmRun, String> {
     let load_secs = started.elapsed().as_secs_f64();
     eprintln!("[probe] model loaded in {load_secs:.1}s");
 
-    let generations = Arc::new(AtomicU64::new(0));
-    let failures = Arc::new(AtomicU64::new(0));
-    let gens = generations.clone();
-    let fails = failures.clone();
+    if mode == LlmMode::Cancel {
+        let n_cancels = cancels.clone();
+        let handle = std::thread::Builder::new()
+            .name("probe-llm".into())
+            .spawn(move || {
+                let mut rng = 0x9E37_79B9_7F4A_7C15_u64;
+                let mut next = move || {
+                    rng ^= rng << 13;
+                    rng ^= rng >> 7;
+                    rng ^= rng << 17;
+                    rng
+                };
+                let mut id = 2_000_000u64;
+                let mut variant = 0u64;
+                while !stop.load(Ordering::Relaxed) {
+                    id += 1;
+                    // A new prefix every fourth turn, so the cancel also
+                    // lands inside the prefix's own chunked decode.
+                    if id % 4 == 0 {
+                        variant += 1;
+                    }
+                    let prose = next() % 2 == 0;
+                    let req = probe_ask(id, prose, variant);
+                    let e = engine.clone();
+                    let turn = std::thread::Builder::new()
+                        .name("probe-ask".into())
+                        .spawn(move || ask(&e, &req))
+                        .expect("spawn an ask");
+                    // 0 to 1.5 s: in the queue, in the prompt, in the
+                    // answer, or after it finished.
+                    std::thread::sleep(std::time::Duration::from_millis(next() % 1_500));
+                    cancel_generation(id);
+                    match turn.join() {
+                        Ok(Ok(AskOutcome::Cancelled)) => {
+                            n_cancels.fetch_add(1, Ordering::Relaxed);
+                        }
+                        Ok(Ok(AskOutcome::Answered { .. } | AskOutcome::Truncated { .. })) => {
+                            gens.fetch_add(1, Ordering::Relaxed);
+                        }
+                        other => {
+                            fails.fetch_add(1, Ordering::Relaxed);
+                            eprintln!("[probe] ask {id}: {other:?}");
+                        }
+                    }
+                }
+            })
+            .map_err(|e| format!("failed to spawn LLM thread: {e}"))?;
+        return Ok(LlmRun {
+            handle: Some(handle),
+            generations,
+            failures,
+            load_spans,
+            cancels,
+            backend: backend.to_string(),
+            load_secs,
+        });
+    }
 
     let handle = std::thread::Builder::new()
         .name("probe-llm".into())
@@ -753,13 +1010,20 @@ fn start_llm(path: &str, stop: Arc<AtomicBool>) -> Result<LlmRun, String> {
         handle: Some(handle),
         generations,
         failures,
+        load_spans,
+        cancels,
         backend: backend.to_string(),
         load_secs,
     })
 }
 
 #[cfg(not(feature = "coach-llm"))]
-fn start_llm(_path: &str, _stop: Arc<AtomicBool>) -> Result<LlmRun, String> {
+fn start_llm(
+    _path: &str,
+    _stop: Arc<AtomicBool>,
+    _mode: LlmMode,
+    _window_open_ns: Arc<AtomicU64>,
+) -> Result<LlmRun, String> {
     Err("this binary was built without the coach-llm feature — rebuild with \
          `--features coach-llm` (or coach-llm-vulkan / coach-llm-metal), \
          or pass --no-llm"
@@ -1183,9 +1447,21 @@ fn main() -> ExitCode {
 
     // ---- LLM first, so the model is warm before the window opens ----
     let stop = Arc::new(AtomicBool::new(false));
+    // 0 until the measured window opens, then its start (`probe::now_ns`).
+    let window_open_ns = Arc::new(AtomicU64::new(0));
     let mut llm: Option<LlmRun> = None;
     if let Some(ref path) = args.gguf {
-        match start_llm(path, stop.clone()) {
+        let mode = if args.llm_load {
+            LlmMode::Load
+        } else if args.llm_cancel {
+            LlmMode::Cancel
+        } else {
+            LlmMode::Generate
+        };
+        // `--llm-load` starts loading when the measured window opens (main
+        // stamps `window_open_ns` there), and the report counts only the
+        // loads that began and finished inside the window.
+        match start_llm(path, stop.clone(), mode, window_open_ns.clone()) {
             Ok(run) => llm = Some(run),
             Err(e) => {
                 eprintln!("error: {e}");
@@ -1790,6 +2066,7 @@ fn main() -> ExitCode {
 
     std::thread::sleep(Duration::from_millis(args.warmup_ms));
     let window_start_ns = yames_lib::probe::now_ns();
+    window_open_ns.store(window_start_ns.max(1), Ordering::Release);
     std::thread::sleep(Duration::from_secs(args.seconds));
 
     // The take stops BEFORE the engine, so the writer's last drain is of a
@@ -1813,6 +2090,9 @@ fn main() -> ExitCode {
         None => None,
     };
 
+    // The measured window is every callback from `window_start_ns` until
+    // the stream stops here.
+    let window_end_ns = yames_lib::probe::now_ns();
     engine.shutdown();
     stop.store(true, Ordering::Relaxed);
     let swaps_done = match swapper {
@@ -1871,11 +2151,14 @@ fn main() -> ExitCode {
         if let Some(h) = run.handle.take() {
             let _ = h.join();
         }
+        let spans = run.load_spans.lock().unwrap_or_else(|e| e.into_inner()).clone();
         (
             run.backend,
             run.load_secs,
             run.generations.load(Ordering::Relaxed),
             run.failures.load(Ordering::Relaxed),
+            loads_in_window(&spans, window_start_ns, window_end_ns),
+            run.cancels.load(Ordering::Relaxed),
         )
     });
 
@@ -1923,9 +2206,16 @@ fn main() -> ExitCode {
     // ---- Output ----
     let mut mode = match &llm_summary {
         None => "baseline (--no-llm)".to_string(),
-        Some((backend, _, _, _)) => format!(
-            "LLM backend={backend} YAMES_LLM_GPU_LAYERS={}",
-            std::env::var("YAMES_LLM_GPU_LAYERS").unwrap_or_else(|_| "(unset)".into())
+        Some((backend, ..)) => format!(
+            "LLM backend={backend} YAMES_LLM_GPU_LAYERS={}{}",
+            std::env::var("YAMES_LLM_GPU_LAYERS").unwrap_or_else(|_| "(unset)".into()),
+            if args.llm_load {
+                " + --llm-load"
+            } else if args.llm_cancel {
+                " + --llm-cancel"
+            } else {
+                ""
+            }
         ),
     };
     // A pasted report has to say whether the band was playing. Two runs
@@ -2006,9 +2296,23 @@ fn main() -> ExitCode {
             None => println!("harmony worker    said nothing"),
         }
     }
-    if let Some((_, load_secs, gens, fails)) = &llm_summary {
-        println!("model load        {load_secs:.1} s");
-        println!("generations       {gens} completed, {fails} failed");
+    if let Some((_, load_secs, gens, fails, loads, cancels)) = &llm_summary {
+        if args.llm_load {
+            println!(
+                "model loads       {} started inside the window, {} began and finished inside it \
+                 ({:.2} s each on average)",
+                loads.started_inside,
+                loads.finished_inside,
+                loads.mean_secs()
+            );
+        } else {
+            println!("model load        {load_secs:.1} s");
+        }
+        if args.llm_cancel {
+            println!("ask turns         {cancels} cancelled, {gens} finished first, {fails} failed");
+        } else {
+            println!("generations       {gens} completed, {fails} failed");
+        }
     }
     println!(
         "stream            {} Hz, {} frames/callback ({:.2} ms)",
@@ -2282,4 +2586,29 @@ fn start_capture(
             (takes, played, asked)
         })
         .expect("spawn the capture")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{loads_in_window, LoadCount};
+
+    /// `--llm-load` counts a load only against the window it was measured
+    /// in: one before it (a slow device setup) is not counted, one still
+    /// running at the end started inside but did not finish inside.
+    #[test]
+    fn loads_are_counted_against_the_measured_window() {
+        let spans = [
+            (50, 150),    // began before the window: not counted at all
+            (100, 400),   // inside
+            (400, 700),   // inside
+            (700, 1_200), // began inside, still loading when the stream stopped
+            (1_000, 1_000), // began exactly at the end: outside
+        ];
+        assert_eq!(
+            loads_in_window(&spans, 100, 1_000),
+            LoadCount { started_inside: 3, finished_inside: 2, finished_ns: 600 }
+        );
+        assert_eq!(loads_in_window(&spans, 100, 1_000).mean_secs(), 300e-9);
+        assert_eq!(loads_in_window(&[], 100, 1_000).mean_secs(), 0.0);
+    }
 }

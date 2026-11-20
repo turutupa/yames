@@ -17,13 +17,10 @@
     "end": "结束",
     "start": "开始",
     "clearAll": "清空",
-    "collapse": "收起",
     "feed": "动态",
     "history": "历史",
     "emptyTitle": "你跟着节拍器演奏时，教练会在一旁倾听。",
     "emptyHint": "点击此面板顶部的“开始”，然后演奏。教练会边听边点评你的节奏，并在你点击“结束”时做总结。",
-    "askPlaceholder": "问问教练…",
-    "send": "发送",
     "today": "今天",
     "yesterday": "昨天",
     "noteSpacingTrend": "音符间距趋势",
@@ -45,7 +42,8 @@
       "notDownloaded": "未下载",
       "notOnThisDevice": "此设备不可用",
       "downloading": "下载中 {{percent}}",
-      "downloadingNoPercent": "下载中"
+      "downloadingNoPercent": "下载中",
+      "checking": "正在校验下载"
     },
     "state": {
       "ready": "已加载，就绪",
@@ -56,8 +54,10 @@
       "failedWhy": "加载失败（{{reason}}）。选择它以重试",
       "notDownloaded": "未下载",
       "update": "旧版本。请在设置 → 练习教练中更新",
-      "otherOnDisk": "未下载。这台电脑上的第二个模型需要后续更新；目前请在设置 → 练习教练中切换",
+      "unplaced": "未下载。无法识别这台电脑上的一个模型；请在设置 → 练习教练中管理",
+      "noRoom": "未下载。需要 {{need}}，可用 {{free}}",
       "downloading": "正在下载",
+      "checking": "正在校验下载",
       "lowMemory": "这台电脑的内存少于此模型所需；可能运行缓慢或无法加载"
     },
     "why": {
@@ -67,18 +67,29 @@
     "download": {
       "start": "下载",
       "pause": "暂停",
+      "pauseHint": "先停下并保留已下载的部分；点击“继续”将从此处接着下载",
+      "cancel": "取消",
+      "cancelHint": "停止并删除已下载的部分",
       "resume": "继续",
       "retry": "重试",
       "anyway": "仍然下载",
       "notNow": "暂不",
       "running": "正在下载… {{percent}}",
       "runningNoPercent": "正在下载…",
+      "runningBytes": "正在下载… {{done}} / {{total}}",
+      "bytes": "{{done}} / {{total}}",
+      "checking": "正在用公布的校验和校验下载… {{percent}}",
       "voices": "正在获取教练的语音…",
       "paused": "已暂停于 {{percent}}。点击“继续”将从此处接着下载。",
+      "pausedBytes": "已暂停于 {{done}} / {{total}}。点击“继续”将从此处接着下载。",
       "pausedNoPercent": "已暂停。点击“继续”将从停下的地方接着下载。",
+      "cancelled": "已取消。已下载的部分已删除。",
       "failed": "下载已中断：{{reason}}",
       "failedNoReason": "下载已中断。",
-      "meteredWarn": "你似乎在使用移动数据。通过它下载 {{size}} 的内容流量很大。"
+      "checksumFailed": "下载的文件与公布的校验和不符，已删除。你原有的内容没有任何改动。",
+      "noRoom": "空间不足：需要 {{need}}，可用 {{free}}。请先腾出空间，再重试。",
+      "meteredWarn": "你似乎在使用移动数据。通过它下载 {{size}} 的内容流量很大。",
+      "spaceWarn": "只有 {{free}} 可用，而这需要 {{need}}。放得下，但余量很小。"
     }
   },
   "coachDetail": {

@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import "../../i18n";
 import { TAKE_ORDER_MAX, TakeOrder, shortCue } from "./CoachLine";
-import { CoachNote, FactLine, NoteBars } from "./CoachNote";
+import { CoachNote, FactLine, NoteBars, NoteCue } from "./CoachNote";
 import type { FactItem, NoteStrip } from "../../coach/takeNote";
 import { UngradedNote } from "../session/SessionCoach";
 import type { SessionRun } from "../session/hooks/useSessionRun";
@@ -48,6 +48,19 @@ describe("the note", () => {
     expect(note).toHaveTextContent("From the Path · Step 2");
   });
 
+  it("says the next thing to try under a finding as the Path's, with its source", () => {
+    render(
+      <CoachNote headline="The tune's first bar slipped on two rounds of three." live testId="n">
+        <NoteCue label="Next time:" say="Count the held E, then come in." source={{ kind: "path", step: 2 }} testId="next" />
+      </CoachNote>,
+    );
+    const next = screen.getByTestId("next");
+    expect(next).toHaveTextContent("Next time: Count the held E, then come in.");
+    expect(next).toHaveTextContent("From the Path · Step 2");
+    // The finding is the headline; the cue is not.
+    expect(screen.getByTestId("n").querySelector(".coach-note-head")).not.toHaveTextContent("Count the held E");
+  });
+
   it("marks a fact it could not tell with a dash, never a cross", () => {
     const facts: FactItem[] = [
       { kind: "heard", mark: "check", line: { key: "session.note.fact.heard", values: { heard: 60, expected: 60 } } },
@@ -79,6 +92,37 @@ describe("the note", () => {
     expect(document.querySelectorAll(".coach-bars-round")).toHaveLength(3);
     const missed = [...document.querySelectorAll('.coach-bar[data-state="missed"]')];
     expect(missed.map((m) => m.textContent)).toEqual(["×1", "×5"]);
+  });
+
+  it("given onAsk, its sentence and each bar open Ask about themselves (DESIGN 5.1)", () => {
+    const onAsk = vi.fn();
+    const strip: NoteStrip = {
+      cells: [1, 2, 3].map((n) => ({ n, state: (n === 2 ? "missed" : "met") as "missed" | "met", round: 1, patternBar: n, spot: n === 2 })),
+      patternBars: 3,
+      rounds: 1,
+      held: null,
+      label: { key: "session.note.strip.roundEvery", values: { count: 3 } },
+    };
+    render(
+      <CoachNote headline="Bar 2 of the tune slipped." onAsk={onAsk} testId="n">
+        <NoteBars strip={strip} label="every 3" onAsk={onAsk} />
+      </CoachNote>,
+    );
+    const say = screen.getByTestId("coach-note-ask");
+    fireEvent.click(say);
+    expect(onAsk).toHaveBeenLastCalledWith({ about: "Bar 2 of the tune slipped.", from: say });
+    const bar = screen.getByTestId("coach-bar-ask-2");
+    fireEvent.click(bar);
+    expect(onAsk).toHaveBeenLastCalledWith({ about: bar.getAttribute("aria-label"), from: bar });
+    expect(bar.getAttribute("aria-label")).toMatch(/2/);
+    // No question is put for the player: no "?" chip, nothing asked.
+    expect(onAsk.mock.calls.every(([r]) => !("question" in r))).toBe(true);
+  });
+
+  it("without onAsk, its words are just words", () => {
+    render(<CoachNote headline="Keep it even." testId="n" />);
+    expect(screen.queryByTestId("coach-note-ask")).toBeNull();
+    expect(screen.getByTestId("n").querySelector("button")).toBeNull();
   });
 });
 

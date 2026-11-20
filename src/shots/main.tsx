@@ -387,12 +387,20 @@ async function drive() {
           await until("the Take to run", () => !!byId("session-live"));
           if (shot!.session.band) await until("the band", () => !!byId("session-band"));
           if (stop !== "playing") {
+            const verdictShown = () => !!byId("session-between") || !!byId("session-result");
+            // More Takes first, each to its own verdict (c1c: the same place twice, three times).
+            for (let more = shot!.session.again ?? 0; more > 0; more -= 1) {
+              await until("a verdict", verdictShown, 30000);
+              big()?.click();
+              await until("the next Take to run", () => !!byId("session-live"), 20000);
+              await until("its verdict", verdictShown, 30000);
+            }
             const outcome =
               shot!.session.grading === "off"
                 ? "session-ungraded"
                 : stop === "noCatch"
                   ? "session-no-catch"
-                  : stop === "between" || stop === "readyAgain"
+                  : stop === "between" || stop === "readyAgain" || stop === "playingAgain" || stop === "loop" || stop === "afterLoop"
                     ? "session-between"
                     : "session-result";
             await until("the verdict", () => !!byId(outcome), 30000);
@@ -409,6 +417,20 @@ async function drive() {
               const nudge = slower && !slower.disabled ? slower : (byId("session-faster") as HTMLButtonElement | null);
               nudge?.click();
               await until("the next Take to be ready", ready, 20000);
+            }
+            if (stop === "playingAgain") {
+              // Go again: straight into the next Take, whose order the last verdict chose.
+              big()?.click();
+              await until("the next Take to run", () => !!byId("session-live"), 20000);
+            }
+            if (stop === "loop" || stop === "afterLoop") {
+              await until("the loop's button", () => !!byId("session-loop"));
+              byId("session-loop")?.click();
+              await until("the loop", () => byId("session-loop-screen")?.dataset.phase === "looping");
+              if (stop === "afterLoop") {
+                big()?.click();
+                await until("the ready screen after the loop", ready, 20000);
+              }
             }
             if (stop === "recap") {
               await pressUntil(

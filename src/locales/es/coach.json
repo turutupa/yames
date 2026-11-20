@@ -17,13 +17,10 @@
     "end": "Terminar",
     "start": "Empezar",
     "clearAll": "Borrar todo",
-    "collapse": "Contraer",
     "feed": "Comentarios",
     "history": "Historial",
     "emptyTitle": "Tu entrenador te escucha mientras tocas con el clic.",
     "emptyHint": "Pulsa Empezar en la parte de arriba de este panel y toca. Comenta tu tempo sobre la marcha y lo resume cuando pulsas Terminar.",
-    "askPlaceholder": "Pregúntale al entrenador…",
-    "send": "Enviar",
     "today": "Hoy",
     "yesterday": "Ayer",
     "noteSpacingTrend": "Tendencia del espaciado de notas",
@@ -45,7 +42,8 @@
       "notDownloaded": "sin descargar",
       "notOnThisDevice": "no disponible en este dispositivo",
       "downloading": "descargando {{percent}}",
-      "downloadingNoPercent": "descargando"
+      "downloadingNoPercent": "descargando",
+      "checking": "comprobando la descarga"
     },
     "state": {
       "ready": "Cargado y listo",
@@ -56,8 +54,10 @@
       "failedWhy": "No se pudo cargar ({{reason}}). Elígelo para reintentarlo",
       "notDownloaded": "Sin descargar",
       "update": "Una versión anterior. Actualízala en Ajustes → Coach",
-      "otherOnDisk": "Sin descargar. Un segundo modelo en este equipo necesita una actualización posterior; por ahora, cambia en Ajustes → Coach",
+      "unplaced": "Sin descargar. No se pudo identificar un modelo de este equipo; gestiónalo en Ajustes → Coach",
+      "noRoom": "Sin descargar. Necesita {{need}}, hay {{free}} libres",
       "downloading": "Descargando",
+      "checking": "Comprobando la descarga",
       "lowMemory": "Este equipo tiene menos memoria de la que quiere este modelo; puede ir lento o no cargar"
     },
     "why": {
@@ -67,18 +67,29 @@
     "download": {
       "start": "Descargar",
       "pause": "Pausar",
+      "pauseHint": "Parar por ahora y conservar lo descargado; Reanudar sigue desde ahí",
+      "cancel": "Cancelar",
+      "cancelHint": "Parar y eliminar lo descargado hasta ahora",
       "resume": "Reanudar",
       "retry": "Reintentar",
       "anyway": "Descargar igualmente",
       "notNow": "Ahora no",
       "running": "Descargando… {{percent}}",
       "runningNoPercent": "Descargando…",
+      "runningBytes": "Descargando… {{done}} de {{total}}",
+      "bytes": "{{done}} de {{total}}",
+      "checking": "Comprobando la descarga con su suma de comprobación publicada… {{percent}}",
       "voices": "Obteniendo las voces del coach…",
       "paused": "En pausa al {{percent}}. Al reanudar, sigue desde ahí.",
+      "pausedBytes": "En pausa en {{done}} de {{total}}. Al reanudar, sigue desde ahí.",
       "pausedNoPercent": "En pausa. Al reanudar, sigue donde se quedó.",
+      "cancelled": "Cancelada. Lo descargado se eliminó.",
       "failed": "La descarga se detuvo: {{reason}}",
       "failedNoReason": "La descarga se detuvo.",
-      "meteredWarn": "Parece que usas datos móviles. {{size}} es mucho para descargar con ellos."
+      "checksumFailed": "El archivo descargado no coincidía con su suma de comprobación publicada, así que se eliminó. No se cambió nada de lo que ya tenías.",
+      "noRoom": "No hay espacio suficiente: necesita {{need}} y hay {{free}} libres. Libera espacio y vuelve a intentarlo.",
+      "meteredWarn": "Parece que usas datos móviles. {{size}} es mucho para descargar con ellos.",
+      "spaceWarn": "Solo hay {{free}} libres y esto necesita {{need}}. Cabe, con poco margen."
     }
   },
   "coachDetail": {

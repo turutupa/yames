@@ -2191,6 +2191,37 @@ export type ModelStatus = {
   studioRecommended: boolean;
   standardRecommended: boolean;
   brainUpdateRecommended: boolean;
+  /**
+   * Each local tier on its own (leg ms2): both can be on disk side by side,
+   * in `models/brain/<tier>/`. One entry per tier. Absent from an older
+   * backend, where the single-brain fields above are the whole truth
+   * (`coach/brainDisk.ts` reads either).
+   */
+  tiers?: TierStatus[];
+  /** Bytes free on the models' volume; null when the platform cannot say. */
+  freeBytes?: number | null;
+};
+
+/** One tier's brain on disk (`ModelStatus.tiers`). */
+export type TierStatus = {
+  tier: string;
+  onDisk: boolean;
+  sizeBytes: number;
+  family: string | null;
+  updateRecommended: boolean;
+  /** A paused download of this tier, kept to resume from; 0 when none. */
+  partialBytes: number;
+  /** What the pinned file weighs. */
+  downloadBytes: number | null;
+  /** A SHA-256 is pinned for it and checked before it is adopted. */
+  checksumPinned: boolean;
+  /**
+   * Bytes of this tier left in the old single place and not in use: an older
+   * copy of the model that the tier's own copy shadows, and a paused
+   * download that could not be moved. Settings shows it with its own Remove.
+   * Absent from an older backend.
+   */
+  olderCopyBytes?: number;
 };
 
 export type DownloadProgress = {
@@ -2199,6 +2230,34 @@ export type DownloadProgress = {
   totalBytes: number;
   fraction: number;
   done: boolean;
+  /**
+   * "transfer" while bytes arrive, "checking" while the brain's checksum is
+   * computed (the bytes then count what has been hashed).
+   */
+  stage?: "transfer" | "checking";
+  /** The download it belongs to (`startModelDownload`'s answer). */
+  generation?: number;
+};
+
+/** The `model-download-complete` payload. */
+export type DownloadComplete = {
+  success: boolean;
+  /**
+   * The download it belongs to. Downloads are numbered in the order they
+   * start; an event from an earlier one than the download the UI started
+   * is stale (a stopped thread's late word) and is ignored.
+   */
+  generation?: number;
+  tier?: string;
+  /** Paused or cancelled by the player. */
+  cancelled?: boolean;
+  /** Cancelled, and the partial file was removed. */
+  discarded?: boolean;
+  /** "space": not enough room; "checksum": the file did not match its pinned hash. */
+  code?: "space" | "checksum";
+  needBytes?: number;
+  freeBytes?: number;
+  error?: string;
 };
 
 export async function getModelStatus(): Promise<ModelStatus> {
@@ -2274,8 +2333,19 @@ export async function downloadModelFile(
   await writeModelChunk(component, filename, Array.from(full));
 }
 
-export async function deleteModels(): Promise<void> {
-  return invoke("delete_models");
+/**
+ * "Remove models": everything, voices included. With a `tier`, that tier's
+ * brain only (Settings → Coach, per tier); the other tier and the voices
+ * stay, and Rust unloads the model only when it may be the one deleted.
+ */
+/**
+ * Remove models: all of them (no tier), one tier's, or, with `olderCopy`,
+ * only the older copy of that tier left in the old place (the copy in use
+ * stays).
+ */
+export async function deleteModels(tier?: string, opts?: { olderCopy?: boolean }): Promise<void> {
+  if (!tier) return invoke("delete_models");
+  return opts?.olderCopy ? invoke("delete_models", { tier, olderCopy: true }) : invoke("delete_models", { tier });
 }
 
 // ---------------------------------------------------------------------------
@@ -2288,8 +2358,9 @@ export async function deleteModels(): Promise<void> {
  * not restarted. Prefer `ensureCoachLoaded()` from `hooks/coachLoader`,
  * which also dedupes the in-flight promise on this side.
  */
-export async function loadCoachModel(): Promise<boolean> {
-  return invoke<boolean>("load_coach_model");
+export async function loadCoachModel(tier?: string): Promise<boolean> {
+  // The tier's own file: both tiers may be on disk side by side.
+  return tier ? invoke<boolean>("load_coach_model", { tier }) : invoke<boolean>("load_coach_model");
 }
 
 /**
@@ -2358,6 +2429,109 @@ export async function coachGenerate(
   } finally {
     // Without this the 15 s chat timer keeps the event loop (and, in
     // tests, the fake clock) busy long after the call resolved.
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
+
+/**
+ * The Ask kind (DESIGN 9.4): one model call a turn, with the static prefix
+ * (system text and the tool list), the context (at most 450 tokens), the
+ * question and, for a choice, the GBNF grammar the registry generates. Rust
+ * keeps the prefix decoded between turns. A malformed grammar rejects with
+ * a message starting "grammar:"; no model is `noModel`, not an error.
+ *
+ * Only `answered` is an answer to act on. `truncated` is text the budget
+ * or the whitespace guard cut off (under a grammar, at most the start of a
+ * sentence of it: never parse it as a tool call); `deadEnd` is a valid
+ * grammar the model could not continue under; `timedOut` is the turn's
+ * deadline, distinct from the player's `cancelled`. In all of those the
+ * rule-made answer stands.
+ */
+export type CoachAskMode = "choice" | "prose";
+
+export interface CoachAskRequest {
+  /** From `newGenerationId()`: what `cancelGeneration` takes. */
+  generationId: number;
+  mode: CoachAskMode;
+  prefix: string;
+  context: string;
+  question: string;
+  grammar?: string | null;
+  /** The turn's budget in Rust, queue and generation together.
+   *  `COACH_ASK_TIMEOUT_MS` when absent. */
+  deadlineMs?: number;
+}
+
+interface CoachAskTimings {
+  prefixCached: boolean;
+  promptMs: number;
+  totalMs: number;
+}
+
+export type CoachAskOutcome =
+  | ({
+      /** The model ended the answer itself, inside the budget. */
+      status: "answered";
+      text: string;
+    } & CoachAskTimings)
+  | ({
+      /** Cut off: not a complete answer. */
+      status: "truncated";
+      text: string;
+      by: "budget" | "whitespace";
+    } & CoachAskTimings)
+  | { status: "deadEnd"; why: string }
+  | { status: "cancelled" }
+  | { status: "timedOut" }
+  | { status: "noModel" };
+
+/** DESIGN 5.5: a turn fits 8 s or the rule-made answer stands. Rust holds
+ *  the turn to it (`deadlineMs`); the wrapper's own timer is a backstop
+ *  `COACH_ASK_BACKSTOP_MS` later, for a Rust side that never answers. */
+export const COACH_ASK_TIMEOUT_MS = 8_000;
+export const COACH_ASK_BACKSTOP_MS = 1_000;
+/** Rust's own cap on a turn (`ASK_MAX_DEADLINE_MS`). A larger `deadlineMs`
+ *  is clamped to it here, before it is sent and before the backstop is
+ *  set: past 2^31 - 1 ms `setTimeout` fires at once. */
+export const COACH_ASK_MAX_DEADLINE_MS = 60_000;
+
+// Unique for the life of the Rust process, across webview reloads too: a
+// cancel Rust holds for an id it has not seen yet must not meet a new turn.
+let nextGenerationId = Date.now() * 1_000;
+
+export function newGenerationId(): number {
+  nextGenerationId += 1;
+  return nextGenerationId;
+}
+
+/** Stop an Ask turn, queued or running. True when Rust found it. */
+export async function cancelGeneration(generationId: number): Promise<boolean> {
+  return invoke<boolean>("cancel_generation", { generationId });
+}
+
+/** One Ask turn. Rust ends it at its deadline with `timedOut`; if Rust has
+ *  not answered a backstop later, the turn is cancelled there and this
+ *  rejects with `Error("coach_ask_timeout")`. */
+export async function coachAsk(request: CoachAskRequest): Promise<CoachAskOutcome> {
+  const asked = request.deadlineMs ?? COACH_ASK_TIMEOUT_MS;
+  const deadlineMs = Number.isFinite(asked)
+    ? Math.min(Math.max(0, Math.floor(asked)), COACH_ASK_MAX_DEADLINE_MS)
+    : COACH_ASK_MAX_DEADLINE_MS;
+  const call = invoke<CoachAskOutcome>("coach_ask", {
+    request: { ...request, grammar: request.grammar ?? null, deadlineMs },
+  });
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      call,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => {
+          void cancelGeneration(request.generationId).catch(() => false);
+          reject(new Error("coach_ask_timeout"));
+        }, deadlineMs + COACH_ASK_BACKSTOP_MS);
+      }),
+    ]);
+  } finally {
     if (timer !== undefined) clearTimeout(timer);
   }
 }
@@ -2543,16 +2717,26 @@ export function onDownloadProgress(callback: (progress: DownloadProgress) => voi
   return listen<DownloadProgress>("model-download-progress", (e) => callback(e.payload));
 }
 
-export function onDownloadComplete(callback: (result: { success: boolean; tier?: string; cancelled?: boolean; error?: string }) => void) {
-  return listen<{ success: boolean; tier?: string; cancelled?: boolean; error?: string }>("model-download-complete", (e) => callback(e.payload));
+export function onDownloadComplete(callback: (result: DownloadComplete) => void) {
+  return listen<DownloadComplete>("model-download-complete", (e) => callback(e.payload));
 }
 
-export async function startModelDownload(url: string, component: string, filename: string, tier: string): Promise<void> {
-  return invoke("start_model_download", { url, component, filename, tier });
+/**
+ * Start (or resume) a brain download. Rust takes only the pinned URL of the
+ * tier asked for, and answers with the download's number, which every one
+ * of its events carries (`generation`).
+ */
+export async function startModelDownload(url: string, component: string, filename: string, tier: string): Promise<number | undefined> {
+  return invoke<number | undefined>("start_model_download", { url, component, filename, tier });
 }
 
-export async function cancelModelDownload(): Promise<void> {
-  return invoke("cancel_model_download");
+/**
+ * Stop the model download. Plain, it is a pause: Rust keeps the bytes and
+ * the next start resumes. With `discard`, a cancel: the partial file of
+ * `tier` / `url` is removed too (a paused one included).
+ */
+export async function cancelModelDownload(opts?: { discard: boolean; tier: string; url: string }): Promise<void> {
+  return opts ? invoke("cancel_model_download", opts) : invoke("cancel_model_download");
 }
 
 export function onPlaybackFinished(callback: () => void) {

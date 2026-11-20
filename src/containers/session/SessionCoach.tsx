@@ -7,9 +7,12 @@
  * or a tempo: the Session's own buttons (`bigAction`) do that, and no sentence
  * here argues with them.
  */
-import { useMemo, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
+import type { AskHandler } from "../coach/askStore";
 import { useTranslation } from "react-i18next";
 import { takeNote } from "../../coach/takeNote";
+import { cueFor, cueOrder } from "../../coach/cues";
+import type { CuePick } from "../../coach/cues";
 import type { FactItem, TakeNote, TakeReview } from "../../coach/takeNote";
 import { useCoachEvent } from "../../coach/useCoachEvent";
 import type { Exercise } from "../../paths/format";
@@ -17,13 +20,14 @@ import type { Line } from "../../session/coachWords";
 import { displayValue, metricKey, reasonLine } from "../../session/coachWords";
 import { readyHonestLineKey } from "../../session/caveats";
 import type { PlanStep } from "../../session/planner";
-import { cleanTempoOf, heardItOf, takesOf } from "../../session/progress";
+import { cleanTempoOf, heardItOf, takesOf, upstrokeOf } from "../../session/progress";
 import { parkedUntil, reviewStateOf } from "../../session/rotation";
 import { currentStep } from "../../session/runner";
-import type { TakeOutcome } from "../../session/runner";
+import type { BigAction, TakeOutcome } from "../../session/runner";
+import { loopLine } from "../../coach/loopLine";
 import { noteNameOf } from "../songs/review/marks";
 import { CoachLine, shortCue } from "../coach/CoachLine";
-import { CoachNote, FactLine, NoteAnswer, NoteBars, NoteChips, NoteLine } from "../coach/CoachNote";
+import { CoachNote, FactLine, NoteAnswer, NoteBars, NoteChips, NoteCue, NoteLine } from "../coach/CoachNote";
 import type { NoteChip } from "../coach/CoachNote";
 import { seedOf } from "./hooks/useSessionRun";
 import type { SessionRun } from "./hooks/useSessionRun";
@@ -31,6 +35,20 @@ import type { WatchControl } from "./practice/useWatch";
 import { lineText } from "./lineText";
 
 type T = ReturnType<typeof useTranslation>["t"];
+
+/**
+ * Ask, for the coach's words in a Session (DESIGN 5.1): the note's sentence
+ * and the recap's line open Ask with that sentence as what the question is
+ * about, a cell of the bar strip opens it on that bar. `SessionView` provides
+ * `askCoach` where Ask exists and nothing while a Take runs (the Take screen
+ * shows its order, not a note, and nothing of Ask is offered then).
+ *
+ * No "?" chips yet: with no model and no fact cards (the next milestone),
+ * Ask's honest "can't answer typed questions yet" is all a question would
+ * get. "What should I try?" keeps opening the How fold. The fact-card leg
+ * adds the chips, with `onAsk({ question })`.
+ */
+export const SessionAsk = createContext<AskHandler | undefined>(undefined);
 
 const DAY_MS = 86_400_000;
 
@@ -45,9 +63,44 @@ export function noteText(t: T, line: Line): string {
   return lineText(t, typeof midi === "number" ? { ...line, values: { ...line.values, note: pitchName(midi) } } : line);
 }
 
-/** The order a running Take shows: the Exercise's cue in its short form, or nothing. */
-export function takeOrderText(exercise: Pick<Exercise, "coachLine"> | null | undefined): string | null {
-  return shortCue(exercise?.coachLine);
+/**
+ * The order a running Take shows (DESIGN 3.4): the cue chosen for it, the
+ * same sentence the ready note and the last result said; without one, the
+ * Exercise's coach line when it is short enough, else nothing.
+ */
+export function takeOrderText(
+  exercise: Pick<Exercise, "coachLine"> | null | undefined,
+  pick?: CuePick | null,
+): string | null {
+  return pick ? cueOrder(pick) : shortCue(exercise?.coachLine);
+}
+
+/**
+ * The cue for the next Take of the step on screen (`cueFor`), from the last
+ * Take of that step in this Session: one sentence for the ready note, the
+ * Take's order and the result's "Next time". Fixed while a Take runs: nothing
+ * it reads changes until the Take's result.
+ */
+export function useNextCue(session: SessionRun): CuePick | null {
+  const step = currentStep(session.run);
+  const outcomes = session.run.outcomes;
+  const last = useMemo(() => {
+    if (!step) return null;
+    const mine = outcomes.filter((o) => o.stepId === step.id);
+    return mine[mine.length - 1] ?? null;
+  }, [outcomes, step]);
+  const note = useTakeNote(session, last);
+  const played = session.take?.exercise ?? session.exercise;
+  return useMemo(() => (played ? cueFor(played, note) : null), [played, note]);
+}
+
+/** The Step's number in its Path, for "From the Path · Step N". */
+function pathStepNumber(session: SessionRun): number | undefined {
+  const { exercise, pathId } = whereOf(session);
+  const base = session.exercise ?? exercise;
+  if (!base || !pathId) return undefined;
+  const path = session.paths.find((p) => p.id === pathId);
+  return path?.steps.find((s) => s.exercises.some((e) => e.id === base.id))?.order;
 }
 
 /** What the Session's coach needs to know about where it is. */
@@ -124,9 +177,17 @@ function findingText(t: T, note: TakeNote, bpm: number): string {
   return parts.join(" ");
 }
 
-/** The one quiet line under a finding: the repeat, else what history knows. */
-function historyText(t: T, note: TakeNote): string | null {
-  if (note.repeatLine) return noteText(t, note.repeatLine);
+/**
+ * The one quiet line under a finding: what the big button does and why, when
+ * a rule chose it (P2's "leave it", P1's "once more"), else what history
+ * knows. Read off `bigAction`'s actual result, so no sentence here argues
+ * with the button.
+ */
+function historyText(t: T, note: TakeNote, big: BigAction): string | null {
+  if (note.repeatLine && (big.kind === "next" || big.kind === "finish") && big.leaveIt) {
+    return noteText(t, note.repeatLine);
+  }
+  if (big.kind === "again" && big.onceMore) return t("session.note.repeat.onceMore", { bpm: big.bpm, up: big.onceMore.up });
   // A new clean tempo is said by the result's own line above the note.
   const line = note.historyLines.find((l) => l.key !== "session.note.history.newClean");
   return line ? noteText(t, line) : null;
@@ -142,10 +203,21 @@ function factText(t: T, fact: FactItem): string {
  */
 export function ResultNote({ session, outcome, howTo }: { session: SessionRun; outcome: TakeOutcome; howTo: readonly string[] }) {
   const { t } = useTranslation();
+  const onAsk = useContext(SessionAsk);
   const note = useTakeNote(session, outcome);
   const [howOpen, setHowOpen] = useState(false);
+  const played = whereOf(session).exercise;
   if (!note || note.kind === "notCaught" || note.kind === "ungraded") return null;
-  const history = historyText(t, note);
+  const history = historyText(t, note, session.big);
+  // One thing to try next time (DESIGN 4.2): only a cue this Take's finding
+  // chose, and only when the next Take is this Exercise again. "Go again"
+  // skips the ready screen, so this is where it is read. A pass that moves
+  // on, or the Session moving on, carries none.
+  const big = session.big;
+  const pick = played ? cueFor(played, note) : null;
+  const next = pick && pick.basis === "measured" && big.kind !== "next" && big.kind !== "finish" ? pick : null;
+  const stepNumber = pathStepNumber(session);
+  const more = next?.cue.more;
   const chips: NoteChip[] = howTo.length
     ? [
         {
@@ -158,16 +230,29 @@ export function ResultNote({ session, outcome, howTo }: { session: SessionRun; o
       ]
     : [];
   return (
-    <CoachNote headline={findingText(t, note, outcome.bpm)} live kind="result" testId="coach-note">
+    <CoachNote headline={findingText(t, note, outcome.bpm)} live kind="result" testId="coach-note" onAsk={onAsk}>
       {note.findingLine && <NoteLine>{noteText(t, note.findingLine)}</NoteLine>}
       {history && <NoteLine testId="coach-history">{history}</NoteLine>}
-      {note.strip && <NoteBars strip={note.strip} label={noteText(t, note.strip.label)} />}
+      {next && (
+        <NoteCue
+          label={t("session.note.nextTime")}
+          say={next.cue.say}
+          source={{ kind: "path", ...(stepNumber === undefined ? {} : { step: stepNumber }) }}
+          testId="coach-next"
+        />
+      )}
+      {note.strip && <NoteBars strip={note.strip} label={noteText(t, note.strip.label)} onAsk={onAsk} />}
       <FactLine facts={note.facts} render={(fact) => factText(t, fact)} />
       <NoteChips chips={chips} />
       {howOpen && (
         <div className="coach-note-how" data-testid="coach-how">
           {howTo.map((line, i) => (
-            <p key={i} className="coach-note-line">
+            <p
+              key={i}
+              className="coach-note-line"
+              data-pointed={more === i ? "" : undefined}
+              ref={more === i ? (el) => el?.scrollIntoView?.({ block: "nearest" }) : undefined}
+            >
               {line}
             </p>
           ))}
@@ -190,14 +275,34 @@ function selfCheckOf(played: Exercise | null | undefined, exercise: Exercise | n
  */
 export function UngradedNote({ session, outcome }: { session: SessionRun; outcome: TakeOutcome }) {
   const { t } = useTranslation();
+  const onAsk = useContext(SessionAsk);
   const { exercise } = whereOf(session);
+  // The Take for the eyes (DESIGN 4.2, "Watch your pick"): its one question,
+  // answered by the player, kept with the Take.
+  if (outcome.ungraded === "eyes") {
+    const id = outcome.takeId;
+    if (!id) return null;
+    const row = session.progress.takes.find((take) => take.id === id);
+    const said = row ? upstrokeOf(row) : null;
+    const question = t("session.eyes.question");
+    return (
+      <CoachNote headline={question} kind="ungraded" testId="coach-note">
+        <NoteAnswer
+          question={t("session.note.ungraded.yourAnswer")}
+          answer={said === "yes" ? "yes" : said === "no" ? "notYet" : undefined}
+          labels={{ yes: t("session.eyes.yes"), notYet: t("session.eyes.no") }}
+          onAnswer={(value) => session.actions.answerUpstroke(id, value === "yes" ? "yes" : "no")}
+        />
+      </CoachNote>
+    );
+  }
   const question = selfCheckOf(exercise, session.exercise);
   const id = outcome.takeId;
   if (!question || !id) return null;
   const row = session.progress.takes.find((take) => take.id === id);
   const answer = row ? (heardItOf(row) ?? undefined) : undefined;
   return (
-    <CoachNote headline={question} kind="ungraded" testId="coach-note">
+    <CoachNote headline={question} kind="ungraded" testId="coach-note" onAsk={onAsk}>
       <NoteAnswer
         question={t("session.note.ungraded.yourAnswer")}
         answer={answer}
@@ -238,24 +343,31 @@ export function ReadyNote({
   step: PlanStep;
   stepNumber: number | undefined;
   watch?: WatchControl;
-  /** Opens the Exercise's How. Absent where the How is already open. */
-  onTry?: () => void;
+  /** Opens the Exercise's How, at the cue's line when it names one. Absent where the How is already open. */
+  onTry?: (more?: number) => void;
 }) {
   const { t } = useTranslation();
+  const onAsk = useContext(SessionAsk);
   const { run } = session;
   const exercise = session.exercise;
   const played = session.take?.exercise ?? exercise;
   const mine = run.outcomes.filter((o) => o.stepId === step.id);
   const last = mine[mine.length - 1] ?? null;
   const lastNote = useTakeNote(session, last);
+  // One thing to do: the cue the last Take chose, or the general one (DESIGN 4.1).
+  const pick = useNextCue(session);
   if (!exercise) return null;
   const source = { kind: "path" as const, ...(stepNumber === undefined ? {} : { step: stepNumber }) };
   const chips: NoteChip[] = [];
   if (watch?.canWatch && watch.hasSound && watch.soundOn && !watch.showing) {
     chips.push({ kind: "play", label: t("session.note.chip.hear"), onClick: watch.toggle, testId: "coach-hear" });
   }
-  if (onTry) chips.push({ kind: "ask", label: t("session.note.chip.try"), onClick: onTry, testId: "coach-try" });
+  if (onTry) chips.push({ kind: "ask", label: t("session.note.chip.try"), onClick: () => onTry(pick?.cue.more), testId: "coach-try" });
 
+  // The Take for the eyes: what to watch, and nothing else.
+  if (run.ungraded === "eyes") {
+    return <CoachNote headline={t("session.eyes.watch")} source={source} kind="ready" testId="coach-note" />;
+  }
   // Ungraded, by choice or because nothing is listening: no claim about the playing.
   if (run.ungraded) {
     const question = selfCheckOf(played, exercise);
@@ -266,10 +378,11 @@ export function ReadyNote({
     const untried = lastNote?.ungraded?.tryLine ?? null;
     return (
       <CoachNote
-        headline={question ? t("session.note.ungraded.listenFor", { question }) : exercise.coachLine}
+        headline={question ? t("session.note.ungraded.listenFor", { question }) : (pick?.cue.say ?? exercise.coachLine)}
         source={source}
         kind="ready"
         testId="coach-note"
+        onAsk={onAsk}
       >
         {!saidOnce && run.ungraded !== "inputOff" && (
           <NoteLine extra testId="coach-not-listening">
@@ -305,8 +418,18 @@ export function ReadyNote({
       : [];
     if (lead) quiet.push({ text: [lead, ...tail].join(" "), id: "coach-last" });
   }
+  // Back from a loop: one line about it, when something was measured (DESIGN 4.2).
+  const afterLoop = run.afterLoop ? loopLine(run.afterLoop.heard, run.afterLoop.loop, !run.ungraded) : null;
+  if (afterLoop) quiet.unshift({ text: noteText(t, afterLoop), id: "coach-after-loop" });
   return (
-    <CoachNote headline={exercise.coachLine} source={source} kind="ready" testId="coach-note">
+    <CoachNote
+      headline={pick?.cue.say ?? exercise.coachLine}
+      source={source}
+      kind="ready"
+      testId="coach-note"
+      onAsk={onAsk}
+      cue={pick ? pick.trigger : undefined}
+    >
       {quiet.map((line) => (
         <NoteLine key={line.id} extra testId={line.id}>
           {line.text}
@@ -358,8 +481,13 @@ export function recapLineText(t: T, session: SessionRun, now: number): string | 
 
 export function RecapLine({ session }: { session: SessionRun }) {
   const { t } = useTranslation();
+  const onAsk = useContext(SessionAsk);
   // Read once, as the recap opens: the line does not move under the player.
   const [text] = useState(() => recapLineText(t, session, Date.now()));
   if (!text) return null;
-  return <CoachLine testId="coach-recap">{text}</CoachLine>;
+  return (
+    <CoachLine testId="coach-recap" onAsk={onAsk}>
+      {text}
+    </CoachLine>
+  );
 }

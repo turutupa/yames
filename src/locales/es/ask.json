@@ -1,0 +1,54 @@
+{
+  "ask": {
+    "title": "Preguntar",
+    "button": "Preguntar",
+    "close": "Cerrar Preguntar",
+    "lookingAt": "Mirando:",
+    "nowLooking": "Ahora mirando: {{place}}",
+    "later": "Preguntar se abre después de esta toma",
+    "placeholder": "Pregunta sobre esta pantalla, tus tomas o tus rutas",
+    "send": "Enviar",
+    "writing": "Escribiendo una respuesta…",
+    "sections": {
+      "ask": "Preguntar",
+      "tools": "Coach de herramientas"
+    },
+    "screen": {
+      "today": "Hoy",
+      "paths": "Rutas",
+      "path": "Una ruta",
+      "step": "Un paso",
+      "session": "Tu sesión",
+      "progress": "Progreso",
+      "jam": "Jam",
+      "songs": "Canciones",
+      "beat": "Metrónomo",
+      "drill": "Rampa de tempo",
+      "setlist": "Setlist",
+      "tools": "Herramientas"
+    },
+    "looking": {
+      "readyFor": "lista para la toma {{n}}",
+      "take": "toma {{n}}",
+      "recap": "el resumen"
+    },
+    "empty": {
+      "title": "¿Qué quieres saber?",
+      "model": "Pregunta sobre esta pantalla, tus tomas o tus rutas. El modelo de este ordenador responde con sus propias palabras, como consejo general.",
+      "loading": "El modelo que elegiste se está preparando. Cuando esté listo, podrás preguntar sobre esta pantalla, tus tomas o tus rutas.",
+      "noModel": "Las preguntas escritas necesitan un modelo en este ordenador, y no hay ninguno activado. Elige uno abajo para preguntar sobre esta pantalla, tus tomas o tus rutas.",
+      "phone": "Las preguntas escritas necesitan un modelo, y los móviles aún no ejecutan ninguno."
+    },
+    "reply": {
+      "noModel": "No hay ningún modelo activado, así que las preguntas escritas aún no se pueden responder. Elige uno al pie de este panel.",
+      "gettingReady": "El modelo aún se está preparando. Vuelve a preguntar en un momento.",
+      "phone": "Los móviles aún no ejecutan un modelo, así que aquí no se pueden responder preguntas escritas.",
+      "nothing": "Esta vez no llegó ninguna respuesta."
+    },
+    "footer": {
+      "model": "Respondido por el modelo de este ordenador. Nada de lo que escribes sale de él.",
+      "local": "Nada de lo que escribes aquí sale de este ordenador.",
+      "phone": "Nada de lo que escribes aquí sale de este móvil."
+    }
+  }
+}

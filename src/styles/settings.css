@@ -210,6 +210,34 @@
   margin-left: 10px;
 }
 
+/* Each model on disk with its own Remove (both tiers may be there). */
+.coach-tier-list {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.coach-tier-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.coach-tier-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.coach-tier-remove {
+  flex: none;
+  padding: 4px 12px;
+}
+
 /* ─── Coach manage / voices sections ───
    The Practice Coach panel renders two stacked download sections: a
    "Voices" prompt that only appears when voices are missing/broken,
@@ -326,10 +354,25 @@
   z-index: 2;
 }
 
-.global-download-bar-cancel {
+/* Pause and Cancel, side by side at the bar's right end (the selector's
+   row offers the same two, in the same words). */
+.global-download-bar-actions {
   position: absolute;
-  right: 16px;  top: 50%;
+  right: 16px;
+  top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  gap: 2px;
+  z-index: 2;
+}
+
+.global-download-bar:has(.global-download-bar-actions) .global-download-bar-label {
+  padding-right: 128px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.global-download-bar-cancel {
   background: none;
   border: none;
   color: var(--text-secondary);
