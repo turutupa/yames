@@ -55,7 +55,7 @@
             {"when":"late","say":"Play each note right with the click."},
             {"when":"early","say":"Wait for the click before each note."},
             {"when":"afterHeld","say":"Count the long note out, then come in."},
-            {"when":"openString","say":"Rest the fretting hand and count the beats."},
+            {"when":"openString","say":"Keep the fretting hand off the strings."},
             {"when":"stringChange","say":"Move the pick across during the note before."},
             {"when":"lastBars","say":"Hold each long note for two full clicks."}
           ],
@@ -2564,9 +2564,9 @@
             {"when":"extras","say":"Keep the pick off the strings in the rests."},
             {"when":"notes","say":"Read one note ahead in the tab as you play."},
             {"when":"late","say":"Play right on the click after each rest."},
-            {"when":"early","say":"Breathe out through both silent beats.","more":1},
+            {"when":"early","say":"Wait out both silent beats, then come in.","more":0},
             {"when":"openString","say":"Lift the finger off in time for open notes."},
-            {"when":"stringChange","say":"Move to the next string during the rest."},
+            {"when":"stringChange","say":"Keep the pick close as you cross."},
             {"when":"lastBars","say":"Count the last two silent beats out loud."}
           ],
           "grading": "graded",
@@ -4007,7 +4007,7 @@
           ],
           "coachLine": "I time each note against where it is written. Whether your foot kept the beat is yours to say.",
           "cues": [
-            {"when":"even","say":"Play each note as the foot comes up.","more":1,"general":true},
+            {"when":"even","say":"Play each 'and' as the foot comes up.","more":1,"general":true},
             {"when":"heard","say":"Catch the string on every upstroke."},
             {"when":"extras","say":"Miss the string on each beat after the first.","more":0},
             {"when":"notes","say":"Read one note ahead in the tab as you play."},
@@ -7917,7 +7917,7 @@
             {"when":"late","say":"Put each long note right on the click."},
             {"when":"early","say":"Play the short note late, just before the beat.","more":1},
             {"when":"openString","say":"Lift both fingers off for the open notes."},
-            {"when":"stringChange","say":"Move across as each open note ends."},
+            {"when":"stringChange","say":"Move across right after each short note."},
             {"when":"lastBars","say":"Hold the last note for its whole beat."}
           ],
           "grading": "graded",
@@ -8990,7 +8990,7 @@
             {"when":"notes","say":"Keep the first finger at fret five.","more":0},
             {"when":"late","say":"Put each note on its sixteenth, no later."},
             {"when":"early","say":"Wait for each note's sixteenth; don't rush."},
-            {"when":"afterHeld","say":"Count through the gap, then come in."},
+            {"when":"afterHeld","say":"Count the long note's beat, then come in."},
             {"when":"stringChange","say":"Have the next finger ready as you cross."},
             {"when":"lastBars","say":"Hold the last note for its whole beat."}
           ],
@@ -9407,7 +9407,7 @@
           "cues": [
             {"when":"even","say":"Add one note a beat, then take one away.","more":0,"general":true},
             {"when":"heard","say":"Pick every written note, right to the end."},
-            {"when":"extras","say":"Play one, two, three, then four notes a beat.","more":0},
+            {"when":"extras","say":"Count each beat's notes and play no more.","more":0},
             {"when":"notes","say":"Read one note ahead in the tab as you play."},
             {"when":"late","say":"Put the first note of each beat on the click."},
             {"when":"early","say":"Wait for the click at the start of each beat."},
@@ -9712,7 +9712,7 @@
             {"when":"heard","say":"Pick every written note, right to the end."},
             {"when":"extras","say":"Play just three notes over two beats."},
             {"when":"notes","say":"Read one note ahead in the tab as you play."},
-            {"when":"late","say":"Make the three wide notes all the same length.","more":1},
+            {"when":"late","say":"Play the first wide note right on the click."},
             {"when":"early","say":"Give the third note its full length.","more":1},
             {"when":"openString","say":"Lift the finger off in time for open notes."},
             {"when":"stringChange","say":"Move the pick across during the note before."},
@@ -11390,7 +11390,7 @@
           ],
           "coachLine": "Band on. I time your notes against it and check them after the take.",
           "cues": [
-            {"when":"even","say":"Leave '2' and '3' to the drums.","more":0,"general":true},
+            {"when":"even","say":"Leave '2' and '3' to the drums till the fill.","more":0,"general":true},
             {"when":"heard","say":"Pick every written note, right to the end."},
             {"when":"extras","say":"Swing past the strings on the silent beats."},
             {"when":"notes","say":"Start each bar on its chord's root note.","more":1},
@@ -11687,7 +11687,7 @@
             {"when":"late","say":"Put each long note right on the click."},
             {"when":"early","say":"Play the short note late, just before the beat."},
             {"when":"openString","say":"Lift both fingers off for the open notes."},
-            {"when":"stringChange","say":"Move across as each open note ends."},
+            {"when":"stringChange","say":"Move across right after each short note."},
             {"when":"lastBars","say":"Hold the last note for its whole beat."}
           ],
           "grading": "graded",

@@ -63,7 +63,7 @@ const TWICE = "Play each note twice, then move on.";
 const F24 = "First finger on fret two, third on fret four.";
 const SHORT_LATE = "Play the short note late, just before the beat.";
 const OPEN_BOTH = "Lift both fingers off for the open notes.";
-const OPEN_CROSS = "Move across as each open note ends.";
+const OPEN_CROSS = "Move across right after each short note.";
 const LAST_BEAT = "Hold the last note for its whole beat.";
 const GALLOP_HEARD = "Pick the two short notes light but clear.";
 const A_LATE = "Play the 'a' late, just before the next beat.";
@@ -85,7 +85,7 @@ export const RHYTHM_FOUNDATIONS_CUES: CueBook = {
     c("late", CLICK_LATE),
     c("early", CLICK_EARLY),
     c("afterHeld", HELD_AFTER),
-    c("openString", "Rest the fretting hand and count the beats."),
+    c("openString", "Keep the fretting hand off the strings."),
     c("stringChange", STRING_AHEAD),
     c("lastBars", "Hold each long note for two full clicks."),
   ],
@@ -194,9 +194,9 @@ export const RHYTHM_FOUNDATIONS_CUES: CueBook = {
     c("extras", REST_QUIET),
     c("notes", NOTES_SAY),
     c("late", REST_LATE),
-    c("early", "Breathe out through both silent beats.", 1),
+    c("early", "Wait out both silent beats, then come in.", 0),
     c("openString", OPEN_LIFT),
-    c("stringChange", REST_MOVE),
+    c("stringChange", "Keep the pick close as you cross."),
     c("lastBars", "Count the last two silent beats out loud."),
   ],
 
@@ -279,7 +279,7 @@ export const RHYTHM_FOUNDATIONS_CUES: CueBook = {
 
   // Level 2, Step 5: off-beats
   "off-beats.the-and": [
-    g("Play each note as the foot comes up.", 1),
+    g("Play each 'and' as the foot comes up.", 1),
     c("heard", UP_CATCH),
     c("extras", "Miss the string on each beat after the first.", 0),
     c("notes", NOTES_SAY),
@@ -516,7 +516,7 @@ export const RHYTHM_FOUNDATIONS_CUES: CueBook = {
     c("notes", "Keep the first finger at fret five.", 0),
     c("late", "Put each note on its sixteenth, no later."),
     c("early", "Wait for each note's sixteenth; don't rush."),
-    c("afterHeld", "Count through the gap, then come in."),
+    c("afterHeld", LONG_BEAT),
     c("stringChange", NEXT_FINGER_CROSS),
     c("lastBars", LAST_BEAT),
   ],
@@ -536,7 +536,7 @@ export const RHYTHM_FOUNDATIONS_CUES: CueBook = {
   "gear-changes.pyramid": [
     g("Add one note a beat, then take one away.", 0),
     c("heard", HEARD_ALL),
-    c("extras", "Play one, two, three, then four notes a beat.", 0),
+    c("extras", "Count each beat's notes and play no more.", 0),
     c("notes", NOTES_SAY),
     c("late", BEAT_LATE),
     c("early", BEAT_EARLY),
@@ -550,7 +550,7 @@ export const RHYTHM_FOUNDATIONS_CUES: CueBook = {
     c("heard", HEARD_ALL),
     c("extras", "Play just three notes over two beats."),
     c("notes", NOTES_SAY),
-    c("late", "Make the three wide notes all the same length.", 1),
+    c("late", "Play the first wide note right on the click."),
     c("early", "Give the third note its full length.", 1),
     c("openString", OPEN_LIFT),
     c("stringChange", STRING_AHEAD),
@@ -616,7 +616,7 @@ export const RHYTHM_FOUNDATIONS_CUES: CueBook = {
 
   // Level 3, Step 12: with the band
   "with-the-band.band-eighths": [
-    g("Leave '2' and '3' to the drums.", 0),
+    g("Leave '2' and '3' to the drums till the fill.", 0),
     c("heard", HEARD_ALL),
     c("extras", SILENT_SWING),
     c("notes", "Start each bar on its chord's root note.", 1),
