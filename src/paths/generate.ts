@@ -9,6 +9,7 @@ import { PATH_SCHEMA_VERSION, STANDARD_TUNING, SUBDIVISION_TICKS, VARIATION_DIME
 import type {
   Backing,
   Crossing,
+  Cue,
   Exercise,
   ExerciseComputed,
   ExerciseVariant,
@@ -41,7 +42,7 @@ import { paceLadder } from "./pace";
 import type { ExerciseSpec, HarmonySpec, PathSpec, VariantBuild, VariantParams, VarySpec } from "./spec";
 import { markAlternate, markEconomy, markSweep, parseTab } from "./tabDsl";
 import { canSpellScale, chordRootName, guideTones, spellChord, spellScale } from "./theory";
-import { FIRST_VERSION_LINE, variantText } from "./variantText";
+import { FIRST_VERSION_LINE, cueTexts, describeVariant, variantText } from "./variantText";
 import type { ScaleId } from "../jam/scales";
 
 const METER = { numerator: 4, denominator: 4 };
@@ -326,6 +327,7 @@ function buildExercise(
     purpose: spec.purpose,
     howTo: spec.howTo,
     coachLine: spec.coach,
+    ...(spec.cues ? { cues: spec.cues.map((cue) => withMore(cue, cue.more)) } : {}),
     grading: profile.mode,
     feedback: spec.feedback ?? profile.feedback,
     meter: METER,
@@ -406,7 +408,92 @@ function buildExercise(
       exercise.howTo = exercise.howTo.filter((line) => !FIRST_VERSION_LINE.test(line));
     }
   }
+  // `more` names a line of the spec's how-to; the pack's may have lost its "first version" line.
+  if (exercise.cues) exercise.cues = exercise.cues.map((cue) => withMore(cue, moreIn(spec.howTo, cue.more, exercise.howTo)));
+  if (spec.cues && exercise.variation) {
+    const variants = exercise.variation.variants;
+    variants.forEach((variant, index) => {
+      if (index === 0) return;
+      const own = variantCues(spec, concrete[0], paramsList[0], concrete[index], paramsList[index], variant);
+      // Absent means "the Exercise's": written only where this variant's differ.
+      if (own && !sameCues(own, exercise.cues ?? [])) variant.cues = own;
+    });
+  }
   return exercise;
+}
+
+/** A cue in one key order (when, say, more, general), with `more` set to `at` or left out. */
+function withMore(cue: Cue, at: number | undefined): Cue {
+  return {
+    when: cue.when,
+    say: cue.say,
+    ...(at === undefined ? {} : { more: at }),
+    ...(cue.general ? { general: true as const } : {}),
+  };
+}
+
+function sameCues(a: readonly Cue[], b: readonly Cue[]): boolean {
+  return (
+    a.length === b.length &&
+    a.every((x, i) => x.when === b[i].when && x.say === b[i].say && x.more === b[i].more && !!x.general === !!b[i].general)
+  );
+}
+
+/** Where line `more` of the spec's how-to sits in `howTo`, or undefined when it is not there. */
+function moreIn(specHowTo: readonly string[], more: number | undefined, howTo: readonly string[]): number | undefined {
+  if (more === undefined) return undefined;
+  const line = specHowTo[more];
+  if (line === undefined) return more; // out of range: kept, for the validator to say so
+  const at = howTo.indexOf(line);
+  return at >= 0 ? at : undefined;
+}
+
+/**
+ * A variant's cues: each said again for its notes (`cueTexts`), or left out
+ * where it cannot be; `more` pointing at the same line of this variant's own
+ * how-to, or dropped when that line is not in it.
+ */
+function variantCues(
+  spec: ExerciseSpec,
+  first: Described,
+  firstParams: VariantParams,
+  variant: Described,
+  params: VariantParams,
+  built: ExerciseVariant,
+): Cue[] | null {
+  const cues = spec.cues;
+  if (!cues) return null;
+  const side = (d: Described, p: VariantParams) => ({
+    notes: d.part.notes,
+    position: d.part.position,
+    harmony: d.harmony,
+    chords: d.part.chords,
+    params: p,
+  });
+  const exerciseText = { purpose: spec.purpose, howTo: spec.howTo, ...side(first, firstParams) };
+  const said = cueTexts(exerciseText, side(variant, params), cues.map((c) => c.say));
+  // Which spec line each of the variant's how-to lines came from: rewritten, written by its build, or none.
+  let from: Array<number | null> | null = null;
+  if (built.howTo) {
+    const described = describeVariant(exerciseText, side(variant, params));
+    const rewritten = described.text?.howTo;
+    from =
+      rewritten && JSON.stringify(rewritten) === JSON.stringify(built.howTo)
+        ? described.howToFrom
+        : built.howTo.map((line) => {
+            const at = spec.howTo.indexOf(line);
+            return at >= 0 ? at : null;
+          });
+  }
+  const out: Cue[] = [];
+  cues.forEach((cue, i) => {
+    const text = said[i];
+    if (!text.ok) return;
+    const more =
+      cue.more === undefined ? undefined : from === null ? moreIn(spec.howTo, cue.more, spec.howTo) : from.indexOf(cue.more);
+    out.push(withMore({ ...cue, say: text.text }, more === undefined || more < 0 ? undefined : more));
+  });
+  return out;
 }
 
 /**
@@ -527,7 +614,7 @@ const isRow = (value: unknown): boolean =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
-  ("tick" in value || ("bpm" in value && "grading" in value));
+  ("tick" in value || ("bpm" in value && "grading" in value) || ("when" in value && "say" in value));
 
 function format(value: unknown, indent: string): string {
   if (Array.isArray(value)) {

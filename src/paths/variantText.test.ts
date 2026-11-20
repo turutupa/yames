@@ -11,7 +11,7 @@ import { buildPath, serializePath } from "./generate";
 import type { PathSpec } from "./spec";
 import { SPECS } from "./specs/index";
 import { validatePath } from "./validate";
-import { describeVariant, mergeSameFacts, sentencesOf, variantText } from "./variantText";
+import { cueTexts, describeVariant, mergeSameFacts, sentencesOf, variantText } from "./variantText";
 import type { ExerciseText, TextSide, VariantText } from "./variantText";
 
 const built = new Map<string, PathDoc>();
@@ -382,6 +382,36 @@ describe("the rules, on small made-up lines", () => {
   const base = (purpose: string, howTo: string[], places: Array<[number, number]>): ExerciseText => ({ ...side(places), purpose, howTo });
   const disclaimer = "The frets and note names here are for the first version. Other Takes move the same figure to another string or key.";
   const A = [[1, 5], [1, 7], [1, 8], [1, 7]] as Array<[number, number]>;
+
+  it("cues: a fret or a string is said again for the variant, a cue naming nothing is the same, one that cannot be said is refused", () => {
+    const ex = base("Three notes on one string, round and round.", ["Frets 5, 7 and 8 on the top string."], A);
+    const said = cueTexts(ex, side([[2, 5], [2, 6], [2, 8], [2, 6]]), [
+      "Put fret 7 right on the click.",
+      "Count every note out loud.",
+      "Keep the top string ringing to fret 8.",
+      "Think of 5, then go.",
+    ]);
+    expect(said).toEqual([
+      { ok: true, text: "Put fret 6 right on the click." },
+      { ok: true, text: "Count every note out loud." },
+      { ok: true, text: "Keep the B string ringing to fret 8." },
+      { ok: false, reason: "a number it cannot place" },
+    ]);
+  });
+
+  it("cues: notes that do not line up keep only the cues that name nothing", () => {
+    const ex = base("Three notes on the top string, up and back.", ["Frets 5, 7 and 8."], A);
+    const said = cueTexts(ex, side([[1, 5], [1, 7], [1, 8]]), ["Put fret 7 right on the click.", "Count every note out loud."]);
+    expect(said[0].ok).toBe(false);
+    expect(said[1]).toEqual({ ok: true, text: "Count every note out loud." });
+  });
+
+  it("cues: with the Exercise as its own variant, a cue naming what its notes do not have is refused", () => {
+    const ex = base("Three notes on one string, round and round.", ["Frets 5, 7 and 8 on the top string."], A);
+    const said = cueTexts(ex, ex, ["Put fret 7 right on the click.", "Put fret 12 right on the click."]);
+    expect(said[0]).toEqual({ ok: true, text: "Put fret 7 right on the click." });
+    expect(said[1].ok).toBe(false);
+  });
 
   it("a variant whose notes do not line up gets nothing", () => {
     const ex = base("Three notes on the top string, up and back.", ["Frets 5, 7 and 8."], A);

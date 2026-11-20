@@ -709,6 +709,7 @@
     },
     "note": {
       "passedAt": "Superado a {{bpm}}.",
+      "nextTime": "La próxima vez:",
       "finding": {
         "ceiling": "Aguanta a {{holds}} BPM y se escapa a {{breaks}}."
       },

@@ -3,10 +3,11 @@
 // last test fails if anyone adds a rule without a row here.
 import { describe, expect, it } from "vitest";
 import { MINIMAL_SPEC, VARIANT_TEXT_SPEC, exercise } from "./fixtures/minimal";
-import type { Exercise, PathDoc, Step } from "./format";
+import type { Cue, Exercise, PathDoc, Step } from "./format";
 import { buildPath } from "./generate";
 import type { ExerciseSpec, PathSpec } from "./spec";
 import { RULES, errorsIn, internalJargonIn, validatePath } from "./validate";
+import { cueWordIssues } from "./cues";
 import type { RuleId } from "./validate";
 
 const fresh = (): PathDoc => JSON.parse(JSON.stringify(buildPath(MINIMAL_SPEC))) as PathDoc;
@@ -30,6 +31,21 @@ function withExercise(id: string, overrides: Partial<ExerciseSpec> & { tab: stri
 }
 
 const warm = (doc: PathDoc): Exercise => doc.levels![0].warmups[0];
+
+/** Cues a teacher could write for "scale" (eighths on the A string, frets 5, 8, 10, 8, the hand moving). */
+const GOOD_CUES: Cue[] = [
+  { when: "even", say: "Count every eighth out loud.", general: true },
+  { when: "heard", say: "Pick each note right through.", more: 0 },
+  { when: "shift", say: "Move the hand on the last eighth before fret 10." },
+  { when: "late", say: "Put fret 8 right on the click." },
+];
+
+/** The minimal Path with cues on "scale", put straight into the pack: a hand-edited file gets the same checks. */
+function cued(cues: Cue[]): PathDoc {
+  const d = fresh();
+  ex(d, "scale").cues = cues;
+  return d;
+}
 
 const setFret = (n: Exercise["notes"][number], fret: number) => {
   n.midi += fret - n.fret;
@@ -573,6 +589,25 @@ const FIXTURES: Record<RuleId, () => unknown> = {
     ex(d, "chained").chain!.maxJointFrets = 0;
     return d;
   },
+  "cue.shape": () => cued([{ when: "soon" as never, say: "Count every eighth out loud." }]),
+  "cue.length": () => cued([{ when: "even", say: "Count every single eighth note out loud and keep counting." }]),
+  "cue.order": () => cued([{ when: "even", say: "Is the last note late?" }]),
+  "cue.honesty": () => cued([{ when: "even", say: "Trust that the coach hears your wrist." }]),
+  "cue.passMark": () => cued([{ when: "even", say: "Get over the bar on every round." }]),
+  "cue.tuning": () => cued([{ when: "even", say: "Check your tuning, then play." }]),
+  "cue.more": () => cued([{ when: "even", say: "Count every eighth out loud.", more: 9 }]),
+  "cue.trigger": () => cued([{ when: "openString", say: "Let the open string ring its full length." }]),
+  "cue.general": () =>
+    cued([
+      { when: "even", say: "Count every eighth out loud.", general: true },
+      { when: "heard", say: "Pick each note right through.", general: true },
+    ]),
+  "cue.specific": () => cued([{ when: "even", say: "Land on fret 12 with the click." }]),
+  "cue.firstVariant": () => {
+    const d = fresh();
+    warm(d).variation!.variants[0].cues = [{ when: "even", say: "Count every eighth out loud." }];
+    return d;
+  },
   "runtime.schedule": () => {
     const d = fresh();
     for (const note of ex(d, "outside").notes) {
@@ -586,6 +621,29 @@ const FIXTURES: Record<RuleId, () => unknown> = {
 describe("the minimal Path", () => {
   it("is correct, so each fixture below has only one thing wrong with it", () => {
     expect(validatePath(fresh()).map((i) => `${i.rule} ${i.where} ${i.message}`)).toEqual([]);
+  });
+});
+
+describe("cues", () => {
+  it("a teacher's cues pass, in the pack and generated from a spec", () => {
+    expect(validatePath(cued(GOOD_CUES)).map((i) => `${i.rule} ${i.where} ${i.message}`)).toEqual([]);
+    const spec = MINIMAL_SPEC.steps[0].exercises.find((e) => e.id === "scale")!;
+    const built = withExercise("scale", { tab: spec.tab!, cues: GOOD_CUES });
+    expect(validatePath(built).map((i) => `${i.rule} ${i.where} ${i.message}`)).toEqual([]);
+    expect(ex(built, "scale").cues).toEqual(GOOD_CUES);
+  });
+
+  it.each([
+    ["Count the held E, then come in.", []],
+    ["Slow down here?", ["cue.order"]],
+    ["Your pick is late on the B.", ["cue.order", "cue.honesty"]],
+    ["Get 85% even this time.", ["cue.order"]],
+    ["Great, now count it.", ["cue.order"]],
+    ["Clear the bar this time.", ["cue.passMark"]],
+    ["Retune the B, it is out of tune.", ["cue.tuning"]],
+    ["Count it.".padEnd(49, "."), ["cue.length"]],
+  ])("%s", (say, rules) => {
+    expect(cueWordIssues(say).map((i) => i.rule)).toEqual(rules);
   });
 });
 

@@ -696,6 +696,7 @@
     },
     "note": {
       "passedAt": "{{bpm}}에서 통과.",
+      "nextTime": "다음에는:",
       "finding": {
         "ceiling": "{{holds}} BPM까지는 유지되고 {{breaks}}에서 흔들려요."
       },

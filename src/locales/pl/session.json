@@ -722,6 +722,7 @@
     },
     "note": {
       "passedAt": "Zaliczone w {{bpm}}.",
+      "nextTime": "Następnym razem:",
       "finding": {
         "ceiling": "Trzyma się w {{holds}} BPM i rozjeżdża w {{breaks}}."
       },

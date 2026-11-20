@@ -696,6 +696,7 @@
     },
     "note": {
       "passedAt": "{{bpm}} で合格。",
+      "nextTime": "次は：",
       "finding": {
         "ceiling": "{{holds}} BPM まではキープし、{{breaks}} で崩れます。"
       },

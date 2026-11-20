@@ -696,6 +696,7 @@
     },
     "note": {
       "passedAt": "Geçti: {{bpm}}.",
+      "nextTime": "Bir dahaki sefere:",
       "finding": {
         "ceiling": "{{holds}} BPM'de tutuyor, {{breaks}} BPM'de kayıyor."
       },

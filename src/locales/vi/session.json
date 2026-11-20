@@ -696,6 +696,7 @@
     },
     "note": {
       "passedAt": "Đạt ở {{bpm}}.",
+      "nextTime": "Lần sau:",
       "finding": {
         "ceiling": "Giữ được ở {{holds}} BPM và bị lệch ở {{breaks}}."
       },

@@ -696,6 +696,7 @@
     },
     "note": {
       "passedAt": "Passed at {{bpm}}.",
+      "nextTime": "Next time:",
       "finding": {
         "ceiling": "It holds at {{holds}} BPM and slips at {{breaks}}."
       },
