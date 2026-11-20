@@ -279,19 +279,10 @@
       "decidedPass": "Geçti",
       "lastTime": "geçen sefer",
       "decidedMiss": "Geri tutan",
-      "notesNotChecked": "Doğru notalar: bu sefer kontrol edilmedi",
       "barsTitle": "Ölçü ölçü",
-      "barsHeld": "Art arda {{count}} ölçü tutuldu",
-      "barsHeld_other": "Art arda {{count}} ölçü tutuldu",
-      "barsMet": "{{of}} ölçüden {{count}} tanesi tutuldu",
       "barHeld": "{{n}}. ölçü: tutuldu",
       "barSlipped": "{{n}}. ölçü: kaydı",
-      "barThin": "{{n}}. ölçü: değerlendirmek için nota az",
-      "legatoAll": "Hammer-on, pull-off ve tap: {{due}} notadan {{sounded}} tanesi duyuldu. Bilgi amaçlı, puanlanmaz.",
-      "legatoSome": "Hammer-on, pull-off ve tap: {{due}} notadan {{sounded}} tanesi duyuldu, {{silent}} tanesi duyulmadı. Bilgi amaçlı, puanlanmaz.",
-      "bendsAll": "Bend: {{due}} bend'den {{onPitch}} tanesi hedef sese ulaştı. Bilgi amaçlı, puanlanmaz.",
-      "bendsSomeFlat": "Bend: {{due}} bend'den {{onPitch}} tanesi hedef sese ulaştı, {{flat}} tanesi kısa kaldı. Bilgi amaçlı, puanlanmaz.",
-      "vibratoHeard": "Vibrato: {{due}} notadan {{present}} tanesinde duyuldu. Bilgi amaçlı, puanlanmaz."
+      "barThin": "{{n}}. ölçü: değerlendirmek için nota az"
     },
     "edge": {
       "kick": "Sınırımı bul",
@@ -701,6 +692,104 @@
       "harmony": "Armoni",
       "technique": "Teknik",
       "style": "Stiller"
+    },
+    "note": {
+      "passedAt": "Geçti: {{bpm}}.",
+      "finding": {
+        "ceiling": "{{holds}} BPM'de tutuyor, {{breaks}} BPM'de kayıyor."
+      },
+      "place": {
+        "slipped": {
+          "bar": "Melodinin {{bar}}. ölçüsü {{of}} geçişin {{count}} tanesinde kaydı.",
+          "bars": "Melodinin {{from}}. ile {{to}}. ölçüleri {{of}} geçişin {{count}} tanesinde kaydı.",
+          "loop": "Kalıp {{of}} geçişin {{count}} tanesinde kaydı.",
+          "fromRound": "{{of}} geçişten {{round}}. geçişe kadar tuttu, sonra dağıldı.",
+          "all": "Melodinin tamamı {{of}} geçişin {{count}} tanesinde kaydı."
+        },
+        "caught": {
+          "bar": "Melodinin {{bar}}. ölçüsü {{of}} geçişin {{count}} tanesinde seni yakaladı.",
+          "bars": "Melodinin {{from}}. ile {{to}}. ölçüleri {{of}} geçişin {{count}} tanesinde seni yakaladı.",
+          "loop": "Kalıp {{of}} geçişin {{count}} tanesinde seni yakaladı.",
+          "all": "Melodinin tamamı {{of}} geçişin {{count}} tanesinde seni yakaladı."
+        },
+        "lastTake": "Geçen denemede {{count}}.",
+        "lastTakeHeld": "Geçen denemede tuttu."
+      },
+      "direction": {
+        "early": "Oradaki notalar erken düştü.",
+        "late": "Oradaki notalar geç düştü.",
+        "earlyOpen": "Oradaki boş {{note}} notaları erken düştü.",
+        "lateOpen": "Oradaki boş {{note}} notaları geç düştü.",
+        "earlyNote": "Oradaki {{fret}}. perdedeki {{note}} notaları erken düştü.",
+        "lateNote": "Oradaki {{fret}}. perdedeki {{note}} notaları geç düştü."
+      },
+      "history": {
+        "newClean": "Yeni temiz tempo: {{bpm}} BPM.",
+        "tooEasy": "İlk denemede rahatça geçti, art arda iki oturum.",
+        "goingDown": "{{bpm}} tempoda art arda üç deneme aşağı gitti.",
+        "stuck": "{{bpm}} tempoda üç deneme, hepsi iki puan farkın içinde.",
+        "closer": "Bu tempoda %{{from}} seviyesinden %{{to}} seviyesine çıktı."
+      },
+      "repeat": {
+        "leaveIt": "Aynı yer üç kez. Bugünlük bırak; genelde yarın daha iyi olur."
+      },
+      "fact": {
+        "heard": "{{expected}} notanın {{heard}} tanesi duyuldu",
+        "noExtras": "fazladan nota yok",
+        "extras": "{{count}} fazla nota",
+        "extras_other": "{{count}} fazla nota",
+        "rightNotes": "%{{value}} doğru nota (sesini belirleyebildiğim {{base}} notadan)",
+        "notesUnchecked": {
+          "notRun": "doğru notalar: bu sefer kontrol edilmedi",
+          "tooFast": "doğru notalar: sesini belirlemek için çok hızlı",
+          "tooFew": "doğru notalar: sesini belirlemek için çok az",
+          "notesRing": "doğru notalar: birbirine karıştı, söyleyemedim",
+          "octaveUnsure": "doğru notalar: oktavı söyleyemedim"
+        },
+        "legato": "{{due}} hammer-on ve pull-off'tan {{sounded}} tanesi duyuldu (bilgi amaçlı, puanlanmaz)",
+        "bends": "{{due}} bend'den {{onPitch}} tanesi hedef sese ulaştı (bilgi amaçlı, puanlanmaz)",
+        "vibrato": "{{due}} notadan {{present}} tanesinde vibrato (bilgi amaçlı, puanlanmaz)"
+      },
+      "mark": {
+        "check": "karşılandı:",
+        "cross": "karşılanmadı:",
+        "dash": "söyleyemedim:"
+      },
+      "strip": {
+        "held": "art arda {{count}} ölçü tutuldu",
+        "held_other": "art arda {{count}} ölçü tutuldu",
+        "roundEvery": "melodi her {{count}} ölçüde bir başa dönüyor",
+        "plain": "çalındığı gibi"
+      },
+      "ready": {
+        "lastValue": "Son deneme: %{{value}} {{metric}}.",
+        "lastCount": "Son deneme: {{value}} {{metric}}.",
+        "lastPassed": "Son deneme: {{bpm}} tempoda geçti.",
+        "lastNotCaught": "Son deneme: yeterince duyamadım."
+      },
+      "chip": {
+        "hear": "Önce dinle",
+        "try": "Ne denemeliyim?"
+      },
+      "ungraded": {
+        "listenFor": "Bu sefer tek bir şeye kulak ver: {{question}}",
+        "notListening": "Bu sefer dinlemiyorum, yani hakem sensin.",
+        "didThey": "Son soru: {{question}}",
+        "yourAnswer": "Cevabın:",
+        "yes": "Evet",
+        "notYet": "Henüz değil",
+        "tryFaster": "İki kez evet. {{bpm}} dener misin?"
+      },
+      "recap": {
+        "passed": "Geçti: {{bpm}} BPM.",
+        "held": "Temiz tempo hâlâ {{bpm}} BPM.",
+        "played": "Son çalınan tempo: {{bpm}} BPM.",
+        "backNext": "{{title}} bir sonraki oturumda geri geliyor.",
+        "backReview": "{{title}} {{count}} gün sonra tekrar için geri geliyor.",
+        "backReview_other": "{{title}} {{count}} gün sonra tekrar için geri geliyor.",
+        "backParked": "{{title}} {{count}} gün dinleniyor, sonra yeniden geliyor.",
+        "backParked_other": "{{title}} {{count}} gün dinleniyor, sonra yeniden geliyor."
+      }
     }
   }
 }

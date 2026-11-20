@@ -22,7 +22,9 @@ import type { SessionRun } from "../hooks/useSessionRun";
 import { fingeredNotes, kindOfMark, useNeckSlot, useNeckTake, zoomOf } from "../hooks/useNeck";
 import type { TimingMark } from "../../songs/review/marks";
 import { lineText } from "../lineText";
-import { AskStart, CoachLine, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart } from "../parts";
+import { AskStart, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart } from "../parts";
+import { TakeOrder } from "../../coach/CoachLine";
+import { ReadyNote, takeOrderText } from "../SessionCoach";
 import { Runway } from "./Runway";
 import { ghostNeck, runwayModel } from "./runwayModel";
 import type { Judged } from "./runwayModel";
@@ -161,6 +163,7 @@ export function RunwayTakeScreen({
   const scored = live.heard + live.missed;
   const canStart = takeCanStart(session, listening);
   const start = startButton(session, listening, t);
+  const order = takeOrderText(exercise);
   const kind = isEdgeStep(step)
     ? t("session.edge.kick")
     : t(categoryTagKey(session.paths, take.pathId));
@@ -218,11 +221,19 @@ export function RunwayTakeScreen({
               </b>
               <span>{t("session.run.bars")}</span>
             </span>
-            <span className="session-compact-coach session-why">{exercise.coachLine}</span>
+            {/* The one order, fixed for the Take (DESIGN 3.4); nothing when
+                the cue is too long for it. */}
+            {order && (
+              <span className="session-compact-coach">
+                <TakeOrder text={order} />
+              </span>
+            )}
           </>
         ) : (
+          // The coach's note: one thing to do before the Take (DESIGN 4.1),
+          // where the coach's line sat beside the tempo.
           <div className="session-brief">
-            <CoachLine>{exercise.coachLine}</CoachLine>
+            <ReadyNote session={session} step={step} stepNumber={stepNumber} watch={watch} />
           </div>
         )}
         <span className="session-compact-stat session-compact-bpm">

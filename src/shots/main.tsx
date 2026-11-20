@@ -392,7 +392,7 @@ async function drive() {
                 ? "session-ungraded"
                 : stop === "noCatch"
                   ? "session-no-catch"
-                  : stop === "between"
+                  : stop === "between" || stop === "readyAgain"
                     ? "session-between"
                     : "session-result";
             await until("the verdict", () => !!byId(outcome), 30000);
@@ -400,6 +400,15 @@ async function drive() {
             if (fair) {
               byId(`session-fair-${fair}`)?.click();
               await until("the fairness answer", () => byId(`session-fair-${fair}`)?.getAttribute("aria-pressed") === "true");
+            }
+            if (stop === "readyAgain") {
+              // A tempo nudge from the result, which (unlike Go again, straight
+              // into the count-in) waits on the ready screen of the next Take,
+              // with the coach's note on this one.
+              const slower = byId("session-slower") as HTMLButtonElement | null;
+              const nudge = slower && !slower.disabled ? slower : (byId("session-faster") as HTMLButtonElement | null);
+              nudge?.click();
+              await until("the next Take to be ready", ready, 20000);
             }
             if (stop === "recap") {
               await pressUntil(

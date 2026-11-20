@@ -279,19 +279,10 @@
       "decidedPass": "통과",
       "lastTime": "지난번",
       "decidedMiss": "발목을 잡은 것",
-      "notesNotChecked": "맞는 음: 이번엔 확인 못 함",
       "barsTitle": "마디별",
-      "barsHeld": "{{count}}마디 연속 유지",
-      "barsHeld_other": "{{count}}마디 연속 유지",
-      "barsMet": "{{of}}마디 중 {{count}}마디 유지",
       "barHeld": "{{n}}마디: 유지",
       "barSlipped": "{{n}}마디: 흔들림",
-      "barThin": "{{n}}마디: 판단하기엔 음이 너무 적음",
-      "legatoAll": "해머링, 풀링, 태핑: {{due}}개 중 {{sounded}}개가 소리 났습니다. 참고용이며 채점하지 않습니다.",
-      "legatoSome": "해머링, 풀링, 태핑: {{due}}개 중 {{sounded}}개가 소리 났고 {{silent}}개는 나지 않았습니다. 참고용이며 채점하지 않습니다.",
-      "bendsAll": "벤딩: {{due}}개 중 {{onPitch}}개가 목표 음에 닿았습니다. 참고용이며 채점하지 않습니다.",
-      "bendsSomeFlat": "벤딩: {{due}}개 중 {{onPitch}}개가 목표 음에 닿았고 {{flat}}개는 모자랐습니다. 참고용이며 채점하지 않습니다.",
-      "vibratoHeard": "비브라토: {{due}}개 음 중 {{present}}개에서 들렸습니다. 참고용이며 채점하지 않습니다."
+      "barThin": "{{n}}마디: 판단하기엔 음이 너무 적음"
     },
     "edge": {
       "kick": "한계 찾기",
@@ -701,6 +692,104 @@
       "harmony": "화성",
       "technique": "테크닉",
       "style": "스타일"
+    },
+    "note": {
+      "passedAt": "{{bpm}}에서 통과.",
+      "finding": {
+        "ceiling": "{{holds}} BPM까지는 유지되고 {{breaks}}에서 흔들려요."
+      },
+      "place": {
+        "slipped": {
+          "bar": "곡의 {{bar}}번째 마디가 {{of}}번 중 {{count}}번 흔들렸어요.",
+          "bars": "곡의 {{from}}~{{to}}번째 마디가 {{of}}번 중 {{count}}번 흔들렸어요.",
+          "loop": "패턴이 {{of}}번 중 {{count}}번 흔들렸어요.",
+          "fromRound": "{{of}}번 중 {{round}}번째까지는 유지하다가 무너졌어요.",
+          "all": "곡 전체가 {{of}}번 중 {{count}}번 흔들렸어요."
+        },
+        "caught": {
+          "bar": "곡의 {{bar}}번째 마디가 {{of}}번 중 {{count}}번 발목을 잡았어요.",
+          "bars": "곡의 {{from}}~{{to}}번째 마디가 {{of}}번 중 {{count}}번 발목을 잡았어요.",
+          "loop": "패턴이 {{of}}번 중 {{count}}번 발목을 잡았어요.",
+          "all": "곡 전체가 {{of}}번 중 {{count}}번 발목을 잡았어요."
+        },
+        "lastTake": "지난 테이크에서는 {{count}}번이었어요.",
+        "lastTakeHeld": "지난 테이크에서는 유지됐어요."
+      },
+      "direction": {
+        "early": "그 부분의 음이 빨랐어요.",
+        "late": "그 부분의 음이 늦었어요.",
+        "earlyOpen": "그 부분의 개방현 {{note}}음이 빨랐어요.",
+        "lateOpen": "그 부분의 개방현 {{note}}음이 늦었어요.",
+        "earlyNote": "{{fret}}프렛의 {{note}}음이 빨랐어요.",
+        "lateNote": "{{fret}}프렛의 {{note}}음이 늦었어요."
+      },
+      "history": {
+        "newClean": "새 클린 템포: {{bpm}} BPM.",
+        "tooEasy": "두 세션 연속으로 첫 테이크를 여유 있게 통과했어요.",
+        "goingDown": "{{bpm}}에서 3번 연속 테이크의 점수가 내려갔어요.",
+        "stuck": "{{bpm}}에서 3번의 테이크가 모두 2점 이내예요.",
+        "closer": "이 템포에서 {{from}}%에서 {{to}}%로 올랐어요."
+      },
+      "repeat": {
+        "leaveIt": "같은 곳에서 세 번째예요. 오늘은 그대로 두세요. 보통 내일 더 나아져요."
+      },
+      "fact": {
+        "heard": "{{expected}}개 음 중 {{heard}}개 들림",
+        "noExtras": "불필요한 음 없음",
+        "extras": "불필요한 음 {{count}}개",
+        "extras_other": "불필요한 음 {{count}}개",
+        "rightNotes": "맞는 음 {{value}}% (음높이를 판별한 {{base}}개 중)",
+        "notesUnchecked": {
+          "notRun": "맞는 음: 이번엔 확인 못 함",
+          "tooFast": "맞는 음: 너무 빨라서 음높이를 판별하지 못함",
+          "tooFew": "맞는 음: 판별할 음이 너무 적음",
+          "notesRing": "맞는 음: 음이 서로 이어져서 판단하지 못함",
+          "octaveUnsure": "맞는 음: 옥타브를 판단하지 못함"
+        },
+        "legato": "해머링·풀링 {{due}}개 중 {{sounded}}개가 소리 남 (참고용, 채점 안 함)",
+        "bends": "벤딩 {{due}}개 중 {{onPitch}}개가 목표 음에 닿음 (참고용, 채점 안 함)",
+        "vibrato": "비브라토 {{due}}개 음 중 {{present}}개 (참고용, 채점 안 함)"
+      },
+      "mark": {
+        "check": "충족:",
+        "cross": "미충족:",
+        "dash": "판단 못 함:"
+      },
+      "strip": {
+        "held": "{{count}}마디 연속 유지",
+        "held_other": "{{count}}마디 연속 유지",
+        "roundEvery": "곡이 {{count}}마디마다 한 바퀴",
+        "plain": "연주한 그대로"
+      },
+      "ready": {
+        "lastValue": "지난 테이크: {{metric}} {{value}}%.",
+        "lastCount": "지난 테이크: {{metric}} {{value}}개.",
+        "lastPassed": "지난 테이크: {{bpm}}에서 통과.",
+        "lastNotCaught": "지난 테이크: 충분히 듣지 못했어요."
+      },
+      "chip": {
+        "hear": "먼저 들어보기",
+        "try": "뭘 해볼까요?"
+      },
+      "ungraded": {
+        "listenFor": "이번엔 한 가지만 들어보세요: {{question}}",
+        "notListening": "이번엔 제가 듣지 않으니 판단은 직접 하세요.",
+        "didThey": "마지막 질문: {{question}}",
+        "yourAnswer": "내 답:",
+        "yes": "예",
+        "notYet": "아직",
+        "tryFaster": "두 번 연속 예. {{bpm}}에서 해볼까요?"
+      },
+      "recap": {
+        "passed": "{{bpm}} BPM에서 통과.",
+        "held": "클린 템포는 그대로 {{bpm}} BPM.",
+        "played": "마지막은 {{bpm}} BPM으로 연주.",
+        "backNext": "{{title}}: 다음 세션에 다시 나와요.",
+        "backReview": "{{title}}: {{count}}일 뒤 복습으로 다시 나와요.",
+        "backReview_other": "{{title}}: {{count}}일 뒤 복습으로 다시 나와요.",
+        "backParked": "{{title}}: {{count}}일 쉬고 새롭게 다시 나와요.",
+        "backParked_other": "{{title}}: {{count}}일 쉬고 새롭게 다시 나와요."
+      }
     }
   }
 }
