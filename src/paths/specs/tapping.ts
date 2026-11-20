@@ -31,6 +31,12 @@ const SAFETY =
 const VARIANT_NOTE =
   "The frets and note names here are for the first version. Other Takes move the same figure to another string or key.";
 
+// Shared with other Paths word for word (coherence audit, S5), so each line is translated once and copied.
+const BAND_IS = "The band is a drummer and a bassist in place of the click.";
+const IF_LOST = "If you get lost, stop, find beat 1 of the next bar and come back in there.";
+// S8, word for word as the other Paths say it. Here it sits in the Advanced warm-up, the first sextuplets of this Path.
+const SEXTUPLETS_ARE = "Sextuplets are six even notes to one click.";
+
 const STRING_OF: Readonly<Record<string, number>> = { "top E": 1, B: 2, G: 3 };
 
 /** One figure on other strings: `"top E: 12-5-8"` is the tap, then the two fretted notes. */
@@ -123,13 +129,13 @@ export default definePath({
   goal: "Tap an arpeggio in triplets, sixteenths and sextuplets, move it through chord changes in A minor and E minor, and hold an eight-bar tapped line over a band.",
   level: "intermediate",
   assumes:
-    "You can play a hammer-on and a pull-off that sound as loud as a picked note (the Beginner Level of Legato covers this), and triplets with a click at 70 BPM. An electric guitar with a little gain makes tapping easier, but every Exercise works clean. The minutes listed are one pass through the material.",
+    "You can play a hammer-on and a pull-off that sound as loud as a picked note, and triplets with a click at 70 BPM (the Beginner Level of Legato covers both). The six-note figures of this Path's Advanced Level build on the rolls of the Intermediate Level of Legato. An electric guitar with a little gain makes tapping easier, but every Exercise works clean. The minutes listed are one pass through the material.",
   prerequisites: { paths: [{ path: "legato", level: "beginner" }], skills: ["Hammer-ons and pull-offs", "Triplets with a click at 70 BPM"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
   variantText: true,
   orderRationale:
-    "One tap and one pull-off first, then the three-note cell every tapping lick is built on. Moving the tap comes before moving the fretting hand, because the tapping finger is the easier of the two to aim. The Beginner Level ends with the same cell through four chords in a second key, E minor on the B string, so that a new key and a new string arrive before a new rhythm. Sixteenths and two strings follow, then a scale under the tap, which needs the legato strength the earlier Steps build. Sextuplets and two tapped notes come last, first on one chord and then through the chords of E minor. The band follows: a solo in triplets in A minor, a full minute, and a second solo in sixteenths in E minor, which is last for its length, eight bars, not its speed.",
+    "One tap and one pull-off first, then the three-note cell every tapping lick is built on. Moving the tap comes before moving the fretting hand, because the tapping finger is the easier of the two to aim. The Beginner Level ends with the same cell through four chords in a second key, E minor on the B string, so that a new key and a new string arrive before a new rhythm. Sixteenths and two strings follow. Sextuplets come next, on the cell alone, so that the speed is the only new thing. Then come a scale under the tap, which needs the legato strength the earlier Steps build, and two tapped notes and string skips, first on one chord and then through the chords of E minor, where they meet the band. Two solos close the Path: one in triplets in A minor, with a full minute of the cell, and one in sixteenths in E minor, which is last for its length, eight bars, not its speed.",
   gradingLimits:
     "The app times the notes it hears and counts them. A tap is a loud attack and is expected to be heard; a pull-off or a hammer-on that is too quiet to catch costs nothing. So the taps carry the grade, and a pass does not prove the notes between them were even or loud: that is for your ear and a recording. Pitch is not checked on tapped lines. Heavy gain makes every note sound present whether it was or not; a light crunch is the honest setting. None of this has been tried on a real guitar yet.",
   steps: [
@@ -137,18 +143,18 @@ export default definePath({
       id: "first-taps",
       title: "The first tap",
       goal: "Tap a note with the picking hand, pull off to a fretted note, and hammer a third, in time.",
-      why: "A tap is a hammer-on made by the other hand. It reaches notes the fretting hand cannot, which is how a three-note arpeggio that would need a seven-fret stretch fits on one string. The tap itself is easy; what makes it sound like music is the pull-off that follows it, and the rhythm.",
+      why: "A tap is a hammer-on made by the other hand. It reaches notes the fretting hand cannot. That is how an arpeggio, a chord played one note at a time, fits on one string when its three notes would need a seven-fret stretch. The tap itself is easy; what makes it sound like music is the pull-off that follows it, and the rhythm.",
       howTo: [
         "Tap with the middle finger of the picking hand, with the pick still held between thumb and first finger. Rest the thumb or the heel of the hand on the edge of the neck to steady it.",
         "Tap straight down, just behind the fret, hard enough to sound the note. Then pull off toward the floor so the finger plucks the string as it leaves. The tab marks a tap T.",
-        "The fretting hand's first finger is already down on its note before you tap, and its tip touches the string beside it to keep that quiet. The heel of the tapping hand rests on the lower strings.",
+        "The fretting hand's first finger is already down on its note before you tap, and its tip touches the string beside it to keep that quiet. The heel of the tapping hand rests on the thicker strings.",
       ],
       payoff: "The three-note tapped arpeggio everybody recognises, slow and even.",
       exercises: [
         {
           id: "tap-and-pull",
           title: "Tap and pull off",
-          purpose: "Two notes: tap fret 12 and pull off to the first finger at fret 5. The smallest tapping there is, and the pull-off is the half that needs work.",
+          purpose: "Two notes on the top string: tap fret 12 and pull off to the first finger at fret 5. The smallest tapping there is, and the pull-off is the half that needs work.",
           howTo: [
             "Eighth notes. The tap lands on the click and the pulled-off note on the 'and'.",
             "Keep the first finger pressed at fret 5 the whole time. Make the second note as loud as the first.",
@@ -328,7 +334,9 @@ export default definePath({
           purpose: "The descending progression over a band with a triplet feel: every bar moves one or both hands. G is tap 15 over frets 7 and 10.",
           howTo: [
             "Triplets, one chord a bar: Am, G, F, E, and round again.",
-            "The move from Am up to G is the big one: both hands go up. Look at fret 7 before you leave.",
+            BAND_IS,
+            "The move from Am up to G is the big one: both hands go up. Look at fret 7 before you leave. If a move is late, leave out a cell and come back in on the next beat.",
+            IF_LOST,
           ],
           coach: "Band on. The taps carry the timing; direct input or headphones is the honest way to take this.",
           tab: ANDALUSIAN,
@@ -425,7 +433,7 @@ export default definePath({
       why: "On one string a tapped line can only go so far. Crossing strings doubles its range, and brings the real problem of tapping with it: the string you just left is still ringing. Both hands share the muting, and it has to happen in the time of one note.",
       howTo: [
         "Each string starts with a tap, so there is always a clear attack to change string on.",
-        "As the tap leaves a string, the heel of the tapping hand touches the strings below it and the fretting hand's first finger touches the ones above.",
+        "As the tap leaves a string, the heel of the tapping hand touches the thicker strings and the fretting hand's first finger lies a little flat to touch the thinner ones.",
         "Keep the fretting hand's shape ready over the next string before you get there.",
       ],
       payoff: "A tapped figure that rolls across three strings and back.",
@@ -489,16 +497,88 @@ export default definePath({
     },
     STRINGS_THROUGH_CHORDS,
     {
+      id: "sextuplet-taps",
+      title: "Sextuplets",
+      goal: "Play the three-note cell twice a beat, hold it, and move it through chords at that speed.",
+      why: "This is the tempo tapping is known for: two cells to every click, a stream of notes with the tap as its pulse. Nothing is new except the speed, and at speed the only things that matter are a small tapping motion and a relaxed fretting hand.",
+      howTo: [
+        "Six to the click, a tap on the click and another halfway through the beat.",
+        "The tapping finger stays within a centimetre of the string. Big motions are what make it late.",
+        "Start two rungs under the tempo you could play for one bar. This is about holding it.",
+      ],
+      payoff: "The sound of tapping at full speed, through Am, F and G.",
+      exercises: [
+        {
+          id: "fast-cell",
+          title: "The cell, twice a beat",
+          purpose: "Tap, pull, hammer in sextuplets: eight cells a bar on one string.",
+          howTo: [
+            "Sextuplets on the top string: tap fret 12, pull off to fret 5, hammer on at fret 8, twice a beat. Feel the first tap of each beat a little stronger than the second.",
+            "If you tense up, drop a rung. Speed comes from the motion getting smaller.",
+            VARIANT_NOTE,
+          ],
+          coach: "Two taps a beat give me a firm grid. Above the middle rungs, evenness is the number to trust.",
+          vary: onStrings(THREE_SETS, sextuplets),
+          tab: sextuplets(1, AM),
+          position: 5,
+          harmony: { scale: ["A", "naturalMinor"] },
+          rungs: ladder(40, 100, 5),
+          passAt: 70,
+          ...TAPS,
+          selfCheck: [LOUD_CHECK],
+          minutes: 6,
+        },
+        {
+          id: "fast-melody",
+          title: "A tune in fast taps",
+          purpose: "Two cells on each tapped note: E, F, G, F, a beat each, in sextuplets.",
+          howTo: [
+            "Sextuplets. The tap moves once a beat, on the click.",
+            "Move the tap during the last hammer-on of the beat. There is less time than there was in triplets.",
+          ],
+          coach: "The taps carry the timing. The first tap after each move is the one that goes late.",
+          tab: FAST_MELODY,
+          position: 5,
+          harmony: { scale: ["A", "naturalMinor"] },
+          rungs: ladder(40, 100, 5),
+          passAt: 70,
+          ...TAPS,
+          minutes: 6,
+        },
+        {
+          id: "fast-changes",
+          title: "Am, F and G in sextuplets",
+          purpose: "Am, F, G, Am, eight cells a bar. The same moves as before with a sixth of a beat to make them in.",
+          howTo: [
+            "Sextuplets on the top string, one chord a bar. Am: tap 12 over frets 5 and 8. F: tap 13. G: tap 15 over frets 7 and 10. Then Am.",
+            "Both hands leave for the G chord together, on the last note of the F bar.",
+          ],
+          coach: "The taps carry the timing. Record it: at this speed your ear in the moment is not a fair judge.",
+          tab: FAST_CHANGES,
+          position: 5,
+          shifts: true,
+          chords: "Am | F | G | Am",
+          harmony: { chordTones: true, cover: true },
+          rungs: ladder(40, 90, 5),
+          passAt: 65,
+          ...TAPS,
+          minutes: 7,
+        },
+      ],
+    },
+    {
       id: "scale-under-the-tap",
       title: "A scale under the tap",
       goal: "Play six notes from one tap: the tap, three pull-offs down a scale shape, and two hammer-ons back up.",
       why: "With three fretted notes under the tap, a tapped line stops being an arpeggio and becomes a scale run. It needs real legato strength: after the tap come five notes from the fretting hand alone, and the last hammer-on has to be loud enough to hand back to the tap.",
       howTo: [
         "Sextuplets: six to the click, with the tap on the click.",
-        "Fingers 1, 3 and 4 on frets 5, 7 and 8. All three are down when you tap, so each pull-off has a note to land on.",
+        "On the top string, fingers 1, 3 and 4 hold frets 5, 7 and 8. On the B string the middle finger takes fret 6 in place of the third finger's 7. All three fingers are down when you tap, so each pull-off has a note to land on.",
         "If the last two notes fade, practise the fretting hand alone: pull, pull, hammer, hammer.",
       ],
       payoff: "A fast scale figure with a high note on every beat that sounds much harder than it is.",
+      difficultyException:
+        "Sextuplets again, and they pass 10 BPM lower than the cell did in the Step before. The demand is five notes in a row from the fretting hand between two taps, where the cell had two, and a note-rate metric counts only the slower tempo.",
       exercises: [
         {
           id: "scale-tap",
@@ -567,82 +647,12 @@ export default definePath({
     },
     SCALE_TAP_AGAIN,
     {
-      id: "sextuplet-taps",
-      title: "Sextuplets",
-      goal: "Play the three-note cell twice a beat, hold it, and move it through chords at that speed.",
-      why: "This is the tempo tapping is known for: two cells to every click, a stream of notes with the tap as its pulse. Nothing is new except the speed, and at speed the only things that matter are a small tapping motion and a relaxed fretting hand.",
-      howTo: [
-        "Six to the click, a tap on the click and another halfway through the beat.",
-        "The tapping finger stays within a centimetre of the string. Big motions are what make it late.",
-        "Start two rungs under the tempo you could play for one bar. This is about holding it.",
-      ],
-      payoff: "The sound of tapping at full speed, through Am, F and G.",
-      exercises: [
-        {
-          id: "fast-cell",
-          title: "The cell, twice a beat",
-          purpose: "Tap, pull, hammer in sextuplets: eight cells a bar on one string.",
-          howTo: [
-            "Sextuplets. Feel the first tap of each beat a little stronger than the second.",
-            "If the hand tightens, drop a rung. Speed comes from the motion getting smaller.",
-            VARIANT_NOTE,
-          ],
-          coach: "Two taps a beat give me a firm grid. Above the middle rungs, evenness is the number to trust.",
-          vary: onStrings(THREE_SETS, sextuplets),
-          tab: sextuplets(1, AM),
-          position: 5,
-          harmony: { scale: ["A", "naturalMinor"] },
-          rungs: ladder(40, 100, 5),
-          passAt: 70,
-          ...TAPS,
-          selfCheck: [LOUD_CHECK],
-          minutes: 6,
-        },
-        {
-          id: "fast-melody",
-          title: "A tune in fast taps",
-          purpose: "Two cells on each tapped note: E, F, G, F, a beat each, in sextuplets.",
-          howTo: [
-            "Sextuplets. The tap moves once a beat, on the click.",
-            "Move the tap during the last hammer-on of the beat. There is less time than there was in triplets.",
-          ],
-          coach: "The taps carry the timing. The first tap after each move is the one that goes late.",
-          tab: FAST_MELODY,
-          position: 5,
-          harmony: { scale: ["A", "naturalMinor"] },
-          rungs: ladder(40, 100, 5),
-          passAt: 70,
-          ...TAPS,
-          minutes: 6,
-        },
-        {
-          id: "fast-changes",
-          title: "Am, F and G in sextuplets",
-          purpose: "Am, F, G, Am, eight cells a bar. The same moves as before with a sixth of a beat to make them in.",
-          howTo: [
-            "Sextuplets, one chord a bar.",
-            "Both hands leave for the G chord together, on the last note of the F bar.",
-          ],
-          coach: "The taps carry the timing. Record it: at this speed your ear in the moment is not a fair judge.",
-          tab: FAST_CHANGES,
-          position: 5,
-          shifts: true,
-          chords: "Am | F | G | Am",
-          harmony: { chordTones: true, cover: true },
-          rungs: ladder(40, 90, 5),
-          passAt: 65,
-          ...TAPS,
-          minutes: 7,
-        },
-      ],
-    },
-    {
       id: "two-taps-and-skips",
       title: "Two tapped notes, and string skips",
       goal: "Tap two different notes in one figure, skip a string between cells, and roll the cell from the top down.",
       why: "Three more shapes that turn the basic cell into phrases: a second tapped note makes a four-note chord out of one string, a skipped string makes a wide arpeggio, and starting the cell with the pull-off to the upper finger turns the pattern around.",
       howTo: [
-        "For two taps, the tapping hand rocks between frets 12 and 15: one tap from the middle finger at each, or the middle and ring fingers.",
+        "For two tapped notes, the tapping hand rocks between frets 12 and 15: one tap from the middle finger at each, or the middle and ring fingers. This is not the double tap, where one fret is tapped twice.",
         "On a string skip, the tapping hand jumps over a string. Keep the heel of the hand on the string in between.",
         "Tap, pull to the upper finger, pull to the first finger, hammer the upper finger: the cell from the top down.",
       ],
@@ -651,7 +661,7 @@ export default definePath({
         {
           id: "two-taps",
           title: "Two tapped notes",
-          purpose: "Tap 12, pull to 5, hammer 8, tap 15, pull to 8, pull to 5. E, A, C, G, C, A: six notes, two of them tapped.",
+          purpose: "Tap 12, pull to 5, hammer 8, tap 15, pull to 8, pull to 5. E, A, C, G, C, A: six notes, two of them tapped. The four different notes, A, C, E and G, are an A minor seventh chord: A minor with one note added.",
           howTo: [
             "Sextuplets. The first tap is on the click and the second halfway through the beat.",
             "After the tap at 15, both fretting fingers are still down: pull to the little finger, then to the first.",
@@ -722,7 +732,7 @@ export default definePath({
         {
           id: "etude-chords",
           title: "Four bars: the chords",
-          purpose: "Am, G, F, E in tapped triplets with the band, the tap on the fifth or the root of each chord.",
+          purpose: "Am, G, F, E in tapped triplets with the band, one chord a bar.",
           howTo: [
             "Triplets, four cells a bar.",
             "This is the A minor progression from the Beginner Level. Play it until the moves need no thought.",
@@ -818,15 +828,15 @@ export default definePath({
     },
     {
       id: "intermediate",
-      title: "Intermediate: sixteenths, strings and scales",
-      summary: "Four-note loops and two taps a beat, on one chord, through three chords in A minor and through Em, C, D and B; the cell across three strings, then on two strings through four chords; and a scale shape under the tap, in A minor and in E minor.",
+      title: "Intermediate: sixteenths and strings",
+      summary: "Four-note loops and two taps a beat, on one chord, through three chords in A minor and through Em, C, D and B; the cell across three strings, then on two strings through four chords.",
       reachLevel: "intermediate",
       startHereIf: [
         "You can play tap, pull, hammer in triplets at 85 BPM with all three notes the same size.",
         "You can move the cell through four chords, such as Am, G, F and E or Em, C, D and B, without stopping.",
         "Your tapping only works on one string, or only in triplets.",
       ],
-      steps: ["sixteenths", "sixteenths-in-e-minor", "two-strings", "strings-through-chords", "scale-under-the-tap", "scale-tap-again"],
+      steps: ["sixteenths", "sixteenths-in-e-minor", "two-strings", "strings-through-chords"],
       warmups: [
         {
           id: "loop-around",
@@ -849,21 +859,21 @@ export default definePath({
     },
     {
       id: "advanced",
-      title: "Advanced: speed, two taps and a band",
-      summary: "The cell in sextuplets, two tapped notes and string skips, on one chord and then through the chords of E minor, then four-bar tapped lines over a band, a full minute, and an eight-bar solo in E minor.",
+      title: "Advanced: speed, scales, two taps and a band",
+      summary: "The cell in sextuplets, a scale shape under the tap in A minor and in E minor, two tapped notes and string skips, on one chord and then through the chords of E minor, then four-bar tapped lines over a band, a full minute, and an eight-bar solo in E minor.",
       reachLevel: "intermediate",
       startHereIf: [
         "You can play the four-note loop in sixteenths at 85 BPM.",
-        "You can play six notes from one tap at 60 BPM and hear all six.",
-        "You can tap a lick, and not yet 4 bars of one over chords.",
+        "You can carry the cell from the top string to the B string and back in triplets at 85 BPM with no string left ringing.",
+        "You can tap four bars over chords in triplets or sixteenths, and not yet in sextuplets.",
       ],
-      steps: ["sextuplet-taps", "two-taps-and-skips", "two-taps-through-chords", "over-the-band", "second-solo"],
+      steps: ["sextuplet-taps", "scale-under-the-tap", "scale-tap-again", "two-taps-and-skips", "two-taps-through-chords", "over-the-band", "second-solo"],
       warmups: [
         {
           id: "fast-around",
           title: "The cell twice a beat, on a new chord",
           purpose: "Tap, pull, hammer in sextuplets on a minor chord, a bar with the fifth tapped and a bar with the octave. A different chord each time.",
-          howTo: ["Start well under your clean tempo. Two taps a beat. The tap moves up five frets at the bar line; the fretting hand stays."],
+          howTo: [SEXTUPLETS_ARE, "Start well under your clean tempo. Two taps a beat. The tap moves up five frets at the bar line; the fretting hand stays."],
           coach: "This is a warm-up. It tells you how it went, and it decides nothing.",
           vary: {
             values: WARM_KEYS,

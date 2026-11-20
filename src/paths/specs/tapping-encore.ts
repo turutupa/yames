@@ -12,7 +12,8 @@
  * - `strings-through-chords`, after `two-strings`: the cell on the top and B
  *   strings at one place on the neck, where the same frets are Am and F on one
  *   string and Em and C on the other. One thing changes at each bar line.
- * - `scale-tap-again`, after `scale-under-the-tap`: the six-note figure on the
+ * - `scale-tap-again`, after `scale-under-the-tap` (both moved to the Advanced Level, after
+ *   `sextuplet-taps`, by the coherence audit, TP-F1): the six-note figure on the
  *   B string in E minor, the tap walking down the scale, and the figure over
  *   Em and Am.
  *
@@ -146,7 +147,7 @@ export const SIXTEENTHS_IN_E_MINOR: StepSpec = {
   why: "The loop and two taps to a beat (the double tap) were learned on one chord, and the loop then went through three chords in A minor. Here both go through Em, C, D and B on the B string, at the frets of the Step 'The cell in E minor'. Nothing in either figure is new. What takes the practice is the bar line: a sixteenth is shorter than a triplet note at the same tempo, so the hand that moves has less time to do it.",
   howTo: [
     "The middle finger of the picking hand taps. The first finger and the little finger of the fretting hand hold the two lower notes: frets 5 and 8 for Em and C, frets 7 and 10 for D, frets 4 and 7 for B.",
-    "On the B string, Em is tap 12, C is tap 13, D is tap 15 and B is tap 12 again. Other Takes play the Exercise with the band at the same frets on the top string, in A minor, or on the G string, in C minor.",
+    "On the B string, Em is tap 12, C is tap 13, D is tap 15 and B is tap 12 again. One play through an Exercise is a Take. Other Takes of the Exercise with the band play the same frets on the top string, in A minor, or on the G string, in C minor.",
     "The loop ends each bar on a pull-off to the first finger, and the double tap ends it on a pull-off to the little finger. In the loop the tapping hand has the three notes after its pull-off to get over the new fret; in the double tap it has only the last note of the bar. Either way the fretting hand moves while the first tap of the new bar sounds.",
     "On the B string and the G string, let the first finger lie a little flat so that it touches the thinner string beside it. On every string the heel of the tapping hand rests on the thicker strings.",
   ],
@@ -341,12 +342,12 @@ export const STRINGS_THROUGH_CHORDS: StepSpec = {
   ],
 };
 
-/** Intermediate, after `scale-under-the-tap`: the six-note figure a second time, in E minor. */
+/** Advanced, after `scale-under-the-tap`: the six-note figure a second time, in E minor. */
 export const SCALE_TAP_AGAIN: StepSpec = {
   id: "scale-tap-again",
   title: "The scale under the tap, in E minor",
   goal: "Play the six-note figure on the B string in E minor, walk the tap down the scale over it, and take the figure from Em to Am.",
-  why: "Six notes from one tap is the hardest thing in this Level, and it was learned in one key. On the B string, frets 5, 7 and 8 are E, F# and G, the first three notes of the E minor scale, so the fingers the top string used, 1, 3 and 4, play the figure in a second key. The frets and fingers do not change, so what the second key tests is the string: the B string is thicker, has a string to keep quiet on each side, and until now took fingers 1, 2 and 4 for this figure. The tempos stay slow on purpose.",
+  why: "Six notes from one tap asks the most of the fretting hand, and it was learned in one key. On the B string, frets 5, 7 and 8 are E, F# and G, the first three notes of the E minor scale, so the fingers the top string used, 1, 3 and 4, play the figure in a second key. The frets and fingers do not change, so what the second key tests is the string: the B string is thicker, has a string to keep quiet on each side, and until now took fingers 1, 2 and 4 for this figure. The tempos stay slow on purpose.",
   howTo: [
     "Sextuplets: six to the click, with the tap on the click. The middle finger of the picking hand taps.",
     "Fingers 1, 3 and 4 hold frets 5, 7 and 8. All three are down when you tap, so each pull-off has a note to land on.",
@@ -399,7 +400,7 @@ export const SCALE_TAP_AGAIN: StepSpec = {
       purpose: "One bar on the B string and one on the top string, at the same frets. On the B string the figure is B over E, F# and G, for the Em bar. On the top string it is E over A, B and C, the figure you learned first, for the Am bar.",
       howTo: [
         "Sextuplets, four figures a bar: tap 12 over frets 5, 7 and 8 on both strings, with the same fingers.",
-        "The first finger's note is the root of each chord: E on the B string, A on the top string. The third finger's note, F# in the first bar and B in the second, is a step of the scale between the chord's notes.",
+        "The first finger's note is the root of each chord, the note the chord is named after: E on the B string, A on the top string. The third finger's note, F# in the first bar and B in the second, is a step of the scale between the chord's notes.",
         "The tapping hand and the first and third fingers cross during the last hammer-on of the bar, while the little finger still holds its note. The little finger follows while the tap sounds: it must be down at fret 8 before the tap pulls off.",
       ],
       coach: "One tap a beat carries the timing. The first beat of each bar shows whether the crossing was on time.",
