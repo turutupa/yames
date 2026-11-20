@@ -42,7 +42,8 @@
       "notDownloaded": "non téléchargé",
       "notOnThisDevice": "indisponible sur cet appareil",
       "downloading": "téléchargement {{percent}}",
-      "downloadingNoPercent": "téléchargement"
+      "downloadingNoPercent": "téléchargement",
+      "checking": "vérification du téléchargement"
     },
     "state": {
       "ready": "Chargé et prêt",
@@ -53,8 +54,10 @@
       "failedWhy": "Échec du chargement ({{reason}}). Choisis-le pour réessayer",
       "notDownloaded": "Non téléchargé",
       "update": "Une version plus ancienne. Mets-la à jour dans Paramètres → Coach",
-      "otherOnDisk": "Non téléchargé. Un second modèle sur cet ordinateur demande une mise à jour ultérieure ; pour l'instant, change dans Paramètres → Coach",
+      "unplaced": "Non téléchargé. Un modèle sur cet ordinateur n'a pas pu être identifié ; gère-le dans Paramètres → Coach",
+      "noRoom": "Non téléchargé. Demande {{need}}, {{free}} libres",
       "downloading": "Téléchargement",
+      "checking": "Vérification du téléchargement",
       "lowMemory": "Cet ordinateur a moins de mémoire que ce modèle n'en demande ; il peut être lent ou ne pas se charger"
     },
     "why": {
@@ -64,18 +67,29 @@
     "download": {
       "start": "Télécharger",
       "pause": "Pause",
+      "pauseHint": "Arrêter pour l'instant et garder ce qui est téléchargé ; Reprendre repart de là",
+      "cancel": "Annuler",
+      "cancelHint": "Arrêter et supprimer ce qui a été téléchargé jusqu'ici",
       "resume": "Reprendre",
       "retry": "Réessayer",
       "anyway": "Télécharger quand même",
       "notNow": "Pas maintenant",
       "running": "Téléchargement… {{percent}}",
       "runningNoPercent": "Téléchargement…",
+      "runningBytes": "Téléchargement… {{done}} sur {{total}}",
+      "bytes": "{{done}} sur {{total}}",
+      "checking": "Vérification du téléchargement avec sa somme de contrôle publiée… {{percent}}",
       "voices": "Récupération des voix du coach…",
       "paused": "En pause à {{percent}}. Reprendre repart de là.",
+      "pausedBytes": "En pause à {{done}} sur {{total}}. Reprendre repart de là.",
       "pausedNoPercent": "En pause. Reprendre repart là où ça s'est arrêté.",
+      "cancelled": "Annulé. Ce qui avait été téléchargé a été supprimé.",
       "failed": "Le téléchargement s'est arrêté : {{reason}}",
       "failedNoReason": "Le téléchargement s'est arrêté.",
-      "meteredWarn": "Tu sembles utiliser les données mobiles. {{size}}, c'est beaucoup à télécharger ainsi."
+      "checksumFailed": "Le fichier téléchargé ne correspondait pas à sa somme de contrôle publiée, il a donc été supprimé. Rien de ce que tu avais déjà n'a été modifié.",
+      "noRoom": "Pas assez de place : il demande {{need}} et {{free}} sont libres. Libère de l'espace, puis réessaie.",
+      "meteredWarn": "Tu sembles utiliser les données mobiles. {{size}}, c'est beaucoup à télécharger ainsi.",
+      "spaceWarn": "Seuls {{free}} sont libres et il faut {{need}}. Ça tient, avec peu de marge."
     }
   },
   "coachDetail": {

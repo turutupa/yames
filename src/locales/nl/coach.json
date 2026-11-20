@@ -42,7 +42,8 @@
       "notDownloaded": "niet gedownload",
       "notOnThisDevice": "niet op dit apparaat",
       "downloading": "downloaden {{percent}}",
-      "downloadingNoPercent": "downloaden"
+      "downloadingNoPercent": "downloaden",
+      "checking": "download controleren"
     },
     "state": {
       "ready": "Geladen en klaar",
@@ -53,8 +54,10 @@
       "failedWhy": "Laden mislukt ({{reason}}). Kies het om het opnieuw te proberen",
       "notDownloaded": "Niet gedownload",
       "update": "Een oudere versie. Werk hem bij in Instellingen → Coach",
-      "otherOnDisk": "Niet gedownload. Een tweede model op deze computer heeft een latere update nodig; wissel voorlopig in Instellingen → Coach",
+      "unplaced": "Niet gedownload. Een model op deze computer kon niet worden herkend; beheer het in Instellingen → Coach",
+      "noRoom": "Niet gedownload. Heeft {{need}} nodig, {{free}} vrij",
       "downloading": "Downloaden",
+      "checking": "De download controleren",
       "lowMemory": "Deze computer heeft minder geheugen dan dit model wil; het kan traag zijn of niet laden"
     },
     "why": {
@@ -64,18 +67,29 @@
     "download": {
       "start": "Downloaden",
       "pause": "Pauzeren",
+      "pauseHint": "Stop voor nu en bewaar wat is gedownload; Hervatten gaat vanaf daar verder",
+      "cancel": "Annuleren",
+      "cancelHint": "Stop en verwijder wat tot nu toe is gedownload",
       "resume": "Hervatten",
       "retry": "Opnieuw proberen",
       "anyway": "Toch downloaden",
       "notNow": "Nu niet",
       "running": "Downloaden… {{percent}}",
       "runningNoPercent": "Downloaden…",
+      "runningBytes": "Downloaden… {{done}} van {{total}}",
+      "bytes": "{{done}} van {{total}}",
+      "checking": "De download controleren op de gepubliceerde checksum… {{percent}}",
       "voices": "De stemmen van de coach ophalen…",
       "paused": "Gepauzeerd bij {{percent}}. Hervatten gaat vanaf daar verder.",
+      "pausedBytes": "Gepauzeerd bij {{done}} van {{total}}. Hervatten gaat vanaf daar verder.",
       "pausedNoPercent": "Gepauzeerd. Hervatten gaat verder waar het stopte.",
+      "cancelled": "Geannuleerd. Wat was gedownload is verwijderd.",
       "failed": "De download is gestopt: {{reason}}",
       "failedNoReason": "De download is gestopt.",
-      "meteredWarn": "Je lijkt mobiele data te gebruiken. {{size}} is veel om daarover te downloaden."
+      "checksumFailed": "Het gedownloade bestand kwam niet overeen met de gepubliceerde checksum en is verwijderd. Niets wat je al had is gewijzigd.",
+      "noRoom": "Te weinig ruimte: er is {{need}} nodig en {{free}} vrij. Maak ruimte vrij en probeer het opnieuw.",
+      "meteredWarn": "Je lijkt mobiele data te gebruiken. {{size}} is veel om daarover te downloaden.",
+      "spaceWarn": "Er is maar {{free}} vrij en hier is {{need}} voor nodig. Het past, met weinig over."
     }
   },
   "coachDetail": {

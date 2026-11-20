@@ -3208,7 +3208,12 @@ export function MainWindow() {
         <DownloadProgressBar
           downloadProgress={coach.downloadProgress}
           downloadingTier={coach.downloadingTier}
-          onCancel={() => coach.cancelDownload()}
+          onPause={() => coach.cancelDownload()}
+          onCancel={
+            coach.downloadingTier && (!coach.downloadProgress || coach.downloadProgress.component === "brain")
+              ? () => coach.discardDownload(coach.downloadingTier!)
+              : undefined
+          }
         />
       )}
 

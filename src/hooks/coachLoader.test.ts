@@ -7,6 +7,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   __resetCoachLoaderForTests,
+  cancelCoachModelDownload,
   coachLoadPending,
   coachResident,
   getCoachModelSnapshot,
@@ -44,6 +45,36 @@ function disk(over: Partial<ModelStatus> = {}): ModelStatus {
 }
 
 const NOTHING_ON_DISK = disk({ brainReady: false, brainTier: null, brainFamily: null, brainSizeBytes: 0 });
+
+/** What an ms2 backend reports: each tier on its own, and the free space. */
+function tiered(o: {
+  onDisk?: ModelTier[];
+  legacy?: ModelTier[];
+  partial?: Partial<Record<ModelTier, number>>;
+  freeBytes?: number | null;
+} = {}): ModelStatus {
+  const onDisk = o.onDisk ?? [];
+  const sizes: Record<ModelTier, number> = { standard: 2_497_280_256, full: 5_027_783_488 };
+  const tiers = (["standard", "full"] as const).map((tier) => ({
+    tier,
+    onDisk: onDisk.includes(tier),
+    sizeBytes: onDisk.includes(tier) ? sizes[tier] : 0,
+    family: onDisk.includes(tier) ? (o.legacy?.includes(tier) ? "legacy" : "qwen3") : null,
+    updateRecommended: !!o.legacy?.includes(tier),
+    partialBytes: o.partial?.[tier] ?? 0,
+    downloadBytes: sizes[tier],
+    checksumPinned: true,
+  }));
+  return disk({
+    brainReady: onDisk.length > 0,
+    brainTier: onDisk[0] ?? null,
+    brainFamily: onDisk.length ? "qwen3" : null,
+    brainSizeBytes: tiers.reduce((n, t) => n + t.sizeBytes, 0),
+    brainUpdateRecommended: !!o.legacy?.length,
+    tiers,
+    freeBytes: o.freeBytes === undefined ? 100e9 : o.freeBytes,
+  });
+}
 
 function caps(over: Record<string, unknown> = {}) {
   return () => ({
@@ -298,14 +329,15 @@ describe("what each row says", () => {
     expect(row("full").name).toBe("Qwen3 8B");
   });
 
-  it("offers no Download for the tier the one place on disk is not holding", async () => {
+  it("with one tier on disk the other row offers its own Download: the two live side by side (ms2)", async () => {
     setCoachModelDisk(disk(), 32_768);
     await openCoachStartupGate();
     await flush();
     expect(row("standard").state).toBe("onDisk");
+    expect(row("standard").canDownload).toBe(false);
     expect(row("full").state).toBe("notDownloaded");
-    expect(row("full").why).toBe("otherOnDisk");
-    expect(row("full").canDownload).toBe(false);
+    expect(row("full").why).toBe(null);
+    expect(row("full").canDownload).toBe(true);
   });
 
   it("legacy weights on disk are not overwritten from the selector (review 2)", async () => {
@@ -315,20 +347,20 @@ describe("what each row says", () => {
     // The same tier: the update is Settings' "Update brain", not a row button.
     expect(row("standard").why).toBe("update");
     expect(row("standard").canDownload).toBe(false);
-    // The other tier would replace them: no Download.
-    expect(row("full").why).toBe("otherOnDisk");
-    expect(row("full").canDownload).toBe(false);
     const started: ModelTier[] = [];
-    registerCoachDownloadPort({ start: (t) => started.push(t), pause: () => {} });
-    expect(startCoachModelDownload("full")).toBe(false);
+    registerCoachDownloadPort({ start: (t) => started.push(t), pause: () => {}, cancel: () => {} });
     expect(startCoachModelDownload("standard")).toBe(false);
-    expect(started).toEqual([]);
+    // The other tier goes to its own folder and never touches them (ms2).
+    expect(row("full").canDownload).toBe(true);
+    expect(startCoachModelDownload("full")).toBe(true);
+    expect(started).toEqual(["full"]);
   });
 
   it("a brain file whose tier is unreadable blocks both rows (review 2)", async () => {
     setCoachModelDisk(disk({ brainTier: null }), 32_768);
     await openCoachStartupGate();
     await flush();
+    expect(row("standard").why).toBe("unplaced");
     expect(row("standard").canDownload).toBe(false);
     expect(row("full").canDownload).toBe(false);
   });
@@ -348,13 +380,15 @@ describe("downloads in the selector", () => {
   function port() {
     const started: ModelTier[] = [];
     let paused = 0;
+    const cancelled: ModelTier[] = [];
     registerCoachDownloadPort({
       start: (tier) => started.push(tier),
       pause: () => {
         paused++;
       },
+      cancel: (tier) => cancelled.push(tier),
     });
-    return { started, paused: () => paused };
+    return { started, cancelled, paused: () => paused };
   }
 
   it("nothing downloads without a press: not at startup, not on a pick", async () => {
@@ -419,11 +453,130 @@ describe("downloads in the selector", () => {
 
   it("refuses a download where the row offers none", async () => {
     const p = port();
-    setCoachModelDisk(disk({ studioRecommended: false }), 8_192);
+    setCoachModelDisk(disk(), 8_192);
+    await openCoachStartupGate();
+    await flush();
+    // On disk already.
+    expect(startCoachModelDownload("standard")).toBe(false);
+    // A build that cannot run a model.
+    __resetCoachLoaderForTests();
+    const q = port();
+    setInvokeResponse("get_coach_capabilities", caps({ llmCompiled: false }));
+    setCoachModelDisk(NOTHING_ON_DISK, 8_192);
     await openCoachStartupGate();
     await flush();
     expect(startCoachModelDownload("full")).toBe(false);
     expect(p.started).toEqual([]);
+    expect(q.started).toEqual([]);
+  });
+
+  it("a download that does not fit is not offered; one that barely fits asks first (ms2)", async () => {
+    const p = port();
+    // 3.1 GB free: Studio (5.0 GB) does not fit, Standard (2.5 GB) only just.
+    setCoachModelDisk(tiered({ freeBytes: 3_100_000_000 }), 32_768);
+    await openCoachStartupGate();
+    await flush();
+    expect(row("full").space?.state).toBe("short");
+    expect(row("full").space?.freeBytes).toBe(3_100_000_000);
+    expect(row("full").canDownload).toBe(false);
+    expect(startCoachModelDownload("full")).toBe(false);
+    expect(row("standard").space?.state).toBe("tight");
+    expect(row("standard").canDownload).toBe(true);
+    // Plenty of room: nothing to say.
+    setCoachModelDisk(tiered({ freeBytes: 100e9 }), 32_768);
+    expect(row("full").space?.state).toBe("ok");
+    // A volume that cannot say gates nothing.
+    setCoachModelDisk(tiered({ freeBytes: null }), 32_768);
+    expect(row("full").space).toBe(null);
+    expect(row("full").canDownload).toBe(true);
+    expect(p.started).toEqual([]);
+  });
+
+  it("the room a resume needs counts the bytes already kept (ms2)", async () => {
+    setCoachModelDisk(
+      tiered({ freeBytes: 3_100_000_000, partial: { full: 4_000_000_000 } }),
+      32_768,
+    );
+    await openCoachStartupGate();
+    await flush();
+    expect(row("full").space?.state).toBe("ok");
+    expect(row("full").canDownload).toBe(true);
+  });
+
+  it("a pause kept on disk comes back after a restart, with its bytes, Resume and Cancel (ms2)", async () => {
+    const p = port();
+    setCoachModelDisk(tiered({ partial: { full: 1_200_000_000 } }), 32_768);
+    await openCoachStartupGate();
+    await flush();
+    const d = row("full").download!;
+    expect(d.phase).toBe("paused");
+    expect(d.downloadedBytes).toBe(1_200_000_000);
+    expect(d.totalBytes).toBe(5_027_783_488);
+    expect(row("full").canDownload).toBe(true);
+    expect(cancelCoachModelDownload("full")).toBe(true);
+    expect(p.cancelled).toEqual(["full"]);
+    // Nothing to cancel on the other row.
+    expect(cancelCoachModelDownload("standard")).toBe(false);
+    expect(p.cancelled).toEqual(["full"]);
+  });
+
+  it("Cancel stops a running download; a cancelled row offers Download again (ms2)", async () => {
+    const p = port();
+    setCoachModelDisk(tiered(), 32_768);
+    await openCoachStartupGate();
+    await flush();
+    setCoachModelDownload({ tier: "standard", phase: "running", stage: "checking", fraction: 0.3, error: null });
+    expect(row("standard").download?.stage).toBe("checking");
+    expect(cancelCoachModelDownload("standard")).toBe(true);
+    expect(p.cancelled).toEqual(["standard"]);
+    setCoachModelDownload({ tier: "standard", phase: "cancelled", stage: "brain", fraction: null, error: null });
+    expect(row("standard").canDownload).toBe(true);
+    expect(cancelCoachModelDownload("standard")).toBe(false);
+  });
+});
+
+describe("both tiers on disk, side by side (ms2)", () => {
+  it("both rows are selectable, and the loader asks Rust for the chosen tier's file", async () => {
+    setCoachModelDisk(tiered({ onDisk: ["standard", "full"] }), 32_768);
+    setCoachModelChoice("full");
+    await openCoachStartupGate();
+    await flush();
+    expect(row("standard").state).toBe("onDisk");
+    expect(state()).toBe("ready");
+    const loads = mockInvoke.mock.calls.filter(([c]) => c === "load_coach_model");
+    expect(loads).toHaveLength(1);
+    expect(loads[0][1]).toEqual({ tier: "full" });
+
+    // Switching loads the other tier's file; nothing is downloaded or deleted.
+    setCoachModelChoice("standard");
+    await flush();
+    const after = mockInvoke.mock.calls.filter(([c]) => c === "load_coach_model");
+    expect(after).toHaveLength(2);
+    expect(after[1][1]).toEqual({ tier: "standard" });
+    expect(row("full").state).toBe("onDisk");
+    expect(calls("delete_models")).toBe(0);
+    expect(calls("start_model_download")).toBe(0);
+  });
+
+  it("an update of one tier's older weights leaves the other tier loadable", async () => {
+    setCoachModelDisk(tiered({ onDisk: ["standard", "full"], legacy: ["standard"] }), 32_768);
+    setCoachModelChoice("full");
+    await openCoachStartupGate();
+    await flush();
+    expect(row("standard").why).toBe("update");
+    expect(state()).toBe("ready");
+  });
+
+  it("a reloaded webview with both tiers on disk asks for the chosen one rather than guess", async () => {
+    setInvokeResponse("is_coach_loaded", () => true);
+    setCoachModelDisk(tiered({ onDisk: ["standard", "full"] }), 32_768);
+    restoreCoachModelChoice("full");
+    await openCoachStartupGate();
+    await flush();
+    const loads = mockInvoke.mock.calls.filter(([c]) => c === "load_coach_model");
+    expect(loads).toHaveLength(1);
+    expect(loads[0][1]).toEqual({ tier: "full" });
+    expect(state()).toBe("ready");
   });
 });
 

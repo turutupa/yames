@@ -42,7 +42,8 @@
       "notDownloaded": "未下載",
       "notOnThisDevice": "此裝置不支援",
       "downloading": "下載中 {{percent}}",
-      "downloadingNoPercent": "下載中"
+      "downloadingNoPercent": "下載中",
+      "checking": "正在驗證下載"
     },
     "state": {
       "ready": "已載入，就緒",
@@ -53,8 +54,10 @@
       "failedWhy": "載入失敗（{{reason}}）。選擇它以重試",
       "notDownloaded": "未下載",
       "update": "舊版本。請在設定 → 練習教練中更新",
-      "otherOnDisk": "未下載。這台電腦上的第二個模型需要後續更新；目前請在設定 → 練習教練中切換",
+      "unplaced": "未下載。無法辨識這台電腦上的一個模型；請在設定 → 練習教練中管理",
+      "noRoom": "未下載。需要 {{need}}，可用 {{free}}",
       "downloading": "下載中",
+      "checking": "正在驗證下載",
       "lowMemory": "這台電腦的記憶體少於此模型所需；可能執行緩慢或無法載入"
     },
     "why": {
@@ -64,18 +67,29 @@
     "download": {
       "start": "下載",
       "pause": "暫停",
+      "pauseHint": "先停下並保留已下載的部分；點選「繼續」會從此處接著下載",
+      "cancel": "取消",
+      "cancelHint": "停止並刪除已下載的部分",
       "resume": "繼續",
       "retry": "重試",
       "anyway": "仍要下載",
       "notNow": "暫不",
       "running": "正在下載… {{percent}}",
       "runningNoPercent": "正在下載…",
+      "runningBytes": "正在下載… {{done}} / {{total}}",
+      "bytes": "{{done}} / {{total}}",
+      "checking": "正在以公布的核對碼驗證下載… {{percent}}",
       "voices": "正在取得教練的語音…",
       "paused": "已暫停於 {{percent}}。點選「繼續」會從此處接著下載。",
+      "pausedBytes": "已暫停於 {{done}} / {{total}}。點選「繼續」會從此處接著下載。",
       "pausedNoPercent": "已暫停。點選「繼續」會從停下的地方接著下載。",
+      "cancelled": "已取消。已下載的部分已刪除。",
       "failed": "下載已中斷：{{reason}}",
       "failedNoReason": "下載已中斷。",
-      "meteredWarn": "你似乎正在使用行動數據。透過它下載 {{size}} 的內容流量很大。"
+      "checksumFailed": "下載的檔案與公布的核對碼不符，已刪除。你原有的內容沒有任何變動。",
+      "noRoom": "空間不足：需要 {{need}}，可用 {{free}}。請先釋出空間，再重試。",
+      "meteredWarn": "你似乎正在使用行動數據。透過它下載 {{size}} 的內容流量很大。",
+      "spaceWarn": "只有 {{free}} 可用，而這需要 {{need}}。放得下，但餘裕很小。"
     }
   },
   "coachDetail": {

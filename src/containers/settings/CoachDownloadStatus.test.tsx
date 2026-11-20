@@ -24,7 +24,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, fireEvent } from "@testing-library/react";
 import { readStylesheet } from "../../test/readStyles";
-import { CoachDownloadConfirmDialog, DownloadHairline } from "./CoachDownloadStatus";
+import { CoachDownloadConfirmDialog, DownloadHairline, DownloadProgressBar } from "./CoachDownloadStatus";
 import type { ModelStatus } from "../../ipc.desktop";
 
 const NOTHING_INSTALLED: ModelStatus = {
@@ -255,5 +255,44 @@ describe("DownloadHairline", () => {
     const body = rule.slice(0, rule.indexOf("}"));
     expect(body).toMatch(/pointer-events:\s*none/);
     expect(body).toMatch(/height:\s*3px/);
+  });
+});
+
+describe("DownloadProgressBar — the same words as the selector (ms2)", () => {
+  const progress = {
+    component: "brain",
+    downloadedBytes: 1_200_000_000,
+    totalBytes: 2_497_280_256,
+    fraction: 0.48,
+    done: false,
+  };
+
+  it("says Pause for the pause and Cancel for the cancel that removes the bytes", () => {
+    const onPause = vi.fn();
+    const onCancel = vi.fn();
+    const { getByTestId } = render(
+      <DownloadProgressBar downloadProgress={progress} downloadingTier="standard" onPause={onPause} onCancel={onCancel} />,
+    );
+    expect(getByTestId("download-bar-pause").textContent).toBe("Pause");
+    expect(getByTestId("download-bar-cancel").textContent).toBe("Cancel");
+    fireEvent.click(getByTestId("download-bar-pause"));
+    expect(onPause).toHaveBeenCalledTimes(1);
+    expect(onCancel).not.toHaveBeenCalled();
+    fireEvent.click(getByTestId("download-bar-cancel"));
+    expect(onCancel).toHaveBeenCalledTimes(1);
+  });
+
+  it("offers no Cancel when there is nothing of the model left to remove", () => {
+    const { queryByTestId } = render(
+      <DownloadProgressBar downloadProgress={{ ...progress, component: "Voice: amy" }} downloadingTier="standard" onPause={() => {}} />,
+    );
+    expect(queryByTestId("download-bar-cancel")).toBeNull();
+  });
+
+  it("says when it is checking the file", () => {
+    const { container } = render(
+      <DownloadProgressBar downloadProgress={{ ...progress, stage: "checking" }} downloadingTier="standard" onPause={() => {}} />,
+    );
+    expect(container.textContent).toContain("published checksum");
   });
 });
