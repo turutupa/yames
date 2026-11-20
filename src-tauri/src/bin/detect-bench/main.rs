@@ -430,10 +430,29 @@ fn cost(mut args: Args) -> Result<ExitCode, String> {
         samples.extend_from_slice(&one);
     }
     samples.truncate((seconds * rate as f64) as usize);
-    let mut m = match args.value("--runtime") {
-        Some(name) => model::load_runtime(&name)?,
-        None => model::load()?,
+    // Loading (reading the archive, optimising the graph): what the first
+    // verifier run of a session pays unless the model was warmed
+    // (`model::warm_in_background`). The second load is the same work with
+    // the code and the allocator warm.
+    let runtime = args.value("--runtime");
+    let load = |name: &Option<String>| match name {
+        Some(name) => model::load_runtime(name),
+        None => model::load(),
     };
+    let (lc, lw) = (thread_cpu_s(), std::time::Instant::now());
+    let mut m = load(&runtime)?;
+    let (load_cpu, load_wall) = (thread_cpu_s().zip(lc).map(|(a, b)| a - b), lw.elapsed().as_secs_f64());
+    let lw = std::time::Instant::now();
+    drop(load(&runtime)?);
+    let reload_wall = lw.elapsed().as_secs_f64();
+    // The first window through a fresh model against a later one.
+    let silence = vec![0.0f32; model::WINDOW_SAMPLES];
+    let lw = std::time::Instant::now();
+    m.infer(&silence)?;
+    let first_window = lw.elapsed().as_secs_f64();
+    let lw = std::time::Instant::now();
+    m.infer(&silence)?;
+    let later_window = lw.elapsed().as_secs_f64();
     let _ = yames_lib::detect::analyse(m.as_mut(), &samples[..rate as usize * 2], rate)?; // warm
     let (c0, w0) = (thread_cpu_s(), std::time::Instant::now());
     let a = yames_lib::detect::analyse(m.as_mut(), &samples, rate)?;
@@ -465,6 +484,11 @@ fn cost(mut args: Args) -> Result<ExitCode, String> {
         "pitchTrackWallSeconds": track_wall,
         "trackerGradeAtSeconds": track_wall,
         "fullGradeAtSeconds": track_wall + wall,
+        "modelLoadWallSeconds": load_wall,
+        "modelLoadCpuSeconds": load_cpu,
+        "modelReloadWallSeconds": reload_wall,
+        "firstWindowWallSeconds": first_window,
+        "laterWindowWallSeconds": later_window,
         "runtime": m.runtime(),
         "audioSeconds": a.seconds,
         "wallSeconds": wall,

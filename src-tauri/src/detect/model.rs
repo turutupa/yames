@@ -172,6 +172,25 @@ pub fn with_shared<R>(f: impl FnOnce(Option<&mut Box<dyn NoteModel>>) -> R) -> R
     with_slot(&SHARED, || if enabled() { load() } else { Err(String::new()) }, f)
 }
 
+/// Load the shared model now, if it is not loaded yet, on a thread of its
+/// own below normal priority, so the first Take's verifier pass does not pay
+/// for it (reading the archive and optimising the graph: `RUNTIME.md`,
+/// "Loading"). Returns at once; spawns at most one thread per process. For
+/// callers off every real-time thread only (the command that loads an
+/// Exercise): never the audio callback, never the onset thread.
+pub fn warm_in_background() {
+    static ONCE: std::sync::Once = std::sync::Once::new();
+    if !enabled() {
+        return;
+    }
+    ONCE.call_once(|| {
+        let _ = std::thread::Builder::new().name("yames-note-model-warm".into()).spawn(|| {
+            crate::coach::lower_current_thread_priority();
+            with_shared(|_| ());
+        });
+    });
+}
+
 /// Not yet asked for; asked for and absent (`Some(None)`); or loaded.
 type Shared = std::sync::Mutex<Option<Option<Box<dyn NoteModel>>>>;
 

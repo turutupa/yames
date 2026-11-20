@@ -601,6 +601,10 @@ impl TimingAnalyzer {
             || details.iter().any(|d| d.bend > 0.0 || d.tech.iter().any(|t| t == "vibrato"));
         if !pitches.is_empty() && wanted {
             self.notes.tap.arm(input_rate);
+            // The verifier will run on this Exercise's Takes: have its model
+            // loaded by the time the first one closes. Its own thread, below
+            // normal priority; this is a command's thread, not a real-time one.
+            crate::detect::model::warm_in_background();
         } else {
             self.notes.tap.disarm();
         }
