@@ -12,14 +12,12 @@ import { useFitOneLine, useFitScale } from "./hooks/useFitOneLine";
 import { useTranslation } from "react-i18next";
 import {
   barLine,
-  barStrip,
   decidingCheck,
   displayBar,
   displayValue,
   metricKey,
   notCaughtHint,
   reasonLine,
-  takeLine,
 } from "../../session/coachWords";
 import type { BarCheck } from "../../session/grade";
 import { EDGE_MINUTES, planSession } from "../../session/planner";
@@ -36,7 +34,9 @@ import {
 } from "../../session/runner";
 import type { TakeOutcome } from "../../session/runner";
 import { PORTRAIT_PHONE_QUERY, useMediaQuery } from "../../hooks/useMediaQuery";
-import { AskStart, CoachLine, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart, timedHowKey } from "./parts";
+import { AskStart, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart, timedHowKey } from "./parts";
+import { TakeOrder } from "../coach/CoachLine";
+import { ReadyNote, RecapLine, ResultNote, UngradedNote, takeOrderText } from "./SessionCoach";
 import { RunwayTakeScreen, isTheoryTake } from "./highway/RunwayTake";
 import { categoryTagKey } from "../../session/kind";
 import { KeyChooser } from "./practice/KeyChooser";
@@ -58,7 +58,6 @@ import type { BeatPosition } from "../../songs/position";
 import type { NeckKind, NeckView } from "../../stage3d/api";
 import { lineText } from "./lineText";
 import { exerciseWords, plannedPurpose } from "../../session/exerciseWords";
-import { readyHonestLineKey } from "../../session/caveats";
 import { ContextLine, StepTag, rise, stepTitle } from "./TodayView";
 import { roleKey } from "./todayPlan";
 import { factsOf } from "../../session/progress";
@@ -461,6 +460,7 @@ function TakeScreen({
     isPlaying,
     view: session.practiceView,
   });
+  const howRef = useRef<HTMLDetailsElement>(null);
   if (!exercise || !take || !step) return null;
 
   const pathTitle = session.paths.find((p) => p.id === take.pathId);
@@ -469,28 +469,33 @@ function TakeScreen({
   const scored = live.heard + live.missed;
   const canStart = takeCanStart(session, listening);
   const start = startButton(session, listening, t);
-  // Said once a Session, before its first Take (UX audit SES-14), and not at
-  // all where the coach's own line already says it (acceptance P1-4).
-  // Played without grading by choice: no bar to meet and nothing listening,
-  // so the coach's line is the Exercise's own tip (owner, 2026-11-18).
+  // Played without grading by choice: no pass mark to meet and nothing
+  // listening (owner, 2026-11-18).
   const byChoice = run.ungraded === "gradingOff" || run.ungraded === "chosen";
-  const honest = run.outcomes.length === 0 && !byChoice ? readyHonestLineKey(exercise) : null;
   // The ready screen says three things (acceptance pass 2, P1-4): where the
-  // hand goes, what is graded, and a folded "how". The bar IS what is graded,
-  // so it is the coach's line; the Exercise's own tip and caveat go in the
-  // fold, and any sentence naming the fret or the tempo the screen already
-  // shows is left out of it.
-  const gradedLine = bar && !byChoice ? lineText(t, bar) : exercise.coachLine;
+  // hand goes, what is graded, and a folded "how". Since the coach's note
+  // (DESIGN 4.1) the Exercise's cue is the note's headline and the honest
+  // line its quiet line, so the fold is the how-to alone; the pass mark sits
+  // beside the tempo, as in the mock (03).
+  const gradedLine = bar && !byChoice ? lineText(t, bar) : null;
   // The words of the notes on screen: the Take's variant's own when it has
   // some (a key-moved Exercise names its key), the Exercise's otherwise.
   const played = take.exercise ?? exercise;
   const words = exerciseWords(exercise, played);
-  const how = howText(
-    words.howTo[0],
-    played.position,
-    [bar && !byChoice ? exercise.coachLine : null, honest ? t(honest) : null],
-    [exercise.tempo.passAtBpm, exercise.tempo.rungs[0]?.bpm, run.bpm],
-  );
+  const how = howText(words.howTo[0], played.position, [], [
+    exercise.tempo.passAtBpm,
+    exercise.tempo.rungs[0]?.bpm,
+    run.bpm,
+  ]);
+  const hasHow = !!how || words.howTo.length > 1;
+  // The one order of a running Take: fixed before the count-in (DESIGN 3.4).
+  const order = takeOrderText(exercise);
+  const openHow = () => {
+    const fold = howRef.current;
+    if (!fold) return;
+    fold.open = true;
+    fold.scrollIntoView({ block: "nearest" });
+  };
 
   return (
     <div className="session-body" data-testid="session-take" data-phase={run.phase}>
@@ -525,6 +530,11 @@ function TakeScreen({
         meta={
           <>
             <MetaTempo bpm={run.bpm} />
+            {!running && gradedLine && (
+              <span className="session-why practice-meta-note" data-testid="session-passmark">
+                {gradedLine}
+              </span>
+            )}
             {running && (
               <span className="session-row session-live practice-live" data-testid="session-live">
                 {/* Nothing scored yet: a quiet "–%", not a green dash that
@@ -591,14 +601,26 @@ function TakeScreen({
 
       <div className="session-mechlow" data-single="">
         <div className="session-col">
+          {/* Ready: the coach's note, one thing to do (DESIGN 4.1). Running:
+              the one order, fixed, or nothing when the cue is too long for
+              it (DESIGN 3.4). */}
+          {running ? (
+            order && <TakeOrder text={order} />
+          ) : (
+            <ReadyNote
+              session={session}
+              step={step}
+              stepNumber={stepNumber}
+              watch={watch}
+              onTry={hasHow ? openHow : undefined}
+            />
+          )}
           {!running && <HandLine position={handOf(played)} />}
-          {/* Ready: what is graded. Running: the Exercise's own tip. */}
-          <CoachLine>{running ? exercise.coachLine : gradedLine}</CoachLine>
-          {/* One hand line, one coach line, one "how", folded: the how-to, the
-              tip and the pick caveat, with nothing the lines above or the
-              picture already said (acceptance P1-4). */}
-          {!running && (how || words.howTo.length > 1) && (
-            <HowLines>
+          {/* One hand line, one note, one "how", folded: the how-to, with
+              nothing the lines above or the picture already said
+              (acceptance P1-4). */}
+          {!running && hasHow && (
+            <HowLines detailsRef={howRef}>
               {how && <div className="session-why session-how-text" data-testid="session-how-text">{how}</div>}
               {/* The how-to's further lines (a variant's key and frets among
                   them), whole and quieter: the numbers in them are the point. */}
@@ -729,12 +751,19 @@ export function howText(
  * acceptance pass 2 on every screen): three paragraphs there pushed the Start button a screen down and
  * read as a wall; the coach's line stays open, the rest is one tap away.
  */
-function HowLines({ children }: { children: React.ReactNode }) {
+function HowLines({
+  children,
+  detailsRef,
+}: {
+  children: React.ReactNode;
+  /** The coach's "What should I try?" opens it. */
+  detailsRef?: React.Ref<HTMLDetailsElement>;
+}) {
   const { t } = useTranslation();
   // Folded everywhere since acceptance pass 2 (P1-4): open, it was the wall
   // of text the owner keeps asking to be rid of.
   return (
-    <details className="session-how" data-testid="session-how">
+    <details className="session-how" data-testid="session-how" ref={detailsRef}>
       <summary>{t("session.paths.howTo")}</summary>
       <div className="session-how-body">{children}</div>
     </details>
@@ -807,126 +836,6 @@ function DecidingNumber({ outcome }: { outcome: TakeOutcome }) {
           </span>
         )}
       </div>
-    </div>
-  );
-}
-
-/**
- * Everything else the bar asked for, each with its own ✓ or ✗, and what could
- * not be checked this time, said plainly in one place (UX audit SES-2, SES-3).
- */
-function OtherChecks({ outcome }: { outcome: TakeOutcome }) {
-  const { t } = useTranslation();
-  const deciding = decidingCheck(outcome.grade);
-  const others = outcome.grade.checks.filter((c) => c !== deciding && c.met !== null && c.value !== null);
-  // Only the pitch check is ever left unmeasured by this build; it is said
-  // plainly here, in one place (UX audit SES-2).
-  const unchecked = outcome.grade.unmeasured.includes("noteIdentity");
-  // Hammer-ons, pull-offs and taps the note verifier heard: reported, not
-  // graded (owner decision 3), so it carries no ✓ or ✗.
-  const legato = outcome.measures.legato;
-  // Bends and vibrato read as curves: reported, not graded either (M5).
-  const { bends, vibrato } = outcome.measures;
-  if (others.length === 0 && !unchecked && !legato && !bends && !vibrato) return null;
-  return (
-    <ul className="session-checks" data-testid="session-checks">
-      {others.map((c, i) => {
-        const value = displayValue(c);
-        const bar = barText(c, t);
-        return (
-          <li key={i} data-met={c.met ? "" : undefined} data-missed={c.met === false ? "" : undefined}>
-            <span className="session-check-mark" aria-hidden="true">{c.met ? "✓" : "✗"}</span>
-            <span>
-              <b>
-                {value}
-                {c.metric !== "extraNotes" ? "%" : ""}
-              </b>{" "}
-              {t(`session.metric.${metricKey(c.metric)}`)}
-            </span>
-            {bar && <span className="session-check-bar">{bar}</span>}
-          </li>
-        );
-      })}
-      {unchecked && (
-        <li data-unchecked="">
-          <span className="session-check-mark" aria-hidden="true">–</span>
-          <span>{t("session.result.notesNotChecked")}</span>
-        </li>
-      )}
-      {legato && (
-        <li data-reported="" data-testid="session-legato">
-          <span className="session-check-mark" aria-hidden="true">·</span>
-          <span>
-            {t(legato.notSounded > 0 ? "session.result.legatoSome" : "session.result.legatoAll", {
-              sounded: legato.sounded,
-              due: legato.due,
-              silent: legato.notSounded,
-            })}
-          </span>
-        </li>
-      )}
-      {bends && (
-        <li data-reported="" data-testid="session-bends">
-          <span className="session-check-mark" aria-hidden="true">·</span>
-          <span>
-            {t(bends.flat > 0 ? "session.result.bendsSomeFlat" : "session.result.bendsAll", {
-              onPitch: bends.onPitch,
-              due: bends.due,
-              flat: bends.flat,
-            })}
-          </span>
-        </li>
-      )}
-      {vibrato && (
-        <li data-reported="" data-testid="session-vibrato">
-          <span className="session-check-mark" aria-hidden="true">·</span>
-          <span>{t("session.result.vibratoHeard", { present: vibrato.present, due: vibrato.due })}</span>
-        </li>
-      )}
-    </ul>
-  );
-}
-
-/**
- * Bar by bar (UX audit SES-3): every bar of the Take, green with ✓ where it
- * held, red with ✗ where it slipped, from the scorer's own per-bar figures;
- * the stretch that counted underlined.
- */
-function BarByBar({ session, outcome }: { session: SessionRun; outcome: TakeOutcome }) {
-  const { t } = useTranslation();
-  const exercise = session.exercise;
-  if (!exercise) return null;
-  const strip = barStrip(exercise, outcome.measures);
-  if (!strip || strip.cells.length < 2) return null;
-  const { cells, held } = strip;
-  const inHeld = (n: number) => !!held && n >= held.from && n < held.from + held.count;
-  const met = cells.filter((c) => c.state === "met").length;
-  return (
-    <div className="session-bars" data-testid="session-bars">
-      <div className="session-bars-head">
-        <span className="session-kick">{t("session.result.barsTitle")}</span>
-        <span className="session-why">
-          {held && outcome.grade.verdict === "passed"
-            ? t("session.result.barsHeld", { count: held.count })
-            : t("session.result.barsMet", { count: met, of: cells.length })}
-        </span>
-      </div>
-      <ol className="session-bars-row" style={{ gridTemplateColumns: `repeat(${cells.length}, minmax(0, 1fr))` }}>
-        {cells.map((c) => (
-          <li
-            key={c.n}
-            data-state={c.state}
-            data-held={inHeld(c.n) ? "" : undefined}
-            aria-label={t(
-              c.state === "met" ? "session.result.barHeld" : c.state === "missed" ? "session.result.barSlipped" : "session.result.barThin",
-              { n: c.n },
-            )}
-          >
-            <span aria-hidden="true">{c.state === "met" ? "✓" : c.state === "missed" ? "✗" : "·"}</span>
-            <small aria-hidden="true">{c.n}</small>
-          </li>
-        ))}
-      </ol>
     </div>
   );
 }
@@ -1137,7 +1046,7 @@ function ResultScreen({ session, pedalMapped }: { session: SessionRun; pedalMapp
   if (!outcome) return null;
   const onEdge = isEdgeStep(currentStep(run));
   const edgeDone = onEdge && edgeOf(run, exercise).done;
-  const line = takeLine(outcome.grade, outcome.measures, outcome.bpm);
+  const words = exerciseWords(exercise, session.take?.exercise);
   return (
     <div className="session-body" data-testid={passed ? "session-result" : "session-between"} data-verdict={outcome.grade.verdict}>
       <div className="session-between">
@@ -1155,9 +1064,10 @@ function ResultScreen({ session, pedalMapped }: { session: SessionRun; pedalMapp
           <DecidingNumber outcome={outcome} />
           <CleanTempoLine outcome={outcome} />
           {onEdge && <EdgePanel session={session} />}
-          <CoachLine good={passed}>{lineText(t, line)}</CoachLine>
-          <OtherChecks outcome={outcome} />
-          <BarByBar session={session} outcome={outcome} />
+          {/* The coach's note: the finding, the Take bar by bar and one fact
+              line, all in one place (DESIGN 4.2; UI_DECISIONS U4.2). The
+              number above carries the grade; the note never turns its colour. */}
+          <ResultNote session={session} outcome={outcome} howTo={words.howTo} />
           {/* There at once, with no fade: a pedal tap the moment the result
               lands must find it (UX audit SES-15). */}
           <button ref={bigRef} className="session-big" data-size="mid" data-fit="" onClick={actions.go} data-testid="session-big">
@@ -1292,6 +1202,8 @@ function UngradedResultScreen({ session }: { session: SessionRun }) {
         <div className="session-why session-rise" style={rise(2)}>
           {t(outcome.ungraded === "inputOff" ? "session.ungraded.body" : "session.ungraded.bodyOff")}
         </div>
+        {/* What the player listened for, and their answer (DESIGN 4.4). */}
+        <UngradedNote session={session} outcome={outcome} />
       </div>
       <div className="session-slot" ref={slot} aria-hidden="true" data-exercise="" />
       <div className="session-center">
@@ -1831,6 +1743,8 @@ function RecapScreen({ session }: { session: SessionRun }) {
             </div>
           )}
         </dl>
+        {/* The coach's one line: what moved, and when it comes back (DESIGN 4.1). */}
+        <RecapLine session={session} />
       </div>
       <div className="session-split">
         <div className="session-col">

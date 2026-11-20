@@ -1,0 +1,376 @@
+/*
+ * The coach's line, its note and the one order during a Take (DESIGN 3.4,
+ * 3.6; mocks 03 to 07, 13, 14).
+ *
+ * Theme tokens only. Inside a Session the learning side's own tokens (--l-*,
+ * session.css) are the source, so a light theme's shadow and green-as-text
+ * come through --l-shade and --l-tone-text; anywhere else the app's tokens.
+ *
+ * The coach's colour (--accent-2) is spent on two things: its glyph and the
+ * 3 px left rule of a note. Never a fill, a label or a chip, and the rule
+ * never turns red or green.
+ */
+.coach-line,
+.coach-note,
+.coach-order {
+  --coach-ink: var(--l-ink, var(--text-primary));
+  --coach-quiet: var(--l-quiet, var(--text-secondary));
+  --coach-faint: var(--l-faint, var(--text-tertiary));
+  --coach-edge: var(--l-line2, var(--border));
+  --coach-hair: var(--l-line, var(--border));
+  --coach-panel: var(--l-panel, var(--bg-card));
+  --coach-shade: var(--l-shade, transparent);
+  --coach-good: var(--l-tone, var(--accent));
+  --coach-good-text: var(--l-tone-text, var(--text-primary));
+  --coach-bad: var(--l-clash, var(--btn-danger));
+  --coach-mark: var(--accent-2);
+}
+
+.coach-glyph {
+  flex: none;
+  color: var(--coach-mark);
+}
+
+/* --- one line ------------------------------------------------------------ */
+
+.coach-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  color: var(--coach-ink);
+  font-size: 17px;
+  line-height: 1.4;
+}
+.coach-line .coach-glyph {
+  margin-top: 0.15em;
+}
+.coach-line-text {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+/* --- the order during a Take --------------------------------------------- */
+
+/* Readable from a playing position: 24 px on a computer, 20 on a phone, in
+   ink, its glyph faint. One fixed line; it may wrap, it is never cut. */
+.coach-order {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  color: var(--coach-ink);
+  font: 600 24px/1.25 var(--l-body, inherit);
+  overflow-wrap: break-word;
+}
+.coach-order .coach-order-glyph {
+  color: var(--coach-faint);
+  opacity: 0.7;
+}
+.main-window.is-mobile .coach-order,
+.session-page[data-phone] .coach-order {
+  font-size: 20px;
+  gap: 10px;
+}
+@media (max-width: 480px) {
+  .coach-order {
+    font-size: 20px;
+  }
+}
+
+/* --- the note ------------------------------------------------------------ */
+
+.coach-note {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  max-width: 820px;
+  padding: 14px 18px 14px 17px;
+  border: 1px solid var(--coach-hair);
+  border-left: 3px solid var(--coach-mark);
+  border-radius: 14px;
+  background: var(--coach-panel);
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--coach-shade) 26%, transparent);
+  color: var(--coach-quiet);
+  font-size: 15px;
+  line-height: 1.45;
+}
+.coach-note p {
+  margin: 0;
+}
+.coach-note-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--coach-ink);
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.35;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+.coach-note-head > span {
+  min-width: 0;
+}
+.coach-note-head .coach-glyph {
+  margin-top: 0.12em;
+}
+.coach-note .coach-block-source {
+  color: var(--coach-quiet);
+}
+.coach-note-line {
+  color: var(--coach-quiet);
+  overflow-wrap: break-word;
+}
+.coach-note-line b {
+  color: var(--coach-ink);
+}
+
+/* The Exercise's own How, opened in place from "What should I try?". */
+.coach-note-how {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 10px;
+  border-left: 1px solid var(--coach-hair);
+}
+
+/* --- chips --------------------------------------------------------------- */
+
+.coach-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.coach-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  max-width: 100%;
+  padding: 6px 15px;
+  border: 1px solid var(--coach-edge);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--coach-ink);
+  font: 600 14px/1.25 var(--l-body, inherit);
+  text-align: left;
+  text-wrap: balance;
+  cursor: pointer;
+}
+.coach-chip:hover {
+  border-color: var(--coach-quiet);
+}
+.coach-chip:focus-visible {
+  outline: 2px solid var(--coach-ink);
+  outline-offset: 2px;
+}
+.coach-chip-lead {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 12px;
+  color: var(--coach-quiet);
+  font-size: 13px;
+}
+.coach-chip[aria-pressed="true"] {
+  border-color: var(--coach-ink);
+  background: color-mix(in srgb, var(--coach-ink) 10%, transparent);
+}
+
+/* --- the ungraded answer ------------------------------------------------- */
+
+.coach-answer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+.coach-answer-q {
+  color: var(--coach-ink);
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+.coach-answer-btn {
+  min-width: 64px;
+  justify-content: center;
+}
+
+/* --- facts --------------------------------------------------------------- */
+
+.coach-facts {
+  color: var(--coach-quiet);
+  font-size: 14.5px;
+  overflow-wrap: break-word;
+}
+.coach-fact-sep {
+  margin: 0 7px;
+  color: var(--coach-faint);
+}
+.coach-fact-mark {
+  display: inline-block;
+  width: 1.1em;
+  margin-right: 3px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--coach-faint);
+}
+.coach-fact[data-mark="check"] .coach-fact-mark {
+  color: var(--coach-good-text);
+}
+.coach-fact[data-mark="cross"] .coach-fact-mark {
+  color: var(--coach-bad);
+}
+/* A dash is "couldn't tell": never red, never counted. */
+.coach-fact[data-mark="dash"] .coach-fact-mark {
+  color: var(--coach-faint);
+}
+
+/* --- bar by bar ---------------------------------------------------------- */
+
+.coach-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.coach-bars-kick {
+  color: var(--coach-quiet);
+  font: 600 12px/1.3 var(--l-display, inherit);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  overflow-wrap: break-word;
+}
+.coach-bars-row,
+.coach-bars-round > ol {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+/* A round of the tune is a group; the next one starts after a wider gap. */
+.coach-bars-row {
+  gap: 10px;
+  padding-bottom: 6px;
+}
+.coach-bars-round {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.coach-bars-round > ol {
+  gap: 3px;
+}
+.coach-bar {
+  position: relative;
+  flex: 1 1 0;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  height: 34px;
+  border: 1px solid var(--coach-hair);
+  border-radius: 6px;
+  color: var(--coach-faint);
+  font: 700 14px/1 var(--l-num, var(--l-display, inherit));
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.coach-bar[data-state="met"] {
+  border-color: color-mix(in srgb, var(--coach-good) 60%, transparent);
+  background: color-mix(in srgb, var(--coach-good) 18%, transparent);
+  color: var(--coach-good-text);
+}
+.coach-bar[data-state="missed"] {
+  border-color: color-mix(in srgb, var(--coach-bad) 65%, transparent);
+  background: color-mix(in srgb, var(--coach-bad) 18%, transparent);
+  color: var(--coach-bad);
+}
+.coach-bar[data-state="thin"] {
+  border-style: dashed;
+}
+.coach-bar-x {
+  margin-right: 2px;
+  font-weight: 600;
+}
+.coach-bar[data-held]::after {
+  content: "";
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  bottom: -6px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--coach-good);
+}
+@media (max-width: 480px) {
+  .coach-bars-row {
+    gap: 6px;
+  }
+  .coach-bars-round > ol {
+    gap: 2px;
+  }
+  .coach-bar {
+    font-size: 13px;
+    height: 32px;
+  }
+}
+
+/* --- where they sit in a Session ----------------------------------------- */
+
+/* The pass mark beside the tempo on the ready screen (mock 03): quiet, and
+   free to wrap under it on a narrow window. */
+.practice-meta-note {
+  flex: 1 1 16em;
+  min-width: 0;
+  font-size: 15px;
+  line-height: 1.4;
+  overflow-wrap: break-word;
+}
+
+/* The runway's live row: the order takes the room the cue had, whole. */
+.session-compact-coach:has(.coach-order) {
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
+}
+@media (orientation: portrait) and (max-width: 700px) {
+  .session-body[data-view="runway"] .session-compact-coach:has(.coach-order) {
+    display: block;
+    flex-basis: 100%;
+    order: 9;
+  }
+}
+.session-runway-notes > .coach-note {
+  margin-bottom: 4px;
+}
+
+/* --- small screens and short windows ------------------------------------- */
+
+.main-window.is-mobile .coach-note {
+  padding: 12px 14px 12px 13px;
+  font-size: 14.5px;
+}
+.main-window.is-mobile .coach-note-head {
+  font-size: 17px;
+}
+
+/* Under 760 px of height the note is its headline, its source and its chips,
+   so Start stays on screen (the last Take and the reasons step aside). */
+@media (min-width: 481px) and (max-height: 760px) {
+  .coach-note [data-extra] {
+    display: none;
+  }
+  .coach-note {
+    gap: 6px;
+    padding-top: 11px;
+    padding-bottom: 11px;
+  }
+  .coach-note-head {
+    font-size: 17px;
+  }
+  /* With the input's trouble on the ready screen, it is what to read. */
+  .session-mechlow:has(.session-input-failed) .coach-note[data-kind="ready"] {
+    display: none;
+  }
+}

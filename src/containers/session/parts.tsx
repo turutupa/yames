@@ -12,15 +12,8 @@ import { useFitPair } from "./hooks/useFitOneLine";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { stepTitle } from "./TodayView";
 
-/** One line from the coach, with its lamp. */
-export function CoachLine({ children, good }: { children: React.ReactNode; good?: boolean }) {
-  return (
-    <div className="session-coach session-glass">
-      <i className="session-lamp" data-good={good ? "" : undefined} />
-      <div>{children}</div>
-    </div>
-  );
-}
+// The coach's line (with its lamp) lived here; it is `containers/coach/CoachLine`
+// now, without the lamp (DESIGN 2: the number carries the grade).
 
 type T = ReturnType<typeof useTranslation>["t"];
 
