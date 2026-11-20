@@ -37,14 +37,55 @@
       "minutes": "{{minutes}} 分",
       "start": "始める",
       "howLong": "時間はどれくらいありますか？ 分数：",
-      "leftOff": "前回の続き",
-      "leftOffValue": {
-        "even": "{{bpm}} BPM で均等さ {{value}}%。今日は少し遅めから始めます。",
-        "heard": "{{bpm}} BPM で音の {{value}}% を聞き取り。今日は少し遅めから始めます。",
-        "accents": "{{bpm}} BPM でアクセントの {{value}}% が正確。今日は少し遅めから始めます。",
-        "notes": "{{bpm}} BPM で正しい音 {{value}}%。今日は少し遅めから始めます。"
+      "line": {
+        "first": "最初のセッションで、どこから始めるかを見つけます。準備は要りません。",
+        "slipped": {
+          "today": {
+            "bar": "{{exercise}}：今日これまでに、曲の {{bar}} 小節目が {{of}} 回中 {{count}} 回で崩れました。",
+            "bars": "{{exercise}}：今日これまでに、曲の {{from}}〜{{to}} 小節目が {{of}} 回中 {{count}} 回で崩れました。",
+            "all": "{{exercise}}：今日これまでに、曲全体が {{of}} 回中 {{count}} 回で崩れました。"
+          },
+          "yesterday": {
+            "bar": "{{exercise}}：昨日、曲の {{bar}} 小節目が {{of}} 回中 {{count}} 回で崩れました。",
+            "bars": "{{exercise}}：昨日、曲の {{from}}〜{{to}} 小節目が {{of}} 回中 {{count}} 回で崩れました。",
+            "all": "{{exercise}}：昨日、曲全体が {{of}} 回中 {{count}} 回で崩れました。"
+          },
+          "lastSession": {
+            "bar": "{{exercise}}：前回のセッションで、曲の {{bar}} 小節目が {{of}} 回中 {{count}} 回で崩れました。",
+            "bars": "{{exercise}}：前回のセッションで、曲の {{from}}〜{{to}} 小節目が {{of}} 回中 {{count}} 回で崩れました。",
+            "all": "{{exercise}}：前回のセッションで、曲全体が {{of}} 回中 {{count}} 回で崩れました。"
+          }
+        },
+        "startsThere": "今日はそこから始めます。",
+        "earned": {
+          "today": "{{exercise}}：今日これまでに、クリーンテンポが {{bpm}} BPM に上がりました。",
+          "yesterday": "{{exercise}}：昨日、クリーンテンポが {{bpm}} BPM に上がりました。",
+          "lastSession": "{{exercise}}：前回のセッションで、クリーンテンポが {{bpm}} BPM に上がりました。"
+        },
+        "earnedThen": {
+          "review": "今日は短い復習をします。",
+          "climb": "今日はテンポを上げます。",
+          "keep": "今日は定着させるために 1 回だけ通します。"
+        },
+        "back": {
+          "even": "前回のセッション、{{exercise}}：{{bpm}} BPM で均等さ {{value}}%。",
+          "heard": "前回のセッション、{{exercise}}：{{bpm}} BPM で音の {{value}}% を聞き取り。",
+          "accents": "前回のセッション、{{exercise}}：{{bpm}} BPM でアクセントの {{value}}% が正確。",
+          "notes": "前回のセッション、{{exercise}}：{{bpm}} BPM で正しい音 {{value}}%。",
+          "plain": "前回のセッションは {{exercise}} の {{bpm}} BPM で終わりました。"
+        },
+        "backRungs": "今日は、本来より 1 段階遅いところから始めます。",
+        "backRungs_other": "今日は、本来より {{count}} 段階遅いところから始めます。",
+        "ungraded": {
+          "today": "今日これまでに、テイクを {{count}} 分。最後は {{exercise}} の {{bpm}} BPM でした。",
+          "today_other": "今日これまでに、テイクを {{count}} 分。最後は {{exercise}} の {{bpm}} BPM でした。",
+          "yesterday": "昨日、テイクを {{count}} 分。最後は {{exercise}} の {{bpm}} BPM でした。",
+          "yesterday_other": "昨日、テイクを {{count}} 分。最後は {{exercise}} の {{bpm}} BPM でした。",
+          "lastSession": "前回のセッションで、テイクを {{count}} 分。最後は {{exercise}} の {{bpm}} BPM でした。",
+          "lastSession_other": "前回のセッションで、テイクを {{count}} 分。最後は {{exercise}} の {{bpm}} BPM でした。"
+        },
+        "samePlace": "今日も同じところからです。"
       },
-      "leftOffPlain": "{{bpm}} BPM。今日は少し遅めから始めます。",
       "whatsIn": "内容とその理由",
       "min": "分",
       "nothing": "まだ弾くものがありません。",

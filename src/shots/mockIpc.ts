@@ -804,7 +804,7 @@ function seededTake(
   };
 }
 
-function sessionSeed(seed: "first" | "returning" | "back" | "three" | "none" | "ungraded"): PathStoreSeed {
+function sessionSeed(seed: "first" | "returning" | "back" | "three" | "none" | "ungraded" | "slipped"): PathStoreSeed {
   if (seed === "first") return { states: [], takes: [], ceilings: [] };
   // The same Takes, every one played without grading (owner, 2026-11-18).
   if (seed === "ungraded") {
@@ -821,6 +821,15 @@ function sessionSeed(seed: "first" | "returning" | "back" | "three" | "none" | "
     };
   }
   if (seed === "none") return sessionSeed("returning");
+  // Today's line (c1b2a): the returning history, its last Take with per-bar
+  // figures in which the tune's first bar slipped, so the line has a place.
+  if (seed === "slipped") {
+    const base = sessionSeed("returning");
+    const [last, ...rest] = base.takes;
+    const facts = last.facts as { measures: Record<string, unknown> };
+    const perBar = Array.from({ length: 8 }, (_u, i) => ({ due: 8, heard: 8, evenness: i % 4 === 0 ? 0.5 : 0.95 }));
+    return { ...base, takes: [{ ...last, facts: { ...facts, measures: { ...facts.measures, perBar } } }, ...rest] };
+  }
   if (seed === "three") return threePaths();
   const away = seed === "back" ? 12 : 1;
   const open = "even-eighths.open-string";

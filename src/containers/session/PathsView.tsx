@@ -38,6 +38,10 @@ import { lineText } from "./lineText";
 import { TabStrip } from "./tabstrip/TabStrip";
 import { rise } from "./TodayView";
 import { InstrumentNote } from "./InstrumentNote";
+import { stepLine } from "../../coach/todayLine";
+import { CoachLine } from "../coach/CoachLine";
+import { askCoach } from "../coach/askStore";
+import { IS_MOBILE } from "../../platform";
 import { PATHS_LIST, pathsUp } from "../main-window/hooks/usePathsPlace";
 import type { PathsAt, PathsPlace } from "../main-window/hooks/usePathsPlace";
 import { BuildsOnLine, StartFirstLine, SubscribeOffer } from "./PathPrerequisites";
@@ -912,6 +916,20 @@ function StepDetail({
   const gradable = step.exercises.filter(isGradable);
   const runnable = isRunnable(path.id);
   const honest = stepHonestLineKey(step);
+  const grading = session.grading ?? "ask";
+  const coachLineOfStep = useMemo(
+    () =>
+      stepLine({
+        progress,
+        paths: session.paths,
+        pathId: path.id,
+        exerciseIds: step.exercises.map((e) => e.id),
+        now: Date.now(),
+        grading,
+      }),
+    [progress, session.paths, path.id, step, grading],
+  );
+  const coachSaid = coachLineOfStep ? t(coachLineOfStep.key, coachLineOfStep.values) : null;
   return (
     <div className="session-page" data-testid="step-detail" data-neck3d={neck3d}>
       <div className="session-rise">
@@ -931,6 +949,15 @@ function StepDetail({
           <div className="session-quiet" style={{ marginTop: 6 }} data-testid="step-skipped-note">
             <span className="session-tag">{t("session.paths.skipped")}</span>{" "}
             {t("session.paths.skippedHow", { level: t(`session.paths.levelName.${skippedBy.id}`) })}
+          </div>
+        )}
+        {coachSaid && (
+          // Only something measured the page does not show (DESIGN 3.1): where
+          // the last Session's Take on this Step slipped. Absent otherwise.
+          <div className="session-step-line" data-testid="step-line">
+            <CoachLine testId="step-coach-line" onAsk={IS_MOBILE ? undefined : askCoach}>
+              {coachSaid}
+            </CoachLine>
           </div>
         )}
       </div>

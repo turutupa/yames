@@ -37,14 +37,55 @@
       "minutes": "{{minutes}}분",
       "start": "시작",
       "howLong": "시간이 얼마나 있나요? 분:",
-      "leftOff": "지난번에 멈춘 곳",
-      "leftOffValue": {
-        "even": "{{bpm}} BPM에서 고르기 {{value}}%. 오늘은 조금 느리게 시작합니다.",
-        "heard": "{{bpm}} BPM에서 음의 {{value}}% 들림. 오늘은 조금 느리게 시작합니다.",
-        "accents": "{{bpm}} BPM에서 악센트 {{value}}% 정확. 오늘은 조금 느리게 시작합니다.",
-        "notes": "{{bpm}} BPM에서 맞는 음 {{value}}%. 오늘은 조금 느리게 시작합니다."
+      "line": {
+        "first": "첫 세션에서 어디서 시작할지 찾습니다. 준비할 것은 없어요.",
+        "slipped": {
+          "today": {
+            "bar": "{{exercise}}: 오늘 아까 곡의 {{bar}}번째 마디가 {{of}}번 중 {{count}}번 흔들렸어요.",
+            "bars": "{{exercise}}: 오늘 아까 곡의 {{from}}~{{to}}번째 마디가 {{of}}번 중 {{count}}번 흔들렸어요.",
+            "all": "{{exercise}}: 오늘 아까 곡 전체가 {{of}}번 중 {{count}}번 흔들렸어요."
+          },
+          "yesterday": {
+            "bar": "{{exercise}}: 어제 곡의 {{bar}}번째 마디가 {{of}}번 중 {{count}}번 흔들렸어요.",
+            "bars": "{{exercise}}: 어제 곡의 {{from}}~{{to}}번째 마디가 {{of}}번 중 {{count}}번 흔들렸어요.",
+            "all": "{{exercise}}: 어제 곡 전체가 {{of}}번 중 {{count}}번 흔들렸어요."
+          },
+          "lastSession": {
+            "bar": "{{exercise}}: 지난 세션에서 곡의 {{bar}}번째 마디가 {{of}}번 중 {{count}}번 흔들렸어요.",
+            "bars": "{{exercise}}: 지난 세션에서 곡의 {{from}}~{{to}}번째 마디가 {{of}}번 중 {{count}}번 흔들렸어요.",
+            "all": "{{exercise}}: 지난 세션에서 곡 전체가 {{of}}번 중 {{count}}번 흔들렸어요."
+          }
+        },
+        "startsThere": "오늘은 거기서 시작해요.",
+        "earned": {
+          "today": "{{exercise}}: 오늘 아까 클린 템포가 {{bpm}} BPM으로 올랐어요.",
+          "yesterday": "{{exercise}}: 어제 클린 템포가 {{bpm}} BPM으로 올랐어요.",
+          "lastSession": "{{exercise}}: 지난 세션에서 클린 템포가 {{bpm}} BPM으로 올랐어요."
+        },
+        "earnedThen": {
+          "review": "오늘은 짧게 복습해요.",
+          "climb": "오늘은 더 빠르게 해요.",
+          "keep": "오늘은 감을 유지하도록 한 번만 해요."
+        },
+        "back": {
+          "even": "지난 세션, {{exercise}}: {{bpm}} BPM에서 고르기 {{value}}%.",
+          "heard": "지난 세션, {{exercise}}: {{bpm}} BPM에서 음의 {{value}}% 들림.",
+          "accents": "지난 세션, {{exercise}}: {{bpm}} BPM에서 악센트 {{value}}% 정확.",
+          "notes": "지난 세션, {{exercise}}: {{bpm}} BPM에서 맞는 음 {{value}}%.",
+          "plain": "지난 세션은 {{exercise}}, {{bpm}} BPM에서 끝났어요."
+        },
+        "backRungs": "오늘은 원래보다 한 단계 낮게 시작해요.",
+        "backRungs_other": "오늘은 원래보다 {{count}}단계 낮게 시작해요.",
+        "ungraded": {
+          "today": "오늘 아까 테이크 {{count}}분, 마지막은 {{exercise}}, {{bpm}} BPM이었어요.",
+          "today_other": "오늘 아까 테이크 {{count}}분, 마지막은 {{exercise}}, {{bpm}} BPM이었어요.",
+          "yesterday": "어제 테이크 {{count}}분, 마지막은 {{exercise}}, {{bpm}} BPM이었어요.",
+          "yesterday_other": "어제 테이크 {{count}}분, 마지막은 {{exercise}}, {{bpm}} BPM이었어요.",
+          "lastSession": "지난 세션에서 테이크 {{count}}분, 마지막은 {{exercise}}, {{bpm}} BPM이었어요.",
+          "lastSession_other": "지난 세션에서 테이크 {{count}}분, 마지막은 {{exercise}}, {{bpm}} BPM이었어요."
+        },
+        "samePlace": "오늘도 같은 자리예요."
       },
-      "leftOffPlain": "{{bpm}} BPM. 오늘은 조금 느리게 시작합니다.",
       "whatsIn": "구성과 그 이유",
       "min": "분",
       "nothing": "아직 연주할 것이 없습니다.",
