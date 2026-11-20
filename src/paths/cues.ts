@@ -104,8 +104,8 @@ export function possibleTriggers(ex: Notes & Pick<Exercise, "passBars" | "graded
   }
   const bars = Array.from({ length: Math.max(1, ex.bars) }, (_v, i) => i + 1);
   for (const t of placeTriggers(ex, bars)) out.add(t);
-  // A long Take can come apart from a round on, whatever the pattern's length.
-  if (ex.loops) out.add("lastBars");
+  // A stamina Take is judged on whether it holds to the end: it can come apart from a round on.
+  if (ex.passBars.some((b) => b.metric === "evennessHold")) out.add("lastBars");
   return out;
 }
 

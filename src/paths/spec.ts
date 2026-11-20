@@ -247,3 +247,33 @@ export type PathSpec = {
 export function definePath(spec: PathSpec): PathSpec {
   return spec;
 }
+
+/** A Path's cues, by the Exercise's pack id (`<step>.<exercise>`, `warmup-<level>.<exercise>`). */
+export type CueBook = Readonly<Record<string, readonly Cue[]>>;
+
+/**
+ * A Path with its cues, kept in a file of their own (`specs/<path>-cues.ts`)
+ * so a content leg can write and review them without touching the Exercises.
+ * A cue for an Exercise the Path does not have is an error here, at once.
+ */
+export function withCues(spec: PathSpec, book: CueBook): PathSpec {
+  const used = new Set<string>();
+  const attach = (ex: ExerciseSpec, group: string): ExerciseSpec => {
+    const id = `${ex.firstStep ?? group}.${ex.id}`;
+    const cues = book[id];
+    if (!cues) return ex;
+    if (ex.cues) throw new Error(`${spec.id}: ${id} has cues in its spec and in the cue book`);
+    used.add(id);
+    return { ...ex, cues: cues.map((c) => ({ ...c })) };
+  };
+  const out: PathSpec = {
+    ...spec,
+    steps: spec.steps.map((step) => ({ ...step, exercises: step.exercises.map((ex) => attach(ex, step.id)) })),
+  };
+  if (spec.levels) {
+    out.levels = spec.levels.map((level) => ({ ...level, warmups: level.warmups.map((ex) => attach(ex, `warmup-${level.id}`)) }));
+  }
+  const unknown = Object.keys(book).filter((id) => !used.has(id));
+  if (unknown.length) throw new Error(`${spec.id}: cues for Exercises it does not have: ${unknown.join(", ")}`);
+  return out;
+}

@@ -327,7 +327,7 @@ function buildExercise(
     purpose: spec.purpose,
     howTo: spec.howTo,
     coachLine: spec.coach,
-    ...(spec.cues ? { cues: spec.cues.map((cue) => ({ ...cue })) } : {}),
+    ...(spec.cues ? { cues: spec.cues.map((cue) => withMore(cue, cue.more)) } : {}),
     grading: profile.mode,
     feedback: spec.feedback ?? profile.feedback,
     meter: METER,
@@ -407,24 +407,36 @@ function buildExercise(
     if (exercise.variation.variants.slice(1).every((v) => v.howTo !== undefined)) {
       exercise.howTo = exercise.howTo.filter((line) => !FIRST_VERSION_LINE.test(line));
     }
-    if (spec.cues) {
-      const variants = exercise.variation.variants;
-      variants.forEach((variant, index) => {
-        if (index === 0) return;
-        const own = variantCues(spec, concrete[0], paramsList[0], concrete[index], paramsList[index], variant);
-        if (own && JSON.stringify(own) !== JSON.stringify(exercise.cues)) variant.cues = own;
-      });
-    }
   }
   // `more` names a line of the spec's how-to; the pack's may have lost its "first version" line.
   if (exercise.cues) exercise.cues = exercise.cues.map((cue) => withMore(cue, moreIn(spec.howTo, cue.more, exercise.howTo)));
+  if (spec.cues && exercise.variation) {
+    const variants = exercise.variation.variants;
+    variants.forEach((variant, index) => {
+      if (index === 0) return;
+      const own = variantCues(spec, concrete[0], paramsList[0], concrete[index], paramsList[index], variant);
+      // Absent means "the Exercise's": written only where this variant's differ.
+      if (own && !sameCues(own, exercise.cues ?? [])) variant.cues = own;
+    });
+  }
   return exercise;
 }
 
-/** A cue with `more` set to `at`, or without it. */
+/** A cue in one key order (when, say, more, general), with `more` set to `at` or left out. */
 function withMore(cue: Cue, at: number | undefined): Cue {
-  const { more: _more, ...rest } = cue;
-  return at === undefined ? rest : { ...rest, more: at };
+  return {
+    when: cue.when,
+    say: cue.say,
+    ...(at === undefined ? {} : { more: at }),
+    ...(cue.general ? { general: true as const } : {}),
+  };
+}
+
+function sameCues(a: readonly Cue[], b: readonly Cue[]): boolean {
+  return (
+    a.length === b.length &&
+    a.every((x, i) => x.when === b[i].when && x.say === b[i].say && x.more === b[i].more && !!x.general === !!b[i].general)
+  );
 }
 
 /** Where line `more` of the spec's how-to sits in `howTo`, or undefined when it is not there. */

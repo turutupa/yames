@@ -3,7 +3,8 @@
  * reviewed it. Technique is taught in words; the pass bars use only what sound
  * can measure.
  */
-import { definePath } from "../spec";
+import { definePath, withCues } from "../spec";
+import { ALTERNATE_PICKING_CUES } from "./alternate-picking-cues";
 import {
   acrossStrings,
   handAt,
@@ -92,7 +93,8 @@ const BOX_ONE_POINTER = "Blues and Pentatonics teaches the box slowly over a ban
 const SAFETY =
   "Stop at any pain in the hand, wrist or forearm. A tired forearm is one thing and pain is another; pain ends the set.";
 
-export default definePath({
+// The cues ("one thing to try") live in their own file: `alternate-picking-cues.ts`.
+export default withCues(definePath({
   id: "alternate-picking",
   title: "Alternate Picking",
   kind: "mechanics",
@@ -1183,4 +1185,4 @@ export default definePath({
       ],
     },
   ],
-});
+}), ALTERNATE_PICKING_CUES);
