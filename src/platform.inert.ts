@@ -56,15 +56,11 @@ export const INERT_SESSION: ReturnType<typeof useSession> = {
   active: false,
   messages: [],
   startedAt: null,
-  cardOpen: false,
   startSession: asyncNoop,
   endSession: asyncNoop,
   isActive: () => false,
-  sendChat: noop,
   clearMessages: noop,
-  toggleCard: noop,
   handleChipAction: noop,
-  registerChatFocus: noop,
   playMode: undefined,
 };
 

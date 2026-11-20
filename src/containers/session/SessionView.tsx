@@ -37,7 +37,9 @@ import type { TakeOutcome } from "../../session/runner";
 import { PORTRAIT_PHONE_QUERY, useMediaQuery } from "../../hooks/useMediaQuery";
 import { AskStart, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart, timedHowKey } from "./parts";
 import { TakeOrder } from "../coach/CoachLine";
-import { ReadyNote, RecapLine, ResultNote, UngradedNote, takeOrderText } from "./SessionCoach";
+import { ReadyNote, RecapLine, ResultNote, SessionAsk, UngradedNote, takeOrderText } from "./SessionCoach";
+import { askCoach } from "../coach/askStore";
+import { IS_MOBILE } from "../../platform";
 import { RunwayTakeScreen, isTheoryTake } from "./highway/RunwayTake";
 import { categoryTagKey } from "../../session/kind";
 import { KeyChooser } from "./practice/KeyChooser";
@@ -67,6 +69,7 @@ import { totalsFrom } from "./ProgressView";
 import type { MainView } from "../main-window/MainHeader";
 import { LeaveSessionDialog } from "./LeaveSessionDialog";
 import { LiveLevelBars } from "../../components/LiveLevelBars";
+import { CoachGlyph } from "../coach/CoachGlyph";
 import "../../styles/session.css";
 
 const WHOLE: NeckView = { kind: "whole" };
@@ -103,6 +106,8 @@ function SessionBar({
   listening,
   hasSignal,
   onTestInput,
+  onAsk,
+  askLater = false,
 }: {
   session: SessionRun;
   /** "Skip this" on a Take's ready screen (UX audit TODAY-2), with its key. */
@@ -113,6 +118,10 @@ function SessionBar({
   listening: boolean;
   hasSignal: boolean;
   onTestInput: () => void;
+  /** Ask's pill (leg c2a1). Absent while a Take runs: nothing of Ask then. */
+  onAsk?: () => void;
+  /** The Ask key was pressed during this Take: one static label instead. */
+  askLater?: boolean;
 }) {
   const { t } = useTranslation();
   const { run, actions } = session;
@@ -206,7 +215,26 @@ function SessionBar({
           {skipKey && <kbd>{skipKey}</kbd>}
         </button>
       )}
+      {askLater ? (
+        <span className="session-coach-ask-later" role="status" data-testid="session-coach-ask-later">
+          {t("ask.later")}
+        </span>
+      ) : (
+        onAsk && <AskPill onAsk={onAsk} />
+      )}
     </div>
+  );
+}
+
+/** Ask, from the Session (leg c2a1): an outlined pill, the coach's colour on its glyph only. */
+function AskPill({ onAsk }: { onAsk: () => void }) {
+  const { t } = useTranslation();
+  return (
+    // Not `session-ask`: that is the grading question's block (parts.tsx).
+    <button type="button" className="session-coach-ask" onClick={onAsk} data-testid="session-coach-ask">
+      <CoachGlyph size={15} />
+      {t("ask.button")}
+    </button>
   );
 }
 
@@ -1837,6 +1865,8 @@ export function SessionView({
   onTestInput,
   onChooseInput,
   inputDevice: _inputDevice = null,
+  onAsk,
+  askLater = false,
 }: {
   session: SessionRun;
   /** The theme. The Session's tab strip draws in its own palette; kept for the caller. */
@@ -1866,6 +1896,10 @@ export function SessionView({
   onChooseInput?: () => void;
   /** The device the input is on, when known. Kept for the caller; the Session reads its own. */
   inputDevice?: string | null;
+  /** Open Ask (leg c2a1): the bar's pill on ready, result, a timed step and the recap. */
+  onAsk?: () => void;
+  /** The Ask key was pressed during the Take: the bar says Ask opens after it. */
+  askLater?: boolean;
 }) {
   const { t } = useTranslation();
   const { run, actions } = session;
@@ -1894,8 +1928,16 @@ export function SessionView({
       ((run.phase === "timedReady" || run.phase === "timed") &&
         (step?.kind === "metronome" || (step?.kind === "jam" && !!step.exerciseId))));
 
+  // The coach's words open Ask where the Session offers it, never during a
+  // Take. Not on a phone: a one-line sentence and a bar cell are under a
+  // thumb's 44 px (phone-learning.spec), and the phone's Ask has no model to
+  // say anything about them; its bar's Ask pill is the way in there.
+  const takeRuns = run.phase === "playing" || run.phase === "listening";
+  const notesAsk = onAsk && !takeRuns && !IS_MOBILE ? askCoach : undefined;
+
   return (
-    // The recap draws no neck either (UX audit SES-10): the page's own backdrop.
+    <SessionAsk.Provider value={notesAsk}>
+    {/* The recap draws no neck either (UX audit SES-10): the page's own backdrop. */}
     <div
       className="session-page session-run"
       data-testid="session"
@@ -1911,7 +1953,15 @@ export function SessionView({
           listening={listening}
           hasSignal={hasSignal}
           onTestInput={testInput}
+          // Nothing of Ask while a Take runs (or its result is worked out).
+          onAsk={run.phase === "playing" || run.phase === "listening" ? undefined : onAsk}
+          askLater={askLater && (run.phase === "playing" || run.phase === "listening")}
         />
+      )}
+      {run.phase === "recap" && onAsk && (
+        <div className="session-recap-coach-ask">
+          <AskPill onAsk={onAsk} />
+        </div>
       )}
       {askedStep && (
         <LeaveSessionDialog
@@ -1972,6 +2022,7 @@ export function SessionView({
       )}
       {run.phase === "recap" && <RecapScreen session={session} />}
     </div>
+    </SessionAsk.Provider>
   );
 }
 

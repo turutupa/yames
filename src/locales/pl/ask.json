@@ -1,0 +1,54 @@
+{
+  "ask": {
+    "title": "Zapytaj",
+    "button": "Zapytaj",
+    "close": "Zamknij Zapytaj",
+    "lookingAt": "Patrzę na:",
+    "nowLooking": "Teraz patrzę na: {{place}}",
+    "later": "Zapytaj otworzy się po tym podejściu",
+    "placeholder": "Zapytaj o ten ekran, swoje podejścia lub ścieżki",
+    "send": "Wyślij",
+    "writing": "Piszę odpowiedź…",
+    "sections": {
+      "ask": "Zapytaj",
+      "tools": "Trener narzędzi"
+    },
+    "screen": {
+      "today": "Dzisiaj",
+      "paths": "Ścieżki",
+      "path": "Ścieżka",
+      "step": "Krok",
+      "session": "Twoja sesja",
+      "progress": "Postępy",
+      "jam": "Jam",
+      "songs": "Utwory",
+      "beat": "Metronom",
+      "drill": "Rozbieg",
+      "setlist": "Setlista",
+      "tools": "Narzędzia"
+    },
+    "looking": {
+      "readyFor": "gotowe na podejście {{n}}",
+      "take": "podejście {{n}}",
+      "recap": "podsumowanie"
+    },
+    "empty": {
+      "title": "Co chcesz wiedzieć?",
+      "model": "Zapytaj o ten ekran, swoje podejścia lub ścieżki. Model na tym komputerze odpowiada własnymi słowami, jako ogólna rada.",
+      "loading": "Wybrany model się przygotowuje. Gdy będzie gotowy, możesz pytać o ten ekran, swoje podejścia lub ścieżki.",
+      "noModel": "Pytania wpisywane z klawiatury wymagają modelu na tym komputerze, a żaden nie jest włączony. Wybierz model poniżej, żeby pytać o ten ekran, swoje podejścia lub ścieżki.",
+      "phone": "Pytania wpisywane z klawiatury wymagają modelu, a telefony jeszcze go nie uruchamiają."
+    },
+    "reply": {
+      "noModel": "Żaden model nie jest włączony, więc na wpisane pytania nie można jeszcze odpowiedzieć. Wybierz model na dole tego panelu.",
+      "gettingReady": "Model wciąż się przygotowuje. Zapytaj ponownie za chwilę.",
+      "phone": "Telefony jeszcze nie uruchamiają modelu, więc na wpisane pytania nie można tu odpowiedzieć.",
+      "nothing": "Tym razem nie przyszła żadna odpowiedź."
+    },
+    "footer": {
+      "model": "Odpowiada model na tym komputerze. Nic, co wpiszesz, go nie opuszcza.",
+      "local": "Nic, co tu wpiszesz, nie opuszcza tego komputera.",
+      "phone": "Nic, co tu wpiszesz, nie opuszcza tego telefonu."
+    }
+  }
+}

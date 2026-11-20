@@ -7,7 +7,8 @@
  * or a tempo: the Session's own buttons (`bigAction`) do that, and no sentence
  * here argues with them.
  */
-import { useMemo, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
+import type { AskHandler } from "../coach/askStore";
 import { useTranslation } from "react-i18next";
 import { takeNote } from "../../coach/takeNote";
 import type { FactItem, TakeNote, TakeReview } from "../../coach/takeNote";
@@ -31,6 +32,20 @@ import type { WatchControl } from "./practice/useWatch";
 import { lineText } from "./lineText";
 
 type T = ReturnType<typeof useTranslation>["t"];
+
+/**
+ * Ask, for the coach's words in a Session (DESIGN 5.1): the note's sentence
+ * and the recap's line open Ask with that sentence as what the question is
+ * about, a cell of the bar strip opens it on that bar. `SessionView` provides
+ * `askCoach` where Ask exists and nothing while a Take runs (the Take screen
+ * shows its order, not a note, and nothing of Ask is offered then).
+ *
+ * No "?" chips yet: with no model and no fact cards (the next milestone),
+ * Ask's honest "can't answer typed questions yet" is all a question would
+ * get. "What should I try?" keeps opening the How fold. The fact-card leg
+ * adds the chips, with `onAsk({ question })`.
+ */
+export const SessionAsk = createContext<AskHandler | undefined>(undefined);
 
 const DAY_MS = 86_400_000;
 
@@ -142,6 +157,7 @@ function factText(t: T, fact: FactItem): string {
  */
 export function ResultNote({ session, outcome, howTo }: { session: SessionRun; outcome: TakeOutcome; howTo: readonly string[] }) {
   const { t } = useTranslation();
+  const onAsk = useContext(SessionAsk);
   const note = useTakeNote(session, outcome);
   const [howOpen, setHowOpen] = useState(false);
   if (!note || note.kind === "notCaught" || note.kind === "ungraded") return null;
@@ -158,10 +174,10 @@ export function ResultNote({ session, outcome, howTo }: { session: SessionRun; o
       ]
     : [];
   return (
-    <CoachNote headline={findingText(t, note, outcome.bpm)} live kind="result" testId="coach-note">
+    <CoachNote headline={findingText(t, note, outcome.bpm)} live kind="result" testId="coach-note" onAsk={onAsk}>
       {note.findingLine && <NoteLine>{noteText(t, note.findingLine)}</NoteLine>}
       {history && <NoteLine testId="coach-history">{history}</NoteLine>}
-      {note.strip && <NoteBars strip={note.strip} label={noteText(t, note.strip.label)} />}
+      {note.strip && <NoteBars strip={note.strip} label={noteText(t, note.strip.label)} onAsk={onAsk} />}
       <FactLine facts={note.facts} render={(fact) => factText(t, fact)} />
       <NoteChips chips={chips} />
       {howOpen && (
@@ -190,6 +206,7 @@ function selfCheckOf(played: Exercise | null | undefined, exercise: Exercise | n
  */
 export function UngradedNote({ session, outcome }: { session: SessionRun; outcome: TakeOutcome }) {
   const { t } = useTranslation();
+  const onAsk = useContext(SessionAsk);
   const { exercise } = whereOf(session);
   const question = selfCheckOf(exercise, session.exercise);
   const id = outcome.takeId;
@@ -197,7 +214,7 @@ export function UngradedNote({ session, outcome }: { session: SessionRun; outcom
   const row = session.progress.takes.find((take) => take.id === id);
   const answer = row ? (heardItOf(row) ?? undefined) : undefined;
   return (
-    <CoachNote headline={question} kind="ungraded" testId="coach-note">
+    <CoachNote headline={question} kind="ungraded" testId="coach-note" onAsk={onAsk}>
       <NoteAnswer
         question={t("session.note.ungraded.yourAnswer")}
         answer={answer}
@@ -242,6 +259,7 @@ export function ReadyNote({
   onTry?: () => void;
 }) {
   const { t } = useTranslation();
+  const onAsk = useContext(SessionAsk);
   const { run } = session;
   const exercise = session.exercise;
   const played = session.take?.exercise ?? exercise;
@@ -270,6 +288,7 @@ export function ReadyNote({
         source={source}
         kind="ready"
         testId="coach-note"
+        onAsk={onAsk}
       >
         {!saidOnce && run.ungraded !== "inputOff" && (
           <NoteLine extra testId="coach-not-listening">
@@ -306,7 +325,7 @@ export function ReadyNote({
     if (lead) quiet.push({ text: [lead, ...tail].join(" "), id: "coach-last" });
   }
   return (
-    <CoachNote headline={exercise.coachLine} source={source} kind="ready" testId="coach-note">
+    <CoachNote headline={exercise.coachLine} source={source} kind="ready" testId="coach-note" onAsk={onAsk}>
       {quiet.map((line) => (
         <NoteLine key={line.id} extra testId={line.id}>
           {line.text}
@@ -358,8 +377,13 @@ export function recapLineText(t: T, session: SessionRun, now: number): string | 
 
 export function RecapLine({ session }: { session: SessionRun }) {
   const { t } = useTranslation();
+  const onAsk = useContext(SessionAsk);
   // Read once, as the recap opens: the line does not move under the player.
   const [text] = useState(() => recapLineText(t, session, Date.now()));
   if (!text) return null;
-  return <CoachLine testId="coach-recap">{text}</CoachLine>;
+  return (
+    <CoachLine testId="coach-recap" onAsk={onAsk}>
+      {text}
+    </CoachLine>
+  );
 }

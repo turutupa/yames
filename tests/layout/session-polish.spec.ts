@@ -177,13 +177,14 @@ test.describe("Today", () => {
 
     await page.mouse.click(5, 300);
     await page.keyboard.press("c");
-    await expect(page.locator(".coach-card.coach-card-open")).toBeVisible();
+    // The coach panel is Ask since leg c2a1.
+    await expect(page.locator(".ask-panel")).toBeVisible();
     await page.waitForTimeout(500);
     await noSidewaysScroll(page, "Today with the coach at 1024");
     const row = page.locator(".session-plan-go").first();
     await row.scrollIntoViewIfNeeded();
     expect(await notHitTestable(page, ".session-plan-row:first-child > .session-plan-go")).toEqual([]);
-    const coach = (await page.locator(".coach-card.coach-card-open").boundingBox())!;
+    const coach = (await page.locator(".ask-panel").boundingBox())!;
     const plan = (await page.locator(".session-today-plan").boundingBox())!;
     expect(plan.x + plan.width, "the plan runs under the coach").toBeLessThanOrEqual(coach.x + 1);
   });

@@ -12,6 +12,7 @@ import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { useSession, __resetHistoryNoticeForTests } from "./useSession";
 import { __resetCoachLoaderForTests } from "./coachLoader";
+import { __resetAskStoreForTests, getAskState } from "../containers/coach/askStore";
 import { mockInvoke, setInvokeResponse } from "../test/mocks";
 import type { SessionReport } from "../types";
 
@@ -76,11 +77,13 @@ describe("whose feed it is", () => {
   beforeEach(() => {
     __resetCoachLoaderForTests();
     __resetHistoryNoticeForTests();
+    __resetAskStoreForTests();
     setInvokeResponse("save_session", () => "stored");
   });
   afterEach(() => {
     __resetCoachLoaderForTests();
     __resetHistoryNoticeForTests();
+    __resetAskStoreForTests();
   });
 
   it("a session that heard nothing posts no end card", async () => {
@@ -103,7 +106,7 @@ describe("whose feed it is", () => {
       await result.current.startSession({ quiet: true });
     });
     expect(result.current.active).toBe(true);
-    expect(result.current.cardOpen).toBe(false);
+    expect(getAskState().open).toBe(false);
     expect(result.current.messages).toEqual([]);
     await act(async () => {
       await result.current.endSession();
@@ -138,7 +141,8 @@ describe("whose feed it is", () => {
     await act(async () => {
       await result.current.startSession();
     });
-    expect(result.current.cardOpen).toBe(true);
+    // The panel opens on the tools' coach (Ask's "Tools coach" section).
+    expect(getAskState()).toMatchObject({ open: true, section: "tools" });
     expect(result.current.messages.some((m) => m.type === "session-start")).toBe(true);
     await act(async () => {
       await result.current.endSession();

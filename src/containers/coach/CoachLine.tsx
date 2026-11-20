@@ -11,6 +11,7 @@
  */
 import { memo } from "react";
 import type { ReactNode } from "react";
+import type { AskHandler } from "./askStore";
 import "../../styles/coach.css";
 
 /** The coach's mark: a speech bubble with three level bars, drawn in `currentColor`. */
@@ -36,12 +37,36 @@ export function CoachGlyph({ size = 18, className = "coach-glyph" }: { size?: nu
   );
 }
 
+/**
+ * The note's sentence or the line's words, tappable when the coach can be
+ * asked about them: Ask opens with that sentence as what the question is
+ * about (DESIGN 5.1). The words as read, not a label of their own. Without
+ * `onAsk`, just the words.
+ */
+export function AskableText({ children, onAsk, testId }: { children: ReactNode; onAsk?: AskHandler; testId?: string }) {
+  if (!onAsk) return <>{children}</>;
+  return (
+    <button
+      type="button"
+      className="coach-say"
+      onClick={(e) => onAsk({ about: e.currentTarget.textContent?.trim() || undefined, from: e.currentTarget })}
+      data-testid={testId}
+    >
+      {children}
+    </button>
+  );
+}
+
 /** One line from the coach: its glyph, then the words. No card, no rule. */
-export function CoachLine({ children, testId }: { children: ReactNode; testId?: string }) {
+export function CoachLine({ children, testId, onAsk }: { children: ReactNode; testId?: string; onAsk?: AskHandler }) {
   return (
     <div className="coach-line" data-testid={testId}>
       <CoachGlyph />
-      <div className="coach-line-text">{children}</div>
+      <div className="coach-line-text">
+        <AskableText onAsk={onAsk} testId={testId ? `${testId}-ask` : undefined}>
+          {children}
+        </AskableText>
+      </div>
     </div>
   );
 }

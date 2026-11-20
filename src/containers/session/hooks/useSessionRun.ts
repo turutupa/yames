@@ -232,14 +232,21 @@ export type SessionRunInput = {
     active: boolean;
     /** `active` as of the calls made, not the last render (`useSession`). */
     isActive?: () => boolean;
-    cardOpen: boolean;
+    /**
+     * Unused since the review of leg c2a1: the old card never showed in a
+     * Session, and closing "the card it opened" at teardown closed Ask, the
+     * drawer the result and the recap offer. Ask's own rules
+     * (`useAskSessionRules`) close it. Kept optional until c2a2 removes the card.
+     */
+    cardOpen?: boolean;
     /**
      * `quiet`: a Session's coach session is for the history, not the coach's feed.
      * `listen: false`: a Session played without grading, which never asks for the input.
      */
     startSession: (options?: { quiet?: boolean; listen?: boolean }) => Promise<void>;
     endSession: () => Promise<void>;
-    toggleCard: () => void;
+    /** Unused, as `cardOpen`. */
+    toggleCard?: () => void;
   };
   listening: boolean;
   /**
@@ -480,7 +487,6 @@ export function useSessionRun(input: SessionRunInput) {
   const snapshot = useRef<EngineSnapshot | null>(null);
   /** What the last teardown handed back: a Session begun from the recap keeps it. */
   const restoredTo = useRef<EngineSnapshot | null>(null);
-  const cardWasOpen = useRef(false);
   /**
    * The coach session this Session started, and the end of it while that is
    * still running. A coach session the player already had running is theirs:
@@ -1342,7 +1348,10 @@ export function useSessionRun(input: SessionRunInput) {
         if (coachEnding.current === ending) coachEnding.current = null;
       });
     }
-    if (!cardWasOpen.current && coach.cardOpen) coach.toggleCard();
+    // Ask is not closed here: the recap offers it (its own pill), and leaving a
+    // result for the recap must not close the drawer the player opened on it.
+    // Ask closes on anything that sounds or moves the picture, and is never
+    // open during a Take (`useAskSessionRules`).
   }, [enqueue]);
 
   /** The recap is the end of the Session: the history is written as it opens. */
@@ -1391,7 +1400,6 @@ export function useSessionRun(input: SessionRunInput) {
         beatGroups: state.beatGroups,
         freeMode: state.freeMode,
       };
-      cardWasOpen.current = coach.cardOpen;
       // The player's own coach session, running before this: not ours to end.
       // One we are still ending is ours, whatever the last render said.
       // `isActive` and not `active`: the end of our last session may have

@@ -71,6 +71,19 @@ compiled (Cargo feature, §3), the TypeScript is not in the bundle
 feature (no greyed tiles — the ROADMAP's *honest status* principle, but
 stricter: absent, not disabled).
 
+**Amended by the coach build (leg c2a1, 2026-11-20; DESIGN 8, "the phone
+build").** "The coach is gone, not greyed out" no longer holds for the whole
+coach: the rule-made coach line, the coach note on a Take, and the rule-made
+Ask ship on phones. Ask is a sheet (92% high, a focus trap, closed by the
+scrim, a swipe down, Back or its close button; the 360 px drawer in
+landscape) opened from a labelled 44 px Ask button in the phone's header and
+from the Session bar's Ask pill. It runs no model on a phone: its empty
+state and its one reply to a typed question say so, and its model selector
+(in the sheet's head) reads "not on this device". Everything else in the row
+above stays cut: the LLM, the brain download, voice, the tools' coach (Start,
+the feed, History), and no component on a phone is named `CoachCard`
+(`scripts/check-mobile-bundle.mjs` still forbids the string).
+
 ### Non-goals for v1 (decided, do not re-litigate)
 
 - **No coach in any form**, including a "lite" 1.5B model or the
