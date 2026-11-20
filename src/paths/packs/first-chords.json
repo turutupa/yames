@@ -29,6 +29,7 @@
       "howTo": [
         "The words this Path uses. The strings, from thickest to thinnest: low E, A, D, G, B and the top string. Fret 1 is the first space next to the nut, at the head end of the neck. Fingers are numbered from the index finger: first, second, third, and the little finger is the fourth.",
         "A click is the tick of the metronome. Each tick is a beat, four beats make a bar, and BPM is how many beats go by in a minute. A whole note lasts a whole bar, a half note two beats, a quarter note one beat. The pass tempo is the speed at which an Exercise counts as done.",
+        "One play through an Exercise is a Take. Each Exercise has a ladder of tempos called rungs: between Takes, Slower and Faster move one rung along it, and the pass tempo is the rung at which the Exercise counts as done. Some Exercises change key or string from Take to Take.",
         "E minor: second finger on the A string at fret 2, third finger on the D string at fret 2. The other four strings are open.",
         "Press with the fingertips, just behind the fret, and keep the fingers arched so they do not lean on the string below. The thumb rests behind the neck, about level with the second finger.",
         "Strum downward from the low E string through all six in one relaxed swing of the forearm and wrist, as if brushing crumbs off the strings. That is a downstroke. Hold the pick loosely.",
@@ -44,6 +45,7 @@
           "purpose": "The E minor chord one string at a time, from the low E string to the top string and back, while you hold the shape down. A note that is dead here is dead in the strum too.",
           "howTo": [
             "Quarter notes, 40 BPM up to a pass at 70.",
+            "On the tab each line is a string: the top line is the top string and the bottom line is the low E string. Each number is the fret to press. 0 is an open string, one played with no finger on it.",
             "Hold the chord down the whole time. Pick the low E string, then A, D, G, B and the top string, and come back: B, G, D, A, low E, and A once more to finish the bar.",
             "The fretted notes are on the A string and the D string, both at fret 2. Everything else is open."
           ],
@@ -834,8 +836,10 @@
           "purpose": "E minor and A minor, four downstrokes each, over a band. The change has to happen between the fourth strum of one bar and the first of the next.",
           "howTo": [
             "Quarter notes, 40 BPM up to a pass at 70. Down on every beat.",
+            "The band is a drummer and a bassist in place of the click.",
             "Start moving the fingers on the fourth strum, so that they land with the next one. It does not matter if that last strum is a little short.",
-            "Keep the strumming hand going whatever the other hand is doing. The band will not wait, and you should not either."
+            "Keep the strumming hand going whatever the other hand is doing. The band will not wait, and you should not either.",
+            "If you get lost, stop, find beat 1 of the next bar and come back in there."
           ],
           "coachLine": "Band on. Each strum is timed and counted. Whether every string rang is for your ear.",
           "grading": "graded",
@@ -1024,11 +1028,11 @@
       "goal": "Hold a C chord, change between A minor and C by moving one finger, and play an eight-bar tune with E minor, A minor and C.",
       "why": "C is the first chord that asks the hand to stretch: the third finger reaches to the third fret of the A string. It comes now because it is one finger away from A minor. The first and second fingers do not move at all. Changes like that, where some fingers stay down as anchors, are worth looking for in every pair of chords you meet. And three chords are enough for a first whole tune.",
       "howTo": [
-        "C: first finger on the B string at fret 1, second finger on the D string at fret 2, third finger on the A string at fret 3. The G string and the top string are open. The low E string is not played.",
+        "A chord named by a letter alone is a major chord, so C is short for C major. Minor chords always have the word minor in the name, as in E minor and A minor. C: first finger on the B string at fret 1, second finger on the D string at fret 2, third finger on the A string at fret 3. The G string and the top string are open. The low E string is not played.",
         "From A minor, only the third finger moves: from the G string at fret 2 to the A string at fret 3. Keep the first and second fingers pressed while it travels.",
         "The open G string sits between two fretted strings. If it is dead, the second or the first finger is leaning on it."
       ],
-      "payoff": "Three chords, a change with anchors, and eight bars that sound like a song.",
+      "payoff": "Three chords, a change with anchors, and eight bars that sound like a song. The Beginner Level of Rhythm Foundations goes well alongside the next Level of this Path. It is single notes with a click, which several other Paths build on.",
       "prerequisites": ["a-minor"],
       "difficulty": 1.17,
       "exercises": [
@@ -4583,7 +4587,7 @@
       "order": 8,
       "title": "Strums between the beats",
       "goal": "Leave a beat without a strum in the middle of a bar, strum only on the 'ands', and play a pattern that stops early so the next chord has time to arrive.",
-      "why": "The last Step made a pattern by leaving strokes out of the down-up swing. This Step leaves out more of them, in harder places. A rest is a beat with no strum on it. An off-beat strum is an upstroke on an 'and' with no downstroke on the beat before it. Both are easy to rush, because the hand wants to fill the gap. And leaving out the last upstroke of a bar gives the fingers on the neck a whole beat, from the strum on 4 to the strum on 1 of the next bar, in which to change chord. In all three the strumming hand does what it did before: down on every beat, up on every 'and', touching the strings only where a strum is written.",
+      "why": "The last Step made a pattern by leaving strokes out of the down-up swing. This Step takes the two hard places of that pattern one at a time, the beat with no strum and the upstroke after it, and then shortens the pattern. A rest is a beat with no strum on it. An off-beat strum is an upstroke on an 'and' with no downstroke on the beat before it. Both are easy to rush, because the hand wants to fill the gap. And leaving out the last upstroke of a bar gives the fingers on the neck a whole beat, from the strum on 4 to the strum on 1 of the next bar, in which to change chord. In all three the strumming hand does what it did before: down on every beat, up on every 'and', touching the strings only where a strum is written.",
       "howTo": [
         "A rest is a place in the bar where nothing is strummed: a beat, or part of a beat. A quarter rest lasts one beat. Count it out loud like any other beat, and let the hand make its downstroke in the air.",
         "In this Step the chord you strummed before a rest rings on through it. Stopping the strings dead is a later Step.",
@@ -5635,7 +5639,7 @@
           "title": "A and D",
           "purpose": "A, D, A, D with the long strum and two short ones, over the band. The third finger slides along the B string and leads the change.",
           "howTo": [
-            "Quarter notes and eighths, 55 BPM up to a pass at 90. Down, down-up, down, down-up.",
+            "Quarter notes and eighths, 50 BPM up to a pass at 85. Down, down-up, down, down-up.",
             "Keep the third finger touching the B string as it slides between fret 2 and fret 3. The other two fingers follow it.",
             "A is strummed from the A string, D from the D string."
           ],
@@ -5756,15 +5760,15 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":55,"grading":"graded"},
-              {"bpm":65,"grading":"graded"},
-              {"bpm":80,"grading":"graded"},
-              {"bpm":90,"grading":"graded"},
-              {"bpm":100,"grading":"graded"},
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":75,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
               {"bpm":110,"grading":"graded"},
               {"bpm":120,"grading":"graded"}
             ],
-            "passAtBpm": 90
+            "passAtBpm": 85
           },
           "passBars": [
             {
@@ -5815,7 +5819,7 @@
             "minGapMsAtTop": 250,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 2.25
+            "difficulty": 2.13
           },
           "chords": ["A", "D", "A", "D"],
           "harmony": {
@@ -5830,7 +5834,7 @@
           "purpose": "An eight-bar form over the band: two bars of A, two of D, one of E, one of D, and two of A. Down, down-up, down, down-up throughout.",
           "howTo": [
             "Quarter notes and eighths, 50 BPM up to a pass at 85.",
-            "Follow the form: A, A, D, D, E, D, A, A. Count the bars.",
+            "Follow the form, the order of the chords: A, A, D, D, E, D, A, A. Count the bars.",
             "D to E and E to D are the long changes. The first finger leads them, sliding along the G string: fret 1 for E, fret 2 for D."
           ],
           "coachLine": "Eight bars with the band. Each strum is timed and counted.",
@@ -7282,7 +7286,7 @@
       "id": "small-f",
       "order": 11,
       "title": "D minor, and the way to F",
-      "goal": "Hold D minor, F major seven and the small F, change between A minor and D minor, and play A minor, F, C, G with the pattern.",
+      "goal": "Hold D minor, F major seven and the small F, change between A minor and D minor, and play A minor, F, C, G with the shorter pattern.",
       "why": "F is where many beginners stop, because it is the first chord in which one finger holds two strings. Take it in three steps instead. D minor first, which is D with one note changed. Then F major seven, a soft and easy chord that is one move from C. Then lay the first finger flat across the top two strings and F major seven becomes F. This is the small F, on four strings. The full barre chord across six strings can wait: the small one is enough for the songs in this Path and for most others.",
       "howTo": [
         "D minor: first finger on the top string at fret 1, second finger on the G string at fret 2, third finger on the B string at fret 3. The D string is open. Top four strings only.",
@@ -7292,7 +7296,7 @@
       ],
       "payoff": "Thirteen chords, the F that stops most beginners, and one of the great four-chord progressions.",
       "prerequisites": ["sevenths-blues"],
-      "difficulty": 2,
+      "difficulty": 1.67,
       "exercises": [
         {
           "id": "small-f.dm-strings",
@@ -7849,9 +7853,9 @@
         {
           "id": "small-f.am-f-c-g",
           "title": "A minor, F, C, G",
-          "purpose": "Four chords, one bar each, with the pattern, over the band: one of the most-used progressions there is, and the reason to learn F.",
+          "purpose": "Four chords, one bar each, with the shorter pattern, over the band: one of the most-used progressions there is, and the reason to learn F.",
           "howTo": [
-            "Quarter notes and eighths, 50 BPM up to a pass at 80. Down, down-up, up-down-up in every bar.",
+            "Quarter notes and eighths, 50 BPM up to a pass at 80. Down, down-up, up, down in every bar: the shorter pattern, so beat 4 is a long downstroke and the fingers have that whole beat to change.",
             "A minor to F: the first finger stays on the B string and lies flat, and the second and third fingers swap strings, with the third going up to fret 3. F to C: the first finger stands up again and the other two move one string thicker.",
             "If F will not ring yet, play F major seven in its place, with the top string open. Come back to the small F later."
           ],
@@ -7888,14 +7892,11 @@
             {"string":3,"fret":2,"midi":57,"tick":2400,"dur":480,"tech":[],"finger":3},
             {"string":2,"fret":1,"midi":60,"tick":2400,"dur":480,"tech":[],"finger":1},
             {"string":1,"fret":0,"midi":64,"tick":2400,"dur":480,"tech":[]},
-            {"string":5,"fret":0,"midi":45,"tick":2880,"dur":480,"tech":[]},
-            {"string":4,"fret":2,"midi":52,"tick":2880,"dur":480,"tech":[],"finger":2},
-            {"string":3,"fret":2,"midi":57,"tick":2880,"dur":480,"tech":[],"finger":3},
-            {"string":2,"fret":1,"midi":60,"tick":2880,"dur":480,"tech":[],"finger":1},
-            {"string":1,"fret":0,"midi":64,"tick":2880,"dur":480,"tech":[]},
-            {"string":3,"fret":2,"midi":57,"tick":3360,"dur":480,"tech":[],"finger":3},
-            {"string":2,"fret":1,"midi":60,"tick":3360,"dur":480,"tech":[],"finger":1},
-            {"string":1,"fret":0,"midi":64,"tick":3360,"dur":480,"tech":[]},
+            {"string":5,"fret":0,"midi":45,"tick":2880,"dur":960,"tech":[]},
+            {"string":4,"fret":2,"midi":52,"tick":2880,"dur":960,"tech":[],"finger":2},
+            {"string":3,"fret":2,"midi":57,"tick":2880,"dur":960,"tech":[],"finger":3},
+            {"string":2,"fret":1,"midi":60,"tick":2880,"dur":960,"tech":[],"finger":1},
+            {"string":1,"fret":0,"midi":64,"tick":2880,"dur":960,"tech":[]},
             {"string":4,"fret":3,"midi":53,"tick":3840,"dur":960,"tech":[],"finger":3},
             {"string":3,"fret":2,"midi":57,"tick":3840,"dur":960,"tech":[],"finger":2},
             {"string":2,"fret":1,"midi":60,"tick":3840,"dur":960,"tech":[],"finger":1},
@@ -7910,13 +7911,10 @@
             {"string":3,"fret":2,"midi":57,"tick":6240,"dur":480,"tech":[],"finger":2},
             {"string":2,"fret":1,"midi":60,"tick":6240,"dur":480,"tech":[],"finger":1},
             {"string":1,"fret":1,"midi":65,"tick":6240,"dur":480,"tech":[],"finger":1},
-            {"string":4,"fret":3,"midi":53,"tick":6720,"dur":480,"tech":[],"finger":3},
-            {"string":3,"fret":2,"midi":57,"tick":6720,"dur":480,"tech":[],"finger":2},
-            {"string":2,"fret":1,"midi":60,"tick":6720,"dur":480,"tech":[],"finger":1},
-            {"string":1,"fret":1,"midi":65,"tick":6720,"dur":480,"tech":[],"finger":1},
-            {"string":3,"fret":2,"midi":57,"tick":7200,"dur":480,"tech":[],"finger":2},
-            {"string":2,"fret":1,"midi":60,"tick":7200,"dur":480,"tech":[],"finger":1},
-            {"string":1,"fret":1,"midi":65,"tick":7200,"dur":480,"tech":[],"finger":1},
+            {"string":4,"fret":3,"midi":53,"tick":6720,"dur":960,"tech":[],"finger":3},
+            {"string":3,"fret":2,"midi":57,"tick":6720,"dur":960,"tech":[],"finger":2},
+            {"string":2,"fret":1,"midi":60,"tick":6720,"dur":960,"tech":[],"finger":1},
+            {"string":1,"fret":1,"midi":65,"tick":6720,"dur":960,"tech":[],"finger":1},
             {"string":5,"fret":3,"midi":48,"tick":7680,"dur":960,"tech":[],"finger":3},
             {"string":4,"fret":2,"midi":52,"tick":7680,"dur":960,"tech":[],"finger":2},
             {"string":3,"fret":0,"midi":55,"tick":7680,"dur":960,"tech":[]},
@@ -7933,14 +7931,11 @@
             {"string":3,"fret":0,"midi":55,"tick":10080,"dur":480,"tech":[]},
             {"string":2,"fret":1,"midi":60,"tick":10080,"dur":480,"tech":[],"finger":1},
             {"string":1,"fret":0,"midi":64,"tick":10080,"dur":480,"tech":[]},
-            {"string":5,"fret":3,"midi":48,"tick":10560,"dur":480,"tech":[],"finger":3},
-            {"string":4,"fret":2,"midi":52,"tick":10560,"dur":480,"tech":[],"finger":2},
-            {"string":3,"fret":0,"midi":55,"tick":10560,"dur":480,"tech":[]},
-            {"string":2,"fret":1,"midi":60,"tick":10560,"dur":480,"tech":[],"finger":1},
-            {"string":1,"fret":0,"midi":64,"tick":10560,"dur":480,"tech":[]},
-            {"string":3,"fret":0,"midi":55,"tick":11040,"dur":480,"tech":[]},
-            {"string":2,"fret":1,"midi":60,"tick":11040,"dur":480,"tech":[],"finger":1},
-            {"string":1,"fret":0,"midi":64,"tick":11040,"dur":480,"tech":[]},
+            {"string":5,"fret":3,"midi":48,"tick":10560,"dur":960,"tech":[],"finger":3},
+            {"string":4,"fret":2,"midi":52,"tick":10560,"dur":960,"tech":[],"finger":2},
+            {"string":3,"fret":0,"midi":55,"tick":10560,"dur":960,"tech":[]},
+            {"string":2,"fret":1,"midi":60,"tick":10560,"dur":960,"tech":[],"finger":1},
+            {"string":1,"fret":0,"midi":64,"tick":10560,"dur":960,"tech":[]},
             {"string":6,"fret":3,"midi":43,"tick":11520,"dur":960,"tech":[],"finger":3},
             {"string":5,"fret":2,"midi":47,"tick":11520,"dur":960,"tech":[],"finger":2},
             {"string":4,"fret":0,"midi":50,"tick":11520,"dur":960,"tech":[]},
@@ -7959,15 +7954,12 @@
             {"string":3,"fret":0,"midi":55,"tick":13920,"dur":480,"tech":[]},
             {"string":2,"fret":0,"midi":59,"tick":13920,"dur":480,"tech":[]},
             {"string":1,"fret":3,"midi":67,"tick":13920,"dur":480,"tech":[],"finger":4},
-            {"string":6,"fret":3,"midi":43,"tick":14400,"dur":480,"tech":[],"finger":3},
-            {"string":5,"fret":2,"midi":47,"tick":14400,"dur":480,"tech":[],"finger":2},
-            {"string":4,"fret":0,"midi":50,"tick":14400,"dur":480,"tech":[]},
-            {"string":3,"fret":0,"midi":55,"tick":14400,"dur":480,"tech":[]},
-            {"string":2,"fret":0,"midi":59,"tick":14400,"dur":480,"tech":[]},
-            {"string":1,"fret":3,"midi":67,"tick":14400,"dur":480,"tech":[],"finger":4},
-            {"string":3,"fret":0,"midi":55,"tick":14880,"dur":480,"tech":[]},
-            {"string":2,"fret":0,"midi":59,"tick":14880,"dur":480,"tech":[]},
-            {"string":1,"fret":3,"midi":67,"tick":14880,"dur":480,"tech":[],"finger":4}
+            {"string":6,"fret":3,"midi":43,"tick":14400,"dur":960,"tech":[],"finger":3},
+            {"string":5,"fret":2,"midi":47,"tick":14400,"dur":960,"tech":[],"finger":2},
+            {"string":4,"fret":0,"midi":50,"tick":14400,"dur":960,"tech":[]},
+            {"string":3,"fret":0,"midi":55,"tick":14400,"dur":960,"tech":[]},
+            {"string":2,"fret":0,"midi":59,"tick":14400,"dur":960,"tech":[]},
+            {"string":1,"fret":3,"midi":67,"tick":14400,"dur":960,"tech":[],"finger":4}
           ],
           "rests": [
             {"tick":1920,"dur":480},
@@ -8030,13 +8022,13 @@
             "chart": "Am | F | C | G"
           },
           "estimatedMinutes": 7,
-          "tab": "/4 5:0+4:2f2+3:2f3+2:1f1+1:0 /8 5:0+4:2f2+3:2f3+2:1f1+1:0 3:2f3+2:1f1+1:0 r 3:2f3+2:1f1+1:0 5:0+4:2f2+3:2f3+2:1f1+1:0 3:2f3+2:1f1+1:0 | /4 4:3f3+3:2f2+2:1f1+1:1f1 /8 4:3f3+3:2f2+2:1f1+1:1f1 3:2f2+2:1f1+1:1f1 r 3:2f2+2:1f1+1:1f1 4:3f3+3:2f2+2:1f1+1:1f1 3:2f2+2:1f1+1:1f1 | /4 5:3f3+4:2f2+3:0+2:1f1+1:0 /8 5:3f3+4:2f2+3:0+2:1f1+1:0 3:0+2:1f1+1:0 r 3:0+2:1f1+1:0 5:3f3+4:2f2+3:0+2:1f1+1:0 3:0+2:1f1+1:0 | /4 6:3f3+5:2f2+4:0+3:0+2:0+1:3f4 /8 6:3f3+5:2f2+4:0+3:0+2:0+1:3f4 3:0+2:0+1:3f4 r 3:0+2:0+1:3f4 6:3f3+5:2f2+4:0+3:0+2:0+1:3f4 3:0+2:0+1:3f4",
+          "tab": "/4 5:0+4:2f2+3:2f3+2:1f1+1:0 /8 5:0+4:2f2+3:2f3+2:1f1+1:0 3:2f3+2:1f1+1:0 r 3:2f3+2:1f1+1:0 /4 5:0+4:2f2+3:2f3+2:1f1+1:0 | /4 4:3f3+3:2f2+2:1f1+1:1f1 /8 4:3f3+3:2f2+2:1f1+1:1f1 3:2f2+2:1f1+1:1f1 r 3:2f2+2:1f1+1:1f1 /4 4:3f3+3:2f2+2:1f1+1:1f1 | /4 5:3f3+4:2f2+3:0+2:1f1+1:0 /8 5:3f3+4:2f2+3:0+2:1f1+1:0 3:0+2:1f1+1:0 r 3:0+2:1f1+1:0 /4 5:3f3+4:2f2+3:0+2:1f1+1:0 | /4 6:3f3+5:2f2+4:0+3:0+2:0+1:3f4 /8 6:3f3+5:2f2+4:0+3:0+2:0+1:3f4 3:0+2:0+1:3f4 r 3:0+2:0+1:3f4 /4 6:3f3+5:2f2+4:0+3:0+2:0+1:3f4",
           "computed": {
-            "noteCount": 96,
+            "noteCount": 84,
             "minGapMsAtTop": 272.73,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 2
+            "difficulty": 1.67
           },
           "chords": ["Am", "F", "C", "G"],
           "harmony": {
@@ -8048,7 +8040,8 @@
             "Did every change arrive on the beat, even when a finger was late?"
           ]
         }
-      ]
+      ],
+      "difficultyException": "The last Exercise uses the shorter pattern, five strums a bar with a quarter note on beat 4, so that the fingers have a whole beat to reach F. The strum rate is lower on purpose. The demand is the small F, one finger holding two strings, and the changes into and out of it, which the metric does not count."
     },
     {
       "id": "light-and-shade",
@@ -8059,7 +8052,7 @@
       "howTo": [
         "An accent is a bigger, faster stroke across all the strings. The strokes around it are smaller and lighter, so the difference can be heard.",
         "To stop the strings, lay the side of the strumming hand across all of them, on the beat. The fretting fingers can ease their pressure at the same moment without leaving the strings.",
-        "For a bass note, pick only the lowest string of the chord: the low E string for G and E minor, the A string for C, the D string for D."
+        "For a bass note, pick only the lowest string of the chord: the low E string for G and E minor, the A string for C and A minor, the D string for D and F. In these chords that lowest note is the root. The root is the note a chord is named after."
       ],
       "payoff": "Strumming that has loud and soft, sound and silence, low and high.",
       "prerequisites": ["small-f"],
@@ -8501,10 +8494,10 @@
         {
           "id": "light-and-shade.bass-strum",
           "title": "Bass note, then strum",
-          "purpose": "On beats 1 and 3 the lowest string of the chord alone, and on beats 2 and 4 a light strum of the top three strings, through G, C, D and G.",
+          "purpose": "On beats 1 and 3 the lowest string of the chord alone, and on beats 2 and 4 a light strum of the top three strings, through A minor, F, C and G.",
           "howTo": [
             "Quarter notes, 55 BPM up to a pass at 90. Bass, strum, bass, strum.",
-            "The bass notes: low E string fret 3 for G, A string fret 3 for C, the open D string for D. The strum is a short downstroke on the G, B and top strings.",
+            "The bass notes: the open A string for A minor, D string fret 3 for F, A string fret 3 for C, low E string fret 3 for G. The strum is a short downstroke on the G, B and top strings.",
             "Hold the whole chord down throughout, even though you play only part of it at a time."
           ],
           "coachLine": "Band on. Each bass note and each strum is timed and counted.",
@@ -8524,30 +8517,30 @@
           "crossing": "none",
           "notesRole": "target",
           "notes": [
-            {"string":6,"fret":3,"midi":43,"tick":0,"dur":960,"tech":[],"finger":3},
-            {"string":3,"fret":0,"midi":55,"tick":960,"dur":960,"tech":[]},
-            {"string":2,"fret":0,"midi":59,"tick":960,"dur":960,"tech":[]},
-            {"string":1,"fret":3,"midi":67,"tick":960,"dur":960,"tech":[],"finger":4},
-            {"string":6,"fret":3,"midi":43,"tick":1920,"dur":960,"tech":[],"finger":3},
-            {"string":3,"fret":0,"midi":55,"tick":2880,"dur":960,"tech":[]},
-            {"string":2,"fret":0,"midi":59,"tick":2880,"dur":960,"tech":[]},
-            {"string":1,"fret":3,"midi":67,"tick":2880,"dur":960,"tech":[],"finger":4},
-            {"string":5,"fret":3,"midi":48,"tick":3840,"dur":960,"tech":[],"finger":3},
-            {"string":3,"fret":0,"midi":55,"tick":4800,"dur":960,"tech":[]},
+            {"string":5,"fret":0,"midi":45,"tick":0,"dur":960,"tech":[]},
+            {"string":3,"fret":2,"midi":57,"tick":960,"dur":960,"tech":[],"finger":3},
+            {"string":2,"fret":1,"midi":60,"tick":960,"dur":960,"tech":[],"finger":1},
+            {"string":1,"fret":0,"midi":64,"tick":960,"dur":960,"tech":[]},
+            {"string":5,"fret":0,"midi":45,"tick":1920,"dur":960,"tech":[]},
+            {"string":3,"fret":2,"midi":57,"tick":2880,"dur":960,"tech":[],"finger":3},
+            {"string":2,"fret":1,"midi":60,"tick":2880,"dur":960,"tech":[],"finger":1},
+            {"string":1,"fret":0,"midi":64,"tick":2880,"dur":960,"tech":[]},
+            {"string":4,"fret":3,"midi":53,"tick":3840,"dur":960,"tech":[],"finger":3},
+            {"string":3,"fret":2,"midi":57,"tick":4800,"dur":960,"tech":[],"finger":2},
             {"string":2,"fret":1,"midi":60,"tick":4800,"dur":960,"tech":[],"finger":1},
-            {"string":1,"fret":0,"midi":64,"tick":4800,"dur":960,"tech":[]},
-            {"string":5,"fret":3,"midi":48,"tick":5760,"dur":960,"tech":[],"finger":3},
-            {"string":3,"fret":0,"midi":55,"tick":6720,"dur":960,"tech":[]},
+            {"string":1,"fret":1,"midi":65,"tick":4800,"dur":960,"tech":[],"finger":1},
+            {"string":4,"fret":3,"midi":53,"tick":5760,"dur":960,"tech":[],"finger":3},
+            {"string":3,"fret":2,"midi":57,"tick":6720,"dur":960,"tech":[],"finger":2},
             {"string":2,"fret":1,"midi":60,"tick":6720,"dur":960,"tech":[],"finger":1},
-            {"string":1,"fret":0,"midi":64,"tick":6720,"dur":960,"tech":[]},
-            {"string":4,"fret":0,"midi":50,"tick":7680,"dur":960,"tech":[]},
-            {"string":3,"fret":2,"midi":57,"tick":8640,"dur":960,"tech":[],"finger":1},
-            {"string":2,"fret":3,"midi":62,"tick":8640,"dur":960,"tech":[],"finger":3},
-            {"string":1,"fret":2,"midi":66,"tick":8640,"dur":960,"tech":[],"finger":2},
-            {"string":4,"fret":0,"midi":50,"tick":9600,"dur":960,"tech":[]},
-            {"string":3,"fret":2,"midi":57,"tick":10560,"dur":960,"tech":[],"finger":1},
-            {"string":2,"fret":3,"midi":62,"tick":10560,"dur":960,"tech":[],"finger":3},
-            {"string":1,"fret":2,"midi":66,"tick":10560,"dur":960,"tech":[],"finger":2},
+            {"string":1,"fret":1,"midi":65,"tick":6720,"dur":960,"tech":[],"finger":1},
+            {"string":5,"fret":3,"midi":48,"tick":7680,"dur":960,"tech":[],"finger":3},
+            {"string":3,"fret":0,"midi":55,"tick":8640,"dur":960,"tech":[]},
+            {"string":2,"fret":1,"midi":60,"tick":8640,"dur":960,"tech":[],"finger":1},
+            {"string":1,"fret":0,"midi":64,"tick":8640,"dur":960,"tech":[]},
+            {"string":5,"fret":3,"midi":48,"tick":9600,"dur":960,"tech":[],"finger":3},
+            {"string":3,"fret":0,"midi":55,"tick":10560,"dur":960,"tech":[]},
+            {"string":2,"fret":1,"midi":60,"tick":10560,"dur":960,"tech":[],"finger":1},
+            {"string":1,"fret":0,"midi":64,"tick":10560,"dur":960,"tech":[]},
             {"string":6,"fret":3,"midi":43,"tick":11520,"dur":960,"tech":[],"finger":3},
             {"string":3,"fret":0,"midi":55,"tick":12480,"dur":960,"tech":[]},
             {"string":2,"fret":0,"midi":59,"tick":12480,"dur":960,"tech":[]},
@@ -8609,11 +8602,11 @@
             "kind": "jam",
             "grooveId": "rock8",
             "feel": "straight",
-            "key": "G",
-            "chart": "G | C | D | G"
+            "key": "A minor",
+            "chart": "Am | F | C | G"
           },
           "estimatedMinutes": 6,
-          "tab": "/4 6:3f3 3:0+2:0+1:3f4 6:3f3 3:0+2:0+1:3f4 | /4 5:3f3 3:0+2:1f1+1:0 5:3f3 3:0+2:1f1+1:0 | /4 4:0 3:2f1+2:3f3+1:2f2 4:0 3:2f1+2:3f3+1:2f2 | /4 6:3f3 3:0+2:0+1:3f4 6:3f3 3:0+2:0+1:3f4",
+          "tab": "/4 5:0 3:2f3+2:1f1+1:0 5:0 3:2f3+2:1f1+1:0 | /4 4:3f3 3:2f2+2:1f1+1:1f1 4:3f3 3:2f2+2:1f1+1:1f1 | /4 5:3f3 3:0+2:1f1+1:0 5:3f3 3:0+2:1f1+1:0 | /4 6:3f3 3:0+2:0+1:3f4 6:3f3 3:0+2:0+1:3f4",
           "computed": {
             "noteCount": 32,
             "minGapMsAtTop": 500,
@@ -8621,7 +8614,7 @@
             "maxPlayableBpm": 400,
             "difficulty": 2.27
           },
-          "chords": ["G", "C", "D", "G"],
+          "chords": ["Am", "F", "C", "G"],
           "harmony": {
             "kind": "chordTones",
             "cover": false
@@ -10548,7 +10541,8 @@
           "howTo": [
             "Quarter notes and eighths, 50 BPM up to a pass at 80.",
             "Bars 1 to 8: G, E minor, C, D, twice, down, down-up, down, down-up. Bars 9 to 16: C, G, D, E minor, C, G, D, D, down, down-up, up-down-up.",
-            "The change of strum at bar 9 is the moment to think about. Say 'chorus' to yourself in bar 8."
+            "The change of strum at bar 9 is the moment to think about. Say 'chorus' to yourself in bar 8.",
+            "When the sixteen bars are steady, play the chorus with beats 2 and 4 a little louder, as you did in the Step Accents, stops and bass notes. Keep the verse light so the chorus has somewhere to go."
           ],
           "coachLine": "Sixteen bars with the band. Each strum is timed and counted.",
           "grading": "graded",

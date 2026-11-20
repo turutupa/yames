@@ -58,7 +58,7 @@ const QUARTER_RIFF = onPairs(`/4 L0 Lx H0 Hx | H0 Hx H0 Lx | L0 Lx H0 Hx | /2 Hx
 const GEAR_ONE = onPairs(`/4 L0 Lx H0 Hx | /8 L0 L0 Lx Lx H0 H0 Hx Hx`);
 const EIGHTH_RIFF = onPairs(`/8 L0 L0 Lx L0 H0 H0 Hx H0 | L0 L0 Lx L0 Hx H0 /4 Lx`);
 const LONG_SHORT = onPairs(`/4 L0 /8 Lx Lx /4 H0 /8 Hx Hx | /4 H0 /8 Hx Hx /4 Lx /8 L0 L0`);
-const FIFTH_TUNE = `/8 3:5 3:7 /4 2:5 /8 2:8 2:5 /4 3:7 | /8 3:5 3:7 2:5 3:7 /2 3:5`;
+// `fifth-tune` is in Step `other-strings` (rhythm-foundations-more.ts): its frets are a jump from the open position.
 
 const QUARTER_RESTS = onPairs(`/4 L0 r L0 r | Lx r Lx r | H0 H0 r H0 | Hx r r r`);
 const STOPS = onPairs(`/8 L0 L0 Lx L0 /4 H0 r | /8 L0 L0 Lx L0 /4 Hx r`);
@@ -131,13 +131,13 @@ export default definePath({
   goal: "Play quarters, eighths, triplets and sixteenths, with rests and off-beats, in time with a click and then with a band.",
   level: "beginner",
   assumes:
-    "You can hold a pick and play a single note on an open string and at a fret. You don't need to have used a click before. The minutes listed are one pass through the material; expect to come back to each Step for days.",
+    "You can hold a pick and play a single note on an open string and at a fret. If you have never played at all, do the Beginner Level of First Chords and Strumming first, or alongside this one. You don't need to have used a click before. The minutes listed are one pass through the material; expect to come back to each Step for days.",
   prerequisites: { skills: ["One clean note at a time", "Holding a pick"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
   variantText: true,
   orderRationale:
-    "The beat first, then two notes to a beat, then silence, because a rest is harder to place than a note. Off-beats come before sixteenths: they use the same eighth-note count, and a player who can't feel the 'and' will not feel the 'e' or the 'a'. Triplets follow sixteenths so the two ways of dividing a beat can be compared. The Advanced Level mixes them, and the band comes last because a band hides a loose rhythm that a click exposes.",
+    "The beat first, then two notes to a beat, then silence, because a rest is harder to place than a note. Off-beats come before sixteenths: they use the same eighth-note count, and a player who can't feel the 'and' will not feel the 'e' or the 'a'. Triplets follow sixteenths so the two ways of dividing a beat can be compared. The Advanced Level mixes them. One riff at the end of the Beginner Level is played with a band, and the band has a Step of its own last, because a band hides a loose rhythm that a click exposes.",
   gradingLimits:
     "The app times each note you play against where it is written and counts the notes it heard, and in most Exercises it checks after the take that the notes were the written ones. Where a note is written to ring across a bar line, and where two strings are played at once, it times and counts the strokes and does not check which notes they were. It does not grade silence itself: a note played in a rest counts as an extra note, and a string left ringing through a rest is yours to hear. Counting out loud and tapping your foot are taught here and not checked. Your setup adds a small delay between playing and the app hearing it, which matters little at these tempos. None of this has been tried on a real guitar yet.",
   steps: [
@@ -147,6 +147,10 @@ export default definePath({
       goal: "Play one note on every click, and hold a note for two clicks or four, without drifting.",
       why: "Everything in music hangs on the beat. Playing exactly with a click feels strange at first: when you are right on it, the click seems to disappear behind your note. That feeling is the thing to learn, and it is easiest to find with one slow note at a time.",
       howTo: [
+        "The words this Path uses. The strings, from thickest to thinnest: low E, A, D, G, B and the top string. Fret 1 is the first space next to the nut, at the head end of the neck. Fingers are numbered from the index finger: first, second, third, and the little finger is the fourth.",
+        "A click is the tick of the metronome. Each tick is a beat, four beats make a bar, and BPM is how many beats go by in a minute. A whole note lasts a whole bar, a half note two beats, a quarter note one beat. The pass tempo is the speed at which an Exercise counts as done.",
+        "One play through an Exercise is a Take. Each Exercise has a ladder of tempos called rungs: between Takes, Slower and Faster move one rung along it, and the pass tempo is the rung at which the Exercise counts as done. Some Exercises change key or string from Take to Take.",
+        "On the tab each line is a string: the top line is the top string and the bottom line is the low E string. Each number is the fret to press. 0 is an open string, one played with no finger on it.",
         "Count '1, 2, 3, 4' out loud with the click before you play, and keep counting while you play.",
         "Every note is a downstroke. Let the pick fall through the string and rest against the next one.",
         "A half note lasts two clicks and a whole note four. Let it ring for its full length and count through it.",
@@ -178,7 +182,7 @@ export default definePath({
           purpose: "A half note, then two quarters, and a whole note to end. Holding a note for exactly two clicks is harder than playing two notes.",
           howTo: [
             "Count '1, 2' through each half note and play the quarters on 3 and 4. The last bar is one note held for all four clicks.",
-            "The fretted notes are at fret 3 on the low E string and fret 2 on the other strings: third finger for fret 3, second finger for fret 2.",
+            "On the low E string the fretted note is at fret 3. On the A string it is at fret 2. Third finger for fret 3, second finger for fret 2.",
           ],
           coach: "I time when each note starts. How long you let it ring is for your ear and your count.",
           vary: HALVES.vary,
@@ -194,7 +198,7 @@ export default definePath({
         {
           id: "quarter-riff",
           title: "A riff in quarter notes",
-          purpose: "E minor pentatonic on two strings, a note on every click for three bars and two half notes to end. Your first riff with a click.",
+          purpose: "E minor pentatonic is a scale of five notes that sound good together, and a riff is a short phrase that repeats. This riff plays four of the five on two strings, a note on every click for three bars and two half notes to end. Your first riff with a click.",
           howTo: [
             "Open string, fretted note, open string, fretted note. Keep the fretting fingers close to the strings so they are ready.",
             "All downstrokes. If a note is late, it is nearly always the fretting finger arriving late, not the pick.",
@@ -221,7 +225,7 @@ export default definePath({
         "Make the upstroke as loud as the downstroke. It is usually quieter because the pick catches less string.",
         "When the rhythm goes back to quarter notes, the hand keeps swinging and simply misses the string on the way up.",
       ],
-      payoff: "A riff in eighths that drives, and a tune at the fifth fret that mixes long and short notes.",
+      payoff: "A riff in eighths that drives, and long, short-short, the commonest rhythm in rock.",
       exercises: [
         {
           id: "gear-one",
@@ -277,23 +281,6 @@ export default definePath({
           grade: "timingNotes",
           minutes: 5,
         },
-        {
-          id: "fifth-tune",
-          title: "A tune at the fifth fret",
-          purpose: "The same rhythms on fretted notes: a short melody in the A minor pentatonic box, eighths and quarters, ending on a long C.",
-          howTo: [
-            "First finger at fret 5, third finger at fret 7, little finger at fret 8 on the B string.",
-            "Count it first without the guitar: '1 and 2, 3 and 4', then '1 and 2 and 3' and hold. Then play what you counted.",
-          ],
-          coach: "After the take I'll say how even it was and whether the notes were the written ones.",
-          tab: FIFTH_TUNE,
-          position: 5,
-          harmony: A_PENT,
-          rungs: ladder(50, 120, 10),
-          passAt: 80,
-          grade: "timingNotes",
-          minutes: 5,
-        },
       ],
     },
     {
@@ -335,7 +322,7 @@ export default definePath({
           title: "Run and stop",
           purpose: "Four eighths, a quarter note, and a beat of silence. The stop on beat 4 is what makes it a riff.",
           howTo: [
-            "Count '1 and 2 and 3, (4)'. Stop the string on 4 and come back in on the next 1.",
+            "Count '1 and 2 and 3, (4)'. A number in brackets is a beat you count and do not play. Stop the string on 4 and come back in on the next 1.",
             "Don't speed up into the stop. The four eighths are the same speed as always.",
           ],
           coach: "I'll say how even it was and check the notes after the take. The silence on beat 4 is yours to keep clean.",
@@ -496,7 +483,7 @@ export default definePath({
       why: "Sixteenths divide the beat in four, and nearly every busy rhythm is a pattern of which of the four you play. The pendulum doubles: the hand now swings four times a beat, and each figure is that swing with one stroke missing.",
       howTo: [
         "Count '1 e and a, 2 e and a'. The hand goes down on the number and the 'and', up on the 'e' and the 'a'.",
-        "Long-short-short is '1, and a': down, down-up. Short-short-long is '1 e and': down-up, down.",
+        "Long-short-short is '1, and a': down, down-up. It is the quarter and two eighths of the Beginner Level at twice the speed, and it is called the gallop. Short-short-long is '1 e and': down-up, down.",
         "Keep the strokes small. The wrist moves, not the arm.",
       ],
       payoff: "A riff with the gallop in it, steady at a tempo where it starts to sound like a band.",
@@ -866,10 +853,10 @@ export default definePath({
         {
           id: "band-eighths",
           title: "An eighth-note riff with the band",
-          purpose: "Four bars in E minor over a rock groove, with rests on beats 2 and 3 of the first three bars, where the snare speaks. The riff follows the chords: E, G, A and back to E.",
+          purpose: "Four bars in E minor over a rock groove, with rests on beats 2 and 3 of the first three bars, where the drums speak. The riff follows the chords: E, G, A and back to E.",
           howTo: [
             "Count '1 and, (2) and, (3) and 4 and' for three bars; bar 4 fills beat 3 and ends on a long note. The hand swings in eighths throughout.",
-            "Each bar starts on the root of its chord: open low E, G at fret 3, the open A string, and E again.",
+            "The root is the note a chord is named after. Each bar starts on the root of its chord: open low E, G at fret 3, the open A string, and E again.",
           ],
           coach: "Band on. I time your notes against it and check them after the take.",
           ...FREE,
@@ -930,7 +917,7 @@ export default definePath({
     {
       id: "beginner",
       title: "Beginner: on the beat",
-      summary: "Quarter notes, eighth notes and rests with a click, on the low strings and then higher up: one note a beat, two notes a beat, and silence in time.",
+      summary: "Quarter notes, eighth notes and rests with a click, on the low strings and then higher up, and a first riff with a band: one note a beat, two notes a beat, and silence in time.",
       reachLevel: "beginner",
       startHereIf: [
         "You've never practised with a click, or you find it hard to stay with one.",

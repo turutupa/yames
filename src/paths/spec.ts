@@ -105,6 +105,13 @@ export type VarySpec = {
 
 export type ExerciseSpec = {
   id: string;
+  /**
+   * The Step this Exercise was first published in, when it has moved to another one. An Exercise's
+   * id in the pack is `<step>.<id>` and is the key its progress is stored under, so a moved Exercise
+   * keeps the id it had: `firstStep: "eighths"` on an Exercise now in `other-strings` still
+   * generates `eighths.fifth-tune`.
+   */
+  firstStep?: string;
   title: string;
   purpose: string;
   howTo: string[];

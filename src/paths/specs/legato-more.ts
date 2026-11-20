@@ -375,9 +375,9 @@ export const SECOND_KEY: StepSpec = {
   goal: "Play written four-bar legato phrases over a band in E minor, with long notes and rests in them, and join two of them into eight bars.",
   why: "The line over the band in the Step before never stops and never leaves fifth position. A solo is made of phrases: a few notes, a long one to land on, a gap. This Step takes the rolls, the three-per-string fragments and the shifts of this Path to a second key and puts air between them. The long notes are where a weak pull-off or a late shift shows.",
   howTo: [
-    "Each phrase mixes sixteenths, in rolls from one pick, and triplets, where one pick starts three notes on a string. Count the triplet beats '1-and-a' before you play them.",
+    "Each phrase mixes sixteenths, in rolls from one pick, and triplets, where one pick starts three notes on a string. Count the triplet beats '1-trip-let, 2-trip-let' before you play them.",
     "Hold each long note for its full length and keep the rests silent: stop the string with the fretting finger, or with the side of the picking hand.",
-    "Play each phrase dry first. With the band on, listen for the first note of every bar landing on its chord.",
+    "Play each phrase with the click first. With the band on, listen for the first note of every bar landing on its chord.",
     "The hand changes position during the long notes and rests where it can. Where it moves inside a line, the Exercise says so.",
   ],
   payoff: "Eight bars of legato over a band in a key that is not A minor, with room to breathe in them.",

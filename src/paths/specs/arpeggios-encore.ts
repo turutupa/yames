@@ -109,7 +109,7 @@ export const FOUR_CHORDS_IN_G: StepSpec = {
       howTo: [
         "Straight eighths, 60 BPM up to a pass at 80. One bar on each chord: G, E minor, G, E minor.",
         "G: D string 5 (third finger), G string 4 (second), B string 3 and top string 3 (first finger, rolled). E minor: D string 14 (third finger), then fret 12 on the G, B and top strings, all with the first finger rolled across.",
-        "Each bar goes up the four strings, back down to the root on the D string, and adds one more note on the G string. Cut that last note short and move the hand in the gap, so the next root lands on the click.",
+        "Each bar goes up the four strings, back down to the root on the D string, and adds one more note on the G string. Cut that last note short and move the hand in the gap, so the next root lands on beat 1.",
       ],
       coach: "Band on. Right notes and time after the take.",
       tab: [G, EM, G, EM].map(upDown).join(" | "),
@@ -244,6 +244,7 @@ export const NEAREST_NOTE_AGAIN: StepSpec = {
       howTo: [
         "Quarter notes or any rhythm you like, 60 to 90 BPM, four bars that loop.",
         "Use only the three notes of each chord. G: G, B, D. E minor: E, G, B. C: C, E, G. D: D, F sharp, A. The written line is one answer.",
+        "To find a chord's notes near your hand, think of its three shapes from Triads: one of them is always within two frets.",
         NOT_CHECKED_YET,
       ],
       coach: "Not checked yet. Record it and listen for any place where the line leaps.",
@@ -270,7 +271,7 @@ const EM7 = min7(14);
 const AM7 = min7(7);
 const D7 = dom7(12);
 // The Path's two, five, one line in C, copied, for the key-moved Exercise.
-const TWO_FIVE_ONE = `/8 4:12 3:10 2:10 1:8 1:10 1:8 2:10 3:10 | 3:7 2:6 2:8 1:7 1:10 1:7 2:8 2:6 | 2:5 2:8 1:7 1:8 1:7 2:8 2:5 3:4 | /1 3:5`;
+const TWO_FIVE_ONE = `/8 4:12f4 3:10f2 2:10f3 1:8f1 1:10f3 1:8f1 2:10f3 3:10f2 | 3:7f2 2:6f1 2:8f3 1:7f2 1:10f4 1:7f2 2:8f3 2:6f1 | 2:5f1 2:8f4 1:7f3 1:8f4 1:7f3 2:8f4 2:5f2 3:4f1 | /1 3:5f2`;
 const TWO_FIVE_ONE_CHART = "Dm7 | G7 | Cmaj7 | Cmaj7";
 // The same line in G, a fourth lower, set where the hand can stay between frets 2 and 7.
 const TWO_FIVE_ONE_IN_G = `/8 4:7f4 3:5f2 2:5f3 1:3f1 1:5f3 1:3f1 2:5f3 3:5f2 | 4:7f3 3:5f1 3:7f3 2:7f4 1:5f1 2:7f4 3:7f3 3:5f1 | 3:4f3 2:3f2 1:2f1 1:3f2 1:2f1 2:3f2 3:4f3 4:4f3 | /1 4:5f4`;
@@ -337,7 +338,7 @@ export const SEVENTHS_IN_G: StepSpec = {
     {
       id: "two-five-one",
       title: "Two, five, one in G",
-      purpose: "A minor seven, D seven and two bars of G major seven as one line in eighths. It is the line you played in C, note for note, a fourth lower, set where the hand can stay between frets 2 and 7.",
+      purpose: "A minor seven, D seven and two bars of G major seven as one line in eighths. It is the line you played in C, note for note, moved to the key of G and set where the hand can stay between frets 2 and 7.",
       howTo: [
         "Straight eighths, 60 BPM up to a pass at 80. The last bar is one long G.",
         "Bar 1, A minor seven: D string 7, G string 5, B string 5, top string 3, then top string 5 and 3, B string 5, G string 5. It is bar 1 of the line in C, five frets lower on the same strings.",

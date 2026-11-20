@@ -40,6 +40,10 @@ const VARIANT_NOTE =
 const CHANGES_NOTE =
   "The strings and chord names here are for the first version. Other Takes play the same frets one string higher: A, C, D and F, with the roots on the A string.";
 
+// S5, the band at its first Exercise: both lines word for word as the other Paths say them, so the translations are copied.
+const BAND_IS = "The band is a drummer and a bassist in place of the click.";
+const LOST = "If you get lost, stop, find beat 1 of the next bar and come back in there.";
+
 // What the A-string version adds, and no rewrite of names can: the low E string now lies unplayed under the pick.
 const LOW_E_QUIET = "The low E string is not played. Begin every stroke on the A string and let the palm keep the low E string quiet.";
 const LOW_E_UNDER = "The low E string is not played. The lowest string the pick touches is the A string, and the palm keeps the low E string quiet.";
@@ -104,7 +108,7 @@ export const A_STRING_CHUG: StepSpec = {
   exercises: [
     {
       id: "a-chug-notes",
-      title: "Muted and open on the A string",
+      title: "Muted and ringing on the A string",
       purpose: "The chug on the open A string with fretted notes let out of the mute: C, D and E flat on frets 3, 5 and 6. The same move as on the low E string, with the mute found again on a thinner string.",
       howTo: [
         "Eighth notes, two to the click, all downstrokes. Mute the open A notes and let the fretted notes ring: lift the palm just enough as you play them.",
@@ -338,9 +342,12 @@ export const GALLOP_CHANGES: StepSpec = {
       title: "Four chords with the band",
       purpose: "Four bars over a hard rock groove in E minor: E, G, A and C, a bar each. In the E, G and A bars the chord lands on beats 1 and 3, with a gallop after the first and a reverse gallop after the second. The C bar has its chord on beat 1 and again on beat 4, held for a beat.",
       howTo: [
+        BAND_IS,
         "Bars 1 to 3, on E, G and A: chord and two short notes, a gallop, chord and two short notes, a reverse gallop. Bar 4, on C: chord and two short notes, a gallop, a reverse gallop, and the C chord held on beat 4.",
         "The chord changes on beat 1 of every bar. Land your chord with the change, and keep every muted note on that chord's root.",
-        "Back to bar 1: the held C chord is where the hand moves. Let it ring short; E needs only the first finger, on fret 2 of the A string.",
+        "Listen for the kick drum, the low thud on beats 1 and 3 and again on the 'and' of 4. In bars 1 to 3 your chords land with it on beats 1 and 3.",
+        "Back to bar 1: the held C chord is where the hand moves. Cut it a little short. E needs only the first finger, on fret 2 of the A string.",
+        LOST,
       ],
       coach: "Band on. Every attack is timed against it and the evenness is reported. A chord's pitch is not checked, and the mute and the strokes are yours to judge. Direct input or headphones make the timing fair.",
       ...FREE,
@@ -391,6 +398,8 @@ export const TWO_PART_RIFF: StepSpec = {
     "The first version is on the low E string; other Takes play the same frets one string higher, over the open A string.",
   ],
   payoff: "An eight-bar riff whose two parts follow each other without a seam.",
+  difficultyException:
+    "Half of the riff is a pedal part like the ones in the two Steps before, at their tempo, and the other half is gallops with chords, three attacks to a beat, so the number falls. The demand is eight bars in one take and a change of hand position and strokes on a bar line, which the metric does not count.",
   exercises: [
     {
       id: "pedal-part",

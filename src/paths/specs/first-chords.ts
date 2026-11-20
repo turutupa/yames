@@ -96,6 +96,8 @@ const EIGHTHS = figure("/8 D U D U D U D U");
 const DOWN_DOWN_UP = figure("/4 D /8 D U /4 D /8 D U");
 /** Down, down-up, up-down-up: the down on beat 3 misses the strings. */
 const PATTERN = figure("/4 D /8 D U r U D U");
+/** Down, down-up, up, down: the pattern without its last upstroke (Step `strums-between-beats`). */
+const SHORT_PATTERN = figure("/4 D /8 D U r U /4 D");
 const ACCENTS = figure("/8 D U A U D U A U");
 const STOP = figure("/4 D /8 D U /4 r /8 D U");
 
@@ -183,6 +185,7 @@ export default definePath({
       howTo: [
         "The words this Path uses. The strings, from thickest to thinnest: low E, A, D, G, B and the top string. Fret 1 is the first space next to the nut, at the head end of the neck. Fingers are numbered from the index finger: first, second, third, and the little finger is the fourth.",
         "A click is the tick of the metronome. Each tick is a beat, four beats make a bar, and BPM is how many beats go by in a minute. A whole note lasts a whole bar, a half note two beats, a quarter note one beat. The pass tempo is the speed at which an Exercise counts as done.",
+        "One play through an Exercise is a Take. Each Exercise has a ladder of tempos called rungs: between Takes, Slower and Faster move one rung along it, and the pass tempo is the rung at which the Exercise counts as done. Some Exercises change key or string from Take to Take.",
         "E minor: second finger on the A string at fret 2, third finger on the D string at fret 2. The other four strings are open.",
         "Press with the fingertips, just behind the fret, and keep the fingers arched so they do not lean on the string below. The thumb rests behind the neck, about level with the second finger.",
         "Strum downward from the low E string through all six in one relaxed swing of the forearm and wrist, as if brushing crumbs off the strings. That is a downstroke. Hold the pick loosely.",
@@ -196,6 +199,7 @@ export default definePath({
           purpose: "The E minor chord one string at a time, from the low E string to the top string and back, while you hold the shape down. A note that is dead here is dead in the strum too.",
           howTo: [
             "Quarter notes, 40 BPM up to a pass at 70.",
+            "On the tab each line is a string: the top line is the top string and the bottom line is the low E string. Each number is the fret to press. 0 is an open string, one played with no finger on it.",
             "Hold the chord down the whole time. Pick the low E string, then A, D, G, B and the top string, and come back: B, G, D, A, low E, and A once more to finish the bar.",
             "The fretted notes are on the A string and the D string, both at fret 2. Everything else is open.",
           ],
@@ -329,8 +333,10 @@ export default definePath({
           purpose: "E minor and A minor, four downstrokes each, over a band. The change has to happen between the fourth strum of one bar and the first of the next.",
           howTo: [
             "Quarter notes, 40 BPM up to a pass at 70. Down on every beat.",
+            "The band is a drummer and a bassist in place of the click.",
             "Start moving the fingers on the fourth strum, so that they land with the next one. It does not matter if that last strum is a little short.",
             "Keep the strumming hand going whatever the other hand is doing. The band will not wait, and you should not either.",
+            "If you get lost, stop, find beat 1 of the next bar and come back in there.",
           ],
           coach: BAND_COACH,
           tab: song(FOUR, ["Em", "Am", "Em", "Am"]),
@@ -352,11 +358,11 @@ export default definePath({
       goal: "Hold a C chord, change between A minor and C by moving one finger, and play an eight-bar tune with E minor, A minor and C.",
       why: "C is the first chord that asks the hand to stretch: the third finger reaches to the third fret of the A string. It comes now because it is one finger away from A minor. The first and second fingers do not move at all. Changes like that, where some fingers stay down as anchors, are worth looking for in every pair of chords you meet. And three chords are enough for a first whole tune.",
       howTo: [
-        "C: first finger on the B string at fret 1, second finger on the D string at fret 2, third finger on the A string at fret 3. The G string and the top string are open. The low E string is not played.",
+        "A chord named by a letter alone is a major chord, so C is short for C major. Minor chords always have the word minor in the name, as in E minor and A minor. C: first finger on the B string at fret 1, second finger on the D string at fret 2, third finger on the A string at fret 3. The G string and the top string are open. The low E string is not played.",
         "From A minor, only the third finger moves: from the G string at fret 2 to the A string at fret 3. Keep the first and second fingers pressed while it travels.",
         "The open G string sits between two fretted strings. If it is dead, the second or the first finger is leaning on it.",
       ],
-      payoff: "Three chords, a change with anchors, and eight bars that sound like a song.",
+      payoff: "Three chords, a change with anchors, and eight bars that sound like a song. The Beginner Level of Rhythm Foundations goes well alongside the next Level of this Path. It is single notes with a click, which several other Paths build on.",
       exercises: [
         {
           id: "c-strings",
@@ -859,7 +865,7 @@ export default definePath({
           title: "A and D",
           purpose: "A, D, A, D with the long strum and two short ones, over the band. The third finger slides along the B string and leads the change.",
           howTo: [
-            "Quarter notes and eighths, 55 BPM up to a pass at 90. Down, down-up, down, down-up.",
+            "Quarter notes and eighths, 50 BPM up to a pass at 85. Down, down-up, down, down-up.",
             "Keep the third finger touching the B string as it slides between fret 2 and fret 3. The other two fingers follow it.",
             "A is strummed from the A string, D from the D string.",
           ],
@@ -870,7 +876,7 @@ export default definePath({
           jam: ROCK("A"),
           harmony: { chordTones: true },
           rungs: ladder(50, 120, 10),
-          passAt: 90,
+          passAt: 85,
           ...STRUM,
           selfCheck: [CHANGE_CHECK],
           minutes: 6,
@@ -881,7 +887,7 @@ export default definePath({
           purpose: "An eight-bar form over the band: two bars of A, two of D, one of E, one of D, and two of A. Down, down-up, down, down-up throughout.",
           howTo: [
             "Quarter notes and eighths, 50 BPM up to a pass at 85.",
-            "Follow the form: A, A, D, D, E, D, A, A. Count the bars.",
+            "Follow the form, the order of the chords: A, A, D, D, E, D, A, A. Count the bars.",
             "D to E and E to D are the long changes. The first finger leads them, sliding along the G string: fret 1 for E, fret 2 for D.",
           ],
           coach: "Eight bars with the band. Each strum is timed and counted.",
@@ -902,7 +908,7 @@ export default definePath({
     {
       id: "small-f",
       title: "D minor, and the way to F",
-      goal: "Hold D minor, F major seven and the small F, change between A minor and D minor, and play A minor, F, C, G with the pattern.",
+      goal: "Hold D minor, F major seven and the small F, change between A minor and D minor, and play A minor, F, C, G with the shorter pattern.",
       why: "F is where many beginners stop, because it is the first chord in which one finger holds two strings. Take it in three steps instead. D minor first, which is D with one note changed. Then F major seven, a soft and easy chord that is one move from C. Then lay the first finger flat across the top two strings and F major seven becomes F. This is the small F, on four strings. The full barre chord across six strings can wait: the small one is enough for the songs in this Path and for most others.",
       howTo: [
         "D minor: first finger on the top string at fret 1, second finger on the G string at fret 2, third finger on the B string at fret 3. The D string is open. Top four strings only.",
@@ -911,6 +917,8 @@ export default definePath({
         "Play both F chords from the D string. The two low strings stay quiet.",
       ],
       payoff: "Thirteen chords, the F that stops most beginners, and one of the great four-chord progressions.",
+      difficultyException:
+        "The last Exercise uses the shorter pattern, five strums a bar with a quarter note on beat 4, so that the fingers have a whole beat to reach F. The strum rate is lower on purpose. The demand is the small F, one finger holding two strings, and the changes into and out of it, which the metric does not count.",
       exercises: [
         {
           id: "dm-strings",
@@ -995,14 +1003,14 @@ export default definePath({
         {
           id: "am-f-c-g",
           title: "A minor, F, C, G",
-          purpose: "Four chords, one bar each, with the pattern, over the band: one of the most-used progressions there is, and the reason to learn F.",
+          purpose: "Four chords, one bar each, with the shorter pattern, over the band: one of the most-used progressions there is, and the reason to learn F.",
           howTo: [
-            "Quarter notes and eighths, 50 BPM up to a pass at 80. Down, down-up, up-down-up in every bar.",
+            "Quarter notes and eighths, 50 BPM up to a pass at 80. Down, down-up, up, down in every bar: the shorter pattern, so beat 4 is a long downstroke and the fingers have that whole beat to change.",
             "A minor to F: the first finger stays on the B string and lies flat, and the second and third fingers swap strings, with the third going up to fret 3. F to C: the first finger stands up again and the other two move one string thicker.",
             "If F will not ring yet, play F major seven in its place, with the top string open. Come back to the small F later.",
           ],
           coach: BAND_COACH,
-          tab: song(PATTERN, ["Am", "F", "C", "G"]),
+          tab: song(SHORT_PATTERN, ["Am", "F", "C", "G"]),
           position: 1,
           chords: "Am | F | C | G",
           jam: ROCK("A minor"),
@@ -1023,7 +1031,7 @@ export default definePath({
       howTo: [
         "An accent is a bigger, faster stroke across all the strings. The strokes around it are smaller and lighter, so the difference can be heard.",
         "To stop the strings, lay the side of the strumming hand across all of them, on the beat. The fretting fingers can ease their pressure at the same moment without leaving the strings.",
-        "For a bass note, pick only the lowest string of the chord: the low E string for G and E minor, the A string for C, the D string for D.",
+        "For a bass note, pick only the lowest string of the chord: the low E string for G and E minor, the A string for C and A minor, the D string for D and F. In these chords that lowest note is the root. The root is the note a chord is named after.",
       ],
       payoff: "Strumming that has loud and soft, sound and silence, low and high.",
       exercises: [
@@ -1072,17 +1080,17 @@ export default definePath({
         {
           id: "bass-strum",
           title: "Bass note, then strum",
-          purpose: "On beats 1 and 3 the lowest string of the chord alone, and on beats 2 and 4 a light strum of the top three strings, through G, C, D and G.",
+          purpose: "On beats 1 and 3 the lowest string of the chord alone, and on beats 2 and 4 a light strum of the top three strings, through A minor, F, C and G.",
           howTo: [
             "Quarter notes, 55 BPM up to a pass at 90. Bass, strum, bass, strum.",
-            "The bass notes: low E string fret 3 for G, A string fret 3 for C, the open D string for D. The strum is a short downstroke on the G, B and top strings.",
+            "The bass notes: the open A string for A minor, D string fret 3 for F, A string fret 3 for C, low E string fret 3 for G. The strum is a short downstroke on the G, B and top strings.",
             "Hold the whole chord down throughout, even though you play only part of it at a time.",
           ],
           coach: "Band on. Each bass note and each strum is timed and counted.",
-          tab: song(bassStrum, ["G", "C", "D", "G"]),
+          tab: song(bassStrum, ["Am", "F", "C", "G"]),
           position: 1,
-          chords: "G | C | D | G",
-          jam: ROCK("G"),
+          chords: "Am | F | C | G",
+          jam: ROCK("A minor"),
           harmony: { chordTones: true },
           rungs: ladder(50, 120, 10),
           passAt: 90,
@@ -1155,6 +1163,7 @@ export default definePath({
             "Quarter notes and eighths, 50 BPM up to a pass at 80.",
             "Bars 1 to 8: G, E minor, C, D, twice, down, down-up, down, down-up. Bars 9 to 16: C, G, D, E minor, C, G, D, D, down, down-up, up-down-up.",
             "The change of strum at bar 9 is the moment to think about. Say 'chorus' to yourself in bar 8.",
+            "When the sixteen bars are steady, play the chorus with beats 2 and 4 a little louder, as you did in the Step Accents, stops and bass notes. Keep the verse light so the chorus has somewhere to go.",
           ],
           coach: "Sixteen bars with the band. Each strum is timed and counted.",
           tab: `${VERSE_TAB} | ${CHORUS_TAB}`,

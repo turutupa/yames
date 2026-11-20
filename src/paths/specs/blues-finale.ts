@@ -345,7 +345,7 @@ export const THREE_CHORUSES_IN_E: StepSpec = {
   why: "The solo in A started low, built, peaked and came home. This one has the same parts in another key, and it ends at the top. E gives the idea more room than A did, because here the box sits in two places an octave apart: at the nut, where the open strings do the first finger's job, and at the twelfth fret, where the same shape starts again. The first chorus uses the low one, the second the high one, and the third walks from one to the other. Almost everything in it is something you have played: the box at the nut, box 1 at the twelfth fret, a slide up the top string, a bend at the top of the box. The one new thing is the walk up the top string that joins the two.",
   howTo: [
     "The form in E: four bars of E7, two of A7, two of E7, then B7, A7, E7 and B7.",
-    "Chorus 1 stays at the nut, on the three low strings, and leaves whole bars empty. Second finger on fret 2, third finger on fret 3, and the first finger for the one B flat at fret 1.",
+    "Chorus 1 stays at the nut, on the three low strings, and leaves whole bars empty. Second finger on fret 2, third finger on fret 3, and the first finger for the one B flat at fret 1. This is the box from the Step 'The blues in E, down at the nut'.",
     "Chorus 2 is in box 1 at the twelfth fret: first finger on fret 12, third finger on fret 14, fourth finger on fret 15. It is the box at the nut, twelve frets higher.",
     "Chorus 3 starts at the nut with the phrase that opened chorus 1, walks up the top string in bars 7 and 8, bends twice in the box at the twelfth fret, and ends on the high E.",
     "At the nut an open string rings until something stops it. Rest the side of the picking hand on a string once you have left it.",

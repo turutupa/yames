@@ -64,8 +64,8 @@ const G7 = dom7(5);
 
 const FOUR_CHORDS = [C, AM, F, G].map(upDown).join(" | ");
 const JOINED = `/4 4:10 3:9 2:8 1:8 | 1:8 1:5 2:5 3:5 | 3:5 2:6 1:5 1:8 | 1:7 2:8 3:7 3:4`;
-const TWO_FIVE_ONE = `/8 4:12 3:10 2:10 1:8 1:10 1:8 2:10 3:10 | 3:7 2:6 2:8 1:7 1:10 1:7 2:8 2:6 | 2:5 2:8 1:7 1:8 1:7 2:8 2:5 3:4 | /1 3:5`;
-const SEVENTHS_JOINED = `/8 4:10 3:9 2:8 1:7 1:8 1:7 2:8 3:9 | 3:9 2:8 2:10 1:8 1:12 1:8 2:10 2:8 | 2:10 1:8 1:10 1:8 2:10 3:10 2:10 2:6 | 2:8 1:7 1:10 1:7 2:8 2:6 3:7 3:4`;
+const TWO_FIVE_ONE = `/8 4:12f4 3:10f2 2:10f3 1:8f1 1:10f3 1:8f1 2:10f3 3:10f2 | 3:7f2 2:6f1 2:8f3 1:7f2 1:10f4 1:7f2 2:8f3 2:6f1 | 2:5f1 2:8f4 1:7f3 1:8f4 1:7f3 2:8f4 2:5f2 3:4f1 | /1 3:5f2`;
+const SEVENTHS_JOINED = `/8 4:10f4 3:9f3 2:8f2 1:7f1 1:8f2 1:7f1 2:8f2 3:9f3 | 3:9f2 2:8f1 2:10f3 1:8f1 1:12f4 1:8f1 2:10f3 2:8f1 | 2:10f3 1:8f1 1:10f3 1:8f1 2:10f3 3:10f2 2:10f3 2:6f1 | 2:8f3 1:7f2 1:10f4 1:7f2 2:8f3 2:6f1 3:7f2 3:4f1`;
 const SEVENTHS_CHART = "Cmaj7 | Am7 | Dm7 | G7";
 const AM_TWO = `/8 6:5f1 6:8f4 5:7f3 4:7f3 3:5f1 2:5f1 1:5f1 2:5f1 | 3:5f1 4:7f3 5:7f3 6:8f4 /2 6:5f1`;
 const C_TWO = `/8 6:8f2 5:7f1 5:10f4 4:10f4 3:9f2 2:8f1 1:8f1 2:8f1 | 3:9f2 4:10f4 5:10f4 5:7f1 /2 6:8f2`;
@@ -218,6 +218,8 @@ export default definePath({
           howTo: [
             "Straight eighths, 60 BPM up to a pass at 80. One bar on each chord: C, A minor, C, A minor.",
             "Each bar goes up the four strings, back down to the root on the D string, and adds one more note on the G string. C starts at fret 10 on the D string, A minor at fret 7.",
+            "The band is a drummer and a bassist in place of the click.",
+            "If you get lost, stop, find beat 1 of the next bar and come back in there.",
           ],
           coach: "Band on. Right notes and time after the take.",
           tab: [C, AM, C, AM].map(upDown).join(" | "),
@@ -241,7 +243,7 @@ export default definePath({
       howTo: [
         "Roots on the D string: C is fret 10, A is fret 7, F is fret 3, G is fret 5.",
         "Major chords (C, F, G) use the shape that goes down a fret on each of the next two strings and then stays: 10, 9, 8, 8. The minor chord (A minor) uses 7, 5, 5, 5.",
-        "Let the last note of each bar be short and move the hand in that gap, so the next bar starts on the click.",
+        "Let the last note of each bar be short and move the hand in that gap, so the next bar starts on beat 1.",
       ],
       payoff: "One, six, four, five as four arpeggios, each starting on its root.",
       exercises: [
@@ -317,6 +319,7 @@ export default definePath({
         "Before each change, ask which notes the two chords share. C and A minor share C and E. A minor and F share A and C. F and G share none, so there you move by one fret.",
         "The line here stays between frets 4 and 10 on the top four strings, and inside the four bars it never jumps more than a string.",
         "The last note, B on the G string, is a half step below the C the line starts on, so the ear is led back to the start. The hand has to move from fret 4 up to fret 10 to get there: the only shift in the line.",
+        "Every bar of the written line is a triad shape you know from Triads, played one note at a time. Bar 1, C, is the four-string shape 10, 9, 8, 8. Bar 2, A minor, is shape two, the first finger across fret 5, with the C at fret 8 on the top string above it. Bar 3, F, is shape three at 5, 6, 5 with that same C above it. Bar 4, G, is shape three at 7, 8, 7, and its last note is the B of shape two, at fret 4 on the G string.",
       ],
       payoff: "Four chords played as one line, with no jump from one chord to the next.",
       difficultyException:
@@ -371,6 +374,7 @@ export default definePath({
           howTo: [
             "Quarter notes or any rhythm you like, 60 to 90 BPM, four bars that loop.",
             "Use only the three notes of each chord. C: C, E, G. A minor: A, C, E. F: F, A, C. G: G, B, D. The written line is one answer.",
+            "To find a chord's notes near your hand, think of its three shapes from Triads: one of them is always within two frets.",
             NOT_CHECKED_YET,
           ],
           coach: "Not checked yet. Record it and listen for any place where the line leaps.",
@@ -394,7 +398,7 @@ export default definePath({
       id: "sevenths",
       title: "Add the seventh",
       goal: "Play C major seven, A minor seven, D minor seven and G seven as four-note arpeggios, and a line through D minor seven, G seven and C major seven: two, five, one, the second, fifth and first chords of the key.",
-      why: "A seventh chord is a triad with one more note, the seventh note counted from its root. In the shape you know, the top note was the root again. Lower it and you get the seventh instead: one fret down for a major seven, two frets down for a minor seven or a plain seven. Four notes give a line more to say, and they are the sound of jazz, soul and a great deal of pop.",
+      why: "A seventh chord is a triad with one more note, the seventh note counted from its root. In the shape you know, the top note was the root again. Lower it and you get the seventh instead: one fret down for a major seven, two frets down for a minor seven or a plain seven. You heard this near the end of Triads, when the top note of C stepped down from C to B to B flat. Four notes give a line more to say, and they are the sound of jazz, soul and a great deal of pop.",
       howTo: [
         "C major seven is C, E, G, B: D string 10, G string 9, B string 8, top string 7.",
         "A minor seven is A, C, E, G: D string 7, G string 5, B string 5, top string 3. D minor seven is the same shape from fret 12.",
@@ -451,6 +455,8 @@ export default definePath({
             "Straight eighths, 60 BPM up to a pass at 80. The last bar is one long C.",
             "Bar 1, D minor seven: D string 12, G string 10, B string 10, top string 8, then top string 10 and 8, B string 10, G string 10.",
             "Bar 2, G seven: G string 7, B string 6 and 8, top string 7 and 10, then back: top string 7, B string 8 and 6. Bar 3, C major seven, starts on E, one fret below the F you just played: B string 5 and 8, top string 7 and 8, then top string 7, B string 8 and 5, G string 4. Bar 4: C on the G string, fret 5, held.",
+            "Bar 1 is the D minor seven shape with one note added above it, the D at fret 10 on the top string. Bars 2 and 3 are not the shapes of this Step. They take the four notes of each chord where they lie near the hand: G, B, D and F between frets 6 and 10, then C, E, G and B between frets 4 and 8.",
+            "Fingers: bar 1 is fingered as the D minor seven shape is. For the D on the top string, let the third finger roll from the B string onto the top string at fret 10, then roll it back. For G seven the hand moves down two frets: first finger at fret 6, second at fret 7, third at fret 8, and the little finger reaches fret 10. For C major seven the first finger slides down to fret 5, with the third finger at fret 7 and the little finger at fret 8. After the last G the hand moves down one more fret: the second finger plays the E at fret 5, the first the B at fret 4, and the second the long C.",
           ],
           coach: "Band on. Right notes and time after the take.",
           tab: TWO_FIVE_ONE,
@@ -551,7 +557,7 @@ export default definePath({
         "Roots on the D string: C at fret 10, F at fret 3, G at fret 5.",
         "In a new key the roots move and the two shapes do not.",
       ],
-      payoff: "A twelve-bar chorus made only of chord notes, in time, without getting lost.",
+      payoff: "Twelve bars made only of chord notes, in time, without getting lost.",
       exercises: [
         {
           id: "twelve-bars",
@@ -598,10 +604,11 @@ export default definePath({
         {
           id: "your-chorus",
           title: "Your turn: a chorus of chord notes",
-          purpose: "Twelve bars in C where every note you play belongs to the chord of its bar. Any rhythm, any order, as few notes as you like.",
+          purpose: "Twelve bars in C where every note you play belongs to the chord of its bar. Any rhythm, any order, as few notes as you like. A chorus here is one time through the twelve bars.",
           howTo: [
             "Quarter notes or any rhythm you like, 60 to 90 BPM, twelve bars that loop.",
             "Over C: C, E, G. Over F: F, A, C. Over G: G, B, D. One note held for a whole bar counts. The written line is an example.",
+            "A way to begin: hold the note C through the first eight bars, since C and F both have it. In bar 9 move down one fret to B for G, go back to C for F and for C, and to B again for the last G. Then add one more chord note in each bar.",
             NOT_CHECKED_YET,
           ],
           coach: "Not checked yet. Record it and listen for whether you can hear the chords change in your line alone.",
@@ -642,6 +649,7 @@ export default definePath({
             "Straight eighths, 50 BPM up to a pass at 75.",
             "Bar 1, C major seven: D string 10, G string 9, B string 8, top string 7 and 8 and 7, B string 8, G string 9. Bar 2, A minor seven: G string 9, B string 8 and 10, top string 8 and 12 and 8, B string 10 and 8.",
             "Bar 3, D minor seven: B string 10, top string 8, 10 and 8, B string 10, G string 10, B string 10 and 6. Bar 4, G seven: B string 8, top string 7, 10 and 7, B string 8 and 6, G string 7 and 4.",
+            "Fingers: bar 1 is the C major seven shape, one finger per fret from the first finger at fret 7, and the second finger rolls from the B string onto the top string for the C at fret 8. For A minor seven the hand moves up one fret: first finger at fret 8, second at fret 9, third at fret 10, and the little finger reaches fret 12. D minor seven stays there: the third finger rolls from the B string onto the top string for the D at fret 10, and the second finger takes the F on the G string. For the last F of bar 3 the first finger drops to fret 6, and G seven is played from there: first finger at fret 6, second at fret 7, third at fret 8, and the little finger reaches fret 10. The first finger moves down to fret 4 for the last B.",
           ],
           coach: "Band on. Right notes and time after the take.",
           tab: SEVENTHS_JOINED,
@@ -711,7 +719,7 @@ export default definePath({
       howTo: [
         "Going up, one downward push through the G, B and top strings: the pick comes to rest against each string before it plays it. Coming back, one upward pull.",
         "The top note is played twice, at the end of the push and the start of the pull, and so is the bottom note. Those are the only places the pick changes direction.",
-        "Fretting hand: press each note only while it sounds. A sweep where the fingers stay down is a strum. Where the first finger holds two strings, rock it from one to the other. The side of the picking hand rests lightly on the strings you have just left.",
+        "Fretting hand: press each note only while it sounds. A sweep where the fingers stay down is a strum. Where the first finger holds two strings, roll it from one to the other. The side of the picking hand rests lightly on the strings you have just left.",
         "Triplets are three even notes to a click.",
       ],
       payoff: "A triad in one motion of the pick, clean, at a slow tempo.",
@@ -760,7 +768,7 @@ export default definePath({
           purpose: "C, A minor, F and G around fret 8, a bar each, with a band playing in triplets.",
           howTo: [
             "Triplets, 50 BPM up to a pass at 70. One bar on each chord.",
-            "C is 9, 8, 8. A minor is 9, 10, 8. F is 10, 10, 8. G is 7, 8, 7. The shapes are the nearest ones from Triads.",
+            "C is 9, 8, 8, shape two. A minor is 9, 10, 8, shape three. F is 10, 10, 8, shape one. G is 7, 8, 7, shape three. They are the nearest shapes from Triads.",
           ],
           coach: "Band on. Timed and counted; the pitch is for your ear.",
           tab: SWEEP_FOUR,
@@ -781,13 +789,13 @@ export default definePath({
       id: "sweeps-in-a-song",
       title: "Sweeps in a song, and where to go next",
       goal: "Sweep an eight-bar progression in two parts of the neck, in other keys, and play the two-octave A minor arpeggio in triplets.",
-      why: "This is the end of the route that began with counting a scale on one string. You know what a chord is, where its notes are, which chords belong together, how to move between them, and how to play them as lines. What is left is speed and bigger shapes, and that is a technique with its own Path: Sweep Picking starts exactly here, with the three-string triad you have just swept, and takes it to five and six strings.",
+      why: "This is the end of the route that began with counting a scale on one string. You know what a chord is, where its notes are, which chords belong together, how to move between them, and how to play them as lines. What is left is speed and bigger shapes, and that is a technique with its own Path: Sweep Picking starts exactly here, with the three-string triad you have just swept, and takes it to five and six strings. If speed is not what you are after, you are not missing a Step. The skill of this Path is choosing the nearest chord note, and its 'your turn' Exercises are the place to keep doing it. The same rule works over any song whose chords you know.",
       howTo: [
         "Bars 1 to 4 around fret 5: C is 5, 5, 3. G is 4, 3, 3. A minor is 5, 5, 5. F is 5, 6, 5.",
         "Bars 5 to 8 around fret 8: C is 9, 8, 8. G is 7, 8, 7. A minor is 9, 10, 8. F is 10, 10, 8.",
         "Keep the tempo where every note is separate. Sweep Picking is where it gets faster: it asks for clean hammer-ons and pull-offs and even alternate picking first, and its first Step passes these triads at 100 BPM.",
       ],
-      payoff: "An eight-bar song in sweeps, and a clear next Path.",
+      payoff: "An eight-bar song in sweeps, and two ways on: Sweep Picking for speed, or your own lines over songs you know.",
       exercises: [
         {
           id: "song-sweeps",

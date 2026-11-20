@@ -8,6 +8,10 @@
  * keys, and the Paths after this one, depend on), and take the top three
  * strings into G major and F major so F sharp and B flat are used and not only
  * named. Every id is new, so nobody's progress moves.
+ *
+ * Coherence audit (card #112): `top-strings-keys` now opens the Intermediate
+ * Level, before `thirds`, so scale and key are shown before a scale is played
+ * in thirds, and it holds the Path's first band Exercise.
  */
 import type { ExerciseSpec, StepSpec, VariantBuild } from "../spec";
 import { STANDARD_TUNING } from "../format";
@@ -31,6 +35,10 @@ function named(evenness = 0.75, overBars = 4): Grading {
 
 const SAY_CHECK = "Did you say each note's name out loud as you played it?";
 const EYES_CHECK = "Could you play it once without looking at the neck?";
+
+// Shared with other Paths word for word (coherence audit, S5), so each line is translated once and copied.
+const THE_BAND = "The band is a drummer and a bassist in place of the click.";
+const IF_LOST = "If you get lost, stop, find beat 1 of the next bar and come back in there.";
 
 const C_MAJOR = { scale: ["C", "major"] as [string, string] };
 const ROCK = (key: string) => ({ groove: "rock8", key });
@@ -131,7 +139,7 @@ export const CHORD_ROOTS: StepSpec = {
   id: "chord-roots",
   title: "The root of a chord you know",
   goal: "Find the root of E, A, D, G and C in the open chords you play, and the same root higher up the neck by the two octave shapes.",
-  why: "A chord is named after one of its notes, the root. In the open chords E, A, D, G and C it is the lowest note you strum, on one of the three low strings, and you can name those now. The octave shapes then find the same root higher up, on the strings where the small chord shapes of later Steps sit. E minor, A minor and D minor have the same roots as E, A and D: the letter is the root, and the word after it says what kind of chord is built on it.",
+  why: "A chord is named after one of its notes, the root. In the open chords E, A, D, G and C it is the lowest note you strum, on one of the three low strings, and you can name those now. If you do not play these chords yet, First Chords and Strumming teaches them, and this Step still works as single notes. The octave shapes then find the same root higher up, on the strings where the small chord shapes of later Steps sit. E minor, A minor and D minor have the same roots as E, A and D: the letter is the root, and the word after it says what kind of chord is built on it.",
   howTo: [
     "E, A and D have their roots on open strings: the low E string, the A string and the D string. G is the low E string at fret 3. C is the A string at fret 3.",
     "From a root on the low E or A string, the octave is two strings over and two frets up. From the D or G string it is two strings over and three frets up.",
@@ -252,8 +260,8 @@ const BETWEEN_A = `/4 5:0 5:1f1 5:2f2 5:1f1 | 5:5f3 5:4f2 5:3f1 5:4f2 | 5:5f1 5:
 
 /**
  * Beginner, closing the Level: every natural note is in place by then, and the
- * thirds in D, E, F and A that open the next Level, and the Paths that build on
- * this Level, need these names.
+ * keys of G and F that open the next Level, the thirds in D, E, F and A after
+ * them, and the Paths that build on this Level, need these names.
  */
 export const IN_BETWEEN: StepSpec = {
   id: "in-between",
@@ -262,7 +270,7 @@ export const IN_BETWEEN: StepSpec = {
   why: "Every note in the Steps so far has been a plain letter, and every walk up a string has skipped frets. The skipped frets are notes too. Each one sits between two letters and takes its name from either neighbour: one fret above F is F sharp, and the same fret is one below G, so it is also G flat. Between E and F, and between B and C, there is no fret to skip, so there is no note in between. Chords and scales away from the natural notes need these: the scale of G major has an F sharp in it, and the scale of F major has a B flat.",
   howTo: [
     "Sharp means one fret higher than the letter. Flat means one fret lower. Fret 2 of the low E string is F sharp and G flat: one fret, two names.",
-    "Four come first here: F sharp, B flat, C sharp and E flat. The key of G has one sharp, F sharp, and the key of D adds C sharp. The key of F has one flat, B flat, and the key of B flat adds E flat.",
+    "Four come first here: F sharp, B flat, C sharp and E flat. The next Step, the first of the Intermediate Level, uses the first two: F sharp in G major and B flat in F major. C sharp and E flat are the next two, in D major and B flat major.",
     "Say each name out loud, as before. The app checks the fret you played and cannot hear which of its two names you gave it.",
   ],
   payoff: "You can name every fret of the low E and A strings up to fret 12, and find F sharp, B flat, C sharp and E flat an octave higher by shape.",
@@ -393,30 +401,30 @@ export const IN_BETWEEN: StepSpec = {
   ],
 };
 
-// --- Intermediate, after the thirds: the top three strings in G and in F --------
+// --- Intermediate, the first Step, before the thirds: the top three strings in G and in F ---
 
 const G_POSITION = `/8 2:8f4 1:5f1 1:7f3 1:8f4 1:7f3 1:5f1 2:8f4 2:7f3 | 2:5f1 3:7f3 3:5f1 3:7f3 2:5f1 2:7f3 2:8f4 1:5f1 | 1:7f3 1:8f4 1:7f3 1:5f1 2:8f4 2:7f3 2:5f1 3:7f3 | 3:5f1 3:7f3 2:5f1 2:7f3 /2 2:8f4`;
 const F_POSITION = `/8 2:6f2 2:8f4 1:5f1 1:6f2 1:8f4 1:6f2 1:5f1 2:8f4 | 2:6f2 2:5f1 3:7f3 3:5f1 3:7f3 2:5f1 2:6f2 2:8f4 | 1:5f1 1:6f2 1:8f4 1:6f2 1:5f1 2:8f4 2:6f2 2:5f1 | 3:7f3 3:5f1 3:7f3 2:5f1 /2 2:6f2`;
 const G_TUNE = `/4 2:8f4 /8 3:7f3 2:5f1 /4 2:8f4 /8 2:7f3 2:8f4 | /4 2:5f1 /8 3:7f3 2:5f1 /4 2:8f4 /8 1:5f1 2:8f4 | /4 2:7f3 /8 2:5f1 2:7f3 /4 1:5f1 /8 1:7f3 1:5f1 | /4 2:8f4 /8 1:7f3 1:5f1 /2 2:8f4`;
 
 /**
- * Intermediate, straight after `thirds`: that Step leaves the player on the G,
- * B and top strings and already moves its thirds to keys whose notes have not
- * been named there. The triads Step later asks which note is on top.
+ * Intermediate, straight after `in-between` and before `thirds`: that Step
+ * plays a scale in thirds and moves it to other keys, so scale and key are
+ * shown here first, on the G, B and top strings where the thirds then sit. The
+ * triads Step later asks which note is on top. `g-tune` is the first Exercise
+ * of the Path with a band, so the band is explained there.
  */
 export const TOP_STRINGS_KEYS: StepSpec = {
   id: "top-strings-keys",
   title: "The top three strings in other keys",
   goal: "Name and play the notes of G major and of F major on the G, B and top strings, one string at a time and then across all three in fifth position.",
-  why: "The walks up each string used the natural notes, and those seven are the notes of C major. Change one of them and you are in another key. G major is C major with F sharp in place of F. F major is C major with B flat in place of B. On each of the top three strings that is one fret moved, except that in F major the open B string itself drops out. Knowing which fret moves lets you name what you play in three keys instead of one.",
+  why: "The walks up each string used the natural notes. Played in order from C, those seven are the C major scale. Music that uses them and comes to rest on C is in the key of C, and C is called its key note. Change the right one of the seven and you are in another key. G major is C major with F sharp in place of F. F major is C major with B flat in place of B. On each of the top three strings that is one fret moved, except that in F major the open B string itself drops out. Knowing which fret moves lets you name what you play in three keys instead of one.",
   howTo: [
     "G major: G, A, B, C, D, E, F sharp. Only F has moved, one fret up.",
     "F major: F, G, A, B flat, C, D, E. Only B has moved, one fret down, so the open B string is not in this key.",
     "Say each name as you play it. F sharp and B flat are the two notes that tell these keys apart from C.",
   ],
   payoff: "A tune in G over a band, on three strings you can name in G major and in F major.",
-  difficultyException:
-    "Two of the four lines are one string at a time in quarter notes, slower than the thirds in eighths before them. The demand is the names of two new keys on three strings, which the metric does not count.",
   exercises: [
     {
       id: "g-major-strings",
@@ -524,8 +532,10 @@ export const TOP_STRINGS_KEYS: StepSpec = {
       purpose: "Four bars over G, C, D and G with a band, in the same fifth position. Bar 3 is bar 2 moved up one note of the scale, and that puts F sharp on the first beat of the D chord.",
       howTo: [
         "Quarter notes and straight eighths, 60 BPM up to a pass at 90.",
-        "Each bar starts on a quarter note on the B string: G at fret 8, E at fret 5, F sharp at fret 7, and G at fret 8 again. They are the root of G, the third of C, the third of D and the root of G.",
-        "First finger at fret 5, third finger at fret 7, little finger at fret 8, as in the Exercise before. The only note on the G string is D at fret 7, once in bar 1 and once in bar 2. The last G is held for two clicks.",
+        THE_BAND,
+        IF_LOST,
+        "Each bar starts on a quarter note on the B string: G at fret 8, E at fret 5, F sharp at fret 7, and G at fret 8 again. Each one is a note of the chord of its bar: G in G, E in C, F sharp in D.",
+        "First finger at fret 5, third finger at fret 7, little finger at fret 8, as in the Exercise before. The only note on the G string is D at fret 7, once in bar 1 and once in bar 2. The last G is held for two beats.",
       ],
       coach: "Band on. Right notes and time after the take.",
       tab: G_TUNE,

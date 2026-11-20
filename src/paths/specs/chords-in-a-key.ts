@@ -97,7 +97,7 @@ export default definePath({
   goal: "Know the seven chords of a major key by number, play the progressions a great many songs are made of with small shapes, and move any of them to another key.",
   level: "early-intermediate",
   assumes:
-    "You can play major and minor triads in three shapes on the top strings and change between C, A minor, F and G with the nearest shapes at 90 BPM: the first two Levels of Triads. The shapes on the D, G and B strings are shown as they come. No other theory is assumed. The minutes listed are one pass through the material; the progressions are worth coming back to in every key you play in.",
+    "You can play major and minor triads in three shapes on the top strings and change between C, A minor, F and G with the nearest shapes at 90 BPM: the first two Levels of Triads. The Intermediate Level of Triads also teaches the shapes on the D, G and B strings, and their frets are given again here. What a key is, what a root is and how to count a scale come from the Beginner Level of Triads. No other theory is assumed. The last two Steps use four-string shapes with the root on the A string or the low E string, and every fret is given. The minutes listed are one pass through the material; the progressions are worth coming back to in every key you play in.",
   prerequisites: {
     paths: [{ path: "triads", level: "intermediate" }],
     skills: ["Major and minor triads on the top strings", "Eighth notes with a click at 80 BPM"],
@@ -128,8 +128,10 @@ export default definePath({
           purpose: "The chords on notes five, six, seven and one of the scale, on the D, G and B strings with the root lowest. In Triads you walked up the first four; these are the rest.",
           howTo: [
             "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
-            "These shapes are on the D, G and B strings, which may be new to you: the D string's note is the lowest. G: D string 5, G string 4, B string 3. A minor: 7, 5, 5. B diminished: 9, 7, 6. C: 10, 9, 8. The D string's fret is given first, and its note is the root: G, A, B, C.",
+            "These shapes are on the D, G and B strings, the set from the Intermediate Level of Triads: the D string's note is the lowest. G: D string 5, G string 4, B string 3. A minor: 7, 5, 5. B diminished: 9, 7, 6. C: 10, 9, 8. The D string's fret is given first, and its note is the root: G, A, B, C.",
             "The diminished shape is the widest: fourth finger on fret 9, second on 7, first on 6.",
+            "The band is a drummer and a bassist in place of the click.",
+            "If you get lost, stop, find beat 1 of the next bar and come back in there.",
           ],
           coach: "Band on. Right notes and time after the take.",
           tab: bars(...UPPER_FOUR),
@@ -192,13 +194,13 @@ export default definePath({
       id: "numbers",
       title: "Chords have numbers",
       goal: "Call the chords of a key by number, play the first, fourth and fifth in an eight-bar form, and play the same numbers in other keys.",
-      why: "Musicians number the chords of a key from one to seven, the same way you numbered the notes of the scale. C is one, F is four, G is five. The reason is practical: a song is the same song in any key, and its numbers do not change when its letters do. 'One, four, five' is a great many songs. Written down, the numbers are Roman numerals: I, IV, V. Minor chords are usually written small: ii, iii, vi.",
+      why: "Musicians number the chords of a key from one to seven, the same way you numbered the notes of the scale in Triads. C is one, F is four, G is five. The reason is practical: a song is the same song in any key, and its numbers do not change when its letters do. 'One, four, five' is a great many songs. Written down, the numbers are Roman numerals: I, IV, V. Minor chords are written small: ii, iii, vi. The diminished chord is small with a circle: vii°. In this Path the numbers are said as words.",
       howTo: [
         "In C: one is C, four is F, five is G. They are the three major chords of the key.",
         "Five wants to go home to one. Play G and then C and listen to it arrive.",
-        "In any other key, find one, and four and five are in the same places around it in the shapes you know.",
+        "In another key you play the same three shapes, and the whole hand moves. D is two frets above C, so in D all three are two frets higher.",
       ],
-      payoff: "You hear 'one, four, five' and your hand knows three shapes, in whatever key is called.",
+      payoff: "You hear 'one, four, five' and your hand knows three shapes, in C and wherever you move them.",
       difficultyException:
         "Three chords here against seven in the Step before, so fewer changes and a lower rate. The new demand is thinking in numbers and keeping an eight-bar form, which the metric does not count.",
       exercises: [
@@ -355,10 +357,10 @@ export default definePath({
       why: "A progression is a short run of chord numbers that turns up in song after song. Learn a handful as numbers and you can follow most songs by ear, because you are listening for a few known shapes instead of every chord from scratch. These three, with the ones you have, cover a very large part of popular music.",
       howTo: [
         "Two, five, one (D minor, G, C) is a very strong way home. Jazz uses it constantly, and pop uses it at the ends of lines.",
-        "Six, four, one, five (A minor, F, C, G) is the song from Triads, C, G, A minor, F, which is one, five, six, four, started from its third chord. Starting on the minor chord makes the same four sound darker.",
+        "Six, four, one, five (A minor, F, C, G) is the loop one, five, six, four (C, G, A minor, F) started from its third chord. Starting on the minor chord makes the same four sound darker.",
         "One, three, four, five (C, E minor, F, G) climbs through the scale: its roots are notes one, three, four and five. In these shapes the root is not always the lowest note, so listen for the band's bass rising.",
       ],
-      payoff: "Three more progressions you can name when you hear them.",
+      payoff: "Three more progressions you can name by number and play in C.",
       difficultyException:
         "The same kind of four-bar line as the Step before: the metric moves a few hundredths with which strings each shape happens to use. The new demand is knowing a progression by its numbers.",
       exercises: [
@@ -386,7 +388,7 @@ export default definePath({
         {
           id: "six-four-one-five",
           title: "Six, four, one, five",
-          purpose: "A minor, F, C, G around fret 5. The same four chords as the song in Triads, starting from the minor one.",
+          purpose: "A minor, F, C, G around fret 5. The same four chords and shapes as one, six, four, five in Coming home, in a new order that starts on the minor one.",
           howTo: [
             "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
             "A minor is 5, 5, 5. F is 5, 6, 5. C is 5, 5, 3. G is 4, 3, 3.",
@@ -426,6 +428,83 @@ export default definePath({
       ],
     },
     {
+      id: "two-places",
+      title: "The same progression in two places",
+      goal: "Play one, six, two, five around fret 8 as well as fret 5, both in one eight-bar take, and then with shapes you choose.",
+      why: "A progression you can play in only one part of the neck is a fingering. One you can play in two is something you understand. The second place is also useful: a part played low under a verse can move up for the chorus, and the song lifts with no new chords.",
+      howTo: [
+        "Around fret 8: C is 9, 8, 8. A minor is 9, 10, 8. D minor is 10, 10, 10. G is 7, 8, 7.",
+        "The numbers are the same in both places. Say them in each.",
+        "Look ahead to fret 9 during the last beat of bar 4.",
+      ],
+      payoff: "One progression, two parts of the neck, and the choice between them.",
+      exercises: [
+        {
+          id: "one-six-two-five-high",
+          title: "One, six, two, five around fret 8",
+          purpose: "The turn you know, one shape higher for every chord. D minor is a first finger laid across fret 10.",
+          howTo: [
+            "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
+            "C is 9, 8, 8. A minor is 9, 10, 8. D minor is 10, 10, 10. G is 7, 8, 7.",
+          ],
+          coach: "Band on. Right notes and time after the take.",
+          tab: bars(C_MID, AM_MID, DM_MID, G_MID),
+          position: 7,
+          shifts: true,
+          chords: "C | Am | Dm | G",
+          jam: ROCK("C"),
+          harmony: { chordTones: true },
+          rungs: ladder(60, 120, 10),
+          passAt: 90,
+          ...named(),
+          minutes: 6,
+        },
+        {
+          id: "low-then-high",
+          title: "Low, then high",
+          purpose: "Eight bars: the turn around fret 5, then the same turn around fret 8.",
+          howTo: [
+            "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
+            "Bars 1 to 4: 5, 5, 3, then 5, 5, 5, then 7, 6, 5, then 4, 3, 3. Bars 5 to 8: 9, 8, 8, then 9, 10, 8, then 10, 10, 10, then 7, 8, 7.",
+          ],
+          coach: "Eight bars with the band. Right notes and time after the take.",
+          tab: bars(C_LOW, AM_LOW, DM_LOW, G_LOW, C_MID, AM_MID, DM_MID, G_MID),
+          position: 3,
+          shifts: true,
+          chords: "C | Am | Dm | G | C | Am | Dm | G",
+          jam: ROCK("C"),
+          harmony: { chordTones: true },
+          rungs: ladder(60, 120, 10),
+          passAt: 90,
+          ...named(0.75, 8),
+          minutes: 6,
+        },
+        {
+          id: "your-turn",
+          title: "Your turn: your own shapes",
+          purpose: "One, six, two, five with any shapes you like on any strings, chosen so the top note moves as little as you can make it.",
+          howTo: [
+            "Straight eighths with a quarter note at the end of each bar, or any rhythm you like, 60 to 90 BPM, four bars that loop.",
+            "Say the number of each chord before you play it. The written line is one answer.",
+            NOT_CHECKED_YET,
+          ],
+          coach: "Not checked yet. Record it and listen to the top notes alone.",
+          tab: [C_LOW, AM_LOW, DM_LOW, G_LOW].map(toTop).join(" | "),
+          position: 3,
+          shifts: true,
+          chords: "C | Am | Dm | G",
+          jam: ROCK("C"),
+          rungs: ladder(60, 90, 10),
+          ...YOUR_TURN,
+          selfCheck: [
+            "Could you say the number of each chord before you played it?",
+            "Did the top note stay within two frets at every change?",
+          ],
+          minutes: 4,
+        },
+      ],
+    },
+    {
       id: "other-keys",
       title: "The same numbers, other keys",
       goal: "Play the seven chords of D major, and move one, six, two, five and two, five, one to keys that change from day to day.",
@@ -434,6 +513,7 @@ export default definePath({
         "D is two frets above C, so every chord of D major is two frets above the matching chord of C major: D, E minor, F sharp minor, G, A, B minor, C sharp diminished.",
         "Before you play in a new key, say its one, four and five out loud. To name them, move the C names up by the same number of frets: two frets above C is D, two above F is G, two above G is A.",
         "The shapes and the fingers do not change at all. Only the fret does.",
+        "Before the first Take in a new key, play its five chord and let it ring, then play its one chord, as you did in Coming home. Hear five ask for one in this key too.",
       ],
       payoff: "A progression is something you can play in any key you are asked for.",
       exercises: [
@@ -513,7 +593,7 @@ export default definePath({
       goal: "Play the main chords of A minor, and hear why its fifth chord is so often made major.",
       why: "A minor uses exactly the same seven notes as C major, and so the same seven chords. What changes is which one feels like home: A minor instead of C. Count from there and A minor is one, D minor is four, E minor is five, and F and G are six and seven, C is three and B diminished is two. The numbers start again from the new home: F was four in C major and is six in A minor, the same chord counted from a different one. A minor is called the relative minor of C major. One thing is new. Minor-key songs very often turn the fifth chord, E minor, into E major, because its G sharp pulls back to A much harder. It is the one note from outside the scale that you will meet all the time.",
       howTo: [
-        "A minor key: one is A minor, four is D minor, five is E minor or E major.",
+        "In the key of A minor, one is A minor, four is D minor, and five is E minor or E major (written i, iv, and v or V; the capital V is the major one).",
         "Six and seven, F and G, are the two major chords just below home. A minor, F, G, A minor is the sound of a great deal of rock.",
         "E major is E, G sharp, B. E minor is 4, 5, 3 and E major is 4, 5, 4: only the top string changes, G to G sharp, one fret below A.",
       ],
@@ -583,85 +663,6 @@ export default definePath({
       ],
     },
     MINOR_KEY_E,
-    {
-      id: "two-places",
-      title: "The same progression in two places",
-      goal: "Play one, six, two, five around fret 8 as well as fret 5, both in one eight-bar take, and then with shapes you choose.",
-      why: "A progression you can play in only one part of the neck is a fingering. One you can play in two is something you understand. The second place is also useful: a part played low under a verse can move up for the chorus, and the song lifts with no new chords.",
-      howTo: [
-        "Around fret 8: C is 9, 8, 8. A minor is 9, 10, 8. D minor is 10, 10, 10. G is 7, 8, 7.",
-        "The numbers are the same in both places. Say them in each.",
-        "Look ahead to fret 9 during the last beat of bar 4.",
-      ],
-      payoff: "One progression, two parts of the neck, and the choice between them.",
-      difficultyException:
-        "A new Level that starts by replaying a known progression in a second place, and ends on a self-checked Exercise. The demand is the second place and the choice between the two.",
-      exercises: [
-        {
-          id: "one-six-two-five-high",
-          title: "One, six, two, five around fret 8",
-          purpose: "The turn you know, one shape higher for every chord. D minor is a first finger laid across fret 10.",
-          howTo: [
-            "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
-            "C is 9, 8, 8. A minor is 9, 10, 8. D minor is 10, 10, 10. G is 7, 8, 7.",
-          ],
-          coach: "Band on. Right notes and time after the take.",
-          tab: bars(C_MID, AM_MID, DM_MID, G_MID),
-          position: 7,
-          shifts: true,
-          chords: "C | Am | Dm | G",
-          jam: ROCK("C"),
-          harmony: { chordTones: true },
-          rungs: ladder(60, 120, 10),
-          passAt: 90,
-          ...named(),
-          minutes: 6,
-        },
-        {
-          id: "low-then-high",
-          title: "Low, then high",
-          purpose: "Eight bars: the turn around fret 5, then the same turn around fret 8.",
-          howTo: [
-            "Straight eighths, 60 BPM up to a pass at 90. One bar on each chord.",
-            "Bars 1 to 4: 5, 5, 3, then 5, 5, 5, then 7, 6, 5, then 4, 3, 3. Bars 5 to 8: 9, 8, 8, then 9, 10, 8, then 10, 10, 10, then 7, 8, 7.",
-          ],
-          coach: "Eight bars with the band. Right notes and time after the take.",
-          tab: bars(C_LOW, AM_LOW, DM_LOW, G_LOW, C_MID, AM_MID, DM_MID, G_MID),
-          position: 3,
-          shifts: true,
-          chords: "C | Am | Dm | G | C | Am | Dm | G",
-          jam: ROCK("C"),
-          harmony: { chordTones: true },
-          rungs: ladder(60, 120, 10),
-          passAt: 90,
-          ...named(0.75, 8),
-          minutes: 6,
-        },
-        {
-          id: "your-turn",
-          title: "Your turn: your own shapes",
-          purpose: "One, six, two, five with any shapes you like on any strings, chosen so the top note moves as little as you can make it.",
-          howTo: [
-            "Straight eighths with a quarter note at the end of each bar, or any rhythm you like, 60 to 90 BPM, four bars that loop.",
-            "Say the number of each chord before you play it. The written line is one answer.",
-            NOT_CHECKED_YET,
-          ],
-          coach: "Not checked yet. Record it and listen to the top notes alone.",
-          tab: [C_LOW, AM_LOW, DM_LOW, G_LOW].map(toTop).join(" | "),
-          position: 3,
-          shifts: true,
-          chords: "C | Am | Dm | G",
-          jam: ROCK("C"),
-          rungs: ladder(60, 90, 10),
-          ...YOUR_TURN,
-          selfCheck: [
-            "Could you say the number of each chord before you played it?",
-            "Did the top note stay within two frets at every change?",
-          ],
-          minutes: 4,
-        },
-      ],
-    },
     {
       id: "twelve-bar",
       title: "Twelve bars with three chords",
@@ -831,7 +832,7 @@ export default definePath({
       summary: "A triad on every note of the scale, the pattern of major and minor, chords called by number, one, four and five in C and moved to another key, the three minor chords as partners of the major ones, lines that stop on five against lines that come home to one, and one, four, five and six in the key of F.",
       startHereIf: [
         "You can change between C, A minor, F and G with triads at 80 BPM.",
-        "You know some chords and could not say which of them belong to 1 key.",
+        "You can play small triads on the top strings and could not say which chords belong to 1 key.",
         "You don't yet know what 'one, four, five' means.",
       ],
       steps: ["seven-chords", "numbers", "one-four-five-again", "the-minors", "coming-home", "numbers-in-f"],
@@ -862,13 +863,13 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: progressions, keys, and the minor key",
-      summary: "Two, five, one and two more named progressions, the seven chords of D, progressions in keys that change, the keys of G and A in full, one, five, six, four in five keys, and the main chords of a minor key in A minor and in E minor.",
+      summary: "Two, five, one and two more named progressions, one progression in two parts of the neck, the seven chords of D, progressions in keys that change, the keys of G and A in full, one, five, six, four in five keys, and the main chords of a minor key in A minor and in E minor.",
       startHereIf: [
         "You can name the 7 chords of C major and say which are minor.",
         "You can play one, six, two, five in C with triads at 90 BPM.",
         "You can't yet move a progression to another key without working out every chord.",
       ],
-      steps: ["progressions", "other-keys", "key-of-g", "key-of-a", "four-chord-songs", "minor-key", "minor-key-e"],
+      steps: ["progressions", "two-places", "other-keys", "key-of-g", "key-of-a", "four-chord-songs", "minor-key", "minor-key-e"],
       warmups: [
         {
           id: "one-six-two-five-warm",
@@ -896,13 +897,13 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: forms, borrowed chords, and sevenths",
-      summary: "One progression in two parts of the neck, the twelve-bar form in more than one key, a verse and a chorus built from four chords, a sixteen-bar form with a bridge, three chords from outside the key, and the seventh chords of the key in the progressions you know.",
+      summary: "The twelve-bar form in more than one key, a verse and a chorus built from four chords, a sixteen-bar form with a bridge, three chords from outside the key, and the seventh chords of the key in the progressions you know.",
       startHereIf: [
         "You can play two, five, one and one, six, two, five in 3 keys.",
         "You know the main chords of a minor key.",
-        "You lose your place in forms longer than 4 bars, or you only know each progression in 1 part of the neck.",
+        "You lose your place in forms longer than 4 bars.",
       ],
-      steps: ["two-places", "twelve-bar", "verse-and-chorus", "sixteen-bars", "borrowed", "sevenths", "sevenths-in-songs"],
+      steps: ["twelve-bar", "verse-and-chorus", "sixteen-bars", "borrowed", "sevenths", "sevenths-in-songs"],
       warmups: [
         {
           id: "two-five-one-warm",

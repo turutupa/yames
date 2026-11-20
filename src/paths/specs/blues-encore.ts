@@ -2,12 +2,14 @@
  * Blues and Pentatonics: the second round of consolidation Steps (2026-11-19).
  * A draft, like the rest of the Path: no teacher or guitarist has reviewed it.
  *
- * Five Steps that finish the list in `plans/paths/NEW_PATHS.md` ("Blues and
- * Pentatonics, extended"): the form in E at the nut with its turnarounds, a
- * faster shuffle, box 5 and a line into box 4, a solo over three choruses, and
- * the slow blues in a second key. Nothing here is a new idea. Each Step takes
- * something the Path has taught to another key, position, tempo or length.
- * Their ids are new, so nobody's progress moves.
+ * Four Steps from the list in `plans/paths/NEW_PATHS.md` ("Blues and
+ * Pentatonics, extended"): the form in E at the nut with its turnarounds,
+ * box 5 and a line into box 4, a solo over three choruses, and the slow blues
+ * in a second key. Nothing here is a new idea. Each Step takes something the
+ * Path has taught to another key, position or length. The fifth, `fast-shuffle`
+ * ("A faster shuffle": jump-boogie, jump-riffs, jump-lick), was cut in the
+ * coherence audit (BP-F6): tempo is the player's to change, and its one piece
+ * of teaching now sits in `twelve-bar.walking`.
  *
  * Helpers are copied from `blues-pentatonics.ts` and `blues-more.ts`, never
  * imported from the Path file: that would be a circular import.
@@ -58,14 +60,6 @@ const YOUR_TURN = { grade: "selfChecked", example: true } as const;
 const NOT_CHECKED_YET =
   "Your turn, and not checked yet: the app can't judge notes you choose, so you tick it off yourself.";
 
-function sh(notes: string): string {
-  return notes
-    .trim()
-    .split(/\s+/)
-    .map((note, index) => `${index % 2 === 0 ? "/4t" : "/8t"} ${note}`)
-    .join(" ");
-}
-
 // ---------------------------------------------------------------------------
 // The blues in E, at the nut.
 // ---------------------------------------------------------------------------
@@ -87,25 +81,6 @@ const TURN_LOW = "/8 6:0 6:0 6:4f4 6:4f4 5:0 5:0 5:1f1 5:1f1";
 const TURN_END = "/4 5:2f2 r 4:1f1 5:2f2";
 
 const NUT_CHORUS = [NUT_E, NUT_E, NUT_E, NUT_E, NUT_A, NUT_A, NUT_E, NUT_E, NUT_B, NUT_A, TURN_LOW, TURN_END].join(" | ");
-
-// ---------------------------------------------------------------------------
-// A faster shuffle: lines the Path has already taught.
-// ---------------------------------------------------------------------------
-
-const walkA = sh("6:5 6:9 5:7 5:9 5:10 5:9 5:7 6:9");
-const walkD = sh("5:5 5:9 4:7 4:9 4:10 4:9 4:7 5:9");
-const walkE = sh("5:7 5:11 4:9 4:11 4:12 4:11 4:9 5:11");
-const BOOGIE = [walkA, walkA, walkA, walkA, walkD, walkD, walkA, walkA, walkE, walkD, walkA, walkE].join(" | ");
-
-// The Beginner Level's straight-eighth riffs, here shuffled.
-const RIFF_A = "/8 6:5 6:5 6:8 6:5 5:5 6:5 5:7 5:5";
-const RIFF_D = "/8 5:5 5:5 5:7 5:5 4:5 5:5 4:7 4:5";
-const RIFF_E = "/8 5:7 5:7 4:5 5:7 4:7 5:7 4:5 5:7";
-const RIFF_END = "/8 5:7 4:5 4:7 4:5 /2 5:7";
-const RIFF_CHORUS = [RIFF_A, RIFF_A, RIFF_A, RIFF_A, RIFF_D, RIFF_D, RIFF_A, RIFF_A, RIFF_E, RIFF_D, RIFF_A, RIFF_END].join(" | ");
-
-// The first four bars of the chorus that lands: two phrases to C#, with A between.
-const LICK_TO_THIRD = `/8 4:7 3:5 3:7 3:5 /2 3:6 | /2 4:7 /2 r | /8 2:5 2:8 2:5 3:7 /2 3:6 | /4 4:7 4:5 /2 4:7`;
 
 // ---------------------------------------------------------------------------
 // Box 5, and the way into box 4.
@@ -321,84 +296,6 @@ export const OPEN_E_BLUES: StepSpec = {
   ],
 };
 
-/** Intermediate: the lines of the form at a quicker tempo. */
-export const FAST_SHUFFLE: StepSpec = {
-  id: "fast-shuffle",
-  title: "A faster shuffle",
-  goal: "Play the boogie line, a chorus of riffs and a lick to the third over a quicker shuffle, with a lighter hand.",
-  why: "Not every blues sits at a medium tempo. The jump feel is the same shuffle played quicker, and it asks for nothing new from the fretting hand: every line here is one you have played. What changes is the picking hand and the ear. A stroke that was fine at 80 BPM is too big at 110, and as the tempo climbs players let the long-short of the shuffle even out a little. Meeting a quick tempo on notes you already know means the tempo is the only new thing.",
-  howTo: [
-    "Pick lighter and smaller. The pick should only just clear the string: a wide stroke that worked at 80 BPM arrives late at 110.",
-    "Keep the fretting fingers close to the strings and press only as hard as the note needs.",
-    "The band keeps its triplet at every tempo, so stay with the hi-hat. The timing bar is the looser shuffle one: an eighth that has evened out a little is not marked down.",
-    "Start each ladder where it starts. The slow rungs are where the small stroke is learned.",
-  ],
-  payoff: "The twelve bars you know at 110 BPM, with a hand that is doing less.",
-  exercises: [
-    {
-      id: "jump-boogie",
-      title: "The boogie line, quicker",
-      purpose: "The walking line from the twelve-bar Step, all twelve bars, at a tempo where the hand has to stay small. The notes are the ones you know.",
-      howTo: [
-        "Shuffle eighths, all twelve bars, 80 BPM up to a pass at 110.",
-        "Root, third, fifth, sixth, flat seven and back down, on each bar's chord: from fret 5 on the low E string for A7, fret 5 on the A string for D7, fret 7 on the A string for E7.",
-        "Let the hand move with each chord, as before, and look at the next root during the last two notes of the bar.",
-      ],
-      coach: "A line you know, with the band at a new tempo. Notes and the shuffle after the take.",
-      tab: BOOGIE,
-      position: 5,
-      shifts: true,
-      chords: TWELVE,
-      jam: TEXAS,
-      rungs: ladder(80, 130, 10),
-      passAt: 110,
-      ...lick("shuffle"),
-      minutes: 6,
-    },
-    {
-      id: "jump-riffs",
-      title: "A chorus of riffs, shuffled",
-      purpose: "The twelve bars of riffs from the Beginner Level, which were played over a straight band. Here the same notes shuffle, and quicker: a riff from each chord's root, all inside box 1.",
-      howTo: [
-        "Shuffle eighths, twelve bars, 80 BPM up to a pass at 110.",
-        "Over A7: A, A, C, A on the low E string (frets 5, 5, 8, 5), then D on the A string, the low A again, and E and D on the A string (frets 7 and 5). Over D7 the riff starts on D (A string, fret 5): D, D, E, D, then G on the D string, D, and A and G on the D string. Over E7 it starts on E (A string, fret 7): E, E, G, E, A, E, G, E.",
-        "Bar 12 is the ending: E, G, A, G, and E held for two beats.",
-        "Rest the side of the picking hand lightly near the bridge so the low strings stay short and tight.",
-      ],
-      coach: "Twelve bars of riffs at speed. Notes and the shuffle after the take.",
-      tab: swing(RIFF_CHORUS),
-      position: 5,
-      chords: TWELVE,
-      jam: TEXAS,
-      harmony: { scaleOverChords: ["A", "minorPentatonic"] },
-      rungs: ladder(80, 130, 10),
-      passAt: 110,
-      ...lick("shuffle", 8),
-      minutes: 6,
-    },
-    {
-      id: "jump-lick",
-      title: "A lick to the third, at speed",
-      purpose: "Four bars over A7 from the chorus that lands: two short phrases that stop on C#, with A between them. At this tempo the stop matters as much as the run.",
-      howTo: [
-        "Shuffle eighths, quarter notes and half notes, 80 BPM up to a pass at 110.",
-        "Bar 1: A on the D string, then C, D, C on the G string and C# held (G string, fret 6). Bar 2: A held, then two beats of rest. Bar 3: E, G, E on the B string, D on the G string, and C# held again. Bar 4: A and G on the D string as quarter notes, then A held.",
-        "Hold each C# for its full two beats. At a quick tempo it is tempting to leave early.",
-      ],
-      coach: "Short phrases and long landings over a quick band. Notes and the shuffle after the take.",
-      tab: swing(LICK_TO_THIRD),
-      position: 5,
-      chords: VAMP_A,
-      jam: TEXAS,
-      harmony: { scaleOverChords: ["A", "minorPentatonic"], allowed: ["C#"] },
-      rungs: ladder(80, 130, 10),
-      passAt: 110,
-      ...lick("shuffle"),
-      minutes: 5,
-    },
-  ],
-};
-
 /** Advanced, after boxes 3 and 4: the last shape, and a line into box 4. */
 export const BOX_FIVE_STEP: StepSpec = {
   id: "box-five",
@@ -411,7 +308,7 @@ export const BOX_FIVE_STEP: StepSpec = {
     "The door below is a slide on the G string from A at fret 2 up to C at fret 5, with the first finger. It puts your hand in box 1.",
     "The way into box 4 is the slide you know from D to E on the top string, frets 10 to 12. Make it with the first finger, not the third, and the hand arrives in box 4.",
   ],
-  payoff: "All five boxes, and one line that runs from the second fret to the fifteenth.",
+  payoff: "All five boxes, and one line that runs from the second fret to the fifteenth. Know the Neck moves all five boxes to a second key.",
   exercises: [
     {
       id: "fifth-shape",
@@ -497,7 +394,7 @@ export const BOX_FIVE_STEP: StepSpec = {
   ],
 };
 
-/** Advanced, before the slow blues: three choruses that make one solo. */
+/** Advanced, after box 5: three choruses that make one solo. It closes the work on the neck. */
 export const THREE_CHORUSES: StepSpec = {
   id: "three-choruses",
   title: "A three-chorus solo",
@@ -510,6 +407,8 @@ export const THREE_CHORUSES: StepSpec = {
     "Learn them one at a time. When you play all three, let the low chorus also be the quiet one and the high chorus the loud one.",
   ],
   payoff: "Thirty-six bars that start low, build, peak and come home: a solo with a shape.",
+  difficultyException:
+    "Empty bars and held notes lower the note rate under the box 5 Step before it, whose lines run in eighth notes from the second fret to the fifteenth. The new demand is length and shape: three choruses that differ, thirty-six bars without losing the form, and a bend at fret 15, which the rate does not count.",
   exercises: [
     {
       id: "chorus-low",

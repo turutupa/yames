@@ -6,7 +6,7 @@
   "category": "foundations",
   "goal": "Play quarters, eighths, triplets and sixteenths, with rests and off-beats, in time with a click and then with a band.",
   "level": "beginner",
-  "assumes": "You can hold a pick and play a single note on an open string and at a fret. You don't need to have used a click before. The minutes listed are one pass through the material; expect to come back to each Step for days.",
+  "assumes": "You can hold a pick and play a single note on an open string and at a fret. If you have never played at all, do the Beginner Level of First Chords and Strumming first, or alongside this one. You don't need to have used a click before. The minutes listed are one pass through the material; expect to come back to each Step for days.",
   "prerequisites": {
     "paths": [],
     "skills": ["One clean note at a time", "Holding a pick"]
@@ -16,7 +16,7 @@
     "status": "draft",
     "history": []
   },
-  "orderRationale": "The beat first, then two notes to a beat, then silence, because a rest is harder to place than a note. Off-beats come before sixteenths: they use the same eighth-note count, and a player who can't feel the 'and' will not feel the 'e' or the 'a'. Triplets follow sixteenths so the two ways of dividing a beat can be compared. The Advanced Level mixes them, and the band comes last because a band hides a loose rhythm that a click exposes.",
+  "orderRationale": "The beat first, then two notes to a beat, then silence, because a rest is harder to place than a note. Off-beats come before sixteenths: they use the same eighth-note count, and a player who can't feel the 'and' will not feel the 'e' or the 'a'. Triplets follow sixteenths so the two ways of dividing a beat can be compared. The Advanced Level mixes them. One riff at the end of the Beginner Level is played with a band, and the band has a Step of its own last, because a band hides a loose rhythm that a click exposes.",
   "gradingLimits": "The app times each note you play against where it is written and counts the notes it heard, and in most Exercises it checks after the take that the notes were the written ones. Where a note is written to ring across a bar line, and where two strings are played at once, it times and counts the strokes and does not check which notes they were. It does not grade silence itself: a note played in a rest counts as an extra note, and a string left ringing through a rest is yours to hear. Counting out loud and tapping your foot are taught here and not checked. Your setup adds a small delay between playing and the app hearing it, which matters little at these tempos. None of this has been tried on a real guitar yet.",
   "estimatedMinutes": 247,
   "steps": [
@@ -27,6 +27,10 @@
       "goal": "Play one note on every click, and hold a note for two clicks or four, without drifting.",
       "why": "Everything in music hangs on the beat. Playing exactly with a click feels strange at first: when you are right on it, the click seems to disappear behind your note. That feeling is the thing to learn, and it is easiest to find with one slow note at a time.",
       "howTo": [
+        "The words this Path uses. The strings, from thickest to thinnest: low E, A, D, G, B and the top string. Fret 1 is the first space next to the nut, at the head end of the neck. Fingers are numbered from the index finger: first, second, third, and the little finger is the fourth.",
+        "A click is the tick of the metronome. Each tick is a beat, four beats make a bar, and BPM is how many beats go by in a minute. A whole note lasts a whole bar, a half note two beats, a quarter note one beat. The pass tempo is the speed at which an Exercise counts as done.",
+        "One play through an Exercise is a Take. Each Exercise has a ladder of tempos called rungs: between Takes, Slower and Faster move one rung along it, and the pass tempo is the rung at which the Exercise counts as done. Some Exercises change key or string from Take to Take.",
+        "On the tab each line is a string: the top line is the top string and the bottom line is the low E string. Each number is the fret to press. 0 is an open string, one played with no finger on it.",
         "Count '1, 2, 3, 4' out loud with the click before you play, and keep counting while you play.",
         "Every note is a downstroke. Let the pick fall through the string and rest against the next one.",
         "A half note lasts two clicks and a whole note four. Let it ring for its full length and count through it."
@@ -304,7 +308,7 @@
           "purpose": "A half note, then two quarters, and a whole note to end. Holding a note for exactly two clicks is harder than playing two notes.",
           "howTo": [
             "Count '1, 2' through each half note and play the quarters on 3 and 4. The last bar is one note held for all four clicks.",
-            "The fretted notes are at fret 3 on the low E string and fret 2 on the other strings: third finger for fret 3, second finger for fret 2."
+            "On the low E string the fretted note is at fret 3. On the A string it is at fret 2. Third finger for fret 3, second finger for fret 2."
           ],
           "coachLine": "I time when each note starts. How long you let it ring is for your ear and your count.",
           "grading": "graded",
@@ -464,7 +468,8 @@
                 },
                 "pool": "all",
                 "howTo": [
-                  "Count '1, 2' through each half note and play the quarters on 3 and 4. The last bar is one note held for all four clicks."
+                  "Count '1, 2' through each half note and play the quarters on 3 and 4. The last bar is one note held for all four clicks.",
+                  "On the A string the fretted note is at fret 2. On the D string it is at fret 2."
                 ],
                 "tab": "/2 5:0 /4 5:2 5:0 | /2 4:0 /4 4:2 4:0 | /2 5:0 /4 5:2 4:0 | /1 4:2",
                 "position": {
@@ -512,7 +517,8 @@
                 },
                 "pool": "all",
                 "howTo": [
-                  "Count '1, 2' through each half note and play the quarters on 3 and 4. The last bar is one note held for all four clicks."
+                  "Count '1, 2' through each half note and play the quarters on 3 and 4. The last bar is one note held for all four clicks.",
+                  "On the D string the fretted note is at fret 2. On the G string it is at fret 2."
                 ],
                 "tab": "/2 4:0 /4 4:2 4:0 | /2 3:0 /4 3:2 3:0 | /2 4:0 /4 4:2 3:0 | /1 3:2",
                 "position": {
@@ -558,7 +564,7 @@
         {
           "id": "on-the-beat.quarter-riff",
           "title": "A riff in quarter notes",
-          "purpose": "E minor pentatonic on two strings, a note on every click for three bars and two half notes to end. Your first riff with a click.",
+          "purpose": "E minor pentatonic is a scale of five notes that sound good together, and a riff is a short phrase that repeats. This riff plays four of the five on two strings, a note on every click for three bars and two half notes to end. Your first riff with a click.",
           "howTo": [
             "Open string, fretted note, open string, fretted note. Keep the fretting fingers close to the strings so they are ready.",
             "All downstrokes. If a note is late, it is nearly always the fretting finger arriving late, not the pick."
@@ -834,9 +840,9 @@
         "Make the upstroke as loud as the downstroke. It is usually quieter because the pick catches less string.",
         "When the rhythm goes back to quarter notes, the hand keeps swinging and simply misses the string on the way up."
       ],
-      "payoff": "A riff in eighths that drives, and a tune at the fifth fret that mixes long and short notes.",
+      "payoff": "A riff in eighths that drives, and long, short-short, the commonest rhythm in rock.",
       "prerequisites": ["on-the-beat"],
-      "difficulty": 2.24,
+      "difficulty": 2.27,
       "exercises": [
         {
           "id": "eighths.gear-one",
@@ -1623,115 +1629,6 @@
               }
             ]
           }
-        },
-        {
-          "id": "eighths.fifth-tune",
-          "title": "A tune at the fifth fret",
-          "purpose": "The same rhythms on fretted notes: a short melody in the A minor pentatonic box, eighths and quarters, ending on a long C.",
-          "howTo": [
-            "First finger at fret 5, third finger at fret 7, little finger at fret 8 on the B string.",
-            "Count it first without the guitar: '1 and 2, 3 and 4', then '1 and 2 and 3' and hold. Then play what you counted."
-          ],
-          "coachLine": "After the take I'll say how even it was and whether the notes were the written ones.",
-          "grading": "graded",
-          "feedback": "afterTake",
-          "meter": {
-            "numerator": 4,
-            "denominator": 4
-          },
-          "bars": 2,
-          "loops": true,
-          "position": {
-            "fret": 5,
-            "shifts": "none"
-          },
-          "pickPlan": "alternate",
-          "crossing": "both",
-          "notesRole": "target",
-          "notes": [
-            {"string":3,"fret":5,"midi":60,"tick":0,"dur":480,"tech":[],"pick":"d"},
-            {"string":3,"fret":7,"midi":62,"tick":480,"dur":480,"tech":[],"pick":"u"},
-            {"string":2,"fret":5,"midi":64,"tick":960,"dur":960,"tech":[],"pick":"d"},
-            {"string":2,"fret":8,"midi":67,"tick":1920,"dur":480,"tech":[],"pick":"d"},
-            {"string":2,"fret":5,"midi":64,"tick":2400,"dur":480,"tech":[],"pick":"u"},
-            {"string":3,"fret":7,"midi":62,"tick":2880,"dur":960,"tech":[],"pick":"d"},
-            {"string":3,"fret":5,"midi":60,"tick":3840,"dur":480,"tech":[],"pick":"d"},
-            {"string":3,"fret":7,"midi":62,"tick":4320,"dur":480,"tech":[],"pick":"u"},
-            {"string":2,"fret":5,"midi":64,"tick":4800,"dur":480,"tech":[],"pick":"d"},
-            {"string":3,"fret":7,"midi":62,"tick":5280,"dur":480,"tech":[],"pick":"u"},
-            {"string":3,"fret":5,"midi":60,"tick":5760,"dur":1920,"tech":[],"pick":"d"}
-          ],
-          "rests": [],
-          "tempo": {
-            "rungs": [
-              {"bpm":50,"grading":"graded"},
-              {"bpm":60,"grading":"graded"},
-              {"bpm":70,"grading":"graded"},
-              {"bpm":80,"grading":"graded"},
-              {"bpm":95,"grading":"graded"},
-              {"bpm":105,"grading":"graded"},
-              {"bpm":120,"grading":"graded"}
-            ],
-            "passAtBpm": 80
-          },
-          "passBars": [
-            {
-              "metric": "timingEvenness",
-              "min": 0.85,
-              "overBars": 4
-            },
-            {
-              "metric": "notesHeard",
-              "min": 0.95,
-              "overBars": 4
-            },
-            {
-              "metric": "extraNotes",
-              "max": 2,
-              "overBars": 4
-            },
-            {
-              "metric": "noteIdentity",
-              "min": 0.9,
-              "overBars": 4
-            }
-          ],
-          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo", "noteIdentity"],
-          "notGraded": [
-            "pickDirection",
-            "muting",
-            "posture",
-            "tension",
-            "handAttribution",
-            "fingering",
-            "tone",
-            "feel"
-          ],
-          "detection": {
-            "flags": [],
-            "notes": []
-          },
-          "backing": {
-            "kind": "click",
-            "subdivision": 1
-          },
-          "estimatedMinutes": 5,
-          "tab": "/8 3:5 3:7 /4 2:5 /8 2:8 2:5 /4 3:7 | /8 3:5 3:7 2:5 3:7 /2 3:5",
-          "subdivision": "eighths",
-          "computed": {
-            "noteCount": 11,
-            "minGapMsAtTop": 250,
-            "handShifts": 0,
-            "maxPlayableBpm": 224,
-            "difficulty": 2.1
-          },
-          "harmony": {
-            "kind": "scale",
-            "root": "A",
-            "scale": "minorPentatonic",
-            "spelled": ["A", "C", "D", "E", "G"],
-            "cover": false
-          }
         }
       ]
     },
@@ -2033,7 +1930,7 @@
           "title": "Run and stop",
           "purpose": "Four eighths, a quarter note, and a beat of silence. The stop on beat 4 is what makes it a riff.",
           "howTo": [
-            "Count '1 and 2 and 3, (4)'. Stop the string on 4 and come back in on the next 1.",
+            "Count '1 and 2 and 3, (4)'. A number in brackets is a beat you count and do not play. Stop the string on 4 and come back in on the next 1.",
             "Don't speed up into the stop. The four eighths are the same speed as always."
           ],
           "coachLine": "I'll say how even it was and check the notes after the take. The silence on beat 4 is yours to keep clean.",
@@ -2808,16 +2705,18 @@
       "id": "other-strings",
       "order": 4,
       "title": "The same rhythms on other strings",
-      "goal": "Play quarters, eighths and rests on the D and G strings and on the G and B strings, and in one riff that crosses three strings, as steadily as on the low strings.",
+      "goal": "Play quarters, eighths and rests on the D and G strings and on the G and B strings, then a tune at the fifth fret and one riff that crosses three strings with a band, as steadily as on the low strings.",
       "why": "Nearly everything so far has been written on the two lowest strings. The rhythms do not belong to those strings: the count, the foot and the swing of the picking hand are the same anywhere on the guitar. What changes is the feel under the pick. The higher strings are thinner and give way more easily, so it is easy to hit them too hard and to rush. Nothing in the rhythm is new here, on purpose.",
       "howTo": [
         "The same five notes carry on across the strings. On the D and G strings the fretted note is at fret 2, under the second finger. On the B and top E strings it is at fret 3, under the third finger.",
         "Count out loud before you play, as in the Steps before: '1, 2, 3, 4' for quarter notes and '1 and 2 and' for eighths. Down on the beat, up on the 'and'.",
-        "Use a lighter stroke than on the low E string, keep the foot tapping, and count through every rest."
+        "Use a lighter stroke than on the low E string, keep the foot tapping, and count through every rest.",
+        "For the tune at the fifth fret the hand moves up the neck. That Exercise names its own frets and fingers.",
+        "The last Exercise is played with a band. Listen to the bass drum and the snare, not to your own guitar."
       ],
-      "payoff": "A four-bar riff across the D, G and B strings with quarters, eighths and a rest in it, as steady as the riffs on the low strings.",
+      "payoff": "A tune at the fifth fret, and a four-bar riff across the D, G and B strings with quarters, eighths and a rest in it, played with a band for the first time.",
       "prerequisites": ["rests"],
-      "difficulty": 2.07,
+      "difficulty": 2.1,
       "exercises": [
         {
           "id": "other-strings.d-and-g",
@@ -3524,16 +3423,127 @@
           }
         },
         {
+          "id": "eighths.fifth-tune",
+          "title": "A tune at the fifth fret",
+          "purpose": "The same rhythms higher up the neck: a short melody on the G and B strings with the hand at the fifth fret, eighths and quarters, ending on a long note. These four notes come back later in the Path.",
+          "howTo": [
+            "On the G string, first finger at fret 5 and third finger at fret 7. On the B string, first finger at fret 5 and little finger at fret 8. Find the notes slowly without the click first.",
+            "Count it first without the guitar: '1 and 2, 3 and 4', then '1 and 2 and 3' and hold. Then play what you counted."
+          ],
+          "coachLine": "After the take I'll say how even it was and whether the notes were the written ones.",
+          "grading": "graded",
+          "feedback": "afterTake",
+          "meter": {
+            "numerator": 4,
+            "denominator": 4
+          },
+          "bars": 2,
+          "loops": true,
+          "position": {
+            "fret": 5,
+            "shifts": "none"
+          },
+          "pickPlan": "alternate",
+          "crossing": "both",
+          "notesRole": "target",
+          "notes": [
+            {"string":3,"fret":5,"midi":60,"tick":0,"dur":480,"tech":[],"pick":"d"},
+            {"string":3,"fret":7,"midi":62,"tick":480,"dur":480,"tech":[],"pick":"u"},
+            {"string":2,"fret":5,"midi":64,"tick":960,"dur":960,"tech":[],"pick":"d"},
+            {"string":2,"fret":8,"midi":67,"tick":1920,"dur":480,"tech":[],"pick":"d"},
+            {"string":2,"fret":5,"midi":64,"tick":2400,"dur":480,"tech":[],"pick":"u"},
+            {"string":3,"fret":7,"midi":62,"tick":2880,"dur":960,"tech":[],"pick":"d"},
+            {"string":3,"fret":5,"midi":60,"tick":3840,"dur":480,"tech":[],"pick":"d"},
+            {"string":3,"fret":7,"midi":62,"tick":4320,"dur":480,"tech":[],"pick":"u"},
+            {"string":2,"fret":5,"midi":64,"tick":4800,"dur":480,"tech":[],"pick":"d"},
+            {"string":3,"fret":7,"midi":62,"tick":5280,"dur":480,"tech":[],"pick":"u"},
+            {"string":3,"fret":5,"midi":60,"tick":5760,"dur":1920,"tech":[],"pick":"d"}
+          ],
+          "rests": [],
+          "tempo": {
+            "rungs": [
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":105,"grading":"graded"},
+              {"bpm":120,"grading":"graded"}
+            ],
+            "passAtBpm": 80
+          },
+          "passBars": [
+            {
+              "metric": "timingEvenness",
+              "min": 0.85,
+              "overBars": 4
+            },
+            {
+              "metric": "notesHeard",
+              "min": 0.95,
+              "overBars": 4
+            },
+            {
+              "metric": "extraNotes",
+              "max": 2,
+              "overBars": 4
+            },
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
+            }
+          ],
+          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo", "noteIdentity"],
+          "notGraded": [
+            "pickDirection",
+            "muting",
+            "posture",
+            "tension",
+            "handAttribution",
+            "fingering",
+            "tone",
+            "feel"
+          ],
+          "detection": {
+            "flags": [],
+            "notes": []
+          },
+          "backing": {
+            "kind": "click",
+            "subdivision": 1
+          },
+          "estimatedMinutes": 5,
+          "tab": "/8 3:5 3:7 /4 2:5 /8 2:8 2:5 /4 3:7 | /8 3:5 3:7 2:5 3:7 /2 3:5",
+          "subdivision": "eighths",
+          "computed": {
+            "noteCount": 11,
+            "minGapMsAtTop": 250,
+            "handShifts": 0,
+            "maxPlayableBpm": 224,
+            "difficulty": 2.1
+          },
+          "harmony": {
+            "kind": "scale",
+            "root": "A",
+            "scale": "minorPentatonic",
+            "spelled": ["A", "C", "D", "E", "G"],
+            "cover": false
+          }
+        },
+        {
           "id": "other-strings.three-strings",
           "title": "A riff across three strings",
           "purpose": "Four bars on the D, G and B strings, each bar with its own rhythm from earlier in the Level: quarters with a pair of eighths, a run that stops, long short-short, and a mix to finish.",
           "howTo": [
+            "The band is a drummer and a bassist in place of the click.",
+            "If you get lost, stop, find beat 1 of the next bar and come back in there.",
             "Count each bar before you play it: '1, 2, 3 and, 4', then '1 and 2 and, 3, (4)', then '1, 2 and, 3, 4 and', then '1 and, 2, 3 and, 4'.",
             "Bar 1 climbs: the open D string, E at fret 2, the open G string, A at fret 2, the open B string. Bar 2 starts on the B string, on D at fret 3. Then it comes down: the open B string, A, the open G string, E on beat 3, and a rest on beat 4.",
             "Bar 3 climbs again: the open D string, E at fret 2 twice, the open G string, A at fret 2 twice. Bar 4 comes back down: the open B string, D at fret 3, the open B string. Then A, the open G string, and E on beat 4.",
             "Second finger at fret 2, third finger at fret 3. The hand does not move."
           ],
-          "coachLine": "This is the Step's test piece. Timing against the click, and the right notes after the take.",
+          "coachLine": "This is the Step's test piece, with the band on. Timing against the band, and the right notes after the take.",
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -3622,12 +3632,17 @@
             "feel"
           ],
           "detection": {
-            "flags": [],
-            "notes": []
+            "flags": ["bandBleed"],
+            "notes": [
+              "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested."
+            ]
           },
           "backing": {
-            "kind": "click",
-            "subdivision": 1
+            "kind": "jam",
+            "grooveId": "rock8",
+            "feel": "straight",
+            "key": "E minor",
+            "chart": "Em | Em | Em | Em"
           },
           "estimatedMinutes": 6,
           "tab": "/4 4:0 4:2 /8 3:0 3:2 /4 2:0 | /8 2:3 2:0 3:2 3:0 /4 4:2 r | /4 4:0 /8 4:2 4:2 /4 3:0 /8 3:2 3:2 | /8 2:0 2:3 /4 2:0 /8 3:2 3:0 /4 4:2",
@@ -3639,6 +3654,7 @@
             "maxPlayableBpm": 400,
             "difficulty": 2.23
           },
+          "chords": ["Em", "Em", "Em", "Em"],
           "harmony": {
             "kind": "scale",
             "root": "E",
@@ -3693,8 +3709,11 @@
                   {"tick":6720,"dur":960}
                 ],
                 "backing": {
-                  "kind": "click",
-                  "subdivision": 1
+                  "kind": "jam",
+                  "grooveId": "rock8",
+                  "feel": "straight",
+                  "key": "E minor",
+                  "chart": "Em | Em | Em | Em"
                 },
                 "computed": {
                   "noteCount": 22,
@@ -3703,6 +3722,7 @@
                   "maxPlayableBpm": 400,
                   "difficulty": 2.23
                 },
+                "chords": ["Em", "Em", "Em", "Em"],
                 "harmony": {
                   "kind": "scale",
                   "root": "E",
@@ -3720,6 +3740,8 @@
                 "pool": "all",
                 "purpose": "Four bars on the A, D and G strings, each bar with its own rhythm from earlier in the Level: quarters with a pair of eighths, a run that stops, long short-short, and a mix to finish.",
                 "howTo": [
+                  "The band is a drummer and a bassist in place of the click.",
+                  "If you get lost, stop, find beat 1 of the next bar and come back in there.",
                   "Count each bar before you play it: '1, 2, 3 and, 4', then '1 and 2 and, 3, (4)', then '1, 2 and, 3, 4 and', then '1 and, 2, 3 and, 4'.",
                   "Bar 1 climbs: the open A string, B at fret 2, the open D string, E at fret 2, the open G string. Bar 2 starts on the G string, on A at fret 2. Then it comes down: the open G string, E, the open D string, B on beat 3, and a rest on beat 4.",
                   "Bar 3 climbs again: the open A string, B at fret 2 twice, the open D string, E at fret 2 twice. Bar 4 comes back down: the open G string, A at fret 2, the open G string. Then E, the open D string, and B on beat 4."
@@ -3758,8 +3780,11 @@
                   {"tick":6720,"dur":960}
                 ],
                 "backing": {
-                  "kind": "click",
-                  "subdivision": 1
+                  "kind": "jam",
+                  "grooveId": "rock8",
+                  "feel": "straight",
+                  "key": "E minor",
+                  "chart": "Em | Em | Em | Em"
                 },
                 "computed": {
                   "noteCount": 22,
@@ -3768,6 +3793,7 @@
                   "maxPlayableBpm": 400,
                   "difficulty": 2.23
                 },
+                "chords": ["Em", "Em", "Em", "Em"],
                 "harmony": {
                   "kind": "scale",
                   "root": "E",
@@ -5956,7 +5982,7 @@
       "why": "Sixteenths divide the beat in four, and nearly every busy rhythm is a pattern of which of the four you play. The pendulum doubles: the hand now swings four times a beat, and each figure is that swing with one stroke missing.",
       "howTo": [
         "Count '1 e and a, 2 e and a'. The hand goes down on the number and the 'and', up on the 'e' and the 'a'.",
-        "Long-short-short is '1, and a': down, down-up. Short-short-long is '1 e and': down-up, down.",
+        "Long-short-short is '1, and a': down, down-up. It is the quarter and two eighths of the Beginner Level at twice the speed, and it is called the gallop. Short-short-long is '1 e and': down-up, down.",
         "Keep the strokes small. The wrist moves, not the arm."
       ],
       "payoff": "A riff with the gallop in it, steady at a tempo where it starts to sound like a band.",
@@ -10876,10 +10902,10 @@
         {
           "id": "with-the-band.band-eighths",
           "title": "An eighth-note riff with the band",
-          "purpose": "Four bars in E minor over a rock groove, with rests on beats 2 and 3 of the first three bars, where the snare speaks. The riff follows the chords: E, G, A and back to E.",
+          "purpose": "Four bars in E minor over a rock groove, with rests on beats 2 and 3 of the first three bars, where the drums speak. The riff follows the chords: E, G, A and back to E.",
           "howTo": [
             "Count '1 and, (2) and, (3) and 4 and' for three bars; bar 4 fills beat 3 and ends on a long note. The hand swings in eighths throughout.",
-            "Each bar starts on the root of its chord: open low E, G at fret 3, the open A string, and E again."
+            "The root is the note a chord is named after. Each bar starts on the root of its chord: open low E, G at fret 3, the open A string, and E again."
           ],
           "coachLine": "Band on. I time your notes against it and check them after the take.",
           "grading": "graded",
@@ -11281,7 +11307,7 @@
     {
       "id": "beginner",
       "title": "Beginner: on the beat",
-      "summary": "Quarter notes, eighth notes and rests with a click, on the low strings and then higher up: one note a beat, two notes a beat, and silence in time.",
+      "summary": "Quarter notes, eighth notes and rests with a click, on the low strings and then higher up, and a first riff with a band: one note a beat, two notes a beat, and silence in time.",
       "entry": "open",
       "placement": {
         "startHereIf": [

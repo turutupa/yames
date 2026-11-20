@@ -17,6 +17,7 @@ import type { PassBar } from "../format";
 import { ladder } from "../templates";
 
 const E_PENT = { scale: ["E", "minorPentatonic"] as [string, string] };
+const A_PENT = { scale: ["A", "minorPentatonic"] as [string, string] };
 
 /** Strokes follow the count, not the note before: taught in words, so the plan is free. */
 const FREE = { pick: "free" } as const satisfies Partial<ExerciseSpec>;
@@ -94,24 +95,28 @@ function onSets(riff: string, sets: Readonly<Record<string, readonly string[]>>,
 const DG_RIFF = onSets(`/4 L0 Lx /8 H0 H0 /4 Hx | /8 H0 Hx H0 L0 /2 Lx`, LEVEL_PAIRS, "D and G");
 const GB_RIFF = onSets(`/4 L0 /8 Lx H0 /4 Hx /8 H0 Lx | /8 L0 L0 Lx L0 H0 Hx /4 H0`, HIGH_PAIRS, "G and B");
 const DG_STOPS = onSets(`/4 Lx r /8 L0 L0 /4 H0 | /8 Hx H0 /4 Lx r L0`, LEVEL_PAIRS, "D and G");
+/** Moved here from Step `eighths` (coherence audit RF-F3): frets 5 to 8 on the G and B strings, after those strings have been met. */
+const FIFTH_TUNE = `/8 3:5 3:7 /4 2:5 /8 2:8 2:5 /4 3:7 | /8 3:5 3:7 2:5 3:7 /2 3:5`;
 const THREE_STRINGS = onSets(
   `/4 L0 Lx /8 M0 Mx /4 H0 | /8 Hx H0 Mx M0 /4 Lx r | /4 L0 /8 Lx Lx /4 M0 /8 Mx Mx | /8 H0 Hx /4 H0 /8 Mx M0 /4 Lx`,
   THREES,
   "D, G and B",
 );
 
-/** Beginner, last: quarters, eighths and rests leave the two low strings. */
+/** Beginner, last: quarters, eighths and rests leave the two low strings, and the last riff is the Path's first with a band. */
 export const OTHER_STRINGS: StepSpec = {
   id: "other-strings",
   title: "The same rhythms on other strings",
-  goal: "Play quarters, eighths and rests on the D and G strings and on the G and B strings, and in one riff that crosses three strings, as steadily as on the low strings.",
+  goal: "Play quarters, eighths and rests on the D and G strings and on the G and B strings, then a tune at the fifth fret and one riff that crosses three strings with a band, as steadily as on the low strings.",
   why: "Nearly everything so far has been written on the two lowest strings. The rhythms do not belong to those strings: the count, the foot and the swing of the picking hand are the same anywhere on the guitar. What changes is the feel under the pick. The higher strings are thinner and give way more easily, so it is easy to hit them too hard and to rush. Nothing in the rhythm is new here, on purpose.",
   howTo: [
     "The same five notes carry on across the strings. On the D and G strings the fretted note is at fret 2, under the second finger. On the B and top E strings it is at fret 3, under the third finger.",
     "Count out loud before you play, as in the Steps before: '1, 2, 3, 4' for quarter notes and '1 and 2 and' for eighths. Down on the beat, up on the 'and'.",
     "Use a lighter stroke than on the low E string, keep the foot tapping, and count through every rest.",
+    "For the tune at the fifth fret the hand moves up the neck. That Exercise names its own frets and fingers.",
+    "The last Exercise is played with a band. Listen to the bass drum and the snare, not to your own guitar.",
   ],
-  payoff: "A four-bar riff across the D, G and B strings with quarters, eighths and a rest in it, as steady as the riffs on the low strings.",
+  payoff: "A tune at the fifth fret, and a four-bar riff across the D, G and B strings with quarters, eighths and a rest in it, played with a band for the first time.",
   exercises: [
     {
       id: "d-and-g",
@@ -177,21 +182,45 @@ export const OTHER_STRINGS: StepSpec = {
       minutes: 5,
     },
     {
+      id: "fifth-tune",
+      // Published in Step `eighths`: the pack id stays `eighths.fifth-tune`, so nobody's progress moves.
+      firstStep: "eighths",
+      title: "A tune at the fifth fret",
+      purpose: "The same rhythms higher up the neck: a short melody on the G and B strings with the hand at the fifth fret, eighths and quarters, ending on a long note. These four notes come back later in the Path.",
+      howTo: [
+        "On the G string, first finger at fret 5 and third finger at fret 7. On the B string, first finger at fret 5 and little finger at fret 8. Find the notes slowly without the click first.",
+        "Count it first without the guitar: '1 and 2, 3 and 4', then '1 and 2 and 3' and hold. Then play what you counted.",
+      ],
+      coach: "After the take I'll say how even it was and whether the notes were the written ones.",
+      tab: FIFTH_TUNE,
+      position: 5,
+      harmony: A_PENT,
+      rungs: ladder(50, 120, 10),
+      passAt: 80,
+      grade: "timingNotes",
+      minutes: 5,
+    },
+    {
       id: "three-strings",
       title: "A riff across three strings",
       purpose: "Four bars on the D, G and B strings, each bar with its own rhythm from earlier in the Level: quarters with a pair of eighths, a run that stops, long short-short, and a mix to finish.",
       howTo: [
+        "The band is a drummer and a bassist in place of the click.",
+        "If you get lost, stop, find beat 1 of the next bar and come back in there.",
         "Count each bar before you play it: '1, 2, 3 and, 4', then '1 and 2 and, 3, (4)', then '1, 2 and, 3, 4 and', then '1 and, 2, 3 and, 4'.",
         "Bar 1 climbs: the open D string, E at fret 2, the open G string, A at fret 2, the open B string. Bar 2 starts on the B string, on D at fret 3. Then it comes down: the open B string, A, the open G string, E on beat 3, and a rest on beat 4.",
         "Bar 3 climbs again: the open D string, E at fret 2 twice, the open G string, A at fret 2 twice. Bar 4 comes back down: the open B string, D at fret 3, the open B string. Then A, the open G string, and E on beat 4.",
         "Second finger at fret 2, third finger at fret 3. The hand does not move.",
         VARIANT_NOTE,
       ],
-      coach: "This is the Step's test piece. Timing against the click, and the right notes after the take.",
+      coach: "This is the Step's test piece, with the band on. Timing against the band, and the right notes after the take.",
       ...FREE,
       vary: THREE_STRINGS.vary,
       tab: THREE_STRINGS.base,
       position: 1,
+      // Both string sets stay inside E minor pentatonic (D E G A B, and A B D E G), so one chart serves every Take.
+      chords: "Em | Em | Em | Em",
+      jam: { groove: "rock8", key: "E minor" },
       harmony: E_PENT,
       rungs: ladder(50, 130, 10),
       passAt: 85,

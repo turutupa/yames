@@ -268,8 +268,6 @@ export const BOX_AT_TWELVE: StepSpec = {
     "The frets are closer together here. Keep the fingers curled and close to the strings, and start at the slowest rung while the hand learns the smaller spacing.",
   ],
   payoff: "Three licks you can play in A and in E, and a box you can find at fret 5 and at fret 12.",
-  difficultyException:
-    "The licks of the Step before in a new place, without its sextuplet run, so the note rate is a little lower. The narrow frets at 12 are the demand.",
   exercises: [
     {
       id: "twelve-descent",
@@ -685,7 +683,7 @@ export const SOLO_IN_E: StepSpec = {
       purpose: "The same twelve bars of chords, and a solo of your own. Use box 1 at fret 12, box 2 above it, the open strings, or all three.",
       howTo: [
         "Straight time, 60 to 90 BPM, twelve bars that loop.",
-        "Give it a shape: say something, answer it somewhere else on the neck, build through bars 9 and 10, and end on one long note. The written solo is an example.",
+        "Give it a shape: say something, answer it somewhere else on the neck, build through bars 9 and 10, and end on one long note. Bend up to one of the long notes. The written solo is an example.",
         NOT_CHECKED_YET,
       ],
       coach: "Not checked yet. Record it, and listen for where it moves.",

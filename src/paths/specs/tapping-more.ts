@@ -121,7 +121,7 @@ const TAPS_AND_SKIP_LINE = [
 
 /** A figure of this Step moved up the neck: the chart moves with it. */
 const KEY_SHIFT: Readonly<Record<string, number>> = { "E minor": 0, "F# minor": 2, "G minor": 3 };
-function inKeys(tab: string, chart: string, shifts: boolean, chordTones: boolean): VarySpec {
+function inKeys(tab: string, chart: string, shifts: boolean, chordTones: boolean, groove?: string): VarySpec {
   return {
     values: { key: Object.keys(KEY_SHIFT) },
     pooled: ["key"],
@@ -133,6 +133,7 @@ function inKeys(tab: string, chart: string, shifts: boolean, chordTones: boolean
         position: 7 + by,
         shifts,
         chords: chartIn(chart, by, p.key),
+        ...(groove ? { jam: { groove, key: p.key } } : {}),
         harmony: chordTones
           ? { chordTones: true, cover: true }
           : { scaleOverChords: [p.key.split(" ")[0], "naturalMinor"] },
@@ -277,7 +278,7 @@ export const TWO_TAPS_THROUGH_CHORDS: StepSpec = {
     "The skip is the cell on the top string and then on the G string, both tapped at fret 12. On the G string the third finger hammers: fret 9 in the E minor bar, fret 7 in the A minor bar.",
     "Other Takes play the same shapes two frets higher, in F# minor, or three frets higher, in G minor.",
   ],
-  payoff: "A four-bar tapped line in E minor with two tapped notes, a string skip and three chords.",
+  payoff: "A four-bar tapped line in E minor with two tapped notes, a string skip and three chords, over a band.",
   exercises: [
     {
       id: "two-taps-em-am",
@@ -351,12 +352,13 @@ export const TWO_TAPS_THROUGH_CHORDS: StepSpec = {
         "Take the bar lines one at a time before joining them. Bar 3 into bar 4 is the hard one: both hands move and the figure changes.",
         VARIANT_NOTE,
       ],
-      coach: "The taps carry the timing. Record it: at this speed your ear in the moment is not a fair judge.",
-      vary: inKeys(TAPS_AND_SKIP_LINE, "Em7 | Em7 | Am7 | Bm7", true, false),
+      coach: "Band on. The taps carry the timing. Record it: at this speed your ear in the moment is not a fair judge.",
+      vary: inKeys(TAPS_AND_SKIP_LINE, "Em7 | Em7 | Am7 | Bm7", true, false, "rock8"),
       tab: TAPS_AND_SKIP_LINE,
       position: 7,
       shifts: true,
       chords: "Em7 | Em7 | Am7 | Bm7",
+      jam: { groove: "rock8", key: "E minor" },
       harmony: { scaleOverChords: ["E", "naturalMinor"] },
       rungs: ladder(40, 90, 5),
       passAt: 65,

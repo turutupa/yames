@@ -146,7 +146,7 @@ export const COMING_HOME: StepSpec = {
   id: "coming-home",
   title: "Coming home",
   goal: "Hear the difference between a line that stops on five and a line that ends on one, and play one, six, four, five and one, six, two, five so that each comes home.",
-  why: "One is home: the chord on the first note of the scale, and the one a line can rest on. Five leans toward it. Stop a line on five and it sounds unfinished, as if it had asked something. Follow that five with one and it sounds finished. Songs use both: a line that stops on five keeps you listening, and a line that ends on one closes the verse. You now have six chords with numbers, so there are many ways to leave home. What matters is hearing when a line has come back.",
+  why: "One is home: the chord on the first note of the scale, and the one a line can rest on. Five leans toward it. You heard this with three chords: a line that stops on five sounds unfinished, and a line that ends on one sounds finished. Songs use both: a line that stops on five keeps you listening, and a line that ends on one closes the verse. You now have six chords with numbers, so there are many ways to leave home. What matters is hearing when a line has come back.",
   howTo: [
     "The six chords by number, in C: one is C, two is D minor, three is E minor, four is F, five is G, six is A minor.",
     "The five used here, around fret 5 on the top three strings, G string first: C is 5, 5, 3. D minor is 7, 6, 5. F is 5, 6, 5. G is 4, 3, 3. A minor is 5, 5, 5.",

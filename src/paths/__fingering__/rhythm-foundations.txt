@@ -106,7 +106,6 @@ eighths.eighth-riff [stringSet=D-and-G] Hand: index at 1, stays | 4:0=0 4:0=0 4:
 eighths.long-short-short [stringSet=low-E-and-A] Hand: index at 1, stays | 6:0=0 6:3=3 6:3=3 5:0=0 5:2=2 5:2=2 5:0=0 5:2=2 5:2=2 6:3=3 6:0=0 6:0=0
 eighths.long-short-short [stringSet=A-and-D] Hand: index at 1, stays | 5:0=0 5:2=2 5:2=2 4:0=0 4:2=2 4:2=2 4:0=0 4:2=2 4:2=2 5:2=2 5:0=0 5:0=0
 eighths.long-short-short [stringSet=D-and-G] Hand: index at 1, stays | 4:0=0 4:2=2 4:2=2 3:0=0 3:2=2 3:2=2 3:0=0 3:2=2 3:2=2 4:2=2 4:0=0 4:0=0
-eighths.fifth-tune [-] Hand: index at 5, stays | 3:5=1 3:7=3 2:5=1 2:8=4 2:5=1 3:7=3 3:5=1 3:7=3 2:5=1 3:7=3 3:5=1
 rests.quarter-rests [stringSet=low-E-and-A] Hand: index at 1, stays | 6:0=0 6:0=0 6:3=3 6:3=3 5:0=0 5:0=0 5:0=0 5:2=2
 rests.quarter-rests [stringSet=A-and-D] Hand: index at 1, stays | 5:0=0 5:0=0 5:2=2 5:2=2 4:0=0 4:0=0 4:0=0 4:2=2
 rests.quarter-rests [stringSet=D-and-G] Hand: index at 1, stays | 4:0=0 4:0=0 4:2=2 4:2=2 3:0=0 3:0=0 3:0=0 3:2=2
@@ -126,6 +125,7 @@ other-strings.g-and-b [stringSet=D-and-G] Hand: index at 1, stays | 4:0=0 4:2=2 
 other-strings.g-and-b [stringSet=B-and-top-E] Hand: index at 1, stays | 2:0=0 2:3=3 1:0=0 1:3=3 1:0=0 2:3=3 2:0=0 2:0=0 2:3=3 2:0=0 1:0=0 1:3=3 1:0=0
 other-strings.stops-higher-up [stringSet=D-and-G] Hand: index at 1, stays | 4:2=2 4:0=0 4:0=0 3:0=0 3:2=2 3:0=0 4:2=2 4:0=0
 other-strings.stops-higher-up [stringSet=B-and-top-E] Hand: index at 1, stays | 2:3=3 2:0=0 2:0=0 1:0=0 1:3=3 1:0=0 2:3=3 2:0=0
+eighths.fifth-tune [-] Hand: index at 5, stays | 3:5=1 3:7=3 2:5=1 2:8=4 2:5=1 3:7=3 3:5=1 3:7=3 2:5=1 3:7=3 3:5=1
 other-strings.three-strings [stringSet=D,-G-and-B] Hand: index at 1, stays | 4:0=0 4:2=2 3:0=0 3:2=2 2:0=0 2:3=3 2:0=0 3:2=2 3:0=0 4:2=2 4:0=0 4:2=2 4:2=2 3:0=0 3:2=2 3:2=2 2:0=0 2:3=3 2:0=0 3:2=2 3:0=0 4:2=2
 other-strings.three-strings [stringSet=A,-D-and-G] Hand: index at 1, stays | 5:0=0 5:2=2 4:0=0 4:2=2 3:0=0 3:2=2 3:0=0 4:2=2 4:0=0 5:2=2 5:0=0 5:2=2 5:2=2 4:0=0 4:2=2 4:2=2 3:0=0 3:2=2 3:0=0 4:2=2 4:0=0 5:2=2
 off-beats.the-and [stringSet=low-E-and-A] Hand: index at 1, stays | 6:0=0 6:3=3 6:3=3 6:3=3 6:3=3 5:0=0 5:2=2 5:2=2 5:2=2 5:2=2

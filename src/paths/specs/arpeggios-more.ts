@@ -153,7 +153,7 @@ export const SEVENTHS_ACROSS: StepSpec = {
     {
       id: "a-minor-seven-two",
       title: "A minor seven, two octaves",
-      purpose: "A, C, E, G twice over, from the low E string to the top string, and back down to the A on the D string. It is the pentatonic box you know, with the D left out.",
+      purpose: "A, C, E, G twice over, from the low E string to the top string, and back down to the A on the D string. If you know box 1 of A minor pentatonic at fret 5 from Blues and Pentatonics, this is that box with the D left out.",
       howTo: [
         "Straight eighths, 50 BPM up to a pass at 80. Two bars.",
         "Up: low E string 5 and 8, A string 7, D string 5 and 7, G string 5, B string 5 and 8, top string 5. Down: B string 8 and 5, G string 5, and the A on the D string, fret 7, held.",
@@ -241,9 +241,9 @@ export const MINOR_TWO_FIVE_ONE: StepSpec = {
   id: "minor-two-five-one",
   title: "Two, five, one in a minor key",
   goal: "Play B half-diminished and E seven as arpeggios, join them into a two, five, one line that lands on A minor, and move the line to other minor keys.",
-  why: "Two, five, one is the way home in a minor key as well, and it sounds darker. In A minor the two chord is built on B, and it comes out half-diminished: B, D, F, A. The five chord is E, turned from minor into a seven chord so that it pulls: E, G sharp, B, D. The G sharp is the one note here from outside the scale, and it sits a fret below A, the note it wants to reach. Playing these arpeggios is the quickest way to hear a minor key's pull.",
+  why: "Two, five, one is the way home in a minor key as well, and it sounds darker. Chords in a Key numbers the chords of a minor key in its second Level. All you need here is that A minor is home. In A minor the two chord is built on B, and it comes out half-diminished: B, D, F, A. The five chord is E, turned from minor into a seven chord so that it pulls: E, G sharp, B, D. The G sharp is the one note here from outside the scale, and it sits a fret below A, the note it wants to reach. Playing these arpeggios is the quickest way to hear a minor key's pull.",
   howTo: [
-    "B half-diminished, written Bm7b5: D string 9, G string 7, B string 6, top string 5. It is B, D, F and A.",
+    "B half-diminished is the B diminished triad from Triads (B, D and F) with A on top. It is written Bm7b5: B minor seven with its fifth lowered a fret. D string 9, G string 7, B string 6, top string 5.",
     "E seven: A string 7, D string 6 and 9, G string 7. It is E, G sharp, B and D.",
     "The D on the G string, fret 7, is in both chords. The F of the first chord falls one fret to E, and the A falls one fret to G sharp.",
   ],
@@ -377,8 +377,8 @@ export const MORE_SWEEPS: StepSpec = {
   goal: "Sweep a triad held by one finger across three strings, sweep the minor shape that has its root lowest, and sweep C, G, A minor and F around fret 5.",
   why: "The first sweeps used shapes where every note has a finger of its own, or nearly. Two more fingerings turn up as soon as you sweep a real progression. One is the triad that is a single finger laid across three strings: there the finger has to roll, pressing one string at a time, or the sweep is just a chord. The other is the minor shape with its root lowest, three fingers on three frets, which is the shape the Sweep Picking Path begins with. The first is in the song in the next Step, and the second is where Sweep Picking will start you, so both get a Step of their own first.",
   howTo: [
-    "A minor at fret 5 is the first finger across the G, B and top strings. To sweep it, press with the part of the finger under the string being played and let the rest go slack: the part nearest the hand for the G string, then the middle, then the tip for the top string. The finger rocks; it does not lift.",
-    "D minor with its root lowest: G string 7 with the third finger, B string 6 with the second, top string 5 with the first. Each finger lifts a little as the next string sounds.",
+    "A minor at fret 5 is the first finger across the G, B and top strings. To sweep it, press with the part of the finger under the string being played and let the rest go slack: the part nearest the hand for the G string, then the middle, then the tip for the top string. The finger rolls. It does not lift.",
+    "D minor with its root lowest, shape one in Triads: G string 7 with the third finger, B string 6 with the second, top string 5 with the first. Each finger lifts a little as the next string sounds. Sweep Picking plays the same shape as A minor at frets 14, 13 and 12, with the same fingers.",
     "The picking hand does what it did before: one push up through the strings, one pull back, the top and bottom notes played twice.",
   ],
   payoff: "The triad fingerings of the song's first four bars, and the shape Sweep Picking starts from, swept slowly and clean.",
@@ -390,7 +390,7 @@ export const MORE_SWEEPS: StepSpec = {
       howTo: [
         "Triplets, 50 BPM up to a pass at 70. Two bars.",
         "The first finger lies across fret 5. G string, B string, top string with one push; top string, B string, G string with one pull. C, E, A and back.",
-        "Rock the finger so only the string you are picking is pressed. If you hear a chord, slow down.",
+        "Roll the finger so only the string you are picking is pressed. If you hear a chord, slow down.",
       ],
       coach: "Timed and counted. On a sweep the strings ring into each other, so the pitch is for your ear.",
       tab: sweeps(AM_BARRE, AM_BARRE),

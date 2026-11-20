@@ -17,7 +17,6 @@ import {
   handAt,
   inPositions,
   ladder,
-  linkedSweep,
   moveChart,
   oneStringClimb,
   repeat,
@@ -71,8 +70,8 @@ const SAFETY =
 /** Semitones from A minor for the natural-minor licks. */
 const KEY_SHIFT: Readonly<Record<string, number>> = { A: 0, B: 2, C: 3, D: 5, E: 7, G: -2 };
 
-/** The same tab moved to other minor keys. Key doesn't change how hard it is. */
-function inKeys(tab: string, keys: readonly string[], scale = "naturalMinor", chart?: string) {
+/** The same tab moved to other minor keys. Key doesn't change how hard it is. A groove gives each key its own band. */
+function inKeys(tab: string, keys: readonly string[], scale = "naturalMinor", chart?: string, groove?: string) {
   return {
     values: { key: keys },
     pooled: ["key"] as const,
@@ -83,6 +82,7 @@ function inKeys(tab: string, keys: readonly string[], scale = "naturalMinor", ch
         tab: moved,
         position: handAt(moved),
         ...(chart ? { chords: moveChart(chart, KEY_SHIFT[p.key]) } : {}),
+        ...(groove ? { jam: { groove, key: `${p.key} minor` } } : {}),
         harmony: { scale: [p.key, scale] as [string, string] },
       };
     },
@@ -116,6 +116,22 @@ const NPS_STARTS = Object.keys(NPS_START);
 // ---------------------------------------------------------------------------
 
 const A_MINOR_LICK = "4:7 3:5 3:7 2:5 3:7 3:5 4:7 4:5";
+
+/** The outside lick's note line for the keys where variantText cannot move it (the lick runs past fret 12). */
+const LICK_LINE: Readonly<Record<string, string>> = {
+  D: "Sixteenths, the lick twice a bar: D on the D string, F and G on the G string, A on the B string, back down G and F, then D and C on the D string.",
+  E: "Sixteenths, the lick twice a bar: E on the D string, G and A on the G string, B on the B string, back down A and G, then E and D on the D string.",
+};
+function lickNamed(v: ReturnType<typeof inKeys>) {
+  return {
+    ...v,
+    build: (p: VariantParams) => {
+      const built = v.build(p);
+      const line = LICK_LINE[p.key];
+      return line ? { ...built, howTo: (ex: readonly string[]) => [line, ...ex.slice(1)] } : built;
+    },
+  };
+}
 const ETUDE = `/16
   ${A_MINOR_LICK} ${A_MINOR_LICK} |
   4:7 3:5 2:6 1:5 2:6 3:5 4:7 3:5 4:7 3:5 2:6 1:5 2:6 3:5 3:7 3:5 |
@@ -146,8 +162,6 @@ function sweep(args: Omit<ExerciseSpec, "pick" | "grade"> & { grade?: ExerciseSp
   return { pick: "sweep", grade: "sweepTiming", selfCheck: [RING_CHECK, NOISE_CHECK], ...args };
 }
 
-const SWEEP_SHIFT: Readonly<Record<string, number>> = { A: 0, C: 3, D: 5, E: -5, G: -2 };
-
 // ---------------------------------------------------------------------------
 // The Steps.
 // ---------------------------------------------------------------------------
@@ -156,7 +170,7 @@ const BEGINNER: StepSpec[] = [
   {
     id: "one-string",
     title: "One-string sixteenths",
-    goal: "Four notes to every click on one string, even, at 110 to 120 BPM.",
+    goal: "Four notes to every click on one string, even, at 100 BPM and then on toward 120.",
     why: "Every fast line in this Path is this motion with something added: a crossing, a shape, a legato note. On one string there is nothing to hide behind, so an uneven stroke shows up at once, and it is the cheapest place to fix it. Sixteenths at 110 to 120 is where most players' picking either becomes a motion they trust or starts to lock up.",
     howTo: [
       "Count '1 e and a': down on 1 and 'and', up on 'e' and 'a'. Every Exercise in this Step is sixteenth notes, four to each click.",
@@ -174,7 +188,7 @@ const BEGINNER: StepSpec[] = [
         tab: `/16 ${repeat("5:0", 16)} | ${repeat("5:0", 16)}`,
         position: 0,
         rungs: ladder(60, 130, 5),
-        passAt: 110,
+        passAt: 100,
         grade: "timing",
         pass: [even(0.9, 8), heard(0.95, 8), extras(2)],
         minutes: 5,
@@ -205,7 +219,7 @@ const BEGINNER: StepSpec[] = [
         position: 5,
         shifts: true,
         rungs: ladder(60, 130, 5),
-        passAt: 110,
+        passAt: 100,
         grade: "timingNotes",
         pass: TIGHT_NOTES,
         minutes: 6,
@@ -253,7 +267,7 @@ const BEGINNER: StepSpec[] = [
         position: 12,
         harmony: { scale: ["A", "naturalMinor"] },
         rungs: ladder(60, 140, 5),
-        passAt: 120,
+        passAt: 110,
         grade: "timingNotes",
         pass: TIGHT_NOTES,
         minutes: 5,
@@ -274,6 +288,37 @@ const BEGINNER: StepSpec[] = [
     difficultyException:
       "Accents are a control problem and the sixteenth tempos drop to 85 to 90; the sextuplet Exercises pass at 75, which is about the note rate of Step 1. The note-rate metric only counts speed.",
     exercises: [
+      {
+        id: "walking-accent",
+        title: "Walk the accent through the beat",
+        purpose: "One note, four bars, and the accent moves from the first sixteenth to the last. Bars 2 and 4 put it on an upstroke.",
+        howTo: ["Sixteenths on fret 7 of the G string. Bar 1 accents the first of each four, bar 2 the second, bar 3 the third, bar 4 the fourth. Keep the time dead still at each change."],
+        coach: "Bars 2 and 4 are the test. The accent reading is rough, so trust your ear too.",
+        tab: `/16 ${repeat("3:7> 3:7 3:7 3:7", 4)} | ${repeat("3:7 3:7> 3:7 3:7", 4)} | ${repeat("3:7 3:7 3:7> 3:7", 4)} | ${repeat("3:7 3:7 3:7 3:7>", 4)}`,
+        position: 5,
+        rungs: ladder(50, 100, 5),
+        passAt: 85,
+        grade: "accents",
+        pass: ACCENTS,
+        minutes: 6,
+      },
+      {
+        id: "open-triplets",
+        title: "Sixteenth triplets on open A, accent every third",
+        purpose: "Six to the click on one open string, with the accent on every third note, so it lands on a downstroke, then an upstroke, then a downstroke.",
+        howTo: [
+          "Sextuplets (sixteenth triplets), six to the click, on the open A string. Accent notes 1 and 4 of each six: the first is a downstroke, the second an upstroke.",
+          "If only the downstroke accents come out, dig the upstroke a little deeper rather than hitting the downstroke softer.",
+        ],
+        coach: "Accent checks are rough. If the upstroke accents disappear on the recording, that is the thing to work on.",
+        tab: `/16t ${repeat("5:0> 5:0 5:0 5:0> 5:0 5:0", 4)}`,
+        position: 0,
+        rungs: ladder(50, 90, 5),
+        passAt: 75,
+        grade: "accents",
+        pass: ACCENTS,
+        minutes: 5,
+      },
       {
         id: "sextuplet-accent",
         title: "8-7-5-7-8-7 in sextuplets, accent on the beat",
@@ -322,44 +367,13 @@ const BEGINNER: StepSpec[] = [
         pass: ACCENTS,
         minutes: 6,
       },
-      {
-        id: "open-triplets",
-        title: "Sixteenth triplets on open A, accent every third",
-        purpose: "Six to the click on one open string, with the accent on every third note, so it lands on a downstroke, then an upstroke, then a downstroke.",
-        howTo: [
-          "Sextuplets (sixteenth triplets), six to the click, on the open A string. Accent notes 1 and 4 of each six: the first is a downstroke, the second an upstroke.",
-          "If only the downstroke accents come out, dig the upstroke a little deeper rather than hitting the downstroke softer.",
-        ],
-        coach: "Accent checks are rough. If the upstroke accents disappear on the recording, that is the thing to work on.",
-        tab: `/16t ${repeat("5:0> 5:0 5:0 5:0> 5:0 5:0", 4)}`,
-        position: 0,
-        rungs: ladder(50, 90, 5),
-        passAt: 75,
-        grade: "accents",
-        pass: ACCENTS,
-        minutes: 5,
-      },
-      {
-        id: "walking-accent",
-        title: "Walk the accent through the beat",
-        purpose: "One note, four bars, and the accent moves from the first sixteenth to the last. Bars 2 and 4 put it on an upstroke.",
-        howTo: ["Sixteenths on fret 7 of the G string. Bar 1 accents the first of each four, bar 2 the second, bar 3 the third, bar 4 the fourth. Keep the time dead still at each change."],
-        coach: "Bars 2 and 4 are the test. The accent reading is rough, so trust your ear too.",
-        tab: `/16 ${repeat("3:7> 3:7 3:7 3:7", 4)} | ${repeat("3:7 3:7> 3:7 3:7", 4)} | ${repeat("3:7 3:7 3:7> 3:7", 4)} | ${repeat("3:7 3:7 3:7 3:7>", 4)}`,
-        position: 5,
-        rungs: ladder(50, 100, 5),
-        passAt: 85,
-        grade: "accents",
-        pass: ACCENTS,
-        minutes: 6,
-      },
     ],
   },
   {
     id: "crossing",
     title: "Crossing two strings",
     goal: "Change strings at sixteenths with no gap and no scrape, on both kinds of crossing.",
-    why: "On one string the pick has nothing in its way; between two strings it has to get over one of them. There are only two kinds of crossing, and every line in the rest of this Path is built from them: outside, where the pick travels around the pair, and inside, where it is trapped between the strings and has to escape.",
+    why: "These are the two crossings from Alternate Picking, now in moving pairs and a lick. On one string the pick has nothing in its way; between two strings it has to get over one of them. There are only two kinds of crossing, and every line in the rest of this Path is built from them: outside, where the pick travels around the pair, and inside, where it is trapped between the strings and has to escape.",
     howTo: [
       "Outside: a downstroke on the lower-pitched string, then an upstroke on the higher one. Each stroke starts from outside the pair.",
       "Inside: an upstroke on the lower-pitched string, then a downstroke on the higher one. Each stroke starts between the two strings, so the pick must hop out of the gap.",
@@ -408,12 +422,16 @@ const BEGINNER: StepSpec[] = [
         howTo: [
           "Sixteenths, the lick twice a bar: A on the D string, C and D on the G string, E on the B string, back down D and C, then A and G on the D string.",
           "Start on a downstroke on the D string. Every string change works out as outside; keep it that way by never adding a stroke.",
+          "The band is a drummer and a bassist in place of the click.",
+          "If you get lost, stop, find beat 1 of the next bar and come back in there.",
         ],
         coach: "This is music now. Get it even, then take it up one rung at a time.",
-        vary: inKeys(`/16 ${repeat(A_MINOR_LICK, 2)}`, ["A", "C", "D", "E", "G"], "minorPentatonic"),
+        vary: lickNamed(inKeys(`/16 ${repeat(A_MINOR_LICK, 2)}`, ["A", "C", "D", "E", "G"], "minorPentatonic", "Am", "rock8")),
         tab: `/16 ${repeat(A_MINOR_LICK, 2)}`,
         position: 5,
         crossing: "outside",
+        chords: "Am",
+        jam: { groove: "rock8", key: "A minor" },
         harmony: { scale: ["A", "minorPentatonic"], cover: true },
         rungs: ladder(50, 110, 5),
         passAt: 100,
@@ -577,7 +595,7 @@ const INTERMEDIATE: StepSpec[] = [
       },
       {
         id: "four-note",
-        title: "Four notes: B5-B8-e5-e8 in sixteenths",
+        title: "Four notes on two strings, in sixteenths",
         purpose: "The four-note version, four to the click: one inside crossing and one outside in every loop, so it is the two kinds taking turns at speed.",
         howTo: [
           "Sixteenths. Two notes on the lower string of the pair, two on the higher (B 5 and 8, top E 5 and 8 to start), round again. Down, up, down, up.",
@@ -632,7 +650,7 @@ const INTERMEDIATE: StepSpec[] = [
     id: "three-per-string",
     title: "Three notes per string",
     goal: "Run A minor in three-note-per-string shapes at sixteenths, where the crossing changes type at every string.",
-    why: "An odd number of notes per string flips the stroke at each change, so outside and inside crossings take turns. This is the shape of most fast scalar playing: a long scale with no position shift to manage, and the same fingering idea on every string.",
+    why: "This is the shape from Alternate Picking, at a higher tempo, and the six-note licks are now in sixteenths. An odd number of notes per string flips the stroke at each change, so outside and inside crossings take turns. This is the shape of most fast scalar playing: a long scale with no position shift to manage, and the same fingering idea on every string.",
     howTo: [
       "Each string has three notes, fretted 1-2-4 or 1-3-4 depending on the gaps. Open the hand from the first finger; don't twist the wrist to reach.",
       "Sixteenths throughout, four to the click, so the string changes fall in different places in the beat. Count the beat, not the strings.",
@@ -1104,17 +1122,19 @@ const INTERMEDIATE: StepSpec[] = [
       {
         id: "picked-arpeggios",
         title: "Picked arpeggios: Am, F, C, G",
-        purpose: "Four-string arpeggios with strict alternate strokes, one chord a bar, for contrast: here every string change is picked, so you feel what economy saves and what it costs.",
+        purpose: "Four-string arpeggios with strict alternate strokes, one chord a bar. Every string change is picked here. The Step 'Sweep basics' plays arpeggios with one push instead, and this is the sound to compare it with.",
         howTo: [
           "Eighth-note triplets, three to the click. Each bar is one chord, up and down twice. Am to F moves one note. Stay at fifth position.",
           "These are alternate-picked, not swept: every stroke alternates even though the notes run across strings.",
+          "Listen to the snare, not to your own fingers. If you get lost, catch the next bar line and carry on.",
         ],
         coach: "I'll check the notes against the chords after the take. Whether it rings like a chord or sounds separated is yours to judge.",
-        vary: inKeys(`/8t ${repeat("4:7 3:5 2:5 1:5 2:5 3:5", 2)} | ${repeat("4:7 3:5 2:6 1:5 2:6 3:5", 2)} | ${repeat("4:5 3:5 2:5 1:8 2:5 3:5", 2)} | ${repeat("4:5 3:7 2:8 1:7 2:8 3:7", 2)}`, ["A", "C", "D", "G"], "naturalMinor", "Am | F | C | G"),
+        vary: inKeys(`/8t ${repeat("4:7 3:5 2:5 1:5 2:5 3:5", 2)} | ${repeat("4:7 3:5 2:6 1:5 2:6 3:5", 2)} | ${repeat("4:5 3:5 2:5 1:8 2:5 3:5", 2)} | ${repeat("4:5 3:7 2:8 1:7 2:8 3:7", 2)}`, ["A", "C", "D", "G"], "naturalMinor", "Am | F | C | G", "rockTwelveEight"),
         tab: `/8t ${repeat("4:7 3:5 2:5 1:5 2:5 3:5", 2)} | ${repeat("4:7 3:5 2:6 1:5 2:6 3:5", 2)} | ${repeat("4:5 3:5 2:5 1:8 2:5 3:5", 2)} | ${repeat("4:5 3:7 2:8 1:7 2:8 3:7", 2)}`,
         position: 5,
         crossing: "both",
         chords: "Am | F | C | G",
+        jam: { groove: "rockTwelveEight", key: "A minor" },
         harmony: { chordTones: true },
         rungs: ladder(50, 110, 5),
         passAt: 100,
@@ -1201,7 +1221,7 @@ const ADVANCED: StepSpec[] = [
       {
         id: "pentatonic-pulls",
         title: "Pentatonic pull-offs in sextuplets",
-        purpose: "Down the box two strings at a time, a pull-off on every string: e 8 to 5, B 8 to 5, G 7 to 5. Bar 1 is picked, bar 2 picks only the upper note on each string.",
+        purpose: "Down the box two strings at a time, a pull-off on every string: top string 8 to 5, B string 8 to 5, G string 7 to 5. Bar 1 is picked, bar 2 picks only the upper note on each string.",
         howTo: [
           "Sextuplets, six to the click. Beats 1 and 2: top E, B and G strings; beats 3 and 4: B, G and D. Bar 1 picks every note. Bar 2 picks the upper note and pulls off to fret 5 on each string.",
           "In bar 2 the picked notes alternate down, up, down across the strings.",
@@ -1255,8 +1275,8 @@ const ADVANCED: StepSpec[] = [
         tab: hammerAscent(),
         position: 5,
         harmony: { scale: ["A", "naturalMinor"] },
-        rungs: ladder(55, 95, 5),
-        passAt: 90,
+        rungs: [40, 50, 55, 65, 75, 85, 90],
+        passAt: 75,
         grade: "timingNotes",
         pass: LEGATO_TAPPED,
         selfCheck: [VOLUME_CHECK, "Were the hammer-ons from nowhere as loud as the picked first note?"],
@@ -1318,7 +1338,7 @@ const ADVANCED: StepSpec[] = [
     goal: "One continuous push of the pick through two and three strings, separate notes, nothing ringing, and a turn at the top.",
     why: "A sweep is one motion that plays several notes, which is why it is not alternate picking done faster. The smallest sweep, two strings, contains the whole technique and the whole problem: if the first note keeps ringing, you get a chord. The app grades these on timing only: swept notes ring into each other, so right notes mostly read 'not checked', and nothing here promises them.",
     howTo: [
-      "One push from the arm, the wrist quiet. The pick comes to rest on the next string between notes, then falls through it.",
+      "One push from the arm, the wrist quiet. The pick comes to rest on the next string between notes, then falls through it. This is the stroke from the Step 'Economy picking', carried across more strings.",
       "Fretting hand: as soon as the next note sounds, release the last one without leaving the string. That is the mute that does most of the work.",
       "Eighth-note triplets throughout, three to the click.",
     ],
@@ -1368,8 +1388,40 @@ const ADVANCED: StepSpec[] = [
         minutes: 5,
       }),
       sweep({
+        id: "two-string-lick",
+        title: "A two-string lick you can use (timing only)",
+        purpose: "Two-string sweeps with a hammer and a pull, ending on D: the Step's audible payoff, and a phrase that works in a solo.",
+        howTo: [
+          "Eighth-note triplets. Down through B and E at fret 5, hammer to 8, pull back to 5, then up through the B string's 8, pull to 5, and land on the G string's 7.",
+          "Only the unmarked notes are picked. The hammer and pulls give you notes for free.",
+        ],
+        coach: "Timing only. A hammer or pull I can't hear costs nothing.",
+        tab: "/8t 2:5 1:5 1:8h 1:5p 2:8 2:5p /4 3:7 r",
+        position: 5,
+        harmony: { scale: ["A", "minorPentatonic"] },
+        rungs: ladder(50, 115, 5),
+        passAt: 95,
+        minutes: 5,
+      }),
+    ],
+  },
+  {
+    id: "five-string-sweeps",
+    title: "Five-string sweeps and links (timing only)",
+    goal: "The three-string loop with a turn at the top, the classic five-string A minor sweep from fret 12, and the link from one shape into the next.",
+    why: "Five strings is the big sweep, the sound people mean by the word. It is only worth having if it connects: a progression doesn't wait while you find the next shape, so the link from one arpeggio into the next is practised as its own skill. As before, these are graded on timing only.",
+    howTo: [
+      "Mute everything. With five strings moving there is more to keep silent than there are fingers: palm on the low strings, fretting fingers across the high ones.",
+      "A link is one small move of the fretting hand on the top or bottom string: a hammer, a pull or a slide into the next chord's nearest note. The pick does nothing at that moment.",
+      "Eighth-note triplets throughout, three to the click.",
+    ],
+    payoff: "A five-string arpeggio up the strings and back with every note separate, and two shapes joined with no gap at the bar line.",
+    exercises: [
+      sweep({
         id: "turnaround",
-        title: "The turnaround at fret 8 (timing only)",
+        // Published in Step `sweep-basics`: the pack id stays `sweep-basics.turnaround`, so nobody's progress moves.
+        firstStep: "sweep-basics",
+        title: "The turnaround on three strings (timing only)",
         purpose: "The whole loop: up three strings, a hammer to the top note and a pull back, down, and round with no extra stroke.",
         howTo: [
           "Eighth-note triplets, two loops a bar. On the Am shape: G string 9, B 10, top E 8, hammer to 12, pull to 8, B 10, and round. First finger on 8, second on 9, third on 10, little finger hammering 12. The other keys are the same shape further up the neck.",
@@ -1394,36 +1446,6 @@ const ADVANCED: StepSpec[] = [
         passAt: 90,
         minutes: 6,
       }),
-      sweep({
-        id: "two-string-lick",
-        title: "A two-string lick you can use (timing only)",
-        purpose: "Two-string sweeps with a hammer and a pull, ending on D: the Step's audible payoff, and a phrase that works in a solo.",
-        howTo: [
-          "Eighth-note triplets. Down through B and E at fret 5, hammer to 8, pull back to 5, then up through the B string's 8, pull to 5, and land on the G string's 7.",
-          "Only the unmarked notes are picked. The hammer and pulls give you notes for free.",
-        ],
-        coach: "Timing only. A hammer or pull I can't hear costs nothing.",
-        tab: "/8t 2:5 1:5 1:8h 1:5p 2:8 2:5p /4 3:7 r",
-        position: 5,
-        harmony: { scale: ["A", "minorPentatonic"] },
-        rungs: ladder(50, 115, 5),
-        passAt: 95,
-        minutes: 5,
-      }),
-    ],
-  },
-  {
-    id: "five-string-sweeps",
-    title: "Five-string sweeps and links (timing only)",
-    goal: "The classic five-string A minor sweep from fret 12, the link from one shape into the next, and Am, F, C, G one pass a chord.",
-    why: "Five strings is the big sweep, the sound people mean by the word. It is only worth having if it connects: a progression doesn't wait while you find the next shape, so the link from one arpeggio into the next is practised as its own skill. As before, these are graded on timing only.",
-    howTo: [
-      "Mute everything. With five strings moving there is more to keep silent than there are fingers: palm on the low strings, fretting fingers across the high ones.",
-      "A link is one small move of the fretting hand on the top or bottom string: a hammer, a pull or a slide into the next chord's nearest note. The pick does nothing at that moment.",
-      "Eighth-note triplets for the loops; quarter-note triplets, three to every two clicks, for the one-pass progression.",
-    ],
-    payoff: "A five-string arpeggio up the neck and back with every note separate, and a four-chord progression played as one unbroken sweep.",
-    exercises: [
       sweep({
         id: "am-five",
         title: "A minor, the classic five-string shape (timing only)",
@@ -1453,7 +1475,7 @@ const ADVANCED: StepSpec[] = [
       sweep({
         id: "the-link",
         title: "The link: one shape into the next (timing only)",
-        purpose: "Two loops of one three-string shape, then two of the next, carried straight across the bar line: the link on its own, where it is easiest to hear.",
+        purpose: "Two loops of the three-string A minor shape, then two of the next chord, carried straight across the bar line. This is the link on its own, where it is easiest to hear.",
         howTo: [
           "Eighth-note triplets, two loops a bar. After the very first note, every G-string note is an upstroke that turns the sweep round, inside the bar and across the bar line alike: the upward push that finishes bar 1 carries straight on into bar 2's shape. Don't stop it and don't restart it.",
           "Choose the nearest note of the new chord, not its root. Good links barely move the hand.",
@@ -1480,39 +1502,6 @@ const ADVANCED: StepSpec[] = [
         selfCheck: ["At the bar line, did the sweep keep going, with no gap and no extra pick stroke before the new shape?", RING_CHECK],
         minutes: 6,
       }),
-      sweep({
-        id: "one-pass-each",
-        title: "Am, F, C, G: one pass a chord (timing only)",
-        purpose: "Up five strings on Am, link, down F, link, up C, link, down G: every chord change is a single small step on an outer string.",
-        howTo: [
-          "Quarter-note triplets, six notes a bar, three to every two clicks: one pass across five strings and one more note on the last string. In bars 2 to 4 the first note comes from the last bar's final note without a pick, by hammer, pull or slide; bar 1's first note is picked each time round.",
-          "Where the last note is four frets away, it is a slide on one finger, not a hammer: the top string's 8 to 12 is the index, and the hand arrives over the F. In bar 2 the pull lands on the ring finger, which slides down into C.",
-          "At 150 this is the note rate of eighth-note triplets at 75: slow on purpose, because the links are what you are learning. Bar 4's G rolls a barre across the D, G and B strings at fret 12.",
-          "Sing the top notes if you can. They make a tune, and the tune is how you keep your place.",
-        ],
-        coach: "Timing only. Four links a round; whether a link was picked is up to your ear.",
-        vary: {
-          values: { key: ["A", "G", "C"] },
-          pooled: ["key"],
-          label: (p) => `${p.key} minor: i-VI-III-VII`,
-          build: (p) => {
-            const chart = moveChart("Am | F | C | G", SWEEP_SHIFT[p.key]);
-            const chords = chart.split("|").map((c) => c.trim());
-            const near = p.key === "A" ? 12 : p.key === "G" ? 10 : 15;
-            const tab = onePassFingers(linkedSweep({ chords, strings: [5, 4, 3, 2, 1], near, rhythm: "/4t", extra: true }));
-            return { tab, position: handAt(tab), shifts: true, chords: chart };
-          },
-        },
-        tab: onePassFingers(linkedSweep({ chords: ["Am", "F", "C", "G"], strings: [5, 4, 3, 2, 1], near: 12, rhythm: "/4t", extra: true })),
-        chain: { maxJointFrets: 5 },
-        position: 12,
-        shifts: true,
-        chords: "Am | F | C | G",
-        harmony: { chordTones: true },
-        rungs: ladder(100, 190, 10),
-        passAt: 150,
-        minutes: 6,
-      }),
     ],
   },
   {
@@ -1526,6 +1515,8 @@ const ADVANCED: StepSpec[] = [
       SAFETY,
     ],
     payoff: "A tapped arpeggio that moves with the chords, a full minute of sixteenths that sounds the same at the end as at the start, and an eight-bar run over a band.",
+    difficultyException:
+      "Tapping is a new motion and starts low, in eighth-note triplets, and the stamina minute is set below your clean tempo on purpose. The new demands are the tap and the length of the minute and the eight-bar run, which the note-rate metric doesn't count.",
     exercises: [
       {
         id: "tap-triplets",
@@ -1555,8 +1546,8 @@ const ADVANCED: StepSpec[] = [
         tab: `/8t ${repeat("1:12t 1:5p 1:8h", 4)}`,
         position: 5,
         harmony: { arpeggio: "Am", cover: true },
-        rungs: ladder(60, 120, 5),
-        passAt: 110,
+        rungs: [50, 60, 75, 85, 95, 110, 120],
+        passAt: 90,
         grade: "timing",
         pass: [even(0.8), heard(0.9), extras(3)],
         selfCheck: ["Was the pulled-off note as loud as the tapped one?"],
@@ -1578,7 +1569,7 @@ const ADVANCED: StepSpec[] = [
         jam: { groove: "rockTwelveEight", key: "A minor" },
         harmony: { chordTones: true, cover: true },
         rungs: ladder(60, 110, 5),
-        passAt: 100,
+        passAt: 90,
         grade: "timing",
         pass: [even(0.8), heard(0.9), extras(3)],
         selfCheck: ["Did each tap land on the bar's first click when the chord changed?"],
@@ -1619,20 +1610,21 @@ const ADVANCED: StepSpec[] = [
       {
         id: "the-run",
         title: "The eight-bar run over the band",
-        purpose: "Eight bars over Am, F, C, G twice, using the whole Path: the outside lick, a picked arpeggio, a C line and a scale run home in sixteenths, then the Gilbert four-note loop, the tap figure over F, the six-note lick as pull-offs in sextuplets, and a run back to A.",
+        purpose: "Eight bars over Am, F, C, G twice, one idea from the Path in each: the outside lick, a picked arpeggio, a C line and a scale run home in sixteenths, then the Gilbert four-note loop, the tap figure over F, the six-note lick as pull-offs in sextuplets, and a run back to A.",
         howTo: [
           "Sixteenths, except bar 6 (eighth-note triplets: tap 13, pull to 5, hammer 8, the F chord) and bar 7 (sextuplets: pick the top string's 8 and pull to 7 and 5, pick the B string's 8 and pull to 6 and 5). One idea a bar, and every bar lands on a tone of its chord on beat 1. Play it dry first and hear that happen.",
+          "Bar 2 is the F arpeggio from the Step 'Economy picking', now in sixteenths and still alternate-picked, as the strokes show.",
           "Listen to the snare, not to your own fingers. If you get lost, catch the next bar line and carry on.",
           "Use direct input or headphones for a graded take: the band reaching a microphone has not been tested.",
         ],
-        coach: "This is the finale: sixteen bars, held to the end. Fast notes on a real rig are the hardest for me to place, so trust the evenness and your ear together.",
+        coach: "This is the finale: the eight bars twice through, held to the end. Fast notes on a real rig are the hardest for me to place, so trust the evenness and your ear together.",
         tab: ETUDE,
         position: 5,
         shifts: true,
         chords: "Am | F | C | G | Am | F | C | G",
         jam: { groove: "rock8", key: "A minor" },
         harmony: { scaleOverChords: ["A", "naturalMinor"] },
-        rungs: ladder(70, 110, 5),
+        rungs: [50, 60, 70, 80, 90, 100, 110],
         passAt: 100,
         grade: "timingNotes",
         pass: FINALE_NOTES,
@@ -1741,22 +1733,6 @@ function burstsOn(figure: Figure) {
 }
 
 /** Octaves, each twice, up the scale and back. */
-/**
- * The two fingers the one-pass chain needs written (fingering audit 2): F's last
- * pull lands on the ring finger, which slides down into C's shape at its own fret,
- * and C's top note is the middle finger, which slides up so the index is free for
- * the pull into G. Bar 2's last note and bar 3's fifth.
- */
-function onePassFingers(tab: string): string {
-  const bars = tab.split("|").map((bar) => bar.trim().split(/\s+/));
-  const mark = (bar: number, index: number, finger: number) => {
-    bars[bar][index] = bars[bar][index].replace(/^(\d:\d+)/, `$1f${finger}`);
-  };
-  mark(1, bars[1].length - 1, 3);
-  mark(2, 5, 2);
-  return bars.map((bar) => bar.join(" ")).join(" | ");
-}
-
 function octavesTab(set: string): string {
   const shapes: Record<string, { low: number; high: number; gap: number; frets: number[] }> = {
     "A and G": { low: 5, high: 3, gap: 2, frets: [7, 8, 10, 12] },
@@ -1842,13 +1818,13 @@ export default definePath({
   goal: "Alternate, economy, legato, sweeps and tapping in A minor, built up one technique at a time, finishing with an eight-bar sixteenth-note run over a band at 100 BPM.",
   level: "intermediate",
   assumes:
-    "You can play the A minor pentatonic box at fret 5 and eighth notes with a click at 90 BPM. No speed is assumed, but the first Step passes at sixteenths around 110 BPM: if sixteenths at 90 are not there yet, start with Rhythm Foundations or the Beginner Level of Alternate Picking. The minutes are one pass through the material; the drills are meant to be repeated for weeks, and their variants change keys and strings so the repetition stays fresh.",
-  prerequisites: { paths: [{ path: "alternate-picking", level: "intermediate" }, { path: "legato", level: "beginner" }], skills: ["The A minor pentatonic box", "Eighth notes with a click at 90 BPM"] },
+    "You can alternate-pick the A minor pentatonic box and a three-notes-per-string run in sixteenths at 80 BPM (Alternate Picking through its Intermediate Level covers this). The first two Levels take the crossings and the three-notes-per-string shape of Alternate Picking to higher tempos and add new drills between them, including speed bursts. The minutes are one pass through the material; the drills are meant to be repeated for weeks, and their variants change keys and strings so the repetition stays fresh.",
+  prerequisites: { paths: [{ path: "alternate-picking", level: "intermediate" }, { path: "legato", level: "intermediate" }], skills: ["The A minor pentatonic box", "Sixteenth notes with a click at 80 BPM"] },
   labelSubdivisions: true,
   paceLadders: true,
   variantText: true,
   orderRationale:
-    "The teacher's fifteen-Step outline, in its order: one string, then accents and groupings, then four-finger independence, then crossings, so that by Step 5 every later technique has its parts. The Path rotates techniques instead of finishing one before the next, because a shredder needs them together and because a rotation keeps a daily Session from being one drill. Picking comes first and stays the backbone: economy picking (Step 10) is taught only after strict alternate picking is reliable across strings and skips, so it is a choice and not a crutch. Legato and sweeps come late because both lean on a fretting hand built by the chromatic Step, and because the app can grade them least: legato is tied to picked notes, and sweeps say 'timing only' in their titles. Tapping and the eight-bar run close it. Where it departs from the outline: Step 1 adds Alternate Picking's 'four of each' as a fourth graded Exercise, Step 6 lands the six-note licks on a quarter note so they stay in sixteenths, Step 10 keeps the alternate-picked arpeggios beside the economy ones for contrast, and every legato Exercise is a picked bar followed by the same notes legato.",
+    "The teacher's fifteen-Step outline, in its order: one string, then accents and groupings, then four-finger independence, then crossings, so that by Step 5 every later technique has its parts. The Path rotates techniques instead of finishing one before the next, because a shredder needs them together and because a rotation keeps a daily Session from being one drill. Picking comes first and stays the backbone: economy picking (Step 10) is taught only after strict alternate picking is reliable across strings and skips, so it is a choice and not a crutch. Legato and sweeps come late because both lean on a fretting hand built by the chromatic Step, and because the app can grade them least: legato is tied to picked notes, and sweeps say 'timing only' in their titles. Tapping and the eight-bar run close it. Where it departs from the outline: Step 1 adds Alternate Picking's 'four of each' as a fourth graded Exercise, Step 6 lands the six-note licks on a quarter note so they stay in sixteenths, Step 10 keeps alternate-picked arpeggios beside the economy runs, as the sound to compare the sweeps with, and every legato Exercise is a picked bar followed by the same notes legato.",
   gradingLimits:
     "Picked single notes, sixteenths to about 120 BPM and sextuplets to about 90, are the case the app is built for: timing evenness, notes heard and extra notes, plus right notes where the notes are at least 75 ms apart and the pitch is clear, after the take. None of it has been tried on a real guitar. Legato: a hammer-on or pull-off the app doesn't hear costs nothing, so the timing leans on the picked notes and the volume of the legato notes is a self-check; a hammer-on from nowhere and a tap count as attacks that must be heard. Sweeps are graded on timing only: swept notes ring into each other, right notes mostly read 'not checked', and their titles say so; only rungs with at least 150 ms between notes are graded. Accents are rough, louder or not. Pick direction is never heard: it is a checklist item wherever the strokes matter. Above sixteenths at 100 BPM, read the timing as provisional until the input delay is calibrated, and use a clean or light-crunch tone for graded takes.",
   steps: [...BEGINNER, ...INTERMEDIATE, ...ADVANCED],
@@ -1858,7 +1834,7 @@ export default definePath({
       title: "Beginner: one string, then two",
       summary: "Sixteenths and sextuplets on one string, accents and groupings, then crossing two strings.",
       startHereIf: [
-        "You can play eighth notes with a click at 90 BPM, but sixteenths come out uneven above about 90.",
+        "You can alternate-pick sixteenths on one string at 90 BPM, and they come out uneven above that.",
         "Accents drift off the beat when you group notes in threes or sixes.",
         "Crossing between two strings catches the pick, or the crossing notes come out quieter.",
       ],
@@ -1899,7 +1875,7 @@ export default definePath({
       title: "Intermediate: fingers, scales, speed, skips and economy",
       summary: "The chromatic and spider drills and the Gilbert pentatonic loops, then three notes per string and its sequences, speed bursts, string skipping, and economy picking with quintuplets.",
       startHereIf: [
-        "You can hold even sixteenths on one string at about 110 BPM.",
+        "You can hold even sixteenths on one string at about 100 BPM.",
         "Crossings between two strings are clean in sixteenths at about 100 BPM.",
         "Scale runs across three strings fall apart, or you've hit a speed wall.",
       ],
@@ -1935,12 +1911,12 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: legato, sweeps, tapping and the band",
-      summary: "Legato tied to picked notes, sweeps graded on timing only, tapping over chords, a stamina minute and the eight-bar run.",
+      summary: "Legato tied to picked notes, sweeps graded on timing only, tapping over chords, a stamina minute and the eight-bar run. Legato, Sweep Picking and Tapping teach these techniques from the first note. This Level is the short version, for joining them to your picking.",
       reachLevel: "advanced",
       startHereIf: [
         "You can run A minor three notes per string across three strings at sixteenths, 95 BPM.",
-        "Your picking is reliable and you want the fretting hand to do more of the work.",
-        "You've never swept, or your sweeps come out as a strummed chord.",
+        "Your picking is reliable, and your hammer-ons and pull-offs are as loud as your picked notes at eighths, 90 BPM.",
+        "You have done the Beginner Levels of Sweep Picking and Tapping, and want sweeps and taps inside your picking.",
       ],
       steps: ["legato-one", "legato-two", "sweep-basics", "five-string-sweeps", "tapping-etude"],
       warmups: [

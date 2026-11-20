@@ -6,11 +6,15 @@
   "category": "technique",
   "goal": "Play a smooth A minor line with hammer-ons and pull-offs as loud and as even as picked notes, up and down all six strings.",
   "level": "early-intermediate",
-  "assumes": "You can fret single notes cleanly with all four fingers and play eighth notes with a click at 80 BPM. No speed is assumed. The minutes listed are one pass through the material; expect to come back to each Step for days or weeks.",
+  "assumes": "You can fret single notes cleanly with all four fingers and play eighth notes with a click at 80 BPM. Most Exercises open with a picked bar of the same notes, and from the Intermediate Level on that bar is in sixteenths, triplets or faster, so you need even picked notes at that speed: sixteenths at about 80 BPM. The Beginner Level of Alternate Picking covers that, and the first Step of its Intermediate Level, Crossing two strings, covers the picked bars that change string. No legato speed is assumed. The minutes listed are one pass through the material; expect to come back to each Step for days or weeks.",
   "prerequisites": {
     "paths": [
       {
         "path": "rhythm-foundations",
+        "level": "beginner"
+      },
+      {
+        "path": "alternate-picking",
         "level": "beginner"
       }
     ],
@@ -1865,7 +1869,8 @@
       "why": "Real legato is hammer-ons and pull-offs joined: one stroke starts a string and the fretting hand keeps it going. The new problem is the third note. The string has lost some of its energy by then, so the finger has to put it back.",
       "howTo": [
         "After a hammer-on, the same finger pulls off again. Hammer down, then flick off sideways: two different moves from one finger.",
-        "In triplets, count '1-and-a, 2-and-a'. The pick plays the 1, the 2, the 3 and the 4, and nothing else.",
+        "Count '1-trip-let, 2-trip-let'. Three even notes a click, with the first one on it.",
+        "In triplets, the pick plays the 1, the 2, the 3 and the 4, and nothing else.",
         "If the last note of a group is faint, slow down. A faster tempo hides it; it does not fix it."
       ],
       "payoff": "A slow trill that holds its volume, and a triplet line across two strings that sounds like one breath.",
@@ -3446,7 +3451,7 @@
       "order": 4,
       "title": "Rolls on one string",
       "goal": "Four sixteenths from one pick, round and round on three fingers, without the volume sagging.",
-      "why": "A roll is the engine of every long legato line: up with two hammer-ons, back with a pull-off, and the pick only marks the beat. At sixteenths the fretting hand has to keep time by itself for three notes out of four, which is the real skill of this Path.",
+      "why": "A roll is the slow trill with a third finger added, and it is the engine of every long legato line: up with two hammer-ons, back with a pull-off, and the pick only marks the beat. At sixteenths the fretting hand has to keep time by itself for three notes out of four, which is the real skill of this Path.",
       "howTo": [
         "Sixteenths, counted '1 e and a'. The pick plays the 1 and the fretting hand plays the 'e', the 'and' and the 'a'.",
         "Keep the middle finger of the three down when the top one hammers, so the pull-off has a note to land on.",
@@ -4727,7 +4732,8 @@
           "purpose": "The roll moved up the B string through A minor: three positions, two beats each, then back. The shape widens after the first move and then stays the same.",
           "howTo": [
             "Sixteenths, one pick a beat. Frets 5, 6, 8, then 6, 8, 10, then 8, 10, 12, then 6, 8, 10 again, each roll played twice.",
-            "All three shapes use fingers 1, 2, 4. The first has a one-fret gap at the bottom; the other two are two frets and two frets. Move the hand during the last note of the beat."
+            "All three shapes use fingers 1, 2, 4. The first has a one-fret gap at the bottom; the other two are two frets and two frets. Move the hand during the last note of the beat. The two shapes with two-fret gaps are the reach that the Step Three notes per string works on.",
+            "Let the thumb sit behind the neck so the hand can open, and do not force a stretch that hurts."
           ],
           "coachLine": "The shifts are where the time usually moves. I'll say how even it was and check the notes after the take.",
           "grading": "graded",
@@ -4863,13 +4869,15 @@
       "goal": "Run the pentatonic box with one pick and one legato note on every string, up with hammer-ons and down with pull-offs.",
       "why": "Most rock and blues legato lives in the pentatonic box, two notes a string. The fretting hand now has to change string in time while the pick only touches each string once, so the two hands have to agree on every crossing.",
       "howTo": [
+        "Box 1 of A minor pentatonic sits at fret 5, two notes on every string. The first finger plays fret 5 on all six strings. The other note is fret 8 with the little finger on the low E, B and top strings, and fret 7 with the third finger on the A, D and G strings.",
+        "Other Takes move the same box to another key's frets.",
         "Going up: pick the lower note of each string and hammer the upper. Going down: pick the upper note and pull off to the lower.",
         "Lay the first finger on the next string a moment before you need it. Coming down, it is the note every pull-off lands on.",
         "Each Exercise is a picked bar, then the same notes legato, unless it says otherwise."
       ],
       "payoff": "The box up and down as one smooth line, and the repeating lick that half of rock guitar is built on.",
       "prerequisites": ["rolls"],
-      "difficulty": 6.55,
+      "difficulty": 6.26,
       "exercises": [
         {
           "id": "pentatonic-legato.box-up",
@@ -4927,15 +4935,15 @@
           ],
           "tempo": {
             "rungs": [
-              {"bpm":55,"grading":"graded"},
-              {"bpm":65,"grading":"graded"},
-              {"bpm":75,"grading":"graded"},
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
               {"bpm":80,"grading":"graded"},
               {"bpm":90,"grading":"graded"},
               {"bpm":100,"grading":"graded"},
               {"bpm":110,"grading":"graded"}
             ],
-            "passAtBpm": 90
+            "passAtBpm": 80
           },
           "passBars": [
             {
@@ -4989,7 +4997,7 @@
             "minGapMsAtTop": 136.36,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 6.11
+            "difficulty": 5.52
           },
           "harmony": {
             "kind": "scale",
@@ -5056,7 +5064,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
-                  "difficulty": 6.11
+                  "difficulty": 5.52
                 },
                 "harmony": {
                   "kind": "scale",
@@ -5123,7 +5131,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
-                  "difficulty": 6.11
+                  "difficulty": 5.52
                 },
                 "harmony": {
                   "kind": "scale",
@@ -5190,7 +5198,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
-                  "difficulty": 6.11
+                  "difficulty": 5.52
                 },
                 "harmony": {
                   "kind": "scale",
@@ -5257,7 +5265,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
-                  "difficulty": 6.11
+                  "difficulty": 5.52
                 },
                 "harmony": {
                   "kind": "scale",
@@ -5276,7 +5284,7 @@
           "purpose": "The same twelve notes coming down: pick the upper note of each string and pull off to the first finger.",
           "howTo": [
             "Sixteenths. Bar 1 picked, bar 2 with a pull-off on every string.",
-            "Both fingers are down on the new string before you pick it. The first finger rolls or hops ahead; it never arrives late."
+            "Both fingers are down on the new string before you pick it. The first finger moves ahead to the next string and never arrives late."
           ],
           "coachLine": "A pick on every string gives me plenty to time. I check the notes after the take.",
           "grading": "graded",
@@ -5326,15 +5334,15 @@
           ],
           "tempo": {
             "rungs": [
-              {"bpm":55,"grading":"graded"},
-              {"bpm":65,"grading":"graded"},
-              {"bpm":75,"grading":"graded"},
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
               {"bpm":80,"grading":"graded"},
               {"bpm":90,"grading":"graded"},
               {"bpm":100,"grading":"graded"},
               {"bpm":110,"grading":"graded"}
             ],
-            "passAtBpm": 90
+            "passAtBpm": 80
           },
           "passBars": [
             {
@@ -5388,7 +5396,7 @@
             "minGapMsAtTop": 136.36,
             "handShifts": 0,
             "maxPlayableBpm": 400,
-            "difficulty": 6.11
+            "difficulty": 5.52
           },
           "harmony": {
             "kind": "scale",
@@ -5455,7 +5463,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
-                  "difficulty": 6.11
+                  "difficulty": 5.52
                 },
                 "harmony": {
                   "kind": "scale",
@@ -5474,7 +5482,7 @@
                 "pool": "all",
                 "howTo": [
                   "Sixteenths. Bar 1 picked, bar 2 with a pull-off on every string.",
-                  "Both fingers are down on the new string before you pick it. The first finger rolls or hops ahead; it never arrives late."
+                  "Both fingers are down on the new string before you pick it. The first finger moves ahead to the next string and never arrives late."
                 ],
                 "tab": "/16 1:11 1:8 2:11 2:8 3:10 3:8 4:10 4:8 5:10 5:8 6:11 6:8 hold | 1:11 1:8p 2:11 2:8p 3:10 3:8p 4:10 4:8p 5:10 5:8p 6:11 6:8p hold",
                 "position": {
@@ -5521,7 +5529,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
-                  "difficulty": 6.11
+                  "difficulty": 5.52
                 },
                 "harmony": {
                   "kind": "scale",
@@ -5540,7 +5548,7 @@
                 "pool": "all",
                 "howTo": [
                   "Sixteenths. Bar 1 picked, bar 2 with a pull-off on every string.",
-                  "Both fingers are down on the new string before you pick it. The first finger rolls or hops ahead; it never arrives late."
+                  "Both fingers are down on the new string before you pick it. The first finger moves ahead to the next string and never arrives late."
                 ],
                 "tab": "/16 1:13 1:10 2:13 2:10 3:12 3:10 4:12 4:10 5:12 5:10 6:13 6:10 hold | 1:13 1:10p 2:13 2:10p 3:12 3:10p 4:12 4:10p 5:12 5:10p 6:13 6:10p hold",
                 "position": {
@@ -5587,7 +5595,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
-                  "difficulty": 6.11
+                  "difficulty": 5.52
                 },
                 "harmony": {
                   "kind": "scale",
@@ -5606,7 +5614,7 @@
                 "pool": "all",
                 "howTo": [
                   "Sixteenths. Bar 1 picked, bar 2 with a pull-off on every string.",
-                  "Both fingers are down on the new string before you pick it. The first finger rolls or hops ahead; it never arrives late."
+                  "Both fingers are down on the new string before you pick it. The first finger moves ahead to the next string and never arrives late."
                 ],
                 "tab": "/16 1:15 1:12 2:15 2:12 3:14 3:12 4:14 4:12 5:14 5:12 6:15 6:12 hold | 1:15 1:12p 2:15 2:12p 3:14 3:12p 4:14 4:12p 5:14 5:12p 6:15 6:12p hold",
                 "position": {
@@ -5653,7 +5661,7 @@
                   "minGapMsAtTop": 136.36,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
-                  "difficulty": 6.11
+                  "difficulty": 5.52
                 },
                 "harmony": {
                   "kind": "scale",
@@ -6187,7 +6195,8 @@
             ]
           }
         }
-      ]
+      ],
+      "difficultyException": "The box runs pass at 80 BPM, below the rolls before them, because their first bar is picked across all six strings, so the note rate falls. It does not count that the fretting hand now changes string on every second note while the pick touches each string once."
     },
     {
       "id": "three-per-string",
@@ -9847,7 +9856,8 @@
           "purpose": "Up four strings with hammer-ons, a turn at the top, and down again with pull-offs, each lower string started by the little finger from nowhere. One pick stroke for the whole bar.",
           "howTo": [
             "Sextuplets. Pick the low E string's fret 5 and nothing else. At the top, pull off from 9 to 7, hammer back to 9, then pull off down the string.",
-            "Coming down, the little finger hammers the first note of each string from the air (D string 9, A string 8, low E string 8), with the other fingers already in place behind it."
+            "Coming down, the little finger hammers the first note of each string from the air (D string 9, A string 8, low E string 8), with the other fingers already in place behind it.",
+            "The way down is the hardest part of this Exercise. If it is not clean yet, go on to the Step From nowhere in the box, which starts the descent on two strings, and come back to this one later."
           ],
           "coachLine": "There is one picked note a bar here, so my timing has little to hold. Record a take and listen: that is the real check.",
           "grading": "graded",
@@ -10039,7 +10049,8 @@
                 "pool": "all",
                 "howTo": [
                   "Sextuplets. Pick the low E string's fret 7 and nothing else. At the top, pull off from 11 to 9, hammer back to 11, then pull off down the string.",
-                  "Coming down, the little finger hammers the first note of each string from the air (D string 11, A string 10, low E string 10), with the other fingers already in place behind it."
+                  "Coming down, the little finger hammers the first note of each string from the air (D string 11, A string 10, low E string 10), with the other fingers already in place behind it.",
+                  "The way down is the hardest part of this Exercise. If it is not clean yet, go on to the Step From nowhere in the box, which starts the descent on two strings, and come back to this one later."
                 ],
                 "tab": "/16t 6:7 6:9h 6:10h 5:7h 5:9h 5:10h 4:7h 4:9h 4:11h 3:7h 3:9h 3:11h 3:9p 3:11h 3:9p 3:7p 4:11h 4:9p 4:7p 5:10h 5:9p 5:7p 6:10h 6:9p",
                 "position": {
@@ -10102,7 +10113,8 @@
                 "pool": "all",
                 "howTo": [
                   "Sextuplets. Pick the low E string's fret 8 and nothing else. At the top, pull off from 12 to 10, hammer back to 12, then pull off down the string.",
-                  "Coming down, the little finger hammers the first note of each string from the air (D string 12, A string 11, low E string 11), with the other fingers already in place behind it."
+                  "Coming down, the little finger hammers the first note of each string from the air (D string 12, A string 11, low E string 11), with the other fingers already in place behind it.",
+                  "The way down is the hardest part of this Exercise. If it is not clean yet, go on to the Step From nowhere in the box, which starts the descent on two strings, and come back to this one later."
                 ],
                 "tab": "/16t 6:8 6:10h 6:11h 5:8h 5:10h 5:11h 4:8h 4:10h 4:12h 3:8h 3:10h 3:12h 3:10p 3:12h 3:10p 3:8p 4:12h 4:10p 4:8p 5:11h 5:10p 5:8p 6:11h 6:10p",
                 "position": {
@@ -10165,7 +10177,8 @@
                 "pool": "all",
                 "howTo": [
                   "Sextuplets. Pick the low E string's fret 10 and nothing else. At the top, pull off from 14 to 12, hammer back to 14, then pull off down the string.",
-                  "Coming down, the little finger hammers the first note of each string from the air (D string 14, A string 13, low E string 13), with the other fingers already in place behind it."
+                  "Coming down, the little finger hammers the first note of each string from the air (D string 14, A string 13, low E string 13), with the other fingers already in place behind it.",
+                  "The way down is the hardest part of this Exercise. If it is not clean yet, go on to the Step From nowhere in the box, which starts the descent on two strings, and come back to this one later."
                 ],
                 "tab": "/16t 6:10 6:12h 6:13h 5:10h 5:12h 5:13h 4:10h 4:12h 4:14h 3:10h 3:12h 3:14h 3:12p 3:14h 3:12p 3:10p 4:14h 4:12p 4:10p 5:13h 5:12p 5:10p 6:13h 6:12p",
                 "position": {
@@ -10228,7 +10241,8 @@
                 "pool": "all",
                 "howTo": [
                   "Sextuplets. Pick the low E string's fret 12 and nothing else. At the top, pull off from 16 to 14, hammer back to 16, then pull off down the string.",
-                  "Coming down, the little finger hammers the first note of each string from the air (D string 16, A string 15, low E string 15), with the other fingers already in place behind it."
+                  "Coming down, the little finger hammers the first note of each string from the air (D string 16, A string 15, low E string 15), with the other fingers already in place behind it.",
+                  "The way down is the hardest part of this Exercise. If it is not clean yet, go on to the Step From nowhere in the box, which starts the descent on two strings, and come back to this one later."
                 ],
                 "tab": "/16t 6:12 6:14h 6:15h 5:12h 5:14h 5:15h 4:12h 4:14h 4:16h 3:12h 3:14h 3:16h 3:14p 3:16h 3:14p 3:12p 4:16h 4:14p 4:12p 5:15h 5:14p 5:12p 6:15h 6:14p",
                 "position": {
@@ -12259,7 +12273,7 @@
       ],
       "payoff": "Two and a half octaves in under two beats of picking, and a line that travels up the neck and home.",
       "prerequisites": ["nowhere-box"],
-      "difficulty": 7.92,
+      "difficulty": 6.62,
       "exercises": [
         {
           "id": "six-string-runs.six-up",
@@ -12329,15 +12343,15 @@
           ],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
-              {"bpm":60,"grading":"graded"},
+              {"bpm":45,"grading":"graded"},
+              {"bpm":55,"grading":"graded"},
               {"bpm":65,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
-              {"bpm":80,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
               {"bpm":90,"grading":"graded"},
               {"bpm":100,"grading":"graded"}
             ],
-            "passAtBpm": 80
+            "passAtBpm": 65
           },
           "passBars": [
             {
@@ -12391,7 +12405,7 @@
             "minGapMsAtTop": 100,
             "handShifts": 3,
             "maxPlayableBpm": 111,
-            "difficulty": 7.92
+            "difficulty": 6.62
           },
           "harmony": {
             "kind": "scale",
@@ -12470,7 +12484,7 @@
                   "minGapMsAtTop": 100,
                   "handShifts": 3,
                   "maxPlayableBpm": 111,
-                  "difficulty": 7.92
+                  "difficulty": 6.62
                 },
                 "harmony": {
                   "kind": "scale",
@@ -12549,7 +12563,7 @@
                   "minGapMsAtTop": 100,
                   "handShifts": 3,
                   "maxPlayableBpm": 132,
-                  "difficulty": 7.92
+                  "difficulty": 6.62
                 },
                 "harmony": {
                   "kind": "scale",
@@ -12628,7 +12642,7 @@
                   "minGapMsAtTop": 100,
                   "handShifts": 0,
                   "maxPlayableBpm": 134,
-                  "difficulty": 7.77
+                  "difficulty": 6.5
                 },
                 "harmony": {
                   "kind": "scale",
@@ -12707,7 +12721,7 @@
                   "minGapMsAtTop": 100,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
-                  "difficulty": 7.77
+                  "difficulty": 6.5
                 },
                 "harmony": {
                   "kind": "scale",
@@ -12788,15 +12802,15 @@
           ],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
-              {"bpm":60,"grading":"graded"},
+              {"bpm":45,"grading":"graded"},
+              {"bpm":55,"grading":"graded"},
               {"bpm":65,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
-              {"bpm":80,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
               {"bpm":90,"grading":"graded"},
               {"bpm":100,"grading":"graded"}
             ],
-            "passAtBpm": 80
+            "passAtBpm": 65
           },
           "passBars": [
             {
@@ -12850,7 +12864,7 @@
             "minGapMsAtTop": 100,
             "handShifts": 3,
             "maxPlayableBpm": 111,
-            "difficulty": 7.92
+            "difficulty": 6.62
           },
           "harmony": {
             "kind": "scale",
@@ -12929,7 +12943,7 @@
                   "minGapMsAtTop": 100,
                   "handShifts": 3,
                   "maxPlayableBpm": 111,
-                  "difficulty": 7.92
+                  "difficulty": 6.62
                 },
                 "harmony": {
                   "kind": "scale",
@@ -13007,7 +13021,7 @@
                   "minGapMsAtTop": 100,
                   "handShifts": 3,
                   "maxPlayableBpm": 132,
-                  "difficulty": 7.92
+                  "difficulty": 6.62
                 },
                 "harmony": {
                   "kind": "scale",
@@ -13085,7 +13099,7 @@
                   "minGapMsAtTop": 100,
                   "handShifts": 0,
                   "maxPlayableBpm": 101,
-                  "difficulty": 7.77
+                  "difficulty": 6.5
                 },
                 "harmony": {
                   "kind": "scale",
@@ -13163,7 +13177,7 @@
                   "minGapMsAtTop": 100,
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
-                  "difficulty": 7.77
+                  "difficulty": 6.5
                 },
                 "harmony": {
                   "kind": "scale",
@@ -13315,7 +13329,8 @@
             "cover": false
           }
         }
-      ]
+      ],
+      "difficultyException": "The two six-string runs pass at 65 BPM because their first bar is picked across all six strings in sextuplets, so the note rate falls below the Step before. It does not count the two shifts inside each run or the length of a line across all six strings."
     },
     {
       "id": "odd-groups",
@@ -14293,7 +14308,10 @@
           "title": "Four bars over the band",
           "purpose": "A legato line over Am, F, C and G: one pick a beat, the rolls from earlier bent to fit each chord. Every bar starts on a note of its chord.",
           "howTo": [
-            "Sixteenths, a pick on each beat and three legato notes after it. Play it dry first and hear each bar land on its chord.",
+            "Sixteenths, a pick on each beat and three legato notes after it. Play the line with the click first, then with the band.",
+            "The band is a drummer and a bassist in place of the click.",
+            "The bassist moves to a new chord every bar. Hear each bar of the line land on its chord.",
+            "If you get lost, stop, find beat 1 of the next bar and come back in there.",
             "It stays in fifth position on the top three strings, so the hand never moves. Only the string under the pick changes."
           ],
           "coachLine": "With the band on I time your picked notes against it and check the notes after the take. Direct input or headphones make that fair.",
@@ -14465,7 +14483,8 @@
           "purpose": "Six strings up with hammer-ons and six down with pull-offs in one line, a pick on each string, and a long A to finish.",
           "howTo": [
             "Sextuplets. The climb fills three beats and the descent starts on beat 4, so the turn at the top comes just before the bar line.",
-            "At the top you hammer onto fret 10 and pick it again to come down. Coming down, the hand drops back a fret at the B string and again at the G string."
+            "At the top you hammer onto fret 10 and pick it again to come down. Coming down, the hand drops back a fret at the B string and again at the G string.",
+            "When that is even, play the climb again and pick only its first note. Each new string then starts with a hammer-on from nowhere, as in the Step Hammer-ons from nowhere."
           ],
           "coachLine": "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
           "grading": "graded",
@@ -14683,7 +14702,8 @@
                 "purpose": "Six strings up with hammer-ons and six down with pull-offs in one line, a pick on each string, and a long B to finish.",
                 "howTo": [
                   "Sextuplets. The climb fills three beats and the descent starts on beat 4, so the turn at the top comes just before the bar line.",
-                  "At the top you hammer onto fret 12 and pick it again to come down. Coming down, the hand drops back a fret at the B string and again at the G string."
+                  "At the top you hammer onto fret 12 and pick it again to come down. Coming down, the hand drops back a fret at the B string and again at the G string.",
+                  "When that is even, play the climb again and pick only its first note. Each new string then starts with a hammer-on from nowhere, as in the Step Hammer-ons from nowhere."
                 ],
                 "tab": "/16t 6:7 6:9h 6:10h 5:7 5:9h 5:10h 4:7 4:9h 4:11h 3:7 3:9h 3:11h 2:8 2:10h 2:12h 1:9 1:10h 1:12h 1:12 1:10p 1:9p 2:12 2:10p 2:8p | 3:11 3:9p 3:7p 4:11 4:9p 4:7p 5:10 5:9p 5:7p 6:10 6:9p 6:7p /2 4:9",
                 "position": {
@@ -14760,7 +14780,8 @@
                 "purpose": "Six strings up with hammer-ons and six down with pull-offs in one line, a pick on each string, and a long C to finish.",
                 "howTo": [
                   "Sextuplets. The climb fills three beats and the descent starts on beat 4, so the turn at the top comes just before the bar line.",
-                  "At the top you hammer onto fret 13 and pick it again to come down. Coming down, the hand drops back a fret at the B string and again at the G string."
+                  "At the top you hammer onto fret 13 and pick it again to come down. Coming down, the hand drops back a fret at the B string and again at the G string.",
+                  "When that is even, play the climb again and pick only its first note. Each new string then starts with a hammer-on from nowhere, as in the Step Hammer-ons from nowhere."
                 ],
                 "tab": "/16t 6:8 6:10h 6:11h 5:8 5:10h 5:11h 4:8 4:10h 4:12h 3:8 3:10h 3:12h 2:9 2:11h 2:13h 1:10 1:11h 1:13h 1:13 1:11p 1:10p 2:13 2:11p 2:9p | 3:12 3:10p 3:8p 4:12 4:10p 4:8p 5:11 5:10p 5:8p 6:11 6:10p 6:8p /2 4:10",
                 "position": {
@@ -14837,7 +14858,8 @@
                 "purpose": "Six strings up with hammer-ons and six down with pull-offs in one line, a pick on each string, and a long D to finish.",
                 "howTo": [
                   "Sextuplets. The climb fills three beats and the descent starts on beat 4, so the turn at the top comes just before the bar line.",
-                  "At the top you hammer onto fret 15 and pick it again to come down. Coming down, the hand drops back a fret at the B string and again at the G string."
+                  "At the top you hammer onto fret 15 and pick it again to come down. Coming down, the hand drops back a fret at the B string and again at the G string.",
+                  "When that is even, play the climb again and pick only its first note. Each new string then starts with a hammer-on from nowhere, as in the Step Hammer-ons from nowhere."
                 ],
                 "tab": "/16t 6:10 6:12h 6:13h 5:10 5:12h 5:13h 4:10 4:12h 4:14h 3:10 3:12h 3:14h 2:11 2:13h 2:15h 1:12 1:13h 1:15h 1:15 1:13p 1:12p 2:15 2:13p 2:11p | 3:14 3:12p 3:10p 4:14 4:12p 4:10p 5:13 5:12p 5:10p 6:13 6:12p 6:10p /2 4:12",
                 "position": {
@@ -15255,9 +15277,9 @@
       "goal": "Play written four-bar legato phrases over a band in E minor, with long notes and rests in them, and join two of them into eight bars.",
       "why": "The line over the band in the Step before never stops and never leaves fifth position. A solo is made of phrases: a few notes, a long one to land on, a gap. This Step takes the rolls, the three-per-string fragments and the shifts of this Path to a second key and puts air between them. The long notes are where a weak pull-off or a late shift shows.",
       "howTo": [
-        "Each phrase mixes sixteenths, in rolls from one pick, and triplets, where one pick starts three notes on a string. Count the triplet beats '1-and-a' before you play them.",
+        "Each phrase mixes sixteenths, in rolls from one pick, and triplets, where one pick starts three notes on a string. Count the triplet beats '1-trip-let, 2-trip-let' before you play them.",
         "Hold each long note for its full length and keep the rests silent: stop the string with the fretting finger, or with the side of the picking hand.",
-        "Play each phrase dry first. With the band on, listen for the first note of every bar landing on its chord.",
+        "Play each phrase with the click first. With the band on, listen for the first note of every bar landing on its chord.",
         "The hand changes position during the long notes and rests where it can. Where it moves inside a line, the Exercise says so."
       ],
       "payoff": "Eight bars of legato over a band in a key that is not A minor, with room to breathe in them.",
