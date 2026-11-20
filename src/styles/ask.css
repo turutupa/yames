@@ -130,13 +130,14 @@
 }
 
 /* ── A Session with the drawer open: the controls move in ──────────────── */
-/* Exit, the clock, the input state and the solid button stay in view, and
-   the text beside the picture with them. The picture's own slot is left
-   alone, so the neck is covered rather than re-framed. */
+/* Exit, the clock, the input state and the solid button stay in view
+   (DESIGN 3.3: the session bar and the action row). The picture's own slot is
+   left alone, so the neck is covered rather than re-framed; and so is the text
+   above and below it (the head, the coach's note): narrowed, it wrapped onto
+   another line and took that line from the picture (the pass mark in the head
+   and the note's sentence, since leg c1b1), which re-framed the neck. */
 .main-body[data-session][data-ask] .session-run :is(
   .session-bar,
-  .practice-head,
-  .session-mechlow,
   .session-actions
 ) {
   margin-right: calc(var(--ask-w) - 12px);
