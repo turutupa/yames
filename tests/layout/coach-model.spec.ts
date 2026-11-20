@@ -8,7 +8,9 @@ import { openShot, settleAnimations, notHitTestable, noSidewaysScroll } from "./
  * of the panel's widths (380 above 720px of window, 320 under it), with a
  * not-downloaded row and with a download in progress; nothing in it is cut,
  * and the panel's Start button and chat stay usable once it closes.
- * Pictures go to `/tmp/coach-ms1/shots/` when `YAMES_COACH_MODEL_SHOTS` is set.
+ * ms2 adds: bytes and Cancel in the row and the window's strip, both tiers on
+ * disk, low storage, a pause kept from before a restart, the checksum stage.
+ * Pictures go to the folder `YAMES_COACH_MODEL_SHOTS` names, when it is set.
  */
 
 const SHOTS_DIR = process.env.YAMES_COACH_MODEL_SHOTS;
@@ -95,8 +97,10 @@ for (const theme of THEMES) {
       if (SHOTS_DIR) await page.screenshot({ path: `${SHOTS_DIR}/${theme}-${size.panel}-not-downloaded.png` });
 
       await download.click();
-      await expect(page.locator(".coach-model-progress")).toContainText("42%");
+      // Bytes, ms2: "1.0 of 2.5 GB", with Pause and Cancel side by side.
+      await expect(page.locator(".coach-model-progress")).toContainText("of 2.5 GB");
       await expect(page.getByRole("menuitem", { name: /^Pause: Standard/ })).toBeVisible();
+      await expect(page.getByRole("menuitem", { name: /^Cancel: Standard/ })).toBeVisible();
       await checkMenu(page, `downloading, ${theme}, ${size.panel}`);
       if (SHOTS_DIR) await page.screenshot({ path: `${SHOTS_DIR}/${theme}-${size.panel}-downloading.png` });
 
@@ -111,7 +115,82 @@ for (const theme of THEMES) {
       const button = (await page.locator(".coach-model-button").boundingBox())!;
       expect(button.x + button.width, "the selector's button in the panel").toBeLessThanOrEqual(card.x + card.width + 0.5);
       expect(button.y + button.height, "the selector's button in the window").toBeLessThanOrEqual(size.height + 0.5);
+      // The window's strip: Pause and Cancel, the selector's words, both
+      // inside the window and pressable.
+      await expect(page.getByTestId("download-bar-pause")).toHaveText("Pause");
+      await expect(page.getByTestId("download-bar-cancel")).toHaveText("Cancel");
+      expect(await notHitTestable(page, "[data-testid=download-bar-pause], [data-testid=download-bar-cancel]")).toEqual([]);
       if (SHOTS_DIR) await page.screenshot({ path: `${SHOTS_DIR}/${theme}-${size.panel}-closed.png` });
+
+      // Cancel from the strip: the bytes go, and the row says so.
+      await page.getByTestId("download-bar-cancel").click();
+      await page.locator(".coach-model-button").click();
+      await expect(page.locator(".coach-model-progress")).toContainText("What had downloaded was removed");
+      await expect(page.getByRole("menuitem", { name: /^Download: Standard/ })).toBeVisible();
+      await checkMenu(page, `cancelled, ${theme}, ${size.panel}`);
+      if (SHOTS_DIR) await page.screenshot({ path: `${SHOTS_DIR}/${theme}-${size.panel}-cancelled.png` });
+    });
+  }
+}
+
+/** Open the coach panel and the selector's menu in one of ms2's worlds. */
+async function openMenu(page: Page, scene: string, size: (typeof SIZES)[number], theme: string) {
+  await openShot(page, scene, { width: size.width, height: size.height }, theme);
+  await page.mouse.click(5, 300);
+  await page.keyboard.press("c");
+  await expect(page.locator(".coach-card.coach-card-open")).toBeVisible();
+  await settleAnimations(page);
+  await page.locator(".coach-model-button").click();
+  await expect(page.locator(".coach-model-menu")).toBeVisible();
+}
+
+// ms2: both tiers on disk, room on disk, a pause kept from before, the check.
+for (const theme of ["ember", "manuscript"]) {
+  for (const size of SIZES) {
+    test(`both models on disk, at ${size.panel}px, in ${theme}`, async ({ page }) => {
+      test.slow();
+      await openMenu(page, "coach-model-bothOnDisk", size, theme);
+      await expect(page.getByRole("menuitemradio", { name: /Studio/ })).toBeVisible();
+      await expect(page.getByRole("menuitemradio", { name: /Standard/ })).toBeVisible();
+      await expect(page.getByRole("menuitem", { name: /^Download/ })).toHaveCount(0);
+      await checkMenu(page, `both on disk, ${theme}, ${size.panel}`);
+      if (SHOTS_DIR) await page.screenshot({ path: `${SHOTS_DIR}/${theme}-${size.panel}-both-on-disk.png` });
+    });
+
+    test(`low storage, at ${size.panel}px, in ${theme}`, async ({ page }) => {
+      test.slow();
+      await openMenu(page, "coach-model-lowStorage", size, theme);
+      await expect(page.locator(".coach-model-menu")).toContainText("Needs 5.3 GB, 3.1 GB free");
+      await expect(page.getByRole("menuitem", { name: /^Download: Studio/ })).toHaveCount(0);
+      await page.getByRole("menuitem", { name: /^Download: Standard/ }).click();
+      await expect(page.locator(".coach-model-note")).toContainText("Only 3.1 GB is free");
+      await expect(page.getByRole("menuitem", { name: /^Download anyway: Standard/ })).toBeVisible();
+      await checkMenu(page, `low storage, ${theme}, ${size.panel}`);
+      if (SHOTS_DIR) await page.screenshot({ path: `${SHOTS_DIR}/${theme}-${size.panel}-low-storage.png` });
+    });
+
+    test(`a pause kept from before, then cancelled, at ${size.panel}px, in ${theme}`, async ({ page }) => {
+      test.slow();
+      await openMenu(page, "coach-model-paused", size, theme);
+      await expect(page.locator(".coach-model-progress")).toContainText("Paused at 1.2 of 5.0 GB");
+      await expect(page.getByRole("menuitem", { name: /^Resume: Studio/ })).toBeVisible();
+      await checkMenu(page, `paused, ${theme}, ${size.panel}`);
+      if (SHOTS_DIR) await page.screenshot({ path: `${SHOTS_DIR}/${theme}-${size.panel}-paused.png` });
+      await page.getByRole("menuitem", { name: /^Cancel: Studio/ }).click();
+      await expect(page.locator(".coach-model-progress")).toContainText("What had downloaded was removed");
+      await expect(page.getByRole("menuitem", { name: /^Download: Studio/ })).toBeVisible();
+      await checkMenu(page, `paused then cancelled, ${theme}, ${size.panel}`);
+    });
+
+    test(`checking the download, at ${size.panel}px, in ${theme}`, async ({ page }) => {
+      test.slow();
+      await openMenu(page, "coach-model-checking", size, theme);
+      await page.getByRole("menuitem", { name: /^Download: Standard/ }).click();
+      await expect(page.locator(".coach-model-progress")).toContainText("published checksum");
+      await checkMenu(page, `checking, ${theme}, ${size.panel}`);
+      if (SHOTS_DIR) await page.screenshot({ path: `${SHOTS_DIR}/${theme}-${size.panel}-checking.png` });
+      await page.keyboard.press("Escape");
+      await expect(page.locator(".coach-model-button")).toContainText("checking");
     });
   }
 }

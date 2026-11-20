@@ -374,8 +374,13 @@ export interface Shot {
    * press with progress at 42% and a pause with "cancelled", the way Rust
    * does. The scene itself only opens the window: the spec opens the coach
    * panel and the selector, and presses Download, as a person would.
+   *
+   * ms2's worlds, the same build: `bothOnDisk` (both tiers side by side),
+   * `lowStorage` (3.1 GB free: Studio does not fit, Standard only just),
+   * `paused` (1.2 GB of Studio kept from before; Cancel removes it), and
+   * `checking` (a press answers with the checksum stage at 60%).
    */
-  coachModel?: "notDownloaded";
+  coachModel?: "notDownloaded" | "bothOnDisk" | "lowStorage" | "paused" | "checking";
   /**
    * The first-run wizard, over a store with no player in it (MVP, 2026-11-16).
    *
@@ -521,6 +526,17 @@ export const SHOTS: Shot[] = [
     height: 900,
     settleMs: 400,
   },
+  // ms2's selector scenes, the same spec.
+  ...(["bothOnDisk", "lowStorage", "paused", "checking"] as const).map((coachModel) => ({
+    id: `coach-model-${coachModel}`,
+    suffix: `coach-model-${coachModel}`,
+    window: "main" as const,
+    tab: "beat" as const,
+    coachModel,
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  })),
   {
     id: "drill",
     suffix: "drill",

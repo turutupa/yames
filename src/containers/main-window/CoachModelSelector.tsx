@@ -3,6 +3,7 @@ import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { brainTierLabelKey } from "../../coach/brainTiers";
+import { gbDoneText, gbText } from "../../coach/brainDisk";
 import {
   cancelCoachModelDownload,
   chooseCoachModel,
@@ -32,20 +33,8 @@ import "../../styles/coach-model.css";
  */
 
 /** Sizes as people read them: decimal gigabytes, one place. */
-function gb(bytes: number, lng: string): string {
-  const n = new Intl.NumberFormat(lng, { maximumFractionDigits: 1, minimumFractionDigits: 1 });
-  return `${n.format(bytes / 1e9)} GB`;
-}
-
-/**
- * The bytes done so far, in the same unit as the whole and never rounded up
- * to it: "2.4 of 2.5 GB" until the last byte, not "2.5 of 2.5 GB".
- */
-function gbOf(done: number, total: number, lng: string): string {
-  const n = new Intl.NumberFormat(lng, { maximumFractionDigits: 1, minimumFractionDigits: 1 });
-  const tenths = done >= total ? total / 1e8 : Math.min(Math.floor(done / 1e8), Math.floor(total / 1e8));
-  return n.format(Math.round(tenths) / 10);
-}
+const gb = gbText;
+const gbOf = gbDoneText;
 
 /** The machine's memory, in the round number its owner knows it by. */
 function memoryGb(mb: number, lng: string): string {

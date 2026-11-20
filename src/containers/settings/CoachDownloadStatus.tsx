@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import type { DownloadProgress, ModelStatus } from "../../ipc.desktop";
 import { brainTierLabelKey } from "../../coach/brainTiers";
-import { tierOnDisk } from "../../coach/brainDisk";
+import { gbDoneText, gbText, tierOnDisk } from "../../coach/brainDisk";
 import { useCoachModel } from "../../hooks/useCoachModel";
 import { formatBytes } from "./formatBytes";
 
@@ -38,7 +38,7 @@ export function CoachDownloadConfirmDialog({
   onUseInstalled: (tier: "standard" | "full") => void;
   onStartDownload: (tier: "standard" | "full") => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // Escape closes this dialog and nothing else. MainWindow's unified hotkey
   // dispatcher listens on `document` in the bubble phase and maps Escape in
@@ -80,7 +80,7 @@ export function CoachDownloadConfirmDialog({
             const isInstalled = tierOnDisk(modelStatus, tier) !== null;
             const space = model.rows.find((r) => r.tier === tier)?.space ?? null;
             const spaceWords = space
-              ? { need: formatBytes(space.needBytes), free: formatBytes(space.freeBytes) }
+              ? { need: gbText(space.needBytes, i18n.language), free: gbText(space.freeBytes, i18n.language) }
               : undefined;
             return (
               <div
@@ -157,14 +157,21 @@ export function DownloadProgressBar({
   /** Absent when there is nothing of the model left to cancel (the voices step). */
   onCancel?: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const pct = downloadProgress ? Math.round(downloadProgress.fraction * 100) : 0;
   const tierLabel = downloadingTier === null ? "" : t(brainTierLabelKey(downloadingTier));
   const modelName = downloadProgress?.component ?? "model";
+  // "1.2 of 2.5 GB", the selector's own words and units.
+  const p = downloadProgress;
   const bytesInfo =
-    downloadProgress && downloadProgress.downloadedBytes > 0
-      ? ` · ${formatBytes(downloadProgress.downloadedBytes)}${downloadProgress.totalBytes > 0 ? ` / ${formatBytes(downloadProgress.totalBytes)}` : ""}`
-      : "";
+    p && p.downloadedBytes > 0 && p.totalBytes > 0
+      ? ` · ${t("coachModel.download.bytes", {
+          done: gbDoneText(p.downloadedBytes, p.totalBytes, i18n.language),
+          total: gbText(p.totalBytes, i18n.language),
+        })}`
+      : p && p.downloadedBytes > 0
+        ? ` · ${formatBytes(p.downloadedBytes)}`
+        : "";
   const label =
     downloadProgress?.stage === "checking"
       ? `${tierLabel} — ${t("coachModel.download.checking", { percent: `${pct}%` })}`

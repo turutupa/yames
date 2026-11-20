@@ -12,7 +12,7 @@ import type { CoachCapabilities, ModelStatus, VoiceDiagnostic } from "../../ipc.
 import { storeSave } from "../../ipc";
 import { deleteModels, getCoachCapabilities, getModelStatus, onTtsSpeechEnded, ttsSetVoice, ttsSpeak, ttsStop } from "../../ipc.desktop";
 import { brainTierLabelKey } from "../../coach/brainTiers";
-import { MODEL_TIERS, tierOnDisk, tiersOnDisk } from "../../coach/brainDisk";
+import { MODEL_TIERS, gbText, tierOnDisk, tiersOnDisk } from "../../coach/brainDisk";
 import { COACH_MODEL_TIERS } from "../../hooks/coachLoader";
 import type { CoachStance } from "../../coach/learningMode";
 import { formatBytes } from "./formatBytes";
@@ -94,7 +94,7 @@ export function CoachSettingsSection({
   onStartDownload: (tier: ModelTier) => void;
   onRequestDownload: (tier: ModelTier) => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   // Tracks the in-flight `deleteModels()` IPC call so the Remove button
   // can show a "Removing…" state and stays clickable-but-disabled. The
   // backend does `std::fs::remove_dir_all` on a 4 GB tree, which on
@@ -798,7 +798,8 @@ export function CoachSettingsSection({
                 const name = t("coachModel.entry", {
                   tier: t(brainTierLabelKey(tier)),
                   model: COACH_MODEL_TIERS.find((x) => x.tier === tier)?.name ?? "",
-                  size: formatBytes(onDisk.sizeBytes),
+                  // The selector's units, so the two say the same size.
+                  size: gbText(onDisk.sizeBytes, i18n.language),
                 });
                 return (
                   <li key={tier} className="coach-tier-item" data-tier={tier}>

@@ -80,6 +80,7 @@
       "running": "Downloading… {{percent}}",
       "runningNoPercent": "Downloading…",
       "runningBytes": "Downloading… {{done}} of {{total}}",
+      "bytes": "{{done}} of {{total}}",
       "checking": "Checking the download against its published checksum… {{percent}}",
       "voices": "Getting the coach's voices…",
       "paused": "Paused at {{percent}}. Resume carries on from there.",
