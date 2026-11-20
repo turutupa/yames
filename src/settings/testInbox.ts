@@ -28,6 +28,8 @@ export const INBOX_ON_KEY = "yames.testInbox.on";
 export const INBOX_URL_KEY = "yames.testInbox.url";
 export const INBOX_SINCE_KEY = "yames.testInbox.since";
 export const INBOX_ITEMS_KEY = "yames.testInbox.items";
+/** A random id for this install, so two devices' sessions of the same second stay apart on the inbox. */
+export const INBOX_DEVICE_KEY = "yames.testInbox.device";
 /** Not under `yames.`: `settingsSnapshot` copies those into every session.json. */
 export const INBOX_TOKEN_KEY = "yamesInbox.token";
 
@@ -132,6 +134,16 @@ function setItem(id: string, item: Omit<InboxItem, "at">) {
   publish();
 }
 
+export function deviceId(): string {
+  const have = get(INBOX_DEVICE_KEY);
+  if (have && /^[a-z0-9]{1,16}$/.test(have)) return have;
+  const bytes = new Uint8Array(6);
+  crypto.getRandomValues(bytes);
+  const id = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+  put(INBOX_DEVICE_KEY, id);
+  return id;
+}
+
 // --- the address and the pairing ----------------------------------------------
 
 /**
@@ -172,7 +184,10 @@ async function call(base: string, method: string, path: string, init: { token?: 
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), CHUNK_TIMEOUT_MS);
   const headers: Record<string, string> = {};
-  if (init.token) headers.Authorization = `Bearer ${init.token}`;
+  if (init.token) {
+    headers.Authorization = `Bearer ${init.token}`;
+    headers["X-Yames-Device"] = deviceId();
+  }
   let body = init.body;
   if (init.json !== undefined) {
     headers["Content-Type"] = "application/json";
@@ -299,10 +314,26 @@ export function syncInbox(force = false): Promise<void> {
 async function runOnce(force: boolean): Promise<void> {
   {
     const since = Number(get(INBOX_SINCE_KEY) ?? "0") || 0;
-    const sessions = await captureSessions().catch(() => []);
+    const sessions = await captureSessions().catch(() => null);
+    if (!sessions) return;
+    // recorded (or still going) since the switch went on; one ended by closing the app has no end time
+    const wanted = (s: (typeof sessions)[number]) => Math.max(s.startedWallMs ?? 0, s.endedWallMs ?? 0) >= since;
+    // a session no longer on the device, or recorded while the switch was off, waits for nothing
+    const keep = new Set(sessions.filter(wanted).map((s) => s.id));
+    const items = readItems();
+    let dropped = false;
+    for (const [id, it] of Object.entries(items)) {
+      if ((it.state === "waiting" || it.state === "sending") && !keep.has(id)) {
+        delete items[id];
+        dropped = true;
+      }
+    }
+    if (dropped) {
+      put(INBOX_ITEMS_KEY, JSON.stringify(items));
+      publish();
+    }
     for (const s of sessions) {
-      // recorded (or still going) since the switch went on; one ended by closing the app has no end time
-      if (s.active || Math.max(s.startedWallMs ?? 0, s.endedWallMs ?? 0) < since) continue;
+      if (s.active || !wanted(s)) continue;
       const prev = readItems()[s.id];
       if (prev?.state === "uploaded" || (prev?.state === "failed" && !force)) continue;
       const base = get(INBOX_URL_KEY);

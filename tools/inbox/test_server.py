@@ -53,7 +53,7 @@ class InboxTest(unittest.TestCase):
 
     def req(self, method, path, body=None, token=TOKEN, headers=None):
         c = http.client.HTTPConnection("127.0.0.1", self.port, timeout=10)
-        h = dict(headers or {})
+        h = {**getattr(self, "headers", {}), **(headers or {})}
         if token is not None:
             h["Authorization"] = f"Bearer {token}"
         c.request(method, path, body=body, headers=h)
@@ -94,9 +94,9 @@ class InboxTest(unittest.TestCase):
         code, doc, _ = self.upload(blob)
         self.assertEqual(code, 201, doc)
         self.assertTrue(doc["done"])
-        self.assertEqual((self.inbox / "20261120-120000.zip").read_bytes(), blob)
+        self.assertEqual((self.inbox / "20261120-120000__anon.zip").read_bytes(), blob)
         self.assertFalse(any((self.inbox / ".partial").iterdir()))
-        self.wait_status("20261120-120000", "kept")
+        self.wait_status("20261120-120000__anon", "kept")
         code, doc, _ = self.req("GET", "/v1/uploads/20261120-120000")
         self.assertEqual((code, doc["done"]), (200, True))
         # sending it again is "already received", never a second copy
@@ -116,7 +116,7 @@ class InboxTest(unittest.TestCase):
         self.assertEqual(doc["received"], 180_000)
         code, doc, _ = self.upload(blob, start=st["received"])
         self.assertEqual(code, 201, doc)
-        self.assertEqual((self.inbox / "20261120-120000.zip").read_bytes(), blob)
+        self.assertEqual((self.inbox / "20261120-120000__anon.zip").read_bytes(), blob)
 
     def test_a_short_body_keeps_what_came_and_resumes(self):
         blob = session_zip()
@@ -147,7 +147,7 @@ class InboxTest(unittest.TestCase):
         code, doc, _ = self.req("PUT", f"/v1/uploads/20261120-120000?offset=0&total={len(b)}", b[:90_000])
         self.assertEqual(code, 200, doc)
         self.assertEqual(self.upload(b, start=90_000)[0], 201)
-        self.assertEqual((self.inbox / "20261120-120000.zip").read_bytes(), b)
+        self.assertEqual((self.inbox / "20261120-120000__anon.zip").read_bytes(), b)
 
     # --- the token -------------------------------------------------------------
 
@@ -163,7 +163,7 @@ class InboxTest(unittest.TestCase):
             ):
                 code, _, _ = self.req(method, path, body, token=tok)
                 self.assertEqual(code, 401, (tok, method, path))
-        self.assertFalse((self.inbox / ".partial" / "20261120-120000.part").exists())
+        self.assertFalse((self.inbox / ".partial" / "20261120-120000__anon.part").exists())
         self.assertEqual(self.req("GET", "/v1/ping")[0], 200)
 
     def test_a_preflight_carries_no_data(self):
@@ -218,7 +218,7 @@ class InboxTest(unittest.TestCase):
         self.assertEqual(code, 400)
         code, _, _ = self.req("PUT", "/v1/uploads/20261120-120000?offset=0&total=10", b"x" * 10, headers={"Transfer-Encoding": "chunked"})
         self.assertEqual(code, 411)
-        self.assertFalse((self.inbox / ".partial" / "20261120-120000.part").exists())
+        self.assertFalse((self.inbox / ".partial" / "20261120-120000__anon.part").exists())
 
     def test_a_zip_that_unpacks_past_the_limit_is_refused(self):
         why = server.check_zip(self._write(session_zip(extra={"big": b"\0" * 400_000})), "20261120-120000", 300_000)
@@ -244,7 +244,7 @@ class InboxTest(unittest.TestCase):
             blob = session_zip(raw_names=names)
             code, doc, _ = self.upload(blob)
             self.assertEqual(code, 422, (names, doc))
-            self.assertFalse((self.inbox / "20261120-120000.zip").exists())
+            self.assertFalse((self.inbox / "20261120-120000__anon.zip").exists())
         self.assertFalse((self.tmp / "evil.txt").exists())
 
     def test_a_zip_with_a_symlink_or_no_session_json_is_refused(self):
@@ -271,6 +271,67 @@ class InboxTest(unittest.TestCase):
                 server.build(host, 0, TOKEN, self.inbox, self.pair_file, self.tmp, self.tmp, None, 10, 10)
         self.assertEqual(self.srv.server_address[0], "127.0.0.1")
 
+    # --- the review's findings (card #123) ---------------------------------------
+
+    def test_an_id_with_a_trailing_newline_is_refused(self):
+        for bad in ("abc%0A", "abc%0D", "abc%0A%0A"):
+            code, _, _ = self.req("PUT", f"/v1/uploads/{bad}?offset=0&total=10", b"x" * 10)
+            self.assertEqual(code, 400, bad)
+        self.assertEqual(sorted(p.name for p in self.inbox.iterdir()), [".partial"])
+
+    def test_a_nested_session_json_is_refused(self):
+        blob = session_zip(extra={"A/session.json": json.dumps({"session": "VICTIM"}).encode()})
+        code, doc, _ = self.upload(blob)
+        self.assertEqual(code, 422, doc)
+        self.assertIn("second session.json", doc["error"])
+
+    def test_two_devices_with_the_same_session_id_never_meet(self):
+        a, b = session_zip(), session_zip(extra={"phone.wav": b"x" * 5000})
+        for dev, blob in (("aaaa1111", a), ("bbbb2222", b)):
+            self.headers = {"X-Yames-Device": dev}
+            code, doc, _ = self.upload(blob)
+            self.assertEqual(code, 201, (dev, doc))
+        self.headers = {}
+        self.assertEqual((self.inbox / "20261120-120000__aaaa1111.zip").read_bytes(), a)
+        self.assertEqual((self.inbox / "20261120-120000__bbbb2222.zip").read_bytes(), b)
+        code, _, _ = self.req("GET", "/v1/uploads/20261120-120000", headers={"X-Yames-Device": "../x"})
+        self.assertEqual(code, 400)
+
+    def test_a_late_chunk_of_an_older_zip_does_not_wipe_the_upload(self):
+        a, b = session_zip(), session_zip(extra={"phone.wav": b"x" * 1000})
+        self.upload(b, stop_after=2)
+        code, doc, _ = self.req("PUT", f"/v1/uploads/20261120-120000?offset=90000&total={len(a)}", a[90_000:180_000])
+        self.assertEqual(code, 409)
+        self.assertEqual(doc["received"], 180_000)
+        self.assertEqual(self.upload(b, start=180_000)[0], 201)
+
+    def test_unicode_digits_are_a_bad_request_not_a_crash(self):
+        for q in ("offset=%C2%B2&total=10", "offset=0&total=%D9%A1"):
+            code, _, _ = self.req("PUT", f"/v1/uploads/20261120-120000?{q}", b"x" * 10)
+            self.assertEqual(code, 400, q)
+        c = http.client.HTTPConnection("127.0.0.1", self.port, timeout=10)
+        c.putrequest("PUT", "/v1/uploads/20261120-120000?offset=0&total=10")
+        c.putheader("Authorization", f"Bearer {TOKEN}")
+        c.putheader("Content-Length", "\u00b2".encode("latin-1"))
+        c.endheaders()
+        self.assertEqual(c.getresponse().status, 411)
+        c.close()
+
+    def test_room_for_the_ingest_and_other_uploads_is_counted(self):
+        # 1.5 MB promised by another upload, nothing of it sent
+        (self.inbox / ".partial" / "other__anon.json").write_text(json.dumps({"total": 1_500_000}))
+        free = server.shutil.disk_usage(self.inbox).free
+        self.app.disk_margin = free - 1_400_000 - 3 * 100
+        code, _, _ = self.req("PUT", "/v1/uploads/20261120-120000?offset=0&total=100", b"x" * 100)
+        self.assertEqual(code, 507)
+
+    def test_an_abandoned_half_upload_is_dropped_after_a_week(self):
+        part = self.inbox / ".partial" / "old__anon.part"
+        part.write_bytes(b"x")
+        os.utime(part, (time.time() - 8 * 86400,) * 2)
+        self.app.expire_partials()
+        self.assertFalse(part.exists())
+
     def _write(self, blob: bytes) -> pathlib.Path:
         p = self.tmp / f"z{time.monotonic_ns()}.zip"
         p.write_bytes(blob)
@@ -278,6 +339,51 @@ class InboxTest(unittest.TestCase):
 
 
 class IngestRunTest(unittest.TestCase):
+    def test_a_restart_requeues_what_was_queued_or_running(self):
+        tmp = pathlib.Path(tempfile.mkdtemp(prefix="inbox-requeue-"))
+        try:
+            for k, st in (("q1__anon", "queued"), ("r1__anon", "running"), ("d1__anon", "ingested"), ("n1__anon", None)):
+                (tmp / f"{k}.zip").write_bytes(b"zip")
+                if st:
+                    (tmp / f"{k}.status.json").write_text(json.dumps({"state": st}))
+            ing = server.Ingester(tmp, tmp / "reports", tmp, None)
+            ing.start()
+            for _ in range(200):
+                if all((ing.status(k) or {}).get("state") == "kept" for k in ("q1__anon", "r1__anon", "n1__anon")):
+                    break
+                time.sleep(0.02)
+            self.assertEqual({k: ing.status(k)["state"] for k in ("q1__anon", "r1__anon", "d1__anon", "n1__anon")},
+                             {"q1__anon": "kept", "r1__anon": "kept", "d1__anon": "ingested", "n1__anon": "kept"})
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_one_bad_ingest_does_not_stop_the_worker(self):
+        tmp = pathlib.Path(tempfile.mkdtemp(prefix="inbox-worker-"))
+        try:
+            ing = server.Ingester(tmp, tmp / "reports", tmp, ["true"])
+            calls = []
+            real = ing._one
+
+            def flaky(k):
+                calls.append(k)
+                if k == "bad__anon":
+                    raise OSError("disk gone")
+                real(k)
+
+            ing._one = flaky
+            ing.start()
+            (tmp / "ok__anon.zip").write_bytes(b"z")
+            ing.q.put("bad__anon")
+            ing.enqueue("ok__anon")
+            for _ in range(200):
+                if (ing.status("ok__anon") or {}).get("state") == "ingested":
+                    break
+                time.sleep(0.02)
+            self.assertEqual(ing.status("ok__anon")["state"], "ingested")
+            self.assertEqual(calls, ["bad__anon", "ok__anon"])
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
     def test_a_finished_upload_runs_the_ingest_and_records_it(self):
         tmp = pathlib.Path(tempfile.mkdtemp(prefix="inbox-ingest-"))
         try:

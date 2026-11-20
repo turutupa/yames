@@ -207,6 +207,23 @@ describe("sending sessions", () => {
     expect(inboxNow().items["20261120-010000"]?.state).toBe("uploaded");
   });
 
+  it("names this install on every request, and the same id each time", async () => {
+    const inbox = await paired();
+    await syncInbox();
+    const devs = new Set(inbox.fetchMock.mock.calls.map(([, init]) => ((init as RequestInit).headers as Record<string, string>)["X-Yames-Device"]));
+    expect(devs.size).toBe(1);
+    expect([...devs][0]).toMatch(/^[a-z0-9]{12}$/);
+  });
+
+  it("forgets a waiting session the switch no longer covers, so nothing retries for ever", async () => {
+    backing.set("yames.testInbox.on", "1");
+    backing.set(INBOX_SINCE_KEY, "1000");
+    backing.set("yames.testInbox.items", JSON.stringify({ "20261120-010000": { state: "waiting", at: 1 }, gone: { state: "waiting", at: 1 } }));
+    backing.set(INBOX_SINCE_KEY, String(1e15));
+    await syncInbox();
+    expect(Object.keys(inboxNow().items).sort()).toEqual(["20261120-020000"]);
+  });
+
   it("waits, unpaired, without sending anything", async () => {
     const inbox = fakeInbox();
     backing.set("yames.testInbox.on", "1");

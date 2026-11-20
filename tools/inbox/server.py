@@ -66,7 +66,15 @@ DISK_MARGIN = 4 * 1024**3
 PAIR_TTL_S = 24 * 3600
 PAIR_FAIL_WINDOW_S = 600
 PAIR_FAIL_MAX = 10
-SESSION_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
+SESSION_RE = re.compile(r"\A[A-Za-z0-9_-]{1,64}\Z")
+# a per-install id the app sends (X-Yames-Device), so two devices' sessions of the same second never meet
+DEVICE_RE = re.compile(r"\A[a-z0-9]{1,16}\Z")
+KEY_RE = re.compile(r"\A[A-Za-z0-9_-]{1,64}__[a-z0-9]{1,16}\Z")
+DIGITS_RE = re.compile(r"\A[0-9]{1,15}\Z")
+# a half-sent upload nobody resumed for this long is dropped
+PARTIAL_TTL_S = 7 * 24 * 3600
+# what an arriving zip needs on the disk besides itself: the ingest unpacks it and writes its store
+INGEST_FACTOR = 3
 LOCAL_HOSTS = {"127.0.0.1", "::1", "localhost"}
 # the app's webview origins (Windows/Android: http(s)://tauri.localhost, macOS/Linux: tauri://localhost) and its dev server
 ALLOWED_ORIGINS = {
@@ -205,11 +213,18 @@ def check_zip(path: pathlib.Path, session: str, max_unpacked: int) -> str | None
                     return "the zip unpacks past the size limit"
                 if parts == [session, "session.json"]:
                     has_json = True
+                elif parts[-1] == "session.json":
+                    # the ingest would take a nested one for a session of its own, named by it
+                    return f"a second session.json in the zip: {name!r}"
             if not has_json:
                 return f"no {session}/session.json in the zip"
             # the ingest names the session's folder from this: it must be the id
+            with z.open(f"{session}/session.json") as f:
+                raw = f.read(1_000_001)
+            if len(raw) > 1_000_000:
+                return "session.json is too big"
             try:
-                doc = json.loads(z.read(f"{session}/session.json")[:1_000_000])
+                doc = json.loads(raw)
             except ValueError:
                 return "session.json is not JSON"
             if not isinstance(doc, dict) or doc.get("session", session) != session:
@@ -239,8 +254,12 @@ class Ingester:
     def start(self) -> None:
         self.thread.start()
         # a zip that came in while the last run was stopped
+        # and one whose ingest was queued or running when it stopped
         for z in sorted(self.inbox.glob("*.zip")):
-            if SESSION_RE.match(z.stem) and not self.status_path(z.stem).exists():
+            if not KEY_RE.fullmatch(z.stem):
+                continue
+            st = self.status(z.stem)
+            if st is None or st.get("state") in ("queued", "running"):
                 self.q.put(z.stem)
 
     def status_path(self, session: str) -> pathlib.Path:
@@ -265,26 +284,32 @@ class Ingester:
     def _run(self) -> None:
         while True:
             session = self.q.get()
-            if self.command is None:
-                self._set(session, state="kept")
-                continue
-            zp = self.inbox / f"{session}.zip"
-            logs = self.reports / "inbox-logs"
-            logs.mkdir(parents=True, exist_ok=True)
-            log_path = logs / f"{session}.log"
-            self._set(session, state="running")
-            t0 = time.time()
             try:
-                with open(log_path, "wb") as lf:
-                    env = {**os.environ, "INIT_CWD": str(self.repo)}
-                    rc = subprocess.call(self.command + [str(zp)], cwd=str(self.repo), stdout=lf, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, env=env)
-            except OSError as e:
-                rc = -1
-                with open(log_path, "a") as lf:
-                    lf.write(f"\ncould not start the ingest: {e}\n")
-            state = "ingested" if rc == 0 else "failed"
-            self._set(session, state=state, rc=rc, seconds=round(time.time() - t0, 1), log=str(log_path), report=str(self.reports / session / "report.html"))
-            log(f"{session}: ingest {state} (rc {rc}, {time.time() - t0:.0f} s), log {log_path}")
+                self._one(session)
+            except Exception as e:  # the only worker: one bad zip must not stop the rest
+                log(f"{session}: the ingest worker hit {type(e).__name__}: {e}")
+
+    def _one(self, session: str) -> None:
+        if self.command is None:
+            self._set(session, state="kept")
+            return
+        zp = self.inbox / f"{session}.zip"
+        logs = self.reports / "inbox-logs"
+        logs.mkdir(parents=True, exist_ok=True)
+        log_path = logs / f"{session}.log"
+        self._set(session, state="running")
+        t0 = time.time()
+        try:
+            with open(log_path, "wb") as lf:
+                env = {**os.environ, "INIT_CWD": str(self.repo)}
+                rc = subprocess.call(self.command + [str(zp)], cwd=str(self.repo), stdout=lf, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, env=env)
+        except OSError as e:
+            rc = -1
+            with open(log_path, "a") as lf:
+                lf.write(f"\ncould not start the ingest: {e}\n")
+        state = "ingested" if rc == 0 else "failed"
+        self._set(session, state=state, rc=rc, seconds=round(time.time() - t0, 1), log=str(log_path), report=str(self.reports / session.split("__")[0] / "report.html"))
+        log(f"{session}: ingest {state} (rc {rc}, {time.time() - t0:.0f} s), log {log_path}")
 
 
 # --- the server ---------------------------------------------------------------
@@ -303,6 +328,30 @@ class Inbox:
         self.disk_margin = disk_margin
         self.locks: dict[str, threading.Lock] = {}
         self.locks_lock = threading.Lock()
+        self.expire_partials()
+
+    def expire_partials(self) -> None:
+        now = time.time()
+        for p in self.partial.iterdir():
+            try:
+                if now - p.stat().st_mtime > PARTIAL_TTL_S:
+                    p.unlink()
+            except OSError:
+                pass
+
+    def pending_bytes(self, but: str) -> int:
+        """What the other half-sent uploads will still need."""
+        n = 0
+        for m in self.partial.glob("*.json"):
+            if m.stem == but:
+                continue
+            try:
+                total = int(json.loads(m.read_text()).get("total", 0))
+                have = self.part(m.stem).stat().st_size if self.part(m.stem).exists() else 0
+                n += max(0, total - have)
+            except (OSError, ValueError, TypeError):
+                pass
+        return n
 
     def lock_for(self, session: str) -> threading.Lock:
         with self.locks_lock:
@@ -348,7 +397,7 @@ def make_handler(app: Inbox):
                 self.send_header("Access-Control-Allow-Origin", origin)
                 self.send_header("Vary", "Origin")
                 self.send_header("Access-Control-Allow-Methods", "GET, PUT, POST, OPTIONS")
-                self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
+                self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type, X-Yames-Device")
                 self.send_header("Access-Control-Allow-Private-Network", "true")
                 self.send_header("Access-Control-Max-Age", "600")
 
@@ -385,17 +434,25 @@ def make_handler(app: Inbox):
                 self.fail(404, "not found")
                 return None
             s = urllib.parse.unquote(m.group(1))
-            if not SESSION_RE.match(s):
+            if not SESSION_RE.fullmatch(s):
                 self.fail(400, "bad session id")
                 return None
             return s
+
+        def key_of(self, session: str) -> str | None:
+            """Where this device's upload of `session` is kept: `<session>__<device>`."""
+            dev = self.headers.get("X-Yames-Device", "anon")
+            if not DEVICE_RE.fullmatch(dev):
+                self.fail(400, "bad device id")
+                return None
+            return f"{session}__{dev}"
 
         def length(self) -> int | None:
             if self.headers.get("Transfer-Encoding"):
                 self.fail(411, "send a Content-Length, not chunked")
                 return None
             raw = self.headers.get("Content-Length")
-            if raw is None or not raw.isdigit():
+            if raw is None or not DIGITS_RE.fullmatch(raw):
                 self.fail(411, "a Content-Length is needed")
                 return None
             return int(raw)
@@ -416,7 +473,10 @@ def make_handler(app: Inbox):
             s = self.session_of(path)
             if s is None:
                 return
-            self.reply(200, app.upload_state(s))
+            key = self.key_of(s)
+            if key is None:
+                return
+            self.reply(200, app.upload_state(key))
 
         def do_POST(self):
             path, _ = self.route()
@@ -451,14 +511,16 @@ def make_handler(app: Inbox):
             s = self.session_of(path)
             if s is None:
                 return
+            key = self.key_of(s)
+            if key is None:
+                return
             n = self.length()
             if n is None:
                 return
-            try:
-                offset = int(q.get("offset", [""])[0])
-                total = int(q.get("total", [""])[0])
-            except ValueError:
+            raw_off, raw_total = q.get("offset", [""])[0], q.get("total", [""])[0]
+            if not (DIGITS_RE.fullmatch(raw_off) and DIGITS_RE.fullmatch(raw_total)):
                 return self.fail(400, "offset and total are needed")
+            offset, total = int(raw_off), int(raw_total)
             if offset < 0 or total <= 0:
                 return self.fail(400, "bad offset or total")
             if n == 0:
@@ -469,24 +531,28 @@ def make_handler(app: Inbox):
                 return self.fail(413, "the chunk is over the size limit", maxChunk=app.max_chunk)
             if offset + n > total:
                 return self.fail(400, "the chunk runs past the total")
-            with app.lock_for(s):
-                st = app.upload_state(s)
+            with app.lock_for(key):
+                st = app.upload_state(key)
                 if st["done"]:
                     return self.fail(409, "already received", **st)
                 if st["total"] is not None and st["total"] != total:
+                    if offset != 0:
+                        # a late chunk of an older zip: say where the current one is
+                        return self.fail(409, "resume from received", **st)
                     # the app zipped the session again (a different size): start over
-                    app.part(s).unlink(missing_ok=True)
-                    st = app.upload_state(s)
+                    app.part(key).unlink(missing_ok=True)
+                    st = app.upload_state(key)
                 if offset != st["received"]:
                     return self.fail(409, "resume from received", **st)
                 if offset == 0:
+                    app.expire_partials()
                     free = shutil.disk_usage(app.inbox).free
-                    if free < total + app.disk_margin:
+                    if free < total * INGEST_FACTOR + app.pending_bytes(key) + app.disk_margin:
                         return self.fail(507, "not enough free disk on the inbox")
-                    app.meta_path(s).write_text(json.dumps({"total": total, "started": time.time()}))
+                    app.meta_path(key).write_text(json.dumps({"total": total, "started": time.time()}))
                 # read the body into the part file; a short read leaves what came, to resume from
                 got = 0
-                with open(app.part(s), "ab") as f:
+                with open(app.part(key), "ab") as f:
                     while got < n:
                         piece = self.rfile.read(min(READ_PIECE, n - got))
                         if not piece:
@@ -500,16 +566,16 @@ def make_handler(app: Inbox):
                 received = offset + n
                 if received < total:
                     return self.reply(200, {"session": s, "received": received, "total": total, "done": False})
-                why = check_zip(app.part(s), s, app.max_bytes * 2)
+                why = check_zip(app.part(key), s, app.max_bytes * 2)
                 if why:
-                    app.part(s).unlink(missing_ok=True)
-                    app.meta_path(s).unlink(missing_ok=True)
-                    log(f"{s}: refused the upload: {why}")
+                    app.part(key).unlink(missing_ok=True)
+                    app.meta_path(key).unlink(missing_ok=True)
+                    log(f"{key}: refused the upload: {why}")
                     return self.reply(422, {"error": why, "session": s})
-                os.replace(app.part(s), app.done_path(s))
-                app.meta_path(s).unlink(missing_ok=True)
-                log(f"{s}: received {total} bytes")
-                app.ingester.enqueue(s)
+                os.replace(app.part(key), app.done_path(key))
+                app.meta_path(key).unlink(missing_ok=True)
+                log(f"{key}: received {total} bytes")
+                app.ingester.enqueue(key)
                 self.reply(201, {"session": s, "received": total, "total": total, "done": True, "ingest": "queued"})
 
     return Handler

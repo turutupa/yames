@@ -280,6 +280,28 @@ class IngestTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             ingest.resolve_input(str(zp), None, False)
 
+    def test_a_nested_session_or_a_namesake_never_replaces_another(self):
+        victim = ingest.raw_root() / "VICTIM"
+        victim.mkdir(parents=True, exist_ok=True)
+        (victim / "session.json").write_text(json.dumps({"session": "VICTIM", "startedWallMs": 1}))
+        zp = self.tmp / "nested.zip"
+        with zipfile.ZipFile(zp, "w") as z:
+            z.writestr("20261120-040000/session.json", json.dumps({"session": "20261120-040000"}))
+            z.writestr("20261120-040000/A/session.json", json.dumps({"session": "VICTIM"}))
+        with self.assertRaises(ValueError):
+            ingest.resolve_input(str(zp), None, False)
+        self.assertEqual(json.loads((victim / "session.json").read_text())["startedWallMs"], 1)
+        # the same name from another device lands beside it; the same recording again replaces itself
+        def zipped(started, platform, name):
+            p = self.tmp / name
+            with zipfile.ZipFile(p, "w") as z:
+                z.writestr("20261120-050000/session.json", json.dumps({"session": "20261120-050000", "startedWallMs": started, "app": {"platform": platform}}))
+            return p
+        a = ingest.resolve_input(str(zipped(10, "windows", "a.zip")), None, False)
+        b = ingest.resolve_input(str(zipped(10, "android", "b.zip")), None, False)
+        a2 = ingest.resolve_input(str(zipped(10, "windows", "a2.zip")), None, False)
+        self.assertEqual([a[0].name, b[0].name, a2[0].name], ["20261120-050000", "20261120-050000-b", "20261120-050000"])
+
 
 if __name__ == "__main__":
     unittest.main()

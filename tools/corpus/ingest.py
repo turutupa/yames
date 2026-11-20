@@ -874,15 +874,15 @@ def sessions_in(p: pathlib.Path) -> list[pathlib.Path]:
 
 # what a zip may unpack to (a 30 min session is about 1 GB; the inbox caps uploads at 16 GB)
 MAX_UNPACKED = 64 * 1024**3
-SAFE_NAME_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
+SAFE_NAME_RE = re.compile(r"\A[A-Za-z0-9_-]{1,64}\Z")
 
 
 def safe_name(name, fallback: str) -> str:
     """A session's folder name: what session.json says when it is a plain name, else the folder's own."""
     name = str(name or "")
-    if SAFE_NAME_RE.match(name):
+    if SAFE_NAME_RE.fullmatch(name):
         return name
-    if SAFE_NAME_RE.match(fallback):
+    if SAFE_NAME_RE.fullmatch(fallback):
         return fallback
     raise ValueError(f"not a session name we can use as a folder: {name!r} / {fallback!r}")
 
@@ -904,15 +904,39 @@ def safe_extract_zip(zp: pathlib.Path, dest: pathlib.Path) -> list[pathlib.Path]
     return sessions_in(dest)
 
 
+def same_session(a: dict, b: dict) -> bool:
+    """Two session.json docs for one recording (the same start, the same device kind)."""
+    return a.get("startedWallMs") == b.get("startedWallMs") and (a.get("app") or {}).get("platform") == (b.get("app") or {}).get("platform")
+
+
+def unique_dest(root: pathlib.Path, name: str, doc: dict) -> pathlib.Path:
+    """`root/name`, unless that holds ANOTHER recording of the same name (two devices in one
+    second): then `name-b`, `name-c`, ... A re-import of the same recording replaces it."""
+    for suffix in [""] + [f"-{c}" for c in "bcdefghijklmnopqrstuvwxyz"]:
+        dest = root / f"{name}{suffix}"
+        try:
+            old = json.loads((dest / "session.json").read_text())
+        except (OSError, ValueError):
+            return dest
+        if same_session(old, doc):
+            return dest
+    raise ValueError(f"too many sessions named {name}")
+
+
 def import_zip(zp: pathlib.Path) -> list[pathlib.Path]:
     """A Share/Zip export -> session folder(s) under the raw root."""
     tmp = pathlib.Path(tempfile.mkdtemp(prefix="yames-zip-", dir=str(raw_root().parent) if raw_root().parent.exists() else None))
     try:
         found = safe_extract_zip(zp, tmp)
+        # a session folder inside another would be taken for a session of its own, named by its json
+        for s in found:
+            if any(o != s and o in s.parents for o in found):
+                raise ValueError(f"{zp}: a session folder inside another ({s.relative_to(tmp)})")
         out = []
         for s in found:
-            name = safe_name(json.loads((s / "session.json").read_text()).get("session"), s.name)
-            dest = raw_root() / name
+            doc = json.loads((s / "session.json").read_text())
+            name = safe_name(doc.get("session"), s.name)
+            dest = unique_dest(raw_root(), name, doc)
             if dest.exists():
                 shutil.rmtree(dest)
             dest.parent.mkdir(parents=True, exist_ok=True)
