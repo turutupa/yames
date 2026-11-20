@@ -262,7 +262,7 @@ export const OPEN_E_BLUES: StepSpec = {
         "Over E7: the open low E twice, G and G# on the same string (frets 3 and 4), B on the A string (fret 2), the open D string, B again, and G#. Over A7 it is the same shape one string higher: the open A twice, C and C# (frets 3 and 4), E on the D string (fret 2), the open G string, E, and C#. Third finger on fret 3, fourth on fret 4, second on fret 2.",
         "The low B has no open string, so the B7 riff stays inside the open B7 chord shape: B twice on the A string (fret 2), the open D string and then D# (fret 1), A on the G string (fret 2), the open B string, A again, and D#. First finger on fret 1, second finger on the A string and third finger on the G string, both at fret 2.",
       ],
-      coach: "Four bars and three chords, with the band changing under you. Notes and the shuffle after the take.",
+      coach: "Four bars and three chords, with the chord changing under you. Notes and the shuffle after the take.",
       tab: swing([NUT_E, NUT_A, NUT_E, NUT_B].join(" | ")),
       position: 1,
       shifts: true,
@@ -282,7 +282,7 @@ export const OPEN_E_BLUES: StepSpec = {
         "Shuffle eighths, then quarter notes, 50 BPM up to a pass at 80. Four bars: the first turnaround, then the second.",
         "Bars 1 and 2: D, C#, C and B step down the B string (frets 3, 2, 1 and open), and the open high E answers each one. Then B on the A string (fret 2), a beat of rest, D# on the D string (fret 1), and B again.",
         "Bars 3 and 4: on the low strings, each note twice: the open E, G# (fret 4), the open A, and B flat (A string, fret 1). Then the same ending: B, a rest, D# and B.",
-        "Let the high E ring through bar 1. That ringing string is the sound of the first turnaround. The band plays E7 and B7 in turn, so each turnaround is heard doing its job.",
+        "Let the high E ring through bar 1. That ringing string is the sound of the first turnaround. The chords are E7 and B7 in turn, so each turnaround is heard doing its job.",
       ],
       coach: "Timed and counted. The open E rings over the line on purpose, so right notes are not checked here: the pitch is for your ear.",
       tab: swing([TURN_TOP, TURN_END, TURN_LOW, TURN_END].join(" | ")),
@@ -536,7 +536,7 @@ export const THREE_CHORUSES: StepSpec = {
     {
       id: "chorus-answers",
       title: "Chorus 2: up a box, call and answer",
-      purpose: "Twelve bars that slide into box 2 in bar 1 and stay there. A busy call ends on C. A slower answer ends on A, or on D when the band is on D7.",
+      purpose: "Twelve bars that slide into box 2 in bar 1 and stay there. A busy call ends on C. A slower answer ends on A, or on D when the chord is D7.",
       howTo: [
         "Shuffle eighths, quarter notes and half notes, 60 BPM up to a pass at 80.",
         "Bar 1 is the door: A on the D string, C, then D slid to E on the G string (frets 7 to 9), and G held on the B string (fret 8). Bar 2 answers: E and G as quarter notes, and A held (B string, fret 10).",

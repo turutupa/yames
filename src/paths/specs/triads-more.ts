@@ -512,7 +512,7 @@ export const SECOND_SONG: StepSpec = {
       rungs: ladder(60, 90, 10),
       ...YOUR_TURN,
       selfCheck: [
-        "Did you play the band's chord in every bar, all sixteen bars?",
+        "Did you play the right chord in every bar, all sixteen bars?",
         "Could a listener hear where the chorus starts?",
       ],
       minutes: 5,

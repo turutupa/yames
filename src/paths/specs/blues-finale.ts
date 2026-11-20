@@ -314,7 +314,7 @@ export const MINOR_BLUES_IN_D: StepSpec = {
     {
       id: "your-d-minor-turn",
       title: "Your turn: a note for each chord",
-      purpose: "Free playing over Dm7, Gm7, Dm7 and A7 with one rule for each chord: A while the band is on Dm7, B flat while it is on Gm7, C# while it is on A7.",
+      purpose: "Free playing over Dm7, Gm7, Dm7 and A7 with one rule for each chord: A while the chord is Dm7, B flat while it is Gm7, C# while it is A7.",
       howTo: [
         "Shuffle, 50 to 70 BPM, four bars that loop: Dm7, Gm7, Dm7, A7.",
         "Play as little as you like. One long note in each bar, the one that bar's chord asks for, is a complete answer. The written line is an example.",
@@ -330,7 +330,7 @@ export const MINOR_BLUES_IN_D: StepSpec = {
       ...YOUR_TURN,
       selfCheck: [
         "Did you play B flat over the Gm7 and C# over the A7, at least once each?",
-        "Did you go back to A when the band went back to Dm7?",
+        "Did you go back to A when the chord went back to Dm7?",
       ],
       minutes: 4,
     },

@@ -268,9 +268,9 @@ export default definePath({
         {
           id: "first-chorus",
           title: "Your first twelve bars",
-          purpose: "A whole chorus of the blues in box 1, built the way real players build one: the lick, then the A riff, said again over D7, then a new line over E7 and D7 that comes home. Twelve bars of playing, with the band changing chords under you.",
+          purpose: "A whole chorus of the blues in box 1, built the way real players build one: the lick, then the A riff, said again over D7, then a new line over E7 and D7 that comes home. Twelve bars of playing, with the chords changing under you.",
           howTo: [
-            "Shuffle eighths, 50 BPM up to a pass at 80. The band plays A7 for four bars, D7 for two, A7 for two, then E7, D7, A7 and E7.",
+            "Shuffle eighths, 50 BPM up to a pass at 80. The chords are A7 for four bars, D7 for two, A7 for two, then E7, D7, A7 and E7.",
             "Bars 1 and 2 are your first lick, and bars 3 and 4 the low and middle A riffs. Bars 5 to 8 are the same four bars again: the lick sounds different over D7 because the chord has moved, not the notes.",
             "Bar 9 starts on E for the E7, bar 10 on D for the D7, bar 11 lands on the middle A, and bar 12 holds E over the E7, which pulls you back to the top.",
             "Shake the last E with a little vibrato if you like. Vibrato isn't graded: the app checks that E was the note and on time, and the shake is yours.",
@@ -631,7 +631,7 @@ export default definePath({
           purpose: "As simple as it gets: a whole note on the root of each bar's chord, all the way through the form.",
           howTo: [
             "Whole notes, one a bar, 70 BPM up to a pass at 90.",
-            "A at fret 5 on the low E, D at 5 and E at 7 on the A string. Hear each move before you play it. Don't count: listen for the band's change.",
+            "A at fret 5 on the low E, D at 5 and E at 7 on the A string. Hear each move before you play it. Don't count: listen for the chord change.",
           ],
           coach: "Twelve notes, each the right root, each on the bar. If you got lost, the band will tell you first.",
           tab: swing(`/1 6:5 | 6:5 | 6:5 | 6:5 | 5:5 | 5:5 | 6:5 | 6:5 | 5:7 | 5:5 | 6:5 | 5:7`),
@@ -693,7 +693,7 @@ export default definePath({
           howTo: [
             "Shuffle eighths, twelve bars, 70 BPM up to a pass at 85.",
             "Bars 1, 3 and 5 are the same phrase: A, C, A, G, E, D from the top string. Bar 4 resolves to C#, E and A. Bar 8 drops to the low A on the E string. Bars 9 to 11 answer, and bar 12 rests on E for the turnaround.",
-            "Rest where it rests. The phrase over D7 in bar 5 is the same notes as bar 1: hear the band change under it.",
+            "Rest where it rests. The phrase over D7 in bar 5 is the same notes as bar 1: hear the chord change under it.",
           ],
           coach: "The whole form, written. I check notes and time over all twelve bars after the take.",
           tab: swing(WRITTEN_CHORUS),
@@ -846,7 +846,7 @@ export default definePath({
           passAt: 75,
           ...bendsTimed(),
           selfCheck: [
-            "On a recording, does each bend sit in tune with the band's chord?",
+            "On a recording, does each bend sit in tune with the chord?",
             "Did you reach the top of each bend before beat 2?",
           ],
           minutes: 5,
@@ -894,7 +894,7 @@ export default definePath({
           purpose: "The same line over A7 and over D7, then an answer over E7 and D7. A blues chorus, written out, with six or seven notes to a phrase.",
           howTo: [
             "Shuffle eighths and quarters, twelve bars, 70 BPM up to a pass at 85.",
-            "Bars 1 and 5 start the same, and the band changes under you. That change is the magic. Bars 9 and 10 are the reply. Rest everywhere it says.",
+            "Bars 1 and 5 start the same, and the chord changes under you. That change is the magic. Bars 9 and 10 are the reply. Rest everywhere it says.",
           ],
           coach: "A lot of silence in this one. I check the notes and their time; a note in a rest shows up as an extra one.",
           tab: swing(`/8 1:5 2:8 /4 2:5 3:7 /8 3:5 4:7 | /2 4:7v /2 r | /1 r | /2 r /4 r /8 3:5 3:7 | /8 1:5 2:8 /4 2:5 3:7 /8 3:5 4:7 | /2 4:7v /2 r | /1 r | /2 r /4 r /8 3:5 3:7 | /8 2:5 3:7 /4 3:5 4:7 /8 3:5 3:7 | /2 3:7 /8 3:5 4:7 /4 3:5 | /2 4:7v /2 r | /1 r`),
@@ -1123,7 +1123,7 @@ export default definePath({
         {
           id: "your-mix",
           title: "Your turn: change the third with the chord",
-          purpose: "Free playing over A7 and D7 with one rule: C# while the band is on A7, C natural while it is on D7.",
+          purpose: "Free playing over A7 and D7 with one rule: C# while the chord is A7, C natural while the chord is D7.",
           howTo: [
             "Shuffle, 70 to 90 BPM, two bars of A7 and two of D7.",
             "Play as little as you like. One C# held over the A7 and one C held over the D7 is a complete answer. The written line is an example.",
@@ -1222,7 +1222,7 @@ export default definePath({
           purpose: "Land on a guide tone on beat 1, then fill with the box. It's the sound of a player who is really hearing the changes.",
           howTo: [
             "A half note, then shuffle eighths, 60 BPM up to a pass at 80.",
-            "C# over A7, C over D7, G over A7, G# over E7, each followed by four notes of box 1. Note how the C# and G# stand out against the band's chord, because that's what they're for.",
+            "C# over A7, C over D7, G over A7, G# over E7, each followed by four notes of box 1. Note how the C# and G# stand out against the chord, because that's what they're for.",
           ],
           coach: "Written notes on this one, checked with their timing after the take.",
           tab: swing(`/2 3:6 /8 2:5 1:5 2:5 3:7 | /2 3:5 /8 3:7 2:5 3:7 3:5 | /2 2:8 /8 2:5 3:7 3:5 4:7 | /2 4:6 /8 2:5 3:7 3:5 3:7`),

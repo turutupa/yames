@@ -255,7 +255,7 @@ export const BOX_KEYS: StepSpec = {
     {
       id: "chorus-in-keys",
       title: "Twelve bars in a new key",
-      purpose: "Your first chorus from Step 1, all twelve bars, in G, C or D. The band changes chords in the new key and the same line follows them.",
+      purpose: "Your first chorus from Step 1, all twelve bars, in G, C or D. The chords are in the new key and the same line follows them.",
       howTo: [
         "Shuffle eighths, 50 BPM up to a pass at 80. Look at which key came up, put your first finger on its root on the low E string, and play the chorus you know from there: fret 3 for G, fret 8 for C, fret 10 for D.",
         "The form has not changed: four bars on the first chord, two on the second, two back home, then one bar each of the third chord, the second, home, and the third again.",
@@ -377,7 +377,7 @@ export const LANDING_REVIEW: StepSpec = {
   id: "landing-review",
   title: "Landing on the third, in new keys",
   goal: "Play the arpeggio and its lick to the third in G and C, then a twelve-bar chorus whose phrases stop on each chord's third.",
-  why: "You have met the two ideas that matter most at this Level: the box moves with the key, and a phrase sounds right when it stops on a note of the chord. This Step puts them together before anything new arrives. The third is the note that says whether a chord is major, so a phrase that stops on it tells the listener which chord the band is on, with no band needed.",
+  why: "You have met the two ideas that matter most at this Level: the box moves with the key, and a phrase sounds right when it stops on a note of the chord. This Step puts them together before anything new arrives. The third is the note that says whether a chord is major, so a phrase that stops on it tells the listener which chord is under it, with no band needed.",
   howTo: [
     "The third of the home chord sits one fret above the minor pentatonic's own third: in A, C# is one fret above C. In every key it is the same move, one fret up on the same string.",
     "The thirds in A: C# over A7 (G string, fret 6), F# over D7 (D string, fret 4), G# over E7 (D string, fret 6). The F# is a fret below the box, so the first finger reaches back for it. So is the B over E7 (G string, fret 4).",
@@ -484,7 +484,7 @@ export const QUICK_CHANGE: StepSpec = {
     "Before you play, listen to the band once through and point at bar 2 when the chord moves.",
     "Everything you play here uses notes and shapes you already know: the roots and the boogie line from the last Step, and the thirds from the Beginner Level. What changes is when.",
   ],
-  payoff: "When a band goes to the IV chord in bar 2, you are already there.",
+  payoff: "When a song goes to the IV chord in bar 2, you are already there.",
   exercises: [
     {
       id: "quick-roots",
@@ -629,7 +629,7 @@ export const MINOR_BLUES: StepSpec = {
     {
       id: "your-minor-chorus",
       title: "Your turn: F over the Dm7",
-      purpose: "Free playing over Am7 and Dm7 with one rule: E while the band is on Am7, F while it is on Dm7.",
+      purpose: "Free playing over Am7 and Dm7 with one rule: E while the chord is Am7, F while it is Dm7.",
       howTo: [
         "Shuffle, 50 to 70 BPM, two bars of Am7 and two of Dm7, four bars that loop.",
         "Play as little as you like. An E held over the Am7 and an F held over the Dm7 is a complete answer. The written line is an example.",
