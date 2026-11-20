@@ -86,15 +86,31 @@ export function useTakeNote(session: SessionRun, outcome: TakeOutcome | null | u
   }, [outcome, review, takes, exercise, pathId, variantSeed, startedAt]);
 }
 
+/**
+ * Where, in words. Every bar of the tune on the same rounds is the tune, not
+ * "bars 1 to 4 of the tune".
+ */
+function placeText(t: T, note: TakeNote): string | null {
+  const { place, placeLine } = note;
+  if (!place || !placeLine) return null;
+  const tuneBars = note.strip?.patternBars ?? 0;
+  if (place.shape === "bars" && tuneBars > 1 && place.patternBars.length >= tuneBars) {
+    const verb = note.verdict === "passed" ? "caught" : "slipped";
+    return t(`session.note.place.${verb}.all`, { count: place.slipped, of: place.of });
+  }
+  return noteText(t, placeLine);
+}
+
 /** The finding as one or two sentences: what decided the verdict when it was not timing, then where and which way. */
 function findingText(t: T, note: TakeNote, bpm: number): string {
   const parts: string[] = [];
   const timing =
     note.deciding?.metric === "timingEvenness" || note.deciding?.metric === "evennessHold" || note.deciding === null;
+  const where = placeText(t, note);
   if (note.verdict === "passed") {
-    if (note.placeLine) {
+    if (where) {
       parts.push(t("session.note.passedAt", { bpm }));
-      parts.push(noteText(t, note.placeLine));
+      parts.push(where);
       if (note.lastTakeLine) parts.push(noteText(t, note.lastTakeLine));
     } else {
       parts.push(noteText(t, note.lead));
@@ -102,8 +118,8 @@ function findingText(t: T, note: TakeNote, bpm: number): string {
     return parts.join(" ");
   }
   // Below the pass mark on notes heard, extras or pitch: that is said before any bar is named.
-  if (!timing || !note.placeLine) parts.push(noteText(t, note.lead));
-  if (note.placeLine) parts.push(noteText(t, note.placeLine));
+  if (!timing || !where) parts.push(noteText(t, note.lead));
+  if (where) parts.push(where);
   if (note.directionLine) parts.push(noteText(t, note.directionLine));
   return parts.join(" ");
 }
@@ -283,7 +299,9 @@ export function ReadyNote({
     const lead = lastTakeLead(t, last);
     const where = lastNote && lastNote.kind === "result" && lastNote.verdict === "belowBar" ? lastNote : null;
     const tail = where
-      ? [where.placeLine, where.directionLine].filter((l): l is Line => !!l).map((l) => noteText(t, l))
+      ? [placeText(t, where), where.directionLine ? noteText(t, where.directionLine) : null].filter(
+          (s): s is string => !!s,
+        )
       : [];
     if (lead) quiet.push({ text: [lead, ...tail].join(" "), id: "coach-last" });
   }
@@ -317,32 +335,25 @@ export function recapLineText(t: T, session: SessionRun, now: number): string | 
     .find((o) => o.grade.cleanBpm !== null && (o.cleanBefore === null || o.grade.cleanBpm > o.cleanBefore));
   const passed = [...mine].reverse().find((o) => o.grade.verdict === "passed");
   const title = last.title;
-  let moved: string;
-  if (raised && raised.grade.cleanBpm !== null) {
-    moved =
-      raised.cleanBefore === null
-        ? t("session.note.recap.cleanFirst", { title, bpm: raised.grade.cleanBpm })
-        : t("session.note.recap.cleanMoved", { title, from: raised.cleanBefore, bpm: raised.grade.cleanBpm });
-  } else if (passed) {
-    moved = t("session.note.recap.passed", { title, bpm: passed.bpm });
-  } else {
+  // A clean tempo that rose is the recap's own headline: not said twice.
+  let moved: string | null = null;
+  if (raised && raised.grade.cleanBpm !== null) moved = null;
+  else if (passed) moved = t("session.note.recap.passed", { bpm: passed.bpm });
+  else if (last.ungraded === undefined) {
     const clean = pathId ? cleanTempoOf(session.progress, pathId, last.exerciseId) : null;
-    moved =
-      clean !== null
-        ? t("session.note.recap.held", { title, bpm: clean })
-        : t("session.note.recap.played", { title, bpm: last.bpm });
+    moved = clean !== null ? t("session.note.recap.held", { bpm: clean }) : t("session.note.recap.played", { bpm: last.bpm });
   }
-  let back = t("session.note.recap.backNext");
+  let back = t("session.note.recap.backNext", { title });
   const pathStep = path?.steps.find((s) => s.exercises.some((e) => e.id === last.exerciseId));
   if (path && pathStep && exercise) {
     const parked = parkedUntil(session.progress, path.id, exercise);
     // `dueReviews` lists what is due now; the date it reads is this one.
     const review = reviewStateOf(session.progress, { path, step: pathStep, exercise });
     const days = (at: number) => Math.max(1, Math.ceil((at - now) / DAY_MS));
-    if (parked !== null && parked > now) back = t("session.note.recap.backParked", { count: days(parked) });
-    else if (review && review.dueAt > now) back = t("session.note.recap.backReview", { count: days(review.dueAt) });
+    if (parked !== null && parked > now) back = t("session.note.recap.backParked", { title, count: days(parked) });
+    else if (review && review.dueAt > now) back = t("session.note.recap.backReview", { title, count: days(review.dueAt) });
   }
-  return `${moved} ${back}`;
+  return moved ? `${moved} ${back}` : back;
 }
 
 export function RecapLine({ session }: { session: SessionRun }) {

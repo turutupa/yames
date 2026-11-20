@@ -344,6 +344,9 @@
 .session-runway-notes > .coach-note {
   margin-bottom: 4px;
 }
+.session-recap-head .coach-line {
+  margin-top: 12px;
+}
 
 /* --- small screens and short windows ------------------------------------- */
 
@@ -353,6 +356,10 @@
 }
 .main-window.is-mobile .coach-note-head {
   font-size: 17px;
+}
+/* A thumb's 44 px (phone-learning.spec.ts). */
+.main-window.is-mobile .coach-chip {
+  min-height: 44px;
 }
 
 /* Under 760 px of height the note is its headline, its source and its chips,

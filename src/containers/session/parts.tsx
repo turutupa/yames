@@ -86,6 +86,7 @@ export function TempoNudges({
           disabled={!can.slower}
           aria-describedby={can.slowerWhy ? "session-slower-why" : undefined}
           onClick={session.actions.slower}
+          data-testid="session-slower"
         >
           {t("session.run.slower")}
         </button>
@@ -96,6 +97,7 @@ export function TempoNudges({
           disabled={!can.faster}
           aria-describedby={can.fasterWhy ? "session-faster-why" : undefined}
           onClick={session.actions.faster}
+          data-testid="session-faster"
         >
           {t("session.run.faster")}
         </button>

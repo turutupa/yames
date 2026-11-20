@@ -703,12 +703,14 @@
           "bar": "Bar {{bar}} of the tune slipped on {{count}} of {{of}} rounds.",
           "bars": "Bars {{from}} to {{to}} of the tune slipped on {{count}} of {{of}} rounds.",
           "loop": "The pattern slipped on {{count}} of {{of}} rounds.",
-          "fromRound": "It held until round {{round}} of {{of}}, then came apart."
+          "fromRound": "It held until round {{round}} of {{of}}, then came apart.",
+          "all": "The whole tune slipped on {{count}} of {{of}} rounds."
         },
         "caught": {
           "bar": "Bar {{bar}} of the tune caught you on {{count}} of {{of}} rounds.",
           "bars": "Bars {{from}} to {{to}} of the tune caught you on {{count}} of {{of}} rounds.",
-          "loop": "The pattern caught you on {{count}} of {{of}} rounds."
+          "loop": "The pattern caught you on {{count}} of {{of}} rounds.",
+          "all": "The whole tune caught you on {{count}} of {{of}} rounds."
         },
         "lastTake": "Last Take it was {{count}}.",
         "lastTakeHeld": "Last Take it held."
@@ -779,16 +781,14 @@
         "tryFaster": "Twice yes. Try {{bpm}}?"
       },
       "recap": {
-        "cleanFirst": "{{title}}: clean tempo {{bpm}} BPM.",
-        "cleanMoved": "{{title}}: clean tempo up from {{from}} to {{bpm}} BPM.",
-        "passed": "{{title}} passed at {{bpm}} BPM.",
-        "held": "{{title}} stays at a clean {{bpm}} BPM.",
-        "played": "{{title}}: played at {{bpm}} BPM.",
-        "backNext": "It comes back next Session.",
-        "backReview": "It comes back for review in {{count}} day.",
-        "backReview_other": "It comes back for review in {{count}} days.",
-        "backParked": "It rests for {{count}} day and comes back fresh.",
-        "backParked_other": "It rests for {{count}} days and comes back fresh."
+        "passed": "Passed at {{bpm}} BPM.",
+        "held": "Clean tempo still {{bpm}} BPM.",
+        "played": "Last played at {{bpm}} BPM.",
+        "backNext": "{{title}} comes back next Session.",
+        "backReview": "{{title}} comes back for review in {{count}} day.",
+        "backReview_other": "{{title}} comes back for review in {{count}} days.",
+        "backParked": "{{title}} rests for {{count}} day and comes back fresh.",
+        "backParked_other": "{{title}} rests for {{count}} days and comes back fresh."
       }
     }
   }

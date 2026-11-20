@@ -30,6 +30,11 @@ const SCENES = [
   "session-ungraded-result",
   "session-ask-ready",
   "progress-ungraded",
+  // The coach's note and its order (coach leg c1b1).
+  "coach-ready-again",
+  "coach-take-order",
+  "coach-ungraded-ready",
+  "coach-ungraded-result",
 ];
 const SIZE = { width: 1400, height: 900 };
 
