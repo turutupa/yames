@@ -165,7 +165,7 @@
       "belowBar": {
         "even": "Bo równość wyniosła {{value}}% przy {{bpm}} BPM. Poprzeczka to {{bar}}%.",
         "heard": "Bo przy {{bpm}} BPM usłyszałem {{value}}% nut. Poprzeczka to {{bar}}%.",
-        "extras": "Przez dodatkowe nuty przy {{bpm}} BPM. Poprzeczka to {{bar}} na cztery takty.",
+        "extras": "Przez dodatkowe nuty przy {{bpm}} BPM. Poprzeczka to najwyżej {{bar}} na cztery takty.",
         "accents": "Bo przy {{bpm}} BPM trafiło {{value}}% akcentów. Poprzeczka to {{bar}}%.",
         "plain": "Bo ostatnie podejście przy {{bpm}} BPM nie przeskoczyło poprzeczki.",
         "notes": "Bo {{value}}% nut, których wysokość rozpoznałem, było zapisanymi przy {{bpm}} BPM. Poprzeczka to {{bar}}%."

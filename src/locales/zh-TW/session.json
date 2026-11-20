@@ -163,7 +163,7 @@
       "belowBar": {
         "even": "因為 {{bpm}} BPM 時均勻度是 {{value}}%。及格線是 {{bar}}%。",
         "heard": "因為 {{bpm}} BPM 時我只聽到 {{value}}% 的音。及格線是 {{bar}}%。",
-        "extras": "因為 {{bpm}} BPM 時有多餘的音。及格線是每四小節 {{bar}} 個。",
+        "extras": "因為 {{bpm}} BPM 時有多餘的音。及格線是每四小節不超過 {{bar}} 個。",
         "accents": "因為 {{bpm}} BPM 時有 {{value}}% 的重音到位。及格線是 {{bar}}%。",
         "plain": "因為上一遍 {{bpm}} BPM 沒過及格線。",
         "notes": "因為 {{bpm}} BPM 時，我能聽出音高的音裡有 {{value}}% 是譜上的音。及格線是 {{bar}}%。"

@@ -164,7 +164,7 @@
       "belowBar": {
         "even": "Perché la regolarità era del {{value}}% a {{bpm}} BPM. L'asticella è al {{bar}}%.",
         "heard": "Perché ho sentito il {{value}}% delle note a {{bpm}} BPM. L'asticella è al {{bar}}%.",
-        "extras": "Per le note in più a {{bpm}} BPM. L'asticella è {{bar}} su quattro battute.",
+        "extras": "Per le note in più a {{bpm}} BPM. L'asticella è {{bar}} al massimo su quattro battute.",
         "accents": "Perché il {{value}}% degli accenti è andato a segno a {{bpm}} BPM. L'asticella è al {{bar}}%.",
         "plain": "Perché l'ultima take a {{bpm}} BPM non ha superato l'asticella.",
         "notes": "Perché il {{value}}% delle note di cui ho riconosciuto l'altezza erano quelle scritte a {{bpm}} BPM. L'asticella è al {{bar}}%."

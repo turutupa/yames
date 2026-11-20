@@ -305,9 +305,9 @@
         },
         "progress": {
           "title": "Tempo pulito",
-          "body": "Progressi conta il tempo pulito: il più veloce a cui hai raggiunto la soglia, non solo il più veloce che hai suonato. È questo il numero da far crescere.",
+          "body": "Progressi conta il tempo pulito: il più veloce a cui hai superato l'asticella, non solo il più veloce che hai suonato. È questo il numero da far crescere.",
           "bodyOff": "Progressi tiene i tuoi minuti, la tua serie e i tempi suonati. Con la valutazione accesa aggiunge il tuo tempo pulito.",
-          "bodyAsk": "Progressi conta il tempo pulito: il più veloce a cui hai raggiunto la soglia, non solo il più veloce che hai suonato. È questo il numero da far crescere."
+          "bodyAsk": "Progressi conta il tempo pulito: il più veloce a cui hai superato l'asticella, non solo il più veloce che hai suonato. È questo il numero da far crescere."
         }
       }
     },
