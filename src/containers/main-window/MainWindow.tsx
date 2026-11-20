@@ -57,6 +57,7 @@ import {
 } from "../../ipc";
 import { AskPanel } from "../coach/AskPanel";
 import { askShownOn, useAskHost } from "../coach/useAskHost";
+import { useCoachToolHost } from "../coach/useCoachToolHost";
 import { askCoach, closeAsk, getAskState, useAskState } from "../coach/askStore";
 import { ToolCoach } from "../coach/ToolCoach";
 import { revealToolRuns } from "../coach/ToolRuns";
@@ -626,6 +627,17 @@ export function MainWindow() {
     isPlaying: state.isPlaying,
     jam: jamSession.jam,
     song: songsSession.song,
+  });
+  // The coach's tools (leg t1a1): one host, built once and read through a
+  // ref, so the per-beat render rebuilds nothing (`useCoachToolHost`).
+  useCoachToolHost({
+    view,
+    setView,
+    pathsPlace,
+    session: sessionRun,
+    instrument,
+    jams: jamSession.jams,
+    loadJam: jamSession.loadJam,
   });
   // Listen (DESIGN 7): the tools' coach, on by the player's press only, ended
   // when they turn it off, leave the tools or leave it idle ten minutes.
