@@ -49,6 +49,14 @@
       "any": "Dein Take",
       "soon": "Takes anhören kommt bald."
     },
+    "source": {
+      "measured": "Gemessen",
+      "measuredTake": "Gemessen · Take {{take}}",
+      "path": "Aus dem Pfad",
+      "pathStep": "Aus dem Pfad · Schritt {{step}}",
+      "app": "Von der App berechnet",
+      "general": "Allgemeiner Rat · nicht aus deinem Spiel"
+    },
     "compare": {
       "title": "Zwei Durchgänge von {{title}} nebeneinander",
       "any": "Zwei Durchgänge nebeneinander",

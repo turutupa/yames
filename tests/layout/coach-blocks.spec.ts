@@ -179,6 +179,45 @@ test.describe("a six-block answer", () => {
   });
 });
 
+test.describe("where the words came from", () => {
+  test("the source line sits under its sentence, inside the dock, never below 12px", async ({ page }) => {
+    // DESIGN 3.6: its own line under the text it covers, an icon and words.
+    // "General advice · not from your playing" is the longest of the four,
+    // and in German it is longer still: it has to wrap, not run off the dock.
+    await openGallery(page, { width: 380, height: 900 });
+
+    const lines = await page.$$eval(".coach-block-source", (nodes) =>
+      nodes.map((n) => {
+        const r = n.getBoundingClientRect();
+        const sentence = n.parentElement?.querySelector(".coach-block-sentence")?.getBoundingClientRect() ?? null;
+        const card = n.closest(".gallery-scene")?.getBoundingClientRect() ?? null;
+        return {
+          theme: n.closest("[data-theme]")?.getAttribute("data-theme") ?? "?",
+          kind: n.getAttribute("data-source"),
+          top: Math.round(r.top),
+          left: Math.round(r.left),
+          right: Math.round(r.right),
+          sentenceBottom: sentence ? Math.round(sentence.bottom) : null,
+          cardLeft: card ? Math.round(card.left) : null,
+          cardRight: card ? Math.round(card.right) : null,
+          font: parseFloat(getComputedStyle(n).fontSize),
+        };
+      }),
+    );
+    // Two scenes carry one in every theme: the verdict (measured) and the general advice.
+    expect(lines.length, "no source lines on the page").toBeGreaterThanOrEqual(26);
+    expect(new Set(lines.map((l) => l.kind))).toEqual(new Set(["measured", "general"]));
+    for (const l of lines) {
+      const where = `${l.theme}/${String(l.kind)}`;
+      expect(l.sentenceBottom, `${where}: no sentence above the source line`).not.toBeNull();
+      expect(l.top, `${where}: the source line is not under its sentence`).toBeGreaterThanOrEqual((l.sentenceBottom ?? 0) - 1);
+      expect(l.right, `${where}: the source line runs out of its card`).toBeLessThanOrEqual((l.cardRight ?? 0) + 1);
+      expect(l.left, `${where}: the source line starts outside its card`).toBeGreaterThanOrEqual((l.cardLeft ?? 0) - 1);
+      expect(l.font, `${where}: the source line is under the 12px floor`).toBeGreaterThanOrEqual(12);
+    }
+  });
+});
+
 test.describe("an answer whose references mean nothing", () => {
   test("draws the one line that resolved and not a frame for the rest", async ({ page }) => {
     /*

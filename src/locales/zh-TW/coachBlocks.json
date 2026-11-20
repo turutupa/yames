@@ -49,6 +49,14 @@
       "any": "你的錄音",
       "soon": "回聽錄音即將推出。"
     },
+    "source": {
+      "measured": "實測",
+      "measuredTake": "實測 · 第 {{take}} 遍",
+      "path": "來自路線",
+      "pathStep": "來自路線 · 第 {{step}} 步",
+      "app": "由應用程式推算",
+      "general": "一般建議 · 並非來自你的演奏"
+    },
     "compare": {
       "title": "{{title}} 的兩遍，並排擺",
       "any": "兩遍並排擺",

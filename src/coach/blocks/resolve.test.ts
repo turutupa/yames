@@ -438,3 +438,41 @@ describe("played bars for the machine, printed bars for the player", () => {
       .toMatchObject({ fromBar: 17, toBar: 20, printedFrom: 17, printedTo: 20 });
   });
 });
+
+describe("where the words came from (DESIGN 3.6)", () => {
+  const ANSWER = {
+    blocks: [
+      { type: "text", text: "The last four bars ran ahead." },
+      { type: "tabExcerpt", score: "song", fromBar: 17, toBar: 20 },
+      { type: "text", text: "Count the held note." },
+      { type: "action", action: { kind: "ramp", fromBpm: 80, toBpm: 96 } },
+    ],
+  };
+
+  it("carries no source unless the caller says one", () => {
+    const { blocks } = resolveCoachAnswer(ANSWER, CTX);
+    expect(blocks).toHaveLength(4);
+    for (const block of blocks) expect(block.source).toBeUndefined();
+  });
+
+  it("puts the caller's source on the text, and only on the text", () => {
+    const { blocks } = resolveCoachAnswer(ANSWER, CTX, { source: { kind: "measured", take: 2 } });
+    expect(blocks.map((b) => [b.type, b.source ?? null])).toEqual([
+      ["text", { kind: "measured", take: 2 }],
+      ["tabExcerpt", null],
+      ["text", { kind: "measured", take: 2 }],
+      ["action", null],
+    ]);
+  });
+
+  it("cannot be claimed by the answer itself", () => {
+    // A model that writes `source` into a block is writing a field the
+    // catalogue does not have; the block is not believed, whatever it says.
+    const { blocks } = resolveCoachAnswer(
+      { blocks: [{ type: "text", text: "Trust me.", source: { kind: "measured" } }] },
+      CTX,
+      { source: { kind: "general" } },
+    );
+    expect(blocks.every((b) => b.source?.kind !== "measured")).toBe(true);
+  });
+});

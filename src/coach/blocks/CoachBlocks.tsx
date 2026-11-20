@@ -28,6 +28,7 @@
  * never acts on its own (U4.3).
  */
 
+import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { ChordDiagram } from "../../components/chords";
 import Fretboard from "../../components/fretboard/Fretboard";
@@ -35,6 +36,7 @@ import { noteName, type PitchClass } from "../../jam/harmony";
 import { SCALES } from "../../jam/scales";
 import type {
   ActionLabel,
+  BlockSource,
   ProgressPoint,
   ResolvedBlock,
   ResolvedChordShape,
@@ -234,6 +236,74 @@ function ActionButton({
 }
 
 // ---------------------------------------------------------------------------
+// Where it came from
+// ---------------------------------------------------------------------------
+
+/** The four marks of DESIGN 3.6's source line, drawn in the text's own colour. */
+const SOURCE_MARK: Record<BlockSource["kind"], ReactElement> = {
+  measured: <path d="M3 12h2l2-6 3 12 3-9 2 5 2-2h4" />,
+  path: (
+    <>
+      <path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z" />
+      <path d="M5 17a3 3 0 0 1 3-3h11" />
+    </>
+  ),
+  app: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v6" />
+      <path d="M12 7.5v.5" />
+    </>
+  ),
+  general: <circle cx="12" cy="12" r="9" strokeDasharray="3 4" />,
+};
+
+function sourceWords(t: Translate, source: BlockSource): string {
+  switch (source.kind) {
+    case "measured":
+      return source.take === undefined
+        ? t("coachBlocks.source.measured")
+        : t("coachBlocks.source.measuredTake", { take: source.take });
+    case "path":
+      return source.step === undefined
+        ? t("coachBlocks.source.path")
+        : t("coachBlocks.source.pathStep", { step: source.step });
+    case "app":
+      return t("coachBlocks.source.app");
+    case "general":
+      return t("coachBlocks.source.general");
+  }
+}
+
+/**
+ * The line under a text block that says where its words came from (DESIGN
+ * 3.6). An icon and words, quiet, never a colour that means anything: the
+ * caller decided the source, this only says it.
+ */
+function SourceLine({ source }: { source: BlockSource }) {
+  const { t } = useTranslation();
+  return (
+    <p className="coach-block-source" data-source={source.kind}>
+      <svg
+        className="coach-block-source-mark"
+        width="13"
+        height="13"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        {SOURCE_MARK[source.kind]}
+      </svg>
+      <span>{sourceWords(t, source)}</span>
+    </p>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // One block
 // ---------------------------------------------------------------------------
 
@@ -369,6 +439,7 @@ export function CoachBlocks({ blocks, onAction, slots, className }: CoachBlocksP
           data-block={block.type}
         >
           <Block block={block} slots={filled} onAction={onAction} />
+          {block.source ? <SourceLine source={block.source} /> : null}
         </div>
       ))}
     </div>

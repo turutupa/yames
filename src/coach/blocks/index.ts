@@ -21,6 +21,7 @@ export { resolveCoachAnswer, checkBlockShape } from "./resolve";
 export type {
   ActionLabel,
   AttemptRef,
+  BlockSource,
   CoachBlockContext,
   DroppedBlock,
   DropReason,
@@ -28,6 +29,7 @@ export type {
   ProgressPoint,
   ResolvedAnswer,
   ResolvedBlock,
+  ResolveOptions,
   ScoreRef,
 } from "./resolve";
 

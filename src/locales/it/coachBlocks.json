@@ -49,6 +49,14 @@
       "any": "La tua take",
       "soon": "Riascoltare una take arriva presto."
     },
+    "source": {
+      "measured": "Misurato",
+      "measuredTake": "Misurato · Take {{take}}",
+      "path": "Dal percorso",
+      "pathStep": "Dal percorso · Tappa {{step}}",
+      "app": "Calcolato dall'app",
+      "general": "Consiglio generale · non dal tuo modo di suonare"
+    },
     "compare": {
       "title": "Due giri di {{title}}, uno accanto all'altro",
       "any": "Due giri, uno accanto all'altro",
