@@ -1538,12 +1538,19 @@ impl TimingAnalyzer {
             // are about whether a NOTE is scored, not about whether a
             // beat happened.
             if let Some(run) = schedule_run.as_mut() {
+                let counting_in = !run.has_started();
                 for beat in beats.iter().filter(|b| b.subdivision_index == 0) {
                     run.note_quarter_in_bar(
                         beat.is_downbeat,
                         ts_ns_to_wall_ms(beat.ts_ns, beat_base_wall_ms, beat_base_ns) as f64,
                         beat.beats_per_bar as u32,
                     );
+                }
+                // The Take starts here, at its first downbeat. A MIDI note
+                // from before it (a keyboard tried out on the ready screen,
+                // or through the count-in) is not a note of this Take.
+                if counting_in && run.has_started() {
+                    notes.midi_seen.store(false, Ordering::Release);
                 }
 
                 // `plans/SONGS.md` A7 — and say what can be said about the
