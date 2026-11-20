@@ -50,6 +50,17 @@
             "The fretted notes are on the A string and the D string, both at fret 2. Everything else is open."
           ],
           "coachLine": "Right notes and steady quarter notes after the take. A dead string shows up as a missing note.",
+          "cues": [
+            {"when":"even","say":"Hold the shape down and let each string ring.","more":2,"general":true},
+            {"when":"heard","say":"Press each fingertip just behind its fret."},
+            {"when":"notes","say":"Put both fingers at fret two: A and D strings.","more":3},
+            {"when":"extras","say":"Pick one string on each click, no more."},
+            {"when":"late","say":"Pick each string right with the click."},
+            {"when":"early","say":"Wait for the click before each string."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Find the next string while the note rings."},
+            {"when":"lastBars","say":"Keep the whole shape down to the last note."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -160,6 +171,16 @@
             "Let the hand fall through the strings. The strum should take no longer than saying 'one'."
           ],
           "coachLine": "A strum is one attack: timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Strum once on '1', then count '2, 3, 4'.","general":true},
+            {"when":"heard","say":"Strum all six strings, starting on the low E."},
+            {"when":"extras","say":"Strum only on '1'; let '2, 3, 4' ring."},
+            {"when":"late","say":"Strum right on the click for '1'."},
+            {"when":"early","say":"Wait for the click on '1' before you strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Brush all the strings in one quick stroke.","more":2},
+            {"when":"lastBars","say":"Keep counting '1, 2, 3, 4' to the last chord."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -277,6 +298,16 @@
             "If the chord stops ringing after a few strums, a finger has relaxed. Press again without stopping the hand."
           ],
           "coachLine": "A strum is one attack: timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Make all four downstrokes the same size.","more":1,"general":true},
+            {"when":"heard","say":"Strum all six strings, starting on the low E."},
+            {"when":"extras","say":"Strum once on each beat, no more."},
+            {"when":"late","say":"Strum right with each click."},
+            {"when":"early","say":"Wait for the click before each strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Brush all the strings in one quick stroke."},
+            {"when":"lastBars","say":"Keep the chord pressed down to the last strum.","more":2}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -483,6 +514,17 @@
             "The open top string is the one that goes dead most often: the first finger leans on it. Arch that finger more."
           ],
           "coachLine": "Right notes and steady quarter notes after the take. A dead string shows up as a missing note.",
+          "cues": [
+            {"when":"even","say":"Arch the first finger so the top string rings.","more":2,"general":true},
+            {"when":"heard","say":"Press each fingertip just behind its fret."},
+            {"when":"notes","say":"Put the first finger on the B string, fret one."},
+            {"when":"extras","say":"Pick one string on each click, no more."},
+            {"when":"late","say":"Pick each string right with the click."},
+            {"when":"early","say":"Wait for the click before each string."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Find the next string while the note rings."},
+            {"when":"lastBars","say":"Keep the whole shape down to the last note."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -589,6 +631,16 @@
             "E minor is strummed from the low E string. A minor is strummed from the A string."
           ],
           "coachLine": "A strum is one attack: timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Move on '4' so the new chord lands on '1'.","more":1,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"extras","say":"Strum only on '1'; let '2, 3, 4' ring."},
+            {"when":"late","say":"Start the change on '4', land on '1'.","more":1},
+            {"when":"early","say":"Wait for '1' before the new chord's strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Strum A minor from the A string.","more":2},
+            {"when":"lastBars","say":"Change back to E minor as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -703,6 +755,16 @@
             "Move on beat 4. If a finger is late, strum anyway and let it catch up."
           ],
           "coachLine": "A strum is one attack: timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Strum on '1' and '3', move on '4'.","more":1,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"extras","say":"Strum only on '1' and '3'."},
+            {"when":"late","say":"Start the change on '4', land on '1'.","more":1},
+            {"when":"early","say":"Wait for '1' before the new chord's strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Strum A minor from the A string."},
+            {"when":"lastBars","say":"Change back to E minor as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -842,6 +904,16 @@
             "If you get lost, stop, find beat 1 of the next bar and come back in there."
           ],
           "coachLine": "Band on. Each strum is timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Keep strumming whatever the other hand does.","more":3,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"extras","say":"Strum once on each beat, no more."},
+            {"when":"late","say":"Start the change on '4', land on '1'.","more":2},
+            {"when":"early","say":"Wait for the band's beat before each strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Strum A minor from the A string."},
+            {"when":"lastBars","say":"Change back to E minor as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -1046,6 +1118,17 @@
             "Listen for the two open strings, G and top E. They are the ones a leaning finger kills."
           ],
           "coachLine": "Right notes and steady quarter notes after the take. A dead string shows up as a missing note.",
+          "cues": [
+            {"when":"even","say":"Keep the G and top strings ringing clear.","more":2,"general":true},
+            {"when":"heard","say":"Press each fingertip just behind its fret."},
+            {"when":"notes","say":"Press the A string at fret three."},
+            {"when":"extras","say":"Pick one string on each click, no more."},
+            {"when":"late","say":"Pick each string right with the click."},
+            {"when":"early","say":"Wait for the click before each string."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Find the next string while the note rings."},
+            {"when":"lastBars","say":"Keep the whole shape down to the last note."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -1151,6 +1234,16 @@
             "Both chords are strummed from the A string. Watch only the third finger: G string fret 2 for A minor, A string fret 3 for C."
           ],
           "coachLine": "Band on. Each strum is timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Move only the third finger; keep two down.","more":1,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"extras","say":"Start each strum on the A string."},
+            {"when":"late","say":"Start the change on '4', land on '1'."},
+            {"when":"early","say":"Wait for the band's beat before each strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Keep the third finger low as it crosses."},
+            {"when":"lastBars","say":"Change back to A minor as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -1329,6 +1422,16 @@
             "From A minor back to E minor at the repeat, the first finger lifts and the other two move back up one string."
           ],
           "coachLine": "Band on. Each strum is timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Move only the fingers the next chord needs.","more":1,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"extras","say":"Strum once on each beat, no more."},
+            {"when":"late","say":"Start the change on '4', land on '1'."},
+            {"when":"early","say":"Wait for the band's beat before each strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Strum A minor and C from the A string."},
+            {"when":"lastBars","say":"Change back to E minor as the tune repeats.","more":2}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -1511,6 +1614,16 @@
             "Hum a note over it. If you can hum while you strum, the strumming hand is running by itself."
           ],
           "coachLine": "Eight bars with the band. Each strum is timed and counted.",
+          "cues": [
+            {"when":"even","say":"Count the bars: '1, 2, 3, 4, 2, 2, 3, 4'.","more":1,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"extras","say":"Strum once on each beat, no more."},
+            {"when":"late","say":"Start the change on '4', land on '1'."},
+            {"when":"early","say":"Wait for the band's beat before each strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Strum A minor and C from the A string."},
+            {"when":"lastBars","say":"Change back to E minor as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -1795,6 +1908,17 @@
             "The fretted notes are the low E string at fret 3, the A string at fret 2 and the top string at fret 3. The three strings in the middle are open. Keep the fourth finger up on its tip so that it does not touch the open B string."
           ],
           "coachLine": "Right notes and steady quarter notes after the take. A dead string shows up as a missing note.",
+          "cues": [
+            {"when":"even","say":"Stand the fourth finger up so the B rings.","more":2,"general":true},
+            {"when":"heard","say":"Press each fingertip just behind its fret."},
+            {"when":"notes","say":"Press the low and top strings at fret three.","more":2},
+            {"when":"extras","say":"Pick one string on each click, no more."},
+            {"when":"late","say":"Pick each string right with the click."},
+            {"when":"early","say":"Wait for the click before each string."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Find the next string while the note rings."},
+            {"when":"lastBars","say":"Keep the whole shape down to the last note."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -1904,6 +2028,16 @@
             "Keep the second finger pressed on the A string at fret 2 through the whole Exercise. The third finger goes between the low E string at fret 3 and the D string at fret 2."
           ],
           "coachLine": "Band on. Each strum is timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Keep the second finger on the A string.","more":1,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"extras","say":"Strum once on each beat, no more."},
+            {"when":"late","say":"Start the change on '4', land on '1'."},
+            {"when":"early","say":"Wait for the band's beat before each strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Strum both chords from the low E string."},
+            {"when":"lastBars","say":"Change back to G as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -2098,6 +2232,16 @@
             "G is strummed from the low E string, C from the A string."
           ],
           "coachLine": "A strum is one attack: timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Move the second and third fingers as a pair.","more":1,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"extras","say":"Strum only on '1' and '3'."},
+            {"when":"late","say":"Start the change on '4', land on '1'."},
+            {"when":"early","say":"Wait for '1' before the new chord's strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Strum G from the low E, C from the A string.","more":2},
+            {"when":"lastBars","say":"Change back to G as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -2234,6 +2378,16 @@
             "G to E minor: the second finger stays. E minor to C: the second and third fingers swap strings, and the first finger lands. Take that one slowly at first."
           ],
           "coachLine": "Band on. Each strum is timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Swap the second and third fingers for C.","more":1,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"extras","say":"Strum once on each beat, no more."},
+            {"when":"late","say":"Start the change on '4', land on '1'."},
+            {"when":"early","say":"Wait for the band's beat before each strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Start C's strum from the A string."},
+            {"when":"lastBars","say":"Change back to G as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -2437,6 +2591,17 @@
             "The top string is the one that goes dead: the third finger, on the B string, leans on it. Stand that finger up on its tip."
           ],
           "coachLine": "Right notes and steady quarter notes after the take. A dead string shows up as a missing note.",
+          "cues": [
+            {"when":"even","say":"Keep the third finger off the top string.","more":2,"general":true},
+            {"when":"heard","say":"Press each fingertip just behind its fret."},
+            {"when":"notes","say":"Press the B string at fret three."},
+            {"when":"extras","say":"Pick one string on each click, no more."},
+            {"when":"late","say":"Pick each string right with the click."},
+            {"when":"early","say":"Wait for the click before each string."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Find the next string while the note rings."},
+            {"when":"lastBars","say":"Keep the whole shape down to the last note."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -2543,6 +2708,16 @@
             "Lift all the fingers together, and land the third finger first with the others right behind it. Fingers that arrive slowly, one at a time, make a chord that arrives one string at a time."
           ],
           "coachLine": "Band on. Each strum is timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Lift all fingers together, third lands first.","more":2,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"extras","say":"Start the D chord's strum on the D string.","more":1},
+            {"when":"late","say":"Start the change on '4', land on '1'."},
+            {"when":"early","say":"Wait for the band's beat before each strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Shorten the stroke for D: four strings."},
+            {"when":"lastBars","say":"Change back to G as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -2720,6 +2895,16 @@
             "G from the low E string, C from the A string, D from the D string: each chord starts one string thinner than the last."
           ],
           "coachLine": "Band on. Each strum is timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Start G, C and D each one string thinner.","more":1,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"extras","say":"Strum D from the D string, C from the A."},
+            {"when":"late","say":"Start the change on '4', land on '1'."},
+            {"when":"early","say":"Wait for the band's beat before each strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Aim the pick at each chord's lowest string."},
+            {"when":"lastBars","say":"Keep the last G steady into the repeat."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -2901,6 +3086,16 @@
             "D to C: the first finger moves from the G string to the B string at fret 1, and the other two cross to the D and A strings. C to G is the pair of fingers moving back up."
           ],
           "coachLine": "Band on. Each strum is timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Move the first finger from G string to B.","more":1,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"extras","say":"Strum D from the D string, C from the A."},
+            {"when":"late","say":"Start the change on '4', land on '1'."},
+            {"when":"early","say":"Wait for the band's beat before each strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Aim the pick at each chord's lowest string."},
+            {"when":"lastBars","say":"Change back to D as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -3100,6 +3295,16 @@
             "Listen for the ups being as evenly spaced as the downs. A late upstroke makes the rhythm limp."
           ],
           "coachLine": "A strum is one attack: timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Down on each beat, up on each 'and'.","more":0,"general":true},
+            {"when":"heard","say":"Catch the top three strings on each upstroke.","more":1},
+            {"when":"extras","say":"Play one down and one up per click, no more."},
+            {"when":"late","say":"Put each downstroke right on the click."},
+            {"when":"early","say":"Wait for the click before each downstroke."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Keep the upstrokes short: top three strings."},
+            {"when":"lastBars","say":"Keep the down-up swing to the last stroke."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -3337,6 +3542,17 @@
             "Two bars of E minor, two of A minor."
           ],
           "coachLine": "A strum is one attack: timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Count '1, 2 and, 3, 4 and' as you strum.","more":0,"general":true},
+            {"when":"heard","say":"Catch the top three strings on each upstroke."},
+            {"when":"extras","say":"Swing up past the strings after '1' and '3'.","more":1},
+            {"when":"late","say":"Put each downstroke right on the click."},
+            {"when":"early","say":"Wait for the click before each downstroke."},
+            {"when":"afterHeld","say":"Swing up past the strings after the long strum.","more":1},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Brush all the strings in one quick stroke."},
+            {"when":"lastBars","say":"Change back to E minor as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -3542,6 +3758,16 @@
             "If the changes fall apart, go back a rung. The swing matters more than the tempo."
           ],
           "coachLine": "Band on. Each strum is timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Keep the hand swinging while the chords change.","more":1,"general":true},
+            {"when":"heard","say":"Catch the top three strings on each upstroke."},
+            {"when":"extras","say":"Play one down and one up per click, no more."},
+            {"when":"late","say":"Let go on the last upstroke, land on '1'.","more":1},
+            {"when":"early","say":"Wait for '1' before the new chord's strum."},
+            {"when":"openString","say":"Let the last upstroke catch open strings.","more":1},
+            {"when":"stringChange","say":"Brush all the strings in one quick stroke."},
+            {"when":"lastBars","say":"Change back to G as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -3789,6 +4015,17 @@
             "Start slower than you think you need to. The silent downstroke on 3 is what goes wrong."
           ],
           "coachLine": "A strum is one attack: timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Say 'down, down-up, up-down-up' as you play.","more":1,"general":true},
+            {"when":"heard","say":"Catch the top three strings on each upstroke."},
+            {"when":"extras","say":"Swing past the strings on the silent strokes.","more":2},
+            {"when":"late","say":"Put each downstroke right on the click."},
+            {"when":"early","say":"Wait for the click before each downstroke."},
+            {"when":"afterHeld","say":"Keep swinging through the long strum on '1'."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Brush all the strings in one quick stroke."},
+            {"when":"lastBars","say":"Keep the down-up swing to the last stroke."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -3995,6 +4232,17 @@
             "The second finger stays on the A string through the change, as before."
           ],
           "coachLine": "A strum is one attack: timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Keep the second finger on the A string.","more":1,"general":true},
+            {"when":"heard","say":"Catch the top three strings on each upstroke."},
+            {"when":"extras","say":"Swing past the strings on the silent strokes."},
+            {"when":"late","say":"Put each downstroke right on the click."},
+            {"when":"early","say":"Wait for the click before each downstroke."},
+            {"when":"afterHeld","say":"Keep swinging through the long strum on '1'."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Brush all the strings in one quick stroke."},
+            {"when":"lastBars","say":"Change back to G as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -4201,6 +4449,17 @@
             "G is strummed from the low E string, D from the D string, E minor from the low E string, C from the A string."
           ],
           "coachLine": "Band on. Each strum is timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Let go on the last upstroke, land on '1'.","more":1,"general":true},
+            {"when":"heard","say":"Catch the top three strings on each upstroke."},
+            {"when":"extras","say":"Swing past the strings on the silent strokes."},
+            {"when":"late","say":"Land each new chord right on '1'."},
+            {"when":"early","say":"Wait for '1' before the new chord's strum."},
+            {"when":"afterHeld","say":"Keep swinging through the long strum on '1'."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Aim the pick at each chord's lowest string.","more":2},
+            {"when":"lastBars","say":"Change back to G as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -4406,6 +4665,9 @@
             "Your turn, and not checked yet: the app can't judge what you choose to play, so you tick it off yourself."
           ],
           "coachLine": "Not checked yet. Record it and listen for whether every bar has the same shape.",
+          "cues": [
+            {"when":"even","say":"Keep the down on '1' and the hand swinging.","more":1,"general":true}
+          ],
           "grading": "selfChecked",
           "feedback": "none",
           "meter": {
@@ -4609,6 +4871,16 @@
             "Two bars of G, two of E minor. The second finger stays on the A string through the change."
           ],
           "coachLine": "A strum is one attack: timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Swing down past the strings on '3'.","more":1,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"extras","say":"Keep '3' silent: let the chord ring on."},
+            {"when":"late","say":"Strum right with each click."},
+            {"when":"early","say":"Wait for the click before each strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Keep the second finger on the A string.","more":2},
+            {"when":"lastBars","say":"Change back to G as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -4779,6 +5051,16 @@
             "Tap the foot on the click. If the upstrokes start to land with the foot, the rhythm has turned over: stop, count a bar out loud, and come back in."
           ],
           "coachLine": "A strum is one attack: timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Tap the foot on the beat, strum on the 'and'.","more":2,"general":true},
+            {"when":"heard","say":"Catch the top three strings on each upstroke.","more":1},
+            {"when":"extras","say":"Swing down past the strings on every beat.","more":1},
+            {"when":"late","say":"Strum each 'and' as soon as the foot lifts."},
+            {"when":"early","say":"Wait for the foot to lift before each 'and'."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Keep the upstrokes short: top three strings."},
+            {"when":"lastBars","say":"Keep the foot tapping to the last 'and'."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -4946,6 +5228,17 @@
             "Use that silent upstroke to move. From G to C the second and third fingers go one string toward the floor (to the next thinner string) as a pair, the fourth finger lifts, and the first lands on the B string at fret 1."
           ],
           "coachLine": "A strum is one attack: timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Move to the new chord during the long '4'.","more":2,"general":true},
+            {"when":"heard","say":"Catch the top three strings on each upstroke."},
+            {"when":"extras","say":"Swing up past the strings after '4'.","more":1},
+            {"when":"late","say":"Start the change on '4', land on '1'.","more":2},
+            {"when":"early","say":"Wait for '1' before the new chord's strum."},
+            {"when":"afterHeld","say":"Keep swinging through the long strum on '1'."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Start C's strum from the A string."},
+            {"when":"lastBars","say":"Change back to G as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -5138,6 +5431,17 @@
             "C is strummed from the A string, G from the low E string, D from the D string, E minor from the low E string."
           ],
           "coachLine": "Band on. Each strum is timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Use all of beat four to reach the next chord.","general":true},
+            {"when":"heard","say":"Catch the top three strings on each upstroke."},
+            {"when":"extras","say":"Swing up past the strings after '4'."},
+            {"when":"late","say":"Start the change on '4', land on '1'."},
+            {"when":"early","say":"Wait for '1' before the new chord's strum."},
+            {"when":"afterHeld","say":"Keep swinging through the long strum on '1'."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Aim the pick at each chord's lowest string.","more":3},
+            {"when":"lastBars","say":"Change back to C as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -5351,6 +5655,17 @@
             "Three fingers share one fret, so they cannot all sit right behind it. Push the third finger closest and let the first sit a little back."
           ],
           "coachLine": "Right notes and steady quarter notes after the take. A dead string shows up as a missing note.",
+          "cues": [
+            {"when":"even","say":"Push the third finger closest to the fret.","more":2,"general":true},
+            {"when":"heard","say":"Press each fingertip just behind its fret."},
+            {"when":"notes","say":"Three fingers at fret two: D, G and B strings."},
+            {"when":"extras","say":"Pick one string on each click, no more."},
+            {"when":"late","say":"Pick each string right with the click."},
+            {"when":"early","say":"Wait for the click before each string."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Find the next string while the note rings."},
+            {"when":"lastBars","say":"Keep the whole shape down to the last note."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -5456,6 +5771,16 @@
             "Hold E minor with the second and third fingers. For E, put the first finger on the G string at fret 1 and leave the other two where they are."
           ],
           "coachLine": "A strum is one attack: timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Add the first finger on the G string, fret one.","more":1,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"extras","say":"Strum once on each beat, no more."},
+            {"when":"late","say":"Start the change on '4', land on '1'."},
+            {"when":"early","say":"Wait for '1' before the new chord's strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Brush all the strings in one quick stroke."},
+            {"when":"lastBars","say":"Change back to E minor as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -5644,6 +5969,17 @@
             "A is strummed from the A string, D from the D string."
           ],
           "coachLine": "Band on. Each strum is timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Slide the third finger along the B string.","more":1,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"extras","say":"Start the D chord's strum on the D string.","more":2},
+            {"when":"late","say":"Let go on the last upstroke, land on '1'."},
+            {"when":"early","say":"Wait for '1' before the new chord's strum."},
+            {"when":"afterHeld","say":"Swing up past the strings after the long strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Aim the pick at each chord's lowest string."},
+            {"when":"lastBars","say":"Change back to A as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -5838,6 +6174,17 @@
             "D to E and E to D are the long changes. The first finger leads them, sliding along the G string: fret 1 for E, fret 2 for D."
           ],
           "coachLine": "Eight bars with the band. Each strum is timed and counted.",
+          "cues": [
+            {"when":"even","say":"Count the bars: A, A, D, D, E, D, A, A.","more":1,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"extras","say":"Start the D chord's strum on the D string."},
+            {"when":"late","say":"Let go on the last upstroke, land on '1'."},
+            {"when":"early","say":"Wait for '1' before the new chord's strum."},
+            {"when":"afterHeld","say":"Swing up past the strings after the long strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Slide the first finger along the G string.","more":2},
+            {"when":"lastBars","say":"Count both bars of A before the repeat."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -6155,6 +6502,17 @@
             "The open G string is the note that turns A into A7, and it sits between two fingers. If it is dead, one of them is touching it: stand both up on their tips."
           ],
           "coachLine": "Right notes and steady quarter notes after the take. A dead string shows up as a missing note.",
+          "cues": [
+            {"when":"even","say":"Stand both fingers up so the G string rings.","more":2,"general":true},
+            {"when":"heard","say":"Press each fingertip just behind its fret."},
+            {"when":"notes","say":"Fret two on the D and B strings, G open."},
+            {"when":"extras","say":"Pick one string on each click, no more."},
+            {"when":"late","say":"Pick each string right with the click."},
+            {"when":"early","say":"Wait for the click before each string."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Find the next string while the note rings."},
+            {"when":"lastBars","say":"Keep the whole shape down to the last note."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -6262,6 +6620,17 @@
             "The three fingers sit close together. If the B string is dead, a finger next to it is touching it: stand the second and third fingers up on their tips."
           ],
           "coachLine": "Right notes and steady quarter notes after the take. A dead string shows up as a missing note.",
+          "cues": [
+            {"when":"even","say":"Put the first finger on the B string, fret one.","more":2,"general":true},
+            {"when":"heard","say":"Press each fingertip just behind its fret."},
+            {"when":"notes","say":"Press the B string at fret one."},
+            {"when":"extras","say":"Pick one string on each click, no more."},
+            {"when":"late","say":"Pick each string right with the click."},
+            {"when":"early","say":"Wait for the click before each string."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Find the next string while the note rings."},
+            {"when":"lastBars","say":"Keep the whole shape down to the last note."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -6369,6 +6738,16 @@
             "A7 is strummed from the A string, D7 from the D string, E7 from the low E string."
           ],
           "coachLine": "Band on. Each strum is timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Keep the third finger at fret two for D7.","more":1,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"extras","say":"Aim the pick at each chord's lowest string.","more":3},
+            {"when":"late","say":"Start the change on '4', land on '1'."},
+            {"when":"early","say":"Wait for the band's beat before each strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Brush all the strings in one quick stroke."},
+            {"when":"lastBars","say":"Change back to A7 as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -6548,6 +6927,16 @@
             "After the E7 in bar 12 the form starts again on A7."
           ],
           "coachLine": "Twelve bars with the band. Each strum is timed and counted.",
+          "cues": [
+            {"when":"even","say":"Count the bars as well as the beats.","more":1,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"extras","say":"Aim the pick at each chord's lowest string."},
+            {"when":"late","say":"Start the change on '4', land on '1'."},
+            {"when":"early","say":"Wait for the band's beat before each strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Move the first finger to the B string for D7.","more":2},
+            {"when":"lastBars","say":"Go back to A7 after the last E7.","more":3}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -6883,6 +7272,17 @@
             "Keep the two short strums of each pair the same length. The band plays its eighths evenly, and so do you."
           ],
           "coachLine": "Twelve bars with the band. Each strum is timed and counted.",
+          "cues": [
+            {"when":"even","say":"Keep both short strums the same length.","more":3,"general":true},
+            {"when":"heard","say":"Catch the top three strings on each upstroke."},
+            {"when":"extras","say":"Swing up past the strings after '1' and '3'."},
+            {"when":"late","say":"Let go on the last upstroke, land on '1'.","more":2},
+            {"when":"early","say":"Wait for '1' before the new chord's strum."},
+            {"when":"afterHeld","say":"Swing up past the strings after the long strum."},
+            {"when":"openString","say":"Let the last upstroke catch open strings.","more":2},
+            {"when":"stringChange","say":"Aim the pick at each chord's lowest string."},
+            {"when":"lastBars","say":"Go back to A7 after the last E7."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -7308,6 +7708,17 @@
             "Compare it with D: only the top string has changed, from fret 2 to fret 1, and the fingers have changed round to reach it."
           ],
           "coachLine": "Right notes and steady quarter notes after the take. A dead string shows up as a missing note.",
+          "cues": [
+            {"when":"even","say":"Reach the first finger to the top string.","more":2,"general":true},
+            {"when":"heard","say":"Press each fingertip just behind its fret."},
+            {"when":"notes","say":"Fret three on the B string, one on the top."},
+            {"when":"extras","say":"Pick one string on each click, no more."},
+            {"when":"late","say":"Pick each string right with the click."},
+            {"when":"early","say":"Wait for the click before each string."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Find the next string while the note rings."},
+            {"when":"lastBars","say":"Keep the whole shape down to the last note."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -7414,6 +7825,16 @@
             "From A minor to D minor: the first finger moves from the B string to the top string at fret 1, the second from the D string to the G string at fret 2, and the third from the G string at fret 2 to the B string at fret 3."
           ],
           "coachLine": "Band on. Each strum is timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Move all three fingers one string thinner.","more":2,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"extras","say":"Start D minor's strum on the D string.","more":1},
+            {"when":"late","say":"Start the change on '4', land on '1'."},
+            {"when":"early","say":"Wait for the band's beat before each strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Take the third finger up a fret as it moves."},
+            {"when":"lastBars","say":"Change back to A minor as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -7584,6 +8005,16 @@
             "Keep the first finger pressed on the B string at fret 1 the whole way through."
           ],
           "coachLine": "Band on. Each strum is timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Keep the first finger on the B string.","more":2,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"extras","say":"Start F major seven's strum on the D string.","more":1},
+            {"when":"late","say":"Start the change on '4', land on '1'."},
+            {"when":"early","say":"Wait for the band's beat before each strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Move the other two fingers across as a pair."},
+            {"when":"lastBars","say":"Change back to C as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -7754,6 +8185,16 @@
             "The top string is the test. If it is dead, flatten the first finger a little more or move it closer to the fret. Do not squeeze harder."
           ],
           "coachLine": "Right notes and steady quarter notes after the take. A dead string shows up as a missing note.",
+          "cues": [
+            {"when":"even","say":"Hold B and top strings with one flat finger.","more":2,"general":true},
+            {"when":"heard","say":"Move the first finger closer to the fret.","more":2},
+            {"when":"notes","say":"Press the D string at fret three."},
+            {"when":"extras","say":"Pick one string on each click, no more."},
+            {"when":"late","say":"Pick each string right with the click."},
+            {"when":"early","say":"Wait for the click before each string."},
+            {"when":"stringChange","say":"Find the next string while the note rings."},
+            {"when":"lastBars","say":"Keep the whole shape down to the last note."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -7860,6 +8301,18 @@
             "If F will not ring yet, play F major seven in its place, with the top string open. Come back to the small F later."
           ],
           "coachLine": "Band on. Each strum is timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Lay the first finger flat for F.","more":1,"general":true},
+            {"when":"heard","say":"Strum through every string of the chord."},
+            {"when":"heard","say":"Play F major seven until the small F rings.","more":2},
+            {"when":"extras","say":"Swing up past the strings after '4'."},
+            {"when":"late","say":"Start the change on '4', land on '1'."},
+            {"when":"early","say":"Wait for '1' before the new chord's strum."},
+            {"when":"afterHeld","say":"Keep swinging through the long strum on '1'."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Swap the second and third fingers for F.","more":1},
+            {"when":"lastBars","say":"Change back to A minor as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -8068,6 +8521,16 @@
             "Make the light strokes lighter before you make the loud ones louder."
           ],
           "coachLine": "Timed and counted, and the accents are read roughly: louder than the strokes beside them or not.",
+          "cues": [
+            {"when":"even","say":"Make the light strokes lighter first.","more":2,"general":true},
+            {"when":"heard","say":"Keep every light stroke on the strings."},
+            {"when":"extras","say":"Play one down and one up per click, no more."},
+            {"when":"late","say":"Put each downstroke right on the click."},
+            {"when":"early","say":"Wait for the click before each downstroke."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Keep the upstrokes short: top three strings."},
+            {"when":"lastBars","say":"Change back to G as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -8311,6 +8774,17 @@
             "A stop that still hums is a hand that landed too lightly, or missed a string. Lay the whole side of the hand across all six."
           ],
           "coachLine": "Band on. Each strum is timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Count '1, 2 and, (3), 4 and' as you strum.","more":0,"general":true},
+            {"when":"heard","say":"Catch the top three strings on each upstroke."},
+            {"when":"extras","say":"Stop the strings with the hand's side on '3'.","more":2},
+            {"when":"late","say":"Lift the hand in time for the down on '4'.","more":1},
+            {"when":"early","say":"Wait for the click on '4' after the stop."},
+            {"when":"afterHeld","say":"Swing up past the strings after the long strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Aim the pick at each chord's lowest string."},
+            {"when":"lastBars","say":"Keep the last G steady into the repeat."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -8501,6 +8975,16 @@
             "Hold the whole chord down throughout, even though you play only part of it at a time."
           ],
           "coachLine": "Band on. Each bass note and each strum is timed and counted.",
+          "cues": [
+            {"when":"even","say":"Hold the whole chord down for bass and strum.","more":2,"general":true},
+            {"when":"heard","say":"Strum just the G, B and top strings.","more":1},
+            {"when":"extras","say":"Pick the bass note alone, one string."},
+            {"when":"late","say":"Strum right with each click."},
+            {"when":"early","say":"Wait for the click before each strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Find each chord's bass note before '1'.","more":1},
+            {"when":"lastBars","say":"Change back to A minor as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -8649,6 +9133,16 @@
             "Listen for four evenly spaced strokes inside each click. The usual fault is to hurry through 'e and a' and then wait for the next beat."
           ],
           "coachLine": "A strum is one attack: timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Count '1 e and a' on every beat.","more":0,"general":true},
+            {"when":"heard","say":"Catch the top three strings on each upstroke.","more":1},
+            {"when":"extras","say":"Play four strokes to each click, no more."},
+            {"when":"late","say":"Put each beat's first stroke on the click."},
+            {"when":"early","say":"Spread the four strokes evenly to the click.","more":2},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Keep the upstrokes short: top three strings."},
+            {"when":"lastBars","say":"Count '1 e and a' right to the end."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -9031,6 +9525,17 @@
             "Ten strums a bar: seven downstrokes and three upstrokes."
           ],
           "coachLine": "A strum is one attack: timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Count '1, and a, 2, and a, 3, and a, 4'.","more":0,"general":true},
+            {"when":"heard","say":"Catch the top three strings on each upstroke."},
+            {"when":"extras","say":"Swing up past the strings on each 'e'.","more":1},
+            {"when":"late","say":"Put each beat's first stroke on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"afterHeld","say":"Keep swinging through the long strum on '4'.","more":1},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Keep the upstrokes short: top three strings."},
+            {"when":"lastBars","say":"Keep the hand swinging in the air after '4'."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -9328,6 +9833,17 @@
             "Beat 4 is one long downstroke, and the rest of that beat is the time to change. The second finger stays on the A string through the change."
           ],
           "coachLine": "A strum is one attack: timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Keep the second finger on the A string.","more":1,"general":true},
+            {"when":"heard","say":"Catch the top three strings on each upstroke."},
+            {"when":"extras","say":"Swing up past the strings on each 'e'."},
+            {"when":"late","say":"Start the change on '4', land on '1'.","more":1},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"afterHeld","say":"Keep swinging through the long strum on '4'."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Keep the upstrokes short: top three strings."},
+            {"when":"lastBars","say":"Change back to G as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -9628,6 +10144,17 @@
             "G is strummed from the low E string, D from the D string, E minor from the low E string, C from the A string."
           ],
           "coachLine": "Band on. Each strum is timed and counted. Whether every string rang is for your ear.",
+          "cues": [
+            {"when":"even","say":"Keep swinging while the fingers travel.","more":1,"general":true},
+            {"when":"heard","say":"Catch the top three strings on each upstroke."},
+            {"when":"extras","say":"Swing up past the strings on each 'e'."},
+            {"when":"late","say":"Start the change on '4', land on '1'.","more":1},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"afterHeld","say":"Keep swinging through the long strum on '4'."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Aim the pick at each chord's lowest string.","more":2},
+            {"when":"lastBars","say":"Change back to G as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -9928,6 +10455,17 @@
             "G to E minor keeps the second finger down. E minor to C, C to D and D back to G are whole-hand changes: let go as you play the last upstroke, and land on beat 1."
           ],
           "coachLine": "Eight bars with the band. Each strum is timed and counted.",
+          "cues": [
+            {"when":"even","say":"Let go on the last upstroke, land on '1'.","more":1,"general":true},
+            {"when":"heard","say":"Catch the top three strings on each upstroke."},
+            {"when":"extras","say":"Swing up past the strings after '1' and '3'."},
+            {"when":"late","say":"Land each new chord right on '1'."},
+            {"when":"early","say":"Wait for '1' before the new chord's strum."},
+            {"when":"afterHeld","say":"Swing up past the strings after the long strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Keep the second finger down from G to E minor.","more":1},
+            {"when":"lastBars","say":"Change back to G as the tune repeats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -10242,6 +10780,17 @@
             "In the last two bars the chord stays on D. Keep the pattern going and count them both."
           ],
           "coachLine": "Eight bars with the band. Each strum is timed and counted.",
+          "cues": [
+            {"when":"even","say":"Have the C shape ready before you start.","more":1,"general":true},
+            {"when":"heard","say":"Catch the top three strings on each upstroke."},
+            {"when":"extras","say":"Swing past the strings on the silent strokes."},
+            {"when":"late","say":"Let go on the last upstroke, land on '1'."},
+            {"when":"early","say":"Wait for '1' before the new chord's strum."},
+            {"when":"afterHeld","say":"Keep swinging through the long strum on '1'."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Aim the pick at each chord's lowest string."},
+            {"when":"lastBars","say":"Count both bars of D, then change to C.","more":2}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -10545,6 +11094,17 @@
             "When the sixteen bars are steady, play the chorus with beats 2 and 4 a little louder, as you did in the Step Accents, stops and bass notes. Keep the verse light so the chorus has somewhere to go."
           ],
           "coachLine": "Sixteen bars with the band. Each strum is timed and counted.",
+          "cues": [
+            {"when":"even","say":"Say 'chorus' to yourself in bar eight.","more":2,"general":true},
+            {"when":"heard","say":"Catch the top three strings on each upstroke."},
+            {"when":"extras","say":"Swing past the strings on the silent strokes."},
+            {"when":"late","say":"Let go on the last upstroke, land on '1'."},
+            {"when":"early","say":"Wait for '1' before the new chord's strum."},
+            {"when":"afterHeld","say":"Swing up past the strings after the long strum."},
+            {"when":"openString","say":"Arch the fingers so the open strings ring."},
+            {"when":"stringChange","say":"Aim the pick at each chord's lowest string."},
+            {"when":"lastBars","say":"Count both bars of D, then go back to G."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -11063,6 +11623,9 @@
             "Your turn, and not checked yet: the app can't judge what you choose to play, so you tick it off yourself."
           ],
           "coachLine": "Not checked yet. Play it for someone, or record it and listen to the whole thing.",
+          "cues": [
+            {"when":"even","say":"Start with four downstrokes a bar.","more":1,"general":true}
+          ],
           "grading": "selfChecked",
           "feedback": "none",
           "meter": {
@@ -11578,6 +12141,16 @@
             "Quarter notes, well under your clean tempo. First finger only: open, then frets 2, 3, 5, 7, 8, 10 and 12, fret 12 again, and back down to fret 2. Press just behind each fret, and only as hard as the note needs."
           ],
           "coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
+          "cues": [
+            {"when":"even","say":"Press only as hard as each note needs.","more":0,"general":true},
+            {"when":"heard","say":"Press just behind each fret as you arrive."},
+            {"when":"late","say":"Arrive at each new fret by its click."},
+            {"when":"early","say":"Wait for the click before each new fret."},
+            {"when":"afterHeld","say":"Hold each note its full length, then move."},
+            {"when":"openString","say":"Have the finger ready as the open note rings."},
+            {"when":"shift","say":"Ease off as you move, press as you arrive."},
+            {"when":"lastBars","say":"Keep pressing just behind the fret to the end."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -12009,6 +12582,16 @@
             "Straight eighths, well under your clean tempo. First finger only: open, then frets 2, 4, 5, 7, 9, 11 and 12, fret 12 again, and back down to fret 2. Let the finger glide along the string between notes without pressing."
           ],
           "coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
+          "cues": [
+            {"when":"even","say":"Glide between notes without pressing.","more":0,"general":true},
+            {"when":"heard","say":"Press just behind each fret as you arrive."},
+            {"when":"late","say":"Start each move as the last note sounds."},
+            {"when":"early","say":"Let each note ring its full length."},
+            {"when":"afterHeld","say":"Hold each note its full length, then move."},
+            {"when":"openString","say":"Have the finger ready as the open note rings."},
+            {"when":"shift","say":"Ease off as you move, press as you arrive."},
+            {"when":"lastBars","say":"Keep pressing just behind the fret to the end."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -12447,6 +13030,15 @@
             "Quarter notes, well under your clean tempo. One flat first finger holds both strings at each fret. Release the pressure as you move and press again when you arrive. Stop if the hand aches: this is strength work, and it builds slowly."
           ],
           "coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
+          "cues": [
+            {"when":"even","say":"Lay the first finger flat over both strings.","more":0,"general":true},
+            {"when":"heard","say":"Pick both strings together on each click."},
+            {"when":"late","say":"Arrive at each new fret by its click."},
+            {"when":"early","say":"Wait for the click before each new fret."},
+            {"when":"shift","say":"Ease off as you move, press as you arrive.","more":0},
+            {"when":"stringChange","say":"Strike both strings in one small stroke."},
+            {"when":"lastBars","say":"Keep the finger flat to the last note."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -12678,7 +13270,14 @@
                   "scale": "major",
                   "spelled": ["C", "D", "E", "F", "G", "A", "B"],
                   "cover": false
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Lay the first finger flat over both strings.","more":0,"general":true},
+                  {"when":"heard","say":"Pick both strings together on each click."},
+                  {"when":"shift","say":"Ease off as you move, press as you arrive.","more":0},
+                  {"when":"stringChange","say":"Strike both strings in one small stroke."},
+                  {"when":"lastBars","say":"Keep the finger flat to the last note."}
+                ]
               },
               {
                 "id": "stringSet=D-and-G,shapeOrder=going-up",
@@ -12738,7 +13337,14 @@
                   "scale": "major",
                   "spelled": ["C", "D", "E", "F", "G", "A", "B"],
                   "cover": false
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Lay the first finger flat over both strings.","more":0,"general":true},
+                  {"when":"heard","say":"Pick both strings together on each click."},
+                  {"when":"shift","say":"Ease off as you move, press as you arrive.","more":0},
+                  {"when":"stringChange","say":"Strike both strings in one small stroke."},
+                  {"when":"lastBars","say":"Keep the finger flat to the last note."}
+                ]
               },
               {
                 "id": "stringSet=D-and-G,shapeOrder=coming-down",
@@ -12798,7 +13404,14 @@
                   "scale": "major",
                   "spelled": ["C", "D", "E", "F", "G", "A", "B"],
                   "cover": false
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Lay the first finger flat over both strings.","more":0,"general":true},
+                  {"when":"heard","say":"Pick both strings together on each click."},
+                  {"when":"shift","say":"Ease off as you move, press as you arrive.","more":0},
+                  {"when":"stringChange","say":"Strike both strings in one small stroke."},
+                  {"when":"lastBars","say":"Keep the finger flat to the last note."}
+                ]
               },
               {
                 "id": "stringSet=A-and-D,shapeOrder=going-up",
@@ -12858,7 +13471,14 @@
                   "scale": "major",
                   "spelled": ["C", "D", "E", "F", "G", "A", "B"],
                   "cover": false
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Lay the first finger flat over both strings.","more":0,"general":true},
+                  {"when":"heard","say":"Pick both strings together on each click."},
+                  {"when":"shift","say":"Ease off as you move, press as you arrive.","more":0},
+                  {"when":"stringChange","say":"Strike both strings in one small stroke."},
+                  {"when":"lastBars","say":"Keep the finger flat to the last note."}
+                ]
               },
               {
                 "id": "stringSet=A-and-D,shapeOrder=coming-down",
@@ -12918,7 +13538,14 @@
                   "scale": "major",
                   "spelled": ["C", "D", "E", "F", "G", "A", "B"],
                   "cover": false
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Lay the first finger flat over both strings.","more":0,"general":true},
+                  {"when":"heard","say":"Pick both strings together on each click."},
+                  {"when":"shift","say":"Ease off as you move, press as you arrive.","more":0},
+                  {"when":"stringChange","say":"Strike both strings in one small stroke."},
+                  {"when":"lastBars","say":"Keep the finger flat to the last note."}
+                ]
               },
               {
                 "id": "stringSet=low-E-and-A,shapeOrder=going-up",
@@ -12978,7 +13605,14 @@
                   "scale": "major",
                   "spelled": ["C", "D", "E", "F", "G", "A", "B"],
                   "cover": false
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Lay the first finger flat over both strings.","more":0,"general":true},
+                  {"when":"heard","say":"Pick both strings together on each click."},
+                  {"when":"shift","say":"Ease off as you move, press as you arrive.","more":0},
+                  {"when":"stringChange","say":"Strike both strings in one small stroke."},
+                  {"when":"lastBars","say":"Keep the finger flat to the last note."}
+                ]
               },
               {
                 "id": "stringSet=low-E-and-A,shapeOrder=coming-down",
@@ -13038,7 +13672,14 @@
                   "scale": "major",
                   "spelled": ["C", "D", "E", "F", "G", "A", "B"],
                   "cover": false
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Lay the first finger flat over both strings.","more":0,"general":true},
+                  {"when":"heard","say":"Pick both strings together on each click."},
+                  {"when":"shift","say":"Ease off as you move, press as you arrive.","more":0},
+                  {"when":"stringChange","say":"Strike both strings in one small stroke."},
+                  {"when":"lastBars","say":"Keep the finger flat to the last note."}
+                ]
               }
             ]
           }
