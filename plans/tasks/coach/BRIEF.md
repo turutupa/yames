@@ -66,7 +66,10 @@ verify with grep before you rely on one, and write any real difference into your
 - **Gates.** `npx tsc --noEmit`, `npm run test` (vitest), `npm run build`; `npm run test:rust` for any
   Rust change; for every screen you touch, its layout specs
   (`npx playwright test --trace off tests/layout/<spec>`); `npm run paths -- check` if pack content
-  changes; the click-jitter probe for anything that adds background compute. All fifteen locale files
+  changes; the click-jitter probe for anything that adds background compute. **A leg that changes any
+  text or style a screen shows runs the full layout suite once before it reports** (`npx playwright test
+  --trace off`): a longer sentence in one leg broke a short-window scene in one theme that none of its
+  named specs covered. All fifteen locale files
   must carry every key (`i18n.locales.test.ts`), so new strings land translated in the same leg.
   Report a gate honestly: if one fails for a reason that is not yours, show that it also fails on
   `coach` untouched, and say so.
