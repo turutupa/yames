@@ -3503,14 +3503,32 @@ pub fn get_models_path(app_handle: AppHandle) -> Result<String, String> {
 /// "Remove models" (no `tier`): every model, voices and engine included.
 /// With a `tier` (Settings → Coach, per tier): that tier's brain only; the
 /// other tier and the voices stay, and the resident model is unloaded only
-/// when it may be the one being deleted.
+/// when it may be the one being deleted. With `older_copy` as well: only
+/// the older copy of that tier left in the old single place
+/// (`TierStatus::older_copy_bytes`); the copy in use is not touched.
 #[tauri::command]
 pub async fn delete_models(
     app_handle: AppHandle,
     dl_state: State<'_, DownloadState>,
     engine: State<'_, SharedCoachEngine>,
     tier: Option<String>,
+    older_copy: Option<bool>,
 ) -> Result<(), String> {
+    if let (Some(tier), Some(true)) = (tier.as_ref(), older_copy) {
+        let tier = tier.clone();
+        let handle: SharedCoachEngine = engine.inner().clone();
+        let app = app_handle.clone();
+        return tokio::task::spawn_blocking(move || {
+            let _held = models::residency_lock();
+            if handle.status().resident() && models::resident_may_be_older_copy(&app) {
+                crate::coach::unload_model(&handle)?;
+                models::note_resident_brain(None);
+            }
+            models::delete_older_copy(&app, &tier)
+        })
+        .await
+        .map_err(|e| format!("delete_models join failed: {e}"))?;
+    }
     if let Some(tier) = tier {
         // A download of this very tier stops first and keeps nothing; one
         // of the other tier runs on.
@@ -3526,6 +3544,7 @@ pub async fn delete_models(
         let handle: SharedCoachEngine = engine.inner().clone();
         let app = app_handle.clone();
         return tokio::task::spawn_blocking(move || {
+            let _held = models::residency_lock();
             if handle.status().resident() && models::resident_may_be(&app, &tier) {
                 crate::coach::unload_model(&handle)?;
                 models::note_resident_brain(None);
@@ -3556,6 +3575,7 @@ pub async fn delete_models(
     let handle: SharedCoachEngine = engine.inner().clone();
     let app = app_handle.clone();
     tokio::task::spawn_blocking(move || {
+        let _held = models::residency_lock();
         crate::coach::unload_model(&handle)?;
         models::note_resident_brain(None);
         models::delete_models(&app)
@@ -3572,16 +3592,21 @@ pub fn start_model_download(
     filename: String,
     tier: String,
     dl_state: State<DownloadState>,
-) -> Result<(), String> {
+) -> Result<u64, String> {
+    // Only the pinned file of the tier asked for (`models::pinned_download`).
+    models::pinned_download(&component, &tier, &url)?;
     let mut guard = dl_state.0.lock().unwrap();
-    // Cancel any existing download first
+    // Stop any existing download first. The new one's thread waits for the
+    // old one to have exited before it touches a file (one transfer at a
+    // time), and the old one's late events are not sent once this exists.
     if let Some(old) = guard.take() {
         old.cancel.store(true, std::sync::atomic::Ordering::Relaxed);
     }
     let control = models::DownloadControl::new(Some(tier.clone()), Some(url.clone()));
+    let generation = control.generation;
     *guard = Some(control.clone());
     models::start_download(app_handle, url, component, filename, tier, control);
-    Ok(())
+    Ok(generation)
 }
 
 /// Stop the running download. Without `discard` it is a pause: the bytes
@@ -3590,9 +3615,9 @@ pub fn start_model_download(
 /// too, by the download's own thread once curl has stopped when one is
 /// running, here when none is (a paused download being cancelled).
 #[tauri::command]
-pub fn cancel_model_download(
+pub async fn cancel_model_download(
     app_handle: AppHandle,
-    dl_state: State<DownloadState>,
+    dl_state: State<'_, DownloadState>,
     discard: Option<bool>,
     tier: Option<String>,
     url: Option<String>,
@@ -3615,7 +3640,17 @@ pub fn cancel_model_download(
         .is_some_and(|c| c.tier == tier && c.url == url);
     if discard && !same {
         if let (Some(tier), Some(url)) = (tier, url) {
-            models::discard_partial(&app_handle, &tier, &url)?;
+            // A paused download whose curl is still stopping holds the part
+            // open: wait for it to exit (off the async runtime) before the
+            // part is removed, so the removal never races a transfer.
+            return tokio::task::spawn_blocking(move || {
+                if !models::wait_for_transfers_of(&tier, &url, std::time::Duration::from_secs(30)) {
+                    return Err("the download is still stopping; try again in a moment".to_string());
+                }
+                models::discard_partial(&app_handle, &tier, &url)
+            })
+            .await
+            .map_err(|e| format!("cancel_model_download join failed: {e}"))?;
         }
     }
     Ok(())
@@ -3644,12 +3679,10 @@ pub async fn load_coach_model(
     let fallback_name = models::brain_display_name(brain.family.as_deref(), Some(&brain.tier));
     let handle: SharedCoachEngine = engine.inner().clone();
     tokio::task::spawn_blocking(move || {
-        let loaded =
-            crate::coach::load_model(&handle, &brain.model, brain.family.as_deref(), &fallback_name);
-        if matches!(loaded, Ok(true)) {
-            models::note_resident_brain(Some(brain.dir.clone()));
-        }
-        loaded
+        // One load at a time, recorded only when it happened.
+        models::load_and_record(brain.dir.clone(), || {
+            crate::coach::load_model(&handle, &brain.model, brain.family.as_deref(), &fallback_name)
+        })
     })
     .await
     .map_err(|e| format!("load_coach_model join failed: {e}"))?
@@ -3666,6 +3699,7 @@ pub async fn unload_coach_model(engine: State<'_, SharedCoachEngine>) -> Result<
     // Joining the inference thread is a blocking wait; keep it off the
     // async runtime.
     tokio::task::spawn_blocking(move || {
+        let _held = models::residency_lock();
         let unloaded = crate::coach::unload_model(&handle);
         if unloaded.is_ok() {
             models::note_resident_brain(None);
@@ -4023,7 +4057,7 @@ pub fn start_voice_repair(
     }
     let control = models::DownloadControl::new(None, None);
     *guard = Some(control.clone());
-    models::start_voice_repair(app_handle, voice_id, control.cancel);
+    models::start_voice_repair(app_handle, voice_id, control);
     Ok(())
 }
 

@@ -89,6 +89,13 @@ pub struct TierStatus {
     /// after the transfer, before the file is adopted).
     #[serde(rename = "checksumPinned")]
     pub checksum_pinned: bool,
+    /// Bytes in the old single place that are this tier's and not in use:
+    /// an older copy of its brain that the copy in the tier's own folder
+    /// shadows, and a paused download of its file that could not be moved
+    /// beside the tier's own. 0 when none. Settings shows them with their
+    /// own Remove; nothing removes them unasked.
+    #[serde(rename = "olderCopyBytes")]
+    pub older_copy_bytes: u64,
 }
 
 /// RAM floor for the Studio tier (Qwen3-8B Q4_K_M, ~8 GB resident).
@@ -325,11 +332,32 @@ fn tier_brain_dir(brain_root: &Path, tier: &str) -> Option<PathBuf> {
     None
 }
 
-/// Which tier the single brain of an older install is. Its `tier` file;
-/// else the tier its marker records; else its size (the Studio file is the
-/// only one past the Studio floor). Never fails: an unreadable tier still
-/// has to go somewhere, and a misfiled brain is only a label.
+/// Which tier the single brain of an older install is. Never fails: an
+/// unreadable tier still has to go somewhere.
+///
+/// The weights themselves decide first (`weights_tier`: a marker whose
+/// `bytes` match them, else their size), and the `tier` file only after.
+/// The order matters because the downloader before ms2 renamed the part
+/// over `model.bin`, THEN wrote the marker, THEN the `tier` file: a quit
+/// between the last two left 8B weights, a marker saying `full` and a
+/// `tier` file still saying `standard`, and reading the `tier` file first
+/// filed the 8B file under Standard, where a later Standard download would
+/// have been renamed over it.
+///
+/// A pre-T04 brain (no marker) is decided by its size where its size can
+/// decide (only the Studio file reaches the Studio floor; a pinned file's
+/// exact size is that file), and by its `tier` file otherwise: the pre-T04
+/// files (Qwen2.5-1.5B for Standard, Phi-3.5-mini for Studio) are both
+/// under the floor and neither is pinned, so for them the `tier` file is
+/// the only record there is. The same crash window existed for them, and
+/// there a stale `tier` file can still misfile a small legacy file; that
+/// file is legacy whichever tier holds it (it is offered an update, never
+/// loaded), and nothing is ever renamed over it from the other tier's
+/// download (`finish_brain_part`).
 fn legacy_tier(brain_root: &Path) -> String {
+    if let Some(t) = weights_tier(brain_root) {
+        return t;
+    }
     let from_file = std::fs::read_to_string(brain_root.join("tier"))
         .ok()
         .map(|t| t.trim().to_string())
@@ -337,20 +365,34 @@ fn legacy_tier(brain_root: &Path) -> String {
     if let Some(t) = from_file {
         return t;
     }
-    let from_marker = read_brain_marker(brain_root)
+    // A marker with no `bytes` (none was ever written so, but a hand-made
+    // one can be) is the last record left before the default.
+    read_brain_marker(brain_root)
+        .and_then(|m| m.get("tier").and_then(serde_json::Value::as_str).map(str::to_string))
+        .filter(|t| is_brain_tier(t))
+        .unwrap_or_else(|| "standard".to_string())
+}
+
+/// The tier the `model.bin` in `dir` belongs to, as far as the file itself
+/// can say; `None` when there is no file or nothing about it decides.
+///
+///   1. A marker whose `bytes` match the file records its tier.
+///   2. A size equal to a pinned file's is that tier's file.
+///   3. At or past the Studio floor it is the Studio file: nothing a
+///      Standard download ever fetched is that large.
+fn weights_tier(dir: &Path) -> Option<String> {
+    let bytes = std::fs::metadata(dir.join("model.bin")).ok()?.len();
+    let described = read_brain_marker(dir)
+        .filter(|m| m.get("bytes").and_then(serde_json::Value::as_u64) == Some(bytes))
         .and_then(|m| m.get("tier").and_then(serde_json::Value::as_str).map(str::to_string))
         .filter(|t| is_brain_tier(t));
-    if let Some(t) = from_marker {
-        return t;
+    if described.is_some() {
+        return described;
     }
-    let bytes = std::fs::metadata(brain_root.join("model.bin"))
-        .map(|m| m.len())
-        .unwrap_or(0);
-    if bytes >= floors::BRAIN_STUDIO {
-        "full".to_string()
-    } else {
-        "standard".to_string()
+    if let Some(a) = BRAIN_ARTIFACTS.iter().find(|a| a.bytes == bytes) {
+        return Some(a.tier.to_string());
     }
+    (bytes >= floors::BRAIN_STUDIO).then(|| "full".to_string())
 }
 
 /// What `adopt_legacy_brain` found and did.
@@ -388,9 +430,18 @@ static ADOPTION: std::sync::Mutex<()> = std::sync::Mutex::new(());
 ///
 /// Nothing here deletes or truncates a brain: the only removals are the two
 /// small metadata files of step 3. If the tier's directory already holds a
-/// brain (only possible by hand), nothing moves and `Conflict` says so.
+/// brain (an older build run after this one writes into the old place
+/// again), nothing moves and `Conflict` says so: the tier's own file is
+/// the one used, and the status reports the other as an older copy
+/// (`TierStatus::older_copy_bytes`) for the player to remove.
+///
+/// A download stopped between its two renames (`finish_brain_part`) is
+/// finished here too: its marker follows the weights it describes.
 pub fn adopt_legacy_brain(brain_root: &Path) -> Result<Adoption, String> {
     let _guard = ADOPTION.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+    for tier in BRAIN_TIERS {
+        settle_verified_marker(&brain_root.join(tier), tier);
+    }
     adopt_partials(brain_root);
     let legacy_model = brain_root.join("model.bin");
     if !legacy_model.is_file() {
@@ -425,9 +476,52 @@ pub fn adopt_legacy_brain(brain_root: &Path) -> Result<Adoption, String> {
     })?;
     sync_dir(&dir);
     sync_dir(brain_root);
+    // A model loaded from the old place is the same file, now here.
+    retarget_resident(brain_root, &dir);
     // Step 3.
     tidy_legacy_metadata(brain_root);
     Ok(Adoption::Adopted(tier))
+}
+
+/// The copy of `tier`'s brain in the old single place that the tier's own
+/// folder shadows (both on disk: `Adoption::Conflict`), if there is one.
+fn shadowed_copy(brain_root: &Path, tier: &str) -> Option<PathBuf> {
+    let old = brain_root.join("model.bin");
+    (old.is_file() && brain_root.join(tier).join("model.bin").is_file() && legacy_tier(brain_root) == tier)
+        .then_some(old)
+}
+
+/// A paused download of `tier`'s pinned file left in the old single place
+/// (`adopt_partials` never moves one over the tier's own part).
+fn stranded_part(brain_root: &Path, tier: &str) -> Option<PathBuf> {
+    let a = pinned_for_tier(tier)?;
+    let old = part_path_for(&brain_root.join("model.bin"), a.url);
+    old.is_file().then_some(old)
+}
+
+/// Remove what the old single place holds of `tier` that is not in use: the
+/// older copy of its brain shadowed by the tier's own (only while that one
+/// is on disk: the only copy is never removed here), and a paused download
+/// of its file left there. The player's press beside "An older copy of this
+/// model is also on disk"; nothing else calls it.
+fn delete_older_copy_in(brain_root: &Path, tier: &str) -> Result<(), String> {
+    let _guard = ADOPTION.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+    if let Some(old) = shadowed_copy(brain_root, tier) {
+        std::fs::remove_file(&old).map_err(|e| format!("could not remove {}: {e}", old.display()))?;
+        tidy_legacy_metadata(brain_root);
+    }
+    if let Some(part) = stranded_part(brain_root, tier) {
+        remove_if_present(&part)?;
+    }
+    Ok(())
+}
+
+fn remove_if_present(path: &Path) -> Result<(), String> {
+    match std::fs::remove_file(path) {
+        Ok(()) => Ok(()),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(e) => Err(format!("could not remove {}: {e}", path.display())),
+    }
 }
 
 /// The old place's `tier` and `model.json`, once no brain is left there and
@@ -549,25 +643,82 @@ fn free_space_at(_path: &Path) -> Option<u64> {
 /// `None` after an unload, or when nothing has been loaded.
 static RESIDENT_BRAIN: std::sync::Mutex<Option<PathBuf>> = std::sync::Mutex::new(None);
 
+/// Held for a whole load, unload or per-tier removal, so a record is only
+/// ever written for a load that happened: `coach::load_model` answers
+/// `Ok(true)` without loading anything when another load is already in
+/// progress, and with every load behind this lock that answer can never be
+/// the one recorded.
+static RESIDENCY: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
+pub fn residency_lock() -> std::sync::MutexGuard<'static, ()> {
+    RESIDENCY.lock().unwrap_or_else(std::sync::PoisonError::into_inner)
+}
+
 pub fn note_resident_brain(dir: Option<PathBuf>) {
     *RESIDENT_BRAIN.lock().unwrap_or_else(std::sync::PoisonError::into_inner) = dir;
+}
+
+fn resident_brain() -> Option<PathBuf> {
+    RESIDENT_BRAIN
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+        .clone()
+}
+
+/// Run one load under the residency lock and record `dir` as resident only
+/// when it answered `Ok(true)`. An error leaves the record alone (a failed
+/// reload keeps the old model answering), and so does `Ok(false)` (nothing
+/// was loaded or unloaded).
+pub fn load_and_record(
+    dir: PathBuf,
+    load: impl FnOnce() -> Result<bool, String>,
+) -> Result<bool, String> {
+    let _held = residency_lock();
+    let loaded = load();
+    if matches!(loaded, Ok(true)) {
+        note_resident_brain(Some(dir));
+    }
+    loaded
+}
+
+/// An adoption moved the brain loaded from the old single place into its
+/// tier's folder: the same file, so the record follows it.
+fn retarget_resident(brain_root: &Path, dir: &Path) {
+    let mut recorded = RESIDENT_BRAIN.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+    if recorded.as_deref() == Some(brain_root) {
+        *recorded = Some(dir.to_path_buf());
+    }
 }
 
 /// Whether the resident model may be `tier`'s: true when it is, and when
 /// it is not known (an unknown is unloaded rather than unlinked under it).
 pub fn resident_may_be(app: &AppHandle, tier: &str) -> bool {
-    let recorded = RESIDENT_BRAIN
-        .lock()
-        .unwrap_or_else(std::sync::PoisonError::into_inner)
-        .clone();
+    let Ok(models) = models_dir(app) else {
+        return true;
+    };
+    resident_may_be_in(resident_brain().as_deref(), &models.join("brain"), tier)
+}
+
+fn resident_may_be_in(recorded: Option<&Path>, root: &Path, tier: &str) -> bool {
     let Some(recorded) = recorded else {
         return true;
     };
+    if recorded == root {
+        // Loaded from the old single place. If that file has gone since
+        // (moved by an adoption this record missed), what is mapped is not
+        // known any more: unload.
+        return !root.join("model.bin").is_file() || legacy_tier(root) == tier;
+    }
+    recorded == root.join(tier)
+}
+
+/// Whether the resident model may be the older copy in the old single place.
+pub fn resident_may_be_older_copy(app: &AppHandle) -> bool {
     let Ok(models) = models_dir(app) else {
         return true;
     };
     let root = models.join("brain");
-    recorded == root.join(tier) || (recorded == root && legacy_tier(&root) == tier)
+    resident_brain().is_none_or(|r| r == root)
 }
 
 /// Total physical RAM in MB, or 0 when the platform query fails.
@@ -666,7 +817,8 @@ pub fn check_model_status(app: &AppHandle) -> Result<ModelStatus, String> {
     let brain_ready = first.is_some();
     let brain_tier = first.map(|t| t.tier.clone());
     let brain_family = first.and_then(|t| t.family.clone());
-    let brain_size_bytes = tiers.iter().map(|t| t.size_bytes).sum();
+    // Older copies are on disk too: "Remove models" frees them with the rest.
+    let brain_size_bytes = tiers.iter().map(|t| t.size_bytes + t.older_copy_bytes).sum();
 
     // `voice_ready` powers the UI banner + the "Download voices" button.
     // For the user to ACTUALLY hear a Piper voice, BOTH the Piper
@@ -748,6 +900,8 @@ fn tier_statuses(brain_root: &Path, memory_mb: u64) -> Vec<TierStatus> {
                 partial_bytes: partial_bytes(&brain_root.join(tier), tier),
                 download_bytes: pinned.map(|a| a.bytes),
                 checksum_pinned: pinned.is_some_and(|a| a.sha256.is_some()),
+                older_copy_bytes: shadowed_copy(brain_root, tier).map_or(0, |p| file_len(&p))
+                    + stranded_part(brain_root, tier).map_or(0, |p| file_len(&p)),
             }
         })
         .collect()
@@ -814,17 +968,19 @@ fn brain_matches_request(brain_dir: &std::path::Path, url: &str, tier: &str) -> 
 /// so it is logged rather than failing an otherwise-good download.
 #[cfg(test)]
 fn write_brain_marker(dir: &std::path::Path, url: &str, tier: &str, bytes: u64) {
-    write_brain_marker_checked(dir, url, tier, bytes, None);
+    let marker = brain_marker_json(url, tier, bytes, None, None);
+    write_synced(&dir.join(BRAIN_MARKER), marker.to_string().as_bytes()).unwrap();
 }
 
-/// The marker, with the SHA-256 the file was checked against when it was.
-fn write_brain_marker_checked(
-    dir: &std::path::Path,
+/// The marker, with the SHA-256 the file was checked against when it was,
+/// and the part's modification time it was checked at (`sidecar_vouches`).
+fn brain_marker_json(
     url: &str,
     tier: &str,
     bytes: u64,
     sha256: Option<&str>,
-) {
+    part_modified: Option<&str>,
+) -> serde_json::Value {
     let mut marker = serde_json::json!({
         "family": family_for_url(url),
         "tier": tier,
@@ -834,13 +990,10 @@ fn write_brain_marker_checked(
     if let Some(sha) = sha256 {
         marker["sha256"] = serde_json::Value::from(sha);
     }
-    let path = dir.join(BRAIN_MARKER);
-    if let Err(e) = write_synced(&path, marker.to_string().as_bytes()) {
-        eprintln!(
-            "[yames] Failed to write brain marker at {}: {e}",
-            path.display(),
-        );
+    if let Some(stamp) = part_modified {
+        marker["partModified"] = serde_json::Value::from(stamp);
     }
+    marker
 }
 
 /// Write model data from the frontend to disk.
@@ -879,17 +1032,23 @@ pub fn delete_brain_tier(app: &AppHandle, tier: &str) -> Result<(), String> {
     delete_brain_tier_in(&brain_root, tier)
 }
 
+/// Remove the older copy of `tier`'s brain (and a paused download of it)
+/// left in the old single place: Settings → Coach, beside "An older copy of
+/// this model is also on disk". The copy in use is not touched.
+pub fn delete_older_copy(app: &AppHandle, tier: &str) -> Result<(), String> {
+    if !is_brain_tier(tier) {
+        return Err(format!("unknown brain tier {tier:?}"));
+    }
+    delete_older_copy_in(&models_dir(app)?.join("brain"), tier)
+}
+
 fn delete_brain_tier_in(brain_root: &Path, tier: &str) -> Result<(), String> {
     // A brain still in the old single place is adopted first, so what is
-    // removed is exactly the tier the player named.
+    // removed is exactly the tier the player named. With two copies of the
+    // tier on disk (`Conflict`) the one in use, the folder's, is removed;
+    // the older copy is left for its own Remove (and, being the tier's
+    // only copy from then on, is adopted by the next call).
     match adopt_legacy_brain(brain_root) {
-        Ok(Adoption::Conflict(t)) if t == tier => {
-            return Err(format!(
-                "two {tier} brains are on disk ({} and {}); remove one by hand",
-                brain_root.join("model.bin").display(),
-                brain_root.join(tier).join("model.bin").display(),
-            ));
-        }
         Err(e) if legacy_tier(brain_root) == tier => {
             // It could not be moved, and it is the one the player asked to
             // delete: remove it where it is.
@@ -904,6 +1063,10 @@ fn delete_brain_tier_in(brain_root: &Path, tier: &str) -> Result<(), String> {
     let dir = brain_root.join(tier);
     if dir.exists() {
         std::fs::remove_dir_all(&dir).map_err(|e| format!("Failed to delete {tier} brain: {e}"))?;
+    }
+    // A paused download of this tier left in the old place goes with it.
+    if let Some(part) = stranded_part(brain_root, tier) {
+        remove_if_present(&part)?;
     }
     Ok(())
 }
@@ -921,11 +1084,9 @@ pub fn discard_partial(app: &AppHandle, tier: &str, url: &str) -> Result<(), Str
 fn discard_partial_in(brain_root: &Path, tier: &str, url: &str) -> Result<(), String> {
     for dir in [brain_root.join(tier), brain_root.to_path_buf()] {
         let part = part_path_for(&dir.join("model.bin"), url);
-        match std::fs::remove_file(&part) {
-            Ok(()) => {}
-            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
-            Err(e) => return Err(format!("could not remove {}: {e}", part.display())),
-        }
+        remove_if_present(&part)?;
+        // A record of a check that part had passed goes with it.
+        remove_if_present(&verified_marker_path(&part))?;
     }
     Ok(())
 }
@@ -972,17 +1133,184 @@ pub struct DownloadControl {
     /// The brain tier and URL it fetches; `None` for a voice repair.
     pub tier: Option<String>,
     pub url: Option<String>,
+    /// This download's number. Every event it emits carries it, and once a
+    /// newer download has started its events are not sent at all: a
+    /// stopped download's late "cancelled" must not clear the state of the
+    /// one that replaced it.
+    pub generation: u64,
+    life: Arc<TransferLife>,
+    /// Transfers still running when this one was made. Its thread waits for
+    /// all of them to have exited before it touches a file.
+    previous: Vec<Arc<TransferLife>>,
 }
 
 impl DownloadControl {
+    /// A new download, numbered after every earlier one. Make it only for a
+    /// thread that will run (`start_download`, `start_voice_repair`): until
+    /// that thread ends, the next download waits for it.
     pub fn new(tier: Option<String>, url: Option<String>) -> Self {
+        let generation = DOWNLOAD_GENERATION.fetch_add(1, Ordering::SeqCst) + 1;
+        let life = Arc::new(TransferLife {
+            tier: tier.clone(),
+            url: url.clone(),
+            ended: std::sync::Mutex::new(false),
+            changed: std::sync::Condvar::new(),
+        });
+        let previous = {
+            let mut live = LIVE_TRANSFERS.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+            live.retain(|t| !t.has_ended());
+            let previous = live.clone();
+            live.push(life.clone());
+            previous
+        };
         DownloadControl {
             cancel: Arc::new(AtomicBool::new(false)),
             discard: Arc::new(AtomicBool::new(false)),
             tier,
             url,
+            generation,
+            life,
+            previous,
         }
     }
+}
+
+// ---------------------------------------------------------------------------
+// One transfer at a time
+// ---------------------------------------------------------------------------
+//
+// Starting a download used to set the old one's cancel flag and start the
+// new thread at once, but the old curl only notices the flag at its next
+// progress line: two curls could append to one `.part`, and after a Cancel
+// and a quick restart the old thread's discard could unlink the new
+// transfer's part. Now a new download's thread first waits for every
+// earlier one to have exited (they have all been told to stop by then; a
+// stop is seen within about a second, at curl's next progress line or the
+// checksum's next 8 MiB chunk), and gives up with a message rather than
+// overlap if one has not exited within `PREVIOUS_STOP_WAIT`. Waiting rather
+// than refusing outright because Pause then Resume, or Cancel then
+// Download, is two quick presses the player expects to simply work.
+
+/// The newest download's number (`DownloadControl::generation`).
+static DOWNLOAD_GENERATION: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
+/// Download threads that have not exited yet.
+static LIVE_TRANSFERS: std::sync::Mutex<Vec<Arc<TransferLife>>> = std::sync::Mutex::new(Vec::new());
+
+/// How long a new download waits for the one it replaces to exit.
+const PREVIOUS_STOP_WAIT: std::time::Duration = std::time::Duration::from_secs(90);
+
+/// One download thread's lifetime, waited on by the next.
+pub struct TransferLife {
+    tier: Option<String>,
+    url: Option<String>,
+    ended: std::sync::Mutex<bool>,
+    changed: std::sync::Condvar,
+}
+
+impl TransferLife {
+    fn has_ended(&self) -> bool {
+        *self.ended.lock().unwrap_or_else(std::sync::PoisonError::into_inner)
+    }
+
+    /// Wait until the thread has exited, or `deadline`. True when it has.
+    fn wait_until(&self, deadline: std::time::Instant) -> bool {
+        let mut ended = self.ended.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        while !*ended {
+            let now = std::time::Instant::now();
+            if now >= deadline {
+                return false;
+            }
+            ended = self
+                .changed
+                .wait_timeout(ended, deadline - now)
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .0;
+        }
+        true
+    }
+}
+
+/// Held by a download thread for its whole life; dropping it (a return, a
+/// panic) is the thread's exit as far as the next download is concerned.
+struct TransferEnd(Arc<TransferLife>);
+
+impl Drop for TransferEnd {
+    fn drop(&mut self) {
+        *self.0.ended.lock().unwrap_or_else(std::sync::PoisonError::into_inner) = true;
+        self.0.changed.notify_all();
+    }
+}
+
+/// Wait for every earlier transfer in `previous` to have exited.
+fn wait_for_previous(previous: &[Arc<TransferLife>], timeout: std::time::Duration) -> bool {
+    let deadline = std::time::Instant::now() + timeout;
+    previous.iter().all(|t| t.wait_until(deadline))
+}
+
+/// Wait for the transfers of `tier`'s `url` that are still exiting (a
+/// paused one whose curl has not stopped yet), so a discard does not race
+/// them. True when none is left.
+pub fn wait_for_transfers_of(tier: &str, url: &str, timeout: std::time::Duration) -> bool {
+    let matching: Vec<Arc<TransferLife>> = LIVE_TRANSFERS
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+        .iter()
+        .filter(|t| t.tier.as_deref() == Some(tier) && t.url.as_deref() == Some(url))
+        .cloned()
+        .collect();
+    wait_for_previous(&matching, timeout)
+}
+
+/// The app, as a download thread emits through it: every
+/// `model-download-progress` / `model-download-complete` payload carries the
+/// download's `generation`, and nothing is sent once a newer download has
+/// started. Derefs to the `AppHandle` for everything else.
+pub struct DownloadEvents {
+    app: AppHandle,
+    generation: u64,
+}
+
+impl std::ops::Deref for DownloadEvents {
+    type Target = AppHandle;
+    fn deref(&self) -> &AppHandle {
+        &self.app
+    }
+}
+
+impl DownloadEvents {
+    fn emit<S: Serialize + Clone>(&self, event: &str, payload: S) -> tauri::Result<()> {
+        match tag_download_event(payload, self.generation) {
+            Some(tagged) => self.app.emit(event, tagged),
+            None => Ok(()),
+        }
+    }
+}
+
+/// The payload with its download's `generation`, or `None` when a newer
+/// download has started since (the event is then not sent).
+fn tag_download_event<S: Serialize>(payload: S, generation: u64) -> Option<serde_json::Value> {
+    if DOWNLOAD_GENERATION.load(Ordering::SeqCst) != generation {
+        return None;
+    }
+    let mut value = serde_json::to_value(payload).ok()?;
+    if let Some(map) = value.as_object_mut() {
+        map.insert("generation".to_string(), serde_json::Value::from(generation));
+    }
+    Some(value)
+}
+
+/// The URLs `start_model_download` will fetch: the pinned brain file of the
+/// tier asked for, and nothing else. The frontend's `MODEL_URLS` sends
+/// exactly these (`brainArtifacts.test.ts`), the voices and the speech
+/// engine come from Rust's own tables (`tts`), and no dev override or test
+/// passes anything else through this command; so a `file://` URL, another
+/// host or another tier's file is refused rather than handed to curl.
+pub fn pinned_download(component: &str, tier: &str, url: &str) -> Result<&'static BrainArtifact, String> {
+    if component != "brain" {
+        return Err(format!("unknown download component {component:?}"));
+    }
+    artifact_for(tier, url).ok_or_else(|| format!("not a download this app offers for the {tier:?} tier: {url}"))
 }
 
 /// Progress event emitted to the frontend during download.
@@ -1059,6 +1387,25 @@ fn brain_failure_event(e: &BrainFetchError, discarded: bool) -> serde_json::Valu
     }
 }
 
+/// The first thing a download thread does: wait for every earlier transfer
+/// to have exited. False (and the event sent) when one did not exit in
+/// time.
+fn begin_after_previous(app: &DownloadEvents, control: &DownloadControl) -> bool {
+    if !wait_for_previous(&control.previous, PREVIOUS_STOP_WAIT) {
+        let _ = app.emit(
+            "model-download-complete",
+            serde_json::json!({
+                "success": false,
+                "error": "the previous download is still stopping; try again in a moment",
+            }),
+        );
+        return false;
+    }
+    // Stopped while it waited: the transfer below sees the flag before it
+    // fetches a byte, and a Cancel's discard still runs as usual.
+    true
+}
+
 /// Download a model file from `url` to the models directory.
 /// Runs on a background thread. Emits "model-download-progress" events.
 /// After the brain model, automatically downloads Piper binary + voice models.
@@ -1077,6 +1424,11 @@ pub fn start_download(
 ) {
     let cancel = control.cancel.clone();
     std::thread::spawn(move || {
+        let _end = TransferEnd(control.life.clone());
+        let app = DownloadEvents { app, generation: control.generation };
+        if !begin_after_previous(&app, &control) {
+            return;
+        }
         let models_dir = match app.path().app_data_dir() {
             Ok(d) => d.join("models"),
             Err(e) => {
@@ -1426,6 +1778,8 @@ fn curl_args(url: &str, part_path: &std::path::Path) -> Vec<std::ffi::OsString> 
     .map(OsString::from)
     .collect();
     args.push(part_path.as_os_str().to_os_string());
+    // Everything after `--` is a URL, never an option.
+    args.push(OsString::from("--"));
     args.push(OsString::from(url));
     args
 }
@@ -1433,7 +1787,7 @@ fn curl_args(url: &str, part_path: &std::path::Path) -> Vec<std::ffi::OsString> 
 /// Download a file with curl, then rename it into place. Returns Ok(()) on
 /// success.
 fn curl_download(
-    app: &AppHandle,
+    app: &DownloadEvents,
     url: &str,
     dest: &std::path::Path,
     cancel: &AtomicBool,
@@ -1560,7 +1914,7 @@ fn curl_fetch(
 ///      over `model.bin`; until that rename the weights on disk are
 ///      whatever they were.
 fn fetch_brain(
-    app: &AppHandle,
+    app: &DownloadEvents,
     models_dir: &Path,
     url: &str,
     tier: &str,
@@ -1570,21 +1924,16 @@ fn fetch_brain(
         return Err(BrainFetchError::Failed(format!("unknown brain tier {tier:?}")));
     }
     let brain_root = models_dir.join("brain");
-    match adopt_legacy_brain(&brain_root) {
-        Ok(Adoption::Conflict(t)) if t == tier => {
-            return Err(BrainFetchError::Failed(format!(
-                "a {tier} brain is still in {} and another in {}; nothing was downloaded",
-                brain_root.display(),
-                brain_root.join(tier).display(),
-            )));
-        }
+    // A `Conflict` (an older copy of this tier in the old place) is no
+    // reason to stop: the download goes to the tier's own folder, and the
+    // older copy is left exactly where it is.
+    if let Err(e) = adopt_legacy_brain(&brain_root) {
         // A brain that could not be moved must not be fetched over.
-        Err(e) if brain_root.join("model.bin").is_file() => {
+        if brain_root.join("model.bin").is_file() {
             return Err(BrainFetchError::Failed(format!(
                 "the brain already on disk could not be moved to its own folder: {e}"
             )));
         }
-        _ => {}
     }
     let dir = brain_root.join(tier);
     let dest = dir.join("model.bin");
@@ -1592,6 +1941,8 @@ fn fetch_brain(
         // Already exactly this file: only the voices may be missing.
         return Ok(());
     }
+    // Before fetching gigabytes, not only before the rename.
+    refuse_foreign_weights(&dir, tier)?;
     std::fs::create_dir_all(&dir).map_err(|e| BrainFetchError::Failed(format!("Failed to create dir: {e}")))?;
     let artifact = artifact_for(tier, url);
     let part = part_path_for(&dest, url);
@@ -1666,6 +2017,7 @@ fn finish_brain_part(
         }
         Some(a) if bytes > a.bytes => {
             let _ = std::fs::remove_file(part);
+            let _ = std::fs::remove_file(verified_marker_path(part));
             return Err(BrainFetchError::Failed(format!(
                 "the download is {bytes} bytes, larger than the {} published; it was removed",
                 a.bytes
@@ -1683,25 +2035,123 @@ fn finish_brain_part(
         }
         None => {}
     }
+    // Never over another tier's file (a brain misfiled by an older build):
+    // the verified part stays for when that is sorted out.
+    refuse_foreign_weights(dir, tier)?;
+    let sidecar = verified_marker_path(part);
+    let part_stamp = modified_stamp(part);
     let mut verified: Option<&str> = None;
     if let Some(expected) = artifact.and_then(|a| a.sha256) {
-        let actual = sha256_file(part, cancel, on_hash)?;
-        if !actual.eq_ignore_ascii_case(expected) {
-            eprintln!(
-                "[yames] brain checksum mismatch for {tier}: expected {expected}, got {actual}"
-            );
-            let _ = std::fs::remove_file(part);
-            return Err(BrainFetchError::Checksum);
+        if sidecar_vouches(&sidecar, bytes, expected, part_stamp.as_deref()) {
+            // Checked already, by a run whose rename then failed: the part
+            // has the same length and modification time it had when it
+            // matched, so it is not read again.
+            on_hash(bytes, bytes);
+        } else {
+            let actual = sha256_file(part, cancel, on_hash)?;
+            if !actual.eq_ignore_ascii_case(expected) {
+                eprintln!(
+                    "[yames] brain checksum mismatch for {tier}: expected {expected}, got {actual}"
+                );
+                let _ = std::fs::remove_file(part);
+                let _ = std::fs::remove_file(&sidecar);
+                return Err(BrainFetchError::Checksum);
+            }
         }
         verified = Some(expected);
     }
-    write_brain_marker_checked(dir, url, tier, bytes, verified);
+    // The order is what keeps the marker and the weights describing each
+    // other at every point:
+    //   1. the new marker goes beside the PART (`<part>.verified.json`),
+    //   2. the part is renamed over `model.bin`, the one step that changes
+    //      the weights; if it fails (Windows, over a mapped file) the old
+    //      marker and the old weights are both still in place, and the
+    //      part and its record are kept for the retry,
+    //   3. the record is renamed over `model.json`; a stop between 2 and 3
+    //      is finished by the next `adopt_legacy_brain`
+    //      (`settle_verified_marker`), and until then the old marker's
+    //      `bytes` do not match the new weights, so it is not believed.
+    let marker = brain_marker_json(url, tier, bytes, verified, part_stamp.as_deref());
+    write_synced(&sidecar, marker.to_string().as_bytes()).map_err(BrainFetchError::Failed)?;
     write_synced(&dir.join("tier"), tier.as_bytes())
         .map_err(|e| BrainFetchError::Failed(format!("Failed to write tier: {e}")))?;
     std::fs::rename(part, dir.join("model.bin"))
         .map_err(|e| BrainFetchError::Failed(format!("Failed to rename file: {e}")))?;
     sync_dir(dir);
+    std::fs::rename(&sidecar, dir.join(BRAIN_MARKER))
+        .map_err(|e| BrainFetchError::Failed(format!("Failed to record the new model: {e}")))?;
+    sync_dir(dir);
     Ok(())
+}
+
+/// Refuse to put a download in `dir` while its `model.bin` is, by its own
+/// record or its size, another tier's file (`weights_tier`). Reported,
+/// never done: the file stays exactly as it is.
+fn refuse_foreign_weights(dir: &Path, tier: &str) -> Result<(), BrainFetchError> {
+    match weights_tier(dir) {
+        Some(found) if found != tier => Err(BrainFetchError::Failed(format!(
+            "the {tier} folder ({}) holds the {found} model's file; it was left as it is and nothing was downloaded over it",
+            dir.display()
+        ))),
+        _ => Ok(()),
+    }
+}
+
+/// Where a verified download's marker waits for its weights' rename.
+fn verified_marker_path(part: &Path) -> PathBuf {
+    part.with_extension("verified.json")
+}
+
+/// A file's modification time, as a string precise to the nanosecond the
+/// platform keeps.
+fn modified_stamp(path: &Path) -> Option<String> {
+    let t = std::fs::metadata(path).ok()?.modified().ok()?;
+    let d = t.duration_since(std::time::UNIX_EPOCH).ok()?;
+    Some(format!("{}.{:09}", d.as_secs(), d.subsec_nanos()))
+}
+
+/// Whether the record beside a part says this very part (same length, same
+/// modification time) already matched `sha256`.
+fn sidecar_vouches(sidecar: &Path, bytes: u64, sha256: &str, stamp: Option<&str>) -> bool {
+    let Some(stamp) = stamp else {
+        return false;
+    };
+    let Ok(raw) = std::fs::read_to_string(sidecar) else {
+        return false;
+    };
+    let Ok(m) = serde_json::from_str::<serde_json::Value>(&raw) else {
+        return false;
+    };
+    m.get("bytes").and_then(serde_json::Value::as_u64) == Some(bytes)
+        && m.get("sha256").and_then(serde_json::Value::as_str) == Some(sha256)
+        && m.get("partModified").and_then(serde_json::Value::as_str) == Some(stamp)
+}
+
+/// Finish a download stopped between its two renames: the part is gone
+/// (renamed over `model.bin`) and its record is still beside where it was.
+/// The record becomes the marker when the weights are the size it records;
+/// otherwise it describes nothing on disk and is removed (a small file of
+/// ours, never weights).
+fn settle_verified_marker(dir: &Path, tier: &str) {
+    let Some(a) = pinned_for_tier(tier) else {
+        return;
+    };
+    let part = part_path_for(&dir.join("model.bin"), a.url);
+    let sidecar = verified_marker_path(&part);
+    if part.exists() || !sidecar.is_file() {
+        return;
+    }
+    let recorded = std::fs::read_to_string(&sidecar)
+        .ok()
+        .and_then(|raw| serde_json::from_str::<serde_json::Value>(&raw).ok())
+        .and_then(|m| m.get("bytes").and_then(serde_json::Value::as_u64));
+    if recorded.is_some() && recorded == std::fs::metadata(dir.join("model.bin")).ok().map(|m| m.len()) {
+        if std::fs::rename(&sidecar, dir.join(BRAIN_MARKER)).is_ok() {
+            sync_dir(dir);
+        }
+    } else {
+        let _ = std::fs::remove_file(&sidecar);
+    }
 }
 
 /// SHA-256 of a file, lowercase hex, read in 8 MiB chunks. Returns
@@ -1747,7 +2197,7 @@ fn sha256_file(
 }
 
 fn do_download(
-    app: &AppHandle,
+    app: &DownloadEvents,
     url: &str,
     component: &str,
     filename: &str,
@@ -1804,8 +2254,14 @@ fn do_download(
 /// unchanged. The complete event omits `tier` so the frontend's
 /// "tier completed" branch doesn't false-fire — a repair leaves the
 /// active brain tier untouched.
-pub fn start_voice_repair(app: AppHandle, voice_id: String, cancel: DownloadCancelFlag) {
+pub fn start_voice_repair(app: AppHandle, voice_id: String, control: DownloadControl) {
+    let cancel = control.cancel.clone();
     std::thread::spawn(move || {
+        let _end = TransferEnd(control.life.clone());
+        let app = DownloadEvents { app, generation: control.generation };
+        if !begin_after_previous(&app, &control) {
+            return;
+        }
         let models_dir = match app.path().app_data_dir() {
             Ok(d) => d.join("models"),
             Err(e) => {
@@ -2213,7 +2669,7 @@ fn post_extract_fixups(piper_dir: &std::path::Path) {
 /// Returns `Err("cancelled")` verbatim when the user aborted, so callers
 /// can emit the cancelled event rather than an error banner.
 fn install_piper_engine(
-    app: &AppHandle,
+    app: &DownloadEvents,
     models_dir: &std::path::Path,
     cancel: &DownloadCancelFlag,
 ) -> Result<(), String> {
@@ -2309,11 +2765,33 @@ mod brain_family_tests {
         );
     }
 
-    fn temp_dir(tag: &str) -> PathBuf {
+    /// A directory for one test, removed when it ends (passed or failed).
+    struct TempDir(PathBuf);
+
+    impl std::ops::Deref for TempDir {
+        type Target = PathBuf;
+        fn deref(&self) -> &PathBuf {
+            &self.0
+        }
+    }
+
+    impl AsRef<Path> for TempDir {
+        fn as_ref(&self) -> &Path {
+            &self.0
+        }
+    }
+
+    impl Drop for TempDir {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+
+    fn temp_dir(tag: &str) -> TempDir {
         let dir = std::env::temp_dir().join(format!("yames-brain-{tag}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
-        dir
+        TempDir(dir)
     }
 
     #[test]
@@ -2494,15 +2972,41 @@ mod brain_store_tests {
 
     static N: AtomicUsize = AtomicUsize::new(0);
 
-    /// A fresh `brain/` root for one test.
-    fn root(tag: &str) -> PathBuf {
+    /// A fresh `brain/` root for one test, removed with everything in it
+    /// (the sparse Studio-sized file included) when the test ends, passed
+    /// or failed. Bind it to a name for the whole test: a temporary is
+    /// dropped, and its directory removed, at the end of its statement.
+    struct TestRoot {
+        brain: PathBuf,
+        top: PathBuf,
+    }
+
+    impl std::ops::Deref for TestRoot {
+        type Target = PathBuf;
+        fn deref(&self) -> &PathBuf {
+            &self.brain
+        }
+    }
+
+    impl AsRef<Path> for TestRoot {
+        fn as_ref(&self) -> &Path {
+            &self.brain
+        }
+    }
+
+    impl Drop for TestRoot {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.top);
+        }
+    }
+
+    fn root(tag: &str) -> TestRoot {
         let n = N.fetch_add(1, Ordering::Relaxed);
-        let dir = std::env::temp_dir()
-            .join(format!("yames-ms2-{tag}-{}-{n}", std::process::id()))
-            .join("brain");
-        let _ = std::fs::remove_dir_all(&dir);
-        std::fs::create_dir_all(&dir).unwrap();
-        dir
+        let top = std::env::temp_dir().join(format!("yames-ms2-{tag}-{}-{n}", std::process::id()));
+        let brain = top.join("brain");
+        let _ = std::fs::remove_dir_all(&top);
+        std::fs::create_dir_all(&brain).unwrap();
+        TestRoot { brain, top }
     }
 
     fn put(path: &Path, bytes: &[u8]) {
@@ -2759,7 +3263,8 @@ mod brain_store_tests {
 
     #[test]
     fn the_hash_is_the_published_one() {
-        let path = root("sha").join("f");
+        let r = root("sha");
+        let path = r.join("f");
         put(&path, b"abc");
         let hex = sha256_file(&path, &AtomicBool::new(false), &mut |_, _| {}).unwrap();
         assert_eq!(hex, ABC_SHA256);
@@ -2767,7 +3272,8 @@ mod brain_store_tests {
 
     #[test]
     fn a_matching_file_is_adopted() {
-        let dir = root("hash-pass").join("standard");
+        let r = root("hash-pass");
+        let dir = r.join("standard");
         let part = part_path_for(&dir.join("model.bin"), STD_URL);
         put(&part, b"abc");
         finish(&dir, &part, Some(&abc_artifact()), false).unwrap();
@@ -2780,7 +3286,8 @@ mod brain_store_tests {
 
     #[test]
     fn a_mismatch_removes_the_part_and_keeps_the_brain_on_disk() {
-        let dir = root("hash-fail").join("standard");
+        let r = root("hash-fail");
+        let dir = r.join("standard");
         put(&dir.join("model.bin"), b"the player's brain");
         let part = part_path_for(&dir.join("model.bin"), STD_URL);
         put(&part, b"abd");
@@ -2791,7 +3298,8 @@ mod brain_store_tests {
 
     #[test]
     fn a_short_part_is_kept_to_resume_and_a_long_one_removed() {
-        let dir = root("hash-size").join("standard");
+        let r = root("hash-size");
+        let dir = r.join("standard");
         let part = part_path_for(&dir.join("model.bin"), STD_URL);
         put(&part, b"ab");
         assert!(matches!(finish(&dir, &part, Some(&abc_artifact()), false), Err(BrainFetchError::Failed(_))));
@@ -2804,7 +3312,8 @@ mod brain_store_tests {
 
     #[test]
     fn a_pause_during_the_check_keeps_the_whole_part() {
-        let dir = root("hash-pause").join("standard");
+        let r = root("hash-pause");
+        let dir = r.join("standard");
         let part = part_path_for(&dir.join("model.bin"), STD_URL);
         put(&part, b"abc");
         assert_eq!(finish(&dir, &part, Some(&abc_artifact()), true), Err(BrainFetchError::Cancelled));
@@ -2817,7 +3326,8 @@ mod brain_store_tests {
 
     #[test]
     fn without_a_pin_the_size_floor_stands_in() {
-        let dir = root("no-pin").join("standard");
+        let r = root("no-pin");
+        let dir = r.join("standard");
         let part = part_path_for(&dir.join("model.bin"), STD_URL);
         put(&part, b"a");
         assert!(matches!(finish(&dir, &part, None, false), Err(BrainFetchError::Failed(_))));
@@ -2918,6 +3428,326 @@ mod brain_store_tests {
         let r = curl_fetch("file:///nonexistent", &part, &AtomicBool::new(true), None, &mut |_, _, _| {});
         assert_eq!(r, Err("cancelled".to_string()));
         assert_eq!(read(&part), b"kept");
+    }
+
+    // ── Review fixes (leg ms2b) ────────────────────────────────────────
+
+    fn marker_for(tier: &str, bytes: u64) -> Vec<u8> {
+        serde_json::json!({ "family": CURRENT_BRAIN_FAMILY, "tier": tier, "url": STD_URL, "bytes": bytes })
+            .to_string()
+            .into_bytes()
+    }
+
+    /// 1. The old downloader wrote the marker, then the `tier` file: a quit
+    /// between the two leaves a marker that describes the weights and a
+    /// `tier` file that does not. The marker wins.
+    #[test]
+    fn a_marker_that_describes_the_weights_outranks_a_stale_tier_file() {
+        let brain = root("stale-tier-file");
+        put(&brain.join("model.bin"), b"8b weights");
+        put(&brain.join(BRAIN_MARKER), &marker_for("full", 10));
+        put(&brain.join("tier"), b"standard");
+        assert_eq!(legacy_tier(&brain), "full");
+        assert_eq!(adopt_legacy_brain(&brain), Ok(Adoption::Adopted("full".into())));
+        assert_eq!(read(&brain.join("full/model.bin")), b"8b weights");
+        assert!(!brain.join("standard").exists());
+    }
+
+    /// 1. A quit right after the old rename: a stale marker AND a stale
+    /// `tier` file, both naming the tier before. The weights' size decides.
+    #[cfg(unix)]
+    #[test]
+    fn stale_records_lose_to_the_size_of_the_weights() {
+        let brain = root("stale-both");
+        let f = std::fs::File::create(brain.join("model.bin")).unwrap();
+        f.set_len(BRAIN_ARTIFACTS[1].bytes).unwrap();
+        drop(f);
+        put(&brain.join(BRAIN_MARKER), &marker_for("standard", BRAIN_ARTIFACTS[0].bytes));
+        put(&brain.join("tier"), b"standard");
+        assert_eq!(legacy_tier(&brain), "full");
+
+        // And the other way: the 4B file's exact size under records saying Studio.
+        let brain = root("stale-both-4b");
+        let f = std::fs::File::create(brain.join("model.bin")).unwrap();
+        f.set_len(BRAIN_ARTIFACTS[0].bytes).unwrap();
+        drop(f);
+        put(&brain.join(BRAIN_MARKER), &marker_for("full", BRAIN_ARTIFACTS[1].bytes));
+        put(&brain.join("tier"), b"full");
+        assert_eq!(legacy_tier(&brain), "standard");
+    }
+
+    /// 1. A pre-T04 brain (no marker, small, not a pinned size): its `tier`
+    /// file is the only record there is.
+    #[test]
+    fn a_pre_t04_brain_follows_its_tier_file() {
+        let brain = root("pre-t04-full");
+        put(&brain.join("model.bin"), b"phi-3.5");
+        put(&brain.join("tier"), b"full");
+        assert_eq!(legacy_tier(&brain), "full");
+        assert_eq!(weights_tier(&brain), None);
+    }
+
+    /// 1. Nothing is ever renamed over another tier's file, by its marker
+    /// or (no marker) by its size; refused before the transfer and at the
+    /// rename, and the verified part is kept.
+    #[test]
+    fn a_download_is_never_renamed_over_another_tiers_file() {
+        let r = root("foreign");
+        let dir = r.join("standard");
+        put(&dir.join("model.bin"), b"the 8B file");
+        put(&dir.join(BRAIN_MARKER), &marker_for("full", 11));
+        assert!(matches!(refuse_foreign_weights(&dir, "standard"), Err(BrainFetchError::Failed(_))));
+        assert_eq!(refuse_foreign_weights(&dir, "full"), Ok(()));
+        let part = part_path_for(&dir.join("model.bin"), STD_URL);
+        put(&part, b"abc");
+        assert!(matches!(finish(&dir, &part, Some(&abc_artifact()), false), Err(BrainFetchError::Failed(_))));
+        assert_eq!(read(&dir.join("model.bin")), b"the 8B file");
+        assert_eq!(read(&dir.join(BRAIN_MARKER)), marker_for("full", 11));
+        assert_eq!(read(&part), b"abc");
+
+        // The same refusal with no marker, on a Studio-sized file.
+        #[cfg(unix)]
+        {
+            std::fs::remove_file(dir.join(BRAIN_MARKER)).unwrap();
+            let f = std::fs::File::create(dir.join("model.bin")).unwrap();
+            f.set_len(floors::BRAIN_STUDIO + 1).unwrap();
+            drop(f);
+            assert!(matches!(finish(&dir, &part, Some(&abc_artifact()), false), Err(BrainFetchError::Failed(_))));
+            assert_eq!(file_len(&dir.join("model.bin")), floors::BRAIN_STUDIO + 1);
+            assert_eq!(read(&part), b"abc");
+        }
+    }
+
+    /// 5. A rename that fails leaves the old marker with the old weights,
+    /// and keeps the verified part; the retry adopts it without hashing it
+    /// again (a set cancel flag would stop any hash at its first chunk).
+    #[cfg(unix)]
+    #[test]
+    fn a_failed_rename_leaves_the_old_marker_with_the_old_weights() {
+        let r = root("rename-fails");
+        let dir = r.join("standard");
+        // `model.bin` as a non-empty directory: the rename over it fails.
+        put(&dir.join("model.bin/inside"), b"x");
+        let old_marker = br#"{"family":"legacy","tier":"standard"}"#.to_vec();
+        put(&dir.join(BRAIN_MARKER), &old_marker);
+        let part = part_path_for(&dir.join("model.bin"), STD_URL);
+        put(&part, b"abc");
+        assert!(matches!(finish(&dir, &part, Some(&abc_artifact()), false), Err(BrainFetchError::Failed(_))));
+        assert_eq!(read(&dir.join(BRAIN_MARKER)), old_marker, "the old marker is still the marker");
+        assert_eq!(read(&part), b"abc", "the verified part is kept");
+        assert!(verified_marker_path(&part).is_file());
+
+        std::fs::remove_dir_all(dir.join("model.bin")).unwrap();
+        put(&dir.join("model.bin"), b"old");
+        let flag = AtomicBool::new(true);
+        finish_brain_part(&dir, &part, STD_URL, "standard", Some(&abc_artifact()), 2, &flag, &mut |_, _| {})
+            .expect("adopted on its earlier check");
+        assert_eq!(read(&dir.join("model.bin")), b"abc");
+        assert_eq!(read_brain_marker(&dir).unwrap()["sha256"], ABC_SHA256);
+        assert!(!verified_marker_path(&part).exists());
+
+        // A part changed since its check is hashed again.
+        let part2 = part_path_for(&r.join("full/model.bin"), BRAIN_ARTIFACTS[1].url);
+        put(&part2, b"abc");
+        let stamp = modified_stamp(&part2);
+        let rec = brain_marker_json(STD_URL, "full", 3, Some(ABC_SHA256), Some("0.000000001"));
+        put(&verified_marker_path(&part2), rec.to_string().as_bytes());
+        assert!(!sidecar_vouches(&verified_marker_path(&part2), 3, ABC_SHA256, stamp.as_deref()));
+    }
+
+    /// 5. Stopped between the weights' rename and the marker's: the next
+    /// call puts the record in place; a record that describes nothing on
+    /// disk is dropped.
+    #[test]
+    fn a_stop_between_the_two_renames_is_finished_by_the_next_call() {
+        let brain = root("between-renames");
+        let dir = brain.join("standard");
+        put(&dir.join("model.bin"), b"abc");
+        put(&dir.join(BRAIN_MARKER), br#"{"family":"legacy","tier":"standard","bytes":99}"#);
+        let part = part_path_for(&dir.join("model.bin"), STD_URL);
+        let rec = brain_marker_json(STD_URL, "standard", 3, Some(ABC_SHA256), None);
+        put(&verified_marker_path(&part), rec.to_string().as_bytes());
+        assert_eq!(read_brain_family(&dir), None, "the old marker is not believed");
+        adopt_legacy_brain(&brain).unwrap();
+        assert_eq!(read_brain_family(&dir).as_deref(), Some(CURRENT_BRAIN_FAMILY));
+        assert!(!verified_marker_path(&part).exists());
+
+        let rec = brain_marker_json(STD_URL, "standard", 7, Some(ABC_SHA256), None);
+        put(&verified_marker_path(&part), rec.to_string().as_bytes());
+        adopt_legacy_brain(&brain).unwrap();
+        assert!(!verified_marker_path(&part).exists());
+        assert_eq!(read_brain_family(&dir).as_deref(), Some(CURRENT_BRAIN_FAMILY));
+        assert_eq!(read(&dir.join("model.bin")), b"abc");
+    }
+
+    /// 2. Two copies of one tier: the folder's is used, the older one is
+    /// reported with its size, each has its own Remove, and nothing goes
+    /// unasked.
+    #[test]
+    fn an_older_copy_is_reported_and_removed_only_by_its_own_press() {
+        let brain = root("older-copy");
+        legacy_install(&brain, "full", b"older 8b copy");
+        put(&brain.join("full/model.bin"), b"8b");
+        put(&brain.join("standard/model.bin"), b"4b");
+        assert_eq!(adopt_legacy_brain(&brain), Ok(Adoption::Conflict("full".into())));
+        let tiers = tier_statuses(&brain, 0);
+        assert_eq!(tiers[1].older_copy_bytes, 13);
+        assert_eq!(tiers[0].older_copy_bytes, 0);
+        assert_eq!(locate_brain_in(&brain, Some("full")).unwrap().model, brain.join("full/model.bin"));
+
+        // Its own Remove: only the older copy.
+        delete_older_copy_in(&brain, "full").unwrap();
+        assert!(!brain.join("model.bin").exists());
+        assert_eq!(read(&brain.join("full/model.bin")), b"8b");
+        assert_eq!(read(&brain.join("standard/model.bin")), b"4b");
+        assert_eq!(tier_statuses(&brain, 0)[1].older_copy_bytes, 0);
+
+        // The tier's Remove works with an older copy on disk: the copy in
+        // use goes; the older one stays and becomes the tier's.
+        legacy_install(&brain, "full", b"older 8b copy");
+        delete_brain_tier_in(&brain, "full").unwrap();
+        assert_eq!(read(&brain.join("model.bin")), b"older 8b copy");
+        assert!(!brain.join("full/model.bin").exists());
+        assert_eq!(adopt_legacy_brain(&brain), Ok(Adoption::Adopted("full".into())));
+        assert_eq!(read(&brain.join("full/model.bin")), b"older 8b copy");
+
+        // A Download of the tier is no longer refused by the conflict.
+        legacy_install(&brain, "full", b"older 8b copy");
+        assert_eq!(refuse_foreign_weights(&brain.join("full"), "full"), Ok(()));
+    }
+
+    /// 2. The older-copy Remove never removes the only copy of a tier.
+    #[test]
+    fn the_only_copy_is_never_an_older_copy() {
+        let brain = root("only-copy");
+        legacy_install(&brain, "full", b"w");
+        assert_eq!(tier_statuses(&brain, 0)[1].older_copy_bytes, 0);
+        delete_older_copy_in(&brain, "full").unwrap();
+        assert_eq!(read(&brain.join("model.bin")), b"w");
+    }
+
+    /// 6. A paused download in the old place that could not move beside the
+    /// tier's own is counted, and the tier's Remove clears it.
+    #[test]
+    fn a_stranded_part_is_counted_and_cleared_by_the_tiers_remove() {
+        let brain = root("stranded");
+        let mine = part_path_for(&brain.join("standard/model.bin"), STD_URL);
+        let old = part_path_for(&brain.join("model.bin"), STD_URL);
+        put(&mine, b"newer half");
+        put(&old, b"older half!");
+        adopt_legacy_brain(&brain).unwrap();
+        let tiers = tier_statuses(&brain, 0);
+        assert_eq!(tiers[0].partial_bytes, 10);
+        assert_eq!(tiers[0].older_copy_bytes, 11);
+        delete_brain_tier_in(&brain, "standard").unwrap();
+        assert!(!old.exists() && !mine.exists());
+        assert_eq!(tier_statuses(&brain, 0)[0].older_copy_bytes, 0);
+    }
+
+    /// 6. The test roots clean up after themselves.
+    #[test]
+    fn a_test_root_is_removed_when_it_is_dropped() {
+        let top = {
+            let brain = root("cleanup");
+            put(&brain.join("standard/model.bin"), b"x");
+            brain.parent().unwrap().to_path_buf()
+        };
+        assert!(!top.exists());
+    }
+
+    /// 4. The record of what is resident: written only by a load that
+    /// happened, with loads one at a time; moved with an adoption; and an
+    /// old-place record whose file has gone reads as unknown.
+    #[test]
+    fn residency_is_recorded_only_for_a_load_that_happened() {
+        use std::sync::atomic::AtomicBool as Flag;
+        static INSIDE: Flag = Flag::new(false);
+        let brain = root("resident");
+
+        // Two loads at once never overlap.
+        let threads: Vec<_> = ["standard", "full"]
+            .iter()
+            .map(|t| {
+                let dir = brain.join(t);
+                std::thread::spawn(move || {
+                    load_and_record(dir, || {
+                        assert!(!INSIDE.swap(true, Ordering::SeqCst), "two loads overlapped");
+                        std::thread::sleep(std::time::Duration::from_millis(30));
+                        INSIDE.store(false, Ordering::SeqCst);
+                        Ok(true)
+                    })
+                })
+            })
+            .collect();
+        for t in threads {
+            assert_eq!(t.join().unwrap(), Ok(true));
+        }
+        // Refused or failed loads leave the record alone.
+        note_resident_brain(Some(brain.join("full")));
+        assert_eq!(load_and_record(brain.join("standard"), || Ok(false)), Ok(false));
+        assert_eq!(load_and_record(brain.join("standard"), || Err("no".into())), Err("no".to_string()));
+        assert_eq!(resident_brain(), Some(brain.join("full")));
+
+        // Loaded from the old place, then adopted: the record follows.
+        legacy_install(&brain, "standard", b"w");
+        note_resident_brain(Some(brain.to_path_buf()));
+        assert!(resident_may_be_in(Some(brain.as_path()), &brain, "standard"));
+        assert!(!resident_may_be_in(Some(brain.as_path()), &brain, "full"));
+        assert_eq!(adopt_legacy_brain(&brain), Ok(Adoption::Adopted("standard".into())));
+        assert_eq!(resident_brain(), Some(brain.join("standard")));
+        // A stale old-place record (its file gone) may be any tier.
+        assert!(resident_may_be_in(Some(brain.as_path()), &brain, "full"));
+        assert!(!resident_may_be_in(Some(brain.join("standard").as_path()), &brain, "full"));
+        note_resident_brain(None);
+    }
+
+    /// 7. Only the pinned files, and the URL is never read as an option.
+    #[test]
+    fn only_the_pinned_files_are_downloaded() {
+        for a in &BRAIN_ARTIFACTS {
+            assert_eq!(pinned_download("brain", a.tier, a.url).map(|x| x.url), Ok(a.url));
+        }
+        assert!(pinned_download("brain", "standard", "file:///etc/passwd").is_err());
+        assert!(pinned_download("brain", "standard", BRAIN_ARTIFACTS[1].url).is_err());
+        assert!(pinned_download("brain", "standard", "-o/tmp/x").is_err());
+        assert!(pinned_download("voice", "standard", STD_URL).is_err());
+        assert!(pinned_download("brain", "huge", STD_URL).is_err());
+
+        let args: Vec<String> = curl_args(STD_URL, Path::new("/tmp/p.part"))
+            .iter()
+            .map(|a| a.to_string_lossy().into_owned())
+            .collect();
+        assert_eq!(&args[args.len() - 2..], ["--", STD_URL]);
+    }
+
+    /// 3. One transfer at a time, and a stopped download's events are not
+    /// sent once a newer one exists.
+    #[test]
+    fn a_new_download_waits_for_the_old_one_and_the_old_ones_events_stop() {
+        let a = DownloadControl::new(Some("standard".into()), Some(STD_URL.into()));
+        let b = DownloadControl::new(Some("standard".into()), Some(STD_URL.into()));
+        assert!(b.generation > a.generation);
+        assert!(b.previous.iter().any(|t| Arc::ptr_eq(t, &a.life)));
+
+        // The old one's events are dropped, the new one's carry its number.
+        assert_eq!(tag_download_event(serde_json::json!({ "cancelled": true }), a.generation), None);
+        let tagged = tag_download_event(serde_json::json!({ "success": true }), b.generation).unwrap();
+        assert_eq!(tagged["generation"], b.generation);
+
+        // The new one waits for the old thread's exit, and gives up (rather
+        // than overlap) when it does not come.
+        assert!(!wait_for_previous(&b.previous, std::time::Duration::from_millis(20)));
+        assert!(!wait_for_transfers_of("standard", STD_URL, std::time::Duration::from_millis(20)));
+        let old_life = a.life.clone();
+        let old = std::thread::spawn(move || {
+            let _end = TransferEnd(old_life);
+            std::thread::sleep(std::time::Duration::from_millis(50));
+        });
+        assert!(wait_for_previous(&b.previous, std::time::Duration::from_secs(10)));
+        assert!(a.life.has_ended());
+        old.join().unwrap();
+        drop(TransferEnd(b.life.clone()));
+        assert!(wait_for_transfers_of("standard", STD_URL, std::time::Duration::from_millis(20)));
     }
 }
 
