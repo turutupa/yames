@@ -151,7 +151,7 @@ export const PEDAL_FROM_A: StepSpec = {
     {
       id: "pedal-a-to-e",
       title: "The pedal changes string",
-      purpose: "Four bars in A minor. Bars 1 and 2 stand on the muted open A string, with the melody on the D and G strings. On the bar line into bar 3 the pedal drops to the muted open low E string, and the melody drops with it, to the A and D strings.",
+      purpose: "Four bars in A minor over a hard rock groove. Bars 1 and 2 stand on the muted open A string, with the melody on the D and G strings. On the bar line into bar 3 the pedal drops to the muted open low E string, and the melody drops with it, to the A and D strings. The chord changes with the pedal: A for two bars, then E for two.",
       howTo: [
         "Sixteenth notes, strict down-up, the same groups in every bar: three, three, three, three, two and two.",
         "Bar 1: frets 7, 9, 10 and 9 on the D string, fret 7 on the G string, fret 10 on the D string. Bar 2: frets 9 and 7 on the G string, then frets 10, 9, 7 and 9 on the D string.",
@@ -159,9 +159,11 @@ export const PEDAL_FROM_A: StepSpec = {
         "The fretting hand never moves: first finger on fret 7, third on fret 9, little finger on fret 10.",
         "At the change the palm rolls back. In bars 3 and 4 it mutes the low E string only, because the A string now carries melody and has to ring. Going back to bar 1 it covers the A string again. From the D string the pick now skips the A string: let the tip of the fretting finger lean against it, as it did against the D string.",
       ],
-      coach: "This is the Step's test piece. After the take the evenness is reported and the notes are checked against the written ones. The mute and the strokes are yours to judge.",
+      coach: "Band on. This is the Step's test piece. The evenness is reported against the band and the notes are checked after the take. The mute and the strokes are yours to judge. Direct input or headphones make the timing fair.",
       tab: PEDAL_A_TO_E,
       position: 7,
+      chords: "A5 | A5 | E5 | E5",
+      jam: { groove: "hardRock", key: "A minor" },
       harmony: A_MINOR,
       rungs: ladder(50, 130, 10),
       passAt: 85,
@@ -208,7 +210,7 @@ export const VERSE_AND_CHORUS: StepSpec = {
   ],
   payoff: "Sixteen bars of rhythm guitar with a band: two verses, two choruses, and the change of feel on the bar line.",
   difficultyException:
-    "The chorus is four attacks to a bar and the verse is a gallop at the tempo the Step before held for a minute, so the note rate falls. The demand is sixteen bars in one take and a change of feel on a bar line, from muted gallops to ringing chords and back, which a note-rate metric does not count.",
+    "The chorus is four attacks to a bar and the verse is the gallop the Step before held for a minute, so the note rate falls. The demand is sixteen bars in one take and a change of feel on a bar line, from muted gallops to ringing chords and back, which a note-rate metric does not count.",
   exercises: [
     {
       id: "verse-riff",
