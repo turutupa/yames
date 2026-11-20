@@ -87,3 +87,82 @@ Answered, not changed: none (the reader passed the stock lines as deliberate).
 - "Move the hand up as each new bar starts." and then "Shift as each new bar starts, not after."
   (gallop-up `shift`, 6 variants: the frets move differently between keys) -> "Arrive on the new note as each
   bar starts."
+
+# First Chords (cues1b, 2026-11-20)
+
+`src/paths/specs/first-chords-cues.ts`, attached with `withCues` in `first-chords.ts`. Inputs and helpers'
+files: `/tmp/coach-cues1/first-chords-dump.txt`, `proof-first-chords/`, `i18n-first-chords/`.
+
+- [x] Cues, all three Levels in one pass (`5075d7c3`; one commit, not one per Level, to save a gen round).
+- [x] Proof-read (`7e004915`), translations (`8b9dbe43`), gates (below).
+
+## The numbers
+
+476 cues on 58 Exercises (55 in Steps, two of them self-checked with a general cue only; 3 warm-ups), 166
+distinct sentences; 511 cue strings in the pack with the warm-ups' variants. By trigger: general 58, heard
+57, late 56, early 56, lastBars 56, openString 54, stringChange 54, extras 53, afterHeld 19, notes 10,
+shift 3. Only the ten "Check every string" Exercises can produce `notes`; only the warm-ups `shift`.
+
+Refusals (first `check`, `/tmp/coach-cues1/fc-gc1.log`), all reworded to name one string and one fret:
+c-strings "Put the third finger on the A string, fret three." (49 characters) -> "Press the A string at fret
+three." · g-strings "Fret three on both E strings, two on the A." (`cue.specific`: an E string it cannot tell
+apart) -> "Press the low and top strings at fret three." · d-strings, d7-strings, f-strings "Fret two on G and
+top strings, ..." and the like (`cue.specific`: a bare "G", "B" or "D" reads as a chord the Exercise does
+not declare) -> "Press the B string at fret three." / "... fret one." / "Press the D string at fret three."
+Worth knowing for the next chord Path: name a string as "the B string", never "B" alone.
+
+## The proof-read (a separate sonnet reader)
+
+12 objections (`/tmp/coach-cues1/proof-first-chords/objections.md`), all taken (was -> now):
+down-down-up, eighths-change, pattern-em, pattern-g-em `stringChange` "Brush all the strings in one quick
+stroke." (their upstrokes catch three strings) -> "Make each downstroke one quick brush." · down-down-up and
+blues-down-down-up `extras` "Swing up past the strings after '1' and '3'." (the afterHeld cue said the same)
+-> "Strum only on '1', '2 and', '3', '4 and'." · em-am-once `late` repeated the general cue -> "Have the new
+chord down before '1'." · d7-strings `notes` repeated the general cue -> "Press the G and top strings at fret
+two." · three-chords general "Move only the fingers the next chord needs." (false for E minor to A minor) ->
+"Move the fingers together, not one by one." · am-c `stringChange` "Keep the third finger low as it
+crosses." (vague) -> "Lift the third finger only a little to cross." · sixteenths-em `early` "Spread the four
+strokes evenly to the click." (no action) -> "Wait for the click at the start of each beat." · only-ands
+`extras` "... on every beat." (beat 1 of bar 1 is played) -> "... on silent beats."
+
+Answered, not changed: none. The reader left the stock lines alone as deliberate.
+
+## Translations
+
+Four sonnet helpers (de fr es it · nl pl pt-BR ru · tr vi ja · ko zh-CN zh-TW), 166 sentences each,
+checked again by me with `/tmp/coach-cues1/check_i18n.py` (problems 0 in all fourteen), merged and
+checked (`/tmp/coach-cues1/fc-merge.log`: every pack ok, 0 errors). After the merge, de's and pl's
+am-strings general cue was a half-statement ("..., die hohe Saite klingt" / "...: wysoka struna dzwoni") ->
+"Wölb den ersten Finger über der hohen Saite." / "Wygnij pierwszy palec nad wysoką struną."
+
+Longest cue per language: en 47 · de 48 · es 48 · fr 48 · it 48 · nl 48 · pl 48 · pt-BR 48 · ru 48 ·
+tr 48 · vi 47 · ja 39 · ko 39 · zh-CN 35 · zh-TW 35 (the Chinese, Japanese and Korean longest is the
+sixteenth-pattern count '1, and a, 2, and a, 3, and a, 4').
+
+Want a native read: tr (the pack uses "vuruş" for both stroke and beat; the helper used "darbe" for a
+stroke), vi ("Với ngón một tới dây cao nhất" for "reach"), ja (fingers as 人差し指/中指/薬指/小指 where the pack
+numbers them; several cues end in ～ます rather than ～ましょう), pt-BR (string names Mi grave / Lá / Ré /
+Sol / Si / "primeira" beside chord letters, as the pack does), ru, pl and pt-BR write "Fmaj7" for
+"F major seven" (the packs' long names do not fit).
+
+## Gates (first-chords, on `8b9dbe43` and after)
+
+- `npm run paths -- check` (every pack): 16 Paths ok, 0 errors (`/tmp/coach-cues1/fc-merge.log`).
+- `npx tsc --noEmit`: clean (`/tmp/coach-cues1/tsc2.log`).
+- `npm run test`: GATE_VITEST2 (`/tmp/coach-cues1/vitest2.log`).
+- `npm run build`: GATE_BUILD2 (`/tmp/coach-cues1/build2.log`).
+
+## Twelve cues to read
+
+- **E minor: "Check every string"** (Level 1). The E minor chord one string at a time, shape held down.
+  general "Hold the shape down and let each string ring." · notes "Put both fingers at fret two: A and D
+  strings." · openString "Arch the fingers so the open strings ring."
+- **"G and C, two strums a bar"** (Level 2). Strum on 1 and 3, beat 4 to move. general "Move the second
+  and third fingers as a pair." · late "Start the change on '4', land on '1'." · stringChange "Strum G from
+  the low E, C from the A string."
+- **"Only the 'ands'"** (Level 2). E minor upstrokes between the beats, nothing on the beats. general "Tap
+  the foot on the beat, strum on the 'and'." · extras "Swing down past the strings on silent beats." · late
+  "Strum each 'and' as soon as the foot lifts."
+- **"A minor, F, C, G"** (Level 3). Four chords with the shorter pattern; the reason to learn F. general
+  "Lay the first finger flat for F." · heard (second) "Play F major seven until the small F rings." ·
+  stringChange "Swap the second and third fingers for F."
