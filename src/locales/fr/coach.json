@@ -29,6 +29,57 @@
     "noteSpacingTrend": "Tendance de l'espacement des notes",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
   },
+  "coachModel": {
+    "label": "Modèle du coach",
+    "button": "Modèle du coach : {{choice}}, {{state}}",
+    "entry": "{{tier}} · {{model}} · {{size}}",
+    "offHint": "Aucun modèle de langage chargé. Le coach continue de fonctionner avec ses propres règles.",
+    "memory": "Prend au moins {{used}} des {{total}} de mémoire de cet ordinateur",
+    "memoryUnknown": "Prend au moins {{used}} de mémoire",
+    "short": {
+      "off": "désactivé",
+      "ready": "prêt",
+      "loading": "chargement",
+      "waiting": "en attente de chargement",
+      "failed": "échec du chargement",
+      "notDownloaded": "non téléchargé",
+      "notOnThisDevice": "indisponible sur cet appareil",
+      "downloading": "téléchargement {{percent}}",
+      "downloadingNoPercent": "téléchargement"
+    },
+    "state": {
+      "ready": "Chargé et prêt",
+      "loading": "Chargement…",
+      "waiting": "Se charge quand l'app est au repos, jamais pendant une prise",
+      "onDisk": "Téléchargé, non chargé",
+      "failed": "Échec du chargement. Choisis-le pour réessayer",
+      "failedWhy": "Échec du chargement ({{reason}}). Choisis-le pour réessayer",
+      "notDownloaded": "Non téléchargé",
+      "update": "Une version plus ancienne. Télécharge la nouvelle",
+      "otherOnDisk": "Non téléchargé. Pour l'instant, un seul modèle tient sur cet ordinateur : change dans Paramètres → Coach"
+    },
+    "why": {
+      "phone": "Indisponible sur cet appareil",
+      "noLlm": "Indisponible sur cet appareil : cette version ne peut pas exécuter de modèle",
+      "ram": "Indisponible sur cet appareil : il faut plus de mémoire"
+    },
+    "download": {
+      "start": "Télécharger",
+      "pause": "Pause",
+      "resume": "Reprendre",
+      "retry": "Réessayer",
+      "anyway": "Télécharger quand même",
+      "notNow": "Pas maintenant",
+      "running": "Téléchargement… {{percent}}",
+      "runningNoPercent": "Téléchargement…",
+      "voices": "Récupération des voix du coach…",
+      "paused": "En pause à {{percent}}. Reprendre repart de là.",
+      "pausedNoPercent": "En pause. Reprendre repart là où ça s'est arrêté.",
+      "failed": "Le téléchargement s'est arrêté : {{reason}}",
+      "failedNoReason": "Le téléchargement s'est arrêté.",
+      "meteredWarn": "Tu sembles utiliser les données mobiles. {{size}}, c'est beaucoup à télécharger ainsi."
+    }
+  },
   "coachDetail": {
     "exercises": "Exercices",
     "notPlayed": "Non joué",

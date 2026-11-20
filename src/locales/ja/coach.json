@@ -29,6 +29,57 @@
     "noteSpacingTrend": "音符間隔の推移",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
   },
+  "coachModel": {
+    "label": "コーチのモデル",
+    "button": "コーチのモデル: {{choice}}、{{state}}",
+    "entry": "{{tier}} · {{model}} · {{size}}",
+    "offHint": "言語モデルは読み込まれていません。コーチは独自のルールで引き続き動作します。",
+    "memory": "このコンピューターのメモリ {{total}} のうち、最低 {{used}} を使用します",
+    "memoryUnknown": "メモリを最低 {{used}} 使用します",
+    "short": {
+      "off": "オフ",
+      "ready": "準備完了",
+      "loading": "読み込み中",
+      "waiting": "読み込み待ち",
+      "failed": "読み込めませんでした",
+      "notDownloaded": "未ダウンロード",
+      "notOnThisDevice": "この端末では使えません",
+      "downloading": "ダウンロード中 {{percent}}",
+      "downloadingNoPercent": "ダウンロード中"
+    },
+    "state": {
+      "ready": "読み込み済みで準備完了",
+      "loading": "読み込み中…",
+      "waiting": "アプリがアイドル状態のときに読み込まれます。テイク中には読み込まれません",
+      "onDisk": "ダウンロード済み、未読み込み",
+      "failed": "読み込めませんでした。選び直すと再試行します",
+      "failedWhy": "読み込めませんでした（{{reason}}）。選び直すと再試行します",
+      "notDownloaded": "未ダウンロード",
+      "update": "古いバージョンです。新しいものをダウンロードしてください",
+      "otherOnDisk": "未ダウンロード。このコンピューターには今のところ1つのモデルしか入りません。設定 → コーチ で切り替えてください"
+    },
+    "why": {
+      "phone": "この端末では使えません",
+      "noLlm": "この端末では使えません: このビルドではモデルを実行できません",
+      "ram": "この端末では使えません: メモリが足りません"
+    },
+    "download": {
+      "start": "ダウンロード",
+      "pause": "一時停止",
+      "resume": "再開",
+      "retry": "再試行",
+      "anyway": "それでもダウンロード",
+      "notNow": "今はしない",
+      "running": "ダウンロード中… {{percent}}",
+      "runningNoPercent": "ダウンロード中…",
+      "voices": "コーチのボイスを取得中…",
+      "paused": "{{percent}} で一時停止中。再開すると続きから始まります。",
+      "pausedNoPercent": "一時停止中。再開すると止まったところから続きます。",
+      "failed": "ダウンロードが止まりました: {{reason}}",
+      "failedNoReason": "ダウンロードが止まりました。",
+      "meteredWarn": "モバイルデータ通信のようです。{{size}} をダウンロードするには大きすぎます。"
+    }
+  },
   "coachDetail": {
     "exercises": "エクササイズ",
     "notPlayed": "未演奏",

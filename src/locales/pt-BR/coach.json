@@ -29,6 +29,57 @@
     "noteSpacingTrend": "Tendência do espaçamento das notas",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
   },
+  "coachModel": {
+    "label": "Modelo do coach",
+    "button": "Modelo do coach: {{choice}}, {{state}}",
+    "entry": "{{tier}} · {{model}} · {{size}}",
+    "offHint": "Nenhum modelo de linguagem carregado. O coach continua funcionando com as próprias regras.",
+    "memory": "Usa pelo menos {{used}} dos {{total}} de memória deste computador",
+    "memoryUnknown": "Usa pelo menos {{used}} de memória",
+    "short": {
+      "off": "desligado",
+      "ready": "pronto",
+      "loading": "carregando",
+      "waiting": "aguardando para carregar",
+      "failed": "não carregou",
+      "notDownloaded": "não baixado",
+      "notOnThisDevice": "indisponível neste dispositivo",
+      "downloading": "baixando {{percent}}",
+      "downloadingNoPercent": "baixando"
+    },
+    "state": {
+      "ready": "Carregado e pronto",
+      "loading": "Carregando…",
+      "waiting": "Carrega quando o app está ocioso, nunca durante uma tomada",
+      "onDisk": "Baixado, não carregado",
+      "failed": "Não carregou. Escolha-o para tentar de novo",
+      "failedWhy": "Não carregou ({{reason}}). Escolha-o para tentar de novo",
+      "notDownloaded": "Não baixado",
+      "update": "Uma versão antiga. Baixe a nova",
+      "otherOnDisk": "Não baixado. Por enquanto só cabe um modelo neste computador: troque em Configurações → Coach"
+    },
+    "why": {
+      "phone": "Indisponível neste dispositivo",
+      "noLlm": "Indisponível neste dispositivo: esta versão não consegue rodar um modelo",
+      "ram": "Indisponível neste dispositivo: precisa de mais memória"
+    },
+    "download": {
+      "start": "Baixar",
+      "pause": "Pausar",
+      "resume": "Retomar",
+      "retry": "Tentar de novo",
+      "anyway": "Baixar mesmo assim",
+      "notNow": "Agora não",
+      "running": "Baixando… {{percent}}",
+      "runningNoPercent": "Baixando…",
+      "voices": "Buscando as vozes do coach…",
+      "paused": "Pausado em {{percent}}. Retomar continua de onde parou.",
+      "pausedNoPercent": "Pausado. Retomar continua de onde parou.",
+      "failed": "O download parou: {{reason}}",
+      "failedNoReason": "O download parou.",
+      "meteredWarn": "Parece que você está no plano de dados do celular. {{size}} é muito para baixar assim."
+    }
+  },
   "coachDetail": {
     "exercises": "Exercícios",
     "notPlayed": "Não tocado",

@@ -649,6 +649,13 @@
 .coach-card-foot > .coach-model {
   flex: 1;
 }
+/* At 320 the card is narrower than the 380 its inside was pinned to, and
+   the right-hand 60px (the chat's Send, the selector's menu) were cut off. */
+@media (max-width: 719px) {
+  .coach-card-inner {
+    min-width: 0;
+  }
+}
 
 /* Chat input */
 .coach-card-chat {

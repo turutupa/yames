@@ -216,7 +216,7 @@ export default function CoachCard({ open, active, messages, onToggle, onStartSes
       data-coach-model-bounds=""
     >
       <div className="coach-card-inner">
-        <div className="coach-card-header">
+        <div className="coach-card-header" data-coach-model-ceiling="">
           {tab === "history" && historyView === "detail" ? (
             <button className="coach-card-header-btn" onClick={handleBack}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

@@ -367,6 +367,14 @@ export interface Shot {
    */
   settings?: { update?: "available" };
   /**
+   * The coach model selector's world (ms1): a build that can run a model,
+   * nothing on disk, both tiers allowed. The mocked download answers a
+   * press with progress at 42% and a pause with "cancelled", the way Rust
+   * does. The scene itself only opens the window: the spec opens the coach
+   * panel and the selector, and presses Download, as a person would.
+   */
+  coachModel?: "notDownloaded";
+  /**
    * The first-run wizard, over a store with no player in it (MVP, 2026-11-16).
    *
    * `welcome` is W0; `input` is W5 with a guitar heard through the mocked
@@ -496,6 +504,17 @@ export const SHOTS: Shot[] = [
     suffix: "metronome",
     window: "main",
     tab: "beat",
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    // The coach model selector (ms1): `tests/layout/coach-model.spec.ts`.
+    id: "coach-model",
+    suffix: "coach-model",
+    window: "main",
+    tab: "beat",
+    coachModel: "notDownloaded",
     width: 1400,
     height: 900,
     settleMs: 400,

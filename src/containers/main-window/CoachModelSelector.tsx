@@ -23,7 +23,8 @@ import "../../styles/coach-model.css";
  * Self-contained: it takes no prop from the panel it sits in, so the Ask
  * dock (leg c2a1) mounts the same component at its own foot. The menu opens
  * upward and stays inside the nearest `[data-coach-model-bounds]` ancestor
- * (the panel), or the window when there is none.
+ * (the panel), or the window when there is none, and below the panel's
+ * `[data-coach-model-ceiling]` (its head) when it marks one.
  *
  * Nothing here downloads, loads or unloads by itself: every one of those
  * is a press, and goes through `hooks/coachLoader.ts`.
@@ -114,8 +115,14 @@ export function CoachModelSelector() {
     const wrap = wrapRef.current;
     if (!wrap) return;
     const top = wrap.getBoundingClientRect().top;
-    const bounds = wrap.closest("[data-coach-model-bounds]")?.getBoundingClientRect();
-    const ceiling = Math.max(bounds?.top ?? 0, 0);
+    const panel = wrap.closest("[data-coach-model-bounds]");
+    // The panel may name a ceiling (its head, where its own controls are):
+    // the menu stops under it rather than covering them.
+    const ceilingEl = panel?.querySelector("[data-coach-model-ceiling]");
+    const ceiling = Math.max(
+      ceilingEl?.getBoundingClientRect().bottom ?? panel?.getBoundingClientRect().top ?? 0,
+      0,
+    );
     setMaxHeight(Math.max(96, top - ceiling - 14));
   }, []);
 

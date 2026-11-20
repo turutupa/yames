@@ -29,6 +29,57 @@
     "noteSpacingTrend": "음표 간격 추세",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
   },
+  "coachModel": {
+    "label": "코치 모델",
+    "button": "코치 모델: {{choice}}, {{state}}",
+    "entry": "{{tier}} · {{model}} · {{size}}",
+    "offHint": "언어 모델이 로드되지 않았습니다. 코치는 자체 규칙으로 계속 동작합니다.",
+    "memory": "이 컴퓨터의 메모리 {{total}} 중 최소 {{used}}를 사용합니다",
+    "memoryUnknown": "메모리를 최소 {{used}} 사용합니다",
+    "short": {
+      "off": "끔",
+      "ready": "준비됨",
+      "loading": "불러오는 중",
+      "waiting": "불러오기 대기 중",
+      "failed": "불러오지 못함",
+      "notDownloaded": "다운로드 안 됨",
+      "notOnThisDevice": "이 기기에서 사용 불가",
+      "downloading": "다운로드 중 {{percent}}",
+      "downloadingNoPercent": "다운로드 중"
+    },
+    "state": {
+      "ready": "불러옴, 준비됨",
+      "loading": "불러오는 중…",
+      "waiting": "앱이 유휴 상태일 때 불러오며, 테이크 중에는 불러오지 않습니다",
+      "onDisk": "다운로드됨, 불러오지 않음",
+      "failed": "불러오지 못했습니다. 선택하면 다시 시도합니다",
+      "failedWhy": "불러오지 못했습니다({{reason}}). 선택하면 다시 시도합니다",
+      "notDownloaded": "다운로드 안 됨",
+      "update": "이전 버전입니다. 새 버전을 다운로드하세요",
+      "otherOnDisk": "다운로드 안 됨. 지금은 이 컴퓨터에 모델 하나만 들어갑니다. 설정 → 코치에서 바꾸세요"
+    },
+    "why": {
+      "phone": "이 기기에서 사용 불가",
+      "noLlm": "이 기기에서 사용 불가: 이 빌드는 모델을 실행할 수 없습니다",
+      "ram": "이 기기에서 사용 불가: 메모리가 더 필요합니다"
+    },
+    "download": {
+      "start": "다운로드",
+      "pause": "일시정지",
+      "resume": "이어받기",
+      "retry": "다시 시도",
+      "anyway": "그래도 다운로드",
+      "notNow": "나중에",
+      "running": "다운로드 중… {{percent}}",
+      "runningNoPercent": "다운로드 중…",
+      "voices": "코치 음성을 가져오는 중…",
+      "paused": "{{percent}}에서 일시정지됨. 이어받기를 누르면 이어서 받습니다.",
+      "pausedNoPercent": "일시정지됨. 이어받기를 누르면 멈춘 곳부터 이어서 받습니다.",
+      "failed": "다운로드가 중단되었습니다: {{reason}}",
+      "failedNoReason": "다운로드가 중단되었습니다.",
+      "meteredWarn": "모바일 데이터를 사용 중인 것 같습니다. {{size}}는 모바일 데이터로 받기에는 큰 용량입니다."
+    }
+  },
   "coachDetail": {
     "exercises": "연습 구간",
     "notPlayed": "연주 안 함",
