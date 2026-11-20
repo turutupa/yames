@@ -131,14 +131,18 @@ describe("variants read by hand", () => {
     });
   });
 
-  // Rhythm Foundations: on the A and D strings both fretted notes are at fret 2, played by the second
-  // finger. "fret 3 ... and fret 2" would become "fret 2 ... and fret 2": the sentence is not written.
-  it.each(["stringSet=A-and-D", "stringSet=D-and-G"])("Rhythm Foundations: %s never says 'fret 2 ... and fret 2'", (variantId) => {
+  // Rhythm Foundations: on the A and D strings both fretted notes are at fret 2. The Step's line is
+  // one sentence a string (coherence audit, 2026-11-20), so each variant names its own two strings;
+  // the finger sentence ("Third finger for fret 3") is not written, and no line says "fret 3".
+  it.each([
+    ["stringSet=A-and-D", "On the A string the fretted note is at fret 2. On the D string it is at fret 2."],
+    ["stringSet=D-and-G", "On the D string the fretted note is at fret 2. On the G string it is at fret 2."],
+  ])("Rhythm Foundations: %s names fret 2 on each string, and no third finger", (variantId, frets) => {
     const own = said("rhythm-foundations", "on-the-beat.halves", variantId);
     expect(own).toEqual({
-      howTo: ["Count '1, 2' through each half note and play the quarters on 3 and 4. The last bar is one note held for all four clicks."],
+      howTo: ["Count '1, 2' through each half note and play the quarters on 3 and 4. The last bar is one note held for all four clicks.", frets],
     });
-    expect(JSON.stringify(own)).not.toMatch(/fret 2/);
+    expect(JSON.stringify(own)).not.toMatch(/fret 3|finger/);
   });
 
   it("Rhythm Foundations: a line with no frets in it is left to the Exercise", () => {
@@ -206,7 +210,10 @@ describe("variants read by hand", () => {
   it("Blues (key): a fretted note that becomes an open string is not given a fret number", () => {
     expect(said("blues-pentatonics", "twelve-bar.walking", "key=E")).toEqual({
       purpose: "A walking shuffle line through the whole form, so you're playing the changes rather than following them.",
-      howTo: ["Shuffle eighths, all twelve bars, 70 BPM up to a pass at 90."],
+      howTo: [
+        "Shuffle eighths, all twelve bars, 55 BPM up to a pass at 90.",
+        "On the faster rungs, pick lighter and smaller. The pick should only just clear the string. Wide strokes that worked at 80 BPM arrive late at 110 BPM.",
+      ],
     });
   });
 

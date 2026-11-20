@@ -65,7 +65,7 @@ describe("what the Paths screen says about prerequisites", () => {
   it("buildsOnPaths names each prerequisite with its Path and Level, in the Path's order", () => {
     expect(buildsOnPaths(RUNNABLE_PATHS, SHRED).map((s) => [s.path.id, s.level])).toEqual([
       ["alternate-picking", "intermediate"],
-      ["legato", "beginner"],
+      ["legato", "intermediate"],
     ]);
     expect(buildsOnPaths(RUNNABLE_PATHS, RHYTHM)).toEqual([]);
     // A prerequisite that is not in the app is not named: nowhere to link.

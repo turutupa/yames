@@ -50,10 +50,10 @@ describe("Builds on: on the Path's page", () => {
     render(<PathsView session={fake().session} />);
     open("shred");
     const line = screen.getByTestId("builds-on-page-shred");
-    expect(line).toHaveTextContent("Builds on: Alternate Picking (Intermediate), Legato (Beginner)");
+    expect(line).toHaveTextContent("Builds on: Alternate Picking (Intermediate), Legato (Intermediate)");
     fireEvent.click(screen.getByTestId("builds-on-page-shred-legato"));
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Legato");
-    expect(screen.getByTestId("builds-on-page-legato")).toHaveTextContent("Builds on: Rhythm Foundations (Beginner)");
+    expect(screen.getByTestId("builds-on-page-legato")).toHaveTextContent("Builds on: Rhythm Foundations (Beginner), Alternate Picking (Beginner)");
   });
 
   it("a Path that builds on nothing has no line", () => {
@@ -96,10 +96,10 @@ describe("Start with X first, or start anyway", () => {
     open("shred");
     expect(screen.queryByTestId("path-start-first")).toBeNull();
     cleanup();
-    // Rhythm Foundations chosen at Intermediate: through Beginner, Legato has nothing to suggest.
+    // Rhythm Foundations and Alternate Picking chosen at Intermediate: through Beginner, Legato has nothing to suggest.
     const rhythm: PlayerProgress = {
       ...NO_PROGRESS,
-      states: [{ pathId: "rhythm-foundations", level: "intermediate", startedAt: NOW, updatedAt: NOW }],
+      states: ["rhythm-foundations", "alternate-picking"].map((pathId) => ({ pathId, level: "intermediate", startedAt: NOW, updatedAt: NOW })),
     };
     render(<PathsView session={fake(rhythm).session} />);
     open("legato");
@@ -128,8 +128,8 @@ describe("Subscribe offers what a Path builds on, never forces it", () => {
     render(<PathsView session={session} />);
     open("legato");
     fireEvent.click(screen.getByTestId("path-subscribe"));
-    expect(screen.getByTestId("path-offer")).toHaveTextContent("Rhythm Foundations comes before this one. Add it to your Paths too?");
-    expect(screen.getByTestId("path-offer-add")).toHaveTextContent("Add Rhythm Foundations");
+    expect(screen.getByTestId("path-offer")).toHaveTextContent("Rhythm Foundations and Alternate Picking come before this one. Add them to your Paths too?");
+    expect(screen.getByTestId("path-offer-add")).toHaveTextContent("Add them");
     fireEvent.click(screen.getByTestId("path-offer-no"));
     expect(screen.queryByTestId("path-offer")).toBeNull();
     expect(actions.subscribe.mock.calls.map(([p]) => p.id)).toEqual(["legato"]);
@@ -154,7 +154,10 @@ describe("Subscribe offers what a Path builds on, never forces it", () => {
   });
 
   it("offers nothing for a Path whose prerequisites are started, or that builds on nothing", () => {
-    const rhythm: PlayerProgress = { ...NO_PROGRESS, states: [{ pathId: "rhythm-foundations", startedAt: NOW, updatedAt: NOW }] };
+    const rhythm: PlayerProgress = {
+      ...NO_PROGRESS,
+      states: ["rhythm-foundations", "alternate-picking"].map((pathId) => ({ pathId, startedAt: NOW, updatedAt: NOW })),
+    };
     render(<PathsView session={fake(rhythm).session} />);
     open("legato");
     fireEvent.click(screen.getByTestId("path-subscribe"));
