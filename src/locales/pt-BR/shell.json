@@ -59,7 +59,7 @@
     },
     "history": {
       "title": "Nada aqui ainda.",
-      "hint": "Cada vez que você toca em Encerrar ou para o metrônomo, aparece aqui. Suas sessões de Hoje ficam em Progresso."
+      "hint": "Ative Ouvir no Metrônomo, no Treino, na Setlist ou na Jam e toque. Quando você desativar, a execução fica guardada aqui."
     },
     "drill": {
       "linear": "Linear: o andamento sobe do BPM inicial até o alvo, um passo por vez.",
@@ -74,8 +74,8 @@
     "startsAt": "Começa em",
     "listening": "Ouvindo",
     "inputOff": "Entrada desligada",
-    "coachOnPlay": "O coach escuta quando você toca",
-    "coachQuiet": "O coach fica quieto durante o passo",
+    "listen": "Ouvir",
+    "listenHint": "Ative para o coach ouvir você tocar aqui. Ele usa sua entrada de áudio até você desativar ou sair das ferramentas.",
     "countIn": "Contagem inicial",
     "backToStart": "Voltar ao início",
     "setUpInput": "Configurar entrada"

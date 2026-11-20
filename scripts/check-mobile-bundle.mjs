@@ -68,7 +68,15 @@ const FORBIDDEN = [
   ["connect_midi_device", "MIDI"],
   ["set_always_on_top", "window management"],
   ["check_update", "the in-app updater"],
+  // The card itself was deleted in leg c2a2 (DESIGN 7, 8: "No new component is
+  // named CoachCard"); the name stays here so none comes back. What replaced
+  // it in the tools (the line and the note under the stage, ToolCoach) and its
+  // History (Progress → Tool runs) are desktop-only: a phone's tools show
+  // nothing coach-related, as before (DESIGN 8). Two strings only their
+  // JavaScript carries stand for them (the class names are in shared CSS).
   ["CoachCard", "the coach card"],
+  ["tool-coach-runs", "the tools' coach line and note (ToolCoach)"],
+  ["tool-runs-clear-confirm", "Progress → Tool runs"],
   // The band ships on a phone (M08); its custom-kit folder does not.
   ["pick_kit_folder", "the folder dialog for a kit of your own samples"],
   ["inspect_kit_folder", "reading a folder of your own samples"],

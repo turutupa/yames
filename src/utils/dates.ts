@@ -1,11 +1,11 @@
 import type { TFunction } from "i18next";
-import type { SavedSession } from "../../types";
+import type { SavedSession } from "../types";
 
 /**
- * Date/time formatting + day-grouping helpers shared between the CoachCard
- * sub-components (FeedMessageItem, HistoryList, SessionDetail). Pulled out
- * to keep the visual components lean and to make these pure functions easy
- * to test in isolation.
+ * Date/time formatting + day-grouping helpers: "Today 14:05", "Yesterday",
+ * a weekday, a date. Used by Progress → Tool runs, the takes lists and the
+ * metronome's last-session line (once the old coach card's helpers, moved
+ * here when the card went in leg c2a2).
  */
 
 export function formatTime(timestamp: number, lang: string): string {

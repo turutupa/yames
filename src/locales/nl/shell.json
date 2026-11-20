@@ -59,7 +59,7 @@
     },
     "history": {
       "title": "Nog niets hier.",
-      "hint": "Elke keer dat je op Beëindigen drukt of de metronoom stopt, verschijnt het hier. Je sessies van Vandaag staan bij Voortgang."
+      "hint": "Zet Luister aan in de Metronoom, het Tempotraining, de Setlist of de Jam en speel. Als je het uitzet, wordt de run hier bewaard."
     },
     "drill": {
       "linear": "Lineair: het tempo klimt stap voor stap van start-BPM naar doel.",
@@ -74,8 +74,8 @@
     "startsAt": "Start bij",
     "listening": "Luistert",
     "inputOff": "Ingang uit",
-    "coachOnPlay": "De coach luistert zodra je afspeelt",
-    "coachQuiet": "De coach zwijgt tijdens een stap",
+    "listen": "Luister",
+    "listenHint": "Zet aan zodat de coach hier naar je spel luistert. Hij gebruikt je audio-ingang tot je het uitzet of de tools verlaat.",
     "countIn": "Aftellen",
     "backToStart": "Terug naar het begin",
     "setUpInput": "Ingang instellen"

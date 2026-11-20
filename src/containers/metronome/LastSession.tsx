@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getSessionHistory } from "../../ipc.desktop";
 import { rescoreReport } from "../../coach/reportStats";
-import { getDayGroup } from "../practice-coach/coachCardHelpers";
+import { getDayGroup } from "../../utils/dates";
 import type { SavedSession } from "../../types";
 
 /**

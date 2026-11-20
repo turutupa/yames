@@ -9,10 +9,6 @@
     "placeholder": "Pregunta sobre esta pantalla, tus tomas o tus rutas",
     "send": "Enviar",
     "writing": "Escribiendo una respuesta…",
-    "sections": {
-      "ask": "Preguntar",
-      "tools": "Coach de herramientas"
-    },
     "screen": {
       "today": "Hoy",
       "paths": "Rutas",

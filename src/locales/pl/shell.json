@@ -59,7 +59,7 @@
     },
     "history": {
       "title": "Jeszcze nic tu nie ma.",
-      "hint": "Za każdym razem, gdy naciśniesz Zakończ albo zatrzymasz metronom, pojawi się to tutaj. Sesje z zakładki „Dzisiaj” są w zakładce „Postępy”."
+      "hint": "Włącz Słuchaj w Metronomie, Rozbiegu, Setliście lub Jamie i graj. Gdy go wyłączysz, przebieg zostanie zapisany tutaj."
     },
     "drill": {
       "linear": "Liniowo: tempo rośnie od BPM startowego do docelowego, krok po kroku.",
@@ -74,8 +74,8 @@
     "startsAt": "Start od",
     "listening": "Słucham",
     "inputOff": "Wejście wyłączone",
-    "coachOnPlay": "Trener słucha, gdy włączysz odtwarzanie",
-    "coachQuiet": "Trener milczy w trakcie kroku",
+    "listen": "Słuchaj",
+    "listenHint": "Włącz, aby trener słuchał tu twojej gry. Korzysta z twojego wejścia audio, dopóki go nie wyłączysz albo nie opuścisz narzędzi.",
     "countIn": "Odliczenie",
     "backToStart": "Wróć na początek",
     "setUpInput": "Ustaw wejście"

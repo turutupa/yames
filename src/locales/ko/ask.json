@@ -9,10 +9,6 @@
     "placeholder": "이 화면, 테이크, 코스에 대해 물어보세요",
     "send": "보내기",
     "writing": "답변을 쓰는 중…",
-    "sections": {
-      "ask": "묻기",
-      "tools": "도구 코치"
-    },
     "screen": {
       "today": "오늘",
       "paths": "코스",

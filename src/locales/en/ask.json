@@ -9,10 +9,6 @@
     "placeholder": "Ask about this screen, your Takes or your Paths",
     "send": "Send",
     "writing": "Writing an answer…",
-    "sections": {
-      "ask": "Ask",
-      "tools": "Tools coach"
-    },
     "screen": {
       "today": "Today",
       "paths": "Paths",

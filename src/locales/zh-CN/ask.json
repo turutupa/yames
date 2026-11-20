@@ -9,10 +9,6 @@
     "placeholder": "问问这个界面、你的练习遍数或你的路线",
     "send": "发送",
     "writing": "正在写回答…",
-    "sections": {
-      "ask": "问",
-      "tools": "工具教练"
-    },
     "screen": {
       "today": "今天",
       "paths": "路线",

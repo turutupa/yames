@@ -103,6 +103,28 @@ const DELIBERATELY_REMOVED: readonly string[] = [
   "session.result.bendsAll",
   "session.result.bendsSomeFlat",
   "session.result.vibratoHeard",
+  // No Start button (DESIGN 7, leg c2a2, 2026-11-20). "Coach listens when you
+  // press play" was never how the code worked (Play never turned the input
+  // on); the slot is the Listen switch now (`transport.listen`), in every
+  // tool, the drill's "stays quiet mid-step" with it.
+  "transport.coachOnPlay",
+  "transport.coachQuiet",
+  // With it, the panel's Start and End, its Feed and History tabs and its
+  // empty state ("Press Start at the top of this panel…") went (DESIGN 7):
+  // the tools' coach is Listen, a line and a note under the stage, and the
+  // History is Progress → Tool runs (`session.progress.toolRuns`). The feed's
+  // "Segment" label and its spinner's "Coach is preparing to speak" went with
+  // the feed renderer; Ask's "Ask | Tools coach" sections with the section.
+  "coachCard.end",
+  "coachCard.start",
+  "coachCard.feed",
+  "coachCard.history",
+  "coachCard.emptyTitle",
+  "coachCard.emptyHint",
+  "coachReport.segment",
+  "coachReport.thinkingAria",
+  "ask.sections.ask",
+  "ask.sections.tools",
 ];
 
 function englishKeys(): string[] {

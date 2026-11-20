@@ -1973,50 +1973,60 @@ body[data-sheet-maximized] .rail {
   }
 }
 
-/* The sentence at the right end: what the coach will do, drawn as the mockup
-   draws it — dashed, because it is the one thing in the bar that is not a
-   control and should not look like one. */
-.transport-note {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 34px;
-  padding: 0 14px;
-  border: 1px dashed var(--border);
-  border-radius: 17px;
-  color: var(--text-muted);
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
-/* Whole or not at all (Transport.tsx): the slot is one line of the note's
-   height and clips the rest. An empty first item of no width goes first, so a
-   note wider than the slot breaks onto the hidden second line rather than
-   overflowing the first. It takes nearly all of the bar's free width; the
-   spacer before it keeps a sliver. */
-.transport-note-slot {
-  flex: 1000 1 0;
-  min-width: 0;
-  height: 34px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  overflow: hidden;
-}
-.transport-note-slot::before {
-  content: "";
-  flex: 1 0 0;
-  height: 34px;
-}
-.transport-note {
-  flex: none;
+/* Listen (DESIGN 7): the input readout's pill, made a switch. The track and
+   the word say the state (the knob's place, "Listen" / "Listening"); the
+   colour only follows them. The word may be shed on a narrow bar like the
+   readout's, never the track: without it the pill would be a mic icon whose
+   state is its colour alone. */
+.transport-listen {
+  font-family: inherit;
+  background: transparent;
+  cursor: pointer;
   white-space: nowrap;
+  transition: color 0.15s ease, border-color 0.15s ease;
 }
-
-/* The compact input readout that stands in for the sentence once the context
-   bar has shed its own input chip. Hidden until then — see the breakpoint. */
-.transport-input-narrow {
-  display: none;
+.transport-listen .transport-switch-track {
+  display: block;
+  width: 28px;
+  height: 16px;
+}
+.transport-listen .transport-switch-track::after {
+  width: 12px;
+  height: 12px;
+}
+.transport-listen.on .transport-switch-track {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.transport-listen.on .transport-switch-track::after {
+  transform: translateX(12px);
+  background: var(--accent);
+}
+.transport-listen.on {
+  color: var(--text-secondary);
+}
+.transport-listen.on.listening {
+  color: var(--feedback-perfect);
+}
+@media (hover: hover) {
+  .transport-listen:hover {
+    color: var(--text-primary);
+    border-color: var(--text-muted);
+  }
+}
+.transport-listen:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (pointer: coarse) {
+  .transport-listen {
+    min-height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .transport-listen,
+  .transport-listen .transport-switch-track::after {
+    transition: none;
+  }
 }
 
 /* =================== Content region =================== */
@@ -2181,28 +2191,6 @@ body[data-sheet-maximized] .rail {
    leaves the stage 168px, which is not a metronome. Two breakpoints fix it,
    both chosen from the arithmetic rather than from a round number. */
 
-/* Under 1160px there is not room for rail + dock + a usable stage
-   (252 + 380 + 528). The coach stops displacing the stage and floats over
-   it instead: the tempo readout keeps its place, which is the same promise
-   docking made when there was room for both. */
-@media (max-width: 1159px) {
-  .coach-card.coach-card-open {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 30;
-    box-shadow: -18px 0 48px -20px rgba(0, 0, 0, 0.55);
-  }
-}
-
-@media (max-width: 719px) {
-  .coach-card.coach-card-open {
-    width: 320px;
-    min-width: 320px;
-  }
-}
-
 /* Under 620px the rail itself is the problem: 252 of 480 is more than half
    the window. It becomes a strip of icons, and opening the library floats it
    back out to full width over the stage rather than squeezing it. */
@@ -2323,28 +2311,12 @@ body[data-sheet-maximized] .rail {
   }
 }
 
-/* The sentence goes at the width where the context bar drops its input chip —
-   on the stated grounds that the transport reports the same state. So the
-   compact readout takes the sentence's place rather than the slot going
-   empty, and input status is on screen at every width the window can reach.
-   The two are not the same number: the swap happens at 961, where the row
-   itself runs out of room, and the chip goes at 919. Between the two both
-   report the input, which is what the app does at every width above 961
-   anyway. Below 919 the transport is the only one left, which is the part
-   that matters.
-
-   The keyboard hint goes here too. It was shedding at 719, which is 240px
-   later than the row could actually afford it. */
+/* The keyboard hint goes at 961, where the row itself runs out of room. It was
+   shedding at 719, which is 240px later than the row could actually afford
+   it. The input's readout (or Listen, in the tools) stays at every width: the
+   context bar drops its own input chip at 919 on the grounds that the
+   transport reports the same state. */
 @media (max-width: 961px) {
-  .transport-note-slot,
-  .transport-note {
-    display: none;
-  }
-
-  .transport-input-narrow {
-    display: flex;
-  }
-
   .transport-key {
     display: none;
   }
@@ -2554,6 +2526,84 @@ body[data-sheet-maximized] .rail {
   }
 }
 
+/* Listen on a narrow bar (leg c2a2, measured by tests/layout/tool-coach.spec.ts).
+ *
+ * Listen is a control where the sentence it replaced was a slot that shrank to
+ * nothing, so the row lost its give: at 1024 a Listen that is listening ran
+ * 17–55px off the window, at 800 the whole switch was past the edge (as the
+ * "Input off" readout already was there, unmeasured). It sheds, in this order:
+ *
+ *   - the keyboard hint, below 1200, on the bars that carry Listen (it is in
+ *     Settings, as on the drill's bar);
+ *   - its word, below 1024, kept for a screen reader (the switch's name) and
+ *     in the title; the track, the mic and the lamp stay, so the state is
+ *     still the knob's place and whether sound arrives is still the lamp;
+ *   - the bar-and-elapsed readouts, below 900 rather than 780, on the bars
+ *     that carry Listen (idle they are transparent anyway; they are readouts,
+ *     Listen is a control); on a Jam's bar below 1200;
+ *   - Play's minimum width, in the 620–719 pinch.
+ *
+ * The track and the lamp are never shed: the setlist's rule under 820 and the
+ * rule under 560 hide every span of the input pill, which on Listen took the
+ * track with them and left a mic whose state was its colour alone. */
+@media (max-width: 1199px) {
+  .transport:has(.transport-listen) .transport-key {
+    display: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .transport .transport-listen {
+    gap: 7px;
+    padding: 0 10px;
+  }
+
+  .transport .transport-listen > span:not([class]) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 899px) {
+  .transport:has(.transport-listen) .transport-readouts {
+    display: none;
+  }
+}
+
+/* A Jam's bar carries a third readout (the chorus), and while the band plays
+ * the three of them pushed Listen 5–80px off a 1024 window. They give way
+ * below 1200, as the setlist's do below 1100 and for the same reason: the
+ * stage already says "chorus 1 · bar 5 of 12" over the form, so they are a
+ * second telling of it, and Listen is a control. */
+@media (max-width: 1199px) {
+  .transport[data-view="jam"]:has(.transport-listen) .transport-readouts {
+    display: none;
+  }
+}
+
+/* The pinch (620–719: the rail still 252 wide, the stage 366). Play, Count-in
+ * and Listen's track were 6–14px wider than the bar. Play's floor of 150 is
+ * the one thing in the row with room to spare: it relaxes to the width its
+ * word needs, so no control and no switch's label has to go. */
+@media (max-width: 719px) {
+  .transport:has(.transport-listen) .transport-play {
+    min-width: 112px;
+    padding: 0 18px;
+  }
+}
+
+.transport .transport-listen span.transport-switch-track {
+  display: block;
+}
+
+.transport .transport-listen span.transport-signal {
+  display: inline-block;
+}
+
 /* The context bar sheds in a fixed order, and the order comes out of the
    arithmetic rather than out of a principle stated in advance.
  *
@@ -2682,18 +2732,6 @@ body[data-sheet-maximized] .rail {
 /* …the preset sidebar's clearance is still double-counted, though. */
 .rail-library .preset-sidebar-header {
   padding-top: 10px;
-}
-
-/* Nothing overlays the dock any more, so it keeps its own top. */
-.coach-card.coach-card-open {
-  margin: 0;
-}
-
-/* The pill is the closed state of the coach card and renders instead of it,
-   not inside it — so hiding `.coach-card:not(.coach-card-open)` never matched
-   anything. The rail's coach row replaces it, status dot and all. */
-.coach-card-pill {
-  display: none;
 }
 
 /* ── The sidebar, collapsed on purpose ───────────────────────────────────
@@ -3069,14 +3107,6 @@ body[data-sheet-maximized] .rail {
 .transport-recording-clock {
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;
-}
-
-/* The coach's sentence is the first thing to go: it is an explanation, and a
-   take that is running is a fact. */
-@media (max-width: 1100px) {
-  .transport[data-recording] .transport-note {
-    display: none;
-  }
 }
 
 @media (max-width: 900px) {

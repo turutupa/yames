@@ -265,7 +265,7 @@
         },
         "coach": {
           "title": "Practice coach",
-          "body": "Listens, scores, and speaks. Ask it anything in its chat box."
+          "body": "Ask it anything here. In the tools, turn on Listen in the bottom bar and it hears you play."
         },
         "zenWidget": {
           "title": "Zen & widget",

@@ -1,0 +1,430 @@
+/*
+ * Progress → Tool runs (DESIGN 7): the old coach card's History, list and
+ * detail, and its end-of-session summary, on the Progress page.
+ *
+ * Moved from coach-card.css (deleted with the card in leg c2a2), on theme
+ * tokens only, at the page's sizes: 12 px is the floor (DESIGN 3.6). The
+ * class names are the ones the components always had.
+ */
+
+/* --- the section --------------------------------------------------------- */
+
+.tool-runs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+  /* A `session-glass` card has no padding of its own: the Path cards above it
+     set theirs (`.session-prog-path`), and without this the title, Clear all
+     and every row sat on the card's border. */
+  padding: 14px 16px 16px;
+}
+.tool-runs-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.tool-runs-head .session-prog-title {
+  flex: 1;
+  margin: 0;
+}
+.tool-runs-back,
+.tool-runs-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .tool-runs-back:hover,
+  .tool-runs-clear:hover {
+    color: var(--text-primary);
+    border-color: var(--text-muted);
+  }
+}
+.tool-runs-intro {
+  margin: 0;
+}
+.tool-runs-empty p {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.tool-runs-confirm {
+  text-align: left;
+}
+@media (pointer: coarse) {
+  .tool-runs-back,
+  .tool-runs-clear {
+    min-height: 44px;
+  }
+}
+
+/* --- the list ------------------------------------------------------------ */
+
+.coach-history-heading {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 10px 0 6px;
+}
+.coach-history-card {
+  position: relative;
+  background: color-mix(in srgb, var(--bg-card, var(--bg-secondary)) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  border-radius: 10px;
+  padding: 10px 40px 10px 12px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+@media (hover: hover) {
+  .coach-history-card:hover {
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+}
+.coach-history-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.coach-history-delete {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 6px;
+}
+@media (hover: hover) {
+  .coach-history-delete:hover {
+    color: var(--feedback-miss);
+  }
+}
+.coach-history-delete:focus-visible {
+  outline: 2px solid var(--accent);
+}
+@media (pointer: coarse) {
+  .coach-history-delete {
+    width: 44px;
+    height: 44px;
+    top: 0;
+    right: 0;
+  }
+}
+.coach-history-card-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+.coach-history-time,
+.coach-history-bpm {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.coach-history-sep {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.coach-history-comment {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+.coach-history-preset {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 3px;
+}
+.coach-history-ic-trend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0 8px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+}
+.coach-history-ic-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* --- a run --------------------------------------------------------------- */
+
+.coach-detail-meta {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.coach-detail-comment {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 4px 0 10px;
+}
+.coach-detail-insights {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 10px 0 12px;
+}
+.coach-detail-insight {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 6px 10px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-radius: 6px;
+  line-height: 1.4;
+}
+.coach-detail-section {
+  margin: 14px 0;
+}
+.coach-detail-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 8px;
+}
+.coach-detail-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.coach-detail-delete-btn {
+  display: block;
+  margin-top: 16px;
+  min-height: 36px;
+  padding: 8px 16px;
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--feedback-miss) 40%, transparent);
+  border-radius: 8px;
+  color: var(--feedback-miss);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .coach-detail-delete-btn:hover {
+    background: color-mix(in srgb, var(--feedback-miss) 10%, transparent);
+  }
+}
+
+/* The run's summary: the score in words beside the ring, then its figures. */
+.coach-mini-report-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0 8px;
+}
+.coach-mini-report-stats {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.coach-mini-report-score-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.coach-mini-report-score-sublabel {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.coach-end-report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+}
+.coach-end-report-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.coach-end-report-stat-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.coach-end-report-stat-sublabel {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+.coach-end-report-stat-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.end-report-components {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 10px 0;
+  border-top: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+}
+.end-report-component-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.end-report-component-label-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+.end-report-component-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.end-report-component-sublabel {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 1px;
+  line-height: 1.3;
+}
+.end-report-component-bar-track {
+  flex: 1;
+  height: 4px;
+  background: color-mix(in srgb, var(--text-primary) 12%, transparent);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.end-report-component-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.end-report-component-value {
+  font-size: 13px;
+  color: var(--text-secondary);
+  min-width: 36px;
+  text-align: right;
+}
+
+/* The timeline of a run's stretches. */
+.coach-segment-timeline {
+  margin-top: 4px;
+}
+.coach-segment-timeline-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.coach-segment-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+.coach-segment-time {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+.coach-segment-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.coach-segment-style {
+  font-weight: 600;
+}
+.coach-segment-sep {
+  color: var(--text-muted);
+}
+.coach-segment-breakdown {
+  flex: 0 0 100%;
+  height: 4px;
+  display: flex;
+  overflow: hidden;
+  border-radius: 2px;
+  margin-top: 4px;
+}
+.coach-segment-breakdown-bar {
+  height: 100%;
+}
+
+/* Clear all, asked once more where it was pressed. */
+.coach-confirm-dialog {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.coach-confirm-dialog p {
+  font-size: 13px;
+  color: var(--text-primary);
+  margin: 0 0 12px;
+}
+.coach-confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+.coach-confirm-cancel,
+.coach-confirm-delete {
+  min-height: 34px;
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+/* "B · Tonal" (global.css): Cancel tonal, Delete the danger red, solid. */
+.coach-confirm-cancel {
+  background: var(--btn-tint);
+  color: var(--btn-tint-ink);
+}
+@media (hover: hover) {
+  .coach-confirm-cancel:hover {
+    background: var(--btn-tint-hover);
+  }
+}
+.coach-confirm-delete {
+  background: var(--btn-danger);
+  color: var(--btn-danger-ink);
+}
+@media (hover: hover) {
+  .coach-confirm-delete:hover {
+    background: color-mix(in srgb, var(--btn-danger) 86%, var(--text-primary));
+  }
+}

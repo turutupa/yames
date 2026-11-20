@@ -43,7 +43,7 @@ import { TakeTape } from "./TakeTape";
 import type { CompareSide } from "../review/useSongCompare";
 import { printedBarNumber } from "../../../songs/position";
 import type { SongScore } from "../../../songs/types";
-import { formatDate } from "../../practice-coach/coachCardHelpers";
+import { formatDate } from "../../../utils/dates";
 import "../../../styles/songs-take-video.css";
 
 /**

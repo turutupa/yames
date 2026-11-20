@@ -145,31 +145,37 @@ describe("Transport", () => {
     }
   });
 
-  it("explains the coach until there is something live to report instead", () => {
-    // The mockup writes a sentence here. It is only true before the coach is
-    // listening — once it is, the slot has to carry the live readout, because
-    // the signal lamp exists nowhere else in the app.
-    const { container, rerender } = render(<Transport {...base} view="beat" />);
-    expect(screen.getByText("Coach listens when you press play")).toBeTruthy();
+  it("puts Listen where the coach's sentence was: a switch, off, in words and shape", () => {
+    // DESIGN 7. "Coach listens when you press play" was never how the code
+    // worked; the switch is the player's press, and it is never on by itself.
+    const onToggle = vi.fn();
+    const { rerender } = render(<Transport {...base} view="beat" listen={{ on: false, onToggle }} />);
+    expect(screen.queryByText("Coach listens when you press play")).toBeNull();
+    const listen = screen.getByRole("switch", { name: /Listen/ });
+    expect(listen.getAttribute("aria-checked")).toBe("false");
+    expect(listen.textContent).toContain("Listen");
+    expect(listen.querySelector(".transport-switch-track")).not.toBeNull();
+    fireEvent.click(listen);
+    expect(onToggle).toHaveBeenCalledTimes(1);
 
-    rerender(<Transport {...base} view="drill" />);
-    expect(screen.getByText("Coach stays quiet mid-step")).toBeTruthy();
+    // On, and the input on: "Listening", the knob across, and the lamp.
+    rerender(<Transport {...base} view="drill" listening hasSignal listen={{ on: true, onToggle }} />);
+    const on = screen.getByRole("switch", { name: /Listening/ });
+    expect(on.getAttribute("aria-checked")).toBe("true");
+    expect(on.querySelector(".transport-signal.on")).not.toBeNull();
 
-    rerender(<Transport {...base} view="drill" listening hasSignal />);
-    expect(container.querySelector(".transport-note")).toBeNull();
-    expect(container.querySelector(".transport-signal.on")).not.toBeNull();
-    expect(screen.getByText("Listening")).toBeTruthy();
+    // On, but the input did not come on: it says so rather than "Listening".
+    rerender(<Transport {...base} view="drill" listen={{ on: true, onToggle }} />);
+    expect(screen.getByTestId("transport-listen").textContent).toContain("Input off");
   });
 
-  it("keeps the input readout reachable at every width", () => {
-    // Parity: below 920px the context bar drops its own input chip, on the
-    // stated grounds that the transport reports the same state. So the
-    // compact readout is in the tree behind the sentence, and the breakpoint
-    // swaps which of the two is drawn.
-    const { container } = render(<Transport {...base} view="beat" />);
-    const narrow = container.querySelector(".transport-input-narrow");
-    expect(narrow).not.toBeNull();
-    expect(narrow?.textContent).toContain("Input off");
+  it("shows the plain input readout where there is no tools' coach (Songs)", () => {
+    const { container, rerender } = render(<Transport {...base} view="songs" />);
+    expect(screen.queryByRole("switch", { name: /Listen/ })).toBeNull();
+    expect(container.querySelector(".transport-input")?.textContent).toContain("Input off");
+    rerender(<Transport {...base} view="songs" listening hasSignal />);
+    expect(container.querySelector(".transport-signal.on")).not.toBeNull();
+    expect(screen.getByText("Listening")).toBeTruthy();
   });
 
   it("formats elapsed time as minutes and seconds", () => {
@@ -210,16 +216,15 @@ describe("Transport — what it sheds, and in what order", () => {
     return out.join("\n");
   };
 
-  it("has the input readout in place before the context bar drops its chip", () => {
+  it("keeps the input readout (and Listen) at every width, after the context bar drops its chip", () => {
     // The context bar sheds `.context-chip-input` at 959 on the stated
     // grounds that the transport reports the same state. So the transport's
-    // compact readout has to be drawn by then — it arrives at 961, where the
-    // row itself runs out of room for the sentence. Put the swap below the
-    // chip's breakpoint instead and there is a band of widths that reports
-    // the input nowhere.
-    expect(at(961)).toContain(".transport-note {\n    display: none;");
-    expect(at(961)).toContain(".transport-input-narrow {\n    display: flex;");
+    // readout, which in the tools is the Listen switch, is never shed.
+    expect(css).not.toContain(".transport-input {\n    display: none;");
+    expect(css).not.toContain(".transport-listen {\n    display: none;");
     expect(at(959)).toContain(".context-chip-input {\n    display: none;");
+    // The word may go on a narrow bar, the track never: its place is the state.
+    expect(ruleBlock(css, ".transport-listen .transport-switch-track")).toContain("display: block");
   });
 
   it("never hides the play button, at any width", () => {

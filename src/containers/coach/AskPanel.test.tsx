@@ -13,7 +13,6 @@ import {
   getAskState,
   openAsk,
   registerAskSender,
-  showToolsCoach,
   subscribeAsk,
 } from "./askStore";
 import { __resetCoachLoaderForTests } from "../../hooks/coachLoader";
@@ -99,15 +98,16 @@ describe("the panel", () => {
     expect(box.value).toBe("");
   });
 
-  it("shows the tools' coach as its second section, and switches between the two", () => {
-    showToolsCoach();
-    render(<AskPanel lookingAt={null} onClose={() => {}} toolsCoach={<div data-testid="tools-body">tools</div>} />);
-    expect(screen.getByTestId("tools-body")).toBeInTheDocument();
-    expect(screen.getByTestId("ask-section-tools")).toHaveAttribute("aria-selected", "true");
-    fireEvent.click(screen.getByTestId("ask-section-ask"));
-    expect(getAskState().section).toBe("ask");
-    expect(screen.queryByTestId("tools-body")).toBeNull();
+  it("is only Ask: no Start, no End, no Feed or History tabs, no sections (leg c2a2)", () => {
+    openAsk();
+    const { container } = render(<AskPanel lookingAt={null} onClose={() => {}} />);
+    expect(container.querySelector("[role=tablist], [data-testid^='ask-section']")).toBeNull();
+    for (const word of ["Start", "End", "Feed", "History"]) {
+      expect(screen.queryByRole("button", { name: word })).toBeNull();
+      expect(screen.queryByRole("tab", { name: word })).toBeNull();
+    }
     expect(screen.getByRole("log")).toBeInTheDocument();
+    expect(container.querySelector(".ask-foot .coach-model-button")).not.toBeNull();
   });
 
   it("the caret goes in the box when a key or a question opened it", () => {

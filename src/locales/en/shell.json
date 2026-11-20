@@ -59,7 +59,7 @@
     },
     "history": {
       "title": "Nothing here yet.",
-      "hint": "Each time you press End or stop the metronome, it shows up here. Your Sessions from Today are in Progress."
+      "hint": "Turn on Listen in the Metronome, Drill, Setlist or Jam and play. When you turn it off, the run is kept here."
     },
     "drill": {
       "linear": "Linear: the tempo climbs from the start BPM to the target, one step at a time.",
@@ -74,8 +74,8 @@
     "startsAt": "Starts at",
     "listening": "Listening",
     "inputOff": "Input off",
-    "coachOnPlay": "Coach listens when you press play",
-    "coachQuiet": "Coach stays quiet mid-step",
+    "listen": "Listen",
+    "listenHint": "Turn on to have the coach listen to your playing here. It uses your audio input until you turn it off or leave the tools.",
     "countIn": "Count-in",
     "backToStart": "Back to the start",
     "setUpInput": "Set up input"

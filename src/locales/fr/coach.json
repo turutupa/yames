@@ -14,17 +14,17 @@
     }
   },
   "coachCard": {
-    "end": "Terminer",
-    "start": "Démarrer",
     "clearAll": "Tout effacer",
-    "feed": "Fil",
-    "history": "Historique",
-    "emptyTitle": "Ton coach écoute pendant que tu joues sur le clic.",
-    "emptyHint": "Appuie sur Démarrer en haut de ce panneau, puis joue. Il commente ton placement au fil du jeu et fait le bilan quand tu appuies sur Terminer.",
     "today": "Aujourd'hui",
     "yesterday": "Hier",
     "noteSpacingTrend": "Tendance de l'espacement des notes",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
+  },
+  "toolCoach": {
+    "runScore": "Score {{score}} à {{bpm}} BPM",
+    "runScoreNoBpm": "Score {{score}}",
+    "sessionScore": "Score de la séance {{score}} · {{word}}",
+    "openRuns": "Ouvrir Passages d'outils dans Progrès"
   },
   "coachModel": {
     "label": "Modèle du coach",
@@ -99,8 +99,6 @@
     "beatPlacement": "Placement sur le temps"
   },
   "coachReport": {
-    "segment": "Segment",
-    "thinkingAria": "Le Coach s'apprête à parler",
     "qualifier": {
       "excellent": "Excellent",
       "good": "Bien",
