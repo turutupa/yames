@@ -232,6 +232,26 @@ inside one, so a turn can overrun its deadline by the longest single step:
 The caller returns at the deadline in any case (it polls every 20 ms); what overruns is the worker,
 and the next job waits behind it.
 
+### Gates after the fixes and the merge of `coach` (c3ab)
+
+- `npm run test:rust` (no feature): 1175 passed, 0 failed (the 15 `take_video` failures are gone with
+  the wrapper's own `TMPDIR`). `/tmp/coach-c3ab/rust.log`.
+- `--features coach-llm` lib suite with the model and the vocabulary: 1186 passed, 0 failed, no
+  `SKIPPED` line. `/tmp/coach-c3ab/rust-llm.log`. The same suite without the variables prints six
+  `SKIPPED: no model` lines (`/tmp/coach-c3ab/test-skip-lines.log`).
+- Probe binary's own test: `/tmp/coach-c3ab/test-probe-bin.log`.
+- tsc pass; vitest 11,767 passed, 1 file failed: the known `TabStage.render.test.tsx` (Bravura); build
+  pass. `/tmp/coach-c3ab/{tsc,vitest,build}.log`.
+- Probe, release, CPU build, `--volume 0.01`, the binary at `/tmp/coach-c3a/click-jitter-probe` rebuilt
+  from this branch. **Busy machine**: hard gates only, p99 not evidence either way.
+
+  | Run | load at start, end | LLM work in the window | p99 ms | missed | allocs / frees | dropped |
+  |---|---|---|---|---|---|---|
+  | `--llm-load` | 5.8, 13.6 | 12 loads started inside, 12 began and finished inside (0.27 s each), 13 Asks | 3.05 | 0 | 0 / 0 | 0 |
+  | `--llm-cancel` | 12.7, 20.6 | 84 Ask turns cancelled, 0 finished first | 3.47 | 0 | 0 / 0 | 0 |
+
+  Logs `/tmp/coach-c3ab/probe-llm-{load,cancel}.log`.
+
 ## Owed after c3ab
 
 - The five quiet-machine probe runs (load average under 6): `bash /tmp/coach-c3a/probe-set.sh`, which
