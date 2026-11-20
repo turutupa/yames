@@ -15,7 +15,7 @@ import type { ExerciseSpec, VariantParams } from "../spec";
 import type { PassBar } from "../format";
 import { handAt, ladder, moveChart, pentatonic, shiftFrets, swing } from "../templates";
 import { BOX_KEYS, LANDING_REVIEW, MINOR_BLUES, QUICK_CHANGE, SIXTHS, STRAIGHT_FEEL, UP_THE_NECK } from "./blues-more";
-import { BOX_FIVE_STEP, FAST_SHUFFLE, OPEN_E_BLUES, SLOW_IN_C, THREE_CHORUSES } from "./blues-encore";
+import { BOX_FIVE_STEP, OPEN_E_BLUES, SLOW_IN_C, THREE_CHORUSES } from "./blues-encore";
 import { MINOR_BLUES_IN_D, THREE_CHORUSES_IN_E } from "./blues-finale";
 
 const TWELVE = "A7 | A7 | A7 | A7 | D7 | D7 | A7 | A7 | E7 | D7 | A7 | E7";
@@ -175,6 +175,15 @@ function inKeys(tab: string, chart: string | undefined, scale: string | undefine
 const NOT_CHECKED_YET =
   "Your turn, and not checked yet: the app can't judge notes you choose, so you tick it off yourself.";
 
+// Shared strings of the curriculum (coherence audit, S5 and S10 to S12): word for word the same in
+// every Path that uses them, so each is translated once.
+const BAND_IS = "The band is a drummer and a bassist in place of the click.";
+const IF_LOST = "If you get lost, stop, find beat 1 of the next bar and come back in there.";
+const HAMMER_IS =
+  "A hammer-on is a note the fretting hand sounds alone: pick the lower note, then bring a finger down hard and fast on the higher fret of the same string.";
+const VIBRATO_IS = "Vibrato is a bend kept very small: push the string a little and let it back, over and over, at an even speed.";
+const ROOT_IS = "The root is the note a chord is named after.";
+
 export default definePath({
   id: "blues-pentatonics",
   title: "Blues and Pentatonics",
@@ -183,13 +192,13 @@ export default definePath({
   goal: "Solo over a twelve-bar blues in A, knowing where the changes are and landing on notes that belong to them.",
   level: "early-intermediate",
   assumes:
-    "You know the open chords and can fret and pick single notes, and you can play eighth notes with a click at 70 BPM. Nothing about scales or blues is assumed. New ideas arrive in A, on purpose, so that theory is the only new thing, and the Steps after them move to other keys. This is a long Path: about three months at fifteen to twenty minutes a day.",
+    "You can fret and pick single notes, and you can play eighth notes with a click at 70 BPM. You play no chords here: you hear them change under your lines. If A7, D7 and E7 are only names to you, First Chords and Strumming has a Step, 'Seventh chords and a twelve-bar blues in A', that strums this same blues. The shuffle is explained in Step 1, and Rhythm Foundations has a Step, 'Three to a beat', on triplets and the shuffle if you want more of it. Nothing about scales or blues is assumed. New ideas arrive in A, on purpose, so that theory is the only new thing, and the Steps after them move to other keys. This is a long Path: about three months at fifteen to twenty minutes a day.",
   prerequisites: { paths: [{ path: "rhythm-foundations", level: "beginner" }], skills: ["Clean single notes", "Eighth notes with a click at 70 BPM"] },
   labelSubdivisions: "mostly",
   paceLadders: true,
   variantText: true,
   orderRationale:
-    "Theory arrives as written lines you can be graded on, and choosing your own notes comes after, as a short 'your turn' at the end of a Step. Chord tones arrive early, as soon as the box is in the hand, as arpeggios of A7, D7 and E7 in box 1, each followed by a lick that ends on the chord's third, before the blue notes: knowing where the chord is matters more than knowing an extra note. Call and response follows because written answers to one call teach phrase length and endings with almost no theory. The blues scale and bends come after the player can find the chord tones, so neither becomes a thing to sit on. A second box comes late on purpose: more notes before good choices makes for faster bad solos. Guide tones come near the end because they are the most abstract idea here and easiest once the form is in the ear. Slow blues comes last as it hides nothing. Between the ideas sit Steps that add little or nothing new: the box in other keys, the same notes over a straight band, the thirds in new keys, the quick change, the minor blues, two more boxes, and sixths. The blues is a style a player stays in for months, and each of those Steps takes what was just learned somewhere new before the next idea arrives. A second round of such Steps sits the same way. Two finished pieces are also taken to a second key straight after they are learned: the minor blues moves to D minor at the end of the Intermediate Level, and the three-chorus solo is built again in E, from the nut to the twelfth fret. In the Intermediate Level the form in E at the nut, with its turnarounds, and a faster shuffle follow bends: by then the twelve bars, the walking line and the riffs are known, so a new key and a quicker tempo each arrive on lines the player already has. In the Advanced Level box 5 follows boxes 3 and 4 and completes the five shapes; the three-chorus solo sits after guide tones, once every tool it puts in order has been taught, and just before the slow blues; and the slow blues in C comes last, as the hardest Step taken to a second key.",
+    "Theory arrives as written lines you can be graded on, and choosing your own notes comes after, as a short 'your turn' at the end of a Step. Chord tones arrive early, as soon as the box is in the hand, as arpeggios of A7, D7 and E7 in box 1, each followed by a lick that ends on the chord's third, before the blue notes: knowing where the chord is matters more than knowing an extra note. Call and response follows because written answers to one call teach phrase length and endings with almost no theory. The blues scale and bends come after the player can find the chord tones, so neither becomes a thing to sit on. A second box comes late on purpose: more notes before good choices makes for faster bad solos. Guide tones come near the end because they are the most abstract idea here and easiest once the form is in the ear. Slow blues comes last as it hides nothing. Between the ideas sit Steps that add little or nothing new: the box in other keys, the same notes over a straight band, the thirds in new keys, the quick change, the minor blues, two more boxes, and sixths. The blues is a style a player stays in for months, and each of those Steps takes what was just learned somewhere new before the next idea arrives. A second round of such Steps sits the same way. Two finished pieces are also taken to a second key straight after they are learned: the minor blues moves to D minor near the end of the Intermediate Level, and the three-chorus solo is built again in E, from the nut to the twelfth fret. In the Intermediate Level the form in E at the nut, with its turnarounds, follows bends: by then the twelve bars, the walking line and the riffs are known, so a new key arrives on lines the player already has. Question and answer phrases close that Level, after the minor blues, because the Step ends on a chorus of the player's own that gathers what the Level taught. In the Advanced Level box 5 follows boxes 3 and 4 and completes the five shapes; the three-chorus solo sits straight after it, in A and then in E, because what it puts in order is the boxes, the slides between them and a bend at the top, so it closes the work on the neck; major and minor together, sixths and guide tones follow as the work on harmony, and the slow blues closes that; and the slow blues in C comes last, as the hardest Step taken to a second key.",
   gradingLimits:
     "Graded Exercises are written lines: the app checks timing evenness, notes heard and extra notes, and right notes after the take where the notes are single, far enough apart and not ringing into each other; elsewhere right notes read 'not checked'. Timing over the shuffle band is judged against the written triplet with a looser bar, so a lighter or heavier swing is not marked down, and a constant lean behind the beat costs nothing at all. The right-note check has only been tried on computer-made guitar sound with no band in the mix, so direct input or headphones are the honest way to play anything with a band; with a microphone and speakers it is untested. A bent note would read as a wrong one, so bends are timed and never pitch-checked: the unison bends are double stops, which the note check leaves alone. Landing on chord tones, staying in the scale, keeping rests and choosing your own notes are not measured today: those Exercises are 'your turn', self-checked and labelled 'not checked yet'. Nothing here grades feel.",
   steps: [
@@ -197,11 +206,14 @@ export default definePath({
       id: "box-one",
       title: "Pentatonic box 1",
       goal: "Play the A minor pentatonic box over a shuffle band, find its three A's inside a riff, and play your first twelve bars.",
-      why: "These five notes are most of the blues and rock you've ever heard. Learning one box well, and knowing which note is the root, gets you playing over a band today. Without the roots, the box is a pattern: with them, it's a map you can navigate. Everything here is played with the band from the first note, because the box only makes sense against a groove.",
+      why: "These five notes are most of the blues and rock you've ever heard. Learning one box well, and knowing which of its notes is home, gets you playing over a band today. Without that home note, the box is a pattern: with it, it's a map you can navigate. Everything here is played with the band from the first note, because the box only makes sense against a groove.",
       howTo: [
         "First finger stays on fret 5, one finger per fret. The notes are A, C, D, E, G, and every string uses two of them.",
-        "The three A's are home: fret 5 on the low E, fret 7 on the D string, fret 5 on the high E. Every Exercise in this Step starts or lands on one of them, so say 'A' when you get there.",
-        "Shuffle eighths are long-short, on the band's triplet: say 'tri-pl-et' and play on the 'tri' and the 'et'. Damp strings you aren't using with the side of your picking hand.",
+        ROOT_IS,
+        "Here the root is A, and the three A's are home: fret 5 on the low E, fret 7 on the D string, fret 5 on the high E. Every Exercise in this Step starts or lands on one of them, so say 'A' when you get there.",
+        BAND_IS,
+        IF_LOST,
+        "Shuffle eighths are long-short. Each beat is split into three even parts, a triplet: count '1-trip-let, 2-trip-let' and play on the number and the 'let'. Damp strings you aren't using with the side of your picking hand.",
       ],
       payoff: "You can play a whole twelve-bar chorus over a shuffle band, and you always know where home is.",
       exercises: [
@@ -252,7 +264,7 @@ export default definePath({
           howTo: [
             "Shuffle eighths, long-short on the band's triplet, 55 BPM up to a pass at 90.",
             "Bar 1: A, C, A, G, E, D, C, D, from the high E string down to the G string. Bar 2: A on the D string, C, G, and the A again, held for two beats.",
-            "Swing it the way the drummer does. If the long-short feels odd, say 'tri-pl-et' and play on the 'tri' and the 'et'.",
+            "Swing it the way the drummer does. If the long-short feels odd, count '1-trip-let' and play on the '1' and the 'let'.",
           ],
           coach: "Written notes, so I can check them after the take, and the timing against a shuffle that allows for your own swing.",
           tab: swing(`/8 1:5 1:8 1:5 2:8 2:5 3:7 3:5 3:7 | /4 4:7 /8 3:5 4:5 /2 4:7`),
@@ -270,10 +282,10 @@ export default definePath({
           title: "Your first twelve bars",
           purpose: "A whole chorus of the blues in box 1, built the way real players build one: the lick, then the A riff, said again over D7, then a new line over E7 and D7 that comes home. Twelve bars of playing, with the chords changing under you.",
           howTo: [
-            "Shuffle eighths, 50 BPM up to a pass at 80. The chords are A7 for four bars, D7 for two, A7 for two, then E7, D7, A7 and E7.",
+            "Shuffle eighths, 50 BPM up to a pass at 80. A blues is a form of twelve bars that goes round and round, and one time round is a chorus. The chords are A7 for four bars, D7 for two, A7 for two, then E7, D7, A7 and E7. You don't play them: you hear them change under your line.",
             "Bars 1 and 2 are your first lick, and bars 3 and 4 the low and middle A riffs. Bars 5 to 8 are the same four bars again: the lick sounds different over D7 because the chord has moved, not the notes.",
             "Bar 9 starts on E for the E7, bar 10 on D for the D7, bar 11 lands on the middle A, and bar 12 holds E over the E7, which pulls you back to the top.",
-            "Shake the last E with a little vibrato if you like. Vibrato isn't graded: the app checks that E was the note and on time, and the shake is yours.",
+            "Shake the last E if you like: push the string a little and let it back, over and over. That shake is called vibrato. It isn't graded: the app checks that E was the note and on time, and the shake is yours.",
           ],
           coach: "Twelve written bars over the band: I check the notes and the shuffle after the take. The vibrato on the last E isn't graded.",
           tab: swing(
@@ -311,7 +323,7 @@ export default definePath({
       goal: "Play the arpeggio of each chord of the blues in box 1, and a lick that ends on each chord's third.",
       why: "This is the single biggest step from playing scales to playing changes. A wrong-sounding note is mostly a note that stopped in the wrong place. An arpeggio is the chord one note at a time, so after playing it you know where the chord lives in the box, and a lick that ends on the third says the chord's name out loud.",
       howTo: [
-        "A7 is A, C#, E, G. D7 is D, F#, A, C. E7 is E, G#, B, D. The third is the second note of each: C#, F# and G#.",
+        "A7 is A, C#, E, G. D7 is D, F#, A, C. E7 is E, G#, B, D. The sign # is read 'sharp' and means one fret higher: C# is one fret above C. Flat means one fret lower. The notes of a chord are named by counting letters up from its root: in A7, C# is the third, E is the fifth and G is the flat seven, a seventh lowered by one fret. The thirds are C#, F# and G#.",
         "Box 1 has no C#, F# or G#: they sit a fret below or beside its notes. That is why the arpeggios move the hand a little, and why they sound so different from the box.",
         "Aim for the last note first, then get there. Decide on it a beat early.",
       ],
@@ -341,11 +353,11 @@ export default definePath({
         {
           id: "a7-arpeggio",
           title: "The A7 arpeggio, and a lick to C#",
-          purpose: "A7 one note at a time from the low root, then a lick that comes down the box and resolves from C to C#: the blue third to the chord's own third.",
+          purpose: "A7 one note at a time from the low root, then a lick that comes down the box and moves up one fret from C to C#, the chord's own third.",
           howTo: [
             "Shuffle eighths, then a half note, 60 BPM up to a pass at 80.",
             "Bar 1, up: A at fret 5 on the low E (second finger), C# at fret 4 on the A string (first finger), E at 7, G at 5 and A at 7 on the D string, C# at 6 on the G string, E at 5 and G at 8 on the B string. Let the hand move up a fret after the C# on the G string, so the fourth finger reaches fret 8 without a stretch.",
-            "Bar 2: G, E, D, C, then C# at fret 6 on the G string for two beats. That half step from C to C# is the sound of the blues resolving.",
+            "Bar 2: G, E, D, C, then C# at fret 6 on the G string for two beats. That move of one fret, a half step, from C to C# is the sound of the blues coming to rest.",
           ],
           coach: "A written arpeggio and lick: I check each note and the timing after the take.",
           tab: swing(`/8 6:5 5:4 5:7 4:5 4:7 3:6 2:5 2:8 | /8 2:8 2:5 3:7 3:5 /2 3:6`),
@@ -362,7 +374,7 @@ export default definePath({
         {
           id: "d7-arpeggio",
           title: "The D7 arpeggio, and a lick to F#",
-          purpose: "D7 from its root on the A string, then a lick that steps down from G to F#, D7's third. Over the IV chord, that one note is what makes the change audible.",
+          purpose: "D7 from its root on the A string, then a lick that steps down from G to F#, D7's third. Over the D7, that one note is what makes the change audible.",
           howTo: [
             "Shuffle eighths, then a half note, 60 BPM up to a pass at 80.",
             "Bar 1, up: D at fret 5 on the A string, F# at 4 and A at 7 on the D string, C at 5 and D at 7 on the G string, F# at 7 on the B string, A at 5 and C at 8 on the high E. First finger starts on fret 4 for the F#, and the hand moves up a fret for the top two strings.",
@@ -387,7 +399,7 @@ export default definePath({
           howTo: [
             "Shuffle eighths, then a half note, 60 BPM up to a pass at 80.",
             "Bar 1, up: E at fret 7 on the A string, G# at 6 and B at 9 on the D string, D at 7 and E at 9 on the G string, G# at 9 on the B string, B at 7 and D at 10 on the high E. First finger on fret 6, then up a fret for the top two strings.",
-            "Bar 2: B, D, B on the high E, A at 10 on the B string, then down a fret to G# and hold it. It's the D7 lick moved up a tone.",
+            "Bar 2: B, D, B on the high E, A at 10 on the B string, then down a fret to G# and hold it. It's the D7 lick moved up two frets.",
           ],
           coach: "Written notes, checked after the take, and the timing against the band's shuffle.",
           tab: swing(`/8 5:7 4:6 4:9 3:7 3:9 2:9 1:7 1:10 | /8 1:7 1:10 1:7 2:10 /2 2:9`),
@@ -463,7 +475,7 @@ export default definePath({
         {
           id: "four-answers",
           title: "One call, four answers",
-          purpose: "The same call four times, and four written answers to it. Each ends somewhere else: on the root, the fifth, the flat seven and the high blue third. Hear what an ending does.",
+          purpose: "The same call four times, and four written answers to it. Each ends somewhere else: on A, on E, on G and on the high C. Hear what an ending does.",
           howTo: [
             "Straight eighths and quarters, 60 BPM up to a pass at 80. Sixteen bars: call, answer, call, answer.",
             "Answer 1 ends on A (finished). Answer 2 ends on E (open). Answer 3 ends on G (it wants to go on). Answer 4 climbs to the high C (it hangs in the air).",
@@ -527,8 +539,9 @@ export default definePath({
       goal: "Add the flat five as a note to pass through, and hear the third move from C to C#.",
       why: "Two notes turn a scale into the blues. The flat five, Eb in A, sounds wrong on its own and wonderful on its way somewhere else. The blue third, C rubbing against the chord's C#, is the tension the whole style runs on. You've been playing the C already; now you'll hear what it's doing.",
       howTo: [
-        "The A blues scale is A, C, D, Eb, E, G. Eb lives at fret 6 on the A string and fret 8 on the G string in this box.",
+        "The A blues scale is A, C, D, Eb, E, G. Eb is E flat, one fret below E: fret 6 on the A string and fret 8 on the G string in this box.",
         "Don't park on the Eb. Walk through it on your way to D or E.",
+        HAMMER_IS,
         "To resolve the blue third, hammer from C to C# with your first and second fingers on the G string.",
       ],
       payoff: "One extra note, and suddenly the lick sounds like the blues rather than a rock scale.",
@@ -649,8 +662,9 @@ export default definePath({
           title: "The boogie line",
           purpose: "A walking shuffle line through the whole form, so you're playing the changes rather than following them. It is the same shape moved to three roots.",
           howTo: [
-            "Shuffle eighths, all twelve bars, 70 BPM up to a pass at 90.",
+            "Shuffle eighths, all twelve bars, 55 BPM up to a pass at 90.",
             "Root, third, fifth, sixth, flat seven, and back down: on A it's frets 5 and 9 on the low E, then 7, 9 and 10 on the A string. It's a stretch from fret 5 to 9, so let the hand move with the chord.",
+            "On the faster rungs, pick lighter and smaller. The pick should only just clear the string. Wide strokes that worked at 80 BPM arrive late at 110 BPM.",
           ],
           coach: "A lot of notes and the whole form. I report notes and time after the take; getting all the way through is the win.",
           vary: inKeys([walkA, walkA, walkA, walkA, walkD, walkD, walkA, walkA, walkE, walkD, walkA, walkE].join(" | "), TWELVE, undefined, ["A", "C", "E", "G"]),
@@ -661,7 +675,7 @@ export default definePath({
           shifts: true,
           chords: TWELVE,
           jam: TEXAS,
-          rungs: ladder(70, 110, 10),
+          rungs: ladder(50, 110, 10),
           passAt: 90,
           ...lick("shuffle"),
           minutes: 6,
@@ -741,6 +755,7 @@ export default definePath({
         "Bend with three fingers on the string, ring finger on the note. Push from the wrist, as if turning a door handle, rather than from the fingers alone.",
         "Play the target first. Then bend until there's no wobble left between what you hear and what you remember.",
         "The app times your bends and doesn't measure how far they go, so your ear judges the pitch on every one of these. Keep your strings fresh: old strings make this much harder.",
+        VIBRATO_IS,
       ],
       payoff: "A bent note that sits on the band's chord tone and arrives on the beat.",
       difficultyException:
@@ -749,7 +764,7 @@ export default definePath({
         {
           id: "reference",
           title: "Target first, then bend",
-          purpose: "Play the note, then bend up to it from a whole tone below: E, then D bent to E; A, then G bent to A; D, then C bent to D.",
+          purpose: "Play the note, then bend up to it from a whole step below, two frets: E, then D bent to E; A, then G bent to A; D, then C bent to D.",
           howTo: [
             "Half notes, 50 to 80 BPM: two beats on the target, two beats on the bend.",
             "Hold the top of the bend without moving it. Use your ear and nothing else.",
@@ -854,7 +869,8 @@ export default definePath({
       ],
     },
     OPEN_E_BLUES,
-    FAST_SHUFFLE,
+    MINOR_BLUES,
+    MINOR_BLUES_IN_D,
     {
       id: "question-answer",
       title: "Question and answer phrases",
@@ -935,7 +951,7 @@ export default definePath({
           purpose: "A whole chorus of your own in that form, which nothing grades. Say something, repeat it and answer it.",
           howTo: [
             "Shuffle, twelve bars, 70 to 85 BPM.",
-            "Make up the A phrase on the spot and repeat it over D7. Don't plan the B. Record it, and be kind to yourself about what comes out.",
+            "Make up the A phrase on the spot and repeat it over D7. Don't plan the B. Use what this Level gave you: one blue note in passing and one bend up to an ending note. Record it, and be kind to yourself about what comes out.",
           ],
           coach: "No marks on this one. If you want a view, listen back to it tomorrow.",
           tab: swing(`/8 1:5 2:8 /4 2:5 3:7 /8 3:5 4:7 | /2 4:7v /2 r | /1 r | /1 r | /8 1:5 2:8 /4 2:5 3:7 /8 3:5 4:7 | /2 4:7v /2 r | /1 r | /1 r | /8 2:5 3:7 /4 3:5 4:7 /8 3:5 3:7 | /2 3:7 /8 3:5 4:7 /4 3:5 | /2 4:7v /2 r | /1 r`),
@@ -948,8 +964,6 @@ export default definePath({
         },
       ],
     },
-    MINOR_BLUES,
-    MINOR_BLUES_IN_D,
     {
       id: "two-boxes",
       title: "Connecting box 1 and box 2",
@@ -961,8 +975,6 @@ export default definePath({
         "Box 1 and box 2 are the same notes. A on the D string, fret 7, is the same in both, and you've already found it.",
       ],
       payoff: "Your lick climbs out of the box, reaches a new high note, and comes home again.",
-      difficultyException:
-        "A new Level and a new shape, played plain at first, so the note rate sits a little under the minor blues chorus before it. The new demand is a second layout of the same notes and a slide between the two, which the rate does not count.",
       exercises: [
         {
           id: "box-two",
@@ -1027,7 +1039,7 @@ export default definePath({
           purpose: "Free playing across both boxes: more room to move, the same aim of a chord tone on beat 1.",
           howTo: [
             "Shuffle, 70 to 90 BPM, A7, E7, D7, A7.",
-            "E on the G string, fret 9, is a good new landing over A7 and E7 alike. The written line is an example.",
+            "E on the G string, fret 9, is a good new landing over A7 and E7 alike. Play it, or bend up to it from fret 7. The written line is an example.",
             NOT_CHECKED_YET,
           ],
           coach: "Not checked yet. Record it and listen to beat 1 of each bar.",
@@ -1048,6 +1060,8 @@ export default definePath({
     },
     UP_THE_NECK,
     BOX_FIVE_STEP,
+    THREE_CHORUSES,
+    THREE_CHORUSES_IN_E,
     {
       id: "major-and-minor",
       title: "Major and minor together",
@@ -1059,8 +1073,6 @@ export default definePath({
         "The high position at fret 10, with the first finger on A on the B string, is where a lot of the sweetest blues phrases live. Nothing in it needs a stretch.",
       ],
       payoff: "A phrase that smiles over the A7 and frowns over the D7, and a high lick at the tenth fret with the sixth in it.",
-      difficultyException:
-        "A new scale, played plain at first, so the note rate sits a little under the Step before, whose lines slide from one box to the next. The new demand is changing the third with the chord, which the rate does not count.",
       exercises: [
         {
           id: "major-box",
@@ -1150,10 +1162,10 @@ export default definePath({
       id: "guide-tones",
       title: "Guide tones through the changes",
       goal: "Hear and play the thirds and sevenths that make each chord what it is, and move between them by half steps.",
-      why: "If you only play two notes per chord, these are the two. The third and seventh of a dominant chord tell the ear exactly what's happening, and from one chord to the next they barely move: G falls a half step to F#, C# falls to C. Play that, and the changes appear in a single line with no band at all. It's the moment theory turns into something you can hear.",
+      why: "If you only play two notes per chord, these are the two. The third and the flat seven of a seventh chord such as A7 tell the ear exactly what's happening, and from one chord to the next they barely move: G falls a half step to F#, C# falls to C. Play that, and the changes appear in a single line with no band at all. It's the moment theory turns into something you can hear.",
       howTo: [
         "A7's guide tones are C# and G. D7's are F# and C. E7's are G# and D.",
-        "G to F# (A7 to D7) and C# to C (A7 to D7) are half steps. E7's G# is the odd one out: go up a tone from F# on the B string.",
+        "G to F# (A7 to D7) and C# to C (A7 to D7) are half steps. E7's G# is the odd one out: go up two frets from F# on the B string.",
         "Sing the line. If you can sing it, you can play over the changes.",
       ],
       payoff: "A single slow line that spells the whole twelve-bar form without any other notes.",
@@ -1259,8 +1271,6 @@ export default definePath({
         },
       ],
     },
-    THREE_CHORUSES,
-    THREE_CHORUSES_IN_E,
     {
       id: "slow-blues",
       title: "Slow blues",
@@ -1272,8 +1282,6 @@ export default definePath({
         "Use vibrato only once a note has landed, not to find it.",
       ],
       payoff: "Twelve slow bars that sound like a blues player, with the space to prove it.",
-      difficultyException:
-        "The tempo drops to 58 BPM, so the note rate falls under the three-chorus solo before it. What gets harder is exposure: long notes, bends and rests with nothing to hide behind, which the rate does not count.",
       exercises: [
         {
           id: "written-chorus",
@@ -1326,7 +1334,7 @@ export default definePath({
           purpose: "Your notes, the same form. Land on a chord tone at each change and leave a gap after it. The written chorus is an example of one way it might go.",
           howTo: [
             "Slow 12/8 feel, 50 to 60 BPM.",
-            "At this tempo you have plenty of time to choose. Fewer notes, and longer ones.",
+            "At this tempo you have plenty of time to choose. Fewer notes, and longer ones: a third or a flat seven of the chord, C# over A7 turning to C over D7, a sixth shape to end on.",
             NOT_CHECKED_YET,
           ],
           coach: "Not checked yet. Record it; I'd rather you heard fewer notes.",
@@ -1377,7 +1385,7 @@ export default definePath({
         {
           id: "box-around",
           title: "A lick around the chords",
-          purpose: "A short shuffle lick in box 1, moved to follow i, IV, V and back. A new key and a new lick each time, so your hands wake up and your ears do too.",
+          purpose: "A short shuffle lick in box 1, moved to follow the three chords of the blues and back home. A new key and a new lick each time, so your hands wake up and your ears do too.",
           howTo: ["Shuffle eighths, well under your clean tempo. Shift at the bar line and let the chord tell you where you are."],
           coach: "This is a warm-up. It tells you how it went, and it decides nothing.",
           vary: {
@@ -1401,13 +1409,13 @@ export default definePath({
     {
       id: "intermediate",
       title: "Intermediate: the form and the voice",
-      summary: "The blues scale, all twelve bars with a written chorus, the quick change, bends that land on time, the form in E at the nut with its turnarounds, a faster shuffle, phrases that ask and answer, and the minor blues in A minor and in D minor.",
+      summary: "The blues scale, all twelve bars with a written chorus, the quick change, bends that land on time, the form in E at the nut with its turnarounds, the minor blues in A minor and in D minor, and phrases that ask and answer, ending on a chorus of your own.",
       startHereIf: [
-        "You can play box 1 from memory, up and down, at 80 BPM eighths.",
+        "You can play box 1 from memory, up and down, as shuffle eighths (long-short) over a band at 80 BPM.",
         "You can play the A7, D7 and E7 arpeggios in box 1 at 80 BPM.",
         "You get lost in the twelve-bar form, or your solos run together with no shape to them.",
       ],
-      steps: ["blues-scale", "twelve-bar", "quick-change", "bends", "open-e-blues", "fast-shuffle", "question-answer", "minor-blues", "minor-blues-in-d"],
+      steps: ["blues-scale", "twelve-bar", "quick-change", "bends", "open-e-blues", "minor-blues", "minor-blues-in-d", "question-answer"],
       warmups: [
         {
           id: "boogie-keys",
@@ -1438,13 +1446,13 @@ export default definePath({
     {
       id: "advanced",
       title: "Advanced: more neck, more harmony, less noise",
-      summary: "All five boxes, from the second fret to the fifteenth, major and minor pentatonic mixed over the changes, sixths, guide tones, a solo built over three choruses, in A and then in E from the nut to the twelfth fret, and slow blues in two keys with nothing to hide behind.",
+      summary: "All five boxes, from the second fret to the fifteenth, a solo built over three choruses, in A and then in E from the nut to the twelfth fret, major and minor pentatonic mixed over the changes, sixths, guide tones, and slow blues in two keys with nothing to hide behind.",
       startHereIf: [
         "You can follow all 12 bars without losing your place.",
-        "You can bend a whole tone up to pitch by ear, and hold it there.",
+        "You can bend a whole step up to pitch by ear, and hold it there.",
         "Your phrases work, and you're stuck in one box playing the same notes over every chord.",
       ],
-      steps: ["two-boxes", "up-the-neck", "box-five", "major-and-minor", "sixths", "guide-tones", "three-choruses", "three-choruses-in-e", "slow-blues", "slow-blues-in-c"],
+      steps: ["two-boxes", "up-the-neck", "box-five", "three-choruses", "three-choruses-in-e", "major-and-minor", "sixths", "guide-tones", "slow-blues", "slow-blues-in-c"],
       warmups: [
         {
           id: "two-boxes-keys",

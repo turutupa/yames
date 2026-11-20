@@ -484,7 +484,7 @@ export const QUICK_CHANGE: StepSpec = {
     "Before you play, listen to the band once through and point at bar 2 when the chord moves.",
     "Everything you play here uses notes and shapes you already know: the roots and the boogie line from the last Step, and the thirds from the Beginner Level. What changes is when.",
   ],
-  payoff: "When a song goes to the IV chord in bar 2, you are already there.",
+  payoff: "When a song goes to its second chord in bar 2, you are already there.",
   exercises: [
     {
       id: "quick-roots",
@@ -550,7 +550,7 @@ export const QUICK_CHANGE: StepSpec = {
   ],
 };
 
-/** Intermediate, last: the minor blues. */
+/** Intermediate, after the form in E at the nut: the minor blues. */
 export const MINOR_BLUES: StepSpec = {
   id: "minor-blues",
   title: "The minor blues",
@@ -562,6 +562,8 @@ export const MINOR_BLUES: StepSpec = {
     "A minor blues is usually slower and sadder. Leave the long notes long.",
   ],
   payoff: "A slow minor chorus where the F arrives with the Dm7 and the G# with the E7.",
+  difficultyException:
+    "A slower band and phrases that end on held notes, so the note rate falls under the Step at the nut before it, whose riffs run in eighth notes through ten bars of the form. The new demand is a new set of chords, Am7 and Dm7, and the F and G# that land on them, which the rate does not count.",
   exercises: [
     {
       id: "am7-dm7",
@@ -587,7 +589,7 @@ export const MINOR_BLUES: StepSpec = {
     {
       id: "the-turn",
       title: "E7, Dm7, Am7, E7",
-      purpose: "The last four bars of the minor form, where every chord has its own note: G# over E7, F over Dm7, A over Am7, and G# again.",
+      purpose: "The last four bars of the minor form, called the turn here. The turnaround is its last two bars. Every chord has its own note: G# over E7, F over Dm7, A over Am7, and G# again.",
       howTo: [
         "Shuffle eighths and half notes, 50 BPM up to a pass at 70.",
         "Bar 1, over E7: E, D, B, D, and G# held (D string, fret 6). Bar 2, over Dm7: D, F, A, D, and F held. Bar 3, over Am7: E, C, A, C, and A held. Bar 4, over E7: E and G# as quarter notes, then E on the A string held.",
@@ -632,7 +634,7 @@ export const MINOR_BLUES: StepSpec = {
       purpose: "Free playing over Am7 and Dm7 with one rule: E while the chord is Am7, F while it is Dm7.",
       howTo: [
         "Shuffle, 50 to 70 BPM, two bars of Am7 and two of Dm7, four bars that loop.",
-        "Play as little as you like. An E held over the Am7 and an F held over the Dm7 is a complete answer. The written line is an example.",
+        "Play as little as you like. An E held over the Am7 and an F held over the Dm7 is a complete answer, and the E can be a bend: G string, fret 7, pushed up a whole step. The written line is an example.",
         NOT_CHECKED_YET,
       ],
       coach: "Not checked yet. Record it and listen for the F arriving with the chord.",
@@ -750,7 +752,7 @@ export const SIXTHS: StepSpec = {
   id: "sixths",
   title: "Sixths",
   goal: "Play two-note sixths on the G and top strings over A7, D7 and E7, through the whole form and at the end of a lick.",
-  why: "A sixth is two notes six scale steps apart. On the guitar here that means two notes of the chord with a string between them, and it is the sound of a great many blues intros, fills and endings. One small shape gives you A7; move the lower note down a fret and it is D7; move the whole shape up two frets from there and it is E7. That is the whole form in three shapes that sit within three frets of each other, which makes sixths the easiest way to play the changes with more than one note.",
+  why: "The sixth of the last Step was a single note. Here a sixth is a pair: two notes six letters apart, counting both. On the guitar here that means two notes of the chord with a string between them, and it is the sound of a great many blues intros, fills and endings. One small shape gives you A7; move the lower note down a fret and it is D7; move the whole shape up two frets from there and it is E7. That is the whole form in three shapes that sit within three frets of each other, which makes sixths the easiest way to play the changes with more than one note.",
   howTo: [
     "A7: C# on the G string (fret 6) with A on the top string (fret 5). D7: C on the G string (fret 5) with A on the top string (fret 5). E7: D on the G string (fret 7) with B on the top string (fret 7).",
     "The B string between them must not ring. Either pick the G string and pluck the top string with your middle finger, or let the fretting finger on the G string lean on the B string and strum through all three.",
