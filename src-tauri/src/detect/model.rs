@@ -12,7 +12,8 @@
 //! bench and parity (`plans/detection/RUNTIME.md`). A build with neither has
 //! no model: [`load`] says so and every caller degrades to
 //! "not run" (`VerifierStatus::NoModel`), which is what a plain
-//! `cargo test` and the default desktop build get.
+//! `cargo build` or `cargo test` gets. Every build people play on is made
+//! with `detect-tract` (`scripts/tauri.mjs`, `release.yml`, `beta.yml`).
 //!
 //! **Time axis.** The model sees 43,844 samples and answers with 172 frames
 //! 256 samples apart, which is 171.27 hops: stitched naively, windows slip
@@ -161,29 +162,56 @@ pub fn load_runtime(name: &str) -> Result<Box<dyn NoteModel>, String> {
 /// verifier off (`YAMES_VERIFIER=0`), or when loading failed or panicked
 /// (said once on stderr, and remembered: a model that would not load is not
 /// tried again on every Take). Inference holds the lock, so callers queue:
-/// the post-Take pass is the only one, and it is one Take at a time. A panic
-/// inside `f` is the caller's to catch (`timing::late_grade` does); the lock
-/// recovers from the poisoning it leaves.
+/// the post-Take pass is the only one, and it is one Take at a time.
+///
+/// A panic inside `f` while it holds a model retires that model the same way
+/// (every later call gets `None`), and then goes on to the caller, whose it is
+/// to catch (`timing::late_grade_staged` does, and keeps the tracker's grade).
 pub fn with_shared<R>(f: impl FnOnce(Option<&mut Box<dyn NoteModel>>) -> R) -> R {
-    static SHARED: std::sync::Mutex<Option<Option<Box<dyn NoteModel>>>> = std::sync::Mutex::new(None);
-    let mut slot = SHARED.lock().unwrap_or_else(|e| e.into_inner());
-    let model = slot.get_or_insert_with(|| {
-        if !enabled() {
-            return None;
-        }
-        match std::panic::catch_unwind(load) {
-            Ok(Ok(m)) => Some(m),
-            Ok(Err(e)) => {
+    static SHARED: Shared = std::sync::Mutex::new(None);
+    with_slot(&SHARED, || if enabled() { load() } else { Err(String::new()) }, f)
+}
+
+/// Not yet asked for; asked for and absent (`Some(None)`); or loaded.
+type Shared = std::sync::Mutex<Option<Option<Box<dyn NoteModel>>>>;
+
+/// [`with_shared`] over a given slot and loader (an empty error is "turned
+/// off": nothing to say).
+fn with_slot<R>(
+    shared: &Shared,
+    load: impl FnOnce() -> Result<Box<dyn NoteModel>, String> + std::panic::UnwindSafe,
+    f: impl FnOnce(Option<&mut Box<dyn NoteModel>>) -> R,
+) -> R {
+    let mut slot = shared.lock().unwrap_or_else(|e| e.into_inner());
+    let model = slot.get_or_insert_with(|| match std::panic::catch_unwind(load) {
+        Ok(Ok(m)) => Some(m),
+        Ok(Err(e)) => {
+            if !e.is_empty() {
                 eprintln!("[yames] the note model did not load, so notes are not verified: {e}");
-                None
             }
-            Err(_) => {
-                eprintln!("[yames] the note model panicked while loading, so notes are not verified");
-                None
-            }
+            None
+        }
+        Err(_) => {
+            eprintln!("[yames] the note model panicked while loading, so notes are not verified");
+            None
         }
     });
-    f(model.as_mut())
+    let had_model = model.is_some();
+    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(model.as_mut()))) {
+        Ok(r) => r,
+        Err(panic) => {
+            if had_model {
+                eprintln!("[yames] the note model panicked while running, so notes are no longer verified");
+                // Left where it is rather than dropped: its state is whatever
+                // the panic left, and one model is all that is ever leaked.
+                if let Some(broken) = slot.replace(None).flatten() {
+                    std::mem::forget(broken);
+                }
+            }
+            drop(slot);
+            std::panic::resume_unwind(panic)
+        }
+    }
 }
 
 /// Whether the verifier should run at all in this process: compiled in, and
@@ -202,6 +230,11 @@ mod tract_backend {
     use super::{NoteModel, WindowOut, NNEF_BYTES, PITCHES, WINDOW_FRAMES, WINDOW_SAMPLES};
     use tract_nnef::prelude::*;
 
+    /// The archive's output nodes as tract names them (the tensors that
+    /// `graph.nnef` assigns to its results `StatefulPartitionedCall_1` and
+    /// `_2`): note, then onset.
+    const OUTPUTS: [&str; 2] = ["StatefulPartitionedCall_1_0", "StatefulPartitionedCall_2_0"];
+
     pub struct TractModel {
         plan: std::sync::Arc<TypedRunnableModel>,
     }
@@ -211,10 +244,18 @@ mod tract_backend {
             let e = |e: TractError| format!("{e:?}");
             let model = tract_nnef::nnef().model_for_read(&mut std::io::Cursor::new(NNEF_BYTES)).map_err(e)?;
             // The archive's outputs are (note, onset), in that order
-            // (`tools/basic-pitch-nnef`); refuse one that says otherwise.
-            let names: Vec<String> = model.output_outlets().map_err(e)?.iter().map(|o| model.node(o.node).name.clone()).collect();
-            if names.len() != 2 || !names[0].starts_with("StatefulPartitionedCall_1") || !names[1].starts_with("StatefulPartitionedCall_2") {
-                return Err(format!("the NNEF note model has outputs {names:?}, not (note, onset)"));
+            // (`tools/basic-pitch-nnef`); refuse one that says otherwise:
+            // exactly these two names, each one window of frames by pitches.
+            let outlets = model.output_outlets().map_err(e)?.to_vec();
+            let names: Vec<&str> = outlets.iter().map(|o| model.node(o.node).name.as_str()).collect();
+            if names != OUTPUTS {
+                return Err(format!("the NNEF note model has outputs {names:?}, not {OUTPUTS:?} (note, onset)"));
+            }
+            for (i, name) in OUTPUTS.iter().enumerate() {
+                let fact = model.output_fact(i).map_err(e)?;
+                if fact.shape.as_concrete() != Some(&[1, WINDOW_FRAMES, PITCHES][..]) {
+                    return Err(format!("the NNEF note model's output `{name}` is {fact:?}, not 1 x {WINDOW_FRAMES} x {PITCHES}"));
+                }
             }
             let plan = model.into_optimized().map_err(e)?.into_runnable().map_err(e)?;
             Ok(Self { plan })
@@ -338,6 +379,64 @@ mod tests {
             assert_eq!(frame, k - window * KEPT_FRAMES + EDGE_FRAMES);
         }
         assert_eq!(model.0, p.frames.div_ceil(KEPT_FRAMES));
+    }
+
+    /// A model that panics on its `n`th window and counts the windows asked.
+    struct Panics(std::sync::Arc<std::sync::atomic::AtomicUsize>);
+
+    impl NoteModel for Panics {
+        fn infer(&mut self, _window: &[f32]) -> Result<WindowOut, String> {
+            self.0.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            panic!("the test model panics");
+        }
+        fn runtime(&self) -> &'static str {
+            "test"
+        }
+    }
+
+    #[test]
+    fn a_model_that_panics_while_running_is_retired() {
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        let shared: Shared = std::sync::Mutex::new(None);
+        let (asked, loads) = (std::sync::Arc::new(AtomicUsize::new(0)), AtomicUsize::new(0));
+        let run = || {
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                with_slot(
+                    &shared,
+                    || {
+                        loads.fetch_add(1, Ordering::SeqCst);
+                        Ok(Box::new(Panics(asked.clone())) as Box<dyn NoteModel>)
+                    },
+                    |m| match m {
+                        Some(m) => m.infer(&[]).map(|_| "ran").unwrap_or("failed"),
+                        None => "no model",
+                    },
+                )
+            }))
+        };
+        assert!(run().is_err(), "the panic reaches the caller, who reports the verifier as failed");
+        assert_eq!(run().ok(), Some("no model"), "the next Take does not meet the broken model");
+        assert_eq!(run().ok(), Some("no model"));
+        assert_eq!((loads.load(Ordering::SeqCst), asked.load(Ordering::SeqCst)), (1, 1), "loaded once, run once");
+    }
+
+    #[test]
+    fn a_model_that_will_not_load_is_asked_for_once() {
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        let shared: Shared = std::sync::Mutex::new(None);
+        let loads = AtomicUsize::new(0);
+        for _ in 0..3 {
+            let got = with_slot(
+                &shared,
+                || {
+                    loads.fetch_add(1, Ordering::SeqCst);
+                    panic!("the test loader panics")
+                },
+                |m| m.is_some(),
+            );
+            assert!(!got);
+        }
+        assert_eq!(loads.load(Ordering::SeqCst), 1);
     }
 
     #[test]
