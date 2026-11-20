@@ -241,6 +241,51 @@ the post-Take thread. `click-jitter-probe --late-pass` (new) loops
 `yames-take-notes` body, now one public function) on a demoted thread under
 the click. **Not run yet**: the box was at load 10-11 every time.
 
+## Review of M2-M5: fixes (2026-11-19)
+
+An independent review of `21414fea`; items 3 and 9 (model loading, Cargo
+features) are another worker's. Commits on `mvp-detect`:
+
+| Item | Commit | What changed |
+|---|---|---|
+| 1 | `13c3cf6a` | **A long Take lost its late grade.** The post-Take pass on a 120 s Take could outlast the 5 s the result waits (`NOTES_WAIT_MS`), and the whole grade was dropped. Now the thread makes the grade from the pitch tracker alone first (right notes and curves) and publishes it as `NotesSlot::provisional`; the model's look and the merged grade replace it when they land. `get_take_grade_with_notes` hands the provisional grade over when its wait runs out (`timing::wait_for_late_grade`), so the frontend still asks once. A pass that has already spent `LATE_BUDGET_MS` (5 s) on the tracker does not start the model. `timing::late_grade_staged`; `late_grade` (the probe's) is it with no stop |
+| 2 | `13c3cf6a` | The grade is in the slot before the Take is written for troubleshooting |
+| 4 | `cc81f392` | Verifier: the written pitch at exactly +-12 semitones is Unsure ("couldn't tell"), not Wrong |
+| 5 | `13c3cf6a` | `pass.notes.source` is `verifier` (tracker's too-fast / notes-ring / octave rules set aside) only when the verifier said right or wrong of at least half the notes counted (`verify::late_source`) |
+| 6 | `c86dc925` | Kept Takes: `.tmp` then rename, names `take-<unix ms>-<count>` (two in one second no longer overwrite), size doc corrected (up to 23 MB a Take, 460 MB for 20), Settings hint says it keeps the raw microphone recording (15 locales) |
+| 7 | `55a072f0` | `withRightNotes` keeps `curves` and `verifier` of a late grade with no `pass` (an Exercise with no pass bars); vitest |
+| 8 | `13c3cf6a` | One `pitch::track` per Take: right notes and curves share it (`score::notes::LateScratch`) |
+| 10 | `8a9a6892` | `midi_seen` is cleared at the Take's first downbeat, not only at load |
+| 11 | this commit | `MEASURE.md`: "a wrong pitch counted right" is a hard gate; `faulty_passed` per chain is noisy; the gated-metric count above corrected to 1,562 |
+
+**Item 1, timings** (`npm run detect:bench -- cost --seconds N`, release,
+onnxruntime, one thread; the box was at load 10 to 60 throughout, so these
+are ranges over 5 runs, not a quiet-machine number; the model's own CPU time
+is the steadier column):
+
+| Audio | Tracker's grade in (pitch track) | Model, wall | Model, CPU | Full grade in |
+|---|---|---|---|---|
+| 30 s | 0.08 to 0.19 s | 0.6 to 2.6 s | 0.6 to 1.3 s | 0.7 to 2.7 s |
+| 60 s | 0.22 to 0.49 s | 2.0 to 3.8 s | 1.6 to 2.5 s | 2.2 to 4.2 s |
+| 120 s | 0.36 to 0.71 s | 2.4 to 5.7 s | 2.2 to 3.2 s | 2.8 to 6.0 s |
+
+So on this desktop-class box the full grade for a 120 s Take lands on either
+side of the 5 s wait depending on load, and the tracker's grade is always in
+well inside it. Before the fix the same Take needed the model plus two pitch
+tracks before anything was published. No phone was measured.
+
+**Bench.** `detect:check` after all of it: 343 Takes, 1,562 gated metrics,
+0 worse, 0 better, 0 missing; no baseline line was edited. Items 4 and 5
+move nothing on the synthetic bench (no scripted mistake is an octave out,
+and the verifier decides nearly every counted note there); item 8 is
+byte-identical by construction (same track, made once).
+
+**Not covered by a test:** item 10's clear sits in the analyzer loop and has
+no unit test; the budget stop is exercised only through `late_grade_staged`'s
+callback, not against a slow machine. The click-jitter probe (`--late-pass`)
+is still not run (load): the pass does the same work as before, less one
+pitch track, in a different order.
+
 ## Opus interlude (2026-11-19, between ed8870d4 and the Fable agent's return)
 
 A stand-in agent picked up the uncommitted M4 work, finished and gated it,
@@ -253,7 +298,8 @@ then did M5. Commits on `mvp-detect`:
 | `d8b5f4eb` | M5: `score/curves.rs`, `grade.curves`, DSL `b2r` / `B2`, bends and vibrato lines, `timing::late_grade`, probe `--late-pass`, bench `bends` group |
 
 Bench numbers are in the M4 and M5 sections above; baselines
-`fast.json` 1,112 -> 1,593 gated metrics, `fast-no-model.json` likewise
+`fast.json` 1,112 -> 1,562 gated metrics (what `detect:check` reports; 1,593
+was a miscount: the file also holds info metrics, which are not checked), `fast-no-model.json` likewise
 extended, earlier values unchanged except the M4 `takes|*` improvements.
 
 Gates run on the final tree: `test:rust` 1089/0, `test:rust:detect` 1083/0

@@ -27,7 +27,7 @@ npm run detect:bench -- <command>     # builds release, with the note model
 | `run --dir <folder>` | recordings with sidecars: public datasets, the owner's corpus | by size |
 | `replay <wav>` | one recording: JSON and a page to look at | seconds |
 | `render <dir>` | write the synthetic Takes out as WAV + sidecars | |
-| `cost` | the note model's CPU time per minute of audio | 5 s |
+| `cost [--seconds N]` | the note model's CPU time per minute of audio, the pitch track's time, and when the tracker's grade and the full late grade would land for a Take of N seconds (default 60) | 5 s |
 
 Useful flags for `run`: `--chains di,phone_mic`, `--only <substring of the
 Take's name>`, `--out <dir>` (default `.detect-bench/<mode>/`, not tracked),
@@ -101,6 +101,20 @@ Tolerance of the check (`eval.rs::tolerance`): a share may get worse by two
 points, or by two notes on a small sample, whichever is more; a time by 1 ms.
 Costs are reported, not gated: they depend on the machine and its load.
 
+**"A wrong pitch counted right" is a hard gate**: `wrong|*|final_right` (what
+the grade counts) and `wrong|*|pitch_right` (the tracker alone). It is the one
+mistake that tells a player a wrong note was right. The check gives these the
+same two-point tolerance as any share, so a pass of `--check` is not enough
+for them: read the two rows in `results/fast.md` after any change to the
+right-notes path, treat any rise over the baseline as a failure of the change
+whatever the exit code says, and never raise them with `--update-baseline`.
+
+`takes|*|faulty_passed` is noisy per chain: n = 23 Takes a chain in the fast
+bench (and `good_passed` n = 15), so one Take is 4 to 7 points and a chain's
+number moves by that for no reason at all. Read the pooled row
+(`takes|all|...`, n = 161), and remember most scripted mistakes are timing
+ones, which is why it is info and not a gate.
+
 `lookup_bias_ms` is the gate for the M0 bug and for its opposite. The synthetic
 audio has no latency in it, so the time the right-notes pass reads a note from
 (`ScheduleRun::pitch_lookups_ms`, the same code `notes::identify` runs) must sit
@@ -146,8 +160,9 @@ failure, but it is a reason to update: the check prints `better` lines.
    webview's local storage and handed to the engine at start-up,
    `src/settings/takeDiagnostics.ts`). With it on, every graded Take
    leaves two files in the app's data folder under `diagnostics/takes/`:
-   `take-<unix seconds>.wav` (the input exactly as the detector got it, mono
-   float, device rate) and `take-<unix seconds>.job.json` (what the app was told to expect: the
+   `take-<unix ms>-<count>.wav` (the input exactly as the detector got it,
+   the raw microphone recording, mono float, device rate: up to 23 MB for a
+   120 s Take, 460 MB for the 20) and `take-<unix ms>-<count>.job.json` (what the app was told to expect: the
    schedule, the written pitches and techniques, the pass bars, where every
    click fell in the audio, the instrument). The last 20 are kept. Nothing
    leaves the machine; the player sends the two files themselves.
