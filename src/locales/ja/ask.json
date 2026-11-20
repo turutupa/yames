@@ -9,10 +9,6 @@
     "placeholder": "この画面、テイク、コースについて聞く",
     "send": "送信",
     "writing": "回答を作成中…",
-    "sections": {
-      "ask": "聞く",
-      "tools": "ツールのコーチ"
-    },
     "screen": {
       "today": "今日",
       "paths": "コース",

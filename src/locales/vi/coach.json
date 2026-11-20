@@ -14,17 +14,17 @@
     }
   },
   "coachCard": {
-    "end": "Kết thúc",
-    "start": "Bắt đầu",
     "clearAll": "Xóa hết",
-    "feed": "Dòng tin",
-    "history": "Lịch sử",
-    "emptyTitle": "Huấn luyện viên lắng nghe khi bạn chơi theo nhịp.",
-    "emptyHint": "Nhấn Bắt đầu ở đầu bảng này rồi chơi. Huấn luyện viên nhận xét nhịp của bạn trong lúc chơi và tóm tắt khi bạn nhấn Kết thúc.",
     "today": "Hôm nay",
     "yesterday": "Hôm qua",
     "noteSpacingTrend": "Xu hướng khoảng cách nốt",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
+  },
+  "toolCoach": {
+    "runScore": "Điểm {{score}} ở {{bpm}} BPM",
+    "runScoreNoBpm": "Điểm {{score}}",
+    "sessionScore": "Điểm buổi tập {{score}} · {{word}}",
+    "openRuns": "Mở Lần chạy công cụ trong Tiến bộ"
   },
   "coachModel": {
     "label": "Mô hình huấn luyện viên",
@@ -85,8 +85,6 @@
     "beatPlacement": "Độ bám phách"
   },
   "coachReport": {
-    "segment": "Đoạn",
-    "thinkingAria": "Huấn luyện viên đang chuẩn bị nói",
     "qualifier": {
       "excellent": "Xuất sắc",
       "good": "Tốt",

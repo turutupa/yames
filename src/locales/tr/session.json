@@ -487,6 +487,8 @@
     },
     "progress": {
       "title": "İlerleme",
+      "toolRuns": "Araç çalışmaları",
+      "toolRunsIntro": "Koçun dinlediği her bölüm, araçlarda ve seanslarda, en yeniden başlayarak.",
       "intro": "Buradaki her şey senin çalışından ölçüldü: duyulan notalar, zamanlama düzgünlüğü, temiz tempo.",
       "cleanMeans": "Herhangi art arda sekiz ölçü boyunca çıtayı geçtiğin en hızlı tempo.",
       "sparkLabel": "Denemeler boyunca düzgünlük, {{title}}",

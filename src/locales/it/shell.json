@@ -59,7 +59,7 @@
     },
     "history": {
       "title": "Ancora niente qui.",
-      "hint": "Ogni volta che premi Termina o fermi il metronomo, compare qui. Le tue sessioni di Oggi sono in Progressi."
+      "hint": "Attiva Ascolta nel Metronomo, nella Rampa, nella Scaletta o nel Jam e suona. Quando lo spegni, l'esecuzione viene conservata qui."
     },
     "drill": {
       "linear": "Lineare: il tempo sale dal BPM iniziale all'obiettivo, un passo alla volta.",
@@ -74,8 +74,8 @@
     "startsAt": "Parte da",
     "listening": "In ascolto",
     "inputOff": "Ingresso spento",
-    "coachOnPlay": "Il coach ascolta quando avvii",
-    "coachQuiet": "Il coach tace durante ogni step",
+    "listen": "Ascolta",
+    "listenHint": "Attivalo per far ascoltare al coach come suoni qui. Usa il tuo ingresso audio finché non lo spegni o esci dagli strumenti.",
     "countIn": "Conteggio iniziale",
     "backToStart": "Torna all'inizio",
     "setUpInput": "Imposta l'ingresso"

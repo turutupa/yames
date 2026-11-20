@@ -14,17 +14,17 @@
     }
   },
   "coachCard": {
-    "end": "Zakończ",
-    "start": "Start",
     "clearAll": "Wyczyść wszystko",
-    "feed": "Na żywo",
-    "history": "Historia",
-    "emptyTitle": "Trener słucha, gdy grasz do kliku.",
-    "emptyHint": "Naciśnij Start u góry tego panelu i graj. Komentuje twój timing na bieżąco i podsumowuje, gdy naciśniesz Zakończ.",
     "today": "Dziś",
     "yesterday": "Wczoraj",
     "noteSpacingTrend": "Trend odstępów nut",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
+  },
+  "toolCoach": {
+    "runScore": "Ocena {{score}} przy {{bpm}} BPM",
+    "runScoreNoBpm": "Ocena {{score}}",
+    "sessionScore": "Ocena sesji {{score}} · {{word}}",
+    "openRuns": "Otwórz Przebiegi narzędzi w Postępach"
   },
   "coachModel": {
     "label": "Model trenera",
@@ -85,8 +85,6 @@
     "beatPlacement": "Pozycja na bicie"
   },
   "coachReport": {
-    "segment": "Segment",
-    "thinkingAria": "Trener przygotowuje się do wypowiedzi",
     "qualifier": {
       "excellent": "Świetnie",
       "good": "Dobrze",

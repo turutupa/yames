@@ -59,7 +59,7 @@
     },
     "history": {
       "title": "Aún no hay nada.",
-      "hint": "Cada vez que pulsas Terminar o paras el metrónomo, aparece aquí. Tus sesiones de Hoy están en Progreso."
+      "hint": "Activa Escuchar en el Metrónomo, la Rampa de tempo, el Setlist o el Jam y toca. Al apagarlo, la pasada se guarda aquí."
     },
     "drill": {
       "linear": "Lineal: el tempo sube del BPM inicial al objetivo, paso a paso.",
@@ -74,8 +74,8 @@
     "startsAt": "Empieza en",
     "listening": "Escuchando",
     "inputOff": "Entrada apagada",
-    "coachOnPlay": "El entrenador escucha al pulsar reproducir",
-    "coachQuiet": "El entrenador calla durante cada paso",
+    "listen": "Escuchar",
+    "listenHint": "Actívalo para que el entrenador escuche cómo tocas aquí. Usa tu entrada de audio hasta que lo apagues o salgas de las herramientas.",
     "countIn": "Cuenta de entrada",
     "backToStart": "Volver al principio",
     "setUpInput": "Configurar entrada"

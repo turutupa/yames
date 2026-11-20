@@ -59,7 +59,7 @@
     },
     "history": {
       "title": "Noch nichts hier.",
-      "hint": "Jedes Mal, wenn du auf Beenden drückst oder das Metronom stoppst, erscheint es hier. Deine Sessions von „Heute“ findest du unter Fortschritt."
+      "hint": "Schalte Zuhören im Metronom, im Tempo-Training, in der Setlist oder im Jam ein und spiel. Wenn du es ausschaltest, wird der Lauf hier gespeichert."
     },
     "drill": {
       "linear": "Linear: das Tempo steigt Schritt für Schritt vom Start-BPM zum Ziel.",
@@ -74,8 +74,8 @@
     "startsAt": "Startet bei",
     "listening": "Hört zu",
     "inputOff": "Eingang aus",
-    "coachOnPlay": "Der Coach hört zu, sobald du startest",
-    "coachQuiet": "Der Coach schweigt während eines Schritts",
+    "listen": "Zuhören",
+    "listenHint": "Schalte ein, damit der Coach hier dein Spiel hört. Er nutzt deinen Audioeingang, bis du ihn ausschaltest oder die Tools verlässt.",
     "countIn": "Einzähler",
     "backToStart": "Zurück zum Anfang",
     "setUpInput": "Eingang einrichten"

@@ -14,17 +14,17 @@
     }
   },
   "coachCard": {
-    "end": "结束",
-    "start": "开始",
     "clearAll": "清空",
-    "feed": "动态",
-    "history": "历史",
-    "emptyTitle": "你跟着节拍器演奏时，教练会在一旁倾听。",
-    "emptyHint": "点击此面板顶部的“开始”，然后演奏。教练会边听边点评你的节奏，并在你点击“结束”时做总结。",
     "today": "今天",
     "yesterday": "昨天",
     "noteSpacingTrend": "音符间距趋势",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
+  },
+  "toolCoach": {
+    "runScore": "得分 {{score}}，{{bpm}} BPM",
+    "runScoreNoBpm": "得分 {{score}}",
+    "sessionScore": "这次练习得分 {{score}} · {{word}}",
+    "openRuns": "在“进度”中打开工具记录"
   },
   "coachModel": {
     "label": "教练模型",
@@ -85,8 +85,6 @@
     "beatPlacement": "落拍位置"
   },
   "coachReport": {
-    "segment": "段落",
-    "thinkingAria": "教练正在准备发言",
     "qualifier": {
       "excellent": "优秀",
       "good": "不错",

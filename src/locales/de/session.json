@@ -487,6 +487,8 @@
     },
     "progress": {
       "title": "Fortschritt",
+      "toolRuns": "Tool-Läufe",
+      "toolRunsIntro": "Jede Strecke, die der Coach gehört hat, in den Tools und in Sessions, die neueste zuerst.",
       "intro": "Alles hier wurde aus deinem Spiel gemessen: gehörte Töne, Gleichmäßigkeit im Timing, sauberes Tempo.",
       "cleanMeans": "Das schnellste Tempo, bei dem du die Messlatte über beliebige acht Takte am Stück erreicht hast.",
       "sparkLabel": "Gleichmäßigkeit über die Takes, {{title}}",

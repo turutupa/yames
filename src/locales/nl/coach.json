@@ -14,17 +14,17 @@
     }
   },
   "coachCard": {
-    "end": "Beëindigen",
-    "start": "Start",
     "clearAll": "Alles wissen",
-    "feed": "Activiteit",
-    "history": "Geschiedenis",
-    "emptyTitle": "Je coach luistert terwijl je op de klik speelt.",
-    "emptyHint": "Druk bovenaan dit paneel op Start en speel. Hij geeft onderweg commentaar op je timing en vat samen als je op Beëindigen drukt.",
     "today": "Vandaag",
     "yesterday": "Gisteren",
     "noteSpacingTrend": "Nootafstand-trend",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
+  },
+  "toolCoach": {
+    "runScore": "Score {{score}} bij {{bpm}} BPM",
+    "runScoreNoBpm": "Score {{score}}",
+    "sessionScore": "Sessiescore {{score}} · {{word}}",
+    "openRuns": "Open Toolruns bij Voortgang"
   },
   "coachModel": {
     "label": "Coachmodel",
@@ -85,8 +85,6 @@
     "beatPlacement": "Beatplaatsing"
   },
   "coachReport": {
-    "segment": "Segment",
-    "thinkingAria": "De coach bereidt zich voor om te spreken",
     "qualifier": {
       "excellent": "Uitstekend",
       "good": "Goed",

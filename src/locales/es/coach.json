@@ -14,17 +14,17 @@
     }
   },
   "coachCard": {
-    "end": "Terminar",
-    "start": "Empezar",
     "clearAll": "Borrar todo",
-    "feed": "Comentarios",
-    "history": "Historial",
-    "emptyTitle": "Tu entrenador te escucha mientras tocas con el clic.",
-    "emptyHint": "Pulsa Empezar en la parte de arriba de este panel y toca. Comenta tu tempo sobre la marcha y lo resume cuando pulsas Terminar.",
     "today": "Hoy",
     "yesterday": "Ayer",
     "noteSpacingTrend": "Tendencia del espaciado de notas",
     "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
+  },
+  "toolCoach": {
+    "runScore": "Puntuación {{score}} a {{bpm}} BPM",
+    "runScoreNoBpm": "Puntuación {{score}}",
+    "sessionScore": "Puntuación de la sesión {{score}} · {{word}}",
+    "openRuns": "Abrir Pasadas de herramientas en Progreso"
   },
   "coachModel": {
     "label": "Modelo del coach",
@@ -85,8 +85,6 @@
     "beatPlacement": "Colocación del pulso"
   },
   "coachReport": {
-    "segment": "Segmento",
-    "thinkingAria": "El entrenador se está preparando para hablar",
     "qualifier": {
       "excellent": "Excelente",
       "good": "Bien",

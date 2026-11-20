@@ -511,6 +511,8 @@
     },
     "progress": {
       "title": "Postępy",
+      "toolRuns": "Przebiegi narzędzi",
+      "toolRunsIntro": "Każdy fragment, którego trener słuchał, w narzędziach i w sesjach, od najnowszego.",
       "intro": "Wszystko tutaj zmierzono na podstawie twojej gry: usłyszane nuty, równość rytmu, czyste tempo.",
       "cleanMeans": "Najszybsze tempo, przy którym przeskoczyłeś poprzeczkę przez dowolne osiem taktów z rzędu.",
       "sparkLabel": "Równość w kolejnych podejściach, {{title}}",

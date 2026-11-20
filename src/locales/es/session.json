@@ -499,6 +499,8 @@
     },
     "progress": {
       "title": "Progreso",
+      "toolRuns": "Pasadas de herramientas",
+      "toolRunsIntro": "Cada tramo que el coach escuchó, en las herramientas y en las sesiones, el más reciente primero.",
       "intro": "Todo lo que hay aquí se midió a partir de cómo tocas: notas oídas, regularidad del tiempo, tempo limpio.",
       "cleanMeans": "Lo más rápido a lo que llegaste al listón, durante ocho compases seguidos cualesquiera.",
       "sparkLabel": "Regularidad a lo largo de las tomas, {{title}}",
