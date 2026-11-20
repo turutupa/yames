@@ -189,9 +189,9 @@ export const SECOND_PAIR: StepSpec = {
     {
       id: "bm-vamp",
       title: "The second vamp with the band",
-      purpose: "Two bars over a funk band: the line and stabs on Bm7, then the line and stabs on the ninth chord.",
+      purpose: "Two bars over a funk band: the line and stabs on Bm7, then the line and stabs on E9.",
       howTo: [
-        "Bar 1 is the bar for the minor seventh chord and bar 2 is the bar for the ninth chord: the two line and stab bars of this Step, one after the other.",
+        "Bar 1 is the Bm7 bar and bar 2 is the E9 bar: the two line and stab bars of this Step, one after the other.",
         "The hand does not move between the bars. In bar 2 the first finger reaches back to fret 6 on the D string, in the sixteenth of rest after the stab on the 'and' of beat 2, and comes back to fret 7 for bar 1.",
         "Listen to the snare on beats 2 and 4. Your stabs come just after it.",
         VARIANT_NOTE,

@@ -320,7 +320,8 @@ type Tok = {
   used?: boolean;
 };
 
-const TOKEN = /[A-G](?:#|b)?(?:maj7|m7b5|m7|dim7|dim|aug|sus2|sus4|m|7|5)?(?![A-Za-z0-9#])|[A-Za-z]+(?:['’][a-z]+)*|\d+|\S/g;
+// A chord symbol's suffix. "E9" is a chord (a ninth), never a string and a fret: those are "E 9" or "E string 9".
+const TOKEN = /[A-G](?:#|b)?(?:maj7|maj9|m7b5|m7|m9|dim7|dim|aug|sus2|sus4|m|7|9|5)?(?![A-Za-z0-9#])|[A-Za-z]+(?:['’][a-z]+)*|\d+|\S/g;
 
 function tokenize(sentence: string): Tok[] {
   const toks: Tok[] = [];
@@ -331,7 +332,7 @@ function tokenize(sentence: string): Tok[] {
     const start = match.index;
     const before = start > 0 ? sentence[start - 1] : " ";
     let kind: Tok["kind"] = /^\d/.test(text) ? "num" : /^[A-Za-z]/.test(text) ? "word" : "punct";
-    if (kind === "word" && /^[A-G](?:#|b)?(?:maj7|m7b5|m7|dim7|dim|aug|sus2|sus4|m|7|5)?$/.test(text) && !/[A-Za-z0-9]/.test(before)) kind = "note";
+    if (kind === "word" && /^[A-G](?:#|b)?(?:maj7|maj9|m7b5|m7|m9|dim7|dim|aug|sus2|sus4|m|7|9|5)?$/.test(text) && !/[A-Za-z0-9]/.test(before)) kind = "note";
     toks.push({ text, low: text.toLowerCase(), start, end: start + text.length, kind, quoted: false });
   }
   // Quoted spans: an opening quote after a space, a bracket or the start; a closing one before a space, punctuation or the end.

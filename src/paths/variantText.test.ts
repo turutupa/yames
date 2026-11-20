@@ -340,6 +340,14 @@ describe("round 3: three holes closed, on made-up lines", () => {
     expect(d.refusals.map((r) => r.reason)).toEqual(["a sentence about another Exercise", "a sentence about another Exercise"]);
   });
 
+  it("a ninth chord is a chord symbol: 'E9' moves with the chart (Funk Lines, the second vamp)", () => {
+    // Read from the notes: in G minor the chart is Gm7, C9 and the first finger reaches back to fret 2.
+    const own = said("funk-lines", "second-pair.bm-vamp", "key=G-minor")!;
+    expect(own.purpose).toBe("Two bars over a funk band: the line and stabs on Gm7, then the line and stabs on C9.");
+    expect(own.howTo![0]).toBe("Bar 1 is the Gm7 bar and bar 2 is the C9 bar: the two line and stab bars of this Step, one after the other.");
+    expect(own.howTo![1]).toContain("reaches back to fret 2 on the D string");
+  });
+
   it("the Paths' own sentences that name another Exercise's material as this one's are still written", () => {
     expect(said("shred", "speed-bursts.one-beat", "stringSet=2")!.howTo![0]).toContain("the fret-12 figure from its top, 15, 13, 12, 13 on the B string");
     // "ring finger ... 17 on the top E": a fret is put on it, so it is the string, though the shape has an E there.
