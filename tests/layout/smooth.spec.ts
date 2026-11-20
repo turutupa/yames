@@ -126,12 +126,12 @@ test("Ask commits nothing during a running Take: the Ask key there is one static
   await openShot(page, "session-playing", WIDE);
   await takeRunning(page);
   await page.keyboard.press("Shift+Slash");
-  await expect(page.locator('[data-testid="session-ask-later"]')).toBeVisible();
+  await expect(page.locator('[data-testid="session-coach-ask-later"]')).toBeVisible();
   const s = await bestWindow(page);
   expect(s.commits, "the Take is running").toBeGreaterThan(0);
   expect(s.renders.AskPanel ?? 0, "the Ask panel rendered during the Take").toBe(0);
   expect(await page.locator(".ask-panel").count(), "the Ask panel is mounted during the Take").toBe(0);
-  expect(await page.locator('[data-testid="session-ask"]').count(), "an Ask button in the bar during the Take").toBe(0);
+  expect(await page.locator('[data-testid="session-coach-ask"]').count(), "an Ask button in the bar during the Take").toBe(0);
   expect(s.longTasks, `long tasks in the best of three windows (longest ${s.longTaskMaxMs} ms)`).toBe(0);
 });
 

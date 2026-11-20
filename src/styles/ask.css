@@ -158,7 +158,7 @@
     margin-right: calc(var(--ask-w) - 12px);
   }
 }
-.main-body[data-session][data-ask] .session-run .session-recap-ask {
+.main-body[data-session][data-ask] .session-run .session-recap-coach-ask {
   display: none;
 }
 
@@ -433,7 +433,7 @@
 }
 
 /* ── The Session bar's Ask pill, and the label during a Take ─────────── */
-.session-page .session-ask {
+.session-page .session-coach-ask {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -447,20 +447,31 @@
   font: 600 13px/1 var(--l-body, inherit);
   white-space: nowrap;
 }
-.session-page .session-ask .ask-glyph {
+.session-page .session-coach-ask .ask-glyph {
   color: var(--accent-2);
 }
 @media (hover: hover) {
-  .session-page .session-ask:hover {
+  .session-page .session-coach-ask:hover {
     background: color-mix(in srgb, var(--l-wash, var(--text-primary)) 8%, transparent);
   }
 }
-.session-page .session-ask-later {
+/* On a phone, a thumb tall like Exit and Skip beside it (phone-learning.css). */
+.main-window.is-mobile .session-page .session-coach-ask {
+  min-height: 44px;
+  min-width: 44px;
+  padding-left: 10px;
+  padding-right: 12px;
+}
+.main-window.is-mobile .session-page .session-bar[data-tight] .session-coach-ask {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+.session-page .session-coach-ask-later {
   flex: none;
   font-size: 13px;
   color: var(--l-quiet, var(--text-secondary));
 }
-.session-page .session-recap-ask {
+.session-page .session-recap-coach-ask {
   display: flex;
   justify-content: flex-end;
 }

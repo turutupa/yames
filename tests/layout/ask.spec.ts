@@ -105,7 +105,7 @@ for (const theme of THEMES) {
       // The Session's own entrance (a scale on the page) is over first.
       await page.waitForTimeout(1000);
       const hero = await rect(page, ".session-practice-hero");
-      await page.locator('[data-testid="session-ask"]').click();
+      await page.locator('[data-testid="session-coach-ask"]').click();
       await expect(page.locator(".ask-panel")).toBeVisible();
       await settleAnimations(page);
       await page.waitForTimeout(260);
@@ -126,8 +126,17 @@ for (const theme of THEMES) {
       }
       expect(await notHitTestable(page, '[data-testid="session-big"], [data-testid="session-exit"]')).toEqual([]);
       // The neck is covered, not re-framed.
-      const after = (await rect(page, ".session-practice-hero"))!;
-      expect([after.width, after.height], "the picture keeps its frame").toEqual([hero!.width, hero!.height]);
+      // Measured open, then closed: the Session's own entrance (a scale on
+      // the page) can still be running when the scene says it is ready.
+      const open = (await rect(page, ".session-practice-hero"))!;
+      await page.locator(".ask-close").click();
+      await expect(page.locator(".ask-panel")).toHaveCount(0);
+      await page.waitForTimeout(200);
+      const closed = (await rect(page, ".session-practice-hero"))!;
+      expect([open.width, open.height], "the picture keeps its frame").toEqual([closed.width, closed.height]);
+      expect(hero, "the picture was there before").not.toBeNull();
+      await page.locator('[data-testid="session-coach-ask"]').click();
+      await expect(page.locator(".ask-panel")).toBeVisible();
       // Start take closes it.
       await page.locator('[data-testid="session-big"]').click();
       await expect(page.locator(".ask-panel")).toHaveCount(0);
@@ -140,7 +149,7 @@ for (const theme of THEMES) {
       test(`the drawer over a result at ${size.width}: the text column stays whole, the button pressable`, async ({ page }) => {
         await openShot(page, "session-result", size, theme);
         await settleAnimations(page);
-        await page.locator('[data-testid="session-ask"]').click();
+        await page.locator('[data-testid="session-coach-ask"]').click();
         await expect(page.locator(".ask-panel")).toBeVisible();
         await settleAnimations(page);
         await page.waitForTimeout(260);
@@ -224,7 +233,7 @@ test.describe("Ask on a phone", () => {
 
   test("a phone Session's bar has the Ask pill; the sheet does not leave the Session", async ({ page }) => {
     await openShot(page, "phone-session-ready", { width: 390, height: 844 });
-    await page.locator('[data-testid="session-ask"]').click();
+    await page.locator('[data-testid="session-coach-ask"]').click();
     await expect(page.locator(".sheet--ask")).toBeVisible();
     await page.locator(".sheet-scrim").click({ position: { x: 10, y: 10 } });
     await expect(page.locator(".sheet--ask")).toHaveCount(0);

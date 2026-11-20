@@ -215,7 +215,7 @@ function SessionBar({
         </button>
       )}
       {askLater ? (
-        <span className="session-ask-later" role="status" data-testid="session-ask-later">
+        <span className="session-coach-ask-later" role="status" data-testid="session-coach-ask-later">
           {t("ask.later")}
         </span>
       ) : (
@@ -229,7 +229,8 @@ function SessionBar({
 function AskPill({ onAsk }: { onAsk: () => void }) {
   const { t } = useTranslation();
   return (
-    <button type="button" className="session-ask" onClick={onAsk} data-testid="session-ask">
+    // Not `session-ask`: that is the grading question's block (parts.tsx).
+    <button type="button" className="session-coach-ask" onClick={onAsk} data-testid="session-coach-ask">
       <CoachGlyph size={15} />
       {t("ask.button")}
     </button>
@@ -2034,7 +2035,7 @@ export function SessionView({
         />
       )}
       {run.phase === "recap" && onAsk && (
-        <div className="session-recap-ask">
+        <div className="session-recap-coach-ask">
           <AskPill onAsk={onAsk} />
         </div>
       )}
