@@ -41,12 +41,37 @@ Branch `coach-ms1` (from `f85383ab`; merges cleanly onto `coach` at `e8872e58`, 
 - Under 720 px the coach card's inside was pinned to 380 px in a 320 px card (Send was cut); fixed.
   While the window's 22 px download strip is up, the card's foot lifts clear of it.
 
+## The reviewer's six (second pass)
+
+1. **Memory is a warning, never a lock.** `recommended()` no longer gates `loadable` or the row
+   state; rows carry `lowMemory` and show "This computer has less memory than this model wants…".
+   "Not on this device" is only a build with no model support (or a phone). A fresh install's
+   default stays Off. Tests: `coachLoader.test.ts` "too little memory is a warning…", "…still lets a
+   model download…"; `CoachModelSelector.test.tsx` "too little memory is a warning in the row".
+2. **No Download over any brain on disk**, legacy included (`otherOnDisk` lost its legacy exception;
+   `canDownload` needs `why === null`, so a legacy same-tier row points to Settings' "Update brain").
+   Tests: "legacy weights on disk are not overwritten…", "a brain file whose tier is unreadable…".
+3. **A failed startup probe** sets `probeFailed`: the chosen row reads "failed" with Retry; `probe()`
+   runs again on Retry, a pick, or the click stopping. Tests: "a failed startup probe reads as
+   failed…", "…asked again when the click stops, never in a loop".
+4. **The stored choice first**: `restoreCoachModelChoice` (from `useCoachDownload`'s `storeLoad`,
+   also on its rejection) sets `choiceKnown`; no reconcile unloads before it. Tests: "nothing is
+   unloaded before the saved choice is read", "a saved Off read late still unloads".
+5. **Residency unknown after a double failure**: `residentUnknown`; the next reconcile asks
+   `isCoachLoaded` first (an input arriving while it asks is settled after the answer, even a
+   throw); Off unloads regardless. Tests: "a failed load and a failed question…", "after a double failure…".
+6. **A Path Session holds every load**: `src/hooks/coachLoadGate.ts` (no IPC, so the phone build's
+   Session screen stays clean), set by `SessionView` for any run phase but idle and recap. Tests:
+   "no load starts while a Path Session is in progress…", "a load already in flight runs on…".
+
+Also: a running download's row says "Downloading" (selector test). Strings: `state.downloading`,
+`state.lowMemory` added; `state.update`, `state.otherOnDisk` reworded; `why.ram` removed; all 15 locales.
+
 ## Answers the leg asked for
 
 - **One brain or two on disk: one.** Both tiers write `models/brain/model.bin` (+ `tier`, `model.json`).
-  Chosen: while one tier is on disk, the other row offers no Download ("One model fits on this
-  computer for now: switch in Settings → Coach", where the switch asks first). Legacy weights (an
-  update recommended) block nothing.
+  While any brain file is on disk (legacy included), the other row offers no Download ("A second
+  model on this computer needs a later update; for now, switch in Settings → Coach").
 - **coachBrainTier "off"** before: unload only (never delete). Kept as the persisted choice; no new
   key, no migration. Restore accepts only `off | standard | full`.
 - **"Fast enough for tips"** (`should_use_model`, `rephrase_p50_ms`) untouched.
