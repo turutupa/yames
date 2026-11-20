@@ -462,7 +462,7 @@
     },
     "keepTakes": {
       "title": "Conserva le mie ultime take per la diagnosi",
-      "hint": "Se una take viene valutata male, il suo audio e ciò che Yames si aspettava possono essere riprodotti per capire il perché. Conserva le ultime 20 su questo dispositivo; non viene inviato nulla. Disattivato per impostazione predefinita.",
+      "hint": "Se una take viene valutata male, il suo audio e ciò che Yames si aspettava possono essere riprodotti per capire il perché. Conserva la registrazione grezza del microfono delle tue ultime 20 take su questo dispositivo (fino a circa 460 MB); non viene inviato nulla. Disattivato per impostazione predefinita.",
       "folder": "Cartella: {{folder}}"
     }
   },

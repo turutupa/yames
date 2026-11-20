@@ -462,7 +462,7 @@
     },
     "keepTakes": {
       "title": "Giữ các lượt chơi gần nhất để khắc phục sự cố",
-      "hint": "Khi một lượt chơi bị chấm sai, âm thanh của nó và những gì Yames mong đợi có thể được phát lại để tìm nguyên nhân. Giữ 20 lượt gần nhất trên thiết bị này; không gửi gì đi đâu. Mặc định tắt.",
+      "hint": "Khi một lượt chơi bị chấm sai, âm thanh của nó và những gì Yames mong đợi có thể được phát lại để tìm nguyên nhân. Giữ bản ghi âm thô từ micrô của 20 lượt chơi gần nhất trên thiết bị này (tối đa khoảng 460 MB); không gửi gì đi đâu. Mặc định tắt.",
       "folder": "Thư mục: {{folder}}"
     }
   },

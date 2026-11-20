@@ -462,7 +462,7 @@
     },
     "keepTakes": {
       "title": "Guardar mis últimas tomas para diagnosticar",
-      "hint": "Si una toma se califica mal, su audio y lo que Yames esperaba pueden reproducirse para ver por qué. Guarda las 20 últimas en este equipo; no se envía nada. Desactivado por defecto.",
+      "hint": "Si una toma se califica mal, su audio y lo que Yames esperaba pueden reproducirse para ver por qué. Guarda la grabación sin procesar del micrófono de tus 20 últimas tomas en este equipo (hasta unos 460 MB); no se envía nada. Desactivado por defecto.",
       "folder": "Carpeta: {{folder}}"
     }
   },

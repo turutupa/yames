@@ -462,7 +462,7 @@
     },
     "keepTakes": {
       "title": "Keep my last Takes for troubleshooting",
-      "hint": "When a Take grades wrong, its audio and what Yames expected can be replayed to find out why. Keeps the last 20 on this computer; nothing is sent anywhere. Off by default.",
+      "hint": "When a Take grades wrong, its audio and what Yames expected can be replayed to find out why. Keeps the raw microphone recording of your last 20 Takes on this computer (up to about 460 MB); nothing is sent anywhere. Off by default.",
       "folder": "Folder: {{folder}}"
     }
   },
