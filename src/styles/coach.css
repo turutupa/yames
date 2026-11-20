@@ -341,9 +341,6 @@
     order: 9;
   }
 }
-.session-runway-notes > .coach-note {
-  margin-bottom: 4px;
-}
 .session-recap-head .coach-line {
   margin-top: 12px;
 }
@@ -362,9 +359,26 @@
   min-height: 44px;
 }
 
-/* Under 760 px of height the note is its headline, its source and its chips,
-   so Start stays on screen (the last Take and the reasons step aside). */
-@media (min-width: 481px) and (max-height: 760px) {
+/* Under 760 px of height the note is its headline and its chips, so Start
+   stays on screen (the last Take, the reasons and the source step aside), and
+   the chips sit beside the headline when there is room. A narrow desktop
+   window (620 x 780) has the same budget. */
+@media (min-width: 481px) and (max-height: 760px), (min-width: 481px) and (max-width: 700px) and (max-height: 900px) {
+  .coach-note[data-kind="ready"] {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 14px;
+  }
+  .coach-note[data-kind="ready"] > .coach-note-head {
+    flex: 1 1 22em;
+    font-size: 16px;
+    line-height: 1.25;
+  }
+  .coach-note[data-kind="ready"] {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
   .coach-note [data-extra],
   .coach-note[data-kind="ready"] > .coach-block-source {
     display: none;
@@ -383,7 +397,8 @@
     padding-bottom: 4px;
   }
   /* With the input's trouble on the ready screen, it is what to read. */
-  .session-mechlow:has(.session-input-failed) .coach-note[data-kind="ready"] {
+  .session-mechlow:has(.session-input-failed) .coach-note[data-kind="ready"],
+  .session-body[data-view="runway"]:has(.session-input-failed) .coach-note[data-kind="ready"] {
     display: none;
   }
 }

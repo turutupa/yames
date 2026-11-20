@@ -230,7 +230,11 @@ export function RunwayTakeScreen({
             )}
           </>
         ) : (
-          <div className="session-brief" />
+          // The coach's note: one thing to do before the Take (DESIGN 4.1),
+          // where the coach's line sat beside the tempo.
+          <div className="session-brief">
+            <ReadyNote session={session} step={step} stepNumber={stepNumber} watch={watch} />
+          </div>
         )}
         <span className="session-compact-stat session-compact-bpm">
           <b>{run.bpm}</b>
@@ -256,8 +260,6 @@ export function RunwayTakeScreen({
 
       <div className="session-actions">
         <div className="session-runway-notes">
-          {/* The coach's note: one thing to do before the Take (DESIGN 4.1). */}
-          {!running && <ReadyNote session={session} step={step} stepNumber={stepNumber} watch={watch} />}
           {/* The ready screen keeps the one picture a hand needs before it
               plays, the neck (WHERE). The runway is WHEN, so it has nothing to
               say until the Take runs, and a frozen strip beside the neck would
