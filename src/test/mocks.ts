@@ -10,6 +10,7 @@
  */
 import { vi } from "vitest";
 import type { AppState } from "../types";
+import type { CoachAskOutcome } from "../ipc";
 
 // Default app state for tests. Override in individual tests via setInvokeResponse.
 export const DEFAULT_TEST_STATE: AppState = {
@@ -187,7 +188,9 @@ const DEFAULT_INVOKE_MAP: Record<string, InvokeFn> = {
   load_coach_model: () => false,
   unload_coach_model: () => undefined,
   coach_generate: () => "",
-  coach_ask: () => ({ status: "noModel" }),
+  // Typed, so the mock can only answer what Rust can (answered, truncated,
+  // deadEnd, cancelled, timedOut, noModel).
+  coach_ask: (): CoachAskOutcome => ({ status: "noModel" }),
   cancel_generation: () => false,
   is_coach_loaded: () => false,
   get_coach_capabilities: () => ({
