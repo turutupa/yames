@@ -764,6 +764,16 @@
       "nudgeBack": "Obraz trochę wcześniej",
       "nudgeOn": "Obraz trochę później",
       "broken": "Tego nagrania nie udało się odtworzyć. Plik mógł zostać przeniesiony lub usunięty."
+    },
+    "hear": {
+      "label": "Słuchaj, co gram",
+      "hint": "Gdy gra jam, a wejście jest włączone, Yames podaje tonację i akord, które słyszy. To szacunek i Yames mówi, kiedy nie jest pewien."
+    },
+    "heard": {
+      "heard": "Usłyszano: {{what}}",
+      "chart": "Z zapisu: {{what}}",
+      "unsure": "Jeszcze nie wiadomo",
+      "listening": "Słucham…"
     }
   },
   "scale": {

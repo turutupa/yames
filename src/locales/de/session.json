@@ -395,7 +395,9 @@
       "fairAsk": "Fühlten sich die Bewertungen heute fair an?",
       "backTo": "Zurück zu {{place}}",
       "more": "5 Minuten mehr",
-      "keepGoing": "Weiter: {{title}}"
+      "keepGoing": "Weiter: {{title}}",
+      "heard": "Im freien Spiel warst du in {{key}}, meist auf {{chords}}.",
+      "heardKey": "Im freien Spiel warst du in {{key}}."
     },
     "paths": {
       "title": "Pfade",

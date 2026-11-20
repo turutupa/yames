@@ -5,6 +5,8 @@
  * press in every state, and it does what a pedal tap does: both come from
  * `bigAction`, so they cannot disagree.
  */
+import { heardRecap, heardSince } from "../../jam/heard";
+import type { HeardKeyName } from "../../jam/heard";
 import { useEffect, useRef, useState } from "react";
 import { useFitOneLine, useFitScale } from "./hooks/useFitOneLine";
 import { useTranslation } from "react-i18next";
@@ -1790,6 +1792,15 @@ function RecapScreen({ session }: { session: SessionRun }) {
   });
   const origin = session.origin;
   const lastExercise = [...steps].reverse().find((s) => s.kind === "exercise");
+  // What was heard in this Session's free play ("Hear what I play", M7):
+  // only a key the engine estimated and that held. Read once, as the recap
+  // opens; nothing when the setting is off, because nothing was heard then.
+  const [heard] = useState(() => {
+    const said = heardRecap(heardSince(run.startedAt));
+    if (!said) return null;
+    const name = (k: HeardKeyName) => t(`jam.key.${k.mode}Named`, { root: k.root });
+    return { key: said.relative ? `${name(said.key)} / ${name(said.relative)}` : name(said.key), chords: said.chords };
+  });
 
   return (
     <div className="session-body session-recap" data-testid="session-recap">
@@ -1829,6 +1840,13 @@ function RecapScreen({ session }: { session: SessionRun }) {
           ))}
           {takes === 0 && <div className="session-why">{t("session.recap.noTakes")}</div>}
           {notGraded && <div className="session-why">{t("session.recap.notGraded")}</div>}
+          {heard && (
+            <div className="session-why" data-testid="session-recap-heard">
+              {heard.chords.length > 0
+                ? t("session.recap.heard", { key: heard.key, chords: heard.chords.join(", ") })
+                : t("session.recap.heardKey", { key: heard.key })}
+            </div>
+          )}
           {lastGraded && <FairTap session={session} outcome={lastGraded} askKey="session.recap.fairAsk" />}
         </div>
         <div className="session-col">

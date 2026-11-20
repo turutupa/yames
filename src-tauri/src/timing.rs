@@ -622,6 +622,8 @@ impl TimingAnalyzer {
             self.notes.tap.disarm();
         }
         *self.schedule.lock().unwrap() = Some((schedule, pass_bars, pitches, details));
+        // a Take is coming: the free-play worker keeps off the model and the ring
+        crate::harmony::worker::set_take_loaded(true);
         self.schedule_version
             .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
     }
@@ -633,6 +635,7 @@ impl TimingAnalyzer {
         self.notes.forget();
         self.notes.tap.disarm();
         *self.schedule.lock().unwrap() = None;
+        crate::harmony::worker::set_take_loaded(false);
         self.schedule_version
             .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
     }
@@ -2975,6 +2978,9 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass,
         .name("yames-take-notes".into())
         .spawn(move || {
             crate::coach::lower_current_thread_priority();
+            // The model is this pass's first: the free-play worker runs no
+            // new window while this is held (`harmony/worker.rs`).
+            let _model_first = crate::harmony::worker::verifier_hold();
             let closed = std::time::Instant::now();
             let graded = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                 let take = crate::score::notes::TakeAudio {

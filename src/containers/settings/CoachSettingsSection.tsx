@@ -57,6 +57,8 @@ export function CoachSettingsSection({
   voiceDiagnostics,
   jamCues,
   setJamCues,
+  jamHear = false,
+  setJamHear,
   onStartDownload,
   onRequestDownload,
 }: {
@@ -83,6 +85,9 @@ export function CoachSettingsSection({
   /** Spoken cues on the Jam tab (JAM_UX_DECISIONS A4). */
   jamCues: boolean;
   setJamCues: Dispatch<SetStateAction<boolean>>;
+  /** "Hear what I play" (detection M7), off by default. */
+  jamHear?: boolean;
+  setJamHear?: Dispatch<SetStateAction<boolean>>;
   onStartDownload: (tier: ModelTier) => void;
   onRequestDownload: (tier: ModelTier) => void;
 }) {
@@ -526,6 +531,33 @@ export function CoachSettingsSection({
           ))}
         </div>
       </div>
+      {/* Hear what I play (detection M7). Off unless turned on: it runs the
+          note model beside the band, and what it names is an estimate that
+          says "couldn't tell" when the evidence is weak. Nothing to do with
+          the voice, so it is not disabled without one. */}
+      {setJamHear && (
+        <div className="setting-row">
+          <div className="setting-label">
+            <label>{t("jam.hear.label")}</label>
+            <span className="setting-hint">{t("jam.hear.hint")}</span>
+          </div>
+          <div className="toggle-group">
+            {([false, true] as const).map((on) => (
+              <button
+                key={String(on)}
+                className={`toggle-btn ${jamHear === on ? "active" : ""}`}
+                data-testid={`jam-hear-${on ? "on" : "off"}`}
+                onClick={() => {
+                  setJamHear(on);
+                  storeSave("jamHear", on);
+                }}
+              >
+                {t(on ? "common.on" : "common.off")}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {/* C5 verbosity — controls how often spoken events fire. "Default"
           honours the gatekeeper's tier decision verbatim. "More" promotes
           written-tier events to spoken so the coach is more talkative

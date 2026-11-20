@@ -409,7 +409,9 @@
       "fairAsk": "Czy dzisiejsze oceny były uczciwe?",
       "backTo": "Wróć: {{place}}",
       "more": "Jeszcze 5 minut",
-      "keepGoing": "Graj dalej: {{title}}"
+      "keepGoing": "Graj dalej: {{title}}",
+      "heard": "W swobodnej grze byłeś w {{key}}, najczęściej na {{chords}}.",
+      "heardKey": "W swobodnej grze byłeś w {{key}}."
     },
     "paths": {
       "title": "Ścieżki",

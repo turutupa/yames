@@ -754,6 +754,16 @@
       "nudgeBack": "Immagine un po' prima",
       "nudgeOn": "Immagine un po' dopo",
       "broken": "Questa take non si è riprodotta. Il file potrebbe essere stato spostato o eliminato."
+    },
+    "hear": {
+      "label": "Ascolta quello che suono",
+      "hint": "Mentre una jam suona e l'ingresso è attivo, Yames indica la tonalità e l'accordo che sente. È una stima, e lo dice quando non è sicuro."
+    },
+    "heard": {
+      "heard": "Sentito: {{what}}",
+      "chart": "Griglia: {{what}}",
+      "unsure": "Non ancora chiaro",
+      "listening": "In ascolto…"
     }
   },
   "scale": {

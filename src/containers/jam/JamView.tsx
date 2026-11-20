@@ -40,7 +40,8 @@ import type { JamTakesState } from "../main-window/hooks/useJamTakes";
 import type { Instrument } from "../../jam/chordShapes";
 import type { BeatEvent } from "../../types";
 import { FormTimeline } from "./FormTimeline";
-import { NowBlock } from "./NowBlock";
+import { HeardLine, NowBlock } from "./NowBlock";
+import type { HeardLine as HeardLineData } from "../../jam/heard";
 import { BandLanes } from "./BandLanes";
 import { PracticeRow, NO_PRACTICE } from "./PracticeRow";
 import { TradeCue } from "./TradeCue";
@@ -151,6 +152,8 @@ interface JamViewProps {
   trainedBpm: number | null;
   /** Whether the mic is on, so the "you" lane says something true. */
   listening: boolean;
+  /** The key and chord heard ("Hear what I play"), or null: off or not playing. */
+  heard?: HeardLineData | null;
   /**
    * The jam's takes: the shelf, whether the build can record at all, and what
    * is playing back (JAM_MODE §4.4). They live in the setup sheet's MORE now.
@@ -260,6 +263,7 @@ export function JamView({
   lineup,
   trainedBpm,
   listening,
+  heard = null,
   takes,
   onToggleTakes,
   camera = null,
@@ -631,11 +635,13 @@ export function JamView({
             scales={scaleLabels}
             fretboardOpen={screen.chordsOpen}
             onToggleFretboard={neck ? () => screen.setChordsOpen(!screen.chordsOpen) : null}
+            heard={heard}
           />
         ) : (
           <div className="jam-now jam-now-quiet">
             <span className="stage-label">{t("jam.now.label")}</span>
             <span className="jam-now-name">{grooveName}</span>
+            {heard && <HeardLine heard={heard} />}
           </div>
         )}
 

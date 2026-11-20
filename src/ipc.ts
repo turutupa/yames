@@ -949,6 +949,66 @@ export async function clearScoreSchedule(): Promise<void> {
   return invoke("clear_score_schedule");
 }
 
+// ── Free play: the key and the chord heard (detection M7) ─────────────────
+
+/** `harmony::Key`: pitch class of the tonic, concert pitch. */
+export type HeardKey = { tonic: number; mode: "major" | "minor" | "blues" };
+export type HeardKeyState = "listening" | "unsure" | "settled" | "chart";
+export type HeardQuality = "maj" | "min" | "dom7" | "maj7" | "min7";
+export type HeardChord = {
+  root: number;
+  /** Null for a chart's chord, whose `label` names it. */
+  quality: HeardQuality | null;
+  label: string | null;
+  fromChart: boolean;
+};
+/** `harmony::Reading`. `notes` (inside and outside counts) is for tools: not shown. */
+export type HeardReading = {
+  keyState: HeardKeyState;
+  key: { key: HeardKey; scale: string; confidence: number; relativeToo: boolean } | null;
+  chord: HeardChord | null;
+  settledAtS: number | null;
+  heardS: number;
+};
+/** `harmony::worker::Live`: a reading and the chord a page may show. */
+export type HeardLive = HeardReading & { shownChord: HeardChord | null };
+/** `harmony::worker::Summary`: what a stretch of free play came to. */
+export type HeardSummary = {
+  reading: HeardReading;
+  chords: { root: number; quality: HeardQuality | null; beats: number }[];
+  chordBeats: number;
+  beats: number;
+};
+/** `harmony::Chart`, in concert pitch. */
+export type HeardChart = {
+  key: HeardKey | null;
+  bars: { root: number; tones: number[]; label: string }[][];
+  beatsPerBar: number;
+};
+
+/**
+ * Start reading the key and chords from the input that is listening. False
+ * when it is not, or the build has no note model: nothing was started.
+ */
+export async function harmonyStart(chart: HeardChart | null, bpm: number): Promise<boolean> {
+  return invoke<boolean>("harmony_start", { chart, bpm });
+}
+
+/** Bar `bar` of the jam's form starts now. */
+export async function harmonyMarkBar(bar: number, bpm: number): Promise<void> {
+  return invoke("harmony_mark_bar", { bar, bpm });
+}
+
+/** Stop reading. What was heard, or null when nothing was running. */
+export async function harmonyStop(): Promise<HeardSummary | null> {
+  return invoke<HeardSummary | null>("harmony_stop");
+}
+
+/** A new reading, or null: the worker ended, or the input was stopped. */
+export function onHarmonyReading(callback: (live: HeardLive | null) => void) {
+  return listen<HeardLive | null>("harmony-reading", (e) => callback(e.payload));
+}
+
 /**
  * The bands the review colours a note by — the scorer's own.
  *

@@ -395,7 +395,9 @@
       "fairAsk": "今日の採点は妥当でしたか？",
       "backTo": "{{place}} に戻る",
       "more": "あと 5 分",
-      "keepGoing": "続ける：{{title}}"
+      "keepGoing": "続ける：{{title}}",
+      "heard": "フリープレイのキーは {{key}}、主なコードは {{chords}} でした。",
+      "heardKey": "フリープレイのキーは {{key}} でした。"
     },
     "paths": {
       "title": "コース",

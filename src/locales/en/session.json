@@ -395,7 +395,9 @@
       "fairAsk": "Did today's grades feel fair?",
       "backTo": "Back to {{place}}",
       "more": "5 more minutes",
-      "keepGoing": "Keep going: {{title}}"
+      "keepGoing": "Keep going: {{title}}",
+      "heard": "In free play you were in {{key}}, mostly on {{chords}}.",
+      "heardKey": "In free play you were in {{key}}."
     },
     "paths": {
       "title": "Paths",

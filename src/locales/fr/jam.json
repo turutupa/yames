@@ -754,6 +754,16 @@
       "nudgeBack": "Image un peu plus tôt",
       "nudgeOn": "Image un peu plus tard",
       "broken": "Cette prise n'a pas pu être lue. Le fichier a peut-être été déplacé ou supprimé."
+    },
+    "hear": {
+      "label": "Écouter ce que je joue",
+      "hint": "Pendant qu'un jam joue et que l'entrée est active, Yames nomme la tonalité et l'accord qu'il entend. C'est une estimation, et il le dit quand il ne sait pas."
+    },
+    "heard": {
+      "heard": "Entendu : {{what}}",
+      "chart": "Grille : {{what}}",
+      "unsure": "Pas encore clair",
+      "listening": "Écoute…"
     }
   },
   "scale": {

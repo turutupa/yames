@@ -395,7 +395,9 @@
       "fairAsk": "Voelden de beoordelingen van vandaag eerlijk?",
       "backTo": "Terug naar {{place}}",
       "more": "Nog 5 minuten",
-      "keepGoing": "Ga door: {{title}}"
+      "keepGoing": "Ga door: {{title}}",
+      "heard": "In vrij spel zat je in {{key}}, vooral op {{chords}}.",
+      "heardKey": "In vrij spel zat je in {{key}}."
     },
     "paths": {
       "title": "Leerpaden",

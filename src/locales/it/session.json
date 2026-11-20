@@ -402,7 +402,9 @@
       "fairAsk": "Ti sono sembrati giusti i voti di oggi?",
       "backTo": "Torna a {{place}}",
       "more": "Altri 5 minuti",
-      "keepGoing": "Continua: {{title}}"
+      "keepGoing": "Continua: {{title}}",
+      "heard": "Suonando libero eri in {{key}}, soprattutto su {{chords}}.",
+      "heardKey": "Suonando libero eri in {{key}}."
     },
     "paths": {
       "title": "Percorsi",

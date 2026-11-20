@@ -157,7 +157,10 @@
     "export_practice_data",
     "set_app_in_background",
     "set_listen_demo",
-    "set_take_diagnostics"
+    "set_take_diagnostics",
+    "harmony_mark_bar",
+    "harmony_start",
+    "harmony_stop"
   ],
   "ipcCommands": [
     "analyze_attempt",
@@ -315,7 +318,10 @@
     "export_practice_data",
     "set_app_in_background",
     "set_listen_demo",
-    "set_take_diagnostics"
+    "set_take_diagnostics",
+    "harmony_mark_bar",
+    "harmony_start",
+    "harmony_stop"
   ],
   "commandsInvokedOutsideIpc": [
     "app_ready",
@@ -527,7 +533,11 @@
     "androidBetaInstall",
     "androidBetaProbe",
     "setListenDemo",
-    "setTakeDiagnostics"
+    "setTakeDiagnostics",
+    "harmonyMarkBar",
+    "harmonyStart",
+    "harmonyStop",
+    "onHarmonyReading"
   ],
   "ipcWrappersWithoutCaller": [
     "clearSessionLogs",
@@ -571,7 +581,8 @@
     "take-playback-ended",
     "tts-speech-ended",
     "tts-speech-started",
-    "audio-route-changed"
+    "audio-route-changed",
+    "harmony-reading"
   ],
   "eventsEmitted": [
     "adaptive-eval",
@@ -602,7 +613,8 @@
     "take-playback-ended",
     "tts-speech-ended",
     "tts-speech-started",
-    "audio-route-changed"
+    "audio-route-changed",
+    "harmony-reading"
   ],
   "hotkeys": [
     {
@@ -1582,6 +1594,11 @@
       "written": false
     },
     "stage.slowStrikes": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "jamHear": {
       "store": "settings.json",
       "read": true,
       "written": true

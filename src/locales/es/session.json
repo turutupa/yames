@@ -402,7 +402,9 @@
       "fairAsk": "¿Te parecieron justas las notas de hoy?",
       "backTo": "Volver a {{place}}",
       "more": "5 minutos más",
-      "keepGoing": "Sigue con: {{title}}"
+      "keepGoing": "Sigue con: {{title}}",
+      "heard": "Tocando libre estuviste en {{key}}, sobre todo con {{chords}}.",
+      "heardKey": "Tocando libre estuviste en {{key}}."
     },
     "paths": {
       "title": "Rutas",

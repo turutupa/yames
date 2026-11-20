@@ -395,7 +395,9 @@
       "fairAsk": "Điểm hôm nay có công bằng không?",
       "backTo": "Về {{place}}",
       "more": "Thêm 5 phút",
-      "keepGoing": "Tập tiếp: {{title}}"
+      "keepGoing": "Tập tiếp: {{title}}",
+      "heard": "Khi chơi tự do, bạn ở giọng {{key}}, chủ yếu trên {{chords}}.",
+      "heardKey": "Khi chơi tự do, bạn ở giọng {{key}}."
     },
     "paths": {
       "title": "Lộ trình",

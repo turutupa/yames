@@ -395,7 +395,9 @@
       "fairAsk": "오늘 채점이 공정했나요?",
       "backTo": "{{place}}(으)로 돌아가기",
       "more": "5분 더",
-      "keepGoing": "계속하기: {{title}}"
+      "keepGoing": "계속하기: {{title}}",
+      "heard": "자유 연주에서 키는 {{key}}, 주로 {{chords}} 코드였습니다.",
+      "heardKey": "자유 연주에서 키는 {{key}}였습니다."
     },
     "paths": {
       "title": "코스",

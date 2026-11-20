@@ -61,6 +61,13 @@ export interface UiPreferences {
    */
   jamCues: boolean;
   setJamCues: Dispatch<SetStateAction<boolean>>;
+  /**
+   * "Hear what I play" (detection M7): while a jam plays and the input
+   * listens, name the key and the chord heard. Off unless turned on: it runs
+   * the note model in the background, and what it says is an estimate.
+   */
+  jamHear: boolean;
+  setJamHear: Dispatch<SetStateAction<boolean>>;
 }
 
 /**
@@ -102,6 +109,7 @@ export function useUiPreferences(): UiPreferences {
   const [animationStyle, setAnimationStyle] =
     useState<AnimationStyle>("scale");
   const [jamCues, setJamCues] = useState(false);
+  const [jamHear, setJamHear] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -130,6 +138,9 @@ export function useUiPreferences(): UiPreferences {
       if (jc !== undefined) setJamCues(jc);
       else await seedJamCues(setJamCues);
 
+      const jh = await storeLoad<boolean>("jamHear");
+      if (jh === true) setJamHear(true);
+
       const as = await storeLoad<string>("animationStyle");
       if (as && ANIMATION_STYLES.includes(as as AnimationStyle)) {
         setAnimationStyle(as as AnimationStyle);
@@ -150,5 +161,7 @@ export function useUiPreferences(): UiPreferences {
     setAnimationStyle,
     jamCues,
     setJamCues,
+    jamHear,
+    setJamHear,
   };
 }

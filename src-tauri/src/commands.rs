@@ -1653,11 +1653,17 @@ pub async fn stop_evaluation(
     midi: State<'_, SharedMidi>,
     session_acc: State<'_, SharedSessionAccumulator>,
     state: State<'_, SharedState>,
+    harmony: State<'_, crate::harmony::worker::SharedHarmony>,
     app_handle: AppHandle,
 ) -> Result<(), String> {
     let mut slow = SlowInputCall::new("stop_evaluation");
     let _turn = EVALUATION_TURN.lock().await;
     slow.got_turn();
+    // The free-play worker reads this input: it ends with it (not waited
+    // for), and the page is told, so a device change can start it again.
+    if harmony.lock().unwrap_or_else(|e| e.into_inner()).take().is_some() {
+        let _ = app_handle.emit("harmony-reading", None::<crate::harmony::worker::Live>);
+    }
     // Idempotency guard — if the analyzer is already stopped (e.g. double-call
     // from a device change racing an explicit Stop), skip silently. The first
     // call already drained telemetry and persisted the log.
@@ -2100,6 +2106,71 @@ pub fn clear_score_schedule(timing_analyzer: State<SharedTimingAnalyzer>) -> Res
         .map_err(|e| format!("Lock failed: {e}"))?;
     ta.clear_score_schedule();
     Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Free play: the key and the chord heard in a jam (`harmony/`, M7)
+// ---------------------------------------------------------------------------
+
+/// Start reading the key and chords of what the player plays, from the input
+/// that is already listening. `false` and nothing started when it is not
+/// listening, or this build has no note model. Off unless the player turned
+/// "Hear what I play" on: the page calls this only then, while a jam plays.
+///
+/// `chart` is the jam's key and chords in concert pitch, when it has them:
+/// the engine then takes them as given and estimates only what is missing.
+/// The reading arrives as `harmony-reading` events (`harmony::worker::Live`,
+/// or `null` when the worker ended by itself or the input was stopped).
+///
+/// Nothing here is on a real-time path: the worker is a thread below normal
+/// priority that gives way to a Take (`harmony/worker.rs`).
+#[tauri::command]
+pub async fn harmony_start(
+    chart: Option<crate::harmony::Chart>,
+    bpm: f64,
+    audio_input: State<'_, SharedAudioInput>,
+    harmony: State<'_, crate::harmony::worker::SharedHarmony>,
+    app_handle: AppHandle,
+) -> Result<bool, String> {
+    // In turn with the input's start and stop: the ring and its rate are read
+    // from an input that is not half-way through opening.
+    let _turn = EVALUATION_TURN.lock().await;
+    // One worker: an earlier one ends by itself (it is not waited for).
+    drop(harmony.lock().unwrap_or_else(|e| e.into_inner()).take());
+    let (ring, rate, listening) = {
+        let ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
+        (ai.ring(), ai.sample_rate(), ai.is_active())
+    };
+    if !listening || !crate::detect::model::enabled() {
+        return Ok(false);
+    }
+    let worker = crate::harmony::worker::Worker::start(ring, rate, chart, beat_seconds(bpm), move |live| {
+        let _ = app_handle.emit("harmony-reading", live);
+    })?;
+    *harmony.lock().unwrap_or_else(|e| e.into_inner()) = Some(worker);
+    Ok(true)
+}
+
+fn beat_seconds(bpm: f64) -> f64 {
+    60.0 / if bpm.is_finite() { bpm.clamp(20.0, 400.0) } else { 120.0 }
+}
+
+/// Bar `bar` of the jam's form starts now, at `bpm`: with a chart, how the
+/// engine knows which of its chords is sounding.
+#[tauri::command]
+pub fn harmony_mark_bar(bar: u32, bpm: f64, harmony: State<crate::harmony::worker::SharedHarmony>) {
+    if let Some(worker) = harmony.lock().unwrap_or_else(|e| e.into_inner()).as_ref() {
+        worker.mark_bar(bar, beat_seconds(bpm));
+    }
+}
+
+/// Stop reading, and say what was heard (`None` when nothing was running).
+#[tauri::command]
+pub async fn harmony_stop(harmony: State<'_, crate::harmony::worker::SharedHarmony>) -> Result<Option<crate::harmony::worker::Summary>, String> {
+    let worker = harmony.lock().unwrap_or_else(|e| e.into_inner()).take();
+    let Some(worker) = worker else { return Ok(None) };
+    // `stop` waits for the window that is running: not on a runtime thread
+    tauri::async_runtime::spawn_blocking(move || worker.stop()).await.map_err(|e| format!("the harmony worker did not stop: {e}"))
 }
 
 /// The bands the review colours a note by — the scorer's own, not the

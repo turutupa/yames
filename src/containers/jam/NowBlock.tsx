@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import type { HeardKeyName, HeardLine as HeardLineData } from "../../jam/heard";
 
 interface NowBlockProps {
   /** The chord under your hands right now, spelled for the key you read in. */
@@ -14,6 +15,33 @@ interface NowBlockProps {
    */
   fretboardOpen: boolean;
   onToggleFretboard: (() => void) | null;
+  /** What Yames hears you play ("Hear what I play"), or null: off. */
+  heard?: HeardLineData | null;
+}
+
+/**
+ * The key and chord heard, in one quiet line (detection M7).
+ *
+ * An estimate, so it is the smallest type on the block and it says "couldn't
+ * tell" rather than guess. Never whether a note was inside or outside the
+ * key: from a microphone that call is wrong too often to show.
+ */
+export function HeardLine({ heard }: { heard: HeardLineData }) {
+  const { t } = useTranslation();
+  const keyText = (k: HeardKeyName) => t(`jam.key.${k.mode}Named`, { root: k.root });
+  let text: string;
+  if (heard.state === "listening") text = t("jam.heard.listening");
+  else if (heard.state === "unsure") text = t("jam.heard.unsure");
+  else {
+    const key = heard.key ? [keyText(heard.key), heard.relative ? keyText(heard.relative) : null].filter(Boolean).join(" / ") : null;
+    const what = [key, heard.chord].filter(Boolean).join(" · ");
+    text = t(heard.state === "chart" ? "jam.heard.chart" : "jam.heard.heard", { what });
+  }
+  return (
+    <span className="jam-now-heard" data-testid="jam-heard" data-state={heard.state} role="status">
+      {text}
+    </span>
+  );
 }
 
 /**
@@ -36,6 +64,7 @@ export function NowBlock({
   scales,
   fretboardOpen,
   onToggleFretboard,
+  heard = null,
 }: NowBlockProps) {
   const { t } = useTranslation();
 
@@ -58,6 +87,7 @@ export function NowBlock({
         {scales.length > 0 && (
           <span className="jam-now-scales">{scales.join(" · ")}</span>
         )}
+        {heard && <HeardLine heard={heard} />}
         {onToggleFretboard && (
           <button
             type="button"

@@ -85,4 +85,15 @@ describe("the spoken-cues migration", () => {
     expect(result.current.jamCues).toBe(false);
     expect(store.saved).toHaveLength(0);
   });
+
+  it("'Hear what I play' is off unless the store says on", async () => {
+    store.values.jamCues = false;
+    const off = renderHook(() => useUiPreferences());
+    await waitFor(() => expect(store.saved.length + 1).toBeGreaterThan(0));
+    expect(off.result.current.jamHear).toBe(false);
+    off.unmount();
+    store.values.jamHear = true;
+    const on = renderHook(() => useUiPreferences());
+    await waitFor(() => expect(on.result.current.jamHear).toBe(true));
+  });
 });

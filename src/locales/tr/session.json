@@ -395,7 +395,9 @@
       "fairAsk": "Bugünkü puanlar adil miydi?",
       "backTo": "{{place}} ekranına dön",
       "more": "5 dakika daha",
-      "keepGoing": "Devam et: {{title}}"
+      "keepGoing": "Devam et: {{title}}",
+      "heard": "Serbest çalarken {{key}} tonundaydın, çoğunlukla {{chords}} üzerinde.",
+      "heardKey": "Serbest çalarken {{key}} tonundaydın."
     },
     "paths": {
       "title": "Yollar",

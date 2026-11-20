@@ -733,6 +733,16 @@
       "nudgeBack": "Hình sớm hơn một chút",
       "nudgeOn": "Hình muộn hơn một chút",
       "broken": "Bản thu này không phát được. Có thể tệp đã bị di chuyển hoặc xóa."
+    },
+    "hear": {
+      "label": "Nghe những gì tôi chơi",
+      "hint": "Khi một bản jam đang chạy và đầu vào đang bật, Yames gọi tên giọng và hợp âm nó nghe được. Đây là ước đoán, và Yames sẽ nói khi chưa chắc."
+    },
+    "heard": {
+      "heard": "Nghe được: {{what}}",
+      "chart": "Theo bản: {{what}}",
+      "unsure": "Chưa xác định được",
+      "listening": "Đang nghe…"
     }
   },
   "scale": {

@@ -754,6 +754,16 @@
       "nudgeBack": "Imagem um pouco antes",
       "nudgeOn": "Imagem um pouco depois",
       "broken": "Esse take não tocou. O arquivo pode ter sido movido ou apagado."
+    },
+    "hear": {
+      "label": "Ouvir o que eu toco",
+      "hint": "Enquanto uma jam toca e a entrada está ligada, o Yames diz o tom e o acorde que ouve. É uma estimativa, e ele avisa quando não tem certeza."
+    },
+    "heard": {
+      "heard": "Ouvido: {{what}}",
+      "chart": "Cifra: {{what}}",
+      "unsure": "Ainda não deu para saber",
+      "listening": "Ouvindo…"
     }
   },
   "scale": {

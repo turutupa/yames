@@ -395,7 +395,9 @@
       "fairAsk": "今天的評分公平嗎？",
       "backTo": "回到{{place}}",
       "more": "再練 5 分鐘",
-      "keepGoing": "繼續：{{title}}"
+      "keepGoing": "繼續：{{title}}",
+      "heard": "自由演奏時你在 {{key}}，主要用了 {{chords}}。",
+      "heardKey": "自由演奏時你在 {{key}}。"
     },
     "paths": {
       "title": "路線",
