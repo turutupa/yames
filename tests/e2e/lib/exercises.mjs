@@ -79,6 +79,35 @@ async function plannerModule() {
   return planner;
 }
 
+/** `src/paths/variants.ts`, bundled on the fly like the planner. */
+let variants = null;
+async function variantsModule() {
+  if (variants) return variants;
+  const built = buildSync({
+    entryPoints: [join(repo, "src", "paths", "variants.ts")],
+    bundle: true,
+    format: "esm",
+    platform: "node",
+    write: false,
+    logLevel: "error",
+  });
+  variants = await import(`data:text/javascript;base64,${Buffer.from(built.outputFiles[0].text).toString("base64")}`);
+  return variants;
+}
+
+/**
+ * The notes a Take plays: `withVariant` in src/session/take.ts. `seed` is the
+ * Session screen's `data-variant-seed`; null plays the Exercise as written.
+ * The id stays the Exercise's own, as the app keeps it.
+ */
+export async function withVariant(exercise, seed) {
+  const list = exercise.variation?.variants;
+  if (seed === null || seed === undefined || !list?.length) return exercise;
+  const variant = list[((seed % list.length) + list.length) % list.length];
+  const { exerciseWithVariant } = await variantsModule();
+  return { ...exerciseWithVariant(exercise, variant), id: exercise.id };
+}
+
 /** `placementLadder` in src/session/planner.ts: the tempos placement climbs, ascending. */
 export async function placementLadder(exercise) {
   const { placementLadder: ladder } = await plannerModule();
