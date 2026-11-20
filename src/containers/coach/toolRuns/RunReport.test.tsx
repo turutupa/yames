@@ -219,7 +219,20 @@ describe("a stretch's numbers, in the tool's note", () => {
 });
 
 describe("a note or a line says each thing once", () => {
-  it("an end note without a report shows its line once, not as a title and a body", () => {
+  it("an end note shows its line once, not as a title and a body", () => {
+    const message: FeedMessage = {
+      id: "end",
+      type: "session-end",
+      timestamp: Date.now() + 1000,
+      content: "Session complete.",
+      report,
+    };
+    const { container } = render(<Note message={message} />);
+    const text = container.textContent ?? "";
+    expect(text.split("Session complete.").length - 1).toBe(1);
+  });
+
+  it("an end note without a report is not shown at all: nothing was saved for it to point at", () => {
     const message: FeedMessage = {
       id: "end",
       type: "session-end",
@@ -227,8 +240,7 @@ describe("a note or a line says each thing once", () => {
       content: "Session complete.",
     };
     const { container } = render(<Note message={message} />);
-    const text = container.textContent ?? "";
-    expect(text.split("Session complete.").length - 1).toBe(1);
+    expect(container.textContent ?? "").not.toContain("Session complete.");
   });
 
   it.each(["system", "coach-tip"] as const)("a %s line shows its words once", (type) => {

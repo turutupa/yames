@@ -53,17 +53,36 @@ export function ToolRuns() {
     rootRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
   }, [history]);
 
+  // A delete the store refused leaves the list as it was (the old card did
+  // the same), and says so: a row that vanished here and came back on the
+  // next visit would be the app being quiet about the one thing it owes.
+  const [failed, setFailed] = useState(false);
+
   const remove = useCallback(async (id: string) => {
-    await deleteSession(id).catch(() => {});
+    try {
+      await deleteSession(id);
+    } catch (e) {
+      console.error("[tool runs] the store refused the delete:", e);
+      setFailed(true);
+      return;
+    }
+    setFailed(false);
     setHistory((h) => (h ?? []).filter((s) => s.id !== id));
     setSelected((s) => (s?.id === id ? null : s));
   }, []);
 
   const clearAll = useCallback(async () => {
-    await clearAllSessions().catch(() => {});
+    setConfirmClear(false);
+    try {
+      await clearAllSessions();
+    } catch (e) {
+      console.error("[tool runs] the store refused to clear:", e);
+      setFailed(true);
+      return;
+    }
+    setFailed(false);
     setHistory([]);
     setSelected(null);
-    setConfirmClear(false);
   }, []);
 
   const runs = history ?? [];
@@ -106,6 +125,11 @@ export function ToolRuns() {
             </button>
           </div>
         </div>
+      )}
+      {failed && (
+        <p className="session-why session-bad tool-runs-failed" role="alert" data-testid="tool-runs-failed">
+          {t("session.progress.toolRunsDeleteFailed")}
+        </p>
       )}
       {history === null ? null : selected ? (
         <ToolRunDetail session={selected} onDelete={() => remove(selected.id)} />

@@ -1687,12 +1687,37 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     lifecycle.current = next.catch(() => {});
     return next;
   }, []);
-  const startSession = useCallback(
-    (options?: StartSessionOptions) => inTurn(() => startNowRef.current(options)),
+  /**
+   * The last start or end asked for and not yet finished. `isActive()` answers
+   * as of the calls made: a session whose end is queued is ending, not
+   * someone's to ride (Listen's end on leaving the tools, then Today's Start
+   * inside the start's window, used to make the Session take the ending
+   * session as the player's and run with the input off). Once the queue has
+   * drained, `activeRef` is the answer again.
+   */
+  const queuedRef = useRef<{ op: "start" | "end" } | null>(null);
+  const queue = useCallback(
+    (op: "start" | "end", work: () => Promise<void>): Promise<void> => {
+      const mark = { op };
+      queuedRef.current = mark;
+      const p = inTurn(work);
+      const settle = () => {
+        if (queuedRef.current === mark) queuedRef.current = null;
+      };
+      p.then(settle, settle);
+      return p;
+    },
     [inTurn],
   );
-  const isActive = useCallback(() => activeRef.current, []);
-  const endSession = useCallback(() => inTurn(() => endNowRef.current()), [inTurn]);
+  const startSession = useCallback(
+    (options?: StartSessionOptions) => queue("start", () => startNowRef.current(options)),
+    [queue],
+  );
+  const isActive = useCallback(
+    () => (queuedRef.current ? queuedRef.current.op === "start" : activeRef.current),
+    [],
+  );
+  const endSession = useCallback(() => queue("end", () => endNowRef.current()), [queue]);
 
   /**
    * Phase 5 — route a chip tap (or its follow-up affordance) into the feed.

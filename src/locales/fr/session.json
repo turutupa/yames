@@ -502,6 +502,7 @@
       "title": "Progrès",
       "toolRuns": "Passages d'outils",
       "toolRunsIntro": "Chaque moment que le coach a écouté, dans les outils et dans les séances, le plus récent d'abord.",
+      "toolRunsDeleteFailed": "La suppression n'a pas pu se faire, donc rien n'a été retiré. Réessaie dans un instant.",
       "intro": "Tout ici a été mesuré à partir de ton jeu : notes entendues, régularité du placement, tempo propre.",
       "cleanMeans": "Le tempo le plus rapide où tu as atteint le seuil, sur n'importe quelles huit mesures d'affilée.",
       "sparkLabel": "Régularité au fil des prises, {{title}}",

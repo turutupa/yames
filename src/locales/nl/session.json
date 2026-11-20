@@ -490,6 +490,7 @@
       "title": "Voortgang",
       "toolRuns": "Toolruns",
       "toolRunsIntro": "Elk stuk waarnaar de coach luisterde, in de tools en in sessies, de nieuwste eerst.",
+      "toolRunsDeleteFailed": "Dat kon niet worden verwijderd, dus er is niets gewist. Probeer het zo nog eens.",
       "intro": "Alles hier is gemeten aan je spel: gehoorde noten, gelijkmatigheid van de timing, schoon tempo.",
       "cleanMeans": "Het snelste tempo waarop je de lat haalde, over willekeurige acht maten achter elkaar.",
       "sparkLabel": "Gelijkmatigheid over de takes, {{title}}",

@@ -148,4 +148,18 @@ describe("ToolCoach", () => {
     fireEvent.click(screen.getByTestId("tool-coach-runs"));
     expect(onOpenRuns).toHaveBeenCalled();
   });
+
+  it("no end note, and no way to Tool runs, for a session too thin to have been saved", () => {
+    // Listen on, the click plays, the player barely plays, Listen off: the
+    // report exists but fails the save gate (`isSegmentReportable`), so
+    // nothing was kept in Tool runs and the note would point at nothing.
+    const thin = { ...REPORT, hitsCount: 1, missCount: 2, totalBeats: 3, skippedBeats: 0 } as SessionReport;
+    const end: FeedMessage = { id: "e", type: "session-end", timestamp: Date.now() + 5, content: "Session complete.", report: thin };
+    const { container } = render(<ToolCoach {...base} listenOn={false} onOpenRuns={vi.fn()} messages={[end]} />);
+    expect(screen.queryByTestId("tool-coach-runs")).toBeNull();
+    expect(screen.queryByTestId("tool-coach-note")).toBeNull();
+    expect(container.firstChild).toBeNull();
+    // Nor a session that recorded nothing at all.
+    expect(toolCoachView([{ ...end, report: undefined }], 0, false).note).toBeNull();
+  });
 });

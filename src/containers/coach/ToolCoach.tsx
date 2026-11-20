@@ -27,6 +27,7 @@ import { useTranslation } from "react-i18next";
 import type { FeedChip, FeedMessage, SessionReport } from "../../types";
 import { SystemStatusChip } from "../../components/SystemStatusChip";
 import { bandForScore } from "../../coach/reportStats";
+import { isSegmentReportable } from "../../coach/miniReport";
 import { HintCard } from "../onboarding/hints/HintCard";
 import { useFirstTimeHint } from "../onboarding/hints/useFirstTimeHint";
 import { shouldHintCoachAsk } from "../onboarding/hints/triggers";
@@ -60,7 +61,13 @@ export function toolCoachView(
   for (const m of messages) {
     if (m.timestamp < runStartedAt) continue;
     if ((m.type === "coach-tip" || m.type === "system") && !m.pending) tip = m;
-    if (m.type === "mini-report" || m.type === "session-end") {
+    // The end note only for a session that was saved: `useSession` keeps one
+    // in Tool runs only when its report passes `isSegmentReportable`, and a
+    // note with a score and a way to a run that is not there would be untrue.
+    // A session that recorded too little ends with the switch going off and
+    // nothing more, as the old card gave such a session no end card.
+    const unsaved = m.type === "session-end" && !(m.report && isSegmentReportable(m.report));
+    if ((m.type === "mini-report" || m.type === "session-end") && !unsaved) {
       note = m;
       chips = [];
     }

@@ -23,7 +23,7 @@ function fakeCoach() {
   return coach;
 }
 
-type Props = { view: string; isPlaying: boolean; coach: ListenCoach };
+type Props = { view: string; isPlaying: boolean; coach: ListenCoach; sessionRunning?: boolean };
 
 function setup(view = "beat") {
   const coach = fakeCoach();
@@ -126,6 +126,67 @@ describe("Listen", () => {
       vi.advanceTimersByTime(LISTEN_IDLE_MS * 2);
     });
     expect(coach.endSession).not.toHaveBeenCalled();
+  });
+
+  it("does not end it from Settings while a Path Session is still running under it", async () => {
+    const { coach, hook, rerender } = setup();
+    await act(async () => hook.result.current.toggle());
+    // Listen on, a Path Session starts and rides it, then Settings over it.
+    rerender({ view: "session", sessionRunning: true });
+    rerender({ view: "settings", sessionRunning: true });
+    act(() => {
+      vi.advanceTimersByTime(LISTEN_IDLE_MS * 2);
+    });
+    expect(coach.endSession).not.toHaveBeenCalled();
+    expect(hook.result.current.on).toBe(true);
+    // The Session over, Settings still open: the ordinary ten minutes again.
+    rerender({ view: "settings", sessionRunning: false });
+    act(() => {
+      vi.advanceTimersByTime(LISTEN_IDLE_MS);
+    });
+    expect(coach.endSession).toHaveBeenCalledTimes(1);
+  });
+
+  it("claims only a session its own press started: Listen off leaves someone else's alone", async () => {
+    const { coach, hook, rerender } = setup();
+    // A coach session someone else started is running when Listen is pressed.
+    await act(async () => coach.startSession());
+    coach.startSession.mockClear();
+    rerender();
+    await act(async () => hook.result.current.toggle());
+    rerender();
+    expect(hook.result.current.on).toBe(true);
+    expect(coach.startSession).not.toHaveBeenCalled();
+    await act(async () => hook.result.current.toggle());
+    rerender();
+    expect(hook.result.current.on).toBe(false);
+    expect(coach.endSession).not.toHaveBeenCalled();
+    expect(coach.isActive()).toBe(true);
+  });
+
+  it("off then on again at once: the new session is its own, though the old one is still ending", async () => {
+    const coach = fakeCoach();
+    let finishEnd: () => void = () => {};
+    coach.endSession.mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          finishEnd = () => {
+            coach.endSession.mockClear();
+            resolve();
+          };
+        }),
+    );
+    const hook = renderHook((p: Props) => useToolListen(p), {
+      initialProps: { view: "beat", isPlaying: false, coach: snapshot(coach) },
+    });
+    await act(async () => hook.result.current.toggle());
+    hook.rerender({ view: "beat", isPlaying: false, coach: snapshot(coach) });
+    act(() => hook.result.current.toggle()); // off: the end is queued, still active
+    act(() => hook.result.current.toggle()); // on again before it has run
+    expect(coach.startSession).toHaveBeenCalledTimes(2);
+    await act(async () => finishEnd());
+    act(() => hook.result.current.toggle()); // and off: this one is ended too
+    expect(coach.endSession).toHaveBeenCalledTimes(1);
   });
 
   it("never ends a session it did not start", () => {

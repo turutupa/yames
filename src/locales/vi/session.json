@@ -490,6 +490,7 @@
       "title": "Tiến bộ",
       "toolRuns": "Lần chạy công cụ",
       "toolRunsIntro": "Mọi đoạn huấn luyện viên đã nghe, trong các công cụ và trong các buổi tập, mới nhất trước.",
+      "toolRunsDeleteFailed": "Không xóa được nên chưa có gì bị gỡ đi. Bạn thử lại sau ít phút nhé.",
       "intro": "Mọi thứ ở đây đều đo từ tiếng đàn của bạn: số nốt nghe được, độ đều của nhịp, tempo sạch.",
       "cleanMeans": "Tempo nhanh nhất bạn đạt mức trong tám ô nhịp liền bất kỳ.",
       "sparkLabel": "Độ đều qua các lượt, {{title}}",

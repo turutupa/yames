@@ -88,6 +88,33 @@ describe("Tool runs", () => {
     expect(mockInvoke.mock.calls.some(([cmd]) => cmd === "clear_all_sessions")).toBe(true);
   });
 
+  it("a delete the store refuses leaves the run in the list, and says so", async () => {
+    setInvokeResponse("delete_session", () => Promise.reject(new Error("database is locked")));
+    render(<ToolRuns />);
+    const rowsShown = await screen.findAllByTestId("tool-run");
+    fireEvent.click(within(rowsShown[1]).getByTestId("tool-run-delete-row"));
+    expect(await screen.findByTestId("tool-runs-failed")).toHaveTextContent("could not be deleted");
+    expect(screen.getAllByTestId("tool-run")).toHaveLength(stored.length);
+    // From the detail too: the run stays open, the list keeps it.
+    fireEvent.click(screen.getAllByTestId("tool-run")[0]);
+    fireEvent.click(await screen.findByTestId("tool-run-delete"));
+    await waitFor(() => expect(mockInvoke).toHaveBeenCalledWith("delete_session", { id: stored[0].id }));
+    expect(screen.getByTestId("tool-run-detail")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("tool-runs-back"));
+    expect(screen.getAllByTestId("tool-run")).toHaveLength(stored.length);
+  });
+
+  it("a clear the store refuses leaves the whole list, and says so", async () => {
+    setInvokeResponse("clear_all_sessions", () => Promise.reject(new Error("database is locked")));
+    render(<ToolRuns />);
+    await screen.findAllByTestId("tool-run");
+    fireEvent.click(screen.getByTestId("tool-runs-clear"));
+    fireEvent.click(screen.getByTestId("tool-runs-clear-confirm"));
+    expect(await screen.findByTestId("tool-runs-failed")).toBeInTheDocument();
+    expect(screen.getAllByTestId("tool-run")).toHaveLength(stored.length);
+    expect(screen.queryByTestId("tool-runs-empty")).toBeNull();
+  });
+
   it("says what will be here when nothing is (COA-49)", async () => {
     setInvokeResponse("get_session_history", () => []);
     render(<ToolRuns />);

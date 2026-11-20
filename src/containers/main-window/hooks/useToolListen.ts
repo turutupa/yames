@@ -41,13 +41,29 @@ export function useToolListen({
   view,
   isPlaying,
   coach,
+  sessionRunning = false,
 }: {
   view: string;
   isPlaying: boolean;
   coach: ListenCoach;
+  /**
+   * A Path Session is in progress (not idle, not its recap). It may be riding
+   * Listen's coach session, and it survives Settings over it, so the idle
+   * timer does not run while it does, whatever the view.
+   */
+  sessionRunning?: boolean;
 }): { on: boolean; toggle: () => void } {
   const [mine, setMine] = useState(false);
   const mineRef = useRef(false);
+  /**
+   * The switch is on but the coach session under it is not this hook's: one
+   * someone else started was already running when Listen was pressed. Listen
+   * off then turns the switch off and ends nothing (only a session this
+   * hook's own `startSession()` started is ever ended here).
+   */
+  const borrowedRef = useRef(false);
+  /** This hook's own end, while it is still queued or running. */
+  const endingRef = useRef<Promise<void> | null>(null);
   const latest = useRef(coach);
   latest.current = coach;
 
@@ -59,7 +75,17 @@ export function useToolListen({
   const end = useCallback(() => {
     if (!mineRef.current) return;
     claim(false);
-    void latest.current.endSession().catch(() => {});
+    if (borrowedRef.current) {
+      borrowedRef.current = false;
+      return;
+    }
+    const p: Promise<void> = latest.current
+      .endSession()
+      .catch(() => {})
+      .finally(() => {
+        if (endingRef.current === p) endingRef.current = null;
+      });
+    endingRef.current = p;
   }, [claim]);
 
   const toggle = useCallback(() => {
@@ -67,7 +93,11 @@ export function useToolListen({
       end();
       return;
     }
+    // A session that is active and is not this hook's own one still ending
+    // belongs to someone else: show the switch on, start nothing, own nothing.
+    borrowedRef.current = latest.current.isActive() && endingRef.current === null;
     claim(true);
+    if (borrowedRef.current) return;
     // Queued behind any end still running (`useSession`'s lifecycle turn).
     void latest.current.startSession().catch(() => {});
   }, [claim, end]);
@@ -85,12 +115,13 @@ export function useToolListen({
     if (!STAYS.has(view)) end();
   }, [view, end]);
 
-  // Ten idle minutes end it. Not while a Path Session is using it.
+  // Ten idle minutes end it. Not while a Path Session is using it: on its
+  // screen, or with Settings open over it.
   useEffect(() => {
-    if (!mine || isPlaying || view === "session") return;
+    if (!mine || isPlaying || view === "session" || sessionRunning) return;
     const timer = window.setTimeout(end, LISTEN_IDLE_MS);
     return () => window.clearTimeout(timer);
-  }, [mine, isPlaying, view, end]);
+  }, [mine, isPlaying, view, sessionRunning, end]);
 
   return { on: mine, toggle };
 }

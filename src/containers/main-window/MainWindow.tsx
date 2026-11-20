@@ -629,7 +629,12 @@ export function MainWindow() {
   });
   // Listen (DESIGN 7): the tools' coach, on by the player's press only, ended
   // when they turn it off, leave the tools or leave it idle ten minutes.
-  const listen = useToolListen({ view, isPlaying: state.isPlaying, coach: session });
+  const listen = useToolListen({
+    view,
+    isPlaying: state.isPlaying,
+    coach: session,
+    sessionRunning: sessionRun.run.phase !== "idle" && sessionRun.run.phase !== "recap",
+  });
   const listenSwitch = useMemo(
     () => ({ on: listen.on, onToggle: listen.toggle }),
     [listen.on, listen.toggle],

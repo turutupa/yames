@@ -502,6 +502,7 @@
       "title": "Progresso",
       "toolRuns": "Execuções das ferramentas",
       "toolRunsIntro": "Cada trecho que o coach ouviu, nas ferramentas e nas sessões, do mais recente ao mais antigo.",
+      "toolRunsDeleteFailed": "Não foi possível excluir, então nada foi removido. Tente de novo daqui a pouco.",
       "intro": "Tudo aqui foi medido a partir do seu jeito de tocar: notas ouvidas, regularidade do tempo, andamento limpo.",
       "cleanMeans": "O mais rápido em que você bateu a meta, em quaisquer oito compassos seguidos.",
       "sparkLabel": "Regularidade ao longo das tomadas, {{title}}",

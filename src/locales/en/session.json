@@ -490,6 +490,7 @@
       "title": "Progress",
       "toolRuns": "Tool runs",
       "toolRunsIntro": "Every stretch the coach listened to, in the tools and in Sessions, newest first.",
+      "toolRunsDeleteFailed": "That could not be deleted, so nothing was removed. Try again in a moment.",
       "intro": "Everything here was measured from your playing: notes heard, timing evenness, clean tempo.",
       "cleanMeans": "The fastest you met the pass mark, over any eight bars in a row.",
       "sparkLabel": "Evenness across Takes, {{title}}",
