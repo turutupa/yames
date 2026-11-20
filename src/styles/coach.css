@@ -23,6 +23,8 @@
   --coach-good: var(--l-tone, var(--accent));
   --coach-good-text: var(--l-tone-text, var(--text-primary));
   --coach-bad: var(--l-clash, var(--btn-danger));
+  /* Red as words: taken toward the ink until it reads on a tinted cell, light themes included. */
+  --coach-bad-text: color-mix(in oklab, var(--coach-bad) 72%, var(--coach-ink));
   --coach-mark: var(--accent-2);
 }
 
@@ -284,7 +286,7 @@
 .coach-bar[data-state="missed"] {
   border-color: color-mix(in srgb, var(--coach-bad) 65%, transparent);
   background: color-mix(in srgb, var(--coach-bad) 18%, transparent);
-  color: var(--coach-bad);
+  color: var(--coach-bad-text);
 }
 .coach-bar[data-state="thin"] {
   border-style: dashed;
@@ -347,6 +349,14 @@
 
 /* --- small screens and short windows ------------------------------------- */
 
+/* A short phone: "Hear it first" is the Watch button under the picture, so
+   the note does not spend a row on it. */
+@media (max-width: 480px) and (max-height: 760px) {
+  .coach-note[data-kind="ready"] .coach-chip[data-kind="play"] {
+    display: none;
+  }
+}
+
 .main-window.is-mobile .coach-note {
   padding: 12px 14px 12px 13px;
   font-size: 14.5px;
@@ -363,7 +373,7 @@
    stays on screen (the last Take, the reasons and the source step aside), and
    the chips sit beside the headline when there is room. A narrow desktop
    window (620 x 780) has the same budget. */
-@media (min-width: 481px) and (max-height: 760px), (min-width: 481px) and (max-width: 700px) and (max-height: 900px) {
+@media (max-height: 760px), (min-width: 481px) and (max-width: 700px) and (max-height: 900px) {
   .coach-note[data-kind="ready"] {
     flex-direction: row;
     flex-wrap: wrap;
