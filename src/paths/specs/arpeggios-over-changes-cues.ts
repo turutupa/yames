@@ -53,6 +53,17 @@ const MOVE_IN_HELD = "Move in the held root's second beat.";
 const MOVE_HELD_LENGTH = "Use each held root's length to move.";
 const LAST_ROOT_TWO = "Hold the last root for its full two beats.";
 const AM_TO_C = "From A minor, go straight back to C on '1'.";
+const AIM_NEAREST = "Aim at the new chord's nearest note on '1'.";
+const FIVE_TO_ONE = "From five, go straight back to one on '1'.";
+const SAY_251 = "Say two, five, one as each chord starts.";
+const SWEEP_PUSH = "Push the pick through all three strings.";
+const LIFT_NEXT = "Lift each finger as the next note sounds.";
+const SWEEP_LATE = "Start each sweep right on the beat.";
+const SWEEP_EARLY = "Wait for the beat before each sweep.";
+const SWEEP_CROSS = "Keep the push one slow, even motion.";
+const LAST_PULL = "Keep the last pull as slow as the first push.";
+const MOVE_AFTER_PULL = "Move the shape as the last pull ends.";
+const SHIFT_SHORT = "Make the last note before each shift short.";
 const SAY_NAME = "Say each chord's name as you land on its root.";
 const ROOT_RING = "Let each root ring for its two beats.";
 const D_ONLY = "Keep the pick on the D string only.";
@@ -504,5 +515,174 @@ export const ARPEGGIOS_OVER_CHANGES_CUES: CueBook = {
     c("shift", MOVE_LAST_ENDS),
     c("stringChange", "Keep the pick close to the strings."),
     c("lastBars", "Keep the quarters even right to the last note."),
+  ],
+
+  // Level 3, Step 12: sevenths joined
+  "joined-sevenths.the-line": [
+    g(AIM_NEAREST),
+    c("notes", "Drop finger one to fret six for the last F.", 3),
+    c("heard", HEARD),
+    c("extras", EXTRAS),
+    c("late", CHANGE_LATE),
+    c("early", CHANGE_EARLY),
+    c("shift", NEXT_READY, 3),
+    c("stringChange", CROSS),
+    c("lastBars", "From G seven, go back to C on '1'."),
+  ],
+  "joined-sevenths.the-line-keys": [
+    g(AIM_NEAREST),
+    c("notes", SAY_1625),
+    c("heard", HEARD),
+    c("extras", EXTRAS),
+    c("late", CHANGE_LATE),
+    c("early", CHANGE_EARLY),
+    c("shift", NEXT_READY),
+    c("stringChange", CROSS),
+    c("lastBars", FIVE_TO_ONE),
+  ],
+  "joined-sevenths.your-changes": [g("Play each chord's seventh at least once.", 1)],
+
+  // Step 13: two, five, one in a minor key
+  "minor-two-five-one.two-and-five": [
+    g("Find E seven's root on the A string before '1'.", 2),
+    c("notes", "Put finger one on fret six for E seven's third.", 2),
+    c("heard", HEARD),
+    c("extras", EXTRAS),
+    c("late", ROOT_LATE),
+    c("early", ROOT_EARLY),
+    c("shift", SHIFT_GAP),
+    c("stringChange", CROSS),
+    c("lastBars", "From E seven, go back to fret nine on '1'."),
+  ],
+  "minor-two-five-one.minor-line": [
+    g("Let the seventh fall to E seven's third.", 4),
+    c("notes", "Keep the shared note as A minor seven starts.", 4),
+    c("heard", HEARD),
+    c("extras", EXTRAS),
+    c("late", CHANGE_LATE),
+    c("early", CHANGE_EARLY),
+    c("afterHeld", HELD_FOUR),
+    c("shift", "Drop the hand to fret three for E seven.", 4),
+    c("stringChange", CROSS),
+    c("lastBars", LAST_FOUR),
+  ],
+  "minor-two-five-one.minor-line-keys": [
+    g("Let two's seventh fall to five's third."),
+    c("notes", SAY_251),
+    c("heard", HEARD),
+    c("extras", EXTRAS),
+    c("late", CHANGE_LATE),
+    c("early", CHANGE_EARLY),
+    c("afterHeld", HELD_FOUR),
+    c("shift", NEXT_READY),
+    c("stringChange", CROSS),
+    c("lastBars", LAST_FOUR),
+  ],
+  "minor-two-five-one.your-minor-line": [g("Play G sharp just before A minor arrives.", 1)],
+
+  // Step 14: first sweeps
+  "first-sweeps.a-minor-sweep": [
+    g("Go slowly enough to stop on any note.", 2),
+    c("heard", SWEEP_PUSH),
+    c("extras", LIFT_NEXT),
+    c("late", SWEEP_LATE),
+    c("early", SWEEP_EARLY),
+    c("stringChange", SWEEP_CROSS),
+    c("lastBars", LAST_PULL),
+  ],
+  "first-sweeps.c-and-a-minor-sweep": [
+    g("Change only the B string's note for A minor.", 1),
+    c("heard", SWEEP_PUSH),
+    c("extras", LIFT_NEXT),
+    c("late", SWEEP_LATE),
+    c("early", SWEEP_EARLY),
+    c("stringChange", SWEEP_CROSS),
+    c("lastBars", LAST_PULL),
+  ],
+  "first-sweeps.four-chords-sweep": [
+    g("Have the next shape ready before '1'.", 1),
+    c("heard", SWEEP_PUSH),
+    c("extras", LIFT_NEXT),
+    c("late", CHANGE_LATE),
+    c("early", CHANGE_EARLY),
+    c("shift", MOVE_AFTER_PULL),
+    c("stringChange", SWEEP_CROSS),
+    c("lastBars", G_TO_C),
+  ],
+
+  // Step 15: more sweeps
+  "more-sweeps.barre-sweep": [
+    g("Roll finger one onto each string in turn.", 2),
+    c("heard", "Press the roll down fully on each string."),
+    c("extras", "If you hear a chord, slow down.", 2),
+    c("late", SWEEP_LATE),
+    c("early", SWEEP_EARLY),
+    c("stringChange", SWEEP_CROSS),
+    c("lastBars", LAST_PULL),
+  ],
+  "more-sweeps.root-lowest-sweep": [
+    g("Keep the fingers in their shape as you move.", 2),
+    c("heard", SWEEP_PUSH),
+    c("extras", LIFT_NEXT),
+    c("late", CHANGE_LATE),
+    c("early", CHANGE_EARLY),
+    c("shift", MOVE_AFTER_PULL),
+    c("stringChange", SWEEP_CROSS),
+    c("lastBars", "From E minor, go back to D minor on '1'."),
+  ],
+  "more-sweeps.low-four-sweep": [
+    g("Roll finger one for G and A minor.", 2),
+    c("heard", SWEEP_PUSH),
+    c("extras", LIFT_NEXT),
+    c("late", CHANGE_LATE),
+    c("early", CHANGE_EARLY),
+    c("afterHeld", "Count the held beat, then sweep C on '1'."),
+    c("shift", MOVE_AFTER_PULL),
+    c("stringChange", SWEEP_CROSS),
+    c("lastBars", "Stop on F's top note and hold it a beat.", 2),
+  ],
+
+  // Step 16: sweeps in a song
+  "sweeps-in-a-song.song-sweeps": [
+    g(SHIFT_SHORT, 1),
+    c("heard", SWEEP_PUSH),
+    c("extras", LIFT_NEXT),
+    c("late", CHANGE_LATE),
+    c("early", CHANGE_EARLY),
+    c("shift", MOVE_AFTER_PULL),
+    c("stringChange", SWEEP_CROSS),
+    c("lastBars", "From F, go back down to fret five for C."),
+  ],
+  "sweeps-in-a-song.song-sweeps-keys": [
+    g(SHIFT_SHORT),
+    c("heard", SWEEP_PUSH),
+    c("extras", LIFT_NEXT),
+    c("late", CHANGE_LATE),
+    c("early", CHANGE_EARLY),
+    c("shift", MOVE_AFTER_PULL),
+    c("stringChange", SWEEP_CROSS),
+    c("lastBars", "From four, go straight back to one on '1'."),
+  ],
+  "sweeps-in-a-song.two-octaves-in-triplets": [
+    g("Count '1-trip-let' and keep it even.", 0),
+    c("heard", HEARD),
+    c("extras", LIFT_NEXT, 2),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("afterHeld", "Count the long note's two beats, then go."),
+    c("stringChange", CROSS),
+    c("lastBars", "Turn round at the lowest note without a pause."),
+  ],
+
+  // Advanced warm-up (key and shape change each Take: nothing named)
+  "warmup-advanced.slow-sweeps": [
+    g("Sweep each chord slowly: one push, one pull.", 0),
+    c("heard", SWEEP_PUSH),
+    c("late", CHANGE_LATE),
+    c("early", CHANGE_EARLY),
+    c("afterHeld", "Count the held beat, then start again on '1'."),
+    c("shift", "Move on as the last pull ends."),
+    c("stringChange", SWEEP_CROSS),
+    c("lastBars", "Hold the last note for its full beat."),
   ],
 };

@@ -21,7 +21,11 @@ Cues: `src/paths/specs/arpeggios-over-changes-cues.ts`, attached with `withCues`
   the strings." (`gc4.log`: 0 errors, 0 refused, 0 rewritten). Level 1's quarter-note Exercises had the
   eighth-note shift cue; changed to "Move as each chord's last note ends.", and the one-octave `lastBars`
   (it repeated `afterHeld`) to "Keep the way down as even as the way up.".
-- [ ] Level 3
+- [x] Level 3 (Advanced: joined-sevenths, minor-two-five-one, first-sweeps, more-sweeps, sweeps-in-a-song,
+  warm-up), 19 Exercises. Refusals: `cue.refused` on the advanced warm-up's third-lowest variants for "Move
+  the shape as the last pull ends." (a shape, not a uniform transposition) and "Stop on the top note and hold
+  it a beat." (a direction) -> "Move on as the last pull ends." / "Hold the last note for its full beat."
+  (`gc6.log`: 0 errors, 0 refused, 0 rewritten).
 - [ ] Proof-read
 - [ ] Translations
 - [ ] Gates
