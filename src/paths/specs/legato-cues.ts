@@ -64,6 +64,21 @@ const HELD_OUT = "Count the held note out, then start again.";
 const THREE_EACH = "Count three notes on each string.";
 const HAMMER_BACK = "Hammer the last note back on its count.";
 const ROLLS_TOP = "Keep the rolls even right to the top.";
+const TOP_HOLD = "Hold the top note right to the end.";
+const LOW_HOLD = "Hold the last low note right to the end.";
+const NEW_FRETTED = "Have the new string fretted before the pick.";
+const DROP_FIRST = "Drop the first finger hard on the new string.";
+const STRING_STOP = "Let each string stop as the next one starts.";
+const SPREAD_SIX = "Spread the six notes evenly to the next pick.";
+const SPREAD_FIVE = "Spread the five notes evenly to the next pick.";
+const ONE_PICK_LATE = "Put the one picked note right on the click.";
+const SIX_TO_CLICK = "Count six notes to every click.";
+const NEXT_FINGER_READY = "Have the next string's finger ready early.";
+const PICK_HALF = "Pick each string on its beat or half beat.";
+const LONG_OUT = "Count each long note out, then move on.";
+const LAST_FULL = "Hold the last note its full length.";
+const REST_LIFT = "Lift off cleanly into each rest.";
+const REST_COUNT = "Count the rest before the next note.";
 
 export const LEGATO_CUES: CueBook = {
   // Level 1 · Step 1: first hammer-ons
@@ -245,7 +260,7 @@ export const LEGATO_CUES: CueBook = {
     c("early", HAMMER_EARLY),
     c("afterHeld", HELD_OUT),
     c("stringChange", FIRST_NEXT),
-    c("lastBars", "Hold the top note right to the end."),
+    c("lastBars", TOP_HOLD),
   ],
   "pentatonic-legato.box-down": [
     g("Pick high, pull off to the first finger.", 0),
@@ -256,7 +271,7 @@ export const LEGATO_CUES: CueBook = {
     c("early", LEGATO_SIXTEENTH),
     c("afterHeld", HELD_OUT),
     c("stringChange", "Move the first finger ahead to the next string.", 1),
-    c("lastBars", "Hold the last low note right to the end."),
+    c("lastBars", LOW_HOLD),
   ],
   "pentatonic-legato.repeating-lick": [
     g("Find a stroke pattern that repeats by itself.", 1),
@@ -298,7 +313,7 @@ export const LEGATO_CUES: CueBook = {
     c("notes", THREE_EACH),
     c("late", BEAT_PICK_LATE),
     c("early", SPREAD_THREE),
-    c("stringChange", "Have the new string fretted before the pick."),
+    c("stringChange", NEW_FRETTED),
     c("lastBars", PULL_TRIPLETS),
   ],
   "three-per-string.three-round": [
@@ -370,6 +385,249 @@ export const LEGATO_CUES: CueBook = {
     c("heard", PULL_SECOND),
     c("late", BEAT_PICK_LATE),
     c("early", LEGATO_SIXTEENTH),
+    c("shift", STEP_UP),
+    c("lastBars", ROLLS_TOP),
+  ],
+
+  // Level 3 · Step 8: hammer-ons from nowhere
+  "from-nowhere.nowhere-two": [
+    g("Hammer the new string's first note from the air.", 1),
+    c("heard", DROP_FIRST),
+    c("extras", "Let the old string stop as the finger lifts.", 1),
+    c("notes", "Say the six notes once before you start."),
+    c("late", BEAT_PICK_LATE),
+    c("early", SPREAD_SIX),
+    c("stringChange", "Cross strings with a hammer, not a pick.", 1),
+    c("lastBars", "Keep the six as even as the picked ones."),
+  ],
+  "from-nowhere.nowhere-ascent": [
+    g("Start each string with a hammer from the air.", 1),
+    c("heard", DROP_FIRST),
+    c("extras", STRING_STOP),
+    c("notes", THREE_EACH),
+    c("late", ONE_PICK_LATE),
+    c("early", SIX_TO_CLICK),
+    c("afterHeld", HELD_OUT),
+    c("stringChange", FIRST_NEXT),
+    c("lastBars", "Hold the last note right to the end.", 0),
+  ],
+  "from-nowhere.one-pick-round": [
+    g("Pick once; everything else is hammer or pull.", 0),
+    c("heard", "Have the lower fingers down before each hammer.", 1),
+    c("extras", STRING_STOP),
+    c("notes", "Pull, hammer, pull at the top, then come down.", 0),
+    c("late", ONE_PICK_LATE),
+    c("early", SIX_TO_CLICK),
+    c("stringChange", "Lead each lower string with the little finger.", 1),
+  ],
+
+  // Level 3 · Step 9: from nowhere in the box
+  "nowhere-box.nowhere-box-two": [
+    g("One pick a beat; start each string from the air.", 0),
+    c("heard", "Land the first finger with the third, together.", 1),
+    c("extras", STRING_STOP),
+    c("notes", STRING_PAIR_SAY),
+    c("late", BEAT_PICK_LATE),
+    c("early", LEGATO_SIXTEENTH),
+    c("afterHeld", HELD_OUT),
+    c("stringChange", NEXT_FINGER_READY),
+    c("lastBars", LAND_HOLD, 0),
+  ],
+  "nowhere-box.nowhere-box-up": [
+    g("Hammer every string from the first finger.", 1),
+    c("heard", DROP_FIRST),
+    c("extras", "Relax the old finger as the first finger lands.", 1),
+    c("notes", STRING_PAIR_SAY),
+    c("late", BEAT_FIRST_LATE),
+    c("early", LEGATO_SIXTEENTH),
+    c("afterHeld", HELD_OUT),
+    c("stringChange", FIRST_NEXT),
+    c("lastBars", TOP_HOLD),
+  ],
+  "nowhere-box.nowhere-box-down": [
+    g("Land both fingers at once; the upper one sounds.", 1),
+    c("heard", PULL_FLICK),
+    c("extras", STRING_STOP),
+    c("notes", STRING_PAIR_SAY),
+    c("late", BEAT_FIRST_LATE),
+    c("early", LEGATO_SIXTEENTH),
+    c("afterHeld", HELD_OUT),
+    c("stringChange", NEXT_FINGER_READY),
+    c("lastBars", LOW_HOLD),
+  ],
+  "nowhere-box.nowhere-box-both": [
+    g("Two picks: one at the bottom, one at the top.", 0),
+    c("heard", PICK_TOP_AGAIN, 0),
+    c("extras", STRING_STOP),
+    c("notes", STRING_PAIR_SAY),
+    c("late", PICK_LATE),
+    c("early", LEGATO_SIXTEENTH),
+    c("afterHeld", HELD_TWO),
+    c("stringChange", NEXT_FINGER_READY),
+    c("lastBars", HOLD_LAST_TWO, 1),
+  ],
+  "nowhere-box.nowhere-box-round": [
+    g("Pick once and let the fingers do the rest.", 0),
+    c("heard", "Hammer again at the turn, then climb.", 1),
+    c("extras", STRING_STOP),
+    c("notes", STRING_PAIR_SAY),
+    c("late", ONE_PICK_LATE),
+    c("early", LEGATO_SIXTEENTH),
+    c("stringChange", NEXT_FINGER_READY),
+  ],
+
+  // Level 3 · Step 10: six-string runs
+  "six-string-runs.six-up": [
+    g("Let the pick mark each string; hammer between.", 1),
+    c("heard", LEAVE_DOWN),
+    c("extras", LIFT_LEAVE),
+    c("notes", THREE_EACH),
+    c("late", PICK_HALF, 1),
+    c("early", SPREAD_THREE),
+    c("afterHeld", HELD_OUT),
+    c("shift", SHIFT_ON_PICK),
+    c("stringChange", FIRST_NEXT),
+    c("lastBars", TOP_HOLD),
+  ],
+  "six-string-runs.six-down": [
+    g("Have all three fingers down before each pick.", 1),
+    c("heard", PULL_SECOND),
+    c("extras", PULL_CLEAR),
+    c("notes", THREE_EACH),
+    c("late", PICK_HALF),
+    c("early", SPREAD_THREE),
+    c("afterHeld", HELD_OUT),
+    c("shift", SHIFT_ON_PICK, 1),
+    c("stringChange", NEW_FRETTED, 1),
+    c("lastBars", LOW_HOLD),
+  ],
+  "six-string-runs.position-run": [
+    g("Look at the fret you are going to.", 1),
+    c("heard", LEAVE_DOWN),
+    c("extras", LIFT_LEAVE),
+    c("notes", "Start the positions at frets 5, 8 and 10.", 0),
+    c("late", PICK_HALF),
+    c("early", SPREAD_THREE),
+    c("afterHeld", HELD_OUT),
+    c("shift", "Shift between beats, on the picked note.", 1),
+    c("stringChange", FIRST_NEXT),
+    c("lastBars", LAND_HOLD),
+  ],
+
+  // Level 3 · Step 11: odd groups
+  "odd-groups.fives": [
+    g("Count five to each click, picking on the beat.", 0),
+    c("heard", PULL_SECOND),
+    c("extras", PULL_CLEAR),
+    c("notes", "Pick fret 8 again on every beat.", 0),
+    c("late", BEAT_PICK_LATE),
+    c("early", SPREAD_FIVE),
+    c("stringChange", "Pick again for the new string on the last beat.", 1),
+    c("lastBars", "Fall onto the G string with a fresh pick.", 0),
+  ],
+  "odd-groups.six-roll": [
+    g("Lean on the fourth note of each six.", 1),
+    c("heard", PULL_SECOND),
+    c("extras", PULL_CLEAR),
+    c("notes", GROUP_NOTES),
+    c("late", BEAT_PICK_LATE),
+    c("early", SPREAD_SIX),
+  ],
+  "odd-groups.fives-down": [
+    g("Start each beat one note lower than the last.", 0),
+    c("heard", "Have the fingers down on the new string first.", 1),
+    c("extras", PULL_CLEAR),
+    c("notes", "Say each beat's first note before you start."),
+    c("late", BEAT_FIRST_LATE),
+    c("early", SPREAD_FIVE),
+    c("stringChange", "Pick every new string; pull off everything else.", 1),
+  ],
+
+  // Level 3 · Step 12: long lines
+  "long-lines.etude": [
+    g("Land each picked note with the bass and drums.", 0),
+    c("heard", PULL_LAST),
+    c("extras", PULL_CLEAR),
+    c("notes", "Keep the hand in fifth position throughout.", 4),
+    c("late", BEAT_PICK_LATE),
+    c("early", LEGATO_SIXTEENTH),
+    c("stringChange", "Change only the string under the pick.", 4),
+    c("lastBars", "Count '1 e and a' right to the last note."),
+  ],
+  "long-lines.six-round": [
+    g("Count the climb's three beats; turn on four.", 0),
+    c("heard", PICK_TOP_AGAIN, 1),
+    c("extras", LIFT_LEAVE),
+    c("notes", THREE_EACH),
+    c("late", PICK_HALF),
+    c("early", SPREAD_THREE),
+    c("afterHeld", HELD_TWO),
+    c("shift", SHIFT_ON_PICK, 1),
+    c("stringChange", FIRST_NEXT),
+    c("lastBars", HOLD_LAST_TWO),
+  ],
+  "long-lines.roll-minute": [
+    g("Start at a tempo you can hold a whole minute.", 0),
+    c("heard", "Keep every hammer-on firm to the last second."),
+    c("late", BEAT_PICK_LATE),
+    c("early", LEGATO_SIXTEENTH),
+    c("lastBars", "Keep the roll as even in the last seconds."),
+  ],
+
+  // Level 3 · Step 13: a second key, over the band
+  "second-key.phrase-climbs": [
+    g("Hold each long note for its full length."),
+    c("heard", PULL_LAST),
+    c("extras", REST_LIFT),
+    c("notes", "Use fingers one, two, four on both top strings.", 0),
+    c("late", PICK_LATE),
+    c("early", REST_COUNT),
+    c("afterHeld", LONG_OUT),
+    c("shift", SHIFT_ON_PICK),
+    c("stringChange", NEXT_FINGER_READY),
+    c("lastBars", LAST_FULL),
+  ],
+  "second-key.phrase-home": [
+    g("Lay the first finger flat across two strings.", 0),
+    c("heard", PULL_LAST),
+    c("extras", REST_LIFT),
+    c("notes", "Come down the B string in two steps.", 1),
+    c("late", PICK_LATE),
+    c("early", REST_COUNT),
+    c("afterHeld", LONG_OUT),
+    c("shift", "Shift on the longer note, little finger first.", 1),
+    c("stringChange", NEXT_FINGER_READY),
+    c("lastBars", LAST_FULL),
+  ],
+  "second-key.phrases-joined": [
+    g("Count through every rest to the end.", 2),
+    c("heard", PULL_LAST),
+    c("extras", REST_LIFT),
+    c("notes", "Start the second phrase with the first finger.", 1),
+    c("late", PICK_LATE),
+    c("early", REST_COUNT),
+    c("afterHeld", LONG_OUT),
+    c("shift", SHIFT_ON_PICK),
+    c("stringChange", NEXT_FINGER_READY),
+    c("lastBars", LAST_FULL),
+  ],
+
+  // Level 3 · warm-ups
+  "warmup-advanced.nowhere-round": [
+    g("One pick a beat; hammer everything else.", 0),
+    c("heard", DROP_FIRST),
+    c("late", BEAT_PICK_LATE),
+    c("early", SIX_TO_CLICK),
+    c("afterHeld", LONG_OUT),
+    c("shift", "Look ahead during each long note.", 0),
+    c("stringChange", "Change strings with a hammer, not a pick."),
+    c("lastBars", "Hold the last long note its full beat."),
+  ],
+  "warmup-advanced.six-roll-climb": [
+    g("Pick, hammer, hammer, pull, pull, hammer.", 0),
+    c("heard", PULL_SECOND),
+    c("late", BEAT_PICK_LATE),
+    c("early", SPREAD_SIX),
     c("shift", STEP_UP),
     c("lastBars", ROLLS_TOP),
   ],
