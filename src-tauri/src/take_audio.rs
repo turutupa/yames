@@ -731,8 +731,9 @@ mod tests {
         assert_eq!(slot.slice(1, 5, 5).err(), Some(HearRefused::NoSuchBar));
         let s = slot.slice(1, 2, 2).unwrap();
         assert_eq!(s.rate, 1000);
-        assert_eq!(s.pcm.len(), 4300 - 3850);
-        assert_eq!(s.length_ms(), 450);
+        // bar 2 is 4000..6000: 150 before, 300 after
+        assert_eq!(s.pcm.len(), 6300 - 3850);
+        assert_eq!(s.length_ms(), 2450);
         // faded at the edges, untouched in the middle
         assert_eq!(s.pcm[0], 0.0);
         assert_eq!(s.pcm[100], 3950.0);

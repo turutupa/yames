@@ -6534,7 +6534,7 @@ mod hear_take_tests {
         held_take(&heard);
         let handoff = crate::take::TakeHandoff::new();
         let mut s = crate::state::AppState::default();
-        s.is_playing = false;
+        assert!(!s.is_playing);
         heard.0.start(&handoff, heard.0.slice(1, 1, 1).unwrap()).unwrap();
         assert!(handoff.is_playing_back());
         raise_transport(&mut s, &heard, &handoff);
