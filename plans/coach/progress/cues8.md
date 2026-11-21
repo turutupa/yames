@@ -14,7 +14,10 @@ Cues: `src/paths/specs/triads-cues.ts`, attached with `withCues` in `triads.ts`.
 - [x] Level 1 (Beginner), 22 Exercises. `check` 0 errors, 0 refused, 0 rewritten (`gc4.log`).
 - [x] Level 2 (Intermediate), 26 Exercises (your-line self-checked: general only). `check` 0 errors, 0
   refused, 0 rewritten (`gc6.log`). Two at 49 characters, shortened.
-- [ ] Level 3
+- [x] Level 3 (Advanced), 24 Exercises (two self-checked: general only). `check` 0 errors, 0 refused,
+  0 rewritten (`gc8.log`). One refusal: "Lay finger one flat for C and for D." (`cue.specific`, "a
+  sentence about the other variants": "for D" read as a string) -> "Barre with finger one for the C
+  and D chords." All 72: 617 cues.
 - [ ] Proof-read
 - [ ] Translations
 - [ ] Gates
