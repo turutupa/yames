@@ -317,6 +317,25 @@ describe("takeNote: one fixture Take per finding kind", () => {
     expect(n.strip?.label).toEqual({ key: "session.note.strip.held", values: { count: 8 } });
   });
 
+  it("the strip's label never says bars held in a row over a crossed bar", () => {
+    // The scorer pools its windows, so its held stretch can span a bar the
+    // strip crosses on its own figures: a pass with bar 4 slipped inside it.
+    const n = note({ slipped: [3], findings: [finding("improved", [0, 9])] });
+    expect(n.verdict).toBe("passed");
+    const strip = n.strip!;
+    expect(strip.held).not.toBeNull();
+    expect(strip.cells.find((c) => c.n === 4)?.state).toBe("missed");
+    expect(strip.label.key).not.toBe("session.note.strip.held");
+    // And wherever the label does say it, every bar it counts is uncrossed.
+    for (const slipped of [[], [3], [8], [0, 9]]) {
+      const s = note({ slipped, findings: [finding("improved", [0, 9])] }).strip!;
+      if (s.label.key !== "session.note.strip.held") continue;
+      const { from, count } = s.held!;
+      expect(s.label.values).toEqual({ count });
+      expect(s.cells.filter((c) => c.n >= from && c.n < from + count).every((c) => c.state !== "missed")).toBe(true);
+    }
+  });
+
   it("Clean: a pass that raised the clean tempo says so", () => {
     const n = note({ findings: [finding("clean", [0, 9])], cleanBefore: 80 });
     expect(n.finding).toBe("clean");
