@@ -81,6 +81,15 @@
       "preset": "{{preset}}",
       "setting": "{{value}}"
     },
+    "command": {
+      "minutes": "{{minutes}} minuti oggi",
+      "jam": "La jam «{{jam}}»",
+      "preset": "Il preset «{{preset}}»",
+      "swapHarder": "Parte {{part}}: qualcosa di più difficile",
+      "swapDifferent": "Parte {{part}}: qualcosa di diverso",
+      "swapStyle": "Parte {{part}}: un altro stile",
+      "other": "{{tool}}"
+    },
     "chip": {
       "goTo": "Vai a {{screen}}",
       "startToday": "Avvia la sessione di oggi",

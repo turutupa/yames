@@ -1,0 +1,157 @@
+{
+  "language": "pl",
+  "noSpaces": false,
+  "verbs": {
+    "open": ["otwórz", "otworzyć", "otwórzcie", "otworz", "idź do", "idz do", "przejdź do", "przejdz do", "przejdź", "przejdz", "idź", "wejdź do", "wejdź w", "wejdź", "przełącz na"],
+    "start": ["zacznij", "zacząć", "rozpocznij", "rozpocząć", "start", "zagraj", "zagrać", "graj", "grać"],
+    "slower": ["wolniej", "zwolnij", "zwolnić", "spowolnij"],
+    "faster": ["szybciej", "przyspiesz", "przyspieszyć", "przyśpiesz"],
+    "loop": ["zapętl", "zapętlić", "zapętlaj", "zapetl", "powtórz", "powtarzaj", "powtórzyć"],
+    "show": ["pokaż", "pokazać", "pokaz", "narysuj", "wyświetl"],
+    "follow": ["śledź", "śledzić", "sledz", "podążaj"],
+    "load": ["wczytaj", "wczytać", "załaduj", "załadować", "zaladuj"],
+    "set": ["ustaw", "ustawić", "zmień", "zmienić", "zmien"],
+    "focus": ["skup się na", "skup się", "skoncentruj się na", "skoncentruj się"],
+    "swap": ["zamień", "zamienić", "zamien", "wymień", "wymienić", "wymien"],
+    "findEdge": ["znajdź moją granicę w", "znajdź moją granicę na", "znajdź moją granicę", "znajdź granicę w", "znajdź granicę na", "znajdź granicę", "znajdz granice", "znajdź mój limit"],
+    "testOut": ["zrób test z", "zrób test", "zrob test", "przetestuj"],
+    "explain": ["wyjaśnij", "wyjasnij", "objaśnij", "wytłumacz"],
+    "make": ["zrób mi", "zrób", "zrob", "stwórz mi", "stwórz", "ułóż mi", "ułóż", "zbuduj"]
+  },
+  "screens": {
+    "today": ["dzisiaj", "dziś", "dzis"],
+    "paths": ["ścieżki", "ścieżek", "sciezki", "sciezek"],
+    "progress": ["postępy", "postępów", "postepy"],
+    "tools": ["narzędzia", "narzędzi", "narzedzia"],
+    "beat": ["metronom", "metronomu"],
+    "drill": ["rozbieg", "rozbiegu"],
+    "setlist": ["setlista", "setlistę", "setlisty", "setliście"],
+    "jam": ["jam", "jamy", "jamu"],
+    "songs": ["utwory", "utworów", "piosenki", "piosenek"],
+    "settings": ["ustawienia", "ustawień", "ustawieniach", "opcje"]
+  },
+  "sections": {
+    "general": ["ogólne", "ogólnych"],
+    "appearance": ["wygląd", "wyglądu"],
+    "instrument": ["instrument", "instrumentu"],
+    "practice": ["ćwiczenie", "ćwiczenia", "ćwiczeń", "cwiczenia"],
+    "coach": ["trener", "trenera"],
+    "tools": ["narzędzia", "narzędzi"],
+    "songs": ["utwory", "utworów"],
+    "keepTakes": ["zachowywanie podejść", "zachowaj podejścia"],
+    "about": ["o aplikacji"]
+  },
+  "settingKeys": {
+    "theme": ["motyw", "motywu", "motyw kolorystyczny"],
+    "language": ["język", "języka"],
+    "practiceView": ["widok ćwiczenia", "widok ćwiczeń"],
+    "bandVolume": ["głośność zespołu", "glosnosc zespolu"],
+    "countIn": ["odliczanie", "odliczania"],
+    "coachVoice": ["głos trenera", "głos"],
+    "coachSuggestions": ["sugestie trenera", "sugestie", "wskazówki trenera", "wskazówki"]
+  },
+  "onOff": {
+    "on": ["włączone", "włączony", "włącz", "wł", "tak"],
+    "off": ["wyłączone", "wyłączony", "wyłącz", "wył"]
+  },
+  "units": {
+    "bpm": ["bpm", "uderzeń na minutę", "uderzenia na minutę"],
+    "minutes": ["minut", "minuty", "minutę", "minuta", "min"],
+    "bar": ["takty", "takt", "taktów", "taktu", "takcie", "taktach"],
+    "step": ["krok", "kroku", "kroków"],
+    "part": ["część", "części", "czesc"],
+    "clicks": ["kliki na uderzenie", "klików na uderzenie", "klik na uderzenie", "kliknięcia na uderzenie", "kliki"]
+  },
+  "nouns": {
+    "tempo": ["tempo", "tempa", "prędkość"],
+    "path": ["ścieżka", "ścieżkę", "ścieżki", "ścieżce", "sciezke"],
+    "jam": ["jam", "jamu"],
+    "preset": ["preset", "presetu"],
+    "chord": ["akord", "akordu"],
+    "scale": ["skala", "skalę", "skali"],
+    "exercise": ["ćwiczenie", "ćwiczenia"],
+    "goal": ["mój cel", "moj cel", "cel"],
+    "session": ["dzisiejszą sesję", "dzisiejsza sesja", "dzisiejszej sesji", "sesję", "sesja", "sesji", "dzisiaj", "dziś"],
+    "mix": ["moja mieszanka", "moją mieszankę", "mieszanka", "mieszankę", "mieszance", "mieszanki", "mix", "miks"],
+    "screen": ["ten ekran", "ekran", "ten widok", "widok"]
+  },
+  "connectors": {
+    "to": ["na", "do", "-"],
+    "at": ["od", "na", "w tempie"],
+    "of": ["w", "z", "na", "od", "dla"],
+    "for": ["na", "dla", "z"]
+  },
+  "swapChoices": {
+    "harder": ["coś trudniejszego", "trudniejsze", "trudniejszy", "trudniejszą", "trudniejszego"],
+    "different": ["coś innego", "coś różnego", "inne", "inny", "innego"],
+    "style": ["inny styl", "innego stylu", "w innym stylu", "styl"]
+  },
+  "ordinals": {
+    "pierwszy": 1,
+    "drugi": 2,
+    "trzeci": 3,
+    "czwarty": 4
+  },
+  "roots": {
+    "sharp": ["krzyżyk", "krzyzyk", "sharp"],
+    "flat": ["bemol", "flat"]
+  },
+  "scales": {
+    "major": ["dur", "durowa", "durową", "jońska", "jońską"],
+    "naturalMinor": ["moll", "mollowa", "mollową", "moll naturalna", "naturalna moll", "eolska", "eolską"],
+    "dorian": ["dorycka", "dorycką"],
+    "mixolydian": ["miksolidyjska", "miksolidyjską", "mixolidyjska", "mixolidyjską"],
+    "minorPentatonic": ["pentatonika molowa", "pentatonikę molową", "molowa pentatonika", "molową pentatonikę", "pentatonika moll", "pentatonikę moll", "pentatonika", "pentatonikę"],
+    "majorPentatonic": ["pentatonika durowa", "pentatonikę durową", "durowa pentatonika", "durową pentatonikę", "pentatonika dur", "pentatonikę dur"],
+    "blues": ["blues", "bluesowa", "bluesową", "blues molowy", "molowy blues"],
+    "harmonicMinor": ["moll harmoniczna", "moll harmoniczną", "harmoniczna moll", "harmoniczną moll", "harmoniczna molowa", "harmoniczną molową"],
+    "melodicMinor": ["moll melodyczna", "moll melodyczną", "melodyczna moll", "melodyczną moll", "melodyczna molowa", "melodyczną molową"],
+    "lydian": ["lidyjska", "lidyjską"],
+    "phrygian": ["frygijska", "frygijską"],
+    "majorBlues": ["blues durowy", "durowy blues"],
+    "altered": ["alterowana", "alterowaną", "altered"],
+    "locrian": ["lokrycka", "lokrycką"],
+    "wholeTone": ["całotonowa", "całotonową"],
+    "diminishedWholeHalf": ["zmniejszona ton półton", "zmniejszoną ton półton"],
+    "diminishedHalfWhole": ["zmniejszona półton ton", "zmniejszoną półton ton"],
+    "phrygianDominant": ["frygijska dominanta", "frygijską dominantę", "frygijska dominantowa", "frygijską dominantową"],
+    "lydianDominant": ["lidyjska dominantowa", "lidyjską dominantową", "lidyjska dominanta", "lidyjską dominantę"],
+    "harmonicMajor": ["dur harmoniczna", "dur harmoniczną", "harmoniczna dur", "harmoniczną dur", "harmoniczna durowa", "harmoniczną durową"],
+    "hungarianMinor": ["węgierska moll", "węgierską moll", "węgierska molowa", "węgierską molową"],
+    "augmentedScale": ["zwiększona", "zwiększoną"],
+    "bebopDominant": ["bebopowa dominantowa", "bebopową dominantową"],
+    "bebopMajor": ["bebopowa durowa", "bebopową durową"],
+    "bebopMinor": ["bebopowa molowa", "bebopową molową"],
+    "chromatic": ["chromatyczna", "chromatyczną"]
+  },
+  "positions": {
+    "open": ["pozycja otwarta", "pozycję otwartą", "otwarta pozycja", "otwartą pozycję"],
+    "rootOn6": ["tonika na 6 strunie", "tonika na szóstej strunie", "tonika na 6", "root na 6 strunie", "root na szóstej strunie", "root na 6"],
+    "rootOn5": ["tonika na 5 strunie", "tonika na piątej strunie", "tonika na 5", "root na 5 strunie", "root na piątej strunie", "root na 5"],
+    "rootOn4": ["tonika na 4 strunie", "tonika na czwartej strunie", "tonika na 4", "root na 4 strunie", "root na czwartej strunie", "root na 4"],
+    "rootOn3": ["tonika na 3 strunie", "tonika na trzeciej strunie", "tonika na 3", "root na 3 strunie", "root na trzeciej strunie", "root na 3"]
+  },
+  "never": {
+    "input": ["mikrofon", "mikrofonu", "mikrofonem", "mikrofonie", "mikrofony", "wejście", "wejścia", "wejściu", "wejściem", "słuchanie", "słuchania", "słuchaj", "słuchać"],
+    "devices": ["urządzenie", "urządzenia", "urządzeń", "urządzeniu", "urządzeniem", "interfejs", "interfejsu", "wyjście", "wyjścia", "głośniki", "głośników", "słuchawki", "słuchawek", "słuchawkami", "karta dźwiękowa", "kartę dźwiękową", "karty dźwiękowej"],
+    "grading": ["z oceną", "bez oceny", "ocenianie", "oceniania", "ocenianiu", "oceniany", "oceniana", "oceniane", "oceń", "oceniaj", "nieoceniany"],
+    "recording": ["nagrywanie", "nagrywania", "nagrywaniu", "nagraj", "nagrać", "nagrywaj", "nagrywać", "nagranie", "nagrania", "nagrań", "nagraniu"],
+    "deleting": ["usuń", "usun", "usunąć", "usuwaj", "usuwać", "skasuj", "skasować", "kasuj", "wykasuj", "wyczyść", "wyczysc", "wyczyścić", "czyść", "zapomnij", "wymaż", "wymazać"],
+    "unfollowing": ["przestań śledzić", "przestań obserwować", "porzuć", "porzucić", "opuść ścieżkę", "wypisz się", "zrezygnuj ze ścieżki"],
+    "model": ["pobierz", "pobrać", "pobieranie", "pobierania", "ściągnij", "ściągnąć", "model", "modelu", "modelem", "llm"],
+    "grades": ["oceny", "ocenę", "ocena", "ocen", "oceną", "wyniki", "wyników", "wynik", "punkty", "punktów", "czyste tempo", "czystego tempa"]
+  },
+  "questions": [
+    "czy", "dlaczego", "czemu", "po co", "co", "jak", "jaki", "jaka", "jakie", "jakiego", "jaką", "jakim", "kiedy", "gdzie", "kto", "który", "która", "które",
+    "ile", "skąd", "dokąd", "czyj", "możesz", "mógłbyś", "mogę", "można", "powinienem", "powinnam", "czy możesz", "jest", "są", "był", "była", "było"
+  ],
+  "notCommand": [
+    "ja", "ty", "on", "ona", "ono", "my", "wy", "oni", "one", "mnie", "ciebie", "cię", "go", "ją", "ich", "nas", "nam", "was", "wam", "to",
+    "nie", "nigdy", "ani", "wczoraj", "jutro", "jutra", "wieczorem", "rano", "później", "potem", "znowu", "znów", "jeszcze", "ponownie", "następny", "następna", "następne", "kolejny", "kolejna", "kolejne", "temu", "wcześniej", "ostatnio", "od nowa", "od początku",
+    "ponieważ", "bo", "bowiem", "ale", "jeśli", "jeżeli", "gdyby", "gdy", "kiedy", "gdzie", "jak", "czy", "niż", "aniżeli",
+    "jest", "są", "był", "była", "było", "byli", "były", "będzie", "jestem", "jesteś", "bym", "zbyt", "bardzo", "naprawdę", "więc", "też", "także",
+    "chcę", "chciałbym", "chciałabym", "potrzebuję", "muszę", "myślę", "czuję", "uważam", "lubię", "wolę", "albo", "lub", "razem", "wraz", "wstecz", "z powrotem", "dla mnie", "ze mną"
+  ],
+  "polite": ["proszę", "ok", "okej", "hej trenerze", "hej", "trenerze", "teraz", "dzięki", "dziękuję", "po prostu", "no"],
+  "fillers": ["mi", "trochę", "troszkę", "troszeczkę", "nieco", "odrobinę", "mój", "moje", "moja", "moją", "moim", "o jeden szczebel", "o szczebel"]
+}

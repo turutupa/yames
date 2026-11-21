@@ -81,6 +81,15 @@
       "preset": "{{preset}}",
       "setting": "{{value}}"
     },
+    "command": {
+      "minutes": "오늘 {{minutes}}분",
+      "jam": "잼 “{{jam}}”",
+      "preset": "프리셋 “{{preset}}”",
+      "swapHarder": "{{part}}번째 파트: 더 어려운 것",
+      "swapDifferent": "{{part}}번째 파트: 다른 것",
+      "swapStyle": "{{part}}번째 파트: 다른 스타일",
+      "other": "{{tool}}"
+    },
     "chip": {
       "goTo": "{{screen}}(으)로 이동",
       "startToday": "오늘의 세션 시작",

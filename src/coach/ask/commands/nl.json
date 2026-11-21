@@ -1,0 +1,163 @@
+{
+  "language": "nl",
+  "noSpaces": false,
+  "verbFinal": true,
+  "verbs": {
+    "open": ["open", "openen", "ga naar", "ga", "ga naar de"],
+    "start": ["start", "starten", "begin", "beginnen", "speel", "spelen"],
+    "slower": ["langzamer", "trager", "langzamer spelen", "trager spelen", "langzamer maken", "maak langzamer", "speel langzamer", "speel trager", "vertraag", "vertragen"],
+    "faster": ["sneller", "sneller spelen", "sneller maken", "maak sneller", "speel sneller", "versnel", "versnellen"],
+    "loop": ["loop", "loopen", "herhaal", "herhalen"],
+    "show": ["toon", "tonen", "laat zien", "laat me zien", "laten zien", "teken", "tekenen"],
+    "follow": ["volg", "volgen"],
+    "load": ["laad", "laden"],
+    "set": ["zet", "zetten", "stel in", "stel", "instellen", "stellen", "verander", "veranderen", "wijzig", "wijzigen"],
+    "focus": ["focus op", "focus", "richt op", "concentreer op"],
+    "swap": ["wissel", "wisselen", "vervang", "vervangen", "verwissel", "verwisselen"],
+    "findEdge": ["vind mijn grens bij", "vind mijn grens op", "vind mijn grens", "vind grens", "zoek mijn grens bij", "zoek mijn grens op", "zoek mijn grens"],
+    "testOut": ["test", "testen", "toets", "toetsen"],
+    "explain": ["leg uit", "uitleggen", "leg", "verklaar"],
+    "make": ["maak", "maken", "bouw", "bouwen", "genereer"]
+  },
+  "screens": {
+    "today": ["vandaag"],
+    "paths": ["leerpaden"],
+    "progress": ["voortgang"],
+    "tools": ["tools"],
+    "beat": ["metronoom"],
+    "drill": ["tempotraining", "tempo-training", "tempo training"],
+    "setlist": ["setlist"],
+    "jam": ["jam", "jams"],
+    "songs": ["nummers"],
+    "settings": ["instellingen"]
+  },
+  "sections": {
+    "general": ["algemeen"],
+    "appearance": ["weergave"],
+    "instrument": ["instrument"],
+    "practice": ["oefenen"],
+    "coach": ["coach"],
+    "tools": ["tools"],
+    "songs": ["nummers"],
+    "keepTakes": ["takes bewaren", "take bewaren"],
+    "about": ["over"]
+  },
+  "settingKeys": {
+    "theme": ["thema"],
+    "language": ["taal"],
+    "practiceView": ["oefenweergave"],
+    "bandVolume": ["bandvolume", "band volume"],
+    "countIn": ["inteller", "count in", "count-in"],
+    "coachVoice": ["coachstem", "coach stem", "coach-stem", "stem"],
+    "coachSuggestions": ["coachsuggesties", "coach suggesties", "coach-suggesties", "suggesties", "tips"]
+  },
+  "onOff": {
+    "on": ["aan", "ja"],
+    "off": ["uit", "nee"]
+  },
+  "units": {
+    "bpm": ["bpm", "slagen per minuut"],
+    "minutes": ["minuten", "minuut", "min"],
+    "bar": ["maten", "maat"],
+    "step": ["stap"],
+    "part": ["deel"],
+    "clicks": ["klikken per tel", "klikken per beat", "klik per tel", "klikken", "klik"]
+  },
+  "nouns": {
+    "tempo": ["tempo", "snelheid"],
+    "path": ["leerpad", "pad"],
+    "jam": ["jam"],
+    "preset": ["preset"],
+    "chord": ["akkoord"],
+    "scale": ["toonladder", "schaal"],
+    "exercise": ["oefening"],
+    "goal": ["mijn doel", "doel"],
+    "session": ["sessie van vandaag", "de sessie van vandaag", "de sessie", "sessie", "vandaag"],
+    "mix": ["mix", "de mix"],
+    "screen": ["dit scherm uit", "dit scherm", "dit scherm", "deze pagina", "deze weergave", "het scherm", "scherm uit", "scherm"]
+  },
+  "connectors": {
+    "to": ["op", "naar", "tot", "-"],
+    "at": ["op", "bij", "vanaf"],
+    "of": ["van", "op", "in", "voor", "bij"],
+    "for": ["voor", "met", "door"]
+  },
+  "swapChoices": {
+    "harder": ["iets moeilijkers", "moeilijkers", "moeilijker", "iets zwaarders", "zwaarder"],
+    "different": ["iets anders", "anders", "iets ander"],
+    "style": ["een andere stijl", "andere stijl", "stijl"]
+  },
+  "ordinals": {
+    "eerste": 1,
+    "tweede": 2,
+    "derde": 3,
+    "vierde": 4
+  },
+  "roots": {
+    "sharp": ["kruis", "sharp"],
+    "flat": ["mol", "flat"]
+  },
+  "scales": {
+    "major": ["majeur", "ionisch"],
+    "naturalMinor": ["natuurlijk mineur", "mineur", "aeolisch"],
+    "dorian": ["dorisch"],
+    "mixolydian": ["mixolydisch"],
+    "minorPentatonic": ["mineur pentatonisch", "mineur pentatoniek", "pentatonisch mineur", "pentatonisch", "pentatoniek"],
+    "majorPentatonic": ["majeur pentatonisch", "majeur pentatoniek", "pentatonisch majeur"],
+    "blues": ["blues", "mineur blues"],
+    "harmonicMinor": ["harmonisch mineur"],
+    "melodicMinor": ["melodisch mineur"],
+    "lydian": ["lydisch"],
+    "phrygian": ["frygisch", "phrygisch"],
+    "majorBlues": ["majeur blues"],
+    "altered": ["gealtereerd", "altered"],
+    "locrian": ["locrisch"],
+    "wholeTone": ["hele toon", "heletoons"],
+    "diminishedWholeHalf": ["verminderd hele halve"],
+    "diminishedHalfWhole": ["verminderd halve hele"],
+    "phrygianDominant": ["frygisch dominant"],
+    "lydianDominant": ["lydisch dominant"],
+    "harmonicMajor": ["harmonisch majeur"],
+    "hungarianMinor": ["hongaars mineur"],
+    "augmentedScale": ["overmatig"],
+    "bebopDominant": ["bebop dominant"],
+    "bebopMajor": ["bebop majeur"],
+    "bebopMinor": ["bebop mineur"],
+    "chromatic": ["chromatisch"]
+  },
+  "positions": {
+    "open": ["open positie"],
+    "rootOn6": ["grondtoon op 6", "grondtoon op de 6e snaar", "grondtoon op de zesde snaar", "grondtoon op snaar 6"],
+    "rootOn5": ["grondtoon op 5", "grondtoon op de 5e snaar", "grondtoon op de vijfde snaar", "grondtoon op snaar 5"],
+    "rootOn4": ["grondtoon op 4", "grondtoon op de 4e snaar", "grondtoon op de vierde snaar", "grondtoon op snaar 4"],
+    "rootOn3": ["grondtoon op 3", "grondtoon op de 3e snaar", "grondtoon op de derde snaar", "grondtoon op snaar 3"]
+  },
+  "never": {
+    "input": ["microfoon", "microfoons", "mic", "ingang", "invoer", "luister", "luisteren", "luistert"],
+    "devices": ["audioapparaat", "audioapparaten", "apparaat", "apparaten", "interface", "uitgang", "luidspreker", "luidsprekers", "speakers", "koptelefoon", "koptelefoons", "hoofdtelefoon"],
+    "grading": ["beoordeling", "beoordelen", "beoordeeld", "beoordeel", "onbeoordeeld"],
+    "recording": ["opname", "opnames", "opnemen", "neem op", "opgenomen", "record", "recording"],
+    "deleting": ["verwijder", "verwijderen", "verwijderd", "wis", "wissen", "weggooien", "gooi weg", "maak leeg", "leegmaken", "vergeet", "vergeten"],
+    "unfollowing": ["ontvolg", "ontvolgen", "stop met volgen", "verlaat het leerpad", "verlaat leerpad", "leerpad verlaten", "het leerpad verlaten", "uitschrijven"],
+    "model": ["download", "downloaden", "model", "modellen", "llm", "taalmodel", "binnenhalen"],
+    "grades": ["cijfers", "cijfer", "score", "scores", "punten", "resultaten", "resultaat", "schoon tempo"]
+  },
+  "questions": [
+    "waarom", "wat", "hoe", "wanneer", "waar", "waarheen", "wie", "wiens", "welke", "welk", "waarvoor", "waarmee", "waarop",
+    "is", "zijn", "ben", "bent", "was", "waren", "heb", "heeft", "hebben", "had", "hadden",
+    "kan", "kun", "kunt", "kunnen", "kon", "zou", "zouden", "zal", "zullen", "moet", "moeten", "mag", "mogen",
+    "wil", "wilt", "willen", "doe", "doet", "doen", "gaat", "wordt", "worden", "word"
+  ],
+  "notCommand": [
+    "ik", "jij", "je", "jou", "jouw", "u", "hij", "zij", "ze", "wij", "we", "ons", "onze", "dat", "zij", "men", "hun",
+    "niet", "geen", "nooit", "niks", "niets", "niemand", "nergens", "zonder", "nee hoor",
+    "later", "straks", "morgen", "gisteren", "vanavond", "vanochtend", "eerder", "vorige", "vorig", "volgende", "daarna", "daarvoor", "nadat", "voordat", "terug", "opnieuw", "weer", "nogmaals", "nog eens", "nog een keer", "van voren af aan",
+    "omdat", "maar", "als", "dan", "want", "dus", "toch", "of",
+    "is", "zijn", "was", "waren", "ben", "bent", "wordt", "werd", "hoe", "wat", "waarom", "wanneer",
+    "te", "heel", "erg", "echt", "zo", "ook",
+    "kan", "kun", "kunt", "kon", "zou", "zal", "moet", "moeten", "wil", "wilt", "willen", "wou", "nodig", "hoef", "hoeft", "denk", "denkt", "dacht", "voel", "voelt", "voelde", "gevoel",
+    "voor mij", "met mij", "bij mij", "mezelf", "heb", "heeft", "had"
+  ],
+  "polite": ["alsjeblieft", "alsjeblief", "alstublieft", "aub", "ok", "oké", "okay", "hey coach", "hé", "hoi", "nu", "bedankt", "dankjewel", "dank je", "even", "gewoon"],
+  "fillers": ["me", "mij", "de", "het", "een", "mijn", "m'n", "iets", "een beetje", "beetje", "een klein beetje"]
+}
