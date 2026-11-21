@@ -75,8 +75,6 @@
           "notes": "Son oturum, {{exercise}}: {{bpm}} BPM'de %{{value}} doğru nota.",
           "plain": "Son oturum şunda bitti: {{exercise}}, {{bpm}} BPM'de."
         },
-        "backAgo": "Bu {{count}} gün önceydi.",
-        "backAgo_other": "Bu {{count}} gün önceydi.",
         "backAway": "Son oturumun {{count}} gün önceydi.",
         "backAway_other": "Son oturumun {{count}} gün önceydi.",
         "backStartsAt": "Bugün {{bpm}} BPM'le başlıyor.",

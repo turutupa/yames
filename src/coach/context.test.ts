@@ -209,6 +209,23 @@ describe("contextForModel", () => {
     expect(contextForModel(buildCoachContext(sources()))).not.toMatch(/\bthe bar\b/i);
   });
 
+  it("says 'clean tempo now' only for a Take that moved it and is not marked not fair (nf1b L3)", () => {
+    const raisedTake: TakeOutcome = {
+      ...TAKE,
+      takeId: "raise",
+      grade: { ...TAKE.grade, verdict: "passed", cleanBpm: 92, passesExercise: true },
+    };
+    const markedRow: PathTakeRow = { ...row(0), id: "raise", bpm: 92, passed: true, facts: { verdict: "passed", fair: "no" } };
+    const fairRow: PathTakeRow = { ...markedRow, facts: { verdict: "passed", fair: "yes" } };
+    const text = (take: TakeOutcome, takes: PathTakeRow[]) =>
+      contextForModel(buildCoachContext(sources({ lastTake: () => take, progress: () => ({ ...PROGRESS, takes }) })));
+    expect(text(raisedTake, [fairRow])).toContain("clean tempo before 88; clean tempo now 92");
+    expect(text(raisedTake, [markedRow])).not.toContain("clean tempo now");
+    // Clean, but at or under the clean tempo it already had: nothing moved.
+    expect(text({ ...raisedTake, cleanBefore: 95 }, [fairRow])).not.toContain("clean tempo now");
+    expect(text({ ...raisedTake, cleanBefore: 92 }, [fairRow])).not.toContain("clean tempo now");
+  });
+
   const HUGE: CoachContext = {
     ...buildCoachContext(sources()),
     takesHere: Array.from({ length: 5 }, (_, i) => row(i)),

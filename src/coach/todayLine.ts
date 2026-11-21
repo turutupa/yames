@@ -222,11 +222,14 @@ function backLine(input: TodayLineInput, session: readonly PathTakeRow[]): Today
         : { key: `${K}.back.plain`, values: { exercise: exercise.title, bpm: last.bpm } },
     );
   }
-  // The days away as a plain number, then the tempo today starts at: no
-  // "rungs lower than it would have", which named neither.
+  // Then the tempo today starts at: no "rungs lower than it would have", which
+  // named neither. The days away are said once, by Today's header ("Last
+  // Session: 12 days ago", hd1) and the plan's reason; after the last number
+  // they are not said again (nf1b: "That was 12 days ago." removed). With no
+  // last number to say, the line still opens with them.
   const said = lines.length > 0;
   const days = plan.daysAway ?? 0;
-  if (days > 0) lines.push({ key: `${K}.${said ? "backAgo" : "backAway"}`, values: { count: days } });
+  if (days > 0 && !said) lines.push({ key: `${K}.backAway`, values: { count: days } });
   const first = firstExerciseStep(plan);
   if (first && first.why.code === "backEased" && rungsToDrop(days) > 0) {
     // The Exercise is named only when it is not the one the sentence before named.

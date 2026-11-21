@@ -75,8 +75,6 @@
           "notes": "前回のセッション、{{exercise}}：{{bpm}} BPM で正しい音 {{value}}%。",
           "plain": "前回のセッションは {{exercise}} の {{bpm}} BPM で終わりました。"
         },
-        "backAgo": "それは {{count}} 日前です。",
-        "backAgo_other": "それは {{count}} 日前です。",
         "backAway": "前回のセッションは {{count}} 日前です。",
         "backAway_other": "前回のセッションは {{count}} 日前です。",
         "backStartsAt": "今日は {{bpm}} BPM から始めます。",

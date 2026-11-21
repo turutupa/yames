@@ -76,9 +76,6 @@
           "notes": "Ultima sessione, {{exercise}}: {{value}}% di note giuste a {{bpm}} BPM.",
           "plain": "L'ultima sessione è finita su {{exercise}} a {{bpm}} BPM."
         },
-        "backAgo": "Era {{count}} giorno fa.",
-        "backAgo_many": "Erano {{count}} giorni fa.",
-        "backAgo_other": "Erano {{count}} giorni fa.",
         "backAway": "La tua ultima sessione è stata {{count}} giorno fa.",
         "backAway_many": "La tua ultima sessione è stata {{count}} giorni fa.",
         "backAway_other": "La tua ultima sessione è stata {{count}} giorni fa.",

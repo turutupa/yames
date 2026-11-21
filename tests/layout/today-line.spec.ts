@@ -113,6 +113,10 @@ async function headerSaysTheFact(page: Page) {
   const kicker = (await kick.textContent())!.trim();
   const line = (await page.locator(".session-today-line .coach-line-text").textContent())!;
   expect(line, "the header repeats Today's line").not.toContain(kicker);
+  // The days away are the header's: the line under it does not say them again
+  // ("That was 12 days ago." was removed, nf1b).
+  expect(line, "Today's line repeats the days away").not.toMatch(/\bdays? ago\b/i);
+  expect(line).toMatch(/^Last Session, .+ BPM\. Today (.+ )?starts at \d+ BPM\.$/);
 }
 
 /** The Step page's line sits under the Step's goal and above its Exercises. */

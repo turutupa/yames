@@ -75,8 +75,6 @@
           "notes": "Buổi tập trước, {{exercise}}: {{value}}% nốt đúng ở {{bpm}} BPM.",
           "plain": "Buổi tập trước kết thúc ở {{exercise}}, {{bpm}} BPM."
         },
-        "backAgo": "Đó là {{count}} ngày trước.",
-        "backAgo_other": "Đó là {{count}} ngày trước.",
         "backAway": "Buổi tập gần nhất của bạn cách đây {{count}} ngày.",
         "backAway_other": "Buổi tập gần nhất của bạn cách đây {{count}} ngày.",
         "backStartsAt": "Hôm nay bắt đầu ở {{bpm}} BPM.",

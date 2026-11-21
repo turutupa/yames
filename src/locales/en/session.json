@@ -75,8 +75,6 @@
           "notes": "Last Session, {{exercise}}: {{value}}% right notes at {{bpm}} BPM.",
           "plain": "Last Session ended on {{exercise}} at {{bpm}} BPM."
         },
-        "backAgo": "That was {{count}} day ago.",
-        "backAgo_other": "That was {{count}} days ago.",
         "backAway": "Your last Session was {{count}} day ago.",
         "backAway_other": "Your last Session was {{count}} days ago.",
         "backStartsAt": "Today starts at {{bpm}} BPM.",

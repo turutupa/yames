@@ -1,0 +1,33 @@
+{
+  "about": "nf1b L4: one row per case, read by both sides. Rust (db.rs, every_shared_clean_tempo_row_agrees) stores each row's factsJson as the exact text in path_takes.facts_json and asks list_clean_tempo_spans; TypeScript (src/session/cleanTempoRows.test.ts) parses factsJson as list_path_takes does (unreadable text is null facts) and asks countsTowardCleanTempo. 'counts' is the answer both must give. minBars is CLEAN_TEMPO_MIN_BARS on both sides.",
+  "minBars": 8,
+  "rows": [
+    { "id": "raised", "bars": 8, "caught": true, "passed": true, "factsJson": "{\"verdict\":\"passed\",\"newClean\":true}", "counts": true },
+    { "id": "raised-short", "bars": 3, "caught": true, "passed": true, "factsJson": "{\"newClean\":true}", "counts": true },
+    { "id": "held-scorer-yes", "bars": 8, "caught": true, "passed": true, "factsJson": "{\"newClean\":false,\"measures\":{\"pass\":{\"countsForCleanTempo\":true}}}", "counts": true },
+    { "id": "held-no-scorer", "bars": 8, "caught": true, "passed": true, "factsJson": "{\"newClean\":false,\"measures\":{}}", "counts": false },
+    { "id": "pre-flag-8", "bars": 8, "caught": true, "passed": true, "factsJson": "{\"verdict\":\"passed\"}", "counts": true },
+    { "id": "pre-flag-7", "bars": 7, "caught": true, "passed": true, "factsJson": "{\"verdict\":\"passed\"}", "counts": false },
+    { "id": "scorer-no", "bars": 12, "caught": true, "passed": true, "factsJson": "{\"measures\":{\"pass\":{\"countsForCleanTempo\":false}}}", "counts": false },
+    { "id": "scorer-yes-short", "bars": 6, "caught": true, "passed": true, "factsJson": "{\"measures\":{\"pass\":{\"countsForCleanTempo\":true}}}", "counts": true },
+    { "id": "not-caught", "bars": 8, "caught": false, "passed": true, "factsJson": "{\"newClean\":true}", "counts": false },
+    { "id": "not-passed", "bars": 8, "caught": true, "passed": false, "factsJson": "{\"newClean\":true}", "counts": false },
+    { "id": "fair-no", "bars": 8, "caught": true, "passed": true, "factsJson": "{\"newClean\":true,\"fair\":\"no\"}", "counts": false },
+    { "id": "fair-yes", "bars": 8, "caught": true, "passed": true, "factsJson": "{\"newClean\":true,\"fair\":\"yes\"}", "counts": true },
+    { "id": "odd-fair-true", "bars": 8, "caught": true, "passed": true, "factsJson": "{\"newClean\":true,\"fair\":true}", "counts": true },
+    { "id": "odd-fair-capital-no", "bars": 8, "caught": true, "passed": true, "factsJson": "{\"newClean\":true,\"fair\":\"No\"}", "counts": true },
+    { "id": "odd-fair-object", "bars": 8, "caught": true, "passed": true, "factsJson": "{\"newClean\":true,\"fair\":{\"answer\":\"no\"}}", "counts": true },
+    { "id": "odd-new-clean-null", "bars": 8, "caught": true, "passed": true, "factsJson": "{\"newClean\":null}", "counts": true },
+    { "id": "odd-new-clean-null-short", "bars": 7, "caught": true, "passed": true, "factsJson": "{\"newClean\":null}", "counts": false },
+    { "id": "odd-new-clean-text", "bars": 8, "caught": true, "passed": true, "factsJson": "{\"newClean\":\"true\"}", "counts": false },
+    { "id": "odd-new-clean-one", "bars": 8, "caught": true, "passed": true, "factsJson": "{\"newClean\":1}", "counts": false },
+    { "id": "odd-scorer-one", "bars": 8, "caught": true, "passed": true, "factsJson": "{\"measures\":{\"pass\":{\"countsForCleanTempo\":1}}}", "counts": true },
+    { "id": "odd-scorer-one-short", "bars": 7, "caught": true, "passed": true, "factsJson": "{\"measures\":{\"pass\":{\"countsForCleanTempo\":1}}}", "counts": false },
+    { "id": "odd-scorer-text", "bars": 8, "caught": true, "passed": true, "factsJson": "{\"newClean\":false,\"measures\":{\"pass\":{\"countsForCleanTempo\":\"true\"}}}", "counts": false },
+    { "id": "odd-facts-null", "bars": 8, "caught": true, "passed": true, "factsJson": "null", "counts": true },
+    { "id": "odd-facts-array", "bars": 8, "caught": true, "passed": true, "factsJson": "[]", "counts": true },
+    { "id": "odd-facts-empty", "bars": 8, "caught": true, "passed": true, "factsJson": "", "counts": true },
+    { "id": "odd-facts-garbled", "bars": 7, "caught": true, "passed": true, "factsJson": "{not json", "counts": false },
+    { "id": "odd-facts-garbled-long", "bars": 8, "caught": true, "passed": true, "factsJson": "{not json", "counts": true }
+  ]
+}

@@ -75,8 +75,6 @@
           "notes": "지난 세션, {{exercise}}: {{bpm}} BPM에서 맞는 음 {{value}}%.",
           "plain": "지난 세션은 {{exercise}}, {{bpm}} BPM에서 끝났어요."
         },
-        "backAgo": "{{count}}일 전이에요.",
-        "backAgo_other": "{{count}}일 전이에요.",
         "backAway": "지난 세션은 {{count}}일 전이에요.",
         "backAway_other": "지난 세션은 {{count}}일 전이에요.",
         "backStartsAt": "오늘은 {{bpm}} BPM에서 시작해요.",

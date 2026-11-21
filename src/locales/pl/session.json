@@ -77,10 +77,6 @@
           "notes": "Ostatnia sesja, {{exercise}}: {{value}}% właściwych nut przy {{bpm}} BPM.",
           "plain": "Ostatnia sesja skończyła się tak: {{exercise}} przy {{bpm}} BPM."
         },
-        "backAgo": "To było {{count}} dzień temu.",
-        "backAgo_few": "To było {{count}} dni temu.",
-        "backAgo_many": "To było {{count}} dni temu.",
-        "backAgo_other": "To było {{count}} dnia temu.",
         "backAway": "Ostatnia sesja była {{count}} dzień temu.",
         "backAway_few": "Ostatnia sesja była {{count}} dni temu.",
         "backAway_many": "Ostatnia sesja była {{count}} dni temu.",

@@ -75,8 +75,6 @@
           "notes": "上次练习，{{exercise}}：{{bpm}} BPM 时音准 {{value}}%。",
           "plain": "上次练习结束在 {{exercise}}，{{bpm}} BPM。"
         },
-        "backAgo": "那是 {{count}} 天前。",
-        "backAgo_other": "那是 {{count}} 天前。",
         "backAway": "你上次练习是 {{count}} 天前。",
         "backAway_other": "你上次练习是 {{count}} 天前。",
         "backStartsAt": "今天从 {{bpm}} BPM 开始。",

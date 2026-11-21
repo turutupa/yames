@@ -75,8 +75,6 @@
           "notes": "Laatste sessie, {{exercise}}: {{value}}% juiste noten op {{bpm}} BPM.",
           "plain": "De laatste sessie eindigde bij {{exercise}} op {{bpm}} BPM."
         },
-        "backAgo": "Dat was {{count}} dag geleden.",
-        "backAgo_other": "Dat was {{count}} dagen geleden.",
         "backAway": "Je laatste sessie was {{count}} dag geleden.",
         "backAway_other": "Je laatste sessie was {{count}} dagen geleden.",
         "backStartsAt": "Vandaag begin je op {{bpm}} BPM.",

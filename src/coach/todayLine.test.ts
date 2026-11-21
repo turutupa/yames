@@ -223,7 +223,8 @@ const TABLE: Array<[string, TodayLineInput, string | null, string | null]> = [
       steps: [WARM, exerciseStep({ bpm: 85, why: { code: "backEased", values: { days: 12, bpm: 85, clean: 90 } } })],
     }),
     "back",
-    `Last Session, ${tune.title}: 79% even at 90 BPM. That was 12 days ago. Today starts at 85 BPM.`,
+    // The days away are the header's ("Last Session: 12 days ago"): not said again here (nf1b).
+    `Last Session, ${tune.title}: 79% even at 90 BPM. Today starts at 85 BPM.`,
   ],
   [
     "back after twelve days, eased, today on another Exercise: it is named",
@@ -234,7 +235,7 @@ const TABLE: Array<[string, TodayLineInput, string | null, string | null]> = [
       steps: [WARM, exerciseStep({ exerciseId: FOUR, title: "Four fingers", bpm: 70, why: { code: "backEased", values: { days: 12, bpm: 70, clean: 75 } } })],
     }),
     "back",
-    `Last Session, ${tune.title}: 79% even at 90 BPM. That was 12 days ago. Today ${four.title} starts at 70 BPM.`,
+    `Last Session, ${tune.title}: 79% even at 90 BPM. Today ${four.title} starts at 70 BPM.`,
   ],
   [
     "back after twelve days, the last Take marked not fair: the days and the tempo alone",
@@ -256,7 +257,7 @@ const TABLE: Array<[string, TodayLineInput, string | null, string | null]> = [
       steps: [WARM, exerciseStep({ bpm: 75, why: { code: "backEased", values: { days: 30, bpm: 75, clean: 90 } } })],
     }),
     "back",
-    `Last Session, ${tune.title}: 79% even at 90 BPM. That was 30 days ago. Today starts at 75 BPM.`,
+    `Last Session, ${tune.title}: 79% even at 90 BPM. Today starts at 75 BPM.`,
   ],
   [
     "ungraded player: minutes and tempo, same place today",

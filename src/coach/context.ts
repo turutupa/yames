@@ -25,7 +25,7 @@ import { exerciseWords, type ExerciseWords } from "../session/exerciseWords";
 import type { GradingChoice } from "../session/grading";
 import type { InputFailure } from "../session/inputStart";
 import type { SessionPlan } from "../session/planner";
-import { takesOf, type PlayerProgress, type TakeFacts } from "../session/progress";
+import { outcomeCountsTowardCleanTempo, takesOf, type PlayerProgress, type TakeFacts } from "../session/progress";
 import type { DueItem } from "../session/rotation";
 import type { RunState, TakeOutcome } from "../session/runner";
 import { withVariant } from "../session/take";
@@ -250,7 +250,7 @@ function num(value: number | null | undefined, digits = 0): string {
   return digits === 0 ? String(Math.round(value)) : value.toFixed(digits);
 }
 
-function takeLine(take: TakeOutcome): string {
+function takeLine(take: TakeOutcome, progress: PlayerProgress): string {
   const g = take.grade;
   const m = take.measures;
   const parts = [`take ${String(take.takeNumber)} at ${String(take.bpm)} bpm: ${g.verdict}`];
@@ -265,7 +265,16 @@ function takeLine(take: TakeOutcome): string {
   if (m.evenness !== null) parts.push(`evenness ${num(m.evenness, 2)}`);
   if (m.noteIdentity !== null) parts.push(`right notes ${num(m.noteIdentity, 2)}`);
   if (take.cleanBefore !== null) parts.push(`clean tempo before ${String(take.cleanBefore)}`);
-  if (g.cleanBpm !== null) parts.push(`clean tempo now ${String(g.cleanBpm)}`);
+  // "Now" only when this Take moved the clean tempo the app shows: not when it
+  // stayed at or under the one before, and not once the player marked its grade
+  // not fair (nf1b L3: the model must not quote a number Progress never shows).
+  if (
+    g.cleanBpm !== null &&
+    (take.cleanBefore === null || g.cleanBpm > take.cleanBefore) &&
+    outcomeCountsTowardCleanTempo(progress, take.takeId)
+  ) {
+    parts.push(`clean tempo now ${String(g.cleanBpm)}`);
+  }
   return parts.join("; ");
 }
 
@@ -310,7 +319,7 @@ export function contextForModel(ctx: CoachContext, maxTokens = 450): string {
       `session: ${ctx.run.phase}, block ${String(ctx.run.stepIndex + 1)}${total ? ` of ${String(total)}` : ""}, ${String(ctx.run.bpm)} bpm, ${String(ctx.run.takes)} takes on this block${ctx.run.ungraded ? `, ungraded (${ctx.run.ungraded})` : ""}`,
     );
   }
-  if (ctx.lastTake) add(`last ${takeLine(ctx.lastTake)}`);
+  if (ctx.lastTake) add(`last ${takeLine(ctx.lastTake, ctx.progress)}`);
   if (ctx.review) add(findingsLine(ctx.review));
   if (ctx.takesHere) add(historyLine(ctx.takesHere));
   if (ctx.song) add(`song: ${clip(ctx.song.song.name, 80)}, bars ${String(ctx.song.range.startBar)}-${String(ctx.song.range.endBar)}`);

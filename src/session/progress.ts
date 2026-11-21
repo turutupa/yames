@@ -8,6 +8,7 @@ import type { Exercise, Level, PathDoc, Step } from "../paths/format";
 import type { ExerciseCeilingRow, PathStateRow, PathTakeRow } from "../ipc";
 import type { TakeMeasures } from "./takeMeasures";
 import type { TakeVerdict } from "./grade";
+import type { TakeOutcome } from "./runner";
 import { CLEAN_TEMPO_MIN_BARS } from "./grade";
 
 /** What `PathTakeRow.facts` holds. Everything optional: old rows stay readable. */
@@ -184,6 +185,18 @@ export function countsTowardCleanTempo(take: PathTakeRow): boolean {
  * ceiling, unless a Take marked not fair is what holds it; then the fastest
  * clean Take not marked so, from the Takes in memory (the store's newest 500),
  * and null when there is none. Not zero: no clean tempo.
+ *
+ * The 500-Take window cuts both ways (nf1b M1; pinned in `cleanTempo.test.ts`),
+ * and the long view (`listCleanTempoSpans`, every Take) can then say otherwise:
+ * - the Take marked not fair is older than the window: it cannot be seen, so
+ *   the ceiling it set is shown (90) while Progress and the long view read the
+ *   fair Takes (85);
+ * - the fair Take that set the tempo is older than the window and a Take
+ *   marked not fair holds the ceiling: the best fair Take in the window is
+ *   shown (75, or null) while the long view says 80.
+ * Both need a player with more than 500 Takes. The fix is one source: the
+ * spans loaded once with the progress and their `bestBpm` used here; see
+ * `plans/coach/progress/nf1b.md` for why that is not done yet.
  */
 export function shownCleanTempoOf(
   progress: PlayerProgress,
@@ -226,6 +239,46 @@ export function shownCleanTempoTakeOf(
     (t) => t.bpm === shown.bpm && countsTowardCleanTempo(t) && (!shown.stored || factsOf(t).newClean === true),
   );
   return at.length > 0 ? at[at.length - 1] : null;
+}
+
+/**
+ * Does a Session's outcome count toward the clean tempo the app shows, read
+ * against the row it was kept as: `countsTowardCleanTempo` of that row (so a
+ * Take marked not fair does not, and neither does one the store holds no
+ * record of a clean tempo for: graded without the scorer's answer, under a
+ * ceiling it did not raise; nf1b L1). With no row in memory (an outcome
+ * without an id, a save that never landed) nothing contradicts the result:
+ * true, so the sentence on screen does not change.
+ */
+export function outcomeCountsTowardCleanTempo(progress: PlayerProgress, takeId: string | undefined): boolean {
+  if (!takeId) return true;
+  const row = progress.takes.find((t) => t.id === takeId);
+  return row === undefined || countsTowardCleanTempo(row);
+}
+
+/**
+ * The clean tempo the app showed just before `first`, an outcome of this
+ * Session, read now rather than when `first` settled (nf1b L2): the clean
+ * tempo shown before the Session's first Take on that Exercise, raised by
+ * each earlier outcome of this Session on it that still counts
+ * (`outcomeCountsTowardCleanTempo`). A Take the player marks not fair after
+ * `first` settled therefore drops out of it. Null for no clean tempo.
+ */
+export function cleanBeforeOutcome(
+  progress: PlayerProgress,
+  outcomes: readonly TakeOutcome[],
+  first: TakeOutcome,
+): number | null {
+  const at = outcomes.indexOf(first);
+  const earlier = (at < 0 ? outcomes : outcomes.slice(0, at)).filter((o) => o.exerciseId === first.exerciseId);
+  let before = earlier.length > 0 ? earlier[0].cleanBefore : first.cleanBefore;
+  for (const o of earlier) {
+    const bpm = o.grade.cleanBpm;
+    if (bpm !== null && (before === null || bpm > before) && outcomeCountsTowardCleanTempo(progress, o.takeId)) {
+      before = bpm;
+    }
+  }
+  return before;
 }
 
 /** Takes on one Exercise, newest first. Ungraded ones included. */

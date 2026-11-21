@@ -22,7 +22,7 @@ import type { Line } from "../../session/coachWords";
 import { displayValue, metricKey, reasonLine } from "../../session/coachWords";
 import { readyHonestLineKey } from "../../session/caveats";
 import type { PlanStep } from "../../session/planner";
-import { heardItOf, isTakeIdMarkedNotFair, shownCleanTempoOf, takesOf, upstrokeOf } from "../../session/progress";
+import { heardItOf, outcomeCountsTowardCleanTempo, shownCleanTempoOf, takesOf, upstrokeOf } from "../../session/progress";
 import { parkedUntil, reviewStateOf } from "../../session/rotation";
 import { currentStep } from "../../session/runner";
 import type { BigAction, TakeOutcome } from "../../session/runner";
@@ -525,7 +525,7 @@ export function recapLineText(t: T, session: SessionRun, now: number): string | 
       (o) =>
         o.grade.cleanBpm !== null &&
         (o.cleanBefore === null || o.grade.cleanBpm > o.cleanBefore) &&
-        !isTakeIdMarkedNotFair(session.progress, o.takeId),
+        outcomeCountsTowardCleanTempo(session.progress, o.takeId),
     );
   const passed = [...mine].reverse().find((o) => o.grade.verdict === "passed");
   const title = last.title;

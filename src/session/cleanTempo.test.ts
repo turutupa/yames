@@ -7,9 +7,12 @@ import { describe, expect, it } from "vitest";
 import type { PathTakeRow } from "../ipc";
 import { ALT } from "./testKit";
 import { groupsFrom } from "../containers/session/ProgressView";
+import type { TakeOutcome } from "./runner";
 import {
+  cleanBeforeOutcome,
   cleanTempoOf,
   countsTowardCleanTempo,
+  outcomeCountsTowardCleanTempo,
   heldCleanTempo,
   isTakeIdMarkedNotFair,
   shownCleanTempoOf,
@@ -117,5 +120,95 @@ describe("a Take marked not fair and the clean tempo", () => {
     expect(heldCleanTempo(take("g", 1, 60, { newClean: true }, { passed: false }))).toBe(false);
     expect(countsTowardCleanTempo(mark(raised("h", 1, 60), "no"))).toBe(false);
     expect(countsTowardCleanTempo(mark(raised("i", 1, 60), "yes"))).toBe(true);
+  });
+});
+
+function outcome(takeId: string | undefined, bpm: number, cleanBpm: number | null, cleanBefore: number | null): TakeOutcome {
+  return {
+    stepId: "s",
+    exerciseId: EX.id,
+    title: "t",
+    bpm,
+    takeNumber: 1,
+    measures: {} as TakeOutcome["measures"],
+    grade: { verdict: "passed", cleanBpm, passesExercise: false } as TakeOutcome["grade"],
+    previousValue: null,
+    cleanBefore,
+    ...(takeId ? { takeId } : {}),
+  };
+}
+
+/**
+ * nf1b M1: pins today's behaviour at the edge of the 500-Take window, in both
+ * directions (`shownCleanTempoOf`'s comment, `plans/coach/progress/nf1b.md`).
+ * When the long view's spans are loaded with the progress, these two change:
+ * the shown tempo becomes the span's best, 85 in the first and 80 in the second.
+ */
+describe("nf1b M1: the 500-Take window, as it stands", () => {
+  it("the Take marked not fair is older than the window: the ceiling it set is still shown", () => {
+    // History: 90 raised the ceiling, marked not fair; 500 Takes later only fair 85s are in memory.
+    const p = progress([held("a", 10, 85), held("b", 20, 85)], 90);
+    expect(shownCleanTempoOf(p, PATH.id, EX.id)).toBe(90);
+    // Progress reads the window and says 85; so does the long view (`list_clean_tempo_spans`).
+    expect(progressShows(p)).toBe(85);
+  });
+
+  it("the fair Take that set the tempo is older than the window: the best fair Take in it is shown", () => {
+    // History: 80 raised the ceiling long ago; 90 raised it again and was marked not fair.
+    const p = progress([mark(raised("ninety", 20, 90), "no"), held("later", 30, 75)], 90);
+    // The long view says 80; the window only knows 75.
+    expect(shownCleanTempoOf(p, PATH.id, EX.id)).toBe(75);
+    expect(progressShows(p)).toBe(75);
+  });
+});
+
+describe("nf1b L1: a result announces only a clean tempo Progress will show", () => {
+  // The ceiling, 90, is held by a Take marked not fair; the shown tempo is 80.
+  const base = [raised("eighty", 10, 80), mark(raised("ninety", 20, 90), "no")];
+
+  it("graded without the scorer's answer, under the ceiling: not announced, and Progress agrees", () => {
+    // What `useSessionRun` keeps: `newClean: false` (90 stands), no `measures.pass`.
+    const fallback = take("fb", 30, 85, { newClean: false, measures: {} as TakeFacts["measures"] });
+    const p = progress([...base, fallback], 90);
+    expect(outcomeCountsTowardCleanTempo(p, "fb")).toBe(false);
+    expect(shownCleanTempoOf(p, PATH.id, EX.id)).toBe(80);
+    expect(progressShows(p)).toBe(80);
+  });
+
+  it("the scorer said it counts: announced, and Progress shows it", () => {
+    const p = progress([...base, held("sc", 30, 85)], 90);
+    expect(outcomeCountsTowardCleanTempo(p, "sc")).toBe(true);
+    expect(shownCleanTempoOf(p, PATH.id, EX.id)).toBe(85);
+    expect(progressShows(p)).toBe(85);
+  });
+
+  it("marked not fair: not announced; no row in memory: the result stands", () => {
+    const p = progress([...base, mark(held("sc", 30, 85), "no")], 90);
+    expect(outcomeCountsTowardCleanTempo(p, "sc")).toBe(false);
+    expect(outcomeCountsTowardCleanTempo(p, "never-saved")).toBe(true);
+    expect(outcomeCountsTowardCleanTempo(p, undefined)).toBe(true);
+  });
+});
+
+describe("nf1b L2: the edge recap's 'before' is read when the recap shows", () => {
+  // Take A at 85 raised the shown 80; Find my edge on the same Exercise came after.
+  const a = outcome("A", 85, 85, 80);
+  const edgeFirst = outcome("E1", 85, 85, 85);
+  const edgeNext = outcome("E2", 90, 90, 85);
+  const outcomes = [a, edgeFirst, edgeNext];
+  const rows = (fair?: "no") => [raised("eighty", 10, 80), fair ? mark(raised("A", 30, 85), fair) : raised("A", 30, 85)];
+
+  it("A kept: 85, as before", () => {
+    expect(cleanBeforeOutcome(progress(rows(), 85), outcomes, edgeFirst)).toBe(85);
+  });
+
+  it("A marked not fair on the recap: 80, not the 85 frozen when the edge's first Take settled", () => {
+    expect(edgeFirst.cleanBefore).toBe(85);
+    expect(cleanBeforeOutcome(progress(rows("no"), 85), outcomes, edgeFirst)).toBe(80);
+  });
+
+  it("an edge with no Take before it in the Session: the value it settled with", () => {
+    expect(cleanBeforeOutcome(progress(rows(), 85), [edgeFirst, edgeNext], edgeFirst)).toBe(85);
+    expect(cleanBeforeOutcome(progress([], null), [outcome("x", 60, null, null)], outcome("x", 60, null, null))).toBeNull();
   });
 });

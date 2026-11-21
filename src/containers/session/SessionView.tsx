@@ -74,7 +74,7 @@ import { loopTitleLine } from "../../coach/loopLine";
 import { exerciseWords, plannedPurpose } from "../../session/exerciseWords";
 import { ContextLine, StepTag, rise, stepTitle } from "./TodayView";
 import { roleKey } from "./todayPlan";
-import { factsOf, isTakeIdMarkedNotFair } from "../../session/progress";
+import { cleanBeforeOutcome, factsOf, outcomeCountsTowardCleanTempo } from "../../session/progress";
 import type { PathTakeRow } from "../../ipc";
 import { totalsFrom } from "./ProgressView";
 import type { MainView } from "../main-window/MainHeader";
@@ -1044,7 +1044,8 @@ export function borderline(outcome: TakeOutcome): boolean {
 function CleanTempoLine({ outcome, notFair }: { outcome: TakeOutcome; notFair: boolean }) {
   const { t } = useTranslation();
   const earned = outcome.grade.cleanBpm;
-  // Marked not fair: not a clean tempo (owner, 1k questions, item 3).
+  // Marked not fair, or kept with no record of a clean tempo: not one Progress
+  // will show, so not one to announce (owner, 1k questions, item 3; nf1b L1).
   if (earned === null || notFair) return null;
   if (outcome.cleanBefore !== null && outcome.cleanBefore >= earned) return null;
   return (
@@ -1204,7 +1205,7 @@ function ResultScreen({ session, pedalMapped }: { session: SessionRun; pedalMapp
             )}
           </div>
           <DecidingNumber outcome={outcome} />
-          <CleanTempoLine outcome={outcome} notFair={isTakeIdMarkedNotFair(session.progress, outcome.takeId)} />
+          <CleanTempoLine outcome={outcome} notFair={!outcomeCountsTowardCleanTempo(session.progress, outcome.takeId)} />
           {onEdge && <EdgePanel session={session} />}
           {/* The coach's note: the finding, the Take bar by bar and one fact
               line, all in one place (DESIGN 4.2; UI_DECISIONS U4.2). The
@@ -1770,11 +1771,14 @@ function RecapItem({ step, session }: { step: PlanStep; session: SessionRun }) {
   if (isEdgeStep(step)) {
     const reached = outcomes.reduce<number | null>(
       (most, o) =>
-        o.grade.verdict === "passed" && o.grade.cleanBpm !== null && !isTakeIdMarkedNotFair(session.progress, o.takeId)
+        o.grade.verdict === "passed" && o.grade.cleanBpm !== null && outcomeCountsTowardCleanTempo(session.progress, o.takeId)
           ? Math.max(most ?? 0, o.grade.cleanBpm)
           : most,
       null,
     );
+    // Read now, not when the first Take settled: an earlier Take marked not
+    // fair on the recap drops out of "before" (nf1b L2).
+    const before = cleanBeforeOutcome(session.progress, session.run.outcomes, first);
     return (
       <div className="session-recap-item session-glass session-rise">
         <div className="session-recap-text">
@@ -1785,9 +1789,7 @@ function RecapItem({ step, session }: { step: PlanStep; session: SessionRun }) {
         </div>
         {reached !== null && (
           <div className="session-recap-number">
-            {first.cleanBefore !== null && first.cleanBefore !== reached && (
-              <span>{first.cleanBefore} → </span>
-            )}
+            {before !== null && before !== reached && <span>{before} → </span>}
             <b>{reached}</b>
             <small>{t("session.edge.recap")}</small>
           </div>
@@ -1858,7 +1860,7 @@ function RecapScreen({ session }: { session: SessionRun }) {
       (o) =>
         o.grade.cleanBpm !== null &&
         (o.cleanBefore === null || o.grade.cleanBpm > o.cleanBefore) &&
-        !isTakeIdMarkedNotFair(session.progress, o.takeId),
+        outcomeCountsTowardCleanTempo(session.progress, o.takeId),
     );
   // Decided once, as the recap opens: an answer given on a result earlier in
   // the Session means no question here, and an answer given here keeps its

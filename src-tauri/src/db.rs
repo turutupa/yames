@@ -3256,6 +3256,39 @@ mod tests {
         assert_eq!(db.list_clean_tempo_spans().unwrap(), [span(p, e, (64, 20), (72, 40))]);
     }
 
+    /// The rows `src/session/cleanTempoRows.test.ts` reads too (nf1b L4): each
+    /// stored with its facts as the exact text in the fixture, odd shapes
+    /// included, and the long view's WHERE gives the answer TypeScript's
+    /// `countsTowardCleanTempo` must give on the same row.
+    #[test]
+    fn every_shared_clean_tempo_row_agrees() {
+        let fixture: serde_json::Value =
+            serde_json::from_str(include_str!("../fixtures/clean_tempo_rows.json")).unwrap();
+        assert_eq!(fixture["minBars"].as_i64().unwrap(), CLEAN_TEMPO_MIN_BARS);
+        let rows = fixture["rows"].as_array().unwrap();
+        assert!(rows.len() >= 20);
+        for row in rows {
+            let id = row["id"].as_str().unwrap();
+            let db = Db::open_in_memory().unwrap();
+            db.conn
+                .execute(
+                    "INSERT INTO path_takes (id, path_id, step_id, exercise_id, started_at, bpm,
+                                             bars, caught, passed, variant_seed, facts_json)
+                     VALUES (?1, 'p', 's', 'x', 10, 80, ?2, ?3, ?4, NULL, ?5)",
+                    rusqlite::params![
+                        id,
+                        row["bars"].as_i64().unwrap(),
+                        row["caught"].as_bool().unwrap(),
+                        row["passed"].as_bool().unwrap(),
+                        row["factsJson"].as_str().unwrap(),
+                    ],
+                )
+                .unwrap();
+            let counts = !db.list_clean_tempo_spans().unwrap().is_empty();
+            assert_eq!(counts, row["counts"].as_bool().unwrap(), "row {id}");
+        }
+    }
+
     /// The same Exercise id on two Paths is two clean tempos, as the ceiling
     /// keys it.
     #[test]

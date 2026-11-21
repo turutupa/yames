@@ -76,9 +76,6 @@
           "notes": "Dernière séance, {{exercise}} : {{value}} % de bonnes notes à {{bpm}} BPM.",
           "plain": "La dernière séance s'est arrêtée sur {{exercise}} à {{bpm}} BPM."
         },
-        "backAgo": "C'était il y a {{count}} jour.",
-        "backAgo_many": "C'était il y a {{count}} jours.",
-        "backAgo_other": "C'était il y a {{count}} jours.",
         "backAway": "Ta dernière séance date d'il y a {{count}} jour.",
         "backAway_many": "Ta dernière séance date d'il y a {{count}} jours.",
         "backAway_other": "Ta dernière séance date d'il y a {{count}} jours.",
