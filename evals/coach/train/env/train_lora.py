@@ -221,7 +221,13 @@ def save_model(model, tok, a, path):
     fp32 master copy being trained) with its tokenizer and generation config."""
     os.makedirs(path, exist_ok=True)
     if a.full_finetune:
-        sd = {k: v.detach().to(torch.bfloat16) for k, v in model.state_dict().items()}
+        # Tied weights (the 0.6B's embeddings and LM head) stay one tensor, as save_pretrained expects.
+        cast, sd = {}, {}
+        for k, v in model.state_dict().items():
+            key = (v.data_ptr(), tuple(v.shape))
+            if key not in cast:
+                cast[key] = v.detach().to(torch.bfloat16)
+            sd[k] = cast[key]
         model.config.use_cache = True
         model.save_pretrained(path, state_dict=sd, safe_serialization=True)
         model.config.use_cache = False
