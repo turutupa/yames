@@ -51,7 +51,47 @@ decisions), `plans/tasks/coach/RULES-FOR-PROMPTS.md` (the rules every agent gets
 - Never: GitHub (no push, issues, PRs, boards), `npm install`, `npm run tauri dev`, `rm`, `sudo`.
   `ssh rtx … powershell.exe` was refused by this session's permission mode (see "Owed").
 
-## READ THIS FIRST: where session 3 stopped (2026-11-20, about 21:00 PT, at its context limit)
+## SESSION 4, LIVE STATE (kept current; newer than everything below; last written 21:15 PT, 2026-11-20)
+
+**Merged this session** (rows in `PROGRESS.md`): t2a, fc1 (0 `cue.refused` anywhere), t1b2b (+ t1b2c,
+t1b2d; two reviews), c2ca, hd1, c5c1 (reviewed: MERGE), c4a1 (+ b, c; two reviews), the session-4
+briefs. `coach` gated green at the hd1 merge (vitest 48,201, layout 393); the c5c1 + c4a1 gate is
+queue job `coach-gates-c5c1`. `smooth.spec.ts` on a quiet machine: paid (17 passed).
+
+**The owner's four decisions as legs:** chip1 (running), nf1 (+ nf1b fixes, running), hd1 (merged),
+rem2 (briefed: `rem2-in-app-reminder.md`; needs c4a2).
+
+**The stock models are on disk** (`~/scratch/yames-c3b-models/Qwen3-4B-Q4_K_M.gguf`, `Qwen3-8B-Q4_K_M.gguf`;
+fetched as queue jobs from the URLs the app pins; SHA-256 equal to `models.rs`' pins). The relay's
+RTX Vulkan numbers will be appended to OWNER-UPDATES: c3b2b uses them for latency.
+
+**Running or on branches** (worktree `~/yames-coach-<leg>`; check `git branch --no-merged coach`):
+
+| Leg | State | Next |
+|---|---|---|
+| c2b1a (+ c2b1c, **c2b1d running**) | fact cards; second review `/tmp/coach-orch/c2b1c-review.md`: two more sentences that could be false (H1 not-caught reason, H2 the rushing correction) | when c2b1d reports: a short re-read of H1 / H2 / M1 to M4 only, merge, gates `ask ask-tools ask-typed coach-session`; then **c2b1b** (plug the slot: `(text) => answerCardFor(text) !== null`, synchronous; translate every `ask.card.*`; F11's wording is "Take N is kept, below the pass mark at X BPM.") |
+| chip1 (running) | a chip's press counts for flagged one-step tools | **review** (can anything change without a press / not be put back), merge, gates `ask ask-tools ask-typed smooth short-window coach-session` |
+| nf1 (+ **nf1b running**) | review `/tmp/coach-orch/nf1-review.md`; nf1b also drops "That was N days ago." from Today's line | read its `useSessionRun.ts` / `planner.ts` hunks, merge (after or before lb1: both edit `useSessionRun.ts`), `gates-rust.sh today-line session planner`; `PathsView.tsx`'s row needs `shownCleanTempoOf` (one line, after t2b) |
+| t2b (running, R) | the recipe store and the list on Paths | **review** (store; saving Takes), merge, regenerate the parity manifest |
+| c4a2 (running) | Notebook, goal, Suggestions row | **review reads `store.ts` whole** plus the callers; merge; then rem2 ‖ c4b2 |
+| c5b1 (running, R audio) | hear-back engine, option A (one Take in RAM) | **audio reviewer on every Rust line**; probe `--hear-take` and the standing pairs on a quiet machine; then c5b2 |
+| lb1 (running, R) | `loop_bars`' bars door | **review** (`useSessionRun.ts`, `runner.ts`), merge |
+| c5c2 (running, R) | `analyze_free_play` as the tool note's finding | **review** (analyzer, payload, thread), merge after or before c5b1 (both touch `timing.rs`, `commands.rs`) |
+
+**Then:** c2b1b → c2b2a → c3b1 ‖ c2b2b → c2cb (add the tuning refusal before search) → **delivery 2**
+→ pol2 (its `useSession.ts` comment item is done) → c3b2a → c3b2b (the measurement; 3 to 5 h of
+queue jobs) → c3d only if the numbers fall short → c3c; beside them c4b2, rem2, t2c, t2d, c5a1,
+c5a2 (after nf1), c5b2, c5c3 (**its size question is open**: 1,305 strings × 14 languages), c6a,
+c6b. Rows and judgement calls: `NEXT-LEGS.md`, `NEXT-LEGS-s4a.md`, `NEXT-LEGS-s4b.md` (all accepted
+as written unless `PROGRESS.md`'s decisions say otherwise).
+
+**Owed gates:** the full layout suite (in `~/yames-coach-night` after `merge --ff-only coach`, lock
+`coach-layout`), after the Ask chain and nf1 merge; the click-jitter probe for c5b1.
+
+**Do not merge into the main checkout while a `coach-gates-*` job runs there** (files move under
+vitest): merge in batches, then gate.
+
+## Where session 3 stopped (2026-11-20, about 21:00 PT, at its context limit) — superseded by the section above where they differ
 
 This section is newer than the "In flight" table under "State" below; where they differ, this wins.
 

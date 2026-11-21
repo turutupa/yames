@@ -33,7 +33,8 @@
     "today": {
       "title": "Vandaag",
       "leadFirst": "Je eerste sessie",
-      "leadBack": "Welkom terug. Het is {{days}} dagen geleden",
+      "leadLast": "Laatste sessie: {{count}} dag geleden",
+      "leadLast_other": "Laatste sessie: {{count}} dagen geleden",
       "minutes": "{{minutes}} min",
       "start": "Starten",
       "howLong": "Hoeveel tijd heb je? Minuten:",

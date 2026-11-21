@@ -1,0 +1,5 @@
+{
+  "lng": "zh-TW",
+  "words": ["為什麼", "是什麼", "有什麼", "怎麼樣", "怎麼", "怎樣", "如何", "什麼", "為何", "我的", "可以嗎", "可以", "應該", "一下", "的話", "能不能", "有沒有", "是否", "請問", "需要", "哪些", "一些", "如果", "還是"],
+  "notes": "Traditional-character twin of the zh-CN list (how, why, what, can, should, a bit, if, please); none can sit inside 練習, 和弦, 音階, 節奏, 拍, 琶音, 指法. Doubtful: 需要, 一些, 還是 as in zh-CN (function-like, never inside a music term). Single characters are deliberately not listed."
+}
