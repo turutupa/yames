@@ -27,7 +27,16 @@ import { getCoachToolHost, type CoachToolHost } from "../../coach/tools/host";
 import { resolveStepCall } from "../../coach/tools/go";
 import { findTool } from "../../coach/tools/registry";
 import { resolvePath, wholeTitleWords } from "../../coach/tools/resolve";
-import { confirmCoachTool, dismissProposal, runCoachTool, runCoachUndo } from "../../coach/tools/run";
+import {
+  chipPressable,
+  confirmCoachTool,
+  dismissProposal,
+  pressCoachChip,
+  retireUndo,
+  runCoachTool,
+  runCoachUndo,
+  undoStillGood,
+} from "../../coach/tools/run";
 import { line, type Line, type Proposal, type Refusal, type RunOutcome, type ToolCall, type ToolChoice, type ToolResult } from "../../coach/tools/types";
 import type { MainView } from "../main-window/MainHeader";
 import { appendAskTurn, askTurnId, getAskState, settleAskTurn, updateAskTurn, type AskTurn } from "./askStore";
@@ -50,6 +59,16 @@ export type UndoState = {
   until: number | null;
   /** live: offered. gone: no longer offered. done: pressed, and it worked. refused: pressed, and the app said no. */
   state: "live" | "gone" | "done" | "refused";
+  /**
+   * A suggestion chip's change (leg chip1): the player saw no proposal, so
+   * its Undo has no clock. It is offered until the value is changed again
+   * (by anyone), the player leaves the screen (in a Session: the step or the
+   * Exercise), or a Take starts (`noteAskUndos`, `noteAskTake`,
+   * `noteAskToolView`).
+   */
+  chip?: true;
+  /** The Session's step it was issued on, or null outside a Session (a chip's Undo only). */
+  step?: number | null;
   /** What came of the press: the undo's own receipt, or why it could not. */
   note?: Line;
 };
@@ -144,7 +163,7 @@ function goTarget(receipt: Line): MainView | null {
   }
 }
 
-function undoOf(result: ToolResult & { ok: true }, host: CoachToolHost, now: number): UndoState | null {
+function undoOf(result: ToolResult & { ok: true }, host: CoachToolHost, now: number, chip?: { step: number | null }): UndoState | null {
   const call = result.undo;
   if (!call) return null;
   const tool = findTool(call.tool);
@@ -153,7 +172,9 @@ function undoOf(result: ToolResult & { ok: true }, host: CoachToolHost, now: num
     return { call, label: line("coachTools.undo.returnTo", { screen }), kind: "go", view: goTarget(result.receipt), until: null, state: "live" };
   }
   // The receipt of a confirmed change is written where it was made: the host's view.
-  return { call, label: line("coachTools.undo.generic"), kind: "confirm", view: viewOf(host), until: now + UNDO_MS, state: "live" };
+  const undo: UndoState = { call, label: line("coachTools.undo.generic"), kind: "confirm", view: viewOf(host), until: now + UNDO_MS, state: "live" };
+  // A chip's change: no clock; it goes when the value, the screen or the step moves, or a Take starts.
+  return chip ? { ...undo, until: null, chip: true, step: chip.step } : undo;
 }
 
 function viewOf(host: CoachToolHost): MainView | null {
@@ -164,7 +185,7 @@ function viewOf(host: CoachToolHost): MainView | null {
   }
 }
 
-function bodyOf(outcome: RunOutcome, host: CoachToolHost, ctx: CoachContext): ToolBody {
+function bodyOf(outcome: RunOutcome, host: CoachToolHost, ctx: CoachContext, chip = false): ToolBody {
   if (!outcome.ok) return { kind: "refusal", line: outcome.line, choices: outcome.choices ?? [] };
   if ("proposal" in outcome) {
     return { kind: "proposal", proposal: outcome.proposal, state: "open", view: viewOf(host), step: ctx.run?.stepIndex ?? null };
@@ -174,7 +195,8 @@ function bodyOf(outcome: RunOutcome, host: CoachToolHost, ctx: CoachContext): To
     receipt: outcome.receipt,
     ...(outcome.later ? { settling: true } : {}),
     ...(outcome.blocks ? { blocks: outcome.blocks } : {}),
-    undo: undoOf(outcome, host, Date.now()),
+    // The step as `useAskHost` says it to `noteAskToolView`: null outside a running Session.
+    undo: undoOf(outcome, host, Date.now(), chip ? { step: ctx.run && ctx.run.phase !== "idle" ? ctx.run.stepIndex : null } : undefined),
   };
 }
 
@@ -224,6 +246,81 @@ export function runAskCall(call: ToolCall, said: string): string {
 function writeOutcome(id: string, outcome: RunOutcome, at: { host: CoachToolHost; ctx: CoachContext }): void {
   appendAskTurn({ id, kind: "tool", body: bodyOf(outcome, at.host, at.ctx) });
   followLater(id, outcome);
+  noteAskUndos();
+}
+
+/**
+ * A suggestion chip's press (leg chip1; the owner's decision: the chip's own
+ * press IS the press for a reversible one-step change, always with Undo).
+ * Only Ask's suggestion chips call this (`AskPanel`'s chip row); a "Which
+ * one?" choice, a typed command and the `accept-suggestion` binding do not.
+ * The runner decides (`pressCoachChip`): a tool flagged in the registry runs
+ * through the same checks a proposal's press makes and comes back as a
+ * receipt whose Undo has no clock; anything else comes back as it would from
+ * `runAskCall` (a proposal for an unflagged `confirm` tool). A second,
+ * separate press is a second change with its own Undo, and the earlier
+ * receipt's Undo for the same thing is retired.
+ */
+export function pressChip(call: ToolCall, said: string): string {
+  if (said.trim()) appendAskTurn({ id: askTurnId(), kind: "user", text: said.trim() });
+  const id = askTurnId();
+  const at = where();
+  if (!at) {
+    appendAskTurn({ id, kind: "tool", body: unavailable() });
+    return id;
+  }
+  const outcome = pressCoachChip(call, at.host, at.ctx);
+  const changed = outcome.ok && !("proposal" in outcome) && chipPressable(findTool(call.tool));
+  if (changed && outcome.undo) retireSameUndos(outcome.undo);
+  appendAskTurn({ id, kind: "tool", body: bodyOf(outcome, at.host, at.ctx, changed) });
+  followLater(id, outcome);
+  noteAskUndos();
+  return id;
+}
+
+/** The same setting's earlier Undo, live: the same tool and (a setting) the same key. */
+function retireSameUndos(next: ToolCall): void {
+  for (const turn of getAskState().turns) {
+    if (turn.kind !== "tool" || turn.body.kind !== "receipt") continue;
+    const undo = turn.body.undo;
+    if (!undo || undo.state !== "live" || undo.kind !== "confirm" || undo.call.tool !== next.tool) continue;
+    if (undo.call.args.key !== next.args.key) continue;
+    retire(turn.id, turn.body, undo);
+  }
+}
+
+function retire(id: string, body: ToolBody & { kind: "receipt" }, undo: UndoState): void {
+  retireUndo(undo.call);
+  setBody(id, { ...body, undo: { ...undo, state: "gone" } });
+}
+
+/**
+ * A chip's Undo is offered until the value it changed is changed again, by
+ * anyone: asked of the runner (`undoStillGood`, which changes nothing) after
+ * every press in Ask and whenever the host says the screen, the step, the
+ * Exercise or the run's phase moved, or the panel opened (`useAskHost`). One
+ * that would no longer put back what its receipt changed is retired; the
+ * receipt stays as a plain line. Pressed in between, the undo's own guard
+ * refuses it (the runner's `at`), so it never changes anything else.
+ */
+export function noteAskUndos(): void {
+  const at = where();
+  for (const turn of getAskState().turns) {
+    if (turn.kind !== "tool" || turn.body.kind !== "receipt") continue;
+    const undo = turn.body.undo;
+    if (!undo?.chip || undo.state !== "live") continue;
+    if (at && undoStillGood(undo.call, at.host, at.ctx)) continue;
+    retire(turn.id, turn.body, undo);
+  }
+}
+
+/** A Take started: no chip's Undo outlives it (the receipt stays, as a plain line). */
+export function noteAskTake(): void {
+  for (const turn of getAskState().turns) {
+    if (turn.kind !== "tool" || turn.body.kind !== "receipt") continue;
+    const undo = turn.body.undo;
+    if (undo?.chip && undo.state === "live") retire(turn.id, turn.body, undo);
+  }
 }
 
 /** The arguments a tool resolves by title from the player's words. */
@@ -337,6 +434,7 @@ export function pressProposal(id: string): void {
   const result = confirmCoachTool(turn.body.proposal, at.host, at.ctx);
   setBody(id, bodyOf(result, at.host, at.ctx));
   followLater(id, result);
+  noteAskUndos();
 }
 
 /** "Not now": the proposal can never be confirmed, and nothing happens. */
@@ -367,6 +465,7 @@ export function pressUndo(id: string): void {
   const result = runCoachUndo(undo.call, at.host, at.ctx);
   if (result.ok) {
     setBody(id, { ...body, undo: { ...undo, state: "done", note: result.receipt } });
+    noteAskUndos();
     return;
   }
   // Not now (a Take, the click still playing): it stays good, and says why.
@@ -403,7 +502,14 @@ export function noteAskToolView(view: MainView, step?: number | null): void {
     }
     if (turn.body.kind !== "receipt") continue;
     const undo = turn.body.undo;
-    if (!undo || undo.state !== "live" || undo.view === null || undo.view === view) continue;
+    if (!undo || undo.state !== "live") continue;
+    if (undo.chip) {
+      // A chip's Undo: only on its screen and, in a Session, its step (leg chip1).
+      const stepMoved = step !== undefined && (undo.step ?? null) !== step;
+      if (undo.view === null || undo.view !== view || stepMoved) retire(turn.id, turn.body, undo);
+      continue;
+    }
+    if (undo.view === null || undo.view === view) continue;
     setBody(turn.id, { ...turn.body, undo: { ...undo, state: "gone" } });
   }
 }

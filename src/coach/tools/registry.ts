@@ -37,15 +37,45 @@ export {
   takeRunning,
 } from "./types";
 
+/**
+ * The tools a suggestion chip's own press may run at once (leg chip1; the
+ * owner's decision: "one press of the chip IS the press for reversible
+ * one-step changes, always with Undo; anything multi-step or not undoable
+ * still goes through a proposal"). Each with why it qualifies. Every one is a
+ * `confirm` tool that changes exactly one value through that control's own
+ * setter, whose undo puts back exactly what was there (guarded by `at`: only
+ * from the value it left), which starts and stops no sound and does not
+ * navigate, and whose proposal is one line "X → Y" with nothing else to
+ * preview. `registry.test.ts` walks this table and fails for any entry that
+ * is not so. Not here, on purpose: `start_today`, `play_exercise`,
+ * `find_edge`, `test_out` (sound starts; the screen changes), `swap_part`,
+ * `set_minutes`, `set_focus` (the plan as it would be is a preview),
+ * `follow_path` (no undo), `load_jam`, `load_preset` (the unsaved-work
+ * question; the click may stop), `set_goal` (no undo from no goal),
+ * `restore_part` (the app's own), `loop_bars`, `make_exercise` (not yet).
+ */
+export const CHIP_PRESS: Readonly<Record<string, string>> = {
+  set_tempo:
+    "One tempo, one step (a rung in a Session, between Takes only). Undo puts the tempo back, only from the tempo it left. Changing the tempo starts and stops nothing.",
+  click_subdivision:
+    "The click's subdivision, one value, outside a Session. Undo puts it back, only from the value it left. The click plays on or stays stopped as it was.",
+  set_setting:
+    "One setting of the short safe list (theme, language, practice view, band volume, count-in, coach voice, coach suggestions), through that control's own setter. Undo puts the stored choice back (band volume's `auto` too), only from the value it left. None of them starts or stops sound or changes the screen.",
+};
+
+function flagged(tools: readonly CoachTool[]): CoachTool[] {
+  return tools.map((tool) => (Object.prototype.hasOwnProperty.call(CHIP_PRESS, tool.name) ? { ...tool, chipPress: true as const } : tool));
+}
+
 /** Every tool, in the order a "what can you do" list would show them. */
-export const COACH_TOOLS: readonly CoachTool[] = [
+export const COACH_TOOLS: readonly CoachTool[] = flagged([
   ...GO_TOOLS,
   ...READ_TOOLS,
   ...PRACTICE_TOOLS,
   ...TODAY_TOOLS,
   ...PLAY_TOOLS,
   ...SETTINGS_TOOLS,
-];
+]);
 
 /** The catalogue's version: bumped when a change is not backwards compatible. */
 export const TOOL_CATALOGUE_VERSION = 1;

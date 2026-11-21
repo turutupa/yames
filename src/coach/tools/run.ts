@@ -30,6 +30,7 @@ import type { MainView } from "../../containers/main-window/MainHeader";
 import type { CoachToolHost, HostOutcome, Sounding } from "./host";
 import { COACH_TOOLS } from "./registry";
 import {
+  inSession,
   line,
   refuse,
   takeRunning,
@@ -266,6 +267,84 @@ export function runCoachTool(
   const checked = checkCall(call, registry, "player");
   if (!checked.ok) return checked;
   return run(checked.call, host, ctx);
+}
+
+/**
+ * Whether a chip's own press may be the press for this tool: registry data
+ * (`chipPress`, set only from `CHIP_PRESS`), and never for a tool that
+ * leaves the screen or that only the app may call, whatever the data says.
+ */
+export function chipPressable(tool: CoachTool | undefined): boolean {
+  return !!tool && tool.kind === "confirm" && tool.chipPress === true && tool.audience === "player" && !tool.leaves;
+}
+
+/**
+ * A suggestion chip's press (leg chip1; the owner's decision: the chip's own
+ * press IS the press for a reversible one-step change, always with Undo).
+ * The ONLY door to "confirm at once", and only Ask's suggestion chips call
+ * it: a typed command, a "Which one?" choice, a model's call and the
+ * `accept-suggestion` binding go through `runCoachTool` and keep the proposal.
+ *
+ * The call goes exactly the way a proposal and its press go: the shape
+ * check, the context (never during a Take; the tool's `when`), the tool's
+ * `propose` (resolution against real data), and then `confirmCoachTool` on
+ * that very proposal, which checks the context again and calls the tool's
+ * `commit` (the screen, the value still what was proposed from). A tool not
+ * flagged, or a proposal that carries a plan or says it cannot be undone:
+ * the proposal is returned as `runCoachTool` would, and nothing has happened.
+ * That every flagged tool's receipt carries its undo is `registry.test.ts`'s
+ * to prove (it presses each one and puts it back).
+ */
+export function pressCoachChip(
+  call: unknown,
+  host: CoachToolHost,
+  ctx: CoachContext,
+  registry: readonly CoachTool[] = COACH_TOOLS,
+): RunOutcome {
+  const checked = checkCall(call, registry, "player");
+  if (!checked.ok) return checked;
+  const outcome = run(checked.call, host, ctx);
+  if (!("proposal" in outcome)) return outcome;
+  const { proposal } = outcome;
+  if (!chipPressable(checked.call.tool) || proposal.noUndo || proposal.plan) return outcome;
+  // In a Session, at once only on the ready screen: a nudge pressed on a result also
+  // takes the Session from the result to ready, which no Undo puts back.
+  if ((inSession(ctx) || host.sessionActive()) && ctx.run?.phase !== "ready") return outcome;
+  return confirmCoachTool(proposal, host, ctx, registry);
+}
+
+/**
+ * Whether an Undo this runner handed out would still put back what its
+ * receipt changed, asked without pressing it (leg chip1: a chip's Undo is
+ * offered until the value is changed again, by anyone). Still live, here (the
+ * view and, in a Session, the Exercise it was issued on), no Take running,
+ * and, for a `confirm` undo, its tool's `propose` (which changes nothing)
+ * still accepts it: the undo's `at` guard says no once the value moved.
+ */
+export function undoStillGood(
+  undo: unknown,
+  host: CoachToolHost,
+  ctx: CoachContext,
+  registry: readonly CoachTool[] = COACH_TOOLS,
+): boolean {
+  if (!isPlainObject(undo) || !undos.has(undo as ToolCall)) return false;
+  const issuedUndo = undo as ToolCall;
+  const checked = checkCall(issuedUndo, registry, "app");
+  if (!checked.ok) return false;
+  const { tool, args } = checked.call;
+  if (tool.kind !== "confirm") return true;
+  try {
+    if (placeOf(host, ctx) !== undos.get(issuedUndo)) return false;
+    if (checkContext(tool, ctx)) return false;
+    return tool.propose(args, host, ctx).ok;
+  } catch {
+    return false;
+  }
+}
+
+/** Spend an Undo without running it: it is no longer offered (a later change, a Take, another screen). */
+export function retireUndo(undo: unknown): void {
+  if (isPlainObject(undo)) undos.delete(undo as ToolCall);
 }
 
 /**

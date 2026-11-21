@@ -217,7 +217,7 @@ describe("set_setting", () => {
     expect(h.changes()).toEqual([]);
     const out = done(confirmCoachTool(proposal, h, toolCtx()));
     expect(h.values[key]).toBe(to);
-    expect(out.undo).toEqual({ tool: "set_setting", args: { key, value: String(fromSaid) } });
+    expect(out.undo).toEqual({ tool: "set_setting", args: { key, value: String(fromSaid), at: String(toSaid) } });
     expect(runCoachUndo(out.undo, h, toolCtx()).ok).toBe(true);
     expect(h.values[key]).toBe(from);
   });
@@ -264,7 +264,7 @@ describe("set_setting", () => {
     expect(proposal.line.values).toEqual({ key: "bandVolume", from: "auto", to: 50 });
     const out = done(confirmCoachTool(proposal, h, toolCtx()));
     expect(h.values.bandVolume).toBe(0.5);
-    expect(out.undo).toEqual({ tool: "set_setting", args: { key: "bandVolume", value: "auto" } });
+    expect(out.undo).toEqual({ tool: "set_setting", args: { key: "bandVolume", value: "auto", at: "50" } });
     expect(runCoachUndo(out.undo, h, toolCtx()).ok).toBe(true);
     expect(h.values.bandVolume).toBe("auto");
   });

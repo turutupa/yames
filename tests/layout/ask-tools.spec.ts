@@ -96,10 +96,31 @@ for (const theme of THEMES) {
         await shot(page, `${theme}-tools-which-yours-${width}`);
       });
 
-      test(`the Metronome at ${width}: a proposal`, async ({ page }) => {
+      test(`the Metronome at ${width}: Slower's chip is the press (a receipt with Undo); a typed "slower" is a proposal`, async ({ page }) => {
         await openShot(page, "metronome", { width, height: 900 }, theme);
         await openFromRail(page);
+        // Leg chip1: a chip's own press is the press for a reversible one-step change.
         await page.locator(".ask-panel .ask-chip", { hasText: "Slower" }).click();
+        const receipt = page.locator(".ask-panel [data-testid=ask-receipt]");
+        await expect(receipt).toContainText("Tempo");
+        await expect(receipt.locator("[data-testid=ask-undo]")).toHaveText("Undo");
+        await expect(receipt.locator("[data-testid=ask-undo]")).toHaveClass(/btn-tonal/);
+        await expect(page.locator(".ask-panel [data-testid=ask-proposal]")).toHaveCount(0);
+        await toolsHold(page, `chip receipt ${width}`);
+        await shot(page, `${theme}-tools-chip-receipt-${width}`);
+        // A confirmed change's ten seconds do not apply: still offered after them (once is enough).
+        if (theme === "ember" && width === 1024) {
+          await page.waitForTimeout(10_500);
+          await expect(receipt.locator("[data-testid=ask-undo]")).toBeVisible();
+        }
+        await receipt.locator("[data-testid=ask-undo]").click();
+        await expect(receipt.locator("[data-testid=ask-undone]")).toContainText("Undone.");
+
+        // What a typed "slower" reaches (the router's call): still a proposal.
+        await page.evaluate(async () => {
+          const mod = await import("/src/containers/coach/askTools.ts");
+          mod.runAskCall({ tool: "set_tempo", args: { direction: "slower" } }, "slower");
+        });
         const proposal = page.locator(".ask-panel [data-testid=ask-proposal]");
         await expect(proposal).toContainText("Tempo");
         await expect(proposal.locator("[data-testid=ask-proposal-go]")).toHaveClass(/btn-tonal/);
@@ -111,34 +132,68 @@ for (const theme of THEMES) {
   });
 }
 
-test("a fast double-click has one effect: on a chip, one call; on a proposal's button, one change, and the Undo drawn under the pointer is not pressed", async ({ page }) => {
+test("a fast double-click has one effect: on a chip, one change and the Undo drawn under the pointer is not pressed; on a proposal's button, one change", async ({ page }) => {
   await openShot(page, "metronome", { width: 1440, height: 900 }, "ember");
   await openFromRail(page);
+  // Leg chip1: Slower's chip is the press. A double-click is one change, and its Undo is not pressed.
   await page.locator(".ask-panel .ask-chip", { hasText: "Slower" }).dblclick();
-  await page.waitForTimeout(150);
-  await expect(page.locator(".ask-panel [data-testid=ask-proposal]")).toHaveCount(1);
-  await expect(page.locator(".ask-panel .ask-thread [data-testid=ask-refusal], .ask-panel .ask-thread [data-testid=ask-receipt]")).toHaveCount(0);
-
-  await page.locator(".ask-panel [data-testid=ask-proposal-go]").dblclick();
   await page.waitForTimeout(150);
   const receipt = page.locator(".ask-panel [data-testid=ask-receipt]");
   await expect(receipt).toHaveCount(1);
   await expect(receipt).toContainText("Tempo");
+  await expect(page.locator(".ask-panel [data-testid=ask-proposal]")).toHaveCount(0);
   await expect(page.locator(".ask-panel [data-testid=ask-undone]")).toHaveCount(0);
   await expect(page.locator(".ask-panel [data-testid=ask-refusal]")).toHaveCount(0);
   await expect(receipt.locator("[data-testid=ask-undo]")).toBeVisible();
+
+  // A proposal (what a typed command reaches): a double-click on its button is one change.
+  await page.evaluate(async () => {
+    const mod = await import("/src/containers/coach/askTools.ts");
+    mod.runAskCall({ tool: "set_tempo", args: { direction: "faster" } }, "faster");
+  });
+  await page.locator(".ask-panel [data-testid=ask-proposal-go]").dblclick();
+  await page.waitForTimeout(150);
+  await expect(receipt).toHaveCount(2);
+  await expect(page.locator(".ask-panel [data-testid=ask-undone]")).toHaveCount(0);
+  await expect(page.locator(".ask-panel [data-testid=ask-refusal]")).toHaveCount(0);
 
   // The chip row above the text box stays where it is after a press: a double-click there is one call too.
   const turnsBefore = await page.locator(".ask-panel .ask-thread .ask-tool").count();
   await page.locator(".ask-panel .ask-chip-row .ask-chip", { hasText: "Faster" }).dblclick();
   await page.waitForTimeout(150);
   await expect(page.locator(".ask-panel .ask-thread .ask-tool")).toHaveCount(turnsBefore + 1);
+  // A second, separate press is a second change: only the newest receipt keeps its Undo.
+  await expect(page.locator(".ask-panel [data-testid=ask-undo]")).toHaveCount(1);
+});
+
+test("in a Session at 1024: Slower's chip nudges at once, with Undo", async ({ page }) => {
+  await openShot(page, "session-ready", { width: 1024, height: 700 }, "ember");
+  await settleAnimations(page);
+  await page.locator('[data-testid="session-coach-ask"]').click();
+  await expect(page.locator(".ask-panel")).toBeVisible();
+  await settleAnimations(page);
+  const chip = page.locator(".ask-panel [data-testid=ask-tool-chips] .ask-chip", { hasText: /Slower|Faster/ }).first();
+  await expect(chip).toBeVisible();
+  await chip.click();
+  const receipt = page.locator(".ask-panel [data-testid=ask-receipt]");
+  await expect(receipt).toContainText("Tempo");
+  await expect(receipt.locator("[data-testid=ask-undo]")).toBeVisible();
+  await expect(page.locator(".ask-panel [data-testid=ask-proposal]")).toHaveCount(0);
+  await toolsHold(page, "session chip receipt");
+  await shot(page, "ember-tools-chip-receipt-session-1024");
 });
 
 test("in German at 1024: long words wrap inside the panel", async ({ page }) => {
   await openShot(page, "metronome", { width: 1024, height: 760 }, "ember", { lng: "de" });
   await openFromRail(page);
+  // The first chip is Slower: its own press is the press (leg chip1), so a receipt with Undo.
   await page.locator(".ask-panel [data-testid=ask-tool-chips] .ask-chip").first().click();
+  await expect(page.locator(".ask-panel [data-testid=ask-receipt] [data-testid=ask-undo]")).toBeVisible();
+  // A proposal, as a typed command reaches it, in German too.
+  await page.evaluate(async () => {
+    const mod = await import("/src/containers/coach/askTools.ts");
+    mod.runAskCall({ tool: "set_tempo", args: { direction: "slower" } }, "langsamer");
+  });
   await expect(page.locator(".ask-panel [data-testid=ask-proposal]")).toBeVisible();
   // What the practice view can be: the choices as chips, in German.
   await askWhichAndYours(page, { tool: "set_setting", args: { key: "practiceView", value: "x" } });

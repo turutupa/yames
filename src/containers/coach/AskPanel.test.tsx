@@ -199,19 +199,22 @@ describe("the panel", () => {
     __setAskToolsForTests(null, null);
   });
 
-  it("the chips are chosen again when a turn is written in place: after the proposal's press, the subdivision chip offers the other value", () => {
+  it("the chips are chosen again when a turn is written in place: after the Undo's press, the subdivision chip offers the other value", () => {
     let now = 1;
     const host = fakeHost({ view: "beat" }, { clickSubdivision: () => now as 1, setClickSubdivision: (s) => ((now = s), "done") });
     __setAskToolsForTests(host, toolCtx({ screen: "beat" }));
     openAsk();
     const { container } = render(<AskPanel lookingAt={{ text: "Metronome", key: "beat" }} onClose={() => {}} />);
+    // A chip's own press is the press (leg chip1): changed at once, with Undo.
     act(() => fireEvent.click(within(screen.getByTestId("ask-empty")).getByRole("button", { name: "Two clicks a beat" })));
     const row = () => [...container.querySelectorAll(".ask-chip-row [data-testid=ask-tool-chips] button")].map((b) => b.textContent);
-    expect(row()).toContain("Two clicks a beat");
-    act(() => fireEvent.click(screen.getByTestId("ask-proposal-go")));
     expect(now).toBe(2);
+    expect(screen.queryByTestId("ask-proposal")).toBeNull();
     expect(row()).toContain("One click a beat");
-    expect(row()).not.toContain("Two clicks a beat");
+    act(() => fireEvent.click(screen.getByTestId("ask-undo")));
+    expect(now).toBe(1);
+    expect(row()).toContain("Two clicks a beat");
+    expect(row()).not.toContain("One click a beat");
     __setAskToolsForTests(null, null);
   });
 });

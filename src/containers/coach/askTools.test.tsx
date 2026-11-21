@@ -21,8 +21,12 @@ import {
   UNDO_MS,
   __setAskToolsForTests,
   askYours,
+  noteAskTake,
   noteAskToolView,
+  noteAskUndos,
   notNowProposal,
+  onePress,
+  pressChip,
   pressProposal,
   pressUndo,
   runAskCall,
@@ -341,6 +345,157 @@ describe("Which one?", () => {
     act(() => fireEvent.click(chips[1]));
     expect(host.where()).toEqual({ view: "paths", at: { pathId: "alt-2", stepId: null } });
     expect(screen.getAllByTestId("ask-receipt")[0]).toHaveTextContent("Opened Alternate Sweeps");
+  });
+
+  it("a choice that is a flagged tool still shows its proposal: only a suggestion chip's press is the press (leg chip1)", () => {
+    const steady = ALT.steps.flatMap((s) => s.exercises).find((e) => e.id === "ap-1-a")!;
+    const host = use(
+      fakeHost({ view: "session", session: true }, { nudges: () => ({ slower: false, faster: true }), nudgeTempo: () => "done" }),
+      toolCtx({ screen: "session", run: { ...runIn("ready"), bpm: 60 }, exercise: steady }),
+    );
+    render(<Thread />);
+    // 80 is two rungs from 60: "Which one?" offers the rung a press away.
+    act(() => void runAskCall({ tool: "set_tempo", args: { bpm: 80 } }, ""));
+    const chips = screen.getByTestId("ask-choices").querySelectorAll("button");
+    expect(chips).toHaveLength(1);
+    act(() => fireEvent.click(chips[0]));
+    expect(screen.getByTestId("ask-proposal-go")).toBeInTheDocument();
+    expect(host.changes()).toEqual([]);
+  });
+});
+
+describe("a suggestion chip's own press (leg chip1)", () => {
+  function tempoHost(start = 120, view: "beat" | "jam" = "beat") {
+    let bpm = start;
+    let at: "beat" | "jam" | "drill" = view;
+    const host = fakeHost({ view }, { view: () => at, tempo: () => bpm, setTempo: (b) => ((bpm = b), "done") });
+    return Object.assign(host, { bpm: () => bpm, set: (b: number) => (bpm = b), go: (v: "beat" | "jam" | "drill") => (at = v) });
+  }
+  const beat = toolCtx({ screen: "beat" });
+  const slower = { tool: "set_tempo", args: { direction: "slower" } };
+
+  it("Slower changes the tempo at once: a receipt with Undo and no proposal; Undo puts it back", () => {
+    vi.useFakeTimers();
+    const host = use(tempoHost(), beat);
+    render(<Thread />);
+    act(() => void pressChip(slower, "Slower"));
+    expect(host.bpm()).toBe(115);
+    expect(screen.queryByTestId("ask-proposal")).toBeNull();
+    expect(screen.getByText("Slower")).toBeInTheDocument();
+    expect(screen.getByTestId("ask-receipt")).toHaveTextContent("115");
+    // No clock: still offered long after a confirmed change's ten seconds.
+    act(() => void vi.advanceTimersByTime(UNDO_MS * 30));
+    expect(screen.getByTestId("ask-undo")).toBeInTheDocument();
+    act(() => fireEvent.click(screen.getByTestId("ask-undo")));
+    expect(host.bpm()).toBe(120);
+    expect(screen.getByTestId("ask-undone")).toBeInTheDocument();
+    expect(host.changes().map((c) => c.args[0])).toEqual([115, 120]);
+  });
+
+  it("a chip for an unflagged tool still shows its proposal and does nothing", () => {
+    const host = use(fakeHost({ view: "today", paths: [ALT] }, { plan: () => ({ steps: [{ id: "a", kind: "exercise", title: "A", minutes: 5 }] }) as unknown as SessionPlan, startToday: () => "done" }));
+    render(<Thread />);
+    act(() => void pressChip({ tool: "start_today", args: {} }, "Start today's Session"));
+    expect(screen.getByTestId("ask-proposal")).toBeInTheDocument();
+    expect(host.changes()).toEqual([]);
+  });
+
+  it("a double-click is one change; a second, separate press is a second change and retires the first Undo", () => {
+    const host = use(tempoHost(), beat);
+    render(<Thread />);
+    const chip = () => document.querySelector<HTMLButtonElement>("[data-testid=chip]")!;
+    const Chip = () => (
+      <button type="button" data-testid="chip" onClick={onePress(() => pressChip(slower, "Slower"))}>
+        Slower
+      </button>
+    );
+    render(<Chip />);
+    act(() => fireEvent.click(chip(), { detail: 1 }));
+    act(() => fireEvent.click(chip(), { detail: 2 }));
+    expect(host.bpm()).toBe(115);
+    expect(screen.getAllByTestId("ask-receipt")).toHaveLength(1);
+    act(() => fireEvent.click(chip(), { detail: 1 }));
+    expect(host.bpm()).toBe(110);
+    const receipts = screen.getAllByTestId("ask-receipt");
+    expect(receipts).toHaveLength(2);
+    expect(receipts[0]).toHaveAttribute("data-undo", "gone");
+    expect(receipts[1]).toHaveAttribute("data-undo", "live");
+    expect(screen.getAllByTestId("ask-undo")).toHaveLength(1);
+    act(() => fireEvent.click(screen.getByTestId("ask-undo")));
+    expect(host.bpm()).toBe(115);
+  });
+
+  it("the Undo goes once the value is changed again by anyone, and a stale press changes nothing", () => {
+    const host = use(tempoHost(), beat);
+    render(<Thread />);
+    act(() => void pressChip(slower, "Slower"));
+    host.set(130);
+    // Pressed before Ask has looked again: the runner's guard refuses it.
+    act(() => fireEvent.click(screen.getByTestId("ask-undo")));
+    expect(host.bpm()).toBe(130);
+    expect(screen.queryByTestId("ask-undo")).toBeNull();
+    // And looked again (the panel opens, the screen moves): retired without a press.
+    act(() => void pressChip(slower, "Slower"));
+    host.set(100);
+    act(() => noteAskUndos());
+    expect(screen.queryByTestId("ask-undo")).toBeNull();
+    expect(screen.getAllByTestId("ask-receipt")[1]).toHaveAttribute("data-undo", "gone");
+  });
+
+  it("the Undo goes when the player leaves the screen, and does not come back", () => {
+    const host = use(tempoHost(), beat);
+    render(<Thread />);
+    act(() => void pressChip(slower, "Slower"));
+    host.go("drill");
+    act(() => noteAskToolView("drill"));
+    host.go("beat");
+    act(() => noteAskToolView("beat"));
+    expect(screen.queryByTestId("ask-undo")).toBeNull();
+    act(() => pressUndo(getAskState().turns.find((x) => x.kind === "tool")!.id));
+    expect(host.bpm()).toBe(115);
+  });
+
+  it("in a Session: the nudge at once, its Undo gone when the step moves on or a Take starts", () => {
+    const steady = ALT.steps.flatMap((s) => s.exercises).find((e) => e.id === "ap-1-a")!;
+    let bpm = 70;
+    const rungs: Record<number, { slower?: number; faster?: number }> = { 60: { faster: 70 }, 70: { slower: 60, faster: 80 }, 80: { slower: 70 } };
+    const host = use(
+      fakeHost({ view: "session", session: true }, {
+        nudges: () => ({ slower: rungs[bpm].slower !== undefined, faster: rungs[bpm].faster !== undefined }),
+        nudgeTempo: (way) => ((bpm = rungs[bpm][way] ?? bpm), "done"),
+      }),
+      () => toolCtx({ screen: "session", run: { ...runIn("ready"), bpm }, exercise: steady }),
+    );
+    render(<Thread />);
+    act(() => void pressChip(slower, "Slower"));
+    expect(bpm).toBe(60);
+    expect(screen.getByTestId("ask-undo")).toBeInTheDocument();
+    act(() => noteAskToolView("session", 0));
+    expect(screen.getByTestId("ask-undo")).toBeInTheDocument();
+    act(() => noteAskTake());
+    expect(screen.queryByTestId("ask-undo")).toBeNull();
+    expect(screen.getByTestId("ask-receipt")).toHaveTextContent("60");
+    act(() => void pressChip(slower, "Slower"));
+    // At 60 there is no Slower: the runner says so, nothing changes.
+    expect(bpm).toBe(60);
+    bpm = 70;
+    act(() => void pressChip(slower, "Slower"));
+    expect(bpm).toBe(60);
+    act(() => noteAskToolView("session", 1));
+    expect(screen.queryByTestId("ask-undo")).toBeNull();
+    expect(host.changes().map((c) => c.member)).toEqual(["nudgeTempo", "nudgeTempo"]);
+  });
+
+  it("during a Take, a chip's press changes nothing", () => {
+    const steady = ALT.steps.flatMap((s) => s.exercises).find((e) => e.id === "ap-1-a")!;
+    const host = use(
+      fakeHost({ view: "session", session: true }, { nudges: () => ({ slower: true, faster: true }), nudgeTempo: () => "done" }),
+      toolCtx({ screen: "session", run: { ...runIn("playing"), bpm: 70 }, exercise: steady }),
+    );
+    render(<Thread />);
+    act(() => void pressChip(slower, "Slower"));
+    expect(host.changes()).toEqual([]);
+    expect(screen.queryByTestId("ask-receipt")).toBeNull();
   });
 });
 
