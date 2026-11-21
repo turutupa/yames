@@ -22,25 +22,30 @@ RULES (binding on you and on every helper you spawn; paste this whole block into
   commit on `coach` or `main`; the orchestrator merges. `node_modules` in your worktree is a symlink
   to `/home/dgx-delgado/yames-coach-build/node_modules`: never `npm install`, `npm ci` or `bun`, and
   never delete through the link.
-- **Heavy commands** (tsc, vitest, the build, Playwright, cargo, the paths generator) go through the
-  wrapper, one plain command per call, output to a file:
-  `bash /home/dgx-delgado/yames-coach-build/plans/coach/tools/run.sh <command...> > /tmp/coach-<leg>/<name>.log 2>&1`.
-  A command that must run inside your worktree gets a two-line script written with the Write tool
-  under `/tmp/coach-<leg>/` (`cd <worktree> || exit 2`, then `exec npx playwright test --trace off "$@"`
-  and the like), run as `bash .../run.sh bash /tmp/coach-<leg>/<script>.sh <args>`. Never
-  `cd x && y` in the command itself.
-  The wrapper sets the Rust environment (`CARGO_TARGET_DIR=$HOME/.target-coach`, the CFLAGS), waits
-  for 16 GB of free RAM, and on weekdays 7 AM to 8 PM Pacific applies the owner's limits by itself:
-  `nice`, 4 cargo jobs, 2 Playwright workers, 4 vitest workers, and **one heavy command at a time
-  across all agents** (a lock: your command waits until another agent's ends). So start a heavy
-  command with `run_in_background: true` and wait for its completion notice, or wait with
-  `~/.local/bin/wait-until --timeout 30m file <log> --grep '<regex of its last line>'`. Never start
-  two heavy commands at once yourself.
-  Exit code 75 means `/tmp/yames-dgx-yield` exists: commit a labelled WIP, write the handoff, stop.
-- **The full layout suite (`npx playwright test` with no spec named) never runs before 8 PM Pacific
-  on a weekday.** Before then run the specs of the screens you touched, by name, and say in your
-  report that the full suite is owed; the orchestrator runs it after 8 PM. After 8 PM and at weekends
-  run it yourself if your leg changes any text or style a screen shows.
+- **Heavy commands go through the job queue** (the owner's rule, OWNER-UPDATES 2026-11-20 18:25):
+  tsc, vitest, the build, Playwright, cargo, `npm run test:rust`, the paths generator's `check` over
+  every pack, a probe. One job per command, wrapped in the build's `run.sh`:
+  `~/.local/bin/job submit --name coach-<leg>-<what> --ram <N>G --est <M>m --cwd <your worktree> -- bash /home/dgx-delgado/yames-coach-build/plans/coach/tools/run.sh <command...>`
+  (for example `... --name coach-t1b2b-tsc --ram 6G --est 5m --cwd /home/dgx-delgado/yames-coach-t1b2b -- bash /home/dgx-delgado/yames-coach-build/plans/coach/tools/run.sh npx tsc --noEmit`).
+  **Any Playwright run also takes `--lock coach-layout`** (one Playwright suite at a time across the
+  whole build). Declare honestly: tsc 6G / 5m; vitest (`npm run test`) 12G / 15m; `npm run build`
+  8G / 6m; Playwright by named specs 8G / 20m; `npm run test:rust` 12G / 30m; a paths `gen` /
+  `strings` / `check` 4G / 5m. Names: lowercase letters, digits and `-`, and not the name of a job
+  still queued or running (add `-2`, `-3` for a re-run).
+  Then wait: `~/.local/bin/job wait coach-<leg>-<what> --timeout 9m` (its exit code is the job's;
+  124 means still running: call it again), and read the result with
+  `~/.local/bin/job logs coach-<leg>-<what> -n 40` (or `> /tmp/coach-<leg>/<what>.log` and grep the
+  file; never print a whole log). `job ls` shows why a queued job waits. Never run a heavy command
+  outside the queue, never with `nohup`, `systemd-run` or a background loop, and never two of your
+  own at once unless they are independent (tsc beside a build is fine; two vitest runs are not).
+  `run.sh` sets the Rust environment (`CARGO_TARGET_DIR=$HOME/.target-coach`, the CFLAGS, a private
+  `TMPDIR`), waits for 16 GB of free RAM and holds the build's lock (the orchestrator takes it alone
+  for a click-jitter probe: your job then waits inside the queue, which is expected).
+  Its exit code 75 means `/tmp/yames-dgx-yield` exists: commit a labelled WIP, write the handoff, stop.
+  Quick commands (git, grep, one small script under two minutes that loads no model) run directly.
+- **The full layout suite (`npx playwright test` with no spec named)** is the orchestrator's unless
+  your prompt says otherwise: never two full suites at once. Run the specs of the screens you
+  touched, by name, and say in your report that the full suite is owed.
 - **Gates.** `npx tsc --noEmit`, `npm run test` (vitest), `npm run build`; `npm run test:rust` for
   any Rust change; the layout specs of every screen you touch; `npm run paths -- check` if pack
   content changes; the click-jitter probe for anything that adds background compute. All fifteen
@@ -63,7 +68,7 @@ RULES (binding on you and on every helper you spawn; paste this whole block into
   `sed -i`, `echo >`; a plain `> file` redirect of a command's output is fine). No inline scripts
   (`python -c`, `node -e`, `bash -c`): write a script file, then run it. One command per call, with
   absolute paths (`git -C <worktree> ...`, `npm --prefix <worktree> ...`); no long `&&` / `;` chains.
-  No `sleep` loops: wait with `~/.local/bin/wait-until`. Kill a process by PID only, never
+  No `sleep` loops: wait with `~/.local/bin/job wait` or `~/.local/bin/wait-until`. Kill a process by PID only, never
   `pkill -f` or `pgrep -f`. Web lookups, if you truly need one: `~/.local/bin/web-look search "..."`,
   with no personal or project data in the query. No personal data in any external request.
 - **Commits.** `git -C <worktree> -c user.name=turutupa -c user.email=44581951+turutupa@users.noreply.github.com commit -F /tmp/coach-<leg>/msg.txt`,

@@ -23,13 +23,16 @@ fourteen other locales and the layout scenes on top of it.
   the chips c1b1 and c2a2 already show moved onto it without changing what the player sees.
 - **Reaching a card from Ask**: a chip press asks and answers in the Ask thread (the turn kind,
   drawn with the existing blocks and the source line). Keep the panel change small and say exactly
-  which lines of `AskPanel.tsx` / `askStore.ts` you touched (t1b2b wires the typed-command router
-  into the same text box after you: leave it a clear seam, `answerTyped(text)` or the like, where
-  "the router first, then the card matcher, then the plain statement" will sit).
+  which lines of `AskPanel.tsx` / `askStore.ts` you touched. **Leg t1b2b runs beside you and owns
+  the text box's send path in `AskPanel.tsx`** (it adds `answerTyped(text)`: the command router
+  first, then a slot for "the next answerer", then the plain statement). You do not touch the send
+  handler: you add the card turn kind, its drawing and the chips, and you export one function,
+  `answerCardFor(text)` (the matcher below plus the card), that c2b1b plugs into t1b2b's slot.
 - Item 5 for the three cards only: the matcher from typed English to a shape
-  (`src/coach/ask/match.ts`), after the command router and only on a clear match, with its
-  near-miss table. Leg t1b2a is writing `src/coach/ask/router.ts` beside you: do not edit it; call
-  nothing of it; your matcher is a separate pure function.
+  (`src/coach/ask/match.ts`), only on a clear match, with its near-miss table. The typed-command
+  router is merged (`src/coach/ask/router.ts`, `plans/coach/progress/t1b2a.md`): do not edit it;
+  your matcher is a separate pure function, and a line the router takes as a command must not also
+  match a card (a test over the router's command table proves it).
 - Strings: **English only**, in the namespace the parent brief names. `i18n.locales.test.ts` demands
   every key in fifteen locales: put the new keys in all fifteen files **with the English text** and
   list them in `plans/coach/progress/c2b1a.md` under "to translate (c2b1b)", so the gate stays green
