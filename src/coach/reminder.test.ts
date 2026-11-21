@@ -67,7 +67,7 @@ describe("reminderLineKey: the player's instrument (rem2c)", () => {
     [null, "notebook.reminder.line"],
   ])("%s → %s", (instrument, key) => {
     expect(reminderLineKey(instrument)).toBe(key);
-    expect(reminderLine(ON, NOW, NONE, instrument)?.key).toBe(key);
+    expect(reminderLine(ON, NOW, DAILY, instrument)?.key).toBe(key);
   });
 });
 

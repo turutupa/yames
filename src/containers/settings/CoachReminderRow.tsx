@@ -25,8 +25,8 @@ export function CoachReminderRow() {
   const { t, i18n } = useTranslation();
   const { reminder, state } = useStoredReminder();
   const { practised, now } = useReminderPractised(reminder);
-  // Not on a day the player has already practised: "starts again after you
-  // next practise" would be untrue then (rem2b, L1).
+  // Not on a day with practice saved: "starts again after your next saved
+  // practice" would be untrue then (rem2b, L1).
   const quiet =
     reminder !== null &&
     practised !== null &&

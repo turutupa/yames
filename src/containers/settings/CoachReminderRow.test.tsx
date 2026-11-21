@@ -334,7 +334,8 @@ describe("Today's reminder line", () => {
   });
 
   it("asks for Songs once, bounded at local midnight 21 days back, never song by song (rem2c M1)", async () => {
-    store.disk.set("coach.reminder", { on: true, time: "00:00", days: ALL, since: Date.now() - 30 * DAY });
+    // Turned on yesterday, so the quiet rule cannot hold.
+    store.disk.set("coach.reminder", { on: true, time: "00:00", days: ALL, since: Date.now() - DAY });
     render(today());
     await loaded();
     expect(await screen.findByTestId("today-reminder")).toBeInTheDocument();
@@ -343,14 +344,18 @@ describe("Today's reminder line", () => {
     expect(store.perSongReads).toBe(0);
   });
 
-  it("a Songs read that rejects (the store unavailable) says nothing (rem2c)", async () => {
-    store.disk.set("coach.reminder", { on: true, time: "00:00", days: ALL, since: Date.now() - 30 * DAY });
+  it("a Songs read that rejects (the store unavailable) says nothing (rem2c); the same read answering says the line", async () => {
+    store.disk.set("coach.reminder", { on: true, time: "00:00", days: ALL, since: Date.now() - DAY });
     store.failSongs = true;
-    render(today([{ startedAt: Date.now() - DAY }]));
+    const { unmount } = render(today([{ startedAt: Date.now() - DAY }]));
     await loaded();
     await act(async () => {});
     expect(store.songReads).toBe(1);
     expect(screen.queryByTestId("today-reminder")).toBeNull();
+    unmount();
+    store.failSongs = false;
+    render(today([{ startedAt: Date.now() - DAY }]));
+    expect(await screen.findByTestId("today-reminder")).toBeInTheDocument();
   });
 
   it("Takes handed in as null (Today's read failed or has not answered) say nothing (rem2c L1, L2)", async () => {
@@ -370,8 +375,9 @@ describe("Today's reminder line", () => {
     ["other", /^Your reminder: practice at .+\.$/],
     [undefined, /^Your reminder: practice at .+\.$/],
   ])("names the instrument the player chose (%s), and never guitar to anyone else (rem2c)", async (instrument, text) => {
-    store.disk.set("coach.reminder", { on: true, time: "00:00", days: ALL, since: Date.now() - 30 * DAY });
-    render(today(store.takes, false, instrument));
+    store.disk.set("coach.reminder", { on: true, time: "00:00", days: ALL, since: Date.now() - DAY });
+    // Not `today(...)`: its default would turn an absent instrument into a guitar.
+    render(<TodayReminder takes={store.takes} instrument={instrument} />);
     await loaded();
     const line = await screen.findByTestId("today-reminder");
     expect(line).toHaveTextContent(text);
@@ -438,5 +444,26 @@ describe("Today's reminder line across midnight (rem2b M1)", () => {
     });
     expect(store.runReads).toBe(3);
     expect(screen.queryByTestId("today-reminder")).toBeNull();
+  });
+
+  it("a sleep across midnight: the window's focus reads again before the late timer, with the new day's bound (rem2c L4)", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date"] });
+    vi.setSystemTime(new Date(2026, 10, 23, 23, 59));
+    store.disk.set("coach.reminder", { on: true, time: "18:00", days: [1], since: Date.now() - DAY });
+    render(today([]));
+    await loaded();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(screen.getByTestId("today-reminder")).toBeInTheDocument();
+    // The clock jumps past midnight while the timer has not fired (a suspended laptop).
+    vi.setSystemTime(new Date(2026, 10, 24, 0, 30));
+    await act(async () => {
+      window.dispatchEvent(new Event("focus"));
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(store.runReads).toBe(2);
+    expect(screen.queryByTestId("today-reminder")).toBeNull();
+    expect(store.songSince[store.songSince.length - 1]).toBe(new Date(2026, 10, 3).getTime());
   });
 });

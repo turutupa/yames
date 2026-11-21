@@ -24,6 +24,11 @@ export function coachSessionBusy(): boolean {
   return busy;
 }
 
+/**
+ * Called on every change of the hold, not only of the Session flag: a Session
+ * starting or ending, and (rem2b) the click starting or stopping
+ * (`setCoachClickPlaying`). Read `coachSessionBusy` or `coachHeld` for which.
+ */
 export function subscribeCoachSessionBusy(listener: () => void): () => void {
   listeners.add(listener);
   return () => {

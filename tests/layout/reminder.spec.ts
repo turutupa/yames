@@ -71,6 +71,12 @@ test.describe("the reminder on Today, on a computer", () => {
     await shot(page, "reminder-today-1024-de");
   });
 
+  test("names the player's own instrument: a drummer is not told guitar (rem2c)", async ({ page }) => {
+    await openShot(page, "today-drums", { width: 1440, height: 900 }, "ember", { reminder: "on" });
+    await settleAnimations(page);
+    await expect(page.getByTestId("today-reminder")).toHaveText(/^Your reminder: drums at .+\.$/);
+  });
+
   test("absent when the reminder is off", async ({ page }) => {
     await openShot(page, "today-line", { width: 1440, height: 900 }, "ember");
     await expect(page.locator(".session-today-line")).toHaveCount(1);

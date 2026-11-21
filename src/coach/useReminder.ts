@@ -97,6 +97,9 @@ export function useReminderPractised(
   }, [on, held, time, days, now]);
 
   // The window coming back (a laptop opened, the app brought forward): look again.
+  // `focus` too (rem2c, review L4): a desktop window often reports no hidden
+  // state around a sleep, and a timer armed before a sleep or a time-zone
+  // change can fire late; a read is cheap since the Songs read is bounded.
   useEffect(() => {
     if (!on || held) return;
     const onVisible = () => {
@@ -105,7 +108,11 @@ export function useReminderPractised(
       setTick((n) => n + 1);
     };
     document.addEventListener("visibilitychange", onVisible);
-    return () => document.removeEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
+    };
   }, [on, held]);
 
   // The reads: on mount or On, on a tick, and when a Session or the click lets go.
