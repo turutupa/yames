@@ -95,6 +95,22 @@
       "on": "Bật",
       "asked": "Chỉ khi tôi hỏi",
       "unreadable": "Lần này không đọc được lựa chọn của bạn; bấm một mục sẽ lưu nó."
+    },
+    "reminder": {
+      "label": "Nhắc luyện tập",
+      "hint": "“Hôm nay” nhắc đến việc này sau giờ này vào những ngày đã chọn, nếu hôm nay chưa có buổi tập nào được lưu. Không có thông báo.",
+      "off": "Tắt",
+      "on": "Bật",
+      "time": "Giờ",
+      "days": "Ngày",
+      "quiet": "“Hôm nay” đã ngừng nhắc: ba ngày nhắc đã qua mà không có buổi tập nào được lưu. Sẽ nhắc lại sau buổi tập được lưu tiếp theo của bạn.",
+      "noDays": "Chưa chọn ngày nào nên “Hôm nay” sẽ không nhắc.",
+      "unreadable": "Lần này không đọc được lời nhắc của bạn nên “Hôm nay” không nhắc; bấm Tắt hoặc Bật sẽ lưu lại.",
+      "line": "Lời nhắc của bạn: luyện tập lúc {{time}}.",
+      "lineGuitar": "Lời nhắc của bạn: tập guitar lúc {{time}}.",
+      "lineBass": "Lời nhắc của bạn: tập bass lúc {{time}}.",
+      "lineDrums": "Lời nhắc của bạn: tập trống lúc {{time}}.",
+      "linePiano": "Lời nhắc của bạn: tập piano lúc {{time}}."
     }
   }
 }

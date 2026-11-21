@@ -95,6 +95,22 @@
       "on": "Attivi",
       "asked": "Solo quando chiedo",
       "unreadable": "Stavolta la tua scelta non si è potuta leggere; premerne una la salva."
+    },
+    "reminder": {
+      "label": "Promemoria di pratica",
+      "hint": "«Oggi» lo menziona dopo quest'ora, in questi giorni, se oggi non è stata salvata nessuna pratica. Non c'è nessuna notifica.",
+      "off": "Disattivato",
+      "on": "Attivo",
+      "time": "Ora",
+      "days": "Giorni",
+      "quiet": "«Oggi» ha smesso di menzionarlo: sono passati tre giorni di promemoria senza pratica salvata. Ricomincia dopo la tua prossima pratica salvata.",
+      "noDays": "Non è stato scelto nessun giorno, quindi «Oggi» non lo menziona.",
+      "unreadable": "Stavolta il tuo promemoria non si è potuto leggere, quindi «Oggi» non lo menziona; premere Disattivato o Attivo lo salva.",
+      "line": "Il tuo promemoria: pratica alle {{time}}.",
+      "lineGuitar": "Il tuo promemoria: chitarra alle {{time}}.",
+      "lineBass": "Il tuo promemoria: basso alle {{time}}.",
+      "lineDrums": "Il tuo promemoria: batteria alle {{time}}.",
+      "linePiano": "Il tuo promemoria: pianoforte alle {{time}}."
     }
   }
 }

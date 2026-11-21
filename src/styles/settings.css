@@ -731,6 +731,56 @@
   box-shadow: var(--btn-sel-ring);
 }
 
+/* Settings → Coach → Practice reminder (leg rem2): Off / On, then the time and
+   the seven weekdays under it, all at the row's end. */
+.coach-reminder-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+.coach-reminder-time {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.coach-reminder-time input {
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color, transparent);
+  font: inherit;
+}
+.coach-reminder-days {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.coach-reminder-days .toggle-btn {
+  padding: 6px 8px;
+  min-width: 40px;
+  text-transform: none;
+}
+@media (pointer: coarse) {
+  .coach-reminder-days .toggle-btn {
+    min-width: 44px;
+  }
+  .coach-reminder-time input {
+    min-height: 44px;
+  }
+}
+@media (max-width: 480px) {
+  .coach-reminder-controls {
+    align-items: stretch;
+  }
+  .coach-reminder-days {
+    justify-content: flex-start;
+  }
+}
+
 .toggle-btn:disabled {
   opacity: 0.3;
   cursor: not-allowed;
