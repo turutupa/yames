@@ -394,6 +394,23 @@ describe("a jam take being written is a Take for the chip (leg chip1b, review M2
     expect("proposal" in pressCoachChip({ tool: "set_tempo", args: { direction: "slower" } }, host, toolCtx({ screen: "jam" }))).toBe(true);
     expect(bpm).toBe(100);
   });
+
+  it("an Undo pressed while a jam take is written is 'not now', changes nothing, and stays good for after it (leg chip1c, review chip1b MEDIUM)", () => {
+    let bpm = 100;
+    let writing = false;
+    const host = fakeHost({ view: "jam", sounding: "band" }, { tempo: () => bpm, setTempo: (b) => ((bpm = b), "done"), jamTakeRunning: () => writing });
+    const ctx = toolCtx({ screen: "jam" });
+    const done = receiptOf(pressCoachChip({ tool: "set_tempo", args: { direction: "slower" } }, host, ctx));
+    expect(bpm).toBe(95);
+    writing = true;
+    const now = runCoachUndo(done.undo, host, ctx);
+    expect(now.ok).toBe(false);
+    expect(!now.ok && now.why).toBe("notNow");
+    expect(bpm).toBe(95);
+    writing = false;
+    expect(runCoachUndo(done.undo, host, ctx).ok).toBe(true);
+    expect(bpm).toBe(100);
+  });
 });
 
 describe("only a flagged tool, and only this door", () => {

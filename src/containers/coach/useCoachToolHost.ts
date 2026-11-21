@@ -52,6 +52,7 @@ import type { MainView } from "../main-window/MainHeader";
 import type { PathsPlace } from "../main-window/hooks/usePathsPlace";
 import type { PracticeView } from "../session/highway/runwayModel";
 import type { SessionRun } from "../session/hooks/useSessionRun";
+import { noteAskJamTake, noteAskLoad } from "./askTools";
 import type { PresetApplied } from "./coachPresetLoad";
 
 /** The safe settings the window holds (the rest are the Session's, or the hook's own: the language). */
@@ -92,6 +93,8 @@ export type CoachToolHostInput = {
   isPlaying: boolean;
   /** A jam take is being written (`useJamTakes().recording`; leg chip1b). Left out: no. */
   jamTakeRunning?: boolean;
+  /** The engine's speed ramp runs (the Drill's, `state.speedRamp.active`; leg chip1c). Left out: no. */
+  speedRampRunning?: boolean;
   /** The tool screens' tempo, and `handleBpmChange` (clamped; on the jam tab it edits the jam). */
   tempo: number;
   setTempo: (bpm: number) => void;
@@ -371,5 +374,16 @@ export function useCoachToolHost(input: CoachToolHostInput): CoachToolHost {
     setCoachToolHost(built);
     return () => setCoachToolHost(null);
   }, [built]);
+  // A jam take is a Take for a chip's Undo (leg chip1c, review chip1b MEDIUM): spent at its
+  // start, drawn as plain lines at its end; once per flip, never per beat.
+  const jamTakeRunning = input.jamTakeRunning === true;
+  useEffect(() => {
+    noteAskJamTake(jamTakeRunning);
+  }, [jamTakeRunning]);
+  // A speed ramp moves the tempo with no press (review chip1b LOW 4): no chip Undo outlives its start.
+  const speedRampRunning = input.speedRampRunning === true;
+  useEffect(() => {
+    if (speedRampRunning) noteAskLoad();
+  }, [speedRampRunning]);
   return built;
 }

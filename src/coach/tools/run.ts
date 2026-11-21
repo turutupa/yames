@@ -455,8 +455,9 @@ export function dismissProposal(proposal: Proposal): void {
  * (`return_to`). An undo that is a `confirm` tool runs at once, because the
  * Undo press is the press. A `confirm` undo pressed anywhere but the view
  * (and, in a Session, the Exercise) it was issued on is refused and spent.
- * Refused as `notNow` (a Take, a click still playing), it stays good for a
- * later press, on that same screen.
+ * Refused as `notNow` (a Take, a click still playing, a jam take being
+ * written: a `confirm` undo only), it stays good for a later press, on that
+ * same screen.
  */
 export function runCoachUndo(
   undo: unknown,
@@ -482,6 +483,12 @@ export function runCoachUndo(
     }
     if (here !== place) {
       return refuse("refused", "coachTools.why.refused.proposal", {}, { detail: "the undo was issued on another screen" });
+    }
+    // A jam take being written is a Take here (review chip1b MEDIUM; the backstop to Ask
+    // retiring chip Undos at its start): not now, and the Undo stays good for after it.
+    if (jamTakeNow(host)) {
+      undos.set(issuedUndo, place);
+      return refuse("notNow", "coachTools.why.notNow.take");
     }
   }
   const outcome = runIssuedUndo(issuedUndo, host, ctx, registry);

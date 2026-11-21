@@ -1801,6 +1801,7 @@ export function MainWindow() {
     },
     isPlaying: state.isPlaying,
     jamTakeRunning: jamTakes.recording,
+    speedRampRunning: !!state.speedRamp?.active,
     tempo: state.bpm,
     setTempo: handleBpmChange,
     subdivision: state.subdivision,

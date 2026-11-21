@@ -22,11 +22,14 @@ import {
   UNDO_MS,
   __setAskToolsForTests,
   askYours,
+  noKeyRepeat,
+  noteAskJamTake,
   noteAskLoad,
   noteAskTake,
   noteAskToolView,
   noteAskUndos,
   notNowProposal,
+  onePress,
   pressChip,
   pressProposal,
   pressUndo,
@@ -594,6 +597,95 @@ describe("a suggestion chip's own press (leg chip1)", () => {
     act(() => void pressChip(slower, "Slower"));
     expect(host.changes()).toEqual([]);
     expect(screen.queryByTestId("ask-receipt")).toBeNull();
+  });
+
+  it("a jam take's start spends the chip's Undo, draws nothing while the take is written, and the Undo pressed then changes nothing (leg chip1c, review chip1b MEDIUM)", () => {
+    let bpm = 100;
+    let writing = false;
+    const jam = toolCtx({ screen: "jam" });
+    use(fakeHost({ view: "jam", sounding: "band" }, { tempo: () => bpm, setTempo: (b) => ((bpm = b), "done"), jamTakeRunning: () => writing }), jam);
+    render(<Thread />);
+    act(() => void pressChip(slower, "Slower"));
+    expect(bpm).toBe(95);
+    writing = true;
+    const before = getAskState().turns;
+    act(() => noteAskJamTake(true));
+    // Nothing of Ask is written while the take records: the very same turns.
+    expect(getAskState().turns).toBe(before);
+    act(() => noteAskLoad());
+    act(() => noteAskUndos());
+    expect(getAskState().turns).toBe(before);
+    // The Undo still drawn, pressed mid-take: the tempo does not jump back.
+    act(() => fireEvent.click(screen.getByTestId("ask-undo")));
+    expect(bpm).toBe(95);
+    writing = false;
+    act(() => noteAskJamTake(false));
+    expect(screen.queryByTestId("ask-undo")).toBeNull();
+    const receipt = getAskState().turns.find((x) => x.kind === "tool");
+    const call = receipt?.kind === "tool" && receipt.body.kind === "receipt" ? receipt.body.undo!.call : null;
+    expect(runCoachUndo(call, fakeHost({ view: "jam" }, { tempo: () => bpm, setTempo: (b) => ((bpm = b), "done") }), jam).ok).toBe(false);
+    expect(bpm).toBe(95);
+  });
+
+  it("the host tells Ask when a jam take flips and when a speed ramp starts; the tempo trainer's step and its revert retire the chip Undos (leg chip1c)", () => {
+    const read = (file: string) => readFileSync(join(__dirname, file), "utf8");
+    const host = read("useCoachToolHost.ts");
+    expect(host).toContain("noteAskJamTake(jamTakeRunning);");
+    expect(host).toMatch(/if \(speedRampRunning\) noteAskLoad\(\);/);
+    expect(read("../main-window/MainWindow.tsx")).toContain("speedRampRunning: !!state.speedRamp?.active,");
+    const jam = read("../main-window/hooks/useJamSession.ts");
+    const step = jam.slice(jam.indexOf("if (to === from) return;"), jam.indexOf("setTrainedBpm(to);"));
+    expect(step).toContain("noteAskLoad();");
+    const revert = jam.slice(jam.indexOf("if (isPlaying || trainedBpm === null) return;"), jam.indexOf("setTrainedBpm(null);"));
+    expect(revert).toContain("noteAskLoad();");
+  });
+
+  it("in a Session, confirming the proposal a second chip press showed keeps the first Undo as the second step back to the start (leg chip1c, review chip1b LOW 2)", () => {
+    vi.useFakeTimers();
+    const steady = ALT.steps.flatMap((s) => s.exercises).find((e) => e.id === "ap-1-a")!;
+    let bpm = 80;
+    const rungs: Record<number, { slower?: number; faster?: number }> = { 60: { faster: 70 }, 70: { slower: 60, faster: 80 }, 80: { slower: 70 } };
+    use(
+      fakeHost({ view: "session", session: true }, {
+        nudges: () => ({ slower: rungs[bpm].slower !== undefined, faster: rungs[bpm].faster !== undefined }),
+        nudgeTempo: (way) => ((bpm = rungs[bpm][way] ?? bpm), "done"),
+      }),
+      () => toolCtx({ screen: "session", run: { ...runIn("ready"), bpm }, exercise: steady }),
+    );
+    render(<Thread />);
+    act(() => void pressChip(slower, "Slower"));
+    expect(bpm).toBe(70);
+    act(() => void pressChip(slower, "Slower"));
+    expect(lastBody().kind).toBe("proposal");
+    const proposal = getAskState().turns[getAskState().turns.length - 1];
+    act(() => pressProposal(proposal.id));
+    expect(bpm).toBe(60);
+    const receipts = () => screen.getAllByTestId("ask-receipt");
+    expect(receipts()[0]).toHaveAttribute("data-undo", "live");
+    // Looked at again past the echo's window: still kept, behind the newer Undo.
+    act(() => void vi.advanceTimersByTime(CHIP_UNDO_SETTLE_MS + 1));
+    act(() => noteAskUndos());
+    expect(receipts()[0]).toHaveAttribute("data-undo", "live");
+    act(() => fireEvent.click(screen.getAllByTestId("ask-undo")[1]));
+    expect(bpm).toBe(70);
+    act(() => fireEvent.click(screen.getAllByTestId("ask-undo")[0]));
+    expect(bpm).toBe(80);
+  });
+
+  it("a key repeat marked on a button that went away does not swallow a later click: any keyup, blur or pointer press clears it (leg chip1c, review chip1b LOW 5)", () => {
+    const mark = () => noKeyRepeat({ key: "Enter", repeat: true, preventDefault: () => {} });
+    const fn = vi.fn();
+    const press = onePress(fn);
+    // Unreset, the next `detail` 0 click is dropped (the held key's repeat).
+    mark();
+    press({ detail: 0 });
+    expect(fn).toHaveBeenCalledTimes(0);
+    for (const clear of [() => window.dispatchEvent(new KeyboardEvent("keyup", { key: "Enter" })), () => window.dispatchEvent(new Event("blur")), () => window.dispatchEvent(new Event("pointerdown"))]) {
+      mark();
+      clear();
+      press({ detail: 0 });
+    }
+    expect(fn).toHaveBeenCalledTimes(3);
   });
 });
 

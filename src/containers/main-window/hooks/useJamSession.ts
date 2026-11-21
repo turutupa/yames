@@ -1071,6 +1071,9 @@ export function useJamSession({
       tempoEveryChoruses: practice.tempoEveryChoruses,
     });
     if (to === from) return;
+    // The trainer moves the tempo with no press: no chip's Undo outlives it (leg chip1c,
+    // review chip1b LOW 4; a chorus's step can land on the value an old Undo guards).
+    noteAskLoad();
     setTrainedBpm(to);
     void setBpm(to).catch(() => {});
     // `jam?.id` again: loading a jam onto a click that is already running has
@@ -1082,6 +1085,8 @@ export function useJamSession({
   /** Stop, and the jam is at its own tempo again. */
   useEffect(() => {
     if (isPlaying || trainedBpm === null) return;
+    // Nor its revert on Stop (leg chip1c): the jam's own tempo may be an old Undo's guard.
+    noteAskLoad();
     setTrainedBpm(null);
     if (view === "jam" && jam) void setBpm(jam.bpm).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps

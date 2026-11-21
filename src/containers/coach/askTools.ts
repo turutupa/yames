@@ -116,6 +116,8 @@ export function registerAskToolContext(fn: (() => CoachContext) | null): () => v
 export function __setAskToolsForTests(host: CoachToolHost | null, ctx: CoachContext | (() => CoachContext) | null): void {
   hostOf = host ? () => host : getCoachToolHost;
   contextOf = ctx === null ? null : typeof ctx === "function" ? ctx : () => ctx;
+  jamTakeHold = null;
+  keyRepeating = false;
 }
 
 function where(): { host: CoachToolHost; ctx: CoachContext } | null {
@@ -299,18 +301,24 @@ function liveChipUndoFor(call: ToolCall): UndoState | null {
  * echo comes back over IPC (`useMetronome`'s state event; more than one
  * render), so a value check here would retire the Undo just issued.
  */
-function retireSameUndos(next: ToolCall): void {
+function retireSameUndos(next: ToolCall, keepStacked = false): void {
   for (const turn of getAskState().turns) {
     if (turn.kind !== "tool" || turn.body.kind !== "receipt") continue;
     const undo = turn.body.undo;
     if (!undo || undo.state !== "live" || undo.kind !== "confirm" || undo.call.tool !== next.tool) continue;
     if (undo.call.args.key !== next.args.key) continue;
+    // `next` puts back exactly the value this chip's Undo guards: kept, the second step back (`stackedBehind`).
+    if (keepStacked && undo.chip && undo.call.args.at !== undefined && undo.call.args.at === undoValueOf(next)) continue;
     retire(turn.id, turn.body, undo);
   }
 }
 
 function retire(id: string, body: ToolBody & { kind: "receipt" }, undo: UndoState): void {
   retireUndo(undo.call);
+  if (jamTakeHold) {
+    jamTakeHold.push({ id, call: undo.call });
+    return;
+  }
   setBody(id, { ...body, undo: { ...undo, state: "gone" } });
 }
 
@@ -342,8 +350,38 @@ export function noteAskUndos(): void {
     if (!undo?.chip || undo.state !== "live") continue;
     if (undo.issued !== undefined && now - undo.issued < CHIP_UNDO_SETTLE_MS) continue;
     if (at && undoStillGood(undo.call, at.host, at.ctx)) continue;
+    if (at && stackedBehind(undo.call, turn.id, at, now)) continue;
     retire(turn.id, turn.body, undo);
   }
+}
+
+/** The one argument an undo puts back (`bpm`, `subdivision`, `value`): not its `at` guard, not a setting's key. */
+function undoValueOf(call: ToolCall): unknown {
+  const names = Object.keys(call.args).filter((name) => name !== "at" && name !== "key");
+  return names.length === 1 ? call.args[names[0]] : undefined;
+}
+
+/**
+ * Whether a newer live Undo of the same thing (a confirmed proposal's, with
+ * its clock) puts back exactly the value `older`'s `at` guards (leg chip1c,
+ * review chip1b LOW 2). Then `older` is the second step of the way back to
+ * where the player started: pressing the newer one makes it good again, so
+ * it is kept. A Session has one rung per nudge and no Undo that spans two.
+ */
+function stackedBehind(older: ToolCall, olderId: string, at: { host: CoachToolHost; ctx: CoachContext }, now: number): boolean {
+  if (older.args.at === undefined) return false;
+  const turns = getAskState().turns;
+  const from = turns.findIndex((t) => t.id === olderId);
+  for (let i = turns.length - 1; i > from; i--) {
+    const turn = turns[i];
+    if (turn.kind !== "tool" || turn.body.kind !== "receipt") continue;
+    const newer = turn.body.undo;
+    if (!newer || newer.kind !== "confirm" || !undoLive(newer, now)) continue;
+    if (newer.call.tool !== older.tool || newer.call.args.key !== older.args.key) continue;
+    if (undoValueOf(newer.call) !== older.args.at) continue;
+    return undoStillGood(newer.call, at.host, at.ctx);
+  }
+  return false;
 }
 
 /** How long a chip's new Undo is left alone by `noteAskUndos` (the IPC echo's round trip, with room). */
@@ -361,7 +399,12 @@ export function noteAskTake(): void {
 /**
  * The values a chip's Undo would put back were replaced by another route
  * (leg chip1b, review L2): a preset, a jam or a setlist entry loaded, or a
- * loop started in a Session. A value that went away and came back must not
+ * loop started in a Session; or moved with no press (leg chip1c, review chip1b
+ * LOW 4): the jam tempo trainer's step and its revert on Stop
+ * (`useJamSession`), a speed ramp's start (`useCoachToolHost`). A hand change
+ * and back is left to the runner's value guard (`at`): the Undo is then good
+ * again and puts back the value before the chip's press, which the player
+ * had. A value that went away and came back must not
  * be overwritten by a stale Undo, so every live chip Undo goes (the receipts
  * stay as plain lines). Called from the load paths and by `useAskHost`,
  * never per beat; does nothing when no chip Undo is live.
@@ -376,12 +419,47 @@ function retireAskChipUndos(): void {
     const undo = turn.body.undo;
     if (!undo?.chip || undo.state !== "live") continue;
     retireUndo(undo.call);
-    settleAskTurn(turn.id, (now) =>
-      now.kind === "tool" && now.body.kind === "receipt" && now.body.undo?.call === undo.call && now.body.undo.state === "live"
-        ? { ...now, body: { ...now.body, undo: { ...now.body.undo, state: "gone" } } }
-        : null,
-    );
+    if (jamTakeHold) jamTakeHold.push({ id: turn.id, call: undo.call });
+    else drawGone(turn.id, undo.call);
   }
+}
+
+/** A spent Undo drawn as a plain line (held, like an answer, while a Session's Take runs). */
+function drawGone(id: string, call: ToolCall): void {
+  settleAskTurn(id, (now) =>
+    now.kind === "tool" && now.body.kind === "receipt" && now.body.undo?.call === call && now.body.undo.state === "live"
+      ? { ...now, body: { ...now.body, undo: { ...now.body.undo, state: "gone" } } }
+      : null,
+  );
+}
+
+/**
+ * Receipts whose Undo the runner spent while a jam take was being written,
+ * drawn as plain lines when it ends; null while no jam take is running.
+ */
+let jamTakeHold: Array<{ id: string; call: ToolCall }> | null = null;
+
+/**
+ * A jam take started or ended (leg chip1c, review chip1b MEDIUM): the owner's
+ * rule counts a jam take being written as a Take, so no Undo of a chip
+ * outlives its start, as with a Session's (`noteAskTake`). The runner spends
+ * them at once; nothing of Ask is drawn while the take is written (the jam
+ * take does not hold Ask's answers the way a Session's Take does), so the
+ * receipts become plain lines when it ends. Pressed in between, an Undo drawn
+ * live is refused by the runner (spent, and its backstop: no `confirm` undo
+ * runs while a jam take is written). Called by `useCoachToolHost` when
+ * `jamTakeRunning` flips, never per beat.
+ */
+export function noteAskJamTake(running: boolean): void {
+  if (running) {
+    if (jamTakeHold === null) jamTakeHold = [];
+    retireAskChipUndos();
+    return;
+  }
+  if (jamTakeHold === null) return;
+  const held = jamTakeHold;
+  jamTakeHold = null;
+  for (const { id, call } of held) drawGone(id, call);
 }
 
 /** The arguments a tool resolves by title from the player's words. */
@@ -498,10 +576,30 @@ export function noKeyRepeat(event: { key: string; repeat: boolean; preventDefaul
   const activates = event.key === "Enter" || event.key === " ";
   if (activates && event.repeat) {
     keyRepeating = true;
+    watchKeyRepeat();
     event.preventDefault();
     return;
   }
   keyRepeating = false;
+}
+
+/**
+ * The flag is one for the whole window, so it must not outlive the held key
+ * (leg chip1c, review chip1b LOW 5): a button replaced while Enter is held
+ * never sees its keyup, and the flag would swallow the next `detail` 0 click
+ * (a screen reader's activation). Any keyup, a blur or a pointer press
+ * anywhere clears it. Installed once, the first time a repeat is marked.
+ */
+let keyRepeatWatched = false;
+function watchKeyRepeat(): void {
+  if (keyRepeatWatched || typeof window === "undefined") return;
+  keyRepeatWatched = true;
+  const clear = (): void => {
+    keyRepeating = false;
+  };
+  window.addEventListener("keyup", clear, true);
+  window.addEventListener("blur", clear, true);
+  window.addEventListener("pointerdown", clear, true);
 }
 
 /** The proposal's button: the runner checks it is still good, then does it. */
@@ -514,8 +612,11 @@ export function pressProposal(id: string): void {
     return;
   }
   const result = confirmCoachTool(turn.body.proposal, at.host, at.ctx);
-  // The same thing changed again: a chip's earlier Undo for it is not this one's to keep.
-  if (result.ok && result.undo) retireSameUndos(result.undo);
+  // The same thing changed again: a chip's earlier Undo for it is not this one's to keep,
+  // unless this one's Undo puts back exactly the value it guards (leg chip1c, review chip1b
+  // LOW 2: in a Session a second chip press is this proposal, and a nudge's Undo is one rung,
+  // so the first chip Undo stays live behind it as the second step back to the start).
+  if (result.ok && result.undo) retireSameUndos(result.undo, true);
   setBody(id, bodyOf(result, at.host, at.ctx));
   followLater(id, result);
 }
