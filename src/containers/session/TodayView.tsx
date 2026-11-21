@@ -14,6 +14,7 @@ import type { PathDoc } from "../../paths/format";
 import { TAKES_TO_READ } from "./hooks/useSessionRun";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { todayLine, todayLineText } from "../../coach/todayLine";
+import { useSongDue } from "./hooks/useSongDue";
 import { CoachLine } from "../coach/CoachLine";
 import { TodayReminder } from "./TodayReminder";
 import { askCoach } from "../coach/askStore";
@@ -296,10 +297,12 @@ export function TodayView({
   // The coach's one sentence above the plan (DESIGN 6.1): from stored rows
   // only, and absent when it would only repeat the rows.
   const grading = session.grading ?? "ask";
+  // c5a2: a due Songs passage, one more sentence after the Path's (read once on mount).
+  const songDue = useSongDue();
   const line = useMemo(
     () =>
-      todayLine({ plan, progress, paths: session.paths, now: Date.now(), grading, takesRead: TAKES_TO_READ }),
-    [plan, progress, session.paths, grading],
+      todayLine({ plan, progress, paths: session.paths, now: Date.now(), grading, takesRead: TAKES_TO_READ, songDue }),
+    [plan, progress, session.paths, grading, songDue],
   );
   const said = line ? todayLineText(t, line) : null;
   // The whole line opens Ask about it, on a computer. A phone's Ask is the

@@ -100,28 +100,64 @@ function valueRule(type: ArgType, tool: string, field: string, rules: Rules): st
 }
 
 /**
- * The arguments object's body: each field in the order the tool declares it,
- * the required ones always, the optional ones as groups. A comma goes before
- * every field but the first one present, which is why the "nothing yet"
- * branch is spelled out (at most quadratic in the number of fields).
+ * Optional arguments the runner takes exactly one of (leg c3bp): the grammar
+ * writes each group as one required slot, its members alternatives, so a call
+ * with both or with neither cannot be written. Only where the tool's own
+ * `propose` refuses both and neither (`set_tempo`: "needs `bpm` or
+ * `direction`, not both"); `grammar.test.ts` holds the runner to it, so the
+ * grammar never refuses a call the runner would take.
+ */
+export const ONE_OF: Readonly<Record<string, readonly (readonly string[])[]>> = {
+  set_tempo: [["bpm", "direction"]],
+};
+
+/** A place in the arguments object: one field, or a ONE_OF group (required, one of its members). */
+type Slot = { optional: boolean; fields: readonly ArgField[] };
+
+function slotsOf(fields: readonly ArgField[], tool: string): Slot[] {
+  const groups = ONE_OF[tool] ?? [];
+  const slots: Slot[] = [];
+  const placed = new Set<string>();
+  for (const f of fields) {
+    if (placed.has(f.name)) continue;
+    const group = groups.find((g) => g.includes(f.name));
+    if (!group) {
+      slots.push({ optional: f.optional === true, fields: [f] });
+      continue;
+    }
+    const members = group.map((name) => fields.find((x) => x.name === name));
+    if (members.some((m) => m === undefined || m.optional !== true)) throw new Error(`grammar: ONE_OF ${tool} names a field that is missing or required`);
+    for (const m of members) placed.add(m!.name);
+    slots.push({ optional: false, fields: members as ArgField[] });
+  }
+  return slots;
+}
+
+/**
+ * The arguments object's body: each slot in the order the tool declares its
+ * fields, the required ones always, the optional ones as groups. A comma goes
+ * before every slot but the first one present, which is why the "nothing yet"
+ * branch is spelled out (at most quadratic in the number of slots).
  */
 function argsBody(fields: readonly ArgField[], tool: string, rules: Rules): string {
-  const item = (f: ArgField) => `${jsonString(f.name)} ws ":" ws ${valueRule(f.type, tool, f.name, rules)}`;
+  const slots = slotsOf(fields, tool);
+  const field = (f: ArgField) => `${jsonString(f.name)} ws ":" ws ${valueRule(f.type, tool, f.name, rules)}`;
+  const item = (s: Slot) => (s.fields.length === 1 ? field(s.fields[0]) : `( ${s.fields.map(field).join(" | ")} )`);
   const after = (i: number): string => {
-    // Something is written already: every later field comes with its comma.
+    // Something is written already: every later slot comes with its comma.
     const parts: string[] = [];
-    for (let k = i; k < fields.length; k++) {
-      const f = fields[k];
-      parts.push(f.optional ? `( "," ws ${item(f)} )?` : `"," ws ${item(f)}`);
+    for (let k = i; k < slots.length; k++) {
+      const s = slots[k];
+      parts.push(s.optional ? `( "," ws ${item(s)} )?` : `"," ws ${item(s)}`);
     }
     return parts.join(" ");
   };
   const first = (i: number): string => {
-    // Nothing written yet: the first field present has no comma.
-    if (i >= fields.length) return "";
-    const f = fields[i];
-    const here = [item(f), after(i + 1)].filter(Boolean).join(" ");
-    if (!f.optional) return here;
+    // Nothing written yet: the first slot present has no comma.
+    if (i >= slots.length) return "";
+    const s = slots[i];
+    const here = [item(s), after(i + 1)].filter(Boolean).join(" ");
+    if (!s.optional) return here;
     const rest = first(i + 1);
     return rest === "" ? `( ${here} )?` : `( ${here} | ${rest} )`;
   };
@@ -137,6 +173,29 @@ function toolRule(tool: ToolSpec, rules: Rules): string {
 }
 
 /**
+ * The cards (leg c3b1b): each card with its own arguments, typed as a tool's
+ * are (`argsBody`), and `"args"` left out entirely when it gives none. A card
+ * that declares no `args` gets the generic bounded argument (two at most).
+ */
+function cardsRule(cards: readonly EvalCard[], rules: Rules): string {
+  const one = (card: EvalCard): string => {
+    const head = `${jsonString("card")} ws ":" ws ${jsonString(card.id)}`;
+    if (card.args === undefined) {
+      const cardArg = rules.add("card-arg", `"\\"" [a-z] [a-zA-Z]{0,15} "\\"" ws ":" ws ( "\\"" qc{1,${CARD_ARG_CHARS}} "\\"" | int3 )`);
+      rules.add("int3", "( [1-9] [0-9]{0,2} )");
+      return rules.add(
+        `c-${ruleName(card.id)}`,
+        `${head} ( "," ws ${jsonString("args")} ws ":" ws "{" ws ( ${cardArg} ( "," ws ${cardArg} ){0,${CARD_ARGS_MAX - 1}} )? ws "}" )?`,
+      );
+    }
+    const body = argsBody(card.args, `card-${card.id}`, rules);
+    const args = `"," ws ${jsonString("args")} ws ":" ws "{" ws ${body ? `${body} ws ` : ""}"}"`;
+    return rules.add(`c-${ruleName(card.id)}`, `${head} ( ${args} )?`);
+  };
+  return rules.add("card", cards.map(one).join(" | "));
+}
+
+/**
  * The grammar for one choice. `situation` narrows the tools to those that can
  * run where the player is (`possible`, from `commandFacts`); left out, every
  * player tool is allowed. The cards and the three answers are always there.
@@ -146,16 +205,7 @@ export function choiceGrammar(catalogue: ToolCatalogue, cards: readonly EvalCard
   const tools = catalogue.tools.filter((t) => t.audience === "player" && (situation === undefined || situation.possible[t.name] === true));
   const kinds: string[] = [];
   if (tools.length > 0) kinds.push(rules.add("call", tools.map((t) => toolRule(t, rules)).join(" | ")));
-  if (cards.length > 0) {
-    const cardArg = rules.add("card-arg", `"\\"" [a-z] [a-zA-Z]{0,15} "\\"" ws ":" ws ( "\\"" qc{1,${CARD_ARG_CHARS}} "\\"" | int3 )`);
-    rules.add("int3", "( [1-9] [0-9]{0,2} )");
-    kinds.push(
-      rules.add(
-        "card",
-        `${jsonString("card")} ws ":" ws ( ${cards.map((c) => jsonString(c.id)).join(" | ")} ) ( "," ws ${jsonString("args")} ws ":" ws "{" ws ( ${cardArg} ( "," ws ${cardArg} ){0,${CARD_ARGS_MAX - 1}} )? ws "}" )?`,
-      ),
-    );
-  }
+  if (cards.length > 0) kinds.push(cardsRule(cards, rules));
   kinds.push(rules.add("answer", `${jsonString("answer")} ws ":" ws ( ${CHOICE_ANSWERS.map(jsonString).join(" | ")} )`));
   const head = `root ::= "{" ws ( ${kinds.join(" | ")} ) ws "}"\n`;
   rules.add("qc", '[^"\\\\\\x00-\\x1f]');

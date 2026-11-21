@@ -36,5 +36,6 @@ describe("loadAllPacks in a language", () => {
         expect(await loadOverlay(doc.id, lng), `${lng}/${doc.id}`).not.toBeNull();
       }
     }
-  });
+    // 20 s once on a busy machine (leg c3int): headroom, as `paths/generate.test.ts`'s "mostly" test has.
+  }, 120_000);
 });

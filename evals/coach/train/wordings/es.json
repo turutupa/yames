@@ -1,0 +1,772 @@
+{
+  "language": "es",
+  "writer": "helper-es",
+  "wordings": {
+    "go_screen": [
+      "abre {screen}",
+      "llévame a {screen}",
+      "ir a {screen} porfa",
+      "quiero ver {screen}",
+      "oye, ¿me puedes abrir {screen}?",
+      "ve a {screen}",
+      "muestrame {screen}",
+      "pantalla {screen}, ya"
+    ],
+    "open_path": [
+      "abre la ruta {path}",
+      "ábreme {path}",
+      "quiero ver la ruta: {path}",
+      "ve a {path}",
+      "abrir ruta {path} porfa",
+      "oye, ¿puedes abrirme la ruta {path}? la quiero mirar",
+      "muéstrame {path}",
+      "abre {path} ya"
+    ],
+    "open_step_here": [
+      "abre el paso {step}",
+      "ve al paso {step}",
+      "paso {step}",
+      "quiero ver el paso {step} de esta ruta",
+      "ábreme el paso {step} porfa",
+      "abre paso {step}",
+      "llévame al paso {step}",
+      "¿me abres el paso {step}? es el que sigue"
+    ],
+    "open_step_of_path": [
+      "abre el paso {step} de {path}",
+      "ve al paso {step} de la ruta {path}",
+      "{path}, paso {step}",
+      "ábreme el paso {step} de {path} porfa",
+      "quiero ver el paso {step} de la ruta {path}",
+      "abre paso {step} en {path}",
+      "oye, llévame al paso {step} de {path}",
+      "paso {step} de {path} ya"
+    ],
+    "open_step_name": [
+      "abre el paso {stepName}",
+      "ve al paso: {stepName}",
+      "ábreme {stepName}",
+      "quiero ver el paso {stepName}",
+      "abrir paso {stepName} porfa",
+      "llévame al paso llamado {stepName}",
+      "oye, ¿me abres el paso de {stepName}?",
+      "abre {stepName} ya"
+    ],
+    "open_settings": [
+      "abre los ajustes de {section}",
+      "ve a ajustes, sección {section}",
+      "configuración: {section}",
+      "quiero cambiar algo en {section}, llévame a ajustes",
+      "abre ajustes > {section}",
+      "ajustes de {section} porfa",
+      "oye, ¿me abres la configuración, la parte de {section}?",
+      "ir a ajustes {section}"
+    ],
+    "show_scale": [
+      "muestra la escala {root} {scale} en el mástil",
+      "enséñame {root} {scale}",
+      "dibuja {root} {scale} en el diapasón",
+      "escala {root} {scale} porfa",
+      "oye, ¿me muestras la escala de {root} {scale}?",
+      "quiero ver {root} {scale} en la guitarra",
+      "pon la escala {root} {scale}",
+      "muestrame {root} {scale}"
+    ],
+    "show_scale_at": [
+      "muestra la escala {root} {scale} en posición: {position}",
+      "enséñame {root} {scale} con {position}",
+      "dibuja {root} {scale}, {position}",
+      "escala {root} {scale} en el mástil, {position}",
+      "oye, ¿me enseñas {root} {scale} usando {position}?",
+      "quiero ver {root} {scale} con {position} porfa",
+      "{root} {scale} / {position}",
+      "muestrame la escala de {root} {scale} en esta posición: {position}"
+    ],
+    "show_chord": [
+      "muestra el acorde {chord}",
+      "¿cómo se toca {chord}?",
+      "enséñame {chord}",
+      "acorde {chord} porfa",
+      "oye, ¿cómo agarro el {chord}?",
+      "quiero ver la digitación de {chord}",
+      "muéstrame cómo hacer {chord}",
+      "{chord} cómo se hace"
+    ],
+    "explain_screen": [
+      "¿para qué sirve esta pantalla?",
+      "explícame esto",
+      "¿qué hago aquí?",
+      "no entiendo esta pantalla, ¿me la explicas?",
+      "que es esto?",
+      "explica la pantalla",
+      "oye coach, ¿qué se puede hacer en esta pantalla?",
+      "ayuda con esta pantalla"
+    ],
+    "start_today": [
+      "empieza la sesión de hoy",
+      "vamos a practicar",
+      "inicia la práctica de hoy",
+      "arranca la sesion de hoy porfa",
+      "quiero empezar a tocar ya",
+      "oye, ¿podemos empezar la sesión de hoy?",
+      "dale, comencemos",
+      "comenzar sesión"
+    ],
+    "start_today_at": [
+      "empieza la sesión de hoy por la parte {part}",
+      "arranca desde la parte {part}",
+      "inicia hoy en la parte {part}",
+      "quiero empezar en la parte {part} porfa",
+      "salta a la parte {part} y empieza",
+      "oye, ¿puedes empezar la sesión desde la parte {part}?",
+      "comienza en la parte {part}",
+      "sesión de hoy, parte {part}, ya"
+    ],
+    "play_exercise": [
+      "toca el ejercicio {exercise}",
+      "pon {exercise}",
+      "quiero practicar {exercise} ahora",
+      "reproduce el ejercicio: {exercise}",
+      "empieza {exercise} porfa",
+      "oye, ¿podemos hacer el ejercicio {exercise}?",
+      "dale a {exercise}",
+      "ejercicio {exercise} ya"
+    ],
+    "play_exercise_bpm": [
+      "toca el ejercicio {exercise} a {bpm} bpm",
+      "pon {exercise} a {bpm}",
+      "quiero practicar {exercise} a {bpm} bpm porfa",
+      "reproduce {exercise} a {bpm} pulsaciones por minuto",
+      "{exercise} a {bpm} bpm ya",
+      "oye, ¿me pones el ejercicio {exercise} a {bpm}?",
+      "empieza {exercise} con el metrónomo a {bpm}",
+      "dale a {exercise}, velocidad {bpm}"
+    ],
+    "tempo_bpm": [
+      "pon el tempo a {bpm}",
+      "{bpm} bpm",
+      "ajusta la velocidad a {bpm} bpm",
+      "cambia el metronomo a {bpm}",
+      "quiero tocar a {bpm}, ¿me lo pones?",
+      "tempo {bpm} porfa",
+      "oye, fija el tempo en {bpm} bpm",
+      "súbelo o bájalo a {bpm}"
+    ],
+    "tempo_faster": [
+      "más rápido",
+      "un poco más deprisa",
+      "acelera",
+      "mas rapido porfa",
+      "sube la velocidad un poquito",
+      "oye, ¿puedes ponerlo un poco más rápido? me quedo corto",
+      "dale más caña al metrónomo",
+      "mas rapidoo"
+    ],
+    "tempo_slower": [
+      "más lento",
+      "un poco más despacio",
+      "baja la velocidad",
+      "mas despacio porfa",
+      "¿puedes ir más lento? mis dedos no llegan",
+      "oye, bájale un poquito al tempo",
+      "mas lentoo plis",
+      "frena un poco, que no me da"
+    ],
+    "find_edge": [
+      "busca mi límite en {exercise}",
+      "encuentra mi límite en el ejercicio {exercise}",
+      "¿cuál es mi tempo limpio más alto en {exercise}?",
+      "quiero saber hasta qué velocidad llego en {exercise}",
+      "busca mi limite en {exercise} porfa",
+      "oye, ¿me ayudas a encontrar mi límite en {exercise}?",
+      "mi límite en {exercise}",
+      "descubre hasta dónde llego con {exercise}"
+    ],
+    "test_out_here": [
+      "haz la prueba del paso {step}",
+      "quiero saltarme el paso {step}, hago la prueba",
+      "prueba para pasar el paso {step}",
+      "pasar el paso {step} con la prueba porfa",
+      "ya domino el paso {step}, déjame demostrarlo",
+      "oye, ¿puedo hacer la prueba del paso {step}?",
+      "test del paso {step}",
+      "saltar paso {step} demostrando que lo sé"
+    ],
+    "test_out_of_path": [
+      "haz la prueba del paso {step} de {path}",
+      "quiero saltarme el paso {step} de la ruta {path} con la prueba",
+      "prueba del paso {step} en {path}",
+      "{path}: prueba para pasar el paso {step}",
+      "ya me sé el paso {step} de {path}, déjame demostrarlo",
+      "oye, ¿puedo hacer la prueba del paso {step} de {path}?",
+      "pasar el paso {step} de {path} porfa",
+      "test paso {step} {path}"
+    ],
+    "loop_bars": [
+      "repite del compás {from} al {to}",
+      "haz un bucle de los compases {from} a {to}, despacio",
+      "loop de {from} a {to} más lento",
+      "quiero repetir los compases {from} hasta {to} porfa",
+      "oye, ¿puedes hacer un bucle del compás {from} al {to} a poca velocidad?",
+      "bucle compases {from}-{to}",
+      "repetir {from} a {to} despacito",
+      "me trabo del compas {from} al {to}, repítelo lento"
+    ],
+    "loop_bar": [
+      "repite el compás {from}",
+      "haz un bucle del compás {from}, despacio",
+      "loop compás {from}",
+      "quiero repetir solo el compás {from} porfa",
+      "oye, ¿repites el compas {from} más lento?",
+      "bucle del compás {from} ya",
+      "solo el compás {from} en bucle",
+      "me falla el compás {from}, repítelo"
+    ],
+    "swap_harder": [
+      "cambia la parte {part} por algo más difícil",
+      "la parte {part} está muy fácil, ponme algo más difícil",
+      "reemplaza la parte {part} por algo mas dificil",
+      "quiero más reto en la parte {part}",
+      "oye, ¿puedes cambiar la parte {part} por algo más difícil?",
+      "parte {part}: más difícil porfa",
+      "súbele la dificultad a la parte {part}",
+      "sustituye la parte {part}, algo con más nivel"
+    ],
+    "swap_different": [
+      "cambia la parte {part} por algo diferente",
+      "la parte {part} no me gusta, pon otra cosa",
+      "reemplaza la parte {part} por algo distinto",
+      "quiero cambiar la parte {part} porfa",
+      "oye, ¿me cambias la parte {part} por otra cosa?",
+      "parte {part}: algo distinto",
+      "sustituye la parte {part}, otra cosa",
+      "esa parte {part} ya me cansó, cámbiala"
+    ],
+    "swap_style": [
+      "cambia la parte {part} por otro estilo",
+      "la parte {part} en un estilo diferente porfa",
+      "reemplaza la parte {part} por un estilo distinto",
+      "quiero otro estilo en la parte {part}",
+      "oye, ¿puedes poner otro estilo en la parte {part}?",
+      "parte {part}: otro estilo",
+      "sustituye la parte {part} por algo de otro género",
+      "cambiar parte {part} a otro estilo"
+    ],
+    "set_minutes": [
+      "que la sesión de hoy dure {minutes} minutos",
+      "tengo {minutes} min, ajusta la sesión",
+      "pon la sesión a {minutes} minutos",
+      "solo tengo {minutes} minutos para practicar hoy",
+      "oye, ¿puedes hacer la sesión de {minutes} minutos?",
+      "sesión de {minutes} min porfa",
+      "cambia la duración de hoy a {minutes} minutos",
+      "hoy toca practicar {minutes} minutos, ajústalo"
+    ],
+    "focus_path": [
+      "hoy solo la ruta {followed}",
+      "enfócate en {followed} para la sesión de hoy",
+      "quiero practicar solo {followed} hoy",
+      "concéntrate en la ruta {followed}",
+      "oye, ¿puedes armar la sesión solo con {followed}?",
+      "foco en {followed} porfa",
+      "sesión de hoy solo de {followed}",
+      "hoy toca solo {followed}, nada más"
+    ],
+    "focus_mix": [
+      "vuelve a la mezcla de todas mis rutas",
+      "quiero la mezcla diaria otra vez",
+      "ya no solo una ruta, pon la mezcla",
+      "mezcla de todo porfa",
+      "oye, vuelve a planear la sesión con todas las rutas que sigo",
+      "quita el foco, que sea una mezcla",
+      "otra vez la mezcla diaria",
+      "sesión mixta de nuevo"
+    ],
+    "follow_path": [
+      "sigue la ruta {path}",
+      "quiero seguir {path}",
+      "añade {path} a mi mezcla diaria",
+      "seguir ruta {path} porfa",
+      "oye, ¿puedes agregar la ruta {path} a las que sigo?",
+      "me apunto a {path}",
+      "suma {path} a mi mezcla",
+      "empieza a seguir {path}"
+    ],
+    "load_jam": [
+      "carga mi jam {jam}",
+      "abre el jam que guardé: {jam}",
+      "quiero tocar sobre {jam}, cárgalo",
+      "cargar jam {jam} porfa",
+      "oye, ¿me cargas mi jam guardado, {jam}?",
+      "pon mi jam {jam}",
+      "carga {jam}",
+      "mi jam {jam} ya"
+    ],
+    "load_preset": [
+      "carga mi preajuste {preset}",
+      "pon el preset {preset} del metrónomo",
+      "quiero usar mi preset guardado: {preset}",
+      "cargar preajuste {preset} porfa",
+      "oye, ¿me cargas el preset {preset}?",
+      "carga {preset}",
+      "activa mi preajuste {preset}",
+      "metrónomo con el preset {preset} ya"
+    ],
+    "click_subdivision": [
+      "que el metrónomo haga {subdivision} clics por pulso",
+      "pon {subdivision} clics por tiempo",
+      "subdivisión de {subdivision} porfa",
+      "quiero {subdivision} clics por pulso en el metrónomo",
+      "oye, ¿puedes poner el click a {subdivision} por pulso?",
+      "metronomo con subdivision {subdivision}",
+      "cambia a {subdivision} clics por tiempo",
+      "dame {subdivision} clics en cada pulso"
+    ],
+    "set_theme": [
+      "cambia el tema a {theme}",
+      "pon el tema {theme}",
+      "quiero la app en tema {theme}",
+      "tema: {theme} porfa",
+      "oye, ¿puedes ponerme el tema {theme}?",
+      "cambiar apariencia a {theme}",
+      "ponle el tema {theme} a la app",
+      "tema {theme} ya"
+    ],
+    "set_view": [
+      "usa la vista {view} para practicar",
+      "quiero ver el {view} al practicar",
+      "cambia la vista de práctica a {view}",
+      "vista {view} porfa",
+      "oye, ¿puedes poner la vista de práctica en {view}?",
+      "practicar con {view}",
+      "pon {view} como vista",
+      "que se vea el {view} mientras toco"
+    ],
+    "count_in_on": [
+      "activa la cuenta previa",
+      "quiero clics antes de empezar la toma",
+      "enciende la cuenta atrás",
+      "pon la cuenta previa porfa",
+      "oye, ¿puedes activar la cuenta previa antes de grabar la toma?",
+      "con cuenta previa",
+      "activar cuenta atras",
+      "que me cuente antes de empezar"
+    ],
+    "count_in_off": [
+      "desactiva la cuenta previa",
+      "quita la cuenta atrás",
+      "sin clics antes de la toma",
+      "apaga la cuenta previa porfa",
+      "oye, ¿puedes quitar la cuenta previa? me estorba",
+      "sin cuenta previa",
+      "desactivar cuenta atras",
+      "que no cuente antes de empezar"
+    ],
+    "voice_on": [
+      "activa la voz del coach",
+      "quiero que me hables",
+      "enciende la voz",
+      "que el coach hable porfa",
+      "oye, ¿puedes activar la voz del entrenador?",
+      "voz activada",
+      "activar voz del coach",
+      "habla en voz alta cuando me corrijas"
+    ],
+    "voice_off": [
+      "desactiva la voz del coach",
+      "que no hable",
+      "apaga la voz",
+      "silencia al coach porfa",
+      "oye, ¿puedes quitar la voz del entrenador? me distrae",
+      "sin voz",
+      "desactivar voz del coach",
+      "no quiero que me hables en voz alta"
+    ],
+    "suggestions_on": [
+      "activa las sugerencias del coach",
+      "quiero consejos mientras toco",
+      "enciende los consejos",
+      "sugerencias activadas porfa",
+      "oye, ¿puedes activar las sugerencias del entrenador?",
+      "que me dé consejos",
+      "activar sugerencias",
+      "pon los tips del coach"
+    ],
+    "suggestions_off": [
+      "desactiva las sugerencias del coach",
+      "no quiero consejos mientras toco",
+      "apaga los consejos",
+      "sin sugerencias porfa",
+      "oye, ¿puedes quitar las sugerencias? me desconcentran",
+      "que no me dé consejos",
+      "desactivar sugerencias",
+      "quita los tips del coach"
+    ],
+    "set_goal": [
+      "mi meta es {goal}",
+      "pon como objetivo: {goal}",
+      "quiero lograr esto: {goal}",
+      "mi objetivo: {goal}",
+      "oye, anota mi meta, que es {goal}",
+      "fija mi meta en {goal}",
+      "cambia mi objetivo a {goal}",
+      "meta nueva: {goal}"
+    ],
+    "yours_input": [
+      "silencia mi micro",
+      "apaga el micrófono",
+      "quiero que dejes de escucharme",
+      "sube la sensibilidad de la entrada",
+      "baja el volumen del mic, está muy alto",
+      "cambia el micrófono que usas",
+      "oye, ¿puedes activar el micro? no me escucha",
+      "pon la entrada en el canal dos",
+      "haz que escuche mejor mi guitarra",
+      "mutea el mic porfa"
+    ],
+    "yours_devices": [
+      "cambia a mis audífonos",
+      "usa los auriculares en vez de los altavoces",
+      "cambia la interfaz de audio",
+      "saca el sonido por las bocinas",
+      "pon la salida en mi interfaz",
+      "oye, ¿puedes cambiar el dispositivo de audio?",
+      "conecta mis cascos",
+      "usa otro dispositivo de salida",
+      "cambia a los parlantes",
+      "que suene por los audifonos"
+    ],
+    "yours_grading": [
+      "desactiva la evaluación",
+      "deja de evaluarme",
+      "quiero que me evalúes esta vez",
+      "apaga el calificador porfa",
+      "oye, ¿puedes quitar la evaluación? hoy solo quiero jugar",
+      "activa la evaluación otra vez",
+      "no me evalúes",
+      "que no cuente esta toma, sin evaluar",
+      "pon la evaluación en automático",
+      "evalúame esta vez, ahora sí"
+    ],
+    "yours_recording": [
+      "empieza a grabar",
+      "graba lo que toco",
+      "para la grabación",
+      "guarda esa grabación",
+      "oye, ¿puedes grabarme esto?",
+      "deja de grabar",
+      "quiero grabar una toma ahora",
+      "no grabes esta vez",
+      "inicia la grabacion",
+      "conserva esa toma, no la pierdas"
+    ],
+    "yours_deleting": [
+      "borra esa toma",
+      "elimina la última grabación",
+      "quiero borrar mi historial",
+      "limpia todo lo que he grabado",
+      "oye, ¿puedes quitar ese jam guardado?",
+      "bórralo, no me gustó",
+      "elimina mis tomas viejas",
+      "suprime la sesión de ayer",
+      "borra todo mi progreso",
+      "olvida esa toma, borrala"
+    ],
+    "yours_unfollowing": [
+      "deja de seguir la ruta {path}",
+      "ya no quiero seguir {path}",
+      "quita {path} de mi mezcla",
+      "abandona la ruta {path}",
+      "oye, ¿puedes sacarme de la ruta {path}?",
+      "salir de {path} porfa",
+      "dejar la ruta {path}",
+      "ya me aburrió {path}, no la sigas más",
+      "elimina {path} de las rutas que sigo",
+      "no quiero más {path} en mi mezcla"
+    ],
+    "yours_model": [
+      "descarga el modelo más grande",
+      "cambia el modelo del coach",
+      "quiero un cerebro más potente para el entrenador",
+      "baja otro modelo de IA",
+      "oye, ¿puedes instalar el modelo grande?",
+      "cambia a otro modelo",
+      "descargar el llm mejor",
+      "pon el modelo pequeño otra vez",
+      "actualiza el modelo del coach",
+      "usa un modelo diferente porfa"
+    ],
+    "yours_grades": [
+      "márcalo como aprobado",
+      "ponme un diez en esa toma",
+      "reinicia mi puntuación",
+      "cambia mi nota de ese ejercicio",
+      "oye, ¿puedes darme el paso por aprobado?",
+      "dame la calificación máxima",
+      "borra mi puntaje y empecemos de cero",
+      "marca ese ejercicio como superado",
+      "sube mi nota, anda",
+      "ponlo como pasado"
+    ],
+    "none_technique": [
+      "¿cómo relajo la muñeca al tocar?",
+      "cómo hago un buen vibrato",
+      "¿cuál es la mejor forma de practicar el picado alternado?",
+      "me duelen los dedos cuando toco barres, ¿qué hago?",
+      "como se hace un bend afinado?",
+      "oye, ¿qué postura es mejor para tocar sentado?",
+      "tips para tocar más limpio",
+      "¿cómo mejoro la velocidad sin tensión?",
+      "¿es mejor usar púa gruesa o fina?",
+      "como silenciar las cuerdas que no toco",
+      "¿qué dedo uso para el hammer-on?",
+      "dime cómo hacer legato"
+    ],
+    "none_theory": [
+      "¿qué diferencia hay entre dórico y menor?",
+      "¿qué es un acorde suspendido?",
+      "como se forma una escala mayor?",
+      "¿por qué suena bien la pentatónica sobre un blues?",
+      "oye, ¿qué es el círculo de quintas?",
+      "¿qué notas tiene un acorde de séptima?",
+      "diferencia entre bemol y sostenido",
+      "¿cuál es la relativa menor de do mayor?",
+      "¿qué es una cadencia?",
+      "explicame que es un modo",
+      "¿qué es la progresión dos cinco uno?",
+      "cuántas notas tiene una escala cromática"
+    ],
+    "none_past": [
+      "ayer abrí {screen} y no entendí nada",
+      "estuve en {screen} toda la mañana",
+      "anoche pasé un rato en {screen}",
+      "la semana pasada usé {screen} un montón",
+      "ya fui a {screen} antes, gracias",
+      "ayer entré a {screen} y todo bien",
+      "hace rato estaba viendo {screen}",
+      "esta mañana toqué una hora, y también miré {screen}",
+      "yo visité {screen} ayer por la noche",
+      "antes abría {screen} todos los días",
+      "estaba en {screen} cuando se cerró la app",
+      "tuve {screen} abierto toda la tarde"
+    ],
+    "none_future": [
+      "mañana abro {screen}",
+      "luego voy a {screen}",
+      "más tarde miro {screen}, ahora no",
+      "recuérdame abrir {screen} esta noche",
+      "después entro a {screen}",
+      "el lunes quiero ver {screen}",
+      "la próxima vez que practique abriré {screen}",
+      "ahorita no, mañana vemos {screen}",
+      "esta noche reviso {screen}",
+      "luego te pido {screen}",
+      "algún día voy a {screen}",
+      "más adelante usaré {screen}"
+    ],
+    "none_negated": [
+      "no abras {screen}",
+      "no quiero ir a {screen}",
+      "no, déjalo, no me lleves a {screen}",
+      "nunca abras {screen} sin avisarme",
+      "no me muestres {screen} todavía",
+      "tampoco quiero {screen}",
+      "no hace falta abrir {screen}",
+      "ni se te ocurra abrir {screen}",
+      "mejor no vayas a {screen}",
+      "no, sin {screen}, gracias",
+      "olvídalo, no abras {screen}",
+      "no vayas a {screen} aún"
+    ],
+    "none_chat": [
+      "gracias",
+      "hola coach",
+      "jaja eres genial",
+      "ok",
+      "buenos días",
+      "vale, entendido",
+      "jajaja",
+      "qué bien, gracias por la ayuda",
+      "me caes bien, coach",
+      "buenas noches",
+      "wow, qué chulo",
+      "hola, ¿qué tal?"
+    ],
+    "none_offtopic": [
+      "¿qué tiempo hace hoy?",
+      "quién ganó el partido de ayer",
+      "qué hay de cenar",
+      "ayúdame con mi tarea de mates",
+      "¿cómo se hace una tortilla de patatas?",
+      "cuéntame un chiste de futbol",
+      "oye, ¿qué película me recomiendas?",
+      "¿cuánto cuesta un vuelo a Madrid?",
+      "abre Spotify",
+      "¿cómo se dice hola en japonés?",
+      "¿qué hora es en Argentina?",
+      "háblame del clima de mañana"
+    ],
+    "none_tuning": [
+      "afina mi guitarra",
+      "¿mi cuerda sol está desafinada?",
+      "cómo afino la guitarra a mi?",
+      "¿me ayudas a afinar?",
+      "la sexta suena baja, ¿qué hago?",
+      "afinación en re, ¿cómo la pongo?",
+      "oye, ¿cómo se afina de oído?",
+      "mi guitarra no está afinada",
+      "pon el afinador",
+      "¿cómo bajo un tono todas las cuerdas?",
+      "¿cuál es la afinación estándar?",
+      "afinar drop d"
+    ],
+    "none_unsupported": [
+      "compra cuerdas nuevas por mí",
+      "transpórtame esta canción a otro tono",
+      "exporta mis datos a excel",
+      "llama a mi profesor",
+      "escríbeme una canción",
+      "oye, ¿puedes pedirme una pizza?",
+      "manda mi progreso por correo",
+      "hazme una tablatura de mi canción favorita",
+      "busca un luthier cerca de mí",
+      "compárteme en instagram",
+      "descárgame un backing track de youtube",
+      "reserva una clase con un maestro"
+    ],
+    "none_wish": [
+      "algún día quiero tocar más rápido",
+      "estoy harto de las escalas",
+      "ojalá tocara como mi guitarrista favorito",
+      "me da pereza practicar hoy",
+      "quiero ser bueno improvisando algún día",
+      "uf, qué cansado estoy de los acordes con cejilla",
+      "me gustaría saber solear",
+      "tengo ganas de aprender jazz",
+      "estoy frustrado con mi velocidad",
+      "ya quisiera tocar esa canción sin fallar",
+      "hoy no tengo ganas de nada",
+      "sueño con tocar en vivo"
+    ],
+    "none_unmeasured": [
+      "¿mi vibrato sonó bien?",
+      "¿llegó el bend a la nota?",
+      "toqué muy fuerte o muy suave?",
+      "¿cómo estuvieron mis dinámicas?",
+      "¿los slides me salieron bien?",
+      "oye, ¿el vibrato de esa parte estuvo bueno?"
+    ],
+    "card_where_slipped": [
+      "¿dónde me equivoqué en mi última toma?",
+      "en qué parte me trabé",
+      "¿en qué compás fallé?",
+      "donde perdí el hilo en esa toma",
+      "oye, ¿en qué punto me caí?"
+    ],
+    "card_early_or_late": [
+      "¿iba adelantado o atrasado en esa toma?",
+      "me apuré o me arrastré?",
+      "¿toqué antes o después del click?",
+      "¿voy corriendo o voy tarde?",
+      "¿hacia qué lado me fui con el tiempo en esa toma?",
+      "oye, ¿tendí a adelantarme o a retrasarme?"
+    ],
+    "card_rushing": [
+      "oye, ¿me adelanté al metrónomo?",
+      "¿me estaba apurando ahí?",
+      "¿aceleré durante esa toma?",
+      "creo que fui corriendo, ¿no?",
+      "toqué por delante del click?"
+    ],
+    "card_dragging": [
+      "¿me quedé atrás del click?",
+      "¿iba retrasado en esa toma?",
+      "creo que me arrastré, ¿cierto?",
+      "fui perdiendo velocidad en la toma?",
+      "oye, ¿toqué después del tiempo todo el rato?"
+    ],
+    "card_why_not_counted": [
+      "¿por qué no contó esa toma?",
+      "por que no pasé el ejercicio",
+      "¿qué falló para que no valiera?",
+      "esa toma no contó, ¿por qué?",
+      "oye, ¿por qué no me aprobó?"
+    ],
+    "card_metric_graded": [
+      "¿la app evalúa {metric}?",
+      "oye, ¿por qué no tomaron en cuenta {metric} en mi toma?",
+      "¿revisa la app {metric}?",
+      "mi nota toma en cuenta {metric}?",
+      "¿califican {metric} en este ejercicio?",
+      "por que la app no evaluó {metric}"
+    ],
+    "card_what_changed": [
+      "¿qué cambió respecto a la toma anterior?",
+      "en qué fue distinta esta toma de la de antes",
+      "¿qué hice diferente esta vez?",
+      "compara esta toma con la anterior",
+      "oye, ¿qué mejoró o empeoró desde la última?"
+    ],
+    "card_improving": [
+      "¿estoy mejorando en este ejercicio?",
+      "voy progresando con esto?",
+      "¿he mejorado desde que empecé?",
+      "¿se nota algún avance?",
+      "oye, ¿cómo voy con este ejercicio?"
+    ],
+    "card_score_made_of": [
+      "¿de qué se compone mi puntuación?",
+      "como se calcula mi resultado",
+      "¿qué cuenta en mi nota?",
+      "desglosa mi score",
+      "oye, ¿qué entra en mi resultado?"
+    ],
+    "card_pass_mark_distance": [
+      "¿cuánto me falta para aprobar?",
+      "a cuánto estoy de la nota de paso",
+      "¿qué tan lejos estoy de pasar?",
+      "¿me falta mucho para pasar el ejercicio?",
+      "oye, ¿cuánto me falta para el aprobado?"
+    ]
+  },
+  "goals": [
+    "tocar el solo de mi canción favorita sin fallar",
+    "tener los acordes con cejilla bien limpios",
+    "improvisar sobre un blues con confianza",
+    "tocar más rápido sin tensión",
+    "aprenderme todas las posiciones de la pentatónica",
+    "tocar con el metrónomo sin adelantarme",
+    "cambiar de acorde sin pararme",
+    "aprender a hacer bends afinados",
+    "tocar fingerstyle con soltura",
+    "dominar el picado alternado",
+    "aprenderme el mástil de memoria",
+    "tocar una canción entera de principio a fin",
+    "mejorar mi ritmo con la mano derecha",
+    "sacar canciones de oído",
+    "tener un vibrato bonito",
+    "tocar arpegios limpios",
+    "improvisar en tonos menores",
+    "tocar en una banda algún día",
+    "practicar todos los días sin saltarme ninguno",
+    "que mis cambios entre escalas suenen fluidos"
+  ],
+  "vocab": {
+    "section": {
+      "devices": ["dispositivos", "dispositivos de audio", "audio"],
+      "grading": ["evaluación", "evaluacion"],
+      "recording": ["grabación", "grabacion", "grabaciones"]
+    },
+    "metric": {
+      "pitch": ["las notas correctas", "las notas que toco bien"],
+      "pickDirection": ["la dirección de la púa", "el picado alterno"],
+      "muting": ["el muteo", "el control del ruido de las cuerdas"],
+      "posture": ["la postura", "cómo me siento con la guitarra"],
+      "tension": ["la tensión en las manos", "la tensión en los hombros"],
+      "handAttribution": ["qué mano cometió el error", "la mano que falló"],
+      "fingering": ["la digitación", "qué dedos uso"],
+      "tone": ["el tono", "la calidad del sonido"],
+      "feel": ["el feeling", "el groove"]
+    }
+  }
+}

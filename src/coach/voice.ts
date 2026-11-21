@@ -60,6 +60,11 @@ type State = {
   sounding: boolean;
   /** Between `takeStarted` and its result. */
   inTake: boolean;
+  /**
+   * "Hear bar N" is playing the player's own bar (c5b2): the take playback
+   * path, which the engine does not report as playing.
+   */
+  hearing: boolean;
   /** The boundary that may still speak once: its kind and the bus `seq` that opened it. */
   armed: { kind: VoiceBoundary; seq: number; text?: string } | null;
   /**
@@ -87,6 +92,7 @@ const state: State = {
   enabled: false,
   sounding: false,
   inTake: false,
+  hearing: false,
   armed: null,
   speaking: 0,
   token: 0,
@@ -124,11 +130,13 @@ function startingHeard(): void {
  */
 function speechStarted(): void {
   if (state.speaking === 0) return;
-  if (state.sounding || state.inTake || soundIsStarting()) stopOut(state.out);
+  if (state.sounding || state.hearing || state.inTake || soundIsStarting()) stopOut(state.out);
 }
 
 function canSpeak(): boolean {
-  return state.enabled && !state.sounding && !state.inTake && !soundIsStarting() && state.out !== null;
+  return (
+    state.enabled && !state.sounding && !state.hearing && !state.inTake && !soundIsStarting() && state.out !== null
+  );
 }
 
 function speak(text: string): void {
@@ -258,6 +266,19 @@ export function setVoiceSounding(on: boolean): void {
 }
 
 /**
+ * "Hear bar N" (c5b2) plays the player's own bar or the demo of it. The
+ * player's half goes through the engine's take playback, which `isPlaying`
+ * does not report, so the press says so here: it cuts the line being said, as
+ * any engine sound does, and nothing is said (a coach key's line included)
+ * until it ends. Its end says nothing either: the boundary's line was cut.
+ */
+export function setVoiceHearing(on: boolean): void {
+  if (state.hearing === on) return;
+  state.hearing = on;
+  if (on) hushCoachVoice();
+}
+
+/**
  * Start listening: the bus and the sound gate. Returns the uninstall. One
  * install at a time; a second replaces the first's output.
  */
@@ -281,6 +302,7 @@ export function resetCoachVoice(): void {
   state.enabled = false;
   state.sounding = false;
   state.inTake = false;
+  state.hearing = false;
   state.armed = null;
   state.speaking = 0;
   state.token = 0;

@@ -56,6 +56,7 @@ import type { BarRange } from "../../../songs/schedule";
 import type { Finding, ScoreSchedule, SongScore } from "../../../songs/types";
 import { withRightNotes } from "../../../session/takeMeasures";
 import { holdSchedule } from "../../../songs/scheduleHold";
+import { publish } from "../../../coach/bus";
 
 /**
  * How long to wait for the forced segment close to come back.
@@ -136,6 +137,12 @@ export type SongAttemptInput = {
    * heard, so a stop has nothing to wait for and nothing to say.
    */
   listening: boolean;
+  /**
+   * Tell the coach's bus when a pass settles with a review (`songPassReviewed`,
+   * DESIGN 9.2). Songs sets it; a Session, which also runs its Takes through
+   * this hook, publishes its own `takeResult` and leaves it off.
+   */
+  publishPass?: boolean;
 };
 
 export function useSongAttempt(input: SongAttemptInput): SongAttemptState {
@@ -267,6 +274,9 @@ export function useSongAttempt(input: SongAttemptInput): SongAttemptState {
       }
       if (result.kind === "nothing") return;
       setReview(result.review);
+      // Once per pass: this stop's generation is still the latest, and only a
+      // pass that produced a review. After the pass, never during it.
+      if (latest.current.publishPass) publish({ type: "songPassReviewed", at: Date.now(), review: result.review });
     });
   }, [input.isPlaying]);
 

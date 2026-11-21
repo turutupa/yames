@@ -26,6 +26,7 @@ import {
   clearScoreSchedule,
   clearSong,
   configureSpeedRamp,
+  forgetHeardTake,
   listExerciseCeilings,
   listPathStates,
   listPathTakes,
@@ -55,6 +56,7 @@ import type { MainView } from "../../main-window/MainHeader";
 import { useSongAttempt } from "../../songs/review/useSongAttempt";
 import { useLiveNoteLights } from "../../songs/review/useLiveNoteLights";
 import { useListenDemo } from "./useListenDemo";
+import { useHearBack } from "./useHearBack";
 import { NO_DEMO, demoEdge, playedMs } from "../../../session/playedClock";
 import type { DemoClock } from "../../../session/playedClock";
 import { newAttemptId } from "../../../songs/attempt";
@@ -503,6 +505,12 @@ export function useSessionRun(input: SessionRunInput) {
 
   /** Which prepare of a Take is the current one: a later one, a demo or a teardown makes it moot. */
   const prepareId = useRef(0);
+  /**
+   * The last graded Take's pitch-pass serial (`ScorerTakeGrade.notesSerial`),
+   * by its row id: what "Hear bar N" asks the engine for (c5b2). Set with the
+   * verdict, read in the render the verdict causes.
+   */
+  const heardOf = useRef<{ takeId: string; serial: number } | null>(null);
 
   const snapshot = useRef<EngineSnapshot | null>(null);
   /** What the last teardown handed back: a Session begun from the recap keeps it. */
@@ -857,7 +865,29 @@ export function useSessionRun(input: SessionRunInput) {
       loadedBand.current = null;
     },
   });
-  const demoOn = listen.active;
+  // "Hear bar N: yours, then the demo" (c5b2), on a result. Called here, ahead
+  // of the loop's and the prepare's effects: leaving the result stops it in
+  // the queue before anything those send can start the transport.
+  const lastOutcome = run.outcomes.length > 0 ? run.outcomes[run.outcomes.length - 1] : null;
+  const resultTakeId = run.phase === "result" ? (lastOutcome?.takeId ?? null) : null;
+  const hear = useHearBack({
+    enqueue,
+    isPlaying,
+    phase: run.phase,
+    takeId: resultTakeId,
+    serial: resultTakeId !== null && heardOf.current?.takeId === resultTakeId ? heardOf.current.serial : null,
+    take: take && lastOutcome && take.bpm === lastOutcome.bpm ? take : null,
+    shown: view === "session",
+    instrument: input.state.instrument,
+    lineup: input.lineup,
+    bandVolume,
+    onTakeOff: () => {
+      prepareId.current += 1;
+      setPreparedTake(null);
+      loadedBand.current = null;
+    },
+  });
+  const demoOn = listen.active || hear.active;
   // The "played" clock leaves out the time the demo played (acceptance 5, P2-11).
   const [demoClock, setDemoClock] = useState<DemoClock>(NO_DEMO);
   useEffect(() => {
@@ -1403,6 +1433,8 @@ export function useSessionRun(input: SessionRunInput) {
       console.warn("[yames] the coach could not read where the Take slipped", err);
     }
     const outcome: TakeOutcome = spot ? { ...plain, spot } : plain;
+    const notesSerial = attempt.lastGrade?.notesSerial;
+    heardOf.current = typeof notesSerial === "number" ? { takeId: row.id, serial: notesSerial } : null;
     dispatch({ type: "takeResult", outcome, now }, attempt.review);
 
     // What the Session goes on to read: kept in memory at once, in the store as
@@ -1487,8 +1519,12 @@ export function useSessionRun(input: SessionRunInput) {
     const entered = lastEntered.current;
     lastEntered.current = null;
     setPreparedTake(null);
+    heardOf.current = null;
     void enqueue(async () => {
       await setPlaying(false).catch(() => {});
+      // The last Take's audio goes with the Session (c5b2), and a finished
+      // bar's slice with it (`forget_heard_take`).
+      await forgetHeardTake().catch(() => {});
       if (entered?.kind === "drill") await stopSpeedRamp().catch(() => {});
       // After any stop still being graded against it (`scheduleHold.ts`).
       await whenScheduleFree();
@@ -2505,6 +2541,10 @@ export function useSessionRun(input: SessionRunInput) {
     big,
     /** "Loop the first bar", when it is offered here, and whether it leads the tonal row. */
     loop,
+    /** "Hear bar N: yours, then the demo" on the result note (c5b2). */
+    hear,
+    /** The loop's sound has the engine (looping, or not let go yet): no hear-back then. */
+    loopSound,
     /** The loop running now, built to play: the neck and the tab draw it. */
     loopPlan,
     /** "This one is for your eyes" is offered on this result. */

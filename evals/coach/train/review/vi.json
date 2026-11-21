@@ -1,0 +1,3 @@
+{ "language": "vi", "reviewer": "reviewer-vi", "sampled": 50,
+  "rejected": [ { "id": "vi-00559", "wording": "focus_path#3", "why": "path arg 'Blues và' swallows the sentence's own 'và thôi' ('and that's all'); the path is Blues, so the arg does not match the words" } ],
+  "notes": "Mostly natural Vietnamese, including unaccented typing. One record has a path name cut wrongly out of the sentence." }

@@ -735,8 +735,11 @@ function mockTakeGrade(
     bars,
     bpm: 80,
     ...(passBars.length > 0 ? { pass: mockPass(recipe, even, barCount, passBars) } : {}),
+    // The pitch pass that made it: what `heard_take` is asked about (c5b2).
+    ...(caught ? { notesSerial: ++mockNotesSerial } : {}),
   };
 }
+let mockNotesSerial = 100;
 
 /** What `score/pass.rs` would say of a recipe's Take, for the bars it was loaded with. */
 function mockPass(
@@ -1077,6 +1080,18 @@ function speechLog(): SpeechEntry[] {
   return (w.__yamesSpeech ??= []);
 }
 
+/** `?hearBack=1`: the Session's last Take's audio is held, so the result note offers "Hear bar N" (c5b2). */
+const HEAR_BACK = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("hearBack") === "1";
+/** The hear-back's calls and the engine sends around them, in order, for the layout suite. */
+function hearBackLog(entry: string): void {
+  if (!HEAR_BACK) return;
+  const w = window as unknown as { __yamesHearBack?: string[] };
+  (w.__yamesHearBack ??= []).push(entry);
+}
+let hearGeneration = 0;
+/** The generation of the player's bar "playing" now; 0 when none. */
+let hearPlaying = 0;
+
 export function installShotMock(shot: Shot, theme: string): void {
   const w = window as unknown as Record<string, unknown>;
   if (w.__TAURI_INTERNALS__) return;
@@ -1174,7 +1189,7 @@ export function installShotMock(shot: Shot, theme: string): void {
   if (shot.songLibrary) {
     // W35 — the scenes that are about the LIST rather than the stage.
     for (const record of songLibraryRecords(shot.songLibrary)) SCORES.set(record.id, record);
-  } else if (shot.tab === "songs" && !shot.starterShelf) {
+  } else if ((shot.tab === "songs" && !shot.starterShelf) || shot.session?.songDue) {
     const record = songShotRecord();
     SCORES.set(record.id, record);
   }
@@ -1412,7 +1427,11 @@ export function installShotMock(shot: Shot, theme: string): void {
     if (!first) return false;
     const beatTicks = (transport.ticksPerQuarter * 4) / (first.denominator || 4);
     const countIn = (transport.countInBars || 0) * (first.numerator || 4);
-    const span = transport.bars.reduce((sum, bar) => sum + bar.lengthTicks, 0);
+    // The range's bars only: the demo of one bar ("Hear bar N", c5b2) is a range
+    // of one. A Take's range is the whole song, as before.
+    const span = transport.bars
+      .slice(transport.range.startBar, transport.range.endBar + 1)
+      .reduce((sum, bar) => sum + bar.lengthTicks, 0);
     return beatCount >= countIn + span / beatTicks;
   }
 
@@ -1691,6 +1710,17 @@ export function installShotMock(shot: Shot, theme: string): void {
         // had open last", and the store is where that is counted.
         lastOpenedAt: r.openedAt,
       })),
+    // c5a2: a passage of the first song came due three days ago (played bars 1..3, 0-based).
+    ...(shot.session?.songDue
+      ? {
+          list_due: () => {
+            const first = [...SCORES.keys()][0];
+            const local = Date.now() - new Date().getTimezoneOffset() * 60_000;
+            const today = Math.floor(local / 86_400_000);
+            return first ? [{ scoreId: first, rangeStartBar: 1, rangeEndBar: 3, dueDay: today - 3, reason: "rushing" }] : [];
+          },
+        }
+      : {}),
     get_score: (a) => SCORES.get(String(a?.id))?.score ?? null,
     get_score_source: (a) => SCORES.get(String(a?.id))?.sourceBase64 ?? null,
     save_score: (a) => {
@@ -1932,6 +1962,32 @@ export function installShotMock(shot: Shot, theme: string): void {
     delete_take: () => null,
     play_take: () => null,
     stop_take_playback: () => null,
+    // "Hear bar N" (c5b1's commands, c5b2's chip). Held only with `?hearBack=1`,
+    // so no other scene grows the chip. Every call, and the sends around it,
+    // in order on `window.__yamesHearBack`. The player's bar "plays" 1.2 s and
+    // ends with `take-playback-ended`, unless stopped first.
+    heard_take: () => (HEAR_BACK ? { held: true, bars: 64 } : { held: false, bars: 0 }),
+    hear_take: (a) => {
+      hearBackLog(`hear_take(${a?.serial},${a?.fromBar},${a?.toBar})`);
+      const generation = ++hearGeneration;
+      hearPlaying = generation;
+      setTimeout(() => {
+        if (hearPlaying !== generation) return;
+        hearBackLog(`ended(${generation})`);
+        emit("take-playback-ended", { generation });
+      }, 1_200);
+      return { generation, lengthMs: 1_200 };
+    },
+    stop_hear_take: (a) => {
+      hearBackLog(`stop_hear_take(${a?.generation})`);
+      if (hearPlaying === Number(a?.generation)) hearPlaying = 0;
+      return true;
+    },
+    forget_heard_take: () => {
+      hearBackLog("forget_heard_take");
+      hearPlaying = 0;
+      return null;
+    },
     // Under the 100 MB the section starts mentioning: the picture is of a
     // shelf, not of a warning about one.
     takes_dir_size: () => 46 * 1024 * 1024,
@@ -1952,6 +2008,7 @@ export function installShotMock(shot: Shot, theme: string): void {
      */
     load_song: (a) => {
       songTransport = (a?.transport as SongTransport | undefined) ?? null;
+      hearBackLog("load_song");
       // A listen demo (card #28) carries the guitar as a guide synth track,
       // which no Take's band does: it plays at its own tempo, never hurried.
       const tracks = (a?.backing as { tracks?: { role: string; guide: boolean }[] } | null)?.tracks ?? [];
@@ -2181,7 +2238,10 @@ export function installShotMock(shot: Shot, theme: string): void {
       return null;
     }
     // Listen first (card #28): the engine ignores the input while a demo plays.
-    if (cmd === "set_listen_demo") return null;
+    if (cmd === "set_listen_demo") {
+      hearBackLog(a?.on === true ? "gate(on)" : "gate(off)");
+      return null;
+    }
     if (cmd === "clear_score_schedule") {
       // The schedule itself is kept: `analyze_attempt` is asked for a pass
       // over it after the transport has already cleared it, and a review
@@ -2238,6 +2298,9 @@ export function installShotMock(shot: Shot, theme: string): void {
     if (cmd === "set_playing" && shot.session) {
       // In the speech log too, so a spec can see what was said around the sound.
       speechLog().push({ op: a?.playing === true ? "play" : "halt", text: "", at: performance.now() });
+      hearBackLog(`set_playing(${a?.playing === true})`);
+      // A Start cuts a hear-back, as `raise_transport` does.
+      if (a?.playing === true) hearPlaying = 0;
       setPlaying(a?.playing === true);
       return null;
     }

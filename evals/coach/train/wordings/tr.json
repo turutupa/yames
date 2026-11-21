@@ -1,0 +1,782 @@
+{
+  "language": "tr",
+  "writer": "helper-tr",
+  "wordings": {
+    "go_screen": [
+      "{screen} aç",
+      "şunu aç: {screen}",
+      "hey koç, {screen} ekranına götür beni",
+      "{screen} ekranı lütfen",
+      "bi {screen} açsana",
+      "{screen} sayfasına git",
+      "şimdi şuraya geçelim: {screen}",
+      "ac su {screen} ekranini"
+    ],
+    "open_path": [
+      "{path} yolunu aç",
+      "şu yolu aç: {path}",
+      "yol sayfası: {path}",
+      "{path} yolunun sayfasına gitsek mi, lütfen",
+      "bana {path} yolunu göster",
+      "{path} yolu lütfen",
+      "acsana su yolu: {path}",
+      "Yollar'dan {path} yolunu açar mısın?"
+    ],
+    "open_step_here": [
+      "{step}. adımı aç",
+      "adım {step} lütfen",
+      "{step}. adıma git",
+      "şu adımı aç: {step}",
+      "bi {step}. adımı açsana",
+      "{step} numaralı adımı göster bana",
+      "adim {step} ac",
+      "bu yolda {step}. adıma geçebilir miyiz?"
+    ],
+    "open_step_of_path": [
+      "{path} yolunun {step}. adımını aç",
+      "{path} yolu, adım {step}",
+      "şunun {step}. adımına git: {path}",
+      "{path} yolunda {step}. adıma geçelim lütfen",
+      "yol: {path}, adım: {step}, aç şunu",
+      "{path} {step}. adım",
+      "{path} yolunun adim {step} kismini acsana",
+      "açar mısın, {path} yolundaki {step}. adımı?"
+    ],
+    "open_step_name": [
+      "{stepName} adımını aç",
+      "şu adımı aç: {stepName}",
+      "adım: {stepName}",
+      "{stepName} adımına git lütfen",
+      "bana {stepName} adımını göster",
+      "{stepName} diye bir adım vardı, onu açar mısın?",
+      "bi {stepName} adimini acsana",
+      "{stepName} adımı"
+    ],
+    "open_settings": [
+      "ayarlarda {section} bölümünü aç",
+      "ayarlar, {section} kısmı",
+      "ayarlardan şunu aç: {section}",
+      "{section} ayarlarına gitsek, lütfen",
+      "ayarlar > {section}",
+      "ayarlarda {section} sekmesine geç",
+      "ayarlari ac, {section} bolumu",
+      "hey koç, ayarların {section} bölümüne bakmak istiyorum, açar mısın?"
+    ],
+    "show_scale": [
+      "{root} {scale} gamını göster",
+      "{root} {scale} gamını çiz",
+      "sapta {root} {scale} göster",
+      "şu gamı göster: {root} {scale}",
+      "{root} {scale} gamını sapta görebilir miyim?",
+      "bana {root} {scale} gamını çizsene",
+      "{root} {scale} gami goster pls",
+      "lütfen sap üzerinde {root} {scale} gamını çizer misin?"
+    ],
+    "show_scale_at": [
+      "{root} {scale} gamını göster, pozisyon: {position}",
+      "{root} {scale} gamını çiz, {position} pozisyonunda",
+      "sapta {root} {scale}, {position}",
+      "şu gamı göster: {root} {scale}, konum: {position}",
+      "{root} {scale} gamı, {position} olsun lütfen",
+      "bana {root} {scale} gamını bu konumda çizsene: {position}",
+      "{root} {scale} gami goster, {position}",
+      "sapta {root} {scale} gamını {position} diye gösterir misin?"
+    ],
+    "show_chord": [
+      "{chord} akorunu göster",
+      "{chord} nasıl basılır, göster",
+      "şu akor: {chord}",
+      "akor göster: {chord}",
+      "{chord} akorunu nasıl tutuyorum, gösterir misin?",
+      "bana {chord} akorunu çizsene",
+      "{chord} akoru pls",
+      "hey koç, {chord} akorunun tuşlarını gösterebilir misin lütfen?"
+    ],
+    "explain_screen": [
+      "bu ekran ne işe yarıyor",
+      "burası ne?",
+      "bu sayfayı açıkla",
+      "bu ekranda ne yapıyorum",
+      "bu ne işe yarar acaba, anlatır mısın?",
+      "bu ekran nedir",
+      "bu sayfa ne yapiyor",
+      "hey koç, buradaki her şeyi bana kısaca açıklar mısın?"
+    ],
+    "start_today": [
+      "bugünün oturumunu başlat",
+      "başla",
+      "bugünkü pratiği başlatalım",
+      "bugünün oturumu lütfen",
+      "hadi başlayalım, bugünün oturumu",
+      "bugunku oturumu baslat",
+      "oturumu başlat",
+      "tamam, bugünkü pratiğe başlayalım, hazırım"
+    ],
+    "start_today_at": [
+      "bugünün oturumunu {part}. bölümden başlat",
+      "{part}. bölümden başla",
+      "oturum {part}. bölümden başlasın",
+      "bugünkü oturumu {part}. bölümden başlatır mısın, lütfen?",
+      "bölüm {part} ile başlayalım",
+      "{part}. bölüme atla ve başlat",
+      "oturumu {part}. bolumden baslat",
+      "ilk ikisini geçtim, {part}. bölümden devam edelim"
+    ],
+    "play_exercise": [
+      "{exercise} alıştırmasını çal",
+      "şu alıştırmayı başlat: {exercise}",
+      "alıştırma: {exercise}",
+      "{exercise} alıştırmasını şimdi çalalım, lütfen",
+      "hadi {exercise} yapalım",
+      "{exercise} alistirmasini oynat",
+      "bi {exercise} çalsana",
+      "hey koç, {exercise} alıştırmasını açıp başlatır mısın?"
+    ],
+    "play_exercise_bpm": [
+      "{exercise} alıştırmasını {bpm} bpm'de çal",
+      "şu alıştırmayı {bpm} bpm ile başlat: {exercise}",
+      "{exercise}, {bpm} bpm",
+      "{exercise} alıştırmasını dakikada {bpm} vuruşla çalalım lütfen",
+      "hadi {exercise} yapalım, tempo {bpm}",
+      "{exercise} alistirmasi {bpm} bpm baslat",
+      "{bpm} bpm'de bi {exercise} çalsana",
+      "hey koç, {exercise} alıştırmasını {bpm} bpm hızında başlatabilir misin?"
+    ],
+    "tempo_bpm": [
+      "tempoyu {bpm} yap",
+      "{bpm} bpm",
+      "hızı {bpm} bpm'e ayarla",
+      "tempo {bpm} olsun lütfen",
+      "metronomu {bpm} bpm'e getirir misin?",
+      "temposunu {bpm}'ye al",
+      "tempo {bpm} yap pls",
+      "hey koç, tempoyu dakikada {bpm} vuruşa ayarlar mısın?"
+    ],
+    "tempo_faster": [
+      "daha hızlı",
+      "hızlandır",
+      "biraz hızlandırsana",
+      "tempoyu biraz yükselt",
+      "hizlandir pls",
+      "çok yavaş kaldı, azıcık hızlandırabilir misin?",
+      "hadi biraz hızlan",
+      "hey koç, parmaklarım ısındı, tempoyu bir tık artırır mısın lütfen?"
+    ],
+    "tempo_slower": [
+      "daha yavaş",
+      "yavaşlat",
+      "biraz yavaşlatsana",
+      "tempoyu biraz düşür",
+      "yavaslat pls",
+      "çok hızlı geliyor, azıcık yavaşlatabilir misin?",
+      "bi tık yavaş lütfen",
+      "hey koç, parmaklarım yetişemiyor, tempoyu biraz yavaşlatır mısın?"
+    ],
+    "find_edge": [
+      "{exercise} alıştırmasında sınırımı bul",
+      "{exercise} için sınırımı bulalım",
+      "sınırımı bul: {exercise}",
+      "{exercise} alıştırmasında en temiz temponun nerede bittiğini bulur musun?",
+      "hey koç, {exercise} üzerinde sınırımı ölçelim",
+      "{exercise} sinirimi bul",
+      "şu alıştırmada sınırımı bul lütfen: {exercise}",
+      "{exercise} alıştırmasında ne kadar hızlı çıkabildiğimi bulsana"
+    ],
+    "test_out_here": [
+      "{step}. adımdan sınavla geç",
+      "{step}. adım için sınava gireyim",
+      "adım {step} sınavı",
+      "{step}. adımı sınavla atlamak istiyorum, mümkün mü?",
+      "şu adıma sınav yapalım: {step}",
+      "bu yolda {step}. adımı test et lütfen",
+      "adim {step} icin sinava gir",
+      "hey koç, {step}. adımı zaten biliyorum, sınavla geçebilir miyim?"
+    ],
+    "test_out_of_path": [
+      "{path} yolunun {step}. adımından sınavla geç",
+      "{path} yolunda {step}. adım için sınava gireyim",
+      "{path}, adım {step}, sınav",
+      "{path} yolundaki {step}. adımı sınavla atlayabilir miyim lütfen?",
+      "yol: {path}, adım: {step}, sınava gir",
+      "{path} yolu {step}. adımı test et",
+      "{path} yolunun adim {step} sinavina gireyim",
+      "hey koç, {path} yolunda {step}. adımı zaten çalıyorum, sınavla geçelim mi?"
+    ],
+    "loop_bars": [
+      "{from}. ölçüden {to}. ölçüye kadar döngüye al",
+      "ölçü {from} ile {to} arasını yavaşça tekrarla",
+      "{from}-{to} ölçülerini döngüye al",
+      "{from}. ile {to}. ölçüler arasını yavaş yavaş çalayım, döngü yapar mısın?",
+      "döngü: ölçü {from} ila {to}",
+      "{from} ile {to} arasini dongu yap",
+      "şu ölçüleri döngüye alsana: {from} - {to}",
+      "hey koç, {from}. ölçüden {to}. ölçüye yavaş bir döngü kurabilir misin lütfen?"
+    ],
+    "loop_bar": [
+      "{from}. ölçüyü döngüye al",
+      "ölçü {from} tekrarla",
+      "sadece {from}. ölçüyü yavaşça döngü yap",
+      "şu ölçüyü tekrarla: {from}",
+      "{from}. ölçüde takılıyorum, döngüye alır mısın?",
+      "bi {from}. ölçüyü döngüleyelim lütfen",
+      "olcu {from} dongu yap",
+      "hey koç, yalnızca {from}. ölçüyü yavaşça tekrar tekrar çalmak istiyorum"
+    ],
+    "swap_harder": [
+      "{part}. bölümü daha zorla değiştir",
+      "bölüm {part} daha zor olsun",
+      "{part}. bölümün yerine daha zor bir şey koy",
+      "bugünkü planda {part}. bölüm çok kolay kaldı, daha zorunu verir misin?",
+      "{part}. bölümü zorlaştır lütfen",
+      "bolum {part} daha zor bir seyle degistir",
+      "şunu değiştir, daha zor olsun: {part}. bölüm",
+      "hey koç, {part}. bölüm artık bana yetmiyor, daha zor bir şey bulsana"
+    ],
+    "swap_different": [
+      "{part}. bölümü başka bir şeyle değiştir",
+      "bölüm {part} başka olsun",
+      "{part}. bölümün yerine başka bir şey koy",
+      "{part}. bölümden sıkıldım, farklı bir şey verebilir misin lütfen?",
+      "şunu değiştir: {part}. bölüm",
+      "bolum {part} baska bisey olsun",
+      "{part}. bölüm değişsin, olur mu?",
+      "hey koç, bugünkü planın {part}. bölümünü başka bir alıştırmayla takas eder misin?"
+    ],
+    "swap_style": [
+      "{part}. bölümü başka bir stille değiştir",
+      "bölüm {part} farklı stilde olsun",
+      "{part}. bölümün yerine başka bir stil koy",
+      "{part}. bölüm hep aynı tarz, başka bir stile çevirir misin lütfen?",
+      "şunun stilini değiştir: {part}. bölüm",
+      "bolum {part} baska stil olsun",
+      "{part}. bölüm için farklı bir stil seç",
+      "hey koç, planın {part}. bölümünü başka bir müzik stiline takas edebilir misin?"
+    ],
+    "set_minutes": [
+      "oturumu {minutes} dakika yap",
+      "{minutes} dakikalık oturum",
+      "bugünün oturumu {minutes} dk olsun",
+      "bugün sadece {minutes} dakikam var, oturumu ona göre ayarlar mısın?",
+      "süreyi {minutes} dakikaya ayarla",
+      "oturum suresi {minutes} dk yap pls",
+      "bugünkü pratiği {minutes} dakika olarak hazırla",
+      "hey koç, bugün biraz acelem var, oturumu {minutes} dakikaya sığdırabilir misin?"
+    ],
+    "focus_path": [
+      "bugünü sadece {followed} yolundan planla",
+      "{followed} yoluna odaklan",
+      "bugünkü plan yalnızca {followed} olsun",
+      "bugün sadece şu yola çalışmak istiyorum: {followed}",
+      "odak: {followed}",
+      "bugunu sadece {followed} yolundan yap lütfen",
+      "hey koç, bugünkü oturumu yalnızca {followed} yolundan hazırlar mısın?",
+      "{followed} yoluna odaklanalım, olur mu?"
+    ],
+    "focus_mix": [
+      "günlük karışıma geri dön",
+      "tüm yollarımdan planla",
+      "yine karışık plana dön",
+      "odağı kaldır, bütün yolları karıştır",
+      "bugünü takip ettiğim tüm yollardan hazırla lütfen",
+      "gunluk miksi geri getir",
+      "tek yola odaklanmayı bırak, her şey karışsın",
+      "hey koç, karışık günlük plana tekrar geçebilir miyiz?"
+    ],
+    "follow_path": [
+      "{path} yolunu takip et",
+      "şu yolu takip et: {path}",
+      "{path} yolunu günlük karışıma ekle",
+      "{path} yolunu takip etmek istiyorum, ekler misin lütfen?",
+      "takibe al: {path}",
+      "{path} yolunu takibe alsana",
+      "{path} yolunu takip et pls",
+      "hey koç, {path} yolunu da karışımıma katar mısın?"
+    ],
+    "load_jam": [
+      "{jam} jamını yükle",
+      "kayıtlı jamı yükle: {jam}",
+      "jam: {jam}",
+      "{jam} adlı jamımı açar mısın lütfen?",
+      "bi {jam} jamını yükleyelim",
+      "{jam} jamini yukle",
+      "şu jamı getir: {jam}",
+      "hey koç, daha önce kaydettiğim {jam} jamını yükleyebilir misin?"
+    ],
+    "load_preset": [
+      "{preset} ön ayarını yükle",
+      "kayıtlı ön ayarı yükle: {preset}",
+      "preset: {preset}",
+      "metronom ön ayarım {preset} idi, yükler misin lütfen?",
+      "bi {preset} ön ayarını getirsene",
+      "{preset} preseti yukle",
+      "şu ayarı yükle: {preset}",
+      "hey koç, kaydettiğim metronom ön ayarını açabilir misin: {preset}"
+    ],
+    "click_subdivision": [
+      "metronomu vuruş başına {subdivision} tık yap",
+      "vuruşta {subdivision} tık olsun",
+      "tık sayısı: {subdivision} (vuruş başına)",
+      "metronom her vuruşta {subdivision} kere tıklasın lütfen",
+      "bölünmeyi {subdivision} yap",
+      "vurusta {subdivision} tik yap",
+      "her vuruşa {subdivision} tıklama ayarla",
+      "hey koç, klik sesini vuruş başına {subdivision} tıklamaya çevirir misin?"
+    ],
+    "set_theme": [
+      "temayı {theme} yap",
+      "tema {theme} olsun",
+      "şu temaya geç: {theme}",
+      "uygulamanın temasını {theme} yapar mısın lütfen?",
+      "tema: {theme}",
+      "temayi {theme} yap pls",
+      "gözüm yoruldu, renk temasını {theme} yapsana",
+      "hey koç, görünümü {theme} temasına değiştirebilir misin?"
+    ],
+    "set_view": [
+      "pratikte {view} görünümünü kullan",
+      "{view} görünümüne geç",
+      "pratik görünümü: {view}",
+      "çalarken {view} görünümü olsun lütfen",
+      "bundan sonra {view} göstersin",
+      "pratik gorunumunu {view} yap",
+      "{view} görünümünü seçer misin?",
+      "hey koç, pratik sırasında {view} görünümünü kullanmak istiyorum"
+    ],
+    "count_in_on": [
+      "ön sayımı aç",
+      "sayımı aç lütfen",
+      "kayıttan önce sayım olsun",
+      "başlamadan önce tıklasın, ön sayımı aç",
+      "on sayimi ac",
+      "count-in açık olsun",
+      "başlamadan önce sayım yapılsın, olur mu?",
+      "hey koç, denemeden önce ön sayımı açar mısın?"
+    ],
+    "count_in_off": [
+      "ön sayımı kapat",
+      "sayımı kapat lütfen",
+      "ön sayım olmasın",
+      "başlamadan önce tıklamasın, sayımı kapat",
+      "on sayimi kapat",
+      "count-in kapalı olsun",
+      "sayım beni geriyor, kapatabilir misin?",
+      "hey koç, ön sayımı kapatır mısın, direkt başlamak istiyorum"
+    ],
+    "voice_on": [
+      "koç sesini aç",
+      "koç konuşsun",
+      "sesli koçu aç lütfen",
+      "koçun sesi açık olsun",
+      "koc sesini ac",
+      "bana sesli konuşmanı istiyorum, aç şunu",
+      "hey koç, konuşmaya başlar mısın? sesi aç",
+      "koçun konuşmasını açabilir miyiz?"
+    ],
+    "voice_off": [
+      "koç sesini kapat",
+      "koç konuşmasın",
+      "sesli koçu kapat lütfen",
+      "koçun sesi kapalı olsun",
+      "koc sesini kapat",
+      "sus biraz, sesi kapat",
+      "hey koç, konuşmayı kes, sadece yazı yeter",
+      "koçun konuşmasını kapatabilir misin?"
+    ],
+    "suggestions_on": [
+      "koç önerilerini aç",
+      "önerileri aç lütfen",
+      "ipuçları açık olsun",
+      "koç bana ipucu versin",
+      "oneri ve ipuclarini ac",
+      "çalarken öneri göstermeni istiyorum, aç",
+      "hey koç, tavsiyeleri tekrar açar mısın?",
+      "koç önerileri açık olsun, olur mu?"
+    ],
+    "suggestions_off": [
+      "koç önerilerini kapat",
+      "önerileri kapat lütfen",
+      "ipuçları kapalı olsun",
+      "koç artık ipucu vermesin",
+      "oneri ve ipuclarini kapat",
+      "çalarken sürekli öneri çıkıyor, kapat şunu",
+      "hey koç, tavsiyeleri kapatır mısın?",
+      "koç önerileri kapalı kalsın"
+    ],
+    "set_goal": [
+      "hedefim: {goal}",
+      "hedefimi şöyle yap: {goal}",
+      "hedef olarak şunu ayarla: {goal}",
+      "yeni hedefim şu olsun lütfen: {goal}",
+      "bi hedef koyalım: {goal}",
+      "hedefimi ayarla, {goal}",
+      "hedefim sunu yaz: {goal}",
+      "hey koç, şu an tek amacım şu, hedef olarak kaydeder misin: {goal}"
+    ],
+    "yours_input": [
+      "mikrofonu sustur",
+      "mikrofonu kapat",
+      "mikrofonumu biraz kıs, çok yüksek",
+      "mikrofon sesini azalt lütfen",
+      "mikrofonu aç, beni dinlesin",
+      "giriş kanalını değiştir",
+      "mikrofona gelen sesi ayarlar mısın?",
+      "mikrofonu degistir pls",
+      "dinlemeyi durdur, mikrofonu kapat",
+      "hey koç, gitar girişini başka bir kanala alır mısın?"
+    ],
+    "yours_devices": [
+      "kulaklığa geç",
+      "ses çıkışını kulaklık yap",
+      "hoparlörleri kullan",
+      "ses cihazını değiştir",
+      "sesi kulaklıktan vermeni istiyorum",
+      "ses kartını değiştirebilir misin?",
+      "ses arayüzümü seç",
+      "kulakliga gec pls",
+      "çıkış cihazını hoparlör olarak ayarla",
+      "hey koç, sesi bluetooth kulaklığa aktarır mısın?"
+    ],
+    "yours_grading": [
+      "değerlendirmeyi kapat",
+      "beni puanlama artık",
+      "bu sefer değerlendir beni",
+      "puanlamayı kapatsana",
+      "değerlendirme olmadan çalmak istiyorum, kapat şunu",
+      "notlandırmayı aç lütfen",
+      "bu denemeyi puanlama",
+      "degerlendirmeyi kapat pls",
+      "dur bakalım, bu sefer beni notlandır",
+      "hey koç, değerlendirmeyi iptal eder misin, sadece çalacağım?"
+    ],
+    "yours_recording": [
+      "kaydı başlat",
+      "kaydı durdur",
+      "kaydetmeye başla",
+      "bu çalışı kaydet",
+      "kaydı kaydetmeyi unutma, sakla",
+      "çaldıklarımı kayda alır mısın lütfen?",
+      "kayit baslat",
+      "kaydı bitir ve sakla",
+      "hey koç, şu an çaldığımı kaydedebilir misin?",
+      "kaydetmeyi kapat, kayıt istemiyorum"
+    ],
+    "yours_deleting": [
+      "son denemeyi sil",
+      "şu kaydı sil",
+      "geçmişimi temizle",
+      "bütün kayıtları sil lütfen",
+      "bu denemeyi kaldır",
+      "kaydettiğim jamı silebilir misin?",
+      "son denemeyi sil pls",
+      "tüm geçmişi sıfırlayıp temizle",
+      "hey koç, dünkü kaydı silsene",
+      "eski denemeleri temizler misin?"
+    ],
+    "yours_unfollowing": [
+      "{path} yolunu takibi bırak",
+      "{path} yolunu takipten çık",
+      "şu yolu bırakmak istiyorum: {path}",
+      "{path} yolunu karışımımdan kaldır lütfen",
+      "takipten çıkar: {path}",
+      "{path} yolunu artık takip etme",
+      "{path} yolunu birak pls",
+      "hey koç, {path} yolunu takip etmeyi bırakabilir miyim?",
+      "yoldan çık: {path}",
+      "{path} yolundan çıkarsana beni"
+    ],
+    "yours_model": [
+      "daha büyük modeli indir",
+      "koçun modelini değiştir",
+      "yapay zeka modelini indir lütfen",
+      "başka bir modele geç",
+      "dil modelini değiştirsene",
+      "koçun beynini yükselt",
+      "daha iyi bir model indirebilir misin?",
+      "modeli indir pls",
+      "hey koç, daha akıllı bir modele geçer misin?",
+      "llm'i değiştir"
+    ],
+    "yours_grades": [
+      "bunu geçti olarak işaretle",
+      "bana bir A ver",
+      "puanımı sıfırla",
+      "notumu yükselt lütfen",
+      "skorumu değiştirebilir misin?",
+      "bu denemeye tam puan ver",
+      "temiz tempomu elle ayarla",
+      "gecti olarak isaretle pls",
+      "hey koç, şu alıştırmayı geçmiş say",
+      "notlarımı sil ve baştan başlat"
+    ],
+    "none_technique": [
+      "bileğimi nasıl rahat tutarım?",
+      "alternatif penada elim neden gerginleşiyor",
+      "hızlı çalarken parmaklarım neden birbirine dolanıyor?",
+      "pena tutuşu nasıl olmalı",
+      "legato çalarken sesleri nasıl eşit çıkarırım?",
+      "barre akorlarında işaret parmağım ağrıyor, ne yapmalıyım",
+      "sweep picking için ipucu var mı?",
+      "vibrato nasil yapilir acaba",
+      "bend yaparken perde nasıl tutulur?",
+      "sol elimin duruşu doğru mu olmalı, nasıl bakmalıyım?",
+      "ritim çalarken sağ el nasıl hareket etmeli",
+      "dize bastırırken ne kadar güç uygulamalıyım?"
+    ],
+    "none_theory": [
+      "dorian ile minör arasındaki fark nedir?",
+      "majör pentatonik neden bu kadar iyi gelir",
+      "bir akor ilerlemesi nasıl kurulur?",
+      "kapalı ve açık akor arasındaki fark ne",
+      "blues gamında mavi nota hangisi?",
+      "dominant yedili neden gerilim yapar?",
+      "ton nasıl bulunur, bir şarkının tonu?",
+      "mixolydian ne zaman kullanılır",
+      "relative minor ne demek",
+      "aralıklar nasıl öğrenilir?",
+      "çevrim ne anlama geliyor müzikte",
+      "modlar ile gamlar aynı şey mi?"
+    ],
+    "none_past": [
+      "dün {screen} açmıştım",
+      "az önce {screen} ekranındaydım",
+      "geçen hafta {screen} kullandım",
+      "sabah bir saat pratik yaptım",
+      "dün gece {screen} bölümüne bakmıştım zaten",
+      "{screen} ekranına dün girdim, çok güzeldi",
+      "evet {screen} açtım, teşekkürler",
+      "bu sabah bir saat çaldım",
+      "önceki seansta {screen} kısmını gördüm",
+      "geçen gün {screen} ekranını açtığımda hata vermişti",
+      "dun {screen} actim",
+      "az önce {screen} sayfasına girip çıktım"
+    ],
+    "none_future": [
+      "yarın {screen} açarım",
+      "{screen} ekranını sonra açalım",
+      "bu akşam hatırlat",
+      "daha sonra {screen} kısmına bakacağım",
+      "yarın sabah {screen} ekranına geçeriz belki",
+      "{screen} için akşama kadar bekle",
+      "haftaya {screen} açmayı düşünüyorum",
+      "bu akşam pratik yapmayı hatırlat bana",
+      "sonra {screen} ekranını açarız",
+      "yarin {screen} bakarim",
+      "şimdilik kalsın, {screen} cumartesi açılır",
+      "birazdan {screen} bölümüne bakacağım"
+    ],
+    "none_negated": [
+      "{screen} açma",
+      "hayır, {screen} ekranını açma",
+      "{screen} ekranına gitme",
+      "yok, bırak olsun, {screen} istemiyorum",
+      "{screen} sayfasını açma lütfen",
+      "hayır, şimdi {screen} açılmasın",
+      "{screen} ekranına geçmeyelim",
+      "tamam bırak, {screen} gerekmiyor",
+      "hayir {screen} acma",
+      "{screen} ekranı lazım değil, kalsın",
+      "boşver, {screen} ekranını açmana gerek yok",
+      "sakın {screen} ekranını açma"
+    ],
+    "none_chat": [
+      "teşekkürler",
+      "selam",
+      "günaydın koç",
+      "sen harikasın",
+      "haha çok iyi",
+      "tamam anladım",
+      "sağ ol, çok yardımcı oldun",
+      "lol",
+      "peki",
+      "iyi geceler",
+      "tesekkurler hocam",
+      "valla çok güzel, sağ ol"
+    ],
+    "none_offtopic": [
+      "bugün hava nasıl olacak?",
+      "dün akşamki maç kaç kaç bitti",
+      "akşam yemeğine ne yapsam",
+      "matematik ödevimde yardım eder misin",
+      "en iyi telefon hangisi",
+      "futbolda en iyi takım hangisi?",
+      "spotify'da bana yeni şarkılar öner",
+      "pizza tarifi verir misin",
+      "istanbul'a nasıl gidilir",
+      "yarın yağmur yağacak mı",
+      "kedim neden mırıldanıyor?",
+      "film önerir misin"
+    ],
+    "none_tuning": [
+      "gitarımı akort et",
+      "sol telim akortsuz mu?",
+      "akort nasıl yapılır",
+      "gitar akordu için en iyi uygulama hangisi?",
+      "mi telini nasıl akort ederim",
+      "drop D akordu nasıl yapılır",
+      "akort aleti kullanmadan akort etmek mümkün mü",
+      "telim sürekli akordan çıkıyor, ne yapmalıyım?",
+      "akort et pls",
+      "re telim bemol mü, bakar mısın?",
+      "yarım ton aşağı akort nasıl yapılır",
+      "gitarım biraz akortsuz geliyor sanki"
+    ],
+    "none_unsupported": [
+      "bana yeni tel satın al",
+      "bu şarkıyı bir ton aşağı aktar",
+      "verilerimi dışa aktar",
+      "öğretmenimi ara",
+      "benim için bir şarkı yaz",
+      "gitar telleri sipariş eder misin?",
+      "pdf olarak tab çıkar",
+      "şarkının notalarını yazdır",
+      "ilerlememi arkadaşlarıma mail at",
+      "benim için bir gitar dersi ayarla",
+      "tel satin al pls",
+      "videomu youtube'a yükle"
+    ],
+    "none_wish": [
+      "bir gün çok hızlı çalmak istiyorum",
+      "gamlardan sıkıldım",
+      "bugün hiç keyfim yok",
+      "keşke solo atabilsem",
+      "parmaklarım çok yoruldu",
+      "bazen hiç ilerlemiyormuşum gibi hissediyorum",
+      "bir gün sahnede çalmayı çok isterim",
+      "bu alıştırmadan nefret ediyorum",
+      "sabırsızım ya",
+      "keske daha cok vaktim olsa",
+      "yine aynı şeyleri çalmaktan bıktım",
+      "bir gün favori şarkımı baştan sona çalarsam çok mutlu olurum"
+    ],
+    "none_unmeasured": [
+      "vibratom iyi miydi?",
+      "bend yaptığımda doğru notaya ulaştı mı",
+      "ne kadar yüksek sesle çaldım, dinamiklerim nasıldı",
+      "kaydırmalarım düzgün muydu",
+      "vibrato yaparken sesim titrek mi çıkıyor",
+      "bendlerim tam yerine oturuyor mu sence"
+    ],
+    "card_where_slipped": [
+      "son denemede nerede takıldım?",
+      "son denemenin neresinde bozuldum",
+      "hangi ölçüde kaçırdım?",
+      "son çalışta nerede hata yaptım, söyler misin",
+      "nerede kaybettim son denemede"
+    ],
+    "card_early_or_late": [
+      "son denemede erken mi geç mi çaldım?",
+      "acele mi ediyorum yoksa geride mi kalıyorum",
+      "tempoyu önde mi arkada mı tuttum?",
+      "son denemede sürüklendim mi, yoksa koştum mu",
+      "önde miydim, geride mi",
+      "zamanlamam hangi yöne kaydı son denemede",
+      "ritimden hangi tarafa saptım",
+      "son denemede vuruşlarım nereye kaydı, öne mi arkaya mı",
+      "metronoma göre önde mi kaldım geride mi?"
+    ],
+    "card_rushing": [
+      "son denemede acele mi ettim?",
+      "hızlanmış mıyım orada",
+      "vuruşun önüne mi geçtim",
+      "sanırım koştum, doğru mu?",
+      "son denemede tempoyu yukarı mı çektim",
+      "metronomun önüne geçip koşturdum mu"
+    ],
+    "card_dragging": [
+      "son denemede geride mi kaldım?",
+      "yavaşlamış mıyım orada",
+      "vuruşun arkasında mı çaldım",
+      "sanırım sürüklendim, doğru mu?",
+      "son denemede tempo düştü mü",
+      "metronomun gerisinde mi kaldım"
+    ],
+    "card_why_not_counted": [
+      "son deneme neden sayılmadı?",
+      "neden geçmedi bu deneme",
+      "bu çalış neden kabul edilmedi",
+      "son denemem niye geçerli olmadı, açıklar mısın",
+      "neden sayılmadı"
+    ],
+    "card_metric_graded": [
+      "{metric} puanlanıyor mu?",
+      "{metric} neden sayılmadı?",
+      "uygulama {metric} konusunda bir şey ölçüyor mu",
+      "{metric} skora dahil mi?",
+      "{metric} burada sayılıyor mu",
+      "{metric} de değerlendirmeye giriyor mu acaba"
+    ],
+    "card_what_changed": [
+      "bu deneme öncekinden ne farklıydı?",
+      "bir önceki denemeye göre ne değişti",
+      "geçen denemeyle bunun farkı ne?",
+      "az önceki denemeden bu yana neler değişti, bakar mısın",
+      "ne değişti ki"
+    ],
+    "card_improving": [
+      "bu alıştırmada ilerliyor muyum?",
+      "gelişiyor muyum acaba",
+      "bu alıştırmada daha iyi oldum mu?",
+      "zamanla bu alıştırmada düzeliyor muyum, söyler misin",
+      "ilerleme var mı bunda"
+    ],
+    "card_score_made_of": [
+      "puanım neyden oluşuyor?",
+      "sonucum neleri içeriyor",
+      "skorum nasıl hesaplandı?",
+      "bu puanın içinde neler var, açıklar mısın",
+      "notum neye göre çıktı"
+    ],
+    "card_pass_mark_distance": [
+      "geçme notuna ne kadar kaldı?",
+      "geçmeye ne kadar uzağım",
+      "geçmem için ne kadar eksik kaldı?",
+      "baraja kaç puan var, bakar mısın",
+      "geçmeme ne kadar var"
+    ]
+  },
+  "goals": [
+    "en sevdiğim şarkının solosunu temiz çalmak",
+    "barre akorlarımı temiz çıkarmak",
+    "alternatif penayı akıcı yapmak",
+    "pentatonik gamlarda sapta rahat gezinmek",
+    "ritim gitarımı sağlamlaştırmak",
+    "bir blues solosu doğaçlama yapabilmek",
+    "parmaklarım hızlansın ve kasılmasın",
+    "legato çalışımı geliştirmek",
+    "metronoma tam oturmak",
+    "akorlar arasında hızlı geçiş yapmak",
+    "Hotel California'nın solosunu çalmak",
+    "sweep picking'i temiz yapmak",
+    "bend ve vibratoyu doğru yapmak",
+    "bütün sapta gamları bilmek",
+    "bir şarkıyı baştan sona hatasız çalmak",
+    "sağ elimi gevşek tutmak",
+    "kulaktan çıkarma yeteneğimi geliştirmek",
+    "arkadaşlarla jam yapabilecek seviyeye gelmek",
+    "tempom düzgün ve sabit olsun",
+    "her gün düzenli pratik yapmak"
+  ],
+  "vocab": {
+    "screen": {
+      "paths": ["yollar"],
+      "beat": ["metronom"],
+      "drill": ["tempo antrenmanı"]
+    },
+    "section": {
+      "devices": ["ses cihazları"],
+      "grading": ["değerlendirme"],
+      "recording": ["kayıt"]
+    },
+    "metric": {
+      "pitch": ["doğru notalar", "notaların doğruluğu"],
+      "pickDirection": ["pena yönü", "alternatif pena vuruşları"],
+      "muting": ["susturma", "tel gürültüsünü kontrol"],
+      "posture": ["duruşum", "gitarı tutuş şeklim"],
+      "tension": ["el ve omuz gerginliği", "kaslardaki gerginlik"],
+      "handAttribution": ["hatayı hangi elin yaptığı", "hangi elin hata yaptığı"],
+      "fingering": ["parmak düzeni", "hangi parmakları kullandığım"],
+      "tone": ["ses kalitesi", "tını"],
+      "feel": ["ritim hissi", "groove"]
+    }
+  }
+}

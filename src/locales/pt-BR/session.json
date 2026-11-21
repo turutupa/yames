@@ -92,7 +92,11 @@
           "lastSession_many": "{{count}} minutos de tomadas na sua última sessão, a última: {{exercise}} a {{bpm}} BPM.",
           "lastSession_other": "{{count}} minutos de tomadas na sua última sessão, a última: {{exercise}} a {{bpm}} BPM."
         },
-        "samePlace": "Hoje começa no mesmo ponto."
+        "samePlace": "Hoje começa no mesmo ponto.",
+        "songDue": {
+          "one": "O compasso {{bar}} de {{song}} está pendente.",
+          "range": "Os compassos {{from}} a {{to}} de {{song}} estão pendentes."
+        }
       },
       "whatsIn": "O que tem nela, e por quê",
       "min": "MIN",
@@ -873,6 +877,11 @@
       },
       "chip": {
         "hear": "Ouvir antes",
+        "hearBack": "Ouvir o compasso {{bar}}: o seu, depois a demo",
+        "hearYours": "O seu: compasso {{bar}} · Parar",
+        "hearDemo": "Demo: compasso {{bar}} · Parar",
+        "hearBackTune": "Ouvir o seu compasso {{played}}, depois a demo do compasso {{tune}}",
+        "hearDemoTune": "Demo: compasso {{tune}} da melodia · Parar",
         "try": "O que devo tentar?"
       },
       "ungraded": {
