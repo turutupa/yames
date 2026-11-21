@@ -564,6 +564,12 @@ function wanted(bucket: Bucket, j: { expect: Expect; tags: string[] }): boolean 
 
 const TRIES = 40;
 
+/**
+ * Intents drawn more often than the rest: "faster" / "slower" with no number
+ * were the stock 4B's commonest error (c3b2m: an invented bpm on 18 items).
+ */
+const INTENT_WEIGHT: Readonly<Record<string, number>> = { tempo_faster: 3, tempo_slower: 3 };
+
 export function generateLanguage(data: LanguageData, file: WordingsFile, opts: GenOptions): GenResult {
   const mix = opts.mix ?? DEFAULT_MIX;
   const rng = rngFor(hashString(`${data.lang}:${opts.seed}`));
@@ -595,7 +601,9 @@ export function generateLanguage(data: LanguageData, file: WordingsFile, opts: G
   const buckets: Bucket[] = ["call", "which", "yours", "card", "noneAsked", "wrongScreen", "withheld"];
   for (const bucket of buckets) {
     const target = Math.round(opts.size * mix[bucket]);
-    const pool = intentsFor(bucket).filter((i) => (usable.get(i.id)?.length ?? 0) > 0);
+    const pool = intentsFor(bucket)
+      .filter((i) => (usable.get(i.id)?.length ?? 0) > 0)
+      .flatMap((i) => Array.from({ length: INTENT_WEIGHT[i.id] ?? 1 }, () => i));
     if (target === 0 || pool.length === 0) continue;
     let made = 0;
     let misses = 0;
