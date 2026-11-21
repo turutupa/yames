@@ -200,7 +200,8 @@ use commands::{
     // W14 — "come back to this", off settings.json and onto migration three.
     clear_due, list_due, save_due,
     // The learning paths' store: migration five.
-    list_exercise_ceilings, list_path_states, list_path_takes, save_path_state, save_path_take,
+    list_clean_tempo_spans, list_exercise_ceilings, list_path_states, list_path_takes,
+    save_path_state, save_path_take,
     // W10 — the door to the coach's judgement (findings.rs) and its ears (pitch.rs).
     analyze_attempt, analyze_take_pitch,
     get_waveform, is_coach_loaded, list_audio_input_devices, list_audio_output_devices,
@@ -1003,6 +1004,7 @@ pub fn run() {
             save_path_take,
             list_path_takes,
             list_exercise_ceilings,
+            list_clean_tempo_spans,
             // W10 — the coach's judgement and its ears.
             analyze_attempt,
             analyze_take_pitch,
