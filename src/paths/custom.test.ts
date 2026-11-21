@@ -70,7 +70,9 @@ describe("the recipe grid", () => {
       const rungs = gradedRungs(ex);
       expect(rungs[0], name).toBe(result.summary.startBpm);
       expect(rungs).toContain(result.summary.passBpm);
-      expect(result.summary.startBpm).toBeLessThanOrEqual(60);
+      // 60, or the pace rule's 0.6 of the pass when that is higher (quarters: 70), never above the pass.
+      expect(result.summary.startBpm).toBeLessThanOrEqual(Math.max(60, Math.round((result.summary.passBpm * 0.6) / 5) * 5));
+      expect(result.summary.startBpm).toBeLessThanOrEqual(result.summary.passBpm);
       expect(result.summary.passBpm).toBeLessThanOrEqual(ex.computed.maxPlayableBpm);
     }
     // The grid is not refused wholesale: every refusal kind it can reach is there, and builds outnumber any one of them.
@@ -169,9 +171,9 @@ describe("refusals", () => {
     const result = buildCustomExercise({ ...MOCK_17, position: 6 });
     expect(result).toEqual({ ok: false, why: { why: "noShapeHere", nearest: [5, 8] } });
     expect(positionsFor(MOCK_17)).toEqual(expect.arrayContaining([5, 8]));
-    // F is not in A minor: no three-per-string start on fret 1 of the low E.
-    const nps = buildCustomExercise({ ...MOCK_17, shape: "threePerString", scale: "naturalMinor", position: 1 } as Recipe);
-    expect(nps).toEqual({ ok: false, why: { why: "noShapeHere", nearest: [0, 3] } });
+    // F# is not in A minor: no three-per-string start on fret 2 of the low E (F at 1 and G at 3 are).
+    const nps = buildCustomExercise({ ...MOCK_17, shape: "threePerString", scale: "naturalMinor", position: 2 } as Recipe);
+    expect(nps).toEqual({ ok: false, why: { why: "noShapeHere", nearest: [1, 3] } });
   });
 
   it("off the neck: outOfRange", () => {

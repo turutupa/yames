@@ -8,8 +8,11 @@ import { buildCustomExercise, customPathDoc, RECIPE_DIRECTIONS, RECIPE_SUBDIVISI
 import type { BuildResult, Recipe, RecipePosition } from "./custom";
 import { scheduleFixtures } from "./pipeline";
 
-/** One of each kind of music per shape: a recipe without its position, grid and length. */
-const MUSIC: ReadonlyArray<Omit<Recipe, "v" | "position" | "subdivision" | "bars" | "direction">> = [
+/** A recipe without its position, grid, length and direction (`Omit` taken over each shape of the union). */
+type Music = Recipe extends infer R ? (R extends Recipe ? Omit<R, "v" | "position" | "subdivision" | "bars" | "direction"> : never) : never;
+
+/** One of each kind of music per shape. */
+const MUSIC: readonly Music[] = [
   { shape: "box", root: "A", scale: "minorPentatonic" },
   { shape: "box", root: "C", scale: "majorPentatonic" },
   { shape: "box", root: "E", scale: "blues" },

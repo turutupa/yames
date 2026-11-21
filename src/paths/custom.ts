@@ -193,7 +193,11 @@ export const CUSTOM_PATH_ID = "my-exercises";
 /** The hand the reach check assumes: the Scales and Modes Path's. */
 export const CUSTOM_REACH_LEVEL: PathLevel = "intermediate";
 
-/** Where a first Take starts (mock 17: "Starts at 60 BPM"), unless the pass is slower. */
+/**
+ * Where a first Take starts (mock 17: "Starts at 60 BPM"), unless the pass is slower.
+ * `paceLadder` raises it to 0.6 of the pass when that is higher, as on every paced
+ * Path (quarters, pass 120: 70).
+ */
 export const START_BPM = 60;
 /** The slowest pass a custom Exercise may have: under it, `unreachable`. */
 export const MIN_PASS_BPM = 40;
