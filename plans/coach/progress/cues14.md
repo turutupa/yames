@@ -13,7 +13,59 @@ Cues: `src/paths/specs/shred-cues.ts`, attached with `withCues` in `shred.ts`.
   string-skipping, economy, warm-up scale-round), 27 Exercises. `check`: 0 errors, 0 refused (`gc5.log`).
 - [x] Level 3 (Advanced: legato-one, legato-two, sweep-basics, five-string-sweeps, tapping-etude,
   warm-up loop-round), 17 Exercises. `check`: 0 errors, 0 refused, 0 cues said in other words (`gc8.log`).
-- [ ] Proof-read. - [ ] Translations. - [ ] Gates.
+- [x] Proof-read (below); `check` after the fixes: 0 errors, 0 refused (`gc10.log`).
+- [ ] Translations. - [ ] Gates.
+
+## The proof-read (three separate sonnet readers, one per Level)
+
+41 objections (`/tmp/coach-cues14/proof-shred/objections-{a,b,c}.md`), 33 taken, 8 answered.
+Taken (was -> now): open-a / loop-round "Keep every stroke the same size." (feel) -> "Keep the same small
+stroke on every note." · chromatic-on-g lastBars (a result) -> "Count '1 e and a' through the walk down."
+· walking-accent early "do not rush the accent" (two ideas) -> the beat cue · sextuplet-accent general
+(two ideas) -> "Accent the first of each six." · three-against-four lastBars "meets the '1'" (ambiguous)
+-> "Keep the foot on the click to the last note." · outside-pairs general (two ideas) -> "Keep the strokes
+the same as the notes change."; inside-pairs general (pointed at another Exercise) -> "Down on the higher
+string, up on the lower."; both heard "as firmly as" (implied loudness heard) -> "Pick both strings of
+every pair." · "Know the next pair / string pair / chord" (no action; three readers) -> "Look at the next
+pair a beat ahead." / "Look at the next string pair a beat ahead." / "Say the next chord's name before it
+comes." · one-string-climb lastBars -> "Count '1 e and a' through the highest notes." · petrucci lastBars
+"pass down" -> "Keep the last pass as even as the first." · six-note-up general (another Exercise) -> "Land
+the last note right on beat four." · threes general (two ideas) -> "Count '1-trip-let' and keep it even."
+· expanding general (false for its last four beats) -> "Add one beat to the burst in each bar."; extras
+"Stop each burst ... on the long note" (no long note at the end) -> "Keep the pick on one string only."
+· octaves heard "as firmly" -> "Pick both strings of every pair." (after "Pick both notes of every octave."
+was refused: "an interval"); extras "Rest a finger on the skipped string" contradicted "Stay clear of the
+skipped string" -> "Keep the stroke small: just the two strings."; notes -> "Say each octave's name as the
+beat starts." · skipped-triad notes "chord tone" -> "Say the chord's three note names before you go." ·
+scale-round shift (two ideas) -> "Shift right as each bar starts." · five-seven-eight general (two ideas)
+-> "Pick only the first note of each beat." · pentatonic-pulls extras duplicated stringChange -> "Keep the
+stroke small: just the strings in use." · hammer-ascent general false for the low E -> "Hammer each new
+string's first note hard."; its stringChange duplicated it -> "Keep the pick close as you cross." ·
+three-both-ways stringChange duplicated the general -> "Keep the push one smooth stroke." · tap-changes
+general false for the second G -> "Move the tap on the last hammer before a change."; lastBars (an order
+to stay still) -> "Count the taps right through the second G." · the-run heard "Pick every note" (bars 6
+and 7 are tapped and pulled) -> "Keep every note sounding right through."; lastBars (count what) -> "Count
+'1 e and a' through the run home." · the-link lastBars (a result) -> "Count the loops right through to
+the end." (after "of the new chord" was refused on Am-to-Dm).
+
+Answered, not changed:
+- *"Press each finger right behind the fret." implies the app heard poor fretting*: it is an order, plain
+  teaching for notes not heard, with no cause claimed; Alternate Picking says the same.
+- *three-strings / stamina-minute shift "Have each new string's first note ready." is a string-change cue*:
+  `shift` fires there only on the string-set variants whose hand moves at a string change, and those
+  variants refuse any sentence about the hand ("Shift during ...", "Move the hand ..."); the cue says what
+  the player does at that place in the words they allow.
+- *three-strings notes "Have every finger ready" is vague*: the fingering differs by string (1-3-4 or
+  1-2-4) and by variant, so it cannot name fingers.
+- *sixes general "Lean a little on the first of each six" is feel*: an accent as plain teaching, the way
+  Alternate Picking teaches sextuplets; nothing claims it was heard.
+- *expanding afterHeld "Count the rest out, then start the burst."*: true where it can fire, the first note
+  of the second and third bursts after the landing and its rest.
+- *five-seven-eight notes "the middle note" is ambiguous*: in 5-7-8-7 the middle note is the 7, which is the
+  how-to's point; "the middle finger" is refused on the semitone variants.
+- *outside-lick notes names only the first note*: kept, the stock Alternate Picking line; the lick repeats
+  twice a bar, so starting on the right note is the order.
+- *three-against-four's original lastBars suggestion "every third"*: replaced by a count order instead.
 
 ## Refusals and rewordings
 

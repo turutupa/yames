@@ -39,8 +39,9 @@ const SIX_LATE = "Put the first of each six on the click.";
 const SIX_EARLY = "Wait for the click before each six.";
 const NEW_PAIR_LATE = "Put each new pair right on the beat.";
 const NEW_PAIR_EARLY = "Wait for the click before each new pair.";
-const NEXT_PAIR = "Know the next pair before it comes.";
+const NEXT_PAIR = "Look at the next pair a beat ahead.";
 const WELL_UNDER = "Start well under your clean tempo.";
+const BOTH_STRINGS = "Pick both strings of every pair.";
 const GROUP_LATE = "Put each group's first note on the click.";
 const GROUP_EARLY = "Wait for the click before each group.";
 const FINGER_BEHIND = "Press each finger right behind the fret.";
@@ -64,8 +65,8 @@ const SKIP_CLEAR = "Stay clear of the skipped string.";
 const RUN_LATE = "Start each run right on the click.";
 const RUN_EARLY = "Wait for the click before each run.";
 const MOVE_SMALL = "Keep the move to the next string small.";
-const SAME_SIZE = "Keep every stroke the same size.";
-const NEXT_CHORD ="Know the next chord before it comes.";
+const SAME_SIZE = "Keep the same small stroke on every note.";
+const NEXT_CHORD = "Say the next chord's name before it comes.";
 const HAMMER_HEARD = "Hammer hard enough to hear the note.";
 const PULL_HEARD = "Pull the string slightly as you lift off.";
 const HAMMER_COUNT = "Count '1 e and a' through the hammered notes.";
@@ -96,7 +97,7 @@ export const SHRED_CUES: CueBook = {
     c("late", BEAT_LATE),
     c("early", BEAT_EARLY),
     c("shift", "Move the hand one fret as each bar starts.", 0),
-    c("lastBars", "Keep the walk down as even as the walk up."),
+    c("lastBars", "Count '1 e and a' through the walk down."),
   ],
   "one-string.four-of-each": [
     g("Move the fretting hand exactly on the beat.", 0),
@@ -123,7 +124,7 @@ export const SHRED_CUES: CueBook = {
     c("heard", QUIET_HEARD),
     c("extras", "Keep the pick on the G string only."),
     c("late", "Put each '1' on the click, accent or not."),
-    c("early", "Wait for the click; do not rush the accent."),
+    c("early", BEAT_EARLY),
     c("lastBars", "Accent the last of each four, right on time."),
   ],
   "accents.open-triplets": [
@@ -135,7 +136,7 @@ export const SHRED_CUES: CueBook = {
     c("openString", "Keep the six even between the accents."),
   ],
   "accents.sextuplet-accent": [
-    g("Accent the first of each six; count the beat.", 0),
+    g("Accent the first of each six.", 0),
     c("heard", QUIET_HEARD),
     c("extras", ONE_STRING),
     c("late", SIX_LATE),
@@ -147,13 +148,13 @@ export const SHRED_CUES: CueBook = {
     c("extras", TOP_ONLY),
     c("late", BEAT_LATE),
     c("early", BEAT_EARLY),
-    c("lastBars", "Count the beats until the accent meets the '1'."),
+    c("lastBars", "Keep the foot on the click to the last note."),
   ],
 
   // Level 1, Step 3: crossing
   "crossing.outside-pairs": [
-    g("Change the notes; keep the strokes the same.", 0),
-    c("heard", "Pick the higher string as firmly as the lower."),
+    g("Keep the strokes the same as the notes change.", 0),
+    c("heard", BOTH_STRINGS),
     c("extras", TWO_STRINGS),
     c("notes", NEXT_PAIR),
     c("late", NEW_PAIR_LATE),
@@ -161,8 +162,8 @@ export const SHRED_CUES: CueBook = {
     c("stringChange", CROSS_CLOSE),
   ],
   "crossing.inside-pairs": [
-    g("Keep it as even as the outside pairs."),
-    c("heard", "Pick the lower string as firmly as the higher."),
+    g("Down on the higher string, up on the lower.", 0),
+    c("heard", BOTH_STRINGS),
     c("extras", TWO_STRINGS),
     c("notes", NEXT_PAIR),
     c("late", NEW_PAIR_LATE),
@@ -184,7 +185,7 @@ export const SHRED_CUES: CueBook = {
     c("late", BEAT_LATE),
     c("early", BEAT_EARLY),
     c("shift", "Start one note higher as each bar starts."),
-    c("lastBars", "Keep the highest notes as even as the low."),
+    c("lastBars", "Count '1 e and a' through the highest notes."),
   ],
 
   // Level 2, Step 4: chromatic
@@ -197,7 +198,7 @@ export const SHRED_CUES: CueBook = {
     c("early", BEAT_EARLY),
     c("shift", SHIFT_PASS, 1),
     c("stringChange", CROSS_CLOSE),
-    c("lastBars", "Keep the last pass down as even as the first."),
+    c("lastBars", "Keep the last pass as even as the first."),
   ],
   "chromatic.spider": [
     g("Lift each finger only when its partner lands.", 2),
@@ -236,7 +237,7 @@ export const SHRED_CUES: CueBook = {
     g("Find each new pair of strings on the beat.", 0),
     c("heard", RIGHT_THROUGH),
     c("extras", CROSS_SMALL),
-    c("notes", "Know the next string pair before it comes.", 2),
+    c("notes", "Look at the next string pair a beat ahead.", 2),
     c("late", SIX_LATE),
     c("early", SIX_EARLY),
     c("stringChange", "Change pairs right on the beat."),
@@ -273,7 +274,7 @@ export const SHRED_CUES: CueBook = {
     c("stringChange", HOP),
   ],
   "three-per-string.six-note-up": [
-    g("Play it as evenly as the descending one."),
+    g(LAND_FOUR, 0),
     c("heard", RIGHT_THROUGH),
     c("extras", TWO_STRINGS),
     c("notes", SIX_NOTES),
@@ -307,7 +308,7 @@ export const SHRED_CUES: CueBook = {
 
   // Level 2, Step 7: sequences
   "sequences.threes": [
-    g("Count '1-trip-let'; each group one note up.", 0),
+    g("Count '1-trip-let' and keep it even.", 0),
     c("heard", RIGHT_THROUGH),
     c("extras", CROSS_SMALL),
     c("notes", "Start each group one note higher."),
@@ -371,9 +372,9 @@ export const SHRED_CUES: CueBook = {
     c("afterHeld", "Count the half note's two beats, then go."),
   ],
   "speed-bursts.expanding": [
-    g("Play one more beat each bar, then rest.", 0),
+    g("Add one beat to the burst in each bar.", 0),
     c("heard", BURST_HEARD),
-    c("extras", BURST_STOP),
+    c("extras", ONE_STRING),
     c("late", BURST_LATE),
     c("early", BURST_EARLY),
     c("afterHeld", "Count the rest out, then start the burst."),
@@ -393,9 +394,9 @@ export const SHRED_CUES: CueBook = {
   // Level 2, Step 9: string skipping
   "string-skipping.octaves": [
     g("Aim the pick at the far string before you go.", 0),
-    c("heard", "Pick the high note as firmly as the low."),
-    c("extras", "Rest a finger lightly on the skipped string.", 2),
-    c("notes", "Name each octave's note before you play it."),
+    c("heard", BOTH_STRINGS),
+    c("extras", TWO_STRINGS),
+    c("notes", "Say each octave's name as the beat starts."),
     c("late", "Put each beat's low note on the click."),
     c("early", NEW_PAIR_EARLY),
     c("shift", "Arrive at the next pair as each beat starts.", 1),
@@ -416,7 +417,7 @@ export const SHRED_CUES: CueBook = {
     g("Keep the hand still after the first note.", 1),
     c("heard", RIGHT_THROUGH),
     c("extras", SKIP_CLEAR),
-    c("notes", "Name each note's chord tone as you play it."),
+    c("notes", "Say the chord's three note names before you go."),
     c("late", BEAT_LATE),
     c("early", BEAT_EARLY),
     c("shift", "Shift up right after the lowest note."),
@@ -470,7 +471,7 @@ export const SHRED_CUES: CueBook = {
     c("heard", RIGHT_THROUGH),
     c("late", BEAT_LATE),
     c("early", BEAT_EARLY),
-    c("shift", "Keep the shift small, right as each bar starts.", 0),
+    c("shift", "Shift right as each bar starts.", 0),
     c("stringChange", CROSS_CLOSE),
     c("lastBars", "Keep the second run as even as the first."),
   ],
@@ -486,7 +487,7 @@ export const SHRED_CUES: CueBook = {
     c("lastBars", HAMMER_COUNT),
   ],
   "legato-one.five-seven-eight": [
-    g("Pick on each beat; hammer and pull in time.", 0),
+    g("Pick only the first note of each beat.", 0),
     c("heard", HAMMER_HEARD),
     c("extras", ONE_STRING),
     c("notes", "Keep the middle note fretted as you hammer.", 1),
@@ -497,7 +498,7 @@ export const SHRED_CUES: CueBook = {
   "legato-one.pentatonic-pulls": [
     g("Keep the pull-offs as even as the picked notes.", 0),
     c("heard", PULL_HEARD),
-    c("extras", CROSS_SMALL),
+    c("extras", IN_USE),
     c("notes", "Have the lower finger down before you pull."),
     c("late", SIX_LATE),
     c("early", SIX_EARLY),
@@ -507,14 +508,14 @@ export const SHRED_CUES: CueBook = {
 
   // Level 3, Step 12: legato across strings
   "legato-two.hammer-ascent": [
-    g("Hammer each string's first note from nowhere.", 0),
+    g("Hammer each new string's first note hard.", 0),
     c("heard", HAMMER_HEARD),
     c("extras", IN_USE),
     c("notes", "Put each hammer right on its fret.", 1),
     c("late", BEAT_LATE),
     c("early", BEAT_EARLY),
     c("afterHeld", HELD_OUT),
-    c("stringChange", "Hammer the new string's first note on time."),
+    c("stringChange", CROSS_CLOSE),
     c("lastBars", "Count the six through every hammer to the top."),
   ],
   "legato-two.pull-descent": [
@@ -554,7 +555,7 @@ export const SHRED_CUES: CueBook = {
     c("extras", LIFT),
     c("late", BEAT_LATE),
     c("early", BEAT_EARLY),
-    c("stringChange", "Keep the turn at the top note small.", 1),
+    c("stringChange", PUSH_ONE),
   ],
   "sweep-basics.two-string-lick": [
     g("Land the last note right on beat three.", 0),
@@ -591,7 +592,7 @@ export const SHRED_CUES: CueBook = {
     c("early", BEAT_EARLY),
     c("shift", "Move as little as you can at the change.", 1),
     c("stringChange", PUSH_ONE),
-    c("lastBars", "Keep the new chord's loops as even as the first."),
+    c("lastBars", "Count the loops right through to the end."),
   ],
 
   // Level 3, Step 15: tapping and the run
@@ -603,12 +604,12 @@ export const SHRED_CUES: CueBook = {
     c("early", TAP_EARLY),
   ],
   "tapping-etude.tap-changes": [
-    g("Move the tap during each chord's last hammer.", 1),
+    g("Move the tap on the last hammer before a change.", 1),
     c("heard", PULL_HEARD),
     c("extras", "Tap only on the top string."),
     c("late", TAP_LATE),
     c("early", TAP_EARLY),
-    c("lastBars", "Keep the tap still for the second G chord."),
+    c("lastBars", "Count the taps right through the second G."),
   ],
   "tapping-etude.stamina-minute": [
     g("Start at a tempo you can hold a whole minute.", 0),
@@ -621,14 +622,14 @@ export const SHRED_CUES: CueBook = {
   ],
   "tapping-etude.the-run": [
     g("Land a chord tone on every '1'.", 0),
-    c("heard", RIGHT_THROUGH),
+    c("heard", "Keep every note sounding right through."),
     c("extras", IN_USE),
     c("notes", NEXT_CHORD),
     c("late", BEAT_LATE),
     c("early", BEAT_EARLY),
     c("shift", "Move the hand during each idea's last note."),
     c("stringChange", CROSS_CLOSE),
-    c("lastBars", "Keep counting through the run home."),
+    c("lastBars", "Count '1 e and a' through the run home."),
   ],
   "warmup-advanced.loop-round": [
     g(WELL_UNDER, 0),
