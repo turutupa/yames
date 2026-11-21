@@ -314,12 +314,22 @@ export function noteAskUndos(): void {
   }
 }
 
-/** A Take started: no chip's Undo outlives it (the receipt stays, as a plain line). */
+/**
+ * A Take started: no chip's Undo outlives it (the receipt stays, as a plain
+ * line). The runner spends it now; the card is written when the Take ends
+ * (`settleAskTurn` holds it), because nothing of Ask commits during a Take.
+ */
 export function noteAskTake(): void {
   for (const turn of getAskState().turns) {
     if (turn.kind !== "tool" || turn.body.kind !== "receipt") continue;
     const undo = turn.body.undo;
-    if (undo?.chip && undo.state === "live") retire(turn.id, turn.body, undo);
+    if (!undo?.chip || undo.state !== "live") continue;
+    retireUndo(undo.call);
+    settleAskTurn(turn.id, (now) =>
+      now.kind === "tool" && now.body.kind === "receipt" && now.body.undo?.call === undo.call && now.body.undo.state === "live"
+        ? { ...now, body: { ...now.body, undo: { ...now.body.undo, state: "gone" } } }
+        : null,
+    );
   }
 }
 

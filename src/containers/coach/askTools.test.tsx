@@ -36,6 +36,7 @@ import {
 import { AskToolTurn } from "./AskToolTurn";
 import { NEVER_ITEMS, NEVER_LIST, SHOW_ME_TOOLS } from "./neverList";
 import { findTool } from "../../coach/tools/registry";
+import { runCoachUndo } from "../../coach/tools/run";
 import { lineKey, lineText } from "./toolWords";
 
 const t = i18n.t.bind(i18n);
@@ -484,6 +485,30 @@ describe("a suggestion chip's own press (leg chip1)", () => {
     act(() => noteAskToolView("session", 1));
     expect(screen.queryByTestId("ask-undo")).toBeNull();
     expect(host.changes().map((c) => c.member)).toEqual(["nudgeTempo", "nudgeTempo"]);
+  });
+
+  it("a Take's start spends the Undo at once and writes the card only when the Take ends (nothing of Ask commits during a Take)", () => {
+    const host = use(tempoHost(), beat);
+    render(<Thread />);
+    act(() => void pressChip(slower, "Slower"));
+    let taking = true;
+    setAskTakeGate(() => taking);
+    try {
+      const before = getAskState().turns;
+      act(() => noteAskTake());
+      expect(getAskState().turns).toBe(before);
+      // Spent in the runner already: even the very object, pressed after the Take, does nothing.
+      const tool = before.find((x) => x.kind === "tool")!;
+      const call = tool.kind === "tool" && tool.body.kind === "receipt" ? tool.body.undo!.call : null;
+      taking = false;
+      expect(runCoachUndo(call, host, beat).ok).toBe(false);
+      expect(host.bpm()).toBe(115);
+      act(() => releaseHeldAsk());
+      expect(screen.queryByTestId("ask-undo")).toBeNull();
+      expect(screen.getByTestId("ask-receipt")).toHaveAttribute("data-undo", "gone");
+    } finally {
+      setAskTakeGate(() => false);
+    }
   });
 
   it("during a Take, a chip's press changes nothing", () => {
