@@ -1,0 +1,50 @@
+{"id":"ja-00420","wording":"start_today#3","text":"今日のメニュー始めよう","where":"paths","expect":{"kind":"none"},"call":{"tool":"start_today","args":{}},"tags":["withheld"]}
+{"id":"ja-00240","wording":"open_step_here#1","text":"5番目のステップ開いて","where":"session (result)","expect":{"kind":"none"},"call":{"tool":"open_step","args":{"step":5}},"tags":["wrong-screen"]}
+{"id":"ja-00397","wording":"none_negated#3","text":"ツールを開くのはやめて","where":"session (ready)","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"ja-00512","wording":"voice_off#2","text":"コーチは黙ってて","where":"session (playing)","expect":{"kind":"none"},"call":{"tool":"set_setting","args":{"key":"coachVoice","value":"off"}},"tags":["wrong-screen"]}
+{"id":"ja-00492","wording":"play_exercise#7","text":"Bm7 と E9 でスタブをってやつ、始めてもらえますか","where":"beat","expect":{"kind":"none"},"call":{"tool":"play_exercise","args":{"exercise":"Bm7 と E9 でスタブを"}},"tags":["withheld"]}
+{"id":"ja-00374","wording":"set_minutes#6","text":"今日の練習、20分でお願い","where":"settings","expect":{"kind":"none"},"call":{"tool":"set_minutes","args":{"minutes":20}},"tags":["withheld"]}
+{"id":"ja-00632","wording":"none_past#7","text":"今日の朝テンポ練習を開いて、そのまま寝ちゃった","where":"session (ready)","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"ja-00673","wording":"none_negated#11","text":"セットリストは見せなくていい","where":"session (ready)","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"ja-00035","wording":"show_chord#7","text":"D5のコードダイアグラム出してもらえますか","where":"session (listening)","expect":{"kind":"none"},"call":{"tool":"show_chord","args":{"chord":"D5"}},"tags":["wrong-screen"]}
+{"id":"ja-00664","wording":"load_jam#7","text":"blues in aロードして","where":"session (playing)","expect":{"kind":"none"},"call":{"tool":"load_jam","args":{"jam":"blues in a"}},"tags":["wrong-screen"]}
+{"id":"ja-00162","wording":"start_today_at#4","text":"パート2から始めてください","where":"session (ready)","expect":{"kind":"none"},"call":{"tool":"start_today","args":{"at":2}},"tags":["wrong-screen"]}
+{"id":"ja-00147","wording":"tempo_faster#1","text":"速くして","where":"session (listening)","expect":{"kind":"none"},"call":{"tool":"set_tempo","args":{"direction":"faster"}},"tags":["relative","wrong-screen"]}
+{"id":"ja-00454","wording":"none_chat#2","text":"おつかれさま〜","where":"progress","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"ja-00041","wording":"yours_input#4","text":"ギターの音を聴いてよ","where":"paths","expect":{"kind":"yours","item":"input"},"tags":["never"]}
+{"id":"ja-00313","wording":"yours_grading#0","text":"採点をオフにして","where":"today","expect":{"kind":"yours","item":"grading"},"tags":["never"]}
+{"id":"ja-00016","wording":"yours_deleting#3","text":"さっきの演奏消して","where":"today","expect":{"kind":"yours","item":"deleting"},"tags":["never"]}
+{"id":"ja-00059","wording":"yours_recording#9","text":"録画スタート","where":"jam","expect":{"kind":"yours","item":"recording"},"tags":["never"]}
+{"id":"ja-00506","wording":"yours_model#1","text":"コーチのモデルを変えて","where":"paths","expect":{"kind":"yours","item":"model"},"tags":["never"]}
+{"id":"ja-00682","wording":"yours_unfollowing#1","text":"ネックを知るをアンフォローして","where":"jam","expect":{"kind":"yours","item":"unfollowing"},"tags":["never"]}
+{"id":"ja-00583","wording":"yours_grades#8","text":"ズルして合格にして","where":"paths","expect":{"kind":"yours","item":"grades"},"tags":["never"]}
+{"id":"ja-00548","wording":"yours_grades#3","text":"成績をAにして","where":"paths","expect":{"kind":"yours","item":"grades"},"tags":["never"]}
+{"id":"ja-00046","wording":"yours_unfollowing#9","text":"もうラインは卒業、フォロー解除お願いします","where":"beat","expect":{"kind":"yours","item":"unfollowing"},"tags":["never"]}
+{"id":"ja-00440","wording":"yours_model#5","text":"AIモデルを入れ替えてもらえますか","where":"beat","expect":{"kind":"yours","item":"model"},"tags":["never"]}
+{"id":"ja-00371","wording":"yours_grading#2","text":"今回は採点してほしい","where":"jam","expect":{"kind":"yours","item":"grading"},"tags":["never"]}
+{"id":"ja-00144","wording":"yours_deleting#8","text":"履歴を消去したい","where":"jam","expect":{"kind":"yours","item":"deleting"},"tags":["never"]}
+{"id":"ja-00646","wording":"yours_input#5","text":"リスニングを止めて","where":"drill","expect":{"kind":"yours","item":"input"},"tags":["never"]}
+{"id":"ja-00060","wording":"find_edge#0","text":"のルートの限界を探して","where":"drill","expect":{"kind":"which"},"call":{"tool":"find_edge","args":{"exercise":"のルート"}},"tags":["ambiguous"]}
+{"id":"ja-00609","wording":"find_edge#0","text":"ピッキングの限界を探して","where":"today","expect":{"kind":"which"},"call":{"tool":"find_edge","args":{"exercise":"ピッキング"}},"tags":["ambiguous"]}
+{"id":"ja-00121","wording":"open_step_name#3","text":"ステップ:ストップ","where":"today","expect":{"kind":"which"},"call":{"tool":"open_step","args":{"query":"ストップ"}},"tags":["ambiguous"]}
+{"id":"ja-00026","wording":"follow_path#4","text":"コードのコースをフォローしてください","where":"today","expect":{"kind":"which"},"call":{"tool":"follow_path","args":{"path":"コード"}},"tags":["ambiguous"]}
+{"id":"ja-00557","wording":"open_path#1","text":"コース「コード」を開いてください","where":"today","expect":{"kind":"which"},"call":{"tool":"open_path","args":{"path":"コード"}},"tags":["ambiguous"]}
+{"id":"ja-00573","wording":"open_step_name#4","text":"三つのコードで開いて","where":"jam","expect":{"kind":"which"},"call":{"tool":"open_step","args":{"query":"三つのコードで"}},"tags":["ambiguous"]}
+{"id":"ja-00642","wording":"find_edge#3","text":"メジャー、どこまで速く弾けるか調べて","where":"tools","expect":{"kind":"which"},"call":{"tool":"find_edge","args":{"exercise":"メジャー"}},"tags":["ambiguous"]}
+{"id":"ja-00630","wording":"open_step_of_path#5","text":"コードのステップ13お願い","where":"drill","expect":{"kind":"which"},"call":{"tool":"open_step","args":{"path":"コード","step":13}},"tags":["ambiguous"]}
+{"id":"ja-00635","wording":"play_exercise_bpm#4","text":"185bpmで一つのフォームでスタート","where":"today","expect":{"kind":"which"},"call":{"tool":"play_exercise","args":{"exercise":"一つのフォームで","bpm":185}},"tags":["ambiguous"]}
+{"id":"ja-00553","wording":"open_path#1","text":"コース「リズム」を開いてください","where":"beat","expect":{"kind":"which"},"call":{"tool":"open_path","args":{"path":"リズム"}},"tags":["ambiguous"]}
+{"id":"ja-00044","wording":"test_out_of_path#4","text":"リズムのステップ7、もう弾けるのでテストアウトお願いします","where":"paths","expect":{"kind":"which"},"call":{"tool":"test_out","args":{"path":"リズム","step":7}},"tags":["ambiguous"]}
+{"id":"ja-00229","wording":"test_out_of_path#2","text":"ピッキング ステップ8 テストアウト","where":"beat","expect":{"kind":"which"},"call":{"tool":"test_out","args":{"path":"ピッキング","step":8}},"tags":["ambiguous"]}
+{"id":"ja-00134","wording":"follow_path#3","text":"ピッキングを毎日のミックスに入れて","where":"paths","expect":{"kind":"which"},"call":{"tool":"follow_path","args":{"path":"ピッキング"}},"tags":["ambiguous"]}
+{"id":"ja-00479","wording":"focus_path#5","text":"今日はブルースとペンタトニックだけやりたい","where":"today","expect":{"kind":"call","tool":"set_focus","args":{"path":"ブルースとペンタトニック"}},"call":{"tool":"set_focus","args":{"path":"ブルースとペンタトニック"}},"tags":[]}
+{"id":"ja-00270","wording":"start_today_at#4","text":"パート1から始めてください","where":"paths","expect":{"kind":"call","tool":"start_today","args":{"at":1}},"call":{"tool":"start_today","args":{"at":1}},"tags":[]}
+{"id":"ja-00221","wording":"voice_on#0","text":"コーチの声をオンにして","where":"jam","expect":{"kind":"call","tool":"set_setting","args":{"key":"coachVoice","value":"on"}},"call":{"tool":"set_setting","args":{"key":"coachVoice","value":"on"}},"tags":[]}
+{"id":"ja-00576","wording":"focus_path#2","text":"今日のメニューをオルタネイト・ピッキングだけにして","where":"paths","expect":{"kind":"call","tool":"set_focus","args":{"path":"オルタネイト・ピッキング"}},"call":{"tool":"set_focus","args":{"path":"オルタネイト・ピッキング"}},"tags":[]}
+{"id":"ja-00228","wording":"load_jam#4","text":"slow rockっていうジャムを読み込みたい","where":"beat","expect":{"kind":"call","tool":"load_jam","args":{"jam":"slow rock"}},"call":{"tool":"load_jam","args":{"jam":"slow rock"}},"tags":[]}
+{"id":"ja-00657","wording":"focus_path#7","text":"今日の練習はブルースとペンタトニック中心でお願い","where":"progress","expect":{"kind":"call","tool":"set_focus","args":{"path":"ブルースとペンタトニック"}},"call":{"tool":"set_focus","args":{"path":"ブルースとペンタトニック"}},"tags":[]}
+{"id":"ja-00410","wording":"tempo_faster#1","text":"速くして","where":"jam","expect":{"kind":"call","tool":"set_tempo","args":{"direction":"faster"}},"call":{"tool":"set_tempo","args":{"direction":"faster"}},"tags":["relative"]}
+{"id":"ja-00154","wording":"set_minutes#4","text":"25分のセッションで","where":"jam","expect":{"kind":"call","tool":"set_minutes","args":{"minutes":25}},"call":{"tool":"set_minutes","args":{"minutes":25}},"tags":[]}
+{"id":"ja-00328","wording":"start_today#4","text":"今日の分やりたい、始めて","where":"setlist","expect":{"kind":"call","tool":"start_today","args":{}},"call":{"tool":"start_today","args":{}},"tags":[]}
+{"id":"ja-00426","wording":"show_scale#5","text":"Ebハーモニックマイナーのスケールってどう弾くの?見せて","where":"paths","expect":{"kind":"call","tool":"show_scale","args":{"root":"Eb","scale":"harmonicMinor"}},"call":{"tool":"show_scale","args":{"root":"Eb","scale":"harmonicMinor"}},"tags":[]}
+{"id":"ja-00293","wording":"suggestions_off#4","text":"練習中のアドバイスを出さないで","where":"drill","expect":{"kind":"call","tool":"set_setting","args":{"key":"coachSuggestions","value":"off"}},"call":{"tool":"set_setting","args":{"key":"coachSuggestions","value":"off"}},"tags":[]}

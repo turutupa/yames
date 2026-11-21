@@ -125,7 +125,8 @@ test.describe("the review with a picture", () => {
     await openShot(page, "songs-camera", size);
 
     for (const [selector, what] of [
-      [".songs-review-said .coach-block-sentence", "the coach's sentence"],
+      // c5a2: the sentence is the coach note's headline now (CoachNote).
+      [".songs-review-said .coach-note-head", "the coach's sentence"],
       [".songs-review-said .coach-block-button", "the fix"],
     ] as const) {
       const box = await page.locator(selector).first().boundingBox();

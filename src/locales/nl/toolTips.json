@@ -1,0 +1,2222 @@
+{
+  "toolTips": {
+    "catalog": {
+      "generic": {
+        "session_start_cold": {
+          "neutral": [
+            "Hé, speel wanneer je zover bent, dan volg ik je timing.",
+            "Fijn dat je er bent. Begin wanneer je warm bent.",
+            "Ik ben klaar wanneer jij het bent. Ik luister zodra je speelt.",
+            "Neem de tijd om je op te stellen. Ik pik je timing op vanaf de eerste noot.",
+            "Geen haast. Begin wanneer je zit en dan gaan we verder.",
+            "Start wanneer je klaar bent. Ik vang je op vanaf de eerste tel.",
+            "Zet je klaar, kom tot rust en begin dan wanneer je wilt.",
+            "Wanneer je klaar bent: ik luister."
+          ]
+        },
+        "session_start_returning": {
+          "neutral": [
+            "Welkom terug. De vorige keer: {lastScore} op {lastBpm} BPM. Laten we daarop voortbouwen.",
+            "Fijn je weer te zien. Vorige sessie haalde je {lastScore} op {lastBpm} BPM.",
+            "Weer aan de slag. Je zat de vorige keer op {lastScore} / {lastBpm} BPM. Laten we blijven klimmen.",
+            "Welkom terug: {lastScore} op {lastBpm} BPM vorige sessie. Ik ben klaar wanneer jij het bent.",
+            "Vorige sessie: {lastScore} op {lastBpm} BPM. Laten we verdergaan waar je bent gebleven.",
+            "Weer hier. Je eindigde op {lastScore} op {lastBpm} BPM: een goede basis.",
+            "Welkom terug. {lastScore} op {lastBpm} BPM de vorige keer. Laten we zien wat vandaag brengt.",
+            "Fijn dat je terug bent. De vorige keer haalde je {lastScore} op {lastBpm} BPM."
+          ]
+        },
+        "accuracy_drop": {
+          "encouragement": [
+            "Er zijn een paar missers ingeslopen. Rustig aan, adem en pak het weer op.",
+            "Je zat vast, en toen een wankeling. Zet je opnieuw op de volgende sterke tel.",
+            "Een kleine dip. Vertraag de pols in je hoofd en pak hem weer op.",
+            "Kleine misser, geen ramp. Vind de klik weer op de volgende maat.",
+            "Even de draad kwijt. Pak de volgende zware tel schoon.",
+            "Een kleine struikeling. Adem in en rij mee op de volgende klik.",
+            "Prima: voel de volgende tel landen voordat je speelt.",
+            "Een beetje drift. Laat het metronoom je weer binnenleiden."
+          ],
+          "neutral": [
+            "Het raakpercentage is wat gezakt. Zet jezelf opnieuw op de volgende maat.",
+            "De nauwkeurigheid zakt. Laat het rusten op de volgende zware tel.",
+            "Het glipt weg. Vertraag het in je hoofd en begin dan opnieuw.",
+            "Er stapelen zich wat missers op. Zoek een schone maat en ga dan door.",
+            "De kwaliteit drijft weg. Zet je een hele maat vast op de klik.",
+            "Missers nemen toe. Adem in, hoor de klik en speel dan.",
+            "Er is drift te zien. Zit een maat stil met de klik voordat je terugkomt.",
+            "Slagen vallen weg. Wacht op de sterke tel en zet jezelf opnieuw."
+          ],
+          "correction": [
+            "De misser houdt aan. Probeer het tempo een paar BPM omlaag te zetten.",
+            "Slagen raken verspreid. Vertraag en bouw op vanaf een schone maat.",
+            "Haal één schone maat en klim dan weer.",
+            "Het patroon valt uit elkaar. Pauzeer, tel jezelf langzaam in en speel dan.",
+            "Stop, tel een hele maat mee met de klik en kom dan weer binnen.",
+            "Zet het tempo vijf BPM lager. Maak het schoon en breng het dan weer omhoog.",
+            "Trek je terug. Speel één stevige maat tegen de klik voordat je er snelheid bij doet.",
+            "Zet jezelf helemaal opnieuw: laat één maat stil, tel hem en begin dan opnieuw."
+          ]
+        },
+        "rushing_trend": {
+          "encouragement": [
+            "Je zit net voor de klik. Adem en rij erop mee.",
+            "Er sluipt een lichte haast in. Plant je voet, laat het metronoom leiden.",
+            "Een beetje vroeg. Zak in op de volgende klik.",
+            "Je zit een haartje voor. Wacht op de klik in plaats van hem te achtervolgen.",
+            "Maar een klein beetje te heet. Ontspan je handen en laat de klik je trekken.",
+            "De pols kruipt omhoog. Adem in en laat de volgende klik je tegemoetkomen.",
+            "Op de rand van haasten. Leun achterover in de stoel en rij op de klik mee.",
+            "Een tikje vroeg. Hoor eerst de klik en speel dan."
+          ],
+          "neutral": [
+            "Het trendt een tikje vroeg. Probeer op de achterkant van de tel te rijden.",
+            "Je duwt voor de klik uit. Laat hem naar je toe komen.",
+            "Vroeg wegdrijven. Zak dieper in elke klik.",
+            "Elke noot landt wat vroeg. Wacht op de klik.",
+            "Je leidt het metronoom. Laat het metronoom jou leiden.",
+            "Het tempo kruipt omhoog. Volg de klik, duw hem niet.",
+            "Noten komen te snel. Houd elke noot in je hoofd een tel langer vast.",
+            "Drift naar voren. Adem in en laat de klik het tempo bepalen."
+          ],
+          "correction": [
+            "Nog steeds vroeg leunen. Tel de tussenslagen en laat elke noot precies op de klik vallen.",
+            "De haast blijft hangen. Vertraag en tel de offbeat tussen elke klik.",
+            "Pauzeer, tel jezelf langzaam in en begin dan opnieuw te spelen.",
+            "Zet een paar BPM lager. Laat de klik leiden voordat je het weer omhoog brengt.",
+            "Je handen racen. Stop, adem in en begin op de volgende sterke tel.",
+            "Zet jezelf opnieuw: laat één maat stil, hoor de klik en kom dan binnen op tel 1.",
+            "Zet het tempo vijf BPM omlaag tot je OP de klik kunt zitten.",
+            "Stop met het metronoom te willen aansturen. Laat het jou een maat lang aansturen."
+          ]
+        },
+        "dragging_trend": {
+          "encouragement": [
+            "Je zit net achter de klik. Til het tempo weer onder je vingers.",
+            "Licht gesleep. Adem en duw terug in de tel.",
+            "Een beetje achter. Leun naar voren, je bent dichtbij.",
+            "Je bent een haartje te laat. Til je handen op en kom de klik van bovenaf tegemoet.",
+            "Net een klein beetje achter. Duw zachtjes: de klik komt je tegemoet.",
+            "De drift naar achteren is klein. Leun erin en rij op de voorkant van elke klik.",
+            "Een tikje laat. Stel je voor dat je iets voor speelt, dan land je op tijd.",
+            "Noten komen net na de klik. Duw een beetje."
+          ],
+          "neutral": [
+            "Het trendt een tikje laat. Probeer iets voor de klik uit te spelen.",
+            "Je zit achter de tel. Duw in elke tel door.",
+            "Laat wegdrijven. Reik naar de voorkant van elke klik.",
+            "Elke noot landt net na de klik. Kom hem juist recht tegemoet.",
+            "Het metronoom laat je achter. Stap in elke klik.",
+            "Het tempo zakt in. Til de handen op en speel bovenop de klik.",
+            "Noten komen laat. Mik op de voorste rand van elke tel.",
+            "Er is gesleep te zien. Stel je voor dat de klik een halve toon eerder komt dan je denkt."
+          ],
+          "correction": [
+            "Nog steeds achterblijven. Speel met de klik, wacht er niet op.",
+            "Het gesleep blijft hangen. Duw het tempo vooruit met je vingers.",
+            "Stop, zet jezelf opnieuw en begin opnieuw op tel 1.",
+            "Zet het tempo wat lager en zet het vast. Het gesleep verdwijnt zodra het makkelijk voelt.",
+            "Pauzeer een maat. Hoor de klik en kom dan precies bovenop tel 1 binnen.",
+            "Zet jezelf opnieuw: tel jezelf langzaam in en speel met meer lift.",
+            "Vertraag het met vijf BPM en mik op de voorkant van elke klik.",
+            "Stop, adem in en kom dan binnen met een lichte duw naar voren."
+          ]
+        },
+        "personal_best_streak": {
+          "encouragement": [
+            "Vastgelockt: houd het vol.",
+            "De reeks loopt. Mooi.",
+            "Op dreef: blijf daar.",
+            "Ja. Verander niets.",
+            "Je rijdt het schoon. Blijf.",
+            "Dat is de pocket: houd hem vast.",
+            "Prachtig. Blijf dat gewoon doen.",
+            "Ogen dicht, ga door."
+          ],
+          "neutral": [
+            "Nieuw sessierecord: vastgelockt.",
+            "Het schoonste stuk tot nu toe. Houd het vast.",
+            "Beste reeks van vandaag. Verander niets.",
+            "Langste schone reeks van de sessie. Houd hem vast.",
+            "Beste reeks van vandaag. Blijf daar.",
+            "Strakste stuk tot nu toe: houd dit gevoel vast.",
+            "Beste timing van de sessie, precies hier.",
+            "Dit is je sessiehoogte: blijf erin zitten."
+          ],
+          "correction": [
+            "Vastgelockt: houd het tempo, ga nog niet sneller.",
+            "De reeks is schoon. Blijf op deze BPM tot het automatisch gaat.",
+            "Precies waar je even wilt blijven.",
+            "Ga nog niet sneller. Laat dit tempo in je handen zakken.",
+            "Blijf vlak: nog niet klimmen. Laat het spiergeheugen worden.",
+            "Houd dit nog een minuut vast voordat je snelheid toevoegt.",
+            "Parkeer hier. Snelheid komt nadat dit saai wordt.",
+            "Weersta de drang om te duwen. Brand eerst dit tempo in."
+          ]
+        },
+        "new_band_locked": {
+          "encouragement": [
+            "{bpmLow} BPM: nu is het van jou.",
+            "Vastgezet op {bpmLow} BPM. Mooi.",
+            "Dit tempo schoon vastgehouden: nieuw plafond.",
+            "{bpmLow} BPM voelt nu makkelijk. Dat is vooruitgang.",
+            "{bpmLow} BPM is van jou. Raak het niet kwijt.",
+            "Stabiel op {bpmLow}. Dat is de nieuwe vloer.",
+            "Schoon op {bpmLow} BPM: houd het warm.",
+            "{bpmLow} BPM: degelijk. Blijf hier nog even."
+          ],
+          "neutral": [
+            "Een minuut lang schoon gespeeld op {bpmLow}–{bpmHigh} BPM.",
+            "{bpmLow}–{bpmHigh} BPM-band: vastgelockt.",
+            "Nieuwe BPM-band in handen: {bpmLow}–{bpmHigh}.",
+            "Een hele minuut schoon op {bpmLow}–{bpmHigh} BPM.",
+            "{bpmLow}–{bpmHigh} BPM stabiel vastgehouden. Dat is de nieuwe basis.",
+            "Lange tijd vastgelockt op {bpmLow}–{bpmHigh} BPM.",
+            "De {bpmLow}–{bpmHigh}-band schoon vastgehouden: dat is een echte winst.",
+            "Pocket volgehouden op {bpmLow}–{bpmHigh} BPM. Raak hem nu niet kwijt."
+          ],
+          "correction": [
+            "{bpmLow}–{bpmHigh} is stabiel. Blijf hier en duw dan een tikje.",
+            "{bpmLow}–{bpmHigh} schoon vastgehouden. Klaar om te klimmen wanneer jij het bent.",
+            "{bpmLow}–{bpmHigh} voelt als van jou. Begin de volgende sessie hier.",
+            "{bpmLow}–{bpmHigh} BPM is vastgelockt. Ga nog niet sneller.",
+            "Je kunt vanaf {bpmLow}–{bpmHigh} klimmen, maar verdien het: eerst nog twee schone minuten.",
+            "{bpmLow}–{bpmHigh} BPM is de nieuwe vloer. Zak er niet weer onder.",
+            "Stabiel op {bpmLow}–{bpmHigh}. Ga pas omhoog als het saai voelt.",
+            "{bpmLow}–{bpmHigh} BPM in handen. Bouw hier een paar minuten op voordat je klimt."
+          ]
+        },
+        "check_in": {
+          "encouragement": [
+            "Je zit er diep in. Is er iets waar je je hierna op wilt richten?",
+            "Meer dan vijf minuten vastgelockt. Wil je dat ik iets specifieks benoem?",
+            "Lange reeks: pauzeer als je wilt, ik ben er.",
+            "Er loopt een degelijke reeks. Wil je dat ik op iets bijzonders luister?",
+            "Je bent hier al een tijd mee bezig. Adem in als je daar behoefte aan hebt.",
+            "Tot nu toe stil. Vertel me waar je aan werkt en ik let erop.",
+            "Nog niets om te benoemen. Waar wil je dat ik op luister?",
+            "Stabiele pocket. Ga door, of verander van versnelling als je er klaar voor bent."
+          ],
+          "neutral": [
+            "Vijf minuten bezig, niets te melden. Degelijke pocket. Doorgaan of van focus wisselen?",
+            "Stil stuk. Vertel me waar je aan werkt.",
+            "Lange ononderbroken reeks. Wil je ergens feedback op?",
+            "Vijf minuten diep erin. Geen problemen te melden: ga door.",
+            "Stabiele sessie. Wil je een andere invalshoek, of de koers houden?",
+            "Lange reeks zonder missers. Wat is de volgende stap?",
+            "Je hebt in de pocket gezeten. Maak de balans op en kies een volgende focus.",
+            "Tot nu toe een stille sessie. Kies een doel als je scherpere feedback wilt."
+          ],
+          "correction": [
+            "Let op: je bent hier al een tijd mee bezig. Neem er tien als je handen dat nodig hebben.",
+            "Meer dan vijf minuten aaneen. Check in met je lichaam voordat je verder duwt.",
+            "Langdurige sessie: strek je vingers en kom dan terug.",
+            "Handen moe? Neem 60 seconden pauze voor de volgende keer.",
+            "Lange reeks: check je polsen en schouders voordat je doorgaat.",
+            "Tijd voor een korte pauze. Koude handen spelen slordig.",
+            "Pauzeer en strek. Twee minuten rust houdt de volgende twintig degelijk.",
+            "Langdurige reeks: geef de handen rust voordat je verder duwt."
+          ]
+        },
+        "fatigue": {
+          "encouragement": [
+            "De nauwkeurigheid zakt de laatste minuten. Neem even een moment.",
+            "Handen die verkrampen? Snel strekken en fris terugkomen.",
+            "De kwaliteit drijft weg. Pauzeer, adem en keer terug.",
+            "Handen werken harder dan zou moeten. Even rust en dan weer erin.",
+            "Je bent al een tijd bezig: leg het instrument 60 seconden neer.",
+            "Het lichaam wordt zwaarder dan de muziek. Even pauzeren.",
+            "Vingers die stijf worden? Schud ze uit en kom dan terug.",
+            "Tijd voor een korte pauze: frisse handen spelen schoner."
+          ],
+          "neutral": [
+            "De nauwkeurigheid daalde de laatste 3 minuten bij een constante BPM: waarschijnlijk vermoeidheid.",
+            "De score daalt zonder tempoverandering. Neem rust.",
+            "Aanhoudende nauwkeurigheidsdaling op dezelfde BPM: noem het een rustcyclus.",
+            "Hetzelfde tempo, dalende nauwkeurigheid. De handen worden moe.",
+            "De kwaliteit zakt, maar het tempo is niet veranderd: dat is vermoeidheid.",
+            "Missers nemen toe terwijl de klik gelijk blijft. Tijd voor een pauze.",
+            "Drie minuten daling bij één tempo. Laat de handen rusten.",
+            "Stabiele BPM, dalende nauwkeurigheid: je handen vertellen je iets."
+          ],
+          "correction": [
+            "Vermoeidheid zichtbaar: stop nu, 90 seconden pauze en kom dan terug.",
+            "Je bent voorbij je piekvenster. Rust voordat de kwaliteit verder daalt.",
+            "Neem de rust. Moe spelen leert de handen slordige gewoonten.",
+            "Stop, sta op en loop een minuut rond. Kom daarna terug.",
+            "De kwaliteit daalt al minuten. Echte rust: minstens 90 seconden.",
+            "De handen zijn voor nu klaar. Pauzeer, schud ze uit, drink wat.",
+            "Doorduwen voorbij moe zet fouten vast. Stop en herstel.",
+            "Leg het instrument neer. Twee minuten rust, beoordeel daarna opnieuw."
+          ]
+        },
+        "recovery": {
+          "encouragement": [
+            "Mooi opgevangen: blijf hier.",
+            "Teruggehaald. Houd het vast.",
+            "Hersteld: houd precies dit gevoel.",
+            "Je hebt het terug. Blijf hier een minuut in zitten.",
+            "Terug van de dip. Verander nu niets.",
+            "Je voelde het wegglippen en haalde het terug. Dat is de vaardigheid.",
+            "Degelijk herstel. Blijf ontspannen, blijf hier.",
+            "Opgevangen voordat het wegliep. Houd dit gevoel vast."
+          ],
+          "neutral": [
+            "Terug naar schoon na de dip. Houd dit tempo.",
+            "De score is weer omhoog: houd hem vast.",
+            "Herstel bevestigd: nauwkeurigheid weer stabiel.",
+            "Weer schoon na de misser. Verander niets.",
+            "De nauwkeurigheid is terug waar hij was. Houd stand.",
+            "Gestabiliseerd na de dip. Houd dit tempo.",
+            "Je hebt de kloof gedicht. Blijf op deze BPM.",
+            "Kwaliteit hersteld. Parkeer hier een minuut."
+          ],
+          "correction": [
+            "Het herstel houdt stand. Duw het tempo nog niet.",
+            "Terug van de dip: blijf vlak, nog niet klimmen.",
+            "Je hebt het gered. Houd precies deze BPM een hele minuut vast.",
+            "Beloon het herstel niet met een tempoverhoging. Blijf hier zitten.",
+            "Weer op koers. Weersta de drang om te versnellen.",
+            "Het herstel is vers: laat het een gewoonte worden voordat je duwt.",
+            "Blijf op deze BPM. Bouw een paar schone maten op voordat je iets verandert.",
+            "Je kwam terug van de misser. Maak het niet ongedaan door te vroeg te klimmen."
+          ]
+        },
+        "recovery_confirmed": {
+          "encouragement": [
+            "Je hebt het terug.",
+            "Mooi opgevangen: houd het vast.",
+            "Terug en schoon.",
+            "Teruggehaald. Blijf hier."
+          ],
+          "neutral": [
+            "De nauwkeurigheid is terug. Houd dit gevoel.",
+            "Terug naar schoon na de dip.",
+            "Herstel bevestigd. Houd stand."
+          ],
+          "correction": [
+            "Het herstel houdt stand: duw het tempo nog niet.",
+            "Weer op koers. Weersta de drang om te klimmen."
+          ]
+        },
+        "tempo_milestone": {
+          "encouragement": [
+            "{bpmLow} BPM: een nieuwe versnelling.",
+            "Voorbij {bpmLow} BPM, schoon.",
+            "{bpmLow}+ en het houdt stand. Mooi.",
+            "Voor het eerst vandaag op {bpmLow} BPM. Voelt goed.",
+            "{bpmLow} schoon gepasseerd. Blijf ontspannen.",
+            "{bpmLow} BPM staat nu op het menu.",
+            "Je zit in {bpmLow}-gebied. Houd het licht vast.",
+            "Welkom op {bpmLow} BPM. Laat het makkelijk voelen."
+          ],
+          "neutral": [
+            "De {bpmLow}-BPM-grens naar boven overschreden.",
+            "Tempomijlpaal: nu in de band {bpmLow}-{bpmHigh}.",
+            "{bpmLow} BPM en stijgend.",
+            "{bpmLow} BPM bereikt. Nieuwe band: {bpmLow}-{bpmHigh}.",
+            "Doorgegaan naar het bereik {bpmLow}-{bpmHigh} BPM.",
+            "Klimmend: {bpmLow} BPM is het nieuwe werktempo.",
+            "{bpmLow} BPM geraakt. Kijk of het blijft hangen.",
+            "Tempo verhoogd naar de zone {bpmLow}-{bpmHigh}."
+          ],
+          "correction": [
+            "Op {bpmLow} BPM: blijf hier tot het schoon is, duw nog niet hoger.",
+            "{bpmLow} BPM-mijlpaal. Stabiliseer voordat je duwt.",
+            "Nieuwe band: {bpmLow}-{bpmHigh}. Zorg dat deze blijft hangen voordat je klimt.",
+            "{bpmLow} BPM is gloednieuw: ga niet sneller tot het saai voelt.",
+            "Verdien {bpmLow} BPM voordat je de volgende grens najaagt. Houd het vast.",
+            "Parkeer op {bpmLow} BPM. De volgende sprong komt na een schone minuut hier.",
+            "{bpmLow} BPM geraakt: zet het nu vast voor de volgende ramp.",
+            "{bpmLow} BPM is vers. Blijf vlak en laat de handen bijkomen."
+          ]
+        },
+        "low_confidence": {
+          "encouragement": [
+            "Het signaal is aan mijn kant wat troebel. Blijf spelen, ik haal het in.",
+            "Het geluid is hier moeilijker te lezen, maar je klinkt goed.",
+            "Ik heb wat moeite je te lezen. Ga door.",
+            "Moeilijk om je schoon te horen vanaf hier. Laat je daardoor niet afleiden.",
+            "De mic vangt wat ruis, maar je speelt prima.",
+            "Ik pik wat waas op het signaal op. Ga door, ik luister.",
+            "Mijn lezing van het geluid is wazig. Je klinkt wel op de tel.",
+            "Het signaal is een tikje ruisig. Vertrouw op je handen."
+          ],
+          "neutral": [
+            "Het detectievertrouwen is de laatste 30 s lager geweest: metingen kunnen ruisiger zijn dan gewoonlijk.",
+            "Lager onsetvertrouwen: feedback kan in dit stuk onnauwkeurig zijn.",
+            "Het geluidssignaal is minder helder: de metingen zijn iets minder betrouwbaar.",
+            "De leeskwaliteit is wat lager. Cijfers kunnen meer schommelen dan gewoonlijk.",
+            "De micingang is moeilijker te verwerken: de nauwkeurigheidsmeting kan afdrijven.",
+            "Er sluipt achtergrondgeluid in: feedback kan een tikje achterlopen.",
+            "Lagere signaalhelderheid het afgelopen halve minuut.",
+            "Het geluid is moeilijker te lezen: neem de metingen met een korreltje zout."
+          ],
+          "correction": [
+            "Je signaal is moeilijk te lezen: check je ingangsniveau of de positie van de mic.",
+            "Het signaal is moeilijk te lezen. Zet je ingangsversterking omhoog of ga dichter bij de mic zitten.",
+            "Notendetectie is onzeker: de ruimte is misschien te rumoerig.",
+            "Mijn lezing van je is onbetrouwbaar. Ga dichter bij de mic zitten als dat kan.",
+            "Het ingangsniveau is mogelijk te laag. Check de meter voordat je doorgaat.",
+            "Moeilijk om slagen van ruis te onderscheiden. Zet alles in de kamer uit en probeer opnieuw.",
+            "Het signaal valt weg. Plug-in of USB-mic: check de verbinding.",
+            "De geluidskwaliteit is zo slecht dat de score mogelijk afwijkt. Los eerst de ingang op."
+          ]
+        },
+        "boundary_signal_a": {
+          "encouragement": [
+            "{change}. Vers segment: neem een moment, vind het gevoel.",
+            "{change}: zet je oor opnieuw en rij dit uit.",
+            "Instellingen veranderd: {change}. Laten we zien hoe deze nieuwe vorm voelt.",
+            "{change}. Nieuw segment, nieuwe start.",
+            "{change}: schone lei, nieuwe score.",
+            "{change}. Adem in en zet je vast in het nieuwe gevoel.",
+            "{change}. Oud segment afgerond: dit staat op zichzelf.",
+            "{change}. Zet je oor opnieuw en wen rustig aan de verandering."
+          ],
+          "neutral": [
+            "{change}. Hier begint een nieuw segment.",
+            "Grensmarkering: {change}. Het volgende stuk wordt apart gescoord.",
+            "Instellingswijziging: {change}. Vorig segment wordt afgesloten.",
+            "{change}. De score voor het volgende stuk begint nu.",
+            "{change}: het vorige segment is afgesloten en geteld.",
+            "Configuratiewissel: {change}. Vers segment.",
+            "{change}. Nieuw segment, nieuwe metingen.",
+            "{change}. Grens overschreden: de score wordt gereset."
+          ],
+          "correction": [
+            "{change}. Laat de nieuwe opstelling natuurlijk aanvoelen voordat je duwt.",
+            "{change}: oud segment afgesloten. Zorg dat dit goed voelt voordat je complexiteit toevoegt.",
+            "Instellingen veranderd midden in een segment: {change}. De nieuwe configuratie wordt apart gescoord.",
+            "{change}. Neem het rustig aan op de nieuwe opstelling: neem oude gewoonten niet mee.",
+            "{change}. Laat het nieuwe gevoel inzakken voordat je snelheid toevoegt.",
+            "{change}: zet jezelf opnieuw en behandel het volgende stuk als een warming-up.",
+            "{change}. Speel het eenvoudig tot de nieuwe configuratie vertrouwd voelt.",
+            "{change}. Duw het nieuwe segment nog niet: maak het eerst schoon."
+          ]
+        },
+        "stamina": {
+          "neutral": [
+            "De score zakt weer voorbij de {staminaMinutes}-minutengrens: neem 30 seconden en kom terug op dezelfde BPM.",
+            "Voorbij de {staminaMinutes}-minutengrens zakt je nauwkeurigheid meestal. Korte pauze, dan weer erin.",
+            "Je zakt meestal rond minuut {staminaMinutes} weg. Neem een pauze en kom fris terug.",
+            "Een uithoudingsmuur rond minuut {staminaMinutes}: een korte pauze nu bespaart later kwaliteit."
+          ]
+        },
+        "ramp_complete": {
+          "neutral": [
+            "Ramp klaar: {startBpm} tot {endBpm}. Je hebt het gehaald.",
+            "Doel bereikt: {endBpm} BPM. Je klom vanaf {startBpm}.",
+            "Ramp afgerond. {startBpm} → {endBpm} BPM voltooid.",
+            "Je hield het vol tot {endBpm} BPM. Ramp vanaf {startBpm} klaar."
+          ]
+        },
+        "pace_coaching": {
+          "neutral": [
+            "De vierde keer op {bpm}: het plafond is echt. Twee sessies op {suggestedBpm} om te consolideren, duw daarna opnieuw.",
+            "Je hebt {bpm} BPM {attemptCount} keer geraakt en het blijft niet hangen. Zak een week naar {suggestedBpm} en bouw het stevig op.",
+            "{attemptCount} pogingen op {bpm} BPM. Plafondwerk: twee sessies op {suggestedBpm}, kom daarna terug.",
+            "Plafond op {bpm} BPM: {attemptCount} pogingen bevestigen het. Parkeer op {suggestedBpm} en laat het zakken."
+          ]
+        },
+        "preset_ceiling_hit": {
+          "neutral": [
+            "{bpmLow}–{bpmHigh} is waar dit stuk voor jou niet meer schoon blijft: {attemptCount} sessies in die band, allemaal rond {score}.",
+            "Je zit weer op {bpmLow}–{bpmHigh}. Je laatste {attemptCount} keer hier kwamen uit rond {score}.",
+            "Ik noteer het terwijl je speelt: {attemptCount} sessies op {bpmLow}–{bpmHigh}, elk in de buurt van {score}.",
+            "Dit is het tempo waarop je scores bij dit stuk beginnen te dalen. Tot nu toe {attemptCount} sessies hier.",
+            "Nu {attemptCount} keer op {bpmLow}–{bpmHigh}, elke keer rond {score}. Laten we zien hoe vandaag uitpakt.",
+            "Dezelfde band als de vorige keer: {bpmLow}–{bpmHigh}, waar deze oefening rond {score} uitkomt."
+          ]
+        },
+        "grid_lost": {
+          "neutral": [
+            "De rastercorrelatie viel weg: speel je nog steeds op de klik?",
+            "Het raster kwijt daar. Bewuste fill, of wegdrijven van de klik?",
+            "De correlatie met het raster viel net weg. Nog bij het metronoom?",
+            "Het lijkt erop dat de groove en de klik uit elkaar zijn. Fill of vrij?"
+          ]
+        },
+        "bias_only": {
+          "encouragement": [
+            "Zeer consistente timing: slechts {biasMs} ms {direction} op de tel. Verschuif alles {correctionDirection} om op de tel te zitten.",
+            "Goede controle: slechts een lichte afwijking van {biasMs} ms {direction}. Een kleine verschuiving {correctionDirection} centreert het."
+          ],
+          "neutral": [
+            "Je landt {biasMs} ms {direction} op de tel: heel consistent, alleen verschoven. Probeer alles {correctionDirection} te verplaatsen.",
+            "Strak en consistent, maar {biasMs} ms {direction} op de klik. Verschuif je aanslag {correctionDirection} om te centreren.",
+            "Je timingspreiding is laag, maar het hele patroon zit {biasMs} ms {direction}. Duw {correctionDirection}.",
+            "Weinig jitter, maar {biasMs} ms {direction} verschoven. Dat is een afwijking: pas {correctionDirection} aan om op de tel te landen."
+          ],
+          "correction": [
+            "Consistente verschuiving van {biasMs} ms {direction}: niet willekeurig, gewoon een afwijking. Verschuif alles {correctionDirection}.",
+            "Elke slag landt {biasMs} ms {direction}. Dat is een systematische afwijking, geen jitter. Corrigeer {correctionDirection}."
+          ]
+        },
+        "boundary_signal_b": {
+          "encouragement": [
+            "Mooi segment: {score}% op {bpm} BPM. Neem een moment.",
+            "{score}% op {bpm} BPM: een degelijke afsluiting.",
+            "Dat stuk afgerond op {score}% / {bpm} BPM. Een goed pauzepunt.",
+            "{score}% op {bpm} BPM sluit dat af: goed werk.",
+            "Segment klaar: {score}% op {bpm} BPM. Mooi.",
+            "Een stille pauze sloot het af: {score}% op {bpm} BPM.",
+            "Schone afronding: {score}% op {bpm} BPM.",
+            "{score}% op {bpm} BPM. Haal even adem."
+          ],
+          "neutral": [
+            "Segment eindigde na stilte: {score}% op {bpm} BPM.",
+            "Een activiteitskloof sloot het segment af: {score}% gescoord.",
+            "Stil stuk: segment afgesloten op {score}%.",
+            "{score}% op {bpm} BPM: segment afgesloten door de pauze.",
+            "De pauze beëindigde het segment: {score}%.",
+            "Segment voorbij: {score}% op {bpm} BPM vastgelegd.",
+            "Segment afgesloten op {score}% / {bpm} BPM.",
+            "{score}% op {bpm} BPM opgeslagen. Maak de balans op als je wilt."
+          ],
+          "correction": [
+            "Segment eindigde op {score}%: bekijk het voor de volgende keer.",
+            "{score}% sloot het segment af. Check wat er wegglipte voor de volgende poging.",
+            "Pauze genoteerd: {score}%. Bekijk de segmentsamenvatting voordat je verdergaat.",
+            "{score}% op {bpm} BPM: een snelle blik op de uitsplitsing is de moeite waard.",
+            "Segment afgesloten onder waar je wilde zijn: {score}%. Stel een diagnose voordat je duwt.",
+            "{score}% op {bpm} BPM: vertraag het de volgende keer.",
+            "Afgerond op {score}%. Werk uit wat er wegglipte voor een nieuwe ronde.",
+            "{score}% op {bpm} BPM. Lees de segmentsamenvatting en probeer het dan opnieuw."
+          ]
+        },
+        "muddy_hits": {
+          "neutral": [
+            "Je raakt elke tel, maar het signaal is zacht: probeer een scherpere aanslag.",
+            "De tellen zijn er allemaal, maar de transiënt is zwak. Sla aan met meer intentie.",
+            "De dekking ziet er goed uit, maar de slagen zijn stil. Meer kracht in de aanslag.",
+            "Je speelt door de klik heen, alleen zacht. Probeer meer contact te maken."
+          ]
+        },
+        "grid_discontinuity": {
+          "neutral": [
+            "Je ging van het raster af: probeer je weer op de klik vast te zetten voor de volgende frase.",
+            "De tel dwaalde van de klik af. Zet jezelf opnieuw en vind de pols voordat je verdergaat.",
+            "Rastertracking viel weg: neem een moment en kom dan weer binnen op de zware tel.",
+            "Daar van de klik afgedreven. Stop, adem en zet je weer vast."
+          ]
+        },
+        "low_completeness": {
+          "neutral": [
+            "Je raakt ongeveer de helft van de verwachte tellen: probeer bij elke tel betrokken te blijven.",
+            "De dekking is laag: zorg dat je elke tel raakt, niet alleen de tellen die natuurlijk voelen.",
+            "Ongeveer de helft van de tellen blijft ongespeeld. Richt je op het voltooien van het hele patroon.",
+            "De telldekking is laag. Probeer hardop te tellen zodat je er geen overslaat."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Je plaatsing op de tel ziet er goed uit, maar de ruimte tussen de noten blijft dwalen. Probeer de onderverdelingen hardop te tellen terwijl je speelt.",
+            "Consequent op de tel, maar de afstand tussen de noten is ongelijk. Tik met je voet en tel de onderverdelingen terwijl je speelt.",
+            "De timing op de tel is er, maar de ruimte tussen de noten verschuift. Tel achtsten (of zestienden) hardop om de afstand vast te zetten.",
+            "De plaatsing is degelijk, de afstand drijft weg. Probeer te vertragen tot de tussenruimtes gelijk voelen en ga dan weer sneller."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "De afstand tussen de noten is gelijkmatig, maar je landt naast de tel. Loop elke klik een haartje vooruit en land er precies op.",
+            "Gelijkmatige afstand, maar de noten zelf zijn van het raster verschoven. Richt je erop de eerste noot van elke groep aan de tel vast te zetten.",
+            "Het ritme tussen je noten is consistent: werk aan waar ze landen ten opzichte van de klik. Probeer net iets voor te spelen op waar je de tel verwacht.",
+            "Goed gevoel voor afstand. Breng nu de hele frase op het raster: mik op het midden van elke tel."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "Plaatsing op de tel en afstand tussen de noten zijn allebei vastgelockt. Dat is het gevoel.",
+            "Afstand en plaatsing allebei raak. Schone sessie.",
+            "Beide dimensies degelijk: je speelt precies waar je wilt zijn.",
+            "De timing zit overal goed. Zo klinkt consistent oefenen."
+          ]
+        },
+        "drill_step_up": {
+          "neutral": [
+            "{accuracyPct}%: tempo omhoog naar {bpm} BPM.",
+            "Schone keer op {accuracyPct}%. Ik zet je omhoog naar {bpm} BPM.",
+            "Dat verdiende het: {accuracyPct}%. Nu op {bpm} BPM.",
+            "{accuracyPct}% haalt de lat: {bpm} BPM vanaf hier.",
+            "Degelijk op {accuracyPct}%. Omhoog naar {bpm} BPM.",
+            "Mooie keer: {accuracyPct}%. {bpm} BPM is de volgende.",
+            "Omhoog naar {bpm} BPM. Je hield {accuracyPct}% vast de vorige keer.",
+            "{accuracyPct}% zegt dat je er klaar voor bent. {bpm} BPM."
+          ]
+        },
+        "drill_step_down": {
+          "neutral": [
+            "{accuracyPct}%: terug naar {bpm} BPM.",
+            "Die keer zakte naar {accuracyPct}%. Omlaag naar {bpm} BPM.",
+            "Terug naar {bpm} BPM: {accuracyPct}% de vorige keer.",
+            "{accuracyPct}%. Laten we het opnieuw opbouwen op {bpm} BPM.",
+            "Terug naar {bpm} BPM na {accuracyPct}%.",
+            "{accuracyPct}% ligt onder de lat: {bpm} BPM voor de volgende keer.",
+            "Omlaag naar {bpm} BPM. Maak het schoon voordat we weer klimmen.",
+            "Terug naar {bpm} BPM; {accuracyPct}% heeft stevigere grond nodig."
+          ]
+        }
+      },
+      "drums": {
+        "session_start_cold": {
+          "neutral": [
+            "Ik ben klaar wanneer jij het bent. Ik volg de kick vanaf je eerste slag.",
+            "Zit lekker en begin wanneer je wilt: ik pik de timing op vanaf de eerste slag.",
+            "Neem de tijd om je handen warm te spelen. Ik begin te luisteren zodra je speelt.",
+            "Fijn dat je er bent. Begin wanneer de sticks goed voelen.",
+            "Wanneer je klaar bent: sla op de kit en ik begin je timing op te pikken.",
+            "Geen haast. Maak je los en speel wanneer je er klaar voor bent.",
+            "Ik ben klaar wanneer jij het bent. Ik volg vanaf de eerste tel.",
+            "Zet je klaar wanneer je wilt: ik luister vanaf je eerste slag."
+          ]
+        },
+        "session_start_returning": {
+          "neutral": [
+            "Welkom terug. Vorige sessie: {lastScore} op {lastBpm} BPM. Laten we zien of de groove snel terugkomt.",
+            "Fijn je te zien. Je haalde de vorige keer {lastScore} op {lastBpm} BPM: de kick heeft nu een uitgangspunt.",
+            "Weer achter de kit. {lastScore} op {lastBpm} BPM vorige sessie. Laten we daarop voortbouwen.",
+            "Welkom terug: {lastScore} / {lastBpm} BPM de vorige keer. Ik ben klaar wanneer jij het bent.",
+            "Vorige sessie op de kit: {lastScore} op {lastBpm} BPM. Laten we dat vasthouden.",
+            "Weer aan de slag. Je zat de vorige keer op {lastScore} / {lastBpm} BPM: een stevig startpunt.",
+            "Welkom terug. {lastScore} op {lastBpm} BPM was de stand van de vorige keer. Laten we ernaartoe spelen.",
+            "Fijn dat je terug bent. {lastScore} op {lastBpm} BPM vorige sessie: kom op."
+          ]
+        },
+        "accuracy_drop": {
+          "correction": [
+            "De kick drijft weg. Zet de rechtervoet op de klik voordat de snare komt.",
+            "De slagen raken verspreid. Breng de kick en snare terug op het raster.",
+            "Stop, tel een maat en begin opnieuw met alleen de voet.",
+            "Trek terug naar alleen kick en hi-hat voor een maat en voeg dan de snare toe.",
+            "Vertraag. Speel vier maten lang alleen de voet op elke klik.",
+            "Het patroon valt uit elkaar. Laat alles weg behalve de kick en bouw het dan weer op.",
+            "Stop de hele kit. Eén maat alleen de klik, en kom dan binnen met de voet.",
+            "Handen en voeten lopen niet gelijk. Zet jezelf opnieuw op de volgende downbeat."
+          ]
+        },
+        "rushing_trend": {
+          "neutral": [
+            "De sticks komen voor de klik. Laat de hi-hat erop wachten.",
+            "Je zit voor op de tel: zet de kick op de klik, niet er net voor.",
+            "De pols kruipt omhoog. Speel de backbeat een tikje later dan goed voelt."
+          ],
+          "correction": [
+            "De rechterhand loopt voor op de kick: leg hem achterover.",
+            "De snare haast. Tel de 16e noten ertussen en zet tel 2 precies op de klik.",
+            "Je jaagt de klik op. Vertraag de rechterhand: de voet volgt vanzelf.",
+            "De hi-hat duwt vooruit. Ontspan de rechterhand en laat de klik het tempo bepalen.",
+            "De snare racet. Zak in de groove en laat hem ademen.",
+            "Zet een paar BPM lager. Laat de kick en snare OP de klik zitten voordat je weer omhoog gaat.",
+            "De sticks lopen voor. Houd ze in: laat eerst het metronoom komen.",
+            "Pauzeer de kit. Tik een maat lang de klik met alleen de voet en neem daarna de handen erbij."
+          ]
+        },
+        "dragging_trend": {
+          "neutral": [
+            "Je zit achter de klik. Breng de kick naar voren om hem te ontmoeten.",
+            "De groove leunt laat: til de hi-hat terug op de tel.",
+            "Je zit een beetje achter. Speel de snare waar je denkt dat hij hoort, niet erna."
+          ],
+          "correction": [
+            "De rechterhand blijft achter bij de kick: leun in de hi-hat.",
+            "De snare sleept. Ga op tel 2 en 4 een tikje voorop, wacht niet op de klik.",
+            "Duw de hi-hat vooruit: de kick hoort OP de klik te zitten, niet erna.",
+            "De aanslag van de sticks is zwaar. Til eerder op: ontmoet de klik bovenop.",
+            "De backbeat is laat. Duw tel 2 en 4 naar voren.",
+            "De hi-hat zit achter. Kom eerder binnen en speel met meer bounce.",
+            "Zet het tempo omlaag en speel met meer lift. Het gesleep verdwijnt zodra het makkelijk voelt.",
+            "De sticks landen laat. Stel je voor dat de klik een haartje eerder komt dan hij doet."
+          ]
+        },
+        "personal_best_streak": {
+          "encouragement": [
+            "Kick en snare vastgelockt.",
+            "In de pocket. Blijf.",
+            "De reeks loopt: blijf daar.",
+            "De ledematen praten met elkaar. Houd het vast.",
+            "Ja. Verander niets.",
+            "Dat is de groove. Blijf erin zitten.",
+            "Strak. Ga door.",
+            "Voeten en handen synchroon. Houd vast."
+          ]
+        },
+        "new_band_locked": {
+          "encouragement": [
+            "{bpmLow}–{bpmHigh} BPM-band volgehouden: de verhouding tussen kick en snare zit vast.",
+            "Pocket houdt stand op {bpmLow}–{bpmHigh} BPM.",
+            "Volgehouden op {bpmLow}–{bpmHigh} BPM: dat is de nieuwe vloer.",
+            "{bpmLow}–{bpmHigh} BPM schoon vastgehouden. Voet en handen praten met elkaar.",
+            "Vastgelockte groove op {bpmLow}–{bpmHigh} BPM. Raak hem niet kwijt.",
+            "{bpmLow}–{bpmHigh} BPM is van jou. Blijf hier.",
+            "De kit gedraagt zich op {bpmLow}–{bpmHigh} BPM. Nieuwe basis.",
+            "Pocket een hele minuut volgehouden op {bpmLow}–{bpmHigh} BPM."
+          ]
+        },
+        "recovery": {
+          "encouragement": [
+            "De groove is terug. Blijf hier.",
+            "Kick en snare weer vastgelockt. Houd het vast.",
+            "De ledematen praten weer met elkaar: houd het vast.",
+            "Je hebt de groove teruggehaald. Verander niets.",
+            "Pocket hersteld. Blijf erin zitten.",
+            "Voet en handen weer synchroon. Houd vast.",
+            "Weer op je plek. Blijf ontspannen.",
+            "De misser opgevangen voordat hij wegliep. Mooi."
+          ]
+        },
+        "recovery_confirmed": {
+          "encouragement": [
+            "Terug in de pocket.",
+            "De groove is terug. Houd hem vast.",
+            "Kick en snare vastgelockt: blijf daar."
+          ]
+        },
+        "fatigue": {
+          "encouragement": [
+            "Handen die verkrampen? Schud de polsen uit en kom terug.",
+            "De kwaliteit drijft weg: kom 60 seconden van de kruk af.",
+            "Praten je onderarmen tegen je? Korte pauze en dan weer erin.",
+            "Voelen de sticks zwaar? Leg ze neer, strek je en keer terug.",
+            "Wordt je grip strak? Stap een minuut weg van de kit.",
+            "De polsen lopen vast: snel uitschudden en dan verder.",
+            "De handen werken harder dan zou moeten. Even rust.",
+            "Leg de sticks even neer: laat de armen bijkomen."
+          ],
+          "correction": [
+            "Vermoeidheid zichtbaar: stop nu, leg de sticks neer, 90 seconden rust. Moe drummen zet slordige timing vast.",
+            "Je bent voorbij je piek: sticks neer, loop een rondje en beoordeel dan opnieuw.",
+            "Stop voordat spanning het overneemt. 90 seconden pauze, drink wat en keer terug.",
+            "De polsen zijn strak. Stop, strek de onderarmen en neem twee minuten pauze.",
+            "Als je hier doorheen duwt, doe je jezelf pijn. Nu echt rust nemen.",
+            "Stop met drummen. Loop een paar minuten weg van de kit.",
+            "Sticks neer. Eerst de onderarmen, dan de handen, en kom terug zodra je los bent.",
+            "Harde stop. Twee minuten pauze en een slok water voordat je terugkomt."
+          ]
+        },
+        "tempo_milestone": {
+          "encouragement": [
+            "Op {bpmLow} BPM: blijf hier tot de kick automatisch gaat. Ga nog niet hoger.",
+            "{bpmLow} BPM-mijlpaal. Zorg dat beide voeten schoon zijn voordat je duwt.",
+            "Nieuwe band: {bpmLow}-{bpmHigh}. Speel één slag per tel op de klik voordat je klimt.",
+            "{bpmLow} BPM is vers. Zet de kick op elke klik vast voordat je fills toevoegt.",
+            "Parkeer op {bpmLow} BPM. De volgende sprong komt na een schone minuut.",
+            "{bpmLow} BPM geraakt: bouw nu een paar schone maten op voordat je hoger gaat.",
+            "{bpmLow}-{bpmHigh} BPM is gloednieuw. Blijf vlak en laat de ledematen bijkomen.",
+            "Verdien {bpmLow} BPM voordat je meer najaagt. Houd het vast tot het makkelijk voelt."
+          ]
+        },
+        "check_in": {
+          "neutral": [
+            "Lange tijd op de kit: werk je aan iets specifieks?",
+            "Meer dan vijf minuten bezig. Wil je dat ik de kick, de hi-hat of allebei benoem?",
+            "Je zat diep in de pocket. Vertel me wat je hierna wilt.",
+            "Degelijke reeks op de kit. Wil je op iets scherpere feedback?",
+            "Al een tijd bezig. Wil je dat ik luister naar kick, snare of de synchronisatie van de ledematen?",
+            "De pocket was stabiel. Wat is de focus vanaf hier?",
+            "Lange groove: kies een doel en ik richt me erop.",
+            "Meer dan vijf minuten. Vertel me waar je de volgende feedback wilt."
+          ]
+        },
+        "ramp_complete": {
+          "neutral": [
+            "Ramp klaar: {startBpm} naar {endBpm} op de kit. Degelijke klim.",
+            "{endBpm} BPM gehaald. De kick hield de ramp vanaf {startBpm} vast.",
+            "Ramp afgerond. {startBpm} → {endBpm} BPM: de ledematen bleven vastgelockt.",
+            "Doel bereikt: {endBpm} BPM. Je dreef het vanaf {startBpm} op de kit."
+          ]
+        },
+        "stamina": {
+          "neutral": [
+            "Rond minuut {staminaMinutes} worden je handen strak. Zet de BPM 5 streepjes lager en bouw opnieuw op.",
+            "Voorbij de {staminaMinutes}-minutengrens beginnen de ledematen af te drijven. Korte pauze en dan weer aan de slag.",
+            "Vermoeidheid toont zich rond minuut {staminaMinutes} op de kit. Laat de polsen rusten en keer terug.",
+            "Je verliest de kick meestal rond minuut {staminaMinutes}. Neem even een adempauze."
+          ]
+        },
+        "bias_only": {
+          "neutral": [
+            "{biasMs} ms {direction} op de klik, heel strak. Verschuif je aanslagpunt {correctionDirection}.",
+            "Je slagen zitten strak bij elkaar, maar {biasMs} ms {direction}. Verplaats de hele groove {correctionDirection}.",
+            "Weinig spreiding, maar steeds {direction}: breng het gevoel van de hele kit {correctionDirection} naar het midden."
+          ]
+        },
+        "pace_coaching": {
+          "neutral": [
+            "Plafond op {bpm}: {attemptCount} pogingen. Twee sessies op {suggestedBpm} zetten de groove vast.",
+            "{attemptCount} slagen op {bpm} BPM en de kitscore blijft steken. Zak naar {suggestedBpm}, speel de groove stevig en duw dan weer."
+          ]
+        },
+        "grid_lost": {
+          "neutral": [
+            "Vier tellen zonder het raster: komt er een fill of ben je van de klik af?",
+            "Het raster kwijt daar. Geplande fill of gewoon wegdrijven?"
+          ]
+        },
+        "muddy_hits": {
+          "neutral": [
+            "Elke tel is geraakt, maar de slagen voelen zacht: probeer harder in de kick te slaan.",
+            "Goede dekking, maar de slag is licht. Sla door het vel heen, tik niet.",
+            "Je raakt elke tel, alleen zacht. Leg meer gewicht in de slag.",
+            "De tellen zijn er, maar het signaal is zwak: verhoog de velocity op de neerslag."
+          ]
+        },
+        "grid_discontinuity": {
+          "neutral": [
+            "Je kit dwaalde af van de klik. Kom binnen op de downbeat en zet hem vast.",
+            "De rastervolging viel weg: stop de fill, zoek de pols en kom schoon weer binnen.",
+            "Het tempo dreef weg van de klik. Zet je kickpatroon opnieuw en lock weer vast.",
+            "Daar ging je van het raster af. Neem een pauze en kom dan weer binnen met je hi-hat op de tel."
+          ]
+        },
+        "low_completeness": {
+          "neutral": [
+            "Je speelt ongeveer de helft van de verwachte tellen: probeer elke slag in het patroon te spelen.",
+            "De dekking is laag: zorg dat je kit elke tel raakt, niet alleen de accenten.",
+            "Ongeveer de helft van de tellen blijft ongespeeld. Richt je op het afmaken van het volledige drumpatroon.",
+            "De teldekking is laag. Tel hardop en zorg dat elke slag zijn plek heeft."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Je slagen landen op de tel, maar de ruimte tussen de slagen blijft verschuiven. Tel de onderverdelingen hardop: laat je mond het onderverdelingsraster bepalen.",
+            "De plaatsing van de groove is stevig, maar de afstand tussen de slagen is ongelijk. Tik je hi-hat op elke onderverdeling om het gevoel vast te zetten.",
+            "Steeds op de tel, maar de ruimte tussen de slagen dwaalt. Tel zestiende noten hardop terwijl je speelt: laat de woorden de ruimtes verankeren.",
+            "De plaatsing op de tel ziet er goed uit, maar de afstand tussen de slagen drijft weg. Vertraag het tempo tot de ruimtes gelijk voelen en bouw dan weer op."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "De afstand tussen je slagen is gelijk, maar de slagen landen naast de klik. Loop de tel een beetje vooruit en sla je kick of snare er precies op.",
+            "Gelijke afstand tussen de slagen, maar de plaatsing ten opzichte van de klik drijft weg. Zet eerst je downbeat-kick vast op de pols en bouw er dan omheen.",
+            "Het groovegevoel tussen de slagen is consistent: werk aan waar het hele patroon ten opzichte van de klik zit. Probeer precies bovenop de tel te spelen, niet iets erachter.",
+            "De afstand klopt. Verankeer nu het patroon aan het raster: mik erop elke slag precies met de klik te laten landen."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "De plaatsing van de slagen en de afstand ertussen zitten allebei vast. Dat is drummen in de pocket.",
+            "Afstand en plaatsing op de tel kloppen allebei. Stevige groove.",
+            "Beide dimensies zitten goed: je speelt nu echt precies.",
+            "De timing zit overal vast. Dat is het gevoel waar je naartoe bouwt."
+          ]
+        },
+        "low_confidence": {
+          "neutral": [
+            "De kit loopt aan mijn kant door elkaar: ik lees het minder helder dan gewoonlijk.",
+            "De bekkens lopen in alles over. Mijn lezing van het laatste halve minuut is ruw.",
+            "Het is nu moeilijk om losse slagen uit de kit te halen. Neem de cijfers met een korreltje zout."
+          ]
+        },
+        "boundary_signal_a": {
+          "neutral": [
+            "{change}. Vanaf hier een nieuw segment: de kit begint opnieuw.",
+            "{change}. Het vorige stuk is afgesloten en geteld.",
+            "{change}: de score begint opnieuw bij de volgende slag."
+          ]
+        },
+        "boundary_signal_b": {
+          "neutral": [
+            "De sticks lagen lang genoeg neer om het segment af te sluiten: {score}% op {bpm} BPM.",
+            "De pauze sloot dat stuk achter de kit af: {score}% op {bpm} BPM.",
+            "{score}% op {bpm} BPM vastgelegd voor dat stuk."
+          ]
+        },
+        "preset_ceiling_hit": {
+          "neutral": [
+            "{bpmLow}–{bpmHigh} is waar dit niet meer standhoudt: {attemptCount} sessies, elk rond {score}.",
+            "Je bent terug op {bpmLow}–{bpmHigh}. De kit landde hier {attemptCount} keer rond {score}.",
+            "{attemptCount} sessies op dit tempo, allemaal rond {score}. Goed om te weten terwijl je speelt."
+          ]
+        }
+      },
+      "electric-guitar": {
+        "session_start_cold": {
+          "neutral": [
+            "Ik ben klaar wanneer jij het bent. Ik begin te volgen vanaf je eerste aanslag.",
+            "Warm je op en start wanneer je wilt: ik begin te luisteren.",
+            "Stem je gitaar, zet je klaar en speel dan wanneer je zover bent.",
+            "Fijn dat je er bent. Begin wanneer je aanslaghand los voelt.",
+            "Wanneer je klaar bent: speel, dan begin ik je timing op te vangen.",
+            "Geen haast. Maak je aanslaghand los en begin dan wanneer je klaar bent.",
+            "Ik ben klaar wanneer jij het bent. Ik volg je vanaf de eerste noot.",
+            "Zet je klaar wanneer je wilt: ik luister vanaf je eerste aanslag."
+          ]
+        },
+        "session_start_returning": {
+          "neutral": [
+            "Welkom terug. Vorige sessie: {lastScore} op {lastBpm} BPM. Laten we voortbouwen op dat plectrumspel.",
+            "Fijn je te zien. Je haalde de vorige keer {lastScore} op {lastBpm} BPM: een goede basis.",
+            "Weer aan de gitaar. {lastScore} op {lastBpm} BPM vorige sessie. Laten we doorpakken.",
+            "Welkom terug: {lastScore} / {lastBpm} BPM de vorige keer. Ik ben klaar wanneer jij het bent.",
+            "Vorige sessie: {lastScore} op {lastBpm} BPM. Ga verder waar je bent gebleven.",
+            "Weer aan de slag. {lastScore} op {lastBpm} BPM de vorige keer: een stevige basis.",
+            "Welkom terug. {lastScore} op {lastBpm} BPM was je score vorige sessie. Laten we die evenaren.",
+            "Fijn dat je terug bent. {lastScore} op {lastBpm} BPM de vorige keer: aan de slag."
+          ]
+        },
+        "accuracy_drop": {
+          "correction": [
+            "Je aanslaghand raakt het raster kwijt. Laat je handpalm op de brug rusten.",
+            "De slagen raken verspreid. Vertraag het aanslagpatroon en accentueer tel 1.",
+            "Demp de snaren en sla neer-op op de klik aan voor een maat, en kom dan weer binnen.",
+            "Stop, speel vier tellen lang alleen één lege snaar op de klik en voeg dan de riff weer toe.",
+            "De aanslag drijft weg. Zet het tempo lager en bouw op vanaf een schone maat.",
+            "Het patroon valt uit elkaar. Pauzeer, tel jezelf langzaam in en speel dan.",
+            "Haal het plectrum van de snaren en hoor een maat lang alleen de klik.",
+            "Zet het vijf BPM lager en speel het schoon door voordat je de snelheid terugbrengt."
+          ]
+        },
+        "rushing_trend": {
+          "neutral": [
+            "Je aanslaghand komt voor de klik. Laat hem wachten.",
+            "Je zit een tikje voor: hoor de klik en sla dan aan.",
+            "De noten komen vroeg. Zit verder achterin elke tel."
+          ],
+          "correction": [
+            "De neerslagen lopen voor: laat de opslagen precies op de klik vallen.",
+            "Je aanslaghand haast zich. Laat het metronoom elke neerslag leiden.",
+            "Tel de achtsten ertussen en voel de ruimte tussen elke klik.",
+            "Zet het tempo vijf BPM lager en laat de klik elke noot uit je trekken.",
+            "Pauzeer een maat. Hoor de klik en kom dan precies op tel 1 binnen.",
+            "Laat je rechterhand op je schoot zakken, adem in en begin dan opnieuw te spelen.",
+            "De handen racen. Demp de snaren en tik eerst een maat lang de klik mee met het plectrum.",
+            "Stop met het metronoom te willen aansturen. Laat het jou een hele maat lang aansturen."
+          ]
+        },
+        "dragging_trend": {
+          "neutral": [
+            "Het plectrum landt achter de klik. Breng het naar voren.",
+            "Je zit laat: begin de slag een fractie eerder.",
+            "Elke noot komt een beetje achteraan. Mik op de voorkant van de klik."
+          ],
+          "correction": [
+            "De opslagen lopen achter: ontmoet de klik op de neerslag.",
+            "Je aanslaghand sleept. Speel met de klik, wacht er niet op.",
+            "Laat het plectrum leiden: kom elke noot tegemoet in plaats van ernaar te reiken.",
+            "Elke noot landt laat. Mik op de voorste rand van elke klik.",
+            "Zet het tempo wat lager en speel met meer lift. Het gesleep verdwijnt zodra het makkelijk voelt.",
+            "Stel je voor dat de klik een haartje eerder komt dan hij doet en kom die tegemoet.",
+            "Stop, adem in en kom dan binnen met een lichte duw naar voren.",
+            "Het plectrum blijft haken: neem de druk weg en laat het stromen."
+          ]
+        },
+        "personal_best_streak": {
+          "encouragement": [
+            "De aanslag zit vast: ga door.",
+            "Een schone reeks loopt. Blijf daar.",
+            "De reeks houdt stand: verander niets.",
+            "Je rechterhand zit in de pocket. Houd vast.",
+            "Dat is het gevoel: houd het.",
+            "De aanslag is gelijkmatig. Ja.",
+            "Strak en schoon. Nog niet sneller.",
+            "Ogen dicht. Ga door."
+          ]
+        },
+        "new_band_locked": {
+          "encouragement": [
+            "{bpmLow}–{bpmHigh} BPM-band volgehouden: je aanslaghand zit vast.",
+            "De pocket van je aanslaghand houdt stand op {bpmLow}–{bpmHigh} BPM.",
+            "Volgehouden op {bpmLow}–{bpmHigh} BPM: nieuwe vloer voor deze riff.",
+            "{bpmLow}–{bpmHigh} BPM schoon vastgehouden. De aanslag ligt rustig.",
+            "Vastgelockt op {bpmLow}–{bpmHigh} BPM. Nieuwe basis voor dit stuk.",
+            "{bpmLow}–{bpmHigh} BPM is van jou. Zak er niet onder.",
+            "Het neer-op-wisselen is stabiel op {bpmLow}–{bpmHigh} BPM.",
+            "Aanslag in de groove op {bpmLow}–{bpmHigh} BPM, een hele minuut lang."
+          ]
+        },
+        "recovery": {
+          "encouragement": [
+            "Je aanslaghand is terug: houd vast.",
+            "Teruggehaald. Blijf ontspannen.",
+            "Hersteld: houd dit gevoel.",
+            "Je voelde het wegglippen en haalde het terug. Dat is de vaardigheid.",
+            "Je rechterhand loopt weer gelijk. Verander niets.",
+            "Terug van de dip. Blijf ontspannen.",
+            "De pocket is hersteld. Blijf erin zitten.",
+            "De drift opgevangen. Houd precies dit gevoel."
+          ]
+        },
+        "recovery_confirmed": {
+          "encouragement": [
+            "Weer schoon: blijf daar.",
+            "De aanslag is terug. Houd vast.",
+            "Weer op de klik. Houd het."
+          ]
+        },
+        "fatigue": {
+          "encouragement": [
+            "Wordt je aanslagarm strak? Schud hem uit en kom dan terug.",
+            "Voelt je pols of onderarm vast? Korte pauze en dan weer erin.",
+            "Er sluipt spanning in: leg de gitaar 60 seconden neer.",
+            "Gaat je schouder omhoog? Laat hem zakken, adem in en ga dan verder.",
+            "De aanslag wordt zwaarder dan nodig. Even rust.",
+            "Knijp je harder in de hals? Ontspan en speel dan.",
+            "Je onderarm werkt te hard: schud uit en ga verder.",
+            "Neem 30 seconden, rol de schouders en ga dan weer aan de slag."
+          ],
+          "correction": [
+            "Vermoeidheid zichtbaar in de aanslag: stop, laat de arm 90 seconden rusten. Moe aanslaan bouwt spanning op.",
+            "Je bent over je piek heen: gitaar neer, strek de pols en kom dan terug.",
+            "Stop voordat de pezen gaan klagen. 90 seconden van de snaren af.",
+            "Je pols wordt overbelast. Leg de gitaar neer, strek de onderarm, twee minuten rust.",
+            "Echte rust: gitaar op de standaard, even rondlopen.",
+            "Je aanslagarm is voor nu klaar. Minstens 90 seconden en kijk dan opnieuw.",
+            "Stop. Polscirkels, onderarmrekken en kom dan fris terug.",
+            "Doorduwen hierna koopt je een blessure. Harde stop."
+          ]
+        },
+        "tempo_milestone": {
+          "encouragement": [
+            "Op {bpmLow} BPM: zorg dat de opslagen even luid zijn als de neerslagen voordat je duwt.",
+            "{bpmLow} BPM-mijlpaal. Houd dit vast tot de aanslag gelijkmatig is.",
+            "Nieuwe band: {bpmLow}-{bpmHigh}. Sla neer-op op één lege snaar voordat je klimt.",
+            "{bpmLow} BPM is vers. Blijf vlak en laat je rechterhand zakken.",
+            "Parkeer op {bpmLow} BPM. De volgende sprong komt na een schone minuut.",
+            "Verdien {bpmLow} BPM voordat je meer najaagt. Houd het vast tot het saai voelt.",
+            "{bpmLow} BPM gehaald: bouw nu een paar schone maten op voordat je hoger gaat.",
+            "{bpmLow}-{bpmHigh} BPM is gloednieuw. Ga niet sneller tot het automatisch gaat."
+          ]
+        },
+        "check_in": {
+          "neutral": [
+            "Lange tijd met de gitaar: riff, akkoorden, iets specifieks?",
+            "Meer dan vijf minuten bezig. Wil je dat ik de aanslag, het ritme of allebei benoem?",
+            "Je zit er diep in. Vertel me waar je feedback op wilt.",
+            "Er loopt een degelijke reeks. Wil je scherpere feedback op een bepaald stuk?",
+            "Je bent al een tijd bezig. Aanslag? Strumming? Vertel me waar ik op moet luisteren.",
+            "De pocket is stabiel. Kies een doel als je nauwkeurigere feedback wilt.",
+            "Lange tijd met de gitaar. Wil je dat ik ergens op let?",
+            "Je zit er diep in. Vertel me waar ik hierna op moet luisteren."
+          ]
+        },
+        "ramp_complete": {
+          "neutral": [
+            "{endBpm} gehaald. Degelijke ramp vanaf {startBpm}: de aanslag bleef gelijkmatig.",
+            "Ramp klaar: {startBpm} tot {endBpm}. Je aanslaghand hield de klim vol.",
+            "Doel bereikt: {endBpm} BPM. Je speelde de hele ramp vanaf {startBpm} door.",
+            "{endBpm} BPM bereikt. Ramp vanaf {startBpm} afgerond: schone aanslag."
+          ]
+        },
+        "stamina": {
+          "neutral": [
+            "Voorbij de {staminaMinutes}-minutengrens spant je aanslaghand aan. Schud hem uit en ga dan verder.",
+            "Rond minuut {staminaMinutes} begint de aanslag te drijven. Korte pauze en dan weer erin.",
+            "Uithoudingsmuur rond minuut {staminaMinutes}: je rechterhand wordt strak. Rust 30 seconden.",
+            "Rond minuut {staminaMinutes} verlies je meestal scherpte in de aanslag. Korte rust en dan terug."
+          ]
+        },
+        "bias_only": {
+          "neutral": [
+            "Je noten vallen steeds {biasMs} ms {direction} op de klik. Verschuif de hele frase {correctionDirection}: het is een timingafwijking, geen chaos.",
+            "Elke slag landt {biasMs} ms {direction}. Dat is een consistente afwijking: verschuif je timing {correctionDirection} om te centreren.",
+            "Weinig spreiding, {biasMs} ms {direction}. Verschuif je timing {correctionDirection} om op de klik te landen."
+          ]
+        },
+        "pace_coaching": {
+          "neutral": [
+            "{attemptCount} pogingen op {bpm} en de score beweegt niet. Zak naar {suggestedBpm}, zet het vast en duw dan opnieuw.",
+            "Plafond bevestigd op {bpm}: {attemptCount} keer geprobeerd. Parkeer een week op {suggestedBpm} en bouw het stevig op."
+          ]
+        },
+        "grid_lost": {
+          "neutral": [
+            "Het raster kwijt daar: fill of vrij? Als het bewust was, negeer me.",
+            "De correlatie met de klik viel weg: speelde je een fill?"
+          ]
+        },
+        "muddy_hits": {
+          "neutral": [
+            "Je raakt de tellen, maar de aanslag is licht: probeer een stevigere slag.",
+            "Goede dekking, zwakke transiënt. Trek het plectrum door de snaar.",
+            "Elke tel landt, maar zacht. Een hardere aanslag maakt het signaal scherper.",
+            "De tellen zijn er allemaal: ga alleen dieper in met het plectrum voor een schonere aanslag."
+          ]
+        },
+        "grid_discontinuity": {
+          "neutral": [
+            "Je aanslag dreef van de klik af. Demp en kom weer binnen op de zware tel.",
+            "Rastertracking viel weg: stop de riff, vind de pols en kom dan weer binnen.",
+            "Daar uit het tempo geraakt. Laat de klik ademen en zet je strumming opnieuw vast.",
+            "Het plectrum dreef van het raster af. Neem een tel en kom terug op de één."
+          ]
+        },
+        "low_completeness": {
+          "neutral": [
+            "Je slaat ongeveer de helft van de verwachte tellen aan: probeer elke noot van de frase te raken.",
+            "De dekking is laag: zorg dat elke tel een aanslag krijgt, niet alleen de tellen die goed zitten.",
+            "Ongeveer de helft van de tellen blijft ongespeeld. Richt je op het voltooien van de hele riff.",
+            "De telldekking is laag. Vertraag als dat nodig is en zorg dat elke tel landt."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Je noten landen goed op de tel, maar de ruimte tussen de noten blijft dwalen. Probeer de onderverdelingen hardop te tellen terwijl je aanslaat.",
+            "Goed op de tel, maar de ruimte tussen de slagen is ongelijk. Tik met je voet op elke onderverdeling om de ruimte vast te zetten.",
+            "De timing op de tel is er, maar de ruimte tussen de noten verschuift. Tel zestienden hardop terwijl je speelt en laat je mond het raster bepalen.",
+            "De plaatsing zit vast, de ruimte drijft weg. Vertraag de riff tot de tussenruimtes gelijk voelen en ga dan weer sneller."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "De ruimte tussen je noten is heel gelijkmatig, maar je landt naast de tel. Loop de klik een haartje vooruit en land er precies op.",
+            "Gelijkmatige ruimte tussen de noten, maar de aanslagen zijn van het raster verschoven. Zet de eerste noot van elke riff vast op de tel en laat de rest volgen.",
+            "Het ritme tussen je noten is consistent: breng nu de hele riff op de klik. Mik op het midden van elke tel, niet op de rand.",
+            "Goed gevoel voor afstand. Richt je op waar elke noot landt ten opzichte van de klik: speel net iets voor op waar je de tel verwacht."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "Afstand en plaatsing zitten allebei vast. Dat is de groove.",
+            "Afstand tussen de noten en plaatsing op de tel allebei raak. Schone riff.",
+            "Beide dimensies degelijk: je speelt precies waar je wilt zijn.",
+            "De timing zit overal goed. Zo moet de riff voelen."
+          ]
+        },
+        "low_confidence": {
+          "neutral": [
+            "Je signaal is aan mijn kant ruisig: ik lees dit stuk minder duidelijk.",
+            "Het is nu moeilijk om aangeslagen noten van snaarruis te onderscheiden. Neem de cijfers met een korreltje zout.",
+            "De ingang is het afgelopen halve minuut troebel. Mijn lezing is zachter dan gewoonlijk."
+          ]
+        },
+        "boundary_signal_a": {
+          "neutral": [
+            "{change}. Vanaf hier een nieuw segment.",
+            "{change}. Het vorige stuk is afgesloten en geteld.",
+            "{change}: de score begint opnieuw bij de volgende noot."
+          ]
+        },
+        "boundary_signal_b": {
+          "neutral": [
+            "De pauze sloot dat segment af: {score}% op {bpm} BPM.",
+            "De snaren waren lang genoeg stil om het te beëindigen: {score}% op {bpm} BPM.",
+            "{score}% op {bpm} BPM vastgelegd voor dat stuk."
+          ]
+        },
+        "preset_ceiling_hit": {
+          "neutral": [
+            "{bpmLow}–{bpmHigh} is waar dit stuk voor jou niet meer schoon blijft: {attemptCount} sessies, elk rond {score}.",
+            "Je zit weer op {bpmLow}–{bpmHigh}. Je laatste {attemptCount} keer hier kwamen uit rond {score}.",
+            "{attemptCount} sessies op dit tempo, allemaal rond {score}. Laten we zien hoe vandaag uitpakt."
+          ]
+        }
+      },
+      "acoustic-guitar": {
+        "session_start_cold": {
+          "neutral": [
+            "Ik ben klaar wanneer jij het bent. Ik begin te volgen vanaf je eerste strum.",
+            "Stem je gitaar en begin wanneer je wilt: ik luister vanaf de eerste noot.",
+            "Strum een paar open akkoorden en speel dan wanneer je zover bent.",
+            "Fijn dat je er bent. Begin wanneer je strumhand los voelt.",
+            "Wanneer je klaar bent: speel, dan begin ik je timing op te vangen.",
+            "Geen haast. Maak je strumarm los en begin dan.",
+            "Ik ben klaar wanneer jij het bent. Ik volg je vanaf de eerste strum.",
+            "Zet je klaar en begin wanneer je wilt: ik luister."
+          ]
+        },
+        "session_start_returning": {
+          "neutral": [
+            "Welkom terug. Vorige sessie: {lastScore} op {lastBpm} BPM. Laten we daarop voortbouwen.",
+            "Fijn je te zien. Je haalde de vorige keer {lastScore} op {lastBpm} BPM: een goede basis.",
+            "Weer met de akoestische. {lastScore} op {lastBpm} BPM vorige sessie. Laten we doorgaan.",
+            "Welkom terug: {lastScore} / {lastBpm} BPM de vorige keer. Ik ben klaar wanneer jij het bent.",
+            "Vorige sessie: {lastScore} op {lastBpm} BPM. Ga verder waar je bent gebleven.",
+            "Weer aan de slag. {lastScore} op {lastBpm} BPM de vorige keer: een stevig beginpunt.",
+            "Welkom terug. {lastScore} op {lastBpm} BPM was je score vorige sessie. Laten we die evenaren.",
+            "Fijn dat je terug bent. {lastScore} op {lastBpm} BPM de vorige keer: aan de slag."
+          ]
+        },
+        "accuracy_drop": {
+          "correction": [
+            "Je strumhand raakt het raster kwijt. Zet je eerst vast op de zware tel.",
+            "De slagen raken verspreid. Strum zachter en accentueer de zware tel.",
+            "Alleen neerslagen op lege snaren op de klik, en kom dan weer binnen.",
+            "Stop, speel een maat lang één akkoord op elke klik en voeg dan het patroon toe.",
+            "Laat het patroon los. Eén neerslag per klik, vier tellen lang, en bouw het dan weer op.",
+            "Vertraag. Krijg één akkoord per klik schoon voordat je de opslagen toevoegt.",
+            "Pauzeer en adem in. Vind de klik en begin dan opnieuw.",
+            "Zet het tempo vijf BPM lager en speel het schoon."
+          ]
+        },
+        "rushing_trend": {
+          "neutral": [
+            "De neerslag komt voor de klik. Laat hem wachten.",
+            "Je strumarm loopt een tikje voor: hoor de klik en beweeg dan.",
+            "Je zit een tikje vroeg. Laat de klik de strum uit je trekken."
+          ],
+          "correction": [
+            "Je strumarm loopt voor: laat de neerslag precies op de klik vallen.",
+            "Je strumhand haast zich. Laat de klik de strum aansturen.",
+            "Tel de tussenslagen: voel de ruimte tussen elke klik.",
+            "Zet het tempo vijf BPM lager en laat de klik elke strum uit je trekken.",
+            "Pauzeer een maat. Hoor de klik en kom dan binnen op tel 1.",
+            "Laat je strumarm langs je zij zakken, adem rustig en begin dan opnieuw.",
+            "De handen racen. Demp de snaren en tik een maat lang de klik mee met het plectrum.",
+            "Stop met het metronoom te willen aansturen. Laat het jou een hele maat lang aansturen."
+          ]
+        },
+        "dragging_trend": {
+          "neutral": [
+            "De strum landt achter de klik. Breng hem naar voren.",
+            "Je strumarm blijft achter: begin de slag een fractie eerder.",
+            "Je zit laat. Mik de neerslag op de voorkant van de klik."
+          ],
+          "correction": [
+            "De strum loopt achter: ontmoet de klik op de neerslag.",
+            "Je strumhand sleept. Speel met de klik, wacht er niet op.",
+            "Geef de strum meer vaart en ontmoet de klik op de neerslag.",
+            "Elke strum landt laat. Mik op de voorste rand van elke klik.",
+            "Zet het tempo lager en speel met meer lift. Het gesleep verdwijnt zodra het makkelijk voelt.",
+            "Stel je voor dat de klik een haartje eerder komt dan hij doet en kom die tegemoet.",
+            "Stop, adem in en kom dan binnen met een lichte duw naar voren.",
+            "De strum blijft haken: neem de druk weg en laat hem stromen."
+          ]
+        },
+        "personal_best_streak": {
+          "encouragement": [
+            "De strum zit vast: ga door.",
+            "Mooie groove. Blijf.",
+            "De reeks houdt stand: blijf daar.",
+            "Je rechterhand zit in de pocket. Houd vast.",
+            "Dat is het gevoel: houd het.",
+            "De balans tussen neer en op klopt. Ja.",
+            "Strak en gelijkmatig. Nog niet sneller.",
+            "Ogen dicht. Ga door."
+          ]
+        },
+        "new_band_locked": {
+          "encouragement": [
+            "{bpmLow}–{bpmHigh} BPM-band volgehouden: de strum zit vast.",
+            "De strumpocket houdt stand op {bpmLow}–{bpmHigh} BPM.",
+            "Volgehouden op {bpmLow}–{bpmHigh} BPM: nieuwe vloer voor dit patroon.",
+            "{bpmLow}–{bpmHigh} BPM schoon vastgehouden. De strum ligt rustig.",
+            "Vastgelockt op {bpmLow}–{bpmHigh} BPM. Nieuwe basis voor dit patroon.",
+            "{bpmLow}–{bpmHigh} BPM is van jou. Zak er niet onder.",
+            "Het neer-op-wisselen is stabiel op {bpmLow}–{bpmHigh} BPM.",
+            "Patroon in de groove op {bpmLow}–{bpmHigh} BPM, een hele minuut lang."
+          ]
+        },
+        "recovery": {
+          "encouragement": [
+            "De strum zit weer op het raster. Houd vast.",
+            "Het patroon teruggehaald. Blijf ontspannen.",
+            "Hersteld: houd dit gevoel.",
+            "Je voelde het wegglippen en haalde het terug. Dat is de vaardigheid.",
+            "Je rechterhand loopt weer gelijk. Verander niets.",
+            "Terug van de dip. Blijf ontspannen.",
+            "Het patroon is weer schoon. Blijf hierin zitten.",
+            "De drift opgevangen. Houd precies dit gevoel."
+          ]
+        },
+        "recovery_confirmed": {
+          "encouragement": [
+            "Weer op koers.",
+            "De strum is weer schoon. Houd vast.",
+            "Teruggehaald. Blijf daar."
+          ]
+        },
+        "fatigue": {
+          "encouragement": [
+            "Wordt je strumarm strak? Schud hem uit en kom dan terug.",
+            "Voelt je pols vast? Even strekken en dan weer erin.",
+            "Er sluipt spanning in de strum: gitaar 60 seconden neer.",
+            "Gaat je schouder omhoog? Laat hem zakken, adem in en ga dan verder.",
+            "De strum wordt zwaarder dan nodig. Even rust.",
+            "Knijp je harder in de hals? Ontspan en speel dan.",
+            "Je onderarm werkt te hard: schud uit en ga verder.",
+            "Neem 30 seconden, rol de schouders en ga dan weer aan de slag."
+          ],
+          "correction": [
+            "Vermoeidheid zichtbaar in de strum: stop, 90 seconden van de snaren af.",
+            "Je bent over je piek heen: leg de gitaar neer, strek de pols en kom dan terug.",
+            "Moe strummen begraaft de dynamiek. Stop, rust en begin opnieuw.",
+            "Je strumarm wordt overbelast. Leg de gitaar neer, strek de onderarm, twee minuten rust.",
+            "Echte rust: gitaar op de standaard, even rondlopen.",
+            "Je strumhand is klaar. Minstens 90 seconden en kijk dan opnieuw.",
+            "Harde stop. Polscirkels, onderarmrekken en ga verder zodra je los bent.",
+            "Doorduwen hierna koopt je een blessure. Stop en herstel."
+          ]
+        },
+        "tempo_milestone": {
+          "encouragement": [
+            "Op {bpmLow} BPM: zorg dat elke strum even zwaar is voordat je klimt.",
+            "{bpmLow} BPM-mijlpaal. Blijf hier tot de balans tussen neer en op gelijkmatig is.",
+            "Nieuwe band: {bpmLow}-{bpmHigh}. Probeer het patroon eerst op één akkoord en ga dan verder.",
+            "{bpmLow} BPM is vers. Blijf vlak tot de strum makkelijk voelt.",
+            "Parkeer op {bpmLow} BPM. De volgende sprong komt na een schone minuut.",
+            "{bpmLow} BPM gehaald: bouw nu een paar schone maten op voordat je hoger gaat.",
+            "{bpmLow}-{bpmHigh} BPM is gloednieuw. Houd het vast tot het saai voelt.",
+            "Verdien {bpmLow} BPM voordat je meer najaagt. Blijf hier."
+          ]
+        },
+        "check_in": {
+          "neutral": [
+            "Lange tijd op de akoestische: akkoorden, fingerpicking, iets specifieks?",
+            "Meer dan vijf minuten bezig. Wil je dat ik de strum of de akkoordwisselingen benoem?",
+            "Je zit er diep in. Vertel me waar je feedback op wilt.",
+            "Er loopt een degelijke reeks. Wil je scherpere feedback op een bepaald stuk?",
+            "Je bent al een tijd bezig. Strum? Akkoordwisselingen? Vertel me waar ik op moet luisteren.",
+            "De pocket is stabiel. Kies een doel als je nauwkeurigere feedback wilt.",
+            "Lange tijd met de akoestische. Wil je dat ik ergens op let?",
+            "Je zit er diep in. Vertel me waar ik hierna op moet luisteren."
+          ]
+        },
+        "ramp_complete": {
+          "neutral": [
+            "Ramp klaar: {startBpm} tot {endBpm}. De strum hield de klim vol.",
+            "{endBpm} BPM gehaald. Je speelde de ramp vanaf {startBpm} door.",
+            "Doel bereikt: {endBpm} BPM. Ramp vanaf {startBpm} afgerond: het patroon bleef.",
+            "{endBpm} BPM bereikt. Goede ramp vanaf {startBpm} op de akoestische."
+          ]
+        },
+        "stamina": {
+          "neutral": [
+            "Je grepdruk loopt rond minuut {staminaMinutes} op. Rust 30 seconden en begin opnieuw.",
+            "Rond minuut {staminaMinutes} spant de strumarm aan. Korte pauze en dan weer erin.",
+            "Voorbij de {staminaMinutes}-minutengrens zakt je nauwkeurigheid meestal weg. Korte rust en ga dan verder.",
+            "Vermoeidheid toont zich rond minuut {staminaMinutes} op de akoestische. Neem een adempauze."
+          ]
+        },
+        "bias_only": {
+          "neutral": [
+            "Het plectrum landt steeds {biasMs} ms {direction}. Geen chaos: verschuif je timing {correctionDirection} om te centreren.",
+            "Consistente afwijking: {biasMs} ms {direction}. Verschuif de hele frase {correctionDirection} en je zit gecentreerd."
+          ]
+        },
+        "pace_coaching": {
+          "neutral": [
+            "{attemptCount} pogingen op {bpm} en het wil niet landen. Probeer twee sessies {suggestedBpm} en kom er dan op terug.",
+            "Plafond bevestigd op {bpm}: zak naar {suggestedBpm} en laat je grephand bijkomen."
+          ]
+        },
+        "grid_lost": {
+          "neutral": [
+            "Het raster kwijt daar. Fill of improvisatie? Als het bewust was, ga door.",
+            "De correlatie met de klik viel weg: speel je een fill?"
+          ]
+        },
+        "muddy_hits": {
+          "neutral": [
+            "Je raakt elke tel, maar de aanslag is licht: probeer een stevigere strum of aanslag met het plectrum.",
+            "Goede dekking, zachte slagen. Meer polskracht door de snaren.",
+            "De tellen zijn er allemaal, alleen stil. Strum met meer intentie door de snaren.",
+            "Je raakt de tellen maar zacht: probeer een scherpere aanslag op de neerslag."
+          ]
+        },
+        "grid_discontinuity": {
+          "neutral": [
+            "Je strum dreef van de klik af. Stop en kom weer binnen op de zware tel.",
+            "Rastertracking viel weg: laat de klik een maat lopen en strum dan weer mee.",
+            "Daar uit het tempo geraakt. Demp de snaren en zet je weer vast op de klik.",
+            "Het strumpatroon dwaalde van het raster af. Adem in en kom schoon weer binnen."
+          ]
+        },
+        "low_completeness": {
+          "neutral": [
+            "Je strumt ongeveer de helft van de verwachte tellen: probeer elke tel van het patroon te raken.",
+            "De dekking is laag: zorg dat elke tel een strum krijgt, niet alleen de sterke.",
+            "Ongeveer de helft van de tellen blijft ongespeeld. Richt je op het voltooien van het hele strumpatroon.",
+            "De telldekking is laag. Tel hardop en zorg dat elke neerslag en opslag landt."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Je strum landt goed op de tel, maar de ruimte tussen de slagen blijft verschuiven. Probeer de onderverdelingen hardop te tellen terwijl je strumt.",
+            "Steeds op de tel, maar de ruimte tussen de strums is ongelijk. Tik met je voet op elke onderverdeling om de ruimte vast te zetten.",
+            "De plaatsing op de tel zit goed, maar de ruimte tussen de strums dwaalt. Tel de onderverdelingen hardop en laat je stem het patroon gelijk houden.",
+            "Goede plaatsing op de tel, maar de ruimte tussen de strums drijft weg. Vertraag het patroon tot de tussenruimtes gelijk voelen en ga dan weer sneller."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "De ruimte tussen je strums is gelijkmatig, maar je landt naast de tel. Loop de klik een haartje vooruit en land er met elke strum precies op.",
+            "Gelijkmatige ruimte tussen de strums, maar het patroon is van het raster verschoven. Zet de neerslag van elke maat vast op de tel en laat de rest volgen.",
+            "Het ritme tussen de strums is consistent: zet nu het hele patroon vast op de klik. Mik op het midden van elke tel.",
+            "Goed gevoel voor afstand. Richt je op waar elke strum landt ten opzichte van de klik: speel net iets voor op waar je de tel verwacht."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "Afstand tussen de strums en plaatsing op de tel zitten allebei vast. Dat is een schoon strumpatroon.",
+            "Afstand en plaatsing allebei raak. Het patroon zit precies waar het hoort.",
+            "Beide dimensies degelijk: je speelt nu echt nauwkeurig.",
+            "De timing zit overal goed. Dat is het strumgevoel dat je wilt."
+          ]
+        },
+        "low_confidence": {
+          "neutral": [
+            "De ruimte drukt op je signaal: ik lees dit stuk minder duidelijk.",
+            "Het is nu moeilijk om strums van ruimtegeluid te onderscheiden. Neem de cijfers met een korreltje zout.",
+            "Je geluid komt het afgelopen halve minuut troebel binnen. Mijn lezing is zachter dan gewoonlijk."
+          ]
+        },
+        "boundary_signal_a": {
+          "neutral": [
+            "{change}. Vanaf hier een nieuw segment.",
+            "{change}. Het vorige stuk is afgesloten en geteld.",
+            "{change}: de score begint opnieuw bij de volgende strum."
+          ]
+        },
+        "boundary_signal_b": {
+          "neutral": [
+            "De pauze sloot dat segment af: {score}% op {bpm} BPM.",
+            "Het strummen stopte lang genoeg om het te beëindigen: {score}% op {bpm} BPM.",
+            "{score}% op {bpm} BPM vastgelegd voor dat stuk."
+          ]
+        },
+        "preset_ceiling_hit": {
+          "neutral": [
+            "{bpmLow}–{bpmHigh} is waar dit stuk voor jou niet meer schoon blijft: {attemptCount} sessies, elk rond {score}.",
+            "Je zit weer op {bpmLow}–{bpmHigh}. Je laatste {attemptCount} keer hier kwamen uit rond {score}.",
+            "{attemptCount} sessies op dit tempo, allemaal rond {score}. Laten we zien hoe vandaag uitpakt."
+          ]
+        }
+      },
+      "bass": {
+        "session_start_cold": {
+          "neutral": [
+            "Ik ben klaar wanneer jij het bent. Ik begin te volgen vanaf je eerste getokkelde noot.",
+            "Warm je op en begin wanneer je wilt: ik begin te luisteren vanaf de eerste noot.",
+            "Maak je tokkelhand los en speel dan wanneer je zover bent.",
+            "Fijn dat je er bent. Begin wanneer je vingers los voelen.",
+            "Wanneer je klaar bent: speel, dan begin ik je timing op te vangen.",
+            "Geen haast. Maak je rechterhand los en begin dan wanneer je klaar bent.",
+            "Ik ben klaar wanneer jij het bent. Ik volg je vanaf de eerste aanslag.",
+            "Zet je klaar wanneer je wilt: ik luister vanaf je eerste noot."
+          ]
+        },
+        "session_start_returning": {
+          "neutral": [
+            "Welkom terug. Vorige sessie: {lastScore} op {lastBpm} BPM. Laten we op die groove voortbouwen.",
+            "Fijn je te zien. Je haalde de vorige keer {lastScore} op {lastBpm} BPM: een stevige baslijn.",
+            "Weer op de bas. {lastScore} op {lastBpm} BPM vorige sessie. Laten we doorgaan.",
+            "Welkom terug: {lastScore} / {lastBpm} BPM de vorige keer. Ik ben klaar wanneer jij het bent.",
+            "Vorige sessie: {lastScore} op {lastBpm} BPM. Pak de groove weer op.",
+            "Weer aan de slag. {lastScore} op {lastBpm} BPM de vorige keer: een goed beginpunt.",
+            "Welkom terug. {lastScore} op {lastBpm} BPM was de maat vorige sessie. Laten we die halen.",
+            "Fijn dat je terug bent. {lastScore} op {lastBpm} BPM de vorige keer: aan de slag."
+          ]
+        },
+        "accuracy_drop": {
+          "correction": [
+            "Je rechterhand drijft weg van de kick. Zet je opnieuw op tel 1.",
+            "De slagen raken verspreid. Vertraag de vingerzetting en lock op de kick.",
+            "Stop, speel alleen grondtonen op de klik en voeg dan de lijn weer toe.",
+            "Laat alles weg behalve de grondtoon en de klik, een maat lang, en ga dan terug naar de lijn.",
+            "Ga terug naar één noot per klik. Bouw de lijn van daaruit weer op.",
+            "Pauzeer de lijn. Zit vier tellen lang bij de klik en kom dan weer binnen.",
+            "Zet het tempo een paar BPM lager en speel het schoon.",
+            "Vertraag. Krijg de grondtoon op elke klik schoon voordat je iets bijzonders toevoegt."
+          ]
+        },
+        "rushing_trend": {
+          "neutral": [
+            "Je tokkelhand komt voor de klik. Laat de klik naar je toe komen.",
+            "De lijn loopt voor: houd elke grondtoon een moment langer vast.",
+            "Je zit een tikje vroeg. Speel de noot waar de klik is, niet ervoor."
+          ],
+          "correction": [
+            "Je tokkelhand loopt voor op de kick: houd hem terug.",
+            "Je rechterhand haast zich. Zit dieper achter de tel met de drummer.",
+            "Tel de tussenslagen: plaats elke getokkelde noot precies op de klik, niet ervoor.",
+            "Zet het tempo vijf BPM lager en laat de klik elke noot uit je trekken.",
+            "Trek de rechterhand terug. De kick moet eerst landen, dan jouw noot.",
+            "Stop, tel jezelf langzaam in en speel dan precies bovenop de klik.",
+            "De handen racen. Demp de snaren en tik eerst met één vinger de klik mee.",
+            "Pauzeer een maat. Hoor de klik en kom dan binnen op tel 1."
+          ]
+        },
+        "dragging_trend": {
+          "neutral": [
+            "De lijn zit achter de klik. Breng hem naar voren.",
+            "Je landt laat: begin het tokkelen een fractie eerder.",
+            "Elke grondtoon komt na de tel. Mik op de voorkant ervan."
+          ],
+          "correction": [
+            "De getokkelde noten lopen achter op de kick: duw lichtjes in elke noot.",
+            "Je rechterhand sleept. Speel met de klik, wacht niet tot de kick landt.",
+            "Til de tokkelvinger eerder op: kom de klik tegemoet op de voorkant van de noot.",
+            "Elke noot landt laat. Mik op de voorste rand van elke klik.",
+            "Duw vanuit de onderarm: de vinger wordt zwaar.",
+            "Zet het tempo wat lager en speel met meer lift. Het gesleep verdwijnt.",
+            "Stel je voor dat de klik een haartje eerder komt dan hij doet en kom die tegemoet.",
+            "Stop, adem in en kom dan binnen met een lichte duw naar voren."
+          ]
+        },
+        "personal_best_streak": {
+          "encouragement": [
+            "Vastgelockt met de kick.",
+            "Pocket. Blijf.",
+            "De reeks loopt: blijf daar.",
+            "Ja. Verander niets.",
+            "Je rechterhand zit in de pocket. Houd vast.",
+            "Bas en klik zijn nu één. Houd het.",
+            "Strak. Blijf hierin zitten.",
+            "Dat is de groove: blijf daar."
+          ]
+        },
+        "new_band_locked": {
+          "encouragement": [
+            "{bpmLow}–{bpmHigh} BPM-band volgehouden: de lock tussen bas en kick is stevig.",
+            "De pocket op de grondtonen houdt stand op {bpmLow}–{bpmHigh} BPM.",
+            "Volgehouden op {bpmLow}–{bpmHigh} BPM: nieuwe vloer voor deze groove.",
+            "{bpmLow}–{bpmHigh} BPM schoon vastgehouden. Je rechterhand ligt rustig.",
+            "Vastgelockt op {bpmLow}–{bpmHigh} BPM. Zak er niet onder.",
+            "{bpmLow}–{bpmHigh} BPM is van jou. Nieuwe basis.",
+            "Bas en klik samen op {bpmLow}–{bpmHigh} BPM. Stevig.",
+            "Pocket volgehouden op {bpmLow}–{bpmHigh} BPM, een hele minuut lang."
+          ]
+        },
+        "recovery": {
+          "encouragement": [
+            "Terug in de pocket. Blijf.",
+            "De lijn teruggehaald. Houd vast.",
+            "De lock tussen bas en kick is hersteld. Houd hem.",
+            "Je rechterhand loopt weer gelijk. Verander niets.",
+            "Je ving het wegglippen op. Blijf hierin zitten.",
+            "De pocket is terug. Blijf ontspannen.",
+            "Het herstel is schoon. Houd precies dit gevoel.",
+            "Thuisgebracht. Blijf daar een minuut."
+          ]
+        },
+        "recovery_confirmed": {
+          "encouragement": [
+            "De groove is terug.",
+            "Lock tussen bas en kick: houd vast.",
+            "Terug in de pocket. Blijf."
+          ]
+        },
+        "fatigue": {
+          "encouragement": [
+            "Worden je tokkelvingers strak? Even strekken en dan weer erin.",
+            "Begint je onderarm vast te zitten? Bas 60 seconden neer.",
+            "Bouwt er spanning op in je rechterhand? Korte pauze en kom dan terug.",
+            "Wordt je grephand zwaar? Neem een moment en ga dan verder.",
+            "Voelt je rechterhand strak? Schud uit en ga dan verder.",
+            "Gaat je schouder omhoog? Laat hem zakken, adem in en ga dan verder.",
+            "Je onderarm werkt te hard. Even rust.",
+            "Neem 30 seconden, rol de polsen en ga dan weer aan de slag."
+          ],
+          "correction": [
+            "Vermoeidheid zichtbaar in de aanslag: stop, 90 seconden rust en kijk dan opnieuw.",
+            "Je bent over je piek heen: bas neer, strek en kom dan terug.",
+            "Stop nu. Moe tokkelen leert de hand een slordige aanslag.",
+            "Je rechterhand wordt overbelast. Leg de bas neer, strek de onderarm, twee minuten rust.",
+            "Echte rust: bas op de standaard, even rondlopen.",
+            "Je tokkelhand is klaar. Minstens 90 seconden en kijk dan opnieuw.",
+            "Harde stop. Polscirkels en onderarmrekken voordat je verdergaat.",
+            "Doorduwen hierna koopt je een blessure. Stop en herstel."
+          ]
+        },
+        "tempo_milestone": {
+          "encouragement": [
+            "Op {bpmLow} BPM: zorg dat elke noot schoon klinkt voordat je klimt.",
+            "{bpmLow} BPM-mijlpaal. Zet de grondtonen vast op de klik voordat je duwt.",
+            "Nieuwe band: {bpmLow}-{bpmHigh}. Loop hem eerst langzaam en voeg dan de bijzondere noten toe.",
+            "{bpmLow} BPM is vers. Blijf hier tot elke noot vol klinkt.",
+            "Parkeer op {bpmLow} BPM. De volgende sprong komt na een schone minuut.",
+            "{bpmLow} BPM gehaald: bouw nu een paar schone maten op voordat je hoger gaat.",
+            "{bpmLow}-{bpmHigh} BPM is gloednieuw. Houd het vast tot het makkelijk voelt.",
+            "Verdien {bpmLow} BPM voordat je meer najaagt. Blijf vlak."
+          ]
+        },
+        "check_in": {
+          "neutral": [
+            "Lange tijd op de bas: lijn, groove, iets specifieks?",
+            "Meer dan vijf minuten vastgelockt met de kick. Wil je ergens op inzoomen?",
+            "Je zat diep in de pocket. Wat is de volgende stap?",
+            "Er loopt een degelijke reeks. Wil je scherpere feedback op een bepaald deel?",
+            "Je bent al een tijd bezig. Walking line? Grondtonen? Vertel me waar ik op moet luisteren.",
+            "De pocket is stabiel. Kies een doel als je nauwkeurigere feedback wilt.",
+            "Lange tijd op de bas. Wil je dat ik ergens op let?",
+            "Je houdt het vast. Vertel me waar ik hierna op moet luisteren."
+          ]
+        },
+        "ramp_complete": {
+          "neutral": [
+            "Ramp klaar: {startBpm} tot {endBpm}. De lock tussen bas en kick hield de klim vol.",
+            "{endBpm} BPM gehaald. Je tokkelde de ramp vanaf {startBpm} door.",
+            "Doel bereikt: {endBpm} BPM. Ramp vanaf {startBpm} afgerond: de groove bleef.",
+            "{endBpm} BPM bereikt. Stevige ramp vanaf {startBpm} op de bas."
+          ]
+        },
+        "stamina": {
+          "neutral": [
+            "Uithoudingsmuur rond minuut {staminaMinutes}: je groove wordt losser. Korte pauze en dan weer erin.",
+            "Rond minuut {staminaMinutes} begint de tokkelhand moe te worden. Rust en kom terug.",
+            "Voorbij de {staminaMinutes}-minutengrens begint de lock met de bas weg te glippen. Korte rust en ga dan verder.",
+            "Je zakt meestal weg rond minuut {staminaMinutes}. Neem 30 seconden en kom schoon terug."
+          ]
+        },
+        "bias_only": {
+          "neutral": [
+            "Je noot valt elke keer {biasMs} ms {direction} op de klik: weinig jitter, alleen verschoven. Pas je aanslag {correctionDirection} aan.",
+            "Je aanslag zit {biasMs} ms {direction}. Heel consistent: verschuif gewoon {correctionDirection} om op de tel te landen."
+          ]
+        },
+        "pace_coaching": {
+          "neutral": [
+            "Plafond op {bpm}: {attemptCount} sessies verder. Zet eerst {suggestedBpm} vast en kom dan terug.",
+            "{attemptCount} pogingen op {bpm} BPM en de groove wil niet vastlocken. Zak naar {suggestedBpm} en consolideer."
+          ]
+        },
+        "grid_lost": {
+          "neutral": [
+            "Het raster kwijt daar. Fill of improvisatie? Als het bewust was, ga door.",
+            "De correlatie met de klik viel weg: speel je een fill?"
+          ]
+        },
+        "muddy_hits": {
+          "neutral": [
+            "Je raakt elke noot, maar het signaal is zacht: ga dieper in met je tokkelhand.",
+            "Goede dekking, maar de aanslag is stil. Meer vingerdruk op elke getokkelde noot.",
+            "Elke tel is er, alleen zacht. Probeer steviger te tokkelen.",
+            "De tellen landen, maar de transiënt is zwak: zet je steviger op de snaar."
+          ]
+        },
+        "grid_discontinuity": {
+          "neutral": [
+            "Je groove dreef van de klik af. Demp en kom weer binnen op de zware tel.",
+            "Rastertracking viel weg: stop de lijn, vind de pols en lock weer in.",
+            "Daar uit het tempo geraakt. Laat de klik ademen en zet je baslijn opnieuw vast.",
+            "De groove dreef van het raster af. Neem een tel en lock weer in op de grondtoon."
+          ]
+        },
+        "low_completeness": {
+          "neutral": [
+            "Je speelt ongeveer de helft van de verwachte tellen: probeer elke noot van de lijn vast te zetten.",
+            "De dekking is laag: zorg dat elke tel een getokkelde noot krijgt, niet alleen de grondtonen.",
+            "Ongeveer de helft van de tellen blijft ongespeeld. Richt je op het voltooien van de hele baslijn.",
+            "De telldekking is laag. Vertraag als dat nodig is en zorg dat elke noot landt."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Je getokkel landt goed op de tel, maar de ruimte tussen de noten blijft verschuiven. Probeer de onderverdelingen hardop te tellen terwijl je speelt.",
+            "De plaatsing op de tel zit goed, maar de ruimte tussen de getokkelde noten is ongelijk. Tik met je voet op elke onderverdeling om de ruimte vast te zetten.",
+            "Steeds op de tel, maar de ruimte tussen de noten dwaalt. Tel de onderverdelingen hardop: laat je stem het raster bepalen.",
+            "Goede plaatsing op de tel, maar de ruimte tussen de getokkelde noten drijft weg. Vertraag de lijn tot de tussenruimtes gelijk voelen en ga dan weer sneller."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "De ruimte tussen je getokkelde noten is gelijkmatig, maar je landt naast de tel. Loop de klik een haartje vooruit en land er met elke noot precies op.",
+            "Gelijkmatige ruimte tussen de noten, maar de lijn zit naast het raster. Zet de eerste noot van elke maat vast op de klik en laat de rest volgen.",
+            "Het ritme tussen de getokkelde noten is consistent: zet nu de hele lijn vast op het raster. Mik op het midden van elke tel.",
+            "Goed gevoel voor afstand in de lijn. Richt je op waar elke getokkelde noot landt ten opzichte van de klik: speel net iets voor op waar je de tel verwacht."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "Afstand tussen de noten en plaatsing op de tel zitten allebei vast. Dat is de pocket.",
+            "Afstand en plaatsing allebei raak. De baslijn zit precies waar hij hoort.",
+            "Beide dimensies degelijk: je groovet echt nauwkeurig.",
+            "De timing zit overal goed. Dat is het baslijngevoel dat je wilt."
+          ]
+        },
+        "low_confidence": {
+          "neutral": [
+            "De lage tonen zijn aan mijn kant moeilijk te lezen: ik ben minder zeker van dit stuk.",
+            "Je signaal is daar beneden troebel. Neem de cijfers van het afgelopen halve minuut met een korreltje zout.",
+            "Het is nu moeilijk om aanslagen uit de lage tonen te halen. Mijn lezing is zachter dan gewoonlijk."
+          ]
+        },
+        "boundary_signal_a": {
+          "neutral": [
+            "{change}. Vanaf hier een nieuw segment.",
+            "{change}. Het vorige stuk is afgesloten en geteld.",
+            "{change}: de score begint opnieuw bij de volgende noot."
+          ]
+        },
+        "boundary_signal_b": {
+          "neutral": [
+            "De pauze sloot dat segment af: {score}% op {bpm} BPM.",
+            "De lijn was lang genoeg stil om het te beëindigen: {score}% op {bpm} BPM.",
+            "{score}% op {bpm} BPM vastgelegd voor dat stuk."
+          ]
+        },
+        "preset_ceiling_hit": {
+          "neutral": [
+            "{bpmLow}–{bpmHigh} is waar deze lijn niet meer goed blijft zitten: {attemptCount} sessies, elk rond {score}.",
+            "Je zit weer op {bpmLow}–{bpmHigh}. Je laatste {attemptCount} keer hier kwamen uit rond {score}.",
+            "{attemptCount} sessies op dit tempo, allemaal rond {score}. Goed om te weten terwijl je speelt."
+          ]
+        }
+      },
+      "piano": {
+        "session_start_cold": {
+          "neutral": [
+            "Ik ben klaar wanneer jij het bent. Ik volg je vanaf je eerste noot.",
+            "Warm je handen op en speel wanneer je wilt: ik begin te luisteren.",
+            "Zit lekker achter de toetsen en begin wanneer je er klaar voor bent.",
+            "Fijn dat je er bent. Begin wanneer de handen los voelen.",
+            "Wanneer je klaar bent: speel en ik begin je timing op te pikken.",
+            "Geen haast. Laat de handen warm worden en begin wanneer je er klaar voor bent.",
+            "Ik ben klaar wanneer jij het bent. Ik volg vanaf de eerste toets.",
+            "Kom tot rust en begin wanneer je wilt: ik luister."
+          ]
+        },
+        "session_start_returning": {
+          "neutral": [
+            "Welkom terug. Vorige sessie: {lastScore} op {lastBpm} BPM. Laten we daarop voortbouwen.",
+            "Fijn je te zien. Je haalde de vorige keer {lastScore} op {lastBpm} BPM: fijn dat je er weer bent.",
+            "Weer achter de toetsen. {lastScore} op {lastBpm} BPM vorige sessie. Laten we doorpakken.",
+            "Welkom terug: {lastScore} / {lastBpm} BPM de vorige keer. Ik ben klaar wanneer jij het bent.",
+            "Vorige sessie: {lastScore} op {lastBpm} BPM. Ga verder waar je bent gebleven.",
+            "Weer aan de slag. {lastScore} op {lastBpm} BPM de vorige keer: een stevige basis.",
+            "Welkom terug. {lastScore} op {lastBpm} BPM was de stand van vorige sessie. Laten we ernaartoe spelen.",
+            "Fijn dat je terug bent. {lastScore} op {lastBpm} BPM de vorige keer: kom op."
+          ]
+        },
+        "accuracy_drop": {
+          "correction": [
+            "De handen drijven uit elkaar. Zet eerst de linkerhand vast op de klik.",
+            "De slagen raken verspreid. Vertraag: eerst de linkerhand alleen, voeg dan de rechter toe.",
+            "Een maat lang alleen de linkerhand op de klik en neem dan de rechterhand erbij.",
+            "Stop met beide handen. Speel vier tellen lang de klik met alleen de linker en leg dan de rechter eroverheen.",
+            "Trek terug naar één noot per klik met de linkerhand en bouw het stuk dan weer op.",
+            "Zet het tempo omlaag en speel de handen apart voordat je ze samenvoegt.",
+            "Pauzeer en adem. Vind de klik en begin opnieuw.",
+            "Zet het vijf BPM langzamer en speel het schoon."
+          ]
+        },
+        "rushing_trend": {
+          "neutral": [
+            "Je handen komen voor de klik. Laat hem naar je toe komen.",
+            "Je zit een tikje voor: hoor de klik en laat dan het akkoord vallen.",
+            "De rechterhand loopt voor. Zit verder achter in elke tel."
+          ],
+          "correction": [
+            "De rechterhand loopt voor op de linker: laat de baknoot precies op de klik landen.",
+            "Haasten: zak dieper in de toetsen en laat de klik elke noot trekken.",
+            "Tel de tussenslagen: zet elke noot waar de klik valt, niet ervoor.",
+            "Zet het tempo vijf BPM lager en laat de klik elke noot uit je trekken.",
+            "Pauzeer een maat. Hoor de klik en kom dan binnen op tel 1.",
+            "Laat je handen op je schoot zakken, adem in en begin dan opnieuw te spelen.",
+            "De rechterhand racet. Speel eerst een maat lang alleen de linkerhand op de klik.",
+            "Probeer het metronoom niet te duwen. Laat het je een hele maat lang trekken."
+          ]
+        },
+        "dragging_trend": {
+          "neutral": [
+            "Je handen landen achter de klik. Breng ze naar voren.",
+            "Je zit laat: begin het akkoord een fractie eerder.",
+            "De linkerhand blijft achter. Mik op de voorkant van de tel."
+          ],
+          "correction": [
+            "De linkerhand blijft achter: ga voorop met de bas, niet met de melodie.",
+            "Gesleep: leid de downbeat met de linkerhand, wacht niet op de klik.",
+            "Ga voorop met de aanslag: ontmoet de klik op de voorkant van elke noot.",
+            "Elke noot landt laat. Mik op de voorste rand van elke klik.",
+            "Zet het tempo omlaag en speel met meer lift. Het gesleep verdwijnt zodra het makkelijk voelt.",
+            "Stel je voor dat de klik een haartje eerder komt dan hij doet, en ontmoet dat.",
+            "Stop, adem in en kom dan binnen met een lichte duw naar voren.",
+            "De vingers worden zwaar. Maak je aanraking lichter en laat ze zweven."
+          ]
+        },
+        "personal_best_streak": {
+          "encouragement": [
+            "Handen vastgelockt. Blijf.",
+            "Beide handen synchroon.",
+            "De reeks loopt: blijf daar.",
+            "De vergrendeling van twee handen is schoon. Houd vast.",
+            "Ja. Verander niets.",
+            "Links en rechts praten met elkaar. Ga door.",
+            "Strak. Blijf hierin zitten.",
+            "Ogen dicht. Ga door."
+          ]
+        },
+        "new_band_locked": {
+          "encouragement": [
+            "{bpmLow}–{bpmHigh} BPM-band volgehouden: beide handen vastgelockt op de klik.",
+            "De pocket van de handsynchronisatie houdt stand op {bpmLow}–{bpmHigh} BPM.",
+            "Volgehouden op {bpmLow}–{bpmHigh} BPM: nieuwe vloer voor deze voicing.",
+            "{bpmLow}–{bpmHigh} BPM schoon vastgehouden. Beide handen zijn gezet.",
+            "Vastgelockt op {bpmLow}–{bpmHigh} BPM. Nieuwe basis voor dit stuk.",
+            "{bpmLow}–{bpmHigh} BPM is van jou. Zak er niet onder.",
+            "Synchronisatie van twee handen stabiel op {bpmLow}–{bpmHigh} BPM.",
+            "Pocket een hele minuut volgehouden op {bpmLow}–{bpmHigh} BPM."
+          ]
+        },
+        "recovery": {
+          "encouragement": [
+            "Handen weer synchroon. Houd het vast.",
+            "De vergrendeling van twee handen is terug. Verander niets.",
+            "Hersteld: blijf ontspannen in de schouders.",
+            "Je ving de drift op. Blijf hierin zitten.",
+            "Links en rechts weer synchroon. Blijf daar.",
+            "Terug van de dip. Verander niets.",
+            "Pocket hersteld. Houd precies dit gevoel vast.",
+            "Thuisgebracht. Blijf daar een minuut."
+          ]
+        },
+        "recovery_confirmed": {
+          "encouragement": [
+            "De aanslag is weer schoon.",
+            "Handen weer synchroon. Houd het vast.",
+            "Terug op de toetsen. Blijf."
+          ]
+        },
+        "fatigue": {
+          "encouragement": [
+            "Worden de polsen strak? Til de handen op, adem en ga dan weer verder.",
+            "Voelen de onderarmen vast? Pauzeer, laat de handen zakken en adem.",
+            "Er sluipt spanning in de schouders: 60 seconden weg van de toetsen.",
+            "Voelen de vingers zwaar? Snel strekken en dan hervatten.",
+            "De handen werken harder dan zou moeten. Even rust.",
+            "Klimmen de schouders omhoog? Laat ze zakken, adem en speel dan.",
+            "Neem 30 seconden, draai de polsen rond en ga dan weer verder.",
+            "Spanning in de polsen neemt toe. Pauzeer, laat de handen op je schoot zakken en adem."
+          ],
+          "correction": [
+            "Vermoeidheid zichtbaar in de aanslag: stop, handen 90 seconden neer.",
+            "Je bent voorbij je piek: ga van de pianokruk af, schud het uit en keer dan terug.",
+            "Moe spelen begraaft de dynamiek. Stop, laat de polsen rusten en begin opnieuw.",
+            "De polsen worden overbelast. Leg de handen neer, strek de onderarmen en neem twee minuten pauze.",
+            "Echte rust: sta op, loop rond en kom fris terug.",
+            "De handen zijn voor nu klaar. Minstens 90 seconden en controleer dan opnieuw.",
+            "Harde stop. Polscirkels en schouderrollen voordat je verder gaat.",
+            "Als je hier doorheen duwt, koop je een blessure. Stop en herstel."
+          ]
+        },
+        "tempo_milestone": {
+          "encouragement": [
+            "Op {bpmLow} BPM: zorg dat de linkerhand rotsvast is voordat je klimt.",
+            "{bpmLow} BPM-mijlpaal. Blijf hier tot beide handen onafhankelijk zijn.",
+            "Nieuwe band: {bpmLow}-{bpmHigh}. Eerst de handen apart en dan samen.",
+            "{bpmLow} BPM is vers. Blijf vlak tot beide handen onafhankelijk zijn.",
+            "Parkeer op {bpmLow} BPM. De volgende sprong komt na een schone minuut.",
+            "{bpmLow} BPM geraakt: bouw nu een paar schone maten op voordat je hoger gaat.",
+            "{bpmLow}-{bpmHigh} BPM is gloednieuw. Houd het vast tot het makkelijk voelt.",
+            "Verdien {bpmLow} BPM voordat je meer najaagt. Blijf vlak."
+          ]
+        },
+        "check_in": {
+          "neutral": [
+            "Lange tijd achter de toetsen: een stuk, een oefening, iets specifieks?",
+            "Meer dan vijf minuten bezig. Wil je dat ik de linkerhand, de rechterhand of beide benoem?",
+            "Je zat er helemaal in. Vertel me waar je feedback op wilt.",
+            "Degelijke reeks. Wil je scherpere feedback op een bepaalde passage?",
+            "Al een tijd bezig. Linkerhand? Rechterhand? Voicings? Vertel me waar ik moet luisteren.",
+            "De pocket was stabiel. Kies een doel als je nauwkeuriger feedback wilt.",
+            "Lange tijd achter de toetsen. Wil je dat ik iets markeer?",
+            "Je zat er diep in. Vertel me waar ik hierna op moet letten."
+          ]
+        },
+        "ramp_complete": {
+          "neutral": [
+            "Ramp klaar: {startBpm} naar {endBpm} op de toetsen. Beide handen hielden de klim vol.",
+            "{endBpm} BPM gehaald. Je speelde de ramp door vanaf {startBpm}.",
+            "Doel bereikt: {endBpm} BPM. Ramp vanaf {startBpm} voltooid: de handen bleven vastgelockt.",
+            "{endBpm} BPM bereikt. Goede ramp vanaf {startBpm} op de toetsen."
+          ]
+        },
+        "stamina": {
+          "neutral": [
+            "Spanning in je aanslag rond minuut {staminaMinutes}. Laat los, adem en kom schoon terug.",
+            "Rond minuut {staminaMinutes} sluipt er spanning in de polsen. Korte rust en hervat dan.",
+            "Voorbij de {staminaMinutes}-minutengrens wordt de aanslag zwaarder. Korte pauze en dan weer aan de toetsen.",
+            "Vermoeidheid in de handen toont zich rond minuut {staminaMinutes}. Rust en keer dan terug."
+          ]
+        },
+        "bias_only": {
+          "neutral": [
+            "De toetsen vallen {biasMs} ms {direction} op de klik met weinig spreiding. Verschuif de timing van je aanslag {correctionDirection}.",
+            "Consistent {biasMs} ms {direction}: dat is een afwijking, geen jitter. Verplaats alles {correctionDirection} om het te centreren."
+          ]
+        },
+        "pace_coaching": {
+          "neutral": [
+            "Plafond op de toetsen bij {bpm}: {attemptCount} pogingen. Twee sessies op {suggestedBpm} om het te verankeren.",
+            "{attemptCount} pogingen op {bpm} en de handen komen niet tot rust. Parkeer op {suggestedBpm} en speel het erin."
+          ]
+        },
+        "grid_lost": {
+          "neutral": [
+            "De rastercorrelatie viel weg. Nog bij de klik, of speel je een frase?",
+            "Het metrische raster kwijt daar. Fill of vrije passage?"
+          ]
+        },
+        "muddy_hits": {
+          "neutral": [
+            "De tellen zijn er allemaal, maar de aanslag is zacht: probeer meer bewust vingergewicht.",
+            "Goede dekking, maar de toetsaanslagen zijn zacht. Duw met meer intentie in de toetsen.",
+            "Elke tel landt, alleen zacht. Leg meer gewicht in elke toetsaanslag.",
+            "Je raakt elke noot, maar het signaal is zwak: verhoog de velocity door de toetsbodem heen."
+          ]
+        },
+        "grid_discontinuity": {
+          "neutral": [
+            "Je spel dreef weg van de klik. Pauzeer en kom weer binnen op de downbeat.",
+            "De rastervolging viel weg: laat de klik een maat doorlopen en kom dan weer binnen.",
+            "Daar ging je van het tempo af. Til je handen op, vind de pols en kom weer binnen.",
+            "De frase dwaalde van het raster af. Neem een tel en zet je weer vast op de klik."
+          ]
+        },
+        "low_completeness": {
+          "neutral": [
+            "Je speelt ongeveer de helft van de verwachte tellen: probeer elke noot in de frase te spelen.",
+            "De dekking is laag: zorg dat elke tel een noot krijgt, niet alleen de melodische pieken.",
+            "Ongeveer de helft van de tellen blijft ongespeeld. Richt je op het afmaken van de hele passage.",
+            "De teldekking is laag. Vertraag en zorg dat elke tel landt voordat je verdergaat."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "De plaatsing van je noten is stevig, maar de ruimte tussen de toetsaanslagen blijft dwalen. Probeer de onderverdelingen hardop te tellen terwijl je speelt.",
+            "Goed op de tel, maar de afstand tussen de noten is ongelijk. Tik met je voet op elke onderverdeling om de afstand tussen de toetsaanslagen vast te zetten.",
+            "De plaatsing op de tel klopt, maar de ruimte tussen de noten verschuift. Tel de onderverdelingen hardop en laat je stem de ruimtes gelijk houden.",
+            "Goede plaatsing op de tel, maar de afstand tussen de noten drijft weg. Vertraag de passage tot de ruimtes gelijk voelen en bouw dan weer snelheid op."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "De afstand tussen je noten is heel gelijk, maar je landt naast de tel. Loop de klik een haartje vooruit en sla elke toets er precies op.",
+            "Gelijke afstand tussen de noten, maar de toetsaanslagen zitten naast het raster. Zet de eerste noot van elke frase vast op de tel en laat de rest volgen.",
+            "Het ritme tussen de toetsaanslagen is consistent: verankeer nu de hele frase aan de klik. Mik op het midden van elke tel.",
+            "Goed gevoel voor afstand. Richt je op waar elke noot ten opzichte van de klik landt: probeer iets voor te spelen op waar je de tel verwacht."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "De afstand tussen de noten en de plaatsing op de tel zitten allebei vast. Dat is schone pianotiming.",
+            "Afstand en plaatsing kloppen allebei. De frase zit precies waar hij hoort.",
+            "Beide dimensies zitten goed: je speelt nu echt precies.",
+            "De timing zit overal vast. Dat is het gevoel waar je naartoe hebt gebouwd."
+          ]
+        },
+        "low_confidence": {
+          "neutral": [
+            "De noten lopen aan mijn kant in elkaar over: ik lees dit stuk minder helder.",
+            "Het pedaal smeert de aanslagen uit. Neem de cijfers van het laatste halve minuut met een korreltje zout.",
+            "Het is nu moeilijk om losse aanslagen uit de akkoorden te halen. Mijn lezing is zachter dan gewoonlijk."
+          ]
+        },
+        "boundary_signal_a": {
+          "neutral": [
+            "{change}. Vanaf hier een nieuw segment.",
+            "{change}. Het vorige stuk is afgesloten en geteld.",
+            "{change}: de score begint opnieuw bij het volgende akkoord."
+          ]
+        },
+        "boundary_signal_b": {
+          "neutral": [
+            "De pauze sloot dat segment af: {score}% op {bpm} BPM.",
+            "Je handen waren lang genoeg van de toetsen om het af te sluiten: {score}% op {bpm} BPM.",
+            "{score}% op {bpm} BPM vastgelegd voor dat stuk."
+          ]
+        },
+        "preset_ceiling_hit": {
+          "neutral": [
+            "{bpmLow}–{bpmHigh} is waar dit voor jou niet meer schoon blijft: {attemptCount} sessies, elk rond {score}.",
+            "Je bent terug op {bpmLow}–{bpmHigh}. Je laatste {attemptCount} runs hier kwamen uit rond {score}.",
+            "{attemptCount} sessies op dit tempo, allemaal rond {score}. Goed om te weten terwijl je speelt."
+          ]
+        }
+      }
+    },
+    "defaultMode": {
+      "generic": {
+        "muddy_hits": {
+          "neutral": [
+            "Je raakt de tellen, maar het signaal komt zacht binnen. Probeer met een stevigere aanslag te spelen.",
+            "Het ritme is er, maar je aanslag is licht. Zet er wat meer in.",
+            "De tellen worden gehaald, maar met een zachte aanraking. Probeer een krachtigere slag.",
+            "Goed ritme, maar het signaal is wat zacht. Leg meer in elke noot.",
+            "Je zit op de tellen, maar geef elke slag wat meer gewicht."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "Je timing zit vast: afstand en plaatsing zijn allebei degelijk.",
+            "Mooi strak: je noten vallen op de juiste plekken en staan gelijkmatig uit elkaar.",
+            "Heel consistent: je plaatsing op de tel en de afstand tussen je noten kloppen allebei.",
+            "Goed gevoel: gelijkmatig verdeelde noten precies op de pols.",
+            "Je timing zit midden in de pocket: afstand en plaatsing zijn er allebei."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "Je noten staan gelijkmatig uit elkaar maar drijven weg van de klik. Probeer je meer aan de pols te verankeren.",
+            "Mooie gelijkmatige afstand, maar je zit een beetje naast de tel. Probeer je op de pols vast te zetten.",
+            "De tussenruimtes tussen je noten zijn consistent, maar ze vallen niet helemaal op de tel. Anker je aan de klik.",
+            "Gelijkmatige afstand tussen de noten, maar de plaatsing dwaalt. Richt je erop elke noot op de tel te laten vallen.",
+            "Je interne timing is consistent, maar de noten drijven weg van de pols. Anker je aan de klik."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Je zit dicht bij elke tel, maar de ruimtes tussen de noten zijn ongelijk. Richt je erop die tussenruimtes gelijker te maken.",
+            "Goede plaatsing op de tel, maar ongelijke afstand tussen de noten. Probeer de tussenruimtes gelijk te houden.",
+            "Je zit dicht bij de tel, maar de afstand tussen de noten varieert. Richt je op gelijke tussenruimtes.",
+            "Je noten staan dichtbij, maar de afstand is wat verspreid. Maak de tussenruimtes gelijk.",
+            "Je valt vlak bij de telposities, maar de afstand tussen de noten is wisselend. Werk eraan de ruimtes gelijk te houden."
+          ]
+        },
+        "great": {
+          "neutral": [
+            "Echt vastgelockt: je timing zit er precies op.",
+            "Stevig gevoel, blijf op die groove rijden.",
+            "Je timing zit precies waar hij hoort.",
+            "Schoon ritme: dat is de pocket.",
+            "Strak vastgelockt: goed werk.",
+            "Dat is een goed gevoel: het tempo is overal stevig."
+          ]
+        },
+        "good_steady": {
+          "neutral": [
+            "Mooi en stabiel: een goed consistent tempo.",
+            "Je houdt het bij elkaar: degelijke timing door het hele segment.",
+            "Het tempo houdt goed stand.",
+            "Goed ritmegevoel: een consistente pols.",
+            "Stabiele timing: je bouwt een degelijke basis."
+          ]
+        },
+        "rushing": {
+          "neutral": [
+            "Je leunt een beetje in de tel. Probeer hem naar je toe te laten komen.",
+            "Je komt iets te vroeg. Leun achterover en laat de pols ademen.",
+            "Het tempo duwt vooruit. Neem de aanslag iets terug.",
+            "Je loopt voor op de tel. Probeer erachter te blijven.",
+            "Er sluipt wat haast in. Vertraag je aanslag, niet je tempo."
+          ]
+        },
+        "dragging": {
+          "neutral": [
+            "Je zakt wat achter de tel. Probeer iets meer naar voren te blijven.",
+            "Het tempo sleept achteraan. Houd je aanslag scherp.",
+            "Je blijft een beetje achter. Duw de aanslag naar voren.",
+            "Achter de tel. Probeer de energie vooruit te laten gaan.",
+            "Er sluipt wat gesleep in. Maak de aanslag scherper."
+          ]
+        },
+        "oscillating": {
+          "neutral": [
+            "Het tempo beweegt heen en weer: sneller en dan weer langzamer.",
+            "De afstand tussen de noten is ongelijk. Probeer de tussenruimtes gelijk te houden.",
+            "De pols dwaalt een beetje. Richt je op een gelijkmatige afstand tussen de noten.",
+            "Eerst haasten, dan slepen. Probeer één stabiel gevoel vast te houden.",
+            "De consistentie van het tempo heeft aandacht nodig. Richt je op een gelijke afstand tussen de noten."
+          ]
+        },
+        "low_score_solid_timing": {
+          "neutral": [
+            "Het midden van je timing is goed. Richt je op meer tellen raken.",
+            "De timing zit op de juiste plek, maar je mist een aantal posities. Vul die gaten.",
+            "Goed timinggevoel, maar het ritme heeft meer dekking nodig. Speel meer van de tellen.",
+            "De pols is er, maar het ritme is dun. Probeer meer posities te raken.",
+            "Je timing is goed gecentreerd. Werk nu aan de dichtheid."
+          ]
+        },
+        "low_coverage": {
+          "neutral": [
+            "Ik hoor maar een deel van je spel. Check je ingangsniveau of speel iets harder.",
+            "Het signaal komt zacht binnen. Probeer met wat meer aanslag te spelen.",
+            "Lage detectiegraad. Misschien moet je je ingangsversterking omhoog zetten.",
+            "Ik pik maar een deel van je spel op. Check het ingangsniveau in de instellingen.",
+            "Zwak signaal. Speel harder of check je ingangsversterking."
+          ]
+        },
+        "noodling": {
+          "neutral": [
+            "Fijn vrij gevoel: laat de ideeën stromen.",
+            "Mooi verkennen: als je zover bent, breng het terug naar de pols.",
+            "Creatieve ruimte: gebruik die goed.",
+            "Goed vrij spel: volg het gevoel.",
+            "Laat het ademen. Kom terug naar het raster wanneer je zover bent."
+          ]
+        },
+        "flat_dynamics": {
+          "neutral": [
+            "Je spel is dynamisch erg gelijkmatig. Probeer de zware tellen wat te laten ademen.",
+            "Elke noot heeft ongeveer hetzelfde volume. Experimenteer met het accentueren van de hoofdtellen.",
+            "Mooie consistentie, maar probeer wat dynamische vorm toe te voegen: sla de zware tellen iets harder aan."
+          ]
+        },
+        "weak_downbeats": {
+          "neutral": [
+            "Probeer tel 1 en 3 iets harder te slaan. Je zware tellen gaan op in de rest.",
+            "Je offbeats zijn wat sterk. Neem ze terug en geef de zware tellen meer druk.",
+            "De hoofdtellen hebben meer gewicht nodig. Laat tel 1 en 3 leiden."
+          ]
+        },
+        "good_accents": {
+          "neutral": [
+            "Mooie dynamische vorm: je zware tellen hebben goed gewicht.",
+            "Goed accent op de hoofdtellen: de groove heeft een duidelijke pols.",
+            "Je zware tellen komen duidelijk door: mooi gevoel."
+          ]
+        },
+        "subdivisions_too_loud": {
+          "neutral": [
+            "De fills zijn wat zwaar. Laat de tussennoten lichter zitten.",
+            "Probeer de onderverdelingsfills zachter te maken. Laat de hoofdtellen het gewicht dragen.",
+            "De fillnoten concurreren met je zware tellen. Neem het terug tussen de tellen."
+          ]
+        }
+      }
+    },
+    "proMode": {
+      "generic": {
+        "muddy_hits": {
+          "neutral": [
+            "Je tellen komen aan, maar het signaalvertrouwen is laag. Probeer een stevigere aanslag op elke noot.",
+            "De detector ziet je slagen, maar met laag vertrouwen. Je transiënten zijn mogelijk te zacht.",
+            "De tellen worden geregistreerd, maar het signaal is zwak. Maak de aanslag scherper voor een schonere transiënt.",
+            "Laag signaalvertrouwen op je slagen. Zet er meer in om de aanslagkracht te verbeteren.",
+            "Je aanslag is te zacht voor betrouwbare detectie. Speel met meer overtuiging."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "De afstand tussen de noten is consistent en de plaatsing op de tel is degelijk: strakke timing over de hele linie.",
+            "Zowel de afstand tussen de noten als de plaatsing op de tel kloppen: schone timing over het geheel.",
+            "Gelijkmatige afstand tussen de noten en nauwkeurige plaatsing op de tel: zo voelt vastgelockt.",
+            "Afstand en plaatsing zijn allebei op orde: de timing is degelijk.",
+            "Consistente afstand en schone plaatsing op de tel: hier valt niets te herstellen."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "De afstand tussen de noten is gelijkmatig, maar de plaatsing op de tel drijft weg: je interne klok is consistent maar niet gesynchroniseerd met de pols.",
+            "Consistente afstand tussen de noten, maar de tellen vallen naast het midden: je interne ritme is goed, anker het gewoon aan het raster.",
+            "Gelijkmatige afstand tussen de noten, maar de plaatsing dwaalt van de tel weg: synchroniseer met de pols.",
+            "Je afstand tussen de noten is betrouwbaar, maar de telposities drijven weg: de interne klok is er, lijn hem gewoon uit met de klik.",
+            "De consistentie van de afstand is goed, maar de plaatsing op de tel klopt niet: richt je erop elke noot op de pols te laten vallen."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "De plaatsing op de tel is raak, maar de afstand in de onderverdeling is inconsistent: de ankerpunten zijn goed, de vulling ertussen is verspreid.",
+            "Goede plaatsing op de tel, maar de tussenruimtes tussen de noten variëren: je posities kloppen, de afstand niet.",
+            "Je zit dicht bij de telposities, maar de afstand tussen de noten is ongelijk: de plaatsing is er, maak de tussenruimtes gelijk.",
+            "Nauwkeurige plaatsing op de tel, inconsistente afstand tussen de noten: de ankerpunten kloppen, werk aan gelijke tussenruimtes.",
+            "De telposities zijn degelijk, maar de afstand in de onderverdeling is onregelmatig: de plaatsing is er, maak nu de vulling gelijkmatig."
+          ]
+        },
+        "great": {
+          "neutral": [
+            "Strakke plaatsing op de tel en gelijkmatige afstand tussen de noten: schone timing over de hele linie.",
+            "Plaatsing op de tel degelijk, afstand consistent: verhoog het tempo wanneer je zover bent.",
+            "Alle timingonderdelen zijn schoon: goede sessie.",
+            "Afstand tussen de noten en plaatsing zijn allebei op orde.",
+            "De timing zit vast: overweeg het tempo te verhogen of de onderverdelingen aan te scherpen."
+          ]
+        },
+        "good_steady": {
+          "neutral": [
+            "Consistente afstand en plaatsing: een degelijke basis. Verhoog het tempo met 5 BPM of maak de aanslag scherper.",
+            "Goede timingconsistentie: een paar posities drijven weg, maar het midden houdt stand.",
+            "Plaatsing en afstand zijn betrouwbaar: er is ruimte om harder door te zetten.",
+            "Het midden van de timing klopt, de afstand is consistent: verhoog het tempo om het uit te dagen.",
+            "Een degelijke timingbasis: richt je erop de aanslag op de zwakkere tellen aan te scherpen."
+          ]
+        },
+        "rushing": {
+          "neutral": [
+            "Je komt consequent te vroeg: een gerichte vroege afwijking in de timing van de aanslag.",
+            "Aanslagen komen voor de tel: neem de inzet iets naar voren terug.",
+            "Vroeg aanslagpatroon: je noten gaan consequent aan de tel vooraf.",
+            "Consistente vroege afwijking: de aanslag haast de pols.",
+            "De timing is vroeg verschoven: laat de tel eerst landen en sla dan aan."
+          ]
+        },
+        "dragging": {
+          "neutral": [
+            "Je komt consequent te laat: een gerichte late afwijking in de timing van de aanslag.",
+            "Aanslagen vallen na de tel: maak de aanslag iets scherper.",
+            "Laat aanslagpatroon: de noten lopen consequent achter de tel aan.",
+            "Consistente late afwijking: de aanslag sleept de pols.",
+            "De timing is laat verschoven: duw de aanslag vooruit om de tel te halen."
+          ]
+        },
+        "oscillating": {
+          "neutral": [
+            "Hoge timingvariantie ondanks een bijna neutraal gemiddelde: de timing is echt onstabiel.",
+            "Geen gerichte afwijking: de timing wisselt tussen vroeg en laat.",
+            "Tempo-instabiliteit: de afstand tussen de noten is inconsistent over het segment.",
+            "Haast-sleeppatroon: geen vaste verschuiving, maar echte variantie in de timing.",
+            "De timingvariantie is hoog: richt je erop de afstand tussen de noten consistent te houden."
+          ]
+        },
+        "low_score_solid_timing": {
+          "neutral": [
+            "Het midden van de timing en de afstand zijn schoon, maar de dekking van de tellen is laag.",
+            "Goede plaatsingsnauwkeurigheid, maar te veel telposities zijn leeg.",
+            "De afstand tussen de noten is consistent, maar de dichtheid is laag: raak meer van de rasterposities.",
+            "De timingbasis is degelijk, dekking is het gat: vul meer posities.",
+            "De plaatsing is nauwkeurig: richt je erop meer van de telposities te raken."
+          ]
+        },
+        "low_coverage": {
+          "neutral": [
+            "Maar een fractie van de telposities had een gedetecteerde slag: het signaal is mogelijk te zacht.",
+            "De detectiegraad is laag: check je ingangsversterking of speel harder.",
+            "De meeste telposities zijn leeg: check het ingangsniveau, dit gaat niet over de kwaliteit van je spel.",
+            "Lage slagdetectie: verhoog de ingangsversterking of de aanslagkracht.",
+            "Het signaal is te zacht voor betrouwbare detectie: speel harder of pas je ingangsniveau aan."
+          ]
+        },
+        "noodling": {
+          "neutral": [
+            "Vrij-spelmodus: de plaatsing op de tel wordt hier niet beoordeeld.",
+            "Vrij verkennen: gebruik het om op te warmen en breng het dan terug naar het raster.",
+            "Geen score bij vrij spel: dit is je creatieve ruimte.",
+            "Vrije modus actief: de beoordeling hervat zodra je weer op de pols vastzet.",
+            "Niet beoordeeld vrij spel: laat het stromen, kom terug naar het raster wanneer je zover bent."
+          ]
+        },
+        "flat_dynamics": {
+          "neutral": [
+            "Weinig amplitudevariatie over de telposities: probeer je aanslag te variëren.",
+            "Minimale dynamische vormgeving over de maat: vergroot het accentverschil op de zware tellen.",
+            "De amplitude is consistent over de posities: bouw een dynamische hiërarchie op: zware tellen het sterkst, offbeats lichter."
+          ]
+        },
+        "weak_downbeats": {
+          "neutral": [
+            "Anti-accentpatroon gedetecteerd: de zware tellen zijn zachter dan de offbeats.",
+            "Je offbeats domineren: verhoog de aanslag op tel 1 en 3.",
+            "De amplitude van de zware tellen ligt onder die van de offbeats: draai de dynamische hiërarchie om."
+          ]
+        },
+        "good_accents": {
+          "neutral": [
+            "Gezond accentverschil: de zware tellen zijn duidelijk sterker dan de offbeats.",
+            "Goede dynamische vormgeving: de amplitude van de zware tellen ligt ruim boven die van de offbeats.",
+            "Sterke accentstructuur: de zware tellen leiden de dynamische hiërarchie."
+          ]
+        },
+        "subdivisions_too_loud": {
+          "neutral": [
+            "De amplitude van de onderverdeling ligt dicht bij die van de zware tellen: de fills overstemmen de accentstructuur.",
+            "De fills zijn net zo hard als de hoofdtellen: verminder de aanslag op de onderverdelingsnoten.",
+            "Geen dynamische hiërarchie tussen tellen en fills: de zware tellen horen te leiden, de onderverdelingen te volgen."
+          ]
+        }
+      }
+    },
+    "words": {
+      "direction": {
+        "before": "vroeg",
+        "after": "laat"
+      },
+      "correctionDirection": {
+        "earlier": "eerder",
+        "later": "later"
+      },
+      "change": {
+        "bpmUp": "tempo omhoog naar {to} BPM",
+        "bpmDown": "tempo omlaag naar {to} BPM",
+        "presetCleared": "preset gewist",
+        "preset": "\"{to}\" wordt geladen",
+        "timeSig": "maatsoort {to}/4",
+        "grouping": "hergroepeerd naar {to}",
+        "instrument": "overschakelen naar {to}",
+        "other": "instelling gewijzigd",
+        "separator": "; "
+      }
+    }
+  }
+}

@@ -1,0 +1,2222 @@
+{
+  "toolTips": {
+    "catalog": {
+      "generic": {
+        "session_start_cold": {
+          "neutral": [
+            "Ciao: suona quando sei pronto e inizierò a seguire il tuo timing.",
+            "Bello averti qui. Inizia quando ti senti caldo.",
+            "Pronto quando lo sei tu. Comincio ad ascoltare appena suoni.",
+            "Prenditi il tempo per prepararti: coglierò il tuo timing dalla prima nota.",
+            "Nessuna fretta. Inizia quando ti sei sistemato e andiamo da lì.",
+            "Premi play quando vuoi. Ti seguo dal primo beat.",
+            "Preparati, mettiti comodo, poi inizia a suonare quando vuoi.",
+            "Quando sei pronto: sono in ascolto."
+          ]
+        },
+        "session_start_returning": {
+          "neutral": [
+            "Bentornato. L'ultima volta: {lastScore} a {lastBpm} BPM. Costruiamo su quello.",
+            "Che bello rivederti. L'ultima sessione hai fatto {lastScore} a {lastBpm} BPM.",
+            "Di nuovo al lavoro. L'ultima volta eri a {lastScore} / {lastBpm} BPM: continuiamo a salire.",
+            "Bentornato: {lastScore} a {lastBpm} BPM nell'ultima sessione. Pronto quando lo sei tu.",
+            "Ultima sessione: {lastScore} a {lastBpm} BPM. Riprendiamo da dove avevi lasciato.",
+            "Di nuovo qui. Avevi chiuso a {lastScore} a {lastBpm} BPM: una buona base.",
+            "Bentornato. {lastScore} a {lastBpm} BPM l'ultima volta. Vediamo cosa porta oggi.",
+            "Bello riaverti qui. L'ultima volta hai fatto {lastScore} a {lastBpm} BPM."
+          ]
+        },
+        "accuracy_drop": {
+          "encouragement": [
+            "Sono comparsi alcuni errori: rallenta, respira, poi riprendi.",
+            "Eri saldo, poi un'esitazione. Riparti sul prossimo beat forte.",
+            "Un piccolo calo. Rallenta il battito nella testa e riprendi.",
+            "Piccola scivolata, nulla di grave. Ritrova il clic alla prossima battuta.",
+            "Hai perso il filo per un attimo. Prendi pulito il prossimo tempo forte.",
+            "Un piccolo inciampo. Respira e sali sul prossimo clic.",
+            "Tranquillo: senti il prossimo beat cadere prima di suonare.",
+            "Un po' di deriva. Lascia che il metronomo ti riporti dentro."
+          ],
+          "neutral": [
+            "La percentuale di colpi è scesa un po': riparti dalla prossima battuta.",
+            "La precisione sta calando. Lascia che si assesti sul prossimo tempo forte.",
+            "Le cose stanno scivolando: rallenta nella testa, poi ricomincia da capo.",
+            "Si accumulano alcuni errori. Trova una battuta pulita, poi continua.",
+            "La qualità sta andando alla deriva. Aggancia il clic per una battuta intera.",
+            "Gli errori aumentano: respira, ascolta il clic, poi suona.",
+            "Si vede la deriva. Resta una battuta in silenzio con il clic prima di rientrare.",
+            "I colpi calano. Aspetta il beat forte e riparti."
+          ],
+          "correction": [
+            "Il calo continua: prova ad abbassare il tempo di qualche BPM.",
+            "I colpi si disperdono. Rallenta e ricostruisci da una battuta pulita.",
+            "Fai una battuta pulita, poi sali di nuovo.",
+            "Lo schema si sta sfaldando: fermati, conta l'attacco piano, poi suona.",
+            "Fermati, conta una battuta intera con il clic, poi rientra.",
+            "Abbassa il tempo di cinque BPM. Falla pulita, poi riportalo su.",
+            "Fai un passo indietro. Fai una battuta solida sul clic prima di aggiungere velocità.",
+            "Ripartenza netta: una battuta di silenzio, contala, poi ricomincia da capo."
+          ]
+        },
+        "rushing_trend": {
+          "encouragement": [
+            "Sei appena davanti al clic: respira e cavalcalo.",
+            "Sta comparendo un po' di fretta. Pianta il piede, lascia che sia il metronomo a guidare.",
+            "Un po' in anticipo: assestati sul prossimo clic.",
+            "Sei un filo avanti. Aspetta il clic invece di inseguirlo.",
+            "Appena un po' caldo. Rilassa le mani e lascia che il clic ti tiri.",
+            "Il battito sta salendo. Respira e lascia che il prossimo clic ti incontri.",
+            "Sul limite della fretta. Appoggiati indietro e cavalca il clic.",
+            "Un tocco in anticipo. Ascolta prima il clic, poi suona."
+          ],
+          "neutral": [
+            "Tendenza a un filo in anticipo: prova a stare sul retro del beat.",
+            "Stai spingendo avanti rispetto al clic: lascia che venga a te.",
+            "Deriva in anticipo. Siediti più a fondo in ogni clic.",
+            "Ogni nota cade un po' in anticipo. Aspetta il clic.",
+            "Stai guidando il metronomo. Lascia che sia lui a guidare te.",
+            "Il passo sta salendo. Segui il clic, non spingerlo.",
+            "Le note arrivano troppo presto. Trattieni ognuna un beat in più nella testa.",
+            "Deriva in avanti. Respira e lascia che sia il clic a dare il passo."
+          ],
+          "correction": [
+            "Sei ancora inclinato in anticipo: conta i tempi intermedi e fai cadere ogni nota proprio sul clic.",
+            "La fretta resta. Rallenta, conta il levare tra un clic e l'altro.",
+            "Fermati, conta l'attacco piano, poi ricomincia a suonare.",
+            "Abbassa di qualche BPM. Fai guidare il clic prima di riportarlo su.",
+            "Le mani corrono. Fermati, respira, riparti sul prossimo beat forte.",
+            "Ripartenza: una battuta di silenzio, ascolta il clic, poi entra sul beat 1.",
+            "Abbassa il tempo di cinque BPM finché riesci a stare SUL clic.",
+            "Smetti di cercare di guidare il metronomo. Lascia che guidi lui per una battuta."
+          ]
+        },
+        "dragging_trend": {
+          "encouragement": [
+            "Sei appena dietro al clic: riporta il tempo sotto le dita.",
+            "Un leggero trascinamento. Respira e spingi di nuovo dentro il beat.",
+            "Un po' indietro: sporgiti in avanti, sei vicino.",
+            "Sei un filo in ritardo. Solleva le mani; incontra il clic in cima.",
+            "Rimani appena indietro. Spingi con dolcezza: il clic ti incontrerà.",
+            "La deriva all'indietro è piccola. Appoggiati in avanti e cavalca la parte anteriore di ogni clic.",
+            "Un tocco in ritardo. Immagina di suonare appena prima e cadrai a tempo.",
+            "Le note arrivano appena dopo il clic. Spingi un po'."
+          ],
+          "neutral": [
+            "Tendenza a un filo in ritardo: prova a suonare leggermente prima del clic.",
+            "Stai dietro al beat: spingi dentro ognuno.",
+            "Deriva in ritardo. Cerca la parte anteriore di ogni clic.",
+            "Ogni nota cade appena dopo il clic. Incontralo di petto invece.",
+            "Il metronomo ti lascia indietro. Entra dentro ogni clic.",
+            "Il passo cede. Solleva le mani e suona sopra il clic.",
+            "Note in ritardo. Punta al bordo anteriore di ogni beat.",
+            "Si vede il trascinamento. Immagina il clic mezzo tono prima di quanto pensi."
+          ],
+          "correction": [
+            "Sei ancora indietro: suona con il clic, non aspettarlo.",
+            "Il trascinamento resta. Spingi il tempo con le dita.",
+            "Fermati, ripartenza, e ricomincia da capo sul beat 1.",
+            "Abbassa un po' il tempo e agganciati. Il trascinamento passerà quando sarà facile.",
+            "Fai una battuta di pausa. Ascolta il clic, poi rientra proprio sopra il beat 1.",
+            "Ripartenza: conta l'attacco piano e suona con più slancio.",
+            "Rallenta di cinque BPM e punta alla parte anteriore di ogni clic.",
+            "Fermati, respira, poi rientra spingendo leggermente in avanti."
+          ]
+        },
+        "personal_best_streak": {
+          "encouragement": [
+            "Saldo: continua così.",
+            "La serie continua. Bene.",
+            "Sei in serie: resta lì.",
+            "Sì. Non cambiare nulla.",
+            "Lo cavalchi pulito. Resta.",
+            "Questo è il pocket: tienitelo stretto.",
+            "Bellissimo. Continua a fare proprio questo.",
+            "A occhi chiusi, continua."
+          ],
+          "neutral": [
+            "Nuovo record della sessione: saldo.",
+            "Il tratto più pulito finora. Mantienilo.",
+            "La serie migliore di oggi. Non cambiare nulla.",
+            "Il tratto pulito più lungo della sessione. Tienilo.",
+            "La serie più alta di oggi. Resta lì.",
+            "Il tratto più compatto finora: tieni questo feeling.",
+            "Il miglior timing della sessione è proprio qui.",
+            "Questo è il tuo massimo della sessione: restaci dentro."
+          ],
+          "correction": [
+            "Saldo: mantieni il tempo, non spingere ancora più veloce.",
+            "La serie è pulita. Resta a questi BPM finché non diventa automatico.",
+            "Esattamente dove vuoi vivere per un minuto.",
+            "Non accelerare ancora. Lascia che questo tempo si assesti nelle mani.",
+            "Resta a questo tempo: ancora nessuna salita. Lascia che diventi memoria muscolare.",
+            "Mantieni questo per un altro minuto prima di aggiungere velocità.",
+            "Parcheggia qui. La velocità viene dopo che questo diventa noioso.",
+            "Resisti alla voglia di spingere. Prima consolida questo tempo."
+          ]
+        },
+        "new_band_locked": {
+          "encouragement": [
+            "{bpmLow} BPM: ora sono tuoi.",
+            "Saldo a {bpmLow} BPM. Bene.",
+            "Hai tenuto questo tempo pulito: nuovo tetto.",
+            "{bpmLow} BPM ora sembra facile. Questo è progresso.",
+            "Padroneggi {bpmLow} BPM. Non perderlo.",
+            "Stabile a {bpmLow}. Questo è il nuovo pavimento.",
+            "Pulito a {bpmLow} BPM: tienilo caldo.",
+            "{bpmLow} BPM: solido. Resta qui ancora un po'."
+          ],
+          "neutral": [
+            "Suonato pulito e sostenuto a {bpmLow}–{bpmHigh} BPM per un minuto.",
+            "Fascia {bpmLow}–{bpmHigh} BPM: saldo.",
+            "Nuova fascia di BPM conquistata: {bpmLow}–{bpmHigh}.",
+            "Pulito per un minuto intero a {bpmLow}–{bpmHigh} BPM.",
+            "{bpmLow}–{bpmHigh} BPM tenuti stabili. Questa è la nuova base.",
+            "Saldo su {bpmLow}–{bpmHigh} BPM per un lungo tratto.",
+            "Hai tenuto pulita la fascia {bpmLow}–{bpmHigh}: è una vera vittoria.",
+            "Pocket sostenuto a {bpmLow}–{bpmHigh} BPM. Non perderlo adesso."
+          ],
+          "correction": [
+            "{bpmLow}–{bpmHigh} è stabile. Resta qui, poi spingi un filo.",
+            "Hai tenuto pulito {bpmLow}–{bpmHigh}. Pronto a salire quando lo sei tu.",
+            "{bpmLow}–{bpmHigh} sembra conquistato. Alla prossima sessione, parti da qui.",
+            "{bpmLow}–{bpmHigh} BPM è saldo. Non accelerare ancora.",
+            "Puoi salire da {bpmLow}–{bpmHigh}, ma guadagnatelo: prima altri due minuti puliti.",
+            "{bpmLow}–{bpmHigh} BPM è il nuovo pavimento. Non scendere sotto.",
+            "Stabile a {bpmLow}–{bpmHigh}. Sali solo quando diventa noioso.",
+            "{bpmLow}–{bpmHigh} BPM conquistati. Costruisci un paio di minuti qui prima di salire."
+          ]
+        },
+        "check_in": {
+          "encouragement": [
+            "Sei stato dentro a fondo. C'è qualcosa su cui vuoi concentrarti dopo?",
+            "Più di cinque minuti saldo. Vuoi che segnali qualcosa di specifico?",
+            "Tratto lungo: fai una pausa se vuoi, io sono qui.",
+            "Buona serie in corso. Vuoi che ascolti qualcosa in particolare?",
+            "Sei dentro da un po'. Respira se ti serve.",
+            "Finora silenzio. Dimmi su cosa stai lavorando e lo terrò d'occhio.",
+            "Ancora nulla da segnalare. Cosa vuoi che ascolti?",
+            "Pocket stabile. Continua, o cambia marcia se sei pronto."
+          ],
+          "neutral": [
+            "Cinque minuti dentro, niente da segnalare. Pocket solido. Continui o cambi focus?",
+            "Tratto silenzioso. Dimmi su cosa stai lavorando.",
+            "Lunga serie ininterrotta. C'è qualcosa su cui vuoi un riscontro?",
+            "Cinque minuti dentro. Nessun problema da segnalare: continua.",
+            "Sessione stabile. Vuoi un altro punto di vista, o restiamo sulla rotta?",
+            "Lunga serie senza scivolate. Cosa viene dopo?",
+            "Sei stato nel pocket. Fai il punto e scegli un prossimo focus.",
+            "Finora sessione silenziosa. Scegli un obiettivo se vuoi un riscontro più preciso."
+          ],
+          "correction": [
+            "Attenzione: sei dentro da un po'. Prenditi dieci minuti se le mani ne hanno bisogno.",
+            "Più di cinque minuti di fila. Ascolta il tuo corpo prima di spingere ancora.",
+            "Sessione prolungata: stira le dita, poi torna.",
+            "Mani stanche? Fai una pausa di 60 secondi prima del prossimo passaggio.",
+            "Tratto lungo: controlla polsi e spalle prima di continuare.",
+            "È ora di una pausa veloce. Mani fredde suonano male.",
+            "Fermati e stirati. Due minuti di pausa tengono solidi i prossimi venti.",
+            "Serie prolungata: dai un po' di riposo alle mani prima di spingere oltre."
+          ]
+        },
+        "fatigue": {
+          "encouragement": [
+            "La precisione è calata negli ultimi minuti. Prenditi un attimo.",
+            "Le mani si irrigidiscono? Uno stiramento veloce, poi torna fresco.",
+            "La qualità sta andando alla deriva. Fermati, respira, ritorna.",
+            "Le mani lavorano più del dovuto. Breve riposo, poi di nuovo dentro.",
+            "Sei andato avanti per un po': metti giù lo strumento per 60 secondi.",
+            "Il corpo diventa più pesante della musica. Pausa veloce.",
+            "Le dita si irrigidiscono? Scuotile, poi torna.",
+            "È ora di una breve pausa: mani fresche suonano più pulito."
+          ],
+          "neutral": [
+            "La precisione è calata negli ultimi 3 minuti a BPM costanti: probabilmente stanchezza.",
+            "Il punteggio è in calo senza cambi di tempo. Fai una pausa.",
+            "Calo di precisione prolungato agli stessi BPM: consideralo un ciclo di riposo.",
+            "Stesso tempo, precisione in calo. Le mani si stanno stancando.",
+            "La qualità cala ma il tempo non è cambiato: è stanchezza.",
+            "Gli errori salgono mentre il clic resta lo stesso. È ora di una pausa.",
+            "Tre minuti di calo a un solo tempo. Riposa le mani.",
+            "BPM costanti, precisione in calo: le tue mani ti stanno dicendo qualcosa."
+          ],
+          "correction": [
+            "Si vede la stanchezza: fermati ora, 90 secondi di pausa, poi torna.",
+            "Hai superato la tua finestra migliore. Riposa prima che la qualità cali ancora.",
+            "Riposati. Suonare stanchi insegna alle mani abitudini sbagliate.",
+            "Fermati, alzati, cammina per un minuto. Poi torna.",
+            "La qualità cala da minuti. Riposo vero: 90 secondi come minimo.",
+            "Le mani per ora hanno finito. Fermati, scuotile, bevi.",
+            "Spingere oltre la stanchezza fissa gli errori. Fermati e recupera.",
+            "Metti giù lo strumento. Due minuti di pausa, poi rivaluta."
+          ]
+        },
+        "recovery": {
+          "encouragement": [
+            "Bel recupero: resta qui.",
+            "L'hai ripreso. Tienilo.",
+            "Recuperato: mantieni proprio questo feeling.",
+            "L'hai riavuto. Restaci dentro per un minuto.",
+            "Fuori dal calo. Non cambiare nulla adesso.",
+            "Hai sentito che scivolava e l'hai riportato su. È questa l'abilità.",
+            "Recupero solido. Resta sciolto, resta qui.",
+            "L'hai preso prima che scappasse. Tieni questo feeling."
+          ],
+          "neutral": [
+            "Di nuovo pulito dopo il calo. Mantieni questo passo.",
+            "Il punteggio è risalito: tienilo.",
+            "Recupero confermato: precisione di nuovo stabile.",
+            "Di nuovo pulito dopo la scivolata. Non cambiare nulla.",
+            "La precisione è tornata dov'era. Resta stabile.",
+            "Stabilizzato dopo il calo. Mantieni questo tempo.",
+            "Hai chiuso il divario. Resta a questi BPM.",
+            "Qualità recuperata. Parcheggia qui un minuto."
+          ],
+          "correction": [
+            "Il recupero regge. Non spingere ancora il tempo.",
+            "Fuori dal calo: resta a questo tempo, ancora nessuna salita.",
+            "L'hai salvato. Mantieni esattamente questi BPM per un minuto intero.",
+            "Non premiare il recupero con un aumento di tempo. Resta qui.",
+            "Di nuovo in carreggiata. Resisti alla voglia di accelerare.",
+            "Il recupero è fresco: lascia che diventi abitudine prima di spingere.",
+            "Resta a questi BPM. Costruisci un paio di battute pulite prima di cambiare qualcosa.",
+            "Sei tornato dopo la scivolata. Non disfarlo salendo troppo presto."
+          ]
+        },
+        "recovery_confirmed": {
+          "encouragement": [
+            "L'hai riavuto.",
+            "Bel recupero: tienilo.",
+            "Di nuovo pulito.",
+            "L'hai ripreso. Resta qui."
+          ],
+          "neutral": [
+            "La precisione è tornata. Mantieni questo feeling.",
+            "Di nuovo pulito dopo il calo.",
+            "Recupero confermato. Resta stabile."
+          ],
+          "correction": [
+            "Il recupero regge: non spingere ancora il tempo.",
+            "Di nuovo in carreggiata. Resisti alla voglia di salire."
+          ]
+        },
+        "tempo_milestone": {
+          "encouragement": [
+            "{bpmLow} BPM: nuova marcia.",
+            "Oltre {bpmLow} BPM, pulito.",
+            "{bpmLow}+ e regge. Bene.",
+            "Prima volta a {bpmLow} BPM oggi. Fa bene.",
+            "Superati {bpmLow} puliti. Resta sciolto.",
+            "{bpmLow} BPM ora è nel menu.",
+            "Sei nel territorio dei {bpmLow}. Tienilo con leggerezza.",
+            "Benvenuto a {bpmLow} BPM. Fai che sembri facile."
+          ],
+          "neutral": [
+            "Superata verso l'alto la soglia dei {bpmLow} BPM.",
+            "Traguardo di tempo: ora nella fascia {bpmLow}-{bpmHigh}.",
+            "{bpmLow} BPM e in salita.",
+            "{bpmLow} BPM raggiunti. Nuova fascia: {bpmLow}-{bpmHigh}.",
+            "Entrato nell'intervallo {bpmLow}-{bpmHigh} BPM.",
+            "In salita: {bpmLow} BPM è il nuovo tempo di lavoro.",
+            "{bpmLow} BPM colpiti. Vediamo se tiene.",
+            "Tempo salito nella zona {bpmLow}-{bpmHigh}."
+          ],
+          "correction": [
+            "A {bpmLow} BPM: resta qui finché non è pulito, non spingere ancora più su.",
+            "Traguardo {bpmLow} BPM. Stabilizza prima di spingere.",
+            "Nuova fascia: {bpmLow}-{bpmHigh}. Assicurati che questa tenga prima di salire.",
+            "{bpmLow} BPM è nuovo di zecca: non accelerare finché non diventa noioso.",
+            "Guadagnati {bpmLow} BPM prima di inseguire il prossimo traguardo. Tienilo.",
+            "Parcheggia a {bpmLow} BPM. Il prossimo salto viene dopo un minuto pulito qui.",
+            "Hai toccato {bpmLow} BPM: ora consolidalo prima della prossima rampa.",
+            "{bpmLow} BPM è fresco. Resta a questo tempo e lascia che le mani si adeguino."
+          ]
+        },
+        "low_confidence": {
+          "encouragement": [
+            "Il segnale da me è un po' torbido: continua a suonare, mi adeguo.",
+            "L'audio qui è più difficile da leggere, ma suoni bene.",
+            "Faccio un po' più fatica a leggerti: continua.",
+            "Da qui è difficile sentirti pulito: non lasciare che ti distragga.",
+            "Il microfono sta captando un po' di rumore, ma stai suonando bene.",
+            "Sto captando un po' di foschia sul segnale: continua, ti ascolto.",
+            "La mia lettura dell'audio è sfocata. Però sembri a tempo.",
+            "Il segnale è un po' rumoroso. Fidati delle tue mani."
+          ],
+          "neutral": [
+            "La confidenza del rilevamento è stata più bassa negli ultimi 30 s: le letture potrebbero essere più rumorose del solito.",
+            "Confidenza più bassa sugli attacchi: il riscontro potrebbe essere impreciso in questo tratto.",
+            "Segnale audio meno chiaro; le metriche sono un po' meno affidabili.",
+            "La qualità di lettura è scesa un po'. I numeri potrebbero oscillare più del solito.",
+            "L'ingresso del microfono è più difficile da interpretare: la lettura della precisione potrebbe andare alla deriva.",
+            "Si insinua del rumore di fondo; il riscontro potrebbe arrivare con un po' di ritardo.",
+            "Chiarezza del segnale più bassa negli ultimi trenta secondi.",
+            "L'audio è più difficile da leggere: prendi le metriche con un pizzico di cautela."
+          ],
+          "correction": [
+            "Il tuo segnale è difficile da leggere: controlla il livello di ingresso o la posizione del microfono.",
+            "Il segnale è difficile da leggere. Alza il guadagno di ingresso o avvicinati al microfono.",
+            "Il rilevamento delle note è incerto: la stanza potrebbe essere troppo rumorosa.",
+            "La mia lettura di te non è affidabile. Avvicinati al microfono se puoi.",
+            "Il livello di ingresso potrebbe essere troppo basso. Controlla il misuratore prima di continuare.",
+            "Difficile distinguere i colpi dal rumore. Silenzia tutto ciò che c'è nella stanza e riprova.",
+            "Il segnale cade. Cavo o microfono USB: controlla la connessione.",
+            "La qualità dell'audio è così scarsa che la valutazione potrebbe essere falsata. Prima sistema l'ingresso."
+          ]
+        },
+        "boundary_signal_a": {
+          "encouragement": [
+            "{change}. Nuovo segmento: prenditi un attimo, trova il feeling.",
+            "{change}: azzera l'orecchio e cavalca questo.",
+            "Impostazioni cambiate: {change}. Vediamo come si sente questa nuova forma.",
+            "{change}. Nuovo segmento, nuovo inizio.",
+            "{change}: lavagna pulita, nuovo punteggio.",
+            "{change}. Respira e agganciati al nuovo feeling.",
+            "{change}. Il vecchio segmento è concluso: questo sta a sé.",
+            "{change}. Azzera l'orecchio ed entra con calma nel cambiamento."
+          ],
+          "neutral": [
+            "{change}. Qui si apre un nuovo segmento.",
+            "Segnale di confine: {change}. Il tratto successivo viene valutato a parte.",
+            "Cambio di impostazioni: {change}. Chiudo il segmento precedente.",
+            "{change}. Il punteggio del tratto successivo parte ora.",
+            "{change}: il segmento precedente è chiuso e conteggiato.",
+            "Cambio di configurazione: {change}. Nuovo segmento.",
+            "{change}. Nuovo segmento, nuove metriche.",
+            "{change}. Confine superato: il punteggio riparte."
+          ],
+          "correction": [
+            "{change}. Fai sembrare naturale il nuovo assetto prima di spingere.",
+            "{change}: vecchio segmento chiuso. Assicurati che questo sembri giusto prima di aggiungere complessità.",
+            "Impostazioni cambiate a metà segmento: {change}. La nuova configurazione viene valutata a parte.",
+            "{change}. Vai piano sul nuovo assetto: non portarti dietro le vecchie abitudini.",
+            "{change}. Assesta il nuovo feeling prima di aggiungere velocità.",
+            "{change}: azzera e tratta il prossimo tratto come un riscaldamento.",
+            "{change}. Suona semplice finché la nuova configurazione non diventa familiare.",
+            "{change}. Non spingere ancora il nuovo segmento: prima falla pulita."
+          ]
+        },
+        "stamina": {
+          "neutral": [
+            "Il punteggio cala di nuovo oltre il minuto {staminaMinutes}: fai 30 secondi di pausa, poi torna agli stessi BPM.",
+            "Oltre il minuto {staminaMinutes} la tua precisione tende a calare. Breve riposo, poi di nuovo dentro.",
+            "Tendi a calare intorno al minuto {staminaMinutes}. Fai una pausa e torna fresco.",
+            "Muro di resistenza intorno al minuto {staminaMinutes}: un breve riposo ora salva la qualità dopo."
+          ]
+        },
+        "ramp_complete": {
+          "neutral": [
+            "Rampa completata: da {startBpm} a {endBpm}. Ce l'hai fatta.",
+            "Obiettivo raggiunto: {endBpm} BPM. Sei salito da {startBpm}.",
+            "Rampa finita. {startBpm} → {endBpm} BPM completata.",
+            "L'hai tenuto fino a {endBpm} BPM. Rampa da {startBpm} completata."
+          ]
+        },
+        "pace_coaching": {
+          "neutral": [
+            "Quarta volta a {bpm}: il tetto è reale. Due sessioni a {suggestedBpm} per consolidare, poi spingi di nuovo.",
+            "Hai toccato {bpm} BPM {attemptCount} volte e non tiene. Scendi a {suggestedBpm} per una settimana, costruiscilo solido.",
+            "{attemptCount} tentativi a {bpm} BPM. Lavoro sul tetto: due sessioni a {suggestedBpm}, poi riprova.",
+            "Tetto a {bpm} BPM: {attemptCount} tentativi lo confermano. Parcheggia a {suggestedBpm} e lascia che si assesti."
+          ]
+        },
+        "preset_ceiling_hit": {
+          "neutral": [
+            "{bpmLow}–{bpmHigh} è dove questo smette di essere pulito per te: {attemptCount} sessioni in quella fascia, tutte intorno a {score}.",
+            "Sei di nuovo a {bpmLow}–{bpmHigh}. Le tue ultime {attemptCount} esecuzioni qui sono state intorno a {score}.",
+            "Lo annoto mentre suoni: {attemptCount} sessioni a {bpmLow}–{bpmHigh}, ognuna vicina a {score}.",
+            "Questo è il tempo a cui i tuoi punteggi su questo iniziano a calare. {attemptCount} sessioni qui finora.",
+            "{attemptCount} volte a {bpmLow}–{bpmHigh} ormai, intorno a {score} ogni volta. Vediamo come va oggi.",
+            "Stessa fascia dell'ultima volta: {bpmLow}–{bpmHigh}, dove questo esercizio è arrivato vicino a {score}."
+          ]
+        },
+        "grid_lost": {
+          "neutral": [
+            "La correlazione con la griglia è calata: stai ancora suonando sul clic?",
+            "Qui hai perso la griglia. Riempimento voluto, o ti stai allontanando dal clic?",
+            "La correlazione con la griglia è appena calata. Sei ancora con il metronomo?",
+            "Sembra che il groove si sia separato dal clic. Riempimento o libero?"
+          ]
+        },
+        "bias_only": {
+          "encouragement": [
+            "Timing molto costante: solo {biasMs} ms {direction}. Sposta tutto {correctionDirection} per stare sul beat.",
+            "Ottimo controllo: solo uno scarto di {biasMs} ms {direction}. Un piccolo spostamento {correctionDirection} lo centrerà."
+          ],
+          "neutral": [
+            "Cadi a {biasMs} ms {direction} sul beat: molto costante, solo spostato. Prova a spostare tutto {correctionDirection}.",
+            "Preciso e costante, ma a {biasMs} ms {direction} sul clic. Sposta il tuo attacco {correctionDirection} per centrarlo.",
+            "La dispersione del tuo timing è bassa, ma l'intero schema sta a {biasMs} ms {direction}. Spostalo {correctionDirection}.",
+            "Poco jitter, ma con uno scarto di {biasMs} ms {direction}. È una tendenza: correggi {correctionDirection} per cadere sul beat."
+          ],
+          "correction": [
+            "Scarto costante di {biasMs} ms {direction}: non casuale, solo una tendenza. Sposta tutto {correctionDirection}.",
+            "Ogni colpo cade a {biasMs} ms {direction}. È un bias di sistema, non jitter. Correggi {correctionDirection}."
+          ]
+        },
+        "boundary_signal_b": {
+          "encouragement": [
+            "Bel segmento: {score}% a {bpm} BPM. Prenditi un attimo.",
+            "{score}% a {bpm} BPM: una chiusura solida.",
+            "Chiuso questo a {score}% / {bpm} BPM. Buon punto di pausa.",
+            "{score}% a {bpm} BPM chiude qui: buon lavoro.",
+            "Segmento finito: {score}% a {bpm} BPM. Bene.",
+            "Una pausa silenziosa l'ha chiuso: {score}% a {bpm} BPM.",
+            "Chiusura pulita: {score}% a {bpm} BPM.",
+            "{score}% a {bpm} BPM. Fai una pausa."
+          ],
+          "neutral": [
+            "Segmento terminato dopo il silenzio: {score}% a {bpm} BPM.",
+            "Una pausa nell'attività ha chiuso il segmento: {score}% di punteggio.",
+            "Tratto silenzioso: segmento chiuso al {score}%.",
+            "{score}% a {bpm} BPM: segmento chiuso dalla pausa.",
+            "La pausa ha concluso il segmento: {score}%.",
+            "Segmento finito: registrato {score}% a {bpm} BPM.",
+            "Segmento chiuso a {score}% / {bpm} BPM.",
+            "{score}% a {bpm} BPM salvato. Fai il punto se vuoi."
+          ],
+          "correction": [
+            "Segmento terminato al {score}%: rivedilo prima del prossimo passaggio.",
+            "{score}% ha chiuso il segmento. Controlla cosa è scivolato prima del prossimo tentativo.",
+            "Pausa rilevata: {score}%. Riguarda il riepilogo del segmento prima di continuare.",
+            "{score}% a {bpm} BPM: vale la pena dare un'occhiata alla ripartizione.",
+            "Segmento chiuso sotto dove volevi: {score}%. Diagnostica prima di spingere.",
+            "{score}% a {bpm} BPM: rallenta al prossimo passaggio.",
+            "Chiuso al {score}%. Sistema ciò che è scivolato prima di un'altra esecuzione.",
+            "{score}% a {bpm} BPM. Leggi il riepilogo del segmento, poi riprova."
+          ]
+        },
+        "muddy_hits": {
+          "neutral": [
+            "Stai prendendo ogni beat ma il segnale è debole: prova un attacco più netto.",
+            "I beat ci sono tutti, ma il transiente è debole. Colpisci con più intenzione.",
+            "La copertura sembra buona ma i colpi sono deboli. Più forza sull'attacco.",
+            "Stai suonando attraverso il clic, solo piano. Prova a fare più contatto."
+          ]
+        },
+        "grid_discontinuity": {
+          "neutral": [
+            "Sei uscito dalla griglia: prova ad agganciarti di nuovo al clic prima della prossima frase.",
+            "Il beat si è allontanato dal clic. Riparti e trova il battito prima di continuare.",
+            "Il tracciamento della griglia è caduto: prenditi un attimo, poi rientra sul tempo forte.",
+            "Lì ti sei allontanato dal clic. Fermati, respira e agganciati di nuovo."
+          ]
+        },
+        "low_completeness": {
+          "neutral": [
+            "Stai colpendo circa metà dei beat previsti: prova a restare presente su ognuno.",
+            "La copertura è bassa: assicurati di colpire ogni beat, non solo quelli che ti vengono naturali.",
+            "Circa metà dei beat non viene suonata. Concentrati sul completare l'intero schema.",
+            "La copertura dei beat è bassa. Prova a contare ad alta voce per essere sicuro di non saltarne nessuno."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Il posizionamento sui beat è buono, ma lo spazio tra le note continua a vagare. Prova a contare le suddivisioni ad alta voce mentre suoni.",
+            "Sei sul beat in modo costante, ma la spaziatura delle note è irregolare. Batti il piede e conta le suddivisioni mentre vai.",
+            "Il timing sui beat c'è, ma la distanza tra le note cambia. Conta le crome (o le semicrome) ad alta voce per fissare la spaziatura.",
+            "Il posizionamento è solido, la spaziatura va alla deriva. Prova a rallentare finché le distanze non sembrano uniformi, poi riaccelera."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "La spaziatura delle note è uniforme, ma stai cadendo fuori dal beat. Anticipa ogni clic di un soffio e cadi proprio su di esso.",
+            "Spaziatura uniforme, ma le note sono spostate rispetto alla griglia. Concentrati nell'agganciare al beat la prima nota di ogni gruppo.",
+            "Il ritmo tra le tue note è costante: lavora su dove cadono rispetto al clic. Prova a suonare appena prima di dove ti aspetti il beat.",
+            "Buon senso della spaziatura. Ora porta l'intera frase sulla griglia: punta al centro di ogni beat."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "Posizionamento sui beat e spaziatura delle note sono entrambi saldi. Ecco il feeling.",
+            "Spaziatura e posizionamento entrambi a punto. Sessione pulita.",
+            "Entrambe le dimensioni sono solide: stai suonando esattamente dove intendi essere.",
+            "Il timing è a punto su tutta la linea. Questo è il suono di una pratica costante."
+          ]
+        },
+        "drill_step_up": {
+          "neutral": [
+            "{accuracyPct}%: tempo salito a {bpm} BPM.",
+            "Giro pulito al {accuracyPct}%. Ti porto a {bpm} BPM.",
+            "Te lo sei guadagnato: {accuracyPct}%. Ora a {bpm} BPM.",
+            "{accuracyPct}% raggiunge l'asticella: da qui {bpm} BPM.",
+            "Solido al {accuracyPct}%. Salgo a {bpm} BPM.",
+            "Bel giro: {accuracyPct}%. Prossimo {bpm} BPM.",
+            "Sale a {bpm} BPM. Hai tenuto il {accuracyPct}% nell'ultimo giro.",
+            "{accuracyPct}% dice che sei pronto. {bpm} BPM."
+          ]
+        },
+        "drill_step_down": {
+          "neutral": [
+            "{accuracyPct}%: torno a {bpm} BPM.",
+            "Quel giro è sceso al {accuracyPct}%. Scendo a {bpm} BPM.",
+            "Arretro a {bpm} BPM: {accuracyPct}% nell'ultimo giro.",
+            "{accuracyPct}%. Ricostruiamolo a {bpm} BPM.",
+            "Faccio un passo indietro a {bpm} BPM dopo il {accuracyPct}%.",
+            "{accuracyPct}% è sotto l'asticella: {bpm} BPM per il prossimo giro.",
+            "Giù a {bpm} BPM. Falla pulita prima di salire di nuovo.",
+            "Scendo a {bpm} BPM; il {accuracyPct}% ha bisogno di un terreno più fermo."
+          ]
+        }
+      },
+      "drums": {
+        "session_start_cold": {
+          "neutral": [
+            "Pronto quando lo sei tu. Comincio a seguire la cassa dal tuo primo colpo.",
+            "Mettiti comodo e inizia quando vuoi: coglierò il timing dal primo colpo.",
+            "Prenditi il tempo per scaldare le mani. Inizio ad ascoltare quando suoni.",
+            "Bello averti qui. Inizia quando le bacchette ti sembrano pronte.",
+            "Quando sei pronto, colpisci la batteria e comincio a seguire il tuo timing.",
+            "Nessuna fretta. Sciogliti, poi suona quando sei pronto.",
+            "Pronto quando lo sei tu. Ti seguo dal primo beat.",
+            "Preparati quando vuoi: ascolto dal tuo primo colpo."
+          ]
+        },
+        "session_start_returning": {
+          "neutral": [
+            "Bentornato. Ultima sessione: {lastScore} a {lastBpm} BPM. Vediamo se il groove torna in fretta.",
+            "Che bello rivederti. L'ultima volta hai fatto {lastScore} a {lastBpm} BPM: ora la cassa ha una base.",
+            "Di nuovo alla batteria. {lastScore} a {lastBpm} BPM nell'ultima sessione. Costruiamo su quello.",
+            "Bentornato: {lastScore} / {lastBpm} BPM l'ultima volta. Pronto quando lo sei tu.",
+            "Ultima sessione alla batteria: {lastScore} a {lastBpm} BPM. Continuiamo da lì.",
+            "Di nuovo qui. L'ultima volta eri a {lastScore} / {lastBpm} BPM: un buon punto di partenza.",
+            "Bentornato. {lastScore} a {lastBpm} BPM era il livello dell'ultima volta. Andiamo a prenderlo.",
+            "Bello riaverti qui. {lastScore} a {lastBpm} BPM nell'ultima sessione: si parte."
+          ]
+        },
+        "accuracy_drop": {
+          "correction": [
+            "La cassa sta andando alla deriva. Aggancia il piede destro al clic prima del rullante.",
+            "I colpi si disperdono. Riporta cassa e rullante sulla griglia.",
+            "Fermati, conta una battuta, riparti solo con il piede.",
+            "Torna a sola cassa e charleston per una battuta, poi aggiungi il rullante.",
+            "Rallenta. Suona solo il piede su ogni clic per quattro battute.",
+            "Lo schema si sta sfaldando. Lascia tutto tranne la cassa, poi rimetti gli altri strati.",
+            "Ferma tutta la batteria. Una battuta di solo clic, poi entra con il piede.",
+            "Mani e piedi non sono sincronizzati. Ricomincia sul prossimo tempo forte."
+          ]
+        },
+        "rushing_trend": {
+          "neutral": [
+            "Le bacchette arrivano prima del clic. Fai aspettare il charleston.",
+            "Sei davanti al beat: metti la cassa sul clic, non appena prima.",
+            "Il passo sta salendo. Suona il backbeat un filo più tardi di come sembra giusto."
+          ],
+          "correction": [
+            "La mano destra anticipa la cassa: tienila indietro.",
+            "Il rullante corre. Conta i sedicesimi intermedi e metti il beat 2 proprio sul clic.",
+            "Stai guidando il clic. Rallenta la mano destra: il piede seguirà.",
+            "Il charleston spinge avanti. Rilassa la mano destra e lascia che sia il clic a dare il passo.",
+            "Il rullante corre. Entra con calma nel groove e lascialo respirare.",
+            "Abbassa di qualche BPM. Fai stare cassa e rullante SUL clic prima di rialzare il tempo.",
+            "Le bacchette guidano. Trattienile: lascia che arrivi prima il metronomo.",
+            "Ferma la batteria. Batti il clic solo con il piede per una battuta, poi riporta le mani."
+          ]
+        },
+        "dragging_trend": {
+          "neutral": [
+            "Stai dietro al clic. Porta la cassa avanti a incontrarlo.",
+            "Il groove tende al ritardo: riporta il charleston sul beat.",
+            "Sei un po' indietro. Suona il rullante dove pensi che sia, non dopo."
+          ],
+          "correction": [
+            "La mano destra è in ritardo sulla cassa: spingi sul charleston.",
+            "Il rullante trascina. Anticipa un po' i beat 2 e 4, non aspettare il clic.",
+            "Spingi avanti il charleston; la cassa deve stare SUL clic, non dopo.",
+            "L'attacco delle bacchette è pesante. Solleva prima: incontra il clic in cima.",
+            "Il backbeat è in ritardo. Spingi avanti i beat 2 e 4.",
+            "Il charleston è indietro. Entra prima e suona con più rimbalzo.",
+            "Abbassa il tempo e suona con più slancio. Il trascinamento passa quando diventa facile.",
+            "Le bacchette cadono in ritardo. Immagina il clic appena più in anticipo di com'è."
+          ]
+        },
+        "personal_best_streak": {
+          "encouragement": [
+            "Cassa e rullante agganciati.",
+            "Pocket. Resta.",
+            "La serie continua: resta lì.",
+            "Gli arti si parlano. Tienilo.",
+            "Sì. Non cambiare nulla.",
+            "Questo è il groove. Siediti dentro.",
+            "Compatto. Continua.",
+            "Piedi e mani sincronizzati. Tieni."
+          ]
+        },
+        "new_band_locked": {
+          "encouragement": [
+            "Fascia {bpmLow}–{bpmHigh} BPM sostenuta: il rapporto tra cassa e rullante è agganciato.",
+            "Il pocket tiene a {bpmLow}–{bpmHigh} BPM.",
+            "Sostenuto a {bpmLow}–{bpmHigh} BPM: questo è il nuovo pavimento.",
+            "{bpmLow}–{bpmHigh} BPM tenuti puliti. Piede e mani si parlano.",
+            "Groove agganciato a {bpmLow}–{bpmHigh} BPM. Non perderlo.",
+            "{bpmLow}–{bpmHigh} BPM padroneggiati. Resta qui.",
+            "La batteria si comporta bene a {bpmLow}–{bpmHigh} BPM. Nuova base.",
+            "Pocket sostenuto a {bpmLow}–{bpmHigh} BPM per un minuto intero."
+          ]
+        },
+        "recovery": {
+          "encouragement": [
+            "Il groove è tornato. Resta qui.",
+            "Aggancio tra cassa e rullante recuperato. Tienilo.",
+            "Gli arti si parlano di nuovo: tienilo.",
+            "Hai riportato su il groove. Non cambiare nulla.",
+            "Pocket recuperato. Siediti dentro.",
+            "Piede e mani risincronizzati. Tieni.",
+            "Di nuovo al tuo posto. Resta sciolto.",
+            "Hai fermato lo scivolone prima che scappasse. Bene."
+          ]
+        },
+        "recovery_confirmed": {
+          "encouragement": [
+            "Di nuovo nel pocket.",
+            "Il groove è tornato. Tienilo.",
+            "Aggancio tra cassa e rullante: resta lì."
+          ]
+        },
+        "fatigue": {
+          "encouragement": [
+            "Le mani si irrigidiscono? Scuoti i polsi e torna.",
+            "La qualità sta andando alla deriva: alzati dallo sgabello per 60 secondi.",
+            "Gli avambracci ti parlano? Breve pausa, poi di nuovo dentro.",
+            "Le bacchette ti sembrano pesanti? Posale, stirati, poi ritorna.",
+            "L'impugnatura si irrigidisce? Allontanati dalla batteria per un minuto.",
+            "I polsi si bloccano: una scrollata veloce, poi continua.",
+            "Le mani lavorano più del dovuto. Breve riposo.",
+            "Posa le bacchette per un momento: lascia che le braccia si riazzerino."
+          ],
+          "correction": [
+            "Si vede la stanchezza: fermati ora, posa le bacchette, 90 secondi di pausa. Suonare stanchi fissa un timing sciatto.",
+            "Hai superato il picco: bacchette giù, fai un giro, poi rivaluta.",
+            "Fermati prima che la tensione prenda il sopravvento. 90 secondi di pausa, bevi, ritorna.",
+            "I polsi sono tesi. Fermati, stira gli avambracci, due minuti di pausa.",
+            "Se spingi oltre questo punto ti farai male. Riposo vero, adesso.",
+            "Smetti di suonare. Allontanati dalla batteria per un paio di minuti.",
+            "Bacchette giù. Prima gli avambracci, poi le mani, poi ritorna quando sei sciolto.",
+            "Stop deciso. Due minuti di pausa e un sorso d'acqua prima di tornare."
+          ]
+        },
+        "tempo_milestone": {
+          "encouragement": [
+            "A {bpmLow} BPM: resta qui finché la cassa non diventa automatica. Non spingere ancora più su.",
+            "Traguardo {bpmLow} BPM. Assicurati che entrambi i piedi siano puliti prima di spingere.",
+            "Nuova fascia: {bpmLow}-{bpmHigh}. Suona un colpo per beat sul clic prima di salire.",
+            "{bpmLow} BPM è nuovo. Aggancia la cassa su ogni clic prima di aggiungere i fill.",
+            "Parcheggia a {bpmLow} BPM. Il prossimo salto viene dopo un minuto pulito.",
+            "Raggiunti {bpmLow} BPM: ora costruisci un paio di battute pulite prima di salire.",
+            "{bpmLow}-{bpmHigh} BPM è nuovissimo. Resta a questo tempo e lascia che gli arti si adeguino.",
+            "Guadagnati {bpmLow} BPM prima di inseguirne altri. Tienili finché non diventa facile."
+          ]
+        },
+        "check_in": {
+          "neutral": [
+            "Lungo tratto alla batteria: c'è qualcosa di specifico su cui lavori?",
+            "Più di cinque minuti dentro. Vuoi che segnali la cassa, il charleston o entrambi?",
+            "Sei stato a fondo nel pocket. Dimmi cosa vuoi dopo.",
+            "Buona serie alla batteria. Vuoi un riscontro più preciso su qualcosa?",
+            "Sei dentro da un po'. Vuoi che ascolti la cassa, il rullante o la sincronia degli arti?",
+            "Il pocket è stato stabile. Qual è il focus da qui?",
+            "Lungo groove in corso: scegli un obiettivo e ci lavoro sopra.",
+            "Più di cinque minuti. Dimmi dove vuoi il prossimo riscontro."
+          ]
+        },
+        "ramp_complete": {
+          "neutral": [
+            "Rampa completata: da {startBpm} a {endBpm} alla batteria. Bella salita.",
+            "Arrivato a {endBpm} BPM. La cassa ha tenuto la rampa da {startBpm}.",
+            "Rampa finita. {startBpm} → {endBpm} BPM: gli arti sono rimasti agganciati.",
+            "Obiettivo raggiunto: {endBpm} BPM. L'hai portata avanti da {startBpm} alla batteria."
+          ]
+        },
+        "stamina": {
+          "neutral": [
+            "Verso il minuto {staminaMinutes} le mani si irrigidiscono. Abbassa i BPM di 5 tacche e ricostruisci.",
+            "Oltre i {staminaMinutes} minuti gli arti iniziano ad andare alla deriva. Breve pausa, poi riprendi.",
+            "La stanchezza si vede verso il minuto {staminaMinutes} alla batteria. Riposa i polsi, poi ritorna.",
+            "Tendi a perdere l'aggancio della cassa verso il minuto {staminaMinutes}. Fai una pausa per respirare."
+          ]
+        },
+        "bias_only": {
+          "neutral": [
+            "{biasMs} ms {direction} rispetto al clic, molto compatto. Sposta il tuo punto di attacco {correctionDirection}.",
+            "I colpi sono agganciati tra loro ma stanno {biasMs} ms {direction}. Sposta tutto il groove {correctionDirection}.",
+            "Poca dispersione ma sempre {direction}: porta il feeling di tutta la batteria {correctionDirection} fino al centro."
+          ]
+        },
+        "pace_coaching": {
+          "neutral": [
+            "Tetto a {bpm}: {attemptCount} tentativi. Due sessioni a {suggestedBpm} agganceranno il groove.",
+            "{attemptCount} colpi a {bpm} BPM e il punteggio della batteria resta fermo. Scendi a {suggestedBpm}, fissa bene il groove, poi spingi."
+          ]
+        },
+        "grid_lost": {
+          "neutral": [
+            "Quattro beat senza la griglia: sta arrivando un fill o sei fuori clic?",
+            "Persa la griglia lì. Fill previsto o stai solo andando alla deriva?"
+          ]
+        },
+        "muddy_hits": {
+          "neutral": [
+            "Ogni beat è arrivato ma i colpi sembrano morbidi: prova a colpire più forte nella cassa.",
+            "Buona copertura ma il colpo è leggero. Spingi attraverso la pelle, non picchiettare.",
+            "Colpisci ogni beat, solo piano. Metti più peso nel colpo.",
+            "I beat ci sono ma il segnale è debole: aumenta la velocity nel colpo verso il basso."
+          ]
+        },
+        "grid_discontinuity": {
+          "neutral": [
+            "La tua batteria si è allontanata dal clic. Rientra sul tempo forte e agganciati.",
+            "Perso il tracciamento della griglia: ferma il fill, trova il pulso, rientra pulito.",
+            "Il tempo si è allontanato dal clic. Reimposta lo schema della cassa e riaggancia.",
+            "Sei uscito dalla griglia. Fai una pausa, poi rientra con il charleston sul beat."
+          ]
+        },
+        "low_completeness": {
+          "neutral": [
+            "Stai colpendo circa metà dei beat previsti: prova a suonare ogni colpo dello schema.",
+            "La copertura è bassa: assicurati che la batteria suoni ogni beat, non solo gli accenti.",
+            "Circa metà dei beat resta non suonata. Concentrati sul completare l'intero schema di batteria.",
+            "La copertura dei beat è bassa. Conta ad alta voce e assicurati che ogni colpo abbia il suo posto."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "I tuoi colpi cadono sul beat, ma gli spazi tra un colpo e l'altro continuano a spostarsi. Conta le suddivisioni ad alta voce: lascia che sia la tua bocca a dare la griglia delle suddivisioni.",
+            "Il posizionamento del groove è solido, ma la spaziatura dei colpi è irregolare. Batti il charleston su ogni suddivisione per fissare il feeling.",
+            "Sei sul beat con costanza, ma lo spazio tra i colpi vaga. Conta i sedicesimi ad alta voce mentre suoni: lascia che le parole ancorino gli spazi.",
+            "Il posizionamento sul beat è buono, ma la spaziatura tra i colpi sta andando alla deriva. Rallenta il tempo finché gli spazi sembrano uguali, poi risali."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "La spaziatura dei colpi è regolare, ma i colpi cadono fuori dal clic. Anticipa leggermente il beat e metti cassa o rullante proprio su di esso.",
+            "Spaziatura regolare tra i colpi, ma la posizione rispetto al clic sta andando alla deriva. Aggancia prima la cassa sul tempo forte al pulso, poi costruisci intorno.",
+            "Il feeling del groove tra i colpi è costante: lavora su dove sta l'intero schema rispetto al clic. Prova a suonare proprio sopra il beat, non leggermente dietro.",
+            "La spaziatura c'è. Ora ancora lo schema alla griglia: punta a far cadere ogni colpo esattamente con il clic."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "Posizione dei colpi e spaziatura tra i colpi sono entrambe agganciate. Questa è batteria da pocket.",
+            "Spaziatura e posizione sul beat entrambe a punto. Groove solido.",
+            "Entrambe le dimensioni a punto: stai suonando con vera precisione adesso.",
+            "Il timing è agganciato su tutta la linea. È il feeling verso cui stai costruendo."
+          ]
+        },
+        "low_confidence": {
+          "neutral": [
+            "Dalla mia parte la batteria si impasta: la sto leggendo meno chiaramente del solito.",
+            "I piatti si mischiano a tutto. La mia lettura dell'ultimo mezzo minuto è approssimativa.",
+            "Ora è difficile isolare i singoli colpi dalla batteria. Prendi i numeri con cautela."
+          ]
+        },
+        "boundary_signal_a": {
+          "neutral": [
+            "{change}. Nuovo segmento da qui: la batteria riparte da zero.",
+            "{change}. Il tratto precedente è chiuso e contato.",
+            "{change}: il punteggio riparte dal prossimo colpo."
+          ]
+        },
+        "boundary_signal_b": {
+          "neutral": [
+            "Le bacchette sono rimaste giù abbastanza da chiudere il segmento: {score}% a {bpm} BPM.",
+            "La pausa ha chiuso quel tratto alla batteria: {score}% a {bpm} BPM.",
+            "{score}% a {bpm} BPM registrato per quel tratto."
+          ]
+        },
+        "preset_ceiling_hit": {
+          "neutral": [
+            "{bpmLow}–{bpmHigh} è dove questo smette di reggere: {attemptCount} sessioni, ognuna vicino a {score}.",
+            "Sei di nuovo a {bpmLow}–{bpmHigh}. La batteria è arrivata intorno a {score} qui {attemptCount} volte.",
+            "{attemptCount} sessioni a questo tempo, tutte vicino a {score}. Vale la pena saperlo mentre suoni."
+          ]
+        }
+      },
+      "electric-guitar": {
+        "session_start_cold": {
+          "neutral": [
+            "Pronto quando lo sei tu. Inizio a seguirti dalla tua prima plettrata.",
+            "Scaldati e premi play quando vuoi: inizio ad ascoltare.",
+            "Accorda, mettiti comodo, poi suona quando sei pronto.",
+            "Bello averti qui. Inizia quando la mano del plettro si sente sciolta.",
+            "Quando sei pronto: suona e inizio a cogliere il tuo timing.",
+            "Nessuna fretta. Sciogli la mano del plettro, poi inizia quando vuoi.",
+            "Pronto quando lo sei tu. Ti seguo dalla prima nota.",
+            "Preparati quando vuoi: ascolto dalla tua prima plettrata."
+          ]
+        },
+        "session_start_returning": {
+          "neutral": [
+            "Bentornato. Ultima sessione: {lastScore} a {lastBpm} BPM. Costruiamo su quella plettrata.",
+            "Che bello rivederti. L'ultima volta hai fatto {lastScore} a {lastBpm} BPM: una buona base.",
+            "Di nuovo alla chitarra. {lastScore} a {lastBpm} BPM nell'ultima sessione. Spingiamo.",
+            "Bentornato: {lastScore} / {lastBpm} BPM l'ultima volta. Pronto quando lo sei tu.",
+            "Ultima sessione: {lastScore} a {lastBpm} BPM. Riprendi da dove avevi lasciato.",
+            "Di nuovo al lavoro. {lastScore} a {lastBpm} BPM l'ultima volta: una base solida.",
+            "Bentornato. {lastScore} a {lastBpm} BPM era il livello dell'ultima sessione. Raggiungiamolo.",
+            "Bello riaverti qui. {lastScore} a {lastBpm} BPM l'ultima volta: andiamo."
+          ]
+        },
+        "accuracy_drop": {
+          "correction": [
+            "La mano del plettro sta perdendo la griglia. Appoggia il palmo sul ponte.",
+            "I colpi si disperdono. Rallenta lo schema di plettrata e accenta il beat 1.",
+            "Silenzia le corde e suona giù-su a tempo con il clic per una battuta, poi rientra.",
+            "Fermati, suona una sola corda a vuoto a tempo con il clic per quattro beat, poi rimetti il riff.",
+            "La plettrata sta andando alla deriva. Abbassa il tempo e ricostruisci da una battuta pulita.",
+            "Lo schema si sta sfaldando. Fermati, conta l'attacco piano, poi suona.",
+            "Solleva il plettro dalle corde e ascolta solo il clic per una battuta.",
+            "Rallenta di cinque BPM e suonalo pulito prima di riportare la velocità."
+          ]
+        },
+        "rushing_trend": {
+          "neutral": [
+            "La mano del plettro cade prima del clic. Lasciala aspettare.",
+            "Sei un filo avanti: ascolta il clic, poi plettra.",
+            "Le note arrivano in anticipo. Siediti più indietro in ogni beat."
+          ],
+          "correction": [
+            "Le plettrate in giù guidano: fai cadere quelle in su proprio sul clic.",
+            "La mano del plettro corre. Lascia che il metronomo guidi ogni colpo in giù.",
+            "Conta le crome intermedie e senti lo spazio tra un clic e l'altro.",
+            "Abbassa il tempo di cinque BPM e lascia che il clic tiri fuori ogni nota da te.",
+            "Fermati una battuta. Ascolta il clic, poi entra proprio sul beat 1.",
+            "Appoggia la mano destra in grembo, respira, poi ricomincia a suonare.",
+            "Le mani corrono. Silenzia le corde e batti il clic con il plettro per una battuta, prima.",
+            "Smetti di cercare di spingere il metronomo. Lascia che ti tiri lui per una battuta intera."
+          ]
+        },
+        "dragging_trend": {
+          "neutral": [
+            "Il plettro cade dietro al clic. Portalo avanti.",
+            "Sei in ritardo: inizia il colpo un attimo prima.",
+            "Ogni nota è un po' indietro. Punta alla parte anteriore del clic."
+          ],
+          "correction": [
+            "Le plettrate in su restano indietro: incontra il clic sul colpo in giù.",
+            "La mano del plettro trascina. Suona con il clic, non aspettarlo.",
+            "Lascia che sia il plettro a guidare: incontra ogni nota invece di rincorrerla.",
+            "Ogni nota cade in ritardo. Punta al bordo anteriore di ogni clic.",
+            "Abbassa un po' il tempo e suona con più slancio. Il trascinamento passa quando sembra facile.",
+            "Immagina il clic un soffio prima di quando è, e raggiungilo.",
+            "Fermati, respira, poi rientra spingendo leggermente in avanti.",
+            "Il plettro si impiglia: allenta la pressione e lascia scorrere."
+          ]
+        },
+        "personal_best_streak": {
+          "encouragement": [
+            "La plettrata è salda: continua.",
+            "Serie pulita in corso. Resta lì.",
+            "La serie regge: non cambiare nulla.",
+            "La mano destra è nel pocket. Tieni.",
+            "Questo è il feeling: tienilo.",
+            "L'attacco del plettro è uniforme. Sì.",
+            "Compatto e pulito. Non accelerare ancora.",
+            "A occhi chiusi. Continua."
+          ]
+        },
+        "new_band_locked": {
+          "encouragement": [
+            "Fascia {bpmLow}–{bpmHigh} BPM sostenuta: la mano del plettro è salda.",
+            "Il pocket della mano del plettro regge a {bpmLow}–{bpmHigh} BPM.",
+            "Sostenuto a {bpmLow}–{bpmHigh} BPM: nuovo pavimento per questo riff.",
+            "Tenuto pulito {bpmLow}–{bpmHigh} BPM. L'attacco del plettro si è assestato.",
+            "Saldo a {bpmLow}–{bpmHigh} BPM. Nuova base per questa parte.",
+            "{bpmLow}–{bpmHigh} BPM tuoi. Non scendere sotto.",
+            "L'alternanza giù-su è stabile a {bpmLow}–{bpmHigh} BPM.",
+            "Plettrata in groove a {bpmLow}–{bpmHigh} BPM per un minuto intero."
+          ]
+        },
+        "recovery": {
+          "encouragement": [
+            "La mano del plettro è tornata: tienila.",
+            "L'hai riportata su. Resta sciolto.",
+            "Recuperato: mantieni questo feeling.",
+            "Hai sentito la scivolata e l'hai riportata a posto. È questa l'abilità.",
+            "La mano destra si è riallineata. Non cambiare nulla.",
+            "Fuori dal calo. Resta rilassato.",
+            "Pocket ritrovato. Siediti dentro.",
+            "Hai preso la deriva. Tieni esattamente questo feeling."
+          ]
+        },
+        "recovery_confirmed": {
+          "encouragement": [
+            "Di nuovo pulito: resta lì.",
+            "La plettrata è tornata. Tienila.",
+            "Di nuovo sul clic. Tienilo."
+          ]
+        },
+        "fatigue": {
+          "encouragement": [
+            "Il braccio del plettro si irrigidisce? Scuotilo, poi torna.",
+            "Polso o avambraccio sembrano bloccati? Una breve pausa, poi rientra.",
+            "La tensione sale: metti giù la chitarra per 60 secondi.",
+            "La spalla si solleva? Abbassala, respira, poi riprendi.",
+            "L'attacco del plettro sta diventando più duro del necessario. Breve riposo.",
+            "La presa sul manico si stringe? Allenta, poi suona.",
+            "L'avambraccio lavora troppo: scuotilo e continua.",
+            "Prenditi 30 secondi, fai girare le spalle, poi torna."
+          ],
+          "correction": [
+            "La stanchezza si vede nell'attacco del plettro: fermati, 90 secondi di riposo per il braccio. Plettrare stanchi crea tensione.",
+            "Hai superato il picco: chitarra giù, stira il polso, poi rientra.",
+            "Fermati prima che i tendini comincino a lamentarsi. 90 secondi lontano dalle corde.",
+            "Il polso è sotto sforzo. Metti giù la chitarra, stira l'avambraccio, due minuti di pausa.",
+            "Riposo vero: chitarra sul supporto, cammina un po'.",
+            "Il braccio del plettro per ora ha finito. 90 secondi come minimo, poi ricontrolla.",
+            "Fermati. Cerchi con il polso, stiramenti dell'avambraccio, poi torna fresco.",
+            "Se spingi oltre ti procurerai un infortunio. Stop netto."
+          ]
+        },
+        "tempo_milestone": {
+          "encouragement": [
+            "A {bpmLow} BPM: assicurati che le plettrate in su siano forti quanto quelle in giù prima di spingere.",
+            "Traguardo {bpmLow} BPM. Resta qui finché l'attacco del plettro non è uniforme.",
+            "Nuova fascia: {bpmLow}-{bpmHigh}. Plettra giù-su su una sola corda a vuoto prima di salire.",
+            "{bpmLow} BPM è nuovo. Resta a questo tempo e lascia che la mano destra si assesti.",
+            "Parcheggia a {bpmLow} BPM. Il prossimo salto viene dopo un minuto pulito.",
+            "Guadagnati {bpmLow} BPM prima di inseguire altro. Tienilo finché non diventa noioso.",
+            "Hai toccato {bpmLow} BPM: ora costruisci un paio di battute pulite prima di salire.",
+            "{bpmLow}-{bpmHigh} BPM è nuovissimo. Non accelerare finché non diventa automatico."
+          ]
+        },
+        "check_in": {
+          "neutral": [
+            "Lungo tratto con la chitarra: riff, accordi, qualcosa di specifico?",
+            "Più di cinque minuti dentro. Vuoi che segnali la plettrata, il ritmo, o entrambi?",
+            "Sei stato concentrato. Dimmi su cosa vuoi un riscontro.",
+            "Serie solida in corso. Vuoi un riscontro più preciso su una sezione?",
+            "Sei dentro da un po'. Plettrata? Strumming? Dimmi dove ascoltare.",
+            "Il pocket è stato stabile. Scegli un obiettivo se vuoi un riscontro più vicino.",
+            "Lungo tratto con la chitarra. C'è qualcosa che vuoi che segnali?",
+            "Sei stato immerso. Dimmi cosa ascoltare dopo."
+          ]
+        },
+        "ramp_complete": {
+          "neutral": [
+            "Arrivato a {endBpm}. Bella rampa da {startBpm}: l'attacco del plettro è rimasto uniforme.",
+            "Rampa finita: da {startBpm} a {endBpm}. La mano del plettro ha retto la salita.",
+            "Obiettivo raggiunto: {endBpm} BPM. Hai plettrato per tutta la rampa da {startBpm}.",
+            "{endBpm} BPM raggiunti. Rampa da {startBpm} completata: plettrata pulita."
+          ]
+        },
+        "stamina": {
+          "neutral": [
+            "Oltre il minuto {staminaMinutes} la mano del plettro si irrigidisce. Scuotila, poi riprendi.",
+            "Intorno al minuto {staminaMinutes} l'attacco del plettro comincia a scivolare. Breve pausa, poi rientra.",
+            "Muro di resistenza al minuto {staminaMinutes}: la mano destra si stringe. Riposa 30 secondi.",
+            "Tendi a perdere mordente nella plettrata intorno al minuto {staminaMinutes}. Breve riposo, poi torna."
+          ]
+        },
+        "bias_only": {
+          "neutral": [
+            "Le tue note cadono costantemente a {biasMs} ms {direction} rispetto al clic. Sposta tutta la frase {correctionDirection}: è una tendenza del timing, non caos.",
+            "Ogni colpo cade a {biasMs} ms {direction}. È una tendenza costante: sposta il tuo timing {correctionDirection} per centrarlo.",
+            "Dispersione bassa, {biasMs} ms {direction}. Sposta il tuo timing {correctionDirection} per cadere sul clic."
+          ]
+        },
+        "pace_coaching": {
+          "neutral": [
+            "{attemptCount} tentativi a {bpm} e il punteggio non si muove. Scendi a {suggestedBpm}, consolida, poi spingi di nuovo.",
+            "Tetto confermato a {bpm}: {attemptCount} prove. Parcheggia a {suggestedBpm} per una settimana e costruiscilo solido."
+          ]
+        },
+        "grid_lost": {
+          "neutral": [
+            "Lì hai perso la griglia: riempimento o libero? Se è voluto, ignorami.",
+            "La correlazione si è staccata dal clic: stavi facendo un riempimento?"
+          ]
+        },
+        "muddy_hits": {
+          "neutral": [
+            "Prendi i beat ma l'attacco del plettro è leggero: prova un colpo più deciso.",
+            "Buona copertura, transiente debole. Porta il plettro attraverso la corda.",
+            "Ogni beat c'è, ma piano. Un attacco più duro rende il segnale più netto.",
+            "I beat ci sono tutti: affonda solo di più con il plettro per un attacco più pulito."
+          ]
+        },
+        "grid_discontinuity": {
+          "neutral": [
+            "La tua plettrata si è allontanata dal clic. Silenzia e rientra sul tempo forte.",
+            "Il tracciamento della griglia è caduto: ferma il riff, trova il battito, poi rientra.",
+            "Lì sei uscito dal tempo. Lascia respirare il clic e riaggancia il tuo strumming.",
+            "Il plettro si è allontanato dalla griglia. Prenditi un beat e rientra sull'uno."
+          ]
+        },
+        "low_completeness": {
+          "neutral": [
+            "Stai plettrando circa metà dei beat previsti: prova a colpire ogni nota della frase.",
+            "La copertura è bassa: assicurati che ogni beat riceva una plettrata, non solo quelli che ti vengono bene.",
+            "Circa metà dei beat non viene suonata. Concentrati sul completare l'intero riff.",
+            "La copertura dei beat è bassa. Rallenta se serve e assicurati che ogni beat cada."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Il posizionamento delle note è solido, ma lo spazio tra una nota e l'altra continua a vagare. Prova a contare le suddivisioni ad alta voce mentre plettri.",
+            "Sei preciso sul beat, ma la distanza tra le plettrate è irregolare. Batti il piede su ogni suddivisione per fissare la spaziatura.",
+            "Il timing sui beat c'è, ma lo spazio tra le note cambia. Conta le semicrome ad alta voce mentre suoni e lascia che sia la tua bocca a dare la griglia.",
+            "Il posizionamento è saldo, la spaziatura va alla deriva. Rallenta il riff finché le distanze non sembrano uniformi, poi riaccelera."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "La tua spaziatura è davvero uniforme, ma cadi fuori dal beat. Anticipa il clic di un soffio e fai cadere ogni nota proprio su di esso.",
+            "Spaziatura uniforme tra le note, ma i colpi sono spostati rispetto alla griglia. Aggancia al beat la prima nota di ogni riff, poi lascia che il resto segua.",
+            "Il ritmo tra le tue note è costante: ora porta l'intero riff sul clic. Punta al centro di ogni beat, non al bordo.",
+            "Buon senso della spaziatura. Concentrati su dove cade ogni nota rispetto al clic: suona appena prima di dove ti aspetti il beat."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "Spaziatura e posizionamento entrambi saldi. Ecco il groove.",
+            "Spaziatura delle note e posizionamento sul beat entrambi a punto. Riff pulito.",
+            "Entrambe le dimensioni sono a punto: stai suonando esattamente dove intendi essere.",
+            "Il timing è saldo su tutta la linea. Così dovrebbe sentirsi il riff."
+          ]
+        },
+        "low_confidence": {
+          "neutral": [
+            "Il tuo segnale da me è rumoroso: leggo questo tratto con meno chiarezza.",
+            "Per ora è difficile distinguere le note plettrate dal rumore delle corde. Prendi i numeri con cautela.",
+            "L'ingresso è torbido da mezzo minuto. La mia lettura è meno netta del solito."
+          ]
+        },
+        "boundary_signal_a": {
+          "neutral": [
+            "{change}. Da qui un nuovo segmento.",
+            "{change}. Il tratto precedente è chiuso e conteggiato.",
+            "{change}: il punteggio riparte dalla prossima nota."
+          ]
+        },
+        "boundary_signal_b": {
+          "neutral": [
+            "La pausa ha chiuso il segmento: {score}% a {bpm} BPM.",
+            "Le corde sono rimaste silenziose abbastanza da chiuderlo: {score}% a {bpm} BPM.",
+            "{score}% a {bpm} BPM registrato per quel tratto."
+          ]
+        },
+        "preset_ceiling_hit": {
+          "neutral": [
+            "{bpmLow}–{bpmHigh} è dove questo smette di essere pulito per te: {attemptCount} sessioni, ognuna vicina a {score}.",
+            "Sei di nuovo a {bpmLow}–{bpmHigh}. Le tue ultime {attemptCount} esecuzioni qui sono state intorno a {score}.",
+            "{attemptCount} sessioni a questo tempo, tutte vicine a {score}. Vediamo come va oggi."
+          ]
+        }
+      },
+      "acoustic-guitar": {
+        "session_start_cold": {
+          "neutral": [
+            "Pronto quando lo sei tu. Inizio a seguirti dalla tua prima strimpellata.",
+            "Accorda e inizia quando vuoi: ascolto dalla prima nota.",
+            "Strimpella qualche accordo a vuoto, poi suona quando sei pronto.",
+            "Bello averti qui. Inizia quando la mano dello strumming si sente sciolta.",
+            "Quando sei pronto: suona e inizio a cogliere il tuo timing.",
+            "Nessuna fretta. Sciogli il braccio dello strumming, poi inizia.",
+            "Pronto quando lo sei tu. Ti seguo dalla prima strimpellata.",
+            "Preparati e inizia quando vuoi: sono in ascolto."
+          ]
+        },
+        "session_start_returning": {
+          "neutral": [
+            "Bentornato. Ultima sessione: {lastScore} a {lastBpm} BPM. Costruiamo su quello.",
+            "Che bello rivederti. L'ultima volta hai fatto {lastScore} a {lastBpm} BPM: una buona base.",
+            "Di nuovo con l'acustica. {lastScore} a {lastBpm} BPM nell'ultima sessione. Continuiamo così.",
+            "Bentornato: {lastScore} / {lastBpm} BPM l'ultima volta. Pronto quando lo sei tu.",
+            "Ultima sessione: {lastScore} a {lastBpm} BPM. Riprendi da dove avevi lasciato.",
+            "Di nuovo al lavoro. {lastScore} a {lastBpm} BPM l'ultima volta: un punto di partenza solido.",
+            "Bentornato. {lastScore} a {lastBpm} BPM era il livello dell'ultima sessione. Raggiungiamolo.",
+            "Bello riaverti qui. {lastScore} a {lastBpm} BPM l'ultima volta: andiamo."
+          ]
+        },
+        "accuracy_drop": {
+          "correction": [
+            "La mano dello strumming sta perdendo la griglia. Aggancia prima il tempo forte.",
+            "I colpi si disperdono. Addolcisci lo strumming e accenta il tempo forte.",
+            "Solo colpi in giù sulle corde a vuoto a tempo con il clic, poi rientra.",
+            "Fermati, suona un solo accordo a ogni clic per una battuta, poi aggiungi lo schema.",
+            "Lascia lo schema. Un colpo in giù per clic per quattro beat, poi ricomincia a sovrapporre.",
+            "Rallenta. Fai pulito un accordo per clic prima di aggiungere i colpi in su.",
+            "Fermati e respira. Trova il clic, poi ricomincia da capo.",
+            "Abbassa il tempo di cinque BPM e suonalo pulito."
+          ]
+        },
+        "rushing_trend": {
+          "neutral": [
+            "Il colpo in giù arriva prima del clic. Lascialo aspettare.",
+            "Il braccio dello strumming anticipa un po': ascolta il clic, poi muoviti.",
+            "Sei un filo in anticipo. Lascia che il clic tiri fuori da te lo strumming."
+          ],
+          "correction": [
+            "Il braccio dello strumming guida: fai cadere il colpo in giù proprio sul clic.",
+            "La mano dello strumming corre. Lascia che sia il clic a guidare lo strumming.",
+            "Conta i tempi intermedi e senti lo spazio tra un clic e l'altro.",
+            "Abbassa il tempo di cinque BPM e lascia che il clic tiri fuori da te ogni colpo.",
+            "Fermati una battuta. Ascolta il clic, poi entra sul beat 1.",
+            "Abbassa il braccio dello strumming lungo il fianco, respira, poi ricomincia.",
+            "Le mani corrono. Silenzia le corde e batti il clic con il plettro per una battuta.",
+            "Smetti di cercare di spingere il metronomo. Lascia che ti tiri lui per una battuta intera."
+          ]
+        },
+        "dragging_trend": {
+          "neutral": [
+            "Lo strumming cade dietro al clic. Portalo avanti.",
+            "Il braccio dello strumming resta indietro: inizia il colpo un attimo prima.",
+            "Sei in ritardo. Punta il colpo in giù alla parte anteriore del clic."
+          ],
+          "correction": [
+            "Lo strumming resta indietro: incontra il clic sul colpo in giù.",
+            "La mano dello strumming trascina. Suona con il clic, non aspettarlo.",
+            "Dai più slancio allo strumming e incontra il clic sul colpo in giù.",
+            "Ogni colpo cade in ritardo. Punta al bordo anteriore di ogni clic.",
+            "Abbassa il tempo e suona con più slancio. Il trascinamento passerà quando sembrerà facile.",
+            "Immagina il clic un soffio prima di quando è, e raggiungilo.",
+            "Fermati, respira, poi rientra spingendo leggermente in avanti.",
+            "Lo strumming si impiglia: allenta e lascia scorrere."
+          ]
+        },
+        "personal_best_streak": {
+          "encouragement": [
+            "Lo strumming è saldo: continua.",
+            "Bel groove in corso. Resta.",
+            "La serie regge: resta lì.",
+            "La mano destra è nel pocket. Tieni.",
+            "Questo è il feeling: tienilo.",
+            "L'equilibrio giù-su è giusto. Sì.",
+            "Compatto e uniforme. Non accelerare ancora.",
+            "A occhi chiusi. Continua."
+          ]
+        },
+        "new_band_locked": {
+          "encouragement": [
+            "Fascia {bpmLow}–{bpmHigh} BPM sostenuta: lo strumming è saldo.",
+            "Il pocket dello strumming regge a {bpmLow}–{bpmHigh} BPM.",
+            "Sostenuto a {bpmLow}–{bpmHigh} BPM: nuovo pavimento per questo schema.",
+            "Tenuto pulito {bpmLow}–{bpmHigh} BPM. Lo strumming si è assestato.",
+            "Saldo a {bpmLow}–{bpmHigh} BPM. Nuova base per questo schema.",
+            "{bpmLow}–{bpmHigh} BPM tuoi. Non scendere sotto.",
+            "L'alternanza giù-su è stabile a {bpmLow}–{bpmHigh} BPM.",
+            "Schema in groove a {bpmLow}–{bpmHigh} BPM per un minuto intero."
+          ]
+        },
+        "recovery": {
+          "encouragement": [
+            "Lo strumming è tornato sulla griglia. Tienilo.",
+            "Hai riportato lo schema a posto. Resta sciolto.",
+            "Recuperato: mantieni questo feeling.",
+            "Hai sentito la scivolata e l'hai riportato a posto. È questa l'abilità.",
+            "La mano destra si è riallineata. Non cambiare nulla.",
+            "Fuori dal calo. Resta sciolto.",
+            "Lo schema è di nuovo pulito. Siediti dentro.",
+            "Hai preso la deriva. Tieni esattamente questo feeling."
+          ]
+        },
+        "recovery_confirmed": {
+          "encouragement": [
+            "Di nuovo in carreggiata.",
+            "Lo strumming è di nuovo pulito. Tienilo.",
+            "L'hai riportato su. Resta lì."
+          ]
+        },
+        "fatigue": {
+          "encouragement": [
+            "Il braccio dello strumming si irrigidisce? Scuotilo, poi torna.",
+            "Il polso sembra bloccato? Un veloce stiramento, poi rientra.",
+            "La tensione si insinua nello strumming: chitarra giù per 60 secondi.",
+            "La spalla si solleva? Abbassala, respira, poi continua.",
+            "Lo strumming sta diventando più pesante del necessario. Breve riposo.",
+            "La presa sul manico si stringe? Allenta, poi suona.",
+            "L'avambraccio lavora troppo: scuotilo e continua.",
+            "Prenditi 30 secondi, fai girare le spalle, poi torna."
+          ],
+          "correction": [
+            "La stanchezza si vede nello strumming: fermati, 90 secondi lontano dalle corde.",
+            "Hai superato il picco: metti giù la chitarra, stira il polso, poi torna.",
+            "Strimpellare stanchi seppellisce le dinamiche. Fermati, riposa, ricomincia.",
+            "Il braccio dello strumming è sotto sforzo. Metti giù la chitarra, stira l'avambraccio, due minuti di pausa.",
+            "Riposo vero: chitarra sul supporto, cammina un po'.",
+            "La mano dello strumming ha finito. 90 secondi come minimo, poi ricontrolla.",
+            "Stop netto. Cerchi con il polso, stiramenti dell'avambraccio, poi continua quando sei sciolto.",
+            "Se spingi oltre ti procurerai un infortunio. Fermati e recupera."
+          ]
+        },
+        "tempo_milestone": {
+          "encouragement": [
+            "A {bpmLow} BPM: assicurati che ogni colpo abbia lo stesso peso prima di salire.",
+            "Traguardo {bpmLow} BPM. Resta qui finché l'equilibrio giù-su non è uniforme.",
+            "Nuova fascia: {bpmLow}-{bpmHigh}. Prova prima lo schema su un solo accordo, poi passa avanti.",
+            "{bpmLow} BPM è nuovo. Resta a questo tempo finché lo strumming non sembra facile.",
+            "Parcheggia a {bpmLow} BPM. Il prossimo salto viene dopo un minuto pulito.",
+            "Hai toccato {bpmLow} BPM: ora costruisci un paio di battute pulite prima di salire.",
+            "{bpmLow}-{bpmHigh} BPM è nuovissimo. Tienilo finché non diventa noioso.",
+            "Guadagnati {bpmLow} BPM prima di inseguire altro. Resta qui."
+          ]
+        },
+        "check_in": {
+          "neutral": [
+            "Lungo tratto con l'acustica: accordi, fingerpicking, qualcosa di specifico?",
+            "Più di cinque minuti dentro. Vuoi che segnali lo strumming o i cambi di accordo?",
+            "Sei stato concentrato. Dimmi su cosa vuoi un riscontro.",
+            "Serie solida in corso. Vuoi un riscontro più preciso su una sezione?",
+            "Sei dentro da un po'. Strumming? Cambi di accordo? Dimmi dove ascoltare.",
+            "Il pocket è stato stabile. Scegli un obiettivo se vuoi un riscontro più vicino.",
+            "Lungo tratto con l'acustica. C'è qualcosa che vuoi che segnali?",
+            "Sei stato immerso. Dimmi cosa ascoltare dopo."
+          ]
+        },
+        "ramp_complete": {
+          "neutral": [
+            "Rampa finita: da {startBpm} a {endBpm}. Lo strumming ha retto la salita.",
+            "Arrivato a {endBpm} BPM. Hai strimpellato per tutta la rampa da {startBpm}.",
+            "Obiettivo raggiunto: {endBpm} BPM. Rampa da {startBpm} completata: lo schema è rimasto.",
+            "{endBpm} BPM raggiunti. Bella rampa da {startBpm} sull'acustica."
+          ]
+        },
+        "stamina": {
+          "neutral": [
+            "La pressione della mano sui tasti sale intorno al minuto {staminaMinutes}. Riposa 30 secondi e riparti.",
+            "Intorno al minuto {staminaMinutes} il braccio dello strumming si irrigidisce. Breve pausa, poi rientra.",
+            "Oltre il minuto {staminaMinutes} la tua precisione tende a calare. Breve riposo, poi riprendi.",
+            "La stanchezza si vede al minuto {staminaMinutes} sull'acustica. Prenditi una pausa."
+          ]
+        },
+        "bias_only": {
+          "neutral": [
+            "Il colpo cade costantemente a {biasMs} ms {direction}. Non è caos: sposta il tuo timing {correctionDirection} per centrarlo.",
+            "Tendenza costante: {biasMs} ms {direction}. Sposta tutta la frase {correctionDirection} e sarai centrato."
+          ]
+        },
+        "pace_coaching": {
+          "neutral": [
+            "{attemptCount} tentativi a {bpm} e non si assesta. Prova {suggestedBpm} per due sessioni, poi ci torni.",
+            "Tetto confermato a {bpm}: scendi a {suggestedBpm} e lascia che la mano sui tasti ti raggiunga."
+          ]
+        },
+        "grid_lost": {
+          "neutral": [
+            "Lì hai perso la griglia. Riempimento o improvvisazione? Se è voluto, continua.",
+            "La correlazione si è staccata dal clic: stai facendo un riempimento?"
+          ]
+        },
+        "muddy_hits": {
+          "neutral": [
+            "Prendi ogni beat ma l'attacco è leggero: prova uno strumming o una plettrata più decisi.",
+            "Buona copertura, colpi deboli. Più forza del polso attraverso le corde.",
+            "I beat ci sono tutti, solo piano. Attraversa le corde con più intenzione.",
+            "Prendi i beat ma piano: prova un attacco più netto sul colpo in giù."
+          ]
+        },
+        "grid_discontinuity": {
+          "neutral": [
+            "Il tuo strumming si è allontanato dal clic. Fermati e rientra sul tempo forte.",
+            "Il tracciamento della griglia è caduto: lascia correre il clic per una battuta, poi rientra con lo strumming.",
+            "Lì sei uscito dal tempo. Smorza le corde e riaggancia il clic.",
+            "Lo schema di strumming si è allontanato dalla griglia. Respira e rientra pulito."
+          ]
+        },
+        "low_completeness": {
+          "neutral": [
+            "Stai strimpellando circa metà dei beat previsti: prova a colpire ogni beat dello schema.",
+            "La copertura è bassa: assicurati che ogni beat riceva un colpo, non solo quelli forti.",
+            "Circa metà dei beat non viene suonata. Concentrati sul completare l'intero schema di strumming.",
+            "La copertura dei beat è bassa. Conta ad alta voce e assicurati che ogni tempo forte e ogni levare cadano."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Il tuo strumming cade bene sul beat, ma lo spazio tra i colpi continua a cambiare. Prova a contare le suddivisioni ad alta voce mentre strimpelli.",
+            "Sei costantemente sul beat, ma la distanza tra i colpi è irregolare. Batti il piede su ogni suddivisione per fissare la spaziatura.",
+            "Il posizionamento sui beat è saldo, ma la spaziatura tra i colpi vaga. Conta le suddivisioni ad alta voce e lascia che sia la tua voce a tenere lo schema uniforme.",
+            "Buon posizionamento sui beat, ma lo spazio tra i colpi va alla deriva. Rallenta lo schema finché le distanze non sembrano uguali, poi riaccelera."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "La spaziatura dei tuoi colpi è uniforme, ma cadi fuori dal beat. Anticipa il clic di un soffio e fai cadere ogni colpo proprio su di esso.",
+            "Spaziatura uniforme tra i colpi, ma lo schema è spostato rispetto alla griglia. Aggancia al beat il colpo in giù di ogni battuta, poi lascia che il resto segua.",
+            "Il ritmo tra i colpi è costante: ora ancora l'intero schema al clic. Punta al centro di ogni beat.",
+            "Buon senso della spaziatura. Concentrati su dove cade ogni colpo rispetto al clic: suona appena prima di dove ti aspetti il beat."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "Spaziatura dei colpi e posizionamento sul beat entrambi saldi. Questo è uno schema di strumming pulito.",
+            "Spaziatura e posizionamento entrambi a punto. Lo schema sta esattamente dove dovrebbe.",
+            "Entrambe le dimensioni sono a punto: stai suonando con vera precisione adesso.",
+            "Timing saldo su tutta la linea. Questo è il feeling di strumming che vuoi."
+          ]
+        },
+        "low_confidence": {
+          "neutral": [
+            "La stanza affolla il tuo segnale: leggo questo tratto con meno chiarezza.",
+            "Per ora è difficile distinguere lo strumming dal rumore della stanza. Prendi i numeri con cautela.",
+            "Il tuo suono mi arriva torbido da mezzo minuto. La mia lettura è meno netta del solito."
+          ]
+        },
+        "boundary_signal_a": {
+          "neutral": [
+            "{change}. Da qui un nuovo segmento.",
+            "{change}. Il tratto precedente è chiuso e conteggiato.",
+            "{change}: il punteggio riparte dal prossimo colpo."
+          ]
+        },
+        "boundary_signal_b": {
+          "neutral": [
+            "La pausa ha chiuso il segmento: {score}% a {bpm} BPM.",
+            "Lo strumming si è fermato abbastanza a lungo da chiuderlo: {score}% a {bpm} BPM.",
+            "{score}% a {bpm} BPM registrato per quel tratto."
+          ]
+        },
+        "preset_ceiling_hit": {
+          "neutral": [
+            "{bpmLow}–{bpmHigh} è dove questo smette di essere pulito per te: {attemptCount} sessioni, ognuna vicina a {score}.",
+            "Sei di nuovo a {bpmLow}–{bpmHigh}. Le tue ultime {attemptCount} esecuzioni qui sono state intorno a {score}.",
+            "{attemptCount} sessioni a questo tempo, tutte vicine a {score}. Vediamo come va oggi."
+          ]
+        }
+      },
+      "bass": {
+        "session_start_cold": {
+          "neutral": [
+            "Pronto quando lo sei tu. Inizio a seguirti dalla tua prima pizzicata.",
+            "Scaldati e inizia quando vuoi: comincio ad ascoltare dalla prima nota.",
+            "Sciogli la mano che pizzica, poi suona quando sei pronto.",
+            "Bello averti qui. Inizia quando le dita si sentono sciolte.",
+            "Quando sei pronto: suona e comincio a cogliere il tuo timing.",
+            "Nessuna fretta. Sciogli la mano destra, poi inizia quando vuoi.",
+            "Pronto quando lo sei tu. Ti seguo dalla prima pizzicata.",
+            "Preparati quando vuoi: ascolto dalla tua prima nota."
+          ]
+        },
+        "session_start_returning": {
+          "neutral": [
+            "Bentornato. Ultima sessione: {lastScore} a {lastBpm} BPM. Costruiamo su quel groove.",
+            "Che bello rivederti. L'ultima volta hai fatto {lastScore} a {lastBpm} BPM: una linea di basso solida.",
+            "Di nuovo al basso. {lastScore} a {lastBpm} BPM nell'ultima sessione. Continuiamo così.",
+            "Bentornato: {lastScore} / {lastBpm} BPM l'ultima volta. Pronto quando lo sei tu.",
+            "Ultima sessione: {lastScore} a {lastBpm} BPM. Riprendi il groove.",
+            "Di nuovo al lavoro. {lastScore} a {lastBpm} BPM l'ultima volta: un buon punto di partenza.",
+            "Bentornato. {lastScore} a {lastBpm} BPM era il traguardo dell'ultima sessione. Raggiungiamolo.",
+            "Bello riaverti qui. {lastScore} a {lastBpm} BPM l'ultima volta: andiamo."
+          ]
+        },
+        "accuracy_drop": {
+          "correction": [
+            "La mano destra si sta staccando dalla cassa. Riparti dal beat 1.",
+            "I colpi si disperdono. Rallenta la diteggiatura e agganciati alla cassa.",
+            "Fermati, suona solo le fondamentali a tempo con il clic, poi aggiungi la linea.",
+            "Lascia tutto tranne la fondamentale e il clic per una battuta, poi torna alla linea.",
+            "Torna a una nota per clic. Ricostruisci la linea da lì.",
+            "Ferma la linea. Resta con il clic per quattro beat, poi rientra.",
+            "Abbassa il tempo di qualche BPM e suonalo pulito.",
+            "Rallenta. Fai la fondamentale su ogni clic prima di aggiungere qualcosa di elaborato."
+          ]
+        },
+        "rushing_trend": {
+          "neutral": [
+            "La mano che pizzica arriva prima del clic. Lascia che il clic venga da te.",
+            "La linea sta passando avanti: tieni ogni fondamentale un attimo di più.",
+            "Sei un filo in anticipo. Suona la nota dove sta il clic, non prima."
+          ],
+          "correction": [
+            "La mano che pizzica guida la cassa: trattienila.",
+            "La mano destra corre. Siediti più a fondo dietro al beat con il batterista.",
+            "Conta i tempi intermedi: metti ogni pizzicata proprio sul clic, non prima.",
+            "Abbassa il tempo di cinque BPM e lascia che il clic tiri fuori ogni nota da te.",
+            "Tira indietro la mano destra. Prima deve cadere la cassa, poi la tua nota.",
+            "Fermati, conta l'attacco piano, poi suona proprio sopra il clic.",
+            "Le mani corrono. Silenzia le corde e batti il clic con un dito, prima.",
+            "Fermati una battuta. Ascolta il clic, poi entra sul beat 1."
+          ]
+        },
+        "dragging_trend": {
+          "neutral": [
+            "La linea sta dietro al clic. Portala su.",
+            "Cadi in ritardo: inizia la pizzicata un attimo prima.",
+            "Ogni fondamentale arriva dopo il beat. Punta alla sua parte anteriore."
+          ],
+          "correction": [
+            "Le pizzicate restano indietro rispetto alla cassa: spingi leggermente dentro ogni nota.",
+            "La mano destra trascina. Suona con il clic, non aspettare che cada la cassa.",
+            "Solleva prima il dito che pizzica: incontra il clic sul fronte della nota.",
+            "Ogni nota cade in ritardo. Punta al bordo anteriore di ogni clic.",
+            "Spingi dall'avambraccio: il dito si fa pesante.",
+            "Abbassa un po' il tempo e suona con più slancio. Il trascinamento passa.",
+            "Immagina il clic un soffio prima di quando è, e raggiungilo.",
+            "Fermati, respira, poi rientra spingendo leggermente in avanti."
+          ]
+        },
+        "personal_best_streak": {
+          "encouragement": [
+            "Agganciato alla cassa.",
+            "Pocket. Resta.",
+            "Serie in corso: resta lì.",
+            "Sì. Non cambiare nulla.",
+            "La mano destra è nel pocket. Tieni.",
+            "Basso e clic ora sono una cosa sola. Tienilo.",
+            "Compatto. Siediti dentro.",
+            "Questo è il groove: resta lì."
+          ]
+        },
+        "new_band_locked": {
+          "encouragement": [
+            "Fascia {bpmLow}–{bpmHigh} BPM sostenuta: l'aggancio basso-cassa è solido.",
+            "Il pocket sulle fondamentali regge a {bpmLow}–{bpmHigh} BPM.",
+            "Sostenuto a {bpmLow}–{bpmHigh} BPM: nuovo pavimento per questo groove.",
+            "Tenuto pulito {bpmLow}–{bpmHigh} BPM. La mano destra si è assestata.",
+            "Saldo a {bpmLow}–{bpmHigh} BPM. Non scendere sotto.",
+            "{bpmLow}–{bpmHigh} BPM tuoi. Nuova base.",
+            "Basso e clic insieme a {bpmLow}–{bpmHigh} BPM. Solido.",
+            "Pocket sostenuto a {bpmLow}–{bpmHigh} BPM per un minuto intero."
+          ]
+        },
+        "recovery": {
+          "encouragement": [
+            "Di nuovo nel pocket. Resta.",
+            "Hai riportato su la linea. Tienila.",
+            "Aggancio basso-cassa recuperato. Tienilo.",
+            "La mano destra si è riallineata. Non cambiare nulla.",
+            "Hai preso la scivolata. Siediti dentro.",
+            "Il pocket è tornato. Resta sciolto.",
+            "Il recupero è pulito. Tieni esattamente questo feeling.",
+            "Riportato a casa. Resta lì per un minuto."
+          ]
+        },
+        "recovery_confirmed": {
+          "encouragement": [
+            "Il groove è tornato.",
+            "Aggancio basso-cassa: tienilo.",
+            "Di nuovo nel pocket. Resta."
+          ]
+        },
+        "fatigue": {
+          "encouragement": [
+            "Le dita che pizzicano si irrigidiscono? Un veloce stiramento e rientra.",
+            "L'avambraccio comincia a bloccarsi? Basso giù per 60 secondi.",
+            "La tensione sale nella mano destra? Breve pausa, poi rientra.",
+            "La mano sui tasti si fa pesante? Prenditi un attimo, poi continua.",
+            "La mano destra si sente tesa? Scuotila, poi riprendi.",
+            "La spalla si solleva? Abbassala, respira, poi continua.",
+            "L'avambraccio lavora troppo. Breve riposo.",
+            "Prenditi 30 secondi, fai girare i polsi, poi torna."
+          ],
+          "correction": [
+            "La stanchezza si vede nell'attacco: fermati, 90 secondi di pausa, poi ricontrolla.",
+            "Hai superato il picco: basso giù, stiramento, poi rientra.",
+            "Fermati ora. Pizzicare stanchi insegna alla mano un attacco trascurato.",
+            "La mano destra è sotto sforzo. Metti giù il basso, stira l'avambraccio, due minuti di pausa.",
+            "Riposo vero: basso sul supporto, cammina un po'.",
+            "La mano che pizzica ha finito. 90 secondi come minimo, poi ricontrolla.",
+            "Stop netto. Cerchi con il polso e stiramenti dell'avambraccio prima di continuare.",
+            "Se spingi oltre ti procurerai un infortunio. Fermati e recupera."
+          ]
+        },
+        "tempo_milestone": {
+          "encouragement": [
+            "A {bpmLow} BPM: assicurati che ogni nota suoni pulita prima di salire.",
+            "Traguardo {bpmLow} BPM. Aggancia le fondamentali al clic prima di spingere.",
+            "Nuova fascia: {bpmLow}-{bpmHigh}. Prima camminala piano, poi aggiungi le note elaborate.",
+            "{bpmLow} BPM è nuovo. Resta qui finché ogni nota non suona piena.",
+            "Parcheggia a {bpmLow} BPM. Il prossimo salto viene dopo un minuto pulito.",
+            "Hai toccato {bpmLow} BPM: ora costruisci un paio di battute pulite prima di salire.",
+            "{bpmLow}-{bpmHigh} BPM è nuovissimo. Tienilo finché non sembra facile.",
+            "Guadagnati {bpmLow} BPM prima di inseguire altro. Resta a questo tempo."
+          ]
+        },
+        "check_in": {
+          "neutral": [
+            "Lungo tratto al basso: linea, groove, qualcosa di specifico?",
+            "Più di cinque minuti agganciato alla cassa. Vuoi mettere a punto qualcosa?",
+            "Sei stato a fondo nel pocket. Cosa viene dopo?",
+            "Serie solida in corso. Vuoi un riscontro più preciso su una parte?",
+            "Sei dentro da un po'. Walking line? Fondamentali? Dimmi dove ascoltare.",
+            "Il pocket è stato stabile. Scegli un obiettivo se vuoi un riscontro più vicino.",
+            "Lungo tratto al basso. C'è qualcosa che vuoi che segnali?",
+            "Hai tenuto il fondo. Dimmi cosa ascoltare dopo."
+          ]
+        },
+        "ramp_complete": {
+          "neutral": [
+            "Rampa finita: da {startBpm} a {endBpm}. L'aggancio basso-cassa ha retto la salita.",
+            "Arrivato a {endBpm} BPM. Hai pizzicato per tutta la rampa da {startBpm}.",
+            "Obiettivo raggiunto: {endBpm} BPM. Rampa da {startBpm} completata: il groove è rimasto.",
+            "{endBpm} BPM raggiunti. Rampa solida da {startBpm} al basso."
+          ]
+        },
+        "stamina": {
+          "neutral": [
+            "Muro di resistenza al minuto {staminaMinutes}: il groove si allenta. Breve pausa, poi rientra.",
+            "Intorno al minuto {staminaMinutes} la mano che pizzica comincia ad affaticarsi. Riposa e torna.",
+            "Oltre il minuto {staminaMinutes} l'aggancio del basso comincia a scivolare. Breve riposo, poi riprendi.",
+            "Tendi a calare intorno al minuto {staminaMinutes}. Prenditi 30 secondi e torna pulito."
+          ]
+        },
+        "bias_only": {
+          "neutral": [
+            "La pizzicata cade ogni volta a {biasMs} ms {direction} rispetto al clic: poco jitter, solo spostata. Regola il tuo attacco {correctionDirection}.",
+            "Il tuo attacco sta a {biasMs} ms {direction}. Molto costante: sposta solo {correctionDirection} per cadere sul beat."
+          ]
+        },
+        "pace_coaching": {
+          "neutral": [
+            "Tetto a {bpm}: {attemptCount} sessioni finora. Aggancia prima {suggestedBpm}, poi torna.",
+            "{attemptCount} tentativi a {bpm} BPM e il groove non si aggancia. Scendi a {suggestedBpm} e consolida."
+          ]
+        },
+        "grid_lost": {
+          "neutral": [
+            "Lì hai perso la griglia. Riempimento o improvvisazione? Se è voluto, continua.",
+            "La correlazione si è staccata dal clic: stai facendo un riempimento?"
+          ]
+        },
+        "muddy_hits": {
+          "neutral": [
+            "Prendi ogni nota ma il segnale è debole: affonda di più con la mano che pizzica.",
+            "Buona copertura ma l'attacco è piano. Più pressione del dito su ogni pizzicata.",
+            "Ogni beat c'è, solo piano. Prova a pizzicare in modo più deciso.",
+            "I beat ci sono ma il transiente è debole: ancorati più forte alla corda."
+          ]
+        },
+        "grid_discontinuity": {
+          "neutral": [
+            "Il tuo groove si è allontanato dal clic. Silenzia e rientra sul tempo forte.",
+            "Il tracciamento della griglia è caduto: ferma la linea, trova il battito e riaggancia.",
+            "Lì sei uscito dal tempo. Lascia respirare il clic e riancora la tua linea di basso.",
+            "Il groove si è allontanato dalla griglia. Prenditi un beat e riagganciati sulla fondamentale."
+          ]
+        },
+        "low_completeness": {
+          "neutral": [
+            "Stai suonando circa metà dei beat previsti: prova ad agganciare ogni nota della linea.",
+            "La copertura è bassa: assicurati che ogni beat riceva una pizzicata, non solo le fondamentali.",
+            "Circa metà dei beat non viene suonata. Concentrati sul riempire l'intera linea di basso.",
+            "La copertura dei beat è bassa. Rallenta se serve e assicurati che ogni nota cada."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Le tue pizzicate cadono bene sul beat, ma lo spazio tra le note continua a cambiare. Prova a contare le suddivisioni ad alta voce mentre suoni.",
+            "Il posizionamento sui beat è saldo, ma la distanza tra le pizzicate è irregolare. Batti il piede su ogni suddivisione per fissare la spaziatura tra le note.",
+            "Sei costantemente sul beat, ma la spaziatura tra le note vaga. Conta le suddivisioni ad alta voce: lascia che sia la tua voce a dare la griglia.",
+            "Buon posizionamento sui beat, ma lo spazio tra le pizzicate va alla deriva. Rallenta la linea finché le distanze non sembrano uguali, poi riaccelera."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "La spaziatura delle tue pizzicate è uniforme, ma cadi fuori dal beat. Anticipa il clic di un soffio e fai cadere ogni pizzicata proprio su di esso.",
+            "Spaziatura uniforme tra le note, ma la linea sta fuori dalla griglia. Aggancia al clic la prima nota di ogni battuta, poi lascia che il resto segua.",
+            "Il ritmo tra le pizzicate è costante: ora ancora l'intera linea alla griglia. Punta al centro di ogni beat.",
+            "Buon senso della spaziatura nella linea. Concentrati su dove cade ogni pizzicata rispetto al clic: suona appena prima di dove ti aspetti il beat."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "Spaziatura delle pizzicate e posizionamento sul beat entrambi saldi. Ecco il pocket.",
+            "Spaziatura e posizionamento entrambi a punto. La linea di basso sta esattamente dove dovrebbe.",
+            "Entrambe le dimensioni sono a punto: stai groovando con vera precisione.",
+            "Timing saldo su tutta la linea. Questo è il feeling di linea di basso che vuoi."
+          ]
+        },
+        "low_confidence": {
+          "neutral": [
+            "Le basse frequenze sono difficili da leggere da me: sono meno sicuro di questo tratto.",
+            "Il tuo segnale è torbido sulle basse. Prendi con cautela i numeri dell'ultimo mezzo minuto.",
+            "Per ora è difficile distinguere gli attacchi nelle basse frequenze. La mia lettura è meno netta del solito."
+          ]
+        },
+        "boundary_signal_a": {
+          "neutral": [
+            "{change}. Da qui un nuovo segmento.",
+            "{change}. Il tratto precedente è chiuso e conteggiato.",
+            "{change}: il punteggio riparte dalla prossima nota."
+          ]
+        },
+        "boundary_signal_b": {
+          "neutral": [
+            "La pausa ha chiuso il segmento: {score}% a {bpm} BPM.",
+            "La linea è rimasta silenziosa abbastanza da chiuderlo: {score}% a {bpm} BPM.",
+            "{score}% a {bpm} BPM registrato per quel tratto."
+          ]
+        },
+        "preset_ceiling_hit": {
+          "neutral": [
+            "{bpmLow}–{bpmHigh} è dove questa linea smette di stare a posto: {attemptCount} sessioni, ognuna vicina a {score}.",
+            "Sei di nuovo a {bpmLow}–{bpmHigh}. Le tue ultime {attemptCount} esecuzioni qui sono state intorno a {score}.",
+            "{attemptCount} sessioni a questo tempo, tutte vicine a {score}. Utile saperlo mentre suoni."
+          ]
+        }
+      },
+      "piano": {
+        "session_start_cold": {
+          "neutral": [
+            "Pronto quando lo sei tu. Comincio a seguire dalla tua prima nota.",
+            "Scalda le mani, poi suona quando vuoi: inizio ad ascoltare.",
+            "Mettiti comodo ai tasti, poi inizia quando sei pronto.",
+            "Bello averti qui. Inizia quando le mani ti sembrano sciolte.",
+            "Quando sei pronto, suona e comincio a seguire il tuo timing.",
+            "Nessuna fretta. Lascia scaldare le mani, poi inizia quando vuoi.",
+            "Pronto quando lo sei tu. Ti seguo dal primo tasto.",
+            "Mettiti comodo e inizia quando vuoi: sono in ascolto."
+          ]
+        },
+        "session_start_returning": {
+          "neutral": [
+            "Bentornato. Ultima sessione: {lastScore} a {lastBpm} BPM. Costruiamo su quello.",
+            "Che bello rivederti. L'ultima volta hai fatto {lastScore} a {lastBpm} BPM: bello essere di nuovo qui.",
+            "Di nuovo ai tasti. {lastScore} a {lastBpm} BPM nell'ultima sessione. Spingiamo avanti.",
+            "Bentornato: {lastScore} / {lastBpm} BPM l'ultima volta. Pronto quando lo sei tu.",
+            "Ultima sessione: {lastScore} a {lastBpm} BPM. Riprendi da dove avevi lasciato.",
+            "Di nuovo qui. {lastScore} a {lastBpm} BPM l'ultima volta: una buona base.",
+            "Bentornato. {lastScore} a {lastBpm} BPM era il riferimento dell'ultima sessione. Raggiungiamolo.",
+            "Bello riaverti qui. {lastScore} a {lastBpm} BPM l'ultima volta: andiamo."
+          ]
+        },
+        "accuracy_drop": {
+          "correction": [
+            "Le mani si stanno separando. Aggancia prima la mano sinistra al clic.",
+            "I colpi si disperdono. Rallenta: prima solo la sinistra, poi aggiungi la destra.",
+            "Solo la mano sinistra sul clic per una battuta, poi porta dentro la destra.",
+            "Ferma entrambe le mani. Suona il clic solo con la sinistra per quattro beat, poi aggiungi la destra.",
+            "Torna a una nota per clic con la mano sinistra, poi ricostruisci il brano.",
+            "Abbassa il tempo e suona a mani separate prima di metterle insieme.",
+            "Fermati e respira. Trova il clic, poi riparti da capo.",
+            "Rallenta di cinque BPM e suona pulito."
+          ]
+        },
+        "rushing_trend": {
+          "neutral": [
+            "Le tue mani arrivano prima del clic. Lascia che sia lui a venire da te.",
+            "Sei un tocco avanti: ascolta il clic, poi lascia cadere l'accordo.",
+            "La mano destra guida. Siediti più indietro in ogni beat."
+          ],
+          "correction": [
+            "La mano destra anticipa la sinistra: fai cadere la nota del basso proprio sul clic.",
+            "Corri: affonda di più nei tasti; lascia che il clic tiri ogni nota.",
+            "Conta i tempi intermedi: metti ogni nota dove cade il clic, non prima.",
+            "Abbassa il tempo di cinque BPM e lascia che il clic tiri fuori ogni nota da te.",
+            "Fai una battuta di pausa. Ascolta il clic, poi entra sul beat 1.",
+            "Appoggia le mani in grembo, respira, poi ricomincia a suonare.",
+            "La mano destra corre. Prima suona solo la sinistra sul clic per una battuta.",
+            "Smetti di cercare di spingere il metronomo. Lascia che sia lui a tirarti per una battuta intera."
+          ]
+        },
+        "dragging_trend": {
+          "neutral": [
+            "Le tue mani cadono dietro al clic. Portale avanti.",
+            "Sei in ritardo: parti con l'accordo una frazione prima.",
+            "La mano sinistra resta indietro. Punta alla parte anteriore del beat."
+          ],
+          "correction": [
+            "La mano sinistra è in ritardo: guida con il basso, non con la melodia.",
+            "Trascini: guida il tempo forte con la mano sinistra; non aspettare il clic.",
+            "Guida con l'attacco: incontra il clic sulla parte anteriore di ogni nota.",
+            "Ogni nota cade in ritardo. Punta al bordo anteriore di ogni clic.",
+            "Abbassa il tempo e suona con più slancio. Il trascinamento passa quando diventa facile.",
+            "Immagina il clic appena più in anticipo di com'è, e raggiungilo.",
+            "Fermati, respira, poi rientra spingendo leggermente in avanti.",
+            "Le dita si fanno pesanti. Alleggerisci il tocco e lasciale fluttuare."
+          ]
+        },
+        "personal_best_streak": {
+          "encouragement": [
+            "Mani agganciate. Resta.",
+            "Entrambe le mani sincronizzate.",
+            "La serie continua: resta lì.",
+            "L'aggancio tra le due mani è pulito. Tieni.",
+            "Sì. Non cambiare nulla.",
+            "Sinistra e destra si parlano. Continua.",
+            "Compatto. Siediti dentro.",
+            "A occhi chiusi. Continua."
+          ]
+        },
+        "new_band_locked": {
+          "encouragement": [
+            "Fascia {bpmLow}–{bpmHigh} BPM sostenuta: entrambe le mani agganciate al clic.",
+            "Il pocket della sincronia tra le mani tiene a {bpmLow}–{bpmHigh} BPM.",
+            "Sostenuto a {bpmLow}–{bpmHigh} BPM: nuovo pavimento per questa voicing.",
+            "{bpmLow}–{bpmHigh} BPM tenuti puliti. Entrambe le mani sono assestate.",
+            "Agganciato a {bpmLow}–{bpmHigh} BPM. Nuova base per questo brano.",
+            "{bpmLow}–{bpmHigh} BPM padroneggiati. Non scendere sotto.",
+            "Sincronia tra le due mani stabile a {bpmLow}–{bpmHigh} BPM.",
+            "Pocket sostenuto a {bpmLow}–{bpmHigh} BPM per un minuto intero."
+          ]
+        },
+        "recovery": {
+          "encouragement": [
+            "Le mani sono di nuovo in sincronia. Tienila.",
+            "Aggancio tra le due mani tornato. Non cambiare nulla.",
+            "Recuperato: resta sciolto nelle spalle.",
+            "Hai fermato la deriva. Siediti dentro.",
+            "Sinistra e destra risincronizzate. Resta lì.",
+            "Uscito dal calo. Non cambiare nulla.",
+            "Pocket recuperato. Tieni proprio questo feeling.",
+            "L'hai riportato a casa. Resta lì per un minuto."
+          ]
+        },
+        "recovery_confirmed": {
+          "encouragement": [
+            "Il tocco è di nuovo pulito.",
+            "Le mani sono di nuovo in sincronia. Tienila.",
+            "Di nuovo sui tasti. Resta."
+          ]
+        },
+        "fatigue": {
+          "encouragement": [
+            "I polsi si irrigidiscono? Solleva le mani, respira, poi torna dentro.",
+            "Gli avambracci si bloccano? Fermati, abbassa le mani, respira.",
+            "La tensione sale nelle spalle: 60 secondi lontano dai tasti.",
+            "Le dita si fanno pesanti? Uno stiramento veloce, poi riprendi.",
+            "Le mani lavorano più del dovuto. Breve riposo.",
+            "Le spalle salgono? Abbassale, respira, poi suona.",
+            "Prenditi 30 secondi, ruota i polsi, poi riprendi.",
+            "La tensione ai polsi cresce. Fermati, appoggia le mani in grembo, respira."
+          ],
+          "correction": [
+            "La stanchezza si vede nel tocco: fermati, mani giù per 90 secondi.",
+            "Hai superato il picco: alzati dallo sgabello, scuoti tutto, poi ritorna.",
+            "Suonare stanchi seppellisce le dinamiche. Fermati, riposa i polsi, riparti.",
+            "I polsi sono sotto sforzo. Posa le mani, stira gli avambracci, due minuti di pausa.",
+            "Riposo vero: alzati, cammina un po', ritorna fresco.",
+            "Le mani per ora hanno finito. 90 secondi come minimo, poi ricontrolla.",
+            "Stop deciso. Fai ruotare polsi e spalle prima di continuare.",
+            "Se spingi oltre questo punto ti procuri un infortunio. Fermati e recupera."
+          ]
+        },
+        "tempo_milestone": {
+          "encouragement": [
+            "A {bpmLow} BPM: assicurati che la mano sinistra sia solidissima prima di salire.",
+            "Traguardo {bpmLow} BPM. Resta qui finché le due mani non sono indipendenti.",
+            "Nuova fascia: {bpmLow}-{bpmHigh}. Prima le mani separate, poi insieme.",
+            "{bpmLow} BPM è nuovo. Resta a questo tempo finché le due mani non sono indipendenti.",
+            "Parcheggia a {bpmLow} BPM. Il prossimo salto viene dopo un minuto pulito.",
+            "Raggiunti {bpmLow} BPM: ora costruisci un paio di battute pulite prima di salire.",
+            "{bpmLow}-{bpmHigh} BPM è nuovissimo. Tienilo finché non diventa facile.",
+            "Guadagnati {bpmLow} BPM prima di inseguirne altri. Resta a questo tempo."
+          ]
+        },
+        "check_in": {
+          "neutral": [
+            "Lungo tratto ai tasti: un brano, un esercizio, qualcosa di specifico?",
+            "Più di cinque minuti dentro. Vuoi che segnali la mano sinistra, la destra o entrambe?",
+            "Sei stato concentrato. Dimmi su cosa vuoi un riscontro.",
+            "Buona serie in corso. Vuoi un riscontro più preciso su un passaggio?",
+            "Sei dentro da un po'. Mano sinistra? Mano destra? Voicing? Dimmi dove ascoltare.",
+            "Il pocket è stato stabile. Scegli un obiettivo se vuoi un riscontro più da vicino.",
+            "Lungo tratto ai tasti. C'è qualcosa che vuoi che segnali?",
+            "Sei stato dentro a fondo. Dimmi cosa ascoltare dopo."
+          ]
+        },
+        "ramp_complete": {
+          "neutral": [
+            "Rampa completata: da {startBpm} a {endBpm} ai tasti. Entrambe le mani hanno tenuto la salita.",
+            "Arrivato a {endBpm} BPM. Hai suonato tutta la rampa da {startBpm}.",
+            "Obiettivo raggiunto: {endBpm} BPM. Rampa da {startBpm} completata: le mani sono rimaste agganciate.",
+            "Raggiunti {endBpm} BPM. Bella rampa da {startBpm} ai tasti."
+          ]
+        },
+        "stamina": {
+          "neutral": [
+            "Tensione nel tocco verso il minuto {staminaMinutes}. Rilascia, respira, ritorna pulito.",
+            "Verso il minuto {staminaMinutes} arriva la tensione ai polsi. Breve riposo, poi riprendi.",
+            "Oltre i {staminaMinutes} minuti il tocco si fa più pesante. Breve pausa, poi di nuovo ai tasti.",
+            "La stanchezza nelle mani si vede verso il minuto {staminaMinutes}. Riposa, poi ritorna."
+          ]
+        },
+        "bias_only": {
+          "neutral": [
+            "I tasti cadono {biasMs} ms {direction} rispetto al clic con poca dispersione. Sposta il tempo del tuo attacco {correctionDirection}.",
+            "{biasMs} ms {direction} con costanza: è un'inclinazione, non jitter. Sposta tutto {correctionDirection} per centrarlo."
+          ]
+        },
+        "pace_coaching": {
+          "neutral": [
+            "Tetto ai tasti a {bpm}: {attemptCount} tentativi. Due sessioni a {suggestedBpm} per consolidare.",
+            "{attemptCount} tentativi a {bpm} e le mani non si assestano. Parcheggia a {suggestedBpm} e fissalo."
+          ]
+        },
+        "grid_lost": {
+          "neutral": [
+            "La correlazione con la griglia è calata. Sei ancora sul clic o stai suonando una frase?",
+            "Persa la griglia metrica lì. Fill o passaggio libero?"
+          ]
+        },
+        "muddy_hits": {
+          "neutral": [
+            "I beat ci sono tutti ma l'attacco è delicato: prova un peso delle dita più intenzionale.",
+            "Buona copertura ma le pressioni sui tasti sono morbide. Spingi nei tasti con più intenzione.",
+            "Ogni beat arriva, solo piano. Metti più peso in ogni pressione del tasto.",
+            "Suoni ogni nota ma il segnale è debole: aumenta la velocity fino in fondo al tasto."
+          ]
+        },
+        "grid_discontinuity": {
+          "neutral": [
+            "Il tuo suonare si è allontanato dal clic. Fermati e rientra sul tempo forte.",
+            "Perso il tracciamento della griglia: lascia andare il clic per una battuta, poi rientra.",
+            "Sei uscito dal tempo. Solleva le mani, trova il pulso e rientra.",
+            "La frase si è allontanata dalla griglia. Prenditi un beat e riaggancia il clic."
+          ]
+        },
+        "low_completeness": {
+          "neutral": [
+            "Stai suonando circa metà dei beat previsti: prova a far cadere una nota su ogni beat della frase.",
+            "La copertura è bassa: assicurati che ogni beat abbia una nota, non solo i picchi melodici.",
+            "Circa metà dei beat resta non suonata. Concentrati sul completare l'intero passaggio.",
+            "La copertura dei beat è bassa. Rallenta e assicurati che ogni beat cada prima di proseguire."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Il posizionamento delle tue note è solido, ma lo spazio tra una pressione e l'altra continua a vagare. Prova a contare le suddivisioni ad alta voce mentre suoni.",
+            "Sei preciso sul beat, ma l'intervallo tra le note è irregolare. Batti il piede su ogni suddivisione per fissare la spaziatura tra le pressioni.",
+            "Il posizionamento sul beat c'è, ma lo spazio tra le note si sposta. Conta le suddivisioni ad alta voce e lascia che sia la voce a tenere uniformi gli spazi.",
+            "Buon posizionamento sul beat, ma la spaziatura delle note sta andando alla deriva. Rallenta il passaggio finché gli spazi sembrano uguali, poi riprendi velocità."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "La spaziatura delle tue note è davvero regolare, ma cadi fuori dal beat. Anticipa il clic di un filo e porta ogni pressione proprio su di esso.",
+            "Spaziatura regolare tra le note, ma le pressioni stanno fuori dalla griglia. Aggancia al beat la prima nota di ogni frase, poi lascia che il resto segua.",
+            "Il ritmo tra le pressioni è costante: ora ancora tutta la frase al clic. Punta al centro di ogni beat.",
+            "Buon senso della spaziatura. Concentrati su dove cade ogni nota rispetto al clic: prova a suonare leggermente prima di dove ti aspetti il beat."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "Spaziatura delle note e posizione sul beat entrambe agganciate. Questo è timing pianistico pulito.",
+            "Spaziatura e posizione entrambe a punto. La frase sta esattamente dove deve stare.",
+            "Entrambe le dimensioni a punto: stai suonando con vera precisione adesso.",
+            "Timing agganciato su tutta la linea. È il feeling a cui stavi lavorando."
+          ]
+        },
+        "low_confidence": {
+          "neutral": [
+            "Dalla mia parte le note si confondono tra loro: sto leggendo questo tratto meno chiaramente.",
+            "Il pedale impasta gli attacchi. Prendi con cautela i numeri dell'ultimo mezzo minuto.",
+            "Ora è difficile isolare i singoli attacchi dagli accordi. La mia lettura è più morbida del solito."
+          ]
+        },
+        "boundary_signal_a": {
+          "neutral": [
+            "{change}. Nuovo segmento da qui.",
+            "{change}. Il tratto precedente è chiuso e contato.",
+            "{change}: il punteggio riparte dal prossimo accordo."
+          ]
+        },
+        "boundary_signal_b": {
+          "neutral": [
+            "La pausa ha chiuso quel segmento: {score}% a {bpm} BPM.",
+            "Le tue mani sono rimaste lontane dai tasti abbastanza da chiuderlo: {score}% a {bpm} BPM.",
+            "{score}% a {bpm} BPM registrato per quel tratto."
+          ]
+        },
+        "preset_ceiling_hit": {
+          "neutral": [
+            "{bpmLow}–{bpmHigh} è dove questo smette di essere pulito per te: {attemptCount} sessioni, ognuna vicino a {score}.",
+            "Sei di nuovo a {bpmLow}–{bpmHigh}. Le tue ultime {attemptCount} prove qui sono arrivate intorno a {score}.",
+            "{attemptCount} sessioni a questo tempo, tutte vicino a {score}. Vale la pena saperlo mentre suoni."
+          ]
+        }
+      }
+    },
+    "defaultMode": {
+      "generic": {
+        "muddy_hits": {
+          "neutral": [
+            "Stai colpendo i beat ma il segnale arriva debole: prova con un tocco più deciso.",
+            "Il ritmo c'è ma il tuo attacco è leggero: spingi un po' di più.",
+            "I beat arrivano ma con un tocco morbido: prova un colpo più forte.",
+            "Buon ritmo, ma il segnale è un po' debole: metti più energia in ogni nota.",
+            "Stai prendendo i beat, ma prova a dare più peso a ogni colpo."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "Il tuo timing è saldo: spaziatura e posizionamento sono entrambi solidi.",
+            "Preciso e compatto: le note cadono al posto giusto e sono distanziate in modo uniforme.",
+            "Molto costante: posizionamento sui beat e spaziatura delle note sono entrambi a punto.",
+            "Ottimo feeling: note uniformemente distanziate che cadono proprio sul battito.",
+            "Il tuo timing è nel pocket: spaziatura e posizionamento ci sono entrambi."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "Le note sono distanziate in modo uniforme ma si allontanano dal clic: prova ad ancorarti di più al battito.",
+            "Buona spaziatura uniforme ma sei un po' fuori dal beat: prova ad agganciarti al battito.",
+            "Le distanze tra le note sono costanti ma non sono proprio sul beat: ancorati al clic.",
+            "Spaziatura uniforme ma il posizionamento vaga: concentrati nel far cadere ogni nota sul beat.",
+            "Il tuo timing interno è costante ma le note si allontanano dal battito: ancorati al clic."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Cadi vicino a ogni beat ma gli spazi tra le note sono irregolari: concentrati nel rendere quelle distanze più uguali.",
+            "Buon posizionamento sui beat ma spaziatura irregolare: prova a tenere uguali le distanze tra le note.",
+            "Sei vicino al beat ma la spaziatura tra le note varia: concentrati su distanze uniformi.",
+            "Le posizioni delle note sono vicine ma la spaziatura è un po' dispersa: uniforma le distanze.",
+            "Cadi vicino alle posizioni dei beat ma la spaziatura delle note è incostante: lavora per tenere uguali gli spazi."
+          ]
+        },
+        "great": {
+          "neutral": [
+            "Davvero saldo: il tuo timing è proprio lì.",
+            "Feeling solido, continua a cavalcare quel groove.",
+            "Il tuo timing sta esattamente dove dovrebbe stare.",
+            "Ritmo pulito: questo è il pocket.",
+            "Saldo e compatto: ottimo lavoro.",
+            "Un gran feeling: il tempo è solido dall'inizio alla fine."
+          ]
+        },
+        "good_steady": {
+          "neutral": [
+            "Bello stabile: buon tempo costante.",
+            "Tieni insieme tutto: timing solido lungo tutto il segmento.",
+            "Il tempo regge bene.",
+            "Buon senso del ritmo: battito costante.",
+            "Timing stabile: stai costruendo una base solida."
+          ]
+        },
+        "rushing": {
+          "neutral": [
+            "Ti stai appoggiando un po' al beat in avanti: prova a lasciare che arrivi a te.",
+            "Arrivi un filo in anticipo: siediti indietro e lascia respirare il battito.",
+            "Il tempo spinge in avanti: alleggerisci un po' l'attacco.",
+            "Sei davanti al beat: prova a stare indietro con lui.",
+            "Si sta formando un po' di fretta: rallenta il tuo attacco, non il tempo."
+          ]
+        },
+        "dragging": {
+          "neutral": [
+            "Ti stai fermando un po' dietro al beat: prova a stare un po' più avanti.",
+            "Il tempo si trascina indietro: tieni l'attacco netto.",
+            "Rimani leggermente indietro: spingi l'attacco in avanti.",
+            "Dietro al beat: prova a tenere l'energia in movimento verso l'avanti.",
+            "Si sente un po' di trascinamento: rendi l'attacco più incisivo."
+          ]
+        },
+        "oscillating": {
+          "neutral": [
+            "Il tempo si muove: accelera e rallenta.",
+            "La spaziatura delle note è irregolare: prova a tenere uguali le distanze tra le note.",
+            "Il battito vaga un po': concentrati su una spaziatura costante tra le note.",
+            "Prima fretta poi trascinamento: prova ad agganciarti a un unico feeling costante.",
+            "La costanza del tempo va migliorata: concentrati su una spaziatura uguale tra le note."
+          ]
+        },
+        "low_score_solid_timing": {
+          "neutral": [
+            "Il centro del tuo timing è buono: concentrati nel colpire più beat.",
+            "Il timing è nel posto giusto, ma ti mancano alcune posizioni: riempi quei vuoti.",
+            "Buon feeling di timing, ma al ritmo serve più copertura: suona più beat.",
+            "Il battito c'è ma il ritmo è rado: prova a colpire più posizioni.",
+            "Il tuo timing è ben centrato: ora lavora sulla densità."
+          ]
+        },
+        "low_coverage": {
+          "neutral": [
+            "Sento solo una parte di quello che suoni: controlla il livello di ingresso o suona un po' più forte.",
+            "Il segnale arriva basso: prova a suonare con un po' più di attacco.",
+            "Tasso di rilevamento basso: potresti dover alzare il guadagno di ingresso.",
+            "Rilevo solo una parte di quello che suoni: controlla il livello di ingresso nelle impostazioni.",
+            "Segnale debole in ingresso: suona più forte o controlla il guadagno di ingresso."
+          ]
+        },
+        "noodling": {
+          "neutral": [
+            "Bel feeling libero: lascia scorrere le idee.",
+            "Bella esplorazione: quando sei pronto, riportati sul battito.",
+            "Spazio creativo: usalo bene.",
+            "Bel gioco libero: segui il feeling.",
+            "Lascialo respirare: torna alla griglia quando sei pronto."
+          ]
+        },
+        "flat_dynamics": {
+          "neutral": [
+            "Il tuo suonare è molto uniforme nelle dinamiche: prova a far respirare un po' i tempi forti.",
+            "Ogni nota ha più o meno lo stesso volume: prova ad accentare i beat principali.",
+            "Bella costanza, ma prova ad aggiungere un po' di forma dinamica: colpisci i tempi forti un filo più forte."
+          ]
+        },
+        "weak_downbeats": {
+          "neutral": [
+            "Prova a colpire i beat 1 e 3 un filo più forte: i tuoi tempi forti si confondono.",
+            "I tuoi levare sono un po' forti: alleggeriscili e spingi i tempi forti.",
+            "I beat principali hanno bisogno di più peso: lascia che i beat 1 e 3 guidino."
+          ]
+        },
+        "good_accents": {
+          "neutral": [
+            "Bella forma dinamica: i tuoi tempi forti hanno un buon peso.",
+            "Ottimo accento sui beat principali: il groove ha un battito chiaro.",
+            "I tuoi tempi forti si sentono chiaramente: bel feeling."
+          ]
+        },
+        "subdivisions_too_loud": {
+          "neutral": [
+            "I riempimenti sono un po' pesanti: lascia le note intermedie più leggere.",
+            "Prova a rendere più morbidi i riempimenti delle suddivisioni: lascia che siano i beat principali a portare il peso.",
+            "Le note di riempimento competono con i tuoi tempi forti: alleggerisci tra un beat e l'altro."
+          ]
+        }
+      }
+    },
+    "proMode": {
+      "generic": {
+        "muddy_hits": {
+          "neutral": [
+            "I tuoi beat arrivano ma la confidenza del segnale è bassa: prova un attacco più deciso su ogni nota.",
+            "Il rilevatore vede i tuoi colpi ma con bassa confidenza: i tuoi transienti potrebbero essere troppo morbidi.",
+            "I beat vengono registrati ma il segnale è debole: rendi l'attacco più netto per ottenere un transiente più pulito.",
+            "Bassa confidenza del segnale sui tuoi colpi: spingi di più per migliorare la forza dell'attacco.",
+            "Il tuo attacco è troppo morbido per un rilevamento affidabile: suona con più convinzione."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "La spaziatura delle note è costante e il posizionamento sui beat è solido: timing compatto su tutta la linea.",
+            "Sia la spaziatura delle note sia il posizionamento sui beat sono a punto: timing pulito nel complesso.",
+            "Spaziatura uniforme delle note e posizionamento preciso sui beat: così si sente un timing saldo.",
+            "Spaziatura e posizionamento sono entrambi a punto: il timing è solido.",
+            "Spaziatura costante e posizionamento pulito sui beat: qui non c'è nulla da correggere."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "La spaziatura delle note è uniforme ma il posizionamento sui beat sta andando alla deriva: il tuo clock interno è costante ma non sincronizzato al battito.",
+            "Spaziatura costante delle note ma i beat cadono fuori centro: il tuo ritmo interno è buono, ancoralo solo alla griglia.",
+            "Spaziatura uniforme tra le note ma il posizionamento vaga lontano dal beat: sincronizzati al battito.",
+            "La spaziatura delle tue note è affidabile ma le posizioni sui beat vanno alla deriva: il clock interno c'è, allinealo solo al clic.",
+            "La costanza della spaziatura è buona ma il posizionamento sui beat è fuori: concentrati nel far cadere ogni nota sul battito."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Il posizionamento sui beat è centrato ma la spaziatura delle suddivisioni è incostante: i punti di ancoraggio sono giusti, i riempimenti tra di essi sono dispersi.",
+            "Buon posizionamento sui beat ma le distanze tra le note variano: le tue posizioni sono corrette, la spaziatura no.",
+            "Sei vicino alle posizioni dei beat ma la spaziatura delle note è irregolare: il posizionamento c'è, uniforma le distanze.",
+            "Posizionamento sui beat preciso, spaziatura delle note incostante: i punti di ancoraggio sono corretti, lavora su distanze uniformi.",
+            "Le posizioni sui beat sono solide ma la spaziatura delle suddivisioni è irregolare: il posizionamento c'è, ora uniforma i riempimenti."
+          ]
+        },
+        "great": {
+          "neutral": [
+            "Posizionamento sui beat preciso e spaziatura uniforme delle note: timing pulito su tutta la linea.",
+            "Posizionamento sui beat solido, spaziatura costante: aumenta il tempo quando sei pronto.",
+            "Tutte le componenti del timing sono pulite: buona sessione.",
+            "Spaziatura delle note e posizionamento entrambi a punto.",
+            "Il timing è saldo: valuta di alzare il tempo o di stringere le suddivisioni."
+          ]
+        },
+        "good_steady": {
+          "neutral": [
+            "Spaziatura e posizionamento costanti: base solida. Alza il tempo di 5 BPM o rendi più netto l'attacco.",
+            "Buona costanza di timing: alcune posizioni si spostano ma il centro regge.",
+            "Posizionamento e spaziatura affidabili: c'è margine per spingere di più.",
+            "Il centro del timing è giusto, la spaziatura è costante: alza il tempo per metterla alla prova.",
+            "Base di timing solida: concentrati nel rendere più netto l'attacco sui beat più deboli."
+          ]
+        },
+        "rushing": {
+          "neutral": [
+            "Arrivi costantemente in anticipo: bias direzionale in anticipo nel timing dell'attacco.",
+            "Gli attacchi delle note arrivano prima del beat: sposta leggermente indietro l'inizio della nota.",
+            "Schema di attacco in anticipo: le tue note precedono il beat in modo costante.",
+            "Bias costante in anticipo: l'attacco incalza il battito.",
+            "Il timing è spostato in anticipo: lascia che il beat arrivi per primo, poi colpisci."
+          ]
+        },
+        "dragging": {
+          "neutral": [
+            "Arrivi costantemente in ritardo: bias direzionale in ritardo nel timing dell'attacco.",
+            "Gli attacchi delle note cadono dopo il beat: rendi leggermente più netto l'attacco.",
+            "Schema di attacco in ritardo: le note seguono il beat in modo costante.",
+            "Bias costante in ritardo: l'attacco trascina il battito.",
+            "Il timing è spostato in ritardo: spingi l'attacco per incontrare il beat."
+          ]
+        },
+        "oscillating": {
+          "neutral": [
+            "Alta varianza del timing nonostante una media vicina al neutro: il timing è davvero instabile.",
+            "Non è un bias direzionale: il timing alterna anticipo e ritardo.",
+            "Instabilità del tempo: la spaziatura delle note è incostante lungo il segmento.",
+            "Schema di fretta e trascinamento: non è uno scostamento fisso, è vera varianza nel timing.",
+            "La varianza del timing è alta: concentrati nel mantenere costante la spaziatura delle note."
+          ]
+        },
+        "low_score_solid_timing": {
+          "neutral": [
+            "Il centro del timing e la spaziatura sono puliti ma la copertura dei beat è bassa.",
+            "Buona precisione di posizionamento ma troppe posizioni dei beat sono vuote.",
+            "La spaziatura delle note è costante ma la densità è bassa: colpisci più posizioni della griglia.",
+            "Le basi del timing sono solide, il punto debole è la copertura: riempi più posizioni.",
+            "Il posizionamento è preciso: concentrati nel colpire più posizioni dei beat."
+          ]
+        },
+        "low_coverage": {
+          "neutral": [
+            "Solo una frazione delle posizioni dei beat ha avuto un colpo rilevato: il segnale potrebbe essere troppo basso.",
+            "Il tasso di rilevamento è basso: controlla il guadagno di ingresso o suona più forte.",
+            "La maggior parte delle posizioni dei beat è vuota: controlla il livello di ingresso, non è un problema della qualità del tuo suonare.",
+            "Rilevamento dei colpi basso: aumenta il guadagno di ingresso o la forza dell'attacco.",
+            "Il segnale è troppo basso per un rilevamento affidabile: suona più forte o regola il livello di ingresso."
+          ]
+        },
+        "noodling": {
+          "neutral": [
+            "Modalità di gioco libero: qui il posizionamento sui beat non viene valutato.",
+            "Esplori liberamente: usalo per scaldarti, poi riportalo alla griglia.",
+            "Nessun punteggio nel gioco libero: questo è il tuo spazio creativo.",
+            "Modalità libera attiva: la valutazione riprende quando torni ad agganciarti al battito.",
+            "Gioco libero non valutato: lascia scorrere, torna alla griglia quando sei pronto."
+          ]
+        },
+        "flat_dynamics": {
+          "neutral": [
+            "Bassa variazione di ampiezza tra le posizioni dei beat: prova a variare l'attacco.",
+            "Dinamica appena accennata lungo la battuta: aumenta la differenza di accento sui tempi forti.",
+            "L'ampiezza è costante tra le posizioni: costruisci una gerarchia dinamica, tempi forti più forti, levare più leggeri."
+          ]
+        },
+        "weak_downbeats": {
+          "neutral": [
+            "Rilevato schema di anti-accento: i tempi forti sono più deboli dei levare.",
+            "I tuoi levare dominano: aumenta l'attacco sui beat 1 e 3.",
+            "L'ampiezza dei tempi forti è inferiore a quella dei levare: inverti la gerarchia dinamica."
+          ]
+        },
+        "good_accents": {
+          "neutral": [
+            "Buona differenza di accento: i tempi forti sono chiaramente più forti dei levare.",
+            "Buona forma dinamica: l'ampiezza dei tempi forti è ben sopra quella dei levare.",
+            "Struttura degli accenti solida: i tempi forti guidano la gerarchia dinamica."
+          ]
+        },
+        "subdivisions_too_loud": {
+          "neutral": [
+            "L'ampiezza delle suddivisioni è vicina a quella dei tempi forti: i riempimenti sovrastano la struttura degli accenti.",
+            "I riempimenti sono forti quanto i beat principali: riduci l'attacco sulle note delle suddivisioni.",
+            "Nessuna gerarchia dinamica tra beat e riempimenti: i tempi forti dovrebbero guidare, le suddivisioni seguire."
+          ]
+        }
+      }
+    },
+    "words": {
+      "direction": {
+        "before": "in anticipo",
+        "after": "in ritardo"
+      },
+      "correctionDirection": {
+        "earlier": "più in anticipo",
+        "later": "più in ritardo"
+      },
+      "change": {
+        "bpmUp": "tempo salito a {to} BPM",
+        "bpmDown": "tempo sceso a {to} BPM",
+        "presetCleared": "preset rimosso",
+        "preset": "caricamento di \"{to}\"",
+        "timeSig": "indicazione di tempo {to}/4",
+        "grouping": "raggruppamento cambiato in {to}",
+        "instrument": "passaggio a {to}",
+        "other": "configurazione cambiata",
+        "separator": "; "
+      }
+    }
+  }
+}

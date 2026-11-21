@@ -92,7 +92,11 @@
           "lastSession_many": "{{count}} minuti di take nella tua ultima sessione, per finire {{exercise}} a {{bpm}} BPM.",
           "lastSession_other": "{{count}} minuti di take nella tua ultima sessione, per finire {{exercise}} a {{bpm}} BPM."
         },
-        "samePlace": "Oggi, nello stesso punto."
+        "samePlace": "Oggi, nello stesso punto.",
+        "songDue": {
+          "one": "La battuta {{bar}} di {{song}} è da riprendere.",
+          "range": "Le battute da {{from}} a {{to}} di {{song}} sono da riprendere."
+        }
       },
       "whatsIn": "Cosa c'è dentro, e perché",
       "min": "MIN",

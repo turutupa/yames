@@ -1,0 +1,8 @@
+{ "language": "zh-CN", "reviewer": "reviewer-zh-CN", "sampled": 50,
+  "rejected": [
+    { "id": "zh-CN-00344", "wording": "play_exercise_bpm#6", "why": "exercise name is a truncated fragment ('上的第'); text is garbled" },
+    { "id": "zh-CN-00285", "wording": "find_edge#1", "why": "name fragments ('上，然后穿过') make the sentence nonsensical" },
+    { "id": "zh-CN-00599", "wording": "play_exercise#6", "why": "name fragment '下到' makes the sentence garbled" },
+    { "id": "zh-CN-00640", "wording": "open_step_name#2", "why": "'弦和' is a meaningless truncated step name" }
+  ],
+  "notes": "Mostly natural; the main defect is exercise/step names cut mid-phrase into meaningless fragments in the ambiguous records. Never-list, wrong-screen and tool records fit their answers." }
