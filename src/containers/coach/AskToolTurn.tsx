@@ -39,6 +39,7 @@ const VERBS: Readonly<Record<string, string>> = {
   open_path: "open",
   open_step: "open",
   open_settings: "open",
+  loop_bars: "loop",
 };
 
 function Source({ words }: { words: string }) {

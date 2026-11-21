@@ -137,6 +137,15 @@ export function askCommandFacts(): CommandFacts | null {
   return at ? commandFacts(at.ctx, viewOf(at.host)) : null;
 }
 
+/** The coach's context now, as the tools read it (the fact cards read it too, leg c2b1a); null without one. */
+export function askToolContext(): CoachContext | null {
+  try {
+    return contextOf?.() ?? null;
+  } catch {
+    return null;
+  }
+}
+
 /** The chips for where the player is now (none without a host or a context). */
 export function askToolChips(): ToolChip[] {
   const at = where();

@@ -49,6 +49,7 @@ const READS = new Set<keyof CoachToolHost>([
   "sounding",
   "jamTakeRunning",
   "nudges",
+  "loopAsk",
 ]);
 
 export function fakeHost(

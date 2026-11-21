@@ -10,7 +10,8 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { buildCoachContext, contextForModel, type CoachScreen, type CoachSources } from "../../coach/context";
+import { lastEvent } from "../../coach/bus";
+import { buildCoachContext, type CoachScreen, type CoachSources } from "../../coach/context";
 import { getCoachModelSnapshot } from "../../hooks/coachLoader";
 import type { Jam } from "../../jam/types";
 import { currentStep } from "../../session/runner";
@@ -18,7 +19,7 @@ import type { SongRecord } from "../../songs/library";
 import { wholeSong } from "../../songs/schedule";
 import type { MainView } from "../main-window/MainHeader";
 import { seedOf, type SessionRun } from "../session/hooks/useSessionRun";
-import { askScreenKey, lookingAtParts } from "./askContext";
+import { askModelContext, askScreenKey, lookingAtParts } from "./askContext";
 import type { AskLookingAt } from "./AskPanel";
 import { noteAskLoad, noteAskTake, noteAskToolView, noteAskUndos, registerAskToolContext } from "./askTools";
 import { useAskSessionRules, useCoachPanel, type CoachPanel } from "./useCoachPanel";
@@ -85,6 +86,17 @@ export function useAskHost(input: AskHostInput): { panel: CoachPanel; lookingAt:
       const outcomes = latest.current.session.run.outcomes;
       return outcomes[outcomes.length - 1];
     },
+    // The last Take's analysis, as the bus carried it with that Take's result
+    // (the note reads the same one): the fact cards' places and leans (c2b1a).
+    review: () => {
+      if (latest.current.view !== "session") return undefined;
+      const outcomes = latest.current.session.run.outcomes;
+      const last = outcomes[outcomes.length - 1];
+      const event = lastEvent("takeResult");
+      if (!last || !event) return undefined;
+      const same = event.outcome === last || (!!last.takeId && event.outcome.takeId === last.takeId);
+      return same ? (event.review ?? undefined) : undefined;
+    },
     jam: () => (latest.current.view === "jam" && latest.current.jam ? { jam: latest.current.jam } : undefined),
     song: () => {
       const song = latest.current.song;
@@ -92,7 +104,8 @@ export function useAskHost(input: AskHostInput): { panel: CoachPanel; lookingAt:
     },
   }).current;
 
-  const panel = useCoachPanel({ contextText: () => contextForModel(buildCoachContext(sources)) });
+  // The model's context leaves the Take's raw review out (review c2b1a F5).
+  const panel = useCoachPanel({ contextText: () => askModelContext(sources) });
 
   // The tools read the same context, at each press (leg t1b1).
   useEffect(() => registerAskToolContext(() => buildCoachContext(sources)), [sources]);

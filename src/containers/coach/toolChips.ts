@@ -8,8 +8,11 @@
  * whose tool says no here (`when(ctx)`, the same check the runner makes).
  * A chip press is an ordinary tool call through the runner.
  *
- * Tools that answer "not yet" (`loop_bars`, `make_exercise`, `explain_screen`,
- * `set_goal`) are never offered: a chip that can only say "not yet" is noise.
+ * Tools that answer "not yet" (`make_exercise`, `explain_screen`, `set_goal`)
+ * are never offered: a chip that can only say "not yet" is noise. `loop_bars`
+ * has its door (leg lb1) and no chip of its own: on a Session's ready screen
+ * and result the Session's own loop button already offers the bar that
+ * slipped, and a chip naming other bars would be a guess.
  * During a Take there are none: Ask is not mounted then.
  */
 import type { CoachContext } from "../../coach/context";

@@ -1,108 +1,63 @@
 /**
- * `useAskHost`'s two chip-Undo effects (leg chip1b, review L4), with the
- * panel and the tool functions stubbed so only the hook's own timing is
- * under test: `noteAskTake` once per Take (never per beat, never per
- * render), `noteAskUndos` when the panel opens or the screen / run moves
- * (never during a Take, never under the Settings overlay), and a loop's
- * start in a Session retiring the chip Undos whether the panel is open or
- * closed (review L2 c).
+ * The model's context in Ask is `askModelContext`, the one without the last
+ * Take's raw review (review c2b1a F5): this checks the wiring, not only the
+ * function, so going back to `contextForModel(buildCoachContext(sources))`
+ * in `useAskHost` fails here (review c2b1c L4).
  */
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
 import "../../i18n";
-import type { MainView } from "../main-window/MainHeader";
 import type { SessionRun } from "../session/hooks/useSessionRun";
-import { useAskHost, type AskHostInput } from "./useAskHost";
-import { noteAskLoad, noteAskTake, noteAskUndos } from "./askTools";
+import type { CoachSources } from "../../coach/context";
 
-const panel = vi.hoisted(() => ({ open: false }));
+const seen = vi.hoisted(() => ({ contextText: null as null | (() => string), sources: [] as unknown[] }));
 
-vi.mock("./askTools", async (importOriginal) => {
-  const real = await importOriginal<typeof import("./askTools")>();
+vi.mock("./askContext", async (importOriginal) => {
+  const real = await importOriginal<typeof import("./askContext")>();
   return {
     ...real,
-    noteAskTake: vi.fn(),
-    noteAskUndos: vi.fn(),
-    noteAskLoad: vi.fn(),
-    noteAskToolView: vi.fn(),
-    registerAskToolContext: () => () => {},
+    askModelContext: (sources: CoachSources) => {
+      seen.sources.push(sources);
+      return "THE MODEL'S CONTEXT";
+    },
   };
 });
 
-vi.mock("./useCoachPanel", async (importOriginal) => {
-  const real = await importOriginal<typeof import("./useCoachPanel")>();
-  return { ...real, useCoachPanel: () => ({ open: panel.open, deferred: false }), useAskSessionRules: () => {} };
+vi.mock("./useCoachPanel", () => ({
+  useCoachPanel: (opts: { contextText: () => string }) => {
+    seen.contextText = opts.contextText;
+    return { open: false, deferred: false };
+  },
+  useAskSessionRules: () => {},
+}));
+
+import { useAskHost } from "./useAskHost";
+
+afterEach(() => {
+  seen.contextText = null;
+  seen.sources = [];
 });
 
-vi.mock("../../coach/context", async (importOriginal) => {
-  const real = await importOriginal<typeof import("../../coach/context")>();
-  return { ...real, buildCoachContext: () => ({}), contextForModel: () => "" };
-});
+const session = {
+  grading: "on",
+  directInput: false,
+  inputStart: { failure: null },
+  progress: { states: [], takes: [], ceilings: [] },
+  plan: null,
+  run: { phase: "idle", outcomes: [], stepIndex: 0, paused: false, ended: false },
+  paths: [],
+  exercise: null,
+  take: null,
+  actions: { togglePause: () => {} },
+} as unknown as SessionRun;
 
-vi.mock("./askContext", () => ({ askScreenKey: () => "k", lookingAtParts: () => [] }));
-
-/** A fresh object every call, as `MainWindow`'s per-beat render hands the hook. */
-function input(view: MainView, phase: string, now = 0): AskHostInput {
-  const session = {
-    run: { phase, stepIndex: 0, outcomes: [], paused: false, ended: false, now },
-    exercise: { id: "ex" },
-    actions: { togglePause: () => {} },
-  } as unknown as SessionRun;
-  return { view, session, listening: false, isPlaying: phase === "playing", jam: null, song: null };
-}
-
-beforeEach(() => {
-  panel.open = false;
-  vi.mocked(noteAskTake).mockClear();
-  vi.mocked(noteAskUndos).mockClear();
-  vi.mocked(noteAskLoad).mockClear();
-});
-
-describe("useAskHost's chip-Undo effects", () => {
-  it("noteAskTake runs once per Take: not per beat, not per render, not again while the Take listens", () => {
-    const { rerender } = renderHook((p: AskHostInput) => useAskHost(p), { initialProps: input("session", "ready") });
-    for (let i = 0; i < 5; i++) rerender(input("session", "ready", i));
-    expect(noteAskTake).not.toHaveBeenCalled();
-    for (let beat = 0; beat < 40; beat++) rerender(input("session", "playing", beat));
-    expect(noteAskTake).toHaveBeenCalledTimes(1);
-    for (let beat = 0; beat < 5; beat++) rerender(input("session", "listening", beat));
-    rerender(input("session", "result"));
-    expect(noteAskTake).toHaveBeenCalledTimes(1);
-    rerender(input("session", "playing"));
-    expect(noteAskTake).toHaveBeenCalledTimes(2);
-  });
-
-  it("noteAskUndos: when the panel opens and when the run moves, never per render, never during a Take, never under Settings", () => {
-    const { rerender } = renderHook((p: AskHostInput) => useAskHost(p), { initialProps: input("beat", "idle") });
-    expect(noteAskUndos).not.toHaveBeenCalled();
-    panel.open = true;
-    rerender(input("beat", "idle"));
-    expect(noteAskUndos).toHaveBeenCalledTimes(1);
-    for (let i = 0; i < 10; i++) rerender(input("beat", "idle", i));
-    expect(noteAskUndos).toHaveBeenCalledTimes(1);
-    // The Settings overlay: nothing asked.
-    rerender(input("settings", "idle"));
-    expect(noteAskUndos).toHaveBeenCalledTimes(1);
-    rerender(input("beat", "idle"));
-    expect(noteAskUndos).toHaveBeenCalledTimes(2);
-    // In a Session: the ready screen asks; a Take does not, at its start or per beat.
-    rerender(input("session", "ready"));
-    expect(noteAskUndos).toHaveBeenCalledTimes(3);
-    for (let beat = 0; beat < 20; beat++) rerender(input("session", "playing", beat));
-    rerender(input("session", "listening"));
-    expect(noteAskUndos).toHaveBeenCalledTimes(3);
-    rerender(input("session", "result"));
-    expect(noteAskUndos).toHaveBeenCalledTimes(4);
-  });
-
-  it("a loop's start in a Session retires the chip Undos, panel closed or open, once per loop", () => {
-    const { rerender } = renderHook((p: AskHostInput) => useAskHost(p), { initialProps: input("session", "ready") });
-    for (let beat = 0; beat < 10; beat++) rerender(input("session", "looping", beat));
-    expect(noteAskLoad).toHaveBeenCalledTimes(1);
-    rerender(input("session", "ready"));
-    panel.open = true;
-    rerender(input("session", "ready"));
-    rerender(input("session", "looping"));
-    expect(noteAskLoad).toHaveBeenCalledTimes(2);
+describe("useAskHost", () => {
+  it("hands the panel askModelContext over its own sources, nothing built beside it", () => {
+    renderHook(() => useAskHost({ view: "today", session, listening: false, isPlaying: false, jam: null, song: null }));
+    expect(seen.contextText).not.toBeNull();
+    expect(seen.contextText!()).toBe("THE MODEL'S CONTEXT");
+    expect(seen.sources).toHaveLength(1);
+    // The sources it passes are the host's getters (the screen among them).
+    expect((seen.sources[0] as CoachSources).screen()).toBe("today");
   });
 });
