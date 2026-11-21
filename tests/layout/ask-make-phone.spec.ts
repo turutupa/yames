@@ -103,8 +103,10 @@ test.describe("on a phone, the keyboard up", () => {
     // The case the defect needs: the box still has the focus from the typed line.
     expect(await boxHasFocus(page), "the box keeps the focus after a send").toBe(true);
     await go.tap();
-    const receipt = page.locator(`${ROOT} [data-testid=ask-receipt]`).last();
-    await expect(receipt).toBeVisible({ timeout: 10_000 });
+    // The make receipt by its place: "Open Paths" below adds a receipt of its own (with its own Undo).
+    const receipts = page.locator(`${ROOT} [data-testid=ask-receipt]`);
+    await expect(receipts.first()).toBeVisible({ timeout: 10_000 });
+    const receipt = receipts.nth((await receipts.count()) - 1);
     await expect(receipt.locator("[data-testid=ask-undo]")).toBeVisible({ timeout: 10_000 });
     await expect(receipt).toContainText("to My exercises.");
     // The press landed, then the keyboard went away.
