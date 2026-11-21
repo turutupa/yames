@@ -661,8 +661,10 @@ describe("pass marks, each in its own words (review c2b2a M1)", () => {
     expect(keys(card(passMarkMs(ctx(), 85)))).toEqual(["ask.card.term.evenMs", "ask.card.term.evenHow"]);
   });
 
-  it("60%: a check the app has no sentence for: no card", () => {
-    expect(noCard(passMarkMs(ctx(), 60))).toEqual({ key: "ask.card.term.markOther", values: { value: 60 } });
+  it("60%: the accents mark in its own words (c2b2ac); a check the app has no sentence for: no card", () => {
+    expect(card(passMarkMs(ctx(), 60)).lines).toEqual([{ key: "ask.card.term.accentsMark", values: { bar: 60 } }]);
+    const other = { ...TUNE, passBars: [{ metric: "someOtherCheck", min: 0.6, overBars: 4 }] } as unknown as Exercise;
+    expect(noCard(passMarkMs(here({ exercise: other }, { exercise: other }), 60))).toEqual({ key: "ask.card.term.markOther", values: { value: 60 } });
   });
 
   it("two checks at the same 90%: both named, notes heard and accents (review c2b2ab L4)", () => {

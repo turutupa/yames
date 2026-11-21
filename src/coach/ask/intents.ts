@@ -135,7 +135,7 @@ export const FACT_CARDS: readonly FactCardTool[] = [
     {
       args: [TAKE_ARG],
       note: "Where the last Take slipped: the bars of the tune, on how many rounds, and which way the notes there leaned.",
-      short: "where the last Take slipped",
+      short: "where it slipped",
     },
     measuredTake,
     (_args, ctx) => whereSlipped(ctx),
@@ -153,7 +153,7 @@ export const FACT_CARDS: readonly FactCardTool[] = [
         },
       ],
       note: "Whether the last Take landed early or late, by bars of the tune.",
-      short: "last Take early or late",
+      short: "early or late",
     },
     measuredTake,
     (args, ctx) => earlyOrLate(ctx, (argString(args, "premise") as Lean | undefined) ?? null),
@@ -171,7 +171,7 @@ export const FACT_CARDS: readonly FactCardTool[] = [
         },
       ],
       note: "Why the last Take did or did not count, or why something is not graded on this Exercise.",
-      short: "why a Take counted or not",
+      short: "why it counted or not",
     },
     cardAboutLastTake,
     (args, ctx) => whyNotCounted(ctx, (argString(args, "what") as "take" | AskableMetric | undefined) ?? "take"),
@@ -182,7 +182,7 @@ export const FACT_CARDS: readonly FactCardTool[] = [
     {
       args: [TAKE_ARG],
       note: "The last Take beside the last measured Take before it on this Exercise: the tempo of each, the number each kept, and whether each met the pass mark. Takes marked not fair are left out.",
-      short: "last Take against the one before",
+      short: "Take vs the one before",
     },
     measuredTake,
     (_args, ctx) => whatChanged(ctx),
@@ -192,7 +192,7 @@ export const FACT_CARDS: readonly FactCardTool[] = [
     {
       args: [],
       note: "The measured Takes of this Exercise, as a named window: tempo, clean tempos earned, evenness of the oldest, the newest and the best. Needs three; Takes marked not fair are left out.",
-      short: "progress over the measured Takes",
+      short: "progress over Takes",
     },
     cardAboutLastTake,
     (_args, ctx) => improving(ctx),
@@ -208,7 +208,7 @@ export const FACT_CARDS: readonly FactCardTool[] = [
     {
       args: [TAKE_ARG],
       note: "Each check of the last Take against its pass mark, in the Exercise's own numbers, and the tempo it is passed at.",
-      short: "how far from the pass mark",
+      short: "how close to passing",
     },
     measuredTake,
     (_args, ctx) => passMarkDistance(ctx),
@@ -219,7 +219,7 @@ export const FACT_CARDS: readonly FactCardTool[] = [
     "exercise_purpose",
     [],
     "What this Exercise is for, in the Path's own words.",
-    "what this Exercise is for",
+    "what it is for",
     (ctx) => !!ctx.exercise?.purpose.trim(),
     (_a, ctx) => exercisePurpose(ctx),
   ),
@@ -227,7 +227,7 @@ export const FACT_CARDS: readonly FactCardTool[] = [
     "exercise_how",
     [],
     "How to play this Exercise, in the Path's own words.",
-    "how to play this Exercise",
+    "how to play it",
     (ctx) => (ctx.exercise?.howTo.length ?? 0) > 0,
     (_a, ctx) => exerciseHow(ctx),
   ),
@@ -235,7 +235,7 @@ export const FACT_CARDS: readonly FactCardTool[] = [
     "exercise_try",
     [],
     "The Path's cue for the next Take: the one the last Take's measurements pick, else the Exercise's general cue.",
-    "what to try next Take",
+    "what to try next",
     (ctx) => (ctx.exercise?.cues?.length ?? 0) > 0,
     (_a, ctx) => exerciseTry(ctx),
   ),
@@ -247,12 +247,12 @@ export const FACT_CARDS: readonly FactCardTool[] = [
     "plan_tempo",
     [],
     "The tempo this part was planned at and why; the tempo now when it moved.",
-    "this part's planned tempo",
+    "why this tempo",
     planStepRunning,
     (_a, ctx) => planTempo(ctx),
   ),
-  pathEntry("plan_next", [], "The next part of this Session's plan.", "what comes next in the Session", planStepRunning, (_a, ctx) => planNext(ctx)),
-  pathEntry("plan_skip", [], "What Test out is, ending in its proposal for the Step the player is on.", "skipping ahead with Test out", () => false, (_a, ctx) =>
+  pathEntry("plan_next", [], "The next part of this Session's plan.", "what comes next", planStepRunning, (_a, ctx) => planNext(ctx)),
+  pathEntry("plan_skip", [], "What Test out is, ending in its proposal for the Step the player is on.", "skipping ahead", () => false, (_a, ctx) =>
     planSkip(ctx),
   ),
   pathEntry(
@@ -260,11 +260,11 @@ export const FACT_CARDS: readonly FactCardTool[] = [
     [{ name: "minutes", type: { kind: "integer", min: 1, max: 240 }, note: "The minutes the player has." }],
     // Today's plan, rightly: the lengths are what Today plans for, outside a Session.
     "The lengths today's plan comes in, ending in the proposal to change it.",
-    "fitting practice into some minutes",
+    "plan for N minutes",
     () => false,
     (args, ctx) => planMinutes(ctx, argNumber(args, "minutes") ?? null),
   ),
-  pathEntry("plan_return", [], "When the review schedule brings this Exercise back.", "when this Exercise comes back", exerciseHere, (_a, ctx) =>
+  pathEntry("plan_return", [], "When the review schedule brings this Exercise back.", "when it comes back", exerciseHere, (_a, ctx) =>
     planReturn(ctx),
   ),
   pathEntry(
@@ -275,14 +275,14 @@ export const FACT_CARDS: readonly FactCardTool[] = [
     () => false,
     (args) => scaleFits(argString(args, "root") ?? "", argString(args, "suffix") ?? UNKNOWN_SUFFIX),
   ),
-  pathEntry("chord_notes", CHORD_ARGS, "The notes of a chord, spelled by the app, and its grip.", "the notes of a chord", () => false, (args) =>
+  pathEntry("chord_notes", CHORD_ARGS, "The notes of a chord, spelled by the app, and its grip.", "notes of a chord", () => false, (args) =>
     chordNotesCard(argString(args, "root") ?? "", argString(args, "suffix") ?? UNKNOWN_SUFFIX),
   ),
   pathEntry(
     "pass_mark_ms",
     [{ name: "value", type: { kind: "integer", min: 1, max: 100 }, optional: true, note: "The percentage the player asked about." }],
     "This Exercise's evenness pass mark in milliseconds at this tempo.",
-    "what a pass mark percentage means",
+    "what a percentage means",
     gradedExerciseHere,
     (args, ctx) => passMarkMs(ctx, argNumber(args, "value") ?? null),
   ),

@@ -45,7 +45,7 @@ import { isGradable, isMarkedNotFair, shownCleanTempoOf, takesOf } from "../../s
 import { reviewStateOf } from "../../session/rotation";
 import { buildTake, withVariant } from "../../session/take";
 import type { FactCard, NoCard, PathCardShape } from "./cards";
-import { lastTakeHere, noteOf, pathIdHere, planStepHere, takeSeedHere, ungradedPlayer } from "./cards";
+import { lastTakeHere, noteOf, pathIdHere, planStepHere, runningPlan, takeSeedHere, ungradedPlayer } from "./cards";
 
 function line(key: string, values: Record<string, string | number> = {}): Line {
   return { key, values };

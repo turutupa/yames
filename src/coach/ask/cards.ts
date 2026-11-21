@@ -156,7 +156,7 @@ function variantKnown(ctx: CoachContext, outcome: TakeOutcome, exercise: Exercis
  * carry the run's plan falls back to `ctx.plan`, which the host sets to the
  * run's plan in a Session.
  */
-function runningPlan(ctx: CoachContext) {
+export function runningPlan(ctx: CoachContext) {
   if (!ctx.run) return null;
   const plan = ctx.run.plan !== undefined ? ctx.run.plan : ctx.plan;
   return plan ?? null;
