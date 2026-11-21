@@ -33,7 +33,7 @@ import type { BarCell, Line } from "../session/coachWords";
 import { barStrip, decidingCheck, notCaughtHint, takeLine } from "../session/coachWords";
 import type { BarCheck, TakeVerdict } from "../session/grade";
 import { rungAbove } from "../session/ladder";
-import { factsOf, heardItOf, isUngradedTake } from "../session/progress";
+import { factsOf, heardItOf, isUngradedTake, takesOf, type PlayerProgress } from "../session/progress";
 import type { TakeOutcome, TakeSpot } from "../session/runner";
 import type { TakeMeasures } from "../session/takeMeasures";
 import type { Finding, FindingKind, NoteVerdict, ScoreSchedule, SongScore } from "../songs/types";
@@ -583,6 +583,25 @@ function directionLine(direction: Direction): Line {
 // ---------------------------------------------------------------------------
 // takeNote
 // ---------------------------------------------------------------------------
+
+/**
+ * The note for `outcome` as the Session's result screen draws it: this
+ * Exercise's earlier Takes (`takesOf` on `pathId`, without this one, newest
+ * first), with `context.session` the Session's start so the repeat table counts
+ * this Session's Takes only. One function for the screen (`useTakeNote`) and
+ * Ask's cards (`noteOf`), so the two cannot pick different cues (c2b2ab, M3).
+ */
+export function noteForTake(
+  outcome: TakeOutcome,
+  review: TakeReview | null,
+  progress: PlayerProgress,
+  pathId: string | null,
+  exercise: Exercise,
+  context: TakeNoteContext = {},
+): TakeNote {
+  const earlier = pathId ? takesOf(progress, pathId, outcome.exerciseId).filter((row) => row.id !== outcome.takeId) : [];
+  return takeNote(outcome, review, earlier, exercise, context);
+}
 
 /**
  * The note after a Take.

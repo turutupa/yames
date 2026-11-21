@@ -109,6 +109,26 @@ describe("the Notebook's source (c4a2b, M1)", () => {
   });
 });
 
+describe("the plan the cards read (review c2b2a H1)", () => {
+  const part = (title: string, bpm: number) => ({ kind: "exercise", id: title, title, bpm, minutes: 4, why: { code: "climb", values: {} } });
+  const today = { minutes: 10, steps: [part("Warm-up", 70), part("Today's second", 80)] };
+  const testOut = { minutes: 5, steps: [part("Test out", 120)] };
+  const host = (view: "session" | "today", phase: string) => {
+    const s = { ...session, plan: today, run: { ...(session.run as object), phase, plan: phase === "idle" ? null : testOut } } as unknown as SessionRun;
+    renderHook(() => useAskHost({ view, session: s, listening: false, isPlaying: false, jam: null, song: null }));
+    seen.contextText!();
+    return seen.sources[seen.sources.length - 1] as CoachSources;
+  };
+
+  it("in a running Session: the plan it runs, not Today's", () => {
+    expect(host("session", "ready").plan?.()).toBe(testOut);
+  });
+
+  it("on Today: Today's plan", () => {
+    expect(host("today", "idle").plan?.()).toBe(today);
+  });
+});
+
 describe("useAskHost", () => {
   it("hands the panel askModelContext over its own sources, nothing built beside it", () => {
     renderHook(() => useAskHost({ view: "today", session, listening: false, isPlaying: false, jam: null, song: null }));
