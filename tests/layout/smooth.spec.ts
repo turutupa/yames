@@ -164,12 +164,20 @@ test("hear-back: the player's bar plays without a commit per frame, and a Take h
   await openShot(page, "session-between", WIDE, "ember", { hearBack: "1" });
   const chip = page.locator('[data-testid="coach-hear-back"]');
   await expect(chip).toBeVisible({ timeout: 30_000 });
+  // The result screen's own commits (the Session's clock) with nothing playing: the baseline.
+  const quiet = await samplePerf(page, 700);
   await chip.click();
   await expect(chip).toHaveText(/^Yours: bar \d+ · Stop$/);
   // The harness's bar lasts 1.2 s; this window sits inside it, after the press's own commit.
   const s = await samplePerf(page, 700);
-  expect(s.commits, `${s.commits} commits while the player's bar played`).toBeLessThanOrEqual(2);
-  expect(rendersOf(s, "CoachNote"), `CoachNote rendered in ${s.commits} commits`).toBeLessThanOrEqual(2);
+  expect(
+    s.commits,
+    `${s.commits} commits while the player's bar played, ${quiet.commits} on the quiet result`,
+  ).toBeLessThanOrEqual(quiet.commits + 2);
+  expect(
+    rendersOf(s, "CoachNote"),
+    `CoachNote rendered ${rendersOf(s, "CoachNote")} times while it played, ${rendersOf(quiet, "CoachNote")} quiet`,
+  ).toBeLessThanOrEqual(rendersOf(quiet, "CoachNote") + 2);
   await expect(chip).toHaveText(/^Hear bar \d+: yours, then the demo$/, { timeout: 30_000 });
 
   await openShot(page, "session-playing", WIDE, "ember", { hearBack: "1" });
