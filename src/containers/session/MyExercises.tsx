@@ -14,7 +14,7 @@ import type { Exercise, PathDoc } from "../../paths/format";
 import { CUSTOM_PATH_ID, customPathDoc } from "../../paths/custom";
 import type { CustomSummary } from "../../paths/custom";
 import { tempoRange } from "../../session/coachWords";
-import { cleanTempoOf, takesOf } from "../../session/progress";
+import { shownCleanTempoOf, takesOf } from "../../session/progress";
 import { removeMyExercise, restoreMyExercise, updateMyExercises, useMyExercises } from "../../session/myExercises";
 import type { MyExercise, RemovedMyExercise } from "../../session/myExercises";
 import { buildMyExercises, keyOf, myExerciseLine } from "../../session/myExerciseBuild";
@@ -114,7 +114,8 @@ export default function MyExercisesList({ session, style }: { session: SessionRu
           const line = myExerciseLine(t, summary);
           const range = tempoRange(exercise);
           const played = takesOf(session.progress, CUSTOM_PATH_ID, exercise.id).length;
-          const clean = cleanTempoOf(session.progress, CUSTOM_PATH_ID, exercise.id);
+          // The clean tempo the app shows: a Take marked not fair left out (nf1).
+          const clean = shownCleanTempoOf(session.progress, CUSTOM_PATH_ID, exercise.id);
           return (
             <div className="session-myex session-glass" key={key} data-testid="my-exercise" data-id={exercise.id}>
               <div className="session-myex-text">

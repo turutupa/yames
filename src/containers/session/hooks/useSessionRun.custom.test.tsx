@@ -71,7 +71,7 @@ function mount(listening = false) {
   };
   const hook = renderHook((p: SessionRunInput) => useSessionRun(p), { initialProps: props });
   /** Render again with the same props (a new object), as a parent's render would. */
-  return { ...hook, again: () => hook.rerender({ ...props }) };
+  return { ...hook, again: (over: Partial<SessionRunInput> = {}) => hook.rerender({ ...props, ...over }) };
 }
 
 describe("useSessionRun — a custom Exercise", () => {
@@ -108,6 +108,13 @@ describe("useSessionRun — a custom Exercise", () => {
     await waitFor(() => expect(h.result.current.run.phase).toBe("ready"));
     await waitFor(() => expect(h.result.current.prepared).toBe(true));
     act(() => h.result.current.actions.go());
+    await waitFor(() =>
+      expect(mockInvoke.mock.calls.some(([c, a]) => c === "set_playing" && (a as { playing: boolean }).playing)).toBe(true),
+    );
+    // The engine says it plays, then that it stopped: the Take is waiting for the scorer.
+    h.again({ isPlaying: true });
+    await waitFor(() => expect(h.result.current.run.phase).toBe("playing"));
+    h.again({ isPlaying: false });
     await waitFor(() => expect(h.result.current.run.phase).toBe("listening"));
 
     ctl.pass = true;

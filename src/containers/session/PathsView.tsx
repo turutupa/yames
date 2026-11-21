@@ -17,7 +17,7 @@ import { stepHonestLineKey } from "../../session/caveats";
 import { testOutRetests } from "../../session/planner";
 import { PATH_BADGE_KEY, exerciseGradingKey, pathBadge } from "../../session/badges";
 import {
-  cleanTempoOf,
+  shownCleanTempoOf,
   currentStepOf,
   isExercisePassed,
   isGradable,
@@ -815,7 +815,7 @@ function ExerciseRow({
 }) {
   const { t } = useTranslation();
   const { progress, actions } = session;
-  const clean = cleanTempoOf(progress, path.id, exercise.id);
+  const clean = shownCleanTempoOf(progress, path.id, exercise.id);
   const passed = isExercisePassed(progress, path.id, exercise);
   const played = takesOf(progress, path.id, exercise.id).length;
   const bar = barLine(exercise, exercise.tempo.passAtBpm);
