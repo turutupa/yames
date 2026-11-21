@@ -138,7 +138,7 @@ import { useLibraryFit } from "./hooks/useLibraryFit";
 import { useSetlistSession } from "./hooks/useSetlistSession";
 import { useJamSession } from "./hooks/useJamSession";
 import { useSongsSession } from "./hooks/useSongsSession";
-import { isLearnTab, isPlayTab, type PlayTab } from "./hooks/useTabRouting";
+import { isLearnTab, isPlayTab, sessionIsTheView, type PlayTab } from "./hooks/useTabRouting";
 import { useSessionRun } from "../session/hooks/useSessionRun";
 import { startSessionInput } from "../../session/inputStart";
 import { useSessionPedal } from "../session/hooks/useSessionPedal";
@@ -276,7 +276,7 @@ export function MainWindow() {
   // way the rail and the tab bar are away: a click on them would walk out of
   // the Session and end it without a word (UX audit NAV-2). Settings' own Back
   // and Escape return to the Session.
-  const inSession = view === "session" || (view === "settings" && mode === "session");
+  const inSession = sessionIsTheView(view, mode);
   const pathsUpOne = pathsPlace.back;
   // Paths reopens where the player was (UX audit NAV-3); the door pressed again
   // while on Paths goes one page up, Step to Path to the list (QA 2026-11-17 #8
@@ -384,7 +384,8 @@ export function MainWindow() {
     hushed: view === "session",
   });
   // The coach's voice at a Session's boundaries, and the coach keys' slot (leg c1b2b).
-  useCoachVoice(coach.coachVoiceMode, state.isPlaying, view === "session");
+  // Settings opened over the Session is not leaving it (review c1b2c, 5).
+  useCoachVoice(coach.coachVoiceMode, state.isPlaying, inSession);
 
   /**
    * Re-send the whole ramp with one or two fields changed.
