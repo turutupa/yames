@@ -92,7 +92,11 @@
           "lastSession_many": "{{count}} minuti di take nella tua ultima sessione, per finire {{exercise}} a {{bpm}} BPM.",
           "lastSession_other": "{{count}} minuti di take nella tua ultima sessione, per finire {{exercise}} a {{bpm}} BPM."
         },
-        "samePlace": "Oggi, nello stesso punto."
+        "samePlace": "Oggi, nello stesso punto.",
+        "songDue": {
+          "one": "La battuta {{bar}} di {{song}} è da riprendere.",
+          "range": "Le battute da {{from}} a {{to}} di {{song}} sono da riprendere."
+        }
       },
       "whatsIn": "Cosa c'è dentro, e perché",
       "min": "MIN",
@@ -873,6 +877,11 @@
       },
       "chip": {
         "hear": "Ascoltala prima",
+        "hearBack": "Ascolta la battuta {{bar}}: la tua, poi la demo",
+        "hearYours": "La tua: battuta {{bar}} · Stop",
+        "hearDemo": "Demo: battuta {{bar}} · Stop",
+        "hearBackTune": "Ascolta la tua battuta {{played}}, poi la demo della battuta {{tune}}",
+        "hearDemoTune": "Demo: battuta {{tune}} della melodia · Stop",
         "try": "Cosa dovrei provare?"
       },
       "ungraded": {

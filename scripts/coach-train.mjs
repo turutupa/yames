@@ -182,7 +182,7 @@ async function cmdGenerate(ev, opt) {
     const t0 = Date.now();
     const data = ev.languageData(lng, paths, wordings);
     const t1 = Date.now();
-    const res = ev.generateLanguage(data, wordings, { size, seed, guard, blocked });
+    const res = ev.generateLanguage(data, wordings, { size, seed, guard, blocked, mix: ev.CARD_MIX });
     all.push(...res.records);
     drops[lng] = res.drops;
     console.log(`${lng}: ${res.records.length} records (names ${t1 - t0} ms, records ${Date.now() - t1} ms; names: path ${data.path.unique.length}/${data.path.ambiguous.length}, step ${data.step.unique.length}/${data.step.ambiguous.length}, exercise ${data.exercise.unique.length}/${data.exercise.ambiguous.length})`);
@@ -192,7 +192,7 @@ async function cmdGenerate(ev, opt) {
   mkdirSync(dir, { recursive: true });
   writeJsonl(path.join(dir, "train.jsonl"), train);
   writeJsonl(path.join(dir, "validation.jsonl"), validation);
-  const stats = { seed, size, mix: ev.DEFAULT_MIX, total: all.length, train: train.length, validation: validation.length, counts: ev.countRecords(all), validationCounts: ev.countRecords(validation), reviewed, drops };
+  const stats = { seed, size, mix: ev.CARD_MIX, total: all.length, train: train.length, validation: validation.length, counts: ev.countRecords(all), validationCounts: ev.countRecords(validation), reviewed, drops };
   writeFileSync(path.join(dir, "stats.json"), `${JSON.stringify(stats, null, 1)}\n`);
   console.log(`total ${all.length}: train ${train.length}, validation ${validation.length}`);
 }
@@ -209,7 +209,10 @@ async function cmdRender(ev, opt) {
     if (opt.check) {
       const okGrammar = ev.gbnfToRegExp(out.grammar).test(out.answer);
       const parsed = JSON.parse(out.answer);
-      const okCall = parsed.tool === undefined || ev.checkCall({ tool: parsed.tool, args: parsed.args }, ev.COACH_TOOLS).ok;
+      const okCall =
+        parsed.tool !== undefined
+          ? ev.checkCall({ tool: parsed.tool, args: parsed.args }, ev.COACH_TOOLS).ok
+          : parsed.card === undefined || ev.checkCall({ tool: parsed.card, args: parsed.args ?? {} }, ev.FACT_CARDS, "player").ok;
       if (!okGrammar || !okCall) {
         bad++;
         console.log(`${r.id}: ${okGrammar ? "" : "grammar "}${okCall ? "" : "checkCall "}${out.answer}`);

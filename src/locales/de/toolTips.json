@@ -109,7 +109,7 @@
             "Das Metronom lässt dich zurück. Tritt in jeden Klick hinein.",
             "Das Tempo sackt ab. Heb die Hände und spiel obenauf auf dem Klick.",
             "Die Noten kommen spät. Ziele auf die Vorderkante jedes Beats.",
-            "Schleppen ist zu sehen. Stell dir vor, der Klick kommt einen halben Schritt früher, als du denkst."
+            "Schleppen ist zu sehen. Ziel auf die Vorderkante jedes Klicks, nicht auf die Mitte."
           ],
           "correction": [
             "Du hängst immer noch zurück – spiel mit dem Klick, warte nicht auf ihn.",
@@ -212,7 +212,7 @@
             "Über fünf Minuten am Stück. Horch in deinen Körper, bevor du weiter schiebst.",
             "Lange Session – streck deine Finger und komm dann zurück.",
             "Müde Hände? Mach 60 Sekunden Pause vor dem nächsten Durchgang.",
-            "Lange Strecke – prüf Handgelenke und Schultern, bevor du weitermachst.",
+            "Lange Strecke ohne Pause. Eine kurze Pause ist eine Option, bevor du weitermachst.",
             "Zeit für eine kurze Pause. Kalte Hände spielen schlampig.",
             "Pausiere und streck dich. Zwei Minuten Pause halten die nächsten zwanzig solide.",
             "Langer Lauf – gönn den Händen Ruhe, bevor du weiter schiebst."
@@ -674,20 +674,20 @@
         },
         "fatigue": {
           "encouragement": [
-            "Verspannen sich die Hände? Schüttel die Handgelenke aus und komm zurück.",
+            "Die Schläge rutschen beim selben Tempo ab. Sticks kurz weg, dann komm zurück.",
             "Die Qualität driftet – steh 60 Sekunden vom Hocker auf.",
             "Melden sich die Unterarme? Kurze Pause, dann wieder rein.",
             "Fühlen sich die Sticks schwer an? Leg sie ab, streck dich, dann komm zurück.",
             "Wird der Griff fest? Geh eine Minute weg vom Kit.",
-            "Die Handgelenke blockieren – kurz ausschütteln, dann weitermachen.",
+            "Die Genauigkeit sinkt – kurze Pause, dann weitermachen.",
             "Die Hände arbeiten härter, als sie müssten. Kurze Pause.",
             "Leg die Sticks für einen Moment ab – lass die Arme zurücksetzen."
           ],
           "correction": [
             "Die Ermüdung ist zu sehen – hör jetzt auf, leg die Sticks ab, 90 Sekunden Pause. Müdes Schlagzeugspielen festigt schlampiges Timing.",
             "Du bist über dem Höhepunkt – Sticks ab, geh eine Runde, dann bewerte neu.",
-            "Hör auf, bevor die Anspannung übernimmt. 90 Sekunden Pause, trink etwas, komm zurück.",
-            "Die Handgelenke sind fest. Stopp, streck die Unterarme, zwei Minuten Pause.",
+            "Die Schläge rutschen bei diesem Tempo immer weiter ab. 90 Sekunden Pause, trink etwas, komm zurück.",
+            "Die Fehler nehmen bei einem Tempo zu. Stopp, Sticks weg, zwei Minuten Pause.",
             "Wenn du hier weitermachst, tust du dir weh. Jetzt echte Pause.",
             "Hör auf zu spielen. Geh ein paar Minuten weg vom Kit.",
             "Sticks ab. Erst die Unterarme, dann die Hände, dann komm zurück, wenn du locker bist.",
@@ -730,7 +730,7 @@
           "neutral": [
             "Um Minute {staminaMinutes} werden die Hände fest. Senk das Tempo um 5 BPM und bau neu auf.",
             "Nach der {staminaMinutes}-Minuten-Marke fangen die Gliedmaßen an zu driften. Kurze Pause, dann weiter.",
-            "Ermüdung zeigt sich am Kit um Minute {staminaMinutes}. Ruh die Handgelenke aus, dann komm zurück.",
+            "Deine Werte am Kit sinken um Minute {staminaMinutes}. Kurze Pause, dann komm zurück.",
             "Um Minute {staminaMinutes} verlierst du tendenziell den Kick-Lock. Mach eine Verschnaufpause."
           ]
         },
@@ -835,7 +835,7 @@
           "neutral": [
             "Ich bin bereit, wenn du es bist. Ich fange bei deinem ersten Anschlag an mitzuschreiben.",
             "Wärm dich auf und drück Play, wann du magst – ich höre dann zu.",
-            "Stimm dich ein, setz dich zurecht und spiel los, wenn du so weit bist.",
+            "Mach es dir bequem, setz dich zurecht und spiel los, wenn du so weit bist.",
             "Schön, dass du da bist. Fang an, wenn sich die Anschlagshand locker anfühlt.",
             "Sobald du bereit bist – spiel, dann erfasse ich dein Timing.",
             "Kein Stress. Lockere die Anschlagshand und starte, wenn du so weit bist.",
@@ -947,22 +947,22 @@
         "fatigue": {
           "encouragement": [
             "Verspannt sich der Anschlagsarm? Schüttle ihn aus und steig wieder ein.",
-            "Fühlt sich Handgelenk oder Unterarm blockiert an? Kurze Pause, dann wieder rein.",
-            "Die Anspannung schleicht sich ein – leg die Gitarre 60 Sekunden weg.",
-            "Zieht sich die Schulter hoch? Lass sie fallen, atme, dann mach weiter.",
+            "Die Genauigkeit rutscht seit ein paar Minuten ab. Kurze Pause, dann wieder rein.",
+            "Bei diesem Tempo schleichen sich Fehler ein – leg die Gitarre 60 Sekunden weg.",
+            "Lange Phase im selben Tempo. Atme durch, dann mach weiter.",
             "Der Plektrumanschlag wird härter, als er sein müsste. Kurze Pause.",
             "Wird der Griff am Hals fester? Lockere dich, dann spiel.",
             "Der Unterarm arbeitet zu hart – ausschütteln und weiterspielen.",
-            "Nimm dir 30 Sekunden, kreise die Schultern, dann geh wieder dran."
+            "Eine Pause von 30 Sekunden ist eine Option, dann geh wieder dran."
           ],
           "correction": [
-            "Die Ermüdung zeigt sich im Anschlag – stopp, ruh den Arm 90 Sekunden aus. Müdes Spielen baut Spannung auf.",
-            "Du bist über dem Höhepunkt – Gitarre weg, Handgelenk dehnen, dann wieder rein.",
+            "Die Genauigkeit sinkt beim selben Tempo – stopp, Gitarre 90 Sekunden weg, dann prüf es noch einmal.",
+            "Deine Werte liegen unter deinem Höchstwert – Gitarre eine Minute weg, dann wieder rein.",
             "Hör auf, bevor sich die Sehnen melden. 90 Sekunden weg von den Saiten.",
-            "Das Handgelenk wird überlastet. Leg die Gitarre weg, dehne den Unterarm, zwei Minuten Pause.",
+            "Die Fehler nehmen bei diesem Tempo weiter zu. Leg die Gitarre weg, zwei Minuten Pause.",
             "Echte Pause – Gitarre auf den Ständer, geh ein bisschen herum.",
             "Der Anschlagsarm ist für jetzt fertig. Mindestens 90 Sekunden, dann prüf noch einmal.",
-            "Stopp. Handgelenkkreise, Unterarm dehnen, dann frisch zurückkommen.",
+            "Stopp hier. Zwei Minuten weg von der Gitarre, dann frisch zurückkommen.",
             "Wenn du hier weitermachst, holst du dir eine Verletzung. Sofort aufhören."
           ]
         },
@@ -1000,7 +1000,7 @@
         },
         "stamina": {
           "neutral": [
-            "Nach der {staminaMinutes}-Minuten-Marke verspannt sich deine Anschlagshand. Schüttle sie aus, dann mach weiter.",
+            "Nach der {staminaMinutes}-Minuten-Marke rutscht dein Timing bei diesem Tempo tendenziell ab. Kurze Pause, dann mach weiter.",
             "Um Minute {staminaMinutes} beginnt der Plektrumanschlag zu driften. Kurze Pause, dann wieder rein.",
             "Ausdauergrenze bei Minute {staminaMinutes} – die rechte Hand wird fest. Ruh dich 30 Sekunden aus.",
             "Um Minute {staminaMinutes} verlierst du tendenziell die Schärfe im Anschlag. Kurze Pause, dann zurück."
@@ -1106,7 +1106,7 @@
         "session_start_cold": {
           "neutral": [
             "Ich bin bereit, wenn du es bist. Ich fange bei deinem ersten Schlag an mitzuschreiben.",
-            "Stimm die Gitarre und fang an, wann du willst – ich höre ab der ersten Note zu.",
+            "Setz dich zurecht und fang an, wann du willst – ich höre ab der ersten Note zu.",
             "Schlag ein paar leere Akkorde an, dann spiel los, wenn du so weit bist.",
             "Schön, dass du da bist. Fang an, wenn sich die Schlaghand locker anfühlt.",
             "Sobald du bereit bist – spiel, dann erfasse ich dein Timing.",
@@ -1219,22 +1219,22 @@
         "fatigue": {
           "encouragement": [
             "Verspannt sich der Schlagarm? Schüttle ihn aus und steig wieder ein.",
-            "Fühlt sich das Handgelenk blockiert an? Kurz dehnen, dann wieder rein.",
-            "Anspannung schleicht sich in den Schlag – Gitarre 60 Sekunden weglegen.",
-            "Zieht sich die Schulter hoch? Lass sie fallen, atme, dann mach weiter.",
+            "Die Genauigkeit rutscht bei diesem Tempo ab. Kurze Pause, dann wieder rein.",
+            "Fehler schleichen sich in den Schlag ein – Gitarre 60 Sekunden weglegen.",
+            "Du schlägst schon eine Weile im selben Tempo. Atme durch, dann mach weiter.",
             "Der Schlag wird schwerer, als er sein müsste. Kurze Pause.",
             "Wird der Griff am Hals fester? Lockere dich, dann spiel.",
             "Der Unterarm arbeitet zu hart – ausschütteln und weiterspielen.",
-            "Nimm dir 30 Sekunden, kreise die Schultern, dann geh wieder dran."
+            "Nimm dir 30 Sekunden, wenn du sie willst, dann geh wieder dran."
           ],
           "correction": [
             "Die Ermüdung zeigt sich im Schlag – stopp, 90 Sekunden weg von den Saiten.",
-            "Du bist über dem Höhepunkt – leg die Gitarre weg, dehne das Handgelenk, dann komm zurück.",
+            "Deine Werte liegen unter deinem Höchstwert – leg die Gitarre eine Minute weg, dann komm zurück.",
             "Müdes Strumming begräbt die Dynamik. Stopp, ausruhen, neu starten.",
             "Der Schlagarm wird überlastet. Leg die Gitarre weg, dehne den Unterarm, zwei Minuten Pause.",
             "Echte Pause – Gitarre auf den Ständer, geh ein bisschen herum.",
             "Die Schlaghand ist fertig. Mindestens 90 Sekunden, dann prüf noch einmal.",
-            "Sofort aufhören. Handgelenkkreise, Unterarm dehnen, dann weiter, wenn du locker bist.",
+            "Sofort aufhören. Zwei Minuten Pause, dann weiter, wenn du so weit bist.",
             "Wenn du hier weitermachst, holst du dir eine Verletzung. Aufhören und erholen."
           ]
         },
@@ -1299,7 +1299,7 @@
         "muddy_hits": {
           "neutral": [
             "Du triffst jeden Schlag, aber der Anschlag ist leicht – versuch einen festeren Schlag oder Anschlag mit dem Plektrum.",
-            "Gute Abdeckung, weiche Schläge. Mehr Handgelenkkraft durch die Saiten.",
+            "Gute Abdeckung, weiche Schläge. Schlag etwas kräftiger durch die Saiten.",
             "Alle Schläge sind da, nur leise. Zieh mit mehr Absicht durch die Saiten.",
             "Du triffst die Schläge, aber weich – versuch einen schärferen Anschlag beim Abschlag."
           ]
@@ -1491,12 +1491,12 @@
           "encouragement": [
             "Verspannen sich die Zupffinger? Kurz dehnen – dann wieder rein.",
             "Blockiert der Unterarm langsam? Bass 60 Sekunden weglegen.",
-            "Baut sich Anspannung in der rechten Hand auf? Kurze Pause, dann wieder rein.",
+            "Die Töne rutschen beim selben Tempo ab. Kurze Pause, dann wieder rein.",
             "Wird die Greifhand schwer? Nimm dir einen Moment, dann mach weiter.",
             "Fühlt sich die rechte Hand fest an? Schüttle sie aus, dann weiter.",
-            "Zieht sich die Schulter hoch? Lass sie fallen, atme, dann mach weiter.",
+            "Lange Phase im selben Tempo. Atme durch, dann mach weiter.",
             "Der Unterarm arbeitet zu hart. Kurze Pause.",
-            "Nimm dir 30 Sekunden, kreise die Handgelenke, dann geh wieder dran."
+            "Nimm dir 30 Sekunden, wenn du sie willst, dann geh wieder dran."
           ],
           "correction": [
             "Die Ermüdung zeigt sich im Anschlag – stopp, 90 Sekunden Pause, dann prüf noch einmal.",
@@ -1505,7 +1505,7 @@
             "Die rechte Hand wird überlastet. Leg den Bass weg, dehne den Unterarm, zwei Minuten Pause.",
             "Echte Pause – Bass auf den Ständer, geh ein bisschen herum.",
             "Die Zupfhand ist fertig. Mindestens 90 Sekunden, dann prüf noch einmal.",
-            "Sofort aufhören. Handgelenkkreise und Unterarm dehnen, bevor du weitermachst.",
+            "Sofort aufhören. Zwei Minuten weg vom Bass, bevor du weitermachst.",
             "Wenn du hier weitermachst, holst du dir eine Verletzung. Aufhören und erholen."
           ]
         },
@@ -1743,7 +1743,7 @@
           "encouragement": [
             "Die Hände sind wieder synchron. Halte es.",
             "Der Zweihand-Lock ist zurück. Ändere nichts.",
-            "Erholt – bleib in den Schultern locker.",
+            "Erholt – bleib gleichmäßig.",
             "Du hast die Drift abgefangen. Bleib darin.",
             "Links und rechts wieder synchron. Bleib dort.",
             "Zurück aus dem Tief. Ändere nichts.",
@@ -1760,23 +1760,23 @@
         },
         "fatigue": {
           "encouragement": [
-            "Verspannen sich die Handgelenke? Heb die Hände, atme durch, dann komm zurück.",
+            "Die Genauigkeit rutscht bei diesem Tempo ab. Heb die Hände, atme durch, dann komm zurück.",
             "Fühlen sich die Unterarme fest an? Pausiere, lass die Hände sinken, atme durch.",
-            "Anspannung schleicht sich in die Schultern – 60 Sekunden weg von den Tasten.",
+            "Bei diesem Tempo schleichen sich Fehler ein – 60 Sekunden weg von den Tasten.",
             "Fühlen sich die Finger schwer an? Kurz strecken, dann weiter.",
             "Die Hände arbeiten härter, als sie müssten. Kurze Pause.",
-            "Steigen die Schultern? Lass sie sinken, atme durch, dann spiel.",
-            "Nimm dir 30 Sekunden, kreis die Handgelenke, dann weiter.",
-            "Die Anspannung im Handgelenk wächst. Pausiere, leg die Hände in den Schoß, atme durch."
+            "Du sitzt schon eine Weile an den Tasten. Atme durch, dann spiel.",
+            "Eine Pause von 30 Sekunden ist eine Option, dann weiter.",
+            "Die Genauigkeit sinkt bei einem Tempo. Pausiere, Hände in den Schoß, atme durch."
           ],
           "correction": [
             "Die Ermüdung zeigt sich im Anschlag – stopp, Hände 90 Sekunden unten.",
             "Du bist über dem Höhepunkt – steh von der Bank auf, schüttel dich aus, dann komm zurück.",
-            "Müdes Spielen begräbt die Dynamik. Stopp, ruh die Handgelenke aus, starte neu.",
-            "Die Handgelenke werden überlastet. Leg die Hände ab, streck die Unterarme, zwei Minuten Pause.",
+            "Die Werte sinken bei diesem Tempo weiter. Stopp, ruh dich aus, starte neu.",
+            "Die Fehler nehmen bei einem Tempo zu. Hände weg von den Tasten, zwei Minuten Pause.",
             "Echte Pause – steh auf, geh herum, komm frisch zurück.",
             "Die Hände sind für jetzt fertig. Mindestens 90 Sekunden, dann prüf neu.",
-            "Harter Stopp. Handgelenkkreise und Schulterkreisen, bevor du weitermachst.",
+            "Harter Stopp. Zwei Minuten weg von den Tasten, bevor du weitermachst.",
             "Wenn du hier weitermachst, holst du dir eine Verletzung. Stopp und erhol dich."
           ]
         },
@@ -1814,8 +1814,8 @@
         },
         "stamina": {
           "neutral": [
-            "Anspannung in deinem Anschlag um Minute {staminaMinutes}. Lass los, atme durch, komm sauber zurück.",
-            "Um Minute {staminaMinutes} schleicht sich die Anspannung im Handgelenk ein. Kurze Pause, dann weiter.",
+            "Deine Werte bei diesem Tempo sinken um Minute {staminaMinutes}. Atme durch, komm sauber zurück.",
+            "Um Minute {staminaMinutes} schleichen sich die Fehler ein. Kurze Pause, dann weiter.",
             "Nach der {staminaMinutes}-Minuten-Marke wird der Anschlag schwerer. Kurze Pause, dann zurück an die Tasten.",
             "Ermüdung in den Händen zeigt sich um Minute {staminaMinutes}. Ruh dich aus, dann komm zurück."
           ]
@@ -2169,7 +2169,7 @@
         },
         "flat_dynamics": {
           "neutral": [
-            "Geringe Amplitudenvariation über die Beat-Positionen – versuch, deinen Pick-Anschlag zu variieren.",
+            "Geringe Amplitudenvariation über die Beat-Positionen – versuch, die Stärke deines Anschlags zu variieren.",
             "Minimale dynamische Gestaltung über den Takt – erhöhe den Akzentunterschied auf den Zählzeiten.",
             "Die Amplitude ist über die Positionen konstant – bau eine dynamische Hierarchie auf: Zählzeiten am stärksten, Upbeats leichter."
           ]
@@ -2177,7 +2177,7 @@
         "weak_downbeats": {
           "neutral": [
             "Anti-Akzent-Muster erkannt – die Zählzeiten sind leiser als die Upbeats.",
-            "Deine Upbeats dominieren – erhöhe den Pick-Anschlag auf Beat 1 und 3.",
+            "Deine Upbeats dominieren – erhöhe den Anschlag auf Beat 1 und 3.",
             "Die Amplitude der Zählzeiten liegt unter der der Upbeats – kehre die dynamische Hierarchie um."
           ]
         },

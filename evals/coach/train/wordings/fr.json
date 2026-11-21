@@ -648,6 +648,14 @@
       "j'espère progresser avant l'été",
       "je suis trop crevé pour jouer"
     ],
+    "none_unmeasured": [
+      "mon vibrato était bien ?",
+      "mon bend est monté à la bonne note ?",
+      "j'ai joué assez fort ou pas ?",
+      "mes nuances étaient correctes ?",
+      "mes glissés sont propres ?",
+      "est-ce que mon vibrato sonne bien sur la dernière prise ?"
+    ],
     "card_where_slipped": [
       "où est-ce que j'ai décroché dans ma dernière prise ?",
       "à quel endroit je me suis planté ?",
@@ -659,8 +667,26 @@
       "j'étais en avance ou en retard sur cette prise ?",
       "est-ce que je précipite ou je traîne ?",
       "je jouais trop tôt ou trop tard ?",
+      "de quel côté je penchais sur ma dernière prise ?",
+      "mon tempo penchait vers quel côté ?",
+      "j'ai tendance à être devant ou derrière le clic ?",
+      "dis-moi si j'étais plutôt en avance ou en retard"
+    ],
+    "card_rushing": [
       "j'accélère pendant ma prise ou pas ?",
-      "suis-je en retard sur le temps ?"
+      "est-ce que j'ai précipité sur ma dernière prise ?",
+      "j'étais devant le temps là ?",
+      "je cours sur le clic non ?",
+      "j'ai accéléré pendant la prise ?",
+      "j'étais en avance sur le temps ?"
+    ],
+    "card_dragging": [
+      "suis-je en retard sur le temps ?",
+      "est-ce que j'ai traîné sur cette prise ?",
+      "j'étais derrière le clic là ?",
+      "je ralentis pendant la prise non ?",
+      "j'étais en retard sur chaque temps ?",
+      "ça traînait sur ma dernière prise ?"
     ],
     "card_why_not_counted": [
       "pourquoi cette prise n'a pas compté ?",
@@ -668,6 +694,14 @@
       "ma prise n'est pas passée, pourquoi",
       "qu'est-ce qui a fait que ça n'a pas compté ?",
       "pourquoi ça n'a pas été validé stp ?"
+    ],
+    "card_metric_graded": [
+      "l'appli vérifie {metric} ?",
+      "{metric}, c'est noté ou pas ?",
+      "pourquoi ça n'a pas compté pour {metric} ?",
+      "est-ce que ça compte dans le score, {metric} ?",
+      "{metric}, ça fait partie de la note ?",
+      "pour {metric}, il y a une évaluation ici ?"
     ],
     "card_what_changed": [
       "qu'est-ce qui a changé par rapport à la prise d'avant ?",
@@ -721,6 +755,17 @@
     "enregistrer une reprise dont je suis fier"
   ],
   "vocab": {
+    "metric": {
+      "pitch": ["les bonnes notes", "la justesse des notes"],
+      "pickDirection": ["le sens du médiator", "l'alternance des coups de médiator"],
+      "muting": ["l'étouffement des cordes", "le contrôle des bruits parasites"],
+      "posture": ["la posture", "ma façon de tenir la guitare"],
+      "tension": ["la tension dans les mains", "la tension des épaules"],
+      "handAttribution": ["la main qui a fait l'erreur"],
+      "fingering": ["le doigté", "les doigts que j'utilise"],
+      "tone": ["le son", "la qualité du son"],
+      "feel": ["le feeling", "le groove"]
+    },
     "screen": {
       "paths": ["parcours"]
     },

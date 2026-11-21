@@ -115,7 +115,17 @@ export type ListenDemo = {
  */
 export function buildListenDemo(
   take: Pick<TakePlan, "pathId" | "exercise" | "bpm">,
-  options: { instrument?: InstrumentId | string; lineup?: JamBand; bandVolume?: number; click?: number } = {},
+  options: {
+    instrument?: InstrumentId | string;
+    lineup?: JamBand;
+    bandVolume?: number;
+    click?: number;
+    /**
+     * Only these pattern bars (from 1, inclusive), after the count-in: the
+     * demo half of "Hear bar N" (c5b2). Absent: the whole pass, as Watch plays it.
+     */
+    bars?: { from: number; to: number };
+  } = {},
 ): ListenDemo {
   const bars = listenBars(take.exercise);
   const pass = writtenOut(take.exercise, bars);
@@ -134,13 +144,23 @@ export function buildListenDemo(
   };
   const tracks = [...(band?.tracks ?? []), guitar];
   const under = takeMix(band, options.bandVolume ?? 0.8, options.click ?? LISTEN_CLICK);
-  const last = score.bars[score.bars.length - 1];
+  const whole = wholeSong(score);
+  const range: BarRange = options.bars
+    ? (() => {
+        const from = Math.min(whole.endBar, Math.max(0, Math.round(options.bars.from) - 1));
+        const to = Math.min(whole.endBar, Math.max(from, Math.round(options.bars.to) - 1));
+        return { startBar: from, endBar: to };
+      })()
+    : whole;
+  const first = score.bars[range.startBar];
+  const last = score.bars[range.endBar];
   const endTick = last ? last.startTick + last.lengthTicks : 0;
+  const playedTicks = endTick - (first?.startTick ?? 0);
   const countInTicks = (score.bars[0]?.lengthTicks ?? 0) * LISTEN_COUNT_IN_BARS;
-  const lengthMs = Math.round(((countInTicks + endTick) / score.ticksPerQuarter) * (60_000 / Math.max(1, take.bpm)));
+  const lengthMs = Math.round(((countInTicks + playedTicks) / score.ticksPerQuarter) * (60_000 / Math.max(1, take.bpm)));
   return {
     score,
-    range: wholeSong(score),
+    range,
     backing: { tracks },
     mix: { ...under, tracks: [...under.tracks, LISTEN_GUITAR_GAIN] },
     guitarTrack: tracks.length - 1,

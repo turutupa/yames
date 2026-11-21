@@ -87,7 +87,11 @@
           "lastSession": "{{count}} minute of Takes in your last Session, ending with {{exercise}} at {{bpm}} BPM.",
           "lastSession_other": "{{count}} minutes of Takes in your last Session, ending with {{exercise}} at {{bpm}} BPM."
         },
-        "samePlace": "Same place today."
+        "samePlace": "Same place today.",
+        "songDue": {
+          "one": "Bar {{bar}} of {{song}} is due.",
+          "range": "Bars {{from}} to {{to}} of {{song}} are due."
+        }
       },
       "whatsIn": "What's in it, and why",
       "min": "MIN",
@@ -852,6 +856,11 @@
       },
       "chip": {
         "hear": "Hear it first",
+        "hearBack": "Hear bar {{bar}}: yours, then the demo",
+        "hearYours": "Yours: bar {{bar}} · Stop",
+        "hearDemo": "Demo: bar {{bar}} · Stop",
+        "hearBackTune": "Hear your bar {{played}}, then the demo of bar {{tune}}",
+        "hearDemoTune": "Demo: bar {{tune}} of the tune · Stop",
         "try": "What should I try?"
       },
       "ungraded": {

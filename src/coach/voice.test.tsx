@@ -21,6 +21,7 @@ import {
   sayAtBoundary,
   sayNow,
   setVoiceEnabled,
+  setVoiceHearing,
   setVoiceInSession,
   setVoiceSounding,
   soundIsStarting,
@@ -317,6 +318,19 @@ describe("the coach's voice", () => {
     // A line in flight is cut when the Session is left.
     setVoiceInSession(false);
     expect(s.out.stops).toBe(1);
+  });
+
+  it("'Hear bar N' cuts the line being said, and nothing is said while it plays (c5b2)", async () => {
+    const s = mount();
+    cleanup = s.uninstall;
+    s.send({ type: "start", plan: PLAN, now: 0 });
+    s.send({ type: "next", now: 1 });
+    expect(s.out.said).toEqual([ORDER]);
+    setVoiceHearing(true);
+    expect(s.out.stops).toBe(1);
+    await flush();
+    expect(sayNow("Next: Jam.")).toBe(false);
+    setVoiceHearing(false);
   });
 
   it("nothing is spoken between a Start and the engine reporting sound", () => {

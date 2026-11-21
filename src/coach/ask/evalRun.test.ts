@@ -64,6 +64,43 @@ describe("scoreItem", () => {
   });
 });
 
+describe("the cards (c3b1b)", () => {
+  // Not items of the held-out set: sentences written for this test only.
+  const result = { view: "session" as const, path: "rhythm-foundations", step: 1, phase: "result" as const };
+  const ready = { ...result, phase: "ready" as const };
+  const card = (text: string, situation: EvalItem["situation"], expect: EvalItem["expect"]) => item({ text, situation, expect });
+
+  it("the rules ask the cards' matcher after the router, in English, where a card has something to read", () => {
+    const slip = card("where did I slip up on that take?", result, { kind: "card", card: "where_slipped", args: {} });
+    expect(rulesAnswer(slip, paths)).toMatchObject({ kind: "card", card: "where_slipped" });
+    // No Take yet on the ready screen: the Take's cards say nothing, the Exercise's still answer.
+    expect(rulesAnswer({ ...slip, situation: ready }, paths).kind).not.toBe("card");
+    expect(rulesAnswer(card("is my muting graded?", ready, { kind: "card", card: "why_not_counted", args: { what: "muting" } }), paths)).toMatchObject({
+      kind: "card",
+      card: "why_not_counted",
+      args: { what: "muting" },
+    });
+    // During a Take, or in another language: no card.
+    expect(rulesAnswer({ ...slip, situation: { ...result, phase: "playing" } }, paths).kind).not.toBe("card");
+    expect(rulesAnswer({ ...slip, lang: "es" }, paths).kind).not.toBe("card");
+  });
+
+  it("a card is right only as asked; another card or a card where none is expected is counted", () => {
+    const why = card("is my muting graded?", ready, { kind: "card", card: "why_not_counted", args: { what: "muting" } });
+    expect(scoreItem(why, { kind: "card", card: "why_not_counted", args: { what: "muting", take: "last" } }, paths).right).toBe(true);
+    expect(scoreItem(why, { kind: "card", card: "why_not_counted", args: {} }, paths).right).toBe(false);
+    const plain = card("why didn't the take count", result, { kind: "card", card: "why_not_counted", args: {} });
+    expect(scoreItem(plain, { kind: "card", card: "why_not_counted", args: { what: "take" } }, paths).right).toBe(true);
+    const none = card("lol", result, { kind: "none" });
+    const scores = [
+      scoreItem(why, { kind: "card", card: "score_made_of", args: {} }, paths),
+      scoreItem(none, { kind: "card", card: "where_slipped", args: {} }, paths),
+    ];
+    expect(scores.every((s) => !s.wrongAction)).toBe(true);
+    expect(summarize("en", [why, { ...none, id: "t-2" }], [scores[0], { ...scores[1], id: "t-2" }])).toMatchObject({ cards: 1, cardsRight: 0, cardsWrong: 1, cardsUninvited: 1 });
+  });
+});
+
 describe("the engines' inputs", () => {
   it("the rules answer small talk with nothing", () => {
     expect(rulesAnswer(item({ text: "thanks!", expect: { kind: "none" } }), paths)).toEqual({ kind: "none" });
