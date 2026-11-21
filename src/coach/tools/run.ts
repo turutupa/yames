@@ -292,14 +292,25 @@ export function chipPressable(tool: CoachTool | undefined): boolean {
  * `commit` (the screen, the value still what was proposed from). A tool not
  * flagged, or a proposal that carries a plan or says it cannot be undone:
  * the proposal is returned as `runCoachTool` would, and nothing has happened.
- * That every flagged tool's receipt carries its undo is `registry.test.ts`'s
+ * That every flagged tool's receipt carries its undo is `chipPress.test.ts`'s
  * to prove (it presses each one and puts it back).
+ *
+ * `prior` (leg chip1b, review M1): the live Undo of the previous chip press
+ * of the same thing, if Ask still offers one. When this press moves on from
+ * exactly the value that press left, the two are one run, and the new Undo
+ * carries the OLDER `from` ("Slower, Slower, Slower, Undo" goes back to the
+ * tempo before the run); the receipt says the run's whole change. In a
+ * Session a run cannot be put back in one press (one rung per nudge, the
+ * only door), so there a second press while the first one's Undo is live
+ * comes back as the proposal. So does any press while a jam take is being
+ * recorded (review M2: the owner's rule counts that as a Take here).
  */
 export function pressCoachChip(
   call: unknown,
   host: CoachToolHost,
   ctx: CoachContext,
   registry: readonly CoachTool[] = COACH_TOOLS,
+  prior?: unknown,
 ): RunOutcome {
   const checked = checkCall(call, registry, "player");
   if (!checked.ok) return checked;
@@ -307,10 +318,70 @@ export function pressCoachChip(
   if (!("proposal" in outcome)) return outcome;
   const { proposal } = outcome;
   if (!chipPressable(checked.call.tool) || proposal.noUndo || proposal.plan) return outcome;
+  const session = inSession(ctx) || host.sessionActive();
   // In a Session, at once only on the ready screen: a nudge pressed on a result also
   // takes the Session from the result to ready, which no Undo puts back.
-  if ((inSession(ctx) || host.sessionActive()) && ctx.run?.phase !== "ready") return outcome;
-  return confirmCoachTool(proposal, host, ctx, registry);
+  if (session && ctx.run?.phase !== "ready") return outcome;
+  if (jamTakeNow(host)) return outcome;
+  const before = liveUndoHere(prior, checked.call.tool.name, host, ctx);
+  if (before && session) return outcome;
+  const result = confirmCoachTool(proposal, host, ctx, registry);
+  return before ? chainUndo(result, before) : result;
+}
+
+/** A jam take is being written (review M2). A read that throws counts as yes: the proposal is the safe side. */
+function jamTakeNow(host: CoachToolHost): boolean {
+  try {
+    return host.jamTakeRunning();
+  } catch {
+    return true;
+  }
+}
+
+/** `prior`, if it is an Undo this runner issued for `tool`, still live, issued where the player is now. */
+function liveUndoHere(prior: unknown, tool: string, host: CoachToolHost, ctx: CoachContext): ToolCall | null {
+  if (!isPlainObject(prior) || !undos.has(prior as ToolCall)) return null;
+  const undo = prior as ToolCall;
+  try {
+    return undo.tool === tool && undos.get(undo) === placeOf(host, ctx) ? undo : null;
+  } catch {
+    return null;
+  }
+}
+
+/** The one argument an undo puts back (`bpm`, `subdivision`, `value`): not its guard, not a setting's key. */
+function valueArg(args: ToolArgs): string | null {
+  const names = Object.keys(args).filter((name) => name !== "at" && name !== "key");
+  return names.length === 1 ? names[0] : null;
+}
+
+/**
+ * One run of presses, one Undo (review M1): when `result` moved on from the
+ * very value `before`'s press left (`before.args.at`), its Undo becomes
+ * `before`'s value guarded by `result`'s `at`, and its receipt's `from` the
+ * run's start. Both single Undos are spent. A run back to where it started
+ * is not chained (an Undo to the value it is at would do nothing): the
+ * result's own Undo stays.
+ */
+function chainUndo(result: ToolResult, before: ToolCall): ToolResult {
+  if (!result.ok || !result.undo) return result;
+  const after = result.undo;
+  const key = valueArg(after.args);
+  if (!key || after.tool !== before.tool || after.args.key !== before.args.key) return result;
+  if (before.args.at === undefined || before.args.at !== after.args[key]) return result;
+  if (before.args[key] === after.args.at) return result;
+  const place = undos.get(after);
+  if (place === undefined) return result;
+  const undo: ToolCall = Object.freeze({ tool: before.tool, args: Object.freeze({ ...before.args, at: after.args.at }) });
+  undos.delete(after);
+  undos.delete(before);
+  undos.set(undo, place);
+  const start = before.args[key];
+  const receipt =
+    "from" in result.receipt.values && (typeof start === "number" || typeof start === "string")
+      ? line(result.receipt.key, { ...result.receipt.values, from: start })
+      : result.receipt;
+  return { ...result, receipt, undo };
 }
 
 /**

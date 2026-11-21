@@ -69,6 +69,8 @@ export type UndoState = {
   chip?: true;
   /** The Session's step it was issued on, or null outside a Session (a chip's Undo only). */
   step?: number | null;
+  /** When it was issued (ms since the epoch; a chip's Undo only): `noteAskUndos` leaves a young one alone. */
+  issued?: number;
   /** What came of the press: the undo's own receipt, or why it could not. */
   note?: Line;
 };
@@ -174,7 +176,7 @@ function undoOf(result: ToolResult & { ok: true }, host: CoachToolHost, now: num
   // The receipt of a confirmed change is written where it was made: the host's view.
   const undo: UndoState = { call, label: line("coachTools.undo.generic"), kind: "confirm", view: viewOf(host), until: now + UNDO_MS, state: "live" };
   // A chip's change: no clock; it goes when the value, the screen or the step moves, or a Take starts.
-  return chip ? { ...undo, until: null, chip: true, step: chip.step } : undo;
+  return chip ? { ...undo, until: null, chip: true, step: chip.step, issued: now } : undo;
 }
 
 function viewOf(host: CoachToolHost): MainView | null {
@@ -257,8 +259,10 @@ function writeOutcome(id: string, outcome: RunOutcome, at: { host: CoachToolHost
  * through the same checks a proposal's press makes and comes back as a
  * receipt whose Undo has no clock; anything else comes back as it would from
  * `runAskCall` (a proposal for an unflagged `confirm` tool). A second,
- * separate press is a second change with its own Undo, and the earlier
- * receipt's Undo for the same thing is retired.
+ * separate press of the same thing retires the earlier receipt's Undo; when
+ * it moved on from exactly the value that press left, its own Undo carries
+ * the run's start (leg chip1b, review M1: "Slower, Slower, Slower, Undo" puts
+ * back the tempo before the run, and the live receipt says the whole change).
  */
 export function pressChip(call: ToolCall, said: string): string {
   if (said.trim()) appendAskTurn({ id: askTurnId(), kind: "user", text: said.trim() });
@@ -268,7 +272,7 @@ export function pressChip(call: ToolCall, said: string): string {
     appendAskTurn({ id, kind: "tool", body: unavailable() });
     return id;
   }
-  const outcome = pressCoachChip(call, at.host, at.ctx);
+  const outcome = pressCoachChip(call, at.host, at.ctx, undefined, liveChipUndoFor(call)?.call);
   const changed = outcome.ok && !("proposal" in outcome) && chipPressable(findTool(call.tool));
   if (changed && outcome.undo) retireSameUndos(outcome.undo);
   appendAskTurn({ id, kind: "tool", body: bodyOf(outcome, at.host, at.ctx, changed) });
@@ -276,11 +280,24 @@ export function pressChip(call: ToolCall, said: string): string {
   return id;
 }
 
+/** The newest live chip Undo of the same tool (and, a setting, the same key) as `call`. */
+function liveChipUndoFor(call: ToolCall): UndoState | null {
+  const turns = getAskState().turns;
+  for (let i = turns.length - 1; i >= 0; i--) {
+    const turn = turns[i];
+    if (turn.kind !== "tool" || turn.body.kind !== "receipt") continue;
+    const undo = turn.body.undo;
+    if (undo?.chip && undo.state === "live" && undo.call.tool === call.tool && undo.call.args.key === call.args.key) return undo;
+  }
+  return null;
+}
+
 /**
  * The same setting's earlier Undo, live: the same tool and (a setting) the
  * same key. Retired by name, not by reading the value: right after a press
- * the host's reads still give the value from before it until the app has
- * rendered, so a value check here would retire the Undo just issued.
+ * the host's reads still give the value from before it until the engine's
+ * echo comes back over IPC (`useMetronome`'s state event; more than one
+ * render), so a value check here would retire the Undo just issued.
  */
 function retireSameUndos(next: ToolCall): void {
   for (const turn of getAskState().turns) {
@@ -301,23 +318,36 @@ function retire(id: string, body: ToolBody & { kind: "receipt" }, undo: UndoStat
  * A chip's Undo is offered until the value it changed is changed again, by
  * anyone: asked of the runner (`undoStillGood`, which changes nothing)
  * whenever the host says the panel opened or the screen, the step, the
- * Exercise or the run's phase moved (`useAskHost`, after the app has
- * rendered, so the reads are current). A change made again through Ask
- * retires it by name at that press (`retireSameUndos`). One that would no
- * longer put back what its receipt changed is retired; the receipt stays as
- * a plain line. Pressed in between, the undo's own guard refuses it (the
- * runner's `at`), so it never changes anything else.
+ * Exercise or the run's phase moved (`useAskHost`). A change made again
+ * through Ask retires it by name at that press (`retireSameUndos`). One that
+ * would no longer put back what its receipt changed is retired; the receipt
+ * stays as a plain line. Pressed in between, the undo's own guard refuses it
+ * (the runner's `at`), so it never changes anything else.
+ *
+ * The host's tempo and subdivision are the engine's echo (`useMetronome`'s
+ * state event over IPC), so for a moment after a press they still read the
+ * value from before it. An Undo younger than `CHIP_UNDO_SETTLE_MS` is left
+ * alone here (leg chip1b, review L1): a look in that moment would retire the
+ * Undo just issued. The runner's guard still holds at its press.
+ * Under the Settings overlay nothing is asked (the player has not left the
+ * screen, and the runner's place is the screen under it).
  */
 export function noteAskUndos(): void {
   const at = where();
+  if (at && viewOf(at.host) === "settings") return;
+  const now = Date.now();
   for (const turn of getAskState().turns) {
     if (turn.kind !== "tool" || turn.body.kind !== "receipt") continue;
     const undo = turn.body.undo;
     if (!undo?.chip || undo.state !== "live") continue;
+    if (undo.issued !== undefined && now - undo.issued < CHIP_UNDO_SETTLE_MS) continue;
     if (at && undoStillGood(undo.call, at.host, at.ctx)) continue;
     retire(turn.id, turn.body, undo);
   }
 }
+
+/** How long a chip's new Undo is left alone by `noteAskUndos` (the IPC echo's round trip, with room). */
+export const CHIP_UNDO_SETTLE_MS = 400;
 
 /**
  * A Take started: no chip's Undo outlives it (the receipt stays, as a plain
@@ -325,6 +355,22 @@ export function noteAskUndos(): void {
  * (`settleAskTurn` holds it), because nothing of Ask commits during a Take.
  */
 export function noteAskTake(): void {
+  retireAskChipUndos();
+}
+
+/**
+ * The values a chip's Undo would put back were replaced by another route
+ * (leg chip1b, review L2): a preset, a jam or a setlist entry loaded, or a
+ * loop started in a Session. A value that went away and came back must not
+ * be overwritten by a stale Undo, so every live chip Undo goes (the receipts
+ * stay as plain lines). Called from the load paths and by `useAskHost`,
+ * never per beat; does nothing when no chip Undo is live.
+ */
+export function noteAskLoad(): void {
+  retireAskChipUndos();
+}
+
+function retireAskChipUndos(): void {
   for (const turn of getAskState().turns) {
     if (turn.kind !== "tool" || turn.body.kind !== "receipt") continue;
     const undo = turn.body.undo;
@@ -428,13 +474,34 @@ export function typedGo(call: ToolCall): TypedGo | null {
  * (`detail` 2 and up) is not a new press. Without this a double-click on a chip
  * ran its call twice, and the second click could land on a button drawn by the
  * first (the receipt's Undo where the proposal's button was). A key press has
- * `detail` 0 and always counts.
+ * `detail` 0 and counts once: a held Enter or Space fires a click on every
+ * auto-repeat, and those are not presses (leg chip1b, review M1). The
+ * button's `onKeyDown` is `noKeyRepeat`, which marks a repeat and stops its
+ * default; a click with `detail` 0 that follows a marked repeat is dropped.
  */
 export function onePress(fn: () => void): (event: { detail: number }) => void {
   return (event) => {
     if (event.detail > 1) return;
+    if (event.detail === 0 && keyRepeating) {
+      keyRepeating = false;
+      return;
+    }
     fn();
   };
+}
+
+/** A held Enter or Space is repeating (set by `noKeyRepeat`, read by `onePress`). One keyboard, one flag. */
+let keyRepeating = false;
+
+/** A tool button's `onKeyDown`: the auto-repeat of a held Enter or Space is not a press. */
+export function noKeyRepeat(event: { key: string; repeat: boolean; preventDefault: () => void }): void {
+  const activates = event.key === "Enter" || event.key === " ";
+  if (activates && event.repeat) {
+    keyRepeating = true;
+    event.preventDefault();
+    return;
+  }
+  keyRepeating = false;
 }
 
 /** The proposal's button: the runner checks it is still good, then does it. */
@@ -519,7 +586,10 @@ export function noteAskToolView(view: MainView, step?: number | null): void {
     const undo = turn.body.undo;
     if (!undo || undo.state !== "live") continue;
     if (undo.chip) {
-      // A chip's Undo: only on its screen and, in a Session, its step (leg chip1).
+      // A chip's Undo: only on its screen and, in a Session, its step (leg chip1). The Settings
+      // overlay is not another screen: it stops nothing and the player comes back to the same
+      // place (leg chip1b, review L2 d); back from it, the view and the step are checked again.
+      if (view === "settings") continue;
       const stepMoved = step !== undefined && (undo.step ?? null) !== step;
       if (undo.view === null || undo.view !== view || stepMoved) retire(turn.id, turn.body, undo);
       continue;

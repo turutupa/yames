@@ -47,6 +47,7 @@ const READS = new Set<keyof CoachToolHost>([
   "safeSettingOptions",
   "goal",
   "sounding",
+  "jamTakeRunning",
   "nudges",
 ]);
 

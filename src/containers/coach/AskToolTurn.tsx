@@ -16,7 +16,7 @@ import { CoachBlocks } from "../../coach/blocks/CoachBlocks";
 import type { SessionPlan } from "../../session/planner";
 import { lineText, stopsKey } from "./toolWords";
 import { NEVER_LIST } from "./neverList";
-import { notNowProposal, onePress, pressProposal, pressUndo, runAskCall, showMeYours, undoLive, type ToolBody, type UndoState } from "./askTools";
+import { noKeyRepeat, notNowProposal, onePress, pressProposal, pressUndo, runAskCall, showMeYours, undoLive, type ToolBody, type UndoState } from "./askTools";
 
 /** The proposal's verb: what its one button says. */
 const VERBS: Readonly<Record<string, string>> = {
@@ -89,7 +89,7 @@ function Receipt({ id, body }: { id: string; body: ToolBody & { kind: "receipt" 
           {lineText(t, body.receipt)}
         </p>
         {live && undo && (
-          <button type="button" className="btn-tonal ask-tool-btn ask-undo" onClick={onePress(() => pressUndo(id))} data-testid="ask-undo">
+          <button type="button" className="btn-tonal ask-tool-btn ask-undo" onClick={onePress(() => pressUndo(id))} onKeyDown={noKeyRepeat} onKeyUp={noKeyRepeat} data-testid="ask-undo">
             {lineText(t, undo.label)}
           </button>
         )}
@@ -134,10 +134,10 @@ function ProposalCard({ id, body }: { id: string; body: ToolBody & { kind: "prop
       {proposal.noUndo && <p className="ask-proposal-fact" data-testid="ask-proposal-noundo">{t("coachTools.ui.noUndo")}</p>}
       {open ? (
         <div className="ask-proposal-actions">
-          <button type="button" className="btn-tonal ask-tool-btn" onClick={onePress(() => pressProposal(id))} data-testid="ask-proposal-go">
+          <button type="button" className="btn-tonal ask-tool-btn" onClick={onePress(() => pressProposal(id))} onKeyDown={noKeyRepeat} onKeyUp={noKeyRepeat} data-testid="ask-proposal-go">
             {t(`coachTools.verb.${VERBS[proposal.tool] ?? "go"}`)}
           </button>
-          <button type="button" className="ask-tool-quiet" onClick={onePress(() => notNowProposal(id))} data-testid="ask-proposal-not-now">
+          <button type="button" className="ask-tool-quiet" onClick={onePress(() => notNowProposal(id))} onKeyDown={noKeyRepeat} onKeyUp={noKeyRepeat} data-testid="ask-proposal-not-now">
             {t("coachTools.ui.notNow")}
           </button>
         </div>
@@ -163,7 +163,7 @@ function Refusal({ body }: { body: ToolBody & { kind: "refusal" } }) {
           {body.choices.map((choice, i) => {
             const words = lineText(t, choice.label);
             return (
-              <button key={i} type="button" className="ask-chip" onClick={onePress(() => runAskCall(choice.call, words))}>
+              <button key={i} type="button" className="ask-chip" onClick={onePress(() => runAskCall(choice.call, words))} onKeyDown={noKeyRepeat} onKeyUp={noKeyRepeat}>
                 {words}
               </button>
             );

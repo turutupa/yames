@@ -90,6 +90,8 @@ export type CoachToolHostInput = {
   loadJam: (jam: Jam) => "done" | "asked";
   /** The engine plays (the click, a jam's band, a song). */
   isPlaying: boolean;
+  /** A jam take is being written (`useJamTakes().recording`; leg chip1b). Left out: no. */
+  jamTakeRunning?: boolean;
   /** The tool screens' tempo, and `handleBpmChange` (clamped; on the jam tab it edits the jam). */
   tempo: number;
   setTempo: (bpm: number) => void;
@@ -337,6 +339,7 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
     paths: () => latest.current.session.paths,
     instrument: () => (latest.current.instrument === "bass" ? "bass" : "guitar"),
     sessionActive: () => latest.current.session.run.phase !== "idle",
+    jamTakeRunning: () => latest.current.jamTakeRunning === true,
     setView: (view) => latest.current.setView(view),
     movePaths: (at) => latest.current.pathsPlace.move(at),
     openSettingsSection: (section) => {

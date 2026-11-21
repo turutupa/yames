@@ -55,6 +55,7 @@ import type { ChordFlavour } from "../../../jam/cheatSheet";
 import type { CheatTab, ChordPage } from "../../jam/ChordSheet";
 import type { Jam, JamBandState, JamPositionCommand } from "../../../jam";
 import { NO_PRACTICE } from "../../jam/PracticeRow";
+import { noteAskLoad } from "../../coach/askTools";
 import type { GrooveEditorPage } from "../../jam/editor";
 import type { BeatEvent } from "../../../types";
 /**
@@ -1298,6 +1299,8 @@ export function useJamSession({
   const loadJam = useCallback(
     (next: Jam) => {
       onJamLoaded();
+      // The coach's chip Undos put back values this jam replaces (leg chip1b, review L2 b).
+      noteAskLoad();
       setActiveJam(next);
       setSaved(next);
       setStageUnsaved(false);

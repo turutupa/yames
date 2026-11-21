@@ -5,10 +5,18 @@
  * The owner's decision: one press of the chip IS the press for a reversible
  * one-step change, always with Undo; anything multi-step or not undoable
  * still goes through a proposal. Which tools qualify is registry data
- * (`CHIP_PRESS`, `chipPress`), and this file holds every flagged tool to it:
- * a flagged tool with no fixture here fails; a flagged tool whose press calls
- * anything but its one setter, starts or stops sound, moves the screen, or
- * whose undo does not put back exactly what was there, fails.
+ * (`CHIP_PRESS`, `chipPress`), and this file holds every flagged tool to it,
+ * against the recording fake host (`fakeHost.ts`): a flagged tool with no
+ * case here fails; a flagged tool whose press calls any host member but one
+ * of the value setters, or any member on the NEVER list below (sound, the
+ * screen, plans, loads), fails; one whose undo does not put the fake's value
+ * back exactly, fails. "No sound, no screen" here means: no such member was
+ * called, and the fake's own `sounding()` and `where()` read the same after.
+ * What a REAL setter does besides (on the jam tab `setTempo` also edits the
+ * jam; the engine reacts to a tempo) is not visible from here: that is
+ * `useCoachToolHost.test.tsx`'s and the layout suite's (`ask-tools.spec.ts`).
+ * Also here (leg chip1b): a run of presses chains into one Undo (review M1),
+ * and a jam take being written keeps the proposal (review M2).
  */
 
 import { readdirSync, readFileSync, statSync } from "node:fs";
@@ -183,8 +191,12 @@ function cases(): Case[] {
     sessionCase("faster"),
     subdivisionCase(null),
     subdivisionCase("click"),
-    ...SAFE_SETTING_KEYS.flatMap((key) => [settingCase(key, null), settingCase(key, "band")]),
   ];
+}
+
+/** `set_setting`, unflagged (review L3): its chip press must stay a proposal for every key. */
+function settingCases(): Case[] {
+  return SAFE_SETTING_KEYS.flatMap((key) => [settingCase(key, null), settingCase(key, "band")]);
 }
 
 function receiptOf(outcome: ReturnType<typeof pressCoachChip>): ToolDone {
@@ -208,15 +220,24 @@ describe("the flag is registry data", () => {
     }
   });
 
-  it("the list, as the owner's rules leave it", () => {
-    expect(flaggedTools().map((t) => t.name)).toEqual(["set_tempo", "click_subdivision", "set_setting"]);
+  it("the list, as the owner's rules leave it (set_setting unflagged: review L3)", () => {
+    expect(flaggedTools().map((t) => t.name)).toEqual(["set_tempo", "click_subdivision"]);
   });
 
-  it("every flagged tool has a case here, and every safe setting is one", () => {
+  it("every flagged tool has a case here", () => {
     const covered = new Set(cases().map((c) => c.tool));
     for (const tool of flaggedTools()) expect(covered.has(tool.name), `add a chip case for ${tool.name}`).toBe(true);
-    const keys = new Set(cases().filter((c) => c.tool === "set_setting").map((c) => c.call.args.key));
-    for (const key of SAFE_SETTING_KEYS) expect(keys.has(key), key).toBe(true);
+  });
+
+  it("a set_setting chip, for every safe key, is still a proposal and changes nothing (no chip offers one; language is not exactly undoable)", () => {
+    const all = settingCases();
+    expect(new Set(all.map((c) => c.call.args.key))).toEqual(new Set(SAFE_SETTING_KEYS));
+    for (const c of all) {
+      const before = c.read();
+      expect("proposal" in pressCoachChip(c.call, c.host, c.ctx()), c.name).toBe(true);
+      expect(c.host.changes(), c.name).toEqual([]);
+      expect(c.read()).toEqual(before);
+    }
   });
 
   it("a tool marked to leave the screen, or the app's own, is never chip-pressable whatever its data says", () => {
@@ -290,6 +311,88 @@ describe("a flagged tool's chip press: one value, its setter, its undo, no sound
     expect(runCoachUndo(out.undo, c.host, toolCtx({ screen: "drill" })).ok).toBe(false);
     expect(c.read()).toBe(95);
     expect(c.host.changes().filter((x) => x.member === "setTempo")).toHaveLength(1);
+  });
+});
+
+describe("a run of presses is one change to undo (leg chip1b, review M1)", () => {
+  it("Slower, Slower, Slower, Undo: back to the tempo before the run; the receipt says the whole change", () => {
+    const c = tempoCase("beat", null, "slower");
+    const one = receiptOf(pressCoachChip(c.call, c.host, c.ctx()));
+    const two = receiptOf(pressCoachChip(c.call, c.host, c.ctx(), undefined, one.undo));
+    const three = receiptOf(pressCoachChip(c.call, c.host, c.ctx(), undefined, two.undo));
+    expect(c.read()).toBe(85);
+    expect(three.receipt.values).toMatchObject({ from: 100, to: 85 });
+    expect(three.undo!.args).toEqual({ bpm: 100, at: 85 });
+    // The single Undos of the run are spent: only the run's is good.
+    expect(undoStillGood(one.undo, c.host, c.ctx())).toBe(false);
+    expect(undoStillGood(two.undo, c.host, c.ctx())).toBe(false);
+    expect(runCoachUndo(three.undo, c.host, c.ctx()).ok).toBe(true);
+    expect(c.read()).toBe(100);
+  });
+
+  it("a subdivision run chains the same way", () => {
+    let sub = 1;
+    const host = fakeHost({ view: "beat" }, { clickSubdivision: () => sub as Subdivision, setClickSubdivision: (next) => ((sub = next), "done") });
+    const ctx = toolCtx({ screen: "beat" });
+    const one = receiptOf(pressCoachChip({ tool: "click_subdivision", args: { subdivision: 2 } }, host, ctx));
+    const two = receiptOf(pressCoachChip({ tool: "click_subdivision", args: { subdivision: 3 } }, host, ctx, undefined, one.undo));
+    expect(two.undo!.args).toEqual({ subdivision: 1, at: 3 });
+    expect(runCoachUndo(two.undo, host, ctx).ok).toBe(true);
+    expect(sub).toBe(1);
+  });
+
+  it("not a run: the value moved since the earlier press (or the press read it before the echo), so the new Undo is its own", () => {
+    const c = tempoCase("beat", null, "slower");
+    const one = receiptOf(pressCoachChip(c.call, c.host, c.ctx()));
+    c.byHand(); // back at 100 by hand: the earlier press's 95 is gone
+    const two = receiptOf(pressCoachChip(c.call, c.host, c.ctx(), undefined, one.undo));
+    expect(two.undo!.args).toEqual({ bpm: 100, at: 95 });
+    expect(two.receipt.values).toMatchObject({ from: 100, to: 95 });
+  });
+
+  it("a run back to where it started keeps the last press's own Undo (an Undo to where it is would do nothing)", () => {
+    const c = tempoCase("beat", null, "slower");
+    const one = receiptOf(pressCoachChip(c.call, c.host, c.ctx()));
+    const two = receiptOf(pressCoachChip({ tool: "set_tempo", args: { direction: "faster" } }, c.host, c.ctx(), undefined, one.undo));
+    expect(c.read()).toBe(100);
+    expect(two.undo!.args).toEqual({ bpm: 95, at: 100 });
+  });
+
+  it("in a Session a second press while the first one's Undo is live is the proposal (one rung per press: no one Undo puts a run back)", () => {
+    const up = sessionCase("faster");
+    const one = receiptOf(pressCoachChip(up.call, up.host, up.ctx()));
+    expect(up.read()).toBe(80);
+    const two = pressCoachChip({ tool: "set_tempo", args: { direction: "slower" } }, up.host, up.ctx(), undefined, one.undo);
+    expect("proposal" in two).toBe(true);
+    expect(up.read()).toBe(80);
+    expect(up.host.changes()).toHaveLength(1);
+    // The first Undo is untouched and still puts back what the player had.
+    expect(runCoachUndo(one.undo, up.host, up.ctx()).ok).toBe(true);
+    expect(up.read()).toBe(70);
+  });
+});
+
+describe("a jam take being written is a Take for the chip (leg chip1b, review M2)", () => {
+  it("the chip falls back to the proposal and changes nothing; once the take stops, it is at once again", () => {
+    let bpm = 100;
+    let writing = true;
+    const host = fakeHost({ view: "jam", sounding: "band" }, { tempo: () => bpm, setTempo: (b) => ((bpm = b), "done"), jamTakeRunning: () => writing });
+    const ctx = toolCtx({ screen: "jam" });
+    expect("proposal" in pressCoachChip({ tool: "set_tempo", args: { direction: "slower" } }, host, ctx)).toBe(true);
+    expect(host.changes()).toEqual([]);
+    expect(bpm).toBe(100);
+    writing = false;
+    receiptOf(pressCoachChip({ tool: "set_tempo", args: { direction: "slower" } }, host, ctx));
+    expect(bpm).toBe(95);
+  });
+
+  it("a read that throws counts as a take being written", () => {
+    let bpm = 100;
+    const host = fakeHost({ view: "jam" }, { tempo: () => bpm, setTempo: (b) => ((bpm = b), "done"), jamTakeRunning: () => {
+      throw new Error("no");
+    } });
+    expect("proposal" in pressCoachChip({ tool: "set_tempo", args: { direction: "slower" } }, host, toolCtx({ screen: "jam" }))).toBe(true);
+    expect(bpm).toBe(100);
   });
 });
 

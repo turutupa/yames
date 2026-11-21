@@ -219,6 +219,60 @@ describe("the panel", () => {
   });
 });
 
+describe("the chip row's own button (leg chip1b: review M1, L4)", () => {
+  function tempoPanel() {
+    let bpm = 120;
+    const host = fakeHost({ view: "beat" }, { tempo: () => bpm, setTempo: (b) => ((bpm = b), "done") });
+    __setAskToolsForTests(host, toolCtx({ screen: "beat" }));
+    openAsk();
+    const { container } = render(<AskPanel lookingAt={{ text: "Metronome", key: "beat" }} onClose={() => {}} />);
+    const chip = () => container.querySelector<HTMLButtonElement>('[data-chip="slower"]')!;
+    return { host, chip, bpm: () => bpm };
+  }
+  afterEach(() => __setAskToolsForTests(null, null));
+
+  it("the second click of a double-click is not a press: one change, one receipt", () => {
+    const { chip, bpm } = tempoPanel();
+    act(() => fireEvent.click(chip(), { detail: 1 }));
+    act(() => fireEvent.click(chip(), { detail: 2 }));
+    expect(bpm()).toBe(115);
+    expect(screen.getAllByTestId("ask-receipt")).toHaveLength(1);
+  });
+
+  it("a held Enter is one press: its auto-repeats change nothing, and Undo puts back what the player had", () => {
+    const { chip, bpm } = tempoPanel();
+    // The browser's own sequence for a held key: keydown, click (detail 0), then keydown(repeat) + click per repeat.
+    act(() => void fireEvent.keyDown(chip(), { key: "Enter" }));
+    act(() => void fireEvent.click(chip(), { detail: 0 }));
+    for (let i = 0; i < 5; i++) {
+      const repeat = fireEvent.keyDown(chip(), { key: "Enter", repeat: true });
+      expect(repeat, "the repeat's default (its click) is stopped").toBe(false);
+      act(() => void fireEvent.click(chip(), { detail: 0 }));
+    }
+    act(() => void fireEvent.keyUp(chip(), { key: "Enter" }));
+    expect(bpm()).toBe(115);
+    expect(screen.getAllByTestId("ask-receipt")).toHaveLength(1);
+    // A new, separate key press is a press again.
+    act(() => void fireEvent.keyDown(chip(), { key: "Enter" }));
+    act(() => void fireEvent.click(chip(), { detail: 0 }));
+    expect(bpm()).toBe(110);
+  });
+
+  it("separate presses chain: Slower ×3, Undo goes back to 120; the live receipt says 120 → 105, the earlier ones are plain lines", () => {
+    const { chip, bpm } = tempoPanel();
+    for (let i = 0; i < 3; i++) act(() => fireEvent.click(chip(), { detail: 1 }));
+    expect(bpm()).toBe(105);
+    const receipts = screen.getAllByTestId("ask-receipt");
+    expect(receipts).toHaveLength(3);
+    expect(receipts.map((r) => r.getAttribute("data-undo"))).toEqual(["gone", "gone", "live"]);
+    expect(receipts[2]).toHaveTextContent("Tempo 120 → 105 BPM");
+    expect(receipts[0]).toHaveTextContent("Tempo 120 → 115 BPM");
+    expect(screen.getAllByTestId("ask-undo")).toHaveLength(1);
+    act(() => fireEvent.click(screen.getByTestId("ask-undo")));
+    expect(bpm()).toBe(120);
+  });
+});
+
 describe("answering", () => {
   it("with no model: the question, then one honest line, and no call to the model", async () => {
     mockInvoke.mockClear();

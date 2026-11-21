@@ -18,14 +18,15 @@ import en from "../../locales/en/coachTools.json";
 import i18n from "../../i18n";
 import { __resetAskStoreForTests, getAskState, releaseHeldAsk, setAskTakeGate, updateAskTurn, useAskState } from "./askStore";
 import {
+  CHIP_UNDO_SETTLE_MS,
   UNDO_MS,
   __setAskToolsForTests,
   askYours,
+  noteAskLoad,
   noteAskTake,
   noteAskToolView,
   noteAskUndos,
   notNowProposal,
-  onePress,
   pressChip,
   pressProposal,
   pressUndo,
@@ -368,9 +369,9 @@ describe("Which one?", () => {
 describe("a suggestion chip's own press (leg chip1)", () => {
   function tempoHost(start = 120, view: "beat" | "jam" = "beat") {
     let bpm = start;
-    let at: "beat" | "jam" | "drill" = view;
+    let at: "beat" | "jam" | "drill" | "settings" = view;
     const host = fakeHost({ view }, { view: () => at, tempo: () => bpm, setTempo: (b) => ((bpm = b), "done") });
-    return Object.assign(host, { bpm: () => bpm, set: (b: number) => (bpm = b), go: (v: "beat" | "jam" | "drill") => (at = v) });
+    return Object.assign(host, { bpm: () => bpm, set: (b: number) => (bpm = b), go: (v: "beat" | "jam" | "drill" | "settings") => (at = v) });
   }
   const beat = toolCtx({ screen: "beat" });
   const slower = { tool: "set_tempo", args: { direction: "slower" } };
@@ -393,7 +394,8 @@ describe("a suggestion chip's own press (leg chip1)", () => {
     expect(host.changes().map((c) => c.args[0])).toEqual([115, 120]);
   });
 
-  it("the Undo just issued survives the moment before the app renders (the host still reads the old value then)", () => {
+  it("the Undo just issued is not retired by the press's own stale read (the host reads the old value until the engine's echo)", () => {
+    vi.useFakeTimers();
     let bpm = 120;
     let shown = 120;
     const host = use(fakeHost({ view: "beat" }, { tempo: () => shown, setTempo: (b) => ((bpm = b), "done") }), beat);
@@ -401,8 +403,9 @@ describe("a suggestion chip's own press (leg chip1)", () => {
     act(() => void pressChip(slower, "Slower"));
     expect(bpm).toBe(115);
     expect(screen.getByTestId("ask-undo")).toBeInTheDocument();
-    // The app renders; the host reads the new tempo; Ask looks again.
+    // The echo arrives; the host reads the new tempo; Ask looks again, after the settle window.
     shown = bpm;
+    act(() => void vi.advanceTimersByTime(CHIP_UNDO_SETTLE_MS + 1));
     act(() => noteAskUndos());
     expect(screen.getByTestId("ask-undo")).toBeInTheDocument();
     expect(host.changes()).toHaveLength(1);
@@ -416,29 +419,69 @@ describe("a suggestion chip's own press (leg chip1)", () => {
     expect(host.changes()).toEqual([]);
   });
 
-  it("a double-click is one change; a second, separate press is a second change and retires the first Undo", () => {
+  // The double-click, the held key and the run of presses are pressed on the real
+  // chip button: `AskPanel.test.tsx`, "the chip row's own button".
+
+  it("a second, separate press retires the first Undo; the run's Undo goes back to the start (leg chip1b, M1)", () => {
     const host = use(tempoHost(), beat);
     render(<Thread />);
-    const chip = () => document.querySelector<HTMLButtonElement>("[data-testid=chip]")!;
-    const Chip = () => (
-      <button type="button" data-testid="chip" onClick={onePress(() => pressChip(slower, "Slower"))}>
-        Slower
-      </button>
-    );
-    render(<Chip />);
-    act(() => fireEvent.click(chip(), { detail: 1 }));
-    act(() => fireEvent.click(chip(), { detail: 2 }));
-    expect(host.bpm()).toBe(115);
-    expect(screen.getAllByTestId("ask-receipt")).toHaveLength(1);
-    act(() => fireEvent.click(chip(), { detail: 1 }));
+    act(() => void pressChip(slower, "Slower"));
+    act(() => void pressChip(slower, "Slower"));
     expect(host.bpm()).toBe(110);
     const receipts = screen.getAllByTestId("ask-receipt");
-    expect(receipts).toHaveLength(2);
     expect(receipts[0]).toHaveAttribute("data-undo", "gone");
     expect(receipts[1]).toHaveAttribute("data-undo", "live");
-    expect(screen.getAllByTestId("ask-undo")).toHaveLength(1);
+    expect(receipts[1]).toHaveTextContent("Tempo 120 → 110 BPM");
     act(() => fireEvent.click(screen.getByTestId("ask-undo")));
+    expect(host.bpm()).toBe(120);
+  });
+
+  it("a look inside the IPC echo's window does not retire the Undo just issued; a look after it, on a value still not the one it left, does (leg chip1b, L1)", () => {
+    vi.useFakeTimers();
+    let bpm = 120;
+    const shown = 120;
+    use(fakeHost({ view: "beat" }, { tempo: () => shown, setTempo: (b) => ((bpm = b), "done") }), beat);
+    render(<Thread />);
+    act(() => void pressChip(slower, "Slower"));
+    expect(bpm).toBe(115);
+    // The panel's effect runs before the engine's echo: the host still reads 120.
+    act(() => noteAskUndos());
+    expect(screen.getByTestId("ask-undo")).toBeInTheDocument();
+    act(() => void vi.advanceTimersByTime(CHIP_UNDO_SETTLE_MS + 1));
+    act(() => noteAskUndos());
+    expect(screen.queryByTestId("ask-undo")).toBeNull();
+  });
+
+  it("a preset, a jam or a setlist entry loaded retires every live chip Undo: a value that went and came back is not overwritten (leg chip1b, L2 b)", () => {
+    const host = use(tempoHost(), beat);
+    render(<Thread />);
+    act(() => void pressChip(slower, "Slower"));
+    // A preset whose tempo is 115 loads: the Undo's guard would still say yes.
+    act(() => noteAskLoad());
+    expect(screen.queryByTestId("ask-undo")).toBeNull();
+    expect(screen.getByTestId("ask-receipt")).toHaveAttribute("data-undo", "gone");
+    const turn = getAskState().turns.find((x) => x.kind === "tool")!;
+    const call = turn.kind === "tool" && turn.body.kind === "receipt" ? turn.body.undo!.call : null;
+    expect(runCoachUndo(call, host, beat).ok).toBe(false);
     expect(host.bpm()).toBe(115);
+  });
+
+  it("the Settings overlay does not retire a chip's Undo; back on the screen it is still good (leg chip1b, L2 d)", () => {
+    vi.useFakeTimers();
+    const host = use(tempoHost(), beat);
+    render(<Thread />);
+    act(() => void pressChip(slower, "Slower"));
+    // Past the echo's window, so the look on Settings is a real one.
+    act(() => void vi.advanceTimersByTime(CHIP_UNDO_SETTLE_MS + 1));
+    host.go("settings");
+    act(() => noteAskToolView("settings", null));
+    act(() => noteAskUndos());
+    expect(screen.getByTestId("ask-undo")).toBeInTheDocument();
+    host.go("beat");
+    act(() => noteAskToolView("beat", null));
+    act(() => noteAskUndos());
+    act(() => fireEvent.click(screen.getByTestId("ask-undo")));
+    expect(host.bpm()).toBe(120);
   });
 
   it("the Undo goes once the value is changed again by anyone, and a stale press changes nothing", () => {
@@ -451,8 +494,10 @@ describe("a suggestion chip's own press (leg chip1)", () => {
     expect(host.bpm()).toBe(130);
     expect(screen.queryByTestId("ask-undo")).toBeNull();
     // And looked again (the panel opens, the screen moves): retired without a press.
+    vi.useFakeTimers();
     act(() => void pressChip(slower, "Slower"));
     host.set(100);
+    act(() => void vi.advanceTimersByTime(CHIP_UNDO_SETTLE_MS + 1));
     act(() => noteAskUndos());
     expect(screen.queryByTestId("ask-undo")).toBeNull();
     expect(screen.getAllByTestId("ask-receipt")[1]).toHaveAttribute("data-undo", "gone");

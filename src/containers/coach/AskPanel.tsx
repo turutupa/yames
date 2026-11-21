@@ -10,7 +10,7 @@ import { CoachGlyph } from "./CoachGlyph";
 import { consumeAskFocus, noteAskScreen, useAskState, type AskTurn } from "./askStore";
 import { answerTyped } from "./askTyped";
 import { AskToolTurn } from "./AskToolTurn";
-import { askToolChips, onePress, pressChip } from "./askTools";
+import { askToolChips, noKeyRepeat, onePress, pressChip } from "./askTools";
 import { lineText } from "./toolWords";
 import "../../styles/ask.css";
 
@@ -181,7 +181,15 @@ function AskConversation({
         {chips.map((chip) => {
           const words = lineText(t, chip.label);
           return (
-            <button key={chip.id} type="button" className="ask-chip" data-chip={chip.id} onClick={onePress(() => pressChip(chip.call, words))}>
+            <button
+              key={chip.id}
+              type="button"
+              className="ask-chip"
+              data-chip={chip.id}
+              onClick={onePress(() => pressChip(chip.call, words))}
+              onKeyDown={noKeyRepeat}
+              onKeyUp={noKeyRepeat}
+            >
               {words}
             </button>
           );
