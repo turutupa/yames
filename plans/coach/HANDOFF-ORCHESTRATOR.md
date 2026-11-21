@@ -68,7 +68,12 @@ In flight when this was last written (check `git worktree list`, `git branch --n
 
 | Leg | Worktree / branch | State | Next |
 |---|---|---|---|
-| **vr1** the variant rewriter says false note names (a defect in shipped code, found by cues4) | `~/yames-coach-vr1`, `coach-vr1` | Running when this was written (brief: `plans/tasks/coach/vr1-variant-rewriter.md`) | Read its report: the count of how-to lines and cues that were false before the fix, by Path; merge; `bash plans/coach/tools/gates-cues.sh` plus `gates.sh tests/layout/coach-session.spec.ts tests/layout/short-window.spec.ts`; say the result in `STATUS.md` (delivery 1h names the defect as known and being fixed). If it stopped before the audit's rewording was done, a second agent finishes it from its progress file. **No cue leg starts before vr1 is merged** (it changes what `check` reports and may reword cues in several packs). |
+| – | – | **Nothing is in flight and nothing is unmerged** (session 2 stopped at 17:45 PT on 2026-11-20, at its context limit, after delivery 1i). The only worktrees are the main checkout and `~/yames-coach-base`. | Start with the night gates under "Owed" if it is after 8 PM Pacific or a weekend; otherwise launch the next legs and run them at 8 PM. |
+
+**vr1** (the variant rewriter, a defect found by cues4) is merged: no false sentence had shipped; `npm
+run paths -- check` now lists rewritten and refused variant sentences, so cue legs no longer need
+`refusals-entry.ts` (drop that line from the cue prompt; `cues-content.md` still mentions the script:
+`CUES_GUIDE.md` is the newer word).
 
 For a merge that changed Rust: `bash plans/coach/tools/gates-rust.sh [layout specs]` (the gates, then
 `npm run test:rust`).
@@ -92,7 +97,7 @@ a polish leg" in `PROGRESS.md`: about twenty now; brief it as two legs, one for 
 one for the tools and Ask), c4a, c4b, t2a to t2c, rem, c3b, c3c, c5a, c5b, c5c, c6. `PLAN.md` has each
 one's scope, design sections and flags; split each as above before briefing it.
 
-Suggested order from here: vr1 (merge) → the night gates below if it is after 8 PM → t1b2a ‖ c2b1a ‖ a
+Suggested order from here: the night gates below if it is after 8 PM → t1b2a ‖ c2b1a ‖ a
 cue leg → t1b2b ‖ c2b1b ‖ a cue leg → c2b2 ‖ c2c ‖ a cue leg (**delivery 2**: Ask answers and acts on
 every device with the selector on Off) → the two polish
 legs → milestone 3 (c4a, c4b, t2, rem) with the remaining cue legs beside it → milestone 4 (c3b, c3c)
