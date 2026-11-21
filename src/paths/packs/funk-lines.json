@@ -49,6 +49,13 @@
             "Keep the three notes after each accent clearly quieter. That contrast is the groove."
           ],
           "coachLine": "I check that the accented notes were louder, roughly, and how even the sixteenths were.",
+          "cues": [
+            {"when":"even","say":"Accent each beat; keep the other three quiet.","more":1,"general":true},
+            {"when":"heard","say":"Pick the quiet notes too, just lighter."},
+            {"when":"extras","say":"Play four notes a beat, no more."},
+            {"when":"late","say":"Put each accent right on the click."},
+            {"when":"early","say":"Wait for the click before each accent."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -160,6 +167,13 @@
             "If the accent pulls the foot with it, slow down a rung. The foot stays on the beat."
           ],
           "coachLine": "The accent readout is rough: louder than the notes beside it or not. Trust your ear too.",
+          "cues": [
+            {"when":"even","say":"Tap the beat with your foot, accent the 'and'.","more":0,"general":true},
+            {"when":"heard","say":"Pick the quiet notes too, just lighter."},
+            {"when":"extras","say":"Play four notes a beat, no more."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click; the accent comes after."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -271,6 +285,13 @@
             "Fourteen quiet notes and two loud ones. The quiet ones are the hard part."
           ],
           "coachLine": "Two accents a bar is what I look for, on 2 and on 4.",
+          "cues": [
+            {"when":"even","say":"Lean on the first note of '2' and of '4'.","more":0,"general":true},
+            {"when":"heard","say":"Pick the quiet notes too, just lighter."},
+            {"when":"extras","say":"Play four notes a beat, no more."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -400,6 +421,14 @@
             "Three beats on A at fret 7, the last beat on G at fret 5."
           ],
           "coachLine": "I time each note against where it is written, and check the two pitches after the take.",
+          "cues": [
+            {"when":"even","say":"Count '1, and a' and leave each 'e' silent.","more":0,"general":true},
+            {"when":"heard","say":"Pick both short notes after each long one."},
+            {"when":"extras","say":"Leave the 'e' of every beat silent."},
+            {"when":"notes","say":"Three beats on fret seven, the last on five.","more":1},
+            {"when":"late","say":"Put each beat's long note on the click."},
+            {"when":"early","say":"Wait the full eighth before the 'and'."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -513,6 +542,14 @@
             "Don't close the hole. The 'a' comes late, just before the next beat."
           ],
           "coachLine": "A closed-up gap shows as early notes. I'll say how even it was.",
+          "cues": [
+            {"when":"even","say":"Count '1 e (and) a' and leave the 'and' empty.","more":0,"general":true},
+            {"when":"heard","say":"Pick the 'a' after each hole."},
+            {"when":"extras","say":"Leave the 'and' of every beat silent."},
+            {"when":"notes","say":"Three beats on fret seven, the last on five."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Play the 'a' late, just before the next beat.","more":1}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -631,6 +668,14 @@
             "Let the foot land in the hole. The first note comes straight after it, on an upstroke."
           ],
           "coachLine": "The first note after each silent beat is the one I'd look at: early means the hole was cut short.",
+          "cues": [
+            {"when":"even","say":"Count '(2) e and a': the beat itself is silent.","more":0,"general":true},
+            {"when":"heard","say":"Pick all three notes after each silent beat."},
+            {"when":"extras","say":"Leave '2', '3' and '4' silent."},
+            {"when":"notes","say":"Three beats on fret seven, the last on five."},
+            {"when":"late","say":"Play each 'e' right after the silent beat.","more":1},
+            {"when":"early","say":"Wait out each silent beat before the 'e'."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -768,6 +813,14 @@
             "Beat 3 is the one that trips you up. The upstroke on the 'a' of beat 2 sounds, and the downstroke straight after it, on beat 3, plays the air."
           ],
           "coachLine": "Twelve notes a bar, each timed against where it is written. The two pitches are checked after the take.",
+          "cues": [
+            {"when":"even","say":"Count '1, and a, 2 e (and) a, (3) e and a'.","more":0,"general":true},
+            {"when":"heard","say":"Pick all twelve notes, right to the end."},
+            {"when":"extras","say":"Leave '3' itself silent."},
+            {"when":"notes","say":"Play beat '4' at fret five, the rest at seven.","more":1},
+            {"when":"late","say":"Play the 'e' of '3' right after the silence."},
+            {"when":"early","say":"Wait out '3' before its 'e'.","more":2}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -885,6 +938,14 @@
             "The picking hand must not follow the fretting hand. If the swing hesitates where the note changes, go down a rung."
           ],
           "coachLine": "Twelve notes a bar: eight A and four G. Each one is timed against where it is written, and the pitches are checked after the take.",
+          "cues": [
+            {"when":"even","say":"Play every 'a' at fret five, the rest at seven.","more":0,"general":true},
+            {"when":"heard","say":"Press fret five fully for each 'a'."},
+            {"when":"extras","say":"Leave '3' and the 'and' of '2' silent."},
+            {"when":"notes","say":"Lift the third finger off for every 'a'.","more":1},
+            {"when":"late","say":"Keep the pick swinging as the note changes.","more":2},
+            {"when":"early","say":"Wait out '3' before its 'e'."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -1002,6 +1063,14 @@
             "Three beats on A at fret 7, the last beat on G at fret 5."
           ],
           "coachLine": "Eight notes a bar. A gap cut short shows as an early 'a': each note is timed against where it is written.",
+          "cues": [
+            {"when":"even","say":"Count '1 (e and) a': two silent strokes a beat.","more":0,"general":true},
+            {"when":"heard","say":"Pick the 'a' before every beat."},
+            {"when":"extras","say":"Leave the 'e' and the 'and' silent."},
+            {"when":"notes","say":"Three beats on fret seven, the last on five.","more":2},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Keep the gap after each beat its full length.","more":1}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -1121,6 +1190,15 @@
             "The hand swings through the silent beat as it does through the notes: four strokes that miss the string."
           ],
           "coachLine": "Seventeen notes in the two bars, all on one pitch. Each one is timed against where it is written.",
+          "cues": [
+            {"when":"even","say":"Count both halves out loud at the first rung.","more":2,"general":true},
+            {"when":"heard","say":"Pick every written note, right to the end."},
+            {"when":"extras","say":"Swing through the silent beat; play nothing.","more":3},
+            {"when":"notes","say":"Keep every note on fret seven."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait out each rest before the next note."},
+            {"when":"lastBars","say":"Land the one short note on '4' to finish.","more":1}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -1275,6 +1353,17 @@
             "The hand swings in sixteenths from the first note to the last."
           ],
           "coachLine": "Band on. I time your notes against it and check them after the take. Direct input or headphones make that fair.",
+          "cues": [
+            {"when":"even","say":"Count '1, and a', then play the 'e' of '2'.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note down to the low A."},
+            {"when":"extras","say":"Leave the 'and' and 'a' of '2' silent."},
+            {"when":"notes","say":"Cross to the A string on '3', fret seven."},
+            {"when":"late","say":"Put '1' and '3' right on the click."},
+            {"when":"early","say":"Wait out each rest before the next note."},
+            {"when":"afterHeld","say":"Count the low A's beat, then start again."},
+            {"when":"stringChange","say":"Move to the A string in the rests of '2'."},
+            {"when":"lastBars","say":"Hold the low A on '4' for its whole beat."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -1410,6 +1499,17 @@
             "The low E string rings easily. Stop it with the fretting finger as soon as each note has spoken."
           ],
           "coachLine": "Band on. I time your notes against it and check them after the take.",
+          "cues": [
+            {"when":"even","say":"Count '1 (e and) a' and start on the low A.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note up to the last A."},
+            {"when":"extras","say":"Leave the 'e' and 'and' of '1' silent."},
+            {"when":"notes","say":"Play C on the low E string at fret eight.","more":0},
+            {"when":"late","say":"Put the low A right on the click."},
+            {"when":"early","say":"Wait out each rest before the next note."},
+            {"when":"afterHeld","say":"Count the held A's beat, then the low A."},
+            {"when":"stringChange","say":"Cross to the A string on the 'a' of '2'."},
+            {"when":"lastBars","say":"Land the held A on '4' and let it ring.","more":0}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -1543,6 +1643,17 @@
             "The held A at the end of bar 2 is your breath. Bar 3 starts on the same note."
           ],
           "coachLine": "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
+          "cues": [
+            {"when":"even","say":"Breathe on the held A, then start the answer.","more":1,"general":true},
+            {"when":"heard","say":"Pick every note of both lines."},
+            {"when":"extras","say":"Leave the rests silent in both lines."},
+            {"when":"notes","say":"Start the answer on the low A, fret five."},
+            {"when":"late","say":"Put '1' and '3' right on the click."},
+            {"when":"early","say":"Wait out each rest before the next note."},
+            {"when":"afterHeld","say":"Count the held A's beat, then play it again.","more":1},
+            {"when":"stringChange","say":"Look at the next string during each rest."},
+            {"when":"lastBars","say":"Land the last A on '4' and let it ring."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -1724,6 +1835,17 @@
             "Bar 2 plays 'One-e, a' again on beat 3: A, G, then F at fret 8 of the A string under the little finger. It ends on a held low D."
           ],
           "coachLine": "Band on. Notes are timed against it and checked after the take. Direct input or headphones make that fair.",
+          "cues": [
+            {"when":"even","say":"Count '1 e (and) a' and start on the high D.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note down to the low D."},
+            {"when":"extras","say":"Leave '2' and its 'e' silent."},
+            {"when":"notes","say":"Reach fret eight on the A string for F.","more":2},
+            {"when":"late","say":"Put '1' and '3' right on the click."},
+            {"when":"early","say":"Wait out each rest before the next note."},
+            {"when":"afterHeld","say":"Count the low D's beat, then start again."},
+            {"when":"stringChange","say":"Cross to the D string on '3'.","more":1},
+            {"when":"lastBars","say":"Hold the low D on '4' for its whole beat.","more":2}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -1861,6 +1983,17 @@
             "G and A are the D string at frets 5 and 7. C is the G string at fret 5."
           ],
           "coachLine": "Band on. Notes are timed against it and checked after the take.",
+          "cues": [
+            {"when":"even","say":"Count '1 (e and) a, 2' and start on the low D.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note up to the high D."},
+            {"when":"extras","say":"Leave the 'e', 'and' and 'a' of '2' silent."},
+            {"when":"notes","say":"Play C on the G string at fret five.","more":3},
+            {"when":"late","say":"Put the low D right on the click."},
+            {"when":"early","say":"Wait out '3' before its 'e'.","more":1},
+            {"when":"afterHeld","say":"Count the high D's beat, then the low D."},
+            {"when":"stringChange","say":"Cross to the D string on the 'e' of '3'."},
+            {"when":"lastBars","say":"Land the high D on '4' and let it ring.","more":2}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -1997,6 +2130,17 @@
             "Bar 4 ends on the high D, the note bar 1 started on."
           ],
           "coachLine": "This is the test piece for the new key. Notes are timed against the band and checked after the take.",
+          "cues": [
+            {"when":"even","say":"Breathe on the low D, then start the answer.","more":1,"general":true},
+            {"when":"heard","say":"Pick every note of both lines."},
+            {"when":"extras","say":"Leave the rests silent in both lines."},
+            {"when":"notes","say":"Start the answer on the low D, fret five."},
+            {"when":"late","say":"Put each line's first note on the click."},
+            {"when":"early","say":"Wait out each rest before the next note."},
+            {"when":"afterHeld","say":"Count the held D's beat, then play it again.","more":1},
+            {"when":"stringChange","say":"Look at the next string during each rest."},
+            {"when":"lastBars","say":"Land the high D on '4' and let it ring.","more":2}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -2162,6 +2306,17 @@
             "The notes are short here, so 'One, and-a' is three short notes with a hole after the first. The hand swings through every silent beat."
           ],
           "coachLine": "Band on, in A minor again. Notes are timed against it and checked after the take.",
+          "cues": [
+            {"when":"even","say":"Play a figure on '1', a figure on '3'.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note of each figure."},
+            {"when":"extras","say":"Leave every '2' silent."},
+            {"when":"notes","say":"Find the low A on the low E string, fret five.","more":1},
+            {"when":"late","say":"Place each figure's first note on its count."},
+            {"when":"early","say":"Wait out '2' in full before '3'."},
+            {"when":"afterHeld","say":"Count the low A's beat, then start again."},
+            {"when":"stringChange","say":"Look at the next string during each rest."},
+            {"when":"lastBars","say":"Hold the low A on '4' for its whole beat.","more":2}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -7377,6 +7532,14 @@
             "Start well under your clean tempo. Down, down-up on every beat, first finger only, and move it up a note at each bar line."
           ],
           "coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
+          "cues": [
+            {"when":"even","say":"Start well under your clean tempo.","more":0,"general":true},
+            {"when":"heard","say":"Pick both short notes after each long one."},
+            {"when":"late","say":"Put each beat's long note on the click."},
+            {"when":"early","say":"Wait the full eighth before the 'and'."},
+            {"when":"shift","say":"Arrive on the new note as each bar starts."},
+            {"when":"lastBars","say":"Keep counting '1, and a' to the top note."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
