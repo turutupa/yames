@@ -42,6 +42,14 @@ New: `hiddenUntilAsked`, `weekly.say.ungradedLeftOut`, `weekly.movedRisen`, `wee
 `plateau.ask`, `plateau.askTwo`. Changed: `plateau.say` and `plateau.sayRange` lose their closing
 question ("Keep at it, try it another way, or let it rest?"), now `plateau.ask`.
 
+## Merge and gates (after `merge(coach): into coach-c4b2`, no conflicts)
+
+- tsc 0 (`coach-c4b2b-tsc-2`); build 0 (`-build`); test:rust 1279 passed, 0 failed (`-rust`).
+- `npm run test`: 466 of 467 files, 50354 passed, 10 skipped; the one failed file is the known
+  `TabStage.render.test.tsx` (node_modules symlink, `Denied ID ... Bravura.woff2?url`) (`-vitest`).
+- Layout `rail`, `today-line`, `coach-session`, `short-window`: 144 passed, 52 skipped
+  (`/tmp/coach-orch/c4b2b-pw.log`).
+
 ## Owed
 
 - Layout `smooth` and `phone-learning` not run tonight.
