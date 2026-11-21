@@ -824,6 +824,9 @@
       },
       "chip": {
         "hear": "先听一下",
+        "hearBack": "听第 {{bar}} 小节：先听你的，再听示范",
+        "hearYours": "你的：第 {{bar}} 小节 · 停止",
+        "hearDemo": "示范：第 {{bar}} 小节 · 停止",
         "try": "我该试什么？"
       },
       "ungraded": {

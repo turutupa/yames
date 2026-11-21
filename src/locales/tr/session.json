@@ -824,6 +824,9 @@
       },
       "chip": {
         "hear": "Önce dinle",
+        "hearBack": "{{bar}}. ölçüyü dinle: seninki, sonra demo",
+        "hearYours": "Seninki: {{bar}}. ölçü · Durdur",
+        "hearDemo": "Demo: {{bar}}. ölçü · Durdur",
         "try": "Ne denemeliyim?"
       },
       "ungraded": {

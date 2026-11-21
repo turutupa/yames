@@ -615,10 +615,7 @@
     "setCalibrationOffset",
     "startVoiceRepair",
     "callbackProbeReport",
-    "listCleanTempoSpans",
-    "forgetHeardTake",
-    "heardTake",
-    "stopHearTake"
+    "listCleanTempoSpans"
   ],
   "eventsListened": [
     "adaptive-eval",

@@ -844,6 +844,9 @@
       },
       "chip": {
         "hear": "Écouter d'abord",
+        "hearBack": "Écouter la mesure {{bar}} : la vôtre, puis la démo",
+        "hearYours": "La vôtre : mesure {{bar}} · Stop",
+        "hearDemo": "Démo : mesure {{bar}} · Stop",
         "try": "Que dois-je essayer ?"
       },
       "ungraded": {

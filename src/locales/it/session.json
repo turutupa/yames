@@ -844,6 +844,9 @@
       },
       "chip": {
         "hear": "Ascoltala prima",
+        "hearBack": "Ascolta la battuta {{bar}}: la tua, poi la demo",
+        "hearYours": "La tua: battuta {{bar}} · Stop",
+        "hearDemo": "Demo: battuta {{bar}} · Stop",
         "try": "Cosa dovrei provare?"
       },
       "ungraded": {

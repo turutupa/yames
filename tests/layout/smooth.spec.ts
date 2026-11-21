@@ -152,6 +152,31 @@ test("coach-loop: a loop running holds a Take's rules, and the coach's note neve
   expect(s.renders.CoachLine ?? 0, `CoachLine rendered in ${s.commits} commits`).toBe(0);
 });
 
+/*
+ * "Hear bar N: yours, then the demo" (coach leg c5b2): while the player's
+ * bar plays nothing renders per frame. The chip's words change at the press
+ * and at the boundary between the halves, nothing in between; and during a
+ * Take the chip is not in the page at all.
+ */
+test("hear-back: the player's bar plays without a commit per frame, and a Take has no chip", async ({ page }) => {
+  test.slow();
+  await installPerf(page, { countRenders: true });
+  await openShot(page, "session-between", WIDE, "ember", { hearBack: "1" });
+  const chip = page.locator('[data-testid="coach-hear-back"]');
+  await expect(chip).toBeVisible({ timeout: 30_000 });
+  await chip.click();
+  await expect(chip).toHaveText(/^Yours: bar \d+ · Stop$/);
+  // The harness's bar lasts 1.2 s; this window sits inside it, after the press's own commit.
+  const s = await samplePerf(page, 700);
+  expect(s.commits, `${s.commits} commits while the player's bar played`).toBeLessThanOrEqual(2);
+  expect(rendersOf(s, "CoachNote"), `CoachNote rendered in ${s.commits} commits`).toBeLessThanOrEqual(2);
+  await expect(chip).toHaveText(/^Hear bar \d+: yours, then the demo$/, { timeout: 30_000 });
+
+  await openShot(page, "session-playing", WIDE, "ember", { hearBack: "1" });
+  await takeRunning(page);
+  await expect(page.locator('[data-testid="coach-hear-back"]')).toHaveCount(0);
+});
+
 test("the lane keeps the display's beat: a frame for every frame, or exactly every other", async ({ page }) => {
   test.slow();
   await installPerf(page);

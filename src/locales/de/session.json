@@ -824,6 +824,9 @@
       },
       "chip": {
         "hear": "Erst anhören",
+        "hearBack": "Takt {{bar}} hören: deiner, dann die Demo",
+        "hearYours": "Deiner: Takt {{bar}} · Stopp",
+        "hearDemo": "Demo: Takt {{bar}} · Stopp",
         "try": "Was soll ich versuchen?"
       },
       "ungraded": {

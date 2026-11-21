@@ -844,6 +844,9 @@
       },
       "chip": {
         "hear": "Ouvir antes",
+        "hearBack": "Ouvir o compasso {{bar}}: o seu, depois a demo",
+        "hearYours": "O seu: compasso {{bar}} · Parar",
+        "hearDemo": "Demo: compasso {{bar}} · Parar",
         "try": "O que devo tentar?"
       },
       "ungraded": {

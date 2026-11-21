@@ -824,6 +824,9 @@
       },
       "chip": {
         "hear": "Eerst luisteren",
+        "hearBack": "Luister naar maat {{bar}}: jouw versie, dan de demo",
+        "hearYours": "Jouw versie: maat {{bar}} · Stop",
+        "hearDemo": "Demo: maat {{bar}} · Stop",
         "try": "Wat kan ik proberen?"
       },
       "ungraded": {
