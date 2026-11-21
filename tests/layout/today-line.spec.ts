@@ -8,7 +8,9 @@ import { test, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { openShot, MOBILE_URL, noSidewaysScroll, settleAnimations } from "./fits";
 
-const SHOTS_DIR = process.env.YAMES_SHOT_DIR ?? "/tmp/coach-c1b2a/shots";
+// Pictures only when asked for: a fixed /tmp path belongs to whoever ran it first.
+const SHOTS_DIR = process.env.YAMES_SHOT_DIR;
+const shot = (page: Page, name: string) => (SHOTS_DIR ? page.screenshot({ path: `${SHOTS_DIR}/${name}` }) : Promise.resolve());
 
 async function lineFits(page: Page) {
   await settleAnimations(page);
@@ -57,7 +59,7 @@ test.describe("Today's line on a computer", () => {
         expect(box.bottom).toBeLessThanOrEqual(head + 0.5);
         await expect(page.getByTestId("today-line-ask")).toHaveJSProperty("tagName", "BUTTON");
         await noSidewaysScroll(page, "Today");
-        await page.screenshot({ path: `${SHOTS_DIR}/today-line-${size.width}-${theme}.png` });
+        await shot(page, `today-line-${size.width}-${theme}.png`);
       });
     }
   }
@@ -69,7 +71,7 @@ test.describe("Today's line on a computer", () => {
       // It wraps onto a second line rather than running out of its column.
       expect(box.height).toBeGreaterThan(box.lineHeight * 1.5);
       await noSidewaysScroll(page, "Today");
-      await page.screenshot({ path: `${SHOTS_DIR}/today-line-1024-${lng}.png` });
+      await shot(page, `today-line-1024-${lng}.png`);
     });
   }
 
@@ -83,7 +85,7 @@ test.describe("Today's line on a computer", () => {
     await openShot(page, "today-back", { width: 1440, height: 900 }, "ember");
     await lineFits(page);
     await expect(page.getByTestId("today-left-off")).toHaveCount(0);
-    await page.screenshot({ path: `${SHOTS_DIR}/today-back-1440-ember.png` });
+    await shot(page, `today-back-1440-ember.png`);
   });
 });
 
@@ -98,7 +100,7 @@ test.describe("Today's line on a phone", () => {
       // A sentence is no thumb target: the phone's Ask is the header's button.
       await expect(page.getByTestId("today-line-ask")).toHaveCount(0);
       await noSidewaysScroll(page, "Today");
-      await page.screenshot({ path: `${SHOTS_DIR}/phone-today-line-${theme}.png` });
+      await shot(page, `phone-today-line-${theme}.png`);
     });
   }
 
@@ -106,6 +108,6 @@ test.describe("Today's line on a phone", () => {
     await openShot(page, "phone-today-line", { width: 360, height: 800 }, "ember", { lng: "ru" });
     await lineFits(page);
     await noSidewaysScroll(page, "Today");
-    await page.screenshot({ path: `${SHOTS_DIR}/phone-today-line-ru.png` });
+    await shot(page, `phone-today-line-ru.png`);
   });
 });
