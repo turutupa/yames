@@ -1689,6 +1689,9 @@ pub async fn stop_evaluation(
     // second stop empties it too; and again once the analyzer has joined.
     let take_handoff = engine_state.0.lock().unwrap_or_else(|e| e.into_inner()).take_handoff();
     heard_input_stops(&heard, &take_handoff);
+    // The second one, on every exit from here (c5b1c, review L4): a `?` on a
+    // poisoned lock or a panic in `ta.stop()` no longer skips it.
+    let heard_again = HeardInputStopsAgain { heard: &heard, handoff: &take_handoff };
     // The free-play worker reads this input: it ends with it (not waited
     // for), and the page is told, so a device change can start it again.
     // It says nothing once ended, so this `null` is the last word.
@@ -1753,7 +1756,7 @@ pub async fn stop_evaluation(
     // here on. Forget again (c5b1b, review M1): a Take that closed while the
     // input was stopping read the epoch the first forget moved, and its pass
     // would keep the player's audio after the input is off.
-    heard_input_stops(&heard, &take_handoff);
+    drop(heard_again);
     telemetry.audio_levels = captured_audio_levels;
     telemetry.input_ring_drops = input_ring_drops;
 
@@ -5569,6 +5572,21 @@ fn heard_input_stops(heard: &HeardTakeState, handoff: &crate::take::TakeHandoff)
     heard.0.clear(handoff, true);
 }
 
+/// `stop_evaluation`'s second [`heard_input_stops`], run when this drops:
+/// explicitly once the analyzer has joined, or on any earlier exit (a `?`, the
+/// idempotency guard's return, a panic unwinding). c5b1c, review L4. Neither
+/// step can panic on a poisoned lock, so it is safe during an unwind.
+struct HeardInputStopsAgain<'a> {
+    heard: &'a HeardTakeState,
+    handoff: &'a crate::take::TakeHandoff,
+}
+
+impl Drop for HeardInputStopsAgain<'_> {
+    fn drop(&mut self) {
+        heard_input_stops(self.heard, self.handoff);
+    }
+}
+
 /// Stop the hear-back `generation` names. Any other playback (a later
 /// hear-back, a jam's take) is left playing.
 #[tauri::command]
@@ -6646,6 +6664,42 @@ mod hear_take_tests {
         assert!(handoff.is_playing_back());
         heard_input_stops(&heard, &handoff);
         assert!(!handoff.is_playing_back(), "a bar of the player stayed in the take slot");
+    }
+
+    /// c5b1c, review L4: `stop_evaluation`'s second forget runs on an early
+    /// return (a `?` on a poisoned lock) and on a panic (in `ta.stop()`), not
+    /// only on the path that reaches it: a Take kept after the first forget
+    /// is gone either way.
+    #[test]
+    fn the_inputs_second_stop_runs_on_an_early_return_and_a_panic() {
+        let heard = HeardTakeState(HeardTakeSlot::new());
+        let handoff = crate::take::TakeHandoff::new();
+        let poisoned = std::sync::Mutex::new(());
+        let _ = std::panic::catch_unwind(|| {
+            let _g = poisoned.lock().unwrap();
+            panic!("another thread panicked holding it");
+        });
+        let stop = |panics: bool| -> Result<(), String> {
+            heard_input_stops(&heard, &handoff);
+            let _again = HeardInputStopsAgain { heard: &heard, handoff: &handoff };
+            // a pass begun during the stop keeps its Take (it read the new epoch)
+            assert!(heard.0.keep(take_for_l4(), heard.0.epoch()));
+            if panics {
+                panic!("ta.stop() panicked after its join");
+            }
+            let _ = poisoned.lock().map_err(|e| format!("Lock failed: {e}"))?;
+            unreachable!("the lock is poisoned");
+        };
+        assert!(stop(false).is_err());
+        assert_eq!(heard.0.held_bytes(), 0, "an early return kept the player's audio");
+        assert!(std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| stop(true))).is_err());
+        assert_eq!(heard.0.held_bytes(), 0, "a panic kept the player's audio");
+    }
+
+    fn take_for_l4() -> HeardTake {
+        let audio = CapturedAudio { samples: vec![0.1; 10_000], rate: 1000, first_ns: 0, detection_delay_ns: 0 };
+        let bars: Vec<(f64, f64)> = (0..4).map(|k| (2000.0 + k as f64 * 2000.0, 4000.0 + k as f64 * 2000.0)).collect();
+        HeardTake::new(2, audio, 0.0, &bars)
     }
 
     fn a_jam_take_recording(root: &std::path::Path, handoff: &crate::take::SharedTake) -> crate::take::TakeSession {
