@@ -14,6 +14,7 @@ import {
   subscribeCoachModel,
 } from "./coachLoader";
 import type { CoachModelSnapshot } from "./coachLoader";
+import { setCoachClickPlaying } from "./coachLoadGate";
 
 /**
  * The coach model, for the UI: the player's choice, its state and every
@@ -52,6 +53,7 @@ export const COACH_GATE_FALLBACK_MS = 1_500;
 export function useCoachModelDriver(playing: boolean): void {
   useEffect(() => {
     setCoachTakeRunning(playing);
+    setCoachClickPlaying(playing);
   }, [playing]);
 
   useEffect(() => {

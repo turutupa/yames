@@ -138,6 +138,7 @@ const DEFAULT_INVOKE_MAP: Record<string, InvokeFn> = {
   delete_score: () => undefined,
   save_attempt: () => undefined,
   query_attempts: () => [],
+  list_attempt_times_since: () => [],
 
   // Learning paths (migration five)
   save_path_state: () => undefined,

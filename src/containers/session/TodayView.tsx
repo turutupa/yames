@@ -9,12 +9,14 @@ import { PLAN_MINUTES } from "../../session/planner";
 import type { PlanStep } from "../../session/planner";
 import { reasonLine } from "../../session/coachWords";
 import { FIRST_PATH_ID } from "../../session/packs";
+import { NO_PROGRESS } from "../../session/progress";
 import type { PathDoc } from "../../paths/format";
 import { TAKES_TO_READ } from "./hooks/useSessionRun";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { todayLine, todayLineText } from "../../coach/todayLine";
 import { useSongDue } from "./hooks/useSongDue";
 import { CoachLine } from "../coach/CoachLine";
+import { TodayReminder } from "./TodayReminder";
 import { askCoach } from "../coach/askStore";
 import { IS_MOBILE } from "../../platform";
 import { lineText } from "./lineText";
@@ -257,6 +259,7 @@ export function TodayView({
   onOpenTools,
   onOpenPaths,
   instrument,
+  instrumentChosen = false,
   onOpenToolsList,
   onChangeInstrument,
 }: {
@@ -267,6 +270,11 @@ export function TodayView({
    * that predate it, which then read as a guitar.
    */
   instrument?: string;
+  /**
+   * `instrument` is the player's own choice, not the electric-guitar fallback
+   * (rem2c): only then does the reminder line name it.
+   */
+  instrumentChosen?: boolean;
   /** To the Tools list, from that note. */
   onOpenToolsList?: () => void;
   /** To the instrument setting, from that note. */
@@ -282,6 +290,17 @@ export function TodayView({
   // TODAY-9). The input's state is the header's chip (TODAY-10).
   const neck3d = useNeck3d();
   const [endRef, endInView] = useEndInView();
+  // rem2b: the reminder reuses the Session's Takes (null until a read of them
+  // answered: rem2c, a failed read is not "no Takes"), and says nothing while
+  // a Session is in progress.
+  const runPhase = session.run?.phase ?? "idle";
+  const reminder = (
+    <TodayReminder
+      takes={session.takesKnown && progress && progress !== NO_PROGRESS ? progress.takes : null}
+      instrument={instrumentChosen ? instrument : undefined}
+      sessionBusy={runPhase !== "idle" && runPhase !== "recap"}
+    />
+  );
 
   // The coach's one sentence above the plan (DESIGN 6.1): from stored rows
   // only, and absent when it would only repeat the rows.
@@ -389,6 +408,7 @@ export function TodayView({
             )}
           </div>
           {/* Mock 12: on a phone the line sits under the title, above the minutes. */}
+          {IS_MOBILE && reminder}
           {IS_MOBILE && coachLine}
           {noPaths ? (
             <button
@@ -438,6 +458,7 @@ export function TodayView({
         </div>
 
         <div className="session-today-plan">
+          {!IS_MOBILE && reminder}
           {!IS_MOBILE && coachLine}
           {steps.length > 0 && (
             <div className="session-plan-head session-rise" style={rise(4)}>
