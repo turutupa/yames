@@ -634,10 +634,13 @@ describe("a suggestion chip's own press (leg chip1)", () => {
     expect(host).toMatch(/if \(speedRampRunning\) noteAskLoad\(\);/);
     expect(read("../main-window/MainWindow.tsx")).toContain("speedRampRunning: !!state.speedRamp?.active,");
     const jam = read("../main-window/hooks/useJamSession.ts");
-    const step = jam.slice(jam.indexOf("if (to === from) return;"), jam.indexOf("setTrainedBpm(to);"));
-    expect(step).toContain("noteAskLoad();");
-    const revert = jam.slice(jam.indexOf("if (isPlaying || trainedBpm === null) return;"), jam.indexOf("setTrainedBpm(null);"));
-    expect(revert).toContain("noteAskLoad();");
+    const between = (from: string, to: string) => {
+      const at = jam.indexOf(from);
+      expect(at, from).toBeGreaterThan(-1);
+      return jam.slice(at, jam.indexOf(to, at));
+    };
+    expect(between("if (to === from) return;", "setTrainedBpm(to);")).toContain("noteAskLoad();");
+    expect(between("if (isPlaying || trainedBpm === null) return;", "setTrainedBpm(null);")).toContain("noteAskLoad();");
   });
 
   it("in a Session, confirming the proposal a second chip press showed keeps the first Undo as the second step back to the start (leg chip1c, review chip1b LOW 2)", () => {
