@@ -146,6 +146,13 @@
   flex-wrap: wrap;
   row-gap: 6px;
 }
+/* The head's view switch (Neck / Runway / Tab) is a control: it moves in too
+   (pol2 item 1). Only the switch, not the head's text: narrowed, the text
+   wrapped and took a line from the picture (above). ask.spec holds the
+   picture's frame with the switch moved in, at 1024 x 700 and x 768. */
+.main-body[data-session][data-ask] .session-run .practice-head .session-viewswitch {
+  margin-right: calc(var(--ask-w) - 12px);
+}
 /* A result: its text column stays whole. Beside the picture it already is
    when the column ends left of the drawer; one column (980 px and under) it
    moves in like the rest. */

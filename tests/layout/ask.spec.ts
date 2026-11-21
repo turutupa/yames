@@ -144,8 +144,33 @@ for (const theme of THEMES) {
     });
 
     for (const size of [
+      { width: 1024, height: 700 },
+      { width: 1024, height: 768 },
+    ]) {
+      test(`the drawer over a Session at ${size.width} x ${size.height}: the view switch moves in, the picture keeps its frame (pol2 item 1)`, async ({ page }) => {
+        await openShot(page, "session-ready", size, theme);
+        await settleAnimations(page);
+        await page.waitForTimeout(1000);
+        const before = (await rect(page, ".session-practice-hero"))!;
+        await page.locator('[data-testid="session-coach-ask"]').click();
+        await expect(page.locator(".ask-panel")).toBeVisible();
+        await settleAnimations(page);
+        await page.waitForTimeout(260);
+        await shot(page, `${theme}-session-ready-switch-${size.width}x${size.height}`);
+        const panel = (await rect(page, ".ask-panel"))!;
+        const sw = await rect(page, ".practice-head .session-viewswitch");
+        expect(sw, "the scene has the view switch").not.toBeNull();
+        expect(sw!.right, "the view switch left of the drawer").toBeLessThanOrEqual(panel.left + 0.5);
+        expect(await notHitTestable(page, ".practice-head .session-viewswitch button")).toEqual([]);
+        const open = (await rect(page, ".session-practice-hero"))!;
+        expect([open.width, open.height], "the picture keeps its frame").toEqual([before.width, before.height]);
+      });
+    }
+
+    for (const size of [
       { width: 1280, height: 800 },
       { width: 1024, height: 700 },
+      { width: 1024, height: 768 },
     ]) {
       test(`the drawer over a result at ${size.width}: the text column stays whole, the button pressable`, async ({ page }) => {
         await openShot(page, "session-result", size, theme);
