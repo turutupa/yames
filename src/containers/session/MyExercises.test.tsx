@@ -336,7 +336,10 @@ describe("Add to today (t2e)", () => {
     const EVENING = new Date(2026, 10, 21, 23, 59).getTime();
     const AFTER = new Date(2026, 10, 22, 0, 1).getTime();
     let clock = EVENING;
-    afterEach(() => vi.restoreAllMocks());
+    // Only the clock's spy: `restoreAllMocks` would also undo the store plugin's mock.
+    afterEach(() => {
+      if (vi.isMockFunction(Date.now)) Date.now.mockRestore();
+    });
 
     it("the row reads the plan's day; a press at 00:01 writes the new day, and yesterday's part is gone", async () => {
       clock = EVENING;

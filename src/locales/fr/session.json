@@ -132,6 +132,9 @@
       "chosenLeftOut": "{{count}} exercice que tu as ajouté n'a pas tenu en {{minutes}} minutes. Choisis plus de minutes, ou retire-en un dans Mes exercices.",
       "chosenLeftOut_many": "{{count}} exercices que tu as ajoutés n'ont pas tenu en {{minutes}} minutes. Choisis plus de minutes, ou retire-en un dans Mes exercices.",
       "chosenLeftOut_other": "{{count}} exercices que tu as ajoutés n'ont pas tenu en {{minutes}} minutes. Choisis plus de minutes, ou retire-en un dans Mes exercices.",
+      "chosenLeftOutGraded": "{{count}} exercice que tu as ajouté n'a pas tenu : une séance joue {{max}} exercices au plus, et tes parcours en prennent {{taken}} aujourd'hui. Plus de minutes ne feront pas de place ; retires-en un dans Mes exercices.",
+      "chosenLeftOutGraded_many": "{{count}} exercices que tu as ajoutés n'ont pas tenu : une séance joue {{max}} exercices au plus, et tes parcours en prennent {{taken}} aujourd'hui. Plus de minutes ne feront pas de place ; retires-en un dans Mes exercices.",
+      "chosenLeftOutGraded_other": "{{count}} exercices que tu as ajoutés n'ont pas tenu : une séance joue {{max}} exercices au plus, et tes parcours en prennent {{taken}} aujourd'hui. Plus de minutes ne feront pas de place ; retires-en un dans Mes exercices.",
       "chosenUnbuilt": "{{count}} exercice que tu as ajouté pour aujourd'hui ne peut plus être construit, il est donc laissé de côté.",
       "chosenUnbuilt_many": "{{count}} exercices que tu as ajoutés pour aujourd'hui ne peuvent plus être construits, ils sont donc laissés de côté.",
       "chosenUnbuilt_other": "{{count}} exercices que tu as ajoutés pour aujourd'hui ne peuvent plus être construits, ils sont donc laissés de côté.",
@@ -499,7 +502,7 @@
       "inToday": "Dans la séance d'aujourd'hui",
       "addedToday": "Ajouté à la séance d'aujourd'hui, après l'échauffement.",
       "takenOffToday": "Retiré de la séance d'aujourd'hui.",
-      "todayFull": "Aujourd'hui compte déjà {{max}} de vos exercices, le maximum accepté. Retirez-en un d'abord."
+      "todayFull": "Aujourd'hui compte déjà {{max}} de tes exercices, le maximum accepté : une séance joue {{graded}} exercices au plus, et une place est gardée pour tes parcours. Retires-en un d'abord."
     },
     "paths": {
       "title": "Parcours",

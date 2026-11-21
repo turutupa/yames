@@ -186,7 +186,8 @@
         "shape": "Dat kan de app niet.",
         "proposal": "Dat is sindsdien veranderd, dus er is niets gedaan. Vraag het opnieuw.",
         "cap": "Je volgt {{cap}} leerpaden, het maximum. Verlaat er eerst een op zijn pagina.",
-        "loopBackwards": "Maat {{to}} komt vóór maat {{from}}. Noem eerst de eerste maat."
+        "loopBackwards": "Maat {{to}} komt vóór maat {{from}}. Noem eerst de eerste maat.",
+        "loopOwn": "Een repeat speelt voorlopig alleen een oefening uit een pad, en dit is een van je eigen oefeningen."
       },
       "failed": "Dat is niet gelukt, en er is niets veranderd.",
       "make": {

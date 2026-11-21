@@ -186,7 +186,8 @@
         "shape": "L'app ne peut pas faire ça.",
         "proposal": "Ça a changé depuis, donc rien n'a été fait. Redemande.",
         "cap": "Tu suis {{cap}} parcours, le maximum possible. Quitte-en un d'abord sur sa page.",
-        "loopBackwards": "La mesure {{to}} vient avant la mesure {{from}}. Nomme d'abord la première mesure."
+        "loopBackwards": "La mesure {{to}} vient avant la mesure {{from}}. Nomme d'abord la première mesure.",
+        "loopOwn": "Pour l'instant, une boucle ne joue qu'un exercice d'un parcours, et celui-ci est l'un de tes propres exercices."
       },
       "failed": "Ça n'a pas marché, et rien n'a été changé.",
       "make": {

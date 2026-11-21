@@ -78,9 +78,11 @@ describe("useSessionRun — exercises added to today", () => {
     // The one that could not be built is counted for Today's line, not planned.
     expect(h.result.current.chosenUnbuilt).toBe(1);
     // The coach's preview of other minutes plans it too.
-    for (const minutes of [5, 10, 15, 20] as const) {
+    for (const minutes of [10, 15, 20] as const) {
       expect(mineIn(h.result.current.previewPlan({ minutes }).steps)).toHaveLength(1);
     }
+    // At five the lead keeps its place (t2eb M3): the part is left out, for the minutes, and said.
+    expect(h.result.current.previewPlan({ minutes: 5 })).toMatchObject({ chosenLeftOut: 1, chosenLeftOutWhy: "minutes" });
     // The Session, from that row.
     act(() => h.result.current.actions.startTodayAt(at));
     h.toSession();
@@ -109,7 +111,10 @@ describe("useSessionRun — exercises added to today", () => {
     const EVENING = new Date(2026, 10, 21, 23, 59).getTime();
     const AFTER = new Date(2026, 10, 22, 0, 1).getTime();
     let clock = EVENING;
-    afterEach(() => vi.restoreAllMocks());
+    // Only the clock's spy: `restoreAllMocks` would also undo the store plugin's mock.
+    afterEach(() => {
+      if (vi.isMockFunction(Date.now)) Date.now.mockRestore();
+    });
 
     it("a move to Paths reads the new day: yesterday's part leaves Today's plan; a press on the new day puts one in", async () => {
       clock = EVENING;

@@ -132,6 +132,9 @@
       "chosenLeftOut": "{{count}} esercizio che hai aggiunto non è entrato in {{minutes}} minuti. Scegli più minuti, o toglilo da I miei esercizi.",
       "chosenLeftOut_many": "{{count}} esercizi che hai aggiunto non sono entrati in {{minutes}} minuti. Scegli più minuti, o togline uno da I miei esercizi.",
       "chosenLeftOut_other": "{{count}} esercizi che hai aggiunto non sono entrati in {{minutes}} minuti. Scegli più minuti, o togline uno da I miei esercizi.",
+      "chosenLeftOutGraded": "{{count}} esercizio che hai aggiunto non è entrato: una sessione riproduce al massimo {{max}} esercizi, e i tuoi percorsi ne occupano {{taken}} oggi. Più minuti non faranno spazio; toglilo da I miei esercizi.",
+      "chosenLeftOutGraded_many": "{{count}} esercizi che hai aggiunto non sono entrati: una sessione riproduce al massimo {{max}} esercizi, e i tuoi percorsi ne occupano {{taken}} oggi. Più minuti non faranno spazio; togline uno da I miei esercizi.",
+      "chosenLeftOutGraded_other": "{{count}} esercizi che hai aggiunto non sono entrati: una sessione riproduce al massimo {{max}} esercizi, e i tuoi percorsi ne occupano {{taken}} oggi. Più minuti non faranno spazio; togline uno da I miei esercizi.",
       "chosenUnbuilt": "{{count}} esercizio che hai aggiunto per oggi non si può più costruire, quindi resta fuori.",
       "chosenUnbuilt_many": "{{count}} esercizi che hai aggiunto per oggi non si possono più costruire, quindi restano fuori.",
       "chosenUnbuilt_other": "{{count}} esercizi che hai aggiunto per oggi non si possono più costruire, quindi restano fuori.",
@@ -499,7 +502,7 @@
       "inToday": "Nella sessione di oggi",
       "addedToday": "Aggiunto alla sessione di oggi, dopo il riscaldamento.",
       "takenOffToday": "Tolto dalla sessione di oggi.",
-      "todayFull": "Oggi contiene già {{max}} dei tuoi esercizi, il massimo consentito. Togline uno prima."
+      "todayFull": "Oggi contiene già {{max}} dei tuoi esercizi, il massimo consentito: una sessione ne riproduce al massimo {{graded}}, e un posto resta riservato ai tuoi percorsi. Togline uno prima."
     },
     "paths": {
       "title": "Percorsi",

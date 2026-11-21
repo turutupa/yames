@@ -62,6 +62,17 @@ function fixtures(): Array<{ name: string; input: PlannerInput }> {
     { name: "one Path focused", paths: [BLUES], progress: returning([ALT, SWEEP, BLUES]), focused: true },
     { name: "a new Path beside one played", paths: [ALT, SWEEP], progress: returning([ALT]) },
     { name: "no Paths", paths: [], progress: progress({ states: [] }) },
+    // A recap in the warm-up slot (a graded one): the Session's cap binds before the minutes.
+    {
+      name: "two Paths after a break",
+      paths: [ALT, SWEEP],
+      progress: progress({
+        takes: [
+          passed(ALT.steps[0].exercises[0].id, 60, 0.87, 20 * DAY),
+          { ...passed(SWEEP.steps[0].exercises[0].id, 60, 0.87, 21 * DAY), pathId: SWEEP.id, stepId: SWEEP.steps[0].id },
+        ],
+      }),
+    },
   ];
   return scenes.flatMap((s) =>
     PLAN_MINUTES.map((minutes) => ({

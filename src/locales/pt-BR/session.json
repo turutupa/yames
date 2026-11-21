@@ -132,6 +132,9 @@
       "chosenLeftOut": "{{count}} exercício que você adicionou não coube em {{minutes}} minutos. Escolha mais minutos ou tire-o em Meus exercícios.",
       "chosenLeftOut_many": "{{count}} exercícios que você adicionou não couberam em {{minutes}} minutos. Escolha mais minutos ou tire algum em Meus exercícios.",
       "chosenLeftOut_other": "{{count}} exercícios que você adicionou não couberam em {{minutes}} minutos. Escolha mais minutos ou tire algum em Meus exercícios.",
+      "chosenLeftOutGraded": "{{count}} exercício que você adicionou não coube: uma sessão toca no máximo {{max}} exercícios, e suas Trilhas ocupam {{taken}} deles hoje. Mais minutos não abrem espaço; tire-o em Meus exercícios.",
+      "chosenLeftOutGraded_many": "{{count}} exercícios que você adicionou não couberam: uma sessão toca no máximo {{max}} exercícios, e suas Trilhas ocupam {{taken}} deles hoje. Mais minutos não abrem espaço; tire algum em Meus exercícios.",
+      "chosenLeftOutGraded_other": "{{count}} exercícios que você adicionou não couberam: uma sessão toca no máximo {{max}} exercícios, e suas Trilhas ocupam {{taken}} deles hoje. Mais minutos não abrem espaço; tire algum em Meus exercícios.",
       "chosenUnbuilt": "{{count}} exercício que você adicionou para hoje não pode mais ser montado, então fica de fora.",
       "chosenUnbuilt_many": "{{count}} exercícios que você adicionou para hoje não podem mais ser montados, então ficam de fora.",
       "chosenUnbuilt_other": "{{count}} exercícios que você adicionou para hoje não podem mais ser montados, então ficam de fora.",
@@ -499,7 +502,7 @@
       "inToday": "Na sessão de hoje",
       "addedToday": "Adicionado à sessão de hoje, depois do aquecimento.",
       "takenOffToday": "Tirado da sessão de hoje.",
-      "todayFull": "Hoje já tem {{max}} dos seus exercícios, o máximo permitido. Tire um primeiro."
+      "todayFull": "Hoje já tem {{max}} dos seus exercícios, o máximo permitido: uma sessão toca no máximo {{graded}} exercícios avaliados, e uma vaga fica reservada para suas Trilhas. Tire um primeiro."
     },
     "paths": {
       "title": "Trilhas",

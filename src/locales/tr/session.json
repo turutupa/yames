@@ -125,6 +125,8 @@
       },
       "chosenLeftOut": "Eklediğin {{count}} alıştırma {{minutes}} dakikaya sığmadı. Daha fazla dakika seç ya da Alıştırmalarım'dan birini çıkar.",
       "chosenLeftOut_other": "Eklediğin {{count}} alıştırma {{minutes}} dakikaya sığmadı. Daha fazla dakika seç ya da Alıştırmalarım'dan birini çıkar.",
+      "chosenLeftOutGraded": "Eklediğin {{count}} alıştırma sığmadı: bir oturum en fazla {{max}} alıştırma çalar ve Yolların bugün bunlardan {{taken}} tanesini alıyor. Daha fazla dakika yer açmaz; Alıştırmalarım'dan birini çıkar.",
+      "chosenLeftOutGraded_other": "Eklediğin {{count}} alıştırma sığmadı: bir oturum en fazla {{max}} alıştırma çalar ve Yolların bugün bunlardan {{taken}} tanesini alıyor. Daha fazla dakika yer açmaz; Alıştırmalarım'dan birini çıkar.",
       "chosenUnbuilt": "Bugün için eklediğin {{count}} alıştırma artık oluşturulamıyor, o yüzden dışarıda bırakıldı.",
       "chosenUnbuilt_other": "Bugün için eklediğin {{count}} alıştırma artık oluşturulamıyor, o yüzden dışarıda bırakıldı.",
       "reason": {
@@ -485,7 +487,7 @@
       "inToday": "Bugünkü oturumda",
       "addedToday": "Bugünkü oturuma, ısınmadan sonra eklendi.",
       "takenOffToday": "Bugünkü oturumdan çıkarıldı.",
-      "todayFull": "Bugün zaten alabileceği en fazla sayıda, {{max}} alıştırmanı içeriyor. Önce birini çıkar."
+      "todayFull": "Bugün zaten alabileceği en fazla sayıda, {{max}} alıştırmanı içeriyor: bir oturum en fazla {{graded}} puanlanan alıştırma çalar ve bir yer Yollarına ayrılır. Önce birini çıkar."
     },
     "paths": {
       "title": "Yollar",

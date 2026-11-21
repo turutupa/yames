@@ -125,6 +125,8 @@
       },
       "chosenLeftOut": "{{count}} Übung, die du hinzugefügt hast, hat in {{minutes}} Minuten nicht Platz gefunden. Wähle mehr Minuten oder nimm sie in Meine Übungen heraus.",
       "chosenLeftOut_other": "{{count}} Übungen, die du hinzugefügt hast, haben in {{minutes}} Minuten nicht Platz gefunden. Wähle mehr Minuten oder nimm eine in Meine Übungen heraus.",
+      "chosenLeftOutGraded": "{{count}} Übung, die du hinzugefügt hast, hat nicht Platz gefunden: Eine Session spielt höchstens {{max}} Übungen, und deine Pfade belegen heute {{taken}} davon. Mehr Minuten schaffen keinen Platz; nimm eine in Meine Übungen heraus.",
+      "chosenLeftOutGraded_other": "{{count}} Übungen, die du hinzugefügt hast, haben nicht Platz gefunden: Eine Session spielt höchstens {{max}} Übungen, und deine Pfade belegen heute {{taken}} davon. Mehr Minuten schaffen keinen Platz; nimm eine in Meine Übungen heraus.",
       "chosenUnbuilt": "{{count}} Übung, die du für heute hinzugefügt hast, lässt sich nicht mehr bauen und bleibt deshalb draußen.",
       "chosenUnbuilt_other": "{{count}} Übungen, die du für heute hinzugefügt hast, lassen sich nicht mehr bauen und bleiben deshalb draußen.",
       "reason": {
@@ -485,7 +487,7 @@
       "inToday": "In der heutigen Session",
       "addedToday": "Zur heutigen Session hinzugefügt, nach dem Aufwärmen.",
       "takenOffToday": "Aus der heutigen Session genommen.",
-      "todayFull": "Heute sind schon {{max}} deiner Übungen drin, mehr geht nicht. Nimm zuerst eine heraus."
+      "todayFull": "Heute sind schon {{max}} deiner Übungen drin, mehr nimmt es nicht auf: Eine Session spielt höchstens {{graded}} Übungen, und ein Platz bleibt für deine Pfade frei. Nimm zuerst eine heraus."
     },
     "paths": {
       "title": "Pfade",

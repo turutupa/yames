@@ -186,7 +186,8 @@
         "shape": "Das kann die App nicht.",
         "proposal": "Das hat sich inzwischen geändert, deshalb wurde nichts gemacht. Frag noch einmal.",
         "cap": "Du folgst {{cap}} Pfaden, mehr geht nicht. Verlasse zuerst einen auf seiner Seite.",
-        "loopBackwards": "Takt {{to}} kommt vor Takt {{from}}. Nenne zuerst den ersten Takt."
+        "loopBackwards": "Takt {{to}} kommt vor Takt {{from}}. Nenne zuerst den ersten Takt.",
+        "loopOwn": "Eine Wiederholung spielt vorerst nur eine Übung aus einem Pfad, und das hier ist eine deiner eigenen Übungen."
       },
       "failed": "Das hat nicht geklappt, und es wurde nichts geändert.",
       "make": {

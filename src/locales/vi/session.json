@@ -125,6 +125,8 @@
       },
       "chosenLeftOut": "{{count}} bài bạn đã thêm không vừa trong {{minutes}} phút. Chọn thêm phút, hoặc bỏ bớt một bài trong Bài của tôi.",
       "chosenLeftOut_other": "{{count}} bài bạn đã thêm không vừa trong {{minutes}} phút. Chọn thêm phút, hoặc bỏ bớt một bài trong Bài của tôi.",
+      "chosenLeftOutGraded": "{{count}} bài bạn đã thêm không vừa: một buổi tập chỉ chơi tối đa {{max}} bài, và Lộ trình của bạn đã chiếm {{taken}} bài hôm nay. Thêm phút cũng không có thêm chỗ; hãy bỏ bớt một bài trong Bài của tôi.",
+      "chosenLeftOutGraded_other": "{{count}} bài bạn đã thêm không vừa: một buổi tập chỉ chơi tối đa {{max}} bài, và Lộ trình của bạn đã chiếm {{taken}} bài hôm nay. Thêm phút cũng không có thêm chỗ; hãy bỏ bớt một bài trong Bài của tôi.",
       "chosenUnbuilt": "{{count}} bài bạn đã thêm cho hôm nay không thể tạo được nữa, nên bị bỏ ra.",
       "chosenUnbuilt_other": "{{count}} bài bạn đã thêm cho hôm nay không thể tạo được nữa, nên bị bỏ ra.",
       "reason": {
@@ -485,7 +487,7 @@
       "inToday": "Trong buổi tập hôm nay",
       "addedToday": "Đã thêm vào buổi tập hôm nay, sau phần khởi động.",
       "takenOffToday": "Đã bỏ khỏi buổi tập hôm nay.",
-      "todayFull": "Hôm nay đã có {{max}} bài của bạn, nhiều nhất có thể. Hãy bỏ bớt một bài trước."
+      "todayFull": "Hôm nay đã có {{max}} bài của bạn, nhiều nhất có thể: một buổi tập chỉ chơi tối đa {{graded}} bài được chấm, và một chỗ luôn dành cho Lộ trình của bạn. Hãy bỏ bớt một bài trước."
     },
     "paths": {
       "title": "Lộ trình",

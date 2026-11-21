@@ -139,6 +139,10 @@
       "chosenLeftOut_few": "{{count}} dodane przez ciebie ćwiczenia nie zmieściły się w {{minutes}} min. Wybierz więcej minut albo zdejmij jedno w Moich ćwiczeniach.",
       "chosenLeftOut_many": "{{count}} dodanych przez ciebie ćwiczeń nie zmieściło się w {{minutes}} min. Wybierz więcej minut albo zdejmij jedno w Moich ćwiczeniach.",
       "chosenLeftOut_other": "{{count}} dodanego przez ciebie ćwiczenia nie zmieściło się w {{minutes}} min. Wybierz więcej minut albo zdejmij jedno w Moich ćwiczeniach.",
+      "chosenLeftOutGraded": "{{count}} dodane przez ciebie ćwiczenie nie zmieściło się: w sesji obowiązuje limit ćwiczeń: {{max}}, a twoje Ścieżki zajmują dziś {{taken}} z nich. Więcej minut miejsca nie zrobi; zdejmij jedno w Moich ćwiczeniach.",
+      "chosenLeftOutGraded_few": "{{count}} dodane przez ciebie ćwiczenia nie zmieściły się: w sesji obowiązuje limit ćwiczeń: {{max}}, a twoje Ścieżki zajmują dziś {{taken}} z nich. Więcej minut miejsca nie zrobi; zdejmij jedno w Moich ćwiczeniach.",
+      "chosenLeftOutGraded_many": "{{count}} dodanych przez ciebie ćwiczeń nie zmieściło się: w sesji obowiązuje limit ćwiczeń: {{max}}, a twoje Ścieżki zajmują dziś {{taken}} z nich. Więcej minut miejsca nie zrobi; zdejmij jedno w Moich ćwiczeniach.",
+      "chosenLeftOutGraded_other": "{{count}} dodanego przez ciebie ćwiczenia nie zmieściło się: w sesji obowiązuje limit ćwiczeń: {{max}}, a twoje Ścieżki zajmują dziś {{taken}} z nich. Więcej minut miejsca nie zrobi; zdejmij jedno w Moich ćwiczeniach.",
       "chosenUnbuilt": "{{count}} dodane na dziś ćwiczenie nie może być już zbudowane, więc je pominięto.",
       "chosenUnbuilt_few": "{{count}} dodane na dziś ćwiczenia nie mogą być już zbudowane, więc je pominięto.",
       "chosenUnbuilt_many": "{{count}} dodanych na dziś ćwiczeń nie może być już zbudowanych, więc je pominięto.",
@@ -513,7 +517,7 @@
       "inToday": "W dzisiejszej sesji",
       "addedToday": "Dodano do dzisiejszej sesji, po rozgrzewce.",
       "takenOffToday": "Zdjęto z dzisiejszej sesji.",
-      "todayFull": "Na dziś jest już {{max}} twoich ćwiczeń, czyli najwięcej. Najpierw zdejmij jedno."
+      "todayFull": "Na dziś jest już {{max}} twoich ćwiczeń, czyli najwięcej: w sesji obowiązuje limit ocenianych ćwiczeń: {{graded}}, a jedno miejsce zostaje dla twoich Ścieżek. Najpierw zdejmij jedno."
     },
     "paths": {
       "title": "Ścieżki",

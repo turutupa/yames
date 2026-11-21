@@ -186,7 +186,8 @@
         "shape": "Uygulama bunu yapamaz.",
         "proposal": "Bu arada bir şey değişti, bu yüzden hiçbir şey yapılmadı. Tekrar sor.",
         "cap": "{{cap}} yolu takip ediyorsun, en fazla bu kadar olabilir. Önce birini kendi sayfasından bırak.",
-        "loopBackwards": "{{to}}. ölçü, {{from}}. ölçüden önce geliyor. Önce ilk ölçüyü söyle."
+        "loopBackwards": "{{to}}. ölçü, {{from}}. ölçüden önce geliyor. Önce ilk ölçüyü söyle.",
+        "loopOwn": "Döngü şimdilik yalnızca bir Yol'daki alıştırmayı çalar, bu ise kendi alıştırmalarından biri."
       },
       "failed": "Olmadı ve hiçbir şey değişmedi.",
       "make": {

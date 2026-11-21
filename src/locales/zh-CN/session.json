@@ -125,6 +125,8 @@
       },
       "chosenLeftOut": "你添加的 {{count}} 个练习没能放进 {{minutes}} 分钟里。请选更长的时间，或在我的练习里移除一个。",
       "chosenLeftOut_other": "你添加的 {{count}} 个练习没能放进 {{minutes}} 分钟里。请选更长的时间，或在我的练习里移除一个。",
+      "chosenLeftOutGraded": "你添加的 {{count}} 个练习没能放进去：一次练习最多 {{max}} 个练习，而今天你的路线已占了 {{taken}} 个。增加时间也腾不出位置；请在我的练习里移除一个。",
+      "chosenLeftOutGraded_other": "你添加的 {{count}} 个练习没能放进去：一次练习最多 {{max}} 个练习，而今天你的路线已占了 {{taken}} 个。增加时间也腾不出位置；请在我的练习里移除一个。",
       "chosenUnbuilt": "你为今天添加的 {{count}} 个练习已无法再生成，所以没有放进去。",
       "chosenUnbuilt_other": "你为今天添加的 {{count}} 个练习已无法再生成，所以没有放进去。",
       "reason": {
@@ -485,7 +487,7 @@
       "inToday": "在今天这次练习里",
       "addedToday": "已加入今天这次练习，排在热身之后。",
       "takenOffToday": "已移出今天这次练习。",
-      "todayFull": "今天已经放了 {{max}} 个你的练习，这是上限。请先移出一个。"
+      "todayFull": "今天已经放了 {{max}} 个你的练习，这是上限：一次练习最多练 {{graded}} 个计分的练习，并且会留一个位置给你的路线。请先移出一个。"
     },
     "paths": {
       "title": "路线",

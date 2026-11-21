@@ -132,6 +132,9 @@
       "chosenLeftOut": "{{count}} ejercicio que añadiste no cupo en {{minutes}} minutos. Elige más minutos o quítalo en Mis ejercicios.",
       "chosenLeftOut_many": "{{count}} ejercicios que añadiste no cupieron en {{minutes}} minutos. Elige más minutos o quita alguno en Mis ejercicios.",
       "chosenLeftOut_other": "{{count}} ejercicios que añadiste no cupieron en {{minutes}} minutos. Elige más minutos o quita alguno en Mis ejercicios.",
+      "chosenLeftOutGraded": "{{count}} ejercicio que añadiste no cupo: una sesión reproduce como mucho {{max}} ejercicios, y tus rutas ocupan {{taken}} hoy. Más minutos no harán sitio; quítalo en Mis ejercicios.",
+      "chosenLeftOutGraded_many": "{{count}} ejercicios que añadiste no cupieron: una sesión reproduce como mucho {{max}} ejercicios, y tus rutas ocupan {{taken}} hoy. Más minutos no harán sitio; quita alguno en Mis ejercicios.",
+      "chosenLeftOutGraded_other": "{{count}} ejercicios que añadiste no cupieron: una sesión reproduce como mucho {{max}} ejercicios, y tus rutas ocupan {{taken}} hoy. Más minutos no harán sitio; quita alguno en Mis ejercicios.",
       "chosenUnbuilt": "{{count}} ejercicio que añadiste para hoy ya no se puede construir, así que se queda fuera.",
       "chosenUnbuilt_many": "{{count}} ejercicios que añadiste para hoy ya no se pueden construir, así que se quedan fuera.",
       "chosenUnbuilt_other": "{{count}} ejercicios que añadiste para hoy ya no se pueden construir, así que se quedan fuera.",
@@ -499,7 +502,7 @@
       "inToday": "En la sesión de hoy",
       "addedToday": "Añadido a la sesión de hoy, después del calentamiento.",
       "takenOffToday": "Quitado de la sesión de hoy.",
-      "todayFull": "Hoy ya tiene {{max}} de tus ejercicios, el máximo que admite. Quita uno primero."
+      "todayFull": "Hoy ya tiene {{max}} de tus ejercicios, el máximo que admite: una sesión reproduce como mucho {{graded}} ejercicios, y se reserva un sitio para tus rutas. Quita uno primero."
     },
     "paths": {
       "title": "Rutas",

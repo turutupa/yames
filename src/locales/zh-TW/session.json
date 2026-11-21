@@ -125,6 +125,8 @@
       },
       "chosenLeftOut": "你加入的 {{count}} 個練習沒能放進 {{minutes}} 分鐘裡。請選更長的時間，或在我的練習裡移除一個。",
       "chosenLeftOut_other": "你加入的 {{count}} 個練習沒能放進 {{minutes}} 分鐘裡。請選更長的時間，或在我的練習裡移除一個。",
+      "chosenLeftOutGraded": "你加入的 {{count}} 個練習沒能放進去：一次練習最多 {{max}} 個練習，而今天你的路線已佔了 {{taken}} 個。增加時間也騰不出位置；請在我的練習裡移除一個。",
+      "chosenLeftOutGraded_other": "你加入的 {{count}} 個練習沒能放進去：一次練習最多 {{max}} 個練習，而今天你的路線已佔了 {{taken}} 個。增加時間也騰不出位置；請在我的練習裡移除一個。",
       "chosenUnbuilt": "你為今天加入的 {{count}} 個練習已無法再產生，所以沒有放進去。",
       "chosenUnbuilt_other": "你為今天加入的 {{count}} 個練習已無法再產生，所以沒有放進去。",
       "reason": {
@@ -485,7 +487,7 @@
       "inToday": "在今天這次練習裡",
       "addedToday": "已加入今天這次練習，排在熱身之後。",
       "takenOffToday": "已移出今天這次練習。",
-      "todayFull": "今天已經放了 {{max}} 個你的練習，這是上限。請先移出一個。"
+      "todayFull": "今天已經放了 {{max}} 個你的練習，這是上限：一次練習最多練 {{graded}} 個計分的練習，並且會留一個位置給你的路線。請先移出一個。"
     },
     "paths": {
       "title": "路線",
