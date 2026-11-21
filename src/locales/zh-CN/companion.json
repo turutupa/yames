@@ -56,6 +56,7 @@
       "stepDoneLast": "{{step}}：{{count}} 个练习中通过 {{passed}} 个，足以完成这一步。",
       "levelDone": "{{path}} 的 {{level}} 已完成：其中每一步都做完了。",
       "pathDone": "{{path}} 已完成：其中每一步都做完了。",
+      "pathDoneFrom": "{{path}} 从 {{level}} 起已完成：从那里开始的每一步都做完了。",
       "benchmark": "基准测试：{{exercise}}，同一遍以 {{bpm}} BPM：第 {{fromDay}} 天均匀度 {{from}}%，第 {{toDay}} 天 {{to}}%。",
       "payoff": "这条路线说：“{{payoff}}”"
     },
@@ -64,7 +65,8 @@
       "kick": "下一条试试的路线",
       "chip": "建议一条路线",
       "next": "{{path}} 是按课程顺序你还没开始的下一条路线，它所依赖的内容都不缺。",
-      "buildsOn": "{{path}} 建立在你已开始的 {{on}} 之上。",
+      "readyGoal": "{{path}} 与你说过想要达成的目标相符，它所依赖的内容都不缺。",
+      "buildsOn":"{{path}} 建立在你已开始的 {{on}} 之上。",
       "buildsOnLevel": "{{path}} 建立在 {{on}} 之上，而你已经完成了那里的 {{level}}。",
       "goal": "你说过你的目标是：“{{goal}}”",
       "open": "打开 {{path}}",

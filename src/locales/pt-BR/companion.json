@@ -56,6 +56,7 @@
       "stepDoneLast": "{{step}}: {{passed}} de {{count}} exercícios aprovados, o bastante para concluir a etapa.",
       "levelDone": "{{level}} em {{path}} está concluído: todas as etapas dele estão feitas.",
       "pathDone": "{{path}} está concluída: todas as etapas dela estão feitas.",
+      "pathDoneFrom": "{{path}} está concluída a partir de {{level}}: todas as etapas dali em diante estão feitas.",
       "benchmark": "Referência: {{exercise}}, a mesma tomada a {{bpm}} BPM: {{from}}% uniforme no dia {{fromDay}}, {{to}}% no dia {{toDay}}.",
       "payoff": "A trilha diz: “{{payoff}}”"
     },
@@ -64,7 +65,8 @@
       "kick": "Uma trilha para tentar a seguir",
       "chip": "Sugerir uma trilha",
       "next": "{{path}} é a próxima trilha, na ordem do currículo, que você ainda não começou, e não falta nada do que ela usa como base.",
-      "buildsOn": "{{path}} se apoia em {{on}}, que você já começou.",
+      "readyGoal": "{{path}} combina com o que você disse que quer alcançar, e não falta nada do que ela usa como base.",
+      "buildsOn":"{{path}} se apoia em {{on}}, que você já começou.",
       "buildsOnLevel": "{{path}} se apoia em {{on}}, e lá você já passou de {{level}}.",
       "goal": "Você disse que está trabalhando em direção a: “{{goal}}”",
       "open": "Abrir {{path}}",

@@ -56,6 +56,7 @@
       "stepDoneLast": "{{step}}: zaliczone ćwiczenia: {{passed}} z {{count}}, to dość, by zakończyć krok.",
       "levelDone": "{{path}}, {{level}}: ukończone, każdy krok jest zrobiony.",
       "pathDone": "Ścieżka {{path}} jest ukończona: każdy krok w niej jest zrobiony.",
+      "pathDoneFrom": "Ścieżka {{path}} jest ukończona od poziomu {{level}}: każdy krok od tego miejsca jest zrobiony.",
       "benchmark": "Punkt odniesienia: {{exercise}}, to samo podejście w {{bpm}} BPM: {{from}}% równo w dniu {{fromDay}}, {{to}}% w dniu {{toDay}}.",
       "payoff": "Ścieżka mówi: „{{payoff}}”"
     },
@@ -64,7 +65,8 @@
       "kick": "Ścieżka do spróbowania dalej",
       "chip": "Zaproponuj ścieżkę",
       "next": "Ścieżka {{path}} jest następna w kolejności programu spośród jeszcze nierozpoczętych, a niczego, na czym się opiera, nie brakuje.",
-      "buildsOn": "{{path}} opiera się na ścieżce: {{on}}. Tę masz już rozpoczętą.",
+      "readyGoal": "Ścieżka {{path}} pasuje do tego, ku czemu według własnych słów zmierzasz, a niczego, na czym się opiera, nie brakuje.",
+      "buildsOn":"{{path}} opiera się na ścieżce: {{on}}. Tę masz już rozpoczętą.",
       "buildsOnLevel": "{{path}} opiera się na ścieżce: {{on}}. Masz tam za sobą: {{level}}.",
       "goal": "Podany przez ciebie cel: „{{goal}}”",
       "open": "Otwórz ścieżkę: {{path}}",

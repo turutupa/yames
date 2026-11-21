@@ -56,6 +56,7 @@
       "stepDoneLast": "{{step}}: đạt {{passed}} trên {{count}} bài, đủ để hoàn thành bước.",
       "levelDone": "{{level}} trong {{path}} đã hoàn thành: mọi bước trong đó đều xong.",
       "pathDone": "{{path}} đã hoàn thành: mọi bước trong đó đều xong.",
+      "pathDoneFrom": "{{path}} đã hoàn thành từ {{level}} trở đi: mọi bước từ đó đều xong.",
       "benchmark": "Mốc: {{exercise}}, cùng một lượt ở {{bpm}} BPM: đều {{from}}% ở ngày {{fromDay}}, {{to}}% ở ngày {{toDay}}.",
       "payoff": "Lộ trình nói: “{{payoff}}”"
     },
@@ -64,7 +65,8 @@
       "kick": "Một lộ trình nên thử tiếp theo",
       "chip": "Gợi ý lộ trình",
       "next": "{{path}} là lộ trình kế tiếp theo thứ tự giáo trình mà bạn chưa bắt đầu, và không thiếu thứ gì nó dựa vào.",
-      "buildsOn": "{{path}} dựa trên {{on}}, mà bạn đã bắt đầu.",
+      "readyGoal": "{{path}} khớp với điều bạn nói là đang hướng tới, và không thiếu thứ gì nó dựa vào.",
+      "buildsOn":"{{path}} dựa trên {{on}}, mà bạn đã bắt đầu.",
       "buildsOnLevel": "{{path}} dựa trên {{on}}, và bạn đã qua {{level}} ở đó.",
       "goal": "Bạn nói đang hướng tới: “{{goal}}”",
       "open": "Mở {{path}}",

@@ -56,6 +56,7 @@
       "stepDoneLast": "{{step}}: {{passed}} de {{count}} ejercicios superados, suficientes para terminar el paso.",
       "levelDone": "{{level}} en {{path}} está terminado: todos sus pasos están hechos.",
       "pathDone": "{{path}} está terminada: todos sus pasos están hechos.",
+      "pathDoneFrom": "{{path}} está terminada desde {{level}}: todos los pasos a partir de ahí están hechos.",
       "benchmark": "Referencia: {{exercise}}, la misma toma a {{bpm}} BPM: {{from}} % parejo el día {{fromDay}}, {{to}} % el día {{toDay}}.",
       "payoff": "La ruta dice: “{{payoff}}”"
     },
@@ -64,7 +65,8 @@
       "kick": "Una ruta para probar a continuación",
       "chip": "Sugerir una ruta",
       "next": "{{path}} es la siguiente ruta, en el orden del currículo, que no has empezado, y no falta nada de lo que le sirve de base.",
-      "buildsOn": "{{path}} se apoya en {{on}}, que ya empezaste.",
+      "readyGoal": "{{path}} encaja con lo que dijiste que quieres lograr, y no falta nada de lo que le sirve de base.",
+      "buildsOn":"{{path}} se apoya en {{on}}, que ya empezaste.",
       "buildsOnLevel": "{{path}} se apoya en {{on}}, y ahí ya pasaste {{level}}.",
       "goal": "Dijiste que trabajas hacia: “{{goal}}”",
       "open": "Abrir {{path}}",

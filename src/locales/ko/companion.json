@@ -56,6 +56,7 @@
       "stepDoneLast": "{{step}}: 과제 {{count}}개 중 {{passed}}개 통과, 단계를 마치기에 충분해요.",
       "levelDone": "{{path}}의 {{level}}을(를) 마쳤어요: 그 안의 단계가 모두 끝났어요.",
       "pathDone": "{{path}}을(를) 마쳤어요: 그 안의 단계가 모두 끝났어요.",
+      "pathDoneFrom": "{{path}}을(를) {{level}}부터 끝까지 마쳤어요: 거기서부터의 단계가 모두 끝났어요.",
       "benchmark": "벤치마크: {{exercise}}, 같은 테이크를 {{bpm}} BPM으로. {{fromDay}}일차에 고르기 {{from}}%,{{toDay}}일차에 {{to}}%.",
       "payoff": "이 코스의 말: “{{payoff}}”"
     },
@@ -64,7 +65,8 @@
       "kick": "다음에 해 볼 코스",
       "chip": "코스 제안",
       "next": "{{path}}은(는) 커리큘럼 순서에서 다음으로, 아직 시작하지 않은 코스예요. 바탕이 되는 것 중 빠진 건 없어요.",
-      "buildsOn": "{{path}}은(는) 이미 시작한 {{on}}에 이어지는 코스예요.",
+      "readyGoal": "{{path}}은(는) 이루고 싶다고 말한 목표에 맞는 코스예요. 바탕이 되는 것 중 빠진 건 없어요.",
+      "buildsOn":"{{path}}은(는) 이미 시작한 {{on}}에 이어지는 코스예요.",
       "buildsOnLevel": "{{path}}은(는) {{on}}에 이어지고, 거기서 {{level}}을(를) 마쳤어요.",
       "goal": "목표로 말한 것: “{{goal}}”",
       "open": "{{path}} 열기",

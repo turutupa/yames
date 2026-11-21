@@ -56,6 +56,7 @@
       "stepDoneLast": "{{step}}: {{passed}} van {{count}} oefeningen gehaald, genoeg om de stap af te ronden.",
       "levelDone": "{{level}} op {{path}} is afgerond: elke stap erin is gedaan.",
       "pathDone": "{{path}} is afgerond: elke stap erin is gedaan.",
+      "pathDoneFrom": "{{path}} is afgerond vanaf {{level}}: elke stap vanaf daar is gedaan.",
       "benchmark": "Meetpunt: {{exercise}}, dezelfde take op {{bpm}} BPM: {{from}}% gelijkmatig op dag {{fromDay}}, {{to}}% op dag {{toDay}}.",
       "payoff": "Het leerpad zegt: “{{payoff}}”"
     },
@@ -64,7 +65,8 @@
       "kick": "Een leerpad om hierna te proberen",
       "chip": "Leerpad voorstellen",
       "next": "{{path}} is het volgende leerpad in de volgorde van het curriculum dat je nog niet hebt gestart, en er ontbreekt niets van wat het nodig heeft.",
-      "buildsOn": "{{path}} bouwt voort op {{on}}, dat je hebt gestart.",
+      "readyGoal": "{{path}} past bij wat je zei na te streven, en er ontbreekt niets van wat het nodig heeft.",
+      "buildsOn":"{{path}} bouwt voort op {{on}}, dat je hebt gestart.",
       "buildsOnLevel": "{{path}} bouwt voort op {{on}}, en je bent daar door {{level}} heen.",
       "goal": "Je zei dat je hiernaartoe werkt: “{{goal}}”",
       "open": "{{path}} openen",

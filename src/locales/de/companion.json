@@ -56,6 +56,7 @@
       "stepDoneLast": "{{step}}: {{passed}} von {{count}} Übungen bestanden, genug, um den Schritt abzuschließen.",
       "levelDone": "{{level}} in {{path}} ist abgeschlossen: Jeder Schritt darin ist erledigt.",
       "pathDone": "{{path}} ist abgeschlossen: Jeder Schritt darin ist erledigt.",
+      "pathDoneFrom": "{{path}} ist ab {{level}} abgeschlossen: Jeder Schritt von dort an ist erledigt.",
       "benchmark": "Benchmark: {{exercise}}, derselbe Take bei {{bpm}} BPM: {{from}} % gleichmäßig an Tag {{fromDay}}, {{to}} % an Tag {{toDay}}.",
       "payoff": "Der Pfad sagt: „{{payoff}}“"
     },
@@ -64,7 +65,8 @@
       "kick": "Ein Pfad zum Ausprobieren",
       "chip": "Pfad vorschlagen",
       "next": "{{path}} ist der nächste Pfad in der Reihenfolge des Lehrplans, den du noch nicht begonnen hast, und nichts, worauf er aufbaut, fehlt.",
-      "buildsOn": "{{path}} baut auf {{on}} auf, den du begonnen hast.",
+      "readyGoal": "{{path}} passt zu dem, worauf du nach eigener Aussage hinarbeitest, und nichts, worauf er aufbaut, fehlt.",
+      "buildsOn":"{{path}} baut auf {{on}} auf, den du begonnen hast.",
       "buildsOnLevel": "{{path}} baut auf {{on}} auf, und du bist dort durch {{level}}.",
       "goal": "Du hast gesagt, du arbeitest hin auf: „{{goal}}“",
       "open": "{{path}} öffnen",

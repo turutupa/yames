@@ -304,7 +304,9 @@ export const FACT_CARDS: readonly FactCardTool[] = [
     "suggest_path",
     [],
     "One Path to try next: not started, nothing it builds on missing; a goal the player set orders it.",
-    "which Path to try next",
+    // Six characters at most: the cards' share of the choice prompt stood at
+    // 292 of its 300 tokens before this card (c2b2ac).
+    "a Path",
     () => true,
     (_a, ctx) => suggestPathCard(ctx.progress, coachStored().goal),
   ),

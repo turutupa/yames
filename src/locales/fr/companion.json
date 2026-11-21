@@ -56,6 +56,7 @@
       "stepDoneLast": "{{step}} : {{passed}} exercices réussis sur {{count}}, assez pour terminer l'étape.",
       "levelDone": "{{level}} dans {{path}} est terminé : toutes ses étapes sont faites.",
       "pathDone": "{{path}} est terminé : toutes ses étapes sont faites.",
+      "pathDoneFrom": "{{path}} est terminé à partir de {{level}} : toutes les étapes à partir de là sont faites.",
       "benchmark": "Repère : {{exercise}}, la même prise à {{bpm}} BPM : {{from}} % régulier au jour {{fromDay}}, {{to}} % au jour {{toDay}}.",
       "payoff": "Le parcours dit : « {{payoff}} »"
     },
@@ -64,7 +65,8 @@
       "kick": "Un parcours à essayer ensuite",
       "chip": "Suggérer un parcours",
       "next": "{{path}} est le prochain parcours, dans l'ordre du programme, que tu n'as pas commencé, et rien de ce sur quoi il s'appuie ne manque.",
-      "buildsOn": "{{path}} s'appuie sur {{on}}, que tu as commencé.",
+      "readyGoal": "{{path}} correspond à ce que tu as dit vouloir atteindre, et rien de ce sur quoi il s'appuie ne manque.",
+      "buildsOn":"{{path}} s'appuie sur {{on}}, que tu as commencé.",
       "buildsOnLevel": "{{path}} s'appuie sur {{on}}, et tu as passé {{level}} là-bas.",
       "goal": "Tu as dit que tu travailles vers : « {{goal}} »",
       "open": "Ouvrir {{path}}",

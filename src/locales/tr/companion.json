@@ -56,6 +56,7 @@
       "stepDoneLast": "{{step}}: {{count}} alıştırmadan {{passed}} tanesi geçildi, adımı bitirmeye yeter.",
       "levelDone": "{{path}} içinde {{level}} bitti: içindeki her adım tamamlandı.",
       "pathDone": "{{path}} bitti: içindeki her adım tamamlandı.",
+      "pathDoneFrom": "{{path}}, {{level}} seviyesinden itibaren bitti: oradan sonraki her adım tamamlandı.",
       "benchmark": "Ölçüt: {{exercise}}, {{bpm}} BPM'de aynı deneme: {{fromDay}}. günde %{{from}} düzgün, {{toDay}}. günde %{{to}}.",
       "payoff": "Yol şunu söylüyor: “{{payoff}}”"
     },
@@ -64,7 +65,8 @@
       "kick": "Sıradaki denenecek yol",
       "chip": "Bir yol öner",
       "next": "{{path}}, müfredat sırasında henüz başlamadığın bir sonraki yol ve dayandığı hiçbir şey eksik değil.",
-      "buildsOn": "{{path}}, başladığın {{on}} yoluna dayanıyor.",
+      "readyGoal": "{{path}}, ulaşmak istediğini söylediğin hedefe uyuyor ve dayandığı hiçbir şey eksik değil.",
+      "buildsOn":"{{path}}, başladığın {{on}} yoluna dayanıyor.",
       "buildsOnLevel": "{{path}}, {{on}} yoluna dayanıyor ve orada {{level}} seviyesini bitirdin.",
       "goal": "Şuna doğru çalıştığını söyledin: “{{goal}}”",
       "open": "{{path}} yolunu aç",
