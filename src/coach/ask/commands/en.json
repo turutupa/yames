@@ -1,0 +1,161 @@
+{
+  "language": "en",
+  "noSpaces": false,
+  "verbs": {
+    "open": ["open", "go to", "go", "take me to"],
+    "start": ["start", "play", "begin"],
+    "slower": ["slower", "slow down", "slow it down"],
+    "faster": ["faster", "speed up", "speed it up"],
+    "loop": ["loop", "repeat"],
+    "show": ["show", "draw"],
+    "follow": ["follow"],
+    "load": ["load"],
+    "set": ["set", "change"],
+    "focus": ["focus on", "focus"],
+    "swap": ["swap", "replace"],
+    "findEdge": ["find my edge on", "find my edge in", "find my edge", "find the edge of", "find edge"],
+    "testOut": ["test out of", "test out"],
+    "explain": ["explain"],
+    "make": ["make me", "make", "build"]
+  },
+  "screens": {
+    "today": ["today"],
+    "paths": ["paths"],
+    "progress": ["progress"],
+    "tools": ["tools"],
+    "beat": ["metronome", "the metronome", "beat"],
+    "drill": ["drill", "the drill"],
+    "setlist": ["setlist", "set list"],
+    "jam": ["jam", "jams"],
+    "songs": ["songs"],
+    "settings": ["settings", "preferences"]
+  },
+  "sections": {
+    "general": ["general"],
+    "appearance": ["appearance"],
+    "instrument": ["instrument"],
+    "practice": ["practice"],
+    "coach": ["coach"],
+    "tools": ["tools"],
+    "songs": ["songs"],
+    "keepTakes": ["keeping takes", "keep takes"],
+    "about": ["about"]
+  },
+  "settingKeys": {
+    "theme": ["theme", "colour theme", "color theme"],
+    "language": ["language"],
+    "practiceView": ["practice view"],
+    "bandVolume": ["band volume"],
+    "countIn": ["count in", "count-in", "countin"],
+    "coachVoice": ["coach voice", "voice"],
+    "coachSuggestions": ["coach suggestions", "suggestions", "tips"]
+  },
+  "onOff": {
+    "on": ["on", "yes"],
+    "off": ["off", "no"]
+  },
+  "units": {
+    "bpm": ["bpm", "beats per minute"],
+    "minutes": ["minutes", "minute", "mins", "min"],
+    "bar": ["bars", "bar", "measures", "measure"],
+    "step": ["step"],
+    "part": ["part"],
+    "clicks": ["clicks per beat", "clicks a beat", "clicks", "click a beat", "click per beat"]
+  },
+  "nouns": {
+    "tempo": ["tempo", "speed"],
+    "path": ["path"],
+    "jam": ["jam"],
+    "preset": ["preset"],
+    "chord": ["chord"],
+    "scale": ["scale"],
+    "exercise": ["exercise"],
+    "goal": ["my goal", "goal"],
+    "session": ["today's session", "the session", "session", "today"],
+    "mix": ["the mix", "mix"],
+    "screen": ["this screen", "the screen", "screen", "this"]
+  },
+  "connectors": {
+    "to": ["to", "through", "until", "-"],
+    "at": ["at", "from"],
+    "of": ["of", "on", "in"],
+    "for": ["for", "with"]
+  },
+  "swapChoices": {
+    "harder": ["something harder", "harder"],
+    "different": ["something different", "something else", "different"],
+    "style": ["another style", "a different style", "style"]
+  },
+  "ordinals": {
+    "first": 1,
+    "second": 2,
+    "third": 3,
+    "fourth": 4
+  },
+  "roots": {
+    "sharp": ["sharp"],
+    "flat": ["flat"]
+  },
+  "scales": {
+    "major": ["major", "ionian"],
+    "naturalMinor": ["natural minor", "minor", "aeolian"],
+    "dorian": ["dorian"],
+    "mixolydian": ["mixolydian"],
+    "minorPentatonic": ["minor pentatonic", "pentatonic minor", "pentatonic"],
+    "majorPentatonic": ["major pentatonic", "pentatonic major"],
+    "blues": ["blues", "minor blues"],
+    "harmonicMinor": ["harmonic minor"],
+    "melodicMinor": ["melodic minor"],
+    "lydian": ["lydian"],
+    "phrygian": ["phrygian"],
+    "majorBlues": ["major blues"],
+    "altered": ["altered"],
+    "locrian": ["locrian"],
+    "wholeTone": ["whole tone"],
+    "diminishedWholeHalf": ["diminished whole half", "whole half diminished"],
+    "diminishedHalfWhole": ["diminished half whole", "half whole diminished"],
+    "phrygianDominant": ["phrygian dominant"],
+    "lydianDominant": ["lydian dominant"],
+    "harmonicMajor": ["harmonic major"],
+    "hungarianMinor": ["hungarian minor"],
+    "augmentedScale": ["augmented"],
+    "bebopDominant": ["bebop dominant"],
+    "bebopMajor": ["bebop major"],
+    "bebopMinor": ["bebop minor"],
+    "chromatic": ["chromatic"]
+  },
+  "positions": {
+    "open": ["open position"],
+    "rootOn6": ["root on 6", "root on the 6th string", "root on the sixth string"],
+    "rootOn5": ["root on 5", "root on the 5th string", "root on the fifth string"],
+    "rootOn4": ["root on 4", "root on the 4th string", "root on the fourth string"],
+    "rootOn3": ["root on 3", "root on the 3rd string", "root on the third string"]
+  },
+  "never": {
+    "input": ["microphone", "mic", "input", "listen", "listening"],
+    "devices": ["audio device", "devices", "device", "interface", "output", "speakers", "headphones"],
+    "grading": ["grading", "graded", "ungraded", "grade me"],
+    "recording": ["recordings", "recording", "record"],
+    "deleting": ["delete", "remove", "erase", "clear", "forget", "wipe"],
+    "unfollowing": ["unfollow", "unsubscribe", "stop following", "leave the path", "leave path", "quit path"],
+    "model": ["download", "model", "llm"],
+    "grades": ["grades", "grade", "scores", "score", "clean tempo"]
+  },
+  "questions": [
+    "why", "what", "what's", "whats", "how", "when", "where", "who", "which", "whose",
+    "is", "are", "am", "was", "were", "do", "does", "did", "can", "could", "would",
+    "should", "will", "shall", "may", "might", "have", "has", "had", "isn't", "aren't"
+  ],
+  "notCommand": [
+    "i", "i'm", "im", "i've", "i'd", "i'll", "you", "your", "you're", "it", "it's", "its",
+    "that", "that's", "they", "we", "he", "she", "him", "her", "them", "us",
+    "don't", "dont", "didn't", "doesn't", "never", "not", "can't", "won't",
+    "later", "tomorrow", "yesterday", "tonight", "next", "ago", "again",
+    "because", "but", "if", "than", "when", "why", "how", "what",
+    "is", "are", "was", "were", "be", "been", "did", "does", "should", "would", "could",
+    "too", "very", "really", "so", "then", "after", "before", "like", "want", "need", "think", "feel",
+    "for me", "with me", "to me", "along", "back", "or", "over"
+  ],
+  "polite": ["please", "ok", "okay", "hey coach", "hey", "now", "thanks", "thank you", "just"],
+  "fillers": ["me", "the", "a bit", "a little", "a", "an", "my", "some", "one step"]
+}
