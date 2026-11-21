@@ -1,48 +1,100 @@
 {
   "notebook": {
     "noticed": {
-      "tempoEvenness": "At {{fast}} BPM your Takes were {{fastScore}}% even; at {{slow}} BPM, {{slowScore}}%.",
+      "tempoEvenness": "A {{fast}} BPM i tuoi take erano regolari al {{fastScore}}%; a {{slow}} BPM, al {{slowScore}}%.",
       "lean": {
         "first": {
-          "late": "The first bar of the pattern sat late against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured.",
-          "early": "The first bar of the pattern sat early against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured."
+          "late": "La prima battuta del pattern cadeva in ritardo rispetto al resto: {{hits}} dei {{count}} take più recenti in cui si poteva misurare.",
+          "early": "La prima battuta del pattern cadeva in anticipo rispetto al resto: {{hits}} dei {{count}} take più recenti in cui si poteva misurare."
         },
         "last": {
-          "late": "The last bar of the pattern sat late against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured.",
-          "early": "The last bar of the pattern sat early against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured."
+          "late": "L'ultima battuta del pattern cadeva in ritardo rispetto al resto: {{hits}} dei {{count}} take più recenti in cui si poteva misurare.",
+          "early": "L'ultima battuta del pattern cadeva in anticipo rispetto al resto: {{hits}} dei {{count}} take più recenti in cui si poteva misurare."
         }
       },
       "place": {
         "afterHeld": {
-          "late": "Bars where a note follows a held one sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars where a note follows a held one sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars where a note follows a held one sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars where a note follows a held one sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "Le battute in cui una nota segue una nota tenuta cadevano in ritardo rispetto al resto: {{hits}} dei {{count}} take più recenti con tali battute in cui si poteva misurare.",
+          "early": "Le battute in cui una nota segue una nota tenuta cadevano in anticipo rispetto al resto: {{hits}} dei {{count}} take più recenti con tali battute in cui si poteva misurare.",
+          "lateOne": "In {{exercise}}, le battute in cui una nota segue una nota tenuta cadevano in ritardo rispetto al resto: {{hits}} dei {{count}} take più recenti di quell'esercizio in cui si poteva misurare.",
+          "earlyOne": "In {{exercise}}, le battute in cui una nota segue una nota tenuta cadevano in anticipo rispetto al resto: {{hits}} dei {{count}} take più recenti di quell'esercizio in cui si poteva misurare."
         },
         "openString": {
-          "late": "Bars with an open string in them sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars with an open string in them sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars with an open string in them sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars with an open string in them sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "Le battute con una corda a vuoto cadevano in ritardo rispetto al resto: {{hits}} dei {{count}} take più recenti con tali battute in cui si poteva misurare.",
+          "early": "Le battute con una corda a vuoto cadevano in anticipo rispetto al resto: {{hits}} dei {{count}} take più recenti con tali battute in cui si poteva misurare.",
+          "lateOne": "In {{exercise}}, le battute con una corda a vuoto cadevano in ritardo rispetto al resto: {{hits}} dei {{count}} take più recenti di quell'esercizio in cui si poteva misurare.",
+          "earlyOne": "In {{exercise}}, le battute con una corda a vuoto cadevano in anticipo rispetto al resto: {{hits}} dei {{count}} take più recenti di quell'esercizio in cui si poteva misurare."
         },
         "shift": {
-          "late": "Bars with a position shift in them sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars with a position shift in them sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars with a position shift in them sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars with a position shift in them sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "Le battute con un cambio di posizione cadevano in ritardo rispetto al resto: {{hits}} dei {{count}} take più recenti con tali battute in cui si poteva misurare.",
+          "early": "Le battute con un cambio di posizione cadevano in anticipo rispetto al resto: {{hits}} dei {{count}} take più recenti con tali battute in cui si poteva misurare.",
+          "lateOne": "In {{exercise}}, le battute con un cambio di posizione cadevano in ritardo rispetto al resto: {{hits}} dei {{count}} take più recenti di quell'esercizio in cui si poteva misurare.",
+          "earlyOne": "In {{exercise}}, le battute con un cambio di posizione cadevano in anticipo rispetto al resto: {{hits}} dei {{count}} take più recenti di quell'esercizio in cui si poteva misurare."
         }
       },
       "tempoPlayed": {
-        "named": "You played {{exercise}} at {{fromBpm}} BPM at first and at {{toBpm}} BPM most recently.",
-        "unnamed": "You played one Exercise at {{fromBpm}} BPM at first and at {{toBpm}} BPM most recently."
+        "named": "Hai suonato {{exercise}} a {{fromBpm}} BPM all'inizio e a {{toBpm}} BPM più di recente.",
+        "unnamed": "Hai suonato un esercizio a {{fromBpm}} BPM all'inizio e a {{toBpm}} BPM più di recente."
       },
       "minutes": {
-        "perSession": "Your last {{sessions}} Sessions had {{now}} minutes played in Takes each, on average; the {{sessions}} before, {{then}}."
+        "perSession": "Le tue ultime {{sessions}} sessioni avevano in media {{now}} minuti suonati nei take ciascuna; le {{sessions}} precedenti, {{then}}."
       }
     },
     "evidence": {
-      "oneExercise": "From {{count}} Takes · {{from}} to {{to}}",
-      "exercises": "From {{count}} Takes on {{exercises}} Exercises · {{from}} to {{to}}"
+      "oneExercise": "Take: {{count}} · da {{from}} a {{to}}",
+      "exercises": "Take: {{count}} su {{exercises}} esercizi · da {{from}} a {{to}}"
+    },
+    "ui": {
+      "tabsLabel": "Coach",
+      "tabAsk": "Chiedi",
+      "tabNotebook": "Taccuino",
+      "noticedTitle": "Cosa ho notato",
+      "goalTitle": "Verso cosa lavori",
+      "loading": "Un momento: leggo gli appunti del coach.",
+      "noticedUnreadable": "L'elenco delle righe che hai escluso non si è potuto leggere, quindi stavolta non viene mostrata nessuna riga. Ogni take è ancora salvato.",
+      "tooFewTakes": "Mi servono cinque take prima di dire qualcosa qui. Take finora: {{count}}. Escludi una riga e smetto di usarla per 30 giorni.",
+      "nothingYet": "Per ora non risalta nulla. Take letti: {{count}}. Una riga compare qui quando la stessa cosa si ripresenta in cinque take o più.",
+      "leaveOutHint": "Escludi una riga e smetto di usarla per 30 giorni.",
+      "leaveOut": "Escludi",
+      "leftOut": "Esclusa per 30 giorni. Ogni take è conservato.",
+      "undo": "Annulla",
+      "leftOutNotRead": "Non esclusa: stavolta l'elenco delle righe escluse non si è potuto leggere.",
+      "notSaved": "Questo vale finché Yames non si chiude: non si è potuto salvare.",
+      "sessionNote": "In una sessione, qui si vede solo ciò che era salvato prima dell'inizio della sessione.",
+      "goalSaid": "Hai detto · {{date}}",
+      "goalSaidUndated": "Hai detto",
+      "goalEdit": "Modifica",
+      "goalAdd": "Aggiungi un obiettivo",
+      "goalNone": "Ancora nessun obiettivo.",
+      "goalUnreadable": "Stavolta il tuo obiettivo non si è potuto leggere, quindi non viene mostrato e non si può cambiare qui.",
+      "goalQuestion": "Verso cosa lavori?",
+      "goalHint": "Un brano, un tempo, uno stile, solo suonare, o parole tue.",
+      "goalInputLabel": "Il tuo obiettivo",
+      "goalSave": "Salva",
+      "goalCancel": "Annulla",
+      "goalChoice": {
+        "song": "Un brano",
+        "tempo": "Un tempo",
+        "style": "Uno stile",
+        "justPlaying": "Solo suonare"
+      },
+      "goalStarter": {
+        "song": "Suonare il brano",
+        "tempo": "Suonare pulito a",
+        "style": "Suonare nello stile di",
+        "justPlaying": "Solo suonare"
+      },
+      "notNow": "Non ora",
+      "notNowDone": "Non ora. Non lo chiederò di nuovo per almeno 7 giorni. Impostazioni → Coach di pratica → Suggerimenti disattiva domande come questa.",
+      "notNowNotRead": "Non salvato: stavolta gli appunti del coach non si sono potuti leggere.",
+      "footer": "Tutto ciò che c'è qui viene dai tuoi take salvati, o è qualcosa che hai scritto tu."
+    },
+    "suggestions": {
+      "label": "Suggerimenti",
+      "hint": "Se il coach propone qualcosa da solo, come la domanda sul tuo obiettivo. Chiedi e il Taccuino ci sono sempre.",
+      "on": "Attivi",
+      "asked": "Solo quando chiedo",
+      "unreadable": "Stavolta la tua scelta non si è potuta leggere; premerne una la salva."
     }
   }
 }

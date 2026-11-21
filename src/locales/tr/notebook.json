@@ -1,48 +1,100 @@
 {
   "notebook": {
     "noticed": {
-      "tempoEvenness": "At {{fast}} BPM your Takes were {{fastScore}}% even; at {{slow}} BPM, {{slowScore}}%.",
+      "tempoEvenness": "{{fast}} BPM'de denemelerin %{{fastScore}} düzenliydi; {{slow}} BPM'de %{{slowScore}}.",
       "lean": {
         "first": {
-          "late": "The first bar of the pattern sat late against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured.",
-          "early": "The first bar of the pattern sat early against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured."
+          "late": "Kalıbın ilk ölçüsü geri kalanına göre geç kaldı: ölçülebildiği en son {{count}} denemenin {{hits}} tanesinde.",
+          "early": "Kalıbın ilk ölçüsü geri kalanına göre erken kaldı: ölçülebildiği en son {{count}} denemenin {{hits}} tanesinde."
         },
         "last": {
-          "late": "The last bar of the pattern sat late against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured.",
-          "early": "The last bar of the pattern sat early against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured."
+          "late": "Kalıbın son ölçüsü geri kalanına göre geç kaldı: ölçülebildiği en son {{count}} denemenin {{hits}} tanesinde.",
+          "early": "Kalıbın son ölçüsü geri kalanına göre erken kaldı: ölçülebildiği en son {{count}} denemenin {{hits}} tanesinde."
         }
       },
       "place": {
         "afterHeld": {
-          "late": "Bars where a note follows a held one sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars where a note follows a held one sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars where a note follows a held one sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars where a note follows a held one sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "Tutulan bir notanın ardından nota gelen ölçüler geri kalanına göre geç kaldı: bu tür ölçüler olan ve ölçülebilen en son {{count}} denemenin {{hits}} tanesinde.",
+          "early": "Tutulan bir notanın ardından nota gelen ölçüler geri kalanına göre erken kaldı: bu tür ölçüler olan ve ölçülebilen en son {{count}} denemenin {{hits}} tanesinde.",
+          "lateOne": "{{exercise}} içinde, tutulan bir notanın ardından nota gelen ölçüler geri kalanına göre geç kaldı: bunun ölçülebildiği en son {{count}} denemesinin {{hits}} tanesinde.",
+          "earlyOne": "{{exercise}} içinde, tutulan bir notanın ardından nota gelen ölçüler geri kalanına göre erken kaldı: bunun ölçülebildiği en son {{count}} denemesinin {{hits}} tanesinde."
         },
         "openString": {
-          "late": "Bars with an open string in them sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars with an open string in them sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars with an open string in them sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars with an open string in them sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "İçinde açık tel olan ölçüler geri kalanına göre geç kaldı: bu tür ölçüler olan ve ölçülebilen en son {{count}} denemenin {{hits}} tanesinde.",
+          "early": "İçinde açık tel olan ölçüler geri kalanına göre erken kaldı: bu tür ölçüler olan ve ölçülebilen en son {{count}} denemenin {{hits}} tanesinde.",
+          "lateOne": "{{exercise}} içinde, içinde açık tel olan ölçüler geri kalanına göre geç kaldı: bunun ölçülebildiği en son {{count}} denemesinin {{hits}} tanesinde.",
+          "earlyOne": "{{exercise}} içinde, içinde açık tel olan ölçüler geri kalanına göre erken kaldı: bunun ölçülebildiği en son {{count}} denemesinin {{hits}} tanesinde."
         },
         "shift": {
-          "late": "Bars with a position shift in them sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars with a position shift in them sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars with a position shift in them sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars with a position shift in them sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "İçinde pozisyon değişimi olan ölçüler geri kalanına göre geç kaldı: bu tür ölçüler olan ve ölçülebilen en son {{count}} denemenin {{hits}} tanesinde.",
+          "early": "İçinde pozisyon değişimi olan ölçüler geri kalanına göre erken kaldı: bu tür ölçüler olan ve ölçülebilen en son {{count}} denemenin {{hits}} tanesinde.",
+          "lateOne": "{{exercise}} içinde, içinde pozisyon değişimi olan ölçüler geri kalanına göre geç kaldı: bunun ölçülebildiği en son {{count}} denemesinin {{hits}} tanesinde.",
+          "earlyOne": "{{exercise}} içinde, içinde pozisyon değişimi olan ölçüler geri kalanına göre erken kaldı: bunun ölçülebildiği en son {{count}} denemesinin {{hits}} tanesinde."
         }
       },
       "tempoPlayed": {
-        "named": "You played {{exercise}} at {{fromBpm}} BPM at first and at {{toBpm}} BPM most recently.",
-        "unnamed": "You played one Exercise at {{fromBpm}} BPM at first and at {{toBpm}} BPM most recently."
+        "named": "{{exercise}} alıştırmasını önce {{fromBpm}} BPM'de, en son {{toBpm}} BPM'de çaldın.",
+        "unnamed": "Bir alıştırmayı önce {{fromBpm}} BPM'de, en son {{toBpm}} BPM'de çaldın."
       },
       "minutes": {
-        "perSession": "Your last {{sessions}} Sessions had {{now}} minutes played in Takes each, on average; the {{sessions}} before, {{then}}."
+        "perSession": "Son {{sessions}} oturumunun her birinde denemelerde ortalama {{now}} dakika çalındı; ondan önceki {{sessions}} oturumda {{then}}."
       }
     },
     "evidence": {
-      "oneExercise": "From {{count}} Takes · {{from}} to {{to}}",
-      "exercises": "From {{count}} Takes on {{exercises}} Exercises · {{from}} to {{to}}"
+      "oneExercise": "{{count}} deneme · {{from}} ile {{to}} arası",
+      "exercises": "{{exercises}} alıştırmadan {{count}} deneme · {{from}} ile {{to}} arası"
+    },
+    "ui": {
+      "tabsLabel": "Koç",
+      "tabAsk": "Sor",
+      "tabNotebook": "Defter",
+      "noticedTitle": "Fark ettiklerim",
+      "goalTitle": "Neye doğru çalışıyorsun",
+      "loading": "Bir saniye: koçun notları okunuyor.",
+      "noticedUnreadable": "Dışarıda bıraktığın satırların listesi okunamadı, bu yüzden bu sefer hiçbir satır gösterilmiyor. Her deneme hâlâ saklanıyor.",
+      "tooFewTakes": "Burada bir şey söylemeden önce beş denemeye ihtiyacım var. Şimdiye kadarki deneme: {{count}}. Bir satırı dışarıda bırakırsan 30 gün boyunca onu kullanmam.",
+      "nothingYet": "Henüz öne çıkan bir şey yok. Okunan deneme: {{count}}. Aynı şey beş veya daha fazla denemede görülünce burada bir satır belirir.",
+      "leaveOutHint": "Bir satırı dışarıda bırakırsan 30 gün boyunca onu kullanmam.",
+      "leaveOut": "Çıkar",
+      "leftOut": "30 gün dışarıda bırakıldı. Her deneme saklanıyor.",
+      "undo": "Geri al",
+      "leftOutNotRead": "Dışarıda bırakılmadı: dışarıda bırakılan satırların listesi bu sefer okunamadı.",
+      "notSaved": "Bu, Yames kapanana kadar geçerli: kaydedilemedi.",
+      "sessionNote": "Bir oturumda burada yalnızca oturum başlamadan önce saklananlar görünür.",
+      "goalSaid": "Dediğin · {{date}}",
+      "goalSaidUndated": "Dediğin",
+      "goalEdit": "Düzenle",
+      "goalAdd": "Hedef ekle",
+      "goalNone": "Henüz hedef yok.",
+      "goalUnreadable": "Hedefin bu sefer okunamadı, bu yüzden gösterilmiyor ve burada değiştirilemiyor.",
+      "goalQuestion": "Neye doğru çalışıyorsun?",
+      "goalHint": "Bir şarkı, bir tempo, bir stil, sadece çalmak ya da kendi sözlerin.",
+      "goalInputLabel": "Hedefin",
+      "goalSave": "Kaydet",
+      "goalCancel": "İptal",
+      "goalChoice": {
+        "song": "Bir şarkı",
+        "tempo": "Bir tempo",
+        "style": "Bir stil",
+        "justPlaying": "Sadece çalmak"
+      },
+      "goalStarter": {
+        "song": "Şu şarkıyı çalmak:",
+        "tempo": "Şu tempoda temiz çalmak:",
+        "style": "Şu tarzda çalmak:",
+        "justPlaying": "Sadece çalmak"
+      },
+      "notNow": "Şimdi değil",
+      "notNowDone": "Şimdi değil. En az 7 gün boyunca tekrar sormayacağım. Ayarlar → Pratik Koçu → Öneriler bunun gibi soruları kapatır.",
+      "notNowNotRead": "Kaydedilmedi: koçun notları bu sefer okunamadı.",
+      "footer": "Buradaki her şey saklanan denemelerinden gelir ya da senin yazdığın bir şeydir."
+    },
+    "suggestions": {
+      "label": "Öneriler",
+      "hint": "Koçun, hedefin hakkındaki soru gibi, kendiliğinden bir şey sunup sunmayacağı. Sor ve Defter her zaman yerinde.",
+      "on": "Açık",
+      "asked": "Yalnızca ben sorunca",
+      "unreadable": "Seçimin bu sefer okunamadı; birine basmak onu kaydeder."
     }
   }
 }

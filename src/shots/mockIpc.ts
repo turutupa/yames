@@ -804,8 +804,9 @@ function seededTake(
   };
 }
 
-function sessionSeed(seed: "first" | "returning" | "back" | "three" | "none" | "ungraded" | "slipped"): PathStoreSeed {
+function sessionSeed(seed: "first" | "returning" | "back" | "three" | "none" | "ungraded" | "slipped" | "notebook"): PathStoreSeed {
   if (seed === "first") return { states: [], takes: [], ceilings: [] };
+  if (seed === "notebook") return notebookSeed();
   // The same Takes, every one played without grading (owner, 2026-11-18).
   if (seed === "ungraded") {
     const base = sessionSeed("returning");
@@ -866,6 +867,29 @@ function sessionSeed(seed: "first" | "returning" | "back" | "three" | "none" | "
       },
     ],
   };
+}
+
+/**
+ * The Notebook's scenes (leg c4a2): two Exercises, each twice at 100 and twice
+ * at 90, less even at 100 on both (the tempo line), the five newest with their
+ * last bar late (the bar-position line). The oldest is nine days old.
+ */
+function notebookSeed(): PathStoreSeed {
+  const base = sessionSeed("returning");
+  const open = "even-eighths.open-string";
+  const four = "even-eighths.four-fingers";
+  const late = [0, 2, -3, 25];
+  const takes = [
+    seededTake(four, 100, 0.74, false, 1),
+    seededTake(open, 100, 0.76, false, 1.1),
+    seededTake(four, 100, 0.72, false, 2),
+    seededTake(open, 100, 0.74, false, 2.1),
+    seededTake(four, 90, 0.86, true, 3),
+    seededTake(four, 90, 0.84, false, 4),
+    seededTake(open, 90, 0.85, true, 5),
+    seededTake(open, 90, 0.87, true, 9),
+  ].map((t, i) => (i < 5 ? { ...t, facts: { ...(t.facts as object), lean: late } } : t));
+  return { ...base, takes };
 }
 
 /**
@@ -1118,6 +1142,8 @@ export function installShotMock(shot: Shot, theme: string): void {
   if (shot.jam?.heard) store.set("jamHear", true);
   // Played Alternate Picking, then unsubscribed from it: no Path at all.
   if (shot.session?.seed === "none") store.set("session.unsubscribed", ["alternate-picking"]);
+  // The Notebook's goal (leg c4a2), said twelve days ago.
+  if (shot.session?.seed === "notebook") store.set("coach.goal", { text: "A clean pentatonic solo at 120", at: Date.now() - 12 * DAY_MS });
   if (shot.session?.unsubscribed) store.set("session.unsubscribed", shot.session.unsubscribed);
   // A focus is kept with the day it was chosen on: the scene's is today's.
   if (shot.session?.focus) store.set("session.todayFocus", storedFocus(shot.session.focus, Date.now()));

@@ -142,10 +142,11 @@ describe("the panel", () => {
     __setAskToolsForTests(null, null);
   });
 
-  it("is only Ask: no Start, no End, no Feed or History tabs, no sections (leg c2a2)", () => {
+  it("is Ask and its Notebook only: no Start, no End, no Feed or History tabs, no sections (legs c2a2, c4a2)", () => {
     openAsk();
     const { container } = render(<AskPanel lookingAt={null} onClose={() => {}} />);
-    expect(container.querySelector("[role=tablist], [data-testid^='ask-section']")).toBeNull();
+    expect(container.querySelector("[data-testid^='ask-section']")).toBeNull();
+    expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([t("notebook.ui.tabAsk"), t("notebook.ui.tabNotebook")]);
     for (const word of ["Start", "End", "Feed", "History"]) {
       expect(screen.queryByRole("button", { name: word })).toBeNull();
       expect(screen.queryByRole("tab", { name: word })).toBeNull();
