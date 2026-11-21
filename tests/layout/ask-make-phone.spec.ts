@@ -103,6 +103,7 @@ test.describe("on a phone, the keyboard up", () => {
     // The case the defect needs: the box still has the focus from the typed line.
     expect(await boxHasFocus(page), "the box keeps the focus after a send").toBe(true);
     await go.tap();
+    const addTappedAt = Date.now();
     // The make receipt by its place: "Open Paths" below adds a receipt of its own (with its own Undo).
     const receipts = page.locator(`${ROOT} [data-testid=ask-receipt]`);
     await expect(receipts.first()).toBeVisible({ timeout: 10_000 });
@@ -117,10 +118,17 @@ test.describe("on a phone, the keyboard up", () => {
     await shot(page, "make-receipt-phone");
 
     // "Open Paths": the move retires the add's Undo, and the receipt says what does its job now.
-    await receipt.locator("[data-testid=ask-receipt-next] .ask-chip").first().tap();
+    // The chip sits about where "Add it" was. A second tap there within Chromium's double-tap window
+    // (measured by leg t2g: 350 ms gives `detail` 2, 450 ms gives 1) is the second half of a double
+    // tap, which `onePress` ignores on purpose (a double tap on "Add it" must not also open Paths).
+    // A finger's next press comes later: wait the window out, then press the chip by what it is.
+    await page.waitForTimeout(Math.max(0, 700 - (Date.now() - addTappedAt)));
+    await receipt.locator("[data-testid=ask-receipt-next] .ask-chip", { hasText: "Open Paths" }).tap();
     await expect(receipt).toBeVisible();
     await expect(receipt.locator("[data-testid=ask-undo]")).toHaveCount(0);
     await expect(receipt).toContainText("The Undo ended when you left the screen this was added on.");
+    // Paths is on screen: the receipt no longer offers to open it (leg t2g; t2d's open point 5).
+    await expect(receipt.locator("[data-testid=ask-receipt-next]")).toHaveCount(0);
     await settleAnimations(page);
     await toBottom(page);
     await makeHolds(page, "phone ended");
