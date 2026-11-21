@@ -77,6 +77,14 @@ export function useAskHost(input: AskHostInput): { panel: CoachPanel; lookingAt:
       if (latest.current.view !== "session" || !s.take) return undefined;
       return s.paths.find((p) => p.id === s.take?.pathId);
     },
+    // The Step of the plan step on screen: a Path card's source says its number (leg c2b2a).
+    step: () => {
+      const s = latest.current.session;
+      if (latest.current.view !== "session") return undefined;
+      const planned = currentStep(s.run);
+      if (!planned || planned.kind !== "exercise") return undefined;
+      return s.paths.find((p) => p.id === planned.pathId)?.steps.find((st) => st.id === planned.stepId);
+    },
     exercise: () => {
       const s = latest.current.session;
       if (latest.current.view !== "session" || !s.exercise) return undefined;

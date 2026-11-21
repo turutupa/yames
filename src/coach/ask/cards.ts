@@ -31,7 +31,7 @@ import type { CoachBlock } from "../blocks/types";
 import type { CoachContext } from "../context";
 import { takeLean } from "../rounds";
 import { biasThresholdMs, heldStretchUncrossed, takeNote, type TakeNote, type TakeReview } from "../takeNote";
-import type { Line } from "../tools/types";
+import type { Line, ToolCall } from "../tools/types";
 import type { Exercise } from "../../paths/format";
 import { NOT_GRADED } from "../../paths/metrics";
 import { displayBar, displayValue, metricKey } from "../../session/coachWords";
@@ -49,7 +49,24 @@ export type CardShape =
   | "what_changed"
   | "improving"
   | "score_made_of"
-  | "pass_mark_distance";
+  | "pass_mark_distance"
+  | PathCardShape;
+
+/** The Path, plan, theory and term cards (leg c2b2a, `pathCards.ts`). */
+export type PathCardShape =
+  | "exercise_purpose"
+  | "exercise_how"
+  | "exercise_try"
+  | "plan_why"
+  | "plan_tempo"
+  | "plan_next"
+  | "plan_skip"
+  | "plan_minutes"
+  | "plan_return"
+  | "scale_fits"
+  | "chord_notes"
+  | "pass_mark_ms"
+  | "clean_tempo";
 
 /** The way a player's question assumed the Take leaned ("am I rushing": early). */
 export type Lean = "early" | "late";
@@ -83,6 +100,13 @@ export type FactCard = {
   uncertain?: true;
   /** Its first line answers a premise the measurement contradicts (mock 15). */
   premise?: true;
+  /**
+   * A tool call the card ends in (leg c2b2a): a drawing (`show_scale`,
+   * `show_chord`) or an action's proposal (`test_out`, `set_minutes`). Ask
+   * issues it through the runner after the card; building the card changes
+   * nothing.
+   */
+  then?: ToolCall;
 };
 
 /** Why there is no card here: said as one line, never as silence. */
@@ -1023,11 +1047,27 @@ export function cardAnswer(card: FactCard, word: (l: Line) => string): ResolvedB
   for (const s of sentences) {
     const last = texts.length - 1;
     if (last >= 0 && texts[last].length + 1 + s.length <= MAX_SENTENCE) texts[last] = `${texts[last]} ${s}`;
-    else texts.push(s.length <= MAX_SENTENCE ? s : `${s.slice(0, MAX_SENTENCE - 1)}…`);
+    // A sentence longer than a block (a Path's own words, quoted whole, leg
+    // c2b2a) goes on in the next block, cut between words: never shortened.
+    else texts.push(...pieces(s));
   }
   if (texts.length === 0) return [];
   const blocks: CoachBlock[] = texts.map((text) => ({ type: "text", text }));
   return resolveCoachAnswer({ blocks }, {}, { source: card.source }).blocks;
+}
+
+/** A sentence in pieces of at most `MAX_SENTENCE` characters, cut at spaces (a word longer than that, at the limit). */
+function pieces(s: string): string[] {
+  const out: string[] = [];
+  let rest = s;
+  while (rest.length > MAX_SENTENCE) {
+    const space = rest.lastIndexOf(" ", MAX_SENTENCE);
+    const cut = space > 0 ? space : MAX_SENTENCE;
+    out.push(rest.slice(0, cut));
+    rest = rest.slice(cut).trimStart();
+  }
+  if (rest) out.push(rest);
+  return out;
 }
 
 /**

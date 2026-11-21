@@ -22,7 +22,22 @@
 import type { CoachContext } from "../context";
 import { TOOL_CATALOGUE_VERSION } from "../tools/registry";
 import { checkCall } from "../tools/run";
-import { argString, takeRunning, type ActTool, type Line, type ToolArgs, type ToolCatalogue, type ToolSpec } from "../tools/types";
+import { argNumber, argString, takeRunning, type ActTool, type Line, type ToolArgs, type ToolCatalogue, type ToolSpec } from "../tools/types";
+import {
+  chordNotesCard,
+  cleanTempo,
+  exerciseHow,
+  exercisePurpose,
+  exerciseTry,
+  passMarkMs,
+  planMinutes,
+  planNext,
+  planReturn,
+  planSkip,
+  planTempo,
+  planWhy,
+  scaleFits,
+} from "./pathCards";
 import {
   ASKABLE_METRICS,
   earlyOrLate,
@@ -49,6 +64,12 @@ export type FactCardTool = ActTool & {
   name: CardShape;
   /** The answer, or why there is none here (one line, never silence). */
   card: (args: ToolArgs, ctx: CoachContext) => FactCard | NoCard;
+  /**
+   * Reads no Take (leg c2b2a: the Path's words, the plan, theory, the app's
+   * terms): answered for a player who plays without grading too, and the card
+   * itself says why it cannot answer here.
+   */
+  readsNoTake?: true;
 };
 
 /** The card's `run` for the generic runner: its first sentence as the receipt. */
@@ -87,6 +108,8 @@ const TAKE_ARG = {
   optional: true,
   note: "Which Take: the last one played (the default).",
 } as const;
+
+const CHORD_ARG = { name: "chord", type: { kind: "query", maxLength: 16 }, note: "The chord as the player wrote it (\"F\", \"Am7\")." } as const;
 
 export const FACT_CARDS: readonly FactCardTool[] = [
   entry(
@@ -160,7 +183,58 @@ export const FACT_CARDS: readonly FactCardTool[] = [
     measuredTake,
     (_args, ctx) => passMarkDistance(ctx),
   ),
+  // Leg c2b2a: the Path, the plan, theory and the app's terms (`pathCards.ts`).
+  pathEntry("exercise_purpose", [], "What this Exercise is for, in the Path's own words.", exerciseHere, (_a, ctx) => exercisePurpose(ctx)),
+  pathEntry("exercise_how", [], "How to play this Exercise, in the Path's own words.", exerciseHere, (_a, ctx) => exerciseHow(ctx)),
+  pathEntry("exercise_try", [], "The Path's cue for the next Take: the one the last Take's measurements pick, else the Exercise's general cue.", exerciseHere, (_a, ctx) => exerciseTry(ctx)),
+  pathEntry("plan_why", [], "Why this part is in today's plan, in the plan's own reasons.", planStepRunning, (_a, ctx) => planWhy(ctx)),
+  pathEntry("plan_tempo", [], "The tempo this part was planned at and why; the tempo now when it moved.", planStepRunning, (_a, ctx) => planTempo(ctx)),
+  pathEntry("plan_next", [], "The next part of today's plan.", planStepRunning, (_a, ctx) => planNext(ctx)),
+  pathEntry("plan_skip", [], "What Test out is, ending in its proposal for the Step the player is on.", () => false, (_a, ctx) => planSkip(ctx)),
+  pathEntry(
+    "plan_minutes",
+    [{ name: "minutes", type: { kind: "integer", min: 1, max: 240 }, note: "The minutes the player has." }],
+    "The lengths today's plan comes in, ending in the proposal to change it.",
+    () => false,
+    (args, ctx) => planMinutes(ctx, argNumber(args, "minutes") ?? null),
+  ),
+  pathEntry("plan_return", [], "When the review schedule brings this Exercise back.", exerciseHere, (_a, ctx) => planReturn(ctx)),
+  pathEntry("scale_fits", [CHORD_ARG], "The scales the app's jam offers over a chord, spelled, the first drawn.", () => false, (args) => scaleFits(argString(args, "chord") ?? "")),
+  pathEntry("chord_notes", [CHORD_ARG], "The notes of a chord, spelled by the app, and its grip.", () => false, (args) => chordNotesCard(argString(args, "chord") ?? "")),
+  pathEntry(
+    "pass_mark_ms",
+    [{ name: "value", type: { kind: "integer", min: 1, max: 100 }, optional: true, note: "The percentage the player asked about." }],
+    "This Exercise's evenness pass mark in milliseconds at this tempo.",
+    gradedExerciseHere,
+    (args, ctx) => passMarkMs(ctx, argNumber(args, "value") ?? null),
+  ),
+  pathEntry("clean_tempo", [], "What a clean tempo is, and the player's own on this Exercise.", gradedExerciseHere, (_a, ctx) => cleanTempo(ctx)),
 ];
+
+function pathEntry(
+  name: CardShape,
+  args: ToolSpec["args"],
+  note: string,
+  when: (ctx: CoachContext) => boolean,
+  card: FactCardTool["card"],
+): FactCardTool {
+  return { ...entry(name, { args, note }, (ctx) => !takeRunning(ctx) && when(ctx), card), readsNoTake: true };
+}
+
+/** An Exercise on screen (its words, its cue, its schedule). */
+function exerciseHere(ctx: CoachContext): boolean {
+  return ctx.exercise !== undefined;
+}
+
+/** A graded Exercise on screen, for a graded player (the pass mark's terms). */
+function gradedExerciseHere(ctx: CoachContext): boolean {
+  return ctx.exercise !== undefined && ctx.exercise.grading === "graded" && !ungradedPlayer(ctx);
+}
+
+/** A Session running a plan step. */
+function planStepRunning(ctx: CoachContext): boolean {
+  return !!ctx.plan && !!ctx.run && ctx.plan.steps[ctx.run.stepIndex] !== undefined;
+}
 
 /** Graded, not in a Take, and an Exercise on screen (a card that reads the Exercise, not a Take). */
 export function cardAboutExercise(ctx: CoachContext): boolean {
@@ -200,6 +274,15 @@ export function runFactCard(call: unknown, ctx: CoachContext): FactCard | NoCard
   if (!checked.ok) return { line: checked.line };
   const tool = checked.call.tool as FactCardTool;
   if (takeRunning(ctx)) return { line: { key: "coachTools.why.notNow.take", values: {} } };
+  // The Path's words, the plan, theory and the app's terms read no Take: the
+  // card itself says why it cannot answer here (leg c2b2a).
+  if (tool.readsNoTake) {
+    try {
+      return tool.card(checked.call.args, ctx);
+    } catch {
+      return { line: NOT_HERE };
+    }
+  }
   if (ungradedPlayer(ctx)) return { line: UNGRADED_LINE };
   // `when` decides what is offered. Asked anyway about a Take that was not
   // caught, too short or not graded, the card answers "I didn't measure that"
@@ -217,3 +300,4 @@ export function runFactCard(call: unknown, ctx: CoachContext): FactCard | NoCard
 }
 
 const NO_TAKE: Line = { key: "ask.card.notNow.noTake", values: {} };
+const NOT_HERE: Line = { key: "ask.card.path.noExercise", values: {} };
