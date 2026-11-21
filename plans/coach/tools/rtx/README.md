@@ -43,6 +43,31 @@ Sync and gates are separate jobs on purpose (one RTX job at a time; the sha argu
 a worktree some other leg moved). A thin bundle needs its base on the RTX: after a PASS sync of X, later
 bundles may use `rtx-bundle.sh <branch> X`; `full` makes a whole-history one (~700 MB, slow).
 
+## The coach router's eval on Vulkan (leg rtx2)
+
+| File | Where it runs | What |
+|---|---|---|
+| `rtx-eval.sh` | RTX WSL (`C:\yt-coach\tools\`) | `look`, `pull <dgx-path> <dest> <sha256>`, `hash`, `build <sha>`, `eval <gguf> <label> <sha256>` |
+| `rtx-eval.ps1` | RTX Windows | `build`: pv1's toolchain + `cargo build --release --features coach-llm-vulkan --bin coach-eval` -> `C:\yt-coach\bin\coach-eval-vk.exe`; `eval`: the binary on `C:\yt-coach\evals\requests.jsonl`, nvidia-smi sampled; log `C:\yt-coach\logs\s6\` |
+| `rtx2-outcomes.sh` | DGX | cut an eval job's outcomes (printed between markers) out of `job logs` |
+| `rtx2-score.sh` | DGX (jobq, run.sh) | `score` RTX outcomes with the b5170fca snapshot's harness (alone + both chains); `cuda` the frozen CUDA binary on a GGUF |
+| `rtx2-diff.mjs` | DGX (plain node) | items whose answer differs between two outcome files, latency quantiles |
+
+```sh
+J=/home/dgx-delgado/.local/bin/job; T=/home/dgx-delgado/yames-coach-rtx2/plans/coach/tools/rtx
+# copy the eval scripts (line 0 again) and build (warm target: 1 min; needs the worktree at <sha8>)
+$J submit --name coach-<leg>-build --machine rtx --env any --ram 10G --est 30m -- bash -c 'renice -n 19 $$ >/dev/null; cd /mnt/c/yt-coach && /mnt/c/Windows/System32/OpenSSH/scp.exe -B -q dgx:$1/rtx-eval.sh dgx:$1/rtx-eval.ps1 tools/ && bash tools/rtx-eval.sh build <sha8>' _ $T
+# pull a file (refuses on a hash mismatch: the file is moved to .bad)
+$J submit --name coach-<leg>-pull --machine rtx --env any --ram 2G --est 5m -- bash /mnt/c/yt-coach/tools/rtx-eval.sh pull <dgx-path> models/<name>.gguf <sha256>
+# requests: the pipeline's heldout/alone/requests.jsonl (rendered on the DGX; the harness needs esbuild, which the RTX lacks)
+$J submit --name coach-<leg>-eval-<label> --machine rtx --env any --ram 4G --gpu 4G --est 10m -- bash /mnt/c/yt-coach/tools/rtx-eval.sh eval <name>.gguf <label> <sha256>
+$J logs coach-<leg>-eval-<label> -n 1000 > <dir>/joblog.txt; bash $T/rtx2-outcomes.sh <dir>/joblog.txt <label> > <dir>/outcomes.jsonl
+$J submit --name coach-<leg>-score-<label> --ram 3G --est 3m --cwd ~/scratch/yames-c3d/code/b5170fca -- bash ~/yames-coach-build/plans/coach/tools/run.sh bash $T/rtx2-score.sh score <label> <dir>/outcomes.jsonl
+```
+
+The first turn after a model loads on a cold Vulkan shader cache takes 5-8+ s (pipeline compile; the
+eval's 8 s deadline timed it out once). Run a quant once before measuring it, or read the second run.
+
 ## Known limits (2026-11-21)
 
 - `C:\yt-coach\wt` has **no `node_modules`**: tsc, vitest and build FAIL at once with that reason. The fix is
