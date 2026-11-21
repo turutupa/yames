@@ -120,12 +120,26 @@ describe("answerCardFor: the seam for the text box's send path", () => {
   });
 
   it("no Take to read (Songs, Jam, Today): null and nothing written, so the next answerer gets it (F6)", () => {
-    for (const screen of ["songs", "jam", "today"] as const) {
-      __setAskToolsForTests(fakeHost(), toolCtx({ screen }));
-      expect(answerCardFor("Where did I mess up?")).toBeNull();
-      expect(answerCardFor("am I rushing?")).toBeNull();
+    // Grading on and off alike (c2b1d M4): off, the card's "you're playing
+    // without grading" line would otherwise be written and keep it from the model.
+    for (const grading of ["on", "off"] as const) {
+      for (const screen of ["songs", "jam", "today"] as const) {
+        __setAskToolsForTests(fakeHost(), toolCtx({ screen, grading }));
+        expect(answerCardFor("Where did I mess up?")).toBeNull();
+        expect(answerCardFor("am I rushing?")).toBeNull();
+        expect(answerCardFor("Why didn't that count?")).toBeNull();
+        expect(answerCardFor("do you check my pick direction?")).toBeNull();
+      }
     }
     expect(getAskState().turns).toEqual([]);
+  });
+
+  it("a metric question with the Exercise on screen and no Take yet still answers (c2b1d M4)", () => {
+    const f = fixture({});
+    __setAskToolsForTests(fakeHost(), { ...f.ctx, lastTake: undefined });
+    expect(answerCardFor("do you check my pick direction?")).not.toBeNull();
+    const card = getAskState().turns[1];
+    expect(card.kind === "card" && card.card.shape).toBe("why_not_counted");
   });
 
   it("a question about another Take: null and nothing written (F6)", () => {

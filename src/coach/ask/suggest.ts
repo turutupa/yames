@@ -17,7 +17,9 @@
  *   The fact cards that can answer here, ordered by what the last Take was,
  *   never the card the thread just answered.
  *
- * At most three chips anywhere (`MAX_CHIPS`). A question chip is one question
+ * At most three chips from one place here (`MAX_CHIPS`). In Ask, card chips
+ * and the tools' chips together are at most four (`askCards.ts`
+ * `MAX_ASK_CHIPS`, review c2b1a F10), the cards first. A question chip is one question
  * shape; pressing it asks and answers in Ask.
  */
 import type { CoachContext } from "../context";

@@ -52,7 +52,7 @@ describe("where did it slip", () => {
       "measured",
     ],
     ["a clean Take", {}, ["ask.card.slip.none"], "measured"],
-    ["a Take not caught", { verdict: "notCaught" }, ["ask.card.count.notCaught"], "app"],
+    ["a Take not caught", { verdict: "notCaught", noCatchReason: "tooFewHeard" }, ["ask.card.count.notCaught.tooFewHeard"], "app"],
     ["a Take too short", { verdict: "tooShort" }, ["ask.card.tooShort"], "measured"],
   ];
   it.each(rows)("%s", (_name, shape, keys, source) => {
@@ -64,15 +64,28 @@ describe("where did it slip", () => {
 
   it("says which way the notes there leaned, as the note does", () => {
     const c = card(whereSlipped(fixture({ failOn: "timingEvenness", slipped: [0, 4], deviation: (bar) => (bar % 4 === 0 ? 40 : 0) }).ctx));
-    expect(c.lines.map((l) => l.key)).toContain("session.note.direction.late");
-    expect(text(c)).toMatch(/^Bar 1 of the tune slipped on 2 of 3 rounds\. The notes there landed late\.$/);
+    expect(c.lines.map((l) => l.key)).toContain("ask.card.direction.late");
+    // Relative to the rest of the Take, as the lean is measured (c2b1d): never "landed late".
+    expect(text(c)).toMatch(/^Bar 1 of the tune slipped on 2 of 3 rounds\. The notes there sat later than the rest of the Take\.$/);
   });
 
   it("below the pass mark with no bar slipped: says what decided it, not only that no bar slipped (F4)", () => {
     const c = card(whereSlipped(fixture({ failOn: "notesHeard" }).ctx));
     expect(c.lines[0].key).toBe("ask.card.slip.none");
     expect(c.lines).toHaveLength(2);
-    expect(c.lines[1].key).toMatch(/^session\.coach\.below\./);
+    expect(said(c.lines[1])).toMatch(/^ask\.card\.below\.heard\(take=2,heard=48,expected=60,bar=\d+\)$/);
+  });
+
+  it("below the pass mark with no bar-by-bar data: a lead line says so (c2b1d L3)", () => {
+    const { ctx, outcome } = fixture({ failOn: "timingEvenness", slipped: [0, 4] });
+    const noBars = { ...ctx, lastTake: { ...outcome, measures: { ...outcome.measures, perBar: undefined } } };
+    const c = card(whereSlipped(noBars));
+    expect(c.lines.map((l) => l.key)).toEqual(["ask.card.below.even", "ask.card.slip.noBars"]);
+    expect(text(c)).toMatch(/^Take 2 was \d+% even, against a pass mark of \d+%\. I didn't measure Take 2 bar by bar/);
+    // A pass with no bar-by-bar data: no below line.
+    const passed = fixture({});
+    const clean = { ...passed.ctx, lastTake: { ...passed.outcome, measures: { ...passed.outcome.measures, perBar: undefined } } };
+    expect(card(whereSlipped(clean)).lines.map((l) => l.key)).toEqual(["ask.card.slip.noBars"]);
   });
 
   it("a Take stopped in its first bar: 'after 1 bar' (F9)", () => {
@@ -124,8 +137,41 @@ describe("early or late, with the premise answered first (mock 15)", () => {
     const c = card(earlyOrLate(fixture({ failOn: "timingEvenness", slipped: [0, 4], deviation: (bar) => (bar % 4 === 0 ? 40 : 0) }).ctx, "early"));
     // The place's own bar is said once, by the place (F7).
     expect(text(c)).toBe(
-      "In Take 2 the bars that leaned sat later than the rest of it, not earlier. A lean the whole Take shares is something I don't measure. Bar 1 of the tune slipped on 2 of 3 rounds. The notes there landed late.",
+      "In Take 2 the bars that leaned sat later than the rest of it, not earlier. A lean the whole Take shares is something I don't measure. Bar 1 of the tune slipped on 2 of 3 rounds. The notes there sat later than the rest of the Take.",
     );
+  });
+
+  it("no correction when the bars that leaned disagree: the place late, another bar early (c2b1d H2)", () => {
+    // Bar 3 of the tune slipped on round 1 only, its notes there +30 ms; bar 1 sat -25 ms on every round.
+    const deviation = (bar: number) => (bar === 2 ? 30 : bar % 4 === 0 ? -25 : 0);
+    const f = fixture({ failOn: "timingEvenness", slipped: [2], deviation });
+    // The fixture really has both: bar 1 leans early past the threshold, and the place's notes late.
+    expect(takeLean(f.review, 4)![0]!).toBeLessThanOrEqual(-biasThresholdMs(BPM));
+    const c = card(earlyOrLate(f.ctx, "early"));
+    expect(c.premise).toBeUndefined();
+    const keys = c.lines.map((l) => l.key);
+    expect(keys.filter((k) => k.startsWith("ask.card.lean.premise"))).toEqual([]);
+    expect(keys).toContain("ask.card.direction.late");
+    expect(c.lines.map(said)).toContain("ask.card.lean.bar.early(bar=1,ms=25)");
+    // Asked the other way round, still no correction.
+    expect(card(earlyOrLate(f.ctx, "late")).premise).toBeUndefined();
+  });
+
+  it("nothing leaned: says what was checked, on how many bars, relative to the rest (c2b1d M1)", () => {
+    const c = card(earlyOrLate(fixture({ deviation: () => 0 }).ctx));
+    expect(said(c.lines[0])).toBe("ask.card.lean.none(take=2,ms=16,measured=4,bars=4)");
+    expect(text(c)).toBe("In Take 2, none of the bars I could measure (4 of 4) sat more than 16 ms earlier or later than the rest of it.");
+    // Two bars never measured: they are not counted as "didn't lean".
+    const some = card(earlyOrLate(fixture({ deviation: null, stored: { lean: [null, 3, null, -2] } }).ctx));
+    expect(said(some.lines[0])).toBe("ask.card.lean.none(take=2,ms=16,measured=2,bars=4)");
+  });
+
+  it("a stored lean with no bar measured: not measured, never 'none leaned' (c2b1d M1)", () => {
+    for (const premise of [null, "early", "late"] as const) {
+      const c = card(earlyOrLate(fixture({ deviation: null, stored: { lean: [null, null, null, null] } }).ctx, premise));
+      expect(c.lines.map((l) => l.key)).toEqual(["ask.card.lean.notMeasured"]);
+      expect(c.uncertain).toBe(true);
+    }
   });
 
   it("every premise line is relative to the Take and names what is not measured (F2)", () => {
@@ -154,7 +200,7 @@ describe("early or late, with the premise answered first (mock 15)", () => {
     const lean = takeLean(f.review, 4)!;
     expect(lean[0]!).toBeLessThanOrEqual(-biasThresholdMs(BPM));
     const c = card(earlyOrLate(f.ctx));
-    expect(c.lines.map((l) => l.key)).toContain("session.note.direction.late");
+    expect(c.lines.map((l) => l.key)).toContain("ask.card.direction.late");
     expect(c.lines.filter((l) => l.key.startsWith("ask.card.lean.bar.") && l.values.bar === 1)).toEqual([]);
   });
 
@@ -173,14 +219,23 @@ describe("early or late, with the premise answered first (mock 15)", () => {
 
 describe("why didn't that count", () => {
   const rows: Array<[string, Parameters<typeof fixture>[0], string, string[], "measured" | "app"]> = [
-    ["a Take not caught", { verdict: "notCaught" }, "take", ["ask.card.count.notCaught", "session.noCatch.*"], "app"],
+    // c2b1d H1: one sentence per reason the scorer gives, and no hint after it (L2).
+    ["a Take not caught: nothing heard", { verdict: "notCaught", noCatchReason: "nothingHeard", heard: 0 }, "take", ["ask.card.count.notCaught.nothingHeard"], "app"],
+    ["a Take not caught: too few heard", { verdict: "notCaught", noCatchReason: "tooFewHeard" }, "take", ["ask.card.count.notCaught.tooFewHeard"], "app"],
+    ["a Take not caught: more extras than hits", { verdict: "notCaught", noCatchReason: "tooManyExtras", heard: 52, extras: 70 }, "take", ["ask.card.count.notCaught.tooManyExtras"], "app"],
+    ["a Take not caught: the detector unsure", { verdict: "notCaught", noCatchReason: "lowConfidence", heard: 60 }, "take", ["ask.card.count.notCaught.lowConfidence"], "app"],
+    ["a Take not caught: no reason given", { verdict: "notCaught" }, "take", ["ask.card.count.notCaught.unknown"], "app"],
     ["a Take too short", { verdict: "tooShort" }, "take", ["ask.card.count.tooShort"], "measured"],
     ["the Take for the eyes", { ungraded: "eyes" }, "take", ["ask.card.count.ungraded.eyes"], "app"],
     ["a pass: it did count (the premise, first)", {}, "take", ["ask.card.count.passed"], "measured"],
-    ["below the pass mark: it counted, and what decided it", { failOn: "timingEvenness", slipped: [0, 4] }, "take", ["ask.card.count.below", "session.coach.below.even"], "measured"],
-    ["marked not fair", { failOn: "timingEvenness", slipped: [0, 4], stored: { fair: "no" } }, "take", ["ask.card.count.below", "session.coach.below.even", "ask.card.count.unfair"], "measured"],
+    ["below the pass mark: it is kept, and what decided it", { failOn: "timingEvenness", slipped: [0, 4] }, "take", ["ask.card.count.below", "ask.card.below.even"], "measured"],
+    ["below with notes missing too", { failOn: "notesHeard", slipped: [0, 4] }, "take", ["ask.card.count.below", "ask.card.below.heard"], "measured"],
+    ["marked not fair", { failOn: "timingEvenness", slipped: [0, 4], stored: { fair: "no" } }, "take", ["ask.card.count.below", "ask.card.below.even", "ask.card.count.unfair"], "measured"],
     // F1: grading on, the grade said "ungraded": the Exercise or this tempo is the player's to check.
     ["an Exercise the player checks themselves, grading on", { exercise: { ...TUNE, grading: "selfChecked" } }, "take", ["ask.card.count.ungraded.selfChecked"], "app"],
+    // c2b1d M2: a key per grading mode.
+    ["a practice-only Exercise, grading on", { exercise: { ...TUNE, grading: "practiceOnly" } }, "take", ["ask.card.count.ungraded.practiceOnly"], "app"],
+    ["an Exercise graded at its landings, grading on", { exercise: { ...TUNE, grading: "landings" } }, "take", ["ask.card.count.ungraded.landings"], "app"],
     [
       "a tempo the player checks themselves, grading on",
       { exercise: { ...TUNE, tempo: { ...TUNE.tempo, rungs: [...TUNE.tempo.rungs.filter((r) => r.bpm !== BPM), { bpm: BPM, grading: "selfChecked" }] } } },
@@ -189,7 +244,8 @@ describe("why didn't that count", () => {
       "app",
     ],
     // F3: a pass that held 5 bars in a row did not move the clean tempo: say so, and how far it got.
-    ["a pass without a clean tempo", { slipped: [0, 1, 2, 3, 4] }, "take", ["ask.card.count.passed", "ask.card.count.notClean"], "measured"],
+    // Its held stretch (from bar 1) has crossed bars inside it: the run's length is not said (c2b1d L1).
+    ["a pass without a clean tempo", { slipped: [0, 1, 2, 3, 4] }, "take", ["ask.card.count.passed", "ask.card.count.notCleanPlain"], "measured"],
     ["pick direction: not graded", {}, "pickDirection", ["ask.card.notMeasured.pickDirection"], "app"],
     ["tone: not graded", {}, "tone", ["ask.card.notMeasured.tone"], "app"],
   ];
@@ -207,7 +263,8 @@ describe("why didn't that count", () => {
     const c = card(whyNotCounted(ctx, "pitch"));
     expect(c.lines[0].key).toBe(checksNotes ? "ask.card.count.pitchGraded" : "ask.card.notMeasured.pitch");
     const timed = { ...exercise, passBars: exercise.passBars.filter((b) => b.metric !== "noteIdentity") };
-    const off = card(whyNotCounted({ ...ctx, exercise: timed }, "pitch"));
+    // No Take to read the pitches of (c2b1d: with one, the measured share is said; see below).
+    const off = card(whyNotCounted({ ...ctx, exercise: timed, lastTake: undefined }, "pitch"));
     expect(off.lines.map((l) => l.key)).toEqual(["ask.card.notMeasured.pitch"]);
     expect(off.uncertain).toBe(true);
   });
@@ -221,14 +278,54 @@ describe("why didn't that count", () => {
     }
   });
 
-  it("the clean-tempo line carries the held stretch and what it needs (F3)", () => {
-    const c = card(whyNotCounted(fixture({ slipped: [0, 1, 2, 3, 4] }).ctx));
-    expect(c.lines.map(said)[1]).toBe("ask.card.count.notClean(take=2,held=5,need=8)");
+  it("the answer for one fixture Take, in English", () => {
+    const c = card(whyNotCounted(fixture({ verdict: "notCaught", noCatchReason: "tooFewHeard" }).ctx));
+    expect(text(c)).toBe("I couldn't grade Take 2: I heard 9 of 60 notes, too few to grade, so it doesn't count against you.");
   });
 
-  it("the answer for one fixture Take, in English", () => {
-    const c = card(whyNotCounted(fixture({ verdict: "notCaught" }).ctx));
-    expect(english(c.lines[0])).toBe("I didn't measure Take 2: I heard 9 of 60 notes, too few to grade, so it doesn't count against you.");
+  it("a Take not caught says 'too few' only when too few were heard, and nothing after the reason (c2b1d H1)", () => {
+    const tv = card(whyNotCounted(fixture({ verdict: "notCaught", noCatchReason: "tooManyExtras", heard: 52, extras: 70 }).ctx));
+    expect(text(tv)).toBe("I couldn't grade Take 2: I heard more notes that weren't written than ones that were, so it doesn't count against you.");
+    const unsure = card(whyNotCounted(fixture({ verdict: "notCaught", noCatchReason: "lowConfidence", heard: 60 }).ctx));
+    expect(text(unsure)).not.toMatch(/too few/);
+    const unknown = card(whyNotCounted(fixture({ verdict: "notCaught" }).ctx));
+    expect(text(unknown)).toBe("I couldn't grade Take 2.");
+    // The same on the other two cards: the reason, and nothing after it.
+    for (const c of [card(whereSlipped(fixture({ verdict: "notCaught", noCatchReason: "tooManyExtras", heard: 52, extras: 70 }).ctx)), card(earlyOrLate(fixture({ verdict: "notCaught", noCatchReason: "tooManyExtras" }).ctx, "early"))]) {
+      expect(c.lines.map((l) => l.key)).toEqual(["ask.card.count.notCaught.tooManyExtras"]);
+    }
+  });
+
+  it("a Take below the pass mark is kept, never 'did count' (F11)", () => {
+    const c = card(whyNotCounted(fixture({ failOn: "timingEvenness", slipped: [0, 4] }).ctx));
+    expect(english(c.lines[0])).toBe("Take 2 is kept, below the pass mark at 90 BPM.");
+    expect(text(c)).not.toMatch(/did count|watch the frets|idle strings|Same notes, same tempo/);
+  });
+
+  it("practice only: never 'one you check yourself' (c2b1d M2)", () => {
+    const c = card(whyNotCounted(fixture({ exercise: { ...TUNE, grading: "practiceOnly" } }).ctx));
+    expect(text(c)).toBe("I didn't measure Take 2: this Exercise is practice only, not graded.");
+  });
+
+  it("the longest run is named only when no bar inside it is crossed on the strip (c2b1d L1)", () => {
+    // A pass whose held stretch (8 bars from bar 1, pooled over windows) has a crossed bar inside it.
+    const f = fixture({ slipped: [3] });
+    const pass = { ...f.outcome.measures.pass!, heldBars: 6, heldFromBar: 0 };
+    const crossed = { ...f.ctx, lastTake: { ...f.outcome, grade: { ...f.outcome.grade, cleanBpm: null }, measures: { ...f.outcome.measures, pass } } };
+    const c = card(whyNotCounted(crossed));
+    expect(c.lines.map((l) => l.key)).toEqual(["ask.card.count.passed", "ask.card.count.notCleanPlain"]);
+    // The same run with no crossed bar inside it: the number is said.
+    const g = fixture({ slipped: [7] });
+    const clean = { ...g.ctx, lastTake: { ...g.outcome, grade: { ...g.outcome.grade, cleanBpm: null }, measures: { ...g.outcome.measures, pass: { ...g.outcome.measures.pass!, heldBars: 6, heldFromBar: 0 } } } };
+    expect(card(whyNotCounted(clean)).lines.map(said)).toContain("ask.card.count.notClean(take=2,held=6,need=8)");
+  });
+
+  it("pitch reported but not graded: says so, with the measured share, never 'I didn't measure that' (c2b1d)", () => {
+    const { ctx, exercise } = fixture({});
+    const timed = { ...exercise, passBars: exercise.passBars.filter((b) => b.metric !== "noteIdentity") };
+    const c = card(whyNotCounted({ ...ctx, exercise: timed }, "pitch"));
+    expect(c.lines.map((l) => l.key)).toEqual(["ask.card.count.pitchNotGraded", "ask.card.count.rightNotes"]);
+    expect(c.source).toEqual({ kind: "measured", take: 2 });
   });
 });
 
@@ -296,5 +393,5 @@ it("fixture tempo is the one the cards report", () => {
 it("a stored Take's single notes: the review is gone, the card does not guess", () => {
   const c = card(whereSlipped(fixture({ failOn: "timingEvenness", slipped: [0, 4], deviation: null, findings: [finding("consistentMiss", [0, 0])] }).ctx));
   // The strip still says where; with no per-note timing, no direction is claimed.
-  expect(c.lines.map((l) => l.key)).not.toContain("session.note.direction.late");
+  expect(c.lines.map((l) => l.key)).not.toContain("ask.card.direction.late");
 });

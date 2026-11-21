@@ -75,30 +75,58 @@
           "early": "Bar {{bar}} of the tune: {{ms}} ms earlier than the rest of the Take.",
           "late": "Bar {{bar}} of the tune: {{ms}} ms later than the rest of the Take."
         },
-        "none": "No bar of Take {{take}} leaned early or late by more than {{ms}} ms.",
-        "notMeasured": "I didn't measure which way Take {{take}} leaned: there is no note-by-note timing for it."
+        "none": "In Take {{take}}, none of the bars I could measure ({{measured}} of {{bars}}) sat more than {{ms}} ms earlier or later than the rest of it.",
+        "notMeasured": "I didn't measure which way Take {{take}} leaned: no bar of it had enough note-by-note timing to tell."
+      },
+      "direction": {
+        "early": "The notes there sat earlier than the rest of the Take.",
+        "late": "The notes there sat later than the rest of the Take.",
+        "earlyOpen": "The open {{note}}s there sat earlier than the rest of the Take.",
+        "lateOpen": "The open {{note}}s there sat later than the rest of the Take.",
+        "earlyNote": "The {{note}}s at fret {{fret}} there sat earlier than the rest of the Take.",
+        "lateNote": "The {{note}}s at fret {{fret}} there sat later than the rest of the Take."
+      },
+      "below": {
+        "plain": "Take {{take}} was below the pass mark at {{bpm}} BPM.",
+        "even": "Take {{take}} was {{value}}% even, against a pass mark of {{bar}}%.",
+        "evenSome": "Take {{take}} was {{value}}% even, against a pass mark of {{bar}}%, and I heard {{heard}} of {{expected}} notes.",
+        "heard": "I heard {{heard}} of {{expected}} notes in Take {{take}}, against a pass mark of {{bar}}%.",
+        "extras": "Take {{take}} had more extra notes than the pass mark allows: {{bar}} or fewer in four bars.",
+        "accents": "In Take {{take}}, {{value}}% of the marked accents came out louder than the notes around them, against a pass mark of {{bar}}%.",
+        "notes": "In Take {{take}}, {{value}}% of the notes I could pitch were the written ones, against a pass mark of {{bar}}%."
       },
       "count": {
         "passed": "Take {{take}} did count: it met the pass mark at {{bpm}} BPM.",
-        "below": "Take {{take}} did count, as a Take below the pass mark at {{bpm}} BPM.",
-        "notCaught": "I didn't measure Take {{take}}: I heard {{heard}} of {{expected}} notes, too few to grade, so it doesn't count against you.",
+        "below": "Take {{take}} is kept, below the pass mark at {{bpm}} BPM.",
+        "notCaught": {
+          "nothingHeard": "I couldn't grade Take {{take}}: I heard none of its notes, so it doesn't count against you.",
+          "tooFewHeard": "I couldn't grade Take {{take}}: I heard {{heard}} of {{expected}} notes, too few to grade, so it doesn't count against you.",
+          "tooManyExtras": "I couldn't grade Take {{take}}: I heard more notes that weren't written than ones that were, so it doesn't count against you.",
+          "lowConfidence": "I couldn't grade Take {{take}}: I wasn't sure enough of the notes I heard, so it doesn't count against you.",
+          "unknown": "I couldn't grade Take {{take}}."
+        },
         "tooShort": "Take {{take}} stopped after {{bars}} bar, too short to judge, so it doesn't count either way.",
         "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too short to judge, so it doesn't count either way.",
         "notClean": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and the longest run in Take {{take}} was {{held}}.",
         "notCleanPlain": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and Take {{take}} didn't have them.",
         "unfair": "You marked this grade as not fair. It is kept as measured, with your answer beside it.",
         "pitchGraded": "The pitch of your notes is part of this Exercise's grade.",
+        "pitchNotGraded": "The pitch of your notes isn't part of this Exercise's grade.",
+        "rightNotes": "In Take {{take}}, {{value}}% of the {{base}} notes I could pitch were the written ones.",
+        "notesUnchecked": "I couldn't check the pitches in Take {{take}}.",
         "ungraded": {
           "eyes": "I didn't measure Take {{take}}: it was the one for your eyes, so nothing was graded.",
           "chosen": "I didn't measure Take {{take}}: you chose to just play it, so nothing was graded.",
           "inputOff": "I didn't measure Take {{take}}: the input wasn't on, so nothing was graded.",
           "gradingOff": "I didn't measure Take {{take}}: grading is off, so nothing was graded.",
           "selfChecked": "I didn't measure Take {{take}}: this Exercise is one you check yourself, so nothing was graded.",
-          "selfCheckedTempo": "I didn't measure Take {{take}}: at {{bpm}} BPM this Exercise is one you check yourself, so nothing was graded."
+          "selfCheckedTempo": "I didn't measure Take {{take}}: at {{bpm}} BPM this Exercise is one you check yourself, so nothing was graded.",
+          "practiceOnly": "I didn't measure Take {{take}}: this Exercise is practice only, not graded.",
+          "landings": "I didn't measure Take {{take}}: this Exercise isn't graded yet."
         }
       },
       "notMeasured": {
-        "pitch": "I didn't measure that. This Exercise times your notes and doesn't check their pitch.",
+        "pitch": "I didn't measure that. The pitch of your notes isn't part of this Exercise's grade.",
         "pickDirection": "I didn't measure that. The app has only sound, and a downstroke and an upstroke can sound alike.",
         "muting": "I didn't measure that. The app can't tell a muted string from a loud one next to it.",
         "posture": "I didn't measure that. The app has no picture of you.",

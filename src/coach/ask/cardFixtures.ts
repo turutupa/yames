@@ -3,7 +3,7 @@
  * `takeNote.test.ts` builds them (a real Exercise of Alternate Picking, a real
  * Take plan, `gradeTake` for the grade), and a coach context around one.
  */
-import type { ScorerPassResult } from "../../ipc";
+import type { NoCatchReason, ScorerPassResult } from "../../ipc";
 import type { SongAttemptReview } from "../../containers/songs/review/useSongAttempt";
 import type { Exercise } from "../../paths/format";
 import { gradeTake } from "../../session/grade";
@@ -33,6 +33,11 @@ export type FixtureShape = {
   findings?: Finding[];
   takeNumber?: number;
   verdict?: "notCaught" | "tooShort";
+  /** The scorer's reason for a Take not caught (absent: none given). */
+  noCatchReason?: NoCatchReason;
+  /** Heard and extra notes, when the fixture needs other counts than its own. */
+  heard?: number;
+  extras?: number;
   ungraded?: UngradedWhy;
   /** What the stored row of this Take keeps (`fair`, `lean`); absent: no stored row. */
   stored?: TakeFacts;
@@ -83,8 +88,9 @@ export function fixture(shape: FixtureShape = {}, over: Partial<CoachContext> = 
   const notCaught = shape.verdict === "notCaught";
   const measures: TakeMeasures = {
     expected: 60,
-    heard: notCaught ? 9 : shape.failOn === "notesHeard" ? 48 : 60,
-    extras: 0,
+    heard: shape.heard ?? (notCaught ? 9 : shape.failOn === "notesHeard" ? 48 : 60),
+    extras: shape.extras ?? 0,
+    ...(shape.noCatchReason ? { noCatchReason: shape.noCatchReason } : {}),
     evenness: 0.9,
     accent: null,
     noteIdentity: 0.97,

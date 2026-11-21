@@ -13,9 +13,10 @@
  * pressed and nothing can be typed.
  */
 import type { FactCard, CardShape } from "../../coach/ask/cards";
-import { isCard, ungradedPlayer } from "../../coach/ask/cards";
+import { isCard, lastTakeHere, ungradedPlayer } from "../../coach/ask/cards";
 import { runFactCard } from "../../coach/ask/intents";
-import { matchCard } from "../../coach/ask/match";
+import { matchCard, type CardCall } from "../../coach/ask/match";
+import type { CoachContext } from "../../coach/context";
 import { cardChipsFor, type ChipChoice } from "../../coach/ask/suggest";
 import type { ToolCall } from "../../coach/tools/types";
 import { appendAskTurn, askTurnId, type AskTurn } from "./askStore";
@@ -58,9 +59,22 @@ export function askCard(call: ToolCall, said: string): string {
 export function answerCardFor(text: string): string | null {
   const call = matchCard(text);
   if (!call) return null;
+  // Checked before the card runs, grading on or off: with grading off the card
+  // answers "you're playing without grading" before it looks for a Take, and
+  // that line on Songs, Jam or Today would keep the question from the model
+  // (review c2b1c M4).
+  const ctx = askToolContext();
+  if (!ctx || !readsSomethingHere(call, ctx)) return null;
   const card = cardBodyFor(call);
   if (card.shape === null && card.line.key === NO_TAKE_KEY) return null;
   return writeCard(card, text);
+}
+
+/** A card has something to read here: the last Take of the Exercise on screen, or for a metric question, the Exercise. */
+function readsSomethingHere(call: CardCall, ctx: CoachContext): boolean {
+  if (lastTakeHere(ctx)) return true;
+  const what = call.args.what;
+  return call.tool === "why_not_counted" && typeof what === "string" && what !== "take" && ctx.exercise !== undefined;
 }
 
 /** The card the thread answered last, so its chip is not offered again at once. */

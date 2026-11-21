@@ -50,6 +50,12 @@ const MATCHES: ReadonlyArray<[string, string, ToolArgs]> = [
   ["was that late?", "early_or_late", { premise: "late" }],
   ["why didn't the last take count?", "why_not_counted", {}],
   ["was I late in my last take?", "early_or_late", { premise: "late" }],
+  // The second review (c2b1c M3): a regression ("does it"), and three safe failures that are clearly this Take.
+  ["Where does it slip?", "where_slipped", {}],
+  ["Where does it fall apart?", "where_slipped", {}],
+  ["Which bar was off?", "where_slipped", {}],
+  ["Why didn't I pass?", "why_not_counted", {}],
+  ["How come that didn't count?", "why_not_counted", {}],
 ];
 
 /** Lines that must not become a card: commands, questions about something else, statements, two shapes at once. */
@@ -101,8 +107,18 @@ const NEAR_MISSES: readonly string[] = [
   "did I rush yesterday?",
   "was I rushing in the first take?",
   "why didn't the previous take count?",
-  "Did the metronome start late?",
-  "is the click late?",
+  // With "my" in them, so ABOUT_ME holds and only NOT_MY_TIMING keeps them out (review c2b1c L4).
+  "Did my metronome start late?",
+  "is my click late?",
+  // The second review (c2b1c M3): each of these matched a card it does not ask for.
+  "Is my click late?",
+  "Was my metronome late?",
+  "Why didn't this Step count towards my Path?",
+  "Am I behind everyone else?",
+  "Why do my notes sound late in the recording?",
+  "Did I rush the warm-up?",
+  "Why didn't I pass the Path?",
+  "was I late in the solo?",
 ];
 
 describe("matchCard: typed English to a card", () => {
