@@ -27,23 +27,25 @@
  *   count in no number). Source "The app".
  */
 import type { BlockSource } from "../blocks/resolve";
+import { ROOT_NAMES } from "../blocks/spec";
 import type { CoachContext } from "../context";
 import { cueFor } from "../cues";
 import type { Line, ToolCall } from "../tools/types";
 import { inSession } from "../tools/types";
-import { chordIntervals, chordNotes, noteName, parseChordName, spellingForKey, type Chord, type Key } from "../../jam/harmony";
+import { chordIntervals, chordNotes, noteName, parseChordName, pitchClass, spellingForKey, type Chord, type ChordQuality, type Key } from "../../jam/harmony";
 import { SCALE_NAMES_EN, scaleNotes, scalesForChord } from "../../jam/scales";
 import type { Exercise, PathDoc, Step } from "../../paths/format";
-import { canSpellScale, spellChord, spellScale } from "../../paths/theory";
+import { chordRootName, spellAbove, spellChord, spellScaleByLetter } from "../../paths/theory";
 import { reasonLine } from "../../session/coachWords";
 import { exerciseWords } from "../../session/exerciseWords";
 import { CLEAN_TEMPO_MIN_BARS } from "../../session/grade";
-import { PLAN_MINUTES } from "../../session/planner";
-import { isMarkedNotFair, shownCleanTempoOf, takesOf } from "../../session/progress";
+import { PLAN_MINUTES, type PlanStep, type Reason } from "../../session/planner";
+import { MY_EXERCISES_PATH_ID } from "../../session/myExercises";
+import { isGradable, isMarkedNotFair, shownCleanTempoOf, takesOf } from "../../session/progress";
 import { reviewStateOf } from "../../session/rotation";
 import { buildTake, withVariant } from "../../session/take";
 import type { FactCard, NoCard, PathCardShape } from "./cards";
-import { lastTakeHere, noteOf, ungradedPlayer } from "./cards";
+import { lastTakeHere, noteOf, takeSeedHere, ungradedPlayer } from "./cards";
 
 function line(key: string, values: Record<string, string | number> = {}): Line {
   return { key, values };
@@ -52,7 +54,7 @@ function line(key: string, values: Record<string, string | number> = {}): Line {
 const APP: BlockSource = { kind: "app" };
 
 /** The player's own exercises (leg t2b): not a Path, so not a Path's progress. */
-export const MY_EXERCISES_PATH = "my-exercises";
+export const MY_EXERCISES_PATH = MY_EXERCISES_PATH_ID;
 
 function noCard(key: string, values: Record<string, string | number> = {}): NoCard {
   return { line: line(key, values) };
@@ -62,15 +64,58 @@ function noCard(key: string, values: Record<string, string | number> = {}): NoCa
 // The Exercise and the Step
 // ---------------------------------------------------------------------------
 
-/** The Exercise as played: the variant of the Take on screen, else the step's. */
+/**
+ * The Exercise on screen: on a Take's result, the variant that Take played;
+ * anywhere else the step's variant, the one the next Take will play (review
+ * c2b2a M2: after a change of key on the ready screen, the last Take's
+ * variant is no longer the one on screen).
+ */
 function played(ctx: CoachContext): Exercise | null {
-  const here = lastTakeHere(ctx);
-  if (here) return here.exercise;
+  if (ctx.run?.phase === "result") {
+    const here = lastTakeHere(ctx);
+    if (here) return here.exercise;
+  }
   return ctx.exercise ? withVariant(ctx.exercise, ctx.variantSeed ?? null) : null;
 }
 
-/** "From the Path · Step N": the Step's number when it is known. */
+/**
+ * The plan the Session is running (`run.plan`, as `currentStep` reads it), not
+ * Today's (review c2b2a H1: a Session begun from a Step's page, Test out, a
+ * step inserted, Today rebuilt after a saved Take). A context that does not
+ * carry the run's plan falls back to `ctx.plan`, which the host sets to the
+ * run's plan in a Session.
+ */
+function runningPlan(ctx: CoachContext) {
+  if (!ctx.run) return null;
+  const plan = ctx.run.plan !== undefined ? ctx.run.plan : ctx.plan;
+  return plan ?? null;
+}
+
+/** The plan step a running Session is on. */
+export function planStepHere(ctx: CoachContext): PlanStep | null {
+  const plan = runningPlan(ctx);
+  if (!plan || !ctx.run) return null;
+  return plan.steps[ctx.run.stepIndex] ?? null;
+}
+
+/**
+ * The Path the Exercise on screen is from: the context's, else the running
+ * plan step's (the player's own exercises are not in the host's list of
+ * Paths, review c2b2a L7).
+ */
+function pathIdHere(ctx: CoachContext): string | null {
+  if (ctx.path?.id) return ctx.path.id;
+  const step = planStepHere(ctx);
+  if (step?.kind === "exercise" && ctx.exercise && step.exerciseId === ctx.exercise.id) return step.pathId;
+  return null;
+}
+
+/**
+ * "From the Path · Step N": the Step's number when it is known. The player's
+ * own exercises are on no Path: their words are the app's, from the recipe.
+ */
 function fromPath(ctx: CoachContext): BlockSource {
+  if (pathIdHere(ctx) === MY_EXERCISES_PATH) return APP;
   return ctx.step ? { kind: "path", step: ctx.step.order } : { kind: "path" };
 }
 
@@ -107,8 +152,11 @@ export function exerciseTry(ctx: CoachContext): FactCard | NoCard {
   const exercise = played(ctx);
   if (!exercise) return noCard("ask.card.path.noExercise");
   const shape: PathCardShape = "exercise_try";
-  // No reading of a Take for an ungraded player: the general cue only.
-  const note = ungradedPlayer(ctx) ? null : noteOf(ctx);
+  // No reading of a Take for an ungraded player: the general cue only. Off the
+  // result screen, a Take of another variant than the one on screen is not
+  // read either (review c2b2a M2): its cue was for notes no longer there.
+  const sameNotes = ctx.run?.phase === "result" || (takeSeedHere(ctx) ?? null) === (ctx.variantSeed ?? null);
+  const note = ungradedPlayer(ctx) || !sameNotes ? null : noteOf(ctx);
   const pick = cueFor(exercise, note);
   const said = pick?.cue.say.trim();
   if (!pick || !said) return { shape, lines: [line("ask.card.path.tryNone")], source: fromPath(ctx) };
@@ -122,10 +170,36 @@ export function exerciseTry(ctx: CoachContext): FactCard | NoCard {
 // The plan
 // ---------------------------------------------------------------------------
 
-/** The plan step a running Session is on. */
-function planStepHere(ctx: CoachContext) {
-  if (!ctx.plan || !ctx.run) return null;
-  return ctx.plan.steps[ctx.run.stepIndex] ?? null;
+/**
+ * The reasons whose sentence says why the part is at its tempo (review c2b2a
+ * L3). The others say why the part is in the plan (a review is due, a Path's
+ * turn), which is not an answer to "why this tempo?".
+ */
+const TEMPO_REASONS: ReadonlySet<Reason["code"]> = new Set<Reason["code"]>([
+  "firstEver",
+  "newExercise",
+  "newStep",
+  "nextInStep",
+  "newFromSibling",
+  "easing",
+  "climb",
+  "climbFast",
+  "notCaught",
+  "backEased",
+  "warmUp",
+  "warmUpClean",
+  "edge",
+  "edgeFirst",
+  "placement",
+  "testOut",
+  "benchmark",
+  "finisher",
+  "playedUngraded",
+]);
+
+function saysTheTempo(reason: Reason): boolean {
+  if (reason.code === "reviewDue" || reason.code === "passedKeepGoing") return typeof reason.values.bpm === "number";
+  return TEMPO_REASONS.has(reason.code);
 }
 
 /** "Why this?": the plan step's own reasons, as the Session's ready screen words them. */
@@ -144,16 +218,18 @@ export function planTempo(ctx: CoachContext): FactCard | NoCard {
   const shape: PathCardShape = "plan_tempo";
   const planned = step.kind === "drill" ? null : step.kind === "jam" ? (step.bpm ?? null) : step.bpm;
   if (planned === null || planned === undefined) return { shape, lines: [line("ask.card.plan.tempoNone")], source: APP };
-  const lines: Line[] = [line("ask.card.plan.tempoPlanned", { bpm: planned }), reasonLine(step.why)];
+  const lines: Line[] = [line("ask.card.plan.tempoPlanned", { bpm: planned })];
+  if (saysTheTempo(step.why)) lines.push(reasonLine(step.why));
   if (ctx.run.bpm > 0 && ctx.run.bpm !== planned) lines.push(line("ask.card.plan.tempoNow", { bpm: ctx.run.bpm }));
   return { shape, lines, source: APP };
 }
 
-/** "What's next?": the next part of today's plan, as the plan holds it. */
+/** "What's next?": the next part of the plan the Session runs, as that plan holds it. */
 export function planNext(ctx: CoachContext): FactCard | NoCard {
   const step = planStepHere(ctx);
-  if (!step || !ctx.plan || !ctx.run) return noCard("ask.card.plan.notInPlan");
-  const next = ctx.plan.steps[ctx.run.stepIndex + 1];
+  const plan = runningPlan(ctx);
+  if (!step || !plan || !ctx.run) return noCard("ask.card.plan.notInPlan");
+  const next = plan.steps[ctx.run.stepIndex + 1];
   if (!next) return { shape: "plan_next", lines: [line("ask.card.plan.nextLast")], source: APP };
   const bpm = next.kind === "drill" ? undefined : next.bpm;
   const lines = [
@@ -200,11 +276,13 @@ const DAY_MS = 24 * 60 * 60 * 1000;
  */
 export function planReturn(ctx: CoachContext): FactCard | NoCard {
   const exercise = ctx.exercise;
-  const pathId = ctx.path?.id;
+  const pathId = pathIdHere(ctx);
   if (!exercise || !pathId) return noCard("ask.card.path.noExercise");
   const shape: PathCardShape = "plan_return";
   if (pathId === MY_EXERCISES_PATH) return { shape, lines: [line("ask.card.plan.returnMine")], source: APP };
   if (exercise.grading !== "graded") return { shape, lines: [line("ask.card.plan.returnUngraded")], source: APP };
+  // Graded with no pass tempo: never passed, so never in the schedule (`isGradable`, review c2b2a L6).
+  if (!isGradable(exercise)) return { shape, lines: [line("ask.card.plan.returnNoPassTempo")], source: APP };
   if (takesOf(ctx.progress, pathId, exercise.id).some(isMarkedNotFair)) {
     return { shape, lines: [line("ask.card.plan.returnNotFair")], source: APP, uncertain: true };
   }
@@ -237,17 +315,16 @@ function unknownChord(root: string, shape: PathCardShape): FactCard {
   return { shape, lines: [line("ask.card.theory.chordUnknown", { root, known: known.join(", ") })], source: APP, uncertain: true };
 }
 
-function spellingOf(symbol: string): "flat" | "sharp" {
-  return symbol.length > 1 && symbol[1] === "b" ? "flat" : "sharp";
-}
-
-/** A chord's notes: `spellChord` where it has a spelling table, else `chordNotes` named the key's way. */
-export function notesOfChord(symbol: string, chord: Chord): string[] {
+/**
+ * A chord's notes, spelled by letter (`spellChord`: every quality has a row
+ * since c2b2ab, review H3). Null for a symbol the speller cannot read (which
+ * `symbolOf` already refuses): never a pitch named with a guessed letter.
+ */
+export function notesOfChord(symbol: string): string[] | null {
   try {
     return spellChord(symbol);
   } catch {
-    const spelling = spellingOf(symbol);
-    return chordNotes(chord).map((pc) => noteName(pc, spelling));
+    return null;
   }
 }
 
@@ -256,10 +333,11 @@ export function chordNotesCard(root: string, suffix: string): FactCard {
   const shape: PathCardShape = "chord_notes";
   const symbol = symbolOf(root, suffix);
   const chord = symbol ? parseChordName(symbol) : null;
-  if (!symbol || !chord) return unknownChord(root, shape);
+  const notes = symbol && chord ? notesOfChord(symbol) : null;
+  if (!symbol || !chord || !notes) return unknownChord(root, shape);
   return {
     shape,
-    lines: [line("ask.card.theory.chordNotes", { chord: symbol, notes: notesOfChord(symbol, chord).join(" ") })],
+    lines: [line("ask.card.theory.chordNotes", { chord: symbol, notes: notes.join(" ") })],
     source: APP,
     then: { tool: "show_chord", args: { chord: symbol } },
   };
@@ -273,35 +351,96 @@ export function homeKeyOf(chord: Chord): Key {
 }
 
 /**
- * "What fits over F?": `scalesForChord` with the chord taken as the home chord
- * of its own key (the sentence names that key), each scale's notes spelled
- * (`spellScale`, else `scaleNotes` named the key's way). The first is drawn.
+ * Where a chord sits in a key, for the qualities whose own key is not one
+ * they are the home chord of (review c2b2a H2): `scalesForChord` reads the
+ * chord where it occurs in the key, and the home key gave Bm7b5 B natural
+ * minor (F# against the chord's F). Each row is the place the theory code
+ * itself names for the quality (its comments in `jam/scales.ts`): semitones
+ * and letters from the chord's root down to the key's, the key's mode, and
+ * the degree the sentence says.
+ */
+type Placement = { semitones: number; letters: number; mode: "major" | "minor"; degree: string };
+
+const V_OF_MAJOR: Placement = { semitones: 5, letters: 3, mode: "major", degree: "V" };
+const V_OF_MINOR: Placement = { semitones: 5, letters: 3, mode: "minor", degree: "V" };
+
+const PLACED: Partial<Record<ChordQuality, Placement>> = {
+  // The iiø of a minor key: Bm7b5 in A minor.
+  m7b5: { semitones: -2, letters: -1, mode: "minor", degree: "ii" },
+  // The vii° of a major key: Bdim in C major.
+  dim: { semitones: 1, letters: 1, mode: "major", degree: "vii" },
+  // The vii°7 of a minor key (its harmonic minor): Bdim7 in C minor.
+  dim7: { semitones: 1, letters: 1, mode: "minor", degree: "vii" },
+  // The III+ of a minor key (its harmonic minor): Eb aug in C minor.
+  aug: { semitones: -3, letters: -2, mode: "minor", degree: "III" },
+  // The altered dominants: the V of a minor key.
+  "7sharp5": V_OF_MINOR,
+  "7b9": V_OF_MINOR,
+  "7sharp9": V_OF_MINOR,
+  // A dominant is the V of a major key, not its home chord.
+  "7": V_OF_MAJOR,
+  "9": V_OF_MAJOR,
+  "11": V_OF_MAJOR,
+  "13": V_OF_MAJOR,
+  "7sus4": V_OF_MAJOR,
+  "7sus2": V_OF_MAJOR,
+  "9sus4": V_OF_MAJOR,
+};
+
+/** Letters above a root for a number of semitones above it, as a scale's root is written. */
+const LETTERS_FOR_SEMITONES = [0, 1, 1, 2, 2, 3, 3, 4, 5, 5, 6, 6] as const;
+
+/** A note `semitones` above the typed root, on the letter given, unless that writes a name the app does not use (Cb, E#). */
+function nameAbove(typed: string, semitones: number, letters: number, fallback: "sharp" | "flat", pc: number): string {
+  const name = spellAbove(typed, semitones, letters);
+  return ROOT_NAMES.includes(name) ? name : noteName(pc, fallback);
+}
+
+/**
+ * "What fits over F?": `scalesForChord` in a key the sentence names: the
+ * chord's home key, or for the qualities in `PLACED` the key the chord occurs
+ * in, with its degree. Only the scales that hold every note of the chord are
+ * offered (a pentatonic missing the seventh, a blues scale with the minor
+ * third over a major one, are not); none left is said, with nothing drawn.
+ * Each is spelled by letter from the root as the player typed it (review L4:
+ * "Gb" is Gb major, not F#). The first is drawn.
  */
 export function scaleFits(root: string, suffix: string): FactCard {
   const shape: PathCardShape = "scale_fits";
   const symbol = symbolOf(root, suffix);
   const chord = symbol ? parseChordName(symbol) : null;
   if (!symbol || !chord) return unknownChord(root, shape);
-  const key = homeKeyOf(chord);
+  const typed = chordRootName(symbol);
+  const placed = PLACED[chord.quality];
+  const key: Key = placed ? { root: pitchClass(chord.root + placed.semitones), mode: placed.mode } : homeKeyOf(chord);
   const spelling = spellingForKey(key);
-  const suggestions = scalesForChord(chord, key);
-  const keyRoot = noteName(key.root, spelling);
-  const lines: Line[] = [
-    line(key.mode === "minor" ? "ask.card.theory.scalesIntroMinor" : "ask.card.theory.scalesIntroMajor", { chord: symbol, root: keyRoot }),
-  ];
-  for (const s of suggestions) {
-    const root = noteName(s.root, spelling);
-    let notes: string[];
-    try {
-      notes = canSpellScale(s.scale) ? spellScale(root, s.scale) : scaleNotes(s.root, s.scale).map((pc) => noteName(pc, spelling));
-    } catch {
-      notes = scaleNotes(s.root, s.scale).map((pc) => noteName(pc, spelling));
-    }
-    lines.push(line("ask.card.theory.scale", { root, name: SCALE_NAMES_EN[s.scale], notes: notes.join(" ") }));
+  const keyRoot = placed ? nameAbove(typed, placed.semitones, placed.letters, spelling, key.root) : typed;
+  const tones = chordNotes(chord);
+  const suggestions = scalesForChord(chord, key).filter((s) => tones.every((pc) => s.pitchClasses.includes(pc)));
+  if (suggestions.length === 0) {
+    return { shape, lines: [line("ask.card.theory.scalesNone", { chord: symbol })], source: APP };
   }
-  const first = suggestions[0];
-  const then: ToolCall | undefined = first ? { tool: "show_scale", args: { root: noteName(first.root, spelling), scale: first.scale } } : undefined;
-  return { shape, lines, source: APP, ...(then ? { then } : {}) };
+  const intro = placed
+    ? line(placed.mode === "minor" ? "ask.card.theory.scalesPlacedMinor" : "ask.card.theory.scalesPlacedMajor", {
+        chord: symbol,
+        degree: placed.degree,
+        root: keyRoot,
+      })
+    : line(key.mode === "minor" ? "ask.card.theory.scalesIntroMinor" : "ask.card.theory.scalesIntroMajor", { chord: symbol, root: keyRoot });
+  const lines: Line[] = [intro];
+  const named = suggestions.map((s) => {
+    // The scale's root by letter: the key's root as said above, else from the chord's as typed.
+    const offset = pitchClass(s.root - chord.root);
+    const name =
+      s.root === key.root ? keyRoot : nameAbove(typed, offset, LETTERS_FOR_SEMITONES[offset], spelling, s.root);
+    const notes = spellScaleByLetter(name, s.scale) ?? scaleNotes(s.root, s.scale).map((pc) => noteName(pc, spelling));
+    return { s, name, notes };
+  });
+  for (const { s, name, notes } of named) {
+    lines.push(line("ask.card.theory.scale", { root: name, name: SCALE_NAMES_EN[s.scale], notes: notes.join(" ") }));
+  }
+  const first = named[0];
+  return { shape, lines, source: APP, then: { tool: "show_scale", args: { root: first.name, scale: first.s.scale } } };
 }
 
 // ---------------------------------------------------------------------------
@@ -341,29 +480,55 @@ function tempoHere(ctx: CoachContext, exercise: Exercise): number | null {
   return exercise.tempo.passAtBpm;
 }
 
+type PassBarOf = Exercise["passBars"][number];
+
+/** A pass bar's minimum as a whole percentage, for a ratio metric; else null. */
+function percentOf(bar: PassBarOf): number | null {
+  return typeof bar.min === "number" && bar.min > 0 && bar.min <= 1 ? Math.round(bar.min * 100) : null;
+}
+
+/** The two checks `pass.rs` measures with `evenness` (the same formula, so the same milliseconds). */
+function isEvenness(bar: PassBarOf): boolean {
+  return (bar.metric === "timingEvenness" || bar.metric === "evennessHold") && typeof bar.min === "number" && bar.min > 0 && bar.min < 1;
+}
+
 /**
- * "What does 85% even mean?": each evenness pass mark of this Exercise in
- * milliseconds at this tempo. A number asked that no pass mark of the Exercise
- * has is said first; an Exercise without an evenness check says so.
+ * "What does 85% even mean?": a pass mark of this Exercise in words.
+ *
+ * - No number asked: each evenness pass mark, in milliseconds at this tempo.
+ * - A number one of its marks has: THAT mark's own sentence (review c2b2a M1):
+ *   evenness and evenness held to the end in milliseconds (`pass.rs` measures
+ *   both with `evenness`), notes heard as a share of the written notes. A mark
+ *   of another check, which the app has no sentence for: no card.
+ * - A number none of its marks has: said first, then the evenness marks.
  */
 export function passMarkMs(ctx: CoachContext, asked: number | null): FactCard | NoCard {
   const exercise = played(ctx);
   if (!exercise || !ctx.exercise) return noCard("ask.card.path.noExercise");
   const shape: PathCardShape = "pass_mark_ms";
   if (exercise.grading !== "graded") return { shape, lines: [line("ask.card.term.ungradedExercise")], source: APP };
-  const marks = exercise.passBars.filter((b) => b.metric === "timingEvenness" && typeof b.min === "number" && b.min > 0 && b.min < 1);
-  const percents = exercise.passBars
-    .map((b) => (typeof b.min === "number" && b.min <= 1 ? Math.round(b.min * 100) : null))
-    .filter((p): p is number => p !== null);
+  const timingMarks = exercise.passBars.filter((b) => b.metric === "timingEvenness" && isEvenness(b));
+  const matching = asked === null ? [] : exercise.passBars.filter((b) => percentOf(b) === asked);
   const lines: Line[] = [];
-  if (asked !== null && !percents.includes(asked)) lines.push(line("ask.card.term.noSuchMark", { value: asked }));
-  if (marks.length === 0) {
-    lines.push(line("ask.card.term.evenNone"));
+  let chosen: PassBarOf[];
+  if (asked === null) chosen = timingMarks;
+  else if (matching.length === 0) {
+    lines.push(line("ask.card.term.noSuchMark", { value: asked }));
+    chosen = timingMarks;
+  } else chosen = matching;
+  for (const b of chosen) {
+    if (b.metric === "notesHeard") lines.push(line("ask.card.term.heardMark", { bar: percentOf(b) ?? 0 }));
+  }
+  const even = chosen.filter(isEvenness);
+  if (even.length === 0) {
+    if (matching.length === 0) lines.push(line("ask.card.term.evenNone"));
+    // The asked mark belongs to a check the app has no sentence for: no card, never another check's numbers.
+    if (lines.length === 0) return noCard("ask.card.term.markOther", { value: asked ?? 0 });
     return { shape, lines, source: APP };
   }
   const bpm = tempoHere(ctx, exercise);
   // `buildTake` reads the Path's id only; `exercise` is the variant played already.
-  const plan = bpm ? buildTake({ id: ctx.path?.id ?? "" } as PathDoc, exercise, bpm, null) : null;
+  const plan = bpm ? buildTake({ id: pathIdHere(ctx) ?? "" } as PathDoc, exercise, bpm, null) : null;
   const gapBeats = plan ? smallestGapBeats(plan.schedule.onsets) : null;
   // The click counts quarter notes on these meters only; elsewhere a beat is not
   // known to be the schedule's beat, so no milliseconds are said.
@@ -372,9 +537,14 @@ export function passMarkMs(ctx: CoachContext, asked: number | null): FactCard | 
     return { shape, lines, source: APP };
   }
   const gapMs = gapBeats * (60000 / bpm);
-  for (const m of marks) {
+  for (const m of even) {
     const mark = m.min as number;
-    lines.push(line("ask.card.term.evenMs", { bar: Math.round(mark * 100), bpm, gap: Math.round(gapMs), ms: Math.round(evennessSpreadMs(mark, gapMs)) }));
+    const values = { bar: Math.round(mark * 100), bpm, gap: Math.round(gapMs), ms: Math.round(evennessSpreadMs(mark, gapMs)) };
+    lines.push(
+      m.metric === "evennessHold"
+        ? line("ask.card.term.holdMs", values)
+        : line("ask.card.term.evenMs", values),
+    );
   }
   lines.push(line("ask.card.term.evenHow"));
   return { shape, lines, source: APP };
@@ -385,7 +555,7 @@ export function cleanTempo(ctx: CoachContext): FactCard {
   const shape: PathCardShape = "clean_tempo";
   const lines: Line[] = [line("ask.card.term.clean", { need: CLEAN_TEMPO_MIN_BARS })];
   const exercise = ctx.exercise;
-  const pathId = ctx.path?.id;
+  const pathId = pathIdHere(ctx);
   if (exercise && pathId && !ungradedPlayer(ctx) && exercise.grading === "graded") {
     if (pathId === MY_EXERCISES_PATH) lines.push(line("ask.card.term.cleanMine"));
     else {

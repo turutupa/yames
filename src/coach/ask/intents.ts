@@ -34,6 +34,7 @@ import {
   planNext,
   planReturn,
   planSkip,
+  planStepHere,
   planTempo,
   planWhy,
   scaleFits,
@@ -252,9 +253,9 @@ function gradedExerciseHere(ctx: CoachContext): boolean {
   return ctx.exercise !== undefined && ctx.exercise.grading === "graded" && !ungradedPlayer(ctx);
 }
 
-/** A Session running a plan step. */
+/** A Session running a plan step (of the plan it runs, not Today's: c2b2ab H1). */
 function planStepRunning(ctx: CoachContext): boolean {
-  return !!ctx.plan && !!ctx.run && ctx.plan.steps[ctx.run.stepIndex] !== undefined;
+  return planStepHere(ctx) !== null;
 }
 
 /** Graded, not in a Take, and an Exercise on screen (a card that reads the Exercise, not a Take). */

@@ -43,6 +43,9 @@ const matches: Array<[string, string, Record<string, unknown>]> = [
   ["what notes are in F7zz?", "chord_notes", { root: "F", suffix: "unknown" }],
   ["What does 85% even mean?", "pass_mark_ms", { value: 85 }],
   ["what does 85 percent mean", "pass_mark_ms", { value: 85 }],
+  ["What does 90% mean?", "pass_mark_ms", { value: 90 }],
+  ["what does 75 % mean", "pass_mark_ms", { value: 75 }],
+  ["What notes are in D6/9?", "chord_notes", { root: "D", suffix: "6/9" }],
   ["What does the evenness pass mark mean?", "pass_mark_ms", {}],
   ["what is timing evenness", "pass_mark_ms", {}],
   ["What is a clean tempo?", "clean_tempo", {}],
@@ -95,6 +98,12 @@ const nearMisses: string[] = [
   // Terms: a number about something else, the "even" of the sentence about a Take.
   "what does BPM mean",
   "what does 85% of my takes mean",
+  // A bare number is not a pass mark: the tempo, a bar, anything on screen (review c2b2a M1).
+  "what does 85 mean",
+  "What does 120 mean?",
+  // A slash chord: the card cannot carry the bass (review c2b2a L5).
+  "what notes are in D/F#",
+  "what fits over C/G",
   "is a clean tempo good",
   "what is a tempo",
   "what does clean mean",

@@ -12,7 +12,7 @@ import { noteFinding, useCoachAnswer } from "../../coach/coachSlot";
 import { sayAtBoundary, type VoiceBoundary } from "../../coach/voice";
 import type { AskHandler } from "../coach/askStore";
 import { useTranslation } from "react-i18next";
-import { takeNote } from "../../coach/takeNote";
+import { noteForTake } from "../../coach/takeNote";
 import { cueFor, cueOrder } from "../../coach/cues";
 import type { CuePick } from "../../coach/cues";
 import type { FactItem, TakeNote, TakeReview } from "../../coach/takeNote";
@@ -22,7 +22,7 @@ import type { Line } from "../../session/coachWords";
 import { displayValue, metricKey, reasonLine } from "../../session/coachWords";
 import { readyHonestLineKey } from "../../session/caveats";
 import type { PlanStep } from "../../session/planner";
-import { heardItOf, lastRaisedOutcome, shownCleanTempoOf, takesOf, upstrokeOf } from "../../session/progress";
+import { heardItOf, lastRaisedOutcome, shownCleanTempoOf, upstrokeOf } from "../../session/progress";
 import { parkedUntil, reviewStateOf } from "../../session/rotation";
 import { MY_EXERCISES_PATH_ID } from "../../session/myExercises";
 import { currentStep } from "../../session/runner";
@@ -166,10 +166,8 @@ export function useTakeNote(session: SessionRun, outcome: TakeOutcome | null | u
   const variantSeed = step ? seedOf(step) : null;
   return useMemo(() => {
     if (!outcome || !exercise || !pathId) return null;
-    const earlier = takesOf({ ...session.progress, takes }, pathId, outcome.exerciseId).filter(
-      (row) => row.id !== outcome.takeId,
-    );
-    return takeNote(outcome, review, earlier, exercise, { variantSeed, session: startedAt });
+    // The same function Ask's cards read the note with (`noteOf`, c2b2ab M3).
+    return noteForTake(outcome, review, { ...session.progress, takes }, pathId, exercise, { variantSeed, session: startedAt });
     // `session.progress` is read for its takes only, which are a dependency.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [outcome, review, takes, exercise, pathId, variantSeed, startedAt]);

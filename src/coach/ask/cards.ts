@@ -30,7 +30,7 @@ import { MAX_SENTENCE } from "../blocks/spec";
 import type { CoachBlock } from "../blocks/types";
 import type { CoachContext } from "../context";
 import { takeLean } from "../rounds";
-import { biasThresholdMs, heldStretchUncrossed, takeNote, type TakeNote, type TakeReview } from "../takeNote";
+import { biasThresholdMs, heldStretchUncrossed, noteForTake, type TakeNote, type TakeReview } from "../takeNote";
 import type { Line, ToolCall } from "../tools/types";
 import type { Exercise } from "../../paths/format";
 import { NOT_GRADED } from "../../paths/metrics";
@@ -164,9 +164,17 @@ function seedOfTake(ctx: CoachContext, outcome: TakeOutcome): number | null {
   return ctx.variantSeed ?? null;
 }
 
+/** The variant the last Take of the Exercise on screen played, or undefined when there is none. */
+export function takeSeedHere(ctx: CoachContext): number | null | undefined {
+  const here = lastTakeHere(ctx);
+  return here ? seedOfTake(ctx, here.outcome) : undefined;
+}
+
 /**
- * The note the result screen drew for this Take, computed again from the same
- * inputs (`takeNote`): this Exercise's earlier Takes, newest first, without it.
+ * The note the result screen drew for this Take, computed again by the same
+ * function (`noteForTake`) from the same inputs: this Exercise's earlier
+ * Takes, and the Session's start, so the repeat count is this Session's as on
+ * the screen (review c2b2a M3).
  */
 export function noteOf(ctx: CoachContext): TakeNote | null {
   const here = lastTakeHere(ctx);
@@ -174,11 +182,12 @@ export function noteOf(ctx: CoachContext): TakeNote | null {
   const { outcome, exercise } = here;
   const row = storedRow(ctx, outcome);
   const pathId = ctx.path?.id ?? row?.pathId ?? null;
-  const earlier = pathId
-    ? takesOf(ctx.progress, pathId, outcome.exerciseId).filter((t) => t.id !== outcome.takeId)
-    : [];
   const review = (ctx.review ?? null) as TakeReview | null;
-  return takeNote(outcome, review, earlier, exercise, { variantSeed: seedOfTake(ctx, outcome) });
+  const session = ctx.run?.startedAt;
+  return noteForTake(outcome, review, ctx.progress, pathId, exercise, {
+    variantSeed: seedOfTake(ctx, outcome),
+    ...(session ? { session } : {}),
+  });
 }
 
 /** The lean of each pattern bar, ms (positive late), from the stored Take or else its review. */

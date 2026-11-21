@@ -83,6 +83,10 @@ function chordArgs(chord: string): { root: string; suffix: string } | null {
   if (!m) return null;
   const root = m[1].toUpperCase() + m[2];
   if (!ROOT_NAMES.includes(root)) return null;
+  // A slash chord ("D/F#"): the card's two arguments cannot carry the bass,
+  // and "D is D F# A" answers a chord that was not asked (review c2b2a L5).
+  // No card; "6/9" is a chord's own name, not a bass.
+  if (m[3].includes("/") && m[3].trim() !== "6/9") return null;
   const parsed = parseChordName(root + m[3]);
   return { root, suffix: parsed ? chordSuffix(parsed.quality) : UNKNOWN_SUFFIX };
 }
@@ -134,7 +138,11 @@ export function matchPathCard(s: string, raw: string): CardCall[] {
   if (mark) {
     const value = q.match(/\b(\d+)\b/)?.[1];
     const n = value ? Number(value) : null;
-    if (n === null || (n >= 1 && n <= 100)) found.push({ tool: "pass_mark_ms", args: n === null ? {} : { value: n } });
+    // A number is a pass mark only when it was typed as a percentage: the
+    // normalised text has lost "%", and "what does 85 mean" may be the tempo
+    // or any number on screen (review c2b2a M1).
+    const percent = n === null || /\d\s*(%|percent\b|per cent\b)/i.test(raw);
+    if (percent && (n === null || (n >= 1 && n <= 100))) found.push({ tool: "pass_mark_ms", args: n === null ? {} : { value: n } });
   }
   if (CLEAN_TEMPO.test(q)) found.push({ tool: "clean_tempo", args: {} });
   return found;

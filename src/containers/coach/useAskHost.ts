@@ -70,7 +70,13 @@ export function useAskHost(input: AskHostInput): { panel: CoachPanel; lookingAt:
       };
     },
     progress: () => latest.current.session.progress,
-    plan: () => (latest.current.view === "session" ? (latest.current.session.plan ?? undefined) : undefined),
+    // In a Session, the plan it RUNS (a Step's page, Test out, a step inserted:
+    // not Today's, review c2b2a H1); on Today, Today's plan; elsewhere none.
+    plan: () => {
+      const { view, session } = latest.current;
+      if (view === "session") return session.run.phase !== "idle" ? (session.run.plan ?? undefined) : undefined;
+      return view === "today" ? (session.plan ?? undefined) : undefined;
+    },
     run: () => (latest.current.view === "session" ? latest.current.session.run : undefined),
     path: () => {
       const s = latest.current.session;

@@ -5,20 +5,21 @@
  */
 import { describe, expect, it } from "vitest";
 import i18n from "../../i18n";
-import { cueFor } from "../cues";
-import type { CoachContext, CoachPath, CoachStep } from "../context";
+import { CHORD_SUFFIXES } from "../blocks/spec";
+import { buildCoachContext, type CoachContext, type CoachPath, type CoachSources, type CoachStep } from "../context";
 import type { Line } from "../tools/types";
-import { chordNotes, noteName, parseChordName } from "../../jam/harmony";
-import { scalesForChord } from "../../jam/scales";
+import { runIn } from "../tools/testPaths";
+import { nameToPitchClass, parseChordName } from "../../jam/harmony";
 import type { Exercise, PathDoc, Step } from "../../paths/format";
 import { spellChord } from "../../paths/theory";
 import { reasonLine } from "../../session/coachWords";
 import { exerciseWords } from "../../session/exerciseWords";
 import type { SessionPlan } from "../../session/planner";
-import { shownCleanTempoOf } from "../../session/progress";
+import { shownCleanTempoOf, type TakeFacts } from "../../session/progress";
 import { reviewStateOf } from "../../session/rotation";
+import { IDLE, runReducer, type RunState } from "../../session/runner";
 import { ALT, DAY, NOW, take as row } from "../../session/testKit";
-import { fixture, TUNE } from "./cardFixtures";
+import { finding, fixture, TUNE } from "./cardFixtures";
 import { isCard, noteOf, type FactCard, type NoCard } from "./cards";
 import { runFactCard } from "./intents";
 import {
@@ -52,6 +53,16 @@ const STEP: CoachStep = {
   howTo: STEP_OF_TUNE.howTo,
   payoff: STEP_OF_TUNE.payoff,
 };
+
+/** The tune with cues of its own: two for uneven timing (the first time, the second), and a general one. */
+const CUED = {
+  ...TUNE,
+  cues: [
+    { when: "even", say: "Even the first evenness cue." },
+    { when: "even", say: "Even the second evenness cue." },
+    { when: "even", say: "The general cue.", general: true },
+  ],
+} as Exercise;
 
 function card(x: FactCard | NoCard): FactCard {
   if (!isCard(x)) throw new Error(`no card: ${x.line.key}`);
@@ -111,10 +122,27 @@ describe("the Exercise, quoted from the Path", () => {
     expect(keys(card(exerciseHow(here({ exercise: bare }, { exercise: bare }))))).toEqual(["ask.card.path.howNone"]);
   });
 
-  it("the variant played: its own purpose, not the Exercise's", () => {
-    const variant = { ...TUNE, purpose: "The variant's own purpose." } as Exercise;
-    const words = exerciseWords(TUNE, variant);
-    expect(words.purpose).toBe("The variant's own purpose.");
+  describe("an Exercise with two variants (review c2b2a M2)", () => {
+    const v0 = { id: "v0", label: "A", params: {}, pool: "p", tab: TUNE.tab, position: TUNE.position, crossing: TUNE.crossing, notes: TUNE.notes, rests: TUNE.rests, backing: TUNE.backing, computed: TUNE.computed };
+    const v1 = { ...v0, id: "v1", label: "B", purpose: "Variant B's own purpose.", howTo: ["Variant B, first line."], cues: [{ when: "lastBars", say: "Variant B's own cue.", general: true }] };
+    const TWO = { ...TUNE, variation: { dimensions: [], pooled: [], notPooled: [], variants: [v0, v1] } } as unknown as Exercise;
+    /** The last Take played variant 0 and is stored with it; the step's variant is `seed`. */
+    const at = (phase: "result" | "ready", seed: number) => {
+      const stored = { ...row(TWO.id, { bpm: 90, startedAt: NOW, variantSeed: 0, facts: {} }), id: "now" };
+      return here({ exercise: TWO, variantSeed: seed, run: runIn(phase), progress: { states: [], ceilings: [], takes: [stored] } }, { exercise: TWO });
+    };
+
+    it("on the Take's result: the words of the variant it played", () => {
+      expect(card(exercisePurpose(at("result", 0))).lines[1].values.text).toBe(TUNE.purpose);
+    });
+
+    it("on a ready screen after the player chose variant B: B's purpose, how-to and cue, the ones the next Take plays", () => {
+      const ctx = at("ready", 1);
+      expect(card(exercisePurpose(ctx)).lines[1].values.text).toBe("Variant B's own purpose.");
+      expect(card(exerciseHow(ctx)).lines.slice(1).map((l) => l.values.text)).toEqual(["Variant B, first line."]);
+      const c = card(exerciseTry(ctx));
+      expect(c.lines).toEqual([{ key: "ask.card.path.tryGeneral", values: {} }, { key: "ask.card.path.quote", values: { text: "Variant B's own cue." } }]);
+    });
   });
 
   it("no Exercise on screen: no card, one line", () => {
@@ -122,20 +150,40 @@ describe("the Exercise, quoted from the Path", () => {
   });
 
   it("what should I try: the cue the result screen picks, byte-equal; 'what Take N measured' only when it was measured", () => {
-    const ctx = here({}, { slipped: [0, 4], failOn: "timingEvenness" });
-    const pick = cueFor(TUNE, noteOf(ctx));
+    const ctx = here({ exercise: CUED }, { exercise: CUED, slipped: [0, 4], failOn: "timingEvenness" });
     const c = card(exerciseTry(ctx));
-    if (!pick) {
-      expect(keys(c)).toEqual(["ask.card.path.tryNone"]);
-      return;
-    }
-    expect(c.lines[1].values.text).toBe(pick.cue.say);
-    expect(c.lines[0].key).toBe(pick.basis === "measured" ? "ask.card.path.tryMeasured" : "ask.card.path.tryGeneral");
+    expect(c.lines).toEqual([
+      { key: "ask.card.path.tryMeasured", values: { take: 2 } },
+      { key: "ask.card.path.quote", values: { text: "Even the first evenness cue." } },
+    ]);
   });
 
   it("playing without grading: the general cue only, never one picked by a measurement", () => {
-    const c = exerciseTry(here({ grading: "off" }, { slipped: [0, 4], failOn: "timingEvenness" }));
-    if (isCard(c)) expect(c.lines[0].key).not.toBe("ask.card.path.tryMeasured");
+    const c = card(exerciseTry(here({ grading: "off", exercise: CUED }, { exercise: CUED, slipped: [0, 4], failOn: "timingEvenness" })));
+    expect(c.lines).toEqual([
+      { key: "ask.card.path.tryGeneral", values: {} },
+      { key: "ask.card.path.quote", values: { text: "The general cue." } },
+    ]);
+  });
+
+  it("the cue for what Take N measured is the result screen's: the repeat count is this Session's (review c2b2a M3)", () => {
+    const START = NOW - 600_000;
+    const shape = { exercise: CUED, slipped: [0, 4], failOn: "timingEvenness" as const, findings: [finding("consistentMiss", [0, 0])] };
+    const perBar = Array.from({ length: 10 }, (_u, bar) => ({ due: 6, heard: 6, evenness: bar === 0 || bar === 4 ? 0.6 : 0.95 }));
+    const before = (session: number) =>
+      row(CUED.id, {
+        bpm: 90,
+        startedAt: START - 60_000,
+        facts: { verdict: "belowBar", headlineMetric: "timingEvenness", headlineValue: 0.79, headlineMin: 0.85, session, measures: { perBar, barsPlayed: 10 } } as unknown as TakeFacts,
+      });
+    const at = (session: number) =>
+      here({ exercise: CUED, run: { ...runIn("result"), startedAt: START }, progress: { states: [], ceilings: [], takes: [before(session)] } }, shape);
+    // The same slip at the same tempo, but in an earlier Session: the screen counts it once, and says the first cue.
+    expect(noteOf(at(START - 86_400_000))?.repeat).toBe(1);
+    expect(card(exerciseTry(at(START - 86_400_000))).lines[1].values.text).toBe("Even the first evenness cue.");
+    // In this Session: the second time, the second cue.
+    expect(noteOf(at(START))?.repeat).toBe(2);
+    expect(card(exerciseTry(at(START))).lines[1].values.text).toBe("Even the second evenness cue.");
   });
 
   it("an Exercise with no cues: 'no cue', never a made-up one", () => {
@@ -240,10 +288,70 @@ describe("theory, worked out by the app", () => {
     expect(chordNotesCard("F#", "m7").lines[0].values).toEqual({ chord: "F#m7", notes: spellChord("F#m7").join(" ") });
   });
 
-  it("a quality with no spelling table: chordNotes, named", () => {
-    const chord = parseChordName("C9")!;
-    const c = chordNotesCard("C", "9");
-    expect(c.lines[0].values.notes).toBe(chordNotes(chord).map((pc) => noteName(pc, "sharp")).join(" "));
+  // Written out by hand from the intervals (review c2b2a H3): every chord tone on its own letter.
+  const SPELLED: Array<[string, string, string]> = [
+    ["C", "9", "C E G Bb D"],
+    ["F", "9", "F A C Eb G"],
+    ["F", "sus4", "F Bb C"],
+    ["D", "sus2", "D E A"],
+    ["C", "m6", "C Eb G A"],
+    ["C", "m(maj7)", "C Eb G B"],
+    ["C", "m9", "C Eb G Bb D"],
+    ["C", "7sus4", "C F G Bb"],
+    ["C", "7#9", "C E G Bb D#"],
+    ["C", "7b9", "C E G Bb Db"],
+    ["C", "7#5", "C E G# Bb"],
+    ["C", "6", "C E G A"],
+    ["C", "6/9", "C E G A D"],
+    ["C", "add9", "C D E G"],
+    ["C", "m(add9)", "C Eb G D"],
+    ["C", "11", "C E G Bb D F"],
+    ["C", "m11", "C Eb G Bb D F"],
+    ["C", "13", "C E G Bb D A"],
+    ["Ab", "13", "Ab C Eb Gb Bb F"],
+    ["Bb", "maj7", "Bb D F A"],
+    ["Eb", "maj9", "Eb G Bb D F"],
+    ["G", "9sus4", "G C D F A"],
+    ["B", "m7b5", "B D F A"],
+    ["F#", "7#5", "F# A# C## E"],
+    ["Gb", "dim7", "Gb Bbb Dbb Fbb"],
+  ];
+
+  it.each(SPELLED)("%s%s is spelled %s", (root, suffix, notes) => {
+    expect(chordNotesCard(root, suffix).lines[0].values.notes).toBe(notes);
+  });
+
+  /** Each quality's chord tones as degrees, as a chord chart writes them: degree N is N-1 letters above the root. */
+  const DEGREES: Record<string, string[]> = {
+    "": ["1", "3", "5"], m: ["1", "b3", "5"], "5": ["1", "5"], dim: ["1", "b3", "b5"], aug: ["1", "3", "#5"],
+    "7": ["1", "3", "5", "b7"], maj7: ["1", "3", "5", "7"], m7: ["1", "b3", "5", "b7"], m7b5: ["1", "b3", "b5", "b7"],
+    dim7: ["1", "b3", "b5", "bb7"], sus2: ["1", "2", "5"], sus4: ["1", "4", "5"], "6": ["1", "3", "5", "6"],
+    m6: ["1", "b3", "5", "6"], add9: ["1", "2", "3", "5"], "9": ["1", "3", "5", "b7", "9"], maj9: ["1", "3", "5", "7", "9"],
+    m9: ["1", "b3", "5", "b7", "9"], "11": ["1", "3", "5", "b7", "9", "11"], "13": ["1", "3", "5", "b7", "9", "13"],
+    m11: ["1", "b3", "5", "b7", "9", "11"], m13: ["1", "b3", "5", "b7", "9", "13"], "7sus4": ["1", "4", "5", "b7"],
+    "7sus2": ["1", "2", "5", "b7"], "7#5": ["1", "3", "#5", "b7"], "6/9": ["1", "3", "5", "6", "9"],
+    "m(add9)": ["1", "b3", "5", "9"], "7b9": ["1", "3", "5", "b7", "b9"], "7#9": ["1", "3", "5", "b7", "#9"],
+    maj13: ["1", "3", "5", "7", "9", "13"], "9sus4": ["1", "4", "5", "b7", "9"], "m(maj7)": ["1", "b3", "5", "7"],
+  };
+  const MAJOR_SEMITONES: Record<number, number> = { 1: 0, 2: 2, 3: 4, 4: 5, 5: 7, 6: 9, 7: 11, 9: 2, 11: 5, 13: 9 };
+  const LETTERS = "CDEFGAB";
+  const TWELVE = ["C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
+
+  it("every quality the app spells, on all twelve roots: each tone on its degree's letter, at its degree's pitch", () => {
+    expect(Object.keys(DEGREES).sort()).toEqual([...CHORD_SUFFIXES].sort());
+    for (const root of TWELVE) {
+      for (const [suffix, degrees] of Object.entries(DEGREES)) {
+        const notes = String(chordNotesCard(root, suffix).lines[0].values.notes).split(" ");
+        expect(notes, `${root}${suffix}`).toHaveLength(degrees.length);
+        degrees.forEach((degree, i) => {
+          const n = Number(degree.replace(/[b#]/g, ""));
+          const shift = [...degree].reduce((s, ch) => s + (ch === "#" ? 1 : ch === "b" ? -1 : 0), 0);
+          const letter = LETTERS[(LETTERS.indexOf(root[0]) + n - 1) % 7];
+          expect(notes[i][0], `${root}${suffix} degree ${degree}`).toBe(letter);
+          expect(nameToPitchClass(notes[i]), `${root}${suffix} degree ${degree}`).toBe((nameToPitchClass(root)! + MAJOR_SEMITONES[n] + shift + 12) % 12);
+        });
+      }
+    }
   });
 
   it("a chord the app cannot read: 'I don't know', with what it can spell on that root, and nothing drawn", () => {
@@ -254,14 +362,64 @@ describe("theory, worked out by the app", () => {
     expect(scaleFits("F", UNKNOWN_SUFFIX).then).toBeUndefined();
   });
 
-  it("what fits over F: scalesForChord with F as the home chord of F major, the first drawn", () => {
-    const c = scaleFits("F", "");
-    const chord = parseChordName("F")!;
-    const expected = scalesForChord(chord, homeKeyOf(chord));
-    expect(c.lines[0]).toEqual({ key: "ask.card.theory.scalesIntroMajor", values: { chord: "F", root: "F" } });
-    expect(c.lines).toHaveLength(1 + expected.length);
-    expect(c.lines[1].values.root).toBe(noteName(expected[0].root, "flat"));
-    expect(c.then).toEqual({ tool: "show_scale", args: { root: noteName(expected[0].root, "flat"), scale: expected[0].scale } });
+  /** The card's scale lines as "root name: notes", for rows written by hand. */
+  const scaleRows = (c: FactCard) => c.lines.filter((l) => l.key === "ask.card.theory.scale").map((l) => `${l.values.root} ${l.values.name}: ${l.values.notes}`);
+
+  // Written out by hand (review c2b2a H2, L4): the key the sentence names, and every scale offered.
+  const FITS: Array<[string, string, Line, string[]]> = [
+    ["F", "", { key: "ask.card.theory.scalesIntroMajor", values: { chord: "F", root: "F" } }, ["F Major: F G A Bb C D E", "F Major pentatonic: F G A C D"]],
+    ["Gb", "", { key: "ask.card.theory.scalesIntroMajor", values: { chord: "Gb", root: "Gb" } }, ["Gb Major: Gb Ab Bb Cb Db Eb F", "Gb Major pentatonic: Gb Ab Bb Db Eb"]],
+    ["C#", "", { key: "ask.card.theory.scalesIntroMajor", values: { chord: "C#", root: "C#" } }, ["C# Major: C# D# E# F# G# A# B#", "C# Major pentatonic: C# D# E# G# A#"]],
+    ["A", "m7", { key: "ask.card.theory.scalesIntroMinor", values: { chord: "Am7", root: "A" } }, ["A Natural minor: A B C D E F G", "A Dorian: A B C D E F# G", "A Minor pentatonic: A C D E G"]],
+    // A major seventh: the major pentatonic has no B, so it is not offered.
+    ["C", "maj7", { key: "ask.card.theory.scalesIntroMajor", values: { chord: "Cmaj7", root: "C" } }, ["C Major: C D E F G A B"]],
+    // Half-diminished: the ii of a minor key, never B minor (F# against the chord's F).
+    ["B", "m7b5", { key: "ask.card.theory.scalesPlacedMinor", values: { chord: "Bm7b5", degree: "ii", root: "A" } }, ["A Natural minor: A B C D E F G", "A Harmonic minor: A B C D E F G#"]],
+    ["F#", "m7b5", { key: "ask.card.theory.scalesPlacedMinor", values: { chord: "F#m7b5", degree: "ii", root: "E" } }, ["E Natural minor: E F# G A B C D", "E Harmonic minor: E F# G A B C D#"]],
+    // Diminished: the vii of a major key, never E minor (B against the chord's Bb).
+    ["B", "dim", { key: "ask.card.theory.scalesPlacedMajor", values: { chord: "Bdim", degree: "vii", root: "C" } }, ["C Major: C D E F G A B", "C Harmonic minor: C D Eb F G Ab B"]],
+    ["E", "dim", { key: "ask.card.theory.scalesPlacedMajor", values: { chord: "Edim", degree: "vii", root: "F" } }, ["F Major: F G A Bb C D E", "F Harmonic minor: F G Ab Bb C Db E"]],
+    ["B", "dim7", { key: "ask.card.theory.scalesPlacedMinor", values: { chord: "Bdim7", degree: "vii", root: "C" } }, ["C Harmonic minor: C D Eb F G Ab B"]],
+    // Augmented: the III of a minor key, never C harmonic minor over Caug (Eb and G against E and G#).
+    ["C", "aug", { key: "ask.card.theory.scalesPlacedMinor", values: { chord: "Caug", degree: "III", root: "A" } }, ["C Altered: C Db D# E F# G# Bb", "A Harmonic minor: A B C D E F G#"]],
+    ["Eb", "aug", { key: "ask.card.theory.scalesPlacedMinor", values: { chord: "Ebaug", degree: "III", root: "C" } }, ["Eb Altered: Eb Fb F# G A B Db", "C Harmonic minor: C D Eb F G Ab B"]],
+    // The altered dominants: the V of a minor key. G altered has no D, so it is not offered over G7b9.
+    ["G", "7b9", { key: "ask.card.theory.scalesPlacedMinor", values: { chord: "G7b9", degree: "V", root: "C" } }, ["C Harmonic minor: C D Eb F G Ab B"]],
+    ["G", "7#5", { key: "ask.card.theory.scalesPlacedMinor", values: { chord: "G7#5", degree: "V", root: "C" } }, ["G Altered: G Ab A# B C# D# F", "C Harmonic minor: C D Eb F G Ab B"]],
+    // A dominant is the V of a major key; the pentatonics and the blues scale lack its third or seventh.
+    ["C", "7", { key: "ask.card.theory.scalesPlacedMajor", values: { chord: "C7", degree: "V", root: "F" } }, ["C Mixolydian: C D E F G A Bb"]],
+    ["C", "7sus4", { key: "ask.card.theory.scalesPlacedMajor", values: { chord: "C7sus4", degree: "V", root: "F" } }, ["F Major: F G A Bb C D E", "C Minor pentatonic: C Eb F G Bb"]],
+  ];
+
+  it.each(FITS)("what fits over %s%s: the key said, and only scales with every chord tone", (root, suffix, intro, rows) => {
+    const c = scaleFits(root, suffix);
+    expect(c.lines[0]).toEqual(intro);
+    expect(scaleRows(c)).toEqual(rows);
+    const first = rows[0].split(" ");
+    expect(c.then).toEqual({ tool: "show_scale", args: { root: first[0], scale: expect.any(String) } });
+  });
+
+  it("G7#9: the app has no scale with every one of its notes, says so, and draws nothing", () => {
+    const c = scaleFits("G", "7#9");
+    expect(c.lines).toEqual([{ key: "ask.card.theory.scalesNone", values: { chord: "G7#9" } }]);
+    expect(c.then).toBeUndefined();
+  });
+
+  it("every quality, all twelve roots: every scale offered holds every note of the chord", () => {
+    for (const root of TWELVE) {
+      for (const suffix of CHORD_SUFFIXES) {
+        const c = scaleFits(root, suffix);
+        const tones = String(chordNotesCard(root, suffix).lines[0].values.notes).split(" ").map((n) => nameToPitchClass(n));
+        const scales = c.lines.filter((l) => l.key === "ask.card.theory.scale");
+        if (scales.length === 0) expect(keys(c), `${root}${suffix}`).toEqual(["ask.card.theory.scalesNone"]);
+        for (const l of scales) {
+          const pcs = String(l.values.notes).split(" ").map((n) => nameToPitchClass(n));
+          for (const t of tones) expect(pcs, `${root}${suffix} over ${l.values.root} ${l.values.name}`).toContain(t);
+          // One letter per note in every seven-note scale offered.
+          if (pcs.length === 7) expect(new Set(String(l.values.notes).split(" ").map((n) => n[0])).size, `${l.values.root} ${l.values.name}`).toBeGreaterThanOrEqual(6);
+        }
+      }
+    }
   });
 
   it("a minor chord is the home chord of a minor key", () => {
@@ -277,15 +435,11 @@ describe("the app's computed terms", () => {
   });
 
   it("what does 85% mean: each evenness pass mark in ms at this tempo, with the tempo said", () => {
-    const ctx = here();
+    const two = { ...TUNE, passBars: [{ metric: "timingEvenness", min: 0.85, overBars: 4 }, { metric: "timingEvenness", min: 0.8, overBars: 8 }] } as Exercise;
+    const ctx = here({ exercise: two }, { exercise: two });
     const c = card(passMarkMs(ctx, null));
-    const even = TUNE.passBars.filter((b) => b.metric === "timingEvenness");
-    if (even.length === 0) {
-      expect(keys(c)).toEqual(["ask.card.term.evenNone"]);
-      return;
-    }
     const msLines = c.lines.filter((l) => l.key === "ask.card.term.evenMs");
-    expect(msLines).toHaveLength(even.length);
+    expect(msLines.map((l) => l.values.bar)).toEqual([85, 80]);
     for (const l of msLines) {
       expect(l.values.bpm).toBe(ctx.run!.bpm);
       expect(l.values.ms).toBe(Math.round(evennessSpreadMs(Number(l.values.bar) / 100, Number(l.values.gap))));
@@ -328,6 +482,138 @@ describe("the app's computed terms", () => {
   it("my own exercises and a player without grading: no number", () => {
     expect(keys(cleanTempo(here({ path: { ...PATH, id: MY_EXERCISES_PATH } })))).toEqual(["ask.card.term.clean", "ask.card.term.cleanMine"]);
     expect(keys(cleanTempo(here({ grading: "off" })))).toEqual(["ask.card.term.clean"]);
+  });
+});
+
+describe("the plan the Session runs, not Today's (review c2b2a H1)", () => {
+  const T0 = NOW - 600_000;
+  const warmUp = { ...PART(70, "Warm-up"), why: { code: "warmUp", values: { bpm: 70 } } } as SessionPlan["steps"][number];
+  const TODAY = planOf([warmUp, PART(80, "Today's second")]);
+  const testOut = { ...PART(120, "Test out"), why: { code: "testOut", values: { step: "Step 3", bpm: 120 } } } as SessionPlan["steps"][number];
+
+  /** The context the host builds: its plan getter still hands Today's plan (the bug), the run is the runner's. */
+  function hosted(run: RunState, today: SessionPlan = TODAY): CoachContext {
+    return buildCoachContext({
+      screen: () => "session",
+      locale: () => "en",
+      now: () => NOW,
+      grading: () => "on",
+      input: () => ({ listening: true, direct: true }),
+      brain: () => ({ llmCompiled: false, choice: "off", resident: false, fastEnough: false }),
+      progress: () => ({ states: [], takes: [], ceilings: [] }),
+      plan: () => today,
+      run: () => run,
+    } as unknown as CoachSources);
+  }
+
+  it("Test out started from a Step's page: the tempo, the reason and what is next are the Test out's", () => {
+    const run = runReducer(IDLE, { type: "start", plan: planOf([testOut]), now: T0, untimed: true });
+    const ctx = hosted(run);
+    expect(card(planTempo(ctx)).lines).toEqual([
+      { key: "ask.card.plan.tempoPlanned", values: { bpm: 120 } },
+      reasonLine(testOut.why),
+    ]);
+    expect(card(planWhy(ctx)).lines[1]).toEqual(reasonLine(testOut.why));
+    expect(keys(card(planNext(ctx)))).toEqual(["ask.card.plan.nextLast"]);
+  });
+
+  it("a step inserted after a result: 'what's next' and 'why this tempo' follow the run's indices", () => {
+    let run = runReducer(IDLE, { type: "start", plan: TODAY, now: T0 });
+    run = runReducer(run, { type: "next", now: T0 + 1000 });
+    // On Today's second part (80), a 95 BPM edge step is inserted after it from its result.
+    run = { ...run, phase: "result" };
+    const edge = { ...PART(95, "Find my edge"), why: { code: "edgeFirst", values: { bpm: 95 } } } as SessionPlan["steps"][number];
+    run = runReducer(run, { type: "insertStep", step: edge, now: T0 + 2000 });
+    const ctx = hosted(run);
+    expect(card(planTempo(ctx)).lines[0]).toEqual({ key: "ask.card.plan.tempoPlanned", values: { bpm: 95 } });
+    expect(keys(card(planNext(ctx)))).toEqual(["ask.card.plan.nextLast"]);
+  });
+
+  it("Today's plan rebuilt after a saved Take: the running Session still reads its own", () => {
+    const run = runReducer(IDLE, { type: "start", plan: TODAY, now: T0 });
+    const rebuilt = planOf([PART(100, "Rebuilt first"), PART(110, "Rebuilt second")]);
+    const ctx = hosted(run, rebuilt);
+    expect(card(planTempo(ctx)).lines[0]).toEqual({ key: "ask.card.plan.tempoPlanned", values: { bpm: 70 } });
+    expect(card(planNext(ctx)).lines).toEqual([{ key: "ask.card.plan.nextBpm", values: { title: "Today's second", bpm: 80, minutes: 4 } }]);
+    expect(english(card(planNext(ctx)).lines[0])).toBe("Next in this Session's plan: Today's second, at 80 BPM, 4 min.");
+  });
+
+  it("why this tempo: a reason that is not about the tempo is not given as if it were (review c2b2a L3)", () => {
+    const due = { ...PART(80), why: { code: "keepWarm", values: { path: "Alternate picking", days: 3 } } } as SessionPlan["steps"][number];
+    const run = runReducer(IDLE, { type: "start", plan: planOf([due]), now: T0 });
+    expect(card(planTempo(hosted(run))).lines).toEqual([{ key: "ask.card.plan.tempoPlanned", values: { bpm: 80 } }]);
+    const review = { ...PART(80), why: { code: "reviewDue", values: { days: 3 } } } as SessionPlan["steps"][number];
+    const run2 = runReducer(IDLE, { type: "start", plan: planOf([review]), now: T0 });
+    expect(keys(card(planTempo(hosted(run2))))).toEqual(["ask.card.plan.tempoPlanned"]);
+  });
+});
+
+describe("pass marks, each in its own words (review c2b2a M1)", () => {
+  const MARKED = {
+    ...TUNE,
+    passBars: [
+      { metric: "timingEvenness", min: 0.85, overBars: 4 },
+      { metric: "notesHeard", min: 0.9, overBars: 16 },
+      { metric: "evennessHold", min: 0.75, overBars: 4 },
+      { metric: "accentPlacement", min: 0.6, overBars: 4 },
+    ],
+  } as Exercise;
+  const ctx = () => here({ exercise: MARKED }, { exercise: MARKED });
+
+  it("90%: the notes-heard mark, never the evenness numbers", () => {
+    const c = card(passMarkMs(ctx(), 90));
+    expect(c.lines).toEqual([{ key: "ask.card.term.heardMark", values: { bar: 90 } }]);
+    expect(english(c.lines[0])).toBe("90% is the notes-heard pass mark: in the bars judged, at least 90 of every 100 written notes must be heard.");
+  });
+
+  it("75%: evenness held to the end, in milliseconds by the same formula", () => {
+    const c = card(passMarkMs(ctx(), 75));
+    expect(keys(c)).toEqual(["ask.card.term.holdMs", "ask.card.term.evenHow"]);
+    expect(c.lines[0].values.bar).toBe(75);
+    expect(c.lines[0].values.ms).toBe(Math.round(evennessSpreadMs(0.75, Number(c.lines[0].values.gap))));
+  });
+
+  it("85%: the evenness mark alone", () => {
+    expect(keys(card(passMarkMs(ctx(), 85)))).toEqual(["ask.card.term.evenMs", "ask.card.term.evenHow"]);
+  });
+
+  it("60%: a check the app has no sentence for: no card", () => {
+    expect(noCard(passMarkMs(ctx(), 60))).toEqual({ key: "ask.card.term.markOther", values: { value: 60 } });
+  });
+});
+
+describe("the review schedule's edges (review c2b2a L6)", () => {
+  it("a graded Exercise with no pass tempo is never brought back, and the card says so", () => {
+    const noPass = { ...TUNE, tempo: { ...TUNE.tempo, passAtBpm: null } } as Exercise;
+    expect(keys(card(planReturn(here({ exercise: noPass }, { exercise: noPass }))))).toEqual(["ask.card.plan.returnNoPassTempo"]);
+  });
+
+  it("the schedule counts a Take marked not fair (the card's 'doesn't leave it out' is true while this holds)", () => {
+    const passAt = TUNE.tempo.passAtBpm ?? 80;
+    const ceiling = { exerciseKey: `${ALT.id}/${TUNE.id}`, cleanBpm: passAt, lastPracticed: NOW - 10 * DAY };
+    const passed = row(TUNE.id, { pathId: ALT.id, bpm: passAt, passed: true, startedAt: NOW - 10 * DAY, facts: { verdict: "passed" } });
+    const review = row(TUNE.id, { pathId: ALT.id, bpm: passAt, passed: true, startedAt: NOW - 8 * DAY, facts: { verdict: "passed", role: "review", fair: "no" } as TakeFacts });
+    const pick = { path: ALT, step: STEP_OF_TUNE as Step, exercise: TUNE };
+    const without = reviewStateOf({ states: [], takes: [passed], ceilings: [ceiling] } as unknown as CoachContext["progress"], pick);
+    const withUnfair = reviewStateOf({ states: [], takes: [passed, review], ceilings: [ceiling] } as unknown as CoachContext["progress"], pick);
+    expect(without).not.toBeNull();
+    expect(withUnfair?.dueAt).not.toBe(without?.dueAt);
+  });
+
+  it("due in a few hours: 'within 1 day', never 'now'", () => {
+    const l: Line = { key: "ask.card.plan.returnDays", values: { count: 1, bpm: 80 } };
+    expect(english(l)).toBe("The review schedule brings this Exercise back within 1 day, at 80 BPM.");
+  });
+});
+
+describe("the player's own exercises (review c2b2a L7)", () => {
+  const MINE_STEP = { ...PART(80), pathId: MY_EXERCISES_PATH } as SessionPlan["steps"][number];
+  const mine = () => here({ path: undefined, step: undefined, run: { ...runIn("result"), plan: planOf([MINE_STEP]) } });
+
+  it("with no Path in the host's list, the running step says whose they are", () => {
+    expect(keys(card(planReturn(mine())))).toEqual(["ask.card.plan.returnMine"]);
+    expect(keys(cleanTempo(mine()))).toEqual(["ask.card.term.clean", "ask.card.term.cleanMine"]);
+    expect(card(exercisePurpose(mine())).source).toEqual({ kind: "app" });
   });
 });
 
