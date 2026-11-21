@@ -1,0 +1,50 @@
+{"id":"pl-00462","wording":"find_edge#2","text":"sprawdź mój limit na nad linią","where":"jam","expect":{"kind":"call","tool":"find_edge","args":{"exercise":"nad linią"}},"call":{"tool":"find_edge","args":{"exercise":"nad linią"}},"tags":[]}
+{"id":"pl-00221","wording":"click_subdivision#0","text":"ustaw 2 kliki na uderzenie","where":"songs","expect":{"kind":"call","tool":"click_subdivision","args":{"subdivision":2}},"call":{"tool":"click_subdivision","args":{"subdivision":2}},"tags":[]}
+{"id":"pl-00419","wording":"tempo_bpm#1","text":"185 bpm","where":"drill","expect":{"kind":"call","tool":"set_tempo","args":{"bpm":185}},"call":{"tool":"set_tempo","args":{"bpm":185}},"tags":[]}
+{"id":"pl-00507","wording":"voice_off#1","text":"cisza, trener niech nie mówi","where":"drill","expect":{"kind":"call","tool":"set_setting","args":{"key":"coachVoice","value":"off"}},"call":{"tool":"set_setting","args":{"key":"coachVoice","value":"off"}},"tags":["already"]}
+{"id":"pl-00504","wording":"set_minutes#2","text":"zrób mi sesję na 20 min","where":"tools","expect":{"kind":"call","tool":"set_minutes","args":{"minutes":20}},"call":{"tool":"set_minutes","args":{"minutes":20}},"tags":[]}
+{"id":"pl-00412","wording":"open_step_name#2","text":"idź do kroku: Sweepy na","where":"today","expect":{"kind":"call","tool":"open_step","args":{"query":"Sweepy na"}},"call":{"tool":"open_step","args":{"query":"Sweepy na"}},"tags":[]}
+{"id":"pl-00640","wording":"set_goal#3","text":"ustaw cel - występować na scenie bez stresu","where":"progress","expect":{"kind":"call","tool":"set_goal","args":{"text":"występować na scenie bez stresu"}},"call":{"tool":"set_goal","args":{"text":"występować na scenie bez stresu"}},"tags":[]}
+{"id":"pl-00673","wording":"start_today#4","text":"dawaj, zaczynamy","where":"paths","expect":{"kind":"call","tool":"start_today","args":{}},"call":{"tool":"start_today","args":{}},"tags":[]}
+{"id":"pl-00055","wording":"find_edge#0","text":"znajdź moją granicę w ćwiczeniu cała piosenka w nowej tonacji","where":"drill","expect":{"kind":"call","tool":"find_edge","args":{"exercise":"cała piosenka w nowej tonacji"}},"call":{"tool":"find_edge","args":{"exercise":"cała piosenka w nowej tonacji"}},"tags":[]}
+{"id":"pl-00671","wording":"voice_off#6","text":"hej, możesz być cicho? wyłącz mówienie trenera","where":"session (result)","expect":{"kind":"call","tool":"set_setting","args":{"key":"coachVoice","value":"off"}},"call":{"tool":"set_setting","args":{"key":"coachVoice","value":"off"}},"tags":["already"]}
+{"id":"pl-00153","wording":"click_subdivision#4","text":"chcę 3 kliknięcia na każde uderzenie","where":"drill","expect":{"kind":"call","tool":"click_subdivision","args":{"subdivision":3}},"call":{"tool":"click_subdivision","args":{"subdivision":3}},"tags":[]}
+{"id":"pl-00141","wording":"test_out_here#3","text":"test kroku 7","where":"paths","expect":{"kind":"call","tool":"test_out","args":{"step":7}},"call":{"tool":"test_out","args":{"step":7}},"tags":[]}
+{"id":"pl-00513","wording":"load_preset#2","text":"ustaw preset gallop","where":"today","expect":{"kind":"call","tool":"load_preset","args":{"preset":"gallop"}},"call":{"tool":"load_preset","args":{"preset":"gallop"}},"tags":[]}
+{"id":"pl-00052","wording":"swap_harder#4","text":"część 1 - trudniej proszę","where":"session (result)","expect":{"kind":"none"},"call":{"tool":"swap_part","args":{"at":1,"choice":"harder"}},"tags":["wrong-screen"]}
+{"id":"pl-00300","wording":"go_screen#1","text":"idź do: narzędzia","where":"session (listening)","expect":{"kind":"none"},"call":{"tool":"go_to","args":{"screen":"tools"}},"tags":["wrong-screen"]}
+{"id":"pl-00034","wording":"none_future#3","text":"przypomnij mi wieczorem o: metronomu","where":"progress","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"pl-00062","wording":"none_negated#5","text":"stop, nie przechodź do: jamu","where":"session (playing)","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"pl-00512","wording":"find_edge#4","text":"znajdz moja granice w jeden, pięć, sześć, cztery jako jedna linia","where":"session (result)","expect":{"kind":"none"},"call":{"tool":"find_edge","args":{"exercise":"jeden, pięć, sześć, cztery jako jedna linia"}},"tags":["wrong-screen"]}
+{"id":"pl-00686","wording":"play_exercise#3","text":"chcę poćwiczyć: Najpierw cel","where":"session (listening)","expect":{"kind":"none"},"call":{"tool":"play_exercise","args":{"exercise":"Najpierw cel"}},"tags":["wrong-screen"]}
+{"id":"pl-00621","wording":"none_tuning#0","text":"nastrój mi gitarę","where":"songs","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"pl-00557","wording":"none_unsupported#8","text":"zrób backing track w stylu reggae","where":"today","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"pl-00061","wording":"none_chat#9","text":"no nieźle","where":"drill","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"pl-00457","wording":"open_path#7","text":"ścieżka Tapping - otwórz","where":"session (ready)","expect":{"kind":"none"},"call":{"tool":"open_path","args":{"path":"Tapping"}},"tags":["wrong-screen"]}
+{"id":"pl-00362","wording":"loop_bars#3","text":"pętla od taktu 9 do taktu 10, na spokojnie","where":"session (playing)","expect":{"kind":"none"},"call":{"tool":"loop_bars","args":{"from":9,"to":10}},"tags":["wrong-screen"]}
+{"id":"pl-00184","wording":"loop_bar#2","text":"tylko takt 4 w pętli","where":"session (playing)","expect":{"kind":"none"},"call":{"tool":"loop_bars","args":{"from":4}},"tags":["wrong-screen"]}
+{"id":"pl-00674","wording":"set_minutes#4","text":"ustaw dzisiejszą sesję na 30 minut","where":"paths","expect":{"kind":"none"},"call":{"tool":"set_minutes","args":{"minutes":30}},"tags":["withheld"]}
+{"id":"pl-00045","wording":"yours_input#0","text":"wycisz mikrofon","where":"beat","expect":{"kind":"yours","item":"input"},"tags":["never"]}
+{"id":"pl-00609","wording":"yours_input#9","text":"hej, możesz wyciszyć wejście?","where":"paths","expect":{"kind":"yours","item":"input"},"tags":["never"]}
+{"id":"pl-00114","wording":"yours_deleting#1","text":"skasuj ostatnie nagranie","where":"setlist","expect":{"kind":"yours","item":"deleting"},"tags":["never"]}
+{"id":"pl-00011","wording":"yours_model#3","text":"przełącz na inny model","where":"beat","expect":{"kind":"yours","item":"model"},"tags":["never"]}
+{"id":"pl-00548","wording":"yours_grades#8","text":"popraw wynik tego podejścia","where":"paths","expect":{"kind":"yours","item":"grades"},"tags":["never"]}
+{"id":"pl-00560","wording":"yours_recording#0","text":"nagraj mnie","where":"today","expect":{"kind":"yours","item":"recording"},"tags":["never"]}
+{"id":"pl-00634","wording":"yours_recording#8","text":"chcę zachować nagranie tego podejścia","where":"session (listening)","expect":{"kind":"yours","item":"recording"},"tags":["never"]}
+{"id":"pl-00610","wording":"yours_model#5","text":"chcę większy model AI, pobierz go","where":"today","expect":{"kind":"yours","item":"model"},"tags":["never"]}
+{"id":"pl-00629","wording":"yours_recording#0","text":"nagraj mnie","where":"drill","expect":{"kind":"yours","item":"recording"},"tags":["never"]}
+{"id":"pl-00540","wording":"yours_grades#6","text":"oznacz ten krok jako zdany","where":"today","expect":{"kind":"yours","item":"grades"},"tags":["never"]}
+{"id":"pl-00027","wording":"yours_grades#0","text":"oznacz to jako zaliczone","where":"paths","expect":{"kind":"yours","item":"grades"},"tags":["never"]}
+{"id":"pl-00219","wording":"yours_grades#0","text":"oznacz to jako zaliczone","where":"setlist","expect":{"kind":"yours","item":"grades"},"tags":["never"]}
+{"id":"pl-00126","wording":"yours_model#1","text":"ściągnij mocniejszy model","where":"progress","expect":{"kind":"yours","item":"model"},"tags":["never"]}
+{"id":"pl-00458","wording":"follow_path#6","text":"dorzuć ścieżkę akordy do mojego miksu","where":"paths","expect":{"kind":"which"},"call":{"tool":"follow_path","args":{"path":"akordy"}},"tags":["ambiguous"]}
+{"id":"pl-00265","wording":"play_exercise#4","text":"zagraj każdego teraz","where":"today","expect":{"kind":"which"},"call":{"tool":"play_exercise","args":{"exercise":"każdego"}},"tags":["ambiguous"]}
+{"id":"pl-00199","wording":"open_step_name#7","text":"hej, możesz otworzyć krok „jednej”?","where":"tools","expect":{"kind":"which"},"call":{"tool":"open_step","args":{"query":"jednej"}},"tags":["ambiguous"]}
+{"id":"pl-00565","wording":"play_exercise#4","text":"zagraj zsynkopowany teraz","where":"today","expect":{"kind":"which"},"call":{"tool":"play_exercise","args":{"exercise":"zsynkopowany"}},"tags":["ambiguous"]}
+{"id":"pl-00214","wording":"open_path#6","text":"idź do ścieżki: akordy","where":"progress","expect":{"kind":"which"},"call":{"tool":"open_path","args":{"path":"akordy"}},"tags":["ambiguous"]}
+{"id":"pl-00636","wording":"open_path#1","text":"picking otwórz","where":"beat","expect":{"kind":"which"},"call":{"tool":"open_path","args":{"path":"picking"}},"tags":["ambiguous"]}
+{"id":"pl-00372","wording":"find_edge#6","text":"szukaj mojego czystego tempa: pierwsze","where":"drill","expect":{"kind":"which"},"call":{"tool":"find_edge","args":{"exercise":"pierwsze"}},"tags":["ambiguous"]}
+{"id":"pl-00146","wording":"follow_path#7","text":"hej, dodaj dla mnie do śledzenia ścieżkę akordy","where":"setlist","expect":{"kind":"which"},"call":{"tool":"follow_path","args":{"path":"akordy"}},"tags":["ambiguous"]}
+{"id":"pl-00309","wording":"open_step_of_path#3","text":"przejdź do kroku 3 ścieżki: picking","where":"drill","expect":{"kind":"which"},"call":{"tool":"open_step","args":{"path":"picking","step":3}},"tags":["ambiguous"]}
+{"id":"pl-00394","wording":"open_path#5","text":"chciałbym zobaczyć stronę ścieżki: akordy, możesz ją otworzyć?","where":"drill","expect":{"kind":"which"},"call":{"tool":"open_path","args":{"path":"akordy"}},"tags":["ambiguous"]}
+{"id":"pl-00281","wording":"play_exercise#0","text":"zagraj ćwiczenie: molowy","where":"tools","expect":{"kind":"which"},"call":{"tool":"play_exercise","args":{"exercise":"molowy"}},"tags":["ambiguous"]}

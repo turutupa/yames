@@ -1,0 +1,2222 @@
+{
+  "toolTips": {
+    "catalog": {
+      "generic": {
+        "session_start_cold": {
+          "neutral": [
+            "Chào bạn — cứ chơi khi sẵn sàng, tôi sẽ bắt đầu theo dõi nhịp của bạn.",
+            "Rất vui có bạn. Hãy bắt đầu khi bạn thấy đã khởi động xong.",
+            "Tôi sẵn sàng khi bạn sẵn sàng. Tôi sẽ bắt đầu nghe ngay khi bạn chơi.",
+            "Cứ thong thả chuẩn bị — tôi sẽ nắm nhịp của bạn từ nốt đầu tiên.",
+            "Không vội. Hãy bắt đầu khi bạn đã ổn định, rồi mình đi tiếp.",
+            "Cứ chơi bất cứ khi nào bạn sẵn sàng. Tôi sẽ bắt nhịp bạn từ phách đầu tiên.",
+            "Chuẩn bị, ổn định chỗ ngồi, rồi chơi bất cứ lúc nào.",
+            "Khi nào bạn sẵn sàng — tôi đang nghe."
+          ]
+        },
+        "session_start_returning": {
+          "neutral": [
+            "Chào mừng bạn quay lại. Lần trước: {lastScore} ở {lastBpm} BPM. Hãy tiếp tục từ đó.",
+            "Rất vui gặp lại bạn. Buổi tập trước bạn đạt {lastScore} ở {lastBpm} BPM.",
+            "Lại bắt đầu nào. Lần trước bạn ở {lastScore} / {lastBpm} BPM — hãy tiếp tục leo lên.",
+            "Chào mừng bạn quay lại — {lastScore} ở {lastBpm} BPM trong buổi tập trước. Sẵn sàng khi bạn sẵn sàng.",
+            "Buổi tập trước: {lastScore} ở {lastBpm} BPM. Hãy tiếp tục từ chỗ bạn đã dừng.",
+            "Lại gặp nhau. Bạn đã kết thúc ở {lastScore} ở {lastBpm} BPM — một mốc tốt.",
+            "Chào mừng bạn quay lại. Lần trước là {lastScore} ở {lastBpm} BPM. Xem hôm nay thế nào nhé.",
+            "Rất vui bạn quay lại. Lần trước bạn đạt {lastScore} ở {lastBpm} BPM."
+          ]
+        },
+        "accuracy_drop": {
+          "encouragement": [
+            "Có vài lần trượt xuất hiện — hãy thả lỏng, hít thở rồi quay lại.",
+            "Bạn đã khớp nhịp, rồi hơi chao đảo. Hãy đặt lại ở phách mạnh tiếp theo.",
+            "Tụt một chút. Hãy làm chậm nhịp trong đầu rồi chơi tiếp.",
+            "Hụt nhẹ — không sao. Hãy tìm lại tiếng click ở ô nhịp tiếp theo.",
+            "Mất mạch một giây. Hãy bắt phách mạnh tiếp theo cho sạch.",
+            "Vấp nhẹ. Hãy hít một hơi rồi vào theo tiếng click tiếp theo.",
+            "Không sao — chỉ cần cảm nhận phách tiếp theo rơi xuống trước khi chơi.",
+            "Hơi trôi một chút. Hãy để máy đếm nhịp dẫn bạn quay lại."
+          ],
+          "neutral": [
+            "Tỷ lệ trúng đã tụt một chút — hãy đặt lại ở ô nhịp tiếp theo.",
+            "Độ chính xác đang tụt. Hãy để nó ổn định ở phách mạnh tiếp theo.",
+            "Mọi thứ đang trượt — hãy làm chậm trong đầu, rồi bắt đầu lại.",
+            "Một số lần trượt đang dồn lại. Hãy tìm một ô nhịp sạch, rồi chơi tiếp.",
+            "Chất lượng đang trôi. Hãy bám theo tiếng click trong trọn một ô nhịp.",
+            "Các lần trượt đang tăng — hãy hít một hơi, nghe tiếng click, rồi chơi.",
+            "Đang trôi nhịp. Hãy ngồi yên một ô nhịp cùng tiếng click trước khi quay lại.",
+            "Các lần đánh đang giảm. Hãy chờ phách mạnh rồi đặt lại."
+          ],
+          "correction": [
+            "Chỗ trượt kéo dài — hãy thử giảm tempo vài BPM.",
+            "Các lần đánh đang tản mát. Hãy chậm lại và xây lại từ một ô nhịp sạch.",
+            "Lấy một ô nhịp sạch, rồi leo lên lại.",
+            "Mẫu chơi đang rã ra — hãy dừng, đếm vào chậm, rồi chơi.",
+            "Dừng lại, đếm trọn một ô nhịp theo tiếng click, rồi vào lại.",
+            "Giảm tempo năm BPM. Làm cho sạch, rồi tăng lại.",
+            "Lùi lại. Chơi cho chắc một ô nhịp theo tiếng click trước khi tăng tốc.",
+            "Đặt lại hẳn — im một ô nhịp, đếm nó, rồi bắt đầu lại."
+          ]
+        },
+        "rushing_trend": {
+          "encouragement": [
+            "Đang đứng ngay trước tiếng click — hãy hít thở và bám theo nó.",
+            "Có chút vội đang len vào. Đặt chân vững, để máy đếm nhịp dẫn.",
+            "Hơi sớm — hãy ổn định vào tiếng click tiếp theo.",
+            "Bạn đi trước một chút. Hãy chờ tiếng click thay vì đuổi theo nó.",
+            "Chỉ hơi nóng một chút. Hãy thả lỏng tay và để tiếng click kéo bạn đi.",
+            "Nhịp đang nhích lên. Hãy hít một hơi và để tiếng click tiếp theo gặp bạn.",
+            "Ở mép của việc vội. Hãy ngả người ra sau trên ghế và bám theo tiếng click.",
+            "Hơi sớm một chút. Hãy nghe tiếng click trước, rồi mới chơi."
+          ],
+          "neutral": [
+            "Đang có xu hướng hơi sớm — hãy thử bám vào phần sau của phách.",
+            "Bạn đang nhích lên trước tiếng click — hãy để nó đến với bạn.",
+            "Đang trôi sớm. Hãy ngồi sâu hơn vào mỗi tiếng click.",
+            "Mỗi nốt đang rơi hơi sớm. Hãy chờ tiếng click.",
+            "Bạn đang dẫn máy đếm nhịp. Hãy để nó dẫn bạn.",
+            "Nhịp đang nhích lên. Hãy khớp với tiếng click, đừng đẩy nó.",
+            "Các nốt đang đến quá sớm. Hãy giữ mỗi nốt lâu thêm một phách trong đầu.",
+            "Trôi về phía trước. Hãy hít một hơi và để tiếng click định nhịp."
+          ],
+          "correction": [
+            "Vẫn đang nghiêng sớm — hãy đếm các nhịp giữa và đặt mỗi nốt đúng vào tiếng click.",
+            "Việc vội vẫn còn. Hãy chậm lại, đếm phách lửng giữa mỗi tiếng click.",
+            "Dừng lại, đếm vào chậm, rồi bắt đầu chơi lại.",
+            "Giảm vài BPM. Hãy để tiếng click dẫn trước khi tăng lại.",
+            "Tay đang chạy đua. Dừng lại, hít một hơi, bắt đầu ở phách mạnh tiếp theo.",
+            "Đặt lại — im một ô nhịp, nghe tiếng click, rồi vào ở phách 1.",
+            "Giảm tempo xuống năm BPM cho đến khi bạn ngồi ĐÚNG trên tiếng click.",
+            "Đừng cố lái máy đếm nhịp nữa. Hãy để nó lái bạn trong một ô nhịp."
+          ]
+        },
+        "dragging_trend": {
+          "encouragement": [
+            "Đang đứng ngay sau tiếng click — hãy nâng tempo lại dưới ngón tay.",
+            "Hơi kéo chậm. Hãy hít thở và đẩy lại vào phách.",
+            "Hơi sau một chút — hãy nghiêng về phía trước, bạn đã gần rồi.",
+            "Bạn trễ một chút. Hãy nâng tay lên; gặp tiếng click ở trên đỉnh.",
+            "Chỉ trễ chút xíu. Hãy đẩy nhẹ — tiếng click sẽ gặp bạn.",
+            "Độ trôi về sau nhỏ. Hãy nghiêng vào và bám phần đầu của mỗi tiếng click.",
+            "Hơi trễ. Hãy hình dung chơi hơi trước một chút và bạn sẽ rơi đúng nhịp.",
+            "Các nốt đang đến ngay sau tiếng click. Hãy đẩy lên một chút."
+          ],
+          "neutral": [
+            "Đang có xu hướng hơi trễ — hãy thử chơi hơi trước tiếng click.",
+            "Bạn đang ngồi sau phách — hãy đẩy vào từng phách.",
+            "Đang trôi trễ. Hãy với tới phần đầu của mỗi tiếng click.",
+            "Mỗi nốt đang rơi ngay sau tiếng click. Hãy gặp nó trực diện.",
+            "Máy đếm nhịp đang bỏ bạn lại. Hãy bước vào từng tiếng click.",
+            "Nhịp đang chùng xuống. Hãy nâng tay lên và chơi ngay trên tiếng click.",
+            "Các nốt đến trễ. Hãy nhắm vào mép đầu của mỗi phách.",
+            "Đang kéo chậm. Hãy hình dung tiếng click sớm hơn bạn nghĩ nửa cung."
+          ],
+          "correction": [
+            "Vẫn đang chùn lại — hãy chơi cùng tiếng click, đừng chờ nó.",
+            "Việc kéo chậm vẫn còn. Hãy đẩy tempo bằng các ngón tay.",
+            "Dừng lại, đặt lại, rồi bắt đầu lại ở phách 1.",
+            "Giảm tempo một chút và khớp vào. Việc kéo chậm sẽ hết khi bạn thấy nhẹ nhàng.",
+            "Dừng một ô nhịp. Nghe tiếng click, rồi vào ngay trên phách 1.",
+            "Đặt lại — đếm vào chậm và chơi với nhiều lực nâng hơn.",
+            "Giảm năm BPM và nhắm vào phần đầu của mỗi tiếng click.",
+            "Dừng lại, hít một hơi, rồi vào lại với chút đẩy về phía trước."
+          ]
+        },
+        "personal_best_streak": {
+          "encouragement": [
+            "Đang khớp — cứ giữ đà.",
+            "Chuỗi đang chạy. Tốt.",
+            "Đang đà tốt — ở lại đó.",
+            "Đúng rồi. Đừng đổi gì cả.",
+            "Chơi sạch. Cứ ở đó.",
+            "Đó là pocket — hãy giữ lấy nó.",
+            "Đẹp. Cứ tiếp tục như vậy.",
+            "Nhắm mắt lại, cứ tiếp tục."
+          ],
+          "neutral": [
+            "Tốt nhất buổi tập — đang khớp.",
+            "Đoạn sạch nhất cho đến giờ. Hãy giữ nó.",
+            "Lượt tốt nhất hôm nay. Đừng đổi gì cả.",
+            "Chuỗi sạch dài nhất của buổi tập. Hãy giữ nó.",
+            "Chuỗi cao nhất hôm nay. Ở lại đó.",
+            "Đoạn chặt nhất cho đến giờ — hãy giữ cảm giác này.",
+            "Nhịp tốt nhất của buổi tập là ngay đây.",
+            "Đây là mức cao nhất buổi tập của bạn — hãy ở lại trong đó."
+          ],
+          "correction": [
+            "Đang khớp — giữ tempo, chưa đẩy nhanh vội.",
+            "Chuỗi đang sạch. Ở mức BPM này cho đến khi nó thành tự động.",
+            "Đúng chỗ bạn muốn ở lại một phút.",
+            "Chưa tăng tốc vội. Hãy để tempo này thấm vào đôi tay.",
+            "Giữ nguyên — chưa leo lên. Hãy để nó thành trí nhớ cơ bắp.",
+            "Giữ mức này thêm một phút nữa trước khi tăng tốc.",
+            "Đậu lại đây. Tốc độ đến sau khi mức này trở nên nhàm.",
+            "Cưỡng lại ý muốn đẩy nhanh. Hãy khắc tempo này vào trước."
+          ]
+        },
+        "new_band_locked": {
+          "encouragement": [
+            "{bpmLow} BPM — giờ là của bạn.",
+            "Đã khớp ở {bpmLow} BPM. Tốt.",
+            "Giữ tempo này sạch — trần mới.",
+            "{bpmLow} BPM giờ thấy dễ rồi. Đó là tiến bộ.",
+            "Bạn làm chủ {bpmLow} BPM. Đừng để mất nó.",
+            "Vững ở {bpmLow}. Đó là sàn mới.",
+            "Sạch ở {bpmLow} BPM — hãy giữ cho nó còn ấm.",
+            "{bpmLow} BPM — vững. Hãy ở lại đây thêm chút nữa."
+          ],
+          "neutral": [
+            "Chơi sạch liên tục ở {bpmLow}–{bpmHigh} BPM trong một phút.",
+            "Dải {bpmLow}–{bpmHigh} BPM: đã khớp.",
+            "Làm chủ dải BPM mới: {bpmLow}–{bpmHigh}.",
+            "Sạch trọn một phút ở {bpmLow}–{bpmHigh} BPM.",
+            "{bpmLow}–{bpmHigh} BPM giữ vững. Đó là mốc nền mới.",
+            "Khớp vào {bpmLow}–{bpmHigh} BPM trong một đoạn dài.",
+            "Giữ sạch dải {bpmLow}–{bpmHigh} — đó là một chiến thắng thật sự.",
+            "Pocket được giữ ở {bpmLow}–{bpmHigh} BPM. Đừng để mất nó lúc này."
+          ],
+          "correction": [
+            "{bpmLow}–{bpmHigh} đã ổn định. Ở lại đây, rồi đẩy lên một chút.",
+            "Giữ sạch {bpmLow}–{bpmHigh}. Sẵn sàng leo khi bạn sẵn sàng.",
+            "{bpmLow}–{bpmHigh} đã thành của bạn. Buổi tập sau, hãy bắt đầu từ đây.",
+            "{bpmLow}–{bpmHigh} BPM đã khớp. Chưa tăng tốc vội.",
+            "Bạn có thể leo từ {bpmLow}–{bpmHigh}, nhưng phải giành lấy — trước hết thêm hai phút sạch nữa.",
+            "{bpmLow}–{bpmHigh} BPM là sàn mới. Đừng tụt xuống dưới nó.",
+            "Ổn định ở {bpmLow}–{bpmHigh}. Chỉ tăng lên khi nó thấy nhàm.",
+            "Làm chủ {bpmLow}–{bpmHigh} BPM. Hãy xây vài phút ở đây trước khi leo."
+          ]
+        },
+        "check_in": {
+          "encouragement": [
+            "Bạn đã chơi rất sâu rồi. Có điều gì bạn muốn tập trung tiếp theo không?",
+            "Hơn năm phút liền khớp nhịp. Bạn có muốn tôi chỉ ra điều gì cụ thể không?",
+            "Một đoạn dài — hãy dừng nếu bạn muốn, tôi ở đây.",
+            "Đang chơi vững. Bạn có muốn tôi nghe điều gì cụ thể không?",
+            "Bạn đã chơi một lúc rồi. Hãy hít một hơi nếu cần.",
+            "Đến giờ vẫn yên. Hãy cho tôi biết bạn đang luyện gì, tôi sẽ để ý.",
+            "Chưa có gì để nêu. Bạn muốn tôi nghe điều gì?",
+            "Pocket vững. Cứ tiếp tục, hoặc đổi hướng nếu bạn sẵn sàng."
+          ],
+          "neutral": [
+            "Năm phút rồi, không có gì để báo. Pocket vững. Tiếp tục hay đổi trọng tâm?",
+            "Một đoạn yên. Hãy cho tôi biết bạn đang luyện gì.",
+            "Một lượt dài không gián đoạn. Bạn có muốn nhận xét về điều gì không?",
+            "Đã năm phút. Không có vấn đề gì để nêu — cứ tiếp tục.",
+            "Buổi tập đều. Bạn muốn một góc nhìn khác, hay giữ hướng hiện tại?",
+            "Một lượt dài không trượt. Tiếp theo là gì?",
+            "Bạn đã ở trong pocket. Hãy nhìn lại và chọn trọng tâm tiếp theo.",
+            "Đến giờ buổi tập vẫn yên. Hãy chọn một mục tiêu nếu bạn muốn nhận xét sắc hơn."
+          ],
+          "correction": [
+            "Lưu ý — bạn đã chơi một lúc rồi. Hãy nghỉ 10 phút nếu tay bạn cần.",
+            "Hơn năm phút liên tục. Hãy hỏi cơ thể mình trước khi đẩy thêm.",
+            "Buổi tập kéo dài — hãy duỗi ngón tay, rồi quay lại.",
+            "Tay mỏi? Hãy nghỉ 60 giây trước lượt tiếp theo.",
+            "Một đoạn dài — hãy kiểm tra cổ tay và vai trước khi tiếp tục.",
+            "Đến lúc nghỉ một chút. Tay lạnh chơi cẩu thả.",
+            "Dừng và duỗi người. Nghỉ hai phút giúp hai mươi phút sau vững.",
+            "Chơi liên tục — hãy cho tay nghỉ trước khi đẩy tiếp."
+          ]
+        },
+        "fatigue": {
+          "encouragement": [
+            "Độ chính xác đã tụt trong vài phút qua. Hãy nghỉ một nhịp.",
+            "Tay đang căng lên? Duỗi nhanh rồi quay lại với sức mới.",
+            "Chất lượng đang trôi. Dừng, hít thở, rồi quay lại.",
+            "Tay đang làm việc nặng hơn mức cần. Nghỉ ngắn, rồi vào lại.",
+            "Bạn đã chơi một lúc rồi — hãy đặt nhạc cụ xuống 60 giây.",
+            "Cơ thể đang nặng hơn âm nhạc. Nghỉ nhanh một chút.",
+            "Ngón tay đang cứng? Hãy lắc cho thả lỏng, rồi quay lại.",
+            "Đến lúc nghỉ ngắn — tay tươi chơi sạch hơn."
+          ],
+          "neutral": [
+            "Độ chính xác giảm trong 3 phút qua ở BPM không đổi — có thể là mệt.",
+            "Điểm đang đi xuống mà tempo không đổi. Hãy nghỉ.",
+            "Độ chính xác giảm liên tục ở cùng BPM — coi đó là một chu kỳ nghỉ.",
+            "Cùng tempo, độ chính xác tụt. Tay đang mệt dần.",
+            "Chất lượng đang trượt mà tempo không đổi — đó là mệt.",
+            "Lỗi tăng trong khi tiếng click giữ nguyên. Đến lúc dừng.",
+            "Ba phút tụt dần ở một tempo. Hãy cho tay nghỉ.",
+            "BPM đều, độ chính xác tụt — đôi tay đang nói với bạn điều gì đó."
+          ],
+          "correction": [
+            "Mệt đã lộ ra — dừng ngay, nghỉ 90 giây, rồi quay lại.",
+            "Bạn đã qua đỉnh. Hãy nghỉ trước khi chất lượng tụt thêm.",
+            "Hãy nghỉ. Chơi khi mệt dạy đôi tay thói quen cẩu thả.",
+            "Dừng, đứng dậy, đi quanh một phút. Rồi quay lại.",
+            "Chất lượng đã giảm nhiều phút. Nghỉ thật sự — tối thiểu 90 giây.",
+            "Đôi tay tạm xong rồi. Dừng, lắc cho thả lỏng, uống nước.",
+            "Cố vượt qua lúc mệt sẽ khắc sâu lỗi. Hãy dừng và hồi phục.",
+            "Đặt nhạc cụ xuống. Nghỉ hai phút, rồi đánh giá lại."
+          ]
+        },
+        "recovery": {
+          "encouragement": [
+            "Cứu hay — ở lại đây.",
+            "Đã kéo lại được. Giữ nó.",
+            "Đã hồi lại — giữ đúng cảm giác này.",
+            "Lấy lại rồi. Ngồi trong đó một phút.",
+            "Đã thoát khỏi chỗ tụt. Đừng đổi gì bây giờ.",
+            "Bạn đã cảm thấy nó trượt và kéo nó lại. Đó mới là kỹ năng.",
+            "Hồi lại vững. Giữ thoải mái, ở lại đây.",
+            "Bắt kịp trước khi nó chạy mất. Giữ cảm giác này."
+          ],
+          "neutral": [
+            "Đã sạch lại sau chỗ tụt. Giữ nhịp này.",
+            "Điểm đã lên lại — giữ nó.",
+            "Hồi phục được xác nhận — độ chính xác lại ổn định.",
+            "Sạch lại sau chỗ trượt. Đừng đổi gì cả.",
+            "Độ chính xác đã về chỗ cũ. Giữ vững.",
+            "Đã ổn định sau chỗ tụt. Giữ tempo này.",
+            "Bạn đã thu hẹp khoảng cách. Ở lại mức BPM này.",
+            "Chất lượng đã hồi. Đậu lại đây một phút."
+          ],
+          "correction": [
+            "Hồi phục đang giữ. Chưa đẩy tempo vội.",
+            "Đã thoát khỏi chỗ tụt — giữ nguyên, chưa leo.",
+            "Bạn đã cứu được nó. Giữ đúng mức BPM này trọn một phút.",
+            "Đừng thưởng cho việc hồi phục bằng cách tăng tempo. Ngồi lại đây.",
+            "Đã trở lại đúng đường. Cưỡng lại ý muốn tăng tốc.",
+            "Hồi phục còn mới — hãy để nó thành thói quen trước khi đẩy.",
+            "Ở lại mức BPM này. Xây vài ô nhịp sạch trước khi đổi gì.",
+            "Bạn đã quay lại từ chỗ trượt. Đừng phá nó bằng cách leo quá sớm."
+          ]
+        },
+        "recovery_confirmed": {
+          "encouragement": [
+            "Lấy lại rồi.",
+            "Cứu hay — giữ nó.",
+            "Quay lại và sạch.",
+            "Đã kéo lại. Ở lại đây."
+          ],
+          "neutral": [
+            "Độ chính xác đã về. Giữ cảm giác này.",
+            "Sạch lại sau chỗ tụt.",
+            "Hồi phục được xác nhận. Giữ vững."
+          ],
+          "correction": [
+            "Hồi phục đang giữ — chưa đẩy tempo vội.",
+            "Đã trở lại đúng đường. Cưỡng lại ý muốn leo."
+          ]
+        },
+        "tempo_milestone": {
+          "encouragement": [
+            "{bpmLow} BPM — số mới.",
+            "Qua {bpmLow} BPM, sạch.",
+            "{bpmLow}+ và vẫn giữ. Tốt.",
+            "Lần đầu ở {bpmLow} BPM hôm nay. Cảm giác tốt.",
+            "Qua {bpmLow} sạch. Giữ thoải mái.",
+            "{bpmLow} BPM giờ đã nằm trong thực đơn.",
+            "Bạn đang ở vùng {bpmLow}. Hãy giữ nhẹ nhàng.",
+            "Chào mừng đến {bpmLow} BPM. Hãy làm cho nó thấy dễ."
+          ],
+          "neutral": [
+            "Đã vượt mốc {bpmLow} BPM lên trên.",
+            "Mốc tempo: giờ ở dải {bpmLow}-{bpmHigh}.",
+            "{bpmLow} BPM và đang lên.",
+            "Đạt {bpmLow} BPM. Dải mới: {bpmLow}-{bpmHigh}.",
+            "Đã chuyển vào khoảng {bpmLow}-{bpmHigh} BPM.",
+            "Đang lên — {bpmLow} BPM là tempo làm việc mới.",
+            "Chạm {bpmLow} BPM. Xem nó có giữ được không.",
+            "Tempo đã nhảy vào vùng {bpmLow}-{bpmHigh}."
+          ],
+          "correction": [
+            "Ở {bpmLow} BPM — ở lại đây cho đến khi sạch, chưa đẩy cao hơn vội.",
+            "Mốc {bpmLow} BPM. Hãy ổn định trước khi đẩy.",
+            "Dải mới: {bpmLow}-{bpmHigh}. Hãy chắc mức này giữ được trước khi leo.",
+            "{bpmLow} BPM còn mới tinh — đừng tăng tốc cho đến khi nó thấy nhàm.",
+            "Hãy giành lấy {bpmLow} BPM trước khi đuổi theo mốc kế tiếp. Giữ nó.",
+            "Đậu ở {bpmLow} BPM. Bước nhảy kế tiếp đến sau một phút sạch ở đây.",
+            "Đã chạm {bpmLow} BPM — giờ hãy khớp nó vào trước đợt tăng kế tiếp.",
+            "{bpmLow} BPM còn mới. Giữ nguyên và để đôi tay bắt kịp."
+          ]
+        },
+        "low_confidence": {
+          "encouragement": [
+            "Tín hiệu hơi mờ ở phía tôi — cứ chơi, tôi sẽ bắt kịp.",
+            "Âm thanh khó đọc hơn ở đoạn này, nhưng bạn nghe ổn.",
+            "Tôi đọc bạn hơi khó — cứ tiếp tục.",
+            "Khó nghe bạn rõ từ đây — đừng để điều đó làm bạn phân tâm.",
+            "Micro đang bắt một ít tạp âm, nhưng bạn chơi ổn.",
+            "Tín hiệu có chút mờ — cứ tiếp tục, tôi đang nghe.",
+            "Tôi đọc âm thanh hơi nhòe. Nhưng bạn nghe có vẻ đúng phách.",
+            "Tín hiệu hơi nhiễu. Hãy tin vào đôi tay."
+          ],
+          "neutral": [
+            "Độ tin cậy nhận diện thấp hơn trong 30 giây qua — số đọc có thể nhiễu hơn bình thường.",
+            "Độ tin cậy nhận điểm bắt đầu thấp hơn — nhận xét có thể kém chính xác ở đoạn này.",
+            "Tín hiệu âm thanh kém rõ hơn; các chỉ số kém tin cậy hơn một chút.",
+            "Chất lượng đọc giảm một chút. Số liệu có thể dao động nhiều hơn bình thường.",
+            "Đầu vào micro khó phân tích hơn — số đọc độ chính xác có thể trôi.",
+            "Tạp âm nền đang len vào; nhận xét có thể trễ một chút.",
+            "Độ rõ tín hiệu thấp hơn trong nửa phút qua.",
+            "Âm thanh khó đọc hơn — hãy xem các chỉ số với một chút dè dặt."
+          ],
+          "correction": [
+            "Khó đọc tín hiệu của bạn — hãy kiểm tra mức đầu vào hoặc vị trí micro.",
+            "Tín hiệu khó đọc. Hãy tăng độ lợi đầu vào hoặc lại gần micro hơn.",
+            "Nhận diện nốt không chắc chắn — có thể phòng quá ồn.",
+            "Cách tôi đọc bạn không đáng tin. Hãy lại gần micro hơn nếu bạn có thể.",
+            "Mức đầu vào có thể quá thấp. Hãy kiểm tra đồng hồ đo trước khi tiếp tục.",
+            "Khó phân biệt lần đánh với tạp âm. Hãy tắt mọi thứ trong phòng rồi thử lại.",
+            "Tín hiệu đang mất. Cắm dây hay micro USB — hãy kiểm tra kết nối.",
+            "Chất lượng âm thanh kém đến mức việc chấm điểm có thể sai. Hãy sửa đầu vào trước."
+          ]
+        },
+        "boundary_signal_a": {
+          "encouragement": [
+            "{change}. Đoạn mới — hãy nghỉ một nhịp, tìm lại cảm giác.",
+            "{change} — hãy đặt lại tai nghe và chơi hết đoạn này.",
+            "Cài đặt đã đổi: {change}. Xem hình dạng mới này cho cảm giác thế nào.",
+            "{change}. Đoạn mới, khởi đầu mới.",
+            "{change} — trang trắng, điểm mới.",
+            "{change}. Hãy hít một hơi và khớp vào cảm giác mới.",
+            "{change}. Đoạn cũ đã xong — đoạn này đứng riêng.",
+            "{change}. Hãy đặt lại tai nghe và làm quen dần với thay đổi."
+          ],
+          "neutral": [
+            "{change}. Đoạn mới mở ra ở đây.",
+            "Điểm ranh giới — {change}. Chặng tiếp theo được chấm riêng.",
+            "Thay đổi cài đặt: {change}. Đang đóng đoạn trước.",
+            "{change}. Điểm cho chặng tiếp theo bắt đầu từ bây giờ.",
+            "{change} — đoạn trước đã đóng và được tính.",
+            "Chuyển cấu hình: {change}. Đoạn mới.",
+            "{change}. Đoạn mới, chỉ số mới.",
+            "{change}. Đã qua ranh giới — điểm được đặt lại."
+          ],
+          "correction": [
+            "{change}. Hãy để thiết lập mới thấy tự nhiên trước khi đẩy.",
+            "{change} — đoạn cũ đã đóng. Hãy chắc thiết lập này ổn trước khi thêm độ phức tạp.",
+            "Cài đặt đã đổi giữa đoạn: {change}. Cấu hình mới được chấm riêng.",
+            "{change}. Hãy chơi chậm với thiết lập mới — đừng mang theo thói quen cũ.",
+            "{change}. Hãy làm cảm giác mới thấm trước khi thêm tốc độ.",
+            "{change} — đặt lại và coi chặng tiếp theo như một lượt khởi động.",
+            "{change}. Hãy chơi đơn giản cho đến khi cấu hình mới quen.",
+            "{change}. Chưa đẩy đoạn mới vội — hãy chơi sạch trước."
+          ]
+        },
+        "stamina": {
+          "neutral": [
+            "Điểm lại đang tụt sau mốc {staminaMinutes} phút — hãy nghỉ 30 giây, rồi quay lại ở cùng BPM.",
+            "Sau mốc {staminaMinutes} phút, độ chính xác của bạn thường tụt. Nghỉ ngắn, rồi vào lại.",
+            "Bạn thường yếu đi quanh phút thứ {staminaMinutes}. Hãy nghỉ và quay lại cho tươi.",
+            "Bức tường sức bền quanh phút thứ {staminaMinutes} — nghỉ ngắn bây giờ giữ được chất lượng về sau."
+          ]
+        },
+        "ramp_complete": {
+          "neutral": [
+            "Đã xong đợt tăng — {startBpm} đến {endBpm}. Bạn đã làm được.",
+            "Đạt mục tiêu: {endBpm} BPM. Bạn đã leo từ {startBpm}.",
+            "Đợt tăng kết thúc. {startBpm} → {endBpm} BPM hoàn tất.",
+            "Bạn đã giữ được đến {endBpm} BPM. Đợt tăng từ {startBpm} xong."
+          ]
+        },
+        "pace_coaching": {
+          "neutral": [
+            "Lần thứ tư ở {bpm} — trần này là thật. Hai buổi ở {suggestedBpm} để củng cố, rồi đẩy lại.",
+            "Bạn đã chạm {bpm} BPM {attemptCount} lần và nó chưa bám. Hãy xuống {suggestedBpm} trong một tuần, xây cho vững.",
+            "{attemptCount} lần thử ở {bpm} BPM. Luyện ở trần: hai buổi ở {suggestedBpm}, rồi quay lại.",
+            "Trần ở {bpm} BPM — {attemptCount} lần thử đã xác nhận. Đậu ở {suggestedBpm} và để nó lắng xuống."
+          ]
+        },
+        "preset_ceiling_hit": {
+          "neutral": [
+            "{bpmLow}–{bpmHigh} là chỗ bài này thôi sạch với bạn — {attemptCount} buổi trong dải đó, đều quanh {score}.",
+            "Bạn lại ở {bpmLow}–{bpmHigh}. {attemptCount} lượt gần nhất ở đây đều quanh {score}.",
+            "Ghi lại khi bạn chơi: {attemptCount} buổi ở {bpmLow}–{bpmHigh}, buổi nào cũng gần {score}.",
+            "Đây là tempo mà điểm của bạn ở bài này bắt đầu tụt. Đến giờ đã {attemptCount} buổi ở đây.",
+            "Giờ đã {attemptCount} lần ở {bpmLow}–{bpmHigh}, mỗi lần quanh {score}. Xem hôm nay thế nào.",
+            "Cùng dải với lần trước — {bpmLow}–{bpmHigh}, nơi bài tập này đang rơi gần {score}."
+          ]
+        },
+        "grid_lost": {
+          "neutral": [
+            "Độ tương quan với lưới đã giảm — bạn còn đang chơi theo tiếng click không?",
+            "Vừa mất lưới. Là nốt đệm có chủ ý, hay đang trôi khỏi tiếng click?",
+            "Độ tương quan với lưới vừa tụt. Vẫn cùng máy đếm nhịp chứ?",
+            "Có vẻ groove đã tách khỏi tiếng click. Nốt đệm hay chơi tự do?"
+          ]
+        },
+        "bias_only": {
+          "encouragement": [
+            "Nhịp rất ổn định — chỉ {direction} {biasMs}ms. Hãy dịch mọi thứ {correctionDirection} để ngồi đúng phách.",
+            "Kiểm soát rất tốt — chỉ nghiêng {direction} {biasMs}ms. Dịch một chút {correctionDirection} sẽ đưa nó vào giữa."
+          ],
+          "neutral": [
+            "Bạn đang rơi {direction} {biasMs}ms so với phách — rất ổn định, chỉ là bị dịch. Hãy thử dịch mọi thứ {correctionDirection}.",
+            "Chặt và ổn định, nhưng {direction} {biasMs}ms so với tiếng click. Hãy dịch lực đánh {correctionDirection} để đưa nó vào giữa.",
+            "Độ tản của nhịp bạn thấp, nhưng cả mẫu chơi nằm {direction} {biasMs}ms. Hãy dịch {correctionDirection}.",
+            "Độ rung thấp, nhưng lệch {direction} {biasMs}ms. Đó là một độ nghiêng — hãy chỉnh {correctionDirection} để rơi đúng phách."
+          ],
+          "correction": [
+            "Độ lệch nhất quán {direction} {biasMs}ms — không ngẫu nhiên, chỉ là một độ nghiêng. Hãy dịch mọi thứ {correctionDirection}.",
+            "Mọi lần đánh đều rơi {direction} {biasMs}ms. Đó là độ lệch hệ thống, không phải độ rung. Hãy chỉnh {correctionDirection}."
+          ]
+        },
+        "boundary_signal_b": {
+          "encouragement": [
+            "Đoạn tốt — {score}% ở {bpm} BPM. Hãy nghỉ một nhịp.",
+            "{score}% ở {bpm} BPM — một điểm chốt vững.",
+            "Kết đoạn đó ở {score}% / {bpm} BPM. Điểm dừng tốt.",
+            "{score}% ở {bpm} BPM khép đoạn đó lại — làm tốt.",
+            "Xong đoạn — {score}% ở {bpm} BPM. Tốt.",
+            "Quãng lặng đã khép nó lại: {score}% ở {bpm} BPM.",
+            "Kết thúc sạch — {score}% ở {bpm} BPM.",
+            "{score}% ở {bpm} BPM. Hãy nghỉ lấy hơi."
+          ],
+          "neutral": [
+            "Đoạn kết thúc sau quãng im — {score}% ở {bpm} BPM.",
+            "Khoảng ngừng chơi đã đóng đoạn: chấm {score}%.",
+            "Một quãng yên — đoạn đóng ở {score}%.",
+            "{score}% ở {bpm} BPM — đoạn đóng bởi quãng nghỉ.",
+            "Quãng nghỉ đã kết thúc đoạn: {score}%.",
+            "Hết đoạn — đã ghi {score}% ở {bpm} BPM.",
+            "Đóng đoạn ở {score}% / {bpm} BPM.",
+            "Đã lưu {score}% ở {bpm} BPM. Hãy nhìn lại nếu bạn muốn."
+          ],
+          "correction": [
+            "Đoạn kết thúc ở {score}% — hãy xem lại trước lượt tiếp theo.",
+            "{score}% đã đóng đoạn. Hãy kiểm tra điều gì đã trượt trước lần thử tiếp theo.",
+            "Đã ghi nhận quãng nghỉ — {score}%. Hãy xem lại tóm tắt đoạn trước khi tiếp tục.",
+            "{score}% ở {bpm} BPM — đáng xem nhanh phần phân tích.",
+            "Đoạn đóng dưới mức bạn muốn: {score}%. Hãy chẩn đoán trước khi đẩy.",
+            "{score}% ở {bpm} BPM — hãy chậm lại ở lượt tiếp theo.",
+            "Kết thúc ở {score}%. Hãy chỉnh lại điều đã trượt trước một lượt nữa.",
+            "{score}% ở {bpm} BPM. Hãy đọc tóm tắt đoạn, rồi thử lại."
+          ]
+        },
+        "muddy_hits": {
+          "neutral": [
+            "Bạn đang trúng mọi phách nhưng tín hiệu nhẹ — hãy thử đánh sắc hơn.",
+            "Các phách đều có, nhưng transient yếu. Hãy đánh với nhiều chủ ý hơn.",
+            "Độ phủ trông tốt nhưng các lần đánh nhỏ. Thêm lực vào lúc đánh.",
+            "Bạn đang chơi xuyên qua tiếng click, chỉ là nhẹ. Hãy thử tiếp xúc mạnh hơn."
+          ]
+        },
+        "grid_discontinuity": {
+          "neutral": [
+            "Bạn đã rời khỏi lưới — hãy thử khớp lại với tiếng click trước câu tiếp theo.",
+            "Nhịp đã lang thang khỏi tiếng click. Hãy đặt lại và tìm nhịp trước khi tiếp tục.",
+            "Theo dõi lưới đã đứt — hãy nghỉ một nhịp, rồi vào lại ở phách mạnh.",
+            "Vừa trôi khỏi tiếng click. Dừng, hít thở và khớp lại."
+          ]
+        },
+        "low_completeness": {
+          "neutral": [
+            "Bạn đang đánh khoảng một nửa số phách dự kiến — hãy cố gắng có mặt ở từng phách.",
+            "Độ phủ thấp — hãy chắc bạn đánh từng phách, không chỉ những phách thấy tự nhiên.",
+            "Khoảng một nửa số phách đang không được chơi. Hãy tập trung hoàn thành trọn mẫu.",
+            "Độ phủ phách thấp. Hãy thử đếm thành tiếng để chắc bạn không bỏ phách nào."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Vị trí phách của bạn trông tốt — nhưng khoảng cách giữa các nốt cứ lang thang. Hãy thử đếm thành tiếng các nốt chia nhỏ khi chơi.",
+            "Đúng phách đều đặn, nhưng khoảng cách nốt không đều. Hãy gõ chân và đếm các nốt chia nhỏ khi chơi.",
+            "Nhịp phách đã có — nhưng khoảng cách giữa các nốt đang dịch chuyển. Hãy đếm thành tiếng nốt móc đơn (hoặc móc kép) để khóa khoảng cách.",
+            "Vị trí vững, khoảng cách đang trôi. Hãy thử chậm lại cho đến khi các khoảng thấy đều, rồi tăng tốc lại."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "Khoảng cách nốt đều — nhưng bạn đang rơi lệch phách. Hãy đón trước mỗi tiếng click một chút và rơi đúng vào nó.",
+            "Khoảng cách đều, nhưng bản thân các nốt bị dịch khỏi lưới. Hãy tập trung khóa nốt đầu của mỗi nhóm vào phách.",
+            "Nhịp giữa các nốt của bạn đều — hãy luyện chỗ chúng rơi so với tiếng click. Hãy thử chơi hơi trước chỗ bạn đoán phách.",
+            "Cảm giác khoảng cách tốt. Giờ hãy đưa cả câu vào lưới — nhắm vào tâm của mỗi phách."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "Vị trí phách và khoảng cách nốt đều đã khớp. Đó chính là cảm giác ấy.",
+            "Khoảng cách và vị trí đều chuẩn. Buổi tập sạch.",
+            "Cả hai chiều đều vững — bạn đang chơi đúng chỗ bạn định.",
+            "Nhịp được căn trên mọi mặt. Đó là âm thanh của việc luyện tập đều đặn."
+          ]
+        },
+        "drill_step_up": {
+          "neutral": [
+            "{accuracyPct}% — tempo tăng lên {bpm} BPM.",
+            "Vòng sạch ở {accuracyPct}%. Đưa bạn lên {bpm} BPM.",
+            "Xứng đáng: {accuracyPct}%. Giờ ở {bpm} BPM.",
+            "{accuracyPct}% đạt mức đạt — từ đây là {bpm} BPM.",
+            "Vững ở {accuracyPct}%. Tăng lên {bpm} BPM.",
+            "Vòng tốt — {accuracyPct}%. Tiếp theo {bpm} BPM.",
+            "Lên {bpm} BPM. Bạn đã giữ {accuracyPct}% ở vòng trước.",
+            "{accuracyPct}% cho thấy bạn sẵn sàng. {bpm} BPM."
+          ]
+        },
+        "drill_step_down": {
+          "neutral": [
+            "{accuracyPct}% — hạ nhẹ về {bpm} BPM.",
+            "Vòng đó tụt xuống {accuracyPct}%. Hạ về {bpm} BPM.",
+            "Lùi về {bpm} BPM — {accuracyPct}% ở vòng trước.",
+            "{accuracyPct}%. Hãy xây lại ở {bpm} BPM.",
+            "Lùi về {bpm} BPM sau {accuracyPct}%.",
+            "{accuracyPct}% dưới mức đạt — {bpm} BPM cho vòng tiếp theo.",
+            "Xuống {bpm} BPM. Làm cho sạch trước khi mình leo lại.",
+            "Hạ nhẹ về {bpm} BPM; {accuracyPct}% cần nền vững hơn."
+          ]
+        }
+      },
+      "drums": {
+        "session_start_cold": {
+          "neutral": [
+            "Sẵn sàng khi bạn sẵn sàng. Tôi sẽ bắt đầu theo dõi tiếng kick từ lần đánh đầu tiên của bạn.",
+            "Ngồi cho ổn và bắt đầu bất cứ lúc nào — tôi sẽ bắt nhịp từ nhát đánh đầu tiên.",
+            "Cứ thong thả khởi động đôi tay. Tôi sẽ bắt đầu nghe khi bạn chơi.",
+            "Rất vui có bạn. Hãy bắt đầu khi dùi trống đã sẵn sàng.",
+            "Khi nào bạn sẵn sàng — đánh vào bộ trống và tôi sẽ bắt đầu bắt nhịp của bạn.",
+            "Không vội. Cho người thả lỏng, rồi chơi khi bạn sẵn sàng.",
+            "Sẵn sàng khi bạn sẵn sàng. Tôi sẽ theo dõi từ phách đầu tiên.",
+            "Chuẩn bị lúc nào cũng được — tôi nghe từ nhát đánh đầu tiên của bạn."
+          ]
+        },
+        "session_start_returning": {
+          "neutral": [
+            "Chào mừng bạn quay lại. Buổi tập trước: {lastScore} ở {lastBpm} BPM. Xem groove có trở lại nhanh không.",
+            "Rất vui gặp lại bạn. Lần trước bạn đạt {lastScore} ở {lastBpm} BPM — tiếng kick giờ đã có mốc nền.",
+            "Lại ngồi sau bộ trống rồi. Buổi trước là {lastScore} ở {lastBpm} BPM. Hãy xây tiếp trên đó.",
+            "Chào mừng bạn quay lại — lần trước {lastScore} / {lastBpm} BPM. Sẵn sàng khi bạn sẵn sàng.",
+            "Buổi trước trên bộ trống: {lastScore} ở {lastBpm} BPM. Hãy tiếp tục như vậy.",
+            "Lại bắt đầu nào. Lần trước bạn ở {lastScore} / {lastBpm} BPM — một điểm xuất phát vững.",
+            "Chào mừng bạn quay lại. {lastScore} ở {lastBpm} BPM là mốc của lần trước. Hãy chạm tới nó.",
+            "Rất vui bạn quay lại. Buổi trước {lastScore} ở {lastBpm} BPM — bắt đầu thôi."
+          ]
+        },
+        "accuracy_drop": {
+          "correction": [
+            "Tiếng kick đang trôi. Hãy khóa chân phải vào tiếng click trước khi vào snare.",
+            "Các lần đánh đang tản mát. Đưa kick và snare trở lại lưới nhịp.",
+            "Dừng lại, đếm một ô nhịp, bắt đầu lại chỉ với chân.",
+            "Lùi về chỉ kick và hi-hat trong một ô nhịp, rồi thêm snare.",
+            "Chậm lại. Chỉ chơi chân trên mỗi tiếng click trong bốn ô nhịp.",
+            "Mẫu chơi đang rã ra. Bỏ hết trừ kick, rồi thêm dần lại.",
+            "Dừng cả bộ trống. Một ô nhịp chỉ nghe tiếng click, rồi vào bằng chân.",
+            "Tay và chân đang lệch nhau. Hãy đặt lại ở phách mạnh tiếp theo."
+          ]
+        },
+        "rushing_trend": {
+          "neutral": [
+            "Dùi trống đang đến trước tiếng click. Hãy để hi-hat chờ nó.",
+            "Bạn đang đi trước phách — hãy đặt kick đúng vào tiếng click, không phải ngay trước nó.",
+            "Nhịp đang nhích lên. Hãy đánh backbeat trễ hơn một chút so với cảm giác đúng."
+          ],
+          "correction": [
+            "Tay phải đang dẫn trước tiếng kick — hãy thả nó lùi lại.",
+            "Snare đang vội. Hãy đếm các nốt móc kép ở giữa và đặt phách 2 đúng vào tiếng click.",
+            "Bạn đang đẩy tiếng click. Hãy làm chậm tay phải; chân sẽ theo sau.",
+            "Hi-hat đang đẩy lên trước. Hãy thả lỏng tay phải và để tiếng click đặt tốc độ.",
+            "Snare đang chạy đua. Hãy nhẹ nhàng vào groove và để nó thở.",
+            "Giảm vài BPM. Làm cho kick-snare nằm ĐÚNG trên tiếng click trước khi tăng lại.",
+            "Dùi trống đang dẫn trước. Hãy giữ chúng lại — để máy đếm nhịp đến trước.",
+            "Tạm dừng bộ trống. Chỉ dùng chân gõ theo tiếng click trong một ô nhịp, rồi mới đưa tay vào."
+          ]
+        },
+        "dragging_trend": {
+          "neutral": [
+            "Đang ngồi sau tiếng click. Hãy đưa kick lên để gặp nó.",
+            "Groove đang nghiêng về trễ — hãy nâng hi-hat trở lại đúng phách.",
+            "Bạn hơi sau một chút. Hãy đánh snare ở chỗ bạn nghĩ nó nằm, không phải sau đó."
+          ],
+          "correction": [
+            "Tay phải đang chậm so với tiếng kick — hãy nghiêng vào hi-hat.",
+            "Snare đang kéo chậm. Hãy dẫn phách 2 và 4 một chút, đừng chờ tiếng click.",
+            "Đẩy hi-hat lên trước; kick phải nằm ĐÚNG trên tiếng click, không phải sau.",
+            "Lực đánh dùi đang nặng. Hãy nhấc sớm hơn — gặp tiếng click ở trên đỉnh.",
+            "Backbeat đang trễ. Hãy đẩy phách 2 và 4 về phía trước.",
+            "Hi-hat đang sau. Hãy vào sớm hơn và đánh với nhiều độ nảy hơn.",
+            "Giảm tempo và chơi với nhiều lực nâng hơn. Việc kéo chậm sẽ hết khi bạn thấy nhẹ nhàng.",
+            "Dùi trống đang rơi trễ. Hãy hình dung tiếng click sớm hơn thực tế một chút."
+          ]
+        },
+        "personal_best_streak": {
+          "encouragement": [
+            "Kick-snare đã khớp.",
+            "Pocket. Ở lại.",
+            "Chuỗi đang chạy — ở lại đó.",
+            "Tay chân đang nói chuyện với nhau. Giữ nó.",
+            "Đúng rồi. Đừng đổi gì cả.",
+            "Đó là groove. Ngồi trong đó.",
+            "Chặt. Cứ tiếp tục.",
+            "Chân và tay đồng bộ. Giữ."
+          ]
+        },
+        "new_band_locked": {
+          "encouragement": [
+            "Dải {bpmLow}–{bpmHigh} BPM được giữ vững — quan hệ kick-snare đã khớp.",
+            "Pocket giữ vững ở {bpmLow}–{bpmHigh} BPM.",
+            "Giữ vững ở {bpmLow}–{bpmHigh} BPM — đó là mốc nền mới.",
+            "Giữ sạch {bpmLow}–{bpmHigh} BPM. Chân và tay đang ăn khớp.",
+            "Groove khớp ở {bpmLow}–{bpmHigh} BPM. Đừng để mất nó.",
+            "Làm chủ {bpmLow}–{bpmHigh} BPM. Ở lại đây.",
+            "Bộ trống nghe lời ở {bpmLow}–{bpmHigh} BPM. Mốc nền mới.",
+            "Pocket giữ vững ở {bpmLow}–{bpmHigh} BPM trong trọn một phút."
+          ]
+        },
+        "recovery": {
+          "encouragement": [
+            "Groove đã trở lại. Ở lại đây.",
+            "Kick-snare đã khớp lại. Giữ nó.",
+            "Tay chân lại ăn khớp — giữ nó.",
+            "Bạn đã kéo groove về lại. Đừng đổi gì cả.",
+            "Pocket đã hồi lại. Ngồi trong đó.",
+            "Chân và tay đã đồng bộ lại. Giữ.",
+            "Đã về lại chỗ ngồi. Giữ thoải mái.",
+            "Bắt kịp chỗ trượt trước khi nó chạy mất. Tốt."
+          ]
+        },
+        "recovery_confirmed": {
+          "encouragement": [
+            "Đã về lại pocket.",
+            "Groove đã trở lại. Giữ nó.",
+            "Kick-snare khớp — ở lại đó."
+          ]
+        },
+        "fatigue": {
+          "encouragement": [
+            "Đôi tay đang căng lên? Lắc cổ tay cho thả lỏng rồi quay lại.",
+            "Chất lượng đang trôi — hãy rời ghế ngồi 60 giây.",
+            "Cẳng tay đang lên tiếng? Dừng ngắn, rồi vào lại.",
+            "Dùi trống thấy nặng? Đặt chúng xuống, duỗi người, rồi quay lại.",
+            "Tay nắm đang siết lại? Rời bộ trống một phút.",
+            "Cổ tay đang cứng — lắc nhanh cho thả lỏng, rồi tiếp tục.",
+            "Đôi tay đang làm việc nặng hơn mức cần. Nghỉ ngắn.",
+            "Đặt dùi xuống một lát — để hai cánh tay được đặt lại."
+          ],
+          "correction": [
+            "Mệt đã lộ ra — dừng ngay, bỏ dùi xuống, nghỉ 90 giây. Đánh trống khi mệt khắc sâu nhịp cẩu thả.",
+            "Bạn đã qua đỉnh — đặt dùi xuống, đi một vòng, rồi đánh giá lại.",
+            "Dừng trước khi sự căng chiếm lấy. Nghỉ 90 giây, uống nước, rồi quay lại.",
+            "Cổ tay đang căng. Dừng, duỗi cẳng tay, nghỉ hai phút.",
+            "Cố vượt qua đây là bạn sẽ tự làm đau mình. Nghỉ thật sự ngay bây giờ.",
+            "Dừng đánh trống. Rời bộ trống vài phút.",
+            "Đặt dùi xuống. Cẳng tay trước, rồi đến bàn tay, rồi quay lại khi đã thả lỏng.",
+            "Dừng hẳn. Nghỉ hai phút và uống một ngụm nước trước khi quay lại."
+          ]
+        },
+        "tempo_milestone": {
+          "encouragement": [
+            "Ở {bpmLow} BPM — ở lại đây cho đến khi kick thành tự động. Chưa đẩy cao hơn vội.",
+            "Mốc {bpmLow} BPM. Hãy chắc cả hai chân đều sạch trước khi đẩy.",
+            "Dải mới: {bpmLow}-{bpmHigh}. Đánh một nhát mỗi phách theo tiếng click trước khi leo.",
+            "{bpmLow} BPM còn mới. Khóa kick trên mỗi tiếng click trước khi thêm fill.",
+            "Đậu ở {bpmLow} BPM. Bước nhảy kế tiếp đến sau một phút sạch.",
+            "Đã chạm {bpmLow} BPM — giờ hãy xây vài ô nhịp sạch trước khi lên cao hơn.",
+            "{bpmLow}-{bpmHigh} BPM còn mới tinh. Giữ ngang và để tay chân bắt kịp.",
+            "Giành lấy {bpmLow} BPM trước khi đuổi theo mốc cao hơn. Giữ cho đến khi thấy dễ."
+          ]
+        },
+        "check_in": {
+          "neutral": [
+            "Đã chơi bộ trống một đoạn dài — bạn đang luyện điều gì cụ thể không?",
+            "Hơn năm phút rồi. Bạn muốn tôi nhận xét kick, hi-hat, hay cả hai?",
+            "Bạn đã ở sâu trong pocket. Hãy cho tôi biết bạn muốn gì tiếp theo.",
+            "Chơi vững trên bộ trống. Bạn có muốn nhận xét sắc hơn về điều gì không?",
+            "Bạn đã chơi một lúc rồi. Muốn tôi nghe kick, snare, hay độ đồng bộ tay chân?",
+            "Pocket đã vững suốt. Trọng tâm từ đây là gì?",
+            "Groove dài đang chạy — hãy chọn một mục tiêu và tôi sẽ tập trung vào đó.",
+            "Hơn năm phút. Hãy cho tôi biết bạn muốn nhận xét tiếp theo ở đâu."
+          ]
+        },
+        "ramp_complete": {
+          "neutral": [
+            "Xong đợt tăng — {startBpm} đến {endBpm} trên bộ trống. Một đợt leo vững.",
+            "Đã tới {endBpm} BPM. Kick giữ được đợt tăng từ {startBpm}.",
+            "Đợt tăng kết thúc. {startBpm} → {endBpm} BPM — tay chân vẫn khớp.",
+            "Đạt mục tiêu: {endBpm} BPM. Bạn đã dẫn nhịp từ {startBpm} trên bộ trống."
+          ]
+        },
+        "stamina": {
+          "neutral": [
+            "Quanh phút thứ {staminaMinutes} đôi tay của bạn căng lên. Giảm BPM 5 nấc và xây lại.",
+            "Qua mốc {staminaMinutes} phút, tay chân bắt đầu trôi. Nghỉ ngắn, rồi quay lại.",
+            "Mệt lộ ra quanh phút thứ {staminaMinutes} trên bộ trống. Cho cổ tay nghỉ, rồi quay lại.",
+            "Bạn thường mất độ khớp của kick quanh phút thứ {staminaMinutes}. Hãy nghỉ lấy hơi."
+          ]
+        },
+        "bias_only": {
+          "neutral": [
+            "{direction} {biasMs}ms so với tiếng click, rất chặt. Hãy dịch điểm đánh của bạn {correctionDirection}.",
+            "Các lần đánh của bạn khớp với nhau nhưng nằm {direction} {biasMs}ms. Hãy dịch cả groove {correctionDirection}.",
+            "Độ tản thấp nhưng nhất quán {direction} — hãy đưa cảm giác của cả bộ trống {correctionDirection} để vào giữa."
+          ]
+        },
+        "pace_coaching": {
+          "neutral": [
+            "Trần ở {bpm} — {attemptCount} lần thử. Hai buổi ở {suggestedBpm} sẽ làm groove vào khuôn.",
+            "{attemptCount} lần đánh ở {bpm} BPM mà điểm bộ trống vẫn kẹt. Hãy xuống {suggestedBpm}, làm groove cho chắc, rồi đẩy."
+          ]
+        },
+        "grid_lost": {
+          "neutral": [
+            "Bốn phách không có lưới — sắp vào fill hay lệch tiếng click?",
+            "Vừa mất lưới. Fill đã định trước hay chỉ đang trôi?"
+          ]
+        },
+        "muddy_hits": {
+          "neutral": [
+            "Phách nào cũng rơi nhưng các lần đánh nghe mềm — hãy thử đạp mạnh hơn vào kick.",
+            "Độ phủ tốt nhưng nhát đánh nhẹ. Hãy đánh xuyên qua mặt trống, đừng chỉ chạm.",
+            "Trúng mọi phách, chỉ là nhỏ. Hãy dồn thêm trọng lượng vào nhát đánh.",
+            "Các phách đã có nhưng tín hiệu yếu — hãy tăng lực ở nhát đánh xuống."
+          ]
+        },
+        "grid_discontinuity": {
+          "neutral": [
+            "Bộ trống của bạn đã lang thang khỏi tiếng click. Hãy vào lại ở phách mạnh và khóa nó.",
+            "Theo dõi lưới đã đứt — dừng fill, tìm nhịp, rồi vào lại cho sạch.",
+            "Tempo đã trôi khỏi tiếng click. Hãy đặt lại mẫu kick và khớp lại.",
+            "Vừa ra khỏi lưới. Nghỉ một chút, rồi vào lại với hi-hat đúng phách."
+          ]
+        },
+        "low_completeness": {
+          "neutral": [
+            "Bạn đang đánh khoảng một nửa số phách dự kiến — hãy cố đánh mọi nhát trong mẫu.",
+            "Độ phủ thấp — hãy chắc bộ trống của bạn đánh mỗi phách, không chỉ các phách nhấn.",
+            "Khoảng một nửa số phách không được chơi. Hãy tập trung hoàn thành trọn mẫu trống.",
+            "Độ phủ phách thấp. Hãy đếm thành tiếng và chắc chắn mỗi lần đánh đều có chỗ của nó."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Các lần đánh của bạn rơi đúng phách, nhưng khoảng cách giữa các nhát cứ dịch chuyển. Hãy đếm thành tiếng các nốt chia nhỏ — để miệng bạn đặt lưới chia nhỏ.",
+            "Vị trí groove vững, nhưng khoảng cách giữa các nhát không đều. Hãy gõ hi-hat trên mỗi nốt chia nhỏ để khóa cảm giác.",
+            "Đúng phách đều đặn, nhưng khoảng cách giữa các lần đánh đang lang thang. Hãy đếm thành tiếng nốt móc kép khi chơi — để lời đếm neo các khoảng.",
+            "Vị trí phách trông tốt — nhưng khoảng cách giữa các nhát đang trôi. Hãy làm chậm tempo cho đến khi các khoảng thấy bằng nhau, rồi tăng lại."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "Khoảng cách các nhát đánh của bạn đều — nhưng các lần đánh đang rơi lệch tiếng click. Hãy đón trước phách một chút và đánh kick hoặc snare ngay vào nó.",
+            "Khoảng cách giữa các nhát đều, nhưng vị trí so với tiếng click đang trôi. Hãy khóa kick ở phách mạnh vào nhịp trước, rồi xây quanh nó.",
+            "Cảm giác groove giữa các nhát nhất quán — hãy luyện chỗ cả mẫu nằm so với tiếng click. Thử đánh ngay trên phách, không phải hơi sau.",
+            "Khoảng cách đã có. Giờ hãy neo mẫu vào lưới — nhắm đánh mỗi nhát đúng cùng tiếng click."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "Vị trí nhát đánh và khoảng cách giữa các lần đánh đều đã khớp. Đó là đánh trống pocket.",
+            "Khoảng cách và vị trí phách đều chuẩn. Groove vững.",
+            "Cả hai chiều đều vững — lúc này bạn đang chơi rất chính xác.",
+            "Nhịp được khóa trên mọi mặt. Đó là cảm giác bạn đang hướng tới."
+          ]
+        },
+        "low_confidence": {
+          "neutral": [
+            "Bộ trống đang hòa lẫn vào nhau ở phía tôi — tôi đọc nó kém rõ hơn thường lệ.",
+            "Cymbal đang tràn vào mọi thứ. Số đọc của tôi trong nửa phút qua khá thô.",
+            "Lúc này khó tách từng lần đánh khỏi bộ trống. Hãy xem các con số một cách lỏng lẻo."
+          ]
+        },
+        "boundary_signal_a": {
+          "neutral": [
+            "{change}. Đoạn mới từ đây — bộ trống bắt đầu lại.",
+            "{change}. Đoạn trước đã đóng và được tính.",
+            "{change} — điểm bắt đầu tính lại từ nhát đánh tiếp theo."
+          ]
+        },
+        "boundary_signal_b": {
+          "neutral": [
+            "Dùi trống đã dừng đủ lâu để khép đoạn — {score}% ở {bpm} BPM.",
+            "Quãng nghỉ đã khép đoạn đó sau bộ trống: {score}% ở {bpm} BPM.",
+            "Đã ghi {score}% ở {bpm} BPM cho đoạn đó."
+          ]
+        },
+        "preset_ceiling_hit": {
+          "neutral": [
+            "{bpmLow}–{bpmHigh} là chỗ bài này thôi giữ được — {attemptCount} buổi, đều quanh {score}.",
+            "Bạn lại ở {bpmLow}–{bpmHigh}. Bộ trống đã đạt quanh {score} ở đây {attemptCount} lần.",
+            "{attemptCount} buổi ở tempo này, buổi nào cũng gần {score}. Đáng biết khi bạn chơi."
+          ]
+        }
+      },
+      "electric-guitar": {
+        "session_start_cold": {
+          "neutral": [
+            "Sẵn sàng khi bạn sẵn sàng. Tôi sẽ bắt đầu theo dõi từ lần gảy đầu tiên của bạn.",
+            "Khởi động xong thì cứ bấm chơi bất cứ lúc nào — tôi sẽ bắt đầu nghe.",
+            "Lên dây xong, ngồi cho ổn, rồi chơi khi bạn sẵn sàng.",
+            "Rất vui có bạn. Hãy bắt đầu khi tay gảy đã thấy thả lỏng.",
+            "Khi nào bạn sẵn sàng — cứ chơi, tôi sẽ bắt đầu bắt nhịp của bạn.",
+            "Không vội. Cho tay gảy thả lỏng, rồi bắt đầu khi bạn sẵn sàng.",
+            "Sẵn sàng khi bạn sẵn sàng. Tôi sẽ theo dõi từ nốt đầu tiên.",
+            "Chuẩn bị lúc nào cũng được — tôi nghe từ lần gảy đầu tiên của bạn."
+          ]
+        },
+        "session_start_returning": {
+          "neutral": [
+            "Chào mừng bạn quay lại. Buổi tập trước: {lastScore} ở {lastBpm} BPM. Hãy xây tiếp trên cách gảy đó.",
+            "Rất vui gặp lại bạn. Lần trước bạn đạt {lastScore} ở {lastBpm} BPM — một nền tảng tốt.",
+            "Lại cầm cây guitar rồi. Buổi trước là {lastScore} ở {lastBpm} BPM. Hãy đẩy lên nữa.",
+            "Chào mừng bạn quay lại — lần trước {lastScore} / {lastBpm} BPM. Sẵn sàng khi bạn sẵn sàng.",
+            "Buổi tập trước: {lastScore} ở {lastBpm} BPM. Hãy tiếp tục từ chỗ bạn đã dừng.",
+            "Lại bắt đầu nào. Lần trước {lastScore} ở {lastBpm} BPM — một mốc nền vững.",
+            "Chào mừng bạn quay lại. {lastScore} ở {lastBpm} BPM là mốc của buổi trước. Hãy bằng nó.",
+            "Rất vui bạn quay lại. Lần trước {lastScore} ở {lastBpm} BPM — bắt đầu thôi."
+          ]
+        },
+        "accuracy_drop": {
+          "correction": [
+            "Tay gảy đang mất lưới nhịp. Hãy tựa cạnh bàn tay vào ngựa đàn.",
+            "Các lần đánh đang tản mát. Hãy làm chậm mẫu gảy và nhấn phách 1.",
+            "Hãy chặn các dây và gảy xuống-lên theo tiếng click trong một ô nhịp, rồi vào lại.",
+            "Dừng lại, gảy chỉ một dây buông theo tiếng click trong bốn phách, rồi thêm riff trở lại.",
+            "Cách gảy đang trôi. Hãy giảm tempo và xây lại từ một ô nhịp sạch.",
+            "Mẫu chơi đang rã ra. Dừng, đếm vào chậm, rồi chơi.",
+            "Nhấc phím gảy khỏi dây và chỉ nghe tiếng click trong một ô nhịp.",
+            "Giảm năm BPM và chơi sạch cả đoạn trước khi đưa tốc độ trở lại."
+          ]
+        },
+        "rushing_trend": {
+          "neutral": [
+            "Tay gảy đang rơi trước tiếng click. Hãy để nó chờ.",
+            "Bạn đang hơi đi trước — nghe tiếng click rồi hãy gảy.",
+            "Các nốt đang đến sớm. Hãy ngồi lùi sâu hơn trong mỗi phách."
+          ],
+          "correction": [
+            "Các nhát gảy xuống đang dẫn đầu — hãy đặt các nhát gảy lên đúng vào tiếng click.",
+            "Tay gảy đang vội. Hãy để máy đếm nhịp dẫn từng nhát gảy xuống.",
+            "Hãy đếm các nốt móc đơn ở giữa và cảm nhận khoảng cách giữa hai tiếng click.",
+            "Giảm tempo năm BPM và để tiếng click kéo từng nốt ra khỏi bạn.",
+            "Dừng một ô nhịp. Nghe tiếng click, rồi vào đúng phách 1.",
+            "Hạ tay phải xuống đùi, hít thở, rồi bắt đầu chơi lại.",
+            "Đôi tay đang chạy đua. Hãy chặn các dây và dùng phím gảy gõ theo tiếng click trong một ô nhịp trước.",
+            "Đừng cố đẩy máy đếm nhịp nữa. Hãy để nó kéo bạn đi trọn một ô nhịp."
+          ]
+        },
+        "dragging_trend": {
+          "neutral": [
+            "Phím gảy đang rơi sau tiếng click. Hãy đưa nó lên trước.",
+            "Bạn đang ngồi trễ — hãy bắt đầu nhát gảy sớm hơn một chút.",
+            "Mỗi nốt đang hơi sau. Hãy nhắm vào phần đầu của tiếng click."
+          ],
+          "correction": [
+            "Các nhát gảy lên đang chậm — hãy gặp tiếng click ở nhát gảy xuống.",
+            "Tay gảy đang kéo chậm. Hãy chơi cùng tiếng click, đừng chờ nó.",
+            "Hãy để phím gảy dẫn — gặp từng nốt thay vì với tới nó.",
+            "Mỗi nốt đang rơi trễ. Hãy nhắm vào mép đầu của mọi tiếng click.",
+            "Giảm tempo một chút và chơi với nhiều lực nâng hơn. Việc kéo chậm sẽ hết khi bạn thấy nhẹ nhàng.",
+            "Hãy hình dung tiếng click sớm hơn thực tế một chút, và gặp nó.",
+            "Dừng lại, hít một hơi, rồi vào lại với chút đẩy về phía trước.",
+            "Phím gảy đang vướng — hãy giảm lực ép và để nó chảy."
+          ]
+        },
+        "personal_best_streak": {
+          "encouragement": [
+            "Cách gảy đang khớp — cứ tiếp tục.",
+            "Chuỗi sạch đang chạy. Ở lại đó.",
+            "Chuỗi đang giữ — đừng đổi gì cả.",
+            "Tay phải đang ở trong pocket. Giữ.",
+            "Đó là cảm giác ấy — hãy giữ nó.",
+            "Lực gảy đang đều. Đúng rồi.",
+            "Chặt và sạch. Chưa tăng tốc vội.",
+            "Nhắm mắt lại. Cứ tiếp tục."
+          ]
+        },
+        "new_band_locked": {
+          "encouragement": [
+            "Dải {bpmLow}–{bpmHigh} BPM được giữ vững — tay gảy đã khớp.",
+            "Pocket của tay gảy giữ vững ở {bpmLow}–{bpmHigh} BPM.",
+            "Giữ vững ở {bpmLow}–{bpmHigh} BPM — mốc nền mới cho riff này.",
+            "Giữ sạch {bpmLow}–{bpmHigh} BPM. Lực gảy đã ổn định.",
+            "Khớp ở {bpmLow}–{bpmHigh} BPM. Mốc nền mới cho đoạn này.",
+            "Làm chủ {bpmLow}–{bpmHigh} BPM. Đừng tụt xuống dưới nó.",
+            "Gảy xuống-lên luân phiên đều ở {bpmLow}–{bpmHigh} BPM.",
+            "Cách gảy vào groove ở {bpmLow}–{bpmHigh} BPM trong trọn một phút."
+          ]
+        },
+        "recovery": {
+          "encouragement": [
+            "Tay gảy đã trở lại — giữ nó.",
+            "Kéo lại được rồi. Giữ thoải mái.",
+            "Đã hồi lại — giữ cảm giác này.",
+            "Bạn đã cảm thấy nó trượt và kéo nó lại. Đó mới là kỹ năng.",
+            "Tay phải đã khớp lại. Đừng đổi gì cả.",
+            "Đã thoát khỏi chỗ tụt. Giữ thư thái.",
+            "Pocket đã hồi lại. Ngồi trong đó.",
+            "Bắt kịp độ trôi. Giữ đúng cảm giác này."
+          ]
+        },
+        "recovery_confirmed": {
+          "encouragement": [
+            "Sạch lại rồi — ở lại đó.",
+            "Cách gảy đã trở lại. Giữ nó.",
+            "Lại đúng tiếng click. Giữ nó."
+          ]
+        },
+        "fatigue": {
+          "encouragement": [
+            "Cánh tay gảy đang căng lên? Lắc cho thả lỏng, rồi vào lại.",
+            "Cổ tay hay cẳng tay thấy cứng? Dừng nhanh một chút, rồi vào lại.",
+            "Sự căng đang len vào — hãy đặt cây đàn xuống 60 giây.",
+            "Vai đang nhướn lên? Hạ nó xuống, hít thở, rồi chơi tiếp.",
+            "Lực gảy đang nặng hơn mức cần. Nghỉ ngắn.",
+            "Tay nắm cần đàn đang siết lại? Thả lỏng, rồi chơi.",
+            "Cẳng tay đang làm việc quá sức — lắc cho thả lỏng rồi tiếp tục.",
+            "Nghỉ 30 giây, xoay vai, rồi quay lại."
+          ],
+          "correction": [
+            "Mệt đã lộ ra ở lực gảy — dừng, cho cánh tay nghỉ 90 giây. Gảy khi mệt sinh ra căng cơ.",
+            "Bạn đã qua đỉnh — đặt đàn xuống, duỗi cổ tay, rồi vào lại.",
+            "Dừng trước khi gân bắt đầu kêu ca. Rời dây đàn 90 giây.",
+            "Cổ tay đang căng quá. Đặt đàn xuống, duỗi cẳng tay, nghỉ hai phút.",
+            "Nghỉ thật sự — đàn lên giá, đi quanh một lúc.",
+            "Cánh tay gảy tạm xong rồi. Tối thiểu 90 giây, rồi kiểm tra lại.",
+            "Dừng. Xoay cổ tay, duỗi cẳng tay, rồi quay lại cho tươi.",
+            "Cố vượt qua đây là tự rước chấn thương vào mình. Dừng hẳn."
+          ]
+        },
+        "tempo_milestone": {
+          "encouragement": [
+            "Ở {bpmLow} BPM — hãy chắc các nhát gảy lên to bằng nhát gảy xuống trước khi đẩy.",
+            "Mốc {bpmLow} BPM. Giữ ở đây cho đến khi lực gảy đều.",
+            "Dải mới: {bpmLow}-{bpmHigh}. Gảy xuống-lên trên một dây buông trước khi leo.",
+            "{bpmLow} BPM còn mới. Giữ ngang và để tay phải ổn định.",
+            "Đậu ở {bpmLow} BPM. Bước nhảy kế tiếp đến sau một phút sạch.",
+            "Giành lấy {bpmLow} BPM trước khi đuổi theo mốc cao hơn. Giữ cho đến khi thấy nhàm.",
+            "Đã chạm {bpmLow} BPM — giờ hãy xây vài ô nhịp sạch trước khi lên cao hơn.",
+            "{bpmLow}-{bpmHigh} BPM còn mới tinh. Đừng tăng tốc cho đến khi nó thành tự động."
+          ]
+        },
+        "check_in": {
+          "neutral": [
+            "Đã chơi guitar một đoạn dài — riff, hợp âm, hay điều gì cụ thể?",
+            "Hơn năm phút rồi. Bạn muốn tôi nhận xét cách gảy, nhịp điệu, hay cả hai?",
+            "Bạn đã tập trung rất lâu. Hãy cho tôi biết bạn muốn nhận xét về điều gì.",
+            "Đang chơi vững. Bạn có muốn nhận xét sắc hơn ở một đoạn cụ thể không?",
+            "Bạn đã chơi một lúc rồi. Cách gảy? Quạt chả? Hãy cho tôi biết nghe ở đâu.",
+            "Pocket đã vững suốt. Hãy chọn một mục tiêu nếu bạn muốn nhận xét kỹ hơn.",
+            "Đã chơi guitar một đoạn dài. Bạn muốn tôi nêu điều gì không?",
+            "Bạn đã chơi rất sâu. Hãy cho tôi biết tiếp theo nên nghe điều gì."
+          ]
+        },
+        "ramp_complete": {
+          "neutral": [
+            "Đã tới {endBpm}. Đợt tăng từ {startBpm} vững — lực gảy giữ đều.",
+            "Xong đợt tăng — {startBpm} đến {endBpm}. Tay gảy đã giữ được suốt đợt leo.",
+            "Đạt mục tiêu: {endBpm} BPM. Bạn đã gảy xuyên suốt đợt tăng từ {startBpm}.",
+            "Đã đạt {endBpm} BPM. Đợt tăng từ {startBpm} hoàn tất — gảy sạch."
+          ]
+        },
+        "stamina": {
+          "neutral": [
+            "Qua mốc {staminaMinutes} phút, tay gảy của bạn căng lên. Lắc cho thả lỏng, rồi chơi tiếp.",
+            "Quanh phút thứ {staminaMinutes} lực gảy bắt đầu trôi. Nghỉ ngắn, rồi vào lại.",
+            "Bức tường sức bền ở phút thứ {staminaMinutes} — tay phải siết lại. Nghỉ 30 giây.",
+            "Bạn thường mất độ sắc khi gảy quanh phút thứ {staminaMinutes}. Nghỉ ngắn, rồi quay lại."
+          ]
+        },
+        "bias_only": {
+          "neutral": [
+            "Các nốt của bạn nhất quán {direction} {biasMs}ms so với tiếng click. Hãy dịch cả câu {correctionDirection} — đó là độ nghiêng của nhịp, không phải hỗn loạn.",
+            "Mọi lần đánh đều rơi {direction} {biasMs}ms. Đó là một độ nghiêng nhất quán — hãy dịch nhịp của bạn {correctionDirection} để đưa nó vào giữa.",
+            "Độ tản thấp, {direction} {biasMs}ms. Hãy dịch nhịp của bạn {correctionDirection} để rơi đúng tiếng click."
+          ]
+        },
+        "pace_coaching": {
+          "neutral": [
+            "{attemptCount} lần thử ở {bpm} mà điểm không nhúc nhích. Hãy xuống {suggestedBpm}, làm cho chắc, rồi đẩy lại.",
+            "Trần ở {bpm} đã xác nhận — {attemptCount} lần thử. Đậu ở {suggestedBpm} một tuần và xây cho vững."
+          ]
+        },
+        "grid_lost": {
+          "neutral": [
+            "Vừa mất lưới — nốt đệm hay chơi tự do? Nếu có chủ ý thì cứ bỏ qua tôi.",
+            "Độ tương quan rời khỏi tiếng click — bạn đang chơi một nốt đệm phải không?"
+          ]
+        },
+        "muddy_hits": {
+          "neutral": [
+            "Bạn đang trúng các phách nhưng lực gảy nhẹ — hãy thử nhát gảy chắc hơn.",
+            "Độ phủ tốt, transient yếu. Hãy đưa phím gảy xuyên qua dây.",
+            "Phách nào cũng có, nhưng nhẹ. Gảy mạnh hơn sẽ làm tín hiệu sắc hơn.",
+            "Các phách đều có đủ — chỉ cần ấn phím gảy sâu hơn để lực gảy sạch hơn."
+          ]
+        },
+        "grid_discontinuity": {
+          "neutral": [
+            "Cách gảy của bạn đã trôi khỏi tiếng click. Hãy chặn dây và vào lại ở phách mạnh.",
+            "Theo dõi lưới đã đứt — dừng riff, tìm nhịp, rồi vào lại.",
+            "Vừa lệch tempo. Hãy để tiếng click thở và khớp lại cách quạt của bạn.",
+            "Phím gảy đã trôi khỏi lưới. Nghỉ một nhịp và vào lại ở phách một."
+          ]
+        },
+        "low_completeness": {
+          "neutral": [
+            "Bạn đang gảy khoảng một nửa số phách dự kiến — hãy cố đánh mọi nốt trong câu.",
+            "Độ phủ thấp — hãy chắc mỗi phách đều có một nhát gảy, không chỉ những phách thấy dễ chịu.",
+            "Khoảng một nửa số phách không được chơi. Hãy tập trung hoàn thành trọn riff.",
+            "Độ phủ phách thấp. Hãy chậm lại nếu cần và chắc chắn mỗi phách đều rơi."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Vị trí nốt của bạn vững — nhưng khoảng cách giữa các nốt cứ lang thang. Hãy thử đếm thành tiếng các nốt chia nhỏ khi gảy.",
+            "Đúng phách tốt, nhưng khoảng cách giữa các nhát gảy không đều. Hãy gõ chân trên mỗi nốt chia nhỏ để neo khoảng cách.",
+            "Nhịp phách đã có — nhưng khoảng cách giữa các nốt đang dịch chuyển. Hãy đếm thành tiếng nốt móc kép khi chơi và để miệng đặt lưới.",
+            "Vị trí đã khóa — khoảng cách đang trôi. Hãy làm chậm riff cho đến khi các khoảng thấy đều, rồi tăng tốc lại."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "Khoảng cách của bạn rất đều — nhưng bạn đang rơi lệch phách. Hãy đón trước tiếng click một chút và đánh từng nốt ngay vào nó.",
+            "Khoảng cách giữa các nốt đều, nhưng các nhát gảy bị dịch khỏi lưới. Hãy khóa nốt đầu của mỗi riff vào phách, rồi để phần còn lại theo sau.",
+            "Nhịp giữa các nốt của bạn nhất quán — giờ hãy đưa cả riff vào đúng tiếng click. Nhắm vào tâm của mỗi phách, không phải mép.",
+            "Cảm giác khoảng cách tốt. Hãy tập trung vào chỗ mỗi nốt rơi so với tiếng click — chơi hơi trước chỗ bạn đoán phách."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "Khoảng cách và vị trí đều đã khớp. Đó chính là groove.",
+            "Khoảng cách nốt và vị trí phách đều chuẩn. Riff sạch.",
+            "Cả hai chiều đều vững — bạn đang chơi đúng chỗ bạn định.",
+            "Nhịp được khóa trên mọi mặt. Đó là cảm giác mà riff nên có."
+          ]
+        },
+        "low_confidence": {
+          "neutral": [
+            "Tín hiệu của bạn đang nhiễu ở phía tôi — tôi đang đọc đoạn này kém rõ hơn.",
+            "Lúc này khó phân biệt nốt được gảy với tạp âm của dây. Hãy xem các con số một cách lỏng lẻo.",
+            "Đầu vào bị đục trong nửa phút qua. Số đọc của tôi mềm hơn thường lệ."
+          ]
+        },
+        "boundary_signal_a": {
+          "neutral": [
+            "{change}. Đoạn mới từ đây.",
+            "{change}. Đoạn trước đã đóng và được tính.",
+            "{change} — điểm bắt đầu tính lại từ nốt tiếp theo."
+          ]
+        },
+        "boundary_signal_b": {
+          "neutral": [
+            "Quãng nghỉ đã khép đoạn đó — {score}% ở {bpm} BPM.",
+            "Dây đàn im đủ lâu để kết thúc nó: {score}% ở {bpm} BPM.",
+            "Đã ghi {score}% ở {bpm} BPM cho đoạn đó."
+          ]
+        },
+        "preset_ceiling_hit": {
+          "neutral": [
+            "{bpmLow}–{bpmHigh} là chỗ bài này thôi sạch với bạn — {attemptCount} buổi, đều quanh {score}.",
+            "Bạn lại ở {bpmLow}–{bpmHigh}. {attemptCount} lượt gần nhất ở đây đều quanh {score}.",
+            "{attemptCount} buổi ở tempo này, buổi nào cũng gần {score}. Xem hôm nay thế nào."
+          ]
+        }
+      },
+      "acoustic-guitar": {
+        "session_start_cold": {
+          "neutral": [
+            "Sẵn sàng khi bạn sẵn sàng. Tôi sẽ bắt đầu theo dõi từ nhịp quạt đầu tiên của bạn.",
+            "Lên dây xong cứ bắt đầu bất cứ lúc nào — tôi sẽ nghe từ nốt đầu tiên.",
+            "Quạt vài hợp âm buông, rồi chơi khi bạn sẵn sàng.",
+            "Rất vui có bạn. Hãy bắt đầu khi tay quạt đã thấy thả lỏng.",
+            "Khi nào bạn sẵn sàng — cứ chơi, tôi sẽ bắt đầu bắt nhịp của bạn.",
+            "Không vội. Cho cánh tay quạt thả lỏng, rồi bắt đầu.",
+            "Sẵn sàng khi bạn sẵn sàng. Tôi sẽ theo dõi từ nhịp quạt đầu tiên.",
+            "Chuẩn bị xong cứ bắt đầu bất cứ lúc nào — tôi đang nghe."
+          ]
+        },
+        "session_start_returning": {
+          "neutral": [
+            "Chào mừng bạn quay lại. Buổi tập trước: {lastScore} ở {lastBpm} BPM. Hãy xây tiếp trên đó.",
+            "Rất vui gặp lại bạn. Lần trước bạn đạt {lastScore} ở {lastBpm} BPM — một nền tảng tốt.",
+            "Lại với cây acoustic rồi. Buổi trước là {lastScore} ở {lastBpm} BPM. Hãy tiếp tục.",
+            "Chào mừng bạn quay lại — lần trước {lastScore} / {lastBpm} BPM. Sẵn sàng khi bạn sẵn sàng.",
+            "Buổi tập trước: {lastScore} ở {lastBpm} BPM. Hãy tiếp tục từ chỗ bạn đã dừng.",
+            "Lại bắt đầu nào. Lần trước {lastScore} ở {lastBpm} BPM — một điểm xuất phát vững.",
+            "Chào mừng bạn quay lại. {lastScore} ở {lastBpm} BPM là mốc của buổi trước. Hãy bằng nó.",
+            "Rất vui bạn quay lại. Lần trước {lastScore} ở {lastBpm} BPM — bắt đầu thôi."
+          ]
+        },
+        "accuracy_drop": {
+          "correction": [
+            "Tay quạt đang mất lưới nhịp. Hãy khóa vào phách mạnh trước.",
+            "Các lần đánh đang tản mát. Quạt nhẹ lại và nhấn phách mạnh.",
+            "Chỉ quạt xuống trên các dây buông theo tiếng click, rồi vào lại.",
+            "Dừng lại, chơi một hợp âm trên mỗi tiếng click trong một ô nhịp, rồi thêm mẫu quạt vào.",
+            "Bỏ mẫu quạt. Một nhát quạt xuống mỗi tiếng click trong bốn phách, rồi thêm dần lại.",
+            "Chậm lại. Làm cho sạch một hợp âm mỗi tiếng click trước khi thêm các nhát quạt lên.",
+            "Dừng và hít thở. Tìm tiếng click, rồi bắt đầu lại.",
+            "Giảm tempo năm BPM và chơi cho sạch."
+          ]
+        },
+        "rushing_trend": {
+          "neutral": [
+            "Nhát quạt xuống đang đến trước tiếng click. Hãy để nó chờ.",
+            "Cánh tay quạt đang dẫn trước một chút — nghe tiếng click rồi hãy di chuyển.",
+            "Bạn hơi sớm một chút. Hãy để tiếng click kéo nhát quạt ra khỏi bạn."
+          ],
+          "correction": [
+            "Cánh tay quạt đang dẫn trước — hãy đặt nhát quạt xuống đúng vào tiếng click.",
+            "Tay quạt đang vội. Hãy để tiếng click dẫn nhát quạt.",
+            "Đếm các nốt ở giữa — cảm nhận khoảng cách giữa hai tiếng click.",
+            "Giảm tempo năm BPM và để tiếng click kéo từng nhát quạt ra khỏi bạn.",
+            "Dừng một ô nhịp. Nghe tiếng click, rồi vào ở phách 1.",
+            "Hạ cánh tay quạt xuống bên hông, hít thở, rồi bắt đầu lại.",
+            "Đôi tay đang chạy đua. Hãy chặn các dây và dùng phím gảy gõ theo tiếng click trong một ô nhịp.",
+            "Đừng cố đẩy máy đếm nhịp nữa. Hãy để nó kéo bạn đi trọn một ô nhịp."
+          ]
+        },
+        "dragging_trend": {
+          "neutral": [
+            "Nhát quạt đang rơi sau tiếng click. Hãy đưa nó lên trước.",
+            "Cánh tay quạt đang tụt lại — hãy bắt đầu nhát quạt sớm hơn một chút.",
+            "Bạn đang ngồi trễ. Hãy nhắm nhát quạt xuống vào phần đầu của tiếng click."
+          ],
+          "correction": [
+            "Nhát quạt đang chậm — hãy gặp tiếng click ở nhát xuống.",
+            "Tay quạt đang kéo chậm. Hãy chơi cùng tiếng click, đừng chờ nó.",
+            "Hãy cho nhát quạt thêm đà và gặp tiếng click ở nhát xuống.",
+            "Mỗi nhát quạt đang rơi trễ. Hãy nhắm vào mép đầu của mọi tiếng click.",
+            "Giảm tempo và chơi với nhiều lực nâng hơn. Việc kéo chậm sẽ hết khi bạn thấy nhẹ nhàng.",
+            "Hãy hình dung tiếng click sớm hơn thực tế một chút, và gặp nó.",
+            "Dừng lại, hít một hơi, rồi vào lại với chút đẩy về phía trước.",
+            "Nhát quạt đang bị vướng — hãy nới lực và để nó chảy."
+          ]
+        },
+        "personal_best_streak": {
+          "encouragement": [
+            "Cách quạt đang khớp — cứ tiếp tục.",
+            "Groove đang chạy tốt. Ở lại đó.",
+            "Chuỗi đang giữ — cứ ở đó.",
+            "Tay phải đang ở trong pocket. Giữ.",
+            "Đó là cảm giác ấy — hãy giữ nó.",
+            "Độ cân bằng xuống-lên đúng rồi. Đúng vậy.",
+            "Chặt và đều. Chưa tăng tốc vội.",
+            "Nhắm mắt lại. Cứ tiếp tục."
+          ]
+        },
+        "new_band_locked": {
+          "encouragement": [
+            "Dải {bpmLow}–{bpmHigh} BPM được giữ vững — cách quạt đã khớp.",
+            "Pocket của cách quạt giữ vững ở {bpmLow}–{bpmHigh} BPM.",
+            "Giữ vững ở {bpmLow}–{bpmHigh} BPM — mốc nền mới cho mẫu quạt này.",
+            "Giữ sạch {bpmLow}–{bpmHigh} BPM. Cách quạt đã ổn định.",
+            "Khớp ở {bpmLow}–{bpmHigh} BPM. Mốc nền mới cho mẫu quạt này.",
+            "Làm chủ {bpmLow}–{bpmHigh} BPM. Đừng tụt xuống dưới nó.",
+            "Quạt xuống-lên luân phiên đều ở {bpmLow}–{bpmHigh} BPM.",
+            "Mẫu quạt vào groove ở {bpmLow}–{bpmHigh} BPM trong trọn một phút."
+          ]
+        },
+        "recovery": {
+          "encouragement": [
+            "Nhát quạt đã về lại lưới. Giữ nó.",
+            "Đã kéo mẫu quạt về lại. Giữ thoải mái.",
+            "Đã hồi lại — giữ cảm giác này.",
+            "Bạn đã cảm thấy nó trượt và kéo nó lại. Đó mới là kỹ năng.",
+            "Tay phải đã khớp lại. Đừng đổi gì cả.",
+            "Đã thoát khỏi chỗ tụt. Giữ thoải mái.",
+            "Mẫu quạt lại sạch. Ngồi trong đó.",
+            "Bắt kịp độ trôi. Giữ đúng cảm giác này."
+          ]
+        },
+        "recovery_confirmed": {
+          "encouragement": [
+            "Đã trở lại đúng đường.",
+            "Cách quạt lại sạch. Giữ nó.",
+            "Đã kéo lại. Ở lại đó."
+          ]
+        },
+        "fatigue": {
+          "encouragement": [
+            "Cánh tay quạt đang căng lên? Lắc cho thả lỏng, rồi vào lại.",
+            "Cổ tay thấy cứng? Duỗi nhanh một chút, rồi vào lại.",
+            "Sự căng đang len vào nhát quạt — đặt đàn xuống 60 giây.",
+            "Vai đang nhướn lên? Hạ nó xuống, hít thở, rồi tiếp tục.",
+            "Nhát quạt đang nặng hơn mức cần. Nghỉ ngắn.",
+            "Tay nắm cần đàn đang siết lại? Thả lỏng, rồi chơi.",
+            "Cẳng tay đang làm việc quá sức — lắc cho thả lỏng rồi tiếp tục.",
+            "Nghỉ 30 giây, xoay vai, rồi quay lại."
+          ],
+          "correction": [
+            "Mệt đã lộ ra ở nhát quạt — dừng, rời dây đàn 90 giây.",
+            "Bạn đã qua đỉnh — đặt đàn xuống, duỗi cổ tay, rồi quay lại.",
+            "Quạt khi mệt làm chìm đi độ mạnh nhẹ. Dừng, nghỉ, rồi bắt đầu lại.",
+            "Cánh tay quạt đang căng quá. Đặt đàn xuống, duỗi cẳng tay, nghỉ hai phút.",
+            "Nghỉ thật sự — đàn lên giá, đi quanh một lúc.",
+            "Tay quạt đã xong. Tối thiểu 90 giây, rồi kiểm tra lại.",
+            "Dừng hẳn. Xoay cổ tay, duỗi cẳng tay, rồi tiếp tục khi đã thả lỏng.",
+            "Cố vượt qua đây là tự rước chấn thương vào mình. Dừng và hồi phục."
+          ]
+        },
+        "tempo_milestone": {
+          "encouragement": [
+            "Ở {bpmLow} BPM — hãy chắc mỗi nhát quạt có lực ngang nhau trước khi leo.",
+            "Mốc {bpmLow} BPM. Giữ ở đây cho đến khi độ cân bằng xuống-lên đều.",
+            "Dải mới: {bpmLow}-{bpmHigh}. Thử mẫu quạt trên một hợp âm trước, rồi mới chuyển.",
+            "{bpmLow} BPM còn mới. Giữ ngang cho đến khi nhát quạt thấy dễ.",
+            "Đậu ở {bpmLow} BPM. Bước nhảy kế tiếp đến sau một phút sạch.",
+            "Đã chạm {bpmLow} BPM — giờ hãy xây vài ô nhịp sạch trước khi lên cao hơn.",
+            "{bpmLow}-{bpmHigh} BPM còn mới tinh. Giữ cho đến khi thấy nhàm.",
+            "Giành lấy {bpmLow} BPM trước khi đuổi theo mốc cao hơn. Ở lại đây."
+          ]
+        },
+        "check_in": {
+          "neutral": [
+            "Đã chơi acoustic một đoạn dài — hợp âm, fingerpicking, hay điều gì cụ thể?",
+            "Hơn năm phút rồi. Bạn muốn tôi nhận xét cách quạt hay các lần chuyển hợp âm?",
+            "Bạn đã tập trung rất lâu. Hãy cho tôi biết bạn muốn nhận xét về điều gì.",
+            "Đang chơi vững. Bạn có muốn nhận xét sắc hơn ở một đoạn cụ thể không?",
+            "Bạn đã chơi một lúc rồi. Cách quạt? Chuyển hợp âm? Hãy cho tôi biết nghe ở đâu.",
+            "Pocket đã vững suốt. Hãy chọn một mục tiêu nếu bạn muốn nhận xét kỹ hơn.",
+            "Đã chơi acoustic một đoạn dài. Bạn muốn tôi nêu điều gì không?",
+            "Bạn đã chơi rất sâu. Hãy cho tôi biết tiếp theo nên nghe điều gì."
+          ]
+        },
+        "ramp_complete": {
+          "neutral": [
+            "Xong đợt tăng — {startBpm} đến {endBpm}. Cách quạt giữ được suốt đợt leo.",
+            "Đã tới {endBpm} BPM. Bạn đã quạt xuyên suốt đợt tăng từ {startBpm}.",
+            "Đạt mục tiêu: {endBpm} BPM. Đợt tăng từ {startBpm} hoàn tất — mẫu quạt vẫn giữ.",
+            "Đã đạt {endBpm} BPM. Đợt tăng từ {startBpm} trên cây acoustic tốt."
+          ]
+        },
+        "stamina": {
+          "neutral": [
+            "Lực bấm của bạn tăng lên quanh phút thứ {staminaMinutes}. Nghỉ 30 giây rồi vào lại.",
+            "Quanh phút thứ {staminaMinutes} cánh tay quạt căng lên. Nghỉ ngắn, rồi vào lại.",
+            "Qua mốc {staminaMinutes} phút, độ chính xác của bạn thường tụt. Nghỉ ngắn, rồi chơi tiếp.",
+            "Mệt lộ ra ở phút thứ {staminaMinutes} trên cây acoustic. Hãy nghỉ lấy hơi."
+          ]
+        },
+        "bias_only": {
+          "neutral": [
+            "Phím gảy đang rơi {direction} {biasMs}ms một cách nhất quán. Không phải hỗn loạn — hãy dịch nhịp của bạn {correctionDirection} để đưa nó vào giữa.",
+            "Độ nghiêng nhất quán: {direction} {biasMs}ms. Hãy dịch cả câu {correctionDirection} và bạn sẽ vào giữa."
+          ]
+        },
+        "pace_coaching": {
+          "neutral": [
+            "{attemptCount} lần thử ở {bpm} mà vẫn chưa ổn định. Hãy thử {suggestedBpm} trong hai buổi, rồi quay lại.",
+            "Trần ở {bpm} đã xác nhận — hãy xuống {suggestedBpm} và để tay bấm bắt kịp."
+          ]
+        },
+        "grid_lost": {
+          "neutral": [
+            "Vừa mất lưới. Nốt đệm hay ngẫu hứng? Nếu có chủ ý thì cứ tiếp tục.",
+            "Độ tương quan rời khỏi tiếng click — bạn đang chơi một nốt đệm phải không?"
+          ]
+        },
+        "muddy_hits": {
+          "neutral": [
+            "Bạn đang trúng mọi phách nhưng lực đánh nhẹ — hãy thử quạt hoặc gảy chắc hơn.",
+            "Độ phủ tốt, các lần đánh mềm. Thêm lực cổ tay xuyên qua các dây.",
+            "Các phách đều có đủ, chỉ là nhỏ. Hãy đánh xuyên qua các dây với nhiều chủ ý hơn.",
+            "Trúng các phách nhưng nhẹ — hãy thử đánh sắc hơn ở nhát quạt xuống."
+          ]
+        },
+        "grid_discontinuity": {
+          "neutral": [
+            "Cách quạt của bạn đã trôi khỏi tiếng click. Hãy dừng và vào lại ở phách mạnh.",
+            "Theo dõi lưới đã đứt — hãy để tiếng click chạy một ô nhịp, rồi quạt vào lại.",
+            "Vừa lệch tempo. Hãy chặn các dây và khớp lại với tiếng click.",
+            "Mẫu quạt đã lang thang khỏi lưới. Hít một hơi rồi vào lại cho sạch."
+          ]
+        },
+        "low_completeness": {
+          "neutral": [
+            "Bạn đang quạt khoảng một nửa số phách dự kiến — hãy cố đánh mọi phách trong mẫu quạt.",
+            "Độ phủ thấp — hãy chắc mỗi phách đều có một nhát quạt, không chỉ những phách mạnh.",
+            "Khoảng một nửa số phách không được chơi. Hãy tập trung hoàn thành trọn mẫu quạt.",
+            "Độ phủ phách thấp. Hãy đếm thành tiếng và chắc chắn mọi phách mạnh lẫn phách nhẹ đều rơi."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Nhát quạt của bạn đúng phách tốt — nhưng khoảng cách giữa các nhát cứ dịch chuyển. Hãy thử đếm thành tiếng các nốt chia nhỏ khi quạt.",
+            "Đúng phách đều đặn, nhưng khoảng cách giữa các nhát quạt không đều. Hãy gõ chân trên mỗi nốt chia nhỏ để khóa khoảng cách.",
+            "Vị trí phách vững — nhưng khoảng cách giữa các nhát quạt đang lang thang. Hãy đếm thành tiếng các nốt chia nhỏ và để giọng bạn giữ mẫu quạt đều.",
+            "Vị trí phách tốt — nhưng khoảng cách giữa các nhát quạt đang trôi. Hãy làm chậm mẫu quạt cho đến khi các khoảng thấy bằng nhau, rồi tăng tốc lại."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "Khoảng cách giữa các nhát quạt của bạn đều — nhưng bạn đang rơi lệch phách. Hãy đón trước tiếng click một chút và đánh từng nhát quạt ngay vào nó.",
+            "Khoảng cách giữa các nhát quạt đều, nhưng mẫu quạt bị dịch khỏi lưới. Hãy khóa nhát xuống của mỗi ô nhịp vào phách, rồi để phần còn lại theo sau.",
+            "Nhịp giữa các nhát quạt nhất quán — giờ hãy neo cả mẫu quạt vào tiếng click. Nhắm vào tâm của mỗi phách.",
+            "Cảm giác khoảng cách tốt. Hãy tập trung vào chỗ mỗi nhát quạt rơi so với tiếng click — chơi hơi trước chỗ bạn đoán phách."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "Khoảng cách và vị trí phách của nhát quạt đều đã khớp. Đó là một mẫu quạt sạch.",
+            "Khoảng cách và vị trí đều chuẩn. Mẫu quạt đang nằm đúng chỗ của nó.",
+            "Cả hai chiều đều vững — lúc này bạn đang chơi rất chính xác.",
+            "Nhịp được khóa trên mọi mặt. Đó là cảm giác quạt mà bạn muốn."
+          ]
+        },
+        "low_confidence": {
+          "neutral": [
+            "Căn phòng đang lấn tín hiệu của bạn — tôi đang đọc đoạn này kém rõ hơn.",
+            "Lúc này khó phân biệt nhát quạt với tạp âm phòng. Hãy xem các con số một cách lỏng lẻo.",
+            "Âm thanh của bạn đến chỗ tôi bị đục trong nửa phút qua. Số đọc của tôi mềm hơn thường lệ."
+          ]
+        },
+        "boundary_signal_a": {
+          "neutral": [
+            "{change}. Đoạn mới từ đây.",
+            "{change}. Đoạn trước đã đóng và được tính.",
+            "{change} — điểm bắt đầu tính lại từ nhát quạt tiếp theo."
+          ]
+        },
+        "boundary_signal_b": {
+          "neutral": [
+            "Quãng nghỉ đã khép đoạn đó — {score}% ở {bpm} BPM.",
+            "Tiếng quạt ngừng đủ lâu để kết thúc nó: {score}% ở {bpm} BPM.",
+            "Đã ghi {score}% ở {bpm} BPM cho đoạn đó."
+          ]
+        },
+        "preset_ceiling_hit": {
+          "neutral": [
+            "{bpmLow}–{bpmHigh} là chỗ bài này thôi sạch với bạn — {attemptCount} buổi, đều quanh {score}.",
+            "Bạn lại ở {bpmLow}–{bpmHigh}. {attemptCount} lượt gần nhất ở đây đều quanh {score}.",
+            "{attemptCount} buổi ở tempo này, buổi nào cũng gần {score}. Xem hôm nay thế nào."
+          ]
+        }
+      },
+      "bass": {
+        "session_start_cold": {
+          "neutral": [
+            "Sẵn sàng khi bạn sẵn sàng. Tôi sẽ bắt đầu theo dõi từ lần búng dây đầu tiên của bạn.",
+            "Khởi động xong cứ bắt đầu bất cứ lúc nào — tôi sẽ nghe từ nốt đầu tiên.",
+            "Thả lỏng tay búng dây, rồi chơi khi bạn sẵn sàng.",
+            "Rất vui có bạn. Hãy bắt đầu khi các ngón tay đã thấy thả lỏng.",
+            "Khi nào bạn sẵn sàng — cứ chơi, tôi sẽ bắt đầu bắt nhịp của bạn.",
+            "Không vội. Cho tay phải thả lỏng, rồi bắt đầu khi sẵn sàng.",
+            "Sẵn sàng khi bạn sẵn sàng. Tôi sẽ theo dõi từ lần búng dây đầu tiên.",
+            "Chuẩn bị lúc nào cũng được — tôi nghe từ nốt đầu tiên của bạn."
+          ]
+        },
+        "session_start_returning": {
+          "neutral": [
+            "Chào mừng bạn quay lại. Buổi tập trước: {lastScore} ở {lastBpm} BPM. Hãy xây tiếp trên groove đó.",
+            "Rất vui gặp lại bạn. Lần trước bạn đạt {lastScore} ở {lastBpm} BPM — một dòng bass vững.",
+            "Lại với cây bass rồi. Buổi trước là {lastScore} ở {lastBpm} BPM. Hãy tiếp tục.",
+            "Chào mừng bạn quay lại — lần trước {lastScore} / {lastBpm} BPM. Sẵn sàng khi bạn sẵn sàng.",
+            "Buổi tập trước: {lastScore} ở {lastBpm} BPM. Hãy nối lại groove.",
+            "Lại bắt đầu nào. Lần trước {lastScore} ở {lastBpm} BPM — một điểm xuất phát tốt.",
+            "Chào mừng bạn quay lại. {lastScore} ở {lastBpm} BPM là mốc của buổi trước. Hãy chạm tới nó.",
+            "Rất vui bạn quay lại. Lần trước {lastScore} ở {lastBpm} BPM — bắt đầu thôi."
+          ]
+        },
+        "accuracy_drop": {
+          "correction": [
+            "Tay phải đang trôi khỏi tiếng kick. Hãy đặt lại ở phách 1.",
+            "Các lần đánh đang tản mát. Làm chậm cách bấm ngón và khóa vào tiếng kick.",
+            "Dừng lại, chỉ chơi các nốt gốc theo tiếng click, rồi thêm dòng bass vào.",
+            "Bỏ hết, chỉ giữ nốt gốc và tiếng click trong một ô nhịp, rồi quay lại dòng bass.",
+            "Lùi về một nốt mỗi tiếng click. Xây lại dòng bass từ đó.",
+            "Tạm dừng dòng bass. Ngồi cùng tiếng click bốn phách, rồi vào lại.",
+            "Giảm tempo vài BPM và chơi cho sạch.",
+            "Chậm lại. Chơi nốt gốc trên mỗi tiếng click cho chắc trước khi thêm bất cứ thứ gì cầu kỳ."
+          ]
+        },
+        "rushing_trend": {
+          "neutral": [
+            "Tay búng dây đang đến trước tiếng click. Hãy để tiếng click đến với bạn.",
+            "Dòng bass đang vượt lên trước — hãy giữ mỗi nốt gốc lâu thêm một chút.",
+            "Bạn hơi sớm một chút. Hãy chơi nốt ở chỗ có tiếng click, không phải trước nó."
+          ],
+          "correction": [
+            "Tay búng dây đang dẫn trước tiếng kick — hãy giữ nó lại.",
+            "Tay phải đang vội. Hãy ngồi sâu hơn sau phách cùng tay trống.",
+            "Đếm các nốt ở giữa — đặt mỗi lần búng dây đúng vào tiếng click, không phải trước nó.",
+            "Giảm tempo năm BPM và để tiếng click kéo từng nốt ra khỏi bạn.",
+            "Kéo tay phải lại. Tiếng kick phải rơi trước, rồi mới đến nốt của bạn.",
+            "Dừng lại, đếm vào chậm, rồi chơi ngay trên tiếng click.",
+            "Đôi tay đang chạy đua. Hãy chặn các dây và dùng một ngón gõ theo tiếng click trước.",
+            "Dừng một ô nhịp. Nghe tiếng click, rồi vào ở phách 1."
+          ]
+        },
+        "dragging_trend": {
+          "neutral": [
+            "Dòng bass đang ngồi sau tiếng click. Hãy đưa nó lên.",
+            "Bạn đang rơi trễ — hãy bắt đầu lần búng dây sớm hơn một chút.",
+            "Mỗi nốt gốc đang đến sau phách. Hãy nhắm vào phần đầu của nó."
+          ],
+          "correction": [
+            "Các lần búng dây đang chậm so với tiếng kick — hãy đẩy nhẹ vào mỗi nốt.",
+            "Tay phải đang kéo chậm. Hãy chơi cùng tiếng click, đừng chờ tiếng kick rơi.",
+            "Hãy nhấc ngón búng dây sớm hơn — gặp tiếng click ở phần đầu của nốt.",
+            "Mỗi nốt đang rơi trễ. Hãy nhắm vào mép đầu của mọi tiếng click.",
+            "Đẩy từ cẳng tay — ngón tay đang nặng dần.",
+            "Giảm tempo một chút và chơi với nhiều lực nâng hơn. Việc kéo chậm sẽ hết.",
+            "Hãy hình dung tiếng click sớm hơn thực tế một chút, và gặp nó.",
+            "Dừng lại, hít một hơi, rồi vào lại với chút đẩy về phía trước."
+          ]
+        },
+        "personal_best_streak": {
+          "encouragement": [
+            "Khớp với tiếng kick.",
+            "Pocket. Ở lại.",
+            "Chuỗi đang chạy — ở lại đó.",
+            "Đúng rồi. Đừng đổi gì cả.",
+            "Tay phải đang ở trong pocket. Giữ.",
+            "Bass và tiếng click giờ là một. Giữ nó.",
+            "Chặt. Ngồi trong đó.",
+            "Đó là groove — ở lại đó."
+          ]
+        },
+        "new_band_locked": {
+          "encouragement": [
+            "Dải {bpmLow}–{bpmHigh} BPM được giữ vững — bass và kick khớp chắc.",
+            "Pocket của nốt gốc giữ vững ở {bpmLow}–{bpmHigh} BPM.",
+            "Giữ vững ở {bpmLow}–{bpmHigh} BPM — mốc nền mới cho groove này.",
+            "Giữ sạch {bpmLow}–{bpmHigh} BPM. Tay phải đã ổn định.",
+            "Khớp ở {bpmLow}–{bpmHigh} BPM. Đừng tụt xuống dưới nó.",
+            "Làm chủ {bpmLow}–{bpmHigh} BPM. Mốc nền mới.",
+            "Bass và tiếng click đi cùng nhau ở {bpmLow}–{bpmHigh} BPM. Vững.",
+            "Pocket giữ vững ở {bpmLow}–{bpmHigh} BPM trong trọn một phút."
+          ]
+        },
+        "recovery": {
+          "encouragement": [
+            "Đã về lại pocket. Ở lại.",
+            "Đã kéo dòng bass về lại. Giữ nó.",
+            "Bass và kick đã khớp lại. Giữ nó.",
+            "Tay phải đã khớp lại. Đừng đổi gì cả.",
+            "Bạn đã bắt kịp chỗ trượt. Ngồi trong đó.",
+            "Pocket đã trở lại. Giữ thoải mái.",
+            "Hồi phục sạch. Giữ đúng cảm giác này.",
+            "Đã đưa nó về nhà. Ở lại đó một phút."
+          ]
+        },
+        "recovery_confirmed": {
+          "encouragement": [
+            "Groove đã trở lại.",
+            "Bass và kick khớp — giữ nó.",
+            "Đã về lại pocket. Ở lại."
+          ]
+        },
+        "fatigue": {
+          "encouragement": [
+            "Các ngón búng dây đang căng lên? Duỗi nhanh — rồi vào lại.",
+            "Cẳng tay bắt đầu cứng? Đặt bass xuống 60 giây.",
+            "Sự căng đang tăng ở tay phải? Nghỉ ngắn, rồi vào lại.",
+            "Tay bấm đang nặng dần? Dừng một lát, rồi tiếp tục.",
+            "Tay phải thấy căng? Lắc cho thả lỏng, rồi chơi tiếp.",
+            "Vai đang nhướn lên? Hạ nó xuống, hít thở, rồi tiếp tục.",
+            "Cẳng tay đang làm việc quá sức. Nghỉ nhanh một chút.",
+            "Nghỉ 30 giây, xoay cổ tay, rồi quay lại."
+          ],
+          "correction": [
+            "Mệt đã lộ ra ở lực búng — dừng, nghỉ 90 giây, rồi kiểm tra lại.",
+            "Bạn đã qua đỉnh — đặt bass xuống, duỗi người, rồi vào lại.",
+            "Dừng ngay. Búng dây khi mệt dạy bàn tay một lực búng cẩu thả.",
+            "Tay phải đang căng quá. Đặt bass xuống, duỗi cẳng tay, nghỉ hai phút.",
+            "Nghỉ thật sự — bass lên giá, đi quanh một lúc.",
+            "Tay búng dây đã xong. Tối thiểu 90 giây, rồi kiểm tra lại.",
+            "Dừng hẳn. Xoay cổ tay và duỗi cẳng tay trước khi tiếp tục.",
+            "Cố vượt qua đây là tự rước chấn thương vào mình. Dừng và hồi phục."
+          ]
+        },
+        "tempo_milestone": {
+          "encouragement": [
+            "Ở {bpmLow} BPM — hãy chắc mỗi nốt ngân sạch trước khi leo.",
+            "Mốc {bpmLow} BPM. Khóa các nốt gốc vào tiếng click trước khi đẩy.",
+            "Dải mới: {bpmLow}-{bpmHigh}. Đi chậm dòng bass trước, rồi mới thêm các nốt cầu kỳ.",
+            "{bpmLow} BPM còn mới. Ở lại đây cho đến khi mỗi nốt nghe đầy đặn.",
+            "Đậu ở {bpmLow} BPM. Bước nhảy kế tiếp đến sau một phút sạch.",
+            "Đã chạm {bpmLow} BPM — giờ hãy xây vài ô nhịp sạch trước khi lên cao hơn.",
+            "{bpmLow}-{bpmHigh} BPM còn mới tinh. Giữ cho đến khi thấy dễ.",
+            "Giành lấy {bpmLow} BPM trước khi đuổi theo mốc cao hơn. Giữ ngang."
+          ]
+        },
+        "check_in": {
+          "neutral": [
+            "Đã chơi bass một đoạn dài — dòng bass, groove, hay điều gì cụ thể?",
+            "Hơn năm phút khớp với tiếng kick. Bạn có muốn chỉnh điều gì không?",
+            "Bạn đã ở sâu trong pocket. Tiếp theo là gì?",
+            "Đang chơi vững. Bạn có muốn nhận xét sắc hơn ở một phần cụ thể không?",
+            "Bạn đã chơi một lúc rồi. Dòng walking? Nốt gốc? Hãy cho tôi biết nghe ở đâu.",
+            "Pocket đã vững suốt. Hãy chọn một mục tiêu nếu bạn muốn nhận xét kỹ hơn.",
+            "Đã chơi bass một đoạn dài. Bạn muốn tôi nêu điều gì không?",
+            "Bạn đã giữ nền rất vững. Hãy cho tôi biết tiếp theo nên nghe điều gì."
+          ]
+        },
+        "ramp_complete": {
+          "neutral": [
+            "Xong đợt tăng — {startBpm} đến {endBpm}. Bass và kick khớp vững suốt đợt leo.",
+            "Đã tới {endBpm} BPM. Bạn đã búng dây xuyên suốt đợt tăng từ {startBpm}.",
+            "Đạt mục tiêu: {endBpm} BPM. Đợt tăng từ {startBpm} hoàn tất — groove vẫn giữ.",
+            "Đã đạt {endBpm} BPM. Đợt tăng từ {startBpm} trên cây bass vững."
+          ]
+        },
+        "stamina": {
+          "neutral": [
+            "Bức tường sức bền ở phút thứ {staminaMinutes} — groove của bạn lỏng ra. Nghỉ ngắn, rồi vào lại.",
+            "Quanh phút thứ {staminaMinutes} tay búng dây bắt đầu mệt. Hãy nghỉ rồi quay lại.",
+            "Qua mốc {staminaMinutes} phút, sự khớp của bass bắt đầu trượt. Nghỉ ngắn, rồi chơi tiếp.",
+            "Bạn thường yếu đi quanh phút thứ {staminaMinutes}. Nghỉ 30 giây, quay lại cho sạch."
+          ]
+        },
+        "bias_only": {
+          "neutral": [
+            "Lần búng dây luôn {direction} {biasMs}ms so với tiếng click — độ rung thấp, chỉ là bị lệch. Hãy chỉnh lực búng {correctionDirection}.",
+            "Lực búng của bạn nằm {direction} {biasMs}ms. Rất nhất quán — chỉ cần dịch {correctionDirection} để rơi đúng phách."
+          ]
+        },
+        "pace_coaching": {
+          "neutral": [
+            "Trần ở {bpm} — đã {attemptCount} buổi. Hãy khóa {suggestedBpm} trước, rồi quay lại.",
+            "{attemptCount} lần thử ở {bpm} BPM mà groove chưa khớp. Hãy xuống {suggestedBpm} và củng cố."
+          ]
+        },
+        "grid_lost": {
+          "neutral": [
+            "Vừa mất lưới. Nốt đệm hay ngẫu hứng? Nếu có chủ ý thì cứ tiếp tục.",
+            "Độ tương quan rời khỏi tiếng click — bạn đang chơi một nốt đệm phải không?"
+          ]
+        },
+        "muddy_hits": {
+          "neutral": [
+            "Trúng mọi nốt nhưng tín hiệu mềm — hãy ấn sâu hơn bằng tay búng dây.",
+            "Độ phủ tốt nhưng lực búng nhỏ. Thêm lực ngón tay vào mỗi lần búng.",
+            "Phách nào cũng có, chỉ là nhẹ. Hãy thử búng dây mạnh dạn hơn.",
+            "Các phách đã rơi nhưng transient yếu — hãy tì chắc hơn lên dây."
+          ]
+        },
+        "grid_discontinuity": {
+          "neutral": [
+            "Groove của bạn đã trôi khỏi tiếng click. Hãy chặn dây và vào lại ở phách mạnh.",
+            "Theo dõi lưới đã đứt — dừng dòng bass, tìm nhịp, rồi khớp lại.",
+            "Vừa lệch tempo. Hãy để tiếng click thở và neo lại dòng bass của bạn.",
+            "Groove đã trôi khỏi lưới. Nghỉ một nhịp và khớp lại ở nốt gốc."
+          ]
+        },
+        "low_completeness": {
+          "neutral": [
+            "Bạn đang chơi khoảng một nửa số phách dự kiến — hãy cố khớp mọi nốt của dòng bass.",
+            "Độ phủ thấp — hãy chắc mỗi phách đều có một lần búng dây, không chỉ các nốt gốc.",
+            "Khoảng một nửa số phách không được chơi. Hãy tập trung chơi trọn dòng bass.",
+            "Độ phủ phách thấp. Hãy chậm lại nếu cần và chắc chắn mọi nốt đều rơi."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Các lần búng dây của bạn đúng phách tốt — nhưng khoảng cách giữa các nốt cứ dịch chuyển. Hãy thử đếm thành tiếng các nốt chia nhỏ khi chơi.",
+            "Vị trí phách vững, nhưng khoảng cách giữa các lần búng không đều. Hãy gõ chân trên mỗi nốt chia nhỏ để khóa khoảng cách các nốt.",
+            "Đúng phách đều đặn, nhưng khoảng cách giữa các nốt đang lang thang. Hãy đếm thành tiếng các nốt chia nhỏ — để giọng bạn đặt lưới.",
+            "Vị trí phách tốt — nhưng khoảng cách giữa các lần búng đang trôi. Hãy làm chậm dòng bass cho đến khi các khoảng thấy bằng nhau, rồi tăng tốc."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "Khoảng cách các lần búng của bạn đều — nhưng bạn đang rơi lệch phách. Hãy đón trước tiếng click một chút và búng mỗi nốt ngay vào nó.",
+            "Khoảng cách giữa các nốt đều, nhưng dòng bass nằm lệch khỏi lưới. Hãy khóa nốt đầu của mỗi ô nhịp vào tiếng click, rồi để phần còn lại theo sau.",
+            "Nhịp giữa các lần búng nhất quán — giờ hãy neo cả dòng bass vào lưới. Nhắm vào tâm của mỗi phách.",
+            "Cảm giác khoảng cách trong dòng bass tốt. Hãy tập trung vào chỗ mỗi lần búng rơi so với tiếng click — chơi hơi trước chỗ bạn đoán phách."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "Khoảng cách búng và vị trí phách đều đã khớp. Đó chính là pocket.",
+            "Khoảng cách và vị trí đều chuẩn. Dòng bass đang nằm đúng chỗ của nó.",
+            "Cả hai chiều đều vững — bạn đang groove rất chính xác.",
+            "Nhịp được khóa trên mọi mặt. Đó là cảm giác dòng bass mà bạn muốn."
+          ]
+        },
+        "low_confidence": {
+          "neutral": [
+            "Phần âm trầm khó đọc ở phía tôi — tôi kém chắc về đoạn này.",
+            "Tín hiệu của bạn bị đục ở dải trầm. Hãy xem các con số của nửa phút qua chỉ như ước chừng.",
+            "Lúc này khó tách các lần búng khỏi dải trầm. Số đọc của tôi mềm hơn thường lệ."
+          ]
+        },
+        "boundary_signal_a": {
+          "neutral": [
+            "{change}. Đoạn mới từ đây.",
+            "{change}. Đoạn trước đã đóng và được tính.",
+            "{change} — điểm bắt đầu tính lại từ nốt tiếp theo."
+          ]
+        },
+        "boundary_signal_b": {
+          "neutral": [
+            "Quãng nghỉ đã khép đoạn đó — {score}% ở {bpm} BPM.",
+            "Dòng bass im đủ lâu để kết thúc nó: {score}% ở {bpm} BPM.",
+            "Đã ghi {score}% ở {bpm} BPM cho đoạn đó."
+          ]
+        },
+        "preset_ceiling_hit": {
+          "neutral": [
+            "{bpmLow}–{bpmHigh} là chỗ dòng bass này thôi vào đúng chỗ — {attemptCount} buổi, đều quanh {score}.",
+            "Bạn lại ở {bpmLow}–{bpmHigh}. {attemptCount} lượt gần nhất ở đây đều quanh {score}.",
+            "{attemptCount} buổi ở tempo này, buổi nào cũng gần {score}. Đáng biết khi bạn chơi."
+          ]
+        }
+      },
+      "piano": {
+        "session_start_cold": {
+          "neutral": [
+            "Sẵn sàng khi bạn sẵn sàng. Tôi sẽ bắt đầu theo dõi từ nốt đầu tiên của bạn.",
+            "Khởi động đôi tay, rồi chơi bất cứ lúc nào — tôi sẽ bắt đầu nghe.",
+            "Ngồi cho ổn trước phím đàn, rồi bắt đầu khi bạn sẵn sàng.",
+            "Rất vui có bạn. Hãy bắt đầu khi đôi tay đã thấy thả lỏng.",
+            "Khi nào bạn sẵn sàng — cứ chơi, tôi sẽ bắt đầu bắt nhịp của bạn.",
+            "Không vội. Cho đôi tay khởi động, rồi bắt đầu khi sẵn sàng.",
+            "Sẵn sàng khi bạn sẵn sàng. Tôi sẽ theo dõi từ phím đầu tiên.",
+            "Ngồi cho ổn và bắt đầu bất cứ lúc nào — tôi đang nghe."
+          ]
+        },
+        "session_start_returning": {
+          "neutral": [
+            "Chào mừng bạn quay lại. Buổi tập trước: {lastScore} ở {lastBpm} BPM. Hãy xây tiếp trên đó.",
+            "Rất vui gặp lại bạn. Lần trước bạn đạt {lastScore} ở {lastBpm} BPM — thật tốt khi được quay lại.",
+            "Lại ngồi trước phím đàn rồi. Buổi trước là {lastScore} ở {lastBpm} BPM. Hãy đẩy lên nữa.",
+            "Chào mừng bạn quay lại — lần trước {lastScore} / {lastBpm} BPM. Sẵn sàng khi bạn sẵn sàng.",
+            "Buổi tập trước: {lastScore} ở {lastBpm} BPM. Hãy tiếp tục từ chỗ bạn đã dừng.",
+            "Lại bắt đầu nào. Lần trước {lastScore} ở {lastBpm} BPM — một mốc nền vững.",
+            "Chào mừng bạn quay lại. {lastScore} ở {lastBpm} BPM là mốc của buổi trước. Hãy bằng nó.",
+            "Rất vui bạn quay lại. Lần trước {lastScore} ở {lastBpm} BPM — bắt đầu thôi."
+          ]
+        },
+        "accuracy_drop": {
+          "correction": [
+            "Hai tay đang trôi xa nhau. Hãy khóa tay trái vào tiếng click trước.",
+            "Các lần đánh đang tản mát. Chậm lại — tay trái một mình, rồi thêm tay phải.",
+            "Chỉ tay trái theo tiếng click trong một ô nhịp, rồi đưa tay phải vào.",
+            "Dừng cả hai tay. Chơi tiếng click chỉ với tay trái trong bốn phách, rồi thêm tay phải.",
+            "Lùi về một nốt mỗi tiếng click bằng tay trái, rồi xây lại cả bài.",
+            "Giảm tempo và chơi từng tay riêng trước khi ghép lại.",
+            "Dừng và hít thở. Tìm tiếng click, rồi bắt đầu lại.",
+            "Giảm năm BPM và chơi cho sạch."
+          ]
+        },
+        "rushing_trend": {
+          "neutral": [
+            "Đôi tay đang đến trước tiếng click. Hãy để nó đến với bạn.",
+            "Bạn đang đi trước một chút — nghe tiếng click rồi hãy thả hợp âm.",
+            "Tay phải đang dẫn trước. Hãy ngồi lùi sâu hơn trong mỗi phách."
+          ],
+          "correction": [
+            "Tay phải đang dẫn trước tay trái — hãy đặt nốt bass đúng vào tiếng click.",
+            "Đang vội — hãy ngồi sâu vào phím đàn; để tiếng click kéo từng nốt.",
+            "Đếm các nốt ở giữa — đặt mỗi nốt ở chỗ tiếng click rơi, không phải trước nó.",
+            "Giảm tempo năm BPM và để tiếng click kéo từng nốt ra khỏi bạn.",
+            "Dừng một ô nhịp. Nghe tiếng click, rồi vào ở phách 1.",
+            "Đặt hai tay xuống đùi, hít thở, rồi bắt đầu chơi lại.",
+            "Tay phải đang chạy đua. Hãy chỉ chơi tay trái theo tiếng click trong một ô nhịp trước.",
+            "Đừng cố đẩy máy đếm nhịp nữa. Hãy để nó kéo bạn đi trọn một ô nhịp."
+          ]
+        },
+        "dragging_trend": {
+          "neutral": [
+            "Đôi tay đang rơi sau tiếng click. Hãy đưa chúng lên trước.",
+            "Bạn đang ngồi trễ — hãy bắt đầu hợp âm sớm hơn một chút.",
+            "Tay trái đang tụt lại. Hãy nhắm vào phần đầu của phách."
+          ],
+          "correction": [
+            "Tay trái đang chậm — hãy dẫn bằng nốt bass, không phải giai điệu.",
+            "Đang kéo chậm — hãy dẫn phách mạnh bằng tay trái; đừng chờ tiếng click.",
+            "Hãy dẫn bằng lúc chạm phím — gặp tiếng click ở phần đầu của mỗi nốt.",
+            "Mỗi nốt đang rơi trễ. Hãy nhắm vào mép đầu của mọi tiếng click.",
+            "Giảm tempo và chơi với nhiều lực nâng hơn. Việc kéo chậm sẽ hết khi bạn thấy nhẹ nhàng.",
+            "Hãy hình dung tiếng click sớm hơn thực tế một chút, và gặp nó.",
+            "Dừng lại, hít một hơi, rồi vào lại với chút đẩy về phía trước.",
+            "Các ngón tay đang nặng dần. Hãy chạm nhẹ hơn và để chúng lướt."
+          ]
+        },
+        "personal_best_streak": {
+          "encouragement": [
+            "Hai tay đã khớp. Ở lại.",
+            "Cả hai tay đồng bộ.",
+            "Chuỗi đang chạy — ở lại đó.",
+            "Sự khớp của hai tay đang sạch. Giữ.",
+            "Đúng rồi. Đừng đổi gì cả.",
+            "Tay trái và tay phải đang nói chuyện với nhau. Cứ tiếp tục.",
+            "Chặt. Ngồi trong đó.",
+            "Nhắm mắt lại. Cứ tiếp tục."
+          ]
+        },
+        "new_band_locked": {
+          "encouragement": [
+            "Dải {bpmLow}–{bpmHigh} BPM được giữ vững — cả hai tay khớp với tiếng click.",
+            "Pocket đồng bộ hai tay giữ vững ở {bpmLow}–{bpmHigh} BPM.",
+            "Giữ vững ở {bpmLow}–{bpmHigh} BPM — mốc nền mới cho cách xếp hợp âm này.",
+            "Giữ sạch {bpmLow}–{bpmHigh} BPM. Cả hai tay đã ổn định.",
+            "Khớp ở {bpmLow}–{bpmHigh} BPM. Mốc nền mới cho bài này.",
+            "Làm chủ {bpmLow}–{bpmHigh} BPM. Đừng tụt xuống dưới nó.",
+            "Sự đồng bộ hai tay đều ở {bpmLow}–{bpmHigh} BPM.",
+            "Pocket giữ vững ở {bpmLow}–{bpmHigh} BPM trong trọn một phút."
+          ]
+        },
+        "recovery": {
+          "encouragement": [
+            "Hai tay đã đồng bộ lại. Giữ nó.",
+            "Hai tay đã khớp lại. Đừng đổi gì cả.",
+            "Đã hồi lại — giữ cho vai thả lỏng.",
+            "Bạn đã bắt kịp độ trôi. Ngồi trong đó.",
+            "Tay trái và tay phải đã đồng bộ lại. Ở lại đó.",
+            "Đã thoát khỏi chỗ tụt. Đừng đổi gì cả.",
+            "Pocket đã hồi lại. Giữ đúng cảm giác này.",
+            "Đã đưa nó về nhà. Ở lại đó một phút."
+          ]
+        },
+        "recovery_confirmed": {
+          "encouragement": [
+            "Lực chạm phím lại sạch.",
+            "Hai tay đã đồng bộ lại. Giữ nó.",
+            "Đã trở lại trên phím đàn. Ở lại."
+          ]
+        },
+        "fatigue": {
+          "encouragement": [
+            "Cổ tay đang căng lên? Nhấc tay lên, hít thở, rồi vào lại.",
+            "Cẳng tay thấy cứng? Dừng lại, thả tay xuống, hít thở.",
+            "Sự căng đang len vào vai — rời phím đàn 60 giây.",
+            "Các ngón tay thấy nặng? Duỗi nhanh, rồi chơi tiếp.",
+            "Đôi tay đang làm việc nặng hơn mức cần. Nghỉ ngắn.",
+            "Vai đang nhướn lên? Hạ chúng xuống, hít thở, rồi chơi.",
+            "Nghỉ 30 giây, xoay cổ tay, rồi quay lại.",
+            "Cổ tay đang căng dần. Dừng lại, đặt hai tay xuống đùi, hít thở."
+          ],
+          "correction": [
+            "Mệt đã lộ ra ở lực chạm phím — dừng, bỏ tay xuống 90 giây.",
+            "Bạn đã qua đỉnh — rời ghế đàn, lắc cho thả lỏng, rồi quay lại.",
+            "Chơi khi mệt làm chìm đi độ mạnh nhẹ. Dừng, cho cổ tay nghỉ, rồi bắt đầu lại.",
+            "Cổ tay đang căng quá. Đặt tay xuống, duỗi cẳng tay, nghỉ hai phút.",
+            "Nghỉ thật sự — đứng dậy, đi quanh, rồi quay lại cho tươi.",
+            "Đôi tay tạm xong rồi. Tối thiểu 90 giây, rồi kiểm tra lại.",
+            "Dừng hẳn. Xoay cổ tay và xoay vai trước khi tiếp tục.",
+            "Cố vượt qua đây là tự rước chấn thương vào mình. Dừng và hồi phục."
+          ]
+        },
+        "tempo_milestone": {
+          "encouragement": [
+            "Ở {bpmLow} BPM — hãy chắc tay trái thật vững trước khi leo.",
+            "Mốc {bpmLow} BPM. Giữ ở đây cho đến khi hai tay độc lập.",
+            "Dải mới: {bpmLow}-{bpmHigh}. Từng tay riêng trước, rồi mới ghép lại.",
+            "{bpmLow} BPM còn mới. Giữ ngang cho đến khi hai tay độc lập.",
+            "Đậu ở {bpmLow} BPM. Bước nhảy kế tiếp đến sau một phút sạch.",
+            "Đã chạm {bpmLow} BPM — giờ hãy xây vài ô nhịp sạch trước khi lên cao hơn.",
+            "{bpmLow}-{bpmHigh} BPM còn mới tinh. Giữ cho đến khi thấy dễ.",
+            "Giành lấy {bpmLow} BPM trước khi đuổi theo mốc cao hơn. Giữ ngang."
+          ]
+        },
+        "check_in": {
+          "neutral": [
+            "Đã chơi phím đàn một đoạn dài — bài, bài tập, hay điều gì cụ thể?",
+            "Hơn năm phút rồi. Bạn muốn tôi nhận xét tay trái, tay phải, hay cả hai?",
+            "Bạn đã tập trung rất lâu. Hãy cho tôi biết bạn muốn nhận xét về điều gì.",
+            "Đang chơi vững. Bạn có muốn nhận xét sắc hơn ở một đoạn cụ thể không?",
+            "Bạn đã chơi một lúc rồi. Tay trái? Tay phải? Cách xếp hợp âm? Hãy cho tôi biết nghe ở đâu.",
+            "Pocket đã vững suốt. Hãy chọn một mục tiêu nếu bạn muốn nhận xét kỹ hơn.",
+            "Đã chơi phím đàn một đoạn dài. Bạn muốn tôi nêu điều gì không?",
+            "Bạn đã chơi rất sâu. Hãy cho tôi biết tiếp theo nên nghe điều gì."
+          ]
+        },
+        "ramp_complete": {
+          "neutral": [
+            "Xong đợt tăng — {startBpm} đến {endBpm} trên phím đàn. Cả hai tay giữ được đợt leo.",
+            "Đã tới {endBpm} BPM. Bạn đã chơi xuyên suốt đợt tăng từ {startBpm}.",
+            "Đạt mục tiêu: {endBpm} BPM. Đợt tăng từ {startBpm} hoàn tất — hai tay vẫn khớp.",
+            "Đã đạt {endBpm} BPM. Đợt tăng từ {startBpm} trên phím đàn tốt."
+          ]
+        },
+        "stamina": {
+          "neutral": [
+            "Có sự căng trong lực chạm phím quanh phút thứ {staminaMinutes}. Thả lỏng, hít thở, quay lại cho sạch.",
+            "Quanh phút thứ {staminaMinutes} sự căng ở cổ tay len vào. Nghỉ ngắn, rồi chơi tiếp.",
+            "Qua mốc {staminaMinutes} phút, lực chạm phím nặng dần. Nghỉ ngắn, rồi quay lại với phím đàn.",
+            "Mệt ở đôi tay lộ ra quanh phút thứ {staminaMinutes}. Nghỉ, rồi quay lại."
+          ]
+        },
+        "bias_only": {
+          "neutral": [
+            "Các phím đang rơi {direction} {biasMs}ms so với tiếng click với độ tản thấp. Hãy dịch thời điểm chạm phím {correctionDirection}.",
+            "Nhất quán {direction} {biasMs}ms — đó là độ nghiêng, không phải độ rung. Hãy dịch mọi thứ {correctionDirection} để vào giữa."
+          ]
+        },
+        "pace_coaching": {
+          "neutral": [
+            "Trần của phím đàn ở {bpm} — {attemptCount} lần thử. Hai buổi ở {suggestedBpm} để củng cố.",
+            "{attemptCount} lần thử ở {bpm} mà đôi tay vẫn chưa ổn định. Hãy đậu ở {suggestedBpm} và rèn cho vào nếp."
+          ]
+        },
+        "grid_lost": {
+          "neutral": [
+            "Độ tương quan với lưới đã giảm. Vẫn theo tiếng click, hay đang chơi một câu nhạc?",
+            "Vừa mất lưới nhịp. Fill hay đoạn tự do?"
+          ]
+        },
+        "muddy_hits": {
+          "neutral": [
+            "Các phách đều có nhưng lực chạm nhẹ — hãy thử dồn trọng lượng ngón tay có chủ ý hơn.",
+            "Độ phủ tốt nhưng các lần nhấn phím mềm. Hãy ấn vào phím với nhiều chủ ý hơn.",
+            "Phách nào cũng rơi, chỉ là nhỏ. Hãy dồn thêm trọng lượng vào mỗi lần nhấn phím.",
+            "Trúng mọi nốt nhưng tín hiệu yếu — hãy tăng velocity xuống tận đáy phím."
+          ]
+        },
+        "grid_discontinuity": {
+          "neutral": [
+            "Cách chơi của bạn đã trôi khỏi tiếng click. Hãy dừng và vào lại ở phách mạnh.",
+            "Theo dõi lưới đã đứt — hãy để tiếng click chạy một ô nhịp, rồi vào lại.",
+            "Vừa lệch tempo. Hãy nhấc tay lên, tìm nhịp, rồi vào lại.",
+            "Câu nhạc đã lang thang khỏi lưới. Nghỉ một nhịp và khớp lại với tiếng click."
+          ]
+        },
+        "low_completeness": {
+          "neutral": [
+            "Bạn đang chơi khoảng một nửa số phách dự kiến — hãy cố đánh mọi nốt trong câu nhạc.",
+            "Độ phủ thấp — hãy chắc mỗi phách đều có một nốt, không chỉ các đỉnh giai điệu.",
+            "Khoảng một nửa số phách không được chơi. Hãy tập trung chơi trọn đoạn nhạc.",
+            "Độ phủ phách thấp. Hãy chậm lại và chắc chắn mỗi phách đều rơi trước khi đi tiếp."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Vị trí nốt của bạn vững — nhưng khoảng cách giữa các lần nhấn phím cứ lang thang. Hãy thử đếm thành tiếng các nốt chia nhỏ khi chơi.",
+            "Đúng phách tốt, nhưng khoảng cách giữa các nốt không đều. Hãy gõ chân trên mỗi nốt chia nhỏ để khóa khoảng cách giữa các lần nhấn phím.",
+            "Vị trí phách đã có — nhưng khoảng cách giữa các nốt đang dịch chuyển. Hãy đếm thành tiếng các nốt chia nhỏ và để giọng bạn giữ các khoảng đều nhau.",
+            "Vị trí phách tốt — nhưng khoảng cách giữa các nốt đang trôi. Hãy làm chậm đoạn nhạc cho đến khi các khoảng thấy bằng nhau, rồi tăng tốc lại."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "Khoảng cách giữa các nốt của bạn rất đều — nhưng bạn đang rơi lệch phách. Hãy đón trước tiếng click một chút và nhấn mỗi phím ngay vào nó.",
+            "Khoảng cách giữa các nốt đều, nhưng các lần nhấn phím nằm lệch khỏi lưới. Hãy khóa nốt đầu của mỗi câu nhạc vào phách, rồi để phần còn lại theo sau.",
+            "Nhịp giữa các lần nhấn phím nhất quán — giờ hãy neo cả câu nhạc vào tiếng click. Nhắm vào tâm của mỗi phách.",
+            "Cảm giác khoảng cách tốt. Hãy tập trung vào chỗ mỗi nốt rơi so với tiếng click — thử chơi hơi trước chỗ bạn đoán phách."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "Khoảng cách nốt và vị trí phách đều đã khớp. Đó là nhịp piano sạch.",
+            "Khoảng cách và vị trí đều chuẩn. Câu nhạc đang nằm đúng chỗ của nó.",
+            "Cả hai chiều đều vững — lúc này bạn đang chơi rất chính xác.",
+            "Nhịp được khóa trên mọi mặt. Đó là cảm giác bạn đang hướng tới."
+          ]
+        },
+        "low_confidence": {
+          "neutral": [
+            "Các nốt đang nhòe vào nhau ở phía tôi — tôi đang đọc đoạn này kém rõ hơn.",
+            "Pedal đang làm nhòe các lần chạm phím. Hãy xem các con số của nửa phút qua một cách lỏng lẻo.",
+            "Lúc này khó tách từng lần chạm phím khỏi các hợp âm. Số đọc của tôi mềm hơn thường lệ."
+          ]
+        },
+        "boundary_signal_a": {
+          "neutral": [
+            "{change}. Đoạn mới từ đây.",
+            "{change}. Đoạn trước đã đóng và được tính.",
+            "{change} — điểm bắt đầu tính lại từ hợp âm tiếp theo."
+          ]
+        },
+        "boundary_signal_b": {
+          "neutral": [
+            "Quãng nghỉ đã khép đoạn đó — {score}% ở {bpm} BPM.",
+            "Đôi tay rời phím đàn đủ lâu để kết thúc nó: {score}% ở {bpm} BPM.",
+            "Đã ghi {score}% ở {bpm} BPM cho đoạn đó."
+          ]
+        },
+        "preset_ceiling_hit": {
+          "neutral": [
+            "{bpmLow}–{bpmHigh} là chỗ bài này thôi sạch với bạn — {attemptCount} buổi, đều quanh {score}.",
+            "Bạn lại ở {bpmLow}–{bpmHigh}. {attemptCount} lượt gần nhất ở đây đều quanh {score}.",
+            "{attemptCount} buổi ở tempo này, buổi nào cũng gần {score}. Đáng biết khi bạn chơi."
+          ]
+        }
+      }
+    },
+    "defaultMode": {
+      "generic": {
+        "muddy_hits": {
+          "neutral": [
+            "Bạn đang đánh trúng các phách nhưng tín hiệu thu vào còn nhẹ — hãy thử đánh chắc tay hơn.",
+            "Nhịp điệu có đủ nhưng lực đánh còn nhẹ — hãy đánh dứt khoát hơn một chút.",
+            "Các phách đã trúng nhưng nhẹ — hãy thử đánh mạnh hơn.",
+            "Nhịp tốt, nhưng tín hiệu hơi nhẹ — hãy dồn thêm lực vào mỗi nốt.",
+            "Bạn đang bắt trúng các phách, nhưng hãy thử thêm lực cho mỗi lần đánh."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "Nhịp của bạn rất khớp — khoảng cách và vị trí nốt đều vững.",
+            "Rất chắc — các nốt rơi đúng chỗ và cách đều nhau.",
+            "Rất ổn định — vị trí phách và khoảng cách giữa các nốt đều chuẩn.",
+            "Cảm giác rất tốt — các nốt cách đều, rơi đúng vào nhịp.",
+            "Nhịp của bạn nằm ngay trong pocket — khoảng cách và vị trí đều đạt."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "Các nốt của bạn cách đều nhưng đang trôi khỏi tiếng click — hãy thử bám vào nhịp nhiều hơn.",
+            "Khoảng cách đều, nhưng bạn hơi lệch khỏi phách — hãy thử bám chặt vào nhịp.",
+            "Khoảng cách giữa các nốt đều đặn nhưng chưa đúng phách — hãy bám theo tiếng click.",
+            "Các nốt cách đều nhưng vị trí đang lang thang — hãy tập trung đặt mỗi nốt đúng vào phách.",
+            "Nhịp bên trong của bạn ổn định nhưng các nốt đang trôi khỏi nhịp — hãy bám theo tiếng click."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Bạn đang đánh sát từng phách nhưng khoảng cách giữa các nốt không đều — hãy tập trung làm các khoảng đó đều hơn.",
+            "Vị trí phách tốt nhưng khoảng cách giữa các nốt không đều — hãy thử giữ các khoảng đó bằng nhau.",
+            "Bạn đang sát phách nhưng khoảng cách giữa các nốt thay đổi — hãy tập trung vào các khoảng đều nhau.",
+            "Vị trí các nốt khá sát nhưng khoảng cách hơi rời rạc — hãy làm các khoảng đều lại.",
+            "Bạn đánh gần các vị trí phách nhưng khoảng cách giữa các nốt không ổn định — hãy luyện giữ các khoảng bằng nhau."
+          ]
+        },
+        "great": {
+          "neutral": [
+            "Rất khớp — nhịp của bạn đúng chỗ.",
+            "Cảm giác chắc, cứ giữ groove đó.",
+            "Nhịp của bạn đang nằm đúng chỗ cần nằm.",
+            "Nhịp sạch — đó chính là pocket.",
+            "Khớp rất chặt — làm tốt lắm.",
+            "Cảm giác rất tốt — tempo vững từ đầu đến cuối."
+          ]
+        },
+        "good_steady": {
+          "neutral": [
+            "Đều và vững — tempo ổn định tốt.",
+            "Giữ được nhịp — nhịp vững suốt đoạn này.",
+            "Tempo đang giữ tốt.",
+            "Cảm giác nhịp tốt — nhịp đều.",
+            "Nhịp đều — bạn đang xây một nền vững."
+          ]
+        },
+        "rushing": {
+          "neutral": [
+            "Bạn đang hơi nhào vào phách — hãy thử để phách đến với bạn.",
+            "Đến sớm một chút — hãy lùi lại và để nhịp thở.",
+            "Tempo đang bị đẩy lên — hãy giảm lực đánh một chút.",
+            "Bạn đang đi trước phách — hãy thử ở lại cùng phách.",
+            "Đang hơi vội — hãy chậm lực đánh lại, đừng chậm tempo."
+          ]
+        },
+        "dragging": {
+          "neutral": [
+            "Đang rơi hơi sau phách — hãy thử đi lên phía trước một chút.",
+            "Tempo đang kéo chậm lại — hãy giữ lực đánh dứt khoát.",
+            "Bạn đang hơi trễ — hãy đẩy lực đánh lên phía trước.",
+            "Sau phách — hãy thử giữ cho năng lượng luôn tiến lên.",
+            "Đang hơi kéo chậm — hãy làm lực đánh sắc hơn."
+          ]
+        },
+        "oscillating": {
+          "neutral": [
+            "Tempo đang dao động — lúc nhanh lúc chậm.",
+            "Khoảng cách giữa các nốt không đều — hãy thử giữ các khoảng đó bằng nhau.",
+            "Nhịp đang hơi lang thang — hãy tập trung giữ khoảng cách đều giữa các nốt.",
+            "Lúc vội lúc chậm — hãy thử bám vào một cảm giác đều.",
+            "Độ ổn định của tempo cần luyện thêm — hãy tập trung vào khoảng cách đều giữa các nốt."
+          ]
+        },
+        "low_score_solid_timing": {
+          "neutral": [
+            "Trung tâm nhịp của bạn tốt — hãy tập trung đánh trúng nhiều phách hơn.",
+            "Nhịp đúng chỗ, nhưng bạn đang bỏ lỡ một số vị trí — hãy lấp các khoảng trống đó.",
+            "Cảm giác nhịp tốt, nhưng nhịp điệu cần phủ nhiều hơn — hãy chơi nhiều phách hơn.",
+            "Nhịp có đó nhưng nhịp điệu còn thưa — hãy thử đánh nhiều vị trí hơn.",
+            "Nhịp của bạn đã được căn tốt — giờ hãy luyện độ dày."
+          ]
+        },
+        "low_coverage": {
+          "neutral": [
+            "Tôi chỉ nghe được một phần bạn chơi — hãy kiểm tra mức đầu vào hoặc chơi to hơn một chút.",
+            "Tín hiệu vào đang thấp — hãy thử đánh mạnh hơn một chút.",
+            "Tỷ lệ nhận diện thấp — có thể bạn cần tăng độ lợi đầu vào.",
+            "Chỉ nhận được một phần bạn chơi — hãy kiểm tra mức đầu vào trong cài đặt.",
+            "Tín hiệu vào yếu — hãy chơi to hơn hoặc kiểm tra độ lợi đầu vào."
+          ]
+        },
+        "noodling": {
+          "neutral": [
+            "Chơi tự do tốt — cứ để ý tưởng chảy.",
+            "Khám phá hay — khi sẵn sàng, hãy quay lại với nhịp.",
+            "Không gian sáng tạo — hãy tận dụng nó.",
+            "Chơi tự do tốt — cứ theo cảm giác.",
+            "Cứ thong thả — khi sẵn sàng thì quay lại với lưới nhịp."
+          ]
+        },
+        "flat_dynamics": {
+          "neutral": [
+            "Cách chơi của bạn rất đều về cường độ — hãy thử để các phách mạnh thở một chút.",
+            "Mọi nốt có âm lượng gần như nhau — hãy thử nhấn vào các phách chính.",
+            "Rất đều, nhưng hãy thử thêm hình dạng cường độ — đánh các phách mạnh nặng hơn một chút."
+          ]
+        },
+        "weak_downbeats": {
+          "neutral": [
+            "Hãy thử đánh phách 1 và 3 mạnh hơn một chút — các phách mạnh của bạn đang bị chìm.",
+            "Các phách yếu của bạn hơi mạnh — hãy giảm chúng và đẩy các phách mạnh lên.",
+            "Các phách chính cần thêm sức nặng — hãy để phách 1 và 3 dẫn dắt."
+          ]
+        },
+        "good_accents": {
+          "neutral": [
+            "Hình dạng cường độ tốt — các phách mạnh của bạn có sức nặng tốt.",
+            "Nhấn phách chính rất tốt — groove có nhịp rõ ràng.",
+            "Các phách mạnh của bạn nghe rõ — cảm giác tốt."
+          ]
+        },
+        "subdivisions_too_loud": {
+          "neutral": [
+            "Các nốt đệm hơi nặng — hãy để các nốt xen giữa nhẹ hơn.",
+            "Hãy thử đánh các nốt chia nhỏ nhẹ hơn — để các phách chính mang sức nặng.",
+            "Các nốt đệm đang lấn át phách mạnh — hãy giảm lực ở giữa các phách."
+          ]
+        }
+      }
+    },
+    "proMode": {
+      "generic": {
+        "muddy_hits": {
+          "neutral": [
+            "Các phách đã trúng nhưng độ tin cậy tín hiệu thấp — hãy thử đánh chắc hơn ở mỗi nốt.",
+            "Bộ dò thấy các lần đánh của bạn nhưng với độ tin cậy thấp — transient của bạn có thể quá nhẹ.",
+            "Các phách được ghi nhận nhưng tín hiệu yếu — hãy làm lực đánh sắc hơn để có transient rõ hơn.",
+            "Độ tin cậy tín hiệu của các lần đánh thấp — hãy đánh dứt khoát hơn để tăng độ mạnh của lực đánh.",
+            "Lực đánh của bạn quá nhẹ để nhận diện đáng tin cậy — hãy chơi quyết liệt hơn."
+          ]
+        },
+        "ic_both_locked": {
+          "neutral": [
+            "Khoảng cách giữa các nốt đều và vị trí phách vững — nhịp chặt toàn diện.",
+            "Cả khoảng cách giữa các nốt lẫn vị trí phách đều chuẩn — nhịp sạch tổng thể.",
+            "Khoảng cách nốt đều và vị trí phách chính xác — đây là cảm giác khi nhịp đã khớp.",
+            "Khoảng cách và vị trí đều chuẩn — nhịp vững.",
+            "Khoảng cách đều và vị trí phách sạch — không có gì cần sửa ở đây."
+          ]
+        },
+        "ic_placement_drift": {
+          "neutral": [
+            "Khoảng cách giữa các nốt đều nhưng vị trí phách đang trôi — đồng hồ bên trong của bạn ổn định nhưng chưa đồng bộ với nhịp.",
+            "Khoảng cách nốt đều nhưng các phách rơi lệch tâm — nhịp bên trong của bạn tốt, chỉ cần neo nó vào lưới.",
+            "Khoảng cách giữa các nốt đều nhưng vị trí đang lang thang khỏi phách — hãy đồng bộ với nhịp.",
+            "Khoảng cách nốt của bạn đáng tin cậy nhưng vị trí phách đang trôi — đồng hồ bên trong đã có, chỉ cần căn nó theo tiếng click.",
+            "Độ đều của khoảng cách tốt nhưng vị trí phách lệch — hãy tập trung đặt mỗi nốt đúng vào nhịp."
+          ]
+        },
+        "ic_spacing_drift": {
+          "neutral": [
+            "Vị trí phách đúng mục tiêu nhưng khoảng cách các nốt chia nhỏ không đều — các điểm neo đúng, các nốt đệm giữa chúng rời rạc.",
+            "Vị trí phách tốt nhưng khoảng cách giữa các nốt thay đổi — vị trí của bạn đúng, khoảng cách thì chưa.",
+            "Bạn sát các vị trí phách nhưng khoảng cách nốt không đều — vị trí đã có, hãy làm các khoảng đều lại.",
+            "Vị trí phách chính xác, khoảng cách nốt không ổn định — các điểm neo đúng, hãy luyện các khoảng đều nhau.",
+            "Vị trí phách vững nhưng khoảng cách nốt chia nhỏ không đều — vị trí đã có, giờ hãy làm đều các nốt đệm."
+          ]
+        },
+        "great": {
+          "neutral": [
+            "Vị trí phách chặt và khoảng cách nốt đều — nhịp sạch toàn diện.",
+            "Vị trí phách vững, khoảng cách đều — hãy nâng tempo khi bạn sẵn sàng.",
+            "Mọi thành phần của nhịp đều sạch — buổi tập tốt.",
+            "Khoảng cách nốt và vị trí đều chuẩn.",
+            "Nhịp đã khớp — hãy cân nhắc tăng tempo hoặc siết chặt các nốt chia nhỏ."
+          ]
+        },
+        "good_steady": {
+          "neutral": [
+            "Khoảng cách và vị trí đều ổn định — nền vững. Hãy tăng tempo 5 BPM hoặc làm lực đánh sắc hơn.",
+            "Độ ổn định nhịp tốt — một vài vị trí trôi nhưng trung tâm vẫn giữ.",
+            "Vị trí và khoảng cách đáng tin cậy — còn dư địa để đẩy mạnh hơn.",
+            "Trung tâm nhịp đúng, khoảng cách đều — hãy tăng tempo để thử thách nó.",
+            "Nền nhịp vững — hãy tập trung làm lực đánh sắc hơn ở các phách yếu."
+          ]
+        },
+        "rushing": {
+          "neutral": [
+            "Liên tục đến sớm — có độ lệch sớm theo một hướng trong thời điểm đánh.",
+            "Các lần đánh nốt đến trước phách — hãy đưa điểm bắt đầu nốt chậm lại một chút.",
+            "Kiểu đánh sớm — các nốt của bạn liên tục đi trước phách.",
+            "Độ lệch sớm nhất quán — lực đánh đang vội so với nhịp.",
+            "Nhịp bị dịch sớm — hãy để phách rơi trước, rồi mới đánh."
+          ]
+        },
+        "dragging": {
+          "neutral": [
+            "Liên tục đến trễ — có độ lệch trễ theo một hướng trong thời điểm đánh.",
+            "Các lần đánh nốt rơi sau phách — hãy làm lực đánh sắc hơn một chút.",
+            "Kiểu đánh trễ — các nốt liên tục đi sau phách.",
+            "Độ lệch trễ nhất quán — lực đánh đang kéo chậm nhịp.",
+            "Nhịp bị dịch trễ — hãy đẩy lực đánh lên để gặp phách."
+          ]
+        },
+        "oscillating": {
+          "neutral": [
+            "Phương sai nhịp cao dù trung bình gần bằng không — nhịp thực sự không ổn định.",
+            "Không phải độ lệch theo một hướng — nhịp đang luân phiên sớm và trễ.",
+            "Tempo không ổn định: khoảng cách nốt không đều trong suốt đoạn này.",
+            "Kiểu vội rồi chậm — không phải độ lệch cố định, mà là phương sai thật trong nhịp.",
+            "Phương sai nhịp cao — hãy tập trung giữ khoảng cách nốt đều."
+          ]
+        },
+        "low_score_solid_timing": {
+          "neutral": [
+            "Trung tâm nhịp và khoảng cách đều sạch nhưng độ phủ phách thấp.",
+            "Độ chính xác vị trí tốt nhưng quá nhiều vị trí phách còn trống.",
+            "Khoảng cách nốt đều nhưng mật độ thấp — hãy đánh nhiều vị trí trên lưới hơn.",
+            "Nền tảng nhịp vững, khoảng trống nằm ở độ phủ — hãy lấp thêm nhiều vị trí.",
+            "Vị trí chính xác — hãy tập trung đánh nhiều vị trí phách hơn."
+          ]
+        },
+        "low_coverage": {
+          "neutral": [
+            "Chỉ một phần nhỏ các vị trí phách có lần đánh được nhận diện — có thể tín hiệu quá nhỏ.",
+            "Tỷ lệ nhận diện thấp — hãy kiểm tra độ lợi đầu vào hoặc chơi to hơn.",
+            "Hầu hết các vị trí phách còn trống — hãy kiểm tra mức đầu vào, đây không phải vấn đề chất lượng chơi.",
+            "Nhận diện lần đánh thấp — hãy tăng độ lợi đầu vào hoặc độ mạnh của lực đánh.",
+            "Tín hiệu quá nhỏ để nhận diện đáng tin cậy — hãy chơi to hơn hoặc chỉnh mức đầu vào."
+          ]
+        },
+        "noodling": {
+          "neutral": [
+            "Chế độ chơi tự do — vị trí phách không được chấm điểm ở đây.",
+            "Đang khám phá tự do — hãy dùng nó để khởi động, rồi đưa lại về lưới.",
+            "Không chấm điểm khi chơi tự do — đây là không gian sáng tạo của bạn.",
+            "Chế độ tự do đang bật — việc chấm điểm tiếp tục khi bạn bám lại vào nhịp.",
+            "Chơi tự do không chấm điểm — cứ để nó chảy, quay lại lưới khi sẵn sàng."
+          ]
+        },
+        "flat_dynamics": {
+          "neutral": [
+            "Biên độ ít thay đổi giữa các vị trí phách — hãy thử thay đổi lực đánh.",
+            "Hình dạng cường độ tối thiểu trong cả ô nhịp — hãy tăng chênh lệch nhấn ở các phách mạnh.",
+            "Biên độ đều ở mọi vị trí — hãy xây một thứ bậc cường độ: phách mạnh to nhất, phách yếu nhẹ hơn."
+          ]
+        },
+        "weak_downbeats": {
+          "neutral": [
+            "Phát hiện kiểu nhấn ngược — các phách mạnh nhỏ hơn các phách yếu.",
+            "Các phách yếu của bạn đang lấn át — hãy tăng lực đánh ở phách 1 và 3.",
+            "Biên độ phách mạnh thấp hơn biên độ phách yếu — hãy đảo ngược thứ bậc cường độ."
+          ]
+        },
+        "good_accents": {
+          "neutral": [
+            "Chênh lệch nhấn lành mạnh — các phách mạnh rõ ràng mạnh hơn các phách yếu.",
+            "Hình dạng cường độ tốt — biên độ phách mạnh cao hơn hẳn biên độ phách yếu.",
+            "Cấu trúc nhấn rõ rệt — các phách mạnh dẫn đầu thứ bậc cường độ."
+          ]
+        },
+        "subdivisions_too_loud": {
+          "neutral": [
+            "Biên độ các nốt chia nhỏ gần bằng biên độ phách mạnh — các nốt đệm đang lấn át cấu trúc nhấn.",
+            "Các nốt đệm to bằng các phách chính — hãy giảm lực đánh ở các nốt chia nhỏ.",
+            "Không có thứ bậc cường độ giữa phách và nốt đệm — phách mạnh nên dẫn, các nốt chia nhỏ nên theo."
+          ]
+        }
+      }
+    },
+    "words": {
+      "direction": {
+        "before": "sớm",
+        "after": "trễ"
+      },
+      "correctionDirection": {
+        "earlier": "sớm hơn",
+        "later": "trễ hơn"
+      },
+      "change": {
+        "bpmUp": "tempo tăng lên {to} BPM",
+        "bpmDown": "tempo giảm xuống {to} BPM",
+        "presetCleared": "đã bỏ preset",
+        "preset": "đang nạp \"{to}\"",
+        "timeSig": "nhịp {to}/4",
+        "grouping": "đã nhóm lại thành {to}",
+        "instrument": "đang chuyển sang {to}",
+        "other": "cấu hình đã thay đổi",
+        "separator": "; "
+      }
+    }
+  }
+}

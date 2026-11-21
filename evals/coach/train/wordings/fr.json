@@ -1,0 +1,733 @@
+{
+  "language": "fr",
+  "writer": "helper-fr",
+  "wordings": {
+    "go_screen": [
+      "ouvre {screen}",
+      "va sur {screen}",
+      "emmène-moi sur {screen} stp",
+      "{screen}",
+      "affiche l'écran {screen} s'il te plaît",
+      "ouvre moi {screen} vite fait",
+      "je voudrais aller sur l'écran {screen}, tu peux ?",
+      "montre-moi {screen}"
+    ],
+    "open_path": [
+      "ouvre le parcours {path}",
+      "va sur la page du parcours : {path}",
+      "{path} stp",
+      "ouvre-moi {path}",
+      "peux-tu m'ouvrir le parcours {path} s'il te plaît ?",
+      "affiche le parcours {path}",
+      "ouvre le parcours {path} svp",
+      "je veux voir {path}, ouvre-le"
+    ],
+    "open_step_here": [
+      "ouvre l'étape {step}",
+      "étape {step}",
+      "va à l'étape {step}",
+      "ouvre letape {step} stp",
+      "montre-moi l'étape {step} de ce parcours",
+      "passe à l'étape {step} s'il te plaît",
+      "affiche l'étape {step}",
+      "ouvre-moi l'étape numéro {step} de cette page"
+    ],
+    "open_step_of_path": [
+      "ouvre l'étape {step} du parcours {path}",
+      "étape {step} de {path}",
+      "va à l'étape {step} dans le parcours : {path}",
+      "montre-moi l'étape {step} de {path} stp",
+      "{path}, étape {step}",
+      "ouvre etape {step} parcours {path}",
+      "peux-tu ouvrir l'étape {step} du parcours {path} ?",
+      "dans {path} je veux l'étape {step}, ouvre-la"
+    ],
+    "open_step_name": [
+      "ouvre l'étape {stepName}",
+      "va à l'étape : {stepName}",
+      "{stepName}, ouvre-la",
+      "ouvre l'étape qui s'appelle {stepName} s'il te plaît",
+      "montre-moi l'étape {stepName}",
+      "ouvre letape {stepName} stp",
+      "je cherche l'étape {stepName}, tu l'ouvres ?",
+      "étape {stepName}"
+    ],
+    "open_settings": [
+      "ouvre les paramètres : {section}",
+      "va dans les réglages {section}",
+      "paramètres {section}",
+      "ouvre les parametres, section {section}",
+      "emmène-moi dans les réglages, partie {section} stp",
+      "je veux régler des trucs dans {section}, ouvre les paramètres là",
+      "peux-tu ouvrir la section {section} des paramètres ?",
+      "réglages > {section}"
+    ],
+    "show_scale": [
+      "montre la gamme {root} {scale} sur le manche",
+      "affiche {root} {scale}",
+      "dessine-moi la gamme de {root} {scale} stp",
+      "gamme {root} {scale}",
+      "je voudrais voir {root} {scale} sur le manche, s'il te plaît",
+      "montre moi {root} {scale}",
+      "peux-tu afficher la gamme {root} {scale} ?",
+      "{root} {scale} sur le manche"
+    ],
+    "show_scale_at": [
+      "montre la gamme {root} {scale}, {position}",
+      "affiche {root} {scale} en {position}",
+      "dessine {root} {scale} sur le manche, {position}",
+      "gamme {root} {scale} : {position}",
+      "montre-moi {root} {scale} svp, {position}",
+      "je veux voir {root} {scale} à cet endroit : {position}",
+      "peux-tu m'afficher {root} {scale} avec {position} ?",
+      "{root} {scale} {position}"
+    ],
+    "show_chord": [
+      "montre l'accord {chord}",
+      "comment on joue {chord} ?",
+      "affiche {chord}",
+      "accord {chord} stp",
+      "montre-moi comment placer les doigts pour {chord}",
+      "je ne sais plus faire le {chord}, tu me le montres ?",
+      "{chord} ?",
+      "peux-tu afficher la grille de l'accord {chord} s'il te plaît ?"
+    ],
+    "explain_screen": [
+      "c'est quoi cet écran ?",
+      "à quoi sert cet écran",
+      "explique-moi cet écran",
+      "je comprends rien a cet ecran",
+      "peux-tu m'expliquer ce que je peux faire ici ?",
+      "qu'est-ce qu'on fait sur cette page ?",
+      "ça sert à quoi ici ?",
+      "explique cet écran stp"
+    ],
+    "start_today": [
+      "lance la séance d'aujourd'hui",
+      "démarre ma séance",
+      "on commence ?",
+      "go pour la séance du jour",
+      "lance la seance stp",
+      "je suis prêt, démarre la séance du jour s'il te plaît",
+      "commence l'entraînement d'aujourd'hui",
+      "c'est parti, lance la séance"
+    ],
+    "start_today_at": [
+      "lance la séance à la partie {part}",
+      "démarre la séance d'aujourd'hui à partir de la partie {part}",
+      "commence par la partie {part}",
+      "partie {part} d'abord stp",
+      "je saute direct à la partie {part} de la séance, lance",
+      "lance la seance, partie {part}",
+      "peux-tu démarrer la séance du jour à la partie {part} s'il te plaît ?",
+      "on attaque la séance à la partie {part}"
+    ],
+    "play_exercise": [
+      "joue l'exercice {exercise}",
+      "lance {exercise}",
+      "démarre l'exercice : {exercise}",
+      "{exercise} stp",
+      "je veux jouer l'exercice {exercise} maintenant",
+      "peux-tu lancer l'exercice {exercise} s'il te plaît ?",
+      "met l'exercice {exercise}",
+      "go {exercise}"
+    ],
+    "play_exercise_bpm": [
+      "joue l'exercice {exercise} à {bpm} bpm",
+      "lance {exercise} à {bpm}",
+      "{exercise} à {bpm} bpm stp",
+      "démarre l'exercice {exercise} avec le tempo à {bpm}",
+      "je veux faire {exercise} a {bpm} bpm",
+      "peux-tu lancer l'exercice {exercise} à {bpm} battements par minute s'il te plaît ?",
+      "{exercise} - {bpm} bpm, go",
+      "met l'exercice {exercise} sur {bpm} bpm et lance"
+    ],
+    "tempo_bpm": [
+      "mets le tempo à {bpm}",
+      "{bpm} bpm",
+      "règle la vitesse sur {bpm} bpm stp",
+      "tempo {bpm}",
+      "peux-tu mettre le métronome à {bpm} s'il te plaît ?",
+      "change le tempo : {bpm} bpm",
+      "mets {bpm} bpm",
+      "je veux jouer à {bpm}, règle le tempo"
+    ],
+    "tempo_faster": [
+      "plus vite",
+      "accélère un peu",
+      "plus rapide stp",
+      "acelere un peu",
+      "va un poil plus vite s'il te plaît",
+      "c'est trop mou, accélère",
+      "peux-tu monter un peu le tempo ?",
+      "un chouia plus rapide"
+    ],
+    "tempo_slower": [
+      "plus lent",
+      "ralentis un peu",
+      "moins vite stp",
+      "ralenti un peu",
+      "peux-tu ralentir un peu ? mes doigts n'arrivent pas à suivre",
+      "va un poil plus lentement s'il te plaît",
+      "c'est trop rapide pour moi, ralentis",
+      "baisse un peu le tempo"
+    ],
+    "find_edge": [
+      "trouve ma limite sur {exercise}",
+      "cherche ma limite sur l'exercice {exercise}",
+      "ma limite sur {exercise} ?",
+      "trouve ma limite stp, exercice {exercise}",
+      "je veux savoir jusqu'où je peux aller propre sur {exercise}",
+      "peux-tu chercher mon tempo limite sur {exercise} s'il te plaît ?",
+      "{exercise} : trouve mon edge",
+      "trouve ma limite dans l'exercice {exercise}"
+    ],
+    "test_out_here": [
+      "fais le test de l'étape {step}",
+      "je passe le test de l'étape {step}",
+      "teste l'étape {step}",
+      "test de letape {step} stp",
+      "je veux valider l'étape {step} en passant le test",
+      "peux-tu me faire passer le test de l'étape {step} s'il te plaît ?",
+      "saute l'étape {step} en la testant",
+      "passe le test pour l'étape {step}"
+    ],
+    "test_out_of_path": [
+      "fais le test de l'étape {step} du parcours {path}",
+      "teste l'étape {step} de {path}",
+      "{path} : test de l'étape {step}",
+      "passe le test de l'étape {step} dans {path} stp",
+      "je veux sauter l'étape {step} du parcours {path} en la prouvant",
+      "peux-tu me faire passer le test de l'etape {step} de {path} ?",
+      "test étape {step}, parcours {path}",
+      "je teste l'étape {step} de {path} direct"
+    ],
+    "loop_bars": [
+      "répète les mesures {from} à {to} doucement",
+      "boucle des mesures {from} à {to}",
+      "loop mesures {from}-{to} lentement stp",
+      "boucle la partie de la mesure {from} jusqu'à la mesure {to}, tranquille",
+      "peux-tu répéter de la mesure {from} à la {to} en ralentissant ?",
+      "je veux bosser les mesures {from} à {to}, boucle-les doucement",
+      "boucle mesure {from} a {to}",
+      "répète en boucle les mesures {from} à {to} à vitesse lente"
+    ],
+    "loop_bar": [
+      "répète la mesure {from} doucement",
+      "boucle la mesure {from}",
+      "loop mesure {from} stp",
+      "boucle juste la mesure {from} lentement",
+      "peux-tu répéter seulement la mesure {from} en boucle ?",
+      "je bute sur la mesure {from}, boucle-la doucement",
+      "mesure {from} en boucle",
+      "répete la mesure {from} lentement s'il te plaît"
+    ],
+    "swap_harder": [
+      "remplace la partie {part} par quelque chose de plus difficile",
+      "partie {part} trop facile, plus dur stp",
+      "change la partie {part} pour plus difficile",
+      "je veux du plus dur à la partie {part}",
+      "peux-tu échanger la partie {part} contre un truc plus corsé ?",
+      "la partie {part} est trop simple pour moi, remplace-la par plus difficile",
+      "plus difficile pour la partie {part}",
+      "remplace partie {part} par plus dur"
+    ],
+    "swap_different": [
+      "remplace la partie {part} par quelque chose de différent",
+      "change la partie {part} pour autre chose",
+      "partie {part} : autre chose stp",
+      "j'en ai marre de la partie {part}, mets autre chose",
+      "peux-tu échanger la partie {part} contre un autre exercice ?",
+      "remplace la partie {part}, quelque chose d'autre",
+      "autre chose pour la partie {part} svp",
+      "je veux changer la partie {part} de la séance, un truc different"
+    ],
+    "swap_style": [
+      "remplace la partie {part} par un autre style",
+      "change le style de la partie {part}",
+      "partie {part} : un style différent stp",
+      "je veux un autre style pour la partie {part}",
+      "peux-tu échanger la partie {part} contre un autre style de jeu ?",
+      "la partie {part} c'est toujours le même style, change",
+      "autre style pour la partie {part}",
+      "remplace partie {part} par un style different svp"
+    ],
+    "set_minutes": [
+      "mets la séance à {minutes} minutes",
+      "{minutes} minutes aujourd'hui",
+      "je n'ai que {minutes} minutes, adapte la séance",
+      "séance de {minutes} min stp",
+      "peux-tu régler la séance du jour sur {minutes} minutes s'il te plaît ?",
+      "fais-moi une séance de {minutes} minutes",
+      "change la durée : {minutes} mins",
+      "je veux jouer {minutes} minutes aujourd'hui, règle ça"
+    ],
+    "focus_path": [
+      "concentre-toi sur le parcours {followed} aujourd'hui",
+      "planifie la séance uniquement avec {followed}",
+      "juste {followed} aujourd'hui stp",
+      "focus sur {followed}",
+      "aujourd'hui je ne veux travailler que le parcours {followed}",
+      "peux-tu faire la séance seulement à partir de {followed} s'il te plaît ?",
+      "met l'accent sur {followed} pour la séance",
+      "séance du jour : uniquement {followed}"
+    ],
+    "focus_mix": [
+      "reviens au mélange habituel",
+      "remets le mix de tous mes parcours",
+      "séance avec tous les parcours suivis stp",
+      "retour au mélange",
+      "peux-tu planifier la séance avec tous mes parcours à nouveau ?",
+      "j'arrête de me concentrer sur un seul parcours, remets le mix",
+      "mélange complet pour aujourd'hui",
+      "remets le mélange de tous les parcours"
+    ],
+    "follow_path": [
+      "suis le parcours {path}",
+      "je veux suivre {path}",
+      "ajoute {path} à mon mélange",
+      "suis {path} stp",
+      "peux-tu ajouter le parcours {path} à ma séance quotidienne ?",
+      "je me lance dans le parcours {path}, mets-le dans mes parcours suivis",
+      "suivre {path}",
+      "ajoute le parcours {path} a mon mix"
+    ],
+    "load_jam": [
+      "charge ma jam {jam}",
+      "ouvre ma jam : {jam}",
+      "charge {jam} stp",
+      "je veux reprendre ma jam {jam}",
+      "peux-tu charger la jam que j'ai sauvegardée, {jam}, s'il te plaît ?",
+      "jam {jam}",
+      "recharge ma jam {jam}",
+      "mets ma jam {jam}"
+    ],
+    "load_preset": [
+      "charge mon préréglage {preset}",
+      "charge mon preset {preset}",
+      "préréglage : {preset} stp",
+      "je veux mon préréglage de métronome {preset}",
+      "peux-tu charger le preset {preset} que j'ai sauvegardé ?",
+      "{preset}, charge-le",
+      "recharge mon preset {preset} s'il te plaît",
+      "mets mon préréglage {preset}"
+    ],
+    "click_subdivision": [
+      "mets {subdivision} clics par temps",
+      "{subdivision} clics par temps stp",
+      "fais clicker le métronome {subdivision} fois par temps",
+      "subdivision : {subdivision} clics par battement",
+      "peux-tu régler le métronome sur {subdivision} clics par temps s'il te plaît ?",
+      "je veux {subdivision} clics par battement",
+      "règle le clic à {subdivision} par temps",
+      "mets le métronome en {subdivision} clic par temps"
+    ],
+    "set_theme": [
+      "mets le thème {theme}",
+      "change le thème en {theme}",
+      "thème {theme} stp",
+      "passe l'appli en thème {theme}",
+      "j'aimerais le thème {theme}, tu peux le mettre ?",
+      "change les couleurs : {theme}",
+      "mets le theme {theme} s'il te plaît",
+      "active le thème {theme}"
+    ],
+    "set_view": [
+      "utilise la vue {view} pour s'entraîner",
+      "mets la vue {view}",
+      "vue d'entraînement : {view}",
+      "je veux la vue {view} quand je joue",
+      "passe en vue {view} stp",
+      "peux-tu changer la vue de pratique en {view} s'il te plaît ?",
+      "vue {view} pendant la pratique",
+      "mets la vue d'entrainement sur {view}"
+    ],
+    "count_in_on": [
+      "active le décompte",
+      "mets le décompte",
+      "je veux un décompte avant de commencer",
+      "decompte on stp",
+      "peux-tu activer le décompte avant la prise s'il te plaît ?",
+      "rallume le décompte",
+      "ajoute des clics avant le début",
+      "décompte activé"
+    ],
+    "count_in_off": [
+      "désactive le décompte",
+      "enlève le décompte",
+      "plus de décompte",
+      "decompte off stp",
+      "je n'ai pas besoin de décompte, coupe-le",
+      "peux-tu désactiver le décompte avant la prise s'il te plaît ?",
+      "éteins le décompte",
+      "supprime les clics avant le début"
+    ],
+    "voice_on": [
+      "active la voix du coach",
+      "mets la voix",
+      "je veux que tu parles à voix haute",
+      "voix on stp",
+      "peux-tu réactiver ta voix s'il te plaît ?",
+      "allume la voix du coach",
+      "parle-moi à voix haute pendant la séance",
+      "voix du coach activée"
+    ],
+    "voice_off": [
+      "désactive la voix du coach",
+      "coupe la voix",
+      "arrête de parler à voix haute",
+      "voix off stp",
+      "peux-tu te taire pendant que je joue ? désactive la voix",
+      "éteins la voix du coach s'il te plaît",
+      "plus de voix",
+      "je préfère sans voix, coupe-la"
+    ],
+    "suggestions_on": [
+      "active les suggestions du coach",
+      "remets les conseils",
+      "je veux des suggestions pendant que je joue",
+      "suggestions on stp",
+      "peux-tu réactiver les conseils du coach s'il te plaît ?",
+      "allume les suggestions",
+      "donne-moi des conseils en cours de séance",
+      "conseils activés"
+    ],
+    "suggestions_off": [
+      "désactive les suggestions du coach",
+      "coupe les conseils",
+      "plus de suggestions",
+      "suggestions off stp",
+      "arrête de me donner des conseils pendant que je joue",
+      "peux-tu désactiver les suggestions s'il te plaît ?",
+      "éteins les conseils du coach",
+      "je veux jouer tranquille, enlève les suggestions"
+    ],
+    "set_goal": [
+      "mon objectif : {goal}",
+      "mets mon objectif sur {goal}",
+      "mon but, c'est {goal}",
+      "objectif : {goal} stp",
+      "je voudrais changer mon objectif pour : {goal}",
+      "peux-tu noter comme objectif : {goal} ?",
+      "nouvel objectif, {goal}",
+      "définis mon objectif : {goal}"
+    ],
+    "yours_input": [
+      "coupe mon micro",
+      "mute le micro",
+      "baisse le volume du micro",
+      "allume l'entrée audio",
+      "arrête de m'écouter",
+      "mets le micro en sourdine stp",
+      "change l'entrée de la guitare",
+      "peux-tu activer le microphone ?",
+      "le mic est trop fort, baisse-le",
+      "ecoute-moi jouer, active l'entrée"
+    ],
+    "yours_devices": [
+      "passe sur mon casque",
+      "change le périphérique audio",
+      "mets le son sur les enceintes",
+      "utilise mon interface audio",
+      "switch sur les écouteurs stp",
+      "change la sortie audio",
+      "je veux jouer dans le casque, change ça",
+      "peux-tu choisir une autre carte son ?",
+      "bascule le son sur les haut-parleurs",
+      "mets l'interface en sortie"
+    ],
+    "yours_grading": [
+      "arrête de m'évaluer",
+      "désactive l'évaluation",
+      "ne me note pas cette fois",
+      "active la notation",
+      "coupe le grading stp",
+      "évalue-moi sur cette prise",
+      "je veux jouer sans être évalué",
+      "peux-tu remettre l'évaluation ?",
+      "stop la notation",
+      "desactive l'evaluation de mon jeu"
+    ],
+    "yours_recording": [
+      "enregistre ce que je joue",
+      "lance l'enregistrement",
+      "arrête l'enregistrement",
+      "garde cet enregistrement",
+      "enregistre-moi stp",
+      "commence à enregistrer",
+      "peux-tu enregistrer la prochaine prise ?",
+      "stoppe d'enregistrer",
+      "je veux garder cette prise, enregistre-la",
+      "mets en route l'enregistrement"
+    ],
+    "yours_deleting": [
+      "supprime cette prise",
+      "efface mon dernier enregistrement",
+      "vide mon historique",
+      "supprime la jam",
+      "efface tout stp",
+      "peux-tu enlever cette prise ?",
+      "oublie ma dernière prise, supprime-la",
+      "efface l'historique de mes séances",
+      "retire cet enregistrement",
+      "supprime le enregistrement d'hier"
+    ],
+    "yours_unfollowing": [
+      "arrête de suivre le parcours {path}",
+      "quitte le parcours {path}",
+      "je ne veux plus suivre {path}",
+      "désabonne-moi de {path}",
+      "abandonne {path} stp",
+      "retire {path} de mes parcours suivis",
+      "peux-tu m'enlever du parcours {path} ?",
+      "j'en ai marre de {path}, arrête de le suivre",
+      "stop {path}",
+      "arrete de suivre {path} s'il te plaît"
+    ],
+    "yours_model": [
+      "télécharge le plus gros modèle",
+      "change le modèle du coach",
+      "installe un autre cerveau pour le coach",
+      "passe sur un modèle plus grand stp",
+      "télécharge le modèle IA",
+      "peux-tu changer l'IA du coach ?",
+      "je veux un meilleur modèle, télécharge-le",
+      "mets le modele plus puissant",
+      "switch le llm du coach",
+      "lance le téléchargement du cerveau"
+    ],
+    "yours_grades": [
+      "marque ça comme réussi",
+      "donne-moi un A",
+      "remets mon score à zéro",
+      "change ma note",
+      "mets-moi la note maximale stp",
+      "valide cette prise, je l'ai réussie",
+      "peux-tu effacer mon score de la dernière prise ?",
+      "mets un bon résultat, j'ai bien joué",
+      "réinitialise mon tempo propre",
+      "ajoute-moi des points"
+    ],
+    "none_technique": [
+      "comment garder le poignet détendu ?",
+      "c'est quoi la meilleure façon de travailler le picking alterné ?",
+      "mon pouce fait mal quand je fais un barré, c'est normal ?",
+      "comment on fait un bon vibrato ?",
+      "astuce pour des hammer-ons plus nets ?",
+      "faut-il tenir le médiator fermement ou souple ?",
+      "comment j'arrête de tendre mon épaule en jouant",
+      "comment bien étouffer les cordes avec la paume ?",
+      "pourquoi mes bends sonnent faux ?",
+      "quelle position pour la main gauche sur le manche ?",
+      "comment travailler la précision des doigts sans me blesser ?",
+      "comment faire des slides propres ?"
+    ],
+    "none_theory": [
+      "quelle est la différence entre dorien et mineur ?",
+      "c'est quoi une quinte diminuée ?",
+      "pourquoi la gamme pentatonique marche sur tout le blues ?",
+      "qu'est-ce qu'un accord suspendu ?",
+      "comment fonctionne le cycle des quintes ?",
+      "à quoi sert le mode mixolydien ?",
+      "c'est quoi la relative mineure de do majeur ?",
+      "dis-moi ce qu'est une cadence parfaite",
+      "pourquoi on dit dièse ou bémol selon la tonalité ?",
+      "quelle différence entre un arpège et un accord ?",
+      "c'est quoi un triton ?",
+      "comment on construit un accord de septième ?"
+    ],
+    "none_past": [
+      "j'ai ouvert {screen} hier",
+      "hier je suis allé sur {screen}",
+      "j'avais déjà regardé {screen} ce matin",
+      "je suis passé par {screen} tout à l'heure",
+      "j'ai joué une heure ce matin",
+      "avant-hier j'ai ouvert {screen}, c'était sympa",
+      "c'est {screen} que j'ai utilisé la semaine dernière",
+      "j'étais sur {screen} hier soir, rien de spécial",
+      "j'ai fini ma séance hier, et j'ai regardé {screen}",
+      "la dernière fois j'ai ouvert {screen} par erreur",
+      "ce matin j'ai bossé mes gammes puis j'ai ouvert {screen}",
+      "j'ai déjà vu {screen} hier"
+    ],
+    "none_future": [
+      "ouvre {screen} demain",
+      "demain j'irai sur {screen}",
+      "rappelle-moi ce soir d'ouvrir {screen}",
+      "plus tard je regarderai {screen}",
+      "on ouvrira {screen} la semaine prochaine",
+      "rappelle-moi de ne pas oublier {screen} demain matin",
+      "pas maintenant, {screen} plus tard",
+      "ce soir j'ouvrirai {screen}",
+      "je passerai sur {screen} tout à l'heure",
+      "dimanche prochain j'irai sur {screen}",
+      "ouvre {screen} dans une heure",
+      "je verrai {screen} après le dîner"
+    ],
+    "none_negated": [
+      "n'ouvre pas {screen}",
+      "ne va pas sur {screen}",
+      "non, pas {screen}",
+      "ouvre surtout pas {screen}",
+      "laisse tomber {screen}",
+      "je ne veux pas aller sur {screen}",
+      "ne m'emmène pas sur {screen}",
+      "non, laisse comme ça, pas {screen}",
+      "jamais {screen}, merci",
+      "ne touche pas à {screen}",
+      "stop, n'ouvre rien de {screen}",
+      "non non, reste ici, pas de {screen}"
+    ],
+    "none_chat": [
+      "merci !",
+      "salut coach",
+      "t'es top",
+      "lol",
+      "ok",
+      "haha bien joué",
+      "bonjour",
+      "ça marche, merci",
+      "trop cool cette appli",
+      "mdr",
+      "à plus tard !",
+      "bonne soirée"
+    ],
+    "none_offtopic": [
+      "il va pleuvoir demain ?",
+      "qui a gagné le match hier soir ?",
+      "t'as une bonne recette de pâtes ?",
+      "aide-moi à faire mes devoirs de maths",
+      "c'est quoi la capitale de l'Australie ?",
+      "tu connais une bonne série à regarder ?",
+      "comment on installe Spotify ?",
+      "il est quelle heure à Tokyo ?",
+      "raconte-moi une blague sur les chats",
+      "quel est le meilleur téléphone en ce moment ?",
+      "j'ai faim, je mange quoi ce soir ?",
+      "tu peux m'aider à écrire un mail à mon patron ?"
+    ],
+    "none_tuning": [
+      "accorde ma guitare",
+      "ma corde de sol est trop basse ?",
+      "comment accorder en drop D ?",
+      "mon la est faux, non ?",
+      "c'est quoi le bon accordage standard ?",
+      "tu peux accorder la sixième corde ?",
+      "mets-moi l'accordeur",
+      "ma guitare se désaccorde tout le temps, pourquoi ?",
+      "accordage en demi-ton plus bas, comment faire ?",
+      "la corde de mi aigu est trop haute je crois",
+      "aide-moi à accorder",
+      "est-ce que ma guitare est bien accordée ?"
+    ],
+    "none_unsupported": [
+      "achète-moi des cordes",
+      "transpose cette chanson d'un ton",
+      "exporte mes données en fichier",
+      "appelle mon prof de guitare",
+      "écris-moi une chanson",
+      "commande-moi un médiator",
+      "envoie mes stats par mail",
+      "traduis ce morceau en tablature pour piano",
+      "réserve-moi un cours de guitare",
+      "partage mon score sur Instagram",
+      "génère-moi un solo complet",
+      "télécharge la partition de ce morceau en pdf"
+    ],
+    "none_wish": [
+      "j'aimerais jouer plus vite un jour",
+      "j'en ai marre des gammes",
+      "j'aimerais tellement savoir improviser",
+      "je suis fatigué de répéter les mêmes accords",
+      "un jour je jouerai sur scène",
+      "ça me saoule de travailler les barrés",
+      "je me sens nul aujourd'hui",
+      "je voudrais avoir de plus longs doigts",
+      "j'ai envie de lâcher la guitare ce soir",
+      "j'adorerais jouer comme mon guitariste préféré",
+      "j'espère progresser avant l'été",
+      "je suis trop crevé pour jouer"
+    ],
+    "card_where_slipped": [
+      "où est-ce que j'ai décroché dans ma dernière prise ?",
+      "à quel endroit je me suis planté ?",
+      "où ça a déraillé sur ma dernière prise",
+      "c'est où que j'ai perdu le fil ?",
+      "ou j'ai glissé sur cette prise stp ?"
+    ],
+    "card_early_or_late": [
+      "j'étais en avance ou en retard sur cette prise ?",
+      "est-ce que je précipite ou je traîne ?",
+      "je jouais trop tôt ou trop tard ?",
+      "j'accélère pendant ma prise ou pas ?",
+      "suis-je en retard sur le temps ?"
+    ],
+    "card_why_not_counted": [
+      "pourquoi cette prise n'a pas compté ?",
+      "pourquoi je n'ai pas validé ?",
+      "ma prise n'est pas passée, pourquoi",
+      "qu'est-ce qui a fait que ça n'a pas compté ?",
+      "pourquoi ça n'a pas été validé stp ?"
+    ],
+    "card_what_changed": [
+      "qu'est-ce qui a changé par rapport à la prise d'avant ?",
+      "différence entre cette prise et la précédente ?",
+      "c'est mieux ou pire que ma dernière prise ?",
+      "qu'est-ce qui est différent cette fois ?",
+      "compare ma prise avec la précédente"
+    ],
+    "card_improving": [
+      "est-ce que je m'améliore sur cet exercice ?",
+      "je progresse ou pas ?",
+      "suis-je en train de m'améliorer ?",
+      "ça va mieux avec le temps sur cet exercice ?",
+      "est ce que je fais des progrès la dessus ?"
+    ],
+    "card_score_made_of": [
+      "mon score se compose de quoi ?",
+      "d'où vient mon résultat ?",
+      "qu'est-ce qui compte dans ma note ?",
+      "comment est calculé mon score ?",
+      "détaille-moi mon résultat stp"
+    ],
+    "card_pass_mark_distance": [
+      "il me manque combien pour réussir ?",
+      "je suis loin du seuil de réussite ?",
+      "à combien suis-je de la note de passage ?",
+      "il me reste quoi avant de valider ?",
+      "j'en suis où par rapport au seuil ?"
+    ]
+  },
+  "goals": [
+    "jouer le solo de mon morceau préféré proprement",
+    "avoir des accords barrés bien nets",
+    "jouer en rythme sans courir",
+    "apprendre à improviser sur le blues",
+    "enchaîner les accords sans m'arrêter",
+    "maîtriser le picking alterné",
+    "jouer Hotel California en entier",
+    "faire des bends justes",
+    "jouer plus détendu, sans crispation",
+    "connaître le manche par cœur",
+    "jouer un riff de métal propre et serré",
+    "être à l'aise avec le fingerpicking",
+    "apprendre mes gammes pentatoniques partout sur le manche",
+    "jouer en groupe sans perdre le tempo",
+    "faire un solo à la fin du mois",
+    "avoir un vibrato qui sonne bien",
+    "jouer mon morceau préféré de bout en bout",
+    "être régulier tous les jours",
+    "lire les tablatures plus vite",
+    "enregistrer une reprise dont je suis fier"
+  ],
+  "vocab": {
+    "screen": {
+      "paths": ["parcours"]
+    },
+    "section": {
+      "devices": ["périphériques", "appareils audio"],
+      "grading": ["évaluation", "notation"],
+      "recording": ["enregistrement"]
+    }
+  }
+}
