@@ -24,7 +24,40 @@
     "runScore": "Ocena {{score}} przy {{bpm}} BPM",
     "runScoreNoBpm": "Ocena {{score}}",
     "sessionScore": "Ocena sesji {{score}} · {{word}}",
-    "openRuns": "Otwórz Przebiegi narzędzi w Postępach"
+    "openRuns": "Otwórz Przebiegi narzędzi w Postępach",
+    "finding": {
+      "beatEarly": "Na uderzeniu {{beat}} taktu Twoje nuty wypadły średnio o {{ms}} ms wcześniej niż nuty na pozostałych uderzeniach: {{agreeing}} z {{notes}} nut na tym uderzeniu wypadło wcześniej niż średnia pozostałych uderzeń.",
+      "beatLate": "Na uderzeniu {{beat}} taktu Twoje nuty wypadły średnio o {{ms}} ms później niż nuty na pozostałych uderzeniach: {{agreeing}} z {{notes}} nut na tym uderzeniu wypadło później niż średnia pozostałych uderzeń.",
+      "subdivision": "W {{missed}} z {{total}} uderzeń, w których ta pozycja była liczona, żadna nuta nie padła na pozycji „{{position}}”.",
+      "ceiling": "W tempie {{low}} BPM co najmniej połowa z Twoich {{lowNotes}} nut na metronomie padła w granicach {{lowMs}} ms od miejsca, w którym Twoje nuty zwykle padają względem metronomu; w tempie {{high}} BPM co najmniej połowa z {{highNotes}} nut na metronomie była od niego oddalona o {{highMs}} ms lub więcej.",
+      "driftEarly": "Na odcinku {{notes}} nut na metronomie ostatnie {{third}} nut padło średnio o {{ms}} ms wcześniej względem metronomu niż pierwsze {{third}} nut.",
+      "driftLate": "Na odcinku {{notes}} nut na metronomie ostatnie {{third}} nut padło średnio o {{ms}} ms później względem metronomu niż pierwsze {{third}} nut.",
+      "position": {
+        "2": {
+          "0": "ósemka na uderzeniu",
+          "1": "ósemka poza uderzeniem"
+        },
+        "3": {
+          "0": "pierwsza triola",
+          "1": "druga triola",
+          "2": "trzecia triola"
+        },
+        "4": {
+          "0": "pierwsza szesnastka",
+          "1": "druga szesnastka",
+          "2": "trzecia szesnastka",
+          "3": "czwarta szesnastka"
+        },
+        "6": {
+          "0": "pierwsza sekstola",
+          "1": "druga sekstola",
+          "2": "trzecia sekstola",
+          "3": "czwarta sekstola",
+          "4": "piąta sekstola",
+          "5": "szósta sekstola"
+        }
+      }
+    }
   },
   "coachModel": {
     "label": "Model trenera",

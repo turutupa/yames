@@ -47,98 +47,218 @@
       "phone": "여기에 입력한 내용은 이 휴대폰 밖으로 나가지 않아요."
     },
     "card": {
-      "chips": "About your last Take:",
+      "chips": "지난 테이크에 대해:",
       "chip": {
-        "where": "Where did it slip?",
-        "lean": "Was I early or late?",
-        "count": "Why didn't that count?"
+        "where": "어디서 흐트러졌나요?",
+        "lean": "빨랐나요, 늦었나요?",
+        "count": "왜 반영되지 않았나요?",
+        "changed": "지난 테이크 이후 뭐가 바뀌었나요?",
+        "improving": "나아지고 있나요?",
+        "madeOf": "점수는 뭘로 이루어지나요?",
+        "distance": "통과 기준까지 얼마나 남았나요?"
       },
       "canAnswer": {
-        "ungraded": "You're playing without grading, so there are no measurements to answer questions about your Takes from."
+        "ungraded": "채점 없이 연주하고 있어서, 테이크에 대한 질문에 답할 측정값이 없어요."
       },
-      "tooShort": "Take {{take}} stopped after {{bars}} bar, too few to judge.",
-      "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too few to judge.",
+      "tooShort": "테이크 {{take}}에서 {{bars}}마디 뒤에 멈췄어요. 판단하기엔 너무 적어요.",
+      "tooShort_other": "테이크 {{take}}에서 {{bars}}마디 뒤에 멈췄어요. 판단하기엔 너무 적어요.",
       "slip": {
-        "none": "No bar slipped in Take {{take}}: every bar that could be judged held.",
-        "noBars": "I didn't measure Take {{take}} bar by bar, so I can't say where it slipped."
+        "none": "테이크 {{take}}에서 흐트러진 마디는 없었어요. 판단할 수 있었던 마디는 모두 유지됐어요.",
+        "noBars": "테이크 {{take}}에 대해서는 마디별로 측정하지 않아서, 어디서 흐트러졌는지는 말할 수 없어요."
       },
       "lean": {
         "premise": {
-          "early": "In Take {{take}} the bars that leaned sat earlier than the rest of it, not later. A lean the whole Take shares is something I don't measure.",
-          "late": "In Take {{take}} the bars that leaned sat later than the rest of it, not earlier. A lean the whole Take shares is something I don't measure."
+          "early": "테이크 {{take}}에서 치우쳤던 마디는 나머지 부분보다 빨랐고, 늦지 않았어요. 테이크 전체에 공통된 치우침은 측정하지 않아요.",
+          "late": "테이크 {{take}}에서 치우쳤던 마디는 나머지 부분보다 늦었고, 빠르지 않았어요. 테이크 전체에 공통된 치우침은 측정하지 않아요."
         },
         "premiseNone": {
-          "early": "No bar of Take {{take}} sat more than {{ms}} ms earlier than the rest of it. A lean the whole Take shares is something I don't measure.",
-          "late": "No bar of Take {{take}} sat more than {{ms}} ms later than the rest of it. A lean the whole Take shares is something I don't measure."
+          "early": "테이크 {{take}}에서 측정할 수 있었던 마디({{bars}}마디 중 {{measured}}마디) 가운데 나머지 부분보다 {{ms}} ms를 넘게 빨랐던 마디는 없었어요. 테이크 전체에 공통된 치우침은 측정하지 않아요.",
+          "late": "테이크 {{take}}에서 측정할 수 있었던 마디({{bars}}마디 중 {{measured}}마디) 가운데 나머지 부분보다 {{ms}} ms를 넘게 늦었던 마디는 없었어요. 테이크 전체에 공통된 치우침은 측정하지 않아요."
         },
         "bar": {
-          "early": "Bar {{bar}} of the tune: {{ms}} ms earlier than the rest of the Take.",
-          "late": "Bar {{bar}} of the tune: {{ms}} ms later than the rest of the Take."
+          "early": "곡의 {{bar}}마디: 테이크의 나머지 부분보다 {{ms}} ms 빨라요.",
+          "late": "곡의 {{bar}}마디: 테이크의 나머지 부분보다 {{ms}} ms 늦어요."
         },
-        "none": "In Take {{take}}, none of the bars I could measure ({{measured}} of {{bars}}) sat more than {{ms}} ms earlier or later than the rest of it.",
-        "notMeasured": "I didn't measure which way Take {{take}} leaned: no bar of it had enough note-by-note timing to tell."
+        "none": "테이크 {{take}}에서 측정할 수 있었던 마디({{bars}}마디 중 {{measured}}마디) 가운데 나머지 부분보다 {{ms}} ms를 넘게 빠르거나 늦은 마디는 없었어요.",
+        "notMeasured": "테이크 {{take}}의 치우침 방향은 측정하지 않았어요. 음 하나하나의 타이밍이 충분한 마디가 없었어요."
       },
       "direction": {
-        "early": "The notes there sat earlier than the rest of the Take.",
-        "late": "The notes there sat later than the rest of the Take.",
-        "earlyOpen": "The open {{note}}s there sat earlier than the rest of the Take.",
-        "lateOpen": "The open {{note}}s there sat later than the rest of the Take.",
-        "earlyNote": "The {{note}}s at fret {{fret}} there sat earlier than the rest of the Take.",
-        "lateNote": "The {{note}}s at fret {{fret}} there sat later than the rest of the Take."
+        "early": "그 부분의 음은 테이크의 나머지 부분보다 빨랐어요.",
+        "late": "그 부분의 음은 테이크의 나머지 부분보다 늦었어요.",
+        "earlyOpen": "그 부분의 개방현 {{note}} 음은 테이크의 나머지 부분보다 빨랐어요.",
+        "lateOpen": "그 부분의 개방현 {{note}} 음은 테이크의 나머지 부분보다 늦었어요.",
+        "earlyNote": "그 부분의 {{fret}}프렛 {{note}} 음은 테이크의 나머지 부분보다 빨랐어요.",
+        "lateNote": "그 부분의 {{fret}}프렛 {{note}} 음은 테이크의 나머지 부분보다 늦었어요."
       },
       "below": {
-        "plain": "Take {{take}} was below the pass mark at {{bpm}} BPM.",
-        "even": "Take {{take}} was {{value}}% even, against a pass mark of {{bar}}%.",
-        "evenSome": "Take {{take}} was {{value}}% even, against a pass mark of {{bar}}%, and I heard {{heard}} of {{expected}} notes.",
-        "heard": "I heard {{heard}} of {{expected}} notes in Take {{take}}, against a pass mark of {{bar}}%.",
-        "extras": "Take {{take}} had more extra notes than the pass mark allows: {{bar}} or fewer in four bars.",
-        "accents": "In Take {{take}}, {{value}}% of the marked accents came out louder than the notes around them, against a pass mark of {{bar}}%.",
-        "notes": "In Take {{take}}, {{value}}% of the notes I could pitch were the written ones, against a pass mark of {{bar}}%."
+        "plain": "테이크 {{take}}의 결과는 {{bpm}} BPM에서 통과 기준 미만이었어요.",
+        "even": "테이크 {{take}}의 고르기는 {{value}}%였고, 통과 기준은 {{bar}}%였어요.",
+        "evenSome": "테이크 {{take}}의 고르기는 {{value}}%였고, 통과 기준은 {{bar}}%였어요. 들린 음은 {{expected}}개 중 {{heard}}개예요.",
+        "heard": "테이크 {{take}}에서 들린 음은 {{expected}}개 중 {{heard}}개였고, 통과 기준은 {{bar}}%였어요.",
+        "extras": "테이크 {{take}}의 여분의 음이 통과 기준의 허용치를 넘었어요. 허용치는 4마디에 {{bar}}개 이하예요.",
+        "accents": "테이크 {{take}}에서 표시된 악센트의 {{value}}%가 주변 음보다 크게 나왔고, 통과 기준은 {{bar}}%였어요.",
+        "notes": "테이크 {{take}}에서 음높이를 판별할 수 있었던 음의 {{value}}%가 악보대로의 음이었고, 통과 기준은 {{bar}}%였어요."
       },
       "count": {
-        "passed": "Take {{take}} did count: it met the pass mark at {{bpm}} BPM.",
-        "below": "Take {{take}} is kept, below the pass mark at {{bpm}} BPM.",
+        "passed": "테이크 {{take}}의 결과는 반영됐어요. {{bpm}} BPM에서 통과 기준을 충족했어요.",
+        "below": "테이크 {{take}}의 결과는 기록돼 있어요. {{bpm}} BPM에서 통과 기준 미만이에요.",
         "notCaught": {
-          "nothingHeard": "I couldn't grade Take {{take}}: I heard none of its notes, so it doesn't count against you.",
-          "tooFewHeard": "I couldn't grade Take {{take}}: I heard {{heard}} of {{expected}} notes, too few to grade, so it doesn't count against you.",
-          "tooManyExtras": "I couldn't grade Take {{take}}: I heard more notes that weren't written than ones that were, so it doesn't count against you.",
-          "lowConfidence": "I couldn't grade Take {{take}}: I wasn't sure enough of the notes I heard, so it doesn't count against you.",
-          "unknown": "I couldn't grade Take {{take}}."
+          "nothingHeard": "테이크 {{take}}: 채점하지 못했어요. 음이 하나도 들리지 않아서, 불이익으로 반영되지 않아요.",
+          "tooFewHeard": "테이크 {{take}}: 채점하지 못했어요. 음이 {{expected}}개 중 {{heard}}개만 들려서 채점하기엔 너무 적고, 불이익으로 반영되지 않아요.",
+          "tooManyExtras": "테이크 {{take}}: 채점하지 못했어요. 악보에 없는 음이 악보대로의 음보다 더 많이 들려서, 불이익으로 반영되지 않아요.",
+          "lowConfidence": "테이크 {{take}}: 채점하지 못했어요. 들린 음을 충분히 확신하지 못해서, 불이익으로 반영되지 않아요.",
+          "unknown": "테이크 {{take}}: 채점하지 못했어요."
         },
-        "tooShort": "Take {{take}} stopped after {{bars}} bar, too short to judge, so it doesn't count either way.",
-        "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too short to judge, so it doesn't count either way.",
-        "notClean": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and the longest run in Take {{take}} was {{held}}.",
-        "notCleanPlain": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and Take {{take}} didn't have them.",
-        "unfair": "You marked this grade as not fair. It is kept as measured, with your answer beside it.",
-        "pitchGraded": "The pitch of your notes is part of this Exercise's grade.",
-        "pitchNotGraded": "The pitch of your notes isn't part of this Exercise's grade.",
-        "rightNotes": "In Take {{take}}, {{value}}% of the {{base}} notes I could pitch were the written ones.",
-        "notesUnchecked": "I couldn't check the pitches in Take {{take}}.",
+        "tooShort": "테이크 {{take}}에서 {{bars}}마디 뒤에 멈췄어요. 판단하기엔 너무 짧아서, 어느 쪽으로도 반영되지 않아요.",
+        "tooShort_other": "테이크 {{take}}에서 {{bars}}마디 뒤에 멈췄어요. 판단하기엔 너무 짧아서, 어느 쪽으로도 반영되지 않아요.",
+        "notClean": "클린 템포는 움직이지 않았어요. 움직이려면 클린 마디가 {{need}}마디 연속으로 필요한데, 테이크 {{take}}에서 가장 길게 이어진 구간은 {{held}}마디였어요.",
+        "notCleanPlain": "클린 템포는 움직이지 않았어요. 움직이려면 클린 마디가 {{need}}마디 연속으로 필요한데, 테이크 {{take}}에는 없었어요.",
+        "unfair": "이 채점을 “공정하지 않음”으로 표시했어요. 측정된 그대로 남아 있고, 표시한 내용이 옆에 붙어 있어요.",
+        "pitchGraded": "음높이는 이 과제의 채점에 포함돼요.",
+        "pitchNotGraded": "음높이는 이 과제의 채점에 포함되지 않아요.",
+        "rightNotes": "테이크 {{take}}에서 음높이를 판별할 수 있었던 {{base}}개 음 중 {{value}}%가 악보대로의 음이었어요.",
+        "notesUnchecked": "테이크 {{take}}의 음높이는 확인하지 못했어요.",
         "ungraded": {
-          "eyes": "I didn't measure Take {{take}}: it was the one for your eyes, so nothing was graded.",
-          "chosen": "I didn't measure Take {{take}}: you chose to just play it, so nothing was graded.",
-          "inputOff": "I didn't measure Take {{take}}: the input wasn't on, so nothing was graded.",
-          "gradingOff": "I didn't measure Take {{take}}: grading is off, so nothing was graded.",
-          "selfChecked": "I didn't measure Take {{take}}: this Exercise is one you check yourself, so nothing was graded.",
-          "selfCheckedTempo": "I didn't measure Take {{take}}: at {{bpm}} BPM this Exercise is one you check yourself, so nothing was graded.",
-          "practiceOnly": "I didn't measure Take {{take}}: this Exercise is practice only, not graded.",
-          "landings": "I didn't measure Take {{take}}: this Exercise isn't graded yet."
+          "eyes": "테이크 {{take}}에 대해서는 측정하지 않았어요. 눈으로 보기 위한 테이크라서 아무것도 채점하지 않았어요.",
+          "chosen": "테이크 {{take}}에 대해서는 측정하지 않았어요. 그냥 연주하기로 해서 아무것도 채점하지 않았어요.",
+          "inputOff": "테이크 {{take}}에 대해서는 측정하지 않았어요. 입력이 켜져 있지 않아서 아무것도 채점하지 않았어요.",
+          "gradingOff": "테이크 {{take}}에 대해서는 측정하지 않았어요. 채점이 꺼져 있어서 아무것도 채점하지 않았어요.",
+          "selfChecked": "테이크 {{take}}에 대해서는 측정하지 않았어요. 이 과제는 직접 확인하는 과제라서 아무것도 채점하지 않았어요.",
+          "selfCheckedTempo": "테이크 {{take}}에 대해서는 측정하지 않았어요. {{bpm}} BPM에서 이 과제는 직접 확인하는 과제라서 아무것도 채점하지 않았어요.",
+          "practiceOnly": "테이크 {{take}}에 대해서는 측정하지 않았어요. 이 과제는 연습 전용이라 채점하지 않아요.",
+          "landings": "테이크 {{take}}에 대해서는 측정하지 않았어요. 이 과제는 아직 채점 대상이 아니에요."
         }
       },
       "notMeasured": {
-        "pitch": "I didn't measure that. The pitch of your notes isn't part of this Exercise's grade.",
-        "pickDirection": "I didn't measure that. The app has only sound, and a downstroke and an upstroke can sound alike.",
-        "muting": "I didn't measure that. The app can't tell a muted string from a loud one next to it.",
-        "posture": "I didn't measure that. The app has no picture of you.",
-        "tension": "I didn't measure that. Only you can feel tension, and it comes before it can be heard.",
-        "handAttribution": "I didn't measure that. A late note sounds the same from either hand.",
-        "fingering": "I didn't measure that. The same pitch sounds the same from any finger.",
-        "tone": "I didn't measure that. Tone and touch aren't measured.",
-        "feel": "I didn't measure that. Whether it sounds good isn't something the app measures."
+        "pitch": "측정하지 않았어요. 음높이는 이 과제의 채점에 포함되지 않아요.",
+        "pickDirection": "측정하지 않았어요. 앱이 가진 건 소리뿐이고, 다운스트로크와 업스트로크는 비슷하게 들릴 수 있어요.",
+        "muting": "측정하지 않았어요. 앱은 뮤트한 줄과 그 옆의 큰 소리를 구별하지 못해요.",
+        "posture": "측정하지 않았어요. 앱은 연주하는 모습을 보지 못해요.",
+        "tension": "측정하지 않았어요. 힘이 들어가는 건 본인만 느낄 수 있고, 소리로 들리기 전에 먼저 나타나요.",
+        "handAttribution": "측정하지 않았어요. 늦은 음은 어느 손으로 쳐도 똑같이 들려요.",
+        "fingering": "측정하지 않았어요. 같은 음높이는 어느 손가락으로 눌러도 똑같이 들려요.",
+        "tone": "측정하지 않았어요. 음색과 터치는 측정하지 않아요.",
+        "feel": "측정하지 않았어요. 듣기 좋은지는 앱이 측정하는 것이 아니에요."
       },
       "notNow": {
-        "noTake": "There's no Take of this Exercise to answer from yet.",
-        "ungraded": "You're playing without grading, so I didn't measure anything to answer that from."
+        "noTake": "이 과제에는 답의 근거가 될 테이크가 아직 없어요.",
+        "notSaved": "테이크 {{take}}는 아직 저장되지 않아서, 그 이전 테이크는 읽을 수 없어요.",
+        "ungraded": "채점 없이 연주하고 있어서, 그에 답할 만한 것을 측정하지 않았어요."
+      },
+      "history": {
+        "leftOut": "“공정하지 않음”으로 표시한 테이크 {{count}}개는 제외했어요.",
+        "leftOut_other": "“공정하지 않음”으로 표시한 테이크 {{count}}개는 제외했어요.",
+        "otherNotes": "이 과제의 다른 버전으로 연주한 테이크 {{count}}개는 제외했어요.",
+        "otherNotes_other": "이 과제의 다른 버전으로 연주한 테이크 {{count}}개는 제외했어요."
+      },
+      "changed": {
+        "first": "이 과제에는 테이크 {{take}} 이전에 측정한 테이크가 없어서, 비교할 대상이 없어요.",
+        "onlyUnfair": "이 과제에서 테이크 {{take}} 이전에 측정한 테이크는 “공정하지 않음”으로 표시한 것뿐이라서, 비교하지 않아요.",
+        "thisUnfair": "테이크 {{take}}의 채점을 “공정하지 않음”으로 표시했기 때문에, 다른 테이크와 비교하지 않아요.",
+        "noneAlike": "이 과제의 같은 버전으로 테이크 {{take}} 이전에 측정한 테이크가 없어서, 비교할 수 있는 것이 없어요.",
+        "sameTempo": "테이크 {{take}} 및 그 직전에 마지막으로 측정한 테이크: 둘 다 {{bpm}} BPM이었어요.",
+        "tempo": "테이크 {{take}} 직전에 마지막으로 측정한 테이크는 {{before}} BPM이었고, 테이크 {{take}}의 템포는 {{bpm}} BPM이었어요.",
+        "metric": {
+          "even": "고르기: 그 테이크 {{before}}%, 테이크 {{take}} {{now}}%.",
+          "heard": "들린 음: 그 테이크 {{before}}%, 테이크 {{take}} {{now}}%.",
+          "extras": "여분의 음: 그 테이크 {{before}}개, 테이크 {{take}} {{now}}개.",
+          "accents": "악센트 적중: 그 테이크 {{before}}%, 테이크 {{take}} {{now}}%.",
+          "notes": "맞은 음: 그 테이크 {{before}}%, 테이크 {{take}} {{now}}%.",
+          "hold": "끝까지 유지된 고르기: 그 테이크 {{before}}%, 테이크 {{take}} {{now}}%."
+        },
+        "noPair": "그 테이크와 테이크 {{take}} 사이에는 나란히 놓고 비교할 수 있는 측정값이 없어요.",
+        "verdict": {
+          "bothPassed": "둘 다 통과 기준을 충족했어요.",
+          "bothBelow": "둘 다 통과 기준 미만이었어요.",
+          "nowPassed": "그 테이크는 통과 기준 미만이었고, 테이크 {{take}}에서는 충족했어요.",
+          "nowBelow": "그 테이크는 통과 기준을 충족했고, 테이크 {{take}}에서는 미만이었어요."
+        }
+      },
+      "improving": {
+        "tooFew": "이 과제에서 비교할 수 있는 측정된 테이크는 {{count}}개이고, 필요한 수는 {{need}}개예요.",
+        "tooFew_other": "이 과제에서 비교할 수 있는 측정된 테이크는 {{count}}개이고, 필요한 수는 {{need}}개예요.",
+        "window": "이 과제의 최근 측정된 테이크 {{count}}개에서 템포는 {{to}} BPM이었어요.",
+        "window_other": "이 과제의 최근 측정된 테이크 {{count}}개에서 템포는 가장 오래된 것의 {{from}} BPM에서 가장 최근 것의 {{to}} BPM으로 바뀌었어요.",
+        "windowSame": "이 과제의 최근 측정된 테이크 {{count}}개에서 템포는 {{to}} BPM이었어요.",
+        "windowSame_other": "이 과제의 최근 측정된 테이크 {{count}}개에서 가장 오래된 것과 가장 최근 것은 둘 다 {{to}} BPM이었어요.",
+        "clean": "그중 {{count}}개가 클린 템포를 얻었고, {{bpm}} BPM이었어요.",
+        "clean_other": "그중 {{count}}개가 클린 템포를 얻었고, 가장 빠른 것은 {{bpm}} BPM이었어요.",
+        "cleanNone": "클린 템포를 얻은 것은 없어요.",
+        "cleanUnknown": "클린 템포를 얻었는지가 남아 있지 않은 것이 있어서, 얻은 수는 셀 수 없어요.",
+        "even": "고르기 기록이 남은 {{count}}개에서는, 그중 가장 오래된 것이 {{first}}%({{firstBpm}} BPM), 가장 최근 것이 {{last}}%({{lastBpm}} BPM), 최고가 {{best}}%({{bestBpm}} BPM)였어요.",
+        "even_other": "고르기 기록이 남은 {{count}}개에서는, 그중 가장 오래된 것이 {{first}}%({{firstBpm}} BPM), 가장 최근 것이 {{last}}%({{lastBpm}} BPM), 최고가 {{best}}%({{bestBpm}} BPM)였어요.",
+        "evenNone": "고르기 기록이 남은 것이 2개 미만이라서, 비교하지 않아요."
+      },
+      "made": {
+        "intro": "이 과제의 통과 기준에는 검사가 {{count}}개 있어요.",
+        "intro_other": "이 과제의 통과 기준에는 검사가 {{count}}개 있어요.",
+        "check": {
+          "even": "고르기: {{over}}마디 연속으로 {{bar}}% 이상.",
+          "heard": "들린 음: 악보에 적힌 음의 {{bar}}% 이상.",
+          "extras": "여분의 음: {{over}}마디에 {{bar}}개 이하.",
+          "accents": "악센트: 표시된 악센트의 {{bar}}% 이상이 주변 음보다 크게.",
+          "notes": "맞은 음: 음높이를 판별할 수 있는 음의 {{bar}}% 이상이 악보대로의 음.",
+          "hold": "끝까지 유지된 고르기: 판단한 구간의 마지막 마디들에서 {{bar}}% 이상."
+        },
+        "unnamed": "그중 {{count}}개는 아직 설명할 수 없는 검사예요.",
+        "unnamed_other": "그중 {{count}}개는 아직 설명할 수 없는 검사예요.",
+        "clean": "통과한 테이크는 클린 마디가 {{need}}마디 연속이면 그 테이크 자신의 템포로 클린 템포를 얻고, 그 템포가 더 빠르면 내 클린 템포를 올려요.",
+        "tempo": "{{passAt}} BPM 이상의 클린 테이크는 이 과제를 통과해요.",
+        "ungraded": {
+          "selfChecked": "이 과제는 직접 확인하는 과제라서 앱이 채점하지 않으므로, 나눠 볼 점수가 없어요.",
+          "practiceOnly": "이 과제는 연습 전용이고 채점하지 않아서, 나눠 볼 점수가 없어요.",
+          "landings": "이 과제는 아직 채점 대상이 아니라서, 나눠 볼 점수가 없어요."
+        },
+        "not": {
+          "pickDirection": "피킹 방향은 채점에 포함되지 않아요.",
+          "muting": "뮤트는 채점에 포함되지 않아요.",
+          "posture": "자세는 채점에 포함되지 않아요.",
+          "tension": "힘 들어감은 채점에 포함되지 않아요.",
+          "handAttribution": "실수가 어느 손에서 나왔는지는 채점에 포함되지 않아요.",
+          "fingering": "어느 손가락으로 음을 쳤는지는 채점에 포함되지 않아요.",
+          "tone": "음색과 터치는 채점에 포함되지 않아요.",
+          "feel": "느낌과 듣기 좋은지는 채점에 포함되지 않아요.",
+          "bendPitch": "벤딩이 얼마나 올라가는지는 채점에 포함되지 않아요.",
+          "vibrato": "비브라토는 채점에 포함되지 않아요.",
+          "noteChoice": "착지음 사이에서 어떤 음을 고르는지는 채점에 포함되지 않아요.",
+          "notesWritten": "음높이는 채점에 포함되지 않아요."
+        }
+      },
+      "distance": {
+        "short": {
+          "even": "고르기: 테이크 {{take}}에서 {{value}}%, 통과 기준 {{bar}}%에 {{count}}포인트 못 미쳐요.",
+          "even_other": "고르기: 테이크 {{take}}에서 {{value}}%, 통과 기준 {{bar}}%에 {{count}}포인트 못 미쳐요.",
+          "heard": "들린 음: 테이크 {{take}}에서 {{value}}%, 통과 기준 {{bar}}%에 {{count}}포인트 못 미쳐요.",
+          "heard_other": "들린 음: 테이크 {{take}}에서 {{value}}%, 통과 기준 {{bar}}%에 {{count}}포인트 못 미쳐요.",
+          "extras": "여분의 음: 테이크 {{take}}에서 {{value}}개, 통과 기준의 허용치보다 {{gap}}개 많아요({{over}}마디에 {{bar}}개 이하).",
+          "accents": "악센트 적중: 테이크 {{take}}에서 {{value}}%, 통과 기준 {{bar}}%에 {{count}}포인트 못 미쳐요.",
+          "accents_other": "악센트 적중: 테이크 {{take}}에서 {{value}}%, 통과 기준 {{bar}}%에 {{count}}포인트 못 미쳐요.",
+          "notes": "맞은 음: 테이크 {{take}}에서 {{value}}%, 통과 기준 {{bar}}%에 {{count}}포인트 못 미쳐요.",
+          "notes_other": "맞은 음: 테이크 {{take}}에서 {{value}}%, 통과 기준 {{bar}}%에 {{count}}포인트 못 미쳐요.",
+          "hold": "끝까지 유지된 고르기: 테이크 {{take}}에서 {{value}}%, 통과 기준 {{bar}}%에 {{count}}포인트 못 미쳐요.",
+          "hold_other": "끝까지 유지된 고르기: 테이크 {{take}}에서 {{value}}%, 통과 기준 {{bar}}%에 {{count}}포인트 못 미쳐요."
+        },
+        "under": {
+          "even": "고르기: 테이크 {{take}}에서 통과 기준 {{bar}}%에 1포인트도 못 미쳐요.",
+          "heard": "들린 음: 테이크 {{take}}에서 통과 기준 {{bar}}%에 1포인트도 못 미쳐요.",
+          "accents": "악센트 적중: 테이크 {{take}}에서 통과 기준 {{bar}}%에 1포인트도 못 미쳐요.",
+          "notes": "맞은 음: 테이크 {{take}}에서 통과 기준 {{bar}}%에 1포인트도 못 미쳐요.",
+          "hold": "끝까지 유지된 고르기: 테이크 {{take}}에서 통과 기준 {{bar}}%에 1포인트도 못 미쳐요."
+        },
+        "unnamed": "통과 기준에는 아직 설명할 수 없는 검사도 {{count}}개 있어서, 테이크 {{take}}가 그 검사에서 어땠는지는 말할 수 없어요.",
+        "unnamed_other": "통과 기준에는 아직 설명할 수 없는 검사도 {{count}}개 있어서, 테이크 {{take}}가 그 검사에서 어땠는지는 말할 수 없어요.",
+        "met": {
+          "even": "고르기: 테이크 {{take}}에서 {{value}}%, 통과 기준 {{bar}}%를 충족해요.",
+          "heard": "들린 음: 테이크 {{take}}에서 {{value}}%, 통과 기준 {{bar}}%를 충족해요.",
+          "extras": "여분의 음: 테이크 {{take}}에서 {{value}}개, 통과 기준({{over}}마디에 {{bar}}개 이하) 안이에요.",
+          "accents": "악센트 적중: 테이크 {{take}}에서 {{value}}%, 통과 기준 {{bar}}%를 충족해요.",
+          "notes": "맞은 음: 테이크 {{take}}에서 {{value}}%, 통과 기준 {{bar}}%를 충족해요.",
+          "hold": "끝까지 유지된 고르기: 테이크 {{take}}에서 {{value}}%, 통과 기준 {{bar}}%를 충족해요."
+        },
+        "unmeasured": "통과 기준의 검사 {{count}}개가 테이크 {{take}}에서 측정되지 않았어요.",
+        "unmeasured_other": "통과 기준의 검사 {{count}}개가 테이크 {{take}}에서 측정되지 않았어요.",
+        "tempo": "테이크 {{take}}의 템포는 {{bpm}} BPM이었어요. {{passAt}} BPM 이상의 클린 테이크는 이 과제를 통과해요.",
+        "none": "테이크 {{take}}에서는 통과 기준의 검사를 하나도 측정하지 않았어요."
       }
     }
   }

@@ -62,16 +62,24 @@ const CARD_CHIP: Readonly<Record<CardShape, string>> = {
   where_slipped: "ask.card.chip.where",
   early_or_late: "ask.card.chip.lean",
   why_not_counted: "ask.card.chip.count",
+  what_changed: "ask.card.chip.changed",
+  improving: "ask.card.chip.improving",
+  score_made_of: "ask.card.chip.madeOf",
+  pass_mark_distance: "ask.card.chip.distance",
 };
 
-/** Which cards come first after a Take of each kind. */
+/**
+ * Which cards come first after a Take of each kind; the first three that can
+ * answer here are offered (c2b1b: below the pass mark, how far it is comes
+ * second; after a pass, what changed).
+ */
 const CARD_ORDER: Readonly<Record<NonNullable<ChipFacts["verdict"]>, readonly CardShape[]>> = {
-  belowBar: ["where_slipped", "early_or_late", "why_not_counted"],
-  passed: ["where_slipped", "early_or_late"],
-  // Nothing was measured: only "why didn't that count" has an answer.
-  notCaught: ["why_not_counted"],
-  tooShort: ["why_not_counted"],
-  ungraded: ["why_not_counted"],
+  belowBar: ["where_slipped", "pass_mark_distance", "early_or_late", "what_changed", "why_not_counted", "improving", "score_made_of"],
+  passed: ["where_slipped", "what_changed", "early_or_late", "improving", "pass_mark_distance", "score_made_of"],
+  // Nothing was measured: "why didn't that count", and what the score is made of.
+  notCaught: ["why_not_counted", "score_made_of"],
+  tooShort: ["why_not_counted", "score_made_of"],
+  ungraded: ["why_not_counted", "score_made_of"],
 };
 
 function cardChips(facts: ChipFacts): ChipChoice[] {
@@ -79,6 +87,7 @@ function cardChips(facts: ChipFacts): ChipChoice[] {
   const order = facts.verdict ? CARD_ORDER[facts.verdict] : [];
   return order
     .filter((shape) => here.has(shape) && shape !== facts.answered)
+    .slice(0, MAX_CHIPS)
     .map((shape) => ({ kind: "card" as const, shape, call: { tool: shape, args: {} }, label: { key: CARD_CHIP[shape], values: {} } }));
 }
 

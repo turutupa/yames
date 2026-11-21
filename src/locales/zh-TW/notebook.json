@@ -1,48 +1,100 @@
 {
   "notebook": {
     "noticed": {
-      "tempoEvenness": "At {{fast}} BPM your Takes were {{fastScore}}% even; at {{slow}} BPM, {{slowScore}}%.",
+      "tempoEvenness": "在 {{fast}} BPM 時，你的幾遍平穩度為 {{fastScore}}%；在 {{slow}} BPM 時為 {{slowScore}}%。",
       "lean": {
         "first": {
-          "late": "The first bar of the pattern sat late against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured.",
-          "early": "The first bar of the pattern sat early against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured."
+          "late": "這個模式的第一小節相對其餘部分偏晚：在可以測量的最近 {{count}} 遍中，有 {{hits}} 遍。",
+          "early": "這個模式的第一小節相對其餘部分偏早：在可以測量的最近 {{count}} 遍中，有 {{hits}} 遍。"
         },
         "last": {
-          "late": "The last bar of the pattern sat late against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured.",
-          "early": "The last bar of the pattern sat early against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured."
+          "late": "這個模式的最後一小節相對其餘部分偏晚：在可以測量的最近 {{count}} 遍中，有 {{hits}} 遍。",
+          "early": "這個模式的最後一小節相對其餘部分偏早：在可以測量的最近 {{count}} 遍中，有 {{hits}} 遍。"
         }
       },
       "place": {
         "afterHeld": {
-          "late": "Bars where a note follows a held one sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars where a note follows a held one sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars where a note follows a held one sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars where a note follows a held one sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "長音後接音符的小節相對其餘部分偏晚：在有這類小節且可以測量的最近 {{count}} 遍中，有 {{hits}} 遍。",
+          "early": "長音後接音符的小節相對其餘部分偏早：在有這類小節且可以測量的最近 {{count}} 遍中，有 {{hits}} 遍。",
+          "lateOne": "在 {{exercise}} 中，長音後接音符的小節相對其餘部分偏晚：在可以測量的該練習最近 {{count}} 遍中，有 {{hits}} 遍。",
+          "earlyOne": "在 {{exercise}} 中，長音後接音符的小節相對其餘部分偏早：在可以測量的該練習最近 {{count}} 遍中，有 {{hits}} 遍。"
         },
         "openString": {
-          "late": "Bars with an open string in them sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars with an open string in them sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars with an open string in them sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars with an open string in them sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "含空弦的小節相對其餘部分偏晚：在有這類小節且可以測量的最近 {{count}} 遍中，有 {{hits}} 遍。",
+          "early": "含空弦的小節相對其餘部分偏早：在有這類小節且可以測量的最近 {{count}} 遍中，有 {{hits}} 遍。",
+          "lateOne": "在 {{exercise}} 中，含空弦的小節相對其餘部分偏晚：在可以測量的該練習最近 {{count}} 遍中，有 {{hits}} 遍。",
+          "earlyOne": "在 {{exercise}} 中，含空弦的小節相對其餘部分偏早：在可以測量的該練習最近 {{count}} 遍中，有 {{hits}} 遍。"
         },
         "shift": {
-          "late": "Bars with a position shift in them sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars with a position shift in them sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars with a position shift in them sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars with a position shift in them sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "含把位移動的小節相對其餘部分偏晚：在有這類小節且可以測量的最近 {{count}} 遍中，有 {{hits}} 遍。",
+          "early": "含把位移動的小節相對其餘部分偏早：在有這類小節且可以測量的最近 {{count}} 遍中，有 {{hits}} 遍。",
+          "lateOne": "在 {{exercise}} 中，含把位移動的小節相對其餘部分偏晚：在可以測量的該練習最近 {{count}} 遍中，有 {{hits}} 遍。",
+          "earlyOne": "在 {{exercise}} 中，含把位移動的小節相對其餘部分偏早：在可以測量的該練習最近 {{count}} 遍中，有 {{hits}} 遍。"
         }
       },
       "tempoPlayed": {
-        "named": "You played {{exercise}} at {{fromBpm}} BPM at first and at {{toBpm}} BPM most recently.",
-        "unnamed": "You played one Exercise at {{fromBpm}} BPM at first and at {{toBpm}} BPM most recently."
+        "named": "你起初以 {{fromBpm}} BPM 彈 {{exercise}}，最近一次是 {{toBpm}} BPM。",
+        "unnamed": "你起初以 {{fromBpm}} BPM 彈一個練習，最近一次是 {{toBpm}} BPM。"
       },
       "minutes": {
-        "perSession": "Your last {{sessions}} Sessions had {{now}} minutes played in Takes each, on average; the {{sessions}} before, {{then}}."
+        "perSession": "你最近 {{sessions}} 次練習，平均每次在各遍中彈了 {{now}} 分鐘；再之前的 {{sessions}} 次是 {{then}}。"
       }
     },
     "evidence": {
-      "oneExercise": "From {{count}} Takes · {{from}} to {{to}}",
-      "exercises": "From {{count}} Takes on {{exercises}} Exercises · {{from}} to {{to}}"
+      "oneExercise": "來自 {{count}} 遍 · {{from}} 至 {{to}}",
+      "exercises": "來自 {{exercises}} 個練習的 {{count}} 遍 · {{from}} 至 {{to}}"
+    },
+    "ui": {
+      "tabsLabel": "教練",
+      "tabAsk": "提問",
+      "tabNotebook": "筆記本",
+      "noticedTitle": "我注意到的",
+      "goalTitle": "你努力的目標",
+      "loading": "請稍候：正在讀取教練的筆記。",
+      "noticedUnreadable": "無法讀取你排除的條目清單，所以這次不顯示任何條目。每一遍仍都有保存。",
+      "tooFewTakes": "我需要五遍才會在這裡說什麼。目前的遍數：{{count}}。排除一個條目，我就 30 天內不再使用它。",
+      "nothingYet": "目前沒有突出的地方。已讀取的遍數：{{count}}。同一件事在五遍或更多遍中出現時，這裡才會出現一條。",
+      "leaveOutHint": "排除一個條目，我就 30 天內不再使用它。",
+      "leaveOut": "排除",
+      "leftOut": "已排除 30 天。每一遍都保留。",
+      "undo": "復原",
+      "leftOutNotRead": "未排除：這次無法讀取已排除條目的清單。",
+      "notSaved": "這會保持到 Yames 關閉為止：無法儲存。",
+      "sessionNote": "在一次練習中，這裡只顯示該次練習開始前已儲存的內容。",
+      "goalSaid": "你說過 · {{date}}",
+      "goalSaidUndated": "你說過",
+      "goalEdit": "編輯",
+      "goalAdd": "新增目標",
+      "goalNone": "還沒有目標。",
+      "goalUnreadable": "這次無法讀取你的目標，所以不顯示，也無法在此變更。",
+      "goalQuestion": "你努力的目標是什麼？",
+      "goalHint": "一首歌、一個速度、一種風格、只是彈彈，或用你自己的話。",
+      "goalInputLabel": "你的目標",
+      "goalSave": "儲存",
+      "goalCancel": "取消",
+      "goalChoice": {
+        "song": "一首歌",
+        "tempo": "一個速度",
+        "style": "一種風格",
+        "justPlaying": "只是彈彈"
+      },
+      "goalStarter": {
+        "song": "要彈的歌：",
+        "tempo": "要彈得乾淨，速度：",
+        "style": "要彈出的風格：",
+        "justPlaying": "只是彈彈"
+      },
+      "notNow": "現在不要",
+      "notNowDone": "現在不要。至少 7 天內我不會再問。設定 → 練習教練 → 建議 可以關閉這類問題。",
+      "notNowNotRead": "未儲存：這次無法讀取教練的筆記。",
+      "footer": "這裡的一切都來自你已儲存的每一遍，或是你自己輸入的內容。"
+    },
+    "suggestions": {
+      "label": "建議",
+      "hint": "教練是否會主動提出什麼，例如關於你目標的問題。提問和筆記本一直都在。",
+      "on": "開啟",
+      "asked": "只在我提問時",
+      "unreadable": "這次無法讀取你的選擇；按一下其中一個就會儲存。"
     }
   }
 }

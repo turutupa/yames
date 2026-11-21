@@ -705,17 +705,24 @@ fn analyse(
     spans.push((open, w[w.len() - 1]));
     let mut wall_s = 0.0;
     let mut audio_s = 0.0;
+    // Only each span's shortfall: a span whose stream prefilled (audio ahead
+    // of wall) must not cancel another span's starvation (c5b1c, review L2).
+    let mut starved_s = 0.0f64;
     for (first, last) in &spans {
-        wall_s += (last.entry_ns - first.entry_ns) as f64 / 1e9;
-        audio_s += (last.sample_pos.saturating_sub(first.sample_pos)) as f64 / sr;
+        let span_wall_s = (last.entry_ns - first.entry_ns) as f64 / 1e9;
+        let span_audio_s = (last.sample_pos.saturating_sub(first.sample_pos)) as f64 / sr;
+        wall_s += span_wall_s;
+        audio_s += span_audio_s;
+        starved_s += (span_wall_s - span_audio_s).max(0.0);
     }
     let ticks_rendered: u64 = w.iter().map(|s| s.ticks as u64).sum();
     let ticks_expected = wall_s / tick_interval_s;
     // Time the DAC had no fresh samples, in ticks. Negative (audio clock
     // running fast) floors at zero. Summed over the spans and floored ONCE
     // (c5b1b, review L2): flooring span by span threw away up to a tick per
-    // span. One span (every standing mode) is the formula it always was.
-    let missed_beats = (((wall_s - audio_s) / tick_interval_s).floor()).max(0.0) as u64;
+    // span. One span (every standing mode) is the formula it always was:
+    // `0.0 + (w - a).max(0.0)` floors to what `(w - a)` floored and clamped did.
+    let missed_beats = ((starved_s / tick_interval_s).floor()).max(0.0) as u64;
 
     let mut frames: Vec<u32> = w.iter().map(|s| s.frames).collect();
     frames.sort_unstable();
@@ -2150,6 +2157,10 @@ fn main() -> ExitCode {
                 // is, beat 0 on the downbeat, no subdivision (c5b1b, review
                 // Q8: the real callback, with a hear-back cut from its slot).
                 if let Some(&at) = h.starts_ns.last() {
+                    // The log was emptied at that Start (below), so a beat of
+                    // the span before cannot be taken for its first, however
+                    // late the device sounds it (c5b1c: a Bluetooth output's
+                    // 100 ms and more put one past `at`).
                     let log = beat_log.lock().unwrap_or_else(|e| e.into_inner());
                     let first = log.iter().find(|b| b.ts_ns >= at);
                     h.first_beats_checked += 1;
@@ -2188,6 +2199,10 @@ fn main() -> ExitCode {
                 // of the take slot first, under the state's lock, then the
                 // transport. Stamped as it is asked for, so the time to the
                 // first click buffer after it is measured (review L2).
+                // The beat log is emptied first: the stopped span's beats were
+                // pushed by the event loop long before (100 ms and more since
+                // `engine.stop`), and nothing else in the probe reads it.
+                beat_log.lock().unwrap_or_else(|e| e.into_inner()).clear();
                 h.starts_ns.push(yames_lib::probe::now_ns());
                 {
                     let mut s = state.lock().unwrap();
@@ -2865,6 +2880,32 @@ mod tests {
         let one: Vec<CallbackSample> = all[..11].to_vec();
         let r = analyse(&one, 1_000, 0, 0, 0.1, false).unwrap();
         assert_eq!(r.missed_beats, ((1.0f64 - 0.94) / 0.1).floor() as u64);
+    }
+
+    /// Review L2 (c5b1c): a span that ran AHEAD (its stream prefilled) does
+    /// not cancel another span's starvation; and one span, starved or ahead,
+    /// is exactly the old formula.
+    #[test]
+    fn a_span_ahead_does_not_hide_another_spans_starvation() {
+        // 1 kHz, a tick every 100 ms. Span 1: 1 s of wall, 0.85 s of audio
+        // (1.5 ticks short). Span 2: 1 s of wall, 1.10 s of audio (1 tick ahead).
+        let mut all = Vec::new();
+        for i in 0..=10u64 {
+            all.push(cb(i * 100_000_000, i * 85));
+        }
+        for i in 0..=10u64 {
+            all.push(cb(2_000_000_000 + i * 100_000_000, i * 110));
+        }
+        let r = analyse(&all, 1_000, 0, 0, 0.1, true).unwrap();
+        // the signed sum read 0.05 s short, which floored to none
+        assert_eq!(r.missed_beats, 1);
+        let old = |w: f64, a: f64| (((w - a) / 0.1).floor()).max(0.0) as u64;
+        for span in [&all[..11], &all[11..]] {
+            let r = analyse(span, 1_000, 0, 0, 0.1, false).unwrap();
+            assert_eq!(r.missed_beats, old(r.wall_s, r.audio_s));
+        }
+        assert_eq!(analyse(&all[..11], 1_000, 0, 0, 0.1, false).unwrap().missed_beats, 1);
+        assert_eq!(analyse(&all[11..], 1_000, 0, 0, 0.1, false).unwrap().missed_beats, 0);
     }
 
     /// Review L2: the time from a Start to the first click buffer after it.

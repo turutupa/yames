@@ -432,6 +432,20 @@ export type Evidence = {
   extras?: number;
   hitRateDelta?: number;
   spreadDeltaMs?: number;
+  /** Free play only (`findings.rs` `FreePlayCounts`): what the tools' sentence counted. */
+  freePlay?: FreePlayCounts;
+};
+
+/** What a free-play finding's sentence counts; which field means what depends on the kind (`findings.rs`). */
+export type FreePlayCounts = {
+  counted: number;
+  agreeing: number;
+  lowBpm?: [number, number];
+  highBpm?: [number, number];
+  lowNotes: number;
+  highNotes: number;
+  lowSpreadMs: number;
+  highSpreadMs: number;
 };
 
 /** One thing the coach found. `findings[0]` is the headline. */

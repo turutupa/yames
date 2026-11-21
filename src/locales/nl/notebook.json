@@ -1,48 +1,100 @@
 {
   "notebook": {
     "noticed": {
-      "tempoEvenness": "At {{fast}} BPM your Takes were {{fastScore}}% even; at {{slow}} BPM, {{slowScore}}%.",
+      "tempoEvenness": "Op {{fast}} BPM waren je takes {{fastScore}}% gelijkmatig; op {{slow}} BPM {{slowScore}}%.",
       "lean": {
         "first": {
-          "late": "The first bar of the pattern sat late against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured.",
-          "early": "The first bar of the pattern sat early against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured."
+          "late": "De eerste maat van het patroon lag laat ten opzichte van de rest: {{hits}} van de {{count}} meest recente takes waarin dit te meten was.",
+          "early": "De eerste maat van het patroon lag vroeg ten opzichte van de rest: {{hits}} van de {{count}} meest recente takes waarin dit te meten was."
         },
         "last": {
-          "late": "The last bar of the pattern sat late against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured.",
-          "early": "The last bar of the pattern sat early against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured."
+          "late": "De laatste maat van het patroon lag laat ten opzichte van de rest: {{hits}} van de {{count}} meest recente takes waarin dit te meten was.",
+          "early": "De laatste maat van het patroon lag vroeg ten opzichte van de rest: {{hits}} van de {{count}} meest recente takes waarin dit te meten was."
         }
       },
       "place": {
         "afterHeld": {
-          "late": "Bars where a note follows a held one sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars where a note follows a held one sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars where a note follows a held one sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars where a note follows a held one sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "Maten waarin een noot op een aangehouden noot volgt lagen laat ten opzichte van de rest: {{hits}} van de {{count}} meest recente takes met zulke maten waarin dit te meten was.",
+          "early": "Maten waarin een noot op een aangehouden noot volgt lagen vroeg ten opzichte van de rest: {{hits}} van de {{count}} meest recente takes met zulke maten waarin dit te meten was.",
+          "lateOne": "In {{exercise}} lagen maten waarin een noot op een aangehouden noot volgt laat ten opzichte van de rest: {{hits}} van de {{count}} meest recente takes ervan waarin dit te meten was.",
+          "earlyOne": "In {{exercise}} lagen maten waarin een noot op een aangehouden noot volgt vroeg ten opzichte van de rest: {{hits}} van de {{count}} meest recente takes ervan waarin dit te meten was."
         },
         "openString": {
-          "late": "Bars with an open string in them sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars with an open string in them sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars with an open string in them sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars with an open string in them sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "Maten met een losse snaar erin lagen laat ten opzichte van de rest: {{hits}} van de {{count}} meest recente takes met zulke maten waarin dit te meten was.",
+          "early": "Maten met een losse snaar erin lagen vroeg ten opzichte van de rest: {{hits}} van de {{count}} meest recente takes met zulke maten waarin dit te meten was.",
+          "lateOne": "In {{exercise}} lagen maten met een losse snaar erin laat ten opzichte van de rest: {{hits}} van de {{count}} meest recente takes ervan waarin dit te meten was.",
+          "earlyOne": "In {{exercise}} lagen maten met een losse snaar erin vroeg ten opzichte van de rest: {{hits}} van de {{count}} meest recente takes ervan waarin dit te meten was."
         },
         "shift": {
-          "late": "Bars with a position shift in them sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars with a position shift in them sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars with a position shift in them sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars with a position shift in them sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "Maten met een positiewissel erin lagen laat ten opzichte van de rest: {{hits}} van de {{count}} meest recente takes met zulke maten waarin dit te meten was.",
+          "early": "Maten met een positiewissel erin lagen vroeg ten opzichte van de rest: {{hits}} van de {{count}} meest recente takes met zulke maten waarin dit te meten was.",
+          "lateOne": "In {{exercise}} lagen maten met een positiewissel erin laat ten opzichte van de rest: {{hits}} van de {{count}} meest recente takes ervan waarin dit te meten was.",
+          "earlyOne": "In {{exercise}} lagen maten met een positiewissel erin vroeg ten opzichte van de rest: {{hits}} van de {{count}} meest recente takes ervan waarin dit te meten was."
         }
       },
       "tempoPlayed": {
-        "named": "You played {{exercise}} at {{fromBpm}} BPM at first and at {{toBpm}} BPM most recently.",
-        "unnamed": "You played one Exercise at {{fromBpm}} BPM at first and at {{toBpm}} BPM most recently."
+        "named": "Je speelde {{exercise}} eerst op {{fromBpm}} BPM en meest recent op {{toBpm}} BPM.",
+        "unnamed": "Je speelde één oefening eerst op {{fromBpm}} BPM en meest recent op {{toBpm}} BPM."
       },
       "minutes": {
-        "perSession": "Your last {{sessions}} Sessions had {{now}} minutes played in Takes each, on average; the {{sessions}} before, {{then}}."
+        "perSession": "Je laatste {{sessions}} sessies hadden gemiddeld elk {{now}} minuten gespeeld in takes; de {{sessions}} daarvoor {{then}}."
       }
     },
     "evidence": {
-      "oneExercise": "From {{count}} Takes · {{from}} to {{to}}",
-      "exercises": "From {{count}} Takes on {{exercises}} Exercises · {{from}} to {{to}}"
+      "oneExercise": "Uit {{count}} takes · {{from}} tot {{to}}",
+      "exercises": "Uit {{count}} takes van {{exercises}} oefeningen · {{from}} tot {{to}}"
+    },
+    "ui": {
+      "tabsLabel": "Coach",
+      "tabAsk": "Vraag",
+      "tabNotebook": "Notitieboek",
+      "noticedTitle": "Wat me is opgevallen",
+      "goalTitle": "Waar je naartoe werkt",
+      "loading": "Een moment: de notities van de coach worden gelezen.",
+      "noticedUnreadable": "De lijst met regels die je hebt weggelaten kon niet worden gelezen, dus nu wordt er geen regel getoond. Elke take is nog opgeslagen.",
+      "tooFewTakes": "Ik heb vijf takes nodig voordat ik hier iets zeg. Takes tot nu toe: {{count}}. Laat een regel weg en ik gebruik hem 30 dagen niet.",
+      "nothingYet": "Er valt nog niets op. Gelezen takes: {{count}}. Een regel verschijnt hier zodra hetzelfde in vijf takes of meer voorkomt.",
+      "leaveOutHint": "Laat een regel weg en ik gebruik hem 30 dagen niet.",
+      "leaveOut": "Weglaten",
+      "leftOut": "30 dagen weggelaten. Elke take blijft bewaard.",
+      "undo": "Ongedaan maken",
+      "leftOutNotRead": "Niet weggelaten: de lijst met weggelaten regels kon nu niet worden gelezen.",
+      "notSaved": "Dit geldt tot Yames wordt gesloten: het kon niet worden opgeslagen.",
+      "sessionNote": "In een sessie toont dit alleen wat was opgeslagen voordat de sessie begon.",
+      "goalSaid": "Je zei · {{date}}",
+      "goalSaidUndated": "Je zei",
+      "goalEdit": "Bewerken",
+      "goalAdd": "Doel toevoegen",
+      "goalNone": "Nog geen doel.",
+      "goalUnreadable": "Je doel kon nu niet worden gelezen, dus het wordt niet getoond en kan hier niet worden gewijzigd.",
+      "goalQuestion": "Waar werk je naartoe?",
+      "goalHint": "Een nummer, een tempo, een stijl, gewoon spelen of je eigen woorden.",
+      "goalInputLabel": "Je doel",
+      "goalSave": "Opslaan",
+      "goalCancel": "Annuleren",
+      "goalChoice": {
+        "song": "Een nummer",
+        "tempo": "Een tempo",
+        "style": "Een stijl",
+        "justPlaying": "Gewoon spelen"
+      },
+      "goalStarter": {
+        "song": "Het nummer spelen",
+        "tempo": "Schoon spelen op",
+        "style": "Spelen in de stijl van",
+        "justPlaying": "Gewoon spelen"
+      },
+      "notNow": "Niet nu",
+      "notNowDone": "Niet nu. Ik vraag het minstens 7 dagen niet opnieuw. Instellingen → Oefencoach → Suggesties zet vragen als deze uit.",
+      "notNowNotRead": "Niet opgeslagen: de notities van de coach konden nu niet worden gelezen.",
+      "footer": "Alles hier komt uit je opgeslagen takes of is iets wat je zelf hebt getypt."
+    },
+    "suggestions": {
+      "label": "Suggesties",
+      "hint": "Of de coach zelf iets aanbiedt, zoals de vraag over je doel. Vraag en het Notitieboek zijn er altijd.",
+      "on": "Aan",
+      "asked": "Alleen als ik vraag",
+      "unreadable": "Je keuze kon nu niet worden gelezen; als je er een indrukt, wordt die opgeslagen."
     }
   }
 }

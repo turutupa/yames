@@ -16,11 +16,17 @@
  *                         hangs `calibration-retry` on it.
  *   `?coachReport=1`      `get_session_report` and `get_final_session_report`
  *                         answer a reportable run, `coach_generate` a sentence.
+ *   `?toolFinding=K`      with `coachReport`, `close_open_segment` emits the
+ *                         `practice-segment-ended` of a free-play run whose
+ *                         `findings[0]` is of kind K (`subdivisionWeak`,
+ *                         `beatPositionBias`, `tempoCeiling`, `drift`), as
+ *                         `analyze_free_play` would rank it (leg c5c2).
  *   `?toolRuns=N`         `get_session_history` answers N saved runs.
  *   `?inputFail=1`        `start_evaluation` is refused, as with no input
  *                         device: Listen is on and says "Input off".
  */
 import type { BeatFeedback, SavedSession, SessionReport } from "../types";
+import type { Finding } from "../songs/types";
 
 const params = () => new URLSearchParams(window.location.search);
 
@@ -30,6 +36,37 @@ export function coachFeedOption(): "lowConf" | null {
 
 export function coachReportOption(): boolean {
   return params().get("coachReport") === "1";
+}
+
+const FINDING_KINDS = ["subdivisionWeak", "beatPositionBias", "tempoCeiling", "drift"] as const;
+
+export function toolFindingOption(): (typeof FINDING_KINDS)[number] | null {
+  const k = params().get("toolFinding");
+  return (FINDING_KINDS as readonly string[]).includes(k ?? "") ? (k as (typeof FINDING_KINDS)[number]) : null;
+}
+
+/** One free-play finding of `kind`, its numbers those of `findings.rs`'s fixtures. */
+export function freePlayFinding(kind: (typeof FINDING_KINDS)[number]): Finding {
+  const base = { onsets: 48, hits: 48, hitRate: 1, meanDeviationMs: 0, deviationBeats: 0, spreadMs: 0, passes: 1, passesAffected: 1 };
+  const evidence: Finding["evidence"] =
+    kind === "subdivisionWeak"
+      ? { ...base, hits: 16, hitRate: 1 / 3, subdivision: 2, subdivisionPosition: [1, 2], hitRateDelta: -0.67, referenceBpm: 120 }
+      : kind === "beatPositionBias"
+        ? { ...base, onsets: 16, hits: 16, meanDeviationMs: 40, deviationBeats: 0.08, beatPosition: 3, referenceBpm: 120 }
+        : kind === "tempoCeiling"
+          ? { ...base, onsets: 20, hits: 20, spreadMs: 45, bpmBand: [100, 140], referenceBpm: 100 }
+          : { ...base, onsets: 60, hits: 60, meanDeviationMs: 40, deviationBeats: 0.08, referenceBpm: 120 };
+  // What each sentence counted (c5c2b M3): `findings.rs`'s `FreePlayCounts`.
+  const none = { counted: 0, agreeing: 0, lowNotes: 0, highNotes: 0, lowSpreadMs: 0, highSpreadMs: 0 };
+  const freePlay =
+    kind === "subdivisionWeak"
+      ? { ...none, counted: 48, agreeing: 32 }
+      : kind === "beatPositionBias"
+        ? { ...none, counted: 16, agreeing: 16 }
+        : kind === "tempoCeiling"
+          ? { ...none, lowBpm: [100, 108], highBpm: [112, 116], lowNotes: 36, highNotes: 24, lowSpreadMs: 2, highSpreadMs: 30 }
+          : { ...none, counted: 60, agreeing: 20 };
+  return { kind, noteIds: [], severity: 0.8, evidence: { ...evidence, freePlay } as Finding["evidence"] };
 }
 
 export function inputFailOption(): boolean {

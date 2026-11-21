@@ -1,0 +1,8 @@
+{ "language": "nl", "reviewer": "reviewer-nl", "sampled": 50,
+  "rejected": [
+    { "id": "nl-00220", "wording": "open_step_name#4", "why": "'ga naar de stap een getapte' garbled name fragment" },
+    { "id": "nl-00369", "wording": "open_path#7", "why": "'pad akkoorden en aanklikken' truncated name makes it garbled" },
+    { "id": "nl-00115", "wording": "play_exercise_bpm#6", "why": "'laten we als mineur doen' nonsensical fragment name" },
+    { "id": "nl-00634", "wording": "yours_grading#6", "why": "text is English ('stop grading me'), not Dutch" }
+  ],
+  "notes": "Good overall; natural Dutch for the never-list, none and which records. Rejections are a few truncated-name garbles and one English text." }

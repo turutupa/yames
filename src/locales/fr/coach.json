@@ -24,7 +24,40 @@
     "runScore": "Score {{score}} à {{bpm}} BPM",
     "runScoreNoBpm": "Score {{score}}",
     "sessionScore": "Score de la séance {{score}} · {{word}}",
-    "openRuns": "Ouvrir Passages d'outils dans Progrès"
+    "openRuns": "Ouvrir Passages d'outils dans Progrès",
+    "finding": {
+      "beatEarly": "Sur le temps {{beat}} de la mesure, tes notes sont arrivées en moyenne {{ms}} ms plus tôt que sur les autres temps : {{agreeing}} des {{notes}} notes de ce temps sont arrivées plus tôt que la moyenne des autres temps.",
+      "beatLate": "Sur le temps {{beat}} de la mesure, tes notes sont arrivées en moyenne {{ms}} ms plus tard que sur les autres temps : {{agreeing}} des {{notes}} notes de ce temps sont arrivées plus tard que la moyenne des autres temps.",
+      "subdivision": "Sur {{missed}} des {{total}} temps où elle a été comptée, aucune note n'est tombée sur la position « {{position}} ».",
+      "ceiling": "À {{low}} BPM, au moins la moitié de tes {{lowNotes}} notes sur le clic sont tombées à moins de {{lowMs}} ms de leur place habituelle par rapport au clic ; à {{high}} BPM, au moins la moitié de tes {{highNotes}} notes sur le clic en étaient à {{highMs}} ms ou plus.",
+      "driftEarly": "Sur un passage de {{notes}} notes sur le clic, les {{third}} dernières sont tombées en moyenne {{ms}} ms plus tôt par rapport au clic que les {{third}} premières.",
+      "driftLate": "Sur un passage de {{notes}} notes sur le clic, les {{third}} dernières sont tombées en moyenne {{ms}} ms plus tard par rapport au clic que les {{third}} premières.",
+      "position": {
+        "2": {
+          "0": "croche sur le temps",
+          "1": "croche en contretemps"
+        },
+        "3": {
+          "0": "premier triolet",
+          "1": "deuxième triolet",
+          "2": "troisième triolet"
+        },
+        "4": {
+          "0": "première double croche",
+          "1": "deuxième double croche",
+          "2": "troisième double croche",
+          "3": "quatrième double croche"
+        },
+        "6": {
+          "0": "premier sextolet",
+          "1": "deuxième sextolet",
+          "2": "troisième sextolet",
+          "3": "quatrième sextolet",
+          "4": "cinquième sextolet",
+          "5": "sixième sextolet"
+        }
+      }
+    }
   },
   "coachModel": {
     "label": "Modèle du coach",

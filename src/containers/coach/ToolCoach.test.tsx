@@ -4,6 +4,8 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import "../../i18n";
 import { ToolCoach, toolCoachView } from "./ToolCoach";
 import type { FeedMessage, SessionReport } from "../../types";
+import { mockListen } from "../../test/mocks";
+import { notifySettingsChange } from "../../ipc";
 
 afterEach(cleanup);
 
@@ -161,5 +163,146 @@ describe("ToolCoach", () => {
     expect(container.firstChild).toBeNull();
     // Nor a session that recorded nothing at all.
     expect(toolCoachView([{ ...end, report: undefined }], 0, false).note).toBeNull();
+  });
+});
+
+describe("ToolCoach: the run's measured finding (C5)", () => {
+  const base = { listenOn: true, inputOn: true, onChipAction: vi.fn() };
+  const DRIFT = {
+    kind: "drift",
+    noteIds: [],
+    severity: 0.8,
+    evidence: {
+      onsets: 60,
+      hits: 60,
+      hitRate: 1,
+      meanDeviationMs: 40,
+      deviationBeats: 0.08,
+      spreadMs: 0,
+      passes: 1,
+      passesAffected: 1,
+      freePlay: { counted: 60, agreeing: 20, lowNotes: 0, highNotes: 0, lowSpreadMs: 0, highSpreadMs: 0 },
+    },
+  };
+  const DRIFT_TEXT = "Over a stretch of 60 notes on the click, the last 20 landed 40 ms later against the click than the first 20, on average.";
+  /** A segment-end; `endMs` is the segment's own wall-clock end (default: now). */
+  const segmentEnded = (findings: unknown[] | undefined, playedMs = 30_000, endMs = Date.now()) => {
+    const calls = mockListen.mock.calls.filter(([event]) => event === "practice-segment-ended");
+    const cb = calls[calls.length - 1]?.[1] as ((e: { payload: unknown }) => void) | undefined;
+    expect(cb, "ToolCoach listens to practice-segment-ended").toBeTruthy();
+    act(() => cb!({ payload: { startMs: endMs - playedMs, endMs, endReason: "user-stopped", findings } }));
+  };
+  const flush = () => act(async () => {});
+
+  it("leads the stopped run's note with the sentence; the report's own follows", async () => {
+    const { rerender } = render(<ToolCoach {...base} isPlaying messages={[]} />);
+    await flush();
+    rerender(<ToolCoach {...base} isPlaying={false} messages={[]} />);
+    segmentEnded([DRIFT]);
+    rerender(<ToolCoach {...base} isPlaying={false} messages={run(Date.now() + 5)} />);
+    const finding = screen.getByTestId("tool-coach-finding");
+    expect(finding.textContent).toBe(DRIFT_TEXT);
+    expect(finding.getAttribute("data-kind")).toBe("drift");
+    expect(screen.getByTestId("tool-coach-said").textContent).toContain("Steady, a touch ahead");
+    expect(screen.getByTestId("tool-coach-note").textContent).toContain("Score 78 at 120 BPM");
+  });
+
+  it("nothing measured: the note is today's, word for word", async () => {
+    const { rerender } = render(<ToolCoach {...base} isPlaying messages={[]} />);
+    await flush();
+    rerender(<ToolCoach {...base} isPlaying={false} messages={[]} />);
+    segmentEnded(undefined);
+    rerender(<ToolCoach {...base} isPlaying={false} messages={run(Date.now() + 5)} />);
+    expect(screen.queryByTestId("tool-coach-finding")).toBeNull();
+    expect(screen.queryByTestId("tool-coach-said")).toBeNull();
+    expect(screen.getByTestId("tool-coach-note").querySelector(".coach-note-head")?.textContent).toContain("Steady, a touch ahead");
+  });
+
+  it("a segment shorter than 10 s says nothing", async () => {
+    const { rerender } = render(<ToolCoach {...base} isPlaying messages={[]} />);
+    await flush();
+    rerender(<ToolCoach {...base} isPlaying={false} messages={[]} />);
+    segmentEnded([DRIFT], 9_000);
+    rerender(<ToolCoach {...base} isPlaying={false} messages={run(Date.now() + 5)} />);
+    expect(screen.queryByTestId("tool-coach-finding")).toBeNull();
+  });
+
+  it("a finding from the last run does not lead the next run's note", async () => {
+    const { rerender } = render(<ToolCoach {...base} isPlaying={false} messages={[]} />);
+    await flush();
+    segmentEnded([DRIFT]);
+    // The next run starts and stops with nothing measured in it.
+    rerender(<ToolCoach {...base} isPlaying messages={[]} />);
+    rerender(<ToolCoach {...base} isPlaying={false} messages={run(Date.now() + 5)} />);
+    expect(screen.queryByTestId("tool-coach-finding")).toBeNull();
+  });
+
+  it("a later segment of the run that closes clean clears an earlier one's finding (M2)", async () => {
+    // A pause mid-run closes segment A with a drift; the player plays on
+    // cleanly and stops: segment B closes with nothing.
+    const { rerender } = render(<ToolCoach {...base} isPlaying messages={[]} />);
+    await flush();
+    segmentEnded([DRIFT]);
+    rerender(<ToolCoach {...base} isPlaying={false} messages={[]} />);
+    segmentEnded(undefined);
+    rerender(<ToolCoach {...base} isPlaying={false} messages={run(Date.now() + 5)} />);
+    expect(screen.queryByTestId("tool-coach-finding")).toBeNull();
+  });
+
+  it("the last segment's finding leads, whatever came before it in the run (M2)", async () => {
+    const { rerender } = render(<ToolCoach {...base} isPlaying messages={[]} />);
+    await flush();
+    segmentEnded(undefined);
+    rerender(<ToolCoach {...base} isPlaying={false} messages={[]} />);
+    segmentEnded([DRIFT]);
+    rerender(<ToolCoach {...base} isPlaying={false} messages={run(Date.now() + 5)} />);
+    expect(screen.getByTestId("tool-coach-finding").textContent).toBe(DRIFT_TEXT);
+  });
+
+  it("a settings change mid-run, whose close is silent, clears an earlier segment's finding (review L-2)", async () => {
+    // Segment A closes on a pause with a drift; the player plays on, changes
+    // the tempo while the click runs (segment B closes with no event) and
+    // stops without another note: no segment closes at the stop.
+    const { rerender } = render(<ToolCoach {...base} isPlaying messages={[]} />);
+    await flush();
+    segmentEnded([DRIFT]);
+    await act(async () => {
+      await notifySettingsChange();
+    });
+    rerender(<ToolCoach {...base} isPlaying={false} messages={run(Date.now() + 5)} />);
+    expect(screen.queryByTestId("tool-coach-finding")).toBeNull();
+  });
+
+  it("a settings change after the run stopped leaves the stopped run's finding (review L-2)", async () => {
+    const { rerender } = render(<ToolCoach {...base} isPlaying messages={[]} />);
+    await flush();
+    rerender(<ToolCoach {...base} isPlaying={false} messages={[]} />);
+    segmentEnded([DRIFT]);
+    await act(async () => {
+      await notifySettingsChange();
+    });
+    rerender(<ToolCoach {...base} isPlaying={false} messages={run(Date.now() + 5)} />);
+    expect(screen.getByTestId("tool-coach-finding").textContent).toBe(DRIFT_TEXT);
+  });
+
+  it("the last run's stop-close landing after a fast restart is not this run's (L3)", async () => {
+    const { rerender } = render(<ToolCoach {...base} isPlaying={false} messages={[]} />);
+    await flush();
+    const lastRunEnded = Date.now() - 50;
+    rerender(<ToolCoach {...base} isPlaying messages={[]} />);
+    // The previous run's close arrives now, but it ended before this run began.
+    segmentEnded([DRIFT], 30_000, lastRunEnded);
+    rerender(<ToolCoach {...base} isPlaying={false} messages={run(Date.now() + 5)} />);
+    expect(screen.queryByTestId("tool-coach-finding")).toBeNull();
+  });
+
+  it("the summary when Listen goes off is never led by a finding", async () => {
+    const { rerender } = render(<ToolCoach {...base} isPlaying messages={[]} />);
+    await flush();
+    rerender(<ToolCoach {...base} isPlaying={false} messages={[]} />);
+    segmentEnded([DRIFT]);
+    const end: FeedMessage = { id: "e", type: "session-end", timestamp: Date.now() + 5, content: "Good work today.", report: REPORT };
+    rerender(<ToolCoach {...base} isPlaying={false} messages={[end]} />);
+    expect(screen.queryByTestId("tool-coach-finding")).toBeNull();
   });
 });

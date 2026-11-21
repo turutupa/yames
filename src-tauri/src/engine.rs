@@ -9043,6 +9043,9 @@ impl MetronomeEngine {
                         subdivision_index: notif.subdivision.min(255) as u8,
                         subdivision_total: notif.subdivision_total.max(1),
                         beats_per_bar: notif.beats_per_bar.max(1),
+                        // Already on the notification (captured before
+                        // the counter advanced); a plain copy, event loop.
+                        bar_beat: notif.measure_beat,
                     });
                     // 64 quarters worth of ticks = up to 64 × 6 = 384
                     // entries at the highest configured subdivision.

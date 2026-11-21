@@ -323,6 +323,31 @@ describe("useCoachToolHost", () => {
     }
   });
 
+  // c4a2b, L3: only an Undo restores an old date; the same words typed again are dated today.
+  it("a goal typed again (not an Undo) is dated the day it was typed", async () => {
+    const host = renderHook(() => useCoachToolHost(input())).result.current;
+    await act(async () => {
+      await loadCoachStored();
+    });
+    const t0 = Date.UTC(2026, 10, 3);
+    const clock = vi.spyOn(Date, "now");
+    try {
+      const setGoal = (text: string, at: number) => {
+        clock.mockReturnValue(at);
+        const run = runCoachTool({ tool: "set_goal", args: { text } }, host, toolCtx());
+        if (!run.ok || !("proposal" in run)) throw new Error(`no proposal: ${JSON.stringify(run)}`);
+        return confirmCoachTool(run.proposal, host, toolCtx());
+      };
+      setGoal("Blues in A", t0);
+      setGoal("Sweep at 90", t0 + 17 * 86_400_000);
+      setGoal("Blues in A", t0 + 17 * 86_400_000 + 60_000);
+      expect(store.disk.get("coach.goal")).toEqual({ text: "Blues in A", at: t0 + 17 * 86_400_000 + 60_000 });
+      expect(coachStored().goal?.at).toBe(t0 + 17 * 86_400_000 + 60_000);
+    } finally {
+      clock.mockRestore();
+    }
+  });
+
   it("the undo of a second goal puts the first back with the date it was set (c4a1b, L4)", async () => {
     const setAt = Date.UTC(2026, 9, 1);
     store.disk.set("coach.goal", { text: "Play the solo at 120", at: setAt });
