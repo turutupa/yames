@@ -742,7 +742,25 @@
       "heard": "聽到：{{what}}",
       "chart": "譜面：{{what}}",
       "unsure": "暫時無法判斷",
-      "listening": "正在聆聽…"
+      "listening": "正在聆聽…",
+      "stopLine": "應用程式在你的演奏裡聽到最多的和弦：{{heard}}。和弦譜上是：{{chart}}。",
+      "sameNotes": "{{heard}} 的每個音，也都在和弦譜的 {{chart}} 裡。"
+    },
+    "change": {
+      "halfUp": "{{from}} 之後接 {{to}} 時，{{note}} 上行半音（一格）到 {{target}}。",
+      "halfDown": "{{from}} 之後接 {{to}} 時，{{note}} 下行半音（一格）到 {{target}}。",
+      "wholeUp": "{{from}} 之後接 {{to}} 時，{{note}} 上行全音（兩格）到 {{target}}。",
+      "wholeDown": "{{from}} 之後接 {{to}} 時，{{note}} 下行全音（兩格）到 {{target}}。",
+      "third": "{{target}} 是 {{to}} 的三音。",
+      "seventh": "{{target}} 是 {{to}} 的七音。"
+    },
+    "pin": {
+      "done": "已把 {{chord}} 的按法 {{shape}} 釘在即興伴奏畫面上。",
+      "noNeck": "你的樂器沒有琴頸，沒辦法釘住按法。",
+      "noShape": "你的琴頸上沒有 {{chord}} 的這種按法。",
+      "changed": "釘住的內容之後又變過，所以保持原樣。",
+      "restored": "之前釘住的按法回來了。",
+      "cleared": "現在沒有釘住任何東西。"
     }
   },
   "scale": {

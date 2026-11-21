@@ -742,7 +742,25 @@
       "heard": "Nghe được: {{what}}",
       "chart": "Theo bản: {{what}}",
       "unsure": "Chưa xác định được",
-      "listening": "Đang nghe…"
+      "listening": "Đang nghe…",
+      "stopLine": "Các hợp âm ứng dụng nghe thấy nhiều nhất trong phần bạn chơi: {{heard}}. Bản có {{chart}}.",
+      "sameNotes": "Mọi nốt của {{heard}} cũng có trong {{chart}} của bản."
+    },
+    "change": {
+      "halfUp": "Khi {{to}} đến sau {{from}}, {{note}} lên nửa cung (một phím) tới {{target}}.",
+      "halfDown": "Khi {{to}} đến sau {{from}}, {{note}} xuống nửa cung (một phím) tới {{target}}.",
+      "wholeUp": "Khi {{to}} đến sau {{from}}, {{note}} lên một cung (hai phím) tới {{target}}.",
+      "wholeDown": "Khi {{to}} đến sau {{from}}, {{note}} xuống một cung (hai phím) tới {{target}}.",
+      "third": "{{target}} là âm quãng ba của {{to}}.",
+      "seventh": "{{target}} là âm quãng bảy của {{to}}."
+    },
+    "pin": {
+      "done": "Đã ghim {{chord}}, thế {{shape}}, lên màn hình Jam.",
+      "noNeck": "Nhạc cụ của bạn không có cần đàn để ghim một thế bấm.",
+      "noShape": "Cần đàn của bạn không có thế bấm đó của {{chord}}.",
+      "changed": "Thế ghim đã đổi từ đó, nên được giữ nguyên.",
+      "restored": "Thế bấm đã ghim trước đó đã trở lại.",
+      "cleared": "Hiện không còn gì được ghim."
     }
   },
   "scale": {

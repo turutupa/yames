@@ -17,7 +17,8 @@
       "comeBack": {
         "tomorrow": "내일 다시 여기로",
         "inDays": "{{days}}일 뒤에 다시"
-      }
+      },
+      "pinShape": "이 잡는 방법 고정"
     },
     "fretboard": {
       "aria": "{{what}}, 지판 위"

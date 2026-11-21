@@ -2473,7 +2473,26 @@ export function installShotMock(shot: Shot, theme: string): void {
       );
       return 1;
     }
-    if (cmd === "harmony_mark_bar" || cmd === "harmony_set_tempo" || cmd === "harmony_stop") return null;
+    /*
+     * What the stretch came to (`harmony::worker::Summary`), for the line under
+     * Jam's stage after a stop (leg c5a1). A real engine names chords of its own
+     * only for a jam heard without its chart; the harness answers as one did:
+     * A minor settled, A7 and D7 heard most, Am7 now and then.
+     */
+    if (cmd === "harmony_stop") {
+      if (shot.jam?.heard !== "heard") return null;
+      return {
+        reading: { keyState: "settled", key: { key: { tonic: 9, mode: "minor" }, scale: "minorPentatonic", confidence: 0.7, relativeToo: false }, chord: null, settledAtS: 13, heardS: 48 },
+        chords: [
+          { root: 9, quality: "dom7", beats: 40 },
+          { root: 2, quality: "dom7", beats: 22 },
+          { root: 9, quality: "min7", beats: 9 },
+        ],
+        chordBeats: 71,
+        beats: 96,
+      };
+    }
+    if (cmd === "harmony_mark_bar" || cmd === "harmony_set_tempo") return null;
 
     if (cmd === "set_jam_position") {
       const command = (a?.command ?? {}) as {

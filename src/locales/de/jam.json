@@ -753,7 +753,25 @@
       "heard": "Gehört: {{what}}",
       "chart": "Chart: {{what}}",
       "unsure": "Noch nicht erkennbar",
-      "listening": "Hört zu…"
+      "listening": "Hört zu…",
+      "stopLine": "Die Akkorde, die die App in deinem Spiel am häufigsten gehört hat: {{heard}}. Im Chart stehen {{chart}}.",
+      "sameNotes": "Jeder Ton von {{heard}} steckt auch in {{chart}} aus dem Chart."
+    },
+    "change": {
+      "halfUp": "Wenn {{to}} auf {{from}} folgt, geht {{note}} einen Halbton (einen Bund) hoch nach {{target}}.",
+      "halfDown": "Wenn {{to}} auf {{from}} folgt, geht {{note}} einen Halbton (einen Bund) runter nach {{target}}.",
+      "wholeUp": "Wenn {{to}} auf {{from}} folgt, geht {{note}} einen Ganzton (zwei Bünde) hoch nach {{target}}.",
+      "wholeDown": "Wenn {{to}} auf {{from}} folgt, geht {{note}} einen Ganzton (zwei Bünde) runter nach {{target}}.",
+      "third": "{{target}} ist die Terz von {{to}}.",
+      "seventh": "{{target}} ist die Septime von {{to}}."
+    },
+    "pin": {
+      "done": "{{chord}}, Griff {{shape}}, an den Jam-Bildschirm angeheftet.",
+      "noNeck": "Dein Instrument hat keinen Hals, an den sich ein Griff anheften ließe.",
+      "noShape": "Einen solchen Griff von {{chord}} gibt es auf deinem Hals nicht.",
+      "changed": "Die Anheftung hat sich inzwischen geändert und bleibt deshalb, wie sie ist.",
+      "restored": "Der zuvor angeheftete Griff ist wieder da.",
+      "cleared": "Jetzt ist nichts angeheftet."
     }
   },
   "scale": {

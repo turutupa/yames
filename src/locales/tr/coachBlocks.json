@@ -17,7 +17,8 @@
       "comeBack": {
         "tomorrow": "Yarın buna geri dön",
         "inDays": "{{days}} gün sonra buna geri dön"
-      }
+      },
+      "pinShape": "Bu basışı sabitle"
     },
     "fretboard": {
       "aria": "{{what}}, klavye üzerinde"

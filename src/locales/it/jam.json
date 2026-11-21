@@ -763,7 +763,25 @@
       "heard": "Sentito: {{what}}",
       "chart": "Griglia: {{what}}",
       "unsure": "Non ancora chiaro",
-      "listening": "In ascolto…"
+      "listening": "In ascolto…",
+      "stopLine": "Gli accordi che l'app ha sentito di più nel tuo suonare: {{heard}}. La griglia ha {{chart}}.",
+      "sameNotes": "Ogni nota di {{heard}} è anche in {{chart}} della griglia."
+    },
+    "change": {
+      "halfUp": "Quando {{to}} viene dopo {{from}}, {{note}} sale di un semitono (un tasto) fino a {{target}}.",
+      "halfDown": "Quando {{to}} viene dopo {{from}}, {{note}} scende di un semitono (un tasto) fino a {{target}}.",
+      "wholeUp": "Quando {{to}} viene dopo {{from}}, {{note}} sale di un tono (due tasti) fino a {{target}}.",
+      "wholeDown": "Quando {{to}} viene dopo {{from}}, {{note}} scende di un tono (due tasti) fino a {{target}}.",
+      "third": "{{target}} è la terza di {{to}}.",
+      "seventh": "{{target}} è la settima di {{to}}."
+    },
+    "pin": {
+      "done": "Fissato {{chord}}, posizione {{shape}}, sulla schermata Jam.",
+      "noNeck": "Il tuo strumento non ha un manico su cui fissare una posizione.",
+      "noShape": "Non c'è questa posizione di {{chord}} sul tuo manico.",
+      "changed": "Il fissaggio è cambiato nel frattempo, quindi resta com'è.",
+      "restored": "La posizione fissata prima è tornata.",
+      "cleared": "Ora non c'è niente di fissato."
     }
   },
   "scale": {

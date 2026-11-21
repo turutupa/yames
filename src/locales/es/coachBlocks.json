@@ -17,7 +17,8 @@
       "comeBack": {
         "tomorrow": "Vuelve a esto mañana",
         "inDays": "Vuelve a esto dentro de {{days}} días"
-      }
+      },
+      "pinShape": "Fijar esta posición"
     },
     "fretboard": {
       "aria": "{{what}}, en el mástil"

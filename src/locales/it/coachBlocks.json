@@ -17,7 +17,8 @@
       "comeBack": {
         "tomorrow": "Torna su questo domani",
         "inDays": "Torna su questo tra {{days}} giorni"
-      }
+      },
+      "pinShape": "Fissa questa posizione"
     },
     "fretboard": {
       "aria": "{{what}}, sul manico"

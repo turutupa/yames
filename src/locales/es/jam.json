@@ -763,7 +763,25 @@
       "heard": "Oído: {{what}}",
       "chart": "Guía: {{what}}",
       "unsure": "Aún no está claro",
-      "listening": "Escuchando…"
+      "listening": "Escuchando…",
+      "stopLine": "Los acordes que la app oyó más en tu toque: {{heard}}. La guía tiene {{chart}}.",
+      "sameNotes": "Todas las notas de {{heard}} están también en {{chart}} de la guía."
+    },
+    "change": {
+      "halfUp": "Cuando {{to}} viene después de {{from}}, {{note}} sube medio tono (un traste) hasta {{target}}.",
+      "halfDown": "Cuando {{to}} viene después de {{from}}, {{note}} baja medio tono (un traste) hasta {{target}}.",
+      "wholeUp": "Cuando {{to}} viene después de {{from}}, {{note}} sube un tono (dos trastes) hasta {{target}}.",
+      "wholeDown": "Cuando {{to}} viene después de {{from}}, {{note}} baja un tono (dos trastes) hasta {{target}}.",
+      "third": "{{target}} es la tercera de {{to}}.",
+      "seventh": "{{target}} es la séptima de {{to}}."
+    },
+    "pin": {
+      "done": "Fijado {{chord}}, posición {{shape}}, en la pantalla de Jam.",
+      "noNeck": "Tu instrumento no tiene mástil donde fijar una posición.",
+      "noShape": "No hay esa posición de {{chord}} en tu mástil.",
+      "changed": "La posición fijada ha cambiado desde entonces, así que se queda como está.",
+      "restored": "Vuelve la posición fijada antes.",
+      "cleared": "Ahora no hay nada fijado."
     }
   },
   "scale": {

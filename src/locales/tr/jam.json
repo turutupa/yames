@@ -753,7 +753,25 @@
       "heard": "Duyulan: {{what}}",
       "chart": "Şema: {{what}}",
       "unsure": "Henüz belli değil",
-      "listening": "Dinliyor…"
+      "listening": "Dinliyor…",
+      "stopLine": "Uygulamanın çalışında en çok duyduğu akorlar: {{heard}}. Şemada şunlar var: {{chart}}.",
+      "sameNotes": "{{heard}} akorunun her notası şemadaki {{chart}} akorunda da var."
+    },
+    "change": {
+      "halfUp": "{{to}}, {{from}} akorundan sonra gelince {{note}} notası yarım ses (bir perde) yukarı çıkıp {{target}} olur.",
+      "halfDown": "{{to}}, {{from}} akorundan sonra gelince {{note}} notası yarım ses (bir perde) aşağı inip {{target}} olur.",
+      "wholeUp": "{{to}}, {{from}} akorundan sonra gelince {{note}} notası bir ses (iki perde) yukarı çıkıp {{target}} olur.",
+      "wholeDown": "{{to}}, {{from}} akorundan sonra gelince {{note}} notası bir ses (iki perde) aşağı inip {{target}} olur.",
+      "third": "{{target}}, {{to}} akorunun 3. derecesidir.",
+      "seventh": "{{target}}, {{to}} akorunun 7. derecesidir."
+    },
+    "pin": {
+      "done": "{{chord}}, {{shape}} basışı, Jam ekranına sabitlendi.",
+      "noNeck": "Enstrümanında basış sabitlenecek bir sap yok.",
+      "noShape": "Senin sapında {{chord}} akorunun böyle bir basışı yok.",
+      "changed": "Sabitleme bu arada değişti, bu yüzden olduğu gibi bırakıldı.",
+      "restored": "Önceden sabitlenen basış geri geldi.",
+      "cleared": "Şu an hiçbir şey sabitli değil."
     }
   },
   "scale": {
