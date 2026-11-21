@@ -63,8 +63,8 @@ export type UndoState = {
    * A suggestion chip's change (leg chip1): the player saw no proposal, so
    * its Undo has no clock. It is offered until the value is changed again
    * (by anyone), the player leaves the screen (in a Session: the step or the
-   * Exercise), or a Take starts (`noteAskUndos`, `noteAskTake`,
-   * `noteAskToolView`).
+   * Exercise), or a Take starts (`noteAskUndos`, `retireSameUndos`,
+   * `noteAskTake`, `noteAskToolView`).
    */
   chip?: true;
   /** The Session's step it was issued on, or null outside a Session (a chip's Undo only). */
@@ -246,7 +246,6 @@ export function runAskCall(call: ToolCall, said: string): string {
 function writeOutcome(id: string, outcome: RunOutcome, at: { host: CoachToolHost; ctx: CoachContext }): void {
   appendAskTurn({ id, kind: "tool", body: bodyOf(outcome, at.host, at.ctx) });
   followLater(id, outcome);
-  noteAskUndos();
 }
 
 /**
@@ -274,11 +273,15 @@ export function pressChip(call: ToolCall, said: string): string {
   if (changed && outcome.undo) retireSameUndos(outcome.undo);
   appendAskTurn({ id, kind: "tool", body: bodyOf(outcome, at.host, at.ctx, changed) });
   followLater(id, outcome);
-  noteAskUndos();
   return id;
 }
 
-/** The same setting's earlier Undo, live: the same tool and (a setting) the same key. */
+/**
+ * The same setting's earlier Undo, live: the same tool and (a setting) the
+ * same key. Retired by name, not by reading the value: right after a press
+ * the host's reads still give the value from before it until the app has
+ * rendered, so a value check here would retire the Undo just issued.
+ */
 function retireSameUndos(next: ToolCall): void {
   for (const turn of getAskState().turns) {
     if (turn.kind !== "tool" || turn.body.kind !== "receipt") continue;
@@ -296,12 +299,14 @@ function retire(id: string, body: ToolBody & { kind: "receipt" }, undo: UndoStat
 
 /**
  * A chip's Undo is offered until the value it changed is changed again, by
- * anyone: asked of the runner (`undoStillGood`, which changes nothing) after
- * every press in Ask and whenever the host says the screen, the step, the
- * Exercise or the run's phase moved, or the panel opened (`useAskHost`). One
- * that would no longer put back what its receipt changed is retired; the
- * receipt stays as a plain line. Pressed in between, the undo's own guard
- * refuses it (the runner's `at`), so it never changes anything else.
+ * anyone: asked of the runner (`undoStillGood`, which changes nothing)
+ * whenever the host says the panel opened or the screen, the step, the
+ * Exercise or the run's phase moved (`useAskHost`, after the app has
+ * rendered, so the reads are current). A change made again through Ask
+ * retires it by name at that press (`retireSameUndos`). One that would no
+ * longer put back what its receipt changed is retired; the receipt stays as
+ * a plain line. Pressed in between, the undo's own guard refuses it (the
+ * runner's `at`), so it never changes anything else.
  */
 export function noteAskUndos(): void {
   const at = where();
@@ -442,9 +447,10 @@ export function pressProposal(id: string): void {
     return;
   }
   const result = confirmCoachTool(turn.body.proposal, at.host, at.ctx);
+  // The same thing changed again: a chip's earlier Undo for it is not this one's to keep.
+  if (result.ok && result.undo) retireSameUndos(result.undo);
   setBody(id, bodyOf(result, at.host, at.ctx));
   followLater(id, result);
-  noteAskUndos();
 }
 
 /** "Not now": the proposal can never be confirmed, and nothing happens. */
@@ -475,7 +481,6 @@ export function pressUndo(id: string): void {
   const result = runCoachUndo(undo.call, at.host, at.ctx);
   if (result.ok) {
     setBody(id, { ...body, undo: { ...undo, state: "done", note: result.receipt } });
-    noteAskUndos();
     return;
   }
   // Not now (a Take, the click still playing): it stays good, and says why.

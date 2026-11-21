@@ -393,6 +393,21 @@ describe("a suggestion chip's own press (leg chip1)", () => {
     expect(host.changes().map((c) => c.args[0])).toEqual([115, 120]);
   });
 
+  it("the Undo just issued survives the moment before the app renders (the host still reads the old value then)", () => {
+    let bpm = 120;
+    let shown = 120;
+    const host = use(fakeHost({ view: "beat" }, { tempo: () => shown, setTempo: (b) => ((bpm = b), "done") }), beat);
+    render(<Thread />);
+    act(() => void pressChip(slower, "Slower"));
+    expect(bpm).toBe(115);
+    expect(screen.getByTestId("ask-undo")).toBeInTheDocument();
+    // The app renders; the host reads the new tempo; Ask looks again.
+    shown = bpm;
+    act(() => noteAskUndos());
+    expect(screen.getByTestId("ask-undo")).toBeInTheDocument();
+    expect(host.changes()).toHaveLength(1);
+  });
+
   it("a chip for an unflagged tool still shows its proposal and does nothing", () => {
     const host = use(fakeHost({ view: "today", paths: [ALT] }, { plan: () => ({ steps: [{ id: "a", kind: "exercise", title: "A", minutes: 5 }] }) as unknown as SessionPlan, startToday: () => "done" }));
     render(<Thread />);
