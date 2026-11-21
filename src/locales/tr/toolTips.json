@@ -4,557 +4,557 @@
       "generic": {
         "session_start_cold": {
           "neutral": [
-            "Hey — play when you're ready and I'll start tracking your timing.",
-            "Good to have you. Start when you feel warm.",
-            "Ready when you are. I'll start listening as soon as you play.",
-            "Take your time getting set up — I'll pick up your timing from the first note.",
-            "No rush. Start when you're settled and we'll go from there.",
-            "Hit play whenever you're ready. I'll catch you from the first beat.",
-            "Set up, settle in, then start playing whenever.",
-            "Whenever you're ready — I'm listening."
+            "Selam — hazır olunca çal, zamanlamanı takip etmeye başlarım.",
+            "Hoş geldin. Isındığını hissedince başla.",
+            "Sen hazır olunca hazırım. Çalar çalmaz dinlemeye başlarım.",
+            "Hazırlanmak için acele etme — zamanlamanı ilk notadan itibaren yakalarım.",
+            "Acele yok. Yerleşince başla, oradan devam ederiz.",
+            "Hazır olduğunda çalmaya başla. Seni ilk vuruştan yakalarım.",
+            "Hazırlan, yerleş, sonra istediğin an çalmaya başla.",
+            "Ne zaman hazırsan — dinliyorum."
           ]
         },
         "session_start_returning": {
           "neutral": [
-            "Welcome back. Last time: {lastScore} at {lastBpm} BPM. Let's build on that.",
-            "Good to see you again. You hit {lastScore} at {lastBpm} BPM last session.",
-            "Back at it. You were at {lastScore} / {lastBpm} BPM last time — let's keep climbing.",
-            "Welcome back — {lastScore} at {lastBpm} BPM last session. Ready when you are.",
-            "Last session: {lastScore} at {lastBpm} BPM. Let's pick up where you left off.",
-            "Back again. You finished at {lastScore} at {lastBpm} BPM — good baseline.",
-            "Welcome back. {lastScore} at {lastBpm} BPM last time. Let's see what today brings.",
-            "Good to have you back. Last time you hit {lastScore} at {lastBpm} BPM."
+            "Tekrar hoş geldin. Geçen sefer: {lastBpm} BPM'de {lastScore}. Bunun üzerine inşa edelim.",
+            "Seni tekrar görmek güzel. Geçen oturumda {lastBpm} BPM'de {lastScore} yaptın.",
+            "Yine buradasın. Geçen sefer {lastScore} / {lastBpm} BPM'deydin — tırmanmaya devam edelim.",
+            "Tekrar hoş geldin — geçen oturumda {lastBpm} BPM'de {lastScore}. Sen hazır olunca hazırım.",
+            "Geçen oturum: {lastBpm} BPM'de {lastScore}. Kaldığın yerden devam edelim.",
+            "Yine buradasın. {lastBpm} BPM'de {lastScore} ile bitirmiştin — iyi bir başlangıç noktası.",
+            "Tekrar hoş geldin. Geçen sefer {lastBpm} BPM'de {lastScore}. Bugün neler getirecek, görelim.",
+            "Geri döndüğün iyi oldu. Geçen sefer {lastBpm} BPM'de {lastScore} yaptın."
           ]
         },
         "accuracy_drop": {
           "encouragement": [
-            "A few misses crept in — ease up, breathe, then come back to it.",
-            "You were locked in, then a wobble. Reset on the next strong beat.",
-            "Quick dip. Slow the pulse in your head and pick it up again.",
-            "Small slip — no big deal. Find the click again on the next bar.",
-            "Lost the thread for a second. Catch the next downbeat clean.",
-            "Tiny stumble. Take a breath and ride the next click in.",
-            "Cool — just feel the next beat land before you play.",
-            "A little drift. Let the metronome lead you back in."
+            "Birkaç kaçırma sızdı — yavaşla, nefes al, sonra geri dön.",
+            "Yerine oturmuştun, sonra bir sallanma oldu. Sonraki güçlü vuruşta sıfırla.",
+            "Küçük bir düşüş. Kafandaki nabzı yavaşlat ve yeniden al.",
+            "Küçük bir kayma — önemli değil. Sonraki ölçüde tıkı yeniden bul.",
+            "Bir an ipi kaçırdın. Sonraki ana vuruşu temiz yakala.",
+            "Ufak bir tökezleme. Bir nefes al ve sonraki tıkın üstüne bin.",
+            "Sorun yok — çalmadan önce sonraki vuruşun yerine oturduğunu hisset.",
+            "Biraz kayma var. Metronom seni geri getirsin."
           ],
           "neutral": [
-            "Hit rate's slipped a bit — reset on the next bar.",
-            "Accuracy is sliding. Let it settle on the next downbeat.",
-            "Things are slipping — slow it in your head, then start fresh.",
-            "Some misses stacking up. Find a clean bar, then keep going.",
-            "Quality's drifting. Lock in with the click for one full bar.",
-            "Misses creeping up — take a breath, hear the click, then play.",
-            "Drift showing. Sit one bar quiet with the click before coming back.",
-            "Hits dropping off. Wait for the strong beat and re-set."
+            "İsabet oranı biraz düştü — sonraki ölçüde sıfırla.",
+            "Doğruluk düşüyor. Sonraki ana vuruşta oturmasına izin ver.",
+            "İşler kayıyor — kafanda yavaşlat, sonra baştan başla.",
+            "Bazı kaçırmalar birikiyor. Temiz bir ölçü bul, sonra devam et.",
+            "Kalite kayıyor. Bir tam ölçü boyunca tıkla kilitlen.",
+            "Kaçırmalar artıyor — bir nefes al, tıkı duy, sonra çal.",
+            "Kayma görünüyor. Dönmeden önce bir ölçü tıkla birlikte sessiz bekle.",
+            "Vuruşlar azalıyor. Güçlü vuruşu bekle ve yeniden ayarla."
           ],
           "correction": [
-            "The slip is sustained — try dialing the tempo down a few BPM.",
-            "Hits are scattering. Slow down and rebuild from a clean bar.",
-            "Get one clean bar, then climb again.",
-            "Pattern's coming apart — pause, count yourself in slow, then play.",
-            "Stop, count a full bar with the click, then come back in.",
-            "Drop the tempo five BPM. Get it clean, then bring it back up.",
-            "Pull back. Get one solid bar against the click before adding speed.",
-            "Reset hard — silence one bar, count it, then start fresh."
+            "Kayma sürüyor — tempoyu birkaç BPM düşürmeyi dene.",
+            "Vuruşlar dağılıyor. Yavaşla ve temiz bir ölçüden yeniden kur.",
+            "Bir temiz ölçü yakala, sonra yeniden tırman.",
+            "Kalıp dağılıyor — dur, yavaş say, sonra çal.",
+            "Dur, tıkla tam bir ölçü say, sonra geri gir.",
+            "Tempoyu beş BPM düşür. Temiz çal, sonra tekrar yükselt.",
+            "Geri çekil. Hız eklemeden önce tıka karşı bir sağlam ölçü yakala.",
+            "Sert sıfırla — bir ölçü sus, say, sonra baştan başla."
           ]
         },
         "rushing_trend": {
           "encouragement": [
-            "Sitting just ahead of the click — breathe and ride it.",
-            "Slight rush creeping in. Plant your foot, let the metronome lead.",
-            "A little early — settle into the next click.",
-            "You're a hair ahead. Wait for the click instead of chasing it.",
-            "Just a tiny bit hot. Relax your hands and let the click pull you.",
-            "Pulse is creeping up. Take a breath and let the next click meet you.",
-            "Edge of rushing. Lean back into the seat and ride the click.",
-            "A touch early. Hear the click first, then play."
+            "Tıkın biraz önündesin — nefes al ve üstüne bin.",
+            "Hafif bir acele sızıyor. Ayağını yere bas, metronom yol göstersin.",
+            "Biraz erken — sonraki tıka otur.",
+            "Kıl payı öndesin. Tıkın peşinden koşma, onu bekle.",
+            "Azıcık hızlısın. Ellerini gevşet ve tık seni çeksin.",
+            "Nabız yükseliyor. Bir nefes al ve sonraki tık seninle buluşsun.",
+            "Acelenin kıyısındasın. Arkana yaslan ve tıkın üstüne bin.",
+            "Biraz erken. Önce tıkı duy, sonra çal."
           ],
           "neutral": [
-            "Trending a touch early — try riding the back of the beat.",
-            "You're nudging ahead of the click — let it come to you.",
-            "Drifting early. Sit deeper into each click.",
-            "Each note's landing a little early. Wait for the click.",
-            "You're leading the metronome. Let it lead you instead.",
-            "Pace is creeping up. Match the click, don't push it.",
-            "Notes are arriving too soon. Hold each one a beat longer in your head.",
-            "Drift forward. Take a breath and let the click set the pace."
+            "Biraz erkene gidiyor — vuruşun arkasına binmeyi dene.",
+            "Tıkın önüne geçiyorsun — sana gelmesine izin ver.",
+            "Erkene kayıyor. Her tıka daha derin otur.",
+            "Her nota biraz erken düşüyor. Tıkı bekle.",
+            "Metronomu sen yönlendiriyorsun. Bırak o seni yönlendirsin.",
+            "Hız yükseliyor. Tıka uy, onu itme.",
+            "Notalar çok erken geliyor. Kafanda her birini bir vuruş daha tut.",
+            "İleri kayma. Bir nefes al ve hızı tık belirlesin."
           ],
           "correction": [
-            "Still leaning early — count the in-betweens and land each note right on the click.",
-            "The rush is sticking. Slow down, count the offbeat between each click.",
-            "Pause, count yourself in slow, then start playing again.",
-            "Drop a few BPM. Get the click to lead before bringing it back up.",
-            "Hands are racing. Stop, take a breath, start on the next strong beat.",
-            "Reset — silence one bar, hear the click, then come in on beat 1.",
-            "Push the tempo down five BPM until you can sit ON the click.",
-            "Stop trying to drive the metronome. Let it drive you for one bar."
+            "Hâlâ erkene yaslanıyorsun — aradakileri say ve her notayı tam tıkın üstüne indir.",
+            "Acele yerleşiyor. Yavaşla, her tık arasındaki zayıf vuruşu say.",
+            "Dur, yavaş say, sonra yeniden çalmaya başla.",
+            "Birkaç BPM düş. Tekrar yükseltmeden önce tıkın önde gitmesini sağla.",
+            "Eller yarışıyor. Dur, bir nefes al, sonraki güçlü vuruşta başla.",
+            "Sıfırla — bir ölçü sus, tıkı duy, sonra 1. vuruştan gir.",
+            "Tıkın ÜSTÜNDE durabilene kadar tempoyu beş BPM aşağı çek.",
+            "Metronomu sürmeye çalışmayı bırak. Bir ölçü boyunca o seni sürsün."
           ]
         },
         "dragging_trend": {
           "encouragement": [
-            "Sitting just behind the click — lift the tempo back under your fingers.",
-            "Slight drag. Breathe and push back into the beat.",
-            "A little behind — lean forward, you're close.",
-            "You're a hair late. Lift your hands; meet the click on top.",
-            "Just barely lagging. Push gently — the click will meet you.",
-            "Drift back is small. Lean in and ride the front of each click.",
-            "Touch late. Imagine playing slightly ahead and you'll land in time.",
-            "Notes are arriving just after the click. Push a little."
+            "Tıkın biraz gerisindesin — tempoyu parmaklarının altında geri kaldır.",
+            "Hafif sürükleme. Nefes al ve vuruşa geri it.",
+            "Biraz geride — öne eğil, yakınsın.",
+            "Kıl payı geç kalıyorsun. Ellerini kaldır; tıkla üstünde buluş.",
+            "Zar zor geride. Nazikçe it — tık seninle buluşur.",
+            "Geriye kayma küçük. Öne yaslan ve her tıkın önüne bin.",
+            "Biraz geç. Azıcık önden çaldığını hayal et, zamanında düşersin.",
+            "Notalar tıkın hemen ardından geliyor. Biraz it."
           ],
           "neutral": [
-            "Trending a touch late — try playing slightly ahead of the click.",
-            "You're sitting behind the beat — push into each one.",
-            "Drifting late. Reach for the front of each click.",
-            "Each note's landing just after the click. Meet it head-on instead.",
-            "The metronome's leaving you behind. Step into each click.",
-            "Pace is sagging. Lift the hands and play on top of the click.",
-            "Notes arriving late. Aim for the front edge of each beat.",
-            "Drag is showing. Imagine the click is a half-step earlier than you think."
+            "Biraz geçe gidiyor — tıkın azıcık önünde çalmayı dene.",
+            "Vuruşun gerisinde duruyorsun — her birine doğru it.",
+            "Geçe kayıyor. Her tıkın önüne uzan.",
+            "Her nota tıkın hemen ardına düşüyor. Onunla karşı karşıya buluş.",
+            "Metronom seni geride bırakıyor. Her tıka adım at.",
+            "Hız sarkıyor. Elleri kaldır ve tıkın üstünde çal.",
+            "Notalar geç geliyor. Her vuruşun ön kenarını hedefle.",
+            "Sürükleme görünüyor. Tıkın düşündüğünden yarım adım erken olduğunu hayal et."
           ],
           "correction": [
-            "Still hanging back — play with the click, don't wait for it.",
-            "The drag is sticking. Push the tempo with your fingers.",
-            "Stop, reset, and start fresh on beat 1.",
-            "Drop the tempo a bit and lock in. The drag will clear once it feels easy.",
-            "Pause one bar. Hear the click, then come in right on top of beat 1.",
-            "Reset — count yourself in slow and play with more lift.",
-            "Slow it down five BPM and aim for the front of every click.",
-            "Stop, take a breath, then come in pushing slightly forward."
+            "Hâlâ geride duruyorsun — tıkla birlikte çal, onu bekleme.",
+            "Sürükleme yerleşiyor. Tempoyu parmaklarınla ilerlet.",
+            "Dur, sıfırla ve 1. vuruştan baştan başla.",
+            "Tempoyu biraz düşür ve oturt. Rahat gelince sürükleme geçer.",
+            "Bir ölçü dur. Tıkı duy, sonra tam 1. vuruşun üstüne gir.",
+            "Sıfırla — yavaş say ve daha çok kaldırarak çal.",
+            "Beş BPM yavaşlat ve her tıkın önünü hedefle.",
+            "Dur, bir nefes al, sonra hafifçe ileri iterek gir."
           ]
         },
         "personal_best_streak": {
           "encouragement": [
-            "Locked in — keep it going.",
-            "Streak's going. Nice.",
-            "On a run — stay there.",
-            "Yes. Don't change anything.",
-            "Riding it clean. Stay.",
-            "That's the pocket — hold on to it.",
-            "Beautiful. Just keep doing that.",
-            "Eyes closed, keep going."
+            "Yerine oturdun — böyle devam.",
+            "Seri sürüyor. Güzel.",
+            "Gidiş iyi — orada kal.",
+            "Evet. Hiçbir şeyi değiştirme.",
+            "Temiz gidiyor. Kal.",
+            "İşte cep bu — sıkı tut.",
+            "Çok güzel. Sadece bunu yapmaya devam et.",
+            "Gözler kapalı, devam et."
           ],
           "neutral": [
-            "New session best — locked in.",
-            "Cleanest stretch so far. Hold it.",
-            "Best run yet today. Don't change a thing.",
-            "Longest clean run of the session. Keep it.",
-            "Top streak of today. Stay there.",
-            "Tightest stretch yet — hold this feel.",
-            "Best timing of the session right here.",
-            "This is your session high — sit in it."
+            "Yeni oturum rekoru — yerine oturdun.",
+            "Şimdiye kadarki en temiz bölüm. Tut.",
+            "Bugünün en iyi serisi. Hiçbir şeyi değiştirme.",
+            "Oturumun en uzun temiz serisi. Koru.",
+            "Bugünün en uzun serisi. Orada kal.",
+            "Şimdiye kadarki en sıkı bölüm — bu hissi tut.",
+            "Oturumun en iyi zamanlaması tam burada.",
+            "Bu senin oturum zirven — içinde kal."
           ],
           "correction": [
-            "Locked in — hold tempo, don't push faster yet.",
-            "Streak's clean. Stay at this BPM until it's automatic.",
-            "Exactly where you want to live for a minute.",
-            "Don't speed up yet. Let this tempo settle into the hands.",
-            "Stay flat — no climbing yet. Let it become muscle memory.",
-            "Hold this for another minute before adding speed.",
-            "Park here. Speed comes after this gets boring.",
-            "Resist the urge to push. Burn this tempo in first."
+            "Yerine oturdun — tempoyu koru, henüz hızlanma.",
+            "Seri temiz. Otomatikleşene kadar bu BPM'de kal.",
+            "Bir dakika boyunca tam yaşamak isteyeceğin yer burası.",
+            "Henüz hızlanma. Bu tempo ellerine otursun.",
+            "Düz kal — henüz tırmanma. Kas hafızasına dönüşsün.",
+            "Hız eklemeden önce bunu bir dakika daha tut.",
+            "Burada park et. Hız, bu sıkıcı gelince gelir.",
+            "İtme isteğine karşı dur. Önce bu tempoyu iyice işle."
           ]
         },
         "new_band_locked": {
           "encouragement": [
-            "{bpmLow} BPM — yours now.",
-            "Locked at {bpmLow} BPM. Nice.",
-            "Held this tempo clean — new ceiling.",
-            "{bpmLow} BPM feels easy now. That's progress.",
-            "You own {bpmLow} BPM. Don't lose it.",
-            "Steady at {bpmLow}. That's the new floor.",
-            "Clean at {bpmLow} BPM — keep it warm.",
-            "{bpmLow} BPM — solid. Stay here a bit longer."
+            "{bpmLow} BPM — artık senin.",
+            "{bpmLow} BPM'de kilitlendi. Güzel.",
+            "Bu tempoyu temiz tuttun — yeni tavan.",
+            "{bpmLow} BPM artık kolay geliyor. Bu ilerleme.",
+            "{bpmLow} BPM sende. Kaybetme.",
+            "{bpmLow}'da sabitsin. Yeni taban bu.",
+            "{bpmLow} BPM'de temiz — sıcak tut.",
+            "{bpmLow} BPM — sağlam. Burada biraz daha kal."
           ],
           "neutral": [
-            "Sustained clean play at {bpmLow}–{bpmHigh} BPM for a minute.",
-            "{bpmLow}–{bpmHigh} BPM band: locked in.",
-            "New BPM band owned: {bpmLow}–{bpmHigh}.",
-            "Clean for a full minute at {bpmLow}–{bpmHigh} BPM.",
-            "{bpmLow}–{bpmHigh} BPM held steady. That's the new baseline.",
-            "Locked into {bpmLow}–{bpmHigh} BPM for a long stretch.",
-            "Held the {bpmLow}–{bpmHigh} band clean — that's a real win.",
-            "Pocket sustained at {bpmLow}–{bpmHigh} BPM. Don't lose it now."
+            "{bpmLow}–{bpmHigh} BPM'de bir dakika boyunca temiz çalma sürdü.",
+            "{bpmLow}–{bpmHigh} BPM aralığı: yerine oturdu.",
+            "Yeni BPM aralığı sende: {bpmLow}–{bpmHigh}.",
+            "{bpmLow}–{bpmHigh} BPM'de tam bir dakika temiz.",
+            "{bpmLow}–{bpmHigh} BPM sabit tutuldu. Yeni başlangıç noktası bu.",
+            "Uzun bir süre {bpmLow}–{bpmHigh} BPM'de kilitli kaldın.",
+            "{bpmLow}–{bpmHigh} aralığını temiz tuttun — bu gerçek bir kazanım.",
+            "Cep {bpmLow}–{bpmHigh} BPM'de sürdü. Şimdi kaybetme."
           ],
           "correction": [
-            "{bpmLow}–{bpmHigh} is stable. Stay here, then push a touch.",
-            "Held {bpmLow}–{bpmHigh} clean. Ready to climb when you are.",
-            "{bpmLow}–{bpmHigh} feels owned. Next session, start here.",
-            "{bpmLow}–{bpmHigh} BPM is locked in. Don't speed up yet.",
-            "You can climb from {bpmLow}–{bpmHigh}, but earn it — two more clean minutes first.",
-            "{bpmLow}–{bpmHigh} BPM is the new floor. Don't drop back below it.",
-            "Stable at {bpmLow}–{bpmHigh}. Move up only when it feels boring.",
-            "{bpmLow}–{bpmHigh} BPM owned. Build a couple of minutes here before climbing."
+            "{bpmLow}–{bpmHigh} sabit. Burada kal, sonra azıcık it.",
+            "{bpmLow}–{bpmHigh} temiz tutuldu. Sen hazır olunca tırmanmaya hazır.",
+            "{bpmLow}–{bpmHigh} sende gibi. Sonraki oturumda buradan başla.",
+            "{bpmLow}–{bpmHigh} BPM yerine oturdu. Henüz hızlanma.",
+            "{bpmLow}–{bpmHigh}'dan tırmanabilirsin ama hak et — önce iki dakika daha temiz çal.",
+            "{bpmLow}–{bpmHigh} BPM yeni taban. Bunun altına geri düşme.",
+            "{bpmLow}–{bpmHigh}'da sabit. Ancak sıkıcı gelince yukarı çık.",
+            "{bpmLow}–{bpmHigh} BPM sende. Tırmanmadan önce burada birkaç dakika oluştur."
           ]
         },
         "check_in": {
           "encouragement": [
-            "You've been deep in it. Anything you want to focus on next?",
-            "Five-plus minutes locked in. Want me to call out anything specific?",
-            "Long stretch — pause if you want, I'm here.",
-            "Solid run going. Want me to listen for anything in particular?",
-            "Been in this a while. Take a breath if you need one.",
-            "Quiet so far. Tell me what you're working on and I'll watch for it.",
-            "Nothing to call out yet. What do you want me to listen for?",
-            "Steady pocket. Keep going, or switch gears if you're ready."
+            "Epeydir işin içindesin. Sıradaki odağın ne olsun?",
+            "Beş dakikadan fazladır kilitlisin. Özel bir şeyi söylememi ister misin?",
+            "Uzun bir bölüm — istersen dur, buradayım.",
+            "Sağlam bir gidiş var. Özellikle bir şeye kulak vermemi ister misin?",
+            "Bir süredir bunun içindesin. Gerekirse bir nefes al.",
+            "Şimdilik sessiz. Üzerinde çalıştığın şeyi söyle, ona göz kulak olayım.",
+            "Henüz söylenecek bir şey yok. Neye kulak vermemi istersin?",
+            "Sabit cep. Devam et, ya da hazırsan vites değiştir."
           ],
           "neutral": [
-            "Five minutes in, nothing to flag. Solid pocket. Keep going or switch focus?",
-            "Quiet stretch. Tell me what you're working on.",
-            "Long uninterrupted run. Anything you want feedback on?",
-            "Five minutes deep. No issues to call out — keep going.",
-            "Steady session. Want a different angle, or stay the course?",
-            "Long run with no slips. What's next?",
-            "You've been in the pocket. Take stock and pick a next focus.",
-            "Quiet session so far. Pick a target if you want sharper feedback."
+            "Beş dakika oldu, işaretlenecek bir şey yok. Sağlam cep. Devam mı, odak değişikliği mi?",
+            "Sessiz bir bölüm. Üzerinde çalıştığın şeyi söyle.",
+            "Uzun, kesintisiz bir seri. Hakkında geri bildirim istediğin bir şey var mı?",
+            "Beş dakikadır devam ediyorsun. Söylenecek bir sorun yok — devam et.",
+            "Sabit bir oturum. Farklı bir açı ister misin, yoksa aynı yolda mı?",
+            "Kaymasız uzun bir seri. Sırada ne var?",
+            "Cebin içindeydin. Durumu gözden geçir ve sıradaki odağı seç.",
+            "Şimdilik sessiz bir oturum. Daha keskin geri bildirim istersen bir hedef seç."
           ],
           "correction": [
-            "Heads up — you've been in this a while. Take 10 if your hands need it.",
-            "Five-plus minutes continuous. Check in with your body before you push more.",
-            "Sustained session — stretch your fingers, then come back.",
-            "Hands tired? Take a 60-second pause before the next pass.",
-            "Long stretch — check the wrists and shoulders before continuing.",
-            "Time for a quick break. Cold hands play sloppy.",
-            "Pause and stretch. Two minutes off keeps the next twenty solid.",
-            "Sustained run — give the hands a rest before pushing further."
+            "Dikkat — bir süredir bunun içindesin. Ellerin ihtiyaç duyuyorsa 10 dakika ara ver.",
+            "Beş dakikadan fazla kesintisiz. Daha fazla zorlamadan önce bedenine kulak ver.",
+            "Uzun bir oturum — parmaklarını esnet, sonra geri dön.",
+            "Eller yorgun mu? Sonraki geçişten önce 60 saniye ara ver.",
+            "Uzun bir bölüm — devam etmeden önce bileklere ve omuzlara bak.",
+            "Kısa bir mola zamanı. Soğuk eller özensiz çalar.",
+            "Dur ve esne. İki dakikalık ara, sonraki yirmiyi sağlam tutar.",
+            "Kesintisiz seri — daha fazla zorlamadan önce ellere dinlenme ver."
           ]
         },
         "fatigue": {
           "encouragement": [
-            "Accuracy's been sliding the last few minutes. Take a beat.",
-            "Hands tightening up? Quick stretch — come back fresh.",
-            "Quality's drifting. Pause, breathe, return.",
-            "Hands working harder than they should. Brief rest, then back in.",
-            "You've been going a while — drop the instrument for 60 seconds.",
-            "Body's getting heavier than the music. Quick break.",
-            "Fingers stiffening up? Shake them out, then come back.",
-            "Time for a short pause — fresh hands play cleaner."
+            "Doğruluk son birkaç dakikadır düşüyor. Bir an ara ver.",
+            "Eller geriliyor mu? Kısa bir esneme — taze dön.",
+            "Kalite kayıyor. Dur, nefes al, geri dön.",
+            "Eller olması gerekenden çok çalışıyor. Kısa bir dinlenme, sonra tekrar gir.",
+            "Bir süredir devam ediyorsun — enstrümanı 60 saniye bırak.",
+            "Beden müzikten daha ağırlaşıyor. Kısa bir mola.",
+            "Parmaklar sertleşiyor mu? Salla, sonra geri dön.",
+            "Kısa bir ara zamanı — taze eller daha temiz çalar."
           ],
           "neutral": [
-            "Accuracy declined over the last 3 minutes at constant BPM — likely fatigue.",
-            "Score trending down without tempo change. Take a rest.",
-            "Sustained accuracy drop at the same BPM — call it a rest cycle.",
-            "Same tempo, falling accuracy. Hands are getting tired.",
-            "Quality's slipping but the tempo hasn't changed — that's fatigue.",
-            "Misses climbing while the click stays the same. Time for a pause.",
-            "Three-minute slide at one tempo. Rest the hands.",
-            "Steady BPM, sliding accuracy — your hands are telling you something."
+            "Doğruluk, sabit BPM'de son 3 dakikada düştü — muhtemelen yorgunluk.",
+            "Tempo değişmeden puan düşüyor. Dinlen.",
+            "Aynı BPM'de süren doğruluk düşüşü — bunu bir dinlenme döngüsü say.",
+            "Aynı tempo, düşen doğruluk. Eller yoruluyor.",
+            "Kalite kayıyor ama tempo değişmedi — bu yorgunluk.",
+            "Tık aynı kalırken kaçırmalar artıyor. Ara zamanı.",
+            "Tek tempoda üç dakikalık kayış. Ellere dinlenme ver.",
+            "Sabit BPM, kayan doğruluk — ellerin sana bir şey söylüyor."
           ],
           "correction": [
-            "Fatigue showing — stop now, 90 seconds off, then come back.",
-            "You're past your peak window. Rest before quality drops further.",
-            "Take the rest. Tired playing teaches the hands sloppy habits.",
-            "Stop, stand up, walk around for a minute. Then come back.",
-            "Quality's been dropping for minutes. Real rest — 90 seconds minimum.",
-            "Hands are done for now. Pause, shake them out, hydrate.",
-            "Pushing past tired locks in mistakes. Stop and recover.",
-            "Set the instrument down. Two minutes off, then re-evaluate."
+            "Yorgunluk görünüyor — şimdi dur, 90 saniye ara ver, sonra dön.",
+            "Zirve aralığını geçtin. Kalite daha da düşmeden dinlen.",
+            "Dinlen. Yorgun çalmak ellere özensiz alışkanlıklar öğretir.",
+            "Dur, ayağa kalk, bir dakika dolaş. Sonra geri dön.",
+            "Kalite dakikalardır düşüyor. Gerçek bir dinlenme — en az 90 saniye.",
+            "Eller şimdilik tamam. Dur, salla, su iç.",
+            "Yorgunluğun ötesine zorlamak hataları yerleştirir. Dur ve toparlan.",
+            "Enstrümanı bırak. İki dakika ara, sonra yeniden değerlendir."
           ]
         },
         "recovery": {
           "encouragement": [
-            "Nice save — stay here.",
-            "Pulled it back. Hold it.",
-            "Recovered — keep this exact feel.",
-            "Got it back. Sit in this for a minute.",
-            "Back from the dip. Don't change anything now.",
-            "You felt it slip and brought it back. That's the skill.",
-            "Solid recovery. Stay loose, stay here.",
-            "Caught it before it ran away. Hold this feel."
+            "Güzel kurtarış — burada kal.",
+            "Geri çektin. Tut.",
+            "Toparladın — tam bu hissi koru.",
+            "Geri aldın. Bir dakika bunun içinde kal.",
+            "Düşüşten döndün. Şimdi hiçbir şeyi değiştirme.",
+            "Kaydığını hissettin ve geri getirdin. Beceri bu.",
+            "Sağlam toparlanma. Gevşek kal, burada kal.",
+            "Kaçmadan yakaladın. Bu hissi tut."
           ],
           "neutral": [
-            "Back to clean after the dip. Keep this pace.",
-            "Score's back up — hold it.",
-            "Recovery confirmed — accuracy steady again.",
-            "Clean again after the slip. Don't change anything.",
-            "Accuracy's back where it was. Hold steady.",
-            "Stabilized after the dip. Keep this tempo.",
-            "You closed the gap. Stay at this BPM.",
-            "Quality recovered. Park here a minute."
+            "Düşüşten sonra yine temiz. Bu hızı koru.",
+            "Puan yeniden yükseldi — tut.",
+            "Toparlanma doğrulandı — doğruluk yine sabit.",
+            "Kaymadan sonra yine temiz. Hiçbir şeyi değiştirme.",
+            "Doğruluk eski yerine döndü. Sabit tut.",
+            "Düşüşten sonra dengelendi. Bu tempoyu koru.",
+            "Farkı kapattın. Bu BPM'de kal.",
+            "Kalite toparlandı. Burada bir dakika park et."
           ],
           "correction": [
-            "Recovery's holding. Don't push the tempo yet.",
-            "Back from the dip — stay flat, no climbing yet.",
-            "You salvaged it. Hold this exact BPM for a full minute.",
-            "Don't reward the recovery with a tempo bump. Sit here.",
-            "Back on track. Resist the urge to speed up.",
-            "Recovery is fresh — let it become habit before pushing.",
-            "Stay at this BPM. Build a couple of clean bars before changing anything.",
-            "You came back from the slip. Don't undo it by climbing too soon."
+            "Toparlanma tutuyor. Tempoyu henüz itme.",
+            "Düşüşten döndün — düz kal, henüz tırmanma.",
+            "Kurtardın. Tam bu BPM'yi bir tam dakika tut.",
+            "Toparlanmayı tempo artışıyla ödüllendirme. Burada otur.",
+            "Yoldasın. Hızlanma isteğine karşı dur.",
+            "Toparlanma taze — itmeden önce alışkanlığa dönüşsün.",
+            "Bu BPM'de kal. Bir şeyi değiştirmeden önce birkaç temiz ölçü oluştur.",
+            "Kaymadan geri döndün. Çok erken tırmanıp bunu bozma."
           ]
         },
         "recovery_confirmed": {
           "encouragement": [
-            "Got it back.",
-            "Nice save — hold it.",
-            "Back and clean.",
-            "Pulled it back. Stay here."
+            "Geri aldın.",
+            "Güzel kurtarış — tut.",
+            "Döndün ve temizsin.",
+            "Geri çektin. Burada kal."
           ],
           "neutral": [
-            "Accuracy's back. Keep this feel.",
-            "Back to clean after the dip.",
-            "Recovery confirmed. Hold steady."
+            "Doğruluk geri geldi. Bu hissi koru.",
+            "Düşüşten sonra yine temiz.",
+            "Toparlanma doğrulandı. Sabit tut."
           ],
           "correction": [
-            "Recovery's holding — don't push the tempo yet.",
-            "Back on track. Resist the urge to climb."
+            "Toparlanma tutuyor — tempoyu henüz itme.",
+            "Yoldasın. Tırmanma isteğine karşı dur."
           ]
         },
         "tempo_milestone": {
           "encouragement": [
-            "{bpmLow} BPM — new gear.",
-            "Past {bpmLow} BPM, clean.",
-            "{bpmLow}+ and holding. Nice.",
-            "First time at {bpmLow} BPM today. Feels good.",
-            "Crossed {bpmLow} clean. Stay loose.",
-            "{bpmLow} BPM is on the menu now.",
-            "You're in {bpmLow}-territory. Hold it lightly.",
-            "Welcome to {bpmLow} BPM. Make it feel easy."
+            "{bpmLow} BPM — yeni vites.",
+            "{bpmLow} BPM'i temiz geçtin.",
+            "{bpmLow}+ ve tutuyor. Güzel.",
+            "Bugün ilk kez {bpmLow} BPM'de. İyi hissettiriyor.",
+            "{bpmLow}'u temiz geçtin. Gevşek kal.",
+            "{bpmLow} BPM artık menüde.",
+            "{bpmLow} bölgesine girdin. Hafifçe tut.",
+            "{bpmLow} BPM'e hoş geldin. Kolay hissettir."
           ],
           "neutral": [
-            "Crossed the {bpmLow}-BPM mark upward.",
-            "Tempo milestone: now in the {bpmLow}-{bpmHigh} band.",
-            "{bpmLow} BPM and climbing.",
-            "{bpmLow} BPM reached. New band: {bpmLow}-{bpmHigh}.",
-            "Moved into the {bpmLow}-{bpmHigh} BPM range.",
-            "Climbing — {bpmLow} BPM is the new working tempo.",
-            "{bpmLow} BPM hit. See if it sticks.",
-            "Tempo bumped into the {bpmLow}-{bpmHigh} zone."
+            "{bpmLow} BPM sınırını yukarı doğru geçtin.",
+            "Tempo kilometre taşı: artık {bpmLow}-{bpmHigh} aralığındasın.",
+            "{bpmLow} BPM ve yükseliyor.",
+            "{bpmLow} BPM'e ulaşıldı. Yeni aralık: {bpmLow}-{bpmHigh}.",
+            "{bpmLow}-{bpmHigh} BPM aralığına geçtin.",
+            "Yükseliyor — {bpmLow} BPM yeni çalışma temposu.",
+            "{bpmLow} BPM'e ulaşıldı. Tutacak mı, bak.",
+            "Tempo {bpmLow}-{bpmHigh} bölgesine çıktı."
           ],
           "correction": [
-            "At {bpmLow} BPM — stay here until clean, don't push higher yet.",
-            "{bpmLow} BPM milestone. Stabilise before pushing.",
-            "New band: {bpmLow}-{bpmHigh}. Make sure this one sticks before climbing.",
-            "{bpmLow} BPM is brand new — don't speed up until it feels boring.",
-            "Earn {bpmLow} BPM before chasing the next mark. Hold it.",
-            "Park at {bpmLow} BPM. The next jump comes after a clean minute here.",
-            "Hit {bpmLow} BPM — now lock it in before the next ramp.",
-            "{bpmLow} BPM is fresh. Stay flat and let the hands catch up."
+            "{bpmLow} BPM'de — temiz olana kadar burada kal, henüz daha yükseğe itme.",
+            "{bpmLow} BPM kilometre taşı. İtmeden önce dengele.",
+            "Yeni aralık: {bpmLow}-{bpmHigh}. Tırmanmadan önce bunun yerleştiğinden emin ol.",
+            "{bpmLow} BPM yepyeni — sıkıcı gelene kadar hızlanma.",
+            "Sonraki işarete koşmadan önce {bpmLow} BPM'i hak et. Tut.",
+            "{bpmLow} BPM'de park et. Sonraki sıçrama burada temiz bir dakikadan sonra gelir.",
+            "{bpmLow} BPM'e ulaştın — şimdi sonraki yükselişten önce oturt.",
+            "{bpmLow} BPM taze. Düz kal ve eller yetişsin."
           ]
         },
         "low_confidence": {
           "encouragement": [
-            "Signal's a bit murky on my end — keep playing, I'll catch up.",
-            "Audio's harder to read here, but you sound good.",
-            "I'm having a slightly tough time reading you — keep going.",
-            "Hard to hear you clean from here — don't let that distract you.",
-            "Mic's catching some noise, but you're playing fine.",
-            "Picking up some haze on the signal — keep going, I'm listening.",
-            "My read on the audio is fuzzy. You sound on the beat though.",
-            "Signal's a touch noisy. Trust your hands."
+            "Sinyal benim tarafımda biraz bulanık — çalmaya devam et, yetişirim.",
+            "Ses burada okunması daha zor ama iyi duyuluyorsun.",
+            "Seni okumakta biraz zorlanıyorum — devam et.",
+            "Seni buradan temiz duymak zor — bu seni dağıtmasın.",
+            "Mikrofon biraz gürültü alıyor ama gayet iyi çalıyorsun.",
+            "Sinyalde biraz bulanıklık alıyorum — devam et, dinliyorum.",
+            "Sesi okumam bulanık. Yine de vuruşun üstünde duyuluyorsun.",
+            "Sinyal biraz gürültülü. Ellerine güven."
           ],
           "neutral": [
-            "Detection confidence has been lower for the last 30s — readings may be noisier than usual.",
-            "Lower onset confidence — feedback might be imprecise this stretch.",
-            "Audio signal less clear; metrics slightly less reliable.",
-            "Read quality's down a bit. Numbers may swing more than usual.",
-            "Mic input's harder to parse — accuracy reading may drift.",
-            "Background noise creeping in; feedback might lag a touch.",
-            "Lower signal clarity for the last half-minute.",
-            "Audio's harder to read — take the metrics with a small grain of salt."
+            "Algılama güveni son 30 saniyedir daha düşük — okumalar her zamankinden gürültülü olabilir.",
+            "Daha düşük başlangıç güveni — geri bildirim bu bölümde kesin olmayabilir.",
+            "Ses sinyali daha az net; ölçümler biraz daha az güvenilir.",
+            "Okuma kalitesi biraz düştü. Sayılar her zamankinden fazla oynayabilir.",
+            "Mikrofon girişi çözümlemesi daha zor — doğruluk okuması kayabilir.",
+            "Arka plan gürültüsü sızıyor; geri bildirim biraz gecikebilir.",
+            "Son yarım dakikadır sinyal netliği daha düşük.",
+            "Sesi okumak daha zor — ölçümleri biraz şüpheyle karşıla."
           ],
           "correction": [
-            "Hard to read your signal — check your input level or mic position.",
-            "Signal's hard to read. Bump your input gain or move closer to the mic.",
-            "Note detection is uncertain — the room might be too noisy.",
-            "My read on you is unreliable. Move closer to the mic if you can.",
-            "Input level may be too low. Check the meter before continuing.",
-            "Hard to tell hits from noise. Mute anything in the room and try again.",
-            "Signal's dropping out. Plug-in or USB-mic — check the connection.",
-            "Audio quality's poor enough that scoring may be off. Fix the input first."
+            "Sinyalini okumak zor — giriş seviyene veya mikrofon konumuna bak.",
+            "Sinyali okumak zor. Giriş kazancını yükselt veya mikrofona yaklaş.",
+            "Nota algılama belirsiz — oda fazla gürültülü olabilir.",
+            "Seni okumam güvenilir değil. Mümkünse mikrofona yaklaş.",
+            "Giriş seviyesi çok düşük olabilir. Devam etmeden önce göstergeye bak.",
+            "Vuruşları gürültüden ayırmak zor. Odadaki her şeyi sustur ve tekrar dene.",
+            "Sinyal kopuyor. Kablo veya USB mikrofon — bağlantıya bak.",
+            "Ses kalitesi puanlamanın yanlış olabileceği kadar kötü. Önce girişi düzelt."
           ]
         },
         "boundary_signal_a": {
           "encouragement": [
-            "{change}. Fresh segment — take a beat, find the feel.",
-            "{change} — reset your ear and ride this one out.",
-            "Settings shifted: {change}. Let's see how this new shape feels.",
-            "{change}. New segment, fresh start.",
-            "{change} — clean slate, new score.",
-            "{change}. Take a breath and lock in to the new feel.",
-            "{change}. Old segment wrapped — this one's on its own.",
-            "{change}. Reset your ear and ease into the change."
+            "{change}. Yeni bölüm — bir an ver, hissi bul.",
+            "{change} — kulağını sıfırla ve bunu sürdür.",
+            "Ayarlar değişti: {change}. Bu yeni şeklin nasıl hissettirdiğine bakalım.",
+            "{change}. Yeni bölüm, yeni başlangıç.",
+            "{change} — temiz sayfa, yeni puan.",
+            "{change}. Bir nefes al ve yeni hisse kilitlen.",
+            "{change}. Eski bölüm tamamlandı — bu kendi başına.",
+            "{change}. Kulağını sıfırla ve değişikliğe yavaşça gir."
           ],
           "neutral": [
-            "{change}. New segment opens here.",
-            "Boundary marker — {change}. Next stretch is scored on its own.",
-            "Settings change: {change}. Closing previous segment.",
-            "{change}. Score for the next stretch starts now.",
-            "{change} — the previous segment is closed and counted.",
-            "Configuration shift: {change}. Fresh segment.",
-            "{change}. New segment, new metrics.",
-            "{change}. Boundary crossed — score resets."
+            "{change}. Yeni bölüm burada açılıyor.",
+            "Sınır işareti — {change}. Sonraki bölüm kendi başına puanlanır.",
+            "Ayar değişikliği: {change}. Önceki bölüm kapatılıyor.",
+            "{change}. Sonraki bölümün puanı şimdi başlıyor.",
+            "{change} — önceki bölüm kapatıldı ve sayıldı.",
+            "Yapılandırma değişikliği: {change}. Yeni bölüm.",
+            "{change}. Yeni bölüm, yeni ölçümler.",
+            "{change}. Sınır geçildi — puan sıfırlanıyor."
           ],
           "correction": [
-            "{change}. Get the new setup feeling natural before you push.",
-            "{change} — old segment closed. Make sure this feels right before adding complexity.",
-            "Settings changed mid-segment: {change}. The new config is scored separately.",
-            "{change}. Take it slow on the new setup — don't carry over old habits.",
-            "{change}. Bed the new feel in before adding speed.",
-            "{change} — reset and treat the next stretch like a warmup.",
-            "{change}. Play it simple until the new config feels familiar.",
-            "{change}. Don't push the new segment yet — get clean first."
+            "{change}. İtmeden önce yeni düzeni doğal hissettir.",
+            "{change} — eski bölüm kapandı. Karmaşıklık eklemeden önce bunun doğru geldiğinden emin ol.",
+            "Ayarlar bölümün ortasında değişti: {change}. Yeni yapılandırma ayrı puanlanır.",
+            "{change}. Yeni düzende yavaş git — eski alışkanlıkları taşıma.",
+            "{change}. Hız eklemeden önce yeni hissi oturt.",
+            "{change} — sıfırla ve sonraki bölümü ısınma gibi gör.",
+            "{change}. Yeni yapılandırma tanıdık gelene kadar basit çal.",
+            "{change}. Yeni bölümü henüz itme — önce temiz çal."
           ]
         },
         "stamina": {
           "neutral": [
-            "Score's dropping past the {staminaMinutes}-minute mark again — take 30 seconds, then come back at the same BPM.",
-            "Past the {staminaMinutes}-minute mark your accuracy tends to slide. Brief rest, then back in.",
-            "You tend to fade around minute {staminaMinutes}. Take a break and return fresh.",
-            "Stamina wall around minute {staminaMinutes} — a short rest now saves quality later."
+            "Puan yine {staminaMinutes}. dakikayı geçince düşüyor — 30 saniye ara ver, sonra aynı BPM'de dön.",
+            "{staminaMinutes}. dakikadan sonra doğruluğun düşme eğiliminde. Kısa bir dinlenme, sonra tekrar gir.",
+            "{staminaMinutes}. dakika civarında zayıflama eğilimindesin. Mola ver ve taze dön.",
+            "{staminaMinutes}. dakika civarında dayanıklılık duvarı — şimdi kısa bir dinlenme, sonra kaliteyi kurtarır."
           ]
         },
         "ramp_complete": {
           "neutral": [
-            "Ramp done — {startBpm} to {endBpm}. You made it.",
-            "Target reached: {endBpm} BPM. You climbed from {startBpm}.",
-            "Ramp finished. {startBpm} → {endBpm} BPM complete.",
-            "You held it to {endBpm} BPM. Ramp from {startBpm} done."
+            "Rampa bitti — {startBpm} - {endBpm}. Başardın.",
+            "Hedefe ulaşıldı: {endBpm} BPM. {startBpm}'den tırmandın.",
+            "Rampa tamamlandı. {startBpm} → {endBpm} BPM bitti.",
+            "{endBpm} BPM'e kadar tuttun. {startBpm}'den başlayan rampa tamam."
           ]
         },
         "pace_coaching": {
           "neutral": [
-            "Fourth time at {bpm} — the ceiling's real. Two sessions at {suggestedBpm} to consolidate, then push again.",
-            "You've hit {bpm} BPM {attemptCount} times and it's not sticking. Drop to {suggestedBpm} for a week, build it solid.",
-            "{attemptCount} attempts at {bpm} BPM. Ceiling work: two sessions at {suggestedBpm}, then revisit.",
-            "Ceiling at {bpm} BPM — {attemptCount} attempts confirms it. Park at {suggestedBpm} and let it settle."
+            "{bpm}'de dördüncü kez — tavan gerçek. Pekiştirmek için {suggestedBpm}'de iki oturum, sonra tekrar it.",
+            "{bpm} BPM'e {attemptCount} kez ulaştın ve oturmuyor. Bir hafta {suggestedBpm}'e in, sağlamca kur.",
+            "{bpm} BPM'de {attemptCount} deneme. Tavan çalışması: {suggestedBpm}'de iki oturum, sonra tekrar bak.",
+            "{bpm} BPM'de tavan — {attemptCount} deneme bunu doğruluyor. {suggestedBpm}'de park et ve oturmasına izin ver."
           ]
         },
         "preset_ceiling_hit": {
           "neutral": [
-            "{bpmLow}–{bpmHigh} is where this one stops being clean for you — {attemptCount} sessions in that band, all around {score}.",
-            "You're back at {bpmLow}–{bpmHigh}. Your last {attemptCount} runs here came in around {score}.",
-            "Noting it while you play: {attemptCount} sessions at {bpmLow}–{bpmHigh}, each of them near {score}.",
-            "This is the tempo your scores on this one start dropping off at. {attemptCount} sessions here so far.",
-            "{attemptCount} times at {bpmLow}–{bpmHigh} now, around {score} each time. Let's see how today sits.",
-            "Same band as last time — {bpmLow}–{bpmHigh}, where this exercise has been landing near {score}."
+            "{bpmLow}–{bpmHigh}, bunun senin için temiz olmaktan çıktığı yer — bu aralıkta {attemptCount} oturum, hepsi {score} civarında.",
+            "Yine {bpmLow}–{bpmHigh}'dasın. Buradaki son {attemptCount} çalışman {score} civarında geldi.",
+            "Sen çalarken not ediyorum: {bpmLow}–{bpmHigh}'da {attemptCount} oturum, her biri {score} civarında.",
+            "Bunda puanlarının düşmeye başladığı tempo bu. Burada şimdiye kadar {attemptCount} oturum.",
+            "Şimdi {bpmLow}–{bpmHigh}'da {attemptCount}. kez, her seferinde {score} civarı. Bugün nasıl duracak, görelim.",
+            "Geçen seferle aynı aralık — {bpmLow}–{bpmHigh}, bu alıştırmanın {score} civarında kaldığı yer."
           ]
         },
         "grid_lost": {
           "neutral": [
-            "Grid correlation dropped — are you still playing to the click?",
-            "Lost the grid there. Intentional fill, or drifting off the click?",
-            "Correlation with the grid just dropped off. Still with the metronome?",
-            "Looks like the groove parted ways with the click. Fill or free?"
+            "Izgara korelasyonu düştü — hâlâ tıka göre mi çalıyorsun?",
+            "Izgarayı kaybettim. Bilerek bir dolgu mu, yoksa tıktan kayıyor musun?",
+            "Izgarayla korelasyon az önce düştü. Hâlâ metronomla mısın?",
+            "Groove tıkla yollarını ayırmış gibi görünüyor. Dolgu mu, serbest mi?"
           ]
         },
         "bias_only": {
           "encouragement": [
-            "Very consistent timing — just {biasMs}ms {direction}. Nudge everything {correctionDirection} to sit on the beat.",
-            "Great control — just a {biasMs}ms lean {direction}. A small shift {correctionDirection} will center it."
+            "Çok tutarlı zamanlama — yalnızca vuruştan {biasMs} ms {direction}. Vuruşa oturmak için her şeyi {correctionDirection} kaydır.",
+            "Harika kontrol — yalnızca {direction} {biasMs} ms'lik bir eğim. {correctionDirection} küçük bir kaydırma ortalar."
           ],
           "neutral": [
-            "You're landing {biasMs}ms {direction} the beat — very consistent, just shifted. Try moving everything {correctionDirection}.",
-            "Tight and consistent, but {biasMs}ms {direction} the click. Shift your attack {correctionDirection} to center it.",
-            "Your timing scatter is low, but the whole pattern sits {biasMs}ms {direction}. Nudge {correctionDirection}.",
-            "Low jitter, but offset by {biasMs}ms {direction}. That's a lean — adjust {correctionDirection} to land on the beat."
+            "Vuruştan {biasMs} ms {direction} düşüyorsun — çok tutarlı, sadece kaymış. Her şeyi {correctionDirection} kaydırmayı dene.",
+            "Sıkı ve tutarlı ama tıktan {biasMs} ms {direction}. Ortalamak için vuruşunu {correctionDirection} kaydır.",
+            "Zamanlama dağılımın düşük ama tüm kalıp {biasMs} ms {direction} duruyor. {correctionDirection} kaydır.",
+            "Düşük titreme ama {biasMs} ms {direction} kaymış. Bu bir eğim — vuruşa düşmek için {correctionDirection} ayarla."
           ],
           "correction": [
-            "Consistent {biasMs}ms offset {direction} — not random, just a lean. Shift everything {correctionDirection}.",
-            "Every hit lands {biasMs}ms {direction}. That's a system bias, not jitter. Correct {correctionDirection}."
+            "Tutarlı {biasMs} ms kayma, {direction} — rastgele değil, sadece bir eğim. Her şeyi {correctionDirection} kaydır.",
+            "Her vuruş {biasMs} ms {direction} düşüyor. Bu sistematik bir sapma, titreme değil. {correctionDirection} düzelt."
           ]
         },
         "boundary_signal_b": {
           "encouragement": [
-            "Nice segment — {score}% at {bpm} BPM. Take a beat.",
-            "{score}% at {bpm} BPM — solid bookend.",
-            "Wrapped that one at {score}% / {bpm} BPM. Good pause point.",
-            "{score}% at {bpm} BPM closes that out — good work.",
-            "Segment done — {score}% at {bpm} BPM. Nice.",
-            "Quiet pause closed it: {score}% at {bpm} BPM.",
-            "Clean wrap — {score}% at {bpm} BPM.",
-            "{score}% at {bpm} BPM. Take a breather."
+            "Güzel bölüm — {bpm} BPM'de %{score}. Bir an ver.",
+            "{bpm} BPM'de %{score} — sağlam bir kapanış.",
+            "Bunu %{score} / {bpm} BPM ile bitirdin. İyi bir duraklama noktası.",
+            "{bpm} BPM'de %{score} bunu kapatıyor — güzel iş.",
+            "Bölüm bitti — {bpm} BPM'de %{score}. Güzel.",
+            "Sessiz bir duraklama kapattı: {bpm} BPM'de %{score}.",
+            "Temiz kapanış — {bpm} BPM'de %{score}.",
+            "{bpm} BPM'de %{score}. Biraz soluklan."
           ],
           "neutral": [
-            "Segment ended after silence — {score}% at {bpm} BPM.",
-            "Activity gap closed segment: {score}% scored.",
-            "Quiet stretch — segment closed at {score}%.",
-            "{score}% at {bpm} BPM — segment closed by the pause.",
-            "Pause ended the segment: {score}%.",
-            "Segment over — {score}% at {bpm} BPM logged.",
-            "Closed segment at {score}% / {bpm} BPM.",
-            "{score}% at {bpm} BPM saved. Take stock if you want."
+            "Bölüm sessizlikten sonra bitti — {bpm} BPM'de %{score}.",
+            "Etkinlik boşluğu bölümü kapattı: %{score} puanlandı.",
+            "Sessiz bir bölüm — bölüm %{score} ile kapandı.",
+            "{bpm} BPM'de %{score} — bölüm duraklamayla kapandı.",
+            "Duraklama bölümü bitirdi: %{score}.",
+            "Bölüm bitti — {bpm} BPM'de %{score} kaydedildi.",
+            "Bölüm %{score} / {bpm} BPM ile kapatıldı.",
+            "{bpm} BPM'de %{score} kaydedildi. İstersen durumu gözden geçir."
           ],
           "correction": [
-            "Segment ended at {score}% — review before the next pass.",
-            "{score}% closed the segment. Check what slipped before the next attempt.",
-            "Pause noted — {score}%. Replay the segment summary before continuing.",
-            "{score}% at {bpm} BPM — worth a quick look at the breakdown.",
-            "Segment closed below where you wanted: {score}%. Diagnose before pushing.",
-            "{score}% at {bpm} BPM — slow it down on the next pass.",
-            "Wrapped at {score}%. Dial in what slipped before another run.",
-            "{score}% at {bpm} BPM. Read the segment summary, then try again."
+            "Bölüm %{score} ile bitti — sonraki geçişten önce gözden geçir.",
+            "%{score} bölümü kapattı. Sonraki denemeden önce neyin kaydığına bak.",
+            "Duraklama not edildi — %{score}. Devam etmeden önce bölüm özetine tekrar bak.",
+            "{bpm} BPM'de %{score} — dökümüne kısa bir göz atmaya değer.",
+            "Bölüm istediğin yerin altında kapandı: %{score}. İtmeden önce teşhis et.",
+            "{bpm} BPM'de %{score} — sonraki geçişte yavaşlat.",
+            "%{score} ile bitti. Başka bir seriden önce neyin kaydığını netleştir.",
+            "{bpm} BPM'de %{score}. Bölüm özetini oku, sonra tekrar dene."
           ]
         },
         "muddy_hits": {
           "neutral": [
-            "You're landing every beat but the signal is soft — try a sharper attack.",
-            "Beats are all there, but the transient is weak. Hit with more intention.",
-            "Coverage looks good but the hits are quiet. More force on the attack.",
-            "You're playing through the click, just softly. Try to make more contact."
+            "Her vuruşa basıyorsun ama sinyal zayıf — daha keskin bir vuruş dene.",
+            "Vuruşların hepsi orada ama geçici ses zayıf. Daha çok niyetle vur.",
+            "Kapsam iyi görünüyor ama vuruşlar sessiz. Vuruşa daha çok güç ver.",
+            "Tıkın içinden çalıyorsun, sadece yumuşakça. Daha fazla temas etmeye çalış."
           ]
         },
         "grid_discontinuity": {
           "neutral": [
-            "You went off the grid — try locking back to the click before the next phrase.",
-            "The beat wandered from the click. Reset and find the pulse before you continue.",
-            "Grid tracking dropped — take a beat, then re-enter on the downbeat.",
-            "Drifted from the click there. Stop, breathe, and lock back in."
+            "Izgaradan çıktın — sonraki cümleden önce tıka geri kilitlenmeyi dene.",
+            "Vuruş tıktan uzaklaştı. Devam etmeden önce sıfırla ve nabzı bul.",
+            "Izgara takibi düştü — bir an ver, sonra ana vuruştan yeniden gir.",
+            "Orada tıktan kaydın. Dur, nefes al ve tekrar kilitlen."
           ]
         },
         "low_completeness": {
           "neutral": [
-            "You're hitting about half the expected beats — try to stay engaged for every one.",
-            "Coverage is low — make sure you're landing each beat, not just the ones that feel natural.",
-            "Around half the beats are going unplayed. Focus on completing the full pattern.",
-            "Beat coverage is low. Try counting aloud to make sure you're not skipping any."
+            "Beklenen vuruşların yaklaşık yarısına basıyorsun — her biri için işin içinde kalmaya çalış.",
+            "Kapsam düşük — yalnızca doğal gelenlere değil, her vuruşa bastığından emin ol.",
+            "Vuruşların yaklaşık yarısı çalınmıyor. Kalıbın tamamını bitirmeye odaklan.",
+            "Vuruş kapsamı düşük. Hiçbirini atlamadığından emin olmak için yüksek sesle saymayı dene."
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "Your beat placement looks good — but the space between notes keeps wandering. Try counting the subdivisions out loud as you play.",
-            "On the beat consistently, but note spacing is uneven. Tap your foot and count subdivisions as you go.",
-            "The beat timing is there — the gap between notes is shifting though. Count eighth notes (or sixteenths) out loud to lock the spacing.",
-            "Placement is solid, spacing is drifting. Try slowing down until the gaps feel even, then speed back up."
+            "Vuruş yerleşimin iyi görünüyor — ama notalar arasındaki boşluk gezinmeye devam ediyor. Çalarken alt bölümleri yüksek sesle saymayı dene.",
+            "Tutarlı biçimde vuruştasın ama nota aralığı eşit değil. Ayağınla tempo tut ve ilerlerken alt bölümleri say.",
+            "Vuruş zamanlaması orada — ancak notalar arasındaki boşluk kayıyor. Aralığı oturtmak için sekizlikleri (veya onaltılıkları) yüksek sesle say.",
+            "Yerleşim sağlam, aralık kayıyor. Boşluklar eşit hissedene kadar yavaşla, sonra tekrar hızlan."
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Note spacing is even — but you're landing off the beat. Anticipate each click by a hair and land right on it.",
-            "Even spacing, but the notes themselves are shifted from the grid. Focus on locking the first note of each group to the beat.",
-            "The rhythm between your notes is consistent — work on where they land relative to the click. Try playing just slightly ahead of where you expect the beat.",
-            "Good spacing feel. Now bring the whole phrase onto the grid — aim for the center of each beat."
+            "Nota aralığı eşit — ama vuruşun dışına düşüyorsun. Her tıkı kıl payı önceden sez ve tam üstüne in.",
+            "Aralık eşit ama notaların kendisi ızgaradan kaymış. Her grubun ilk notasını vuruşa kilitlemeye odaklan.",
+            "Notaların arasındaki ritim tutarlı — tıka göre nereye düştüklerinde çalış. Vuruşu beklediğin yerin biraz önünde çalmayı dene.",
+            "Aralık hissi iyi. Şimdi tüm cümleyi ızgaraya getir — her vuruşun ortasını hedefle."
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Beat placement and note spacing are both locked in. That's the feel right there.",
-            "Spacing and placement both on point. Clean session.",
-            "Both dimensions solid — you're playing exactly where you intend to be.",
-            "Timing is dialed in across the board. That's what consistent practice sounds like."
+            "Vuruş yerleşimi ve nota aralığı ikisi de yerine oturdu. İşte o his bu.",
+            "Aralık da yerleşim de tam yerinde. Temiz oturum.",
+            "İki boyut da sağlam — tam olmak istediğin yerde çalıyorsun.",
+            "Zamanlama her yönden oturmuş. Tutarlı çalışma böyle duyulur."
           ]
         },
         "drill_step_up": {
           "neutral": [
-            "{accuracyPct}% — tempo up to {bpm} BPM.",
-            "Clean round at {accuracyPct}%. Moving you up to {bpm} BPM.",
-            "That earned it: {accuracyPct}%. Now at {bpm} BPM.",
-            "{accuracyPct}% meets the pass mark — {bpm} BPM from here.",
-            "Solid at {accuracyPct}%. Stepping up to {bpm} BPM.",
-            "Nice round — {accuracyPct}%. {bpm} BPM next.",
-            "Up to {bpm} BPM. You held {accuracyPct}% last round.",
-            "{accuracyPct}% says you're ready. {bpm} BPM."
+            "%{accuracyPct} — tempo {bpm} BPM'e çıkıyor.",
+            "%{accuracyPct} ile temiz bir tur. Seni {bpm} BPM'e çıkarıyorum.",
+            "Bunu hak etti: %{accuracyPct}. Şimdi {bpm} BPM'de.",
+            "%{accuracyPct} çıtayı geçiyor — bundan sonra {bpm} BPM.",
+            "%{accuracyPct} ile sağlam. {bpm} BPM'e çıkılıyor.",
+            "Güzel tur — %{accuracyPct}. Sırada {bpm} BPM var.",
+            "{bpm} BPM'e çıkıyor. Son turda %{accuracyPct} tuttun.",
+            "%{accuracyPct} hazır olduğunu söylüyor. {bpm} BPM."
           ]
         },
         "drill_step_down": {
           "neutral": [
-            "{accuracyPct}% — easing back to {bpm} BPM.",
-            "That round slipped to {accuracyPct}%. Dropping to {bpm} BPM.",
-            "Backing off to {bpm} BPM — {accuracyPct}% last round.",
-            "{accuracyPct}%. Let's rebuild it at {bpm} BPM.",
-            "Pulling back to {bpm} BPM after {accuracyPct}%.",
-            "{accuracyPct}% is under the pass mark — {bpm} BPM for the next round.",
-            "Down to {bpm} BPM. Get it clean before we climb again.",
-            "Easing to {bpm} BPM; {accuracyPct}% needs firmer ground."
+            "%{accuracyPct} — {bpm} BPM'e geri çekiliyor.",
+            "O tur %{accuracyPct}'e düştü. {bpm} BPM'e iniliyor.",
+            "{bpm} BPM'e geri çekiliyor — son turda %{accuracyPct}.",
+            "%{accuracyPct}. {bpm} BPM'de yeniden kuralım.",
+            "%{accuracyPct}'in ardından {bpm} BPM'e çekiliyor.",
+            "%{accuracyPct} çıtanın altında — sonraki tur için {bpm} BPM.",
+            "{bpm} BPM'e iniyor. Tekrar tırmanmadan önce temiz çal.",
+            "{bpm} BPM'e iniliyor; %{accuracyPct} daha sağlam zemin ister."
           ]
         }
       },
@@ -1920,139 +1920,139 @@
       "generic": {
         "muddy_hits": {
           "neutral": [
-            "You're hitting the beats but the signal is coming in soft — try playing with a firmer touch.",
-            "The rhythm is there but your attack is light — dig in a bit more.",
-            "Beats are landing but with a soft touch — try a stronger stroke.",
-            "Good rhythm, but the signal is a little soft — put more into each note.",
-            "You're connecting with the beats, but try adding more weight to each stroke."
+            "Vuruşlara basıyorsun ama sinyal zayıf geliyor — daha sert bir dokunuşla çalmayı dene.",
+            "Ritim var ama vuruşun hafif — biraz daha bastır.",
+            "Vuruşlar yerine oturuyor ama dokunuş yumuşak — daha güçlü bir vuruş dene.",
+            "Ritim iyi ama sinyal biraz zayıf — her notaya biraz daha güç ver.",
+            "Vuruşlarla buluşuyorsun ama her vuruşa biraz daha ağırlık vermeyi dene."
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Your timing is locked in — spacing and placement are both solid.",
-            "Nice and tight — your notes are landing in the right spots and they're evenly spaced.",
-            "Really consistent — your beat placement and note spacing are both dialled in.",
-            "Great feel — evenly spaced notes hitting right on the pulse.",
-            "Your timing is right in the pocket — spacing and placement are both there."
+            "Zamanlaman yerine oturmuş — aralıklar da yerleşim de sağlam.",
+            "Gayet sıkı — notaların doğru yerlere düşüyor ve eşit aralıklı.",
+            "Çok tutarlı — vuruş yerleşimin de nota aralıkların da yerinde.",
+            "Çok iyi bir his — tam nabza düşen eşit aralıklı notalar.",
+            "Zamanlaman tam kıvamında — aralıklar da yerleşim de tamam."
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Your notes are evenly spaced but drifting off the click — try anchoring to the pulse more.",
-            "Good even spacing but you're a little off the beat — try locking to the pulse.",
-            "The gaps between your notes are consistent but they're not quite on the beat — anchor to the click.",
-            "Even note spacing but the placement is wandering — focus on landing each note on the beat.",
-            "Your internal timing is consistent but the notes are drifting off the pulse — anchor to the click."
+            "Notaların eşit aralıklı ama tıkın dışına kayıyor — nabza daha çok tutunmayı dene.",
+            "Aralıklar eşit ama vuruştan biraz uzaktasın — nabza kilitlenmeyi dene.",
+            "Notaların arasındaki boşluklar tutarlı ama tam vuruşta değiller — tıka tutun.",
+            "Notalar eşit aralıklı ama yerleşim geziniyor — her notayı vuruşa oturtmaya odaklan.",
+            "İç zamanlaman tutarlı ama notalar nabzın dışına kayıyor — tıka tutun."
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "You're landing close to each beat but the spaces between notes are uneven — focus on making those gaps more equal.",
-            "Good beat placement but uneven note spacing — try keeping the gaps between notes equal.",
-            "You're close to the beat but the spacing between notes varies — focus on even gaps.",
-            "Your note positions are close but the spacing is a bit scattered — even out the gaps.",
-            "Landing near the beat positions but the note spacing is inconsistent — work on keeping the spaces equal."
+            "Her vuruşa yakın düşüyorsun ama notalar arasındaki boşluklar eşit değil — bu boşlukları eşitlemeye odaklan.",
+            "Vuruş yerleşimin iyi ama nota aralıkları eşit değil — notalar arasındaki boşlukları eşit tutmayı dene.",
+            "Vuruşa yakınsın ama notalar arasındaki aralık değişiyor — eşit boşluklara odaklan.",
+            "Nota konumların yakın ama aralıklar biraz dağınık — boşlukları eşitle.",
+            "Vuruş konumlarının yakınına düşüyorsun ama nota aralıkları tutarsız — boşlukları eşit tutmaya çalış."
           ]
         },
         "great": {
           "neutral": [
-            "Really locked in — your timing is right there.",
-            "Solid feel, keep riding that groove.",
-            "Your timing is sitting right where it should be.",
-            "Clean rhythm — that's the pocket.",
-            "Locked in tight — great work.",
-            "That's a great feel — tempo is solid throughout."
+            "Gerçekten yerine oturmuş — zamanlaman tam yerinde.",
+            "Sağlam bir his, o grooveda devam et.",
+            "Zamanlaman olması gereken yerde duruyor.",
+            "Temiz ritim — işte cep (pocket) bu.",
+            "Sıkı sıkıya oturmuş — güzel iş.",
+            "Harika bir his — tempo baştan sona sağlam."
           ]
         },
         "good_steady": {
           "neutral": [
-            "Nice and steady — good consistent tempo.",
-            "Keeping it together — solid timing through the segment.",
-            "Tempo is holding well.",
-            "Good rhythm feel — consistent pulse.",
-            "Steady timing — you're building a solid foundation."
+            "Düzgün ve sabit — tutarlı bir tempo.",
+            "Toparlıyorsun — bölüm boyunca sağlam zamanlama.",
+            "Tempo iyi tutuyor.",
+            "İyi bir ritim hissi — tutarlı nabız.",
+            "Sabit zamanlama — sağlam bir temel kuruyorsun."
           ]
         },
         "rushing": {
           "neutral": [
-            "You're leaning into the beat a little — try letting it come to you.",
-            "Arriving a touch early — sit back and let the pulse breathe.",
-            "The tempo is pushing forward — ease off the attack slightly.",
-            "You're ahead of the beat — try staying back with it.",
-            "A bit of a rush happening — slow your attack, not your tempo."
+            "Vuruşa biraz yaslanıyorsun — onun sana gelmesine izin vermeyi dene.",
+            "Azıcık erken geliyorsun — geride dur, nabız nefes alsın.",
+            "Tempo ileri doğru itiyor — vuruşu biraz yumuşat.",
+            "Vuruşun önündesin — onunla birlikte geride durmayı dene.",
+            "Biraz acele var — temponu değil, vuruşunu yavaşlat."
           ]
         },
         "dragging": {
           "neutral": [
-            "Settling a bit behind the beat — try staying a little more forward.",
-            "The tempo is dragging back — keep your attack crisp.",
-            "You're lagging slightly — push the attack forward.",
-            "Behind the beat — try keeping the energy moving forward.",
-            "A bit of drag happening — sharpen the attack."
+            "Vuruşun biraz gerisine yerleşiyorsun — biraz daha önde durmayı dene.",
+            "Tempo geriye sürükleniyor — vuruşunu net tut.",
+            "Hafifçe geri kalıyorsun — vuruşu ileri it.",
+            "Vuruşun gerisindesin — enerjiyi ileri taşımayı dene.",
+            "Biraz sürükleme var — vuruşu keskinleştir."
           ]
         },
         "oscillating": {
           "neutral": [
-            "The tempo is moving around — speeding up and slowing down.",
-            "Note spacing is uneven — try keeping the gaps between notes equal.",
-            "The pulse is wandering a bit — focus on steady spacing between notes.",
-            "Rushing then dragging — try locking into one steady feel.",
-            "Tempo consistency needs work — focus on equal note spacing."
+            "Tempo dalgalanıyor — hızlanıyor ve yavaşlıyor.",
+            "Nota aralıkları eşit değil — notalar arasındaki boşlukları eşit tutmayı dene.",
+            "Nabız biraz geziniyor — notalar arasında sabit aralığa odaklan.",
+            "Önce acele, sonra sürükleme — tek bir sabit hisse kilitlenmeyi dene.",
+            "Tempo tutarlılığı üzerinde çalışmak gerek — eşit nota aralığına odaklan."
           ]
         },
         "low_score_solid_timing": {
           "neutral": [
-            "Your timing center is good — focus on hitting more of the beats.",
-            "Timing is in the right place, but you're missing some positions — fill those gaps.",
-            "Good timing feel, but the rhythm needs more coverage — play more of the beats.",
-            "The pulse is there but the rhythm is thin — try hitting more positions.",
-            "Your timing is centered well — now work on density."
+            "Zamanlama merkezin iyi — vuruşların daha çoğuna basmaya odaklan.",
+            "Zamanlama doğru yerde ama bazı konumları kaçırıyorsun — o boşlukları doldur.",
+            "Zamanlama hissi iyi ama ritmin kapsamı artmalı — vuruşların daha çoğunu çal.",
+            "Nabız var ama ritim seyrek — daha fazla konuma basmayı dene.",
+            "Zamanlaman iyi ortalanmış — şimdi yoğunluk üzerinde çalış."
           ]
         },
         "low_coverage": {
           "neutral": [
-            "I'm only hearing some of your playing — check your input level or play a touch louder.",
-            "Signal is coming in low — try playing with a bit more attack.",
-            "Low detection rate — you may need to turn up your input gain.",
-            "Only picking up part of your playing — check the input level in settings.",
-            "Weak signal coming in — play louder or check your input gain."
+            "Çaldığının yalnızca bir kısmını duyuyorum — giriş seviyesine bak veya biraz daha yüksek çal.",
+            "Sinyal düşük geliyor — biraz daha güçlü vurarak çalmayı dene.",
+            "Algılama oranı düşük — giriş kazancını yükseltmen gerekebilir.",
+            "Çaldığının yalnızca bir kısmını yakalıyorum — ayarlardan giriş seviyesine bak.",
+            "Zayıf sinyal geliyor — daha yüksek çal veya giriş kazancına bak."
           ]
         },
         "noodling": {
           "neutral": [
-            "Good free feel — let the ideas flow.",
-            "Nice exploration — when you're ready, bring it back to the pulse.",
-            "Creative space — use it well.",
-            "Good free play — follow the feel.",
-            "Let it breathe — come back to the grid when you're ready."
+            "İyi bir serbest his — fikirler aksın.",
+            "Güzel keşif — hazır olunca nabza geri dön.",
+            "Yaratıcı alan — iyi kullan.",
+            "İyi serbest çalma — hissin peşinden git.",
+            "Nefes alsın — hazır olunca ızgaraya dön."
           ]
         },
         "flat_dynamics": {
           "neutral": [
-            "Your playing is very even dynamically — try letting the downbeats breathe a little.",
-            "Every note is about the same volume — experiment with accenting the main beats.",
-            "Nice consistency, but try adding some dynamic shape — hit the downbeats a touch harder."
+            "Çalışın dinamik olarak çok düz — ana vuruşların nefes almasına izin vermeyi dene.",
+            "Her nota yaklaşık aynı ses seviyesinde — ana vuruşlara vurgu yapmayı dene.",
+            "Güzel tutarlılık ama biraz dinamik şekil eklemeyi dene — ana vuruşlara biraz daha sert bas."
           ]
         },
         "weak_downbeats": {
           "neutral": [
-            "Try hitting beats 1 and 3 a touch harder — your downbeats are blending in.",
-            "Your upbeats are a little strong — ease off them and push the downbeats.",
-            "The main beats need more weight — let beats 1 and 3 lead."
+            "1. ve 3. vuruşlara biraz daha sert basmayı dene — ana vuruşların geri vuruşlara karışıyor.",
+            "Geri vuruşların biraz güçlü — onlarda geri çekil, ana vuruşları öne çıkar.",
+            "Ana vuruşlar daha fazla ağırlık istiyor — 1. ve 3. vuruşlar öne geçsin."
           ]
         },
         "good_accents": {
           "neutral": [
-            "Nice dynamic shape — your downbeats have good weight.",
-            "Great accent on the main beats — the groove has a clear pulse.",
-            "Your downbeats are coming through clearly — nice feel."
+            "Güzel dinamik şekil — ana vuruşlarının ağırlığı iyi.",
+            "Ana vuruşlarda harika vurgu — groove'un net bir nabzı var.",
+            "Ana vuruşların net duyuluyor — güzel his."
           ]
         },
         "subdivisions_too_loud": {
           "neutral": [
-            "The fills are a bit heavy — let the in-between notes sit lighter.",
-            "Try making the subdivision fills softer — let the main beats carry the weight.",
-            "The fill notes are competing with your downbeats — ease off between the beats."
+            "Dolgular biraz ağır — aradaki notalar daha hafif dursun.",
+            "Alt bölüm dolgularını daha yumuşak yapmayı dene — ağırlığı ana vuruşlar taşısın.",
+            "Dolgu notaları ana vuruşlarınla yarışıyor — vuruşların arasında geri çekil."
           ]
         }
       }
@@ -2061,160 +2061,160 @@
       "generic": {
         "muddy_hits": {
           "neutral": [
-            "Your beats are landing but the signal confidence is low — try a firmer attack on each note.",
-            "The detector sees your hits but with low confidence — your transients may be too soft.",
-            "Beats are registering but the signal is weak — sharpen the attack to get a cleaner transient.",
-            "Low signal confidence on your hits — dig in more to improve the attack strength.",
-            "Your attack is too soft for reliable detection — play with more conviction."
+            "Vuruşların yerine oturuyor ama sinyal güveni düşük — her notada daha sert bir vuruş dene.",
+            "Algılayıcı vuruşlarını görüyor ama düşük güvenle — geçici sesler (transient) fazla yumuşak olabilir.",
+            "Vuruşlar kaydediliyor ama sinyal zayıf — daha temiz bir geçici ses için vuruşu keskinleştir.",
+            "Vuruşlarında sinyal güveni düşük — vuruş gücünü artırmak için daha çok bastır.",
+            "Vuruşun güvenilir algılama için fazla yumuşak — daha kararlı çal."
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Note spacing is consistent and beat placement is solid — tight all-round timing.",
-            "Both note spacing and beat placement are on point — clean timing overall.",
-            "Even note spacing and accurate beat placement — this is what locked-in feels like.",
-            "Spacing and placement are both dialled in — timing is solid.",
-            "Consistent spacing and clean beat placement — nothing to fix here."
+            "Nota aralığı tutarlı ve vuruş yerleşimi sağlam — her yönden sıkı zamanlama.",
+            "Hem nota aralığı hem vuruş yerleşimi tam yerinde — genel olarak temiz zamanlama.",
+            "Eşit nota aralığı ve doğru vuruş yerleşimi — yerine oturmak böyle bir şey.",
+            "Aralık da yerleşim de tam kıvamında — zamanlama sağlam.",
+            "Tutarlı aralık ve temiz vuruş yerleşimi — burada düzeltilecek bir şey yok."
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Note spacing is even but beat placement is drifting — your internal clock is consistent but not synced to the pulse.",
-            "Consistent note spacing but the beats are landing off-center — your internal rhythm is good, just anchor it to the grid.",
-            "Even spacing between notes but the placement is wandering off the beat — sync to the pulse.",
-            "Your note spacing is reliable but the beat positions are drifting — the internal clock is there, just align it to the click.",
-            "Spacing consistency is good but beat placement is off — focus on landing each note on the pulse."
+            "Nota aralığı eşit ama vuruş yerleşimi kayıyor — iç saatin tutarlı ama nabızla eşlenmiyor.",
+            "Nota aralığı tutarlı ama vuruşlar merkezin dışına düşüyor — iç ritmin iyi, sadece onu ızgaraya bağla.",
+            "Notalar arası aralık eşit ama yerleşim vuruştan uzağa geziniyor — nabızla eşle.",
+            "Nota aralığın güvenilir ama vuruş konumları kayıyor — iç saat var, sadece tıka hizala.",
+            "Aralık tutarlılığı iyi ama vuruş yerleşimi tutmuyor — her notayı nabza oturtmaya odaklan."
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "Beat placement is on target but subdivision spacing is inconsistent — anchor points are right, the fills between them are scattered.",
-            "Good beat placement but the gaps between notes vary — your positions are correct, the spacing is not.",
-            "You're close to the beat positions but note spacing is uneven — the placement is there, even out the gaps.",
-            "Accurate beat placement, inconsistent note spacing — the anchor points are correct, work on even gaps.",
-            "Beat positions are solid but subdivision spacing is irregular — the placement is there, now even out the fills."
+            "Vuruş yerleşimi hedefte ama alt bölüm aralığı tutarsız — çapa noktaları doğru, aralarındaki dolgular dağınık.",
+            "Vuruş yerleşimi iyi ama notalar arasındaki boşluklar değişiyor — konumların doğru, aralık değil.",
+            "Vuruş konumlarına yakınsın ama nota aralığı eşit değil — yerleşim tamam, boşlukları eşitle.",
+            "Vuruş yerleşimi doğru, nota aralığı tutarsız — çapa noktaları doğru, eşit boşluklar üzerinde çalış.",
+            "Vuruş konumları sağlam ama alt bölüm aralığı düzensiz — yerleşim tamam, şimdi dolguları eşitle."
           ]
         },
         "great": {
           "neutral": [
-            "Tight beat placement and even note spacing — clean all-round timing.",
-            "Beat placement solid, spacing consistent — push the tempo when you're ready.",
-            "All timing components clean — good session.",
-            "Note spacing and placement both dialled in.",
-            "Timing is locked — consider bumping the tempo or tightening the subdivisions."
+            "Sıkı vuruş yerleşimi ve eşit nota aralığı — her yönden temiz zamanlama.",
+            "Vuruş yerleşimi sağlam, aralık tutarlı — hazır olunca tempoyu yükselt.",
+            "Tüm zamanlama bileşenleri temiz — iyi oturum.",
+            "Nota aralığı da yerleşim de tam kıvamında.",
+            "Zamanlama kilitli — tempoyu artırmayı veya alt bölümleri sıkılaştırmayı düşün."
           ]
         },
         "good_steady": {
           "neutral": [
-            "Consistent spacing and placement — solid foundation. Push tempo 5 BPM or sharpen the attack.",
-            "Good timing consistency — a few positions drift but the center holds.",
-            "Placement and spacing reliable — room to push harder.",
-            "Timing center is on, spacing is consistent — push the tempo to challenge it.",
-            "Solid timing foundation — focus on sharpening the attack on weaker beats."
+            "Tutarlı aralık ve yerleşim — sağlam temel. Tempoyu 5 BPM yükselt veya vuruşu keskinleştir.",
+            "İyi zamanlama tutarlılığı — birkaç konum kayıyor ama merkez tutuyor.",
+            "Yerleşim ve aralık güvenilir — daha fazla zorlamaya yer var.",
+            "Zamanlama merkezi yerinde, aralık tutarlı — zorlamak için tempoyu yükselt.",
+            "Sağlam zamanlama temeli — daha zayıf vuruşlarda vuruşu keskinleştirmeye odaklan."
           ]
         },
         "rushing": {
           "neutral": [
-            "Consistently arriving early — directional early bias in the attack timing.",
-            "Note attacks are arriving before the beat — ease the onset forward slightly.",
-            "Early attack pattern — your notes are preceding the beat consistently.",
-            "Consistent early bias — the attack is rushing the pulse.",
-            "Timing is shifted early — let the beat land first, then hit."
+            "Sürekli erken geliyorsun — vuruş zamanlamasında yönlü erken eğilim.",
+            "Nota vuruşları beklenen vuruştan önce geliyor — başlangıcı biraz ileri çek.",
+            "Erken vuruş örüntüsü — notaların vuruştan sürekli önce geliyor.",
+            "Tutarlı erken eğilim — vuruş nabzı acele ettiriyor.",
+            "Zamanlama erkene kaymış — önce vuruşun yerine oturmasına izin ver, sonra vur."
           ]
         },
         "dragging": {
           "neutral": [
-            "Consistently arriving late — directional late bias in the attack timing.",
-            "Note attacks are landing after the beat — sharpen the attack slightly.",
-            "Late attack pattern — notes are trailing the beat consistently.",
-            "Consistent late bias — the attack is dragging the pulse.",
-            "Timing is shifted late — push the attack to meet the beat."
+            "Sürekli geç geliyorsun — vuruş zamanlamasında yönlü geç eğilim.",
+            "Nota vuruşları vuruştan sonra düşüyor — vuruşu biraz keskinleştir.",
+            "Geç vuruş örüntüsü — notalar vuruşun sürekli gerisinde kalıyor.",
+            "Tutarlı geç eğilim — vuruş nabzı sürüklüyor.",
+            "Zamanlama geçe kaymış — vuruşu, beklenen vuruşla buluşacak şekilde ileri it."
           ]
         },
         "oscillating": {
           "neutral": [
-            "High timing variance despite a near-neutral average — the timing is genuinely unstable.",
-            "Not a directional bias — the timing is alternating early and late.",
-            "Tempo instability: note spacing is inconsistent across the segment.",
-            "Rushing-dragging pattern — not a fixed offset, true variance in the timing.",
-            "Timing variance is high — focus on keeping note spacing consistent."
+            "Ortalama nötre yakın olsa da zamanlama değişkenliği yüksek — zamanlama gerçekten kararsız.",
+            "Yönlü bir eğilim değil — zamanlama erken ve geç arasında gidip geliyor.",
+            "Tempo kararsızlığı: nota aralığı bölüm boyunca tutarsız.",
+            "Acele-sürükleme örüntüsü — sabit bir kayma değil, zamanlamada gerçek değişkenlik.",
+            "Zamanlama değişkenliği yüksek — nota aralığını tutarlı tutmaya odaklan."
           ]
         },
         "low_score_solid_timing": {
           "neutral": [
-            "Timing center and spacing are clean but beat coverage is low.",
-            "Good placement accuracy but too many beat positions are empty.",
-            "Note spacing is consistent but density is low — hit more of the grid positions.",
-            "Timing fundamentals are solid, coverage is the gap — fill out more positions.",
-            "Placement is accurate — focus on hitting more of the beat positions."
+            "Zamanlama merkezi ve aralık temiz ama vuruş kapsamı düşük.",
+            "Yerleşim doğruluğu iyi ama çok fazla vuruş konumu boş.",
+            "Nota aralığı tutarlı ama yoğunluk düşük — ızgara konumlarının daha çoğuna bas.",
+            "Zamanlama temelleri sağlam, eksik olan kapsam — daha fazla konumu doldur.",
+            "Yerleşim doğru — vuruş konumlarının daha çoğuna basmaya odaklan."
           ]
         },
         "low_coverage": {
           "neutral": [
-            "Only a fraction of beat positions had a detected hit — signal may be too quiet.",
-            "Detection rate is low — check your input gain or play louder.",
-            "Most beat positions are empty — check the input level, this isn't a playing-quality issue.",
-            "Low hit detection — increase input gain or attack strength.",
-            "Signal is too quiet for reliable detection — play louder or adjust your input level."
+            "Vuruş konumlarının yalnızca bir kısmında algılanan vuruş var — sinyal fazla sessiz olabilir.",
+            "Algılama oranı düşük — giriş kazancına bak veya daha yüksek çal.",
+            "Vuruş konumlarının çoğu boş — giriş seviyesine bak, bu bir çalma kalitesi sorunu değil.",
+            "Düşük vuruş algılama — giriş kazancını veya vuruş gücünü artır.",
+            "Sinyal güvenilir algılama için fazla sessiz — daha yüksek çal veya giriş seviyeni ayarla."
           ]
         },
         "noodling": {
           "neutral": [
-            "Free-play mode — beat placement isn't being graded here.",
-            "Exploring freely — use it to warm up, then rein it back to the grid.",
-            "No scoring in free play — this is your creative space.",
-            "Free-form mode active — grading resumes when you lock back to the pulse.",
-            "Ungraded free play — let it flow, come back to the grid when ready."
+            "Serbest çalma modu — vuruş yerleşimi burada puanlanmıyor.",
+            "Serbestçe keşfediyorsun — ısınmak için kullan, sonra ızgaraya geri dön.",
+            "Serbest çalmada puanlama yok — burası senin yaratıcı alanın.",
+            "Serbest biçim modu açık — nabza geri kilitlenince puanlama devam eder.",
+            "Puanlanmayan serbest çalma — akışına bırak, hazır olunca ızgaraya dön."
           ]
         },
         "flat_dynamics": {
           "neutral": [
-            "Low amplitude variation across beat positions — try varying your pick attack.",
-            "Minimal dynamic shaping across the bar — increase accent differential on the downbeats.",
-            "Amplitude is consistent across positions — build in a dynamic hierarchy: downbeats strongest, upbeats lighter."
+            "Vuruş konumları arasında genlik değişimi düşük — vuruşunun gücünü değiştirmeyi dene.",
+            "Ölçü boyunca asgari dinamik şekillendirme — ana vuruşlarda vurgu farkını artır.",
+            "Konumlar arasında genlik tutarlı — dinamik bir hiyerarşi kur: ana vuruşlar en güçlü, geri vuruşlar daha hafif."
           ]
         },
         "weak_downbeats": {
           "neutral": [
-            "Anti-accent pattern detected — downbeats are quieter than upbeats.",
-            "Your upbeats are dominating — increase pick attack on beats 1 and 3.",
-            "Downbeat amplitude is below upbeat amplitude — reverse the dynamic hierarchy."
+            "Ters vurgu örüntüsü algılandı — ana vuruşlar geri vuruşlardan daha sessiz.",
+            "Geri vuruşların baskın — 1. ve 3. vuruşlarda vuruş gücünü artır.",
+            "Ana vuruş genliği geri vuruş genliğinin altında — dinamik hiyerarşiyi tersine çevir."
           ]
         },
         "good_accents": {
           "neutral": [
-            "Healthy accent differential — downbeats are clearly stronger than upbeats.",
-            "Good dynamic shaping — downbeat amplitude is well above upbeat amplitude.",
-            "Strong accent structure — downbeats leading the dynamic hierarchy."
+            "Sağlıklı vurgu farkı — ana vuruşlar geri vuruşlardan belirgin biçimde daha güçlü.",
+            "İyi dinamik şekillendirme — ana vuruş genliği geri vuruş genliğinin çok üstünde.",
+            "Güçlü vurgu yapısı — ana vuruşlar dinamik hiyerarşiye öncülük ediyor."
           ]
         },
         "subdivisions_too_loud": {
           "neutral": [
-            "Subdivision amplitude is close to downbeat amplitude — fills are overwhelming the accent structure.",
-            "The fills are as loud as the main beats — reduce attack on the subdivision notes.",
-            "No dynamic hierarchy between beats and fills — downbeats should lead, subdivisions should follow."
+            "Alt bölüm genliği ana vuruş genliğine yakın — dolgular vurgu yapısını bastırıyor.",
+            "Dolgular ana vuruşlar kadar yüksek — alt bölüm notalarında vuruşu azalt.",
+            "Vuruşlar ile dolgular arasında dinamik hiyerarşi yok — ana vuruşlar öncülük etmeli, alt bölümler takip etmeli."
           ]
         }
       }
     },
     "words": {
       "direction": {
-        "before": "before",
-        "after": "after"
+        "before": "önce",
+        "after": "sonra"
       },
       "correctionDirection": {
-        "earlier": "earlier",
-        "later": "later"
+        "earlier": "daha erken",
+        "later": "daha geç"
       },
       "change": {
-        "bpmUp": "tempo up to {to} BPM",
-        "bpmDown": "tempo down to {to} BPM",
-        "presetCleared": "preset cleared",
-        "preset": "loading \"{to}\"",
-        "timeSig": "time signature {to}/4",
-        "grouping": "regrouped to {to}",
-        "instrument": "switching to {to}",
-        "other": "config changed",
+        "bpmUp": "tempo {to} BPM'e yükseliyor",
+        "bpmDown": "tempo {to} BPM'e düşüyor",
+        "presetCleared": "ön ayar temizlendi",
+        "preset": "\"{to}\" yükleniyor",
+        "timeSig": "ölçü {to}/4",
+        "grouping": "yeni gruplama: {to}",
+        "instrument": "geçiş: {to}",
+        "other": "ayar değişti",
         "separator": "; "
       }
     }

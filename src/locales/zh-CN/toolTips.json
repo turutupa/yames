@@ -4,557 +4,557 @@
       "generic": {
         "session_start_cold": {
           "neutral": [
-            "Hey — play when you're ready and I'll start tracking your timing.",
-            "Good to have you. Start when you feel warm.",
-            "Ready when you are. I'll start listening as soon as you play.",
-            "Take your time getting set up — I'll pick up your timing from the first note.",
-            "No rush. Start when you're settled and we'll go from there.",
-            "Hit play whenever you're ready. I'll catch you from the first beat.",
-            "Set up, settle in, then start playing whenever.",
-            "Whenever you're ready — I'm listening."
+            "嗨，准备好了就弹，我会开始跟踪你的节奏。",
+            "很高兴你来了。觉得热身够了就开始。",
+            "你准备好我就准备好。你一弹，我就开始聆听。",
+            "慢慢准备，我从第一个音就开始捕捉你的节奏。",
+            "不着急。等你坐稳了再开始，我们从那里接着来。",
+            "准备好了就按下开始。我从第一拍就跟上你。",
+            "准备好，坐稳，然后随时开始演奏。",
+            "你准备好了就开始，我在听。"
           ]
         },
         "session_start_returning": {
           "neutral": [
-            "Welcome back. Last time: {lastScore} at {lastBpm} BPM. Let's build on that.",
-            "Good to see you again. You hit {lastScore} at {lastBpm} BPM last session.",
-            "Back at it. You were at {lastScore} / {lastBpm} BPM last time — let's keep climbing.",
-            "Welcome back — {lastScore} at {lastBpm} BPM last session. Ready when you are.",
-            "Last session: {lastScore} at {lastBpm} BPM. Let's pick up where you left off.",
-            "Back again. You finished at {lastScore} at {lastBpm} BPM — good baseline.",
-            "Welcome back. {lastScore} at {lastBpm} BPM last time. Let's see what today brings.",
-            "Good to have you back. Last time you hit {lastScore} at {lastBpm} BPM."
+            "欢迎回来。上次：{lastBpm} BPM，{lastScore}。我们在此基础上继续。",
+            "又见面了。上次练习你在 {lastBpm} BPM 得了 {lastScore}。",
+            "继续练习。上次你是 {lastScore} / {lastBpm} BPM，我们接着往上走。",
+            "欢迎回来，上次练习是 {lastBpm} BPM，{lastScore}。你准备好就开始。",
+            "上次练习：{lastBpm} BPM，{lastScore}。从你停下的地方接着来。",
+            "又来了。你上次以 {lastBpm} BPM 收在 {lastScore}，是个不错的基准。",
+            "欢迎回来。上次是 {lastBpm} BPM，{lastScore}。看看今天会怎样。",
+            "欢迎回来。上次你在 {lastBpm} BPM 得了 {lastScore}。"
           ]
         },
         "accuracy_drop": {
           "encouragement": [
-            "A few misses crept in — ease up, breathe, then come back to it.",
-            "You were locked in, then a wobble. Reset on the next strong beat.",
-            "Quick dip. Slow the pulse in your head and pick it up again.",
-            "Small slip — no big deal. Find the click again on the next bar.",
-            "Lost the thread for a second. Catch the next downbeat clean.",
-            "Tiny stumble. Take a breath and ride the next click in.",
-            "Cool — just feel the next beat land before you play.",
-            "A little drift. Let the metronome lead you back in."
+            "出现了几个失误，放松一下，呼吸，然后回来。",
+            "你之前很稳，然后晃了一下。在下一个强拍重新来过。",
+            "短暂的下滑。在脑子里把脉搏放慢，再重新接上。",
+            "小失误，没什么大不了。下一小节重新找到节拍声。",
+            "断了一下线。干净地接住下一个强拍。",
+            "小小的磕绊。呼吸一下，跟着下一下节拍声进来。",
+            "没事，先感受下一拍落下，再演奏。",
+            "有点偏移。让节拍器带你回来。"
           ],
           "neutral": [
-            "Hit rate's slipped a bit — reset on the next bar.",
-            "Accuracy is sliding. Let it settle on the next downbeat.",
-            "Things are slipping — slow it in your head, then start fresh.",
-            "Some misses stacking up. Find a clean bar, then keep going.",
-            "Quality's drifting. Lock in with the click for one full bar.",
-            "Misses creeping up — take a breath, hear the click, then play.",
-            "Drift showing. Sit one bar quiet with the click before coming back.",
-            "Hits dropping off. Wait for the strong beat and re-set."
+            "命中率有些下滑，在下一小节重新来过。",
+            "准确度在下滑。让它在下一个强拍上稳下来。",
+            "在往下滑，在脑子里放慢，然后重新开始。",
+            "失误在累积。找一个干净的小节，然后继续。",
+            "质量在偏移。跟着节拍声稳住一整个小节。",
+            "失误在增多，呼吸一下，听节拍声，然后演奏。",
+            "出现了偏移。先跟着节拍声安静待一个小节再回来。",
+            "击音在减少。等强拍，然后重新开始。"
           ],
           "correction": [
-            "The slip is sustained — try dialing the tempo down a few BPM.",
-            "Hits are scattering. Slow down and rebuild from a clean bar.",
-            "Get one clean bar, then climb again.",
-            "Pattern's coming apart — pause, count yourself in slow, then play.",
-            "Stop, count a full bar with the click, then come back in.",
-            "Drop the tempo five BPM. Get it clean, then bring it back up.",
-            "Pull back. Get one solid bar against the click before adding speed.",
-            "Reset hard — silence one bar, count it, then start fresh."
+            "下滑持续了，试试把速度降低几 BPM。",
+            "击音在分散。放慢，从一个干净的小节重新建立。",
+            "先拿到一个干净的小节，再往上走。",
+            "节奏型在散开，暂停，慢慢数拍进入，然后演奏。",
+            "停下，跟着节拍声数一整个小节，再进来。",
+            "把速度降低五 BPM。弹干净，再升回来。",
+            "退回来。在加速之前，先跟着节拍声弹稳一个小节。",
+            "彻底重来，静默一个小节，数拍，然后重新开始。"
           ]
         },
         "rushing_trend": {
           "encouragement": [
-            "Sitting just ahead of the click — breathe and ride it.",
-            "Slight rush creeping in. Plant your foot, let the metronome lead.",
-            "A little early — settle into the next click.",
-            "You're a hair ahead. Wait for the click instead of chasing it.",
-            "Just a tiny bit hot. Relax your hands and let the click pull you.",
-            "Pulse is creeping up. Take a breath and let the next click meet you.",
-            "Edge of rushing. Lean back into the seat and ride the click.",
-            "A touch early. Hear the click first, then play."
+            "稍微在节拍声前面，呼吸，跟着它走。",
+            "有一点抢拍在冒头。脚踏实，让节拍器带路。",
+            "有点早，沉到下一下节拍声里。",
+            "你领先了一点点。等节拍声，别追它。",
+            "只是稍微有点急。放松双手，让节拍声拉着你。",
+            "脉搏在往上爬。呼吸一下，让下一下节拍声来迎你。",
+            "快到抢拍的边缘了。身体往后靠，跟着节拍声走。",
+            "稍微早了一点。先听节拍声，再演奏。"
           ],
           "neutral": [
-            "Trending a touch early — try riding the back of the beat.",
-            "You're nudging ahead of the click — let it come to you.",
-            "Drifting early. Sit deeper into each click.",
-            "Each note's landing a little early. Wait for the click.",
-            "You're leading the metronome. Let it lead you instead.",
-            "Pace is creeping up. Match the click, don't push it.",
-            "Notes are arriving too soon. Hold each one a beat longer in your head.",
-            "Drift forward. Take a breath and let the click set the pace."
+            "趋势略偏早，试试跟在拍子的后沿。",
+            "你在轻轻地超前节拍声，让它自己过来。",
+            "在往早的方向偏。更深地沉进每一下节拍声。",
+            "每个音都落得稍早。等节拍声。",
+            "你在领着节拍器走。让它领你。",
+            "步伐在加快。和节拍声对上，别推它。",
+            "音来得太早。在脑子里把每个音多留一拍。",
+            "在往前偏。呼吸一下，让节拍声定下步伐。"
           ],
           "correction": [
-            "Still leaning early — count the in-betweens and land each note right on the click.",
-            "The rush is sticking. Slow down, count the offbeat between each click.",
-            "Pause, count yourself in slow, then start playing again.",
-            "Drop a few BPM. Get the click to lead before bringing it back up.",
-            "Hands are racing. Stop, take a breath, start on the next strong beat.",
-            "Reset — silence one bar, hear the click, then come in on beat 1.",
-            "Push the tempo down five BPM until you can sit ON the click.",
-            "Stop trying to drive the metronome. Let it drive you for one bar."
+            "还是偏早，数拍与拍之间的空隙，把每个音正好落在节拍声上。",
+            "抢拍没有消退。放慢，在每下节拍声之间数反拍。",
+            "暂停，慢慢数拍进入，然后重新开始演奏。",
+            "降低几 BPM。先让节拍声带路，再升回来。",
+            "双手在赶。停下，呼吸，在下一个强拍重新开始。",
+            "重来，静默一个小节，听节拍声，然后在第 1 拍进来。",
+            "把速度降低五 BPM，直到你能坐在节拍声上。",
+            "别再想着带动节拍器。让它带你走一个小节。"
           ]
         },
         "dragging_trend": {
           "encouragement": [
-            "Sitting just behind the click — lift the tempo back under your fingers.",
-            "Slight drag. Breathe and push back into the beat.",
-            "A little behind — lean forward, you're close.",
-            "You're a hair late. Lift your hands; meet the click on top.",
-            "Just barely lagging. Push gently — the click will meet you.",
-            "Drift back is small. Lean in and ride the front of each click.",
-            "Touch late. Imagine playing slightly ahead and you'll land in time.",
-            "Notes are arriving just after the click. Push a little."
+            "稍微在节拍声后面，把速度重新提回到手指下。",
+            "有一点拖。呼吸，推回到拍子里。",
+            "有点落后，往前靠，你已经很近了。",
+            "你晚了一点点。抬起双手，在节拍声的上面迎上它。",
+            "只是略微滞后。轻轻推一下，节拍声会迎上你。",
+            "往后偏得很小。往前靠，跟着每下节拍声的前沿走。",
+            "稍微晚了一点。想象自己弹得稍微超前一点，你就会落在拍上。",
+            "音正好落在节拍声之后。推一点。"
           ],
           "neutral": [
-            "Trending a touch late — try playing slightly ahead of the click.",
-            "You're sitting behind the beat — push into each one.",
-            "Drifting late. Reach for the front of each click.",
-            "Each note's landing just after the click. Meet it head-on instead.",
-            "The metronome's leaving you behind. Step into each click.",
-            "Pace is sagging. Lift the hands and play on top of the click.",
-            "Notes arriving late. Aim for the front edge of each beat.",
-            "Drag is showing. Imagine the click is a half-step earlier than you think."
+            "趋势略偏晚，试试弹得稍微超前节拍声。",
+            "你落在拍子后面，往每一拍里推。",
+            "在往晚的方向偏。去够每下节拍声的前沿。",
+            "每个音都刚好落在节拍声之后。改为正面迎上它。",
+            "节拍器把你甩在后面了。踏进每一下节拍声。",
+            "步伐在下沉。抬起双手，在节拍声的上面演奏。",
+            "音来得晚。瞄准每一拍的前沿。",
+            "拖拍显现了。想象节拍声比你以为的早半步。"
           ],
           "correction": [
-            "Still hanging back — play with the click, don't wait for it.",
-            "The drag is sticking. Push the tempo with your fingers.",
-            "Stop, reset, and start fresh on beat 1.",
-            "Drop the tempo a bit and lock in. The drag will clear once it feels easy.",
-            "Pause one bar. Hear the click, then come in right on top of beat 1.",
-            "Reset — count yourself in slow and play with more lift.",
-            "Slow it down five BPM and aim for the front of every click.",
-            "Stop, take a breath, then come in pushing slightly forward."
+            "还是往后缩，跟着节拍声演奏，别等它。",
+            "拖拍没有消退。用手指把速度推起来。",
+            "停下，重来，从第 1 拍重新开始。",
+            "把速度降一点，稳住。一旦觉得轻松，拖拍就会消失。",
+            "暂停一个小节。听节拍声，然后正好落在第 1 拍上进来。",
+            "重来，慢慢数拍进入，弹得更有提劲。",
+            "放慢五 BPM，瞄准每下节拍声的前沿。",
+            "停下，呼吸，然后稍微往前推着进来。"
           ]
         },
         "personal_best_streak": {
           "encouragement": [
-            "Locked in — keep it going.",
-            "Streak's going. Nice.",
-            "On a run — stay there.",
-            "Yes. Don't change anything.",
-            "Riding it clean. Stay.",
-            "That's the pocket — hold on to it.",
-            "Beautiful. Just keep doing that.",
-            "Eyes closed, keep going."
+            "很稳，保持下去。",
+            "连续在继续。不错。",
+            "正在一段连续里，留在那儿。",
+            "对，什么都别改。",
+            "弹得干净，保持住。",
+            "这就是在点上，抓住它。",
+            "很好。就这样继续。",
+            "闭上眼睛，继续。"
           ],
           "neutral": [
-            "New session best — locked in.",
-            "Cleanest stretch so far. Hold it.",
-            "Best run yet today. Don't change a thing.",
-            "Longest clean run of the session. Keep it.",
-            "Top streak of today. Stay there.",
-            "Tightest stretch yet — hold this feel.",
-            "Best timing of the session right here.",
-            "This is your session high — sit in it."
+            "这次练习的新纪录，很稳。",
+            "到目前为止最干净的一段。保持。",
+            "今天最好的一段。什么都别改。",
+            "这次练习里最长的干净连续。保持。",
+            "今天的最高连续。留在那儿。",
+            "到目前为止最紧的一段，保持这个感觉。",
+            "这次练习里最好的节奏就在这里。",
+            "这是这次练习的最高点，待在里面。"
           ],
           "correction": [
-            "Locked in — hold tempo, don't push faster yet.",
-            "Streak's clean. Stay at this BPM until it's automatic.",
-            "Exactly where you want to live for a minute.",
-            "Don't speed up yet. Let this tempo settle into the hands.",
-            "Stay flat — no climbing yet. Let it become muscle memory.",
-            "Hold this for another minute before adding speed.",
-            "Park here. Speed comes after this gets boring.",
-            "Resist the urge to push. Burn this tempo in first."
+            "很稳，保持速度，先别推快。",
+            "连续很干净。留在这个 BPM，直到它成为自动的。",
+            "这正是你想停留一会儿的地方。",
+            "先别加速。让这个速度在手上沉淀下来。",
+            "保持平稳，先别往上爬。让它成为肌肉记忆。",
+            "在加速之前，再保持一分钟。",
+            "停在这里。等这个速度变得无聊了，再加速。",
+            "忍住想往上推的冲动。先把这个速度磨熟。"
           ]
         },
         "new_band_locked": {
           "encouragement": [
-            "{bpmLow} BPM — yours now.",
-            "Locked at {bpmLow} BPM. Nice.",
-            "Held this tempo clean — new ceiling.",
-            "{bpmLow} BPM feels easy now. That's progress.",
-            "You own {bpmLow} BPM. Don't lose it.",
-            "Steady at {bpmLow}. That's the new floor.",
-            "Clean at {bpmLow} BPM — keep it warm.",
-            "{bpmLow} BPM — solid. Stay here a bit longer."
+            "{bpmLow} BPM，现在是你的了。",
+            "稳在 {bpmLow} BPM。不错。",
+            "把这个速度弹干净了，新的上限。",
+            "{bpmLow} BPM 现在觉得轻松了。这就是进步。",
+            "你拿下了 {bpmLow} BPM。别丢了它。",
+            "稳在 {bpmLow}。这是新的下限。",
+            "在 {bpmLow} BPM 很干净，保持热度。",
+            "{bpmLow} BPM，扎实。再在这里待一会儿。"
           ],
           "neutral": [
-            "Sustained clean play at {bpmLow}–{bpmHigh} BPM for a minute.",
-            "{bpmLow}–{bpmHigh} BPM band: locked in.",
-            "New BPM band owned: {bpmLow}–{bpmHigh}.",
-            "Clean for a full minute at {bpmLow}–{bpmHigh} BPM.",
-            "{bpmLow}–{bpmHigh} BPM held steady. That's the new baseline.",
-            "Locked into {bpmLow}–{bpmHigh} BPM for a long stretch.",
-            "Held the {bpmLow}–{bpmHigh} band clean — that's a real win.",
-            "Pocket sustained at {bpmLow}–{bpmHigh} BPM. Don't lose it now."
+            "在 {bpmLow}–{bpmHigh} BPM 持续干净演奏了一分钟。",
+            "{bpmLow}–{bpmHigh} BPM 区间：已稳住。",
+            "拿下了新的 BPM 区间：{bpmLow}–{bpmHigh}。",
+            "在 {bpmLow}–{bpmHigh} BPM 干净地保持了整整一分钟。",
+            "{bpmLow}–{bpmHigh} BPM 守得很稳。这是新的基线。",
+            "在 {bpmLow}–{bpmHigh} BPM 稳住了很长一段。",
+            "把 {bpmLow}–{bpmHigh} 这个区间弹干净了，这是实实在在的收获。",
+            "在 {bpmLow}–{bpmHigh} BPM 持续在点上。现在别丢了。"
           ],
           "correction": [
-            "{bpmLow}–{bpmHigh} is stable. Stay here, then push a touch.",
-            "Held {bpmLow}–{bpmHigh} clean. Ready to climb when you are.",
-            "{bpmLow}–{bpmHigh} feels owned. Next session, start here.",
-            "{bpmLow}–{bpmHigh} BPM is locked in. Don't speed up yet.",
-            "You can climb from {bpmLow}–{bpmHigh}, but earn it — two more clean minutes first.",
-            "{bpmLow}–{bpmHigh} BPM is the new floor. Don't drop back below it.",
-            "Stable at {bpmLow}–{bpmHigh}. Move up only when it feels boring.",
-            "{bpmLow}–{bpmHigh} BPM owned. Build a couple of minutes here before climbing."
+            "{bpmLow}–{bpmHigh} 很稳定。留在这里，然后稍微推一点。",
+            "把 {bpmLow}–{bpmHigh} 弹干净了。你准备好了就往上爬。",
+            "{bpmLow}–{bpmHigh} 觉得已经拿下了。下次练习，从这里开始。",
+            "{bpmLow}–{bpmHigh} BPM 已经稳住。先别加速。",
+            "你可以从 {bpmLow}–{bpmHigh} 往上爬，但要挣来：先再来两分钟干净的。",
+            "{bpmLow}–{bpmHigh} BPM 是新的下限。别掉到它下面。",
+            "在 {bpmLow}–{bpmHigh} 很稳定。等它变得无聊了再往上。",
+            "{bpmLow}–{bpmHigh} BPM 已拿下。在往上爬之前，先在这里积累几分钟。"
           ]
         },
         "check_in": {
           "encouragement": [
-            "You've been deep in it. Anything you want to focus on next?",
-            "Five-plus minutes locked in. Want me to call out anything specific?",
-            "Long stretch — pause if you want, I'm here.",
-            "Solid run going. Want me to listen for anything in particular?",
-            "Been in this a while. Take a breath if you need one.",
-            "Quiet so far. Tell me what you're working on and I'll watch for it.",
-            "Nothing to call out yet. What do you want me to listen for?",
-            "Steady pocket. Keep going, or switch gears if you're ready."
+            "你已经投入很久了。接下来想专注于什么吗？",
+            "已经连续五分钟以上了。想让我点出什么具体的吗？",
+            "这一段很长，想暂停就暂停，我在这儿。",
+            "这一段很扎实。想让我特别听什么吗？",
+            "已经练了一阵子了。需要的话就呼吸一下。",
+            "到目前为止很安静。告诉我你在练什么，我来留意。",
+            "暂时没什么要点出的。你想让我听什么？",
+            "节奏很稳。继续，或者你准备好了就换个方向。"
           ],
           "neutral": [
-            "Five minutes in, nothing to flag. Solid pocket. Keep going or switch focus?",
-            "Quiet stretch. Tell me what you're working on.",
-            "Long uninterrupted run. Anything you want feedback on?",
-            "Five minutes deep. No issues to call out — keep going.",
-            "Steady session. Want a different angle, or stay the course?",
-            "Long run with no slips. What's next?",
-            "You've been in the pocket. Take stock and pick a next focus.",
-            "Quiet session so far. Pick a target if you want sharper feedback."
+            "五分钟了，没有要标记的。节奏扎实。继续，还是换个重点？",
+            "安静的一段。告诉我你在练什么。",
+            "很长的不间断演奏。有什么想要反馈的吗？",
+            "已经五分钟了。没有要点出的问题，继续。",
+            "这次练习很平稳。想换个角度，还是继续原路？",
+            "很长的一段，没有失误。接下来呢？",
+            "你一直在点上。盘点一下，选一个接下来的重点。",
+            "这次练习到目前为止很安静。想要更尖锐的反馈，就选个目标。"
           ],
           "correction": [
-            "Heads up — you've been in this a while. Take 10 if your hands need it.",
-            "Five-plus minutes continuous. Check in with your body before you push more.",
-            "Sustained session — stretch your fingers, then come back.",
-            "Hands tired? Take a 60-second pause before the next pass.",
-            "Long stretch — check the wrists and shoulders before continuing.",
-            "Time for a quick break. Cold hands play sloppy.",
-            "Pause and stretch. Two minutes off keeps the next twenty solid.",
-            "Sustained run — give the hands a rest before pushing further."
+            "提醒一下，你已经练了一阵子了。如果手需要，休息十分钟。",
+            "已经连续五分钟以上。在继续推进之前，先留意一下身体。",
+            "练习持续得很久，伸展一下手指，然后回来。",
+            "手累了吗？在下一遍之前，暂停 60 秒。",
+            "这一段很长，继续之前先看看手腕和肩膀。",
+            "该稍微休息一下了。冷的手弹得草率。",
+            "暂停并伸展。休息两分钟，能让之后的二十分钟保持扎实。",
+            "已经持续演奏了很久，在继续推进之前让手休息一下。"
           ]
         },
         "fatigue": {
           "encouragement": [
-            "Accuracy's been sliding the last few minutes. Take a beat.",
-            "Hands tightening up? Quick stretch — come back fresh.",
-            "Quality's drifting. Pause, breathe, return.",
-            "Hands working harder than they should. Brief rest, then back in.",
-            "You've been going a while — drop the instrument for 60 seconds.",
-            "Body's getting heavier than the music. Quick break.",
-            "Fingers stiffening up? Shake them out, then come back.",
-            "Time for a short pause — fresh hands play cleaner."
+            "准确度最近几分钟一直在下滑。歇一拍。",
+            "手紧了吗？快速伸展一下，回来时重新精神。",
+            "质量在偏移。暂停，呼吸，再回来。",
+            "手比应有的更费劲了。短暂休息，再回来。",
+            "你已经练了一阵子了，把乐器放下 60 秒。",
+            "身体比音乐更沉了。快速休息一下。",
+            "手指僵了吗？甩一甩，然后回来。",
+            "该短暂停一下了，新鲜的手弹得更干净。"
           ],
           "neutral": [
-            "Accuracy declined over the last 3 minutes at constant BPM — likely fatigue.",
-            "Score trending down without tempo change. Take a rest.",
-            "Sustained accuracy drop at the same BPM — call it a rest cycle.",
-            "Same tempo, falling accuracy. Hands are getting tired.",
-            "Quality's slipping but the tempo hasn't changed — that's fatigue.",
-            "Misses climbing while the click stays the same. Time for a pause.",
-            "Three-minute slide at one tempo. Rest the hands.",
-            "Steady BPM, sliding accuracy — your hands are telling you something."
+            "在恒定的 BPM 下，最近 3 分钟准确度下降，很可能是疲劳。",
+            "得分在下降，速度没有变。休息一下。",
+            "同一个 BPM 下准确度持续下降，算作一个休息周期。",
+            "速度不变，准确度在掉。手在变累。",
+            "质量在下滑，但速度没有变，这就是疲劳。",
+            "节拍声没变，失误在攀升。该暂停了。",
+            "在同一个速度上滑了三分钟。让手休息。",
+            "BPM 稳定，准确度下滑，你的手在告诉你些什么。"
           ],
           "correction": [
-            "Fatigue showing — stop now, 90 seconds off, then come back.",
-            "You're past your peak window. Rest before quality drops further.",
-            "Take the rest. Tired playing teaches the hands sloppy habits.",
-            "Stop, stand up, walk around for a minute. Then come back.",
-            "Quality's been dropping for minutes. Real rest — 90 seconds minimum.",
-            "Hands are done for now. Pause, shake them out, hydrate.",
-            "Pushing past tired locks in mistakes. Stop and recover.",
-            "Set the instrument down. Two minutes off, then re-evaluate."
+            "疲劳显现了，现在停下，休息 90 秒，然后回来。",
+            "你已经过了状态最好的时段。在质量进一步下降之前先休息。",
+            "去休息。疲惫的演奏会让手养成草率的习惯。",
+            "停下，站起来，走动一分钟。然后回来。",
+            "质量已经下降了好几分钟。真正的休息，至少 90 秒。",
+            "手暂时到此为止。暂停，甩一甩，喝点水。",
+            "硬撑过疲劳会把错误固定下来。停下来恢复。",
+            "把乐器放下。休息两分钟，再重新评估。"
           ]
         },
         "recovery": {
           "encouragement": [
-            "Nice save — stay here.",
-            "Pulled it back. Hold it.",
-            "Recovered — keep this exact feel.",
-            "Got it back. Sit in this for a minute.",
-            "Back from the dip. Don't change anything now.",
-            "You felt it slip and brought it back. That's the skill.",
-            "Solid recovery. Stay loose, stay here.",
-            "Caught it before it ran away. Hold this feel."
+            "救得好，留在这里。",
+            "拉回来了。保持。",
+            "恢复了，保持这个确切的感觉。",
+            "拿回来了。在这里待一分钟。",
+            "从下滑中回来了。现在什么都别改。",
+            "你感觉到它在滑，并把它拉了回来。这就是本事。",
+            "恢复得扎实。保持放松，留在这里。",
+            "在它跑远之前抓住了。保持这个感觉。"
           ],
           "neutral": [
-            "Back to clean after the dip. Keep this pace.",
-            "Score's back up — hold it.",
-            "Recovery confirmed — accuracy steady again.",
-            "Clean again after the slip. Don't change anything.",
-            "Accuracy's back where it was. Hold steady.",
-            "Stabilized after the dip. Keep this tempo.",
-            "You closed the gap. Stay at this BPM.",
-            "Quality recovered. Park here a minute."
+            "下滑之后又回到了干净。保持这个步伐。",
+            "得分回升了，保持。",
+            "恢复已确认，准确度又稳定了。",
+            "失误之后又干净了。什么都别改。",
+            "准确度回到了原来的水平。保持平稳。",
+            "下滑之后稳住了。保持这个速度。",
+            "你把差距补上了。留在这个 BPM。",
+            "质量恢复了。在这里停一分钟。"
           ],
           "correction": [
-            "Recovery's holding. Don't push the tempo yet.",
-            "Back from the dip — stay flat, no climbing yet.",
-            "You salvaged it. Hold this exact BPM for a full minute.",
-            "Don't reward the recovery with a tempo bump. Sit here.",
-            "Back on track. Resist the urge to speed up.",
-            "Recovery is fresh — let it become habit before pushing.",
-            "Stay at this BPM. Build a couple of clean bars before changing anything.",
-            "You came back from the slip. Don't undo it by climbing too soon."
+            "恢复在保持。先别推速度。",
+            "从下滑中回来了，保持平稳，先别往上爬。",
+            "你把它救回来了。在这个确切的 BPM 上保持整整一分钟。",
+            "别用加速来奖励这次恢复。留在这里。",
+            "回到正轨了。忍住想加速的冲动。",
+            "恢复还很新，在推进之前让它成为习惯。",
+            "留在这个 BPM。在改变任何东西之前，先积累几个干净的小节。",
+            "你从失误中回来了。别因为爬得太早而把它抵消。"
           ]
         },
         "recovery_confirmed": {
           "encouragement": [
-            "Got it back.",
-            "Nice save — hold it.",
-            "Back and clean.",
-            "Pulled it back. Stay here."
+            "拿回来了。",
+            "救得好，保持。",
+            "回来了，很干净。",
+            "拉回来了。留在这里。"
           ],
           "neutral": [
-            "Accuracy's back. Keep this feel.",
-            "Back to clean after the dip.",
-            "Recovery confirmed. Hold steady."
+            "准确度回来了。保持这个感觉。",
+            "下滑之后又回到了干净。",
+            "恢复已确认。保持平稳。"
           ],
           "correction": [
-            "Recovery's holding — don't push the tempo yet.",
-            "Back on track. Resist the urge to climb."
+            "恢复在保持，先别推速度。",
+            "回到正轨了。忍住想往上爬的冲动。"
           ]
         },
         "tempo_milestone": {
           "encouragement": [
-            "{bpmLow} BPM — new gear.",
-            "Past {bpmLow} BPM, clean.",
-            "{bpmLow}+ and holding. Nice.",
-            "First time at {bpmLow} BPM today. Feels good.",
-            "Crossed {bpmLow} clean. Stay loose.",
-            "{bpmLow} BPM is on the menu now.",
-            "You're in {bpmLow}-territory. Hold it lightly.",
-            "Welcome to {bpmLow} BPM. Make it feel easy."
+            "{bpmLow} BPM，新的一档。",
+            "过了 {bpmLow} BPM，很干净。",
+            "{bpmLow} 以上，还稳着。不错。",
+            "今天第一次到 {bpmLow} BPM。感觉不错。",
+            "干净地越过了 {bpmLow}。保持放松。",
+            "{bpmLow} BPM 现在在菜单上了。",
+            "你进入了 {bpmLow} 的区域。轻轻地握住它。",
+            "欢迎来到 {bpmLow} BPM。让它变得轻松。"
           ],
           "neutral": [
-            "Crossed the {bpmLow}-BPM mark upward.",
-            "Tempo milestone: now in the {bpmLow}-{bpmHigh} band.",
-            "{bpmLow} BPM and climbing.",
-            "{bpmLow} BPM reached. New band: {bpmLow}-{bpmHigh}.",
-            "Moved into the {bpmLow}-{bpmHigh} BPM range.",
-            "Climbing — {bpmLow} BPM is the new working tempo.",
-            "{bpmLow} BPM hit. See if it sticks.",
-            "Tempo bumped into the {bpmLow}-{bpmHigh} zone."
+            "向上越过了 {bpmLow} BPM 这个点。",
+            "速度里程碑：现在在 {bpmLow}-{bpmHigh} 区间。",
+            "{bpmLow} BPM，还在往上。",
+            "到达 {bpmLow} BPM。新区间：{bpmLow}-{bpmHigh}。",
+            "进入了 {bpmLow}-{bpmHigh} BPM 范围。",
+            "在往上爬，{bpmLow} BPM 是新的练习速度。",
+            "到了 {bpmLow} BPM。看看能不能站稳。",
+            "速度提到了 {bpmLow}-{bpmHigh} 的范围。"
           ],
           "correction": [
-            "At {bpmLow} BPM — stay here until clean, don't push higher yet.",
-            "{bpmLow} BPM milestone. Stabilise before pushing.",
-            "New band: {bpmLow}-{bpmHigh}. Make sure this one sticks before climbing.",
-            "{bpmLow} BPM is brand new — don't speed up until it feels boring.",
-            "Earn {bpmLow} BPM before chasing the next mark. Hold it.",
-            "Park at {bpmLow} BPM. The next jump comes after a clean minute here.",
-            "Hit {bpmLow} BPM — now lock it in before the next ramp.",
-            "{bpmLow} BPM is fresh. Stay flat and let the hands catch up."
+            "在 {bpmLow} BPM，留在这里直到弹干净，先别推更高。",
+            "{bpmLow} BPM 里程碑。推进之前先稳住。",
+            "新区间：{bpmLow}-{bpmHigh}。往上爬之前，先确保这个站稳。",
+            "{bpmLow} BPM 是全新的，等它变得无聊之前别加速。",
+            "先挣到 {bpmLow} BPM，再去追下一个点。保持。",
+            "停在 {bpmLow} BPM。下一次跳升，要在这里干净一分钟之后。",
+            "到了 {bpmLow} BPM，下一次提速之前先把它锁住。",
+            "{bpmLow} BPM 还很新。保持平稳，让手跟上来。"
           ]
         },
         "low_confidence": {
           "encouragement": [
-            "Signal's a bit murky on my end — keep playing, I'll catch up.",
-            "Audio's harder to read here, but you sound good.",
-            "I'm having a slightly tough time reading you — keep going.",
-            "Hard to hear you clean from here — don't let that distract you.",
-            "Mic's catching some noise, but you're playing fine.",
-            "Picking up some haze on the signal — keep going, I'm listening.",
-            "My read on the audio is fuzzy. You sound on the beat though.",
-            "Signal's a touch noisy. Trust your hands."
+            "我这边的信号有点模糊，继续演奏，我会跟上。",
+            "这里的音频更难读，不过你听起来不错。",
+            "我读你有点吃力，继续。",
+            "从这里很难听清楚你，别让这分散你的注意。",
+            "麦克风收进了一些噪声，但你弹得没问题。",
+            "信号里有些杂音，继续，我在听。",
+            "我对音频的判读很模糊。不过你听起来在拍上。",
+            "信号有一点噪。相信你的手。"
           ],
           "neutral": [
-            "Detection confidence has been lower for the last 30s — readings may be noisier than usual.",
-            "Lower onset confidence — feedback might be imprecise this stretch.",
-            "Audio signal less clear; metrics slightly less reliable.",
-            "Read quality's down a bit. Numbers may swing more than usual.",
-            "Mic input's harder to parse — accuracy reading may drift.",
-            "Background noise creeping in; feedback might lag a touch.",
-            "Lower signal clarity for the last half-minute.",
-            "Audio's harder to read — take the metrics with a small grain of salt."
+            "过去 30 秒检测置信度较低，读数可能比平时更嘈杂。",
+            "起音置信度较低，这一段的反馈可能不够精确。",
+            "音频信号不够清晰，指标的可靠性略低。",
+            "判读质量略有下降。数字可能比平时摆动得更大。",
+            "麦克风输入更难解析，准确度读数可能漂移。",
+            "背景噪声在渗入，反馈可能会稍有延迟。",
+            "过去半分钟信号清晰度较低。",
+            "音频更难读，对这些指标要持保留的态度。"
           ],
           "correction": [
-            "Hard to read your signal — check your input level or mic position.",
-            "Signal's hard to read. Bump your input gain or move closer to the mic.",
-            "Note detection is uncertain — the room might be too noisy.",
-            "My read on you is unreliable. Move closer to the mic if you can.",
-            "Input level may be too low. Check the meter before continuing.",
-            "Hard to tell hits from noise. Mute anything in the room and try again.",
-            "Signal's dropping out. Plug-in or USB-mic — check the connection.",
-            "Audio quality's poor enough that scoring may be off. Fix the input first."
+            "很难读取你的信号，检查输入电平或麦克风位置。",
+            "信号很难读。调高输入增益，或者靠近麦克风一点。",
+            "音符检测不确定，房间可能太吵了。",
+            "我对你的判读不可靠。可以的话靠近麦克风。",
+            "输入电平可能太低。继续之前先看一下电平表。",
+            "很难分清击音和噪声。把房间里的声音都静音，再试一次。",
+            "信号在断。插线或 USB 麦克风，检查连接。",
+            "音频质量差到评分可能不准。先修好输入。"
           ]
         },
         "boundary_signal_a": {
           "encouragement": [
-            "{change}. Fresh segment — take a beat, find the feel.",
-            "{change} — reset your ear and ride this one out.",
-            "Settings shifted: {change}. Let's see how this new shape feels.",
-            "{change}. New segment, fresh start.",
-            "{change} — clean slate, new score.",
-            "{change}. Take a breath and lock in to the new feel.",
-            "{change}. Old segment wrapped — this one's on its own.",
-            "{change}. Reset your ear and ease into the change."
+            "{change}。新的一段，歇一拍，找找感觉。",
+            "{change}，重置你的耳朵，把这一段弹下去。",
+            "设置变了：{change}。看看这个新的形态感觉如何。",
+            "{change}。新的一段，重新开始。",
+            "{change}，一张白纸，新的得分。",
+            "{change}。呼吸一下，稳住新的感觉。",
+            "{change}。上一段结束了，这一段独立计算。",
+            "{change}。重置你的耳朵，慢慢适应这个变化。"
           ],
           "neutral": [
-            "{change}. New segment opens here.",
-            "Boundary marker — {change}. Next stretch is scored on its own.",
-            "Settings change: {change}. Closing previous segment.",
-            "{change}. Score for the next stretch starts now.",
-            "{change} — the previous segment is closed and counted.",
-            "Configuration shift: {change}. Fresh segment.",
-            "{change}. New segment, new metrics.",
-            "{change}. Boundary crossed — score resets."
+            "{change}。新的一段从这里开始。",
+            "分界标记：{change}。接下来这一段单独评分。",
+            "设置变更：{change}。关闭上一段。",
+            "{change}。下一段的得分现在开始。",
+            "{change}，上一段已关闭并计入。",
+            "配置变化：{change}。新的一段。",
+            "{change}。新的一段，新的指标。",
+            "{change}。越过了分界，得分重置。"
           ],
           "correction": [
-            "{change}. Get the new setup feeling natural before you push.",
-            "{change} — old segment closed. Make sure this feels right before adding complexity.",
-            "Settings changed mid-segment: {change}. The new config is scored separately.",
-            "{change}. Take it slow on the new setup — don't carry over old habits.",
-            "{change}. Bed the new feel in before adding speed.",
-            "{change} — reset and treat the next stretch like a warmup.",
-            "{change}. Play it simple until the new config feels familiar.",
-            "{change}. Don't push the new segment yet — get clean first."
+            "{change}。推进之前，先让新的设置感觉自然。",
+            "{change}，上一段已关闭。增加复杂度之前，确认这个感觉对。",
+            "一段进行中设置变了：{change}。新的配置单独评分。",
+            "{change}。新的设置慢慢来，别把旧习惯带过来。",
+            "{change}。在加速之前，先把新的感觉沉淀下来。",
+            "{change}，重置，把接下来这一段当作热身。",
+            "{change}。弹得简单一点，直到新的配置变得熟悉。",
+            "{change}。先别推新的这一段，先弹干净。"
           ]
         },
         "stamina": {
           "neutral": [
-            "Score's dropping past the {staminaMinutes}-minute mark again — take 30 seconds, then come back at the same BPM.",
-            "Past the {staminaMinutes}-minute mark your accuracy tends to slide. Brief rest, then back in.",
-            "You tend to fade around minute {staminaMinutes}. Take a break and return fresh.",
-            "Stamina wall around minute {staminaMinutes} — a short rest now saves quality later."
+            "得分在过了 {staminaMinutes} 分钟这个点之后又在下降，休息 30 秒，然后以同样的 BPM 回来。",
+            "过了 {staminaMinutes} 分钟这个点，你的准确度往往会下滑。短暂休息，然后回来。",
+            "你往往在第 {staminaMinutes} 分钟前后变弱。休息一下，精神回来再接着练。",
+            "第 {staminaMinutes} 分钟前后有一道耐力的墙，现在短暂休息，能保住之后的质量。"
           ]
         },
         "ramp_complete": {
           "neutral": [
-            "Ramp done — {startBpm} to {endBpm}. You made it.",
-            "Target reached: {endBpm} BPM. You climbed from {startBpm}.",
-            "Ramp finished. {startBpm} → {endBpm} BPM complete.",
-            "You held it to {endBpm} BPM. Ramp from {startBpm} done."
+            "渐进完成，{startBpm} 到 {endBpm}。你做到了。",
+            "到达目标：{endBpm} BPM。你从 {startBpm} 爬了上来。",
+            "渐进结束。{startBpm} → {endBpm} BPM 完成。",
+            "你守到了 {endBpm} BPM。从 {startBpm} 开始的渐进已完成。"
           ]
         },
         "pace_coaching": {
           "neutral": [
-            "Fourth time at {bpm} — the ceiling's real. Two sessions at {suggestedBpm} to consolidate, then push again.",
-            "You've hit {bpm} BPM {attemptCount} times and it's not sticking. Drop to {suggestedBpm} for a week, build it solid.",
-            "{attemptCount} attempts at {bpm} BPM. Ceiling work: two sessions at {suggestedBpm}, then revisit.",
-            "Ceiling at {bpm} BPM — {attemptCount} attempts confirms it. Park at {suggestedBpm} and let it settle."
+            "第四次到 {bpm}，上限是真实的。先在 {suggestedBpm} 练两次来巩固，然后再推。",
+            "你已经到过 {bpm} BPM {attemptCount} 次，但没有站稳。降到 {suggestedBpm} 一周，把它打扎实。",
+            "在 {bpm} BPM 尝试了 {attemptCount} 次。上限练习：在 {suggestedBpm} 练两次，然后再回来。",
+            "{bpm} BPM 的上限，{attemptCount} 次尝试证实了它。停在 {suggestedBpm}，让它沉淀下来。"
           ]
         },
         "preset_ceiling_hit": {
           "neutral": [
-            "{bpmLow}–{bpmHigh} is where this one stops being clean for you — {attemptCount} sessions in that band, all around {score}.",
-            "You're back at {bpmLow}–{bpmHigh}. Your last {attemptCount} runs here came in around {score}.",
-            "Noting it while you play: {attemptCount} sessions at {bpmLow}–{bpmHigh}, each of them near {score}.",
-            "This is the tempo your scores on this one start dropping off at. {attemptCount} sessions here so far.",
-            "{attemptCount} times at {bpmLow}–{bpmHigh} now, around {score} each time. Let's see how today sits.",
-            "Same band as last time — {bpmLow}–{bpmHigh}, where this exercise has been landing near {score}."
+            "{bpmLow}–{bpmHigh} 是这个练习对你不再干净的地方，这个区间有 {attemptCount} 次练习，都在 {score} 左右。",
+            "你又回到了 {bpmLow}–{bpmHigh}。你在这里最近 {attemptCount} 次的成绩都在 {score} 左右。",
+            "趁你演奏时记一下：在 {bpmLow}–{bpmHigh} 有 {attemptCount} 次练习，每次都接近 {score}。",
+            "这是你在这个练习上得分开始下降的速度。到目前为止这里有 {attemptCount} 次练习。",
+            "现在在 {bpmLow}–{bpmHigh} 已经 {attemptCount} 次了，每次都在 {score} 左右。看看今天怎么样。",
+            "和上次是同一个区间，{bpmLow}–{bpmHigh}，这个练习在这里的得分一直接近 {score}。"
           ]
         },
         "grid_lost": {
           "neutral": [
-            "Grid correlation dropped — are you still playing to the click?",
-            "Lost the grid there. Intentional fill, or drifting off the click?",
-            "Correlation with the grid just dropped off. Still with the metronome?",
-            "Looks like the groove parted ways with the click. Fill or free?"
+            "与网格的相关性下降了，你还在跟着节拍声弹吗？",
+            "那里丢了网格。是有意的填充，还是偏离了节拍声？",
+            "与网格的相关性刚刚掉了。还在跟着节拍器吗？",
+            "看起来律动和节拍声分开了。是填充还是自由演奏？"
           ]
         },
         "bias_only": {
           "encouragement": [
-            "Very consistent timing — just {biasMs}ms {direction}. Nudge everything {correctionDirection} to sit on the beat.",
-            "Great control — just a {biasMs}ms lean {direction}. A small shift {correctionDirection} will center it."
+            "节奏非常一致，只是{direction} {biasMs} ms。把整体{correctionDirection}一点，就能落在拍上。",
+            "控制得很好，只是{direction} {biasMs} ms 的偏移。小幅{correctionDirection}一点就能居中。"
           ],
           "neutral": [
-            "You're landing {biasMs}ms {direction} the beat — very consistent, just shifted. Try moving everything {correctionDirection}.",
-            "Tight and consistent, but {biasMs}ms {direction} the click. Shift your attack {correctionDirection} to center it.",
-            "Your timing scatter is low, but the whole pattern sits {biasMs}ms {direction}. Nudge {correctionDirection}.",
-            "Low jitter, but offset by {biasMs}ms {direction}. That's a lean — adjust {correctionDirection} to land on the beat."
+            "你落点{direction} {biasMs} ms，很一致，只是整体偏了。试试把整体{correctionDirection}。",
+            "紧凑而一致，但{direction}节拍声 {biasMs} ms。把你的发音{correctionDirection}以居中。",
+            "你的节奏离散度很低，但整个节奏型{direction} {biasMs} ms。{correctionDirection}一点。",
+            "抖动很低，但整体{direction}偏移了 {biasMs} ms。这是一种偏向，向{correctionDirection}调整以落在拍上。"
           ],
           "correction": [
-            "Consistent {biasMs}ms offset {direction} — not random, just a lean. Shift everything {correctionDirection}.",
-            "Every hit lands {biasMs}ms {direction}. That's a system bias, not jitter. Correct {correctionDirection}."
+            "一致的 {biasMs} ms 偏移，{direction}，不是随机的，只是偏向。把整体{correctionDirection}。",
+            "每一下击音都{direction} {biasMs} ms。这是系统性的偏差，不是抖动。向{correctionDirection}修正。"
           ]
         },
         "boundary_signal_b": {
           "encouragement": [
-            "Nice segment — {score}% at {bpm} BPM. Take a beat.",
-            "{score}% at {bpm} BPM — solid bookend.",
-            "Wrapped that one at {score}% / {bpm} BPM. Good pause point.",
-            "{score}% at {bpm} BPM closes that out — good work.",
-            "Segment done — {score}% at {bpm} BPM. Nice.",
-            "Quiet pause closed it: {score}% at {bpm} BPM.",
-            "Clean wrap — {score}% at {bpm} BPM.",
-            "{score}% at {bpm} BPM. Take a breather."
+            "这一段不错，{bpm} BPM 下 {score}%。歇一拍。",
+            "{bpm} BPM 下 {score}%，扎实的收尾。",
+            "这一段以 {score}% / {bpm} BPM 收尾。适合停一下。",
+            "{bpm} BPM 下 {score}% 收了这一段，做得好。",
+            "这一段完成，{bpm} BPM 下 {score}%。不错。",
+            "安静的停顿结束了它：{bpm} BPM 下 {score}%。",
+            "干净的收尾，{bpm} BPM 下 {score}%。",
+            "{bpm} BPM 下 {score}%。喘口气。"
           ],
           "neutral": [
-            "Segment ended after silence — {score}% at {bpm} BPM.",
-            "Activity gap closed segment: {score}% scored.",
-            "Quiet stretch — segment closed at {score}%.",
-            "{score}% at {bpm} BPM — segment closed by the pause.",
-            "Pause ended the segment: {score}%.",
-            "Segment over — {score}% at {bpm} BPM logged.",
-            "Closed segment at {score}% / {bpm} BPM.",
-            "{score}% at {bpm} BPM saved. Take stock if you want."
+            "静默之后这一段结束，{bpm} BPM 下 {score}%。",
+            "活动间隙关闭了这一段：得分 {score}%。",
+            "安静的一段，这一段以 {score}% 关闭。",
+            "{bpm} BPM 下 {score}%，这一段被停顿关闭。",
+            "停顿结束了这一段：{score}%。",
+            "这一段结束，已记录 {bpm} BPM 下 {score}%。",
+            "这一段以 {score}% / {bpm} BPM 关闭。",
+            "已保存 {bpm} BPM 下 {score}%。想盘点就盘点。"
           ],
           "correction": [
-            "Segment ended at {score}% — review before the next pass.",
-            "{score}% closed the segment. Check what slipped before the next attempt.",
-            "Pause noted — {score}%. Replay the segment summary before continuing.",
-            "{score}% at {bpm} BPM — worth a quick look at the breakdown.",
-            "Segment closed below where you wanted: {score}%. Diagnose before pushing.",
-            "{score}% at {bpm} BPM — slow it down on the next pass.",
-            "Wrapped at {score}%. Dial in what slipped before another run.",
-            "{score}% at {bpm} BPM. Read the segment summary, then try again."
+            "这一段以 {score}% 结束，下一遍之前先回顾。",
+            "{score}% 关闭了这一段。下一次尝试之前，看看哪里滑了。",
+            "已记录停顿，{score}%。继续之前重看这一段的摘要。",
+            "{bpm} BPM 下 {score}%，值得快速看一下明细。",
+            "这一段关闭时低于你想要的水平：{score}%。推进之前先诊断。",
+            "{bpm} BPM 下 {score}%，下一遍放慢。",
+            "以 {score}% 收尾。再来一遍之前，先弄清哪里滑了。",
+            "{bpm} BPM 下 {score}%。读一下这一段的摘要，然后再试一次。"
           ]
         },
         "muddy_hits": {
           "neutral": [
-            "You're landing every beat but the signal is soft — try a sharper attack.",
-            "Beats are all there, but the transient is weak. Hit with more intention.",
-            "Coverage looks good but the hits are quiet. More force on the attack.",
-            "You're playing through the click, just softly. Try to make more contact."
+            "每一拍你都落到了，但信号偏软，试试更利落的发音。",
+            "拍点都在，但瞬态很弱。更有意图地击出。",
+            "覆盖看起来不错，但击音很轻。发音上多用点力。",
+            "你是在节拍声里演奏，只是很轻。试着多接触一些。"
           ]
         },
         "grid_discontinuity": {
           "neutral": [
-            "You went off the grid — try locking back to the click before the next phrase.",
-            "The beat wandered from the click. Reset and find the pulse before you continue.",
-            "Grid tracking dropped — take a beat, then re-enter on the downbeat.",
-            "Drifted from the click there. Stop, breathe, and lock back in."
+            "你偏离了网格，在下一个乐句之前试着重新锁回节拍声。",
+            "拍子偏离了节拍声。重置，先找到脉搏再继续。",
+            "网格跟踪丢了，歇一拍，然后在强拍上重新进入。",
+            "那里偏离了节拍声。停下，呼吸，重新锁回来。"
           ]
         },
         "low_completeness": {
           "neutral": [
-            "You're hitting about half the expected beats — try to stay engaged for every one.",
-            "Coverage is low — make sure you're landing each beat, not just the ones that feel natural.",
-            "Around half the beats are going unplayed. Focus on completing the full pattern.",
-            "Beat coverage is low. Try counting aloud to make sure you're not skipping any."
+            "你只打了大约一半预期的拍子，试着每一拍都投入。",
+            "覆盖偏低，确保每一拍都落到，而不只是感觉自然的那些。",
+            "大约一半的拍子没有弹。专注于完成完整的节奏型。",
+            "拍点覆盖偏低。试着出声数拍，确保没有漏掉。"
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "Your beat placement looks good — but the space between notes keeps wandering. Try counting the subdivisions out loud as you play.",
-            "On the beat consistently, but note spacing is uneven. Tap your foot and count subdivisions as you go.",
-            "The beat timing is there — the gap between notes is shifting though. Count eighth notes (or sixteenths) out loud to lock the spacing.",
-            "Placement is solid, spacing is drifting. Try slowing down until the gaps feel even, then speed back up."
+            "你的拍点落位不错，但音符之间的间隔一直在游移。演奏时试着把细分出声数出来。",
+            "一直落在拍上，但音符间距不均匀。一边踩脚一边数细分。",
+            "拍子的时间是对的，但音符之间的间隔在变化。出声数八分音符（或十六分音符）来锁住间距。",
+            "落位扎实，间距在漂移。试着放慢，直到间隔感觉均匀，再加速回来。"
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Note spacing is even — but you're landing off the beat. Anticipate each click by a hair and land right on it.",
-            "Even spacing, but the notes themselves are shifted from the grid. Focus on locking the first note of each group to the beat.",
-            "The rhythm between your notes is consistent — work on where they land relative to the click. Try playing just slightly ahead of where you expect the beat.",
-            "Good spacing feel. Now bring the whole phrase onto the grid — aim for the center of each beat."
+            "音符间距均匀，但你落在拍外。每下节拍声稍微提前一点点，正好落在它上面。",
+            "间距均匀，但音符本身相对网格偏移了。专注把每组的第一个音锁在拍上。",
+            "你的音符之间的节奏是一致的，练习它们相对节拍声的落点。试着弹得比你预期的拍子位置稍微超前一点。",
+            "间距的感觉不错。现在把整个乐句带到网格上，瞄准每一拍的中心。"
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Beat placement and note spacing are both locked in. That's the feel right there.",
-            "Spacing and placement both on point. Clean session.",
-            "Both dimensions solid — you're playing exactly where you intend to be.",
-            "Timing is dialed in across the board. That's what consistent practice sounds like."
+            "拍点落位和音符间距都稳住了。就是这个感觉。",
+            "间距和落位都在点上。很干净的一次练习。",
+            "两个维度都扎实，你弹在了你想要的确切位置。",
+            "节奏全面调准了。这就是持续练习听起来的样子。"
           ]
         },
         "drill_step_up": {
           "neutral": [
-            "{accuracyPct}% — tempo up to {bpm} BPM.",
-            "Clean round at {accuracyPct}%. Moving you up to {bpm} BPM.",
-            "That earned it: {accuracyPct}%. Now at {bpm} BPM.",
-            "{accuracyPct}% meets the pass mark — {bpm} BPM from here.",
-            "Solid at {accuracyPct}%. Stepping up to {bpm} BPM.",
-            "Nice round — {accuracyPct}%. {bpm} BPM next.",
-            "Up to {bpm} BPM. You held {accuracyPct}% last round.",
-            "{accuracyPct}% says you're ready. {bpm} BPM."
+            "{accuracyPct}%，速度升到 {bpm} BPM。",
+            "干净的一轮，{accuracyPct}%。把你升到 {bpm} BPM。",
+            "这是挣来的：{accuracyPct}%。现在 {bpm} BPM。",
+            "{accuracyPct}% 达到了及格线，从这里起 {bpm} BPM。",
+            "{accuracyPct}% 很扎实。升到 {bpm} BPM。",
+            "不错的一轮，{accuracyPct}%。下一轮 {bpm} BPM。",
+            "升到 {bpm} BPM。上一轮你守住了 {accuracyPct}%。",
+            "{accuracyPct}% 说明你准备好了。{bpm} BPM。"
           ]
         },
         "drill_step_down": {
           "neutral": [
-            "{accuracyPct}% — easing back to {bpm} BPM.",
-            "That round slipped to {accuracyPct}%. Dropping to {bpm} BPM.",
-            "Backing off to {bpm} BPM — {accuracyPct}% last round.",
-            "{accuracyPct}%. Let's rebuild it at {bpm} BPM.",
-            "Pulling back to {bpm} BPM after {accuracyPct}%.",
-            "{accuracyPct}% is under the pass mark — {bpm} BPM for the next round.",
-            "Down to {bpm} BPM. Get it clean before we climb again.",
-            "Easing to {bpm} BPM; {accuracyPct}% needs firmer ground."
+            "{accuracyPct}%，退回到 {bpm} BPM。",
+            "那一轮滑到了 {accuracyPct}%。降到 {bpm} BPM。",
+            "退到 {bpm} BPM，上一轮 {accuracyPct}%。",
+            "{accuracyPct}%。我们在 {bpm} BPM 重新建立。",
+            "{accuracyPct}% 之后退回到 {bpm} BPM。",
+            "{accuracyPct}% 低于及格线，下一轮 {bpm} BPM。",
+            "降到 {bpm} BPM。先弹干净，再往上爬。",
+            "放缓到 {bpm} BPM；{accuracyPct}% 需要更坚实的地基。"
           ]
         }
       },
@@ -1920,139 +1920,139 @@
       "generic": {
         "muddy_hits": {
           "neutral": [
-            "You're hitting the beats but the signal is coming in soft — try playing with a firmer touch.",
-            "The rhythm is there but your attack is light — dig in a bit more.",
-            "Beats are landing but with a soft touch — try a stronger stroke.",
-            "Good rhythm, but the signal is a little soft — put more into each note.",
-            "You're connecting with the beats, but try adding more weight to each stroke."
+            "你打在了拍点上，但收到的信号偏弱，试试用更实的力度。",
+            "节奏有了，但你的发音偏轻，再用力一点。",
+            "拍点落住了，但触感偏软，试试更有力的一下。",
+            "节奏不错，但信号有点弱，每个音多投入一些。",
+            "你和拍点是对上的，但每一下可以再加点分量。"
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Your timing is locked in — spacing and placement are both solid.",
-            "Nice and tight — your notes are landing in the right spots and they're evenly spaced.",
-            "Really consistent — your beat placement and note spacing are both dialled in.",
-            "Great feel — evenly spaced notes hitting right on the pulse.",
-            "Your timing is right in the pocket — spacing and placement are both there."
+            "你的节奏很稳，间距和落点都扎实。",
+            "又稳又紧，音落在了对的位置上，间隔也均匀。",
+            "非常一致，拍点落位和音符间距都调得很准。",
+            "感觉很好，均匀的音符正落在脉搏上。",
+            "你的节奏正在点上，间距和落点都到位。"
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Your notes are evenly spaced but drifting off the click — try anchoring to the pulse more.",
-            "Good even spacing but you're a little off the beat — try locking to the pulse.",
-            "The gaps between your notes are consistent but they're not quite on the beat — anchor to the click.",
-            "Even note spacing but the placement is wandering — focus on landing each note on the beat.",
-            "Your internal timing is consistent but the notes are drifting off the pulse — anchor to the click."
+            "你的音符间距均匀，但在偏离节拍声，试试更贴着脉搏。",
+            "间距均匀，但离拍点有一点偏差，试试锁住脉搏。",
+            "音符之间的间隔一致，但没有完全落在拍上，贴紧节拍声。",
+            "间距均匀，但落点在游移，专注把每个音落在拍上。",
+            "你的内部节奏一致，但音符在偏离脉搏，贴紧节拍声。"
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "You're landing close to each beat but the spaces between notes are uneven — focus on making those gaps more equal.",
-            "Good beat placement but uneven note spacing — try keeping the gaps between notes equal.",
-            "You're close to the beat but the spacing between notes varies — focus on even gaps.",
-            "Your note positions are close but the spacing is a bit scattered — even out the gaps.",
-            "Landing near the beat positions but the note spacing is inconsistent — work on keeping the spaces equal."
+            "你落在每个拍点附近，但音符之间的间隔不均匀，专注把这些间隔弄得更相等。",
+            "拍点落位不错，但音符间距不均匀，试试让音符之间的间隔保持相等。",
+            "你离拍点很近，但音符间距有变化，专注让间隔均匀。",
+            "音符位置接近，但间距有些分散，把间隔调均匀。",
+            "落在拍点附近，但音符间距不一致，练习让间隔保持相等。"
           ]
         },
         "great": {
           "neutral": [
-            "Really locked in — your timing is right there.",
-            "Solid feel, keep riding that groove.",
-            "Your timing is sitting right where it should be.",
-            "Clean rhythm — that's the pocket.",
-            "Locked in tight — great work.",
-            "That's a great feel — tempo is solid throughout."
+            "非常稳，你的节奏就在那里。",
+            "感觉扎实，继续保持这个律动。",
+            "你的节奏正落在该在的位置。",
+            "干净的节奏，这就是在点上。",
+            "稳稳锁住，做得好。",
+            "感觉很好，速度全程稳定。"
           ]
         },
         "good_steady": {
           "neutral": [
-            "Nice and steady — good consistent tempo.",
-            "Keeping it together — solid timing through the segment.",
-            "Tempo is holding well.",
-            "Good rhythm feel — consistent pulse.",
-            "Steady timing — you're building a solid foundation."
+            "稳稳当当，速度一致。",
+            "保持得住，这一段的节奏扎实。",
+            "速度守得很好。",
+            "节奏感不错，脉搏一致。",
+            "节奏平稳，你正在打下扎实的基础。"
           ]
         },
         "rushing": {
           "neutral": [
-            "You're leaning into the beat a little — try letting it come to you.",
-            "Arriving a touch early — sit back and let the pulse breathe.",
-            "The tempo is pushing forward — ease off the attack slightly.",
-            "You're ahead of the beat — try staying back with it.",
-            "A bit of a rush happening — slow your attack, not your tempo."
+            "你有点往拍子里扑，试试让拍子自己过来。",
+            "到得稍早，往后坐一点，让脉搏有喘息的空间。",
+            "速度在往前推，把力度稍微收一收。",
+            "你在拍子前面，试试和它一起留在后面。",
+            "有一点抢拍，放慢你的发音，而不是速度。"
           ]
         },
         "dragging": {
           "neutral": [
-            "Settling a bit behind the beat — try staying a little more forward.",
-            "The tempo is dragging back — keep your attack crisp.",
-            "You're lagging slightly — push the attack forward.",
-            "Behind the beat — try keeping the energy moving forward.",
-            "A bit of drag happening — sharpen the attack."
+            "稍微落在拍子后面，试试再往前一点。",
+            "速度在往后拖，保持发音利落。",
+            "你略微滞后，把发音往前推。",
+            "落在拍子后面，试试让劲头继续往前走。",
+            "有一点拖拍，把发音弄得更利落。"
           ]
         },
         "oscillating": {
           "neutral": [
-            "The tempo is moving around — speeding up and slowing down.",
-            "Note spacing is uneven — try keeping the gaps between notes equal.",
-            "The pulse is wandering a bit — focus on steady spacing between notes.",
-            "Rushing then dragging — try locking into one steady feel.",
-            "Tempo consistency needs work — focus on equal note spacing."
+            "速度在起伏，一会儿快一会儿慢。",
+            "音符间距不均匀，试试让音符之间的间隔保持相等。",
+            "脉搏有点在游移，专注让音符之间的间距稳定。",
+            "先抢后拖，试试锁定一种稳定的感觉。",
+            "速度的一致性还需要练习，专注让音符间距相等。"
           ]
         },
         "low_score_solid_timing": {
           "neutral": [
-            "Your timing center is good — focus on hitting more of the beats.",
-            "Timing is in the right place, but you're missing some positions — fill those gaps.",
-            "Good timing feel, but the rhythm needs more coverage — play more of the beats.",
-            "The pulse is there but the rhythm is thin — try hitting more positions.",
-            "Your timing is centered well — now work on density."
+            "你的节奏中心不错，专注多打到一些拍点。",
+            "节奏的位置是对的，但有些位置漏掉了，把这些空缺补上。",
+            "节奏感不错，但覆盖还不够，多打一些拍点。",
+            "脉搏在，但节奏偏稀，试试多打一些位置。",
+            "你的节奏中心很好，现在练习密度。"
           ]
         },
         "low_coverage": {
           "neutral": [
-            "I'm only hearing some of your playing — check your input level or play a touch louder.",
-            "Signal is coming in low — try playing with a bit more attack.",
-            "Low detection rate — you may need to turn up your input gain.",
-            "Only picking up part of your playing — check the input level in settings.",
-            "Weak signal coming in — play louder or check your input gain."
+            "我只听到了你演奏的一部分，检查输入电平，或者稍微弹响一点。",
+            "进来的信号偏低，试试用更多一点的力度。",
+            "检测率偏低，你可能需要调高输入增益。",
+            "只收到了你演奏的一部分，到设置里检查输入电平。",
+            "进来的信号很弱，弹响一点，或者检查输入增益。"
           ]
         },
         "noodling": {
           "neutral": [
-            "Good free feel — let the ideas flow.",
-            "Nice exploration — when you're ready, bring it back to the pulse.",
-            "Creative space — use it well.",
-            "Good free play — follow the feel.",
-            "Let it breathe — come back to the grid when you're ready."
+            "自由的感觉不错，让想法流动起来。",
+            "很好的探索，准备好了就回到脉搏上来。",
+            "这是创作的空间，好好用它。",
+            "自由演奏不错，跟着感觉走。",
+            "让它自然呼吸，准备好了就回到网格上来。"
           ]
         },
         "flat_dynamics": {
           "neutral": [
-            "Your playing is very even dynamically — try letting the downbeats breathe a little.",
-            "Every note is about the same volume — experiment with accenting the main beats.",
-            "Nice consistency, but try adding some dynamic shape — hit the downbeats a touch harder."
+            "你的演奏力度非常平均，试试让强拍有一点呼吸。",
+            "每个音的音量差不多，试试给主要的拍子加重音。",
+            "一致性不错，但试试加入一些力度的起伏，强拍稍微打重一点。"
           ]
         },
         "weak_downbeats": {
           "neutral": [
-            "Try hitting beats 1 and 3 a touch harder — your downbeats are blending in.",
-            "Your upbeats are a little strong — ease off them and push the downbeats.",
-            "The main beats need more weight — let beats 1 and 3 lead."
+            "试试把第 1 拍和第 3 拍打重一点，你的强拍被淹没了。",
+            "你的弱拍有点强，把它们收一收，把强拍推出来。",
+            "主要的拍子需要更多分量，让第 1 拍和第 3 拍带头。"
           ]
         },
         "good_accents": {
           "neutral": [
-            "Nice dynamic shape — your downbeats have good weight.",
-            "Great accent on the main beats — the groove has a clear pulse.",
-            "Your downbeats are coming through clearly — nice feel."
+            "力度的起伏不错，你的强拍很有分量。",
+            "主要拍子上的重音很好，律动的脉搏很清楚。",
+            "你的强拍很清晰地出来了，感觉不错。"
           ]
         },
         "subdivisions_too_loud": {
           "neutral": [
-            "The fills are a bit heavy — let the in-between notes sit lighter.",
-            "Try making the subdivision fills softer — let the main beats carry the weight.",
-            "The fill notes are competing with your downbeats — ease off between the beats."
+            "填充的音有点重，让中间的音轻一些。",
+            "试试把细分的填充音弄得更轻，让主要的拍子承担分量。",
+            "填充的音在和你的强拍争，拍子之间收一收。"
           ]
         }
       }
@@ -2061,161 +2061,161 @@
       "generic": {
         "muddy_hits": {
           "neutral": [
-            "Your beats are landing but the signal confidence is low — try a firmer attack on each note.",
-            "The detector sees your hits but with low confidence — your transients may be too soft.",
-            "Beats are registering but the signal is weak — sharpen the attack to get a cleaner transient.",
-            "Low signal confidence on your hits — dig in more to improve the attack strength.",
-            "Your attack is too soft for reliable detection — play with more conviction."
+            "你的拍点落住了，但信号置信度偏低，试试每个音用更实的发音。",
+            "检测器看到了你的击音，但置信度偏低，你的瞬态可能太软。",
+            "拍点有记录，但信号偏弱，把发音弄得更利落，以得到更干净的瞬态。",
+            "你的击音信号置信度偏低，多投入一些，以提高发音强度。",
+            "你的发音太软，无法被可靠检测，演奏时更坚定一些。"
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Note spacing is consistent and beat placement is solid — tight all-round timing.",
-            "Both note spacing and beat placement are on point — clean timing overall.",
-            "Even note spacing and accurate beat placement — this is what locked-in feels like.",
-            "Spacing and placement are both dialled in — timing is solid.",
-            "Consistent spacing and clean beat placement — nothing to fix here."
+            "音符间距一致，拍点落位扎实，整体节奏紧凑。",
+            "音符间距和拍点落位都很准，整体节奏干净。",
+            "间距均匀，拍点落位准确，这就是锁定的感觉。",
+            "间距和落位都调得很准，节奏扎实。",
+            "间距一致，拍点落位干净，这里没有需要修正的。"
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Note spacing is even but beat placement is drifting — your internal clock is consistent but not synced to the pulse.",
-            "Consistent note spacing but the beats are landing off-center — your internal rhythm is good, just anchor it to the grid.",
-            "Even spacing between notes but the placement is wandering off the beat — sync to the pulse.",
-            "Your note spacing is reliable but the beat positions are drifting — the internal clock is there, just align it to the click.",
-            "Spacing consistency is good but beat placement is off — focus on landing each note on the pulse."
+            "音符间距均匀，但拍点落位在漂移，你的内部时钟是一致的，但没有和脉搏同步。",
+            "音符间距一致，但拍点落在偏离中心的位置，你的内部节奏不错，只需把它锚定到网格上。",
+            "音符之间的间距均匀，但落位在偏离拍点，和脉搏同步。",
+            "你的音符间距可靠，但拍点位置在漂移，内部时钟是有的，只需对齐到节拍声。",
+            "间距一致性不错，但拍点落位有偏差，专注把每个音落在脉搏上。"
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "Beat placement is on target but subdivision spacing is inconsistent — anchor points are right, the fills between them are scattered.",
-            "Good beat placement but the gaps between notes vary — your positions are correct, the spacing is not.",
-            "You're close to the beat positions but note spacing is uneven — the placement is there, even out the gaps.",
-            "Accurate beat placement, inconsistent note spacing — the anchor points are correct, work on even gaps.",
-            "Beat positions are solid but subdivision spacing is irregular — the placement is there, now even out the fills."
+            "拍点落位在目标上，但细分间距不一致，锚点是对的，它们之间的填充是分散的。",
+            "拍点落位不错，但音符之间的间隔有变化，你的位置是对的，间距不是。",
+            "你离拍点位置很近，但音符间距不均匀，落位有了，把间隔调均匀。",
+            "拍点落位准确，音符间距不一致，锚点是对的，练习让间隔均匀。",
+            "拍点位置扎实，但细分间距不规则，落位有了，现在把填充弄均匀。"
           ]
         },
         "great": {
           "neutral": [
-            "Tight beat placement and even note spacing — clean all-round timing.",
-            "Beat placement solid, spacing consistent — push the tempo when you're ready.",
-            "All timing components clean — good session.",
-            "Note spacing and placement both dialled in.",
-            "Timing is locked — consider bumping the tempo or tightening the subdivisions."
+            "拍点落位紧凑，音符间距均匀，整体节奏干净。",
+            "拍点落位扎实，间距一致，准备好了就提高速度。",
+            "所有节奏要素都干净，这次练习不错。",
+            "音符间距和落位都调得很准。",
+            "节奏已锁定，可以考虑提高速度，或收紧细分。"
           ]
         },
         "good_steady": {
           "neutral": [
-            "Consistent spacing and placement — solid foundation. Push tempo 5 BPM or sharpen the attack.",
-            "Good timing consistency — a few positions drift but the center holds.",
-            "Placement and spacing reliable — room to push harder.",
-            "Timing center is on, spacing is consistent — push the tempo to challenge it.",
-            "Solid timing foundation — focus on sharpening the attack on weaker beats."
+            "间距和落位一致，基础扎实。把速度提高 5 BPM，或把发音弄得更利落。",
+            "节奏一致性不错，有几个位置在漂移，但中心守住了。",
+            "落位和间距可靠，还有往上推的余地。",
+            "节奏中心在点上，间距一致，提高速度来挑战它。",
+            "节奏基础扎实，专注把较弱的拍子上的发音弄得更利落。"
           ]
         },
         "rushing": {
           "neutral": [
-            "Consistently arriving early — directional early bias in the attack timing.",
-            "Note attacks are arriving before the beat — ease the onset forward slightly.",
-            "Early attack pattern — your notes are preceding the beat consistently.",
-            "Consistent early bias — the attack is rushing the pulse.",
-            "Timing is shifted early — let the beat land first, then hit."
+            "一直到得偏早，发音时间上有方向性的偏早倾向。",
+            "音符的发音在拍子之前到来，把起音稍微往后放。",
+            "发音偏早的模式，你的音符一直先于拍子。",
+            "一致的偏早倾向，发音在抢脉搏。",
+            "节奏整体偏早，让拍子先落下，再打。"
           ]
         },
         "dragging": {
           "neutral": [
-            "Consistently arriving late — directional late bias in the attack timing.",
-            "Note attacks are landing after the beat — sharpen the attack slightly.",
-            "Late attack pattern — notes are trailing the beat consistently.",
-            "Consistent late bias — the attack is dragging the pulse.",
-            "Timing is shifted late — push the attack to meet the beat."
+            "一直到得偏晚，发音时间上有方向性的偏晚倾向。",
+            "音符的发音落在拍子之后，把发音弄得稍微利落一点。",
+            "发音偏晚的模式，音符一直跟在拍子后面。",
+            "一致的偏晚倾向，发音在拖脉搏。",
+            "节奏整体偏晚，把发音往前推，去迎上拍子。"
           ]
         },
         "oscillating": {
           "neutral": [
-            "High timing variance despite a near-neutral average — the timing is genuinely unstable.",
-            "Not a directional bias — the timing is alternating early and late.",
-            "Tempo instability: note spacing is inconsistent across the segment.",
-            "Rushing-dragging pattern — not a fixed offset, true variance in the timing.",
-            "Timing variance is high — focus on keeping note spacing consistent."
+            "尽管平均值接近中性，节奏的方差很高，节奏确实不稳定。",
+            "这不是方向性的偏差，节奏在偏早和偏晚之间交替。",
+            "速度不稳定：整段中音符间距不一致。",
+            "抢拍和拖拍交替的模式，不是固定的偏移，而是节奏中真实的方差。",
+            "节奏方差很高，专注让音符间距保持一致。"
           ]
         },
         "low_score_solid_timing": {
           "neutral": [
-            "Timing center and spacing are clean but beat coverage is low.",
-            "Good placement accuracy but too many beat positions are empty.",
-            "Note spacing is consistent but density is low — hit more of the grid positions.",
-            "Timing fundamentals are solid, coverage is the gap — fill out more positions.",
-            "Placement is accurate — focus on hitting more of the beat positions."
+            "节奏中心和间距都干净，但拍点覆盖偏低。",
+            "落位准确度不错，但太多拍点位置是空的。",
+            "音符间距一致，但密度偏低，多打一些网格位置。",
+            "节奏基本功扎实，缺口在覆盖，把更多位置补满。",
+            "落位准确，专注多打到一些拍点位置。"
           ]
         },
         "low_coverage": {
           "neutral": [
-            "Only a fraction of beat positions had a detected hit — signal may be too quiet.",
-            "Detection rate is low — check your input gain or play louder.",
-            "Most beat positions are empty — check the input level, this isn't a playing-quality issue.",
-            "Low hit detection — increase input gain or attack strength.",
-            "Signal is too quiet for reliable detection — play louder or adjust your input level."
+            "只有一小部分拍点位置检测到了击音，信号可能太小。",
+            "检测率偏低，检查输入增益，或弹响一点。",
+            "大部分拍点位置是空的，检查输入电平，这不是演奏质量的问题。",
+            "击音检测偏低，提高输入增益或发音强度。",
+            "信号太小，无法可靠检测，弹响一点，或调整输入电平。"
           ]
         },
         "noodling": {
           "neutral": [
-            "Free-play mode — beat placement isn't being graded here.",
-            "Exploring freely — use it to warm up, then rein it back to the grid.",
-            "No scoring in free play — this is your creative space.",
-            "Free-form mode active — grading resumes when you lock back to the pulse.",
-            "Ungraded free play — let it flow, come back to the grid when ready."
+            "自由演奏模式，这里不对拍点落位评分。",
+            "自由探索，用它来热身，然后再收回到网格上。",
+            "自由演奏不评分，这是你的创作空间。",
+            "自由形式模式已启用，等你锁回脉搏时恢复评分。",
+            "未评分的自由演奏，让它流动，准备好了再回到网格上。"
           ]
         },
         "flat_dynamics": {
           "neutral": [
-            "Low amplitude variation across beat positions — try varying your pick attack.",
-            "Minimal dynamic shaping across the bar — increase accent differential on the downbeats.",
-            "Amplitude is consistent across positions — build in a dynamic hierarchy: downbeats strongest, upbeats lighter."
+            "各拍点位置之间的振幅变化很小，试试改变你的发音力度。",
+            "整个小节的力度塑形很少，加大强拍上的重音差。",
+            "各位置的振幅一致，建立力度层次：强拍最强，弱拍更轻。"
           ]
         },
         "weak_downbeats": {
           "neutral": [
-            "Anti-accent pattern detected — downbeats are quieter than upbeats.",
-            "Your upbeats are dominating — increase pick attack on beats 1 and 3.",
-            "Downbeat amplitude is below upbeat amplitude — reverse the dynamic hierarchy."
+            "检测到反重音模式，强拍比弱拍更轻。",
+            "你的弱拍占了主导，加大第 1 拍和第 3 拍的发音力度。",
+            "强拍振幅低于弱拍振幅，把力度层次反过来。"
           ]
         },
         "good_accents": {
           "neutral": [
-            "Healthy accent differential — downbeats are clearly stronger than upbeats.",
-            "Good dynamic shaping — downbeat amplitude is well above upbeat amplitude.",
-            "Strong accent structure — downbeats leading the dynamic hierarchy."
+            "重音差很健康，强拍明显比弱拍强。",
+            "力度塑形不错，强拍振幅远高于弱拍振幅。",
+            "重音结构很强，强拍引领着力度层次。"
           ]
         },
         "subdivisions_too_loud": {
           "neutral": [
-            "Subdivision amplitude is close to downbeat amplitude — fills are overwhelming the accent structure.",
-            "The fills are as loud as the main beats — reduce attack on the subdivision notes.",
-            "No dynamic hierarchy between beats and fills — downbeats should lead, subdivisions should follow."
+            "细分振幅接近强拍振幅，填充音压过了重音结构。",
+            "填充音和主要拍子一样响，减小细分音上的发音力度。",
+            "拍子和填充音之间没有力度层次，强拍应该带头，细分应该跟随。"
           ]
         }
       }
     },
     "words": {
       "direction": {
-        "before": "before",
-        "after": "after"
+        "before": "偏早",
+        "after": "偏晚"
       },
       "correctionDirection": {
-        "earlier": "earlier",
-        "later": "later"
+        "earlier": "提前",
+        "later": "推后"
       },
       "change": {
-        "bpmUp": "tempo up to {to} BPM",
-        "bpmDown": "tempo down to {to} BPM",
-        "presetCleared": "preset cleared",
-        "preset": "loading \"{to}\"",
-        "timeSig": "time signature {to}/4",
-        "grouping": "regrouped to {to}",
-        "instrument": "switching to {to}",
-        "other": "config changed",
-        "separator": "; "
+        "bpmUp": "速度升到 {to} BPM",
+        "bpmDown": "速度降到 {to} BPM",
+        "presetCleared": "预设已清除",
+        "preset": "正在载入“{to}”",
+        "timeSig": "拍号 {to}/4",
+        "grouping": "重新分组为 {to}",
+        "instrument": "切换到 {to}",
+        "other": "设置已更改",
+        "separator": "；"
       }
     }
   }

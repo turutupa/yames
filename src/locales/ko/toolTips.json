@@ -4,557 +4,557 @@
       "generic": {
         "session_start_cold": {
           "neutral": [
-            "Hey — play when you're ready and I'll start tracking your timing.",
-            "Good to have you. Start when you feel warm.",
-            "Ready when you are. I'll start listening as soon as you play.",
-            "Take your time getting set up — I'll pick up your timing from the first note.",
-            "No rush. Start when you're settled and we'll go from there.",
-            "Hit play whenever you're ready. I'll catch you from the first beat.",
-            "Set up, settle in, then start playing whenever.",
-            "Whenever you're ready — I'm listening."
+            "안녕하세요. 준비되면 연주하세요. 타이밍 추적을 시작할게요.",
+            "와 주셔서 좋아요. 몸이 풀리면 시작하세요.",
+            "준비되면 말씀하세요. 연주하면 바로 듣기 시작할게요.",
+            "천천히 준비하세요. 첫 음부터 타이밍을 잡을게요.",
+            "서두르지 않아도 돼요. 자리를 잡으면 시작하고 거기서부터 가요.",
+            "준비되면 언제든 연주를 시작하세요. 첫 박부터 잡을게요.",
+            "준비하고 자리를 잡은 다음 언제든 연주를 시작하세요.",
+            "준비되면 언제든 시작하세요. 듣고 있어요."
           ]
         },
         "session_start_returning": {
           "neutral": [
-            "Welcome back. Last time: {lastScore} at {lastBpm} BPM. Let's build on that.",
-            "Good to see you again. You hit {lastScore} at {lastBpm} BPM last session.",
-            "Back at it. You were at {lastScore} / {lastBpm} BPM last time — let's keep climbing.",
-            "Welcome back — {lastScore} at {lastBpm} BPM last session. Ready when you are.",
-            "Last session: {lastScore} at {lastBpm} BPM. Let's pick up where you left off.",
-            "Back again. You finished at {lastScore} at {lastBpm} BPM — good baseline.",
-            "Welcome back. {lastScore} at {lastBpm} BPM last time. Let's see what today brings.",
-            "Good to have you back. Last time you hit {lastScore} at {lastBpm} BPM."
+            "다시 오셨네요. 지난번은 {lastBpm} BPM에서 {lastScore}였어요. 거기서부터 쌓아 가요.",
+            "다시 만나서 반가워요. 지난 세션에서 {lastBpm} BPM에 {lastScore}였어요.",
+            "다시 시작이네요. 지난번엔 {lastScore} / {lastBpm} BPM이었어요. 계속 올라가 봐요.",
+            "다시 오셨네요. 지난 세션은 {lastBpm} BPM에서 {lastScore}였어요. 준비되면 시작하세요.",
+            "지난 세션은 {lastBpm} BPM에서 {lastScore}였어요. 멈춘 곳에서 이어 가요.",
+            "또 오셨네요. {lastBpm} BPM에서 {lastScore}로 마쳤어요. 좋은 기준이에요.",
+            "다시 오셨네요. 지난번엔 {lastBpm} BPM에서 {lastScore}였어요. 오늘은 어떨지 봐요.",
+            "다시 와 주셔서 좋아요. 지난번엔 {lastBpm} BPM에서 {lastScore}였어요."
           ]
         },
         "accuracy_drop": {
           "encouragement": [
-            "A few misses crept in — ease up, breathe, then come back to it.",
-            "You were locked in, then a wobble. Reset on the next strong beat.",
-            "Quick dip. Slow the pulse in your head and pick it up again.",
-            "Small slip — no big deal. Find the click again on the next bar.",
-            "Lost the thread for a second. Catch the next downbeat clean.",
-            "Tiny stumble. Take a breath and ride the next click in.",
-            "Cool — just feel the next beat land before you play.",
-            "A little drift. Let the metronome lead you back in."
+            "놓친 음이 조금 생겼어요. 힘을 빼고 숨을 쉰 다음 다시 돌아오세요.",
+            "잘 맞다가 살짝 흔들렸어요. 다음 강박에서 다시 맞춰 보세요.",
+            "잠깐 떨어졌어요. 머릿속 맥박을 늦추고 다시 이어 가세요.",
+            "작은 실수예요. 별일 아니에요. 다음 마디에서 클릭을 다시 찾아 보세요.",
+            "잠깐 흐름을 놓쳤어요. 다음 다운비트를 깔끔하게 잡아 보세요.",
+            "살짝 걸렸어요. 숨을 쉬고 다음 클릭에 올라타 보세요.",
+            "괜찮아요. 연주하기 전에 다음 박이 떨어지는 걸 느껴 보세요.",
+            "조금 벗어났어요. 메트로놈이 다시 이끌게 해 보세요."
           ],
           "neutral": [
-            "Hit rate's slipped a bit — reset on the next bar.",
-            "Accuracy is sliding. Let it settle on the next downbeat.",
-            "Things are slipping — slow it in your head, then start fresh.",
-            "Some misses stacking up. Find a clean bar, then keep going.",
-            "Quality's drifting. Lock in with the click for one full bar.",
-            "Misses creeping up — take a breath, hear the click, then play.",
-            "Drift showing. Sit one bar quiet with the click before coming back.",
-            "Hits dropping off. Wait for the strong beat and re-set."
+            "적중률이 조금 떨어졌어요. 다음 마디에서 다시 맞춰 보세요.",
+            "정확도가 떨어지고 있어요. 다음 다운비트에서 안정시켜 보세요.",
+            "점점 흐트러지고 있어요. 머릿속에서 늦춘 다음 새로 시작해 보세요.",
+            "놓친 음이 쌓이고 있어요. 깔끔한 마디를 찾은 다음 계속하세요.",
+            "품질이 벗어나고 있어요. 한 마디 동안 클릭에 맞춰 보세요.",
+            "놓친 음이 늘고 있어요. 숨을 쉬고 클릭을 들은 다음 연주하세요.",
+            "벗어남이 보여요. 한 마디는 클릭과 함께 쉬었다가 돌아오세요.",
+            "적중이 줄고 있어요. 강박을 기다렸다가 다시 맞추세요."
           ],
           "correction": [
-            "The slip is sustained — try dialing the tempo down a few BPM.",
-            "Hits are scattering. Slow down and rebuild from a clean bar.",
-            "Get one clean bar, then climb again.",
-            "Pattern's coming apart — pause, count yourself in slow, then play.",
-            "Stop, count a full bar with the click, then come back in.",
-            "Drop the tempo five BPM. Get it clean, then bring it back up.",
-            "Pull back. Get one solid bar against the click before adding speed.",
-            "Reset hard — silence one bar, count it, then start fresh."
+            "흐트러짐이 이어지고 있어요. 템포를 몇 BPM 낮춰 보세요.",
+            "타격이 흩어져요. 느리게 하고 깔끔한 마디에서 다시 쌓아 보세요.",
+            "깔끔한 마디를 하나 만든 다음 다시 올라가세요.",
+            "패턴이 무너지고 있어요. 멈추고 천천히 카운트를 센 다음 연주하세요.",
+            "멈추고 클릭에 맞춰 한 마디를 센 다음 다시 들어오세요.",
+            "템포를 5 BPM 낮추세요. 깔끔하게 만든 다음 다시 올리세요.",
+            "한 걸음 물러나세요. 속도를 더하기 전에 클릭에 맞는 안정된 마디를 하나 만드세요.",
+            "확실히 리셋하세요. 한 마디는 쉬면서 세고, 그다음 새로 시작하세요."
           ]
         },
         "rushing_trend": {
           "encouragement": [
-            "Sitting just ahead of the click — breathe and ride it.",
-            "Slight rush creeping in. Plant your foot, let the metronome lead.",
-            "A little early — settle into the next click.",
-            "You're a hair ahead. Wait for the click instead of chasing it.",
-            "Just a tiny bit hot. Relax your hands and let the click pull you.",
-            "Pulse is creeping up. Take a breath and let the next click meet you.",
-            "Edge of rushing. Lean back into the seat and ride the click.",
-            "A touch early. Hear the click first, then play."
+            "클릭보다 살짝 앞서 있어요. 숨을 쉬고 클릭을 타 보세요.",
+            "조금 서두르는 느낌이 생겨요. 발을 딛고 메트로놈이 이끌게 하세요.",
+            "조금 일러요. 다음 클릭에 자리를 잡아 보세요.",
+            "아주 조금 앞서요. 클릭을 쫓지 말고 기다려 보세요.",
+            "아주 살짝 뜨거워요. 손에서 힘을 빼고 클릭이 당기게 해 보세요.",
+            "맥박이 올라가고 있어요. 숨을 쉬고 다음 클릭이 만나러 오게 하세요.",
+            "서두르기 직전이에요. 의자에 기대듯 뒤로 앉아 클릭을 타 보세요.",
+            "조금 일러요. 클릭을 먼저 듣고 나서 연주하세요."
           ],
           "neutral": [
-            "Trending a touch early — try riding the back of the beat.",
-            "You're nudging ahead of the click — let it come to you.",
-            "Drifting early. Sit deeper into each click.",
-            "Each note's landing a little early. Wait for the click.",
-            "You're leading the metronome. Let it lead you instead.",
-            "Pace is creeping up. Match the click, don't push it.",
-            "Notes are arriving too soon. Hold each one a beat longer in your head.",
-            "Drift forward. Take a breath and let the click set the pace."
+            "조금 일찍 가는 경향이에요. 박의 뒤쪽을 타 보세요.",
+            "클릭보다 살짝 앞으로 나가요. 클릭이 다가오게 두세요.",
+            "일찍 벗어나고 있어요. 각 클릭에 더 깊이 앉아 보세요.",
+            "음이 하나하나 조금 일찍 떨어져요. 클릭을 기다리세요.",
+            "메트로놈을 앞서 가고 있어요. 대신 메트로놈이 이끌게 하세요.",
+            "속도가 올라가고 있어요. 클릭에 맞추고 밀지 마세요.",
+            "음이 너무 일찍 도착해요. 머릿속에서 하나하나를 한 박 더 붙잡아 보세요.",
+            "앞으로 벗어나요. 숨을 쉬고 클릭이 속도를 정하게 하세요."
           ],
           "correction": [
-            "Still leaning early — count the in-betweens and land each note right on the click.",
-            "The rush is sticking. Slow down, count the offbeat between each click.",
-            "Pause, count yourself in slow, then start playing again.",
-            "Drop a few BPM. Get the click to lead before bringing it back up.",
-            "Hands are racing. Stop, take a breath, start on the next strong beat.",
-            "Reset — silence one bar, hear the click, then come in on beat 1.",
-            "Push the tempo down five BPM until you can sit ON the click.",
-            "Stop trying to drive the metronome. Let it drive you for one bar."
+            "계속 일찍 쏠려요. 사이의 박을 세면서 각 음을 클릭에 정확히 놓으세요.",
+            "서두름이 이어져요. 느리게 하고 클릭과 클릭 사이의 뒷박을 세 보세요.",
+            "멈추고 천천히 카운트를 센 다음 다시 연주하세요.",
+            "몇 BPM 낮추세요. 클릭이 이끌게 한 다음 다시 올리세요.",
+            "손이 달리고 있어요. 멈추고 숨을 쉰 다음 다음 강박에서 시작하세요.",
+            "리셋하세요. 한 마디는 쉬면서 클릭을 듣고 1박에 들어오세요.",
+            "클릭 위에 앉을 수 있을 때까지 템포를 5 BPM 내리세요.",
+            "메트로놈을 몰려고 하지 마세요. 한 마디 동안 메트로놈이 이끌게 하세요."
           ]
         },
         "dragging_trend": {
           "encouragement": [
-            "Sitting just behind the click — lift the tempo back under your fingers.",
-            "Slight drag. Breathe and push back into the beat.",
-            "A little behind — lean forward, you're close.",
-            "You're a hair late. Lift your hands; meet the click on top.",
-            "Just barely lagging. Push gently — the click will meet you.",
-            "Drift back is small. Lean in and ride the front of each click.",
-            "Touch late. Imagine playing slightly ahead and you'll land in time.",
-            "Notes are arriving just after the click. Push a little."
+            "클릭보다 살짝 뒤에 있어요. 템포를 손끝 아래로 다시 끌어올리세요.",
+            "조금 처져요. 숨을 쉬고 박 안으로 다시 밀어 보세요.",
+            "조금 뒤예요. 앞으로 기울이세요. 거의 다 왔어요.",
+            "아주 조금 늦어요. 손을 들어 클릭의 위에서 만나 보세요.",
+            "간신히 처지는 정도예요. 살짝 밀면 클릭이 만나러 와요.",
+            "뒤로 벗어난 건 작아요. 몸을 기울여 각 클릭의 앞쪽을 타 보세요.",
+            "조금 늦어요. 아주 살짝 앞서 연주한다고 상상하면 박에 맞아요.",
+            "음이 클릭 바로 뒤에 도착해요. 조금 밀어 보세요."
           ],
           "neutral": [
-            "Trending a touch late — try playing slightly ahead of the click.",
-            "You're sitting behind the beat — push into each one.",
-            "Drifting late. Reach for the front of each click.",
-            "Each note's landing just after the click. Meet it head-on instead.",
-            "The metronome's leaving you behind. Step into each click.",
-            "Pace is sagging. Lift the hands and play on top of the click.",
-            "Notes arriving late. Aim for the front edge of each beat.",
-            "Drag is showing. Imagine the click is a half-step earlier than you think."
+            "조금 늦게 가는 경향이에요. 클릭보다 살짝 앞서 연주해 보세요.",
+            "박 뒤에 앉아 있어요. 하나하나 안으로 밀어 넣어 보세요.",
+            "늦게 벗어나고 있어요. 각 클릭의 앞쪽으로 손을 뻗어 보세요.",
+            "음이 하나하나 클릭 바로 뒤에 떨어져요. 대신 정면으로 만나 보세요.",
+            "메트로놈이 앞서 가요. 각 클릭 안으로 한 걸음 들어가 보세요.",
+            "속도가 처지고 있어요. 손을 들고 클릭 위에서 연주하세요.",
+            "음이 늦게 도착해요. 각 박의 앞쪽 가장자리를 겨냥하세요.",
+            "처짐이 보여요. 클릭이 생각보다 반 박자 앞에 있다고 상상해 보세요."
           ],
           "correction": [
-            "Still hanging back — play with the click, don't wait for it.",
-            "The drag is sticking. Push the tempo with your fingers.",
-            "Stop, reset, and start fresh on beat 1.",
-            "Drop the tempo a bit and lock in. The drag will clear once it feels easy.",
-            "Pause one bar. Hear the click, then come in right on top of beat 1.",
-            "Reset — count yourself in slow and play with more lift.",
-            "Slow it down five BPM and aim for the front of every click.",
-            "Stop, take a breath, then come in pushing slightly forward."
+            "계속 뒤에 머물러요. 클릭을 기다리지 말고 클릭과 함께 연주하세요.",
+            "처짐이 이어져요. 손끝으로 템포를 밀어 보세요.",
+            "멈추고 리셋한 다음 1박에서 새로 시작하세요.",
+            "템포를 조금 낮추고 맞춰 보세요. 편해지면 처짐은 사라져요.",
+            "한 마디 쉬세요. 클릭을 듣고 1박 바로 위에서 들어오세요.",
+            "리셋하세요. 천천히 카운트를 센 다음 더 가볍게 들어 올리며 연주하세요.",
+            "5 BPM 느리게 하고 모든 클릭의 앞쪽을 겨냥하세요.",
+            "멈추고 숨을 쉰 다음 살짝 앞으로 밀면서 들어오세요."
           ]
         },
         "personal_best_streak": {
           "encouragement": [
-            "Locked in — keep it going.",
-            "Streak's going. Nice.",
-            "On a run — stay there.",
-            "Yes. Don't change anything.",
-            "Riding it clean. Stay.",
-            "That's the pocket — hold on to it.",
-            "Beautiful. Just keep doing that.",
-            "Eyes closed, keep going."
+            "딱 맞아요. 계속 이어 가세요.",
+            "연속이 이어지고 있어요. 좋아요.",
+            "흐름을 타고 있어요. 거기 머무르세요.",
+            "네. 아무것도 바꾸지 마세요.",
+            "깔끔하게 타고 있어요. 머무르세요.",
+            "그게 포켓이에요. 놓치지 마세요.",
+            "아름다워요. 그대로 계속하세요.",
+            "눈을 감고 계속하세요."
           ],
           "neutral": [
-            "New session best — locked in.",
-            "Cleanest stretch so far. Hold it.",
-            "Best run yet today. Don't change a thing.",
-            "Longest clean run of the session. Keep it.",
-            "Top streak of today. Stay there.",
-            "Tightest stretch yet — hold this feel.",
-            "Best timing of the session right here.",
-            "This is your session high — sit in it."
+            "이번 세션 최고 기록이에요. 딱 맞아요.",
+            "지금까지 가장 깔끔한 구간이에요. 유지하세요.",
+            "오늘 최고의 흐름이에요. 아무것도 바꾸지 마세요.",
+            "이번 세션에서 가장 긴 깔끔한 구간이에요. 유지하세요.",
+            "오늘의 최고 연속이에요. 거기 머무르세요.",
+            "지금까지 가장 촘촘한 구간이에요. 이 느낌을 유지하세요.",
+            "이번 세션에서 가장 좋은 타이밍이 바로 여기예요.",
+            "이게 이번 세션의 최고 기록이에요. 그 안에 앉아 보세요."
           ],
           "correction": [
-            "Locked in — hold tempo, don't push faster yet.",
-            "Streak's clean. Stay at this BPM until it's automatic.",
-            "Exactly where you want to live for a minute.",
-            "Don't speed up yet. Let this tempo settle into the hands.",
-            "Stay flat — no climbing yet. Let it become muscle memory.",
-            "Hold this for another minute before adding speed.",
-            "Park here. Speed comes after this gets boring.",
-            "Resist the urge to push. Burn this tempo in first."
+            "딱 맞아요. 템포를 유지하고 아직 더 빠르게 하지 마세요.",
+            "연속이 깔끔해요. 자동으로 될 때까지 이 BPM에 머무르세요.",
+            "잠시 머물기 딱 좋은 곳이에요.",
+            "아직 빨라지지 마세요. 이 템포가 손에 자리 잡게 하세요.",
+            "평평하게 유지하세요. 아직 올리지 마세요. 몸이 기억하게 하세요.",
+            "속도를 더하기 전에 1분 더 유지하세요.",
+            "여기에 세워 두세요. 이게 지루해진 다음에 속도를 올리세요.",
+            "밀고 싶은 마음을 참으세요. 먼저 이 템포를 몸에 새기세요."
           ]
         },
         "new_band_locked": {
           "encouragement": [
-            "{bpmLow} BPM — yours now.",
-            "Locked at {bpmLow} BPM. Nice.",
-            "Held this tempo clean — new ceiling.",
-            "{bpmLow} BPM feels easy now. That's progress.",
-            "You own {bpmLow} BPM. Don't lose it.",
-            "Steady at {bpmLow}. That's the new floor.",
-            "Clean at {bpmLow} BPM — keep it warm.",
-            "{bpmLow} BPM — solid. Stay here a bit longer."
+            "{bpmLow} BPM, 이제 당신 거예요.",
+            "{bpmLow} BPM에 고정됐어요. 좋아요.",
+            "이 템포를 깔끔하게 유지했어요. 새 천장이에요.",
+            "{bpmLow} BPM이 이제 쉽게 느껴져요. 그게 진전이에요.",
+            "{bpmLow} BPM을 가졌어요. 잃지 마세요.",
+            "{bpmLow}에서 안정적이에요. 그게 새 바닥이에요.",
+            "{bpmLow} BPM에서 깔끔해요. 따뜻하게 유지하세요.",
+            "{bpmLow} BPM, 탄탄해요. 여기에 조금 더 머무르세요."
           ],
           "neutral": [
-            "Sustained clean play at {bpmLow}–{bpmHigh} BPM for a minute.",
-            "{bpmLow}–{bpmHigh} BPM band: locked in.",
-            "New BPM band owned: {bpmLow}–{bpmHigh}.",
-            "Clean for a full minute at {bpmLow}–{bpmHigh} BPM.",
-            "{bpmLow}–{bpmHigh} BPM held steady. That's the new baseline.",
-            "Locked into {bpmLow}–{bpmHigh} BPM for a long stretch.",
-            "Held the {bpmLow}–{bpmHigh} band clean — that's a real win.",
-            "Pocket sustained at {bpmLow}–{bpmHigh} BPM. Don't lose it now."
+            "{bpmLow}–{bpmHigh} BPM에서 1분 동안 깔끔한 연주를 유지했어요.",
+            "{bpmLow}–{bpmHigh} BPM 구간: 고정됐어요.",
+            "새 BPM 구간을 얻었어요: {bpmLow}–{bpmHigh}.",
+            "{bpmLow}–{bpmHigh} BPM에서 꼬박 1분 동안 깔끔했어요.",
+            "{bpmLow}–{bpmHigh} BPM을 안정적으로 유지했어요. 이게 새 기준선이에요.",
+            "{bpmLow}–{bpmHigh} BPM에 오래 고정됐어요.",
+            "{bpmLow}–{bpmHigh} 구간을 깔끔하게 유지했어요. 진짜 성과예요.",
+            "{bpmLow}–{bpmHigh} BPM에서 포켓이 유지됐어요. 이제 잃지 마세요."
           ],
           "correction": [
-            "{bpmLow}–{bpmHigh} is stable. Stay here, then push a touch.",
-            "Held {bpmLow}–{bpmHigh} clean. Ready to climb when you are.",
-            "{bpmLow}–{bpmHigh} feels owned. Next session, start here.",
-            "{bpmLow}–{bpmHigh} BPM is locked in. Don't speed up yet.",
-            "You can climb from {bpmLow}–{bpmHigh}, but earn it — two more clean minutes first.",
-            "{bpmLow}–{bpmHigh} BPM is the new floor. Don't drop back below it.",
-            "Stable at {bpmLow}–{bpmHigh}. Move up only when it feels boring.",
-            "{bpmLow}–{bpmHigh} BPM owned. Build a couple of minutes here before climbing."
+            "{bpmLow}–{bpmHigh}은 안정적이에요. 여기에 머문 다음 조금 밀어 보세요.",
+            "{bpmLow}–{bpmHigh}을 깔끔하게 유지했어요. 준비되면 올라가세요.",
+            "{bpmLow}–{bpmHigh}이 내 것 같아요. 다음 세션은 여기서 시작하세요.",
+            "{bpmLow}–{bpmHigh} BPM에 고정됐어요. 아직 빨라지지 마세요.",
+            "{bpmLow}–{bpmHigh}에서 올라갈 수 있지만 자격을 얻으세요. 먼저 깔끔한 2분이 더 필요해요.",
+            "{bpmLow}–{bpmHigh} BPM이 새 바닥이에요. 그 아래로 내려가지 마세요.",
+            "{bpmLow}–{bpmHigh}에서 안정적이에요. 지루하게 느껴질 때만 올리세요.",
+            "{bpmLow}–{bpmHigh} BPM을 얻었어요. 올라가기 전에 여기서 몇 분 쌓으세요."
           ]
         },
         "check_in": {
           "encouragement": [
-            "You've been deep in it. Anything you want to focus on next?",
-            "Five-plus minutes locked in. Want me to call out anything specific?",
-            "Long stretch — pause if you want, I'm here.",
-            "Solid run going. Want me to listen for anything in particular?",
-            "Been in this a while. Take a breath if you need one.",
-            "Quiet so far. Tell me what you're working on and I'll watch for it.",
-            "Nothing to call out yet. What do you want me to listen for?",
-            "Steady pocket. Keep going, or switch gears if you're ready."
+            "깊이 몰입하고 계셨어요. 다음에 집중하고 싶은 게 있나요?",
+            "5분 넘게 집중하고 있어요. 특별히 짚어 드릴 게 있을까요?",
+            "긴 구간이에요. 원하면 멈추세요. 저는 여기 있어요.",
+            "좋은 흐름이에요. 특별히 들어 볼 게 있을까요?",
+            "한동안 이어 왔어요. 필요하면 숨을 돌리세요.",
+            "지금까지 조용해요. 무엇을 연습 중인지 알려 주시면 지켜볼게요.",
+            "아직 짚을 게 없어요. 무엇을 들어 드릴까요?",
+            "안정적인 포켓이에요. 계속하거나 준비되면 방향을 바꾸세요."
           ],
           "neutral": [
-            "Five minutes in, nothing to flag. Solid pocket. Keep going or switch focus?",
-            "Quiet stretch. Tell me what you're working on.",
-            "Long uninterrupted run. Anything you want feedback on?",
-            "Five minutes deep. No issues to call out — keep going.",
-            "Steady session. Want a different angle, or stay the course?",
-            "Long run with no slips. What's next?",
-            "You've been in the pocket. Take stock and pick a next focus.",
-            "Quiet session so far. Pick a target if you want sharper feedback."
+            "5분이 지났고 짚을 게 없어요. 포켓이 탄탄해요. 계속할까요, 초점을 바꿀까요?",
+            "조용한 구간이에요. 무엇을 연습 중인지 알려 주세요.",
+            "끊김 없이 긴 연주예요. 피드백을 원하는 게 있나요?",
+            "5분째예요. 짚을 문제는 없어요. 계속하세요.",
+            "안정적인 세션이에요. 다른 각도로 볼까요, 이대로 갈까요?",
+            "실수 없이 긴 연주예요. 다음은 뭘까요?",
+            "포켓에 계셨어요. 점검하고 다음 초점을 골라 보세요.",
+            "지금까지 조용한 세션이에요. 더 날카로운 피드백을 원하면 목표를 골라 보세요."
           ],
           "correction": [
-            "Heads up — you've been in this a while. Take 10 if your hands need it.",
-            "Five-plus minutes continuous. Check in with your body before you push more.",
-            "Sustained session — stretch your fingers, then come back.",
-            "Hands tired? Take a 60-second pause before the next pass.",
-            "Long stretch — check the wrists and shoulders before continuing.",
-            "Time for a quick break. Cold hands play sloppy.",
-            "Pause and stretch. Two minutes off keeps the next twenty solid.",
-            "Sustained run — give the hands a rest before pushing further."
+            "알려 드려요. 한참 이어 왔어요. 손이 필요로 하면 10분 쉬세요.",
+            "5분 넘게 쉬지 않았어요. 더 밀기 전에 몸 상태를 살펴보세요.",
+            "오래 이어진 세션이에요. 손가락을 스트레칭한 다음 돌아오세요.",
+            "손이 피곤한가요? 다음 연주 전에 60초 쉬세요.",
+            "긴 구간이에요. 계속하기 전에 손목과 어깨를 확인하세요.",
+            "잠깐 쉴 시간이에요. 차가운 손은 거칠게 연주해요.",
+            "멈추고 스트레칭하세요. 2분 쉬면 다음 20분이 탄탄해져요.",
+            "오래 이어진 연주예요. 더 밀기 전에 손을 쉬게 하세요."
           ]
         },
         "fatigue": {
           "encouragement": [
-            "Accuracy's been sliding the last few minutes. Take a beat.",
-            "Hands tightening up? Quick stretch — come back fresh.",
-            "Quality's drifting. Pause, breathe, return.",
-            "Hands working harder than they should. Brief rest, then back in.",
-            "You've been going a while — drop the instrument for 60 seconds.",
-            "Body's getting heavier than the music. Quick break.",
-            "Fingers stiffening up? Shake them out, then come back.",
-            "Time for a short pause — fresh hands play cleaner."
+            "정확도가 지난 몇 분 동안 떨어지고 있어요. 잠깐 쉬세요.",
+            "손이 뻣뻣해지나요? 잠깐 스트레칭하고 새로운 마음으로 돌아오세요.",
+            "품질이 벗어나고 있어요. 멈추고 숨을 쉰 다음 돌아오세요.",
+            "손이 필요 이상으로 애쓰고 있어요. 잠깐 쉬었다가 다시 들어오세요.",
+            "한참 이어 왔어요. 악기를 60초 동안 내려놓으세요.",
+            "몸이 음악보다 무거워지고 있어요. 잠깐 쉬세요.",
+            "손가락이 굳나요? 털어 낸 다음 돌아오세요.",
+            "잠깐 쉴 시간이에요. 쉰 손이 더 깔끔하게 연주해요."
           ],
           "neutral": [
-            "Accuracy declined over the last 3 minutes at constant BPM — likely fatigue.",
-            "Score trending down without tempo change. Take a rest.",
-            "Sustained accuracy drop at the same BPM — call it a rest cycle.",
-            "Same tempo, falling accuracy. Hands are getting tired.",
-            "Quality's slipping but the tempo hasn't changed — that's fatigue.",
-            "Misses climbing while the click stays the same. Time for a pause.",
-            "Three-minute slide at one tempo. Rest the hands.",
-            "Steady BPM, sliding accuracy — your hands are telling you something."
+            "BPM이 같은 채로 지난 3분 동안 정확도가 떨어졌어요. 피로일 가능성이 높아요.",
+            "템포 변화 없이 점수가 내려가고 있어요. 쉬세요.",
+            "같은 BPM에서 정확도가 계속 떨어졌어요. 휴식 주기로 보세요.",
+            "템포는 같고 정확도는 떨어져요. 손이 피곤해지고 있어요.",
+            "품질은 떨어지는데 템포는 그대로예요. 피로예요.",
+            "클릭은 그대로인데 놓친 음이 늘고 있어요. 쉴 시간이에요.",
+            "한 템포에서 3분 동안 떨어졌어요. 손을 쉬게 하세요.",
+            "BPM은 일정한데 정확도가 떨어져요. 손이 뭔가를 말하고 있어요."
           ],
           "correction": [
-            "Fatigue showing — stop now, 90 seconds off, then come back.",
-            "You're past your peak window. Rest before quality drops further.",
-            "Take the rest. Tired playing teaches the hands sloppy habits.",
-            "Stop, stand up, walk around for a minute. Then come back.",
-            "Quality's been dropping for minutes. Real rest — 90 seconds minimum.",
-            "Hands are done for now. Pause, shake them out, hydrate.",
-            "Pushing past tired locks in mistakes. Stop and recover.",
-            "Set the instrument down. Two minutes off, then re-evaluate."
+            "피로가 보여요. 지금 멈추고 90초 쉰 다음 돌아오세요.",
+            "최고조 구간을 지났어요. 품질이 더 떨어지기 전에 쉬세요.",
+            "쉬세요. 피곤한 연주는 손에 거친 습관을 가르쳐요.",
+            "멈추고 일어나서 1분 동안 걸으세요. 그다음 돌아오세요.",
+            "품질이 몇 분째 떨어지고 있어요. 제대로 쉬세요. 최소 90초예요.",
+            "손은 지금은 끝났어요. 멈추고 털어 내고 물을 마시세요.",
+            "피곤한 채로 밀면 실수가 굳어요. 멈추고 회복하세요.",
+            "악기를 내려놓으세요. 2분 쉰 다음 다시 평가하세요."
           ]
         },
         "recovery": {
           "encouragement": [
-            "Nice save — stay here.",
-            "Pulled it back. Hold it.",
-            "Recovered — keep this exact feel.",
-            "Got it back. Sit in this for a minute.",
-            "Back from the dip. Don't change anything now.",
-            "You felt it slip and brought it back. That's the skill.",
-            "Solid recovery. Stay loose, stay here.",
-            "Caught it before it ran away. Hold this feel."
+            "잘 만회했어요. 여기에 머무르세요.",
+            "되돌렸어요. 유지하세요.",
+            "회복했어요. 이 느낌 그대로 유지하세요.",
+            "되찾았어요. 1분 동안 여기 앉아 보세요.",
+            "떨어졌다가 돌아왔어요. 이제 아무것도 바꾸지 마세요.",
+            "흔들리는 걸 느끼고 되돌렸어요. 그게 실력이에요.",
+            "탄탄한 회복이에요. 힘을 빼고 여기에 머무르세요.",
+            "멀리 가기 전에 잡았어요. 이 느낌을 유지하세요."
           ],
           "neutral": [
-            "Back to clean after the dip. Keep this pace.",
-            "Score's back up — hold it.",
-            "Recovery confirmed — accuracy steady again.",
-            "Clean again after the slip. Don't change anything.",
-            "Accuracy's back where it was. Hold steady.",
-            "Stabilized after the dip. Keep this tempo.",
-            "You closed the gap. Stay at this BPM.",
-            "Quality recovered. Park here a minute."
+            "떨어진 뒤 다시 깔끔해졌어요. 이 속도를 유지하세요.",
+            "점수가 다시 올라왔어요. 유지하세요.",
+            "회복이 확인됐어요. 정확도가 다시 안정적이에요.",
+            "실수 뒤 다시 깔끔해요. 아무것도 바꾸지 마세요.",
+            "정확도가 원래 자리로 돌아왔어요. 안정적으로 유지하세요.",
+            "떨어진 뒤 안정됐어요. 이 템포를 유지하세요.",
+            "격차를 좁혔어요. 이 BPM에 머무르세요.",
+            "품질이 회복됐어요. 1분 동안 여기에 머무르세요."
           ],
           "correction": [
-            "Recovery's holding. Don't push the tempo yet.",
-            "Back from the dip — stay flat, no climbing yet.",
-            "You salvaged it. Hold this exact BPM for a full minute.",
-            "Don't reward the recovery with a tempo bump. Sit here.",
-            "Back on track. Resist the urge to speed up.",
-            "Recovery is fresh — let it become habit before pushing.",
-            "Stay at this BPM. Build a couple of clean bars before changing anything.",
-            "You came back from the slip. Don't undo it by climbing too soon."
+            "회복이 유지되고 있어요. 아직 템포를 밀지 마세요.",
+            "떨어진 뒤 돌아왔어요. 평평하게 유지하세요. 아직 올리지 마세요.",
+            "되살렸어요. 이 BPM을 꼬박 1분 동안 유지하세요.",
+            "회복했다고 템포를 올려 주지 마세요. 여기 앉아 계세요.",
+            "다시 궤도예요. 빨라지고 싶은 마음을 참으세요.",
+            "회복한 지 얼마 안 됐어요. 밀기 전에 습관이 되게 하세요.",
+            "이 BPM에 머무르세요. 뭔가 바꾸기 전에 깔끔한 마디를 몇 개 쌓으세요.",
+            "실수에서 돌아왔어요. 너무 일찍 올려서 되돌리지 마세요."
           ]
         },
         "recovery_confirmed": {
           "encouragement": [
-            "Got it back.",
-            "Nice save — hold it.",
-            "Back and clean.",
-            "Pulled it back. Stay here."
+            "되찾았어요.",
+            "잘 만회했어요. 유지하세요.",
+            "돌아왔고 깔끔해요.",
+            "되돌렸어요. 여기 머무르세요."
           ],
           "neutral": [
-            "Accuracy's back. Keep this feel.",
-            "Back to clean after the dip.",
-            "Recovery confirmed. Hold steady."
+            "정확도가 돌아왔어요. 이 느낌을 유지하세요.",
+            "떨어진 뒤 다시 깔끔해졌어요.",
+            "회복이 확인됐어요. 안정적으로 유지하세요."
           ],
           "correction": [
-            "Recovery's holding — don't push the tempo yet.",
-            "Back on track. Resist the urge to climb."
+            "회복이 유지되고 있어요. 아직 템포를 밀지 마세요.",
+            "다시 궤도예요. 올리고 싶은 마음을 참으세요."
           ]
         },
         "tempo_milestone": {
           "encouragement": [
-            "{bpmLow} BPM — new gear.",
-            "Past {bpmLow} BPM, clean.",
-            "{bpmLow}+ and holding. Nice.",
-            "First time at {bpmLow} BPM today. Feels good.",
-            "Crossed {bpmLow} clean. Stay loose.",
-            "{bpmLow} BPM is on the menu now.",
-            "You're in {bpmLow}-territory. Hold it lightly.",
-            "Welcome to {bpmLow} BPM. Make it feel easy."
+            "{bpmLow} BPM, 새 기어예요.",
+            "{bpmLow} BPM을 넘었어요. 깔끔해요.",
+            "{bpmLow} 이상에서 유지하고 있어요. 좋아요.",
+            "오늘 처음으로 {bpmLow} BPM이에요. 느낌이 좋아요.",
+            "{bpmLow}을 깔끔하게 넘었어요. 힘을 빼세요.",
+            "이제 {bpmLow} BPM이 메뉴에 올랐어요.",
+            "{bpmLow} 영역에 들어왔어요. 가볍게 유지하세요.",
+            "{bpmLow} BPM에 오신 걸 환영해요. 쉽게 느껴지게 만들어 보세요."
           ],
           "neutral": [
-            "Crossed the {bpmLow}-BPM mark upward.",
-            "Tempo milestone: now in the {bpmLow}-{bpmHigh} band.",
-            "{bpmLow} BPM and climbing.",
-            "{bpmLow} BPM reached. New band: {bpmLow}-{bpmHigh}.",
-            "Moved into the {bpmLow}-{bpmHigh} BPM range.",
-            "Climbing — {bpmLow} BPM is the new working tempo.",
-            "{bpmLow} BPM hit. See if it sticks.",
-            "Tempo bumped into the {bpmLow}-{bpmHigh} zone."
+            "{bpmLow} BPM 선을 위로 넘었어요.",
+            "템포 이정표예요. 이제 {bpmLow}-{bpmHigh} 구간이에요.",
+            "{bpmLow} BPM이고 올라가고 있어요.",
+            "{bpmLow} BPM에 도달했어요. 새 구간: {bpmLow}-{bpmHigh}.",
+            "{bpmLow}-{bpmHigh} BPM 범위로 들어왔어요.",
+            "올라가고 있어요. {bpmLow} BPM이 새 작업 템포예요.",
+            "{bpmLow} BPM을 쳤어요. 자리 잡는지 보세요.",
+            "템포가 {bpmLow}-{bpmHigh} 영역으로 올랐어요."
           ],
           "correction": [
-            "At {bpmLow} BPM — stay here until clean, don't push higher yet.",
-            "{bpmLow} BPM milestone. Stabilise before pushing.",
-            "New band: {bpmLow}-{bpmHigh}. Make sure this one sticks before climbing.",
-            "{bpmLow} BPM is brand new — don't speed up until it feels boring.",
-            "Earn {bpmLow} BPM before chasing the next mark. Hold it.",
-            "Park at {bpmLow} BPM. The next jump comes after a clean minute here.",
-            "Hit {bpmLow} BPM — now lock it in before the next ramp.",
-            "{bpmLow} BPM is fresh. Stay flat and let the hands catch up."
+            "{bpmLow} BPM이에요. 깔끔해질 때까지 여기 머무르고 아직 더 올리지 마세요.",
+            "{bpmLow} BPM 이정표예요. 밀기 전에 안정시키세요.",
+            "새 구간: {bpmLow}-{bpmHigh}. 올라가기 전에 이게 자리 잡는지 확인하세요.",
+            "{bpmLow} BPM은 막 시작이에요. 지루하게 느껴질 때까지 빨라지지 마세요.",
+            "다음 선을 쫓기 전에 {bpmLow} BPM을 얻으세요. 유지하세요.",
+            "{bpmLow} BPM에 세워 두세요. 다음 점프는 여기서 깔끔한 1분을 보낸 뒤예요.",
+            "{bpmLow} BPM을 쳤어요. 다음 올리기 전에 이걸 고정하세요.",
+            "{bpmLow} BPM은 새것이에요. 평평하게 유지하고 손이 따라오게 하세요."
           ]
         },
         "low_confidence": {
           "encouragement": [
-            "Signal's a bit murky on my end — keep playing, I'll catch up.",
-            "Audio's harder to read here, but you sound good.",
-            "I'm having a slightly tough time reading you — keep going.",
-            "Hard to hear you clean from here — don't let that distract you.",
-            "Mic's catching some noise, but you're playing fine.",
-            "Picking up some haze on the signal — keep going, I'm listening.",
-            "My read on the audio is fuzzy. You sound on the beat though.",
-            "Signal's a touch noisy. Trust your hands."
+            "제 쪽에서 신호가 조금 흐려요. 계속 연주하세요. 따라갈게요.",
+            "여기서는 오디오를 읽기 어렵지만 연주는 좋게 들려요.",
+            "읽기가 조금 어려워요. 계속하세요.",
+            "여기서는 깔끔하게 듣기 어려워요. 그것 때문에 흔들리지 마세요.",
+            "마이크가 잡음을 조금 잡고 있지만 연주는 괜찮아요.",
+            "신호에 흐림이 있어요. 계속하세요. 듣고 있어요.",
+            "오디오 읽기가 흐릿해요. 그래도 박에 맞게 들려요.",
+            "신호에 잡음이 조금 있어요. 손을 믿으세요."
           ],
           "neutral": [
-            "Detection confidence has been lower for the last 30s — readings may be noisier than usual.",
-            "Lower onset confidence — feedback might be imprecise this stretch.",
-            "Audio signal less clear; metrics slightly less reliable.",
-            "Read quality's down a bit. Numbers may swing more than usual.",
-            "Mic input's harder to parse — accuracy reading may drift.",
-            "Background noise creeping in; feedback might lag a touch.",
-            "Lower signal clarity for the last half-minute.",
-            "Audio's harder to read — take the metrics with a small grain of salt."
+            "지난 30초 동안 감지 신뢰도가 낮았어요. 평소보다 측정값이 더 흔들릴 수 있어요.",
+            "온셋 신뢰도가 낮아요. 이 구간의 피드백이 정확하지 않을 수 있어요.",
+            "오디오 신호가 덜 선명해요. 측정값이 조금 덜 믿을 만해요.",
+            "읽기 품질이 조금 떨어졌어요. 숫자가 평소보다 더 흔들릴 수 있어요.",
+            "마이크 입력을 해석하기 어려워요. 정확도 값이 흔들릴 수 있어요.",
+            "배경 소음이 들어오고 있어요. 피드백이 조금 늦을 수 있어요.",
+            "지난 30초 동안 신호 선명도가 낮았어요.",
+            "오디오를 읽기 어려워요. 측정값은 조금 에누리해서 보세요."
           ],
           "correction": [
-            "Hard to read your signal — check your input level or mic position.",
-            "Signal's hard to read. Bump your input gain or move closer to the mic.",
-            "Note detection is uncertain — the room might be too noisy.",
-            "My read on you is unreliable. Move closer to the mic if you can.",
-            "Input level may be too low. Check the meter before continuing.",
-            "Hard to tell hits from noise. Mute anything in the room and try again.",
-            "Signal's dropping out. Plug-in or USB-mic — check the connection.",
-            "Audio quality's poor enough that scoring may be off. Fix the input first."
+            "신호를 읽기 어려워요. 입력 레벨이나 마이크 위치를 확인하세요.",
+            "신호를 읽기 어려워요. 입력 게인을 올리거나 마이크에 더 가까이 가세요.",
+            "음 감지가 불확실해요. 방이 너무 시끄러울 수 있어요.",
+            "지금은 제 읽기를 믿기 어려워요. 가능하면 마이크에 더 가까이 가세요.",
+            "입력 레벨이 너무 낮을 수 있어요. 계속하기 전에 미터를 확인하세요.",
+            "타격과 소음을 구분하기 어려워요. 방 안의 소리를 끄고 다시 해 보세요.",
+            "신호가 끊겨요. 플러그인 방식이든 USB 마이크든 연결을 확인하세요.",
+            "오디오 품질이 나빠서 채점이 틀릴 수 있어요. 먼저 입력을 고치세요."
           ]
         },
         "boundary_signal_a": {
           "encouragement": [
-            "{change}. Fresh segment — take a beat, find the feel.",
-            "{change} — reset your ear and ride this one out.",
-            "Settings shifted: {change}. Let's see how this new shape feels.",
-            "{change}. New segment, fresh start.",
-            "{change} — clean slate, new score.",
-            "{change}. Take a breath and lock in to the new feel.",
-            "{change}. Old segment wrapped — this one's on its own.",
-            "{change}. Reset your ear and ease into the change."
+            "{change}. 새 구간이에요. 잠깐 숨을 쉬고 느낌을 찾으세요.",
+            "{change}. 귀를 리셋하고 이번 구간을 이어 가세요.",
+            "설정이 바뀌었어요: {change}. 이 새 모양이 어떤지 봐요.",
+            "{change}. 새 구간, 새 출발이에요.",
+            "{change}. 깨끗한 판이고 점수도 새로예요.",
+            "{change}. 숨을 쉬고 새 느낌에 맞춰 보세요.",
+            "{change}. 이전 구간은 끝났어요. 이번 구간은 따로예요.",
+            "{change}. 귀를 리셋하고 변화에 천천히 들어가세요."
           ],
           "neutral": [
-            "{change}. New segment opens here.",
-            "Boundary marker — {change}. Next stretch is scored on its own.",
-            "Settings change: {change}. Closing previous segment.",
-            "{change}. Score for the next stretch starts now.",
-            "{change} — the previous segment is closed and counted.",
-            "Configuration shift: {change}. Fresh segment.",
-            "{change}. New segment, new metrics.",
-            "{change}. Boundary crossed — score resets."
+            "{change}. 여기서 새 구간이 열려요.",
+            "경계 표시: {change}. 다음 구간은 따로 채점돼요.",
+            "설정 변경: {change}. 이전 구간을 닫아요.",
+            "{change}. 다음 구간의 점수는 지금부터 시작돼요.",
+            "{change}. 이전 구간은 닫히고 집계됐어요.",
+            "구성 변경: {change}. 새 구간이에요.",
+            "{change}. 새 구간, 새 측정값이에요.",
+            "{change}. 경계를 넘었어요. 점수가 리셋돼요."
           ],
           "correction": [
-            "{change}. Get the new setup feeling natural before you push.",
-            "{change} — old segment closed. Make sure this feels right before adding complexity.",
-            "Settings changed mid-segment: {change}. The new config is scored separately.",
-            "{change}. Take it slow on the new setup — don't carry over old habits.",
-            "{change}. Bed the new feel in before adding speed.",
-            "{change} — reset and treat the next stretch like a warmup.",
-            "{change}. Play it simple until the new config feels familiar.",
-            "{change}. Don't push the new segment yet — get clean first."
+            "{change}. 밀기 전에 새 설정이 자연스럽게 느껴지게 하세요.",
+            "{change}. 이전 구간은 닫혔어요. 복잡함을 더하기 전에 이게 맞게 느껴지는지 확인하세요.",
+            "구간 도중에 설정이 바뀌었어요: {change}. 새 구성은 따로 채점돼요.",
+            "{change}. 새 설정에서는 천천히 하세요. 예전 습관을 가져오지 마세요.",
+            "{change}. 속도를 더하기 전에 새 느낌을 자리 잡게 하세요.",
+            "{change}. 리셋하고 다음 구간을 워밍업처럼 다루세요.",
+            "{change}. 새 구성이 익숙해질 때까지 단순하게 연주하세요.",
+            "{change}. 새 구간을 아직 밀지 마세요. 먼저 깔끔하게 만드세요."
           ]
         },
         "stamina": {
           "neutral": [
-            "Score's dropping past the {staminaMinutes}-minute mark again — take 30 seconds, then come back at the same BPM.",
-            "Past the {staminaMinutes}-minute mark your accuracy tends to slide. Brief rest, then back in.",
-            "You tend to fade around minute {staminaMinutes}. Take a break and return fresh.",
-            "Stamina wall around minute {staminaMinutes} — a short rest now saves quality later."
+            "{staminaMinutes}분 선을 넘으면 점수가 또 떨어지고 있어요. 30초 쉰 다음 같은 BPM으로 돌아오세요.",
+            "{staminaMinutes}분 선을 넘으면 정확도가 떨어지는 경향이 있어요. 잠깐 쉬었다가 다시 들어오세요.",
+            "{staminaMinutes}분쯤에서 힘이 빠지는 경향이 있어요. 쉬었다가 새로운 마음으로 돌아오세요.",
+            "{staminaMinutes}분쯤에 체력의 벽이 있어요. 지금 잠깐 쉬면 나중의 품질을 지켜요."
           ]
         },
         "ramp_complete": {
           "neutral": [
-            "Ramp done — {startBpm} to {endBpm}. You made it.",
-            "Target reached: {endBpm} BPM. You climbed from {startBpm}.",
-            "Ramp finished. {startBpm} → {endBpm} BPM complete.",
-            "You held it to {endBpm} BPM. Ramp from {startBpm} done."
+            "램프 완료예요. {startBpm}에서 {endBpm}까지요. 해냈어요.",
+            "목표에 도달했어요: {endBpm} BPM. {startBpm}에서 올라왔어요.",
+            "램프가 끝났어요. {startBpm} → {endBpm} BPM 완료예요.",
+            "{endBpm} BPM까지 유지했어요. {startBpm}에서 시작한 램프가 끝났어요."
           ]
         },
         "pace_coaching": {
           "neutral": [
-            "Fourth time at {bpm} — the ceiling's real. Two sessions at {suggestedBpm} to consolidate, then push again.",
-            "You've hit {bpm} BPM {attemptCount} times and it's not sticking. Drop to {suggestedBpm} for a week, build it solid.",
-            "{attemptCount} attempts at {bpm} BPM. Ceiling work: two sessions at {suggestedBpm}, then revisit.",
-            "Ceiling at {bpm} BPM — {attemptCount} attempts confirms it. Park at {suggestedBpm} and let it settle."
+            "{bpm}에서 네 번째예요. 천장이 진짜예요. {suggestedBpm}에서 두 세션을 하며 다진 다음 다시 밀어 보세요.",
+            "{bpm} BPM에 {attemptCount}번 도달했는데 자리 잡지 않아요. 일주일 동안 {suggestedBpm}으로 내려가 탄탄하게 쌓으세요.",
+            "{bpm} BPM에서 {attemptCount}번 시도했어요. 천장 연습이에요. {suggestedBpm}에서 두 세션을 한 다음 다시 보세요.",
+            "{bpm} BPM의 천장이에요. {attemptCount}번의 시도가 그걸 확인해요. {suggestedBpm}에 세워 두고 자리 잡게 하세요."
           ]
         },
         "preset_ceiling_hit": {
           "neutral": [
-            "{bpmLow}–{bpmHigh} is where this one stops being clean for you — {attemptCount} sessions in that band, all around {score}.",
-            "You're back at {bpmLow}–{bpmHigh}. Your last {attemptCount} runs here came in around {score}.",
-            "Noting it while you play: {attemptCount} sessions at {bpmLow}–{bpmHigh}, each of them near {score}.",
-            "This is the tempo your scores on this one start dropping off at. {attemptCount} sessions here so far.",
-            "{attemptCount} times at {bpmLow}–{bpmHigh} now, around {score} each time. Let's see how today sits.",
-            "Same band as last time — {bpmLow}–{bpmHigh}, where this exercise has been landing near {score}."
+            "{bpmLow}–{bpmHigh}는 이 연습이 깔끔하지 않게 되는 지점이에요. 이 구간에서 {attemptCount}번의 세션이 모두 {score} 정도였어요.",
+            "다시 {bpmLow}–{bpmHigh}예요. 여기서의 지난 {attemptCount}번은 {score} 정도였어요.",
+            "연주하는 동안 적어 둘게요. {bpmLow}–{bpmHigh}에서 {attemptCount}번의 세션, 각각 {score} 근처예요.",
+            "이 연습의 점수가 떨어지기 시작하는 템포예요. 지금까지 여기서 {attemptCount}번의 세션이에요.",
+            "이제 {bpmLow}–{bpmHigh}에서 {attemptCount}번째예요. 매번 {score} 정도예요. 오늘은 어떤지 봐요.",
+            "지난번과 같은 구간이에요. {bpmLow}–{bpmHigh}에서 이 과제는 {score} 근처에 머물러 왔어요."
           ]
         },
         "grid_lost": {
           "neutral": [
-            "Grid correlation dropped — are you still playing to the click?",
-            "Lost the grid there. Intentional fill, or drifting off the click?",
-            "Correlation with the grid just dropped off. Still with the metronome?",
-            "Looks like the groove parted ways with the click. Fill or free?"
+            "그리드 상관이 떨어졌어요. 아직 클릭에 맞춰 연주하고 있나요?",
+            "방금 그리드를 놓쳤어요. 일부러 넣은 필인인가요, 클릭에서 벗어나고 있나요?",
+            "그리드와의 상관이 방금 떨어졌어요. 아직 메트로놈과 함께인가요?",
+            "그루브가 클릭과 갈라선 것 같아요. 필인인가요, 자유 연주인가요?"
           ]
         },
         "bias_only": {
           "encouragement": [
-            "Very consistent timing — just {biasMs}ms {direction}. Nudge everything {correctionDirection} to sit on the beat.",
-            "Great control — just a {biasMs}ms lean {direction}. A small shift {correctionDirection} will center it."
+            "타이밍이 아주 일정해요. 다만 {biasMs}ms {direction} 연주해요. 전체를 {correctionDirection} 옮기면 박에 앉아요.",
+            "컨트롤이 좋아요. {biasMs}ms {direction} 쏠렸을 뿐이에요. 조금만 {correctionDirection} 옮기면 가운데에 와요."
           ],
           "neutral": [
-            "You're landing {biasMs}ms {direction} the beat — very consistent, just shifted. Try moving everything {correctionDirection}.",
-            "Tight and consistent, but {biasMs}ms {direction} the click. Shift your attack {correctionDirection} to center it.",
-            "Your timing scatter is low, but the whole pattern sits {biasMs}ms {direction}. Nudge {correctionDirection}.",
-            "Low jitter, but offset by {biasMs}ms {direction}. That's a lean — adjust {correctionDirection} to land on the beat."
+            "박보다 {biasMs}ms {direction} 떨어져요. 아주 일정하고 위치만 옮겨졌어요. 전체를 {correctionDirection} 옮겨 보세요.",
+            "촘촘하고 일정하지만 클릭보다 {biasMs}ms {direction} 연주해요. 어택을 {correctionDirection} 옮겨 가운데에 맞춰 보세요.",
+            "타이밍 흩어짐은 낮지만 패턴 전체가 {biasMs}ms {direction} 놓여요. {correctionDirection} 조금 옮겨 보세요.",
+            "지터는 낮지만 {biasMs}ms {direction} 어긋나 있어요. 쏠림이에요. {correctionDirection} 조정해서 박에 맞추세요."
           ],
           "correction": [
-            "Consistent {biasMs}ms offset {direction} — not random, just a lean. Shift everything {correctionDirection}.",
-            "Every hit lands {biasMs}ms {direction}. That's a system bias, not jitter. Correct {correctionDirection}."
+            "{biasMs}ms {direction} 일정하게 어긋나요. 무작위가 아니라 쏠림이에요. 전체를 {correctionDirection} 옮기세요.",
+            "모든 타격이 {biasMs}ms {direction} 떨어져요. 지터가 아니라 시스템적인 치우침이에요. {correctionDirection} 보정하세요."
           ]
         },
         "boundary_signal_b": {
           "encouragement": [
-            "Nice segment — {score}% at {bpm} BPM. Take a beat.",
-            "{score}% at {bpm} BPM — solid bookend.",
-            "Wrapped that one at {score}% / {bpm} BPM. Good pause point.",
-            "{score}% at {bpm} BPM closes that out — good work.",
-            "Segment done — {score}% at {bpm} BPM. Nice.",
-            "Quiet pause closed it: {score}% at {bpm} BPM.",
-            "Clean wrap — {score}% at {bpm} BPM.",
-            "{score}% at {bpm} BPM. Take a breather."
+            "좋은 구간이에요. {bpm} BPM에서 {score}%예요. 잠깐 쉬세요.",
+            "{bpm} BPM에서 {score}%예요. 탄탄한 마무리예요.",
+            "{score}% / {bpm} BPM으로 마쳤어요. 쉬기 좋은 지점이에요.",
+            "{bpm} BPM에서 {score}%로 마무리돼요. 잘했어요.",
+            "구간이 끝났어요. {bpm} BPM에서 {score}%예요. 좋아요.",
+            "조용한 쉼이 마무리했어요. {bpm} BPM에서 {score}%예요.",
+            "깔끔한 마무리예요. {bpm} BPM에서 {score}%예요.",
+            "{bpm} BPM에서 {score}%예요. 숨을 돌리세요."
           ],
           "neutral": [
-            "Segment ended after silence — {score}% at {bpm} BPM.",
-            "Activity gap closed segment: {score}% scored.",
-            "Quiet stretch — segment closed at {score}%.",
-            "{score}% at {bpm} BPM — segment closed by the pause.",
-            "Pause ended the segment: {score}%.",
-            "Segment over — {score}% at {bpm} BPM logged.",
-            "Closed segment at {score}% / {bpm} BPM.",
-            "{score}% at {bpm} BPM saved. Take stock if you want."
+            "무음 뒤에 구간이 끝났어요. {bpm} BPM에서 {score}%예요.",
+            "연주 공백이 구간을 닫았어요. {score}%로 채점됐어요.",
+            "조용한 구간이에요. 구간이 {score}%로 닫혔어요.",
+            "{bpm} BPM에서 {score}%예요. 쉼으로 구간이 닫혔어요.",
+            "쉼이 구간을 끝냈어요. {score}%예요.",
+            "구간이 끝났어요. {bpm} BPM에서 {score}%가 기록됐어요.",
+            "구간을 {score}% / {bpm} BPM으로 닫았어요.",
+            "{bpm} BPM에서 {score}%가 저장됐어요. 원하면 돌아보세요."
           ],
           "correction": [
-            "Segment ended at {score}% — review before the next pass.",
-            "{score}% closed the segment. Check what slipped before the next attempt.",
-            "Pause noted — {score}%. Replay the segment summary before continuing.",
-            "{score}% at {bpm} BPM — worth a quick look at the breakdown.",
-            "Segment closed below where you wanted: {score}%. Diagnose before pushing.",
-            "{score}% at {bpm} BPM — slow it down on the next pass.",
-            "Wrapped at {score}%. Dial in what slipped before another run.",
-            "{score}% at {bpm} BPM. Read the segment summary, then try again."
+            "구간이 {score}%로 끝났어요. 다음 연주 전에 살펴보세요.",
+            "{score}%로 구간이 닫혔어요. 다음 시도 전에 무엇이 어긋났는지 확인하세요.",
+            "쉼을 확인했어요. {score}%예요. 계속하기 전에 구간 요약을 다시 보세요.",
+            "{bpm} BPM에서 {score}%예요. 세부 항목을 잠깐 볼 만해요.",
+            "원하던 것보다 낮게 구간이 닫혔어요: {score}%. 밀기 전에 원인을 살펴보세요.",
+            "{bpm} BPM에서 {score}%예요. 다음 연주는 느리게 하세요.",
+            "{score}%로 마쳤어요. 또 하기 전에 어긋난 것을 맞춰 보세요.",
+            "{bpm} BPM에서 {score}%예요. 구간 요약을 읽고 다시 해 보세요."
           ]
         },
         "muddy_hits": {
           "neutral": [
-            "You're landing every beat but the signal is soft — try a sharper attack.",
-            "Beats are all there, but the transient is weak. Hit with more intention.",
-            "Coverage looks good but the hits are quiet. More force on the attack.",
-            "You're playing through the click, just softly. Try to make more contact."
+            "모든 박을 맞추고 있지만 신호가 약해요. 어택을 더 날카롭게 해 보세요.",
+            "박은 다 있지만 트랜지언트가 약해요. 더 의도를 담아 치세요.",
+            "채움은 좋아 보이는데 타격이 작아요. 어택에 힘을 더 주세요.",
+            "클릭을 따라 연주하고 있지만 약해요. 더 접촉하려고 해 보세요."
           ]
         },
         "grid_discontinuity": {
           "neutral": [
-            "You went off the grid — try locking back to the click before the next phrase.",
-            "The beat wandered from the click. Reset and find the pulse before you continue.",
-            "Grid tracking dropped — take a beat, then re-enter on the downbeat.",
-            "Drifted from the click there. Stop, breathe, and lock back in."
+            "그리드에서 벗어났어요. 다음 프레이즈 전에 클릭에 다시 맞춰 보세요.",
+            "박이 클릭에서 벗어났어요. 계속하기 전에 리셋하고 맥박을 찾으세요.",
+            "그리드 추적이 끊겼어요. 잠깐 쉰 다음 다운비트에서 다시 들어오세요.",
+            "방금 클릭에서 벗어났어요. 멈추고 숨을 쉰 다음 다시 맞추세요."
           ]
         },
         "low_completeness": {
           "neutral": [
-            "You're hitting about half the expected beats — try to stay engaged for every one.",
-            "Coverage is low — make sure you're landing each beat, not just the ones that feel natural.",
-            "Around half the beats are going unplayed. Focus on completing the full pattern.",
-            "Beat coverage is low. Try counting aloud to make sure you're not skipping any."
+            "예상된 박의 절반 정도를 치고 있어요. 모든 박에 참여해 보세요.",
+            "채움이 낮아요. 자연스럽게 느껴지는 박만이 아니라 모든 박을 치고 있는지 확인하세요.",
+            "박의 절반쯤이 연주되지 않아요. 패턴 전체를 채우는 데 집중하세요.",
+            "박 채움이 낮아요. 빠뜨리는 게 없도록 소리 내어 세어 보세요."
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "Your beat placement looks good — but the space between notes keeps wandering. Try counting the subdivisions out loud as you play.",
-            "On the beat consistently, but note spacing is uneven. Tap your foot and count subdivisions as you go.",
-            "The beat timing is there — the gap between notes is shifting though. Count eighth notes (or sixteenths) out loud to lock the spacing.",
-            "Placement is solid, spacing is drifting. Try slowing down until the gaps feel even, then speed back up."
+            "박 위치는 좋아 보이지만 음 사이 간격이 계속 흔들려요. 연주하면서 분할을 소리 내어 세어 보세요.",
+            "박에는 꾸준히 맞지만 음 간격이 고르지 않아요. 발로 박자를 치고 분할을 세며 가세요.",
+            "박 타이밍은 맞는데 음 사이 간격이 변해요. 8분음표(또는 16분음표)를 소리 내어 세어 간격을 맞추세요.",
+            "위치는 탄탄하고 간격이 벗어나고 있어요. 간격이 고르게 느껴질 때까지 느리게 한 다음 다시 올리세요."
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Note spacing is even — but you're landing off the beat. Anticipate each click by a hair and land right on it.",
-            "Even spacing, but the notes themselves are shifted from the grid. Focus on locking the first note of each group to the beat.",
-            "The rhythm between your notes is consistent — work on where they land relative to the click. Try playing just slightly ahead of where you expect the beat.",
-            "Good spacing feel. Now bring the whole phrase onto the grid — aim for the center of each beat."
+            "음 간격은 고르지만 박에서 벗어나 떨어져요. 각 클릭을 아주 조금 앞서 예상하고 그 위에 정확히 놓으세요.",
+            "간격은 고르지만 음 자체가 그리드에서 옮겨져 있어요. 각 그룹의 첫 음을 박에 맞추는 데 집중하세요.",
+            "음 사이의 리듬은 일정해요. 클릭을 기준으로 음이 어디에 떨어지는지 다듬어 보세요. 박이 올 것 같은 곳보다 아주 조금 앞서 연주해 보세요.",
+            "간격 느낌은 좋아요. 이제 프레이즈 전체를 그리드에 올리세요. 각 박의 한가운데를 겨냥하세요."
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Beat placement and note spacing are both locked in. That's the feel right there.",
-            "Spacing and placement both on point. Clean session.",
-            "Both dimensions solid — you're playing exactly where you intend to be.",
-            "Timing is dialed in across the board. That's what consistent practice sounds like."
+            "박 위치와 음 간격이 둘 다 잘 맞아요. 그게 바로 그 느낌이에요.",
+            "간격과 위치가 둘 다 정확해요. 깔끔한 세션이에요.",
+            "두 가지 모두 탄탄해요. 의도한 바로 그 자리에서 연주하고 있어요.",
+            "타이밍이 전반적으로 잘 잡혀 있어요. 꾸준한 연습은 이런 소리예요."
           ]
         },
         "drill_step_up": {
           "neutral": [
-            "{accuracyPct}% — tempo up to {bpm} BPM.",
-            "Clean round at {accuracyPct}%. Moving you up to {bpm} BPM.",
-            "That earned it: {accuracyPct}%. Now at {bpm} BPM.",
-            "{accuracyPct}% meets the pass mark — {bpm} BPM from here.",
-            "Solid at {accuracyPct}%. Stepping up to {bpm} BPM.",
-            "Nice round — {accuracyPct}%. {bpm} BPM next.",
-            "Up to {bpm} BPM. You held {accuracyPct}% last round.",
-            "{accuracyPct}% says you're ready. {bpm} BPM."
+            "{accuracyPct}%예요. 템포를 {bpm} BPM으로 올려요.",
+            "{accuracyPct}%로 깔끔해요. {bpm} BPM으로 올려요.",
+            "그럴 만했어요: {accuracyPct}%. 이제 {bpm} BPM이에요.",
+            "{accuracyPct}%는 통과 기준을 충족해요. 여기서부터 {bpm} BPM이에요.",
+            "{accuracyPct}%로 탄탄해요. {bpm} BPM으로 올려요.",
+            "좋은 연주예요. {accuracyPct}%예요. 다음은 {bpm} BPM이에요.",
+            "{bpm} BPM으로 올라가요. 방금 {accuracyPct}%를 유지했어요.",
+            "{accuracyPct}%면 준비된 거예요. {bpm} BPM이에요."
           ]
         },
         "drill_step_down": {
           "neutral": [
-            "{accuracyPct}% — easing back to {bpm} BPM.",
-            "That round slipped to {accuracyPct}%. Dropping to {bpm} BPM.",
-            "Backing off to {bpm} BPM — {accuracyPct}% last round.",
-            "{accuracyPct}%. Let's rebuild it at {bpm} BPM.",
-            "Pulling back to {bpm} BPM after {accuracyPct}%.",
-            "{accuracyPct}% is under the pass mark — {bpm} BPM for the next round.",
-            "Down to {bpm} BPM. Get it clean before we climb again.",
-            "Easing to {bpm} BPM; {accuracyPct}% needs firmer ground."
+            "{accuracyPct}%예요. {bpm} BPM으로 내려가요.",
+            "방금 연주는 {accuracyPct}%로 떨어졌어요. {bpm} BPM으로 내려요.",
+            "방금 {accuracyPct}%였어요. {bpm} BPM으로 물러나요.",
+            "{accuracyPct}%예요. {bpm} BPM에서 다시 쌓아 봐요.",
+            "{accuracyPct}% 뒤에 {bpm} BPM으로 물러나요.",
+            "{accuracyPct}%는 통과 기준 아래예요. 다음에는 {bpm} BPM이에요.",
+            "{bpm} BPM으로 내려가요. 다시 올라가기 전에 깔끔하게 만드세요.",
+            "{bpm} BPM으로 내려요. {accuracyPct}%는 더 단단한 바닥이 필요해요."
           ]
         }
       },
@@ -1920,139 +1920,139 @@
       "generic": {
         "muddy_hits": {
           "neutral": [
-            "You're hitting the beats but the signal is coming in soft — try playing with a firmer touch.",
-            "The rhythm is there but your attack is light — dig in a bit more.",
-            "Beats are landing but with a soft touch — try a stronger stroke.",
-            "Good rhythm, but the signal is a little soft — put more into each note.",
-            "You're connecting with the beats, but try adding more weight to each stroke."
+            "박은 맞추고 있는데 신호가 약하게 들어와요. 좀 더 단단하게 쳐 보세요.",
+            "리듬은 있는데 어택이 가벼워요. 조금 더 힘을 실어 보세요.",
+            "박은 맞고 있지만 터치가 약해요. 더 강하게 쳐 보세요.",
+            "리듬은 좋은데 신호가 조금 약해요. 한 음 한 음에 힘을 더 실어 보세요.",
+            "박은 잘 맞추고 있어요. 다만 한 번 한 번에 무게를 더 실어 보세요."
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Your timing is locked in — spacing and placement are both solid.",
-            "Nice and tight — your notes are landing in the right spots and they're evenly spaced.",
-            "Really consistent — your beat placement and note spacing are both dialled in.",
-            "Great feel — evenly spaced notes hitting right on the pulse.",
-            "Your timing is right in the pocket — spacing and placement are both there."
+            "타이밍이 딱 맞아요. 간격과 위치 둘 다 안정적이에요.",
+            "아주 촘촘해요. 음이 제자리에 떨어지고 간격도 고르게 유지돼요.",
+            "아주 일정해요. 박 위치와 음 간격이 둘 다 잘 잡혀 있어요.",
+            "좋은 느낌이에요. 고른 간격의 음이 맥박에 정확히 놓여요.",
+            "타이밍이 포켓에 쏙 들어와 있어요. 간격과 위치 둘 다 좋아요."
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Your notes are evenly spaced but drifting off the click — try anchoring to the pulse more.",
-            "Good even spacing but you're a little off the beat — try locking to the pulse.",
-            "The gaps between your notes are consistent but they're not quite on the beat — anchor to the click.",
-            "Even note spacing but the placement is wandering — focus on landing each note on the beat.",
-            "Your internal timing is consistent but the notes are drifting off the pulse — anchor to the click."
+            "음 간격은 고른데 클릭에서 벗어나고 있어요. 맥박에 더 붙여 보세요.",
+            "간격은 고르지만 박에서 조금 벗어나 있어요. 맥박에 맞춰 보세요.",
+            "음 사이 간격은 일정한데 박에는 딱 맞지 않아요. 클릭에 맞춰 보세요.",
+            "음 간격은 고른데 위치가 흔들려요. 각 음을 박에 놓는 데 집중해 보세요.",
+            "속으로 세는 타이밍은 일정한데 음이 맥박에서 벗어나고 있어요. 클릭에 맞춰 보세요."
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "You're landing close to each beat but the spaces between notes are uneven — focus on making those gaps more equal.",
-            "Good beat placement but uneven note spacing — try keeping the gaps between notes equal.",
-            "You're close to the beat but the spacing between notes varies — focus on even gaps.",
-            "Your note positions are close but the spacing is a bit scattered — even out the gaps.",
-            "Landing near the beat positions but the note spacing is inconsistent — work on keeping the spaces equal."
+            "각 박에는 가깝게 들어가는데 음 사이 간격이 고르지 않아요. 간격을 더 같게 맞추는 데 집중해 보세요.",
+            "박 위치는 좋은데 음 간격이 고르지 않아요. 음 사이 간격을 같게 유지해 보세요.",
+            "박에는 가깝지만 음 사이 간격이 달라져요. 간격을 고르게 하는 데 집중해 보세요.",
+            "음 위치는 가깝지만 간격이 조금 흩어져요. 간격을 고르게 맞춰 보세요.",
+            "박 위치 근처에는 들어가는데 음 간격이 일정하지 않아요. 간격을 같게 유지해 보세요."
           ]
         },
         "great": {
           "neutral": [
-            "Really locked in — your timing is right there.",
-            "Solid feel, keep riding that groove.",
-            "Your timing is sitting right where it should be.",
-            "Clean rhythm — that's the pocket.",
-            "Locked in tight — great work.",
-            "That's a great feel — tempo is solid throughout."
+            "아주 잘 맞아요. 타이밍이 딱 그 자리예요.",
+            "느낌이 단단해요. 그 그루브를 계속 타 보세요.",
+            "타이밍이 있어야 할 자리에 있어요.",
+            "깔끔한 리듬이에요. 그게 포켓이에요.",
+            "꽉 맞아요. 잘하고 있어요.",
+            "느낌이 좋아요. 템포가 내내 안정적이에요."
           ]
         },
         "good_steady": {
           "neutral": [
-            "Nice and steady — good consistent tempo.",
-            "Keeping it together — solid timing through the segment.",
-            "Tempo is holding well.",
-            "Good rhythm feel — consistent pulse.",
-            "Steady timing — you're building a solid foundation."
+            "차분하고 안정적이에요. 템포가 일정해요.",
+            "흐트러지지 않아요. 구간 내내 타이밍이 안정적이에요.",
+            "템포가 잘 유지되고 있어요.",
+            "리듬 느낌이 좋아요. 맥박이 일정해요.",
+            "타이밍이 안정적이에요. 탄탄한 기초를 쌓고 있어요."
           ]
         },
         "rushing": {
           "neutral": [
-            "You're leaning into the beat a little — try letting it come to you.",
-            "Arriving a touch early — sit back and let the pulse breathe.",
-            "The tempo is pushing forward — ease off the attack slightly.",
-            "You're ahead of the beat — try staying back with it.",
-            "A bit of a rush happening — slow your attack, not your tempo."
+            "박 쪽으로 조금 기울어 있어요. 박이 다가오게 두어 보세요.",
+            "조금 일찍 도착하고 있어요. 한 걸음 물러나 맥박이 숨 쉬게 해 보세요.",
+            "템포가 앞으로 쏠려요. 어택을 살짝 줄여 보세요.",
+            "박보다 앞서 있어요. 박과 함께 뒤에 머물러 보세요.",
+            "약간 서두르고 있어요. 템포가 아니라 어택을 늦춰 보세요."
           ]
         },
         "dragging": {
           "neutral": [
-            "Settling a bit behind the beat — try staying a little more forward.",
-            "The tempo is dragging back — keep your attack crisp.",
-            "You're lagging slightly — push the attack forward.",
-            "Behind the beat — try keeping the energy moving forward.",
-            "A bit of drag happening — sharpen the attack."
+            "박 뒤에 조금 자리 잡고 있어요. 조금 더 앞으로 가 보세요.",
+            "템포가 뒤로 처지고 있어요. 어택을 또렷하게 유지해 보세요.",
+            "조금 처지고 있어요. 어택을 앞으로 밀어 보세요.",
+            "박보다 뒤예요. 에너지를 계속 앞으로 움직여 보세요.",
+            "약간 끌리고 있어요. 어택을 더 날카롭게 해 보세요."
           ]
         },
         "oscillating": {
           "neutral": [
-            "The tempo is moving around — speeding up and slowing down.",
-            "Note spacing is uneven — try keeping the gaps between notes equal.",
-            "The pulse is wandering a bit — focus on steady spacing between notes.",
-            "Rushing then dragging — try locking into one steady feel.",
-            "Tempo consistency needs work — focus on equal note spacing."
+            "템포가 오락가락해요. 빨라졌다 느려졌다 해요.",
+            "음 간격이 고르지 않아요. 음 사이 간격을 같게 유지해 보세요.",
+            "맥박이 조금 흔들려요. 음 사이 간격을 일정하게 하는 데 집중해 보세요.",
+            "서둘렀다 처졌다 해요. 하나의 일정한 느낌에 맞춰 보세요.",
+            "템포 일관성이 더 필요해요. 음 간격을 같게 하는 데 집중해 보세요."
           ]
         },
         "low_score_solid_timing": {
           "neutral": [
-            "Your timing center is good — focus on hitting more of the beats.",
-            "Timing is in the right place, but you're missing some positions — fill those gaps.",
-            "Good timing feel, but the rhythm needs more coverage — play more of the beats.",
-            "The pulse is there but the rhythm is thin — try hitting more positions.",
-            "Your timing is centered well — now work on density."
+            "타이밍의 중심은 좋아요. 더 많은 박을 치는 데 집중해 보세요.",
+            "타이밍은 제자리에 있는데 비는 자리가 있어요. 그 빈틈을 채워 보세요.",
+            "타이밍 느낌은 좋지만 리듬을 더 채워야 해요. 더 많은 박을 연주해 보세요.",
+            "맥박은 있는데 리듬이 성겨요. 더 많은 자리를 쳐 보세요.",
+            "타이밍이 잘 중심에 있어요. 이제 밀도를 채워 보세요."
           ]
         },
         "low_coverage": {
           "neutral": [
-            "I'm only hearing some of your playing — check your input level or play a touch louder.",
-            "Signal is coming in low — try playing with a bit more attack.",
-            "Low detection rate — you may need to turn up your input gain.",
-            "Only picking up part of your playing — check the input level in settings.",
-            "Weak signal coming in — play louder or check your input gain."
+            "연주의 일부만 들려요. 입력 레벨을 확인하거나 조금 더 크게 연주해 보세요.",
+            "신호가 약하게 들어와요. 어택을 조금 더 주고 연주해 보세요.",
+            "감지율이 낮아요. 입력 게인을 올려야 할 수도 있어요.",
+            "연주의 일부만 잡히고 있어요. 설정에서 입력 레벨을 확인해 보세요.",
+            "신호가 약해요. 더 크게 연주하거나 입력 게인을 확인해 보세요."
           ]
         },
         "noodling": {
           "neutral": [
-            "Good free feel — let the ideas flow.",
-            "Nice exploration — when you're ready, bring it back to the pulse.",
-            "Creative space — use it well.",
-            "Good free play — follow the feel.",
-            "Let it breathe — come back to the grid when you're ready."
+            "자유로운 느낌이 좋아요. 아이디어가 흐르게 두세요.",
+            "탐색하는 연주가 좋아요. 준비되면 맥박으로 돌아오세요.",
+            "창의적인 시간이에요. 잘 써 보세요.",
+            "자유 연주가 좋아요. 느낌을 따라가세요.",
+            "숨 쉬게 두세요. 준비되면 그리드로 돌아오세요."
           ]
         },
         "flat_dynamics": {
           "neutral": [
-            "Your playing is very even dynamically — try letting the downbeats breathe a little.",
-            "Every note is about the same volume — experiment with accenting the main beats.",
-            "Nice consistency, but try adding some dynamic shape — hit the downbeats a touch harder."
+            "연주의 강약이 아주 고르게 유지돼요. 다운비트가 조금 숨 쉬게 해 보세요.",
+            "모든 음의 볼륨이 거의 같아요. 주요 박에 악센트를 줘 보세요.",
+            "일관성은 좋지만 강약의 모양을 더해 보세요. 다운비트를 조금 더 세게 쳐 보세요."
           ]
         },
         "weak_downbeats": {
           "neutral": [
-            "Try hitting beats 1 and 3 a touch harder — your downbeats are blending in.",
-            "Your upbeats are a little strong — ease off them and push the downbeats.",
-            "The main beats need more weight — let beats 1 and 3 lead."
+            "1박과 3박을 조금 더 세게 쳐 보세요. 다운비트가 묻히고 있어요.",
+            "업비트가 조금 강해요. 업비트는 줄이고 다운비트를 밀어 보세요.",
+            "주요 박에 무게가 더 필요해요. 1박과 3박이 이끌게 해 보세요."
           ]
         },
         "good_accents": {
           "neutral": [
-            "Nice dynamic shape — your downbeats have good weight.",
-            "Great accent on the main beats — the groove has a clear pulse.",
-            "Your downbeats are coming through clearly — nice feel."
+            "강약의 모양이 좋아요. 다운비트에 무게가 잘 실려요.",
+            "주요 박의 악센트가 좋아요. 그루브에 맥박이 분명해요.",
+            "다운비트가 또렷하게 나와요. 느낌이 좋아요."
           ]
         },
         "subdivisions_too_loud": {
           "neutral": [
-            "The fills are a bit heavy — let the in-between notes sit lighter.",
-            "Try making the subdivision fills softer — let the main beats carry the weight.",
-            "The fill notes are competing with your downbeats — ease off between the beats."
+            "필인이 조금 무거워요. 사이에 있는 음은 더 가볍게 두세요.",
+            "분할음 필인을 더 부드럽게 해 보세요. 주요 박이 무게를 맡게 하세요.",
+            "필인 음이 다운비트와 경쟁해요. 박과 박 사이에서는 힘을 빼 보세요."
           ]
         }
       }
@@ -2061,160 +2061,160 @@
       "generic": {
         "muddy_hits": {
           "neutral": [
-            "Your beats are landing but the signal confidence is low — try a firmer attack on each note.",
-            "The detector sees your hits but with low confidence — your transients may be too soft.",
-            "Beats are registering but the signal is weak — sharpen the attack to get a cleaner transient.",
-            "Low signal confidence on your hits — dig in more to improve the attack strength.",
-            "Your attack is too soft for reliable detection — play with more conviction."
+            "박은 맞고 있지만 신호 신뢰도가 낮아요. 각 음의 어택을 더 단단하게 해 보세요.",
+            "감지기가 타격을 보고는 있지만 신뢰도가 낮아요. 트랜지언트가 너무 부드러울 수 있어요.",
+            "박은 인식되지만 신호가 약해요. 어택을 날카롭게 해서 더 깔끔한 트랜지언트를 만들어 보세요.",
+            "타격의 신호 신뢰도가 낮아요. 더 깊이 쳐서 어택 세기를 높여 보세요.",
+            "어택이 너무 부드러워 안정적으로 감지되지 않아요. 더 확신을 갖고 연주해 보세요."
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Note spacing is consistent and beat placement is solid — tight all-round timing.",
-            "Both note spacing and beat placement are on point — clean timing overall.",
-            "Even note spacing and accurate beat placement — this is what locked-in feels like.",
-            "Spacing and placement are both dialled in — timing is solid.",
-            "Consistent spacing and clean beat placement — nothing to fix here."
+            "음 간격이 일정하고 박 위치도 안정적이에요. 전체적으로 촘촘한 타이밍이에요.",
+            "음 간격과 박 위치가 둘 다 정확해요. 전체적으로 깔끔한 타이밍이에요.",
+            "고른 음 간격과 정확한 박 위치예요. 딱 맞는 느낌이 바로 이거예요.",
+            "간격과 위치가 둘 다 잘 잡혀 있어요. 타이밍이 안정적이에요.",
+            "일정한 간격과 깔끔한 박 위치예요. 고칠 게 없어요."
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Note spacing is even but beat placement is drifting — your internal clock is consistent but not synced to the pulse.",
-            "Consistent note spacing but the beats are landing off-center — your internal rhythm is good, just anchor it to the grid.",
-            "Even spacing between notes but the placement is wandering off the beat — sync to the pulse.",
-            "Your note spacing is reliable but the beat positions are drifting — the internal clock is there, just align it to the click.",
-            "Spacing consistency is good but beat placement is off — focus on landing each note on the pulse."
+            "음 간격은 고르지만 박 위치가 벗어나고 있어요. 속으로 세는 시계는 일정하지만 맥박에 동기화되어 있지 않아요.",
+            "음 간격은 일정한데 박이 중심에서 벗어나 떨어져요. 속의 리듬은 좋으니 그리드에 맞춰 보세요.",
+            "음 사이 간격은 고르지만 위치가 박에서 벗어나고 있어요. 맥박에 맞춰 보세요.",
+            "음 간격은 믿을 만한데 박 위치가 벗어나고 있어요. 속의 시계는 있으니 클릭에 맞춰 보세요.",
+            "간격의 일관성은 좋지만 박 위치가 맞지 않아요. 각 음을 맥박에 놓는 데 집중해 보세요."
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "Beat placement is on target but subdivision spacing is inconsistent — anchor points are right, the fills between them are scattered.",
-            "Good beat placement but the gaps between notes vary — your positions are correct, the spacing is not.",
-            "You're close to the beat positions but note spacing is uneven — the placement is there, even out the gaps.",
-            "Accurate beat placement, inconsistent note spacing — the anchor points are correct, work on even gaps.",
-            "Beat positions are solid but subdivision spacing is irregular — the placement is there, now even out the fills."
+            "박 위치는 목표에 맞지만 분할음 간격이 일정하지 않아요. 기준점은 맞고 그 사이를 채우는 음이 흩어져요.",
+            "박 위치는 좋은데 음 사이 간격이 달라져요. 위치는 맞고 간격은 그렇지 않아요.",
+            "박 위치에는 가깝지만 음 간격이 고르지 않아요. 위치는 잡혀 있으니 간격을 고르게 맞춰 보세요.",
+            "박 위치는 정확하고 음 간격은 일정하지 않아요. 기준점은 맞으니 간격을 고르게 하는 데 집중해 보세요.",
+            "박 위치는 안정적이지만 분할음 간격이 불규칙해요. 위치는 잡혀 있으니 이제 사이를 채우는 음을 고르게 해 보세요."
           ]
         },
         "great": {
           "neutral": [
-            "Tight beat placement and even note spacing — clean all-round timing.",
-            "Beat placement solid, spacing consistent — push the tempo when you're ready.",
-            "All timing components clean — good session.",
-            "Note spacing and placement both dialled in.",
-            "Timing is locked — consider bumping the tempo or tightening the subdivisions."
+            "촘촘한 박 위치와 고른 음 간격이에요. 전체적으로 깔끔한 타이밍이에요.",
+            "박 위치가 안정적이고 간격도 일정해요. 준비되면 템포를 올려 보세요.",
+            "타이밍의 모든 요소가 깔끔해요. 좋은 세션이에요.",
+            "음 간격과 위치가 둘 다 잘 잡혀 있어요.",
+            "타이밍이 딱 맞아요. 템포를 올리거나 분할음을 더 촘촘하게 해 보세요."
           ]
         },
         "good_steady": {
           "neutral": [
-            "Consistent spacing and placement — solid foundation. Push tempo 5 BPM or sharpen the attack.",
-            "Good timing consistency — a few positions drift but the center holds.",
-            "Placement and spacing reliable — room to push harder.",
-            "Timing center is on, spacing is consistent — push the tempo to challenge it.",
-            "Solid timing foundation — focus on sharpening the attack on weaker beats."
+            "간격과 위치가 일정해요. 탄탄한 기초예요. 템포를 5 BPM 올리거나 어택을 날카롭게 해 보세요.",
+            "타이밍이 일관적이에요. 몇몇 위치는 벗어나지만 중심은 유지돼요.",
+            "위치와 간격이 믿을 만해요. 더 밀어붙일 여유가 있어요.",
+            "타이밍 중심이 맞고 간격이 일정해요. 템포를 올려 도전해 보세요.",
+            "타이밍 기초가 탄탄해요. 약한 박의 어택을 날카롭게 하는 데 집중해 보세요."
           ]
         },
         "rushing": {
           "neutral": [
-            "Consistently arriving early — directional early bias in the attack timing.",
-            "Note attacks are arriving before the beat — ease the onset forward slightly.",
-            "Early attack pattern — your notes are preceding the beat consistently.",
-            "Consistent early bias — the attack is rushing the pulse.",
-            "Timing is shifted early — let the beat land first, then hit."
+            "계속 일찍 도착하고 있어요. 어택 타이밍에 일찍 쏠리는 방향성이 있어요.",
+            "음의 어택이 박보다 먼저 와요. 온셋을 살짝 늦춰 보세요.",
+            "어택이 이른 패턴이에요. 음이 계속 박보다 앞서요.",
+            "일찍 쏠리는 경향이 일정해요. 어택이 맥박을 앞서 가요.",
+            "타이밍이 일찍 치우쳐 있어요. 박이 먼저 떨어지게 한 다음 치세요."
           ]
         },
         "dragging": {
           "neutral": [
-            "Consistently arriving late — directional late bias in the attack timing.",
-            "Note attacks are landing after the beat — sharpen the attack slightly.",
-            "Late attack pattern — notes are trailing the beat consistently.",
-            "Consistent late bias — the attack is dragging the pulse.",
-            "Timing is shifted late — push the attack to meet the beat."
+            "계속 늦게 도착하고 있어요. 어택 타이밍에 늦게 쏠리는 방향성이 있어요.",
+            "음의 어택이 박 뒤에 떨어져요. 어택을 살짝 날카롭게 해 보세요.",
+            "어택이 늦은 패턴이에요. 음이 계속 박 뒤를 따라와요.",
+            "늦게 쏠리는 경향이 일정해요. 어택이 맥박을 끌고 있어요.",
+            "타이밍이 늦게 치우쳐 있어요. 어택을 밀어서 박에 맞춰 보세요."
           ]
         },
         "oscillating": {
           "neutral": [
-            "High timing variance despite a near-neutral average — the timing is genuinely unstable.",
-            "Not a directional bias — the timing is alternating early and late.",
-            "Tempo instability: note spacing is inconsistent across the segment.",
-            "Rushing-dragging pattern — not a fixed offset, true variance in the timing.",
-            "Timing variance is high — focus on keeping note spacing consistent."
+            "평균은 중립에 가깝지만 타이밍 편차가 커요. 타이밍이 실제로 불안정해요.",
+            "한 방향으로 치우친 게 아니에요. 타이밍이 일찍과 늦게를 오가요.",
+            "템포가 불안정해요. 구간 내내 음 간격이 일정하지 않아요.",
+            "서두름과 처짐이 번갈아 나와요. 고정된 오프셋이 아니라 타이밍의 실제 편차예요.",
+            "타이밍 편차가 커요. 음 간격을 일정하게 유지하는 데 집중해 보세요."
           ]
         },
         "low_score_solid_timing": {
           "neutral": [
-            "Timing center and spacing are clean but beat coverage is low.",
-            "Good placement accuracy but too many beat positions are empty.",
-            "Note spacing is consistent but density is low — hit more of the grid positions.",
-            "Timing fundamentals are solid, coverage is the gap — fill out more positions.",
-            "Placement is accurate — focus on hitting more of the beat positions."
+            "타이밍 중심과 간격은 깔끔하지만 박 채움률이 낮아요.",
+            "위치 정확도는 좋지만 비어 있는 박 자리가 너무 많아요.",
+            "음 간격은 일정하지만 밀도가 낮아요. 더 많은 그리드 위치를 쳐 보세요.",
+            "타이밍의 기본은 탄탄하고 부족한 건 채움률이에요. 더 많은 위치를 채워 보세요.",
+            "위치는 정확해요. 더 많은 박 위치를 치는 데 집중해 보세요."
           ]
         },
         "low_coverage": {
           "neutral": [
-            "Only a fraction of beat positions had a detected hit — signal may be too quiet.",
-            "Detection rate is low — check your input gain or play louder.",
-            "Most beat positions are empty — check the input level, this isn't a playing-quality issue.",
-            "Low hit detection — increase input gain or attack strength.",
-            "Signal is too quiet for reliable detection — play louder or adjust your input level."
+            "감지된 타격이 있는 박 위치가 일부뿐이에요. 신호가 너무 작을 수 있어요.",
+            "감지율이 낮아요. 입력 게인을 확인하거나 더 크게 연주해 보세요.",
+            "대부분의 박 위치가 비어 있어요. 입력 레벨을 확인해 보세요. 연주 품질 문제가 아니에요.",
+            "타격 감지가 적어요. 입력 게인이나 어택 세기를 높여 보세요.",
+            "신호가 너무 작아 안정적으로 감지되지 않아요. 더 크게 연주하거나 입력 레벨을 조정해 보세요."
           ]
         },
         "noodling": {
           "neutral": [
-            "Free-play mode — beat placement isn't being graded here.",
-            "Exploring freely — use it to warm up, then rein it back to the grid.",
-            "No scoring in free play — this is your creative space.",
-            "Free-form mode active — grading resumes when you lock back to the pulse.",
-            "Ungraded free play — let it flow, come back to the grid when ready."
+            "자유 연주 모드예요. 여기서는 박 위치를 채점하지 않아요.",
+            "자유롭게 탐색 중이에요. 워밍업에 쓰고 다시 그리드로 돌아오세요.",
+            "자유 연주에서는 채점하지 않아요. 창의적인 시간이에요.",
+            "자유 형식 모드가 켜져 있어요. 맥박에 다시 맞추면 채점이 재개돼요.",
+            "채점하지 않는 자유 연주예요. 흐르게 두고 준비되면 그리드로 돌아오세요."
           ]
         },
         "flat_dynamics": {
           "neutral": [
-            "Low amplitude variation across beat positions — try varying your pick attack.",
-            "Minimal dynamic shaping across the bar — increase accent differential on the downbeats.",
-            "Amplitude is consistent across positions — build in a dynamic hierarchy: downbeats strongest, upbeats lighter."
+            "박 위치 전반에 걸쳐 진폭 변화가 작아요. 어택에 변화를 줘 보세요.",
+            "마디 전체에서 강약의 변화가 거의 없어요. 다운비트의 악센트 차이를 키워 보세요.",
+            "위치 전반에서 진폭이 일정해요. 강약의 위계를 만들어 보세요. 다운비트는 가장 강하게, 업비트는 더 가볍게."
           ]
         },
         "weak_downbeats": {
           "neutral": [
-            "Anti-accent pattern detected — downbeats are quieter than upbeats.",
-            "Your upbeats are dominating — increase pick attack on beats 1 and 3.",
-            "Downbeat amplitude is below upbeat amplitude — reverse the dynamic hierarchy."
+            "반대 악센트 패턴이 감지됐어요. 다운비트가 업비트보다 작아요.",
+            "업비트가 지배하고 있어요. 1박과 3박의 어택을 키워 보세요.",
+            "다운비트 진폭이 업비트 진폭보다 낮아요. 강약의 위계를 뒤집어 보세요."
           ]
         },
         "good_accents": {
           "neutral": [
-            "Healthy accent differential — downbeats are clearly stronger than upbeats.",
-            "Good dynamic shaping — downbeat amplitude is well above upbeat amplitude.",
-            "Strong accent structure — downbeats leading the dynamic hierarchy."
+            "악센트 차이가 건강해요. 다운비트가 업비트보다 분명히 강해요.",
+            "강약의 모양이 좋아요. 다운비트 진폭이 업비트 진폭보다 훨씬 높아요.",
+            "악센트 구조가 탄탄해요. 다운비트가 강약의 위계를 이끌고 있어요."
           ]
         },
         "subdivisions_too_loud": {
           "neutral": [
-            "Subdivision amplitude is close to downbeat amplitude — fills are overwhelming the accent structure.",
-            "The fills are as loud as the main beats — reduce attack on the subdivision notes.",
-            "No dynamic hierarchy between beats and fills — downbeats should lead, subdivisions should follow."
+            "분할음 진폭이 다운비트 진폭에 가까워요. 필인이 악센트 구조를 덮고 있어요.",
+            "필인이 주요 박만큼 커요. 분할음의 어택을 줄여 보세요.",
+            "박과 필인 사이에 강약의 위계가 없어요. 다운비트가 이끌고 분할음이 따라가야 해요."
           ]
         }
       }
     },
     "words": {
       "direction": {
-        "before": "before",
-        "after": "after"
+        "before": "빠르게",
+        "after": "늦게"
       },
       "correctionDirection": {
-        "earlier": "earlier",
-        "later": "later"
+        "earlier": "앞당겨",
+        "later": "늦춰"
       },
       "change": {
-        "bpmUp": "tempo up to {to} BPM",
-        "bpmDown": "tempo down to {to} BPM",
-        "presetCleared": "preset cleared",
-        "preset": "loading \"{to}\"",
-        "timeSig": "time signature {to}/4",
-        "grouping": "regrouped to {to}",
-        "instrument": "switching to {to}",
-        "other": "config changed",
+        "bpmUp": "템포 {to} BPM으로 올림",
+        "bpmDown": "템포 {to} BPM으로 내림",
+        "presetCleared": "프리셋 해제",
+        "preset": "\"{to}\" 불러오는 중",
+        "timeSig": "박자 {to}/4",
+        "grouping": "그룹 변경: {to}",
+        "instrument": "전환: {to}",
+        "other": "설정 변경",
         "separator": "; "
       }
     }

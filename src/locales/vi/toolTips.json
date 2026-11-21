@@ -4,557 +4,557 @@
       "generic": {
         "session_start_cold": {
           "neutral": [
-            "Hey — play when you're ready and I'll start tracking your timing.",
-            "Good to have you. Start when you feel warm.",
-            "Ready when you are. I'll start listening as soon as you play.",
-            "Take your time getting set up — I'll pick up your timing from the first note.",
-            "No rush. Start when you're settled and we'll go from there.",
-            "Hit play whenever you're ready. I'll catch you from the first beat.",
-            "Set up, settle in, then start playing whenever.",
-            "Whenever you're ready — I'm listening."
+            "Chào bạn — cứ chơi khi sẵn sàng, tôi sẽ bắt đầu theo dõi nhịp của bạn.",
+            "Rất vui có bạn. Hãy bắt đầu khi bạn thấy đã khởi động xong.",
+            "Tôi sẵn sàng khi bạn sẵn sàng. Tôi sẽ bắt đầu nghe ngay khi bạn chơi.",
+            "Cứ thong thả chuẩn bị — tôi sẽ nắm nhịp của bạn từ nốt đầu tiên.",
+            "Không vội. Hãy bắt đầu khi bạn đã ổn định, rồi mình đi tiếp.",
+            "Cứ chơi bất cứ khi nào bạn sẵn sàng. Tôi sẽ bắt nhịp bạn từ phách đầu tiên.",
+            "Chuẩn bị, ổn định chỗ ngồi, rồi chơi bất cứ lúc nào.",
+            "Khi nào bạn sẵn sàng — tôi đang nghe."
           ]
         },
         "session_start_returning": {
           "neutral": [
-            "Welcome back. Last time: {lastScore} at {lastBpm} BPM. Let's build on that.",
-            "Good to see you again. You hit {lastScore} at {lastBpm} BPM last session.",
-            "Back at it. You were at {lastScore} / {lastBpm} BPM last time — let's keep climbing.",
-            "Welcome back — {lastScore} at {lastBpm} BPM last session. Ready when you are.",
-            "Last session: {lastScore} at {lastBpm} BPM. Let's pick up where you left off.",
-            "Back again. You finished at {lastScore} at {lastBpm} BPM — good baseline.",
-            "Welcome back. {lastScore} at {lastBpm} BPM last time. Let's see what today brings.",
-            "Good to have you back. Last time you hit {lastScore} at {lastBpm} BPM."
+            "Chào mừng bạn quay lại. Lần trước: {lastScore} ở {lastBpm} BPM. Hãy tiếp tục từ đó.",
+            "Rất vui gặp lại bạn. Buổi tập trước bạn đạt {lastScore} ở {lastBpm} BPM.",
+            "Lại bắt đầu nào. Lần trước bạn ở {lastScore} / {lastBpm} BPM — hãy tiếp tục leo lên.",
+            "Chào mừng bạn quay lại — {lastScore} ở {lastBpm} BPM trong buổi tập trước. Sẵn sàng khi bạn sẵn sàng.",
+            "Buổi tập trước: {lastScore} ở {lastBpm} BPM. Hãy tiếp tục từ chỗ bạn đã dừng.",
+            "Lại gặp nhau. Bạn đã kết thúc ở {lastScore} ở {lastBpm} BPM — một mốc tốt.",
+            "Chào mừng bạn quay lại. Lần trước là {lastScore} ở {lastBpm} BPM. Xem hôm nay thế nào nhé.",
+            "Rất vui bạn quay lại. Lần trước bạn đạt {lastScore} ở {lastBpm} BPM."
           ]
         },
         "accuracy_drop": {
           "encouragement": [
-            "A few misses crept in — ease up, breathe, then come back to it.",
-            "You were locked in, then a wobble. Reset on the next strong beat.",
-            "Quick dip. Slow the pulse in your head and pick it up again.",
-            "Small slip — no big deal. Find the click again on the next bar.",
-            "Lost the thread for a second. Catch the next downbeat clean.",
-            "Tiny stumble. Take a breath and ride the next click in.",
-            "Cool — just feel the next beat land before you play.",
-            "A little drift. Let the metronome lead you back in."
+            "Có vài lần trượt xuất hiện — hãy thả lỏng, hít thở rồi quay lại.",
+            "Bạn đã khớp nhịp, rồi hơi chao đảo. Hãy đặt lại ở phách mạnh tiếp theo.",
+            "Tụt một chút. Hãy làm chậm nhịp trong đầu rồi chơi tiếp.",
+            "Hụt nhẹ — không sao. Hãy tìm lại tiếng click ở ô nhịp tiếp theo.",
+            "Mất mạch một giây. Hãy bắt phách mạnh tiếp theo cho sạch.",
+            "Vấp nhẹ. Hãy hít một hơi rồi vào theo tiếng click tiếp theo.",
+            "Không sao — chỉ cần cảm nhận phách tiếp theo rơi xuống trước khi chơi.",
+            "Hơi trôi một chút. Hãy để máy đếm nhịp dẫn bạn quay lại."
           ],
           "neutral": [
-            "Hit rate's slipped a bit — reset on the next bar.",
-            "Accuracy is sliding. Let it settle on the next downbeat.",
-            "Things are slipping — slow it in your head, then start fresh.",
-            "Some misses stacking up. Find a clean bar, then keep going.",
-            "Quality's drifting. Lock in with the click for one full bar.",
-            "Misses creeping up — take a breath, hear the click, then play.",
-            "Drift showing. Sit one bar quiet with the click before coming back.",
-            "Hits dropping off. Wait for the strong beat and re-set."
+            "Tỷ lệ trúng đã tụt một chút — hãy đặt lại ở ô nhịp tiếp theo.",
+            "Độ chính xác đang tụt. Hãy để nó ổn định ở phách mạnh tiếp theo.",
+            "Mọi thứ đang trượt — hãy làm chậm trong đầu, rồi bắt đầu lại.",
+            "Một số lần trượt đang dồn lại. Hãy tìm một ô nhịp sạch, rồi chơi tiếp.",
+            "Chất lượng đang trôi. Hãy bám theo tiếng click trong trọn một ô nhịp.",
+            "Các lần trượt đang tăng — hãy hít một hơi, nghe tiếng click, rồi chơi.",
+            "Đang trôi nhịp. Hãy ngồi yên một ô nhịp cùng tiếng click trước khi quay lại.",
+            "Các lần đánh đang giảm. Hãy chờ phách mạnh rồi đặt lại."
           ],
           "correction": [
-            "The slip is sustained — try dialing the tempo down a few BPM.",
-            "Hits are scattering. Slow down and rebuild from a clean bar.",
-            "Get one clean bar, then climb again.",
-            "Pattern's coming apart — pause, count yourself in slow, then play.",
-            "Stop, count a full bar with the click, then come back in.",
-            "Drop the tempo five BPM. Get it clean, then bring it back up.",
-            "Pull back. Get one solid bar against the click before adding speed.",
-            "Reset hard — silence one bar, count it, then start fresh."
+            "Chỗ trượt kéo dài — hãy thử giảm tempo vài BPM.",
+            "Các lần đánh đang tản mát. Hãy chậm lại và xây lại từ một ô nhịp sạch.",
+            "Lấy một ô nhịp sạch, rồi leo lên lại.",
+            "Mẫu chơi đang rã ra — hãy dừng, đếm vào chậm, rồi chơi.",
+            "Dừng lại, đếm trọn một ô nhịp theo tiếng click, rồi vào lại.",
+            "Giảm tempo năm BPM. Làm cho sạch, rồi tăng lại.",
+            "Lùi lại. Chơi cho chắc một ô nhịp theo tiếng click trước khi tăng tốc.",
+            "Đặt lại hẳn — im một ô nhịp, đếm nó, rồi bắt đầu lại."
           ]
         },
         "rushing_trend": {
           "encouragement": [
-            "Sitting just ahead of the click — breathe and ride it.",
-            "Slight rush creeping in. Plant your foot, let the metronome lead.",
-            "A little early — settle into the next click.",
-            "You're a hair ahead. Wait for the click instead of chasing it.",
-            "Just a tiny bit hot. Relax your hands and let the click pull you.",
-            "Pulse is creeping up. Take a breath and let the next click meet you.",
-            "Edge of rushing. Lean back into the seat and ride the click.",
-            "A touch early. Hear the click first, then play."
+            "Đang đứng ngay trước tiếng click — hãy hít thở và bám theo nó.",
+            "Có chút vội đang len vào. Đặt chân vững, để máy đếm nhịp dẫn.",
+            "Hơi sớm — hãy ổn định vào tiếng click tiếp theo.",
+            "Bạn đi trước một chút. Hãy chờ tiếng click thay vì đuổi theo nó.",
+            "Chỉ hơi nóng một chút. Hãy thả lỏng tay và để tiếng click kéo bạn đi.",
+            "Nhịp đang nhích lên. Hãy hít một hơi và để tiếng click tiếp theo gặp bạn.",
+            "Ở mép của việc vội. Hãy ngả người ra sau trên ghế và bám theo tiếng click.",
+            "Hơi sớm một chút. Hãy nghe tiếng click trước, rồi mới chơi."
           ],
           "neutral": [
-            "Trending a touch early — try riding the back of the beat.",
-            "You're nudging ahead of the click — let it come to you.",
-            "Drifting early. Sit deeper into each click.",
-            "Each note's landing a little early. Wait for the click.",
-            "You're leading the metronome. Let it lead you instead.",
-            "Pace is creeping up. Match the click, don't push it.",
-            "Notes are arriving too soon. Hold each one a beat longer in your head.",
-            "Drift forward. Take a breath and let the click set the pace."
+            "Đang có xu hướng hơi sớm — hãy thử bám vào phần sau của phách.",
+            "Bạn đang nhích lên trước tiếng click — hãy để nó đến với bạn.",
+            "Đang trôi sớm. Hãy ngồi sâu hơn vào mỗi tiếng click.",
+            "Mỗi nốt đang rơi hơi sớm. Hãy chờ tiếng click.",
+            "Bạn đang dẫn máy đếm nhịp. Hãy để nó dẫn bạn.",
+            "Nhịp đang nhích lên. Hãy khớp với tiếng click, đừng đẩy nó.",
+            "Các nốt đang đến quá sớm. Hãy giữ mỗi nốt lâu thêm một phách trong đầu.",
+            "Trôi về phía trước. Hãy hít một hơi và để tiếng click định nhịp."
           ],
           "correction": [
-            "Still leaning early — count the in-betweens and land each note right on the click.",
-            "The rush is sticking. Slow down, count the offbeat between each click.",
-            "Pause, count yourself in slow, then start playing again.",
-            "Drop a few BPM. Get the click to lead before bringing it back up.",
-            "Hands are racing. Stop, take a breath, start on the next strong beat.",
-            "Reset — silence one bar, hear the click, then come in on beat 1.",
-            "Push the tempo down five BPM until you can sit ON the click.",
-            "Stop trying to drive the metronome. Let it drive you for one bar."
+            "Vẫn đang nghiêng sớm — hãy đếm các nhịp giữa và đặt mỗi nốt đúng vào tiếng click.",
+            "Việc vội vẫn còn. Hãy chậm lại, đếm phách lửng giữa mỗi tiếng click.",
+            "Dừng lại, đếm vào chậm, rồi bắt đầu chơi lại.",
+            "Giảm vài BPM. Hãy để tiếng click dẫn trước khi tăng lại.",
+            "Tay đang chạy đua. Dừng lại, hít một hơi, bắt đầu ở phách mạnh tiếp theo.",
+            "Đặt lại — im một ô nhịp, nghe tiếng click, rồi vào ở phách 1.",
+            "Giảm tempo xuống năm BPM cho đến khi bạn ngồi ĐÚNG trên tiếng click.",
+            "Đừng cố lái máy đếm nhịp nữa. Hãy để nó lái bạn trong một ô nhịp."
           ]
         },
         "dragging_trend": {
           "encouragement": [
-            "Sitting just behind the click — lift the tempo back under your fingers.",
-            "Slight drag. Breathe and push back into the beat.",
-            "A little behind — lean forward, you're close.",
-            "You're a hair late. Lift your hands; meet the click on top.",
-            "Just barely lagging. Push gently — the click will meet you.",
-            "Drift back is small. Lean in and ride the front of each click.",
-            "Touch late. Imagine playing slightly ahead and you'll land in time.",
-            "Notes are arriving just after the click. Push a little."
+            "Đang đứng ngay sau tiếng click — hãy nâng tempo lại dưới ngón tay.",
+            "Hơi kéo chậm. Hãy hít thở và đẩy lại vào phách.",
+            "Hơi sau một chút — hãy nghiêng về phía trước, bạn đã gần rồi.",
+            "Bạn trễ một chút. Hãy nâng tay lên; gặp tiếng click ở trên đỉnh.",
+            "Chỉ trễ chút xíu. Hãy đẩy nhẹ — tiếng click sẽ gặp bạn.",
+            "Độ trôi về sau nhỏ. Hãy nghiêng vào và bám phần đầu của mỗi tiếng click.",
+            "Hơi trễ. Hãy hình dung chơi hơi trước một chút và bạn sẽ rơi đúng nhịp.",
+            "Các nốt đang đến ngay sau tiếng click. Hãy đẩy lên một chút."
           ],
           "neutral": [
-            "Trending a touch late — try playing slightly ahead of the click.",
-            "You're sitting behind the beat — push into each one.",
-            "Drifting late. Reach for the front of each click.",
-            "Each note's landing just after the click. Meet it head-on instead.",
-            "The metronome's leaving you behind. Step into each click.",
-            "Pace is sagging. Lift the hands and play on top of the click.",
-            "Notes arriving late. Aim for the front edge of each beat.",
-            "Drag is showing. Imagine the click is a half-step earlier than you think."
+            "Đang có xu hướng hơi trễ — hãy thử chơi hơi trước tiếng click.",
+            "Bạn đang ngồi sau phách — hãy đẩy vào từng phách.",
+            "Đang trôi trễ. Hãy với tới phần đầu của mỗi tiếng click.",
+            "Mỗi nốt đang rơi ngay sau tiếng click. Hãy gặp nó trực diện.",
+            "Máy đếm nhịp đang bỏ bạn lại. Hãy bước vào từng tiếng click.",
+            "Nhịp đang chùng xuống. Hãy nâng tay lên và chơi ngay trên tiếng click.",
+            "Các nốt đến trễ. Hãy nhắm vào mép đầu của mỗi phách.",
+            "Đang kéo chậm. Hãy hình dung tiếng click sớm hơn bạn nghĩ nửa cung."
           ],
           "correction": [
-            "Still hanging back — play with the click, don't wait for it.",
-            "The drag is sticking. Push the tempo with your fingers.",
-            "Stop, reset, and start fresh on beat 1.",
-            "Drop the tempo a bit and lock in. The drag will clear once it feels easy.",
-            "Pause one bar. Hear the click, then come in right on top of beat 1.",
-            "Reset — count yourself in slow and play with more lift.",
-            "Slow it down five BPM and aim for the front of every click.",
-            "Stop, take a breath, then come in pushing slightly forward."
+            "Vẫn đang chùn lại — hãy chơi cùng tiếng click, đừng chờ nó.",
+            "Việc kéo chậm vẫn còn. Hãy đẩy tempo bằng các ngón tay.",
+            "Dừng lại, đặt lại, rồi bắt đầu lại ở phách 1.",
+            "Giảm tempo một chút và khớp vào. Việc kéo chậm sẽ hết khi bạn thấy nhẹ nhàng.",
+            "Dừng một ô nhịp. Nghe tiếng click, rồi vào ngay trên phách 1.",
+            "Đặt lại — đếm vào chậm và chơi với nhiều lực nâng hơn.",
+            "Giảm năm BPM và nhắm vào phần đầu của mỗi tiếng click.",
+            "Dừng lại, hít một hơi, rồi vào lại với chút đẩy về phía trước."
           ]
         },
         "personal_best_streak": {
           "encouragement": [
-            "Locked in — keep it going.",
-            "Streak's going. Nice.",
-            "On a run — stay there.",
-            "Yes. Don't change anything.",
-            "Riding it clean. Stay.",
-            "That's the pocket — hold on to it.",
-            "Beautiful. Just keep doing that.",
-            "Eyes closed, keep going."
+            "Đang khớp — cứ giữ đà.",
+            "Chuỗi đang chạy. Tốt.",
+            "Đang đà tốt — ở lại đó.",
+            "Đúng rồi. Đừng đổi gì cả.",
+            "Chơi sạch. Cứ ở đó.",
+            "Đó là pocket — hãy giữ lấy nó.",
+            "Đẹp. Cứ tiếp tục như vậy.",
+            "Nhắm mắt lại, cứ tiếp tục."
           ],
           "neutral": [
-            "New session best — locked in.",
-            "Cleanest stretch so far. Hold it.",
-            "Best run yet today. Don't change a thing.",
-            "Longest clean run of the session. Keep it.",
-            "Top streak of today. Stay there.",
-            "Tightest stretch yet — hold this feel.",
-            "Best timing of the session right here.",
-            "This is your session high — sit in it."
+            "Tốt nhất buổi tập — đang khớp.",
+            "Đoạn sạch nhất cho đến giờ. Hãy giữ nó.",
+            "Lượt tốt nhất hôm nay. Đừng đổi gì cả.",
+            "Chuỗi sạch dài nhất của buổi tập. Hãy giữ nó.",
+            "Chuỗi cao nhất hôm nay. Ở lại đó.",
+            "Đoạn chặt nhất cho đến giờ — hãy giữ cảm giác này.",
+            "Nhịp tốt nhất của buổi tập là ngay đây.",
+            "Đây là mức cao nhất buổi tập của bạn — hãy ở lại trong đó."
           ],
           "correction": [
-            "Locked in — hold tempo, don't push faster yet.",
-            "Streak's clean. Stay at this BPM until it's automatic.",
-            "Exactly where you want to live for a minute.",
-            "Don't speed up yet. Let this tempo settle into the hands.",
-            "Stay flat — no climbing yet. Let it become muscle memory.",
-            "Hold this for another minute before adding speed.",
-            "Park here. Speed comes after this gets boring.",
-            "Resist the urge to push. Burn this tempo in first."
+            "Đang khớp — giữ tempo, chưa đẩy nhanh vội.",
+            "Chuỗi đang sạch. Ở mức BPM này cho đến khi nó thành tự động.",
+            "Đúng chỗ bạn muốn ở lại một phút.",
+            "Chưa tăng tốc vội. Hãy để tempo này thấm vào đôi tay.",
+            "Giữ nguyên — chưa leo lên. Hãy để nó thành trí nhớ cơ bắp.",
+            "Giữ mức này thêm một phút nữa trước khi tăng tốc.",
+            "Đậu lại đây. Tốc độ đến sau khi mức này trở nên nhàm.",
+            "Cưỡng lại ý muốn đẩy nhanh. Hãy khắc tempo này vào trước."
           ]
         },
         "new_band_locked": {
           "encouragement": [
-            "{bpmLow} BPM — yours now.",
-            "Locked at {bpmLow} BPM. Nice.",
-            "Held this tempo clean — new ceiling.",
-            "{bpmLow} BPM feels easy now. That's progress.",
-            "You own {bpmLow} BPM. Don't lose it.",
-            "Steady at {bpmLow}. That's the new floor.",
-            "Clean at {bpmLow} BPM — keep it warm.",
-            "{bpmLow} BPM — solid. Stay here a bit longer."
+            "{bpmLow} BPM — giờ là của bạn.",
+            "Đã khớp ở {bpmLow} BPM. Tốt.",
+            "Giữ tempo này sạch — trần mới.",
+            "{bpmLow} BPM giờ thấy dễ rồi. Đó là tiến bộ.",
+            "Bạn làm chủ {bpmLow} BPM. Đừng để mất nó.",
+            "Vững ở {bpmLow}. Đó là sàn mới.",
+            "Sạch ở {bpmLow} BPM — hãy giữ cho nó còn ấm.",
+            "{bpmLow} BPM — vững. Hãy ở lại đây thêm chút nữa."
           ],
           "neutral": [
-            "Sustained clean play at {bpmLow}–{bpmHigh} BPM for a minute.",
-            "{bpmLow}–{bpmHigh} BPM band: locked in.",
-            "New BPM band owned: {bpmLow}–{bpmHigh}.",
-            "Clean for a full minute at {bpmLow}–{bpmHigh} BPM.",
-            "{bpmLow}–{bpmHigh} BPM held steady. That's the new baseline.",
-            "Locked into {bpmLow}–{bpmHigh} BPM for a long stretch.",
-            "Held the {bpmLow}–{bpmHigh} band clean — that's a real win.",
-            "Pocket sustained at {bpmLow}–{bpmHigh} BPM. Don't lose it now."
+            "Chơi sạch liên tục ở {bpmLow}–{bpmHigh} BPM trong một phút.",
+            "Dải {bpmLow}–{bpmHigh} BPM: đã khớp.",
+            "Làm chủ dải BPM mới: {bpmLow}–{bpmHigh}.",
+            "Sạch trọn một phút ở {bpmLow}–{bpmHigh} BPM.",
+            "{bpmLow}–{bpmHigh} BPM giữ vững. Đó là mốc nền mới.",
+            "Khớp vào {bpmLow}–{bpmHigh} BPM trong một đoạn dài.",
+            "Giữ sạch dải {bpmLow}–{bpmHigh} — đó là một chiến thắng thật sự.",
+            "Pocket được giữ ở {bpmLow}–{bpmHigh} BPM. Đừng để mất nó lúc này."
           ],
           "correction": [
-            "{bpmLow}–{bpmHigh} is stable. Stay here, then push a touch.",
-            "Held {bpmLow}–{bpmHigh} clean. Ready to climb when you are.",
-            "{bpmLow}–{bpmHigh} feels owned. Next session, start here.",
-            "{bpmLow}–{bpmHigh} BPM is locked in. Don't speed up yet.",
-            "You can climb from {bpmLow}–{bpmHigh}, but earn it — two more clean minutes first.",
-            "{bpmLow}–{bpmHigh} BPM is the new floor. Don't drop back below it.",
-            "Stable at {bpmLow}–{bpmHigh}. Move up only when it feels boring.",
-            "{bpmLow}–{bpmHigh} BPM owned. Build a couple of minutes here before climbing."
+            "{bpmLow}–{bpmHigh} đã ổn định. Ở lại đây, rồi đẩy lên một chút.",
+            "Giữ sạch {bpmLow}–{bpmHigh}. Sẵn sàng leo khi bạn sẵn sàng.",
+            "{bpmLow}–{bpmHigh} đã thành của bạn. Buổi tập sau, hãy bắt đầu từ đây.",
+            "{bpmLow}–{bpmHigh} BPM đã khớp. Chưa tăng tốc vội.",
+            "Bạn có thể leo từ {bpmLow}–{bpmHigh}, nhưng phải giành lấy — trước hết thêm hai phút sạch nữa.",
+            "{bpmLow}–{bpmHigh} BPM là sàn mới. Đừng tụt xuống dưới nó.",
+            "Ổn định ở {bpmLow}–{bpmHigh}. Chỉ tăng lên khi nó thấy nhàm.",
+            "Làm chủ {bpmLow}–{bpmHigh} BPM. Hãy xây vài phút ở đây trước khi leo."
           ]
         },
         "check_in": {
           "encouragement": [
-            "You've been deep in it. Anything you want to focus on next?",
-            "Five-plus minutes locked in. Want me to call out anything specific?",
-            "Long stretch — pause if you want, I'm here.",
-            "Solid run going. Want me to listen for anything in particular?",
-            "Been in this a while. Take a breath if you need one.",
-            "Quiet so far. Tell me what you're working on and I'll watch for it.",
-            "Nothing to call out yet. What do you want me to listen for?",
-            "Steady pocket. Keep going, or switch gears if you're ready."
+            "Bạn đã chơi rất sâu rồi. Có điều gì bạn muốn tập trung tiếp theo không?",
+            "Hơn năm phút liền khớp nhịp. Bạn có muốn tôi chỉ ra điều gì cụ thể không?",
+            "Một đoạn dài — hãy dừng nếu bạn muốn, tôi ở đây.",
+            "Đang chơi vững. Bạn có muốn tôi nghe điều gì cụ thể không?",
+            "Bạn đã chơi một lúc rồi. Hãy hít một hơi nếu cần.",
+            "Đến giờ vẫn yên. Hãy cho tôi biết bạn đang luyện gì, tôi sẽ để ý.",
+            "Chưa có gì để nêu. Bạn muốn tôi nghe điều gì?",
+            "Pocket vững. Cứ tiếp tục, hoặc đổi hướng nếu bạn sẵn sàng."
           ],
           "neutral": [
-            "Five minutes in, nothing to flag. Solid pocket. Keep going or switch focus?",
-            "Quiet stretch. Tell me what you're working on.",
-            "Long uninterrupted run. Anything you want feedback on?",
-            "Five minutes deep. No issues to call out — keep going.",
-            "Steady session. Want a different angle, or stay the course?",
-            "Long run with no slips. What's next?",
-            "You've been in the pocket. Take stock and pick a next focus.",
-            "Quiet session so far. Pick a target if you want sharper feedback."
+            "Năm phút rồi, không có gì để báo. Pocket vững. Tiếp tục hay đổi trọng tâm?",
+            "Một đoạn yên. Hãy cho tôi biết bạn đang luyện gì.",
+            "Một lượt dài không gián đoạn. Bạn có muốn nhận xét về điều gì không?",
+            "Đã năm phút. Không có vấn đề gì để nêu — cứ tiếp tục.",
+            "Buổi tập đều. Bạn muốn một góc nhìn khác, hay giữ hướng hiện tại?",
+            "Một lượt dài không trượt. Tiếp theo là gì?",
+            "Bạn đã ở trong pocket. Hãy nhìn lại và chọn trọng tâm tiếp theo.",
+            "Đến giờ buổi tập vẫn yên. Hãy chọn một mục tiêu nếu bạn muốn nhận xét sắc hơn."
           ],
           "correction": [
-            "Heads up — you've been in this a while. Take 10 if your hands need it.",
-            "Five-plus minutes continuous. Check in with your body before you push more.",
-            "Sustained session — stretch your fingers, then come back.",
-            "Hands tired? Take a 60-second pause before the next pass.",
-            "Long stretch — check the wrists and shoulders before continuing.",
-            "Time for a quick break. Cold hands play sloppy.",
-            "Pause and stretch. Two minutes off keeps the next twenty solid.",
-            "Sustained run — give the hands a rest before pushing further."
+            "Lưu ý — bạn đã chơi một lúc rồi. Hãy nghỉ 10 phút nếu tay bạn cần.",
+            "Hơn năm phút liên tục. Hãy hỏi cơ thể mình trước khi đẩy thêm.",
+            "Buổi tập kéo dài — hãy duỗi ngón tay, rồi quay lại.",
+            "Tay mỏi? Hãy nghỉ 60 giây trước lượt tiếp theo.",
+            "Một đoạn dài — hãy kiểm tra cổ tay và vai trước khi tiếp tục.",
+            "Đến lúc nghỉ một chút. Tay lạnh chơi cẩu thả.",
+            "Dừng và duỗi người. Nghỉ hai phút giúp hai mươi phút sau vững.",
+            "Chơi liên tục — hãy cho tay nghỉ trước khi đẩy tiếp."
           ]
         },
         "fatigue": {
           "encouragement": [
-            "Accuracy's been sliding the last few minutes. Take a beat.",
-            "Hands tightening up? Quick stretch — come back fresh.",
-            "Quality's drifting. Pause, breathe, return.",
-            "Hands working harder than they should. Brief rest, then back in.",
-            "You've been going a while — drop the instrument for 60 seconds.",
-            "Body's getting heavier than the music. Quick break.",
-            "Fingers stiffening up? Shake them out, then come back.",
-            "Time for a short pause — fresh hands play cleaner."
+            "Độ chính xác đã tụt trong vài phút qua. Hãy nghỉ một nhịp.",
+            "Tay đang căng lên? Duỗi nhanh rồi quay lại cho tươi.",
+            "Chất lượng đang trôi. Dừng, hít thở, rồi quay lại.",
+            "Tay đang làm việc nặng hơn mức cần. Nghỉ ngắn, rồi vào lại.",
+            "Bạn đã chơi một lúc rồi — hãy đặt nhạc cụ xuống 60 giây.",
+            "Cơ thể đang nặng hơn âm nhạc. Nghỉ nhanh một chút.",
+            "Ngón tay đang cứng? Hãy lắc cho thả lỏng, rồi quay lại.",
+            "Đến lúc nghỉ ngắn — tay tươi chơi sạch hơn."
           ],
           "neutral": [
-            "Accuracy declined over the last 3 minutes at constant BPM — likely fatigue.",
-            "Score trending down without tempo change. Take a rest.",
-            "Sustained accuracy drop at the same BPM — call it a rest cycle.",
-            "Same tempo, falling accuracy. Hands are getting tired.",
-            "Quality's slipping but the tempo hasn't changed — that's fatigue.",
-            "Misses climbing while the click stays the same. Time for a pause.",
-            "Three-minute slide at one tempo. Rest the hands.",
-            "Steady BPM, sliding accuracy — your hands are telling you something."
+            "Độ chính xác giảm trong 3 phút qua ở BPM không đổi — có thể là mệt.",
+            "Điểm đang đi xuống mà tempo không đổi. Hãy nghỉ.",
+            "Độ chính xác giảm liên tục ở cùng BPM — coi đó là một chu kỳ nghỉ.",
+            "Cùng tempo, độ chính xác tụt. Tay đang mệt dần.",
+            "Chất lượng đang trượt mà tempo không đổi — đó là mệt.",
+            "Lỗi tăng trong khi tiếng click giữ nguyên. Đến lúc dừng.",
+            "Ba phút tụt dần ở một tempo. Hãy cho tay nghỉ.",
+            "BPM đều, độ chính xác tụt — đôi tay đang nói với bạn điều gì đó."
           ],
           "correction": [
-            "Fatigue showing — stop now, 90 seconds off, then come back.",
-            "You're past your peak window. Rest before quality drops further.",
-            "Take the rest. Tired playing teaches the hands sloppy habits.",
-            "Stop, stand up, walk around for a minute. Then come back.",
-            "Quality's been dropping for minutes. Real rest — 90 seconds minimum.",
-            "Hands are done for now. Pause, shake them out, hydrate.",
-            "Pushing past tired locks in mistakes. Stop and recover.",
-            "Set the instrument down. Two minutes off, then re-evaluate."
+            "Mệt đã lộ ra — dừng ngay, nghỉ 90 giây, rồi quay lại.",
+            "Bạn đã qua đỉnh. Hãy nghỉ trước khi chất lượng tụt thêm.",
+            "Hãy nghỉ. Chơi khi mệt dạy đôi tay thói quen cẩu thả.",
+            "Dừng, đứng dậy, đi quanh một phút. Rồi quay lại.",
+            "Chất lượng đã giảm nhiều phút. Nghỉ thật sự — tối thiểu 90 giây.",
+            "Đôi tay tạm xong rồi. Dừng, lắc cho thả lỏng, uống nước.",
+            "Cố vượt qua lúc mệt sẽ khắc sâu lỗi. Hãy dừng và hồi phục.",
+            "Đặt nhạc cụ xuống. Nghỉ hai phút, rồi đánh giá lại."
           ]
         },
         "recovery": {
           "encouragement": [
-            "Nice save — stay here.",
-            "Pulled it back. Hold it.",
-            "Recovered — keep this exact feel.",
-            "Got it back. Sit in this for a minute.",
-            "Back from the dip. Don't change anything now.",
-            "You felt it slip and brought it back. That's the skill.",
-            "Solid recovery. Stay loose, stay here.",
-            "Caught it before it ran away. Hold this feel."
+            "Cứu hay — ở lại đây.",
+            "Đã kéo lại được. Giữ nó.",
+            "Đã hồi lại — giữ đúng cảm giác này.",
+            "Lấy lại rồi. Ngồi trong đó một phút.",
+            "Đã thoát khỏi chỗ tụt. Đừng đổi gì bây giờ.",
+            "Bạn đã cảm thấy nó trượt và kéo nó lại. Đó mới là kỹ năng.",
+            "Hồi lại vững. Giữ thoải mái, ở lại đây.",
+            "Bắt kịp trước khi nó chạy mất. Giữ cảm giác này."
           ],
           "neutral": [
-            "Back to clean after the dip. Keep this pace.",
-            "Score's back up — hold it.",
-            "Recovery confirmed — accuracy steady again.",
-            "Clean again after the slip. Don't change anything.",
-            "Accuracy's back where it was. Hold steady.",
-            "Stabilized after the dip. Keep this tempo.",
-            "You closed the gap. Stay at this BPM.",
-            "Quality recovered. Park here a minute."
+            "Đã sạch lại sau chỗ tụt. Giữ nhịp này.",
+            "Điểm đã lên lại — giữ nó.",
+            "Hồi phục được xác nhận — độ chính xác lại ổn định.",
+            "Sạch lại sau chỗ trượt. Đừng đổi gì cả.",
+            "Độ chính xác đã về chỗ cũ. Giữ vững.",
+            "Đã ổn định sau chỗ tụt. Giữ tempo này.",
+            "Bạn đã thu hẹp khoảng cách. Ở lại mức BPM này.",
+            "Chất lượng đã hồi. Đậu lại đây một phút."
           ],
           "correction": [
-            "Recovery's holding. Don't push the tempo yet.",
-            "Back from the dip — stay flat, no climbing yet.",
-            "You salvaged it. Hold this exact BPM for a full minute.",
-            "Don't reward the recovery with a tempo bump. Sit here.",
-            "Back on track. Resist the urge to speed up.",
-            "Recovery is fresh — let it become habit before pushing.",
-            "Stay at this BPM. Build a couple of clean bars before changing anything.",
-            "You came back from the slip. Don't undo it by climbing too soon."
+            "Hồi phục đang giữ. Chưa đẩy tempo vội.",
+            "Đã thoát khỏi chỗ tụt — giữ nguyên, chưa leo.",
+            "Bạn đã cứu được nó. Giữ đúng mức BPM này trọn một phút.",
+            "Đừng thưởng cho việc hồi phục bằng cách tăng tempo. Ngồi lại đây.",
+            "Đã trở lại đúng đường. Cưỡng lại ý muốn tăng tốc.",
+            "Hồi phục còn mới — hãy để nó thành thói quen trước khi đẩy.",
+            "Ở lại mức BPM này. Xây vài ô nhịp sạch trước khi đổi gì.",
+            "Bạn đã quay lại từ chỗ trượt. Đừng phá nó bằng cách leo quá sớm."
           ]
         },
         "recovery_confirmed": {
           "encouragement": [
-            "Got it back.",
-            "Nice save — hold it.",
-            "Back and clean.",
-            "Pulled it back. Stay here."
+            "Lấy lại rồi.",
+            "Cứu hay — giữ nó.",
+            "Quay lại và sạch.",
+            "Đã kéo lại. Ở lại đây."
           ],
           "neutral": [
-            "Accuracy's back. Keep this feel.",
-            "Back to clean after the dip.",
-            "Recovery confirmed. Hold steady."
+            "Độ chính xác đã về. Giữ cảm giác này.",
+            "Sạch lại sau chỗ tụt.",
+            "Hồi phục được xác nhận. Giữ vững."
           ],
           "correction": [
-            "Recovery's holding — don't push the tempo yet.",
-            "Back on track. Resist the urge to climb."
+            "Hồi phục đang giữ — chưa đẩy tempo vội.",
+            "Đã trở lại đúng đường. Cưỡng lại ý muốn leo."
           ]
         },
         "tempo_milestone": {
           "encouragement": [
-            "{bpmLow} BPM — new gear.",
-            "Past {bpmLow} BPM, clean.",
-            "{bpmLow}+ and holding. Nice.",
-            "First time at {bpmLow} BPM today. Feels good.",
-            "Crossed {bpmLow} clean. Stay loose.",
-            "{bpmLow} BPM is on the menu now.",
-            "You're in {bpmLow}-territory. Hold it lightly.",
-            "Welcome to {bpmLow} BPM. Make it feel easy."
+            "{bpmLow} BPM — số mới.",
+            "Qua {bpmLow} BPM, sạch.",
+            "{bpmLow}+ và vẫn giữ. Tốt.",
+            "Lần đầu ở {bpmLow} BPM hôm nay. Cảm giác tốt.",
+            "Qua {bpmLow} sạch. Giữ thoải mái.",
+            "{bpmLow} BPM giờ đã nằm trong thực đơn.",
+            "Bạn đang ở vùng {bpmLow}. Hãy giữ nhẹ nhàng.",
+            "Chào mừng đến {bpmLow} BPM. Hãy làm cho nó thấy dễ."
           ],
           "neutral": [
-            "Crossed the {bpmLow}-BPM mark upward.",
-            "Tempo milestone: now in the {bpmLow}-{bpmHigh} band.",
-            "{bpmLow} BPM and climbing.",
-            "{bpmLow} BPM reached. New band: {bpmLow}-{bpmHigh}.",
-            "Moved into the {bpmLow}-{bpmHigh} BPM range.",
-            "Climbing — {bpmLow} BPM is the new working tempo.",
-            "{bpmLow} BPM hit. See if it sticks.",
-            "Tempo bumped into the {bpmLow}-{bpmHigh} zone."
+            "Đã vượt mốc {bpmLow} BPM lên trên.",
+            "Mốc tempo: giờ ở dải {bpmLow}-{bpmHigh}.",
+            "{bpmLow} BPM và đang lên.",
+            "Đạt {bpmLow} BPM. Dải mới: {bpmLow}-{bpmHigh}.",
+            "Đã chuyển vào khoảng {bpmLow}-{bpmHigh} BPM.",
+            "Đang lên — {bpmLow} BPM là tempo làm việc mới.",
+            "Chạm {bpmLow} BPM. Xem nó có giữ được không.",
+            "Tempo đã nhảy vào vùng {bpmLow}-{bpmHigh}."
           ],
           "correction": [
-            "At {bpmLow} BPM — stay here until clean, don't push higher yet.",
-            "{bpmLow} BPM milestone. Stabilise before pushing.",
-            "New band: {bpmLow}-{bpmHigh}. Make sure this one sticks before climbing.",
-            "{bpmLow} BPM is brand new — don't speed up until it feels boring.",
-            "Earn {bpmLow} BPM before chasing the next mark. Hold it.",
-            "Park at {bpmLow} BPM. The next jump comes after a clean minute here.",
-            "Hit {bpmLow} BPM — now lock it in before the next ramp.",
-            "{bpmLow} BPM is fresh. Stay flat and let the hands catch up."
+            "Ở {bpmLow} BPM — ở lại đây cho đến khi sạch, chưa đẩy cao hơn vội.",
+            "Mốc {bpmLow} BPM. Hãy ổn định trước khi đẩy.",
+            "Dải mới: {bpmLow}-{bpmHigh}. Hãy chắc mức này giữ được trước khi leo.",
+            "{bpmLow} BPM còn mới tinh — đừng tăng tốc cho đến khi nó thấy nhàm.",
+            "Hãy giành lấy {bpmLow} BPM trước khi đuổi theo mốc kế tiếp. Giữ nó.",
+            "Đậu ở {bpmLow} BPM. Bước nhảy kế tiếp đến sau một phút sạch ở đây.",
+            "Đã chạm {bpmLow} BPM — giờ hãy khớp nó vào trước đợt tăng kế tiếp.",
+            "{bpmLow} BPM còn mới. Giữ nguyên và để đôi tay bắt kịp."
           ]
         },
         "low_confidence": {
           "encouragement": [
-            "Signal's a bit murky on my end — keep playing, I'll catch up.",
-            "Audio's harder to read here, but you sound good.",
-            "I'm having a slightly tough time reading you — keep going.",
-            "Hard to hear you clean from here — don't let that distract you.",
-            "Mic's catching some noise, but you're playing fine.",
-            "Picking up some haze on the signal — keep going, I'm listening.",
-            "My read on the audio is fuzzy. You sound on the beat though.",
-            "Signal's a touch noisy. Trust your hands."
+            "Tín hiệu hơi mờ ở phía tôi — cứ chơi, tôi sẽ bắt kịp.",
+            "Âm thanh khó đọc hơn ở đoạn này, nhưng bạn nghe ổn.",
+            "Tôi đọc bạn hơi khó — cứ tiếp tục.",
+            "Khó nghe bạn rõ từ đây — đừng để điều đó làm bạn phân tâm.",
+            "Micro đang bắt một ít tạp âm, nhưng bạn chơi ổn.",
+            "Tín hiệu có chút mờ — cứ tiếp tục, tôi đang nghe.",
+            "Tôi đọc âm thanh hơi nhòe. Nhưng bạn nghe có vẻ đúng phách.",
+            "Tín hiệu hơi nhiễu. Hãy tin vào đôi tay."
           ],
           "neutral": [
-            "Detection confidence has been lower for the last 30s — readings may be noisier than usual.",
-            "Lower onset confidence — feedback might be imprecise this stretch.",
-            "Audio signal less clear; metrics slightly less reliable.",
-            "Read quality's down a bit. Numbers may swing more than usual.",
-            "Mic input's harder to parse — accuracy reading may drift.",
-            "Background noise creeping in; feedback might lag a touch.",
-            "Lower signal clarity for the last half-minute.",
-            "Audio's harder to read — take the metrics with a small grain of salt."
+            "Độ tin cậy nhận diện thấp hơn trong 30 giây qua — số đọc có thể nhiễu hơn bình thường.",
+            "Độ tin cậy nhận điểm bắt đầu thấp hơn — nhận xét có thể kém chính xác ở đoạn này.",
+            "Tín hiệu âm thanh kém rõ hơn; các chỉ số kém tin cậy hơn một chút.",
+            "Chất lượng đọc giảm một chút. Số liệu có thể dao động nhiều hơn bình thường.",
+            "Đầu vào micro khó phân tích hơn — số đọc độ chính xác có thể trôi.",
+            "Tạp âm nền đang len vào; nhận xét có thể trễ một chút.",
+            "Độ rõ tín hiệu thấp hơn trong nửa phút qua.",
+            "Âm thanh khó đọc hơn — hãy xem các chỉ số với một chút dè dặt."
           ],
           "correction": [
-            "Hard to read your signal — check your input level or mic position.",
-            "Signal's hard to read. Bump your input gain or move closer to the mic.",
-            "Note detection is uncertain — the room might be too noisy.",
-            "My read on you is unreliable. Move closer to the mic if you can.",
-            "Input level may be too low. Check the meter before continuing.",
-            "Hard to tell hits from noise. Mute anything in the room and try again.",
-            "Signal's dropping out. Plug-in or USB-mic — check the connection.",
-            "Audio quality's poor enough that scoring may be off. Fix the input first."
+            "Khó đọc tín hiệu của bạn — hãy kiểm tra mức đầu vào hoặc vị trí micro.",
+            "Tín hiệu khó đọc. Hãy tăng độ lợi đầu vào hoặc lại gần micro hơn.",
+            "Nhận diện nốt không chắc chắn — có thể phòng quá ồn.",
+            "Cách tôi đọc bạn không đáng tin. Hãy lại gần micro hơn nếu bạn có thể.",
+            "Mức đầu vào có thể quá thấp. Hãy kiểm tra đồng hồ đo trước khi tiếp tục.",
+            "Khó phân biệt lần đánh với tạp âm. Hãy tắt mọi thứ trong phòng rồi thử lại.",
+            "Tín hiệu đang mất. Cắm dây hay micro USB — hãy kiểm tra kết nối.",
+            "Chất lượng âm thanh kém đến mức việc chấm điểm có thể sai. Hãy sửa đầu vào trước."
           ]
         },
         "boundary_signal_a": {
           "encouragement": [
-            "{change}. Fresh segment — take a beat, find the feel.",
-            "{change} — reset your ear and ride this one out.",
-            "Settings shifted: {change}. Let's see how this new shape feels.",
-            "{change}. New segment, fresh start.",
-            "{change} — clean slate, new score.",
-            "{change}. Take a breath and lock in to the new feel.",
-            "{change}. Old segment wrapped — this one's on its own.",
-            "{change}. Reset your ear and ease into the change."
+            "{change}. Đoạn mới — hãy nghỉ một nhịp, tìm lại cảm giác.",
+            "{change} — hãy đặt lại tai nghe và chơi hết đoạn này.",
+            "Cài đặt đã đổi: {change}. Xem hình dạng mới này cho cảm giác thế nào.",
+            "{change}. Đoạn mới, khởi đầu mới.",
+            "{change} — trang trắng, điểm mới.",
+            "{change}. Hãy hít một hơi và khớp vào cảm giác mới.",
+            "{change}. Đoạn cũ đã xong — đoạn này đứng riêng.",
+            "{change}. Hãy đặt lại tai nghe và làm quen dần với thay đổi."
           ],
           "neutral": [
-            "{change}. New segment opens here.",
-            "Boundary marker — {change}. Next stretch is scored on its own.",
-            "Settings change: {change}. Closing previous segment.",
-            "{change}. Score for the next stretch starts now.",
-            "{change} — the previous segment is closed and counted.",
-            "Configuration shift: {change}. Fresh segment.",
-            "{change}. New segment, new metrics.",
-            "{change}. Boundary crossed — score resets."
+            "{change}. Đoạn mới mở ra ở đây.",
+            "Điểm ranh giới — {change}. Chặng tiếp theo được chấm riêng.",
+            "Thay đổi cài đặt: {change}. Đang đóng đoạn trước.",
+            "{change}. Điểm cho chặng tiếp theo bắt đầu từ bây giờ.",
+            "{change} — đoạn trước đã đóng và được tính.",
+            "Chuyển cấu hình: {change}. Đoạn mới.",
+            "{change}. Đoạn mới, chỉ số mới.",
+            "{change}. Đã qua ranh giới — điểm được đặt lại."
           ],
           "correction": [
-            "{change}. Get the new setup feeling natural before you push.",
-            "{change} — old segment closed. Make sure this feels right before adding complexity.",
-            "Settings changed mid-segment: {change}. The new config is scored separately.",
-            "{change}. Take it slow on the new setup — don't carry over old habits.",
-            "{change}. Bed the new feel in before adding speed.",
-            "{change} — reset and treat the next stretch like a warmup.",
-            "{change}. Play it simple until the new config feels familiar.",
-            "{change}. Don't push the new segment yet — get clean first."
+            "{change}. Hãy để thiết lập mới thấy tự nhiên trước khi đẩy.",
+            "{change} — đoạn cũ đã đóng. Hãy chắc thiết lập này ổn trước khi thêm độ phức tạp.",
+            "Cài đặt đã đổi giữa đoạn: {change}. Cấu hình mới được chấm riêng.",
+            "{change}. Hãy chơi chậm với thiết lập mới — đừng mang theo thói quen cũ.",
+            "{change}. Hãy làm cảm giác mới thấm trước khi thêm tốc độ.",
+            "{change} — đặt lại và coi chặng tiếp theo như một lượt khởi động.",
+            "{change}. Hãy chơi đơn giản cho đến khi cấu hình mới quen.",
+            "{change}. Chưa đẩy đoạn mới vội — hãy chơi sạch trước."
           ]
         },
         "stamina": {
           "neutral": [
-            "Score's dropping past the {staminaMinutes}-minute mark again — take 30 seconds, then come back at the same BPM.",
-            "Past the {staminaMinutes}-minute mark your accuracy tends to slide. Brief rest, then back in.",
-            "You tend to fade around minute {staminaMinutes}. Take a break and return fresh.",
-            "Stamina wall around minute {staminaMinutes} — a short rest now saves quality later."
+            "Điểm lại đang tụt sau mốc {staminaMinutes} phút — hãy nghỉ 30 giây, rồi quay lại ở cùng BPM.",
+            "Sau mốc {staminaMinutes} phút, độ chính xác của bạn thường tụt. Nghỉ ngắn, rồi vào lại.",
+            "Bạn thường yếu đi quanh phút thứ {staminaMinutes}. Hãy nghỉ và quay lại cho tươi.",
+            "Bức tường sức bền quanh phút thứ {staminaMinutes} — nghỉ ngắn bây giờ giữ được chất lượng về sau."
           ]
         },
         "ramp_complete": {
           "neutral": [
-            "Ramp done — {startBpm} to {endBpm}. You made it.",
-            "Target reached: {endBpm} BPM. You climbed from {startBpm}.",
-            "Ramp finished. {startBpm} → {endBpm} BPM complete.",
-            "You held it to {endBpm} BPM. Ramp from {startBpm} done."
+            "Đã xong đợt tăng — {startBpm} đến {endBpm}. Bạn đã làm được.",
+            "Đạt mục tiêu: {endBpm} BPM. Bạn đã leo từ {startBpm}.",
+            "Đợt tăng kết thúc. {startBpm} → {endBpm} BPM hoàn tất.",
+            "Bạn đã giữ được đến {endBpm} BPM. Đợt tăng từ {startBpm} xong."
           ]
         },
         "pace_coaching": {
           "neutral": [
-            "Fourth time at {bpm} — the ceiling's real. Two sessions at {suggestedBpm} to consolidate, then push again.",
-            "You've hit {bpm} BPM {attemptCount} times and it's not sticking. Drop to {suggestedBpm} for a week, build it solid.",
-            "{attemptCount} attempts at {bpm} BPM. Ceiling work: two sessions at {suggestedBpm}, then revisit.",
-            "Ceiling at {bpm} BPM — {attemptCount} attempts confirms it. Park at {suggestedBpm} and let it settle."
+            "Lần thứ tư ở {bpm} — trần này là thật. Hai buổi ở {suggestedBpm} để củng cố, rồi đẩy lại.",
+            "Bạn đã chạm {bpm} BPM {attemptCount} lần và nó chưa bám. Hãy xuống {suggestedBpm} trong một tuần, xây cho vững.",
+            "{attemptCount} lần thử ở {bpm} BPM. Luyện ở trần: hai buổi ở {suggestedBpm}, rồi quay lại.",
+            "Trần ở {bpm} BPM — {attemptCount} lần thử đã xác nhận. Đậu ở {suggestedBpm} và để nó lắng xuống."
           ]
         },
         "preset_ceiling_hit": {
           "neutral": [
-            "{bpmLow}–{bpmHigh} is where this one stops being clean for you — {attemptCount} sessions in that band, all around {score}.",
-            "You're back at {bpmLow}–{bpmHigh}. Your last {attemptCount} runs here came in around {score}.",
-            "Noting it while you play: {attemptCount} sessions at {bpmLow}–{bpmHigh}, each of them near {score}.",
-            "This is the tempo your scores on this one start dropping off at. {attemptCount} sessions here so far.",
-            "{attemptCount} times at {bpmLow}–{bpmHigh} now, around {score} each time. Let's see how today sits.",
-            "Same band as last time — {bpmLow}–{bpmHigh}, where this exercise has been landing near {score}."
+            "{bpmLow}–{bpmHigh} là chỗ bài này thôi sạch với bạn — {attemptCount} buổi trong dải đó, đều quanh {score}.",
+            "Bạn lại ở {bpmLow}–{bpmHigh}. {attemptCount} lượt gần nhất ở đây đều quanh {score}.",
+            "Ghi lại khi bạn chơi: {attemptCount} buổi ở {bpmLow}–{bpmHigh}, buổi nào cũng gần {score}.",
+            "Đây là tempo mà điểm của bạn ở bài này bắt đầu tụt. Đến giờ đã {attemptCount} buổi ở đây.",
+            "Giờ đã {attemptCount} lần ở {bpmLow}–{bpmHigh}, mỗi lần quanh {score}. Xem hôm nay thế nào.",
+            "Cùng dải với lần trước — {bpmLow}–{bpmHigh}, nơi bài tập này đang rơi gần {score}."
           ]
         },
         "grid_lost": {
           "neutral": [
-            "Grid correlation dropped — are you still playing to the click?",
-            "Lost the grid there. Intentional fill, or drifting off the click?",
-            "Correlation with the grid just dropped off. Still with the metronome?",
-            "Looks like the groove parted ways with the click. Fill or free?"
+            "Độ tương quan với lưới đã giảm — bạn còn đang chơi theo tiếng click không?",
+            "Vừa mất lưới. Là nốt đệm có chủ ý, hay đang trôi khỏi tiếng click?",
+            "Độ tương quan với lưới vừa tụt. Vẫn cùng máy đếm nhịp chứ?",
+            "Có vẻ groove đã tách khỏi tiếng click. Nốt đệm hay chơi tự do?"
           ]
         },
         "bias_only": {
           "encouragement": [
-            "Very consistent timing — just {biasMs}ms {direction}. Nudge everything {correctionDirection} to sit on the beat.",
-            "Great control — just a {biasMs}ms lean {direction}. A small shift {correctionDirection} will center it."
+            "Nhịp rất ổn định — chỉ {direction} {biasMs}ms. Hãy dịch mọi thứ {correctionDirection} để ngồi đúng phách.",
+            "Kiểm soát rất tốt — chỉ nghiêng {direction} {biasMs}ms. Dịch một chút {correctionDirection} sẽ đưa nó vào giữa."
           ],
           "neutral": [
-            "You're landing {biasMs}ms {direction} the beat — very consistent, just shifted. Try moving everything {correctionDirection}.",
-            "Tight and consistent, but {biasMs}ms {direction} the click. Shift your attack {correctionDirection} to center it.",
-            "Your timing scatter is low, but the whole pattern sits {biasMs}ms {direction}. Nudge {correctionDirection}.",
-            "Low jitter, but offset by {biasMs}ms {direction}. That's a lean — adjust {correctionDirection} to land on the beat."
+            "Bạn đang rơi {direction} {biasMs}ms so với phách — rất ổn định, chỉ là bị dịch. Hãy thử dịch mọi thứ {correctionDirection}.",
+            "Chặt và ổn định, nhưng {direction} {biasMs}ms so với tiếng click. Hãy dịch lực đánh {correctionDirection} để đưa nó vào giữa.",
+            "Độ tản của nhịp bạn thấp, nhưng cả mẫu chơi nằm {direction} {biasMs}ms. Hãy dịch {correctionDirection}.",
+            "Độ rung thấp, nhưng lệch {direction} {biasMs}ms. Đó là một độ nghiêng — hãy chỉnh {correctionDirection} để rơi đúng phách."
           ],
           "correction": [
-            "Consistent {biasMs}ms offset {direction} — not random, just a lean. Shift everything {correctionDirection}.",
-            "Every hit lands {biasMs}ms {direction}. That's a system bias, not jitter. Correct {correctionDirection}."
+            "Độ lệch nhất quán {direction} {biasMs}ms — không ngẫu nhiên, chỉ là một độ nghiêng. Hãy dịch mọi thứ {correctionDirection}.",
+            "Mọi lần đánh đều rơi {direction} {biasMs}ms. Đó là độ lệch hệ thống, không phải độ rung. Hãy chỉnh {correctionDirection}."
           ]
         },
         "boundary_signal_b": {
           "encouragement": [
-            "Nice segment — {score}% at {bpm} BPM. Take a beat.",
-            "{score}% at {bpm} BPM — solid bookend.",
-            "Wrapped that one at {score}% / {bpm} BPM. Good pause point.",
-            "{score}% at {bpm} BPM closes that out — good work.",
-            "Segment done — {score}% at {bpm} BPM. Nice.",
-            "Quiet pause closed it: {score}% at {bpm} BPM.",
-            "Clean wrap — {score}% at {bpm} BPM.",
-            "{score}% at {bpm} BPM. Take a breather."
+            "Đoạn tốt — {score}% ở {bpm} BPM. Hãy nghỉ một nhịp.",
+            "{score}% ở {bpm} BPM — một điểm chốt vững.",
+            "Kết đoạn đó ở {score}% / {bpm} BPM. Điểm dừng tốt.",
+            "{score}% ở {bpm} BPM khép đoạn đó lại — làm tốt.",
+            "Xong đoạn — {score}% ở {bpm} BPM. Tốt.",
+            "Quãng lặng đã khép nó lại: {score}% ở {bpm} BPM.",
+            "Kết thúc sạch — {score}% ở {bpm} BPM.",
+            "{score}% ở {bpm} BPM. Hãy nghỉ lấy hơi."
           ],
           "neutral": [
-            "Segment ended after silence — {score}% at {bpm} BPM.",
-            "Activity gap closed segment: {score}% scored.",
-            "Quiet stretch — segment closed at {score}%.",
-            "{score}% at {bpm} BPM — segment closed by the pause.",
-            "Pause ended the segment: {score}%.",
-            "Segment over — {score}% at {bpm} BPM logged.",
-            "Closed segment at {score}% / {bpm} BPM.",
-            "{score}% at {bpm} BPM saved. Take stock if you want."
+            "Đoạn kết thúc sau quãng im — {score}% ở {bpm} BPM.",
+            "Khoảng ngừng chơi đã đóng đoạn: chấm {score}%.",
+            "Một quãng yên — đoạn đóng ở {score}%.",
+            "{score}% ở {bpm} BPM — đoạn đóng bởi quãng nghỉ.",
+            "Quãng nghỉ đã kết thúc đoạn: {score}%.",
+            "Hết đoạn — đã ghi {score}% ở {bpm} BPM.",
+            "Đóng đoạn ở {score}% / {bpm} BPM.",
+            "Đã lưu {score}% ở {bpm} BPM. Hãy nhìn lại nếu bạn muốn."
           ],
           "correction": [
-            "Segment ended at {score}% — review before the next pass.",
-            "{score}% closed the segment. Check what slipped before the next attempt.",
-            "Pause noted — {score}%. Replay the segment summary before continuing.",
-            "{score}% at {bpm} BPM — worth a quick look at the breakdown.",
-            "Segment closed below where you wanted: {score}%. Diagnose before pushing.",
-            "{score}% at {bpm} BPM — slow it down on the next pass.",
-            "Wrapped at {score}%. Dial in what slipped before another run.",
-            "{score}% at {bpm} BPM. Read the segment summary, then try again."
+            "Đoạn kết thúc ở {score}% — hãy xem lại trước lượt tiếp theo.",
+            "{score}% đã đóng đoạn. Hãy kiểm tra điều gì đã trượt trước lần thử tiếp theo.",
+            "Đã ghi nhận quãng nghỉ — {score}%. Hãy xem lại tóm tắt đoạn trước khi tiếp tục.",
+            "{score}% ở {bpm} BPM — đáng xem nhanh phần phân tích.",
+            "Đoạn đóng dưới mức bạn muốn: {score}%. Hãy chẩn đoán trước khi đẩy.",
+            "{score}% ở {bpm} BPM — hãy chậm lại ở lượt tiếp theo.",
+            "Kết thúc ở {score}%. Hãy chỉnh lại điều đã trượt trước một lượt nữa.",
+            "{score}% ở {bpm} BPM. Hãy đọc tóm tắt đoạn, rồi thử lại."
           ]
         },
         "muddy_hits": {
           "neutral": [
-            "You're landing every beat but the signal is soft — try a sharper attack.",
-            "Beats are all there, but the transient is weak. Hit with more intention.",
-            "Coverage looks good but the hits are quiet. More force on the attack.",
-            "You're playing through the click, just softly. Try to make more contact."
+            "Bạn đang trúng mọi phách nhưng tín hiệu nhẹ — hãy thử đánh sắc hơn.",
+            "Các phách đều có, nhưng transient yếu. Hãy đánh với nhiều chủ ý hơn.",
+            "Độ phủ trông tốt nhưng các lần đánh nhỏ. Thêm lực vào lúc đánh.",
+            "Bạn đang chơi xuyên qua tiếng click, chỉ là nhẹ. Hãy thử tiếp xúc mạnh hơn."
           ]
         },
         "grid_discontinuity": {
           "neutral": [
-            "You went off the grid — try locking back to the click before the next phrase.",
-            "The beat wandered from the click. Reset and find the pulse before you continue.",
-            "Grid tracking dropped — take a beat, then re-enter on the downbeat.",
-            "Drifted from the click there. Stop, breathe, and lock back in."
+            "Bạn đã rời khỏi lưới — hãy thử khớp lại với tiếng click trước câu tiếp theo.",
+            "Nhịp đã lang thang khỏi tiếng click. Hãy đặt lại và tìm nhịp trước khi tiếp tục.",
+            "Theo dõi lưới đã đứt — hãy nghỉ một nhịp, rồi vào lại ở phách mạnh.",
+            "Vừa trôi khỏi tiếng click. Dừng, hít thở và khớp lại."
           ]
         },
         "low_completeness": {
           "neutral": [
-            "You're hitting about half the expected beats — try to stay engaged for every one.",
-            "Coverage is low — make sure you're landing each beat, not just the ones that feel natural.",
-            "Around half the beats are going unplayed. Focus on completing the full pattern.",
-            "Beat coverage is low. Try counting aloud to make sure you're not skipping any."
+            "Bạn đang đánh khoảng một nửa số phách dự kiến — hãy cố gắng có mặt ở từng phách.",
+            "Độ phủ thấp — hãy chắc bạn đánh từng phách, không chỉ những phách thấy tự nhiên.",
+            "Khoảng một nửa số phách đang không được chơi. Hãy tập trung hoàn thành trọn mẫu.",
+            "Độ phủ phách thấp. Hãy thử đếm thành tiếng để chắc bạn không bỏ phách nào."
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "Your beat placement looks good — but the space between notes keeps wandering. Try counting the subdivisions out loud as you play.",
-            "On the beat consistently, but note spacing is uneven. Tap your foot and count subdivisions as you go.",
-            "The beat timing is there — the gap between notes is shifting though. Count eighth notes (or sixteenths) out loud to lock the spacing.",
-            "Placement is solid, spacing is drifting. Try slowing down until the gaps feel even, then speed back up."
+            "Vị trí phách của bạn trông tốt — nhưng khoảng cách giữa các nốt cứ lang thang. Hãy thử đếm thành tiếng các nốt chia nhỏ khi chơi.",
+            "Đúng phách đều đặn, nhưng khoảng cách nốt không đều. Hãy gõ chân và đếm các nốt chia nhỏ khi chơi.",
+            "Nhịp phách đã có — nhưng khoảng cách giữa các nốt đang dịch chuyển. Hãy đếm thành tiếng nốt móc đơn (hoặc móc kép) để khóa khoảng cách.",
+            "Vị trí vững, khoảng cách đang trôi. Hãy thử chậm lại cho đến khi các khoảng thấy đều, rồi tăng tốc lại."
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Note spacing is even — but you're landing off the beat. Anticipate each click by a hair and land right on it.",
-            "Even spacing, but the notes themselves are shifted from the grid. Focus on locking the first note of each group to the beat.",
-            "The rhythm between your notes is consistent — work on where they land relative to the click. Try playing just slightly ahead of where you expect the beat.",
-            "Good spacing feel. Now bring the whole phrase onto the grid — aim for the center of each beat."
+            "Khoảng cách nốt đều — nhưng bạn đang rơi lệch phách. Hãy đón trước mỗi tiếng click một chút và rơi đúng vào nó.",
+            "Khoảng cách đều, nhưng bản thân các nốt bị dịch khỏi lưới. Hãy tập trung khóa nốt đầu của mỗi nhóm vào phách.",
+            "Nhịp giữa các nốt của bạn đều — hãy luyện chỗ chúng rơi so với tiếng click. Hãy thử chơi hơi trước chỗ bạn đoán phách.",
+            "Cảm giác khoảng cách tốt. Giờ hãy đưa cả câu vào lưới — nhắm vào tâm của mỗi phách."
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Beat placement and note spacing are both locked in. That's the feel right there.",
-            "Spacing and placement both on point. Clean session.",
-            "Both dimensions solid — you're playing exactly where you intend to be.",
-            "Timing is dialed in across the board. That's what consistent practice sounds like."
+            "Vị trí phách và khoảng cách nốt đều đã khớp. Đó chính là cảm giác ấy.",
+            "Khoảng cách và vị trí đều chuẩn. Buổi tập sạch.",
+            "Cả hai chiều đều vững — bạn đang chơi đúng chỗ bạn định.",
+            "Nhịp được căn trên mọi mặt. Đó là âm thanh của việc luyện tập đều đặn."
           ]
         },
         "drill_step_up": {
           "neutral": [
-            "{accuracyPct}% — tempo up to {bpm} BPM.",
-            "Clean round at {accuracyPct}%. Moving you up to {bpm} BPM.",
-            "That earned it: {accuracyPct}%. Now at {bpm} BPM.",
-            "{accuracyPct}% meets the pass mark — {bpm} BPM from here.",
-            "Solid at {accuracyPct}%. Stepping up to {bpm} BPM.",
-            "Nice round — {accuracyPct}%. {bpm} BPM next.",
-            "Up to {bpm} BPM. You held {accuracyPct}% last round.",
-            "{accuracyPct}% says you're ready. {bpm} BPM."
+            "{accuracyPct}% — tempo tăng lên {bpm} BPM.",
+            "Vòng sạch ở {accuracyPct}%. Đưa bạn lên {bpm} BPM.",
+            "Xứng đáng: {accuracyPct}%. Giờ ở {bpm} BPM.",
+            "{accuracyPct}% đạt mức đạt — từ đây là {bpm} BPM.",
+            "Vững ở {accuracyPct}%. Tăng lên {bpm} BPM.",
+            "Vòng tốt — {accuracyPct}%. Tiếp theo {bpm} BPM.",
+            "Lên {bpm} BPM. Bạn đã giữ {accuracyPct}% ở vòng trước.",
+            "{accuracyPct}% cho thấy bạn sẵn sàng. {bpm} BPM."
           ]
         },
         "drill_step_down": {
           "neutral": [
-            "{accuracyPct}% — easing back to {bpm} BPM.",
-            "That round slipped to {accuracyPct}%. Dropping to {bpm} BPM.",
-            "Backing off to {bpm} BPM — {accuracyPct}% last round.",
-            "{accuracyPct}%. Let's rebuild it at {bpm} BPM.",
-            "Pulling back to {bpm} BPM after {accuracyPct}%.",
-            "{accuracyPct}% is under the pass mark — {bpm} BPM for the next round.",
-            "Down to {bpm} BPM. Get it clean before we climb again.",
-            "Easing to {bpm} BPM; {accuracyPct}% needs firmer ground."
+            "{accuracyPct}% — hạ nhẹ về {bpm} BPM.",
+            "Vòng đó tụt xuống {accuracyPct}%. Hạ về {bpm} BPM.",
+            "Lùi về {bpm} BPM — {accuracyPct}% ở vòng trước.",
+            "{accuracyPct}%. Hãy xây lại ở {bpm} BPM.",
+            "Lùi về {bpm} BPM sau {accuracyPct}%.",
+            "{accuracyPct}% dưới mức đạt — {bpm} BPM cho vòng tiếp theo.",
+            "Xuống {bpm} BPM. Làm cho sạch trước khi mình leo lại.",
+            "Hạ nhẹ về {bpm} BPM; {accuracyPct}% cần nền vững hơn."
           ]
         }
       },
@@ -1920,139 +1920,139 @@
       "generic": {
         "muddy_hits": {
           "neutral": [
-            "You're hitting the beats but the signal is coming in soft — try playing with a firmer touch.",
-            "The rhythm is there but your attack is light — dig in a bit more.",
-            "Beats are landing but with a soft touch — try a stronger stroke.",
-            "Good rhythm, but the signal is a little soft — put more into each note.",
-            "You're connecting with the beats, but try adding more weight to each stroke."
+            "Bạn đang đánh trúng các phách nhưng tín hiệu thu vào còn nhẹ — hãy thử đánh chắc tay hơn.",
+            "Nhịp điệu có đủ nhưng lực đánh còn nhẹ — hãy đánh dứt khoát hơn một chút.",
+            "Các phách đã trúng nhưng nhẹ — hãy thử đánh mạnh hơn.",
+            "Nhịp tốt, nhưng tín hiệu hơi nhẹ — hãy dồn thêm lực vào mỗi nốt.",
+            "Bạn đang bắt trúng các phách, nhưng hãy thử thêm lực cho mỗi lần đánh."
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Your timing is locked in — spacing and placement are both solid.",
-            "Nice and tight — your notes are landing in the right spots and they're evenly spaced.",
-            "Really consistent — your beat placement and note spacing are both dialled in.",
-            "Great feel — evenly spaced notes hitting right on the pulse.",
-            "Your timing is right in the pocket — spacing and placement are both there."
+            "Nhịp của bạn rất khớp — khoảng cách và vị trí nốt đều vững.",
+            "Rất chắc — các nốt rơi đúng chỗ và cách đều nhau.",
+            "Rất ổn định — vị trí phách và khoảng cách giữa các nốt đều chuẩn.",
+            "Cảm giác rất tốt — các nốt cách đều, rơi đúng vào nhịp.",
+            "Nhịp của bạn nằm ngay trong pocket — khoảng cách và vị trí đều đạt."
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Your notes are evenly spaced but drifting off the click — try anchoring to the pulse more.",
-            "Good even spacing but you're a little off the beat — try locking to the pulse.",
-            "The gaps between your notes are consistent but they're not quite on the beat — anchor to the click.",
-            "Even note spacing but the placement is wandering — focus on landing each note on the beat.",
-            "Your internal timing is consistent but the notes are drifting off the pulse — anchor to the click."
+            "Các nốt của bạn cách đều nhưng đang trôi khỏi tiếng click — hãy thử bám vào nhịp nhiều hơn.",
+            "Khoảng cách đều, nhưng bạn hơi lệch khỏi phách — hãy thử bám chặt vào nhịp.",
+            "Khoảng cách giữa các nốt đều đặn nhưng chưa đúng phách — hãy bám theo tiếng click.",
+            "Các nốt cách đều nhưng vị trí đang lang thang — hãy tập trung đặt mỗi nốt đúng vào phách.",
+            "Nhịp bên trong của bạn ổn định nhưng các nốt đang trôi khỏi nhịp — hãy bám theo tiếng click."
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "You're landing close to each beat but the spaces between notes are uneven — focus on making those gaps more equal.",
-            "Good beat placement but uneven note spacing — try keeping the gaps between notes equal.",
-            "You're close to the beat but the spacing between notes varies — focus on even gaps.",
-            "Your note positions are close but the spacing is a bit scattered — even out the gaps.",
-            "Landing near the beat positions but the note spacing is inconsistent — work on keeping the spaces equal."
+            "Bạn đang đánh sát từng phách nhưng khoảng cách giữa các nốt không đều — hãy tập trung làm các khoảng đó đều hơn.",
+            "Vị trí phách tốt nhưng khoảng cách giữa các nốt không đều — hãy thử giữ các khoảng đó bằng nhau.",
+            "Bạn đang sát phách nhưng khoảng cách giữa các nốt thay đổi — hãy tập trung vào các khoảng đều nhau.",
+            "Vị trí các nốt khá sát nhưng khoảng cách hơi rời rạc — hãy làm các khoảng đều lại.",
+            "Bạn đánh gần các vị trí phách nhưng khoảng cách giữa các nốt không ổn định — hãy luyện giữ các khoảng bằng nhau."
           ]
         },
         "great": {
           "neutral": [
-            "Really locked in — your timing is right there.",
-            "Solid feel, keep riding that groove.",
-            "Your timing is sitting right where it should be.",
-            "Clean rhythm — that's the pocket.",
-            "Locked in tight — great work.",
-            "That's a great feel — tempo is solid throughout."
+            "Rất khớp — nhịp của bạn đúng chỗ.",
+            "Cảm giác chắc, cứ giữ groove đó.",
+            "Nhịp của bạn đang nằm đúng chỗ cần nằm.",
+            "Nhịp sạch — đó chính là pocket.",
+            "Khớp rất chặt — làm tốt lắm.",
+            "Cảm giác rất tốt — tempo vững từ đầu đến cuối."
           ]
         },
         "good_steady": {
           "neutral": [
-            "Nice and steady — good consistent tempo.",
-            "Keeping it together — solid timing through the segment.",
-            "Tempo is holding well.",
-            "Good rhythm feel — consistent pulse.",
-            "Steady timing — you're building a solid foundation."
+            "Đều và vững — tempo ổn định tốt.",
+            "Giữ được nhịp — nhịp vững suốt đoạn này.",
+            "Tempo đang giữ tốt.",
+            "Cảm giác nhịp tốt — nhịp đều.",
+            "Nhịp đều — bạn đang xây một nền vững."
           ]
         },
         "rushing": {
           "neutral": [
-            "You're leaning into the beat a little — try letting it come to you.",
-            "Arriving a touch early — sit back and let the pulse breathe.",
-            "The tempo is pushing forward — ease off the attack slightly.",
-            "You're ahead of the beat — try staying back with it.",
-            "A bit of a rush happening — slow your attack, not your tempo."
+            "Bạn đang hơi nhào vào phách — hãy thử để phách đến với bạn.",
+            "Đến sớm một chút — hãy lùi lại và để nhịp thở.",
+            "Tempo đang bị đẩy lên — hãy giảm lực đánh một chút.",
+            "Bạn đang đi trước phách — hãy thử ở lại cùng phách.",
+            "Đang hơi vội — hãy chậm lực đánh lại, đừng chậm tempo."
           ]
         },
         "dragging": {
           "neutral": [
-            "Settling a bit behind the beat — try staying a little more forward.",
-            "The tempo is dragging back — keep your attack crisp.",
-            "You're lagging slightly — push the attack forward.",
-            "Behind the beat — try keeping the energy moving forward.",
-            "A bit of drag happening — sharpen the attack."
+            "Đang rơi hơi sau phách — hãy thử đi lên phía trước một chút.",
+            "Tempo đang kéo chậm lại — hãy giữ lực đánh dứt khoát.",
+            "Bạn đang hơi trễ — hãy đẩy lực đánh lên phía trước.",
+            "Sau phách — hãy thử giữ cho năng lượng luôn tiến lên.",
+            "Đang hơi kéo chậm — hãy làm lực đánh sắc hơn."
           ]
         },
         "oscillating": {
           "neutral": [
-            "The tempo is moving around — speeding up and slowing down.",
-            "Note spacing is uneven — try keeping the gaps between notes equal.",
-            "The pulse is wandering a bit — focus on steady spacing between notes.",
-            "Rushing then dragging — try locking into one steady feel.",
-            "Tempo consistency needs work — focus on equal note spacing."
+            "Tempo đang dao động — lúc nhanh lúc chậm.",
+            "Khoảng cách giữa các nốt không đều — hãy thử giữ các khoảng đó bằng nhau.",
+            "Nhịp đang hơi lang thang — hãy tập trung giữ khoảng cách đều giữa các nốt.",
+            "Lúc vội lúc chậm — hãy thử bám vào một cảm giác đều.",
+            "Độ ổn định của tempo cần luyện thêm — hãy tập trung vào khoảng cách đều giữa các nốt."
           ]
         },
         "low_score_solid_timing": {
           "neutral": [
-            "Your timing center is good — focus on hitting more of the beats.",
-            "Timing is in the right place, but you're missing some positions — fill those gaps.",
-            "Good timing feel, but the rhythm needs more coverage — play more of the beats.",
-            "The pulse is there but the rhythm is thin — try hitting more positions.",
-            "Your timing is centered well — now work on density."
+            "Trung tâm nhịp của bạn tốt — hãy tập trung đánh trúng nhiều phách hơn.",
+            "Nhịp đúng chỗ, nhưng bạn đang bỏ lỡ một số vị trí — hãy lấp các khoảng trống đó.",
+            "Cảm giác nhịp tốt, nhưng nhịp điệu cần phủ nhiều hơn — hãy chơi nhiều phách hơn.",
+            "Nhịp có đó nhưng nhịp điệu còn thưa — hãy thử đánh nhiều vị trí hơn.",
+            "Nhịp của bạn đã được căn tốt — giờ hãy luyện độ dày."
           ]
         },
         "low_coverage": {
           "neutral": [
-            "I'm only hearing some of your playing — check your input level or play a touch louder.",
-            "Signal is coming in low — try playing with a bit more attack.",
-            "Low detection rate — you may need to turn up your input gain.",
-            "Only picking up part of your playing — check the input level in settings.",
-            "Weak signal coming in — play louder or check your input gain."
+            "Tôi chỉ nghe được một phần bạn chơi — hãy kiểm tra mức đầu vào hoặc chơi to hơn một chút.",
+            "Tín hiệu vào đang thấp — hãy thử đánh mạnh hơn một chút.",
+            "Tỷ lệ nhận diện thấp — có thể bạn cần tăng độ lợi đầu vào.",
+            "Chỉ nhận được một phần bạn chơi — hãy kiểm tra mức đầu vào trong cài đặt.",
+            "Tín hiệu vào yếu — hãy chơi to hơn hoặc kiểm tra độ lợi đầu vào."
           ]
         },
         "noodling": {
           "neutral": [
-            "Good free feel — let the ideas flow.",
-            "Nice exploration — when you're ready, bring it back to the pulse.",
-            "Creative space — use it well.",
-            "Good free play — follow the feel.",
-            "Let it breathe — come back to the grid when you're ready."
+            "Chơi tự do tốt — cứ để ý tưởng chảy.",
+            "Khám phá hay — khi sẵn sàng, hãy quay lại với nhịp.",
+            "Không gian sáng tạo — hãy tận dụng nó.",
+            "Chơi tự do tốt — cứ theo cảm giác.",
+            "Cứ thong thả — khi sẵn sàng thì quay lại với lưới nhịp."
           ]
         },
         "flat_dynamics": {
           "neutral": [
-            "Your playing is very even dynamically — try letting the downbeats breathe a little.",
-            "Every note is about the same volume — experiment with accenting the main beats.",
-            "Nice consistency, but try adding some dynamic shape — hit the downbeats a touch harder."
+            "Cách chơi của bạn rất đều về cường độ — hãy thử để các phách mạnh thở một chút.",
+            "Mọi nốt có âm lượng gần như nhau — hãy thử nhấn vào các phách chính.",
+            "Rất đều, nhưng hãy thử thêm hình dạng cường độ — đánh các phách mạnh nặng hơn một chút."
           ]
         },
         "weak_downbeats": {
           "neutral": [
-            "Try hitting beats 1 and 3 a touch harder — your downbeats are blending in.",
-            "Your upbeats are a little strong — ease off them and push the downbeats.",
-            "The main beats need more weight — let beats 1 and 3 lead."
+            "Hãy thử đánh phách 1 và 3 mạnh hơn một chút — các phách mạnh của bạn đang bị chìm.",
+            "Các phách yếu của bạn hơi mạnh — hãy giảm chúng và đẩy các phách mạnh lên.",
+            "Các phách chính cần thêm sức nặng — hãy để phách 1 và 3 dẫn dắt."
           ]
         },
         "good_accents": {
           "neutral": [
-            "Nice dynamic shape — your downbeats have good weight.",
-            "Great accent on the main beats — the groove has a clear pulse.",
-            "Your downbeats are coming through clearly — nice feel."
+            "Hình dạng cường độ tốt — các phách mạnh của bạn có sức nặng tốt.",
+            "Nhấn phách chính rất tốt — groove có nhịp rõ ràng.",
+            "Các phách mạnh của bạn nghe rõ — cảm giác tốt."
           ]
         },
         "subdivisions_too_loud": {
           "neutral": [
-            "The fills are a bit heavy — let the in-between notes sit lighter.",
-            "Try making the subdivision fills softer — let the main beats carry the weight.",
-            "The fill notes are competing with your downbeats — ease off between the beats."
+            "Các nốt đệm hơi nặng — hãy để các nốt xen giữa nhẹ hơn.",
+            "Hãy thử đánh các nốt chia nhỏ nhẹ hơn — để các phách chính mang sức nặng.",
+            "Các nốt đệm đang lấn át phách mạnh — hãy giảm lực ở giữa các phách."
           ]
         }
       }
@@ -2061,160 +2061,160 @@
       "generic": {
         "muddy_hits": {
           "neutral": [
-            "Your beats are landing but the signal confidence is low — try a firmer attack on each note.",
-            "The detector sees your hits but with low confidence — your transients may be too soft.",
-            "Beats are registering but the signal is weak — sharpen the attack to get a cleaner transient.",
-            "Low signal confidence on your hits — dig in more to improve the attack strength.",
-            "Your attack is too soft for reliable detection — play with more conviction."
+            "Các phách đã trúng nhưng độ tin cậy tín hiệu thấp — hãy thử đánh chắc hơn ở mỗi nốt.",
+            "Bộ dò thấy các lần đánh của bạn nhưng với độ tin cậy thấp — transient của bạn có thể quá nhẹ.",
+            "Các phách được ghi nhận nhưng tín hiệu yếu — hãy làm lực đánh sắc hơn để có transient rõ hơn.",
+            "Độ tin cậy tín hiệu của các lần đánh thấp — hãy đánh dứt khoát hơn để tăng độ mạnh của lực đánh.",
+            "Lực đánh của bạn quá nhẹ để nhận diện đáng tin cậy — hãy chơi quyết liệt hơn."
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Note spacing is consistent and beat placement is solid — tight all-round timing.",
-            "Both note spacing and beat placement are on point — clean timing overall.",
-            "Even note spacing and accurate beat placement — this is what locked-in feels like.",
-            "Spacing and placement are both dialled in — timing is solid.",
-            "Consistent spacing and clean beat placement — nothing to fix here."
+            "Khoảng cách giữa các nốt đều và vị trí phách vững — nhịp chặt toàn diện.",
+            "Cả khoảng cách giữa các nốt lẫn vị trí phách đều chuẩn — nhịp sạch tổng thể.",
+            "Khoảng cách nốt đều và vị trí phách chính xác — đây là cảm giác khi nhịp đã khớp.",
+            "Khoảng cách và vị trí đều chuẩn — nhịp vững.",
+            "Khoảng cách đều và vị trí phách sạch — không có gì cần sửa ở đây."
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Note spacing is even but beat placement is drifting — your internal clock is consistent but not synced to the pulse.",
-            "Consistent note spacing but the beats are landing off-center — your internal rhythm is good, just anchor it to the grid.",
-            "Even spacing between notes but the placement is wandering off the beat — sync to the pulse.",
-            "Your note spacing is reliable but the beat positions are drifting — the internal clock is there, just align it to the click.",
-            "Spacing consistency is good but beat placement is off — focus on landing each note on the pulse."
+            "Khoảng cách giữa các nốt đều nhưng vị trí phách đang trôi — đồng hồ bên trong của bạn ổn định nhưng chưa đồng bộ với nhịp.",
+            "Khoảng cách nốt đều nhưng các phách rơi lệch tâm — nhịp bên trong của bạn tốt, chỉ cần neo nó vào lưới.",
+            "Khoảng cách giữa các nốt đều nhưng vị trí đang lang thang khỏi phách — hãy đồng bộ với nhịp.",
+            "Khoảng cách nốt của bạn đáng tin cậy nhưng vị trí phách đang trôi — đồng hồ bên trong đã có, chỉ cần căn nó theo tiếng click.",
+            "Độ đều của khoảng cách tốt nhưng vị trí phách lệch — hãy tập trung đặt mỗi nốt đúng vào nhịp."
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "Beat placement is on target but subdivision spacing is inconsistent — anchor points are right, the fills between them are scattered.",
-            "Good beat placement but the gaps between notes vary — your positions are correct, the spacing is not.",
-            "You're close to the beat positions but note spacing is uneven — the placement is there, even out the gaps.",
-            "Accurate beat placement, inconsistent note spacing — the anchor points are correct, work on even gaps.",
-            "Beat positions are solid but subdivision spacing is irregular — the placement is there, now even out the fills."
+            "Vị trí phách đúng mục tiêu nhưng khoảng cách các nốt chia nhỏ không đều — các điểm neo đúng, các nốt đệm giữa chúng rời rạc.",
+            "Vị trí phách tốt nhưng khoảng cách giữa các nốt thay đổi — vị trí của bạn đúng, khoảng cách thì chưa.",
+            "Bạn sát các vị trí phách nhưng khoảng cách nốt không đều — vị trí đã có, hãy làm các khoảng đều lại.",
+            "Vị trí phách chính xác, khoảng cách nốt không ổn định — các điểm neo đúng, hãy luyện các khoảng đều nhau.",
+            "Vị trí phách vững nhưng khoảng cách nốt chia nhỏ không đều — vị trí đã có, giờ hãy làm đều các nốt đệm."
           ]
         },
         "great": {
           "neutral": [
-            "Tight beat placement and even note spacing — clean all-round timing.",
-            "Beat placement solid, spacing consistent — push the tempo when you're ready.",
-            "All timing components clean — good session.",
-            "Note spacing and placement both dialled in.",
-            "Timing is locked — consider bumping the tempo or tightening the subdivisions."
+            "Vị trí phách chặt và khoảng cách nốt đều — nhịp sạch toàn diện.",
+            "Vị trí phách vững, khoảng cách đều — hãy nâng tempo khi bạn sẵn sàng.",
+            "Mọi thành phần của nhịp đều sạch — buổi tập tốt.",
+            "Khoảng cách nốt và vị trí đều chuẩn.",
+            "Nhịp đã khớp — hãy cân nhắc tăng tempo hoặc siết chặt các nốt chia nhỏ."
           ]
         },
         "good_steady": {
           "neutral": [
-            "Consistent spacing and placement — solid foundation. Push tempo 5 BPM or sharpen the attack.",
-            "Good timing consistency — a few positions drift but the center holds.",
-            "Placement and spacing reliable — room to push harder.",
-            "Timing center is on, spacing is consistent — push the tempo to challenge it.",
-            "Solid timing foundation — focus on sharpening the attack on weaker beats."
+            "Khoảng cách và vị trí đều ổn định — nền vững. Hãy tăng tempo 5 BPM hoặc làm lực đánh sắc hơn.",
+            "Độ ổn định nhịp tốt — một vài vị trí trôi nhưng trung tâm vẫn giữ.",
+            "Vị trí và khoảng cách đáng tin cậy — còn dư địa để đẩy mạnh hơn.",
+            "Trung tâm nhịp đúng, khoảng cách đều — hãy tăng tempo để thử thách nó.",
+            "Nền nhịp vững — hãy tập trung làm lực đánh sắc hơn ở các phách yếu."
           ]
         },
         "rushing": {
           "neutral": [
-            "Consistently arriving early — directional early bias in the attack timing.",
-            "Note attacks are arriving before the beat — ease the onset forward slightly.",
-            "Early attack pattern — your notes are preceding the beat consistently.",
-            "Consistent early bias — the attack is rushing the pulse.",
-            "Timing is shifted early — let the beat land first, then hit."
+            "Liên tục đến sớm — có độ lệch sớm theo một hướng trong thời điểm đánh.",
+            "Các lần đánh nốt đến trước phách — hãy đưa điểm bắt đầu nốt chậm lại một chút.",
+            "Kiểu đánh sớm — các nốt của bạn liên tục đi trước phách.",
+            "Độ lệch sớm nhất quán — lực đánh đang vội so với nhịp.",
+            "Nhịp bị dịch sớm — hãy để phách rơi trước, rồi mới đánh."
           ]
         },
         "dragging": {
           "neutral": [
-            "Consistently arriving late — directional late bias in the attack timing.",
-            "Note attacks are landing after the beat — sharpen the attack slightly.",
-            "Late attack pattern — notes are trailing the beat consistently.",
-            "Consistent late bias — the attack is dragging the pulse.",
-            "Timing is shifted late — push the attack to meet the beat."
+            "Liên tục đến trễ — có độ lệch trễ theo một hướng trong thời điểm đánh.",
+            "Các lần đánh nốt rơi sau phách — hãy làm lực đánh sắc hơn một chút.",
+            "Kiểu đánh trễ — các nốt liên tục đi sau phách.",
+            "Độ lệch trễ nhất quán — lực đánh đang kéo chậm nhịp.",
+            "Nhịp bị dịch trễ — hãy đẩy lực đánh lên để gặp phách."
           ]
         },
         "oscillating": {
           "neutral": [
-            "High timing variance despite a near-neutral average — the timing is genuinely unstable.",
-            "Not a directional bias — the timing is alternating early and late.",
-            "Tempo instability: note spacing is inconsistent across the segment.",
-            "Rushing-dragging pattern — not a fixed offset, true variance in the timing.",
-            "Timing variance is high — focus on keeping note spacing consistent."
+            "Phương sai nhịp cao dù trung bình gần bằng không — nhịp thực sự không ổn định.",
+            "Không phải độ lệch theo một hướng — nhịp đang luân phiên sớm và trễ.",
+            "Tempo không ổn định: khoảng cách nốt không đều trong suốt đoạn này.",
+            "Kiểu vội rồi chậm — không phải độ lệch cố định, mà là phương sai thật trong nhịp.",
+            "Phương sai nhịp cao — hãy tập trung giữ khoảng cách nốt đều."
           ]
         },
         "low_score_solid_timing": {
           "neutral": [
-            "Timing center and spacing are clean but beat coverage is low.",
-            "Good placement accuracy but too many beat positions are empty.",
-            "Note spacing is consistent but density is low — hit more of the grid positions.",
-            "Timing fundamentals are solid, coverage is the gap — fill out more positions.",
-            "Placement is accurate — focus on hitting more of the beat positions."
+            "Trung tâm nhịp và khoảng cách đều sạch nhưng độ phủ phách thấp.",
+            "Độ chính xác vị trí tốt nhưng quá nhiều vị trí phách còn trống.",
+            "Khoảng cách nốt đều nhưng mật độ thấp — hãy đánh nhiều vị trí trên lưới hơn.",
+            "Nền tảng nhịp vững, khoảng trống nằm ở độ phủ — hãy lấp thêm nhiều vị trí.",
+            "Vị trí chính xác — hãy tập trung đánh nhiều vị trí phách hơn."
           ]
         },
         "low_coverage": {
           "neutral": [
-            "Only a fraction of beat positions had a detected hit — signal may be too quiet.",
-            "Detection rate is low — check your input gain or play louder.",
-            "Most beat positions are empty — check the input level, this isn't a playing-quality issue.",
-            "Low hit detection — increase input gain or attack strength.",
-            "Signal is too quiet for reliable detection — play louder or adjust your input level."
+            "Chỉ một phần nhỏ các vị trí phách có lần đánh được nhận diện — có thể tín hiệu quá nhỏ.",
+            "Tỷ lệ nhận diện thấp — hãy kiểm tra độ lợi đầu vào hoặc chơi to hơn.",
+            "Hầu hết các vị trí phách còn trống — hãy kiểm tra mức đầu vào, đây không phải vấn đề chất lượng chơi.",
+            "Nhận diện lần đánh thấp — hãy tăng độ lợi đầu vào hoặc độ mạnh của lực đánh.",
+            "Tín hiệu quá nhỏ để nhận diện đáng tin cậy — hãy chơi to hơn hoặc chỉnh mức đầu vào."
           ]
         },
         "noodling": {
           "neutral": [
-            "Free-play mode — beat placement isn't being graded here.",
-            "Exploring freely — use it to warm up, then rein it back to the grid.",
-            "No scoring in free play — this is your creative space.",
-            "Free-form mode active — grading resumes when you lock back to the pulse.",
-            "Ungraded free play — let it flow, come back to the grid when ready."
+            "Chế độ chơi tự do — vị trí phách không được chấm điểm ở đây.",
+            "Đang khám phá tự do — hãy dùng nó để khởi động, rồi đưa lại về lưới.",
+            "Không chấm điểm khi chơi tự do — đây là không gian sáng tạo của bạn.",
+            "Chế độ tự do đang bật — việc chấm điểm tiếp tục khi bạn bám lại vào nhịp.",
+            "Chơi tự do không chấm điểm — cứ để nó chảy, quay lại lưới khi sẵn sàng."
           ]
         },
         "flat_dynamics": {
           "neutral": [
-            "Low amplitude variation across beat positions — try varying your pick attack.",
-            "Minimal dynamic shaping across the bar — increase accent differential on the downbeats.",
-            "Amplitude is consistent across positions — build in a dynamic hierarchy: downbeats strongest, upbeats lighter."
+            "Biên độ ít thay đổi giữa các vị trí phách — hãy thử thay đổi lực đánh.",
+            "Hình dạng cường độ tối thiểu trong cả ô nhịp — hãy tăng chênh lệch nhấn ở các phách mạnh.",
+            "Biên độ đều ở mọi vị trí — hãy xây một thứ bậc cường độ: phách mạnh to nhất, phách yếu nhẹ hơn."
           ]
         },
         "weak_downbeats": {
           "neutral": [
-            "Anti-accent pattern detected — downbeats are quieter than upbeats.",
-            "Your upbeats are dominating — increase pick attack on beats 1 and 3.",
-            "Downbeat amplitude is below upbeat amplitude — reverse the dynamic hierarchy."
+            "Phát hiện kiểu nhấn ngược — các phách mạnh nhỏ hơn các phách yếu.",
+            "Các phách yếu của bạn đang lấn át — hãy tăng lực đánh ở phách 1 và 3.",
+            "Biên độ phách mạnh thấp hơn biên độ phách yếu — hãy đảo ngược thứ bậc cường độ."
           ]
         },
         "good_accents": {
           "neutral": [
-            "Healthy accent differential — downbeats are clearly stronger than upbeats.",
-            "Good dynamic shaping — downbeat amplitude is well above upbeat amplitude.",
-            "Strong accent structure — downbeats leading the dynamic hierarchy."
+            "Chênh lệch nhấn lành mạnh — các phách mạnh rõ ràng mạnh hơn các phách yếu.",
+            "Hình dạng cường độ tốt — biên độ phách mạnh cao hơn hẳn biên độ phách yếu.",
+            "Cấu trúc nhấn rõ rệt — các phách mạnh dẫn đầu thứ bậc cường độ."
           ]
         },
         "subdivisions_too_loud": {
           "neutral": [
-            "Subdivision amplitude is close to downbeat amplitude — fills are overwhelming the accent structure.",
-            "The fills are as loud as the main beats — reduce attack on the subdivision notes.",
-            "No dynamic hierarchy between beats and fills — downbeats should lead, subdivisions should follow."
+            "Biên độ các nốt chia nhỏ gần bằng biên độ phách mạnh — các nốt đệm đang lấn át cấu trúc nhấn.",
+            "Các nốt đệm to bằng các phách chính — hãy giảm lực đánh ở các nốt chia nhỏ.",
+            "Không có thứ bậc cường độ giữa phách và nốt đệm — phách mạnh nên dẫn, các nốt chia nhỏ nên theo."
           ]
         }
       }
     },
     "words": {
       "direction": {
-        "before": "before",
-        "after": "after"
+        "before": "sớm",
+        "after": "trễ"
       },
       "correctionDirection": {
-        "earlier": "earlier",
-        "later": "later"
+        "earlier": "sớm hơn",
+        "later": "trễ hơn"
       },
       "change": {
-        "bpmUp": "tempo up to {to} BPM",
-        "bpmDown": "tempo down to {to} BPM",
-        "presetCleared": "preset cleared",
-        "preset": "loading \"{to}\"",
-        "timeSig": "time signature {to}/4",
-        "grouping": "regrouped to {to}",
-        "instrument": "switching to {to}",
-        "other": "config changed",
+        "bpmUp": "tempo tăng lên {to} BPM",
+        "bpmDown": "tempo giảm xuống {to} BPM",
+        "presetCleared": "đã bỏ preset",
+        "preset": "đang nạp \"{to}\"",
+        "timeSig": "nhịp {to}/4",
+        "grouping": "đã nhóm lại thành {to}",
+        "instrument": "đang chuyển sang {to}",
+        "other": "cấu hình đã thay đổi",
         "separator": "; "
       }
     }

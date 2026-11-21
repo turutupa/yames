@@ -1,30 +1,23 @@
 {
   "de": [
-    "electric-guitar",
     "acoustic-guitar",
     "bass",
     "drums",
     "piano"
   ],
   "es": [
-    "electric-guitar",
     "acoustic-guitar",
     "bass",
     "drums",
     "piano"
   ],
   "fr": [
-    "electric-guitar",
     "acoustic-guitar",
     "bass",
     "drums",
     "piano"
   ],
   "it": [
-    "generic",
-    "defaultMode",
-    "proMode",
-    "words",
     "electric-guitar",
     "acoustic-guitar",
     "bass",
@@ -32,10 +25,6 @@
     "piano"
   ],
   "ja": [
-    "generic",
-    "defaultMode",
-    "proMode",
-    "words",
     "electric-guitar",
     "acoustic-guitar",
     "bass",
@@ -43,10 +32,6 @@
     "piano"
   ],
   "ko": [
-    "generic",
-    "defaultMode",
-    "proMode",
-    "words",
     "electric-guitar",
     "acoustic-guitar",
     "bass",
@@ -54,10 +39,6 @@
     "piano"
   ],
   "nl": [
-    "generic",
-    "defaultMode",
-    "proMode",
-    "words",
     "electric-guitar",
     "acoustic-guitar",
     "bass",
@@ -65,10 +46,6 @@
     "piano"
   ],
   "pl": [
-    "generic",
-    "defaultMode",
-    "proMode",
-    "words",
     "electric-guitar",
     "acoustic-guitar",
     "bass",
@@ -76,10 +53,6 @@
     "piano"
   ],
   "pt-BR": [
-    "generic",
-    "defaultMode",
-    "proMode",
-    "words",
     "electric-guitar",
     "acoustic-guitar",
     "bass",
@@ -87,10 +60,6 @@
     "piano"
   ],
   "ru": [
-    "generic",
-    "defaultMode",
-    "proMode",
-    "words",
     "electric-guitar",
     "acoustic-guitar",
     "bass",
@@ -98,10 +67,6 @@
     "piano"
   ],
   "tr": [
-    "generic",
-    "defaultMode",
-    "proMode",
-    "words",
     "electric-guitar",
     "acoustic-guitar",
     "bass",
@@ -109,10 +74,6 @@
     "piano"
   ],
   "vi": [
-    "generic",
-    "defaultMode",
-    "proMode",
-    "words",
     "electric-guitar",
     "acoustic-guitar",
     "bass",
@@ -120,10 +81,6 @@
     "piano"
   ],
   "zh-CN": [
-    "generic",
-    "defaultMode",
-    "proMode",
-    "words",
     "electric-guitar",
     "acoustic-guitar",
     "bass",
@@ -132,9 +89,6 @@
   ],
   "zh-TW": [
     "generic",
-    "defaultMode",
-    "proMode",
-    "words",
     "electric-guitar",
     "acoustic-guitar",
     "bass",

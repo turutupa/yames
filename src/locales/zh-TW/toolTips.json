@@ -1920,139 +1920,139 @@
       "generic": {
         "muddy_hits": {
           "neutral": [
-            "You're hitting the beats but the signal is coming in soft — try playing with a firmer touch.",
-            "The rhythm is there but your attack is light — dig in a bit more.",
-            "Beats are landing but with a soft touch — try a stronger stroke.",
-            "Good rhythm, but the signal is a little soft — put more into each note.",
-            "You're connecting with the beats, but try adding more weight to each stroke."
+            "你有擊中拍點，但收到的訊號偏弱，試著用更紮實的力道演奏。",
+            "節奏有了，但你的力道偏輕，再用力一點。",
+            "拍點有落到，但力道偏軟，試著打得更有力。",
+            "節奏不錯，但訊號有點弱，每個音多投入一些。",
+            "你有對上拍點，但試著讓每一下更有分量。"
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Your timing is locked in — spacing and placement are both solid.",
-            "Nice and tight — your notes are landing in the right spots and they're evenly spaced.",
-            "Really consistent — your beat placement and note spacing are both dialled in.",
-            "Great feel — evenly spaced notes hitting right on the pulse.",
-            "Your timing is right in the pocket — spacing and placement are both there."
+            "你的節奏很穩，間距和落點都扎實。",
+            "又穩又緊，音落在對的位置，間距也均勻。",
+            "非常一致，拍點落點和音符間距都抓得很準。",
+            "很棒的律動，音符間距均勻，正好落在脈動上。",
+            "你的節奏正好落在拍點上，間距和落點都到位。"
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Your notes are evenly spaced but drifting off the click — try anchoring to the pulse more.",
-            "Good even spacing but you're a little off the beat — try locking to the pulse.",
-            "The gaps between your notes are consistent but they're not quite on the beat — anchor to the click.",
-            "Even note spacing but the placement is wandering — focus on landing each note on the beat.",
-            "Your internal timing is consistent but the notes are drifting off the pulse — anchor to the click."
+            "你的音符間距均勻，但離開了節拍器，試著更貼緊脈動。",
+            "間距均勻，但稍微偏離拍點，試著鎖住脈動。",
+            "音符之間的間隔一致，但沒有完全落在拍上，貼緊節拍器。",
+            "音符間距均勻，但落點在飄，專心把每個音落在拍上。",
+            "你內在的節奏一致，但音符漸漸偏離脈動，貼緊節拍器。"
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "You're landing close to each beat but the spaces between notes are uneven — focus on making those gaps more equal.",
-            "Good beat placement but uneven note spacing — try keeping the gaps between notes equal.",
-            "You're close to the beat but the spacing between notes varies — focus on even gaps.",
-            "Your note positions are close but the spacing is a bit scattered — even out the gaps.",
-            "Landing near the beat positions but the note spacing is inconsistent — work on keeping the spaces equal."
+            "你落在每個拍點附近，但音符之間的間隔不均，專心讓間隔更平均。",
+            "拍點落點不錯，但音符間距不均，試著讓音符之間的間隔相等。",
+            "你靠近拍點，但音符之間的間距有變化，專心讓間隔均勻。",
+            "你的音符位置很接近，但間距有點分散，把間隔弄均勻。",
+            "落在拍點附近，但音符間距不一致，練習讓間隔相等。"
           ]
         },
         "great": {
           "neutral": [
-            "Really locked in — your timing is right there.",
-            "Solid feel, keep riding that groove.",
-            "Your timing is sitting right where it should be.",
-            "Clean rhythm — that's the pocket.",
-            "Locked in tight — great work.",
-            "That's a great feel — tempo is solid throughout."
+            "真的很穩，你的節奏就在那裡。",
+            "律動扎實，繼續保持這個 groove。",
+            "你的節奏正落在該在的位置。",
+            "節奏乾淨，這就是 pocket。",
+            "鎖得很緊，做得很好。",
+            "律動很好，整段速度都很穩。"
           ]
         },
         "good_steady": {
           "neutral": [
-            "Nice and steady — good consistent tempo.",
-            "Keeping it together — solid timing through the segment.",
-            "Tempo is holding well.",
-            "Good rhythm feel — consistent pulse.",
-            "Steady timing — you're building a solid foundation."
+            "穩穩的，速度一致。",
+            "保持住了，整段節奏扎實。",
+            "速度維持得不錯。",
+            "節奏感不錯，脈動一致。",
+            "節奏穩定，你正在打下紮實的基礎。"
           ]
         },
         "rushing": {
           "neutral": [
-            "You're leaning into the beat a little — try letting it come to you.",
-            "Arriving a touch early — sit back and let the pulse breathe.",
-            "The tempo is pushing forward — ease off the attack slightly.",
-            "You're ahead of the beat — try staying back with it.",
-            "A bit of a rush happening — slow your attack, not your tempo."
+            "你有點往拍子裡擠，試著讓它自己過來。",
+            "稍微早到了，往後坐一點，讓脈動呼吸。",
+            "速度在往前推，把力道稍微放輕。",
+            "你超前拍子了，試著待在拍子後面。",
+            "出現一點搶拍，放慢你的力道，而不是速度。"
           ]
         },
         "dragging": {
           "neutral": [
-            "Settling a bit behind the beat — try staying a little more forward.",
-            "The tempo is dragging back — keep your attack crisp.",
-            "You're lagging slightly — push the attack forward.",
-            "Behind the beat — try keeping the energy moving forward.",
-            "A bit of drag happening — sharpen the attack."
+            "稍微落在拍子後面，試著再往前一點。",
+            "速度在往後拖，讓力道保持俐落。",
+            "你稍微落後，把力道往前送。",
+            "落在拍子後面，試著讓能量持續往前。",
+            "出現一點拖拍，讓力道更銳利。"
           ]
         },
         "oscillating": {
           "neutral": [
-            "The tempo is moving around — speeding up and slowing down.",
-            "Note spacing is uneven — try keeping the gaps between notes equal.",
-            "The pulse is wandering a bit — focus on steady spacing between notes.",
-            "Rushing then dragging — try locking into one steady feel.",
-            "Tempo consistency needs work — focus on equal note spacing."
+            "速度在變動，一下變快一下變慢。",
+            "音符間距不均，試著讓音符之間的間隔相等。",
+            "脈動有點飄，專心讓音符之間的間距穩定。",
+            "先搶拍再拖拍，試著鎖定同一個穩定的律動。",
+            "速度的一致性還要加強，專心讓音符間距相等。"
           ]
         },
         "low_score_solid_timing": {
           "neutral": [
-            "Your timing center is good — focus on hitting more of the beats.",
-            "Timing is in the right place, but you're missing some positions — fill those gaps.",
-            "Good timing feel, but the rhythm needs more coverage — play more of the beats.",
-            "The pulse is there but the rhythm is thin — try hitting more positions.",
-            "Your timing is centered well — now work on density."
+            "你的節奏重心不錯，專心多打到一些拍點。",
+            "節奏落在對的地方，但有些位置沒打到，把空缺補上。",
+            "節奏感不錯，但涵蓋的拍點不夠，多演奏一些拍點。",
+            "脈動有了，但節奏偏稀疏，試著多打幾個位置。",
+            "你的節奏重心很好，現在練習密度。"
           ]
         },
         "low_coverage": {
           "neutral": [
-            "I'm only hearing some of your playing — check your input level or play a touch louder.",
-            "Signal is coming in low — try playing with a bit more attack.",
-            "Low detection rate — you may need to turn up your input gain.",
-            "Only picking up part of your playing — check the input level in settings.",
-            "Weak signal coming in — play louder or check your input gain."
+            "我只聽到你演奏的一部分，檢查輸入音量，或演奏稍微大聲一點。",
+            "進來的訊號偏低，試著用多一點力道演奏。",
+            "偵測率偏低，你可能需要調高輸入增益。",
+            "只收到你演奏的一部分，到設定中檢查輸入音量。",
+            "進來的訊號很弱，演奏大聲一點，或檢查輸入增益。"
           ]
         },
         "noodling": {
           "neutral": [
-            "Good free feel — let the ideas flow.",
-            "Nice exploration — when you're ready, bring it back to the pulse.",
-            "Creative space — use it well.",
-            "Good free play — follow the feel.",
-            "Let it breathe — come back to the grid when you're ready."
+            "自由的感覺不錯，讓想法流動。",
+            "探索得很好，準備好時再回到脈動上。",
+            "這是創意的空間，好好利用。",
+            "自由演奏不錯，跟著感覺走。",
+            "讓它呼吸，準備好時再回到節拍格點。"
           ]
         },
         "flat_dynamics": {
           "neutral": [
-            "Your playing is very even dynamically — try letting the downbeats breathe a little.",
-            "Every note is about the same volume — experiment with accenting the main beats.",
-            "Nice consistency, but try adding some dynamic shape — hit the downbeats a touch harder."
+            "你的演奏力度非常平均，試著讓強拍多一點呼吸。",
+            "每個音的音量差不多，試著為主要拍點加上重音。",
+            "一致性不錯，但試著加入一些力度的起伏，強拍打重一點。"
           ]
         },
         "weak_downbeats": {
           "neutral": [
-            "Try hitting beats 1 and 3 a touch harder — your downbeats are blending in.",
-            "Your upbeats are a little strong — ease off them and push the downbeats.",
-            "The main beats need more weight — let beats 1 and 3 lead."
+            "試著把第 1 拍和第 3 拍打重一點，你的強拍被蓋住了。",
+            "你的弱拍有點強，收斂一下，把強拍推出來。",
+            "主要拍點需要更多分量，讓第 1 拍和第 3 拍帶頭。"
           ]
         },
         "good_accents": {
           "neutral": [
-            "Nice dynamic shape — your downbeats have good weight.",
-            "Great accent on the main beats — the groove has a clear pulse.",
-            "Your downbeats are coming through clearly — nice feel."
+            "力度的起伏不錯，你的強拍很有分量。",
+            "主要拍點的重音很好，律動有清楚的脈動。",
+            "你的強拍很清楚地傳出來，感覺不錯。"
           ]
         },
         "subdivisions_too_loud": {
           "neutral": [
-            "The fills are a bit heavy — let the in-between notes sit lighter.",
-            "Try making the subdivision fills softer — let the main beats carry the weight.",
-            "The fill notes are competing with your downbeats — ease off between the beats."
+            "填補的音有點重，讓中間的音輕一些。",
+            "試著把細分的填補音放輕，讓主要拍點承載分量。",
+            "填補的音在和你的強拍較勁，拍與拍之間放輕。"
           ]
         }
       }
@@ -2061,161 +2061,161 @@
       "generic": {
         "muddy_hits": {
           "neutral": [
-            "Your beats are landing but the signal confidence is low — try a firmer attack on each note.",
-            "The detector sees your hits but with low confidence — your transients may be too soft.",
-            "Beats are registering but the signal is weak — sharpen the attack to get a cleaner transient.",
-            "Low signal confidence on your hits — dig in more to improve the attack strength.",
-            "Your attack is too soft for reliable detection — play with more conviction."
+            "你的拍點有落到，但訊號可信度偏低，每個音試著用更紮實的力道。",
+            "偵測器看到你的擊音，但可信度偏低，你的瞬態可能太軟。",
+            "拍點有被記錄，但訊號偏弱，加強力道以得到更乾淨的瞬態。",
+            "你的擊音訊號可信度偏低，再多投入一些，提高力道強度。",
+            "你的力道太軟，無法可靠偵測，演奏時更有把握一些。"
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Note spacing is consistent and beat placement is solid — tight all-round timing.",
-            "Both note spacing and beat placement are on point — clean timing overall.",
-            "Even note spacing and accurate beat placement — this is what locked-in feels like.",
-            "Spacing and placement are both dialled in — timing is solid.",
-            "Consistent spacing and clean beat placement — nothing to fix here."
+            "音符間距一致，拍點落點扎實，整體節奏緊密。",
+            "音符間距和拍點落點都很準，整體節奏乾淨。",
+            "音符間距均勻，拍點落點準確，這就是鎖定的感覺。",
+            "間距和落點都抓得很準，節奏扎實。",
+            "間距一致，拍點落點乾淨，這裡沒有需要修正的地方。"
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Note spacing is even but beat placement is drifting — your internal clock is consistent but not synced to the pulse.",
-            "Consistent note spacing but the beats are landing off-center — your internal rhythm is good, just anchor it to the grid.",
-            "Even spacing between notes but the placement is wandering off the beat — sync to the pulse.",
-            "Your note spacing is reliable but the beat positions are drifting — the internal clock is there, just align it to the click.",
-            "Spacing consistency is good but beat placement is off — focus on landing each note on the pulse."
+            "音符間距均勻，但拍點落點在偏移，你的內在時鐘一致，但沒有和脈動同步。",
+            "音符間距一致，但拍點落在偏離中心的位置，你的內在節奏不錯，只要把它對齊節拍格點。",
+            "音符之間的間距均勻，但落點偏離拍點，與脈動同步。",
+            "你的音符間距可靠，但拍點位置在偏移，內在時鐘有了，只要對齊節拍器。",
+            "間距的一致性不錯，但拍點落點偏了，專心把每個音落在脈動上。"
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "Beat placement is on target but subdivision spacing is inconsistent — anchor points are right, the fills between them are scattered.",
-            "Good beat placement but the gaps between notes vary — your positions are correct, the spacing is not.",
-            "You're close to the beat positions but note spacing is uneven — the placement is there, even out the gaps.",
-            "Accurate beat placement, inconsistent note spacing — the anchor points are correct, work on even gaps.",
-            "Beat positions are solid but subdivision spacing is irregular — the placement is there, now even out the fills."
+            "拍點落點準確，但細分的間距不一致，錨點是對的，其間的填補音很分散。",
+            "拍點落點不錯，但音符之間的間隔有變化，你的位置是對的，間距不是。",
+            "你靠近拍點位置，但音符間距不均，落點有了，把間隔弄均勻。",
+            "拍點落點準確，音符間距不一致，錨點是對的，練習讓間隔均勻。",
+            "拍點位置扎實，但細分的間距不規則，落點有了，現在把填補音弄均勻。"
           ]
         },
         "great": {
           "neutral": [
-            "Tight beat placement and even note spacing — clean all-round timing.",
-            "Beat placement solid, spacing consistent — push the tempo when you're ready.",
-            "All timing components clean — good session.",
-            "Note spacing and placement both dialled in.",
-            "Timing is locked — consider bumping the tempo or tightening the subdivisions."
+            "拍點落點緊密，音符間距均勻，整體節奏乾淨。",
+            "拍點落點扎實，間距一致，準備好時再提高速度。",
+            "所有節奏項目都很乾淨，這次練習不錯。",
+            "音符間距和落點都抓得很準。",
+            "節奏已鎖定，可以考慮調高速度，或讓細分更緊密。"
           ]
         },
         "good_steady": {
           "neutral": [
-            "Consistent spacing and placement — solid foundation. Push tempo 5 BPM or sharpen the attack.",
-            "Good timing consistency — a few positions drift but the center holds.",
-            "Placement and spacing reliable — room to push harder.",
-            "Timing center is on, spacing is consistent — push the tempo to challenge it.",
-            "Solid timing foundation — focus on sharpening the attack on weaker beats."
+            "間距和落點一致，基礎扎實。把速度提高 5 BPM，或加強力道。",
+            "節奏一致性不錯，有幾個位置偏移，但重心穩住了。",
+            "落點和間距可靠，還有空間可以更進一步。",
+            "節奏重心對了，間距一致，提高速度來挑戰它。",
+            "節奏基礎扎實，專心加強較弱拍點上的力道。"
           ]
         },
         "rushing": {
           "neutral": [
-            "Consistently arriving early — directional early bias in the attack timing.",
-            "Note attacks are arriving before the beat — ease the onset forward slightly.",
-            "Early attack pattern — your notes are preceding the beat consistently.",
-            "Consistent early bias — the attack is rushing the pulse.",
-            "Timing is shifted early — let the beat land first, then hit."
+            "持續提早到達，起音時間有方向性的偏早。",
+            "音符的起音在拍點之前到達，把起音稍微往前帶。",
+            "偏早的起音模式，你的音符持續領先拍點。",
+            "持續偏早，起音在搶脈動。",
+            "節奏整體偏早，讓拍點先落下，再擊音。"
           ]
         },
         "dragging": {
           "neutral": [
-            "Consistently arriving late — directional late bias in the attack timing.",
-            "Note attacks are landing after the beat — sharpen the attack slightly.",
-            "Late attack pattern — notes are trailing the beat consistently.",
-            "Consistent late bias — the attack is dragging the pulse.",
-            "Timing is shifted late — push the attack to meet the beat."
+            "持續延遲到達，起音時間有方向性的偏晚。",
+            "音符的起音落在拍點之後，把起音稍微加強。",
+            "偏晚的起音模式，音符持續落在拍點後面。",
+            "持續偏晚，起音在拖脈動。",
+            "節奏整體偏晚，把起音推上去，去對上拍點。"
           ]
         },
         "oscillating": {
           "neutral": [
-            "High timing variance despite a near-neutral average — the timing is genuinely unstable.",
-            "Not a directional bias — the timing is alternating early and late.",
-            "Tempo instability: note spacing is inconsistent across the segment.",
-            "Rushing-dragging pattern — not a fixed offset, true variance in the timing.",
-            "Timing variance is high — focus on keeping note spacing consistent."
+            "平均值接近零，但節奏變異很大，節奏確實不穩。",
+            "這不是方向性的偏差，節奏在偏早和偏晚之間交替。",
+            "速度不穩：整段的音符間距不一致。",
+            "搶拍與拖拍交替的模式，不是固定的偏移，是節奏中真正的變異。",
+            "節奏變異很大，專心讓音符間距保持一致。"
           ]
         },
         "low_score_solid_timing": {
           "neutral": [
-            "Timing center and spacing are clean but beat coverage is low.",
-            "Good placement accuracy but too many beat positions are empty.",
-            "Note spacing is consistent but density is low — hit more of the grid positions.",
-            "Timing fundamentals are solid, coverage is the gap — fill out more positions.",
-            "Placement is accurate — focus on hitting more of the beat positions."
+            "節奏重心和間距都乾淨，但拍點涵蓋率偏低。",
+            "落點準確度不錯，但太多拍點位置是空的。",
+            "音符間距一致，但密度偏低，多打一些格點位置。",
+            "節奏基本功扎實，缺口在涵蓋率，多填一些位置。",
+            "落點準確，專心多打一些拍點位置。"
           ]
         },
         "low_coverage": {
           "neutral": [
-            "Only a fraction of beat positions had a detected hit — signal may be too quiet.",
-            "Detection rate is low — check your input gain or play louder.",
-            "Most beat positions are empty — check the input level, this isn't a playing-quality issue.",
-            "Low hit detection — increase input gain or attack strength.",
-            "Signal is too quiet for reliable detection — play louder or adjust your input level."
+            "只有一小部分拍點位置偵測到擊音，訊號可能太小聲。",
+            "偵測率偏低，檢查輸入增益，或演奏大聲一點。",
+            "大部分拍點位置是空的，檢查輸入音量，這不是演奏品質的問題。",
+            "擊音偵測偏低，提高輸入增益或力道強度。",
+            "訊號太小聲，無法可靠偵測，演奏大聲一點，或調整輸入音量。"
           ]
         },
         "noodling": {
           "neutral": [
-            "Free-play mode — beat placement isn't being graded here.",
-            "Exploring freely — use it to warm up, then rein it back to the grid.",
-            "No scoring in free play — this is your creative space.",
-            "Free-form mode active — grading resumes when you lock back to the pulse.",
-            "Ungraded free play — let it flow, come back to the grid when ready."
+            "自由演奏模式，這裡不評分拍點落點。",
+            "自由探索中，拿來暖身，然後再收回到節拍格點。",
+            "自由演奏不計分，這是你的創意空間。",
+            "自由模式已啟用，等你回到脈動上，評分就會繼續。",
+            "未評分的自由演奏，讓它流動，準備好時再回到節拍格點。"
           ]
         },
         "flat_dynamics": {
           "neutral": [
-            "Low amplitude variation across beat positions — try varying your pick attack.",
-            "Minimal dynamic shaping across the bar — increase accent differential on the downbeats.",
-            "Amplitude is consistent across positions — build in a dynamic hierarchy: downbeats strongest, upbeats lighter."
+            "各拍點位置的振幅變化很小，試著改變你的起音力道。",
+            "整個小節的力度塑形很少，加大強拍上的重音差距。",
+            "各位置的振幅一致，建立力度層次：強拍最強，弱拍較輕。"
           ]
         },
         "weak_downbeats": {
           "neutral": [
-            "Anti-accent pattern detected — downbeats are quieter than upbeats.",
-            "Your upbeats are dominating — increase pick attack on beats 1 and 3.",
-            "Downbeat amplitude is below upbeat amplitude — reverse the dynamic hierarchy."
+            "偵測到反重音模式，強拍比弱拍小聲。",
+            "你的弱拍佔了上風，加大第 1 拍和第 3 拍的起音力道。",
+            "強拍的振幅低於弱拍的振幅，把力度層次反過來。"
           ]
         },
         "good_accents": {
           "neutral": [
-            "Healthy accent differential — downbeats are clearly stronger than upbeats.",
-            "Good dynamic shaping — downbeat amplitude is well above upbeat amplitude.",
-            "Strong accent structure — downbeats leading the dynamic hierarchy."
+            "重音差距良好，強拍明顯強於弱拍。",
+            "力度塑形不錯，強拍的振幅遠高於弱拍的振幅。",
+            "重音結構很強，強拍帶領著力度層次。"
           ]
         },
         "subdivisions_too_loud": {
           "neutral": [
-            "Subdivision amplitude is close to downbeat amplitude — fills are overwhelming the accent structure.",
-            "The fills are as loud as the main beats — reduce attack on the subdivision notes.",
-            "No dynamic hierarchy between beats and fills — downbeats should lead, subdivisions should follow."
+            "細分的振幅接近強拍的振幅，填補音蓋過了重音結構。",
+            "填補音和主要拍點一樣大聲，減少細分音符的起音力道。",
+            "拍點與填補音之間沒有力度層次，強拍應該帶頭，細分應該跟隨。"
           ]
         }
       }
     },
     "words": {
       "direction": {
-        "before": "before",
-        "after": "after"
+        "before": "偏早",
+        "after": "偏晚"
       },
       "correctionDirection": {
-        "earlier": "earlier",
-        "later": "later"
+        "earlier": "提早",
+        "later": "延後"
       },
       "change": {
-        "bpmUp": "tempo up to {to} BPM",
-        "bpmDown": "tempo down to {to} BPM",
-        "presetCleared": "preset cleared",
-        "preset": "loading \"{to}\"",
-        "timeSig": "time signature {to}/4",
-        "grouping": "regrouped to {to}",
-        "instrument": "switching to {to}",
-        "other": "config changed",
-        "separator": "; "
+        "bpmUp": "速度調高到 {to} BPM",
+        "bpmDown": "速度調低到 {to} BPM",
+        "presetCleared": "預設已清除",
+        "preset": "載入「{to}」",
+        "timeSig": "拍號 {to}/4",
+        "grouping": "改為 {to} 分組",
+        "instrument": "切換為 {to}",
+        "other": "設定已更改",
+        "separator": "；"
       }
     }
   }
