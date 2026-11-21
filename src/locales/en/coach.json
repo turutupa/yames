@@ -26,12 +26,12 @@
     "sessionScore": "Session score {{score}} · {{word}}",
     "openRuns": "Open Tool runs in Progress",
     "finding": {
-      "beatEarly": "Beat {{beat}} of the bar came {{ms}} ms early on average, out of line with the other beats.",
-      "beatLate": "Beat {{beat}} of the bar came {{ms}} ms late on average, out of line with the other beats.",
-      "subdivision": "No note landed on the {{position}} in {{missed}} of {{total}} beats.",
-      "ceiling": "Your timing held at {{holds}} BPM and slipped at {{breaks}} BPM.",
-      "driftEarly": "By the last third of the run you were landing {{ms}} ms earlier than in the first third.",
-      "driftLate": "By the last third of the run you were landing {{ms}} ms later than in the first third.",
+      "beatEarly": "On beat {{beat}} of the bar your notes came {{ms}} ms earlier than on the other beats, on average: {{agreeing}} of the {{notes}} notes on that beat were earlier than that average.",
+      "beatLate": "On beat {{beat}} of the bar your notes came {{ms}} ms later than on the other beats, on average: {{agreeing}} of the {{notes}} notes on that beat were later than that average.",
+      "subdivision": "No note landed on the {{position}} on {{missed}} of the {{total}} beats you played through.",
+      "ceiling": "At {{low}} BPM, at least half of your {{lowNotes}} notes landed within {{lowMs}} ms of their usual place against the click; at {{high}} BPM, at least half of your {{highNotes}} notes were {{highMs}} ms or more from it.",
+      "driftEarly": "Over a stretch of {{notes}} notes, the last {{third}} landed {{ms}} ms earlier against the click than the first {{third}}, on average.",
+      "driftLate": "Over a stretch of {{notes}} notes, the last {{third}} landed {{ms}} ms later against the click than the first {{third}}, on average.",
       "position": {
         "2": {
           "0": "eighth on the beat",

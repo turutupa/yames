@@ -229,13 +229,22 @@ export const ToolCoach = /* @__PURE__ */ memo(function ToolCoach({
   );
 });
 
-/** What `analyze_free_play` found in the run, from `practice-segment-ended`. */
+/**
+ * What `analyze_free_play` found in the run, from `practice-segment-ended`.
+ * `at` is the segment's own end (`endMs`, wall-clock ms), never the arrival.
+ */
 type RunFindings = { findings: Finding[]; playedMs: number; at: number };
 
 /**
- * The findings of the run that is playing or just stopped (C5): the newest
- * free-play segment of the run that had any, from the segment-end event. They
- * are not stored anywhere; a new run forgets them.
+ * The findings of the run that is playing or just stopped (C5): those of the
+ * run's LAST free-play segment to close, from the segment-end event. A later
+ * segment of the same run that closes with none clears them (c5c2b M2), so a
+ * stretch before a pause never leads the note of a run that went on cleanly;
+ * the sentences count their own notes, so they say what stretch they are
+ * about. They are not stored anywhere; a new run forgets them.
+ *
+ * A segment that ended before this run began (the last run's stop-close
+ * landing after a fast restart) is ignored, by its own `endMs` (L3).
  *
  * Nothing renders while the click runs: a segment that closes mid-run (a pause
  * of four seconds after thirty of play) is kept in a ref, and published when
@@ -246,10 +255,12 @@ type RunFindings = { findings: Finding[]; playedMs: number; at: number };
 function useRunFindings(listenOn: boolean, isPlaying: boolean): RunFindings | null {
   const latest = useRef<RunFindings | null>(null);
   const playing = useRef(isPlaying);
+  const runStart = useRef(Date.now());
   const [published, setPublished] = useState<RunFindings | null>(null);
   useEffect(() => {
     playing.current = isPlaying;
     if (isPlaying) {
+      runStart.current = Date.now();
       latest.current = null;
       setPublished(null);
     } else {
@@ -261,12 +272,15 @@ function useRunFindings(listenOn: boolean, isPlaying: boolean): RunFindings | nu
     let live = true;
     let unlisten: (() => void) | null = null;
     onPracticeSegmentEnded((payload) => {
-      if (!live || !payload.findings || payload.findings.length === 0) return;
-      latest.current = {
-        findings: payload.findings,
-        playedMs: Math.max(0, payload.endMs - payload.startMs),
-        at: Date.now(),
-      };
+      if (!live || payload.endMs < runStart.current) return;
+      latest.current =
+        payload.findings && payload.findings.length > 0
+          ? {
+              findings: payload.findings,
+              playedMs: Math.max(0, payload.endMs - payload.startMs),
+              at: payload.endMs,
+            }
+          : null;
       if (!playing.current) setPublished(latest.current);
     })
       .then((fn) => {
