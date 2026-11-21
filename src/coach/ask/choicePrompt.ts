@@ -40,7 +40,7 @@ export const CHOICE_TOOLS_TOKENS = 1100;
 /**
  * The "Cards:" section of the prefix (leg c3int). The seven cards take 245;
  * a one-line card costs ~18, so about three more fit. Past that, every card
- * goes by its id and three words (~7 each), which holds some twenty-five.
+ * goes by its id and its hand-written `short` (at most six words).
  */
 export const CHOICE_CARDS_TOKENS = 300;
 export const CHOICE_PREFIX_TOKENS = CHOICE_TOOLS_TOKENS + CHOICE_CARDS_TOKENS;
@@ -179,9 +179,23 @@ export function choicePrefix(
   for (const [name, values] of lists) lines.push(`${name}=${values.join("|")}`);
   if (cards.length > 0) {
     lines.push("", "Cards:");
-    for (const card of cards) lines.push(cardLine(card, notes));
+    lines.push(...cardLines(cards, notes));
   }
   return lines.join("\n");
+}
+
+/**
+ * The cards' lines within `CHOICE_CARDS_TOKENS`, as the budget's note says:
+ * each with its note to the first stop while they fit, else EVERY card with
+ * its hand-written `short` (leg c2b2ac: twenty cards did not fit whole, and
+ * three words cut from the note gave "Why this part" and "The scales the";
+ * the seven Take cards and the thirteen others read alike). A card with no
+ * `short` (a test's made-up one) keeps the first three words of its note.
+ */
+function cardLines(cards: readonly EvalCard[], notes: boolean): string[] {
+  const full = cards.map((card) => cardLine(card, notes));
+  if (!notes || estimateTokens(full.join("\n")) <= CHOICE_CARDS_TOKENS) return full;
+  return cards.map((card) => cardLine(card, notes, true));
 }
 
 /**
@@ -190,10 +204,11 @@ export function choicePrefix(
  * and is left out), and its note to the first stop. A card that declares no
  * arguments is its id and note, as before.
  */
-function cardLine(card: EvalCard, notes: boolean): string {
+function cardLine(card: EvalCard, notes: boolean, brief = false): string {
   const shown = (card.args ?? []).filter((f) => !(f.name === "take" && f.type.kind === "enum" && f.type.values.length === 1));
   const signature = card.args === undefined ? card.id : `${card.id}(${shown.map(argText).join(", ")})`;
   if (!notes) return signature;
+  if (brief) return `${signature}: ${card.short ?? card.note.split(/\s+/).slice(0, 3).join(" ")}`;
   return `${signature}: ${card.args === undefined ? card.note : shortNote(card.note)}`;
 }
 

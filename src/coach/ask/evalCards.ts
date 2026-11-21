@@ -17,8 +17,14 @@ export type EvalCard = {
   note: string;
   /** Its arguments, typed as a tool's are (all optional today). Absent: the grammar's generic card argument. */
   args?: readonly ArgField[];
+  /**
+   * What it answers in at most six words, by hand (leg c2b2ac): the prompt's
+   * line for every card when the notes do not fit `CHOICE_CARDS_TOKENS`.
+   * Absent (a test's made-up card): the first three words of the note.
+   */
+  short?: string;
 };
 
-export const EVAL_CARDS: readonly EvalCard[] = FACT_CARDS.map((card) => ({ id: card.name, note: card.note, args: card.args }));
+export const EVAL_CARDS: readonly EvalCard[] = FACT_CARDS.map((card) => ({ id: card.name, note: card.note, args: card.args, short: card.short }));
 
 export const CARD_IDS: readonly string[] = EVAL_CARDS.map((card) => card.id);

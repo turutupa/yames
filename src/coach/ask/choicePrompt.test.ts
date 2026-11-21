@@ -62,6 +62,26 @@ describe("choicePrefix", () => {
     );
     expect(cardsPart).toBeLessThanOrEqual(CHOICE_CARDS_TOKENS);
   });
+
+  it("every card is in the prefix, by its hand-written short line: at most six words, no two alike (c2b2ac)", () => {
+    const prefix = choicePrefix(catalogue(), EVAL_CARDS);
+    for (const c of EVAL_CARDS) expect(prefix).toContain("\n" + c.id);
+    const shorts = EVAL_CARDS.map((c) => c.short ?? "");
+    for (const s of shorts) {
+      expect(s.trim().length, "a card without a short line").toBeGreaterThan(0);
+      expect(s.trim().split(/\s+/).length, s).toBeLessThanOrEqual(6);
+    }
+    expect(new Set(shorts.map((s) => s.toLowerCase())).size).toBe(shorts.length);
+    // The twenty cards' notes do not fit their 300: every card goes by its short line, never three words of its note.
+    for (const c of EVAL_CARDS) expect(prefix).toMatch(new RegExp(`\\n${c.id}(\\([^)]*\\))?: ${c.short}(\\n|$)`));
+    expect(prefix).toContain("\nplan_why(): why this part is planned\n");
+    expect(prefix).toContain("\nscale_fits(root=ROOT, suffix=SUFFIX): scales that hold a chord\n");
+    expect(prefix).not.toContain(": Why this part\n");
+    expect(prefix).not.toContain(": The scales the\n");
+    expect(estimateTokens(prefix.split("\n\nCards:")[0])).toBeLessThanOrEqual(CHOICE_TOOLS_TOKENS);
+    expect(estimateTokens(prefix.split("\n\nCards:")[1] ?? "")).toBeLessThanOrEqual(CHOICE_CARDS_TOKENS);
+    expect(estimateTokens(prefix)).toBeLessThanOrEqual(CHOICE_PREFIX_TOKENS);
+  });
 });
 
 describe("choicePrefix, leg c3bp's fixes", () => {

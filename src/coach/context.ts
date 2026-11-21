@@ -72,7 +72,13 @@ export type CoachInput = {
   failure?: InputFailure;
 };
 
-export type CoachRun = Pick<RunState, "phase" | "stepIndex" | "bpm" | "takes" | "outcomes" | "ungraded" | "untimed">;
+/**
+ * The run, as the cards read it. `plan` is the plan the Session RUNS (not
+ * Today's, review c2b2a H1) and `startedAt` its start (the result screen's
+ * repeat count, M3): optional only so a fixture may leave them out.
+ */
+export type CoachRun = Pick<RunState, "phase" | "stepIndex" | "bpm" | "takes" | "outcomes" | "ungraded" | "untimed"> &
+  Partial<Pick<RunState, "plan" | "startedAt">>;
 export type CoachPath = Pick<PathDoc, "id" | "title" | "kind" | "goal" | "gradingLimits">;
 export type CoachStep = Pick<Step, "id" | "order" | "title" | "goal" | "why" | "howTo" | "payoff">;
 
@@ -165,6 +171,8 @@ export function buildCoachContext(latest: CoachSources): CoachContext {
       outcomes: run.outcomes,
       ungraded: run.ungraded,
       untimed: run.untimed,
+      plan: run.plan,
+      startedAt: run.startedAt,
     };
   }
 
@@ -322,7 +330,7 @@ export function contextForModel(ctx: CoachContext, maxTokens = 450): string {
   if (ctx.step) add(`step ${String(ctx.step.order)}: ${clip(ctx.step.title, 80)}; goal: ${clip(ctx.step.goal)}`);
   if (ctx.exercise) add(`exercise: ${clip(ctx.exercise.title, 80)}; purpose: ${clip(ctx.words?.purpose ?? ctx.exercise.purpose)}`);
   if (ctx.run) {
-    const total = ctx.plan?.steps.length;
+    const total = (ctx.run.plan ?? ctx.plan)?.steps.length;
     add(
       `session: ${ctx.run.phase}, block ${String(ctx.run.stepIndex + 1)}${total ? ` of ${String(total)}` : ""}, ${String(ctx.run.bpm)} bpm, ${String(ctx.run.takes)} takes on this block${ctx.run.ungraded ? `, ungraded (${ctx.run.ungraded})` : ""}`,
     );
