@@ -22,7 +22,25 @@ const g = (say: string, more?: number): Cue => ({ ...c("even", say, more), gener
 
 // Shared orders, word for word, so each is translated once.
 const HEARD = "Press right behind each fret so it rings.";
-const EXTRAS = "Play one note on each click, no more.";
+const EXTRAS = "Play one note on each beat, no more.";
+const EXTRAS8 = "Play two notes to each beat, no more.";
+const EXTRAS_TAB = "Play just the notes on the tab, no more.";
+const EARLY_BEAT = "Wait for the beat before each new note.";
+const HELD_LOOP_BEAT = "Count the last note's two beats, then go again.";
+const LATE_CHORD = "See each chord's place before '1'.";
+const SAY_CHORD = "Say each chord's name on its first beat.";
+const NEXT_PAIR = "Have the next pair ready before the click.";
+const LAST_PAIR = "Finish on the opening pair, two clicks each.";
+const SHIFT_NAME = "Move the first finger with each new name.";
+const NEXT_SHAPE = "Look at the next shape before you move.";
+const SHAPE_READY = "Have the next shape ready before the click.";
+const BACK_TO_FIRST = "Go from the middle shape back to the first.";
+const GUIDE_TWO = "Let finger two guide on the G string.";
+const CALL_THIRDS = "Call each third major or minor as you play it.";
+const A_TO_C = "Cross to the A string with finger one for C.";
+const E_FOR_G = "Drop to the low E string with finger one for G.";
+const BACK_G = "Go back to the low E string on '1' for G.";
+const BACK_D = "Go back to the A string on '1' for D.";
 const LATE = "Look at the next fret before the click.";
 const EARLY = "Wait for the click before each new note.";
 const HELD = "Count each long note's two clicks, then move.";
@@ -137,7 +155,7 @@ export const KNOW_THE_NECK_CUES: CueBook = {
     c("afterHeld", HELD),
     c("shift", TOGETHER),
     c("stringChange", CLOSE),
-    c("lastBars", "Finish on the opening pair, two clicks each."),
+    c("lastBars", LAST_PAIR),
   ],
   "octaves.every-a": [
     g("Say the same name at every place you play."),
@@ -289,5 +307,212 @@ export const KNOW_THE_NECK_CUES: CueBook = {
     c("early", EARLY),
     c("shift", "Move up a note as each bar starts."),
     c("lastBars", KEEP_NAMING),
+  ],
+
+  // Level 2 (Intermediate), Step 6: G major and F major on the top strings
+  "top-strings-keys.g-major-strings": [
+    g("Name the key's one sharp every time it comes.", 1),
+    c("notes", "Say the sharp's name before you play it.", 1),
+    c("heard", HEARD_ANY),
+    c("extras", EXTRAS),
+    c("late", LATE_SAY),
+    c("early", EARLY),
+    c("afterHeld", HELD_LOOP),
+    c("openString", OPEN_CLICK),
+    c("shift", SHIFT_NAME),
+    c("lastBars", KEEP_NAMING),
+  ],
+  "top-strings-keys.f-major-strings": [
+    g("Name the key's one flat every time it comes.", 1),
+    c("notes", "Say the flat's name before you play it.", 1),
+    c("heard", HEARD_ANY),
+    c("extras", EXTRAS),
+    c("late", LATE_SAY),
+    c("early", EARLY),
+    c("afterHeld", HELD_LOOP),
+    c("shift", "Slide to each new name in one move."),
+    c("lastBars", KEEP_NAMING),
+  ],
+  "top-strings-keys.fifth-position-keys": [
+    g("Keep the hand where it is for every note.", 1),
+    c("notes", "Picture each place before you play it.", 1),
+    c("heard", HEARD_ANY),
+    c("extras", EXTRAS8),
+    c("late", LATE_SAY),
+    c("early", EARLY),
+    c("afterHeld", HELD_LOOP),
+    c("stringChange", CLOSE),
+    c("lastBars", KEEP_NAMING),
+  ],
+  "top-strings-keys.g-tune": [
+    g(SAY_CHORD, 3),
+    c("notes", "One finger per fret: five, seven and eight.", 4),
+    c("heard", HEARD),
+    c("extras", EXTRAS_TAB),
+    c("late", "Find each bar's first note before '1'.", 3),
+    c("early", EARLY_BEAT),
+    c("afterHeld", "Give each quarter note its full beat."),
+    c("stringChange", CROSS),
+    c("lastBars", "Hold the last G its full two beats."),
+  ],
+  // Step 7: thirds
+  "thirds.thirds-g-b": [
+    g(CALL_THIRDS, 1),
+    c("notes", "Same fret for major, one fret back for minor.", 1),
+    c("heard", HEARD_ANY),
+    c("extras", EXTRAS8),
+    c("late", NEXT_PAIR),
+    c("early", EARLY),
+    c("afterHeld", HELD_LOOP),
+    c("shift", GUIDE_TWO),
+    c("stringChange", CROSS),
+    c("lastBars", LAST_PAIR),
+  ],
+  "thirds.thirds-top": [
+    g("Let finger one guide on the top string."),
+    c("notes", "Go two frets back for minor, one for major.", 1),
+    c("heard", HEARD),
+    c("extras", EXTRAS8),
+    c("late", NEXT_PAIR),
+    c("early", EARLY),
+    c("afterHeld", HELD_LOOP),
+    c("shift", "Move finger one up with each new pair."),
+    c("stringChange", CROSS),
+    c("lastBars", LAST_PAIR),
+  ],
+  "thirds.thirds-tune": [
+    g("Play root and third, then third and fifth.", 1),
+    c("notes", "Find C, F and G at frets five, ten and twelve.", 1),
+    c("heard", HEARD),
+    c("extras", EXTRAS8),
+    c("late", LATE_CHORD),
+    c("early", EARLY_BEAT),
+    c("afterHeld", HELD_LOOP_BEAT),
+    c("shift", "Shift as each bar starts, not after."),
+    c("stringChange", CROSS),
+    c("lastBars", "Come back down to C and hold it two beats."),
+  ],
+  // Step 8: roots
+  "roots.one-four-five": [
+    g("Say one, four, five as you play each root.", 1),
+    c("notes", "Fourth at the same fret, fifth two frets up.", 1),
+    c("heard", HEARD_ANY),
+    c("extras", EXTRAS),
+    c("late", "Have each root ready before its click."),
+    c("early", EARLY),
+    c("afterHeld", HELD_LOOP),
+    c("stringChange", CROSS),
+    c("lastBars", "Finish on the root, held for two clicks."),
+  ],
+  "roots.roots-and-fifths": [
+    g("Say A, D, E as each chord comes round.", 1),
+    c("notes", "Find each fifth one string over, two frets up.", 1),
+    c("heard", HEARD),
+    c("extras", EXTRAS8),
+    c("late", "Have each root ready before its click."),
+    c("early", EARLY_BEAT),
+    c("afterHeld", HELD_LOOP_BEAT),
+    c("shift", "Move up two frets for the third chord."),
+    c("stringChange", CROSS),
+    c("lastBars", "Land back on A and hold it two beats."),
+  ],
+  "roots.root-octaves": [
+    g("See the octave shape under every root.", 1),
+    c("notes", "Move the shape to the A string for C.", 1),
+    c("heard", HEARD),
+    c("extras", EXTRAS),
+    c("late", LATE_CHORD),
+    c("early", EARLY_BEAT),
+    c("shift", SHAPE_MOVE),
+    c("stringChange", CROSS),
+    c("lastBars", "Say G on both notes of the last chord."),
+  ],
+  // Step 9: roots in G and D
+  "roots-other-keys.g-one-four-five": [
+    g(SAY_CHORD, 3),
+    c("notes", "Keep finger one at fret three on both strings.", 2),
+    c("heard", HEARD),
+    c("extras", EXTRAS),
+    c("late", LATE_CHORD),
+    c("early", EARLY_BEAT),
+    c("stringChange", A_TO_C),
+    c("lastBars", BACK_G),
+  ],
+  "roots-other-keys.d-one-four-five": [
+    g(SAY_CHORD, 3),
+    c("notes", "Keep finger three at fret five on both strings.", 2),
+    c("heard", HEARD),
+    c("extras", EXTRAS),
+    c("late", LATE_CHORD),
+    c("early", EARLY_BEAT),
+    c("stringChange", E_FOR_G),
+    c("lastBars", BACK_D),
+  ],
+  "roots-other-keys.g-one-six-four-five": [
+    g(SAY_CHORD, 3),
+    c("notes", "Lift finger one for E minor's open string.", 2),
+    c("heard", HEARD),
+    c("extras", EXTRAS8),
+    c("late", LATE_CHORD),
+    c("early", EARLY_BEAT),
+    c("openString", "Leave the hand where it is for the open E."),
+    c("stringChange", A_TO_C),
+    c("lastBars", BACK_G),
+  ],
+  "roots-other-keys.d-one-six-four-five": [
+    g(SAY_CHORD, 3),
+    c("notes", "Move finger one to fret two for B minor.", 2),
+    c("heard", HEARD),
+    c("extras", EXTRAS8),
+    c("late", LATE_CHORD),
+    c("early", EARLY_BEAT),
+    c("stringChange", E_FOR_G),
+    c("lastBars", BACK_D),
+  ],
+  // Step 10: triads
+  "triads.c-three-places": [
+    g("Say C, E, G in each of the three shapes.", 1),
+    c("notes", "Name the top note: G, then C, then E."),
+    c("heard", HEARD),
+    c("extras", EXTRAS8),
+    c("late", SHAPE_READY),
+    c("early", EARLY),
+    c("shift", NEXT_SHAPE),
+    c("stringChange", CROSS),
+    c("lastBars", BACK_TO_FIRST),
+  ],
+  "triads.am-three-places": [
+    g("Say A, C, E in each of the three shapes.", 1),
+    c("notes", "Start with all three strings at fret five.", 1),
+    c("heard", HEARD),
+    c("extras", EXTRAS8),
+    c("late", SHAPE_READY),
+    c("early", EARLY),
+    c("shift", NEXT_SHAPE),
+    c("stringChange", CROSS),
+    c("lastBars", BACK_TO_FIRST),
+  ],
+  "triads.near-triads": [
+    g("Keep the hand in one place for all three chords."),
+    c("notes", "For F, play the B string at fret six.", 1),
+    c("heard", HEARD),
+    c("extras", EXTRAS8),
+    c("late", LATE_CHORD),
+    c("early", EARLY_BEAT),
+    c("afterHeld", HELD_LOOP_BEAT),
+    c("shift", "Change only the fingers, not the hand."),
+    c("stringChange", CROSS),
+    c("lastBars", "Roll C once, then hold its lowest note.", 1),
+  ],
+  // Level 2 warm-up: a key that changes every Take
+  "warmup-intermediate.thirds-around": [
+    g(CALL_THIRDS),
+    c("heard", HEARD_ANY),
+    c("late", LATE_SAY),
+    c("early", EARLY),
+    c("afterHeld", HELD_LOOP),
+    c("shift", GUIDE_TWO),
+    c("stringChange", CLOSE),
+    c("lastBars", LAST_PAIR),
   ],
 };

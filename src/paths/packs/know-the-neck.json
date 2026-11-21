@@ -175,7 +175,7 @@
             {"when":"even","say":"Name each note aloud: E, F, G, A, B, C, D.","general":true},
             {"when":"notes","say":"Find F at fret one and C at fret eight.","more":1},
             {"when":"heard","say":"Press right behind each fret so it rings."},
-            {"when":"extras","say":"Play one note on each click, no more."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
             {"when":"late","say":"Look at the next fret before the click."},
             {"when":"early","say":"Wait for the click before each new note."},
             {"when":"afterHeld","say":"Count the last note's two clicks, then go again."},
@@ -301,7 +301,7 @@
             {"when":"even","say":"Name each note aloud: A, B, C, D, E, F, G.","general":true},
             {"when":"notes","say":"Find C at fret three and F at fret eight.","more":1},
             {"when":"heard","say":"Press right behind each fret so it rings."},
-            {"when":"extras","say":"Play one note on each click, no more."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
             {"when":"late","say":"Look at the next fret before the click."},
             {"when":"early","say":"Wait for the click before each new note."},
             {"when":"afterHeld","say":"Count the last note's two clicks, then go again."},
@@ -427,7 +427,7 @@
             {"when":"even","say":"Say each name twice, once on each string.","general":true},
             {"when":"notes","say":"Play the A string five frets below the low E.","more":1},
             {"when":"heard","say":"Press right behind each fret so it rings."},
-            {"when":"extras","say":"Play one note on each click, no more."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
             {"when":"late","say":"Find the A string's fret before the click."},
             {"when":"early","say":"Wait for the click before each new note."},
             {"when":"afterHeld","say":"Count each long note's two clicks, then move."},
@@ -814,7 +814,7 @@
             {"when":"even","say":"Say one name for both notes of each pair.","general":true},
             {"when":"notes","say":"Take each higher note with the little finger.","more":1},
             {"when":"heard","say":"Press each note firmly so it rings."},
-            {"when":"extras","say":"Play one note on each click, no more."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
             {"when":"late","say":"Say each note's name before you play it."},
             {"when":"early","say":"Wait for the click before each new note."},
             {"when":"afterHeld","say":"Count each long note's two clicks, then move."},
@@ -1044,7 +1044,7 @@
             {"when":"even","say":"Say the same name at every place you play.","general":true},
             {"when":"notes","say":"Find each place from the one before it.","more":1},
             {"when":"heard","say":"Press each note firmly so it rings."},
-            {"when":"extras","say":"Play one note on each click, no more."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
             {"when":"late","say":"Find each note's place before its click."},
             {"when":"early","say":"Wait for the click before each new note."},
             {"when":"afterHeld","say":"Count the last note's four clicks, then go."},
@@ -1355,7 +1355,7 @@
             {"when":"even","say":"Say the chord each root belongs to.","general":true},
             {"when":"notes","say":"Put finger three on fret three for G and C.","more":2},
             {"when":"heard","say":"Press right behind each fret so it rings."},
-            {"when":"extras","say":"Play one note on each click, no more."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
             {"when":"late","say":"Look at the next fret before the click."},
             {"when":"early","say":"Wait for the click before each new note."},
             {"when":"afterHeld","say":"Count the open E's two clicks, then go again."},
@@ -1483,7 +1483,7 @@
             {"when":"even","say":"Find each root's octave: two strings, two frets.","general":true},
             {"when":"notes","say":"Put finger two on both notes at fret two.","more":2},
             {"when":"heard","say":"Press right behind each fret so it rings."},
-            {"when":"extras","say":"Play one note on each click, no more."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
             {"when":"late","say":"Have the octave shape ready before the click."},
             {"when":"early","say":"Wait for the click before each new note."},
             {"when":"afterHeld","say":"Count each long note's two clicks, then move."},
@@ -1609,7 +1609,7 @@
             {"when":"even","say":"Reach three frets up from the D and G strings.","general":true},
             {"when":"notes","say":"Reach the octave with the little finger.","more":2},
             {"when":"heard","say":"Press right behind each fret so it rings."},
-            {"when":"extras","say":"Play one note on each click, no more."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
             {"when":"late","say":"Have the octave shape ready before the click."},
             {"when":"early","say":"Wait for the click before each new note."},
             {"when":"afterHeld","say":"Count each long note's two clicks, then move."},
@@ -1736,7 +1736,7 @@
             {"when":"even","say":"Say each note's name as you play it.","general":true},
             {"when":"notes","say":"Picture each place before you play it.","more":2},
             {"when":"heard","say":"Press each note firmly so it rings."},
-            {"when":"extras","say":"Play one note on each click, no more."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
             {"when":"late","say":"Say each note's name before you play it."},
             {"when":"early","say":"Wait for the click before each new note."},
             {"when":"afterHeld","say":"Count each long note's two clicks, then move."},
@@ -1945,7 +1945,7 @@
                   {"when":"even","say":"Say each note's name as you play it.","general":true},
                   {"when":"notes","say":"Picture each place before you play it."},
                   {"when":"heard","say":"Press each note firmly so it rings."},
-                  {"when":"extras","say":"Play one note on each click, no more."},
+                  {"when":"extras","say":"Play one note on each beat, no more."},
                   {"when":"late","say":"Say each note's name before you play it."},
                   {"when":"early","say":"Wait for the click before each new note."},
                   {"when":"afterHeld","say":"Count each long note's two clicks, then move."},
@@ -1988,7 +1988,7 @@
             {"when":"even","say":"Name each note aloud: D, E, F, G, A, B, C.","general":true},
             {"when":"notes","say":"Find F at fret three and C at fret ten.","more":1},
             {"when":"heard","say":"Press right behind each fret so it rings."},
-            {"when":"extras","say":"Play one note on each click, no more."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
             {"when":"late","say":"Look at the next fret before the click."},
             {"when":"early","say":"Wait for the click before each new note."},
             {"when":"afterHeld","say":"Count the last note's two clicks, then go again."},
@@ -2114,7 +2114,7 @@
             {"when":"even","say":"Name each note aloud: G, A, B, C, D, E, F.","general":true},
             {"when":"notes","say":"Find C at fret five and F at fret ten.","more":1},
             {"when":"heard","say":"Press right behind each fret so it rings."},
-            {"when":"extras","say":"Play one note on each click, no more."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
             {"when":"late","say":"Look at the next fret before the click."},
             {"when":"early","say":"Wait for the click before each new note."},
             {"when":"afterHeld","say":"Count the last note's two clicks, then go again."},
@@ -2240,7 +2240,7 @@
             {"when":"even","say":"Name each note aloud: B, C, D, E, F, G, A.","general":true},
             {"when":"notes","say":"Find C at fret one and F at fret six.","more":1},
             {"when":"heard","say":"Press right behind each fret so it rings."},
-            {"when":"extras","say":"Play one note on each click, no more."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
             {"when":"late","say":"Look at the next fret before the click."},
             {"when":"early","say":"Wait for the click before each new note."},
             {"when":"afterHeld","say":"Count the last note's two clicks, then go again."},
@@ -2366,7 +2366,7 @@
             {"when":"even","say":"Say the same name on every string.","general":true},
             {"when":"notes","say":"Find each place from the one before it."},
             {"when":"heard","say":"Press each note firmly so it rings."},
-            {"when":"extras","say":"Play one note on each click, no more."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
             {"when":"late","say":"Find each note's place before its click."},
             {"when":"early","say":"Wait for the click before each new note."},
             {"when":"afterHeld","say":"Count the last note's four clicks, then go."},
@@ -2763,7 +2763,7 @@
             {"when":"even","say":"Name each in-between note from its neighbours.","more":1,"general":true},
             {"when":"notes","say":"Keep one finger per fret, three in a row.","more":2},
             {"when":"heard","say":"Press right behind each fret so it rings."},
-            {"when":"extras","say":"Play one note on each click, no more."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
             {"when":"late","say":"Look at the next fret before the click."},
             {"when":"early","say":"Wait for the click before each new note."},
             {"when":"afterHeld","say":"Count the last note's two clicks, then go again."},
@@ -2883,7 +2883,7 @@
             {"when":"even","say":"Find the same four names on the A string.","more":1,"general":true},
             {"when":"notes","say":"Keep one finger per fret, three in a row.","more":2},
             {"when":"heard","say":"Press right behind each fret so it rings."},
-            {"when":"extras","say":"Play one note on each click, no more."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
             {"when":"late","say":"Look at the next fret before the click."},
             {"when":"early","say":"Wait for the click before each new note."},
             {"when":"afterHeld","say":"Count the last note's two clicks, then go again."},
@@ -3005,7 +3005,7 @@
             {"when":"even","say":"Say sharps going up and flats coming down.","more":1,"general":true},
             {"when":"notes","say":"Keep one finger per fret, four in a row.","more":2},
             {"when":"heard","say":"Press right behind each fret so it rings."},
-            {"when":"extras","say":"Play one note on each click, no more."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
             {"when":"late","say":"Look at the next fret before the click."},
             {"when":"early","say":"Wait for the click before each new note."},
             {"when":"afterHeld","say":"Count the last note's four clicks, then go."},
@@ -3242,7 +3242,7 @@
                   {"when":"even","say":"Say sharps going up and flats coming down.","general":true},
                   {"when":"notes","say":"Keep one finger per fret, four in a row.","more":2},
                   {"when":"heard","say":"Press right behind each fret so it rings."},
-                  {"when":"extras","say":"Play one note on each click, no more."},
+                  {"when":"extras","say":"Play one note on each beat, no more."},
                   {"when":"late","say":"Look at the next fret before the click."},
                   {"when":"early","say":"Wait for the click before each new note."},
                   {"when":"afterHeld","say":"Count the last note's four clicks, then go."},
@@ -3269,7 +3269,7 @@
             {"when":"even","say":"Say one name for both notes of each pair.","more":2,"general":true},
             {"when":"notes","say":"Take each higher note with finger three.","more":1},
             {"when":"heard","say":"Press each note firmly so it rings."},
-            {"when":"extras","say":"Play one note on each click, no more."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
             {"when":"late","say":"Say each note's name before you play it."},
             {"when":"early","say":"Wait for the click before each new note."},
             {"when":"afterHeld","say":"Count each long note's two clicks, then move."},
@@ -3471,7 +3471,7 @@
                   {"when":"even","say":"Say one name for both notes of each pair.","general":true},
                   {"when":"notes","say":"Take each higher note with finger three."},
                   {"when":"heard","say":"Press each note firmly so it rings."},
-                  {"when":"extras","say":"Play one note on each click, no more."},
+                  {"when":"extras","say":"Play one note on each beat, no more."},
                   {"when":"late","say":"Say each note's name before you play it."},
                   {"when":"early","say":"Wait for the click before each new note."},
                   {"when":"afterHeld","say":"Count each long note's two clicks, then move."},
@@ -3511,6 +3511,18 @@
             "The frets and note names here are for the G string. Other Takes walk the B string and the top string in the same key."
           ],
           "coachLine": "Right notes and steady quarters after the take. The names are yours to say.",
+          "cues": [
+            {"when":"even","say":"Name the key's one sharp every time it comes.","more":1,"general":true},
+            {"when":"notes","say":"Say the sharp's name before you play it.","more":1},
+            {"when":"heard","say":"Press each note firmly so it rings."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
+            {"when":"late","say":"Say each note's name before you play it."},
+            {"when":"early","say":"Wait for the click before each new note."},
+            {"when":"afterHeld","say":"Count the last note's two clicks, then go again."},
+            {"when":"openString","say":"Put the open string right on the click."},
+            {"when":"shift","say":"Move the first finger with each new name."},
+            {"when":"lastBars","say":"Keep naming the notes to the last one."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -3724,7 +3736,19 @@
                   "scale": "major",
                   "spelled": ["G", "A", "B", "C", "D", "E", "F#"],
                   "cover": true
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Name the key's one sharp every time it comes.","general":true},
+                  {"when":"notes","say":"Say the sharp's name before you play it."},
+                  {"when":"heard","say":"Press each note firmly so it rings."},
+                  {"when":"extras","say":"Play one note on each beat, no more."},
+                  {"when":"late","say":"Say each note's name before you play it."},
+                  {"when":"early","say":"Wait for the click before each new note."},
+                  {"when":"afterHeld","say":"Count the last note's two clicks, then go again."},
+                  {"when":"openString","say":"Put the open string right on the click."},
+                  {"when":"shift","say":"Move the first finger with each new name."},
+                  {"when":"lastBars","say":"Keep naming the notes to the last one."}
+                ]
               },
               {
                 "id": "stringSet=top-E-string",
@@ -3780,7 +3804,19 @@
                   "scale": "major",
                   "spelled": ["G", "A", "B", "C", "D", "E", "F#"],
                   "cover": true
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Name the key's one sharp every time it comes.","general":true},
+                  {"when":"notes","say":"Say the sharp's name before you play it."},
+                  {"when":"heard","say":"Press each note firmly so it rings."},
+                  {"when":"extras","say":"Play one note on each beat, no more."},
+                  {"when":"late","say":"Say each note's name before you play it."},
+                  {"when":"early","say":"Wait for the click before each new note."},
+                  {"when":"afterHeld","say":"Count the last note's two clicks, then go again."},
+                  {"when":"openString","say":"Put the open string right on the click."},
+                  {"when":"shift","say":"Move the first finger with each new name."},
+                  {"when":"lastBars","say":"Keep naming the notes to the last one."}
+                ]
               }
             ]
           }
@@ -3795,6 +3831,17 @@
             "The frets and note names here are for the G string. Other Takes walk the B string and the top string in the same key."
           ],
           "coachLine": "Right notes and steady quarters after the take. The names are yours to say.",
+          "cues": [
+            {"when":"even","say":"Name the key's one flat every time it comes.","more":1,"general":true},
+            {"when":"notes","say":"Say the flat's name before you play it.","more":1},
+            {"when":"heard","say":"Press each note firmly so it rings."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
+            {"when":"late","say":"Say each note's name before you play it."},
+            {"when":"early","say":"Wait for the click before each new note."},
+            {"when":"afterHeld","say":"Count the last note's two clicks, then go again."},
+            {"when":"shift","say":"Slide to each new name in one move."},
+            {"when":"lastBars","say":"Keep naming the notes to the last one."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -4008,7 +4055,18 @@
                   "scale": "major",
                   "spelled": ["F", "G", "A", "Bb", "C", "D", "E"],
                   "cover": true
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Name the key's one flat every time it comes.","general":true},
+                  {"when":"notes","say":"Say the flat's name before you play it."},
+                  {"when":"heard","say":"Press each note firmly so it rings."},
+                  {"when":"extras","say":"Play one note on each beat, no more."},
+                  {"when":"late","say":"Say each note's name before you play it."},
+                  {"when":"early","say":"Wait for the click before each new note."},
+                  {"when":"afterHeld","say":"Count the last note's two clicks, then go again."},
+                  {"when":"shift","say":"Slide to each new name in one move."},
+                  {"when":"lastBars","say":"Keep naming the notes to the last one."}
+                ]
               },
               {
                 "id": "stringSet=top-E-string",
@@ -4064,7 +4122,18 @@
                   "scale": "major",
                   "spelled": ["F", "G", "A", "Bb", "C", "D", "E"],
                   "cover": true
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Name the key's one flat every time it comes.","general":true},
+                  {"when":"notes","say":"Say the flat's name before you play it."},
+                  {"when":"heard","say":"Press each note firmly so it rings."},
+                  {"when":"extras","say":"Play one note on each beat, no more."},
+                  {"when":"late","say":"Say each note's name before you play it."},
+                  {"when":"early","say":"Wait for the click before each new note."},
+                  {"when":"afterHeld","say":"Count the last note's two clicks, then go again."},
+                  {"when":"shift","say":"Slide to each new name in one move."},
+                  {"when":"lastBars","say":"Keep naming the notes to the last one."}
+                ]
               }
             ]
           }
@@ -4081,6 +4150,17 @@
             "On other Takes the key is F major, in the same position."
           ],
           "coachLine": "Right notes and even eighths after the take. Say the names slowly first, without the click.",
+          "cues": [
+            {"when":"even","say":"Keep the hand where it is for every note.","more":1,"general":true},
+            {"when":"notes","say":"Picture each place before you play it.","more":1},
+            {"when":"heard","say":"Press each note firmly so it rings."},
+            {"when":"extras","say":"Play two notes to each beat, no more."},
+            {"when":"late","say":"Say each note's name before you play it."},
+            {"when":"early","say":"Wait for the click before each new note."},
+            {"when":"afterHeld","say":"Count the last note's two clicks, then go again."},
+            {"when":"stringChange","say":"Keep the pick close to the strings."},
+            {"when":"lastBars","say":"Keep naming the notes to the last one."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -4337,7 +4417,18 @@
                   "scale": "major",
                   "spelled": ["F", "G", "A", "Bb", "C", "D", "E"],
                   "cover": true
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Keep the hand where it is for every note.","general":true},
+                  {"when":"notes","say":"Picture each place before you play it."},
+                  {"when":"heard","say":"Press each note firmly so it rings."},
+                  {"when":"extras","say":"Play two notes to each beat, no more."},
+                  {"when":"late","say":"Say each note's name before you play it."},
+                  {"when":"early","say":"Wait for the click before each new note."},
+                  {"when":"afterHeld","say":"Count the last note's two clicks, then go again."},
+                  {"when":"stringChange","say":"Keep the pick close to the strings."},
+                  {"when":"lastBars","say":"Keep naming the notes to the last one."}
+                ]
               }
             ]
           }
@@ -4354,6 +4445,17 @@
             "First finger at fret 5, third finger at fret 7, little finger at fret 8, as in the Exercise before. The only note on the G string is D at fret 7, once in bar 1 and once in bar 2. The last G is held for two beats."
           ],
           "coachLine": "Band on. Right notes and time after the take.",
+          "cues": [
+            {"when":"even","say":"Say each chord's name on its first beat.","more":3,"general":true},
+            {"when":"notes","say":"One finger per fret: five, seven and eight.","more":4},
+            {"when":"heard","say":"Press right behind each fret so it rings."},
+            {"when":"extras","say":"Play just the notes on the tab, no more."},
+            {"when":"late","say":"Find each bar's first note before '1'.","more":3},
+            {"when":"early","say":"Wait for the beat before each new note."},
+            {"when":"afterHeld","say":"Give each quarter note its full beat."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Hold the last G its full two beats."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -4498,6 +4600,18 @@
             "In C: frets 5 and 5, 7 and 6, 9 and 8, 10 and 10, 12 and 12. Same fret is major; one fret back on the B string is minor."
           ],
           "coachLine": "Right notes and even eighths after the take. Major or minor is yours to name.",
+          "cues": [
+            {"when":"even","say":"Call each third major or minor as you play it.","more":1,"general":true},
+            {"when":"notes","say":"Same fret for major, one fret back for minor.","more":1},
+            {"when":"heard","say":"Press each note firmly so it rings."},
+            {"when":"extras","say":"Play two notes to each beat, no more."},
+            {"when":"late","say":"Have the next pair ready before the click."},
+            {"when":"early","say":"Wait for the click before each new note."},
+            {"when":"afterHeld","say":"Count the last note's two clicks, then go again."},
+            {"when":"shift","say":"Let finger two guide on the G string."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Finish on the opening pair, two clicks each."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -4902,6 +5016,18 @@
             "In C: B string 5 with top string 3, then 6 and 5, 8 and 7, 10 and 8, 12 and 10, and back."
           ],
           "coachLine": "Right notes and even eighths after the take.",
+          "cues": [
+            {"when":"even","say":"Let finger one guide on the top string.","general":true},
+            {"when":"notes","say":"Go two frets back for minor, one for major.","more":1},
+            {"when":"heard","say":"Press right behind each fret so it rings."},
+            {"when":"extras","say":"Play two notes to each beat, no more."},
+            {"when":"late","say":"Have the next pair ready before the click."},
+            {"when":"early","say":"Wait for the click before each new note."},
+            {"when":"afterHeld","say":"Count the last note's two clicks, then go again."},
+            {"when":"shift","say":"Move finger one up with each new pair."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Finish on the opening pair, two clicks each."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -5018,6 +5144,18 @@
             "C: frets 5 and 5, then 9 and 8. F: 10 and 10, then 14 and 13. G: 12 and 12, then 16 and 15. Every note is a note of the chord under it."
           ],
           "coachLine": "Band on. Right notes and time after the take.",
+          "cues": [
+            {"when":"even","say":"Play root and third, then third and fifth.","more":1,"general":true},
+            {"when":"notes","say":"Find C, F and G at frets five, ten and twelve.","more":1},
+            {"when":"heard","say":"Press right behind each fret so it rings."},
+            {"when":"extras","say":"Play two notes to each beat, no more."},
+            {"when":"late","say":"See each chord's place before '1'."},
+            {"when":"early","say":"Wait for the beat before each new note."},
+            {"when":"afterHeld","say":"Count the last note's two beats, then go again."},
+            {"when":"shift","say":"Shift as each bar starts, not after."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Come back down to C and hold it two beats."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -5165,6 +5303,17 @@
             "Root twice, fourth twice, fifth twice, fourth twice, and round again. First finger on the root and the fourth, third finger on the fifth."
           ],
           "coachLine": "Right notes and steady quarters after the take. Name the three chords of the key before you start.",
+          "cues": [
+            {"when":"even","say":"Say one, four, five as you play each root.","more":1,"general":true},
+            {"when":"notes","say":"Fourth at the same fret, fifth two frets up.","more":1},
+            {"when":"heard","say":"Press each note firmly so it rings."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
+            {"when":"late","say":"Have each root ready before its click."},
+            {"when":"early","say":"Wait for the click before each new note."},
+            {"when":"afterHeld","say":"Count the last note's two clicks, then go again."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Finish on the root, held for two clicks."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -5535,6 +5684,18 @@
             "A: low E string 5, A string 7. D: A string 5, D string 7. E: A string 7, D string 9. Then back to A and hold it."
           ],
           "coachLine": "Band on. Right notes and time after the take.",
+          "cues": [
+            {"when":"even","say":"Say A, D, E as each chord comes round.","more":1,"general":true},
+            {"when":"notes","say":"Find each fifth one string over, two frets up.","more":1},
+            {"when":"heard","say":"Press right behind each fret so it rings."},
+            {"when":"extras","say":"Play two notes to each beat, no more."},
+            {"when":"late","say":"Have each root ready before its click."},
+            {"when":"early","say":"Wait for the beat before each new note."},
+            {"when":"afterHeld","say":"Count the last note's two beats, then go again."},
+            {"when":"shift","say":"Move up two frets for the third chord."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Land back on A and hold it two beats."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -5665,6 +5826,17 @@
             "Am: low E string 5 and D string 7. F: fret 1 and fret 3. C: A string 3 and G string 5. G: low E string 3 and D string 5."
           ],
           "coachLine": "Band on. Right notes and time after the take. The jump to F is the long one.",
+          "cues": [
+            {"when":"even","say":"See the octave shape under every root.","more":1,"general":true},
+            {"when":"notes","say":"Move the shape to the A string for C.","more":1},
+            {"when":"heard","say":"Press right behind each fret so it rings."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
+            {"when":"late","say":"See each chord's place before '1'."},
+            {"when":"early","say":"Wait for the beat before each new note."},
+            {"when":"shift","say":"Move both fingers as one shape to each fret."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Say G on both notes of the last chord."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -5802,6 +5974,16 @@
             "Say the chord's name on beat 1 of each bar."
           ],
           "coachLine": "Band on. Right notes and steady quarters after the take.",
+          "cues": [
+            {"when":"even","say":"Say each chord's name on its first beat.","more":3,"general":true},
+            {"when":"notes","say":"Keep finger one at fret three on both strings.","more":2},
+            {"when":"heard","say":"Press right behind each fret so it rings."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
+            {"when":"late","say":"See each chord's place before '1'."},
+            {"when":"early","say":"Wait for the beat before each new note."},
+            {"when":"stringChange","say":"Cross to the A string with finger one for C."},
+            {"when":"lastBars","say":"Go back to the low E string on '1' for G."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -5921,6 +6103,16 @@
             "Say the chord's name on beat 1 of each bar."
           ],
           "coachLine": "Band on. Right notes and steady quarters after the take.",
+          "cues": [
+            {"when":"even","say":"Say each chord's name on its first beat.","more":3,"general":true},
+            {"when":"notes","say":"Keep finger three at fret five on both strings.","more":2},
+            {"when":"heard","say":"Press right behind each fret so it rings."},
+            {"when":"extras","say":"Play one note on each beat, no more."},
+            {"when":"late","say":"See each chord's place before '1'."},
+            {"when":"early","say":"Wait for the beat before each new note."},
+            {"when":"stringChange","say":"Drop to the low E string with finger one for G."},
+            {"when":"lastBars","say":"Go back to the A string on '1' for D."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -6040,6 +6232,17 @@
             "Say the chord's name on beat 1 of each bar."
           ],
           "coachLine": "Band on. Right notes and even eighths after the take.",
+          "cues": [
+            {"when":"even","say":"Say each chord's name on its first beat.","more":3,"general":true},
+            {"when":"notes","say":"Lift finger one for E minor's open string.","more":2},
+            {"when":"heard","say":"Press right behind each fret so it rings."},
+            {"when":"extras","say":"Play two notes to each beat, no more."},
+            {"when":"late","say":"See each chord's place before '1'."},
+            {"when":"early","say":"Wait for the beat before each new note."},
+            {"when":"openString","say":"Leave the hand where it is for the open E."},
+            {"when":"stringChange","say":"Cross to the A string with finger one for C."},
+            {"when":"lastBars","say":"Go back to the low E string on '1' for G."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -6175,6 +6378,16 @@
             "Say the chord's name on beat 1 of each bar."
           ],
           "coachLine": "Band on. Right notes and even eighths after the take.",
+          "cues": [
+            {"when":"even","say":"Say each chord's name on its first beat.","more":3,"general":true},
+            {"when":"notes","say":"Move finger one to fret two for B minor.","more":2},
+            {"when":"heard","say":"Press right behind each fret so it rings."},
+            {"when":"extras","say":"Play two notes to each beat, no more."},
+            {"when":"late","say":"See each chord's place before '1'."},
+            {"when":"early","say":"Wait for the beat before each new note."},
+            {"when":"stringChange","say":"Drop to the low E string with finger one for G."},
+            {"when":"lastBars","say":"Go back to the A string on '1' for D."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -6326,6 +6539,17 @@
             "G string 5, B string 5, top string 3. Then 9, 8, 8. Then 12, 13, 12. The same three letters every time: C, E and G."
           ],
           "coachLine": "Right notes and even eighths after the take.",
+          "cues": [
+            {"when":"even","say":"Say C, E, G in each of the three shapes.","more":1,"general":true},
+            {"when":"notes","say":"Name the top note: G, then C, then E."},
+            {"when":"heard","say":"Press right behind each fret so it rings."},
+            {"when":"extras","say":"Play two notes to each beat, no more."},
+            {"when":"late","say":"Have the next shape ready before the click."},
+            {"when":"early","say":"Wait for the click before each new note."},
+            {"when":"shift","say":"Look at the next shape before you move."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Go from the middle shape back to the first."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -6439,6 +6663,17 @@
             "All three strings at fret 5. Then G string 9, B string 10, top string 8. Then 14, 13, 12. The letters are A, C and E."
           ],
           "coachLine": "Right notes and even eighths after the take.",
+          "cues": [
+            {"when":"even","say":"Say A, C, E in each of the three shapes.","more":1,"general":true},
+            {"when":"notes","say":"Start with all three strings at fret five.","more":1},
+            {"when":"heard","say":"Press right behind each fret so it rings."},
+            {"when":"extras","say":"Play two notes to each beat, no more."},
+            {"when":"late","say":"Have the next shape ready before the click."},
+            {"when":"early","say":"Wait for the click before each new note."},
+            {"when":"shift","say":"Look at the next shape before you move."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Go from the middle shape back to the first."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -6552,6 +6787,18 @@
             "C: G string 5, B string 5, top string 3. F: 5, 6, 5. G: 4, 3, 3. Each of the first three bars rolls its shape up and back twice. The last bar rolls C once and holds its lowest note."
           ],
           "coachLine": "Band on. Right notes and time after the take.",
+          "cues": [
+            {"when":"even","say":"Keep the hand in one place for all three chords.","general":true},
+            {"when":"notes","say":"For F, play the B string at fret six.","more":1},
+            {"when":"heard","say":"Press right behind each fret so it rings."},
+            {"when":"extras","say":"Play two notes to each beat, no more."},
+            {"when":"late","say":"See each chord's place before '1'."},
+            {"when":"early","say":"Wait for the beat before each new note."},
+            {"when":"afterHeld","say":"Count the last note's two beats, then go again."},
+            {"when":"shift","say":"Change only the fingers, not the hand."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Roll C once, then hold its lowest note.","more":1}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -10477,6 +10724,16 @@
             "Straight eighths, well under your clean tempo. Lower note, then upper. Each pair is a third: major where both strings are at the same fret, minor where the B string is one fret lower. Say which each pair is."
           ],
           "coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
+          "cues": [
+            {"when":"even","say":"Call each third major or minor as you play it.","general":true},
+            {"when":"heard","say":"Press each note firmly so it rings."},
+            {"when":"late","say":"Say each note's name before you play it."},
+            {"when":"early","say":"Wait for the click before each new note."},
+            {"when":"afterHeld","say":"Count the last note's two clicks, then go again."},
+            {"when":"shift","say":"Let finger two guide on the G string."},
+            {"when":"stringChange","say":"Keep the pick close to the strings."},
+            {"when":"lastBars","say":"Finish on the opening pair, two clicks each."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
