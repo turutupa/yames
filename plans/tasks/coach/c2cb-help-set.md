@@ -10,6 +10,11 @@ them), `t1a1.md` (`explain_screen`: `read`, no arguments, today `notWiredYet`). 
 `DESIGN.md` 5.3 (the "The app" row: "a translated help set, about 40 entries"), 5.4, 5.5 (the "A free
 question" row and the footer), 3.1 (what each screen is), 13 ("explain this screen" goes at once).
 
+**Size.** Forty entries in fifteen languages is the heaviest translation load in this wave. Do items 1
+to 4 in English first (every key in all fifteen files as English, listed under "to translate"),
+commit; if your context is then past 170k tokens, stop there: items 5 and 6 become leg c2cc
+(worktree `/home/dgx-delgado/yames-coach-c2cc`, launched from this file).
+
 ## What to build
 
 1. **The help set**, `src/coach/ask/help.ts` (ids, which screens each belongs to, the question shapes
