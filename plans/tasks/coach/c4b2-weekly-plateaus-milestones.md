@@ -2,6 +2,18 @@
 
 Worktree `/home/dgx-delgado/yames-coach-c4b2`, branch `coach-c4b2`. Logs under `/tmp/coach-c4b2/`.
 
+**From c4b1's review (session 3, `MERGE`; do these first, they are small):** in `db.rs` drop the
+`ORDER BY` of `clean_tempo_spans_sql` (the fold does not need it; assert "no TEMP B-TREE" and a clock
+bound instead of the index) and break a tie on "first" by the lower tempo (`at == first_at && bpm <
+first_bpm`), with a test for both tie rules and one for `countsForCleanTempo` stored as JSON `null`
+(Rust in the store: **R**, the diff goes to the reviewer). In `totals.test.ts`: pin the time zone
+for the daylight-saving rows, add a Saturday-start week and a Session across two weeks. **Call
+`weekStartOf` with the player's region** (`navigator.language` or `Intl.DateTimeFormat()
+.resolvedOptions().locale`, falling back to `i18n.language`), not the app's language. **Join every
+span to an Exercise that still exists** before a sentence is built from it. A Take the player marked
+not fair still counts in the span, as it does in the ceiling Progress shows: do not filter it on
+your side alone (it is a question for the owner, in `STATUS.md`).
+
 PLAN's leg c4b, second half. **Needs c4a1, c4a2 and c4b1 merged.** This is the largest brief here:
 build it **in English with unit tests and the screens first**, commit, and if your context passes 170k
 tokens at that point, stop: the fourteen locales and the layout scenes become leg c4b3 (the
