@@ -162,8 +162,37 @@
     "luego", "después", "despues", "mañana", "ayer", "anoche", "esta noche", "antes", "otra vez", "de nuevo", "nuevamente", "próximo", "proximo", "próxima", "proxima", "siguiente", "hace",
     "que", "qué", "porque", "por qué", "pero", "si", "aunque", "cuando", "cuándo", "mientras", "como", "cómo", "cuál", "cual", "o",
     "demasiado", "muy", "mucho", "tan", "también", "tambien", "ya", "todavía", "todavia", "aún", "aun", "además", "ademas",
-    "para mí", "para mi", "conmigo", "atrás", "atras", "encima", "volver", "vuelve", "otra"
+    "para mí", "para mi", "conmigo", "atrás", "atras", "encima", "volver", "vuelve", "otra",
+    "a mayor escala", "a menor escala", "a gran escala"
   ],
   "polite": ["por favor", "porfa", "porfavor", "ok", "okay", "vale", "oye coach", "oye", "ahora", "ahora mismo", "gracias", "solo", "sólo", "hola"],
-  "fillers": ["me", "el", "la", "los", "las", "un poco", "un", "una", "unos", "unas", "mi", "mis", "al"]
+  "fillers": ["me", "el", "la", "los", "las", "un poco", "un", "una", "unos", "unas", "mi", "mis", "al"],
+  "recipe": {
+    "shapes": {
+      "box": ["caja", "box"],
+      "threePerString": ["tres por cuerda", "3 por cuerda", "3nps"],
+      "arpeggio": ["arpegios", "arpegio"],
+      "oneString": ["en una cuerda", "por una cuerda", "en una sola cuerda", "una sola cuerda", "una cuerda"],
+      "chromatic": ["cromático", "cromatico", "araña", "spider"]
+    },
+    "chords": {
+      "maj": ["mayor"],
+      "min": ["menor"],
+      "dim": ["disminuido", "dim"],
+      "aug": ["aumentado", "aug"],
+      "7": ["dominante 7", "séptima dominante", "septima dominante", "dominante", "séptima", "septima", "7"],
+      "maj7": ["mayor 7", "séptima mayor", "septima mayor", "maj7"],
+      "m7": ["menor 7", "séptima menor", "septima menor", "m7"],
+      "m7b5": ["semidisminuido", "menor 7 bemol 5", "m7b5"],
+      "dim7": ["disminuido 7", "séptima disminuida", "septima disminuida", "dim7"]
+    },
+    "subdivisions": {
+      "quarters": ["notas negras", "negras"],
+      "eighths": ["notas corcheas", "corcheas", "octavos"],
+      "eighthTriplets": ["tresillos de corcheas", "tresillos", "tresillo"],
+      "sixteenths": ["semicorcheas", "dieciseisavos"]
+    },
+    "fret": ["traste #", "# traste"],
+    "numberSuffixes": ["o"]
+  }
 }

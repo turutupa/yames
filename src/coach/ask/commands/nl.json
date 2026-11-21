@@ -95,7 +95,7 @@
   },
   "roots": {
     "sharp": ["kruis", "sharp"],
-    "flat": ["mol", "flat"]
+    "flat": ["flat"]
   },
   "scales": {
     "major": ["majeur", "ionisch"],
@@ -159,5 +159,44 @@
     "voor mij", "met mij", "bij mij", "mezelf", "heb", "heeft", "had"
   ],
   "polite": ["alsjeblieft", "alsjeblief", "alstublieft", "aub", "ok", "oké", "okay", "hey coach", "hé", "hoi", "nu", "bedankt", "dankjewel", "dank je", "even", "gewoon"],
-  "fillers": ["me", "mij", "de", "het", "een", "mijn", "m'n", "iets", "een beetje", "beetje", "een klein beetje"]
+  "fillers": ["me", "mij", "de", "het", "een", "mijn", "m'n", "iets", "een beetje", "beetje", "een klein beetje"],
+  "recipe": {
+    "shapes": {
+      "box": ["boxpatroon", "box patroon", "box"],
+      "threePerString": ["drie noten per snaar", "3 noten per snaar", "drie per snaar", "3 per snaar", "3nps"],
+      "arpeggio": ["arpeggio's", "arpeggios", "arpeggio", "arp"],
+      "oneString": ["op één snaar", "op een snaar", "op 1 snaar", "één snaar"],
+      "chromatic": ["chromatische", "chromatisch", "spider"]
+    },
+    "chords": {
+      "maj": ["majeur"],
+      "min": ["mineur"],
+      "dim": ["verminderd", "dim"],
+      "aug": ["overmatig", "aug"],
+      "7": ["dominant 7", "dominant septiem", "dominant", "septiem", "7"],
+      "maj7": ["majeur 7", "majeur septiem", "maj7"],
+      "m7": ["mineur 7", "mineur septiem", "m7"],
+      "m7b5": ["half verminderd", "halfverminderd", "m7b5"],
+      "dim7": ["verminderd 7", "dim7"]
+    },
+    "subdivisions": {
+      "quarters": ["kwartnoten", "kwartnoot", "kwarten", "kwart"],
+      "eighths": ["achtste noten", "achtste noot", "achtsten", "achtste", "8e noten"],
+      "eighthTriplets": ["achtste triolen", "achtstetriolen", "triolen", "triool"],
+      "sixteenths": ["zestiende noten", "zestiende noot", "zestienden", "zestiende", "16e noten"]
+    },
+    "fret": ["fret #", "# fret", "positie #", "# positie"],
+    "numberSuffixes": ["e", "de", "ste"],
+    "rootNames": {
+      "fis": "F#",
+      "cis": "C#",
+      "gis": "G#",
+      "dis": "D#",
+      "ais": "A#",
+      "bes": "Bb",
+      "ges": "Gb",
+      "es": "Eb",
+      "as": "Ab"
+    }
+  }
 }

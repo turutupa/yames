@@ -157,8 +157,41 @@
     "depois", "mais tarde", "tarde", "amanhã", "amanha", "ontem", "hoje à noite", "hoje a noite", "esta noite", "essa noite", "antes", "de novo", "outra vez", "novamente", "próximo", "proximo", "próxima", "proxima", "já",
     "que", "porque", "pois", "mas", "se", "embora", "quando", "enquanto", "então", "entao", "ou", "também", "tambem",
     "demais", "muito", "bastante", "tão", "tao", "realmente",
-    "pra mim", "para mim", "comigo", "atrás", "atras", "voltar", "volta", "por cima", "de volta"
+    "pra mim", "para mim", "comigo", "atrás", "atras", "voltar", "volta", "por cima", "de volta",
+    "a maior escala", "a menor escala"
   ],
   "polite": ["por favor", "pfv", "obrigado", "obrigada", "valeu", "ok", "okay", "oi coach", "ei coach", "oi", "ei", "agora", "só"],
-  "fillers": ["me", "o", "a", "os", "as", "um pouco", "um", "uma", "uns", "umas", "meu", "minha", "meus", "minhas", "ao", "aos"]
+  "fillers": ["me", "o", "a", "os", "as", "um pouco", "um", "uma", "uns", "umas", "meu", "minha", "meus", "minhas", "ao", "aos", "e"],
+  "recipe": {
+    "shapes": {
+      "box": ["caixa", "box"],
+      "threePerString": ["três por corda", "tres por corda", "3 por corda", "3nps"],
+      "arpeggio": ["arpejos", "arpejo"],
+      "oneString": ["em uma corda só", "em uma só corda", "numa só corda", "em uma corda", "numa corda", "uma corda só", "uma corda"],
+      "chromatic": ["cromático", "cromatico", "aranha", "spider"]
+    },
+    "chords": {
+      "maj": ["maior"],
+      "min": ["menor"],
+      "dim": ["diminuto", "diminuta", "diminuído", "diminuido", "dim"],
+      "aug": ["aumentado", "aumentada", "aug"],
+      "7": ["sétima dominante", "setima dominante", "dominante", "sétima", "setima", "7"],
+      "maj7": ["maior 7", "sétima maior", "setima maior", "maj7"],
+      "m7": ["menor 7", "sétima menor", "setima menor", "m7"],
+      "m7b5": ["meio diminuto", "meio-diminuto", "menor 7 bemol 5", "m7b5"],
+      "dim7": ["diminuto 7", "sétima diminuta", "setima diminuta", "dim7"]
+    },
+    "subdivisions": {
+      "quarters": ["semínimas", "seminimas", "semínima", "seminima"],
+      "eighths": ["colcheias", "colcheia"],
+      "eighthTriplets": ["tercinas de colcheias", "tercinas", "tercina", "quiálteras", "quialteras"],
+      "sixteenths": ["semicolcheias", "semicolcheia"]
+    },
+    "fret": ["casa #", "# casa", "traste #", "# traste"],
+    "numberSuffixes": ["a", "o"],
+    "article": {
+      "words": ["a", "e"],
+      "rootAfter": ["em", "do"]
+    }
+  }
 }
