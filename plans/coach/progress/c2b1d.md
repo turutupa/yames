@@ -59,6 +59,16 @@ names the finding. 65 `ask.card.*` strings (plural forms counted), 27 new or rew
   changed only from the ready screen, `runner.ts` `setVariant`).
 - **F10** the cap of four in Ask stands; `suggest.ts`'s header and the brief now say so.
 
+## Gates (after merging `coach`; logs under `/tmp/coach-c2b1d/`)
+
+- `npx tsc --noEmit`: pass (job coach-c2b1d-tsc-2).
+- `npm run test` (full): 48862 passed, 10 skipped; the only failing file is the known
+  `TabStage.render.test.tsx` (symlink). Before the merge, a targeted run had one `ToolCoach.test.tsx`
+  failure that passed on `coach` and in the full run (a flake).
+- `npm run build`: pass.
+- Layout `ask`, `ask-tools`, `ask-typed`, `coach-session`: 61 passed, 52 skipped. `smooth.spec.ts`
+  is the orchestrator's (nothing a Take renders changed).
+
 ## For c2b1b
 
 The 27 new or rewritten strings are English in all fourteen other locales. None uses `count`, so
