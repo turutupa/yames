@@ -26,40 +26,47 @@ export const CHOICE_CONTEXT_TOKENS = 450;
 /** An enum this short is listed in the prompt; a longer one is named by examples (the grammar holds it all). */
 const LIST_ENUM_UP_TO = 13;
 
+/**
+ * One argument, as short as it can be read: `name` (the player's words),
+ * `name#` (a number), `name=a|b` (a short closed set), `name=a|b…` (a long
+ * one, by example: the grammar holds every value). `?` marks an optional one.
+ */
 function argText(f: ArgField): string {
-  const opt = f.optional ? "?" : "";
+  const name = `${f.name}${f.optional ? "?" : ""}`;
   switch (f.type.kind) {
     case "enum":
-      return f.type.values.length <= LIST_ENUM_UP_TO
-        ? `${f.name}${opt}: ${f.type.values.join("|")}`
-        : `${f.name}${opt}: ${f.type.values.slice(0, 3).join("|")}|…`;
+      return f.type.values.length <= LIST_ENUM_UP_TO ? `${name}=${f.type.values.join("|")}` : `${name}=${f.type.values.slice(0, 2).join("|")}…`;
     case "integer":
-      return `${f.name}${opt}: ${f.type.min}-${f.type.max}`;
+      return `${name}#`;
     case "query":
-      return `${f.name}${opt}: words`;
-    case "chordName":
-      return `${f.name}${opt}: chord like Am7`;
     case "appId":
-      return `${f.name}${opt}: id`;
+      return name;
+    case "chordName":
+      return `${name}=Am7…`;
   }
+}
+
+/** A tool's note, to its first full stop or colon: the line the model reads. */
+function shortNote(note: string): string {
+  const cut = note.search(/[.:;(]/);
+  return (cut > 0 ? note.slice(0, cut) : note).trim();
 }
 
 /** The static head. A pure function of the catalogue and the cards. */
 export function choicePrefix(catalogue: ToolCatalogue, cards: readonly EvalCard[]): string {
   const lines: string[] = [
-    "Choose what the app does with the player's message. Reply with one JSON object, nothing else.",
-    '- {"tool":NAME,"args":{...}} when the player asks the app to do one of the tools below',
-    ...(cards.length > 0 ? ['- {"card":ID} when a card below answers the question'] : []),
-    '- {"answer":"which"} when the request could mean two or more different things',
-    '- {"answer":"yours"} when the player asks to record, delete, grade, change the microphone, devices, grading or the model: only the player does those',
-    '- {"answer":"none"} for anything else: chat, a question, or a request no tool does here',
-    "Name Paths, Steps, Exercises, jams and presets in the player's own words. Numbers as digits.",
+    "Reply with one JSON object for the player's message:",
+    '{"tool":NAME,"args":{...}} to do one tool below (names in the player\'s words, numbers as digits)',
+    ...(cards.length > 0 ? ['{"card":ID} when a card below answers it'] : []),
+    '{"answer":"which"} if it could mean two different things',
+    '{"answer":"yours"} for recording, deleting, grading, grades, microphone, devices, the model, unfollowing: the player\'s own',
+    '{"answer":"none"} for anything else',
     "",
     "Tools:",
   ];
   for (const tool of catalogue.tools) {
     if (tool.audience !== "player") continue;
-    lines.push(`${tool.name}(${tool.args.map(argText).join(", ")}): ${tool.note}`);
+    lines.push(`${tool.name}(${tool.args.map(argText).join(", ")}): ${shortNote(tool.note)}`);
   }
   if (cards.length > 0) {
     lines.push("", "Cards:");

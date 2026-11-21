@@ -161,7 +161,7 @@ function langsOf(ev, opt) {
 /** The first `limit` items across the languages, spread evenly (a smoke run takes some of each). */
 function limitItems(sets, limit) {
   if (!limit) return sets;
-  const per = Math.max(1, Math.floor(limit / sets.length));
+  const per = Math.max(1, Math.ceil(limit / sets.length));
   let left = limit;
   return sets.map((s) => {
     const take = Math.min(per, left, s.items.length);

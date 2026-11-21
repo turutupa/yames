@@ -9,6 +9,8 @@
  */
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { beforeAll, describe, expect, it } from "vitest";
 import type { PathDoc } from "../../paths/format";
 import { loadAllPacks } from "../../session/packs";
@@ -16,8 +18,10 @@ import { COACH_TOOLS } from "../tools/registry";
 import { CARD_IDS } from "./evalCards";
 import { EVAL_LANGUAGES, judgeExpected, parseSetFile, type EvalItem } from "./evalWorld";
 
-const setFile = (lng: string) => new URL(`../../../evals/coach/tools/${lng}.jsonl`, import.meta.url);
-const README = new URL("../../../evals/coach/README.md", import.meta.url);
+// Not `new URL(…, import.meta.url)`: Vite rewrites that into an asset URL.
+const EVALS = join(dirname(fileURLToPath(import.meta.url)), "../../../evals/coach");
+const setFile = (lng: string) => join(EVALS, "tools", `${lng}.jsonl`);
+const README = join(EVALS, "README.md");
 
 const SETS = new Map<string, { raw: string; items: EvalItem[] }>();
 for (const lng of EVAL_LANGUAGES) {

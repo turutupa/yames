@@ -8,6 +8,7 @@
  *     UPDATE_CHOICE_GRAMMAR=1 npx vitest run src/coach/ask/grammar.test.ts
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { NEVER_ITEMS } from "../../containers/coach/neverList";
@@ -15,7 +16,8 @@ import { COACH_TOOLS, toolCatalogue } from "../tools/registry";
 import { EVAL_CARDS } from "./evalCards";
 import { CHOICE_ANSWERS, choiceGrammar, gbnfLiteral, parseChoice } from "./grammar";
 
-const FIXTURE = fileURLToPath(new URL("./choice-grammar.gbnf", import.meta.url));
+// Not `new URL(…, import.meta.url)`: Vite rewrites that into an asset URL.
+const FIXTURE = join(dirname(fileURLToPath(import.meta.url)), "choice-grammar.gbnf");
 const catalogue = toolCatalogue(COACH_TOOLS);
 const full = choiceGrammar(catalogue, EVAL_CARDS);
 
