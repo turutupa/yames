@@ -178,18 +178,60 @@ test("Ask commits nothing during a running Take: the Ask key there is one static
    * panel itself is not mounted, so it cannot render with the shell at each
    * report from the engine.
    */
+  /*
+   * hd1: it waits on states, not on time. Under load the three windows of
+   * `bestWindow` could outlast the Take, and once the Take ends Ask opens as
+   * the bar promised, which read as "rendered during the Take". Now every
+   * window measured begins and ends with the Take playing (one that the Take
+   * ended in is thrown away, and the scene is opened once more if none fit),
+   * the counts of the DOM are read while it plays, and AskPanel's renders are
+   * summed over every window kept, not read from the best one alone.
+   */
   await installPerf(page, { countRenders: true });
-  await openShot(page, "session-playing", WIDE);
-  await takeRunning(page);
-  await page.keyboard.press("Shift+Slash");
-  await expect(page.locator('[data-testid="session-coach-ask-later"]')).toBeVisible();
-  const s = await bestWindow(page);
+  let kept: { best: PerfSample; askRenders: number } | null = null;
+  for (let attempt = 0; attempt < 2 && !kept; attempt++) {
+    await openShot(page, "session-playing", WIDE);
+    await takeRunning(page);
+    await page.keyboard.press("Shift+Slash");
+    await expect(page.locator('[data-testid="session-coach-ask-later"]')).toBeVisible({ timeout: 30_000 });
+    // The press's own commit is over: two frames have been drawn since.
+    await page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
+    if ((await takePhase(page)) !== "playing") continue;
+    expect(await page.locator(".ask-panel").count(), "the Ask panel is mounted during the Take").toBe(0);
+    expect(await page.locator('[data-testid="session-coach-ask"]').count(), "an Ask button in the bar during the Take").toBe(0);
+    kept = await windowsInTake(page);
+  }
+  expect(kept, "no measuring window began and ended inside the Take, in two openings of the scene").not.toBeNull();
+  const s = kept!.best;
   expect(s.commits, "the Take is running").toBeGreaterThan(0);
-  expect(s.renders.AskPanel ?? 0, "the Ask panel rendered during the Take").toBe(0);
-  expect(await page.locator(".ask-panel").count(), "the Ask panel is mounted during the Take").toBe(0);
-  expect(await page.locator('[data-testid="session-coach-ask"]').count(), "an Ask button in the bar during the Take").toBe(0);
+  expect(kept!.askRenders, "the Ask panel rendered during the Take").toBe(0);
   expect(s.longTasks, `long tasks in the best of three windows (longest ${s.longTaskMaxMs} ms)`).toBe(0);
 });
+
+/** What the Take's big button says it is doing. */
+function takePhase(page: Page): Promise<string | null> {
+  return page.locator('[data-testid="session-take"]').getAttribute("data-phase");
+}
+
+/**
+ * `bestWindow`, held inside the Take: up to three windows, each kept only when
+ * the Take was playing when it ended (it was when the first began, and a
+ * window after one the Take ended in is not taken). The best kept window by
+ * long tasks, and the Ask panel's renders over all kept windows; null when
+ * not one window fit.
+ */
+async function windowsInTake(page: Page): Promise<{ best: PerfSample; askRenders: number } | null> {
+  let best: PerfSample | null = null;
+  let askRenders = 0;
+  for (let i = 0; i < 3; i++) {
+    const s = await samplePerf(page, WINDOW_MS);
+    if ((await takePhase(page)) !== "playing") break;
+    askRenders += s.renders.AskPanel ?? 0;
+    if (!best || s.longTasks < best.longTasks) best = s;
+    if (s.longTasks === 0) break;
+  }
+  return best ? { best, askRenders } : null;
+}
 
 test("the open Ask panel on a tool screen does not re-render with the beat", async ({ page }) => {
   test.slow();

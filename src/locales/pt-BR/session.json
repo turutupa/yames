@@ -33,7 +33,9 @@
     "today": {
       "title": "Hoje",
       "leadFirst": "Sua primeira sessão",
-      "leadBack": "Que bom ver você de volta. Já faz {{days}} dias",
+      "leadLast": "Última sessão: há {{count}} dia",
+      "leadLast_many": "Última sessão: há {{count}} dias",
+      "leadLast_other": "Última sessão: há {{count}} dias",
       "minutes": "{{minutes}} min",
       "start": "Começar",
       "howLong": "Quanto tempo você tem? Minutos:",
