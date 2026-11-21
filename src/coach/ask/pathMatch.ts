@@ -11,7 +11,10 @@
  *
  * Pure: no React, no store, no i18n.
  */
+import { ROOT_NAMES } from "../blocks/spec";
+import { chordSuffix, parseChordName } from "../../jam/harmony";
 import type { CardCall } from "./match";
+import { UNKNOWN_SUFFIX } from "./pathCards";
 
 const NUMBER_WORDS: Readonly<Record<string, number>> = {
   five: 5,
@@ -69,11 +72,27 @@ function numberOf(word: string): number | null {
   return NUMBER_WORDS[word] ?? null;
 }
 
+/**
+ * The chord's two closed arguments: its root as written, and the app's own
+ * suffix for its quality (`chordSuffix`), or `unknown` when the app does not
+ * read the chord. A root the app does not name ("E#") is no card.
+ */
+function chordArgs(chord: string): { root: string; suffix: string } | null {
+  const s = chord.replace(/♯/g, "#").replace(/♭/g, "b");
+  const m = /^([A-Ga-g])([#b]?)(.*)$/.exec(s);
+  if (!m) return null;
+  const root = m[1].toUpperCase() + m[2];
+  if (!ROOT_NAMES.includes(root)) return null;
+  const parsed = parseChordName(root + m[3]);
+  return { root, suffix: parsed ? chordSuffix(parsed.quality) : UNKNOWN_SUFFIX };
+}
+
 function chordFrom(raw: string, re: RegExp): string | null {
   const m = re.exec(raw.trim());
   if (!m) return null;
   const chord = m[1];
-  if (NOT_A_CHORD.test(chord) || chord.length > 16) return null;
+  // A lone lower-case "a" is the article ("what notes are in a chord").
+  if (NOT_A_CHORD.test(chord) || chord.length > 16 || chord === "a") return null;
   // A chord symbol goes on from its root with a quality, a number or nothing:
   // "blues", "deep" or "every" are words, not a B, a D or an E chord.
   return CHORD_SHAPE.test(chord) ? chord : null;
@@ -103,11 +122,13 @@ export function matchPathCard(s: string, raw: string): CardCall[] {
   if (PLAN_RETURN.test(q)) found.push({ tool: "plan_return", args: {} });
   if (CHORD_NOTES.test(q)) {
     const chord = chordFrom(raw, CHORD_NOTES_RAW);
-    if (chord) found.push({ tool: "chord_notes", args: { chord } });
+    const args = chord ? chordArgs(chord) : null;
+    if (args) found.push({ tool: "chord_notes", args });
   }
   if (SCALE_FITS.test(q)) {
     const chord = chordFrom(raw, SCALE_FITS_RAW);
-    if (chord) found.push({ tool: "scale_fits", args: { chord } });
+    const args = chord ? chordArgs(chord) : null;
+    if (args) found.push({ tool: "scale_fits", args });
   }
   const mark = PASS_MARK_MS.exec(q);
   if (mark) {

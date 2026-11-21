@@ -305,8 +305,7 @@
       },
       "theory": {
         "chordNotes": "{{chord}} is {{notes}}.",
-        "chordUnknown": "I don't know the chord “{{asked}}”. Chords I can spell on {{root}}: {{known}}.",
-        "chordUnknownNoRoot": "I don't know the chord “{{asked}}”. I can spell chords written like C, Am, G7, Fmaj7 or Bm7b5.",
+        "chordUnknown": "I don't know that chord. Chords I can spell on {{root}}: {{known}}.",
         "scalesIntroMajor": "Over {{chord}}, taken as the home chord of {{root}} major, the app's jam offers these scales.",
         "scalesIntroMinor": "Over {{chord}}, taken as the home chord of {{root}} minor, the app's jam offers these scales.",
         "scale": "{{root}} {{name}}: {{notes}}."

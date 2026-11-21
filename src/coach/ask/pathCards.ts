@@ -221,31 +221,20 @@ export function planReturn(ctx: CoachContext): FactCard | NoCard {
 // Theory
 // ---------------------------------------------------------------------------
 
-const ROOT = /^([A-Ga-g])([#b♯♭]?)/;
+/** The chord argument's "the player's chord is not one the app reads". */
+export const UNKNOWN_SUFFIX = "unknown";
 
-/** The player's chord as the app writes it ("f#m7" -> "F#m7"), or null. */
-export function chordSymbolOf(asked: string): string | null {
-  const s = asked.trim().replace(/♯/g, "#").replace(/♭/g, "b");
-  const m = ROOT.exec(s);
-  if (!m) return null;
-  const symbol = m[1].toUpperCase() + s.slice(1);
+/** A chord's two closed arguments as the app writes the chord ("F#" + "m7"), or null. */
+function symbolOf(root: string, suffix: string): string | null {
+  if (!root || suffix === UNKNOWN_SUFFIX) return null;
+  const symbol = `${root}${suffix}`;
   return parseChordName(symbol) ? symbol : null;
 }
 
-function rootOf(asked: string): string | null {
-  const m = ROOT.exec(asked.trim().replace(/♯/g, "#").replace(/♭/g, "b"));
-  return m ? m[1].toUpperCase() + m[2] : null;
-}
-
 /** "I don't know that chord", with the chords the app spells on the same root. */
-function unknownChord(asked: string, shape: PathCardShape): FactCard {
-  const root = rootOf(asked);
-  const known = root ? [root, `${root}m`, `${root}7`, `${root}maj7`, `${root}m7`].filter((c) => parseChordName(c) !== null) : [];
-  const lines =
-    root && known.length > 0
-      ? [line("ask.card.theory.chordUnknown", { asked: asked.trim(), root, known: known.join(", ") })]
-      : [line("ask.card.theory.chordUnknownNoRoot", { asked: asked.trim() })];
-  return { shape, lines, source: APP, uncertain: true };
+function unknownChord(root: string, shape: PathCardShape): FactCard {
+  const known = [root, `${root}m`, `${root}7`, `${root}maj7`, `${root}m7`].filter((c) => parseChordName(c) !== null);
+  return { shape, lines: [line("ask.card.theory.chordUnknown", { root, known: known.join(", ") })], source: APP, uncertain: true };
 }
 
 function spellingOf(symbol: string): "flat" | "sharp" {
@@ -263,11 +252,11 @@ export function notesOfChord(symbol: string, chord: Chord): string[] {
 }
 
 /** "What notes are in F7?": spelled by the app, drawn by `show_chord`. */
-export function chordNotesCard(asked: string): FactCard {
+export function chordNotesCard(root: string, suffix: string): FactCard {
   const shape: PathCardShape = "chord_notes";
-  const symbol = chordSymbolOf(asked);
+  const symbol = symbolOf(root, suffix);
   const chord = symbol ? parseChordName(symbol) : null;
-  if (!symbol || !chord) return unknownChord(asked, shape);
+  if (!symbol || !chord) return unknownChord(root, shape);
   return {
     shape,
     lines: [line("ask.card.theory.chordNotes", { chord: symbol, notes: notesOfChord(symbol, chord).join(" ") })],
@@ -288,11 +277,11 @@ export function homeKeyOf(chord: Chord): Key {
  * of its own key (the sentence names that key), each scale's notes spelled
  * (`spellScale`, else `scaleNotes` named the key's way). The first is drawn.
  */
-export function scaleFits(asked: string): FactCard {
+export function scaleFits(root: string, suffix: string): FactCard {
   const shape: PathCardShape = "scale_fits";
-  const symbol = chordSymbolOf(asked);
+  const symbol = symbolOf(root, suffix);
   const chord = symbol ? parseChordName(symbol) : null;
-  if (!symbol || !chord) return unknownChord(asked, shape);
+  if (!symbol || !chord) return unknownChord(root, shape);
   const key = homeKeyOf(chord);
   const spelling = spellingForKey(key);
   const suggestions = scalesForChord(chord, key);

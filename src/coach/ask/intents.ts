@@ -37,7 +37,9 @@ import {
   planTempo,
   planWhy,
   scaleFits,
+  UNKNOWN_SUFFIX,
 } from "./pathCards";
+import { CHORD_SUFFIXES, ROOT_NAMES } from "../blocks/spec";
 import {
   ASKABLE_METRICS,
   earlyOrLate,
@@ -109,7 +111,15 @@ const TAKE_ARG = {
   note: "Which Take: the last one played (the default).",
 } as const;
 
-const CHORD_ARG = { name: "chord", type: { kind: "query", maxLength: 16 }, note: "The chord as the player wrote it (\"F\", \"Am7\")." } as const;
+/** A chord as two closed sets: its root and the app's own suffix ("" major, "m7", …), or `unknown` (c2b2a). */
+const CHORD_ARGS: ToolSpec["args"] = [
+  { name: "root", type: { kind: "enum", values: ROOT_NAMES }, note: "The chord's root, as a musician writes it." },
+  {
+    name: "suffix",
+    type: { kind: "enum", values: [...CHORD_SUFFIXES, UNKNOWN_SUFFIX] },
+    note: "The quality as the app writes it after the root (\"\" for major); `unknown` when the player's chord is not one the app reads.",
+  },
+];
 
 export const FACT_CARDS: readonly FactCardTool[] = [
   entry(
@@ -184,9 +194,16 @@ export const FACT_CARDS: readonly FactCardTool[] = [
     (_args, ctx) => passMarkDistance(ctx),
   ),
   // Leg c2b2a: the Path, the plan, theory and the app's terms (`pathCards.ts`).
-  pathEntry("exercise_purpose", [], "What this Exercise is for, in the Path's own words.", exerciseHere, (_a, ctx) => exercisePurpose(ctx)),
-  pathEntry("exercise_how", [], "How to play this Exercise, in the Path's own words.", exerciseHere, (_a, ctx) => exerciseHow(ctx)),
-  pathEntry("exercise_try", [], "The Path's cue for the next Take: the one the last Take's measurements pick, else the Exercise's general cue.", exerciseHere, (_a, ctx) => exerciseTry(ctx)),
+  // Offered (as a chip) only where the Path has the words; asked anyway, the card says it has none.
+  pathEntry("exercise_purpose", [], "What this Exercise is for, in the Path's own words.", (ctx) => !!ctx.exercise?.purpose.trim(), (_a, ctx) => exercisePurpose(ctx)),
+  pathEntry("exercise_how", [], "How to play this Exercise, in the Path's own words.", (ctx) => (ctx.exercise?.howTo.length ?? 0) > 0, (_a, ctx) => exerciseHow(ctx)),
+  pathEntry(
+    "exercise_try",
+    [],
+    "The Path's cue for the next Take: the one the last Take's measurements pick, else the Exercise's general cue.",
+    (ctx) => (ctx.exercise?.cues?.length ?? 0) > 0,
+    (_a, ctx) => exerciseTry(ctx),
+  ),
   pathEntry("plan_why", [], "Why this part is in today's plan, in the plan's own reasons.", planStepRunning, (_a, ctx) => planWhy(ctx)),
   pathEntry("plan_tempo", [], "The tempo this part was planned at and why; the tempo now when it moved.", planStepRunning, (_a, ctx) => planTempo(ctx)),
   pathEntry("plan_next", [], "The next part of today's plan.", planStepRunning, (_a, ctx) => planNext(ctx)),
@@ -199,8 +216,12 @@ export const FACT_CARDS: readonly FactCardTool[] = [
     (args, ctx) => planMinutes(ctx, argNumber(args, "minutes") ?? null),
   ),
   pathEntry("plan_return", [], "When the review schedule brings this Exercise back.", exerciseHere, (_a, ctx) => planReturn(ctx)),
-  pathEntry("scale_fits", [CHORD_ARG], "The scales the app's jam offers over a chord, spelled, the first drawn.", () => false, (args) => scaleFits(argString(args, "chord") ?? "")),
-  pathEntry("chord_notes", [CHORD_ARG], "The notes of a chord, spelled by the app, and its grip.", () => false, (args) => chordNotesCard(argString(args, "chord") ?? "")),
+  pathEntry("scale_fits", CHORD_ARGS, "The scales the app's jam offers over a chord, spelled, the first drawn.", () => false, (args) =>
+    scaleFits(argString(args, "root") ?? "", argString(args, "suffix") ?? UNKNOWN_SUFFIX),
+  ),
+  pathEntry("chord_notes", CHORD_ARGS, "The notes of a chord, spelled by the app, and its grip.", () => false, (args) =>
+    chordNotesCard(argString(args, "root") ?? "", argString(args, "suffix") ?? UNKNOWN_SUFFIX),
+  ),
   pathEntry(
     "pass_mark_ms",
     [{ name: "value", type: { kind: "integer", min: 1, max: 100 }, optional: true, note: "The percentage the player asked about." }],

@@ -24,7 +24,7 @@
  */
 import type { CoachContext } from "../context";
 import type { Line, ToolCall } from "../tools/types";
-import type { CardShape } from "./cards";
+import { ungradedPlayer, type CardShape } from "./cards";
 import { cardsHere } from "./intents";
 
 export const MAX_CHIPS = 3;
@@ -139,5 +139,8 @@ export function suggestChips(place: ChipPlace, facts: ChipFacts): ChipChoice[] {
 export function cardChipsFor(ctx: CoachContext, place: "askEmpty" | "askAbove", answered: CardShape | null = null): ChipChoice[] {
   const take = ctx.lastTake;
   const verdict = take ? (take.ungraded !== undefined ? "ungraded" : take.grade.verdict) : null;
-  return suggestChips(place, { cards: cardsHere(ctx), verdict, answered });
+  // A player without grading sees no card chips (Ask's empty state says why in
+  // one line); the Path's words and the plan still answer a typed question.
+  const cards = ungradedPlayer(ctx) ? [] : cardsHere(ctx);
+  return suggestChips(place, { cards, verdict, answered });
 }
