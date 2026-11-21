@@ -6,7 +6,7 @@
  * volume the legato bar has to match. Shred's two legato Steps start at
  * sextuplets; this Path is the road up to them and past them.
  */
-import { definePath } from "../spec";
+import { definePath, withCues } from "../spec";
 import type { VariantParams } from "../spec";
 import { STANDARD_TUNING } from "../format";
 import type { PassBar } from "../format";
@@ -14,6 +14,7 @@ import { pcOfName } from "../theory";
 import { handAt, ladder, moveChart, oneStringClimb, repeat, shiftFrets, threeNpsCells } from "../templates";
 import type { FretCell } from "../templates";
 import { NOWHERE_BOX, SECOND_KEY, THREE_PER_STRING_SHAPES } from "./legato-more";
+import { LEGATO_CUES } from "./legato-cues";
 
 const even = (min: number, overBars = 4): PassBar => ({ metric: "timingEvenness", min, overBars });
 const heard = (min: number, overBars = 4): PassBar => ({ metric: "notesHeard", min, overBars });
@@ -198,7 +199,7 @@ function climb(p: VariantParams, value: string, cell: readonly number[], marks: 
   return { tab, position: handAt(tab), shifts: true, harmony: { scale: [p.key, "naturalMinor"] as [string, string] } };
 }
 
-export default definePath({
+export default withCues(definePath({
   id: "legato",
   title: "Legato",
   kind: "mechanics",
@@ -1237,4 +1238,4 @@ export default definePath({
       ],
     },
   ],
-});
+}), LEGATO_CUES);
