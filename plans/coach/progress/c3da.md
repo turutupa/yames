@@ -71,7 +71,17 @@ was a wrong action (every one was a press, a refusal or a passage).
 
 ### 1d. The same model outputs through `coach`'s rules (51464eaf)
 
-PENDING (job `coach-c3da-chain-coach`).
+Job `coach-c3da-chain-coach` (1373): `node scripts/coach-eval.mjs chain --order rules-first --outcomes
+heldout/alone/outcomes.jsonl` from this worktree; no model run, the held-out COUNT untouched. Output
+`/tmp/coach-c3da/chain-on-coach/` (compare script `/tmp/coach-c3da/coachchain.mjs`).
+
+**Right tool 148/183 (80.9%)** (snapshot 144, model alone 153), wrong actions 7 (unchanged), cards right
+129, which asked 20/27. The rules answer 76 items (54 right). The five `make_exercise {shape: …}` answers
+are gone (`coach`'s `make` route reads a recipe or nothing; the model now gets those lines, and was right on
+all five). **Everything else in 1c is still there on `coach`**: the nine card questions -> yours, the
+`load` with no noun -> which (es-012, nl-005, ko-003, tr-003), nl-006 and ko-006 -> which, vi-004 -> yours
+recording, and the five Path search passages (es-017, tr-002, en-050, pl-016, vi-018). On calls the rules
+still cost 8 the model had right and save 3.
 
 ### 1e. Validation misses (35 of 525)
 
@@ -226,6 +236,8 @@ must not fire on a question about how grading works (9 card items lost; a "how /
 question goes to the cards), (b) `load` with no noun should resolve against the player's jam and preset
 names before offering both, (c) the Turkish suffix and the vi "ghi" word, (d) a Path search passage
 should not end the turn when a model is on (5 lost): search after the model, or when the model says
-none. With those, rules-first would have lost 3 calls instead of 12 on this run and kept the 3 it saved.
+none. With those, rules-first would have lost 3 calls (nl-006, ko-006, ja-003) instead of 12 on this run
+(8 on `coach` today) and kept the 3 it saved: 153 - 3 + 3 = 153, the model-alone number, with the rules'
+safety kept. Fixing nl-006 / ko-006 too would put it at 155.
 Model-first is not safer: the rules' "which" for a no-space navigating name (ja) is a deliberate guard the
 model does not have.
