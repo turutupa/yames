@@ -18735,6 +18735,8 @@
                   "stringSet": "G: 14-5-9"
                 },
                 "pool": "all",
+                "purpose": "The tapping cell on A minor's notes: tap the high note, pull off to the low fretted note, hammer the middle one.",
+                "howTo": ["Eighth-note triplets, three to the click."],
                 "tab": "/8t 3:14t 3:5p 3:9h 3:14t 3:5p 3:9h 3:14t 3:5p 3:9h 3:14t 3:5p 3:9h",
                 "position": {
                   "fret": 5,

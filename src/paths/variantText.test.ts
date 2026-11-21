@@ -79,12 +79,15 @@ describe("variants read by hand", () => {
     });
   });
 
-  // The notes on the B string are not the Exercise's moved one interval, so no note is named again (vr1):
-  // the frets are, and the sentences that name notes are left out.
-  it("Tapping: the scale under the tap on the B string, frets but no note names", () => {
+  // The notes on the B string are not the Exercise's moved one interval (vr1), and the names are still said:
+  // the six in the order played, and "the E at fret 5", are the notes the variant plays at those places.
+  it("Tapping: the scale under the tap on the B string, frets and note names", () => {
     expect(said("tapping", "scale-under-the-tap.scale-tap", "stringSet=B:-12-over-5-6-8")).toEqual({
-      purpose: "Tap 12, pull off to 8, 6 and 5, hammer 6 and 8.",
-      howTo: ["Sextuplets. One tap a beat; the fretting hand plays the other five notes."],
+      purpose: "Tap 12, pull off to 8, 6 and 5, hammer 6 and 8. B, G, F, E, F, G: six to the beat.",
+      howTo: [
+        "Sextuplets. One tap a beat; the fretting hand plays the other five notes.",
+        "Lean a little on the fourth note, the E at fret 5. It is the middle of the beat and keeps the six even.",
+      ],
     });
   });
 
@@ -99,11 +102,14 @@ describe("variants read by hand", () => {
     });
   });
 
-  // The same triplet on the top string is 5-7-8: fingers 1, 3, 4, and E, F, G became A, B, C, a fourth up
-  // and then a fifth: not one interval, so the purpose's note names are not said again (vr1) and the
-  // variant reads the Exercise's text.
-  it("Legato (stringSet): the triplet on the top string gets no text", () => {
-    expect(said("legato", "hammer-and-pull.triplet-up", "stringSet=top-E-5-7-8")).toBeNull();
+  // The same triplet on the top string is 5-7-8: fingers 1, 3, 4, so nothing about the second finger is said.
+  // E, F, G became A, B, C (not one interval), and "A, B, C on the top string" is said because the list is
+  // put on a string: the names are the notes the variant plays there (vr1).
+  it("Legato (stringSet): the triplet on the top string loses the finger sentences", () => {
+    expect(said("legato", "hammer-and-pull.triplet-up", "stringSet=top-E-5-7-8")).toEqual({
+      purpose: "A, B, C on the top string as a triplet: pick, hammer, hammer.",
+      howTo: ["Triplets, three to the click. Bar 1 picked."],
+    });
   });
 
   // Five frets up, 12 to 16 is a much shorter reach than 7 to 11: "at full stretch" is not said there (round 2, rule 6).
@@ -422,9 +428,25 @@ describe("a note or key name is rewritten only where the variant is that transpo
 
   it("same key, another string: B, C, D, E on the B string is not a transposition of G, A, B, C", () => {
     const onB: TextSide = { ...side([[2, 0], [2, 1], [2, 3], [2, 5]], 1), harmony: G, params: { key: "G" } };
-    expect(cueTexts(ex, onB, says).map((s) => s.ok)).toEqual([false, true, false]);
-    // The key's name stays: the key did not move.
-    expect(cueTexts(ex, onB, says)[1]).toEqual({ ok: true, text: "Say G major's names." });
+    expect(cueTexts(ex, onB, says)).toEqual([
+      { ok: false, reason: "a note name, and the notes did not all move the same interval" },
+      // The key's name stays: the key did not move.
+      { ok: true, text: "Say G major's names." },
+      // A note put at a fret is the note the variant plays at that place: E at fret 5 on the B string.
+      { ok: true, text: "Land on E at fret 5." },
+    ]);
+    // Put at a fret in one sentence, named again in the next: the same note.
+    expect(cueTexts(ex, onB, ["Land on C at fret 5. Hold the C.", "Hold the C."])).toEqual([
+      { ok: true, text: "Land on E at fret 5. Hold the E." },
+      { ok: false, reason: "a note name, and the notes did not all move the same interval" },
+    ]);
+    // Three or more names in the order played are the notes played: B, C, D, E on the B string.
+    expect(cueTexts(ex, onB, ["G, A, B, C, then back."])).toEqual([{ ok: true, text: "B, C, D, E, then back." }]);
+    expect(cueTexts(ex, onB, ["G, B, A, then back."])[0].ok).toBe(false);
+    // A name given a part in the key is its identity, wherever the sentence before put it.
+    expect(cueTexts(ex, onB, ["Land on C at fret 5. Hold the C, the home note."])).toEqual([
+      { ok: false, reason: "a note's part in the key, and the notes did not all move the same interval" },
+    ]);
   });
 
   it("a true transposition still rewrites the note, the key and the fret", () => {

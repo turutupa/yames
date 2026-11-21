@@ -462,7 +462,8 @@ function rewriteSentence(
   sentence: string,
   ctx: Ctx,
   countCarried: boolean,
-): Written & { counting?: boolean; specific?: boolean } {
+  placedBefore: ReadonlySet<number> = new Set(),
+): Written & { counting?: boolean; specific?: boolean; placed?: number[] } {
   const toks = tokenize(sentence);
   const edits: Edit[] = [];
   const { move, ex, v } = ctx;
@@ -490,6 +491,54 @@ function rewriteSentence(
   let keptKey = false;
   /** A note said by another name. */
   let renamedNote = false;
+  /**
+   * Notes this sentence puts at a fret ("D at fret 3", "C at 8"), with those an earlier sentence of the
+   * same text put there. Such a name is a label for the note at that place, so where the notes did not
+   * all move one interval it may still be said again: it names the note the variant plays at that place.
+   * Any other name of a note is its identity ("each A", "the one sharp in G major"), true only under a
+   * transposition.
+   */
+  const placed = new Set<number>(placedBefore);
+  {
+    /** The note named from token `i` and the token it ends on, or null. */
+    const noteAt = (i: number): { pc: number; end: number } | null => {
+      const t = toks[i];
+      if (!t || t.quoted || t.kind !== "note" || !/^[A-G](#|b)?$/.test(t.text)) return null;
+      if (t.text.length === 1 && ["sharp", "flat"].includes(toks[i + 1]?.low ?? "")) return { pc: pcOfName(t.text + (toks[i + 1].low === "sharp" ? "#" : "b")), end: i + 1 };
+      return { pc: pcOfName(t.text), end: i };
+    };
+    const stringFrom = (i: number): boolean => {
+      const [a, b, c] = [toks[i], toks[i + 1], toks[i + 2]];
+      if (!a || a.quoted) return false;
+      if (["low", "high", "top"].includes(a.low)) return true;
+      return a.kind === "note" && /^[A-G]$/.test(a.text) && !!b && /^strings?$/.test(b.low) && !c?.quoted;
+    };
+    for (let i = 0; i < toks.length; i += 1) {
+      const first = noteAt(i);
+      if (!first) continue;
+      // "D at fret 3", "C at 8".
+      const next = toks[first.end + 1];
+      const num = toks[first.end + 2]?.low === "fret" ? toks[first.end + 3] : toks[first.end + 2];
+      if (next && !next.quoted && next.low === "at" && num && num.kind === "num" && !num.quoted) placed.add(first.pc);
+      // "E, F, G on the B string": a list of notes, every one of them on that string.
+      const run = [first];
+      let j = first.end + 1;
+      for (;;) {
+        let k = j;
+        while (toks[k] && !toks[k].quoted && LIST_JOIN.has(toks[k].low) && k - j < 3) k += 1;
+        const more = k > j ? noteAt(k) : null;
+        if (!more) break;
+        run.push(more);
+        j = more.end + 1;
+      }
+      if (toks[j]?.low === "on" && toks[j + 1]?.low === "the" && stringFrom(j + 2)) for (const n of run) placed.add(n.pc);
+      // "C, B, A, B: pick, pull, pull, hammer": three or more names that are the notes in the order played.
+      const played = ex.notes.map((n) => pcOf(n.midi));
+      const inOrder = (s: number) => run.every((n, k) => played[s + k] === n.pc);
+      if (run.length >= 3 && played.some((_p, s) => s + run.length <= played.length && inOrder(s))) for (const n of run) placed.add(n.pc);
+      i = first.end;
+    }
+  }
   const sentenceFrets = new Map<number, number>();
   const sentenceStrings = new Map<number, number>();
   const sentencePcs = new Map<number, number>();
@@ -887,8 +936,12 @@ function rewriteSentence(
       if (to !== pc) {
         // A name is said again only where the variant is that transposition: every note moved the same
         // interval. The same key on another string, or another box of it, puts another note at the same
-        // place, and "F sharp, the one sharp in G major" read as "A, the one sharp in G major".
-        if (move.pcShift === null) return refuse("a note name, and the notes did not all move the same interval");
+        // place, and "F sharp, the one sharp in G major" read as "A, the one sharp in G major". A note put
+        // at a fret is the exception: "D at fret 3" names the note at that place, and so does its answer.
+        if (move.pcShift === null && !placed.has(pc)) return refuse("a note name, and the notes did not all move the same interval");
+        // "The key note, G, is the open string": a name given a part in the key is its identity, whatever
+        // place the sentence before put it at.
+        if (move.pcShift === null && hasWord("key", "keys", "tonic", "home")) return refuse("a note's part in the key, and the notes did not all move the same interval");
         renamedNote = true;
       }
       sentencePcs.set(pc, to);
@@ -1280,7 +1333,7 @@ function rewriteSentence(
       }
     }
   }
-  return { ok: true, text: out, counting, specific };
+  return { ok: true, text: out, counting, specific, placed: [...placed] };
 }
 
 function sentenceSlice(sentence: string, from: Tok, to: Tok): string {
@@ -1360,16 +1413,20 @@ export function mergeSameFacts(sentences: readonly string[]): string[] {
 
 function rewriteText(text: string, where: string, ctx: Ctx, refusals: Refusal[]): TextResult {
   const kept: string[] = [];
+  // The notes this text has put at a place so far (see `rewriteSentence`): "Bar 2: ... then D held" is the
+  // D the sentence before put at fret 3. Not carried from one how-to line to the next.
+  const placed = new Set<number>();
   let counting = false;
   const sentences = sentencesOf(text);
   for (let i = 0; i < sentences.length; i += 1) {
-    const result = rewriteSentence(sentences[i], ctx, counting);
+    const result = rewriteSentence(sentences[i], ctx, counting, placed);
     if (!result.ok) {
       refusals.push({ where, sentence: sentences[i], reason: result.reason });
       for (const later of sentences.slice(i + 1)) refusals.push({ where, sentence: later, reason: "after a sentence that was not written" });
       return { text: kept.length ? mergeSameFacts(kept).join(" ") : null, firstRefused: i === 0 };
     }
     counting = counting || !!result.counting;
+    for (const pc of result.placed ?? []) placed.add(pc);
     kept.push(result.text);
   }
   return { text: mergeSameFacts(kept).join(" "), firstRefused: false };
@@ -1416,11 +1473,13 @@ export function cueTexts(exercise: ExerciseText, variant: TextSide, says: readon
     if (sentences.length === 0) return { ok: false, reason: "no words" };
     const out: string[] = [];
     let counting = false;
+    let placed = new Set<number>();
     for (const sentence of sentences) {
       if (ctx) {
-        const written = rewriteSentence(sentence, ctx, counting);
+        const written = rewriteSentence(sentence, ctx, counting, placed);
         if (!written.ok) return { ok: false, reason: written.reason };
         counting = counting || !!written.counting;
+        placed = new Set(written.placed);
         out.push(written.text);
         continue;
       }
