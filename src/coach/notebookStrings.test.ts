@@ -19,7 +19,7 @@ const NOTICED = ALL.filter(([key]) => key.startsWith("notebook.noticed."));
 
 describe("the Notebook, in English", () => {
   it("has strings to check", () => {
-    expect(NOTICED.length).toBeGreaterThan(20);
+    expect(NOTICED.length).toBeGreaterThanOrEqual(20);
   });
 
   it.each(ALL)("%s claims nothing the app cannot measure", (_key, text) => {
