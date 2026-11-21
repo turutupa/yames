@@ -166,6 +166,13 @@ describe("early or late, with the premise answered first (mock 15)", () => {
     expect(said(some.lines[0])).toBe("ask.card.lean.none(take=2,ms=16,measured=2,bars=4)");
   });
 
+  it("asked about rushing, nothing leaned: says what was checked, as lean.none does (c2b1b)", () => {
+    // Two of the four bars were never measured: "no bar" would cover them too.
+    const c = card(earlyOrLate(fixture({ deviation: null, stored: { lean: [null, 3, null, -2] } }).ctx, "early"));
+    expect(said(c.lines[0])).toBe("ask.card.lean.premiseNone.early(take=2,ms=16,measured=2,bars=4)");
+    expect(text(c)).toMatch(/^In Take 2, none of the bars I could measure \(2 of 4\) sat more than 16 ms earlier than the rest of it\./);
+  });
+
   it("a stored lean with no bar measured: not measured, never 'none leaned' (c2b1d M1)", () => {
     for (const premise of [null, "early", "late"] as const) {
       const c = card(earlyOrLate(fixture({ deviation: null, stored: { lean: [null, null, null, null] } }).ctx, premise));

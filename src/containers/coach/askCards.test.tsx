@@ -5,16 +5,17 @@
  * ungraded player is told what Ask can answer instead.
  */
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { fixture } from "../../coach/ask/cardFixtures";
 import { fakeHost, toolCtx } from "../../coach/tools/fakeHost";
 import { __resetCoachLoaderForTests } from "../../hooks/coachLoader";
 import i18n from "../../i18n";
 import { AskPanel } from "./AskPanel";
 import { AskCardTurn } from "./AskCardTurn";
-import { answerCardFor, askCard, lastCardShape, MAX_ASK_CHIPS, withinChipCap } from "./askCards";
+import { answerCardFor, askCard, lastCardShape, MAX_ASK_CHIPS, typedCardAnswerer, withinChipCap } from "./askCards";
 import { askPrompt } from "./askContext";
-import { __resetAskStoreForTests, getAskState, openAsk } from "./askStore";
+import { __resetAskStoreForTests, getAskState, openAsk, registerAskSender } from "./askStore";
+import { answerTyped, setAskNextAnswerer } from "./askTyped";
 import { __setAskToolsForTests } from "./askTools";
 
 const t = i18n.t.bind(i18n);
@@ -36,10 +37,11 @@ describe("a chip asks and answers in the thread", () => {
     openAsk();
     render(<AskPanel lookingAt={{ text: "Your Session", key: "session|tune" }} onClose={() => {}} />);
     const row = screen.getByTestId("ask-card-chips");
+    // Below the pass mark (c2b1b): where, how far the pass mark is, early or late.
     expect(within(row).getAllByRole("button").map((b) => b.textContent)).toEqual([
       `?${t("ask.card.chip.where")}`,
+      `?${t("ask.card.chip.distance")}`,
       `?${t("ask.card.chip.lean")}`,
-      `?${t("ask.card.chip.count")}`,
     ]);
     fireEvent.click(screen.getByTestId("ask-card-chip-where_slipped"), { detail: 1 });
     const turns = getAskState().turns;
@@ -48,10 +50,10 @@ describe("a chip asks and answers in the thread", () => {
     expect(card).toHaveAttribute("data-card", "where_slipped");
     expect(card).toHaveTextContent("Bar 1 of the tune slipped on 2 of 3 rounds.");
     expect(card).toHaveTextContent(`${t("coachBlocks.source.measuredTake", { take: 2 })}`);
-    // Above the text box now: the other two, never the one just answered.
+    // Above the text box now: the next three, never the one just answered.
     const again = screen.getByTestId("ask-card-chips");
     expect(within(again).queryByTestId("ask-card-chip-where_slipped")).toBeNull();
-    expect(within(again).getAllByRole("button")).toHaveLength(2);
+    expect(within(again).getAllByRole("button")).toHaveLength(3);
   });
 
   it("at most four chips at once (the tools' own cap), card chips first (F10)", () => {
@@ -156,6 +158,86 @@ describe("answerCardFor: the seam for the text box's send path", () => {
     render(<AskCardTurn card={card.kind === "card" ? card.card : (null as never)} />);
     expect(screen.getByTestId("ask-card")).toHaveTextContent(t("ask.card.notNow.ungraded"));
     expect(screen.getByTestId("ask-card")).toHaveTextContent(t("coachBlocks.source.app"));
+  });
+});
+
+describe("the seam: typed text, the router, then the cards, then the model (c2b1b)", () => {
+  afterEach(() => {
+    setAskNextAnswerer(null);
+  });
+
+  /** What reached the model or the plain statement (the host's answerer). */
+  const capture = () => {
+    const sent: string[] = [];
+    registerAskSender((q) => {
+      sent.push(q);
+    });
+    return sent;
+  };
+  const panel = () => render(<AskPanel lookingAt={{ text: "Your Session", key: "session|tune" }} onClose={() => {}} />);
+
+  it("with the panel open, a card question typed in English answers with the card, not the model", () => {
+    __setAskToolsForTests(fakeHost(), below().ctx);
+    openAsk();
+    panel();
+    const sent = capture();
+    let outcome: ReturnType<typeof answerTyped> = null;
+    act(() => {
+      outcome = answerTyped("How far is the pass mark?", "en");
+    });
+    expect(outcome).toBe("next");
+    const turns = getAskState().turns;
+    expect(turns.map((x) => x.kind)).toEqual(["user", "card"]);
+    expect(turns[1].kind === "card" && turns[1].card.shape).toBe("pass_mark_distance");
+    expect(sent).toEqual([]);
+    expect(screen.getByTestId("ask-card")).toHaveTextContent("Even: 79% in Take 2, 6 points short of the pass mark of 85%.");
+  });
+
+  it("a line the router takes as a command never reaches a card", () => {
+    __setAskToolsForTests(fakeHost(), below().ctx);
+    openAsk();
+    panel();
+    let asked = 0;
+    const cards = typedCardAnswerer(() => "en");
+    setAskNextAnswerer((text) => {
+      asked += 1;
+      return cards(text);
+    });
+    // The router answers it (a call, or "not on this screen"); the slot is never asked.
+    expect(["call", "notHere"]).toContain(answerTyped("slower", "en"));
+    expect(asked).toBe(0);
+    expect(getAskState().turns.some((x) => x.kind === "card")).toBe(false);
+  });
+
+  it("in any other language typed text does not reach a card: it goes on to the model", () => {
+    __setAskToolsForTests(fakeHost(), below().ctx);
+    setAskNextAnswerer(typedCardAnswerer(() => "de"));
+    const sent = capture();
+    // English words, German interface: still not a card (cards are reached by chip there).
+    expect(answerTyped("where did it slip?", "de")).toBe("asked");
+    expect(sent).toEqual(["where did it slip?"]);
+    expect(getAskState().turns.some((x) => x.kind === "card")).toBe(false);
+  });
+
+  it("not a card's question: nothing written by the cards, and the model gets it", () => {
+    __setAskToolsForTests(fakeHost(), below().ctx);
+    openAsk();
+    panel();
+    const sent = capture();
+    expect(answerTyped("should I anchor my pinky?", "en")).toBe("asked");
+    expect(sent).toEqual(["should I anchor my pinky?"]);
+    expect(getAskState().turns.some((x) => x.kind === "card")).toBe(false);
+  });
+
+  it("the panel closed: the slot is empty again", () => {
+    __setAskToolsForTests(fakeHost(), below().ctx);
+    openAsk();
+    const { unmount } = panel();
+    unmount();
+    const sent = capture();
+    expect(answerTyped("where did it slip?", "en")).toBe("asked");
+    expect(sent).toEqual(["where did it slip?"]);
+    expect(getAskState().turns.some((x) => x.kind === "card")).toBe(false);
   });
 });
 
