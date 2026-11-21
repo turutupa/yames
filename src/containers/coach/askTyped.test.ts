@@ -264,7 +264,8 @@ describe("a typed name opens at once only by the title's whole words (review t1b
   it.each([
     ["en", "go to class", "Classic Rock"],
     ["en", "go first", "First Chords and Strumming"],
-    ["en", "go over", "Arpeggios over Changes"],
+    ["en", "open first", "First Chords and Strumming"],
+    ["en", "go to arpeggios", "Arpeggios over Changes"],
     ["de", "geh zu erste", "Erste Akkorde und Strumming"],
     ["es", "ve a rock", "Rock clásico"],
   ])("%s: '%s' is one press labelled %s, nothing opens", async (lng, text, title) => {
@@ -279,6 +280,14 @@ describe("a typed name opens at once only by the title's whole words (review t1b
     expect(choices?.map((c) => c.label)).toEqual([{ key: "coachTools.choice.path", values: { path: title } }]);
     runAskCall(choices![0].call, text);
     expect(host.where().at.pathId).toBe(want!.id);
+  }, 60_000);
+
+  it("en: 'go over' opens nothing ('over' is in the table's notCommand since t1b2c)", async () => {
+    const paths = await loadAllPacks("en");
+    const host = fakeHost({ view: "today", paths });
+    __setAskToolsForTests(host, toolCtx({ screen: "today", locale: "en" }));
+    expect(answerTyped("go over", "en")).not.toBe("call");
+    expect(host.changes()).toEqual([]);
   }, 60_000);
 
   it.each([

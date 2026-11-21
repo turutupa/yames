@@ -9,6 +9,10 @@
  *    - `which`: the refusal turn "Which one?" with the choices, each a full call;
  *    - `yours`: "that one is yours" (`askYours`);
  *    - `none` with `notHere`: the runner says why not here, and changes nothing.
+ *    A `go` by a typed name (`typedGo`) is resolved first: naming nothing, the
+ *    sentence goes on to 2 and 3; one Path or Step, it opens at once only when
+ *    the typed name is the title's whole words, otherwise it is one press
+ *    labelled with the resolved title (review t1b2c, findings 1 and 5).
  * 2. The next answerer (`setAskNextAnswerer`): today it answers nothing; the
  *    fact cards plug in here (c2b1a's `answerCardFor`, wired by c2b1b).
  * 3. What Ask did before commands: the model when one is selected, otherwise
@@ -72,8 +76,8 @@ export function answerTyped(text: string, language: string): TypedOutcome | null
         // A typed name opens at once only by the title's whole words; a partial one is one press
         // ("go to class" is not Classic Rock; review t1b2c, finding 5).
         const go = typedGo(routed.call);
-        if (go.kind === "none") break;
-        if (go.kind === "one" && !go.whole) return askWhich(said, [go.choice]);
+        if (go?.kind === "none") break;
+        if (go?.kind === "one" && !go.whole) return askWhich(said, [go.choice]);
         // A name that named nothing: the sentence goes on (review t1b2b, finding 2).
         if (runTypedCall(routed.call, said)) return "call";
         break;
