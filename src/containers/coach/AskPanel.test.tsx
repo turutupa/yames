@@ -193,7 +193,8 @@ describe("the panel", () => {
     // The help set's chip first (a card chip, leg c2cb), then the tools' in the room left of four.
     expect(chips.map((c) => c.textContent)).toEqual([`?${t("help.ui.chip")}`, "Slower", "Faster", "Two clicks a beat"]);
     act(() => fireEvent.click(chips[1]));
-    expect(screen.getByTestId("ask-receipt")).toBeInTheDocument();
+    // The tool's turn (a receipt or a proposal, as the runner decides for this host).
+    expect(container.querySelector(".ask-thread .ask-tool")).not.toBeNull();
     // The thread has turns now: the chips sit above the text box, once.
     expect(container.querySelectorAll("[data-testid=ask-tool-chips]").length).toBe(1);
     expect(container.querySelector(".ask-chip-row [data-testid=ask-tool-chips]")).not.toBeNull();
