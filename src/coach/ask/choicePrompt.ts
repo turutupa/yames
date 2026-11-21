@@ -84,13 +84,22 @@ function argText(f: ArgField): string {
   }
 }
 
+/**
+ * An undo's guard (`at` on set_tempo, set_setting, click_subdivision): the
+ * app's own undo writes it, never the player. Not shown to the model (leg
+ * c3bp, revision 2: shown, it was filled with the number the player asked
+ * for, `{"direction":"faster","at":110}` for "up to 110"). The grammar keeps
+ * it, as the runner takes it.
+ */
+export const isUndoGuard = (f: ArgField) => f.optional === true && f.note.includes("undo's guard");
+
 /** A tool's arguments; a ONE_OF group as `a or b` (the grammar takes exactly one of them). */
 function argsText(tool: ToolSpec): string {
   const groups = ONE_OF[tool.name] ?? [];
   const out: string[] = [];
   const done = new Set<string>();
   for (const f of tool.args) {
-    if (done.has(f.name)) continue;
+    if (done.has(f.name) || isUndoGuard(f)) continue;
     const group = groups.find((g) => g.includes(f.name));
     if (!group) {
       out.push(argText(f));
@@ -127,9 +136,9 @@ export function choicePrefix(
     "Reply with one JSON object for the player's message:",
     '{"tool":NAME,"args":{...}} to do one tool below (names in the player\'s words, numbers as digits; an optional arg? only if the player said it)',
     ...(cards.length > 0 ? ['{"card":ID} when a card below answers it'] : []),
-    '{"answer":"which"} if it could mean two different things, as a name that fits two titles',
+    '{"answer":"which"} if it could mean two different things, as when "Paths these words name" lists two or more',
     '{"answer":"yours"} for recording, deleting, grading, grades, microphone, devices, the model, unfollowing: the player\'s own',
-    '{"answer":"none"} for anything else',
+    '{"answer":"none"} for anything else, and for a tool that is not in "Tools here"',
     "",
     "Tools:",
   ];
@@ -144,7 +153,12 @@ export function choicePrefix(
     }
     // set_setting: the keys with the values each takes, rather than the keys alone.
     const keyed = tool.name === "set_setting" && tool.args.some((f) => f.name === "key" && f.type.kind === "enum");
-    const args = keyed ? tool.args.map((f) => `${f.name}${f.optional ? "?" : ""}`).join(", ") : argsText(tool);
+    const args = keyed
+      ? tool.args
+          .filter((f) => !isUndoGuard(f))
+          .map((f) => `${f.name}${f.optional ? "?" : ""}`)
+          .join(", ")
+      : argsText(tool);
     const signature = `${tool.name}(${args})`;
     lines.push(notes ? `${signature}: ${shortNote(tool.note)}` : signature);
     if (keyed) lines.push(`  key=value: ${SAFE_SETTING_KEYS.map((k) => `${k}=${settingValues[k].join("|")}`).join("; ")}`);

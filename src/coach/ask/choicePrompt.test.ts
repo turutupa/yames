@@ -6,7 +6,7 @@ import { THEMES } from "../../themes";
 import { estimateTokens } from "../context";
 import { SAFE_SETTING_KEYS } from "../tools/host";
 import { COACH_TOOLS, toolCatalogue } from "../tools/registry";
-import { CHOICE_CONTEXT_TOKENS, CHOICE_PREFIX_TOKENS, SETTING_VALUES, choiceContext, choicePrefix, namedTitles } from "./choicePrompt";
+import { CHOICE_CONTEXT_TOKENS, CHOICE_PREFIX_TOKENS, SETTING_VALUES, choiceContext, choicePrefix, isUndoGuard, namedTitles } from "./choicePrompt";
 import { commandTableFor } from "./commandTable";
 import { EVAL_CARDS } from "./evalCards";
 import { EVAL_LANGUAGES, WORLD_THEMES } from "./evalWorld";
@@ -63,7 +63,25 @@ describe("choicePrefix, leg c3bp's fixes", () => {
 
   it("says to leave out an optional argument the player did not say, and shows set_tempo's two as one or the other", () => {
     expect(prefix).toContain("an optional arg? only if the player said it");
-    expect(prefix).toContain("set_tempo(bpm# or direction=slower|faster, at?#)");
+    expect(prefix).toContain("set_tempo(bpm# or direction=slower|faster): ");
+  });
+
+  it("hides the undo's guards (the app's undo writes them, never the player), and only those", () => {
+    const guards = catalogue().tools.flatMap((t) => t.args.filter(isUndoGuard).map((f) => `${t.name}.${f.name}`));
+    expect(guards.sort()).toEqual(["click_subdivision.at", "set_setting.at", "set_tempo.at"]);
+    expect(prefix).toContain("click_subdivision(subdivision#): ");
+    expect(prefix).toContain("set_setting(key, value): ");
+    // Other `at`s are the player's: a part's number.
+    expect(prefix).toContain("start_today(at?#): ");
+    expect(prefix).toContain("swap_part(at#, ");
+  });
+
+  it("points 'which' and 'none' at the context's own lines", () => {
+    expect(prefix).toContain('as when "Paths these words name" lists two or more');
+    expect(prefix).toContain('for a tool that is not in "Tools here"');
+    const context = choiceContext({ screen: "today", session: "none", grading: "on", possible: ["go_to"], named: ["A", "B"] });
+    expect(context).toContain("Tools here: go_to");
+    expect(context).toContain("Paths these words name: A; B");
   });
 
   it("gives set_setting the values each key takes, for every safe key", () => {
