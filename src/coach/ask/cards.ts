@@ -51,7 +51,9 @@ export type CardShape =
   | "improving"
   | "score_made_of"
   | "pass_mark_distance"
-  | PathCardShape;
+  | PathCardShape
+  // Leg c4b3: `coach/pathSuggest.ts`.
+  | "suggest_path";
 
 /** The Path, plan, theory and term cards (leg c2b2a, `pathCards.ts`). */
 export type PathCardShape =

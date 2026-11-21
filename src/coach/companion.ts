@@ -5,8 +5,8 @@
  * `useCompanionWatch` runs once, in MainWindow, beside the Session's own
  * hook: when the stored Takes, the Paths, grading or the coach's keys change
  * (never per beat: none of them changes during a Take), it works out what is
- * on offer (the weekly look-back, the plateau question; milestones are
- * c4b3's) and asks the one-card budget (`cardBudget.ts`) which one this run
+ * on offer (a milestone of the last Session, the weekly look-back, the
+ * plateau question) and asks the one-card budget (`cardBudget.ts`) which one this run
  * shows. Everything is kept in memory: nothing here writes to the store.
  *
  * The dot (DESIGN 6.6): the look-back, or a plateau question, is waiting on
@@ -21,6 +21,8 @@ import { cardForThisRun, type CardOffer } from "./cardBudget";
 import { plateausNow, type Plateau } from "./nudges";
 import { coachKeyStates, coachStored, loadCoachStored, subscribeCoachStored } from "./store";
 import { lookBack, type LookBack } from "./weekly";
+import { milestonesNow, type Milestone } from "./milestones";
+import { rememberPaths } from "./pathSuggest";
 import type { Weekday } from "../session/totals";
 
 export type CompanionState = {
@@ -30,18 +32,27 @@ export type CompanionState = {
   look: LookBack | null;
   /** The newest plateau now, graded only. */
   plateau: Plateau | null;
+  /** The newest milestone of the last Session (`milestones.ts`), graded only. */
+  milestone: Milestone | null;
   /** Progress has shown the card this run. */
   seen: boolean;
 };
 
-const EMPTY: CompanionState = Object.freeze({ card: null, look: null, plateau: null, seen: false });
+const EMPTY: CompanionState = Object.freeze({ card: null, look: null, plateau: null, milestone: null, seen: false });
 let state: CompanionState = EMPTY;
 const listeners = new Set<() => void>();
 /** Plateau episodes answered this run (memory only). */
 const answered = new Set<string>();
 
 function publish(next: CompanionState): void {
-  if (next.card === state.card && next.look === state.look && next.plateau === state.plateau && next.seen === state.seen) return;
+  if (
+    next.card === state.card &&
+    next.look === state.look &&
+    next.plateau === state.plateau &&
+    next.milestone === state.milestone &&
+    next.seen === state.seen
+  )
+    return;
   state = next;
   for (const listener of listeners) listener();
 }
@@ -85,13 +96,16 @@ export function companionFor(
   graded: boolean,
   weekStart: Weekday,
   now: number,
-): { look: LookBack | null; plateau: Plateau | null; offers: CardOffer[] } {
+): { look: LookBack | null; plateau: Plateau | null; milestone: Milestone | null; offers: CardOffer[] } {
   const look = lookBack({ progress, paths, spans: null, now, weekStart, graded, goal: coachStored().goal });
   const plateau = plateausNow(progress, paths, now, graded).find((p) => !answered.has(p.key)) ?? null;
+  // The newest milestone of the last Session (c4b3); the others are not queued.
+  const milestone = milestonesNow(progress, paths, now, graded)[0] ?? null;
   const offers: CardOffer[] = [];
+  if (milestone) offers.push({ kind: "milestone", key: milestone.key });
   if (look) offers.push({ kind: "weekly", key: `weekly@${look.start}` });
   if (plateau) offers.push({ kind: "plateau", key: plateau.key });
-  return { look, plateau, offers };
+  return { look, plateau, milestone, offers };
 }
 
 /**
@@ -119,13 +133,18 @@ export function useCompanionWatch(
   useEffect(() => {
     void loadCoachStored().catch(() => {});
   }, []);
+  // The asked Path suggestion reads the loaded Paths from here (memory only).
+  useEffect(() => {
+    rememberPaths(paths);
+  }, [paths]);
   useEffect(() => {
     if (blocked) return;
     const now = Date.now();
-    const { look, plateau, offers } = companionFor(progress, paths, graded, weekStart, now);
+    const { look, plateau, milestone, offers } = companionFor(progress, paths, graded, weekStart, now);
     const card = cardForThisRun(offers, stored, states, now);
     const same = card !== null && state.card !== null && card.kind === state.card.kind && card.key === state.card.key;
-    publish({ card: same ? state.card : card, look, plateau, seen: same ? state.seen : false });
+    const keptMilestone = milestone && state.milestone && milestone.key === state.milestone.key ? state.milestone : milestone;
+    publish({ card: same ? state.card : card, look, plateau, milestone: keptMilestone, seen: same ? state.seen : false });
   }, [progress, paths, graded, weekStart, blocked, stored, states]);
 }
 

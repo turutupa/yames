@@ -31,7 +31,7 @@ vi.mock("../../ipc", async (importOriginal) => {
 });
 
 import i18n from "../../i18n";
-import { loadCoachStored, resetCoachStored } from "../../coach/store";
+import { cardMayShow, coachKeyStates, coachStored, loadCoachStored, resetCoachStored } from "../../coach/store";
 import { CoachSuggestionsRow } from "./CoachSuggestionsRow";
 
 const t = i18n.t.bind(i18n);
@@ -88,9 +88,36 @@ describe("Suggestions: On / Only when I ask", () => {
       fireEvent.click(screen.getByTestId("coach-suggestions-on"));
     });
     const cards = store.saves.find(([k]) => k === "coach.cards")?.[1] as Record<string, { dismissed: number; lastDismissed: number | null }>;
-    expect(cards.weekly).toEqual({ dismissed: 0, lastDismissed: null });
-    expect(cards.plateau).toEqual({ dismissed: 0, lastDismissed: null });
+    // Owner, 2026-11-21: On lifts "until you ask" only, from now; the Hide's
+    // seven days stand, and a card hidden once is left exactly as it was.
+    expect(cards.weekly).toEqual({ dismissed: 0, lastDismissed: at });
+    expect(cards.plateau).toEqual({ dismissed: 1, lastDismissed: at });
     expect(store.saves.filter(([k]) => k === "coach.cards")).toHaveLength(1);
+  });
+
+  // Owner, 2026-11-21: pressing On does not lift an earlier Hide's seven days.
+  it("On leaves a card hidden once within its seven days hidden, and writes no coach.cards for it", async () => {
+    const at = Date.now() - 86_400_000;
+    store.disk.set("coach.cards", { weekly: { dismissed: 1, lastDismissed: at } });
+    render(<CoachSuggestionsRow />);
+    await loaded();
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("coach-suggestions-on"));
+    });
+    expect(store.saves).toEqual([["coach.suggestions", "on"]]);
+    expect(cardMayShow(coachStored(), "weekly", Date.now(), coachKeyStates())).toBe(false);
+  });
+
+  it("On after a second Hide: the card stays quiet for that Hide's seven days, then may come back", async () => {
+    const at = Date.now() - 86_400_000;
+    store.disk.set("coach.cards", { weekly: { dismissed: 2, lastDismissed: at } });
+    render(<CoachSuggestionsRow />);
+    await loaded();
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("coach-suggestions-on"));
+    });
+    expect(cardMayShow(coachStored(), "weekly", Date.now(), coachKeyStates())).toBe(false);
+    expect(cardMayShow(coachStored(), "weekly", at + 7 * 86_400_000, coachKeyStates())).toBe(true);
   });
 
   // c4b2b's re-read, LOW 4: the cards' half of On is followed too.

@@ -87,6 +87,12 @@ const MATCHES: ReadonlyArray<[string, string, ToolArgs]> = [
   // int1b (review c2b1b, item 4): passing this Exercise is the pass mark's own subject.
   ["How close am I to passing this exercise?", "pass_mark_distance", {}],
   ["how far off am I from passing?", "pass_mark_distance", {}],
+  // c4b3 (review M3): "suggest a Path", asked as a request as often as a question.
+  ["suggest a path", "suggest_path", {}],
+  ["Suggest a Path", "suggest_path", {}],
+  ["can you recommend another path?", "suggest_path", {}],
+  ["Which path should I try next?", "suggest_path", {}],
+  ["what path next?", "suggest_path", {}],
 ];
 
 /** Lines that must not become a card: commands, questions about something else, statements, two shapes at once. */
@@ -107,6 +113,10 @@ const NEAR_MISSES: readonly string[] = [
   "should I play behind the beat?",
   "can I rush a fill?",
   "how do I hold the pick?",
+  // c4b3 (review M3): near the Path suggestion, not it.
+  "suggest a pathway",
+  "what path am I on?",
+  "suggest a tempo",
   // c2b2a: "what is a clean tempo?", "what does 85% even mean?", "why this tempo?" and
   // "what should I try?" now have cards (`pathMatch.test.ts`, with their near-misses).
   "why not 100 yet?",
