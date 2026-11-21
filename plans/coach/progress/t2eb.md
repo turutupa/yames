@@ -28,5 +28,13 @@ and a check that the loop engine plays a generated Exercise; until then no door 
 - L7 (`runPaths` identity on `chosenBuilt`): reshaping the memo key touches the Session's prepare effect; left.
 - L8 (non-gradable chosen exercise): could not be produced by a recipe; not chased.
 
-## Gates
-(see below, filled as they run)
+## Gates (after the merge of `coach`; logs under `/tmp/coach-t2e/`)
+- `npx tsc --noEmit`: pass (coach-t2eb-tsc-2). `npm run build`: pass (coach-t2eb-build).
+- `npm run test` (`vitest-b.log`): 52,064 passed, 10 skipped; the only failure is the known
+  `TabStage.render.test.tsx` (cannot load through the symlink). Parity passed (no new settings key).
+- Layout, the nine specs, `--workers=4` (`layout-b.log`): 394 passed, 71 skipped, 0 failed.
+- `smooth.spec.ts --workers=2` (`smooth-b.log`): 17 passed, 1 failed: "Ask commits nothing during a running
+  Take" (long task 66 ms, best of 3). Alone, `--repeat-each=3`: 3 of 3 passed on t2eb and 3 of 3 on `coach`
+  untouched (the busy machine, as in t2e).
+- Translations: two sonnet translators (7 locales each), one sonnet proof-reader (fixed fr's register).
+- Review diff (own commits, non-locale source): `/tmp/coach-orch/t2eb-fix.diff`.
