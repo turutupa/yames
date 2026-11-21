@@ -11,8 +11,9 @@
  * single notes, where the right-notes check is at its best. A strummed triad is
  * not graded, so nothing here is strummed for a grade.
  */
-import { definePath } from "../spec";
+import { definePath, withCues } from "../spec";
 import type { VariantParams } from "../spec";
+import { TRIADS_CUES } from "./triads-cues";
 import { handAt, ladder, moveChart, shiftFrets } from "../templates";
 import { DIMINISHED, F_AND_G, MORE_MINORS } from "./harmony-more";
 import { F_AND_G_MIDDLE, LOW_SET, MINORS_MIDDLE, SECOND_SONG, THREE_SETS } from "./triads-more";
@@ -122,7 +123,7 @@ function shapeWarmup(shapes: Readonly<Record<string, Moved>>, keys: Readonly<Rec
   };
 }
 
-export default definePath({
+export default withCues(definePath({
   id: "triads",
   title: "Triads",
   kind: "theory",
@@ -1042,4 +1043,4 @@ export default definePath({
       ],
     },
   ],
-});
+}), TRIADS_CUES);
