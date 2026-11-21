@@ -110,7 +110,8 @@ describe("lookBack", () => {
   it("speaks of minutes and tempos only with grading off", () => {
     const look = lookBack(input(week(), { graded: false }))!;
     expect(look.graded).toBe(false);
-    expect(look.sentence.key).toBe("companion.weekly.say.ungraded");
+    // The week holds Takes marked not fair: the sentence says it leaves them out (L10).
+    expect(look.sentence.key).toBe("companion.weekly.say.ungradedLeftOut");
     expect(look.benchmark).toBeNull();
     expect(look.stuck).toBeNull();
     expect(look.milestones).toEqual([]);
