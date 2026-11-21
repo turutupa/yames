@@ -128,7 +128,7 @@
       "removeTierLabel": "{{name}} verwijderen",
       "olderCopy": "Er staat ook een oudere kopie van dit model op de schijf · {{size}}",
       "removeOlderCopyLabel": "De oudere kopie van {{name}} verwijderen",
-      "removeModels": "Modellen verwijderen",
+      "removeModels": "Modellen en stemmen verwijderen",
       "stance": "Manier van coachen",
       "stanceHint": "Hoe streng de coach is terwijl je in de tools speelt",
       "stanceStrict": "Streng",
@@ -137,7 +137,26 @@
       "stanceLearningDesc": "Geeft je de helft meer ruimte voordat er iets gezegd wordt, houdt correcties uit je oren terwijl je speelt, en begint bij wat goed ging. Je score wordt in beide gevallen precies hetzelfde berekend.",
       "cuesNoVoice": "Heeft een coachstem nodig: kies hierboven Standaard of Studio. Tot dan blijven de aanwijzingen op het scherm.",
       "toolsOnly": "Alleen tools",
-      "toolsOnlyHint": "Geldt in Metronoom, Tempotraining en Jam. Sessies beoordelen altijd op dezelfde manier."
+      "toolsOnlyHint": "Geldt in Metronoom, Tempotraining en Jam. Sessies beoordelen altijd op dezelfde manier.",
+      "groups": {
+        "answers": "Antwoorden",
+        "voice": "Stem",
+        "suggestions": "Suggesties",
+        "notebook": "Notitieboek",
+        "tools": "In de tools"
+      },
+      "answersRuleMade": "De coach antwoordt vanuit je takes en leerpaden.",
+      "answersLangs": "In eigen woorden in: {{langs}}.",
+      "notebook": {
+        "leftOutTitle": "Regels die je hebt weggelaten",
+        "empty": "Niets weggelaten.",
+        "leftOutOn": "Weggelaten op {{date}}",
+        "bringBack": "Terughalen",
+        "broughtBack": "Weer terug in je Notitieboek.",
+        "lineGone": "Een regel die je recente takes niet meer laten zien",
+        "comesBack": "Een regel die je weglaat komt na dertig dagen vanzelf terug. Er wordt niets verwijderd.",
+        "unreadableEntries": "Sommige regels zijn weggelaten op een manier die deze versie niet kan lezen. Ze blijven weggelaten, zoals opgeslagen."
+      }
     },
     "general": {
       "title": "Algemeen",

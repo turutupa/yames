@@ -138,6 +138,17 @@ const DELIBERATELY_REMOVED: readonly string[] = [
   "coachReport.thinkingAria",
   "ask.sections.ask",
   "ask.sections.tools",
+  // The wizard's coach step asks one thing (leg c6a, DESIGN 8): "Should the
+  // coach also answer in its own words?". Its Off card is "Off" now
+  // (`onboarding.coach.off`), the report line under "what it does" went with
+  // the old coach session, and "Try the listening feature anyway" left the
+  // step (judgement call 29: an input and eight beats, a microphone push in
+  // the coach's step; W5 runs before it on every run, so it had no other home).
+  "onboarding.coach.what2",
+  "onboarding.coach.timing.title",
+  "onboarding.coach.timing.desc",
+  "onboarding.coach.tryListening.label",
+  "onboarding.coach.tryListening.hint",
 ];
 
 function englishKeys(): string[] {

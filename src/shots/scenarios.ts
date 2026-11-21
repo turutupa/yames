@@ -437,6 +437,8 @@ export interface Shot {
       | "soundLook"
       /** W3, reached by skipping the steps before it. */
       | "handsFree"
+      /** W4, the coach's one question (leg c6a): reached by answering W5's question "No". */
+      | "coach"
       | "ready";
     /** "What do you want most right now?", answered on the start step (`startRecommendation.ts`). */
     goal?: "basics" | "harmony" | "technique" | "speed";
@@ -877,7 +879,7 @@ export const SHOTS: Shot[] = [
     settleMs: 300,
   },
   // The first run (MVP). Not on the site: the layout suite opens them.
-  ...(["welcome", "instrument", "start", "inputAsk", "input", "inputSilent", "inputNone", "soundLook", "handsFree", "ready"] as const).map(
+  ...(["welcome", "instrument", "start", "inputAsk", "input", "inputSilent", "inputNone", "soundLook", "handsFree", "coach", "ready"] as const).map(
     (stop): Shot => ({
       id: `firstrun-${stop.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`,
       suffix: `firstrun-${stop.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`,

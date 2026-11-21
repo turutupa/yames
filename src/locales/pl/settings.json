@@ -128,7 +128,7 @@
       "removeTierLabel": "Usuń {{name}}",
       "olderCopy": "Na dysku jest też starsza kopia tego modelu · {{size}}",
       "removeOlderCopyLabel": "Usuń starszą kopię {{name}}",
-      "removeModels": "Usuń modele",
+      "removeModels": "Usuń modele i głosy",
       "stance": "Styl prowadzenia",
       "stanceHint": "Jak surowy jest trener, gdy grasz w narzędziach",
       "stanceStrict": "Ostro",
@@ -137,7 +137,26 @@
       "stanceLearningDesc": "Daje ci o połowę więcej luzu, zanim cokolwiek powie, trzyma poprawki z dala od twoich uszu podczas grania i zaczyna od tego, co wyszło. Wynik liczony jest dokładnie tak samo w obu przypadkach.",
       "cuesNoVoice": "Wymaga głosu trenera: wybierz powyżej Standard lub Studio. Do tego czasu zapowiedzi zostają na ekranie.",
       "toolsOnly": "Tylko narzędzia",
-      "toolsOnlyHint": "Działa w Metronomie, Rozbiegu i Jamie. Sesje zawsze oceniają tak samo."
+      "toolsOnlyHint": "Działa w Metronomie, Rozbiegu i Jamie. Sesje zawsze oceniają tak samo.",
+      "groups": {
+        "answers": "Odpowiedzi",
+        "voice": "Głos",
+        "suggestions": "Sugestie",
+        "notebook": "Notatnik",
+        "tools": "W narzędziach"
+      },
+      "answersRuleMade": "Trener odpowiada na podstawie twoich podejść i ścieżek.",
+      "answersLangs": "Własnymi słowami w językach: {{langs}}.",
+      "notebook": {
+        "leftOutTitle": "Pominięte wiersze",
+        "empty": "Nic nie pominięto.",
+        "leftOutOn": "Pominięto {{date}}",
+        "bringBack": "Przywróć",
+        "broughtBack": "Wiersz wrócił do Notatnika.",
+        "lineGone": "Wiersz, którego ostatnie podejścia już nie pokazują",
+        "comesBack": "Pominięty wiersz wraca sam po trzydziestu dniach. Nic nie jest usuwane.",
+        "unreadableEntries": "Niektóre wiersze zostały pominięte w sposób, którego ta wersja nie potrafi odczytać. Pozostają pominięte, tak jak zapisano."
+      }
     },
     "general": {
       "title": "Ogólne",

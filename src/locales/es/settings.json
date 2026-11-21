@@ -128,7 +128,7 @@
       "removeTierLabel": "Eliminar {{name}}",
       "olderCopy": "También hay una copia anterior de este modelo en el disco · {{size}}",
       "removeOlderCopyLabel": "Eliminar la copia anterior de {{name}}",
-      "removeModels": "Eliminar modelos",
+      "removeModels": "Eliminar modelos y voces",
       "stance": "Estilo de entrenamiento",
       "stanceHint": "Lo exigente que es el coach contigo mientras tocas en las herramientas",
       "stanceStrict": "Estricto",
@@ -137,7 +137,26 @@
       "stanceLearningDesc": "Te da la mitad más de margen antes de decir nada, te quita las correcciones del oído mientras tocas y empieza por lo que salió bien. Tu puntuación se calcula exactamente igual en los dos casos.",
       "cuesNoVoice": "Necesita una voz del coach: elige Estándar o Studio arriba. Hasta entonces, los avisos se quedan en pantalla.",
       "toolsOnly": "Solo herramientas",
-      "toolsOnlyHint": "Se aplica en el Metrónomo, la Rampa de tempo y el Jam. Las sesiones siempre califican igual."
+      "toolsOnlyHint": "Se aplica en el Metrónomo, la Rampa de tempo y el Jam. Las sesiones siempre califican igual.",
+      "groups": {
+        "answers": "Respuestas",
+        "voice": "Voz",
+        "suggestions": "Sugerencias",
+        "notebook": "Cuaderno",
+        "tools": "En las herramientas"
+      },
+      "answersRuleMade": "El coach responde a partir de tus tomas y rutas.",
+      "answersLangs": "Con sus propias palabras en: {{langs}}.",
+      "notebook": {
+        "leftOutTitle": "Líneas que dejaste fuera",
+        "empty": "Nada dejado fuera.",
+        "leftOutOn": "Dejada fuera el {{date}}",
+        "bringBack": "Recuperar",
+        "broughtBack": "De vuelta en tu Cuaderno.",
+        "lineGone": "Una línea que tus tomas recientes ya no muestran",
+        "comesBack": "Una línea que dejas fuera vuelve sola a los treinta días. No se borra nada.",
+        "unreadableEntries": "Algunas líneas se dejaron fuera de una forma que esta versión no puede leer. Siguen fuera, tal como están guardadas."
+      }
     },
     "general": {
       "title": "General",

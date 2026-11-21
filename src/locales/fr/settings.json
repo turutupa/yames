@@ -128,7 +128,7 @@
       "removeTierLabel": "Supprimer {{name}}",
       "olderCopy": "Une copie plus ancienne de ce modèle est aussi sur le disque · {{size}}",
       "removeOlderCopyLabel": "Supprimer la copie plus ancienne de {{name}}",
-      "removeModels": "Supprimer les modèles",
+      "removeModels": "Supprimer les modèles et les voix",
       "stance": "Style de coaching",
       "stanceHint": "À quel point le coach est exigeant quand tu joues dans les outils",
       "stanceStrict": "Strict",
@@ -137,7 +137,26 @@
       "stanceLearningDesc": "Te laisse une fois et demie plus de marge avant de dire quoi que ce soit, garde les corrections hors de tes oreilles pendant que tu joues, et commence par ce qui a marché. Ta note est calculée exactement de la même façon dans les deux cas.",
       "cuesNoVoice": "Nécessite une voix du coach : choisis Standard ou Studio ci-dessus. En attendant, les annonces restent à l'écran.",
       "toolsOnly": "Outils seulement",
-      "toolsOnlyHint": "S'applique au Métronome, à la Rampe et au Jam. Les séances notent toujours de la même façon."
+      "toolsOnlyHint": "S'applique au Métronome, à la Rampe et au Jam. Les séances notent toujours de la même façon.",
+      "groups": {
+        "answers": "Réponses",
+        "voice": "Voix",
+        "suggestions": "Suggestions",
+        "notebook": "Carnet",
+        "tools": "Dans les outils"
+      },
+      "answersRuleMade": "Le coach répond à partir de tes prises et de tes parcours.",
+      "answersLangs": "Avec ses propres mots en : {{langs}}.",
+      "notebook": {
+        "leftOutTitle": "Lignes que tu as écartées",
+        "empty": "Rien d'écarté.",
+        "leftOutOn": "Écartée le {{date}}",
+        "bringBack": "Remettre",
+        "broughtBack": "De retour dans ton Carnet.",
+        "lineGone": "Une ligne que tes prises récentes ne montrent plus",
+        "comesBack": "Une ligne que tu écartes revient d'elle-même au bout de trente jours. Rien n'est supprimé.",
+        "unreadableEntries": "Certaines lignes ont été écartées d'une manière que cette version ne sait pas lire. Elles restent écartées, telles qu'enregistrées."
+      }
     },
     "general": {
       "title": "Général",

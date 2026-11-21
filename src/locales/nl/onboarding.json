@@ -67,13 +67,15 @@
     },
     "coach": {
       "title": "Oefencoach",
-      "what1": "De coach luistert mee via je audio-ingang en beoordeelt hoe je timing op de klik ligt.",
-      "what2": "Na elke run schrijft hij een kort verslag — met een gedownload model legt hij ook uit wat je hierna kunt oefenen.",
+      "what1": "De coach leest je takes en je leerpaden: hij geeft je de regel van Vandaag, een notitie na een take en antwoorden als je iets vraagt.",
+      "question": "Moet de coach ook in eigen woorden antwoorden?",
+      "withoutModel": "Uit geeft je nog steeds de regel, de notitie, de tools en antwoorden vanuit je takes en leerpaden.",
+      "modelBuys": "Met een model krijgt een vraag die de eigen antwoorden van de app niet dekken een antwoord in de eigen woorden van het model, gemarkeerd als algemeen advies. Alles wat gemeten is komt hoe dan ook uit de app.",
       "privacy": "Alles draait op deze computer. Je audio verlaat hem nooit en releasebuilds nemen niets op.",
       "recommended": "Aanbevolen",
-      "timing": {
-        "title": "Alleen timingfeedback",
-        "desc": "Geen download. Je houdt de live stippen, de timingscore en je sessiegeschiedenis."
+      "off": {
+        "title": "Uit",
+        "desc": "Geen download. De coach antwoordt vanuit je takes en leerpaden."
       },
       "standard": {
         "title": "Standaardmodel",
@@ -86,15 +88,11 @@
       "studioNeedsRam": "Studio heeft minstens 16 GB RAM nodig — deze computer heeft {{gb}} GB.",
       "standardNeedsRam": "Het Standaard-model heeft minstens 8 GB RAM nodig — deze computer heeft {{gb}} GB.",
       "unavailableInBuild": "Niet beschikbaar in deze build.",
-      "reasonNoLlm": "Deze build kan geen model draaien, dus timingfeedback is hier de eerlijke keuze.",
+      "reasonNoLlm": "Deze build kan geen model draaien, dus Uit is hier de eerlijke keuze.",
       "reasonLowMemory": "Deze computer heeft {{gb}} GB RAM — te weinig om een model comfortabel te draaien.",
       "reasonInstalled": "Staat al op deze computer — niets op te halen.",
       "downloadNote": "De download begint zodra je verdergaat en loopt op de achtergrond door.",
       "downloading": "Coachmodel downloaden",
-      "tryListening": {
-        "label": "Toch de luisterfunctie proberen",
-        "hint": "Twee korte stappen: kies je ingang, speel acht tellen, bekijk je timing."
-      },
       "voiceReady": "De stemmen van de coach staan klaar.",
       "voicePick": "Kies een stem",
       "voiceDismiss": "Sluiten"
@@ -189,7 +187,7 @@
       },
       "controlKeyboard": "Toetsenbord",
       "controlFootswitch": "Voetschakelaar",
-      "coachTiming": "Alleen timingfeedback",
+      "coachTiming": "Uit: antwoorden vanuit takes en leerpaden",
       "inputNone": "Niet ingesteld",
       "alwaysOnTop": "Altijd op voorgrond",
       "start": "Naar Vandaag",
