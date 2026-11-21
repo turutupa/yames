@@ -92,7 +92,11 @@
           "lastSession_many": "{{count}} minutos de tomadas na sua última sessão, a última: {{exercise}} a {{bpm}} BPM.",
           "lastSession_other": "{{count}} minutos de tomadas na sua última sessão, a última: {{exercise}} a {{bpm}} BPM."
         },
-        "samePlace": "Hoje começa no mesmo ponto."
+        "samePlace": "Hoje começa no mesmo ponto.",
+        "songDue": {
+          "one": "O compasso {{bar}} de {{song}} é para hoje.",
+          "range": "Os compassos {{from}} a {{to}} de {{song}} são para hoje."
+        }
       },
       "whatsIn": "O que tem nela, e por quê",
       "min": "MIN",

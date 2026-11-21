@@ -1134,7 +1134,7 @@ export function installShotMock(shot: Shot, theme: string): void {
   if (shot.songLibrary) {
     // W35 — the scenes that are about the LIST rather than the stage.
     for (const record of songLibraryRecords(shot.songLibrary)) SCORES.set(record.id, record);
-  } else if (shot.tab === "songs" && !shot.starterShelf) {
+  } else if ((shot.tab === "songs" && !shot.starterShelf) || shot.session?.songDue) {
     const record = songShotRecord();
     SCORES.set(record.id, record);
   }
@@ -1650,6 +1650,17 @@ export function installShotMock(shot: Shot, theme: string): void {
         // had open last", and the store is where that is counted.
         lastOpenedAt: r.openedAt,
       })),
+    // c5a2: a passage of the first song came due three days ago (played bars 1..3, 0-based).
+    ...(shot.session?.songDue
+      ? {
+          list_due: () => {
+            const first = [...SCORES.keys()][0];
+            const local = Date.now() - new Date().getTimezoneOffset() * 60_000;
+            const today = Math.floor(local / 86_400_000);
+            return first ? [{ scoreId: first, rangeStartBar: 1, rangeEndBar: 3, dueDay: today - 3, reason: "rushing" }] : [];
+          },
+        }
+      : {}),
     get_score: (a) => SCORES.get(String(a?.id))?.score ?? null,
     get_score_source: (a) => SCORES.get(String(a?.id))?.sourceBase64 ?? null,
     save_score: (a) => {

@@ -87,7 +87,11 @@
           "lastSession": "Son oturumunda {{count}} dakikalık deneme, sonuncusu: {{exercise}}, {{bpm}} BPM'de.",
           "lastSession_other": "Son oturumunda {{count}} dakikalık deneme, sonuncusu: {{exercise}}, {{bpm}} BPM'de."
         },
-        "samePlace": "Bugün aynı yerden."
+        "samePlace": "Bugün aynı yerden.",
+        "songDue": {
+          "one": "{{song}} şarkısının {{bar}}. ölçüsü bugün için planlı.",
+          "range": "{{song}} şarkısının {{from}}–{{to}}. ölçüleri bugün için planlı."
+        }
       },
       "whatsIn": "İçinde ne var, neden",
       "min": "DK",

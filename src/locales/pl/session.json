@@ -97,7 +97,11 @@
           "lastSession_many": "{{count}} minut podejść w ostatniej sesji, ostatnie: {{exercise}} przy {{bpm}} BPM.",
           "lastSession_other": "{{count}} minuty podejść w ostatniej sesji, ostatnie: {{exercise}} przy {{bpm}} BPM."
         },
-        "samePlace": "Dziś zaczynamy w tym samym miejscu."
+        "samePlace": "Dziś zaczynamy w tym samym miejscu.",
+        "songDue": {
+          "one": "Na dziś zaplanowany jest takt {{bar}} utworu {{song}}.",
+          "range": "Na dziś zaplanowane są takty {{from}}–{{to}} utworu {{song}}."
+        }
       },
       "whatsIn": "Co w niej jest i dlaczego",
       "min": "MIN",

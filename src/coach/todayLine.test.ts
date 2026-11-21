@@ -95,8 +95,10 @@ function input(over: {
   ceilings?: PlayerProgress["ceilings"];
   grading?: TodayLineInput["grading"];
   takesRead?: number;
+  songDue?: TodayLineInput["songDue"];
 }): TodayLineInput {
   return {
+    ...(over.songDue === undefined ? {} : { songDue: over.songDue }),
     plan: {
       minutes: 15,
       mood: over.mood ?? "returning",
@@ -278,6 +280,76 @@ const TABLE: Array<[string, TodayLineInput, string | null, string | null]> = [
     "ungraded",
     null,
   ],
+  // c5a2 (judgement call 18): a due Songs passage, after the Path's line.
+  [
+    "a Songs passage due: one more sentence after the Path's line",
+    input({ songDue: { song: "Wish You Were Here", from: 17, to: 24 } }),
+    "slipped",
+    `${tune.title}: bar 1 of the tune slipped on 2 of 3 rounds yesterday. Today starts there. Bars 17 to 24 of Wish You Were Here are due today.`,
+  ],
+  [
+    "a Songs passage of one bar due",
+    input({ songDue: { song: "Blackbird", from: 9, to: 9 } }),
+    "slipped",
+    `${tune.title}: bar 1 of the tune slipped on 2 of 3 rounds yesterday. Today starts there. Bar 9 of Blackbird is due today.`,
+  ],
+  [
+    "a Songs passage due and no Path line: the passage alone",
+    input({
+      takes: [take({ facts: { measures: { perBar: perBar(3, {}), barsPlayed: BARS * 3 } } })],
+      songDue: { song: "Blackbird", from: 9, to: 12 },
+    }),
+    "songDue",
+    "Bars 9 to 12 of Blackbird are due today.",
+  ],
+  [
+    "a Songs passage due after a back line",
+    input({
+      mood: "back",
+      daysAway: 12,
+      takes: [take({ daysAgo: 12 })],
+      steps: [WARM, exerciseStep({ bpm: 85, why: { code: "backEased", values: { days: 12, bpm: 85, clean: 90 } } })],
+      songDue: { song: "Blackbird", from: 1, to: 4 },
+    }),
+    "back",
+    `Last Session, ${tune.title}: 79% even at 90 BPM. Today starts at 85 BPM. Bars 1 to 4 of Blackbird are due today.`,
+  ],
+  [
+    "a Songs passage due on the first day: not said",
+    input({
+      mood: "first",
+      daysAway: null,
+      takes: [],
+      steps: [exerciseStep({ role: "placement", why: { code: "placement", values: {} } })],
+      songDue: { song: "Blackbird", from: 9, to: 12 },
+    }),
+    "first",
+    "Your first Session finds where you start. Nothing to prepare.",
+  ],
+  [
+    "a Songs passage due, first day with no placement (ungraded): not said",
+    input({
+      mood: "first",
+      daysAway: null,
+      takes: [],
+      steps: [exerciseStep({ why: { code: "firstEver", values: {} } })],
+      songDue: { song: "Blackbird", from: 9, to: 12 },
+    }),
+    null,
+    null,
+  ],
+  [
+    "a Songs passage due, an empty plan: no line",
+    input({ steps: [], songDue: { song: "Blackbird", from: 9, to: 12 } }),
+    null,
+    null,
+  ],
+  [
+    "no Songs passage due (null): the Path's line alone",
+    input({ songDue: null }),
+    "slipped",
+    `${tune.title}: bar 1 of the tune slipped on 2 of 3 rounds yesterday. Today starts there.`,
+  ],
 ];
 
 /** A row of the table by its name: an index moves when a row is added. */
@@ -369,6 +441,11 @@ describe("the line's English is honest", () => {
   it.each(LINE)("%s: claims nothing the app cannot measure, and never calls the pass mark \"the bar\"", (_k, text) => {
     expect(bannedClaimsIn(text, true).map((c) => c.name)).toEqual([]);
     expect(text).not.toMatch(/\bthe bar\b|\bpass bar\b/i);
+  });
+
+  it.each(LINE.filter(([k]) => /\.songDue\./.test(k)))("%s states what the store holds: no overdue, no forgot", (_k, text) => {
+    expect(text).not.toMatch(/overdue|forg[eo]t|late|still|again|should/i);
+    expect(text).toMatch(/\{\{song\}\}/);
   });
 
   it.each(LINE.filter(([k]) => /\.(slipped|earned|ungraded)\.|\.back\./.test(k)))("%s names its window", (_k, text) => {

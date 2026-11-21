@@ -92,7 +92,11 @@
           "lastSession_many": "{{count}} minutes de prises lors de ta dernière séance, pour finir {{exercise}} à {{bpm}} BPM.",
           "lastSession_other": "{{count}} minutes de prises lors de ta dernière séance, pour finir {{exercise}} à {{bpm}} BPM."
         },
-        "samePlace": "Aujourd'hui, au même endroit."
+        "samePlace": "Aujourd'hui, au même endroit.",
+        "songDue": {
+          "one": "La mesure {{bar}} de {{song}} est prévue aujourd'hui.",
+          "range": "Les mesures {{from}} à {{to}} de {{song}} sont prévues aujourd'hui."
+        }
       },
       "whatsIn": "Ce qu'il y a dedans, et pourquoi",
       "min": "MIN",

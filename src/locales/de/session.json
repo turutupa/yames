@@ -87,7 +87,11 @@
           "lastSession": "{{count}} Minute Takes in deiner letzten Session, zum Schluss {{exercise}} bei {{bpm}} BPM.",
           "lastSession_other": "{{count}} Minuten Takes in deiner letzten Session, zum Schluss {{exercise}} bei {{bpm}} BPM."
         },
-        "samePlace": "Heute an derselben Stelle."
+        "samePlace": "Heute an derselben Stelle.",
+        "songDue": {
+          "one": "Takt {{bar}} von {{song}} ist heute dran.",
+          "range": "Takte {{from}} bis {{to}} von {{song}} sind heute dran."
+        }
       },
       "whatsIn": "Was drin ist, und warum",
       "min": "MIN",

@@ -92,7 +92,11 @@
           "lastSession_many": "{{count}} minutos de tomas en tu última sesión, terminando con {{exercise}} a {{bpm}} BPM.",
           "lastSession_other": "{{count}} minutos de tomas en tu última sesión, terminando con {{exercise}} a {{bpm}} BPM."
         },
-        "samePlace": "Hoy, en el mismo punto."
+        "samePlace": "Hoy, en el mismo punto.",
+        "songDue": {
+          "one": "El compás {{bar}} de {{song}} toca hoy.",
+          "range": "Los compases {{from}} a {{to}} de {{song}} tocan hoy."
+        }
       },
       "whatsIn": "Qué incluye, y por qué",
       "min": "MIN",

@@ -78,6 +78,29 @@ test.describe("Today's line on a computer", () => {
     });
   }
 
+  // c5a2 (judgement call 18): a due Songs passage, one sentence after the Path's line.
+  for (const [size, theme, lng] of [
+    [{ width: 1440, height: 900 }, "ember", "en"],
+    [{ width: 1440, height: 900 }, "manuscript", "en"],
+    [{ width: 1024, height: 700 }, "ember", "ru"],
+  ] as const) {
+    test(`a due Songs passage follows the Path's line, whole, at ${size.width}x${size.height} in ${theme} (${lng})`, async ({ page }) => {
+      await openShot(page, "today-line-song-due", size, theme, { lng });
+      await expect(page.locator(".session-today-line .coach-line-text")).toContainText(lng === "en" ? "are due today." : "такты", { timeout: 5000 });
+      const box = await lineFits(page);
+      const head = await page.locator(".session-plan-head").first().evaluate((el) => el.getBoundingClientRect().top);
+      expect(box.bottom).toBeLessThanOrEqual(head + 0.5);
+      if (lng === "en") {
+        const text = (await page.locator(".session-today-line .coach-line-text").textContent())!;
+        expect(text).toMatch(/slipped .+ Today starts there\. Bars \d+ to \d+ of .+ are due today\.$/);
+        // One passage at most.
+        expect(text.match(/due today/g)).toHaveLength(1);
+      }
+      await noSidewaysScroll(page, "Today");
+      await shot(page, `today-line-song-due-${size.width}-${theme}-${lng}`);
+    });
+  }
+
   test("absent, not empty, when it has nothing to add", async ({ page }) => {
     await openShot(page, "today-returning", { width: 1440, height: 900 }, "ember");
     await expect(page.locator(".session-today-line")).toHaveCount(0);
@@ -172,6 +195,15 @@ test.describe("Today's line on a phone", () => {
     await headerSaysTheFact(page);
     await noSidewaysScroll(page, "Today");
     await shot(page, "phone-today-back-ember");
+  });
+
+  test("a due Songs passage on a phone: after the Path's line, whole, not a target", async ({ page }) => {
+    await openShot(page, "phone-today-line-song-due", { width: 360, height: 800 }, "ember");
+    await expect(page.locator(".session-today-line .coach-line-text")).toContainText("are due today.", { timeout: 5000 });
+    await lineFits(page);
+    await expect(page.getByTestId("today-line-ask")).toHaveCount(0);
+    await noSidewaysScroll(page, "Today");
+    await shot(page, "phone-today-line-song-due-ember");
   });
 
   test("in Russian on a phone it wraps and is never cut", async ({ page }) => {

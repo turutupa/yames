@@ -66,6 +66,11 @@ export interface Shot {
      */
     /** `slipped`: `returning`, its last Take with per-bar figures in which the tune's first bar slipped (Today's line). */
     seed: "first" | "returning" | "back" | "three" | "none" | "ungraded" | "slipped";
+    /**
+     * c5a2: a Songs passage of the library's first song came due three days
+     * ago (`list_due`), bars 2 to 4 as played; Today's line names it.
+     */
+    songDue?: boolean;
     /** Today's focus (`session.todayFocus`): "mix" or a Path's id. Absent: the mix. */
     focus?: string;
     /** Paths switched out of the daily mix (`session.offMix`). */
@@ -966,6 +971,16 @@ export const SHOTS: Shot[] = [
     width: 1440,
     height: 900,
     settleMs: 300,
+  },
+  {
+    // c5a2: the same line, then a due Songs passage (judgement call 18).
+    id: "today-line-song-due",
+    suffix: "today-line-song-due",
+    window: "main",
+    session: { seed: "slipped", minutes: 15, stop: "today", songDue: true },
+    width: 1440,
+    height: 900,
+    settleMs: 400,
   },
   {
     // The Step page's line (c1b2a): the same history, on the Step whose
@@ -2263,6 +2278,7 @@ export const PHONE_LEARNING_SCENES = [
   "today-drums",
   "today-returning",
   "today-line",
+  "today-line-song-due",
   "today-no-paths",
   "today-focus-two",
   "today-focus-three-one",
@@ -2329,7 +2345,7 @@ for (const id of PHONE_LEARNING_SCENES) {
 // `tests/layout/session-variant-text.spec.ts` (session-variant-e is in the list
 // above since the band's slider became thumb-sized, card #93). Today back after
 // a break on a phone: its header and line read together (hd1).
-for (const id of ["session-variant-runway", "step-line", "today-back"]) {
+for (const id of ["session-variant-runway", "step-line", "today-back", "songs-review-rushing"]) {
   const desktop = SHOTS.find((s) => s.id === id);
   if (desktop) SHOTS.push({ ...desktop, id: `phone-${id}`, suffix: `phone-${id}`, width: 360, height: 800 });
 }

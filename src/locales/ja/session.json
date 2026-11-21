@@ -87,7 +87,11 @@
           "lastSession": "前回のセッションで、テイクを {{count}} 分。最後は {{exercise}} の {{bpm}} BPM でした。",
           "lastSession_other": "前回のセッションで、テイクを {{count}} 分。最後は {{exercise}} の {{bpm}} BPM でした。"
         },
-        "samePlace": "今日も同じところからです。"
+        "samePlace": "今日も同じところからです。",
+        "songDue": {
+          "one": "{{song}} の {{bar}} 小節目は今日が予定日です。",
+          "range": "{{song}} の {{from}}–{{to}} 小節は今日が予定日です。"
+        }
       },
       "whatsIn": "内容とその理由",
       "min": "分",

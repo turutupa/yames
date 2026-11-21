@@ -32,10 +32,13 @@ import { rungsToDrop } from "../session/planner";
 import type { PlayerProgress } from "../session/progress";
 import { calendarDaysBetween, factsOf, isUngradedTake, sessionKeyOf, shownCleanTempoTakeOf } from "../session/progress";
 import type { PathTakeRow } from "../ipc";
+import type { DuePassage } from "./songDue";
+import { songDueLine } from "./songDue";
 
 /**
- * Which sentence it is. `songDue` ("Bars 17 to 24 of your song are due
- * today", `listDue`) belongs to leg c5a: typed here, never chosen yet.
+ * Which sentence it is. `songDue` ("Bars 17 to 24 of {{song}} are due
+ * today.", `listDue`, c5a2) follows the Path's line as one more sentence, and
+ * is the kind only when there is no Path line to follow.
  */
 export type TodayLineCase = "first" | "slipped" | "earned" | "back" | "ungraded" | "songDue";
 
@@ -54,6 +57,12 @@ export type TodayLineInput = {
    * that Session (its minutes) is not said.
    */
   takesRead: number;
+  /**
+   * The Songs passage due longest ago (today or earlier), already in printed
+   * bars and with the song's name (`songDue.ts`, read once when Today mounts).
+   * Absent or null: none due, or not read yet.
+   */
+  songDue?: DuePassage | null;
 };
 
 /** When the last Session was, as a sentence names it. */
@@ -246,8 +255,22 @@ function backLine(input: TodayLineInput, session: readonly PathTakeRow[]): Today
 
 /**
  * Today's line, or null: nothing measured to add, and the slot is absent.
+ *
+ * The Path's line, then a due Songs passage as one more sentence (judgement
+ * call 18): never on the first day (no Takes yet, or the `first` case), at
+ * most one passage, and on its own only when there is no Path line.
  */
 export function todayLine(input: TodayLineInput): TodayLine | null {
+  const line = pathTodayLine(input);
+  const { plan, progress, songDue } = input;
+  if (!songDue || plan.steps.length === 0) return line;
+  if (plan.mood === "first" || progress.takes.length === 0 || line?.kind === "first") return line;
+  const due = songDueLine(songDue);
+  return line ? { kind: line.kind, lines: [...line.lines, due] } : { kind: "songDue", lines: [due] };
+}
+
+/** The Path's part of Today's line, or null. */
+function pathTodayLine(input: TodayLineInput): TodayLine | null {
   const { plan, progress, paths, now, grading } = input;
   if (plan.steps.length === 0) return null;
   const takes = progress.takes;

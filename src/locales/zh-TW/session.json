@@ -87,7 +87,11 @@
           "lastSession": "上次練習中彈了 {{count}} 分鐘，最後一遍是 {{exercise}}，{{bpm}} BPM。",
           "lastSession_other": "上次練習中彈了 {{count}} 分鐘，最後一遍是 {{exercise}}，{{bpm}} BPM。"
         },
-        "samePlace": "今天還是從同一個地方開始。"
+        "samePlace": "今天還是從同一個地方開始。",
+        "songDue": {
+          "one": "{{song}} 第 {{bar}} 小節定在今天回來練習。",
+          "range": "{{song}} 第 {{from}}–{{to}} 小節定在今天回來練習。"
+        }
       },
       "whatsIn": "練什麼，為什麼",
       "min": "分鐘",
