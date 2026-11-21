@@ -855,6 +855,8 @@
         "hearBack": "聽第 {{bar}} 小節：先聽你的，再聽示範",
         "hearYours": "你的：第 {{bar}} 小節 · 停止",
         "hearDemo": "示範：第 {{bar}} 小節 · 停止",
+        "hearBackTune": "聽你的第 {{played}} 小節，再聽曲子第 {{tune}} 小節的示範",
+        "hearDemoTune": "示範：曲子第 {{tune}} 小節 · 停止",
         "try": "我該試什麼？"
       },
       "ungraded": {

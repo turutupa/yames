@@ -855,6 +855,8 @@
         "hearBack": "{{bar}}번째 마디 듣기: 내 연주, 그다음 시범",
         "hearYours": "내 연주: {{bar}}번째 마디 · 정지",
         "hearDemo": "시범: {{bar}}번째 마디 · 정지",
+        "hearBackTune": "내 {{played}}번째 마디 듣기, 그다음 곡의 {{tune}}번째 마디 시범",
+        "hearDemoTune": "시범: 곡의 {{tune}}번째 마디 · 정지",
         "try": "뭘 해볼까요?"
       },
       "ungraded": {

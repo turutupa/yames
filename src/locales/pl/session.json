@@ -897,6 +897,8 @@
         "hearBack": "Posłuchaj taktu {{bar}}: twój, potem demo",
         "hearYours": "Twój: takt {{bar}} · Stop",
         "hearDemo": "Demo: takt {{bar}} · Stop",
+        "hearBackTune": "Posłuchaj twojego taktu {{played}}, potem dema taktu {{tune}}",
+        "hearDemoTune": "Demo: takt {{tune}} melodii · Stop",
         "try": "Co mam spróbować?"
       },
       "ungraded": {

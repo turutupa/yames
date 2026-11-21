@@ -876,6 +876,8 @@
         "hearBack": "Ascolta la battuta {{bar}}: la tua, poi la demo",
         "hearYours": "La tua: battuta {{bar}} · Stop",
         "hearDemo": "Demo: battuta {{bar}} · Stop",
+        "hearBackTune": "Ascolta la tua battuta {{played}}, poi la demo della battuta {{tune}}",
+        "hearDemoTune": "Demo: battuta {{tune}} della melodia · Stop",
         "try": "Cosa dovrei provare?"
       },
       "ungraded": {
