@@ -370,7 +370,7 @@
         "even": "{{value}}% de regularidad con un listón del {{bar}}%. Estaban todas las notas; falla el espacio entre ellas. Mismas notas, mismo tempo.",
         "heard": "Oí {{heard}} de {{expected}} notas, y el tiempo no puede aprobar sin ellas.",
         "extras": "{{extras}} notas que no esperaba. Apaga las cuerdas al aire si están sonando.",
-        "accents": "El {{value}}% de los acentos marcados sonó más fuerte que las notas de alrededor.",
+        "accents": "De media, los acentos marcados salieron un {{value}}% más fuertes que las otras notas.",
         "notes": "El {{value}}% de las notas que pude identificar eran las escritas. Mismas notas, mismo tempo, y atento a los trastes.",
         "evenSome": "{{value}}% de regularidad con un listón del {{bar}}%, y {{missed}} notas no sonaron. Mismas notas, mismo tempo, todas."
       },

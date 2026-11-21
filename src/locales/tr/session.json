@@ -364,7 +364,7 @@
         "even": "Çıta %{{bar}} iken düzgünlük %{{value}}. Notaların hepsi vardı; sorun aralarındaki boşlukta. Aynı notalar, aynı tempo.",
         "heard": "{{expected}} notadan {{heard}} tanesini duydum; onlar olmadan zamanlama geçemez.",
         "extras": "Beklemediğim {{extras}} nota. Boştaki teller çınlıyorsa onları sustur.",
-        "accents": "İşaretli aksanların %{{value}} kadarı çevresindeki notalardan yüksek çıktı.",
+        "accents": "Ortalama olarak, işaretli aksanlar diğer notalardan %{{value}} daha yüksek çıktı.",
         "notes": "Perdesini seçebildiğim notaların %{{value}}'i yazılanlardı. Aynı notalar, aynı tempo, perdelere dikkat.",
         "evenSome": "Çıta %{{bar}} iken düzgünlük %{{value}}, ve {{missed}} nota çıkmadı. Aynı notalar, aynı tempo, her biri."
       },

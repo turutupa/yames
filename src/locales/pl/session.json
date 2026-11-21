@@ -376,7 +376,7 @@
         "even": "Równość {{value}}% przy poprzeczce {{bar}}%. Wszystkie nuty były; chodzi o odstępy między nimi. Te same nuty, to samo tempo.",
         "heard": "Usłyszałem {{heard}} z {{expected}} nut, a bez nich rytm nie może zaliczyć.",
         "extras": "Nuty, których się nie spodziewałem: {{extras}}. Wycisz wolne struny, jeśli dzwonią.",
-        "accents": "{{value}}% zaznaczonych akcentów zabrzmiało głośniej niż nuty wokół nich.",
+        "accents": "Zaznaczone akcenty wypadły średnio o {{value}}% głośniej niż pozostałe nuty.",
         "notes": "{{value}}% nut, których wysokość rozpoznałem, było zapisanymi. Te same nuty, to samo tempo, i uważaj na progi.",
         "evenSome": "Równość {{value}}% przy poprzeczce {{bar}}%, a {{missed}} nut nie zabrzmiało. Te same nuty, to samo tempo, każda z nich."
       },

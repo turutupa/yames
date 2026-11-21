@@ -364,7 +364,7 @@
         "even": "{{value}} % gleichmäßig bei einer Latte von {{bar}} %. Alle Töne waren da, es liegt am Abstand dazwischen. Gleiche Töne, gleiches Tempo.",
         "heard": "Ich habe {{heard}} von {{expected}} Tönen gehört, und ohne sie kann das Timing nicht bestehen.",
         "extras": "{{extras}} Töne, mit denen ich nicht gerechnet habe. Dämpf die freien Saiten, falls sie mitklingen.",
-        "accents": "{{value}} % der markierten Akzente kamen lauter als die Töne drumherum.",
+        "accents": "Im Durchschnitt kamen die markierten Akzente {{value}} % lauter heraus als die anderen Töne.",
         "notes": "{{value}} % der Töne, deren Höhe ich erkennen konnte, waren die notierten. Gleiche Töne, gleiches Tempo, und achte auf die Bünde.",
         "evenSome": "{{value}} % gleichmäßig bei einer Latte von {{bar}} %, und {{missed}} Töne kamen nicht. Gleiche Töne, gleiches Tempo, jeder einzelne."
       },

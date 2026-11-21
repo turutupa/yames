@@ -76,7 +76,10 @@ function stepQuoted(step: number, source: BlockSource & { kind: "path" }, world:
   const onScreen = world.ctx?.step;
   const found = doc?.steps.find((s) => s.order === step) ?? (!source.pathId && onScreen?.order === step ? onScreen : null);
   if (!found) return { kind: "turn", body: { shape: null, line: line("ask.source.stepGone", { step }), source: APP } };
-  const quotes = [found.goal, found.why].filter((s) => s.trim() !== "").map((text) => line("ask.card.path.quote", { text }));
+  // The Step's goal and its why, each as the Path wrote it; a field left empty is not quoted.
+  const quotes = [found.goal, found.why]
+    .filter((s): s is string => typeof s === "string" && s.trim() !== "")
+    .map((text) => line("ask.card.path.quote", { text }));
   const cited: BlockSource = source.pathId ? { kind: "path", step, pathId: source.pathId } : { kind: "path", step };
   return {
     kind: "turn",
