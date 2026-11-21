@@ -33,7 +33,10 @@ const LAST_EVEN = "Keep the eighths even right to the last note.";
 const LOOK = "Look at the next fret before you move.";
 const IN_SHAPE = "Keep the fingers in shape as the hand slides.";
 const HAND_STILL = "Keep the hand still; only the fingers change.";
-const LOOP_ONE = "Land back on one right on '1'.";
+const UNTIL_FIVE = "Keep the hand still until chord five.";
+const FIVE_TO_ONE = "From five, go straight back to one on '1'.";
+const TOP_BEAT = "Hold each chord's top note a full beat.";
+const NEXT_RING = "Have the next chord ready as the top note rings.";
 // One string, quarter notes.
 const HEARD_ONE = "Press right behind the fret, then pick.";
 const EXTRAS_Q = "Pick each note once, on its click.";
@@ -46,11 +49,20 @@ const HOLD_TOP = "Hold the top note for beats three and four.";
 // Chord numbers, for the Exercises that change key.
 const SAY_1451 = "Say one, four, five, one as each chord starts.";
 const SAY_NUMBER = "Say each chord's number before you play it.";
+const SAY_1645 = "Say one, six, four, five as each chord starts.";
 const TOP_SAME = "Keep the top string's fret for one and four.";
+const FOUR_ADD2 = "For four, add finger two on the B string.";
 // Shapes, named where the Exercise has one version.
 const BACK_TO_C = "From G, go straight back to C on '1'.";
 const F_ACROSS_13 = "For F, lay finger one across fret thirteen.";
 const G_FINGER1_7 = "For G, put finger one at fret seven.";
+const G_ACROSS_3 = "For G, lay finger one across fret three.";
+const F_ADD2 = "For F, add finger two on the B string, fret six.";
+const AM_F3_10 = "For A minor, put finger three at fret ten.";
+const EM_TO_AM = "From E minor, go straight back to A minor.";
+const TEN_TO_FIVE = "From fret ten, drop to fret five as it loops.";
+const SEVEN_TO_THREE = "From fret seven, drop to fret three as it loops.";
+const NINE_TO_FIVE = "From fret nine, drop to fret five as it loops.";
 
 /**
  * One rolled-shape Exercise: its general cue, its `notes`, `shift` and
@@ -180,7 +192,7 @@ export const TRIADS_CUES: CueBook = {
     g("Lead with the G string: five, ten, fourteen.", 1),
     "Second finger on the G string, fret fourteen.",
     SHIFT,
-    "From fret ten, drop to fret five as it loops.",
+    TEN_TO_FIVE,
   ),
   "f-and-g.g-three-places": roll(
     g("Lead with the G string: four, seven, twelve.", 1),
@@ -214,7 +226,7 @@ export const TRIADS_CUES: CueBook = {
     "For G, put finger one at fret ten.",
     BACK_TO_C,
   ),
-  "three-chords.stay-put-keys": roll(g(SAY_1451), TOP_SAME, HAND_STILL, "From five, go straight back to one on '1'."),
+  "three-chords.stay-put-keys": roll(g(SAY_1451), TOP_SAME, HAND_STILL, FIVE_TO_ONE),
 
   // Level 1, Step 6: three chords, tunes
   "three-chords-tunes.five-before-four": roll(
@@ -238,4 +250,155 @@ export const TRIADS_CUES: CueBook = {
   "three-chords-tunes.eight-bars-keys": roll(g(SAY_NUMBER), TOP_SAME, HAND_STILL, "From four, go straight back to one on '1'."),
 
   "warmup-beginner.shape-one-keys": warm(g(SAY_1451)),
+
+  // Level 2 (Intermediate), Step 7: minor
+  "minor.c-to-c-minor": [
+    g("Move only the B string's note for C minor.", 1),
+    c("notes", "For C minor, put finger two at fret four."),
+    c("heard", HEARD),
+    c("extras", EXTRAS),
+    c("late", LATE),
+    c("early", EARLY),
+    c("stringChange", CROSS),
+    c("lastBars", "From C minor, go straight back to C on '1'."),
+  ],
+  "minor.a-minor-three": roll(
+    g("Lead with the G string: five, nine, fourteen.", 1),
+    "Finger one flat across fret five for A minor.",
+    SHIFT,
+    NINE_TO_FIVE,
+  ),
+  "minor.c-and-a-minor": roll(
+    g("Move one note for A minor; keep the other two.", 1),
+    "For high A minor, put finger three at fret ten.",
+    "Look at fret nine before you leave A minor.",
+    "From A minor, drop to fret five for C.",
+  ),
+
+  // Level 2, Step 8: more minors
+  "more-minors.d-minor-three": roll(
+    g("Lead with the G string: two, seven, ten.", 1),
+    "Barre fret ten with finger one for D minor.",
+    SHIFT,
+    "From fret seven, drop to fret two as it loops.",
+  ),
+  "more-minors.e-minor-three": roll(
+    g("Lead with the G string: four, nine, twelve.", 1),
+    "Barre fret twelve with finger one for E minor.",
+    SHIFT,
+    "From fret nine, drop to fret four as it loops.",
+  ),
+  "more-minors.three-minors": roll(
+    g("Stay between frets three and seven throughout."),
+    "For D minor, put finger three at fret seven.",
+    "For E minor, move finger one to fret three.",
+    EM_TO_AM,
+  ),
+
+  // Level 2, Step 9: four chords
+  "four-chords.low": roll(g(UNTIL_FIVE), F_ADD2, G_ACROSS_3, BACK_TO_C),
+  "four-chords.mid": roll(g("Keep finger one on the top string at fret eight."), AM_F3_10, G_FINGER1_7, BACK_TO_C),
+  "four-chords.walk-the-key": roll(
+    g("Say major, minor, minor, major as you climb."),
+    "For the minors, put finger two on the B string.",
+    "Keep finger three on the G string as you climb.",
+    "From F, drop to fret five for C on '1'.",
+  ),
+  "four-chords.four-chords-keys": roll(g(SAY_1645), FOUR_ADD2, UNTIL_FIVE, FIVE_TO_ONE),
+
+  // Level 2, Step 10: the top note
+  "top-note.falling-line": [
+    g(TOP_BEAT, 2),
+    c("notes", AM_F3_10),
+    c("heard", HEARD),
+    c("extras", EXTRAS),
+    c("late", LATE),
+    c("early", EARLY),
+    c("afterHeld", NEXT_RING),
+    c("shift", "Keep the G string at fret twelve from C to G."),
+    c("stringChange", CROSS),
+    c("lastBars", "Keep finger one on fret eight from A minor to F."),
+  ],
+  "top-note.low-line": [
+    g(TOP_BEAT),
+    c("notes", G_ACROSS_3),
+    c("heard", HEARD),
+    c("extras", EXTRAS),
+    c("late", LATE),
+    c("early", EARLY),
+    c("afterHeld", NEXT_RING),
+    c("shift", "For A minor, lay finger one across fret five."),
+    c("stringChange", CROSS),
+    c("lastBars", F_ADD2),
+  ],
+  "top-note.your-line": [g("Find the shape whose top note moves least.", 1)],
+
+  // Level 2, Step 11: the middle strings
+  "middle-strings.c-middle": roll(
+    g("Lead with the D string: five, ten, fourteen.", 1),
+    "Lay finger one across fret five, three strings.",
+    SHIFT,
+    TEN_TO_FIVE,
+  ),
+  "middle-strings.a-minor-middle": roll(
+    g("Lead with the D string: seven, ten, fourteen.", 1),
+    "Finger one on the B string, fret thirteen.",
+    SHIFT,
+    "From fret ten, drop to fret seven as it loops.",
+  ),
+  "middle-strings.four-chords-middle": roll(
+    g("Keep finger one at fret five for three chords."),
+    F_ADD2,
+    "For G, put finger one at fret three.",
+    BACK_TO_C,
+  ),
+
+  // Level 2, Step 12: F and G on the middle strings
+  "f-and-g-middle.f-middle": roll(
+    g("Lead with the D string: three, seven, ten.", 1),
+    "Barre fret ten with finger one for F.",
+    SHIFT,
+    SEVEN_TO_THREE,
+  ),
+  "f-and-g-middle.g-middle": roll(
+    g("Lead with the D string: five, nine, twelve.", 1),
+    "Barre fret twelve with finger one for G.",
+    SHIFT,
+    NINE_TO_FIVE,
+  ),
+  "f-and-g-middle.three-chords-middle": roll(
+    g("Keep the D string at fret ten from C to F.", 2),
+    G_FINGER1_7,
+    "Lay finger one across fret ten for F.",
+    BACK_TO_C,
+  ),
+  "f-and-g-middle.three-chords-middle-keys": roll(
+    g(SAY_1451),
+    "For four, lay finger one across all three.",
+    "Keep the D string's fret from one to four.",
+    FIVE_TO_ONE,
+  ),
+
+  // Level 2, Step 13: minors on the middle strings
+  "minors-middle.d-minor-middle": roll(
+    g("Lead with the D string: three, seven, twelve.", 1),
+    "Finger one across the G and B strings at ten.",
+    SHIFT,
+    SEVEN_TO_THREE,
+  ),
+  "minors-middle.e-minor-middle": roll(
+    g("Lead with the D string: five, nine, fourteen.", 1),
+    "Finger one across the G and B strings at twelve.",
+    SHIFT,
+    NINE_TO_FIVE,
+  ),
+  "minors-middle.three-minors-middle": roll(
+    g("Keep fret seven on the D string into D minor.", 2),
+    "For D minor, add finger four on the G string.",
+    "For E minor, put finger one at fret four.",
+    EM_TO_AM,
+  ),
+  "minors-middle.four-chords-middle-keys": roll(g(SAY_1645), FOUR_ADD2, UNTIL_FIVE, FIVE_TO_ONE),
+
+  "warmup-intermediate.major-shapes": warm(g("Start well under your clean tempo.")),
 };
