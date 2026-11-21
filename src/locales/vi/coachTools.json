@@ -15,6 +15,8 @@
       "setTempo": "Tempo {{from}} → {{to}} BPM",
       "findEdge": "Đang tìm giới hạn của bạn ở {{title}}",
       "testOut": "Đang kiểm tra vượt Bước {{step}}: {{title}}",
+      "loopBar": "Đang lặp ô nhịp {{bar}} ở {{bpm}} BPM",
+      "loopBars": "Đang lặp ô nhịp {{from}} đến {{to}} ở {{bpm}} BPM",
       "swapPart": "Phần {{part}} giờ là {{to}}",
       "restorePart": "Phần {{part}} lại là {{from}}",
       "setMinutes": "Hôm nay giờ là {{to}} phút",
@@ -47,6 +49,8 @@
       "findEdge": "Tìm giới hạn của bạn ở {{title}} ({{path}} · Bước {{step}}), từ {{bpm}} BPM",
       "findEdgeNoBpm": "Tìm giới hạn của bạn ở {{title}} ({{path}} · Bước {{step}})",
       "testOut": "Kiểm tra vượt Bước {{step}}: {{title}}, trong {{takes}} lượt",
+      "loopBar": "Lặp ô nhịp {{bar}} ở {{bpm}} BPM, cho đến khi bạn dừng",
+      "loopBars": "Lặp ô nhịp {{from}} đến {{to}} ở {{bpm}} BPM, cho đến khi bạn dừng",
       "swapPart": "Phần {{part}}: {{from}} → {{to}}",
       "restorePart": "Đặt phần {{part}} về lại {{title}}",
       "setMinutes": "Hôm nay: {{from}} → {{to}} phút, {{parts}} phần",
@@ -115,7 +119,8 @@
       "load": "Tải",
       "keep": "Giữ",
       "go": "Đi",
-      "open": "Mở"
+      "open": "Mở",
+      "loop": "Lặp lại"
     },
     "why": {
       "which": "Cái nào?",
@@ -132,7 +137,10 @@
         "level": "{{path}} không có mức nào tên “{{query}}”.",
         "swap": "Không có gì tên “{{query}}” có thể đặt vào phần {{part}}.",
         "rung": "Ở đó không có tempo nào để đặt.",
-        "settingValue": "{{key}} không thể là “{{query}}”. Đây là những giá trị có thể chọn:"
+        "settingValue": "{{key}} không thể là “{{query}}”. Đây là những giá trị có thể chọn:",
+        "loopBar": "Giai điệu này không có ô nhịp {{bar}}.",
+        "loopAcross": "Ô nhịp {{from}} đến {{to}} chạy quá cuối giai điệu rồi vòng lại đoạn đầu. Hãy chọn các ô nhịp trong một vòng của giai điệu.",
+        "loopOneBar": "Bài này chỉ có một ô nhịp: hãy chọn ô nhịp 1."
       },
       "notNow": {
         "take": "Sau lượt này.",
@@ -163,13 +171,15 @@
         "following": "Bạn đã theo {{path}} rồi.",
         "alreadySubdivision": "Đã là {{subdivision}} click mỗi phách rồi.",
         "alreadySetting": "{{key}} đã là {{value}} rồi.",
-        "alreadyGoal": "Đó đã là mục tiêu của bạn rồi."
+        "alreadyGoal": "Đó đã là mục tiêu của bạn rồi.",
+        "loopHere": "Vòng lặp bắt đầu từ một Bài trong một Buổi tập, giữa các Lượt."
       },
       "notWiredYet": "Ứng dụng chưa làm được việc đó từ đây.",
       "refused": {
         "shape": "Ứng dụng không làm được việc đó.",
         "proposal": "Việc đó đã thay đổi từ lúc ấy, nên chưa làm gì. Hãy hỏi lại.",
-        "cap": "Bạn đang theo {{cap}} lộ trình, nhiều nhất có thể. Hãy bỏ một lộ trình ở trang của nó trước."
+        "cap": "Bạn đang theo {{cap}} lộ trình, nhiều nhất có thể. Hãy bỏ một lộ trình ở trang của nó trước.",
+        "loopBackwards": "Ô nhịp {{to}} đứng trước ô nhịp {{from}}. Hãy nói ô nhịp đầu trước."
       },
       "failed": "Không được, và chưa có gì bị thay đổi."
     },

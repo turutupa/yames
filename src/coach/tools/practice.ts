@@ -1,7 +1,7 @@
 /**
  * The `confirm` tools that start or shape playing (TOOLS 2.2): `start_today`,
- * `play_exercise`, `set_tempo`, `find_edge`, `test_out`, and the two typed
- * and waiting, `loop_bars` and `make_exercise`.
+ * `play_exercise`, `set_tempo`, `find_edge`, `test_out`, `loop_bars` (its door
+ * since leg lb1), and the one typed and waiting, `make_exercise`.
  *
  * Each `propose` resolves the call against the app's own data and says exactly
  * what a press will do (the Exercise by its title, the tempo it will start at,
@@ -22,6 +22,7 @@ import { isGradable, lastCaughtTake, takesOf } from "../../session/progress";
 import { findExercise } from "../../session/packs";
 import type { Exercise, PathDoc } from "../../paths/format";
 import type { PlayerProgress } from "../../session/progress";
+import type { LoopRefusal } from "../../session/runner";
 import type { CoachContext } from "../context";
 import { MAX_STEP, MAX_QUERY, outsideSession, resolveStepCall, sessionOpen } from "./go";
 import type { CoachToolHost } from "./host";
@@ -376,8 +377,49 @@ const testOut = defineConfirmTool<TestOut>({
   },
 });
 
-/** The Session's loop plays the bar that slipped, not bars named from outside (leg c1c): typed, waiting. */
-const loopBars = defineConfirmTool<never>({
+/**
+ * `loop_bars` resolved: the bars as asked (for the press), the pattern bars and
+ * tempo the loop plays, and the Exercise and variant it was proposed on.
+ */
+type LoopBars = {
+  asked: { from: number; to: number };
+  fromBar: number;
+  toBar: number;
+  bpm: number;
+  loopId: string;
+  variantSeed: number | null;
+};
+
+/** The runner's reason a loop cannot start, in words (`runner.loopAsked`). */
+function loopRefused(why: LoopRefusal, from: number, to: number): Refusal {
+  switch (why) {
+    case "notHere":
+      return refuse("notNow", "coachTools.why.notNow.loopHere");
+    case "outsideTune":
+      return refuse("notFound", "coachTools.why.notFound.loopBar", { bar: from < 1 ? from : to });
+    case "backwards":
+      return refuse("refused", "coachTools.why.refused.loopBackwards", { from, to });
+    case "acrossRounds":
+      return refuse("notFound", "coachTools.why.notFound.loopAcross", { from, to });
+    case "oneBar":
+      return refuse("notFound", "coachTools.why.notFound.loopOneBar");
+  }
+}
+
+/** One bar, or a run of them: the line's key and its values. */
+function loopLine(kind: "propose" | "receipt", { fromBar, toBar, bpm }: { fromBar: number; toBar: number; bpm: number }) {
+  return fromBar === toBar
+    ? line(`coachTools.${kind}.loopBar`, { bar: fromBar, bpm })
+    : line(`coachTools.${kind}.loopBars`, { from: fromBar, to: toBar, bpm });
+}
+
+/**
+ * The Session's loop of bars the player names (leg lb1): the bars as printed,
+ * mapped to the pattern's by the runner (`loopAsked`), slow (two rungs under
+ * the Take's tempo), ungraded unless the Session listens and grades, never a
+ * part of the plan. From an Exercise's ready screen or its result only.
+ */
+const loopBars = defineConfirmTool<LoopBars>({
   name: "loop_bars",
   kind: "confirm",
   audience: "player",
@@ -387,8 +429,28 @@ const loopBars = defineConfirmTool<never>({
     { name: "to", type: { kind: "integer", min: 1, max: 999 }, optional: true, note: "The last bar, as printed. Left out: the first alone." },
   ],
   when: (ctx) => !takeRunning(ctx),
-  propose: () => notWiredYet("loop_bars"),
-  commit: () => notWiredYet("loop_bars"),
+  propose(args, host) {
+    const from = argNumber(args, "from") ?? 1;
+    const to = argNumber(args, "to") ?? from;
+    const asked = host.loopAsk(from, to);
+    if (asked === "notWiredYet") return notWiredYet("loop_bars");
+    if ("refused" in asked) return loopRefused(asked.refused, from, to);
+    return { ok: true, line: loopLine("propose", asked), resolved: { asked: { from, to }, ...asked } };
+  },
+  commit(resolved, host) {
+    const { from, to } = resolved.asked;
+    // The press re-checks: a Take started, the tempo moved, the step changed since the proposal.
+    const now = host.loopAsk(from, to);
+    if (now === "notWiredYet") return notWiredYet("loop_bars");
+    if ("refused" in now) return gone(`the loop cannot start now: ${now.refused}`);
+    if (now.fromBar !== resolved.fromBar || now.toBar !== resolved.toBar || now.bpm !== resolved.bpm) return gone("the tempo or the step moved");
+    // Bound to the Exercise and the variant it was proposed on, by the tool itself (lb1b L5).
+    if (now.loopId !== resolved.loopId || now.variantSeed !== resolved.variantSeed) return gone("the Exercise or its variant changed");
+    const out = host.loopBars(from, to);
+    if (out === "notWiredYet") return notWiredYet("loop_bars");
+    if (out !== "done") return gone(`the loop did not start: ${out}`);
+    return { ok: true, receipt: loopLine("receipt", resolved) };
+  },
 });
 
 /** A custom Exercise (TOOLS 2.4, leg t2): typed, waiting. */

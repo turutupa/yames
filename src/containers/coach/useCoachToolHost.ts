@@ -13,8 +13,9 @@
  * gate), the click, and the safe settings' own setters. c4a1 wired `goal` /
  * `setGoal` and the `coachSuggestions` setting to the coach's stored keys
  * (`src/coach/store.ts`: `coach.goal`, `coach.suggestions`), read once on
- * mount; until that read has finished they answer "notWiredYet". Still a stub
- * from `notWiredHost()`: `loopBars` (no bars door on the loop).
+ * mount; until that read has finished they answer "notWiredYet". `loopAsk` /
+ * `loopBars` reach the Session's loop through `startLoop(bars)` since leg
+ * lb1. No member is a stub any more.
  *
  * Review fixes (t1a2b): band volume is read and written as the STORED choice
  * (`bandChoice`, `"auto"` for none, put back as `null`); `sounding(target)`
@@ -45,7 +46,7 @@ import {
 import i18n, { getLanguages } from "../../i18n";
 import { listPresets as listPresetsIpc, storeSave } from "../../ipc";
 import { findExercise } from "../../session/packs";
-import { tempoNudges } from "../../session/runner";
+import { loopAsked, tempoNudges } from "../../session/runner";
 import { THEMES } from "../../themes";
 import type { Preset, Subdivision, VoiceMode } from "../../types";
 import type { MainView } from "../main-window/MainHeader";
@@ -223,6 +224,15 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
       const can = tempoNudges(session().run, session().exercise);
       return { slower: can.slower, faster: can.faster };
     },
+    // The Session's loop of bars as printed (leg lb1): the same check `startLoop(bars)` makes.
+    loopAsk: (fromBar, toBar) => {
+      const asked = loopAsked(session().run, session().exercise, fromBar, toBar);
+      if ("refused" in asked) return { refused: asked.refused };
+      const { fromBar: from, toBar: to, bpm, id, variantSeed } = asked.loop;
+      return { fromBar: from, toBar: to, bpm, loopId: id, variantSeed: variantSeed ?? null };
+    },
+    // `startLoop` answers null only when the reducer took the loop (lb1b L4): only then "done".
+    loopBars: (fromBar, toBar) => session().actions.startLoop({ fromBar, toBar }) ?? "done",
     findEdge: (pathId, exerciseId) => {
       const { path, step, exercise } = exerciseOf(pathId, exerciseId);
       session().actions.findEdge(path, step, exercise);

@@ -15,6 +15,8 @@
       "setTempo": "Tempo {{from}} → {{to}} BPM",
       "findEdge": "Recherche de ta limite sur {{title}}",
       "testOut": "Test de l'étape {{step}} : {{title}}",
+      "loopBar": "Mesure {{bar}} en boucle à {{bpm}} BPM",
+      "loopBars": "Mesures {{from}} à {{to}} en boucle à {{bpm}} BPM",
       "swapPart": "La partie {{part}} est maintenant {{to}}",
       "restorePart": "La partie {{part}} est de nouveau {{from}}",
       "setMinutes": "Aujourd'hui, c'est {{to}} minutes",
@@ -47,6 +49,8 @@
       "findEdge": "Trouver ta limite sur {{title}} ({{path}} · Étape {{step}}), à partir de {{bpm}} BPM",
       "findEdgeNoBpm": "Trouver ta limite sur {{title}} ({{path}} · Étape {{step}})",
       "testOut": "Tester l'étape {{step}} : {{title}}, en {{takes}} prises",
+      "loopBar": "Boucler la mesure {{bar}} à {{bpm}} BPM, jusqu'à ce que tu arrêtes",
+      "loopBars": "Boucler les mesures {{from}} à {{to}} à {{bpm}} BPM, jusqu'à ce que tu arrêtes",
       "swapPart": "Partie {{part}} : {{from}} → {{to}}",
       "restorePart": "Remettre la partie {{part}} sur {{title}}",
       "setMinutes": "Aujourd'hui : {{from}} → {{to}} minutes, {{parts}} parties",
@@ -115,7 +119,8 @@
       "load": "Charger",
       "keep": "Garder",
       "go": "Y aller",
-      "open": "Ouvrir"
+      "open": "Ouvrir",
+      "loop": "Boucler"
     },
     "why": {
       "which": "Lequel ?",
@@ -132,7 +137,10 @@
         "level": "{{path}} n'a pas de niveau nommé « {{query}} ».",
         "swap": "Rien de nommé « {{query}} » ne peut aller dans la partie {{part}}.",
         "rung": "Il n'y a pas de tempo à régler là.",
-        "settingValue": "{{key}} ne peut pas être « {{query}} ». Voici ce que ça peut être :"
+        "settingValue": "{{key}} ne peut pas être « {{query}} ». Voici ce que ça peut être :",
+        "loopBar": "Cette mélodie n'a pas de mesure {{bar}}.",
+        "loopAcross": "Les mesures {{from}} à {{to}} dépassent la fin de la mélodie et reprennent à son début. Demande des mesures à l'intérieur d'un seul passage.",
+        "loopOneBar": "Cet exercice n'a qu'une mesure : demande la mesure 1."
       },
       "notNow": {
         "take": "Après cette prise.",
@@ -163,13 +171,15 @@
         "following": "Tu suis déjà {{path}}.",
         "alreadySubdivision": "C'est déjà {{subdivision}} clics par temps.",
         "alreadySetting": "{{key}} est déjà {{value}}.",
-        "alreadyGoal": "C'est déjà ton objectif."
+        "alreadyGoal": "C'est déjà ton objectif.",
+        "loopHere": "Une boucle part d'un exercice dans une séance, entre deux prises."
       },
       "notWiredYet": "L'app ne sait pas encore faire ça d'ici.",
       "refused": {
         "shape": "L'app ne peut pas faire ça.",
         "proposal": "Ça a changé depuis, donc rien n'a été fait. Redemande.",
-        "cap": "Tu suis {{cap}} parcours, le maximum possible. Quitte-en un d'abord sur sa page."
+        "cap": "Tu suis {{cap}} parcours, le maximum possible. Quitte-en un d'abord sur sa page.",
+        "loopBackwards": "La mesure {{to}} vient avant la mesure {{from}}. Nomme d'abord la première mesure."
       },
       "failed": "Ça n'a pas marché, et rien n'a été changé."
     },
