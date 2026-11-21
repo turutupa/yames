@@ -24,9 +24,11 @@ import type { CoachContext } from "../../coach/context";
 import type { ResolvedBlock } from "../../coach/blocks/resolve";
 import { commandFacts, type CommandFacts } from "../../coach/ask/router";
 import { getCoachToolHost, type CoachToolHost } from "../../coach/tools/host";
+import { resolveStepCall } from "../../coach/tools/go";
 import { findTool } from "../../coach/tools/registry";
+import { resolvePath, wholeTitleWords } from "../../coach/tools/resolve";
 import { confirmCoachTool, dismissProposal, runCoachTool, runCoachUndo } from "../../coach/tools/run";
-import { line, type Line, type Proposal, type RunOutcome, type ToolCall, type ToolChoice, type ToolResult } from "../../coach/tools/types";
+import { line, type Line, type Proposal, type Refusal, type RunOutcome, type ToolCall, type ToolChoice, type ToolResult } from "../../coach/tools/types";
 import type { MainView } from "../main-window/MainHeader";
 import { appendAskTurn, askTurnId, getAskState, settleAskTurn, updateAskTurn, type AskTurn } from "./askStore";
 import { NEVER_LIST, type NeverItem } from "./neverList";
@@ -228,12 +230,21 @@ function writeOutcome(id: string, outcome: RunOutcome, at: { host: CoachToolHost
 const NAMED = ["path", "query", "exercise", "jam", "preset"] as const;
 
 /**
+ * A refusal that says a typed NAME named nothing ("no Path called …"): every
+ * such line carries the name as `query`. "No Step 12 there" carries a number
+ * and is an answer (review t1b2c, finding 2).
+ */
+function nameNotFound(outcome: Refusal): boolean {
+  return outcome.why === "notFound" && (outcome.choices ?? []).length === 0 && typeof outcome.line.values.query === "string";
+}
+
+/**
  * A typed command (leg t1b2c): as `runAskCall`, except that a call whose
  * typed name named nothing the app has (`notFound`, no choices) writes
  * nothing and returns false, so Ask goes on to its next answerer and the
  * model: "コースを開くと固まる" is a sentence, not a Path called "固まる"
- * (review t1b2b, finding 2). A refusal about a number ("no Step 7 there")
- * is still the answer.
+ * (review t1b2b, finding 2). A refusal about a number ("no Step 12 there")
+ * is still the answer (review t1b2c, finding 2).
  */
 export function runTypedCall(call: ToolCall, said: string): boolean {
   const at = where();
@@ -243,10 +254,61 @@ export function runTypedCall(call: ToolCall, said: string): boolean {
   }
   const outcome = runCoachTool(call, at.host, at.ctx);
   const named = NAMED.some((k) => typeof call.args[k] === "string");
-  if (!outcome.ok && outcome.why === "notFound" && named && (outcome.choices ?? []).length === 0) return false;
+  if (!outcome.ok && named && nameNotFound(outcome)) return false;
   if (said.trim()) appendAskTurn({ id: askTurnId(), kind: "user", text: said.trim() });
   writeOutcome(askTurnId(), outcome, at);
   return true;
+}
+
+/**
+ * What a typed `go` by name (`open_path`, `open_step` with a Path or a Step
+ * named) would open, found before anything is written (review t1b2c,
+ * findings 1 and 5):
+ *
+ * - `none`: the name names nothing; the sentence is not answered here.
+ * - `one`: exactly one thing, as the choice a press runs, labelled and called
+ *   by its resolved title (never the typed leftover); `whole` when the typed
+ *   name matched the title's whole words (`wholeTitleWords`), the only case
+ *   typed text may open at once.
+ * - `runner`: several matches, or a Step number the Path lacks: the runner's
+ *   own answer, which is choices or a refusal and never opens anything.
+ * - null: not a named `go` (or no host): this says nothing about it.
+ *
+ * Reads the host's Paths; changes nothing.
+ */
+export type TypedGo = { kind: "none" } | { kind: "one"; choice: ToolChoice; whole: boolean } | { kind: "runner" };
+
+export function typedGo(call: ToolCall): TypedGo | null {
+  const RUNNER: TypedGo = { kind: "runner" };
+  const pathName = typeof call.args.path === "string" ? call.args.path : undefined;
+  const query = typeof call.args.query === "string" ? call.args.query : undefined;
+  const named = call.tool === "open_path" ? pathName !== undefined : call.tool === "open_step" && (pathName !== undefined || query !== undefined);
+  if (!named) return null;
+  const at = where();
+  if (!at) return null;
+  if (call.tool === "open_path") {
+    if (pathName === undefined) return null;
+    const found = resolvePath(pathName, at.host.paths());
+    if ("none" in found) return { kind: "none" };
+    if ("several" in found) return RUNNER;
+    const title = found.found.title;
+    return {
+      kind: "one",
+      choice: { label: line("coachTools.choice.path", { path: title }), call: { tool: "open_path", args: { path: title } } },
+      whole: wholeTitleWords(pathName, title),
+    };
+  }
+  const found = resolveStepCall("open_step", call.args, at.host, at.ctx);
+  if (!("step" in found)) return nameNotFound(found) ? { kind: "none" } : RUNNER;
+  const { path, step } = found;
+  return {
+    kind: "one",
+    choice: {
+      label: line("coachTools.choice.step", { path: path.title, step: step.order, title: step.title }),
+      call: { tool: "open_step", args: { path: path.title, step: step.order } },
+    },
+    whole: (pathName === undefined || wholeTitleWords(pathName, path.title)) && (query === undefined || wholeTitleWords(query, step.title)),
+  };
 }
 
 /**

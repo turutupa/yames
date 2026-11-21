@@ -19,14 +19,20 @@
  */
 import { commandTableFor } from "../../coach/ask/commandTable";
 import { routeCommand } from "../../coach/ask/router";
-import { line } from "../../coach/tools/types";
+import { line, type ToolChoice } from "../../coach/tools/types";
 import { appendAskTurn, askTurnId, sendAsk } from "./askStore";
-import { askCommandFacts, askYours, runAskCall, runTypedCall } from "./askTools";
+import { askCommandFacts, askYours, runAskCall, runTypedCall, typedGo } from "./askTools";
 
 /**
  * An answerer tried after the router and before the model: true when it
  * answered (and wrote its own turns, the player's among them), false to let
  * the sentence go on to the model or the plain statement.
+ *
+ * Synchronous, by contract: it decides and writes its turns before it
+ * returns. Anything but a boolean (a Promise above all) is taken as "not
+ * answered", warned about in dev, and the sentence goes on to the model,
+ * so an answerer that went on to write a turn later would give the player
+ * two answers to one sentence (review t1b2c, finding 4).
  */
 export type AskNextAnswerer = (text: string) => boolean;
 
@@ -36,6 +42,8 @@ let nextAnswerer: AskNextAnswerer = NO_ANSWER;
 /**
  * Plug in the answerer that comes after the router (one at a time, the last
  * wins); the returned function unplugs it. Today nothing is plugged in.
+ * `fn` must be synchronous and return a boolean (see `AskNextAnswerer`): an
+ * async answerer is never waited for, and its answer would follow the model's.
  */
 export function setAskNextAnswerer(fn: AskNextAnswerer | null): () => void {
   const mine = fn ?? NO_ANSWER;
@@ -60,18 +68,29 @@ export function answerTyped(text: string, language: string): TypedOutcome | null
   if (table && facts) {
     const routed = routeCommand(said, table, facts);
     switch (routed.kind) {
-      case "call":
+      case "call": {
+        // A typed name opens at once only by the title's whole words; a partial one is one press
+        // ("go to class" is not Classic Rock; review t1b2c, finding 5).
+        const go = typedGo(routed.call);
+        if (go.kind === "none") break;
+        if (go.kind === "one" && !go.whole) return askWhich(said, [go.choice]);
         // A name that named nothing: the sentence goes on (review t1b2b, finding 2).
         if (runTypedCall(routed.call, said)) return "call";
         break;
-      case "which":
-        appendAskTurn({ id: askTurnId(), kind: "user", text: said });
-        appendAskTurn({
-          id: askTurnId(),
-          kind: "tool",
-          body: { kind: "refusal", line: line("coachTools.why.which", { query: said }), choices: routed.choices },
-        });
-        return "which";
+      }
+      case "which": {
+        // Without spaces a named `go` is always one press; it is resolved first, so a leftover
+        // that names nothing goes on, and the chip is the title a press opens (review t1b2c, finding 1).
+        const only = routed.choices.length === 1 ? typedGo(routed.choices[0].call) : null;
+        if (only?.kind === "none") break;
+        if (only?.kind === "one") return askWhich(said, [only.choice]);
+        // Several Paths, or a Step number the Path lacks: the runner's choices or its refusal, never a move.
+        if (only?.kind === "runner") {
+          if (runTypedCall(routed.choices[0].call, said)) return "which";
+          break;
+        }
+        return askWhich(said, routed.choices);
+      }
       case "yours":
         askYours(routed.item, said);
         return "yours";
@@ -84,14 +103,28 @@ export function answerTyped(text: string, language: string): TypedOutcome | null
         break;
     }
   }
-  // The slot is someone else's code: a throw or a Promise is not an answer (review t1b2b, finding 5).
+  // The slot is someone else's code: a throw is not an answer (review t1b2b, finding 5), and neither
+  // is anything but a boolean, a Promise above all (review t1b2c, finding 4; see `setAskNextAnswerer`).
   let answered = false;
   try {
-    answered = nextAnswerer(said) === true;
+    const r: unknown = nextAnswerer(said);
+    if (typeof r === "boolean") answered = r;
+    else if (import.meta.env.DEV) console.warn("Ask's next answerer must answer synchronously with a boolean; got", typeof r, "(taken as not answered)");
   } catch {
     answered = false;
   }
   if (answered) return "next";
   sendAsk(said);
   return "asked";
+}
+
+/** "Which one?": the player's turn, then the choices, each a full call a press runs. */
+function askWhich(said: string, choices: readonly ToolChoice[]): TypedOutcome {
+  appendAskTurn({ id: askTurnId(), kind: "user", text: said });
+  appendAskTurn({
+    id: askTurnId(),
+    kind: "tool",
+    body: { kind: "refusal", line: line("coachTools.why.which", { query: said }), choices },
+  });
+  return "which";
 }

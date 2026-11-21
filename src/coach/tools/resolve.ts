@@ -64,6 +64,23 @@ export function titleMatch(query: string, title: string): 0 | 1 | 2 {
 }
 
 /**
+ * Whether `query` names `title` by its whole words, as typed text must before
+ * it opens anything at once (review t1b2c, finding 5): the title itself, or a
+ * run of two or more of its words in order. One word that is not the whole
+ * title ("class", "first", "over") is not: a casual sentence is full of words
+ * that start or sit inside a title, and the player gets one press instead.
+ * A script without spaces: only the whole title, typed with or without them.
+ */
+export function wholeTitleWords(query: string, title: string): boolean {
+  const q = normalizeWords(query);
+  const t = normalizeWords(title);
+  if (q.length === 0 || t.length === 0) return false;
+  if (q === t || q.replace(/ /g, "") === t.replace(/ /g, "")) return true;
+  if (UNSPACED.test(q)) return false;
+  return q.includes(" ") && ` ${t} `.includes(` ${q} `);
+}
+
+/**
  * The items `query` names. An exact title wins over partial ones; one partial
  * match is found; several are choices, in the order given.
  */

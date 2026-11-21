@@ -16,8 +16,27 @@ import {
   snapPart,
   snapToRung,
   titleMatch,
+  wholeTitleWords,
 } from "./resolve";
 import { ALT, ALT_BLUES, LEGATO_ES, TEST_PATHS } from "./testPaths";
+
+describe("wholeTitleWords: what typed text may open at once (review t1b2c, finding 5)", () => {
+  it("the whole title, or a run of two or more of its words", () => {
+    expect(wholeTitleWords("classic rock", "Classic Rock")).toBe(true);
+    expect(wholeTitleWords("Triads", "Triads")).toBe(true);
+    expect(wholeTitleWords("first chords", "First Chords and Strumming")).toBe(true);
+    expect(wholeTitleWords("rock clasico", "Rock clásico")).toBe(true);
+    expect(wholeTitleWords("オルタネイトピッキング", "オルタネイト・ピッキング")).toBe(true);
+  });
+  it("not a prefix, one word of a longer title, or words out of order", () => {
+    expect(wholeTitleWords("class", "Classic Rock")).toBe(false);
+    expect(wholeTitleWords("first", "First Chords and Strumming")).toBe(false);
+    expect(wholeTitleWords("over", "Arpeggios over Changes")).toBe(false);
+    expect(wholeTitleWords("rock classic", "Classic Rock")).toBe(false);
+    expect(wholeTitleWords("ブルース", "ブルースとペンタトニック")).toBe(false);
+    expect(wholeTitleWords("", "Triads")).toBe(false);
+  });
+});
 
 describe("normalizeWords", () => {
   it.each([
