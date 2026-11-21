@@ -228,6 +228,12 @@ async function drive() {
           document.querySelector<HTMLButtonElement>(`[data-testid="audio-input-grade-${which}"]`)?.click();
         if (stop === "inputAsk") {
           await until("the question", () => !!document.querySelector('[data-testid="audio-input-grade-yes"]'));
+        } else if (stop === "coach") {
+          // The coach step comes straight after the input's question on a computer (leg c6a).
+          answer("no");
+          await until("Next", () => !!button(i18n.t("onboarding.next")) && !button(i18n.t("onboarding.next"))!.disabled);
+          button(i18n.t("onboarding.next"))!.click();
+          await until("the coach step", () => !!document.querySelector('[data-testid="coach-tier-off"]'), 20000);
         } else if (stop === "soundLook" || stop === "handsFree") {
           answer("no");
           await until("Next", () => !!button(i18n.t("onboarding.next")) && !button(i18n.t("onboarding.next"))!.disabled);

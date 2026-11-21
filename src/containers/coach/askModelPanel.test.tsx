@@ -65,7 +65,7 @@ describe("the model's turn in the panel", () => {
   it("the footer says the model answers in its own words only where it is on", () => {
     openAsk();
     const off = panel();
-    expect(document.querySelector(".ask-footer")).toHaveTextContent(t("ask.footer.model"));
+    expect(document.querySelector(".ask-footer")).toHaveTextContent(t("help.ui.footer.model"));
     off.unmount();
     turn.wanted = true;
     panel();

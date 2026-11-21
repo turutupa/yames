@@ -58,7 +58,7 @@ import {
 } from "../../ipc";
 import { AskPanel } from "../coach/AskPanel";
 import { askShownOn, useAskHost } from "../coach/useAskHost";
-import { noteAskLoad } from "../coach/askTools";
+import { askTakeNow, noteAskLoad } from "../coach/askTools";
 import { useCoachToolHost } from "../coach/useCoachToolHost";
 import { loadPresetAfterReRead } from "../coach/coachPresetLoad";
 import { askCoach, closeAsk, getAskState, useAskState } from "../coach/askStore";
@@ -89,7 +89,8 @@ import { WhatsNewModal } from "../onboarding/whats-new/WhatsNewModal";
 import { useWhatsNew } from "../onboarding/whats-new/useWhatsNew";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { DrillView } from "../drill/DrillView";
-import { JamView } from "../jam/JamView";
+import { JamView, neckFor } from "../jam/JamView";
+import { registerJamPin } from "../coach/pinShape";
 import { SongsView } from "../songs/SongsView";
 import { useScheduleLeavesWithSong } from "../songs/useScheduleLeavesWithSong";
 import { useSongsDue } from "../songs/review/useSongsDue";
@@ -123,7 +124,7 @@ import { presetBeatGroups, presetFreeMode } from "../../utils/meter";
 import { formBars } from "../../jam/forms";
 import { barInView, jamHarmony, nextChange } from "../../jam/display";
 import { chordName, displayTransposition } from "../../jam/harmony";
-import { heardChart, heardLine } from "../../jam/heard";
+import { heardChart, heardLine, jamHeardKey } from "../../jam/heard";
 import { useHeard } from "../../jam/useHeard";
 import { useShareMenu } from "./useShareMenu";
 import { ShareMenuPopover } from "./ShareMenuPopover";
@@ -681,11 +682,15 @@ export function MainWindow() {
   const heardJam = mode === "jam" ? jamSession.jam : null;
   const heardInSession = mode === "session" && sessionStep?.kind === "jam" && !sessionStep.exerciseId;
   const heardChartNow = useMemo(() => (heardJam ? heardChart(heardJam) : null), [heardJam]);
+  const heardJamKey = useMemo(() => (heardJam ? jamHeardKey(heardJam, jamHarmony(heardJam)) : null), [heardJam]);
   const heardLive = useHeard({
     active: jamHear && state.isPlaying && evaluation.enabled && (!!heardJam || heardInSession),
     chart: heardChartNow,
     bpm: state.bpm,
     formBar: currentBeat?.formBar ?? 0,
+    // A jam on the Jam screen: its stop is the coach's `jamStopped` (leg c5a1).
+    jamRun: !!heardJam && state.isPlaying,
+    runKey: heardJamKey,
   });
   // Recording session (card #109): a jam or the Session's free play is kept
   // while it plays and the input listens. A finisher too, ungraded.
@@ -707,6 +712,21 @@ export function MainWindow() {
   const heardShown = useMemo(
     () => (jamHear && heardJam ? heardLine(heardLive, displayTransposition(heardJam.transposition ?? "concert")) : null),
     [jamHear, heardJam, heardLive],
+  );
+
+  // "Pin this shape" from Ask (leg c5a1): the chord sheet's own edit, behind a
+  // press, read at the press (the door reads the latest of these, never a beat).
+  const pinDoor = useRef({ view, jam: jamSession.jam, editJam: jamSession.editJam, instrument });
+  pinDoor.current = { view, jam: jamSession.jam, editJam: jamSession.editJam, instrument };
+  useEffect(
+    () =>
+      registerJamPin({
+        jamOnScreen: () => (pinDoor.current.view === "jam" ? (pinDoor.current.jam ?? null) : null),
+        neck: () => neckFor(pinDoor.current.instrument),
+        takeNow: askTakeNow,
+        setPin: (pin) => pinDoor.current.editJam({ pinnedShape: pin }),
+      }),
+    [],
   );
 
   // The tours (O6, card #50). "Show me around" walks Today, Paths, a Session
@@ -3060,6 +3080,7 @@ export function MainWindow() {
             onChipAction={session.handleChipAction}
             onAsk={askCoach}
             onOpenRuns={openToolRuns}
+            jam={view === "jam" ? jamSession.jam : null}
           />
         )}
         {/* Nothing to transport on an empty setlist tab. */}

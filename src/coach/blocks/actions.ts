@@ -46,6 +46,12 @@ export type CoachActionHost = {
   ramp?: (action: OfKind<"ramp">) => void;
   /** The notebook. */
   comeBack?: (action: OfKind<"comeBack">) => void;
+  /**
+   * The Jam screen's pinned grip (leg c5a1). The host decides and says what
+   * came of it (its receipt, its Undo, its refusal during a Take): this map
+   * only hands the press on, and only a press calls it.
+   */
+  pinShape?: (action: OfKind<"pinShape">) => void;
 };
 
 /** Whether the press did anything, and if not, why not. */
@@ -84,6 +90,11 @@ export function runCoachAction(action: CoachAction, host: CoachActionHost = {}):
       if (!host.comeBack) return "notWiredYet";
       host.comeBack(action);
       return "done";
+
+    case "pinShape":
+      if (!host.pinShape) return "notWiredYet";
+      host.pinShape(action);
+      return "done";
   }
 }
 
@@ -102,11 +113,12 @@ export function useCoachAction(host: CoachActionHost): (action: CoachAction) => 
     loopBars,
     ramp,
     comeBack,
+    pinShape,
   } = host;
   return useCallback(
     (action: CoachAction) => {
-      runCoachAction(action, { loadPreset, loadJam, setClickSubdivision, loopBars, ramp, comeBack });
+      runCoachAction(action, { loadPreset, loadJam, setClickSubdivision, loopBars, ramp, comeBack, pinShape });
     },
-    [loadPreset, loadJam, setClickSubdivision, loopBars, ramp, comeBack],
+    [loadPreset, loadJam, setClickSubdivision, loopBars, ramp, comeBack, pinShape],
   );
 }

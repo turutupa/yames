@@ -128,7 +128,7 @@
       "removeTierLabel": "{{name}} entfernen",
       "olderCopy": "Eine ältere Kopie dieses Modells liegt ebenfalls auf der Festplatte · {{size}}",
       "removeOlderCopyLabel": "Die ältere Kopie von {{name}} entfernen",
-      "removeModels": "Modelle entfernen",
+      "removeModels": "Modelle und Stimmen entfernen",
       "stance": "Coaching-Stil",
       "stanceHint": "Wie streng der Coach in den Werkzeugen mit dir ist, während du spielst",
       "stanceStrict": "Streng",
@@ -137,7 +137,26 @@
       "stanceLearningDesc": "Lässt dir die Hälfte mehr Spielraum, bevor überhaupt etwas gesagt wird, hält Korrekturen beim Spielen aus deinen Ohren und fängt mit dem an, was gut lief. Deine Bewertung wird in beiden Fällen genau gleich gerechnet.",
       "cuesNoVoice": "Braucht eine Coach-Stimme: wähle oben Standard oder Studio. Bis dahin stehen die Ansagen auf dem Bildschirm.",
       "toolsOnly": "Nur Werkzeuge",
-      "toolsOnlyHint": "Gilt in Metronom, Tempo-Training und Jam. Sitzungen bewerten immer gleich."
+      "toolsOnlyHint": "Gilt in Metronom, Tempo-Training und Jam. Sitzungen bewerten immer gleich.",
+      "groups": {
+        "answers": "Antworten",
+        "voice": "Stimme",
+        "suggestions": "Vorschläge",
+        "notebook": "Notizbuch",
+        "tools": "In den Werkzeugen"
+      },
+      "answersRuleMade": "Der Coach antwortet aus deinen Takes und Pfaden.",
+      "answersLangs": "Mit eigenen Worten auf: {{langs}}.",
+      "notebook": {
+        "leftOutTitle": "Zeilen, die du ausgelassen hast",
+        "empty": "Nichts ausgelassen.",
+        "leftOutOn": "Ausgelassen am {{date}}",
+        "bringBack": "Zurückholen",
+        "broughtBack": "Wieder in deinem Notizbuch.",
+        "lineGone": "Eine Zeile, die deine letzten Takes nicht mehr zeigen",
+        "comesBack": "Eine Zeile, die du auslässt, kommt nach dreißig Tagen von selbst zurück. Nichts wird gelöscht.",
+        "unreadableEntries": "Einige Zeilen wurden auf eine Weise ausgelassen, die diese Version nicht lesen kann. Sie bleiben ausgelassen, so wie gespeichert."
+      }
     },
     "general": {
       "title": "Allgemein",

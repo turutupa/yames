@@ -14,7 +14,9 @@ import { modelTurnWanted, stopModelTurn } from "./askModelTurn";
 import { AskToolTurn } from "./AskToolTurn";
 import { AskCardChips, AskCardTurn } from "./AskCardTurn";
 import { pressSource } from "./askSources";
-import { askCardChips, askUngradedHere, typedCardAnswerer, withinChipCap } from "./askCards";
+import { askCardChips, askUngradedHere, withinChipCap } from "./askCards";
+import { isEnglish, typedRuleAnswerer } from "./askAnswerers";
+import { askEmptyKey } from "./askEmpty";
 import { askToolChips, noKeyRepeat, onePress, pressChip } from "./askTools";
 import { lineText } from "./toolWords";
 import "../../styles/ask.css";
@@ -189,7 +191,10 @@ function AskConversation({
   lookingKey: string | null;
 }) {
   const { t, i18n } = useTranslation();
-  const model = useCoachModel().state;
+  const coachModel = useCoachModel();
+  const model = coachModel.state;
+  // A build with no model in it is never offered one (leg c2cc, review L10).
+  const canRunModel = !coachModel.rows.some((r) => r.why === "noLlm");
   // A question typed and not sent survives a visit to the Notebook's tab (c4a2b, L4).
   const [draft, setDraft] = useState(askDraft);
   useEffect(() => keepAskDraft(draft), [draft]);
@@ -200,9 +205,10 @@ function AskConversation({
     if (el) el.scrollTop = el.scrollHeight;
   }, [turns]);
 
-  // Typed English reaches the fact cards after the router (leg c2b1b): plugged into
-  // the send path's slot while the panel is mounted, unplugged when it closes.
-  useEffect(() => setAskNextAnswerer(typedCardAnswerer(() => i18n.language)), [i18n]);
+  // After the router, the rule-made answerers (legs c2b1b, c2cb): tuning, the fact cards,
+  // the help set, then search of the player's Paths. Plugged into the send path's slot
+  // while the panel is mounted, unplugged when it closes.
+  useEffect(() => setAskNextAnswerer(typedRuleAnswerer(() => i18n.language)), [i18n]);
   // The panel going stops the model's turn in flight (leg c3b2a); its answer is dropped.
   useEffect(() => () => stopModelTurn(), []);
 
@@ -250,13 +256,12 @@ function AskConversation({
     setDraft("");
   };
 
-  const emptyKey = IS_MOBILE
-    ? "ask.empty.phone"
-    : model === "ready"
-      ? "ask.empty.model"
-      : model === "loading" || model === "waiting"
-        ? "ask.empty.loading"
-        : "ask.empty.noModel";
+  // Without a model, typed questions are still answered by the rules and search (leg c2cb, DESIGN 5.5);
+  // outside English, typed text reaches search alone and the chips the rest (leg c2cc).
+  const emptyKey = askEmptyKey({ mobile: IS_MOBILE, model, english: isEnglish(i18n.language), canRunModel });
+  // "About your last Take:" heads the card chips only when one is about a Take, not "What is this screen for?" alone.
+  const takeCards = cards.some((c) => c.shape !== "help");
+  const placeholder = !IS_MOBILE && model === "ready" ? t("ask.placeholder") : t("help.ui.placeholder");
 
   return (
     <>
@@ -266,7 +271,7 @@ function AskConversation({
             <p className="ask-empty-title">{t("ask.empty.title")}</p>
             <p className="ask-empty-text">{t(emptyKey)}</p>
             {ungraded && <p className="ask-empty-text" data-testid="ask-card-ungraded">{t("ask.card.canAnswer.ungraded")}</p>}
-            {cardRow && <p className="ask-empty-text ask-empty-tools">{t("ask.card.chips")}</p>}
+            {cardRow && takeCards && <p className="ask-empty-text ask-empty-tools">{t("ask.card.chips")}</p>}
             {cardRow}
             {chipRow && <p className="ask-empty-text ask-empty-tools">{t("coachTools.ui.chipsIntro")}</p>}
             {chipRow}
@@ -287,8 +292,8 @@ function AskConversation({
           className="ask-input"
           rows={1}
           value={draft}
-          placeholder={t("ask.placeholder")}
-          aria-label={t("ask.placeholder")}
+          placeholder={placeholder}
+          aria-label={placeholder}
           onChange={(e) => setDraft(e.target.value)}
           onFocus={() => onTyping(true)}
           onBlur={() => onTyping(false)}
@@ -370,12 +375,12 @@ function AskFooter({ tab }: { tab: AskTab }) {
     tab === "notebook"
       ? "notebook.ui.footer"
       : IS_MOBILE
-        ? "ask.footer.phone"
+        ? "help.ui.footer.phone"
         : model === "ready"
           ? modelTurnWanted(i18n.language)
             ? "ask.footer.choice"
-            : "ask.footer.model"
-          : "ask.footer.local";
+            : "help.ui.footer.model"
+          : "help.ui.footer.local";
   return <p className="ask-footer">{t(key)}</p>;
 }
 

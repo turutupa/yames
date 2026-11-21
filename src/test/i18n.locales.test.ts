@@ -39,6 +39,8 @@ const NAMESPACES = [
   // The coach over time: the weekly look-back, the plateau question, the dot on Progress (leg c4b2).
   "companion",
   "drill",
+  // The help set: what each screen is for and the app's written words (leg c2cb).
+  "help",
   "jam",
   "metronome",
   // The Notebook, Ask's second tab: its noticed lines (leg c4a1) and the tab itself (c4a2).

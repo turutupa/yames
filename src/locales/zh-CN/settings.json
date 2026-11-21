@@ -128,7 +128,7 @@
       "removeTierLabel": "移除{{name}}",
       "olderCopy": "磁盘上还有这个模型的一份旧副本 · {{size}}",
       "removeOlderCopyLabel": "移除{{name}}的旧副本",
-      "removeModels": "移除模型",
+      "removeModels": "移除模型和语音",
       "stance": "教练风格",
       "stanceHint": "在工具中演奏时教练的严格程度",
       "stanceStrict": "严格",
@@ -137,7 +137,26 @@
       "stanceLearningDesc": "在开口之前多给你一半的余地，弹的时候不把纠正送进你耳朵，而且先说做对的地方。两种设置下你的评分算法完全一样。",
       "cuesNoVoice": "需要教练语音：请在上方选择“标准”或“工作室”。在此之前提示显示在屏幕上。",
       "toolsOnly": "仅工具",
-      "toolsOnlyHint": "适用于节拍器、变速练习和即兴伴奏。课程的评分方式始终不变。"
+      "toolsOnlyHint": "适用于节拍器、变速练习和即兴伴奏。课程的评分方式始终不变。",
+      "groups": {
+        "answers": "回答",
+        "voice": "语音",
+        "suggestions": "建议",
+        "notebook": "笔记",
+        "tools": "在工具里"
+      },
+      "answersRuleMade": "教练根据你的每一遍和路线来回答。",
+      "answersLangs": "用它自己的话回答的语言：{{langs}}。",
+      "notebook": {
+        "leftOutTitle": "你排除的条目",
+        "empty": "没有排除的条目。",
+        "leftOutOn": "{{date}} 排除",
+        "bringBack": "恢复",
+        "broughtBack": "已回到你的笔记。",
+        "lineGone": "你最近几遍里不再出现的一条",
+        "comesBack": "你排除的条目三十天后会自动恢复。不会删除任何内容。",
+        "unreadableEntries": "有些条目是以这个版本无法读取的方式被排除的。它们会保持排除状态，按原样保存。"
+      }
     },
     "general": {
       "title": "通用",

@@ -1,0 +1,77 @@
+{
+  "help": {
+    "entry": {
+      "screen": {
+        "today": "Hoy arma tu sesión con las rutas que sigues, y Empezar la inicia. Elige cuántos minutos tienes y, si sigues más de una ruta, si hoy las mezcla o se queda con una. Cada fila dice por qué está en el plan; Cambiar la cambia por otro ejercicio, y pulsar una fila empieza la sesión ahí.",
+        "paths": "Rutas lista todas las rutas, agrupadas en Fundamentos, Cómo funciona la armonía, Técnica y Estilos; nada está bloqueado, así que puedes empezar cualquier paso. Cada tarjeta muestra dónde estás, y su interruptor pone la ruta en tu mezcla diaria o la deja fuera. Mis ejercicios, los que hiciste en Preguntar, están al final.",
+        "path": "La página de una ruta muestra dónde estás en ella, con el botón que sigue desde ahí, y los pasos en orden. Nivel elige desde dónde te empieza Hoy, y Suscribirme pone la ruta en el plan de Hoy, hasta cuatro rutas a la vez. El desplegable de abajo dice qué puede y qué no puede medir esta ruta.",
+        "step": "La página de un paso lista sus ejercicios con sus tempos y sus listones; Tocar esto toca uno, y Buscar mi límite sube su tempo cuando ya lo has tocado. Si superas la mayoría de los ejercicios evaluados, el paso está hecho, o Hacer examen prueba cada uno que aún no hayas superado en una sola toma. Notas de técnica dice por qué está el paso y cómo tocarlo.",
+        "sessionReady": "Este es el ejercicio antes de su toma: el tempo, el listón y la nota del coach sobre qué probar. Más lento y Más rápido cambian el tempo, Ver ilumina las notas en orden sin evaluar nada, y tras una toma que falló en un punto, un botón repite ese compás o dos a un tempo más lento, sin evaluar. El botón grande empieza la toma.",
+        "sessionTake": "Hay una toma en marcha: la cuenta atrás y luego las notas que tocas contra la cuadrícula según llegan. La vista queda bloqueada mientras dura, y Terminar toma la para. Preguntar se abre de nuevo cuando la toma ha terminado.",
+        "sessionResult": "Así fue la toma: el número que decidió, si alcanzó el listón y, compás a compás, dónde aguantó o falló. El botón grande repite o sigue adelante, y la fila de debajo cambia el tempo o repite un compás. Preguntar puede contarte más sobre esta toma.",
+        "sessionTimed": "Esta parte de la sesión va contra el reloj y no se evalúa: un calentamiento, un jam, una rampa, un cierre o tu turno. Empiézala y pasa a la siguiente sola cuando se acaba su tiempo; Pausa, Reiniciar y Saltar están ahí mientras corre.",
+        "sessionRecap": "La sesión ha terminado: lo que tocaste, lo que se movió y cuándo vuelve un ejercicio. Desde aquí puedes tocar 5 minutos más, volver a donde estabas o abrir Progreso.",
+        "progress": "Progreso es lo que se midió de tu forma de tocar: minutos en tomas, sesiones, tu racha de días y el tempo limpio de cada ruta a lo largo del tiempo. Arriba puede haber una nota del coach: tu semana, un hito como un paso terminado o una pregunta sobre un ejercicio que ha dejado de avanzar. En un ordenador, Pasadas de herramientas, debajo, guarda cada tramo en que el coach escuchó en las herramientas y en las sesiones.",
+        "tools": "Herramientas reúne el Metrónomo, Setlist, Rampa de tempo, Jam y Canciones. Úsalas cuando quieras; lo que tocas en ellas es tuyo y no mueve nada en tus rutas.",
+        "metronome": "El Metrónomo es un clic para tocar encima. Ajusta el tempo (o márcalo con toques), el compás, la subdivisión, los acentos y el sonido, y guarda una configuración como preset. Con Escuchar activado, el coach escucha mientras tocas.",
+        "drill": "Rampa de tempo sube el tempo mientras tocas, escrita como una frase que editas: tempo inicial y objetivo, qué tan rápido sube y a lo largo de cuántos compases. Lineal sube de forma constante, Zigzag sube y vuelve atrás, y Adaptativo sube o baja el tempo según cómo toques.",
+        "setlist": "Una setlist es una rutina que armas tú: pasos que suenan en orden, cada uno con su tempo, su compás y su duración. Cada paso dice cuándo sigue y cómo pasa al siguiente; Empezar toca la lista.",
+        "jam": "Jam es una banda que toca una forma mientras tú tocas encima, y nunca se evalúa. Elige un ambiente, el estilo, la forma y los acordes; las herramientas de práctica pueden dejar fuera a la banda unos compases, alternar compases contigo o subir el tempo en cada vuelta.",
+        "songs": "Canciones abre un archivo de Guitar Pro o MusicXML y muestra su tablatura, lleva el tiempo y te sigue. Elige tu parte, los compases y la velocidad, repite un tramo y decide a quién oyes. El archivo se queda en este dispositivo.",
+        "settings": "Ajustes reúne las opciones de la app: General, Práctica (incluido si se evalúa tu forma de tocar), Dispositivos para la entrada de audio, Entrenador, Apariencia, las herramientas, Canciones, Atajos y más. Preguntar no está abierto ahí.",
+        "modelSelector": "El modelo del coach elige si un modelo de lenguaje corre en este ordenador: Desactivado deja al coach con sus propias reglas, y Estándar o Studio es un modelo que primero necesita una Descarga. Nada se descarga hasta que pulses Descargar; un modelo que elegiste se carga solo después de que arranque la app, nunca durante una toma, y sigue cargado hasta que elijas Desactivado u otro. Con un modelo cargado, una pregunta escrita que nada más aquí responde recibe una respuesta con sus propias palabras, marcada como consejo general.",
+        "ask": "Preguntar responde preguntas sobre esta pantalla, tus tomas y tus rutas, con lo que la app midió y lo que dicen las rutas; un chip hace una pregunta con una pulsación. Los comandos escritos como «más lento» o «abrir Progreso» se ejecutan, o se ofrecen para confirmarlos con una pulsación. La pestaña Cuaderno guarda lo que el coach ha notado y tu objetivo."
+      },
+      "word": {
+        "take": "Una toma es una pasada de un ejercicio en una sesión, desde la cuenta atrás hasta el final. Una toma evaluada se mide y puede alcanzar el listón; una demasiado corta para juzgarla no cuenta ni a favor ni en contra. En Jam y Canciones, una toma es una grabación de ti tocando, sin listón, aunque Canciones muestra qué notas acertaste.",
+        "step": "Un paso es una etapa de una ruta, con unos pocos ejercicios y notas sobre por qué está ahí. Está hecho cuando superas la mayoría de sus ejercicios evaluados, o haciendo el examen.",
+        "level": "Tu Nivel en una ruta, Principiante, Intermedio o Avanzado, fija el paso desde el que te empieza Hoy. Hoy salta los pasos por debajo, pero aún puedes tocarlos.",
+        "rung": "Un peldaño es un escalón de tempo de un ejercicio. Más rápido y Más lento mueven un peldaño, y alcanzar el listón deja que el plan te suba al siguiente.",
+        "passMark": "Un listón es lo que una toma debe alcanzar para superarse, por ejemplo qué tan regular es el tempo o cuántas de las notas se oyen. Cada ejercicio muestra sus propios listones, y una toma los cumple solo cuando alcanza todos los que pudo medir.",
+        "cleanTempo": "Tu tempo limpio en un ejercicio es el tempo más rápido al que alcanzaste el listón durante ocho compases seguidos. Las tomas que marcaste como no justas no cuentan para él, ni para un hito.",
+        "review": "Un repaso trae de vuelta un ejercicio que superaste, un día después y luego a los 3, 7, 14 y 30 días, para dos tomas que lo mantengan fresco. Si falló, vuelve antes y un peldaño más lento.",
+        "parked": "Un ejercicio queda aparcado cuando tres sesiones seguidas no trajeron un tempo limpio nuevo. Descansa un par de días y luego vuelve fresco.",
+        "benchmark": "Un benchmark es la misma toma del mismo ejercicio al mismo tempo los días 1, 7, 14 y 21 de una ruta, contados desde el día en que te suscribes, para que oigas el cambio. Hoy pone uno en el plan cuando ya has hecho tu primera sesión en la ruta, y uno que se deja pasar una semana se omite, no se recupera.",
+        "grading": "Evaluada significa que la app escucha por tu entrada y mide tu tempo y tus notas contra el listón. Sin evaluar, o Solo tocar, te da el clic y lo visual sin medir nada; esas tomas cuentan como práctica, pero solo las tomas evaluadas mueven tu tempo limpio y tus pasos. Ajustes, Práctica lo elige, y una sesión puede preguntarlo.",
+        "notFair": "Tras un resultado ajustado puedes decir que la nota no fue justa. La nota se guarda como se midió, con tu respuesta al lado, y esa toma deja de contar para el tempo limpio que muestra la app y no da ningún hito. Si luego respondes Sí, vuelve a contar.",
+        "listen": "Escuchar es el interruptor de la barra de las herramientas que deja al coach escuchar tu forma de tocar ahí. Sigue apagado hasta que lo enciendas; al apagarlo, la pasada se guarda en Pasadas de herramientas.",
+        "toolRuns": "Pasadas de herramientas, en Progreso, lista cada tramo en que el coach escuchó en las herramientas y en las sesiones, el más reciente primero. Solo está en el ordenador.",
+        "myExercises": "Mis ejercicios son ejercicios que hiciste tú, listados al final de Rutas. No pertenecen a ninguna ruta y no superan nada. Haces uno en Preguntar escribiendo lo que quieres, como una escala y una posición, y pulsando Add it.",
+        "notebook": "El Cuaderno es la segunda pestaña de Preguntar. Muestra lo que el coach notó en al menos cinco de tus tomas guardadas, te deja dejar una línea fuera durante 30 días y guarda tu objetivo con tus propias palabras. Nada de lo que hay en él lo escribe un modelo.",
+        "variant": "Algunos ejercicios vienen en variantes: la misma habilidad en otra tonalidad o en otra forma. La sesión elige una, y sus propias palabras sustituyen a las del ejercicio donde las tiene.",
+        "countIn": "En una sesión, la cuenta atrás es un compás de clics antes de cada toma, para que entres a tiempo, y no forma parte de lo que se evalúa. En el Metrónomo y en Rampa de tempo es el interruptor Cuenta de entrada de la barra inferior: unos pocos tiempos de clic antes del primero.",
+        "loop": "Un bucle toca un compás o dos del ejercicio una y otra vez, despacio, hasta que lo paras. Nada de lo que hay en un bucle se evalúa ni se guarda.",
+        "testOut": "Hacer examen toca una toma al tempo de superación de cada ejercicio de un paso que aún no hayas superado. Supera suficientes y el paso está hecho.",
+        "warmUp": "Un calentamiento abre una sesión y un cierre la termina. Ambos van contra el reloj y no se evalúan."
+      }
+    },
+    "tuning": {
+      "none": "La app todavía no tiene afinador, así que no comprobé tu afinación y aquí no puedo ayudarte con eso."
+    },
+    "search": {
+      "from": "El pasaje más cercano en tus rutas, de «{{step}}» en {{path}}:"
+    },
+    "ui": {
+      "chip": "¿Para qué sirve esta pantalla?",
+      "placeholder": "Busca en tus rutas o toca una pregunta",
+      "empty": {
+        "local": "Escribe una pregunta y la app responde con tus tomas, tus rutas y su propia ayuda, sin necesitar un modelo. O toca una pregunta de abajo.",
+        "phone": "Escribe una pregunta y la app responde con tus tomas, tus rutas y su propia ayuda. O toca una pregunta de abajo.",
+        "search": "Escribe una pregunta y la app la busca en tus rutas. Toca una pregunta de abajo para saber de tus tomas y de esta pantalla.",
+        "searchLoading": "Escribe una pregunta y la app la busca ahora en tus rutas; toca una pregunta de abajo para saber de tus tomas y de esta pantalla. El modelo que elegiste se está preparando; cuando esté listo, añade consejo general con sus propias palabras, indicado como tal.",
+        "searchModel": "Escribe una pregunta y la app la busca en tus rutas; lo que ellas no responden, lo responde el modelo de este ordenador con sus propias palabras, indicado como consejo general. Toca una pregunta de abajo para saber de tus tomas y de esta pantalla."
+      },
+      "reply": {
+        "local": "Nada en tus tomas, tus rutas ni la ayuda de la app responde eso. Con un modelo activado, elegido al pie de este panel, podría responder con sus propias palabras.",
+        "phone": "Nada en tus tomas, tus rutas ni la ayuda de la app responde eso.",
+        "search": "Nada en tus rutas responde eso.",
+        "searchLocal": "Nada en tus rutas responde eso. Con un modelo activado, elegido al pie de este panel, podría responder con sus propias palabras."
+      },
+      "footer": {
+        "local": "Respuestas a partir de tus tomas y tus rutas. Nada de lo que escribes sale de este ordenador.",
+        "phone": "Respuestas a partir de tus tomas y tus rutas. Nada de lo que escribes sale de este teléfono.",
+        "model": "Respuestas a partir de tus tomas y tus rutas, y con sus propias palabras, del modelo de este ordenador. Nada de lo que escribes sale de él."
+      }
+    }
+  }
+}

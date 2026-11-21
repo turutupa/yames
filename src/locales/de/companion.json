@@ -64,7 +64,7 @@
       "label": "Ein Pfad zum Ausprobieren, vom Coach",
       "kick": "Ein Pfad zum Ausprobieren",
       "chip": "Pfad vorschlagen",
-      "next": "{{path}} ist der nächste Pfad in der Reihenfolge des Lehrplans, den du noch nicht begonnen hast, und nichts, worauf er aufbaut, fehlt.",
+      "next": "Von den Pfaden, die du noch nicht begonnen hast, ist {{path}} der erste in der Reihenfolge des Lehrplans, bei dem alles, worauf er aufbaut, vorhanden ist.",
       "readyGoal": "{{path}} passt zu dem, worauf du nach eigener Aussage hinarbeitest, und nichts, worauf er aufbaut, fehlt.",
       "buildsOn":"{{path}} baut auf {{on}} auf, den du begonnen hast.",
       "buildsOnLevel": "{{path}} baut auf {{on}} auf, und du bist dort durch {{level}}.",

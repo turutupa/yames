@@ -14,6 +14,8 @@ import { coachGenerate } from "../../ipc";
 import { getCoachModelSnapshot } from "../../hooks/coachLoader";
 import { IS_MOBILE } from "../../platform";
 import { askPrompt } from "./askContext";
+import { isEnglish } from "./askAnswerers";
+import { askNothingKey } from "./askEmpty";
 import {
   appendAskTurn,
   askTurnId,
@@ -40,19 +42,28 @@ import {
  * sent it (`coach_generate`, kind `chat`, its timeout and the Rust side's
  * formatting); an empty or failed answer is said to be one.
  */
-export async function answerAsk(question: string, t: TFunction, contextText: () => string): Promise<void> {
+export async function answerAsk(
+  question: string,
+  t: TFunction,
+  contextText: () => string,
+  language = "en",
+): Promise<void> {
   const q = question.trim();
   if (!q) return;
   const { turns: before, about } = getAskState();
   appendAskTurn({ id: askTurnId(), kind: "user", text: q });
-  if (IS_MOBILE) {
-    appendAskTurn({ id: askTurnId(), kind: "app", text: t("ask.reply.phone") });
-    return;
-  }
-  const model = getCoachModelSnapshot().state;
-  if (model !== "ready") {
-    const key = model === "loading" || model === "waiting" ? "ask.reply.gettingReady" : "ask.reply.noModel";
-    appendAskTurn({ id: askTurnId(), kind: "app", text: t(key) });
+  const snap = getCoachModelSnapshot();
+  const model = snap.state;
+  if (IS_MOBILE || model !== "ready") {
+    // The rules and search came first (leg c2cb): this is what is left when none of them answered, saying
+    // only what was checked in this language and offering a model only where one can run (leg c2cc).
+    const where = {
+      mobile: IS_MOBILE,
+      model,
+      english: isEnglish(language),
+      canRunModel: !snap.rows.some((r) => r.why === "noLlm"),
+    };
+    appendAskTurn({ id: askTurnId(), kind: "app", text: t(askNothingKey(where)) });
     return;
   }
   const id = askTurnId();
@@ -86,13 +97,13 @@ export type CoachPanel = {
  * (never in a render): the context the model reads, `contextForModel`'s text.
  */
 export function useCoachPanel({ contextText }: { contextText: () => string }): CoachPanel {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { open, deferred } = useAskState();
   const latest = useRef(contextText);
   latest.current = contextText;
   useEffect(
-    () => registerAskSender((question) => void answerAsk(question, t, () => latest.current())),
-    [t],
+    () => registerAskSender((question) => void answerAsk(question, t, () => latest.current(), i18n.language)),
+    [t, i18n],
   );
   const close = useCallback(() => closeAsk(), []);
   return { open, deferred, toggle: toggleAsk, show: openAsk, close };

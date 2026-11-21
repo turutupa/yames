@@ -163,16 +163,36 @@ const skip = () => screen.getByRole("button", { name: "Skip" });
 describe("W4 — what the screen says", () => {
   it("states what the coach does and one true privacy line", async () => {
     await mount();
+    // Leg c6a: what the coach does now (it reads Takes and Paths; it no longer
+    // "listens through your audio input"), the one question, and what Off keeps.
+    expect(screen.getByText(/reads your Takes and your Paths/i)).toBeInTheDocument();
+    expect(screen.queryByText(/listens through your audio input/i)).toBeNull();
+    expect(screen.getByTestId("coach-question")).toHaveTextContent(
+      "Should the coach also answer in its own words?",
+    );
     expect(
-      screen.getByText(/listens through your audio input and scores/i),
+      screen.getByText("Off still gives you the line, the note, the tools and answers from your Takes and Paths."),
     ).toBeInTheDocument();
-    expect(screen.getByText(/writes a short report/i)).toBeInTheDocument();
     // Both halves of the privacy promise: nothing leaves, nothing is recorded.
     expect(
       screen.getByText(
         "Everything runs on this machine. Your audio never leaves it, and release builds never record it.",
       ),
     ).toBeInTheDocument();
+  });
+
+  // Review c6a M1: the question stays (a loaded model does answer, in Ask, a
+  // question nothing else covers: `answerAsk`), and under the tiers one line
+  // says exactly what the download buys, labelled general advice.
+  it("says under the tiers what a model buys today: general advice for what the app does not answer", async () => {
+    await mount();
+    const buys = screen.getByTestId("coach-model-buys");
+    expect(buys).toHaveTextContent(
+      "With a model, a question the app's own answers don't cover gets a reply in the model's own words, labelled as general advice. Everything measured comes from the app either way.",
+    );
+    // After the tier cards, not above them.
+    const tiers = screen.getByTestId("coach-tiers");
+    expect(tiers.compareDocumentPosition(buys) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it("offers exactly three choices", async () => {
@@ -343,34 +363,23 @@ describe("W4 — the commit on Next", () => {
   });
 });
 
-describe("W4 — the optional listening branch (decision 3)", () => {
-  it("is offered only to timing-only users", async () => {
-    await mount();
-    expect(screen.queryByTestId("coach-try-listening")).toBeNull();
-    await click(card("off"));
-    expect(screen.getByTestId("coach-try-listening")).toBeInTheDocument();
-  });
-
-  // MVP, 2026-11-16: W5 comes before this step on every run now, so a player
-  // who has been through it is not offered it again.
-  it("is not offered once the input step has already run", async () => {
-    await mount({
-      state: stateAt("coach", { visited: ["welcome", "instrument", "audio-input", "coach"] }),
-    });
+// Leg c6a, judgement call 29: "Try the listening feature anyway" asked for an
+// input and eight beats, a microphone push in the coach's step. It left, and
+// nothing in the step asks for the microphone or for grading.
+describe("W4 — no listening push", () => {
+  it("offers no listening box, whatever is chosen and whether or not W5 ran", async () => {
+    await mount({ state: stateAt("coach", { visited: ["welcome", "instrument", "coach"] }) });
     await click(card("off"));
     expect(screen.queryByTestId("coach-try-listening")).toBeNull();
+    expect(screen.queryByRole("checkbox")).toBeNull();
   });
 
-  it("records the intent for O5 when ticked", async () => {
+  it("records no listening intent for a player who chose Off", async () => {
     const { dispatch } = await mount({ llmCompiled: false });
-    const checkbox = within(screen.getByTestId("coach-try-listening")).getByRole("checkbox");
-    await click(checkbox);
-    // Ticking it is a selection, not navigation.
-    expect(dispatch).not.toHaveBeenCalled();
     await click(next());
     expect(dispatch).toHaveBeenNthCalledWith(1, {
       type: "SET_CONTEXT",
-      patch: { coachTier: "off", tryListening: true },
+      patch: { coachTier: "off", tryListening: false },
     });
   });
 });

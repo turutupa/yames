@@ -30,15 +30,11 @@
     },
     "empty": {
       "title": "Ne öğrenmek istiyorsun?",
-      "model": "Bu ekranı, denemelerini veya yollarını sor. Bu bilgisayardaki model, genel bir tavsiye olarak kendi sözleriyle yanıtlar.",
-      "loading": "Seçtiğin model hazırlanıyor. Hazır olunca bu ekranı, denemelerini veya yollarını sorabilirsin.",
-      "noModel": "Yazılan sorular için bu bilgisayarda bir model gerekir ve hiçbiri açık değil. Bu ekranı, denemelerini veya yollarını sormak için aşağıdan birini seç.",
-      "phone": "Yazılan sorular için bir model gerekir ve telefonlar henüz model çalıştırmıyor."
+      "model": "Bu ekranı, denemelerini veya yollarını sor: uygulama ölçtüklerinden, yollarından ve kendi yardımından yanıtlar. Bunların yanıtlamadığını bu bilgisayardaki model, genel tavsiye diye işaretleyip kendi sözleriyle yanıtlar.",
+      "loading": "Bu ekranı, denemelerini veya yollarını sor: uygulama şimdi, ölçtüklerinden, yollarından ve kendi yardımından yanıtlar. Seçtiğin model hazırlanıyor; hazır olunca kendi sözleriyle, öyle işaretlenmiş genel tavsiye ekler."
     },
     "reply": {
-      "noModel": "Hiçbir model açık değil, bu yüzden yazılan sorular henüz yanıtlanamıyor. Bu panelin altından birini seç.",
       "gettingReady": "Model hâlâ hazırlanıyor. Biraz sonra tekrar sor.",
-      "phone": "Telefonlar henüz model çalıştırmıyor, bu yüzden yazılan sorular burada yanıtlanamıyor.",
       "nothing": "Bu sefer yanıt gelmedi."
     },
     "model": {
@@ -48,10 +44,7 @@
       "reading": "Sorunu böyle anladım. Sen basana kadar hiçbir şey olmaz."
     },
     "footer": {
-      "choice": "Yanıtlar denemelerinden ve yollarından gelir; bu bilgisayardaki model de yardımcı olur. Hiçbir şey bilgisayardan çıkmaz.",
-      "model": "Bu bilgisayardaki model yanıtladı. Yazdığın hiçbir şey bilgisayardan çıkmaz.",
-      "local": "Buraya yazdığın hiçbir şey bu bilgisayardan çıkmaz.",
-      "phone": "Buraya yazdığın hiçbir şey bu telefondan çıkmaz."
+      "choice": "Yanıtlar denemelerinden ve yollarından gelir; bu bilgisayardaki model de yardımcı olur. Hiçbir şey bilgisayardan çıkmaz."
     },
     "card": {
       "chips": "Son denemen hakkında:",

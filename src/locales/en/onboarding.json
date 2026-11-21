@@ -67,13 +67,15 @@
     },
     "coach": {
       "title": "Practice coach",
-      "what1": "The coach listens through your audio input and scores how your timing sits against the click.",
-      "what2": "After each run it writes a short report — and, with a coach model downloaded, explains what to work on next.",
+      "what1": "The coach reads your Takes and your Paths: it gives you Today's line, a note after a Take, and answers when you ask.",
+      "question": "Should the coach also answer in its own words?",
+      "withoutModel": "Off still gives you the line, the note, the tools and answers from your Takes and Paths.",
+      "modelBuys": "With a model, a question the app's own answers don't cover gets a reply in the model's own words, labelled as general advice. Everything measured comes from the app either way.",
       "privacy": "Everything runs on this machine. Your audio never leaves it, and release builds never record it.",
       "recommended": "Recommended",
-      "timing": {
-        "title": "Timing feedback only",
-        "desc": "No download. You still get the live dots, the timing score and your session history."
+      "off": {
+        "title": "Off",
+        "desc": "No download. The coach answers from your Takes and Paths."
       },
       "standard": {
         "title": "Standard model",
@@ -86,15 +88,11 @@
       "studioNeedsRam": "Studio needs at least 16 GB of RAM — this machine has {{gb}} GB.",
       "standardNeedsRam": "The Standard model needs at least 8 GB of RAM — this machine has {{gb}} GB.",
       "unavailableInBuild": "Not available in this build.",
-      "reasonNoLlm": "This build can't run a model, so timing feedback is the honest choice here.",
+      "reasonNoLlm": "This build can't run a model, so Off is the honest choice here.",
       "reasonLowMemory": "This machine has {{gb}} GB of RAM — not enough to run a coach model comfortably.",
       "reasonInstalled": "Already downloaded on this machine — nothing to fetch.",
       "downloadNote": "The download starts when you continue and keeps running in the background.",
       "downloading": "Downloading the coach model",
-      "tryListening": {
-        "label": "Try the listening feature anyway",
-        "hint": "Two short steps: pick your input, play eight beats, and see your timing."
-      },
       "voiceReady": "Coach voices are ready.",
       "voicePick": "Pick a voice",
       "voiceDismiss": "Dismiss"
@@ -189,7 +187,7 @@
       },
       "controlKeyboard": "Keyboard",
       "controlFootswitch": "Footswitch",
-      "coachTiming": "Timing feedback only",
+      "coachTiming": "Off: answers from your Takes and Paths",
       "inputNone": "Not set up",
       "alwaysOnTop": "Always on top",
       "start": "Go to Today",

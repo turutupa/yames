@@ -148,7 +148,14 @@ ms1's first run had put the selector in the left rail: the relaunch moves it to 
 | c4b3 milestones, Path suggestion, On / Hide (+ c4b3b) | merged | `coach-c4b3` | 2026-11-21 | Review `c4b3-review.md` (H1 "the next Path"; M1 `pathDone`). `suggest_path` is the 21st card (short "a Path": the cards' 300-token share is full). c4b4: the scenes and `pathSuggest.next`'s wording. |
 | c2b2b sources, locales, scenes | merged | `coach-c2b2b` | 2026-11-21 | `progress/c2b2b.md`. Source lines pressable; the accents sentences corrected in four places. For pol2: a long quote is cut between words into two blocks; "accents landed N%" strings; it Take gender. |
 | rtx1 the RTX through the queue | merged (scripts) | `coach-rtx1` | 2026-11-21 | `plans/coach/tools/rtx/README.md`. Rust suite runs there (4.5 min); no `node_modules`, no browsers; sync writes objects and `refs/remotes/dgx/*` into the owner's repository there. |
-| t2d (+ t2dc), t2f, c2cb, c5a1, c6a, c4b4 (session 6) | **on branches** | `coach-<leg>` | 2026-11-21 | See `HANDOFF-S6.md`. |
+| t2d (+ t2dc) the exercise command in fourteen languages | merged | `coach-t2d` | 2026-11-21 | Review `t2d-review.md` (es "a menor escala", bare 五声), re-read `t2dc-review.md`: MERGE; its L1, L2, L5 are pol2's. t2e (Today's part) and "Hear it" are their own legs. |
+| t2f the phone's Ask sheet lost every press with the keyboard up | merged | `coach-t2f` | 2026-11-21 | `progress/t2f.md`. Its scene fails on `coach` after t2d merged (the Undo after "Open Paths"): leg t2g. |
+| c4b4 the companion's scenes | merged | `coach-c4b4` | 2026-11-21 | `companion.spec.ts`; `pathSuggest.next` reworded. |
+| c5a1 the coach on Jam, items 1 to 4 (+ c5a1c) | merged | `coach-c5a1` | 2026-11-21 | Review `c5a1-review.md`, re-read `c5a1c-review.md`: MERGE (L1 for pol2). The stop line shows only with chord names off (the engine estimates no chords beside a chart). c5a1b: the finisher. |
+| c6a Settings → Coach in five groups, the wizard (+ c6ab) | merged | `coach-c6a` | 2026-11-21 | Review `c6a-review.md` (H1: an unreadable left-out entry blanked the app). c6b (docs) is last. |
+| c2cb the help set and the answer order (+ c2cc) | merged | `coach-c2cb` | 2026-11-21 | Review `c2cb-review.md` (the tuning refusal; help stealing "this step"). **Delivery 2.** |
+| c3da the router's misses, analysed | merged (a note) | `coach-c3da` | 2026-11-21 | `progress/c3da.md`: sections 3 and 5 are for the leg that renders training data; 1c lists fifteen rules defects (leg rules1). |
+| t2e, t2g, pol2, rtx2, rules1 (session 6) | **running or on branches** | `coach-<leg>` | 2026-11-21 | See `HANDOFF-S6.md`. |
 
 **`smooth.spec.ts` on a quiet machine (session 4, 20:10 PT, load 7 falling, nothing else running, in
 `~/yames-coach-night` at `coach` + t2a): 17 passed in 45 s.** The gate owed since delivery 1j is paid.

@@ -41,11 +41,11 @@ describe("a chip asks and answers in the thread", () => {
     openAsk();
     render(<AskPanel lookingAt={{ text: "Your Session", key: "session|tune" }} onClose={() => {}} />);
     const row = screen.getByTestId("ask-card-chips");
-    // Below the pass mark (c2b1b): where, how far the pass mark is, early or late.
+    // Below the pass mark (c2b1b): where, how far the pass mark is; then the help set's chip (c2cb).
     expect(within(row).getAllByRole("button").map((b) => b.textContent)).toEqual([
       `?${t("ask.card.chip.where")}`,
       `?${t("ask.card.chip.distance")}`,
-      `?${t("ask.card.chip.lean")}`,
+      `?${t("help.ui.chip")}`,
     ]);
     fireEvent.click(screen.getByTestId("ask-card-chip-where_slipped"), { detail: 1 });
     const turns = getAskState().turns;
@@ -84,26 +84,33 @@ describe("a chip asks and answers in the thread", () => {
     __setAskToolsForTests(fakeHost(), below().ctx);
     openAsk();
     render(<AskPanel lookingAt={{ text: "Your Session", key: "session|tune" }} onClose={() => {}} />);
-    const chip = screen.getByTestId("ask-card-chip-early_or_late");
+    const chip = screen.getByTestId("ask-card-chip-pass_mark_distance");
     fireEvent.click(chip, { detail: 1 });
     fireEvent.click(chip, { detail: 2 });
     expect(getAskState().turns.filter((x) => x.kind === "card")).toHaveLength(1);
   });
 
-  it("an ungraded player: no card chip, and one line saying what is not there to answer from", () => {
+  it("an ungraded player: no card chip (only 'What is this screen for?'), and one line saying what is not there to answer from", () => {
     __setAskToolsForTests(fakeHost(), fixture({ slipped: [0, 4], failOn: "timingEvenness" }, { grading: "off" }).ctx);
     openAsk();
     render(<AskPanel lookingAt={{ text: "Your Session", key: "session|tune" }} onClose={() => {}} />);
-    expect(screen.queryByTestId("ask-card-chips")).toBeNull();
+    expect(within(screen.getByTestId("ask-card-chips")).getAllByRole("button").map((b) => b.getAttribute("data-chip"))).toEqual(["help"]);
+    expect(screen.queryByText(t("ask.card.chips"))).toBeNull();
     expect(screen.getByTestId("ask-card-ungraded")).toHaveTextContent(t("ask.card.canAnswer.ungraded"));
   });
 
-  it("off a Session, no card and no ungraded line", () => {
+  it("off a Session, no card and no ungraded line; 'What is this screen for?' answers with Today's help entry (c2cb)", () => {
     __setAskToolsForTests(fakeHost(), toolCtx({ screen: "today" }));
     openAsk();
     render(<AskPanel lookingAt={{ text: "Today", key: "today" }} onClose={() => {}} />);
-    expect(screen.queryByTestId("ask-card-chips")).toBeNull();
+    expect(within(screen.getByTestId("ask-card-chips")).getAllByRole("button").map((b) => b.getAttribute("data-chip"))).toEqual(["help"]);
+    expect(screen.queryByText(t("ask.card.chips"))).toBeNull();
     expect(screen.queryByTestId("ask-card-ungraded")).toBeNull();
+    fireEvent.click(screen.getByTestId("ask-card-chip-help"), { detail: 1 });
+    const card = screen.getByTestId("ask-card");
+    expect(card).toHaveAttribute("data-card", "help");
+    expect(card).toHaveTextContent(t("help.entry.screen.today").slice(0, 40));
+    expect(card).toHaveTextContent(t("coachBlocks.source.app"));
   });
 });
 
@@ -283,6 +290,19 @@ describe("'suggest a Path' (leg c4b3, review M2)", () => {
     expect(cardChipsFor(toolCtx({ screen: "paths" }), "askEmpty").map((c) => c.kind === "card" && c.shape)).toContain("suggest_path");
     expect(cardChipsFor(toolCtx({ screen: "progress" }), "askEmpty").map((c) => c.kind === "card" && c.shape)).toContain("suggest_path");
     expect(cardChipsFor(fixture({}, { lastTake: undefined }).ctx, "askEmpty").map((c) => c.kind === "card" && c.shape)).not.toContain("suggest_path");
+  });
+
+  it("with the help chip (c2c merge): three at most, 'Suggest a Path' kept on Paths and Progress, 'What is this screen for?' last", () => {
+    for (const screen of ["paths", "progress", "today"] as const) {
+      const shapes = cardChipsFor(toolCtx({ screen }), "askEmpty").map((c) => c.kind === "card" && c.shape);
+      expect(shapes.length, screen).toBeLessThanOrEqual(3);
+      expect(shapes.at(-1), screen).toBe("help");
+      if (screen !== "today") expect(shapes, screen).toContain("suggest_path");
+      else expect(shapes, screen).not.toContain("suggest_path");
+    }
+    const session = cardChipsFor(fixture({}, { lastTake: undefined }).ctx, "askEmpty").map((c) => c.kind === "card" && c.shape);
+    expect(session.length).toBeLessThanOrEqual(3);
+    expect(session.at(-1)).toBe("help");
   });
 });
 

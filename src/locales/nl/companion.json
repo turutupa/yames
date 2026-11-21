@@ -64,7 +64,7 @@
       "label": "Een leerpad om hierna te proberen, van de coach",
       "kick": "Een leerpad om hierna te proberen",
       "chip": "Leerpad voorstellen",
-      "next": "{{path}} is het volgende leerpad in de volgorde van het curriculum dat je nog niet hebt gestart, en er ontbreekt niets van wat het nodig heeft.",
+      "next": "Van de leerpaden die je nog niet hebt gestart, is {{path}} het eerste in de volgorde van het curriculum waarbij alles op orde is waarop het voortbouwt.",
       "readyGoal": "{{path}} past bij wat je zei na te streven, en er ontbreekt niets van wat het nodig heeft.",
       "buildsOn":"{{path}} bouwt voort op {{on}}, dat je hebt gestart.",
       "buildsOnLevel": "{{path}} bouwt voort op {{on}}, en je bent daar door {{level}} heen.",

@@ -168,11 +168,6 @@ test.describe("on a phone", () => {
     await previewReceiptEnded(page, ".ask-sheet", "phone", true, 44, false);
   });
 
-  // Leg t2d finding, owed to a fix leg: in the phone build (`YAMES_MOBILE=1`) a click or a tap on the
-  // sheet's "Add it" leaves the proposal open and shows no receipt, in five runs, while the same press
-  // works at 1440 and 1024. Not chased here; the scene is ready for the fix.
-  test.fixme("the sheet (Ember): Add it, the receipt with Undo, the Undo ended; every target 44 px", async ({ page }) => {
-    await openSheetWithPreview(page);
-    await previewReceiptEnded(page, ".ask-sheet", "phone", true, 44);
-  });
+  // "Add it", the receipt with Undo and the Undo ended, on a phone with the keyboard up: leg t2f's
+  // `ask-make-phone.spec.ts` (t2d's `fixme` here, which that spec covers; dropped by leg t2g).
 });

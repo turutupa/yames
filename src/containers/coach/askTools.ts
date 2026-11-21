@@ -19,9 +19,13 @@
  *   runner's refusal ("That one has gone; ask again") when the context moved on.
  * - **refusal**: why not, and "Which one?"'s choices, each a full call.
  * - **yours**: a never-list item: one line, and a "show me" that only navigates.
+ *
+ * `explain_screen`'s answer is not a tool turn: it is a help entry, written as
+ * a help card (`writeOutcome`, leg c2cb).
  */
 import type { CoachContext } from "../../coach/context";
 import type { ResolvedBlock } from "../../coach/blocks/resolve";
+import { helpCard, isHelpLine } from "../../coach/ask/help";
 import { commandFacts, type CommandFacts } from "../../coach/ask/router";
 import { getCoachToolHost, type CoachToolHost } from "../../coach/tools/host";
 import { resolveStepCall } from "../../coach/tools/go";
@@ -88,6 +92,8 @@ export type ToolBody =
       /** The app is still finding out (a preset being re-read): the receipt says it is at it. */
       settling?: boolean;
       blocks?: readonly ResolvedBlock[];
+      /** The jam the blocks were drawn on (`ToolDone.forJam`): what "Pin this shape" pins to. */
+      forJam?: string;
       /** Where to go next (`ToolDone.next`, leg t2c: "Open Paths"). */
       next?: readonly ToolChoice[];
       undo: UndoState | null;
@@ -229,6 +235,7 @@ function bodyOf(outcome: RunOutcome, host: CoachToolHost, ctx: CoachContext, chi
     receipt: outcome.receipt,
     ...(outcome.later ? { settling: true } : {}),
     ...(outcome.blocks ? { blocks: outcome.blocks } : {}),
+    ...(outcome.forJam ? { forJam: outcome.forJam } : {}),
     ...(outcome.next && outcome.next.length > 0 ? { next: outcome.next } : {}),
     // The step as `useAskHost` says it to `noteAskToolView`: null outside a running Session.
     undo: undoOf(outcome, host, Date.now(), chip ? { step: ctx.run && ctx.run.phase !== "idle" ? ctx.run.stepIndex : null } : undefined),
@@ -372,6 +379,11 @@ function tellTakeStart(): void {
 }
 
 function writeOutcome(id: string, outcome: RunOutcome, at: { host: CoachToolHost; ctx: CoachContext }): void {
+  // `explain_screen`'s answer is a help entry (leg c2cb): drawn as the app's words, not as something done.
+  if (outcome.ok && !("proposal" in outcome) && isHelpLine(outcome.receipt)) {
+    appendAskTurn({ id, kind: "card", card: helpCard(outcome.receipt) });
+    return;
+  }
   retireOlderMakes(outcome);
   appendAskTurn({ id, kind: "tool", body: bodyOf(outcome, at.host, at.ctx) });
   followLater(id, outcome);
@@ -830,7 +842,15 @@ export function noteAskToolView(view: MainView, step?: number | null): void {
       continue;
     }
     if (turn.body.kind !== "receipt") continue;
-    const undo = turn.body.undo;
+    // A next chip to the screen now on screen has nothing left to do ("Open Paths" on Paths; leg t2g,
+    // t2d's open point 5): it goes, and does not come back.
+    let body = turn.body;
+    const next = body.next?.filter((c) => !(c.call.tool === "go_to" && c.call.args.screen === view));
+    if (body.next && next && next.length < body.next.length) {
+      body = { ...body, next: next.length > 0 ? next : undefined };
+      setBody(turn.id, body);
+    }
+    const undo = body.undo;
     if (!undo || undo.state !== "live") continue;
     if (undo.chip) {
       // A chip's Undo: only on its screen and, in a Session, its step (leg chip1). The Settings
@@ -838,7 +858,7 @@ export function noteAskToolView(view: MainView, step?: number | null): void {
       // place (leg chip1b, review L2 d); back from it, the view and the step are checked again.
       if (view === "settings") continue;
       const stepMoved = step !== undefined && (undo.step ?? null) !== step;
-      if (undo.view === null || undo.view !== view || stepMoved) retire(turn.id, turn.body, undo);
+      if (undo.view === null || undo.view !== view || stepMoved) retire(turn.id, body, undo);
       continue;
     }
     if (undo.view === null || undo.view === view) continue;
@@ -846,7 +866,7 @@ export function noteAskToolView(view: MainView, step?: number | null): void {
     // it ended (it does not come back) and what does the same job, rather than losing it silently
     // (review t2c, finding 3; review t2cb, MEDIUM 1).
     const said = laterDecidesUndo(undo) && undoLive(undo, Date.now()) ? { note: line("coachTools.make.undoLeft") } : {};
-    setBody(turn.id, { ...turn.body, undo: { ...undo, state: "gone", ...said } });
+    setBody(turn.id, { ...body, undo: { ...undo, state: "gone", ...said } });
   }
 }
 

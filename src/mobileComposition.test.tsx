@@ -273,9 +273,24 @@ describe("SettingsView on a phone", () => {
     expect(screen.queryByText("Hotkeys")).toBeNull();
     expect(screen.queryByText("Widget")).toBeNull();
     expect(screen.queryByText(/always on top/i)).toBeNull();
-    // The practice reminder is rule-made and shows on a phone (leg rem2), without naming the coach.
+    // Leg c6a (judgement call 28, the owner's selector placement): a phone's
+    // Settings → Coach holds Answers (the models "not on this device", nothing
+    // to press), Suggestions (with the practice reminder, rem2) and Notebook,
+    // and nothing that downloads, loads or speaks.
+    const coach = document.getElementById("settings-coach")!;
+    expect(
+      Array.from(coach.querySelectorAll("[data-coach-group]")).map((g) => g.getAttribute("data-coach-group")),
+    ).toEqual(["answers", "suggestions", "notebook"]);
+    expect(coach.querySelector('[data-coach-group="answers"] button')).toBeNull();
     expect(screen.getByTestId("coach-reminder-row")).toBeInTheDocument();
-    expectNoCoachAnywhere();
+    expect(screen.queryByText("Download voices")).toBeNull();
+    expect(screen.queryByText("Voice Name")).toBeNull();
+    // Review c6a L5: Voice and In the tools are absent from the whole page, not
+    // only from the coach section, with the rows they hold.
+    expect(document.querySelector('[data-coach-group="voice"]')).toBeNull();
+    expect(document.querySelector('[data-coach-group="tools"]')).toBeNull();
+    expect(screen.queryByText(/Remove models/)).toBeNull();
+    expect(screen.queryByText("Hear what I play")).toBeNull();
   });
 });
 

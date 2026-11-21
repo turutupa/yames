@@ -67,13 +67,15 @@
     },
     "coach": {
       "title": "練習教練",
-      "what1": "教練透過音訊輸入聆聽，並為你的拍點與節拍器的貼合程度評分。",
-      "what2": "每段結束後會寫一份簡短報告；下載模型後還會說明接下來該練什麼。",
+      "what1": "教練讀你的每一遍和你的路線：給你「今天」的一句話，每一遍之後的一則筆記，你問時回答。",
+      "question": "教練是否也用它自己的話回答？",
+      "withoutModel": "關閉時仍然有這句話、這則筆記、工具，以及根據你的每一遍和路線給出的回答。",
+      "modelBuys": "有了模型，應用程式自帶回答沒有涵蓋的問題，會得到模型用它自己的話給出的回覆，並標明為一般建議。無論哪種情況，所有測量結果都來自應用程式。",
       "privacy": "一切都在本機執行。你的音訊不會離開這台電腦，正式版也不會錄音。",
       "recommended": "建議",
-      "timing": {
-        "title": "僅拍點回饋",
-        "desc": "不用下載。即時圓點、拍點評分與練習紀錄照常可用。"
+      "off": {
+        "title": "關閉",
+        "desc": "不用下載。教練根據你的每一遍和路線回答。"
       },
       "standard": {
         "title": "標準模型",
@@ -86,15 +88,11 @@
       "studioNeedsRam": "Studio 至少需要 16 GB 記憶體，本機只有 {{gb}} GB。",
       "standardNeedsRam": "標準模型至少需要 8 GB 記憶體，本機只有 {{gb}} GB。",
       "unavailableInBuild": "此版本不提供。",
-      "reasonNoLlm": "此版本無法執行模型，因此這裡如實建議僅拍點回饋。",
+      "reasonNoLlm": "此版本無法執行模型，因此這裡如實的選擇是「關閉」。",
       "reasonLowMemory": "本機記憶體為 {{gb}} GB，不足以順暢執行模型。",
       "reasonInstalled": "本機已下載，不需要再取得。",
       "downloadNote": "繼續時開始下載，並在背景持續進行。",
       "downloading": "正在下載教練模型",
-      "tryListening": {
-        "label": "仍然試試聆聽功能",
-        "hint": "兩步就好：選擇輸入、彈八拍、看看你的拍點。"
-      },
       "voiceReady": "教練語音已就緒。",
       "voicePick": "選擇語音",
       "voiceDismiss": "關閉"
@@ -189,7 +187,7 @@
       },
       "controlKeyboard": "鍵盤",
       "controlFootswitch": "踏板開關",
-      "coachTiming": "僅節奏回饋",
+      "coachTiming": "關閉：根據你的每一遍和路線回答",
       "inputNone": "未設定",
       "alwaysOnTop": "永遠在最上層",
       "start": "前往今天",

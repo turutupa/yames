@@ -67,13 +67,15 @@
     },
     "coach": {
       "title": "练习教练",
-      "what1": "教练通过音频输入聆听，并为你的时值与节拍器的贴合程度打分。",
-      "what2": "每段结束后会写一份简短报告；下载模型后还会说明接下来该练什么。",
+      "what1": "教练读你的每一遍和你的路线：给你「今天」的一句话，每一遍之后的一条笔记，你问时回答。",
+      "question": "教练是否也用它自己的话回答？",
+      "withoutModel": "关闭时仍然有这句话、这条笔记、工具，以及根据你的每一遍和路线给出的回答。",
+      "modelBuys": "有了模型，应用自带回答没有覆盖的问题，会得到模型用它自己的话给出的回复，并标明为一般建议。无论哪种情况，所有测量结果都来自应用。",
       "privacy": "一切都在本机运行。你的音频不会离开这台电脑，正式版也不会录音。",
       "recommended": "推荐",
-      "timing": {
-        "title": "仅时值反馈",
-        "desc": "无需下载。实时圆点、时值评分和练习记录照常可用。"
+      "off": {
+        "title": "关闭",
+        "desc": "无需下载。教练根据你的每一遍和路线回答。"
       },
       "standard": {
         "title": "标准模型",
@@ -86,15 +88,11 @@
       "studioNeedsRam": "Studio 至少需要 16 GB 内存，本机只有 {{gb}} GB。",
       "standardNeedsRam": "标准模型至少需要 8 GB 内存，本机只有 {{gb}} GB。",
       "unavailableInBuild": "此版本不提供。",
-      "reasonNoLlm": "此版本无法运行模型，所以这里如实推荐仅时值反馈。",
+      "reasonNoLlm": "此版本无法运行模型，所以这里如实的选择是「关闭」。",
       "reasonLowMemory": "本机内存为 {{gb}} GB，不足以流畅运行模型。",
       "reasonInstalled": "本机已下载，无需再次获取。",
       "downloadNote": "继续时开始下载，并在后台继续。",
       "downloading": "正在下载教练模型",
-      "tryListening": {
-        "label": "仍然试试聆听功能",
-        "hint": "两步就好：选择输入，弹八拍，看看你的时值。"
-      },
       "voiceReady": "教练语音已就绪。",
       "voicePick": "选择语音",
       "voiceDismiss": "关闭"
@@ -189,7 +187,7 @@
       },
       "controlKeyboard": "键盘",
       "controlFootswitch": "踏板开关",
-      "coachTiming": "仅节奏反馈",
+      "coachTiming": "关闭：根据你的每一遍和路线回答",
       "inputNone": "未设置",
       "alwaysOnTop": "总在最前",
       "start": "前往今天",

@@ -128,7 +128,7 @@
       "removeTierLabel": "{{name}}を削除",
       "olderCopy": "このモデルの古いコピーもディスクに残っています · {{size}}",
       "removeOlderCopyLabel": "{{name}}の古いコピーを削除",
-      "removeModels": "モデルを削除",
+      "removeModels": "モデルとボイスを削除",
       "stance": "コーチのスタイル",
       "stanceHint": "ツールで演奏中、コーチがどれだけ厳しいか",
       "stanceStrict": "厳しめ",
@@ -137,7 +137,26 @@
       "stanceLearningDesc": "何か言うまでの余裕を1.5倍にし、演奏中は指摘を耳に入れず、うまくいったところから話します。採点はどちらでもまったく同じに計算されます。",
       "cuesNoVoice": "コーチの声が必要です: 上でスタンダードかスタジオを選んでください。それまでは画面に表示されます。",
       "toolsOnly": "ツールのみ",
-      "toolsOnlyHint": "メトロノーム、テンポ練習、ジャムで有効です。セッションの採点は常に同じです。"
+      "toolsOnlyHint": "メトロノーム、テンポ練習、ジャムで有効です。セッションの採点は常に同じです。",
+      "groups": {
+        "answers": "答え",
+        "voice": "声",
+        "suggestions": "提案",
+        "notebook": "ノート",
+        "tools": "ツールで"
+      },
+      "answersRuleMade": "コーチはテイクとコースから答えます。",
+      "answersLangs": "自分の言葉で答える言語：{{langs}}。",
+      "notebook": {
+        "leftOutTitle": "外した項目",
+        "empty": "外した項目はありません。",
+        "leftOutOn": "{{date}}に外しました",
+        "bringBack": "戻す",
+        "broughtBack": "ノートに戻りました。",
+        "lineGone": "最近のテイクにもう表れない項目",
+        "comesBack": "外した項目は30日後に自動で戻ります。削除されるものはありません。",
+        "unreadableEntries": "一部の項目は、このバージョンでは読み取れない形で外されています。保存されたまま、外した状態が続きます。"
+      }
     },
     "general": {
       "title": "一般",

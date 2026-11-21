@@ -65,7 +65,13 @@ export interface Shot {
      * Path is subscribed (QA 2026-11-17 #7).
      */
     /** `slipped`: `returning`, its last Take with per-bar figures in which the tune's first bar slipped (Today's line). */
-    seed: "first" | "returning" | "back" | "three" | "none" | "ungraded" | "slipped" | "notebook";
+    /**
+     * The companion's seeds (c4b4; `companionSeed` in mockIpc.ts), one proactive
+     * card each: `week` the look-back (three Sessions last week), `plateau` the
+     * question, `milestone` the first Exercise passed yesterday, `levelDone` a
+     * Level finished yesterday (its milestone, and the Path suggestion on Paths).
+     */
+    seed: "first" | "returning" | "back" | "three" | "none" | "ungraded" | "slipped" | "notebook" | "week" | "plateau" | "milestone" | "levelDone";
     /**
      * c5a2: a Songs passage of the library's first song came due three days
      * ago (`list_due`), bars 2 to 4 as played; Today's line names it.
@@ -431,6 +437,8 @@ export interface Shot {
       | "soundLook"
       /** W3, reached by skipping the steps before it. */
       | "handsFree"
+      /** W4, the coach's one question (leg c6a): reached by answering W5's question "No". */
+      | "coach"
       | "ready";
     /** "What do you want most right now?", answered on the start step (`startRecommendation.ts`). */
     goal?: "basics" | "harmony" | "technique" | "speed";
@@ -871,7 +879,7 @@ export const SHOTS: Shot[] = [
     settleMs: 300,
   },
   // The first run (MVP). Not on the site: the layout suite opens them.
-  ...(["welcome", "instrument", "start", "inputAsk", "input", "inputSilent", "inputNone", "soundLook", "handsFree", "ready"] as const).map(
+  ...(["welcome", "instrument", "start", "inputAsk", "input", "inputSilent", "inputNone", "soundLook", "handsFree", "coach", "ready"] as const).map(
     (stop): Shot => ({
       id: `firstrun-${stop.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`,
       suffix: `firstrun-${stop.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`,
@@ -1948,6 +1956,63 @@ export const SHOTS: Shot[] = [
     height: 900,
     settleMs: 300,
   },
+  // The companion (c4b2, c4b3; scenes c4b4): one proactive card per seed, first
+  // on Progress; the Path suggestion last on Paths; the dot on the rail on Today.
+  // Measured by `tests/layout/companion.spec.ts`; phone copies are added below.
+  {
+    id: "progress-week",
+    suffix: "progress-week",
+    window: "main",
+    session: { seed: "week", stop: "progress" },
+    width: 1160,
+    height: 800,
+    settleMs: 300,
+  },
+  {
+    id: "progress-plateau",
+    suffix: "progress-plateau",
+    window: "main",
+    session: { seed: "plateau", stop: "progress" },
+    width: 1160,
+    height: 800,
+    settleMs: 300,
+  },
+  {
+    id: "progress-milestone",
+    suffix: "progress-milestone",
+    window: "main",
+    session: { seed: "milestone", stop: "progress" },
+    width: 1160,
+    height: 800,
+    settleMs: 300,
+  },
+  {
+    id: "progress-level-done",
+    suffix: "progress-level-done",
+    window: "main",
+    session: { seed: "levelDone", stop: "progress" },
+    width: 1160,
+    height: 800,
+    settleMs: 300,
+  },
+  {
+    id: "paths-suggestion",
+    suffix: "paths-suggestion",
+    window: "main",
+    session: { seed: "levelDone", stop: "paths" },
+    width: 1160,
+    height: 800,
+    settleMs: 300,
+  },
+  {
+    id: "today-dot",
+    suffix: "today-dot",
+    window: "main",
+    session: { seed: "week", stop: "today" },
+    width: 1160,
+    height: 800,
+    settleMs: 300,
+  },
   // The tours (card #50): Today with a three-part plan, then "Show me
   // around" from Settings. `?tourStop=N` walks to stop N.
   {
@@ -2383,6 +2448,13 @@ for (const id of PHONE_LEARNING_SCENES) {
 // above since the band's slider became thumb-sized, card #93). Today back after
 // a break on a phone: its header and line read together (hd1).
 for (const id of ["session-variant-runway", "step-line", "today-back"]) {
+  const desktop = SHOTS.find((s) => s.id === id);
+  if (desktop) SHOTS.push({ ...desktop, id: `phone-${id}`, suffix: `phone-${id}`, width: 360, height: 800 });
+}
+
+// The companion's scenes on a phone (c4b4): the card on Progress, the
+// suggestion on Paths, the dot on the tab bar.
+for (const id of ["progress-week", "progress-plateau", "progress-milestone", "paths-suggestion", "today-dot"]) {
   const desktop = SHOTS.find((s) => s.id === id);
   if (desktop) SHOTS.push({ ...desktop, id: `phone-${id}`, suffix: `phone-${id}`, width: 360, height: 800 });
 }
