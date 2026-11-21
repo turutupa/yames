@@ -113,6 +113,27 @@ fn the_beat_map_reads_a_tempo_step_off_the_log_not_off_a_bpm() {
     assert!((beats.interval_ms_at(1.0) - 500.0).abs() < 1e-9);
 }
 
+/// c5b1: the bars a hear-back cuts by are the engine's own bar lines, a meter
+/// change included, and a bar the Take stopped inside is not one of them.
+#[test]
+fn complete_bars_follow_the_engines_bar_lines_and_skip_an_unfinished_one() {
+    let mut beats = BeatMap::default();
+    // a 4/4 bar at 500 ms, a 3/4 bar at 500 ms, then two quarters of a 4/4 bar
+    for (i, per) in [4, 4, 4, 4, 3, 3, 3, 4, 4].iter().enumerate() {
+        beats.push_quarter_in_bar(1000.0 + i as f64 * 500.0, *per);
+    }
+    let bars = beats.complete_bars_ms();
+    assert_eq!(bars, vec![(1000.0, 3000.0), (3000.0, 4500.0)]);
+    // All of the last bar's quarters logged: its end is where the next would open.
+    for i in 9..11 {
+        beats.push_quarter_in_bar(1000.0 + i as f64 * 500.0, 4);
+    }
+    assert_eq!(beats.complete_bars_ms().last(), Some(&(4500.0, 6500.0)));
+    // A fixture's map, with no bar lines logged, counts bars of four.
+    assert_eq!(steady(120.0, 9).complete_bars_ms(), vec![(0.0, 2000.0), (2000.0, 4000.0)]);
+    assert_eq!(steady(120.0, 7).complete_bars_ms(), vec![(0.0, 2000.0)]);
+}
+
 #[test]
 fn the_beat_map_inverts_itself() {
     let beats = steady(120.0, 9);
