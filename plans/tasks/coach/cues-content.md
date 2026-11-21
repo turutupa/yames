@@ -76,8 +76,11 @@ count-in: an order they can carry out, about the hands or the count, true of the
 
 - **`check` passing is not enough.** It reports 0 errors while a cue is silently dropped from some
   variants (a key change that is not a plain transposition loses a cue that says "pair", "cross",
-  "root", "new fret", or names a string or fret). After each Level run `refusals-entry.ts` (below): it
-  lists what `cueTexts` drops and why. Reword until it lists nothing.
+  "root", "new fret", or names a string or fret). **Since leg vr1 (session 2) `npm run paths -- check
+  <path>` prints these itself**: `cue.refused` (a variant cannot say the cue) and `variant.rewritten`
+  (a variant says it in other words: read each one, it must be true of that variant's tab), and the
+  error `variant.rewrite`. Reword until `cue.refused` lists nothing for your Path. `refusals-entry.ts`
+  is no longer needed.
 - The checker reads a bare "B", "G", "D" or "E strings" as a chord name or a string it cannot tell
   apart: write "the B string", name one string and one fret, and name a chord as a chord.
 - The proof-readers' commonest objections: a place cue that missed its place in the tab; a cue true
@@ -100,9 +103,8 @@ count-in: an order they can carry out, about the hands or the count, true of the
 
 ## Size
 
-One Path is one leg. If your prompt names a second Path: start it only when the first is committed and
-gated **and** your context is still under about 110k tokens; otherwise stop and say the second was not
-started. Never leave a Path half translated at the end: a Path whose English cues are merged but whose
+One Path is one leg (session 2: every Path of 54 to 73 Exercises used 240k to 275k tokens; a Path over
+about 70 Exercises is two legs, by Level, and your prompt says which Levels are yours). Never leave a Path half translated at the end: a Path whose English cues are merged but whose
 overlays are not fails `check`. If you must stop mid-Path, stop before step 4 or after it, and say which.
 
 ## What you own

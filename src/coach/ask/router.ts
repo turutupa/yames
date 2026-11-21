@@ -1,0 +1,810 @@
+/**
+ * Typed commands: what the player typed, as one tool call, or "not a command"
+ * (TOOLS 2.1, the "typed command" row; DESIGN 5.3, engine 1; leg t1b2a).
+ *
+ * `routeCommand(text, table, facts)` is pure: no React, no store, no i18n
+ * runtime, nothing run. It returns one of
+ *
+ * - `call`: a tool call the runner (`runCoachTool`) takes as it is;
+ * - `which`: two or more calls the words could mean, for "Which one?";
+ * - `yours`: a never-list item, for "that one is yours" (`askYours`);
+ * - `none`: not a command. Ask falls through to its next way of answering.
+ *   `notHere` carries the call when the words were a command whose tool
+ *   cannot run here (its `when` says no): the caller may let the runner say
+ *   why, which changes nothing.
+ *
+ * ## A wrong action is the failure that matters
+ *
+ * So the router prefers `none` to a guess, in this order:
+ *
+ * 1. A question is not a command: a question mark, or a first word from the
+ *    table's `questions` ("why", "can", "is"). "Can you open Paths for me
+ *    later?" is answered, not obeyed.
+ * 2. A sentence about something is not a command: any word from
+ *    `notCommand` ("I", "it", "later", "not", "yesterday", "than").
+ * 3. A never-list word answers `yours`, before any verb is looked at, so
+ *    "start recording" or "open grading settings" can never become a call.
+ * 4. Then the command itself, matched whole: a verb first (anywhere, in a
+ *    language written without spaces) and everything after it accounted for.
+ *    A word left over that the command does not use means `none`.
+ *
+ * Names (a Path, a Step, an Exercise, a jam, a preset) go to the tool as
+ * `query`, as the player wrote them; the app resolves them (`resolve.ts`).
+ * Numbers go as typed; the tools snap them.
+ *
+ * ## A bare number
+ *
+ * A tempo where a tempo can be set (Metronome, Drill, a jam, a Session
+ * between Takes); minutes on Today, where that is the only number that makes
+ * sense; "Which one?" with both where both could be meant and both can run;
+ * otherwise nothing. A number that cannot be a tempo (under 20, over 300) is
+ * not one, and one that cannot be today's minutes (over 60) is not those.
+ */
+import type { CoachContext } from "../context";
+import type { NeverItem } from "../../containers/coach/neverList";
+import { ROOT_NAMES } from "../blocks/spec";
+import { chordNamePattern } from "../blocks/schema";
+import { COACH_TOOLS } from "../tools/registry";
+import { line, type CoachTool, type Line, type ToolArgs, type ToolCall, type ToolChoice } from "../tools/types";
+import {
+  CONNECTOR_IDS,
+  NOUN_IDS,
+  UNIT_IDS,
+  phraseKey,
+  type CommandTable,
+  type ConnectorId,
+  type NounId,
+  type UnitId,
+  type VerbId,
+} from "./commandTable";
+
+// ---------------------------------------------------------------------------
+// What the router is told, and what it says
+// ---------------------------------------------------------------------------
+
+/** The little the router needs to know about where the player is. Plain data. */
+export type CommandFacts = {
+  /** The view on screen (`MainView`), or the coach's screen when the view is not known. */
+  view: string;
+  /** For each player tool, whether its `when(ctx)` says it can run here. */
+  possible: Readonly<Record<string, boolean>>;
+  /** A tempo can be set here (`set_tempo` can run). */
+  tempo: boolean;
+  /** Today's minutes are the number that makes sense here (Today, `set_minutes` can run). */
+  minutes: boolean;
+  /** A Session is on its ready or result screen. */
+  betweenTakes: boolean;
+};
+
+export type RouteResult =
+  | { kind: "call"; call: ToolCall }
+  | { kind: "which"; choices: readonly ToolChoice[] }
+  | { kind: "yours"; item: NeverItem }
+  | { kind: "none"; notHere?: ToolCall };
+
+/**
+ * The facts, from the coach's context and the view on screen (`host.view()`;
+ * Settings is a view the context reports as Today). Every player tool's
+ * `when` is asked once; one that throws counts as "cannot run".
+ */
+export function commandFacts(ctx: CoachContext, view?: string | null, registry: readonly CoachTool[] = COACH_TOOLS): CommandFacts {
+  const possible: Record<string, boolean> = {};
+  for (const tool of registry) {
+    if (tool.audience !== "player") continue;
+    try {
+      possible[tool.name] = tool.when(ctx) === true;
+    } catch {
+      possible[tool.name] = false;
+    }
+  }
+  const at = view ?? ctx.screen;
+  const phase = ctx.run?.phase;
+  return {
+    view: at,
+    possible,
+    tempo: possible.set_tempo === true,
+    minutes: possible.set_minutes === true && at === "today",
+    betweenTakes: phase === "ready" || phase === "result",
+  };
+}
+
+const NONE: RouteResult = { kind: "none" };
+
+/** Where a bare "start" / "play" means today's Session. */
+const START_SCREENS = new Set(["today", "paths", "path", "step", "progress"]);
+
+/** A tempo a player types (the tool screens allow 20 to 300). */
+const TEMPO_MIN = 20;
+const TEMPO_MAX = 300;
+/** Today's minutes a bare number may be (the picker has 5 to 20). */
+const MINUTES_BARE_MAX = 60;
+/** The longest name, in words, the router hands a tool as a `query`. */
+const QUERY_WORDS = 6;
+const QUERY_CHARS = 80;
+
+// ---------------------------------------------------------------------------
+// The table, compiled once
+// ---------------------------------------------------------------------------
+
+type Toks = readonly string[];
+type Phrases = readonly Toks[];
+
+type Compiled = {
+  noSpaces: boolean;
+  verbs: Array<{ id: VerbId; words: Toks }>;
+  screens: Array<{ id: string; words: Toks }>;
+  sections: Array<{ id: string; words: Toks }>;
+  settingKeys: Array<{ id: string; words: Toks }>;
+  onOff: Array<{ id: string; words: Toks }>;
+  scales: Array<{ id: string; words: Toks }>;
+  positions: Array<{ id: string; words: Toks }>;
+  swapChoices: Array<{ id: string; words: Toks }>;
+  never: Array<{ id: NeverItem; words: Toks }>;
+  units: Record<UnitId, Phrases>;
+  nouns: Record<NounId, Phrases>;
+  connectors: Record<ConnectorId, Phrases>;
+  sharp: Phrases;
+  flat: Phrases;
+  ordinals: Map<string, number>;
+  unitWords: Set<string>;
+  questions: Phrases;
+  notCommand: Phrases;
+  polite: Phrases;
+  fillers: Phrases;
+};
+
+const compiledTables = new WeakMap<CommandTable, Compiled>();
+
+/** Tokens: words with spaces; with no spaces, runs of digits, runs of Latin letters, and single characters. */
+function tokenize(text: string, noSpaces: boolean): string[] {
+  if (!noSpaces) return text.split(" ").filter((t) => t.length > 0);
+  return text.replace(/ /g, "").match(/\d+|[a-z#'-]+|./gu) ?? [];
+}
+
+const byLength = (a: { words: Toks } | Toks, b: { words: Toks } | Toks): number =>
+  ("words" in b ? b.words : b).length - ("words" in a ? a.words : a).length;
+
+function compile(table: CommandTable): Compiled {
+  const hit = compiledTables.get(table);
+  if (hit) return hit;
+  const ns = table.noSpaces;
+  const toks = (p: string): Toks => tokenize(phraseKey(p), ns);
+  const phrases = (words: readonly string[] | undefined): Phrases => (words ?? []).map(toks).filter((t) => t.length > 0).sort(byLength);
+  const entries = <K extends string>(group: Partial<Record<K, readonly string[]>>): Array<{ id: K; words: Toks }> =>
+    (Object.entries(group) as Array<[K, readonly string[] | undefined]>)
+      .flatMap(([id, words]) => phrases(words).map((w) => ({ id, words: w })))
+      .sort(byLength);
+  const record = <K extends string>(ids: readonly K[], group: Partial<Record<K, readonly string[]>>): Record<K, Phrases> =>
+    Object.fromEntries(ids.map((id) => [id, phrases(group[id])])) as Record<K, Phrases>;
+  const units = record(UNIT_IDS, table.units);
+  const compiled: Compiled = {
+    noSpaces: ns,
+    verbs: entries(table.verbs),
+    screens: entries(table.screens),
+    sections: entries(table.sections),
+    settingKeys: entries(table.settingKeys),
+    onOff: entries(table.onOff),
+    scales: entries(table.scales),
+    positions: entries(table.positions),
+    swapChoices: entries(table.swapChoices),
+    never: entries(table.never),
+    units,
+    nouns: record(NOUN_IDS, table.nouns),
+    connectors: record(CONNECTOR_IDS, table.connectors),
+    sharp: phrases(table.roots.sharp),
+    flat: phrases(table.roots.flat),
+    ordinals: new Map(Object.entries(table.ordinals ?? {}).map(([w, n]) => [phraseKey(w), n])),
+    unitWords: new Set(Object.values(units).flatMap((ps) => ps.filter((p) => p.length === 1).map((p) => p[0]))),
+    questions: phrases(table.questions),
+    notCommand: phrases(table.notCommand),
+    polite: phrases(table.polite),
+    fillers: phrases(table.fillers),
+  };
+  compiledTables.set(table, compiled);
+  return compiled;
+}
+
+// ---------------------------------------------------------------------------
+// Matching
+// ---------------------------------------------------------------------------
+
+function startsWith(t: Toks, p: Toks, at = 0): boolean {
+  if (p.length === 0 || at + p.length > t.length) return false;
+  for (let i = 0; i < p.length; i++) if (t[at + i] !== p[i]) return false;
+  return true;
+}
+
+function endsWith(t: Toks, p: Toks): boolean {
+  return t.length >= p.length && startsWith(t, p, t.length - p.length);
+}
+
+function equals(t: Toks, p: Toks): boolean {
+  return t.length === p.length && startsWith(t, p);
+}
+
+function indexOf(t: Toks, p: Toks): number {
+  for (let i = 0; i + p.length <= t.length; i++) if (startsWith(t, p, i)) return i;
+  return -1;
+}
+
+/** The longest of `phrases` at the start of `t`, or null. */
+function lead(t: Toks, phrases: Phrases): Toks | null {
+  for (const p of phrases) if (startsWith(t, p)) return p;
+  return null;
+}
+
+/** `t` without a leading phrase from `phrases`, or null when none leads it. */
+function after(t: Toks, phrases: Phrases): Toks | null {
+  const p = lead(t, phrases);
+  return p ? t.slice(p.length) : null;
+}
+
+/** `t` with any one of `phrases` taken off its start, if one is there. */
+function skip(t: Toks, phrases: Phrases): Toks {
+  return after(t, phrases) ?? t;
+}
+
+/** `t` without a trailing phrase from `phrases`, or null. */
+function before(t: Toks, phrases: Phrases): Toks | null {
+  for (const p of phrases) if (endsWith(t, p)) return t.slice(0, t.length - p.length);
+  return null;
+}
+
+function exactId<T extends string>(t: Toks, entries: ReadonlyArray<{ id: T; words: Toks }>): T | null {
+  for (const e of entries) if (equals(t, e.words)) return e.id;
+  return null;
+}
+
+function leadId<T extends string>(t: Toks, entries: ReadonlyArray<{ id: T; words: Toks }>): { id: T; rest: Toks } | null {
+  for (const e of entries) if (startsWith(t, e.words)) return { id: e.id, rest: t.slice(e.words.length) };
+  return null;
+}
+
+function contains(t: Toks, phrases: Phrases): boolean {
+  return phrases.some((p) => indexOf(t, p) >= 0);
+}
+
+function joinToks(t: Toks, c: Compiled): string {
+  return t.join(c.noSpaces ? "" : " ");
+}
+
+/** A whole number as typed (digits only, at most four). */
+function num(token: string | undefined): number | null {
+  return token !== undefined && /^\d{1,4}$/.test(token) ? Number(token) : null;
+}
+
+// ---------------------------------------------------------------------------
+// The text
+// ---------------------------------------------------------------------------
+
+type Text = { toks: Toks; question: boolean };
+
+function normalize(text: string, c: Compiled): Text {
+  let s = text.normalize("NFKC").toLowerCase().replace(/[’‘`´]/g, "'");
+  const question = /[?¿？]/.test(s);
+  // A range typed "3-4" or "3–4" is "3 - 4"; a hyphen inside a word ("count-in") stays.
+  s = s.replace(/(\d)\s*[-–—]\s*(?=\d)/g, "$1 - ");
+  s = s.replace(/[^\p{L}\p{N}\p{M}#'\- ]+/gu, " ").replace(/\s+/g, " ").trim();
+  const raw = tokenize(s, c.noSpaces);
+  // "80bpm", "15min": a number glued to a unit is two words. Only a unit: "16th" stays one.
+  const toks: string[] = [];
+  for (const tok of raw) {
+    const glued = /^(\d+)(\p{L}+)$/u.exec(tok);
+    if (glued && c.unitWords.has(glued[2])) toks.push(glued[1], glued[2]);
+    else if (tok !== "'" ) toks.push(tok);
+  }
+  return { toks, question };
+}
+
+function stripPolite(t: Toks, c: Compiled): Toks {
+  let out = t;
+  for (let moved = true; moved && out.length > 0; ) {
+    moved = false;
+    const front = after(out, c.polite);
+    if (front) {
+      out = front;
+      moved = true;
+    }
+    const back = before(out, c.polite);
+    if (back) {
+      out = back;
+      moved = true;
+    }
+  }
+  return out;
+}
+
+function isQuestion(t: Toks, c: Compiled): boolean {
+  return c.noSpaces ? contains(t, c.questions) : lead(t, c.questions) !== null;
+}
+
+function neverItem(t: Toks, c: Compiled): NeverItem | null {
+  for (const e of c.never) if (indexOf(t, e.words) >= 0) return e.id;
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// The calls
+// ---------------------------------------------------------------------------
+
+const call = (tool: string, args: ToolArgs = {}): ToolCall => ({ tool, args });
+
+/** A name to hand a tool as `query`: a few words, none of them a number, a unit or a verb. */
+function query(t: Toks, c: Compiled): string | null {
+  let q = t;
+  for (let f = lead(q, c.fillers); f; f = lead(q, c.fillers)) q = q.slice(f.length);
+  // "follow me": nothing is named.
+  if (q.length === 0) return null;
+  // "start a new session" asks for today's Session in words the router does not take; it is not an Exercise's name.
+  if (contains(q, c.nouns.session)) return null;
+  if (!c.noSpaces && q.length > QUERY_WORDS) return null;
+  if (q.some((tok) => num(tok) !== null || tok === "-")) return null;
+  if (lead(q, Object.values(c.connectors).flat())) return null;
+  for (const v of c.verbs) if (v.id === "slower" || v.id === "faster") if (indexOf(q, v.words) >= 0) return null;
+  for (const u of Object.values(c.units)) if (contains(q, u)) return null;
+  // "start the metronome" names a screen, not an Exercise.
+  if (exactId(q, c.screens) !== null) return null;
+  const text = joinToks(q, c);
+  return text.length > 0 && text.length <= QUERY_CHARS ? text : null;
+}
+
+/** Only fillers, or nothing at all. */
+function empty(t: Toks, c: Compiled): boolean {
+  let q = t;
+  for (let f = lead(q, c.fillers); f; f = lead(q, c.fillers)) q = q.slice(f.length);
+  return q.length === 0;
+}
+
+/** Try `parse` on `t`, then on `t` with one leading filler taken off, and so on. */
+function withFillers<R>(t: Toks, c: Compiled, parse: (t: Toks) => R | null): R | null {
+  for (let q: Toks | null = t; q; q = after(q, c.fillers)) {
+    const r = parse(q);
+    if (r !== null) return r;
+    if (q.length === 0) break;
+  }
+  return null;
+}
+
+/** A number, and the unit after it if there is one: `[80]`, `[80, bpm]`. */
+function numberWithUnit(t: Toks, c: Compiled): { n: number; unit: UnitId | null } | null {
+  const n = num(t[0]);
+  if (n === null) return null;
+  const rest = t.slice(1);
+  if (rest.length === 0) return { n, unit: null };
+  for (const unit of UNIT_IDS) for (const p of c.units[unit]) if (equals(rest, p)) return { n, unit };
+  return null;
+}
+
+/** "3", "3 to 4", "3 - 4", "the first": a range of bars. */
+function barRange(t: Toks, c: Compiled): { from: number; to?: number } | null {
+  let q = skip(t, c.fillers);
+  const ordinal = q.length > 0 ? c.ordinals.get(q[0]) : undefined;
+  if (ordinal !== undefined) {
+    const rest = after(q.slice(1), c.units.bar);
+    return rest && rest.length === 0 ? { from: ordinal } : null;
+  }
+  q = skip(q, c.units.bar);
+  const from = num(q[0]);
+  if (from === null || from < 1) return null;
+  if (q.length === 1) return { from };
+  const tail = after(q.slice(1), c.connectors.to);
+  const to = tail && tail.length === 1 ? num(tail[0]) : null;
+  if (to === null || to < from) return null;
+  return { from, to };
+}
+
+/** "step 7", "step 7 of alternate picking", "alternate picking step 7": a Step, and its Path's words. */
+function stepPlace(t: Toks, c: Compiled): { step: number; path?: string } | null {
+  const i = t.findIndex((_, k) => c.units.step.some((p) => startsWith(t, p, k)));
+  if (i < 0) return null;
+  const stepLen = (c.units.step.find((p) => startsWith(t, p, i)) ?? []).length;
+  const n = num(t[i + stepLen]);
+  if (n === null || n < 1) return null;
+  const head = t.slice(0, i);
+  const tail = t.slice(i + stepLen + 1);
+  if (head.length === 0 && tail.length === 0) return { step: n };
+  if (head.length > 0 && tail.length === 0) {
+    const path = query(skip(head, c.nouns.path), c);
+    return path ? { step: n, path } : null;
+  }
+  if (head.length === 0) {
+    const of = after(tail, c.connectors.of);
+    const path = of ? query(skip(of, c.nouns.path), c) : null;
+    return path ? { step: n, path } : null;
+  }
+  return null;
+}
+
+function bareNumber(n: number, f: CommandFacts): RouteResult {
+  const tempo = f.tempo && n >= TEMPO_MIN && n <= TEMPO_MAX;
+  const minutes = f.minutes && n >= 1 && n <= MINUTES_BARE_MAX;
+  if (tempo && minutes) return which([call("set_tempo", { bpm: n }), call("set_minutes", { minutes: n })], f);
+  if (tempo) return { kind: "call", call: call("set_tempo", { bpm: n }) };
+  if (minutes) return { kind: "call", call: call("set_minutes", { minutes: n }) };
+  return NONE;
+}
+
+/** A number with its unit, as the tool the unit names. */
+function unitCall(n: number, unit: UnitId | null): ToolCall | null {
+  switch (unit) {
+    case "bpm":
+      return call("set_tempo", { bpm: n });
+    case "minutes":
+      return call("set_minutes", { minutes: n });
+    case "clicks":
+      return n >= 1 && n <= 6 ? call("click_subdivision", { subdivision: n }) : null;
+    case "step":
+    case "bar":
+    case "part":
+    case null:
+      return null;
+  }
+}
+
+/** "theme velvet", "count in on", "band volume 80": a safe setting and its value. */
+function settingCall(t: Toks, c: Compiled): ToolCall | null {
+  const key = leadId(t, c.settingKeys);
+  if (!key) return null;
+  const rest = skip(key.rest, c.connectors.to);
+  if (rest.length === 0) return null;
+  switch (key.id) {
+    case "countIn":
+    case "coachVoice":
+    case "coachSuggestions": {
+      const value = exactId(rest, c.onOff);
+      return value ? call("set_setting", { key: key.id, value }) : null;
+    }
+    case "bandVolume": {
+      const n = rest.length === 1 ? num(rest[0]) : null;
+      return n !== null && n <= 150 ? call("set_setting", { key: key.id, value: String(n) }) : null;
+    }
+    default: {
+      if (!c.noSpaces && rest.length > 3) return null;
+      const value = query(rest, c);
+      return value ? call("set_setting", { key: key.id, value }) : null;
+    }
+  }
+}
+
+/** "settings", "practice settings", "settings practice", "settings · coach". */
+function settingsCall(t: Toks, c: Compiled): ToolCall | null {
+  const settings = c.screens.filter((s) => s.id === "settings").map((s) => s.words);
+  const tail = after(t, settings);
+  const head = before(t, settings);
+  const section = tail !== null ? skip(tail, [...c.connectors.of, ...c.fillers]) : head !== null ? head : null;
+  if (section === null) return null;
+  const named = skip(section, c.fillers);
+  if (named.length === 0) return call("go_to", { screen: "settings" });
+  const id = exactId(named, c.sections);
+  return id ? call("open_settings", { section: id }) : null;
+}
+
+/** A screen by its name alone: "paths", "the metronome", "settings". */
+function screenCall(t: Toks, c: Compiled): ToolCall | null {
+  const settings = settingsCall(t, c);
+  if (settings) return settings;
+  const id = exactId(skip(t, c.fillers), c.screens);
+  return id ? call("go_to", { screen: id }) : null;
+}
+
+/** "a minor pentatonic", "c sharp dorian root on 5", "the a blues scale". */
+function scaleCall(t: Toks, c: Compiled): ToolCall | null {
+  const root = rootAt(t, c);
+  if (!root) return null;
+  const scale = leadId(root.rest, c.scales);
+  if (!scale) return null;
+  const rest = skip(scale.rest, c.nouns.scale);
+  const args: Record<string, string> = { root: root.name, scale: scale.id };
+  if (rest.length > 0) {
+    const position = leadId(skip(rest, [...c.connectors.of, ...c.fillers]), c.positions);
+    if (!position || position.rest.length > 0) return null;
+    args.position = position.id;
+  }
+  return call("show_scale", args);
+}
+
+/** A root note: a letter, then "#", "b", "sharp" or "flat". */
+function rootAt(t: Toks, c: Compiled): { name: string; rest: Toks } | null {
+  const first = t[0];
+  if (!first) return null;
+  const letter = /^([a-g])(#|b)?$/.exec(first);
+  if (!letter) return null;
+  let name = letter[1].toUpperCase() + (letter[2] ?? "");
+  let rest: Toks = t.slice(1);
+  if (!letter[2]) {
+    const sharp = after(rest, c.sharp);
+    const flat = sharp ? null : after(rest, c.flat);
+    if (sharp) {
+      name += "#";
+      rest = sharp;
+    } else if (flat) {
+      name += "b";
+      rest = flat;
+    }
+  }
+  return ROOT_NAMES.includes(name) ? { name, rest } : null;
+}
+
+let chordPattern: RegExp | null = null;
+
+/** "chord am7", "the c#m7 chord", "am7": a chord the app can draw. A lone root needs the word "chord". */
+function chordCall(t: Toks, c: Compiled): ToolCall | null {
+  const named = after(t, c.nouns.chord) ?? before(t, c.nouns.chord);
+  const body = named ?? t;
+  if (body.length !== 1) return null;
+  const tok = body[0];
+  const name = tok.charAt(0).toUpperCase() + tok.slice(1);
+  chordPattern ??= new RegExp(chordNamePattern());
+  if (!chordPattern.test(name)) return null;
+  if (named === null && ROOT_NAMES.includes(name)) return null;
+  return call("show_chord", { chord: name });
+}
+
+// ---------------------------------------------------------------------------
+// The verbs
+// ---------------------------------------------------------------------------
+
+function verbAt(t: Toks, c: Compiled): { id: VerbId; rest: Toks } | null {
+  if (!c.noSpaces) return leadId(t, c.verbs);
+  // Without spaces the verb may sit anywhere (Japanese and Korean put it last).
+  // What is left keeps its particles in the middle; the ones at either end are dropped ("パスを" → "パス").
+  for (const v of c.verbs) {
+    const i = indexOf(t, v.words);
+    if (i < 0) continue;
+    let rest: Toks = [...t.slice(0, i), ...t.slice(i + v.words.length)];
+    for (let back = before(rest, c.fillers); back; back = before(rest, c.fillers)) rest = back;
+    return { id: v.id, rest };
+  }
+  return null;
+}
+
+type Parsed = readonly ToolCall[] | RouteResult | null;
+
+function parseVerb(id: VerbId, rest: Toks, c: Compiled, f: CommandFacts): Parsed {
+  switch (id) {
+    case "open": {
+      if (rest.length === 0) return null;
+      const screen = screenCall(rest, c);
+      if (screen) return [screen];
+      const step = stepPlace(skip(rest, c.fillers), c);
+      if (step) return [call("open_step", step.path ? { path: step.path, step: step.step } : { step: step.step })];
+      const named = after(skip(rest, c.fillers), c.nouns.path) ?? before(rest, c.nouns.path) ?? rest;
+      const path = query(named, c);
+      return path ? [call("open_path", { path })] : null;
+    }
+    case "start": {
+      const q = skip(rest, c.fillers);
+      if (q.length === 0) return START_SCREENS.has(f.view) ? [call("start_today")] : null;
+      // "start today", "start today's session at part 3", "start at 3", "start part 3".
+      const session = after(q, c.nouns.session);
+      const at = startAt(session ?? q, c);
+      if (session !== null && session.length === 0) return [call("start_today")];
+      if (at !== null) return [call("start_today", { at })];
+      if (session !== null) return null;
+      // "play outside picking", "play outside picking at 80".
+      const exercise = skip(q, c.nouns.exercise);
+      const atIndex = exercise.findIndex((_tok, k) => c.connectors.at.some((p) => startsWith(exercise, p, k)) && num(exercise[k + 1]) !== null);
+      if (atIndex > 0) {
+        const tempo = numberWithUnit(exercise.slice(atIndex + 1), c);
+        const name = query(exercise.slice(0, atIndex), c);
+        if (!tempo || (tempo.unit !== null && tempo.unit !== "bpm") || !name) return null;
+        return [call("play_exercise", { exercise: name, bpm: tempo.n })];
+      }
+      const name = query(exercise, c);
+      return name ? [call("play_exercise", { exercise: name })] : null;
+    }
+    case "slower":
+    case "faster":
+      return empty(rest, c) ? [call("set_tempo", { direction: id })] : null;
+    case "loop": {
+      const range = barRange(rest, c);
+      return range ? [call("loop_bars", range)] : null;
+    }
+    case "show": {
+      return withFillers(rest, c, (q) => {
+        const bars = after(q, c.units.bar);
+        if (bars) {
+          const range = barRange(bars, c);
+          return range ? [call("show_bars", range)] : null;
+        }
+        const scale = scaleCall(q, c);
+        if (scale) return [scale];
+        const chord = chordCall(q, c);
+        return chord ? [chord] : null;
+      });
+    }
+    case "follow": {
+      const named = after(skip(rest, c.fillers), c.nouns.path) ?? before(rest, c.nouns.path) ?? rest;
+      const path = query(named, c);
+      return path ? [call("follow_path", { path })] : null;
+    }
+    case "load": {
+      const q = skip(rest, c.fillers);
+      const jam = after(q, c.nouns.jam) ?? before(q, c.nouns.jam);
+      if (jam) {
+        const name = query(jam, c);
+        return name ? [call("load_jam", { jam: name })] : null;
+      }
+      const preset = after(q, c.nouns.preset) ?? before(q, c.nouns.preset);
+      if (preset) {
+        const name = query(preset, c);
+        return name ? [call("load_preset", { preset: name })] : null;
+      }
+      const name = query(q, c);
+      return name ? [call("load_jam", { jam: name }), call("load_preset", { preset: name })] : null;
+    }
+    case "set":
+      return parseSet(skip(rest, c.fillers), c, f);
+    case "focus": {
+      const q = skip(skip(rest, c.connectors.of), c.fillers);
+      if (q.length === 0) return null;
+      if (c.nouns.mix.some((p) => equals(q, p))) return [call("set_focus")];
+      const path = query(skip(q, c.nouns.path), c);
+      return path ? [call("set_focus", { path })] : null;
+    }
+    case "swap": {
+      const q = skip(skip(rest, c.fillers), c.units.part);
+      const at = num(q[0]);
+      if (at === null || at < 1) return null;
+      const tail = skip(skip(q.slice(1), c.connectors.for), c.fillers);
+      if (tail.length === 0) return SWAP_ORDER.map((choice) => call("swap_part", { at, choice }));
+      const choice = exactId(tail, c.swapChoices);
+      return choice ? [call("swap_part", { at, choice })] : null;
+    }
+    case "findEdge": {
+      const name = query(skip(skip(rest, c.connectors.of), c.nouns.exercise), c);
+      return name ? [call("find_edge", { exercise: name })] : null;
+    }
+    case "testOut": {
+      const q = skip(skip(rest, c.connectors.of), c.fillers);
+      const step = stepPlace(q, c);
+      if (step) return [call("test_out", step.path ? { path: step.path, step: step.step } : { step: step.step })];
+      const name = query(q, c);
+      return name ? [call("test_out", { query: name })] : null;
+    }
+    case "explain": {
+      const q = skip(rest, c.fillers);
+      return q.length === 0 || c.nouns.screen.some((p) => equals(q, p)) ? [call("explain_screen")] : null;
+    }
+    case "make": {
+      const q = skip(rest, c.fillers);
+      if (q.length === 0 || (!c.noSpaces && q.length > 8)) return null;
+      const shape = joinToks(q, c);
+      return shape.length <= QUERY_CHARS ? [call("make_exercise", { shape })] : null;
+    }
+  }
+}
+
+const SWAP_ORDER = ["harder", "different", "style"] as const;
+
+/** "at 3", "at part 3", "part 3", "from 3": the part of today's plan to start at. */
+function startAt(t: Toks, c: Compiled): number | null {
+  const q = skip(skip(t, c.connectors.at), c.units.part);
+  const n = q.length === 1 ? num(q[0]) : null;
+  return n !== null && n >= 1 && n <= MAX_START_PART ? n : null;
+}
+
+/** `start_today`'s `at` (the tool's `MAX_PART`). */
+const MAX_START_PART = 20;
+
+function parseSet(t: Toks, c: Compiled, f: CommandFacts): Parsed {
+  if (t.length === 0) return null;
+  // "set 80", "set 80 bpm", "set 15 minutes", "set 2 clicks".
+  const counted = numberWithUnit(t, c);
+  if (counted) {
+    if (counted.unit === null) return bareNumber(counted.n, f);
+    const made = unitCall(counted.n, counted.unit);
+    return made ? [made] : null;
+  }
+  // "set the tempo to 80".
+  const tempo = after(t, c.nouns.tempo);
+  if (tempo) {
+    const n = numberWithUnit(skip(tempo, c.connectors.to), c);
+    return n && (n.unit === null || n.unit === "bpm") ? [call("set_tempo", { bpm: n.n })] : null;
+  }
+  // "set minutes to 15", "set clicks to 2".
+  for (const unit of ["minutes", "clicks"] as const) {
+    const rest = after(t, c.units[unit]);
+    if (rest) {
+      const n = skip(rest, c.connectors.to);
+      const made = n.length === 1 && num(n[0]) !== null ? unitCall(num(n[0])!, unit) : null;
+      return made ? [made] : null;
+    }
+  }
+  // "set my goal to play the solo at 120".
+  const goal = after(t, c.nouns.goal);
+  if (goal) {
+    const text = skip(goal, c.connectors.to);
+    return text.length > 0 ? [call("set_goal", { text: joinToks(text, c) })] : null;
+  }
+  const setting = settingCall(t, c);
+  return setting ? [setting] : null;
+}
+
+/** The forms with no verb: "80", "80 bpm", "15 minutes", "step 7", "paths", "theme velvet". */
+function parseBare(t: Toks, c: Compiled, f: CommandFacts): Parsed {
+  const counted = numberWithUnit(t, c);
+  if (counted) {
+    if (counted.unit === null) return bareNumber(counted.n, f);
+    const made = unitCall(counted.n, counted.unit);
+    return made ? [made] : null;
+  }
+  const tempo = after(t, c.nouns.tempo);
+  if (tempo) {
+    const n = numberWithUnit(skip(tempo, c.connectors.to), c);
+    return n && (n.unit === null || n.unit === "bpm") ? [call("set_tempo", { bpm: n.n })] : null;
+  }
+  const step = stepPlace(t, c);
+  if (step) return [call("open_step", step.path ? { path: step.path, step: step.step } : { step: step.step })];
+  const screen = screenCall(t, c);
+  if (screen) return [screen];
+  const setting = settingCall(t, c);
+  return setting ? [setting] : null;
+}
+
+// ---------------------------------------------------------------------------
+// The answer
+// ---------------------------------------------------------------------------
+
+/**
+ * A "Which one?" chip's words. Tempo reuses `coachTools.choice.rung`; the
+ * others are `coachTools.command.*`, keys leg t1b2b adds in fifteen locales
+ * with the wiring (nothing shows them before then).
+ */
+function labelOf(c: ToolCall): Line {
+  const a = c.args;
+  switch (c.tool) {
+    case "set_tempo":
+      return line("coachTools.choice.rung", { bpm: a.bpm ?? "" });
+    case "set_minutes":
+      return line("coachTools.command.minutes", { minutes: a.minutes ?? "" });
+    case "load_jam":
+      return line("coachTools.command.jam", { jam: a.jam ?? "" });
+    case "load_preset":
+      return line("coachTools.command.preset", { preset: a.preset ?? "" });
+    case "swap_part":
+      return line(
+        a.choice === "harder" ? "coachTools.command.swapHarder" : a.choice === "different" ? "coachTools.command.swapDifferent" : "coachTools.command.swapStyle",
+        { part: a.at ?? "" },
+      );
+    default:
+      return line("coachTools.command.other", { tool: c.tool });
+  }
+}
+
+/** Several calls: only the ones that can run here are offered. */
+function which(calls: readonly ToolCall[], f: CommandFacts): RouteResult {
+  const here = calls.filter((x) => f.possible[x.tool] === true);
+  if (here.length >= 2) return { kind: "which", choices: here.map((x) => ({ label: labelOf(x), call: x })) };
+  if (here.length === 1) return { kind: "call", call: here[0] };
+  return calls.length > 0 ? { kind: "none", notHere: calls[0] } : NONE;
+}
+
+function settle(parsed: Parsed, f: CommandFacts): RouteResult {
+  if (parsed === null) return NONE;
+  if ("kind" in parsed) return parsed;
+  const calls: readonly ToolCall[] = parsed;
+  if (calls.length === 0) return NONE;
+  if (calls.length === 1) return f.possible[calls[0].tool] === true ? { kind: "call", call: calls[0] } : { kind: "none", notHere: calls[0] };
+  return which(calls, f);
+}
+
+/**
+ * What the player typed, as a tool call, "Which one?", "that one is yours",
+ * or not a command. Pure; see the file's head for the order of the checks.
+ */
+export function routeCommand(text: string, table: CommandTable, facts: CommandFacts): RouteResult {
+  const c = compile(table);
+  const typed = normalize(text, c);
+  if (typed.question) return NONE;
+  const t = stripPolite(typed.toks, c);
+  if (t.length === 0) return NONE;
+  if (isQuestion(t, c)) return NONE;
+  if (contains(t, c.notCommand)) return NONE;
+  const never = neverItem(t, c);
+  if (never) return { kind: "yours", item: never };
+  // "a bit faster": a filler may come before the verb.
+  const verb = verbAt(t, c) ?? verbAt(skip(t, c.fillers), c);
+  if (verb) return settle(parseVerb(verb.id, verb.rest, c, facts), facts);
+  return settle(parseBare(t, c, facts), facts);
+}

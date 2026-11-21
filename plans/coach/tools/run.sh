@@ -24,7 +24,8 @@ if [ -e /tmp/yames-dgx-yield ]; then
   exit 75
 fi
 
-export PATH="$HOME/.cargo/bin:$PATH"
+export HOME="${HOME:-/home/dgx-delgado}"
+export PATH="$HOME/.cargo/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
 export CFLAGS='-std=gnu11 -Wno-implicit-function-declaration'
 export CARGO_TARGET_DIR="$HOME/.target-coach"
 export CARGO_BUILD_JOBS=8
@@ -42,7 +43,12 @@ while [ "$(free -g | awk '/Mem/{print $7}')" -lt 16 ]; do
   timeout 120 tail -f /dev/null
 done
 
-if [ ! -e /tmp/yames-dgx-full ]; then
+# OWNER-UPDATES 2026-11-20 18:08: "full throttle, the DGX is lent": the daytime
+# limits are lifted until the owner says otherwise. The orchestrator records
+# that in /tmp/coach-orch/limits (one word: "full" = lifted, "day" = the
+# weekday limits below apply again; overwrite the file, never delete it).
+limits="$(cat /tmp/coach-orch/limits 2>/dev/null || echo day)"
+if [ ! -e /tmp/yames-dgx-full ] && [ "$limits" != "full" ]; then
   dow="$(TZ=America/Los_Angeles date +%u)"
   hour="$(TZ=America/Los_Angeles date +%-H)"
   if [ "$dow" -le 5 ] && [ "$hour" -ge 7 ] && [ "$hour" -lt 20 ]; then

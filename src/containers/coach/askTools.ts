@@ -22,6 +22,7 @@
  */
 import type { CoachContext } from "../../coach/context";
 import type { ResolvedBlock } from "../../coach/blocks/resolve";
+import { commandFacts, type CommandFacts } from "../../coach/ask/router";
 import { getCoachToolHost, type CoachToolHost } from "../../coach/tools/host";
 import { findTool } from "../../coach/tools/registry";
 import { confirmCoachTool, dismissProposal, runCoachTool, runCoachUndo } from "../../coach/tools/run";
@@ -98,6 +99,17 @@ function where(): { host: CoachToolHost; ctx: CoachContext } | null {
   const host = hostOf();
   const ctx = contextOf?.();
   return host && ctx ? { host, ctx } : null;
+}
+
+/**
+ * What the typed-command router needs to know about where the player is now
+ * (`commandFacts`, leg t1b2a), read at the press like everything here; null
+ * without a host or a context. Leg t1b2b's wiring:
+ * `routeCommand(text, commandTableFor(lng), askCommandFacts())`.
+ */
+export function askCommandFacts(): CommandFacts | null {
+  const at = where();
+  return at ? commandFacts(at.ctx, viewOf(at.host)) : null;
 }
 
 /** The chips for where the player is now (none without a host or a context). */
