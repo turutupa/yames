@@ -41,6 +41,17 @@ const A_TO_C = "Cross to the A string with finger one for C.";
 const E_FOR_G = "Drop to the low E string with finger one for G.";
 const BACK_G = "Go back to the low E string on '1' for G.";
 const BACK_D = "Go back to the A string on '1' for D.";
+const EXTRAS_TWO = "Play two notes on each string, no more.";
+const EXTRAS_HALF = "Play one note every two beats, no more.";
+const HELD_OUT = "Count the held note out, then go again.";
+const STRING_PAIRS = "Name each string's two notes before you start.";
+const JOIN = "Start each box where the last one ended.";
+const SEE_BOX = "See the next box before the hand moves.";
+const DOWN_BOXES = "Come down box by box to where you started.";
+const SHIFT_OCT = "Shift up as each new octave starts.";
+const R3F3 = "Say root, third, fifth, third for each chord.";
+const FINGER_AT_TWO = "One finger per fret, finger one at fret two.";
+const LAND = "Land on a note of the chord on every '1'.";
 const LATE = "Look at the next fret before the click.";
 const EARLY = "Wait for the click before each new note.";
 const HELD = "Count each long note's two clicks, then move.";
@@ -51,7 +62,6 @@ const DOTS = "Find frets five, seven and twelve by the dots.";
 const OPEN_CLICK = "Put the open string right on the click.";
 const SHAPE_MOVE = "Move both fingers as one shape to each fret.";
 const KEEP_NAMING = "Keep naming the notes to the last one.";
-const BY_SHAPE = "Find each note by shape, not by counting.";
 const BAR_MOVE = "Move the hand as each bar starts.";
 const SAY_NAME ="Say each note's name as you play it.";
 const ONE_PER_FRET3 = "Keep one finger per fret, three in a row.";
@@ -514,5 +524,191 @@ export const KNOW_THE_NECK_CUES: CueBook = {
     c("shift", GUIDE_TWO),
     c("stringChange", CLOSE),
     c("lastBars", LAST_PAIR),
+  ],
+
+  // Level 3 (Advanced), Step 11: the five boxes
+  "five-boxes.each-box": [
+    g("Find every key note before you start.", 1),
+    c("notes", STRING_PAIRS, 1),
+    c("heard", HEARD_ANY),
+    c("extras", EXTRAS_TWO),
+    c("late", LATE_SAY),
+    c("early", EARLY),
+    c("afterHeld", HELD_OUT),
+    c("stringChange", CLOSE),
+    c("lastBars", KEEP_NAMING),
+  ],
+  "five-boxes.ladder": [
+    g(JOIN, 1),
+    c("notes", "Say which box you are in as you climb."),
+    c("heard", HEARD),
+    c("extras", EXTRAS8),
+    c("late", SEE_BOX),
+    c("early", EARLY),
+    c("afterHeld", "Give the last note its full beat, then go again."),
+    c("shift", "Put finger one where the higher finger just was.", 1),
+    c("stringChange", CROSS),
+    c("lastBars", DOWN_BOXES),
+  ],
+  "five-boxes.three-octaves": [
+    g("Say A, C, D, E in each of the three octaves."),
+    c("notes", "Start each octave on A: frets five, seven, ten.", 1),
+    c("heard", HEARD),
+    c("extras", EXTRAS8),
+    c("late", LATE),
+    c("early", EARLY),
+    c("shift", SHIFT_OCT),
+    c("stringChange", CROSS),
+    c("lastBars", "Hold the top A at fret seventeen two clicks."),
+  ],
+  // Step 12: the boxes in E minor
+  "boxes-second-key.e-minor-each-box": [
+    g("Find every key note before you start.", 2),
+    c("notes", STRING_PAIRS, 1),
+    c("heard", HEARD_ANY),
+    c("extras", EXTRAS_TWO),
+    c("late", LATE_SAY),
+    c("early", EARLY),
+    c("afterHeld", HELD_OUT),
+    c("stringChange", CLOSE),
+    c("lastBars", KEEP_NAMING),
+  ],
+  "boxes-second-key.e-minor-ladder": [
+    g(JOIN, 2),
+    c("notes", "Name the two E's where the boxes join.", 3),
+    c("heard", HEARD),
+    c("extras", EXTRAS8),
+    c("late", SEE_BOX),
+    c("early", EARLY),
+    c("openString", "Put the open G and B right on the click."),
+    c("shift", "Keep the hand still for boxes one and two.", 2),
+    c("stringChange", CROSS),
+    c("lastBars", DOWN_BOXES),
+  ],
+  "boxes-second-key.e-minor-three-octaves": [
+    g("Say E, G, A, B in each of the three octaves."),
+    c("notes", "Start each octave on an E, low to high.", 3),
+    c("heard", HEARD),
+    c("extras", EXTRAS8),
+    c("late", LATE),
+    c("early", EARLY),
+    c("openString", "Put the open E and A right on the click."),
+    c("shift", SHIFT_OCT),
+    c("stringChange", "Flatten finger one from the A to the D string.", 2),
+    c("lastBars", "Hold the top E at fret twelve two clicks."),
+  ],
+  "boxes-second-key.e-minor-box-one-twice": [
+    g("See one shape twice: the nut, then fret twelve."),
+    c("notes", "Put finger one at fret twelve for every string.", 3),
+    c("heard", HEARD),
+    c("extras", EXTRAS8),
+    c("late", LATE),
+    c("early", EARLY),
+    c("afterHeld", "Count the held note's two clicks, then move up.", 1),
+    c("openString", OPEN_CLICK),
+    c("shift", "Be at fret twelve before the next '1'.", 1),
+    c("stringChange", CROSS),
+    c("lastBars", "Hold the last note at fret fifteen."),
+  ],
+  // Step 13: arpeggios
+  "arpeggios.am-up": [
+    g("Say A, C and E as each one sounds."),
+    c("notes", "Take the G string's fret nine with finger two.", 1),
+    c("heard", HEARD),
+    c("extras", EXTRAS8),
+    c("late", LATE),
+    c("early", EARLY),
+    c("shift", "Shift once: G string, fret five to fret nine.", 1),
+    c("stringChange", CROSS),
+    c("lastBars", "End on the A at the D string's fret seven."),
+  ],
+  "arpeggios.c-up": [
+    g("Hold an open C chord as you pick each string.", 1),
+    c("notes", "Keep the C chord held down as you pick.", 1),
+    c("heard", HEARD),
+    c("extras", EXTRAS8),
+    c("late", LATE),
+    c("early", EARLY),
+    c("openString", "Put the open G right on the click."),
+    c("shift", "Slide up to fret eight with the little finger."),
+    c("stringChange", CROSS),
+    c("lastBars", "Finish on C, the A string at fret three."),
+  ],
+  "arpeggios.changes-in-position": [
+    g(SAY_CHORD),
+    c("notes", "Move only the notes that change between chords.", 1),
+    c("heard", HEARD_ANY),
+    c("extras", EXTRAS8),
+    c("late", LATE_CHORD),
+    c("early", EARLY_BEAT),
+    c("stringChange", CLOSE),
+    c("lastBars", "Go from the last chord back to the first on '1'."),
+  ],
+  // Step 14: the changes in A minor
+  "the-changes.thirds-of-the-chords": [
+    g("Say C, A, E, B as the chords change."),
+    c("notes", "Sit a fret low, in fourth position.", 1),
+    c("heard", HEARD),
+    c("extras", EXTRAS_HALF),
+    c("late", LATE_CHORD),
+    c("early", EARLY_BEAT),
+    c("stringChange", CROSS),
+    c("lastBars", "Go from B back to C on '1'."),
+  ],
+  "the-changes.root-third-fifth": [
+    g(R3F3),
+    c("notes", "Keep every note within a fret of fifth position.", 1),
+    c("heard", HEARD),
+    c("extras", EXTRAS),
+    c("late", LATE_CHORD),
+    c("early", EARLY_BEAT),
+    c("shift", "Drop finger one to fret four for G."),
+    c("stringChange", CROSS),
+    c("lastBars", "Go from the G chord back to A minor on '1'."),
+  ],
+  "the-changes.land-on-a-chord-tone": [g(LAND, 1)],
+  // Step 15: the changes in G
+  "changes-in-g.g-three-lines": [
+    g("Say what job the note does on each chord.", 1),
+    c("notes", FINGER_AT_TWO, 4),
+    c("heard", HEARD),
+    c("extras", EXTRAS_HALF),
+    c("late", LATE_CHORD),
+    c("early", EARLY_BEAT),
+    c("stringChange", "Move to the next string every four bars."),
+    c("lastBars", "Go back to the D string on '1' to start again."),
+  ],
+  "changes-in-g.g-root-third-fifth": [
+    g(R3F3),
+    c("notes", FINGER_AT_TWO, 2),
+    c("heard", HEARD),
+    c("extras", EXTRAS),
+    c("late", LATE_CHORD),
+    c("early", EARLY_BEAT),
+    c("stringChange", CROSS),
+    c("lastBars", "Go from the D chord back to G on '1'."),
+  ],
+  "changes-in-g.g-arpeggios": [
+    g("Keep the fingers that stay; move only one.", 2),
+    c("notes", "Add the little finger at fret five for E minor.", 2),
+    c("heard", HEARD),
+    c("extras", EXTRAS8),
+    c("late", LATE_CHORD),
+    c("early", EARLY_BEAT),
+    c("shift", "Move the hand down a fret for D, then back.", 4),
+    c("stringChange", CROSS),
+    c("lastBars", "Move back up a fret for G on '1'.", 4),
+  ],
+  "changes-in-g.g-land-on-a-chord-tone": [g("Land on a note of the chord and name its job.")],
+  // Level 3 warm-up: a key and a pair of boxes that change every Take
+  "warmup-advanced.two-boxes-up": [
+    g(SAY_NAME),
+    c("heard", HEARD_ANY),
+    c("late", LATE_SAY),
+    c("early", EARLY),
+    c("afterHeld", HELD_OUT),
+    c("shift", "Land the first note after the hold on its click."),
+    c("stringChange", CLOSE),
+    c("lastBars", KEEP_NAMING),
   ],
 };
