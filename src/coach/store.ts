@@ -201,6 +201,19 @@ export function withCardAsked(cards: CoachCards, kind: string): CoachCards {
   return { ...cards, [kind]: { ...card, dismissed: 0, lastDismissed: null } };
 }
 
+/**
+ * "On" under Settings → Coach → Suggestions (owner, 2026-11-21): it lifts only
+ * the "until you ask" of a kind hidden twice, and only from now. The last
+ * Hide's seven days stand (`lastDismissed` is kept), and a kind hidden once is
+ * left exactly as it is: a Hide was its own press. The same object when no
+ * kind was hidden twice.
+ */
+export function withCardStopLifted(cards: CoachCards, kind: string): CoachCards {
+  const card = cardOf(cards, kind);
+  if (card.dismissed < CARD_DISMISSALS_TO_STOP) return cards;
+  return { ...cards, [kind]: { ...card, dismissed: 0 } };
+}
+
 /** Is this noticed line left out now? Thirty days after it was, it may return. */
 export function isSuppressed(suppressed: Suppressed, id: string, now: number): boolean {
   const at = suppressed[id];
@@ -585,10 +598,12 @@ export function saveCardAsked(kind: string): Written {
 /**
  * The player asked for these kinds again, in one write: "On" pressed under
  * Settings → Coach → Suggestions (c4b2b), the way back the second "Hide"
- * names ("Hidden until you ask"). Writes only when some had dismissals.
+ * names ("Hidden until you ask"). It does not lift a Hide's seven days
+ * (`withCardStopLifted`, owner 2026-11-21). Writes only when a kind was
+ * hidden twice.
  */
 export function saveCardsAsked(kinds: readonly string[]): Written {
-  return writeMap({ key: "cards", op: (cards) => kinds.reduce((acc, kind) => withCardAsked(acc, kind), cards) });
+  return writeMap({ key: "cards", op: (cards) => kinds.reduce((acc, kind) => withCardStopLifted(acc, kind), cards) });
 }
 
 /** "Leave out" on a noticed line. Not a delete: every Take stays. */

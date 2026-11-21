@@ -49,6 +49,7 @@ import {
   SUPPRESS_DAYS,
   withCardAsked,
   withCardDismissed,
+  withCardStopLifted,
   withSuppressed,
 } from "./store";
 
@@ -171,6 +172,18 @@ describe("the rules of DESIGN 6.6", () => {
     expect(cardMayShow({ suggestions: "on", cards }, "plateau", NOW + 400 * DAY, READ)).toBe(false);
     cards = withCardAsked(cards, "plateau");
     expect(cardMayShow({ suggestions: "on", cards }, "plateau", NOW + 400 * DAY, READ)).toBe(true);
+  });
+
+  // Owner, 2026-11-21: On lifts "until you ask" from now, never a Hide's seven days.
+  it("On (withCardStopLifted) keeps the last Hide's seven days and leaves a kind hidden once alone", () => {
+    const once = withCardDismissed({}, "weekly", NOW);
+    expect(withCardStopLifted(once, "weekly")).toBe(once);
+    let twice = withCardDismissed({}, "plateau", NOW);
+    twice = withCardDismissed(twice, "plateau", NOW + 8 * DAY);
+    const lifted = withCardStopLifted(twice, "plateau");
+    expect(lifted.plateau).toEqual({ dismissed: 0, lastDismissed: NOW + 8 * DAY });
+    expect(cardMayShow({ suggestions: "on", cards: lifted }, "plateau", NOW + 9 * DAY, READ)).toBe(false);
+    expect(cardMayShow({ suggestions: "on", cards: lifted }, "plateau", NOW + 15 * DAY, READ)).toBe(true);
   });
 
   // c4a1c, F1: either key may hold "Only when I ask" or two dismissals.
