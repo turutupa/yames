@@ -20,6 +20,7 @@ import type { MainView } from "../main-window/MainHeader";
 import { seedOf, type SessionRun } from "../session/hooks/useSessionRun";
 import { askScreenKey, lookingAtParts } from "./askContext";
 import type { AskLookingAt } from "./AskPanel";
+import { registerNotebookSource } from "./askStore";
 import { noteAskToolView, registerAskToolContext } from "./askTools";
 import { useAskSessionRules, useCoachPanel, type CoachPanel } from "./useCoachPanel";
 
@@ -96,6 +97,16 @@ export function useAskHost(input: AskHostInput): { panel: CoachPanel; lookingAt:
 
   // The tools read the same context, at each press (leg t1b1).
   useEffect(() => registerAskToolContext(() => buildCoachContext(sources)), [sources]);
+  // The Notebook reads the stored Takes when its tab opens (leg c4a2), never per beat.
+  useEffect(
+    () =>
+      registerNotebookSource(() => {
+        const s = latest.current.session;
+        const inRun = latest.current.view === "session" && s.run.phase !== "idle";
+        return { rows: s.progress.takes, paths: s.paths, sessionStartedAt: inRun ? s.run.startedAt : null };
+      }),
+    [],
+  );
 
   const { session, view, isPlaying } = input;
 

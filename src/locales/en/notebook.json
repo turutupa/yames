@@ -43,6 +43,58 @@
     "evidence": {
       "oneExercise": "From {{count}} Takes · {{from}} to {{to}}",
       "exercises": "From {{count}} Takes on {{exercises}} Exercises · {{from}} to {{to}}"
+    },
+    "ui": {
+      "tabsLabel": "Coach",
+      "tabAsk": "Ask",
+      "tabNotebook": "Notebook",
+      "noticedTitle": "What I've noticed",
+      "goalTitle": "What you're working toward",
+      "loading": "One moment: reading the coach's notes.",
+      "noticedUnreadable": "The list of lines you left out could not be read, so no line is shown this time. Every Take is still stored.",
+      "tooFewTakes": "I need five Takes before I say anything here. Takes so far: {{count}}. Leave a line out and I stop using it for 30 days.",
+      "nothingYet": "Nothing stands out yet. Takes read: {{count}}. A line appears here once the same thing shows up in five Takes or more.",
+      "leaveOutHint": "Leave a line out and I stop using it for 30 days.",
+      "leaveOut": "Leave out",
+      "leftOut": "Left out for 30 days. Every Take is kept.",
+      "undo": "Undo",
+      "leftOutNotRead": "Not left out: the list of lines left out could not be read this time.",
+      "notSaved": "This holds until Yames closes: it could not be saved.",
+      "sessionNote": "In a Session, this shows only what was stored before the Session began.",
+      "goalSaid": "You said · {{date}}",
+      "goalSaidUndated": "You said",
+      "goalEdit": "Edit",
+      "goalAdd": "Add a goal",
+      "goalNone": "No goal yet.",
+      "goalUnreadable": "Your goal could not be read this time, so it is not shown and cannot be changed here.",
+      "goalQuestion": "What are you working toward?",
+      "goalHint": "A song, a tempo, a style, just playing, or your own words.",
+      "goalInputLabel": "Your goal",
+      "goalSave": "Save",
+      "goalCancel": "Cancel",
+      "goalChoice": {
+        "song": "A song",
+        "tempo": "A tempo",
+        "style": "A style",
+        "justPlaying": "Just playing"
+      },
+      "goalStarter": {
+        "song": "To play the song",
+        "tempo": "To play cleanly at",
+        "style": "To play in the style of",
+        "justPlaying": "Just playing"
+      },
+      "notNow": "Not now",
+      "notNowDone": "Not now. I won't ask again for at least 7 days. Settings → Coach → Suggestions turns questions like this off.",
+      "notNowNotRead": "Not saved: the coach's notes could not be read this time.",
+      "footer": "Everything here comes from your stored Takes, or is something you typed."
+    },
+    "suggestions": {
+      "label": "Suggestions",
+      "hint": "Whether the coach offers anything on its own, such as the question about your goal. Ask and the Notebook are always there.",
+      "on": "On",
+      "asked": "Only when I ask",
+      "unreadable": "Your choice could not be read this time; pressing one saves it."
     }
   }
 }

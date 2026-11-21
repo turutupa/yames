@@ -15,6 +15,8 @@
  * function that answers a question; this file only keeps the turns.
  */
 import { useSyncExternalStore } from "react";
+import type { PathTakeRow } from "../../ipc";
+import type { PathDoc } from "../../paths/format";
 import type { ToolBody } from "./askTools";
 
 export type AskTurn =
@@ -42,7 +44,12 @@ export type AskRequest = {
    * model with the next question; cleared by any open without one.
    */
   about?: string;
+  /** Which tab it opens on (leg c4a2). Any open without one opens on Ask. */
+  tab?: AskTab;
 };
+
+/** Ask's two tabs (DESIGN 6.7, mock 10): the conversation, and the Notebook. */
+export type AskTab = "ask" | "notebook";
 
 /** The function a coach line, note or chip is given as its `onAsk`. */
 export type AskHandler = (request?: AskRequest) => void;
@@ -63,6 +70,8 @@ export type AskState = {
   about: string | null;
   /** The screen the last turn or divider was written on, for the next divider. */
   screenKey: string | null;
+  /** The tab showing (leg c4a2). A question, a caret or an "about" always opens on Ask. */
+  tab: AskTab;
 };
 
 const INITIAL: AskState = {
@@ -72,6 +81,7 @@ const INITIAL: AskState = {
   focusPending: false,
   about: null,
   screenKey: null,
+  tab: "ask",
 };
 
 let state: AskState = INITIAL;
@@ -126,8 +136,42 @@ export function openAsk(request: AskRequest = {}): void {
     deferred: false,
     focusPending: request.focus === true,
     about: request.about?.trim() || null,
+    tab: request.tab ?? "ask",
   });
   if (request.question?.trim()) sender?.(request.question.trim());
+}
+
+/** The tab strip's press (leg c4a2). Writes nothing anywhere but this module. */
+export function setAskTab(tab: AskTab): void {
+  if (state.tab !== tab) set({ tab });
+}
+
+/**
+ * What the Notebook is built from (leg c4a2), read once when its tab opens:
+ * the stored Takes, the Paths (for an Exercise's notes and title), and, in a
+ * Session, when it began (DESIGN 6.6: nothing proactive in a Session, and the
+ * Notebook says nothing new about the Takes of the Session under it).
+ */
+export type NotebookSource = {
+  rows: readonly PathTakeRow[];
+  paths: readonly PathDoc[];
+  /** The Session's start (ms) while one is open, else null. */
+  sessionStartedAt: number | null;
+};
+
+let notebookSource: (() => NotebookSource) | null = null;
+
+/** The host (`useAskHost`) says where the Takes are; read at the tab's open, never per beat. */
+export function registerNotebookSource(fn: (() => NotebookSource) | null): () => void {
+  notebookSource = fn;
+  return () => {
+    if (notebookSource === fn) notebookSource = null;
+  };
+}
+
+/** The Notebook's input now, or null without a host. */
+export function readNotebookSource(): NotebookSource | null {
+  return notebookSource ? notebookSource() : null;
 }
 
 /** For a coach line, note or chip (`onAsk`): open Ask, the caret in its box. */
@@ -262,5 +306,6 @@ export function __resetAskStoreForTests(): void {
   takeRunning = () => false;
   held = [];
   nextId = 0;
+  notebookSource = null;
   for (const l of [...listeners]) l();
 }
