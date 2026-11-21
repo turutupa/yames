@@ -49,6 +49,20 @@ example "your first Exercise passed") can show again on a later app run, until t
 or its seven days, unless Hide is pressed. That departs from the brief's "each once, stored in
 coach.cards" on purpose.
 
-## Gates
+## Choice prompt
 
-(see the end of this file)
+`suggest_path`'s short note is "a Path": the cards' share stood at 292 of 300 and the card's line
+costs ceil(chars / 3), so "which Path to try next" made it 305. Now 1,397 tokens in all (tools and
+format 1,095, the 21 cards 299).
+
+## Gates (on 109e1dca)
+
+- `npx tsc --noEmit`: pass (job coach-c4b3b-tsc).
+- `npm run test`: 475 of 476 files, 51,092 tests pass; the one failure is the known
+  `TabStage.render.test.tsx` load through the symlink (`/tmp/coach-c4b3/c4b3b-test.log`).
+- `npm run build`: pass.
+- `npm run test:rust`: 1,278 pass, 1 failed: `harmony::worker::tests::ended_by_the_input_it_says_nothing_more`
+  ("waited 20s for a window to be running", a busy machine; this leg touches no Rust). Re-run
+  alone (`harmony::worker::tests`, 17 tests): pass. The grammar precheck tests pass
+  (`/tmp/coach-c4b3/c4b3b-rust.log`).
+- Layout `ask ask-cards rail today-line short-window` with `--lock coach-layout`: 142 passed.
