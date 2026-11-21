@@ -510,6 +510,19 @@ export function TodayView({
               {t("session.today.moreBelow")}
             </div>
           )}
+          {/* What the player added to today and is not in the plan, said, never dropped in silence (t2e). */}
+          {((plan.chosenLeftOut ?? 0) > 0 || session.chosenUnbuilt > 0) && (
+            <div className="session-footnote" data-testid="today-chosen-left-out">
+              {(plan.chosenLeftOut ?? 0) > 0 && (
+                <span className="session-why">
+                  {t("session.today.chosenLeftOut", { count: plan.chosenLeftOut, minutes: plan.minutes })}
+                </span>
+              )}
+              {session.chosenUnbuilt > 0 && (
+                <span className="session-why">{t("session.today.chosenUnbuilt", { count: session.chosenUnbuilt })}</span>
+              )}
+            </div>
+          )}
           {(plan.skipped ?? []).length > 0 && (
             <div className="session-footnote session-skipped" data-testid="today-skipped">
               <span className="session-kick">{t("session.today.resting")}</span>

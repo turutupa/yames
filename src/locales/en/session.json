@@ -485,7 +485,7 @@
       "inToday": "In today's Session",
       "addedToday": "Added to today's Session, after the warm-up.",
       "takenOffToday": "Taken off today's Session.",
-      "todayFull": "Today already holds {{count}} of your exercises. Take one off first."
+      "todayFull": "Today already holds {{max}} of your exercises, the most it takes. Take one off first."
     },
     "paths": {
       "title": "Paths",

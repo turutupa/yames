@@ -120,8 +120,13 @@
         "yourTurn": "Du bist dran · nicht geprüft",
         "finisher": "Zum Schluss · ohne Wertung",
         "jam": "Jam · ohne Wertung",
-        "drill": "Tempo-Rampe"
+        "drill": "Tempo-Rampe",
+        "mine": "Deine Übung"
       },
+      "chosenLeftOut": "{{count}} Übung, die du hinzugefügt hast, hat in {{minutes}} Minuten nicht Platz gefunden. Wähle mehr Minuten oder nimm sie in Meine Übungen heraus.",
+      "chosenLeftOut_other": "{{count}} Übungen, die du hinzugefügt hast, haben in {{minutes}} Minuten nicht Platz gefunden. Wähle mehr Minuten oder nimm eine in Meine Übungen heraus.",
+      "chosenUnbuilt": "{{count}} Übung, die du für heute hinzugefügt hast, lässt sich nicht mehr bauen und bleibt deshalb draußen.",
+      "chosenUnbuilt_other": "{{count}} Übungen, die du für heute hinzugefügt hast, lassen sich nicht mehr bauen und bleiben deshalb draußen.",
       "reason": {
         "firstEver": "Deine erste. Bleib genau auf dem Klick; das Tempo kommt später.",
         "newExercise": "Neu für dich. Langsam angehen und sauber bleiben.",
@@ -155,7 +160,8 @@
         "keepWarmYesterday": "Bleibt warm, zuletzt gestern gespielt.",
         "keepWarmToday": "Bleibt warm, heute schon gespielt.",
         "keepWarmNew": "Ein erster Vorgeschmack.",
-        "focusChosen": "Heute nur dieser Pfad, wie du gewählt hast."
+        "focusChosen": "Heute nur dieser Pfad, wie du gewählt hast.",
+        "chosenToday": "Du hast sie für heute hinzugefügt."
       },
       "from": "{{path}} · {{level}} · Schritt {{step}}",
       "fromNoLevel": "{{path}} · Schritt {{step}}",
@@ -265,6 +271,7 @@
       "newFromSibling": "Neu. Sie beginnt bei {{bpm}} BPM, etwa 80 % deines sauberen Tempos von {{clean}} BPM bei {{sibling}}.",
       "newFromSiblingNoClean": "Neu. Sie beginnt bei {{bpm}} BPM, berechnet aus deinen Takes bei {{sibling}}.",
       "focusChosen": "Du hast heute {{path}} gewählt, also kommt die ganze Session daraus.",
+      "chosenToday": "Eine deiner eigenen Übungen, von dir zur heutigen Session hinzugefügt.",
       "playedUngraded": "Da, wo du aufgehört hast: {{bpm}} BPM."
     },
     "bar": {
@@ -470,7 +477,15 @@
       "undoFull": "Meine Übungen ist voll (50), deshalb kann Rückgängig diese nicht zurückholen.",
       "undoAlready": "Diese Übung ist schon wieder in Meine Übungen.",
       "cantBuild": "Diese Übung lässt sich nicht mehr bauen: Diese Version von Yames erstellt sie nicht mehr. Sie bleibt hier, bis du sie entfernst.",
-      "howTo": "Spiel sie wie notiert, mit dem Klick."
+      "howTo": "Spiel sie wie notiert, mit dem Klick.",
+      "addToday": "Für heute hinzufügen",
+      "addTodayLabel": "{{what}} zur heutigen Session hinzufügen",
+      "takeOffToday": "Für heute entfernen",
+      "takeOffTodayLabel": "{{what}} aus der heutigen Session nehmen",
+      "inToday": "In der heutigen Session",
+      "addedToday": "Zur heutigen Session hinzugefügt, nach dem Aufwärmen.",
+      "takenOffToday": "Aus der heutigen Session genommen.",
+      "todayFull": "Heute sind schon {{max}} deiner Übungen drin, mehr geht nicht. Nimm zuerst eine heraus."
     },
     "paths": {
       "title": "Pfade",

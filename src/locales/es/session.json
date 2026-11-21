@@ -126,8 +126,15 @@
         "yourTurn": "Tu turno · sin comprobar",
         "finisher": "Para cerrar · sin nota",
         "jam": "Jam · sin nota",
-        "drill": "Rampa de tempo"
+        "drill": "Rampa de tempo",
+        "mine": "Tu ejercicio"
       },
+      "chosenLeftOut": "{{count}} ejercicio que añadiste no cupo en {{minutes}} minutos. Elige más minutos o quítalo en Mis ejercicios.",
+      "chosenLeftOut_many": "{{count}} ejercicios que añadiste no cupieron en {{minutes}} minutos. Elige más minutos o quita alguno en Mis ejercicios.",
+      "chosenLeftOut_other": "{{count}} ejercicios que añadiste no cupieron en {{minutes}} minutos. Elige más minutos o quita alguno en Mis ejercicios.",
+      "chosenUnbuilt": "{{count}} ejercicio que añadiste para hoy ya no se puede construir, así que se queda fuera.",
+      "chosenUnbuilt_many": "{{count}} ejercicios que añadiste para hoy ya no se pueden construir, así que se quedan fuera.",
+      "chosenUnbuilt_other": "{{count}} ejercicios que añadiste para hoy ya no se pueden construir, así que se quedan fuera.",
       "reason": {
         "firstEver": "Tu primero. Clávalo con el clic; la velocidad llega después.",
         "newExercise": "Es nuevo para ti. Ve despacio y que suene limpio.",
@@ -161,7 +168,8 @@
         "keepWarmYesterday": "Para no perderlo: tocado ayer.",
         "keepWarmToday": "Para no perderlo: ya tocado hoy.",
         "keepWarmNew": "Una primera probada.",
-        "focusChosen": "Hoy solo esta ruta, como elegiste."
+        "focusChosen": "Hoy solo esta ruta, como elegiste.",
+        "chosenToday": "Lo añadiste para hoy."
       },
       "from": "{{path}} · {{level}} · Paso {{step}}",
       "fromNoLevel": "{{path}} · Paso {{step}}",
@@ -271,6 +279,7 @@
       "newFromSibling": "Nuevo. Empieza a {{bpm}} BPM, cerca del 80 % de tu tempo limpio de {{clean}} BPM en {{sibling}}.",
       "newFromSiblingNoClean": "Nuevo. Empieza a {{bpm}} BPM, calculado a partir de tus tomas en {{sibling}}.",
       "focusChosen": "Elegiste {{path}} para hoy, así que toda la sesión sale de ahí.",
+      "chosenToday": "Uno de tus propios ejercicios, añadido por ti a la sesión de hoy.",
       "playedUngraded": "Donde lo dejaste: {{bpm}} BPM."
     },
     "bar": {
@@ -482,7 +491,15 @@
       "undoFull": "Mis ejercicios está lleno (50), así que Deshacer no puede volver a poner este.",
       "undoAlready": "Ese ya está de vuelta en Mis ejercicios.",
       "cantBuild": "Este ya no se puede construir: esta versión de Yames ya no lo crea. Se queda aquí hasta que lo quites.",
-      "howTo": "Tócalo tal como está escrito, con el clic."
+      "howTo": "Tócalo tal como está escrito, con el clic.",
+      "addToday": "Añadir a hoy",
+      "addTodayLabel": "Añadir {{what}} a la sesión de hoy",
+      "takeOffToday": "Quitar de hoy",
+      "takeOffTodayLabel": "Quitar {{what}} de la sesión de hoy",
+      "inToday": "En la sesión de hoy",
+      "addedToday": "Añadido a la sesión de hoy, después del calentamiento.",
+      "takenOffToday": "Quitado de la sesión de hoy.",
+      "todayFull": "Hoy ya tiene {{max}} de tus ejercicios, el máximo que admite. Quita uno primero."
     },
     "paths": {
       "title": "Rutas",

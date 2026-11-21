@@ -15,6 +15,8 @@ import { MY_EXERCISES_KEY, resetMyExercisesForTest, updateMyExercises } from "..
 import { installSettings } from "../../test/parity/store";
 import { load } from "@tauri-apps/plugin-store";
 import { loadMyExercisesList } from "./MyExercisesSection";
+import { CHOSEN_TODAY_KEY, resetChosenTodayForTest } from "../../session/chosenToday";
+import { dayKey } from "../../session/swap";
 
 afterEach(() => {
   cleanup();
@@ -212,5 +214,63 @@ describe("My exercises on the Paths screen", () => {
     fireEvent.click(within(row).getByTestId("my-exercise-remove"));
     expect(actions.playExercise).not.toHaveBeenCalled();
     await waitFor(() => expect(store.values.get(MY_EXERCISES_KEY)).toEqual([]));
+  });
+});
+
+describe("Add to today (t2e)", () => {
+  afterEach(() => resetChosenTodayForTest());
+  const today = () => dayKey(Date.now());
+
+  it("Add to today writes today's key and nothing else; Take off today and each Undo write it back", async () => {
+    const store = await withStored([
+      { recipe: MOCK_17, addedAt: NOW },
+      { recipe: CHROMATIC, addedAt: NOW - 1 },
+    ]);
+    const { session } = fake();
+    render(<PathsView session={session} />);
+    const rows = await screen.findAllByTestId("my-exercise");
+    // Nothing written by showing the list.
+    expect(store.writes).toEqual([]);
+    const press = within(rows[1]).getByTestId("my-exercise-today");
+    expect(press).toHaveTextContent("Add to today");
+    expect(press).toHaveAccessibleName("Add Chromatic, one finger a fret from fret 5: up. 6 bars. to today's Session");
+    fireEvent.click(press);
+    const key = customExerciseId(CHROMATIC).replace(/^my\./, "");
+    await waitFor(() => expect(store.values.get(CHOSEN_TODAY_KEY)).toEqual({ day: today(), keys: [key] }));
+    expect(store.writes.map(([k]) => k)).toEqual([CHOSEN_TODAY_KEY]);
+    await waitFor(() => expect(within(rows[1]).getByTestId("my-exercise-today")).toHaveTextContent("Take off today"));
+    expect(within(rows[1]).getByTestId("my-exercise-in-today")).toBeInTheDocument();
+    expect(within(rows[0]).queryByTestId("my-exercise-in-today")).toBeNull();
+    expect(screen.getByTestId("my-exercise-notice")).toHaveTextContent("Added to today's Session");
+    // Undo of the Add.
+    fireEvent.click(screen.getByTestId("my-exercise-undo"));
+    await waitFor(() => expect(store.values.get(CHOSEN_TODAY_KEY)).toEqual({ day: today(), keys: [] }));
+    await waitFor(() => expect(within(rows[1]).getByTestId("my-exercise-today")).toHaveTextContent("Add to today"));
+    // Add, Take off, Undo of the Take off: back in today.
+    fireEvent.click(within(rows[1]).getByTestId("my-exercise-today"));
+    await waitFor(() => expect(store.values.get(CHOSEN_TODAY_KEY)).toEqual({ day: today(), keys: [key] }));
+    await waitFor(() => expect(within(rows[1]).getByTestId("my-exercise-today")).toHaveTextContent("Take off today"));
+    fireEvent.click(within(rows[1]).getByTestId("my-exercise-today"));
+    await waitFor(() => expect(store.values.get(CHOSEN_TODAY_KEY)).toEqual({ day: today(), keys: [] }));
+    expect(screen.getByTestId("my-exercise-notice")).toHaveTextContent("Taken off today's Session");
+    fireEvent.click(screen.getByTestId("my-exercise-undo"));
+    await waitFor(() => expect(store.values.get(CHOSEN_TODAY_KEY)).toEqual({ day: today(), keys: [key] }));
+    // The list itself was never written.
+    expect(store.writes.some(([k]) => k === MY_EXERCISES_KEY)).toBe(false);
+  });
+
+  it("yesterday's choice shows as not in today, and is not written over until a press", async () => {
+    const key = customExerciseId(MOCK_17).replace(/^my\./, "");
+    const store = await installSettings({
+      [MY_EXERCISES_KEY]: [{ recipe: MOCK_17, addedAt: NOW }],
+      [CHOSEN_TODAY_KEY]: { day: "2020-01-01", keys: [key] },
+    });
+    const { session } = fake();
+    render(<PathsView session={session} />);
+    const row = await screen.findByTestId("my-exercise");
+    await act(async () => {});
+    expect(within(row).getByTestId("my-exercise-today")).toHaveTextContent("Add to today");
+    expect(within(row).queryByTestId("my-exercise-in-today")).toBeNull();
+    expect(store.writes).toEqual([]);
   });
 });

@@ -120,8 +120,13 @@
         "yourTurn": "Jouw beurt · niet gecontroleerd",
         "finisher": "Afsluiter · zonder beoordeling",
         "jam": "Jam · zonder beoordeling",
-        "drill": "Temposchaal"
+        "drill": "Temposchaal",
+        "mine": "Jouw oefening"
       },
+      "chosenLeftOut": "{{count}} oefening die je toevoegde paste niet in {{minutes}} minuten. Kies meer minuten of haal er een weg in Mijn oefeningen.",
+      "chosenLeftOut_other": "{{count}} oefeningen die je toevoegde pasten niet in {{minutes}} minuten. Kies meer minuten of haal er een weg in Mijn oefeningen.",
+      "chosenUnbuilt": "{{count}} oefening die je voor vandaag toevoegde kan niet meer worden gemaakt en blijft dus weg.",
+      "chosenUnbuilt_other": "{{count}} oefeningen die je voor vandaag toevoegde kunnen niet meer worden gemaakt en blijven dus weg.",
       "reason": {
         "firstEver": "Je eerste. Zit precies op de klik; snelheid komt later.",
         "newExercise": "Nieuw voor je. Rustig aan en houd het schoon.",
@@ -155,7 +160,8 @@
         "keepWarmYesterday": "Warm houden, gisteren gespeeld.",
         "keepWarmToday": "Warm houden, vandaag al gespeeld.",
         "keepWarmNew": "Een eerste kennismaking.",
-        "focusChosen": "Vandaag alleen dit pad, zoals je koos."
+        "focusChosen": "Vandaag alleen dit pad, zoals je koos.",
+        "chosenToday": "Door jou toegevoegd voor vandaag."
       },
       "from": "{{path}} · {{level}} · Stap {{step}}",
       "fromNoLevel": "{{path}} · Stap {{step}}",
@@ -265,6 +271,7 @@
       "newFromSibling": "Nieuw. Hij begint op {{bpm}} BPM, ongeveer 80% van je schone {{clean}} BPM op {{sibling}}.",
       "newFromSiblingNoClean": "Nieuw. Hij begint op {{bpm}} BPM, berekend uit je takes op {{sibling}}.",
       "focusChosen": "Je koos vandaag {{path}}, dus de hele sessie komt daaruit.",
+      "chosenToday": "Een van je eigen oefeningen, door jou aan de sessie van vandaag toegevoegd.",
       "playedUngraded": "Waar je was gebleven: {{bpm}} BPM."
     },
     "bar": {
@@ -470,7 +477,15 @@
       "undoFull": "Mijn oefeningen is vol (50), dus Ongedaan maken kan deze niet terugzetten.",
       "undoAlready": "Deze staat al weer in Mijn oefeningen.",
       "cantBuild": "Deze oefening kan niet meer worden gemaakt: deze versie van Yames maakt hem niet meer. Hij blijft hier staan tot je hem verwijdert.",
-      "howTo": "Speel het zoals geschreven, met de klik."
+      "howTo": "Speel het zoals geschreven, met de klik.",
+      "addToday": "Aan vandaag toevoegen",
+      "addTodayLabel": "{{what}} aan de sessie van vandaag toevoegen",
+      "takeOffToday": "Van vandaag halen",
+      "takeOffTodayLabel": "{{what}} uit de sessie van vandaag halen",
+      "inToday": "In de sessie van vandaag",
+      "addedToday": "Aan de sessie van vandaag toegevoegd, na de warming-up.",
+      "takenOffToday": "Uit de sessie van vandaag gehaald.",
+      "todayFull": "Vandaag bevat al {{max}} van je oefeningen, het maximum. Haal er eerst een weg."
     },
     "paths": {
       "title": "Leerpaden",

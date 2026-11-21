@@ -120,8 +120,13 @@
         "yourTurn": "Lượt bạn · không kiểm tra",
         "finisher": "Kết thúc · không chấm",
         "jam": "Jam · không chấm điểm",
-        "drill": "Tăng dần tempo"
+        "drill": "Tăng dần tempo",
+        "mine": "Bài của bạn"
       },
+      "chosenLeftOut": "{{count}} bài bạn đã thêm không vừa trong {{minutes}} phút. Chọn thêm phút, hoặc bỏ bớt một bài trong Bài của tôi.",
+      "chosenLeftOut_other": "{{count}} bài bạn đã thêm không vừa trong {{minutes}} phút. Chọn thêm phút, hoặc bỏ bớt một bài trong Bài của tôi.",
+      "chosenUnbuilt": "{{count}} bài bạn đã thêm cho hôm nay không thể tạo được nữa, nên bị bỏ ra.",
+      "chosenUnbuilt_other": "{{count}} bài bạn đã thêm cho hôm nay không thể tạo được nữa, nên bị bỏ ra.",
       "reason": {
         "firstEver": "Bài đầu tiên. Bám sát tiếng click; tốc độ để sau.",
         "newExercise": "Bài mới với bạn. Chậm thôi và giữ cho sạch.",
@@ -155,7 +160,8 @@
         "keepWarmYesterday": "Giữ phong độ, chơi lần cuối hôm qua.",
         "keepWarmToday": "Giữ phong độ, đã chơi hôm nay.",
         "keepWarmNew": "Làm quen trước.",
-        "focusChosen": "Hôm nay chỉ lộ trình này, như bạn đã chọn."
+        "focusChosen": "Hôm nay chỉ lộ trình này, như bạn đã chọn.",
+        "chosenToday": "Bạn đã thêm bài này cho hôm nay."
       },
       "from": "{{path}} · {{level}} · Bước {{step}}",
       "fromNoLevel": "{{path}} · Bước {{step}}",
@@ -265,6 +271,7 @@
       "newFromSibling": "Mới. Bắt đầu ở {{bpm}} BPM, khoảng 80% tempo sạch {{clean}} BPM của bạn ở {{sibling}}.",
       "newFromSiblingNoClean": "Mới. Bắt đầu ở {{bpm}} BPM, tính từ các lượt của bạn ở {{sibling}}.",
       "focusChosen": "Hôm nay bạn chọn {{path}}, nên cả buổi tập đều lấy từ đó.",
+      "chosenToday": "Một bài của riêng bạn, do bạn thêm vào buổi tập hôm nay.",
       "playedUngraded": "Tiếp từ chỗ bạn dừng: {{bpm}} BPM."
     },
     "bar": {
@@ -470,7 +477,15 @@
       "undoFull": "Bài của tôi đã đầy (50), nên Hoàn tác không thể đưa bài này trở lại.",
       "undoAlready": "Bài này đã có lại trong Bài của tôi.",
       "cantBuild": "Bài này không thể dựng lại nữa: phiên bản Yames này không còn tạo ra nó. Nó vẫn ở đây cho đến khi bạn xóa.",
-      "howTo": "Chơi đúng như đã viết, theo click."
+      "howTo": "Chơi đúng như đã viết, theo click.",
+      "addToday": "Thêm vào hôm nay",
+      "addTodayLabel": "Thêm {{what}} vào buổi tập hôm nay",
+      "takeOffToday": "Bỏ khỏi hôm nay",
+      "takeOffTodayLabel": "Bỏ {{what}} khỏi buổi tập hôm nay",
+      "inToday": "Trong buổi tập hôm nay",
+      "addedToday": "Đã thêm vào buổi tập hôm nay, sau phần khởi động.",
+      "takenOffToday": "Đã bỏ khỏi buổi tập hôm nay.",
+      "todayFull": "Hôm nay đã có {{max}} bài của bạn, nhiều nhất có thể. Hãy bỏ bớt một bài trước."
     },
     "paths": {
       "title": "Lộ trình",

@@ -126,8 +126,15 @@
         "yourTurn": "À toi · non vérifié",
         "finisher": "Pour finir · non noté",
         "jam": "Jam · non noté",
-        "drill": "Rampe de tempo"
+        "drill": "Rampe de tempo",
+        "mine": "Ton exercice"
       },
+      "chosenLeftOut": "{{count}} exercice que tu as ajouté n'a pas tenu en {{minutes}} minutes. Choisis plus de minutes, ou retire-en un dans Mes exercices.",
+      "chosenLeftOut_many": "{{count}} exercices que tu as ajoutés n'ont pas tenu en {{minutes}} minutes. Choisis plus de minutes, ou retire-en un dans Mes exercices.",
+      "chosenLeftOut_other": "{{count}} exercices que tu as ajoutés n'ont pas tenu en {{minutes}} minutes. Choisis plus de minutes, ou retire-en un dans Mes exercices.",
+      "chosenUnbuilt": "{{count}} exercice que tu as ajouté pour aujourd'hui ne peut plus être construit, il est donc laissé de côté.",
+      "chosenUnbuilt_many": "{{count}} exercices que tu as ajoutés pour aujourd'hui ne peuvent plus être construits, ils sont donc laissés de côté.",
+      "chosenUnbuilt_other": "{{count}} exercices que tu as ajoutés pour aujourd'hui ne peuvent plus être construits, ils sont donc laissés de côté.",
       "reason": {
         "firstEver": "Ton premier. Cale-toi pile sur le clic ; la vitesse viendra après.",
         "newExercise": "Nouveau pour toi. Prends ton temps et reste propre.",
@@ -161,7 +168,8 @@
         "keepWarmYesterday": "Pour garder la main, joué hier.",
         "keepWarmToday": "Pour garder la main, déjà joué aujourd'hui.",
         "keepWarmNew": "Un premier aperçu.",
-        "focusChosen": "Seulement ce parcours aujourd'hui, comme tu l'as choisi."
+        "focusChosen": "Seulement ce parcours aujourd'hui, comme tu l'as choisi.",
+        "chosenToday": "Tu l'as ajouté pour aujourd'hui."
       },
       "from": "{{path}} · {{level}} · Étape {{step}}",
       "fromNoLevel": "{{path}} · Étape {{step}}",
@@ -271,6 +279,7 @@
       "newFromSibling": "Nouveau. Il commence à {{bpm}} BPM, environ 80 % de ton tempo propre de {{clean}} BPM sur {{sibling}}.",
       "newFromSiblingNoClean": "Nouveau. Il commence à {{bpm}} BPM, calculé d'après tes prises sur {{sibling}}.",
       "focusChosen": "Tu as choisi {{path}} pour aujourd'hui, donc toute la séance en vient.",
+      "chosenToday": "Un de tes propres exercices, ajouté par toi à la séance d'aujourd'hui.",
       "playedUngraded": "Là où tu t'es arrêté : {{bpm}} BPM."
     },
     "bar": {
@@ -482,7 +491,15 @@
       "undoFull": "Mes exercices est plein (50), donc Annuler ne peut pas remettre celui-ci.",
       "undoAlready": "Celui-ci est déjà de retour dans Mes exercices.",
       "cantBuild": "Celui-ci ne peut plus être construit : cette version de Yames ne le propose plus. Il reste ici jusqu'à ce que vous le retiriez.",
-      "howTo": "Jouez-le tel qu'il est écrit, avec le clic."
+      "howTo": "Jouez-le tel qu'il est écrit, avec le clic.",
+      "addToday": "Ajouter à aujourd'hui",
+      "addTodayLabel": "Ajouter {{what}} à la séance d'aujourd'hui",
+      "takeOffToday": "Retirer d'aujourd'hui",
+      "takeOffTodayLabel": "Retirer {{what}} de la séance d'aujourd'hui",
+      "inToday": "Dans la séance d'aujourd'hui",
+      "addedToday": "Ajouté à la séance d'aujourd'hui, après l'échauffement.",
+      "takenOffToday": "Retiré de la séance d'aujourd'hui.",
+      "todayFull": "Aujourd'hui compte déjà {{max}} de vos exercices, le maximum accepté. Retirez-en un d'abord."
     },
     "paths": {
       "title": "Parcours",

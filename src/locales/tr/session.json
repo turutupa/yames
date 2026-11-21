@@ -120,8 +120,13 @@
         "yourTurn": "Sıra sende · kontrol yok",
         "finisher": "Kapanış · notlanmaz",
         "jam": "Jam · notlanmaz",
-        "drill": "Tempo rampası"
+        "drill": "Tempo rampası",
+        "mine": "Senin alıştırman"
       },
+      "chosenLeftOut": "Eklediğin {{count}} alıştırma {{minutes}} dakikaya sığmadı. Daha fazla dakika seç ya da Alıştırmalarım'dan birini çıkar.",
+      "chosenLeftOut_other": "Eklediğin {{count}} alıştırma {{minutes}} dakikaya sığmadı. Daha fazla dakika seç ya da Alıştırmalarım'dan birini çıkar.",
+      "chosenUnbuilt": "Bugün için eklediğin {{count}} alıştırma artık oluşturulamıyor, o yüzden dışarıda bırakıldı.",
+      "chosenUnbuilt_other": "Bugün için eklediğin {{count}} alıştırma artık oluşturulamıyor, o yüzden dışarıda bırakıldı.",
       "reason": {
         "firstEver": "İlkin. Kliğe tam otur; hız sonra gelir.",
         "newExercise": "Senin için yeni. Yavaş al ve temiz tut.",
@@ -155,7 +160,8 @@
         "keepWarmYesterday": "Sıcak kalsın, en son dün çalındı.",
         "keepWarmToday": "Sıcak kalsın, bugün zaten çalındı.",
         "keepWarmNew": "İlk tadımlık.",
-        "focusChosen": "Seçtiğin gibi, bugün yalnızca bu yol."
+        "focusChosen": "Seçtiğin gibi, bugün yalnızca bu yol.",
+        "chosenToday": "Bugün için sen ekledin."
       },
       "from": "{{path}} · {{level}} · Adım {{step}}",
       "fromNoLevel": "{{path}} · Adım {{step}}",
@@ -265,6 +271,7 @@
       "newFromSibling": "Yeni. {{sibling}} üzerindeki temiz {{clean}} BPM temponun yaklaşık %80'i olan {{bpm}} BPM'den başlar.",
       "newFromSiblingNoClean": "Yeni. {{sibling}} üzerindeki kayıtlarından hesaplanan {{bpm}} BPM'den başlar.",
       "focusChosen": "Bugün için {{path}} yolunu seçtin, oturumun tamamı oradan.",
+      "chosenToday": "Kendi alıştırmalarından biri, bugünkü oturuma senin eklediğin.",
       "playedUngraded": "Kaldığın yerden: {{bpm}} BPM."
     },
     "bar": {
@@ -470,7 +477,15 @@
       "undoFull": "Alıştırmalarım dolu (50), bu yüzden Geri al bunu geri koyamaz.",
       "undoAlready": "Bu alıştırma zaten Alıştırmalarım'da.",
       "cantBuild": "Bu artık oluşturulamıyor: Yames'in bu sürümü onu artık üretmiyor. Sen kaldırana kadar burada durur.",
-      "howTo": "Yazıldığı gibi çal, klikle birlikte."
+      "howTo": "Yazıldığı gibi çal, klikle birlikte.",
+      "addToday": "Bugüne ekle",
+      "addTodayLabel": "{{what}} alıştırmasını bugünkü oturuma ekle",
+      "takeOffToday": "Bugünden çıkar",
+      "takeOffTodayLabel": "{{what}} alıştırmasını bugünkü oturumdan çıkar",
+      "inToday": "Bugünkü oturumda",
+      "addedToday": "Bugünkü oturuma, ısınmadan sonra eklendi.",
+      "takenOffToday": "Bugünkü oturumdan çıkarıldı.",
+      "todayFull": "Bugün zaten alabileceği en fazla sayıda, {{max}} alıştırmanı içeriyor. Önce birini çıkar."
     },
     "paths": {
       "title": "Yollar",
