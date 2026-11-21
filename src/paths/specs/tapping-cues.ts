@@ -44,6 +44,16 @@ const DOWN_TO_E = "Drop both hands one fret for the last chord.";
 const LOOK_AT_7 = "Look at fret 7 as the B chord ends.";
 const WELL_UNDER = "Start well under your clean tempo.";
 const HIGH_TAP = "Keep the high tap as even as the low one.";
+const FLICK_LAST = "Flick the last pull-off of each beat.";
+const PUT_BACK = "Put the little finger back down as you tap.";
+const BOTH_TAPS_LATE = "Put both taps of each beat on the count.";
+const BOTH_TAPS_EARLY = "Wait for '1' and 'and' before each tap.";
+const SHAPE_BACK_AM = "Bring the shape back to frets 5 and 8 for Am.";
+const EACH_STRING_FIRM = "Tap each string as firmly as the top one.";
+const ONE_ON_ONE = "Land each tap on one string, not two.";
+const ROLL_ACROSS = "Roll the first finger across without lifting.";
+const CROSS_ON_HAMMER = "Cross both hands during the last hammer-on.";
+const FRET_STRING_FIRST = "Fret the new string before the tap pulls off.";
 
 export const TAPPING_CUES: CueBook = {
   // Step 1: first taps
@@ -157,6 +167,134 @@ export const TAPPING_CUES: CueBook = {
   "warmup-beginner.cell-around": [
     g(WELL_UNDER, 0),
     c("heard", HAMMER_FIRM),
+    c("late", TAP_LATE),
+    c("early", TAP_EARLY),
+    c("lastBars", HIGH_TAP),
+  ],
+
+  // Step 5: sixteenths
+  "sixteenths.four-note-loop": [
+    g("Count '1 e and a' with the tap on the '1'.", 0),
+    c("heard", FLICK_LAST, 1),
+    c("extras", ONE_STRING),
+    c("late", TAP_LATE),
+    c("early", TAP_EARLY),
+  ],
+  "sixteenths.double-tap": [
+    g("Tap twice a beat: on '1' and on the 'and'.", 0),
+    c("heard", "Put the higher finger back down as you tap.", 1),
+    c("extras", ONE_STRING),
+    c("late", BOTH_TAPS_LATE),
+    c("early", BOTH_TAPS_EARLY),
+  ],
+  "sixteenths.sixteenth-changes": [
+    g("Move both hands from each chord's last pull-off.", 1),
+    c("heard", FRET_FIRST),
+    c("extras", TOP_ONLY),
+    c("late", CHORD_LATE),
+    c("early", CHORD_EARLY),
+    c("lastBars", SHAPE_BACK_AM),
+  ],
+
+  // Step 6: sixteenths in E minor
+  "sixteenths-in-e-minor.loop-em-to-c": [
+    g("Be over the new fret before the chord changes.", 1),
+    c("heard", FLICK_LAST),
+    c("extras", B_ONLY),
+    c("late", CHORD_LATE),
+    c("early", CHORD_EARLY),
+    c("lastBars", BACK_TO_12_C),
+  ],
+  "sixteenths-in-e-minor.double-tap-d-to-b": [
+    g("Move the tapping hand on each chord's last note.", 1),
+    c("heard", "Lift the little finger as the hand moves.", 1),
+    c("extras", B_ONLY),
+    c("late", BOTH_TAPS_LATE),
+    c("early", BOTH_TAPS_EARLY),
+    c("lastBars", LOOK_AT_7, 2),
+  ],
+  "sixteenths-in-e-minor.loop-em-c-d-b": [
+    g("Move the tap in the three notes after it.", 1),
+    c("heard", FRET_FIRST),
+    c("extras", B_ONLY),
+    c("late", CHORD_LATE),
+    c("early", CHORD_EARLY),
+    c("lastBars", DOWN_TO_B),
+  ],
+  "sixteenths-in-e-minor.double-tap-em-c-d-b": [
+    g("Keep the taps going in eighths; never wait.", 1),
+    c("heard", PUT_BACK, 2),
+    c("extras", B_ONLY),
+    c("late", "Change the tap's fret between two taps.", 1),
+    c("early", BOTH_TAPS_EARLY),
+    c("lastBars", DOWN_TO_B),
+  ],
+  "sixteenths-in-e-minor.loop-with-the-band": [
+    g("Play the loop with the band, not ahead of it."),
+    c("heard", FLICK_LAST),
+    c("extras", ONE_STRING),
+    c("late", BAND_LATE),
+    c("early", BAND_EARLY),
+    c("lastBars", DOWN_TO_LAST),
+  ],
+
+  // Step 7: two strings
+  "two-strings.two-string-triplets": [
+    g("Cross with both hands together, every beat.", 1),
+    c("heard", EACH_STRING_FIRM),
+    c("extras", ONE_ON_ONE),
+    c("late", TAP_LATE),
+    c("early", TAP_EARLY),
+    c("stringChange", ROLL_ACROSS, 1),
+  ],
+  "two-strings.three-strings": [
+    g("Use the third finger for the G string's fret 7.", 1),
+    c("heard", EACH_STRING_FIRM),
+    c("extras", ONE_ON_ONE),
+    c("late", TAP_LATE),
+    c("early", TAP_EARLY),
+    c("stringChange", "Move both hands across during the hammer-on."),
+  ],
+  "two-strings.two-strings-sixteenths": [
+    g("Cross on each loop's last pull-off.", 1),
+    c("heard", FLICK_LAST),
+    c("extras", ONE_ON_ONE),
+    c("late", TAP_LATE),
+    c("early", TAP_EARLY),
+    c("stringChange", ROLL_ACROSS),
+  ],
+
+  // Step 8: strings through the chords
+  "strings-through-chords.am-to-em": [
+    g(CROSS_ON_HAMMER, 1),
+    c("heard", FRET_STRING_FIRST, 1),
+    c("extras", ONE_ON_ONE),
+    c("late", CHORD_LATE),
+    c("early", CHORD_EARLY),
+    c("stringChange", "Keep both hands at the same frets as you cross."),
+    c("lastBars", "Cross back to the top string for Am."),
+  ],
+  "strings-through-chords.am-f-c-em": [
+    g("Say 'tap' or 'string' for what moves next.", 1),
+    c("heard", FRET_STRING_FIRST),
+    c("extras", ONE_ON_ONE),
+    c("late", CHORD_LATE),
+    c("early", CHORD_EARLY),
+    c("stringChange", CROSS_ON_HAMMER),
+    c("lastBars", "Move the tap back down a fret for Em."),
+  ],
+  "strings-through-chords.two-strings-with-the-band": [
+    g("Play two chords on each string with the band."),
+    c("heard", FRET_STRING_FIRST),
+    c("extras", ONE_ON_ONE),
+    c("late", BAND_LATE),
+    c("early", BAND_EARLY),
+    c("stringChange", CROSS_ON_HAMMER),
+    c("lastBars", "Move the tap down a fret for the last chord."),
+  ],
+  "warmup-intermediate.loop-around": [
+    g(WELL_UNDER, 0),
+    c("heard", FLICK_LAST),
     c("late", TAP_LATE),
     c("early", TAP_EARLY),
     c("lastBars", HIGH_TAP),

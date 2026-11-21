@@ -10,7 +10,8 @@ Cues: `src/paths/specs/tapping-cues.ts`, attached with `withCues` in `tapping.ts
   (the pass marks are timing, notes heard and extras); `stringChange` on 11, `afterHeld` on one.
 - [x] Level 1 (Beginner: first-taps, moving-the-tap, changing-the-chord, cell-in-e-minor, warm-up
   cell-around), 14 Exercises. `check`: 0 errors, 0 refused, 0 cues rewritten (`gc2.log`).
-- [ ] Level 2
+- [x] Level 2 (Intermediate: sixteenths, sixteenths-in-e-minor, two-strings, strings-through-chords,
+  warm-up loop-around), 15 Exercises. `check`: 0 errors, 0 refused, 0 cues rewritten (`gc4.log`).
 - [ ] Level 3
 - [ ] Proof-read
 - [ ] Translations
@@ -22,3 +23,7 @@ Level 1: the G-string variants of the Step 1 cells hammer with the third finger,
 was refused three times -> "Land each hammer-on firmly enough to sound.", "Bring the tap down as the
 hammer-on lands.", "Flick the last pull-off toward the floor.". `cue.specific` refused "for the E chord"
 (a bare E reads as a string) -> "for the last chord".
+
+Level 2: the double tap's G-string variant refused "Put the little finger back down as you tap." -> "Put
+the higher finger back down as you tap." (the base tab carries no finger marks; the variant hammers
+with the third).
