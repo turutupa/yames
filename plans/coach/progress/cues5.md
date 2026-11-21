@@ -9,7 +9,8 @@ Cues: `src/paths/specs/scales-and-modes-cues.ts`, attached with `withCues` in `s
   `/tmp/coach-cues5/scales-and-modes-dump.txt`.
 - [x] Level 1 (Beginner: major-scale, movable-major, what-a-key-is, keys-by-hand, relative-minor,
   minor-second-key, warm-up scale-walk), 23 Exercises.
-- [ ] Level 2 (Intermediate).
+- [x] Level 2 (Intermediate: chords-from-the-scale, harmonic-minor, harmonic-minor-again, sequences,
+  more-neck, second-shape, warm-up shape-of-the-day), 24 Exercises.
 - [ ] Level 3 (Advanced).
 - [ ] Proof-read.
 - [ ] Translations.
@@ -23,3 +24,8 @@ variants (the G and D strings are not a uniform transposition of the B string): 
 "finger", "each new fret", "the hand", "'whole' or 'half' for each step" -> orders that name a note,
 not a fret ("See where the next note is before the click.", "Move on as soon as each note sounds.",
 "Start one note higher as each bar starts.", "Say 'half' as you play notes four and eight.").
+
+Level 2: the intermediate warm-up's minor-shape variants refused "the same two frets higher", "the
+hand", "cross strings" -> "Play it twice: the second time just as even.", "Have the first note ready
+as the held one ends.", "Keep the pick close to the strings.". The key-moved Exercises (one shape
+moved along the same strings) say degrees, fingers and string names and were refused nothing.
