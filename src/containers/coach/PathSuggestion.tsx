@@ -25,6 +25,10 @@ export function PathSuggestion({ session, onOpen }: { session: SessionRun; onOpe
   );
   // Unasked: off with "Only when I ask", and while that choice is not read.
   if (!suggestion || states.suggestions !== "read" || stored.suggestions === "asked") return null;
+  // Never during a Take (review c4b3 L5). The rail and the tab bar are hidden
+  // in a Session, so Paths should not be on screen then; this holds it anyway.
+  const phase = session.run.phase;
+  if (phase === "playing" || phase === "listening") return null;
   return (
     <section className="coach-note companion-card path-suggestion" data-testid="path-suggestion" aria-label={t("companion.pathSuggest.label")}>
       <div className="companion-head">

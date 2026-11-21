@@ -91,6 +91,14 @@ describe("when: what can be asked here", () => {
     expect(cardsHere(fixture(shape, over).ctx).filter((n) => (ALL_CARDS as readonly string[]).includes(n))).toEqual(cards);
   });
 
+  it("a Path suggestion reads no grade and no Take: here for an ungraded player, with no Take, never in a Take (c4b3)", () => {
+    expect(cardsHere(fixture({}, { grading: "off" }).ctx)).toContain("suggest_path");
+    expect(cardsHere(fixture({}, { run: { ...runIn("result"), ungraded: "chosen" } }).ctx)).toContain("suggest_path");
+    expect(cardsHere(fixture({}, { lastTake: undefined }).ctx)).toContain("suggest_path");
+    expect(cardsHere(fixture({ verdict: "notCaught" }).ctx)).toContain("suggest_path");
+    expect(cardsHere(fixture({}, { run: runIn("playing") }).ctx)).not.toContain("suggest_path");
+  });
+
   it("during a Take: no card at all, the Path's and the plan's included (c2b2a)", () => {
     expect(cardsHere(fixture({}, { run: runIn("playing") }).ctx)).toEqual([]);
   });

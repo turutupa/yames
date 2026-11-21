@@ -49,7 +49,28 @@ describe("suggestPath", () => {
     const s = suggestPath(NO_PROGRESS, [ALT, SWEEP_OPEN], goal)!;
     expect(s.path.id).toBe(SWEEP.id);
     expect(s.goal).toEqual(goal);
-    expect(suggestionLines(s).map((l) => l.key)).toEqual(["companion.pathSuggest.next", "companion.pathSuggest.goal"]);
+    // Review c4b3 H1: Sweep is not the next in the curriculum's order (Alternate
+    // Picking is): it is said to match the goal, never to be "the next".
+    expect(s.reason).toEqual({ key: "readyGoal", values: { path: SWEEP.title } });
+    expect(suggestionLines(s).map((l) => l.key)).toEqual(["companion.pathSuggest.readyGoal", "companion.pathSuggest.goal"]);
+  });
+
+  it("a goal that leaves the first ready Path first: \"the next\", and the goal not quoted", () => {
+    // "picking" is in both titles: a tie, so the curriculum's order stands.
+    const s = suggestPath(NO_PROGRESS, [ALT, SWEEP_OPEN], { text: "picking", at: NOW - DAY })!;
+    expect(s.path.id).toBe(ALT.id);
+    expect(s.reason.key).toBe("next");
+    expect(s.goal).toBeNull();
+  });
+
+  it("common words and parts of words decide nothing (review c4b3 L6)", () => {
+    for (const text of ["I want to play guitar better", "sweeping", "a sweepstake"]) {
+      const s = suggestPath(NO_PROGRESS, [ALT, SWEEP_OPEN], { text, at: NOW - DAY })!;
+      expect(s.path.id, text).toBe(ALT.id);
+      expect(s.goal, text).toBeNull();
+    }
+    // A plural is the same word.
+    expect(suggestPath(NO_PROGRESS, [ALT, SWEEP_OPEN], { text: "sweeps", at: NOW - DAY })!.path.id).toBe(SWEEP.id);
   });
 });
 

@@ -30,6 +30,7 @@ import type { Exercise, PathDoc, Step } from "../paths/format";
 import {
   chosenLevelOf,
   countsTowardCleanTempo,
+  isExercisePassed,
   isGradable,
   levelStartIndex,
   passesNeeded,
@@ -127,9 +128,13 @@ export function milestonesNow(progress: PlayerProgress, paths: readonly PathDoc[
   const out: Milestone[] = [];
 
   // The first Exercise passed: the earliest pass anywhere is in this Session.
+  // Anywhere includes the player's own exercises (they earn no milestone, but
+  // a pass there was a first), and a clean tempo on a Path not loaded now
+  // makes an earlier pass unknown: then the sentence is not said (review c4b3 L2).
+  const loaded = new Set(paths.map((p) => p.id));
   let first: { path: PathDoc; passed: Passed } | null = null;
-  let unknownEarlier = false;
-  for (const path of own) {
+  let unknownEarlier = progress.ceilings.some((c) => c.cleanBpm > 0 && !loaded.has(c.exerciseKey.slice(0, c.exerciseKey.indexOf("/"))));
+  for (const path of paths) {
     for (const step of path.steps) {
       for (const ex of step.exercises) {
         const passed = passedOf(progress, path.id, ex);
@@ -139,7 +144,7 @@ export function milestonesNow(progress: PlayerProgress, paths: readonly PathDoc[
       }
     }
   }
-  if (first && !unknownEarlier && inSession(first.passed.take)) {
+  if (first && first.path.id !== MY_EXERCISES_PATH_ID && !unknownEarlier && inSession(first.passed.take)) {
     const { exercise, take, bpm } = first.passed;
     out.push({
       kind: "firstPassed",
@@ -155,11 +160,16 @@ export function milestonesNow(progress: PlayerProgress, paths: readonly PathDoc[
     const pathDone = allFinished(progress, path.id, owed);
     if (inSession(pathDone)) {
       const last = path.steps[path.steps.length - 1];
+      // A Level chosen above the first, with a Step below it not finished: the
+      // sentence says what is done, from that Level on (review c4b3 M1).
+      const chosen = chosenLevelOf(progress, path);
+      const below = path.steps.slice(0, levelStartIndex(path, chosen));
+      const from = chosen && below.some((s) => stepFinish(progress, path.id, s) === null) ? chosen : null;
       out.push({
         kind: "pathDone",
         key: `pathDone:${path.id}`,
         at: pathDone.startedAt,
-        line: { key: "pathDone", values: { path: path.title } },
+        line: from ? { key: "pathDoneFrom", values: { path: path.title, level: from.title } } : { key: "pathDone", values: { path: path.title } },
         payoff: last?.payoff || null,
       });
       continue;
@@ -190,11 +200,16 @@ export function milestonesNow(progress: PlayerProgress, paths: readonly PathDoc[
       const next = path.steps[at + 1] ?? null;
       const values: Record<string, string | number> = { step: step.title, passed: done.passed, count: done.count };
       if (next) values.next = next.title;
+      // "The others stay in your reviews" only when the planner counts the same
+      // Exercises passed: it reads the stored clean tempo, a Take marked not
+      // fair included, and this count does not (review c4b3 L3).
+      const plannerPassed = step.exercises.filter((ex) => isGradable(ex) && isExercisePassed(progress, path.id, ex)).length;
+      const rest = done.passed < done.count && plannerPassed === done.passed;
       out.push({
         kind: "stepDone",
         key: `stepDone:${path.id}/${step.id}`,
         at: done.take.startedAt,
-        line: { key: next ? (done.passed < done.count ? "stepDoneRest" : "stepDone") : "stepDoneLast", values },
+        line: { key: next ? (rest ? "stepDoneRest" : "stepDone") : "stepDoneLast", values },
         payoff: null,
       });
       break;

@@ -71,7 +71,7 @@ const CARD_CHIP: Readonly<Partial<Record<CardShape, string>>> = {
   improving: "ask.card.chip.improving",
   score_made_of: "ask.card.chip.madeOf",
   pass_mark_distance: "ask.card.chip.distance",
-  // Not in `CARD_ORDER`: offered after no Take; asked, or on Paths (c4b3).
+  // Leg c4b3: offered before a Take, on Paths and Progress only (`BEFORE_A_TAKE`, last).
   suggest_path: "companion.pathSuggest.chip",
   // Leg c2b2a.
   exercise_purpose: "ask.card.chip.purpose",
@@ -90,7 +90,15 @@ const CARD_CHIP: Readonly<Partial<Record<CardShape, string>>> = {
  * the plan's reasons (leg c2b2a). After a Take these follow the Take's own
  * cards, so they fill a row only where the Take's cards leave room.
  */
-const BEFORE_A_TAKE: readonly CardShape[] = ["exercise_try", "plan_why", "exercise_purpose", "exercise_how", "plan_tempo", "plan_next", "clean_tempo"];
+const BEFORE_A_TAKE: readonly CardShape[] = ["exercise_try", "plan_why", "exercise_purpose", "exercise_how", "plan_tempo", "plan_next", "clean_tempo", "suggest_path"];
+
+/**
+ * Where "Suggest a Path" is offered as a chip (leg c4b3, review M2): the Paths
+ * list and Progress, the two places a player looks for what to do next, and
+ * only before a Take (no verdict), last, within the three. Typed, it is
+ * answered anywhere but a Take.
+ */
+const SUGGEST_PATH_CHIP_SCREENS: ReadonlySet<CoachContext["screen"]> = new Set(["paths", "progress"]);
 const AFTER_THE_TAKE: readonly CardShape[] = ["exercise_try", "plan_next", "exercise_how"];
 
 /**
@@ -143,6 +151,6 @@ export function cardChipsFor(ctx: CoachContext, place: "askEmpty" | "askAbove", 
   const verdict = take ? (take.ungraded !== undefined ? "ungraded" : take.grade.verdict) : null;
   // A player without grading sees no card chips (Ask's empty state says why in
   // one line); the Path's words and the plan still answer a typed question.
-  const cards = ungradedPlayer(ctx) ? [] : cardsHere(ctx);
+  const cards = ungradedPlayer(ctx) ? [] : cardsHere(ctx).filter((c) => c !== "suggest_path" || SUGGEST_PATH_CHIP_SCREENS.has(ctx.screen));
   return suggestChips(place, { cards, verdict, answered });
 }

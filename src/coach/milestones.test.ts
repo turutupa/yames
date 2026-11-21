@@ -132,6 +132,36 @@ describe("milestonesNow", () => {
     expect(out.map((m) => [m.kind, m.key, m.payoff])).toEqual([["pathDone", `pathDone:${P.id}`, "You can hear s3."]]);
   });
 
+  it("a Path finished from a chosen Level, the Steps below it skipped: says from where (review c4b3 M1)", () => {
+    const withLevel = (takes: PathTakeRow[]) =>
+      progress({ takes, ceilings: ceilingsOf(takes), states: [{ pathId: P.id, startedAt: NOW - 60 * DAY, updatedAt: NOW - DAY, level: "intermediate" }] });
+    const skipped = milestonesNow(withLevel([clean("f", 100, LAST)]), [P], NOW, true);
+    // (f is also the player's first Exercise passed.)
+    expect(skipped.filter((m) => m.kind === "pathDone").map((m) => m.line)).toEqual([
+      { key: "pathDoneFrom", values: { path: "Path p", level: "Level intermediate" } },
+    ]);
+    // Every Step below finished too: the whole Path is done, and it says so.
+    const all = milestonesNow(withLevel([...s1Done(), ...s2Done(), clean("f", 100, LAST)]), [P], NOW, true);
+    expect(all.map((m) => m.line)).toEqual([{ key: "pathDone", values: { path: "Path p" } }]);
+  });
+
+  it("first Exercise passed: not said after an earlier pass on the player's own exercise, or a clean tempo on a Path not loaded (review c4b3 L2)", () => {
+    const mine = pathOf(MY_EXERCISES_PATH_ID);
+    const own = [clean("a", 100, 5, {}, MY_EXERCISES_PATH_ID), clean("a", 100, LAST)];
+    expect(milestonesNow(prog(own), [P, mine], NOW, true).map((m) => m.kind)).toEqual([]);
+    const takes = [clean("a", 100, LAST)];
+    const gone = progress({ takes, ceilings: [...ceilingsOf(takes), { exerciseKey: "gone-path/x", cleanBpm: 120, lastPracticed: NOW - 90 * DAY }] });
+    expect(milestonesNow(gone, [P], NOW, true)).toEqual([]);
+    // With neither, it is said.
+    expect(milestonesNow(prog(takes), [P, mine], NOW, true).map((m) => m.kind)).toEqual(["firstPassed"]);
+  });
+
+  it("a Step finished: no \"the others stay in your reviews\" when the planner counts one more passed (review c4b3 L3)", () => {
+    // d's clean tempo is held by a Take marked not fair: the planner counts it passed, the fair count does not.
+    const out = now([clean("a", 100, 1), clean("b", 100, 2), notFair("d", 100, 3), clean("c", 100, LAST)]);
+    expect(out.map((m) => m.line)).toEqual([{ key: "stepDone", values: { step: "Step s1", passed: 3, count: 4, next: "Step s2" } }]);
+  });
+
   it("Path finished: a Take marked not fair alone never earns it", () => {
     expect(kinds([...s1Done(), ...s2Done(), notFair("f", 100, LAST)])).toEqual([]);
   });

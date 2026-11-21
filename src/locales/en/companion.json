@@ -56,6 +56,7 @@
       "stepDoneLast": "{{step}}: {{passed}} of {{count}} Exercises passed, enough to finish the Step.",
       "levelDone": "{{level}} on {{path}} is finished: every Step in it is done.",
       "pathDone": "{{path}} is finished: every Step in it is done.",
+      "pathDoneFrom": "{{path}} is finished from {{level}} on: every Step from there is done.",
       "benchmark": "Benchmark: {{exercise}}, the same Take at {{bpm}} BPM: {{from}}% even on day {{fromDay}}, {{to}}% on day {{toDay}}.",
       "payoff": "The Path says: “{{payoff}}”"
     },
@@ -64,6 +65,7 @@
       "kick": "A Path to try next",
       "chip": "Suggest a Path",
       "next": "{{path}} is the next Path in the curriculum's order that you have not started, and nothing it builds on is missing.",
+      "readyGoal": "{{path}} matches what you said you are working toward, and nothing it builds on is missing.",
       "buildsOn": "{{path}} builds on {{on}}, which you have started.",
       "buildsOnLevel": "{{path}} builds on {{on}}, and you are through {{level}} there.",
       "goal": "You said you are working toward: “{{goal}}”",
