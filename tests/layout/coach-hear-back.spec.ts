@@ -1,3 +1,4 @@
+import { writeFileSync } from "node:fs";
 import { test, expect, type Page } from "@playwright/test";
 import { MOBILE_URL, noSidewaysScroll, openShot, settleAnimations } from "./fits";
 
@@ -73,6 +74,8 @@ test("one press: the player's bar, then the demo, in the safe order", async ({ p
   await expect(chip).toHaveText(`Hear bar ${bar}: yours, then the demo`, { timeout: 30_000 });
   const log = await hearLog(page);
   test.info().annotations.push({ type: "hear-back order", description: log.join(" > ") });
+  // For the review: the order as logged, beside the pictures.
+  if (process.env.YAMES_SHOT_DIR) writeFileSync(`${process.env.YAMES_SHOT_DIR}/hear-back-order.txt`, `${log.join("\n")}\n`);
   const at = (prefix: string) => log.findIndex((e) => e.startsWith(prefix));
   expect(log[0], "the input is gated before anything sounds").toBe("gate(on)");
   expect(at("hear_take(")).toBeGreaterThan(0);
