@@ -64,7 +64,8 @@ export interface Shot {
      * `none`: played Alternate Picking once, then unsubscribed from it, so no
      * Path is subscribed (QA 2026-11-17 #7).
      */
-    seed: "first" | "returning" | "back" | "three" | "none" | "ungraded";
+    /** `slipped`: `returning`, its last Take with per-bar figures in which the tune's first bar slipped (Today's line). */
+    seed: "first" | "returning" | "back" | "three" | "none" | "ungraded" | "slipped";
     /** Today's focus (`session.todayFocus`): "mix" or a Path's id. Absent: the mix. */
     focus?: string;
     /** Paths switched out of the daily mix (`session.offMix`). */
@@ -952,6 +953,17 @@ export const SHOTS: Shot[] = [
     window: "main",
     session: { seed: "back", stop: "today" },
     width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    // Today's line (c1b2a, mock 01): the last Take's first bar slipped
+    // yesterday, and today's plan starts on that Exercise.
+    id: "today-line",
+    suffix: "today-line",
+    window: "main",
+    session: { seed: "slipped", minutes: 15, stop: "today" },
+    width: 1440,
     height: 900,
     settleMs: 300,
   },
@@ -2239,6 +2251,7 @@ export const PHONE_LEARNING_SCENES = [
   "today-first",
   "today-drums",
   "today-returning",
+  "today-line",
   "today-no-paths",
   "today-focus-two",
   "today-focus-three-one",

@@ -37,14 +37,55 @@
       "minutes": "{{minutes}} 分鐘",
       "start": "開始",
       "howLong": "你有多少時間？分鐘數：",
-      "leftOff": "上次練到哪裡",
-      "leftOffValue": {
-        "even": "{{bpm}} BPM 時均勻度 {{value}}%。今天從慢一點開始。",
-        "heard": "{{bpm}} BPM 時聽到 {{value}}% 的音。今天從慢一點開始。",
-        "accents": "{{bpm}} BPM 時 {{value}}% 的重音到位。今天從慢一點開始。",
-        "notes": "{{bpm}} BPM 時音準 {{value}}%。今天從慢一點開始。"
+      "line": {
+        "first": "你的第一次練習會找出你從哪裡開始。不用準備。",
+        "slipped": {
+          "today": {
+            "bar": "{{exercise}}：今天稍早，曲子第 {{bar}} 小節在 {{of}} 輪中有 {{count}} 輪亂了。",
+            "bars": "{{exercise}}：今天稍早，曲子第 {{from}} 到 {{to}} 小節在 {{of}} 輪中有 {{count}} 輪亂了。",
+            "all": "{{exercise}}：今天稍早，整段曲子在 {{of}} 輪中有 {{count}} 輪亂了。"
+          },
+          "yesterday": {
+            "bar": "{{exercise}}：昨天，曲子第 {{bar}} 小節在 {{of}} 輪中有 {{count}} 輪亂了。",
+            "bars": "{{exercise}}：昨天，曲子第 {{from}} 到 {{to}} 小節在 {{of}} 輪中有 {{count}} 輪亂了。",
+            "all": "{{exercise}}：昨天，整段曲子在 {{of}} 輪中有 {{count}} 輪亂了。"
+          },
+          "lastSession": {
+            "bar": "{{exercise}}：上次練習中，曲子第 {{bar}} 小節在 {{of}} 輪中有 {{count}} 輪亂了。",
+            "bars": "{{exercise}}：上次練習中，曲子第 {{from}} 到 {{to}} 小節在 {{of}} 輪中有 {{count}} 輪亂了。",
+            "all": "{{exercise}}：上次練習中，整段曲子在 {{of}} 輪中有 {{count}} 輪亂了。"
+          }
+        },
+        "startsThere": "今天就從那裡開始。",
+        "earned": {
+          "today": "{{exercise}}：今天稍早，你的乾淨速度升到了 {{bpm}} BPM。",
+          "yesterday": "{{exercise}}：昨天，你的乾淨速度升到了 {{bpm}} BPM。",
+          "lastSession": "{{exercise}}：上次練習中，你的乾淨速度升到了 {{bpm}} BPM。"
+        },
+        "earnedThen": {
+          "review": "今天會安排一次簡短的複習。",
+          "climb": "今天會更快一些。",
+          "keep": "今天安排一遍來保持它。"
+        },
+        "back": {
+          "even": "上次練習，{{exercise}}：{{bpm}} BPM 時均勻度 {{value}}%。",
+          "heard": "上次練習，{{exercise}}：{{bpm}} BPM 時聽到 {{value}}% 的音。",
+          "accents": "上次練習，{{exercise}}：{{bpm}} BPM 時 {{value}}% 的重音到位。",
+          "notes": "上次練習，{{exercise}}：{{bpm}} BPM 時音準 {{value}}%。",
+          "plain": "上次練習結束在 {{exercise}}，{{bpm}} BPM。"
+        },
+        "backRungs": "今天比原本低一檔開始。",
+        "backRungs_other": "今天比原本低 {{count}} 檔開始。",
+        "ungraded": {
+          "today": "今天稍早彈了 {{count}} 分鐘，最後一遍是 {{exercise}}，{{bpm}} BPM。",
+          "today_other": "今天稍早彈了 {{count}} 分鐘，最後一遍是 {{exercise}}，{{bpm}} BPM。",
+          "yesterday": "昨天彈了 {{count}} 分鐘，最後一遍是 {{exercise}}，{{bpm}} BPM。",
+          "yesterday_other": "昨天彈了 {{count}} 分鐘，最後一遍是 {{exercise}}，{{bpm}} BPM。",
+          "lastSession": "上次練習中彈了 {{count}} 分鐘，最後一遍是 {{exercise}}，{{bpm}} BPM。",
+          "lastSession_other": "上次練習中彈了 {{count}} 分鐘，最後一遍是 {{exercise}}，{{bpm}} BPM。"
+        },
+        "samePlace": "今天還是從同一個地方開始。"
       },
-      "leftOffPlain": "{{bpm}} BPM。今天從慢一點開始。",
       "whatsIn": "練什麼，為什麼",
       "min": "分鐘",
       "nothing": "還沒有可以彈的內容。",

@@ -164,7 +164,7 @@ import type { StoredFocus, TodayFocus } from "../../../session/focus";
 import type { SwapChoice, SwapMemory, SwapOptions } from "../../../session/swap";
 
 /** How many Takes are read back for planning. More than any plan looks at. */
-const TAKES_TO_READ = 500;
+export const TAKES_TO_READ = 500;
 const MINUTES_KEY = "session.minutes";
 /** Paths the player unsubscribed from; their rows and Takes stay (`PlayerProgress.unsubscribed`). */
 const UNSUBSCRIBED_KEY = "session.unsubscribed";
@@ -604,9 +604,9 @@ export function useSessionRun(input: SessionRunInput) {
     void storeSave(MINUTES_KEY, next).catch(() => {});
   }, []);
 
-  /** The band's level, per player, kept. */
-  const setBandVolume = useCallback((next: number) => {
-    const level = readBandVolume(next) ?? 0;
+  /** The band's level, per player, kept. `null` gives the choice back to the app (the coach's undo). */
+  const setBandVolume = useCallback((next: number | null) => {
+    const level = next === null ? null : (readBandVolume(next) ?? 0);
     setBandChoice(level);
     void storeSave(BAND_VOLUME_KEY, level).catch(() => {});
   }, []);
@@ -682,6 +682,28 @@ export function useSessionRun(input: SessionRunInput) {
   const plan: SessionPlan = useMemo(
     () => applySwaps(basePlan, todaySwaps, swapContext),
     [basePlan, todaySwaps, swapContext],
+  );
+  /**
+   * Today's plan as it would be with other minutes or another focus, built the
+   * way `plan` is and changing nothing (the coach's `set_minutes` / `set_focus`
+   * proposal draws it before the player presses). A new focus takes its
+   * swaps with it, as `setTodayFocus` does.
+   */
+  const previewPlan = useCallback(
+    (change: { minutes?: PlanMinutes; focus?: TodayFocus }): SessionPlan => {
+      const next = change.focus === undefined ? today : todayPathsOf(myPaths, offMix, readFocus(change.focus));
+      const base = planSession({
+        minutes: change.minutes ?? minutes,
+        now: planClock,
+        paths: next.paths,
+        progress,
+        avoid: avoidSet(swapMemory),
+        ungraded: grading === "off",
+        ...(next.focusedPath ? { focused: true } : {}),
+      });
+      return applySwaps(base, swapsIn(swapMemory, next.focus), swapContext);
+    },
+    [today, myPaths, offMix, minutes, planClock, progress, swapMemory, grading, swapContext],
   );
 
   /** What Today's row `index` can be swapped for (owner, 2026-11-18). */
@@ -2372,6 +2394,7 @@ export function useSessionRun(input: SessionRunInput) {
   return {
     run,
     plan,
+    previewPlan,
     minutes,
     setMinutes,
     practiceView: preview ? ("neck" as PracticeView) : practiceView,
@@ -2381,6 +2404,8 @@ export function useSessionRun(input: SessionRunInput) {
     viewHintSeen,
     dismissViewHint,
     bandVolume,
+    /** The player's stored band level, or null: none chosen, the app decides (`bandVolumeFor`). */
+    bandChoice,
     setBandVolume,
     /**
      * The keys the Exercise on the stage can be played in, and which is on

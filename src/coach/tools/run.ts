@@ -26,19 +26,24 @@ import { runCoachAction, type CoachActionOutcome } from "../blocks/actions";
 import type { CoachAction } from "../blocks/types";
 import type { CoachContext } from "../context";
 import { chordNamePattern } from "../blocks/schema";
-import type { CoachToolHost, HostOutcome } from "./host";
+import type { MainView } from "../../containers/main-window/MainHeader";
+import type { CoachToolHost, HostOutcome, Sounding } from "./host";
 import { COACH_TOOLS } from "./registry";
 import {
+  line,
   refuse,
   takeRunning,
+  type ActTool,
   type ArgType,
   type ArgValue,
   type CoachTool,
   type Proposal,
+  type Proposed,
   type Refusal,
   type RunOutcome,
   type ToolArgs,
   type ToolAudience,
+  type ToolCall,
   type ToolResult,
 } from "./types";
 
@@ -134,25 +139,117 @@ function guarded<T extends RunOutcome>(name: string, run: () => T): T | Refusal 
   }
 }
 
-/** The proposals this runner minted and nobody has confirmed yet. */
-const issued = new WeakSet<Proposal>();
+/**
+ * The proposals this runner minted and nobody has confirmed yet, each with
+ * what its tool resolved. That stays here, out of the caller's reach: the
+ * proposal it hands out carries no `resolved`, so nothing a caller does to the
+ * object it holds can change what the press does (review finding 6).
+ */
+const issued = new WeakMap<Proposal, unknown>();
+
+function mint(
+  tool: CoachTool,
+  args: ToolArgs,
+  proposed: Omit<Proposal, "tool" | "args"> & { resolved: unknown },
+): Proposed {
+  const proposal: Proposal = Object.freeze({
+    tool: tool.name,
+    args: Object.freeze({ ...args }),
+    line: proposed.line,
+    ...(proposed.plan ? { plan: proposed.plan } : {}),
+    ...(proposed.noUndo ? { noUndo: true as const } : {}),
+  });
+  issued.set(proposal, proposed.resolved);
+  return { ok: true, proposal };
+}
+
+/**
+ * The undos this runner handed out and nobody has pressed yet. `runCoachUndo`
+ * runs only one of these, once: a call made up by a caller, an app-only tool
+ * named from outside, or an Undo pressed twice does nothing (review finding 5).
+ */
+const undos = new WeakMap<ToolCall, string>();
+
+/**
+ * Where an undo was handed out: the view and, in a Session, the Exercise
+ * (its block and id). An undo is a plain call (`set_setting {countIn: off}`,
+ * `set_tempo {bpm, at}`) that names no screen, so a `confirm` undo pressed
+ * anywhere else would change that screen's count-in or tempo instead
+ * (review t1a2b, finding A). `runCoachUndo` compares this with where the app
+ * is at the press.
+ */
+function placeOf(host: CoachToolHost, ctx: CoachContext): string {
+  const exercise = host.sessionActive() ? `${String(ctx.run?.stepIndex ?? "")}:${ctx.exercise?.id ?? ""}` : "";
+  return `${host.view()}|${exercise}`;
+}
+
+/** A result as it leaves the runner: its undo, if any, frozen and remembered with where it was issued. */
+function issue<T extends RunOutcome>(outcome: T, host: CoachToolHost, ctx: CoachContext): T {
+  if (!outcome.ok || !("receipt" in outcome) || !outcome.undo) return outcome;
+  const undo: ToolCall = Object.freeze({ tool: outcome.undo.tool, args: Object.freeze({ ...outcome.undo.args }) });
+  undos.set(undo, placeOf(host, ctx));
+  return { ...outcome, undo } as T;
+}
+
+/**
+ * A `go` tool run dry: every read as it is, and the three doors a `go` tool
+ * moves the app through shut. What the tool returns is then exactly what it
+ * would do, nothing has moved, and `target` is the view it would show (null:
+ * it would show none).
+ */
+function dryRun(tool: ActTool, args: ToolArgs, host: CoachToolHost, ctx: CoachContext): { dry: ToolResult; target: MainView | null } {
+  let target: MainView | null = null;
+  const dryHost: CoachToolHost = {
+    ...host,
+    setView: (view) => {
+      target = view;
+    },
+    movePaths: () => {},
+    openSettingsSection: () => {
+      target = "settings";
+    },
+  };
+  const dry = tool.run(args, dryHost, ctx);
+  return { dry, target };
+}
+
+/**
+ * What a navigating `go` tool would stop by going where it goes: nothing for
+ * Settings (an overlay) or for the mode already playing, which the host
+ * knows (`sounding(target)`, review findings 7 and 8).
+ */
+function leavingStops(tool: ActTool, args: ToolArgs, host: CoachToolHost, ctx: CoachContext): { dry: ToolResult; stops: Sounding | null } {
+  const { dry, target } = dryRun(tool, args, host, ctx);
+  return { dry, stops: dry.ok && target !== null ? host.sounding(target) : null };
+}
+
+/**
+ * A `go` tool that leaves the screen while something sounds, and would stop
+ * it, is not "at once" (the owner's rule: nothing sounds or stops sounding).
+ * What it would do comes back as a proposal (the receipt's key under
+ * `coachTools.propose.`, with what stops). Anything else runs as it is.
+ */
+function runGo(tool: ActTool, args: ToolArgs, host: CoachToolHost, ctx: CoachContext): RunOutcome {
+  if (tool.kind !== "go" || !tool.leaves) return tool.run(args, host, ctx);
+  const { dry, stops } = leavingStops(tool, args, host, ctx);
+  if (!stops) return tool.run(args, host, ctx);
+  if (!dry.ok || !dry.undo) return dry;
+  const key = dry.receipt.key.replace(/^coachTools\.receipt\./, "coachTools.propose.");
+  return mint(tool, args, { line: line(key, { ...dry.receipt.values, stops }), resolved: Object.freeze({ ...args }) });
+}
 
 function run(checked: CheckedCall, host: CoachToolHost, ctx: CoachContext): RunOutcome {
   const { tool, args } = checked;
   const wrong = checkContext(tool, ctx);
   if (wrong) return wrong;
-  if (tool.kind !== "confirm") return guarded(tool.name, () => tool.run(args, host, ctx));
+  if (tool.kind !== "confirm") return guarded(tool.name, () => issue(runGo(tool, args, host, ctx), host, ctx));
   return guarded(tool.name, (): RunOutcome => {
     const proposed = tool.propose(args, host, ctx);
     if (!proposed.ok) return proposed;
-    const proposal: Proposal = Object.freeze({
-      tool: tool.name,
-      args: Object.freeze({ ...args }),
-      line: proposed.line,
-      resolved: proposed.resolved,
-    });
-    issued.add(proposal);
-    return { ok: true, proposal };
+    // A Session about to open says what it stops.
+    const stops = tool.leaves ? host.sounding() : null;
+    const said = stops ? line(proposed.line.key, { ...proposed.line.values, stops }) : proposed.line;
+    return mint(tool, args, { ...proposed, line: said });
   });
 }
 
@@ -183,12 +280,17 @@ export function confirmCoachTool(
   registry: readonly CoachTool[] = COACH_TOOLS,
 ): ToolResult {
   if (!issued.has(proposal)) return refuse("refused", "coachTools.why.refused.proposal", {}, { detail: "not a live proposal" });
+  const resolved = issued.get(proposal);
   issued.delete(proposal);
   const tool = registry.find((t) => t.name === proposal.tool);
-  if (!tool || tool.kind !== "confirm") return refuse("refused", "coachTools.why.refused.proposal", {}, { detail: "no such confirm tool" });
+  if (!tool || !(tool.kind === "confirm" || (tool.kind === "go" && tool.leaves))) {
+    return refuse("refused", "coachTools.why.refused.proposal", {}, { detail: "no such confirm tool" });
+  }
   const wrong = checkContext(tool, ctx);
   if (wrong) return wrong;
-  return guarded(tool.name, () => tool.commit(proposal.resolved, host, ctx));
+  // A `go` tool's proposal holds its checked arguments: run it for real now.
+  if (tool.kind !== "confirm") return guarded(tool.name, () => issue(tool.run(resolved as ToolArgs, host, ctx), host, ctx));
+  return guarded(tool.name, () => issue(tool.commit(resolved, host, ctx), host, ctx));
 }
 
 /** Drop a proposal the player turned down ("Not now"), so it can never be confirmed. */
@@ -197,9 +299,14 @@ export function dismissProposal(proposal: Proposal): void {
 }
 
 /**
- * The press on a receipt's Undo: the call the tool returned as its `undo`.
- * May reach the app's own tools (`return_to`). An undo that is a `confirm`
- * tool runs at once, because the Undo press is the press.
+ * The press on a receipt's Undo: the `undo` this runner handed out with a
+ * result, the very object, and once (a made-up call, or the same Undo
+ * pressed twice, is refused and runs nothing). May reach the app's own tools
+ * (`return_to`). An undo that is a `confirm` tool runs at once, because the
+ * Undo press is the press. A `confirm` undo pressed anywhere but the view
+ * (and, in a Session, the Exercise) it was issued on is refused and spent.
+ * Refused as `notNow` (a Take, a click still playing), it stays good for a
+ * later press, on that same screen.
  */
 export function runCoachUndo(
   undo: unknown,
@@ -207,8 +314,45 @@ export function runCoachUndo(
   ctx: CoachContext,
   registry: readonly CoachTool[] = COACH_TOOLS,
 ): ToolResult {
+  if (!isPlainObject(undo) || !undos.has(undo as ToolCall)) {
+    return refuse("refused", "coachTools.why.refused.proposal", {}, { detail: "not a live undo" });
+  }
+  const issuedUndo = undo as ToolCall;
+  const place = undos.get(issuedUndo) ?? "";
+  undos.delete(issuedUndo);
+  // A `confirm` undo puts back a screen's own setting: anywhere else it would change
+  // another screen's, so it is refused and spent. A `go` undo moves the view by design.
+  const tool = registry.find((t) => t.name === issuedUndo.tool);
+  if (tool?.kind === "confirm") {
+    let here: string | null = null;
+    try {
+      here = placeOf(host, ctx);
+    } catch {
+      // A host that cannot say where it is cannot be where the undo was issued.
+    }
+    if (here !== place) {
+      return refuse("refused", "coachTools.why.refused.proposal", {}, { detail: "the undo was issued on another screen" });
+    }
+  }
+  const outcome = runIssuedUndo(issuedUndo, host, ctx, registry);
+  if (!outcome.ok && outcome.why === "notNow") undos.set(issuedUndo, place);
+  return outcome;
+}
+
+function runIssuedUndo(undo: ToolCall, host: CoachToolHost, ctx: CoachContext, registry: readonly CoachTool[]): ToolResult {
   const checked = checkCall(undo, registry, "app");
   if (!checked.ok) return checked;
+  // Undo is not a press on "this stops the click": going back waits until it has stopped.
+  const { tool, args } = checked.call;
+  if (tool.kind === "go" && tool.leaves && !takeRunning(ctx)) {
+    let stops: Sounding | null = null;
+    try {
+      stops = leavingStops(tool, args, host, ctx).stops;
+    } catch {
+      // A tool that throws is reported by `run` below, as a refusal.
+    }
+    if (stops) return refuse("notNow", "coachTools.why.notNow.sounding", { stops });
+  }
   const outcome = run(checked.call, host, ctx);
   if (!("proposal" in outcome)) return outcome;
   return confirmCoachTool(outcome.proposal, host, ctx, registry);
@@ -225,11 +369,14 @@ export function runCoachUndo(
 export function runBlockAction(action: CoachAction, host: CoachToolHost): CoachActionOutcome {
   let outcome: HostOutcome = "done";
   const result = runCoachAction(action, {
+    // The block's button goes through the same gate as the library's; its question is the app's own.
     loadPreset: (id) => {
-      outcome = host.loadPreset(id);
+      const out = host.loadPreset(id);
+      outcome = out === "asked" ? "done" : out;
     },
     loadJam: (id) => {
-      outcome = host.loadJam(id);
+      const out = host.loadJam(id);
+      outcome = out === "asked" ? "done" : out;
     },
     setClickSubdivision: (subdivision) => {
       outcome = host.setClickSubdivision(subdivision);

@@ -37,14 +37,59 @@
       "minutes": "{{minutes}} min",
       "start": "Começar",
       "howLong": "Quanto tempo você tem? Minutos:",
-      "leftOff": "Onde você parou",
-      "leftOffValue": {
-        "even": "{{value}}% de regularidade a {{bpm}} BPM. Hoje começa mais devagar.",
-        "heard": "{{value}}% das notas ouvidas a {{bpm}} BPM. Hoje começa mais devagar.",
-        "accents": "{{value}}% dos acentos no lugar a {{bpm}} BPM. Hoje começa mais devagar.",
-        "notes": "{{value}}% de notas certas a {{bpm}} BPM. Hoje começa mais devagar."
+      "line": {
+        "first": "Sua primeira sessão descobre de onde você parte. Não há nada para preparar.",
+        "slipped": {
+          "today": {
+            "bar": "{{exercise}}: mais cedo hoje, o compasso {{bar}} da melodia escapou em {{count}} de {{of}} vezes.",
+            "bars": "{{exercise}}: mais cedo hoje, os compassos {{from}} a {{to}} da melodia escaparam em {{count}} de {{of}} vezes.",
+            "all": "{{exercise}}: mais cedo hoje, a melodia inteira escapou em {{count}} de {{of}} vezes."
+          },
+          "yesterday": {
+            "bar": "{{exercise}}: ontem, o compasso {{bar}} da melodia escapou em {{count}} de {{of}} vezes.",
+            "bars": "{{exercise}}: ontem, os compassos {{from}} a {{to}} da melodia escaparam em {{count}} de {{of}} vezes.",
+            "all": "{{exercise}}: ontem, a melodia inteira escapou em {{count}} de {{of}} vezes."
+          },
+          "lastSession": {
+            "bar": "{{exercise}}: na sua última sessão, o compasso {{bar}} da melodia escapou em {{count}} de {{of}} vezes.",
+            "bars": "{{exercise}}: na sua última sessão, os compassos {{from}} a {{to}} da melodia escaparam em {{count}} de {{of}} vezes.",
+            "all": "{{exercise}}: na sua última sessão, a melodia inteira escapou em {{count}} de {{of}} vezes."
+          }
+        },
+        "startsThere": "Hoje começa por ele.",
+        "earned": {
+          "today": "{{exercise}}: mais cedo hoje, seu andamento limpo subiu para {{bpm}} BPM.",
+          "yesterday": "{{exercise}}: ontem, seu andamento limpo subiu para {{bpm}} BPM.",
+          "lastSession": "{{exercise}}: na sua última sessão, seu andamento limpo subiu para {{bpm}} BPM."
+        },
+        "earnedThen": {
+          "review": "Hoje ele ganha uma revisão curta.",
+          "climb": "Hoje ele vai mais rápido.",
+          "keep": "Hoje ele ganha uma execução para se manter."
+        },
+        "back": {
+          "even": "Última sessão, {{exercise}}: {{value}}% de regularidade a {{bpm}} BPM.",
+          "heard": "Última sessão, {{exercise}}: {{value}}% das notas ouvidas a {{bpm}} BPM.",
+          "accents": "Última sessão, {{exercise}}: {{value}}% dos acentos no lugar a {{bpm}} BPM.",
+          "notes": "Última sessão, {{exercise}}: {{value}}% de notas certas a {{bpm}} BPM.",
+          "plain": "A última sessão terminou assim: {{exercise}} a {{bpm}} BPM."
+        },
+        "backRungs": "Hoje começa {{count}} degrau abaixo de onde começaria.",
+        "backRungs_many": "Hoje começa {{count}} degraus abaixo de onde começaria.",
+        "backRungs_other": "Hoje começa {{count}} degraus abaixo de onde começaria.",
+        "ungraded": {
+          "today": "{{count}} minuto de tomadas mais cedo hoje, a última: {{exercise}} a {{bpm}} BPM.",
+          "today_many": "{{count}} minutos de tomadas mais cedo hoje, a última: {{exercise}} a {{bpm}} BPM.",
+          "today_other": "{{count}} minutos de tomadas mais cedo hoje, a última: {{exercise}} a {{bpm}} BPM.",
+          "yesterday": "{{count}} minuto de tomadas ontem, a última: {{exercise}} a {{bpm}} BPM.",
+          "yesterday_many": "{{count}} minutos de tomadas ontem, a última: {{exercise}} a {{bpm}} BPM.",
+          "yesterday_other": "{{count}} minutos de tomadas ontem, a última: {{exercise}} a {{bpm}} BPM.",
+          "lastSession": "{{count}} minuto de tomadas na sua última sessão, a última: {{exercise}} a {{bpm}} BPM.",
+          "lastSession_many": "{{count}} minutos de tomadas na sua última sessão, a última: {{exercise}} a {{bpm}} BPM.",
+          "lastSession_other": "{{count}} minutos de tomadas na sua última sessão, a última: {{exercise}} a {{bpm}} BPM."
+        },
+        "samePlace": "Hoje começa no mesmo ponto."
       },
-      "leftOffPlain": "{{bpm}} BPM. Hoje começa mais devagar.",
       "whatsIn": "O que tem nela, e por quê",
       "min": "MIN",
       "nothing": "Ainda não há nada para tocar.",

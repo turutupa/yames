@@ -52,6 +52,16 @@ export type NotWired = "notWiredYet";
 export type HostOutcome = "done" | NotWired;
 
 /**
+ * A load through the window's unsaved-work gate: `"asked"` when the app's
+ * own question opened instead (an edited jam, setlist or preset), and the
+ * load waits on the player's answer, which may be Cancel.
+ */
+export type LoadOutcome = HostOutcome | "asked";
+
+/** A saved preset as the tools see it: its name, and the screen it opens on. */
+export type PresetRef = NamedRef & { view?: MainView };
+
+/**
  * The Settings sections a tool may open, each to its element id
  * (`id="settings-…"` in `src/containers/settings/`; `registry.test.ts` checks
  * every one is there). Opening a section is how a never-action is still
@@ -93,6 +103,24 @@ export type SafeSettingKey = (typeof SAFE_SETTING_KEYS)[number];
 
 export type SafeSettingValue = string | number | boolean;
 
+/**
+ * Band volume's stored value when the player never chose one: the app
+ * decides (`bandVolumeFor`: off under a graded Take on a microphone). The host
+ * reads and writes the STORED choice, never the level derived for the screen
+ * on show, so an undo can give the choice back (finding 1 of the t1a2 review).
+ */
+export const BAND_VOLUME_AUTO = "auto";
+
+/**
+ * One value a safe setting may take now, and the words that name it (its id,
+ * and for a language its own name). Only what the app's own control would
+ * offer: Voice "on" is not an option with no voice installed.
+ */
+export type SafeSettingOption = { value: SafeSettingValue; names: readonly string[] };
+
+/** What is sounding: the click (Metronome, Drill), a jam's band, or a song. */
+export type Sounding = "click" | "band" | "song";
+
 export type CoachToolHost = {
   // -- Wired in t1a1: where the player is, and going somewhere -------------
 
@@ -112,6 +140,14 @@ export type CoachToolHost = {
   movePaths: (at: PathsAt) => void;
   /** Open Settings at a section. */
   openSettingsSection: (section: SettingsSection) => void;
+  /**
+   * What is playing outside a Session, or null (named by the MODE playing:
+   * under Settings, the mode Settings covers). With a `target`: what showing
+   * that view would stop, as `useTabRouting.setView` does it. Settings is an
+   * overlay and stops nothing, nor does going back to the mode that plays.
+   * While it is not null a navigating `go` tool waits for a press (t1a2).
+   */
+  sounding: (target?: MainView) => Sounding | null;
 
   // -- Declared for t1a2 (the `confirm` tools) -----------------------------
 
@@ -132,6 +168,8 @@ export type CoachToolHost = {
   setTempo: (bpm: number) => HostOutcome;
   /** `actions.slower` / `faster`. */
   nudgeTempo: (direction: "slower" | "faster") => HostOutcome;
+  /** Which of those mean anything now (`tempoNudges`: a Test out is locked, the ladder has ends). */
+  nudges: () => { slower: boolean; faster: boolean } | NotWired;
   /** `actions.findEdge`. */
   findEdge: (pathId: string, exerciseId: string) => HostOutcome;
   /** `actions.testOut`. */
@@ -150,18 +188,20 @@ export type CoachToolHost = {
   followPath: (pathId: string, level: string | null) => "done" | "cap" | NotWired;
   /** The jams, by the names the player gave them. */
   jams: () => readonly NamedRef[];
-  /** `CoachActionHost.loadJam`. */
-  loadJam: (jamId: string) => HostOutcome;
-  /** The saved presets, by name. */
-  presets: () => readonly NamedRef[] | NotWired;
-  /** `CoachActionHost.loadPreset`. */
-  loadPreset: (presetId: string) => HostOutcome;
+  /** `CoachActionHost.loadJam`, behind the unsaved-work gate. */
+  loadJam: (jamId: string) => LoadOutcome;
+  /** The saved presets, by name, with the screen each opens on (re-read at every call). */
+  presets: () => readonly PresetRef[] | NotWired;
+  /** `CoachActionHost.loadPreset`, behind the unsaved-work gate. */
+  loadPreset: (presetId: string) => LoadOutcome;
   /** The click's subdivision now. */
   clickSubdivision: () => Subdivision | NotWired;
   /** `CoachActionHost.setClickSubdivision`. */
   setClickSubdivision: (subdivision: Subdivision) => HostOutcome;
   /** A safe setting's value now (for the undo). */
   safeSetting: (key: SafeSettingKey) => SafeSettingValue | NotWired;
+  /** The values a safe setting may take now (band volume, a number, has none). */
+  safeSettingOptions: (key: SafeSettingKey) => readonly SafeSettingOption[] | NotWired;
   /** Change a safe setting through its existing setter. */
   setSafeSetting: (key: SafeSettingKey, value: SafeSettingValue) => HostOutcome;
   /** The Notebook's goal (DESIGN 9.5), when there is a Notebook. */
@@ -185,6 +225,7 @@ export const HOST_MEMBERS = [
   "setView",
   "movePaths",
   "openSettingsSection",
+  "sounding",
   "plan",
   "minutes",
   "todayFocus",
@@ -195,6 +236,7 @@ export const HOST_MEMBERS = [
   "tempo",
   "setTempo",
   "nudgeTempo",
+  "nudges",
   "findEdge",
   "testOut",
   "swapOptions",
@@ -210,6 +252,7 @@ export const HOST_MEMBERS = [
   "clickSubdivision",
   "setClickSubdivision",
   "safeSetting",
+  "safeSettingOptions",
   "setSafeSetting",
   "goal",
   "setGoal",
@@ -238,6 +281,13 @@ export const WIRED_IN_T1A1: readonly (keyof CoachToolHost)[] = [
   "jams",
 ];
 
+/**
+ * The members the real host still leaves as stubs after t1a2: the Notebook's
+ * goal (leg c4a) and a loop of bars named from outside (the Session's loop
+ * plays the bar that slipped; no door takes bars).
+ */
+export const STILL_NOT_WIRED: readonly (keyof CoachToolHost)[] = ["goal", "setGoal", "loopBars"];
+
 const NOT_WIRED = "notWiredYet" as const;
 
 /**
@@ -256,6 +306,7 @@ export function notWiredHost(): CoachToolHost {
     setView: () => {},
     movePaths: () => {},
     openSettingsSection: () => {},
+    sounding: () => null,
     plan: () => null,
     minutes: () => 15,
     todayFocus: () => "mix",
@@ -266,6 +317,7 @@ export function notWiredHost(): CoachToolHost {
     tempo: nothing,
     setTempo: nothing,
     nudgeTempo: nothing,
+    nudges: nothing,
     findEdge: nothing,
     testOut: nothing,
     swapOptions: nothing,
@@ -281,6 +333,7 @@ export function notWiredHost(): CoachToolHost {
     clickSubdivision: nothing,
     setClickSubdivision: nothing,
     safeSetting: nothing,
+    safeSettingOptions: nothing,
     setSafeSetting: nothing,
     goal: nothing,
     setGoal: nothing,

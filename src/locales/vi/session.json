@@ -37,14 +37,55 @@
       "minutes": "{{minutes}} phút",
       "start": "Bắt đầu",
       "howLong": "Bạn có bao nhiêu thời gian? Số phút:",
-      "leftOff": "Chỗ bạn dừng lần trước",
-      "leftOffValue": {
-        "even": "Đều {{value}}% ở {{bpm}} BPM. Hôm nay bắt đầu chậm hơn.",
-        "heard": "Nghe được {{value}}% số nốt ở {{bpm}} BPM. Hôm nay bắt đầu chậm hơn.",
-        "accents": "{{value}}% nhấn đúng chỗ ở {{bpm}} BPM. Hôm nay bắt đầu chậm hơn.",
-        "notes": "{{value}}% nốt đúng ở {{bpm}} BPM. Hôm nay bắt đầu chậm hơn."
+      "line": {
+        "first": "Buổi tập đầu tiên sẽ tìm ra điểm bạn bắt đầu. Không cần chuẩn bị gì.",
+        "slipped": {
+          "today": {
+            "bar": "{{exercise}}: trước đó hôm nay, ô nhịp {{bar}} của giai điệu bị lệch ở {{count}}/{{of}} vòng.",
+            "bars": "{{exercise}}: trước đó hôm nay, ô nhịp {{from}} đến {{to}} của giai điệu bị lệch ở {{count}}/{{of}} vòng.",
+            "all": "{{exercise}}: trước đó hôm nay, cả giai điệu bị lệch ở {{count}}/{{of}} vòng."
+          },
+          "yesterday": {
+            "bar": "{{exercise}}: hôm qua, ô nhịp {{bar}} của giai điệu bị lệch ở {{count}}/{{of}} vòng.",
+            "bars": "{{exercise}}: hôm qua, ô nhịp {{from}} đến {{to}} của giai điệu bị lệch ở {{count}}/{{of}} vòng.",
+            "all": "{{exercise}}: hôm qua, cả giai điệu bị lệch ở {{count}}/{{of}} vòng."
+          },
+          "lastSession": {
+            "bar": "{{exercise}}: trong buổi tập gần nhất, ô nhịp {{bar}} của giai điệu bị lệch ở {{count}}/{{of}} vòng.",
+            "bars": "{{exercise}}: trong buổi tập gần nhất, ô nhịp {{from}} đến {{to}} của giai điệu bị lệch ở {{count}}/{{of}} vòng.",
+            "all": "{{exercise}}: trong buổi tập gần nhất, cả giai điệu bị lệch ở {{count}}/{{of}} vòng."
+          }
+        },
+        "startsThere": "Hôm nay bắt đầu từ đó.",
+        "earned": {
+          "today": "{{exercise}}: trước đó hôm nay, tempo sạch của bạn tăng lên {{bpm}} BPM.",
+          "yesterday": "{{exercise}}: hôm qua, tempo sạch của bạn tăng lên {{bpm}} BPM.",
+          "lastSession": "{{exercise}}: trong buổi tập gần nhất, tempo sạch của bạn tăng lên {{bpm}} BPM."
+        },
+        "earnedThen": {
+          "review": "Hôm nay bài này được ôn lại ngắn.",
+          "climb": "Hôm nay bài này chạy nhanh hơn.",
+          "keep": "Hôm nay bài này có một lượt để giữ vững."
+        },
+        "back": {
+          "even": "Buổi tập trước, {{exercise}}: đều {{value}}% ở {{bpm}} BPM.",
+          "heard": "Buổi tập trước, {{exercise}}: nghe được {{value}}% số nốt ở {{bpm}} BPM.",
+          "accents": "Buổi tập trước, {{exercise}}: {{value}}% nhấn đúng chỗ ở {{bpm}} BPM.",
+          "notes": "Buổi tập trước, {{exercise}}: {{value}}% nốt đúng ở {{bpm}} BPM.",
+          "plain": "Buổi tập trước kết thúc ở {{exercise}}, {{bpm}} BPM."
+        },
+        "backRungs": "Hôm nay bắt đầu thấp hơn {{count}} nấc so với lẽ ra.",
+        "backRungs_other": "Hôm nay bắt đầu thấp hơn {{count}} nấc so với lẽ ra.",
+        "ungraded": {
+          "today": "{{count}} phút các lượt chơi trước đó hôm nay, lượt cuối: {{exercise}} ở {{bpm}} BPM.",
+          "today_other": "{{count}} phút các lượt chơi trước đó hôm nay, lượt cuối: {{exercise}} ở {{bpm}} BPM.",
+          "yesterday": "{{count}} phút các lượt chơi hôm qua, lượt cuối: {{exercise}} ở {{bpm}} BPM.",
+          "yesterday_other": "{{count}} phút các lượt chơi hôm qua, lượt cuối: {{exercise}} ở {{bpm}} BPM.",
+          "lastSession": "{{count}} phút các lượt chơi trong buổi tập gần nhất, lượt cuối: {{exercise}} ở {{bpm}} BPM.",
+          "lastSession_other": "{{count}} phút các lượt chơi trong buổi tập gần nhất, lượt cuối: {{exercise}} ở {{bpm}} BPM."
+        },
+        "samePlace": "Hôm nay bắt đầu đúng chỗ đó."
       },
-      "leftOffPlain": "{{bpm}} BPM. Hôm nay bắt đầu chậm hơn.",
       "whatsIn": "Có gì trong buổi tập, và vì sao",
       "min": "PHÚT",
       "nothing": "Chưa có gì để chơi.",

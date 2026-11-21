@@ -149,14 +149,76 @@ describe("a confirm tool does nothing until confirmed", () => {
 
   it("one built by hand, or changed after it was shown, does nothing", () => {
     const { host } = minutesHost();
-    const forged: Proposal = { tool: "fixture_minutes", args: { minutes: 20 }, line: line("x"), resolved: { from: 10, to: 20 } };
+    const forged: Proposal = { tool: "fixture_minutes", args: { minutes: 20 }, line: line("x") };
     expect(confirmCoachTool(forged, host, toolCtx(), REGISTRY)).toMatchObject({ ok: false, why: "refused" });
     const real = proposalOf(runCoachTool({ tool: "fixture_minutes", args: { minutes: 20 } }, host, toolCtx(), REGISTRY));
     expect(Object.isFrozen(real)).toBe(true);
     expect(() => {
-      (real as { resolved: unknown }).resolved = { from: 10, to: 5 };
+      (real as { resolved?: unknown }).resolved = { from: 10, to: 5 };
     }).toThrow();
     expect(host.changes()).toEqual([]);
+  });
+
+  it("what the tool resolved is out of the caller's reach: the press does what was proposed (review 6)", () => {
+    const { host, minutes } = minutesHost();
+    const real = proposalOf(runCoachTool({ tool: "fixture_minutes", args: { minutes: 20 } }, host, toolCtx(), REGISTRY));
+    expect("resolved" in real).toBe(false);
+    expect(() => {
+      (real.args as Record<string, unknown>).minutes = 5;
+    }).toThrow();
+    expect(() => {
+      (real.line.values as Record<string, unknown>).to = 5;
+    }).not.toThrow();
+    expect(confirmCoachTool(real, host, toolCtx(), REGISTRY)).toMatchObject({ ok: true, receipt: { values: { to: 20 } } });
+    expect(minutes()).toBe(20);
+  });
+
+  it("a go proposal's arguments are kept by the runner: changing the call afterwards changes nothing (review 6)", () => {
+    const call = { tool: "go_to", args: { screen: "paths" } };
+    const host = fakeHost({ view: "beat", sounding: "click" });
+    const out = runCoachTool(call, host, toolCtx({ screen: "beat" }));
+    call.args.screen = "progress";
+    const done = confirmCoachTool(proposalOf(out), host, toolCtx({ screen: "beat" }));
+    expect(done).toMatchObject({ ok: true, receipt: { values: { screen: "paths" } } });
+    expect(host.where().view).toBe("paths");
+  });
+
+  // An undo is the runner's, and runs once (review 5).
+  it("a made-up undo, even naming a real tool or an app-only one, is refused and runs nothing", () => {
+    const { host, minutes } = minutesHost();
+    for (const forged of [
+      { tool: "fixture_minutes", args: { minutes: 5 } },
+      { tool: "return_to", args: { screen: "paths" } },
+      { tool: "set_tempo", args: { bpm: 80 } },
+      null,
+      "fixture_minutes",
+    ]) {
+      expect(runCoachUndo(forged, host, toolCtx(), REGISTRY), JSON.stringify(forged)).toMatchObject({ ok: false, why: "refused", detail: "not a live undo" });
+    }
+    expect(host.changes()).toEqual([]);
+    expect(minutes()).toBe(10);
+  });
+
+  it("an issued undo runs once; a copy of it is not it; pressed twice, the second does nothing", () => {
+    const { host, minutes } = minutesHost();
+    const done = confirmCoachTool(proposalOf(runCoachTool({ tool: "fixture_minutes", args: { minutes: 20 } }, host, toolCtx(), REGISTRY)), host, toolCtx(), REGISTRY);
+    if (!done.ok || !done.undo) throw new Error("no undo");
+    expect(Object.isFrozen(done.undo) && Object.isFrozen(done.undo.args)).toBe(true);
+    expect(runCoachUndo({ ...done.undo }, host, toolCtx(), REGISTRY)).toMatchObject({ ok: false, detail: "not a live undo" });
+    expect(runCoachUndo(done.undo, host, toolCtx(), REGISTRY).ok).toBe(true);
+    expect(minutes()).toBe(10);
+    host.setMinutes(20);
+    expect(runCoachUndo(done.undo, host, toolCtx(), REGISTRY)).toMatchObject({ ok: false, detail: "not a live undo" });
+    expect(minutes()).toBe(20);
+  });
+
+  it("an undo refused for now (a Take running) stays good for the next press", () => {
+    const { host, minutes } = minutesHost();
+    const done = confirmCoachTool(proposalOf(runCoachTool({ tool: "fixture_minutes", args: { minutes: 20 } }, host, toolCtx(), REGISTRY)), host, toolCtx(), REGISTRY);
+    if (!done.ok || !done.undo) throw new Error("no undo");
+    expect(runCoachUndo(done.undo, host, toolCtx({ screen: "session", run: runIn("playing") }), REGISTRY)).toMatchObject({ why: "notNow" });
+    expect(runCoachUndo(done.undo, host, toolCtx(), REGISTRY).ok).toBe(true);
+    expect(minutes()).toBe(10);
   });
 
   it("Not now: a dismissed proposal can never be confirmed", () => {

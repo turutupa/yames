@@ -37,14 +37,55 @@
       "minutes": "{{minutes}} min",
       "start": "Starten",
       "howLong": "Hoeveel tijd heb je? Minuten:",
-      "leftOff": "Waar je gebleven was",
-      "leftOffValue": {
-        "even": "{{value}}% gelijkmatig op {{bpm}} BPM. Vandaag begint langzamer.",
-        "heard": "{{value}}% van de noten gehoord op {{bpm}} BPM. Vandaag begint langzamer.",
-        "accents": "{{value}}% van de accenten raak op {{bpm}} BPM. Vandaag begint langzamer.",
-        "notes": "{{value}}% juiste noten op {{bpm}} BPM. Vandaag begint langzamer."
+      "line": {
+        "first": "Je eerste sessie vindt uit waar je begint. Er is niets voor te bereiden.",
+        "slipped": {
+          "today": {
+            "bar": "{{exercise}}: maat {{bar}} van de melodie gleed vandaag in {{count}} van de {{of}} keer.",
+            "bars": "{{exercise}}: maat {{from}} tot {{to}} van de melodie gleed vandaag in {{count}} van de {{of}} keer.",
+            "all": "{{exercise}}: de hele melodie gleed vandaag in {{count}} van de {{of}} keer."
+          },
+          "yesterday": {
+            "bar": "{{exercise}}: maat {{bar}} van de melodie gleed gisteren in {{count}} van de {{of}} keer.",
+            "bars": "{{exercise}}: maat {{from}} tot {{to}} van de melodie gleed gisteren in {{count}} van de {{of}} keer.",
+            "all": "{{exercise}}: de hele melodie gleed gisteren in {{count}} van de {{of}} keer."
+          },
+          "lastSession": {
+            "bar": "{{exercise}}: maat {{bar}} van de melodie gleed in je laatste sessie in {{count}} van de {{of}} keer.",
+            "bars": "{{exercise}}: maat {{from}} tot {{to}} van de melodie gleed in je laatste sessie in {{count}} van de {{of}} keer.",
+            "all": "{{exercise}}: de hele melodie gleed in je laatste sessie in {{count}} van de {{of}} keer."
+          }
+        },
+        "startsThere": "Vandaag begint daar.",
+        "earned": {
+          "today": "{{exercise}}: je schone tempo ging vandaag omhoog naar {{bpm}} BPM.",
+          "yesterday": "{{exercise}}: je schone tempo ging gisteren omhoog naar {{bpm}} BPM.",
+          "lastSession": "{{exercise}}: je schone tempo ging in je laatste sessie omhoog naar {{bpm}} BPM."
+        },
+        "earnedThen": {
+          "review": "Vandaag krijgt die een korte herhaling.",
+          "climb": "Vandaag gaat die sneller.",
+          "keep": "Vandaag krijgt die één run om het vast te houden."
+        },
+        "back": {
+          "even": "Laatste sessie, {{exercise}}: {{value}}% gelijkmatig op {{bpm}} BPM.",
+          "heard": "Laatste sessie, {{exercise}}: {{value}}% van de noten gehoord op {{bpm}} BPM.",
+          "accents": "Laatste sessie, {{exercise}}: {{value}}% van de accenten raak op {{bpm}} BPM.",
+          "notes": "Laatste sessie, {{exercise}}: {{value}}% juiste noten op {{bpm}} BPM.",
+          "plain": "De laatste sessie eindigde bij {{exercise}} op {{bpm}} BPM."
+        },
+        "backRungs": "Vandaag begint een trede lager dan anders.",
+        "backRungs_other": "Vandaag begint {{count}} treden lager dan anders.",
+        "ungraded": {
+          "today": "{{count}} minuut aan takes vandaag, de laatste {{exercise}} op {{bpm}} BPM.",
+          "today_other": "{{count}} minuten aan takes vandaag, de laatste {{exercise}} op {{bpm}} BPM.",
+          "yesterday": "{{count}} minuut aan takes gisteren, de laatste {{exercise}} op {{bpm}} BPM.",
+          "yesterday_other": "{{count}} minuten aan takes gisteren, de laatste {{exercise}} op {{bpm}} BPM.",
+          "lastSession": "{{count}} minuut aan takes in je laatste sessie, de laatste {{exercise}} op {{bpm}} BPM.",
+          "lastSession_other": "{{count}} minuten aan takes in je laatste sessie, de laatste {{exercise}} op {{bpm}} BPM."
+        },
+        "samePlace": "Vandaag op dezelfde plek."
       },
-      "leftOffPlain": "{{bpm}} BPM. Vandaag begint langzamer.",
       "whatsIn": "Wat erin zit, en waarom",
       "min": "MIN",
       "nothing": "Er is nog niets om te spelen.",

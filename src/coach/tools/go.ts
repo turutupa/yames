@@ -81,11 +81,11 @@ function samePlace(a: PathsAt, b: PathsAt): boolean {
 }
 
 /** Between Takes, and not inside a Session. */
-function outsideSession(ctx: CoachContext): boolean {
+export function outsideSession(ctx: CoachContext): boolean {
   return !takeRunning(ctx) && !inSession(ctx);
 }
 
-const sessionOpen = (): Refusal => refuse("notNow", "coachTools.why.notNow.session");
+export const sessionOpen = (): Refusal => refuse("notNow", "coachTools.why.notNow.session");
 
 /** Show `at` on Paths, from wherever the app is, and say so. */
 function openOnPaths(host: CoachToolHost, at: PathsAt, receipt: ToolResult & { ok: true }): ToolResult {
@@ -106,10 +106,10 @@ function pathChoices(several: readonly PathDoc[], extra: ToolArgs = {}, tool = "
   }));
 }
 
-function stepChoices(several: readonly StepHit[]): ToolChoice[] {
+function stepChoices(several: readonly StepHit[], tool = "open_step"): ToolChoice[] {
   return several.slice(0, MAX_CHOICES).map(({ path, step }) => ({
     label: line("coachTools.choice.step", { path: path.title, step: step.order, title: step.title }),
-    call: { tool: "open_step", args: { path: path.title, step: step.order } },
+    call: { tool, args: { path: path.title, step: step.order } },
   }));
 }
 
@@ -119,6 +119,7 @@ const goTo: ActTool = {
   name: "go_to",
   kind: "go",
   audience: "player",
+  leaves: true,
   note: "Show a screen.",
   args: [{ name: "screen", type: { kind: "enum", values: GO_TO_SCREENS }, note: "The screen to show." }],
   when: outsideSession,
@@ -136,6 +137,7 @@ const openPath: ActTool = {
   name: "open_path",
   kind: "go",
   audience: "player",
+  leaves: true,
   note: "Open a Path's page, named in the player's words.",
   args: [{ name: "path", type: { kind: "query", maxLength: MAX_QUERY }, note: "The Path, as the player names it." }],
   when: outsideSession,
@@ -155,8 +157,8 @@ const openPath: ActTool = {
   },
 };
 
-/** The Path a Step is asked on: the one named, else the one the player is on. */
-function pathForStep(args: ToolArgs, host: CoachToolHost, ctx: CoachContext): Resolved<PathDoc> | null {
+/** The Path a Step is asked on: the one named, else the one the player is on. (Also `test_out`'s.) */
+export function pathForStep(args: ToolArgs, host: CoachToolHost, ctx: CoachContext): Resolved<PathDoc> | null {
   const named = argString(args, "path");
   const paths = host.paths();
   if (named !== undefined) return resolvePath(named, paths);
@@ -165,10 +167,48 @@ function pathForStep(args: ToolArgs, host: CoachToolHost, ctx: CoachContext): Re
   return here ? { found: here } : null;
 }
 
+/**
+ * A Step from a call's `path?`, `step?` and `query?` (one of the last two
+ * needed): `open_step`'s resolution, and `test_out`'s. Several matches are
+ * choices that call `tool` again.
+ */
+export function resolveStepCall(tool: string, args: ToolArgs, host: CoachToolHost, ctx: CoachContext): StepHit | Refusal {
+  const number = argNumber(args, "step");
+  const query = argString(args, "query");
+  if (number === undefined && query === undefined) {
+    return refuse("refused", "coachTools.why.refused.shape", {}, { detail: `${tool} needs \`step\` or \`query\`` });
+  }
+  const path = pathForStep(args, host, ctx);
+  if (path && "none" in path) return refuse("notFound", "coachTools.why.notFound.path", { query: argString(args, "path") ?? "" });
+  if (path && "several" in path) {
+    const keep: Record<string, string | number> = {};
+    if (number !== undefined) keep.step = number;
+    if (query !== undefined) keep.query = query;
+    return refuse("notFound", "coachTools.why.which", { query: argString(args, "path") ?? "" }, {
+      choices: pathChoices(path.several, keep, tool),
+    });
+  }
+  if (!path && number !== undefined) {
+    // "Step 3", and no Path to count it on.
+    return refuse("notFound", "coachTools.why.notFound.whichPath", { step: number });
+  }
+  const on = path ? { path: path.found } : { paths: host.paths() };
+  const ask = number !== undefined ? { number } : { query: query ?? "" };
+  const found = resolveStep(on, ask);
+  if ("none" in found) {
+    return refuse("notFound", "coachTools.why.notFound.step", number !== undefined ? { step: number } : { query: query ?? "" });
+  }
+  if ("several" in found) {
+    return refuse("notFound", "coachTools.why.which", { query: query ?? "" }, { choices: stepChoices(found.several, tool) });
+  }
+  return found.found;
+}
+
 const openStep: ActTool = {
   name: "open_step",
   kind: "go",
   audience: "player",
+  leaves: true,
   note: "Open a Step's page, by its number on the Path or by the player's words.",
   args: [
     {
@@ -183,35 +223,9 @@ const openStep: ActTool = {
   when: outsideSession,
   run(args, host, ctx) {
     if (host.sessionActive()) return sessionOpen();
-    const number = argNumber(args, "step");
-    const query = argString(args, "query");
-    if (number === undefined && query === undefined) {
-      return refuse("refused", "coachTools.why.refused.shape", {}, { detail: "open_step needs `step` or `query`" });
-    }
-    const path = pathForStep(args, host, ctx);
-    if (path && "none" in path) return refuse("notFound", "coachTools.why.notFound.path", { query: argString(args, "path") ?? "" });
-    if (path && "several" in path) {
-      const keep: Record<string, string | number> = {};
-      if (number !== undefined) keep.step = number;
-      if (query !== undefined) keep.query = query;
-      return refuse("notFound", "coachTools.why.which", { query: argString(args, "path") ?? "" }, {
-        choices: pathChoices(path.several, keep, "open_step"),
-      });
-    }
-    if (!path && number !== undefined) {
-      // "Step 3", and no Path to count it on.
-      return refuse("notFound", "coachTools.why.notFound.whichPath", { step: number });
-    }
-    const on = path ? { path: path.found } : { paths: host.paths() };
-    const ask = number !== undefined ? { number } : { query: query ?? "" };
-    const found = resolveStep(on, ask);
-    if ("none" in found) {
-      return refuse("notFound", "coachTools.why.notFound.step", number !== undefined ? { step: number } : { query: query ?? "" });
-    }
-    if ("several" in found) {
-      return refuse("notFound", "coachTools.why.which", { query: query ?? "" }, { choices: stepChoices(found.several) });
-    }
-    const { path: doc, step } = found.found;
+    const found = resolveStepCall("open_step", args, host, ctx);
+    if (!("step" in found)) return found;
+    const { path: doc, step } = found;
     return openOnPaths(host, { pathId: doc.id, stepId: step.id }, {
       ok: true,
       receipt: line("coachTools.receipt.openStep", { path: doc.title, step: step.order, title: step.title }),
@@ -225,6 +239,7 @@ const openSettings: ActTool = {
   name: "open_settings",
   kind: "go",
   audience: "player",
+  leaves: true,
   note: "Open Settings at a section: also how the player is shown a control that is theirs alone.",
   args: [{ name: "section", type: { kind: "enum", values: SECTION_NAMES }, note: "The section." }],
   // From a Session too, between Takes: Settings covers it and comes back to it.
@@ -248,6 +263,7 @@ const returnToTool: ActTool = {
   name: "return_to",
   kind: "go",
   audience: "app",
+  leaves: true,
   note: "Back to where the app was before a `go` tool ran.",
   args: [
     { name: "screen", type: { kind: "enum", values: ALL_VIEWS }, note: "The view to show." },

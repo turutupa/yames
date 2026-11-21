@@ -37,14 +37,55 @@
       "minutes": "{{minutes}} dk",
       "start": "Başla",
       "howLong": "Ne kadar vaktin var? Dakika:",
-      "leftOff": "Kaldığın yer",
-      "leftOffValue": {
-        "even": "{{bpm}} BPM'de %{{value}} düzgün. Bugün daha yavaş başlıyor.",
-        "heard": "{{bpm}} BPM'de notaların %{{value}}'i duyuldu. Bugün daha yavaş başlıyor.",
-        "accents": "{{bpm}} BPM'de vurguların %{{value}}'i yerinde. Bugün daha yavaş başlıyor.",
-        "notes": "{{bpm}} BPM'de %{{value}} doğru nota. Bugün daha yavaş başlıyor."
+      "line": {
+        "first": "İlk oturumun nereden başladığını bulur. Hazırlanacak bir şey yok.",
+        "slipped": {
+          "today": {
+            "bar": "{{exercise}}: bugün daha önce melodinin {{bar}}. ölçüsü {{of}} geçişin {{count}} tanesinde kaydı.",
+            "bars": "{{exercise}}: bugün daha önce melodinin {{from}}. ile {{to}}. ölçüleri {{of}} geçişin {{count}} tanesinde kaydı.",
+            "all": "{{exercise}}: bugün daha önce melodinin tamamı {{of}} geçişin {{count}} tanesinde kaydı."
+          },
+          "yesterday": {
+            "bar": "{{exercise}}: dün melodinin {{bar}}. ölçüsü {{of}} geçişin {{count}} tanesinde kaydı.",
+            "bars": "{{exercise}}: dün melodinin {{from}}. ile {{to}}. ölçüleri {{of}} geçişin {{count}} tanesinde kaydı.",
+            "all": "{{exercise}}: dün melodinin tamamı {{of}} geçişin {{count}} tanesinde kaydı."
+          },
+          "lastSession": {
+            "bar": "{{exercise}}: son oturumunda melodinin {{bar}}. ölçüsü {{of}} geçişin {{count}} tanesinde kaydı.",
+            "bars": "{{exercise}}: son oturumunda melodinin {{from}}. ile {{to}}. ölçüleri {{of}} geçişin {{count}} tanesinde kaydı.",
+            "all": "{{exercise}}: son oturumunda melodinin tamamı {{of}} geçişin {{count}} tanesinde kaydı."
+          }
+        },
+        "startsThere": "Bugün oradan başlıyor.",
+        "earned": {
+          "today": "{{exercise}}: bugün daha önce temiz tempon {{bpm}} BPM'e çıktı.",
+          "yesterday": "{{exercise}}: dün temiz tempon {{bpm}} BPM'e çıktı.",
+          "lastSession": "{{exercise}}: son oturumunda temiz tempon {{bpm}} BPM'e çıktı."
+        },
+        "earnedThen": {
+          "review": "Bugün kısa bir tekrar alıyor.",
+          "climb": "Bugün daha hızlı çalınıyor.",
+          "keep": "Bugün korumak için bir tur alıyor."
+        },
+        "back": {
+          "even": "Son oturum, {{exercise}}: {{bpm}} BPM'de %{{value}} düzgün.",
+          "heard": "Son oturum, {{exercise}}: {{bpm}} BPM'de notaların %{{value}}'i duyuldu.",
+          "accents": "Son oturum, {{exercise}}: {{bpm}} BPM'de vurguların %{{value}}'i yerinde.",
+          "notes": "Son oturum, {{exercise}}: {{bpm}} BPM'de %{{value}} doğru nota.",
+          "plain": "Son oturum şunda bitti: {{exercise}}, {{bpm}} BPM'de."
+        },
+        "backRungs": "Bugün olacağından {{count}} basamak aşağıdan başlıyor.",
+        "backRungs_other": "Bugün olacağından {{count}} basamak aşağıdan başlıyor.",
+        "ungraded": {
+          "today": "Bugün daha önce {{count}} dakikalık deneme, sonuncusu: {{exercise}}, {{bpm}} BPM'de.",
+          "today_other": "Bugün daha önce {{count}} dakikalık deneme, sonuncusu: {{exercise}}, {{bpm}} BPM'de.",
+          "yesterday": "Dün {{count}} dakikalık deneme, sonuncusu: {{exercise}}, {{bpm}} BPM'de.",
+          "yesterday_other": "Dün {{count}} dakikalık deneme, sonuncusu: {{exercise}}, {{bpm}} BPM'de.",
+          "lastSession": "Son oturumunda {{count}} dakikalık deneme, sonuncusu: {{exercise}}, {{bpm}} BPM'de.",
+          "lastSession_other": "Son oturumunda {{count}} dakikalık deneme, sonuncusu: {{exercise}}, {{bpm}} BPM'de."
+        },
+        "samePlace": "Bugün aynı yerden."
       },
-      "leftOffPlain": "{{bpm}} BPM. Bugün daha yavaş başlıyor.",
       "whatsIn": "İçinde ne var, neden",
       "min": "DK",
       "nothing": "Henüz çalınacak bir şey yok.",

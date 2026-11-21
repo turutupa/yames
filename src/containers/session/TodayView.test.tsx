@@ -147,11 +147,35 @@ describe("the plan as a list", () => {
     expect(onOpenTools).toHaveBeenCalledTimes(1);
   });
 
-  it("says what a first Session is for", () => {
+  it("says what a first Session is for, once: the coach's line, and the kicker says only that it is the first", () => {
     render(<TodayView session={planned()} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} />);
+    expect(screen.getByTestId("today-line").textContent).toBe("Your first Session finds where you start. Nothing to prepare.");
+    expect(screen.getByTestId("today-lead").textContent).toBe("Your first session");
+  });
+
+  it("without a line, the kicker says what a first Session is for", () => {
+    const session = planned();
+    const noPlacement = { ...session, plan: { ...session.plan, steps: session.plan.steps.filter((s) => s.id !== "p") } } as SessionRun;
+    render(<TodayView session={noPlacement} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} />);
+    expect(screen.queryByTestId("today-line")).toBeNull();
     // Broken only between its parts, never "START" alone (acceptance P1-11).
     expect(screen.getByTestId("today-lead").textContent).toBe("First session · finds where you start");
     expect(screen.getByTestId("today-lead").querySelectorAll(".session-kick-part")).toHaveLength(2);
+  });
+
+  it("the line is the coach's glyph and a sentence that opens Ask; no card, no slot when absent", () => {
+    render(<TodayView session={planned()} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} />);
+    const slot = document.querySelector(".session-today-line")!;
+    expect(slot.querySelector("svg.coach-glyph")).not.toBeNull();
+    expect(slot.querySelector(".session-card, .session-glass")).toBeNull();
+    const ask = screen.getByTestId("today-line-ask");
+    expect(ask.tagName).toBe("BUTTON");
+    fireEvent.click(ask);
+    cleanup();
+    const session = planned();
+    render(<TodayView session={{ ...session, plan: { ...session.plan, steps: [session.plan.steps[0]] } } as SessionRun} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} />);
+    expect(document.querySelector(".session-today-line")).toBeNull();
+    expect(screen.queryByTestId("today-left-off")).toBeNull();
   });
 });
 

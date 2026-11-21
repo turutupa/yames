@@ -53,6 +53,7 @@ import {
   storeSave,
   togglePlayback,
   openFeedback,
+  listPresets,
   MIC_PERMISSION_TIMEOUT_MS,
 } from "../../ipc";
 import { AskPanel } from "../coach/AskPanel";
@@ -627,17 +628,6 @@ export function MainWindow() {
     isPlaying: state.isPlaying,
     jam: jamSession.jam,
     song: songsSession.song,
-  });
-  // The coach's tools (leg t1a1): one host, built once and read through a
-  // ref, so the per-beat render rebuilds nothing (`useCoachToolHost`).
-  useCoachToolHost({
-    view,
-    setView,
-    pathsPlace,
-    session: sessionRun,
-    instrument,
-    jams: jamSession.jams,
-    loadJam: jamSession.loadJam,
   });
   // Listen (DESIGN 7): the tools' coach, on by the player's press only, ended
   // when they turn it off, leave the tools or leave it idle ten minutes.
@@ -1773,6 +1763,58 @@ export function MainWindow() {
     setlistSession.closeSetlist();
     closeJamRef.current();
   }, [setView, setlistSession.closeSetlist]);
+
+  // The coach's tools (legs t1a1, t1a2): one host, built once and read
+  // through a ref, so the per-beat render rebuilds nothing
+  // (`useCoachToolHost`). Here, below the unsaved-work gate and the preset
+  // loader it goes through.
+  useCoachToolHost({
+    view,
+    mode,
+    setView,
+    pathsPlace,
+    session: sessionRun,
+    instrument,
+    jams: jamSession.jams,
+    // The gate runs the action now, or opens its question and runs it on the answer: say which.
+    loadJam: (jam) => {
+      let ran = false;
+      guarded(() => {
+        ran = true;
+        jamSession.loadJam(jam);
+        setView("jam");
+      });
+      return ran ? "done" : "asked";
+    },
+    isPlaying: state.isPlaying,
+    tempo: state.bpm,
+    setTempo: handleBpmChange,
+    subdivision: state.subdivision,
+    setSubdivision: (subdivision) => void setSubdivision(subdivision).catch(() => {}),
+    loadPreset: (preset) => {
+      let ran = false;
+      guarded(() => {
+        ran = true;
+        // Re-read at the press: a preset deleted since the coach proposed it is not applied.
+        void listPresets()
+          .then((list) => {
+            const fresh = list.find((p) => p.id === preset.id);
+            if (fresh) void handleLoadPreset(fresh);
+          })
+          .catch(() => {});
+      });
+      return ran ? "done" : "asked";
+    },
+    settings: {
+      theme: state.theme,
+      setTheme: (theme) => void setTheme(theme).catch(() => {}),
+      countIn: countInOn,
+      toggleCountIn,
+      coachVoice: coach.coachVoiceMode,
+      setCoachVoice: coach.setCoachVoiceMode,
+      voiceAvailable: coach.coachBrainTier !== "off" && coach.availableVoices.length > 0,
+    },
+  });
 
 
   // Close dropdown on outside click
