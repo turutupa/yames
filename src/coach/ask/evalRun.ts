@@ -284,7 +284,8 @@ export function scoreItem(item: EvalItem, answer: EngineAnswer, paths: readonly 
       const want = effectOf({ tool: expect.tool, args: expect.args }, item.situation, item.lang, paths);
       rightTool = answer.kind === "call" && answer.call.tool === expect.tool;
       rightArgs = rightTool && answer.kind === "call" && (argsEqual(answer.call.args, expect.args) || (acted && got?.did === want.did));
-      wrongAction = acted && got?.did !== want.did;
+      // The asked-for call written another way (a goal's capitals) is not another action.
+      wrongAction = acted && !rightArgs && got?.did !== want.did;
       right = rightArgs;
       break;
     }
