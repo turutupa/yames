@@ -63,6 +63,13 @@ const EM_C_SLIDE = "Slide finger two up a fret from E minor to C.";
 const TOP_SET = "Move to the top three strings for chord five.";
 const D_TO_G = "From D, go straight back to G on '1'.";
 const C_TO_G = "From C, go straight back to G on '1'.";
+const G7_ACROSS = "Lay finger one across fret seven for G.";
+const G7_DOWN = "Move finger one down to fret seven for G.";
+const F4_B = "Put the fourth finger on the B string for F.";
+const VERSE_CHORUS = "Play the verse low, the chorus a shape higher.";
+const SECTIONS = "Count four-bar sections; climb for the bridge.";
+const A_FIRST = "Start each chord on the A string.";
+const SKIP_A = "Skip the A string after a low E string root.";
 
 /**
  * One picked-chord Exercise: its general cue, its `notes`, `shift` and
@@ -337,7 +344,7 @@ export const CHORDS_IN_A_KEY_CUES: CueBook = {
   // Level 2 (Intermediate), Step 7: named progressions
   "progressions.two-five-one": arp(
     g("Climb with each chord and arrive on C on '1'.", 2),
-    "Lay finger one across fret seven for G.",
+    G7_ACROSS,
     "Move finger one up to fret eight for C.",
     LAST_TWO_C,
   ),
@@ -349,7 +356,7 @@ export const CHORDS_IN_A_KEY_CUES: CueBook = {
   ),
   "progressions.one-three-four-five": arp(
     g("Move only the top note from C to E minor."),
-    "Put the fourth finger on the B string for F.",
+    F4_B,
     "Drop finger one to fret seven for G.",
     BACK_TO_C,
   ),
@@ -358,7 +365,7 @@ export const CHORDS_IN_A_KEY_CUES: CueBook = {
   "two-places.one-six-two-five-high": arp(
     g("Play the turn a shape higher, around fret eight."),
     DM_TEN,
-    "Move finger one down to fret seven for G.",
+    G7_DOWN,
     BACK_TO_C,
   ),
   "two-places.low-then-high": arp(
@@ -443,4 +450,108 @@ export const CHORDS_IN_A_KEY_CUES: CueBook = {
 
   // Level 2 warm-up (the key changes between Takes)
   "warmup-intermediate.one-six-two-five-warm": warm(g(SAY_1625, 0), LOOP_ONE),
+
+  // Level 3 (Advanced), Step 15: twelve bars
+  "twelve-bar.twelve-low": arp(g("Count four bars of C before the first F.", 1), F_FINGER2, SHIFT, BACK_TO_C),
+  "twelve-bar.twelve-high": arp(g("Play the same twelve bars a shape higher."), F4_B, G7_DOWN, BACK_TO_C),
+  "twelve-bar.twelve-keys": arp(g("Count four bars of one, then two of four."), FIND_FIRST, SHIFT, LOOP_ONE),
+
+  // Level 3, Step 16: a verse and a chorus
+  "verse-and-chorus.verse-chorus": arp(
+    g(VERSE_CHORUS, 1),
+    AM_F,
+    "Move up to fret eight for the chorus C.",
+    "From F, drop back to A minor at fret five.",
+  ),
+  "verse-and-chorus.verse-chorus-keys": arp(g(VERSE_CHORUS), FIND_FIRST, SHIFT, "Drop back down for the verse on '1'."),
+  "verse-and-chorus.your-song": [g("Write the numbers down, then find the shapes.", 1)],
+
+  // Level 3, Step 17: sixteen bars with a bridge
+  "sixteen-bars.bridge": arp(
+    g("Walk the root down the G string, chord by chord.", 2),
+    "Keep the E minor shape for D minor, just lower.",
+    G7_ACROSS,
+    "From G, climb to fret ten for F on '1'.",
+  ),
+  "sixteen-bars.aaba": arp(
+    g(SECTIONS, 1),
+    "Find G at fret seven only for the bridge.",
+    "Climb to fret ten for F as the bridge starts.",
+    BACK_TO_C,
+  ),
+  "sixteen-bars.aaba-keys": arp(g(SECTIONS), FIND_FIRST, SHIFT, LOOP_ONE),
+  "sixteen-bars.your-bridge": [g("Start the bridge on four or six, end on five.", 1)],
+
+  // Level 3, Step 18: chords from outside the key
+  "borrowed.flat-seven": arp(
+    g("Slide the C shape down to fret one for B flat.", 1),
+    "Lay finger one across fret one for F.",
+    SHIFT,
+    KEEP_LOOP,
+  ),
+  "borrowed.major-two": arp(
+    g("Follow the top note up: G, A, B, C.", 2),
+    "Put the B string at fret seven for D major.",
+    G7_ACROSS,
+    "Drop from the high C back to the low C on '1'.",
+  ),
+  "borrowed.minor-four": arp(
+    g("For F minor, move finger one to fret four.", 2),
+    "Hold F with fingers two, three and one.",
+    SHIFT,
+    KEEP_LOOP,
+  ),
+  "borrowed.your-borrowed": [g("Put the outside chord in bar two or three.", 1)],
+
+  // Level 3, Step 19: seventh chords
+  "sevenths.major-seven": arp(
+    g("Drop the root on the G string to the seventh."),
+    "Put finger two on the G string for major seven.",
+    "Move up to fret eight on the A string for F.",
+    "From F major seven, back to fret three for C.",
+    A_FIRST,
+  ),
+  "sevenths.minor-seven": arp(
+    g("Lift finger four and lay finger one flat.", 1),
+    "Put finger four on the G string for D minor.",
+    "Move finger one to fret seven for E minor.",
+    "Go back to fret five for D minor on '1'.",
+    A_FIRST,
+  ),
+  "sevenths.seven-and-half-diminished": arp(
+    g("Look at fret two before you leave G seven.", 3),
+    "Lay finger one flat at fret ten for G seven.",
+    "Move down to fret two for B diminished.",
+    "From fret two, jump up to fret ten for G.",
+    A_FIRST,
+  ),
+  "sevenths.seven-sevenths": arp(
+    g("Spell the scale with the roots as you climb.", 3),
+    "Put the roots on the low E string from G seven.",
+    "Drop to fret three, low E string, for G seven.",
+    "From the last C major seven, drop to fret three.",
+    "Skip the A string from G seven on.",
+  ),
+
+  // Level 3, Step 20: sevenths in songs
+  "sevenths-in-songs.two-five-one-sevenths": arp(
+    g("Hear the B string's note fall, then rise."),
+    "Put the low E string at fret three for G seven.",
+    SHIFT,
+    "Stay on C major seven for the last two bars.",
+    SKIP_A,
+  ),
+  "sevenths-in-songs.one-six-two-five-sevenths": arp(
+    g("Keep finger one on fret five into D minor seven.", 2),
+    "Lay finger one at fret five for A minor seven.",
+    SHIFT,
+    "From G seven, go straight to C major seven.",
+    SKIP_A,
+  ),
+  "sevenths-in-songs.sevenths-keys": arp(g(SAY_1625), FIND_FIRST, SHIFT, LOOP_ONE, SKIP_A),
+  "sevenths-in-songs.your-sevenths": [g("Pluck all four strings of each shape together.", 1)],
+
+  // Level 3 warm-ups (the key changes between Takes)
+  "warmup-advanced.two-five-one-warm": warm(g("Listen for five falling into one.", 0)),
+  "warmup-advanced.seven-chords-keys": warm(g(SAY_PATTERN, 0)),
 };
