@@ -16,7 +16,7 @@
  * The findings ride on `practice-segment-ended` and are never stored
  * (NEXT-LEGS s4a, judgement call 9).
  */
-import type { Finding } from "../songs/types";
+import type { Finding, FreePlayCounts } from "../songs/types";
 
 /** A run under this gets no note at all (`useSegmentCoach`), so no sentence. */
 export const TOOL_FINDING_MIN_RUN_MS = 10_000;
@@ -38,23 +38,11 @@ export type ToolFindingLine = {
   kind: Finding["kind"];
 };
 
-/**
- * What a free-play sentence counted (`findings.rs` `FreePlayCounts`, c5c2b
- * M3). On the wire only; Songs' `Finding` type does not carry it.
- */
-export type FreePlayCounts = {
-  counted: number;
-  agreeing: number;
-  lowBpm?: [number, number];
-  highBpm?: [number, number];
-  lowNotes: number;
-  highNotes: number;
-  lowSpreadMs: number;
-  highSpreadMs: number;
-};
+/** What a free-play sentence counted (`findings.rs` `FreePlayCounts`, c5c2b M3). */
+export type { FreePlayCounts };
 
 function countsOf(f: Finding): FreePlayCounts | undefined {
-  return (f.evidence as Finding["evidence"] & { freePlay?: FreePlayCounts }).freePlay;
+  return f.evidence.freePlay;
 }
 
 /** A tempo band as played: "100" or "96–99". */

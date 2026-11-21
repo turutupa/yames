@@ -125,6 +125,7 @@ const TS_EVIDENCE: readonly (keyof Evidence)[] = [
   "extras",
   "hitRateDelta",
   "spreadDeltaMs",
+  "freePlay",
 ];
 
 const TS_FINDING: readonly (keyof Finding)[] = [
