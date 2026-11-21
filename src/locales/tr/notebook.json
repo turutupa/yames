@@ -98,15 +98,19 @@
     },
     "reminder": {
       "label": "Çalışma hatırlatıcısı",
-      "hint": "“Bugün”, henüz çalışmadıysan seçili günlerde bu saatten sonra bunu gösterir. Bildirim yok.",
+      "hint": "“Bugün”, bugün kaydedilmiş bir çalışma yoksa seçili günlerde bu saatten sonra bunu gösterir. Bildirim yok.",
       "off": "Kapalı",
       "on": "Açık",
       "time": "Saat",
       "days": "Günler",
-      "quiet": "“Bugün” artık bunu göstermiyor: üç hatırlatıcı günü çalışmadan geçti. Bir daha çalıştıktan sonra yeniden başlar.",
+      "quiet": "“Bugün” artık bunu göstermiyor: üç hatırlatıcı günü kaydedilmiş çalışma olmadan geçti. Bir sonraki kaydedilmiş çalışmadan sonra yeniden başlar.",
       "noDays": "Hiç gün seçilmedi, bu yüzden “Bugün” bunu göstermiyor.",
       "unreadable": "Hatırlatıcın bu sefer okunamadı, bu yüzden “Bugün” onu göstermiyor; Kapalı ya da Açık'a basmak onu kaydeder.",
-      "line": "Hatırlatıcın: gitar, saat {{time}}."
+      "line": "Hatırlatıcın: çalışma, saat {{time}}.",
+      "lineGuitar": "Hatırlatıcın: gitar, saat {{time}}.",
+      "lineBass": "Hatırlatıcın: bas gitar, saat {{time}}.",
+      "lineDrums": "Hatırlatıcın: davul, saat {{time}}.",
+      "linePiano": "Hatırlatıcın: piyano, saat {{time}}."
     }
   }
 }

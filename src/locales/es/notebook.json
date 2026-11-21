@@ -98,15 +98,19 @@
     },
     "reminder": {
       "label": "Recordatorio de práctica",
-      "hint": "«Hoy» lo menciona a partir de esta hora en estos días, si aún no has practicado. No hay ninguna notificación.",
+      "hint": "«Hoy» lo menciona a partir de esta hora en estos días, si hoy no se ha guardado ninguna práctica. No hay ninguna notificación.",
       "off": "No",
       "on": "Sí",
       "time": "Hora",
       "days": "Días",
-      "quiet": "«Hoy» ha dejado de mencionarlo: pasaron tres días de recordatorio sin practicar. Vuelve a hacerlo después de que practiques de nuevo.",
+      "quiet": "«Hoy» ha dejado de mencionarlo: pasaron tres días de recordatorio sin ninguna práctica guardada. Vuelve a hacerlo después de tu próxima práctica guardada.",
       "noDays": "No hay ningún día elegido, así que «Hoy» no lo menciona.",
       "unreadable": "No se pudo leer tu recordatorio esta vez, así que «Hoy» no lo menciona; al pulsar No o Sí se guarda.",
-      "line": "Tu recordatorio: guitarra a las {{time}}."
+      "line": "Tu recordatorio: practicar a las {{time}}.",
+      "lineGuitar": "Tu recordatorio: guitarra a las {{time}}.",
+      "lineBass": "Tu recordatorio: bajo a las {{time}}.",
+      "lineDrums": "Tu recordatorio: batería a las {{time}}.",
+      "linePiano": "Tu recordatorio: piano a las {{time}}."
     }
   }
 }

@@ -98,15 +98,19 @@
     },
     "reminder": {
       "label": "Übungserinnerung",
-      "hint": "„Heute“ erwähnt sie nach dieser Uhrzeit an diesen Tagen, wenn du noch nicht geübt hast. Es gibt keine Benachrichtigung.",
+      "hint": "„Heute“ erwähnt sie nach dieser Uhrzeit an diesen Tagen, wenn heute noch keine Übung gespeichert wurde. Es gibt keine Benachrichtigung.",
       "off": "Aus",
       "on": "An",
       "time": "Uhrzeit",
       "days": "Tage",
-      "quiet": "„Heute“ erwähnt sie nicht mehr: Drei Erinnerungstage vergingen ohne Üben. Nachdem du das nächste Mal geübt hast, geht es wieder los.",
+      "quiet": "„Heute“ erwähnt sie nicht mehr: Drei Erinnerungstage vergingen ohne gespeicherte Übung. Nach deiner nächsten gespeicherten Übung geht es wieder los.",
       "noDays": "Es sind keine Tage gewählt, deshalb erwähnt „Heute“ sie nicht.",
       "unreadable": "Deine Erinnerung konnte diesmal nicht gelesen werden, deshalb erwähnt „Heute“ sie nicht; ein Klick auf Aus oder An speichert sie.",
-      "line": "Deine Erinnerung: Gitarre um {{time}}."
+      "line": "Deine Erinnerung: Üben um {{time}}.",
+      "lineGuitar": "Deine Erinnerung: Gitarre um {{time}}.",
+      "lineBass": "Deine Erinnerung: Bass um {{time}}.",
+      "lineDrums": "Deine Erinnerung: Schlagzeug um {{time}}.",
+      "linePiano": "Deine Erinnerung: Klavier um {{time}}."
     }
   }
 }
