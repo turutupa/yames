@@ -21,7 +21,13 @@ import { CHORD_SUFFIXES, NECK_POSITIONS, ROOT_NAMES, SCALE_NAMES } from "../bloc
 import { commandTableFor } from "../ask/commandTable";
 import { GRAMMAR_QUERY_MAX } from "../ask/grammar";
 import { CARD_IDS } from "../ask/evalCards";
-import { WORLD_FOLLOWED, WORLD_JAMS, WORLD_PRESETS, WORLD_THEMES, effectOf, type EvalLanguage, type EvalView, type Expect, type Situation } from "../ask/evalWorld";
+import { WORLD_FOLLOWED, WORLD_JAMS, WORLD_PRESETS, WORLD_THEMES, contextFor, effectOf, type EvalLanguage, type EvalView, type Expect, type Situation } from "../ask/evalWorld";
+import { ASKABLE_METRICS, ungradedPlayer } from "../ask/cards";
+import { FACT_CARDS, cardAboutLastTake, type FactCardTool } from "../ask/intents";
+import type { CoachContext, CoachRun } from "../context";
+import { checkCall } from "../tools/run";
+import { argString, takeRunning, type ToolArgs } from "../tools/types";
+import type { TakeOutcome } from "../../session/runner";
 import { CALL_INTENTS, CARD_INTENTS, NONE_INTENTS, YOURS_INTENTS, slotsIn, type CallIntent, type Filled, type Intent, type Slot } from "./intents";
 import type { LeakGuard } from "./leakage";
 import { leakKey } from "./leakage";
@@ -37,11 +43,15 @@ export type WordingsFile = {
   writer: string;
   wordings: Record<string, string[]>;
   goals?: string[];
-  vocab?: Partial<Record<"screen" | "section" | "scale" | "position", Record<string, string[]>>>;
+  vocab?: Partial<Record<"screen" | "section" | "scale" | "position" | "metric", Record<string, string[]>>>;
 };
 
-/** Shares of a language's records by what the right answer is (the rest of `none` split below). */
-export type Mix = { call: number; which: number; yours: number; card: number; noneAsked: number; wrongScreen: number; withheld: number };
+/**
+ * Shares of a language's records by what the right answer is (the rest of `none` split below).
+ * `cardNone`: a card question the card's own rule turns away here (no Take to read, a Take
+ * running, an ungraded player): `none` (leg c3int).
+ */
+export type Mix = { call: number; which: number; yours: number; card: number; cardNone: number; noneAsked: number; wrongScreen: number; withheld: number };
 
 /**
  * About two in five calls (the held-out set: two in three), the rest the
@@ -49,9 +59,20 @@ export type Mix = { call: number; which: number; yours: number; card: number; no
  * three kinds of nothing (not a request; a tool that cannot run here; a tool
  * not in the list). Cards take a share only once `EVAL_CARDS` has ids.
  */
-export const DEFAULT_MIX: Mix = { call: 0.4, which: 0.18, yours: 0.16, card: 0, noneAsked: 0.13, wrongScreen: 0.09, withheld: 0.04 };
-/** With cards on (TOOLS 3.4's four actions / four answers / two ask or refuse, tilted to the misses). */
-export const CARD_MIX: Mix = { call: 0.3, which: 0.13, yours: 0.12, card: 0.2, noneAsked: 0.1, wrongScreen: 0.1, withheld: 0.05 };
+export const DEFAULT_MIX: Mix = { call: 0.4, which: 0.18, yours: 0.16, card: 0, cardNone: 0, noneAsked: 0.13, wrongScreen: 0.09, withheld: 0.04 };
+/** The card questions' shares with cards on: a card answer 20%, a card question turned away 4%. */
+const CARD_SHARE = 0.2;
+const CARD_NONE_SHARE = 0.04;
+/**
+ * With cards on (leg c3int): the card shares, and every other share of
+ * `DEFAULT_MIX` scaled by what is left, so call / which / yours / none keep
+ * c3d1's proportions among the records that are not card questions.
+ */
+export const CARD_MIX: Mix = (() => {
+  const rest = 1 - CARD_SHARE - CARD_NONE_SHARE;
+  const scaled = Object.fromEntries(Object.entries(DEFAULT_MIX).map(([k, x]) => [k, x * rest])) as Mix;
+  return { ...scaled, card: CARD_SHARE, cardNone: CARD_NONE_SHARE };
+})();
 
 export type GenOptions = {
   /** Records wanted in this language. */
@@ -176,7 +197,7 @@ export type LanguageData = {
   step: Names;
   exercise: Names;
   followed: string[];
-  words: Record<"screen" | "section" | "scale" | "position", Record<string, string[]>>;
+  words: Record<"screen" | "section" | "scale" | "position" | "metric", Record<string, string[]>>;
   goals: string[];
 };
 
@@ -243,6 +264,8 @@ export function languageData(lang: EvalLanguage, paths: readonly PathDoc[], file
       section: fromTable("sections", OPENABLE_SECTIONS, file.vocab?.section),
       scale: fromTable("scales", SCALE_NAMES, file.vocab?.scale),
       position: fromTable("positions", NECK_POSITIONS, file.vocab?.position),
+      // The wordings file's own words only: no command table names these.
+      metric: Object.fromEntries(ASKABLE_METRICS.flatMap((id) => (file.vocab?.metric?.[id]?.length ? [[id, [...file.vocab.metric[id]]]] : []))),
     },
     goals: (file.goals ?? []).filter((g) => g.trim() !== "" && !/\d/.test(g)),
   };
@@ -365,7 +388,8 @@ export function fillSlots(rng: Rng, intent: Intent, situation: Situation, data: 
       case "screen":
       case "section":
       case "scale":
-      case "position": {
+      case "position":
+      case "metric": {
         const table = data.words[slot];
         const ids = Object.keys(table);
         if (ids.length === 0) return null;
@@ -480,7 +504,7 @@ export function judge(intent: Intent, f: Filled, situation: Situation, lang: str
     case "none":
       return { expect: { kind: "none" }, tags: ["not-a-request"] };
     case "card":
-      return CARD_IDS.includes(intent.card) ? { expect: { kind: "card", card: intent.card }, tags: ["card"] } : { drop: "card not on coach yet" };
+      return CARD_IDS.includes(intent.card) ? judgeCard(intent.card, intent.args?.(f) ?? {}, situation, lang, paths) : { drop: "card not on coach yet" };
     case "call": {
       const args = intent.args(f);
       // A name longer than the grammar lets a query be could never be written by the model.
@@ -507,6 +531,70 @@ export function judge(intent: Intent, f: Filled, situation: Situation, lang: str
   }
 }
 
+/**
+ * The coach's context for a card question (leg c3int). The eval world keeps
+ * no Takes: as in the held-out set, a Session's result screen stands for "a
+ * Take of the Exercise on screen just ended", so there the context carries a
+ * measured one (only what `when` reads: its Exercise and a graded verdict;
+ * no card body runs on it). `run.ungraded` is the runner's `null` (the
+ * world's `contextFor` writes `false`, which `ungradedPlayer` reads as
+ * ungraded).
+ */
+export function cardContext(situation: Situation, lang: string, paths: readonly PathDoc[]): CoachContext {
+  const ctx = contextFor(situation, lang, paths);
+  const run = ctx.run ? ({ ...ctx.run, ungraded: null } as unknown as CoachRun) : undefined;
+  const withRun = run ? { ...ctx, run } : ctx;
+  if (situation.view !== "session" || situation.phase !== "result" || !ctx.exercise) return withRun;
+  const lastTake = {
+    stepId: situation.step === undefined ? "" : String(situation.step),
+    exerciseId: ctx.exercise.id,
+    title: ctx.exercise.title,
+    bpm: run?.bpm ?? 80,
+    takeNumber: 1,
+    grade: { verdict: "belowBar", cleanBpm: null },
+    previousValue: null,
+    cleanBefore: null,
+  } as unknown as TakeOutcome;
+  return { ...withRun, lastTake };
+}
+
+/**
+ * A card question, judged by the card's own rule (`runFactCard`'s gate,
+ * before any card body): the shape check (`checkCall` on `FACT_CARDS`),
+ * then nothing while a Take runs, nothing about quality for an ungraded
+ * player, and otherwise the card when its `when` holds, a Take of this
+ * Exercise is there, or it reads the Exercise (`score_made_of`, a
+ * `why_not_counted` naming one thing). Anything turned away is `none`.
+ */
+export function judgeCard(card: string, args: ToolArgs, situation: Situation, lang: string, paths: readonly PathDoc[]): Judged {
+  const checked = checkCall({ tool: card, args }, FACT_CARDS, "player");
+  if (!checked.ok) return { drop: `card ${card}: ${checked.line.key}` };
+  const tool = checked.call.tool as FactCardTool;
+  const ctx = cardContext(situation, lang, paths);
+  if (takeRunning(ctx)) return { expect: { kind: "none" }, tags: ["card-near", "take-running"] };
+  if (ungradedPlayer(ctx)) return { expect: { kind: "none" }, tags: ["card-near", "ungraded"] };
+  const what = argString(checked.call.args, "what");
+  const aboutExercise = ctx.exercise !== undefined && ((tool.name === "why_not_counted" && what !== undefined && what !== "take") || tool.name === "score_made_of");
+  if (!tool.when(ctx) && !cardAboutLastTake(ctx) && !aboutExercise) return { expect: { kind: "none" }, tags: ["card-near", "no-take"] };
+  // Not the tag "card": `countRecords` counts kinds and tags in one row.
+  const tags = ["card-answer", ...Object.keys(args).map((k) => `card-${k}`)];
+  return { expect: { kind: "card", card, ...(Object.keys(args).length > 0 ? { args } : {}) }, tags };
+}
+
+/**
+ * Where a card question is asked: mostly a Session (its result screen the
+ * most, where the cards have a Take), sometimes anywhere.
+ */
+function cardSituation(rng: Rng, paths: readonly PathDoc[]): Situation {
+  if (rng() < 0.2) return sampleSituation(rng, paths);
+  const p = pick(rng, paths);
+  const ph = rng();
+  const phase = ph < 0.6 ? "result" : ph < 0.8 ? "ready" : ph < 0.92 ? "playing" : "listening";
+  const g = rng();
+  const grading = g < 0.8 ? undefined : g < 0.9 ? ("off" as const) : ("ask" as const);
+  return { view: "session", path: p.id, step: pick(rng, p.steps).order, phase, ...(grading ? { grading } : {}) };
+}
+
 // ---------------------------------------------------------------------------
 // One language
 // ---------------------------------------------------------------------------
@@ -523,7 +611,7 @@ function toolList(rng: Rng, keep: string | null, drop: string | null): string[] 
   return out.filter((t) => !withhold.has(t));
 }
 
-type Bucket = "call" | "which" | "yours" | "card" | "noneAsked" | "wrongScreen" | "withheld";
+type Bucket = "call" | "which" | "yours" | "card" | "cardNone" | "noneAsked" | "wrongScreen" | "withheld";
 
 /** The intents a bucket draws from. */
 function intentsFor(bucket: Bucket): readonly Intent[] {
@@ -537,6 +625,7 @@ function intentsFor(bucket: Bucket): readonly Intent[] {
     case "yours":
       return YOURS_INTENTS;
     case "card":
+    case "cardNone":
       return CARD_INTENTS.filter((i) => CARD_IDS.includes(i.card));
     case "noneAsked":
       return NONE_INTENTS;
@@ -557,6 +646,8 @@ function wanted(bucket: Bucket, j: { expect: Expect; tags: string[] }): boolean 
       return j.expect.kind === "yours";
     case "card":
       return j.expect.kind === "card";
+    case "cardNone":
+      return j.expect.kind === "none" && j.tags.includes("card-near");
     case "noneAsked":
       return j.expect.kind === "none";
   }
@@ -598,7 +689,7 @@ export function generateLanguage(data: LanguageData, file: WordingsFile, opts: G
 
   const records: TrainRecord[] = [];
   const seen = new Set<string>();
-  const buckets: Bucket[] = ["call", "which", "yours", "card", "noneAsked", "wrongScreen", "withheld"];
+  const buckets: Bucket[] = ["call", "which", "yours", "card", "cardNone", "noneAsked", "wrongScreen", "withheld"];
   for (const bucket of buckets) {
     const target = Math.round(opts.size * mix[bucket]);
     const pool = intentsFor(bucket)
@@ -614,7 +705,7 @@ export function generateLanguage(data: LanguageData, file: WordingsFile, opts: G
       let done = false;
       let lastRefusal: string | null = null;
       for (let t = 0; t < TRIES && !done; t++) {
-        const situation = sampleSituation(rng, data.paths);
+        const situation = bucket === "card" || bucket === "cardNone" ? cardSituation(rng, data.paths) : sampleSituation(rng, data.paths);
         const f = fillSlots(rng, intent, situation, data, bucket === "which");
         if (!f) continue;
         const tool = intent.kind === "call" ? (intent as CallIntent).tool : null;
@@ -646,6 +737,7 @@ export function generateLanguage(data: LanguageData, file: WordingsFile, opts: G
           text,
           expect: j.expect,
           ...(tool ? { call: { tool, args: (intent as CallIntent).args(f) } } : {}),
+          ...(intent.kind === "card" ? { card: { card: intent.card, args: intent.args?.(f) ?? {} } } : {}),
           tags: j.tags,
         });
         made++;

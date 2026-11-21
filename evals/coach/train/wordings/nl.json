@@ -648,6 +648,14 @@
       "ik droom ervan om op het podium te staan",
       "ik ben gefrustreerd van barré"
     ],
+    "none_unmeasured": [
+      "was mijn vibrato goed?",
+      "heeft mijn bending de doeltoon gehaald?",
+      "speelde ik hard genoeg, of te zacht?",
+      "hoe was mijn dynamiek in de laatste take?",
+      "waren mijn slides netjes?",
+      "klinkt mijn vibrato eigenlijk gelijkmatig"
+    ],
     "card_where_slipped": [
       "waar ben ik in mijn laatste take de mist ingegaan?",
       "op welke plek ging het mis?",
@@ -660,7 +668,25 @@
       "heb ik gerushed of gesleept?",
       "zat ik voor de beat of erachter?",
       "was ik in de laatste take eerder snel of langzaam?",
-      "heb ik gehaast?"
+      "naar welke kant helde mijn timing over?",
+      "zat ik meer vooraan of achteraan?",
+      "welke kant ging mijn timing op, vooruit of achteruit"
+    ],
+    "card_rushing": [
+      "heb ik gehaast?",
+      "was ik in de laatste take te snel?",
+      "ben ik de beat vooruit gelopen?",
+      "heb ik versneld tijdens het spelen?",
+      "liep ik voor op de klik",
+      "ben ik daar steeds sneller geworden"
+    ],
+    "card_dragging": [
+      "heb ik gesleept?",
+      "was ik in de laatste take te langzaam?",
+      "ben ik achter de beat aangehobbeld?",
+      "heb ik vertraagd tijdens het spelen?",
+      "liep ik achter op de klik",
+      "ben ik daar steeds trager geworden"
     ],
     "card_why_not_counted": [
       "waarom telde die take niet mee?",
@@ -668,6 +694,14 @@
       "waarom werd dat niet meegeteld?",
       "wat ontbrak er om het te laten tellen?",
       "waarom telt mijn laatste take niet"
+    ],
+    "card_metric_graded": [
+      "beoordeelt de app {metric}?",
+      "waarom heeft de app {metric} niet meegeteld?",
+      "controleert de app {metric}?",
+      "heeft de app {metric} meegenomen in mijn score?",
+      "telt de app {metric} eigenlijk mee",
+      "let de app op {metric} in een take?"
     ],
     "card_what_changed": [
       "wat was er anders dan bij de take ervoor?",
@@ -720,5 +754,17 @@
     "bij nummers met de band kunnen meespelen",
     "elke dag consequent oefenen"
   ],
-  "vocab": {}
+  "vocab": {
+    "metric": {
+      "pitch": ["het spelen van de juiste noten", "mijn toonkeuze"],
+      "pickDirection": ["mijn aanslagrichting", "het wisselslagpatroon"],
+      "muting": ["het dempen van snaren", "mijn snaarruis"],
+      "posture": ["mijn houding", "hoe ik zit"],
+      "tension": ["mijn spanning", "de spanning in mijn handen en schouders"],
+      "handAttribution": ["de handtoewijzing van fouten", "welke hand een fout maakt"],
+      "fingering": ["mijn vingerzetting", "mijn vingerkeuze"],
+      "tone": ["mijn toon", "mijn klankkwaliteit"],
+      "feel": ["mijn feel", "mijn groove"]
+    }
+  }
 }

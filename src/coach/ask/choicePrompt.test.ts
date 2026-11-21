@@ -6,7 +6,7 @@ import { THEMES } from "../../themes";
 import { estimateTokens } from "../context";
 import { SAFE_SETTING_KEYS } from "../tools/host";
 import { COACH_TOOLS, toolCatalogue } from "../tools/registry";
-import { CHOICE_CONTEXT_TOKENS, CHOICE_PREFIX_TOKENS, SETTING_VALUES, choiceContext, choicePrefix, isUndoGuard, namedTitles } from "./choicePrompt";
+import { CHOICE_CARDS_TOKENS, CHOICE_CONTEXT_TOKENS, CHOICE_PREFIX_TOKENS, CHOICE_TOOLS_TOKENS, SETTING_VALUES, choiceContext, choicePrefix, isUndoGuard, namedTitles } from "./choicePrompt";
 import { commandTableFor } from "./commandTable";
 import { EVAL_CARDS } from "./evalCards";
 import { EVAL_LANGUAGES, WORLD_THEMES } from "./evalWorld";
@@ -26,19 +26,41 @@ describe("choicePrefix", () => {
     expect(first).not.toMatch(/\d{4}-\d{2}-\d{2}|\d{1,2}:\d{2}/);
   });
 
-  it("lists every player tool and fits DESIGN 5.5's 900 tokens", () => {
+  it("lists every player tool and fits its 1100 tokens (c3bp), the whole prefix 1400 (c3int)", () => {
     const prefix = choicePrefix(catalogue(), EVAL_CARDS);
     for (const tool of catalogue().tools) expect(prefix).toContain(`\n${tool.name}(`);
     expect(prefix).not.toContain("return_to");
+    // The tools and the format. The cards come on top, gated on their own: see below (c3b1b, c3int).
+    expect(estimateTokens(prefix.split("\n\nCards:")[0])).toBeLessThanOrEqual(CHOICE_TOOLS_TOKENS);
     expect(estimateTokens(prefix)).toBeLessThanOrEqual(CHOICE_PREFIX_TOKENS);
+    expect(CHOICE_PREFIX_TOKENS).toBe(CHOICE_TOOLS_TOKENS + CHOICE_CARDS_TOKENS);
   });
 
-  it("still fits with a card list as long as the cards' (about 40 one-liners)", () => {
+  it("lists each card with its arguments and its note to the first stop (c3b1b)", () => {
+    const prefix = choicePrefix(catalogue(), EVAL_CARDS);
+    expect(prefix).toContain("\nearly_or_late(premise?=early|late): ");
+    expect(prefix).toContain("\nimproving(): ");
+    expect(prefix).toMatch(/\nwhy_not_counted\(what\?=take\|pitch\|.*\|feel\): /);
+    // The `take` every last-Take card carries has one value: not shown.
+    expect(prefix).not.toContain("take?=last");
+    const names = choicePrefix(catalogue(), EVAL_CARDS, { notes: false });
+    expect(names).toContain("\nearly_or_late(premise?=early|late)\n");
+  });
+
+  it("with the real cards, and with a card list as long as 40 one-liners", () => {
+    const real = estimateTokens(choicePrefix(catalogue(), EVAL_CARDS));
     const cards = Array.from({ length: 40 }, (_, i) => ({ id: `card_${i}`, note: "What the player's best clean tempo is here." }));
     const prefix = choicePrefix(catalogue(), cards);
     expect(prefix).toContain("card_39: ");
-    // Reported, not gated: c3b1b decides how cards are described once they exist.
-    expect(estimateTokens(prefix)).toBeGreaterThan(0);
+    // The orchestrator's budget (c3int): tools and format 1100, the cards' section 300, 1400 in all.
+    // Rust does not cap the prefix (it is decoded once and kept); past 300, cards go by id and three
+    // words. 40 one-liners are reported, not gated: they would not fit.
+    const tools = estimateTokens(choicePrefix(catalogue(), EVAL_CARDS).split("\n\nCards:")[0]);
+    const cardsPart = estimateTokens(choicePrefix(catalogue(), EVAL_CARDS).split("\n\nCards:")[1] ?? "");
+    console.info(
+      `choice prefix: ${real} tokens in all (tools and format ${tools}, the ${EVAL_CARDS.length} cards ${cardsPart}); ${estimateTokens(prefix)} with 40 one-line cards`,
+    );
+    expect(cardsPart).toBeLessThanOrEqual(CHOICE_CARDS_TOKENS);
   });
 });
 

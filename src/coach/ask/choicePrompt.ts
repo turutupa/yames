@@ -29,8 +29,21 @@ import { ONE_OF } from "./grammar";
  * with. The prefix is decoded once and kept (c3a's prefix cache), so a turn
  * pays none of it; the budget still sums under half of the 4,096 window
  * (1100 + 450 + 150 + 48).
+ *
+ * Leg c3int: the fact cards' section on top, gated on its own at
+ * `CHOICE_CARDS_TOKENS` (the seven cards take ~250), so the whole prefix is
+ * at most 1400. Worst case of a turn, by `estimateTokens`: ~100 of Rust's
+ * system text and ChatML, 1400 prefix, 450 context, ~150 question, 96 answer
+ * (a prose one; a choice is 48): ~2,200 of the 4,096 window.
  */
-export const CHOICE_PREFIX_TOKENS = 1100;
+export const CHOICE_TOOLS_TOKENS = 1100;
+/**
+ * The "Cards:" section of the prefix (leg c3int). The seven cards take 245;
+ * a one-line card costs ~18, so about three more fit. Past that, every card
+ * goes by its id and three words (~7 each), which holds some twenty-five.
+ */
+export const CHOICE_CARDS_TOKENS = 300;
+export const CHOICE_PREFIX_TOKENS = CHOICE_TOOLS_TOKENS + CHOICE_CARDS_TOKENS;
 /** DESIGN 5.5, and `coach::ASK_CONTEXT_MAX_TOKENS`. */
 export const CHOICE_CONTEXT_TOKENS = 450;
 
@@ -135,7 +148,7 @@ export function choicePrefix(
   const lines: string[] = [
     "Reply with one JSON object for the player's message:",
     '{"tool":NAME,"args":{...}} to do one tool below (names in the player\'s words, numbers as digits; an optional arg? only if the player said it)',
-    ...(cards.length > 0 ? ['{"card":ID} when a card below answers it'] : []),
+    ...(cards.length > 0 ? ['{"card":ID,"args":{...}} when a card below answers it'] : []),
     '{"answer":"which"} if it could mean two different things, as when "Paths these words name" lists two or more',
     '{"answer":"yours"} for recording, deleting, grading, grades, microphone, devices, the model, unfollowing: the player\'s own',
     '{"answer":"none"} for anything else, and for a tool that is not in "Tools here"',
@@ -166,9 +179,22 @@ export function choicePrefix(
   for (const [name, values] of lists) lines.push(`${name}=${values.join("|")}`);
   if (cards.length > 0) {
     lines.push("", "Cards:");
-    for (const card of cards) lines.push(notes ? `${card.id}: ${card.note}` : card.id);
+    for (const card of cards) lines.push(cardLine(card, notes));
   }
   return lines.join("\n");
+}
+
+/**
+ * One card in the prefix (leg c3b1b): its id, its arguments as a tool's are
+ * written (the `take` every last-Take card carries has one value, "last",
+ * and is left out), and its note to the first stop. A card that declares no
+ * arguments is its id and note, as before.
+ */
+function cardLine(card: EvalCard, notes: boolean): string {
+  const shown = (card.args ?? []).filter((f) => !(f.name === "take" && f.type.kind === "enum" && f.type.values.length === 1));
+  const signature = card.args === undefined ? card.id : `${card.id}(${shown.map(argText).join(", ")})`;
+  if (!notes) return signature;
+  return `${signature}: ${card.args === undefined ? card.note : shortNote(card.note)}`;
 }
 
 /** What the context says: plain facts, already in the player's language where they are titles. */

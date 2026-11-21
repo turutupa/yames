@@ -648,6 +648,14 @@
       "hoje não tenho vontade de nada",
       "sonho em tocar ao vivo"
     ],
+    "none_unmeasured": [
+      "meu vibrato ficou bom?",
+      "o bend chegou na nota?",
+      "toquei forte demais ou fraco demais?",
+      "como estão minhas dinâmicas?",
+      "os slides saíram bem?",
+      "ei, o vibrato daquela parte ficou legal?"
+    ],
     "card_where_slipped": [
       "onde eu errei na minha última tomada?",
       "em que parte eu travei",
@@ -660,7 +668,22 @@
       "corri ou arrastei?",
       "toquei antes ou depois do clique?",
       "tô apressando ou atrasando?",
-      "oi, eu me adiantei ao metrônomo?"
+      "pra que lado eu fui com o tempo nessa tomada?",
+      "ei, eu tendi a adiantar ou a atrasar?"
+    ],
+    "card_rushing": [
+      "oi, eu me adiantei ao metrônomo?",
+      "eu estava me apressando ali?",
+      "acelerei durante essa tomada?",
+      "acho que fui correndo, né?",
+      "toquei na frente do clique?"
+    ],
+    "card_dragging": [
+      "fiquei atrás do clique?",
+      "eu estava atrasado nessa tomada?",
+      "acho que arrastei, né?",
+      "fui perdendo velocidade na tomada?",
+      "ei, toquei depois do tempo o tempo todo?"
     ],
     "card_why_not_counted": [
       "por que essa tomada não contou?",
@@ -668,6 +691,14 @@
       "o que deu errado pra não valer?",
       "essa tomada não contou, por quê?",
       "ei, por que não fui aprovado?"
+    ],
+    "card_metric_graded": [
+      "o app avalia {metric}?",
+      "ei, por que o app não levou {metric} em conta?",
+      "o app confere {metric}?",
+      "minha nota leva {metric} em conta?",
+      "avaliam {metric} nesse exercício?",
+      "por que o app não avaliou {metric}"
     ],
     "card_what_changed": [
       "o que mudou em relação à tomada anterior?",
@@ -725,6 +756,17 @@
       "devices": ["dispositivos", "dispositivos de áudio", "áudio"],
       "grading": ["avaliação", "avaliacao"],
       "recording": ["gravação", "gravacao", "gravações"]
+    },
+    "metric": {
+      "pitch": ["as notas certas", "as notas que toco certo"],
+      "pickDirection": ["a direção da palhetada", "a palhetada alternada"],
+      "muting": ["o abafamento", "o controle do ruído das cordas"],
+      "posture": ["a postura", "como eu sento com o violão"],
+      "tension": ["a tensão nas mãos", "a tensão nos ombros"],
+      "handAttribution": ["qual mão errou", "a mão que errou"],
+      "fingering": ["a digitação", "quais dedos eu uso"],
+      "tone": ["o timbre", "a qualidade do som"],
+      "feel": ["a pegada", "o groove"]
     }
   }
 }

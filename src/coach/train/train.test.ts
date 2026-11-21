@@ -17,7 +17,7 @@ import { choiceGrammar } from "../ask/grammar";
 import { gbnfAccepts, gbnfToRegExp } from "./gbnf";
 import { LeakGuard, editDistance, leakKey } from "./leakage";
 import { ASK_SYSTEM_PROMPT, askPromptHead, askPromptTail, renderRecord } from "./render";
-import { ALREADY, WRONG_SCREEN, generateLanguage, languageData, splitValidation, wordingProblem, type WordingsFile } from "./generate";
+import { ALREADY, WRONG_SCREEN, generateLanguage, judgeCard, languageData, splitValidation, wordingProblem, type WordingsFile } from "./generate";
 import { CALL_INTENTS, INTENTS, intentById } from "./intents";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -155,6 +155,28 @@ describe("the generator (en, a small wordings file)", () => {
     for (const k of ["which", "yours", "none"]) expect(kinds[k], k).toBeGreaterThan(0);
   });
 
+  it("judges a card question by the card's own rule (leg c3int)", () => {
+    const p = paths.find((x) => x.steps.length > 0)!;
+    const session = (phase: "result" | "ready" | "playing", grading?: "off") => ({ view: "session" as const, path: p.id, step: p.steps[0].order, phase, ...(grading ? { grading } : {}) });
+    const expectOf = (card: string, args: Record<string, string>, s: Parameters<typeof judgeCard>[2]) => {
+      const j = judgeCard(card, args, s, "en", paths);
+      return "drop" in j ? j : { ...j.expect, tags: j.tags };
+    };
+    // A Take there (the result screen): the card, with the words' argument.
+    expect(expectOf("early_or_late", { premise: "late" }, session("result"))).toMatchObject({ kind: "card", card: "early_or_late", args: { premise: "late" } });
+    expect(expectOf("where_slipped", {}, session("result"))).toEqual({ kind: "card", card: "where_slipped", tags: ["card-answer"] });
+    // No Take to read: none; but the Exercise-reading cards answer on the ready screen.
+    expect(expectOf("where_slipped", {}, session("ready"))).toMatchObject({ kind: "none", tags: ["card-near", "no-take"] });
+    expect(expectOf("score_made_of", {}, session("ready"))).toMatchObject({ kind: "card" });
+    expect(expectOf("why_not_counted", { what: "muting" }, session("ready"))).toMatchObject({ kind: "card", args: { what: "muting" } });
+    expect(expectOf("improving", {}, { view: "paths" })).toMatchObject({ kind: "none", tags: ["card-near", "no-take"] });
+    // During a Take, and for an ungraded player: none.
+    expect(expectOf("where_slipped", {}, session("playing"))).toMatchObject({ kind: "none", tags: ["card-near", "take-running"] });
+    expect(expectOf("pass_mark_distance", {}, session("result", "off"))).toMatchObject({ kind: "none", tags: ["card-near", "ungraded"] });
+    // A shape the card refuses is dropped, never answered.
+    expect(expectOf("early_or_late", { premise: "sideways" }, session("result"))).toHaveProperty("drop");
+  });
+
   it("renders a pair the grammar accepts, and splits validation by language and kind", () => {
     const data = languageData("en", paths, file);
     const { records } = generateLanguage(data, file, { size: 120, seed: 4, guard: new LeakGuard() });
@@ -171,5 +193,6 @@ describe("the generator (en, a small wordings file)", () => {
     expect(train.length + validation.length).toBe(records.length);
     expect(validation.length).toBeGreaterThan(0);
     expect(train.some((r) => validation.includes(r))).toBe(false);
-  });
+    // 22 s once on a busy machine (leg c3int): headroom, as `paths/generate.test.ts`'s "mostly" test has.
+  }, 120_000);
 });

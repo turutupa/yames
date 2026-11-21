@@ -8,7 +8,8 @@
  *   message, with no model: the command router as `answerTyped` uses it (a
  *   named `open_path` / `open_step` opens at once only by the title's whole
  *   words, a name that names nothing goes on), then Path search
- *   (`answerSearchFor`, leg c2ca). No fact cards yet (not on `coach`).
+ *   (`answerSearchFor`, leg c2ca), with the fact cards' English matcher
+ *   between the two (`rulesCard`, leg c3b1b).
  * - `askRequestFor` / `modelAnswer`: one `coach::ask` choice request per item
  *   (the prefix, the context, the grammar) and its outcome read back. Only
  *   `answered` is an answer (c3a): every other status is "no answer".
@@ -21,6 +22,7 @@ import { commandFacts } from "./router";
 import { routeCommand } from "./router";
 import { commandTableFor } from "./commandTable";
 import { answerSearchFor } from "./search";
+import { matchCard } from "./match";
 import { resolvePath, wholeTitleWords, normalizeWords } from "../tools/resolve";
 import { resolveStepCall } from "../tools/go";
 import { COACH_TOOLS, toolCatalogue } from "../tools/registry";
@@ -130,9 +132,43 @@ export function rulesAnswer(item: EvalItem, paths: readonly PathDoc[]): EngineAn
         break;
     }
   }
+  const card = rulesCard(item, ctx);
+  if (card) return card;
   const found = answerSearchFor(said, { language: item.lang, paths, progress: ctx.progress });
   if (found) return { kind: "search", step: `${found.hit.pathId}/${found.hit.stepId}` };
   return { kind: "none" };
+}
+
+/**
+ * The fact cards' typed matcher, as the text box runs it after the router
+ * (`askCards.ts` `typedCardAnswerer`, leg c3b1b): English only, a card only
+ * when `matchCard` is sure, and only when it has something to read here
+ * (`readsSomethingHere`). The eval's world keeps no Takes, so "a last Take of
+ * the Exercise on screen" is the Session's result screen (a Take just ended);
+ * the Exercise alone (any Session) is enough for what the score is made of
+ * and for "is my muting graded".
+ */
+function rulesCard(item: EvalItem, ctx: ReturnType<typeof contextFor>): EngineAnswer | null {
+  if (item.lang !== "en") return null;
+  const call = matchCard(item.text);
+  if (!call) return null;
+  const s = item.situation;
+  if (s.view === "session" && (s.phase === "playing" || s.phase === "listening")) return null;
+  const lastTake = s.view === "session" && s.phase === "result";
+  const what = call.args.what;
+  const aboutExercise = call.tool === "score_made_of" || (call.tool === "why_not_counted" && typeof what === "string" && what !== "take");
+  if (!lastTake && !(aboutExercise && ctx.exercise !== undefined)) return null;
+  return { kind: "card", card: call.tool, args: call.args };
+}
+
+/** A card's arguments as they decide its answer: `take` is always the last, `what: "take"` is the default. */
+function cardArgsKey(args: ToolArgs | undefined): string {
+  const out: Record<string, string | number> = {};
+  for (const [k, v] of Object.entries(args ?? {}).sort(([a], [b]) => a.localeCompare(b))) {
+    if (k === "take" || (k === "what" && v === "take")) continue;
+    out[k] = typeof v === "string" ? normalizeWords(v) : v;
+  }
+  return JSON.stringify(out);
 }
 
 // ---------------------------------------------------------------------------
@@ -283,7 +319,7 @@ const describeAnswer = (a: EngineAnswer): string => {
     case "call":
       return `call ${a.call.tool} ${JSON.stringify(a.call.args)}`;
     case "card":
-      return `card ${a.card}`;
+      return `card ${a.card} ${cardArgsKey(a.args)}`;
     case "yours":
       return `yours${a.item ? ` ${a.item}` : ""}`;
     case "search":
@@ -317,7 +353,8 @@ export function scoreItem(item: EvalItem, answer: EngineAnswer, paths: readonly 
     }
     case "card":
       wrongAction = acted;
-      right = answer.kind === "card" && answer.card === expect.card;
+      // The same card asked the same way: "is my muting graded" is not "why didn't that count" (c3b1b).
+      right = answer.kind === "card" && answer.card === expect.card && cardArgsKey(answer.args) === cardArgsKey(expect.args);
       break;
     case "which":
       wrongAction = acted;
@@ -335,7 +372,7 @@ export function scoreItem(item: EvalItem, answer: EngineAnswer, paths: readonly 
   return {
     id: item.id,
     lang: item.lang,
-    expect: expect.kind === "call" ? `call ${expect.tool} ${JSON.stringify(expect.args)}` : expect.kind === "card" ? `card ${expect.card}` : expect.kind,
+    expect: expect.kind === "call" ? `call ${expect.tool} ${JSON.stringify(expect.args)}` : expect.kind === "card" ? `card ${expect.card} ${cardArgsKey(expect.args)}` : expect.kind,
     got: describeAnswer(answer),
     rightTool,
     rightArgs,
@@ -363,6 +400,10 @@ export type Summary = {
   noneRight: number;
   cards: number;
   cardsRight: number;
+  /** Card items answered with another card, or the same card asked another way (c3b1b). */
+  cardsWrong: number;
+  /** A card given where the item expects none (a call, which, yours or none). */
+  cardsUninvited: number;
   right: number;
   noAnswer: number;
   /** No answers by status (only the statuses seen). */
@@ -400,6 +441,8 @@ export function summarize(lang: string, items: readonly EvalItem[], scores: read
     noneRight: count((s, i) => i.expect.kind === "none" && s.right),
     cards: count((_, i) => i.expect.kind === "card"),
     cardsRight: count((s, i) => i.expect.kind === "card" && s.right),
+    cardsWrong: count((s, i) => i.expect.kind === "card" && !s.right && s.got.startsWith("card ")),
+    cardsUninvited: count((s, i) => i.expect.kind !== "card" && s.got.startsWith("card ")),
     right: count((s) => s.right),
     noAnswer: count((s) => s.noAnswer !== null),
     noAnswerBy,
@@ -415,15 +458,15 @@ const pct = (a: number, b: number) => (b === 0 ? "-" : `${Math.round((100 * a) /
 /** The summary table, in Markdown. */
 export function summaryMarkdown(title: string, rows: readonly Summary[], note: string): string {
   const head =
-    "| lang | n | right | right tool | right args | wrong actions | asked (which) | yours | none | cards | no answer | median ms | p90 ms | prefix cached |\n" +
-    "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|";
+    "| lang | n | right | right tool | right args | wrong actions | asked (which) | yours | none | cards right | wrong card | card uninvited | no answer | median ms | p90 ms | prefix cached |\n" +
+    "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|";
   const by = (r: Summary) => {
     const parts = Object.entries(r.noAnswerBy ?? {}).map(([k, v]) => `${k} ${v}`);
     return parts.length > 0 ? `${r.noAnswer} (${parts.join(", ")})` : `${r.noAnswer}`;
   };
   const body = rows.map(
     (r) =>
-      `| ${r.lang} | ${r.n} | ${pct(r.right, r.n)} | ${r.rightTool}/${r.calls} (${pct(r.rightTool, r.calls)}) | ${r.rightArgs}/${r.calls} (${pct(r.rightArgs, r.calls)}) | ${r.wrongActions} (${pct(r.wrongActions, r.n)}) | ${r.asked}/${r.which} | ${r.yoursRight}/${r.yours} | ${r.noneRight}/${r.none} | ${r.cardsRight}/${r.cards} | ${by(r)} | ${r.medianMs ?? "-"} | ${r.p90Ms ?? "-"} | ${r.prefixKnown ? `${r.prefixCached}/${r.prefixKnown}` : "-"} |`,
+      `| ${r.lang} | ${r.n} | ${pct(r.right, r.n)} | ${r.rightTool}/${r.calls} (${pct(r.rightTool, r.calls)}) | ${r.rightArgs}/${r.calls} (${pct(r.rightArgs, r.calls)}) | ${r.wrongActions} (${pct(r.wrongActions, r.n)}) | ${r.asked}/${r.which} | ${r.yoursRight}/${r.yours} | ${r.noneRight}/${r.none} | ${r.cardsRight}/${r.cards} | ${r.cardsWrong ?? 0} | ${r.cardsUninvited ?? 0} | ${by(r)} | ${r.medianMs ?? "-"} | ${r.p90Ms ?? "-"} | ${r.prefixKnown ? `${r.prefixCached}/${r.prefixKnown}` : "-"} |`,
   );
   return `# ${title}\n\n${note}\n\n${head}\n${body.join("\n")}\n`;
 }

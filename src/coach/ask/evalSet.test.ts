@@ -93,8 +93,8 @@ describe("the tool test set", () => {
     }
   });
 
-  // c3b1b turns this on when it adds the card items (TOOLS 3.4's four / four / two).
-  it.skip("meets the full mix: 20 a language, 60 in en / es / de, four actions / four answers / two ask or refuse in ten", () => {
+  // On since c3b1b added the card items (TOOLS 3.4's four / four / two).
+  it("meets the full mix: 20 a language, 60 in en / es / de, four actions / four answers / two ask or refuse in ten", () => {
     let total = 0;
     for (const [lng, { items }] of SETS) {
       const n = kindsOf(items);

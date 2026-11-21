@@ -648,6 +648,14 @@
       "spero di migliorare prima dell'estate",
       "sono troppo distrutto per suonare"
     ],
+    "none_unmeasured": [
+      "il mio vibrato era buono?",
+      "il bending è arrivato alla nota giusta?",
+      "ho suonato abbastanza forte o no?",
+      "le mie dinamiche erano a posto?",
+      "i miei slide sono puliti?",
+      "il vibrato suona bene nell'ultima take?"
+    ],
     "card_where_slipped": [
       "dove ho perso il filo nella mia ultima take?",
       "in che punto mi sono sbagliato?",
@@ -659,8 +667,26 @@
       "ero in anticipo o in ritardo in questa take?",
       "corro o trascino?",
       "suonavo troppo presto o troppo tardi?",
+      "da che parte pendevo nella mia ultima take?",
+      "il mio tempo pendeva da che lato?",
+      "tendo a stare davanti o dietro al click?",
+      "dimmi se ero più in anticipo o in ritardo"
+    ],
+    "card_rushing": [
       "accelero durante la take o no?",
-      "sono in ritardo sul tempo?"
+      "ho corso nell'ultima take?",
+      "ero davanti al tempo lì?",
+      "corro sul click, vero?",
+      "ho accelerato durante la take?",
+      "ero in anticipo sul tempo?"
+    ],
+    "card_dragging": [
+      "sono in ritardo sul tempo?",
+      "ho trascinato in questa take?",
+      "ero dietro al click lì?",
+      "rallento durante la take, no?",
+      "ero in ritardo su ogni battere?",
+      "trascinava nella mia ultima take?"
     ],
     "card_why_not_counted": [
       "perché questa take non è stata contata?",
@@ -668,6 +694,14 @@
       "la mia take non è passata, perché",
       "cos'è che ha fatto non contare questa take?",
       "perché non è stata convalidata per favore?"
+    ],
+    "card_metric_graded": [
+      "l'app controlla {metric}?",
+      "{metric}, lo valuta l'app o no?",
+      "perché non ha contato niente per {metric}?",
+      "{metric} fa parte del punteggio?",
+      "conta qualcosa {metric} qui?",
+      "per {metric}, c'è una valutazione in questa take?"
     ],
     "card_what_changed": [
       "cosa è cambiato rispetto alla take di prima?",
@@ -721,6 +755,17 @@
     "registrare una cover di cui sono fiero"
   ],
   "vocab": {
+    "metric": {
+      "pitch": ["le note giuste", "l'intonazione delle note"],
+      "pickDirection": ["la direzione del plettro", "la plettrata alternata"],
+      "muting": ["lo smorzamento delle corde", "il controllo dei rumori"],
+      "posture": ["la postura", "come tengo la chitarra"],
+      "tension": ["la tensione nelle mani", "la tensione sulle spalle"],
+      "handAttribution": ["quale mano ha sbagliato"],
+      "fingering": ["la diteggiatura", "le dita che uso"],
+      "tone": ["il suono", "la qualità del suono"],
+      "feel": ["il feeling", "il groove"]
+    },
     "screen": {
       "paths": ["percorsi"]
     },

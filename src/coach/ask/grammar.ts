@@ -173,6 +173,29 @@ function toolRule(tool: ToolSpec, rules: Rules): string {
 }
 
 /**
+ * The cards (leg c3b1b): each card with its own arguments, typed as a tool's
+ * are (`argsBody`), and `"args"` left out entirely when it gives none. A card
+ * that declares no `args` gets the generic bounded argument (two at most).
+ */
+function cardsRule(cards: readonly EvalCard[], rules: Rules): string {
+  const one = (card: EvalCard): string => {
+    const head = `${jsonString("card")} ws ":" ws ${jsonString(card.id)}`;
+    if (card.args === undefined) {
+      const cardArg = rules.add("card-arg", `"\\"" [a-z] [a-zA-Z]{0,15} "\\"" ws ":" ws ( "\\"" qc{1,${CARD_ARG_CHARS}} "\\"" | int3 )`);
+      rules.add("int3", "( [1-9] [0-9]{0,2} )");
+      return rules.add(
+        `c-${ruleName(card.id)}`,
+        `${head} ( "," ws ${jsonString("args")} ws ":" ws "{" ws ( ${cardArg} ( "," ws ${cardArg} ){0,${CARD_ARGS_MAX - 1}} )? ws "}" )?`,
+      );
+    }
+    const body = argsBody(card.args, `card-${card.id}`, rules);
+    const args = `"," ws ${jsonString("args")} ws ":" ws "{" ws ${body ? `${body} ws ` : ""}"}"`;
+    return rules.add(`c-${ruleName(card.id)}`, `${head} ( ${args} )?`);
+  };
+  return rules.add("card", cards.map(one).join(" | "));
+}
+
+/**
  * The grammar for one choice. `situation` narrows the tools to those that can
  * run where the player is (`possible`, from `commandFacts`); left out, every
  * player tool is allowed. The cards and the three answers are always there.
@@ -182,16 +205,7 @@ export function choiceGrammar(catalogue: ToolCatalogue, cards: readonly EvalCard
   const tools = catalogue.tools.filter((t) => t.audience === "player" && (situation === undefined || situation.possible[t.name] === true));
   const kinds: string[] = [];
   if (tools.length > 0) kinds.push(rules.add("call", tools.map((t) => toolRule(t, rules)).join(" | ")));
-  if (cards.length > 0) {
-    const cardArg = rules.add("card-arg", `"\\"" [a-z] [a-zA-Z]{0,15} "\\"" ws ":" ws ( "\\"" qc{1,${CARD_ARG_CHARS}} "\\"" | int3 )`);
-    rules.add("int3", "( [1-9] [0-9]{0,2} )");
-    kinds.push(
-      rules.add(
-        "card",
-        `${jsonString("card")} ws ":" ws ( ${cards.map((c) => jsonString(c.id)).join(" | ")} ) ( "," ws ${jsonString("args")} ws ":" ws "{" ws ( ${cardArg} ( "," ws ${cardArg} ){0,${CARD_ARGS_MAX - 1}} )? ws "}" )?`,
-      ),
-    );
-  }
+  if (cards.length > 0) kinds.push(cardsRule(cards, rules));
   kinds.push(rules.add("answer", `${jsonString("answer")} ws ":" ws ( ${CHOICE_ANSWERS.map(jsonString).join(" | ")} )`));
   const head = `root ::= "{" ws ( ${kinds.join(" | ")} ) ws "}"\n`;
   rules.add("qc", '[^"\\\\\\x00-\\x1f]');
