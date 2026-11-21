@@ -30,7 +30,7 @@ const SHIFT = "Start each change on the last eighth.";
 const LAST_EVEN = "Keep the eighths even right to the last note.";
 const KEEP_LOOP = "Keep the shape down as the loop starts again.";
 const D_FIRST = "Start each chord on the D string.";
-const FIND_FIRST = "Find every shape of the key before you start.";
+const FIND_FIRST = "Say each chord's number before you play it.";
 // Shapes, named where the Exercise has one version.
 const BDIM = "Fourth finger on fret nine for B diminished.";
 const DROP_BACK = "Play the last C through, then drop to fret five.";
@@ -49,7 +49,9 @@ const LAST_TWO_C = "Stay on C for the last two bars.";
 const LAST_TWO_F = "Stay on F for the last two bars.";
 const LAST_TWO_ONE = "Stay on one for the last two bars.";
 const LOOP_ONE = "Land back on one right on '1'.";
-const SAY_PATTERN = "Say the pattern: major, minor, minor, major.";
+const SAY_PATTERN = "Say major, minor or diminished for each chord.";
+const SAY_1451 = "Say one, four, five, one as each chord starts.";
+const SAY_1645 = "Say one, six, four, five as each chord starts.";
 const SAY_1625 = "Say one, six, two, five as each chord starts.";
 const SAY_1564 = "Say one, five, six, four as each chord starts.";
 const AM_LAST = "Keep A minor's barre down to the last note.";
@@ -67,7 +69,7 @@ const G7_ACROSS = "Lay finger one across fret seven for G.";
 const G7_DOWN = "Move finger one down to fret seven for G.";
 const F4_B = "Put the fourth finger on the B string for F.";
 const VERSE_CHORUS = "Play the verse low, the chorus a shape higher.";
-const SECTIONS = "Count four-bar sections; climb for the bridge.";
+const SECTIONS = "Count four-bar sections all the way round.";
 const A_FIRST = "Start each chord on the A string.";
 const SKIP_A = "Skip the A string after a low E string root.";
 
@@ -106,7 +108,7 @@ export const CHORDS_IN_A_KEY_CUES: CueBook = {
     c("extras", EXTRAS),
     c("late", LATE),
     c("early", EARLY),
-    c("shift", "Lead each move up with the root on the D string."),
+    c("shift", "Move to the next root before '1'."),
     c("stringChange", CROSS),
     c("lastBars", DROP_BACK),
   ],
@@ -122,7 +124,7 @@ export const CHORDS_IN_A_KEY_CUES: CueBook = {
     c("lastBars", DROP_BACK),
   ],
   "seven-chords.majors-and-minors": [
-    g("Stay near fret five; only the fingers change."),
+    g("Stay near fret five as the chords change."),
     c("notes", AM_BARRE, 2),
     c("heard", HEARD),
     c("extras", EXTRAS),
@@ -135,7 +137,7 @@ export const CHORDS_IN_A_KEY_CUES: CueBook = {
 
   // Level 1, Step 2: numbers
   "numbers.one-four-five-middle": [
-    g("Say one, four, five, one as each chord starts.", 2),
+    g(SAY_1451, 2),
     c("notes", C_MID_BARRE, 1),
     c("heard", HEARD),
     c("extras", EXTRAS),
@@ -250,7 +252,7 @@ export const CHORDS_IN_A_KEY_CUES: CueBook = {
 
   // Level 1, Step 5: coming home
   "coming-home.one-six-four-five": [
-    g("Say one, six, four, five as each chord starts.", 3),
+    g(SAY_1645, 3),
     c("notes", AM_F, 2),
     c("heard", HEARD),
     c("extras", EXTRAS),
@@ -272,7 +274,7 @@ export const CHORDS_IN_A_KEY_CUES: CueBook = {
     c("lastBars", KEEP_LOOP),
   ],
   "coming-home.one-six-two-five-home": [
-    g("Play D minor where F was: one, six, two, five.", 3),
+    g(SAY_1625, 3),
     c("notes", DM_G7),
     c("heard", HEARD),
     c("extras", EXTRAS),
@@ -286,13 +288,13 @@ export const CHORDS_IN_A_KEY_CUES: CueBook = {
 
   // Level 1, Step 6: the numbers in F
   "numbers-in-f.one-four-five-f": [
-    g("Say one, four, five, one: F is home now.", 3),
+    g(SAY_1451, 3),
     c("notes", BB_BARRE, 2),
     c("heard", HEARD),
     c("extras", EXTRAS),
     c("late", LATE),
     c("early", EARLY),
-    c("shift", "Move finger one up to fret six for B flat.", 2),
+    c("shift", "Put finger two on the G string, fret seven.", 2),
     c("stringChange", CROSS),
     c("lastBars", KEEP_LOOP),
   ],
@@ -308,7 +310,7 @@ export const CHORDS_IN_A_KEY_CUES: CueBook = {
     c("lastBars", LAST_TWO_F),
   ],
   "numbers-in-f.one-six-four-five-f": [
-    g("Say one, six, four, five, and stop on C.", 4),
+    g(SAY_1645, 4),
     c("notes", DM_ADD3, 2),
     c("heard", HEARD),
     c("extras", EXTRAS),
@@ -370,7 +372,7 @@ export const CHORDS_IN_A_KEY_CUES: CueBook = {
   ),
   "two-places.low-then-high": arp(
     g("Play the turn low, then a shape higher."),
-    DM_TEN,
+    "Lay finger one across fret ten for high D minor.",
     "Move up to fret eight for the second C.",
     "From G, drop back to the low C on '1'.",
   ),
@@ -384,7 +386,7 @@ export const CHORDS_IN_A_KEY_CUES: CueBook = {
     "Play the last D chord, then drop to fret seven.",
   ),
   "other-keys.one-six-two-five-keys": arp(g(SAY_1625), FIND_FIRST, SHIFT, LOOP_ONE),
-  "other-keys.two-five-one-keys": arp(g("Let five fall into one, then hold one two bars."), FIND_FIRST, SHIFT, LAST_TWO_ONE),
+  "other-keys.two-five-one-keys": arp(g("Let five fall into one, then hold one two bars."), FIND_FIRST, SHIFT, "After one, go straight into two on '1'."),
 
   // Level 2, Step 10: the key of G
   "key-of-g.seven-in-g": arp(
@@ -423,8 +425,8 @@ export const CHORDS_IN_A_KEY_CUES: CueBook = {
   "four-chord-songs.one-five-six-four-keys": arp(g(SAY_1564), FIND_FIRST, SHIFT, LOOP_ONE),
 
   // Level 2, Step 13: the minor key
-  "minor-key.minor-one-four-five": arp(g("Say one, four, five, one: A minor is home."), DM_G7, EM_B5, AM_LAST),
-  "minor-key.minor-six-seven": arp(g("Say one, six, seven, one: A minor is home."), AM_F, G_FLAT, AM_LAST),
+  "minor-key.minor-one-four-five": arp(g(SAY_1451), DM_G7, "Move finger one down to fret three for E minor.", AM_LAST),
+  "minor-key.minor-six-seven": arp(g("Say one, six, seven, one as each chord starts."), AM_F, G_FLAT, AM_LAST),
   "minor-key.down-to-e": arp(
     g("Keep one shape and walk it down: G, F, E.", 2),
     E_FOUR,
@@ -443,7 +445,7 @@ export const CHORDS_IN_A_KEY_CUES: CueBook = {
   ),
   "minor-key-e.two-homes": arp(
     g("Hear G as home, then E minor as home.", 3),
-    D_TWO,
+    "For the first D, lay finger one across fret two.",
     "Move up to fret nine for the second E minor.",
     D_TO_G,
   ),
@@ -468,7 +470,7 @@ export const CHORDS_IN_A_KEY_CUES: CueBook = {
 
   // Level 3, Step 17: sixteen bars with a bridge
   "sixteen-bars.bridge": arp(
-    g("Walk the root down the G string, chord by chord.", 2),
+    g("Walk the root down the G string, three chords.", 2),
     "Keep the E minor shape for D minor, just lower.",
     G7_ACROSS,
     "From G, climb to fret ten for F on '1'.",
@@ -484,7 +486,7 @@ export const CHORDS_IN_A_KEY_CUES: CueBook = {
 
   // Level 3, Step 18: chords from outside the key
   "borrowed.flat-seven": arp(
-    g("Slide the C shape down to fret one for B flat.", 1),
+    g("Slide the whole C shape down for B flat.", 1),
     "Lay finger one across fret one for F.",
     SHIFT,
     KEEP_LOOP,
@@ -529,7 +531,7 @@ export const CHORDS_IN_A_KEY_CUES: CueBook = {
     g("Spell the scale with the roots as you climb.", 3),
     "Put the roots on the low E string from G seven.",
     "Drop to fret three, low E string, for G seven.",
-    "From the last C major seven, drop to fret three.",
+    "Back to the A string, fret three, for C.",
     "Skip the A string from G seven on.",
   ),
 
@@ -538,7 +540,7 @@ export const CHORDS_IN_A_KEY_CUES: CueBook = {
     g("Hear the B string's note fall, then rise."),
     "Put the low E string at fret three for G seven.",
     SHIFT,
-    "Stay on C major seven for the last two bars.",
+    "Hold C major seven, then D minor seven on '1'.",
     SKIP_A,
   ),
   "sevenths-in-songs.one-six-two-five-sevenths": arp(

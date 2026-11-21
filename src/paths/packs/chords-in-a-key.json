@@ -60,7 +60,7 @@
             {"when":"extras","say":"Pick one string on each eighth, no more."},
             {"when":"late","say":"Have the next shape ready before '1'."},
             {"when":"early","say":"Wait for '1' before the new chord's first note."},
-            {"when":"shift","say":"Lead each move up with the root on the D string."},
+            {"when":"shift","say":"Move to the next root before '1'."},
             {"when":"stringChange","say":"Keep the pick close as it crosses strings."},
             {"when":"lastBars","say":"Play the last C through, then drop to fret five."}
           ],
@@ -200,7 +200,7 @@
           ],
           "coachLine": "Eight bars with the band. Right notes and time after the take.",
           "cues": [
-            {"when":"even","say":"Say the pattern: major, minor, minor, major.","more":3,"general":true},
+            {"when":"even","say":"Say major, minor or diminished for each chord.","more":3,"general":true},
             {"when":"notes","say":"Fourth finger on fret nine for B diminished."},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
@@ -377,7 +377,7 @@
           ],
           "coachLine": "Band on. Right notes and time after the take.",
           "cues": [
-            {"when":"even","say":"Stay near fret five; only the fingers change.","general":true},
+            {"when":"even","say":"Stay near fret five as the chords change.","general":true},
             {"when":"notes","say":"Lay one finger across fret five for A minor.","more":2},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
@@ -893,7 +893,7 @@
           "coachLine": "A key that changes from day to day. Right notes and time after the take.",
           "cues": [
             {"when":"even","say":"Count two bars of one, two of four, then five.","general":true},
-            {"when":"notes","say":"Find every shape of the key before you start."},
+            {"when":"notes","say":"Say each chord's number before you play it."},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
             {"when":"late","say":"Have the next shape ready before '1'."},
@@ -2844,7 +2844,7 @@
           ],
           "coachLine": "Eight bars with the band. Right notes and time after the take.",
           "cues": [
-            {"when":"even","say":"Play D minor where F was: one, six, two, five.","more":3,"general":true},
+            {"when":"even","say":"Say one, six, two, five as each chord starts.","more":3,"general":true},
             {"when":"notes","say":"For D minor, put the G string at fret seven."},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
@@ -3147,13 +3147,13 @@
           ],
           "coachLine": "Band on. Right notes and time after the take.",
           "cues": [
-            {"when":"even","say":"Say one, four, five, one: F is home now.","more":3,"general":true},
+            {"when":"even","say":"Say one, four, five, one as each chord starts.","more":3,"general":true},
             {"when":"notes","say":"Lay finger one across fret six for B flat.","more":2},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
             {"when":"late","say":"Have the next shape ready before '1'."},
             {"when":"early","say":"Wait for '1' before the new chord's first note."},
-            {"when":"shift","say":"Move finger one up to fret six for B flat.","more":2},
+            {"when":"shift","say":"Put finger two on the G string, fret seven.","more":2},
             {"when":"stringChange","say":"Keep the pick close as it crosses strings."},
             {"when":"lastBars","say":"Keep the shape down as the loop starts again."}
           ],
@@ -3472,7 +3472,7 @@
           ],
           "coachLine": "Band on. Right notes and time after the take.",
           "cues": [
-            {"when":"even","say":"Say one, six, four, five, and stop on C.","more":4,"general":true},
+            {"when":"even","say":"Say one, six, four, five as each chord starts.","more":4,"general":true},
             {"when":"notes","say":"For D minor, add finger three at fret seven.","more":2},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
@@ -4408,7 +4408,7 @@
           "coachLine": "Eight bars with the band. Right notes and time after the take.",
           "cues": [
             {"when":"even","say":"Play the turn low, then a shape higher.","general":true},
-            {"when":"notes","say":"Lay finger one across fret ten for D minor."},
+            {"when":"notes","say":"Lay finger one across fret ten for high D minor."},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
             {"when":"late","say":"Have the next shape ready before '1'."},
@@ -4713,7 +4713,7 @@
           ],
           "coachLine": "Eight bars with the band. Right notes and time after the take.",
           "cues": [
-            {"when":"even","say":"Say the pattern: major, minor, minor, major.","general":true},
+            {"when":"even","say":"Say major, minor or diminished for each chord.","general":true},
             {"when":"notes","say":"For C sharp diminished, reach with finger four."},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
@@ -4890,7 +4890,7 @@
           "coachLine": "A key that changes from day to day. Right notes and time after the take.",
           "cues": [
             {"when":"even","say":"Say one, six, two, five as each chord starts.","general":true},
-            {"when":"notes","say":"Find every shape of the key before you start."},
+            {"when":"notes","say":"Say each chord's number before you play it."},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
             {"when":"late","say":"Have the next shape ready before '1'."},
@@ -5253,14 +5253,14 @@
           "coachLine": "A key that changes from day to day. Right notes and time after the take.",
           "cues": [
             {"when":"even","say":"Let five fall into one, then hold one two bars.","general":true},
-            {"when":"notes","say":"Find every shape of the key before you start."},
+            {"when":"notes","say":"Say each chord's number before you play it."},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
             {"when":"late","say":"Have the next shape ready before '1'."},
             {"when":"early","say":"Wait for '1' before the new chord's first note."},
             {"when":"shift","say":"Start each change on the last eighth."},
             {"when":"stringChange","say":"Keep the pick close as it crosses strings."},
-            {"when":"lastBars","say":"Stay on one for the last two bars."}
+            {"when":"lastBars","say":"After one, go straight into two on '1'."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -5634,7 +5634,7 @@
           ],
           "coachLine": "Eight bars with the band. Right notes and time after the take.",
           "cues": [
-            {"when":"even","say":"Say the pattern: major, minor, minor, major.","more":3,"general":true},
+            {"when":"even","say":"Say major, minor or diminished for each chord.","more":3,"general":true},
             {"when":"notes","say":"For F sharp diminished, reach with finger four."},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
@@ -6150,7 +6150,7 @@
           ],
           "coachLine": "Eight bars with the band. Right notes and time after the take.",
           "cues": [
-            {"when":"even","say":"Say the pattern: major, minor, minor, major.","more":3,"general":true},
+            {"when":"even","say":"Say major, minor or diminished for each chord.","more":3,"general":true},
             {"when":"notes","say":"For G sharp diminished, reach with finger four."},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
@@ -7099,7 +7099,7 @@
           "coachLine": "A key that changes from day to day. Right notes and time after the take.",
           "cues": [
             {"when":"even","say":"Say one, five, six, four as each chord starts.","general":true},
-            {"when":"notes","say":"Find every shape of the key before you start."},
+            {"when":"notes","say":"Say each chord's number before you play it."},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
             {"when":"late","say":"Have the next shape ready before '1'."},
@@ -7478,13 +7478,13 @@
           ],
           "coachLine": "Band on. Right notes and time after the take.",
           "cues": [
-            {"when":"even","say":"Say one, four, five, one: A minor is home.","general":true},
+            {"when":"even","say":"Say one, four, five, one as each chord starts.","general":true},
             {"when":"notes","say":"For D minor, put the G string at fret seven."},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
             {"when":"late","say":"Have the next shape ready before '1'."},
             {"when":"early","say":"Wait for '1' before the new chord's first note."},
-            {"when":"shift","say":"Put finger three on the B string, fret five."},
+            {"when":"shift","say":"Move finger one down to fret three for E minor."},
             {"when":"stringChange","say":"Keep the pick close as it crosses strings."},
             {"when":"lastBars","say":"Keep A minor's barre down to the last note."}
           ],
@@ -7622,7 +7622,7 @@
           ],
           "coachLine": "Band on. Right notes and time after the take.",
           "cues": [
-            {"when":"even","say":"Say one, six, seven, one: A minor is home.","general":true},
+            {"when":"even","say":"Say one, six, seven, one as each chord starts.","general":true},
             {"when":"notes","say":"Keep finger one across fret five, A minor to F."},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
@@ -8365,7 +8365,7 @@
           "coachLine": "Eight bars with the band. Right notes and time after the take.",
           "cues": [
             {"when":"even","say":"Hear G as home, then E minor as home.","more":3,"general":true},
-            {"when":"notes","say":"Lay finger one across fret two for D."},
+            {"when":"notes","say":"For the first D, lay finger one across fret two."},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
             {"when":"late","say":"Have the next shape ready before '1'."},
@@ -8974,7 +8974,7 @@
           "coachLine": "A key that changes from day to day. Right notes and time after the take.",
           "cues": [
             {"when":"even","say":"Count four bars of one, then two of four.","general":true},
-            {"when":"notes","say":"Find every shape of the key before you start."},
+            {"when":"notes","say":"Say each chord's number before you play it."},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
             {"when":"late","say":"Have the next shape ready before '1'."},
@@ -9789,7 +9789,7 @@
           "coachLine": "A key that changes from day to day. Right notes and time after the take.",
           "cues": [
             {"when":"even","say":"Play the verse low, the chorus a shape higher.","general":true},
-            {"when":"notes","say":"Find every shape of the key before you start."},
+            {"when":"notes","say":"Say each chord's number before you play it."},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
             {"when":"late","say":"Have the next shape ready before '1'."},
@@ -10446,7 +10446,7 @@
           ],
           "coachLine": "Band on. Right notes and time after the take.",
           "cues": [
-            {"when":"even","say":"Walk the root down the G string, chord by chord.","more":2,"general":true},
+            {"when":"even","say":"Walk the root down the G string, three chords.","more":2,"general":true},
             {"when":"notes","say":"Keep the E minor shape for D minor, just lower."},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
@@ -10591,7 +10591,7 @@
           ],
           "coachLine": "Sixteen bars with the band. Right notes and time after the take.",
           "cues": [
-            {"when":"even","say":"Count four-bar sections; climb for the bridge.","more":1,"general":true},
+            {"when":"even","say":"Count four-bar sections all the way round.","more":1,"general":true},
             {"when":"notes","say":"Find G at fret seven only for the bridge."},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
@@ -10831,8 +10831,8 @@
           ],
           "coachLine": "A key that changes from day to day. Right notes and time after the take.",
           "cues": [
-            {"when":"even","say":"Count four-bar sections; climb for the bridge.","general":true},
-            {"when":"notes","say":"Find every shape of the key before you start."},
+            {"when":"even","say":"Count four-bar sections all the way round.","general":true},
+            {"when":"notes","say":"Say each chord's number before you play it."},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
             {"when":"late","say":"Have the next shape ready before '1'."},
@@ -11861,7 +11861,7 @@
           ],
           "coachLine": "Band on. Right notes and time after the take.",
           "cues": [
-            {"when":"even","say":"Slide the C shape down to fret one for B flat.","more":1,"general":true},
+            {"when":"even","say":"Slide the whole C shape down for B flat.","more":1,"general":true},
             {"when":"notes","say":"Lay finger one across fret one for F."},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
@@ -12861,7 +12861,7 @@
             {"when":"early","say":"Wait for '1' before the new chord's first note."},
             {"when":"shift","say":"Drop to fret three, low E string, for G seven."},
             {"when":"stringChange","say":"Skip the A string from G seven on."},
-            {"when":"lastBars","say":"From the last C major seven, drop to fret three."}
+            {"when":"lastBars","say":"Back to the A string, fret three, for C."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -13056,7 +13056,7 @@
             {"when":"early","say":"Wait for '1' before the new chord's first note."},
             {"when":"shift","say":"Start each change on the last eighth."},
             {"when":"stringChange","say":"Skip the A string after a low E string root."},
-            {"when":"lastBars","say":"Stay on C major seven for the last two bars."}
+            {"when":"lastBars","say":"Hold C major seven, then D minor seven on '1'."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -13338,7 +13338,7 @@
           "coachLine": "A key that changes from day to day. Right notes and time after the take.",
           "cues": [
             {"when":"even","say":"Say one, six, two, five as each chord starts.","general":true},
-            {"when":"notes","say":"Find every shape of the key before you start."},
+            {"when":"notes","say":"Say each chord's number before you play it."},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"extras","say":"Pick one string on each eighth, no more."},
             {"when":"late","say":"Have the next shape ready before '1'."},
@@ -15473,7 +15473,7 @@
           ],
           "coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
           "cues": [
-            {"when":"even","say":"Say the pattern: major, minor, minor, major.","more":0,"general":true},
+            {"when":"even","say":"Say major, minor or diminished for each chord.","more":0,"general":true},
             {"when":"heard","say":"Press the whole shape down before you pick."},
             {"when":"late","say":"Have the next shape ready before '1'."},
             {"when":"early","say":"Wait for '1' before the new chord's first note."},
