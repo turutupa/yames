@@ -22,7 +22,7 @@ import type { Line } from "../../session/coachWords";
 import { displayValue, metricKey, reasonLine } from "../../session/coachWords";
 import { readyHonestLineKey } from "../../session/caveats";
 import type { PlanStep } from "../../session/planner";
-import { cleanTempoOf, heardItOf, takesOf, upstrokeOf } from "../../session/progress";
+import { heardItOf, lastRaisedOutcome, shownCleanTempoOf, takesOf, upstrokeOf } from "../../session/progress";
 import { parkedUntil, reviewStateOf } from "../../session/rotation";
 import { currentStep } from "../../session/runner";
 import type { BigAction, TakeOutcome } from "../../session/runner";
@@ -529,9 +529,8 @@ export function recapLineText(t: T, session: SessionRun, now: number): string | 
   const path = pathId ? session.paths.find((p) => p.id === pathId) : undefined;
   const exercise = path?.steps.flatMap((s) => s.exercises).find((e) => e.id === last.exerciseId);
   const mine = outcomes.filter((o) => o.exerciseId === last.exerciseId);
-  const raised = [...mine]
-    .reverse()
-    .find((o) => o.grade.cleanBpm !== null && (o.cleanBefore === null || o.grade.cleanBpm > o.cleanBefore));
+  // "Rose" against the "before" read now (nf1c L2), not the one frozen at settle.
+  const raised = lastRaisedOutcome(session.progress, outcomes, mine);
   const passed = [...mine].reverse().find((o) => o.grade.verdict === "passed");
   const title = last.title;
   // A clean tempo that rose is the recap's own headline: not said twice.
@@ -539,7 +538,7 @@ export function recapLineText(t: T, session: SessionRun, now: number): string | 
   if (raised && raised.grade.cleanBpm !== null) moved = null;
   else if (passed) moved = t("session.note.recap.passed", { bpm: passed.bpm });
   else if (last.ungraded === undefined) {
-    const clean = pathId ? cleanTempoOf(session.progress, pathId, last.exerciseId) : null;
+    const clean = pathId ? shownCleanTempoOf(session.progress, pathId, last.exerciseId) : null;
     moved = clean !== null ? t("session.note.recap.held", { bpm: clean }) : t("session.note.recap.played", { bpm: last.bpm });
   }
   let back = t("session.note.recap.backNext", { title });

@@ -81,7 +81,11 @@ export type TakeOutcome = {
   grade: TakeGrade;
   /** The same number on the last Take heard, to show it move. Null: first. */
   previousValue: number | null;
-  /** The clean tempo before this Take. */
+  /**
+   * The clean tempo before this Take, as the app shows it (`shownCleanTempoOf`:
+   * a Take marked not fair left out). What it quotes as "before", not what
+   * decided whether this Take raised the stored ceiling.
+   */
   cleanBefore: number | null;
   /** The stored row's id, so an answer to "was this fair?" can be kept on it. */
   takeId?: string;
