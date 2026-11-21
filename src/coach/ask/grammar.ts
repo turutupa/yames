@@ -100,28 +100,64 @@ function valueRule(type: ArgType, tool: string, field: string, rules: Rules): st
 }
 
 /**
- * The arguments object's body: each field in the order the tool declares it,
- * the required ones always, the optional ones as groups. A comma goes before
- * every field but the first one present, which is why the "nothing yet"
- * branch is spelled out (at most quadratic in the number of fields).
+ * Optional arguments the runner takes exactly one of (leg c3bp): the grammar
+ * writes each group as one required slot, its members alternatives, so a call
+ * with both or with neither cannot be written. Only where the tool's own
+ * `propose` refuses both and neither (`set_tempo`: "needs `bpm` or
+ * `direction`, not both"); `grammar.test.ts` holds the runner to it, so the
+ * grammar never refuses a call the runner would take.
+ */
+export const ONE_OF: Readonly<Record<string, readonly (readonly string[])[]>> = {
+  set_tempo: [["bpm", "direction"]],
+};
+
+/** A place in the arguments object: one field, or a ONE_OF group (required, one of its members). */
+type Slot = { optional: boolean; fields: readonly ArgField[] };
+
+function slotsOf(fields: readonly ArgField[], tool: string): Slot[] {
+  const groups = ONE_OF[tool] ?? [];
+  const slots: Slot[] = [];
+  const placed = new Set<string>();
+  for (const f of fields) {
+    if (placed.has(f.name)) continue;
+    const group = groups.find((g) => g.includes(f.name));
+    if (!group) {
+      slots.push({ optional: f.optional === true, fields: [f] });
+      continue;
+    }
+    const members = group.map((name) => fields.find((x) => x.name === name));
+    if (members.some((m) => m === undefined || m.optional !== true)) throw new Error(`grammar: ONE_OF ${tool} names a field that is missing or required`);
+    for (const m of members) placed.add(m!.name);
+    slots.push({ optional: false, fields: members as ArgField[] });
+  }
+  return slots;
+}
+
+/**
+ * The arguments object's body: each slot in the order the tool declares its
+ * fields, the required ones always, the optional ones as groups. A comma goes
+ * before every slot but the first one present, which is why the "nothing yet"
+ * branch is spelled out (at most quadratic in the number of slots).
  */
 function argsBody(fields: readonly ArgField[], tool: string, rules: Rules): string {
-  const item = (f: ArgField) => `${jsonString(f.name)} ws ":" ws ${valueRule(f.type, tool, f.name, rules)}`;
+  const slots = slotsOf(fields, tool);
+  const field = (f: ArgField) => `${jsonString(f.name)} ws ":" ws ${valueRule(f.type, tool, f.name, rules)}`;
+  const item = (s: Slot) => (s.fields.length === 1 ? field(s.fields[0]) : `( ${s.fields.map(field).join(" | ")} )`);
   const after = (i: number): string => {
-    // Something is written already: every later field comes with its comma.
+    // Something is written already: every later slot comes with its comma.
     const parts: string[] = [];
-    for (let k = i; k < fields.length; k++) {
-      const f = fields[k];
-      parts.push(f.optional ? `( "," ws ${item(f)} )?` : `"," ws ${item(f)}`);
+    for (let k = i; k < slots.length; k++) {
+      const s = slots[k];
+      parts.push(s.optional ? `( "," ws ${item(s)} )?` : `"," ws ${item(s)}`);
     }
     return parts.join(" ");
   };
   const first = (i: number): string => {
-    // Nothing written yet: the first field present has no comma.
-    if (i >= fields.length) return "";
-    const f = fields[i];
-    const here = [item(f), after(i + 1)].filter(Boolean).join(" ");
-    if (!f.optional) return here;
+    // Nothing written yet: the first slot present has no comma.
+    if (i >= slots.length) return "";
+    const s = slots[i];
+    const here = [item(s), after(i + 1)].filter(Boolean).join(" ");
+    if (!s.optional) return here;
     const rest = first(i + 1);
     return rest === "" ? `( ${here} )?` : `( ${here} | ${rest} )`;
   };
