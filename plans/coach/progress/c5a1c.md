@@ -21,6 +21,15 @@ Branch `coach-c5a1` (worktree `/home/dgx-delgado/yames-coach-c5a1`). Work list: 
   Hiding it needs the raw instrument on `CoachToolHost` (`host.instrument()` maps everything to guitar or bass), a
   change to the host interface for a harmless case. Left.
 
-## Gates
+## Merge
 
-(filled in as they run)
+`git merge coach` (c4b3, c2b2b, t2f, t2d, tc2): clean, auto-merged `intents.ts` and `resolve.ts`. The generated
+grammar / schema files were not touched by either side's conflict (`choice-grammar.gbnf` comes from `coach` only;
+`spec.test.ts` checks the files equal the generator's output and passed).
+
+## Gates (after the merge; logs `job logs <name>`, test log copy `/tmp/coach-c5a1/c5a1c-test.log`)
+
+- Named vitest before the merge (`coach-c5a1c-vt1`): pass. tsc (`coach-c5a1c-tsc1`, `-tsc2`): pass. Build (`coach-c5a1c-build`): pass.
+- vitest (`coach-c5a1c-test`): 51856 passed, 10 skipped; only the known `TabStage.render.test.tsx` load failure.
+- Rust precheck (`coach-c5a1c-precheck`): 7 passed.
+- Layout jam, jam-watch, jam-coach, tool-coach, ask, ask-tools, `--workers=4` (`coach-c5a1c-layout`): 156 passed, 2 skipped, 0 failed.
