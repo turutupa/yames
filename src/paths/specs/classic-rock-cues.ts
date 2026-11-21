@@ -67,9 +67,12 @@ const HOLD_A_AGAIN = "Hold the last A two beats, then start again.";
 const LAST_A_BOTH = "Hold the last A for both beats.";
 const WELL_UNDER = "Start well under your clean tempo.";
 const NEW_BAR_MOVE = "Move the whole hand as each new bar starts.";
-const BOX_HEARD = "Pick every note, top string to bottom.";
+const BOX_HEARD = "Pick every note, up the box and back down.";
 const HELD_CLIMB = "Count the held note out, then climb again.";
-const TWO_A_STRING = "Cross after every two notes, without a gap.";
+const TWO_A_STRING = RIFF_CROSS;
+const SHIFT_ONE_GO = "Move the whole hand in one go, on the beat.";
+const SWITCH_PAIRS = "Switch string pairs with no gap between stops.";
+const PICK_THROUGH = "Keep the pick moving through both strings.";
 const DOWN_EVEN = "Come down as evenly as you went up.";
 const AFTER_LONG = "Count each long note out, then go on.";
 // Loops with a pull-off.
@@ -82,8 +85,7 @@ const STOP_HELD = "Count the held stop's two beats, then go.";
 const STOP_LAST = "Hold the last stop for its two beats.";
 const GB_ONLY = "Strike just the G and B strings each time.";
 // Embellishments inside a chord.
-const HAMMER_THIRD = "Hammer hard enough to hear the third.";
-const CHORD_HELD = "Keep the chord held while open strings ring.";
+const HAMMER_THIRD = "Hammer hard enough to hear the hammered note.";
 const ONE_FINGER_OPEN = "Lift one finger for the open string, not all.";
 const BEAT_LATE = "Put each beat's first note right on the beat.";
 const BEAT_EARLY = "Wait for each beat before its first note.";
@@ -92,7 +94,7 @@ const TONES_HEARD = "Pick every chord tone, up and back.";
 const NEW_CHORD_MOVE = "Move the hand as each new chord starts.";
 const HELD_OUT = "Count the held note out, then start again.";
 const ROOT_END = "End each bar on that chord's root.";
-const ROOT_SING = "Sing the root before each bar starts.";
+const ROOT_SING = "Aim the last eighth at the root on beat three.";
 const ROOT_HEARD = "Pick all four eighths before each root.";
 const ROOT_LATE = "Land each root right on beat three.";
 const ROOT_EARLY = "Wait for beat three before each root.";
@@ -111,28 +113,28 @@ const CALL_QUIET = "Stay silent while the call plays.";
 const CALL_LATE = "Come in right on '1' after the call.";
 const CALL_EARLY = "Wait for '1' after the call to come in.";
 const ANSWER_HEARD = "Pick every note of the answer, to the end.";
-const ANSWER_LAST = "Hold the last A its two beats, then listen.";
+const ANSWER_LAST = "Hold the last A for its two beats.";
 const SIX_HEARD = "Pick all six notes of every group.";
 const SIX_LOWER = "Start each group one box note lower.";
 const SAY_SIX = "Say 'one-two-three-four-five-six' each beat.";
 const NEXT_STRING_EARLY = "Lay finger one on the next string early.";
 const PICK_THREE = "Pick three, pull off one, every beat.";
 const FAST_HEARD = "Pick G, A and C each time; pull off for A.";
-const TO_THE_NUT = "Get to the nut while the open E's sound.";
-const INTO_BOX_TWO = "Shift with finger one, two frets, into box 2.";
-const PHRASE_FIRST = "Say each phrase's first note before it comes.";
+const TO_THE_NUT = "Move the hand while the open strings ring.";
+const INTO_BOX_TWO = "Move the whole hand as the new box starts.";
+const PHRASE_FIRST = "Set the hand for each phrase's first note.";
 const LAST_E_REST = "Hold the last E two beats, then rest two.";
 
 export const CLASSIC_ROCK_CUES: CueBook = {
   // Level 1, Step 1: riffs
   "riffs.root-riff": [
     g("Lock every eighth to the drummer's hi-hat.", 0),
-    c("notes", "One finger per fret; keep the hand still.", 2),
+    c("notes", "Keep the hand still: one finger per fret.", 2),
     c("heard", RIFF_OPENERS),
     c("extras", EXTRAS),
     c("late", RIFF_LATE),
     c("early", RIFF_EARLY),
-    c("afterHeld", QUARTER_FULL),
+    c("afterHeld", AFTER_LONG),
     c("stringChange", RIFF_CROSS),
     c("lastBars", "Land the last two quarters right on the beat."),
   ],
@@ -144,7 +146,7 @@ export const CLASSIC_ROCK_CUES: CueBook = {
     c("early", RIFF_EARLY),
     c("afterHeld", SHAPE_LONG),
     c("shift", "Keep the finger shape as the hand moves."),
-    c("stringChange", SHAPE_FLAT, 2),
+    c("stringChange", PICK_THROUGH),
     c("lastBars", LAST_FIVE),
   ],
   "riffs.pedal-riff": [
@@ -167,9 +169,9 @@ export const CLASSIC_ROCK_CUES: CueBook = {
     c("extras", EXTRAS),
     c("late", RIFF_LATE),
     c("early", RIFF_EARLY),
-    c("afterHeld", QUARTER_FULL),
+    c("afterHeld", AFTER_LONG),
     c("openString", "Have the next finger ready as the open E sounds."),
-    c("stringChange", "Cross to the A string with no gap."),
+    c("stringChange", RIFF_CROSS),
     c("lastBars", "Land G and F sharp right on the beat."),
   ],
   "riffs-in-e.e-fourths-riff": [
@@ -179,8 +181,8 @@ export const CLASSIC_ROCK_CUES: CueBook = {
     c("late", RIFF_LATE),
     c("early", RIFF_EARLY),
     c("afterHeld", SHAPE_LONG),
-    c("shift", "Move the hand up for frets 10 and 9.", 2),
-    c("stringChange", SHAPE_ONE_HIT),
+    c("shift", "Move the whole hand together between shapes.", 2),
+    c("stringChange", PICK_THROUGH),
     c("lastBars", LAST_FIVE),
   ],
   "riffs-in-e.e-pedal-riff": [
@@ -197,7 +199,7 @@ export const CLASSIC_ROCK_CUES: CueBook = {
 
   // Level 1, Step 3: the box and its extension
   "box-extension.page-descent": [
-    g("Count '1 e and a' and keep the groups even.", 1),
+    g("Count '1 e and a' on every group.", 1),
     c("notes", GROUP_TWICE, 2),
     c("heard", GROUP_HEARD),
     c("extras", EXTRAS),
@@ -236,7 +238,7 @@ export const CLASSIC_ROCK_CUES: CueBook = {
     c("late", EIGHTH_LATE),
     c("early", EIGHTH_EARLY),
     c("afterHeld", "Count the last A's beat, then climb again."),
-    c("shift", "Move up to fret 7, then back to 5 at the end.", 2),
+    c("shift", SHIFT_ONE_GO, 2),
     c("stringChange", CROSS_CLOSE),
     c("lastBars", "Land the last A on beat four, a full beat."),
   ],
@@ -272,7 +274,7 @@ export const CLASSIC_ROCK_CUES: CueBook = {
     c("late", EIGHTH_LATE),
     c("early", EIGHTH_EARLY),
     c("afterHeld", "Count the last E's beat, then climb again."),
-    c("shift", "Move up to fret 14, then back to 12 at the end.", 2),
+    c("shift", SHIFT_ONE_GO, 2),
     c("stringChange", CROSS_CLOSE),
     c("lastBars", "Land the last E on beat four, a full beat."),
   ],
@@ -281,34 +283,34 @@ export const CLASSIC_ROCK_CUES: CueBook = {
   "major-pentatonic.major-box": [
     g("Keep one finger per fret across the box.", 1),
     c("notes", "Name each A as you pass it, up and down.", 1),
-    c("heard", "Pick every note, top string to bottom."),
+    c("heard", BOX_HEARD),
     c("extras", EXTRAS),
     c("late", EIGHTH_LATE),
     c("early", EIGHTH_EARLY),
-    c("afterHeld", "Count the held note out, then climb again."),
-    c("stringChange", "Cross after every two notes, without a gap."),
+    c("afterHeld", HELD_CLIMB),
+    c("stringChange", TWO_A_STRING),
     c("lastBars", "Come down as evenly as you went up."),
   ],
   "major-pentatonic.southern-lick": [
-    g("First finger on 14, third on 16, fourth on 17.", 2),
+    g("Put finger one on fret 14 for the whole lick.", 2),
     c("notes", "Say A, F sharp, E, C sharp as you start.", 1),
-    c("heard", "Pick every note of the roll, high to low."),
+    c("heard", "Pick every note of the roll, none skipped."),
     c("extras", EXTRAS),
     c("late", EIGHTH_LATE),
     c("early", EIGHTH_EARLY),
     c("afterHeld", HOLD_A_AGAIN),
     c("stringChange", CROSS_CLOSE),
-    c("lastBars", LAST_A_BOTH),
+    c("lastBars", "Land the last A right on beat three."),
   ],
   "major-pentatonic.minor-vs-major": [
     g("Drop the hand a fret for the major bars.", 1),
-    c("notes", "Play C sharp, not C, in the major bars.", 1),
+    c("notes", "Play C sharp, not C, in the last bar.", 1),
     c("heard", "Pick every eighth in both phrases."),
     c("extras", EXTRAS),
     c("late", EIGHTH_LATE),
     c("early", EIGHTH_EARLY),
     c("afterHeld", "Count each long note out, then go on."),
-    c("shift", "Move the hand one fret as the mood changes."),
+    c("shift", SHIFT_ONE_GO),
     c("stringChange", CROSS_CLOSE),
     c("lastBars", LAST_A_BOTH),
   ],
@@ -327,7 +329,7 @@ export const CLASSIC_ROCK_CUES: CueBook = {
 
   // Level 2, Step 6: box 2
   "box-two.box-two-shape": [
-    g("First finger on fret 7, one finger per fret.", 1),
+    g("Put finger one on fret 7, one finger per fret.", 1),
     c("notes", "Say 'A' each time you play one.", 2),
     c("heard", BOX_HEARD),
     c("extras", EXTRAS),
@@ -339,7 +341,7 @@ export const CLASSIC_ROCK_CUES: CueBook = {
   ],
   "box-two.two-boxes-line": [
     g("Move up two frets on the G string into box 2.", 3),
-    c("notes", "Play fret 9 on the G string to enter box 2.", 1),
+    c("notes", "Play frets 8 and 10 on both top strings.", 1),
     c("heard", "Pick every eighth through both boxes."),
     c("extras", EXTRAS),
     c("late", EIGHTH_LATE),
@@ -392,22 +394,22 @@ export const CLASSIC_ROCK_CUES: CueBook = {
     c("extras", TOP_TWO),
     c("late", S16_LATE),
     c("early", S16_EARLY),
-    c("afterHeld", "Count the last E's beat, then start again."),
+    c("afterHeld", "Count the last note's beat, then start again."),
     c("openString", "Move along the B string while the open E rings."),
-    c("stringChange", "Keep the pick between the top two strings."),
+    c("stringChange", "Cross to the open string and back evenly."),
     c("lastBars", "Climb G, A, B, then land on E at fret 5.", 1),
   ],
 
   // Level 2, Step 8: double stops
   "double-stops.stops-and-run": [
-    g("Hit each double stop short, like a snare."),
+    g("Hit both strings of each stop together."),
     c("notes", "Say A, G, E, D, C, A, C, A down the box.", 1),
     c("heard", "Play all eight double stops of the first bar.", 1),
     c("extras", "Strike two strings for stops, one for the run."),
     c("late", EIGHTH_LATE),
     c("early", EIGHTH_EARLY),
     c("afterHeld", AFTER_LONG),
-    c("stringChange", "Go from stops to single notes with no gap."),
+    c("stringChange", "Cross strings with no gap between notes."),
     c("lastBars", "Play G, E, G, then hold the A two beats.", 1),
   ],
   "double-stops.stops-and-single": [
@@ -422,7 +424,7 @@ export const CLASSIC_ROCK_CUES: CueBook = {
     c("lastBars", "Hold the last G its two beats, then go again."),
   ],
   "double-stops.thirds-over-changes": [
-    g("Play each stop on the beat, then count the rest.", 1),
+    g("Play three stops, count the rest, then the run.", 1),
     c("notes", "Play C sharp in the first run, D in the second.", 1),
     c("heard", "Strike all three stops before each rest."),
     c("extras", "Leave each rest silent, then pick the run."),
@@ -440,11 +442,11 @@ export const CLASSIC_ROCK_CUES: CueBook = {
     c("late", RIFF_LATE),
     c("early", RIFF_EARLY),
     c("afterHeld", STOP_HELD),
-    c("stringChange", "Hold the B string at fret 12; walk the G string.", 1),
+    c("stringChange", SWITCH_PAIRS),
     c("lastBars", STOP_LAST),
   ],
   "double-stops-in-e.stops-on-a": [
-    g("Third finger flat at fret 14, first at fret 12.", 2),
+    g("Lay finger three at fret 14, one at fret 12.", 2),
     c("heard", "Strike the fret 12 stops as firmly as fret 14."),
     c("extras", GB_ONLY, 1),
     c("late", RIFF_LATE),
@@ -464,14 +466,14 @@ export const CLASSIC_ROCK_CUES: CueBook = {
     c("lastBars", STOP_LAST),
   ],
   "double-stops-in-e.stops-chorus": [
-    g("Know the next chord before each figure starts.", 1),
+    g("Say the next chord's name before it comes.", 1),
     c("heard", "Strike every stop, all twelve bars through."),
     c("extras", SHAPE_TWO_ONLY),
     c("late", RIFF_LATE),
     c("early", RIFF_EARLY),
     c("afterHeld", STOP_HELD),
     c("shift", "Move up two frets for the B bar, then back.", 2),
-    c("stringChange", SHAPE_FLAT),
+    c("stringChange", SWITCH_PAIRS),
     c("lastBars", "Hold the last G sharp and B for two beats.", 1),
   ],
 
@@ -483,13 +485,13 @@ export const CLASSIC_ROCK_CUES: CueBook = {
     c("late", EIGHTH_LATE),
     c("early", EIGHTH_EARLY),
     c("afterHeld", "Count the held G sharp out, then start again."),
-    c("openString", CHORD_HELD),
+    c("openString", ONE_FINGER_OPEN),
     c("stringChange", CROSS_CLOSE),
     c("lastBars", "Hold the last G sharp for its full beat."),
   ],
   "embellishment.hammered-thirds": [
     g("Hammer both strings to fret 9 together.", 2),
-    c("heard", "Hammer both fingers down hard, as one."),
+    c("heard", "Hammer one flat finger onto both strings."),
     c("extras", EXTRAS),
     c("late", EIGHTH_LATE),
     c("early", EIGHTH_EARLY),
@@ -504,8 +506,8 @@ export const CLASSIC_ROCK_CUES: CueBook = {
     c("late", EIGHTH_LATE),
     c("early", EIGHTH_EARLY),
     c("afterHeld", "Count the held E out, then hit the low E."),
-    c("openString", CHORD_HELD),
-    c("shift", "Barre fret 5 as the second bar starts.", 1),
+    c("openString", ONE_FINGER_OPEN),
+    c("shift", "Move the whole E shape up to fret 5.", 1),
     c("stringChange", CROSS_CLOSE),
     c("lastBars", "Hold the open high E for two beats.", 1),
   ],
@@ -535,22 +537,22 @@ export const CLASSIC_ROCK_CUES: CueBook = {
   ],
   "embellishment-in-a.fourth-and-back": [
     g("Keep the lower finger down; move the top one.", 3),
-    c("heard", "Strike every pair, the quarters and the eighths."),
+    c("heard", "Play the bass note, then every pair after it."),
     c("extras", "Strike just the two strings after the bass note."),
     c("late", BEAT_LATE),
     c("early", BEAT_EARLY),
     c("afterHeld", QUARTER_FULL),
     c("openString", ONE_FINGER_OPEN, 3),
-    c("stringChange", "Slide the third finger along the B string to D.", 4),
+    c("stringChange", "Keep the third finger on the B string for D.", 4),
     c("lastBars", "Hold the D shape through to the last pair."),
   ],
   "embellishment-in-a.a-and-d-part": [
     g("Change shape while the open bass string sounds.", 2),
-    c("heard", HAMMER_THIRD),
+    c("heard", "Play the bass note, then every pair after it."),
     c("extras", EXTRAS),
     c("late", BEAT_LATE),
     c("early", BEAT_EARLY),
-    c("afterHeld", "Count the bass note's beat, then the pair."),
+    c("afterHeld", "Count the held note out, then play on."),
     c("openString", ONE_FINGER_OPEN),
     c("stringChange", "Lead the change with the third finger.", 3),
     c("lastBars", "Hold the last pair for both beats.", 1),
@@ -607,7 +609,7 @@ export const CLASSIC_ROCK_CUES: CueBook = {
     c("lastBars", "Land the held A on beat three."),
   ],
   "chord-tones-ade.ade-roots": [
-    g("First finger on fret 4; the hand stays put.", 2),
+    g("Put finger one on fret 4; keep the hand still.", 2),
     c("notes", ROOT_SING),
     c("heard", ROOT_HEARD),
     c("extras", EXTRAS),
@@ -654,18 +656,18 @@ export const CLASSIC_ROCK_CUES: CueBook = {
   ],
   "melody.bent-melody": [
     g("Hear the target B before you bend.", 2),
-    c("heard", "Pick the notes after each bend as firmly."),
+    c("heard", "Pick the note after each bend, every time."),
     c("extras", "Pick each bend once and let it ring."),
     c("late", "Pick each bend right on its beat."),
     c("early", "Wait for the beat before each bend."),
-    c("stringChange", "Have the next finger ready as each bend ends."),
+    c("stringChange", "Have the next string's finger ready early."),
     c("lastBars", "Hold the last bend up for its two beats."),
   ],
   "melody.one-note": [g("Play the same B five ways, one per bar.")],
 
   // Level 3, Step 15: call and response
   "call-response.answer-the-lick": [
-    g("Stay silent for the call, then answer on '1'.", 0),
+    g("Let the call finish, then answer on '1'.", 0),
     c("notes", "End each answer on an A.", 1),
     c("heard", ANSWER_HEARD),
     c("extras", CALL_QUIET),
@@ -727,7 +729,7 @@ export const CLASSIC_ROCK_CUES: CueBook = {
     c("extras", EXTRAS),
     c("late", GROUP_LATE),
     c("early", GROUP_EARLY),
-    c("stringChange", NEXT_STRING_EARLY, 3),
+    c("stringChange", "Lay finger one on each higher string early.", 3),
     c("lastBars", "Land the top note on the beat and hold it."),
   ],
   "sixes-at-twelve.sixes-phrase": [
@@ -737,7 +739,7 @@ export const CLASSIC_ROCK_CUES: CueBook = {
     c("extras", EXTRAS),
     c("late", BEAT_LATE),
     c("early", BEAT_EARLY),
-    c("afterHeld", "Ready finger four for fret 15 while B is held.", 2),
+    c("afterHeld", LONG_TO_END),
     c("stringChange", CROSS_CLOSE),
     c("lastBars", "Land the low E on the beat and hold it."),
   ],
@@ -777,7 +779,7 @@ export const CLASSIC_ROCK_CUES: CueBook = {
   "climax.the-peak": [
     g("Join the three moves without a gap."),
     c("notes", "Start bar three on the low C, fret 8.", 1),
-    c("heard", FAST_HEARD),
+    c("heard", "Pick every sixteenth, right up to the top."),
     c("extras", EXTRAS),
     c("late", S16_LATE),
     c("early", S16_EARLY),
@@ -789,7 +791,7 @@ export const CLASSIC_ROCK_CUES: CueBook = {
   // Level 3, Step 18: the solo in E
   "solo-in-e.e-solo-a": [
     g("Go to the nut during bar three's open notes.", 2),
-    c("notes", "Say E, G, A, B, D, E as you climb.", 1),
+    c("notes", PHRASE_FIRST),
     c("heard", HEARD_SHORT),
     c("extras", EXTRAS),
     c("late", BEAT_LATE),
@@ -802,7 +804,7 @@ export const CLASSIC_ROCK_CUES: CueBook = {
   "solo-in-e.e-solo-b": [
     g("Play A with finger one to climb into box 2.", 2),
     c("notes", "Climb E, G, A, B, D, E, A, then back to G.", 1),
-    c("heard", PICK_THREE),
+    c("heard", "Pick every note, right through to the last."),
     c("extras", EXTRAS),
     c("late", BEAT_LATE),
     c("early", BEAT_EARLY),
@@ -822,7 +824,7 @@ export const CLASSIC_ROCK_CUES: CueBook = {
     c("openString", TO_THE_NUT),
     c("shift", INTO_BOX_TWO),
     c("stringChange", CROSS_CLOSE),
-    c("lastBars", "Hold the last E all four beats, then go round.", 1),
+    c("lastBars", "Hold the last E through all four beats.", 1),
   ],
   "solo-in-e.your-e-solo": [g("Say something, then answer it higher up.", 1)],
 
@@ -868,9 +870,9 @@ export const CLASSIC_ROCK_CUES: CueBook = {
     c("heard", GROUP_HEARD),
     c("late", GROUP_LATE),
     c("early", GROUP_EARLY),
-    c("afterHeld", "Count the held note out, then move the hand."),
+    c("afterHeld", "Count the held note out before the next group."),
     c("shift", NEW_BAR_MOVE, 0),
     c("stringChange", CROSS_CLOSE),
-    c("lastBars", "Keep the groups even right to the last note."),
+    c("lastBars", "Hold the last note for its two beats."),
   ],
 };
