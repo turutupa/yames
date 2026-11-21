@@ -32,8 +32,48 @@ Note `long-chains.chain-four` can produce `openString`.
 - [x] Step 2: Beginner and Intermediate Steps 6 to 9 and the warm-ups written; `check`: 0 errors,
   0 `cue.refused`, none of my cues rewritten for a variant (`/tmp/coach-cues13a/gc5.log`).
 - [x] Step 3: proof-read (below); `check` after the fixes: 0 errors, 0 refused (`gc6.log`).
-- [ ] Step 4: translations.
-- [ ] Step 5: gates.
+- [x] Step 4: translations: four sonnet helpers (de fr es it · nl pl pt-BR ru · tr vi ja · ko zh-CN
+  zh-TW), 115 sentences each, every file checked again by me (`check_i18n.py`, problems 0 in all
+  fourteen), merged: every overlay 1109 of 1109 (`/tmp/coach-cues13a/merge.log`; the "different
+  numbers" warnings are beat numbers written as digits, which the brief allows). My fixes before the
+  merge: G sharp written "G#" in every language, as all the overlays write it (the helpers had Gis,
+  G dièse, G-диез...); pt-BR note and chord names back to letters (A, D menor, F, G) as its overlay
+  writes them, string names kept as its overlay's (corda Sol, Ré, Lá, Si).
+- [x] Step 5: gates (below).
+
+## Gates (logs in `/tmp/coach-cues13a/`)
+
+- `npm run paths -- check` (every pack): 16 Paths ok, 0 errors; sweep-picking 0 refused
+  (`check-all.log`).
+- `npx tsc --noEmit`: clean (`tsc.log`, after the merge).
+- `npm run test`: 414 of 415 files, 30,759 of 30,759 tests passed (`vitest.log`); the one file is the
+  known worktree-only `TabStage.render.test.tsx`.
+- `npm run build`: ok (`build.log`).
+- No Rust file changed; no layout run (the orchestrator's).
+
+## Longest cue per language, and what wants a native read
+
+en 47 · de 48 · fr 48 · es 48 · it 48 · pl 48 · pt-BR 48 · ru 48 · tr 48 · vi 48 · nl 47 · ko 29 ·
+ja 26 · zh-CN 23 · zh-TW 23. Read first: ru's clipped stringChange cues on sweep-then-scale and
+lick-to-bend ("Струна B после ... пулл-оффа"); ja in plain imperative where its overlay is です/ます;
+ko 태핑 for "tap"; tr "es" for a rest (its overlay has no single word); pl and pt-BR cues trimmed to
+fit 48 (blunter); D minor in nl/pl/ru (the overlays have no D minor to copy); "roll" (ロール, lăn,
+yuvarla, roll in pl/ru/pt-BR).
+
+## Twelve cues to read
+
+- **"C major, the short reach"** (Beginner, turnaround). The three-string loop with a hammer and pull
+  at the top. general "Keep it one loop: never stop at the bottom." · late "Hammer the top note on
+  beats two and four." · early "Wait for the top note's beat before the hammer."
+- **"Two strings, a run, and a bend"** (Beginner, phrases). A rolled sweep at fret 5 into a lick and a
+  bend. general "Roll the index across fret 5, one string each." · heard "Press fret 5 as the pick
+  reaches each string." · lastBars "Land the bend's note right on beat one."
+- **"A minor with a tap on top"** (Intermediate, five-e-shape). The five-string A-shape with the top A
+  tapped. general "Pull off to fret 12 right after the tap." · heard "Tap fret 17 firmly enough to hear
+  it." · late "Put the tap right on beat three."
+- **"A minor in two places"** (Intermediate, moving-shapes). E-shape at fret 5, A-shape at fret 12, a
+  seven-fret shift. general "Use the rest to throw the hand up to fret 12." · heard "Press the first
+  note after each jump fully." · shift "Jump back down on the last note."
 
 ## The numbers
 
