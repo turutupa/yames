@@ -28,6 +28,18 @@ Spelling callers: `spellChord` in `paths/generate.ts`, `validate.ts`, `variantTe
 Changed: `plan.why`, `plan.next`, `plan.nextBpm`, `plan.nextLast` ("today's plan" → "this Session's plan"), `plan.skip`, `plan.returnDays*` ("in" → "within"), `theory.scalesIntroMajor/Minor`, `term.clean`.
 New: `plan.returnNoPassTempo`, `theory.scalesPlacedMajor`, `theory.scalesPlacedMinor`, `theory.scalesNone`, `term.holdMs`, `term.heardMark`, `term.markOther`.
 
+## Merge of `coach` and gates
+
+`git merge coach`: clean (no conflicts). With the thirteen cards in `FACT_CARDS` the cards section was 568 tokens:
+`cardLine` now drops to the id and three words of the note past `CHOICE_CARDS_TOKENS` (`cardLines`): 269 of 300,
+prefix 1361 of 1400. Grammar fixture regenerated (`UPDATE_CHOICE_GRAMMAR=1`, adds the thirteen cards); training
+data untouched, `src/coach/train` tests pass.
+
+- tsc pass (`coach-c2b2ab-tsc-3`); build pass (`coach-c2b2ab-build-2`); `npm run paths -- check` pass, no pack changed.
+- vitest (`coach-c2b2ab-test-2`): 50746 passed, 10 skipped; only the known `TabStage.render.test.tsx` load failure.
+- Rust precheck `the_generated_choice_grammar_passes_the_precheck`: ok (`coach-c2b2ab-precheck-2`).
+- Layout `ask`, `ask-tools`, `ask-cards` (`coach-c2b2ab-layout`): 41 passed.
+
 ## To translate (c2b2b)
 
 Everything in c2b2a's list, plus the strings above.
