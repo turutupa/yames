@@ -148,6 +148,9 @@ describe("buildCoachContext", () => {
       outcomes: [TAKE],
       ungraded: null,
       untimed: false,
+      // The plan the Session runs and its start (c2b2ab, review c2b2a H1 and M3).
+      plan: PLAN,
+      startedAt: 0,
     });
     expect(Object.keys(ctx.path ?? {}).sort()).toEqual(["goal", "gradingLimits", "id", "kind", "title"]);
     expect(Object.keys(ctx.step ?? {}).sort()).toEqual(["goal", "howTo", "id", "order", "payoff", "title", "why"]);

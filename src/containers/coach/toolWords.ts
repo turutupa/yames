@@ -97,6 +97,16 @@ export function lineValues(t: TFunction, l: Line): Record<string, string | numbe
   for (const name of ["from", "to", "focus"] as const) {
     if (out[name] === "mix" && (l.key.endsWith("Focus") || l.key.endsWith("setFocus"))) out[name] = t("coachTools.value.mix");
   }
+  // `make_exercise`'s receipt names what it added: the shape's own sentence from My exercises (leg t2c).
+  if (l.key.startsWith("coachTools.receipt.makeExercise") && typeof l.values.shape === "string") {
+    out.what = t(`session.myExercises.shape.${l.values.shape}`, {
+      root: l.values.root ?? "",
+      scale: out.scale ?? "",
+      chord: l.values.chord ?? "",
+      position: l.values.position ?? "",
+      string: l.values.string ?? "",
+    });
+  }
   const key = out.key;
   if (typeof key === "string" && SETTING_KEYS.has(key)) {
     for (const name of ["from", "to", "value"] as const) {

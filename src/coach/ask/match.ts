@@ -14,6 +14,7 @@
  */
 import type { ToolArgs } from "../tools/types";
 import type { AskableMetric, CardShape } from "./cards";
+import { matchPathCard } from "./pathMatch";
 
 export type CardCall = { tool: CardShape; args: ToolArgs };
 
@@ -149,6 +150,19 @@ function metricIn(s: string): AskableMetric | null {
 export function matchCard(text: string): CardCall | null {
   const s = normalizeQuestion(text);
   if (!s || s.length > 160) return null;
+  // The Path, plan, theory and term cards (leg c2b2a): one shape across both
+  // tables, or no card.
+  const found = [...matchPathCard(s, text), ...matchTakeCards(s)];
+  return found.length === 1 ? found[0] : null;
+}
+
+/** The Take cards' table (legs c2b1a, c2b1b): every shape it finds in `s`. */
+function matchTakeCards(s: string): CardCall[] {
+  const one = matchTakeCard(s);
+  return one ? [one] : [];
+}
+
+function matchTakeCard(s: string): CardCall | null {
   const asks = s.endsWith("?") || QUESTION_START.test(s);
   if (!asks || GENERAL_START.test(s)) return null;
   const q = s.replace(/\?/g, "").trim();

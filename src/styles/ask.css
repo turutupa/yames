@@ -606,6 +606,44 @@
   font-size: 14px;
   color: var(--text-secondary);
 }
+/* make_exercise's preview (leg t2c, mock 17): the line, the notes on a small neck, the first note named. */
+.ask-make {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.ask-make-line,
+.ask-make-first {
+  margin: 0;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.ask-make-first {
+  color: var(--text-secondary);
+}
+.ask-make-neck {
+  display: block;
+  max-width: 100%;
+  max-height: 110px;
+}
+.ask-make-string,
+.ask-make-fret {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+.ask-make-fretnum {
+  fill: var(--text-secondary);
+  font-size: 9px;
+}
+.ask-make-dot {
+  fill: var(--text-secondary);
+}
+.ask-make-dot-first {
+  fill: var(--accent);
+  stroke: var(--accent-2);
+  stroke-width: 1.5;
+}
 .ask-proposal-plan {
   margin: 0;
   padding-left: 20px;

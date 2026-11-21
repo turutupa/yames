@@ -31,7 +31,11 @@
       "loadAsked": "Yames đã hỏi về các thay đổi chưa lưu của bạn trước. Chưa tải gì cho đến khi bạn trả lời.",
       "clickSubdivision": "Số tiếng click mỗi phách: {{to}}",
       "setSetting": "{{key}}: {{to}}",
-      "setGoal": "Đã giữ mục tiêu: “{{to}}”"
+      "setGoal": "Đã giữ mục tiêu: “{{to}}”",
+      "makeExercise": "Added {{what}} to My exercises.",
+      "makeExerciseAdding": "Adding {{what}} to My exercises…",
+      "undoMakeExercise": "Taken back out of My exercises.",
+      "undoMakeExerciseDoing": "Taking it back out of My exercises…"
     },
     "propose": {
       "goTo": "Mở {{screen}}?",
@@ -62,7 +66,9 @@
       "clickSubdivision": "Số tiếng click mỗi phách: {{from}} → {{to}}",
       "setSetting": "{{key}}: {{from}} → {{to}}",
       "setGoal": "Giữ làm mục tiêu của bạn: “{{to}}”",
-      "setGoalFrom": "Đổi mục tiêu của bạn từ “{{from}}” thành “{{to}}”"
+      "setGoalFrom": "Đổi mục tiêu của bạn từ “{{from}}” thành “{{to}}”",
+      "makeExercise": "Add it to My exercises",
+      "undoMakeExercise": "Take it back out of My exercises"
     },
     "stops": {
       "click": "Tiếng click dừng.",
@@ -120,7 +126,8 @@
       "keep": "Giữ",
       "go": "Đi",
       "open": "Mở",
-      "loop": "Lặp lại"
+      "loop": "Lặp lại",
+      "add": "Add it"
     },
     "why": {
       "which": "Cái nào?",
@@ -181,7 +188,38 @@
         "cap": "Bạn đang theo {{cap}} lộ trình, nhiều nhất có thể. Hãy bỏ một lộ trình ở trang của nó trước.",
         "loopBackwards": "Ô nhịp {{to}} đứng trước ô nhịp {{from}}. Hãy nói ô nhịp đầu trước."
       },
-      "failed": "Không được, và chưa có gì bị thay đổi."
+      "failed": "Không được, và chưa có gì bị thay đổi.",
+      "make": {
+        "what": "Say what to make: a scale or a chord, and its root. For example “A minor pentatonic, 5th fret”.",
+        "root": "Say its root too: for example “A minor pentatonic”.",
+        "chord": "Say which chord the arpeggio is: for example “A minor 7 arpeggio”.",
+        "needScale": "Say which scale: for example “A minor pentatonic”.",
+        "scale": "The app can't make an exercise in {{scale}} yet. It makes the minor and major pentatonic, blues, major, natural and harmonic minor, dorian and mixolydian.",
+        "boxScale": "A box is for the minor pentatonic, the major pentatonic and blues, not {{scale}}.",
+        "threeScale": "Three notes a string is for major, natural minor, harmonic minor, dorian and mixolydian, not {{scale}}.",
+        "mixed": "That names a scale and a chord at once, or one that shape doesn't take. Say one.",
+        "noShapeHere": "That shape doesn't start at fret {{fret}}.",
+        "outOfRange": "From fret {{fret}} it runs off the end of the neck.",
+        "tooManyNotes": "One time through needs {{count}} bar.",
+        "tooManyNotes_other": "One time through needs {{count}} bars.",
+        "tooLong": "One time through needs more than {{count}} bars, the most an exercise can have.",
+        "tooFewNotes": "That's too few notes for so many bars: they fill {{count}} bar.",
+        "tooFewNotes_other": "That's too few notes for so many bars: they fill {{count}} bars.",
+        "unreachable": "No hand the app knows can play that fast enough to grade it.",
+        "notMade": "The app can't make that one.",
+        "loading": "The app is getting the exercise maker ready. Ask again in a moment.",
+        "loadFailed": "The app couldn't load the exercise maker, so nothing was made.",
+        "full": "My exercises is full (50), so this one wasn't added. Remove one there first.",
+        "already": "That one is already on My exercises.",
+        "badRecipe": "The app can't make that one.",
+        "unreadable": "My exercises couldn't be read just now, so nothing was added.",
+        "failed": "My exercises couldn't be saved just now, so nothing was added.",
+        "undo": {
+          "gone": "It's no longer on My exercises.",
+          "unreadable": "My exercises couldn't be read just now, so nothing was taken out.",
+          "failed": "My exercises couldn't be saved just now, so it's still there."
+        }
+      }
     },
     "yours": {
       "input": "Việc này là của bạn. Huấn luyện viên không bao giờ bật hay tắt đầu vào. Nút Nghe ở công cụ và thanh buổi tập làm việc đó, còn đầu vào nằm trong Cài đặt.",
@@ -255,6 +293,25 @@
         "neck": "Cần đàn",
         "runway": "Đường băng",
         "tab": "Tab"
+      }
+    },
+    "make": {
+      "source": "Worked out by the app",
+      "graded": "Starts at {{bpm}} BPM. Timing and notes heard can be graded; the rest is yours.",
+      "startsOn": "Starts on {{note}}: string {{string}}, fret {{fret}}.",
+      "startsOnString": "Starts on string {{string}}, fret {{fret}}.",
+      "notesLabel": "{{n}} notes, frets {{from}} to {{to}}",
+      "openPaths": "Open Paths",
+      "undoLeft": "The Undo ended when you left the screen this was added on. To take it out, use Remove on My exercises in Paths.",
+      "chip": {
+        "fret": "Fret {{fret}}",
+        "bars": "{{count}} bar",
+        "bars_other": "{{count}} bars",
+        "quarters": "Quarter notes instead",
+        "eighths": "Eighths instead",
+        "eighthTriplets": "Triplets instead",
+        "sixteenths": "Sixteenths instead",
+        "nextPosition": "Next position"
       }
     }
   }

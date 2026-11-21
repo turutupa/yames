@@ -31,7 +31,14 @@ const SCALE_LETTER_OFFSETS: Partial<Record<ScaleId, readonly number[]>> = {
   majorBlues: [0, 1, 2, 2, 4, 5],
 };
 
-const CHORD_LETTER_OFFSETS: Partial<Record<ChordQuality, readonly number[]>> = {
+/**
+ * Letters above the root, per interval of the quality in `harmony.ts`, in the
+ * same order. Every quality has one (c2b2ab, review H3): a quality without a
+ * row fell back to a key-wide sharp or flat and wrote C9 as C E G A# D. A
+ * second is one letter up (the 9th, b9 and #9 alike: C7#9 has D#, not Eb), a
+ * fourth three (the 11th, sus4: Fsus4 has Bb), a sixth five (the 13th).
+ */
+const CHORD_LETTER_OFFSETS: Record<ChordQuality, readonly number[]> = {
   maj: [0, 2, 4],
   min: [0, 2, 4],
   dim: [0, 2, 4],
@@ -42,6 +49,28 @@ const CHORD_LETTER_OFFSETS: Partial<Record<ChordQuality, readonly number[]>> = {
   m7: [0, 2, 4, 6],
   m7b5: [0, 2, 4, 6],
   dim7: [0, 2, 4, 6],
+  sus2: [0, 1, 4],
+  sus4: [0, 3, 4],
+  "6": [0, 2, 4, 5],
+  m6: [0, 2, 4, 5],
+  add9: [0, 1, 2, 4],
+  "9": [0, 2, 4, 6, 1],
+  maj9: [0, 2, 4, 6, 1],
+  m9: [0, 2, 4, 6, 1],
+  "11": [0, 2, 4, 6, 1, 3],
+  "13": [0, 2, 4, 6, 1, 5],
+  m11: [0, 2, 4, 6, 1, 3],
+  m13: [0, 2, 4, 6, 1, 5],
+  "7sus4": [0, 3, 4, 6],
+  "7sus2": [0, 1, 4, 6],
+  "7sharp5": [0, 2, 4, 6],
+  "69": [0, 2, 4, 5, 1],
+  madd9: [0, 2, 4, 1],
+  "7b9": [0, 2, 4, 6, 1],
+  "7sharp9": [0, 2, 4, 6, 1],
+  maj13: [0, 2, 4, 6, 1, 5],
+  "9sus4": [0, 3, 4, 6, 1],
+  mMaj7: [0, 2, 4, 6],
 };
 
 export function pcOfName(name: string): number {
@@ -65,6 +94,16 @@ function spell(root: string, intervals: readonly number[], offsets: readonly num
   });
 }
 
+/**
+ * The note `semitones` above `root`, written on the letter `letters` above
+ * root's: a key's tonic named from a chord as the player wrote it (Bm7b5's
+ * key a whole tone and one letter down is A; Bbdim's, a semitone and one
+ * letter up, is Cb).
+ */
+export function spellAbove(root: string, semitones: number, letters: number): string {
+  return spell(root, [((semitones % 12) + 12) % 12], [((letters % 7) + 7) % 7])[0];
+}
+
 export function scaleIsKnown(scale: string): scale is ScaleId {
   return scale in SCALES;
 }
@@ -77,6 +116,22 @@ export function spellScale(root: string, scale: ScaleId): string[] {
   const offsets = SCALE_LETTER_OFFSETS[scale];
   if (!offsets) throw new Error(`no spelling table for scale ${scale}`);
   return spell(root, SCALES[scale].intervals, offsets);
+}
+
+/**
+ * A scale spelled by letter for a sentence (Ask's "what fits over"): the table
+ * above, else one letter per note for any seven-note scale (altered, melodic
+ * minor, the modes). Null for the others (pentatonic-like and symmetrical
+ * scales without a table), which have no one letter per note. Leaves
+ * `canSpellScale` alone, so what the Path generator writes does not move.
+ */
+export function spellScaleByLetter(root: string, scale: ScaleId): string[] | null {
+  const intervals = SCALES[scale].intervals;
+  // The altered scale as it is written over its chord: 1 b9 #9 3 #11 #5 b7, so
+  // C altered has the E, G# and D# that C7, C7#5 and C7#9 are spelled with.
+  const altered = scale === "altered" ? [0, 1, 1, 2, 3, 4, 6] : null;
+  const offsets = SCALE_LETTER_OFFSETS[scale] ?? altered ?? (intervals.length === 7 ? [0, 1, 2, 3, 4, 5, 6] : null);
+  return offsets ? spell(root, intervals, offsets) : null;
 }
 
 export function scalePcs(root: string, scale: ScaleId): number[] {
