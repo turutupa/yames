@@ -217,7 +217,11 @@
           "gone": "It's no longer on My exercises.",
           "unreadable": "My exercises couldn't be read just now, so it's still there.",
           "failed": "My exercises couldn't be saved just now, so it's still there."
-        }
+        },
+        "tooManyNotes_few": "One time through needs {{count}} bars.",
+        "tooManyNotes_many": "One time through needs {{count}} bars.",
+        "tooFewNotes_few": "That's too few notes for so many bars: they fill {{count}} bars.",
+        "tooFewNotes_many": "That's too few notes for so many bars: they fill {{count}} bars."
       }
     },
     "yours": {
@@ -309,7 +313,9 @@
         "eighths": "Eighths instead",
         "eighthTriplets": "Triplets instead",
         "sixteenths": "Sixteenths instead",
-        "nextPosition": "Next position"
+        "nextPosition": "Next position",
+        "bars_few": "{{count}} bars",
+        "bars_many": "{{count}} bars"
       }
     }
   }
