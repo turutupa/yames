@@ -440,6 +440,34 @@
       "heard": "자유 연주에서 키는 {{key}}, 주로 {{chords}} 코드였습니다.",
       "heardKey": "자유 연주에서 키는 {{key}}였습니다."
     },
+    "myExercises": {
+      "title": "내 과제",
+      "intro": "직접 만든 과제예요. 어떤 코스에도 속하지 않고, 통과로 치지도 않아요.",
+      "shape": {
+        "box": "{{root}} {{scale}}, {{position}}프렛의 박스",
+        "threePerString": "{{root}} {{scale}}, {{position}}프렛부터 한 줄에 세 음씩",
+        "arpeggio": "{{chord}} 아르페지오, {{position}}프렛부터",
+        "oneString": "{{root}} {{scale}}, {{string}}번 줄을 따라 {{position}}프렛부터",
+        "chromatic": "크로매틱, 한 프렛에 손가락 하나씩 {{position}}프렛부터"
+      },
+      "direction": {
+        "up": "올라가기",
+        "down": "내려가기",
+        "upAndBack": "올라갔다 내려오기"
+      },
+      "line": "{{shape}}: {{direction}}. {{bars}}.",
+      "bars": "{{count}}마디",
+      "bars_other": "{{count}}마디",
+      "remove": "삭제",
+      "removeLabel": "{{what}}을(를) 내 과제에서 삭제",
+      "removed": "내 과제에서 삭제했어요.",
+      "undo": "실행 취소",
+      "notSaved": "내 과제를 지금 읽거나 저장하지 못해서 아무것도 바뀌지 않았어요.",
+      "undoFull": "내 과제가 가득 찼어요(50). 하나를 삭제한 뒤 실행 취소를 누르면 이 과제가 돌아와요.",
+      "undoAlready": "그 과제는 이미 내 과제에 다시 들어 있어요.",
+      "cantBuild": "이 과제는 더 이상 만들 수 없어요. 이 버전의 Yames는 더 이상 만들지 않아요. 삭제하기 전까지 여기에 남아요.",
+      "howTo": "적힌 대로, 클릭에 맞춰 연주하세요."
+    },
     "paths": {
       "title": "코스",
       "intro": "목표를 고르세요. 잠긴 것은 없습니다. 어떤 단계든 시작할 수 있고 마음을 바꿔도 됩니다.",

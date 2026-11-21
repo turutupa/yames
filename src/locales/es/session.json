@@ -451,6 +451,35 @@
       "heard": "Tocando libre estuviste en {{key}}, sobre todo con {{chords}}.",
       "heardKey": "Tocando libre estuviste en {{key}}."
     },
+    "myExercises": {
+      "title": "Mis ejercicios",
+      "intro": "Ejercicios que has creado tú. No pertenecen a ninguna ruta y no aprueban nada.",
+      "shape": {
+        "box": "{{root}} {{scale}}, la caja en el traste {{position}}",
+        "threePerString": "{{root}} {{scale}}, tres notas por cuerda desde el traste {{position}}",
+        "arpeggio": "Arpegio de {{chord}} desde el traste {{position}}",
+        "oneString": "{{root}} {{scale}} a lo largo de la cuerda {{string}} desde el traste {{position}}",
+        "chromatic": "Cromático, un dedo por traste desde el traste {{position}}"
+      },
+      "direction": {
+        "up": "subiendo",
+        "down": "bajando",
+        "upAndBack": "subiendo y volviendo a bajar"
+      },
+      "line": "{{shape}}: {{direction}}. {{bars}}.",
+      "bars": "{{count}} compás",
+      "bars_many": "{{count}} compases",
+      "bars_other": "{{count}} compases",
+      "remove": "Quitar",
+      "removeLabel": "Quitar {{what}} de Mis ejercicios",
+      "removed": "Quitado de Mis ejercicios.",
+      "undo": "Deshacer",
+      "notSaved": "Mis ejercicios no se pudieron leer o guardar en este momento, así que no ha cambiado nada.",
+      "undoFull": "Mis ejercicios está lleno (50). Quita uno y Deshacer lo vuelve a poner.",
+      "undoAlready": "Ese ya está de vuelta en Mis ejercicios.",
+      "cantBuild": "Este ya no se puede construir: esta versión de Yames ya no lo crea. Se queda aquí hasta que lo quites.",
+      "howTo": "Tócalo tal como está escrito, con el clic."
+    },
     "paths": {
       "title": "Rutas",
       "intro": "Elige un objetivo. No hay nada bloqueado: puedes empezar cualquier paso y cambiar de idea.",

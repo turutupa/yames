@@ -440,6 +440,34 @@
       "heard": "Serbest çalarken {{key}} tonundaydın, çoğunlukla {{chords}} üzerinde.",
       "heardKey": "Serbest çalarken {{key}} tonundaydın."
     },
+    "myExercises": {
+      "title": "Alıştırmalarım",
+      "intro": "Kendi yaptığın alıştırmalar. Hiçbir yola ait değiller ve hiçbir şeyi geçmiş saymazlar.",
+      "shape": {
+        "box": "{{root}} {{scale}}, {{position}}. perdede kutu kalıbı",
+        "threePerString": "{{root}} {{scale}}, {{position}}. perdeden başlayarak telde üçer nota",
+        "arpeggio": "{{chord}} arpej, {{position}}. perdeden başlayarak",
+        "oneString": "{{root}} {{scale}}, {{string}}. tel boyunca {{position}}. perdeden başlayarak",
+        "chromatic": "Kromatik, perde başına bir parmak, {{position}}. perdeden başlayarak"
+      },
+      "direction": {
+        "up": "yukarı",
+        "down": "aşağı",
+        "upAndBack": "yukarı ve geri aşağı"
+      },
+      "line": "{{shape}}: {{direction}}. {{bars}}.",
+      "bars": "{{count}} ölçü",
+      "bars_other": "{{count}} ölçü",
+      "remove": "Kaldır",
+      "removeLabel": "{{what}} alıştırmasını Alıştırmalarım'dan kaldır",
+      "removed": "Alıştırmalarım'dan kaldırıldı.",
+      "undo": "Geri al",
+      "notSaved": "Alıştırmalarım şu anda okunamadı veya kaydedilemedi, bu yüzden hiçbir şey değişmedi.",
+      "undoFull": "Alıştırmalarım dolu (50). Birini kaldır, sonra Geri al bunu geri koyar.",
+      "undoAlready": "Bu alıştırma zaten Alıştırmalarım'da.",
+      "cantBuild": "Bu artık oluşturulamıyor: Yames'in bu sürümü onu artık üretmiyor. Sen kaldırana kadar burada durur.",
+      "howTo": "Yazıldığı gibi çal, klikle birlikte."
+    },
     "paths": {
       "title": "Yollar",
       "intro": "Bir hedef seç. Hiçbir şey kilitli değil: istediğin adımdan başlayabilir, fikrini değiştirebilirsin.",

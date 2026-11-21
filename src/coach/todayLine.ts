@@ -32,6 +32,7 @@ import { rungsToDrop } from "../session/planner";
 import type { PlayerProgress } from "../session/progress";
 import { calendarDaysBetween, factsOf, isUngradedTake, sessionKeyOf, shownCleanTempoTakeOf } from "../session/progress";
 import type { PathTakeRow } from "../ipc";
+import { isCustomTake } from "../session/myExercises";
 
 /**
  * Which sentence it is. `songDue` ("Bars 17 to 24 of your song are due
@@ -245,9 +246,27 @@ function backLine(input: TodayLineInput, session: readonly PathTakeRow[]): Today
 }
 
 /**
+ * The history as Today's line and the Step page's line read it (t2bb): the
+ * Takes of My exercises left out, so a custom Take never silences the line and
+ * is never named; it speaks from the last Path Take. `takesRead` shrinks by as
+ * many, so "the read may have been cut" is judged on the same window.
+ */
+function withoutCustomTakes<I extends { progress: PlayerProgress; takesRead?: number }>(input: I): I {
+  const takes = input.progress.takes.filter((t) => !isCustomTake(t));
+  if (takes.length === input.progress.takes.length) return input;
+  const dropped = input.progress.takes.length - takes.length;
+  return {
+    ...input,
+    progress: { ...input.progress, takes },
+    ...(input.takesRead === undefined ? {} : { takesRead: input.takesRead - dropped }),
+  };
+}
+
+/**
  * Today's line, or null: nothing measured to add, and the slot is absent.
  */
-export function todayLine(input: TodayLineInput): TodayLine | null {
+export function todayLine(rawInput: TodayLineInput): TodayLine | null {
+  const input = withoutCustomTakes(rawInput);
   const { plan, progress, paths, now, grading } = input;
   if (plan.steps.length === 0) return null;
   const takes = progress.takes;
@@ -318,7 +337,7 @@ export function stepLine(input: {
   now: number;
   grading: GradingChoice;
 }): Line | null {
-  const { progress, paths, pathId, exerciseIds, now, grading } = input;
+  const { progress, paths, pathId, exerciseIds, now, grading } = withoutCustomTakes(input);
   if (grading === "off") return null;
   const session = lastSessionOf(progress.takes);
   const latest = session.find((t) => t.pathId === pathId && exerciseIds.includes(t.exerciseId) && isGraded(t));

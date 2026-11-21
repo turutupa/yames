@@ -451,6 +451,35 @@
       "heard": "Suonando libero eri in {{key}}, soprattutto su {{chords}}.",
       "heardKey": "Suonando libero eri in {{key}}."
     },
+    "myExercises": {
+      "title": "I miei esercizi",
+      "intro": "Esercizi che hai creato tu. Non appartengono a nessun percorso e non fanno superare nulla.",
+      "shape": {
+        "box": "{{root}} {{scale}}, il box al tasto {{position}}",
+        "threePerString": "{{root}} {{scale}}, tre note per corda dal tasto {{position}}",
+        "arpeggio": "Arpeggio di {{chord}} dal tasto {{position}}",
+        "oneString": "{{root}} {{scale}} lungo la corda {{string}} dal tasto {{position}}",
+        "chromatic": "Cromatico, un dito per tasto dal tasto {{position}}"
+      },
+      "direction": {
+        "up": "in salita",
+        "down": "in discesa",
+        "upAndBack": "in salita e poi di nuovo in discesa"
+      },
+      "line": "{{shape}}: {{direction}}. {{bars}}.",
+      "bars": "{{count}} battuta",
+      "bars_many": "{{count}} battute",
+      "bars_other": "{{count}} battute",
+      "remove": "Rimuovi",
+      "removeLabel": "Rimuovi {{what}} da I miei esercizi",
+      "removed": "Rimosso da I miei esercizi.",
+      "undo": "Annulla",
+      "notSaved": "I miei esercizi non si sono potuti leggere o salvare in questo momento, quindi non è cambiato nulla.",
+      "undoFull": "I miei esercizi è pieno (50). Rimuovine uno, poi Annulla rimette questo.",
+      "undoAlready": "Questo è già tornato in I miei esercizi.",
+      "cantBuild": "Questo non si può più costruire: questa versione di Yames non lo crea più. Resta qui finché non lo rimuovi.",
+      "howTo": "Suonalo come scritto, con il click."
+    },
     "paths": {
       "title": "Percorsi",
       "intro": "Scegli un obiettivo. Niente è bloccato: puoi iniziare qualsiasi tappa e cambiare idea.",

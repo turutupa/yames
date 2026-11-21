@@ -1122,6 +1122,7 @@ export function installShotMock(shot: Shot, theme: string): void {
   // A focus is kept with the day it was chosen on: the scene's is today's.
   if (shot.session?.focus) store.set("session.todayFocus", storedFocus(shot.session.focus, Date.now()));
   if (shot.session?.offMix) store.set("session.offMix", shot.session.offMix);
+  if (shot.session?.myExercises) store.set("myExercises", shot.session.myExercises);
   const pathStore = sessionSeed(shot.session?.seed ?? "first");
   (window as unknown as { __SHOT_PATHS__: PathStoreSeed }).__SHOT_PATHS__ = pathStore;
 

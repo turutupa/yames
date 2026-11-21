@@ -440,6 +440,34 @@
       "heard": "Im freien Spiel warst du in {{key}}, meist auf {{chords}}.",
       "heardKey": "Im freien Spiel warst du in {{key}}."
     },
+    "myExercises": {
+      "title": "Meine Übungen",
+      "intro": "Übungen, die du selbst gebaut hast. Sie gehören zu keinem Pfad und bestehen nichts.",
+      "shape": {
+        "box": "{{root}} {{scale}}, die Box ab Bund {{position}}",
+        "threePerString": "{{root}} {{scale}}, drei Töne pro Saite ab Bund {{position}}",
+        "arpeggio": "{{chord}}-Arpeggio ab Bund {{position}}",
+        "oneString": "{{root}} {{scale}} auf Saite {{string}} ab Bund {{position}}",
+        "chromatic": "Chromatisch, ein Finger pro Bund ab Bund {{position}}"
+      },
+      "direction": {
+        "up": "aufwärts",
+        "down": "abwärts",
+        "upAndBack": "auf und wieder ab"
+      },
+      "line": "{{shape}}: {{direction}}. {{bars}}.",
+      "bars": "{{count}} Takt",
+      "bars_other": "{{count}} Takte",
+      "remove": "Entfernen",
+      "removeLabel": "{{what}} aus Meine Übungen entfernen",
+      "removed": "Aus Meine Übungen entfernt.",
+      "undo": "Rückgängig",
+      "notSaved": "Meine Übungen konnten gerade nicht gelesen oder gespeichert werden, deshalb hat sich nichts geändert.",
+      "undoFull": "Meine Übungen ist voll (50). Entferne eine Übung, dann holt Rückgängig diese zurück.",
+      "undoAlready": "Diese Übung ist schon wieder in Meine Übungen.",
+      "cantBuild": "Diese Übung lässt sich nicht mehr bauen: Diese Version von Yames erstellt sie nicht mehr. Sie bleibt hier, bis du sie entfernst.",
+      "howTo": "Spiel sie wie notiert, mit dem Klick."
+    },
     "paths": {
       "title": "Pfade",
       "intro": "Such dir ein Ziel aus. Nichts ist gesperrt: Du kannst mit jedem Schritt anfangen und es dir anders überlegen.",
