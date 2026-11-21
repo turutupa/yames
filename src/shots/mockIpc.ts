@@ -1042,7 +1042,8 @@ export function installFallbackCamera(): void {
 }
 
 /** What the harness's speech engine was asked to do (`tts_speak`, `tts_stop`). */
-type SpeechEntry = { op: "speak" | "stop" | "play" | "halt"; text: string; at: number };
+/** `dim`: whether a speak asked Rust to dim the click (the Session's voice never does). */
+type SpeechEntry = { op: "speak" | "stop" | "play" | "halt"; text: string; at: number; dim?: boolean };
 /** The lines still "playing", ended by a stop. */
 const speechEnds: Array<() => void> = [];
 function speechLog(): SpeechEntry[] {
@@ -1573,7 +1574,7 @@ export function installShotMock(shot: Shot, theme: string): void {
     // and every stop, in order, on `window.__yamesSpeech` for the layout suite.
     // A line "plays" for three seconds, or until a stop, as the real engine's does.
     tts_speak: (a: Record<string, unknown> | undefined) => {
-      speechLog().push({ op: "speak", text: String(a?.text ?? ""), at: performance.now() });
+      speechLog().push({ op: "speak", text: String(a?.text ?? ""), at: performance.now(), dim: a?.dim !== false });
       return new Promise<null>((resolve) => {
         const done = () => resolve(null);
         speechEnds.push(done);

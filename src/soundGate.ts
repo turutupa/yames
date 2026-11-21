@@ -1,11 +1,12 @@
 /**
  * "Sound is about to start": called by `ipc.ts` the moment anything asks the
- * engine to play (`setPlaying(true)`, `togglePlayback`), before the request
- * leaves for Rust.
+ * engine to play (`setPlaying(true)`, `togglePlayback`), right AFTER the
+ * request has left for Rust: the voice's `tts_stop` may wait on a process
+ * kill on the main thread, and the Start must not queue behind it.
  *
  * The coach's voice listens here so that a Start pressed while it is talking
- * cuts it before the count-in's first click, not after the engine reports it
- * is playing (DESIGN section 8, Voice: "Start stops it"). A module of its own,
+ * cuts it at the count-in's start, not after the engine reports it is
+ * playing (DESIGN section 8, Voice: "Start stops it"). A module of its own,
  * with no imports, so a test that mocks `ipc.ts` whole still has it.
  *
  * Listeners run synchronously and must be cheap: one of them sits in front of

@@ -66,14 +66,19 @@ export async function setSubdivision(subdivision: Subdivision): Promise<void> {
 }
 
 export async function togglePlayback(): Promise<void> {
-  // The coach's voice stops before anything sounds (src/soundGate.ts).
+  // The engine's call leaves first, then the coach's voice is cut
+  // (src/soundGate.ts): `tts_stop` may wait on a process kill on the main
+  // thread, and the count-in must not queue behind it.
+  const started = invoke<void>("toggle_playback");
   soundStarting();
-  return invoke("toggle_playback");
+  return started;
 }
 
 export async function setPlaying(playing: boolean): Promise<void> {
+  // Same order as `togglePlayback`: the Start first, the cut after it.
+  const started = invoke<void>("set_playing", { playing });
   if (playing) soundStarting();
-  return invoke("set_playing", { playing });
+  return started;
 }
 
 export async function setWidgetMode(mode: "compact" | "comfortable"): Promise<void> {
@@ -2608,7 +2613,14 @@ export async function getCoachCapabilities(): Promise<CoachCapabilities> {
 // TTS (Text-to-Speech)
 // ---------------------------------------------------------------------------
 
-export async function ttsSpeak(text: string): Promise<void> {
+/**
+ * Speak a line. The metronome is dimmed while it lives unless `dim: false`
+ * is passed: the Session's boundary voice does, since its lines are never
+ * spoken over sound and a dim still held when Start cuts one would leave the
+ * count-in's first click quiet. Every other caller passes nothing.
+ */
+export async function ttsSpeak(text: string, opts?: { dim?: boolean }): Promise<void> {
+  if (opts?.dim === false) return invoke("tts_speak", { text, dim: false });
   return invoke("tts_speak", { text });
 }
 

@@ -11,13 +11,14 @@ import { openShot } from "./fits";
  * - With Voice on, a ready screen says its note's headline and a result its
  *   finding: the same string the screen shows.
  * - Nothing is said while anything sounds, and a Start stops a line still
- *   being said before the engine is asked to play.
+ *   being said right after the engine is asked to play (never before: the
+ *   count-in must not wait on the cut), without ever dimming the click.
  * - With Voice off nothing reaches the speech engine at all.
  */
 
 const WIDE = { width: 1440, height: 900 };
 
-type Entry = { op: "speak" | "stop" | "play" | "halt"; text: string; at: number };
+type Entry = { op: "speak" | "stop" | "play" | "halt"; text: string; at: number; dim?: boolean };
 
 async function speech(page: Page): Promise<Entry[]> {
   return page.evaluate(() => (window as unknown as { __yamesSpeech?: Entry[] }).__yamesSpeech ?? []);
@@ -29,22 +30,35 @@ async function headline(page: Page): Promise<string> {
   return (await page.locator('[data-testid="coach-note"] .coach-note-head').first().innerText()).trim();
 }
 
-/** The rules every log must keep: no line starts while the engine plays; a Start cuts a line still playing. */
+/**
+ * The rules every log must keep: no line starts while the engine plays; the
+ * Session's voice never dims the click; and a Start cuts a line still playing,
+ * with the cut sent right after the Start (the engine's call leaves first, so
+ * the count-in never waits on a speech process being killed).
+ */
 function expectQuietOverSound(log: Entry[]) {
   let playing = false;
   let speakingSince: number | null = null;
+  let owedCut: number | null = null;
   for (const e of log) {
     if (e.op === "play") {
       // A line said in the last three seconds and not stopped would be playing now.
-      expect(speakingSince === null || e.at - speakingSince >= 3_000, `a Start at ${e.at} ran over speech`).toBe(true);
+      if (speakingSince !== null && e.at - speakingSince < 3_000) owedCut = e.at;
       playing = true;
-    } else if (e.op === "halt") playing = false;
-    else if (e.op === "stop") speakingSince = null;
-    else if (e.op === "speak") {
+    } else if (e.op === "halt") {
+      expect(owedCut, `a Start at ${owedCut} ran over speech`).toBeNull();
+      playing = false;
+    } else if (e.op === "stop") {
+      if (owedCut !== null) expect(e.at - owedCut, "the cut came long after the Start").toBeLessThan(250);
+      speakingSince = null;
+      owedCut = null;
+    } else if (e.op === "speak") {
       expect(playing, `"${e.text}" was said while the engine played`).toBe(false);
+      expect(e.dim, `"${e.text}" dimmed the click`).toBe(false);
       speakingSince = e.at;
     }
   }
+  expect(owedCut, `a Start at ${owedCut} ran over speech`).toBeNull();
 }
 
 test("Voice on, a ready screen: the order the note shows, said once", async ({ page }) => {
@@ -59,10 +73,12 @@ test("Voice on, a result: the finding the note shows; nothing during the Take, a
   await expect.poll(async () => spoken(await speech(page)).includes(shown)).toBe(true);
   const log = await speech(page);
   expectQuietOverSound(log);
-  // The order, cut by the Start, then nothing until the finding.
+  // The order, then the Start, then the cut right after it (never before: the
+  // engine's call leaves first), then nothing until the finding.
   const firstPlay = log.findIndex((e) => e.op === "play");
   expect(firstPlay).toBeGreaterThan(0);
-  expect(log.slice(0, firstPlay).map((e) => e.op)).toEqual(["speak", "stop"]);
+  expect(log.slice(0, firstPlay).map((e) => e.op)).toEqual(["speak"]);
+  expect(log[firstPlay + 1]?.op).toBe("stop");
   expect(spoken(log)).toHaveLength(2);
   expect(spoken(log)[1]).toBe(shown);
 });

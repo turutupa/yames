@@ -384,7 +384,7 @@ export function MainWindow() {
     hushed: view === "session",
   });
   // The coach's voice at a Session's boundaries, and the coach keys' slot (leg c1b2b).
-  useCoachVoice(coach.coachVoiceMode, state.isPlaying);
+  useCoachVoice(coach.coachVoiceMode, state.isPlaying, view === "session");
 
   /**
    * Re-send the whole ramp with one or two fields changed.

@@ -10,6 +10,8 @@ import type { TakeGrade } from "../../session/grade";
 import type { PlanStep, Reason } from "../../session/planner";
 import type { BigAction, RunState, TakeOutcome } from "../../session/runner";
 import type { TakeMeasures } from "../../session/takeMeasures";
+import { installCoachVoice, resetCoachVoice, setVoiceSounding } from "../../coach/voice";
+import { soundStarting } from "../../soundGate";
 import { acceptSuggestion, explainLastText, suggestionsOnScreen, whatNextText } from "./coachKeys";
 
 const t = i18n.t.bind(i18n) as unknown as Parameters<typeof whatNextText>[0];
@@ -180,6 +182,30 @@ describe("while a Take runs", () => {
       expect(whatNextText(t, s), phase).toBeNull();
       expect(acceptSuggestion(s), phase).toBe(false);
       expect(s.spies.startLoop).not.toHaveBeenCalled();
+    }
+  });
+});
+
+describe("between a Start and the engine reporting sound", () => {
+  it("all three do nothing on the ready screen, and the loop is not started over the count-in", () => {
+    const uninstall = installCoachVoice({ speak: () => Promise.resolve(), stop: () => Promise.resolve() });
+    try {
+      const ready = session("ready", [outcome("belowBar")], { kind: "playTake", bpm: 80 }, { loop: true });
+      // What ipc.setPlaying(true) does right after it asks the engine to play.
+      soundStarting();
+      expect(explainLastText(t, ready)).toBeNull();
+      expect(whatNextText(t, ready)).toBeNull();
+      expect(acceptSuggestion(ready)).toBe(false);
+      expect(ready.spies.startLoop).not.toHaveBeenCalled();
+      // The engine reports sound and then stops: the keys answer again.
+      setVoiceSounding(true);
+      setVoiceSounding(false);
+      expect(whatNextText(t, ready)).not.toBeNull();
+      expect(acceptSuggestion(ready)).toBe(true);
+      expect(ready.spies.startLoop).toHaveBeenCalledTimes(1);
+    } finally {
+      uninstall();
+      resetCoachVoice();
     }
   });
 });

@@ -7,7 +7,7 @@
  */
 import { act, renderHook } from "@testing-library/react";
 import { useReducer } from "react";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { TakeGrade } from "../session/grade";
 import type { LoopStep, PlanMinutes, PlanStep, Reason, SessionPlan } from "../session/planner";
 import { IDLE, runReducer, type RunEvent, type RunState, type TakeOutcome } from "../session/runner";
@@ -21,8 +21,15 @@ import {
   sayAtBoundary,
   sayNow,
   setVoiceEnabled,
+  setVoiceInSession,
   setVoiceSounding,
+  soundIsStarting,
 } from "./voice";
+
+/** Let settled speak calls run their `then`. */
+async function flush(): Promise<void> {
+  for (let i = 0; i < 3; i += 1) await Promise.resolve();
+}
 
 const WHY = { code: "focus", values: {} } as unknown as Reason;
 const WARM_UP: PlanStep = { kind: "metronome", id: "warm", title: "Warm-up", bpm: 70, subdivision: 1, minutes: 1, why: WHY };
@@ -82,10 +89,13 @@ function screen(run: RunState): void {
 
 type Out = { said: string[]; stops: number; pending: Array<() => void> };
 
-function mount(options: { voice?: boolean } = {}) {
+function mount(options: { voice?: boolean; lostStops?: number } = {}) {
   const out: Out = { said: [], stops: 0, pending: [] };
+  let lost = options.lostStops ?? 0;
   const uninstall = installCoachVoice({
-    // Speech lasts until the test ends it (or a stop does).
+    // Speech lasts until the test ends it, or a stop that arrives in time does
+    // (Rust settles the speak once the cancel is seen). A lost stop is one
+    // Rust received before the line had begun: it cancels nothing.
     speak: (text) =>
       new Promise<void>((resolve) => {
         out.said.push(text);
@@ -93,6 +103,11 @@ function mount(options: { voice?: boolean } = {}) {
       }),
     stop: () => {
       out.stops += 1;
+      if (lost > 0) {
+        lost -= 1;
+      } else {
+        out.pending.splice(0).forEach((resolve) => resolve());
+      }
       return Promise.resolve();
     },
   });
@@ -106,7 +121,7 @@ function mount(options: { voice?: boolean } = {}) {
     act(() => hook.result.current.dispatch(event));
     screen(hook.result.current.run);
   };
-  /** The engine starts: what `ipc.setPlaying(true)` does first, then the state it reports. */
+  /** The engine starts: the gate `ipc.setPlaying(true)` runs right after asking, then the state it reports. */
   const play = () => {
     soundStarting();
     setVoiceSounding(true);
@@ -192,20 +207,112 @@ describe("the coach's voice", () => {
     expect(s.out.said.slice(before)).toEqual([FINDING]);
   });
 
-  it("a Start pressed during speech cuts it at once, before the engine reports playing", () => {
+  it("a Start pressed during speech cuts it at once, before the engine reports playing", async () => {
     const s = mount();
     cleanup = s.uninstall;
     s.send({ type: "start", plan: PLAN, now: 0 });
     s.send({ type: "next", now: 1 });
     expect(s.out.said).toEqual([ORDER]);
     expect(s.out.stops).toBe(0);
-    // ipc.setPlaying(true) calls the sound gate before it asks the engine.
+    // ipc.setPlaying(true) runs the sound gate right after it asks the engine.
     soundStarting();
     expect(s.out.stops).toBe(1);
-    // The engine's own report changes nothing more: already quiet.
+    // The speak settles on the cut; then the engine's own report changes nothing more.
+    await flush();
     setVoiceSounding(true);
     s.send({ type: "takeStarted", now: 5 });
     expect(s.out.stops).toBe(1);
+  });
+
+  it("a lost stop is sent again when sound is reported and at takeStarted", async () => {
+    // The first stop reaches Rust before the line had begun: it cancels nothing.
+    const s = mount({ lostStops: 1 });
+    cleanup = s.uninstall;
+    s.send({ type: "start", plan: PLAN, now: 0 });
+    s.send({ type: "next", now: 1 });
+    soundStarting();
+    expect(s.out.stops).toBe(1);
+    await flush();
+    // Still speaking (the speak has not settled): the engine's report cuts it again.
+    setVoiceSounding(true);
+    expect(s.out.stops).toBe(2);
+    await flush();
+    // That one took: the speak settled, so takeStarted has nothing left to stop.
+    s.send({ type: "takeStarted", now: 5 });
+    expect(s.out.stops).toBe(2);
+  });
+
+  it("a lost stop is sent again at takeStarted when sound came by another road", async () => {
+    const s = mount({ lostStops: 2 });
+    cleanup = s.uninstall;
+    s.send({ type: "start", plan: PLAN, now: 0 });
+    s.send({ type: "next", now: 1 });
+    soundStarting();
+    await flush();
+    setVoiceSounding(true);
+    await flush();
+    expect(s.out.stops).toBe(2);
+    s.send({ type: "takeStarted", now: 5 });
+    expect(s.out.stops).toBe(3);
+  });
+
+  it("a coach key pressed while the order is being said speaks the key's line, with no stop before it", async () => {
+    const s = mount();
+    cleanup = s.uninstall;
+    s.send({ type: "start", plan: PLAN, now: 0 });
+    s.send({ type: "next", now: 1 });
+    expect(s.out.said).toEqual([ORDER]);
+    // The speak replaces the order itself (`tts_speak` cancels what is speaking):
+    // a stop of ours first could land after the new line began and cut it.
+    expect(sayNow("Next: Jam.")).toBe(true);
+    expect(s.out.said).toEqual([ORDER, "Next: Jam."]);
+    expect(s.out.stops).toBe(0);
+  });
+
+  it("leaving the Session drops a waiting line and cuts one being said", async () => {
+    const s = mount();
+    cleanup = s.uninstall;
+    s.send({ type: "start", plan: PLAN, now: 0 });
+    s.play();
+    s.send({ type: "timedStart", now: 1 });
+    s.send({ type: "next", now: 2 }); // deferred: the warm-up's last bar still sounds
+    setVoiceInSession(false); // Escape to Today
+    s.stop();
+    expect(s.out.said).toEqual([]);
+    // Nor does a key or a late note speak outside the Session.
+    expect(sayNow("Next: Jam.")).toBe(false);
+    setVoiceInSession(true);
+    // A line in flight is cut when the Session is left.
+    expect(sayNow("Next: Jam.")).toBe(true);
+    setVoiceInSession(false);
+    expect(s.out.stops).toBe(1);
+  });
+
+  it("nothing is spoken between a Start and the engine reporting sound", () => {
+    const s = mount();
+    cleanup = s.uninstall;
+    s.send({ type: "start", plan: PLAN, now: 0 });
+    s.send({ type: "next", now: 1 });
+    soundStarting();
+    expect(soundIsStarting()).toBe(true);
+    expect(sayNow("Next: Jam.")).toBe(false);
+    setVoiceSounding(true);
+    expect(soundIsStarting()).toBe(false);
+  });
+
+  it("a Start the engine never reports stops holding the voice after a moment", () => {
+    vi.useFakeTimers();
+    try {
+      const s = mount();
+      cleanup = s.uninstall;
+      soundStarting();
+      expect(sayNow("Next: Jam.")).toBe(false);
+      vi.advanceTimersByTime(2_500);
+      expect(soundIsStarting()).toBe(false);
+      expect(sayNow("Next: Jam.")).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("takeStarted alone cuts speech too (a Start that came by another road)", () => {

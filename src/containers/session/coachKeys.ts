@@ -14,6 +14,7 @@
  * the big button followed, in the sentences the Session already says.
  */
 import { findingFor } from "../../coach/coachSlot";
+import { soundIsStarting } from "../../coach/voice";
 import { reasonLine } from "../../session/coachWords";
 import { currentStep } from "../../session/runner";
 import type { BigAction, RunState, TakeOutcome } from "../../session/runner";
@@ -23,8 +24,13 @@ import type { SessionRun } from "./hooks/useSessionRun";
 
 type T = Parameters<typeof bigLabel>[1];
 
-/** Where the coach's keys answer: a ready screen of an Exercise, or a result. */
+/**
+ * Where the coach's keys answer: a ready screen of an Exercise, or a result.
+ * Not between a Start and the engine reporting sound: the phase is still
+ * `ready` then, and the count-in is about to begin (`soundIsStarting`).
+ */
 export function coachKeysAnswer(run: Pick<RunState, "phase">): boolean {
+  if (soundIsStarting()) return false;
   return run.phase === "ready" || run.phase === "result";
 }
 
@@ -123,6 +129,8 @@ export function suggestionsOnScreen(
 export function acceptSuggestion(
   session: Pick<SessionRun, "run" | "big" | "loop" | "eyes" | "actions">,
 ): boolean {
+  // A loop pressed between Start and the engine's report would stop the count-in.
+  if (!coachKeysAnswer(session.run)) return false;
   const on = suggestionsOnScreen(session);
   if (on.length !== 1) return false;
   on[0].press();

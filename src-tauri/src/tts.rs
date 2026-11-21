@@ -1295,6 +1295,14 @@ pub fn dim_enter(dim: &mut TtsDimState, live_volume: f32) -> Option<f32> {
     }
 }
 
+/// Whether a `tts_speak` dims the metronome while it lives: yes unless the
+/// caller says `dim: false`. The Session's boundary voice does, because its
+/// lines are never spoken over sound, and a dim still held when Start cuts
+/// one would leave the count-in's first click at 15%.
+pub fn speak_dims(dim: Option<bool>) -> bool {
+    dim.unwrap_or(true)
+}
+
 /// Apply an exit-dim transition. Returns the volume to RESTORE when
 /// this exit drains the counter to zero (caller writes it back); None
 /// when there are still outer dims active.
@@ -1811,6 +1819,16 @@ mod tts_playback_tests {
 #[cfg(test)]
 mod tts_dim_tests {
     use super::*;
+
+    #[test]
+    fn a_speak_dims_unless_told_not_to() {
+        // Every existing caller passes nothing: unchanged, it dims.
+        assert!(speak_dims(None));
+        assert!(speak_dims(Some(true)));
+        // The Session's boundary voice: no dim, so the dim state is never
+        // entered and a cut leaves nothing to restore.
+        assert!(!speak_dims(Some(false)));
+    }
 
     #[test]
     fn single_dim_records_and_restores_original() {

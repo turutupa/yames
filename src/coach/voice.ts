@@ -20,10 +20,16 @@
  * - whenever anything sounds (`setSounding`, the engine's own state: a Take, a
  *   warm-up, a jam, a loop, the demo of "Hear it first");
  * - from the moment anything asks the engine to play (`soundGate`), which is
- *   how a Start pressed mid-sentence cuts it before the count-in, not after.
+ *   how a Start pressed mid-sentence cuts it at the count-in's start, not
+ *   after the engine reports it; and until that report, the coach keys do
+ *   nothing either (`soundIsStarting`);
+ * - outside the Session (`setVoiceInSession`).
  *
  * A cut is `ttsStop()`, and only for speech this module started: the voice
- * preview in Settings is not the coach's to stop.
+ * preview in Settings is not the coach's to stop. It is sent again on every
+ * later cut until the speak settles, since one that reached Rust before the
+ * line had begun cancels nothing. The speech never dims the click
+ * (`ttsSpeak(text, { dim: false })` in `useCoachVoice`).
  *
  * It subscribes to the coach's bus (Session events, never the beat) and holds
  * no React state: nothing renders because of it.
@@ -49,10 +55,27 @@ type State = {
   inTake: boolean;
   /** The boundary that may still speak once: its kind and the bus `seq` that opened it. */
   armed: { kind: VoiceBoundary; seq: number; text?: string } | null;
-  /** Our own speech in flight, by token; 0 when none. */
+  /**
+   * Our own speech that may still be sounding, by token; 0 when none. Held
+   * until the speak call settles, not until the first cut: a stop that Rust
+   * received before the line had begun cancels nothing, so a later cut sends
+   * it again.
+   */
   speaking: number;
   token: number;
+  /** The Session is the view (`useCoachVoice`). Leaving it hushes and forgets. */
+  inSession: boolean;
+  /**
+   * When a Start was last asked for (`soundGate`), until the engine reports
+   * sound, playback stops or a Session boundary passes; null when none. Read
+   * against `STARTING_MS` so a Start the engine never honoured cannot keep
+   * the voice and the keys shut for good.
+   */
+  startingAt: number | null;
 };
+
+/** How long a Start the engine has not yet reported keeps the voice and the coach keys shut. */
+const STARTING_MS = 2_000;
 
 const state: State = {
   out: null,
@@ -62,26 +85,51 @@ const state: State = {
   armed: null,
   speaking: 0,
   token: 0,
+  inSession: true,
+  startingAt: null,
 };
 
-/** Stop our own speech, if any is in flight. */
+/** Stop our own speech, if any may still be sounding. Sent again on every cut until the speak settles. */
 export function hushCoachVoice(): void {
   state.armed = null;
   if (state.speaking === 0) return;
-  state.speaking = 0;
   stopOut(state.out);
 }
 
+/**
+ * A Start has been asked for and the engine has not yet reported sound: the
+ * voice is quiet and the coach keys do nothing (finding 6 of the c1b2b review).
+ */
+export function soundIsStarting(): boolean {
+  if (state.startingAt === null) return false;
+  if (Date.now() - state.startingAt < STARTING_MS) return true;
+  state.startingAt = null;
+  return false;
+}
+
+function startingHeard(): void {
+  state.startingAt = Date.now();
+  hushCoachVoice();
+}
+
 function canSpeak(): boolean {
-  return state.enabled && !state.sounding && !state.inTake && state.out !== null;
+  return (
+    state.enabled &&
+    state.inSession &&
+    !state.sounding &&
+    !state.inTake &&
+    !soundIsStarting() &&
+    state.out !== null
+  );
 }
 
 function speak(text: string): void {
   const out = state.out;
   const said = text.trim();
   if (!out || !said) return;
-  // A new line replaces the one being said: one voice, one sentence at a time.
-  if (state.speaking !== 0) stopOut(out);
+  // A new line replaces the one being said: `tts_speak` cancels whatever is
+  // speaking itself. No stop of our own first: one that reached Rust after
+  // the new line had begun would cut the new line instead.
   const token = ++state.token;
   state.speaking = token;
   const done = () => {
@@ -106,6 +154,7 @@ function heard(event: Delivered): void {
   switch (event.type) {
     case "takeStarted":
       state.inTake = true;
+      state.startingAt = null;
       hushCoachVoice();
       return;
     case "takeResult":
@@ -140,7 +189,7 @@ export function sayAtBoundary(kind: VoiceBoundary, text: string): void {
   if (!armed || armed.kind !== kind || armed.text !== undefined) return;
   // The engine still winding down from what came before (a warm-up's last
   // bar, a loop): kept, and said when it stops, if nothing else happens first.
-  if (state.enabled && state.out && !state.inTake && state.sounding) {
+  if (state.enabled && state.inSession && state.out && !state.inTake && state.sounding) {
     state.armed = { ...armed, text };
     return;
   }
@@ -165,10 +214,25 @@ export function setVoiceEnabled(on: boolean): void {
   if (!on) hushCoachVoice();
 }
 
-/** The engine is playing (or stopped). Playing stops our speech at once. */
+/**
+ * The Session is the view, or not. Leaving it drops a line waiting for the
+ * engine to stop and cuts one being said: the Session's order is not heard
+ * on Today or the Metronome.
+ */
+export function setVoiceInSession(on: boolean): void {
+  state.inSession = on;
+  if (!on) hushCoachVoice();
+}
+
+/**
+ * The engine is playing (or stopped). Playing stops our speech at once, and
+ * again if a first stop was lost (the speak still unsettled). Either report
+ * ends the "starting" window.
+ */
 export function setVoiceSounding(on: boolean): void {
   if (state.sounding === on) return;
   state.sounding = on;
+  state.startingAt = null;
   if (on) {
     hushCoachVoice();
     return;
@@ -188,7 +252,7 @@ export function setVoiceSounding(on: boolean): void {
 export function installCoachVoice(out: VoiceOut): () => void {
   state.out = out;
   const offBus = subscribe(heard);
-  const offSound = onSoundStarting(hushCoachVoice);
+  const offSound = onSoundStarting(startingHeard);
   return () => {
     offBus();
     offSound();
@@ -206,4 +270,6 @@ export function resetCoachVoice(): void {
   state.armed = null;
   state.speaking = 0;
   state.token = 0;
+  state.inSession = true;
+  state.startingAt = null;
 }
