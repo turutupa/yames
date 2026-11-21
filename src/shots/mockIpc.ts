@@ -2233,9 +2233,12 @@ export function installShotMock(shot: Shot, theme: string): void {
       } else if (coachReport && toolFinding) {
         // `?toolFinding=K` (leg c5c2): the free-play close of the run that just
         // stopped, carrying what `analyze_free_play` ranked first.
+        // Wall-clock ms, as the engine sends them: the note ties a finding to
+        // the run by the segment's own end (c5c2b L3).
+        const endMs = Date.now();
         emit("practice-segment-ended", {
-          startMs: 0,
-          endMs: 30_000,
+          startMs: endMs - 30_000,
+          endMs,
           score: 82,
           componentScores: { intervalConsistency: 0.84, gridAlignment: 0.81, hitCompleteness: 0.88, onsetEfficiency: 0.92 },
           bpm: 120,
