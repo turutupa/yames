@@ -33,4 +33,13 @@ fourteen recipe word lists, the translations, Today's part and the scenes.
 
 ## Gates (logs `/tmp/coach-t2c/`)
 
-See the final report.
+- tsc: pass (coach-t2c-tsc-4, on the last commit).
+- vitest, full (coach-t2c-test, `vitest.log`): 50,260 passed, 3 files failed: the known `TabStage.render.test.tsx`;
+  `i18n.songs-wave` plural forms (mine: fixed after, see below); `useSessionRun.listen` "plays the demo song" under
+  load. After the fix: songs-wave, locales, listen, tendencies, myExercises 83 of 83 (coach-t2c-vt-3). Named
+  Ask/tools/session suite before it: 3,443 passed (coach-t2c-vt-2, `vt2.log`).
+- build: pass (coach-t2c-build-2). The generator is its own chunk now (`custom-*.js`, 100 kB; main 6,588 -> 6,488 kB).
+- layout `ask.spec.ts` + `ask-tools.spec.ts`, `YAMES_LAYOUT_PORT=7493`: 37 passed (coach-t2c-layout-2,
+  `layout2.log`). The first run (port 7471) was void: "something else answered" on the port, goto timeouts.
+- Rust precheck of the regenerated grammar: `the_generated_choice_grammar_passes_the_precheck` ok (coach-t2c-rust-gbnf).
+- Held-out eval, rules only: `coach-eval.mjs rules` summary identical on `coach` and here (`rules-coach/`, `rules-t2c/`).
