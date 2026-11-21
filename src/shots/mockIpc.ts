@@ -1517,6 +1517,8 @@ export function installShotMock(shot: Shot, theme: string): void {
     list_path_states: () => pathStore.states,
     list_path_takes: () => pathStore.takes,
     list_exercise_ceilings: () => pathStore.ceilings,
+    // The long view (c4b1), read by the look-back on Progress (c4b2). No seed has spans yet.
+    list_clean_tempo_spans: () => [],
     save_path_state: (a) => {
       const row = a?.state as PathStateRow;
       pathStore.states = [...pathStore.states.filter((s) => s.pathId !== row.pathId), row];
