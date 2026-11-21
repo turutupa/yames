@@ -142,12 +142,15 @@ export function fitRow(row: HTMLElement): void {
 /**
  * Re-fits when `label` changes, on resize, and once the web fonts land.
  *
- * Keyed on the row element itself, not on a ref object: a row that is
- * unmounted and mounted again (the footer's row comes and goes with Watch's
- * availability) is a new element under the same ref, and an effect keyed on
- * the ref kept measuring and observing the old one. The new row was then
- * never fitted, and ran 3–5px off a 360px phone once its controls settled
- * (lf1). Pass the element from a callback ref (`useState`'s setter).
+ * Keyed on the row element itself, not on a ref object: a row that mounts
+ * after the first render (the footer's row is null while Watch is not
+ * available) or mounts again is a new element under the same ref, and an
+ * effect keyed on the ref would not run for it until the label changed. Pass
+ * the element from a callback ref (`useState`'s setter).
+ *
+ * The controls in the row must not animate their size: the fit takes
+ * `data-fit` off to measure, and a `transition` on padding or width is then
+ * measured mid-way (lf1: Watch under `button`'s `transition: all`).
  */
 export function useFitRow(row: HTMLElement | null, label: string): void {
   useLayoutEffect(() => {

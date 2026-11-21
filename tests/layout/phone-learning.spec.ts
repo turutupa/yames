@@ -398,16 +398,9 @@ test.describe("the learning side on a phone", () => {
         );
         expect(rects.length, "Watch, Sound and what the footer carries").toBeGreaterThanOrEqual(3);
         const rowBox = (await row.boundingBox())!;
-        const diag = await row.evaluate((el) => ({
-          sw: el.scrollWidth,
-          cw: el.clientWidth,
-          kids: Array.from(el.children).map((c) => {
-            const cs = getComputedStyle(c);
-            return `${c.className}|ow=${(c as HTMLElement).offsetWidth}|bw=${c.getBoundingClientRect().width.toFixed(1)}|flex=${cs.flex}|ml=${cs.marginLeft}|tf=${cs.transform}|ov=${cs.overflow}`;
-          }),
-          parent: `${el.parentElement?.className}|${el.parentElement?.getBoundingClientRect().width}`,
-        }));
-        const seen = `fit=${await row.getAttribute("data-fit")} row=${Math.round(rowBox.x)}..${Math.round(rowBox.x + rowBox.width)} ${JSON.stringify(rects)} ${JSON.stringify(diag)}`;
+        // What the fit saw, for a failure: `data-fit` and the row's own overflow.
+        const overflow = await row.evaluate((el) => `scrollWidth ${el.scrollWidth}, clientWidth ${el.clientWidth}`);
+        const seen = `data-fit=${await row.getAttribute("data-fit")}, row ${Math.round(rowBox.x)}..${Math.round(rowBox.x + rowBox.width)}, ${overflow}, ${JSON.stringify(rects)}`;
         for (const r of rects) {
           // Centred on one line: a taller control may start a few px higher.
           expect(Math.abs(r.top + r.h / 2 - (rects[0].top + rects[0].h / 2)), `the footer's row broke into two: ${seen}`).toBeLessThanOrEqual(2);

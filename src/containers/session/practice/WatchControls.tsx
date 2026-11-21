@@ -93,8 +93,8 @@ export function WatchRow({ watch }: { watch: WatchControl }) {
  */
 export function WatchFooterRow({ watch, children }: { watch: WatchControl; children?: ReactNode }) {
   const { i18n } = useTranslation();
-  // The element, not a ref object: the row is unmounted while Watch is not
-  // available, and a row mounted again must be fitted again (`useFitRow`).
+  // The element, not a ref object: the row is not there while Watch is not
+  // available, and a row that mounts later must be fitted too (`useFitRow`).
   const [row, setRow] = useState<HTMLDivElement | null>(null);
   useFitRow(row, `${i18n.language}|${watch.showing}|${watch.again}|${watch.hasSound}`);
   if (!watch.canWatch) return null;
