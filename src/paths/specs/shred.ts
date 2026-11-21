@@ -9,7 +9,7 @@
  * Picking and Sweep Picking specs, not imported from them: each Path owns its
  * notes, so a change to a deep-dive Path never moves this one under a player.
  */
-import { definePath } from "../spec";
+import { definePath, withCues } from "../spec";
 import type { ExerciseSpec, StepSpec, VariantParams } from "../spec";
 import type { PassBar } from "../format";
 import {
@@ -27,6 +27,7 @@ import {
   threeNpsCells,
 } from "../templates";
 import type { FretCell } from "../templates";
+import { SHRED_CUES } from "./shred-cues";
 
 // ---------------------------------------------------------------------------
 // Pass bars. Easy Steps ask for tighter evenness; finales ask for 16 bars.
@@ -1810,7 +1811,7 @@ function pullDescent(): string {
 // The Path.
 // ---------------------------------------------------------------------------
 
-export default definePath({
+export default withCues(definePath({
   id: "shred",
   title: "Shred",
   kind: "mechanics",
@@ -1945,4 +1946,4 @@ export default definePath({
       ],
     },
   ],
-});
+}), SHRED_CUES);
