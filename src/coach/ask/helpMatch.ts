@@ -103,7 +103,11 @@ const TUNING = new RegExp(
     "\\b(?<!fine )tune (my|your|the|a|this|each|every|all|all the|all my|all of my) (guitar|guitars|bass|instrument|[a-g] string|low e|high e|strings?)\\b",
     "\\b(how|should|can|do|does|did) (do |can |should )?(i|you|we) tune\\b",
     "\\b(?<!fine )tuned (to|down|up|in|correctly|right|properly)\\b",
-    "\\b(drop d|drop c|open g tuning|dadgad|half step down|whole step down|eb standard|e flat standard)\\b",
+    // "Half step down" alone is a move ("move it a half step down" on Jam),
+    // not a tuning: only with "tune" / "tuned" beside it (pol2 extras A5;
+    // with "tuning" anywhere, the first line above already says yes).
+    "\\b(drop d|drop c|open g tuning|dadgad|eb standard|e flat standard)\\b",
+    "\\btuned? (a |one )?(half|whole) steps? down\\b",
     "\\b(string|strings|guitar|bass) (is|are|sounds?|sound) (sharp|flat)\\b",
   ].join("|"),
 );
