@@ -1455,7 +1455,11 @@ export function installShotMock(shot: Shot, theme: string): void {
     // warm-up loads no song, so only a Take (a song loaded) is hurried. A
     // warm-up at 15 ms a beat moved the camera every 60 ms and hid what the
     // neck does at a real tempo (acceptance P0-1).
-    const fast = shot.session && shot.session.stop !== "playing" && shot.session.stop !== "timed" && !!songTransport;
+    // The Take after "Go again" in a `playingAgain` scene is the one the scene
+    // is about, so it runs at its tempo too: hurried, it was over before the
+    // smoothness suite could watch it on the neck (pol1).
+    const watched = (window as unknown as { __SHOT_TAKE_WATCHED__?: boolean }).__SHOT_TAKE_WATCHED__ === true;
+    const fast = shot.session && shot.session.stop !== "playing" && shot.session.stop !== "timed" && !watched && !!songTransport;
     const demoBpm = songDemo ? songTransport?.tempoMap[0]?.bpm : undefined;
     beatTimer = setTimeout(beatLoop, fast && !songDemo ? 15 : 60000 / (demoBpm || (STATE.bpm as number)));
   }

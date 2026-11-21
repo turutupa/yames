@@ -74,15 +74,19 @@
           "notes": "Laatste sessie, {{exercise}}: {{value}}% juiste noten op {{bpm}} BPM.",
           "plain": "De laatste sessie eindigde bij {{exercise}} op {{bpm}} BPM."
         },
-        "backRungs": "Vandaag begint een trede lager dan anders.",
-        "backRungs_other": "Vandaag begint {{count}} treden lager dan anders.",
+        "backAgo": "Dat was {{count}} dag geleden.",
+        "backAgo_other": "Dat was {{count}} dagen geleden.",
+        "backAway": "Je laatste sessie was {{count}} dag geleden.",
+        "backAway_other": "Je laatste sessie was {{count}} dagen geleden.",
+        "backStartsAt": "Vandaag begin je op {{bpm}} BPM.",
+        "backStartsAtOther": "Vandaag begint {{exercise}} op {{bpm}} BPM.",
         "ungraded": {
-          "today": "{{count}} minuut aan takes vandaag, de laatste {{exercise}} op {{bpm}} BPM.",
-          "today_other": "{{count}} minuten aan takes vandaag, de laatste {{exercise}} op {{bpm}} BPM.",
-          "yesterday": "{{count}} minuut aan takes gisteren, de laatste {{exercise}} op {{bpm}} BPM.",
-          "yesterday_other": "{{count}} minuten aan takes gisteren, de laatste {{exercise}} op {{bpm}} BPM.",
-          "lastSession": "{{count}} minuut aan takes in je laatste sessie, de laatste {{exercise}} op {{bpm}} BPM.",
-          "lastSession_other": "{{count}} minuten aan takes in je laatste sessie, de laatste {{exercise}} op {{bpm}} BPM."
+          "today": "{{count}} minuut aan takes vandaag, als laatste {{exercise}} op {{bpm}} BPM.",
+          "today_other": "{{count}} minuten aan takes vandaag, als laatste {{exercise}} op {{bpm}} BPM.",
+          "yesterday": "{{count}} minuut aan takes gisteren, als laatste {{exercise}} op {{bpm}} BPM.",
+          "yesterday_other": "{{count}} minuten aan takes gisteren, als laatste {{exercise}} op {{bpm}} BPM.",
+          "lastSession": "{{count}} minuut aan takes in je laatste sessie, als laatste {{exercise}} op {{bpm}} BPM.",
+          "lastSession_other": "{{count}} minuten aan takes in je laatste sessie, als laatste {{exercise}} op {{bpm}} BPM."
         },
         "samePlace": "Vandaag op dezelfde plek."
       },
@@ -270,7 +274,7 @@
       "endTake": "Take beëindigen",
       "goAgain": "Nog een keer, {{bpm}} BPM",
       "next": "Volgende: {{title}}",
-      "finish": "Bekijk hoe het ging",
+      "finish": "Sessie afronden",
       "done": "Klaar",
       "slower": "Langzamer",
       "faster": "Sneller",

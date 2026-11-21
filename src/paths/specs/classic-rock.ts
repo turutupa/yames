@@ -9,7 +9,7 @@
  * notes are a song's. Choosing your own notes is a short "your turn" at the end
  * of some Steps, self-checked and labelled "not checked yet".
  */
-import { definePath } from "../spec";
+import { definePath, withCues } from "../spec";
 import type { ExerciseSpec, VariantParams } from "../spec";
 import type { PassBar } from "../format";
 import { handAt, ladder, moveChart, pentatonic, shiftFrets } from "../templates";
@@ -22,6 +22,7 @@ import {
   SOLO_IN_E,
 } from "./classic-rock-more";
 import { EMBELLISHMENT_IN_A, SIXES_AT_TWELVE } from "./classic-rock-encore";
+import { CLASSIC_ROCK_CUES } from "./classic-rock-cues";
 
 // ---------------------------------------------------------------------------
 // Grading. Every written line carries a timing bar. Tighter on the early
@@ -214,7 +215,7 @@ const THREE_OVER_FOUR = (() => {
   return `/16 ${bars.join(" | ")} | /4 1:5 r /2 r`;
 })();
 
-export default definePath({
+export default withCues(definePath({
   id: "classic-rock",
   title: "Classic Rock",
   kind: "theory",
@@ -1336,4 +1337,4 @@ export default definePath({
       ],
     },
   ],
-});
+}), CLASSIC_ROCK_CUES);

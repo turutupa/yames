@@ -644,8 +644,15 @@ export function takeNote(
           return { ...cell, ...folded, spot: cell.state === "missed" && spotBars.has(folded.patternBar) };
         });
         const rounds = roundsIn(cells.length, patternBars);
+        // The scorer's held stretch is pooled over windows (`score/pass.rs`), so
+        // a bar inside it can still be crossed on the strip, which judges each
+        // bar alone. "N bars in a row held" over a crossed bar argued with the
+        // picture under it: said only when every bar of the stretch is uncrossed.
+        const held = stripped.held;
+        const heldUncrossed =
+          !!held && !cells.some((c) => c.n >= held.from && c.n < held.from + held.count && c.state === "missed");
         const label: Line =
-          passed && stripped.held
+          passed && stripped.held && heldUncrossed
             ? { key: "session.note.strip.held", values: { count: stripped.held.count } }
             : patternBars > 1 && rounds > 1
               ? { key: "session.note.strip.roundEvery", values: { count: patternBars } }

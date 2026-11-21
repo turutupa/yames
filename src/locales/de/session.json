@@ -74,15 +74,19 @@
           "notes": "Letzte Session, {{exercise}}: {{value}} % richtige Töne bei {{bpm}} BPM.",
           "plain": "Die letzte Session endete bei {{exercise}} mit {{bpm}} BPM."
         },
-        "backRungs": "Heute startest du eine Stufe tiefer als sonst.",
-        "backRungs_other": "Heute startest du {{count}} Stufen tiefer als sonst.",
+        "backAgo": "Das ist {{count}} Tag her.",
+        "backAgo_other": "Das ist {{count}} Tage her.",
+        "backAway": "Deine letzte Session war vor {{count}} Tag.",
+        "backAway_other": "Deine letzte Session war vor {{count}} Tagen.",
+        "backStartsAt": "Heute startest du bei {{bpm}} BPM.",
+        "backStartsAtOther": "Heute startet {{exercise}} bei {{bpm}} BPM.",
         "ungraded": {
-          "today": "{{count}} Minute Takes heute, der letzte: {{exercise}} bei {{bpm}} BPM.",
-          "today_other": "{{count}} Minuten Takes heute, der letzte: {{exercise}} bei {{bpm}} BPM.",
-          "yesterday": "{{count}} Minute Takes gestern, der letzte: {{exercise}} bei {{bpm}} BPM.",
-          "yesterday_other": "{{count}} Minuten Takes gestern, der letzte: {{exercise}} bei {{bpm}} BPM.",
-          "lastSession": "{{count}} Minute Takes in deiner letzten Session, der letzte: {{exercise}} bei {{bpm}} BPM.",
-          "lastSession_other": "{{count}} Minuten Takes in deiner letzten Session, der letzte: {{exercise}} bei {{bpm}} BPM."
+          "today": "{{count}} Minute Takes heute, zum Schluss {{exercise}} bei {{bpm}} BPM.",
+          "today_other": "{{count}} Minuten Takes heute, zum Schluss {{exercise}} bei {{bpm}} BPM.",
+          "yesterday": "{{count}} Minute Takes gestern, zum Schluss {{exercise}} bei {{bpm}} BPM.",
+          "yesterday_other": "{{count}} Minuten Takes gestern, zum Schluss {{exercise}} bei {{bpm}} BPM.",
+          "lastSession": "{{count}} Minute Takes in deiner letzten Session, zum Schluss {{exercise}} bei {{bpm}} BPM.",
+          "lastSession_other": "{{count}} Minuten Takes in deiner letzten Session, zum Schluss {{exercise}} bei {{bpm}} BPM."
         },
         "samePlace": "Heute an derselben Stelle."
       },
@@ -270,7 +274,7 @@
       "endTake": "Take beenden",
       "goAgain": "Noch mal, {{bpm}} BPM",
       "next": "Weiter: {{title}}",
-      "finish": "Wie lief's?",
+      "finish": "Session beenden",
       "done": "Fertig",
       "slower": "Langsamer",
       "faster": "Schneller",

@@ -13,9 +13,9 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { PathTakeRow } from "../../ipc";
 import type { PathDoc } from "../../paths/format";
-import { barLengthTicks } from "../../paths/format";
-import { calendarDaysBetween, currentStepOf, factsOf, isUngradedTake, sessionKeyOf } from "../../session/progress";
+import { currentStepOf, factsOf, isUngradedTake } from "../../session/progress";
 import { findExercise } from "../../session/packs";
+import { totalsFrom } from "../../session/totals";
 import { CLEAN_TEMPO_MIN_BARS } from "../../session/grade";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { useNeck3d } from "./hooks/useNeck";
@@ -118,26 +118,9 @@ export function groupsFrom(takes: readonly PathTakeRow[], paths: readonly PathDo
   return out.sort((a, b) => b.lastAt - a.lastAt);
 }
 
-/**
- * The top row. Minutes are the Takes' own length, from their bars and tempo,
- * so a warm-up or a pause is not counted: played, not "spent in the app".
- */
-export function totalsFrom(takes: readonly PathTakeRow[], paths: readonly PathDoc[], now = Date.now()) {
-  let seconds = 0;
-  for (const take of takes) {
-    const path = paths.find((p) => p.id === take.pathId);
-    const meter = (path && findExercise(path, take.exerciseId)?.exercise.meter) ?? { numerator: 4, denominator: 4 };
-    if (take.bpm > 0) seconds += (take.bars * (barLengthTicks(meter) / 960) * 60) / take.bpm;
-  }
-  const sessions = new Set(takes.map(sessionKeyOf)).size;
-  // Days back from today with a Take on them; a streak still counts until a
-  // whole day has gone by without one.
-  const days = new Set(takes.map((t) => calendarDaysBetween(t.startedAt, now)));
-  const start = days.has(0) ? 0 : days.has(1) ? 1 : -1;
-  let streak = 0;
-  if (start >= 0) while (days.has(start + streak)) streak += 1;
-  return { minutes: Math.round(seconds / 60), seconds, sessions, streak };
-}
+// The top row's numbers live in `src/session/totals.ts`; re-exported so the
+// Session's streak keeps its import.
+export { totalsFrom };
 
 /** A value's trend in a row. Decorative beside the number it sits next to; each point says its value on hover. */
 function Spark({

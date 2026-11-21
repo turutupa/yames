@@ -6,12 +6,13 @@
  * hears most firmly; the pull-offs and hammer-ons between them cost nothing if
  * they are too quiet to catch. Everything is graded on timing, never on pitch.
  */
-import { definePath } from "../spec";
+import { definePath, withCues } from "../spec";
 import type { ExerciseSpec, VariantParams } from "../spec";
 import type { PassBar } from "../format";
 import { ladder, repeat, shiftFrets } from "../templates";
 import { CELL_IN_E_MINOR, SECOND_SOLO, TWO_TAPS_THROUGH_CHORDS } from "./tapping-more";
 import { SCALE_TAP_AGAIN, SIXTEENTHS_IN_E_MINOR, STRINGS_THROUGH_CHORDS } from "./tapping-encore";
+import { TAPPING_CUES } from "./tapping-cues";
 
 const even = (min: number, overBars = 4): PassBar => ({ metric: "timingEvenness", min, overBars });
 const heard = (min: number, overBars = 4): PassBar => ({ metric: "notesHeard", min, overBars });
@@ -121,7 +122,7 @@ function warm(p: VariantParams, value: string, group: (s: number, f: number[]) =
 }
 const WARM_KEYS = { key: Object.keys(WARM_SHIFT) } as const;
 
-export default definePath({
+export default withCues(definePath({
   id: "tapping",
   title: "Tapping",
   kind: "mechanics",
@@ -889,4 +890,4 @@ export default definePath({
       ],
     },
   ],
-});
+}), TAPPING_CUES);

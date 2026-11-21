@@ -2766,6 +2766,15 @@ pub fn list_exercise_ceilings(
     store.read_or(Vec::new(), |db| db.list_exercise_ceilings())
 }
 
+/// The first and the best clean tempo of every Exercise, over every Take kept
+/// (the long view; Progress asks for it when it opens). Read-only.
+#[tauri::command(async)]
+pub fn list_clean_tempo_spans(
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Vec<crate::db::CleanTempoSpan> {
+    store.read_or(Vec::new(), |db| db.list_clean_tempo_spans())
+}
+
 // ---------------------------------------------------------------------------
 // The coach's judgement, and its ears — the door to `findings.rs` and
 // `pitch.rs`
