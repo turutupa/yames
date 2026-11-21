@@ -33,6 +33,17 @@ Branch `coach-c3b2a`. Logs `/tmp/coach-c3b2a/`.
 (`answerTyped` calls `stopModelTurn` first); the panel unmounting (`askModelPanel.test.tsx`). None starts
 when the take gate, the context's Take or a jam take says so. A result after a cancel is dropped.
 
+## Gates
+
+- tsc: pass (`coach-c3b2a-tsc3`). Build: pass (`coach-c3b2a-build`).
+- vitest named (12 files, 509 tests): pass. Full `npm run test`: 50068 passed, 1 file failed: the known
+  `TabStage.render.test.tsx` (symlink). `/tmp/coach-c3b2a/vitest.log`.
+- Layout `ask ask-tools ask-typed ask-cards coach-model short-window smooth`: 170 passed, 3 failed, all
+  `smooth.spec.ts` long tasks (`/tmp/coach-c3b2a/pw2.log`). Re-run of smooth alone: 4 failed
+  (`smooth2.log`); `coach` untouched, same spec, same hour: 6 failed (`smooth-coach.log`). Load average
+  60 to 107 throughout: not evidence either way. Ask is not mounted in a Take and this leg adds nothing per
+  beat. Owed: smooth on a quiet machine.
+
 ## Open
 
 - CPU backend: a click starting while a generation is in flight does not cancel it (the gate only stops
