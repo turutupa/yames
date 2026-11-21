@@ -51,6 +51,29 @@ decisions), `plans/tasks/coach/RULES-FOR-PROMPTS.md` (the rules every agent gets
 - Never: GitHub (no push, issues, PRs, boards), `npm install`, `npm run tauri dev`, `rm`, `sudo`.
   `ssh rtx … powershell.exe` was refused by this session's permission mode (see "Owed").
 
+## SESSION 5, in flight (started 2026-11-20 23:45 by this machine's clock; newer than everything below)
+
+Every agent's prompt starts from `/tmp/coach-orch/s5/RULES-INLINE.md` (the rules block, session 5's
+copy; if `/tmp` was cleared, `RULES-FOR-PROMPTS.md` is the same list) plus `code-leg-prompt.md`.
+The relay's answers (OWNER-UPDATES, ~23:15): the planner ignores not-fair Takes too; expired
+"Leave out" entries stay on disk, not shown; the tip catalogue is translated whole, most-seen first;
+training in a venv under `~/scratch`.
+
+| Leg (worktree `~/yames-coach-<x>`) | Launched | What | When it reports |
+|---|---|---|---|
+| int1b (on `-int1`) | 23:55 | the two reviews' fixes (`t2bb-review.md`, `c2b1b-review.md`) | re-read `/tmp/coach-orch/int1b-fix.diff` (fresh reviewer), merge `coach-int1`, `touch /tmp/coach-orch/s5/int1-merged` (c5a2b waits on it), gates with `ask ask-tools ask-typed ask-cards notebook my-exercises coach-session settings phone-header phone-learning short-window`; `done-leg.sh int1 c2b1b c4a2 t2b`; then launch rem2, c4b2, t2c, c2b2a, c3b1b, c3b2a, pol2 |
+| c5c2m (on `-c5c2`) | 23:55 | `merge coach`, the second review's fixes (`c5c2b-review.md`: MERGE AFTER FIXES, audio side clean; M-1 the counts are of notes on the click's ticks: wording), gates | if Rust changed after the review: a short re-read of `/tmp/coach-orch/c5c2m-fix.diff`; merge; `gates-rust.sh tool-coach` |
+| c5a2b (on `-c5a2`) | 00:05 | the review's fixes (`c5a2-review.md`: overdue passages called "due today" in eight locales; "% right notes" from the previous pass's recording), then `merge coach` once int1 is in (the due line gates on the raw input, not on `withoutCustomTakes`) | read the hunk near the recording path, merge, gates `songs-coach songs-review today-line short-window phone-learning` |
+| c5b1c | 23:55 | the audio re-read's four LOW (`c5b1b-review.md`) | audio reviewer on `/tmp/coach-orch/c5b1c-review.diff`, merge, `gates-rust.sh`; then the probe on a quiet machine |
+| c5b2 | 00:15 | the hear-back chip | reviewer on `/tmp/coach-orch/c5b2-review.diff` (R: `useSessionRun.ts`, `useListenDemo.ts`), merge after c5b1c |
+| c3bp | 00:00 | the prompt fixes the measurement asked for; re-measure both tiers into `~/scratch/yames-c3bp-results/` | merge (no review flag unless Rust changed); its `choicePrompt.ts` is what c3d renders with |
+| c3d1 | 00:00 | the router's training records (never the held-out set), a validation split, `scripts/coach-train.mjs render` | merge; with c3denv done launch **c3d2** (the trial, the training jobs, the table against stock) |
+| c3denv | 00:00 | venv `~/scratch/yames-c3d/venv`, Qwen3 0.6B / 1.7B / 4B safetensors, `train_lora.py`, the LoRA → GGUF → llama.cpp-with-grammar smoke test, timing rows | merge (scripts under `evals/coach/train/env/`) |
+| c5c3 | 00:00 | the tip catalogue into `toolTips.json`, fifteen locales, most-seen first | merge, gates with `tool-coach`; c5c4 if it handed off |
+
+Still owed after these: the full layout suite (in `~/yames-coach-night`), the hear-back probe on a
+quiet machine, then milestones 2 to 5 as listed below.
+
 ## READ THIS FIRST: where session 4 stopped (2026-11-20, 23:05 by this machine's clock, at its context limit)
 
 Newer than everything below; where they differ, this wins. **Delivered: 1m and 1n** (`STATUS.md`).
