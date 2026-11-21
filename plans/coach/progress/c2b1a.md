@@ -68,6 +68,38 @@ tension,handAttribution,fingering,tone,feel}`, `notNow.{noTake,ungraded}`.
 - Path Takes have no `take` / `compare` block (those reference Songs attempts): a block for a Path Take
   needs a new reference type.
 
-## Gates
+## Diff for review (every hunk outside `src/coach/ask/`)
 
-(filled in below as they run)
+- `askStore.ts`: one type import (`CardBody`) and one member of `AskTurn`, `{ kind: "card"; card }`.
+  No state, no function changed.
+- `AskPanel.tsx`: two imports; in `AskConversation`, two `useMemo`s keyed like the tool chips
+  (`[lookingKey, turns]`: never per beat) and the `cardRow` element; in the empty state, the ungraded
+  line and the card chips with their intro before the tool chips; above the text box, `cardRow` before
+  `chipRow` in the same `.ask-chip-row`; in `Turn`, `case "card"`. The send handler is untouched.
+- `askTools.ts`: one new export, `askToolContext()` (the registered context getter, null-safe).
+- `askContext.ts`: `answeredByTool` counts a `card` turn as an answer (a model does not see a question
+  a card answered).
+- `useAskHost.ts`: a `review` getter (the bus's last `takeResult` review when it is the last outcome's).
+- `ask.css`: `.ask-card-blocks`, `.ask-chip-lead`, the gap between the two chip rows.
+- `SessionCoach.tsx` (ReadyNote, ResultNote) and `ToolCoach.tsx`: the chips mapped from `suggestChips`;
+  same chips, labels, handlers and test ids as before.
+- New: `askCards.ts`, `AskCardTurn.tsx`, `askCards.test.tsx`. Locale files: `ask.card.*` added.
+
+## Gates (logs in /tmp/coach-c2b1a/)
+
+- `tsc --noEmit`: pass (`tsc.log`).
+- `npm run build`: pass (`build.log`).
+- **vitest, full, second run (`vitest-2.log`): 29936 passed**; only the known `TabStage.render.test.tsx`
+  load failure and one "Timeout calling onTaskUpdate" (load) with every test passing.
+- vitest, full, first run (`vitest.log`, a busier machine): 29934 passed, 2 failed, both 20 s timeouts under load in files this leg
+  does not touch (`paths/generate.test.ts` "mostly", `session/packs.test.ts` overlays), plus the known
+  `TabStage.render.test.tsx` load failure and four unhandled `document is not defined` from
+  `askTools.test.tsx`'s 0.7 s timers firing after teardown. Alone (`vt-rerun.log`): `askTools.test`,
+  `packs.test`, `ToolCoach.test` pass with no unhandled error; `generate.test` "mostly" timed out again
+  in the worktree, and on `coach` untouched it passed at 95 s with "Timeout calling onTaskUpdate"
+  (`vt-gen-base.log`): the machine's load, not this leg (it reads packs only).
+- The leg's own files: `src/coach/ask` + `src/containers/coach` + i18n: green (`vt-own.log` after fixes,
+  re-run in `vt-own-2`).
+- Layout by name, `ask`, `ask-tools`, `coach-session`, `smooth` (`layout.log`): 74 passed, 52 skipped
+  (the picture scenes, no env var), 1 failed: `smooth` "session-playing-tab" (one 168 ms long task);
+  alone it passes (`layout-smooth.log`). The full layout suite is owed (the orchestrator's).

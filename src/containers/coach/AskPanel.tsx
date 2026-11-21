@@ -224,7 +224,7 @@ function AskConversation({
             {ungraded && <p className="ask-empty-text" data-testid="ask-card-ungraded">{t("ask.card.canAnswer.ungraded")}</p>}
             {cardRow && <p className="ask-empty-text ask-empty-tools">{t("ask.card.chips")}</p>}
             {cardRow}
-            {chipRow &&<p className="ask-empty-text ask-empty-tools">{t("coachTools.ui.chipsIntro")}</p>}
+            {chipRow && <p className="ask-empty-text ask-empty-tools">{t("coachTools.ui.chipsIntro")}</p>}
             {chipRow}
           </div>
         ) : (
