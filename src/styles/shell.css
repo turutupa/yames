@@ -2552,6 +2552,71 @@ body[data-sheet-maximized] .rail {
   }
 }
 
+/* Between 1024 and 1199 the word stays, and in a long language it did not fit:
+ * at 1024 German's "Eingang aus" ran Listen 3–7px past the window (the readouts
+ * are there, transparent until the first bar, so that pressing Play does not
+ * move the row), and Portuguese's longer words further. The row makes room
+ * by its layout, nothing shed, nothing shortened:
+ *
+ *   - the gaps close from 22 to 16;
+ *   - each readout puts its label under its number rather than beside it, so a
+ *     readout is as wide as the longer of the two ("VERGANGEN"), not both;
+ *   - and Listen's word may take a second line inside its pill, so the pill is
+ *     never wider than its longest word needs. It only does when the row is
+ *     full: the spacer before it gives up its room first. */
+@media (max-width: 1199px) {
+  .transport:has(.transport-listen) {
+    gap: 16px;
+  }
+
+  .transport:has(.transport-listen) .transport-readouts {
+    gap: 16px;
+    padding-left: 16px;
+  }
+
+  .transport:has(.transport-listen) .transport-readout {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .transport:has(.transport-listen) .transport-readout .transport-value {
+    line-height: 1.05;
+  }
+
+  .transport:has(.transport-listen) .transport-readout .transport-label {
+    line-height: 1.1;
+  }
+
+  .transport .transport-listen {
+    flex-shrink: 1;
+    min-width: min-content;
+  }
+
+  .transport .transport-listen > span:not([class]) {
+    white-space: normal;
+    line-height: 1.15;
+    text-align: left;
+  }
+
+  /* The same give for the two other labels a long language makes long, on a
+   * bar that carries Listen: Count-in's word and a setlist's Skip
+   * (Portuguese's "Contagem inicial" and "Pular para o próximo" ran a
+   * listening Listen 19–30px past a 1024 window with a setlist loaded). */
+  .transport:has(.transport-listen) > .transport-switch,
+  .transport:has(.transport-listen) > .transport-setlist {
+    flex-shrink: 1;
+    min-width: min-content;
+  }
+
+  .transport:has(.transport-listen) > .transport-switch .transport-switch-label,
+  .transport:has(.transport-listen) .transport-skip {
+    white-space: normal;
+    line-height: 1.1;
+    text-align: left;
+  }
+}
+
 @media (max-width: 1023px) {
   .transport .transport-listen {
     gap: 7px;
