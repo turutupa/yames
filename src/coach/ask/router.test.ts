@@ -117,6 +117,12 @@ const NEAR_MISSES_NONE = [
   "2 more takes",
   "after step 7, what next",
   "thanks, that was faster",
+  "follow me",
+  "start a new session",
+  "make it faster",
+  "set it to 80",
+  "open",
+  "play the next exercise",
 ] as const;
 
 /** Never-list requests: `yours` with the item, on every screen, never a call. */
@@ -185,6 +191,7 @@ const COMMANDS: ReadonlyArray<[string, keyof typeof facts, string, ToolArgs]> = 
   ["open paths", "today", "go_to", { screen: "paths" }],
   ["Open Paths.", "today", "go_to", { screen: "paths" }],
   ["go to the metronome", "today", "go_to", { screen: "beat" }],
+  ["go home", "paths", "go_to", { screen: "today" }],
   ["paths", "today", "go_to", { screen: "paths" }],
   ["please open progress", "paths", "go_to", { screen: "progress" }],
   ["settings", "today", "go_to", { screen: "settings" }],

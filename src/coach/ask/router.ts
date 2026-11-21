@@ -332,8 +332,11 @@ const call = (tool: string, args: ToolArgs = {}): ToolCall => ({ tool, args });
 /** A name to hand a tool as `query`: a few words, none of them a number, a unit or a verb. */
 function query(t: Toks, c: Compiled): string | null {
   let q = t;
-  for (let f = lead(q, c.fillers); f && q.length > f.length; f = lead(q, c.fillers)) q = q.slice(f.length);
+  for (let f = lead(q, c.fillers); f; f = lead(q, c.fillers)) q = q.slice(f.length);
+  // "follow me": nothing is named.
   if (q.length === 0) return null;
+  // "start a new session" asks for today's Session in words the router does not take; it is not an Exercise's name.
+  if (contains(q, c.nouns.session)) return null;
   if (!c.noSpaces && q.length > QUERY_WORDS) return null;
   if (q.some((tok) => num(tok) !== null || tok === "-")) return null;
   if (lead(q, Object.values(c.connectors).flat())) return null;
@@ -507,7 +510,7 @@ function rootAt(t: Toks, c: Compiled): { name: string; rest: Toks } | null {
   const letter = /^([a-g])(#|b)?$/.exec(first);
   if (!letter) return null;
   let name = letter[1].toUpperCase() + (letter[2] ?? "");
-  let rest = t.slice(1);
+  let rest: Toks = t.slice(1);
   if (!letter[2]) {
     const sharp = after(rest, c.sharp);
     const flat = sharp ? null : after(rest, c.flat);

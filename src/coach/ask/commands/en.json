@@ -19,7 +19,7 @@
     "make": ["make me", "make", "build"]
   },
   "screens": {
-    "today": ["today"],
+    "today": ["today", "home"],
     "paths": ["paths"],
     "progress": ["progress"],
     "tools": ["tools"],
