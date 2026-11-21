@@ -57,6 +57,8 @@ export type CoachBlocksProps = {
   /** The three drawings still being built elsewhere. */
   slots?: Partial<CoachBlockSlots>;
   className?: string;
+  /** A press on a source line (Ask, leg c2b2b). Absent, no source line is a target. */
+  onSource?: (source: BlockSource, words: string) => void;
 };
 
 // ---------------------------------------------------------------------------
@@ -279,26 +281,52 @@ function sourceWords(t: Translate, source: BlockSource): string {
  * The line under a text block that says where its words came from (DESIGN
  * 3.6). An icon and words, quiet, never a colour that means anything: the
  * caller decided the source, this only says it.
+ *
+ * With `onPress` (Ask, leg c2b2b) the words are a button that opens what the
+ * line cites, handed the source and the words as read. Without it the line is
+ * not a target at all.
  */
-export function SourceLine({ source }: { source: BlockSource }) {
+export function SourceLine({ source, onPress }: { source: BlockSource; onPress?: (source: BlockSource, words: string) => void }) {
   const { t } = useTranslation();
+  const words = sourceWords(t, source);
+  const mark = (
+    <svg
+      className="coach-block-source-mark"
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {SOURCE_MARK[source.kind]}
+    </svg>
+  );
+  if (onPress) {
+    return (
+      <p className="coach-block-source" data-source={source.kind}>
+        <button
+          type="button"
+          className="coach-block-source-press"
+          data-testid="coach-source-press"
+          // The second click of a double-click is not a second press (as Ask's chips, leg chip1b).
+          onClick={(event) => {
+            if (event.detail <= 1) onPress(source, words);
+          }}
+        >
+          {mark}
+          <span>{words}</span>
+        </button>
+      </p>
+    );
+  }
   return (
     <p className="coach-block-source" data-source={source.kind}>
-      <svg
-        className="coach-block-source-mark"
-        width="13"
-        height="13"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        {SOURCE_MARK[source.kind]}
-      </svg>
-      <span>{sourceWords(t, source)}</span>
+      {mark}
+      <span>{words}</span>
     </p>
   );
 }
@@ -426,7 +454,7 @@ function Block({
 // The answer
 // ---------------------------------------------------------------------------
 
-export function CoachBlocks({ blocks, onAction, slots, className }: CoachBlocksProps) {
+export function CoachBlocks({ blocks, onAction, slots, className, onSource }: CoachBlocksProps) {
   if (blocks.length === 0) return null;
   const filled: CoachBlockSlots = { ...PLACEHOLDER_SLOTS, ...slots };
 
@@ -439,7 +467,7 @@ export function CoachBlocks({ blocks, onAction, slots, className }: CoachBlocksP
           data-block={block.type}
         >
           <Block block={block} slots={filled} onAction={onAction} />
-          {block.source ? <SourceLine source={block.source} /> : null}
+          {block.source ? <SourceLine source={block.source} onPress={onSource} /> : null}
         </div>
       ))}
     </div>
