@@ -20,7 +20,6 @@ const SETTING_KEYS = new Set(["theme", "language", "practiceView", "bandVolume",
 /** What `stops` names, with a key per case so each language words it whole. */
 const STOPS = new Set(["click", "band", "song"]);
 
-const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 /** A safe setting's value in words: on / off, "the app chooses", a percentage, a theme's or a language's name. */
 export function settingValueText(t: TFunction, key: string, value: string | number): string {
@@ -33,25 +32,54 @@ export function settingValueText(t: TFunction, key: string, value: string | numb
   return String(value);
 }
 
+/**
+ * The proposals the runner makes of a navigating `go` tool while something
+ * sounds (`run.ts` turns `coachTools.receipt.<x>` into `coachTools.propose.<x>`),
+ * named here so the keys are known to be live.
+ */
+export const GO_PROPOSAL_KEYS = [
+  "coachTools.propose.goTo",
+  "coachTools.propose.openPath",
+  "coachTools.propose.openStep",
+  "coachTools.propose.openSettings",
+  "coachTools.propose.returnTo",
+] as const;
+
+const NO_SWAP: Readonly<Record<string, string>> = {
+  harder: "coachTools.why.notNow.noSwap.harder",
+  harderWarmUp: "coachTools.why.notNow.noSwap.harderWarmUp",
+  different: "coachTools.why.notNow.noSwap.different",
+  style: "coachTools.why.notNow.noSwap.style",
+};
+
+const SOUNDING: Readonly<Record<string, string>> = {
+  click: "coachTools.why.notNow.soundingClick",
+  band: "coachTools.why.notNow.soundingBand",
+  song: "coachTools.why.notNow.soundingSong",
+};
+
 /** The template for this line: the key itself, or the one written for the values it carries. */
 export function lineKey(l: Line): string {
   const v = l.values;
+  const faster = v.direction === "faster";
+  const level = v.level !== undefined && v.level !== "";
   switch (l.key) {
     case "coachTools.receipt.followPath":
+      return level ? "coachTools.receipt.followPathLevel" : l.key;
     case "coachTools.propose.followPath":
-      return v.level !== undefined && v.level !== "" ? `${l.key}Level` : l.key;
+      return level ? "coachTools.propose.followPathLevel" : l.key;
     case "coachTools.why.notFound.step":
       return v.step === undefined ? "coachTools.why.notFound.stepQuery" : l.key;
     case "coachTools.why.notNow.tempoEnd":
-      return `${l.key}${v.direction === "faster" ? "Faster" : "Slower"}`;
+      return faster ? "coachTools.why.notNow.tempoEndFaster" : "coachTools.why.notNow.tempoEndSlower";
     case "coachTools.propose.nudgeTempo":
-      return `${l.key}${v.direction === "faster" ? "Faster" : "Slower"}`;
+      return faster ? "coachTools.propose.nudgeTempoFaster" : "coachTools.propose.nudgeTempoSlower";
     case "coachTools.why.notNow.noSwap":
-      return `${l.key}.${typeof v.none === "string" ? v.none : "different"}`;
+      return NO_SWAP[String(v.none)] ?? NO_SWAP.different;
     case "coachTools.propose.findEdge":
       return v.bpm === "" || v.bpm === undefined ? "coachTools.propose.findEdgeNoBpm" : l.key;
     case "coachTools.why.notNow.sounding":
-      return typeof v.stops === "string" && STOPS.has(v.stops) ? `${l.key}${cap(v.stops)}` : l.key;
+      return SOUNDING[String(v.stops)] ?? l.key;
     case "coachTools.propose.setGoal":
       return v.from !== undefined && v.from !== "" ? "coachTools.propose.setGoalFrom" : l.key;
     default:
