@@ -1,0 +1,3 @@
+{ "language": "ru", "reviewer": "reviewer-ru", "sampled": 50,
+  "rejected": [],
+  "notes": "Natural Russian with plausible loanwords; expected answers match the texts. 'оцени мою игру' (grading) is borderline but fits the never-list." }

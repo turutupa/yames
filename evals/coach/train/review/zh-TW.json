@@ -1,0 +1,10 @@
+{ "language": "zh-TW", "reviewer": "reviewer-zh-TW", "sampled": 50,
+  "rejected": [
+    { "id": "zh-TW-00659", "wording": "yours_grading#9", "why": "whole text is English ('turn off grading'), not zh-TW" },
+    { "id": "zh-TW-00236", "wording": "yours_grading#9", "why": "whole text is English ('turn off grading'), not zh-TW" },
+    { "id": "zh-TW-00054", "wording": "play_exercise_bpm#7", "why": "exercise name truncated to '上的節奏型', garbled" },
+    { "id": "zh-TW-00470", "wording": "play_exercise#3", "why": "exercise name truncated to '上的十六分音符節奏型', garbled" },
+    { "id": "zh-TW-00266", "wording": "find_edge#5", "why": "'弦上的的極限速度' is a broken name fragment with doubled 的" },
+    { "id": "zh-TW-00545", "wording": "show_scale#5", "why": "text says only 'E五聲' but args pick minorPentatonic; scale type not stated" }
+  ],
+  "notes": "Mostly natural; defects are truncated exercise names, an English-only wording template, and one under-specified scale." }

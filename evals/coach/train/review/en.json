@@ -1,0 +1,3 @@
+{ "language": "en", "reviewer": "reviewer-en", "sampled": 50,
+  "rejected": [],
+  "notes": "All 50 records read naturally and their expected answers fit the words; only typos/terseness (lod, opn stp, tst out), which are allowed. Mild note: en-00643 'loop 16 to 21 slowly' carries a tempo hint but the loop_bars call still fits." }
