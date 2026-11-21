@@ -8,14 +8,16 @@
  * is built from them the first time a search runs and kept per language
  * (`searchIndexFor`), never at startup and never in a render.
  *
- * Ranking is BM25 over one passage at a time: a Step's `why`, `payoff` and
- * each `howTo` line, an Exercise's `purpose` and each `howTo` line, and the
- * same fields of the variant the player plays where the variant has its own
- * words (`exerciseWords`). Tokens are words for scripts with spaces, and
- * character bigrams for Japanese, Chinese and Korean. Below `SEARCH_FLOOR`
- * the answer is none: a question about another topic must not get a random
- * passage. The floor is set from the fixtures (`searchData/fixtures/`, see
- * `search.test.ts`).
+ * A passage is one field: a Step's `why`, `payoff` or one `howTo` line, an
+ * Exercise's `purpose` or one `howTo` line, and the same fields of the variant
+ * the player plays where the variant has its own words (`exerciseWords`).
+ * Ranking is BM25 twice: the Steps first, each Step one document of all its
+ * passages and its titles, then the best passage inside each Step (a single
+ * line scored alone favoured short lines that shared one rare word with the
+ * question). Tokens are words for scripts with spaces, and character bigrams
+ * for Japanese, Chinese and Korean. Below `SEARCH_FLOOR` the answer is none:
+ * a question about another topic must not get a random passage. The floor is
+ * set from the fixtures (`searchData/fixtures/`, `searchFixtures.test.ts`).
  */
 
 import type { BlockSource } from "../blocks/resolve";
@@ -31,10 +33,11 @@ import { isStepPassed, isSubscribed, type PlayerProgress } from "../../session/p
 export type SearchField = "purpose" | "howTo" | "why" | "payoff" | "goal";
 
 /**
- * The teaching text searched, per owner. `goal` was tried and left out: a
- * Step's goal names what is played ("Play E minor and A minor in time"), not
- * how or why, and with it in the index the fixtures lost hits to goals that
- * share only a chord name (search.test.ts records the run).
+ * The teaching text searched (DESIGN 5.3). `goal` was tried and left out: with
+ * it the fixtures found the same number first (39 of 84) and one fewer over
+ * the floor (34 against 35), though four more in the first three
+ * (`searchFixtures.test.ts`, SEARCH_REPORT=1, the "with the Steps' goals" row).
+ * Worth trying again when a model chooses among the candidates (c3b).
  */
 export const INDEXED_FIELDS: readonly SearchField[] = ["purpose", "howTo", "why", "payoff"];
 
@@ -361,15 +364,29 @@ export function searchIndexFor(paths: readonly PathDoc[], lng: string): SearchIn
 // The search
 // ---------------------------------------------------------------------------
 
-/**
- * The score below which a passage is not an answer. Set from the fixtures
- * (`search.test.ts`, "the floor"): above the best score of every question in
- * the near-miss tables, below the best score of the questions that hit.
- */
-export const SEARCH_FLOOR = 0;
+/** One way over the floor: a Step's score and strength both at least these. */
+export type SearchFloor = ReadonlyArray<{ score: number; strength: number }>;
 
-/** The share of the question's weight the Step must hold (see `SEARCH_FLOOR`). */
-export const SEARCH_MIN_COVERAGE = 0;
+/**
+ * Below the floor the answer is none. A hit is over it one of two ways: a
+ * strong score with some strength (a long question, several words matched),
+ * or a fair score with nearly all of the question's weight matched (a short
+ * one: "what is a power chord"). `strength` is the Step's score over the most
+ * the question could score (every word's idf × (k1 + 1)), so a word no Path
+ * has pulls it down.
+ *
+ * Set from the fixtures (`searchFixtures.test.ts`, SEARCH_REPORT=1, 2026-11-20):
+ * the pair that lets none of the 77 near-misses through (en 16, de 20, ja 20,
+ * es / ru / zh-CN 10 each) and keeps the most first-place hits: 36 of 39. One
+ * number alone did worse: a score floor kept 30 (short questions score low),
+ * a strength floor let "what time is it" through. The nearest near-misses:
+ * "was kostet eine neue Gitarre" 8.36 / 0.475, "how do I tune my guitar"
+ * 6.32 / 0.745 ("Tunes on one string").
+ */
+export const SEARCH_FLOOR: SearchFloor = [
+  { score: 8.5, strength: 0.34 },
+  { score: 4.5, strength: 0.84 },
+];
 
 /** How many candidates a search returns: the model (c3b) may later choose among them. */
 export const SEARCH_LIMIT = 5;
@@ -379,10 +396,8 @@ export type SearchOptions = {
   pathIds?: ReadonlySet<string> | null;
   /** The variant played, where there is one: its own words replace the Exercise's. */
   played?: { exerciseId: string; variantId: string } | null;
-  /** Defaults to `SEARCH_FLOOR`; the calibration test passes 0. */
-  floor?: number;
-  /** Defaults to `SEARCH_MIN_COVERAGE`; the calibration test passes 0. */
-  minCoverage?: number;
+  /** Defaults to `SEARCH_FLOOR`; null is no floor (the calibration run). */
+  floor?: SearchFloor | null;
   /** Defaults to `SEARCH_LIMIT`. */
   limit?: number;
 };
@@ -399,9 +414,10 @@ function eligible(index: SearchIndex, p: Passage, opts: SearchOptions): boolean 
 }
 
 /**
- * The nearest passages to `query`, best first: at most `limit`, one per
- * Step or Exercise (five lines of one Exercise are one answer, not five), each
- * at or above the floor. Empty: none.
+ * The nearest passages to `query`, best first: the Steps are ranked by BM25
+ * over each Step's whole text (its title counted `TITLE_WEIGHT` times), and
+ * each Step quotes its own best passage. At most `limit`, one per Step, each
+ * over the floor. Empty: none.
  */
 export function searchPaths(query: string, index: SearchIndex, opts: SearchOptions = {}): SearchHit[] {
   const terms = [...new Set(tokenize(query, index.lng))];
@@ -419,14 +435,13 @@ export function searchPaths(query: string, index: SearchIndex, opts: SearchOptio
     const now = best.get(step);
     if (!now || score > now.score || (score === now.score && doc < now.doc)) best.set(step, { doc, score });
   }
-  const floor = opts.floor ?? SEARCH_FLOOR;
-  const minCoverage = opts.minCoverage ?? SEARCH_MIN_COVERAGE;
+  const floor = opts.floor === undefined ? SEARCH_FLOOR : opts.floor;
   const ranked: SearchHit[] = [];
   for (const [step, { doc, score: passageScore }] of best) {
     const score = stepRank.scores.get(step) ?? 0;
     const coverage = said > 0 ? (stepRank.matched.get(step) ?? 0) / said : 0;
     const strength = said > 0 ? score / (said * (BM25_K1 + 1)) : 0;
-    if (score < floor || coverage < minCoverage) continue;
+    if (floor && !floor.some((f) => score >= f.score && strength >= f.strength)) continue;
     ranked.push({ ...index.passages[doc], score, coverage, strength, passageScore });
   }
   ranked.sort((a, b) => b.score - a.score || b.passageScore - a.passageScore);
