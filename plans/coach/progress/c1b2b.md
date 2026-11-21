@@ -69,6 +69,10 @@ Commits `67b6a89d`, `4ee86679`. Gates: tsc pass; vitest 17,967 pass, the one fil
 
 Commits `3c348b09` (Rust, 1 and 3), `03384e0a` (voice, 1), `c9d2c8ea` (5). Gates (logs in /tmp/coach-c1b2b/): `npm run test:rust` 1,220 pass (`rust-d.log`); tsc pass (`tsc-d.log`); vitest on the touched files 45 pass (`vt-d.log`), whole suite 17,969 pass, the one file is the known `TabStage.render.test.tsx` (`vitest-full-d.log`); build pass (`build-d.log`); layout `coach-voice`, `coach-session`, `smooth`: 46 passed, 52 skipped (`pw-d.log`). Owed: the full layout suite after 8 PM. No probe re-run: nothing touches the callback, the engine's frame loop, the beat queue or any lock the callback try-locks; the Rust change only moves where a generation is read and which thread `tts_stop` runs on.
 
+### Third review (leg c1b2e, from /tmp/coach-orch/c1b2d-review.md)
+
+1. **`tts_stop` is a sync command again; only the kill leaves the main thread (fixed, the reviewer's second remedy).** Making it `(async)` (second review, 3) put its generation bump on a tokio task, and tokio does not order two tasks: the Settings preview sends `ttsStop()` then `ttsSpeak(line)` in one tick, so the stop could land after the speak's own cancel and silence the new line. Now `tts_stop` calls `tts::cancel_active_speech_deferred_kill`: the bump and the PID taken under the lock on the main thread, in IPC arrival order as before the second review; the kill of that PID (`taskkill` on Windows) on a detached `std::thread::spawn`, no lock held across it. `cancel_active_speech` (used by `tts_speak` on its async worker) is unchanged in behaviour; both share `bump_and_take_pid`. Note 2 of the review (`taskkill` blocking a tokio worker in `tts_stop`) goes away with it. Rust test `tts_dim_tests::the_stop_path_bumps_and_takes_the_pid_before_any_kill` (on the shared step, with no real process); the ordering itself is asserted by the attribute. No frontend change.
+
 ## Open
 
 - The tools' coach (`useSession.ts`) pops its own reveal FIFO on any `tts-speech-started`; in a Session it is hushed, so the two never interleave there. Outside a Session our voice never speaks.

@@ -4030,15 +4030,14 @@ pub async fn tts_speak(
 /// instead of queueing behind it. Idempotent — a no-op when nothing
 /// is currently speaking.
 ///
-/// `(async)`: the body runs on an async runtime worker, not the main
-/// thread. Killing Piper mid-synthesis is a `taskkill` process on
-/// Windows (a `kill` on the Unixes), and on the main thread it held up
-/// every event and synchronous command queued behind it, Start's own
-/// `state-changed` among them. Nothing here needs the main thread: the
-/// generation and the PID sit behind `SharedTtsActive`'s mutex.
-#[tauri::command(async)]
+/// Sync on purpose: the generation bump runs in IPC arrival order, so a
+/// stop sent just before a speak (the Settings preview sends both in one
+/// tick) can never land after the speak's own cancel and silence it. Only
+/// the kill of Piper (a `taskkill` process on Windows) leaves the main
+/// thread, on a detached thread of its own.
+#[tauri::command]
 pub fn tts_stop(tts_active: State<'_, SharedTtsActive>) {
-    crate::tts::cancel_active_speech(tts_active.inner());
+    crate::tts::cancel_active_speech_deferred_kill(tts_active.inner());
 }
 
 #[tauri::command]

@@ -151,15 +151,27 @@ pub fn create_shared_tts_active() -> SharedTtsActive {
 /// a cold device), and a `tts_stop` landing in that wait must cancel the
 /// speak rather than be absorbed into a later snapshot.
 pub fn cancel_active_speech(active: &SharedTtsActive) -> u64 {
-    let (generation, pid) = {
-        let mut guard = active.lock().unwrap();
-        guard.generation = guard.generation.wrapping_add(1);
-        (guard.generation, guard.pid.take())
-    };
+    let (generation, pid) = bump_and_take_pid(active);
     if let Some(pid) = pid {
         kill_pid(pid);
     }
     generation
+}
+
+/// `tts_stop`'s cancel: the bump and the PID now, on the caller's thread,
+/// so a stop stays ordered before a speak sent after it; the kill (a
+/// `taskkill` process on Windows) on a detached thread of its own, so the
+/// main thread never waits for it. No lock is held across the kill.
+pub fn cancel_active_speech_deferred_kill(active: &SharedTtsActive) {
+    if let (_, Some(pid)) = bump_and_take_pid(active) {
+        std::thread::spawn(move || kill_pid(pid));
+    }
+}
+
+fn bump_and_take_pid(active: &SharedTtsActive) -> (u64, Option<u32>) {
+    let mut guard = active.lock().unwrap();
+    guard.generation = guard.generation.wrapping_add(1);
+    (guard.generation, guard.pid.take())
 }
 
 /// Whether the speak that owns `my_gen` is still the current one: no
@@ -1876,6 +1888,24 @@ mod tts_dim_tests {
         });
         assert_eq!(result, Ok(()));
         assert!(!started);
+    }
+
+    #[test]
+    fn the_stop_path_bumps_and_takes_the_pid_before_any_kill() {
+        // `tts_stop`'s cancel does its bump and takes the PID on the
+        // caller's thread; only the kill is deferred. Checked on the
+        // shared step (no real process: a fake PID must never reach `kill`).
+        let active = create_shared_tts_active();
+        let my_gen = cancel_active_speech(&active);
+        active.lock().unwrap().pid = Some(4242);
+        let (generation, pid) = bump_and_take_pid(&active);
+        assert_eq!(generation, my_gen.wrapping_add(1));
+        assert_eq!(pid, Some(4242));
+        assert_eq!(active.lock().unwrap().pid, None);
+        assert!(!speech_is_current(&active, my_gen));
+        // With no PID there is nothing to spawn: the stop returns at once.
+        cancel_active_speech_deferred_kill(&active);
+        assert!(!speech_is_current(&active, my_gen.wrapping_add(1)));
     }
 
     #[test]
