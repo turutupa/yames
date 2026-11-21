@@ -51,6 +51,28 @@ worktree `/home/dgx-delgado/yames-coach-tc2`, tools and fragments `/tmp/coach-tc
   coach spoke"; left (not in the review).
 
 ## Status
-- [x] English (39 keys) + lint; vitest `toolTips.locales.test.ts` 51/51 (job coach-tc2b-lint).
-- [ ] Fourteen locales (three sonnet translators, then three proof-readers).
-- [ ] Merge `coach`; gates.
+- [x] English (40 keys: the 39 above + `generic.fatigue.encouragement.2` "Quality's drifting" ->
+  "slipping", found after the review's four) + lint; `toolTips.locales.test.ts` 51/51 (coach-tc2b-lint).
+- [x] Fourteen locales: three sonnet translators (de fr it es nl / pl ru tr pt-BR vi / ja ko zh-CN zh-TW,
+  brief `/tmp/coach-tc2/b/HELPER.md`), one sonnet proof-reader per group (`PROOF.md`): fixes in it (10:
+  "allo stesso tempo" read as "at the same time", "fascia di tempo" -> "fascia di BPM"), pl (13: calque
+  "osuwać się", "po N minut" read as "after"), fr 3, ru 2, ko 4, es 1, nl 1. The 40th key was written by
+  the coder and proof-read in all 14 by a fifth sonnet (`/tmp/coach-tc2/b/one.json`).
+- [x] Key diff against tc2's last commit (`node scripts/tool-tips-keydiff.mjs 088396f7
+  plans/coach/progress/tc2b.keys.txt`): every locale 40 changed, 0 outside, 0 unchanged; es also has the
+  4 es-only keys as "outside" (by design, `/tmp/coach-tc2/b/es-extra.keys.txt`).
+- [x] Proof the new lint bites: a mirror (`/tmp/coach-tc2/b/lint.mjs`) over tc2's English (088396f7)
+  flags all 24 stamina lines + `drums.fatigue.correction.2` (hydrate) + `.7` (water); over HEAD, none.
+- [x] Merged `coach` (clean). Gates: tsc pass (coach-tc2b-tsc); build pass (coach-tc2b-build); `npm run
+  test` 472/473 files, 51041 tests, only the known TabStage.render symlink file fails (coach-tc2b-test,
+  `/tmp/coach-tc2/b/test.log`); layout `tool-coach.spec.ts` `--workers=2` 57 passed, 2 skipped
+  (coach-tc2b-layout).
+
+## Native reads wanted
+it "a tempo costante" / "a tempo invariato"; ko "어떤 템포 구간"; tr "aksıyor" (slipping), "ipucu" (tip); pl
+and ru "minut" / "минут" after a variable N (right for some N only, as every count line in those files).
+
+## Left
+- `drums.fatigue.encouragement.1` "Quality's drifting — get off the throne for 60 seconds." has the same
+  "drifting" fault (found at the end; not changed).
+- `generic.check_in.neutral.5` "Long run with no slips" (see "For the owner").
