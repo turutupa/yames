@@ -1,0 +1,24 @@
+{
+  "lng": "es",
+  "notes": "Six questions chosen from the English ones. Unsure: Spanish players say 'pulsación alterna' but also 'púa alterna'; 'ligados' (hammer-on and pull-off together) is the common word, so the pull-off question says 'ligados'. `none` are questions the Paths do not answer.",
+  "questions": [
+    { "q": "cómo mantengo las corcheas parejas cuando toco con púa alterna", "expect": ["alternate-picking/even-eighths", "rhythm-foundations/eighths", "alternate-picking/other-strings"] },
+    { "q": "mis ligados de bajada suenan muy flojos, cómo hago que suenen", "expect": ["legato/first-pulls", "legato/hammer-and-pull", "shred/legato-one"] },
+    { "q": "cómo cuento los tresillos", "expect": ["rhythm-foundations/triplets", "metal-rhythm/triplets-and-bursts"] },
+    { "q": "qué es un power chord", "expect": ["metal-rhythm/power-chords"] },
+    { "q": "cuál es la tonalidad relativa menor de una escala mayor", "expect": ["scales-and-modes/relative-minor", "scales-and-modes/minor-second-key", "chords-in-a-key/minor-key"] },
+    { "q": "cómo cambio de acordes más rápido", "expect": ["first-chords/a-minor", "first-chords/c-major", "first-chords/g-major", "first-chords/d-major", "first-chords/a-and-e"] }
+  ],
+  "none": [
+    "cómo afino mi guitarra",
+    "qué cuerdas debería comprar",
+    "qué amplificador me recomiendas",
+    "qué tiempo hará mañana",
+    "cuéntame un chiste",
+    "cuánto cuesta una guitarra nueva",
+    "cómo cambio las cuerdas de una guitarra acústica",
+    "cómo exporto mis datos",
+    "cómo ajusto el alma del mástil",
+    "recomiéndame un pedal de distorsión"
+  ]
+}

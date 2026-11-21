@@ -1,0 +1,165 @@
+{
+  "language": "it",
+  "noSpaces": false,
+  "verbs": {
+    "open": ["apri i", "apri il", "apri la", "apri le", "apri lo", "apri gli", "apri", "aprire", "apra", "vai a", "vai al", "vai alla", "vai allo", "vai ai", "vai alle", "vai agli", "vai su", "andare a", "andare al", "andare alla", "andare ai", "andare alle", "portami a", "portami al", "portami alla"],
+    "start": ["avvia", "avviare", "inizia", "iniziare", "comincia", "cominciare", "suona", "suonare", "parti", "partire", "fai partire", "riproduci"],
+    "slower": ["più lento", "piu lento", "più piano", "piu piano", "più lentamente", "piu lentamente", "rallenta", "rallentare", "meno veloce", "vai più lento", "vai piu lento", "vai più piano", "vai piu piano"],
+    "faster": ["più veloce", "piu veloce", "più velocemente", "piu velocemente", "più rapido", "piu rapido", "più svelto", "piu svelto", "accelera", "accelerare", "vai più veloce", "vai piu veloce"],
+    "loop": ["ripeti", "ripetere", "loop", "cicla", "ciclare", "fai un loop su", "fai un loop di", "fai loop"],
+    "show": ["mostra", "mostrami", "mostrare", "fammi vedere", "fai vedere", "visualizza", "disegna"],
+    "follow": ["segui", "seguire"],
+    "load": ["carica", "caricare"],
+    "set": ["imposta", "impostare", "metti", "mettere", "cambia", "cambiare", "regola", "regolare"],
+    "focus": ["concentrati su", "concentrati", "focalizzati su", "focalizzati", "focus su", "focus"],
+    "swap": ["sostituisci", "sostituire", "scambia", "scambiare", "cambia la parte", "cambiare la parte"],
+    "findEdge": ["trova il mio limite su", "trova il mio limite in", "trova il mio limite", "trovare il mio limite", "cerca il mio limite su", "cerca il mio limite in", "cerca il mio limite", "trova il limite di"],
+    "testOut": ["fai la prova di", "fai la prova", "fai il test di", "fai il test", "prova"],
+    "explain": ["spiega", "spiegami", "spiegare"],
+    "make": ["fammi", "creami", "crea", "creare", "genera", "costruisci", "fai"]
+  },
+  "screens": {
+    "today": ["oggi", "home"],
+    "paths": ["percorsi"],
+    "progress": ["progressi"],
+    "tools": ["strumenti"],
+    "beat": ["metronomo"],
+    "drill": ["rampa", "rampe"],
+    "setlist": ["scaletta", "scalette", "setlist"],
+    "jam": ["jam"],
+    "songs": ["brani"],
+    "settings": ["impostazioni", "preferenze"]
+  },
+  "sections": {
+    "general": ["generale"],
+    "appearance": ["aspetto"],
+    "instrument": ["strumento"],
+    "practice": ["pratica"],
+    "coach": ["coach"],
+    "tools": ["strumenti"],
+    "songs": ["brani"],
+    "keepTakes": ["conservare le take", "conservare take"],
+    "about": ["informazioni"]
+  },
+  "settingKeys": {
+    "theme": ["tema"],
+    "language": ["lingua"],
+    "practiceView": ["vista di pratica", "vista pratica"],
+    "bandVolume": ["volume della band", "volume band"],
+    "countIn": ["conteggio iniziale", "conteggio"],
+    "coachVoice": ["voce del coach", "voce"],
+    "coachSuggestions": ["suggerimenti del coach", "suggerimenti", "consigli"]
+  },
+  "onOff": {
+    "on": ["attivo", "attiva", "attivato", "attivata", "acceso", "accesa", "on", "sì"],
+    "off": ["disattivo", "disattiva", "disattivato", "disattivata", "spento", "spenta", "off"]
+  },
+  "units": {
+    "bpm": ["bpm", "battiti al minuto"],
+    "minutes": ["minuti", "minuto", "mins", "min"],
+    "bar": ["battute", "battuta"],
+    "step": ["tappa"],
+    "part": ["parte"],
+    "clicks": ["click per battito", "click a battito", "clic per battito", "click", "clic"]
+  },
+  "nouns": {
+    "tempo": ["tempo", "velocità", "velocita"],
+    "path": ["percorso"],
+    "jam": ["jam"],
+    "preset": ["preset"],
+    "chord": ["accordo", "l'accordo"],
+    "scale": ["scala", "la scala"],
+    "exercise": ["esercizio", "l'esercizio"],
+    "goal": ["il mio obiettivo", "mio obiettivo", "obiettivo"],
+    "session": ["la sessione di oggi", "sessione di oggi", "la sessione", "sessione", "oggi"],
+    "mix": ["il mix", "mix"],
+    "screen": ["questa schermata", "la schermata", "schermata", "questo"]
+  },
+  "connectors": {
+    "to": ["a", "fino a", "-"],
+    "at": ["a", "da", "dal", "dalla", "al", "alla"],
+    "of": ["di", "del", "della", "dello", "dei", "delle", "degli", "su", "sul", "sulla", "in", "nel", "nella"],
+    "for": ["per", "con"]
+  },
+  "swapChoices": {
+    "harder": ["qualcosa di più difficile", "qualcosa di piu difficile", "più difficile", "piu difficile"],
+    "different": ["qualcosa di diverso", "qualcos'altro", "qualcosa d'altro", "diverso", "altro"],
+    "style": ["un altro stile", "altro stile", "uno stile diverso", "stile"]
+  },
+  "ordinals": {
+    "primo": 1,
+    "prima": 1,
+    "secondo": 2,
+    "seconda": 2,
+    "terzo": 3,
+    "terza": 3,
+    "quarto": 4,
+    "quarta": 4
+  },
+  "roots": {
+    "sharp": ["diesis"],
+    "flat": ["bemolle"]
+  },
+  "scales": {
+    "major": ["maggiore", "ionica", "ionico"],
+    "naturalMinor": ["minore naturale", "minore", "eolia", "eolico"],
+    "dorian": ["dorica", "dorico"],
+    "mixolydian": ["misolidia", "misolidio"],
+    "minorPentatonic": ["pentatonica minore", "minore pentatonica", "pentatonica"],
+    "majorPentatonic": ["pentatonica maggiore", "maggiore pentatonica"],
+    "blues": ["blues", "blues minore"],
+    "harmonicMinor": ["minore armonica", "armonica minore"],
+    "melodicMinor": ["minore melodica", "melodica minore"],
+    "lydian": ["lidia", "lidio"],
+    "phrygian": ["frigia", "frigio"],
+    "majorBlues": ["blues maggiore"],
+    "altered": ["alterata", "alterato"],
+    "locrian": ["locria", "locrio"],
+    "wholeTone": ["toni interi", "per toni interi", "tutto tono"],
+    "diminishedWholeHalf": ["diminuita tono semitono", "tono semitono diminuita"],
+    "diminishedHalfWhole": ["diminuita semitono tono", "semitono tono diminuita"],
+    "phrygianDominant": ["frigia dominante", "frigio dominante"],
+    "lydianDominant": ["lidia dominante", "lidio dominante"],
+    "harmonicMajor": ["maggiore armonica", "armonica maggiore"],
+    "hungarianMinor": ["minore ungherese", "ungherese minore"],
+    "augmentedScale": ["aumentata"],
+    "bebopDominant": ["bebop dominante"],
+    "bebopMajor": ["bebop maggiore"],
+    "bebopMinor": ["bebop minore"],
+    "chromatic": ["cromatica"]
+  },
+  "positions": {
+    "open": ["posizione aperta"],
+    "rootOn6": ["tonica su 6", "tonica sulla 6", "tonica sulla sesta corda", "radice su 6", "radice sulla 6", "radice sulla sesta corda"],
+    "rootOn5": ["tonica su 5", "tonica sulla 5", "tonica sulla quinta corda", "radice su 5", "radice sulla 5", "radice sulla quinta corda"],
+    "rootOn4": ["tonica su 4", "tonica sulla 4", "tonica sulla quarta corda", "radice su 4", "radice sulla 4", "radice sulla quarta corda"],
+    "rootOn3": ["tonica su 3", "tonica sulla 3", "tonica sulla terza corda", "radice su 3", "radice sulla 3", "radice sulla terza corda"]
+  },
+  "never": {
+    "input": ["microfono", "mic", "ingresso", "ingressi", "input", "ascolta", "ascoltare", "ascoltando", "ascoltami", "ascolto"],
+    "devices": ["dispositivo", "dispositivi", "interfaccia", "uscita", "uscite", "altoparlante", "altoparlanti", "casse", "cuffia", "cuffie"],
+    "grading": ["valutazione", "valutazioni", "valutare", "valuta", "valutami", "valutata", "valutato"],
+    "recording": ["registrazione", "registrazioni", "registrare", "registra", "registrando", "registrami"],
+    "deleting": ["elimina", "eliminare", "eliminalo", "cancella", "cancellare", "cancellalo", "rimuovi", "rimuovere", "rimuovilo", "svuota", "svuotare", "dimentica", "dimenticare", "togli", "togliere", "azzera"],
+    "unfollowing": ["smetti di seguire", "smettere di seguire", "abbandona il percorso", "abbandonare il percorso", "lascia il percorso", "lasciare il percorso", "esci dal percorso", "uscire dal percorso", "disiscriviti"],
+    "model": ["scarica", "scaricare", "scaricalo", "download", "modello", "modelli", "llm"],
+    "grades": ["voto", "voti", "punteggio", "punteggi", "tempo pulito"]
+  },
+  "questions": [
+    "perché", "perche", "cosa", "che", "che cosa", "come", "quando", "dove", "chi", "quale", "quali", "quanto", "quanta", "quanti", "quante",
+    "cos'è", "cos'e", "com'è", "com'era", "dov'è", "puoi", "può", "potresti", "posso", "possiamo", "devo", "dovrei", "dobbiamo",
+    "è", "e'", "sono", "sei", "siamo", "ho", "hai", "ha", "hanno", "c'è", "era", "erano", "sarà", "sarebbe", "vuoi", "vuole", "voglio", "sto", "stai", "sta"
+  ],
+  "notCommand": [
+    "io", "tu", "lui", "lei", "noi", "voi", "loro",
+    "ho", "hai", "ha", "sono", "sei", "è", "e'", "era", "ero", "erano", "stato", "stata", "sarà", "sarebbe", "sia", "c'è", "sto", "stai", "sta", "stavo", "avevo", "suonavo", "suonato", "suonata", "praticato", "praticavo",
+    "ieri", "domani", "dopo", "stasera", "stanotte", "tardi", "più tardi", "ancora", "di nuovo", "da capo", "ricomincia", "ricominciare", "prossimo", "prossima", "scorso", "scorsa",
+    "non", "mai", "né", "nemmeno", "neanche", "niente", "nessuno", "nessuna",
+    "che", "perché", "perche", "ma", "se", "però", "pero", "quando", "mentre", "quindi", "oppure", "o", "anche",
+    "troppo", "molto", "davvero", "proprio", "abbastanza",
+    "voglio", "vorrei", "vuoi", "vuole", "devo", "dovrei", "bisogno", "penso", "credo", "sento", "posso", "puoi", "può", "potrei", "potresti", "dovrebbe", "vorrebbe",
+    "per me", "con me", "a me", "indietro", "sopra"
+  ],
+  "polite": ["per favore", "per piacere", "per cortesia", "grazie", "ok", "okay", "ehi coach", "ehi", "ora", "adesso", "solo", "dai", "pure"],
+  "fillers": ["il mio", "la mia", "i miei", "le mie", "il", "lo", "la", "le", "i", "gli", "un po'", "un", "uno", "una", "mi", "mio", "mia", "miei", "mie"]
+}

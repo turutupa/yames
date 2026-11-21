@@ -1,0 +1,156 @@
+{
+  "language": "vi",
+  "noSpaces": false,
+  "ordinalPlaces": {
+    "bar": ["ô nhịp thứ #"],
+    "step": ["bước thứ #"]
+  },
+  "verbs": {
+    "open": ["mở", "chuyển đến", "chuyển tới", "chuyển sang", "vào"],
+    "start": ["bắt đầu", "chơi"],
+    "slower": ["chậm hơn", "chậm lại", "làm chậm lại", "làm chậm", "chậm", "giảm tốc độ"],
+    "faster": ["nhanh hơn", "nhanh lên", "làm nhanh hơn", "làm nhanh", "nhanh", "tăng tốc"],
+    "loop": ["lặp lại", "lặp"],
+    "show": ["cho xem", "hiển thị", "hiện", "xem", "vẽ"],
+    "follow": ["theo dõi", "theo"],
+    "load": ["tải", "nạp"],
+    "set": ["thay đổi", "đặt", "đổi", "chỉnh"],
+    "focus": ["tập trung vào", "tập trung"],
+    "swap": ["đổi phần", "thay phần", "thay thế", "hoán đổi", "thay"],
+    "findEdge": ["tìm giới hạn của tôi ở", "tìm giới hạn của tôi trong", "tìm giới hạn của tôi", "tìm giới hạn ở", "tìm giới hạn trong", "tìm giới hạn của", "tìm giới hạn"],
+    "testOut": ["kiểm tra vượt", "thi vượt"],
+    "explain": ["giải thích"],
+    "make": ["tạo", "soạn", "xây dựng"]
+  },
+  "screens": {
+    "today": ["hôm nay"],
+    "paths": ["lộ trình"],
+    "progress": ["tiến bộ"],
+    "tools": ["công cụ"],
+    "beat": ["máy đếm nhịp", "metronome"],
+    "drill": ["luyện tempo"],
+    "setlist": ["setlist"],
+    "jam": ["jam"],
+    "songs": ["bài hát"],
+    "settings": ["cài đặt"]
+  },
+  "sections": {
+    "general": ["chung"],
+    "appearance": ["giao diện"],
+    "instrument": ["nhạc cụ"],
+    "practice": ["luyện tập"],
+    "coach": ["huấn luyện viên"],
+    "tools": ["công cụ"],
+    "songs": ["bài hát"],
+    "keepTakes": ["giữ các lượt chơi", "giữ lượt chơi"],
+    "about": ["giới thiệu"]
+  },
+  "settingKeys": {
+    "theme": ["chủ đề"],
+    "language": ["ngôn ngữ"],
+    "practiceView": ["chế độ xem luyện tập"],
+    "bandVolume": ["âm lượng ban nhạc"],
+    "countIn": ["đếm nhịp vào", "đếm vào"],
+    "coachVoice": ["giọng huấn luyện viên", "giọng nói huấn luyện viên", "giọng nói", "giọng"],
+    "coachSuggestions": ["gợi ý của huấn luyện viên", "gợi ý huấn luyện viên", "gợi ý"]
+  },
+  "onOff": {
+    "on": ["bật", "bật lên"],
+    "off": ["tắt", "tắt đi"]
+  },
+  "units": {
+    "bpm": ["bpm", "nhịp mỗi phút", "nhịp trên phút"],
+    "minutes": ["phút"],
+    "bar": ["ô nhịp"],
+    "step": ["bước"],
+    "part": ["phần"],
+    "clicks": ["tiếng click mỗi phách", "click mỗi phách", "tiếng click", "click"]
+  },
+  "nouns": {
+    "tempo": ["tempo", "tốc độ"],
+    "path": ["lộ trình"],
+    "jam": ["jam"],
+    "preset": ["cài đặt sẵn", "preset"],
+    "chord": ["hợp âm"],
+    "scale": ["thang âm", "âm giai"],
+    "exercise": ["bài tập"],
+    "goal": ["mục tiêu của tôi", "mục tiêu"],
+    "session": ["buổi tập hôm nay", "buổi tập", "hôm nay"],
+    "mix": ["hỗn hợp các lộ trình của tôi", "hỗn hợp các lộ trình", "hỗn hợp lộ trình", "hỗn hợp"],
+    "screen": ["màn hình này", "màn hình", "trang này", "này"]
+  },
+  "connectors": {
+    "to": ["đến", "tới", "thành", "sang", "-"],
+    "at": ["ở", "tại", "từ", "lúc"],
+    "of": ["của", "ở", "trong", "về", "vào"],
+    "for": ["cho", "thành", "sang", "bằng"]
+  },
+  "swapChoices": {
+    "harder": ["bài khó hơn", "khó hơn", "khó"],
+    "different": ["bài khác", "khác"],
+    "style": ["phong cách khác", "kiểu khác", "phong cách"]
+  },
+  "ordinals": {},
+  "roots": {
+    "sharp": ["thăng", "sharp"],
+    "flat": ["giáng", "flat"]
+  },
+  "scales": {
+    "major": ["trưởng", "thang trưởng", "âm giai trưởng", "ionian"],
+    "naturalMinor": ["thứ", "thứ tự nhiên", "thang thứ", "âm giai thứ", "aeolian"],
+    "dorian": ["dorian"],
+    "mixolydian": ["mixolydian"],
+    "minorPentatonic": ["ngũ cung thứ", "pentatonic thứ", "ngũ cung", "pentatonic"],
+    "majorPentatonic": ["ngũ cung trưởng", "pentatonic trưởng"],
+    "blues": ["blues", "blues thứ"],
+    "harmonicMinor": ["thứ hòa thanh", "thứ harmonic", "harmonic minor"],
+    "melodicMinor": ["thứ giai điệu", "thứ melodic", "melodic minor"],
+    "lydian": ["lydian"],
+    "phrygian": ["phrygian"],
+    "majorBlues": ["blues trưởng", "major blues"],
+    "altered": ["altered"],
+    "locrian": ["locrian"],
+    "wholeTone": ["toàn cung", "thang toàn cung", "whole tone"],
+    "diminishedWholeHalf": ["diminished whole half", "diminished toàn cung nửa cung"],
+    "diminishedHalfWhole": ["diminished half whole", "diminished nửa cung toàn cung"],
+    "phrygianDominant": ["phrygian dominant"],
+    "lydianDominant": ["lydian dominant"],
+    "harmonicMajor": ["trưởng hòa thanh", "trưởng harmonic", "harmonic major"],
+    "hungarianMinor": ["hungarian thứ", "hungarian minor"],
+    "augmentedScale": ["augmented"],
+    "bebopDominant": ["bebop dominant"],
+    "bebopMajor": ["bebop trưởng", "bebop major"],
+    "bebopMinor": ["bebop thứ", "bebop minor"],
+    "chromatic": ["chromatic"]
+  },
+  "positions": {
+    "open": ["vị trí mở", "thế mở", "dây buông"],
+    "rootOn6": ["nốt gốc ở dây 6", "nốt gốc trên dây 6", "nốt gốc dây 6", "root ở dây 6", "root trên dây 6", "root dây 6", "gốc ở dây 6"],
+    "rootOn5": ["nốt gốc ở dây 5", "nốt gốc trên dây 5", "nốt gốc dây 5", "root ở dây 5", "root trên dây 5", "root dây 5", "gốc ở dây 5"],
+    "rootOn4": ["nốt gốc ở dây 4", "nốt gốc trên dây 4", "nốt gốc dây 4", "root ở dây 4", "root trên dây 4", "root dây 4", "gốc ở dây 4"],
+    "rootOn3": ["nốt gốc ở dây 3", "nốt gốc trên dây 3", "nốt gốc dây 3", "root ở dây 3", "root trên dây 3", "root dây 3", "gốc ở dây 3"]
+  },
+  "never": {
+    "input": ["micro", "mic", "micrô", "đầu vào", "nghe", "lắng nghe"],
+    "devices": ["thiết bị âm thanh", "thiết bị", "đầu ra âm thanh", "đầu ra", "loa", "tai nghe", "giao diện âm thanh", "card âm thanh"],
+    "grading": ["chấm điểm", "chấm"],
+    "recording": ["ghi âm", "thu âm", "bản ghi", "bản thu", "ghi"],
+    "deleting": ["xóa", "xoá", "xóa bỏ", "loại bỏ", "dọn dẹp", "dọn", "quên", "gỡ", "bỏ"],
+    "unfollowing": ["bỏ theo dõi", "bỏ theo", "ngừng theo dõi", "ngừng theo", "hủy theo dõi", "rời khỏi lộ trình", "bỏ lộ trình"],
+    "model": ["tải xuống", "tải về", "mô hình", "model", "llm"],
+    "grades": ["điểm số", "điểm", "bảng điểm", "kết quả", "tempo sạch"]
+  },
+  "questions": [
+    "tại sao", "vì sao", "sao", "làm sao", "như thế nào", "thế nào", "khi nào", "bao giờ", "bao nhiêu", "ở đâu", "đâu", "ai", "cái gì", "gì", "có thể", "có", "liệu", "nên", "phải",
+    "tôi", "mình"
+  ],
+  "notCommand": [
+    "bạn", "nó", "chúng ta", "chúng tôi", "họ", "anh ấy", "cô ấy", "đó", "kia",
+    "không", "chẳng", "đừng", "chưa", "chả",
+    "hôm qua", "ngày mai", "mai", "tối nay", "lát nữa", "hôm kia", "tuần trước", "trước", "sau", "lần nữa", "nữa", "đã", "đang", "rồi", "chơi lại", "bắt đầu lại", "làm lại", "thử lại", "mở lại", "xem lại", "nghe lại", "từ đầu", "quay lại", "trở lại", "trở về",
+    "vì", "bởi vì", "nhưng", "nếu", "khi", "mà", "hay", "hoặc", "so với", "hơn cả", "hơn là", "chứ",
+    "muốn", "cần", "nghĩ", "thấy", "cảm thấy", "thích", "quá", "rất", "lắm", "thật", "khá", "cũng", "còn", "với tôi", "cùng tôi"
+  ],
+  "polite": ["làm ơn", "vui lòng", "nhé", "nha", "ạ", "đi", "thôi", "hộ", "giúp tôi", "giúp mình", "giúp", "dùm", "giùm", "cho tôi", "cho mình", "cảm ơn", "ok", "oke", "ê", "ơi", "bây giờ", "ngay"],
+  "fillers": ["một chút", "một tí", "chút xíu", "chút", "tí", "hơi", "cái", "các", "những", "một nấc", "một bậc"]
+}

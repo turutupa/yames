@@ -38,7 +38,9 @@ guardrails, all seven), 3.6 (question chip, source line, fact line), 9.1 (what t
    - An ungraded player gets no card about quality: the shapes' `when` is false, and Ask says what it
      can answer instead.
 4. **`src/coach/ask/suggest.ts`**: which question chips to offer where (on the result's note, on the
-   ready note, in Ask's empty state, above the text box), at most three, by a pure function of the
+   ready note, in Ask's empty state, above the text box), at most three card chips, and in Ask at
+   most four chips in all, card and tool chips together (the orchestrator's decision on review
+   c2b1a F10: the tools' own cap, cards first), by a pure function of the
    context with a table test. A chip is one question shape; pressing it asks and answers in Ask. The
    chips c1b1 and c2a2 already show keep working, now through this.
 5. **Typed English reaches the cards by matching** (DESIGN 5.3, engine 2): a small matcher from typed

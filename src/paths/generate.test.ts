@@ -131,7 +131,9 @@ describe("subdivisions", () => {
       }
     }
     expect(named).toBeGreaterThan(100);
-  });
+    // It builds every "mostly" Path in full: seconds on a quiet machine, past
+    // vitest's 5 s default once under load (the relay's note, 19:35).
+  }, 60_000);
 });
 
 describe("a variant's own text", () => {

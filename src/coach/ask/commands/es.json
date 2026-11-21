@@ -1,0 +1,169 @@
+{
+  "language": "es",
+  "noSpaces": false,
+  "verbs": {
+    "open": ["abre los", "abre las", "abre el", "abre la", "abre","abrir", "abra", "ve a", "ve al", "ir a", "ir al", "vamos a", "llévame a", "llevame a"],
+    "start": ["empieza", "empezar", "comienza", "comenzar", "inicia", "iniciar", "arranca", "toca", "tocar", "reproduce"],
+    "slower": ["más lento", "mas lento", "más despacio", "mas despacio", "ve más lento", "ve más despacio", "ve mas lento", "ve mas despacio", "baja la velocidad"],
+    "faster": ["más rápido", "mas rapido", "más deprisa", "mas deprisa", "acelera", "acelerar", "ve más rápido", "ve mas rapido", "sube la velocidad"],
+    "loop": ["repite", "repetir", "loop", "bucle", "haz un bucle de", "haz un bucle"],
+    "show": ["muestra", "mostrar", "muéstrame", "muestrame", "enséñame", "ensename", "dibuja"],
+    "follow": ["sigue", "seguir", "síguelo"],
+    "load": ["carga", "cargar"],
+    "set": ["pon", "poner", "cambia", "cambiar", "ajusta", "ajustar", "fija", "fijar", "establece"],
+    "focus": ["enfócate en", "enfocate en", "enfoca en", "concéntrate en", "concentrate en", "céntrate en", "centrate en", "enfócate", "enfoca", "concéntrate", "céntrate"],
+    "swap": ["reemplaza", "reemplazar", "sustituye", "sustituir", "cambia la parte", "cambiar la parte"],
+    "findEdge": ["busca mi límite en", "busca mi limite en", "busca mi límite", "busca mi limite", "encuentra mi límite en", "encuentra mi limite en", "encuentra mi límite", "encuentra mi limite", "buscar mi límite", "buscar mi limite", "busca el límite de", "busca el limite de"],
+    "testOut": ["haz la prueba del", "haz la prueba de", "haz la prueba", "prueba del", "prueba de", "prueba", "pasa la prueba de", "pasa la prueba del"],
+    "explain": ["explica", "explícame", "explicame", "explicar"],
+    "make": ["hazme", "créame", "creame", "crea", "crear", "genera", "construye", "haz"]
+  },
+  "screens": {
+    "today": ["hoy", "inicio"],
+    "paths": ["rutas"],
+    "progress": ["progreso"],
+    "tools": ["herramientas"],
+    "beat": ["metrónomo", "metronomo"],
+    "drill": ["rampa de tempo", "rampa", "rampas"],
+    "setlist": ["setlist", "set list"],
+    "jam": ["jam", "jams"],
+    "songs": ["canciones"],
+    "settings": ["ajustes", "configuración", "configuracion", "preferencias"]
+  },
+  "sections": {
+    "general": ["general"],
+    "appearance": ["apariencia", "aspecto"],
+    "instrument": ["instrumento"],
+    "practice": ["práctica", "practica"],
+    "coach": ["entrenador", "coach"],
+    "tools": ["herramientas"],
+    "songs": ["canciones"],
+    "keepTakes": ["guardar tomas", "guardar las tomas"],
+    "about": ["acerca de"]
+  },
+  "settingKeys": {
+    "theme": ["tema"],
+    "language": ["idioma"],
+    "practiceView": ["vista de práctica", "vista de practica"],
+    "bandVolume": ["volumen de la banda", "volumen de banda"],
+    "countIn": ["cuenta previa", "cuenta atrás", "cuenta atras"],
+    "coachVoice": ["voz del coach", "voz del entrenador", "voz"],
+    "coachSuggestions": ["sugerencias del coach", "sugerencias del entrenador", "sugerencias", "consejos"]
+  },
+  "onOff": {
+    "on": ["activado", "activada", "activa", "encendido", "encendida", "on", "sí"],
+    "off": ["desactivado", "desactivada", "desactiva", "apagado", "apagada", "off"]
+  },
+  "units": {
+    "bpm": ["bpm", "pulsaciones por minuto", "latidos por minuto"],
+    "minutes": ["minutos", "minuto", "mins", "min"],
+    "bar": ["compases", "compás", "compas"],
+    "step": ["paso"],
+    "part": ["parte"],
+    "clicks": ["clics por pulso", "clics por tiempo", "clic por pulso", "clic por tiempo", "clics", "clic", "clicks"]
+  },
+  "nouns": {
+    "tempo": ["tempo", "velocidad"],
+    "path": ["ruta"],
+    "jam": ["jam"],
+    "preset": ["preajuste", "preset"],
+    "chord": ["acorde"],
+    "scale": ["escala"],
+    "exercise": ["ejercicio"],
+    "goal": ["mi meta", "meta", "mi objetivo", "objetivo"],
+    "session": ["la sesión de hoy", "la sesion de hoy", "sesión de hoy", "sesion de hoy", "la sesión", "la sesion", "sesión", "sesion", "hoy"],
+    "mix": ["la mezcla", "mezcla"],
+    "screen": ["esta pantalla", "la pantalla", "pantalla", "esto"]
+  },
+  "connectors": {
+    "to": ["a", "hasta", "-"],
+    "at": ["a", "en", "desde"],
+    "of": ["de", "del", "en", "sobre"],
+    "for": ["por", "para", "con"]
+  },
+  "swapChoices": {
+    "harder": ["algo más difícil", "algo mas dificil", "más difícil", "mas dificil"],
+    "different": ["algo diferente", "algo distinto", "algo más", "diferente", "distinto"],
+    "style": ["otro estilo", "un estilo diferente", "un estilo distinto", "estilo"]
+  },
+  "ordinals": {
+    "primer": 1,
+    "primero": 1,
+    "primera": 1,
+    "segundo": 2,
+    "segunda": 2,
+    "tercer": 3,
+    "tercero": 3,
+    "tercera": 3,
+    "cuarto": 4,
+    "cuarta": 4
+  },
+  "roots": {
+    "sharp": ["sostenido"],
+    "flat": ["bemol"]
+  },
+  "scales": {
+    "major": ["mayor", "jónico", "jonico"],
+    "naturalMinor": ["menor natural", "menor", "eólico", "eolico"],
+    "dorian": ["dórico", "dorico"],
+    "mixolydian": ["mixolidio"],
+    "minorPentatonic": ["pentatónica menor", "pentatonica menor", "menor pentatónica", "menor pentatonica", "pentatónica", "pentatonica"],
+    "majorPentatonic": ["pentatónica mayor", "pentatonica mayor", "mayor pentatónica", "mayor pentatonica"],
+    "blues": ["blues", "blues menor"],
+    "harmonicMinor": ["menor armónica", "menor armonica", "armónica menor", "armonica menor"],
+    "melodicMinor": ["menor melódica", "menor melodica", "melódica menor", "melodica menor"],
+    "lydian": ["lidio"],
+    "phrygian": ["frigio"],
+    "majorBlues": ["blues mayor"],
+    "altered": ["alterada", "alterado"],
+    "locrian": ["locrio"],
+    "wholeTone": ["tonos enteros", "de tonos enteros"],
+    "diminishedWholeHalf": ["disminuida tono semitono", "tono semitono disminuida"],
+    "diminishedHalfWhole": ["disminuida semitono tono", "semitono tono disminuida"],
+    "phrygianDominant": ["frigio dominante", "dominante frigio"],
+    "lydianDominant": ["lidio dominante", "dominante lidio"],
+    "harmonicMajor": ["mayor armónica", "mayor armonica", "armónica mayor", "armonica mayor"],
+    "hungarianMinor": ["menor húngara", "menor hungara", "húngara menor", "hungara menor"],
+    "augmentedScale": ["aumentada"],
+    "bebopDominant": ["bebop dominante", "dominante bebop"],
+    "bebopMajor": ["bebop mayor", "mayor bebop"],
+    "bebopMinor": ["bebop menor", "menor bebop"],
+    "chromatic": ["cromática", "cromatica"]
+  },
+  "positions": {
+    "open": ["posición abierta", "posicion abierta"],
+    "rootOn6": ["raíz en 6", "raiz en 6", "raíz en la 6", "raiz en la 6", "raíz en la sexta cuerda", "raiz en la sexta cuerda"],
+    "rootOn5": ["raíz en 5", "raiz en 5", "raíz en la 5", "raiz en la 5", "raíz en la quinta cuerda", "raiz en la quinta cuerda"],
+    "rootOn4": ["raíz en 4", "raiz en 4", "raíz en la 4", "raiz en la 4", "raíz en la cuarta cuerda", "raiz en la cuarta cuerda"],
+    "rootOn3": ["raíz en 3", "raiz en 3", "raíz en la 3", "raiz en la 3", "raíz en la tercera cuerda", "raiz en la tercera cuerda"]
+  },
+  "never": {
+    "input": ["micrófono", "microfono", "micro", "mic", "entrada", "entradas", "input", "escuchar", "escucha", "escuchando", "escúchame", "escuchame"],
+    "devices": ["dispositivo", "dispositivos", "interfaz", "salida", "salidas", "altavoz", "altavoces", "bocinas", "parlantes", "auriculares", "audífonos", "audifonos", "cascos"],
+    "grading": ["evaluación", "evaluacion", "evaluar", "evalúa", "evalua", "evalúame", "evaluame", "evaluada", "evaluado", "sin evaluar"],
+    "recording": ["grabación", "grabacion", "grabaciones", "grabar", "graba", "grabando", "grabe", "grabo"],
+    "deleting": ["borrar", "borra", "bórralo", "borralo", "borrame", "elimina", "eliminar", "elimínalo", "eliminalo", "quitar", "quita", "limpiar", "limpia", "olvida", "olvidar", "suprimir", "suprime"],
+    "unfollowing": ["dejar de seguir", "deja de seguir", "dejar la ruta", "deja la ruta", "abandonar la ruta", "abandona la ruta", "abandonar ruta", "salir de la ruta", "sal de la ruta"],
+    "model": ["descargar", "descarga", "descargo", "modelo", "modelos", "llm"],
+    "grades": ["nota", "notas", "puntuación", "puntuacion", "puntuaciones", "puntaje", "puntajes", "calificación", "calificacion", "calificaciones", "calificar", "califica", "tempo limpio"]
+  },
+  "questions": [
+    "por qué", "por que", "porqué", "qué", "que", "cuál", "cual", "cuáles", "cuales", "cuándo", "cuando", "cómo", "como",
+    "dónde", "donde", "quién", "quien", "quiénes", "quienes", "cuánto", "cuanto", "cuánta", "cuántos", "cuántas", "para qué",
+    "puedes", "puede", "podrías", "podrias", "podría", "podria", "podemos", "puedo", "debería", "deberia", "debo", "debes",
+    "es", "está", "esta", "estás", "están", "son", "eres", "soy", "hay", "había", "fue", "fueron", "era", "ha", "han", "has",
+    "tengo", "tienes", "tiene", "quieres", "quiere", "vas", "voy", "va", "sería", "seria", "sabes", "sabe"
+  ],
+  "notCommand": [
+    "yo", "tú", "tu", "usted", "él", "ella", "eso", "ese", "esa", "nosotros", "ellos", "ellas", "lo",
+    "estoy", "tengo", "he", "estaba", "estuve", "estuvo", "fue", "fueron", "era", "eran", "es", "son", "está", "están", "soy", "eres", "ser", "sido", "sería", "seria",
+    "debería", "deberia", "debo", "puedo", "puedes", "puede", "quiero", "quería", "queria", "quieres", "necesito", "pienso", "creo", "siento", "tuve", "toqué", "toque", "practiqué", "practique", "practicado",
+    "no", "nunca", "ni", "tampoco", "jamás", "jamas",
+    "luego", "después", "despues", "mañana", "ayer", "anoche", "esta noche", "antes", "otra vez", "de nuevo", "nuevamente", "próximo", "proximo", "próxima", "proxima", "siguiente", "hace",
+    "que", "qué", "porque", "por qué", "pero", "si", "aunque", "cuando", "cuándo", "mientras", "como", "cómo", "cuál", "cual", "o",
+    "demasiado", "muy", "mucho", "tan", "también", "tambien", "ya", "todavía", "todavia", "aún", "aun", "además", "ademas",
+    "para mí", "para mi", "conmigo", "atrás", "atras", "encima", "volver", "vuelve", "otra"
+  ],
+  "polite": ["por favor", "porfa", "porfavor", "ok", "okay", "vale", "oye coach", "oye", "ahora", "ahora mismo", "gracias", "solo", "sólo", "hola"],
+  "fillers": ["me", "el", "la", "los", "las", "un poco", "un", "una", "unos", "unas", "mi", "mis", "al"]
+}

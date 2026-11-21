@@ -184,6 +184,11 @@ describe("set_setting", () => {
       { value: false, names: ["off"] },
       { value: true, names: ["on"] },
     ],
+    // As the real host offers `coach.suggestions` (c4a1): off is "Only when I ask".
+    coachSuggestions: [
+      { value: false, names: ["off", "only when I ask", "when I ask", "asked"] },
+      { value: true, names: ["on"] },
+    ],
     // No voice installed: only Off.
     coachVoice: [{ value: false, names: ["off"] }],
     // A level is a percentage; the one word is "the app chooses".
@@ -210,6 +215,9 @@ describe("set_setting", () => {
     ["bandVolume", "70", 1, 0.7, 100, 70],
     ["bandVolume", "73%", 1, 0.75, 100, 75],
     ["bandVolume", "400", 1, 1.5, 100, 150],
+    ["coachSuggestions", "off", true, false, "on", "off"],
+    ["coachSuggestions", "only when I ask", true, false, "on", "off"],
+    ["coachSuggestions", "on", false, true, "off", "on"],
   ])("%s to %s: proposes from → to, sets it on the press, and the undo puts it back", (key, words, from, to, fromSaid, toSaid) => {
     const h = host({ [key]: from });
     const proposal = proposalOf(runCoachTool(call("set_setting", { key, value: words }), h, toolCtx()));
@@ -255,6 +263,7 @@ describe("set_setting", () => {
     h.setSafeSetting("theme", "velvet");
     expect(confirmCoachTool(proposal, h, toolCtx())).toMatchObject({ line: { key: "coachTools.why.refused.proposal" } });
     expect(h.values.theme).toBe("velvet");
+    // A host that has not read the coach's keys yet (the real one, before its first load) says so.
     expect(runCoachTool(call("set_setting", { key: "coachSuggestions", value: "on" }), host({}), toolCtx())).toMatchObject({ why: "notWiredYet" });
   });
 
@@ -340,7 +349,7 @@ describe("set_setting", () => {
 });
 
 describe("set_goal", () => {
-  it("not wired (the Notebook is leg c4a's) says so and touches nothing", () => {
+  it("a host that has not read `coach.goal` yet says so and touches nothing", () => {
     const h = fakeHost();
     expect(runCoachTool(call("set_goal", { text: "Play the solo at 120" }), h, toolCtx())).toMatchObject({ why: "notWiredYet" });
     expect(h.changes()).toEqual([]);
