@@ -24,24 +24,43 @@ import { askToolContext } from "./askTools";
 /** A card turn's body: the card, or the one line that says why there is none. */
 export type CardBody = FactCard | { shape: null; line: FactCard["lines"][number] };
 
-/** Ask a card by call and answer it in the thread: the player's words, then the card. */
-export function askCard(call: ToolCall, said: string): string {
+const NO_TAKE_KEY = "ask.card.notNow.noTake";
+
+/** The card for a call where the player is now, or the one line that says why there is none. */
+function cardBodyFor(call: ToolCall): CardBody {
+  const ctx = askToolContext();
+  const out = ctx ? runFactCard(call, ctx) : { line: { key: NO_TAKE_KEY, values: {} } };
+  return isCard(out) ? out : { shape: null, line: out.line };
+}
+
+function writeCard(card: CardBody, said: string): string {
   if (said.trim()) appendAskTurn({ id: askTurnId(), kind: "user", text: said.trim() });
   const id = askTurnId();
-  const ctx = askToolContext();
-  const out = ctx ? runFactCard(call, ctx) : { line: { key: "ask.card.notNow.noTake", values: {} } };
-  const card: CardBody = isCard(out) ? out : { shape: null, line: out.line };
   appendAskTurn({ id, kind: "card", card });
   return id;
+}
+
+/** Ask a card by call and answer it in the thread: the player's words, then the card. */
+export function askCard(call: ToolCall, said: string): string {
+  return writeCard(cardBodyFor(call), said);
 }
 
 /**
  * Typed English, after the command router: a card when the matcher is sure,
  * else null and nothing written (the next way of answering takes it).
+ * Synchronous, as the send path's slot requires.
+ *
+ * With no Take of this Exercise to read (Songs, Jam, a Session before its
+ * first Take) it is not a card's question either: null, nothing written, and
+ * the next answerer (a model that has the song's review) sees it (review
+ * c2b1a F6). A chip still answers "no Take yet" in one line: it asked.
  */
 export function answerCardFor(text: string): string | null {
   const call = matchCard(text);
-  return call ? askCard(call, text) : null;
+  if (!call) return null;
+  const card = cardBodyFor(call);
+  if (card.shape === null && card.line.key === NO_TAKE_KEY) return null;
+  return writeCard(card, text);
 }
 
 /** The card the thread answered last, so its chip is not offered again at once. */
@@ -61,6 +80,14 @@ export function lastCardShape(turns: readonly AskTurn[]): CardShape | null {
 export function askUngradedHere(): boolean {
   const ctx = askToolContext();
   return !!ctx && ctx.screen === "session" && ungradedPlayer(ctx);
+}
+
+/** At most this many chips in Ask at once, card chips and tool chips together (DESIGN: three anywhere). */
+export const MAX_ASK_CHIPS = 3;
+
+/** The tool chips that fit beside `cards` card chips: the cards go first. */
+export function withinChipCap<T>(cards: number, tools: readonly T[]): T[] {
+  return tools.slice(0, Math.max(0, MAX_ASK_CHIPS - cards));
 }
 
 /** Ask's card chips for where the player is now (none without a context). */

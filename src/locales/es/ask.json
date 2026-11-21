@@ -56,19 +56,20 @@
       "canAnswer": {
         "ungraded": "You're playing without grading, so there are no measurements to answer questions about your Takes from."
       },
-      "tooShort": "Take {{take}} stopped after {{bars}} bars, too few to judge.",
+      "tooShort": "Take {{take}} stopped after {{bars}} bar, too few to judge.",
+      "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too few to judge.",
       "slip": {
         "none": "No bar slipped in Take {{take}}: every bar that could be judged held.",
         "noBars": "I didn't measure Take {{take}} bar by bar, so I can't say where it slipped."
       },
       "lean": {
         "premise": {
-          "early": "In Take {{take}} your notes landed early, not late.",
-          "late": "In Take {{take}} your notes landed late, not early."
+          "early": "In Take {{take}} the bars that leaned sat earlier than the rest of it, not later. A lean the whole Take shares is something I don't measure.",
+          "late": "In Take {{take}} the bars that leaned sat later than the rest of it, not earlier. A lean the whole Take shares is something I don't measure."
         },
         "premiseNone": {
-          "early": "Take {{take}} didn't lean early: no bar was more than {{ms}} ms off the rest of it.",
-          "late": "Take {{take}} didn't lean late: no bar was more than {{ms}} ms off the rest of it."
+          "early": "No bar of Take {{take}} sat more than {{ms}} ms earlier than the rest of it. A lean the whole Take shares is something I don't measure.",
+          "late": "No bar of Take {{take}} sat more than {{ms}} ms later than the rest of it. A lean the whole Take shares is something I don't measure."
         },
         "bar": {
           "early": "Bar {{bar}} of the tune: {{ms}} ms earlier than the rest of the Take.",
@@ -81,14 +82,19 @@
         "passed": "Take {{take}} did count: it met the pass mark at {{bpm}} BPM.",
         "below": "Take {{take}} did count, as a Take below the pass mark at {{bpm}} BPM.",
         "notCaught": "I didn't measure Take {{take}}: I heard {{heard}} of {{expected}} notes, too few to grade, so it doesn't count against you.",
-        "tooShort": "Take {{take}} stopped after {{bars}} bars, too short to judge, so it doesn't count either way.",
+        "tooShort": "Take {{take}} stopped after {{bars}} bar, too short to judge, so it doesn't count either way.",
+        "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too short to judge, so it doesn't count either way.",
+        "notClean": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and the longest run in Take {{take}} was {{held}}.",
+        "notCleanPlain": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and Take {{take}} didn't have them.",
         "unfair": "You marked this grade as not fair. It is kept as measured, with your answer beside it.",
         "pitchGraded": "The pitch of your notes is part of this Exercise's grade.",
         "ungraded": {
           "eyes": "I didn't measure Take {{take}}: it was the one for your eyes, so nothing was graded.",
           "chosen": "I didn't measure Take {{take}}: you chose to just play it, so nothing was graded.",
           "inputOff": "I didn't measure Take {{take}}: the input wasn't on, so nothing was graded.",
-          "gradingOff": "I didn't measure Take {{take}}: grading is off, so nothing was graded."
+          "gradingOff": "I didn't measure Take {{take}}: grading is off, so nothing was graded.",
+          "selfChecked": "I didn't measure Take {{take}}: this Exercise is one you check yourself, so nothing was graded.",
+          "selfCheckedTempo": "I didn't measure Take {{take}}: at {{bpm}} BPM this Exercise is one you check yourself, so nothing was graded."
         }
       },
       "notMeasured": {

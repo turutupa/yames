@@ -12,7 +12,7 @@ import { __resetCoachLoaderForTests } from "../../hooks/coachLoader";
 import i18n from "../../i18n";
 import { AskPanel } from "./AskPanel";
 import { AskCardTurn } from "./AskCardTurn";
-import { answerCardFor, askCard, lastCardShape } from "./askCards";
+import { answerCardFor, askCard, lastCardShape, MAX_ASK_CHIPS, withinChipCap } from "./askCards";
 import { askPrompt } from "./askContext";
 import { __resetAskStoreForTests, getAskState, openAsk } from "./askStore";
 import { __setAskToolsForTests } from "./askTools";
@@ -52,6 +52,24 @@ describe("a chip asks and answers in the thread", () => {
     const again = screen.getByTestId("ask-card-chips");
     expect(within(again).queryByTestId("ask-card-chip-where_slipped")).toBeNull();
     expect(within(again).getAllByRole("button")).toHaveLength(2);
+  });
+
+  it("at most three chips at once, card chips first (F10)", () => {
+    __setAskToolsForTests(fakeHost(), below().ctx);
+    openAsk();
+    render(<AskPanel lookingAt={{ text: "Your Session", key: "session|tune" }} onClose={() => {}} />);
+    const count = () =>
+      (screen.queryByTestId("ask-card-chips")?.querySelectorAll("button").length ?? 0) +
+      (screen.queryByTestId("ask-tool-chips")?.querySelectorAll("button").length ?? 0);
+    expect(count()).toBeLessThanOrEqual(MAX_ASK_CHIPS);
+    fireEvent.click(screen.getByTestId("ask-card-chip-where_slipped"), { detail: 1 });
+    expect(count()).toBeLessThanOrEqual(MAX_ASK_CHIPS);
+  });
+
+  it("the cap: tool chips fill only the room the cards leave", () => {
+    expect(withinChipCap(3, ["a", "b"])).toEqual([]);
+    expect(withinChipCap(2, ["a", "b", "c", "d"])).toEqual(["a"]);
+    expect(withinChipCap(0, ["a", "b", "c", "d"])).toEqual(["a", "b", "c"]);
   });
 
   it("a double-click is one question", () => {
@@ -96,6 +114,21 @@ describe("answerCardFor: the seam for the text box's send path", () => {
     __setAskToolsForTests(fakeHost(), below().ctx);
     expect(answerCardFor("slower")).toBeNull();
     expect(answerCardFor("should I anchor my pinky?")).toBeNull();
+    expect(getAskState().turns).toEqual([]);
+  });
+
+  it("no Take to read (Songs, Jam, Today): null and nothing written, so the next answerer gets it (F6)", () => {
+    for (const screen of ["songs", "jam", "today"] as const) {
+      __setAskToolsForTests(fakeHost(), toolCtx({ screen }));
+      expect(answerCardFor("Where did I mess up?")).toBeNull();
+      expect(answerCardFor("am I rushing?")).toBeNull();
+    }
+    expect(getAskState().turns).toEqual([]);
+  });
+
+  it("a question about another Take: null and nothing written (F6)", () => {
+    __setAskToolsForTests(fakeHost(), below().ctx);
+    expect(answerCardFor("Was I late in Take 1?")).toBeNull();
     expect(getAskState().turns).toEqual([]);
   });
 

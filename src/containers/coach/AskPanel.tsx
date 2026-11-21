@@ -10,7 +10,7 @@ import { CoachGlyph } from "./CoachGlyph";
 import { consumeAskFocus, noteAskScreen, sendAsk, useAskState, type AskTurn } from "./askStore";
 import { AskToolTurn } from "./AskToolTurn";
 import { AskCardChips, AskCardTurn } from "./AskCardTurn";
-import { askCardChips, askUngradedHere } from "./askCards";
+import { askCardChips, askUngradedHere, withinChipCap } from "./askCards";
 import { askToolChips, onePress, runAskCall } from "./askTools";
 import { lineText } from "./toolWords";
 import "../../styles/ask.css";
@@ -175,9 +175,10 @@ function AskConversation({
   // The tools' chips for where the player is (leg t1b1): chosen when the screen or
   // the thread is written (a turn updated in place too: a proposal's press changes
   // what the chips may offer), never per beat (the panel renders from its store alone).
-  const chips = useMemo(() => askToolChips(), [lookingKey, turns]);
   // The fact cards' question chips (leg c2b1a), chosen the same way, never per beat.
   const cards = useMemo(() => askCardChips(turns.length === 0 ? "askEmpty" : "askAbove", turns), [lookingKey, turns]);
+  // At most three chips anywhere: the cards' first, the tools' in the room left (review c2b1a F10).
+  const chips = useMemo(() => withinChipCap(cards.length, askToolChips()), [lookingKey, turns, cards]);
   const ungraded = useMemo(() => turns.length === 0 && askUngradedHere(), [lookingKey, turns]);
   const cardRow =
     cards.length > 0 ? (

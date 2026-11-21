@@ -8,8 +8,21 @@
  * built in an effect or a handler, never in a render.
  */
 import type { TFunction } from "i18next";
-import type { CoachContext } from "../../coach/context";
+import { buildCoachContext, contextForModel, type CoachContext, type CoachSources } from "../../coach/context";
 import type { AskTurn } from "./askStore";
+
+/**
+ * The context a model reads, from the same getters as the tools and cards,
+ * without the last Take's raw analysis (`review`). The cards read it through
+ * the Take's note, which withholds what the scorer cannot vouch for; its raw
+ * findings carry a whole-Take rushing or dragging (the lean lag correction
+ * hides), played-bar numbers where the coach speaks in bars of the tune, and
+ * the findings of a Take that was not caught (review c2b1a F5). The Take's
+ * own line (verdict, what decided it, the counts) still goes in.
+ */
+export function askModelContext(sources: CoachSources): string {
+  return contextForModel(buildCoachContext({ ...sources, review: undefined }));
+}
 
 /** The parts of "Looking at: …", in order. Never empty. */
 export function lookingAtParts(ctx: CoachContext, t: TFunction): string[] {

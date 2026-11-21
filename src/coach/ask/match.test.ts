@@ -46,6 +46,10 @@ const MATCHES: ReadonlyArray<[string, string, ToolArgs]> = [
   ["does the app check my pitch?", "why_not_counted", { what: "pitch" }],
   ["did it hear my wrong notes?", "why_not_counted", { what: "pitch" }],
   ["do you track my posture", "why_not_counted", { what: "posture" }],
+  // Still cards after the review's fixes (F6): "that" as the subject, the last Take named.
+  ["was that late?", "early_or_late", { premise: "late" }],
+  ["why didn't the last take count?", "why_not_counted", {}],
+  ["was I late in my last take?", "early_or_late", { premise: "late" }],
 ];
 
 /** Lines that must not become a card: commands, questions about something else, statements, two shapes at once. */
@@ -82,6 +86,23 @@ const NEAR_MISSES: readonly string[] = [
   "rushing",
   "",
   "?",
+  // The review of c2b1a (F6): each of these matched a card it does not ask for.
+  "Why is there no count-in?",
+  "why isn't there a count in?",
+  "Why didn't my bends count?",
+  "why didn't my vibrato count?",
+  "Am I behind on my Path?",
+  "am I ahead of schedule?",
+  "am i behind with my practice?",
+  "What does it mean to rush?",
+  "what does dragging mean?",
+  "Was I late in Take 1?",
+  "where did take 3 slip?",
+  "did I rush yesterday?",
+  "was I rushing in the first take?",
+  "why didn't the previous take count?",
+  "Did the metronome start late?",
+  "is the click late?",
 ];
 
 describe("matchCard: typed English to a card", () => {

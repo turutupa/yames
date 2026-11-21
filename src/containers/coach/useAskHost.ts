@@ -11,7 +11,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { lastEvent } from "../../coach/bus";
-import { buildCoachContext, contextForModel, type CoachScreen, type CoachSources } from "../../coach/context";
+import { buildCoachContext, type CoachScreen, type CoachSources } from "../../coach/context";
 import { getCoachModelSnapshot } from "../../hooks/coachLoader";
 import type { Jam } from "../../jam/types";
 import { currentStep } from "../../session/runner";
@@ -19,7 +19,7 @@ import type { SongRecord } from "../../songs/library";
 import { wholeSong } from "../../songs/schedule";
 import type { MainView } from "../main-window/MainHeader";
 import { seedOf, type SessionRun } from "../session/hooks/useSessionRun";
-import { askScreenKey, lookingAtParts } from "./askContext";
+import { askModelContext, askScreenKey, lookingAtParts } from "./askContext";
 import type { AskLookingAt } from "./AskPanel";
 import { noteAskToolView, registerAskToolContext } from "./askTools";
 import { useAskSessionRules, useCoachPanel, type CoachPanel } from "./useCoachPanel";
@@ -104,7 +104,8 @@ export function useAskHost(input: AskHostInput): { panel: CoachPanel; lookingAt:
     },
   }).current;
 
-  const panel = useCoachPanel({ contextText: () => contextForModel(buildCoachContext(sources)) });
+  // The model's context leaves the Take's raw review out (review c2b1a F5).
+  const panel = useCoachPanel({ contextText: () => askModelContext(sources) });
 
   // The tools read the same context, at each press (leg t1b1).
   useEffect(() => registerAskToolContext(() => buildCoachContext(sources)), [sources]);

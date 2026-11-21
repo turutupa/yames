@@ -43,8 +43,21 @@ export function normalizeQuestion(text: string): string {
 const QUESTION_START = /^(where|which|was|were|am|are|is|did|do|does|why|how|what|when|show me where|tell me where|tell me why)\b/;
 /** Questions about practice in general, not about a Take: never a card. */
 const GENERAL_START = /^(should|could|can|would|is it|is there|how (do|can|should) (i|you) (play|hold|practi[cs]e|learn|get))\b/;
-/** About the player's own playing: a card is about a Take, never about music in general. */
-const ABOUT_ME = /\b(i|me|my|mine|it|that|this|take|takes)\b/;
+/**
+ * About the player's own playing: a card is about a Take, never about music in
+ * general. "It", "that" and "this" count only as the subject of the question
+ * ("where did it slip", "was that late"), not in "what does it mean to rush"
+ * (review c2b1a F6).
+ */
+const ABOUT_ME = /\b(i|me|my|mine|take|takes)\b|\b(was|were|is|did|has|had) (it|that|this)\b/;
+/** A question about what a word means, not about a Take. */
+const MEANING = /\b(mean|means|meaning|define|definition|difference between)\b/;
+/** Another Take than the last one, which is the only one a card reads. */
+const OTHER_TAKE =
+  /\b(takes? (\d+|one|two|three|four|five|six|seven|eight|nine|ten)|first take|(previous|earlier|other|second|third) takes?|take before|the one before|yesterday|last (session|week|time)|this morning|earlier today|before that)\b/;
+/** "Late" or "behind" about something else than the notes: the metronome, a schedule, a Path. */
+const NOT_MY_TIMING =
+  /\b(metronome|click|count ?in|backing|drums?|band|app) (start|starts|started|come|comes|came|was|is|play|plays|played|run|runs|ran)\b|\b(ahead|behind) (of )?(schedule|time|plan)\b|\b(ahead|behind) (on|with|in) (my|the)\b/;
 
 const SLIP =
   /\b(slip|slips|slipped|slipping|go wrong|went wrong|goes wrong|mess up|messed up|mess it up|trip up|tripped up|fall apart|fell apart|lose it|lost it|break down|broke down|miss|missed)\b/;
@@ -56,6 +69,15 @@ const LATE = /\b(drag|drags|dragging|dragged|behind|late)\b/;
 const NOT_TIMING = /\b(too late to|late for|early for|early days|late today|early today|stay up late)\b/;
 
 const WHY_NOT = /\bwhy\b.*\b(not|no)\b/;
+/**
+ * The subject of "why didn't … count": the Take ("it", "that", "my take"). Any
+ * other subject is a card only when it is a metric this table knows ("my
+ * downstrokes"); "my bends", "there" ("why is there no count-in") are not.
+ */
+const WHY_ABOUT_TAKE =
+  /\bwhy (did|does|do|was|were|is|has|have|had|would|will|could)( not)? (it|that|this|((my|the|that|this) (last )?takes?))\b/;
+/** The count-in is not a count. */
+const COUNT_IN = /\bcount ?in\b/;
 const COUNTED = /\b(count|counts|counted|grade|graded|grades|score|scored|measure|measured|pass|passed|register|registered)\b/;
 /** "Do you check / grade / measure / hear …?", about something the player plays. */
 const CHECKS = /^(do|does|did|are|is|can|will)\b.*\b(check|checks|checked|checking|grade|grades|graded|grading|measure|measures|measured|measuring|hear|hears|heard|track|tracks|tracked|score|scores|scored|count|counts|counted)\b/;
@@ -88,10 +110,13 @@ export function matchCard(text: string): CardCall | null {
   const asks = s.endsWith("?") || QUESTION_START.test(s);
   if (!asks || GENERAL_START.test(s)) return null;
   const q = s.replace(/\?/g, "").trim();
+  // A card reads the last Take, as it is: not another Take, not a definition,
+  // not the count-in (review c2b1a F6).
+  if (OTHER_TAKE.test(q) || MEANING.test(q) || COUNT_IN.test(q)) return null;
 
   const found: CardCall[] = [];
 
-  const timing = !NOT_TIMING.test(q);
+  const timing = !NOT_TIMING.test(q) && !NOT_MY_TIMING.test(q);
   const early = timing && EARLY.test(q);
   const late = timing && LATE.test(q);
 
@@ -106,7 +131,8 @@ export function matchCard(text: string): CardCall | null {
 
   const metric = metricIn(q);
   if (WHY_NOT.test(q) && COUNTED.test(q)) {
-    found.push({ tool: "why_not_counted", args: metric ? { what: metric } : {} });
+    if (metric) found.push({ tool: "why_not_counted", args: { what: metric } });
+    else if (WHY_ABOUT_TAKE.test(q)) found.push({ tool: "why_not_counted", args: {} });
   } else if (metric && CHECKS.test(q)) {
     found.push({ tool: "why_not_counted", args: { what: metric } });
   }

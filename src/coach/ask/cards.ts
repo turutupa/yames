@@ -33,6 +33,7 @@ import { takeLean } from "../rounds";
 import { biasThresholdMs, takeNote, type TakeNote, type TakeReview } from "../takeNote";
 import type { Line } from "../tools/types";
 import type { Exercise } from "../../paths/format";
+import { CLEAN_TEMPO_MIN_BARS } from "../../session/grade";
 import { factsOf, leanOf, takesOf } from "../../session/progress";
 import type { TakeOutcome, UngradedWhy } from "../../session/runner";
 import { withVariant } from "../../session/take";
@@ -96,12 +97,23 @@ export function lastTakeHere(ctx: CoachContext): { outcome: TakeOutcome; exercis
   const outcome = ctx.lastTake;
   const exercise = ctx.exercise;
   if (!outcome || !exercise || outcome.exerciseId !== exercise.id) return null;
-  return { outcome, exercise: withVariant(exercise, ctx.variantSeed ?? null) };
+  return { outcome, exercise: withVariant(exercise, seedOfTake(ctx, outcome)) };
 }
 
 function storedRow(ctx: CoachContext, outcome: TakeOutcome): PathTakeRow | null {
   if (!outcome.takeId) return null;
   return ctx.progress.takes.find((row) => row.id === outcome.takeId) ?? null;
+}
+
+/**
+ * The variant the Take was played on: its stored row's, when it is stored
+ * (the step's variant may have changed on the ready screen since, review
+ * c2b1a F8), else the step's now (the outcome carries no seed).
+ */
+function seedOfTake(ctx: CoachContext, outcome: TakeOutcome): number | null {
+  const row = storedRow(ctx, outcome);
+  if (row) return row.variantSeed ?? null;
+  return ctx.variantSeed ?? null;
 }
 
 /**
@@ -118,7 +130,7 @@ export function noteOf(ctx: CoachContext): TakeNote | null {
     ? takesOf(ctx.progress, pathId, outcome.exerciseId).filter((t) => t.id !== outcome.takeId)
     : [];
   const review = (ctx.review ?? null) as TakeReview | null;
-  return takeNote(outcome, review, earlier, exercise, { variantSeed: ctx.variantSeed ?? null });
+  return takeNote(outcome, review, earlier, exercise, { variantSeed: seedOfTake(ctx, outcome) });
 }
 
 /** The lean of each pattern bar, ms (positive late), from the stored Take or else its review. */
@@ -159,10 +171,10 @@ function measured(outcome: TakeOutcome): BlockSource {
 const APP: BlockSource = { kind: "app" };
 
 /** The Take was not heard, not long enough or not graded: there is nothing measured to read. */
-function unmeasuredTake(shape: CardShape, outcome: TakeOutcome, note: TakeNote): FactCard | null {
+function unmeasuredTake(ctx: CoachContext, shape: CardShape, outcome: TakeOutcome, note: TakeNote, exercise: Exercise): FactCard | null {
   const take = outcome.takeNumber;
   if (note.kind === "ungraded") {
-    return { shape, lines: [ungradedLine(outcome.ungraded, take)], source: APP, uncertain: true };
+    return { shape, lines: [ungradedLine(ctx, outcome, exercise)], source: APP, uncertain: true };
   }
   if (note.kind === "notCaught") {
     const { heard, expected } = outcome.measures;
@@ -174,14 +186,28 @@ function unmeasuredTake(shape: CardShape, outcome: TakeOutcome, note: TakeNote):
     const bars = outcome.measures.barsPlayed;
     return {
       shape,
-      lines: [shape === "why_not_counted" ? line("ask.card.count.tooShort", { take, bars }) : line("ask.card.tooShort", { take, bars })],
+      // `count` picks the plural ("after 1 bar", review c2b1a F9).
+      lines: [
+        shape === "why_not_counted"
+          ? line("ask.card.count.tooShort", { take, bars, count: bars })
+          : line("ask.card.tooShort", { take, bars, count: bars }),
+      ],
       source: measured(outcome),
     };
   }
   return null;
 }
 
-function ungradedLine(why: UngradedWhy | undefined, take: number): Line {
+/**
+ * Why a Take was not graded. The player's own reason when they gave one
+ * (`outcome.ungraded`); grading switched off only when it is; otherwise the
+ * grade itself said "ungraded", which is the Exercise (or this tempo of it)
+ * being one the player checks themselves (`gradeTake`): never "grading is
+ * off" while it is on (review c2b1a F1).
+ */
+function ungradedLine(ctx: CoachContext, outcome: TakeOutcome, exercise: Exercise): Line {
+  const take = outcome.takeNumber;
+  const why: UngradedWhy | undefined = outcome.ungraded;
   switch (why) {
     case "eyes":
       return line("ask.card.count.ungraded.eyes", { take });
@@ -190,7 +216,10 @@ function ungradedLine(why: UngradedWhy | undefined, take: number): Line {
     case "inputOff":
       return line("ask.card.count.ungraded.inputOff", { take });
     default:
-      return line("ask.card.count.ungraded.gradingOff", { take });
+      if (ctx.grading === "off") return line("ask.card.count.ungraded.gradingOff", { take });
+      return exercise.grading !== "graded"
+        ? line("ask.card.count.ungraded.selfChecked", { take })
+        : line("ask.card.count.ungraded.selfCheckedTempo", { take, bpm: outcome.bpm });
   }
 }
 
@@ -203,9 +232,9 @@ export function whereSlipped(ctx: CoachContext): FactCard | NoCard {
   const here = lastTakeHere(ctx);
   const note = noteOf(ctx);
   if (!here || !note) return noTake();
-  const { outcome } = here;
+  const { outcome, exercise } = here;
   const shape: CardShape = "where_slipped";
-  const unmeasured = unmeasuredTake(shape, outcome, note);
+  const unmeasured = unmeasuredTake(ctx, shape, outcome, note, exercise);
   if (unmeasured) return unmeasured;
   const take = outcome.takeNumber;
   const where = placeOf(note);
@@ -217,7 +246,11 @@ export function whereSlipped(ctx: CoachContext): FactCard | NoCard {
   }
   // No bar-by-bar reading of this Take at all: say so, never guess.
   if (!note.strip) return { shape, lines: [line("ask.card.slip.noBars", { take })], source: APP, uncertain: true };
-  return { shape, lines: [line("ask.card.slip.none", { take })], source: measured(outcome) };
+  const lines: Line[] = [line("ask.card.slip.none", { take })];
+  // Below the pass mark with every bar held (extra notes, the right notes: not
+  // judged bar by bar): what decided it, or the card reads as a clean Take (F4).
+  if (note.verdict === "belowBar") lines.push(note.lead);
+  return { shape, lines, source: measured(outcome) };
 }
 
 /** At most this many bars are named one by one. */
@@ -233,7 +266,7 @@ export function earlyOrLate(ctx: CoachContext, premise: Lean | null = null): Fac
   if (!here || !note) return noTake();
   const { outcome, exercise } = here;
   const shape: CardShape = "early_or_late";
-  const unmeasured = unmeasuredTake(shape, outcome, note);
+  const unmeasured = unmeasuredTake(ctx, shape, outcome, note, exercise);
   if (unmeasured) return unmeasured;
   const take = outcome.takeNumber;
   const threshold = Math.round(biasThresholdMs(outcome.bpm));
@@ -246,8 +279,11 @@ export function earlyOrLate(ctx: CoachContext, premise: Lean | null = null): Fac
     return { shape, lines: [line("ask.card.lean.notMeasured", { take })], source: APP, uncertain: true };
   }
 
-  // The way the Take leaned, as one word: the note's reading where it named a
-  // place, else every leaning bar the same way, else none.
+  // The way the bars that leaned went, as one word: the note's reading where it
+  // named a place, else every leaning bar the same way, else none. Every one of
+  // them is relative to the rest of the Take: the scorer's lag correction hides
+  // a lean the whole Take shares, so the premise lines say only what was
+  // measured, and that the rest was not (review c2b1a F2).
   const ways = new Set(leaning.map((b) => (b.ms > 0 ? "late" : "early")));
   const way: Lean | null = note.direction?.way ?? (ways.size === 1 ? ([...ways][0] as Lean) : null);
 
@@ -266,8 +302,15 @@ export function earlyOrLate(ctx: CoachContext, premise: Lean | null = null): Fac
   }
 
   const where = note.direction ? placeOf(note) : null;
-  if (where && note.directionLine) lines.push(where, withNoteName(note.directionLine));
-  for (const b of leaning.slice(0, MAX_LEAN_BARS)) {
+  // The place's own bars are said once, by the place and its direction (from
+  // the rounds that slipped); their mean over every round could point the
+  // other way, so it is not said beside them (review c2b1a F7).
+  const placeBars = new Set<number>();
+  if (where && note.directionLine) {
+    lines.push(where, withNoteName(note.directionLine));
+    for (const pb of note.place?.patternBars ?? []) placeBars.add(pb);
+  }
+  for (const b of leaning.filter((x) => !placeBars.has(x.bar)).slice(0, MAX_LEAN_BARS)) {
     const ms = Math.abs(b.ms);
     lines.push(b.ms > 0 ? line("ask.card.lean.bar.late", { bar: b.bar, ms }) : line("ask.card.lean.bar.early", { bar: b.bar, ms }));
   }
@@ -317,16 +360,26 @@ export function whyNotCounted(ctx: CoachContext, what: "take" | AskableMetric = 
   const here = lastTakeHere(ctx);
   const note = noteOf(ctx);
   if (!here || !note) return noTake();
-  const { outcome } = here;
-  const unmeasured = unmeasuredTake(shape, outcome, note);
+  const { outcome, exercise } = here;
+  const unmeasured = unmeasuredTake(ctx, shape, outcome, note, exercise);
   if (unmeasured) return unmeasured;
   const take = outcome.takeNumber;
   const row = storedRow(ctx, outcome);
   const unfair = row ? factsOf(row).fair === "no" : false;
   const lines: Line[] = [];
   // It did count: that answers the question's premise first.
-  if (note.verdict === "passed") lines.push(line("ask.card.count.passed", { take, bpm: outcome.bpm }));
-  else {
+  if (note.verdict === "passed") {
+    lines.push(line("ask.card.count.passed", { take, bpm: outcome.bpm }));
+    // A pass that did not move the clean tempo: the question most likely meant
+    // that, so say what a clean tempo takes and how far this Take got (F3).
+    if (outcome.grade.cleanBpm === null) {
+      // The scorer's longest held stretch when it judged the Take; without it,
+      // `gradeTake` withholds the clean tempo only for want of that stretch.
+      const held = outcome.measures.pass?.heldBars;
+      if (held === undefined) lines.push(line("ask.card.count.notCleanPlain", { take, need: CLEAN_TEMPO_MIN_BARS }));
+      else if (held < CLEAN_TEMPO_MIN_BARS) lines.push(line("ask.card.count.notClean", { take, held, need: CLEAN_TEMPO_MIN_BARS }));
+    }
+  } else {
     lines.push(line("ask.card.count.below", { take, bpm: outcome.bpm }));
     lines.push(note.lead);
   }
