@@ -10,7 +10,7 @@
  */
 import { vi } from "vitest";
 import type { AppState } from "../types";
-import type { CoachAskOutcome } from "../ipc";
+import type { CleanTempoSpanRow, CoachAskOutcome } from "../ipc";
 
 // Default app state for tests. Override in individual tests via setInvokeResponse.
 export const DEFAULT_TEST_STATE: AppState = {
@@ -145,6 +145,7 @@ const DEFAULT_INVOKE_MAP: Record<string, InvokeFn> = {
   save_path_take: () => undefined,
   list_path_takes: () => [],
   list_exercise_ceilings: () => [],
+  list_clean_tempo_spans: (): CleanTempoSpanRow[] => [],
 
   // Diagnostic session logs (D1)
   list_session_logs: () => [],
