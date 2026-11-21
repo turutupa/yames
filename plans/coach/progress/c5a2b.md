@@ -21,4 +21,8 @@ Orchestrator's decision: `todayLine(rawInput)` → `withoutCustomTakes(rawInput)
 
 ## Gates
 
-(filled in below as they run; logs in /tmp/coach-c5a2b/)
+Logs in /tmp/coach-c5a2b/. Before the merge: the six touched vitest files 211 passed (job coach-c5a2b-vt1), tsc pass (coach-c5a2b-tsc1). After the merge (521fdbbe):
+
+- tsc pass (coach-c5a2b-tsc2); build pass (coach-c5a2b-build).
+- vitest full: 50054 passed, 11 skipped; the known `TabStage.render.test.tsx` cannot load (`vitest.log`).
+- Layout `songs-coach`, `songs-review`, `songs`, `today-line`, `short-window`, `phone-learning`, `songs-camera`: 481 passed, 1 failed (`pw.log`): `phone-learning` "phone-session-ready, Tab view: the footer is one row after a Watch at 360px" (335 against 332 px), the same Session-screen case that failed under load in c5a2's run and passed alone; re-run alone it failed again, 336 against 332 px (`pw2.log`, 5 others passed). This leg touches no Session screen; the same case on `coach` untouched (main checkout, 5801115d): job coach-c5a2b-pw3-oncoach.
