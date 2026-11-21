@@ -4,8 +4,23 @@ Branch `coach-c2cb` (from `coach` at `aadecbdd`). Logs `/tmp/coach-c2cb/`.
 
 ## Status
 
-Items 1 to 4 written (English); gates running. Item 5 (fourteen locales) by sonnet helpers after the English
-proofread. Item 6 (scenes) pending.
+Items 1 to 5 done (English read against the code by a sonnet helper, eight fixes taken; fourteen locales by
+three sonnet helpers). Item 6 (scenes) handed to c2cc: `c2cb-HANDOFF.md`. `coach` merged in.
+
+## Gates (logs in /tmp/coach-c2cb/)
+
+- tsc after the merge: pass (`coach-c2cb-tsc-3`). Build: pass (`coach-c2cb-build`).
+- vitest full (`vitest.log`): 51270 passed; failed only the known `TabStage.render.test.tsx` (symlink) and two of
+  mine (the namespace list, a chip test), fixed and re-run with the i18n / parity / Ask files: 111 passed (`coach-c2cb-vt3`).
+- Layout `ask ask-tools short-window phone-header ask-cards ask-typed` (`layout.log`): 132 passed, 15 failed, every
+  one a 30 s timeout loading the shot page at load 40+; `ask-tools` + `ask-cards` again with `--workers=2`: 23 of 23
+  passed (`layout-2.log`).
+
+## Also changed
+
+- The seven `ask.json` keys that said typed questions need a model are removed in fifteen locales (listed in
+  `localeKeys.test.ts`' `DELIBERATELY_REMOVED`); their places are `help.ui.*`.
+- The tuning line also runs before the cards (not only before search).
 
 ## What landed
 
