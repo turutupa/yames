@@ -33,6 +33,7 @@ import { takeLean } from "../rounds";
 import { biasThresholdMs, heldStretchUncrossed, takeNote, type TakeNote, type TakeReview } from "../takeNote";
 import type { Line } from "../tools/types";
 import type { Exercise } from "../../paths/format";
+import { NOT_GRADED } from "../../paths/metrics";
 import { displayBar, displayValue, metricKey } from "../../session/coachWords";
 import { CLEAN_TEMPO_MIN_BARS } from "../../session/grade";
 import { factsOf, leanOf, takesOf } from "../../session/progress";
@@ -40,8 +41,15 @@ import type { TakeOutcome, UngradedWhy } from "../../session/runner";
 import { withVariant } from "../../session/take";
 import type { PathTakeRow } from "../../ipc";
 
-/** The question shapes this leg answers. c2b1b adds more by adding names here and entries in `intents.ts`. */
-export type CardShape = "where_slipped" | "early_or_late" | "why_not_counted";
+/** The question shapes the cards answer: a name here, a function below, an entry in `intents.ts`. */
+export type CardShape =
+  | "where_slipped"
+  | "early_or_late"
+  | "why_not_counted"
+  | "what_changed"
+  | "improving"
+  | "score_made_of"
+  | "pass_mark_distance";
 
 /** The way a player's question assumed the Take leaned ("am I rushing": early). */
 export type Lean = "early" | "late";
@@ -393,10 +401,10 @@ export function earlyOrLate(ctx: CoachContext, premise: Lean | null = null): Fac
     lines.push(way === "late" ? line("ask.card.lean.premise.late", { take }) : line("ask.card.lean.premise.early", { take }));
     contradicted = true;
   } else if (premise && ways.size === 0 && measuredBars.length > 0) {
+    // Says what was checked, as `lean.none` does: the measured bars, of how many (c2b1b).
+    const checked = { take, ms: threshold, measured: measuredBars.length, bars: (lean ?? []).length };
     lines.push(
-      premise === "early"
-        ? line("ask.card.lean.premiseNone.early", { take, ms: threshold })
-        : line("ask.card.lean.premiseNone.late", { take, ms: threshold }),
+      premise === "early" ? line("ask.card.lean.premiseNone.early", checked) : line("ask.card.lean.premiseNone.late", checked),
     );
     contradicted = true;
   }
@@ -484,7 +492,7 @@ export function whyNotCounted(ctx: CoachContext, what: "take" | AskableMetric = 
   if (unmeasured) return unmeasured;
   const take = outcome.takeNumber;
   const row = storedRow(ctx, outcome);
-  const unfair = row ? factsOf(row).fair === "no" : false;
+  const unfair = row ? markedNotFair(row) : false;
   const lines: Line[] = [];
   // It did count: that answers the question's premise first.
   if (note.verdict === "passed") {
@@ -511,6 +519,369 @@ export function whyNotCounted(ctx: CoachContext, what: "take" | AskableMetric = 
   }
   if (unfair) lines.push(line("ask.card.count.unfair"));
   return { shape, lines, source: measured(outcome), premise: true };
+}
+
+// ---------------------------------------------------------------------------
+// The stored Takes the history cards read (leg c2b1b)
+// ---------------------------------------------------------------------------
+
+/**
+ * The player marked this Take's grade as not fair. The one place the history
+ * cards ask: such a Take is left out of every number they quote or count, and
+ * the card says how many it left out. Leg nf1 adds the same rule to
+ * `session/progress.ts` (`isMarkedNotFair`); once both are merged this
+ * should call that one.
+ */
+export function markedNotFair(row: PathTakeRow): boolean {
+  return factsOf(row).fair === "no";
+}
+
+/** A stored Take that was graded and measured: heard, long enough, and not played ungraded. */
+function measuredRow(row: PathTakeRow): boolean {
+  const f = factsOf(row);
+  return row.caught && f.ungraded === undefined && (f.verdict === "passed" || f.verdict === "belowBar");
+}
+
+/** The Path the Take belongs to: the context's, else the stored row's. Null: no history can be read. */
+function pathIdOf(ctx: CoachContext, outcome: TakeOutcome): string | null {
+  return ctx.path?.id ?? storedRow(ctx, outcome)?.pathId ?? null;
+}
+
+/** What a check is called in a card, as a literal key suffix; null: a metric the cards have no words for. */
+type CheckKind = "even" | "heard" | "extras" | "accents" | "notes" | "hold";
+
+function checkKind(metric: string): CheckKind | null {
+  switch (metric) {
+    case "timingEvenness":
+      return "even";
+    case "notesHeard":
+      return "heard";
+    case "extraNotes":
+      return "extras";
+    case "accentPlacement":
+      return "accents";
+    case "noteIdentity":
+      return "notes";
+    case "evennessHold":
+      return "hold";
+    default:
+      return null;
+  }
+}
+
+/** One literal key per kind (the locale coverage reads them). */
+const CHANGED_KEY: Readonly<Record<CheckKind, string>> = {
+  even: "ask.card.changed.metric.even",
+  heard: "ask.card.changed.metric.heard",
+  extras: "ask.card.changed.metric.extras",
+  accents: "ask.card.changed.metric.accents",
+  notes: "ask.card.changed.metric.notes",
+  hold: "ask.card.changed.metric.hold",
+};
+const SHORT_KEY: Readonly<Record<CheckKind, string>> = {
+  even: "ask.card.distance.short.even",
+  heard: "ask.card.distance.short.heard",
+  extras: "ask.card.distance.short.extras",
+  accents: "ask.card.distance.short.accents",
+  notes: "ask.card.distance.short.notes",
+  hold: "ask.card.distance.short.hold",
+};
+const MET_KEY: Readonly<Record<CheckKind, string>> = {
+  even: "ask.card.distance.met.even",
+  heard: "ask.card.distance.met.heard",
+  extras: "ask.card.distance.met.extras",
+  accents: "ask.card.distance.met.accents",
+  notes: "ask.card.distance.met.notes",
+  hold: "ask.card.distance.met.hold",
+};
+const MADE_KEY: Readonly<Record<CheckKind, string>> = {
+  even: "ask.card.made.check.even",
+  heard: "ask.card.made.check.heard",
+  extras: "ask.card.made.check.extras",
+  accents: "ask.card.made.check.accents",
+  notes: "ask.card.made.check.notes",
+  hold: "ask.card.made.check.hold",
+};
+/** What the Exercise does not grade (`NOT_GRADED` ids), one sentence each. */
+const NOT_PART_KEY: Readonly<Record<string, string>> = {
+  pickDirection: "ask.card.made.not.pickDirection",
+  muting: "ask.card.made.not.muting",
+  posture: "ask.card.made.not.posture",
+  tension: "ask.card.made.not.tension",
+  handAttribution: "ask.card.made.not.handAttribution",
+  fingering: "ask.card.made.not.fingering",
+  tone: "ask.card.made.not.tone",
+  feel: "ask.card.made.not.feel",
+  bendPitch: "ask.card.made.not.bendPitch",
+  vibrato: "ask.card.made.not.vibrato",
+  noteChoice: "ask.card.made.not.noteChoice",
+  notesWritten: "ask.card.made.not.notesWritten",
+};
+
+/** A pass-mark check the cards can name: a kind with words, and pitch only where the Exercise grades it. */
+function namedCheck(metric: string, exercise: Exercise): CheckKind | null {
+  const kind = checkKind(metric);
+  if (kind === "notes" && !gradesPitch(exercise)) return null;
+  return kind;
+}
+
+/** The number of bars a check holds over, from the Exercise's own pass marks. */
+function overBarsOf(exercise: Exercise, metric: string, index: number): number | null {
+  const at = exercise.passBars[index];
+  if (at && at.metric === metric) return at.overBars;
+  return exercise.passBars.find((b) => b.metric === metric)?.overBars ?? null;
+}
+
+/** The "I left out N Takes you marked not fair" line, when there were any. */
+function leftOutLine(count: number): Line[] {
+  return count > 0 ? [line("ask.card.history.leftOut", { count })] : [];
+}
+
+// ---------------------------------------------------------------------------
+// What changed since the last Take
+// ---------------------------------------------------------------------------
+
+/**
+ * "What changed since the last Take?": this Take beside the last measured Take
+ * before it on the same Exercise, each number from its own record (the stored
+ * row's headline number, and this Take's check on the same metric and pass
+ * mark). The tempo of each is said, so two numbers at two tempos are never
+ * read as one change. No earlier measured Take: nothing to compare, said so.
+ * Takes marked not fair are skipped, and counted.
+ */
+export function whatChanged(ctx: CoachContext): FactCard | NoCard {
+  const here = lastTakeHere(ctx);
+  const note = noteOf(ctx);
+  if (!here || !note) return noTake();
+  const { outcome, exercise } = here;
+  const shape: CardShape = "what_changed";
+  const unmeasured = unmeasuredTake(ctx, shape, outcome, note, exercise);
+  if (unmeasured) return unmeasured;
+  const take = outcome.takeNumber;
+  const own = storedRow(ctx, outcome);
+  if (own && markedNotFair(own)) {
+    return { shape, lines: [line("ask.card.changed.thisUnfair", { take })], source: APP };
+  }
+  const pathId = pathIdOf(ctx, outcome);
+  if (!pathId) return noTake();
+  let leftOut = 0;
+  let before: PathTakeRow | null = null;
+  for (const row of takesOf(ctx.progress, pathId, outcome.exerciseId)) {
+    if (row.id === outcome.takeId || !measuredRow(row)) continue;
+    if (markedNotFair(row)) {
+      leftOut += 1;
+      continue;
+    }
+    before = row;
+    break;
+  }
+  if (!before) {
+    // "No measured Take before it" would be false beside Takes left out as not fair: say those were all there is.
+    const first = leftOut > 0 ? line("ask.card.changed.onlyUnfair", { take }) : line("ask.card.changed.first", { take });
+    return { shape, lines: [first, ...leftOutLine(leftOut)], source: APP };
+  }
+  const lines: Line[] = [
+    before.bpm === outcome.bpm
+      ? line("ask.card.changed.sameTempo", { take, bpm: outcome.bpm })
+      : line("ask.card.changed.tempo", { take, before: before.bpm, bpm: outcome.bpm }),
+  ];
+  // The number the stored Take kept (its headline), and this Take's check on
+  // the same metric and the same pass mark: the only pair measured alike.
+  const f = factsOf(before);
+  const metric = f.headlineMetric;
+  const kind = metric ? checkKind(metric) : null;
+  const now = metric
+    ? outcome.grade.checks.find((c) => c.metric === metric && c.min === f.headlineMin && c.max === f.headlineMax)
+    : undefined;
+  const beforeValue = metric && typeof f.headlineValue === "number" ? displayValue({ metric, value: f.headlineValue }) : null;
+  const nowValue = now ? displayValue(now) : null;
+  if (kind && beforeValue !== null && nowValue !== null) {
+    lines.push(line(CHANGED_KEY[kind], { take, before: beforeValue, now: nowValue }));
+  } else {
+    lines.push(line("ask.card.changed.noPair", { take }));
+  }
+  const was = f.verdict === "passed";
+  const is = outcome.grade.verdict === "passed";
+  lines.push(
+    line(
+      was && is ? "ask.card.changed.verdict.bothPassed" : !was && !is ? "ask.card.changed.verdict.bothBelow" : is ? "ask.card.changed.verdict.nowPassed" : "ask.card.changed.verdict.nowBelow",
+      { take },
+    ),
+  );
+  lines.push(...leftOutLine(leftOut));
+  return { shape, lines, source: measured(outcome) };
+}
+
+// ---------------------------------------------------------------------------
+// Am I improving
+// ---------------------------------------------------------------------------
+
+/** At least this many measured Takes before "am I improving" compares anything. */
+export const IMPROVING_MIN_TAKES = 3;
+
+/** A stored Take's evenness, as the result screen showed it: the scorer's check on the Exercise's first evenness pass mark. */
+function evennessOfRow(row: PathTakeRow, exercise: Exercise): number | null {
+  const f = factsOf(row);
+  const bar = exercise.passBars.find((b) => b.metric === "timingEvenness");
+  if (!bar) return null;
+  const check = f.measures?.pass?.checks?.find((c) => c.metric === "timingEvenness" && c.overBars === bar.overBars);
+  if (check && typeof check.measured === "number") return displayValue({ metric: "timingEvenness", value: check.measured });
+  if (f.headlineMetric === "timingEvenness" && f.headlineMin === bar.min && typeof f.headlineValue === "number") {
+    return displayValue({ metric: "timingEvenness", value: f.headlineValue });
+  }
+  return null;
+}
+
+/** Whether a stored Take earned a clean tempo: true, false, or null when the row cannot say. */
+function earnedClean(row: PathTakeRow): boolean | null {
+  const f = factsOf(row);
+  if (f.verdict !== "passed") return false;
+  if (f.newClean === true) return true;
+  const counts = f.measures?.pass?.countsForCleanTempo;
+  return typeof counts === "boolean" ? counts : null;
+}
+
+/**
+ * "Am I improving?": the measured Takes of this Exercise the app keeps (its
+ * 500-Take window), named as a window ("in your last N measured Takes"):
+ * the tempo of the oldest and the newest, how many earned a clean tempo and
+ * the fastest of those, and the evenness of the oldest, the newest and the
+ * best. Fewer than three: says so. No verdict on the trend: the numbers.
+ * Takes marked not fair are left out, and counted.
+ */
+export function improving(ctx: CoachContext): FactCard | NoCard {
+  const here = lastTakeHere(ctx);
+  if (!here) return noTake();
+  const { outcome, exercise } = here;
+  const shape: CardShape = "improving";
+  const pathId = pathIdOf(ctx, outcome);
+  if (!pathId) return noTake();
+  const measuredRows = takesOf(ctx.progress, pathId, outcome.exerciseId).filter(measuredRow);
+  const window = measuredRows.filter((r) => !markedNotFair(r));
+  const leftOut = measuredRows.length - window.length;
+  if (window.length < IMPROVING_MIN_TAKES) {
+    return {
+      shape,
+      lines: [line("ask.card.improving.tooFew", { count: window.length, need: IMPROVING_MIN_TAKES }), ...leftOutLine(leftOut)],
+      source: APP,
+    };
+  }
+  // Newest first, as the store keeps them.
+  const newest = window[0];
+  const oldest = window[window.length - 1];
+  const lines: Line[] = [
+    oldest.bpm === newest.bpm
+      ? line("ask.card.improving.windowSame", { count: window.length, to: newest.bpm })
+      : line("ask.card.improving.window", { count: window.length, from: oldest.bpm, to: newest.bpm }),
+  ];
+  const clean = window.map(earnedClean);
+  // A row that cannot say whether it earned one: no count is said rather than a wrong one.
+  if (!clean.includes(null)) {
+    const earned = window.filter((_r, i) => clean[i] === true);
+    lines.push(
+      earned.length === 0
+        ? line("ask.card.improving.cleanNone")
+        : line("ask.card.improving.clean", { count: earned.length, bpm: Math.max(...earned.map((r) => r.bpm)) }),
+    );
+  }
+  const even = window.map((r) => evennessOfRow(r, exercise)).filter((v): v is number => v !== null);
+  if (even.length >= 2) {
+    // `even` keeps the window's order: [0] the newest, the last the oldest.
+    lines.push(line("ask.card.improving.even", { count: even.length, first: even[even.length - 1], last: even[0], best: Math.max(...even) }));
+  } else {
+    lines.push(line("ask.card.improving.evenNone"));
+  }
+  lines.push(...leftOutLine(leftOut));
+  return { shape, lines, source: { kind: "measured" } };
+}
+
+// ---------------------------------------------------------------------------
+// What the score is made of
+// ---------------------------------------------------------------------------
+
+/**
+ * "What is the score made of?": the Exercise's pass mark, check by check, in
+ * its own numbers; the tempo it is passed at and what a clean tempo takes;
+ * then what it does not grade (`Exercise.notGraded`, `NOT_GRADED`). From the
+ * Path, needs no Take. An Exercise the app does not grade says that alone.
+ */
+export function scoreMadeOf(ctx: CoachContext): FactCard | NoCard {
+  const exercise = ctx.exercise;
+  if (!exercise) return noTake();
+  const shape: CardShape = "score_made_of";
+  const source: BlockSource = { kind: "path" };
+  if (exercise.grading !== "graded") {
+    const key =
+      exercise.grading === "practiceOnly"
+        ? "ask.card.made.ungraded.practiceOnly"
+        : exercise.grading === "landings"
+          ? "ask.card.made.ungraded.landings"
+          : "ask.card.made.ungraded.selfChecked";
+    return { shape, lines: [line(key)], source };
+  }
+  const checks: Line[] = [];
+  exercise.passBars.forEach((bar, i) => {
+    const kind = namedCheck(bar.metric, exercise);
+    const mark = displayBar(bar);
+    if (!kind || mark === null) return;
+    checks.push(line(MADE_KEY[kind], { bar: mark, over: overBarsOf(exercise, bar.metric, i) ?? bar.overBars }));
+  });
+  const lines: Line[] = checks.length > 0 ? [line("ask.card.made.intro", { count: checks.length }), ...checks] : [];
+  lines.push(line("ask.card.made.clean", { need: CLEAN_TEMPO_MIN_BARS }));
+  if (exercise.tempo.passAtBpm !== null) lines.push(line("ask.card.made.tempo", { passAt: exercise.tempo.passAtBpm }));
+  for (const id of exercise.notGraded) {
+    const key = NOT_PART_KEY[id];
+    if (key && NOT_GRADED[id] !== undefined) lines.push(line(key));
+  }
+  return { shape, lines, source };
+}
+
+// ---------------------------------------------------------------------------
+// How far the pass mark is
+// ---------------------------------------------------------------------------
+
+/**
+ * "How far is the pass mark?": each check of the last Take against its pass
+ * mark, in the Exercise's own numbers (the ones short of it first, with the
+ * gap), the checks it could not measure as a count, and the tempo the
+ * Exercise is passed at when the Take was slower. "Even" in milliseconds at
+ * this tempo is not here (c2b2a's computed terms).
+ */
+export function passMarkDistance(ctx: CoachContext): FactCard | NoCard {
+  const here = lastTakeHere(ctx);
+  const note = noteOf(ctx);
+  if (!here || !note) return noTake();
+  const { outcome, exercise } = here;
+  const shape: CardShape = "pass_mark_distance";
+  const unmeasured = unmeasuredTake(ctx, shape, outcome, note, exercise);
+  if (unmeasured) return unmeasured;
+  const take = outcome.takeNumber;
+  const short: Line[] = [];
+  const met: Line[] = [];
+  let notMeasured = 0;
+  outcome.grade.checks.forEach((c, i) => {
+    const kind = namedCheck(c.metric, exercise);
+    if (!kind) return;
+    const value = displayValue(c);
+    const mark = displayBar(c);
+    if (c.met === null || value === null || mark === null) {
+      notMeasured += 1;
+      return;
+    }
+    const over = overBarsOf(exercise, c.metric, i) ?? 0;
+    if (c.met) met.push(line(MET_KEY[kind], { take, value, bar: mark, over }));
+    else {
+      // Short of it by less than the rounding shows (84.6% against 85%): "< 1", never "0 short".
+      const gap = kind === "extras" ? value - mark : mark - value;
+      short.push(line(SHORT_KEY[kind], { take, value, bar: mark, over, gap: gap >= 1 ? gap : "< 1" }));
+    }
+  });
+  const lines: Line[] = [...short, ...met];
+  if (notMeasured > 0) lines.push(line("ask.card.distance.unmeasured", { take, count: notMeasured }));
+  const passAt = exercise.tempo.passAtBpm;
+  if (passAt !== null && outcome.bpm < passAt) lines.push(line("ask.card.distance.tempo", { take, bpm: outcome.bpm, passAt }));
+  if (lines.length === 0) lines.push(line("ask.card.distance.none", { take }));
+  return { shape, lines, source: measured(outcome) };
 }
 
 function noTake(): NoCard {

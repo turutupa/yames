@@ -56,6 +56,28 @@ const MATCHES: ReadonlyArray<[string, string, ToolArgs]> = [
   ["Which bar was off?", "where_slipped", {}],
   ["Why didn't I pass?", "why_not_counted", {}],
   ["How come that didn't count?", "why_not_counted", {}],
+  // c2b1b: the four cards about the Take's history and the pass mark.
+  ["what changed since the last take?", "what_changed", {}],
+  ["What changed?", "what_changed", {}],
+  ["What's different from my previous take?", "what_changed", {}],
+  ["was that better than the last one?", "what_changed", {}],
+  ["Did I do better?", "what_changed", {}],
+  ["how does this compare to my last take?", "what_changed", {}],
+  ["am I improving?", "improving", {}],
+  ["Am I getting better at this exercise?", "improving", {}],
+  ["have I improved?", "improving", {}],
+  ["how am I doing?", "improving", {}],
+  ["What is the score made of?", "score_made_of", {}],
+  ["how is my take graded?", "score_made_of", {}],
+  ["what do you check?", "score_made_of", {}],
+  ["what is the grade based on?", "score_made_of", {}],
+  ["how far is the pass mark?", "pass_mark_distance", {}],
+  ["How far was I from passing?", "pass_mark_distance", {}],
+  ["how close am I to the pass mark?", "pass_mark_distance", {}],
+  ["did I nearly pass?", "pass_mark_distance", {}],
+  ["what do I need to pass?", "pass_mark_distance", {}],
+  // A metric named: the why card's question, never what the score is made of.
+  ["do you grade my muting?", "why_not_counted", { what: "muting" }],
 ];
 
 /** Lines that must not become a card: commands, questions about something else, statements, two shapes at once. */
@@ -80,9 +102,7 @@ const NEAR_MISSES: readonly string[] = [
   "what does 85% even mean?",
   "why this tempo?",
   "why not 100 yet?",
-  "am I improving?",
-  "what changed since the last take?",
-  "how far is the pass mark?",
+  // c2b1b: these three now have cards (see MATCHES); their near-misses are below.
   "what should I try?",
   "why is it so slow",
   "do you check my tone and my muting?",
@@ -119,6 +139,25 @@ const NEAR_MISSES: readonly string[] = [
   "Did I rush the warm-up?",
   "Why didn't I pass the Path?",
   "was I late in the solo?",
+  // c2b1b: near the four new cards, and not their question.
+  "what changed in the app?",
+  "what changed in this version?",
+  "what changed since take 3?",
+  "what changed since yesterday?",
+  "what changed on this step?",
+  "am I improving overall?",
+  "am I getting better at guitar?",
+  "am I improving on the Path?",
+  "is my playing improving and was I late?",
+  "how far is the next step?",
+  "how far am I from the end of the path?",
+  "what is my score?",
+  "what is a pass mark?",
+  "what does the pass mark mean?",
+  "how is the weather?",
+  "did I pass?",
+  "how far is it to the next exercise?",
+  "what changed since the previous take, and was I late?",
 ];
 
 describe("matchCard: typed English to a card", () => {

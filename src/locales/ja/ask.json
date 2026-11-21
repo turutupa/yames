@@ -47,98 +47,197 @@
       "phone": "ここに入力した内容はこのスマートフォンから出ません。"
     },
     "card": {
-      "chips": "About your last Take:",
+      "chips": "直前のテイクについて:",
       "chip": {
-        "where": "Where did it slip?",
-        "lean": "Was I early or late?",
-        "count": "Why didn't that count?"
+        "where": "どこで崩れた?",
+        "lean": "走っていた? 遅れていた?",
+        "count": "なぜカウントされなかった?",
+        "changed": "前回のテイクから何が変わった?",
+        "improving": "上達している?",
+        "madeOf": "スコアの内訳は?",
+        "distance": "合格ラインまでどのくらい?"
       },
       "canAnswer": {
-        "ungraded": "You're playing without grading, so there are no measurements to answer questions about your Takes from."
+        "ungraded": "採点なしで弾いているため、テイクについての質問に答えられる測定がありません。"
       },
-      "tooShort": "Take {{take}} stopped after {{bars}} bar, too few to judge.",
-      "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too few to judge.",
+      "tooShort": "テイク{{take}}は{{bars}}小節で止まりました。判定するには少なすぎます。",
+      "tooShort_other": "テイク{{take}}は{{bars}}小節で止まりました。判定するには少なすぎます。",
       "slip": {
-        "none": "No bar slipped in Take {{take}}: every bar that could be judged held.",
-        "noBars": "I didn't measure Take {{take}} bar by bar, so I can't say where it slipped."
+        "none": "テイク{{take}}では、崩れた小節はありませんでした。判定できた小節はすべて保たれていました。",
+        "noBars": "テイク{{take}}は小節ごとには測定していないので、どこで崩れたかは言えません。"
       },
       "lean": {
         "premise": {
-          "early": "In Take {{take}} the bars that leaned sat earlier than the rest of it, not later. A lean the whole Take shares is something I don't measure.",
-          "late": "In Take {{take}} the bars that leaned sat later than the rest of it, not earlier. A lean the whole Take shares is something I don't measure."
+          "early": "テイク{{take}}で偏りのあった小節は、他の部分より早く、遅くはありませんでした。テイク全体に共通する偏りは測定していません。",
+          "late": "テイク{{take}}で偏りのあった小節は、他の部分より遅く、早くはありませんでした。テイク全体に共通する偏りは測定していません。"
         },
         "premiseNone": {
-          "early": "No bar of Take {{take}} sat more than {{ms}} ms earlier than the rest of it. A lean the whole Take shares is something I don't measure.",
-          "late": "No bar of Take {{take}} sat more than {{ms}} ms later than the rest of it. A lean the whole Take shares is something I don't measure."
+          "early": "テイク{{take}}では、測定できた小節({{bars}}小節中{{measured}}小節)のどれも、他の部分より{{ms}} ms を超えて早くはありませんでした。テイク全体に共通する偏りは測定していません。",
+          "late": "テイク{{take}}では、測定できた小節({{bars}}小節中{{measured}}小節)のどれも、他の部分より{{ms}} ms を超えて遅くはありませんでした。テイク全体に共通する偏りは測定していません。"
         },
         "bar": {
-          "early": "Bar {{bar}} of the tune: {{ms}} ms earlier than the rest of the Take.",
-          "late": "Bar {{bar}} of the tune: {{ms}} ms later than the rest of the Take."
+          "early": "曲の{{bar}}小節目: テイクの他の部分より{{ms}} ms 早い。",
+          "late": "曲の{{bar}}小節目: テイクの他の部分より{{ms}} ms 遅い。"
         },
-        "none": "In Take {{take}}, none of the bars I could measure ({{measured}} of {{bars}}) sat more than {{ms}} ms earlier or later than the rest of it.",
-        "notMeasured": "I didn't measure which way Take {{take}} leaned: no bar of it had enough note-by-note timing to tell."
+        "none": "テイク{{take}}では、測定できた小節({{bars}}小節中{{measured}}小節)のどれも、他の部分より{{ms}} ms を超えて早くも遅くもありませんでした。",
+        "notMeasured": "テイク{{take}}がどちらに偏っていたかは測定していません。音ごとのタイミングが足りず、判断できる小節がありませんでした。"
       },
       "direction": {
-        "early": "The notes there sat earlier than the rest of the Take.",
-        "late": "The notes there sat later than the rest of the Take.",
-        "earlyOpen": "The open {{note}}s there sat earlier than the rest of the Take.",
-        "lateOpen": "The open {{note}}s there sat later than the rest of the Take.",
-        "earlyNote": "The {{note}}s at fret {{fret}} there sat earlier than the rest of the Take.",
-        "lateNote": "The {{note}}s at fret {{fret}} there sat later than the rest of the Take."
+        "early": "そこの音は、テイクの他の部分より早い位置にありました。",
+        "late": "そこの音は、テイクの他の部分より遅い位置にありました。",
+        "earlyOpen": "そこの開放弦の{{note}}は、テイクの他の部分より早い位置にありました。",
+        "lateOpen": "そこの開放弦の{{note}}は、テイクの他の部分より遅い位置にありました。",
+        "earlyNote": "そこの{{fret}}フレットの{{note}}は、テイクの他の部分より早い位置にありました。",
+        "lateNote": "そこの{{fret}}フレットの{{note}}は、テイクの他の部分より遅い位置にありました。"
       },
       "below": {
-        "plain": "Take {{take}} was below the pass mark at {{bpm}} BPM.",
-        "even": "Take {{take}} was {{value}}% even, against a pass mark of {{bar}}%.",
-        "evenSome": "Take {{take}} was {{value}}% even, against a pass mark of {{bar}}%, and I heard {{heard}} of {{expected}} notes.",
-        "heard": "I heard {{heard}} of {{expected}} notes in Take {{take}}, against a pass mark of {{bar}}%.",
-        "extras": "Take {{take}} had more extra notes than the pass mark allows: {{bar}} or fewer in four bars.",
-        "accents": "In Take {{take}}, {{value}}% of the marked accents came out louder than the notes around them, against a pass mark of {{bar}}%.",
-        "notes": "In Take {{take}}, {{value}}% of the notes I could pitch were the written ones, against a pass mark of {{bar}}%."
+        "plain": "テイク{{take}}は{{bpm}} BPM で合格ラインに届きませんでした。",
+        "even": "テイク{{take}}の均等さは{{value}}%で、合格ラインは{{bar}}%でした。",
+        "evenSome": "テイク{{take}}の均等さは{{value}}%で、合格ラインは{{bar}}%でした。聞き取れた音は{{expected}}音のうち{{heard}}音です。",
+        "heard": "テイク{{take}}で聞き取れた音は{{expected}}音のうち{{heard}}音で、合格ラインは{{bar}}%でした。",
+        "extras": "テイク{{take}}は、余分な音が合格ラインの許容を超えていました。許容は4小節で{{bar}}個以下です。",
+        "accents": "テイク{{take}}では、印のあるアクセントのうち{{value}}%が周りの音より大きく出ていました。合格ラインは{{bar}}%です。",
+        "notes": "テイク{{take}}では、音程を判定できた音のうち{{value}}%が譜面どおりの音でした。合格ラインは{{bar}}%です。"
       },
       "count": {
-        "passed": "Take {{take}} did count: it met the pass mark at {{bpm}} BPM.",
-        "below": "Take {{take}} is kept, below the pass mark at {{bpm}} BPM.",
+        "passed": "テイク{{take}}はカウントされました。{{bpm}} BPM で合格ラインを満たしています。",
+        "below": "テイク{{take}}は記録されています。{{bpm}} BPM で合格ラインには届いていません。",
         "notCaught": {
-          "nothingHeard": "I couldn't grade Take {{take}}: I heard none of its notes, so it doesn't count against you.",
-          "tooFewHeard": "I couldn't grade Take {{take}}: I heard {{heard}} of {{expected}} notes, too few to grade, so it doesn't count against you.",
-          "tooManyExtras": "I couldn't grade Take {{take}}: I heard more notes that weren't written than ones that were, so it doesn't count against you.",
-          "lowConfidence": "I couldn't grade Take {{take}}: I wasn't sure enough of the notes I heard, so it doesn't count against you.",
-          "unknown": "I couldn't grade Take {{take}}."
+          "nothingHeard": "テイク{{take}}は採点できませんでした。音が一つも聞き取れなかったため、不利な扱いにはなりません。",
+          "tooFewHeard": "テイク{{take}}は採点できませんでした。{{expected}}音のうち{{heard}}音しか聞き取れず、採点するには少なすぎるため、不利な扱いにはなりません。",
+          "tooManyExtras": "テイク{{take}}は採点できませんでした。譜面にない音のほうが、譜面どおりの音より多く聞こえたため、不利な扱いにはなりません。",
+          "lowConfidence": "テイク{{take}}は採点できませんでした。聞き取った音に十分な確信が持てなかったため、不利な扱いにはなりません。",
+          "unknown": "テイク{{take}}は採点できませんでした。"
         },
-        "tooShort": "Take {{take}} stopped after {{bars}} bar, too short to judge, so it doesn't count either way.",
-        "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too short to judge, so it doesn't count either way.",
-        "notClean": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and the longest run in Take {{take}} was {{held}}.",
-        "notCleanPlain": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and Take {{take}} didn't have them.",
-        "unfair": "You marked this grade as not fair. It is kept as measured, with your answer beside it.",
-        "pitchGraded": "The pitch of your notes is part of this Exercise's grade.",
-        "pitchNotGraded": "The pitch of your notes isn't part of this Exercise's grade.",
-        "rightNotes": "In Take {{take}}, {{value}}% of the {{base}} notes I could pitch were the written ones.",
-        "notesUnchecked": "I couldn't check the pitches in Take {{take}}.",
+        "tooShort": "テイク{{take}}は{{bars}}小節で止まりました。判定するには短すぎるため、どちらにもカウントされません。",
+        "tooShort_other": "テイク{{take}}は{{bars}}小節で止まりました。判定するには短すぎるため、どちらにもカウントされません。",
+        "notClean": "クリーンテンポは動きませんでした。動かすにはクリーンな小節が{{need}}小節連続で必要で、テイク{{take}}の最長は{{held}}小節でした。",
+        "notCleanPlain": "クリーンテンポは動きませんでした。動かすにはクリーンな小節が{{need}}小節連続で必要ですが、テイク{{take}}にはそれがありませんでした。",
+        "unfair": "この採点を「公平ではない」とマークしました。測定したままの結果が残り、あなたのマークが横に添えられます。",
+        "pitchGraded": "音の高さは、この課題の採点に含まれます。",
+        "pitchNotGraded": "音の高さは、この課題の採点に含まれません。",
+        "rightNotes": "テイク{{take}}では、音程を判定できた{{base}}音のうち{{value}}%が譜面どおりの音でした。",
+        "notesUnchecked": "テイク{{take}}の音程は確認できませんでした。",
         "ungraded": {
-          "eyes": "I didn't measure Take {{take}}: it was the one for your eyes, so nothing was graded.",
-          "chosen": "I didn't measure Take {{take}}: you chose to just play it, so nothing was graded.",
-          "inputOff": "I didn't measure Take {{take}}: the input wasn't on, so nothing was graded.",
-          "gradingOff": "I didn't measure Take {{take}}: grading is off, so nothing was graded.",
-          "selfChecked": "I didn't measure Take {{take}}: this Exercise is one you check yourself, so nothing was graded.",
-          "selfCheckedTempo": "I didn't measure Take {{take}}: at {{bpm}} BPM this Exercise is one you check yourself, so nothing was graded.",
-          "practiceOnly": "I didn't measure Take {{take}}: this Exercise is practice only, not graded.",
-          "landings": "I didn't measure Take {{take}}: this Exercise isn't graded yet."
+          "eyes": "テイク{{take}}は測定していません。目で見るためのテイクで、何も採点していないためです。",
+          "chosen": "テイク{{take}}は測定していません。ただ弾くことを選んだため、何も採点していません。",
+          "inputOff": "テイク{{take}}は測定していません。入力がオンではなかったため、何も採点していません。",
+          "gradingOff": "テイク{{take}}は測定していません。採点がオフのため、何も採点していません。",
+          "selfChecked": "テイク{{take}}は測定していません。この課題は自分で確認するものなので、何も採点していません。",
+          "selfCheckedTempo": "テイク{{take}}は測定していません。{{bpm}} BPM では、この課題は自分で確認するものなので、何も採点していません。",
+          "practiceOnly": "テイク{{take}}は測定していません。この課題は練習専用で、採点なしです。",
+          "landings": "テイク{{take}}は測定していません。この課題はまだ採点対象ではありません。"
         }
       },
       "notMeasured": {
-        "pitch": "I didn't measure that. The pitch of your notes isn't part of this Exercise's grade.",
-        "pickDirection": "I didn't measure that. The app has only sound, and a downstroke and an upstroke can sound alike.",
-        "muting": "I didn't measure that. The app can't tell a muted string from a loud one next to it.",
-        "posture": "I didn't measure that. The app has no picture of you.",
-        "tension": "I didn't measure that. Only you can feel tension, and it comes before it can be heard.",
-        "handAttribution": "I didn't measure that. A late note sounds the same from either hand.",
-        "fingering": "I didn't measure that. The same pitch sounds the same from any finger.",
-        "tone": "I didn't measure that. Tone and touch aren't measured.",
-        "feel": "I didn't measure that. Whether it sounds good isn't something the app measures."
+        "pitch": "測定していません。音の高さは、この課題の採点に含まれません。",
+        "pickDirection": "測定していません。アプリが扱うのは音だけで、ダウンストロークとアップストロークは同じように聞こえることがあります。",
+        "muting": "測定していません。アプリは、ミュートした弦と、隣で大きく鳴る弦を聞き分けられません。",
+        "posture": "測定していません。アプリにはあなたの映像がありません。",
+        "tension": "測定していません。力みを感じ取れるのはあなただけで、それは音として聞こえるより先に現れます。",
+        "handAttribution": "測定していません。遅れた音は、どちらの手でも同じように聞こえます。",
+        "fingering": "測定していません。同じ音程は、どの指で弾いても同じように聞こえます。",
+        "tone": "測定していません。音色とタッチは測定の対象外です。",
+        "feel": "測定していません。良く聞こえるかどうかは、アプリが測定するものではありません。"
       },
       "notNow": {
-        "noTake": "There's no Take of this Exercise to answer from yet.",
-        "ungraded": "You're playing without grading, so I didn't measure anything to answer that from."
+        "noTake": "この課題には、答えの元になるテイクがまだありません。",
+        "ungraded": "採点なしで弾いているため、それに答えるための測定はしていません。"
+      },
+      "history": {
+        "leftOut": "「公平ではない」とマークされたテイク{{count}}件は除外しました。",
+        "leftOut_other": "「公平ではない」とマークされたテイク{{count}}件は除外しました。"
+      },
+      "changed": {
+        "first": "この課題には、テイク{{take}}より前に測定したテイクがないため、比べるものがありません。",
+        "onlyUnfair": "この課題でテイク{{take}}より前に測定したテイクは、「公平ではない」とマークされたものだけなので、比較しません。",
+        "thisUnfair": "テイク{{take}}の採点を「公平ではない」とマークしたため、他のテイクとは比較しません。",
+        "sameTempo": "テイク{{take}}と、その前に最後に測定したテイクは、どちらも{{bpm}} BPM でした。",
+        "tempo": "テイク{{take}}の前に最後に測定したテイクは{{before}} BPM で、テイク{{take}}は{{bpm}} BPM でした。",
+        "metric": {
+          "even": "均等さ: そのテイクは{{before}}%、テイク{{take}}は{{now}}%。",
+          "heard": "聞き取れた音: そのテイクは{{before}}%、テイク{{take}}は{{now}}%。",
+          "extras": "余分な音: そのテイクは{{before}}個、テイク{{take}}は{{now}}個。",
+          "accents": "アクセントが合った割合: そのテイクは{{before}}%、テイク{{take}}は{{now}}%。",
+          "notes": "正しい音: そのテイクは{{before}}%、テイク{{take}}は{{now}}%。",
+          "hold": "最後まで保たれた均等さ: そのテイクは{{before}}%、テイク{{take}}は{{now}}%。"
+        },
+        "noPair": "そのテイクとテイク{{take}}には、並べて比べられる共通の測定値がありません。",
+        "verdict": {
+          "bothPassed": "どちらも合格ラインを満たしていました。",
+          "bothBelow": "どちらも合格ラインに届いていませんでした。",
+          "nowPassed": "そのテイクは合格ラインに届かず、テイク{{take}}は満たしていました。",
+          "nowBelow": "そのテイクは合格ラインを満たし、テイク{{take}}は届いていませんでした。"
+        }
+      },
+      "improving": {
+        "tooFew": "この課題で比較できる測定済みのテイクは{{count}}件で、必要なのは{{need}}件です。",
+        "tooFew_other": "この課題で比較できる測定済みのテイクは{{count}}件で、必要なのは{{need}}件です。",
+        "window": "この課題の直近の測定済みテイク{{count}}件では、テンポは{{to}} BPM でした。",
+        "window_other": "この課題の直近の測定済みテイク{{count}}件では、テンポは最も古いものの{{from}} BPM から、最も新しいものの{{to}} BPM になりました。",
+        "windowSame": "この課題の直近の測定済みテイク{{count}}件では、テンポは{{to}} BPM でした。",
+        "windowSame_other": "この課題の直近の測定済みテイク{{count}}件では、最も古いものも最も新しいものも{{to}} BPM でした。",
+        "clean": "そのうち{{count}}件がクリーンテンポを獲得し、{{bpm}} BPM でした。",
+        "clean_other": "そのうち{{count}}件がクリーンテンポを獲得し、最速は{{bpm}} BPM でした。",
+        "cleanNone": "クリーンテンポを獲得したものはありません。",
+        "even": "均等さの記録が残っている{{count}}件では、最も古いものが{{first}}%、最も新しいものが{{last}}%、最高は{{best}}%でした。",
+        "even_other": "均等さの記録が残っている{{count}}件では、最も古いものが{{first}}%、最も新しいものが{{last}}%、最高は{{best}}%でした。",
+        "evenNone": "均等さの記録が残っているのは2件未満のため、比較しません。"
+      },
+      "made": {
+        "intro": "この課題の合格ラインには、{{count}}件のチェックがあります。",
+        "intro_other": "この課題の合格ラインには、{{count}}件のチェックがあります。",
+        "check": {
+          "even": "均等さ: {{over}}小節連続で{{bar}}%以上。",
+          "heard": "聞き取れた音: 譜面の音の{{bar}}%以上。",
+          "extras": "余分な音: {{over}}小節で{{bar}}個以下。",
+          "accents": "アクセント: 印のあるアクセントの{{bar}}%以上が、周りの音より大きいこと。",
+          "notes": "正しい音: 音程を判定できる音の{{bar}}%以上が、譜面どおりであること。",
+          "hold": "最後まで保たれた均等さ: 判定した区間の最後の数小節で{{bar}}%以上。"
+        },
+        "clean": "クリーンな小節が{{need}}小節連続すると、そのテイクでクリーンテンポが動きます。",
+        "tempo": "{{passAt}} BPM 以上のクリーンなテイクで、この課題は合格です。",
+        "ungraded": {
+          "selfChecked": "この課題は自分で確認するもので、アプリは採点しないため、内訳にするスコアがありません。",
+          "practiceOnly": "この課題は練習専用で採点なしのため、内訳にするスコアがありません。",
+          "landings": "この課題はまだ採点対象ではないため、内訳にするスコアがありません。"
+        },
+        "not": {
+          "pickDirection": "ピッキングの方向は採点に含まれません。",
+          "muting": "ミュートは採点に含まれません。",
+          "posture": "姿勢は採点に含まれません。",
+          "tension": "力みは採点に含まれません。",
+          "handAttribution": "ずれがどちらの手から出たかは採点に含まれません。",
+          "fingering": "どの指で音を弾いたかは採点に含まれません。",
+          "tone": "音色とタッチは採点に含まれません。",
+          "feel": "感触や、良く聞こえるかどうかは採点に含まれません。",
+          "bendPitch": "ベンドで音程がどこまで動くかは採点に含まれません。",
+          "vibrato": "ビブラートは採点に含まれません。",
+          "noteChoice": "着地点の間でどの音を選ぶかは採点に含まれません。",
+          "notesWritten": "音の高さは採点に含まれません。"
+        }
+      },
+      "distance": {
+        "short": {
+          "even": "均等さ: テイク{{take}}は{{value}}%で、合格ライン{{bar}}%まであと{{gap}}ポイントです。",
+          "heard": "聞き取れた音: テイク{{take}}は{{value}}%で、合格ライン{{bar}}%まであと{{gap}}ポイントです。",
+          "extras": "余分な音: テイク{{take}}は{{value}}個で、合格ラインの許容を{{gap}}個超えています({{over}}小節で{{bar}}個以下)。",
+          "accents": "アクセントが合った割合: テイク{{take}}は{{value}}%で、合格ライン{{bar}}%まであと{{gap}}ポイントです。",
+          "notes": "正しい音: テイク{{take}}は{{value}}%で、合格ライン{{bar}}%まであと{{gap}}ポイントです。",
+          "hold": "最後まで保たれた均等さ: テイク{{take}}は{{value}}%で、合格ライン{{bar}}%まであと{{gap}}ポイントです。"
+        },
+        "met": {
+          "even": "均等さ: テイク{{take}}は{{value}}%で、合格ライン{{bar}}%を満たしています。",
+          "heard": "聞き取れた音: テイク{{take}}は{{value}}%で、合格ライン{{bar}}%を満たしています。",
+          "extras": "余分な音: テイク{{take}}は{{value}}個で、合格ライン({{over}}小節で{{bar}}個以下)の範囲内です。",
+          "accents": "アクセントが合った割合: テイク{{take}}は{{value}}%で、合格ライン{{bar}}%を満たしています。",
+          "notes": "正しい音: テイク{{take}}は{{value}}%で、合格ライン{{bar}}%を満たしています。",
+          "hold": "最後まで保たれた均等さ: テイク{{take}}は{{value}}%で、合格ライン{{bar}}%を満たしています。"
+        },
+        "unmeasured": "合格ラインのチェックのうち{{count}}件が、テイク{{take}}では測定されませんでした。",
+        "unmeasured_other": "合格ラインのチェックのうち{{count}}件が、テイク{{take}}では測定されませんでした。",
+        "tempo": "テイク{{take}}は{{bpm}} BPM でした。{{passAt}} BPM 以上のクリーンなテイクで、この課題は合格です。",
+        "none": "テイク{{take}}では、合格ラインのチェックを一つも測定していません。"
       }
     }
   }

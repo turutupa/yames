@@ -47,102 +47,217 @@
       "phone": "Nic, co tu wpiszesz, nie opuszcza tego telefonu."
     },
     "card": {
-      "chips": "About your last Take:",
+      "chips": "O twoim ostatnim podejściu:",
       "chip": {
-        "where": "Where did it slip?",
-        "lean": "Was I early or late?",
-        "count": "Why didn't that count?"
+        "where": "Gdzie się zachwiało?",
+        "lean": "Czy byłem za wcześnie, czy za późno?",
+        "count": "Dlaczego to się nie liczyło?",
+        "changed": "Co się zmieniło od ostatniego podejścia?",
+        "improving": "Czy robię postępy?",
+        "madeOf": "Z czego składa się wynik?",
+        "distance": "Jak daleko do poprzeczki?"
       },
       "canAnswer": {
-        "ungraded": "You're playing without grading, so there are no measurements to answer questions about your Takes from."
+        "ungraded": "Grasz bez oceny, więc nie ma pomiarów, z których mógłbym odpowiadać na pytania o twoje podejścia."
       },
-      "tooShort": "Take {{take}} stopped after {{bars}} bar, too few to judge.",
-      "tooShort_few": "Take {{take}} stopped after {{bars}} bars, too few to judge.",
-      "tooShort_many": "Take {{take}} stopped after {{bars}} bars, too few to judge.",
-      "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too few to judge.",
+      "tooShort": "Podejście {{take}} zatrzymało się po {{bars}} takcie, za mało, żeby ocenić.",
+      "tooShort_few": "Podejście {{take}} zatrzymało się po {{bars}} taktach, za mało, żeby ocenić.",
+      "tooShort_many": "Podejście {{take}} zatrzymało się po {{bars}} taktach, za mało, żeby ocenić.",
+      "tooShort_other": "Podejście {{take}} zatrzymało się po {{bars}} taktu, za mało, żeby ocenić.",
       "slip": {
-        "none": "No bar slipped in Take {{take}}: every bar that could be judged held.",
-        "noBars": "I didn't measure Take {{take}} bar by bar, so I can't say where it slipped."
+        "none": "W podejściu {{take}} żaden takt się nie zachwiał: każdy takt, który dało się ocenić, wytrzymał.",
+        "noBars": "Nie mierzyłem podejścia {{take}} takt po takcie, więc nie powiem, gdzie się zachwiało."
       },
       "lean": {
         "premise": {
-          "early": "In Take {{take}} the bars that leaned sat earlier than the rest of it, not later. A lean the whole Take shares is something I don't measure.",
-          "late": "In Take {{take}} the bars that leaned sat later than the rest of it, not earlier. A lean the whole Take shares is something I don't measure."
+          "early": "W podejściu {{take}} takty, które się odchyliły, wypadły wcześniej niż reszta podejścia, nie później. Odchylenia wspólnego dla całego podejścia nie mierzę.",
+          "late": "W podejściu {{take}} takty, które się odchyliły, wypadły później niż reszta podejścia, nie wcześniej. Odchylenia wspólnego dla całego podejścia nie mierzę."
         },
         "premiseNone": {
-          "early": "No bar of Take {{take}} sat more than {{ms}} ms earlier than the rest of it. A lean the whole Take shares is something I don't measure.",
-          "late": "No bar of Take {{take}} sat more than {{ms}} ms later than the rest of it. A lean the whole Take shares is something I don't measure."
+          "early": "W podejściu {{take}} żaden z taktów, które mogłem zmierzyć ({{measured}} z {{bars}}), nie wypadł o więcej niż {{ms}} ms wcześniej niż reszta podejścia. Odchylenia wspólnego dla całego podejścia nie mierzę.",
+          "late": "W podejściu {{take}} żaden z taktów, które mogłem zmierzyć ({{measured}} z {{bars}}), nie wypadł o więcej niż {{ms}} ms później niż reszta podejścia. Odchylenia wspólnego dla całego podejścia nie mierzę."
         },
         "bar": {
-          "early": "Bar {{bar}} of the tune: {{ms}} ms earlier than the rest of the Take.",
-          "late": "Bar {{bar}} of the tune: {{ms}} ms later than the rest of the Take."
+          "early": "Takt {{bar}} utworu: {{ms}} ms wcześniej niż reszta podejścia.",
+          "late": "Takt {{bar}} utworu: {{ms}} ms później niż reszta podejścia."
         },
-        "none": "In Take {{take}}, none of the bars I could measure ({{measured}} of {{bars}}) sat more than {{ms}} ms earlier or later than the rest of it.",
-        "notMeasured": "I didn't measure which way Take {{take}} leaned: no bar of it had enough note-by-note timing to tell."
+        "none": "W podejściu {{take}} żaden z taktów, które mogłem zmierzyć ({{measured}} z {{bars}}), nie wypadł o więcej niż {{ms}} ms wcześniej ani później niż reszta podejścia.",
+        "notMeasured": "Nie mierzyłem, w którą stronę odchyliło się podejście {{take}}: żaden jego takt nie miał dość czasów nuta po nucie, żeby to stwierdzić."
       },
       "direction": {
-        "early": "The notes there sat earlier than the rest of the Take.",
-        "late": "The notes there sat later than the rest of the Take.",
-        "earlyOpen": "The open {{note}}s there sat earlier than the rest of the Take.",
-        "lateOpen": "The open {{note}}s there sat later than the rest of the Take.",
-        "earlyNote": "The {{note}}s at fret {{fret}} there sat earlier than the rest of the Take.",
-        "lateNote": "The {{note}}s at fret {{fret}} there sat later than the rest of the Take."
+        "early": "Nuty w tym miejscu wypadły wcześniej niż reszta podejścia.",
+        "late": "Nuty w tym miejscu wypadły później niż reszta podejścia.",
+        "earlyOpen": "Otwarte nuty {{note}} w tym miejscu wypadły wcześniej niż reszta podejścia.",
+        "lateOpen": "Otwarte nuty {{note}} w tym miejscu wypadły później niż reszta podejścia.",
+        "earlyNote": "Nuty {{note}} na progu {{fret}} w tym miejscu wypadły wcześniej niż reszta podejścia.",
+        "lateNote": "Nuty {{note}} na progu {{fret}} w tym miejscu wypadły później niż reszta podejścia."
       },
       "below": {
-        "plain": "Take {{take}} was below the pass mark at {{bpm}} BPM.",
-        "even": "Take {{take}} was {{value}}% even, against a pass mark of {{bar}}%.",
-        "evenSome": "Take {{take}} was {{value}}% even, against a pass mark of {{bar}}%, and I heard {{heard}} of {{expected}} notes.",
-        "heard": "I heard {{heard}} of {{expected}} notes in Take {{take}}, against a pass mark of {{bar}}%.",
-        "extras": "Take {{take}} had more extra notes than the pass mark allows: {{bar}} or fewer in four bars.",
-        "accents": "In Take {{take}}, {{value}}% of the marked accents came out louder than the notes around them, against a pass mark of {{bar}}%.",
-        "notes": "In Take {{take}}, {{value}}% of the notes I could pitch were the written ones, against a pass mark of {{bar}}%."
+        "plain": "Podejście {{take}} było poniżej poprzeczki, przy {{bpm}} BPM.",
+        "even": "Podejście {{take}} było {{value}}% równo, przy poprzeczce {{bar}}%.",
+        "evenSome": "Podejście {{take}} było {{value}}% równo, przy poprzeczce {{bar}}%, a usłyszałem {{heard}} z {{expected}} nut.",
+        "heard": "Usłyszałem {{heard}} z {{expected}} nut w podejściu {{take}}, przy poprzeczce {{bar}}%.",
+        "extras": "W podejściu {{take}} było więcej dodatkowych nut, niż dopuszcza poprzeczka: {{bar}} lub mniej w czterech taktach.",
+        "accents": "W podejściu {{take}} {{value}}% zaznaczonych akcentów wypadło głośniej niż nuty wokół nich, przy poprzeczce {{bar}}%.",
+        "notes": "W podejściu {{take}} {{value}}% nut, których wysokość mogłem określić, było zapisanymi, przy poprzeczce {{bar}}%."
       },
       "count": {
-        "passed": "Take {{take}} did count: it met the pass mark at {{bpm}} BPM.",
-        "below": "Take {{take}} is kept, below the pass mark at {{bpm}} BPM.",
+        "passed": "Podejście {{take}} się liczyło: osiągnęło poprzeczkę przy {{bpm}} BPM.",
+        "below": "Podejście {{take}} zostaje zapisane, poniżej poprzeczki przy {{bpm}} BPM.",
         "notCaught": {
-          "nothingHeard": "I couldn't grade Take {{take}}: I heard none of its notes, so it doesn't count against you.",
-          "tooFewHeard": "I couldn't grade Take {{take}}: I heard {{heard}} of {{expected}} notes, too few to grade, so it doesn't count against you.",
-          "tooManyExtras": "I couldn't grade Take {{take}}: I heard more notes that weren't written than ones that were, so it doesn't count against you.",
-          "lowConfidence": "I couldn't grade Take {{take}}: I wasn't sure enough of the notes I heard, so it doesn't count against you.",
-          "unknown": "I couldn't grade Take {{take}}."
+          "nothingHeard": "Nie mogłem ocenić podejścia {{take}}: nie usłyszałem żadnej z jego nut, więc nie liczy się przeciwko tobie.",
+          "tooFewHeard": "Nie mogłem ocenić podejścia {{take}}: usłyszałem {{heard}} z {{expected}} nut, za mało, żeby ocenić, więc nie liczy się przeciwko tobie.",
+          "tooManyExtras": "Nie mogłem ocenić podejścia {{take}}: usłyszałem więcej nut, których nie było w zapisie, niż tych, które były, więc nie liczy się przeciwko tobie.",
+          "lowConfidence": "Nie mogłem ocenić podejścia {{take}}: nie byłem dość pewny usłyszanych nut, więc nie liczy się przeciwko tobie.",
+          "unknown": "Nie mogłem ocenić podejścia {{take}}."
         },
-        "tooShort": "Take {{take}} stopped after {{bars}} bar, too short to judge, so it doesn't count either way.",
-        "tooShort_few": "Take {{take}} stopped after {{bars}} bars, too short to judge, so it doesn't count either way.",
-        "tooShort_many": "Take {{take}} stopped after {{bars}} bars, too short to judge, so it doesn't count either way.",
-        "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too short to judge, so it doesn't count either way.",
-        "notClean": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and the longest run in Take {{take}} was {{held}}.",
-        "notCleanPlain": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and Take {{take}} didn't have them.",
-        "unfair": "You marked this grade as not fair. It is kept as measured, with your answer beside it.",
-        "pitchGraded": "The pitch of your notes is part of this Exercise's grade.",
-        "pitchNotGraded": "The pitch of your notes isn't part of this Exercise's grade.",
-        "rightNotes": "In Take {{take}}, {{value}}% of the {{base}} notes I could pitch were the written ones.",
-        "notesUnchecked": "I couldn't check the pitches in Take {{take}}.",
+        "tooShort": "Podejście {{take}} zatrzymało się po {{bars}} takcie, za krótko, żeby ocenić, więc nie liczy się w żadną stronę.",
+        "tooShort_few": "Podejście {{take}} zatrzymało się po {{bars}} taktach, za krótko, żeby ocenić, więc nie liczy się w żadną stronę.",
+        "tooShort_many": "Podejście {{take}} zatrzymało się po {{bars}} taktach, za krótko, żeby ocenić, więc nie liczy się w żadną stronę.",
+        "tooShort_other": "Podejście {{take}} zatrzymało się po {{bars}} taktu, za krótko, żeby ocenić, więc nie liczy się w żadną stronę.",
+        "notClean": "Nie ruszyło to twojego czystego tempa: potrzeba do tego {{need}} czystych taktów z rzędu, a najdłuższa seria w podejściu {{take}} miała {{held}}.",
+        "notCleanPlain": "Nie ruszyło to twojego czystego tempa: potrzeba do tego {{need}} czystych taktów z rzędu, a podejście {{take}} ich nie miało.",
+        "unfair": "Ta ocena została oznaczona jako niesprawiedliwa. Zostaje zapisana tak, jak zmierzono, a obok jest twoja odpowiedź.",
+        "pitchGraded": "Wysokość twoich nut jest częścią oceny tego ćwiczenia.",
+        "pitchNotGraded": "Wysokość twoich nut nie jest częścią oceny tego ćwiczenia.",
+        "rightNotes": "W podejściu {{take}} {{value}}% z {{base}} nut, których wysokość mogłem określić, było zapisanymi.",
+        "notesUnchecked": "Nie mogłem sprawdzić wysokości dźwięków w podejściu {{take}}.",
         "ungraded": {
-          "eyes": "I didn't measure Take {{take}}: it was the one for your eyes, so nothing was graded.",
-          "chosen": "I didn't measure Take {{take}}: you chose to just play it, so nothing was graded.",
-          "inputOff": "I didn't measure Take {{take}}: the input wasn't on, so nothing was graded.",
-          "gradingOff": "I didn't measure Take {{take}}: grading is off, so nothing was graded.",
-          "selfChecked": "I didn't measure Take {{take}}: this Exercise is one you check yourself, so nothing was graded.",
-          "selfCheckedTempo": "I didn't measure Take {{take}}: at {{bpm}} BPM this Exercise is one you check yourself, so nothing was graded.",
-          "practiceOnly": "I didn't measure Take {{take}}: this Exercise is practice only, not graded.",
-          "landings": "I didn't measure Take {{take}}: this Exercise isn't graded yet."
+          "eyes": "Nie mierzyłem podejścia {{take}}: było to podejście dla twoich oczu, więc nic nie oceniono.",
+          "chosen": "Nie mierzyłem podejścia {{take}}: wybór padł na samo zagranie go, więc nic nie oceniono.",
+          "inputOff": "Nie mierzyłem podejścia {{take}}: wejście nie było włączone, więc nic nie oceniono.",
+          "gradingOff": "Nie mierzyłem podejścia {{take}}: ocenianie jest wyłączone, więc nic nie oceniono.",
+          "selfChecked": "Nie mierzyłem podejścia {{take}}: to ćwiczenie sprawdzasz sam, więc nic nie oceniono.",
+          "selfCheckedTempo": "Nie mierzyłem podejścia {{take}}: przy {{bpm}} BPM to ćwiczenie sprawdzasz sam, więc nic nie oceniono.",
+          "practiceOnly": "Nie mierzyłem podejścia {{take}}: to ćwiczenie jest tylko do ćwiczenia, bez oceny.",
+          "landings": "Nie mierzyłem podejścia {{take}}: to ćwiczenie nie jest jeszcze oceniane."
         }
       },
       "notMeasured": {
-        "pitch": "I didn't measure that. The pitch of your notes isn't part of this Exercise's grade.",
-        "pickDirection": "I didn't measure that. The app has only sound, and a downstroke and an upstroke can sound alike.",
-        "muting": "I didn't measure that. The app can't tell a muted string from a loud one next to it.",
-        "posture": "I didn't measure that. The app has no picture of you.",
-        "tension": "I didn't measure that. Only you can feel tension, and it comes before it can be heard.",
-        "handAttribution": "I didn't measure that. A late note sounds the same from either hand.",
-        "fingering": "I didn't measure that. The same pitch sounds the same from any finger.",
-        "tone": "I didn't measure that. Tone and touch aren't measured.",
-        "feel": "I didn't measure that. Whether it sounds good isn't something the app measures."
+        "pitch": "Tego nie mierzyłem. Wysokość twoich nut nie jest częścią oceny tego ćwiczenia.",
+        "pickDirection": "Tego nie mierzyłem. Aplikacja ma tylko dźwięk, a uderzenie w dół i w górę mogą brzmieć tak samo.",
+        "muting": "Tego nie mierzyłem. Aplikacja nie odróżni stłumionej struny od głośnej obok niej.",
+        "posture": "Tego nie mierzyłem. Aplikacja nie ma twojego obrazu.",
+        "tension": "Tego nie mierzyłem. Napięcie czujesz tylko ty, a pojawia się ono, zanim da się je usłyszeć.",
+        "handAttribution": "Tego nie mierzyłem. Spóźniona nuta brzmi tak samo z którejkolwiek ręki.",
+        "fingering": "Tego nie mierzyłem. Ta sama wysokość brzmi tak samo z każdego palca.",
+        "tone": "Tego nie mierzyłem. Brzmienie i dotyk nie są mierzone.",
+        "feel": "Tego nie mierzyłem. Tego, czy brzmi to dobrze, aplikacja nie mierzy."
       },
       "notNow": {
-        "noTake": "There's no Take of this Exercise to answer from yet.",
-        "ungraded": "You're playing without grading, so I didn't measure anything to answer that from."
+        "noTake": "Nie ma jeszcze podejścia do tego ćwiczenia, z którego mógłbym odpowiedzieć.",
+        "ungraded": "Grasz bez oceny, więc nic nie zmierzyłem, z czego mógłbym na to odpowiedzieć."
+      },
+      "history": {
+        "leftOut": "Pominąłem {{count}} podejście, które oznaczono jako niesprawiedliwe.",
+        "leftOut_few": "Pominąłem {{count}} podejścia, które oznaczono jako niesprawiedliwe.",
+        "leftOut_many": "Pominąłem {{count}} podejść, które oznaczono jako niesprawiedliwe.",
+        "leftOut_other": "Pominąłem {{count}} podejścia, które oznaczono jako niesprawiedliwe."
+      },
+      "changed": {
+        "first": "Nie mam zmierzonego podejścia do tego ćwiczenia sprzed podejścia {{take}}, więc nie ma z czym go porównać.",
+        "onlyUnfair": "Jedyne zmierzone podejścia do tego ćwiczenia sprzed podejścia {{take}} to te, które oznaczono jako niesprawiedliwe, więc nie porównuję go z nimi.",
+        "thisUnfair": "Ocena podejścia {{take}} została oznaczona jako niesprawiedliwa, więc nie porównuję go z innymi podejściami.",
+        "sameTempo": "Podejście {{take}} i ostatnie zmierzone podejście przed nim były oba przy {{bpm}} BPM.",
+        "tempo": "Ostatnie zmierzone podejście przed podejściem {{take}} było przy {{before}} BPM; podejście {{take}} było przy {{bpm}} BPM.",
+        "metric": {
+          "even": "Równo: {{before}}% w tamtym podejściu, {{now}}% w podejściu {{take}}.",
+          "heard": "Usłyszane nuty: {{before}}% w tamtym podejściu, {{now}}% w podejściu {{take}}.",
+          "extras": "Dodatkowe nuty: {{before}} w tamtym podejściu, {{now}} w podejściu {{take}}.",
+          "accents": "Akcenty trafione: {{before}}% w tamtym podejściu, {{now}}% w podejściu {{take}}.",
+          "notes": "Właściwe nuty: {{before}}% w tamtym podejściu, {{now}}% w podejściu {{take}}.",
+          "hold": "Równość utrzymana do końca: {{before}}% w tamtym podejściu, {{now}}% w podejściu {{take}}."
+        },
+        "noPair": "To podejście i podejście {{take}} nie mają wspólnej zmierzonej liczby, którą mogę zestawić.",
+        "verdict": {
+          "bothPassed": "Oba osiągnęły poprzeczkę.",
+          "bothBelow": "Oba były poniżej poprzeczki.",
+          "nowPassed": "Tamto podejście było poniżej poprzeczki; podejście {{take}} ją osiągnęło.",
+          "nowBelow": "Tamto podejście osiągnęło poprzeczkę; podejście {{take}} było poniżej niej."
+        }
+      },
+      "improving": {
+        "tooFew": "Mogę porównać {{count}} zmierzone podejście do tego ćwiczenia, a potrzeba {{need}}.",
+        "tooFew_few": "Mogę porównać {{count}} zmierzone podejścia do tego ćwiczenia, a potrzeba {{need}}.",
+        "tooFew_many": "Mogę porównać {{count}} zmierzonych podejść do tego ćwiczenia, a potrzeba {{need}}.",
+        "tooFew_other": "Mogę porównać {{count}} zmierzonego podejścia do tego ćwiczenia, a potrzeba {{need}}.",
+        "window": "W twoim ostatnim zmierzonym podejściu ({{count}}) do tego ćwiczenia tempo wynosiło {{to}} BPM.",
+        "window_few": "W twoich ostatnich {{count}} zmierzonych podejściach do tego ćwiczenia tempo zmieniło się z {{from}} BPM w najstarszym na {{to}} BPM w najnowszym.",
+        "window_many": "W twoich ostatnich {{count}} zmierzonych podejściach do tego ćwiczenia tempo zmieniło się z {{from}} BPM w najstarszym na {{to}} BPM w najnowszym.",
+        "window_other": "W twoich ostatnich {{count}} zmierzonych podejściach do tego ćwiczenia tempo zmieniło się z {{from}} BPM w najstarszym na {{to}} BPM w najnowszym.",
+        "windowSame": "W twoim ostatnim zmierzonym podejściu ({{count}}) do tego ćwiczenia tempo wynosiło {{to}} BPM.",
+        "windowSame_few": "W twoich ostatnich {{count}} zmierzonych podejściach do tego ćwiczenia najstarsze i najnowsze były oba przy {{to}} BPM.",
+        "windowSame_many": "W twoich ostatnich {{count}} zmierzonych podejściach do tego ćwiczenia najstarsze i najnowsze były oba przy {{to}} BPM.",
+        "windowSame_other": "W twoich ostatnich {{count}} zmierzonych podejściach do tego ćwiczenia najstarsze i najnowsze były oba przy {{to}} BPM.",
+        "clean": "{{count}} z nich dało czyste tempo, przy {{bpm}} BPM.",
+        "clean_few": "{{count}} z nich dały czyste tempo; najszybsze miało {{bpm}} BPM.",
+        "clean_many": "{{count}} z nich dało czyste tempo; najszybsze miało {{bpm}} BPM.",
+        "clean_other": "{{count}} z nich dało czyste tempo; najszybsze miało {{bpm}} BPM.",
+        "cleanNone": "Żadne z nich nie dało czystego tempa.",
+        "even": "Równość w {{count}} z nich, w których ją zachowano: {{first}}% w najstarszym, {{last}}% w najnowszym, {{best}}% w najlepszym.",
+        "even_few": "Równość w {{count}} z nich, w których ją zachowano: {{first}}% w najstarszym, {{last}}% w najnowszym, {{best}}% w najlepszym.",
+        "even_many": "Równość w {{count}} z nich, w których ją zachowano: {{first}}% w najstarszym, {{last}}% w najnowszym, {{best}}% w najlepszym.",
+        "even_other": "Równość w {{count}} z nich, w których ją zachowano: {{first}}% w najstarszym, {{last}}% w najnowszym, {{best}}% w najlepszym.",
+        "evenNone": "Mniej niż dwa z nich zachowały wartość równości, więc jej nie porównuję."
+      },
+      "made": {
+        "intro": "Poprzeczka tego ćwiczenia ma {{count}} kontrolę.",
+        "intro_few": "Poprzeczka tego ćwiczenia ma {{count}} kontrole.",
+        "intro_many": "Poprzeczka tego ćwiczenia ma {{count}} kontroli.",
+        "intro_other": "Poprzeczka tego ćwiczenia ma {{count}} kontroli.",
+        "check": {
+          "even": "Równo: co najmniej {{bar}}% przez {{over}} taktów z rzędu.",
+          "heard": "Usłyszane nuty: co najmniej {{bar}}% zapisanych nut.",
+          "extras": "Dodatkowe nuty: {{bar}} lub mniej w {{over}} taktach.",
+          "accents": "Akcenty: co najmniej {{bar}}% zaznaczonych akcentów głośniej niż nuty wokół nich.",
+          "notes": "Właściwe nuty: co najmniej {{bar}}% nut, których wysokość mogę określić, to zapisane.",
+          "hold": "Równość utrzymana do końca: co najmniej {{bar}}% w ostatnich taktach ocenianego odcinka."
+        },
+        "clean": "Podejście rusza twoje czyste tempo, gdy ma {{need}} czystych taktów z rzędu.",
+        "tempo": "Czyste podejście przy {{passAt}} BPM lub szybciej zalicza ćwiczenie.",
+        "ungraded": {
+          "selfChecked": "To ćwiczenie sprawdzasz sam: aplikacja go nie ocenia, więc nie ma wyniku do rozłożenia.",
+          "practiceOnly": "To ćwiczenie jest tylko do ćwiczenia, bez oceny, więc nie ma wyniku do rozłożenia.",
+          "landings": "To ćwiczenie nie jest jeszcze oceniane, więc nie ma wyniku do rozłożenia."
+        },
+        "not": {
+          "pickDirection": "Kierunek uderzenia kostką nie jest częścią oceny.",
+          "muting": "Tłumienie nie jest częścią oceny.",
+          "posture": "Postawa nie jest częścią oceny.",
+          "tension": "Napięcie nie jest częścią oceny.",
+          "handAttribution": "To, z której ręki wziął się błąd, nie jest częścią oceny.",
+          "fingering": "To, który palec zagrał nutę, nie jest częścią oceny.",
+          "tone": "Brzmienie i dotyk nie są częścią oceny.",
+          "feel": "Wyczucie i to, czy brzmi to dobrze, nie są częścią oceny.",
+          "bendPitch": "To, jak daleko sięga bend, nie jest częścią oceny.",
+          "vibrato": "Vibrato nie jest częścią oceny.",
+          "noteChoice": "To, jakie nuty wybierasz między punktami docelowymi, nie jest częścią oceny.",
+          "notesWritten": "Wysokość twoich nut nie jest częścią oceny."
+        }
+      },
+      "distance": {
+        "short": {
+          "even": "Równo: {{value}}% w podejściu {{take}}, {{gap}} punktów poniżej poprzeczki {{bar}}%.",
+          "heard": "Usłyszane nuty: {{value}}% w podejściu {{take}}, {{gap}} punktów poniżej poprzeczki {{bar}}%.",
+          "extras": "Dodatkowe nuty: {{value}} w podejściu {{take}}, o {{gap}} więcej, niż dopuszcza poprzeczka ({{bar}} lub mniej w {{over}} taktach).",
+          "accents": "Akcenty trafione: {{value}}% w podejściu {{take}}, {{gap}} punktów poniżej poprzeczki {{bar}}%.",
+          "notes": "Właściwe nuty: {{value}}% w podejściu {{take}}, {{gap}} punktów poniżej poprzeczki {{bar}}%.",
+          "hold": "Równość utrzymana do końca: {{value}}% w podejściu {{take}}, {{gap}} punktów poniżej poprzeczki {{bar}}%."
+        },
+        "met": {
+          "even": "Równo: {{value}}% w podejściu {{take}}, co osiąga poprzeczkę {{bar}}%.",
+          "heard": "Usłyszane nuty: {{value}}% w podejściu {{take}}, co osiąga poprzeczkę {{bar}}%.",
+          "extras": "Dodatkowe nuty: {{value}} w podejściu {{take}}, w granicach poprzeczki: {{bar}} lub mniej w {{over}} taktach.",
+          "accents": "Akcenty trafione: {{value}}% w podejściu {{take}}, co osiąga poprzeczkę {{bar}}%.",
+          "notes": "Właściwe nuty: {{value}}% w podejściu {{take}}, co osiąga poprzeczkę {{bar}}%.",
+          "hold": "Równość utrzymana do końca: {{value}}% w podejściu {{take}}, co osiąga poprzeczkę {{bar}}%."
+        },
+        "unmeasured": "Nie zmierzono {{count}} kontroli poprzeczki w podejściu {{take}}.",
+        "unmeasured_few": "Nie zmierzono {{count}} kontroli poprzeczki w podejściu {{take}}.",
+        "unmeasured_many": "Nie zmierzono {{count}} kontroli poprzeczki w podejściu {{take}}.",
+        "unmeasured_other": "Nie zmierzono {{count}} kontroli poprzeczki w podejściu {{take}}.",
+        "tempo": "Podejście {{take}} było przy {{bpm}} BPM; czyste podejście przy {{passAt}} BPM lub szybciej zalicza ćwiczenie.",
+        "none": "Nie zmierzyłem żadnej kontroli poprzeczki w podejściu {{take}}."
       }
     }
   }

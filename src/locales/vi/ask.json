@@ -47,98 +47,197 @@
       "phone": "Những gì bạn gõ ở đây không rời khỏi điện thoại này."
     },
     "card": {
-      "chips": "About your last Take:",
+      "chips": "Về lượt gần nhất của bạn:",
       "chip": {
-        "where": "Where did it slip?",
-        "lean": "Was I early or late?",
-        "count": "Why didn't that count?"
+        "where": "Trượt ở đâu?",
+        "lean": "Tôi sớm hay trễ?",
+        "count": "Sao lượt đó không được tính?",
+        "changed": "Từ lượt trước đã đổi gì?",
+        "improving": "Tôi có tiến bộ không?",
+        "madeOf": "Điểm gồm những gì?",
+        "distance": "Còn cách mức đạt bao xa?"
       },
       "canAnswer": {
-        "ungraded": "You're playing without grading, so there are no measurements to answer questions about your Takes from."
+        "ungraded": "Bạn đang chơi không chấm điểm, nên không có số đo nào để trả lời các câu hỏi về lượt của bạn."
       },
-      "tooShort": "Take {{take}} stopped after {{bars}} bar, too few to judge.",
-      "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too few to judge.",
+      "tooShort": "Lượt {{take}} dừng sau {{bars}} ô nhịp, quá ít để đánh giá.",
+      "tooShort_other": "Lượt {{take}} dừng sau {{bars}} ô nhịp, quá ít để đánh giá.",
       "slip": {
-        "none": "No bar slipped in Take {{take}}: every bar that could be judged held.",
-        "noBars": "I didn't measure Take {{take}} bar by bar, so I can't say where it slipped."
+        "none": "Không có ô nhịp nào trượt trong lượt {{take}}: mọi ô nhịp có thể đánh giá đều giữ được.",
+        "noBars": "Tôi không đo lượt {{take}} theo từng ô nhịp, nên tôi không thể nói nó trượt ở đâu."
       },
       "lean": {
         "premise": {
-          "early": "In Take {{take}} the bars that leaned sat earlier than the rest of it, not later. A lean the whole Take shares is something I don't measure.",
-          "late": "In Take {{take}} the bars that leaned sat later than the rest of it, not earlier. A lean the whole Take shares is something I don't measure."
+          "early": "Trong lượt {{take}}, các ô nhịp bị lệch nằm sớm hơn phần còn lại của lượt, không phải trễ hơn. Độ lệch mà cả lượt cùng có là điều tôi không đo.",
+          "late": "Trong lượt {{take}}, các ô nhịp bị lệch nằm trễ hơn phần còn lại của lượt, không phải sớm hơn. Độ lệch mà cả lượt cùng có là điều tôi không đo."
         },
         "premiseNone": {
-          "early": "No bar of Take {{take}} sat more than {{ms}} ms earlier than the rest of it. A lean the whole Take shares is something I don't measure.",
-          "late": "No bar of Take {{take}} sat more than {{ms}} ms later than the rest of it. A lean the whole Take shares is something I don't measure."
+          "early": "Trong lượt {{take}}, không ô nhịp nào trong số tôi đo được ({{measured}} trên {{bars}}) nằm sớm hơn phần còn lại của lượt quá {{ms}} ms. Độ lệch mà cả lượt cùng có là điều tôi không đo.",
+          "late": "Trong lượt {{take}}, không ô nhịp nào trong số tôi đo được ({{measured}} trên {{bars}}) nằm trễ hơn phần còn lại của lượt quá {{ms}} ms. Độ lệch mà cả lượt cùng có là điều tôi không đo."
         },
         "bar": {
-          "early": "Bar {{bar}} of the tune: {{ms}} ms earlier than the rest of the Take.",
-          "late": "Bar {{bar}} of the tune: {{ms}} ms later than the rest of the Take."
+          "early": "Ô nhịp {{bar}} của bản nhạc: sớm hơn phần còn lại của lượt {{ms}} ms.",
+          "late": "Ô nhịp {{bar}} của bản nhạc: trễ hơn phần còn lại của lượt {{ms}} ms."
         },
-        "none": "In Take {{take}}, none of the bars I could measure ({{measured}} of {{bars}}) sat more than {{ms}} ms earlier or later than the rest of it.",
-        "notMeasured": "I didn't measure which way Take {{take}} leaned: no bar of it had enough note-by-note timing to tell."
+        "none": "Trong lượt {{take}}, không ô nhịp nào trong số tôi đo được ({{measured}} trên {{bars}}) nằm sớm hơn hay trễ hơn phần còn lại của lượt quá {{ms}} ms.",
+        "notMeasured": "Tôi không đo lượt {{take}} lệch về phía nào: không ô nhịp nào của nó có đủ thời điểm từng nốt để biết."
       },
       "direction": {
-        "early": "The notes there sat earlier than the rest of the Take.",
-        "late": "The notes there sat later than the rest of the Take.",
-        "earlyOpen": "The open {{note}}s there sat earlier than the rest of the Take.",
-        "lateOpen": "The open {{note}}s there sat later than the rest of the Take.",
-        "earlyNote": "The {{note}}s at fret {{fret}} there sat earlier than the rest of the Take.",
-        "lateNote": "The {{note}}s at fret {{fret}} there sat later than the rest of the Take."
+        "early": "Các nốt ở đó nằm sớm hơn phần còn lại của lượt.",
+        "late": "Các nốt ở đó nằm trễ hơn phần còn lại của lượt.",
+        "earlyOpen": "Các nốt {{note}} buông ở đó nằm sớm hơn phần còn lại của lượt.",
+        "lateOpen": "Các nốt {{note}} buông ở đó nằm trễ hơn phần còn lại của lượt.",
+        "earlyNote": "Các nốt {{note}} ở phím {{fret}} ở đó nằm sớm hơn phần còn lại của lượt.",
+        "lateNote": "Các nốt {{note}} ở phím {{fret}} ở đó nằm trễ hơn phần còn lại của lượt."
       },
       "below": {
-        "plain": "Take {{take}} was below the pass mark at {{bpm}} BPM.",
-        "even": "Take {{take}} was {{value}}% even, against a pass mark of {{bar}}%.",
-        "evenSome": "Take {{take}} was {{value}}% even, against a pass mark of {{bar}}%, and I heard {{heard}} of {{expected}} notes.",
-        "heard": "I heard {{heard}} of {{expected}} notes in Take {{take}}, against a pass mark of {{bar}}%.",
-        "extras": "Take {{take}} had more extra notes than the pass mark allows: {{bar}} or fewer in four bars.",
-        "accents": "In Take {{take}}, {{value}}% of the marked accents came out louder than the notes around them, against a pass mark of {{bar}}%.",
-        "notes": "In Take {{take}}, {{value}}% of the notes I could pitch were the written ones, against a pass mark of {{bar}}%."
+        "plain": "Lượt {{take}} dưới mức đạt ở {{bpm}} BPM.",
+        "even": "Lượt {{take}} có độ đều {{value}}%, so với mức đạt {{bar}}%.",
+        "evenSome": "Lượt {{take}} có độ đều {{value}}%, so với mức đạt {{bar}}%, và tôi nghe được {{heard}} trên {{expected}} nốt.",
+        "heard": "Tôi nghe được {{heard}} trên {{expected}} nốt trong lượt {{take}}, so với mức đạt {{bar}}%.",
+        "extras": "Lượt {{take}} có nhiều nốt thừa hơn mức đạt cho phép: {{bar}} hoặc ít hơn trong bốn ô nhịp.",
+        "accents": "Trong lượt {{take}}, {{value}}% số nhấn được đánh dấu to hơn các nốt quanh nó, so với mức đạt {{bar}}%.",
+        "notes": "Trong lượt {{take}}, {{value}}% số nốt tôi xác định được cao độ là nốt đã viết, so với mức đạt {{bar}}%."
       },
       "count": {
-        "passed": "Take {{take}} did count: it met the pass mark at {{bpm}} BPM.",
-        "below": "Take {{take}} is kept, below the pass mark at {{bpm}} BPM.",
+        "passed": "Lượt {{take}} có được tính: nó đạt mức đạt ở {{bpm}} BPM.",
+        "below": "Lượt {{take}} được giữ lại, dưới mức đạt ở {{bpm}} BPM.",
         "notCaught": {
-          "nothingHeard": "I couldn't grade Take {{take}}: I heard none of its notes, so it doesn't count against you.",
-          "tooFewHeard": "I couldn't grade Take {{take}}: I heard {{heard}} of {{expected}} notes, too few to grade, so it doesn't count against you.",
-          "tooManyExtras": "I couldn't grade Take {{take}}: I heard more notes that weren't written than ones that were, so it doesn't count against you.",
-          "lowConfidence": "I couldn't grade Take {{take}}: I wasn't sure enough of the notes I heard, so it doesn't count against you.",
-          "unknown": "I couldn't grade Take {{take}}."
+          "nothingHeard": "Tôi không chấm được lượt {{take}}: tôi không nghe được nốt nào của nó, nên nó không bị tính chống lại bạn.",
+          "tooFewHeard": "Tôi không chấm được lượt {{take}}: tôi nghe được {{heard}} trên {{expected}} nốt, quá ít để chấm, nên nó không bị tính chống lại bạn.",
+          "tooManyExtras": "Tôi không chấm được lượt {{take}}: tôi nghe nhiều nốt không có trong bản viết hơn nốt có trong bản viết, nên nó không bị tính chống lại bạn.",
+          "lowConfidence": "Tôi không chấm được lượt {{take}}: tôi không đủ chắc về các nốt đã nghe, nên nó không bị tính chống lại bạn.",
+          "unknown": "Tôi không chấm được lượt {{take}}."
         },
-        "tooShort": "Take {{take}} stopped after {{bars}} bar, too short to judge, so it doesn't count either way.",
-        "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too short to judge, so it doesn't count either way.",
-        "notClean": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and the longest run in Take {{take}} was {{held}}.",
-        "notCleanPlain": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and Take {{take}} didn't have them.",
-        "unfair": "You marked this grade as not fair. It is kept as measured, with your answer beside it.",
-        "pitchGraded": "The pitch of your notes is part of this Exercise's grade.",
-        "pitchNotGraded": "The pitch of your notes isn't part of this Exercise's grade.",
-        "rightNotes": "In Take {{take}}, {{value}}% of the {{base}} notes I could pitch were the written ones.",
-        "notesUnchecked": "I couldn't check the pitches in Take {{take}}.",
+        "tooShort": "Lượt {{take}} dừng sau {{bars}} ô nhịp, quá ngắn để đánh giá, nên không được tính theo cách nào.",
+        "tooShort_other": "Lượt {{take}} dừng sau {{bars}} ô nhịp, quá ngắn để đánh giá, nên không được tính theo cách nào.",
+        "notClean": "Nó không làm đổi tempo sạch của bạn: muốn vậy cần {{need}} ô nhịp sạch liên tiếp, và chuỗi dài nhất trong lượt {{take}} là {{held}}.",
+        "notCleanPlain": "Nó không làm đổi tempo sạch của bạn: muốn vậy cần {{need}} ô nhịp sạch liên tiếp, và lượt {{take}} không có chuỗi đó.",
+        "unfair": "Bạn đã đánh dấu điểm này là không công bằng. Nó được giữ nguyên như đã đo, kèm câu trả lời của bạn.",
+        "pitchGraded": "Cao độ các nốt của bạn là một phần điểm của bài này.",
+        "pitchNotGraded": "Cao độ các nốt của bạn không phải một phần điểm của bài này.",
+        "rightNotes": "Trong lượt {{take}}, {{value}}% trong {{base}} nốt tôi xác định được cao độ là nốt đã viết.",
+        "notesUnchecked": "Tôi không kiểm tra được cao độ trong lượt {{take}}.",
         "ungraded": {
-          "eyes": "I didn't measure Take {{take}}: it was the one for your eyes, so nothing was graded.",
-          "chosen": "I didn't measure Take {{take}}: you chose to just play it, so nothing was graded.",
-          "inputOff": "I didn't measure Take {{take}}: the input wasn't on, so nothing was graded.",
-          "gradingOff": "I didn't measure Take {{take}}: grading is off, so nothing was graded.",
-          "selfChecked": "I didn't measure Take {{take}}: this Exercise is one you check yourself, so nothing was graded.",
-          "selfCheckedTempo": "I didn't measure Take {{take}}: at {{bpm}} BPM this Exercise is one you check yourself, so nothing was graded.",
-          "practiceOnly": "I didn't measure Take {{take}}: this Exercise is practice only, not graded.",
-          "landings": "I didn't measure Take {{take}}: this Exercise isn't graded yet."
+          "eyes": "Tôi không đo lượt {{take}}: đó là lượt để bạn xem bằng mắt, nên không có gì được chấm.",
+          "chosen": "Tôi không đo lượt {{take}}: bạn chọn chỉ chơi, nên không có gì được chấm.",
+          "inputOff": "Tôi không đo lượt {{take}}: đầu vào không bật, nên không có gì được chấm.",
+          "gradingOff": "Tôi không đo lượt {{take}}: chấm điểm đang tắt, nên không có gì được chấm.",
+          "selfChecked": "Tôi không đo lượt {{take}}: bài này là bài bạn tự kiểm tra, nên không có gì được chấm.",
+          "selfCheckedTempo": "Tôi không đo lượt {{take}}: ở {{bpm}} BPM, bài này là bài bạn tự kiểm tra, nên không có gì được chấm.",
+          "practiceOnly": "Tôi không đo lượt {{take}}: bài này chỉ để luyện, không chấm điểm.",
+          "landings": "Tôi không đo lượt {{take}}: bài này chưa được chấm điểm."
         }
       },
       "notMeasured": {
-        "pitch": "I didn't measure that. The pitch of your notes isn't part of this Exercise's grade.",
-        "pickDirection": "I didn't measure that. The app has only sound, and a downstroke and an upstroke can sound alike.",
-        "muting": "I didn't measure that. The app can't tell a muted string from a loud one next to it.",
-        "posture": "I didn't measure that. The app has no picture of you.",
-        "tension": "I didn't measure that. Only you can feel tension, and it comes before it can be heard.",
-        "handAttribution": "I didn't measure that. A late note sounds the same from either hand.",
-        "fingering": "I didn't measure that. The same pitch sounds the same from any finger.",
-        "tone": "I didn't measure that. Tone and touch aren't measured.",
-        "feel": "I didn't measure that. Whether it sounds good isn't something the app measures."
+        "pitch": "Tôi không đo điều đó. Cao độ các nốt của bạn không phải một phần điểm của bài này.",
+        "pickDirection": "Tôi không đo điều đó. Ứng dụng chỉ có âm thanh, và một nhát gảy xuống với một nhát gảy lên có thể nghe giống nhau.",
+        "muting": "Tôi không đo điều đó. Ứng dụng không phân biệt được dây bị bóp tiếng với dây to tiếng bên cạnh.",
+        "posture": "Tôi không đo điều đó. Ứng dụng không có hình ảnh nào của bạn.",
+        "tension": "Tôi không đo điều đó. Chỉ bạn mới cảm nhận được sự căng, và nó đến trước khi có thể nghe thấy.",
+        "handAttribution": "Tôi không đo điều đó. Một nốt trễ nghe giống nhau dù từ tay nào.",
+        "fingering": "Tôi không đo điều đó. Cùng một cao độ nghe giống nhau dù từ ngón nào.",
+        "tone": "Tôi không đo điều đó. Âm sắc và lực chạm không được đo.",
+        "feel": "Tôi không đo điều đó. Nghe có hay hay không không phải điều ứng dụng đo."
       },
       "notNow": {
-        "noTake": "There's no Take of this Exercise to answer from yet.",
-        "ungraded": "You're playing without grading, so I didn't measure anything to answer that from."
+        "noTake": "Chưa có lượt nào của bài này để trả lời.",
+        "ungraded": "Bạn đang chơi không chấm điểm, nên tôi không đo gì để trả lời điều đó."
+      },
+      "history": {
+        "leftOut": "Tôi đã bỏ ra {{count}} lượt bạn đánh dấu là không công bằng.",
+        "leftOut_other": "Tôi đã bỏ ra {{count}} lượt bạn đánh dấu là không công bằng."
+      },
+      "changed": {
+        "first": "Tôi không có lượt nào của bài này được đo trước lượt {{take}}, nên không có gì để so sánh.",
+        "onlyUnfair": "Các lượt của bài này được đo trước lượt {{take}} chỉ là những lượt bạn đánh dấu là không công bằng, nên tôi không so sánh với chúng.",
+        "thisUnfair": "Bạn đã đánh dấu điểm của lượt {{take}} là không công bằng, nên tôi không so sánh nó với các lượt khác.",
+        "sameTempo": "Lượt {{take}} và lượt được đo gần nhất trước đó đều ở {{bpm}} BPM.",
+        "tempo": "Lượt được đo gần nhất trước lượt {{take}} ở {{before}} BPM; lượt {{take}} ở {{bpm}} BPM.",
+        "metric": {
+          "even": "Độ đều: {{before}}% ở lượt đó, {{now}}% ở lượt {{take}}.",
+          "heard": "Số nốt nghe được: {{before}}% ở lượt đó, {{now}}% ở lượt {{take}}.",
+          "extras": "Nốt thừa: {{before}} ở lượt đó, {{now}} ở lượt {{take}}.",
+          "accents": "Nhấn đúng: {{before}}% ở lượt đó, {{now}}% ở lượt {{take}}.",
+          "notes": "Đúng nốt: {{before}}% ở lượt đó, {{now}}% ở lượt {{take}}.",
+          "hold": "Độ đều giữ đến cuối: {{before}}% ở lượt đó, {{now}}% ở lượt {{take}}."
+        },
+        "noPair": "Lượt đó và lượt {{take}} không có chung một số đo nào để tôi đặt cạnh nhau.",
+        "verdict": {
+          "bothPassed": "Cả hai đều đạt mức đạt.",
+          "bothBelow": "Cả hai đều dưới mức đạt.",
+          "nowPassed": "Lượt đó dưới mức đạt; lượt {{take}} đạt.",
+          "nowBelow": "Lượt đó đạt mức đạt; lượt {{take}} dưới mức đạt."
+        }
+      },
+      "improving": {
+        "tooFew": "Tôi có thể so sánh {{count}} lượt được đo của bài này, và cần {{need}}.",
+        "tooFew_other": "Tôi có thể so sánh {{count}} lượt được đo của bài này, và cần {{need}}.",
+        "window": "Trong {{count}} lượt được đo gần nhất của bài này, tempo là {{to}} BPM.",
+        "window_other": "Trong {{count}} lượt được đo gần nhất của bài này, tempo đi từ {{from}} BPM ở lượt cũ nhất đến {{to}} BPM ở lượt mới nhất.",
+        "windowSame": "Trong {{count}} lượt được đo gần nhất của bài này, tempo là {{to}} BPM.",
+        "windowSame_other": "Trong {{count}} lượt được đo gần nhất của bài này, lượt cũ nhất và lượt mới nhất đều ở {{to}} BPM.",
+        "clean": "{{count}} trong số đó đạt tempo sạch, ở {{bpm}} BPM.",
+        "clean_other": "{{count}} trong số đó đạt tempo sạch; nhanh nhất là {{bpm}} BPM.",
+        "cleanNone": "Không lượt nào trong số đó đạt tempo sạch.",
+        "even": "Độ đều, trong {{count}} lượt trong số đó có giữ số này: {{first}}% ở lượt cũ nhất, {{last}}% ở lượt mới nhất, {{best}}% là cao nhất.",
+        "even_other": "Độ đều, trong {{count}} lượt trong số đó có giữ số này: {{first}}% ở lượt cũ nhất, {{last}}% ở lượt mới nhất, {{best}}% là cao nhất.",
+        "evenNone": "Ít hơn hai lượt trong số đó có số đo độ đều, nên tôi không so sánh."
+      },
+      "made": {
+        "intro": "Mức đạt của bài này có {{count}} phép kiểm tra.",
+        "intro_other": "Mức đạt của bài này có {{count}} phép kiểm tra.",
+        "check": {
+          "even": "Độ đều: ít nhất {{bar}}% trong {{over}} ô nhịp liên tiếp.",
+          "heard": "Số nốt nghe được: ít nhất {{bar}}% số nốt đã viết.",
+          "extras": "Nốt thừa: {{bar}} hoặc ít hơn trong {{over}} ô nhịp.",
+          "accents": "Nhấn: ít nhất {{bar}}% số nhấn được đánh dấu to hơn các nốt quanh nó.",
+          "notes": "Đúng nốt: ít nhất {{bar}}% số nốt tôi xác định được cao độ là nốt đã viết.",
+          "hold": "Độ đều giữ đến cuối: ít nhất {{bar}}% trên các ô nhịp cuối của đoạn được đánh giá."
+        },
+        "clean": "Một lượt làm đổi tempo sạch của bạn khi nó có {{need}} ô nhịp sạch liên tiếp.",
+        "tempo": "Một lượt sạch ở {{passAt}} BPM trở lên là đạt bài.",
+        "ungraded": {
+          "selfChecked": "Bài này là bài bạn tự kiểm tra: ứng dụng không chấm điểm, nên không có điểm nào để chia nhỏ.",
+          "practiceOnly": "Bài này chỉ để luyện, không chấm điểm, nên không có điểm nào để chia nhỏ.",
+          "landings": "Bài này chưa được chấm điểm, nên không có điểm nào để chia nhỏ."
+        },
+        "not": {
+          "pickDirection": "Hướng gảy không phải một phần của điểm.",
+          "muting": "Bóp tiếng không phải một phần của điểm.",
+          "posture": "Tư thế không phải một phần của điểm.",
+          "tension": "Sự căng không phải một phần của điểm.",
+          "handAttribution": "Một lỗi trượt đến từ tay nào không phải một phần của điểm.",
+          "fingering": "Ngón nào chơi một nốt không phải một phần của điểm.",
+          "tone": "Âm sắc và lực chạm không phải một phần của điểm.",
+          "feel": "Cảm giác, và việc nghe có hay không, không phải một phần của điểm.",
+          "bendPitch": "Một nốt bend đi xa bao nhiêu không phải một phần của điểm.",
+          "vibrato": "Vibrato không phải một phần của điểm.",
+          "noteChoice": "Bạn chọn nốt nào giữa các điểm đáp không phải một phần của điểm.",
+          "notesWritten": "Cao độ các nốt của bạn không phải một phần của điểm."
+        }
+      },
+      "distance": {
+        "short": {
+          "even": "Độ đều: {{value}}% ở lượt {{take}}, thiếu {{gap}} điểm so với mức đạt {{bar}}%.",
+          "heard": "Số nốt nghe được: {{value}}% ở lượt {{take}}, thiếu {{gap}} điểm so với mức đạt {{bar}}%.",
+          "extras": "Nốt thừa: {{value}} ở lượt {{take}}, nhiều hơn mức đạt cho phép {{gap}} ({{bar}} hoặc ít hơn trong {{over}} ô nhịp).",
+          "accents": "Nhấn đúng: {{value}}% ở lượt {{take}}, thiếu {{gap}} điểm so với mức đạt {{bar}}%.",
+          "notes": "Đúng nốt: {{value}}% ở lượt {{take}}, thiếu {{gap}} điểm so với mức đạt {{bar}}%.",
+          "hold": "Độ đều giữ đến cuối: {{value}}% ở lượt {{take}}, thiếu {{gap}} điểm so với mức đạt {{bar}}%."
+        },
+        "met": {
+          "even": "Độ đều: {{value}}% ở lượt {{take}}, đạt mức đạt {{bar}}%.",
+          "heard": "Số nốt nghe được: {{value}}% ở lượt {{take}}, đạt mức đạt {{bar}}%.",
+          "extras": "Nốt thừa: {{value}} ở lượt {{take}}, nằm trong mức đạt {{bar}} hoặc ít hơn trong {{over}} ô nhịp.",
+          "accents": "Nhấn đúng: {{value}}% ở lượt {{take}}, đạt mức đạt {{bar}}%.",
+          "notes": "Đúng nốt: {{value}}% ở lượt {{take}}, đạt mức đạt {{bar}}%.",
+          "hold": "Độ đều giữ đến cuối: {{value}}% ở lượt {{take}}, đạt mức đạt {{bar}}%."
+        },
+        "unmeasured": "{{count}} phép kiểm tra của mức đạt không được đo trong lượt {{take}}.",
+        "unmeasured_other": "{{count}} phép kiểm tra của mức đạt không được đo trong lượt {{take}}.",
+        "tempo": "Lượt {{take}} ở {{bpm}} BPM; một lượt sạch ở {{passAt}} BPM trở lên là đạt bài.",
+        "none": "Tôi không đo phép kiểm tra nào của mức đạt trong lượt {{take}}."
       }
     }
   }

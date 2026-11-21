@@ -8,10 +8,10 @@ import { IS_MOBILE } from "../../platform";
 import { CoachModelSelector } from "../main-window/CoachModelSelector";
 import { CoachGlyph } from "./CoachGlyph";
 import { consumeAskFocus, noteAskScreen, useAskState, type AskTurn } from "./askStore";
-import { answerTyped } from "./askTyped";
+import { answerTyped, setAskNextAnswerer } from "./askTyped";
 import { AskToolTurn } from "./AskToolTurn";
 import { AskCardChips, AskCardTurn } from "./AskCardTurn";
-import { askCardChips, askUngradedHere, withinChipCap } from "./askCards";
+import { askCardChips, askUngradedHere, typedCardAnswerer, withinChipCap } from "./askCards";
 import { askToolChips, noKeyRepeat, onePress, pressChip } from "./askTools";
 import { lineText } from "./toolWords";
 import "../../styles/ask.css";
@@ -172,6 +172,10 @@ function AskConversation({
     const el = threadRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [turns]);
+
+  // Typed English reaches the fact cards after the router (leg c2b1b): plugged into
+  // the send path's slot while the panel is mounted, unplugged when it closes.
+  useEffect(() => setAskNextAnswerer(typedCardAnswerer(() => i18n.language)), [i18n]);
 
   // The tools' chips for where the player is (leg t1b1): chosen when the screen or
   // the thread is written (a turn updated in place too: a proposal's press changes
