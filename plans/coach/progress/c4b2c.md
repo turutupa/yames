@@ -54,4 +54,16 @@ till {day}" is true only on a day no part of the plan plays it.
 
 ## Merge and gates
 
-(filled in below after `merge(coach): into coach-c4b2`)
+`git merge coach`: "Already up to date" (c4b2b's `a2939fe6` already holds `coach`'s tip
+`fb4c5193`, the model's wiring in Ask included), so no merge commit.
+
+- tsc 0 (`coach-c4b2c-tsc-2`); build 0 (`coach-c4b2c-build`).
+- `npm run test`: 466 of 467 files, 50363 passed, 10 skipped; the one failed file is the known
+  `TabStage.render.test.tsx` (node_modules symlink) (`/home/dgx-delgado/scratch/jobq/990-coach-c4b2c-vitest.log`).
+- Layout `rail`, `today-line`, `short-window`: 120 passed (`coach-c4b2c-pw`).
+- The eight new tests against the old source (`coach-c4b2c-vold`): all eight failed.
+
+## For c4b3
+
+Translate the strings above (and c4b2b's). The plateau question now has three shapes; a
+translation must keep `{{n}}` in `sayToday` / `sayRangeToday`.
