@@ -1,0 +1,174 @@
+{
+  "language": "de",
+  "noSpaces": false,
+  "verbFinal": true,
+  "ordinalPlaces": {
+    "bar": ["# takt"],
+    "step": ["# schritt"]
+  },
+  "verbs": {
+    "open": ["öffne", "öffnen", "geh zu", "gehe zu", "geh zur", "gehe zur", "geh zum", "gehe zum", "geh auf", "gehe auf", "wechsle zu", "wechsel zu"],
+    "start": ["starte", "start", "starten", "spiel", "spiele", "spielen", "beginne", "beginnen", "fang an", "fange an"],
+    "slower": ["langsamer", "langsamer spielen", "langsamer machen", "spiel langsamer", "spiele langsamer", "mach langsamer", "mache langsamer", "verlangsame", "verlangsamen"],
+    "faster": ["schneller", "schneller spielen", "schneller machen", "spiel schneller", "spiele schneller", "mach schneller", "mache schneller", "beschleunige", "beschleunigen"],
+    "loop": ["loop", "loope", "loopen", "wiederhole", "wiederholen"],
+    "show": ["zeig", "zeige", "zeigen", "anzeigen", "zeichne", "zeichnen"],
+    "follow": ["folge", "folgen", "verfolge"],
+    "load": ["lade", "laden"],
+    "set": ["stelle", "stell", "stellen", "setze", "setz", "setzen", "ändere", "ändern", "einstellen"],
+    "focus": ["fokus auf", "fokussiere auf", "fokussiere", "fokus"],
+    "swap": ["tausche", "tauschen", "wechsle", "wechseln", "ersetze", "ersetzen"],
+    "findEdge": ["finde meine grenze bei", "finde meine grenze", "finde grenze bei", "finde grenze", "suche meine grenze bei", "suche meine grenze"],
+    "testOut": ["teste", "testen", "test"],
+    "explain": ["erkläre", "erklär", "erklären"],
+    "make": ["mach", "mache", "machen", "erstelle", "erstellen", "baue", "bauen", "generiere"]
+  },
+  "screens": {
+    "today": ["heute", "startseite"],
+    "paths": ["pfade", "pfaden"],
+    "progress": ["fortschritt"],
+    "tools": ["werkzeuge"],
+    "beat": ["metronom"],
+    "drill": ["tempo-training", "tempo training", "tempotraining"],
+    "setlist": ["setlist"],
+    "jam": ["jam", "jams"],
+    "songs": ["songs"],
+    "settings": ["einstellungen", "einstellung"]
+  },
+  "sections": {
+    "general": ["allgemein"],
+    "appearance": ["darstellung"],
+    "instrument": ["instrument"],
+    "practice": ["üben"],
+    "coach": ["coach"],
+    "tools": ["werkzeuge"],
+    "songs": ["songs"],
+    "keepTakes": ["takes aufbewahren", "take aufbewahren"],
+    "about": ["über"]
+  },
+  "settingKeys": {
+    "theme": ["design", "thema", "farbschema"],
+    "language": ["sprache"],
+    "practiceView": ["übungsansicht"],
+    "bandVolume": ["bandlautstärke", "band lautstärke"],
+    "countIn": ["einzähler", "count in", "count-in"],
+    "coachVoice": ["coach-stimme", "coach stimme", "coachstimme", "stimme"],
+    "coachSuggestions": ["coach-vorschläge", "coach vorschläge", "vorschläge", "tipps"]
+  },
+  "onOff": {
+    "on": ["an", "ein", "ja"],
+    "off": ["aus", "nein"]
+  },
+  "units": {
+    "bpm": ["bpm", "schläge pro minute"],
+    "minutes": ["minuten", "minute", "min"],
+    "bar": ["takte", "takt", "takten"],
+    "step": ["schritt"],
+    "part": ["teil"],
+    "clicks": ["klicks pro schlag", "klicks pro zählzeit", "klick pro schlag", "klicks"]
+  },
+  "nouns": {
+    "tempo": ["tempo", "geschwindigkeit"],
+    "path": ["pfad"],
+    "jam": ["jam"],
+    "preset": ["preset"],
+    "chord": ["akkord"],
+    "scale": ["tonleiter", "skala"],
+    "exercise": ["übung"],
+    "goal": ["mein ziel", "ziel"],
+    "session": ["heutige session", "heutigen session", "die session", "session", "heute"],
+    "mix": ["mix", "mischung"],
+    "screen": ["diesen bildschirm", "dieser bildschirm", "bildschirm", "diese ansicht", "diese seite", "diesen screen", "ansicht"]
+  },
+  "connectors": {
+    "to": ["auf", "bis", "zu", "-"],
+    "at": ["bei", "ab", "von"],
+    "of": ["von", "auf", "in", "bei", "mit"],
+    "for": ["für", "gegen", "mit", "durch"]
+  },
+  "swapChoices": {
+    "harder": ["etwas schwereres", "schwereres", "schwerer", "etwas härteres", "härteres", "härter", "etwas schwierigeres", "schwierigeres", "schwieriger"],
+    "different": ["etwas anderes", "anderes", "anders", "etwas verschiedenes"],
+    "style": ["einen anderen stil", "anderen stil", "anderer stil", "stil"]
+  },
+  "ordinals": {
+    "erste": 1,
+    "ersten": 1,
+    "zweite": 2,
+    "zweiten": 2,
+    "dritte": 3,
+    "dritten": 3,
+    "vierte": 4,
+    "vierten": 4
+  },
+  "roots": {
+    "sharp": ["sharp", "kreuz"],
+    "flat": ["flat"]
+  },
+  "scales": {
+    "major": ["dur", "ionisch"],
+    "naturalMinor": ["natürlich moll", "moll", "äolisch"],
+    "dorian": ["dorisch"],
+    "mixolydian": ["mixolydisch"],
+    "minorPentatonic": ["moll pentatonik", "mollpentatonik", "pentatonik moll", "pentatonik"],
+    "majorPentatonic": ["dur pentatonik", "durpentatonik", "pentatonik dur"],
+    "blues": ["blues", "moll blues"],
+    "harmonicMinor": ["harmonisch moll"],
+    "melodicMinor": ["melodisch moll"],
+    "lydian": ["lydisch"],
+    "phrygian": ["phrygisch"],
+    "majorBlues": ["dur blues"],
+    "altered": ["alteriert"],
+    "locrian": ["lokrisch"],
+    "wholeTone": ["ganzton", "ganztonleiter"],
+    "diminishedWholeHalf": ["vermindert ganzton halbton"],
+    "diminishedHalfWhole": ["vermindert halbton ganzton"],
+    "phrygianDominant": ["phrygisch dominant"],
+    "lydianDominant": ["lydisch dominant"],
+    "harmonicMajor": ["harmonisch dur"],
+    "hungarianMinor": ["ungarisch moll"],
+    "augmentedScale": ["übermäßig"],
+    "bebopDominant": ["bebop dominant"],
+    "bebopMajor": ["bebop dur"],
+    "bebopMinor": ["bebop moll"],
+    "chromatic": ["chromatisch"]
+  },
+  "positions": {
+    "open": ["offene lage", "offene position"],
+    "rootOn6": ["grundton auf 6", "grundton auf der 6 saite", "grundton auf der sechsten saite", "grundton auf saite 6"],
+    "rootOn5": ["grundton auf 5", "grundton auf der 5 saite", "grundton auf der fünften saite", "grundton auf saite 5"],
+    "rootOn4": ["grundton auf 4", "grundton auf der 4 saite", "grundton auf der vierten saite", "grundton auf saite 4"],
+    "rootOn3": ["grundton auf 3", "grundton auf der 3 saite", "grundton auf der dritten saite", "grundton auf saite 3"]
+  },
+  "never": {
+    "input": ["mikrofon", "mikrofone", "mikrofons", "mikro", "eingang", "eingangs", "eingabe", "zuhören", "hör zu", "hört zu", "anhören"],
+    "devices": ["audiogerät", "audiogeräte", "audiogeräten", "audiogeräts", "gerät", "geräte", "geräten", "schnittstelle", "audiointerface", "ausgang", "lautsprecher", "kopfhörer", "soundkarte"],
+    "grading": ["bewertung", "bewerten", "bewertet", "bewerte", "unbewertet", "benotung", "benoten", "benotet"],
+    "recording": ["aufnahme", "aufnahmen", "aufnehmen", "nimm auf", "aufzeichnen", "aufzeichnung", "aufzeichnungen", "aufgenommen", "record", "recording"],
+    "deleting": ["löschen", "lösche", "lösch", "gelöscht", "entfernen", "entferne", "entfern", "entfernt", "wegmachen", "vergiss", "vergessen", "leeren", "leere"],
+    "unfollowing": ["entfolgen", "entfolge", "verlasse den pfad", "verlasse pfad", "pfad verlassen", "den pfad verlassen", "abbestellen"],
+    "model": ["herunterladen", "lade herunter", "runterladen", "lade runter", "download", "downloaden", "modell", "modelle", "modells", "modellen", "llm", "sprachmodell"],
+    "grades": ["noten", "note", "zensur", "zensuren", "punkte", "punktzahl", "ergebnis", "ergebnisse", "bewertungen", "score", "scores", "sauberes tempo"]
+  },
+  "questions": [
+    "warum", "wieso", "weshalb", "weswegen", "was", "wie", "wann", "wo", "wohin", "woher", "wer", "wen", "wem", "wessen",
+    "welche", "welcher", "welches", "welchen", "welchem", "wozu", "womit", "wofür", "wodurch", "woran", "worauf",
+    "ist", "sind", "bin", "bist", "seid", "war", "waren", "hat", "hast", "haben", "hatte", "hatten",
+    "kann", "kannst", "können", "könnt", "könnte", "könntest", "soll", "sollst", "sollte", "sollen",
+    "würde", "würdest", "würden", "darf", "darfst", "dürfen", "muss", "musst", "müssen",
+    "wird", "wirst", "werden", "wäre", "wären", "hätte", "hättest", "gibt", "tut", "tust",
+    "willst", "will", "wollen", "möchte", "möchtest"
+  ],
+  "notCommand": [
+    "ich", "du", "dir", "dich", "dein", "deine", "deinen", "er", "sie", "es", "ihn", "ihm", "ihr", "ihre", "wir", "uns", "unser", "man", "dass",
+    "nicht", "kein", "keine", "keinen", "keiner", "nie", "niemals", "nichts", "niemand", "weder", "ohne",
+    "später", "morgen", "gestern", "abend", "abends", "nächste", "nächsten", "nächster", "nächstes", "vorhin", "vorher", "nachher", "danach", "davor", "wieder", "nochmal", "noch mal", "noch einmal", "erneut", "neu", "von vorn", "von vorne",
+    "weil", "aber", "wenn", "falls", "ob", "als", "denn", "sondern", "oder", "bevor", "nachdem",
+    "ist", "sind", "war", "waren", "bin", "bist", "sei", "wäre", "wurde", "wird", "wie", "was", "warum", "wann",
+    "zu schnell", "zu langsam", "zu laut", "zu leise", "zu viel", "zu wenig", "zu früh", "zu spät", "zu oft", "zu lang", "zu kurz", "zu hoch", "zu tief",
+    "sehr", "viel", "wirklich", "so", "dann", "mag", "gern", "gerne", "lieber", "will", "willst", "wollen", "wollte", "möchte", "möchtest", "muss", "musst", "brauche", "brauchst", "denke", "denkst", "glaube", "glaubst", "fühle", "fühlt", "fühlte", "kann", "kannst", "soll", "sollte", "hab", "habe", "hast", "hat", "habt",
+    "für mich", "mit mir", "bei mir", "zurück", "drüber", "darüber"
+  ],
+  "polite": ["bitte", "ok", "okay", "hey coach", "hey", "jetzt", "danke", "einfach"],
+  "fillers": ["mir", "mich", "die", "der", "das", "den", "dem", "des", "ein", "eine", "einen", "einem", "einer", "mein", "meine", "meinen", "meinem", "meiner", "ein bisschen", "bisschen", "ein wenig", "etwas"]
+}

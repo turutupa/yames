@@ -81,6 +81,15 @@
       "preset": "{{preset}}",
       "setting": "{{value}}"
     },
+    "command": {
+      "minutes": "Bugün {{minutes}} dakika",
+      "jam": "“{{jam}}” jam’i",
+      "preset": "“{{preset}}” ön ayarı",
+      "swapHarder": "{{part}}. bölüm: daha zor bir şey",
+      "swapDifferent": "{{part}}. bölüm: başka bir şey",
+      "swapStyle": "{{part}}. bölüm: başka bir stil",
+      "other": "{{tool}}"
+    },
     "chip": {
       "goTo": "Git: {{screen}}",
       "startToday": "Bugünün oturumunu başlat",

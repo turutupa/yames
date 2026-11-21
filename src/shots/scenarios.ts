@@ -2327,8 +2327,9 @@ for (const id of PHONE_LEARNING_SCENES) {
 
 // A key-moved Exercise's own how-to on a phone (card #79), measured by
 // `tests/layout/session-variant-text.spec.ts` (session-variant-e is in the list
-// above since the band's slider became thumb-sized, card #93).
-for (const id of ["session-variant-runway", "step-line"]) {
+// above since the band's slider became thumb-sized, card #93). Today back after
+// a break on a phone: its header and line read together (hd1).
+for (const id of ["session-variant-runway", "step-line", "today-back"]) {
   const desktop = SHOTS.find((s) => s.id === id);
   if (desktop) SHOTS.push({ ...desktop, id: `phone-${id}`, suffix: `phone-${id}`, width: 360, height: 800 });
 }

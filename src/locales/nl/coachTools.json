@@ -81,6 +81,15 @@
       "preset": "{{preset}}",
       "setting": "{{value}}"
     },
+    "command": {
+      "minutes": "Vandaag {{minutes}} minuten",
+      "jam": "De jam “{{jam}}”",
+      "preset": "De preset “{{preset}}”",
+      "swapHarder": "Deel {{part}}: iets moeilijkers",
+      "swapDifferent": "Deel {{part}}: iets anders",
+      "swapStyle": "Deel {{part}}: een andere stijl",
+      "other": "{{tool}}"
+    },
     "chip": {
       "goTo": "Ga naar {{screen}}",
       "startToday": "Sessie van vandaag starten",
