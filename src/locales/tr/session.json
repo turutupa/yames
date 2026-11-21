@@ -33,7 +33,8 @@
     "today": {
       "title": "Bugün",
       "leadFirst": "İlk seansın",
-      "leadBack": "Tekrar hoş geldin. {{days}} gün oldu",
+      "leadLast": "Son oturum: {{count}} gün önce",
+      "leadLast_other": "Son oturum: {{count}} gün önce",
       "minutes": "{{minutes}} dk",
       "start": "Başla",
       "howLong": "Ne kadar vaktin var? Dakika:",

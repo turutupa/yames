@@ -33,7 +33,8 @@
     "today": {
       "title": "Today",
       "leadFirst": "Your first session",
-      "leadBack": "Welcome back. It has been {{days}} days",
+      "leadLast": "Last Session: {{count}} day ago",
+      "leadLast_other": "Last Session: {{count}} days ago",
       "minutes": "{{minutes}} min",
       "start": "Start",
       "howLong": "How long have you got? Minutes:",

@@ -33,7 +33,8 @@
     "today": {
       "title": "今日",
       "leadFirst": "はじめてのセッション",
-      "leadBack": "おかえりなさい。{{days}} 日ぶりです",
+      "leadLast": "前回のセッション：{{count}} 日前",
+      "leadLast_other": "前回のセッション：{{count}} 日前",
       "minutes": "{{minutes}} 分",
       "start": "始める",
       "howLong": "時間はどれくらいありますか？ 分数：",
