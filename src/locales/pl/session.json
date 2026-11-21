@@ -33,7 +33,10 @@
     "today": {
       "title": "Dzisiaj",
       "leadFirst": "Twoja pierwsza sesja",
-      "leadBack": "Witaj z powrotem. Ostatnio grałeś {{days}} dni temu",
+      "leadLast": "Ostatnia sesja: {{count}} dzień temu",
+      "leadLast_few": "Ostatnia sesja: {{count}} dni temu",
+      "leadLast_many": "Ostatnia sesja: {{count}} dni temu",
+      "leadLast_other": "Ostatnia sesja: {{count}} dnia temu",
       "minutes": "{{minutes}} min",
       "start": "Zaczynamy",
       "howLong": "Ile masz czasu? Minuty:",

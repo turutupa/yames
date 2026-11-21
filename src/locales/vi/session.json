@@ -33,7 +33,8 @@
     "today": {
       "title": "Hôm nay",
       "leadFirst": "Buổi tập đầu tiên của bạn",
-      "leadBack": "Chào mừng trở lại. Đã {{days}} ngày rồi",
+      "leadLast": "Buổi tập trước: {{count}} ngày trước",
+      "leadLast_other": "Buổi tập trước: {{count}} ngày trước",
       "minutes": "{{minutes}} phút",
       "start": "Bắt đầu",
       "howLong": "Bạn có bao nhiêu thời gian? Số phút:",

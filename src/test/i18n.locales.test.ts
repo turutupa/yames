@@ -39,6 +39,8 @@ const NAMESPACES = [
   "drill",
   "jam",
   "metronome",
+  // The Notebook, Ask's second tab: its noticed lines (leg c4a1) and the tab itself (c4a2).
+  "notebook",
   "onboarding",
   // Today, a Session, Paths and Progress: a whole side of the app in one file,
   // so its strings can be translated in one sitting.

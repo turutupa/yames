@@ -33,7 +33,8 @@
     "today": {
       "title": "오늘",
       "leadFirst": "첫 세션",
-      "leadBack": "다시 오셨네요. {{days}}일 만입니다",
+      "leadLast": "지난 세션: {{count}}일 전",
+      "leadLast_other": "지난 세션: {{count}}일 전",
       "minutes": "{{minutes}}분",
       "start": "시작",
       "howLong": "시간이 얼마나 있나요? 분:",

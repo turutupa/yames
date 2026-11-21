@@ -1,0 +1,5 @@
+{
+  "lng": "ja",
+  "words": ["どうやって", "どうすれば", "どうしたら", "いいですか", "ありますか", "なんですか", "何ですか", "でしょうか", "のですか", "ですか", "ますか", "ください", "したい", "ように", "について", "するには", "すれば", "ている", "には", "とは", "って", "なぜ", "どう", "ましょう"],
+  "notes": "Hiragana question and grammar material only (how, why, what-is, can-I, please, want-to, about, -te iru); no kanji or katakana entry, so 練習, 弾く, 弦, 和音, コード, 指, リズム, スケール, 音階, ピッキング, ハンマリング, ミュート, 拍, 速さ are untouched. Doubtful: どう (short, but no musical word contains it; it also covers どうして), って and には (hiragana runs that could in theory sit inside a long hiragana-only word, never a guitar term); する and った left out on purpose, as bare する/った is too common inside inflected content verbs like 練習する and 弾いた chains."
+}

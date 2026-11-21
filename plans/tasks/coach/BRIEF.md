@@ -21,7 +21,15 @@ verify with grep before you rely on one, and write any real difference into your
   press. Tools are sorted: at once (with a receipt and undo) / one press / never. Never, and not tools at
   all: the microphone and audio devices, grading consent, recording, deleting anything, downloads, grades,
   anything during a Take.
-- Tools are built model-free first (chips, commands, receipts, proposals). No fine-tuning.
+- Tools are built model-free first (chips, commands, receipts, proposals). Fine-tuning: approved by
+  the owner on 2026-11-20 18:35 as leg c3d, only after c3b2b has measured the stock models and only
+  if they fall short (`c3d-small-router.md`); nothing trained ships before it beats stock on the
+  held-out set.
+- A suggestion chip's own press is the press for a reversible one-step change, always with Undo
+  (owner, 2026-11-20; leg chip1). Typed text and a model's tool call still get a proposal.
+- A Take marked "not fair" is left out of every clean tempo the app shows or quotes and of
+  milestones (owner, 2026-11-20; leg nf1). The planner's own arithmetic is unchanged.
+- The practice reminder is in-app only: no notification, no new permission (owner, 2026-11-20; rem2).
 - Grading is opt-in; the coach never pushes the microphone; ungraded practice is first-class.
 - Everything follows the active theme (theme tokens, never a hard-coded colour); tonal buttons; one
   picture at a time during a Take; nothing during a Take may cost the click.
