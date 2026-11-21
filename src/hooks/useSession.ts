@@ -10,13 +10,14 @@ import { useToolCoach } from "./useToolCoach";
  * change): `usePracticeHistory` (whether a session is on, its start and end,
  * the final report and the save) and `useToolCoach` (the feed, the tips,
  * speech, the chips). The history's state is made first, the tool coach
- * second, the history's start and end last, which keeps the effects in the
- * order the one hook ran them (see `plans/coach/progress/c5c1.md`).
+ * second, the history's start and end last. That keeps the effects in the
+ * order the one hook ran them, but for the history's four mirrors, which now
+ * run before the tool coach's ten instead of after: they share no ref (the
+ * table is in `plans/coach/progress/c5c1.md`).
  */
 export { __resetHistoryNoticeForTests, type StartSessionOptions } from "./usePracticeHistory";
 
 type Evaluation = ReturnType<typeof useEvaluation>;
-
 
 interface UseSessionOptions {
   evaluation: Evaluation;
