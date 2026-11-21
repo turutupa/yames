@@ -63,10 +63,13 @@ first review and most re-reads found real defects** (do not skip either); test a
 
 **On branches, in this order:**
 
-1. **`coach-int1`** (`~/yames-coach-int1`; its agent was running at 23:05: if `plans/coach/progress/int1.md`
-   is not there, relaunch it with session 4's prompt: merge `coach-t2b`, `coach-c2b1b`, `coach-c4a2`
-   into it, resolve `AskPanel.tsx` and `useAskHost.ts` keeping every side's hunks, two follow-ups,
-   gates). Then a fix agent on that branch with two work lists: `/tmp/coach-orch/t2bb-review.md`
+1. **`coach-int1`** (`~/yames-coach-int1`): **finished at 23:25 and gated on its branch** (`coach-t2b`,
+   `coach-c2b1b` and `coach-c4a2` merged onto chip1; the conflicts were import lines only, every
+   side's hunks kept; `progress/int1.md`; tsc, vitest 49,812, build, twelve layout specs 426 passed).
+   **Nothing was running when session 4 ended.** Not merged into `coach` because the re-read asks
+   for fixes first. Its open decision: the history cards still compare an own exercise's Takes with
+   earlier Takes of the same recipe (identical music: accepted). Next: a fix agent on that branch
+   with two work lists: `/tmp/coach-orch/t2bb-review.md`
    (MEDIUM: the "list is full" Undo notice promises something no press can do; LOW: Undo's order
    beside an unreadable row) and `/tmp/coach-orch/c2b1b-review.md` (three MEDIUM: "what changed" and
    "am I improving" mix variants of an Exercise (`takesOf` ignores `variantSeed`); evenness is said
