@@ -39,7 +39,7 @@
         "myExercises": "Bài của tôi là các bài bạn tự tạo, được liệt kê ở cuối Lộ trình. Chúng không thuộc lộ trình nào và không đạt gì. Bạn tạo một bài trong Hỏi bằng cách gõ điều bạn muốn, như một thang âm và một vị trí, rồi bấm Thêm.",
         "notebook": "Sổ tay là tab thứ hai của Hỏi. Nó hiện những gì huấn luyện viên nhận thấy qua ít nhất năm lượt đã lưu của bạn, cho bạn bỏ một dòng trong 30 ngày, và giữ mục tiêu của bạn bằng lời của bạn. Không có gì trong đó do mô hình viết.",
         "variant": "Một số bài có biến thể: cùng một kỹ năng ở giọng khác hoặc thế bấm khác. Buổi tập chọn một, và lời riêng của nó thay lời của bài ở chỗ nó có.",
-        "countIn": "Trong một buổi tập, đếm vào là ô nhịp tiếng click trước mỗi lượt, để bạn vào đúng lúc, và nó không nằm trong phần được chấm điểm. Trên Metronome và trong Drill, nó là công tắc đếm vào ở thanh dưới: vài phách click trước phách đầu tiên.",
+        "countIn": "Trong một buổi tập, đếm vào là ô nhịp tiếng click trước mỗi lượt, để bạn vào đúng lúc, và nó không nằm trong phần được chấm điểm. Trên Máy đếm nhịp và trong Luyện tempo, nó là công tắc đếm vào ở thanh dưới: vài phách click trước phách đầu tiên.",
         "loop": "Vòng lặp chơi một hay hai ô nhịp của bài lặp đi lặp lại, chậm, cho đến khi bạn dừng. Không có gì trong vòng lặp được chấm hay được lưu.",
         "testOut": "Kiểm tra vượt chơi một lượt ở tempo đạt của từng bài trong một bước mà bạn chưa đạt. Đạt đủ nhiều trong số đó là bước xong.",
         "warmUp": "Khởi động mở đầu một buổi tập và phần kết khép lại nó. Cả hai chạy theo đồng hồ và không chấm điểm."

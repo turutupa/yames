@@ -39,7 +39,7 @@
         "myExercises": "Meus exercícios são exercícios que você mesmo criou, listados no fim de Trilhas. Não pertencem a nenhuma trilha e não passam nada. Você cria um em Perguntar digitando o que quer, como uma escala e uma posição, e apertando Adicionar.",
         "notebook": "O Caderno é a segunda aba de Perguntar. Mostra o que o coach notou em pelo menos cinco das suas tomadas guardadas, deixa você tirar uma linha por 30 dias e guarda seu objetivo com as suas palavras. Nada nele é escrito por um modelo.",
         "variant": "Alguns exercícios vêm em variantes: a mesma habilidade em outro tom ou outro desenho. A sessão escolhe uma, e as palavras dela substituem as do exercício onde existirem.",
-        "countIn": "Numa sessão, a contagem de entrada é o compasso de cliques antes de cada tomada, para você entrar no tempo, e não faz parte do que é avaliado. No Metrônomo e no Drill é a chave de contagem de entrada na barra de baixo: alguns tempos de clique antes do primeiro.",
+        "countIn": "Numa sessão, a contagem de entrada é o compasso de cliques antes de cada tomada, para você entrar no tempo, e não faz parte do que é avaliado. No Metrônomo e no Treino é a chave de contagem de entrada na barra de baixo: alguns tempos de clique antes do primeiro.",
         "loop": "Um loop toca um compasso ou dois do exercício em círculo, devagar, até você parar. Nada num loop é avaliado nem guardado.",
         "testOut": "Fazer teste toca uma tomada no andamento de aprovação de cada exercício de uma etapa que você ainda não passou. Passe em quantos bastarem e a etapa está feita.",
         "warmUp": "Um aquecimento abre uma sessão e um final a fecha. Os dois correm contra o relógio e não são avaliados."

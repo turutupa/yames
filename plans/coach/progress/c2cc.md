@@ -42,11 +42,18 @@ Tests first: `help.test.ts`'s new rows failed 18 of 105 on the old `helpMatch.ts
 
 ## Locales
 
-(pending)
+Eight changed `help.json` entries, five new `help.ui.*` keys, two `ask.json` keys, in fourteen locales (commit
+`99a28f86`): three sonnet translators (de/es/fr/it/nl; pl/pt-BR/ru/tr/vi; ja/ko/zh-CN/zh-TW), then three separate
+sonnet proof-readers. `jq empty` on every file. Native reads wanted: "milestone" words (no earlier screen term in most
+locales); the count-in switch's name (no locale string for it); pass-mark words de Messlatte, es listón, it asticella,
+nl lat, pl poprzeczka, ru планка, tr çıta are the glossary's existing words (crossbar-like; a decision for the owner,
+not changed here).
 
 ## Part 2: scenes
 
-(pending)
+`tests/layout/ask-help.spec.ts` (commit `df62d9b6`): en search passage + tuning line + "the tune" left alone (1440,
+Ember, Today); ja search passage (phone, Manuscript); "What is this screen for?" on Today (1440 Manuscript, phone Ember)
+and on the result (1440 Ember, phone Manuscript). Pictures only to `$YAMES_SHOT_DIR`.
 
 ## Gates
 

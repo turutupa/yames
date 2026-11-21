@@ -19,7 +19,7 @@
         "jam": "Jam, sen üstünde çalarken bir formu çalan bir gruptur ve asla değerlendirilmez. Bir tarz, havayı, formu ve akorları seç; pratik araçları grubu birkaç ölçü için çıkarabilir, seninle ölçü takas edebilir ya da her turda tempoyu yükseltebilir.",
         "songs": "Şarkılar bir Guitar Pro ya da MusicXML dosyası açar, tabını gösterir, zamanı tutar ve nerede olduğunu izler. Partini, ölçüleri ve hızı seç, bir bölümü döngüye al ve kimi duyacağını ayarla. Dosya bu cihazda kalır.",
         "settings": "Ayarlar uygulamanın seçimlerini tutar: Genel, Pratik (çalışının değerlendirilip değerlendirilmeyeceği dahil), ses girişi için Cihazlar, Pratik Koçu, Görünüm, araçlar, Şarkılar, Kısayollar ve daha fazlası. Sor orada açık değildir.",
-        "modelSelector": "Koç modeli, bu bilgisayarda bir dil modelinin çalışıp çalışmayacağını seçer: Kapalı koçu kendi kurallarında tutar; Standart ya da Studio ise önce İndir gerektiren bir modeldir. İndir'e basana kadar hiçbir şey inmez; seçtiğin model uygulama açıldıktan sonra kendiliğinden yüklenir, hiçbir zaman bir deneme sırasında yüklenmez, ve sen Kapalı'yı ya da başka bir modeli seçene kadar yüklü kalır. Model yüklüyken burada başka hiçbir şeyin yanıtlamadığı yazılı bir soru, genel tavsiye diye işaretlenmiş, kendi sözleriyle bir yanıt alır.",
+        "modelSelector": "Koç modeli, bu bilgisayarda bir dil modelinin çalışıp çalışmayacağını seçer: Kapalı koçu kendi kurallarında tutar; Standart ya da Studio ise önce İndir gerektiren bir modeldir. İndir'e basana kadar hiçbir şey inmez; seçtiğin model uygulama açıldıktan sonra kendiliğinden yüklenir, hiçbir zaman bir deneme sırasında yüklenmez ve sen Kapalı'yı ya da başka bir modeli seçene kadar yüklü kalır. Model yüklüyken burada başka hiçbir şeyin yanıtlamadığı yazılı bir soru, genel tavsiye diye işaretlenmiş, kendi sözleriyle bir yanıt alır.",
         "ask": "Sor, bu ekran, denemelerin ve yolların hakkındaki soruları uygulamanın ölçtüğüne ve yolların söylediğine göre yanıtlar; bir çip tek basışla soru sorar. “Daha yavaş” ya da “İlerleme'yi aç” gibi yazılı komutlar yerine getirilir ya da tek basışa sunulur. Defter sekmesi koçun fark ettiklerini ve hedefini tutar."
       },
       "word": {
@@ -27,11 +27,11 @@
         "step": "Adım, bir yolun bir aşamasıdır; birkaç alıştırması ve neden orada olduğuna dair notları var. Derecelendirilen alıştırmalarının çoğunu geçince ya da sınava girince tamamlanır.",
         "level": "Bir yoldaki seviyen, Başlangıç, Orta ya da İleri, Bugün'ün seni hangi adımdan başlatacağını belirler. Altındaki adımları Bugün atlar, ama yine de çalabilirsin.",
         "rung": "Basamak, bir alıştırmanın tempo adımıdır. Daha hızlı ve Daha yavaş bir basamak oynatır; çıtayı geçmek planın seni bir sonrakine çıkarmasına izin verir.",
-        "passMark": "Çıta, bir denemenin geçmek için ulaşması gerekendir; örneğin zamanlamanın ne kadar düzgün olduğu ya da notaların kaçının duyulduğu. Her alıştırma kendi çıtalarını gösterir ve bir deneme onlara ancak ölçülebilen hepsine ulaşınca ulaşmış olur.",
+        "passMark": "Çıta, bir denemenin geçmek için ulaşması gerekendir; örneğin zamanlamanın ne kadar düzgün olduğu ya da notaların kaçının duyulduğu. Her alıştırma kendi çıtalarını gösterir ve bir deneme, ölçülebilen her çıtayı geçtiğinde hepsini geçmiş olur.",
         "cleanTempo": "Bir alıştırmadaki temiz tempon, art arda sekiz ölçü boyunca çıtayı geçtiğin en hızlı tempodur. Adil değil dediğin denemeler ona da, bir kilometre taşına da sayılmaz.",
         "review": "Tekrar, geçtiğin bir alıştırmayı bir gün sonra, sonra 3, 7, 14 ve 30 gün sonra, taze kalsın diye iki denemelik geri getirir. Kaydıysa daha erken ve bir basamak yavaş döner.",
         "parked": "Üst üste üç oturum yeni bir temiz tempo getirmeyince bir alıştırma dinlenmeye alınır. Birkaç gün dinlenir, sonra taze döner.",
-        "benchmark": "Ölçüt, bir yolun 1, 7, 14 ve 21. günlerinde, abone olduğun günden sayılarak, aynı alıştırmanın aynı tempoda aynı denemesidir; değişimi duyasın diye. Yoldaki ilk oturumun geride kaldıktan sonra Bugün birini plana koyar; bir hafta kaçırılan atlanır, telafi edilmez.",
+        "benchmark": "Ölçüt, bir yolun 1, 7, 14 ve 21. günlerinde, abone olduğun günden sayılarak, aynı alıştırmanın aynı tempoda aynı denemesidir; değişimi duyasın diye. Yoldaki ilk oturum geride kaldıktan sonra Bugün birini plana koyar; bir hafta kaçırılan atlanır, telafi edilmez.",
         "grading": "Değerlendirmeli, uygulamanın girişinden dinleyip zamanlamanı ve notalarını çıtaya göre ölçmesi demektir. Değerlendirilmedi, yani Sadece çal, hiçbir şey ölçmeden klik ve görsel verir; bu denemeler pratik sayılır ama temiz tempona ve adımlarına yalnızca değerlendirmeli denemeler dokunur. Bunu Ayarlar, Pratik seçer ve bir oturum sorabilir.",
         "notFair": "Yakın bir sonuçtan sonra notun adil olmadığını söyleyebilirsin. Not ölçüldüğü gibi, yanına cevabınla birlikte kalır ve o deneme uygulamanın gösterdiği temiz tempoya sayılmaz olur ve kilometre taşı kazandırmaz. Sonra Evet dersen yeniden sayılır.",
         "listen": "Dinle, araç çubuğundaki, koçun orada çalışını dinlemesini sağlayan anahtardır. Sen açana kadar kapalı kalır; kapatınca çalışma Araç çalışmaları'nda saklanır.",
@@ -39,7 +39,7 @@
         "myExercises": "Alıştırmalarım kendi yaptığın alıştırmalardır ve Yollar'ın altında listelenir. Hiçbir yola ait değildir ve hiçbir şey geçirmez. Birini Sor'da ne istediğini, örneğin bir gam ve bir pozisyon yazıp Ekle'ye basarak yaparsın.",
         "notebook": "Defter, Sor'un ikinci sekmesidir. Saklanmış en az beş denemende koçun fark ettiklerini gösterir, bir satırı 30 gün dışarıda bırakmana izin verir ve hedefini kendi sözlerinle tutar. İçindeki hiçbir şeyi bir model yazmaz.",
         "variant": "Bazı alıştırmaların varyantları vardır: aynı beceri başka bir tonda ya da başka bir kalıpta. Oturum birini seçer ve varsa kendi sözleri alıştırmanınkinin yerine geçer.",
-        "countIn": "Bir oturumda sayım, her denemeden önceki klik ölçüsüdür; zamanında girmen için, ve değerlendirilenin parçası değildir. Metronom'da ve Drill'de alt çubuktaki sayım düğmesidir: ilk vuruştan önce birkaç vuruşluk klik.",
+        "countIn": "Bir oturumda sayım, her denemeden önceki klik ölçüsüdür; zamanında girmen için, ve değerlendirilenin parçası değildir. Metronom'da ve Tempo Antrenmanı'nda alt çubuktaki sayım düğmesidir: ilk vuruştan önce birkaç vuruşluk klik.",
         "loop": "Döngü, alıştırmanın bir iki ölçüsünü sen durdurana kadar yavaşça tekrar tekrar çalar. Bir döngüdeki hiçbir şey değerlendirilmez ya da saklanmaz.",
         "testOut": "Sınava gir, bir adımda henüz geçmediğin her alıştırmanın geçme temposunda bir deneme çalar. Yeterince çoğunu geç, adım tamamdır.",
         "warmUp": "Isınma bir oturumu açar, kapanış kapatır. İkisi de saate karşı işler ve değerlendirilmez."
@@ -57,9 +57,9 @@
       "empty": {
         "local": "Bir soru yaz; uygulama denemelerinden, yollarından ve kendi yardımından, model olmadan yanıtlar. Ya da aşağıdaki bir soruya dokun.",
         "phone": "Bir soru yaz; uygulama denemelerinden, yollarından ve kendi yardımından yanıtlar. Ya da aşağıdaki bir soruya dokun.",
-        "search": "Bir soru yaz; uygulama onu yollarında arar. Denemelerin ve bu ekran için aşağıdaki bir soruya dokun.",
-        "searchLoading": "Bir soru yaz; uygulama onu şimdi yollarında arar; denemelerin ve bu ekran için aşağıdaki bir soruya dokun. Seçtiğin model hazırlanıyor; hazır olunca kendi sözleriyle, öyle işaretlenmiş genel tavsiye ekler.",
-        "searchModel": "Bir soru yaz; uygulama onu yollarında arar; onların yanıtlamadığını bu bilgisayardaki model kendi sözleriyle, genel tavsiye olarak yanıtlar. Denemelerin ve bu ekran için aşağıdaki bir soruya dokun."
+        "search": "Bir soru yaz; uygulama onu yollarında arar. Denemelerin ve bu ekran hakkında sormak için aşağıdaki bir soruya dokun.",
+        "searchLoading": "Bir soru yaz; uygulama onu şimdi yollarında arar; denemelerin ve bu ekran hakkında sormak için aşağıdaki bir soruya dokun. Seçtiğin model hazırlanıyor; hazır olunca kendi sözleriyle, öyle işaretlenmiş genel tavsiye ekler.",
+        "searchModel": "Bir soru yaz; uygulama onu yollarında arar; onların yanıtlamadığını bu bilgisayardaki model kendi sözleriyle, genel tavsiye olarak yanıtlar. Denemelerin ve bu ekran hakkında sormak için aşağıdaki bir soruya dokun."
       },
       "reply": {
         "local": "Denemelerinde, yollarında ya da uygulamanın yardımında bunu yanıtlayan bir şey yok. Bu panelin altında seçilen bir model açıkken kendi sözleriyle yanıtlayabilir.",
