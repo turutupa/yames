@@ -42,6 +42,11 @@ describe("titleMatch", () => {
     ["", "Ligado", 0],
     ["拨弦", "交替拨弦", 1],
     ["扫弦", "交替拨弦", 0],
+    // Typed run together, as the router hands it over (review t1b2b, finding 4).
+    ["얼터네이트피킹", "얼터네이트 피킹", 1],
+    ["블루스와펜타토닉", "블루스와 펜타토닉", 1],
+    ["オルタネイトピッキング", "オルタネイト・ピッキング", 1],
+    ["피킹얼터네이트", "얼터네이트 피킹", 0],
   ] as const)("%s in %s = %i", (query, title, score) => {
     expect(titleMatch(query, title)).toBe(score);
   });

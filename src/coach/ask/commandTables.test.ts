@@ -103,7 +103,24 @@ describe.each(LANGUAGES)("%s", (lng) => {
       if (fixed) expect(args, `${text}: ${id} carries no args of its own`).toBeUndefined();
       else expect(args, `${text}: a name carries its args`).toBeDefined();
       const r = routeCommand(text, table(), facts[where]);
-      expect(r, `${text} (on ${where})`).toEqual({ kind: "call", call: { tool, args: fixed ?? args } });
+      const expected = { tool, args: fixed ?? args };
+      // Without spaces, a Path opened by a typed name is one press, never at once (review t1b2b, finding 1).
+      if (table().noSpaces && tool === "open_path") {
+        expect(r.kind === "which" ? r.choices.map((x) => x.call) : r, `${text} (on ${where})`).toEqual([expected]);
+      } else {
+        expect(r, `${text} (on ${where})`).toEqual({ kind: "call", call: expected });
+      }
+    }
+  });
+
+  it("without spaces, no navigation by a typed name runs at once: one press (review t1b2b, finding 1)", () => {
+    if (!table().noSpaces) return;
+    for (const { text, args } of lines.commands) {
+      if (!args) continue;
+      for (const [, f] of SCREENS) {
+        const r = routeCommand(text, table(), f);
+        if (r.kind === "call") expect(["open_path", "open_step"], `${text}: ${r.call.tool} at once`).not.toContain(r.call.tool);
+      }
     }
   });
 

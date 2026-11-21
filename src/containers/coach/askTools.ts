@@ -215,10 +215,38 @@ export function runAskCall(call: ToolCall, said: string): string {
     appendAskTurn({ id, kind: "tool", body: unavailable() });
     return id;
   }
-  const outcome = runCoachTool(call, at.host, at.ctx);
+  writeOutcome(id, runCoachTool(call, at.host, at.ctx), at);
+  return id;
+}
+
+function writeOutcome(id: string, outcome: RunOutcome, at: { host: CoachToolHost; ctx: CoachContext }): void {
   appendAskTurn({ id, kind: "tool", body: bodyOf(outcome, at.host, at.ctx) });
   followLater(id, outcome);
-  return id;
+}
+
+/** The arguments a tool resolves by title from the player's words. */
+const NAMED = ["path", "query", "exercise", "jam", "preset"] as const;
+
+/**
+ * A typed command (leg t1b2c): as `runAskCall`, except that a call whose
+ * typed name named nothing the app has (`notFound`, no choices) writes
+ * nothing and returns false, so Ask goes on to its next answerer and the
+ * model: "コースを開くと固まる" is a sentence, not a Path called "固まる"
+ * (review t1b2b, finding 2). A refusal about a number ("no Step 7 there")
+ * is still the answer.
+ */
+export function runTypedCall(call: ToolCall, said: string): boolean {
+  const at = where();
+  if (!at) {
+    runAskCall(call, said);
+    return true;
+  }
+  const outcome = runCoachTool(call, at.host, at.ctx);
+  const named = NAMED.some((k) => typeof call.args[k] === "string");
+  if (!outcome.ok && outcome.why === "notFound" && named && (outcome.choices ?? []).length === 0) return false;
+  if (said.trim()) appendAskTurn({ id: askTurnId(), kind: "user", text: said.trim() });
+  writeOutcome(askTurnId(), outcome, at);
+  return true;
 }
 
 /**

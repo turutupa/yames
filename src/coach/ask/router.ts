@@ -358,6 +358,9 @@ function query(t: Toks, c: Compiled): string | null {
   // "start the metronome" names a screen, not an Exercise.
   if (exactId(q, c.screens) !== null) return null;
   const text = joinToks(q, c);
+  // Without spaces, one character left over is the tail of a word, never a name: "開けて" less "開け"
+  // is "て", which "はじめての…" contains (review t1b2b, finding 1).
+  if (c.noSpaces && Array.from(text).length < 2) return null;
   return text.length > 0 && text.length <= QUERY_CHARS ? text : null;
 }
 
@@ -775,7 +778,10 @@ function parseBare(t: Toks, c: Compiled, f: CommandFacts): Parsed {
     if (counted.unit === null) return bareNumber(counted.n, f);
     const made = unitCall(counted.n, counted.unit);
     if (made) return [made];
-    // "7단계": a number and a place's unit may be an ordinal place (leg t1b2b); a count is nothing.
+    // "7. Schritt": a number and a place's unit may be an ordinal place (leg t1b2b); a count is nothing.
+    // Not without spaces: there a number glued to its unit ("3단계") is a count as often as a place, so
+    // only a verb makes it one ("3단계 열어줘"; review t1b2b, finding 6).
+    if (c.noSpaces) return null;
     const step = stepPlace(t, c);
     return step ? [call("open_step", step.path ? { path: step.path, step: step.step } : { step: step.step })] : null;
   }
@@ -812,6 +818,10 @@ function labelOf(c: ToolCall): Line {
       return line("coachTools.command.jam", { jam: a.jam ?? "" });
     case "load_preset":
       return line("coachTools.command.preset", { preset: a.preset ?? "" });
+    case "open_path":
+      return line("coachTools.choice.path", { path: a.path ?? "" });
+    case "open_step":
+      return line("coachTools.chip.openStep", { path: a.path ?? "", step: a.step ?? "" });
     case "swap_part":
       return line(
         a.choice === "harder" ? "coachTools.command.swapHarder" : a.choice === "different" ? "coachTools.command.swapDifferent" : "coachTools.command.swapStyle",
@@ -840,6 +850,24 @@ function settle(parsed: Parsed, f: CommandFacts): RouteResult {
 }
 
 /**
+ * Without spaces, a name is whatever characters the verb left over, and a
+ * leftover that happens to sit inside a real title resolves ("コース開ける"
+ * once opened "ネックを知る" on its "る"). So there a `go` tool that would
+ * navigate to a thing by such a name is never run at once: it is one choice,
+ * "Which one?", a press (review t1b2b, finding 1). Screens and sections are
+ * closed words, not leftovers, and still go at once.
+ */
+function pressNamedGo(r: RouteResult, c: Compiled): RouteResult {
+  if (!c.noSpaces || r.kind !== "call") return r;
+  const tool = COACH_TOOLS.find((x) => x.name === r.call.tool);
+  if (tool?.kind !== "go" || !NAME_ARGS.some((k) => typeof r.call.args[k] === "string")) return r;
+  return { kind: "which", choices: [{ label: labelOf(r.call), call: r.call }] };
+}
+
+/** The arguments a tool resolves by title from the player's words (`resolve.ts`). */
+const NAME_ARGS = ["path", "query", "exercise", "jam", "preset"] as const;
+
+/**
  * What the player typed, as a tool call, "Which one?", "that one is yours",
  * or not a command. Pure; see the file's head for the order of the checks.
  */
@@ -855,6 +883,6 @@ export function routeCommand(text: string, table: CommandTable, facts: CommandFa
   if (never) return { kind: "yours", item: never };
   // "a bit faster": a filler may come before the verb.
   const verb = verbAt(t, c) ?? verbAt(skip(t, c.fillers), c);
-  if (verb) return settle(parseVerb(verb.id, verb.rest, c, facts), facts);
-  return settle(parseBare(t, c, facts), facts);
+  if (verb) return pressNamedGo(settle(parseVerb(verb.id, verb.rest, c, facts), facts), c);
+  return pressNamedGo(settle(parseBare(t, c, facts), facts), c);
 }

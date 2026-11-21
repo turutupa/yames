@@ -232,7 +232,8 @@ function AskConversation({
           onFocus={() => onTyping(true)}
           onBlur={() => onTyping(false)}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) send(e);
+            // WebKit's Enter that commits an IME composition comes after compositionend, as keyCode 229 (review t1b2b, finding 3).
+            if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && e.nativeEvent.keyCode !== 229) send(e);
           }}
           data-testid="ask-input"
         />

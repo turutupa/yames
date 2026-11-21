@@ -21,7 +21,7 @@ import { commandTableFor } from "../../coach/ask/commandTable";
 import { routeCommand } from "../../coach/ask/router";
 import { line } from "../../coach/tools/types";
 import { appendAskTurn, askTurnId, sendAsk } from "./askStore";
-import { askCommandFacts, askYours, runAskCall } from "./askTools";
+import { askCommandFacts, askYours, runAskCall, runTypedCall } from "./askTools";
 
 /**
  * An answerer tried after the router and before the model: true when it
@@ -61,8 +61,9 @@ export function answerTyped(text: string, language: string): TypedOutcome | null
     const routed = routeCommand(said, table, facts);
     switch (routed.kind) {
       case "call":
-        runAskCall(routed.call, said);
-        return "call";
+        // A name that named nothing: the sentence goes on (review t1b2b, finding 2).
+        if (runTypedCall(routed.call, said)) return "call";
+        break;
       case "which":
         appendAskTurn({ id: askTurnId(), kind: "user", text: said });
         appendAskTurn({
@@ -83,7 +84,14 @@ export function answerTyped(text: string, language: string): TypedOutcome | null
         break;
     }
   }
-  if (nextAnswerer(said)) return "next";
+  // The slot is someone else's code: a throw or a Promise is not an answer (review t1b2b, finding 5).
+  let answered = false;
+  try {
+    answered = nextAnswerer(said) === true;
+  } catch {
+    answered = false;
+  }
+  if (answered) return "next";
   sendAsk(said);
   return "asked";
 }

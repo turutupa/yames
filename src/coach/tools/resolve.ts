@@ -54,8 +54,11 @@ export function titleMatch(query: string, title: string): 0 | 1 | 2 {
   if (q.length === 0 || t.length === 0) return 0;
   if (q === t) return 2;
   const words = t.split(" ");
+  // A player of a script without spaces types a title's words run together ("얼터네이트피킹"
+  // for "얼터네이트 피킹", "オルタネイトピッキング" for "オルタネイト・ピッキング"; review t1b2b, finding 4).
+  const joined = t.replace(/ /g, "");
   const every = q.split(" ").every((part) =>
-    UNSPACED.test(part) ? t.includes(part) : words.some((word) => word.startsWith(part)),
+    UNSPACED.test(part) ? t.includes(part) || joined.includes(part) : words.some((word) => word.startsWith(part)),
   );
   return every ? 1 : 0;
 }

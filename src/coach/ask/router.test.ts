@@ -485,9 +485,11 @@ describe("the command tables", () => {
     expectCall(routeCommand("第7步", places, facts.paths), "open_step", { step: 7 });
     expectCall(routeCommand("打开第7步", places, facts.paths), "open_step", { step: 7 });
     expectCall(routeCommand("步骤7", places, facts.paths), "open_step", { step: 7 });
-    // A number glued to the unit an ordinal place ends with ("7단계") is that place, said alone too.
+    // A number glued to the unit an ordinal place ends with ("7단계") is that place after a verb; said
+    // alone, without spaces, it is as often a count ("3 stages"), so nothing (review t1b2b, finding 6).
     const ko = { ...zh, units: { ...zh.units, step: ["단계"] }, ordinalPlaces: { step: ["#단계"] } } as CommandTable;
-    expectCall(routeCommand("7단계", ko, facts.paths), "open_step", { step: 7 });
+    expectCall(routeCommand("7단계打开", ko, facts.paths), "open_step", { step: 7 });
+    expect(routeCommand("7단계", ko, facts.paths)).toEqual({ kind: "none" });
     expect(routeCommand("7단계", { ...ko, ordinalPlaces: undefined } as CommandTable, facts.paths)).toEqual({ kind: "none" });
     // "3小节" is three bars: not a place.
     expect(routeCommand("循环3小节", places, facts.today)).toEqual({ kind: "none" });
