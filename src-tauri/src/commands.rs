@@ -3897,7 +3897,10 @@ pub async fn tts_speak(
     // dim_exit, leaving the metronome stuck quiet. Cancelling here
     // also covers the per-voice-preview click pattern the user asked
     // for: clicking another voice should stop the current one.
-    crate::tts::cancel_active_speech(tts_active.inner());
+    // The generation this speak owns, taken under the cancel's own lock:
+    // a `tts_stop` from here on (even during the device wait below)
+    // cancels this speak.
+    let my_gen = crate::tts::cancel_active_speech(tts_active.inner());
 
     // Dim metronome volume during speech (temporary, not persisted).
     //
@@ -3987,7 +3990,7 @@ pub async fn tts_speak(
             return Err("the audio output device is not available, so there is                         nowhere for the coach to speak"
                 .to_string());
         }
-        crate::tts::speak_standalone(&snapshot, &text_owned, &tts_active_arc, || {
+        crate::tts::speak_standalone(&snapshot, &text_owned, &tts_active_arc, my_gen, || {
             let _ = app_handle_for_emit.emit("tts-speech-started", ());
         })
     })
@@ -4026,7 +4029,14 @@ pub async fn tts_speak(
 /// path so clicking a second voice cuts off the first one's audio
 /// instead of queueing behind it. Idempotent — a no-op when nothing
 /// is currently speaking.
-#[tauri::command]
+///
+/// `(async)`: the body runs on an async runtime worker, not the main
+/// thread. Killing Piper mid-synthesis is a `taskkill` process on
+/// Windows (a `kill` on the Unixes), and on the main thread it held up
+/// every event and synchronous command queued behind it, Start's own
+/// `state-changed` among them. Nothing here needs the main thread: the
+/// generation and the PID sit behind `SharedTtsActive`'s mutex.
+#[tauri::command(async)]
 pub fn tts_stop(tts_active: State<'_, SharedTtsActive>) {
     crate::tts::cancel_active_speech(tts_active.inner());
 }

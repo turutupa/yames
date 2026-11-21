@@ -143,15 +143,29 @@ pub fn create_shared_tts_active() -> SharedTtsActive {
 /// stops via the generation check in `speak_standalone`'s poll loop,
 /// which is why interruption still lands within ~100 ms even when the
 /// WAV is already playing.
-pub fn cancel_active_speech(active: &SharedTtsActive) {
-    let pid = {
+///
+/// Returns the generation it bumped to, read under the same lock: the
+/// one a `tts_speak` that cancels to make room for itself owns. Taking it
+/// here, and not when `speak_standalone` starts, matters because
+/// `tts_speak` waits for the output device in between (up to seconds on
+/// a cold device), and a `tts_stop` landing in that wait must cancel the
+/// speak rather than be absorbed into a later snapshot.
+pub fn cancel_active_speech(active: &SharedTtsActive) -> u64 {
+    let (generation, pid) = {
         let mut guard = active.lock().unwrap();
         guard.generation = guard.generation.wrapping_add(1);
-        guard.pid.take()
+        (guard.generation, guard.pid.take())
     };
     if let Some(pid) = pid {
         kill_pid(pid);
     }
+    generation
+}
+
+/// Whether the speak that owns `my_gen` is still the current one: no
+/// `tts_stop` and no newer `tts_speak` has bumped the generation since.
+pub fn speech_is_current(active: &SharedTtsActive, my_gen: u64) -> bool {
+    active.lock().unwrap().generation == my_gen
 }
 
 /// Force-kill a PID. `kill -9` (SIGKILL) on the Unixes, `taskkill /F` on
@@ -303,8 +317,9 @@ impl TtsEngine {
         // No interrupt tracking when called via this legacy entry —
         // create a one-shot SharedTtsActive that nobody else can see.
         let active = create_shared_tts_active();
+        let my_gen = active.lock().unwrap().generation;
         self.speaking = true;
-        let result = speak_standalone(&snap, text, &active, on_ready_to_play);
+        let result = speak_standalone(&snap, text, &active, my_gen, on_ready_to_play);
         self.speaking = false;
         result
     }
@@ -769,13 +784,18 @@ pub fn speak_standalone<F: FnOnce()>(
     snap: &TtsSnapshot,
     text: &str,
     active: &SharedTtsActive,
+    my_gen: u64,
     on_ready_to_play: F,
 ) -> Result<(), String> {
-    // Snapshot the generation we own. Any later increment means we
-    // were cancelled — `cancel_active_speech` bumps and a fresh
-    // `speak_standalone` bumps inside `commands::tts_speak` BEFORE
-    // calling us, so this snapshot is the marker we compare against.
-    let my_gen = active.lock().unwrap().generation;
+    // `my_gen` is the generation this speak owns, taken by the caller
+    // when it cancelled the previous speak (`commands::tts_speak` gets it
+    // from `cancel_active_speech`). Any later increment means we were
+    // cancelled, including a `tts_stop` that landed while the caller was
+    // still waiting for the output device: that one ends the speak here,
+    // before Piper runs or anything plays.
+    if !speech_is_current(active, my_gen) {
+        return Ok(());
+    }
 
     let piper_dir = snap.models_dir.join("piper");
     let piper_bin = piper_dir.join(piper_exe_name());
@@ -852,7 +872,7 @@ pub fn speak_standalone<F: FnOnce()>(
                 &tmp_wav,
                 snap.volume,
                 snap.speech.as_ref(),
-                &|| active.lock().unwrap().generation == my_gen,
+                &|| speech_is_current(active, my_gen),
             );
             let _ = std::fs::remove_file(&tmp_wav);
             match play_outcome {
@@ -1828,6 +1848,34 @@ mod tts_dim_tests {
         // The Session's boundary voice: no dim, so the dim state is never
         // entered and a cut leaves nothing to restore.
         assert!(!speak_dims(Some(false)));
+    }
+
+    #[test]
+    fn a_stop_during_the_device_wait_cancels_the_speak() {
+        // `tts_speak`: the cancel that makes room for it hands back the
+        // generation it owns.
+        let active = create_shared_tts_active();
+        let my_gen = cancel_active_speech(&active);
+        assert!(speech_is_current(&active, my_gen));
+        // A `tts_stop` lands while the output device is still opening,
+        // before `speak_standalone` has started.
+        cancel_active_speech(&active);
+        assert!(!speech_is_current(&active, my_gen));
+        // The speak then returns cancelled: no error, nothing played, the
+        // "started" hook never fired. (Before the fix it re-read the
+        // generation here, took the stop's value as its own and spoke.)
+        let snap = TtsSnapshot {
+            voice: "lessac".to_string(),
+            models_dir: std::env::temp_dir().join("yames-no-models-here"),
+            volume: 1.0,
+            speech: None,
+        };
+        let mut started = false;
+        let result = speak_standalone(&snap, "Next: chords in G.", &active, my_gen, || {
+            started = true;
+        });
+        assert_eq!(result, Ok(()));
+        assert!(!started);
     }
 
     #[test]
