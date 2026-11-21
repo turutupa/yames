@@ -177,7 +177,7 @@ function AskConversation({
   // what the chips may offer), never per beat (the panel renders from its store alone).
   // The fact cards' question chips (leg c2b1a), chosen the same way, never per beat.
   const cards = useMemo(() => askCardChips(turns.length === 0 ? "askEmpty" : "askAbove", turns), [lookingKey, turns]);
-  // At most three chips anywhere: the cards' first, the tools' in the room left (review c2b1a F10).
+  // At most four chips at once (the tools' own cap): the cards' first, the tools' in the room left (review c2b1a F10).
   const chips = useMemo(() => withinChipCap(cards.length, askToolChips()), [lookingKey, turns, cards]);
   const ungraded = useMemo(() => turns.length === 0 && askUngradedHere(), [lookingKey, turns]);
   const cardRow =

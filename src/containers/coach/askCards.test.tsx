@@ -54,22 +54,24 @@ describe("a chip asks and answers in the thread", () => {
     expect(within(again).getAllByRole("button")).toHaveLength(2);
   });
 
-  it("at most three chips at once, card chips first (F10)", () => {
+  it("at most four chips at once (the tools' own cap), card chips first (F10)", () => {
     __setAskToolsForTests(fakeHost(), below().ctx);
     openAsk();
     render(<AskPanel lookingAt={{ text: "Your Session", key: "session|tune" }} onClose={() => {}} />);
     const count = () =>
       (screen.queryByTestId("ask-card-chips")?.querySelectorAll("button").length ?? 0) +
       (screen.queryByTestId("ask-tool-chips")?.querySelectorAll("button").length ?? 0);
-    expect(count()).toBeLessThanOrEqual(MAX_ASK_CHIPS);
+    // Three cards and the tools' first chip: the tools had more to offer than the room left.
+    expect(count()).toBe(MAX_ASK_CHIPS);
+    expect(screen.getByTestId("ask-card-chips").querySelectorAll("button")).toHaveLength(3);
     fireEvent.click(screen.getByTestId("ask-card-chip-where_slipped"), { detail: 1 });
     expect(count()).toBeLessThanOrEqual(MAX_ASK_CHIPS);
   });
 
   it("the cap: tool chips fill only the room the cards leave", () => {
-    expect(withinChipCap(3, ["a", "b"])).toEqual([]);
-    expect(withinChipCap(2, ["a", "b", "c", "d"])).toEqual(["a"]);
-    expect(withinChipCap(0, ["a", "b", "c", "d"])).toEqual(["a", "b", "c"]);
+    expect(withinChipCap(4, ["a", "b"])).toEqual([]);
+    expect(withinChipCap(3, ["a", "b", "c", "d"])).toEqual(["a"]);
+    expect(withinChipCap(0, ["a", "b", "c", "d"])).toEqual(["a", "b", "c", "d"]);
   });
 
   it("a double-click is one question", () => {

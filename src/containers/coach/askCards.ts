@@ -82,8 +82,12 @@ export function askUngradedHere(): boolean {
   return !!ctx && ctx.screen === "session" && ungradedPlayer(ctx);
 }
 
-/** At most this many chips in Ask at once, card chips and tool chips together (DESIGN: three anywhere). */
-export const MAX_ASK_CHIPS = 3;
+/**
+ * At most this many chips in Ask at once, card chips and tool chips together:
+ * the tools' own cap (`toolChips.ts` `MAX_CHIPS`, t1b1), so a screen without
+ * cards looks as it did and one with them never grows past it (review c2b1a F10).
+ */
+export const MAX_ASK_CHIPS = 4;
 
 /** The tool chips that fit beside `cards` card chips: the cards go first. */
 export function withinChipCap<T>(cards: number, tools: readonly T[]): T[] {
