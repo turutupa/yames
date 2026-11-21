@@ -43,4 +43,11 @@ press as it did before. The send button is excluded (the keyboard stays up after
 ## Status
 
 - [x] cause, fix, spec, unit test; tsc green (`coach-t2f-tsc`)
-- [ ] spec after the fix, vitest, build, layout gates
+- [x] `npm run test` (`coach-t2f-test`): 476 of 477 files, 51183 passed; the one failure is the
+  known `TabStage.render.test.tsx` symlink load
+- [x] `npm run build` (`coach-t2f-build`): green
+- [x] layout (`coach-t2f-layout`): ask-make-phone (2), ask, phone-header, my-exercises green; six
+  desktop `ask-tools` scenes hit the 30 s timeout under load; `ask-tools` re-run alone with
+  `--workers=2` (`coach-t2f-layout-2`): 19 of 19 passed
+
+Review diff: `/tmp/coach-orch/t2f-review.diff` (AskPanel.tsx only).
