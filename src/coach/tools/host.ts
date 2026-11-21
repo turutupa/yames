@@ -42,6 +42,7 @@ import type { PathDoc } from "../../paths/format";
 import type { TodayFocus } from "../../session/focus";
 import type { PlanMinutes, PlanStep, SessionPlan } from "../../session/planner";
 import type { PlayerProgress } from "../../session/progress";
+import type { LoopRefusal } from "../../session/runner";
 import type { SwapChoice, SwapOptions } from "../../session/swap";
 import type { Subdivision } from "../../types";
 
@@ -216,9 +217,18 @@ export type CoachToolHost = {
   /** The Notebook's goal (DESIGN 9.5), when there is a Notebook. */
   goal: () => string | null | NotWired;
   setGoal: (text: string) => HostOutcome;
-  /** The Songs transport's loop (leg c1c). */
-  loopBars: (fromBar: number, toBar: number) => HostOutcome;
+  /**
+   * The Session's loop of bars as printed (leg lb1), without starting it:
+   * the pattern bars and tempo a press would loop, or why it cannot
+   * (`runner.loopAsked`).
+   */
+  loopAsk: (fromBar: number, toBar: number) => LoopAsk | NotWired;
+  /** `sessionRun.actions.startLoop({ fromBar, toBar })`, bars as printed: "done", or why it did not start. */
+  loopBars: (fromBar: number, toBar: number) => HostOutcome | LoopRefusal;
 };
+
+/** What `loopAsk` answers: the loop a press would start, in pattern bars, or the runner's reason. */
+export type LoopAsk = { fromBar: number; toBar: number; bpm: number } | { refused: LoopRefusal };
 
 /**
  * Every member, at runtime. The check below fails to compile when the
@@ -265,6 +275,7 @@ export const HOST_MEMBERS = [
   "setSafeSetting",
   "goal",
   "setGoal",
+  "loopAsk",
   "loopBars",
 ] as const satisfies readonly (keyof CoachToolHost)[];
 
@@ -291,11 +302,10 @@ export const WIRED_IN_T1A1: readonly (keyof CoachToolHost)[] = [
 ];
 
 /**
- * The members the real host still leaves as stubs after t1a2: the Notebook's
- * goal (leg c4a) and a loop of bars named from outside (the Session's loop
- * plays the bar that slipped; no door takes bars).
+ * The members the real host still leaves as stubs: the Notebook's goal (leg
+ * c4a). The loop of bars named from outside has its door since leg lb1.
  */
-export const STILL_NOT_WIRED: readonly (keyof CoachToolHost)[] = ["goal", "setGoal", "loopBars"];
+export const STILL_NOT_WIRED: readonly (keyof CoachToolHost)[] = ["goal", "setGoal"];
 
 const NOT_WIRED = "notWiredYet" as const;
 
@@ -346,6 +356,7 @@ export function notWiredHost(): CoachToolHost {
     setSafeSetting: nothing,
     goal: nothing,
     setGoal: nothing,
+    loopAsk: nothing,
     loopBars: nothing,
   };
 }

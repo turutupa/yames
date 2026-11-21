@@ -3,7 +3,7 @@
  * P1, once more here, and P2, leave it (DESIGN 4.2).
  */
 import { describe, expect, it } from "vitest";
-import type { TakeGrade } from "./grade";
+import { takeBarsOf, type TakeGrade } from "./grade";
 import { planSession } from "./planner";
 import type { LoopStep, SessionPlan } from "./planner";
 import { hasRungAbove, rungAbove, rungBelow } from "./ladder";
@@ -15,8 +15,12 @@ import {
   eventForBigAction,
   eyesOffer,
   leaveNeedsAsking,
+  LOOP_MAX_BARS,
+  loopAsked,
+  loopAt,
   loopBars,
   loopOffer,
+  printedLoopBars,
   runReducer,
   timedTempoAdjustable,
 } from "./runner";
@@ -283,6 +287,86 @@ describe("this one is for your eyes", () => {
     const after = take(eyes, "ungraded", undefined, true);
     expect(after.bpm).toBe(state.bpm);
     expect(loopOffer(after, EX)).toBeNull();
+  });
+});
+
+describe("loopAt: bars the player asked for (leg lb1)", () => {
+  const FOUR = { ...EX, bars: 4 };
+
+  it("builds the loop loopOffer would, for the asked bars: same id, two rungs under, no minutes", () => {
+    const result = take(atFocus(), "belowBar", SLIPPED);
+    const offer = loopOffer(result, EX) as { loop: LoopStep };
+    const asked = loopAt(result, EX, offer.loop.fromBar, offer.loop.toBar);
+    expect(asked).toEqual({ loop: offer.loop });
+    const own = loopAt(result, FOUR, 2, 4) as { loop: LoopStep };
+    expect(own.loop).toMatchObject({ kind: "loop", id: offer.loop.id, fromBar: 2, toBar: 4, minutes: 0, bpm: offer.loop.bpm });
+  });
+
+  it("honours a range past LOOP_MAX_BARS: that limit is the coach's offer, not the player's request", () => {
+    const state = take(atFocus(), "belowBar", SLIPPED);
+    const asked = loopAt(state, FOUR, 1, 4) as { loop: LoopStep };
+    expect(asked.loop.toBar - asked.loop.fromBar + 1).toBeGreaterThan(LOOP_MAX_BARS);
+  });
+
+  it("allows a fresh step with no Take yet, still two rungs under the step's tempo", () => {
+    const fresh = atFocus();
+    expect(fresh.phase).toBe("ready");
+    expect(fresh.takes).toBe(0);
+    const asked = loopAt(fresh, EX, 1, 1) as { loop: LoopStep };
+    expect(asked.loop.bpm).toBe(rungBelow(EX, rungBelow(EX, fresh.bpm)));
+    expect(run(fresh, { type: "loop", loop: asked.loop, now: NOW }).phase).toBe("looping");
+  });
+
+  it.each([
+    ["off an Exercise's screens: idle", () => IDLE, 1, 1, "notHere"],
+    ["during a Take", () => run(atFocus(), { type: "takeStarted", now: NOW }), 1, 1, "notHere"],
+    ["while a loop runs", () => run(atFocus(), { type: "loop", loop: (loopAt(atFocus(), EX, 1, 1) as { loop: LoopStep }).loop, now: NOW }), 1, 1, "notHere"],
+    ["on a warm-up", () => run(IDLE, { type: "start", plan: plan(), now: NOW }), 1, 1, "notHere"],
+    ["bar 0", () => atFocus(), 0, 1, "outsideTune"],
+    ["past the pattern", () => atFocus(), 1, 5, "outsideTune"],
+    ["to before from", () => atFocus(), 3, 2, "backwards"],
+  ] as const)("refuses %s", (_name, state, from, to, why) => {
+    expect(loopAt(state(), FOUR, from, to)).toEqual({ refused: why });
+  });
+
+  it("refuses with no Exercise", () => {
+    expect(loopAt(atFocus(), null, 1, 1)).toEqual({ refused: "notHere" });
+  });
+});
+
+describe("printedLoopBars: bars as the Session prints them", () => {
+  const FOUR = { ...EX, bars: 4 };
+  const takeBars = takeBarsOf(FOUR);
+
+  it("a number up to the pattern's length is the pattern's bar", () => {
+    expect(printedLoopBars(FOUR, 3, 4)).toEqual({ fromBar: 3, toBar: 4 });
+    expect(printedLoopBars(FOUR, 1, 1)).toEqual({ fromBar: 1, toBar: 1 });
+  });
+
+  it("a Take's bar past the pattern folds onto its pattern bar, round by round", () => {
+    expect(takeBars).toBeGreaterThan(8);
+    expect(printedLoopBars(FOUR, 7, 8)).toEqual({ fromBar: 3, toBar: 4 });
+    expect(printedLoopBars(FOUR, 5, 5)).toEqual({ fromBar: 1, toBar: 1 });
+    expect(printedLoopBars(FOUR, takeBars, takeBars)).toEqual({ fromBar: ((takeBars - 1) % 4) + 1, toBar: ((takeBars - 1) % 4) + 1 });
+  });
+
+  it("refuses a range across a round seam rather than guess", () => {
+    expect(printedLoopBars(FOUR, 4, 5)).toEqual({ refused: "acrossRounds" });
+    expect(printedLoopBars(FOUR, 2, 7)).toEqual({ refused: "acrossRounds" });
+    expect(printedLoopBars(FOUR, 3, 6)).toEqual({ refused: "acrossRounds" });
+  });
+
+  it("refuses past the Take's last bar, before bar 1, and backwards", () => {
+    expect(printedLoopBars(FOUR, takeBars + 1, takeBars + 1)).toEqual({ refused: "outsideTune" });
+    expect(printedLoopBars(FOUR, 0, 2)).toEqual({ refused: "outsideTune" });
+    expect(printedLoopBars(FOUR, 4, 3)).toEqual({ refused: "backwards" });
+  });
+
+  it("loopAsked: where the player is first, then the bars, then the loop", () => {
+    const ready = atFocus();
+    expect(loopAsked(IDLE, FOUR, 99, 1)).toEqual({ refused: "notHere" });
+    expect(loopAsked(ready, FOUR, 4, 5)).toEqual({ refused: "acrossRounds" });
+    expect(loopAsked(ready, FOUR, 7, 8)).toEqual(loopAt(ready, FOUR, 3, 4));
   });
 });
 

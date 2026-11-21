@@ -109,6 +109,8 @@ import {
   jumpNeedsAsking,
   eyesOffer,
   leaveNeedsAsking,
+  isLoopBars,
+  loopAsked,
   loopOffer,
   runReducer,
   timedBpm,
@@ -116,7 +118,7 @@ import {
   timedTempoLive,
   tempoNudges,
 } from "../../../session/runner";
-import type { BigAction, LoopHeard, RunState, TakeOutcome, UngradedWhy } from "../../../session/runner";
+import type { BigAction, LoopHeard, LoopRefusal, RunState, TakeOutcome, UngradedWhy } from "../../../session/runner";
 import { spotOf, takeNote } from "../../../coach/takeNote";
 import { pickDirectionMatters } from "../../../session/caveats";
 import { loopHeardOf } from "../../../coach/loopLine";
@@ -1845,12 +1847,23 @@ export function useSessionRun(input: SessionRunInput) {
   /** "Loop the first bar", when the Session offers it (`loopOffer`). */
   const loop = useMemo(() => loopOffer(run, exercise, { notYetTwice }), [run, exercise, notYetTwice]);
 
-  const startLoop = useCallback(() => {
-    if (!loop) return;
-    if (listen.active) listen.stop({ tail: false });
-    autoStart.current = false;
-    dispatch({ type: "loop", loop: loop.loop, now: Date.now() });
-  }, [loop, listen]);
+  /**
+   * With no bars, the Session's own offer (`loop`). With bars as printed
+   * (`loop_bars`, leg lb1), the loop `loopAsked` builds for them, or why not.
+   * Null when a loop started. A click handler's event is not bars.
+   */
+  const startLoop = useCallback(
+    (bars?: { fromBar: number; toBar: number }): LoopRefusal | null => {
+      const asked = isLoopBars(bars) ? loopAsked(run, exercise, bars.fromBar, bars.toBar) : loop;
+      if (!asked) return "notHere";
+      if ("refused" in asked) return asked.refused;
+      if (listen.active) listen.stop({ tail: false });
+      autoStart.current = false;
+      dispatch({ type: "loop", loop: asked.loop, now: Date.now() });
+      return null;
+    },
+    [loop, listen, run, exercise],
+  );
 
   /** "This one is for your eyes": offered on this result (`eyesOffer`). */
   const pickMatters = !!take && take.exercise.grading === "graded" && pickDirectionMatters(take.exercise);

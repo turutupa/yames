@@ -12,8 +12,9 @@
  * focus and swaps, the jams and presets (behind the window's unsaved-work
  * gate), the click, and the safe settings' own setters. Still stubs from
  * `notWiredHost()`, answering "notWiredYet": `goal` / `setGoal` (the
- * Notebook, leg c4a), `loopBars` (no bars door on the loop), and the
- * `coachSuggestions` setting (c4a's stored key).
+ * Notebook, leg c4a) and the `coachSuggestions` setting (c4a's stored key).
+ * `loopAsk` / `loopBars` reach the Session's loop through `startLoop(bars)`
+ * since leg lb1.
  *
  * Review fixes (t1a2b): band volume is read and written as the STORED choice
  * (`bandChoice`, `"auto"` for none, put back as `null`); `sounding(target)`
@@ -35,7 +36,7 @@ import {
 import i18n, { getLanguages } from "../../i18n";
 import { listPresets as listPresetsIpc, storeSave } from "../../ipc";
 import { findExercise } from "../../session/packs";
-import { tempoNudges } from "../../session/runner";
+import { loopAsked, tempoNudges } from "../../session/runner";
 import { THEMES } from "../../themes";
 import type { Preset, Subdivision, VoiceMode } from "../../types";
 import type { MainView } from "../main-window/MainHeader";
@@ -204,6 +205,13 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
       const can = tempoNudges(session().run, session().exercise);
       return { slower: can.slower, faster: can.faster };
     },
+    // The Session's loop of bars as printed (leg lb1): the same check `startLoop(bars)` makes.
+    loopAsk: (fromBar, toBar) => {
+      const asked = loopAsked(session().run, session().exercise, fromBar, toBar);
+      if ("refused" in asked) return { refused: asked.refused };
+      return { fromBar: asked.loop.fromBar, toBar: asked.loop.toBar, bpm: asked.loop.bpm };
+    },
+    loopBars: (fromBar, toBar) => session().actions.startLoop({ fromBar, toBar }) ?? "done",
     findEdge: (pathId, exerciseId) => {
       const { path, step, exercise } = exerciseOf(pathId, exerciseId);
       session().actions.findEdge(path, step, exercise);
