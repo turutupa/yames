@@ -1141,6 +1141,9 @@ export function installShotMock(shot: Shot, theme: string): void {
     store.delete("presets");
   }
   if (shot.instrument) store.set("instrument", shot.instrument);
+  // `?instrument=<id>` (rem2c): any scene with another stored instrument (the reminder's line names it).
+  const urlInstrument = new URLSearchParams(window.location.search).get("instrument");
+  if (urlInstrument) store.set("instrument", urlInstrument);
   // The Tools page names the setlist and the jam last opened (acceptance
   // P2-13): a returning player has opened one of each.
   if (shot.session?.seed === "returning") {
