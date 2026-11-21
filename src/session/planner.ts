@@ -141,6 +141,8 @@ export type ReasonCode =
   | "focusTurn"
   /** The player chose this one Path for today (`focus.ts`). */
   | "focusChosen"
+  /** The player added this exercise of theirs to today (My exercises, t2e). */
+  | "chosenToday"
   | "keepWarm"
   | "reviewDue"
   | "parked"
@@ -283,7 +285,15 @@ export type SessionPlan = {
   focusPathId?: string | null;
   /** Subscribed Paths with nothing today, and why. Today's footer. */
   skipped?: Array<{ pathId: string; why: Reason }>;
+  /**
+   * Exercises the player chose for today (`PlannerInput.chosen`) that did not
+   * fit in the minutes, counted. Absent when every one fit, or none was chosen.
+   */
+  chosenLeftOut?: number;
 };
+
+/** One of the player's own exercises, chosen for today: its one-Step document and the Exercise. */
+export type ChosenExercise = { path: PathDoc; exercise: Exercise };
 
 export type PlannerInput = {
   minutes: PlanMinutes;
@@ -311,6 +321,14 @@ export type PlannerInput = {
    * starts on its first Exercise like any other.
    */
   ungraded?: boolean;
+  /**
+   * The player's own exercises chosen for today ("Add to today" on My
+   * exercises, leg t2e), in the order chosen. Each is a block right after the
+   * warm-up, and the planner's own blocks make room (`withChosen`). The planner
+   * never adds one by itself. Absent or empty: the plan is exactly what it
+   * always was.
+   */
+  chosen?: readonly ChosenExercise[];
 };
 
 /** How many rungs to come down after this long away. */
@@ -942,8 +960,125 @@ function daysSince(at: number | null, now: number): number | null {
  * minutes the last block is a finisher over the band, else a review, else Find
  * my edge. Never more than four graded Exercises, never a block under three
  * minutes, and a Path with nothing today says why in `skipped`.
+ *
+ * Exercises the player chose for today (`chosen`) then go in after the
+ * warm-up (`withChosen`); with none, this is the plan as it always was.
  */
 export function planSession(input: PlannerInput): SessionPlan {
+  const plan = planFromPaths(input);
+  return input.chosen && input.chosen.length > 0 ? withChosen(plan, input, input.chosen) : plan;
+}
+
+/**
+ * A chosen exercise's block: time for two Takes and a breath, as any block
+ * (`MIN_BLOCK_MINUTES`, declared below; a test holds the two equal).
+ */
+export const CHOSEN_MINUTES = 3;
+
+/**
+ * The player's chosen exercises put into a plan (TOOLS 2.4, leg t2e).
+ *
+ * - Each is a block of `CHOSEN_MINUTES`, in the order chosen, right after the
+ *   warm-up slot (first, at five minutes, which has none). The warm-up is never
+ *   touched.
+ * - The total stays the minutes chosen. The planner's own blocks make room
+ *   from the end: the last block goes first, then the one before it, up to
+ *   the lead (the focus block); then the lead shrinks, never under
+ *   `MIN_BLOCK_MINUTES`; only when that is still not enough does the lead go
+ *   too. Minutes freed beyond what the chosen blocks need go back to the lead,
+ *   or, when it went, to the last chosen block.
+ * - A Session still holds at most `MAX_GRADED` graded Exercises: the planner's
+ *   blocks go from the end until the chosen ones fit beside the warm-up slot
+ *   and the lead.
+ * - As many as fit: at most the minutes after the warm-up over
+ *   `CHOSEN_MINUTES`, and at most `MAX_GRADED` less the warm-up slot's and the
+ *   lead's Exercise. Those that do not fit are counted in `chosenLeftOut`, for
+ *   Today to say so; never dropped in silence.
+ * - The tempo is the one `tempoFor` gives any Exercise from its own Takes
+ *   (eased after a break, like the rest); the context says the player chose
+ *   it. A Path's blocks that went say why in `skipped`, as any Path with
+ *   nothing today.
+ */
+function withChosen(plan: SessionPlan, input: PlannerInput, chosenIn: readonly ChosenExercise[]): SessionPlan {
+  const { progress, now } = input;
+  const seen = new Set<string>();
+  const chosen = chosenIn.filter((c) => {
+    const k = key(c);
+    if (seen.has(k) || !c.path.steps[0] || !isGradable(c.exercise)) return false;
+    seen.add(k);
+    return true;
+  });
+  const minutesOf = (list: readonly PlanStep[]) => list.reduce((sum, s) => sum + s.minutes, 0);
+  const gradedOf = (list: readonly PlanStep[]) => list.filter((s) => s.kind === "exercise").length;
+  const empty = plan.steps.length === 0;
+  // The warm-up slot: the first step from ten minutes up (a recap, a benchmark or the click).
+  const warmCount = !empty && plan.minutes >= 10 ? 1 : 0;
+  const warm = plan.steps.slice(0, warmCount);
+  const rest = plan.steps.slice(warmCount);
+  const budget = (empty ? plan.minutes : minutesOf(plan.steps)) - minutesOf(warm);
+  const leadAt = Math.max(0, rest.findIndex((s) => s.id === "focus"));
+  const lead = rest[leadAt];
+  const leadGraded = lead && lead.kind === "exercise" ? 1 : 0;
+  const fit = Math.max(
+    0,
+    Math.min(chosen.length, Math.floor(budget / CHOSEN_MINUTES), MAX_GRADED - gradedOf(warm) - leadGraded),
+  );
+  const leftOut = chosen.length - fit;
+  if (fit === 0) return leftOut > 0 ? { ...plan, chosenLeftOut: leftOut } : plan;
+
+  const need = fit * CHOSEN_MINUTES;
+  let freed = empty ? budget : 0;
+  // The planner's blocks after the lead's, then before it, from the end.
+  const dropped = new Set<number>();
+  const keptGraded = () => gradedOf(rest.filter((_, i) => !dropped.has(i)));
+  for (let i = rest.length - 1; i >= 0; i -= 1) {
+    if (i === leadAt) continue;
+    if (freed >= need && keptGraded() + gradedOf(warm) + fit <= MAX_GRADED) break;
+    dropped.add(i);
+    freed += rest[i].minutes;
+  }
+  let leadMinutes = lead && !dropped.has(leadAt) ? lead.minutes : 0;
+  if (lead && freed < need) {
+    const give = Math.max(0, leadMinutes - MIN_BLOCK_MINUTES);
+    if (freed + give >= need) {
+      leadMinutes -= need - freed;
+      freed = need;
+    } else {
+      dropped.add(leadAt);
+      freed += leadMinutes;
+      leadMinutes = 0;
+    }
+  }
+  const extra = freed - need;
+  const leadKept = lead !== undefined && !dropped.has(leadAt);
+  if (leadKept) leadMinutes += extra;
+
+  const daysAway = plan.daysAway ?? 0;
+  const drop = plan.mood === "back" ? rungsToDrop(daysAway) : 0;
+  const parts: PlanStep[] = chosen.slice(0, fit).map((c, i) => {
+    const pick: Pick = { path: c.path, step: c.path.steps[0], exercise: c.exercise };
+    const base = tempoFor(c.path, c.exercise, progress);
+    const tempo = drop > 0 ? eased(pick, base, drop, daysAway, progress) : base;
+    const mins = CHOSEN_MINUTES + (!leadKept && i === fit - 1 ? extra : 0);
+    const step = exerciseStep(pick, `mine-${i + 1}`, "next", tempo, mins, progress);
+    return { ...step, context: { code: "chosenToday", values: {} } };
+  });
+  const kept = rest.flatMap((s, i) =>
+    dropped.has(i) ? [] : i === leadAt && s.minutes !== leadMinutes ? [{ ...s, minutes: leadMinutes }] : [s],
+  );
+  const steps = [...warm, ...parts, ...kept];
+  const paths = input.paths.filter((path) => path.steps.some((s) => s.exercises.some(isGradable)));
+  const focusHere = steps.some((s) => "pathId" in s && s.pathId === plan.focusPathId);
+  return {
+    ...plan,
+    steps,
+    focusPathId: focusHere ? plan.focusPathId : null,
+    skipped: skippedOf(paths, steps, progress, now),
+    ...(leftOut > 0 ? { chosenLeftOut: leftOut } : {}),
+  };
+}
+
+function planFromPaths(input: PlannerInput): SessionPlan {
   const { minutes, now, progress } = input;
   const paths = input.paths.filter((path) => path.steps.some((s) => s.exercises.some(isGradable)));
   const lastTake = progress.takes[0];

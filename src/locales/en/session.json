@@ -120,8 +120,13 @@
         "yourTurn": "Your turn · not checked",
         "finisher": "Finisher · not graded",
         "jam": "Jam · not graded",
-        "drill": "Tempo ramp"
+        "drill": "Tempo ramp",
+        "mine": "Your exercise"
       },
+      "chosenLeftOut": "{{count}} exercise you added didn't fit in {{minutes}} minutes. Choose more minutes, or take one off in My exercises.",
+      "chosenLeftOut_other": "{{count}} exercises you added didn't fit in {{minutes}} minutes. Choose more minutes, or take one off in My exercises.",
+      "chosenUnbuilt": "{{count}} exercise you added for today can't be built any more, so it's left out.",
+      "chosenUnbuilt_other": "{{count}} exercises you added for today can't be built any more, so they're left out.",
       "reason": {
         "firstEver": "Your first one. Sit right on the click; speed comes later.",
         "newExercise": "New to you. Take it slow and keep it clean.",
@@ -155,7 +160,8 @@
         "keepWarmYesterday": "Keeping it warm, last played yesterday.",
         "keepWarmToday": "Keeping it warm, played earlier today.",
         "keepWarmNew": "A first taste.",
-        "focusChosen": "Only this Path today, as you chose."
+        "focusChosen": "Only this Path today, as you chose.",
+        "chosenToday": "You added it for today."
       },
       "from": "{{path}} · {{level}} · Step {{step}}",
       "fromNoLevel": "{{path}} · Step {{step}}",
@@ -265,6 +271,7 @@
       "newFromSibling": "New. It starts at {{bpm}} BPM, about 80% of your clean {{clean}} BPM on {{sibling}}.",
       "newFromSiblingNoClean": "New. It starts at {{bpm}} BPM, worked out from your Takes on {{sibling}}.",
       "focusChosen": "You chose {{path}} for today, so the whole Session comes from it.",
+      "chosenToday": "One of your own exercises, added to today's Session by you.",
       "playedUngraded": "Where you left it: {{bpm}} BPM."
     },
     "bar": {
@@ -470,7 +477,15 @@
       "undoFull": "My exercises is full (50), so Undo can't put this one back.",
       "undoAlready": "That one is already back on My exercises.",
       "cantBuild":"This one can't be built any more: this version of Yames no longer makes it. It stays here until you remove it.",
-      "howTo": "Play it as written, with the click."
+      "howTo": "Play it as written, with the click.",
+      "addToday": "Add to today",
+      "addTodayLabel": "Add {{what}} to today's Session",
+      "takeOffToday": "Take off today",
+      "takeOffTodayLabel": "Take {{what}} off today's Session",
+      "inToday": "In today's Session",
+      "addedToday": "Added to today's Session, after the warm-up.",
+      "takenOffToday": "Taken off today's Session.",
+      "todayFull": "Today already holds {{count}} of your exercises. Take one off first."
     },
     "paths": {
       "title": "Paths",
