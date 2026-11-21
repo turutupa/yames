@@ -1,6 +1,7 @@
 /**
  * The coach's proactive card on Progress (DESIGN 6.2, 6.3, 6.6; mock 10):
- * the weekly look-back, or, alone, the plateau question. First on the page,
+ * a milestone of the last Session (`coach/milestones.ts`, c4b3), the weekly
+ * look-back, or, alone, the plateau question. First on the page,
  * one per app run (`coach/cardBudget.ts`), never in a Session, the wizard or
  * Settings (Progress is none of them).
  *
@@ -304,7 +305,10 @@ export function CompanionCard({ session }: { session: SessionRun }) {
   // A graded look-back waits for the long view (M4): until it answers, what
   // moved is not known, and a card that says it would flash and change.
   const weekReady = look !== null && !look.needsSpans;
-  const shown = card !== null && hiding !== "done" && (card.kind === "weekly" ? weekReady : companion.plateau !== null);
+  const shown =
+    card !== null &&
+    hiding !== "done" &&
+    (card.kind === "weekly" ? weekReady : card.kind === "milestone" ? companion.milestone !== null : companion.plateau !== null);
   useEffect(() => {
     if (shown) markCompanionSeen();
   }, [shown]);
@@ -364,6 +368,28 @@ export function CompanionCard({ session }: { session: SessionRun }) {
           </button>
         </div>
         <WeekBody look={look} session={session} showPlateau={plateauMayShow} />
+      </section>
+    );
+  }
+  if (card.kind === "milestone" && companion.milestone && companion.milestone.key === card.key) {
+    const m = companion.milestone;
+    return (
+      <section className="coach-note companion-card" data-testid="companion-milestone-card" aria-label={t("companion.milestone.label")}>
+        <div className="companion-head">
+          <CoachGlyph size={17} />
+          <span className="companion-kick">{t("companion.milestone.kick", { date: day(m.at) })}</span>
+          <button type="button" className="companion-hide" onClick={hide} data-testid="companion-hide">
+            {t("companion.hide")}
+          </button>
+        </div>
+        <p className="companion-say" data-testid="companion-milestone-line">
+          {t(`companion.milestone.${m.line.key}`, m.line.values)}
+        </p>
+        {m.payoff && (
+          <p className="companion-goal" data-testid="companion-milestone-payoff">
+            {t("companion.milestone.payoff", { payoff: m.payoff })}
+          </p>
+        )}
       </section>
     );
   }

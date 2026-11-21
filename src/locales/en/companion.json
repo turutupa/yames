@@ -46,6 +46,18 @@
       "another": "Try it another way",
       "rest": "Rest it till {{day}}",
       "rested": "It rests till {{day}}, as the plan already has it. Nothing changed."
+    },
+    "milestone": {
+      "label": "A milestone, from the coach",
+      "kick": "From your Session on {{date}}",
+      "firstPassed": "{{exercise}}: clean at {{bpm}} BPM, at or over its pass mark of {{passAt}}. That is your first Exercise passed.",
+      "stepDone": "{{step}}: {{passed}} of {{count}} Exercises passed, enough to finish the Step. Next on the Path: {{next}}.",
+      "stepDoneRest": "{{step}}: {{passed}} of {{count}} Exercises passed, enough to finish the Step. Next on the Path: {{next}}. The others stay in your reviews until they pass.",
+      "stepDoneLast": "{{step}}: {{passed}} of {{count}} Exercises passed, enough to finish the Step.",
+      "levelDone": "{{level}} on {{path}} is finished: every Step in it is done.",
+      "pathDone": "{{path}} is finished: every Step in it is done.",
+      "benchmark": "Benchmark: {{exercise}}, the same Take at {{bpm}} BPM: {{from}}% even on day {{fromDay}}, {{to}}% on day {{toDay}}.",
+      "payoff": "The Path says: “{{payoff}}”"
     }
   }
 }
