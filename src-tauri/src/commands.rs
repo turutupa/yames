@@ -262,11 +262,20 @@ pub fn set_subdivision(
     persist_state(&state, &app_handle);
 }
 
+/// `is_playing = true`, with a hear-back cut first (c5b1, [`cut_hear_back`]).
+/// The caller holds the state's lock, as `hear_take` does when it hands a bar
+/// over, so the two cannot interleave.
+fn raise_transport(s: &mut crate::state::AppState, heard: &HeardTakeState, handoff: &crate::take::TakeHandoff) {
+    cut_hear_back(heard, handoff);
+    s.is_playing = true;
+}
+
 #[tauri::command]
 pub fn toggle_playback(
     state: State<SharedState>,
     engine_state: State<EngineState>,
     tempo_ctx: State<SharedTempoContext>,
+    heard: State<HeardTakeState>,
     app_handle: AppHandle,
 ) {
     let is_playing = {
@@ -294,7 +303,7 @@ pub fn toggle_playback(
             // context itself. Writing here afterwards would overwrite that
             // correction with a stale `true`, which is precisely the "Stop
             // over silence" this whole change exists to kill.
-            state.lock().unwrap().is_playing = true;
+            raise_transport(&mut state.lock().unwrap(), &heard, &engine.take_handoff());
             tempo_ctx.set_playing(true);
             if let Err(e) = engine.start(state.inner().clone(), app_handle.clone()) {
                 eprintln!("[yames] play failed: {e}");
@@ -313,13 +322,14 @@ pub fn set_playing(
     state: State<SharedState>,
     engine_state: State<EngineState>,
     tempo_ctx: State<SharedTempoContext>,
+    heard: State<HeardTakeState>,
     app_handle: AppHandle,
 ) {
     {
         let mut engine = engine_state.0.lock().unwrap();
         if playing && !engine.is_running() {
             // Written before the start, never after — see `toggle_playback`.
-            state.lock().unwrap().is_playing = true;
+            raise_transport(&mut state.lock().unwrap(), &heard, &engine.take_handoff());
             // D2 — mirror into tempo context so the onset detector gates on
             // the live playing state.
             tempo_ctx.set_playing(true);
@@ -725,8 +735,10 @@ pub fn start_speed_ramp(
     state: State<SharedState>,
     engine_state: State<EngineState>,
     tempo_ctx: State<SharedTempoContext>,
+    heard: State<HeardTakeState>,
     app_handle: AppHandle,
 ) {
+    let handoff = engine_state.0.lock().unwrap().take_handoff();
     {
         let mut s = state.lock().unwrap();
         s.speed_ramp.active = true;
@@ -748,7 +760,7 @@ pub fn start_speed_ramp(
             beats: s.speed_ramp.warmup_beats,
             done: 0,
         };
-        s.is_playing = true;
+        raise_transport(&mut s, &heard, &handoff);
         // Don't touch s.bpm — ramp uses its own current_bpm
     }
     // D2 — gate onset analysis on the running state. Both this and
@@ -773,8 +785,10 @@ pub fn start_speed_ramp_from(
     state: State<SharedState>,
     engine_state: State<EngineState>,
     tempo_ctx: State<SharedTempoContext>,
+    heard: State<HeardTakeState>,
     app_handle: AppHandle,
 ) {
+    let handoff = engine_state.0.lock().unwrap().take_handoff();
     {
         let mut s = state.lock().unwrap();
         s.speed_ramp.active = true;
@@ -801,7 +815,7 @@ pub fn start_speed_ramp_from(
             beats: s.speed_ramp.warmup_beats,
             done: 0,
         };
-        s.is_playing = true;
+        raise_transport(&mut s, &heard, &handoff);
         // Don't touch s.bpm — ramp uses its own current_bpm
     }
     // D2 — gate onset analysis on the running state. Written before the
@@ -1663,11 +1677,15 @@ pub async fn stop_evaluation(
     session_acc: State<'_, SharedSessionAccumulator>,
     state: State<'_, SharedState>,
     harmony: State<'_, crate::harmony::worker::SharedHarmony>,
+    heard: State<'_, HeardTakeState>,
     app_handle: AppHandle,
 ) -> Result<(), String> {
     let mut slow = SlowInputCall::new("stop_evaluation");
     let _turn = EVALUATION_TURN.lock().await;
     slow.got_turn();
+    // The input stops: the last heard Take's audio goes with it (c5b1).
+    // Before the guard below, so a second stop empties it too.
+    heard.0.forget();
     // The free-play worker reads this input: it ends with it (not waited
     // for), and the page is told, so a device change can start it again.
     // It says nothing once ended, so this `null` is the last word.
@@ -5463,6 +5481,81 @@ pub fn stop_take_playback(engine_state: State<EngineState>) -> Result<(), String
 }
 
 // ---------------------------------------------------------------------------
+// "Hear bar N": the last heard Take, played back a bar at a time (c5b1,
+// src-tauri/src/take_audio.rs)
+// ---------------------------------------------------------------------------
+
+/// The last heard Take's slot, managed beside the timing analyzer (which
+/// fills it) so a Start can cut a hear-back without waiting on the analyzer's
+/// lock.
+pub struct HeardTakeState(pub crate::take_audio::SharedHeardTake);
+
+/// A Start always wins over a hear-back: called by every door that raises the
+/// transport, with the app state's lock held and BEFORE `is_playing` rises,
+/// because the take branch runs ahead of the click and would silence it. One
+/// atomic swap when no hear-back is in the take slot; a jam's listen-back is
+/// left as it was.
+fn cut_hear_back(heard: &HeardTakeState, handoff: &crate::take::TakeHandoff) {
+    heard.0.cut(handoff);
+}
+
+/// Play bars `from_bar..=to_bar` (1-based, after the count-in) of the Take
+/// whose grade carried `serial`, through the jam's listen-back path, with a
+/// short margin either side. Refused unless that Take's audio is held, while
+/// the transport runs, and while a jam take records. The copy is made here;
+/// the held audio is not touched.
+#[tauri::command]
+pub fn hear_take(
+    serial: u64,
+    from_bar: u32,
+    to_bar: u32,
+    state: State<SharedState>,
+    engine_state: State<EngineState>,
+    take_state: State<TakeState>,
+    heard: State<HeardTakeState>,
+) -> Result<crate::take_audio::HearBack, String> {
+    {
+        let session = take_state.0.lock().unwrap_or_else(|e| e.into_inner());
+        if session.is_recording() {
+            return Err("stop recording before hearing a bar back".into());
+        }
+    }
+    let slice = heard.0.slice(serial, from_bar, to_bar).map_err(|e| e.to_string())?;
+    let handoff = engine_state.0.lock().unwrap().take_handoff();
+    // Under the state's lock: a Start cuts under it too, so it either came
+    // first (refused here) or comes after the generation is recorded.
+    let s = state.lock().unwrap();
+    if s.is_playing {
+        return Err("stop the click before hearing a bar back".into());
+    }
+    heard.0.start(&handoff, slice)
+}
+
+/// Stop the hear-back `generation` names. Any other playback (a later
+/// hear-back, a jam's take) is left playing.
+#[tauri::command]
+pub fn stop_hear_take(
+    generation: u64,
+    engine_state: State<EngineState>,
+    heard: State<HeardTakeState>,
+) -> bool {
+    let handoff = engine_state.0.lock().unwrap().take_handoff();
+    heard.0.stop(&handoff, generation)
+}
+
+/// Whether the Take whose grade carried `serial` is held, and how many bars.
+#[tauri::command]
+pub fn heard_take(serial: u64, heard: State<HeardTakeState>) -> crate::take_audio::HeldTake {
+    heard.0.held(serial)
+}
+
+/// Let the last heard Take's audio go now.
+#[tauri::command]
+pub fn forget_heard_take(heard: State<HeardTakeState>) {
+    heard.0.forget();
+}
+
+// ---------------------------------------------------------------------------
 // W19 — the download is caught (`plans/SONGS.md` S0.9)
 //
 // The Downloads folder is listed while Songs is the open mode, and a Guitar
@@ -6418,6 +6511,51 @@ mod evaluation_turn_tests {
         drop(held);
         rx.recv_timeout(std::time::Duration::from_secs(5)).expect("and went once it was free");
         waiter.join().unwrap();
+    }
+}
+
+#[cfg(test)]
+mod hear_take_tests {
+    use super::*;
+    use crate::take_audio::{CapturedAudio, HeardTake, HeardTakeSlot};
+    use std::sync::Arc;
+
+    fn held_take(heard: &HeardTakeState) {
+        let audio = CapturedAudio { samples: vec![0.1; 10_000], rate: 1000, first_ns: 0, detection_delay_ns: 0 };
+        let bars: Vec<(f64, f64)> = (0..4).map(|k| (2000.0 + k as f64 * 2000.0, 4000.0 + k as f64 * 2000.0)).collect();
+        assert!(heard.0.keep(HeardTake::new(1, audio, 0.0, &bars), heard.0.epoch()));
+    }
+
+    /// c5b1: every door that raises the transport takes a hear-back out of
+    /// the take slot first, played out or not, and the flag rises after it.
+    #[test]
+    fn a_start_cuts_a_hear_back_before_the_transport_rises() {
+        let heard = HeardTakeState(HeardTakeSlot::new());
+        held_take(&heard);
+        let handoff = crate::take::TakeHandoff::new();
+        let mut s = crate::state::AppState::default();
+        s.is_playing = false;
+        heard.0.start(&handoff, heard.0.slice(1, 1, 1).unwrap()).unwrap();
+        assert!(handoff.is_playing_back());
+        raise_transport(&mut s, &heard, &handoff);
+        assert!(s.is_playing);
+        assert!(!handoff.is_playing_back(), "the bar would have silenced the click");
+        // and with nothing in the slot it only raises the flag
+        let mut s = crate::state::AppState::default();
+        raise_transport(&mut s, &heard, &handoff);
+        assert!(s.is_playing);
+    }
+
+    /// The jam's own listen-back is left as it is today: a Start does not
+    /// take it out of the slot.
+    #[test]
+    fn a_start_leaves_the_jams_listen_back_as_it_was() {
+        let heard = HeardTakeState(HeardTakeSlot::new());
+        let handoff = crate::take::TakeHandoff::new();
+        handoff.set_play(Some(crate::take::TakePlayback { pcm: Arc::new(vec![0.0; 8]), sample_rate: 48_000 }));
+        let mut s = crate::state::AppState::default();
+        raise_transport(&mut s, &heard, &handoff);
+        assert!(handoff.is_playing_back());
     }
 }
 

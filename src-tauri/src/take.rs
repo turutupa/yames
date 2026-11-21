@@ -542,6 +542,28 @@ impl TakeHandoff {
         generation
     }
 
+    /// `set_play(None)`, but only while the playback in the slot is still the
+    /// one `generation` named: a hear-back (`take_audio::HeardTakeSlot`) stops
+    /// its own playback and never a jam's listen-back that replaced it. The
+    /// same three steps as `set_play`, under the same lock, so the callback
+    /// sees exactly what a `set_play(None)` shows it. Command thread only.
+    /// `true` when it cleared the slot.
+    pub fn clear_play_if(&self, generation: u64) -> bool {
+        self.drain_retired();
+        let cleared = self.play.lock().ok().is_some_and(|mut slot| {
+            if self.play_generation.load(Ordering::Acquire) != generation {
+                return false;
+            }
+            self.bump_play_generation();
+            self.write_play(&mut slot, None);
+            self.clear_play_endings();
+            true
+        });
+        #[cfg(target_os = "android")]
+        crate::output_park::wake();
+        cleared
+    }
+
     /// `set_play`'s three steps, apart so a test can interleave the other
     /// threads between them. Called with the slot's lock held.
     fn bump_play_generation(&self) {
@@ -3525,6 +3547,24 @@ mod tests {
         assert_ne!(second, first, "two playbacks share a generation");
         let stopped = handoff.set_play(None).expect("a generation");
         assert_ne!(stopped, second, "a stop did not move the generation");
+    }
+
+    /// c5b1: a hear-back stops only its own playback. One that a jam's
+    /// listen-back has replaced is left playing; its own is cleared the way
+    /// `set_play(None)` clears it, and the callback is handed `None`.
+    #[test]
+    fn clear_play_if_clears_only_the_playback_it_names() {
+        let handoff = TakeHandoff::new();
+        let mut seen = 0u64;
+        let heard = handoff.set_play(Some(a_playback(10))).unwrap();
+        let jam = handoff.set_play(Some(a_playback(10))).unwrap();
+        assert!(!handoff.clear_play_if(heard), "a stale generation cleared the jam's take");
+        assert!(handoff.is_playing_back());
+        assert_eq!(handoff.play_generation(), jam);
+        assert!(handoff.clear_play_if(jam));
+        assert!(!handoff.is_playing_back());
+        assert!(handoff.poll_play(&mut seen).expect("a change").is_none());
+        assert!(!handoff.clear_play_if(jam), "cleared twice");
     }
 
     /// Card #14, item 1. The old take runs off its end in the same instant

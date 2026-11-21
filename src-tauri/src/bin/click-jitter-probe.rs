@@ -69,6 +69,9 @@
 //!                        change and the tempo step — the seam every few
 //!                        seconds for the length of the run
 //!   --song-take          --song, and record a take of it
+//!   --hear-take          stop, hear two bars of a fake Take back through the
+//!                        take slot, start again (cutting it half the time),
+//!                        for the whole run; measured over the click's spans
 //! ```
 //!
 //! Exit codes: 0 pass, 1 gate failure, 2 setup/usage error.
@@ -122,6 +125,7 @@ use yames_lib::probe::{
     MelodicBank, MetronomeEngine, SongBacking, SongBar, SongNote, SongRange, SongRole, SongSounds,
     SynthPlayer, SynthRing,
     SongTempo, SongTrack, SongTransport, TakeRing, TakeSession, TakeStart,
+    CapturedAudio, HeardTake, HeardTakeSlot,
 };
 
 // ---------------------------------------------------------------------------
@@ -297,6 +301,10 @@ struct Args {
     /// ring fed with strummed chords in real time.
     harmony: bool,
     capture: bool,
+    /// `--hear-take` (c5b1): stop, hear two bars of a fake Take back through
+    /// the take slot, start again (cutting it half the time), for the whole
+    /// run. See `run_hear_takes`.
+    hear_take: bool,
     /// Whether the tempo / resolution came from the command line, so `--jam`
     /// can supply its own 240 BPM sixteenths without overruling a run that
     /// asked for something else.
@@ -330,6 +338,7 @@ impl Default for Args {
             late_pass: false,
             harmony: false,
             capture: false,
+            hear_take: false,
             jam_voice: None,
             bpm_set: false,
             subdivision_set: false,
@@ -450,6 +459,10 @@ fn parse_args() -> Result<Args, String> {
             }
             "--capture" => {
                 a.capture = true;
+                consumed = 1;
+            }
+            "--hear-take" => {
+                a.hear_take = true;
                 consumed = 1;
             }
             "-h" | "--help" => return Err("help".into()),
@@ -578,6 +591,15 @@ click-jitter-probe — ROADMAP §4 audio-safety gate
   --song-take        --song, and record a take of it. `take.rs` does not
                      know whether it is recording a band or a song, and
                      this is the flag that checks that
+  --hear-take        \"Hear bar N\" (c5b1): a fake 40 s Take at 44.1 kHz in
+                     the last-heard slot, then for the whole run: the click
+                     (or song) for 3 s, a stop, two bars of the Take handed
+                     to the take slot as `hear_take` does it, played out or
+                     cut by a Start half-way, alternately, and the click
+                     again. Jitter and missed beats are measured over the
+                     click's spans only (a hear-back records no callback
+                     sample); allocations, frees and dropped notifications
+                     over everything. Combines with --song-loop --song-take
 
 exit 0 = pass, 1 = gate failure, 2 = setup error";
 
@@ -622,6 +644,7 @@ fn analyse(
     overflow: usize,
     window_start_ns: u64,
     tick_interval_s: f64,
+    click_spans: bool,
 ) -> Result<Report, String> {
     let w: Vec<CallbackSample> = all
         .iter()
@@ -640,8 +663,21 @@ fn analyse(
     let mut max_gap_ms = 0.0f64;
     let mut dropouts = 0usize;
 
+    // `--hear-take`: the transport stops and starts again every few seconds,
+    // and only a buffer the click (or song) plays records a sample — a stopped
+    // or hear-back buffer returns before the probe's stamp, and the engine's
+    // sample counter starts again from nought at every Start. So the run is
+    // cut into spans where the counter goes back, every pair of callbacks is
+    // taken inside one span only, and missed beats are counted span by span:
+    // the time the DAC had no fresh samples while the click was meant to be
+    // sounding. The stopped gaps between spans are not dropouts.
+    let span_breaks = |a: &CallbackSample, b: &CallbackSample| click_spans && b.sample_pos <= a.sample_pos;
+
     for pair in w.windows(2) {
         let (a, b) = (pair[0], pair[1]);
+        if span_breaks(&a, &b) {
+            continue;
+        }
         let delta_ms = (b.entry_ns.saturating_sub(a.entry_ns)) as f64 / 1e6;
         // The device drains the buffer `a` just filled at exactly
         // frames/sample_rate, so that is when `b` is due.
@@ -656,15 +692,30 @@ fn analyse(
     }
     abs_jitter_ms.sort_by(|x, y| x.partial_cmp(y).unwrap());
 
-    let first = w[0];
-    let last = w[w.len() - 1];
-    let wall_s = (last.entry_ns - first.entry_ns) as f64 / 1e9;
-    let audio_s = (last.sample_pos.saturating_sub(first.sample_pos)) as f64 / sr;
+    // One span for the standing modes; one per Start for `--hear-take`.
+    let mut spans: Vec<(CallbackSample, CallbackSample)> = Vec::new();
+    let mut open = w[0];
+    for pair in w.windows(2) {
+        if span_breaks(&pair[0], &pair[1]) {
+            spans.push((open, pair[0]));
+            open = pair[1];
+        }
+    }
+    spans.push((open, w[w.len() - 1]));
+    let mut wall_s = 0.0;
+    let mut audio_s = 0.0;
+    let mut missed_beats = 0u64;
+    for (first, last) in &spans {
+        let wall = (last.entry_ns - first.entry_ns) as f64 / 1e9;
+        let audio = (last.sample_pos.saturating_sub(first.sample_pos)) as f64 / sr;
+        wall_s += wall;
+        audio_s += audio;
+        // Time the DAC had no fresh samples, in ticks. Negative (audio clock
+        // running fast) floors at zero.
+        missed_beats += (((wall - audio) / tick_interval_s).floor()).max(0.0) as u64;
+    }
     let ticks_rendered: u64 = w.iter().map(|s| s.ticks as u64).sum();
     let ticks_expected = wall_s / tick_interval_s;
-    // Time the DAC had no fresh samples, in ticks. Negative (audio clock
-    // running fast) floors at zero.
-    let missed_beats = (((wall_s - audio_s) / tick_interval_s).floor()).max(0.0) as u64;
 
     let mut frames: Vec<u32> = w.iter().map(|s| s.frames).collect();
     frames.sort_unstable();
@@ -2064,10 +2115,82 @@ fn main() -> ExitCode {
         None
     };
 
+    // `--hear-take`: the last heard Take, filled before the run.
+    let heard = args.hear_take.then(fake_heard_take);
+
     std::thread::sleep(Duration::from_millis(args.warmup_ms));
     let window_start_ns = yames_lib::probe::now_ns();
     window_open_ns.store(window_start_ns.max(1), Ordering::Release);
-    std::thread::sleep(Duration::from_secs(args.seconds));
+    let hear_summary = match heard {
+        None => {
+            std::thread::sleep(Duration::from_secs(args.seconds));
+            None
+        }
+        Some(heard) => {
+            // The hear-back loop, here on the main thread because it is the
+            // one that owns the engine's start and stop, as a command does.
+            let handoff = engine.take_handoff();
+            let end = std::time::Instant::now() + Duration::from_secs(args.seconds);
+            let left = || end.saturating_duration_since(std::time::Instant::now());
+            let mut h = HearSummary { held_bytes: heard.held_bytes(), ..HearSummary::default() };
+            let mut k = 0u32;
+            loop {
+                // The click, for three seconds.
+                std::thread::sleep(left().min(Duration::from_secs(3)));
+                if left().is_zero() {
+                    break;
+                }
+                // Stop, as `set_playing(false)` does.
+                engine.stop();
+                state.lock().unwrap().is_playing = false;
+                std::thread::sleep(left().min(Duration::from_millis(100)));
+                // Two bars handed in, as `hear_take` does it: the copy first,
+                // then the hand-over under the state's lock.
+                let from = 1 + (2 * k) % (FAKE_TAKE_BARS - 1);
+                let started = match heard.slice(1, from, from + 1) {
+                    Ok(slice) => {
+                        let s = state.lock().unwrap();
+                        if s.is_playing {
+                            None
+                        } else {
+                            heard.start(&handoff, slice).ok()
+                        }
+                    }
+                    Err(_) => None,
+                };
+                match started {
+                    // Played out (and left in the slot finished, as the
+                    // screen would leave it), or cut half-way by the Start.
+                    Some(back) if k % 2 == 0 => {
+                        std::thread::sleep(left().min(Duration::from_millis(back.length_ms + 250)));
+                        h.played_out += 1;
+                    }
+                    Some(back) => {
+                        std::thread::sleep(left().min(Duration::from_millis(back.length_ms / 2)));
+                        h.cut_by_start += 1;
+                    }
+                    None => h.refused += 1,
+                }
+                // A Start, as `set_playing(true)` does it: the hear-back out
+                // of the take slot first, under the state's lock, then the
+                // transport.
+                {
+                    let mut s = state.lock().unwrap();
+                    heard.cut(&handoff);
+                    s.is_playing = true;
+                }
+                if let Err(e) = engine.start_headless(state.clone()) {
+                    eprintln!("error: the click did not start again after a hear-back: {e}");
+                    return ExitCode::from(2);
+                }
+                k += 1;
+                if left().is_zero() {
+                    break;
+                }
+            }
+            Some(h)
+        }
+    };
 
     // The take stops BEFORE the engine, so the writer's last drain is of a
     // ring the callback is still alive to have filled.
@@ -2195,6 +2318,7 @@ fn main() -> ExitCode {
         overflow,
         window_start_ns,
         tick_interval_s,
+        args.hear_take,
     ) {
         Ok(r) => r,
         Err(e) => {
@@ -2273,9 +2397,22 @@ fn main() -> ExitCode {
     if args.capture {
         mode.push_str(" + --capture");
     }
+    if args.hear_take {
+        mode.push_str(" + --hear-take");
+    }
 
     println!("\n=== click-jitter-probe ===");
     println!("mode              {mode}");
+    if let Some(h) = &hear_summary {
+        println!(
+            "hear-backs        {} played out, {} cut by a Start, {} refused; {} click spans; the held Take {} bytes",
+            h.played_out,
+            h.cut_by_start,
+            h.refused,
+            h.played_out + h.cut_by_start + 1,
+            h.held_bytes
+        );
+    }
     if let Some((takes, played, asked)) = &capture_summary {
         println!("capture           {takes} Takes written, {played} of {asked} chirps played and stamped");
     }
@@ -2482,6 +2619,43 @@ fn start_harmony(stop: Arc<AtomicBool>) -> (std::thread::JoinHandle<(u64, u64)>,
 /// bent, some with vibrato) graded over and over by `timing::late_grade`, the
 /// function the `yames-take-notes` thread runs, on a thread demoted the same
 /// way. Returns the thread, the passes done and their total milliseconds.
+// ---------------------------------------------------------------------------
+// `--hear-take` (c5b1)
+// ---------------------------------------------------------------------------
+
+/// Complete bars in the fake Take: 40 s at 120 BPM in 4/4 after a one-bar
+/// count-in.
+const FAKE_TAKE_BARS: u32 = 19;
+
+#[derive(Default)]
+struct HearSummary {
+    played_out: u64,
+    cut_by_start: u64,
+    refused: u64,
+    held_bytes: usize,
+}
+
+/// The last heard Take, as the pitch pass leaves it: 40 s at 44.1 kHz (so the
+/// callback resamples it, as it would a Take heard through another device's
+/// rate), a quiet pluck on every beat, the bars two seconds long from 2 s.
+fn fake_heard_take() -> Arc<HeardTakeSlot> {
+    let rate = 44_100u32;
+    let samples: Vec<f32> = (0..rate as usize * 40)
+        .map(|i| {
+            let t = i as f32 / rate as f32;
+            let since_beat = t % 0.5;
+            0.1 * (-since_beat * 8.0).exp() * (std::f32::consts::TAU * 196.0 * t).sin()
+        })
+        .collect();
+    let bars: Vec<(f64, f64)> = (0..FAKE_TAKE_BARS)
+        .map(|k| (2000.0 + k as f64 * 2000.0, 4000.0 + k as f64 * 2000.0))
+        .collect();
+    let slot = HeardTakeSlot::new();
+    let take = HeardTake::new(1, CapturedAudio { samples, rate, first_ns: 0, detection_delay_ns: 0 }, 0.0, &bars);
+    slot.keep(take, slot.epoch());
+    slot
+}
+
 fn start_late_pass(stop: Arc<AtomicBool>) -> (std::thread::JoinHandle<()>, Arc<AtomicU64>, Arc<AtomicU64>) {
     use yames_lib::instrument::Instrument;
     use yames_lib::pitch::ScoreNote;

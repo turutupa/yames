@@ -10,7 +10,7 @@
  */
 import { vi } from "vitest";
 import type { AppState } from "../types";
-import type { CleanTempoSpanRow, CoachAskOutcome } from "../ipc";
+import type { CleanTempoSpanRow, CoachAskOutcome, HeldTake } from "../ipc";
 
 // Default app state for tests. Override in individual tests via setInvokeResponse.
 export const DEFAULT_TEST_STATE: AppState = {
@@ -206,6 +206,15 @@ const DEFAULT_INVOKE_MAP: Record<string, InvokeFn> = {
     standardRecommended: true,
     brainUpdateRecommended: false,
   }),
+
+  // "Hear bar N" (c5b1). Nothing held by default, as in a fresh app: a
+  // test that wants the chip answers `heard_take` / `hear_take` itself.
+  heard_take: (): HeldTake => ({ held: false, bars: 0 }),
+  hear_take: () => {
+    throw new Error("that Take's audio is not held");
+  },
+  stop_hear_take: (): boolean => false,
+  forget_heard_take: () => undefined,
 
   // TTS
   tts_speak: () => undefined,

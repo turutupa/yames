@@ -405,6 +405,10 @@ pub struct NotesPass {
     /// input audio, which may not even be that instrument. So such a Take gets
     /// no pass over its audio; right notes stay "not checked this time".
     pub midi_seen: Arc<std::sync::atomic::AtomicBool>,
+    /// The last heard Take's audio, which the pitch pass moves here when it
+    /// is done with it rather than freeing it ("Hear bar N", c5b1). Not
+    /// emptied by a new Take's load: replaced by the next Take's audio.
+    pub heard: crate::take_audio::SharedHeardTake,
 }
 
 impl NotesPass {
@@ -535,8 +539,14 @@ impl TimingAnalyzer {
                 slot: Arc::new(Mutex::new(NotesSlot::default())),
                 diagnostics: Arc::new(crate::take_diagnostics::TakeDiagnostics::default()),
                 midi_seen: Arc::new(std::sync::atomic::AtomicBool::new(false)),
+                heard: crate::take_audio::HeardTakeSlot::new(),
             },
         }
+    }
+
+    /// The last heard Take, for `hear_take` and the input's stop.
+    pub fn heard_take(&self) -> crate::take_audio::SharedHeardTake {
+        self.notes.heard.clone()
     }
 
     /// Where the onset detector keeps a Session Take's audio. Handed to it
@@ -3009,6 +3019,10 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass,
     let run = run.clone();
     let slot = notes.slot.clone();
     let diagnostics = notes.diagnostics.clone();
+    // Read now, as the Take closes: an input stopped while the pass runs
+    // moves it, and the audio is then freed rather than kept.
+    let heard = notes.heard.clone();
+    let heard_epoch = heard.epoch();
     // What the recording session says this Take is, read as it closes: the
     // next Take's context may be set before this thread writes.
     let capture_context = crate::capture::global().context_snapshot();
@@ -3072,8 +3086,11 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass,
                     crate::capture::global().write_take(&audio.samples, audio.rate, audio.first_ns, job);
                 }));
             }
-            // The Take's audio is freed here, on this thread.
-            drop(audio);
+            // The Take's audio is kept as the last heard Take ("Hear bar N",
+            // c5b1), in RAM only. The one it replaces, or this one when it is
+            // refused, is freed here, on this thread.
+            let bars = run.bar_spans_ms();
+            heard.keep(crate::take_audio::HeardTake::new(serial, audio, start_ms, &bars), heard_epoch);
         });
     if spawned.is_err() {
         notes.slot.lock().unwrap().pending = false;
@@ -6449,6 +6466,7 @@ mod notes_pass_tests {
             slot: Arc::new(Mutex::new(NotesSlot::default())),
             diagnostics: Arc::new(crate::take_diagnostics::TakeDiagnostics::default()),
             midi_seen: Arc::new(std::sync::atomic::AtomicBool::new(false)),
+            heard: crate::take_audio::HeardTakeSlot::new(),
         };
         notes.tap.arm(Some(RATE));
         let mut ring = RingBuffer::new(RATE as usize * 4);
@@ -6531,10 +6549,67 @@ mod notes_pass_tests {
         assert!(!grade.notes_pending);
         assert_eq!(grade.notes_serial, Some(serial));
         assert!(notes.slot.lock().unwrap().provisional.is_none(), "the tracker's grade is dropped once the full one is in");
+        // c5b1: the audio is kept as the last heard Take once the pass is
+        // done with it, rather than freed, with the Take's complete bars.
+        let held = loop {
+            let held = notes.heard.held(serial);
+            if held.held {
+                break held;
+            }
+            assert!(std::time::Instant::now() < deadline, "the Take's audio was never kept");
+            thread::sleep(Duration::from_millis(10));
+        };
+        assert_eq!(held.bars, run.bar_spans_ms().len() as u32);
+        assert!(held.bars >= 1, "{held:?}");
         // A new Take's load forgets it: no answer for the next Take.
         notes.forget();
         assert!(notes.slot.lock().unwrap().grade.is_none());
         assert_eq!(close_take_notes(&run, weights, &notes, &mut started, "electric-guitar"), None);
+        // The heard Take is not a grade: a load leaves it for the next
+        // Take's audio to replace, and the input's stop to empty.
+        assert!(notes.heard.held(serial).held);
+        notes.heard.forget();
+        assert!(!notes.heard.held(serial).held);
+    }
+
+    /// c5b1: a Take whose audio the pitch pass never got keeps nothing: a
+    /// MIDI Take, a pull that fell behind, a tap that never armed.
+    #[test]
+    fn nothing_is_kept_for_hearing_back_without_a_usable_capture() {
+        let notes = NotesPass {
+            tap: crate::take_audio::TakeAudioTap::new(),
+            slot: Arc::new(Mutex::new(NotesSlot::default())),
+            diagnostics: Arc::new(crate::take_diagnostics::TakeDiagnostics::default()),
+            midi_seen: Arc::new(std::sync::atomic::AtomicBool::new(false)),
+            heard: crate::take_audio::HeardTakeSlot::new(),
+        };
+        let schedule = ScoreSchedule {
+            onsets: vec![ExpectedOnset { id: 0, beat: 0.0, note_ids: vec![0], soft: false, accent: false }],
+            length_beats: 4.0,
+            loops: false,
+        };
+        let run = ScheduleRun::new(schedule)
+            .with_pass_bars(vec![PassBar { metric: "noteIdentity".into(), min: Some(0.9), max: None, over_bars: 1 }])
+            .with_note_pitches(vec![ScoreNote { id: 0, midi: 60.0 }]);
+        let weights = Instrument::ElectricGuitar.profile().score_weights;
+        let mut started = None;
+        // no capture: the tap was never armed
+        assert_eq!(close_take_notes(&run, weights, &notes, &mut started, "electric-guitar"), None);
+        // a gap: more came in than one pull takes
+        notes.tap.arm(Some(100));
+        let mut ring = RingBuffer::new(1000);
+        notes.tap.pull(&ring, 0);
+        ring.write(&[0.0; 51]);
+        notes.tap.pull(&ring, 1);
+        assert_eq!(close_take_notes(&run, weights, &notes, &mut started, "electric-guitar"), None);
+        // MIDI: armed and captured, but the pass never looks at it
+        notes.tap.arm(Some(100));
+        notes.tap.pull(&ring, 2);
+        ring.write(&[0.0; 10]);
+        notes.tap.pull(&ring, 3);
+        notes.midi_seen.store(true, std::sync::atomic::Ordering::Release);
+        assert_eq!(close_take_notes(&run, weights, &notes, &mut started, "electric-guitar"), None);
+        assert_eq!(notes.heard.held_bytes(), 0);
     }
 
     /// A Take with MIDI notes in it gets no pass over its audio: a MIDI note's
