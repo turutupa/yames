@@ -309,7 +309,8 @@ export function TodayView({
         ? t("session.today.leadFirst")
         : t("session.today.leadFirstOutcome")
       : plan.mood === "back"
-        ? t("session.today.leadBack", { days: plan.daysAway ?? 0 })
+        ? // The plain fact, in the register of Today's line beneath it; no welcome.
+          t("session.today.leadLast", { count: plan.daysAway ?? 0 })
         : weekday;
 
   // Subscribed to nothing: Today has no plan to build, so its one big action

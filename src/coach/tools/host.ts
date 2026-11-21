@@ -302,10 +302,11 @@ export const WIRED_IN_T1A1: readonly (keyof CoachToolHost)[] = [
 ];
 
 /**
- * The members the real host still leaves as stubs: the Notebook's goal (leg
- * c4a). The loop of bars named from outside has its door since leg lb1.
+ * The members the real host still leaves as stubs: none. The Notebook's goal
+ * was wired by c4a1 (`coach.goal`); the loop of bars named from outside has
+ * its door since leg lb1 (`startLoop(bars)`).
  */
-export const STILL_NOT_WIRED: readonly (keyof CoachToolHost)[] = ["goal", "setGoal"];
+export const STILL_NOT_WIRED: readonly (keyof CoachToolHost)[] = [];
 
 const NOT_WIRED = "notWiredYet" as const;
 

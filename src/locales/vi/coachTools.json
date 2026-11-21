@@ -85,6 +85,15 @@
       "preset": "{{preset}}",
       "setting": "{{value}}"
     },
+    "command": {
+      "minutes": "{{minutes}} phút hôm nay",
+      "jam": "Jam “{{jam}}”",
+      "preset": "Preset “{{preset}}”",
+      "swapHarder": "Phần {{part}}: bài khó hơn",
+      "swapDifferent": "Phần {{part}}: bài khác",
+      "swapStyle": "Phần {{part}}: phong cách khác",
+      "other": "{{tool}}"
+    },
     "chip": {
       "goTo": "Đến {{screen}}",
       "startToday": "Bắt đầu buổi tập hôm nay",

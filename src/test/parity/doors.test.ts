@@ -24,8 +24,9 @@ function callers(name: string): string[] {
 
 const DOORS: Array<[string, string, string[]]> = [
   // COA-07, COA-61, section 3.1 item 4: the order of calls is what makes a session.
-  ["saveSession", "a session is only saved by useSession", [n("hooks", "useSession.ts")]],
-  ["getFinalSessionReport", "the final report is only read by useSession", [n("hooks", "useSession.ts")]],
+  // `useSession` composes the history's hook since leg c5c1; the calls moved with it.
+  ["saveSession", "a session is only saved by useSession's history hook", [n("hooks", "usePracticeHistory.ts")]],
+  ["getFinalSessionReport", "the final report is only read by useSession's history hook", [n("hooks", "usePracticeHistory.ts")]],
   // JTK-33, SNR-85: the promise dialogs live in front of these.
   ["startTake", "a take is only started by the two take hooks", [
     n("containers", "main-window", "hooks", "useJamTakes.ts"),
@@ -54,7 +55,16 @@ describe("the doors", () => {
   // Wherever the shell ends up living. Two sessions would each save, two routers
   // would disagree about which mode is on, two dispatchers would act twice.
   // `useCoachPanel` registers the one answerer Ask's store calls (leg c2a1).
-  it.each(["useSession", "useTabRouting", "useActionDispatcher", "useCoachPanel"])(
+  // `useSession`'s three parts (leg c5c1) are each called once, by it.
+  it.each([
+    "useSession",
+    "usePracticeHistoryState",
+    "useToolCoach",
+    "usePracticeHistory",
+    "useTabRouting",
+    "useActionDispatcher",
+    "useCoachPanel",
+  ])(
     "%s is mounted exactly once",
     (hook) => {
       const mounted = productionTs().flatMap((f) =>

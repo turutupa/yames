@@ -88,9 +88,32 @@ test.describe("Today's line on a computer", () => {
     await openShot(page, "today-back", { width: 1440, height: 900 }, "ember");
     await lineFits(page);
     await expect(page.getByTestId("today-left-off")).toHaveCount(0);
+    await headerSaysTheFact(page);
     await shot(page, "today-back-1440-ember");
   });
+
+  test("back after a break at 1024x700: the header says the fact, the line beneath it whole", async ({ page }) => {
+    await openShot(page, "today-back", { width: 1024, height: 700 }, "ember");
+    await lineFits(page);
+    await headerSaysTheFact(page);
+    await noSidewaysScroll(page, "Today");
+    await shot(page, "today-back-1024-ember");
+  });
 });
+
+/**
+ * Today's header back after a break (owner, the 1k questions, item 4): the
+ * plain fact, "Last Session: 12 days ago", never a welcome; and not Today's
+ * line said twice.
+ */
+async function headerSaysTheFact(page: Page) {
+  const kick = page.getByTestId("today-lead");
+  await expect(kick).toHaveText(/^Last Session: \d+ days ago$/i);
+  await expect(kick).not.toHaveText(/welcome|it has been|you/i);
+  const kicker = (await kick.textContent())!.trim();
+  const line = (await page.locator(".session-today-line .coach-line-text").textContent())!;
+  expect(line, "the header repeats Today's line").not.toContain(kicker);
+}
 
 /** The Step page's line sits under the Step's goal and above its Exercises. */
 async function stepLineInPlace(page: Page, box: { top: number; bottom: number }) {
@@ -138,6 +161,14 @@ test.describe("Today's line on a phone", () => {
       await shot(page, `phone-today-line-${theme}`);
     });
   }
+
+  test("back after a break on a phone: the header says the fact, the line beneath it whole", async ({ page }) => {
+    await openShot(page, "phone-today-back", { width: 360, height: 800 }, "ember");
+    await lineFits(page);
+    await headerSaysTheFact(page);
+    await noSidewaysScroll(page, "Today");
+    await shot(page, "phone-today-back-ember");
+  });
 
   test("in Russian on a phone it wraps and is never cut", async ({ page }) => {
     await openShot(page, "phone-today-line", { width: 360, height: 800 }, "ember", { lng: "ru" });

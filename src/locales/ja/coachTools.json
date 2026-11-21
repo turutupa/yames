@@ -85,6 +85,15 @@
       "preset": "{{preset}}",
       "setting": "{{value}}"
     },
+    "command": {
+      "minutes": "今日は{{minutes}}分",
+      "jam": "ジャム「{{jam}}」",
+      "preset": "プリセット「{{preset}}」",
+      "swapHarder": "パート{{part}}：もっと難しいもの",
+      "swapDifferent": "パート{{part}}：別のもの",
+      "swapStyle": "パート{{part}}：別のスタイル",
+      "other": "{{tool}}"
+    },
     "chip": {
       "goTo": "{{screen}}へ",
       "startToday": "今日のセッションを始める",

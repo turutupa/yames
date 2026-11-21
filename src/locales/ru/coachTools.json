@@ -85,6 +85,15 @@
       "preset": "{{preset}}",
       "setting": "{{value}}"
     },
+    "command": {
+      "minutes": "{{minutes}} мин сегодня",
+      "jam": "Джем «{{jam}}»",
+      "preset": "Пресет «{{preset}}»",
+      "swapHarder": "Часть {{part}}: что-то посложнее",
+      "swapDifferent": "Часть {{part}}: что-то другое",
+      "swapStyle": "Часть {{part}}: другой стиль",
+      "other": "{{tool}}"
+    },
     "chip": {
       "goTo": "Перейти: {{screen}}",
       "startToday": "Начать сегодняшнюю сессию",

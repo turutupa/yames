@@ -10,11 +10,12 @@
  * t1a1 wired where the player is and going somewhere (the `go` tools); t1a2
  * wired the `confirm` tools' doors: the Session's actions, Today's minutes,
  * focus and swaps, the jams and presets (behind the window's unsaved-work
- * gate), the click, and the safe settings' own setters. Still stubs from
- * `notWiredHost()`, answering "notWiredYet": `goal` / `setGoal` (the
- * Notebook, leg c4a) and the `coachSuggestions` setting (c4a's stored key).
- * `loopAsk` / `loopBars` reach the Session's loop through `startLoop(bars)`
- * since leg lb1.
+ * gate), the click, and the safe settings' own setters. c4a1 wired `goal` /
+ * `setGoal` and the `coachSuggestions` setting to the coach's stored keys
+ * (`src/coach/store.ts`: `coach.goal`, `coach.suggestions`), read once on
+ * mount; until that read has finished they answer "notWiredYet". `loopAsk` /
+ * `loopBars` reach the Session's loop through `startLoop(bars)` since leg
+ * lb1. No member is a stub any more.
  *
  * Review fixes (t1a2b): band volume is read and written as the STORED choice
  * (`bandChoice`, `"auto"` for none, put back as `null`); `sounding(target)`
@@ -33,6 +34,15 @@ import {
   type SafeSettingOption,
   type SafeSettingValue,
 } from "../../coach/tools/host";
+import {
+  coachGoalKnown,
+  coachStored,
+  coachStoredLoaded,
+  coachStoredUnread,
+  loadCoachStored,
+  saveGoal,
+  saveSuggestions,
+} from "../../coach/store";
 import i18n, { getLanguages } from "../../i18n";
 import { listPresets as listPresetsIpc, storeSave } from "../../ipc";
 import { findExercise } from "../../session/packs";
@@ -115,6 +125,14 @@ const ON_OFF: readonly SafeSettingOption[] = [
   { value: false, names: ["off"] },
   { value: true, names: ["on"] },
 ];
+/** Suggestions: on, or "Only when I ask" (DESIGN 6.6), which the tool words as off. */
+const SUGGESTIONS_OPTIONS: readonly SafeSettingOption[] = [
+  { value: false, names: ["off", "only when I ask", "when I ask", "asked"] },
+  { value: true, names: ["on"] },
+];
+
+/** `coach.suggestions` read, and read without a failure: only then is "from" in a proposal true. */
+const suggestionsKnown = () => coachStoredLoaded() && !coachStoredUnread("suggestions");
 
 export function buildCoachToolHost(latest: { readonly current: CoachToolHostInput }): CoachToolHost {
   const session = () => latest.current.session;
@@ -160,8 +178,9 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
       case "coachVoice":
         return settings.coachVoice === "voice";
       case "coachSuggestions":
-        // The stored key is the Notebook leg's (c4a: `coach.suggestions`).
-        return "notWiredYet";
+        // `coach.suggestions` (c4a1): on, or "Only when I ask" (off). Not read yet, or its read failed
+        // (c4a1b): unknown, so no proposal "from" a value nobody read.
+        return suggestionsKnown() ? coachStored().suggestions === "on" : "notWiredYet";
     }
   };
 
@@ -278,7 +297,7 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
         case "coachVoice":
           return latest.current.settings.voiceAvailable ? ON_OFF : ON_OFF.slice(0, 1);
         case "coachSuggestions":
-          return "notWiredYet";
+          return suggestionsKnown() ? SUGGESTIONS_OPTIONS : "notWiredYet";
       }
     },
     setSafeSetting: (key, value) => {
@@ -308,8 +327,18 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
           return "done";
         }
         case "coachSuggestions":
-          return "notWiredYet";
+          if (!suggestionsKnown()) return "notWiredYet";
+          saveSuggestions(value ? "on" : "asked");
+          return "done";
       }
+    },
+    // `coach.goal` (c4a1). Until it has been read, and when its read failed (c4a1b, L5), it is
+    // unknown, not "no goal": no proposal, since one could replace a goal it never saw.
+    goal: () => (coachGoalKnown() ? (coachStored().goal?.text ?? null) : "notWiredYet"),
+    setGoal: (text) => {
+      if (!coachGoalKnown()) return "notWiredYet";
+      if (!saveGoal(text, Date.now())) throw new Error("not a goal the store keeps");
+      return "done";
     },
     view: () => latest.current.view,
     pathsAt: () => latest.current.pathsPlace.at,
@@ -342,6 +371,8 @@ export function useCoachToolHost(input: CoachToolHostInput): CoachToolHost {
   useEffect(() => {
     // The presets' first copy, so the first `load_preset` finds them.
     built.presets();
+    // The coach's stored keys (read only; nothing is written until a press).
+    void loadCoachStored().catch(() => {});
     setCoachToolHost(built);
     return () => setCoachToolHost(null);
   }, [built]);

@@ -85,6 +85,15 @@
       "preset": "{{preset}}",
       "setting": "{{value}}"
     },
+    "command": {
+      "minutes": "今天 {{minutes}} 分钟",
+      "jam": "即兴伴奏“{{jam}}”",
+      "preset": "预设“{{preset}}”",
+      "swapHarder": "第{{part}}部分：更难的",
+      "swapDifferent": "第{{part}}部分：换个不一样的",
+      "swapStyle": "第{{part}}部分：另一种风格",
+      "other": "{{tool}}"
+    },
     "chip": {
       "goTo": "前往{{screen}}",
       "startToday": "开始今天的这次练习",
