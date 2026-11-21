@@ -68,6 +68,20 @@ const HOLD_G = "Hold the last G its full beat, then gallop.";
 const BB_A_G = "Put B flat on '3', A on its 'and', G on '4'.";
 const GALLOP_SAY = "Say '1, and a, 2 e and' before you start.";
 const FIVE_FRETS = "Move the hand five frets as each bar starts.";
+const OFF_IN_RESTS = "Keep the pick off the string on each rest.";
+const SILENCE_CHORD = "Silence each chord with both hands on its rest.";
+const CLICK_ACCENT_LATE = "Put each accent right on the click.";
+const CLICK_ACCENT_EARLY = "Wait for the click before each accent.";
+const FINGERS_7910 = "Fingers one, three, four on frets 7, 9 and 10.";
+const MELODY_LATE = "Put each melody note right on its count.";
+const MELODY_EARLY = "Wait for the count before each melody note.";
+const OPEN_E_FIRM = "Pick each open E as firmly as the melody.";
+const OPEN_A_FIRM = "Pick each open A as firmly as the melody.";
+const CROSS_ALTERNATE = "Keep the strokes alternating at every crossing.";
+const SKIP_SMALL = "Make the skip smaller, not faster.";
+const LAST_TWOS = "Count the last beat in twos: melody, pedal.";
+const IN_USE = "Keep the pick on the strings in use.";
+const OFF_SKIPPED = "Keep the pick off the string you skip.";
 
 export const METAL_RHYTHM_CUES: CueBook = {
   // ---------------------------------------------------------------- Level 1
@@ -164,7 +178,7 @@ export const METAL_RHYTHM_CUES: CueBook = {
   "chug-and-chord.stop-riff": [
     g("Count every rest; play after it on the 'and'.", 1),
     c("heard", CHUGS_BETWEEN),
-    c("extras", "Silence each chord with both hands on its rest.", 0),
+    c("extras", SILENCE_CHORD, 0),
     c("late", AND_LATE),
     c("early", AND_EARLY, 1),
     c("openString", CHUG_ON_E),
@@ -298,8 +312,8 @@ export const METAL_RHYTHM_CUES: CueBook = {
     g("Down-up-down-up, four notes to every click.", 0),
     c("heard", "Pick all four notes of every beat."),
     c("extras", ONE_STRING),
-    c("late", "Put each accent right on the click."),
-    c("early", "Wait for the click before each accent."),
+    c("late", CLICK_ACCENT_LATE),
+    c("early", CLICK_ACCENT_EARLY),
     c("openString", "Accent just the first of each four.", 0),
     c("lastBars", "Count '1 e and a' right to the last note."),
   ],
@@ -385,5 +399,150 @@ export const METAL_RHYTHM_CUES: CueBook = {
     c("early", FIRST_SHORT_EARLY),
     c("shift", FIVE_FRETS),
     c("lastBars", "Keep '1 e and' even right to the last note."),
+  ],
+
+  // ---------------------------------------------------------------- Level 3
+  // Step 9: stop and start (chug-rest changes string between Takes)
+  "stop-start.chug-rest": [
+    g("Count '1 2 3' in sixteenths; play on 1 and 2.", 0),
+    c("heard", "Pick both chugs of every group."),
+    c("extras", OFF_IN_RESTS),
+    c("late", "Put each group's first chug on its count."),
+    c("early", "Wait out each rest before the next chug."),
+    c("openString", "Keep the hand swinging down-up through rests.", 1),
+    c("lastBars", "Put the two fretted eighths on '4 and'.", 0),
+  ],
+  "stop-start.chord-and-burst": [
+    g("Start the chugs after each hole on the beat.", 1),
+    c("heard", "Pick all four chugs of every burst."),
+    c("extras", SILENCE_CHORD, 1),
+    c("late", "Land each off-beat chord on its 'and'."),
+    c("early", "Wait for beat two before the four chugs.", 1),
+    c("openString", "Count the rest after the first chord in full."),
+    c("stringChange", TWO_ONE),
+    c("lastBars", STOP_LAST_G),
+  ],
+  "stop-start.gallop-holes": [
+    g("Say '1, and a, (2) e and, 3, a, 4' first.", 0),
+    c("heard", "Pick the single chug before beat four.", 0),
+    c("extras", OFF_IN_RESTS),
+    c("notes", "One finger per fret on frets 3, 5 and 6.", 1),
+    c("late", "Put each note after a rest on its count."),
+    c("early", "Wait out each rest in full before playing."),
+    c("openString", "Put the single chug right on the 'a'.", 0),
+    c("lastBars", "Put A on '4' and G on its 'and' to end."),
+  ],
+
+  // Step 10: triplets and bursts (triplet-chug changes string between Takes)
+  "triplets-and-bursts.triplet-chug": [
+    g("Count '1-trip-let, 2-trip-let' as you play.", 0),
+    c("heard", "Pick all three notes of every beat."),
+    c("extras", ONE_STRING),
+    c("late", CLICK_ACCENT_LATE),
+    c("early", CLICK_ACCENT_EARLY),
+    c("openString", "Accent beats two and four just as strongly.", 1),
+    c("lastBars", "Count '1-trip-let' right to the last note."),
+  ],
+  "triplets-and-bursts.sextuplet-burst": [
+    g("Six notes to the click, then the chord.", 0),
+    c("heard", "Pick all six notes of every burst."),
+    c("extras", JUST_TWO),
+    c("late", CHORD_COUNT_LATE),
+    c("early", "Fill the whole beat with six before the chord."),
+    c("afterHeld", "Set the next chord while this one rings.", 1),
+    c("openString", "Start each burst right on the click."),
+    c("stringChange", TWO_ONE),
+    c("lastBars", "Hold the last chord its full beat, then burst."),
+  ],
+  "triplets-and-bursts.tremolo": [
+    g("Change note exactly on the beat.", 1),
+    c("heard", "Pick every note four times, right through."),
+    c("extras", "Keep the pick on the A string only."),
+    c("notes", FINGERS_7910, 0),
+    c("late", "Put each new note right on the click."),
+    c("early", "Wait for the click before each new note."),
+    c("shift", "Move up two frets: first finger on fret 9.", 0),
+    c("lastBars", "Count '1 e and a' on every note to the end."),
+  ],
+
+  // Step 11: pedal riffs
+  "pedal-riffs.pedal-a": [
+    g("Play one melody note, then two open Es.", 0),
+    c("heard", OPEN_E_FIRM),
+    c("extras", "Keep the pick on the two low strings only."),
+    c("notes", FINGERS_7910, 0),
+    c("late", MELODY_LATE),
+    c("early", MELODY_EARLY),
+    c("openString", "Keep the open Es even between melody notes."),
+    c("stringChange", CROSS_ALTERNATE, 1),
+    c("lastBars", LAST_TWOS),
+  ],
+  "pedal-riffs.pedal-skip": [
+    g("Rest a spare finger on the string you skip.", 0),
+    c("heard", OPEN_E_FIRM),
+    c("extras", OFF_SKIPPED),
+    c("notes", FINGERS_7910, 0),
+    c("late", MELODY_LATE),
+    c("early", MELODY_EARLY),
+    c("openString", "Slow down until the open Es are even.", 1),
+    c("stringChange", SKIP_SMALL),
+    c("lastBars", LAST_TWOS),
+  ],
+  "pedal-riffs.pedal-both": [
+    g("Lay each finger flat across both strings.", 1),
+    c("heard", OPEN_E_FIRM),
+    c("extras", "Pick one string at a time under the flat finger.", 1),
+    c("notes", "Start the way down on the D string's fret 9.", 0),
+    c("late", MELODY_LATE),
+    c("early", MELODY_EARLY),
+    c("openString", "Keep the open Es even through every skip."),
+    c("stringChange", SKIP_SMALL),
+    c("lastBars", "End on both 7s: the A string, then the D string.", 0),
+  ],
+
+  // Step 12: the pedal from the A string
+  "pedal-from-a.a-pedal-d": [
+    g("Keep the fingers arched, clear of the A string.", 1),
+    c("heard", OPEN_A_FIRM),
+    c("extras", IN_USE, 2),
+    c("notes", FINGERS_7910, 1),
+    c("late", MELODY_LATE),
+    c("early", MELODY_EARLY),
+    c("openString", "Keep the open As even between melody notes."),
+    c("stringChange", CROSS_ALTERNATE),
+    c("lastBars", LAST_TWOS),
+  ],
+  "pedal-from-a.a-pedal-g": [
+    g("Lean the fingertip on the string you skip.", 2),
+    c("heard", OPEN_A_FIRM),
+    c("extras", OFF_SKIPPED),
+    c("notes", FINGERS_7910),
+    c("late", MELODY_LATE),
+    c("early", MELODY_EARLY),
+    c("openString", "Slow down until the open As are even.", 1),
+    c("stringChange", SKIP_SMALL),
+    c("lastBars", LAST_TWOS),
+  ],
+  "pedal-from-a.a-pedal-both": [
+    g("Count three, three, three, three, two and two.", 0),
+    c("heard", OPEN_A_FIRM),
+    c("extras", IN_USE),
+    c("notes", "Say A, B, C, D, E as you climb."),
+    c("late", MELODY_LATE),
+    c("early", MELODY_EARLY),
+    c("openString", "Keep the open As even through both skips.", 2),
+    c("stringChange", "Skip the D string both ways, evenly.", 2),
+    c("lastBars", "Come down frets 10, 9, 7 on each string.", 1),
+  ],
+  "pedal-from-a.pedal-a-to-e": [
+    g("Keep the hand still: one finger per fret.", 3),
+    c("heard", "Pick every pedal note as firmly as the melody."),
+    c("extras", "Keep the pick on the pedal and melody strings."),
+    c("notes", FINGERS_7910, 3),
+    c("late", MELODY_LATE),
+    c("early", MELODY_EARLY),
+    c("openString", "Keep the open pedal even across the change."),
+    c("stringChange", "Move the pedal down to the low E on bar three.", 4),
+    c("lastBars", "Go back to the open A right on beat one."),
   ],
 };
