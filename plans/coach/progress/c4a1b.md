@@ -40,6 +40,21 @@ Branch `coach-c4a1` (the same worktree as c4a1), logs in `/tmp/coach-c4a1b/`. Wo
 - `readCards` / `readSuppressed` now take `now`.
 - Strings: the lean / place / minutes sentences changed (English in all fifteen files, still c4a2's to translate).
 
-## Gates
+## Merge of `coach`
 
-(filled in below as they run)
+`git merge coach` (c4b1 and the rest) went through without a conflict; `manifest.json` auto-merged. Regenerated
+with `UPDATE_PARITY_MANIFEST=1` on `surface.test.ts` (job `coach-c4a1b-parity`): no change, and it holds both sides
+(c4a1's four `coach.*` settings keys; `list_clean_tempo_spans` / `listCleanTempoSpans` from `coach`). After the merge
+`totalsFrom` lives in `src/session/totals.ts`; the minutes line now sums with it directly, so it cannot drift from
+Progress.
+
+## Gates (logs: `job logs <name>`; the full vitest log at `/tmp/coach-c4a1b/vitest.log`)
+
+- `npx tsc --noEmit`: pass (`coach-c4a1b-tsc`, after the merge `coach-c4a1b-tsc-2`).
+- The five touched test files: 213 pass (`coach-c4a1b-vt1`).
+- `npm run test` (full, after the merge): 48083 pass, 1 fail, in 421 files (`coach-c4a1b-vitest`). The failures:
+  the known `TabStage.render.test.tsx` (not loadable through the linked `node_modules`), and one
+  `ToolCoach.test.tsx` case ("after Listen goes off ...": the rendered body was empty), a file this leg does not
+  touch; re-run alone it passes 11 of 11 (`coach-c4a1b-vt-toolcoach`): a flake under load.
+- `npm run build`: pass (`coach-c4a1b-build`).
+- No layout run: no screen or stylesheet changed.
