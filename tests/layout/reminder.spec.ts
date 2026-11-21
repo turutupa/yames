@@ -142,7 +142,10 @@ test.describe("Settings → Coach → Practice reminder", () => {
 test.describe("Settings → Practice reminder on a phone", () => {
   test.use({ baseURL: MOBILE_URL, isMobile: true, hasTouch: true });
   test("its own section, every control 44 px, inside the panel", async ({ page }) => {
-    await openShot(page, "settings-update", { width: 360, height: 800 }, "ember", { reminder: "on" });
+    // A phone has no rail: Settings is its tab (as phone-tabs.spec does it).
+    await openShot(page, "metronome", { width: 360, height: 800 }, "ember", { reminder: "on" });
+    await page.click('.mobile-tab[data-tab="settings"]');
+    await page.waitForSelector(".settings-section");
     await expect(page.locator("#settings-coach-reminder")).toHaveCount(1);
     await rowFits(page, 44);
     await noSidewaysScroll(page, "Settings");
