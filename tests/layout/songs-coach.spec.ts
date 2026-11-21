@@ -11,7 +11,7 @@
  * Pictures only when `YAMES_SHOT_DIR` names a folder.
  */
 import { test, expect, type Page } from "@playwright/test";
-import { openShot, settleAnimations, notHitTestable, noSidewaysScroll, MOBILE_URL } from "./fits";
+import { openShot, settleAnimations, notHitTestable, noSidewaysScroll } from "./fits";
 
 const SHOTS_DIR = process.env.YAMES_SHOT_DIR;
 async function shot(page: Page, name: string) {
@@ -46,6 +46,9 @@ async function noteHolds(page: Page, where: string) {
   const n = (await rect(page, '[data-testid="songs-note"]'))!;
   const fix = (await rect(page, ".songs-review-said .coach-block-button"))!;
   expect(fix, `${where}: the fix`).not.toBeNull();
+  // A button on one line of its words, not a ribbon of letters down the side.
+  expect(fix.width, `${where}: the fix is narrower than it is tall`).toBeGreaterThan(fix.height * 2);
+  expect(fix.height, `${where}: the fix's words wrap letter by letter`).toBeLessThan(60);
   expect(n.left, `${where}: note left`).toBeGreaterThanOrEqual(head.left - 0.5);
   expect(n.right, `${where}: note right`).toBeLessThanOrEqual(head.right + 0.5);
   expect(fix.top, `${where}: the fix under the note`).toBeGreaterThanOrEqual(n.bottom - 0.5);
@@ -126,14 +129,17 @@ test.describe("Ask's dock on Songs (measured, judgement call 19)", () => {
   });
 });
 
-test.describe("the Songs note on a phone", () => {
-  test.use({ baseURL: MOBILE_URL, isMobile: true, hasTouch: true });
-  test("after a pass at 360x800: the note and the fix on screen, the line no target", async ({ page }) => {
-    await openShot(page, "phone-songs-review-rushing", { width: 360, height: 800 }, "ember");
-    await noteHolds(page, "phone 360");
-    // A phone's Ask is the header's button: the sentence is not one.
-    await expect(page.getByTestId("coach-note-ask")).toHaveCount(0);
+/*
+ * No phone case: the phone build has no Songs tab (MobileTabBar), so there is
+ * no Songs review on a phone to measure. The narrowest Songs there is is the
+ * desktop's smallest window, 480 x 780, where the review's head turns to one
+ * column (`@container stage (max-width: 620px)`).
+ */
+test.describe("the Songs note at the smallest window", () => {
+  test("after a pass at 480x780: the note and the fix on screen", async ({ page }) => {
+    await openShot(page, "songs-review-rushing", { width: 480, height: 780 }, "ember");
+    await noteHolds(page, "480");
     await noSidewaysScroll(page, "Songs");
-    await shot(page, "phone-songs-note-360");
+    await shot(page, "songs-note-480");
   });
 });

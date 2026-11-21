@@ -52,15 +52,23 @@
   flex: 1 1 100%;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   gap: 8px;
   min-width: 0;
 }
 
-/* c5a2 — the sentence is the Session's note now (`CoachNote`, coach.css);
-   it takes the row's width, and the fix's button sits under it. */
+/* c5a2 — the sentence is the Session's note now (`CoachNote`, coach.css),
+   the fix's button under it. Inside the review's pinned head, which has to
+   leave the player's own picture on screen at 480 x 780: the note is set a
+   step tighter here than on a Session's result, and casts no shadow inside
+   a panel that is already raised. */
 .songs-review-said > .coach-note {
-  align-self: stretch;
+  gap: 4px;
+  padding: 10px 14px 10px 13px;
+  box-shadow: none;
+}
+
+.songs-review-said .coach-note-head {
+  font-size: 16px;
 }
 
 /* A verdict is one sentence and reads as one, so it is allowed the room the
