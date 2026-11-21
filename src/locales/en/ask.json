@@ -30,8 +30,8 @@
     },
     "empty": {
       "title": "What do you want to know?",
-      "model": "Ask about this screen, your Takes or your Paths. The model on this computer answers in its own words, as general advice.",
-      "loading": "The model you chose is getting ready. Once it is, you can ask about this screen, your Takes or your Paths."
+      "model": "Ask about this screen, your Takes or your Paths: the app answers from what it measured, your Paths and its own help. What those don't answer, the model on this computer answers in its own words, labelled as general advice.",
+      "loading": "Ask about this screen, your Takes or your Paths: the app answers now, from what it measured, your Paths and its own help. The model you chose is getting ready; once it is, it adds general advice in its own words, labelled as such."
     },
     "reply": {
       "gettingReady": "The model is still getting ready. Ask again in a moment.",

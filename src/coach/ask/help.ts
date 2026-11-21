@@ -172,7 +172,8 @@ const SCREEN_HELP: Readonly<Record<Exclude<CoachScreen, "session">, HelpId>> = {
 const SESSION_HELP: Readonly<Record<RunPhase, HelpId>> = {
   idle: "screen.sessionReady",
   ready: "screen.sessionReady",
-  looping: "screen.sessionReady",
+  // A loop is running, not the ready screen (leg c2cc, review L4).
+  looping: "word.loop",
   playing: "screen.sessionTake",
   listening: "screen.sessionTake",
   result: "screen.sessionResult",

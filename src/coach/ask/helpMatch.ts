@@ -16,8 +16,15 @@ import { normalizeQuestion } from "./match";
 /** Words before or after the question that change nothing about it. */
 const LEAD = /^(so|ok|okay|hey|hi|um|uh|and|but|sorry|please|quick question|coach|yames)\s+/;
 const TAIL = /\s+(in yames|in this app|in the app|on yames|here|exactly|again|please|then|for me|anyway)$/;
-const ARTICLE = "(a |an |the |my |this |that |these |those |your )?";
+/**
+ * Only a general article: "this step", "my pass mark", "your notebook" ask
+ * about the one on screen or the player's own, which a card, search or the
+ * model answers, never the glossary (leg c2cc, review M1).
+ */
+const ARTICLE = "(a |an |the )?";
 const SUFFIX = "( screen| page| tab| view| section| panel| menu)";
+/** "this" names a screen only with one of these after it ("this drill screen"), never "this drill". */
+const THIS_SUFFIX = "( screen| page| view| tab)";
 
 function strip(text: string): string {
   let s = normalizeQuestion(text).replace(/\?/g, " ").replace(/\s+/g, " ").trim();
@@ -46,14 +53,13 @@ function wordShapes(w: string): RegExp[] {
 
 /** The question shapes that ask what a screen is for. `s` is the entry's names. */
 function screenShapes(s: string, suffixNeeded: boolean): RegExp[] {
-  const S = `(${s})${SUFFIX}${suffixNeeded ? "" : "?"}`;
-  const A = "(a |an |the |this )?";
+  const S = `((a |an |the )?(${s})${SUFFIX}${suffixNeeded ? "" : "?"}|this (${s})${THIS_SUFFIX})`;
   return [
-    new RegExp(`^what (is|are) ${A}${S}( for| about)?$`),
-    new RegExp(`^what (does|do|can) ${A}${S} do$`),
-    new RegExp(`^how (does|do) ${A}${S} work$`),
-    new RegExp(`^what can i do (on|in|with) ${A}${S}$`),
-    new RegExp(`^(how do i use|how to use|how do you use|explain|help with|help on) ${A}${S}$`),
+    new RegExp(`^what (is|are) ${S}( for| about)?$`),
+    new RegExp(`^what (does|do|can) ${S} do$`),
+    new RegExp(`^how (does|do) ${S} work$`),
+    new RegExp(`^what can i do (on|in|with) ${S}$`),
+    new RegExp(`^(how do i use|how to use|how do you use|explain|help with|help on) ${S}$`),
   ];
 }
 
@@ -87,14 +93,16 @@ export function matchHelp(text: string): HelpId | null {
 /**
  * A typed English question about tuning: the guitar's or a string's, a tuner,
  * a named tuning. "Tunes on one string" (a Step's title) and "what tune is
- * this" are not.
+ * this" are not, and neither is "the tune" as the piece being played, which
+ * is what the app itself calls it ("slow the tune down", "loop the tune to
+ * bar 4"), nor "fine-tune my picking" (leg c2cc, review H1).
  */
 const TUNING = new RegExp(
   [
-    "\\b(in tune|out of tune|tuning|tunings|tuner|tuners|retune|retuning|detune|detuned|re tune)\\b",
-    "\\btune (my|the|your|a|this|that|each|every|all|it|up|down|to)\\b",
+    "\\b(in tune|out of tune|(?<!fine )tuning|tunings|tuner|tuners|retune|retuning|detune|detuned|re tune)\\b",
+    "\\b(?<!fine )tune (my|your|the|a|this|each|every|all|all the|all my|all of my) (guitar|guitars|bass|instrument|[a-g] string|low e|high e|strings?)\\b",
     "\\b(how|should|can|do|does|did) (do |can |should )?(i|you|we) tune\\b",
-    "\\btuned (to|down|up|in|correctly|right|properly)\\b",
+    "\\b(?<!fine )tuned (to|down|up|in|correctly|right|properly)\\b",
     "\\b(drop d|drop c|open g tuning|dadgad|half step down|whole step down|eb standard|e flat standard)\\b",
     "\\b(string|strings|guitar|bass) (is|are|sounds?|sound) (sharp|flat)\\b",
   ].join("|"),

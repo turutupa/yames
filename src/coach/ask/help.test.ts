@@ -36,7 +36,7 @@ const SCREENS: Record<CoachScreen, HelpId | null> = {
 const PHASES: Record<RunPhase, HelpId> = {
   idle: "screen.sessionReady",
   ready: "screen.sessionReady",
-  looping: "screen.sessionReady",
+  looping: "word.loop",
   playing: "screen.sessionTake",
   listening: "screen.sessionTake",
   result: "screen.sessionResult",
@@ -57,6 +57,20 @@ describe("the help set", () => {
       expect(s, e.id).not.toMatch(/\bthe bar\b(?! by bar)/i);
       expect(s, e.id).not.toMatch(/\btun(e|ing|er)\b/i);
     }
+  });
+
+  it("says what the code does where the review of c2cb found it did not (c2cc: M4, L1 to L6, L9)", () => {
+    const w = (id: HelpId) => words(helpKey(id)) as string;
+    expect(w("screen.modelSelector")).not.toMatch(/downloads or loads until/);
+    expect(w("screen.modelSelector")).toMatch(/loads by itself after the app starts, never during a Take/);
+    expect(w("screen.progress")).toMatch(/in the tools and in Sessions/);
+    expect(w("screen.progress")).toMatch(/milestone/);
+    expect(w("word.passMark")).toMatch(/every one it could measure/);
+    expect(w("word.benchmark")).toMatch(/counted from the day you subscribe/);
+    expect(w("word.take")).toMatch(/Songs shows which notes landed/);
+    expect(w("word.countIn")).toMatch(/^In a Session/);
+    expect(w("word.notFair")).toMatch(/earns no milestone/);
+    expect(w("word.cleanTempo")).toMatch(/milestone/);
   });
 
   it("names no entry in en/help.json that the table lacks", () => {
@@ -149,6 +163,59 @@ describe("asksAboutTuning", () => {
     "my guitar is out of tune",
   ];
   for (const text of YES) it(`"${text}" is about tuning`, () => expect(asksAboutTuning(text)).toBe(true));
-  const NO = ["what tune is this", "Tunes on one string", "where did it slip?", "what is a rung?", "play a tune for me", "open paths"];
+  const NO = [
+    "what tune is this",
+    "Tunes on one string",
+    "where did it slip?",
+    "what is a rung?",
+    "play a tune for me",
+    "open paths",
+    // c2cc (review H1): the app calls a piece "the tune"; these are about the music, not the strings.
+    "How do I fine-tune my picking?",
+    "Can I slow the tune down?",
+    "speed the tune up",
+    "how do I play the tune a bit faster",
+    "loop the tune to bar 4",
+    "play the tune to the end",
+    "which bar of the tune slipped?",
+    "the tune comes round too fast",
+    "can I play this tune up to bar 8",
+    "start the tune from the top",
+    "is the tune in 4/4?",
+    "make the tune easier",
+    "play the tune a little slower",
+    "repeat this tune twice",
+    "I keep fine tuning my vibrato",
+    "how fast is the tune",
+    "skip to the end of the tune",
+  ];
   for (const text of NO) it(`"${text}" is not about tuning`, () => expect(asksAboutTuning(text)).toBe(false));
+  const STILL = ["tune my guitar", "can you tune the B string for me", "tune the strings", "How do you tune a bass?", "is there a tuner?"];
+  for (const text of STILL) it(`"${text}" is still about tuning`, () => expect(asksAboutTuning(text)).toBe(true));
+});
+
+describe("matchHelp leaves the thing on screen to the cards, search or the model (review M1)", () => {
+  const NO = [
+    "What is this step for?",
+    "explain this take",
+    "What is this song?",
+    "What is my pass mark?",
+    "what is my level?",
+    "what is that rung",
+    "what is this drill for",
+    "explain your notebook",
+  ];
+  for (const text of NO) it(`"${text}" is not a help question`, () => expect(matchHelp(text)).toBeNull());
+  const YES: Array<[string, HelpId]> = [
+    ["what is a take", "word.take"],
+    ["what is the pass mark", "word.passMark"],
+    ["what is pass mark?", "word.passMark"],
+  ];
+  for (const [text, id] of YES) it(`"${text}" is ${id}`, () => expect(matchHelp(text)).toBe(id));
+  it('"what is the drill screen for" and "what is this drill screen for" are still the Drill entry', () => {
+    expect(matchHelp("what is the drill screen for")).toBe("screen.drill");
+    expect(matchHelp("what is this drill screen for")).toBe("screen.drill");
+    expect(matchHelp("how does this metronome page work")).toBe("screen.metronome");
+    expect(matchHelp("what is this metronome panel for")).toBeNull();
+  });
 });

@@ -11,7 +11,7 @@
         "sessionResult": "This is how the Take went: the number that decided it, whether it met the pass mark, and bar by bar where it held or slipped. The big button goes again or moves on, and the row under it changes the tempo or loops a bar. Ask can tell you more about this Take.",
         "sessionTimed": "This part of the Session runs against the clock and is not graded: a warm-up, a jam, a ramp, a finisher or your turn. Start it, and it moves on by itself when its time is up; Pause, Restart and Skip are there while it runs.",
         "sessionRecap": "The Session is done: what you played, what moved, and when an Exercise comes back. From here you can play five more minutes, go back to where you were, or open Progress.",
-        "progress": "Progress is what was measured from your playing: minutes in Takes, Sessions, your day streak, and each Path's clean tempos over time. On a computer, Tool runs below it keeps every stretch the coach listened to in the tools.",
+        "progress": "Progress is what was measured from your playing: minutes in Takes, Sessions, your day streak, and each Path's clean tempos over time. A note from the coach can sit at the top: your week, a milestone such as a Step finished, or a question about an Exercise that has stopped moving. On a computer, Tool runs below keeps every stretch the coach listened to in the tools and in Sessions.",
         "tools": "Tools holds the Metronome, Setlist, Drill, Jam and Songs. Use them any time; what you play in them stays yours and moves nothing on your Paths.",
         "metronome": "The Metronome is a click to play to. Set the tempo (or tap it), the meter, the subdivision, the accents and the sound, and save a setup as a preset. With Listen on, the coach listens while you play.",
         "drill": "Drill climbs the tempo while you play, written as a sentence you edit: start and target tempo, how fast it climbs and for how many bars. Linear climbs steadily, Zigzag climbs and drops back, and Adaptive raises or lowers the tempo from how you play.",
@@ -19,27 +19,27 @@
         "jam": "Jam is a band that plays a form while you play over it, and it is never graded. Choose a vibe, the feel, the form and the chords; the practice tools can drop the band out for a few bars, trade bars with you, or raise the tempo each time round.",
         "songs": "Songs opens a Guitar Pro or MusicXML file and shows its tab, keeps time and follows where you are. Choose your part, the bars and the speed, loop a stretch, and set who you hear. The file stays on this device.",
         "settings": "Settings holds the app's choices: General, Practice (including whether your playing is graded), Devices for the audio input, Practice Coach, Appearance, the tools, Songs, Hotkeys and more. Ask is not open there.",
-        "modelSelector": "The coach model chooses whether a language model runs on this computer: Off keeps the coach on its own rules, and Standard or Studio is a model that needs a Download first. Nothing downloads or loads until you press. With a model loaded, a typed question nothing else here answers gets a reply in its own words, marked as general advice.",
+        "modelSelector": "The coach model chooses whether a language model runs on this computer: Off keeps the coach on its own rules, and Standard or Studio is a model that needs a Download first. Nothing downloads until you press Download; a model you chose loads by itself after the app starts, never during a Take, and stays loaded until you choose Off or another one. With a model loaded, a typed question nothing else here answers gets a reply in its own words, marked as general advice.",
         "ask": "Ask answers questions about this screen, your Takes and your Paths, from what the app measured and what the Paths say; a chip asks a question in one press. Typed commands such as \"slower\" or \"open Progress\" are carried out, or offered for one press. The Notebook tab keeps what the coach has noticed and your goal."
       },
       "word": {
-        "take": "A Take is one run of an Exercise in a Session, from the count-in to its end. A graded Take is measured and can meet the pass mark; one that is too short to judge counts neither way. In Jam and Songs a take is a recording of you playing, and it is not graded.",
+        "take": "A Take is one run of an Exercise in a Session, from the count-in to its end. A graded Take is measured and can meet the pass mark; one that is too short to judge counts neither way. In Jam and Songs a take is a recording of you playing with no pass mark, though Songs shows which notes landed.",
         "step": "A Step is one stage of a Path, with a few Exercises and notes on why it is there. It is done when you pass most of its graded Exercises, or by testing out.",
         "level": "Your Level on a Path, Beginner, Intermediate or Advanced, sets the Step Today starts you from. Steps below it are skipped by Today, but you can still play them.",
         "rung": "A rung is one tempo step of an Exercise. Faster and Slower move one rung, and meeting the pass mark lets the plan take you up to the next.",
-        "passMark": "A pass mark is what a Take must reach to pass, for example how even the timing is or how many of the notes are heard. Each Exercise shows its own pass marks, and a Take meets them only when it reaches every one.",
-        "cleanTempo": "Your clean tempo on an Exercise is the fastest tempo at which you met the pass mark over eight bars in a row. Takes you marked not fair don't count toward it.",
+        "passMark": "A pass mark is what a Take must reach to pass, for example how even the timing is or how many of the notes are heard. Each Exercise shows its own pass marks, and a Take meets them only when it reaches every one it could measure.",
+        "cleanTempo": "Your clean tempo on an Exercise is the fastest tempo at which you met the pass mark over eight bars in a row. Takes you marked not fair don't count toward it, or toward a milestone.",
         "review": "A review brings back an Exercise you passed, a day later and then after 3, 7, 14 and 30 days, for two Takes to keep it fresh. If it slipped, it comes back sooner and a notch slower.",
         "parked": "An Exercise is parked when three Sessions in a row brought no new clean tempo. It rests for a couple of days and then comes back fresh.",
-        "benchmark": "A benchmark is the same Take of the same Exercise on days 1, 7, 14 and 21 after you subscribe to a Path, so you can hear the change. Today puts it in the plan when one is due.",
+        "benchmark": "A benchmark is the same Take of the same Exercise at the same tempo on days 1, 7, 14 and 21 of a Path, counted from the day you subscribe, so you can hear the change. Today puts one in the plan once your first Session on the Path is behind you, and one missed by a week is skipped, not made up.",
         "grading": "Graded means the app listens through your input and measures your timing and notes against the pass mark. Ungraded, or Just play, gives you the click and the visuals with nothing measured; those Takes count as practice, but only graded Takes move your clean tempo and your Steps. Settings, Practice chooses it, and a Session can ask.",
-        "notFair": "After a close result you can say the grade wasn't fair. The grade is kept as measured, with your answer beside it, and that Take stops counting toward the clean tempo the app shows. Answer Yes later and it counts again.",
+        "notFair": "After a close result you can say the grade wasn't fair. The grade is kept as measured, with your answer beside it, and that Take stops counting toward the clean tempo the app shows and earns no milestone. Answer Yes later and it counts again.",
         "listen": "Listen is the switch in the tools' bar that lets the coach listen to your playing there. It stays off until you turn it on; when you turn it off, the run is kept in Tool runs.",
         "toolRuns": "Tool runs, on Progress, lists every stretch the coach listened to in the tools and in Sessions, newest first. It is on a computer only.",
         "myExercises": "My exercises are exercises you made yourself, listed at the bottom of Paths. They belong to no Path and pass nothing. You make one in Ask by typing what you want, such as a scale and a position, and pressing Add it.",
         "notebook": "The Notebook is Ask's second tab. It shows what the coach noticed across at least five of your stored Takes, lets you leave a line out for 30 days, and keeps your goal in your own words. Nothing in it is written by a model.",
         "variant": "Some Exercises come in variants: the same skill in another key or another shape. The Session chooses one, and its own words replace the Exercise's where it has them.",
-        "countIn": "The count-in is one bar of clicks before you start playing, so you come in on time. It is not part of what is graded.",
+        "countIn": "In a Session, the count-in is one bar of clicks before each Take, so you come in on time, and it is not part of what is graded. On the Metronome and in Drill it is the count-in switch in the bottom bar: a few beats of click before the first one.",
         "loop": "A loop plays a bar or two of the Exercise round and round, slowly, until you stop it. Nothing in a loop is graded or kept.",
         "testOut": "Test out plays one Take at the pass tempo of each Exercise in a Step you haven't passed yet. Pass enough of them and the Step is done.",
         "warmUp": "A warm-up opens a Session and a finisher closes it. Both run against the clock and are not graded."
@@ -56,11 +56,16 @@
       "placeholder": "Search your Paths, or tap a question",
       "empty": {
         "local": "Type a question and the app answers from your Takes, your Paths and its own help, with no model needed. Or tap a question below.",
-        "phone": "Type a question and the app answers from your Takes, your Paths and its own help. Or tap a question below."
+        "phone": "Type a question and the app answers from your Takes, your Paths and its own help. Or tap a question below.",
+        "search": "Type a question and the app searches your Paths for it. Tap a question below for your Takes and this screen.",
+        "searchLoading": "Type a question and the app searches your Paths for it now; tap a question below for your Takes and this screen. The model you chose is getting ready; once it is, it adds general advice in its own words, labelled as such.",
+        "searchModel": "Type a question and the app searches your Paths for it; what they don't answer, the model on this computer answers in its own words, labelled as general advice. Tap a question below for your Takes and this screen."
       },
       "reply": {
         "local": "Nothing in your Takes, your Paths or the app's help answers that. With a model on, chosen at the foot of this panel, it could answer in its own words.",
-        "phone": "Nothing in your Takes, your Paths or the app's help answers that."
+        "phone": "Nothing in your Takes, your Paths or the app's help answers that.",
+        "search": "Nothing in your Paths answers that.",
+        "searchLocal": "Nothing in your Paths answers that. With a model on, chosen at the foot of this panel, it could answer in its own words."
       },
       "footer": {
         "local": "Answers from your Takes and Paths. Nothing you type leaves this computer.",

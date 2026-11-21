@@ -287,6 +287,20 @@ describe("answering", () => {
     expect(mockInvoke.mock.calls.some(([cmd]) => cmd === "coach_generate")).toBe(false);
   });
 
+  it("outside English, the empty state and the plain statement name only search and the chips (c2cc, review M2)", async () => {
+    await i18n.changeLanguage("de");
+    try {
+      openAsk();
+      render(<AskPanel lookingAt={null} onClose={() => {}} />);
+      expect(screen.getByTestId("ask-empty")).toHaveTextContent(t("help.ui.empty.search"));
+      await answerAsk("warum?", t, () => "ctx", "de");
+      expect(getAskState().turns.at(-1)).toMatchObject({ kind: "app", text: t("help.ui.reply.searchLocal") });
+      expect(t("help.ui.reply.searchLocal")).not.toBe(t("help.ui.reply.local"));
+    } finally {
+      await i18n.changeLanguage("en");
+    }
+  });
+
   it("a model still loading says so", async () => {
     snapshot.state = "loading";
     await answerAsk("why?", t, () => "ctx");

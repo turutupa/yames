@@ -14,7 +14,8 @@ import { modelTurnWanted, stopModelTurn } from "./askModelTurn";
 import { AskToolTurn } from "./AskToolTurn";
 import { AskCardChips, AskCardTurn } from "./AskCardTurn";
 import { askCardChips, askUngradedHere, withinChipCap } from "./askCards";
-import { typedRuleAnswerer } from "./askAnswerers";
+import { isEnglish, typedRuleAnswerer } from "./askAnswerers";
+import { askEmptyKey } from "./askEmpty";
 import { askToolChips, noKeyRepeat, onePress, pressChip } from "./askTools";
 import { lineText } from "./toolWords";
 import "../../styles/ask.css";
@@ -174,7 +175,10 @@ function AskConversation({
   lookingKey: string | null;
 }) {
   const { t, i18n } = useTranslation();
-  const model = useCoachModel().state;
+  const coachModel = useCoachModel();
+  const model = coachModel.state;
+  // A build with no model in it is never offered one (leg c2cc, review L10).
+  const canRunModel = !coachModel.rows.some((r) => r.why === "noLlm");
   // A question typed and not sent survives a visit to the Notebook's tab (c4a2b, L4).
   const [draft, setDraft] = useState(askDraft);
   useEffect(() => keepAskDraft(draft), [draft]);
@@ -236,14 +240,9 @@ function AskConversation({
     setDraft("");
   };
 
-  // Without a model, typed questions are still answered by the rules and search (leg c2cb, DESIGN 5.5).
-  const emptyKey = IS_MOBILE
-    ? "help.ui.empty.phone"
-    : model === "ready"
-      ? "ask.empty.model"
-      : model === "loading" || model === "waiting"
-        ? "ask.empty.loading"
-        : "help.ui.empty.local";
+  // Without a model, typed questions are still answered by the rules and search (leg c2cb, DESIGN 5.5);
+  // outside English, typed text reaches search alone and the chips the rest (leg c2cc).
+  const emptyKey = askEmptyKey({ mobile: IS_MOBILE, model, english: isEnglish(i18n.language), canRunModel });
   // "About your last Take:" heads the card chips only when one is about a Take, not "What is this screen for?" alone.
   const takeCards = cards.some((c) => c.shape !== "help");
   const placeholder = !IS_MOBILE && model === "ready" ? t("ask.placeholder") : t("help.ui.placeholder");
