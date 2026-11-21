@@ -41,7 +41,15 @@
       "phone": "Điện thoại chưa chạy được mô hình, nên ở đây chưa thể trả lời câu hỏi gõ vào.",
       "nothing": "Lần này không có câu trả lời nào trả về."
     },
+    "model": {
+      "plain": "Tôi chưa có câu trả lời sẵn cho việc này từ các lượt và lộ trình của bạn.",
+      "working": "Tôi đang tìm thêm bằng lời của mình…",
+      "stop": "Dừng",
+      "gettingReady": "Đang chuẩn bị…",
+      "reading": "Đây là cách tôi hiểu câu hỏi của bạn. Sẽ không có gì xảy ra cho đến khi bạn bấm."
+    },
     "footer": {
+      "choice": "Trả lời từ các lượt và lộ trình của bạn, và bằng lời riêng của mô hình trên máy tính này. Không gì rời khỏi máy.",
       "model": "Do mô hình trên máy tính này trả lời. Những gì bạn gõ không rời khỏi máy.",
       "local": "Những gì bạn gõ ở đây không rời khỏi máy tính này.",
       "phone": "Những gì bạn gõ ở đây không rời khỏi điện thoại này."

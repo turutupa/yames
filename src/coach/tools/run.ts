@@ -148,13 +148,6 @@ function guarded<T extends RunOutcome>(name: string, run: () => T): T | Refusal 
  */
 const issued = new WeakMap<Proposal, unknown>();
 
-/**
- * The proposals minted for a `go` tool the model chose (leg c3b2a): a `go`
- * tool that does not leave a sound behind runs at once from a chip or a typed
- * command, so only these may be confirmed as a `go` tool that does not leave.
- */
-const modelGo = new WeakSet<Proposal>();
-
 function mint(
   tool: CoachTool,
   args: ToolArgs,
@@ -258,9 +251,8 @@ function proposeGo(tool: ActTool, args: ToolArgs, host: CoachToolHost, ctx: Coac
   if (!dry.ok || !dry.undo) return dry;
   const stops = tool.leaves && target !== null ? host.sounding(target) : null;
   const key = dry.receipt.key.replace(/^coachTools\.receipt\./, "coachTools.propose.");
-  const minted = mint(tool, args, { line: line(key, stops ? { ...dry.receipt.values, stops } : dry.receipt.values), resolved: Object.freeze({ ...args }) });
-  modelGo.add(minted.proposal);
-  return minted;
+  // Every `go` tool leaves (`leaves: true`), so `confirmCoachTool` runs this proposal's press as it runs runGo's.
+  return mint(tool, args, { line: line(key, stops ? { ...dry.receipt.values, stops } : dry.receipt.values), resolved: Object.freeze({ ...args }) });
 }
 
 /** Who made a call: a chip or a typed command (`player`), or the model's choice (`model`). */
@@ -463,9 +455,8 @@ export function confirmCoachTool(
   if (!issued.has(proposal)) return refuse("refused", "coachTools.why.refused.proposal", {}, { detail: "not a live proposal" });
   const resolved = issued.get(proposal);
   issued.delete(proposal);
-  const fromModel = modelGo.delete(proposal);
   const tool = registry.find((t) => t.name === proposal.tool);
-  if (!tool || !(tool.kind === "confirm" || (tool.kind === "go" && (tool.leaves || fromModel)))) {
+  if (!tool || !(tool.kind === "confirm" || (tool.kind === "go" && tool.leaves))) {
     return refuse("refused", "coachTools.why.refused.proposal", {}, { detail: "no such confirm tool" });
   }
   const wrong = checkContext(tool, ctx);
@@ -478,7 +469,6 @@ export function confirmCoachTool(
 /** Drop a proposal the player turned down ("Not now"), so it can never be confirmed. */
 export function dismissProposal(proposal: Proposal): void {
   issued.delete(proposal);
-  modelGo.delete(proposal);
 }
 
 /**

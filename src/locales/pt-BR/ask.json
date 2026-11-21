@@ -41,7 +41,15 @@
       "phone": "Os celulares ainda não executam um modelo, então as perguntas digitadas não podem ser respondidas aqui.",
       "nothing": "Nenhuma resposta voltou desta vez."
     },
+    "model": {
+      "plain": "Não tenho uma resposta pronta para isso nas suas tomadas ou trilhas.",
+      "working": "Procurando mais com minhas próprias palavras…",
+      "stop": "Parar",
+      "gettingReady": "Preparando…",
+      "reading": "Como entendi sua pergunta. Nada acontece até você pressionar."
+    },
     "footer": {
+      "choice": "Respostas das suas tomadas e trilhas e, com palavras próprias, do modelo neste computador. Nada sai dele.",
       "model": "Respondido pelo modelo neste computador. Nada do que você digita sai dele.",
       "local": "Nada do que você digita aqui sai deste computador.",
       "phone": "Nada do que você digita aqui sai deste celular."

@@ -41,7 +41,15 @@
       "phone": "I telefoni non eseguono ancora un modello, quindi qui le domande scritte non hanno risposta.",
       "nothing": "Questa volta non è arrivata nessuna risposta."
     },
+    "model": {
+      "plain": "Non ho una risposta pronta a questo dalle tue take o dai tuoi percorsi.",
+      "working": "Cerco altro con parole mie…",
+      "stop": "Ferma",
+      "gettingReady": "Mi preparo…",
+      "reading": "Come ho capito la tua domanda. Non succede nulla finché non premi."
+    },
     "footer": {
+      "choice": "Risposte dalle tue take e dai tuoi percorsi e, con parole proprie, dal modello su questo computer. Niente ne esce.",
       "model": "Risposta del modello su questo computer. Niente di ciò che scrivi ne esce.",
       "local": "Niente di ciò che scrivi qui lascia questo computer.",
       "phone": "Niente di ciò che scrivi qui lascia questo telefono."

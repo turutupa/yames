@@ -41,7 +41,15 @@
       "phone": "Los móviles aún no ejecutan un modelo, así que aquí no se pueden responder preguntas escritas.",
       "nothing": "Esta vez no llegó ninguna respuesta."
     },
+    "model": {
+      "plain": "Para eso no tengo una respuesta lista en tus tomas ni en tus rutas.",
+      "working": "Buscando algo más con mis propias palabras…",
+      "stop": "Detener",
+      "gettingReady": "Preparándome…",
+      "reading": "Así he entendido lo que preguntaste. No pasa nada hasta que pulses."
+    },
     "footer": {
+      "choice": "Respuestas de tus tomas y tus rutas y, con sus propias palabras, del modelo de este ordenador. Nada sale de él.",
       "model": "Respondido por el modelo de este ordenador. Nada de lo que escribes sale de él.",
       "local": "Nada de lo que escribes aquí sale de este ordenador.",
       "phone": "Nada de lo que escribes aquí sale de este móvil."
