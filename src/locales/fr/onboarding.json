@@ -87,7 +87,7 @@
       "studioNeedsRam": "Studio demande au moins 16 Go de RAM — cette machine en a {{gb}}.",
       "standardNeedsRam": "Le modèle Standard demande au moins 8 Go de RAM — cette machine en a {{gb}}.",
       "unavailableInBuild": "Indisponible dans cette version.",
-      "reasonNoLlm": "Cette version ne peut pas exécuter de modèle : le retour de timing est le choix honnête ici.",
+      "reasonNoLlm": "Cette version ne peut pas exécuter de modèle : Désactivé est le choix honnête ici.",
       "reasonLowMemory": "Cette machine a {{gb}} Go de RAM — pas assez pour faire tourner un modèle confortablement.",
       "reasonInstalled": "Déjà téléchargé sur cette machine — rien à récupérer.",
       "downloadNote": "Le téléchargement démarre quand tu continues et se poursuit en arrière-plan.",

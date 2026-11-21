@@ -148,13 +148,13 @@
       "answersRuleMade": "코치는 테이크와 코스를 바탕으로 답해요.",
       "answersLangs": "자체 표현으로 답하는 언어: {{langs}}.",
       "notebook": {
-        "leftOutTitle": "뺀 줄",
-        "empty": "뺀 줄이 없어요.",
+        "leftOutTitle": "뺀 항목",
+        "empty": "뺀 항목이 없어요.",
         "leftOutOn": "{{date}}에 뺌",
-        "bringBack": "되돌리기",
+        "bringBack": "다시 넣기",
         "broughtBack": "노트에 다시 넣었어요.",
-        "lineGone": "최근 테이크에는 더 이상 나타나지 않는 줄",
-        "comesBack": "뺀 줄은 30일 뒤 저절로 돌아와요. 삭제되는 것은 없어요."
+        "lineGone": "최근 테이크에는 더 이상 나타나지 않는 항목",
+        "comesBack": "뺀 항목은 30일 뒤 저절로 돌아와요. 삭제되는 것은 없어요."
       }
     },
     "general": {

@@ -87,7 +87,7 @@
       "studioNeedsRam": "Studioには16 GB以上のRAMが必要です。この端末は{{gb}} GBです。",
       "standardNeedsRam": "スタンダードのモデルには8 GB以上のRAMが必要です。この端末は{{gb}} GBです。",
       "unavailableInBuild": "このビルドでは利用できません。",
-      "reasonNoLlm": "このビルドはモデルを実行できないため、タイミング表示のみが正直な選択です。",
+      "reasonNoLlm": "このビルドはモデルを実行できないため、オフが正直な選択です。",
       "reasonLowMemory": "この端末のRAMは{{gb}} GBで、モデルを快適に動かすには足りません。",
       "reasonInstalled": "この端末にダウンロード済みです。取得するものはありません。",
       "downloadNote": "次に進むとダウンロードが始まり、バックグラウンドで続きます。",

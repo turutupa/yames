@@ -87,7 +87,7 @@
       "studioNeedsRam": "Studio heeft minstens 16 GB RAM nodig — deze computer heeft {{gb}} GB.",
       "standardNeedsRam": "Het Standaard-model heeft minstens 8 GB RAM nodig — deze computer heeft {{gb}} GB.",
       "unavailableInBuild": "Niet beschikbaar in deze build.",
-      "reasonNoLlm": "Deze build kan geen model draaien, dus timingfeedback is hier de eerlijke keuze.",
+      "reasonNoLlm": "Deze build kan geen model draaien, dus Uit is hier de eerlijke keuze.",
       "reasonLowMemory": "Deze computer heeft {{gb}} GB RAM — te weinig om een model comfortabel te draaien.",
       "reasonInstalled": "Staat al op deze computer — niets op te halen.",
       "downloadNote": "De download begint zodra je verdergaat en loopt op de achtergrond door.",

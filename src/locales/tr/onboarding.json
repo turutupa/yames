@@ -69,7 +69,7 @@
       "title": "Çalışma koçu",
       "what1": "Koç denemelerini ve yollarını okur: sana Bugün'ün satırını, her denemeden sonra bir not verir ve sorduğunda yanıt verir.",
       "question": "Koç kendi sözleriyle de yanıt versin mi?",
-      "withoutModel": "Kapalıyken de satırı, notu, araçları ve denemelerinden ile yollarından yanıtları alırsın.",
+      "withoutModel": "Kapalıyken de satırı, notu, araçları ve denemelerine ve yollarına dayanan yanıtları alırsın.",
       "privacy": "Her şey bu bilgisayarda çalışır. Sesin dışarı çıkmaz, yayın sürümleri kayıt yapmaz.",
       "recommended": "Önerilen",
       "off": {
@@ -87,7 +87,7 @@
       "studioNeedsRam": "Studio en az 16 GB RAM ister — bu bilgisayarda {{gb}} GB var.",
       "standardNeedsRam": "Standart model en az 8 GB RAM ister — bu bilgisayarda {{gb}} GB var.",
       "unavailableInBuild": "Bu sürümde kullanılamaz.",
-      "reasonNoLlm": "Bu sürüm model çalıştıramıyor; burada dürüst seçim zamanlama geri bildirimi.",
+      "reasonNoLlm": "Bu sürüm model çalıştıramıyor; burada dürüst seçim Kapalı.",
       "reasonLowMemory": "Bu bilgisayarda {{gb}} GB RAM var — bir modeli rahat çalıştırmaya yetmez.",
       "reasonInstalled": "Bu bilgisayarda zaten indirilmiş — alınacak bir şey yok.",
       "downloadNote": "İndirme devam ettiğinde başlar ve arka planda sürer.",
