@@ -72,4 +72,14 @@ Session of all. That is what the decision asks; if the owner reads it as untrue,
 
 ## Gates (logs under `/tmp/coach-t2bb/`)
 
-See the final section, filled in as they run.
+- `npx tsc --noEmit`: pass (coach-t2bb-tsc-3).
+- `npm run test` (coach-t2bb-vitest, `vitest.log`): 49,083 passed, 439 of 440 files; the one file is the
+  known `TabStage.render.test.tsx` (symlink).
+- `npm run build`: pass (coach-t2bb-build).
+- Layout, `YAMES_LAYOUT_PORT=7471` (7777 is held by an unrelated python service): my-exercises,
+  paths-prereq, phone-learning, short-window, today-line, planner: 369 passed (coach-t2bb-layout,
+  `layout.log`). The phone-learning "footer is one row after a Watch at 360px" test alone, three times
+  (`--repeat-each 3`, both scenes): 6 of 6 passed (`footer.log`). The 1 px failure t2b saw under load did not
+  come back.
+- Mutation check: with `pathSessionCount` put back to count every Take, the planner test fails (`mut.log`).
+- Not run: the full layout suite (the orchestrator's); `test:rust` (no Rust changed).
