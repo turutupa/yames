@@ -53,9 +53,10 @@ test.describe("the reminder on Today, on a computer", () => {
     test(`above the line, whole, at ${size.width} in ${theme}${dock ? " with Ask docked" : ""}`, async ({ page }) => {
       await openShot(page, "today-line", size, theme, { reminder: "on" });
       if (dock) {
-        // The dock open beside Today (the coach's Ask, as the header opens it).
-        const ask = page.getByTestId("header-ask");
-        if ((await ask.count()) > 0) await ask.first().click();
+        // The dock open beside Today: Ask, from the rail's row (as ask.spec opens it).
+        await page.locator(".rail-footer .rail-action").first().click();
+        await expect(page.locator(".ask-panel")).toBeVisible();
+        await page.waitForTimeout(260); // the panel's own slide-in
       }
       await reminderWhole(page);
       await expect(page.getByTestId("today-reminder")).toHaveText(/^Your reminder: guitar at .+\.$/);
