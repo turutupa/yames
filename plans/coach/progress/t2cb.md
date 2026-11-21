@@ -21,4 +21,12 @@ Branch `coach-t2c` (same worktree). Logs and messages under `/tmp/coach-t2cb/`.
 
 ## Gates
 
-(filled in after the merge of `coach`)
+After `merge(coach): into coach-t2c` (conflicts: `askTools.ts`, where `runAskCallAs` and coach's `modelCallBody` / Take listeners were both kept; `AskToolTurn.tsx`, where the proposal shows the model's "reading" line, then the preview). The grammar fixture regenerated with `UPDATE_CHOICE_GRAMMAR=1`: no change. Choice prefix: 1,342 tokens (tools and format 1,095 of 1,100; the 7 cards 245).
+
+- tsc: pass (coach-t2cb-tsc-2).
+- vitest full (coach-t2cb-test): 50,502 passed, 10 skipped; 1 file failed: the known `TabStage.render.test.tsx` (node_modules symlink). Training-file and held-out tests pass with `make_exercise` in the registry.
+- build: pass (coach-t2cb-build).
+- Rust precheck `the_generated_choice_grammar_passes_the_precheck`: ok (coach-t2cb-rust-gbnf).
+- layout `ask`, `ask-tools`, `ask-typed` (port 7495, lock coach-layout): 39 passed (coach-t2cb-layout).
+
+A model call to `make_exercise` (coach's `modelCallBody`) does not wait for the generator as a typed one does: before the first load it is refused ("loading") and the rule-made answer stands.
