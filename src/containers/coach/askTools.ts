@@ -25,6 +25,7 @@ import type { ResolvedBlock } from "../../coach/blocks/resolve";
 import { commandFacts, type CommandFacts } from "../../coach/ask/router";
 import { getCoachToolHost, type CoachToolHost } from "../../coach/tools/host";
 import { resolveStepCall } from "../../coach/tools/go";
+import { exerciseGenerator, loadExerciseGenerator } from "../../coach/tools/make";
 import { findTool } from "../../coach/tools/registry";
 import { resolvePath, wholeTitleWords } from "../../coach/tools/resolve";
 import {
@@ -82,6 +83,8 @@ export type ToolBody =
       /** The app is still finding out (a preset being re-read): the receipt says it is at it. */
       settling?: boolean;
       blocks?: readonly ResolvedBlock[];
+      /** Where to go next (`ToolDone.next`, leg t2c: "Open My exercises"). */
+      next?: readonly ToolChoice[];
       undo: UndoState | null;
     }
   | {
@@ -208,6 +211,7 @@ function bodyOf(outcome: RunOutcome, host: CoachToolHost, ctx: CoachContext, chi
     receipt: outcome.receipt,
     ...(outcome.later ? { settling: true } : {}),
     ...(outcome.blocks ? { blocks: outcome.blocks } : {}),
+    ...(outcome.next && outcome.next.length > 0 ? { next: outcome.next } : {}),
     // The step as `useAskHost` says it to `noteAskToolView`: null outside a running Session.
     undo: undoOf(outcome, host, Date.now(), chip ? { step: ctx.run && ctx.run.phase !== "idle" ? ctx.run.stepIndex : null } : undefined),
   };
@@ -219,10 +223,38 @@ function followLater(id: string, outcome: RunOutcome): void {
   void outcome.later.then((settled) => {
     // Only the settled line, applied to the turn as it is when written (it may be
     // held through a Take, and the turn may have changed meanwhile).
-    settleAskTurn(id, (turn) =>
-      turn.kind === "tool" && turn.body.kind === "receipt" ? { ...turn, body: { ...turn.body, receipt: settled, settling: false } } : null,
-    );
+    settleAskTurn(id, (turn) => {
+      if (turn.kind !== "tool" || turn.body.kind !== "receipt") return null;
+      // It settled as a refusal (leg t2c: the store did not keep it): nothing to undo, nowhere to go.
+      if (settled.key.startsWith("coachTools.why.") && turn.body.undo) {
+        retireUndo(turn.body.undo.call);
+        return { ...turn, body: { ...turn.body, next: undefined, receipt: settled, settling: false, undo: { ...turn.body.undo, state: "gone" } } };
+      }
+      return { ...turn, body: { ...turn.body, receipt: settled, settling: false } };
+    });
   });
+}
+
+/**
+ * A `make_exercise` call (leg t2c) waits for the generator, which is not in the
+ * shell's first load: loaded once, then the call runs as it would have. Any
+ * other call runs at once.
+ */
+function withGenerator(call: ToolCall, run: () => void): boolean {
+  if (call.tool !== "make_exercise" || exerciseGenerator()) return false;
+  void loadExerciseGenerator().then(run, run);
+  return true;
+}
+
+/** A newer `make_exercise` proposal replaces the open one (a variant chip, a recipe typed again): it is retired through the runner. */
+function retireOlderMakes(outcome: RunOutcome): void {
+  if (!outcome.ok || !("proposal" in outcome) || outcome.proposal.tool !== "make_exercise") return;
+  for (const turn of getAskState().turns) {
+    if (turn.kind !== "tool" || turn.body.kind !== "proposal" || turn.body.state !== "open") continue;
+    if (turn.body.proposal.tool !== "make_exercise") continue;
+    dismissProposal(turn.body.proposal);
+    setBody(turn.id, { ...turn.body, state: "expired" });
+  }
 }
 
 function turnOf(id: string): (AskTurn & { kind: "tool" }) | null {
@@ -247,16 +279,22 @@ const unavailable = (): ToolBody => ({ kind: "refusal", line: line("coachTools.w
 export function runAskCall(call: ToolCall, said: string): string {
   if (said.trim()) appendAskTurn({ id: askTurnId(), kind: "user", text: said.trim() });
   const id = askTurnId();
-  const at = where();
-  if (!at) {
-    appendAskTurn({ id, kind: "tool", body: unavailable() });
-    return id;
-  }
-  writeOutcome(id, runCoachTool(call, at.host, at.ctx), at);
+  if (withGenerator(call, () => runAskCallAs(id, call))) return id;
+  runAskCallAs(id, call);
   return id;
 }
 
+function runAskCallAs(id: string, call: ToolCall): void {
+  const at = where();
+  if (!at) {
+    appendAskTurn({ id, kind: "tool", body: unavailable() });
+    return;
+  }
+  writeOutcome(id, runCoachTool(call, at.host, at.ctx), at);
+}
+
 function writeOutcome(id: string, outcome: RunOutcome, at: { host: CoachToolHost; ctx: CoachContext }): void {
+  retireOlderMakes(outcome);
   appendAskTurn({ id, kind: "tool", body: bodyOf(outcome, at.host, at.ctx) });
   followLater(id, outcome);
 }
@@ -492,6 +530,8 @@ function nameNotFound(outcome: Refusal): boolean {
  * is still the answer (review t1b2c, finding 2).
  */
 export function runTypedCall(call: ToolCall, said: string): boolean {
+  // `make_exercise` names nothing by title, so it is always the answer: run once the generator is in.
+  if (withGenerator(call, () => runTypedCall(call, said))) return true;
   const at = where();
   if (!at) {
     runAskCall(call, said);
@@ -629,7 +669,6 @@ export function pressProposal(id: string): void {
   setBody(id, bodyOf(result, at.host, at.ctx));
   followLater(id, result);
 }
-
 /** "Not now": the proposal can never be confirmed, and nothing happens. */
 export function notNowProposal(id: string): void {
   const turn = turnOf(id);
@@ -658,6 +697,14 @@ export function pressUndo(id: string): void {
   const result = runCoachUndo(undo.call, at.host, at.ctx);
   if (result.ok) {
     setBody(id, { ...body, undo: { ...undo, state: "done", note: result.receipt } });
+    // An Undo the app finishes a moment later (leg t2c: the store's write): its note says how it went.
+    void result.later?.then((settled) =>
+      settleAskTurn(id, (turn) =>
+        turn.kind === "tool" && turn.body.kind === "receipt" && turn.body.undo
+          ? { ...turn, body: { ...turn.body, undo: { ...turn.body.undo, state: settled.key.startsWith("coachTools.why.") ? "refused" : "done", note: settled } } }
+          : null,
+      ),
+    );
     return;
   }
   // Not now (a Take, the click still playing): it stays good, and says why.

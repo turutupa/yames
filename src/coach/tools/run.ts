@@ -159,6 +159,7 @@ function mint(
     line: proposed.line,
     ...(proposed.plan ? { plan: proposed.plan } : {}),
     ...(proposed.noUndo ? { noUndo: true as const } : {}),
+    ...(proposed.preview ? { preview: proposed.preview } : {}),
   });
   issued.set(proposal, proposed.resolved);
   return { ok: true, proposal };

@@ -47,6 +47,7 @@ import {
 import i18n, { getLanguages } from "../../i18n";
 import { listPresets as listPresetsIpc, storeSave } from "../../ipc";
 import { findExercise } from "../../session/packs";
+import { addRecipeToMyExercises, undoAddedRecipe } from "../../session/myExerciseDoor";
 import { loopAsked, tempoNudges } from "../../session/runner";
 import { THEMES } from "../../themes";
 import type { Preset, Subdivision, VoiceMode } from "../../types";
@@ -239,6 +240,9 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
     },
     // `startLoop` answers null only when the reducer took the loop (lb1b L4): only then "done".
     loopBars: (fromBar, toBar) => session().actions.startLoop({ fromBar, toBar }) ?? "done",
+    // My exercises (leg t2c): the store's one writer, through `myExerciseDoor.ts`.
+    addMyExercise: (recipe, addedAt) => addRecipeToMyExercises(recipe, addedAt),
+    undoAddedExercise: (key, addedAt) => undoAddedRecipe(key, addedAt),
     findEdge: (pathId, exerciseId) => {
       const { path, step, exercise } = exerciseOf(pathId, exerciseId);
       session().actions.findEdge(path, step, exercise);

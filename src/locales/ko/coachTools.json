@@ -31,7 +31,11 @@
       "loadAsked": "Yames가 먼저 저장하지 않은 변경 사항에 대해 물었어요. 답할 때까지 아무것도 불러오지 않아요.",
       "clickSubdivision": "한 박당 클릭: {{to}}",
       "setSetting": "{{key}}: {{to}}",
-      "setGoal": "목표를 저장했어요: “{{to}}”"
+      "setGoal": "목표를 저장했어요: “{{to}}”",
+      "makeExercise": "Added {{what}} to My exercises.",
+      "makeExerciseAdding": "Adding {{what}} to My exercises…",
+      "undoMakeExercise": "Taken back out of My exercises.",
+      "undoMakeExerciseDoing": "Taking it back out of My exercises…"
     },
     "propose": {
       "goTo": "{{screen}}을(를) 열까요?",
@@ -62,7 +66,9 @@
       "clickSubdivision": "한 박당 클릭: {{from}} → {{to}}",
       "setSetting": "{{key}}: {{from}} → {{to}}",
       "setGoal": "이것을 목표로 저장: “{{to}}”",
-      "setGoalFrom": "목표를 “{{from}}”에서 “{{to}}”(으)로 변경"
+      "setGoalFrom": "목표를 “{{from}}”에서 “{{to}}”(으)로 변경",
+      "makeExercise": "Add it to My exercises",
+      "undoMakeExercise": "Take it back out of My exercises"
     },
     "stops": {
       "click": "클릭이 멈춰요.",
@@ -120,7 +126,8 @@
       "keep": "저장",
       "go": "이동",
       "open": "열기",
-      "loop": "반복"
+      "loop": "반복",
+      "add": "Add it"
     },
     "why": {
       "which": "어느 쪽인가요?",
@@ -181,7 +188,37 @@
         "cap": "코스 {{cap}}개를 따라가고 있어요. 최대치예요. 먼저 하나를 해당 페이지에서 그만두세요.",
         "loopBackwards": "{{to}}번째 마디는 {{from}}번째 마디보다 앞이에요. 시작 마디를 먼저 말해 주세요."
       },
-      "failed": "되지 않았고, 아무것도 바뀌지 않았어요."
+      "failed": "되지 않았고, 아무것도 바뀌지 않았어요.",
+      "make": {
+        "what": "Say what to make: a scale or a chord, and its root. For example “A minor pentatonic, 5th fret”.",
+        "root": "Say its root too: for example “A minor pentatonic”.",
+        "chord": "Say which chord the arpeggio is: for example “A minor 7 arpeggio”.",
+        "needScale": "Say which scale: for example “A minor pentatonic”.",
+        "scale": "The app can't make an exercise in {{scale}} yet. It makes the minor and major pentatonic, blues, major, natural and harmonic minor, dorian and mixolydian.",
+        "boxScale": "A box is for the minor pentatonic, the major pentatonic and blues, not {{scale}}.",
+        "threeScale": "Three notes a string is for major, natural minor, harmonic minor, dorian and mixolydian, not {{scale}}.",
+        "mixed": "That names a scale and a chord at once, or one that shape doesn't take. Say one.",
+        "noShapeHere": "That shape doesn't start at fret {{fret}}.",
+        "outOfRange": "From fret {{fret}} it runs off the end of the neck.",
+        "tooManyNotes_one": "One time through needs {{count}} bar.",
+        "tooManyNotes_other": "One time through needs {{count}} bars.",
+        "tooLong": "One time through needs more than {{count}} bars, the most an exercise can have.",
+        "tooFewNotes_one": "That's too few notes for so many bars: they fill {{count}} bar.",
+        "tooFewNotes_other": "That's too few notes for so many bars: they fill {{count}} bars.",
+        "unreachable": "No hand the app knows can play that fast enough to grade it.",
+        "notMade": "The app can't make that one.",
+        "loading": "The app is getting the exercise maker ready. Ask again in a moment.",
+        "full": "My exercises is full (50), so this one wasn't added. Remove one there first.",
+        "already": "That one is already on My exercises.",
+        "badRecipe": "The app can't make that one.",
+        "unreadable": "My exercises couldn't be read just now, so nothing was added.",
+        "failed": "My exercises couldn't be saved just now, so nothing was added.",
+        "undo": {
+          "gone": "It's no longer on My exercises.",
+          "unreadable": "My exercises couldn't be read just now, so it's still there.",
+          "failed": "My exercises couldn't be saved just now, so it's still there."
+        }
+      }
     },
     "yours": {
       "input": "이건 당신이 직접 하는 일이에요. 코치는 입력을 켜거나 끄지 않아요. 도구의 듣기와 세션 바가 하고, 입력은 설정에 있어요.",
@@ -255,6 +292,24 @@
         "neck": "넥",
         "runway": "런웨이",
         "tab": "탭"
+      }
+    },
+    "make": {
+      "source": "Worked out by the app",
+      "graded": "Starts at {{bpm}} BPM. Timing and notes heard can be graded; the rest is yours.",
+      "startsOn": "Starts on {{note}}: string {{string}}, fret {{fret}}.",
+      "startsOnString": "Starts on string {{string}}, fret {{fret}}.",
+      "notesLabel": "{{n}} notes, frets {{from}} to {{to}}",
+      "openList": "Open My exercises",
+      "chip": {
+        "fret": "Fret {{fret}}",
+        "bars_one": "{{count}} bar",
+        "bars_other": "{{count}} bars",
+        "quarters": "Quarter notes instead",
+        "eighths": "Eighths instead",
+        "eighthTriplets": "Triplets instead",
+        "sixteenths": "Sixteenths instead",
+        "nextPosition": "Next position"
       }
     }
   }

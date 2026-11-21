@@ -157,6 +157,17 @@ type Compiled = {
   notCommand: Phrases;
   polite: Phrases;
   fillers: Phrases;
+  /** `make_exercise`'s recipe words (leg t2c), or null: the language types no recipe. */
+  recipe: CompiledRecipe | null;
+};
+
+type CompiledRecipe = {
+  shapes: Array<{ id: string; words: Toks }>;
+  chords: Array<{ id: string; words: Toks }>;
+  subdivisions: Array<{ id: string; words: Toks }>;
+  directions: Array<{ id: string; words: Toks }>;
+  fret: readonly Place[];
+  numberSuffixes: readonly string[];
 };
 
 const compiledTables = new WeakMap<CommandTable, Compiled>();
@@ -212,6 +223,16 @@ function compile(table: CommandTable): Compiled {
     notCommand: phrases(table.notCommand),
     polite: phrases(table.polite),
     fillers: phrases(table.fillers),
+    recipe: table.recipe
+      ? {
+          shapes: entries(table.recipe.shapes ?? {}),
+          chords: entries(table.recipe.chords ?? {}),
+          subdivisions: entries(table.recipe.subdivisions ?? {}),
+          directions: entries(table.recipe.directions ?? {}),
+          fret: places(table.recipe.fret),
+          numberSuffixes: (table.recipe.numberSuffixes ?? []).map(phraseKey),
+        }
+      : null,
   };
   compiledTables.set(table, compiled);
   return compiled;
@@ -717,12 +738,132 @@ function parseVerb(id: VerbId, rest: Toks, c: Compiled, f: CommandFacts): Parsed
       return q.length === 0 || c.nouns.screen.some((p) => equals(q, p)) ? [call("explain_screen")] : null;
     }
     case "make": {
-      const q = skip(rest, c.fillers);
-      if (q.length === 0 || (!c.noSpaces && q.length > 8)) return null;
-      const shape = joinToks(q, c);
-      return shape.length <= QUERY_CHARS ? [call("make_exercise", { shape })] : null;
+      const made = recipeCall(rest, c, true);
+      return made ? [made] : null;
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// A recipe (leg t2c): "a minor pentatonic eighths 5th fret"
+// ---------------------------------------------------------------------------
+
+/** The most a typed position may be (`make_exercise`'s `position`). */
+const MAX_RECIPE_FRET = 15;
+const MAX_RECIPE_BARS = 8;
+
+/** A number, or one written as an ordinal ("5th") with the table's suffixes. */
+function ordinalNum(token: string | undefined, r: CompiledRecipe): number | null {
+  const n = num(token);
+  if (n !== null || token === undefined) return n;
+  const m = /^(\d{1,4})(\p{L}+)$/u.exec(token);
+  return m && r.numberSuffixes.includes(m[2]) ? Number(m[1]) : null;
+}
+
+/** "fret 5", "5th fret", "position 5" at the start of `t`: the fret and what follows. */
+function fretAt(t: Toks, r: CompiledRecipe): { n: number; rest: Toks } | null {
+  for (const p of r.fret) {
+    if (p.pre.length > 0 && !startsWith(t, p.pre)) continue;
+    const n = ordinalNum(t[p.pre.length], r);
+    if (n === null) continue;
+    const end = p.pre.length + 1;
+    if (p.post.length > 0 && !startsWith(t, p.post, end)) continue;
+    return { n, rest: t.slice(end + p.post.length) };
+  }
+  return null;
+}
+
+/**
+ * The text read as a recipe, every word accounted for: a root and its scale
+ * (or, with an arpeggio word, its chord), a shape, a subdivision, a direction,
+ * the fret it starts at, a number of bars, the word "exercise", and fillers
+ * and connectors between them. `reading` says whether the words after the root
+ * are a scale or a chord ("a minor" is both).
+ */
+function recipeAs(t: Toks, c: Compiled, r: CompiledRecipe, reading: "scale" | "chord", made: boolean): ToolCall | null {
+  const args: Record<string, string | number> = {};
+  // Without a verb, a recipe needs a word only an exercise has: "a minor pentatonic" alone is a scale, not a request.
+  let exerciseWord = made;
+  const once = (name: string, value: string | number): boolean => {
+    if (name in args) return false;
+    args[name] = value;
+    return true;
+  };
+  const glue = [...c.fillers, ...c.connectors.at, ...c.connectors.of, ...c.connectors.for];
+  let q = t;
+  while (q.length > 0) {
+    if (args.root === undefined) {
+      const root = rootAt(q, c);
+      const music = root ? leadId(root.rest, reading === "scale" ? c.scales : r.chords) : null;
+      // "a chromatic exercise": the shape with no key, not A's chromatic scale.
+      if (root && music && music.id !== "chromatic") {
+        args.root = root.name;
+        args[reading] = music.id;
+        q = skip(music.rest, c.nouns.scale);
+        continue;
+      }
+    }
+    const shape = leadId(q, r.shapes);
+    if (shape) {
+      if (!once("shape", shape.id)) return null;
+      exerciseWord = true;
+      q = shape.rest;
+      continue;
+    }
+    const sub = leadId(q, r.subdivisions);
+    if (sub) {
+      if (!once("subdivision", sub.id)) return null;
+      exerciseWord = true;
+      q = sub.rest;
+      continue;
+    }
+    const dir = leadId(q, r.directions);
+    if (dir) {
+      if (!once("direction", dir.id)) return null;
+      exerciseWord = true;
+      q = dir.rest;
+      continue;
+    }
+    const fret = fretAt(q, r);
+    if (fret) {
+      if (fret.n > MAX_RECIPE_FRET || !once("position", fret.n)) return null;
+      exerciseWord = true;
+      q = fret.rest;
+      continue;
+    }
+    const bars = num(q[0]);
+    const barsRest = bars === null ? null : after(q.slice(1), c.units.bar);
+    if (bars !== null && barsRest) {
+      if (bars < 1 || bars > MAX_RECIPE_BARS || !once("bars", bars)) return null;
+      exerciseWord = true;
+      q = barsRest;
+      continue;
+    }
+    const noun = after(q, c.nouns.exercise);
+    if (noun) {
+      exerciseWord = true;
+      q = noun;
+      continue;
+    }
+    const filler = after(q, glue);
+    if (filler) {
+      q = filler;
+      continue;
+    }
+    return null;
+  }
+  if (!exerciseWord) return null;
+  // The chord reading is only an arpeggio's; the scale reading never is.
+  if (reading === "chord" ? args.shape !== "arpeggio" || args.chord === undefined : args.shape === "arpeggio") return null;
+  // Something to make: a root and its scale or chord, or the one shape with no key. A bare shape is the tool's to ask about.
+  if (args.root === undefined && args.shape !== "chromatic" && !(made && args.shape !== undefined)) return null;
+  return call("make_exercise", args);
+}
+
+/** The recipe the words are, or null (not a recipe, or not in this language's table). */
+function recipeCall(t: Toks, c: Compiled, made: boolean): ToolCall | null {
+  if (!c.recipe || t.length === 0) return null;
+  return recipeAs(t, c, c.recipe, "scale", made) ?? recipeAs(t, c, c.recipe, "chord", made);
 }
 
 const SWAP_ORDER = ["harder", "different", "style"] as const;
@@ -795,7 +936,10 @@ function parseBare(t: Toks, c: Compiled, f: CommandFacts): Parsed {
   const screen = screenCall(t, c);
   if (screen) return [screen];
   const setting = settingCall(t, c);
-  return setting ? [setting] : null;
+  if (setting) return [setting];
+  // "a minor pentatonic eighths 5th fret" (leg t2c): a recipe with no verb, every word a recipe's.
+  const recipe = recipeCall(t, c, false);
+  return recipe ? [recipe] : null;
 }
 
 // ---------------------------------------------------------------------------

@@ -4,9 +4,8 @@
  * with the list on screen (`MyExercisesList`, lazy) or by a tool that adds one;
  * the store itself is `myExercises.ts`.
  */
-import type { TFunction } from "i18next";
 import { buildCustomExercise, recipeKey, recipeProblem } from "../paths/custom";
-import type { BuildResult, CustomSummary, Recipe } from "../paths/custom";
+import type { BuildResult, Recipe } from "../paths/custom";
 import { MY_EXERCISES_MAX } from "./myExercises";
 import type { MyExercise } from "./myExercises";
 
@@ -39,31 +38,5 @@ export function buildMyExercises(list: readonly MyExercise[]): Array<{ entry: My
   return list.map((entry) => ({ entry, built: buildCustomExercise(entry.recipe) }));
 }
 
-/** A chord as its symbol: written the same in every language the app speaks. */
-const CHORD_SUFFIX: Readonly<Record<string, string>> = {
-  maj: "",
-  min: "m",
-  dim: "dim",
-  aug: "+",
-  "7": "7",
-  maj7: "maj7",
-  m7: "m7",
-  m7b5: "m7♭5",
-  dim7: "dim7",
-};
-
-/** One line: what it is, where it starts and which way it goes, then its length. Never stored. */
-export function myExerciseLine(t: TFunction, s: CustomSummary): string {
-  const shape = t(`session.myExercises.shape.${s.shape}`, {
-    root: s.root ?? "",
-    scale: s.scale ? t(`scale.${s.scale}`) : "",
-    chord: s.chord !== null && s.root ? `${s.root}${CHORD_SUFFIX[s.chord] ?? s.chord}` : "",
-    position: s.position,
-    string: s.firstNote.string,
-  });
-  return t("session.myExercises.line", {
-    shape,
-    direction: t(`session.myExercises.direction.${s.direction}`),
-    bars: t("session.myExercises.bars", { count: s.bars }),
-  });
-}
+/** The words moved to the light `myExerciseWords.ts` (t2c: Ask's preview says them without the generator). */
+export { myExerciseLine } from "./myExerciseWords";

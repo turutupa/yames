@@ -14,6 +14,8 @@ import { memo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CoachBlocks } from "../../coach/blocks/CoachBlocks";
 import type { SessionPlan } from "../../session/planner";
+import type { ToolChoice } from "../../coach/tools/types";
+import { MakeExercisePreview } from "./MakeExercisePreview";
 import { lineText, stopsKey } from "./toolWords";
 import { NEVER_LIST } from "./neverList";
 import { noKeyRepeat, notNowProposal, onePress, pressProposal, pressUndo, runAskCall, showMeYours, undoLive, type ToolBody, type UndoState } from "./askTools";
@@ -40,6 +42,7 @@ const VERBS: Readonly<Record<string, string>> = {
   open_step: "open",
   open_settings: "open",
   loop_bars: "loop",
+  make_exercise: "add",
 };
 
 function Source({ words }: { words: string }) {
@@ -106,6 +109,7 @@ function Receipt({ id, body }: { id: string; body: ToolBody & { kind: "receipt" 
         </p>
       )}
       {body.blocks && body.blocks.length > 0 && <CoachBlocks className="ask-tool-blocks" blocks={body.blocks} />}
+      {body.next && body.next.length > 0 && !body.settling && <Choices choices={body.next} testId="ask-receipt-next" />}
       <Source words={t("coachTools.source.did")} />
     </div>
   );
@@ -129,7 +133,13 @@ function ProposalCard({ id, body }: { id: string; body: ToolBody & { kind: "prop
   const open = state === "open";
   return (
     <div className="ask-tool ask-proposal" data-testid="ask-proposal" data-state={state}>
+      {proposal.preview && <MakeExercisePreview preview={proposal.preview} />}
       <p className="ask-proposal-line">{lineText(t, proposal.line)}</p>
+      {proposal.preview && (
+        <p className="ask-proposal-fact" data-testid="ask-make-graded">
+          {t("coachTools.make.graded", { bpm: proposal.preview.summary.startBpm })}
+        </p>
+      )}
       {proposal.plan && <PlanList plan={proposal.plan} />}
       {stops && <p className="ask-proposal-fact" data-testid="ask-proposal-stops">{t(stops)}</p>}
       {proposal.noUndo && <p className="ask-proposal-fact" data-testid="ask-proposal-noundo">{t("coachTools.ui.noUndo")}</p>}
@@ -142,11 +152,30 @@ function ProposalCard({ id, body }: { id: string; body: ToolBody & { kind: "prop
             {t("coachTools.ui.notNow")}
           </button>
         </div>
-      ) : state === "expired" ? (
+      ) : null}
+      {open && proposal.preview && proposal.preview.variants.length > 0 && <Choices choices={proposal.preview.variants} testId="ask-make-variants" />}
+      {open ? null : state === "expired" ? (
         <p className="ask-tool-note" data-testid="ask-proposal-expired">{t("coachTools.why.refused.proposal")}</p>
       ) : (
         <p className="ask-tool-note" data-testid="ask-proposal-dismissed">{t("coachTools.ui.leftAsIs")}</p>
       )}
+    </div>
+  );
+}
+
+/** Chips that each make a full call (a "Which one?" choice, a variant, where to go next). */
+function Choices({ choices, testId }: { choices: readonly ToolChoice[]; testId: string }) {
+  const { t } = useTranslation();
+  return (
+    <div className="ask-chips" data-testid={testId}>
+      {choices.map((choice, i) => {
+        const words = lineText(t, choice.label);
+        return (
+          <button key={i} type="button" className="ask-chip" onClick={onePress(() => runAskCall(choice.call, words))} onKeyDown={noKeyRepeat} onKeyUp={noKeyRepeat}>
+            {words}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -159,18 +188,7 @@ function Refusal({ body }: { body: ToolBody & { kind: "refusal" } }) {
         <Mark kind="none" />
         <p className="ask-receipt-text">{lineText(t, body.line)}</p>
       </div>
-      {body.choices.length > 0 && (
-        <div className="ask-chips" data-testid="ask-choices">
-          {body.choices.map((choice, i) => {
-            const words = lineText(t, choice.label);
-            return (
-              <button key={i} type="button" className="ask-chip" onClick={onePress(() => runAskCall(choice.call, words))} onKeyDown={noKeyRepeat} onKeyUp={noKeyRepeat}>
-                {words}
-              </button>
-            );
-          })}
-        </div>
-      )}
+      {body.choices.length > 0 && <Choices choices={body.choices} testId="ask-choices" />}
       <Source words={t("coachTools.source.app")} />
     </div>
   );
