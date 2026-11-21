@@ -8,7 +8,7 @@
  * check the one thing this Path is about: that the note played was the note
  * meant. Naming the notes out loud is taught and cannot be heard.
  */
-import { definePath } from "../spec";
+import { definePath, withCues } from "../spec";
 import type { ExerciseSpec } from "../spec";
 import { STANDARD_TUNING } from "../format";
 import type { PassBar } from "../format";
@@ -16,6 +16,7 @@ import { pcOfName, scalePcs } from "../theory";
 import { handAt, ladder, moveChart, oneStringClimb, pentatonic, repeat, shiftFrets } from "../templates";
 import { CHORD_ROOTS, IN_BETWEEN, TOP_STRINGS_KEYS } from "./know-the-neck-more";
 import { BOXES_SECOND_KEY, CHANGES_IN_G, ROOTS_OTHER_KEYS } from "./know-the-neck-encore";
+import { KNOW_THE_NECK_CUES } from "./know-the-neck-cues";
 
 type Grading = Pick<ExerciseSpec, "grade" | "alsoGraded" | "pass">;
 
@@ -131,7 +132,7 @@ const THIRDS_LINE = `/2 3:5 3:5 | 4:7 4:7 | 2:5 2:5 | 3:4 3:4`;
 const ROOT_THIRD_FIFTH = `/4 4:7f3 3:5f1 2:5f1 3:5f1 | 5:8f4 4:7f3 3:5f1 4:7f3 | 3:5f1 2:5f1 2:8f4 2:5f1 | 4:5f2 3:4f1 3:7f4 3:4f1`;
 const LANDING_EXAMPLE = `/2 3:5 /8 2:5 3:7 3:5 4:7 | /2 4:7 /8 3:5 3:7 2:5 3:7 | /2 2:5 /8 2:8 2:5 3:7 3:5 | /2 3:4 /8 3:7 3:5 4:7 4:5`;
 
-export default definePath({
+export default withCues(definePath({
   id: "know-the-neck",
   title: "Know the Neck",
   kind: "theory",
@@ -1041,4 +1042,4 @@ export default definePath({
       ],
     },
   ],
-});
+}), KNOW_THE_NECK_CUES);
