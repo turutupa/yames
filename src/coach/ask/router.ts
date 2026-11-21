@@ -171,6 +171,8 @@ type CompiledRecipe = {
   numberSuffixes: readonly string[];
   /** A root's letter that is also an article (`RecipeWords.article`). */
   article: { words: readonly string[]; rootAfter: Phrases; rootBefore: Phrases };
+  /** A note's name this language writes otherwise (`RecipeWords.rootNames`): its root, or null (the line is not read). */
+  rootNames: ReadonlyMap<string, string | null>;
 };
 
 const compiledTables = new WeakMap<CommandTable, Compiled>();
@@ -238,6 +240,7 @@ function compile(table: CommandTable): Compiled {
             rootAfter: phrases(table.recipe.article?.rootAfter),
             rootBefore: phrases(table.recipe.article?.rootBefore),
           },
+          rootNames: new Map(Object.entries(table.recipe.rootNames ?? {}).map(([w, root]) => [phraseKey(w), root])),
         }
       : null,
   };
@@ -807,7 +810,7 @@ function recipeAs(t: Toks, c: Compiled, r: CompiledRecipe, reading: "scale" | "c
   let q = t;
   while (q.length > 0) {
     if (args.root === undefined && !keyless) {
-      const root = rootAt(q, c);
+      const root = recipeRootAt(q, c, r);
       const music = root ? leadId(root.rest, musicOf) : null;
       // "a chromatic exercise": the shape with no key, not A's chromatic scale.
       if (root && music && music.id !== "chromatic") {
@@ -900,7 +903,7 @@ function articleOrRoot(t: Toks, q: Toks, afterRoot: Toks, c: Compiled, r: Compil
   // "a minor pentatonic": read as A, unless the line names its key at the end (`trailingKey`).
   if (a.rootBefore.some((p) => startsWith(afterRoot, p))) return "guess";
   for (let i = 1; i < q.length; i++) {
-    const later = rootAt(q.slice(i), c);
+    const later = recipeRootAt(q.slice(i), c, r);
     if (later && leadId(later.rest, musicOf)) return "article";
   }
   return "keyless";
@@ -915,13 +918,26 @@ function trailingKey(q: Toks, c: Compiled, r: CompiledRecipe): string | null {
   const connectors = [...c.connectors.at, ...c.connectors.of, ...c.connectors.for].map((p) => p.join(" "));
   const lead = r.article.rootAfter.filter((p) => connectors.includes(p.join(" ")));
   const rest = lead.length > 0 ? after(q, lead) : null;
-  const root = rest ? rootAt(rest, c) : null;
+  const root = rest ? recipeRootAt(rest, c, r) : null;
   return root && root.rest.length === 0 ? root.name : null;
+}
+
+/** A root in a recipe: the language's own name for it (`rootNames`, leg t2d), else a letter (`rootAt`). */
+function recipeRootAt(t: Toks, c: Compiled, r: CompiledRecipe): { name: string; rest: Toks } | null {
+  const first = t[0];
+  if (first !== undefined && r.rootNames.has(first)) {
+    const name = r.rootNames.get(first);
+    return name ? { name, rest: t.slice(1) } : null;
+  }
+  return rootAt(t, c);
 }
 
 /** The recipe the words are, or null (not a recipe, or not in this language's table). */
 function recipeCall(t: Toks, c: Compiled, made: boolean): ToolCall | null {
   if (!c.recipe || t.length === 0) return null;
+  // A letter that names another note here than in English (German "b"): the key cannot be told, so the line is not read.
+  const unread = c.recipe.rootNames;
+  if (t.some((tok) => unread.has(tok) && unread.get(tok) === null)) return null;
   return recipeAs(t, c, c.recipe, "scale", made) ?? recipeAs(t, c, c.recipe, "chord", made);
 }
 

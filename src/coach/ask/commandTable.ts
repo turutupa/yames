@@ -17,7 +17,7 @@
  * file: no empty list, no phrase under two verbs, no never-list phrase that
  * is also a verb, and every id one the app knows.
  */
-import { NECK_POSITIONS, SCALE_NAMES } from "../blocks/spec";
+import { NECK_POSITIONS, ROOT_NAMES, SCALE_NAMES } from "../blocks/spec";
 import { SAFE_SETTING_KEYS, SETTINGS_SECTIONS } from "../tools/host";
 import { GO_TO_SCREENS } from "../tools/go";
 import { MAKE_CHORDS, MAKE_SHAPES, MAKE_SUBDIVISIONS } from "../tools/make";
@@ -144,9 +144,17 @@ export type RecipeWords = {
    * the key was never said ("make a blues exercise": the tool asks which).
    */
   article?: { words: Words; rootAfter?: Words; rootBefore?: Words };
+  /**
+   * Leg t2d. A note's name this language writes otherwise than English, read
+   * in a recipe only: a word to the app's root (`ROOT_NAMES`; German "h" is
+   * B, "fis" F#), or null for a letter that names another note here than in
+   * English (German "b" is B flat): a line holding it is not read as a recipe
+   * at all, since the key it means cannot be told.
+   */
+  rootNames?: Readonly<Record<string, string | null>>;
 };
 
-const RECIPE_IDS: Readonly<Record<Exclude<keyof RecipeWords, "fret" | "numberSuffixes" | "article">, readonly string[]>> = {
+const RECIPE_IDS: Readonly<Record<Exclude<keyof RecipeWords, "fret" | "numberSuffixes" | "article" | "rootNames">, readonly string[]>> = {
   shapes: MAKE_SHAPES,
   chords: MAKE_CHORDS,
   subdivisions: MAKE_SUBDIVISIONS,
@@ -192,6 +200,14 @@ function recipeProblems(recipe: RecipeWords | undefined): string[] {
     }
     if (recipe.article.rootAfter !== undefined) check("recipe.article.rootAfter", recipe.article.rootAfter);
     if (recipe.article.rootBefore !== undefined) check("recipe.article.rootBefore", recipe.article.rootBefore);
+  }
+  if (recipe.rootNames !== undefined) {
+    const names = Object.entries(recipe.rootNames ?? {});
+    if (names.length === 0) problems.push("recipe.rootNames is empty");
+    for (const [word, root] of names) {
+      if (word !== phraseKey(word) || word.includes(" ")) problems.push(`recipe.rootNames: "${word}" is not one lower-case word`);
+      if (root !== null && !ROOT_NAMES.includes(root)) problems.push(`recipe.rootNames.${word}: "${String(root)}" is not a root the app knows`);
+    }
   }
   return problems;
 }
