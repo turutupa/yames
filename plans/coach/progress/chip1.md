@@ -14,7 +14,7 @@ not undoable still goes through a proposal.
 | `src/coach/tools/registry.ts` | `CHIP_PRESS`: tool → why it qualifies; `COACH_TOOLS` copies `chipPress: true` onto exactly those entries. The table lives here because `practice.ts` (set_tempo) is lb1's tonight. |
 | `src/coach/tools/run.ts` | `chipPressable(tool)`; `pressCoachChip(call, host, ctx)`: shape check → `run` (Take, `when`, `propose`) → if flagged, no plan, no noUndo, and (in a Session) the phase is `ready` → `confirmCoachTool` on that very proposal (context again, `commit` re-checks screen and value). Otherwise the proposal, as `runCoachTool`. `undoStillGood(undo, host, ctx)` (live, same place, no Take, the undo's own `propose` still says yes; changes nothing). `retireUndo(undo)`. |
 | `src/coach/tools/play.ts`, `settings.ts` | `click_subdivision` and `set_setting` gain an optional `at` guard (as `set_tempo` had): their undo is `{..., at: <the value it left>}`, refused once the value moved. |
-| `src/containers/coach/askTools.ts` | `pressChip(call, said)` (the chip row's press); `UndoState.chip` / `step`; a chip's Undo has no clock; `noteAskUndos()` (retire chip Undos `undoStillGood` says no to; after every press in Ask), `noteAskTake()`, `noteAskToolView` retires a chip's Undo on another view or step; a second chip press retires the earlier live Undo of the same tool (and key). |
+| `src/containers/coach/askTools.ts` | `pressChip(call, said)` (the chip row's press); `UndoState.chip` / `step`; a chip's Undo has no clock; `noteAskUndos()` (retire chip Undos `undoStillGood` says no to; run only from `useAskHost`'s effect, not after a press: see chip1b.md), `noteAskTake()`, `noteAskToolView` retires a chip's Undo on another view or step; a second chip press retires the earlier live Undo of the same tool (and key). |
 | `src/containers/coach/useAskHost.ts` | Calls `noteAskTake()` when a Take starts and `noteAskUndos()` when the panel opens or the view / phase / Exercise / outcomes move (never per beat). |
 | `src/containers/coach/AskPanel.tsx` | Two lines: the import, and the chip row's `onClick` calls `pressChip` instead of `runAskCall`. |
 | Tests | `src/coach/tools/chipPress.test.ts` (new, the registry walk), `askTools.test.tsx` (+8), `AskPanel.test.tsx` (one test now presses Undo instead of a proposal), `play.test.ts` (undo args carry `at`), `tests/layout/ask-tools.spec.ts` (the Slower scenes; a Session scene). |
@@ -37,7 +37,7 @@ Not flagged: `start_today`, `play_exercise`, `find_edge`, `test_out` (sound star
 Offered (no ten-second clock) until the first of:
 
 - the value is changed again by anyone: checked by the runner (`undoStillGood`, the undo's `at` guard)
-  after every press in Ask and when the panel opens or the screen / phase / Exercise / outcomes move. A
+  when the panel opens or the screen / phase / Exercise / outcomes move (`useAskHost`'s effect only). A
   change made by hand while the panel stays open on the same screen is NOT seen until one of those
   moments; pressed in between, the runner's guard refuses it, nothing changes, the card says "The way
   back is no longer there" and the button goes. That is the longest honest lifetime without a
