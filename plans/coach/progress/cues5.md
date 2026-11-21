@@ -15,8 +15,61 @@ Cues: `src/paths/specs/scales-and-modes-cues.ts`, attached with `withCues` in `s
   choosing, choosing-again, warm-up mode-of-the-day), 25 Exercises (3 self-checked: general cue only).
   `check`: 0 errors, 0 `cue.refused`, 0 cues rewritten for a variant (`/tmp/coach-cues5/gc5.log`).
 - [x] Proof-read (below); `check` after the fixes: 0 errors, 0 refused, 0 rewritten (`gc7.log`).
-- [ ] Translations.
-- [ ] Gates.
+- [x] Translations: four sonnet helpers (de fr es it · nl pl pt-BR ru · tr vi ja · ko zh-CN zh-TW), 235
+  sentences each, every file checked again by me with `check_i18n.py` (problems 0 in all fourteen), merged:
+  every overlay 1432 of 1432 (`/tmp/coach-cues5/merge.log`; the "different numbers" warnings are fret
+  numbers written as digits where the English spells them, which the brief allows).
+- [x] Gates (below).
+
+## Gates (logs in `/tmp/coach-cues5/`)
+
+- `npm run paths -- check` (every pack): 16 Paths ok, 0 errors (`check-all.log`).
+- `npx tsc --noEmit`: clean (`tsc.log`).
+- `npm run test`: 412 of 413 files, 29,537 of 29,537 tests passed (`vitest.log`); the one file is the known
+  worktree-only `TabStage.render.test.tsx`.
+- `npm run build`: ok (`build.log`).
+- No Rust file changed; no layout run (the orchestrator's).
+
+## For the generator's owner (not changed, not mine)
+
+`check` refuses a step word ("for each step") on the formula's and the beginner warm-up's string
+variants as "an interval, and the move is not a uniform transposition", although the whole/half pattern
+is the same on every string; and "Come down as evenly as you went up" on the intermediate warm-up's
+minor variants ("the line's contour differs"), although every shape goes up and back. Both worked round
+in the wording.
+
+## The numbers
+
+637 cues on 72 Exercises (all covered: 66 graded, 3 self-checked with the general cue only, 3 warm-ups),
+235 distinct sentences. By trigger: general 72, heard 69, late 69, early 69, lastBars 69, stringChange 67,
+notes 66, extras 66, afterHeld 63, shift 24, openString 3. Final `check`: 0 errors, 0 `cue.refused`, 0 cues
+said in other words for a variant (the Path's 78 `variant.rewritten` lines are all how-to and purpose
+sentences, none mine; read on the first run, they read true).
+
+## Longest cue per language, and what wants a native read
+
+en 48 · de 48 · es 48 · fr 48 · it 48 · nl 48 · pl 48 · pt-BR 48 · ru 48 · tr 48 · vi 47 · ko 34 · ja 26 ·
+zh-CN 24 · zh-TW 24. Read first: the spoken syllables, which no overlay had and the translators made up
+('one-trip-let': pl 'tri-o-la', ru 'три-о-ла', pt-BR '1-tri-o-lá', tr 'bir-üç-lü', vi 'một-ba-nốt', ja
+「ワン・トリ・プレット」, ko 트리-플렛, zh 三-连-音; 'skip one', 'one-three, two-four', 'whole' / 'half');
+ja "1の指" for finger one (its overlay has no finger numbers); ko written in 해요체 where its overlay is
+formal; "click" in tr ("tık") and vi ("click"); fr and de shorten "root" in a few cues to fit. Every
+language keeps letter note names with # and b as its overlay does (de writes B, not H, as its overlay does).
+
+## Twelve cues to read
+
+- **"G major in open position"** (Level 1). The scale from G with its one sharp, F# at the D string's fret 4.
+  general "Say each note's name as you play it: G to G." · notes "Play F sharp at the D string's fret four." ·
+  afterHeld "Count the last G's two beats, then go again."
+- **"The shape, one octave"** (Level 1, a new key each Take). The movable major shape on the low three
+  strings. general "Keep one finger per fret; the hand stays still." · notes "Put finger two on the root
+  before you start." · lastBars "Come down as evenly as you went up."
+- **"Eight bars over one, four and five"** (Level 2, E minor or A minor). The plain seventh over Em and Am,
+  the raised one over B7. general "Raise the seventh over the five chord only." · notes "Keep the plain
+  seventh over the other chords." · lastBars "Land on the root and hold it two beats."
+- **"Minor, then Dorian"** (Level 3). Two phrases, each with F and then with F#. general "Play F in the first
+  phrase, F sharp in the next." · notes "Find F sharp at the D string's fret four." · shift "Reach finger one
+  back a fret for F sharp."
 
 ## The proof-read (three separate sonnet readers, one per Level: cues, tabs, purposes, how-tos, the guide's rules)
 
