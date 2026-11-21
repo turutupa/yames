@@ -34,7 +34,18 @@ orchestrator keeps. Newest last.
   as queue jobs, measured against the stock models on a held-out set before anything ships. Applied to
   PLAN.md ("Not in this plan" no longer lists fine-tuning; it is leg c3d, after c3b).
 - The chip question from 1h ("should a chip's own press count") is still with the owner: the two-press
-  behaviour stays, and nothing built in session 3 depends on it.
+  behaviour stays, and nothing built in session 3 depends on it. **Answered, see the next entry.**
+- 2026-11-20, "owner decisions on the 1k questions" (session 4 applied them as legs): (1) a chip's own
+  press is the press for a reversible one-step change, always with Undo; multi-step or not undoable
+  still goes through a proposal → leg **chip1** (`chip1-chip-press-counts.md`; the orchestrator's
+  reading, recorded as a reading: typed commands keep their proposal, because free text can be misread
+  and a chip cannot). (2) The practice reminder is in-app only → **rem Part 2, option A**, after c4a2.
+  (3) A Take marked "not fair" is out of both the clean tempo Progress shows and milestones → leg
+  **nf1** (`nf1-not-fair-takes.md`; R: `db.rs`). (4) Today's header says the plain fact → leg **hd1**
+  (`hd1-today-header.md`; English "Last Session: 12 days ago"), with the relay's 19:35 note (headroom
+  for `generate.test.ts` "mostly" and `smooth.spec.ts` "Ask commits nothing").
+- 2026-11-20 20:05 (relay): the Vulkan probe (pv1) runs on the RTX by the relay, with Qwen3 4B Q4_K_M;
+  its numbers will be appended to OWNER-UPDATES. Not run on the DGX. c3b uses them when they land.
 
 ## What happened to wave 1's first run
 
