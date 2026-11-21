@@ -49,6 +49,27 @@ const LOOK_NEXT = "Look at the next string during each rest.";
 const HIGH_D_LAND = "Land the high D on '4' and let it ring.";
 const WELL_UNDER = "Start well under your clean tempo.";
 const ARRIVE = "Arrive on the new note as each bar starts.";
+const STAB_BOTH = "Catch both strings with every stab.";
+const STAB_EARLY = "Wait for the click before each stab.";
+const ROOT_BEAT = "Count the root's full beat, then stab.";
+const AND_HALFWAY = "Play each 'and' halfway between the clicks.";
+const AND_WAIT = "Wait for the click, then stab on the 'and'.";
+const ROOT_TO_STAB = "Move from the root to the stab on the 'and'.";
+const LOW_FIRM = "Pick every low note as firmly as the stabs.";
+const AND_24_ONLY = "Play only the 'and' of '2' and of '4'.";
+const STAB_LATE24 = "Put the stabs right on the 'and' of '2' and '4'.";
+const WAIT_AND2 = "Wait for the 'and' of '2' before the stab.";
+const LOOK_STAB = "Look at the stab's strings during the rest.";
+const D9_READY = "Have the D9 shape ready before '1'.";
+const SNARE = "Put your stabs just after the snare.";
+const SNARE_EARLY = "Let the snare sound before each stab.";
+const F4_REACH = "Reach back to fret four for the F sharp.";
+const SECOND_HALF = "Keep the second half as even as the first.";
+const OCT_BOTH = "Strike both strings of every octave.";
+const CROSS3 = "Keep the stroke small across the three strings.";
+const E_24_ONLY = "Play only the 'e' of '2' and of '4'.";
+const TWO_WAIT = "Wait out '2' before its 'e'.";
+const SHAPE_OVER = "Keep the shape as it moves a string over.";
 
 export const FUNK_LINES_CUES: CueBook = {
   // Level 1 (Beginner), Step 1: the engine
@@ -222,5 +243,137 @@ export const FUNK_LINES_CUES: CueBook = {
     c("early", LONG_FULL),
     c("shift", ARRIVE),
     c("lastBars", "Keep counting '1, and a' to the top note."),
+  ],
+
+  // Level 2 (Intermediate), Step 6: stabs
+  "stabs.stab-backbeat": [
+    g("Low A on '1' and '3', stab on '2' and '4'.", 0),
+    c("heard", STAB_BOTH),
+    c("extras", "Leave the 'and' after each stab silent."),
+    c("late", "Put each stab right on '2' and '4'."),
+    c("early", STAB_EARLY),
+    c("afterHeld", ROOT_BEAT),
+    c("stringChange", "Jump from the low A to the stab in one move."),
+  ],
+  "stabs.stab-offbeat": [
+    g("Count '1 and, (2) and': stab on every 'and'.", 0),
+    c("heard", STAB_BOTH),
+    c("extras", NO_234),
+    c("late", AND_HALFWAY),
+    c("early", AND_WAIT),
+    c("stringChange", ROOT_TO_STAB),
+  ],
+  "stabs.stab-sixteenths": [
+    g("Learn it a beat at a time with the count.", 0),
+    c("heard", "Catch both strings on the upstroke stabs too.", 1),
+    c("extras", "Strike the strings only where a stab is written."),
+    c("late", "Put the stab on '4' right on the click."),
+    c("early", "Wait out each rest before the next stab."),
+    c("stringChange", "Move to the stab right after the low A."),
+  ],
+
+  // Step 7: a line and a stab
+  "line-and-stab.call-and-stab": [
+    g("Count '1 (e) and a', then stab on the 'and'.", 0),
+    c("heard", LOW_FIRM),
+    c("extras", AND_24_ONLY),
+    c("late", STAB_LATE24),
+    c("early", WAIT_AND2),
+    c("stringChange", LOOK_STAB),
+  ],
+  "line-and-stab.am-to-d": [
+    g("Ready the next chord's fingers in the long rest.", 1),
+    c("heard", STAB_BOTH),
+    c("extras", "Leave '3' and '4' silent; stab on the 'and'."),
+    c("late", "Put each root right on '1'."),
+    c("early", "Wait out the long rest before the last stab."),
+    c("stringChange", ROOT_TO_STAB),
+    c("lastBars", D9_READY, 1),
+  ],
+  "line-and-stab.vamp": [
+    g(SNARE, 1),
+    c("heard", LOW_FIRM),
+    c("extras", AND_24_ONLY),
+    c("late", STAB_LATE24),
+    c("early", SNARE_EARLY),
+    c("shift", F4_REACH, 0),
+    c("stringChange", LOOK_STAB),
+    c("lastBars", D9_READY),
+  ],
+
+  // Step 8: the second pair
+  "second-pair.bm-stabs": [
+    g("Stab on '2' and '4', then on every 'and'.", 0),
+    c("heard", STAB_BOTH),
+    c("extras", "Leave the 'and' after each backbeat stab silent."),
+    c("late", "Put each root right on the click."),
+    c("early", STAB_EARLY),
+    c("afterHeld", ROOT_BEAT),
+    c("stringChange", "Play both roots with the first finger.", 2),
+    c("lastBars", "Count '1 and, (2) and' to the last stab."),
+  ],
+  "second-pair.bm-line-stab": [
+    g("Play the beat, 'and' and 'a' on '1' and '3'.", 0),
+    c("heard", LOW_FIRM),
+    c("extras", AND_24_ONLY),
+    c("late", STAB_LATE24),
+    c("early", WAIT_AND2),
+    c("stringChange", LOOK_STAB),
+  ],
+  "second-pair.e9-line-stab": [
+    g("Reach back one fret for the G sharp.", 1),
+    c("heard", LOW_FIRM),
+    c("extras", AND_24_ONLY),
+    c("late", STAB_LATE24),
+    c("early", WAIT_AND2),
+    c("stringChange", "Cross to the D string a fret lower."),
+  ],
+  "second-pair.bm-vamp": [
+    g(SNARE, 2),
+    c("heard", LOW_FIRM),
+    c("extras", AND_24_ONLY),
+    c("late", STAB_LATE24),
+    c("early", SNARE_EARLY),
+    c("stringChange", LOOK_STAB),
+    c("lastBars", SECOND_HALF),
+  ],
+
+  // Step 9: octaves
+  "octaves.octave-eighths": [
+    g("Keep the fingers' spacing as the shape slides.", 0),
+    c("heard", OCT_BOTH),
+    c("extras", "Leave '2' and '3' silent; play their 'and'."),
+    c("late", "Put the octave on '1' right on the click."),
+    c("early", "Wait out '2' and '3' in full."),
+    c("afterHeld", "Count the held octave's beat, then start again."),
+    c("shift", "Slide up three frets on the 'and' of '3'."),
+    c("stringChange", CROSS3),
+    c("lastBars", "Slide back down for the held A on '4'.", 1),
+  ],
+  "octaves.octave-sixteenths": [
+    g("Squeeze for each octave, relax for each rest.", 1),
+    c("heard", OCT_BOTH),
+    c("extras", E_24_ONLY),
+    c("late", ONE_THREE),
+    c("early", TWO_WAIT),
+    c("stringChange", CROSS3, 0),
+  ],
+  "octaves.octave-line": [
+    g("Move the shape in the rests after each 'e'.", 1),
+    c("heard", OCT_BOTH),
+    c("extras", E_24_ONLY),
+    c("late", ONE_THREE),
+    c("early", TWO_WAIT),
+    c("shift", "Move two frets in the rest before '1' and '3'.", 1),
+    c("stringChange", SHAPE_OVER, 0),
+    c("lastBars", SECOND_HALF),
+  ],
+  "warmup-intermediate.hole-up": [
+    g(WELL_UNDER, 0),
+    c("heard", A_HEARD),
+    c("late", BEAT_LATE),
+    c("early", A_LATE),
+    c("shift", ARRIVE),
+    c("lastBars", "Keep counting '1 e (and) a' to the top note."),
   ],
 };

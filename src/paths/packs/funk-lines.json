@@ -2502,6 +2502,15 @@
             "Make the stab half as long as the bass note. It sits where you put the accents in 'Accent two and four'."
           ],
           "coachLine": "A stab is one attack to me: I time it and count it, and I don't check its pitch.",
+          "cues": [
+            {"when":"even","say":"Low A on '1' and '3', stab on '2' and '4'.","more":0,"general":true},
+            {"when":"heard","say":"Catch both strings with every stab."},
+            {"when":"extras","say":"Leave the 'and' after each stab silent."},
+            {"when":"late","say":"Put each stab right on '2' and '4'."},
+            {"when":"early","say":"Wait for the click before each stab."},
+            {"when":"afterHeld","say":"Count the root's full beat, then stab."},
+            {"when":"stringChange","say":"Jump from the low A to the stab in one move."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -2600,6 +2609,14 @@
             "The foot taps every beat. After beat 1 the guitar plays only between the taps."
           ],
           "coachLine": "I time each stab against where it is written. Whether your foot kept the beat is yours to say.",
+          "cues": [
+            {"when":"even","say":"Count '1 and, (2) and': stab on every 'and'.","more":0,"general":true},
+            {"when":"heard","say":"Catch both strings with every stab."},
+            {"when":"extras","say":"Leave '2', '3' and '4' silent."},
+            {"when":"late","say":"Play each 'and' halfway between the clicks."},
+            {"when":"early","say":"Wait for the click, then stab on the 'and'."},
+            {"when":"stringChange","say":"Move from the root to the stab on the 'and'."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -2701,6 +2718,14 @@
             "Stabs on the 'e' and the 'a' are upstrokes. Let them be as loud as the downstroke ones."
           ],
           "coachLine": "Six stabs and a bass note in the bar. I time each one.",
+          "cues": [
+            {"when":"even","say":"Learn it a beat at a time with the count.","more":0,"general":true},
+            {"when":"heard","say":"Catch both strings on the upstroke stabs too.","more":1},
+            {"when":"extras","say":"Strike the strings only where a stab is written."},
+            {"when":"late","say":"Put the stab on '4' right on the click."},
+            {"when":"early","say":"Wait out each rest before the next stab."},
+            {"when":"stringChange","say":"Move to the stab right after the low A."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -2831,6 +2856,14 @@
             "Stop the low string before each stab so the two don't ring together."
           ],
           "coachLine": "I time every attack, low notes and stabs alike. Pitch is not checked when stabs are in the line.",
+          "cues": [
+            {"when":"even","say":"Count '1 (e) and a', then stab on the 'and'.","more":0,"general":true},
+            {"when":"heard","say":"Pick every low note as firmly as the stabs."},
+            {"when":"extras","say":"Play only the 'and' of '2' and of '4'."},
+            {"when":"late","say":"Put the stabs right on the 'and' of '2' and '4'."},
+            {"when":"early","say":"Wait for the 'and' of '2' before the stab."},
+            {"when":"stringChange","say":"Look at the stab's strings during the rest."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -2940,6 +2973,15 @@
             "The hand does not move. Use the long rest in the middle of each bar to get the third and little fingers ready over fret 7, or the first finger back over fret 5."
           ],
           "coachLine": "I time every attack and say how even they were. The change of chord is where it slips.",
+          "cues": [
+            {"when":"even","say":"Ready the next chord's fingers in the long rest.","more":1,"general":true},
+            {"when":"heard","say":"Catch both strings with every stab."},
+            {"when":"extras","say":"Leave '3' and '4' silent; stab on the 'and'."},
+            {"when":"late","say":"Put each root right on '1'."},
+            {"when":"early","say":"Wait out the long rest before the last stab."},
+            {"when":"stringChange","say":"Move from the root to the stab on the 'and'."},
+            {"when":"lastBars","say":"Have the D9 shape ready before '1'.","more":1}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -3048,6 +3090,16 @@
             "Listen to the snare on 2 and 4. Your stabs come just after it."
           ],
           "coachLine": "Band on. I time every attack against it.",
+          "cues": [
+            {"when":"even","say":"Put your stabs just after the snare.","more":1,"general":true},
+            {"when":"heard","say":"Pick every low note as firmly as the stabs."},
+            {"when":"extras","say":"Play only the 'and' of '2' and of '4'."},
+            {"when":"late","say":"Put the stabs right on the 'and' of '2' and '4'."},
+            {"when":"early","say":"Let the snare sound before each stab."},
+            {"when":"shift","say":"Reach back to fret four for the F sharp.","more":0},
+            {"when":"stringChange","say":"Look at the stab's strings during the rest."},
+            {"when":"lastBars","say":"Have the D9 shape ready before '1'."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -3196,6 +3248,16 @@
             "The first finger plays both roots. With the hand swinging in sixteenths, every attack here is a downstroke."
           ],
           "coachLine": "A stab is one attack: timed and counted, never pitch-checked. The change of chord is where the time slips.",
+          "cues": [
+            {"when":"even","say":"Stab on '2' and '4', then on every 'and'.","more":0,"general":true},
+            {"when":"heard","say":"Catch both strings with every stab."},
+            {"when":"extras","say":"Leave the 'and' after each backbeat stab silent."},
+            {"when":"late","say":"Put each root right on the click."},
+            {"when":"early","say":"Wait for the click before each stab."},
+            {"when":"afterHeld","say":"Count the root's full beat, then stab."},
+            {"when":"stringChange","say":"Play both roots with the first finger.","more":2},
+            {"when":"lastBars","say":"Count '1 and, (2) and' to the last stab."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -3326,6 +3388,14 @@
             "Stop the low string before each stab so the two don't ring together."
           ],
           "coachLine": "Every attack is timed, low notes and stabs alike. Pitch is not checked when stabs are in the line.",
+          "cues": [
+            {"when":"even","say":"Play the beat, 'and' and 'a' on '1' and '3'.","more":0,"general":true},
+            {"when":"heard","say":"Pick every low note as firmly as the stabs."},
+            {"when":"extras","say":"Play only the 'and' of '2' and of '4'."},
+            {"when":"late","say":"Put the stabs right on the 'and' of '2' and '4'."},
+            {"when":"early","say":"Wait for the 'and' of '2' before the stab."},
+            {"when":"stringChange","say":"Look at the stab's strings during the rest."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -3436,6 +3506,14 @@
             "The stab is E and G# at fret 9 of the G and B strings, third and little fingers."
           ],
           "coachLine": "Every attack is timed, low notes and stabs alike. Pitch is not checked when stabs are in the line.",
+          "cues": [
+            {"when":"even","say":"Reach back one fret for the G sharp.","more":1,"general":true},
+            {"when":"heard","say":"Pick every low note as firmly as the stabs."},
+            {"when":"extras","say":"Play only the 'and' of '2' and of '4'."},
+            {"when":"late","say":"Put the stabs right on the 'and' of '2' and '4'."},
+            {"when":"early","say":"Wait for the 'and' of '2' before the stab."},
+            {"when":"stringChange","say":"Cross to the D string a fret lower."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -3546,6 +3624,15 @@
             "Listen to the snare on beats 2 and 4. Your stabs come just after it."
           ],
           "coachLine": "Band on. Every attack is timed against it.",
+          "cues": [
+            {"when":"even","say":"Put your stabs just after the snare.","more":2,"general":true},
+            {"when":"heard","say":"Pick every low note as firmly as the stabs."},
+            {"when":"extras","say":"Play only the 'and' of '2' and of '4'."},
+            {"when":"late","say":"Put the stabs right on the 'and' of '2' and '4'."},
+            {"when":"early","say":"Let the snare sound before each stab."},
+            {"when":"stringChange","say":"Look at the stab's strings during the rest."},
+            {"when":"lastBars","say":"Keep the second half as even as the first."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -3994,6 +4081,17 @@
             "Bar 2 ends on a held A."
           ],
           "coachLine": "An octave is one attack to me: I time it and count it.",
+          "cues": [
+            {"when":"even","say":"Keep the fingers' spacing as the shape slides.","more":0,"general":true},
+            {"when":"heard","say":"Strike both strings of every octave."},
+            {"when":"extras","say":"Leave '2' and '3' silent; play their 'and'."},
+            {"when":"late","say":"Put the octave on '1' right on the click."},
+            {"when":"early","say":"Wait out '2' and '3' in full."},
+            {"when":"afterHeld","say":"Count the held octave's beat, then start again."},
+            {"when":"shift","say":"Slide up three frets on the 'and' of '3'."},
+            {"when":"stringChange","say":"Keep the stroke small across the three strings."},
+            {"when":"lastBars","say":"Slide back down for the held A on '4'.","more":1}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -4109,6 +4207,14 @@
             "Squeeze for the note, relax for the rest. The fretting hand makes the rhythm as much as the pick does."
           ],
           "coachLine": "Eight attacks a bar. I time each one.",
+          "cues": [
+            {"when":"even","say":"Squeeze for each octave, relax for each rest.","more":1,"general":true},
+            {"when":"heard","say":"Strike both strings of every octave."},
+            {"when":"extras","say":"Play only the 'e' of '2' and of '4'."},
+            {"when":"late","say":"Put '1' and '3' right on the click."},
+            {"when":"early","say":"Wait out '2' before its 'e'."},
+            {"when":"stringChange","say":"Keep the stroke small across the three strings.","more":0}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -4224,6 +4330,16 @@
             "Move during the two sixteenths of rest at the end of each half bar."
           ],
           "coachLine": "Band on. I time every attack against it.",
+          "cues": [
+            {"when":"even","say":"Move the shape in the rests after each 'e'.","more":1,"general":true},
+            {"when":"heard","say":"Strike both strings of every octave."},
+            {"when":"extras","say":"Play only the 'e' of '2' and of '4'."},
+            {"when":"late","say":"Put '1' and '3' right on the click."},
+            {"when":"early","say":"Wait out '2' before its 'e'."},
+            {"when":"shift","say":"Move two frets in the rest before '1' and '3'.","more":1},
+            {"when":"stringChange","say":"Keep the shape as it moves a string over.","more":0},
+            {"when":"lastBars","say":"Keep the second half as even as the first."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -8203,6 +8319,14 @@
             "Start well under your clean tempo. Down, up, miss, up on every beat, first finger only, and move it up a note at each bar line."
           ],
           "coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
+          "cues": [
+            {"when":"even","say":"Start well under your clean tempo.","more":0,"general":true},
+            {"when":"heard","say":"Pick the 'a' after each hole."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Play the 'a' late, just before the next beat."},
+            {"when":"shift","say":"Arrive on the new note as each bar starts."},
+            {"when":"lastBars","say":"Keep counting '1 e (and) a' to the top note."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
