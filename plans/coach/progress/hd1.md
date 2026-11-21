@@ -32,12 +32,15 @@ trước", ja "前回のセッション：N 日前", ko "지난 세션: N일 전
 zh-TW "上次練習：N 天前". Each takes the locale's word for Session from
 `line.back.even` and its "N days ago" from `backAgo`.
 
-Read together on `today-back`: header "LAST SESSION: 12 DAYS AGO", then
-Today's line "Last Session, X: 79% even at 90 BPM. That was 12 days ago.
-Today starts at 85 BPM." Not word for word (the spec checks the line does not
-contain the header's text), but the "12 days ago" is said twice. The owner's
-decision fixes the header; if the repeat grates, the line's `backAgo` sentence
-is the one that could go (it is `todayLine.ts`, nf1's tonight; not touched).
+Read together on `today-back` (pictures `/tmp/coach-hd1/shots/today-back-1024-ember.png`,
+`phone-today-back-ember.png`): header "LAST SESSION: 12 DAYS AGO", then Today's
+line "Last Session, Four fingers, one string: 78% even at 80 BPM. That was 12
+days ago. Today starts at 70 BPM.", and the second row's note "12 days off, so
+we ease back in under your clean 70." Not word for word (the spec checks the
+line does not contain the header's text), but "12 days" is said three times on
+one screen. The owner's decision fixes the header; if the repeat grates, the
+line's "That was 12 days ago." (`backAgo`) is the one that could go: it is
+`todayLine.ts`, nf1's tonight, so not touched here. Open point for the owner.
 
 Pictures: `today-line.spec.ts` now checks the header on `today-back` at 1440
 and 1024 and on a phone (`phone-today-back`, a new phone copy of the scene in
