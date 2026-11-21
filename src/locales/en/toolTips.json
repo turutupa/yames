@@ -109,7 +109,7 @@
             "The metronome's leaving you behind. Step into each click.",
             "Pace is sagging. Lift the hands and play on top of the click.",
             "Notes arriving late. Aim for the front edge of each beat.",
-            "Drag is showing. Imagine the click is a half-step earlier than you think."
+            "Drag is showing. Aim for the front edge of each click, not the middle."
           ],
           "correction": [
             "Still hanging back — play with the click, don't wait for it.",
@@ -212,7 +212,7 @@
             "Five-plus minutes continuous. Check in with your body before you push more.",
             "Sustained session — stretch your fingers, then come back.",
             "Hands tired? Take a 60-second pause before the next pass.",
-            "Long stretch — check the wrists and shoulders before continuing.",
+            "Long stretch without a pause. A short break is an option before you continue.",
             "Time for a quick break. Cold hands play sloppy.",
             "Pause and stretch. Two minutes off keeps the next twenty solid.",
             "Sustained run — give the hands a rest before pushing further."
@@ -674,20 +674,20 @@
         },
         "fatigue": {
           "encouragement": [
-            "Hands tightening up? Shake the wrists out and come back.",
+            "Hits are slipping at the same tempo. Sticks down a moment, then come back.",
             "Quality's drifting — get off the throne for 60 seconds.",
             "Forearms talking to you? Brief pause, then back in.",
             "Sticks feeling heavy? Set them down, stretch, then return.",
             "Grip getting tight? Step away from the kit for a minute.",
-            "Wrists locking up — quick shake-out, then continue.",
+            "Accuracy's sliding — quick break, then continue.",
             "Hands working harder than they should. Brief rest.",
             "Take the sticks down for a moment — let the arms reset."
           ],
           "correction": [
             "Fatigue's showing — stop now, drop the sticks, 90 seconds rest. Tired drumming locks in sloppy timing.",
             "You're past peak — sticks down, walk a lap, then re-evaluate.",
-            "Stop before tension takes over. 90 seconds off, hydrate, return.",
-            "Wrists are tight. Stop, stretch the forearms, two minutes off.",
+            "Hits keep slipping at this tempo. 90 seconds off, hydrate, return.",
+            "Misses are climbing at one tempo. Stop, sticks down, two minutes off.",
             "Push past this and you'll hurt yourself. Real rest now.",
             "Stop drumming. Walk away from the kit for a couple of minutes.",
             "Sticks down. Forearms first, then hands, then return when loose.",
@@ -730,7 +730,7 @@
           "neutral": [
             "Around minute {staminaMinutes} your hands tighten up. Drop the BPM 5 ticks and rebuild.",
             "Past the {staminaMinutes}-minute mark the limbs start to drift. Short break, then back at it.",
-            "Fatigue shows around minute {staminaMinutes} on the kit. Rest the wrists, then return.",
+            "Your scores on the kit dip around minute {staminaMinutes}. A short rest, then return.",
             "You tend to lose the kick lock around minute {staminaMinutes}. Take a breather."
           ]
         },
@@ -835,7 +835,7 @@
           "neutral": [
             "Ready when you are. I'll start tracking from your first pick.",
             "Get warmed up and hit play whenever — I'll start listening.",
-            "Tune up, settle in, then play when you're ready.",
+            "Get comfortable, settle in, then play when you're ready.",
             "Good to have you. Start when the picking hand feels loose.",
             "Whenever you're set — play and I'll start catching your timing.",
             "No rush. Get the pick hand loose, then start when ready.",
@@ -947,22 +947,22 @@
         "fatigue": {
           "encouragement": [
             "Picking arm tightening up? Shake it out, then back in.",
-            "Wrist or forearm feeling locked? Quick pause, then come back in.",
-            "Tension creeping in — set the guitar down for 60 seconds.",
-            "Shoulder lifting? Drop it, breathe, then resume.",
+            "Accuracy's been slipping for a few minutes. Quick pause, then come back in.",
+            "Misses creeping in at this tempo — set the guitar down for 60 seconds.",
+            "Long run at one tempo. Breathe, then resume.",
             "Pick attack getting harder than it needs to be. Brief rest.",
             "Grip tightening on the neck? Loosen up, then play.",
             "Forearm working too hard — shake out and continue.",
-            "Take 30 seconds, roll the shoulders, then back to it."
+            "A 30-second break is an option, then back to it."
           ],
           "correction": [
-            "Fatigue's showing in the pick attack — stop, rest the arm 90 seconds. Tired picking builds tension.",
-            "You're past peak — guitar down, stretch the wrist, then back in.",
+            "Accuracy has been dropping at the same tempo — stop, guitar down 90 seconds, then check it again.",
+            "Scores are below your peak — guitar down for a minute, then back in.",
             "Stop before the tendons start complaining. 90 seconds off the strings.",
-            "Wrist is straining. Set the guitar down, stretch the forearm, two minutes off.",
+            "Misses keep rising at this tempo. Set the guitar down, two minutes off.",
             "Real rest — guitar on the stand, walk around for a bit.",
             "Picking arm is done for now. 90 seconds minimum, then re-check.",
-            "Stop. Wrist circles, forearm stretches, then come back fresh.",
+            "Stop here. Two minutes away from the guitar, then come back fresh.",
             "Push past this and you'll buy yourself an injury. Hard stop."
           ]
         },
@@ -1000,7 +1000,7 @@
         },
         "stamina": {
           "neutral": [
-            "Past the {staminaMinutes}-minute mark your picking hand tenses. Shake it out, then resume.",
+            "Past the {staminaMinutes}-minute mark your timing at this tempo tends to slip. A short break, then resume.",
             "Around minute {staminaMinutes} the pick attack starts to drift. Quick break, then back in.",
             "Stamina wall at minute {staminaMinutes} — right hand tightens. Rest 30 seconds.",
             "You tend to lose edge on the picking around minute {staminaMinutes}. Short rest, then return."
@@ -1106,7 +1106,7 @@
         "session_start_cold": {
           "neutral": [
             "Ready when you are. I'll start tracking from your first strum.",
-            "Get tuned up and start whenever — I'll listen from the first note.",
+            "Get settled and start whenever — I'll listen from the first note.",
             "Strum a few open chords, then play when you're ready.",
             "Good to have you. Start when the strum hand feels loose.",
             "Whenever you're set — play and I'll start catching your timing.",
@@ -1219,22 +1219,22 @@
         "fatigue": {
           "encouragement": [
             "Strumming arm tightening up? Shake it out, then back in.",
-            "Wrist feeling locked? Quick stretch, then come back in.",
-            "Tension creeping into the strum — guitar down for 60 seconds.",
-            "Shoulder lifting? Drop it, breathe, then continue.",
+            "Accuracy's sliding at this tempo. Quick break, then come back in.",
+            "Misses creeping into the strum — guitar down for 60 seconds.",
+            "Been strumming at one tempo a while. Breathe, then continue.",
             "Strum getting heavier than it needs to be. Brief rest.",
             "Grip tightening on the neck? Loosen up, then play.",
             "Forearm working too hard — shake out and continue.",
-            "Take 30 seconds, roll the shoulders, then back to it."
+            "Take 30 seconds if you want them, then back to it."
           ],
           "correction": [
             "Fatigue's showing in the strum — stop, 90 seconds off the strings.",
-            "You're past peak — set the guitar down, stretch the wrist, then return.",
+            "Scores are below your peak — set the guitar down for a minute, then return.",
             "Tired strumming buries the dynamics. Stop, rest, restart.",
             "Strumming arm is straining. Set the guitar down, stretch the forearm, two minutes off.",
             "Real rest — guitar on the stand, walk around for a bit.",
             "Strumming hand is done. 90 seconds minimum, then re-check.",
-            "Hard stop. Wrist circles, forearm stretches, then continue when loose.",
+            "Hard stop. Two minutes off, then continue when you're ready.",
             "Push past this and you'll buy yourself an injury. Stop and recover."
           ]
         },
@@ -1299,7 +1299,7 @@
         "muddy_hits": {
           "neutral": [
             "You're landing every beat but the attack is light — try a firmer strum or pick.",
-            "Good coverage, soft hits. More wrist force through the strings.",
+            "Good coverage, soft hits. Strum a little harder through the strings.",
             "Beats are all there, just quiet. Drive through the strings with more intent.",
             "Landing the beats but softly — try a sharper attack on the downstroke."
           ]
@@ -1491,12 +1491,12 @@
           "encouragement": [
             "Plucking fingers tightening up? Quick stretch — back in.",
             "Forearm starting to lock? Bass down for 60 seconds.",
-            "Tension building in the right hand? Brief break, then come back in.",
+            "Notes are slipping at the same tempo. Brief break, then come back in.",
             "Fretting hand getting heavy? Take a moment, then continue.",
             "Right hand feels tight? Shake it out, then resume.",
-            "Shoulder lifting? Drop it, breathe, then continue.",
+            "Long run at one tempo. Breathe, then continue.",
             "Forearm working too hard. Quick rest.",
-            "Take 30 seconds, roll the wrists, then back to it."
+            "Take 30 seconds if you want them, then back to it."
           ],
           "correction": [
             "Fatigue's showing in the attack — stop, 90 seconds off, then re-check.",
@@ -1505,7 +1505,7 @@
             "Right hand is straining. Set the bass down, stretch the forearm, two minutes off.",
             "Real rest — bass on the stand, walk around for a bit.",
             "Plucking hand is done. 90 seconds minimum, then re-check.",
-            "Hard stop. Wrist circles and forearm stretches before continuing.",
+            "Hard stop. Two minutes off the bass before continuing.",
             "Push past this and you'll buy yourself an injury. Stop and recover."
           ]
         },
@@ -1743,7 +1743,7 @@
           "encouragement": [
             "Hands back in sync. Hold it.",
             "Two-hand lock back. Don't change anything.",
-            "Recovered — stay loose in the shoulders.",
+            "Recovered — keep it steady.",
             "You caught the drift. Sit in this.",
             "Left and right re-synced. Stay there.",
             "Back from the dip. Don't change anything.",
@@ -1760,23 +1760,23 @@
         },
         "fatigue": {
           "encouragement": [
-            "Wrists tightening up? Lift the hands, breathe, then back in.",
+            "Accuracy's slipping at this tempo. Lift the hands, breathe, then back in.",
             "Forearms feeling locked? Pause, drop the hands, breathe.",
-            "Tension creeping into the shoulders — 60 seconds off the keys.",
+            "Misses creeping in at this tempo — 60 seconds off the keys.",
             "Fingers feeling heavy? Quick stretch, then resume.",
             "Hands working harder than they should. Brief rest.",
-            "Shoulders climbing? Drop them, breathe, then play.",
-            "Take 30 seconds, roll the wrists, then back to it.",
-            "Wrist tension building. Pause, drop the hands to your lap, breathe."
+            "Been at the keys a while. Breathe, then play.",
+            "A 30-second break is an option, then back to it.",
+            "Accuracy's sliding at one tempo. Pause, hands in your lap, breathe."
           ],
           "correction": [
             "Fatigue's showing in the touch — stop, hands down 90 seconds.",
             "You're past peak — get off the bench, shake it out, then return.",
-            "Tired playing buries the dynamics. Stop, rest the wrists, restart.",
-            "Wrists are straining. Set the hands down, stretch the forearms, two minutes off.",
+            "Scores keep dropping at this tempo. Stop, rest, restart.",
+            "Misses keep rising at one tempo. Hands off the keys, two minutes off.",
             "Real rest — stand up, walk around, come back fresh.",
             "Hands are done for now. 90 seconds minimum, then re-check.",
-            "Hard stop. Wrist circles and shoulder rolls before continuing.",
+            "Hard stop. Two minutes off the keys before continuing.",
             "Push past this and you'll buy yourself an injury. Stop and recover."
           ]
         },
@@ -1814,8 +1814,8 @@
         },
         "stamina": {
           "neutral": [
-            "Tension in your touch around minute {staminaMinutes}. Release, breathe, come back clean.",
-            "Around minute {staminaMinutes} the wrist tension creeps in. Brief rest, then resume.",
+            "Your scores at this tempo slip around minute {staminaMinutes}. Breathe, come back clean.",
+            "Around minute {staminaMinutes} the misses start to creep in. Brief rest, then resume.",
             "Past the {staminaMinutes}-minute mark the touch gets heavier. Short break, then back at the keys.",
             "Fatigue in the hands shows around minute {staminaMinutes}. Rest, then return."
           ]
@@ -2169,7 +2169,7 @@
         },
         "flat_dynamics": {
           "neutral": [
-            "Low amplitude variation across beat positions — try varying your pick attack.",
+            "Low amplitude variation across beat positions — try varying your attack strength.",
             "Minimal dynamic shaping across the bar — increase accent differential on the downbeats.",
             "Amplitude is consistent across positions — build in a dynamic hierarchy: downbeats strongest, upbeats lighter."
           ]
@@ -2177,7 +2177,7 @@
         "weak_downbeats": {
           "neutral": [
             "Anti-accent pattern detected — downbeats are quieter than upbeats.",
-            "Your upbeats are dominating — increase pick attack on beats 1 and 3.",
+            "Your upbeats are dominating — increase attack on beats 1 and 3.",
             "Downbeat amplitude is below upbeat amplitude — reverse the dynamic hierarchy."
           ]
         },

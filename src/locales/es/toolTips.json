@@ -109,7 +109,7 @@
             "El metrónomo te va dejando atrás. Entra en cada clic.",
             "El ritmo decae. Levanta las manos y toca encima del clic.",
             "Las notas llegan tarde. Apunta al borde delantero de cada pulso.",
-            "Se nota el arrastre. Imagina que el clic suena un pelo antes de lo que crees."
+            "Se nota el arrastre. Apunta al borde delantero de cada clic, no al centro."
           ],
           "correction": [
             "Sigues quedándote atrás: toca con el clic, no lo esperes.",
@@ -212,7 +212,7 @@
             "Más de cinco minutos seguidos. Consulta a tu cuerpo antes de exigir más.",
             "Sesión sostenida: estira los dedos y luego vuelve.",
             "¿Manos cansadas? Haz una pausa de 60 segundos antes de la siguiente pasada.",
-            "Tramo largo: revisa muñecas y hombros antes de continuar.",
+            "Tramo largo sin pausa. Un descanso corto es una opción antes de continuar.",
             "Hora de una pausa rápida. Las manos frías tocan descuidado.",
             "Para y estira. Dos minutos de descanso mantienen sólidos los siguientes veinte.",
             "Tramo sostenido: deja descansar las manos antes de seguir empujando."
@@ -674,20 +674,20 @@
         },
         "fatigue": {
           "encouragement": [
-            "¿Se tensan las manos? Sacude las muñecas y vuelve.",
+            "Los golpes se van descolocando al mismo tempo. Baquetas abajo un momento y vuelve.",
             "La calidad se desvía: levántate de la banqueta 60 segundos.",
             "¿Te hablan los antebrazos? Pausa breve y vuelves.",
             "¿Pesan las baquetas? Déjalas, estira y vuelve.",
             "¿Se te tensa el agarre? Aléjate de la batería un minuto.",
-            "Las muñecas se bloquean: sacúdelas rápido y sigue.",
+            "La precisión se va resbalando: descanso rápido y sigue.",
             "Las manos trabajan más de lo que deberían. Descanso breve.",
             "Baja las baquetas un momento: deja que los brazos se reinicien."
           ],
           "correction": [
             "Se nota la fatiga: para ya, suelta las baquetas y 90 segundos de descanso. Tocar cansado fija un timing descuidado.",
             "Has pasado tu mejor momento: baquetas fuera, da una vuelta y luego vuelve a evaluar.",
-            "Para antes de que la tensión te domine. 90 segundos de pausa, bebe agua y vuelve.",
-            "Las muñecas están tensas. Para, estira los antebrazos y dos minutos de descanso.",
+            "Los golpes siguen fallando a este tempo. 90 segundos de pausa, bebe agua y vuelve.",
+            "Los fallos suben en un mismo tempo. Para, baquetas abajo y dos minutos de descanso.",
             "Si sigues más allá de esto, te harás daño. Descanso de verdad ahora.",
             "Deja de tocar. Aléjate de la batería un par de minutos.",
             "Baquetas fuera. Primero los antebrazos, luego las manos, y vuelve cuando estés suelto.",
@@ -730,7 +730,7 @@
           "neutral": [
             "Hacia el minuto {staminaMinutes} se te tensan las manos. Baja el BPM 5 puntos y reconstruye.",
             "Pasado el minuto {staminaMinutes} las extremidades empiezan a desviarse. Descanso breve y vuelta.",
-            "La fatiga aparece hacia el minuto {staminaMinutes} en la batería. Descansa las muñecas y vuelve.",
+            "Tus puntuaciones en la batería bajan hacia el minuto {staminaMinutes}. Un descanso corto y vuelves.",
             "Tiendes a perder el enganche del bombo hacia el minuto {staminaMinutes}. Tómate un respiro."
           ]
         },
@@ -835,7 +835,7 @@
           "neutral": [
             "Listo cuando tú lo estés. Empezaré a seguirte desde tu primera púa.",
             "Entra en calor y dale a reproducir cuando quieras: empezaré a escuchar.",
-            "Afina, acomódate y toca cuando estés listo.",
+            "Ponte cómodo, tómate tu tiempo y toca cuando estés listo.",
             "Qué bien tenerte aquí. Empieza cuando la mano de la púa esté suelta.",
             "Cuando estés listo, toca y empezaré a captar tu timing.",
             "Sin prisa. Suelta la mano de la púa y empieza cuando quieras.",
@@ -947,22 +947,22 @@
         "fatigue": {
           "encouragement": [
             "¿Se tensa el brazo de la púa? Sacúdelo y vuelve a entrar.",
-            "¿Muñeca o antebrazo agarrotados? Pausa rápida y vuelve a entrar.",
-            "Se cuela la tensión: deja la guitarra 60 segundos.",
-            "¿Se te sube el hombro? Suéltalo, respira y retoma.",
+            "Llevas unos minutos perdiendo precisión. Pausa rápida y vuelve a entrar.",
+            "Se cuelan los fallos a este tempo: deja la guitarra 60 segundos.",
+            "Tirada larga a un mismo tempo. Respira y retoma.",
             "El ataque de la púa se vuelve más duro de lo necesario. Descanso breve.",
             "¿Se aprieta el agarre en el mástil? Afloja y luego toca.",
             "El antebrazo trabaja demasiado: sacúdelo y continúa.",
-            "Tómate 30 segundos, mueve los hombros en círculo y vuelve a ello."
+            "Un descanso de 30 segundos es una opción, y luego a ello."
           ],
           "correction": [
-            "La fatiga se nota en el ataque de la púa: para y descansa el brazo 90 segundos. Picar cansado genera tensión.",
-            "Has pasado tu mejor momento: guitarra abajo, estira la muñeca y vuelve a entrar.",
+            "La precisión ha ido bajando al mismo tempo: para, guitarra abajo 90 segundos y vuelve a comprobarlo.",
+            "Tus puntuaciones están por debajo de tu mejor nivel: guitarra abajo un minuto y vuelve a entrar.",
             "Para antes de que los tendones empiecen a quejarse. 90 segundos sin tocar las cuerdas.",
-            "La muñeca se está forzando. Deja la guitarra, estira el antebrazo y descansa dos minutos.",
+            "Los fallos siguen subiendo a este tempo. Deja la guitarra y dos minutos de descanso.",
             "Descanso de verdad: la guitarra en el soporte y date un paseo.",
             "El brazo de la púa ha acabado por ahora. 90 segundos como mínimo y luego vuelve a evaluar.",
-            "Para. Círculos de muñeca, estiramientos de antebrazo y vuelve fresco.",
+            "Para aquí. Dos minutos lejos de la guitarra y vuelve fresco.",
             "Si fuerzas más allá de esto, te estás comprando una lesión. Parada total."
           ]
         },
@@ -1000,7 +1000,7 @@
         },
         "stamina": {
           "neutral": [
-            "Pasado el minuto {staminaMinutes}, la mano de la púa se tensa. Sacúdela y retoma.",
+            "Pasado el minuto {staminaMinutes}, tu ritmo a este tempo tiende a desviarse. Descanso breve y retoma.",
             "Hacia el minuto {staminaMinutes} el ataque de la púa empieza a desviarse. Pausa breve y vuelta.",
             "Muro de resistencia en el minuto {staminaMinutes}: la mano derecha se tensa. Descansa 30 segundos.",
             "Sueles perder filo con el picado hacia el minuto {staminaMinutes}. Descanso corto y vuelta."
@@ -1106,7 +1106,7 @@
         "session_start_cold": {
           "neutral": [
             "Listo cuando tú lo estés. Empezaré a seguirte desde tu primer rasgueo.",
-            "Afina y empieza cuando quieras: escucharé desde la primera nota.",
+            "Acomódate y empieza cuando quieras: escucharé desde la primera nota.",
             "Rasguea unos acordes al aire y toca cuando estés listo.",
             "Qué bien tenerte aquí. Empieza cuando la mano del rasgueo esté suelta.",
             "Cuando estés listo, toca y empezaré a captar tu timing.",
@@ -1219,22 +1219,22 @@
         "fatigue": {
           "encouragement": [
             "¿Se tensa el brazo del rasgueo? Sacúdelo y vuelve a entrar.",
-            "¿Muñeca agarrotada? Estiramiento rápido y vuelve a entrar.",
-            "Se cuela la tensión en el rasgueo: guitarra abajo durante 60 segundos.",
-            "¿Se te sube el hombro? Suéltalo, respira y continúa.",
+            "La precisión se va resbalando a este tempo. Descanso rápido y vuelve a entrar.",
+            "Se cuelan los fallos en el rasgueo: guitarra abajo durante 60 segundos.",
+            "Llevas un rato rasgueando a un mismo tempo. Respira y continúa.",
             "El rasgueo se vuelve más pesado de lo necesario. Descanso breve.",
             "¿Se aprieta el agarre en el mástil? Afloja y luego toca.",
             "El antebrazo trabaja demasiado: sacúdelo y continúa.",
-            "Tómate 30 segundos, mueve los hombros en círculo y vuelve a ello."
+            "Tómate 30 segundos si los quieres, y vuelve a ello."
           ],
           "correction": [
             "La fatiga se nota en el rasgueo: para y deja las cuerdas 90 segundos.",
-            "Has pasado tu mejor momento: deja la guitarra, estira la muñeca y vuelve.",
+            "Tus puntuaciones están por debajo de tu mejor nivel: deja la guitarra un minuto y vuelve.",
             "Rasguear cansado entierra la dinámica. Para, descansa y reinicia.",
             "El brazo del rasgueo se está forzando. Deja la guitarra, estira el antebrazo y descansa dos minutos.",
             "Descanso de verdad: la guitarra en el soporte y date un paseo.",
             "La mano del rasgueo ha acabado. 90 segundos como mínimo y luego vuelve a evaluar.",
-            "Parada total. Círculos de muñeca y estiramientos de antebrazo, y continúa cuando estés suelto.",
+            "Parada total. Dos minutos de pausa y continúa cuando estés listo.",
             "Si fuerzas más allá de esto, te estás comprando una lesión. Para y recupérate."
           ]
         },
@@ -1299,7 +1299,7 @@
         "muddy_hits": {
           "neutral": [
             "Estás tocando todos los pulsos, pero el ataque es suave: prueba un rasgueo o una púa más firme.",
-            "Buena cobertura, golpes suaves. Más fuerza de muñeca a través de las cuerdas.",
+            "Buena cobertura, golpes suaves. Rasguea un poco más fuerte a través de las cuerdas.",
             "Los pulsos están todos, solo que flojos. Atraviesa las cuerdas con más intención.",
             "Los pulsos suenan, pero suaves: prueba un ataque más nítido en el rasgueo hacia abajo."
           ]
@@ -1491,12 +1491,12 @@
           "encouragement": [
             "¿Se tensan los dedos que pulsan? Estiramiento rápido y vuelve a entrar.",
             "¿El antebrazo empieza a agarrotarse? Bajo abajo durante 60 segundos.",
-            "¿Se acumula tensión en la mano derecha? Pausa breve y vuelve a entrar.",
+            "Las notas se van descolocando al mismo tempo. Pausa breve y vuelve a entrar.",
             "¿La mano que pisa las cuerdas se pone pesada? Tómate un momento y continúa.",
             "¿La mano derecha se siente tensa? Sacúdela y retoma.",
-            "¿Se te sube el hombro? Suéltalo, respira y continúa.",
+            "Tirada larga a un mismo tempo. Respira y continúa.",
             "El antebrazo trabaja demasiado. Descanso rápido.",
-            "Tómate 30 segundos, mueve las muñecas en círculo y vuelve a ello."
+            "Tómate 30 segundos si los quieres, y vuelve a ello."
           ],
           "correction": [
             "La fatiga se nota en el ataque: para, 90 segundos de descanso y vuelve a evaluar.",
@@ -1505,7 +1505,7 @@
             "La mano derecha se está forzando. Deja el bajo, estira el antebrazo y descansa dos minutos.",
             "Descanso de verdad: el bajo en el soporte y date un paseo.",
             "La mano que pulsa ha acabado. 90 segundos como mínimo y luego vuelve a evaluar.",
-            "Parada total. Círculos de muñeca y estiramientos de antebrazo antes de continuar.",
+            "Parada total. Dos minutos sin el bajo antes de continuar.",
             "Si fuerzas más allá de esto, te estás comprando una lesión. Para y recupérate."
           ]
         },
@@ -1743,7 +1743,7 @@
           "encouragement": [
             "Las manos vuelven a estar sincronizadas. Mantenlo.",
             "Vuelve el enganche entre las dos manos. No cambies nada.",
-            "Recuperado: mantén los hombros sueltos.",
+            "Recuperado: mantenlo estable.",
             "Cogiste la deriva. Quédate en esto.",
             "Izquierda y derecha vuelven a estar sincronizadas. Quédate ahí.",
             "De vuelta tras el bajón. No cambies nada.",
@@ -1760,23 +1760,23 @@
         },
         "fatigue": {
           "encouragement": [
-            "¿Se tensan las muñecas? Levanta las manos, respira y vuelve.",
+            "La precisión se va resbalando a este tempo. Levanta las manos, respira y vuelve.",
             "¿Notas los antebrazos bloqueados? Pausa, suelta las manos y respira.",
-            "La tensión se cuela en los hombros: 60 segundos fuera del teclado.",
+            "Se cuelan los fallos a este tempo: 60 segundos fuera del teclado.",
             "¿Pesan los dedos? Estiramiento rápido y sigue.",
             "Las manos trabajan más de lo que deberían. Descanso breve.",
-            "¿Suben los hombros? Bájalos, respira y toca.",
-            "Tómate 30 segundos, gira las muñecas y vuelve a ello.",
-            "La tensión en las muñecas aumenta. Pausa, deja las manos en el regazo y respira."
+            "Llevas un rato en el teclado. Respira y toca.",
+            "Un descanso de 30 segundos es una opción, y luego a ello.",
+            "La precisión se va resbalando a un mismo tempo. Pausa, manos en el regazo y respira."
           ],
           "correction": [
             "Se nota la fatiga en el toque: para, manos abajo 90 segundos.",
             "Has pasado tu mejor momento: levántate de la banqueta, sacude el cuerpo y vuelve.",
-            "Tocar cansado entierra la dinámica. Para, descansa las muñecas y reinicia.",
-            "Las muñecas se fuerzan. Deja las manos, estira los antebrazos y dos minutos de descanso.",
+            "Las puntuaciones siguen bajando a este tempo. Para, descansa y reinicia.",
+            "Los fallos siguen subiendo a un mismo tempo. Manos fuera del teclado, dos minutos de descanso.",
             "Descanso de verdad: levántate, camina y vuelve fresco.",
             "Las manos han acabado por ahora. 90 segundos como mínimo y luego revisa.",
-            "Parada total. Círculos de muñeca y rotación de hombros antes de continuar.",
+            "Parada total. Dos minutos fuera del teclado antes de continuar.",
             "Si sigues más allá de esto, te estás ganando una lesión. Para y recupérate."
           ]
         },
@@ -1814,8 +1814,8 @@
         },
         "stamina": {
           "neutral": [
-            "Tensión en tu toque hacia el minuto {staminaMinutes}. Suelta, respira y vuelve limpio.",
-            "Hacia el minuto {staminaMinutes} se cuela la tensión en las muñecas. Descanso breve y vuelta.",
+            "Tus puntuaciones a este tempo bajan hacia el minuto {staminaMinutes}. Respira y vuelve limpio.",
+            "Hacia el minuto {staminaMinutes} empiezan a colarse los fallos. Descanso breve y vuelta.",
             "Pasado el minuto {staminaMinutes} el toque se vuelve más pesado. Pausa corta y vuelta al teclado.",
             "La fatiga en las manos aparece hacia el minuto {staminaMinutes}. Descansa y vuelve."
           ]
@@ -2169,7 +2169,7 @@
         },
         "flat_dynamics": {
           "neutral": [
-            "Poca variación de amplitud entre posiciones del pulso: prueba a variar tu ataque de púa.",
+            "Poca variación de amplitud entre posiciones del pulso: prueba a variar la fuerza de tu ataque.",
             "Mínima forma dinámica a lo largo del compás: aumenta la diferencia de acento en los tiempos fuertes.",
             "La amplitud es constante entre posiciones: construye una jerarquía dinámica: tiempos fuertes lo más fuertes, contratiempos más ligeros."
           ]
@@ -2177,7 +2177,7 @@
         "weak_downbeats": {
           "neutral": [
             "Patrón de acento invertido detectado: los tiempos fuertes suenan más bajos que los contratiempos.",
-            "Tus contratiempos dominan: aumenta el ataque de púa en los pulsos 1 y 3.",
+            "Tus contratiempos dominan: aumenta el ataque en los pulsos 1 y 3.",
             "La amplitud de los tiempos fuertes está por debajo de la de los contratiempos: invierte la jerarquía dinámica."
           ]
         },

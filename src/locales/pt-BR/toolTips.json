@@ -109,7 +109,7 @@
             "O metrônomo está deixando você para trás. Entre em cada clique.",
             "O ritmo está cedendo. Levante as mãos e toque por cima do clique.",
             "Notas chegando tarde. Mire na borda da frente de cada tempo.",
-            "O arrasto está aparecendo. Imagine que o clique vem um fio mais cedo do que você pensa."
+            "O arrasto está aparecendo. Mire na borda frontal de cada clique, não no meio."
           ],
           "correction": [
             "Ainda ficando para trás: toque com o clique, não espere por ele.",
@@ -212,7 +212,7 @@
             "Mais de cinco minutos contínuos. Sinta o corpo antes de forçar mais.",
             "Sessão prolongada: alongue os dedos e depois volte.",
             "Mãos cansadas? Faça uma pausa de 60 segundos antes da próxima passada.",
-            "Um longo trecho: confira os pulsos e os ombros antes de continuar.",
+            "Um longo trecho sem pausa. Um descanso curto é uma opção antes de continuar.",
             "Hora de uma pausa rápida. Mãos frias tocam desleixado.",
             "Pause e alongue. Dois minutos de descanso mantêm os próximos vinte sólidos.",
             "Sequência prolongada: dê um descanso às mãos antes de forçar mais."
@@ -674,20 +674,20 @@
         },
         "fatigue": {
           "encouragement": [
-            "As mãos estão enrijecendo? Sacuda os pulsos e volte.",
+            "Os toques estão escorregando no mesmo andamento. Baquetas de lado por um momento e volte.",
             "A qualidade está oscilando: saia do banco por 60 segundos.",
             "Os antebraços estão avisando? Uma pausa breve e depois volte.",
             "As baquetas estão pesadas? Largue-as, alongue e depois volte.",
             "A pegada está apertando? Afaste-se da bateria por um minuto.",
-            "Os pulsos estão travando: sacuda rápido e depois continue.",
+            "A precisão está caindo: uma pausa rápida e depois continue.",
             "As mãos estão trabalhando mais do que deveriam. Um descanso breve.",
             "Largue as baquetas por um momento: deixe os braços reiniciarem."
           ],
           "correction": [
             "O cansaço aparece: pare agora, largue as baquetas, 90 segundos de descanso. Tocar bateria cansado fixa um tempo desleixado.",
             "Você passou do pico: baquetas no chão, dê uma volta e depois reavalie.",
-            "Pare antes que a tensão tome conta. 90 segundos de pausa, hidrate-se e volte.",
-            "Os pulsos estão tensos. Pare, alongue os antebraços, dois minutos de pausa.",
+            "Os toques continuam escorregando nesse andamento. 90 segundos de pausa, hidrate-se e volte.",
+            "Os erros estão subindo em um só andamento. Pare, baquetas de lado, dois minutos de pausa.",
             "Se forçar além disso, você vai se machucar. Descanso de verdade agora.",
             "Pare de tocar. Afaste-se da bateria por uns dois minutos.",
             "Baquetas no chão. Primeiro os antebraços, depois as mãos, e volte quando estiver solto.",
@@ -730,7 +730,7 @@
           "neutral": [
             "Por volta do minuto {staminaMinutes} suas mãos enrijecem. Baixe o BPM em 5 e reconstrua.",
             "Depois dos {staminaMinutes} minutos os membros começam a derivar. Uma pausa curta e volte ao trabalho.",
-            "O cansaço aparece por volta do minuto {staminaMinutes} na bateria. Descanse os pulsos e volte.",
+            "Sua pontuação na bateria cai por volta do minuto {staminaMinutes}. Um descanso curto e volte.",
             "Você costuma perder a trava do bumbo por volta do minuto {staminaMinutes}. Respire um pouco."
           ]
         },
@@ -835,7 +835,7 @@
           "neutral": [
             "Pronto quando você estiver. Começo a acompanhar a partir da sua primeira palhetada.",
             "Aqueça e toque quando quiser: eu começo a ouvir.",
-            "Afine, acomode-se e toque quando estiver pronto.",
+            "Fique à vontade, acomode-se e toque quando estiver pronto.",
             "Bom ter você aqui. Comece quando a mão da palheta estiver solta.",
             "Quando estiver pronto, toque e eu começo a captar seu tempo.",
             "Sem pressa. Solte a mão da palheta e comece quando estiver pronto.",
@@ -947,22 +947,22 @@
         "fatigue": {
           "encouragement": [
             "O braço da palheta está enrijecendo? Sacuda-o e depois volte.",
-            "Pulso ou antebraço travados? Uma pausa rápida e depois volte.",
-            "A tensão está aparecendo: largue a guitarra por 60 segundos.",
-            "Ombro subindo? Solte-o, respire e depois retome.",
+            "A precisão vem caindo há alguns minutos. Uma pausa rápida e depois volte.",
+            "Os erros estão aparecendo nesse andamento: largue a guitarra por 60 segundos.",
+            "Trecho longo em um só andamento. Respire e depois retome.",
             "O ataque da palheta está mais duro do que precisa. Um descanso breve.",
             "A mão está apertando o braço? Solte e depois toque.",
             "O antebraço está trabalhando demais: sacuda e continue.",
-            "Pause 30 segundos, gire os ombros e depois volte."
+            "Uma pausa de 30 segundos é uma opção, e depois volte."
           ],
           "correction": [
-            "O cansaço aparece no ataque da palheta: pare, descanse o braço por 90 segundos. Palhetada cansada gera tensão.",
-            "Você passou do pico: guitarra de lado, alongue o pulso e depois volte.",
+            "A precisão vem caindo no mesmo andamento: pare, guitarra de lado por 90 segundos e depois confira de novo.",
+            "Sua pontuação está abaixo do seu pico: guitarra de lado por um minuto e depois volte.",
             "Pare antes que os tendões comecem a reclamar. 90 segundos longe das cordas.",
-            "O pulso está forçando. Largue a guitarra, alongue o antebraço, dois minutos de pausa.",
+            "Os erros continuam subindo nesse andamento. Largue a guitarra, dois minutos de pausa.",
             "Descanso de verdade: guitarra no suporte, ande um pouco.",
             "O braço da palheta terminou por agora. 90 segundos no mínimo e depois reavalie.",
-            "Pare. Giros de pulso, alongamentos do antebraço e depois volte renovado.",
+            "Pare por aqui. Dois minutos longe da guitarra e depois volte renovado.",
             "Se forçar além disso, você compra uma lesão. Pare de vez."
           ]
         },
@@ -1000,7 +1000,7 @@
         },
         "stamina": {
           "neutral": [
-            "Depois dos {staminaMinutes} minutos a mão da palheta fica tensa. Sacuda e depois retome.",
+            "Depois dos {staminaMinutes} minutos seu ritmo nesse andamento tende a escorregar. Uma pausa curta e depois retome.",
             "Por volta do minuto {staminaMinutes} o ataque da palheta começa a derivar. Uma pausa rápida e volte.",
             "O muro de resistência no minuto {staminaMinutes}: a mão direita aperta. Descanse 30 segundos.",
             "Você costuma perder o fio da palhetada por volta do minuto {staminaMinutes}. Descanso curto e volte."
@@ -1106,7 +1106,7 @@
         "session_start_cold": {
           "neutral": [
             "Pronto quando você estiver. Começo a acompanhar a partir da sua primeira batida.",
-            "Afine o violão e comece quando quiser: eu ouço desde a primeira nota.",
+            "Acomode-se e comece quando quiser: eu ouço desde a primeira nota.",
             "Toque alguns acordes soltos e depois comece quando estiver pronto.",
             "Bom ter você aqui. Comece quando a mão da batida estiver solta.",
             "Quando estiver pronto, toque e eu começo a captar seu tempo.",
@@ -1219,22 +1219,22 @@
         "fatigue": {
           "encouragement": [
             "O braço da batida está enrijecendo? Sacuda-o e depois volte.",
-            "Pulso travado? Um alongamento rápido e depois volte.",
-            "A tensão está aparecendo na batida: largue o violão por 60 segundos.",
-            "Ombro subindo? Solte-o, respire e depois continue.",
+            "A precisão está caindo nesse andamento. Uma pausa rápida e depois volte.",
+            "Os erros estão aparecendo na batida: largue o violão por 60 segundos.",
+            "Faz um tempo que você toca em um só andamento. Respire e depois continue.",
             "A batida está mais pesada do que precisa. Um descanso breve.",
             "A mão está apertando o braço do violão? Solte e depois toque.",
             "O antebraço está trabalhando demais: sacuda e continue.",
-            "Pause 30 segundos, gire os ombros e depois volte."
+            "Pause 30 segundos, se quiser, e depois volte."
           ],
           "correction": [
             "O cansaço aparece na batida: pare, 90 segundos longe das cordas.",
-            "Você passou do pico: largue o violão, alongue o pulso e depois volte.",
+            "Sua pontuação está abaixo do seu pico: largue o violão por um minuto e depois volte.",
             "Batida cansada enterra a dinâmica. Pare, descanse, recomece.",
             "O braço da batida está forçando. Largue o violão, alongue o antebraço, dois minutos de pausa.",
             "Descanso de verdade: violão no suporte, ande um pouco.",
             "A mão da batida terminou. 90 segundos no mínimo e depois reavalie.",
-            "Pare de vez. Giros de pulso, alongamentos do antebraço e depois continue quando estiver solto.",
+            "Pare de vez. Dois minutos de pausa e depois continue quando estiver pronto.",
             "Se forçar além disso, você compra uma lesão. Pare e se recupere."
           ]
         },
@@ -1299,7 +1299,7 @@
         "muddy_hits": {
           "neutral": [
             "Você está acertando todos os tempos, mas o ataque está leve: tente uma batida ou palhetada mais firme.",
-            "Boa cobertura, toques suaves. Mais força do pulso através das cordas.",
+            "Boa cobertura, toques suaves. Toque um pouco mais forte através das cordas.",
             "Os tempos estão todos aí, só baixos. Atravesse as cordas com mais intenção.",
             "Acertando os tempos, mas suave: tente um ataque mais nítido na batida para baixo."
           ]
@@ -1491,12 +1491,12 @@
           "encouragement": [
             "Os dedos que tocam as cordas estão enrijecendo? Um alongamento rápido e volte.",
             "O antebraço está começando a travar? Largue o baixo por 60 segundos.",
-            "A tensão está aumentando na mão direita? Uma pausa breve e depois volte.",
+            "As notas estão escorregando no mesmo andamento. Uma pausa breve e depois volte.",
             "A mão que pisa as cordas está ficando pesada? Pare um momento e depois continue.",
             "A mão direita parece tensa? Sacuda e depois retome.",
-            "Ombro subindo? Solte-o, respire e depois continue.",
+            "Trecho longo em um só andamento. Respire e depois continue.",
             "O antebraço está trabalhando demais. Um descanso rápido.",
-            "Pause 30 segundos, gire os pulsos e depois volte."
+            "Pause 30 segundos, se quiser, e depois volte."
           ],
           "correction": [
             "O cansaço aparece no ataque: pare, 90 segundos de pausa e depois reavalie.",
@@ -1505,7 +1505,7 @@
             "A mão direita está forçando. Largue o baixo, alongue o antebraço, dois minutos de pausa.",
             "Descanso de verdade: baixo no suporte, ande um pouco.",
             "A mão que toca as cordas terminou. 90 segundos no mínimo e depois reavalie.",
-            "Pare de vez. Giros de pulso e alongamentos do antebraço antes de continuar.",
+            "Pare de vez. Dois minutos longe do baixo antes de continuar.",
             "Se forçar além disso, você compra uma lesão. Pare e se recupere."
           ]
         },
@@ -1743,7 +1743,7 @@
           "encouragement": [
             "As mãos voltaram a sincronizar. Segure.",
             "A trava das duas mãos voltou. Não mude nada.",
-            "Recuperou: fique solto nos ombros.",
+            "Recuperou: mantenha firme.",
             "Você pegou a deriva. Fique nisso.",
             "Esquerda e direita sincronizadas de novo. Fique aí.",
             "De volta da queda. Não mude nada.",
@@ -1760,23 +1760,23 @@
         },
         "fatigue": {
           "encouragement": [
-            "Os pulsos estão enrijecendo? Levante as mãos, respire e volte.",
+            "A precisão está caindo nesse andamento. Levante as mãos, respire e volte.",
             "Os antebraços parecem travados? Pause, solte as mãos, respire.",
-            "A tensão está aparecendo nos ombros: 60 segundos longe das teclas.",
+            "Os erros estão aparecendo nesse andamento: 60 segundos longe das teclas.",
             "Os dedos estão pesados? Um alongamento rápido e retome.",
             "As mãos estão trabalhando mais do que deveriam. Um descanso breve.",
-            "Os ombros estão subindo? Solte-os, respire e depois toque.",
-            "Pause 30 segundos, gire os pulsos e depois volte.",
-            "A tensão nos pulsos está aumentando. Pause, solte as mãos no colo, respire."
+            "Faz um tempo que você está nas teclas. Respire e depois toque.",
+            "Uma pausa de 30 segundos é uma opção, e depois volte.",
+            "A precisão está caindo em um só andamento. Pause, mãos no colo, respire."
           ],
           "correction": [
             "O cansaço aparece no toque: pare, mãos para baixo por 90 segundos.",
             "Você passou do pico: levante do banco, sacuda e depois volte.",
-            "Tocar cansado enterra a dinâmica. Pare, descanse os pulsos, recomece.",
-            "Os pulsos estão forçando. Largue as mãos, alongue os antebraços, dois minutos de pausa.",
+            "A pontuação continua caindo nesse andamento. Pare, descanse, recomece.",
+            "Os erros continuam subindo em um só andamento. Mãos fora das teclas, dois minutos de pausa.",
             "Descanso de verdade: levante, ande um pouco, volte renovado.",
             "As mãos terminaram por agora. 90 segundos no mínimo e depois reavalie.",
-            "Pare de vez. Giros de pulso e de ombros antes de continuar.",
+            "Pare de vez. Dois minutos longe das teclas antes de continuar.",
             "Se forçar além disso, você compra uma lesão. Pare e se recupere."
           ]
         },
@@ -1814,8 +1814,8 @@
         },
         "stamina": {
           "neutral": [
-            "Tensão no seu toque por volta do minuto {staminaMinutes}. Solte, respire e volte limpo.",
-            "Por volta do minuto {staminaMinutes} a tensão nos pulsos aparece. Descanso breve e retome.",
+            "Sua pontuação nesse andamento cai por volta do minuto {staminaMinutes}. Respire e volte limpo.",
+            "Por volta do minuto {staminaMinutes} os erros começam a aparecer. Descanso breve e retome.",
             "Depois dos {staminaMinutes} minutos o toque fica mais pesado. Uma pausa curta e volte às teclas.",
             "O cansaço nas mãos aparece por volta do minuto {staminaMinutes}. Descanse e volte."
           ]
@@ -2169,7 +2169,7 @@
         },
         "flat_dynamics": {
           "neutral": [
-            "Pouca variação de amplitude entre as posições dos tempos: tente variar seu ataque.",
+            "Pouca variação de amplitude entre as posições dos tempos: tente variar a força do seu ataque.",
             "Modelagem dinâmica mínima ao longo do compasso: aumente a diferença de acento nos tempos fortes.",
             "A amplitude é consistente entre as posições: construa uma hierarquia dinâmica: tempos fortes mais fortes, contratempos mais leves."
           ]
@@ -2177,7 +2177,7 @@
         "weak_downbeats": {
           "neutral": [
             "Padrão de antiacento detectado: os tempos fortes estão mais baixos que os contratempos.",
-            "Seus contratempos estão dominando: aumente o ataque nos tempos 1 e 3.",
+            "Seus contratempos estão dominando: aumente a intensidade do ataque nos tempos 1 e 3.",
             "A amplitude dos tempos fortes está abaixo da dos contratempos: inverta a hierarquia dinâmica."
           ]
         },
