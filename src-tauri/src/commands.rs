@@ -2645,6 +2645,18 @@ pub fn query_attempts(
     store.read_or(Vec::new(), |db| db.query_attempts(&query))
 }
 
+/// When each Songs attempt since `since` (ms) started, every song at once,
+/// oldest first: the practice reminder's one read of Songs (rem2c). Unlike
+/// the reads above, an unavailable store is an `Err`, not an empty list: the
+/// reminder must not tell a player who practised that they did not.
+#[tauri::command(async)]
+pub fn list_attempt_times_since(
+    since: i64,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<Vec<i64>, String> {
+    store.with(|db| db.attempt_times_since(since))
+}
+
 // -- come back to this (COACH_UX A5) ---------------------------------------
 //
 // The promise the coach's fourth button makes. It lived in `settings.json`

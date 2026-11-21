@@ -19,6 +19,7 @@ import { formatBytes } from "./formatBytes";
 import { coachStatusLabel, coachTierLabel, withLoaderState } from "./coachStatus";
 import { useCoachModel } from "../../hooks/useCoachModel";
 import { CoachSuggestionsRow } from "./CoachSuggestionsRow";
+import { CoachReminderRow } from "./CoachReminderRow";
 
 // Short per-voice sample line played when the user clicks a voice
 // button. Each line is distinct on purpose so the user can hear timbre
@@ -491,6 +492,8 @@ export function CoachSettingsSection({
       </div>
       {/* Suggestions: On / Only when I ask (DESIGN 6.6; leg c4a2). c6 regroups. */}
       <CoachSuggestionsRow />
+      {/* Practice reminder: in the app only, Today mentions it (leg rem2). */}
+      <CoachReminderRow />
       <div className="setting-row">
         <div className="setting-label">
           <label>{t("settings.coach.voice")}</label>

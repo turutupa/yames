@@ -95,6 +95,22 @@
       "on": "On",
       "asked": "Only when I ask",
       "unreadable": "Your choice could not be read this time; pressing one saves it."
+    },
+    "reminder": {
+      "label": "Practice reminder",
+      "hint": "Today mentions it after this time on these days, if no practice has been saved today. There is no notification.",
+      "off": "Off",
+      "on": "On",
+      "time": "Time",
+      "days": "Days",
+      "quiet": "Today has stopped mentioning it: three reminder days went by with no practice saved. It starts again after your next saved practice.",
+      "noDays": "No days are chosen, so Today will not mention it.",
+      "unreadable": "Your reminder could not be read this time, so Today does not mention it; pressing Off or On saves it.",
+      "line": "Your reminder: practice at {{time}}.",
+      "lineGuitar": "Your reminder: guitar at {{time}}.",
+      "lineBass": "Your reminder: bass at {{time}}.",
+      "lineDrums": "Your reminder: drums at {{time}}.",
+      "linePiano": "Your reminder: piano at {{time}}."
     }
   }
 }
