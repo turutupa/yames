@@ -22,8 +22,17 @@ describe("the check's report on the variant rewriter", () => {
   });
 
   it("lists the cues a variant cannot say", () => {
-    const r = rewriteReport(buildPath(spec("first-chords")), null);
-    expect(r.refused.length).toBeGreaterThan(0);
+    // No shipped pack has one since leg fc1, so the cue First Chords used to have is put back by hand.
+    const doc = buildPath(spec("first-chords"));
+    expect(rewriteReport(doc, null).refused).toEqual([]);
+    const ex = find(doc, "warmup-advanced.small-barre");
+    ex.cues = [...(ex.cues ?? []), { when: "late", say: "Arrive at each new fret by its click." }];
+    const r = rewriteReport(doc, null);
+    expect(r.refused).toContainEqual({
+      where: "warmup-advanced.small-barre#stringSet=D-and-G,shapeOrder=going-up",
+      cue: "Arrive at each new fret by its click.",
+      reason: "a layout of frets, and the frets moved differently",
+    });
     expect(r.errors).toEqual([]);
   });
 
