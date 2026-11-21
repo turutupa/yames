@@ -31,7 +31,9 @@ export type AskTurn =
   /** The app saying something true about Ask itself (no model, nothing came back). */
   | { id: string; kind: "app"; text: string }
   /** "Now looking at: Progress": the screen changed mid-conversation. */
-  | { id: string; kind: "divider"; text: string };
+  | { id: string; kind: "divider"; text: string }
+  /** The model is choosing an answer (leg c3b2a): "Looking for more in my own words… Stop". */
+  | { id: string; kind: "model" };
 
 /** What an entry point opens Ask with. */
 export type AskRequest = {
@@ -221,6 +223,11 @@ export function setAskTakeGate(running: () => boolean): void {
   takeRunning = running;
 }
 
+/** Whether the host says a Take is running now (leg c3b2a: no model turn starts in one). */
+export function askTakeGate(): boolean {
+  return takeRunning();
+}
+
 /** A deferred open, once the Take is over: open it now. */
 export function openDeferredAsk(): void {
   if (!state.deferred || takeRunning()) return;
@@ -260,9 +267,14 @@ export function updateAskTurn(id: string, next: AskTurn): void {
  * it is written (so a held change does not undo what happened to the turn
  * while it was held; review t1b1 N3). The change returns null to leave it be.
  */
-export type AskTurnChange = AskTurn | ((current: AskTurn) => AskTurn | null);
+export type AskTurnChange = AskTurn | ((current: AskTurn) => AskTurn | null) | "gone";
 
 function applyAskTurn(id: string, next: AskTurnChange): void {
+  if (next === "gone") {
+    // The turn leaves the thread (leg c3b2a: the model's working line, once it has nothing to add).
+    if (state.turns.some((t) => t.id === id)) set({ turns: state.turns.filter((t) => t.id !== id) });
+    return;
+  }
   if (typeof next !== "function") {
     updateAskTurn(id, next);
     return;

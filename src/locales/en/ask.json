@@ -41,7 +41,15 @@
       "phone": "Phones don't run a model yet, so typed questions can't be answered here.",
       "nothing": "No answer came back this time."
     },
+    "model": {
+      "plain": "I have no ready answer for that from your Takes or your Paths.",
+      "working": "Looking for more in my own words…",
+      "stop": "Stop",
+      "gettingReady": "Getting ready…",
+      "reading": "My reading of what you asked. Nothing happens until you press."
+    },
     "footer": {
+      "choice": "Answers from your Takes and Paths, and in its own words on this computer. Nothing leaves it.",
       "model": "Answered by the model on this computer. Nothing you type leaves it.",
       "local": "Nothing you type here leaves this computer.",
       "phone": "Nothing you type here leaves this phone."

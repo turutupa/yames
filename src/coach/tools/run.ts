@@ -148,6 +148,13 @@ function guarded<T extends RunOutcome>(name: string, run: () => T): T | Refusal 
  */
 const issued = new WeakMap<Proposal, unknown>();
 
+/**
+ * The proposals minted for a `go` tool the model chose (leg c3b2a): a `go`
+ * tool that does not leave a sound behind runs at once from a chip or a typed
+ * command, so only these may be confirmed as a `go` tool that does not leave.
+ */
+const modelGo = new WeakSet<Proposal>();
+
 function mint(
   tool: CoachTool,
   args: ToolArgs,
@@ -239,10 +246,31 @@ function runGo(tool: ActTool, args: ToolArgs, host: CoachToolHost, ctx: CoachCon
   return mint(tool, args, { line: line(key, { ...dry.receipt.values, stops }), resolved: Object.freeze({ ...args }) });
 }
 
-function run(checked: CheckedCall, host: CoachToolHost, ctx: CoachContext): RunOutcome {
+/**
+ * A `go` tool the model chose (leg c3b2a; the owner's rule: nothing the model
+ * chose runs at once): run dry, and what it would do comes back as a
+ * proposal (the receipt's key under `coachTools.propose.`, with what stops if
+ * it leaves a sound behind). A refusal, or a dry run that would move nothing
+ * ("You're on Today already"), comes back as it is: nothing has moved.
+ */
+function proposeGo(tool: ActTool, args: ToolArgs, host: CoachToolHost, ctx: CoachContext): RunOutcome {
+  const { dry, target } = dryRun(tool, args, host, ctx);
+  if (!dry.ok || !dry.undo) return dry;
+  const stops = tool.leaves && target !== null ? host.sounding(target) : null;
+  const key = dry.receipt.key.replace(/^coachTools\.receipt\./, "coachTools.propose.");
+  const minted = mint(tool, args, { line: line(key, stops ? { ...dry.receipt.values, stops } : dry.receipt.values), resolved: Object.freeze({ ...args }) });
+  modelGo.add(minted.proposal);
+  return minted;
+}
+
+/** Who made a call: a chip or a typed command (`player`), or the model's choice (`model`). */
+export type CallOrigin = { via?: "player" | "model" };
+
+function run(checked: CheckedCall, host: CoachToolHost, ctx: CoachContext, origin: CallOrigin = {}): RunOutcome {
   const { tool, args } = checked;
   const wrong = checkContext(tool, ctx);
   if (wrong) return wrong;
+  if (tool.kind === "go" && origin.via === "model") return guarded(tool.name, () => proposeGo(tool, args, host, ctx));
   if (tool.kind !== "confirm") return guarded(tool.name, () => issue(runGo(tool, args, host, ctx), host, ctx));
   return guarded(tool.name, (): RunOutcome => {
     const proposed = tool.propose(args, host, ctx);
@@ -257,16 +285,19 @@ function run(checked: CheckedCall, host: CoachToolHost, ctx: CoachContext): RunO
 /**
  * Run a player's call (a chip, a typed command, a model's pick). A `go` or
  * `read` tool acts now; a `confirm` tool returns a proposal and does nothing.
+ * With `{ via: "model" }` a `go` tool is a proposal too (`proposeGo`): only a
+ * `read` tool the model chose acts at once, and it changes nothing.
  */
 export function runCoachTool(
   call: unknown,
   host: CoachToolHost,
   ctx: CoachContext,
   registry: readonly CoachTool[] = COACH_TOOLS,
+  origin: CallOrigin = {},
 ): RunOutcome {
   const checked = checkCall(call, registry, "player");
   if (!checked.ok) return checked;
-  return run(checked.call, host, ctx);
+  return run(checked.call, host, ctx, origin);
 }
 
 /**
@@ -432,8 +463,9 @@ export function confirmCoachTool(
   if (!issued.has(proposal)) return refuse("refused", "coachTools.why.refused.proposal", {}, { detail: "not a live proposal" });
   const resolved = issued.get(proposal);
   issued.delete(proposal);
+  const fromModel = modelGo.delete(proposal);
   const tool = registry.find((t) => t.name === proposal.tool);
-  if (!tool || !(tool.kind === "confirm" || (tool.kind === "go" && tool.leaves))) {
+  if (!tool || !(tool.kind === "confirm" || (tool.kind === "go" && (tool.leaves || fromModel)))) {
     return refuse("refused", "coachTools.why.refused.proposal", {}, { detail: "no such confirm tool" });
   }
   const wrong = checkContext(tool, ctx);
@@ -446,6 +478,7 @@ export function confirmCoachTool(
 /** Drop a proposal the player turned down ("Not now"), so it can never be confirmed. */
 export function dismissProposal(proposal: Proposal): void {
   issued.delete(proposal);
+  modelGo.delete(proposal);
 }
 
 /**
