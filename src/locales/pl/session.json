@@ -909,6 +909,13 @@
       "question": "Czy któreś uderzenie zaczęło się ruchem w górę?",
       "yes": "Tak",
       "no": "Nie"
+    },
+    "keys": {
+      "noTakeYet": "Nie było jeszcze podejścia, więc nie mam na czym się oprzeć.",
+      "ungradedLast": "Ostatnie podejście było bez oceny, więc niczego w nim nie zmierzyłem.",
+      "lastBelow": "Ostatnie podejście: poniżej poprzeczki przy {{bpm}} BPM.",
+      "whatNext": "{{action}}. {{why}}",
+      "whatNextAlone": "{{action}}."
     }
   }
 }

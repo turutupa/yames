@@ -867,6 +867,13 @@
       "question": "Did any beat start on an upstroke?",
       "yes": "Yes",
       "no": "No"
+    },
+    "keys": {
+      "noTakeYet": "No Take yet, so I have nothing to go on.",
+      "ungradedLast": "Your last Take wasn't graded, so I measured nothing in it.",
+      "lastBelow": "Last Take: under the pass mark at {{bpm}} BPM.",
+      "whatNext": "{{action}}. {{why}}",
+      "whatNextAlone": "{{action}}."
     }
   }
 }

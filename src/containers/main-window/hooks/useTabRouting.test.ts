@@ -10,7 +10,7 @@
 // an unchecked string.
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { PLAY_TABS, useTabRouting } from "./useTabRouting";
+import { PLAY_TABS, sessionIsTheView, useTabRouting } from "./useTabRouting";
 
 const getActiveTab = vi.fn();
 const setActiveTab = vi.fn();
@@ -139,5 +139,19 @@ describe("useTabRouting — Settings over a mode", () => {
     setActiveTab.mockClear();
     act(() => result.current.setView("settings"));
     expect(setActiveTab).not.toHaveBeenCalled();
+  });
+
+  it("Settings opened over a Session is still the Session (the coach's voice keeps its order)", async () => {
+    const { result } = playing();
+    await waitFor(() => expect(getActiveTab).toHaveBeenCalled());
+    act(() => result.current.setView("session"));
+    expect(sessionIsTheView(result.current.view, result.current.mode)).toBe(true);
+    act(() => result.current.setView("settings"));
+    expect(sessionIsTheView(result.current.view, result.current.mode)).toBe(true);
+    // Settings over a tool, and any other view, is not.
+    act(() => result.current.setView("today"));
+    expect(sessionIsTheView(result.current.view, result.current.mode)).toBe(false);
+    act(() => result.current.setView("settings"));
+    expect(sessionIsTheView(result.current.view, result.current.mode)).toBe(false);
   });
 });

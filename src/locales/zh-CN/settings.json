@@ -271,7 +271,10 @@
         "session-pause": "暂停 / 继续",
         "session-restart": "重录这一遍",
         "session-prev": "返回上一个练习块",
-        "session-watch": "观看顺序"
+        "session-watch": "观看顺序",
+        "ask-explain-last": "解释上一遍",
+        "ask-what-next": "接下来做什么",
+        "accept-suggestion": "采纳建议"
       },
       "descs": {
         "play": "开始或停止节拍器",
@@ -331,7 +334,10 @@
         "session-pause": "热身或计时段中：暂停，或继续",
         "session-restart": "热身或计时段中：从头开始。录制之后：同一段再来一次",
         "session-prev": "练习中：返回此前一个练习块",
-        "session-watch": "Take 之前，在琴颈上：按速度依次点亮各音，或停止。没有声音，不评分"
+        "session-watch": "Take 之前，在琴颈上：按速度依次点亮各音，或停止。没有声音，不评分",
+        "ask-explain-last": "练习中：教练用一句话说出它在你上一遍里发现了什么",
+        "ask-what-next": "练习中：教练说出大按钮接下来会做什么，以及原因",
+        "accept-suggestion": "练习中：按下屏幕上教练的建议，仅在恰好有一条时可用"
       },
       "scope": {
         "in": {

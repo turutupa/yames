@@ -79,6 +79,8 @@ export function sessionEventFor(
         bpm: after.bpm,
         takes: after.takes,
         timed: after.phase === "timedReady",
+        // Every `again` starts its Take by itself (`autoStart` in useSessionRun).
+        ...(event.type === "again" ? { straight: true as const } : {}),
       };
     }
     return null;

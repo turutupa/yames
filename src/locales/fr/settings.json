@@ -271,7 +271,10 @@
         "session-pause": "Pause / reprendre",
         "session-restart": "Recommencer la prise",
         "session-prev": "Revenir au bloc précédent",
-        "session-watch": "Voir l'ordre"
+        "session-watch": "Voir l'ordre",
+        "ask-explain-last": "Expliquer la dernière prise",
+        "ask-what-next": "Et ensuite",
+        "accept-suggestion": "Accepter la suggestion"
       },
       "descs": {
         "play": "Démarrer ou arrêter le métronome",
@@ -331,7 +334,10 @@
         "session-pause": "Pendant un échauffement ou un bloc minuté : le mettre en pause, ou continuer",
         "session-restart": "Pendant un échauffement ou un bloc minuté : depuis le début. Après une prise : la même prise encore",
         "session-prev": "Dans une séance : revenir au bloc d'avant",
-        "session-watch": "Avant une prise, sur le manche : allume les notes dans l'ordre au tempo, ou arrête. Sans son, sans note"
+        "session-watch": "Avant une prise, sur le manche : allume les notes dans l'ordre au tempo, ou arrête. Sans son, sans note",
+        "ask-explain-last": "Dans une séance : le coach dit en une ligne ce qu'il a trouvé dans ta dernière prise",
+        "ask-what-next": "Dans une séance : le coach dit ce que fera le grand bouton, et pourquoi",
+        "accept-suggestion": "Dans une séance : appuie sur la suggestion du coach à l'écran, quand il n'y en a qu'une"
       },
       "scope": {
         "in": {

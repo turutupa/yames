@@ -271,7 +271,10 @@
         "session-pause": "Pause / weiter",
         "session-restart": "Take neu starten",
         "session-prev": "Zurück zum vorigen Block",
-        "session-watch": "Reihenfolge ansehen"
+        "session-watch": "Reihenfolge ansehen",
+        "ask-explain-last": "Letzten Take erklären",
+        "ask-what-next": "Was als Nächstes kommt",
+        "accept-suggestion": "Vorschlag annehmen"
       },
       "descs": {
         "play": "Starte oder stoppe das Metronom",
@@ -331,7 +334,10 @@
         "session-pause": "Beim Aufwärmen oder in einem Zeitblock: pausieren oder weitermachen",
         "session-restart": "Beim Aufwärmen oder in einem Zeitblock: von vorn. Nach einem Take: derselbe Take nochmal",
         "session-prev": "In einer Session: zurück zum Block davor",
-        "session-watch": "Vor einem Take, auf dem Hals: die Töne der Reihe nach im Tempo aufleuchten lassen, oder stoppen. Ohne Ton, ohne Bewertung"
+        "session-watch": "Vor einem Take, auf dem Hals: die Töne der Reihe nach im Tempo aufleuchten lassen, oder stoppen. Ohne Ton, ohne Bewertung",
+        "ask-explain-last": "In einer Session: der Coach sagt in einer Zeile, was er in deinem letzten Take gefunden hat",
+        "ask-what-next": "In einer Session: der Coach sagt, was der große Button tut, und warum",
+        "accept-suggestion": "In einer Session: den Vorschlag des Coachs auf dem Bildschirm drücken, wenn es genau einen gibt"
       },
       "scope": {
         "in": {

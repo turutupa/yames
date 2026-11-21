@@ -109,6 +109,8 @@ import { ViewTransition } from "../../components/ViewTransition";
 import { ZenTransition } from "../zen/ZenTransition";
 import { useEvaluation } from "../../hooks/useEvaluation";
 import { useSession } from "../../hooks/useSession";
+import { useCoachVoice } from "../../coach/useCoachVoice";
+import { useCoachKeys } from "../session/hooks/useCoachKeys";
 import AudioInputTestModal from "../settings/AudioInputTestModal";
 import SettingsTimeline from "../settings/SettingsTimeline";
 import { InputTesterModal } from "../settings/InputTesterModal";
@@ -137,7 +139,7 @@ import { useLibraryFit } from "./hooks/useLibraryFit";
 import { useSetlistSession } from "./hooks/useSetlistSession";
 import { useJamSession } from "./hooks/useJamSession";
 import { useSongsSession } from "./hooks/useSongsSession";
-import { isLearnTab, isPlayTab, type PlayTab } from "./hooks/useTabRouting";
+import { isLearnTab, isPlayTab, sessionIsTheView, type PlayTab } from "./hooks/useTabRouting";
 import { useSessionRun } from "../session/hooks/useSessionRun";
 import { startSessionInput } from "../../session/inputStart";
 import { useSessionPedal } from "../session/hooks/useSessionPedal";
@@ -275,7 +277,7 @@ export function MainWindow() {
   // way the rail and the tab bar are away: a click on them would walk out of
   // the Session and end it without a word (UX audit NAV-2). Settings' own Back
   // and Escape return to the Session.
-  const inSession = view === "session" || (view === "settings" && mode === "session");
+  const inSession = sessionIsTheView(view, mode);
   const pathsUpOne = pathsPlace.back;
   // Paths reopens where the player was (UX audit NAV-3); the door pressed again
   // while on Paths goes one page up, Step to Path to the list (QA 2026-11-17 #8
@@ -382,6 +384,9 @@ export function MainWindow() {
     jamMode: jamModeActive,
     hushed: view === "session",
   });
+  // The coach's voice at a Session's boundaries, and the coach keys' slot (leg c1b2b).
+  // Settings opened over the Session is not leaving it (review c1b2c, 5).
+  useCoachVoice(coach.coachVoiceMode, state.isPlaying, inSession);
 
   /**
    * Re-send the whole ramp with one or two fields changed.
@@ -1835,6 +1840,7 @@ export function MainWindow() {
   // A press of the single footswitch. Through a ref because the pedal needs the
   // MIDI bindings, which are built from the dispatcher this hands to.
   const pedalPress = useRef<() => void>(() => {});
+  const coachKeys = useCoachKeys(sessionRun);
   // The Watch button shows its key as the player has it bound.
   useEffect(() => setWatchKeyLabel(platformKey(keyBindings["session-watch"] || "")), [keyBindings]);
   const sessionActions = useMemo(
@@ -1854,8 +1860,13 @@ export function MainWindow() {
       restart: sessionRun.actions.restart,
       // The neck's Watch preview, which listens for it while it is on screen.
       watch: toggleWatch,
+      // The coach's keys (leg c1b2b): stable, they read the latest Session themselves.
+      explainLast: coachKeys.explainLast,
+      whatNext: coachKeys.whatNext,
+      acceptSuggestion: coachKeys.acceptSuggestion,
     }),
     [
+      coachKeys,
       sessionRun.actions.togglePause,
       sessionRun.actions.restart,
       sessionRun.actions.previous,

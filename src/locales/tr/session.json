@@ -867,6 +867,13 @@
       "question": "Herhangi bir vuruş yukarı vuruşla mı başladı?",
       "yes": "Evet",
       "no": "Hayır"
+    },
+    "keys": {
+      "noTakeYet": "Henüz deneme yok, o yüzden elimde dayanacak bir şey yok.",
+      "ungradedLast": "Son denemen değerlendirilmedi, o yüzden içinde hiçbir şey ölçmedim.",
+      "lastBelow": "Son deneme: {{bpm}} BPM'de çıtanın altında.",
+      "whatNext": "{{action}}. {{why}}",
+      "whatNextAlone": "{{action}}."
     }
   }
 }

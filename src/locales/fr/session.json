@@ -888,6 +888,13 @@
       "question": "Un temps a-t-il commencé par un coup montant ?",
       "yes": "Oui",
       "no": "Non"
+    },
+    "keys": {
+      "noTakeYet": "Pas encore de prise, je n'ai donc rien sur quoi m'appuyer.",
+      "ungradedLast": "Ta dernière prise n'a pas été notée, je n'y ai donc rien mesuré.",
+      "lastBelow": "Dernière prise : sous le seuil à {{bpm}} BPM.",
+      "whatNext": "{{action}}. {{why}}",
+      "whatNextAlone": "{{action}}."
     }
   }
 }
