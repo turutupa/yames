@@ -109,7 +109,7 @@
             "Máy đếm nhịp đang bỏ bạn lại. Hãy bước vào từng tiếng click.",
             "Nhịp đang chùng xuống. Hãy nâng tay lên và chơi ngay trên tiếng click.",
             "Các nốt đến trễ. Hãy nhắm vào mép đầu của mỗi phách.",
-            "Đang kéo chậm. Hãy hình dung tiếng click sớm hơn bạn nghĩ nửa cung."
+            "Đang kéo chậm. Hãy nhắm vào mép đầu của mỗi tiếng click, không phải điểm giữa."
           ],
           "correction": [
             "Vẫn đang chùn lại — hãy chơi cùng tiếng click, đừng chờ nó.",
@@ -212,7 +212,7 @@
             "Hơn năm phút liên tục. Hãy hỏi cơ thể mình trước khi đẩy thêm.",
             "Buổi tập kéo dài — hãy duỗi ngón tay, rồi quay lại.",
             "Tay mỏi? Hãy nghỉ 60 giây trước lượt tiếp theo.",
-            "Một đoạn dài — hãy kiểm tra cổ tay và vai trước khi tiếp tục.",
+            "Một đoạn dài không nghỉ. Nghỉ ngắn một chút là một lựa chọn trước khi bạn tiếp tục.",
             "Đến lúc nghỉ một chút. Tay lạnh chơi cẩu thả.",
             "Dừng và duỗi người. Nghỉ hai phút giúp hai mươi phút sau vững.",
             "Chơi liên tục — hãy cho tay nghỉ trước khi đẩy tiếp."
@@ -674,20 +674,20 @@
         },
         "fatigue": {
           "encouragement": [
-            "Đôi tay đang căng lên? Lắc cổ tay cho thả lỏng rồi quay lại.",
+            "Các nhát đánh đang trượt ở cùng một tempo. Đặt dùi xuống một lát, rồi quay lại.",
             "Chất lượng đang trôi — hãy rời ghế ngồi 60 giây.",
             "Cẳng tay đang lên tiếng? Dừng ngắn, rồi vào lại.",
             "Dùi trống thấy nặng? Đặt chúng xuống, duỗi người, rồi quay lại.",
             "Tay nắm đang siết lại? Rời bộ trống một phút.",
-            "Cổ tay đang cứng — lắc nhanh cho thả lỏng, rồi tiếp tục.",
+            "Độ chính xác đang tụt — nghỉ nhanh một chút, rồi tiếp tục.",
             "Đôi tay đang làm việc nặng hơn mức cần. Nghỉ ngắn.",
             "Đặt dùi xuống một lát — để hai cánh tay được đặt lại."
           ],
           "correction": [
             "Mệt đã lộ ra — dừng ngay, bỏ dùi xuống, nghỉ 90 giây. Đánh trống khi mệt khắc sâu nhịp cẩu thả.",
             "Bạn đã qua đỉnh — đặt dùi xuống, đi một vòng, rồi đánh giá lại.",
-            "Dừng trước khi sự căng chiếm lấy. Nghỉ 90 giây, uống nước, rồi quay lại.",
-            "Cổ tay đang căng. Dừng, duỗi cẳng tay, nghỉ hai phút.",
+            "Các nhát đánh cứ trượt ở tempo này. Nghỉ 90 giây, uống nước, rồi quay lại.",
+            "Số lần hụt đang tăng ở một tempo. Dừng, đặt dùi xuống, nghỉ hai phút.",
             "Cố vượt qua đây là bạn sẽ tự làm đau mình. Nghỉ thật sự ngay bây giờ.",
             "Dừng đánh trống. Rời bộ trống vài phút.",
             "Đặt dùi xuống. Cẳng tay trước, rồi đến bàn tay, rồi quay lại khi đã thả lỏng.",
@@ -730,7 +730,7 @@
           "neutral": [
             "Quanh phút thứ {staminaMinutes} đôi tay của bạn căng lên. Giảm BPM 5 nấc và xây lại.",
             "Qua mốc {staminaMinutes} phút, tay chân bắt đầu trôi. Nghỉ ngắn, rồi quay lại.",
-            "Mệt lộ ra quanh phút thứ {staminaMinutes} trên bộ trống. Cho cổ tay nghỉ, rồi quay lại.",
+            "Điểm của bạn trên bộ trống tụt quanh phút thứ {staminaMinutes}. Nghỉ ngắn, rồi quay lại.",
             "Bạn thường mất độ khớp của kick quanh phút thứ {staminaMinutes}. Hãy nghỉ lấy hơi."
           ]
         },
@@ -835,7 +835,7 @@
           "neutral": [
             "Sẵn sàng khi bạn sẵn sàng. Tôi sẽ bắt đầu theo dõi từ lần gảy đầu tiên của bạn.",
             "Khởi động xong thì cứ bấm chơi bất cứ lúc nào — tôi sẽ bắt đầu nghe.",
-            "Lên dây xong, ngồi cho ổn, rồi chơi khi bạn sẵn sàng.",
+            "Cứ thoải mái, ngồi cho ổn, rồi chơi khi bạn sẵn sàng.",
             "Rất vui có bạn. Hãy bắt đầu khi tay gảy đã thấy thả lỏng.",
             "Khi nào bạn sẵn sàng — cứ chơi, tôi sẽ bắt đầu bắt nhịp của bạn.",
             "Không vội. Cho tay gảy thả lỏng, rồi bắt đầu khi bạn sẵn sàng.",
@@ -947,22 +947,22 @@
         "fatigue": {
           "encouragement": [
             "Cánh tay gảy đang căng lên? Lắc cho thả lỏng, rồi vào lại.",
-            "Cổ tay hay cẳng tay thấy cứng? Dừng nhanh một chút, rồi vào lại.",
-            "Sự căng đang len vào — hãy đặt cây đàn xuống 60 giây.",
-            "Vai đang nhướn lên? Hạ nó xuống, hít thở, rồi chơi tiếp.",
+            "Độ chính xác đã tụt vài phút nay. Dừng nhanh một chút, rồi vào lại.",
+            "Số lần hụt đang len vào ở tempo này — hãy đặt cây đàn xuống 60 giây.",
+            "Đã chạy dài ở một tempo. Hít thở, rồi chơi tiếp.",
             "Lực gảy đang nặng hơn mức cần. Nghỉ ngắn.",
             "Tay nắm cần đàn đang siết lại? Thả lỏng, rồi chơi.",
             "Cẳng tay đang làm việc quá sức — lắc cho thả lỏng rồi tiếp tục.",
-            "Nghỉ 30 giây, xoay vai, rồi quay lại."
+            "Nghỉ 30 giây là một lựa chọn, rồi quay lại."
           ],
           "correction": [
-            "Mệt đã lộ ra ở lực gảy — dừng, cho cánh tay nghỉ 90 giây. Gảy khi mệt sinh ra căng cơ.",
-            "Bạn đã qua đỉnh — đặt đàn xuống, duỗi cổ tay, rồi vào lại.",
+            "Độ chính xác cứ tụt ở cùng một tempo — dừng, đặt đàn xuống 90 giây, rồi kiểm tra lại.",
+            "Điểm đang thấp hơn đỉnh của bạn — đặt đàn xuống một phút, rồi vào lại.",
             "Dừng trước khi gân bắt đầu kêu ca. Rời dây đàn 90 giây.",
-            "Cổ tay đang căng quá. Đặt đàn xuống, duỗi cẳng tay, nghỉ hai phút.",
+            "Số lần hụt cứ tăng ở tempo này. Đặt đàn xuống, nghỉ hai phút.",
             "Nghỉ thật sự — đàn lên giá, đi quanh một lúc.",
             "Cánh tay gảy tạm xong rồi. Tối thiểu 90 giây, rồi kiểm tra lại.",
-            "Dừng. Xoay cổ tay, duỗi cẳng tay, rồi quay lại cho tươi.",
+            "Dừng ở đây. Rời cây đàn hai phút, rồi quay lại cho tươi.",
             "Cố vượt qua đây là tự rước chấn thương vào mình. Dừng hẳn."
           ]
         },
@@ -1000,7 +1000,7 @@
         },
         "stamina": {
           "neutral": [
-            "Qua mốc {staminaMinutes} phút, tay gảy của bạn căng lên. Lắc cho thả lỏng, rồi chơi tiếp.",
+            "Qua mốc {staminaMinutes} phút, nhịp của bạn ở tempo này dễ bị trượt. Nghỉ ngắn, rồi chơi tiếp.",
             "Quanh phút thứ {staminaMinutes} lực gảy bắt đầu trôi. Nghỉ ngắn, rồi vào lại.",
             "Bức tường sức bền ở phút thứ {staminaMinutes} — tay phải siết lại. Nghỉ 30 giây.",
             "Bạn thường mất độ sắc khi gảy quanh phút thứ {staminaMinutes}. Nghỉ ngắn, rồi quay lại."
@@ -1106,7 +1106,7 @@
         "session_start_cold": {
           "neutral": [
             "Sẵn sàng khi bạn sẵn sàng. Tôi sẽ bắt đầu theo dõi từ nhịp quạt đầu tiên của bạn.",
-            "Lên dây xong cứ bắt đầu bất cứ lúc nào — tôi sẽ nghe từ nốt đầu tiên.",
+            "Ổn định chỗ ngồi xong cứ bắt đầu bất cứ lúc nào — tôi sẽ nghe từ nốt đầu tiên.",
             "Quạt vài hợp âm buông, rồi chơi khi bạn sẵn sàng.",
             "Rất vui có bạn. Hãy bắt đầu khi tay quạt đã thấy thả lỏng.",
             "Khi nào bạn sẵn sàng — cứ chơi, tôi sẽ bắt đầu bắt nhịp của bạn.",
@@ -1219,22 +1219,22 @@
         "fatigue": {
           "encouragement": [
             "Cánh tay quạt đang căng lên? Lắc cho thả lỏng, rồi vào lại.",
-            "Cổ tay thấy cứng? Duỗi nhanh một chút, rồi vào lại.",
-            "Sự căng đang len vào nhát quạt — đặt đàn xuống 60 giây.",
-            "Vai đang nhướn lên? Hạ nó xuống, hít thở, rồi tiếp tục.",
+            "Độ chính xác đang tụt ở tempo này. Nghỉ nhanh một chút, rồi vào lại.",
+            "Số lần hụt đang len vào nhát quạt — đặt đàn xuống 60 giây.",
+            "Đã quạt ở một tempo khá lâu. Hít thở, rồi tiếp tục.",
             "Nhát quạt đang nặng hơn mức cần. Nghỉ ngắn.",
             "Tay nắm cần đàn đang siết lại? Thả lỏng, rồi chơi.",
             "Cẳng tay đang làm việc quá sức — lắc cho thả lỏng rồi tiếp tục.",
-            "Nghỉ 30 giây, xoay vai, rồi quay lại."
+            "Nghỉ 30 giây nếu bạn muốn, rồi quay lại."
           ],
           "correction": [
             "Mệt đã lộ ra ở nhát quạt — dừng, rời dây đàn 90 giây.",
-            "Bạn đã qua đỉnh — đặt đàn xuống, duỗi cổ tay, rồi quay lại.",
+            "Điểm đang thấp hơn đỉnh của bạn — đặt đàn xuống một phút, rồi quay lại.",
             "Quạt khi mệt làm chìm đi độ mạnh nhẹ. Dừng, nghỉ, rồi bắt đầu lại.",
             "Cánh tay quạt đang căng quá. Đặt đàn xuống, duỗi cẳng tay, nghỉ hai phút.",
             "Nghỉ thật sự — đàn lên giá, đi quanh một lúc.",
             "Tay quạt đã xong. Tối thiểu 90 giây, rồi kiểm tra lại.",
-            "Dừng hẳn. Xoay cổ tay, duỗi cẳng tay, rồi tiếp tục khi đã thả lỏng.",
+            "Dừng hẳn. Nghỉ hai phút, rồi tiếp tục khi bạn sẵn sàng.",
             "Cố vượt qua đây là tự rước chấn thương vào mình. Dừng và hồi phục."
           ]
         },
@@ -1299,7 +1299,7 @@
         "muddy_hits": {
           "neutral": [
             "Bạn đang trúng mọi phách nhưng lực đánh nhẹ — hãy thử quạt hoặc gảy chắc hơn.",
-            "Độ phủ tốt, các lần đánh mềm. Thêm lực cổ tay xuyên qua các dây.",
+            "Độ phủ tốt, các lần đánh mềm. Quạt mạnh tay hơn một chút khi lướt qua các dây.",
             "Các phách đều có đủ, chỉ là nhỏ. Hãy đánh xuyên qua các dây với nhiều chủ ý hơn.",
             "Trúng các phách nhưng nhẹ — hãy thử đánh sắc hơn ở nhát quạt xuống."
           ]
@@ -1491,12 +1491,12 @@
           "encouragement": [
             "Các ngón búng dây đang căng lên? Duỗi nhanh — rồi vào lại.",
             "Cẳng tay bắt đầu cứng? Đặt bass xuống 60 giây.",
-            "Sự căng đang tăng ở tay phải? Nghỉ ngắn, rồi vào lại.",
+            "Các nốt đang trượt ở cùng một tempo. Nghỉ ngắn, rồi vào lại.",
             "Tay bấm đang nặng dần? Dừng một lát, rồi tiếp tục.",
             "Tay phải thấy căng? Lắc cho thả lỏng, rồi chơi tiếp.",
-            "Vai đang nhướn lên? Hạ nó xuống, hít thở, rồi tiếp tục.",
+            "Đã chạy dài ở một tempo. Hít thở, rồi tiếp tục.",
             "Cẳng tay đang làm việc quá sức. Nghỉ nhanh một chút.",
-            "Nghỉ 30 giây, xoay cổ tay, rồi quay lại."
+            "Nghỉ 30 giây nếu bạn muốn, rồi quay lại."
           ],
           "correction": [
             "Mệt đã lộ ra ở lực búng — dừng, nghỉ 90 giây, rồi kiểm tra lại.",
@@ -1505,7 +1505,7 @@
             "Tay phải đang căng quá. Đặt bass xuống, duỗi cẳng tay, nghỉ hai phút.",
             "Nghỉ thật sự — bass lên giá, đi quanh một lúc.",
             "Tay búng dây đã xong. Tối thiểu 90 giây, rồi kiểm tra lại.",
-            "Dừng hẳn. Xoay cổ tay và duỗi cẳng tay trước khi tiếp tục.",
+            "Dừng hẳn. Rời cây bass hai phút trước khi tiếp tục.",
             "Cố vượt qua đây là tự rước chấn thương vào mình. Dừng và hồi phục."
           ]
         },
@@ -1743,7 +1743,7 @@
           "encouragement": [
             "Hai tay đã đồng bộ lại. Giữ nó.",
             "Hai tay đã khớp lại. Đừng đổi gì cả.",
-            "Đã hồi lại — giữ cho vai thả lỏng.",
+            "Đã hồi lại — giữ cho đều.",
             "Bạn đã bắt kịp độ trôi. Ngồi trong đó.",
             "Tay trái và tay phải đã đồng bộ lại. Ở lại đó.",
             "Đã thoát khỏi chỗ tụt. Đừng đổi gì cả.",
@@ -1760,23 +1760,23 @@
         },
         "fatigue": {
           "encouragement": [
-            "Cổ tay đang căng lên? Nhấc tay lên, hít thở, rồi vào lại.",
+            "Độ chính xác đang tụt ở tempo này. Nhấc tay lên, hít thở, rồi vào lại.",
             "Cẳng tay thấy cứng? Dừng lại, thả tay xuống, hít thở.",
-            "Sự căng đang len vào vai — rời phím đàn 60 giây.",
+            "Số lần hụt đang len vào ở tempo này — rời phím đàn 60 giây.",
             "Các ngón tay thấy nặng? Duỗi nhanh, rồi chơi tiếp.",
             "Đôi tay đang làm việc nặng hơn mức cần. Nghỉ ngắn.",
-            "Vai đang nhướn lên? Hạ chúng xuống, hít thở, rồi chơi.",
-            "Nghỉ 30 giây, xoay cổ tay, rồi quay lại.",
-            "Cổ tay đang căng dần. Dừng lại, đặt hai tay xuống đùi, hít thở."
+            "Đã ngồi trước phím đàn khá lâu. Hít thở, rồi chơi.",
+            "Nghỉ 30 giây là một lựa chọn, rồi quay lại.",
+            "Độ chính xác đang tụt ở một tempo. Dừng lại, đặt hai tay lên đùi, hít thở."
           ],
           "correction": [
             "Mệt đã lộ ra ở lực chạm phím — dừng, bỏ tay xuống 90 giây.",
             "Bạn đã qua đỉnh — rời ghế đàn, lắc cho thả lỏng, rồi quay lại.",
-            "Chơi khi mệt làm chìm đi độ mạnh nhẹ. Dừng, cho cổ tay nghỉ, rồi bắt đầu lại.",
-            "Cổ tay đang căng quá. Đặt tay xuống, duỗi cẳng tay, nghỉ hai phút.",
+            "Điểm cứ giảm ở tempo này. Dừng, nghỉ, rồi bắt đầu lại.",
+            "Số lần hụt cứ tăng ở một tempo. Nhấc tay khỏi phím, nghỉ hai phút.",
             "Nghỉ thật sự — đứng dậy, đi quanh, rồi quay lại cho tươi.",
             "Đôi tay tạm xong rồi. Tối thiểu 90 giây, rồi kiểm tra lại.",
-            "Dừng hẳn. Xoay cổ tay và xoay vai trước khi tiếp tục.",
+            "Dừng hẳn. Rời phím đàn hai phút trước khi tiếp tục.",
             "Cố vượt qua đây là tự rước chấn thương vào mình. Dừng và hồi phục."
           ]
         },
@@ -1814,8 +1814,8 @@
         },
         "stamina": {
           "neutral": [
-            "Có sự căng trong lực chạm phím quanh phút thứ {staminaMinutes}. Thả lỏng, hít thở, quay lại cho sạch.",
-            "Quanh phút thứ {staminaMinutes} sự căng ở cổ tay len vào. Nghỉ ngắn, rồi chơi tiếp.",
+            "Điểm của bạn ở tempo này tụt quanh phút thứ {staminaMinutes}. Hít thở, quay lại cho sạch.",
+            "Quanh phút thứ {staminaMinutes} các lần hụt bắt đầu len vào. Nghỉ ngắn, rồi chơi tiếp.",
             "Qua mốc {staminaMinutes} phút, lực chạm phím nặng dần. Nghỉ ngắn, rồi quay lại với phím đàn.",
             "Mệt ở đôi tay lộ ra quanh phút thứ {staminaMinutes}. Nghỉ, rồi quay lại."
           ]
@@ -2169,7 +2169,7 @@
         },
         "flat_dynamics": {
           "neutral": [
-            "Biên độ ít thay đổi giữa các vị trí phách — hãy thử thay đổi lực đánh.",
+            "Biên độ ít thay đổi giữa các vị trí phách — hãy thử thay đổi cường độ tấn công của nốt.",
             "Hình dạng cường độ tối thiểu trong cả ô nhịp — hãy tăng chênh lệch nhấn ở các phách mạnh.",
             "Biên độ đều ở mọi vị trí — hãy xây một thứ bậc cường độ: phách mạnh to nhất, phách yếu nhẹ hơn."
           ]
@@ -2177,7 +2177,7 @@
         "weak_downbeats": {
           "neutral": [
             "Phát hiện kiểu nhấn ngược — các phách mạnh nhỏ hơn các phách yếu.",
-            "Các phách yếu của bạn đang lấn át — hãy tăng lực đánh ở phách 1 và 3.",
+            "Các phách yếu của bạn đang lấn át — hãy tăng cường độ tấn công ở phách 1 và 3.",
             "Biên độ phách mạnh thấp hơn biên độ phách yếu — hãy đảo ngược thứ bậc cường độ."
           ]
         },

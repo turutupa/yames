@@ -109,7 +109,7 @@
             "Il metronomo ti lascia indietro. Entra dentro ogni clic.",
             "Il passo cede. Solleva le mani e suona sopra il clic.",
             "Note in ritardo. Punta al bordo anteriore di ogni beat.",
-            "Si vede il trascinamento. Immagina il clic mezzo tono prima di quanto pensi."
+            "Si vede il trascinamento. Punta al bordo anteriore di ogni clic, non al centro."
           ],
           "correction": [
             "Sei ancora indietro: suona con il clic, non aspettarlo.",
@@ -212,7 +212,7 @@
             "Più di cinque minuti di fila. Ascolta il tuo corpo prima di spingere ancora.",
             "Sessione prolungata: stira le dita, poi torna.",
             "Mani stanche? Fai una pausa di 60 secondi prima del prossimo passaggio.",
-            "Tratto lungo: controlla polsi e spalle prima di continuare.",
+            "Tratto lungo senza pausa. Una breve pausa è un'opzione prima di continuare.",
             "È ora di una pausa veloce. Mani fredde suonano male.",
             "Fermati e stirati. Due minuti di pausa tengono solidi i prossimi venti.",
             "Serie prolungata: dai un po' di riposo alle mani prima di spingere oltre."
@@ -674,20 +674,20 @@
         },
         "fatigue": {
           "encouragement": [
-            "Le mani si irrigidiscono? Scuoti i polsi e torna.",
+            "I colpi scivolano allo stesso tempo. Bacchette giù un momento, poi torna.",
             "La qualità sta andando alla deriva: alzati dallo sgabello per 60 secondi.",
             "Gli avambracci ti parlano? Breve pausa, poi di nuovo dentro.",
             "Le bacchette ti sembrano pesanti? Posale, stirati, poi ritorna.",
             "L'impugnatura si irrigidisce? Allontanati dalla batteria per un minuto.",
-            "I polsi si bloccano: una scrollata veloce, poi continua.",
+            "La precisione cala: una pausa veloce, poi continua.",
             "Le mani lavorano più del dovuto. Breve riposo.",
             "Posa le bacchette per un momento: lascia che le braccia si riazzerino."
           ],
           "correction": [
             "Si vede la stanchezza: fermati ora, posa le bacchette, 90 secondi di pausa. Suonare stanchi fissa un timing sciatto.",
             "Hai superato il picco: bacchette giù, fai un giro, poi rivaluta.",
-            "Fermati prima che la tensione prenda il sopravvento. 90 secondi di pausa, bevi, ritorna.",
-            "I polsi sono tesi. Fermati, stira gli avambracci, due minuti di pausa.",
+            "I colpi continuano a scivolare a questo tempo. 90 secondi di pausa, bevi, ritorna.",
+            "Gli errori salgono a un solo tempo. Fermati, bacchette giù, due minuti di pausa.",
             "Se spingi oltre questo punto ti farai male. Riposo vero, adesso.",
             "Smetti di suonare. Allontanati dalla batteria per un paio di minuti.",
             "Bacchette giù. Prima gli avambracci, poi le mani, poi ritorna quando sei sciolto.",
@@ -730,7 +730,7 @@
           "neutral": [
             "Verso il minuto {staminaMinutes} le mani si irrigidiscono. Abbassa i BPM di 5 tacche e ricostruisci.",
             "Oltre i {staminaMinutes} minuti gli arti iniziano ad andare alla deriva. Breve pausa, poi riprendi.",
-            "La stanchezza si vede verso il minuto {staminaMinutes} alla batteria. Riposa i polsi, poi ritorna.",
+            "I tuoi punteggi alla batteria calano verso il minuto {staminaMinutes}. Un breve riposo, poi ritorna.",
             "Tendi a perdere l'aggancio della cassa verso il minuto {staminaMinutes}. Fai una pausa per respirare."
           ]
         },
@@ -835,7 +835,7 @@
           "neutral": [
             "Pronto quando lo sei tu. Inizio a seguirti dalla tua prima plettrata.",
             "Scaldati e premi play quando vuoi: inizio ad ascoltare.",
-            "Accorda, mettiti comodo, poi suona quando sei pronto.",
+            "Mettiti comodo, prenditi il tuo tempo, poi suona quando sei pronto.",
             "Bello averti qui. Inizia quando la mano del plettro si sente sciolta.",
             "Quando sei pronto: suona e inizio a cogliere il tuo timing.",
             "Nessuna fretta. Sciogli la mano del plettro, poi inizia quando vuoi.",
@@ -947,22 +947,22 @@
         "fatigue": {
           "encouragement": [
             "Il braccio del plettro si irrigidisce? Scuotilo, poi torna.",
-            "Polso o avambraccio sembrano bloccati? Una breve pausa, poi rientra.",
-            "La tensione sale: metti giù la chitarra per 60 secondi.",
-            "La spalla si solleva? Abbassala, respira, poi riprendi.",
+            "La precisione cala da qualche minuto. Una breve pausa, poi rientra.",
+            "Gli errori salgono a questo tempo: metti giù la chitarra per 60 secondi.",
+            "Lungo tratto a un solo tempo. Respira, poi riprendi.",
             "L'attacco del plettro sta diventando più duro del necessario. Breve riposo.",
             "La presa sul manico si stringe? Allenta, poi suona.",
             "L'avambraccio lavora troppo: scuotilo e continua.",
-            "Prenditi 30 secondi, fai girare le spalle, poi torna."
+            "Una pausa di 30 secondi è un'opzione, poi torna."
           ],
           "correction": [
-            "La stanchezza si vede nell'attacco del plettro: fermati, 90 secondi di riposo per il braccio. Plettrare stanchi crea tensione.",
-            "Hai superato il picco: chitarra giù, stira il polso, poi rientra.",
+            "La precisione è calata allo stesso tempo: fermati, chitarra giù 90 secondi, poi ricontrolla.",
+            "I punteggi sono sotto il tuo picco: chitarra giù per un minuto, poi rientra.",
             "Fermati prima che i tendini comincino a lamentarsi. 90 secondi lontano dalle corde.",
-            "Il polso è sotto sforzo. Metti giù la chitarra, stira l'avambraccio, due minuti di pausa.",
+            "Gli errori continuano a salire a questo tempo. Metti giù la chitarra, due minuti di pausa.",
             "Riposo vero: chitarra sul supporto, cammina un po'.",
             "Il braccio del plettro per ora ha finito. 90 secondi come minimo, poi ricontrolla.",
-            "Fermati. Cerchi con il polso, stiramenti dell'avambraccio, poi torna fresco.",
+            "Fermati qui. Due minuti lontano dalla chitarra, poi torna fresco.",
             "Se spingi oltre ti procurerai un infortunio. Stop netto."
           ]
         },
@@ -1000,7 +1000,7 @@
         },
         "stamina": {
           "neutral": [
-            "Oltre il minuto {staminaMinutes} la mano del plettro si irrigidisce. Scuotila, poi riprendi.",
+            "Oltre il minuto {staminaMinutes} il tuo timing a questo tempo tende a scivolare. Una breve pausa, poi riprendi.",
             "Intorno al minuto {staminaMinutes} l'attacco del plettro comincia a scivolare. Breve pausa, poi rientra.",
             "Muro di resistenza al minuto {staminaMinutes}: la mano destra si stringe. Riposa 30 secondi.",
             "Tendi a perdere mordente nella plettrata intorno al minuto {staminaMinutes}. Breve riposo, poi torna."
@@ -1106,7 +1106,7 @@
         "session_start_cold": {
           "neutral": [
             "Pronto quando lo sei tu. Inizio a seguirti dalla tua prima strimpellata.",
-            "Accorda e inizia quando vuoi: ascolto dalla prima nota.",
+            "Sistemati e inizia quando vuoi: ascolto dalla prima nota.",
             "Strimpella qualche accordo a vuoto, poi suona quando sei pronto.",
             "Bello averti qui. Inizia quando la mano dello strumming si sente sciolta.",
             "Quando sei pronto: suona e inizio a cogliere il tuo timing.",
@@ -1219,22 +1219,22 @@
         "fatigue": {
           "encouragement": [
             "Il braccio dello strumming si irrigidisce? Scuotilo, poi torna.",
-            "Il polso sembra bloccato? Un veloce stiramento, poi rientra.",
-            "La tensione si insinua nello strumming: chitarra giù per 60 secondi.",
-            "La spalla si solleva? Abbassala, respira, poi continua.",
+            "La precisione cala a questo tempo. Una pausa veloce, poi rientra.",
+            "Gli errori salgono nello strumming: chitarra giù per 60 secondi.",
+            "Strimpelli a un solo tempo da un po'. Respira, poi continua.",
             "Lo strumming sta diventando più pesante del necessario. Breve riposo.",
             "La presa sul manico si stringe? Allenta, poi suona.",
             "L'avambraccio lavora troppo: scuotilo e continua.",
-            "Prenditi 30 secondi, fai girare le spalle, poi torna."
+            "Prenditi 30 secondi, se vuoi, poi torna."
           ],
           "correction": [
             "La stanchezza si vede nello strumming: fermati, 90 secondi lontano dalle corde.",
-            "Hai superato il picco: metti giù la chitarra, stira il polso, poi torna.",
+            "I punteggi sono sotto il tuo picco: metti giù la chitarra per un minuto, poi torna.",
             "Strimpellare stanchi seppellisce le dinamiche. Fermati, riposa, ricomincia.",
             "Il braccio dello strumming è sotto sforzo. Metti giù la chitarra, stira l'avambraccio, due minuti di pausa.",
             "Riposo vero: chitarra sul supporto, cammina un po'.",
             "La mano dello strumming ha finito. 90 secondi come minimo, poi ricontrolla.",
-            "Stop netto. Cerchi con il polso, stiramenti dell'avambraccio, poi continua quando sei sciolto.",
+            "Stop netto. Due minuti di pausa, poi continua quando sei pronto.",
             "Se spingi oltre ti procurerai un infortunio. Fermati e recupera."
           ]
         },
@@ -1299,7 +1299,7 @@
         "muddy_hits": {
           "neutral": [
             "Prendi ogni beat ma l'attacco è leggero: prova uno strumming o una plettrata più decisi.",
-            "Buona copertura, colpi deboli. Più forza del polso attraverso le corde.",
+            "Buona copertura, colpi deboli. Strimpella un po' più forte attraverso le corde.",
             "I beat ci sono tutti, solo piano. Attraversa le corde con più intenzione.",
             "Prendi i beat ma piano: prova un attacco più netto sul colpo in giù."
           ]
@@ -1491,12 +1491,12 @@
           "encouragement": [
             "Le dita che pizzicano si irrigidiscono? Un veloce stiramento e rientra.",
             "L'avambraccio comincia a bloccarsi? Basso giù per 60 secondi.",
-            "La tensione sale nella mano destra? Breve pausa, poi rientra.",
+            "Le note scivolano allo stesso tempo. Breve pausa, poi rientra.",
             "La mano sui tasti si fa pesante? Prenditi un attimo, poi continua.",
             "La mano destra si sente tesa? Scuotila, poi riprendi.",
-            "La spalla si solleva? Abbassala, respira, poi continua.",
+            "Lungo tratto a un solo tempo. Respira, poi continua.",
             "L'avambraccio lavora troppo. Breve riposo.",
-            "Prenditi 30 secondi, fai girare i polsi, poi torna."
+            "Prenditi 30 secondi, se vuoi, poi torna."
           ],
           "correction": [
             "La stanchezza si vede nell'attacco: fermati, 90 secondi di pausa, poi ricontrolla.",
@@ -1505,7 +1505,7 @@
             "La mano destra è sotto sforzo. Metti giù il basso, stira l'avambraccio, due minuti di pausa.",
             "Riposo vero: basso sul supporto, cammina un po'.",
             "La mano che pizzica ha finito. 90 secondi come minimo, poi ricontrolla.",
-            "Stop netto. Cerchi con il polso e stiramenti dell'avambraccio prima di continuare.",
+            "Stop netto. Due minuti lontano dal basso prima di continuare.",
             "Se spingi oltre ti procurerai un infortunio. Fermati e recupera."
           ]
         },
@@ -1743,7 +1743,7 @@
           "encouragement": [
             "Le mani sono di nuovo in sincronia. Tienila.",
             "Aggancio tra le due mani tornato. Non cambiare nulla.",
-            "Recuperato: resta sciolto nelle spalle.",
+            "Recuperato: mantieni la costanza.",
             "Hai fermato la deriva. Siediti dentro.",
             "Sinistra e destra risincronizzate. Resta lì.",
             "Uscito dal calo. Non cambiare nulla.",
@@ -1760,23 +1760,23 @@
         },
         "fatigue": {
           "encouragement": [
-            "I polsi si irrigidiscono? Solleva le mani, respira, poi torna dentro.",
+            "La precisione cala a questo tempo. Solleva le mani, respira, poi torna dentro.",
             "Gli avambracci si bloccano? Fermati, abbassa le mani, respira.",
-            "La tensione sale nelle spalle: 60 secondi lontano dai tasti.",
+            "Gli errori salgono a questo tempo: 60 secondi lontano dai tasti.",
             "Le dita si fanno pesanti? Uno stiramento veloce, poi riprendi.",
             "Le mani lavorano più del dovuto. Breve riposo.",
-            "Le spalle salgono? Abbassale, respira, poi suona.",
-            "Prenditi 30 secondi, ruota i polsi, poi riprendi.",
-            "La tensione ai polsi cresce. Fermati, appoggia le mani in grembo, respira."
+            "Sei ai tasti da un po'. Respira, poi suona.",
+            "Una pausa di 30 secondi è un'opzione, poi riprendi.",
+            "La precisione cala a un solo tempo. Fermati, mani in grembo, respira."
           ],
           "correction": [
             "La stanchezza si vede nel tocco: fermati, mani giù per 90 secondi.",
             "Hai superato il picco: alzati dallo sgabello, scuoti tutto, poi ritorna.",
-            "Suonare stanchi seppellisce le dinamiche. Fermati, riposa i polsi, riparti.",
-            "I polsi sono sotto sforzo. Posa le mani, stira gli avambracci, due minuti di pausa.",
+            "I punteggi continuano a calare a questo tempo. Fermati, riposa, riparti.",
+            "Gli errori continuano a salire a un solo tempo. Mani fuori dai tasti, due minuti di pausa.",
             "Riposo vero: alzati, cammina un po', ritorna fresco.",
             "Le mani per ora hanno finito. 90 secondi come minimo, poi ricontrolla.",
-            "Stop deciso. Fai ruotare polsi e spalle prima di continuare.",
+            "Stop deciso. Due minuti lontano dai tasti prima di continuare.",
             "Se spingi oltre questo punto ti procuri un infortunio. Fermati e recupera."
           ]
         },
@@ -1814,8 +1814,8 @@
         },
         "stamina": {
           "neutral": [
-            "Tensione nel tocco verso il minuto {staminaMinutes}. Rilascia, respira, ritorna pulito.",
-            "Verso il minuto {staminaMinutes} arriva la tensione ai polsi. Breve riposo, poi riprendi.",
+            "I tuoi punteggi a questo tempo calano verso il minuto {staminaMinutes}. Respira, ritorna pulito.",
+            "Verso il minuto {staminaMinutes} iniziano ad arrivare gli errori. Breve riposo, poi riprendi.",
             "Oltre i {staminaMinutes} minuti il tocco si fa più pesante. Breve pausa, poi di nuovo ai tasti.",
             "La stanchezza nelle mani si vede verso il minuto {staminaMinutes}. Riposa, poi ritorna."
           ]
@@ -2169,7 +2169,7 @@
         },
         "flat_dynamics": {
           "neutral": [
-            "Bassa variazione di ampiezza tra le posizioni dei beat: prova a variare l'attacco.",
+            "Bassa variazione di ampiezza tra le posizioni dei beat: prova a variare la forza del tuo attacco.",
             "Dinamica appena accennata lungo la battuta: aumenta la differenza di accento sui tempi forti.",
             "L'ampiezza è costante tra le posizioni: costruisci una gerarchia dinamica, tempi forti più forti, levare più leggeri."
           ]
@@ -2177,7 +2177,7 @@
         "weak_downbeats": {
           "neutral": [
             "Rilevato schema di anti-accento: i tempi forti sono più deboli dei levare.",
-            "I tuoi levare dominano: aumenta l'attacco sui beat 1 e 3.",
+            "I tuoi levare dominano: aumenta la forza dell'attacco sui beat 1 e 3.",
             "L'ampiezza dei tempi forti è inferiore a quella dei levare: inverti la gerarchia dinamica."
           ]
         },

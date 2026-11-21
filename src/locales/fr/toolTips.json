@@ -109,7 +109,7 @@
             "Le métronome te laisse derrière. Entre dans chaque clic.",
             "L'allure s'affaisse. Soulève les mains et joue sur le dessus du clic.",
             "Les notes arrivent en retard. Vise le bord avant de chaque temps.",
-            "La traîne se voit. Imagine que le clic est un demi-ton plus tôt que tu ne le crois."
+            "La traîne se voit. Vise le début de chaque clic, pas le milieu."
           ],
           "correction": [
             "Toujours en retrait — joue avec le clic, ne l'attends pas.",
@@ -212,7 +212,7 @@
             "Plus de cinq minutes d'affilée. Écoute ton corps avant de pousser davantage.",
             "Séance prolongée — étire tes doigts, puis reviens.",
             "Les mains fatiguées ? Fais une pause de 60 secondes avant le prochain passage.",
-            "Longue durée — vérifie les poignets et les épaules avant de continuer.",
+            "Longue durée sans pause. Une courte pause est possible avant de continuer.",
             "C'est l'heure d'une courte pause. Des mains froides jouent mal.",
             "Pause et étirements. Deux minutes de repos gardent solides les vingt suivantes.",
             "Longue série — laisse les mains se reposer avant d'aller plus loin."
@@ -674,20 +674,20 @@
         },
         "fatigue": {
           "encouragement": [
-            "Les mains se crispent ? Secoue les poignets et reviens.",
+            "Les coups dérapent au même tempo. Baguettes posées un instant, puis reviens.",
             "La qualité dérive — lève-toi du tabouret pendant 60 secondes.",
             "Les avant-bras te parlent ? Une courte pause, puis reviens.",
             "Les baguettes sont lourdes ? Pose-les, étire-toi, puis reviens.",
             "La prise se crispe ? Éloigne-toi de la batterie une minute.",
-            "Les poignets se bloquent — secoue-les vite, puis continue.",
+            "La précision baisse — petite pause, puis continue.",
             "Les mains travaillent plus qu'elles ne devraient. Un bref repos.",
             "Pose les baguettes un instant — laisse les bras se remettre à zéro."
           ],
           "correction": [
             "La fatigue se voit — arrête-toi maintenant, lâche les baguettes, 90 secondes de repos. Jouer fatigué ancre un timing brouillon.",
             "Tu as dépassé ton pic — baguettes posées, fais un tour, puis refais le point.",
-            "Arrête-toi avant que la tension ne prenne le dessus. 90 secondes de pause, hydrate-toi, reviens.",
-            "Les poignets sont raides. Arrête-toi, étire les avant-bras, deux minutes de pause.",
+            "Les coups continuent de dériver à ce tempo. 90 secondes de pause, hydrate-toi, reviens.",
+            "Les ratés augmentent sur un même tempo. Arrête-toi, baguettes posées, deux minutes de pause.",
             "Si tu forces au-delà, tu vas te faire mal. Un vrai repos maintenant.",
             "Arrête de jouer. Éloigne-toi de la batterie pendant quelques minutes.",
             "Baguettes posées. D'abord les avant-bras, puis les mains, et reviens quand tu es détendu.",
@@ -730,7 +730,7 @@
           "neutral": [
             "Vers la minute {staminaMinutes}, tes mains se crispent. Baisse de 5 BPM et reconstruis.",
             "Passé la minute {staminaMinutes}, les membres commencent à dériver. Une courte pause, puis reviens.",
-            "La fatigue se voit vers la minute {staminaMinutes} à la batterie. Repose les poignets, puis reviens.",
+            "Tes scores à la batterie baissent vers la minute {staminaMinutes}. Un court repos, puis reviens.",
             "Tu as tendance à perdre le calage de la grosse caisse vers la minute {staminaMinutes}. Fais une pause."
           ]
         },
@@ -835,7 +835,7 @@
           "neutral": [
             "Prêt quand tu l'es. Je commence à suivre dès ton premier coup de médiator.",
             "Échauffe-toi et lance-toi quand tu veux — je commence à écouter.",
-            "Accorde, installe-toi, puis joue quand tu es prêt.",
+            "Mets-toi à l'aise, installe-toi, puis joue quand tu es prêt.",
             "Content de te voir. Commence quand la main du médiator est détendue.",
             "Quand tu es prêt — joue et je commence à capter ton timing.",
             "Pas de précipitation. Détends la main du médiator, puis commence quand tu veux.",
@@ -947,22 +947,22 @@
         "fatigue": {
           "encouragement": [
             "Le bras du médiator se crispe ? Secoue-le, puis reprends.",
-            "Poignet ou avant-bras bloqué ? Petite pause, puis reprends.",
-            "La tension s'installe — pose la guitare pendant 60 secondes.",
-            "L'épaule monte ? Relâche-la, respire, puis reprends.",
+            "La précision baisse depuis quelques minutes. Petite pause, puis reprends.",
+            "Les ratés s'installent à ce tempo — pose la guitare pendant 60 secondes.",
+            "Longue série sur un même tempo. Respire, puis reprends.",
             "L'attaque du médiator devient plus dure qu'il ne faut. Courte pause.",
             "La prise se serre sur le manche ? Relâche, puis joue.",
             "L'avant-bras travaille trop — secoue-le et continue.",
-            "Prends 30 secondes, roule les épaules, puis reprends."
+            "Une pause de 30 secondes est possible, puis reprends."
           ],
           "correction": [
-            "La fatigue se voit dans l'attaque du médiator — arrête-toi, repose le bras 90 secondes. Un jeu fatigué au médiator crée de la tension.",
-            "Tu as passé ton pic — guitare posée, étire le poignet, puis reprends.",
+            "La précision baisse au même tempo — arrête-toi, guitare posée 90 secondes, puis revérifie.",
+            "Tes scores sont sous ton meilleur niveau — guitare posée une minute, puis reprends.",
             "Arrête-toi avant que les tendons ne se plaignent. 90 secondes loin des cordes.",
-            "Le poignet force. Pose la guitare, étire l'avant-bras, deux minutes de pause.",
+            "Les ratés continuent d'augmenter à ce tempo. Pose la guitare, deux minutes de pause.",
             "Un vrai repos — guitare sur le support, marche un peu.",
             "Le bras du médiator a fini pour l'instant. 90 secondes minimum, puis revérifie.",
-            "Arrête. Cercles du poignet, étirements de l'avant-bras, puis reviens frais.",
+            "Arrête-toi ici. Deux minutes loin de la guitare, puis reviens frais.",
             "Si tu forces au-delà, tu t'achètes une blessure. Arrêt net."
           ]
         },
@@ -1000,7 +1000,7 @@
         },
         "stamina": {
           "neutral": [
-            "Au-delà de {staminaMinutes} minutes, ta main du médiator se crispe. Secoue-la, puis reprends.",
+            "Au-delà de {staminaMinutes} minutes, ta précision à ce tempo a tendance à baisser. Une courte pause, puis reprends.",
             "Vers la minute {staminaMinutes}, l'attaque du médiator commence à dériver. Courte pause, puis reprends.",
             "Mur d'endurance à la minute {staminaMinutes} — la main droite se resserre. Repose-toi 30 secondes.",
             "Tu as tendance à perdre en netteté au médiator vers la minute {staminaMinutes}. Courte pause, puis reviens."
@@ -1106,7 +1106,7 @@
         "session_start_cold": {
           "neutral": [
             "Prêt quand tu l'es. Je commence à suivre dès ton premier coup de gratte.",
-            "Accorde et commence quand tu veux — j'écoute dès la première note.",
+            "Installe-toi et commence quand tu veux — j'écoute dès la première note.",
             "Gratte quelques accords à vide, puis joue quand tu es prêt.",
             "Content de te voir. Commence quand la main qui gratte est détendue.",
             "Quand tu es prêt — joue et je commence à capter ton timing.",
@@ -1219,22 +1219,22 @@
         "fatigue": {
           "encouragement": [
             "Le bras qui gratte se crispe ? Secoue-le, puis reprends.",
-            "Poignet bloqué ? Petit étirement, puis reprends.",
-            "La tension s'installe dans le geste — pose la guitare pendant 60 secondes.",
-            "L'épaule monte ? Relâche-la, respire, puis continue.",
+            "La précision baisse à ce tempo. Petite pause, puis reprends.",
+            "Les ratés s'installent dans le geste — pose la guitare pendant 60 secondes.",
+            "Tu grattes sur un même tempo depuis un moment. Respire, puis continue.",
             "Le geste devient plus lourd qu'il ne faut. Courte pause.",
             "La prise se serre sur le manche ? Relâche, puis joue.",
             "L'avant-bras travaille trop — secoue-le et continue.",
-            "Prends 30 secondes, roule les épaules, puis reprends."
+            "Prends 30 secondes si tu veux, puis reprends."
           ],
           "correction": [
             "La fatigue se voit dans le geste — arrête-toi, 90 secondes loin des cordes.",
-            "Tu as passé ton pic — pose la guitare, étire le poignet, puis reviens.",
+            "Tes scores sont sous ton meilleur niveau — pose la guitare une minute, puis reviens.",
             "Un jeu fatigué à la gratte écrase les nuances. Arrête-toi, repose-toi, repars.",
             "Le bras qui gratte force. Pose la guitare, étire l'avant-bras, deux minutes de pause.",
             "Un vrai repos — guitare sur le support, marche un peu.",
             "La main qui gratte a fini. 90 secondes minimum, puis revérifie.",
-            "Arrêt net. Cercles du poignet, étirements de l'avant-bras, puis continue quand tu es détendu.",
+            "Arrêt net. Deux minutes de pause, puis continue quand tu es prêt.",
             "Si tu forces au-delà, tu t'achètes une blessure. Arrête-toi et récupère."
           ]
         },
@@ -1299,7 +1299,7 @@
         "muddy_hits": {
           "neutral": [
             "Tu tombes chaque temps mais l'attaque est légère — essaie un coup plus ferme, à la gratte ou au médiator.",
-            "Bonne couverture, coups mous. Plus de force du poignet à travers les cordes.",
+            "Bonne couverture, coups mous. Gratte un peu plus fort à travers les cordes.",
             "Les temps sont tous là, juste faibles. Traverse les cordes avec plus d'intention.",
             "Les temps tombent mais doucement — essaie une attaque plus nette sur le descendant."
           ]
@@ -1491,12 +1491,12 @@
           "encouragement": [
             "Les doigts qui pincent se crispent ? Petit étirement — puis reprends.",
             "L'avant-bras commence à se bloquer ? Pose la basse pendant 60 secondes.",
-            "La tension monte dans la main droite ? Courte pause, puis reprends.",
+            "Les notes dérapent au même tempo. Courte pause, puis reprends.",
             "La main gauche s'alourdit ? Prends un moment, puis continue.",
             "La main droite semble tendue ? Secoue-la, puis reprends.",
-            "L'épaule monte ? Relâche-la, respire, puis continue.",
+            "Longue série sur un même tempo. Respire, puis continue.",
             "L'avant-bras travaille trop. Courte pause.",
-            "Prends 30 secondes, roule les poignets, puis reprends."
+            "Prends 30 secondes si tu veux, puis reprends."
           ],
           "correction": [
             "La fatigue se voit dans l'attaque — arrête-toi, 90 secondes de pause, puis revérifie.",
@@ -1505,7 +1505,7 @@
             "La main droite force. Pose la basse, étire l'avant-bras, deux minutes de pause.",
             "Un vrai repos — basse sur le support, marche un peu.",
             "La main qui pince a fini. 90 secondes minimum, puis revérifie.",
-            "Arrêt net. Cercles du poignet et étirements de l'avant-bras avant de continuer.",
+            "Arrêt net. Deux minutes loin de la basse avant de continuer.",
             "Si tu forces au-delà, tu t'achètes une blessure. Arrête-toi et récupère."
           ]
         },
@@ -1743,7 +1743,7 @@
           "encouragement": [
             "Les mains sont de nouveau synchronisées. Tiens-le.",
             "Le calage des deux mains est revenu. Ne change rien.",
-            "Rattrapé — reste détendu au niveau des épaules.",
+            "Rattrapé — garde la régularité.",
             "Tu as rattrapé la dérive. Installe-toi là-dedans.",
             "Gauche et droite resynchronisées. Reste là.",
             "Sorti de la baisse. Ne change rien.",
@@ -1760,23 +1760,23 @@
         },
         "fatigue": {
           "encouragement": [
-            "Les poignets se crispent ? Lève les mains, respire, puis reviens.",
+            "La précision baisse à ce tempo. Lève les mains, respire, puis reviens.",
             "Les avant-bras sont bloqués ? Fais une pause, lâche les mains, respire.",
-            "La tension monte dans les épaules — 60 secondes loin du clavier.",
+            "Les ratés s'installent à ce tempo — 60 secondes loin du clavier.",
             "Les doigts sont lourds ? Un petit étirement, puis reprends.",
             "Les mains travaillent plus qu'elles ne devraient. Un bref repos.",
-            "Les épaules montent ? Relâche-les, respire, puis joue.",
-            "Prends 30 secondes, fais rouler les poignets, puis reviens.",
-            "La tension monte dans les poignets. Fais une pause, pose les mains sur les genoux, respire."
+            "Tu es au clavier depuis un moment. Respire, puis joue.",
+            "Une pause de 30 secondes est possible, puis reviens.",
+            "La précision baisse sur un même tempo. Fais une pause, mains sur les genoux, respire."
           ],
           "correction": [
             "La fatigue se voit dans le toucher — arrête-toi, mains posées 90 secondes.",
             "Tu as dépassé ton pic — lève-toi du tabouret, secoue-toi, puis reviens.",
-            "Jouer fatigué écrase les nuances. Arrête-toi, repose les poignets, recommence.",
-            "Les poignets forcent. Pose les mains, étire les avant-bras, deux minutes de pause.",
+            "Les scores continuent de baisser à ce tempo. Arrête-toi, repose-toi, recommence.",
+            "Les ratés continuent d'augmenter sur un même tempo. Mains hors du clavier, deux minutes de pause.",
             "Un vrai repos — lève-toi, marche un peu, reviens frais.",
             "Les mains en ont fini pour l'instant. 90 secondes au minimum, puis refais le point.",
-            "Arrêt net. Rotations des poignets et des épaules avant de continuer.",
+            "Arrêt net. Deux minutes loin du clavier avant de continuer.",
             "Si tu forces au-delà, tu t'achètes une blessure. Arrête-toi et récupère."
           ]
         },
@@ -1814,8 +1814,8 @@
         },
         "stamina": {
           "neutral": [
-            "Tension dans ton toucher vers la minute {staminaMinutes}. Relâche, respire, reviens proprement.",
-            "Vers la minute {staminaMinutes}, la tension des poignets s'installe. Un bref repos, puis reprends.",
+            "Tes scores à ce tempo baissent vers la minute {staminaMinutes}. Respire, reviens proprement.",
+            "Vers la minute {staminaMinutes}, les ratés commencent à s'installer. Un bref repos, puis reprends.",
             "Passé la minute {staminaMinutes}, le toucher s'alourdit. Une courte pause, puis reviens au clavier.",
             "La fatigue des mains se voit vers la minute {staminaMinutes}. Repose-toi, puis reviens."
           ]
@@ -2169,7 +2169,7 @@
         },
         "flat_dynamics": {
           "neutral": [
-            "Faible variation d'amplitude entre les positions de temps — essaie de varier ton attaque.",
+            "Faible variation d'amplitude entre les positions de temps — essaie de varier la force de ton attaque.",
             "Très peu de relief dynamique sur la mesure — augmente la différence d'accent sur les premiers temps.",
             "L'amplitude est constante d'une position à l'autre — construis une hiérarchie dynamique : premiers temps les plus forts, contretemps plus légers."
           ]
@@ -2177,7 +2177,7 @@
         "weak_downbeats": {
           "neutral": [
             "Schéma d'anti-accent détecté — les premiers temps sont plus faibles que les contretemps.",
-            "Tes contretemps dominent — augmente l'attaque sur les temps 1 et 3.",
+            "Tes contretemps dominent — renforce l'attaque sur les temps 1 et 3.",
             "L'amplitude des premiers temps est inférieure à celle des contretemps — inverse la hiérarchie dynamique."
           ]
         },

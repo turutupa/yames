@@ -109,7 +109,7 @@
             "Metronom cię zostawia. Wejdź w każdy klik.",
             "Tempo opada. Unieś ręce i graj na wierzchu klika.",
             "Nuty przychodzą późno. Celuj w przedni brzeg każdego uderzenia.",
-            "Widać ciągnięcie. Wyobraź sobie, że klik jest pół kroku wcześniej, niż myślisz."
+            "Widać ciągnięcie. Celuj w przednią krawędź każdego kliku, nie w środek."
           ],
           "correction": [
             "Nadal zostajesz z tyłu — graj z klikiem, nie czekaj na niego.",
@@ -212,7 +212,7 @@
             "Ponad pięć minut ciągłej gry. Sprawdź, jak się czuje twoje ciało, zanim pójdziesz dalej.",
             "Długa sesja — rozciągnij palce, potem wróć.",
             "Zmęczone ręce? Zrób 60 sekund przerwy przed następnym przejściem.",
-            "Długi odcinek — sprawdź nadgarstki i ramiona, zanim będziesz kontynuować.",
+            "Długi odcinek bez przerwy. Krótka przerwa to opcja, zanim będziesz kontynuować.",
             "Czas na krótką przerwę. Zimne ręce grają niechlujnie.",
             "Zatrzymaj się i rozciągnij. Dwie minuty przerwy utrzymają pewne następne dwadzieścia.",
             "Długa seria — daj rękom odpocząć, zanim pójdziesz dalej."
@@ -674,20 +674,20 @@
         },
         "fatigue": {
           "encouragement": [
-            "Ręce się napinają? Otrząśnij nadgarstki i wróć.",
+            "Uderzenia się rozjeżdżają przy tym samym tempie. Pałki na chwilę na bok, potem wróć.",
             "Jakość dryfuje — zejdź ze stołka na 60 sekund.",
             "Przedramiona dają ci znać? Krótka pauza, potem wróć.",
             "Pałki wydają się ciężkie? Odłóż je, rozciągnij się, potem wróć.",
             "Chwyt robi się mocny? Odejdź od zestawu na minutę.",
-            "Nadgarstki się blokują — krótkie otrząśnięcie, potem kontynuuj.",
+            "Dokładność spada — krótka przerwa, potem kontynuuj.",
             "Ręce pracują ciężej, niż powinny. Krótki odpoczynek.",
             "Odłóż pałki na chwilę — pozwól ramionom się zresetować."
           ],
           "correction": [
             "Zmęczenie widać — zatrzymaj się teraz, odłóż pałki, 90 sekund odpoczynku. Zmęczone granie utrwala niechlujny rytm.",
             "Minął twój szczyt — pałki na bok, przejdź się, potem oceń na nowo.",
-            "Zatrzymaj się, zanim napięcie przejmie kontrolę. 90 sekund przerwy, napij się, wróć.",
-            "Nadgarstki są napięte. Zatrzymaj się, rozciągnij przedramiona, dwie minuty przerwy.",
+            "Uderzenia wciąż się rozjeżdżają przy tym tempie. 90 sekund przerwy, napij się, wróć.",
+            "Pudła rosną przy jednym tempie. Zatrzymaj się, pałki na bok, dwie minuty przerwy.",
             "Jeśli przepchniesz to dalej, zrobisz sobie krzywdę. Prawdziwy odpoczynek teraz.",
             "Przestań grać. Odejdź od zestawu na kilka minut.",
             "Pałki na bok. Najpierw przedramiona, potem dłonie, wróć, gdy będziesz luźny.",
@@ -730,7 +730,7 @@
           "neutral": [
             "Około {staminaMinutes}. minuty twoje ręce się napinają. Zmniejsz BPM o 5 kresek i odbuduj.",
             "Po {staminaMinutes}. minucie kończyny zaczynają dryfować. Krótka przerwa, potem wróć do gry.",
-            "Zmęczenie widać około {staminaMinutes}. minuty przy zestawie. Odpocznij nadgarstkami, potem wróć.",
+            "Twoje wyniki przy zestawie spadają około {staminaMinutes}. minuty. Krótki odpoczynek, potem wróć.",
             "Masz tendencję do gubienia zgrania stopy około {staminaMinutes}. minuty. Złap oddech."
           ]
         },
@@ -835,7 +835,7 @@
           "neutral": [
             "Jestem gotowy, kiedy ty. Zacznę śledzić od twojego pierwszego uderzenia kostką.",
             "Rozgrzej się i zacznij grać, kiedy chcesz — zacznę słuchać.",
-            "Nastrój gitarę, ułóż się, a potem graj, kiedy będziesz gotów.",
+            "Usiądź wygodnie, ułóż się, a potem graj, kiedy będziesz gotów.",
             "Dobrze, że jesteś. Zacznij, gdy ręka z kostką będzie luźna.",
             "Kiedy będziesz gotów — zagraj, a zacznę łapać twój rytm.",
             "Bez pośpiechu. Rozluźnij rękę z kostką, potem zacznij, kiedy chcesz.",
@@ -947,22 +947,22 @@
         "fatigue": {
           "encouragement": [
             "Ramię z kostką się napina? Otrząśnij je, potem wróć.",
-            "Nadgarstek albo przedramię czują się zablokowane? Krótka pauza, potem wróć.",
-            "Napięcie się wkrada — odłóż gitarę na 60 sekund.",
-            "Podnosi się bark? Opuść go, oddychaj, potem wznów.",
+            "Dokładność spada od kilku minut. Krótka pauza, potem wróć.",
+            "Pudła się wkradają przy tym tempie — odłóż gitarę na 60 sekund.",
+            "Długi odcinek w jednym tempie. Oddychaj, potem wznów.",
             "Atak kostki robi się cięższy, niż musi. Krótki odpoczynek.",
             "Chwyt na gryfie się zaciska? Poluzuj, potem graj.",
             "Przedramię pracuje zbyt ciężko — otrząśnij i graj dalej.",
-            "Weź 30 sekund, porusz barkami, potem wróć do gry."
+            "30-sekundowa przerwa to opcja, potem wróć do gry."
           ],
           "correction": [
-            "Zmęczenie widać w ataku kostki — zatrzymaj się, odpocznij ramieniem 90 sekund. Zmęczone granie kostką buduje napięcie.",
-            "Minął twój szczyt — gitarę na bok, rozciągnij nadgarstek, potem wróć.",
+            "Dokładność spada przy tym samym tempie — zatrzymaj się, gitara na bok na 90 sekund, potem sprawdź jeszcze raz.",
+            "Wyniki są poniżej twojego szczytu — gitarę na bok na minutę, potem wróć.",
             "Zatrzymaj się, zanim ścięgna zaczną protestować. 90 sekund bez strun.",
-            "Nadgarstek się przeciąża. Odłóż gitarę, rozciągnij przedramię, dwie minuty przerwy.",
+            "Pudła wciąż rosną przy tym tempie. Odłóż gitarę, dwie minuty przerwy.",
             "Prawdziwy odpoczynek — gitara na stojak, przejdź się trochę.",
             "Ramię z kostką ma na razie dość. Minimum 90 sekund, potem oceń na nowo.",
-            "Zatrzymaj się. Krążenia nadgarstkiem, rozciąganie przedramienia, potem wróć świeży.",
+            "Zatrzymaj się tutaj. Dwie minuty z dala od gitary, potem wróć świeży.",
             "Jeśli przepchniesz to dalej, kupisz sobie kontuzję. Twardy stop."
           ]
         },
@@ -1000,7 +1000,7 @@
         },
         "stamina": {
           "neutral": [
-            "Po {staminaMinutes}. minucie ręka z kostką się napina. Otrząśnij ją, potem wznów.",
+            "Po {staminaMinutes}. minucie twój rytm przy tym tempie zwykle się rozjeżdża. Krótka przerwa, potem wznów.",
             "Około {staminaMinutes}. minuty atak kostki zaczyna dryfować. Krótka przerwa, potem wróć.",
             "Ściana wytrzymałości w {staminaMinutes}. minucie — prawa ręka się zaciska. Odpocznij 30 sekund.",
             "Około {staminaMinutes}. minuty masz tendencję do tracenia ostrości w graniu kostką. Krótki odpoczynek, potem wróć."
@@ -1106,7 +1106,7 @@
         "session_start_cold": {
           "neutral": [
             "Jestem gotowy, kiedy ty. Zacznę śledzić od twojego pierwszego uderzenia w struny.",
-            "Nastrój gitarę i zacznij, kiedy chcesz — będę słuchać od pierwszej nuty.",
+            "Ułóż się i zacznij, kiedy chcesz — będę słuchać od pierwszej nuty.",
             "Zagraj kilka pustych akordów, a potem graj, kiedy będziesz gotów.",
             "Dobrze, że jesteś. Zacznij, gdy ręka od strumowania będzie luźna.",
             "Kiedy będziesz gotów — zagraj, a zacznę łapać twój rytm.",
@@ -1219,22 +1219,22 @@
         "fatigue": {
           "encouragement": [
             "Ręka od strumowania się napina? Otrząśnij ją, potem wróć.",
-            "Nadgarstek czuje się zablokowany? Krótkie rozciągnięcie, potem wróć.",
-            "Napięcie wkrada się w uderzanie — odłóż gitarę na 60 sekund.",
-            "Podnosi się bark? Opuść go, oddychaj, potem kontynuuj.",
+            "Dokładność spada przy tym tempie. Krótka przerwa, potem wróć.",
+            "Pudła wkradają się w uderzanie — odłóż gitarę na 60 sekund.",
+            "Już jakiś czas uderzasz w jednym tempie. Oddychaj, potem kontynuuj.",
             "Uderzanie robi się cięższe, niż musi. Krótki odpoczynek.",
             "Chwyt na gryfie się zaciska? Poluzuj, potem graj.",
             "Przedramię pracuje zbyt ciężko — otrząśnij i graj dalej.",
-            "Weź 30 sekund, porusz barkami, potem wróć do gry."
+            "Weź 30 sekund, jeśli chcesz, potem wróć do gry."
           ],
           "correction": [
             "Zmęczenie widać w uderzaniu — zatrzymaj się, 90 sekund bez strun.",
-            "Minął twój szczyt — odłóż gitarę, rozciągnij nadgarstek, potem wróć.",
+            "Wyniki są poniżej twojego szczytu — odłóż gitarę na minutę, potem wróć.",
             "Zmęczone uderzanie zakopuje dynamikę. Zatrzymaj się, odpocznij, zacznij od nowa.",
             "Ręka od strumowania się przeciąża. Odłóż gitarę, rozciągnij przedramię, dwie minuty przerwy.",
             "Prawdziwy odpoczynek — gitara na stojak, przejdź się trochę.",
             "Ręka od strumowania ma dość. Minimum 90 sekund, potem oceń na nowo.",
-            "Twardy stop. Krążenia nadgarstkiem, rozciąganie przedramienia, potem kontynuuj, gdy będziesz luźny.",
+            "Twardy stop. Dwie minuty przerwy, potem kontynuuj, gdy będziesz gotów.",
             "Jeśli przepchniesz to dalej, kupisz sobie kontuzję. Zatrzymaj się i odpocznij."
           ]
         },
@@ -1299,7 +1299,7 @@
         "muddy_hits": {
           "neutral": [
             "Trafiasz w każde uderzenie, ale atak jest lekki — spróbuj mocniejszego uderzania albo kostki.",
-            "Dobre pokrycie, miękkie uderzenia. Więcej siły nadgarstka przez struny.",
+            "Dobre pokrycie, miękkie uderzenia. Uderzaj trochę mocniej przez struny.",
             "Uderzenia są wszystkie, tylko ciche. Przeprowadź uderzenie przez struny z większym zamiarem.",
             "Trafiasz w uderzenia, ale miękko — spróbuj ostrzejszego ataku na uderzeniu w dół."
           ]
@@ -1491,12 +1491,12 @@
           "encouragement": [
             "Palce szarpiące się napinają? Krótkie rozciągnięcie — i wracaj.",
             "Przedramię zaczyna się blokować? Bas na bok na 60 sekund.",
-            "Napięcie narasta w prawej ręce? Krótka przerwa, potem wróć.",
+            "Dźwięki się rozjeżdżają przy tym samym tempie. Krótka przerwa, potem wróć.",
             "Ręka na gryfie robi się ciężka? Weź chwilę, potem kontynuuj.",
             "Prawa ręka czuje się spięta? Otrząśnij ją, potem wznów.",
-            "Podnosi się bark? Opuść go, oddychaj, potem kontynuuj.",
+            "Długi odcinek w jednym tempie. Oddychaj, potem kontynuuj.",
             "Przedramię pracuje zbyt ciężko. Krótki odpoczynek.",
-            "Weź 30 sekund, porusz nadgarstkami, potem wróć do gry."
+            "Weź 30 sekund, jeśli chcesz, potem wróć do gry."
           ],
           "correction": [
             "Zmęczenie widać w ataku — zatrzymaj się, 90 sekund przerwy, potem oceń na nowo.",
@@ -1505,7 +1505,7 @@
             "Prawa ręka się przeciąża. Odłóż bas, rozciągnij przedramię, dwie minuty przerwy.",
             "Prawdziwy odpoczynek — bas na stojak, przejdź się trochę.",
             "Ręka szarpiąca ma dość. Minimum 90 sekund, potem oceń na nowo.",
-            "Twardy stop. Krążenia nadgarstkiem i rozciąganie przedramienia, zanim będziesz kontynuować.",
+            "Twardy stop. Dwie minuty z dala od basu, zanim będziesz kontynuować.",
             "Jeśli przepchniesz to dalej, kupisz sobie kontuzję. Zatrzymaj się i odpocznij."
           ]
         },
@@ -1743,7 +1743,7 @@
           "encouragement": [
             "Ręce znowu w synchronie. Trzymaj.",
             "Zgranie obu rąk wróciło. Niczego nie zmieniaj.",
-            "Odzyskane — zostań rozluźniony w barkach.",
+            "Odzyskane — trzymaj równe tempo.",
             "Złapałeś dryf. Siedź w tym.",
             "Lewa i prawa znowu zsynchronizowane. Zostań tam.",
             "Wyszedłeś ze spadku. Niczego nie zmieniaj.",
@@ -1760,23 +1760,23 @@
         },
         "fatigue": {
           "encouragement": [
-            "Nadgarstki się napinają? Unieś ręce, oddychaj, potem wróć.",
+            "Dokładność spada przy tym tempie. Unieś ręce, oddychaj, potem wróć.",
             "Przedramiona czują się zablokowane? Zatrzymaj się, opuść ręce, oddychaj.",
-            "Napięcie wkrada się w barki — 60 sekund przerwy od klawiszy.",
+            "Pudła się wkradają przy tym tempie — 60 sekund przerwy od klawiszy.",
             "Palce wydają się ciężkie? Krótkie rozciągnięcie, potem wznów.",
             "Ręce pracują ciężej, niż powinny. Krótki odpoczynek.",
-            "Barki się unoszą? Opuść je, oddychaj, potem graj.",
-            "Weź 30 sekund, porusz nadgarstkami, potem wróć do gry.",
-            "Napięcie w nadgarstkach narasta. Zatrzymaj się, opuść ręce na kolana, oddychaj."
+            "Już jakiś czas siedzisz przy klawiszach. Oddychaj, potem graj.",
+            "30-sekundowa przerwa to opcja, potem wróć do gry.",
+            "Dokładność spada przy jednym tempie. Zatrzymaj się, ręce na kolana, oddychaj."
           ],
           "correction": [
             "Zmęczenie widać w dotyku — zatrzymaj się, ręce w dół na 90 sekund.",
             "Minął twój szczyt — wstań z ławki, otrząśnij się, potem wróć.",
-            "Zmęczona gra zakopuje dynamikę. Zatrzymaj się, odpocznij nadgarstkami, zacznij od nowa.",
-            "Nadgarstki się przeciążają. Odłóż ręce, rozciągnij przedramiona, dwie minuty przerwy.",
+            "Wyniki wciąż spadają przy tym tempie. Zatrzymaj się, odpocznij, zacznij od nowa.",
+            "Pudła wciąż rosną przy jednym tempie. Ręce z klawiszy, dwie minuty przerwy.",
             "Prawdziwy odpoczynek — wstań, przejdź się, wróć świeży.",
             "Ręce mają na razie dość. Minimum 90 sekund, potem oceń na nowo.",
-            "Twardy stop. Krążenia nadgarstkami i barkami, zanim będziesz kontynuować.",
+            "Twardy stop. Dwie minuty z dala od klawiszy, zanim będziesz kontynuować.",
             "Jeśli przepchniesz to dalej, kupisz sobie kontuzję. Zatrzymaj się i odpocznij."
           ]
         },
@@ -1814,8 +1814,8 @@
         },
         "stamina": {
           "neutral": [
-            "Napięcie w dotyku około {staminaMinutes}. minuty. Rozluźnij się, oddychaj, wróć czysto.",
-            "Około {staminaMinutes}. minuty napięcie w nadgarstkach się wkrada. Krótki odpoczynek, potem wznów.",
+            "Twoje wyniki przy tym tempie spadają około {staminaMinutes}. minuty. Oddychaj, wróć czysto.",
+            "Około {staminaMinutes}. minuty zaczynają się wkradać pudła. Krótki odpoczynek, potem wznów.",
             "Po {staminaMinutes}. minucie dotyk robi się cięższy. Krótka przerwa, potem wróć do klawiszy.",
             "Zmęczenie rąk widać około {staminaMinutes}. minuty. Odpocznij, potem wróć."
           ]
@@ -2169,7 +2169,7 @@
         },
         "flat_dynamics": {
           "neutral": [
-            "Mała zmienność amplitudy w pozycjach uderzeń — spróbuj zmieniać swój atak.",
+            "Mała zmienność amplitudy w pozycjach uderzeń — spróbuj zmieniać siłę swojego ataku.",
             "Minimalne kształtowanie dynamiki w takcie — zwiększ różnicę akcentów na mocnych częściach taktu.",
             "Amplituda jest stała we wszystkich pozycjach — zbuduj hierarchię dynamiczną: mocne części taktu najsilniejsze, słabe lżejsze."
           ]
@@ -2177,7 +2177,7 @@
         "weak_downbeats": {
           "neutral": [
             "Wykryto wzorzec anty-akcentu — mocne części taktu są cichsze niż słabe.",
-            "Twoje słabe części taktu dominują — zwiększ atak na uderzeniach 1 i 3.",
+            "Twoje słabe części taktu dominują — wzmocnij atak na uderzeniach 1 i 3.",
             "Amplituda mocnych części taktu jest niższa niż słabych — odwróć hierarchię dynamiczną."
           ]
         },
