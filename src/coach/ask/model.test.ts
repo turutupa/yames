@@ -54,7 +54,7 @@ describe("the switch", () => {
 });
 
 describe("the budgets (DESIGN 5.5)", () => {
-  it("prefix within 900, byte-identical turn to turn; output 48; deadline 8 s", () => {
+  it("prefix within CHOICE_PREFIX_TOKENS (1100 since the choice prompt's fixes), byte-identical turn to turn; output 48; deadline 8 s", () => {
     const a = choiceRequest("slower please", FACTS, 1);
     const b = choiceRequest("what is a clean tempo", { ...FACTS, screen: "today" }, 2, "slower please");
     expect(a.prefix).toBe(b.prefix);

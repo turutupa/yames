@@ -30,6 +30,19 @@ Branch `coach-c3b2a` (same worktree). Logs `/tmp/coach-c3b2ab/`. Review: `/tmp/c
 - L1 (the CPU gate) belongs to the leg that turns a language on. L4 (a jam take render on cancel), L5
   (Notebook tab cancels a turn: acceptable, now written here), L6: for c3b2b.
 
-## Gates
+## Merge with `coach`
 
-(below, after the merge with `coach`)
+`git merge coach`: clean, no conflicts (`coach` touched no `ask.json`). `ASK_PREFIX_TOKENS` is
+`CHOICE_PREFIX_TOKENS`, now 1100 from `coach`; the budget test already compared against the constant, only
+its name said 900 (renamed). The parity manifest never listed `ask.model.*`: unchanged.
+
+## Gates (after the merge; logs `/home/dgx-delgado/scratch/jobq/<id>-coach-c3b2ab-*.log`)
+
+- tsc: pass (866). Build: pass (868).
+- `npm run test` (867): 50245 passed, 11 skipped, 2 files failed: the known `TabStage.render.test.tsx`
+  (symlink), and `ToolCoach.test.tsx` "after Listen goes off…" (not touched here; passes alone on this branch,
+  877, 138/138 with the leg's files, and on `coach` untouched, 878): load, not this leg.
+- Layout `ask ask-tools ask-typed ask-cards coach-model short-window` (870): 154 passed, 2 timed out at 30 s
+  (ask-tools Metronome 1024 ember, at its 10.5 s wait; ask-cards Session 1024 ember) while the full vitest
+  ran beside it; the two specs re-run alone (879): 23 passed.
+- Owed: `smooth.spec.ts` on a quiet machine (not run: the machine is too busy for a timing spec).
