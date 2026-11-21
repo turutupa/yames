@@ -7,16 +7,20 @@
  * TypeScript. `counts` is the answer both must give.
  */
 import fs from "node:fs";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import type { PathTakeRow } from "../ipc";
 import { CLEAN_TEMPO_MIN_BARS } from "./grade";
 import { countsTowardCleanTempo } from "./progress";
 
+/** This file's folder (happy-dom's `URL` will not resolve a relative path against a file URL). */
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+
 type Row = { id: string; bars: number; caught: boolean; passed: boolean; factsJson: string; counts: boolean };
 const fixture = JSON.parse(
   // From this file, not the working directory (nf1c L3), as Rust's `include_str!` does.
-  fs.readFileSync(fileURLToPath(new URL("../../src-tauri/fixtures/clean_tempo_rows.json", import.meta.url)), "utf8"),
+  fs.readFileSync(path.resolve(HERE, "../../src-tauri/fixtures/clean_tempo_rows.json"), "utf8"),
 ) as { minBars: number; rows: Row[] };
 
 /** `serde_json::from_str(&facts).unwrap_or(Value::Null)`, as `list_path_takes` hands a row over. */
@@ -66,10 +70,7 @@ describe("the long view and the app agree on every shared row", () => {
  */
 describe("useSessionRun: 'before' is the shown tempo, what is stored is the ceiling's", () => {
   const source = fs
-    .readFileSync(
-      fileURLToPath(new URL("../containers/session/hooks/useSessionRun.ts", import.meta.url)),
-      "utf8",
-    )
+    .readFileSync(path.resolve(HERE, "../containers/session/hooks/useSessionRun.ts"), "utf8")
     .replace(/\s+/g, " ")
     .replace(/\( /g, "(")
     .replace(/ \)/g, ")");
