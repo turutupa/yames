@@ -8,7 +8,8 @@
  * plan cannot print. Two-note power chords are one attack, so they are graded
  * on timing and notes heard and never on pitch.
  */
-import { definePath } from "../spec";
+import { definePath, withCues } from "../spec";
+import { METAL_RHYTHM_CUES } from "./metal-rhythm-cues";
 import type { ExerciseSpec, VariantParams } from "../spec";
 import type { PassBar } from "../format";
 import { ladder, repeat } from "../templates";
@@ -133,7 +134,7 @@ const warmLabel = (p: VariantParams) => `${p.stringSet === "A string" ? ON_A[p.k
 
 const WARMUP_VALUES = { key: Object.keys(ROOT_FRET), stringSet: ["low E string", "A string"] } as const;
 
-export default definePath({
+export default withCues(definePath({
   id: "metal-rhythm",
   title: "Metal Rhythm",
   kind: "mechanics",
@@ -1017,4 +1018,4 @@ export default definePath({
       ],
     },
   ],
-});
+}), METAL_RHYTHM_CUES);

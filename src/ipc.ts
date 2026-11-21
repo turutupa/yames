@@ -2087,6 +2087,29 @@ export async function listExerciseCeilings(): Promise<ExerciseCeilingRow[]> {
   return invoke<ExerciseCeilingRow[]>("list_exercise_ceilings");
 }
 
+/**
+ * One Exercise's clean tempo over every Take kept (`db.rs` `CleanTempoSpan`):
+ * the first earned and the best, each with its Take's `startedAt`. The best
+ * is the same number `listExerciseCeilings` reports.
+ */
+export type CleanTempoSpanRow = {
+  pathId: string;
+  exerciseId: string;
+  firstBpm: number;
+  firstAt: number;
+  bestBpm: number;
+  bestAt: number;
+};
+
+/**
+ * The long view: first and best clean tempo per Exercise, read past the
+ * 500-Take window. Read-only, off the main thread. Ask for it on demand
+ * (when Progress opens), never at startup and never during a Take.
+ */
+export async function listCleanTempoSpans(): Promise<CleanTempoSpanRow[]> {
+  return invoke<CleanTempoSpanRow[]>("list_clean_tempo_spans");
+}
+
 /** Forget one — the player played it, or does not want the reminder. */
 export async function clearDue(
   scoreId: string,

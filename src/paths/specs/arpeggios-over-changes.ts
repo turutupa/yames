@@ -8,7 +8,7 @@
  * teaches which notes, slowly. Speed is Sweep Picking's subject, and the last
  * Level here hands the player over to it.
  */
-import { definePath } from "../spec";
+import { definePath, withCues } from "../spec";
 import type { ExerciseSpec, VariantParams } from "../spec";
 import { handAt, ladder, moveChart, shiftFrets } from "../templates";
 import { ROCK, named, tokens, top } from "./triadShapes";
@@ -16,6 +16,7 @@ import { MINOR_TWO_FIVE_ONE, MORE_SWEEPS, SEVENTHS_ACROSS, TWO_OCTAVES_MORE } fr
 import { FOUR_CHORDS_IN_G, NEAREST_NOTE_AGAIN, SEVENTHS_IN_G } from "./arpeggios-encore";
 import type { Shape } from "./triadShapes";
 import { keyHowTo } from "./keyText";
+import { ARPEGGIOS_OVER_CHANGES_CUES } from "./arpeggios-over-changes-cues";
 import type { KeyLineKind } from "./keyText";
 
 const YOUR_TURN = { grade: "selfChecked", example: true } as const;
@@ -141,7 +142,7 @@ function inKeys(
   };
 }
 
-export default definePath({
+export default withCues(definePath({
   id: "arpeggios-over-changes",
   title: "Arpeggios over Changes",
   kind: "theory",
@@ -978,4 +979,4 @@ export default definePath({
       ],
     },
   ],
-});
+}), ARPEGGIOS_OVER_CHANGES_CUES);

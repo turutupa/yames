@@ -176,7 +176,8 @@
     "capture_outbox_prepare",
     "capture_sessions",
     "cancel_generation",
-    "coach_ask"
+    "coach_ask",
+    "list_clean_tempo_spans"
   ],
   "ipcCommands": [
     "analyze_attempt",
@@ -353,7 +354,8 @@
     "capture_outbox_prepare",
     "capture_sessions",
     "cancel_generation",
-    "coach_ask"
+    "coach_ask",
+    "list_clean_tempo_spans"
   ],
   "commandsInvokedOutsideIpc": [
     "app_ready",
@@ -586,7 +588,8 @@
     "captureSessions",
     "cancelGeneration",
     "coachAsk",
-    "newGenerationId"
+    "newGenerationId",
+    "listCleanTempoSpans"
   ],
   "ipcWrappersWithoutCaller": [
     "clearSessionLogs",
@@ -599,7 +602,8 @@
     "reorderPresets",
     "setCalibrationOffset",
     "startVoiceRepair",
-    "callbackProbeReport"
+    "callbackProbeReport",
+    "listCleanTempoSpans"
   ],
   "eventsListened": [
     "adaptive-eval",

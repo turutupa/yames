@@ -18,6 +18,35 @@ orchestrator keeps. Newest last.
   head and Settings → Coach; Download in the selector, not a detour to Settings; naming by model and
   size is fine. Applied to PLAN.md (decisions 1 to 3), the shared brief, ms1 and c2a1.
 
+- 2026-11-20 16:20 (session 3 applied it): no fixed `/tmp` path in tests. `today-line.spec.ts` on `coach`
+  still had the default folder (the fix is on the owner's `revamp`, which this checkout cannot fetch):
+  the same one-line fix goes into leg fix2 here. The other new specs were checked: every one takes its
+  picture folder from an env var with no default.
+- 2026-11-20 17:52 (relay): the Windows ARM64 run of the download code is done and green (`models::` 52
+  passed, the unit suite 1,214). Nothing is owed on Windows.
+- 2026-11-20 18:08 and 18:25 (owner): full throttle; no cap on agents; every long or heavy command through
+  the job queue (`~/.local/bin/job`), `--lock coach-layout` on any Playwright run; the 16 GB memory guard
+  stays; never two full layout suites at once. Applied: `RULES-FOR-PROMPTS.md` (the heavy-commands rule),
+  `run.sh` (`/tmp/coach-orch/limits` holds "full"; write "day" there when the owner restores the weekday
+  limits), `cues-prompt.md`, every prompt from 18:25 on.
+- 2026-11-20 18:35 (owner): training is approved once c3b has measured stock Qwen3 4B / 8B on tool
+  choice and latency and they fall short: a small router first, a LoRA of the 4B if the numbers say so;
+  as queue jobs, measured against the stock models on a held-out set before anything ships. Applied to
+  PLAN.md ("Not in this plan" no longer lists fine-tuning; it is leg c3d, after c3b).
+- The chip question from 1h ("should a chip's own press count") is still with the owner: the two-press
+  behaviour stays, and nothing built in session 3 depends on it. **Answered, see the next entry.**
+- 2026-11-20, "owner decisions on the 1k questions" (session 4 applied them as legs): (1) a chip's own
+  press is the press for a reversible one-step change, always with Undo; multi-step or not undoable
+  still goes through a proposal → leg **chip1** (`chip1-chip-press-counts.md`; the orchestrator's
+  reading, recorded as a reading: typed commands keep their proposal, because free text can be misread
+  and a chip cannot). (2) The practice reminder is in-app only → **rem Part 2, option A**, after c4a2.
+  (3) A Take marked "not fair" is out of both the clean tempo Progress shows and milestones → leg
+  **nf1** (`nf1-not-fair-takes.md`; R: `db.rs`). (4) Today's header says the plain fact → leg **hd1**
+  (`hd1-today-header.md`; English "Last Session: 12 days ago"), with the relay's 19:35 note (headroom
+  for `generate.test.ts` "mostly" and `smooth.spec.ts` "Ask commits nothing").
+- 2026-11-20 20:05 (relay): the Vulkan probe (pv1) runs on the RTX by the relay, with Qwen3 4B Q4_K_M;
+  its numbers will be appended to OWNER-UPDATES. Not run on the DGX. c3b uses them when they land.
+
 ## What happened to wave 1's first run
 
 The orchestrator ended its turn while waiting and the runtime stopped the three agents (and ms1's
@@ -55,6 +84,32 @@ ms1's first run had put the selector in the left rail: the relaunch moves it to 
 | cues4 Know the Neck | merged | `coach-cues4` | 2026-11-20 | `progress/cues4.md`. 519 cues on 57 Exercises (212 distinct sentences), fifteen languages, three proof-readers (36 objections, 31 taken, 5 answered). 274k tokens; Legato not started. Samples read by the orchestrator ("See the octave shape: two strings, two frets."; "Find F at fret one and C at fret eight."): accepted. **Six Paths of sixteen have cues.** **FOUND, a defect in shipped code, not fixed (it needs its own code leg, `vr1`):** `cueTexts` / the variant rewriter (`src/paths/variantText.ts`) does not refuse a note or key name when a variant moves the same line to another string in the same key or to another box; it rewrites the name as if the variant were a transposition, and the result is false ("Play F sharp, the one sharp in G major." became "Play A, the one sharp in G major."). `refusals-entry.ts` prints these as "rewritten", not as refusals. cues4 reworded its own; **the cues of the five Paths merged earlier (c4c, cues1 to cues3) and every Exercise's how-to lines go through the same rewriter and have not been audited for it.** |
 | vr1 the variant rewriter | merged | `coach-vr1` | 2026-11-20 | `progress/vr1.md`. Failing tests first, from the real Exercises ("Play F sharp, the one sharp in G major." → "Play A, …"; "Find each A" → "Find each C / D / E / G"). Fix in `src/paths/variantText.ts`: a renamed note is said again only when every note of the variant moved the same interval, or when the sentence puts the note at a place ("D at fret 3"); never beside "key", "tonic" or "home"; otherwise the sentence is refused for that variant. `npm run paths -- check` now prints `variant.rewritten`, `cue.refused` and the error `variant.rewrite` (`src/paths/rewrites.ts`): **cue legs no longer need `refusals-entry.ts`**. **Audit of all sixteen packs: 0 how-to lines and 0 cues were false in what shipped** (the before / after diff of the generated variant texts, and 112 placed-note sentences read by hand); the only false ones were Know the Neck's cues, reworded by cues4 before its merge. One Rhythm Foundations line reworded and translated; Shred's tap-triplets variant regained two lines. 271k tokens. Leg gates: check, tsc, vitest 26,304, build, layout 112. |
 | t1b1 the tools in the Ask panel (+ t1b1b) | built (321k tokens: too big again; UI, fifteen locales and scenes should have been two legs); screens read against mock 16 (a proposal with one tonal button and "Not now"; "Which one?"; "That one is yours" with "Show me in Settings"; the source line "The app"): accepted; **reviewed: MERGE AFTER FIXES** (`/tmp/coach-orch/t1b1-review.md`): a press is the only way in, nothing per beat, the thread is never persisted, "show me" only navigates; to fix: an open proposal stayed pressable on later screens with a stale "what stops" line; chips not recomputed after a turn is updated; "Loaded" said before the preset was applied; a held late answer overwrote later changes. t1b1b fixed all four with tests (169k): a proposal remembers its screen and, in a Session, its step, and is retired through the runner when either moves on; chips keyed on the thread; `loadPresetAfterReRead` waits for the preset to be applied and says "didn't load fully" when a step fails (new key `coachTools.receipt.presetFailed`); a held answer is applied to the turn as it is then; the second click of a double-click is not a press on any tool button. **Merged** 2026-11-20. | `coach-t1b1` | 2026-11-20 | `progress/t1b1.md` on its branch. **A reading to confirm with the owner:** a chip for a one-press tool ("Slower", "Start today's Session") shows the proposal first, so it is two presses in all; the chip's own press could count as the press. **For a polish leg:** mock 16's "the page marks the row the proposal points at" is not built; the chips are not re-chosen when Paths opens a Step page with Ask open; a chip's words reach a model's conversation without the tool's answer (c3b). Native reads: the `yours.*` lines, the button verbs (de "Los", fr "Y aller"). |
+| t1b2a the typed-command router, English (session 3) | merged | `coach-t1b2a` | 2026-11-20 | `progress/t1b2a.md`. `src/coach/ask/router.ts` (pure: `call` / `which` / `yours` / `none`), `commandTable.ts`, `commands/en.json` (beside the router, not a locale namespace). 61 command lines reach all 24 player tools (no chip-only tool); 71 near-misses return `none` and 18 return `yours`, each on ten screens. Order: a question is never a command; a `notCommand` word anywhere ends it; never-list words before any verb; a leftover word ends it. `askPrompt` drops a player turn a tool answered (diff read by the orchestrator: eighteen lines, sound). 239k tokens. Leg gates: tsc, vitest 26,951, build. Nothing calls the router yet (t1b2b). **For a polish leg:** "show me my progress" falls through; "play some music" reaches `play_exercise` and gets "not found". |
+| cues5 Scales and Modes (session 3) | merged | `coach-cues5` | 2026-11-20 | `progress/cues5.md`. 637 cues on 72 Exercises (235 distinct sentences), fifteen languages, three proof-readers (29 objections, 26 taken, 3 answered). 0 `cue.refused`. 284k tokens. Samples read by the orchestrator ("Raise the seventh over the five chord only."; "Count the last G's two beats, then go again."): accepted. Generator quirks worked round in the wording (it refuses "step" words on string variants). Native reads: the counting syllables in pl, ru, pt-BR, tr, vi, ja, ko, zh; ko register; fr / de shorten "root". **Seven Paths of sixteen have cues.** |
+| cues9 Funk Lines (session 3) | merged | `coach-cues9` | 2026-11-20 | `progress/cues9.md`. 344 cues on 49 Exercises (209 distinct), fifteen languages, three readers (16 objections, all taken). Most cues say where a note sits in '1 e and a' or which sixteenth is silent; a stray note is named only in `extras`. Samples read: accepted ("Count '1, and a' and leave each 'e' silent."). Native reads: **it first** (its overlay counts '1 e e a': the 'e' and the 'and' are the same word), pl, ru, ja, tr. |
+| cues8 Triads (session 3) | merged | `coach-cues8` | 2026-11-20 | `progress/cues8.md`. 617 cues on 72 Exercises (171 distinct), fifteen languages, three readers (31 objections, all taken; four cues contradicted the tab and were corrected). 303k tokens. ko, zh-CN, zh-TW written by the leg itself (the session's limit of twenty agents refused a fourth translator): **want a native read**. Samples read: accepted ("Move only the top note, down to fret one."). |
+| cues6 Classic Rock (session 3) | merged | `coach-cues6` | 2026-11-20 | `progress/cues6.md`. 579 cues on 72 Exercises (299 distinct), fifteen languages, three readers (56 objections, 51 taken, 5 answered). Bends: "Hear the target B before you bend.", never a pitch verdict. Samples read: accepted. Native reads: "hi-hat", "call", the spoken counts; some de / es / it / nl / ru cues drop a detail to fit 48 characters. |
+| cues10 Metal Rhythm (session 3) | merged | `coach-cues10` | 2026-11-20 | `progress/cues10.md`. 445 cues on 54 Exercises (271 distinct), fifteen languages, three readers (17 objections, 14 taken). The palm and "down on every eighth" only in general cues, as the Exercise's own how-to; no slip cue names them. Samples read: accepted ("Say '1, and a, 2 e and' before you start."). Native reads: the counts, "kick", de "Sprungsaite" (coined), ja register. |
+| cues7 Legato (session 3) | merged | `coach-cues7` | 2026-11-20 | `progress/cues7.md`. 467 cues on 52 Exercises (180 distinct), fifteen languages, three readers (37 objections, 31 taken). No cue says the app heard a hammer-on. Samples read: accepted ("Place each hammer-on on its count, not before."). English to reword: "First finger in a fret from the D string up." **Found: the cues slow the generator** (`generate.test.ts` "subdivisions … mostly" past its 20 s timeout; on `coach` after these five merges it fails for that alone): leg gt1. **Twelve Paths of sixteen have cues.** |
+| rem Part 1 (session 3) | merged (a report) | `coach-rem` | 2026-11-20 | `progress/rem.md`. Nothing reaches a player whose app is closed without a new dependency, a new permission prompt, or (Linux) a scheduler entry; the official notification plugin does not schedule on desktop and adds a boot receiver on Android. **Orchestrator's decision: Part 2 builds option A** (in-app only: on a reminder day after the set time, with no Session yet, Today says so; no dependency, no permission), after c4a2. Option B (an OS-held reminder on Android raised by the player's own press; Windows and macOS later) waits for the owner's answer (questions in `STATUS.md`). |
+| cues13a Sweep Picking, first half (session 3) | merged | `coach-cues13a` | 2026-11-20 | `progress/cues13a.md`. 255 cues on 37 Exercises (Beginner, Intermediate Steps 6 to 9, the warm-ups), 115 distinct, fifteen languages, two readers (32 objections, 31 taken). The stock families are constants at the top of the file for cues13b (running: the other 35 Exercises). Samples read: accepted ("Hammer the top note on beats two and four."). |
+| cues12 Tapping (session 3) | merged | `coach-cues12` | 2026-11-20 | `progress/cues12.md`. 301 cues on 52 Exercises (120 distinct), fifteen languages, three readers (25 objections, 21 taken: ten cues that said "as firmly as" implied the app heard how hard a tap landed and are now orders). Samples read: accepted ("Move the tap during the last hammer-on."). Native reads: the count syllables (ja '1-トリ-プル'), tr "klikı". |
+| cues11 Arpeggios over Changes (session 3) | merged | `coach-cues11` | 2026-11-20 | `progress/cues11.md`. 465 cues on 57 Exercises (161 distinct), fifteen languages, three readers (24 objections, all taken). Tones named by their number in the chord. Samples read: accepted ("Let five's seventh fall to one's third."). Checker quirks written up there (it reads "next" as a string). **Fifteen Paths of sixteen have cues or half of them; Shred (cues14) and Sweep's second half (cues13b) are running.** |
+| pol1 polish, the Session and Today (session 3) | merged | `coach-pol1` | 2026-11-20 | `progress/pol1.md`. Nine of ten items: no fixed `/tmp` path in `today-line.spec` (the owner's 16:20 update); the back-from-a-break sentence ("… That was 12 days ago. Today starts at 85 BPM."); "ending with X" in de / es / fr / it / nl; a Step-line scene; no Faster under "once more here"; **"N bars in a row held" was wrong on real data** (the scorer pools windows, so a bar inside the stretch can be crossed): now said only when none is; "Finish the Session"; the neck's "Go again" scene in `smooth.spec` (the shot harness sped that Take up: fixed in the harness). Nothing in `useSessionRun.ts`, `useSession.ts` or Ask. Leg gates: tsc, vitest, build, layout 266 passed (two `smooth` long-task failures under load, passed alone). **Left:** item 10 (First Chords' fourteen cues a variant cannot say). **Found, not fixed:** Today's header kick still reads "WELCOME BACK. IT HAS BEEN 12 DAYS" (older than the coach build; the owner's rule is no "welcome back"): for pol2 or a small leg. The full layout suite is owed again (text changed on Today, the Step page, the result). |
+| c4b1 the long view (Rust `db.rs`) and `totals.ts` (session 3) | built; **with the reviewer** (`/tmp/coach-orch/c4b1-review.md`) | `coach-c4b1` | – | `progress/c4b1.md` on its branch. `list_clean_tempo_spans` (read-only; first and best clean tempo per Exercise; the plan asserted; 5.6 ms on 5,000 Takes), `listCleanTempoSpans` in `ipc.ts`, `src/session/totals.ts` (`totalsFrom` moved, `weekTotals`, `weekStartOf`). Leg gates: `test:rust` 1,229, tsc, vitest, build. Decision to confirm: a Take marked not fair stays in (so `bestBpm` equals the ceiling Progress shows). |
+| t1b2b typed commands in fifteen languages, wired (session 3) | built; **with the reviewer** (`/tmp/coach-orch/t1b2b-review.md`) | `coach-t1b2b` | – | `progress/t1b2b.md` on its branch. Fourteen tables, per language a dozen commands and 34 to 40 near-misses re-read by a second reader; `answerTyped` (the router, then the slot `setAskNextAnswerer`, then the model or the plain statement); `verbFinal` (de, nl, tr), `ordinalPlaces` (ja, ko, zh). Screens read against mock 16. **Open:** in ja / ko / zh a sentence with a verb and leftover characters can become a call with the leftover as a name (the reviewer is asked whether that needs a guard before merge). |
+| c2b1a fact cards, machinery and three cards in English (session 3) | built (359k tokens: too big even as a half); **with the reviewer** (`/tmp/coach-orch/c2b1a-review.md`) | `coach-c2b1a` | – | `progress/c2b1a.md` on its branch. `intents.ts`, `cards.ts`, `suggest.ts`, `match.ts`, a `card` turn kind, `answerCardFor(text)`; where it slipped, early or late (the premise answered first), why it did not count. The cards are their own list (`FACT_CARDS`), not entries of `COACH_TOOLS`. 51 `ask.card.*` strings are English in fourteen locales until c2b1b. Merges after t1b2b (it must merge `coach` and plug nothing: c2b1b plugs the slot). |
+| gt1 the generator's time | running | `coach-gt1` | – | Brief `gt1-generator-time.md`: where the cues' variant work costs time, whether any of it runs on the player's device, the fix, the tests kept honest. The cue merges' vitest gate waits on it. |
+
+**The full layout suite on `coach`** (`ffabfcb7`: delivery 1i plus cues5 and t1b2a; queue job
+`coach-layout-full`, 55 minutes behind the probe's lock, 18.4 minutes of tests): **1,423 passed, 1
+failed, 278 skipped.** The failure is `smooth.spec.ts` "phone-session-runway-playing: no long task" (two
+long tasks, the longest 77 ms, with a dozen legs' jobs running). Re-run alone at a load average of 96:
+that scene passed and the desktop runway scene failed instead (one long task of 218 ms). A timing
+test on a machine at that load says nothing either way: **`smooth.spec.ts` is owed one run on a quiet
+machine** (`job submit … --lock coach-layout --cwd ~/yames-coach-night -- bash plans/coach/tools/run.sh
+npx playwright test --trace off tests/layout/smooth.spec.ts`). No other spec failed: ten merges of
+text and styles since delivery 1c broke no layout.
 
 **Delivery 1d (2026-11-20, session 2):** c2a2 on `coach`: tsc, vitest 396 files / 13,689 (exit 1 from a
 worker RPC timeout, every test passing), build, layout 192 passed (`/tmp/coach-orch/gates-1d.log`).
@@ -67,6 +122,33 @@ test passing, and was clean on the re-run). `plans/coach/tools/gates.sh` is the 
 After c0 + c1a on `coach`: tsc clean, vitest 381 files / 11,475 tests, build clean (logs `/tmp/coach-orch/`).
 In a worktree one vitest file (`TabStage.render.test.tsx`) cannot load through the `node_modules`
 symlink; it passes in the main checkout.
+
+## The click-jitter probe, session 3 (2026-11-20, 18:22 to 19:02 PT)
+
+`coach` at `dfec7b0c`, release, CPU LLM build (`coach-llm`), `--volume 0.01`, run alone under the
+build's lock (`plans/coach/tools/probe-night.sh` as queue job `coach-probe-night`; logs
+`/tmp/coach-orch/probe-<label>.log`). Each run waited for a 1-minute load under 4. Another account's
+machine-learning job was running throughout (one core and its data workers).
+
+| Run | load at start, end | p50 ms | p99 ms | max ms | missed | allocs / frees | dropped | Result |
+|---|---|---|---|---|---|---|---|---|
+| baseline `--no-llm` | 3.76, 4.97 | 0.117 | **0.850** | 3.05 | 0 | 0 / 0 | 0 | PASS |
+| `--no-llm --song-loop --song-take` | 2.67, 2.53 | 0.106 | **0.683** | 0.98 | 0 | 0 / 0 | 0 | PASS |
+| `--no-llm --jam-swap --jam-move --jam-take` | 2.53, 1.98 | 0.155 | **0.766** | 5.56 | 0 | 0 / 0 | 0 | PASS |
+| `--llm-load` (Qwen3 0.6B, CPU, 18 threads; 9 generations) | 1.98, 14.78 | 0.227 | 4.473 | 27.8 | 0 | 0 / 0 | 0 | p99 advisory FAIL |
+| `--llm-cancel` (same) | 3.46, 13.96 | 0.069 | 3.351 | 12.0 | 0 | 0 / 0 | 0 | p99 advisory FAIL |
+| `--gguf … --jam-swap --jam-move --jam-take`, `--gguf … --song-loop --song-take` | not made | | | | | | | the load did not fall under 4 again (cancelled after 40 minutes: the run was holding every leg's gates) |
+
+Reading: with no model the click's path is inside the gate on all three schedulers, with session 1
+and 2's changes in (the loop, the voice at boundaries). With a model generating **on the CPU** the
+four hard numbers stay 0 and p99 does not: the inference threads are themselves the load (the run
+takes the machine from a load of 2 to 14: 18 threads on 20 cores, at normal priority, as AGENTS.md
+says of ggml's thread pool). That is the CPU-only build, which a shipped build is not; the run that
+answers for a player's machine is Qwen3 4B on Vulkan, **which could not be made here**: this DGX
+has no Vulkan headers and no `glslc`, and the leg that would have set them up in the home folder
+(`plans/tasks/coach/pv1-probe-vulkan.md`) was refused by the permission mode and not tried another
+way. **For c3b:** on a CPU-only build, cap the generation's threads (half the cores) or keep Ask's
+model answers off while the click plays; measure both with this probe.
 
 ## Decisions recorded while building
 

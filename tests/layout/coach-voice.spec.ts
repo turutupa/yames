@@ -125,7 +125,7 @@ test("the coach's keys: one line in the coach's slot, no panel, spoken with Voic
   await expect(answer).toHaveText(finding);
   await expect.poll(async () => spoken(await speech(page)).at(-1)).toBe(finding);
   await page.keyboard.press("u");
-  await expect(answer).toContainText(/Go again|Next|Start|See how it went/);
+  await expect(answer).toContainText(/Go again|Next|Start|Finish the Session/);
   const said = (await answer.innerText()).trim();
   await expect.poll(async () => spoken(await speech(page)).at(-1)).toBe(said);
   // No panel opened.
