@@ -36,6 +36,21 @@ export function askScreenKey(ctx: CoachContext): string {
   return [ctx.screen, ctx.screen === "session" ? (ctx.exercise?.id ?? "") : "", ctx.jam?.jam.id ?? "", ctx.song?.song.id ?? ""].join("|");
 }
 
+/**
+ * A player's turn a tool answered: a chip's words, a typed command, a "show
+ * me" (`runAskCall`, `askYours` write the user turn, then the tool turn after
+ * it). The model sees no tool turns, so without this it would read a question
+ * nobody replied to. A divider between the two does not count as a reply.
+ */
+function answeredByTool(turns: readonly AskTurn[], index: number): boolean {
+  for (let i = index + 1; i < turns.length; i++) {
+    const next = turns[i];
+    if (next.kind === "divider") continue;
+    return next.kind === "tool";
+  }
+  return false;
+}
+
 /** The last exchanges, as the old chat sent them. */
 const TURNS_IN_PROMPT = 6;
 
@@ -54,7 +69,8 @@ export function askPrompt(
 ): string {
   if (about) contextText = `${contextText}\nThe player is asking about this: "${about}"`;
   const recent = turns
-    .filter((x): x is AskTurn & { kind: "user" | "coach" } => x.kind === "user" || (x.kind === "coach" && !x.pending))
+    .filter((x, i): x is AskTurn & { kind: "user" | "coach" } =>
+      (x.kind === "user" && !answeredByTool(turns, i)) || (x.kind === "coach" && !x.pending))
     .slice(-TURNS_IN_PROMPT);
   const conversation =
     recent.length > 0
