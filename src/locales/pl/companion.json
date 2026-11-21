@@ -1,0 +1,51 @@
+{
+  "companion": {
+    "dot": "A note from the coach is waiting on Progress",
+    "hide": "Hide",
+    "notNow": "Not now",
+    "undo": "Undo",
+    "hidden": "Hidden for seven days. Settings → Coach → Suggestions turns these off.",
+    "hiddenUntilAsked": "Hidden until you ask for it: pressing On under Settings → Coach → Suggestions lets these come back.",
+    "cardsNotRead": "The coach's hidden cards could not be read just now, so they stay hidden.",
+    "weekly": {
+      "label": "Your week, from the coach",
+      "kick": "Your week · {{from}} to {{to}}",
+      "say": {
+        "ungraded": "That week: {{sessions}} Sessions, {{minutes}} minutes of playing, Exercises played: {{exercises}}.",
+        "ungradedLeftOut": "That week, leaving out your own exercises and Takes marked not fair: {{sessions}} Sessions, {{minutes}} minutes of playing, Exercises played: {{exercises}}.",
+        "held": "No clean tempo moved that week, over {{sessions}} Sessions.",
+        "benchOnly": "No clean tempo moved that week, and the benchmark Take is more even than on day {{fromDay}}.",
+        "one": "One clean tempo moved that week.",
+        "oneAndBench": "One clean tempo moved that week, and the benchmark Take is more even than on day {{fromDay}}.",
+        "many": "Clean tempos that moved that week: {{count}}.",
+        "manyAndBench": "Clean tempos that moved that week: {{count}}, and the benchmark Take is more even than on day {{fromDay}}."
+      },
+      "goal": "You said you are working toward: “{{goal}}”",
+      "bench": "Benchmark: {{exercise}}, the same Take at {{bpm}} BPM, day {{fromDay}} and day {{toDay}}",
+      "benchValue": "{{from}}% → {{to}}% even",
+      "movedHeadClean": "Clean tempos that week, in BPM",
+      "movedHeadPlayed": "Tempo played on the first and the last day that week, in BPM",
+      "movedFromTo": "{{from}} → {{to}}",
+      "movedNew": "first clean tempo: {{to}}",
+      "movedRisen": "now {{to}}, a new clean tempo",
+      "milestone": "{{exercise}}: clean from {{from}} to {{to}} BPM since {{date}}.",
+      "foot": "That week: Sessions {{sessions}} · minutes {{minutes}} · Takes {{takes}}",
+      "footLeftOut": "That week, leaving out your own exercises and Takes marked not fair: Sessions {{sessions}} · minutes {{minutes}} · Takes {{takes}}"
+    },
+    "plateau": {
+      "label": "A question from the coach",
+      "kick": "A question from the coach",
+      "say": "{{exercise}}: {{sessions}} Sessions in a row at {{bpm}} BPM without a new clean tempo. The plan rests it till {{day}}.",
+      "sayRange": "{{exercise}}: {{sessions}} Sessions in a row between {{low}} and {{high}} BPM without a new clean tempo. The plan rests it till {{day}}.",
+      "sayToday": "{{exercise}}: {{sessions}} Sessions in a row at {{bpm}} BPM without a new clean tempo; it is part {{n}} of today's plan.",
+      "sayRangeToday": "{{exercise}}: {{sessions}} Sessions in a row between {{low}} and {{high}} BPM without a new clean tempo; it is part {{n}} of today's plan.",
+      "askTwo": "Keep at it, or let it rest?",
+      "askToday": "Keep at it, or try it another way?",
+      "askKeep": "Keep at it?",
+      "keep": "Keep at it",
+      "another": "Try it another way",
+      "rest": "Rest it till {{day}}",
+      "rested": "It rests till {{day}}, as the plan already has it. Nothing changed."
+    }
+  }
+}

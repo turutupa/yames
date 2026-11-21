@@ -2,11 +2,20 @@
  * Totals: the top row of Progress (`totalsFrom`, moved here from
  * `ProgressView.tsx` with its test) and one calendar week of it (`weekTotals`).
  *
- * The week tests build their times from local calendar fields, so they hold
- * in whatever time zone the machine runs in; where that zone changes its
- * clocks in March 2026, the DST rows exercise the change itself.
+ * The week tests build their times from local calendar fields. The time zone
+ * is pinned for this file (c4b2, from c4b1's review) so the daylight-saving
+ * rows really cross a clock change on every machine: Europe/Berlin, and
+ * America/New_York inside the one US row. Vitest runs files in forks, and
+ * the zone is put back after the file.
  */
-import { describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
+
+const TZ_BEFORE = process.env.TZ;
+process.env.TZ = "Europe/Berlin";
+afterAll(() => {
+  if (TZ_BEFORE === undefined) delete process.env.TZ;
+  else process.env.TZ = TZ_BEFORE;
+});
 import { totalsFrom, weekStartOf, weekTotals } from "./totals";
 import type { Weekday } from "./totals";
 import { ALT, DAY, NOW, take } from "./testKit";
@@ -53,6 +62,38 @@ describe("weekStartOf", () => {
 describe("weekTotals", () => {
   const MON = 1 as Weekday;
   const SUN = 0 as Weekday;
+  const SAT = 6 as Weekday;
+
+  it("the pinned zone changes its clocks inside the DST rows' weeks", () => {
+    // 23 to 30 March 2026 in Berlin is 167 hours: the rows above cross a real change.
+    expect(Math.round((at(2026, 3, 30, 0) - at(2026, 3, 23, 0)) / 3_600_000)).toBe(167);
+    expect(Math.round((at(2026, 10, 26, 0) - at(2026, 10, 19, 0)) / 3_600_000)).toBe(169);
+  });
+
+  it("a week with the US spring change, in New York", () => {
+    process.env.TZ = "America/New_York";
+    try {
+      const start = at(2026, 3, 8, 0);
+      const end = at(2026, 3, 15, 0);
+      expect(Math.round((end - start) / 3_600_000)).toBe(167);
+      const { thisWeek } = weekTotals([], [ALT], at(2026, 3, 10), SUN);
+      expect(thisWeek.start).toBe(start);
+      expect(thisWeek.end).toBe(end);
+    } finally {
+      process.env.TZ = "Europe/Berlin";
+    }
+  });
+
+  it("splits a Session that ran across the week's edge between the two weeks", () => {
+    const now = at(2026, 4, 1); // Wednesday, Monday-first: the week of 30 March
+    const takes = [
+      take(EX.id, { startedAt: at(2026, 3, 29, 23, 50), bars: 60, bpm: 60, facts: { session: 7 } }),
+      take(EX.id, { startedAt: at(2026, 3, 30, 0, 10), bars: 60, bpm: 60, facts: { session: 7 } }),
+    ];
+    const { thisWeek, lastWeek } = weekTotals(takes, [ALT], now, MON);
+    expect(thisWeek).toMatchObject({ takes: 1, sessions: 1, minutes: 4 });
+    expect(lastWeek).toMatchObject({ takes: 1, sessions: 1, minutes: 4 });
+  });
 
   it.each<[string, number, Weekday, number, number]>([
     // name, now, week start, expected start, expected end
@@ -62,8 +103,9 @@ describe("weekTotals", () => {
     ["on the week's first day itself", at(2026, 3, 30, 0, 5), MON, at(2026, 3, 30, 0), at(2026, 4, 6, 0)],
     // Europe moves its clocks on Sunday 29 March 2026, the US on Sunday 8 March.
     ["a week with Europe's spring change", at(2026, 3, 29, 20), MON, at(2026, 3, 23, 0), at(2026, 3, 30, 0)],
-    ["a week with the US spring change", at(2026, 3, 10), SUN, at(2026, 3, 8, 0), at(2026, 3, 15, 0)],
     ["a week with Europe's autumn change", at(2026, 10, 25, 9), MON, at(2026, 10, 19, 0), at(2026, 10, 26, 0)],
+    ["a Saturday-first week", at(2026, 4, 1), SAT, at(2026, 3, 28, 0), at(2026, 4, 4, 0)],
+    ["a Saturday-first week, on the Saturday", at(2026, 3, 28, 0, 5), SAT, at(2026, 3, 28, 0), at(2026, 4, 4, 0)],
   ])("%s", (_name, now, weekStart, start, end) => {
     const { thisWeek, lastWeek } = weekTotals([], [ALT], now, weekStart);
     expect(thisWeek.start).toBe(start);
