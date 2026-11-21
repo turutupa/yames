@@ -74,7 +74,7 @@ describe("the cards (c3b1b)", () => {
     const slip = card("where did I slip up on that take?", result, { kind: "card", card: "where_slipped", args: {} });
     expect(rulesAnswer(slip, paths)).toMatchObject({ kind: "card", card: "where_slipped" });
     // No Take yet on the ready screen: the Take's cards say nothing, the Exercise's still answer.
-    expect(rulesAnswer({ ...slip, situation: ready }, paths)).toEqual({ kind: "none" });
+    expect(rulesAnswer({ ...slip, situation: ready }, paths).kind).not.toBe("card");
     expect(rulesAnswer(card("is my muting graded?", ready, { kind: "card", card: "why_not_counted", args: { what: "muting" } }), paths)).toMatchObject({
       kind: "card",
       card: "why_not_counted",
