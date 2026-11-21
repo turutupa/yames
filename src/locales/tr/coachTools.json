@@ -15,6 +15,8 @@
       "setTempo": "Tempo {{from}} → {{to}} BPM",
       "findEdge": "Sınırın bulunuyor: {{title}}",
       "testOut": "Adım {{step}} sınavı başladı: {{title}}",
+      "loopBar": "{{bar}}. ölçü döngüde, {{bpm}} BPM",
+      "loopBars": "{{from}}–{{to}}. ölçüler döngüde, {{bpm}} BPM",
       "swapPart": "{{part}}. bölüm artık: {{to}}",
       "restorePart": "{{part}}. bölüm yine: {{from}}",
       "setMinutes": "Bugün artık {{to}} dakika",
@@ -47,6 +49,8 @@
       "findEdge": "Sınırını bul: {{title}} ({{path}} · Adım {{step}}), {{bpm}} BPM'den",
       "findEdgeNoBpm": "Sınırını bul: {{title}} ({{path}} · Adım {{step}})",
       "testOut": "Adım {{step}} sınavı: {{title}}, {{takes}} denemede",
+      "loopBar": "{{bar}}. ölçüyü {{bpm}} BPM ile sen durdurana kadar döngüye al",
+      "loopBars": "{{from}}–{{to}}. ölçüleri {{bpm}} BPM ile sen durdurana kadar döngüye al",
       "swapPart": "{{part}}. bölüm: {{from}} → {{to}}",
       "restorePart": "{{part}}. bölüm yine {{title}} olsun",
       "setMinutes": "Bugün: {{from}} → {{to}} dakika, {{parts}} bölüm",
@@ -81,6 +85,15 @@
       "preset": "{{preset}}",
       "setting": "{{value}}"
     },
+    "command": {
+      "minutes": "Bugün {{minutes}} dakika",
+      "jam": "“{{jam}}” jam’i",
+      "preset": "“{{preset}}” ön ayarı",
+      "swapHarder": "{{part}}. bölüm: daha zor bir şey",
+      "swapDifferent": "{{part}}. bölüm: başka bir şey",
+      "swapStyle": "{{part}}. bölüm: başka bir stil",
+      "other": "{{tool}}"
+    },
     "chip": {
       "goTo": "Git: {{screen}}",
       "startToday": "Bugünün oturumunu başlat",
@@ -106,7 +119,8 @@
       "load": "Yükle",
       "keep": "Kalsın",
       "go": "Git",
-      "open": "Aç"
+      "open": "Aç",
+      "loop": "Döngüye al"
     },
     "why": {
       "which": "Hangisi?",
@@ -123,7 +137,10 @@
         "level": "{{path}} yolunda “{{query}}” adında bir seviye yok.",
         "swap": "“{{query}}” adındaki hiçbir şey {{part}}. bölüme konamaz.",
         "rung": "Orada ayarlanacak bir tempo yok.",
-        "settingValue": "{{key}} “{{query}}” olamaz. Olabilecekler şunlar:"
+        "settingValue": "{{key}} “{{query}}” olamaz. Olabilecekler şunlar:",
+        "loopBar": "Bu melodide {{bar}}. ölçü yok.",
+        "loopAcross": "{{from}}–{{to}}. ölçüler melodinin sonundan taşıp yeniden başına geçiyor. Melodinin tek bir turu içinden ölçüler iste.",
+        "loopOneBar": "Bu Alıştırma tek ölçü: 1. ölçüyü iste."
       },
       "notNow": {
         "take": "Bu denemeden sonra.",
@@ -154,13 +171,15 @@
         "following": "{{path}} yolunu zaten takip ediyorsun.",
         "alreadySubdivision": "Zaten vuruş başına {{subdivision}} tık.",
         "alreadySetting": "{{key}} zaten {{value}}.",
-        "alreadyGoal": "Hedefin zaten bu."
+        "alreadyGoal": "Hedefin zaten bu.",
+        "loopHere": "Döngü, bir Oturumdaki Alıştırmadan, Denemeler arasında başlar."
       },
       "notWiredYet": "Uygulama bunu buradan henüz yapamıyor.",
       "refused": {
         "shape": "Uygulama bunu yapamaz.",
         "proposal": "Bu arada bir şey değişti, bu yüzden hiçbir şey yapılmadı. Tekrar sor.",
-        "cap": "{{cap}} yolu takip ediyorsun, en fazla bu kadar olabilir. Önce birini kendi sayfasından bırak."
+        "cap": "{{cap}} yolu takip ediyorsun, en fazla bu kadar olabilir. Önce birini kendi sayfasından bırak.",
+        "loopBackwards": "{{to}}. ölçü, {{from}}. ölçüden önce geliyor. Önce ilk ölçüyü söyle."
       },
       "failed": "Olmadı ve hiçbir şey değişmedi."
     },

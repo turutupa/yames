@@ -10,10 +10,12 @@
  * t1a1 wired where the player is and going somewhere (the `go` tools); t1a2
  * wired the `confirm` tools' doors: the Session's actions, Today's minutes,
  * focus and swaps, the jams and presets (behind the window's unsaved-work
- * gate), the click, and the safe settings' own setters. Still stubs from
- * `notWiredHost()`, answering "notWiredYet": `goal` / `setGoal` (the
- * Notebook, leg c4a), `loopBars` (no bars door on the loop), and the
- * `coachSuggestions` setting (c4a's stored key).
+ * gate), the click, and the safe settings' own setters. c4a1 wired `goal` /
+ * `setGoal` and the `coachSuggestions` setting to the coach's stored keys
+ * (`src/coach/store.ts`: `coach.goal`, `coach.suggestions`), read once on
+ * mount; until that read has finished they answer "notWiredYet". `loopAsk` /
+ * `loopBars` reach the Session's loop through `startLoop(bars)` since leg
+ * lb1. No member is a stub any more.
  *
  * Review fixes (t1a2b): band volume is read and written as the STORED choice
  * (`bandChoice`, `"auto"` for none, put back as `null`); `sounding(target)`
@@ -32,16 +34,26 @@ import {
   type SafeSettingOption,
   type SafeSettingValue,
 } from "../../coach/tools/host";
+import {
+  coachGoalKnown,
+  coachStored,
+  coachStoredLoaded,
+  coachStoredUnread,
+  loadCoachStored,
+  saveGoal,
+  saveSuggestions,
+} from "../../coach/store";
 import i18n, { getLanguages } from "../../i18n";
 import { listPresets as listPresetsIpc, storeSave } from "../../ipc";
 import { findExercise } from "../../session/packs";
-import { tempoNudges } from "../../session/runner";
+import { loopAsked, tempoNudges } from "../../session/runner";
 import { THEMES } from "../../themes";
 import type { Preset, Subdivision, VoiceMode } from "../../types";
 import type { MainView } from "../main-window/MainHeader";
 import type { PathsPlace } from "../main-window/hooks/usePathsPlace";
 import type { PracticeView } from "../session/highway/runwayModel";
 import type { SessionRun } from "../session/hooks/useSessionRun";
+import { noteAskJamTake, noteAskLoad } from "./askTools";
 import type { PresetApplied } from "./coachPresetLoad";
 
 /** The safe settings the window holds (the rest are the Session's, or the hook's own: the language). */
@@ -80,6 +92,10 @@ export type CoachToolHostInput = {
   loadJam: (jam: Jam) => "done" | "asked";
   /** The engine plays (the click, a jam's band, a song). */
   isPlaying: boolean;
+  /** A jam take is being written (`useJamTakes().recording`; leg chip1b). Left out: no. */
+  jamTakeRunning?: boolean;
+  /** The engine's speed ramp runs (the Drill's, `state.speedRamp.active`; leg chip1c). Left out: no. */
+  speedRampRunning?: boolean;
   /** The tool screens' tempo, and `handleBpmChange` (clamped; on the jam tab it edits the jam). */
   tempo: number;
   setTempo: (bpm: number) => void;
@@ -114,6 +130,14 @@ const ON_OFF: readonly SafeSettingOption[] = [
   { value: false, names: ["off"] },
   { value: true, names: ["on"] },
 ];
+/** Suggestions: on, or "Only when I ask" (DESIGN 6.6), which the tool words as off. */
+const SUGGESTIONS_OPTIONS: readonly SafeSettingOption[] = [
+  { value: false, names: ["off", "only when I ask", "when I ask", "asked"] },
+  { value: true, names: ["on"] },
+];
+
+/** `coach.suggestions` read, and read without a failure: only then is "from" in a proposal true. */
+const suggestionsKnown = () => coachStoredLoaded() && !coachStoredUnread("suggestions");
 
 export function buildCoachToolHost(latest: { readonly current: CoachToolHostInput }): CoachToolHost {
   const session = () => latest.current.session;
@@ -159,8 +183,9 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
       case "coachVoice":
         return settings.coachVoice === "voice";
       case "coachSuggestions":
-        // The stored key is the Notebook leg's (c4a: `coach.suggestions`).
-        return "notWiredYet";
+        // `coach.suggestions` (c4a1): on, or "Only when I ask" (off). Not read yet, or its read failed
+        // (c4a1b): unknown, so no proposal "from" a value nobody read.
+        return suggestionsKnown() ? coachStored().suggestions === "on" : "notWiredYet";
     }
   };
 
@@ -204,6 +229,15 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
       const can = tempoNudges(session().run, session().exercise);
       return { slower: can.slower, faster: can.faster };
     },
+    // The Session's loop of bars as printed (leg lb1): the same check `startLoop(bars)` makes.
+    loopAsk: (fromBar, toBar) => {
+      const asked = loopAsked(session().run, session().exercise, fromBar, toBar);
+      if ("refused" in asked) return { refused: asked.refused };
+      const { fromBar: from, toBar: to, bpm, id, variantSeed } = asked.loop;
+      return { fromBar: from, toBar: to, bpm, loopId: id, variantSeed: variantSeed ?? null };
+    },
+    // `startLoop` answers null only when the reducer took the loop (lb1b L4): only then "done".
+    loopBars: (fromBar, toBar) => session().actions.startLoop({ fromBar, toBar }) ?? "done",
     findEdge: (pathId, exerciseId) => {
       const { path, step, exercise } = exerciseOf(pathId, exerciseId);
       session().actions.findEdge(path, step, exercise);
@@ -270,7 +304,7 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
         case "coachVoice":
           return latest.current.settings.voiceAvailable ? ON_OFF : ON_OFF.slice(0, 1);
         case "coachSuggestions":
-          return "notWiredYet";
+          return suggestionsKnown() ? SUGGESTIONS_OPTIONS : "notWiredYet";
       }
     },
     setSafeSetting: (key, value) => {
@@ -300,14 +334,25 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
           return "done";
         }
         case "coachSuggestions":
-          return "notWiredYet";
+          if (!suggestionsKnown()) return "notWiredYet";
+          saveSuggestions(value ? "on" : "asked");
+          return "done";
       }
+    },
+    // `coach.goal` (c4a1). Until it has been read, and when its read failed (c4a1b, L5), it is
+    // unknown, not "no goal": no proposal, since one could replace a goal it never saw.
+    goal: () => (coachGoalKnown() ? (coachStored().goal?.text ?? null) : "notWiredYet"),
+    setGoal: (text) => {
+      if (!coachGoalKnown()) return "notWiredYet";
+      if (!saveGoal(text, Date.now())) throw new Error("not a goal the store keeps");
+      return "done";
     },
     view: () => latest.current.view,
     pathsAt: () => latest.current.pathsPlace.at,
     paths: () => latest.current.session.paths,
     instrument: () => (latest.current.instrument === "bass" ? "bass" : "guitar"),
     sessionActive: () => latest.current.session.run.phase !== "idle",
+    jamTakeRunning: () => latest.current.jamTakeRunning === true,
     setView: (view) => latest.current.setView(view),
     movePaths: (at) => latest.current.pathsPlace.move(at),
     openSettingsSection: (section) => {
@@ -334,8 +379,21 @@ export function useCoachToolHost(input: CoachToolHostInput): CoachToolHost {
   useEffect(() => {
     // The presets' first copy, so the first `load_preset` finds them.
     built.presets();
+    // The coach's stored keys (read only; nothing is written until a press).
+    void loadCoachStored().catch(() => {});
     setCoachToolHost(built);
     return () => setCoachToolHost(null);
   }, [built]);
+  // A jam take is a Take for a chip's Undo (leg chip1c, review chip1b MEDIUM): spent at its
+  // start, drawn as plain lines at its end; once per flip, never per beat.
+  const jamTakeRunning = input.jamTakeRunning === true;
+  useEffect(() => {
+    noteAskJamTake(jamTakeRunning);
+  }, [jamTakeRunning]);
+  // A speed ramp moves the tempo with no press (review chip1b LOW 4): no chip Undo outlives its start.
+  const speedRampRunning = input.speedRampRunning === true;
+  useEffect(() => {
+    if (speedRampRunning) noteAskLoad();
+  }, [speedRampRunning]);
   return built;
 }

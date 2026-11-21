@@ -31,6 +31,14 @@ export function reasonLine(reason: Reason): Line {
   if (code === "backEased" && values.clean === undefined) {
     return { key: "session.why.backEasedNoClean", values };
   }
+  // A clean tempo is quoted only when the planner's ceiling is the one the app
+  // shows (`quotableCleanTempoOf`, nf1c); without one, words with no number.
+  if (code === "newFromSibling" && values.clean === undefined) {
+    return { key: "session.why.newFromSiblingNoClean", values };
+  }
+  if (code === "passedKeepGoing" && values.bpm === undefined) {
+    return { key: "session.why.passedKeepGoingNoClean", values };
+  }
   // Rotation reasons: a variant per what was measured, never a guessed number.
   if (code === "focusTurn" && typeof values.days === "number") {
     return { key: "session.why.focusTurnAway", values };
@@ -45,6 +53,7 @@ export function reasonLine(reason: Reason): Line {
   if (code === "reviewDue" && values.slipped !== undefined) {
     return { key: "session.why.reviewDueSlipped", values };
   }
+  if (code === "reviewDue" && values.bpm === undefined) return { key: "session.why.reviewDueNoClean", values };
   return { key: `session.why.${code}`, values };
 }
 

@@ -446,6 +446,30 @@ impl BeatMap {
         60_000.0 / gaps[gaps.len() / 2]
     }
 
+    /// Every bar of the played range whose quarters were all logged, in order
+    /// from bar 1: where it opened and where the next bar opens (or, for the
+    /// last, where it would have), in ms. The bar lines are the engine's own
+    /// count, so a meter change or a tempo step lands where it happened. A bar
+    /// the Take stopped inside is not one of them.
+    pub(crate) fn complete_bars_ms(&self) -> Vec<(f64, f64)> {
+        let per_bar = self.beats_per_bar_or(DEFAULT_BEATS_PER_BAR).max(1) as usize;
+        let starts: Vec<usize> = if self.bar_starts.is_empty() {
+            (0..self.beats_ms.len()).step_by(per_bar).collect()
+        } else {
+            self.bar_starts.clone()
+        };
+        let mut bars = Vec::with_capacity(starts.len());
+        for (k, &start) in starts.iter().enumerate() {
+            let next = starts.get(k + 1).copied().unwrap_or(start + per_bar);
+            if next > self.beats_ms.len() {
+                break;
+            }
+            let Some(end) = self.time_at_beat(next as f64) else { break };
+            bars.push((self.beats_ms[start], end));
+        }
+        bars
+    }
+
     pub(crate) fn beats_per_bar_or(&self, fallback: u32) -> u32 {
         if self.beats_per_bar > 0 {
             self.beats_per_bar
@@ -2253,6 +2277,13 @@ impl ScheduleRun {
     /// Whether the written pitches were loaded with the schedule.
     pub fn has_pitches(&self) -> bool {
         !self.pitches.is_empty()
+    }
+
+    /// The Take's complete bars in wall ms, bar 1 first
+    /// ([`BeatMap::complete_bars_ms`]): what a hear-back cuts by
+    /// (`take_audio::HeardTake`).
+    pub fn bar_spans_ms(&self) -> Vec<(f64, f64)> {
+        self.beats.complete_bars_ms()
     }
 
     /// The grades this run reports from now on say the pitch pass with this

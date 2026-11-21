@@ -24,9 +24,20 @@ import type { CoachContext } from "../../coach/context";
 import type { ResolvedBlock } from "../../coach/blocks/resolve";
 import { commandFacts, type CommandFacts } from "../../coach/ask/router";
 import { getCoachToolHost, type CoachToolHost } from "../../coach/tools/host";
+import { resolveStepCall } from "../../coach/tools/go";
 import { findTool } from "../../coach/tools/registry";
-import { confirmCoachTool, dismissProposal, runCoachTool, runCoachUndo } from "../../coach/tools/run";
-import { line, type Line, type Proposal, type RunOutcome, type ToolCall, type ToolChoice, type ToolResult } from "../../coach/tools/types";
+import { resolvePath, wholeTitleWords } from "../../coach/tools/resolve";
+import {
+  chipPressable,
+  confirmCoachTool,
+  dismissProposal,
+  pressCoachChip,
+  retireUndo,
+  runCoachTool,
+  runCoachUndo,
+  undoStillGood,
+} from "../../coach/tools/run";
+import { line, type Line, type Proposal, type Refusal, type RunOutcome, type ToolCall, type ToolChoice, type ToolResult } from "../../coach/tools/types";
 import type { MainView } from "../main-window/MainHeader";
 import { appendAskTurn, askTurnId, getAskState, settleAskTurn, updateAskTurn, type AskTurn } from "./askStore";
 import { NEVER_LIST, type NeverItem } from "./neverList";
@@ -48,6 +59,18 @@ export type UndoState = {
   until: number | null;
   /** live: offered. gone: no longer offered. done: pressed, and it worked. refused: pressed, and the app said no. */
   state: "live" | "gone" | "done" | "refused";
+  /**
+   * A suggestion chip's change (leg chip1): the player saw no proposal, so
+   * its Undo has no clock. It is offered until the value is changed again
+   * (by anyone), the player leaves the screen (in a Session: the step or the
+   * Exercise), or a Take starts (`noteAskUndos`, `retireSameUndos`,
+   * `noteAskTake`, `noteAskToolView`).
+   */
+  chip?: true;
+  /** The Session's step it was issued on, or null outside a Session (a chip's Undo only). */
+  step?: number | null;
+  /** When it was issued (ms since the epoch; a chip's Undo only): `noteAskUndos` leaves a young one alone. */
+  issued?: number;
   /** What came of the press: the undo's own receipt, or why it could not. */
   note?: Line;
 };
@@ -93,6 +116,8 @@ export function registerAskToolContext(fn: (() => CoachContext) | null): () => v
 export function __setAskToolsForTests(host: CoachToolHost | null, ctx: CoachContext | (() => CoachContext) | null): void {
   hostOf = host ? () => host : getCoachToolHost;
   contextOf = ctx === null ? null : typeof ctx === "function" ? ctx : () => ctx;
+  jamTakeHold = null;
+  keyRepeating = false;
 }
 
 function where(): { host: CoachToolHost; ctx: CoachContext } | null {
@@ -110,6 +135,15 @@ function where(): { host: CoachToolHost; ctx: CoachContext } | null {
 export function askCommandFacts(): CommandFacts | null {
   const at = where();
   return at ? commandFacts(at.ctx, viewOf(at.host)) : null;
+}
+
+/** The coach's context now, as the tools read it (the fact cards read it too, leg c2b1a); null without one. */
+export function askToolContext(): CoachContext | null {
+  try {
+    return contextOf?.() ?? null;
+  } catch {
+    return null;
+  }
 }
 
 /** The chips for where the player is now (none without a host or a context). */
@@ -142,7 +176,7 @@ function goTarget(receipt: Line): MainView | null {
   }
 }
 
-function undoOf(result: ToolResult & { ok: true }, host: CoachToolHost, now: number): UndoState | null {
+function undoOf(result: ToolResult & { ok: true }, host: CoachToolHost, now: number, chip?: { step: number | null }): UndoState | null {
   const call = result.undo;
   if (!call) return null;
   const tool = findTool(call.tool);
@@ -151,7 +185,9 @@ function undoOf(result: ToolResult & { ok: true }, host: CoachToolHost, now: num
     return { call, label: line("coachTools.undo.returnTo", { screen }), kind: "go", view: goTarget(result.receipt), until: null, state: "live" };
   }
   // The receipt of a confirmed change is written where it was made: the host's view.
-  return { call, label: line("coachTools.undo.generic"), kind: "confirm", view: viewOf(host), until: now + UNDO_MS, state: "live" };
+  const undo: UndoState = { call, label: line("coachTools.undo.generic"), kind: "confirm", view: viewOf(host), until: now + UNDO_MS, state: "live" };
+  // A chip's change: no clock; it goes when the value, the screen or the step moves, or a Take starts.
+  return chip ? { ...undo, until: null, chip: true, step: chip.step, issued: now } : undo;
 }
 
 function viewOf(host: CoachToolHost): MainView | null {
@@ -162,7 +198,7 @@ function viewOf(host: CoachToolHost): MainView | null {
   }
 }
 
-function bodyOf(outcome: RunOutcome, host: CoachToolHost, ctx: CoachContext): ToolBody {
+function bodyOf(outcome: RunOutcome, host: CoachToolHost, ctx: CoachContext, chip = false): ToolBody {
   if (!outcome.ok) return { kind: "refusal", line: outcome.line, choices: outcome.choices ?? [] };
   if ("proposal" in outcome) {
     return { kind: "proposal", proposal: outcome.proposal, state: "open", view: viewOf(host), step: ctx.run?.stepIndex ?? null };
@@ -172,7 +208,8 @@ function bodyOf(outcome: RunOutcome, host: CoachToolHost, ctx: CoachContext): To
     receipt: outcome.receipt,
     ...(outcome.later ? { settling: true } : {}),
     ...(outcome.blocks ? { blocks: outcome.blocks } : {}),
-    undo: undoOf(outcome, host, Date.now()),
+    // The step as `useAskHost` says it to `noteAskToolView`: null outside a running Session.
+    undo: undoOf(outcome, host, Date.now(), chip ? { step: ctx.run && ctx.run.phase !== "idle" ? ctx.run.stepIndex : null } : undefined),
   };
 }
 
@@ -215,10 +252,308 @@ export function runAskCall(call: ToolCall, said: string): string {
     appendAskTurn({ id, kind: "tool", body: unavailable() });
     return id;
   }
-  const outcome = runCoachTool(call, at.host, at.ctx);
+  writeOutcome(id, runCoachTool(call, at.host, at.ctx), at);
+  return id;
+}
+
+function writeOutcome(id: string, outcome: RunOutcome, at: { host: CoachToolHost; ctx: CoachContext }): void {
   appendAskTurn({ id, kind: "tool", body: bodyOf(outcome, at.host, at.ctx) });
   followLater(id, outcome);
+}
+
+/**
+ * A suggestion chip's press (leg chip1; the owner's decision: the chip's own
+ * press IS the press for a reversible one-step change, always with Undo).
+ * Only Ask's suggestion chips call this (`AskPanel`'s chip row); a "Which
+ * one?" choice, a typed command and the `accept-suggestion` binding do not.
+ * The runner decides (`pressCoachChip`): a tool flagged in the registry runs
+ * through the same checks a proposal's press makes and comes back as a
+ * receipt whose Undo has no clock; anything else comes back as it would from
+ * `runAskCall` (a proposal for an unflagged `confirm` tool). A second,
+ * separate press of the same thing retires the earlier receipt's Undo; when
+ * it moved on from exactly the value that press left, its own Undo carries
+ * the run's start (leg chip1b, review M1: "Slower, Slower, Slower, Undo" puts
+ * back the tempo before the run, and the live receipt says the whole change).
+ */
+export function pressChip(call: ToolCall, said: string): string {
+  if (said.trim()) appendAskTurn({ id: askTurnId(), kind: "user", text: said.trim() });
+  const id = askTurnId();
+  const at = where();
+  if (!at) {
+    appendAskTurn({ id, kind: "tool", body: unavailable() });
+    return id;
+  }
+  const outcome = pressCoachChip(call, at.host, at.ctx, undefined, liveChipUndoFor(call)?.call);
+  const changed = outcome.ok && !("proposal" in outcome) && chipPressable(findTool(call.tool));
+  if (changed && outcome.undo) retireSameUndos(outcome.undo);
+  appendAskTurn({ id, kind: "tool", body: bodyOf(outcome, at.host, at.ctx, changed) });
+  followLater(id, outcome);
   return id;
+}
+
+/** The newest live chip Undo of the same tool (and, a setting, the same key) as `call`. */
+function liveChipUndoFor(call: ToolCall): UndoState | null {
+  const turns = getAskState().turns;
+  for (let i = turns.length - 1; i >= 0; i--) {
+    const turn = turns[i];
+    if (turn.kind !== "tool" || turn.body.kind !== "receipt") continue;
+    const undo = turn.body.undo;
+    if (undo?.chip && undo.state === "live" && undo.call.tool === call.tool && undo.call.args.key === call.args.key) return undo;
+  }
+  return null;
+}
+
+/**
+ * The same setting's earlier Undo, live: the same tool and (a setting) the
+ * same key. Retired by name, not by reading the value: right after a press
+ * the host's reads still give the value from before it until the engine's
+ * echo comes back over IPC (`useMetronome`'s state event; more than one
+ * render), so a value check here would retire the Undo just issued.
+ */
+function retireSameUndos(next: ToolCall, keepStacked = false): void {
+  for (const turn of getAskState().turns) {
+    if (turn.kind !== "tool" || turn.body.kind !== "receipt") continue;
+    const undo = turn.body.undo;
+    if (!undo || undo.state !== "live" || undo.kind !== "confirm" || undo.call.tool !== next.tool) continue;
+    if (undo.call.args.key !== next.args.key) continue;
+    // `next` puts back exactly the value this chip's Undo guards: kept, the second step back (`stackedBehind`).
+    if (keepStacked && undo.chip && undo.call.args.at !== undefined && undo.call.args.at === undoValueOf(next)) continue;
+    retire(turn.id, turn.body, undo);
+  }
+}
+
+function retire(id: string, body: ToolBody & { kind: "receipt" }, undo: UndoState): void {
+  retireUndo(undo.call);
+  if (jamTakeHold) {
+    jamTakeHold.push({ id, call: undo.call });
+    return;
+  }
+  setBody(id, { ...body, undo: { ...undo, state: "gone" } });
+}
+
+/**
+ * A chip's Undo is offered until the value it changed is changed again, by
+ * anyone: asked of the runner (`undoStillGood`, which changes nothing)
+ * whenever the host says the panel opened or the screen, the step, the
+ * Exercise or the run's phase moved (`useAskHost`). A change made again
+ * through Ask retires it by name at that press (`retireSameUndos`). One that
+ * would no longer put back what its receipt changed is retired; the receipt
+ * stays as a plain line. Pressed in between, the undo's own guard refuses it
+ * (the runner's `at`), so it never changes anything else.
+ *
+ * The host's tempo and subdivision are the engine's echo (`useMetronome`'s
+ * state event over IPC), so for a moment after a press they still read the
+ * value from before it. An Undo younger than `CHIP_UNDO_SETTLE_MS` is left
+ * alone here (leg chip1b, review L1): a look in that moment would retire the
+ * Undo just issued. The runner's guard still holds at its press.
+ * Under the Settings overlay nothing is asked (the player has not left the
+ * screen, and the runner's place is the screen under it).
+ */
+export function noteAskUndos(): void {
+  const at = where();
+  if (at && viewOf(at.host) === "settings") return;
+  const now = Date.now();
+  for (const turn of getAskState().turns) {
+    if (turn.kind !== "tool" || turn.body.kind !== "receipt") continue;
+    const undo = turn.body.undo;
+    if (!undo?.chip || undo.state !== "live") continue;
+    if (undo.issued !== undefined && now - undo.issued < CHIP_UNDO_SETTLE_MS) continue;
+    if (at && undoStillGood(undo.call, at.host, at.ctx)) continue;
+    if (at && stackedBehind(undo.call, turn.id, at, now)) continue;
+    retire(turn.id, turn.body, undo);
+  }
+}
+
+/** The one argument an undo puts back (`bpm`, `subdivision`, `value`): not its `at` guard, not a setting's key. */
+function undoValueOf(call: ToolCall): unknown {
+  const names = Object.keys(call.args).filter((name) => name !== "at" && name !== "key");
+  return names.length === 1 ? call.args[names[0]] : undefined;
+}
+
+/**
+ * Whether a newer live Undo of the same thing (a confirmed proposal's, with
+ * its clock) puts back exactly the value `older`'s `at` guards (leg chip1c,
+ * review chip1b LOW 2). Then `older` is the second step of the way back to
+ * where the player started: pressing the newer one makes it good again, so
+ * it is kept. A Session has one rung per nudge and no Undo that spans two.
+ */
+function stackedBehind(older: ToolCall, olderId: string, at: { host: CoachToolHost; ctx: CoachContext }, now: number): boolean {
+  if (older.args.at === undefined) return false;
+  const turns = getAskState().turns;
+  const from = turns.findIndex((t) => t.id === olderId);
+  for (let i = turns.length - 1; i > from; i--) {
+    const turn = turns[i];
+    if (turn.kind !== "tool" || turn.body.kind !== "receipt") continue;
+    const newer = turn.body.undo;
+    if (!newer || newer.kind !== "confirm" || !undoLive(newer, now)) continue;
+    if (newer.call.tool !== older.tool || newer.call.args.key !== older.args.key) continue;
+    if (undoValueOf(newer.call) !== older.args.at) continue;
+    return undoStillGood(newer.call, at.host, at.ctx);
+  }
+  return false;
+}
+
+/** How long a chip's new Undo is left alone by `noteAskUndos` (the IPC echo's round trip, with room). */
+export const CHIP_UNDO_SETTLE_MS = 400;
+
+/**
+ * A Take started: no chip's Undo outlives it (the receipt stays, as a plain
+ * line). The runner spends it now; the card is written when the Take ends
+ * (`settleAskTurn` holds it), because nothing of Ask commits during a Take.
+ */
+export function noteAskTake(): void {
+  retireAskChipUndos();
+}
+
+/**
+ * The values a chip's Undo would put back were replaced by another route
+ * (leg chip1b, review L2): a preset, a jam or a setlist entry loaded, or a
+ * loop started in a Session; or moved with no press (leg chip1c, review chip1b
+ * LOW 4): the jam tempo trainer's step and its revert on Stop
+ * (`useJamSession`), a speed ramp's start (`useCoachToolHost`). A hand change
+ * and back is left to the runner's value guard (`at`): the Undo is then good
+ * again and puts back the value before the chip's press, which the player
+ * had. A value that went away and came back must not
+ * be overwritten by a stale Undo, so every live chip Undo goes (the receipts
+ * stay as plain lines). Called from the load paths and by `useAskHost`,
+ * never per beat; does nothing when no chip Undo is live.
+ */
+export function noteAskLoad(): void {
+  retireAskChipUndos();
+}
+
+function retireAskChipUndos(): void {
+  for (const turn of getAskState().turns) {
+    if (turn.kind !== "tool" || turn.body.kind !== "receipt") continue;
+    const undo = turn.body.undo;
+    if (!undo?.chip || undo.state !== "live") continue;
+    retireUndo(undo.call);
+    if (jamTakeHold) jamTakeHold.push({ id: turn.id, call: undo.call });
+    else drawGone(turn.id, undo.call);
+  }
+}
+
+/** A spent Undo drawn as a plain line (held, like an answer, while a Session's Take runs). */
+function drawGone(id: string, call: ToolCall): void {
+  settleAskTurn(id, (now) =>
+    now.kind === "tool" && now.body.kind === "receipt" && now.body.undo?.call === call && now.body.undo.state === "live"
+      ? { ...now, body: { ...now.body, undo: { ...now.body.undo, state: "gone" } } }
+      : null,
+  );
+}
+
+/**
+ * Receipts whose Undo the runner spent while a jam take was being written,
+ * drawn as plain lines when it ends; null while no jam take is running.
+ */
+let jamTakeHold: Array<{ id: string; call: ToolCall }> | null = null;
+
+/**
+ * A jam take started or ended (leg chip1c, review chip1b MEDIUM): the owner's
+ * rule counts a jam take being written as a Take, so no Undo of a chip
+ * outlives its start, as with a Session's (`noteAskTake`). The runner spends
+ * them at once; nothing of Ask is drawn while the take is written (the jam
+ * take does not hold Ask's answers the way a Session's Take does), so the
+ * receipts become plain lines when it ends. Pressed in between, an Undo drawn
+ * live is refused by the runner (spent, and its backstop: no `confirm` undo
+ * runs while a jam take is written). Called by `useCoachToolHost` when
+ * `jamTakeRunning` flips, never per beat.
+ */
+export function noteAskJamTake(running: boolean): void {
+  if (running) {
+    if (jamTakeHold === null) jamTakeHold = [];
+    retireAskChipUndos();
+    return;
+  }
+  if (jamTakeHold === null) return;
+  const held = jamTakeHold;
+  jamTakeHold = null;
+  for (const { id, call } of held) drawGone(id, call);
+}
+
+/** The arguments a tool resolves by title from the player's words. */
+const NAMED = ["path", "query", "exercise", "jam", "preset"] as const;
+
+/**
+ * A refusal that says a typed NAME named nothing ("no Path called …"): every
+ * such line carries the name as `query`. "No Step 12 there" carries a number
+ * and is an answer (review t1b2c, finding 2).
+ */
+function nameNotFound(outcome: Refusal): boolean {
+  return outcome.why === "notFound" && (outcome.choices ?? []).length === 0 && typeof outcome.line.values.query === "string";
+}
+
+/**
+ * A typed command (leg t1b2c): as `runAskCall`, except that a call whose
+ * typed name named nothing the app has (`notFound`, no choices) writes
+ * nothing and returns false, so Ask goes on to its next answerer and the
+ * model: "コースを開くと固まる" is a sentence, not a Path called "固まる"
+ * (review t1b2b, finding 2). A refusal about a number ("no Step 12 there")
+ * is still the answer (review t1b2c, finding 2).
+ */
+export function runTypedCall(call: ToolCall, said: string): boolean {
+  const at = where();
+  if (!at) {
+    runAskCall(call, said);
+    return true;
+  }
+  const outcome = runCoachTool(call, at.host, at.ctx);
+  const named = NAMED.some((k) => typeof call.args[k] === "string");
+  if (!outcome.ok && named && nameNotFound(outcome)) return false;
+  if (said.trim()) appendAskTurn({ id: askTurnId(), kind: "user", text: said.trim() });
+  writeOutcome(askTurnId(), outcome, at);
+  return true;
+}
+
+/**
+ * What a typed `go` by name (`open_path`, `open_step` with a Path or a Step
+ * named) would open, found before anything is written (review t1b2c,
+ * findings 1 and 5):
+ *
+ * - `none`: the name names nothing; the sentence is not answered here.
+ * - `one`: exactly one thing, as the choice a press runs, labelled and called
+ *   by its resolved title (never the typed leftover); `whole` when the typed
+ *   name matched the title's whole words (`wholeTitleWords`), the only case
+ *   typed text may open at once.
+ * - `runner`: several matches, or a Step number the Path lacks: the runner's
+ *   own answer, which is choices or a refusal and never opens anything.
+ * - null: not a named `go` (or no host): this says nothing about it.
+ *
+ * Reads the host's Paths; changes nothing.
+ */
+export type TypedGo = { kind: "none" } | { kind: "one"; choice: ToolChoice; whole: boolean } | { kind: "runner" };
+
+export function typedGo(call: ToolCall): TypedGo | null {
+  const RUNNER: TypedGo = { kind: "runner" };
+  const pathName = typeof call.args.path === "string" ? call.args.path : undefined;
+  const query = typeof call.args.query === "string" ? call.args.query : undefined;
+  const named = call.tool === "open_path" ? pathName !== undefined : call.tool === "open_step" && (pathName !== undefined || query !== undefined);
+  if (!named) return null;
+  const at = where();
+  if (!at) return null;
+  if (call.tool === "open_path") {
+    if (pathName === undefined) return null;
+    const found = resolvePath(pathName, at.host.paths());
+    if ("none" in found) return { kind: "none" };
+    if ("several" in found) return RUNNER;
+    const title = found.found.title;
+    return {
+      kind: "one",
+      choice: { label: line("coachTools.choice.path", { path: title }), call: { tool: "open_path", args: { path: title } } },
+      whole: wholeTitleWords(pathName, title),
+    };
+  }
+  const found = resolveStepCall("open_step", call.args, at.host, at.ctx);
+  if (!("step" in found)) return nameNotFound(found) ? { kind: "none" } : RUNNER;
+  const { path, step } = found;
+  return {
+    kind: "one",
+    choice: {
+      label: line("coachTools.choice.step", { path: path.title, step: step.order, title: step.title }),
+      call: { tool: "open_step", args: { path: path.title, step: step.order } },
+    },
+    whole: (pathName === undefined || wholeTitleWords(pathName, path.title)) && (query === undefined || wholeTitleWords(query, step.title)),
+  };
 }
 
 /**
@@ -226,13 +561,54 @@ export function runAskCall(call: ToolCall, said: string): string {
  * (`detail` 2 and up) is not a new press. Without this a double-click on a chip
  * ran its call twice, and the second click could land on a button drawn by the
  * first (the receipt's Undo where the proposal's button was). A key press has
- * `detail` 0 and always counts.
+ * `detail` 0 and counts once: a held Enter or Space fires a click on every
+ * auto-repeat, and those are not presses (leg chip1b, review M1). The
+ * button's `onKeyDown` is `noKeyRepeat`, which marks a repeat and stops its
+ * default; a click with `detail` 0 that follows a marked repeat is dropped.
  */
 export function onePress(fn: () => void): (event: { detail: number }) => void {
   return (event) => {
     if (event.detail > 1) return;
+    if (event.detail === 0 && keyRepeating) {
+      keyRepeating = false;
+      return;
+    }
     fn();
   };
+}
+
+/** A held Enter or Space is repeating (set by `noKeyRepeat`, read by `onePress`). One keyboard, one flag. */
+let keyRepeating = false;
+
+/** A tool button's `onKeyDown`: the auto-repeat of a held Enter or Space is not a press. */
+export function noKeyRepeat(event: { key: string; repeat: boolean; preventDefault: () => void }): void {
+  const activates = event.key === "Enter" || event.key === " ";
+  if (activates && event.repeat) {
+    keyRepeating = true;
+    watchKeyRepeat();
+    event.preventDefault();
+    return;
+  }
+  keyRepeating = false;
+}
+
+/**
+ * The flag is one for the whole window, so it must not outlive the held key
+ * (leg chip1c, review chip1b LOW 5): a button replaced while Enter is held
+ * never sees its keyup, and the flag would swallow the next `detail` 0 click
+ * (a screen reader's activation). Any keyup, a blur or a pointer press
+ * anywhere clears it. Installed once, the first time a repeat is marked.
+ */
+let keyRepeatWatched = false;
+function watchKeyRepeat(): void {
+  if (keyRepeatWatched || typeof window === "undefined") return;
+  keyRepeatWatched = true;
+  const clear = (): void => {
+    keyRepeating = false;
+  };
+  window.addEventListener("keyup", clear, true);
+  window.addEventListener("blur", clear, true);
+  window.addEventListener("pointerdown", clear, true);
 }
 
 /** The proposal's button: the runner checks it is still good, then does it. */
@@ -245,6 +621,11 @@ export function pressProposal(id: string): void {
     return;
   }
   const result = confirmCoachTool(turn.body.proposal, at.host, at.ctx);
+  // The same thing changed again: a chip's earlier Undo for it is not this one's to keep,
+  // unless this one's Undo puts back exactly the value it guards (leg chip1c, review chip1b
+  // LOW 2: in a Session a second chip press is this proposal, and a nudge's Undo is one rung,
+  // so the first chip Undo stays live behind it as the second step back to the start).
+  if (result.ok && result.undo) retireSameUndos(result.undo, true);
   setBody(id, bodyOf(result, at.host, at.ctx));
   followLater(id, result);
 }
@@ -313,7 +694,17 @@ export function noteAskToolView(view: MainView, step?: number | null): void {
     }
     if (turn.body.kind !== "receipt") continue;
     const undo = turn.body.undo;
-    if (!undo || undo.state !== "live" || undo.view === null || undo.view === view) continue;
+    if (!undo || undo.state !== "live") continue;
+    if (undo.chip) {
+      // A chip's Undo: only on its screen and, in a Session, its step (leg chip1). The Settings
+      // overlay is not another screen: it stops nothing and the player comes back to the same
+      // place (leg chip1b, review L2 d); back from it, the view and the step are checked again.
+      if (view === "settings") continue;
+      const stepMoved = step !== undefined && (undo.step ?? null) !== step;
+      if (undo.view === null || undo.view !== view || stepMoved) retire(turn.id, turn.body, undo);
+      continue;
+    }
+    if (undo.view === null || undo.view === view) continue;
     setBody(turn.id, { ...turn.body, undo: { ...undo, state: "gone" } });
   }
 }

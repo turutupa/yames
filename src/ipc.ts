@@ -2089,8 +2089,11 @@ export async function listExerciseCeilings(): Promise<ExerciseCeilingRow[]> {
 
 /**
  * One Exercise's clean tempo over every Take kept (`db.rs` `CleanTempoSpan`):
- * the first earned and the best, each with its Take's `startedAt`. The best
- * is the same number `listExerciseCeilings` reports.
+ * the first earned and the best, each with its Take's `startedAt`. A Take the
+ * player marked not fair is left out, so the best is the clean tempo the app
+ * shows (`shownCleanTempoOf`): the ceiling `listExerciseCeilings` reports,
+ * unless only such a Take holds it. An Exercise whose only clean Takes are
+ * marked not fair has no span.
  */
 export type CleanTempoSpanRow = {
   pathId: string;
@@ -3147,6 +3150,52 @@ export async function playTake(id: string): Promise<number> {
 
 export async function stopTakePlayback(): Promise<void> {
   return invoke("stop_take_playback");
+}
+
+/** What `hearTake` resolves to (`take_audio::HearBack`). */
+export interface HearBack {
+  /** The playback's generation: what `take-playback-ended` carries when it runs out. */
+  generation: number;
+  /** How long it runs, margins included. */
+  lengthMs: number;
+}
+
+/** Whether a Take's audio is held (`take_audio::HeldTake`). */
+export interface HeldTake {
+  held: boolean;
+  /** Complete bars held, from bar 1; 0 when not held. */
+  bars: number;
+}
+
+/**
+ * "Hear bar N" (c5b1): play bars `fromBar..=toBar` (1-based, after the
+ * count-in) of the last heard Take, the one whose grade carried `serial`,
+ * through the engine's take playback. Rejects when that Take's audio is not
+ * held, the bar is not in it, the click is running, or a jam take records:
+ * show nothing then. The audio lives in memory only and goes when the input
+ * stops. A Start cuts it.
+ */
+export async function hearTake(
+  serial: number,
+  fromBar: number,
+  toBar: number,
+): Promise<HearBack> {
+  return invoke("hear_take", { serial, fromBar, toBar });
+}
+
+/** Stop the hear-back `generation` names; anything else plays on. */
+export async function stopHearTake(generation: number): Promise<boolean> {
+  return invoke("stop_hear_take", { generation });
+}
+
+/** Whether the Take whose grade carried `serial` is held, and how many bars. */
+export async function heardTake(serial: number): Promise<HeldTake> {
+  return invoke("heard_take", { serial });
+}
+
+/** Let the last heard Take's audio go now. */
+export async function forgetHeardTake(): Promise<void> {
+  return invoke("forget_heard_take");
 }
 
 /**

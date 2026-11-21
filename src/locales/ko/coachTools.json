@@ -15,6 +15,8 @@
       "setTempo": "템포 {{from}} → {{to}} BPM",
       "findEdge": "{{title}}에서 한계를 찾는 중",
       "testOut": "{{step}}단계 건너뛰기 테스트 중: {{title}}",
+      "loopBar": "{{bar}}번째 마디를 {{bpm}} BPM으로 반복 중",
+      "loopBars": "{{from}}~{{to}}번째 마디를 {{bpm}} BPM으로 반복 중",
       "swapPart": "{{part}}번째 파트가 이제 {{to}}이에요",
       "restorePart": "{{part}}번째 파트가 다시 {{from}}이에요",
       "setMinutes": "오늘은 이제 {{to}}분이에요",
@@ -47,6 +49,8 @@
       "findEdge": "{{title}}({{path}} · {{step}}단계)에서 한계 찾기, {{bpm}} BPM부터",
       "findEdgeNoBpm": "{{title}}({{path}} · {{step}}단계)에서 한계 찾기",
       "testOut": "{{step}}단계 건너뛰기 테스트: {{title}}, {{takes}}테이크",
+      "loopBar": "{{bar}}번째 마디를 {{bpm}} BPM으로 반복, 멈출 때까지",
+      "loopBars": "{{from}}~{{to}}번째 마디를 {{bpm}} BPM으로 반복, 멈출 때까지",
       "swapPart": "{{part}}번째 파트: {{from}} → {{to}}",
       "restorePart": "{{part}}번째 파트를 {{title}}(으)로 되돌리기",
       "setMinutes": "오늘: {{from}} → {{to}}분, {{parts}}개 파트",
@@ -81,6 +85,15 @@
       "preset": "{{preset}}",
       "setting": "{{value}}"
     },
+    "command": {
+      "minutes": "오늘 {{minutes}}분",
+      "jam": "잼 “{{jam}}”",
+      "preset": "프리셋 “{{preset}}”",
+      "swapHarder": "{{part}}번째 파트: 더 어려운 것",
+      "swapDifferent": "{{part}}번째 파트: 다른 것",
+      "swapStyle": "{{part}}번째 파트: 다른 스타일",
+      "other": "{{tool}}"
+    },
     "chip": {
       "goTo": "{{screen}}(으)로 이동",
       "startToday": "오늘의 세션 시작",
@@ -106,7 +119,8 @@
       "load": "불러오기",
       "keep": "저장",
       "go": "이동",
-      "open": "열기"
+      "open": "열기",
+      "loop": "반복"
     },
     "why": {
       "which": "어느 쪽인가요?",
@@ -123,7 +137,10 @@
         "level": "{{path}}에는 “{{query}}”(이)라는 레벨이 없어요.",
         "swap": "“{{query}}”(은)는 {{part}}번째 파트에 넣을 수 없어요.",
         "rung": "거기에는 설정할 템포가 없어요.",
-        "settingValue": "{{key}}은(는) “{{query}}”일 수 없어요. 가능한 값은 다음과 같아요:"
+        "settingValue": "{{key}}은(는) “{{query}}”일 수 없어요. 가능한 값은 다음과 같아요:",
+        "loopBar": "이 곡에는 {{bar}}번째 마디가 없어요.",
+        "loopAcross": "{{from}}~{{to}}번째 마디는 곡의 끝을 넘어 다시 처음으로 이어져요. 곡 한 바퀴 안의 마디로 요청해 주세요.",
+        "loopOneBar": "이 과제는 마디가 하나뿐이에요. 1번째 마디로 요청해 주세요."
       },
       "notNow": {
         "take": "이 테이크가 끝난 뒤에요.",
@@ -154,13 +171,15 @@
         "following": "이미 {{path}}을(를) 따라가고 있어요.",
         "alreadySubdivision": "이미 한 박당 클릭 {{subdivision}}번이에요.",
         "alreadySetting": "{{key}}은(는) 이미 {{value}}이에요.",
-        "alreadyGoal": "그건 이미 당신의 목표예요."
+        "alreadyGoal": "그건 이미 당신의 목표예요.",
+        "loopHere": "반복은 세션 안의 과제에서, 테이크 사이에 시작할 수 있어요."
       },
       "notWiredYet": "앱이 여기서는 아직 그걸 할 수 없어요.",
       "refused": {
         "shape": "그건 앱이 할 수 있는 일이 아니에요.",
         "proposal": "그 뒤로 바뀌어서 아무것도 하지 않았어요. 다시 물어보세요.",
-        "cap": "코스 {{cap}}개를 따라가고 있어요. 최대치예요. 먼저 하나를 해당 페이지에서 그만두세요."
+        "cap": "코스 {{cap}}개를 따라가고 있어요. 최대치예요. 먼저 하나를 해당 페이지에서 그만두세요.",
+        "loopBackwards": "{{to}}번째 마디는 {{from}}번째 마디보다 앞이에요. 시작 마디를 먼저 말해 주세요."
       },
       "failed": "되지 않았고, 아무것도 바뀌지 않았어요."
     },

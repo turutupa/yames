@@ -15,6 +15,8 @@
       "setTempo": "Tempo {{from}} → {{to}} BPM",
       "findEdge": "Buscando tu límite en {{title}}",
       "testOut": "Haciendo la prueba del Paso {{step}}: {{title}}",
+      "loopBar": "Repitiendo el compás {{bar}} a {{bpm}} BPM",
+      "loopBars": "Repitiendo los compases {{from}} a {{to}} a {{bpm}} BPM",
       "swapPart": "La parte {{part}} ahora es {{to}}",
       "restorePart": "La parte {{part}} vuelve a ser {{from}}",
       "setMinutes": "Hoy son {{to}} minutos",
@@ -47,6 +49,8 @@
       "findEdge": "Buscar tu límite en {{title}} ({{path}} · Paso {{step}}), desde {{bpm}} BPM",
       "findEdgeNoBpm": "Buscar tu límite en {{title}} ({{path}} · Paso {{step}})",
       "testOut": "Hacer la prueba del Paso {{step}}: {{title}}, en {{takes}} tomas",
+      "loopBar": "Repetir el compás {{bar}} a {{bpm}} BPM, hasta que lo pares",
+      "loopBars": "Repetir los compases {{from}} a {{to}} a {{bpm}} BPM, hasta que lo pares",
       "swapPart": "Parte {{part}}: {{from}} → {{to}}",
       "restorePart": "Devolver la parte {{part}} a {{title}}",
       "setMinutes": "Hoy: {{from}} → {{to}} minutos, {{parts}} partes",
@@ -81,6 +85,15 @@
       "preset": "{{preset}}",
       "setting": "{{value}}"
     },
+    "command": {
+      "minutes": "{{minutes}} minutos hoy",
+      "jam": "El jam «{{jam}}»",
+      "preset": "El preajuste «{{preset}}»",
+      "swapHarder": "Parte {{part}}: algo más difícil",
+      "swapDifferent": "Parte {{part}}: algo diferente",
+      "swapStyle": "Parte {{part}}: otro estilo",
+      "other": "{{tool}}"
+    },
     "chip": {
       "goTo": "Ir a {{screen}}",
       "startToday": "Empezar la sesión de hoy",
@@ -106,7 +119,8 @@
       "load": "Cárgalo",
       "keep": "Guárdalo",
       "go": "Ir",
-      "open": "Ábrelo"
+      "open": "Ábrelo",
+      "loop": "Repítelo"
     },
     "why": {
       "which": "¿Cuál?",
@@ -123,7 +137,10 @@
         "level": "{{path}} no tiene ningún nivel llamado «{{query}}».",
         "swap": "Nada llamado «{{query}}» puede ir en la parte {{part}}.",
         "rung": "Ahí no hay ningún tempo que fijar.",
-        "settingValue": "{{key}} no puede ser «{{query}}». Estos son los valores posibles:"
+        "settingValue": "{{key}} no puede ser «{{query}}». Estos son los valores posibles:",
+        "loopBar": "Esta melodía no tiene el compás {{bar}}.",
+        "loopAcross": "Los compases {{from}} a {{to}} se salen del final de la melodía y vuelven a su principio. Pide compases dentro de una sola vuelta.",
+        "loopOneBar": "Este Ejercicio tiene un solo compás: pide el compás 1."
       },
       "notNow": {
         "take": "Después de esta toma.",
@@ -154,13 +171,15 @@
         "following": "Ya sigues {{path}}.",
         "alreadySubdivision": "Ya son {{subdivision}} clics por pulso.",
         "alreadySetting": "{{key}} ya es {{value}}.",
-        "alreadyGoal": "Ese ya es tu objetivo."
+        "alreadyGoal": "Ese ya es tu objetivo.",
+        "loopHere": "Un bucle empieza desde un Ejercicio en una Sesión, entre tomas."
       },
       "notWiredYet": "La app aún no puede hacer eso desde aquí.",
       "refused": {
         "shape": "Eso no es algo que la app pueda hacer.",
         "proposal": "Eso ha cambiado desde entonces, así que no se hizo nada. Vuelve a preguntar.",
-        "cap": "Sigues {{cap}} rutas, el máximo posible. Deja una primero en su página."
+        "cap": "Sigues {{cap}} rutas, el máximo posible. Deja una primero en su página.",
+        "loopBackwards": "El compás {{to}} va antes que el compás {{from}}. Nombra primero el primer compás."
       },
       "failed": "Eso no funcionó, y no se cambió nada."
     },

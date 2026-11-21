@@ -15,6 +15,8 @@
       "setTempo": "Tempo {{from}} → {{to}} BPM",
       "findEdge": "Je grens zoeken bij {{title}}",
       "testOut": "Stap {{step}} testen: {{title}}",
+      "loopBar": "Maat {{bar}} op repeat, met {{bpm}} BPM",
+      "loopBars": "Maat {{from}} tot {{to}} op repeat, met {{bpm}} BPM",
       "swapPart": "Deel {{part}} is nu {{to}}",
       "restorePart": "Deel {{part}} is weer {{from}}",
       "setMinutes": "Vandaag is nu {{to}} minuten",
@@ -47,6 +49,8 @@
       "findEdge": "Je grens zoeken bij {{title}} ({{path}} · Stap {{step}}), vanaf {{bpm}} BPM",
       "findEdgeNoBpm": "Je grens zoeken bij {{title}} ({{path}} · Stap {{step}})",
       "testOut": "Stap {{step}} testen: {{title}}, in {{takes}} takes",
+      "loopBar": "Maat {{bar}} herhalen met {{bpm}} BPM, tot je stopt",
+      "loopBars": "Maat {{from}} tot {{to}} herhalen met {{bpm}} BPM, tot je stopt",
       "swapPart": "Deel {{part}}: {{from}} → {{to}}",
       "restorePart": "Deel {{part}} terugzetten op {{title}}",
       "setMinutes": "Vandaag: {{from}} → {{to}} minuten, {{parts}} delen",
@@ -81,6 +85,15 @@
       "preset": "{{preset}}",
       "setting": "{{value}}"
     },
+    "command": {
+      "minutes": "Vandaag {{minutes}} minuten",
+      "jam": "De jam “{{jam}}”",
+      "preset": "De preset “{{preset}}”",
+      "swapHarder": "Deel {{part}}: iets moeilijkers",
+      "swapDifferent": "Deel {{part}}: iets anders",
+      "swapStyle": "Deel {{part}}: een andere stijl",
+      "other": "{{tool}}"
+    },
     "chip": {
       "goTo": "Ga naar {{screen}}",
       "startToday": "Sessie van vandaag starten",
@@ -106,7 +119,8 @@
       "load": "Laden",
       "keep": "Bewaren",
       "go": "Ga",
-      "open": "Openen"
+      "open": "Openen",
+      "loop": "Herhaal"
     },
     "why": {
       "which": "Welke?",
@@ -123,7 +137,10 @@
         "level": "{{path}} heeft geen niveau met de naam “{{query}}”.",
         "swap": "Niets met de naam “{{query}}” kan in deel {{part}}.",
         "rung": "Er is daar geen tempo om in te stellen.",
-        "settingValue": "{{key}} kan niet “{{query}}” zijn. Dit kan het wel zijn:"
+        "settingValue": "{{key}} kan niet “{{query}}” zijn. Dit kan het wel zijn:",
+        "loopBar": "Deze melodie heeft geen maat {{bar}}.",
+        "loopAcross": "Maat {{from}} tot {{to}} lopen voorbij het einde van de melodie en weer in het begin. Vraag om maten binnen één ronde.",
+        "loopOneBar": "Deze oefening heeft één maat: vraag om maat 1."
       },
       "notNow": {
         "take": "Na deze take.",
@@ -154,13 +171,15 @@
         "following": "Je volgt {{path}} al.",
         "alreadySubdivision": "Het zijn al {{subdivision}} kliks per tel.",
         "alreadySetting": "{{key}} is al {{value}}.",
-        "alreadyGoal": "Dat is al je doel."
+        "alreadyGoal": "Dat is al je doel.",
+        "loopHere": "Een loop start vanuit een oefening in een sessie, tussen takes."
       },
       "notWiredYet": "De app kan dat vanaf hier nog niet.",
       "refused": {
         "shape": "Dat kan de app niet.",
         "proposal": "Dat is sindsdien veranderd, dus er is niets gedaan. Vraag het opnieuw.",
-        "cap": "Je volgt {{cap}} leerpaden, het maximum. Verlaat er eerst een op zijn pagina."
+        "cap": "Je volgt {{cap}} leerpaden, het maximum. Verlaat er eerst een op zijn pagina.",
+        "loopBackwards": "Maat {{to}} komt vóór maat {{from}}. Noem eerst de eerste maat."
       },
       "failed": "Dat is niet gelukt, en er is niets veranderd."
     },

@@ -450,6 +450,55 @@ describe("the command tables", () => {
     expect(routeCommand("昨日パスを開いた", ja, facts.today)).toEqual({ kind: "none" });
     expect(routeCommand("録音を開いて", ja, facts.today)).toEqual({ kind: "yours", item: "recording" });
   });
+
+  it("a language that puts the verb last (`verbFinal`, leg t1b2b) takes a verb that ends the text, and only then", () => {
+    const de = structuredClone(en) as unknown as CommandTable & { verbs: Record<string, string[]>; screens: Record<string, string[]>; notCommand: string[] };
+    (de as { language: string }).language = "de";
+    de.verbs.open = ["öffne", "öffnen"];
+    de.screens.paths = ["pfade"];
+    de.notCommand = [...de.notCommand, "nicht", "morgen"];
+    expect(validateCommandTable(de)).toEqual([]);
+    // Without the flag, a verb at the end is not a command.
+    expect(routeCommand("pfade öffnen", de, facts.today)).toEqual({ kind: "none" });
+    const final = { ...de, verbFinal: true } as CommandTable;
+    expect(validateCommandTable(final)).toEqual([]);
+    expectCall(routeCommand("pfade öffnen", final, facts.today), "go_to", { screen: "paths" });
+    expectCall(routeCommand("öffne pfade", final, facts.today), "go_to", { screen: "paths" });
+    expect(routeCommand("pfade morgen öffnen", final, facts.today)).toEqual({ kind: "none" });
+    expect(routeCommand("pfade nicht öffnen", final, facts.today)).toEqual({ kind: "none" });
+    expect(routeCommand("öffnen", final, facts.today)).toEqual({ kind: "none" });
+    expect(validateCommandTable({ ...final, noSpaces: true } as CommandTable).join()).toContain("verbFinal");
+  });
+
+  it("an nth bar or Step written around its number (`ordinalPlaces`, leg t1b2b), and never a count", () => {
+    const zh = structuredClone(en) as unknown as CommandTable & Record<string, unknown>;
+    const t = zh as unknown as { language: string; noSpaces: boolean; verbs: Record<string, string[]>; units: Record<string, string[]>; fillers: string[] };
+    t.language = "zh-CN";
+    t.noSpaces = true;
+    t.verbs.loop = ["循环"];
+    t.verbs.open = ["打开"];
+    t.units.bar = ["小节"];
+    t.units.step = ["步骤"];
+    const places = { ...zh, ordinalPlaces: { bar: ["第#小节"], step: ["第#步"] } } as CommandTable;
+    expect(validateCommandTable(places)).toEqual([]);
+    expectCall(routeCommand("循环第3小节", places, facts.today), "loop_bars", { from: 3 });
+    expectCall(routeCommand("第7步", places, facts.paths), "open_step", { step: 7 });
+    expectCall(routeCommand("打开第7步", places, facts.paths), "open_step", { step: 7 });
+    expectCall(routeCommand("步骤7", places, facts.paths), "open_step", { step: 7 });
+    // A number glued to the unit an ordinal place ends with ("7단계") is that place after a verb; said
+    // alone, without spaces, it is as often a count ("3 stages"), so nothing (review t1b2b, finding 6).
+    const ko = { ...zh, units: { ...zh.units, step: ["단계"] }, ordinalPlaces: { step: ["#단계"] } } as CommandTable;
+    expectCall(routeCommand("7단계打开", ko, facts.paths), "open_step", { step: 7 });
+    expect(routeCommand("7단계", ko, facts.paths)).toEqual({ kind: "none" });
+    expect(routeCommand("7단계", { ...ko, ordinalPlaces: undefined } as CommandTable, facts.paths)).toEqual({ kind: "none" });
+    // "3小节" is three bars: not a place.
+    expect(routeCommand("循环3小节", places, facts.today)).toEqual({ kind: "none" });
+    expect(routeCommand("循环第3小节", zh, facts.today)).toEqual({ kind: "none" });
+    const bad = { ...zh, ordinalPlaces: { bar: ["第小节"], step: ["#"] } } as CommandTable;
+    const problems = validateCommandTable(bad).join("\n");
+    expect(problems).toContain("exactly one #");
+    expect(problems).toContain("only the number");
+  });
 });
 
 // ---------------------------------------------------------------------------

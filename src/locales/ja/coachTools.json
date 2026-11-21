@@ -15,6 +15,8 @@
       "setTempo": "テンポ {{from}} → {{to}} BPM",
       "findEdge": "{{title}}であなたの限界を探しています",
       "testOut": "ステップ{{step}}の飛び級テスト中：{{title}}",
+      "loopBar": "{{bar}}小節目を{{bpm}} BPMでループ中",
+      "loopBars": "{{from}}〜{{to}}小節を{{bpm}} BPMでループ中",
       "swapPart": "パート{{part}}は{{to}}になりました",
       "restorePart": "パート{{part}}は{{from}}に戻りました",
       "setMinutes": "今日は{{to}}分になりました",
@@ -47,6 +49,8 @@
       "findEdge": "{{title}}（{{path}} · ステップ{{step}}）で限界を探す、{{bpm}} BPMから",
       "findEdgeNoBpm": "{{title}}（{{path}} · ステップ{{step}}）で限界を探す",
       "testOut": "ステップ{{step}}の飛び級テスト：{{title}}、{{takes}}テイク",
+      "loopBar": "{{bar}}小節目を{{bpm}} BPMでループ、止めるまで",
+      "loopBars": "{{from}}〜{{to}}小節を{{bpm}} BPMでループ、止めるまで",
       "swapPart": "パート{{part}}：{{from}} → {{to}}",
       "restorePart": "パート{{part}}を{{title}}に戻す",
       "setMinutes": "今日：{{from}} → {{to}}分、{{parts}}パート",
@@ -81,6 +85,15 @@
       "preset": "{{preset}}",
       "setting": "{{value}}"
     },
+    "command": {
+      "minutes": "今日は{{minutes}}分",
+      "jam": "ジャム「{{jam}}」",
+      "preset": "プリセット「{{preset}}」",
+      "swapHarder": "パート{{part}}：もっと難しいもの",
+      "swapDifferent": "パート{{part}}：別のもの",
+      "swapStyle": "パート{{part}}：別のスタイル",
+      "other": "{{tool}}"
+    },
     "chip": {
       "goTo": "{{screen}}へ",
       "startToday": "今日のセッションを始める",
@@ -106,7 +119,8 @@
       "load": "読み込む",
       "keep": "保存",
       "go": "移動",
-      "open": "開く"
+      "open": "開く",
+      "loop": "ループ"
     },
     "why": {
       "which": "どれですか？",
@@ -123,7 +137,10 @@
         "level": "{{path}}に「{{query}}」というレベルはありません。",
         "swap": "「{{query}}」はパート{{part}}に入れられません。",
         "rung": "そこには設定できるテンポがありません。",
-        "settingValue": "{{key}}は「{{query}}」にできません。選べるのは次のとおりです："
+        "settingValue": "{{key}}は「{{query}}」にできません。選べるのは次のとおりです：",
+        "loopBar": "この曲に{{bar}}小節目はありません。",
+        "loopAcross": "{{from}}〜{{to}}小節は曲の終わりを越えて、また最初に戻ってしまいます。曲の1周の中の小節を指定してください。",
+        "loopOneBar": "この課題は1小節だけです。1小節目を指定してください。"
       },
       "notNow": {
         "take": "このテイクのあとで。",
@@ -154,13 +171,15 @@
         "following": "すでに{{path}}をフォローしています。",
         "alreadySubdivision": "すでに1拍あたり{{subdivision}}クリックです。",
         "alreadySetting": "{{key}}はすでに{{value}}です。",
-        "alreadyGoal": "それはすでにあなたの目標です。"
+        "alreadyGoal": "それはすでにあなたの目標です。",
+        "loopHere": "ループは、セッション中の課題から、テイクの合間に始められます。"
       },
       "notWiredYet": "アプリはここからはまだそれができません。",
       "refused": {
         "shape": "それはアプリにはできません。",
         "proposal": "そのあと状況が変わったため、何も行っていません。もう一度聞いてください。",
-        "cap": "{{cap}}個のコースをフォロー中で、これが上限です。先にどれかをそのページで外してください。"
+        "cap": "{{cap}}個のコースをフォロー中で、これが上限です。先にどれかをそのページで外してください。",
+        "loopBackwards": "{{to}}小節目は{{from}}小節目より前です。先に始めの小節を言ってください。"
       },
       "failed": "うまくいかず、何も変更されていません。"
     },

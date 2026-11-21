@@ -55,6 +55,7 @@ import type { ChordFlavour } from "../../../jam/cheatSheet";
 import type { CheatTab, ChordPage } from "../../jam/ChordSheet";
 import type { Jam, JamBandState, JamPositionCommand } from "../../../jam";
 import { NO_PRACTICE } from "../../jam/PracticeRow";
+import { noteAskLoad } from "../../coach/askTools";
 import type { GrooveEditorPage } from "../../jam/editor";
 import type { BeatEvent } from "../../../types";
 /**
@@ -1070,6 +1071,9 @@ export function useJamSession({
       tempoEveryChoruses: practice.tempoEveryChoruses,
     });
     if (to === from) return;
+    // The trainer moves the tempo with no press: no chip's Undo outlives it (leg chip1c,
+    // review chip1b LOW 4; a chorus's step can land on the value an old Undo guards).
+    noteAskLoad();
     setTrainedBpm(to);
     void setBpm(to).catch(() => {});
     // `jam?.id` again: loading a jam onto a click that is already running has
@@ -1081,6 +1085,8 @@ export function useJamSession({
   /** Stop, and the jam is at its own tempo again. */
   useEffect(() => {
     if (isPlaying || trainedBpm === null) return;
+    // Nor its revert on Stop (leg chip1c): the jam's own tempo may be an old Undo's guard.
+    noteAskLoad();
     setTrainedBpm(null);
     if (view === "jam" && jam) void setBpm(jam.bpm).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1298,6 +1304,8 @@ export function useJamSession({
   const loadJam = useCallback(
     (next: Jam) => {
       onJamLoaded();
+      // The coach's chip Undos put back values this jam replaces (leg chip1b, review L2 b).
+      noteAskLoad();
       setActiveJam(next);
       setSaved(next);
       setStageUnsaved(false);

@@ -288,6 +288,10 @@
 .ask-turn-coach.coach-blocks {
   margin: 0;
 }
+/* A fact card (leg c2b1a): the existing blocks, with the source the app attached. */
+.ask-card-blocks.coach-blocks {
+  margin: 0;
+}
 .ask-divider {
   display: flex;
   align-items: center;
@@ -422,6 +426,16 @@
 .ask-chip-row {
   flex: none;
   padding: 0 12px 8px;
+}
+.ask-chip-row .ask-card-chips + .ask-chips {
+  margin-top: 8px;
+}
+/* The question chip's leading "?" (DESIGN 3.6), in the label's own ink. */
+.ask-chip-lead {
+  margin-inline-end: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
 }
 /* A question chip's shape (DESIGN 3.6): neutral 1 px outline, ink label. */
 .ask-chip {

@@ -145,6 +145,10 @@ pub mod probe {
     /// the gate covers the ring the output callback writes into and the
     /// writer thread draining it to disk underneath the stream.
     pub use crate::take::{SharedTake, TakeHandoff, TakeRing, TakeSession, TakeStart};
+    /// c5b1 — `--hear-take`: the last heard Take's slot, filled with a fake
+    /// capture, and a bar of it played through the take slot between spans
+    /// of the click, the way `hear_take` and a Start do it.
+    pub use crate::take_audio::{CapturedAudio, HeardTake, HeardTakeSlot};
     /// W30 — and the other kind of take. `--jam-loopback-take` opens a real
     /// capture on the output endpoint, so the gate covers the output callback
     /// with a SECOND device's callback running beside it and a writer thread
@@ -221,6 +225,8 @@ use commands::{
     tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk, DownloadState,
     check_take_sound, delete_take, list_takes, play_take, start_take, stop_take, stop_take_playback,
     takes_dir_size,
+    // c5b1 — "Hear bar N": the last heard Take, a bar at a time.
+    forget_heard_take, hear_take, heard_take, stop_hear_take, HeardTakeState,
     // W9 — the engine plays a song (`plans/SONGS.md` A1/A4/A6).
     clear_song, load_song, pick_sound_font, seek_song, set_song_mix, set_song_range,
     set_song_sound_font,
@@ -572,7 +578,11 @@ pub fn run() {
             app.manage(create_shared_audio_input());
             app.manage(create_shared_onset_detector());
             app.manage(harmony::worker::SharedHarmony::default());
-            app.manage(Arc::new(Mutex::new(TimingAnalyzer::new(beat_log))));
+            let timing_analyzer = TimingAnalyzer::new(beat_log);
+            // c5b1 — the analyzer's pitch pass fills it; Start, `hear_take`
+            // and the input's stop reach it without the analyzer's lock.
+            app.manage(HeardTakeState(timing_analyzer.heard_take()));
+            app.manage(Arc::new(Mutex::new(timing_analyzer)));
             app.manage(create_shared_session_accumulator());
 
             // The practice store (ROADMAP 1.1). Opened, migrated and
@@ -913,6 +923,10 @@ pub fn run() {
             play_take,
             stop_take_playback,
             takes_dir_size,
+            hear_take,
+            stop_hear_take,
+            heard_take,
+            forget_heard_take,
             // W21 — the camera's recording, streamed to disk beside the take.
             take_video_begin,
             take_video_append,

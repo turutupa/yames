@@ -1,0 +1,24 @@
+{
+  "lng": "zh-CN",
+  "notes": "Six questions chosen from the English ones. Unsure: Chinese players write 'power chord' as 强力和弦 or just 'power chord'/'五度和弦'; palm mute is 闷音 or 手掌闷音. `none` are questions the Paths do not answer.",
+  "questions": [
+    { "q": "交替拨弦的时候八分音符怎么才能弹得均匀", "expect": ["alternate-picking/even-eighths", "rhythm-foundations/eighths", "alternate-picking/other-strings"] },
+    { "q": "勾弦声音太小怎么办", "expect": ["legato/first-pulls", "legato/hammer-and-pull", "shred/legato-one"] },
+    { "q": "三连音怎么数拍子", "expect": ["rhythm-foundations/triplets", "metal-rhythm/triplets-and-bursts"] },
+    { "q": "什么是强力和弦?", "expect": ["metal-rhythm/power-chords"] },
+    { "q": "一个调的关系小调是什么", "expect": ["scales-and-modes/relative-minor", "scales-and-modes/minor-second-key", "chords-in-a-key/minor-key"] },
+    { "q": "怎么才能更快地换和弦", "expect": ["first-chords/a-minor", "first-chords/c-major", "first-chords/g-major", "first-chords/d-major", "first-chords/a-and-e"] }
+  ],
+  "none": [
+    "怎么给吉他调音",
+    "我该买什么琴弦",
+    "推荐一个音箱",
+    "明天天气怎么样",
+    "讲个笑话",
+    "一把新吉他多少钱",
+    "木吉他怎么换弦",
+    "怎么导出我的数据",
+    "琴颈的调节杆怎么调",
+    "能推荐一个失真效果器吗"
+  ]
+}

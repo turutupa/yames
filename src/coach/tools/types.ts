@@ -205,6 +205,18 @@ export type ToolSpec = {
    * stops. A `confirm` tool's proposal names what stops.
    */
   leaves?: true;
+  /**
+   * A suggestion chip's own press is the press (the owner's decision on the
+   * 1k questions, item 1; leg chip1): the runner confirms the proposal at once
+   * (`pressCoachChip`) and the receipt carries Undo. Set only in the
+   * registry's `CHIP_PRESS` table, never at a call site, and only on a
+   * `confirm` tool that changes one value, has an undo that puts back exactly
+   * what was there, starts and stops no sound and does not navigate;
+   * `chipPress.test.ts` walks every flagged tool and proves it. A typed
+   * command, a "Which one?" choice, a model's call and the
+   * `accept-suggestion` binding never read it: they keep the proposal.
+   */
+  chipPress?: true;
 };
 
 type ToolFunctions = {

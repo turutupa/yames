@@ -10,7 +10,8 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { buildCoachContext, contextForModel, type CoachScreen, type CoachSources } from "../../coach/context";
+import { lastEvent } from "../../coach/bus";
+import { buildCoachContext, type CoachScreen, type CoachSources } from "../../coach/context";
 import { getCoachModelSnapshot } from "../../hooks/coachLoader";
 import type { Jam } from "../../jam/types";
 import { currentStep } from "../../session/runner";
@@ -18,9 +19,9 @@ import type { SongRecord } from "../../songs/library";
 import { wholeSong } from "../../songs/schedule";
 import type { MainView } from "../main-window/MainHeader";
 import { seedOf, type SessionRun } from "../session/hooks/useSessionRun";
-import { askScreenKey, lookingAtParts } from "./askContext";
+import { askModelContext, askScreenKey, lookingAtParts } from "./askContext";
 import type { AskLookingAt } from "./AskPanel";
-import { noteAskToolView, registerAskToolContext } from "./askTools";
+import { noteAskLoad, noteAskTake, noteAskToolView, noteAskUndos, registerAskToolContext } from "./askTools";
 import { useAskSessionRules, useCoachPanel, type CoachPanel } from "./useCoachPanel";
 
 /** The screens Ask is shown on: all of them but Settings. */
@@ -85,6 +86,17 @@ export function useAskHost(input: AskHostInput): { panel: CoachPanel; lookingAt:
       const outcomes = latest.current.session.run.outcomes;
       return outcomes[outcomes.length - 1];
     },
+    // The last Take's analysis, as the bus carried it with that Take's result
+    // (the note reads the same one): the fact cards' places and leans (c2b1a).
+    review: () => {
+      if (latest.current.view !== "session") return undefined;
+      const outcomes = latest.current.session.run.outcomes;
+      const last = outcomes[outcomes.length - 1];
+      const event = lastEvent("takeResult");
+      if (!last || !event) return undefined;
+      const same = event.outcome === last || (!!last.takeId && event.outcome.takeId === last.takeId);
+      return same ? (event.review ?? undefined) : undefined;
+    },
     jam: () => (latest.current.view === "jam" && latest.current.jam ? { jam: latest.current.jam } : undefined),
     song: () => {
       const song = latest.current.song;
@@ -92,7 +104,8 @@ export function useAskHost(input: AskHostInput): { panel: CoachPanel; lookingAt:
     },
   }).current;
 
-  const panel = useCoachPanel({ contextText: () => contextForModel(buildCoachContext(sources)) });
+  // The model's context leaves the Take's raw review out (review c2b1a F5).
+  const panel = useCoachPanel({ contextText: () => askModelContext(sources) });
 
   // The tools read the same context, at each press (leg t1b1).
   useEffect(() => registerAskToolContext(() => buildCoachContext(sources)), [sources]);
@@ -107,9 +120,19 @@ export function useAskHost(input: AskHostInput): { panel: CoachPanel; lookingAt:
   useEffect(() => {
     noteAskToolView(view, step);
   }, [view, step]);
+  // A chip's Undo does not outlive a Take's start (leg chip1). Once per Take, never per beat.
+  const takeRunning = run.phase === "playing" || run.phase === "listening";
+  useEffect(() => {
+    if (takeRunning) noteAskTake();
+  }, [takeRunning]);
+  // Nor a loop's start in a Session, whether the panel is open or not (leg chip1b, review L2 c).
+  const looping = inSession && run.phase === "looping";
+  useEffect(() => {
+    if (looping) noteAskLoad();
+  }, [looping]);
   useAskSessionRules({
     inSession,
-    takeRunning: run.phase === "playing" || run.phase === "listening",
+    takeRunning,
     timedRunning: run.phase === "timed" && !run.paused && !run.ended,
     pauseTimed: session.actions.togglePause,
     sounding: isPlaying,
@@ -128,6 +151,13 @@ export function useAskHost(input: AskHostInput): { panel: CoachPanel; lookingAt:
     const key = askScreenKey(ctx);
     setLookingAt((prev) => (prev?.text === text && prev.key === key ? prev : { text, key }));
   }, [panel.open, view, run.phase, exerciseId, outcomes, input.jam?.id, input.song?.id, t, sources]);
+
+  // A chip's Undo goes once the value it changed has moved (leg chip1): asked when the
+  // panel opens and when the screen, the Exercise or the run moves, never per beat, never
+  // during a Take, and not under the Settings overlay (it stops nothing; leg chip1b).
+  useEffect(() => {
+    if (panel.open && !takeRunning && askShownOn(view)) noteAskUndos();
+  }, [panel.open, view, run.phase, exerciseId, outcomes, takeRunning]);
 
   return { panel, lookingAt };
 }

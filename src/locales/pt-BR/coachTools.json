@@ -15,6 +15,8 @@
       "setTempo": "Andamento {{from}} → {{to}} BPM",
       "findEdge": "Procurando seu limite em {{title}}",
       "testOut": "Fazendo o teste da Etapa {{step}}: {{title}}",
+      "loopBar": "Repetindo o compasso {{bar}} a {{bpm}} BPM",
+      "loopBars": "Repetindo os compassos {{from}} a {{to}} a {{bpm}} BPM",
       "swapPart": "A parte {{part}} agora é {{to}}",
       "restorePart": "A parte {{part}} voltou a ser {{from}}",
       "setMinutes": "Hoje são {{to}} minutos",
@@ -47,6 +49,8 @@
       "findEdge": "Procurar seu limite em {{title}} ({{path}} · Etapa {{step}}), a partir de {{bpm}} BPM",
       "findEdgeNoBpm": "Procurar seu limite em {{title}} ({{path}} · Etapa {{step}})",
       "testOut": "Fazer o teste da Etapa {{step}}: {{title}}, em {{takes}} tomadas",
+      "loopBar": "Repetir o compasso {{bar}} a {{bpm}} BPM, até você parar",
+      "loopBars": "Repetir os compassos {{from}} a {{to}} a {{bpm}} BPM, até você parar",
       "swapPart": "Parte {{part}}: {{from}} → {{to}}",
       "restorePart": "Devolver a parte {{part}} para {{title}}",
       "setMinutes": "Hoje: {{from}} → {{to}} minutos, {{parts}} partes",
@@ -81,6 +85,15 @@
       "preset": "{{preset}}",
       "setting": "{{value}}"
     },
+    "command": {
+      "minutes": "{{minutes}} minutos hoje",
+      "jam": "A jam “{{jam}}”",
+      "preset": "A predefinição “{{preset}}”",
+      "swapHarder": "Parte {{part}}: algo mais difícil",
+      "swapDifferent": "Parte {{part}}: algo diferente",
+      "swapStyle": "Parte {{part}}: outro estilo",
+      "other": "{{tool}}"
+    },
     "chip": {
       "goTo": "Ir para {{screen}}",
       "startToday": "Começar a sessão de hoje",
@@ -106,7 +119,8 @@
       "load": "Carregar",
       "keep": "Guardar",
       "go": "Ir",
-      "open": "Abrir"
+      "open": "Abrir",
+      "loop": "Repetir"
     },
     "why": {
       "which": "Qual?",
@@ -123,7 +137,10 @@
         "level": "{{path}} não tem nível chamado “{{query}}”.",
         "swap": "Nada chamado “{{query}}” pode entrar na parte {{part}}.",
         "rung": "Não há andamento para definir aí.",
-        "settingValue": "{{key}} não pode ser “{{query}}”. Estes são os valores possíveis:"
+        "settingValue": "{{key}} não pode ser “{{query}}”. Estes são os valores possíveis:",
+        "loopBar": "Esta melodia não tem o compasso {{bar}}.",
+        "loopAcross": "Os compassos {{from}} a {{to}} passam do fim da melodia e voltam ao início dela. Peça compassos dentro de uma volta só.",
+        "loopOneBar": "Este Exercício tem um só compasso: peça o compasso 1."
       },
       "notNow": {
         "take": "Depois desta tomada.",
@@ -154,13 +171,15 @@
         "following": "Você já segue {{path}}.",
         "alreadySubdivision": "Já são {{subdivision}} cliques por tempo.",
         "alreadySetting": "{{key}} já é {{value}}.",
-        "alreadyGoal": "Essa já é sua meta."
+        "alreadyGoal": "Essa já é sua meta.",
+        "loopHere": "Uma repetição começa a partir de um Exercício numa Sessão, entre as Tomadas."
       },
       "notWiredYet": "O app ainda não consegue fazer isso daqui.",
       "refused": {
         "shape": "Isso não é algo que o app possa fazer.",
         "proposal": "Isso mudou desde então, então nada foi feito. Pergunte de novo.",
-        "cap": "Você segue {{cap}} trilhas, o máximo possível. Deixe uma primeiro na página dela."
+        "cap": "Você segue {{cap}} trilhas, o máximo possível. Deixe uma primeiro na página dela.",
+        "loopBackwards": "O compasso {{to}} vem antes do compasso {{from}}. Diga o primeiro compasso primeiro."
       },
       "failed": "Isso não funcionou, e nada foi alterado."
     },

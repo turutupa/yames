@@ -13033,8 +13033,8 @@
           "cues": [
             {"when":"even","say":"Lay the first finger flat over both strings.","more":0,"general":true},
             {"when":"heard","say":"Pick both strings together on each click."},
-            {"when":"late","say":"Arrive at each new fret by its click."},
-            {"when":"early","say":"Wait for the click before each new fret."},
+            {"when":"late","say":"Land the flat finger right on each click."},
+            {"when":"early","say":"Wait for the click before each move."},
             {"when":"shift","say":"Ease off as you move, press as you arrive.","more":0},
             {"when":"stringChange","say":"Strike both strings in one small stroke."},
             {"when":"lastBars","say":"Keep the finger flat to the last note."}
@@ -13270,14 +13270,7 @@
                   "scale": "major",
                   "spelled": ["C", "D", "E", "F", "G", "A", "B"],
                   "cover": false
-                },
-                "cues": [
-                  {"when":"even","say":"Lay the first finger flat over both strings.","more":0,"general":true},
-                  {"when":"heard","say":"Pick both strings together on each click."},
-                  {"when":"shift","say":"Ease off as you move, press as you arrive.","more":0},
-                  {"when":"stringChange","say":"Strike both strings in one small stroke."},
-                  {"when":"lastBars","say":"Keep the finger flat to the last note."}
-                ]
+                }
               },
               {
                 "id": "stringSet=D-and-G,shapeOrder=going-up",
@@ -13337,14 +13330,7 @@
                   "scale": "major",
                   "spelled": ["C", "D", "E", "F", "G", "A", "B"],
                   "cover": false
-                },
-                "cues": [
-                  {"when":"even","say":"Lay the first finger flat over both strings.","more":0,"general":true},
-                  {"when":"heard","say":"Pick both strings together on each click."},
-                  {"when":"shift","say":"Ease off as you move, press as you arrive.","more":0},
-                  {"when":"stringChange","say":"Strike both strings in one small stroke."},
-                  {"when":"lastBars","say":"Keep the finger flat to the last note."}
-                ]
+                }
               },
               {
                 "id": "stringSet=D-and-G,shapeOrder=coming-down",
@@ -13404,14 +13390,7 @@
                   "scale": "major",
                   "spelled": ["C", "D", "E", "F", "G", "A", "B"],
                   "cover": false
-                },
-                "cues": [
-                  {"when":"even","say":"Lay the first finger flat over both strings.","more":0,"general":true},
-                  {"when":"heard","say":"Pick both strings together on each click."},
-                  {"when":"shift","say":"Ease off as you move, press as you arrive.","more":0},
-                  {"when":"stringChange","say":"Strike both strings in one small stroke."},
-                  {"when":"lastBars","say":"Keep the finger flat to the last note."}
-                ]
+                }
               },
               {
                 "id": "stringSet=A-and-D,shapeOrder=going-up",
@@ -13471,14 +13450,7 @@
                   "scale": "major",
                   "spelled": ["C", "D", "E", "F", "G", "A", "B"],
                   "cover": false
-                },
-                "cues": [
-                  {"when":"even","say":"Lay the first finger flat over both strings.","more":0,"general":true},
-                  {"when":"heard","say":"Pick both strings together on each click."},
-                  {"when":"shift","say":"Ease off as you move, press as you arrive.","more":0},
-                  {"when":"stringChange","say":"Strike both strings in one small stroke."},
-                  {"when":"lastBars","say":"Keep the finger flat to the last note."}
-                ]
+                }
               },
               {
                 "id": "stringSet=A-and-D,shapeOrder=coming-down",
@@ -13538,14 +13510,7 @@
                   "scale": "major",
                   "spelled": ["C", "D", "E", "F", "G", "A", "B"],
                   "cover": false
-                },
-                "cues": [
-                  {"when":"even","say":"Lay the first finger flat over both strings.","more":0,"general":true},
-                  {"when":"heard","say":"Pick both strings together on each click."},
-                  {"when":"shift","say":"Ease off as you move, press as you arrive.","more":0},
-                  {"when":"stringChange","say":"Strike both strings in one small stroke."},
-                  {"when":"lastBars","say":"Keep the finger flat to the last note."}
-                ]
+                }
               },
               {
                 "id": "stringSet=low-E-and-A,shapeOrder=going-up",
@@ -13605,14 +13570,7 @@
                   "scale": "major",
                   "spelled": ["C", "D", "E", "F", "G", "A", "B"],
                   "cover": false
-                },
-                "cues": [
-                  {"when":"even","say":"Lay the first finger flat over both strings.","more":0,"general":true},
-                  {"when":"heard","say":"Pick both strings together on each click."},
-                  {"when":"shift","say":"Ease off as you move, press as you arrive.","more":0},
-                  {"when":"stringChange","say":"Strike both strings in one small stroke."},
-                  {"when":"lastBars","say":"Keep the finger flat to the last note."}
-                ]
+                }
               },
               {
                 "id": "stringSet=low-E-and-A,shapeOrder=coming-down",
@@ -13672,14 +13630,7 @@
                   "scale": "major",
                   "spelled": ["C", "D", "E", "F", "G", "A", "B"],
                   "cover": false
-                },
-                "cues": [
-                  {"when":"even","say":"Lay the first finger flat over both strings.","more":0,"general":true},
-                  {"when":"heard","say":"Pick both strings together on each click."},
-                  {"when":"shift","say":"Ease off as you move, press as you arrive.","more":0},
-                  {"when":"stringChange","say":"Strike both strings in one small stroke."},
-                  {"when":"lastBars","say":"Keep the finger flat to the last note."}
-                ]
+                }
               }
             ]
           }
