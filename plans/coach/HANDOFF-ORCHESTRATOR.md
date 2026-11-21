@@ -55,8 +55,17 @@ decisions), `plans/tasks/coach/RULES-FOR-PROMPTS.md` (the rules every agent gets
 
 This section is newer than the "In flight" table under "State" below; where they differ, this wins.
 
-**Delivered:** 1j and 1k (`STATUS.md`). `coach` is gated green at `8c0ea4e6` plus docs. Fifteen Paths
-of sixteen have cues; Sweep Picking has half.
+**Delivered:** 1j, 1k and 1l (`STATUS.md`). `coach` is gated green with cues13b merged: **all sixteen
+Paths have cues** (item 5 below is done). **Nothing is running.** Worktrees left on purpose:
+`~/yames-coach-t1b2b`, `-c2b1a`, `-c4a1`, `-t2a` (unmerged work), `-cues13b` (merged: `done-leg.sh
+cues13b`), `-night`, `-base`.
+
+**t1b2c finished** (item 1 below): all six findings fixed with tests on `coach-t1b2b`, `coach` merged
+in without conflict, gates green (`plans/coach/progress/t1b2c.md`). What is left of item 1 is the
+second reader on the fix (`git diff 6ae65f54^..coach-t1b2b` is too wide: give it the fix commit
+`304b7213` and the files `router.ts`, `askTyped.ts`, `askTools.ts` (`runTypedCall`), `resolve.ts`
+(`titleMatch`'s joined match), `AskPanel.tsx`), then the merge. For c2b1b: the next answerer must be
+synchronous (a Promise counts as "not answered").
 
 **On branches, not merged. Do these first, in this order:**
 
