@@ -774,7 +774,10 @@ function parseBare(t: Toks, c: Compiled, f: CommandFacts): Parsed {
   if (counted) {
     if (counted.unit === null) return bareNumber(counted.n, f);
     const made = unitCall(counted.n, counted.unit);
-    return made ? [made] : null;
+    if (made) return [made];
+    // "7단계": a number and a place's unit may be an ordinal place (leg t1b2b); a count is nothing.
+    const step = stepPlace(t, c);
+    return step ? [call("open_step", step.path ? { path: step.path, step: step.step } : { step: step.step })] : null;
   }
   const tempo = after(t, c.nouns.tempo);
   if (tempo) {
