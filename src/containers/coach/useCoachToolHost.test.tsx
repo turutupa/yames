@@ -8,6 +8,8 @@ import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getCoachToolHost, HOST_MEMBERS, STILL_NOT_WIRED, WIRED_IN_T1A1 } from "../../coach/tools/host";
 import { confirmCoachTool, runCoachTool, runCoachUndo } from "../../coach/tools/run";
+import type { Proposal, RunOutcome } from "../../coach/tools/types";
+import { coachStored, coachStoredLoaded, loadCoachStored, resetCoachStored } from "../../coach/store";
 import type { Preset } from "../../types";
 import { toolCtx } from "../../coach/tools/fakeHost";
 import { TEST_PATHS } from "../../coach/tools/testPaths";
@@ -88,6 +90,7 @@ function input(over: Partial<CoachToolHostInput> = {}): CoachToolHostInput & { m
 
 afterEach(() => {
   vi.useRealTimers();
+  resetCoachStored();
 });
 
 describe("useCoachToolHost", () => {
@@ -147,13 +150,59 @@ describe("useCoachToolHost", () => {
     expect(props.views).toEqual([]);
   });
 
-  it("only the Notebook's goal and a loop of named bars are still stubs", () => {
+  it("only a loop of named bars is still a stub", () => {
     const { result } = renderHook(() => useCoachToolHost(input()));
     const host = result.current as unknown as Record<string, (...args: unknown[]) => unknown>;
+    expect(STILL_NOT_WIRED).toEqual(["loopBars"]);
     for (const member of STILL_NOT_WIRED) expect(host[member](), member).toBe("notWiredYet");
     expect(HOST_MEMBERS.filter((m) => !WIRED_IN_T1A1.includes(m) && !STILL_NOT_WIRED.includes(m)).length).toBeGreaterThan(20);
-    expect(result.current.safeSetting("coachSuggestions")).toBe("notWiredYet");
     expect(result.current.jams()).toEqual([{ id: "j1", name: "Slow blues" }]);
+  });
+
+  it("the goal and Suggestions wait for the coach's keys to be read, then read and write them (c4a1)", async () => {
+    const { result } = renderHook(() => useCoachToolHost(input()));
+    const host = result.current;
+    // Read on mount; a proposal before that would be over a goal nobody has seen.
+    if (!coachStoredLoaded()) {
+      expect(host.goal()).toBe("notWiredYet");
+      expect(host.safeSetting("coachSuggestions")).toBe("notWiredYet");
+    }
+    await act(async () => {
+      await loadCoachStored();
+    });
+    // A player who never chose: no goal, Suggestions on.
+    expect(host.goal()).toBeNull();
+    expect(host.safeSetting("coachSuggestions")).toBe(true);
+
+    const proposalOf = (out: RunOutcome): Proposal => {
+      if (!out.ok || !("proposal" in out)) throw new Error(`no proposal: ${JSON.stringify(out)}`);
+      return out.proposal;
+    };
+    const off = proposalOf(runCoachTool({ tool: "set_setting", args: { key: "coachSuggestions", value: "off" } }, host, toolCtx()));
+    expect(off.line).toEqual({ key: "coachTools.propose.setSetting", values: { key: "coachSuggestions", from: "on", to: "off" } });
+    expect(coachStored().suggestions).toBe("on");
+    const kept = confirmCoachTool(off, host, toolCtx());
+    if (!kept.ok || !kept.undo) throw new Error("not kept");
+    expect(coachStored().suggestions).toBe("asked");
+    expect(host.safeSetting("coachSuggestions")).toBe(false);
+    expect(runCoachUndo(kept.undo, host, toolCtx()).ok).toBe(true);
+    expect(coachStored().suggestions).toBe("on");
+
+    const goal = proposalOf(runCoachTool({ tool: "set_goal", args: { text: "Play the solo at 120" } }, host, toolCtx()));
+    expect(goal.line.key).toBe("coachTools.propose.setGoal");
+    expect(coachStored().goal).toBeNull();
+    const set = confirmCoachTool(goal, host, toolCtx());
+    expect(set).toMatchObject({ ok: true, receipt: { key: "coachTools.receipt.setGoal" } });
+    expect(coachStored().goal?.text).toBe("Play the solo at 120");
+    expect(host.goal()).toBe("Play the solo at 120");
+    // No goal before: no undo (clearing a goal is the player's own).
+    expect(set.ok && "undo" in set ? set.undo : undefined).toBeUndefined();
+    // A second goal: its undo puts the first back, in the store.
+    const second = confirmCoachTool(proposalOf(runCoachTool({ tool: "set_goal", args: { text: "Join a band" } }, host, toolCtx())), host, toolCtx());
+    if (!second.ok || !second.undo) throw new Error("no undo");
+    expect(coachStored().goal?.text).toBe("Join a band");
+    expect(runCoachUndo(second.undo, host, toolCtx()).ok).toBe(true);
+    expect(coachStored().goal?.text).toBe("Play the solo at 120");
   });
 
   it("says what sounds: nothing in a Session, the band on the jam, a song on Songs, else the click", () => {

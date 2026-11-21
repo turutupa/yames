@@ -1,0 +1,66 @@
+{
+  "notebook": {
+    "noticed": {
+      "tempoEvenness": "At {{fast}} BPM your Takes were {{fastScore}}% even; at {{slow}} BPM, {{slowScore}}%.",
+      "lean": {
+        "first": {
+          "late_one": "The first bar of the pattern sat late against the rest: {{hits}} of your last {{count}} Take.",
+          "late_other": "The first bar of the pattern sat late against the rest: {{hits}} of your last {{count}} Takes.",
+          "early_one": "The first bar of the pattern sat early against the rest: {{hits}} of your last {{count}} Take.",
+          "early_other": "The first bar of the pattern sat early against the rest: {{hits}} of your last {{count}} Takes."
+        },
+        "last": {
+          "late_one": "The last bar of the pattern sat late against the rest: {{hits}} of your last {{count}} Take.",
+          "late_other": "The last bar of the pattern sat late against the rest: {{hits}} of your last {{count}} Takes.",
+          "early_one": "The last bar of the pattern sat early against the rest: {{hits}} of your last {{count}} Take.",
+          "early_other": "The last bar of the pattern sat early against the rest: {{hits}} of your last {{count}} Takes."
+        }
+      },
+      "place": {
+        "afterHeld": {
+          "late_one": "Bars where a note follows a held one sat late against the rest: {{hits}} of your last {{count}} Take on them.",
+          "late_other": "Bars where a note follows a held one sat late against the rest: {{hits}} of your last {{count}} Takes on them.",
+          "early_one": "Bars where a note follows a held one sat early against the rest: {{hits}} of your last {{count}} Take on them.",
+          "early_other": "Bars where a note follows a held one sat early against the rest: {{hits}} of your last {{count}} Takes on them.",
+          "lateOne_one": "In {{exercise}}, bars where a note follows a held one sat late against the rest: {{hits}} of your last {{count}} Take on it.",
+          "lateOne_other": "In {{exercise}}, bars where a note follows a held one sat late against the rest: {{hits}} of your last {{count}} Takes on it.",
+          "earlyOne_one": "In {{exercise}}, bars where a note follows a held one sat early against the rest: {{hits}} of your last {{count}} Take on it.",
+          "earlyOne_other": "In {{exercise}}, bars where a note follows a held one sat early against the rest: {{hits}} of your last {{count}} Takes on it."
+        },
+        "openString": {
+          "late_one": "Bars with an open string in them sat late against the rest: {{hits}} of your last {{count}} Take on them.",
+          "late_other": "Bars with an open string in them sat late against the rest: {{hits}} of your last {{count}} Takes on them.",
+          "early_one": "Bars with an open string in them sat early against the rest: {{hits}} of your last {{count}} Take on them.",
+          "early_other": "Bars with an open string in them sat early against the rest: {{hits}} of your last {{count}} Takes on them.",
+          "lateOne_one": "In {{exercise}}, bars with an open string in them sat late against the rest: {{hits}} of your last {{count}} Take on it.",
+          "lateOne_other": "In {{exercise}}, bars with an open string in them sat late against the rest: {{hits}} of your last {{count}} Takes on it.",
+          "earlyOne_one": "In {{exercise}}, bars with an open string in them sat early against the rest: {{hits}} of your last {{count}} Take on it.",
+          "earlyOne_other": "In {{exercise}}, bars with an open string in them sat early against the rest: {{hits}} of your last {{count}} Takes on it."
+        },
+        "shift": {
+          "late_one": "Bars with a position shift in them sat late against the rest: {{hits}} of your last {{count}} Take on them.",
+          "late_other": "Bars with a position shift in them sat late against the rest: {{hits}} of your last {{count}} Takes on them.",
+          "early_one": "Bars with a position shift in them sat early against the rest: {{hits}} of your last {{count}} Take on them.",
+          "early_other": "Bars with a position shift in them sat early against the rest: {{hits}} of your last {{count}} Takes on them.",
+          "lateOne_one": "In {{exercise}}, bars with a position shift in them sat late against the rest: {{hits}} of your last {{count}} Take on it.",
+          "lateOne_other": "In {{exercise}}, bars with a position shift in them sat late against the rest: {{hits}} of your last {{count}} Takes on it.",
+          "earlyOne_one": "In {{exercise}}, bars with a position shift in them sat early against the rest: {{hits}} of your last {{count}} Take on it.",
+          "earlyOne_other": "In {{exercise}}, bars with a position shift in them sat early against the rest: {{hits}} of your last {{count}} Takes on it."
+        }
+      },
+      "tempoPlayed": {
+        "named": "You played {{exercise}} at {{fromBpm}} BPM at first and at {{toBpm}} BPM most recently.",
+        "unnamed": "You played one Exercise at {{fromBpm}} BPM at first and at {{toBpm}} BPM most recently."
+      },
+      "minutes": {
+        "perSession": "Your last {{sessions}} Sessions had {{now}} minutes of playing each, on average; the {{sessions}} before, {{then}}."
+      }
+    },
+    "evidence": {
+      "oneExercise_one": "From {{count}} Take · {{from}} to {{to}}",
+      "oneExercise_other": "From {{count}} Takes · {{from}} to {{to}}",
+      "exercises_one": "From {{count}} Take on {{exercises}} Exercises · {{from}} to {{to}}",
+      "exercises_other": "From {{count}} Takes on {{exercises}} Exercises · {{from}} to {{to}}"
+    }
+  }
+}
