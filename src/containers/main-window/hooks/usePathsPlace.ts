@@ -87,7 +87,9 @@ export function usePathsPlace(
     (next: PathsAt) => {
       const nowKey = placeKey(atRef.current);
       const el = contentRef.current;
-      if (el) scrolls.current.set(nowKey, el.scrollTop);
+      // Only Paths' own scroll: a move from another screen (the coach's
+      // `open_path` from Today) would write that screen's (pol2 item 11).
+      if (el && lastView.current === "paths") scrolls.current.set(nowKey, el.scrollTop);
       const nextKey = placeKey(next);
       if (nextKey === nowKey) return;
       if (depth(next) > depth(atRef.current)) scrolls.current.delete(nextKey);
