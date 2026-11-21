@@ -24,7 +24,40 @@
     "runScore": "Nota {{score}} a {{bpm}} BPM",
     "runScoreNoBpm": "Nota {{score}}",
     "sessionScore": "Nota da sessão {{score}} · {{word}}",
-    "openRuns": "Abrir Execuções das ferramentas em Progresso"
+    "openRuns": "Abrir Execuções das ferramentas em Progresso",
+    "finding": {
+      "beatEarly": "O tempo {{beat}} do compasso chegou {{ms}} ms adiantado em média, fora de linha com os outros tempos.",
+      "beatLate": "O tempo {{beat}} do compasso chegou {{ms}} ms atrasado em média, fora de linha com os outros tempos.",
+      "subdivision": "Nenhuma nota caiu na posição “{{position}}” em {{missed}} de {{total}} tempos.",
+      "ceiling": "Seu tempo segurou em {{holds}} BPM e escapou em {{breaks}} BPM.",
+      "driftEarly": "No último terço da execução, você estava caindo {{ms}} ms mais cedo do que no primeiro terço.",
+      "driftLate": "No último terço da execução, você estava caindo {{ms}} ms mais tarde do que no primeiro terço.",
+      "position": {
+        "2": {
+          "0": "colcheia no tempo",
+          "1": "colcheia fora do tempo"
+        },
+        "3": {
+          "0": "primeira tercina",
+          "1": "segunda tercina",
+          "2": "terceira tercina"
+        },
+        "4": {
+          "0": "primeira semicolcheia",
+          "1": "segunda semicolcheia",
+          "2": "terceira semicolcheia",
+          "3": "quarta semicolcheia"
+        },
+        "6": {
+          "0": "primeira sextina",
+          "1": "segunda sextina",
+          "2": "terceira sextina",
+          "3": "quarta sextina",
+          "4": "quinta sextina",
+          "5": "sexta sextina"
+        }
+      }
+    }
   },
   "coachModel": {
     "label": "Modelo do coach",

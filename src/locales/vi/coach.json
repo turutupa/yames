@@ -24,7 +24,40 @@
     "runScore": "Điểm {{score}} ở {{bpm}} BPM",
     "runScoreNoBpm": "Điểm {{score}}",
     "sessionScore": "Điểm buổi tập {{score}} · {{word}}",
-    "openRuns": "Mở Lần chạy công cụ trong Tiến bộ"
+    "openRuns": "Mở Lần chạy công cụ trong Tiến bộ",
+    "finding": {
+      "beatEarly": "Nhịp {{beat}} của ô nhịp trung bình đến sớm {{ms}} ms, lệch so với các nhịp còn lại.",
+      "beatLate": "Nhịp {{beat}} của ô nhịp trung bình đến trễ {{ms}} ms, lệch so với các nhịp còn lại.",
+      "subdivision": "Không có nốt nào rơi vào vị trí “{{position}}” ở {{missed}} trên {{total}} nhịp.",
+      "ceiling": "Giữ được ở {{holds}} BPM và bị lệch ở {{breaks}} BPM.",
+      "driftEarly": "Ở một phần ba cuối của lần chạy, bạn đánh sớm hơn {{ms}} ms so với một phần ba đầu.",
+      "driftLate": "Ở một phần ba cuối của lần chạy, bạn đánh trễ hơn {{ms}} ms so với một phần ba đầu.",
+      "position": {
+        "2": {
+          "0": "nốt móc đơn trên nhịp",
+          "1": "nốt móc đơn ngoài nhịp"
+        },
+        "3": {
+          "0": "nốt thứ nhất của chùm ba",
+          "1": "nốt thứ hai của chùm ba",
+          "2": "nốt thứ ba của chùm ba"
+        },
+        "4": {
+          "0": "nốt móc kép thứ nhất",
+          "1": "nốt móc kép thứ hai",
+          "2": "nốt móc kép thứ ba",
+          "3": "nốt móc kép thứ tư"
+        },
+        "6": {
+          "0": "nốt thứ nhất của chùm sáu",
+          "1": "nốt thứ hai của chùm sáu",
+          "2": "nốt thứ ba của chùm sáu",
+          "3": "nốt thứ tư của chùm sáu",
+          "4": "nốt thứ năm của chùm sáu",
+          "5": "nốt thứ sáu của chùm sáu"
+        }
+      }
+    }
   },
   "coachModel": {
     "label": "Mô hình huấn luyện viên",

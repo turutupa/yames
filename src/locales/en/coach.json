@@ -24,7 +24,40 @@
     "runScore": "Score {{score}} at {{bpm}} BPM",
     "runScoreNoBpm": "Score {{score}}",
     "sessionScore": "Session score {{score}} · {{word}}",
-    "openRuns": "Open Tool runs in Progress"
+    "openRuns": "Open Tool runs in Progress",
+    "finding": {
+      "beatEarly": "Beat {{beat}} of the bar came {{ms}} ms early on average, out of line with the other beats.",
+      "beatLate": "Beat {{beat}} of the bar came {{ms}} ms late on average, out of line with the other beats.",
+      "subdivision": "No note landed on the {{position}} in {{missed}} of {{total}} beats.",
+      "ceiling": "Your timing held at {{holds}} BPM and slipped at {{breaks}} BPM.",
+      "driftEarly": "By the last third of the run you were landing {{ms}} ms earlier than in the first third.",
+      "driftLate": "By the last third of the run you were landing {{ms}} ms later than in the first third.",
+      "position": {
+        "2": {
+          "0": "eighth on the beat",
+          "1": "off-beat eighth"
+        },
+        "3": {
+          "0": "first triplet",
+          "1": "second triplet",
+          "2": "third triplet"
+        },
+        "4": {
+          "0": "first sixteenth",
+          "1": "second sixteenth",
+          "2": "third sixteenth",
+          "3": "fourth sixteenth"
+        },
+        "6": {
+          "0": "first sextuplet",
+          "1": "second sextuplet",
+          "2": "third sextuplet",
+          "3": "fourth sextuplet",
+          "4": "fifth sextuplet",
+          "5": "sixth sextuplet"
+        }
+      }
+    }
   },
   "coachModel": {
     "label": "Coach model",

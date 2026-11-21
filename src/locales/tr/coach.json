@@ -24,7 +24,40 @@
     "runScore": "Puan {{score}}, {{bpm}} BPM’de",
     "runScoreNoBpm": "Puan {{score}}",
     "sessionScore": "Seans puanı {{score}} · {{word}}",
-    "openRuns": "İlerleme’de Araç çalışmalarını aç"
+    "openRuns": "İlerleme’de Araç çalışmalarını aç",
+    "finding": {
+      "beatEarly": "Ölçünün {{beat}}. vuruşu ortalama {{ms}} ms erken geldi, diğer vuruşlardan ayrışıyor.",
+      "beatLate": "Ölçünün {{beat}}. vuruşu ortalama {{ms}} ms geç geldi, diğer vuruşlardan ayrışıyor.",
+      "subdivision": "{{total}} vuruşun {{missed}} tanesinde “{{position}}” konumuna hiç nota düşmedi.",
+      "ceiling": "Zamanlaman {{holds}} BPM'de tutuyor, {{breaks}} BPM'de kayıyor.",
+      "driftEarly": "Çalışmanın son üçte birinde, ilk üçte birine göre {{ms}} ms daha erken düşüyordun.",
+      "driftLate": "Çalışmanın son üçte birinde, ilk üçte birine göre {{ms}} ms daha geç düşüyordun.",
+      "position": {
+        "2": {
+          "0": "vuruş üstü sekizlik",
+          "1": "vuruş dışı sekizlik"
+        },
+        "3": {
+          "0": "birinci üçleme",
+          "1": "ikinci üçleme",
+          "2": "üçüncü üçleme"
+        },
+        "4": {
+          "0": "birinci onaltılık",
+          "1": "ikinci onaltılık",
+          "2": "üçüncü onaltılık",
+          "3": "dördüncü onaltılık"
+        },
+        "6": {
+          "0": "birinci altılama",
+          "1": "ikinci altılama",
+          "2": "üçüncü altılama",
+          "3": "dördüncü altılama",
+          "4": "beşinci altılama",
+          "5": "altıncı altılama"
+        }
+      }
+    }
   },
   "coachModel": {
     "label": "Koç modeli",

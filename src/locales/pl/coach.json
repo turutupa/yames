@@ -24,7 +24,40 @@
     "runScore": "Ocena {{score}} przy {{bpm}} BPM",
     "runScoreNoBpm": "Ocena {{score}}",
     "sessionScore": "Ocena sesji {{score}} · {{word}}",
-    "openRuns": "Otwórz Przebiegi narzędzi w Postępach"
+    "openRuns": "Otwórz Przebiegi narzędzi w Postępach",
+    "finding": {
+      "beatEarly": "Uderzenie {{beat}} taktu wypadło średnio {{ms}} ms za wcześnie, odstając od pozostałych uderzeń.",
+      "beatLate": "Uderzenie {{beat}} taktu wypadło średnio {{ms}} ms za późno, odstając od pozostałych uderzeń.",
+      "subdivision": "Żadna nuta nie padła na pozycji „{{position}}” w {{missed}} z {{total}} uderzeń.",
+      "ceiling": "Twój rytm trzyma się w {{holds}} BPM i rozjeżdża w {{breaks}} BPM.",
+      "driftEarly": "W ostatniej trzeciej części przebiegu wchodzisz o {{ms}} ms wcześniej niż w pierwszej trzeciej części.",
+      "driftLate": "W ostatniej trzeciej części przebiegu wchodzisz o {{ms}} ms później niż w pierwszej trzeciej części.",
+      "position": {
+        "2": {
+          "0": "ósemka na uderzeniu",
+          "1": "ósemka poza uderzeniem"
+        },
+        "3": {
+          "0": "pierwsza triola",
+          "1": "druga triola",
+          "2": "trzecia triola"
+        },
+        "4": {
+          "0": "pierwsza szesnastka",
+          "1": "druga szesnastka",
+          "2": "trzecia szesnastka",
+          "3": "czwarta szesnastka"
+        },
+        "6": {
+          "0": "pierwsza sekstola",
+          "1": "druga sekstola",
+          "2": "trzecia sekstola",
+          "3": "czwarta sekstola",
+          "4": "piąta sekstola",
+          "5": "szósta sekstola"
+        }
+      }
+    }
   },
   "coachModel": {
     "label": "Model trenera",

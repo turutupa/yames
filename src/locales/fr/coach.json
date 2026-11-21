@@ -24,7 +24,40 @@
     "runScore": "Score {{score}} à {{bpm}} BPM",
     "runScoreNoBpm": "Score {{score}}",
     "sessionScore": "Score de la séance {{score}} · {{word}}",
-    "openRuns": "Ouvrir Passages d'outils dans Progrès"
+    "openRuns": "Ouvrir Passages d'outils dans Progrès",
+    "finding": {
+      "beatEarly": "Le temps {{beat}} de la mesure est arrivé en moyenne {{ms}} ms en avance, en décalage avec les autres temps.",
+      "beatLate": "Le temps {{beat}} de la mesure est arrivé en moyenne {{ms}} ms en retard, en décalage avec les autres temps.",
+      "subdivision": "Aucune note n'a été détectée sur la position « {{position}} » pour {{missed}} temps sur {{total}}.",
+      "ceiling": "Ton timing a tenu à {{holds}} BPM et a glissé à {{breaks}} BPM.",
+      "driftEarly": "Sur le dernier tiers du passage, tu jouais {{ms}} ms plus tôt que sur le premier tiers.",
+      "driftLate": "Sur le dernier tiers du passage, tu jouais {{ms}} ms plus tard que sur le premier tiers.",
+      "position": {
+        "2": {
+          "0": "croche sur le temps",
+          "1": "croche en contretemps"
+        },
+        "3": {
+          "0": "premier triolet",
+          "1": "deuxième triolet",
+          "2": "troisième triolet"
+        },
+        "4": {
+          "0": "première double croche",
+          "1": "deuxième double croche",
+          "2": "troisième double croche",
+          "3": "quatrième double croche"
+        },
+        "6": {
+          "0": "premier sextolet",
+          "1": "deuxième sextolet",
+          "2": "troisième sextolet",
+          "3": "quatrième sextolet",
+          "4": "cinquième sextolet",
+          "5": "sixième sextolet"
+        }
+      }
+    }
   },
   "coachModel": {
     "label": "Modèle du coach",

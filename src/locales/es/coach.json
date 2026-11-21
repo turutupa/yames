@@ -24,7 +24,40 @@
     "runScore": "Puntuación {{score}} a {{bpm}} BPM",
     "runScoreNoBpm": "Puntuación {{score}}",
     "sessionScore": "Puntuación de la sesión {{score}} · {{word}}",
-    "openRuns": "Abrir Pasadas de herramientas en Progreso"
+    "openRuns": "Abrir Pasadas de herramientas en Progreso",
+    "finding": {
+      "beatEarly": "El pulso {{beat}} del compás llegó con una media de {{ms}} ms de adelanto, desajustado respecto a los demás pulsos.",
+      "beatLate": "El pulso {{beat}} del compás llegó con una media de {{ms}} ms de retraso, desajustado respecto a los demás pulsos.",
+      "subdivision": "No se detectó ninguna nota en la posición «{{position}}» en {{missed}} de {{total}} pulsos.",
+      "ceiling": "Tu timing aguantó a {{holds}} BPM y se escapó a {{breaks}} BPM.",
+      "driftEarly": "En el último tercio de la pasada tocabas {{ms}} ms antes que en el primer tercio.",
+      "driftLate": "En el último tercio de la pasada tocabas {{ms}} ms después que en el primer tercio.",
+      "position": {
+        "2": {
+          "0": "corchea en el pulso",
+          "1": "corchea a contratiempo"
+        },
+        "3": {
+          "0": "primer tresillo",
+          "1": "segundo tresillo",
+          "2": "tercer tresillo"
+        },
+        "4": {
+          "0": "primera semicorchea",
+          "1": "segunda semicorchea",
+          "2": "tercera semicorchea",
+          "3": "cuarta semicorchea"
+        },
+        "6": {
+          "0": "primer seisillo",
+          "1": "segundo seisillo",
+          "2": "tercer seisillo",
+          "3": "cuarto seisillo",
+          "4": "quinto seisillo",
+          "5": "sexto seisillo"
+        }
+      }
+    }
   },
   "coachModel": {
     "label": "Modelo del coach",

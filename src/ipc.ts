@@ -1229,6 +1229,13 @@ export type PracticeSegmentEndedPayload = {
    * revamp wave). Absent in free play, and from a build without it.
    */
   takeGrade?: ScorerTakeGrade;
+  /**
+   * C5 — what `analyze_free_play` (`findings.rs`) measured in this segment,
+   * ranked, `findings[0]` the headline; Songs' `Finding` shape, bars absent.
+   * Free play only, and absent when nothing ranked. Never stored: neither the
+   * D1 log's segment nor the mini-report's `SessionReport` carries it.
+   */
+  findings?: Finding[];
 };
 
 /** Why the scorer would not grade a Take (`score.rs` `NoCatchReason`). */

@@ -13,7 +13,9 @@
  *   shows it at the end of the line, as a tonal button. The cap of two such
  *   tips in five minutes is the intervention layer's, unchanged.
  * - **The note**: when a run of 10 s or more stops (`useSegmentCoach` reports
- *   nothing under that), the report on it, with its question chips; when
+ *   nothing under that), the report on it, with its question chips, led by
+ *   one measured sentence when `analyze_free_play` found something in the run
+ *   (`coach/toolFinding.ts`; the findings ride on the segment-end event); when
  *   Listen goes off, the summary, saved to Progress → Tool runs. Hidden as soon
  *   as the next run starts.
  *
@@ -22,9 +24,12 @@
  * the Drill. It renders from its props only, none of which change at a beat,
  * and it is `memo`: the window re-rendering at every beat never reaches it.
  */
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { FeedChip, FeedMessage, SessionReport } from "../../types";
+import type { Finding } from "../../songs/types";
+import { onPracticeSegmentEnded } from "../../ipc";
+import { toolFinding, toolFindingText } from "../../coach/toolFinding";
 import { SystemStatusChip } from "../../components/SystemStatusChip";
 import { bandForScore } from "../../coach/reportStats";
 import { isSegmentReportable } from "../../coach/miniReport";
@@ -114,11 +119,18 @@ export const ToolCoach = /* @__PURE__ */ memo(function ToolCoach({
   useEffect(() => {
     if (isPlaying) setRunStartedAt(Date.now());
   }, [isPlaying]);
+  const findings = useRunFindings(listenOn, isPlaying);
 
   const { tip, note, chips } = useMemo(
     () => toolCoachView(messages, runStartedAt, isPlaying),
     [messages, runStartedAt, isPlaying],
   );
+  // The note a run gets when it stops leads with what was measured in it, when
+  // something was (C5); the report's own sentence follows. Never the summary.
+  const finding =
+    note?.type === "mini-report" && findings && findings.at >= runStartedAt
+      ? toolFinding(findings.findings, findings.playedMs)
+      : null;
   const askHint = useFirstTimeHint("coach-ask", !!note && shouldHintCoachAsk(note.type));
 
   if (!listenOn && !note) return null;
@@ -161,13 +173,22 @@ export const ToolCoach = /* @__PURE__ */ memo(function ToolCoach({
       )}
       {note && (
         <CoachNote
-          headline={note.content}
+          headline={
+            finding ? (
+              <span data-testid="tool-coach-finding" data-kind={finding.kind}>
+                {toolFindingText(finding, t)}
+              </span>
+            ) : (
+              note.content
+            )
+          }
           source={{ kind: "measured" }}
           live
           kind={note.type === "session-end" ? "tool-end" : "tool-run"}
           testId="tool-coach-note"
           onAsk={onAsk}
         >
+          {finding && <NoteLine testId="tool-coach-said">{note.content}</NoteLine>}
           {note.report && note.type === "mini-report" && <RunFacts report={note.report} bpm={note.meta?.bpm} />}
           {note.report && note.type === "session-end" && (
             <NoteLine testId="tool-coach-score">
@@ -198,6 +219,59 @@ export const ToolCoach = /* @__PURE__ */ memo(function ToolCoach({
     </div>
   );
 });
+
+/** What `analyze_free_play` found in the run, from `practice-segment-ended`. */
+type RunFindings = { findings: Finding[]; playedMs: number; at: number };
+
+/**
+ * The findings of the run that is playing or just stopped (C5): the newest
+ * free-play segment of the run that had any, from the segment-end event. They
+ * are not stored anywhere; a new run forgets them.
+ *
+ * Nothing renders while the click runs: a segment that closes mid-run (a pause
+ * of four seconds after thirty of play) is kept in a ref, and published when
+ * the run stops. The stop's own close (`closeOpenSegment`) lands a few ms
+ * after the click stops, before the note's report is fetched, and is
+ * published as it lands.
+ */
+function useRunFindings(listenOn: boolean, isPlaying: boolean): RunFindings | null {
+  const latest = useRef<RunFindings | null>(null);
+  const playing = useRef(isPlaying);
+  const [published, setPublished] = useState<RunFindings | null>(null);
+  useEffect(() => {
+    playing.current = isPlaying;
+    if (isPlaying) {
+      latest.current = null;
+      setPublished(null);
+    } else {
+      setPublished(latest.current);
+    }
+  }, [isPlaying]);
+  useEffect(() => {
+    if (!listenOn) return;
+    let live = true;
+    let unlisten: (() => void) | null = null;
+    onPracticeSegmentEnded((payload) => {
+      if (!live || !payload.findings || payload.findings.length === 0) return;
+      latest.current = {
+        findings: payload.findings,
+        playedMs: Math.max(0, payload.endMs - payload.startMs),
+        at: Date.now(),
+      };
+      if (!playing.current) setPublished(latest.current);
+    })
+      .then((fn) => {
+        if (live) unlisten = fn;
+        else fn();
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+      unlisten?.();
+    };
+  }, [listenOn]);
+  return published;
+}
 
 function qualifierKey(score: number): string {
   switch (bandForScore(score)) {

@@ -24,7 +24,40 @@
     "runScore": "Score {{score}} bei {{bpm}} BPM",
     "runScoreNoBpm": "Score {{score}}",
     "sessionScore": "Session-Score {{score}} · {{word}}",
-    "openRuns": "Tool-Läufe unter Fortschritt öffnen"
+    "openRuns": "Tool-Läufe unter Fortschritt öffnen",
+    "finding": {
+      "beatEarly": "Schlag {{beat}} des Takts kam im Schnitt {{ms}} ms zu früh, abweichend von den anderen Schlägen des Takts.",
+      "beatLate": "Schlag {{beat}} des Takts kam im Schnitt {{ms}} ms zu spät, abweichend von den anderen Schlägen des Takts.",
+      "subdivision": "Auf der Position „{{position}}“ wurde in {{missed}} von {{total}} Schlägen keine Note erkannt.",
+      "ceiling": "Dein Timing hielt bei {{holds}} BPM und rutschte bei {{breaks}} BPM.",
+      "driftEarly": "Im letzten Drittel des Laufs hast du {{ms}} ms früher gespielt als im ersten Drittel.",
+      "driftLate": "Im letzten Drittel des Laufs hast du {{ms}} ms später gespielt als im ersten Drittel.",
+      "position": {
+        "2": {
+          "0": "Achtel auf dem Schlag",
+          "1": "Achtel zwischen den Schlägen"
+        },
+        "3": {
+          "0": "erste Triole",
+          "1": "zweite Triole",
+          "2": "dritte Triole"
+        },
+        "4": {
+          "0": "erstes Sechzehntel",
+          "1": "zweites Sechzehntel",
+          "2": "drittes Sechzehntel",
+          "3": "viertes Sechzehntel"
+        },
+        "6": {
+          "0": "erste Sextole",
+          "1": "zweite Sextole",
+          "2": "dritte Sextole",
+          "3": "vierte Sextole",
+          "4": "fünfte Sextole",
+          "5": "sechste Sextole"
+        }
+      }
+    }
   },
   "coachModel": {
     "label": "Coach-Modell",
