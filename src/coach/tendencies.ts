@@ -18,8 +18,9 @@
  *   gets those and nothing else;
  * - a line whose id is in `coach.suppressed` is left out for thirty days;
  * - only the newest `TAKES_WINDOW` (500) rows are read, whatever is passed;
- * - Takes on the reserved Path `mine` (the player's own exercises, t2b) are
- *   never read for a measured line or a tempo (their minutes count, as in Progress).
+ * - Takes on the player's own exercises (`CUSTOM_PATH_ID`, `paths/custom.ts`)
+ *   are never read for a measured line or a tempo (their minutes count, as in
+ *   Progress).
  *
  * Pure: no store, no React, no clock but `now`. Build it on demand (when the
  * Notebook opens), never in a render or per beat.
@@ -28,7 +29,8 @@ import type { PathTakeRow } from "../ipc";
 import type { CueTrigger, Exercise, PathDoc } from "../paths/format";
 import { placeTriggers } from "../paths/cues";
 import { findExercise } from "../session/packs";
-import { factsOf, isUngradedTake, leanOf, sessionKeyOf } from "../session/progress";
+import { CUSTOM_PATH_ID } from "../paths/custom";
+import { factsOf, isMarkedNotFair, isUngradedTake, leanOf, sessionKeyOf } from "../session/progress";
 import { withVariant } from "../session/take";
 import { totalsFrom } from "../session/totals";
 import { biasThresholdMs } from "./takeNote";
@@ -52,8 +54,8 @@ export const MIN_SESSIONS = 6;
 export const RECENT_SESSIONS = 8;
 /** And the two halves must differ by at least this many whole minutes. */
 export const MIN_MINUTES_CHANGE = 2;
-/** The Path id t2b reserves for the player's own exercises: kept out of tendencies. */
-export const OWN_EXERCISES_PATH = "mine";
+/** The Path the player's own exercises are stored under (`paths/custom.ts`): kept out of tendencies. */
+export const OWN_EXERCISES_PATH = CUSTOM_PATH_ID;
 
 export type TendencyKind = "tempoEvenness" | "lean" | "place" | "tempoPlayed" | "minutes";
 
@@ -107,7 +109,7 @@ export function playedOf(rows: readonly PathTakeRow[]): PathTakeRow[] {
 
 /** The window the measured lines read: `playedOf`, less Takes marked not fair and the player's own exercises. */
 export function windowOf(rows: readonly PathTakeRow[]): PathTakeRow[] {
-  return playedOf(rows).filter((t) => t.pathId !== OWN_EXERCISES_PATH && factsOf(t).fair !== "no");
+  return playedOf(rows).filter((t) => t.pathId !== OWN_EXERCISES_PATH && !isMarkedNotFair(t));
 }
 
 /** A Take whose measures can be compared: graded and heard. */
@@ -179,6 +181,9 @@ function tempoEvenness(window: readonly PathTakeRow[]): NoticedLine | null {
     byEx.set(exKey(t), tempos);
   }
   // Every (fast, slow) pair some Exercise was played at, enough times at each.
+  // `fastE` / `slowE` hold one evenness per Take (c4a2b, L8): the sentence's
+  // "your Takes were 74% even" is the mean over exactly the Takes the evidence
+  // line counts; the per-Exercise means only decide whether every Exercise dropped.
   type Pair = { fast: number; slow: number; takes: PathTakeRow[]; fastE: number[]; slowE: number[]; drops: number[] };
   const pairs = new Map<string, Pair>();
   for (const tempos of byEx.values()) {
@@ -188,12 +193,14 @@ function tempoEvenness(window: readonly PathTakeRow[]): NoticedLine | null {
         const [fast, slow] = [bpms[i], bpms[j]];
         const f = tempos.get(fast)!;
         const s = tempos.get(slow)!;
-        const fe = mean(f.map((t) => evennessOf(t)!));
-        const se = mean(s.map((t) => evennessOf(t)!));
+        const fes = f.map((t) => evennessOf(t)!);
+        const ses = s.map((t) => evennessOf(t)!);
+        const fe = mean(fes);
+        const se = mean(ses);
         const pair = pairs.get(`${fast}:${slow}`) ?? { fast, slow, takes: [], fastE: [], slowE: [], drops: [] };
         pair.takes.push(...f, ...s);
-        pair.fastE.push(fe);
-        pair.slowE.push(se);
+        pair.fastE.push(...fes);
+        pair.slowE.push(...ses);
         pair.drops.push((se - fe) * 100);
         pairs.set(`${fast}:${slow}`, pair);
       }

@@ -5,8 +5,8 @@
  * in `useAskHost` fails here (review c2b1c L4).
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { renderHook } from "@testing-library/react";
-import "../../i18n";
+import { act, render, renderHook, screen } from "@testing-library/react";
+import i18n from "../../i18n";
 import type { SessionRun } from "../session/hooks/useSessionRun";
 import type { CoachSources } from "../../coach/context";
 
@@ -23,6 +23,13 @@ vi.mock("./askContext", async (importOriginal) => {
   };
 });
 
+// The coach's keys read as nothing stored: the goal question would be asked out of a Session.
+vi.mock("../../ipc", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../ipc")>()),
+  storeLoad: vi.fn(async () => undefined),
+  storeSave: vi.fn(async () => {}),
+}));
+
 vi.mock("./useCoachPanel", () => ({
   useCoachPanel: (opts: { contextText: () => string }) => {
     seen.contextText = opts.contextText;
@@ -32,10 +39,14 @@ vi.mock("./useCoachPanel", () => ({
 }));
 
 import { useAskHost } from "./useAskHost";
+import { readNotebookSource } from "./askStore";
+import { Notebook } from "./Notebook";
+import { loadCoachStored, resetCoachStored } from "../../coach/store";
 
 afterEach(() => {
   seen.contextText = null;
   seen.sources = [];
+  resetCoachStored();
 });
 
 const session = {
@@ -50,6 +61,53 @@ const session = {
   take: null,
   actions: { togglePause: () => {} },
 } as unknown as SessionRun;
+
+describe("the Notebook's source (c4a2b, M1)", () => {
+  const DAY = 86_400_000;
+  const started = Date.now() - 2 * 3_600_000;
+  const take = (id: string, ago: number) => ({
+    id,
+    pathId: "fx",
+    stepId: "s1",
+    exerciseId: "a",
+    startedAt: Date.now() - ago,
+    bpm: 100,
+    bars: 8,
+    caught: true,
+    passed: false,
+    facts: {},
+  });
+  // The first Take is ten days old (the goal question's age), two were played in this Session.
+  const rows = [take("old", 10 * DAY), take("in1", 3_600_000), take("in2", 1_800_000)];
+  const running = (phase: string) =>
+    ({
+      ...session,
+      progress: { states: [], takes: rows, ceilings: [] },
+      run: { ...(session.run as object), phase, startedAt: started },
+    }) as unknown as SessionRun;
+
+  it("a Session that runs while Today shows is still a Session: its start is passed on", () => {
+    renderHook(() => useAskHost({ view: "today", session: running("ready"), listening: false, isPlaying: false, jam: null, song: null }));
+    expect(readNotebookSource()?.sessionStartedAt).toBe(started);
+  });
+
+  it("no Session running: no start, whatever the view", () => {
+    renderHook(() => useAskHost({ view: "session", session: running("idle"), listening: false, isPlaying: false, jam: null, song: null }));
+    expect(readNotebookSource()?.sessionStartedAt).toBeNull();
+  });
+
+  it("on screen: the Notebook says it shows what was stored before, reads none of the Session's Takes, and never asks the goal", async () => {
+    renderHook(() => useAskHost({ view: "progress", session: running("result"), listening: false, isPlaying: false, jam: null, song: null }));
+    render(<Notebook />);
+    await act(async () => {
+      await loadCoachStored();
+    });
+    expect(screen.getByTestId("nb-session-note")).toBeInTheDocument();
+    // One Take before the Session: "Takes so far: 1", not 3.
+    expect(screen.getByTestId("nb-too-few")).toHaveTextContent(i18n.t("notebook.ui.tooFewTakes", { count: 1 }));
+    expect(screen.queryByTestId("nb-goal-offer")).toBeNull();
+  });
+});
 
 describe("useAskHost", () => {
   it("hands the panel askModelContext over its own sources, nothing built beside it", () => {

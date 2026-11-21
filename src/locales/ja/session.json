@@ -440,6 +440,34 @@
       "heard": "フリープレイのキーは {{key}}、主なコードは {{chords}} でした。",
       "heardKey": "フリープレイのキーは {{key}} でした。"
     },
+    "myExercises": {
+      "title": "自作の課題",
+      "intro": "自分で作った課題です。どのコースにも属さず、合格にもなりません。",
+      "shape": {
+        "box": "{{root}} {{scale}}、{{position}}フレットのボックス",
+        "threePerString": "{{root}} {{scale}}、{{position}}フレットから1弦に3音ずつ",
+        "arpeggio": "{{chord}} のアルペジオ、{{position}}フレットから",
+        "oneString": "{{root}} {{scale}}、{{string}}弦に沿って{{position}}フレットから",
+        "chromatic": "クロマチック、1フレットに1本の指で{{position}}フレットから"
+      },
+      "direction": {
+        "up": "上がる",
+        "down": "下がる",
+        "upAndBack": "上がって下がる"
+      },
+      "line": "{{shape}}：{{direction}}。{{bars}}。",
+      "bars": "{{count}} 小節",
+      "bars_other": "{{count}} 小節",
+      "remove": "削除",
+      "removeLabel": "{{what}} を自作の課題から削除",
+      "removed": "自作の課題から削除しました。",
+      "undo": "元に戻す",
+      "notSaved": "自作の課題を読み込めなかったか保存できなかったため、何も変わっていません。",
+      "undoFull": "自作の課題がいっぱいです(50)。そのため、元に戻すではこの課題を戻せません。",
+      "undoAlready": "その課題はすでに自作の課題に戻っています。",
+      "cantBuild": "この課題はもう作れません。このバージョンの Yames では作れなくなりました。削除するまでここに残ります。",
+      "howTo": "書かれたとおりに、クリックに合わせて弾きます。"
+    },
     "paths": {
       "title": "コース",
       "intro": "目標を選びましょう。ロックされたものはありません。どのステップからでも始められ、あとから変えられます。",

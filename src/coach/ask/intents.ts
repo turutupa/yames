@@ -26,10 +26,14 @@ import { argString, takeRunning, type ActTool, type Line, type ToolArgs, type To
 import {
   ASKABLE_METRICS,
   earlyOrLate,
+  improving,
   isCard,
   lastTakeHere,
+  passMarkDistance,
+  scoreMadeOf,
   ungradedPlayer,
   UNGRADED_LINE,
+  whatChanged,
   whereSlipped,
   whyNotCounted,
   type AskableMetric,
@@ -125,7 +129,43 @@ export const FACT_CARDS: readonly FactCardTool[] = [
     cardAboutLastTake,
     (args, ctx) => whyNotCounted(ctx, (argString(args, "what") as "take" | AskableMetric | undefined) ?? "take"),
   ),
+  // Leg c2b1b.
+  entry(
+    "what_changed",
+    {
+      args: [TAKE_ARG],
+      note: "The last Take beside the last measured Take before it on this Exercise: the tempo of each, the number each kept, and whether each met the pass mark. Takes marked not fair are left out.",
+    },
+    measuredTake,
+    (_args, ctx) => whatChanged(ctx),
+  ),
+  entry(
+    "improving",
+    {
+      args: [],
+      note: "The measured Takes of this Exercise, as a named window: tempo, clean tempos earned, evenness of the oldest, the newest and the best. Needs three; Takes marked not fair are left out.",
+    },
+    cardAboutLastTake,
+    (_args, ctx) => improving(ctx),
+  ),
+  entry(
+    "score_made_of",
+    { args: [], note: "What this Exercise's pass mark checks, in its own numbers, and what it does not grade." },
+    cardAboutExercise,
+    (_args, ctx) => scoreMadeOf(ctx),
+  ),
+  entry(
+    "pass_mark_distance",
+    { args: [TAKE_ARG], note: "Each check of the last Take against its pass mark, in the Exercise's own numbers, and the tempo it is passed at." },
+    measuredTake,
+    (_args, ctx) => passMarkDistance(ctx),
+  ),
 ];
+
+/** Graded, not in a Take, and an Exercise on screen (a card that reads the Exercise, not a Take). */
+export function cardAboutExercise(ctx: CoachContext): boolean {
+  return !takeRunning(ctx) && !ungradedPlayer(ctx) && ctx.exercise !== undefined;
+}
 
 export function findCard(name: string): FactCardTool | undefined {
   return FACT_CARDS.find((c) => c.name === name);
@@ -166,7 +206,8 @@ export function runFactCard(call: unknown, ctx: CoachContext): FactCard | NoCard
   // itself (uncertainty by rule); with no Take of this Exercise, one line says so.
   // "Is my pick direction graded?" needs the Exercise, not a Take.
   const what = argString(checked.call.args, "what");
-  const aboutExercise = tool.name === "why_not_counted" && what !== undefined && what !== "take" && ctx.exercise !== undefined;
+  const aboutExercise =
+    ctx.exercise !== undefined && ((tool.name === "why_not_counted" && what !== undefined && what !== "take") || tool.name === "score_made_of");
   if (!tool.when(ctx) && !cardAboutLastTake(ctx) && !aboutExercise) return { line: NO_TAKE };
   try {
     return tool.card(checked.call.args, ctx);

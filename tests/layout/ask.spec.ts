@@ -79,9 +79,10 @@ for (const theme of THEMES) {
         const content = (await rect(page, ".main-content"))!;
         const panel = (await rect(page, ".ask-panel"))!;
         expect(content.right, "the content ends where the dock starts").toBeLessThanOrEqual(panel.left + 0.5);
-        // Only Ask (leg c2a2): the tools' coach is Listen on the transport,
-        // so the panel has no sections to switch between and no Start.
-        expect(await page.locator('.ask-panel [role="tablist"], .ask-panel [data-testid^="ask-section-"]').count(), "sections in Ask").toBe(0);
+        // Only Ask and its Notebook (legs c2a2, c4a2): the tools' coach is
+        // Listen on the transport, so no other section and no Start.
+        expect(await page.locator('.ask-panel [data-testid^="ask-section-"]').count(), "sections in Ask").toBe(0);
+        await expect(page.locator('.ask-panel [role="tab"]')).toHaveText(["Ask", "Notebook"]);
         expect(await page.locator(".ask-panel [class*='coach-card']").count(), "the old coach card in Ask").toBe(0);
         await expect(page.locator(".ask-panel").getByRole("button", { name: /^start$/i })).toHaveCount(0);
       });
