@@ -47,6 +47,18 @@ Cuts: `soundStarting` (`voice.test` "a Start pressed during speech..."; `coach-v
 - Layout by name: `settings`, `coach-session`, `smooth`, `coach-voice`: 63 passed, 52 skipped (env-gated variants) (`pw-gates.log`).
 - Owed: the full layout suite (gates ran before 8 PM Pacific).
 
+## Review fixes (leg c1b2c, from /tmp/coach-orch/c1b2b-review.md)
+
+1. **Start never waits on speech.** `ipc.ts` posts `set_playing` / `toggle_playback` first, then runs the sound gate (the voice's `tts_stop`, which may wait on a process kill on the main thread). Test `src/ipc.soundGate.test.ts`; `coach-voice.spec.ts` now asks for the cut right after the Start (within 250 ms), never before it.
+2. **No dim for the Session's voice.** `tts_speak` takes `dim: Option<bool>` (absent = dims, as before; `tts::speak_dims`); `useCoachVoice` speaks with `ttsSpeak(text, { dim: false })`, so a cut leaves nothing to restore and the count-in's first click is full volume. Every other caller sends `{ text }` only and is unchanged. Rust test `a_speak_dims_unless_told_not_to`; the spec checks every Session speak asked for no dim (the harness logs `dim`).
+3. **Lost stops re-sent.** `speaking` is held until the speak settles; every cut (`setVoiceSounding(true)`, `takeStarted`, the gate) sends the stop again while it is set. Tests: "a lost stop is sent again ...".
+4. **`speak()` sends no stop of its own** (`tts_speak` cancels what is speaking). Test: "a coach key pressed while the order is being said ...".
+5. **Leaving the Session hushes** (`setVoiceInSession(false)` from `MainWindow`'s `view === "session"`): drops a waiting line, cuts one in flight. It is not a gate on entering: the ready note's effect runs before the window's, and a gate refused the first order (the spec caught it). Test: "leaving the Session drops a waiting line ...".
+6. **The "starting" window.** The gate sets `startingAt`; `soundIsStarting()` is true until the engine reports sound or stops (`setVoiceSounding`), `takeStarted`, or 2 s pass. The voice's `canSpeak` and `coachKeysAnswer` (so all three keys, and `acceptSuggestion` before it presses anything) read it. Tests in `voice.test.tsx` and `coachKeys.test.ts` ("between a Start and the engine reporting sound").
+7. **Not changed: the spoken order is the settled one.** `session.take` is a synchronous `useMemo` of the same `current` that gives `session.exercise`, so the prepared Take never arrives a render later; `useTakeNote`'s inputs (the `takeResult` event, the Take row in `progress.takes`) land in the same batch as the result, before any ready screen. Only a player's own action on the ready screen can change the cue afterwards, which is not a race.
+
+Commits `67b6a89d`, `4ee86679`. Gates: tsc pass; vitest 17,967 pass, the one file is the known `TabStage.render.test.tsx` (`vitest-full.log`); build pass (`build2.log`); `npm run test:rust` 1,219 pass (`rust.log`); layout `coach-voice`, `coach-session`, `smooth`, `settings`: 63 passed, 52 skipped (`pw-fixes2.log`). Owed: the full layout suite after 8 PM, and the jitter probe (the Rust change adds no work on any thread; it only skips two lock-and-write blocks).
+
 ## Open
 
 - The tools' coach (`useSession.ts`) pops its own reveal FIFO on any `tts-speech-started`; in a Session it is hushed, so the two never interleave there. Outside a Session our voice never speaks.
